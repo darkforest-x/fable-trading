@@ -1,0 +1,185 @@
+{
+  "source_commit": "88e62200f08b8ffbd703eb4a5708cd9a6e2a6c2b",
+  "checked_ms": 1792768330695,
+  "design": {
+    "project_id": "8978791379095391159",
+    "screen_id": "0e1cb04622f444cea23f0fa2a9f46919",
+    "model": "GEMINI_3_8_FLASH",
+    "html": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sX2Y1ZmZhYTgzNjQwYzQ5NjhhY2JjN2I5YTdjOTFjNjZjEgsSBxCg8tPG9wkYAZIBIwoKcHJvamVjdF9pZBIVQhM4OTc4NzkxMzc5MDk1MzkxMTU5&filename=&opi=96797242",
+    "image": "https://lh3.googleusercontent.com/aida/AEtjO1VnszM8-dKGZvTrcfwpJD304-AsdExcUShVTbs-3is6hL-lc47KeL6ktwoHF6zr8jQNPPzUkMnTyH2hyDCmjn_M4S2KTYgXWg2rdZixzPV_cwbOXBjuWgQdFVzYIgTwCbnOOiGRJq8tgMSkgrr-PgGBrNLHYFoipOPK46_OitT1F_pdG-zKQHK5IT20kXPPvhYcLHAwpvYQNvNj-hh3Y4i3Cm_A8IAE701d_hHIL2OfTA-s0GTfeHDYY54"
+  },
+  "tests": {
+    "broad_python_passed": 727,
+    "final_touched_backend_passed": 37,
+    "frontend_passed": 52,
+    "counts_overlap": true,
+    "commands": [
+      ".venv/bin/python -m pytest -q tests/okx_execution tests/research_workspace/test_paper*.py tests/research_workspace/test_monday_ticket.py tests/monitor/test_monday_candles.py tests/monitor/test_monday_order_context.py tests/monitor/test_asset_delivery.py tests/monitor/test_api_startup_imports.py tests/boundaries/test_layer_imports.py --disable-warnings",
+      ".venv/bin/python -m pytest -q tests/okx_execution/test_free_manual.py tests/okx_execution/test_free_exposure.py tests/monitor/test_monday_order_context.py --disable-warnings",
+      "node --test tests/monitor/frontend_monday*.test.cjs tests/monitor/frontend_range_chart.test.cjs tests/monitor/frontend_startup_hints.test.cjs tests/monitor/frontend_glass_navigation.test.cjs"
+    ]
+  },
+  "browser": {
+    "box": {
+      "x": 0,
+      "y": 10.03050422668457,
+      "width": 390,
+      "height": 832.0000133514404
+    },
+    "dims": {
+      "client": 388,
+      "scroll": 388,
+      "modal": "true",
+      "top": 10.03050422668457,
+      "bottom": 842.0305042266846,
+      "bodyOverflow": "hidden"
+    },
+    "afterLeverage": "5000",
+    "afterStop": "5000",
+    "confirms": 1,
+    "restored": {
+      "focus": "mf-quick-toggle",
+      "inert": 1,
+      "hidden": true
+    },
+    "narrow": {
+      "client": 318,
+      "scroll": 318,
+      "bottom": 567.289270401001
+    },
+    "keyboard": {
+      "top": 41.953189849853516,
+      "bottom": 329.9531898498535,
+      "form": 110.5,
+      "footer": 328.95318603515625
+    },
+    "desktop": {
+      "x": 1012,
+      "y": 83.83978271484375,
+      "width": 400,
+      "height": 888
+    },
+    "errors": []
+  },
+  "interactions": {
+    "initialInert": true,
+    "manualKept": "91",
+    "edited": true,
+    "trap": {
+      "inside": true,
+      "element": "<button type=\"submit\" data-fl-preview=\"\" class=\"mf-live-primary\">预览实盘做多</button>"
+    },
+    "keyboard": {
+      "top": 92,
+      "bottom": 400,
+      "footer": 399,
+      "scrollHeight": 131
+    },
+    "swipeClosed": true,
+    "backdropClosed": true,
+    "restored": {
+      "chartInert": false,
+      "focus": "mf-quick-toggle"
+    }
+  },
+  "readonly": {
+    "live_defaults_status": 200,
+    "seconds": 1.15,
+    "actual_max_leverage": "100",
+    "uses_max": true,
+    "target_equity_multiple": 9.999999999999998,
+    "exchange_writes": 0,
+    "wick_context": {
+      "status": 200,
+      "symbol": "ETHFI-USDT-SWAP",
+      "timeframe": "15m",
+      "side": "long",
+      "week": "2026-10-19",
+      "stop_loss": "0.6361",
+      "candle_ms": 1792764900000,
+      "level": "0.6369292"
+    },
+    "paper_defaults_status": 200,
+    "paper_actual_max_leverage": "20",
+    "paper_target_multiple": 5.0,
+    "paper_pool": "alts"
+  },
+  "post_restart_readonly": {
+    "live_defaults_status": 200,
+    "seconds": 2.8,
+    "actual_max_leverage": "100",
+    "uses_max": true,
+    "target_equity_multiple": 10.0,
+    "exchange_writes": 0,
+    "wick_context": {
+      "status": 200,
+      "symbol": "ETHFI-USDT-SWAP",
+      "timeframe": "15m",
+      "side": "long",
+      "week": "2026-10-19",
+      "stop_loss": "0.6361",
+      "candle_ms": 1792764900000,
+      "level": "0.6369292"
+    },
+    "paper_defaults_status": 200,
+    "paper_actual_max_leverage": "20",
+    "paper_target_multiple": 5.000000000000001,
+    "paper_pool": "alts"
+  },
+  "services": {
+    "checked_ms": 1792768330695,
+    "manual_worker": {
+      "errors": [],
+      "free_manual_revision": "free-manual-20261023-v2",
+      "heartbeat_ms": 1792768329029,
+      "worker_error": null
+    },
+    "free_tickets": 0,
+    "service_alive": true,
+    "scan": {
+      "status": "idle",
+      "errors": 0,
+      "completed": 2008,
+      "total": 2008
+    },
+    "monday_connected": true,
+    "week": "2026-10-19",
+    "market": {
+      "monitoring_enabled": false,
+      "workers": {
+        "sync": false,
+        "context": false
+      }
+    },
+    "patrols_enabled": 4,
+    "patrols_total": 4,
+    "patrol_worker": {
+      "state": "idle",
+      "heartbeat_ms": 1792768297350
+    },
+    "monday_states": {
+      "loading": 134,
+      "ready": 362,
+      "missing_monday": 11
+    },
+    "browser_session": "fib-drawer",
+    "browser_pid": 96571,
+    "browser_closed": true,
+    "browser_process_exited": true
+  },
+  "real_test_orders": 0,
+  "screenshots": [
+    "output/playwright/monday-drawer/desktop.png",
+    "output/playwright/monday-drawer/mobile-320.png",
+    "output/playwright/monday-drawer/mobile-keyboard.png",
+    "output/playwright/monday-drawer/mobile-live-confirmed.png",
+    "output/playwright/monday-drawer/mobile-paper.png"
+  ],
+  "limitations": [
+    "No physical iPhone acceptance; browser widths 1440/390/320 and emulated visual viewport/offset verified.",
+    "Account/candle warmup remains explicit; paper defaults retry transient risk-cache warmup.",
+    "No real exchange POSTs or live tickets created in acceptance.",
+    "Existing same-symbol live inventory still blocks changing leverage; native limit exits wait for fill/remainder cancellation.",
+    "Exposure is based on total USDT equity before entry fees; quantity rounds down to the venue lot step. External price moves are not forcibly rebalanced."
+  ]
+}

@@ -1,3 +1,11 @@
+## 2026-10-23 · Mobile Monday order drawer, wick stops and equity exposure
+
+- Owner confirmed current chart timeframe: newest closed current-week lower/upper 1.618 wick supplies long low / short high. Missing history or no eligible wick stays explicit. Demand-only weekly backfill is separate from scanning.
+- Both quick paper/live modes now use the Stitch bottom drawer, visual viewport keyboard handling, independent form scroll, fixed action, background inertness, focus return and handle-only dismissal. Desktop keeps a floating ticket. Saved mobile drag offsets cannot move the drawer offscreen; delayed defaults cannot overwrite manual stops.
+- BTC and ETH each have independent 10x total USDT equity allowance; alts share 5x. Gross positions, opening pending orders and unresolved local intents consume allowance. Default100percent remaining; stop distance has no1R cap. Contract leverage defaults to instrument/quantity-tier maximum and changes collateral only. Paper reuses its existing ledger, account and durable receipts; legacy full-desk presets unchanged.
+- Code88e62200f0, Stitch0e1cb04622f444cea23f0fa2a9f46919/GEMINI_3_8_FLASH.727 broad Python checks and37 final touched-backend checks (overlap),52frontend checks pass. Browser390/320/1440 plus keyboard viewport/offset, stale-stop/manual-edit, focus/swipe and intercepted confirmation verified. Real read-only BTC max100x with10x equity, paper altmax20x with5x equity, ETHFI15m wick. Zero live tickets/orders; both services updated, manual revisionv2/errors empty, market workers stopped. Existing scan/patrol/startup state in receipt. Browserfib-drawer/PID96571closed/exited.
+- Evidence `artifacts/monday-drawer-sizing-20261023/receipt.json`; two required learnings saved. Unrelated README deletion, historical deletions and MondayBark edits preserved.
+
 ## 2026-10-23 · Case4 4h wick plus three inside closes: BTC exploratory, alts negative
 
 - Owner case4:4h pin body strictly inside1618, wick touches; next3complete contiguous4h closes at/inside level, equality allowed, opens/wicks may cross. First weekly-side touch inherited. Enter pin+16h, originalpin SL/nearMondayedge TP. UTC4h versusNYMonday winter boundary handled using original5m firsttouch and knownprefix; no volume condition.
