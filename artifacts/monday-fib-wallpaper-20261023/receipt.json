@@ -1,0 +1,91 @@
+{
+  "status": "delivered",
+  "completed_at": "2026-10-23T02:44:27.695667+00:00",
+  "url": "https://spikeok.com/#monday-fib",
+  "source_commit": "957306d1377b8efe6249ecdd086aac52385ce86a",
+  "stitch": {
+    "project_id": "8978791379095391159",
+    "model": "GEMINI_3_8_FLASH",
+    "layout_screen": "01029a886460402ab4161498766a7687",
+    "solid_levels_screen": "98d9f34701d9464db73bf2ec7133d827",
+    "final_screen": "fd410c9bd37443dd8759a713c57e2d47",
+    "html": "stitch-draggable-glass.html",
+    "screenshot": "stitch-draggable-glass.png"
+  },
+  "behavior": [
+    "Full viewport real 15m closed candles; default latest touched contract by occurrence time",
+    "Monday high/low and both outer 1.618 lines solid; internal five lines optional",
+    "Manual contract selection pins; follow latest resumes; week rollover resets",
+    "No Telegram UI or subscription write code",
+    "Five draggable glass modules with pointer capture only on grips; bounded coordinates; desktop/mobile local positions; double-click or Home reset",
+    "18px backdrop blur, 180% saturation and 18% white tint; reduced-motion support"
+  ],
+  "validation": {
+    "node_tests": 48,
+    "python_asset_tests": 2,
+    "node_command": "node --test tests/monitor/frontend_monday_fib_layout.test.cjs tests/monitor/frontend_monday_fib.test.cjs tests/monitor/frontend_monday_fib_chart.test.cjs tests/monitor/frontend_range_chart.test.cjs tests/monitor/frontend_module_loader.test.cjs tests/monitor/frontend_chart_tools.test.cjs tests/monitor/frontend_shell.test.cjs",
+    "python_command": ".venv/bin/python -m pytest tests/monitor/test_asset_delivery.py -q",
+    "browser_viewports": [
+      "1280x900",
+      "390x844",
+      "320x740"
+    ],
+    "overflow": false,
+    "console_errors": 0,
+    "console_warnings": 0,
+    "verified": [
+      "live EWJ and BTC candles and four solid levels",
+      "search, empty search, contract selection, pinned refresh and resume latest",
+      "internal level switch and keyboard chart zoom",
+      "actual card drag on desktop and narrow viewport",
+      "position survives full reload; keyboard Home and actual double-click reset",
+      "other workspace restores scrolling and removes wallpaper",
+      "all five modules expose grip handles"
+    ],
+    "touch_limit": "Touch Pointer Events covered by unit tests; native IAB drag tested at narrow sizes. IAB rejected raw touch injection, so no physical touch-device certification.",
+    "screenshots": [
+      "desktop.jpg",
+      "desktop-glass-drag.jpg",
+      "mobile.jpg"
+    ]
+  },
+  "health_after_cleanup": {
+    "service_alive": true,
+    "scan_completed": 2008,
+    "scan_total": 2008,
+    "scan_errors": 0,
+    "model_ready": false,
+    "model_note": "Expected false; no production model",
+    "stream_connected": true,
+    "unique_touched_contracts": 419,
+    "telegram_enabled": true,
+    "telegram_activation_ms": 1792682048630,
+    "patrol_enabled": 4,
+    "patrol_last_statuses": [
+      "partial",
+      "partial",
+      "partial",
+      "partial"
+    ],
+    "worker": {
+      "pid": 1266,
+      "heartbeat_ms": 1792723466979,
+      "state": "idle"
+    }
+  },
+  "cleanup": {
+    "created_tab": "IAB 1",
+    "closed": true,
+    "iab_tabs_remaining": 0,
+    "viewport_override_reset": true,
+    "new_browser_processes": 0
+  },
+  "safety": {
+    "subscription_writes": 0,
+    "test_messages": 0,
+    "orders": 0,
+    "service_restarts": 0
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}

@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-fib-wallpaper-20261023
+    artifact_type: manifest
+    role: Monday Fib full-screen candlestick workspace with draggable translucent glass controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: 957306d1377b8efe6249ecdd086aac52385ce86a
+    source_path: artifacts/monday-fib-wallpaper-20261023/receipt.json
+    storage_uri: repo://artifacts/monday-fib-wallpaper-20261023/receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'Stitch fd410c9bd37443dd8759a713c57e2d47. Four solid levels; latest-follow and manual pin; five draggable glass modules with separate mobile/desktop layout memory. Telegram UI removed; service state preserved. 48 frontend and 2 asset tests; desktop/mobile browser checks. No trading or backend change.'
   - artifact_id: monday-1618-book-20261023-v1
     artifact_type: manifest
     role: 'Does resting order-book depth in front of the move at the touch judge whether the 1618 holds?'

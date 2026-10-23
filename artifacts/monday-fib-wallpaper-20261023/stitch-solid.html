@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+
+<html class="h-full w-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Spike · 周一1.618 · 全屏行情壁纸 (全实线定界版)</title>
+<!-- Google Fonts: Plus Jakarta Sans & Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "tertiary-fixed-dim": "#ffb4ab",
+            "surface-container-lowest": "#ffffff",
+            "chart-bear": "#dc2626",
+            "error-container": "#ffdad6",
+            "surface-dim": "#d4daea",
+            "surface-tint": "#005cbb",
+            "fib-blue": "#0ea5e9",
+            "on-primary": "#ffffff",
+            "tertiary-container": "#df2828",
+            "on-primary-fixed-variant": "#00458f",
+            "background": "#f9f9ff",
+            "surface-variant": "#dde2f2",
+            "on-background": "#161c27",
+            "chart-bull": "#16a34a",
+            "glass-card-bg": "rgba(255, 255, 255, 0.92)",
+            "secondary-container": "#7cf994",
+            "canvas-bg": "#F7F8F6",
+            "glass-bg": "rgba(255, 255, 255, 0.76)",
+            "tertiary-fixed": "#ffdad6",
+            "primary-fixed": "#d7e2ff",
+            "tertiary": "#ba0012",
+            "surface-container-high": "#e2e8f8",
+            "inverse-primary": "#abc7ff",
+            "on-tertiary-fixed": "#410002",
+            "on-error-container": "#93000a",
+            "surface-container-highest": "#dde2f2",
+            "surface-container-low": "#f0f3ff",
+            "on-secondary-fixed": "#002109",
+            "outline": "#717785",
+            "glass-specular": "rgba(255, 255, 255, 0.9)",
+            "error": "#ba1a1a",
+            "on-surface-variant": "#414753",
+            "primary": "#0059b5",
+            "on-tertiary": "#ffffff",
+            "surface-container": "#e8eefe",
+            "on-secondary-container": "#007230",
+            "secondary-fixed-dim": "#62df7d",
+            "on-secondary": "#ffffff",
+            "surface": "#f9f9ff",
+            "inverse-surface": "#2a313d",
+            "device-chassis": "#202227",
+            "on-tertiary-fixed-variant": "#93000b",
+            "on-primary-fixed": "#001b3f",
+            "on-secondary-fixed-variant": "#005320",
+            "on-surface": "#161c27",
+            "secondary-fixed": "#7ffc97",
+            "secondary": "#006e2d",
+            "on-tertiary-container": "#fffaf9",
+            "surface-bright": "#f9f9ff",
+            "on-primary-container": "#fcfbff",
+            "primary-fixed-dim": "#abc7ff",
+            "primary-container": "#0071e3",
+            "inverse-on-surface": "#ecf0ff",
+            "fib-mid": "#94a3b8",
+            "on-error": "#ffffff",
+            "outline-variant": "#c1c6d6"
+          },
+          borderRadius: {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "space-sm": "0.5rem",
+            "gutter-sm": "1rem",
+            "space-xs": "0.25rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "margin-mobile": "1.25rem",
+            "gutter": "1.5rem",
+            "margin": "2rem",
+            "margin-desktop": "3rem",
+            "space-xl": "2.5rem",
+            "gutter-lg": "2rem"
+          },
+          fontFamily: {
+            "body-md": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "label-sm": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "headline-sm": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "display-lg": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "headline-xl": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "body-sm": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "display-lg-mobile": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "headline-lg": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "metric-val": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "body-lg": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "label-md": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "headline-md": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "headline-xl-mobile": ["Plus Jakarta Sans", "system-ui", "sans-serif"]
+          },
+          fontSize: {
+            "body-md": ["15px", { lineHeight: "21px", letterSpacing: "-0.005em", fontWeight: "400" }],
+            "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.04em", fontWeight: "600" }],
+            "headline-sm": ["17px", { lineHeight: "22px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "display-lg": ["48px", { lineHeight: "56px", letterSpacing: "-0.03em", fontWeight: "700" }],
+            "headline-xl": ["36px", { lineHeight: "44px", letterSpacing: "-0.025em", fontWeight: "600" }],
+            "body-sm": ["13px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "400" }],
+            "display-lg-mobile": ["34px", { lineHeight: "40px", letterSpacing: "-0.025em", fontWeight: "700" }],
+            "headline-lg": ["24px", { lineHeight: "30px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "metric-val": ["28px", { lineHeight: "32px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "body-lg": ["17px", { lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "400" }],
+            "label-md": ["13px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "500" }],
+            "headline-md": ["20px", { lineHeight: "26px", letterSpacing: "-0.015em", fontWeight: "600" }],
+            "headline-xl-mobile": ["28px", { lineHeight: "34px", letterSpacing: "-0.02em", fontWeight: "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Liquid Glass Materiality according to Design Tokens */
+    .apple-glass {
+      background: rgba(255, 255, 255, 0.74);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.95), 0 10px 30px -4px rgba(26, 27, 31, 0.07);
+    }
+    .apple-glass-card {
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(36px) saturate(190%);
+      -webkit-backdrop-filter: blur(36px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 1), 0 20px 48px -8px rgba(15, 23, 42, 0.12);
+    }
+    .apple-glass-pill {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.9), 0 4px 16px -2px rgba(26, 27, 31, 0.05);
+    }
+    .tap-spring {
+      transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1), background-color 180ms ease, opacity 180ms ease;
+    }
+    .tap-spring:active {
+      transform: scale(0.96);
+    }
+    /* Tabular numeric rendering for institutional precision */
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tap-spring {
+        transition: none !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="h-full w-full overflow-hidden select-none bg-[#F7F8F6] text-on-surface font-body-md antialiased relative">
+<!-- ========================================================================= -->
+<!-- 1. FULL VIEWPORT IMMERSIVE WALLPAPER CANVAS (Absolute inset:0, z-0)      -->
+<!-- ========================================================================= -->
+<div class="absolute inset-0 w-full h-full z-0 overflow-hidden bg-[#F7F8F6] pointer-events-none" id="chart-canvas-container">
+<svg class="w-full h-full" id="wallpaper-chart-svg" preserveaspectratio="none" viewbox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<!-- Gradients -->
+<lineargradient id="mondayBandGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#0284c7" stop-opacity="0.07"></stop>
+<stop offset="100%" stop-color="#0284c7" stop-opacity="0.02"></stop>
+</lineargradient>
+<lineargradient id="bullCandleGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#16a34a"></stop>
+<stop offset="100%" stop-color="#15803d"></stop>
+</lineargradient>
+<lineargradient id="bearCandleGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#f43f5e"></stop>
+<stop offset="100%" stop-color="#e11d48"></stop>
+</lineargradient>
+<lineargradient id="volBullGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#16a34a" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#16a34a" stop-opacity="0.04"></stop>
+</lineargradient>
+<lineargradient id="volBearGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#f43f5e" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#f43f5e" stop-opacity="0.04"></stop>
+</lineargradient>
+</defs>
+<!-- Background Ambient Grid Lines -->
+<g opacity="0.65" stroke="#e2e8f0" stroke-dasharray="2 4" stroke-width="1">
+<!-- Horizontal grid levels -->
+<line x1="0" x2="1350" y1="120" y2="120"></line>
+<line x1="0" x2="1350" y1="230" y2="230"></line>
+<line x1="0" x2="1350" y1="360" y2="360"></line>
+<line x1="0" x2="1350" y1="490" y2="490"></line>
+<line x1="0" x2="1350" y1="620" y2="620"></line>
+<line x1="0" x2="1350" y1="740" y2="740"></line>
+<!-- Vertical time grid -->
+<line x1="160" x2="160" y1="0" y2="850"></line>
+<line x1="340" x2="340" y1="0" y2="850"></line>
+<line x1="520" x2="520" y1="0" y2="850"></line>
+<line x1="700" x2="700" y1="0" y2="850"></line>
+<line x1="880" x2="880" y1="0" y2="850"></line>
+<line x1="1060" x2="1060" y1="0" y2="850"></line>
+<line x1="1240" x2="1240" y1="0" y2="850"></line>
+</g>
+<!-- Monday Baseline Band (Monday High 93,950 -> Y: 290, Monday Low 88,975 -> Y: 570) -->
+<rect fill="url(#mondayBandGrad)" height="280" width="1350" x="0" y="290"></rect>
+<!-- Monday Session Vertical Marker Anchor -->
+<rect fill="#0284c7" fill-opacity="0.04" height="280" width="220" x="180" y="290"></rect>
+<line opacity="0.35" stroke="#0ea5e9" stroke-dasharray="3 3" stroke-width="1.5" x1="180" x2="180" y1="50" y2="850"></line>
+<text fill="#0284c7" font-size="11" font-weight="600" opacity="0.8" x="186" y="280">周一定界起点 00:00 EST</text>
+<!-- Upper 1.618 Extension Level (97,024.80) -> Y: 118 -->
+<g id="upper-1618-group">
+<line opacity="0.9" stroke="#10b981" stroke-width="2" x1="0" x2="1350" y1="118" y2="118"></line>
+<rect fill="#16a34a" height="24" rx="6" width="82" x="1352" y="106"></rect>
+<text class="tabular-nums" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle" x="1393" y="122">97,024.80</text>
+<text fill="#15803d" font-size="12" font-weight="700" x="1260" y="112">触及 +1.618 扩展线</text>
+</g>
+<!-- Monday High (93,950.00) -> Y: 290 -->
+<g id="monday-high-group">
+<line opacity="0.85" stroke="#0284c7" stroke-width="1.75" x1="0" x2="1350" y1="290" y2="290"></line>
+<rect fill="#0284c7" fill-opacity="0.12" height="24" rx="6" stroke="#0284c7" stroke-width="1" width="82" x="1352" y="278"></rect>
+<text class="tabular-nums" fill="#0284c7" font-size="11" font-weight="700" text-anchor="middle" x="1393" y="294">93,950.00</text>
+<text fill="#0369a1" font-size="11" font-weight="600" x="60" y="284">周一高点 (Monday High)</text>
+</g>
+<!-- Optional Hidden Fibs (0.5 EQ / 0.618 / 0.705) -> Controlled by dock toggle -->
+<g class="transition-opacity duration-300" id="internal-fibs-group" opacity="0">
+<!-- 0.705 Fib -> Y: 372 -->
+<line opacity="0.7" stroke="#94a3b8" stroke-dasharray="3 3" stroke-width="1" x1="0" x2="1350" y1="372" y2="372"></line>
+<text class="tabular-nums" fill="#64748b" font-size="10" font-weight="600" x="1354" y="376">92,482 (0.705)</text>
+<!-- 0.618 Fib -> Y: 418 -->
+<line opacity="0.75" stroke="#0ea5e9" stroke-dasharray="4 2" stroke-width="1.2" x1="0" x2="1350" y1="418" y2="418"></line>
+<text class="tabular-nums" fill="#0284c7" font-size="10" font-weight="600" x="1354" y="422">92,049 (0.618)</text>
+<!-- 0.5 Equilibrium EQ (91,462.60) -> Y: 430 -->
+<line opacity="0.85" stroke="#64748b" stroke-dasharray="4 3" stroke-width="1.5" x1="0" x2="1350" y1="430" y2="430"></line>
+<rect fill="#f1f5f9" height="22" rx="4" stroke="#94a3b8" stroke-width="1" width="82" x="1352" y="418"></rect>
+<text class="tabular-nums" fill="#475569" font-size="10" font-weight="700" text-anchor="middle" x="1393" y="433">91,462.60</text>
+<text fill="#64748b" font-size="11" font-weight="600" x="60" y="425">中间平衡位 0.5 EQ</text>
+</g>
+<!-- Monday Low (88,975.20) -> Y: 570 -->
+<g id="monday-low-group">
+<line opacity="0.85" stroke="#0284c7" stroke-width="1.75" x1="0" x2="1350" y1="570" y2="570"></line>
+<rect fill="#0284c7" fill-opacity="0.12" height="24" rx="6" stroke="#0284c7" stroke-width="1" width="82" x="1352" y="558"></rect>
+<text class="tabular-nums" fill="#0284c7" font-size="11" font-weight="700" text-anchor="middle" x="1393" y="574">88,975.20</text>
+<text fill="#0369a1" font-size="11" font-weight="600" x="60" y="564">周一低点 (Monday Low)</text>
+</g>
+<!-- Lower 1.618 Extension Level (85,900.80) -> Y: 742 -->
+<g id="lower-1618-group">
+<line opacity="0.9" stroke="#f43f5e" stroke-width="2" x1="0" x2="1350" y1="742" y2="742"></line>
+<rect fill="#dc2626" height="24" rx="6" width="82" x="1352" y="730"></rect>
+<text class="tabular-nums" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle" x="1393" y="746">85,900.80</text>
+<text fill="#be123c" font-size="12" font-weight="700" x="1260" y="736">支撑 -1.618 扩展线</text>
+</g>
+<!-- Bottom Volume Histogram Bars -->
+<g id="volume-histogram" opacity="0.85">
+<!-- Monday Accumulation Bars -->
+<rect fill="url(#volBullGrad)" height="28" rx="1" width="10" x="175" y="790"></rect>
+<rect fill="url(#volBullGrad)" height="38" rx="1" width="10" x="190" y="780"></rect>
+<rect fill="url(#volBearGrad)" height="22" rx="1" width="10" x="205" y="796"></rect>
+<rect fill="url(#volBullGrad)" height="33" rx="1" width="10" x="220" y="785"></rect>
+<rect fill="url(#volBearGrad)" height="16" rx="1" width="10" x="235" y="802"></rect>
+<rect fill="url(#volBullGrad)" height="42" rx="1" width="10" x="250" y="776"></rect>
+<rect fill="url(#volBullGrad)" height="26" rx="1" width="10" x="265" y="792"></rect>
+<rect fill="url(#volBearGrad)" height="18" rx="1" width="10" x="280" y="800"></rect>
+<!-- Tuesday Consolidation -->
+<rect fill="url(#volBearGrad)" height="20" rx="1" width="10" x="340" y="798"></rect>
+<rect fill="url(#volBullGrad)" height="32" rx="1" width="10" x="355" y="786"></rect>
+<rect fill="url(#volBullGrad)" height="48" rx="1" width="10" x="370" y="770"></rect>
+<rect fill="url(#volBearGrad)" height="28" rx="1" width="10" x="385" y="790"></rect>
+<rect fill="url(#volBullGrad)" height="36" rx="1" width="10" x="400" y="782"></rect>
+<rect fill="url(#volBearGrad)" height="24" rx="1" width="10" x="415" y="794"></rect>
+<rect fill="url(#volBullGrad)" height="38" rx="1" width="10" x="430" y="780"></rect>
+<rect fill="url(#volBearGrad)" height="33" rx="1" width="10" x="445" y="785"></rect>
+<!-- Wednesday Mid-range Push -->
+<rect fill="url(#volBullGrad)" height="28" rx="1" width="10" x="520" y="790"></rect>
+<rect fill="url(#volBullGrad)" height="44" rx="1" width="10" x="535" y="774"></rect>
+<rect fill="url(#volBullGrad)" height="58" rx="1" width="10" x="550" y="760"></rect>
+<rect fill="url(#volBearGrad)" height="36" rx="1" width="10" x="565" y="782"></rect>
+<rect fill="url(#volBullGrad)" height="30" rx="1" width="10" x="580" y="788"></rect>
+<rect fill="url(#volBearGrad)" height="23" rx="1" width="10" x="595" y="795"></rect>
+<rect fill="url(#volBullGrad)" height="48" rx="1" width="10" x="610" y="770"></rect>
+<rect fill="url(#volBearGrad)" height="34" rx="1" width="10" x="625" y="784"></rect>
+<!-- Thursday Breakout Surge -->
+<rect fill="url(#volBullGrad)" height="53" rx="1" width="10" x="710" y="765"></rect>
+<rect fill="url(#volBullGrad)" height="68" rx="1" width="10" x="725" y="750"></rect>
+<rect fill="url(#volBullGrad)" height="76" rx="1" width="10" x="740" y="742"></rect>
+<rect fill="url(#volBearGrad)" height="50" rx="1" width="10" x="755" y="768"></rect>
+<rect fill="url(#volBullGrad)" height="64" rx="1" width="10" x="770" y="754"></rect>
+<rect fill="url(#volBullGrad)" height="72" rx="1" width="10" x="785" y="746"></rect>
+<rect fill="url(#volBearGrad)" height="44" rx="1" width="10" x="800" y="774"></rect>
+<!-- Friday/Weekend Sustained Momentum -->
+<rect fill="url(#volBullGrad)" height="63" rx="1" width="10" x="880" y="755"></rect>
+<rect fill="url(#volBullGrad)" height="78" rx="1" width="10" x="895" y="740"></rect>
+<rect fill="url(#volBearGrad)" height="58" rx="1" width="10" x="910" y="760"></rect>
+<rect fill="url(#volBullGrad)" height="68" rx="1" width="10" x="925" y="750"></rect>
+<rect fill="url(#volBullGrad)" height="88" rx="1" width="10" x="940" y="730"></rect>
+<rect fill="url(#volBullGrad)" height="73" rx="1" width="10" x="955" y="745"></rect>
+<rect fill="url(#volBearGrad)" height="66" rx="1" width="10" x="970" y="752"></rect>
+<!-- Monday Target Climax Spike (Current) -->
+<rect fill="url(#volBullGrad)" height="83" rx="1" width="10" x="1050" y="735"></rect>
+<rect fill="url(#volBullGrad)" height="98" rx="1" width="10" x="1065" y="720"></rect>
+<rect fill="url(#volBullGrad)" height="108" rx="1" width="10" x="1080" y="710"></rect>
+<rect fill="url(#volBullGrad)" height="118" rx="1" width="10" x="1095" y="700"></rect>
+<rect fill="url(#volBearGrad)" height="90" rx="1" width="10" x="1110" y="728"></rect>
+<rect fill="url(#volBullGrad)" height="130" rx="1" width="10" x="1125" y="688"></rect>
+<rect fill="url(#volBullGrad)" height="124" rx="1" width="10" x="1140" y="694"></rect>
+<rect fill="url(#volBullGrad)" height="110" rx="1" width="10" x="1155" y="708"></rect>
+<rect fill="url(#volBearGrad)" height="104" rx="1" width="10" x="1170" y="714"></rect>
+<rect fill="url(#volBullGrad)" height="143" rx="1" width="10" x="1185" y="675"></rect>
+<rect fill="url(#volBullGrad)" height="158" rx="1" width="10" x="1200" y="660"></rect>
+<rect fill="url(#volBullGrad)" height="168" rx="1" width="10" x="1215" y="650"></rect>
+<rect fill="url(#volBearGrad)" height="153" rx="1" width="10" x="1230" y="665"></rect>
+</g>
+<!-- CANDLESTICKS SEQUENCE (Edge-to-Edge Narrative: Monday Low bounce -> Range oscillation -> Massive Expansion to 1.618 Target) -->
+<g id="candlesticks-layer">
+<!-- Block 1: Monday Range Definition (88,975 - 93,950) -->
+<!-- Candle 1 -->
+<line stroke="#dc2626" stroke-width="1.5" x1="180" x2="180" y1="520" y2="575"></line>
+<rect fill="url(#bearCandleGrad)" height="38" rx="1.5" width="10" x="175" y="530"></rect>
+<!-- Candle 2 (Monday Low Test 88,975) -->
+<line stroke="#16a34a" stroke-width="1.5" x1="195" x2="195" y1="540" y2="572"></line>
+<rect fill="url(#bullCandleGrad)" height="24" rx="1.5" width="10" x="190" y="542"></rect>
+<!-- Candle 3 -->
+<line stroke="#16a34a" stroke-width="1.5" x1="210" x2="210" y1="495" y2="550"></line>
+<rect fill="url(#bullCandleGrad)" height="42" rx="1.5" width="10" x="205" y="500"></rect>
+<!-- Candle 4 -->
+<line stroke="#16a34a" stroke-width="1.5" x1="225" x2="225" y1="465" y2="510"></line>
+<rect fill="url(#bullCandleGrad)" height="35" rx="1.5" width="10" x="220" y="470"></rect>
+<!-- Candle 5 (Monday High Establish 93,950) -->
+<line stroke="#16a34a" stroke-width="1.5" x1="240" x2="240" y1="288" y2="475"></line>
+<rect fill="url(#bullCandleGrad)" height="170" rx="1.5" width="10" x="235" y="295"></rect>
+<!-- Candle 6 -->
+<line stroke="#dc2626" stroke-width="1.5" x1="255" x2="255" y1="290" y2="340"></line>
+<rect fill="url(#bearCandleGrad)" height="40" rx="1.5" width="10" x="250" y="296"></rect>
+<!-- Candle 7 -->
+<line stroke="#dc2626" stroke-width="1.5" x1="270" x2="270" y1="320" y2="375"></line>
+<rect fill="url(#bearCandleGrad)" height="38" rx="1.5" width="10" x="265" y="332"></rect>
+<!-- Block 2: Mid-Week Equilibrium Rotation -->
+<line stroke="#16a34a" stroke-width="1.5" x1="330" x2="330" y1="360" y2="415"></line>
+<rect fill="url(#bullCandleGrad)" height="38" rx="1.5" width="10" x="325" y="370"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="345" x2="345" y1="355" y2="400"></line>
+<rect fill="url(#bullCandleGrad)" height="30" rx="1.5" width="10" x="340" y="360"></rect>
+<line stroke="#dc2626" stroke-width="1.5" x1="360" x2="360" y1="340" y2="390"></line>
+<rect fill="url(#bearCandleGrad)" height="32" rx="1.5" width="10" x="355" y="350"></rect>
+<line stroke="#dc2626" stroke-width="1.5" x1="375" x2="375" y1="365" y2="445"></line>
+<rect fill="url(#bearCandleGrad)" height="58" rx="1.5" width="10" x="370" y="380"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="390" x2="390" y1="420" y2="455"></line>
+<rect fill="url(#bullCandleGrad)" height="26" rx="1.5" width="10" x="385" y="425"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="405" x2="405" y1="410" y2="465"></line>
+<rect fill="url(#bullCandleGrad)" height="42" rx="1.5" width="10" x="400" y="415"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="420" x2="420" y1="390" y2="435"></line>
+<rect fill="url(#bullCandleGrad)" height="30" rx="1.5" width="10" x="415" y="398"></rect>
+<line stroke="#dc2626" stroke-width="1.5" x1="435" x2="435" y1="385" y2="425"></line>
+<rect fill="url(#bearCandleGrad)" height="28" rx="1.5" width="10" x="430" y="392"></rect>
+<line stroke="#dc2626" stroke-width="1.5" x1="450" x2="450" y1="410" y2="465"></line>
+<rect fill="url(#bearCandleGrad)" height="40" rx="1.5" width="10" x="445" y="418"></rect>
+<!-- Block 3: Higher Low Formation at 0.5 EQ -->
+<line stroke="#16a34a" stroke-width="1.5" x1="510" x2="510" y1="425" y2="480"></line>
+<rect fill="url(#bullCandleGrad)" height="38" rx="1.5" width="10" x="505" y="435"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="525" x2="525" y1="415" y2="455"></line>
+<rect fill="url(#bullCandleGrad)" height="30" rx="1.5" width="10" x="520" y="420"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="540" x2="540" y1="395" y2="430"></line>
+<rect fill="url(#bullCandleGrad)" height="28" rx="1.5" width="10" x="535" y="400"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="555" x2="555" y1="375" y2="415"></line>
+<rect fill="url(#bullCandleGrad)" height="32" rx="1.5" width="10" x="550" y="380"></rect>
+<line stroke="#dc2626" stroke-width="1.5" x1="570" x2="570" y1="365" y2="400"></line>
+<rect fill="url(#bearCandleGrad)" height="24" rx="1.5" width="10" x="565" y="372"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="585" x2="585" y1="355" y2="390"></line>
+<rect fill="url(#bullCandleGrad)" height="26" rx="1.5" width="10" x="580" y="360"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="600" x2="600" y1="335" y2="375"></line>
+<rect fill="url(#bullCandleGrad)" height="32" rx="1.5" width="10" x="595" y="340"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="615" x2="615" y1="315" y2="355"></line>
+<rect fill="url(#bullCandleGrad)" height="30" rx="1.5" width="10" x="610" y="322"></rect>
+<!-- Block 4: Monday High Breakout & Liquidity Sweep -->
+<line stroke="#16a34a" stroke-width="1.5" x1="695" x2="695" y1="285" y2="335"></line>
+<rect fill="url(#bullCandleGrad)" height="42" rx="1.5" width="10" x="690" y="288"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="710" x2="710" y1="270" y2="310"></line>
+<rect fill="url(#bullCandleGrad)" height="30" rx="1.5" width="10" x="705" y="275"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="725" x2="725" y1="250" y2="290"></line>
+<rect fill="url(#bullCandleGrad)" height="30" rx="1.5" width="10" x="720" y="255"></rect>
+<line stroke="#dc2626" stroke-width="1.5" x1="740" x2="740" y1="235" y2="275"></line>
+<rect fill="url(#bearCandleGrad)" height="28" rx="1.5" width="10" x="735" y="242"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="755" x2="755" y1="245" y2="285"></line>
+<rect fill="url(#bullCandleGrad)" height="32" rx="1.5" width="10" x="750" y="250"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="770" x2="770" y1="220" y2="265"></line>
+<rect fill="url(#bullCandleGrad)" height="35" rx="1.5" width="10" x="765" y="225"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="785" x2="785" y1="200" y2="240"></line>
+<rect fill="url(#bullCandleGrad)" height="32" rx="1.5" width="10" x="780" y="205"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="800" x2="800" y1="185" y2="225"></line>
+<rect fill="url(#bullCandleGrad)" height="30" rx="1.5" width="10" x="795" y="190"></rect>
+<!-- Block 5: The Extension Surge to 1.618 Fib Target -->
+<line stroke="#dc2626" stroke-width="1.5" x1="865" x2="865" y1="175" y2="215"></line>
+<rect fill="url(#bearCandleGrad)" height="30" rx="1.5" width="10" x="860" y="180"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="880" x2="880" y1="160" y2="195"></line>
+<rect fill="url(#bullCandleGrad)" height="26" rx="1.5" width="10" x="875" y="166"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="895" x2="895" y1="145" y2="180"></line>
+<rect fill="url(#bullCandleGrad)" height="28" rx="1.5" width="10" x="890" y="150"></rect>
+<line stroke="#dc2626" stroke-width="1.5" x1="910" x2="910" y1="152" y2="185"></line>
+<rect fill="url(#bearCandleGrad)" height="24" rx="1.5" width="10" x="905" y="158"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="925" x2="925" y1="135" y2="175"></line>
+<rect fill="url(#bullCandleGrad)" height="32" rx="1.5" width="10" x="920" y="140"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="940" x2="940" y1="120" y2="160"></line>
+<rect fill="url(#bullCandleGrad)" height="32" rx="1.5" width="10" x="935" y="125"></rect>
+<!-- Block 6: Institutional Target Touched - 1.618 Spike -->
+<line stroke="#16a34a" stroke-width="1.5" x1="1045" x2="1045" y1="125" y2="165"></line>
+<rect fill="url(#bullCandleGrad)" height="30" rx="1.5" width="10" x="1040" y="130"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="1060" x2="1060" y1="114" y2="148"></line>
+<rect fill="url(#bullCandleGrad)" height="26" rx="1.5" width="10" x="1055" y="120"></rect>
+<!-- THE PIN CANDLE: Pierces 97,024.80 (Y: 118) -->
+<line stroke="#10b981" stroke-width="2" x1="1075" x2="1075" y1="116" y2="155"></line>
+<rect fill="url(#bullCandleGrad)" height="28" rx="1.5" width="10" x="1070" y="122"></rect>
+<!-- Micro Touch Radar Pulse Ring on the 1.618 level -->
+<circle cx="1075" cy="118" fill="none" opacity="0.8" r="8" stroke="#10b981" stroke-width="2"></circle>
+<circle cx="1075" cy="118" fill="#10b981" r="3"></circle>
+<!-- Following Candles holding near extension -->
+<line stroke="#dc2626" stroke-width="1.5" x1="1090" x2="1090" y1="120" y2="150"></line>
+<rect fill="url(#bearCandleGrad)" height="22" rx="1.5" width="10" x="1085" y="125"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="1105" x2="1105" y1="122" y2="158"></line>
+<rect fill="url(#bullCandleGrad)" height="26" rx="1.5" width="10" x="1100" y="128"></rect>
+<line stroke="#dc2626" stroke-width="1.5" x1="1120" x2="1120" y1="124" y2="152"></line>
+<rect fill="url(#bearCandleGrad)" height="20" rx="1.5" width="10" x="1115" y="128"></rect>
+<line stroke="#16a34a" stroke-width="1.5" x1="1135" x2="1135" y1="120" y2="145"></line>
+<rect fill="url(#bullCandleGrad)" height="18" rx="1.5" width="10" x="1130" y="124"></rect>
+<!-- CURRENT FORMING CANDLE (96,420.50 -> Y: 132) -->
+<line stroke="#16a34a" stroke-width="1.5" x1="1150" x2="1150" y1="126" y2="148"></line>
+<rect fill="url(#bullCandleGrad)" height="16" rx="1.5" width="10" x="1145" y="130"></rect>
+<!-- Active Price Reference Line across right axis -->
+<line opacity="0.7" stroke="#0071E3" stroke-dasharray="3 2" stroke-width="1" x1="1155" x2="1350" y1="132" y2="132"></line>
+<rect fill="#0071E3" height="20" rx="4" width="82" x="1352" y="122"></rect>
+<text class="tabular-nums" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle" x="1393" y="136">96,420.50</text>
+</g>
+<!-- Right Price Scale Coordinates Frame -->
+<g opacity="0.6" stroke="#cbd5e1" stroke-width="1">
+<line x1="1350" x2="1350" y1="0" y2="850"></line>
+</g>
+<!-- Static Coordinates Numbers on Price Axis -->
+<g class="tabular-nums" fill="#64748b" font-size="10" font-weight="600" text-anchor="start">
+<text x="1356" y="60">98,500.00</text>
+<text x="1356" y="210">95,200.00</text>
+<text x="1356" y="340">93,100.00</text>
+<text x="1356" y="470">90,800.00</text>
+<text x="1356" y="650">87,200.00</text>
+<text x="1356" y="790">84,500.00</text>
+</g>
+<!-- Bottom Timeline Axis -->
+<g stroke="#e2e8f0" stroke-width="1">
+<line x1="0" x2="1440" y1="850" y2="850"></line>
+</g>
+<g class="tabular-nums" fill="#94a3b8" font-size="11" font-weight="500" text-anchor="middle">
+<text x="180" y="872">05-19 00:00 (Mon)</text>
+<text x="360" y="872">05-20 08:00</text>
+<text x="540" y="872">05-20 20:00</text>
+<text x="720" y="872">05-21 04:00</text>
+<text x="900" y="872">05-21 12:00</text>
+<text x="1080" y="872">05-21 16:30 (触达)</text>
+<text x="1260" y="872">05-21 当前 (15m)</text>
+</g>
+</svg>
+</div>
+<!-- ========================================================================= -->
+<!-- 2. FLOATING APPLE GLASS UI LAYER (pointer-events-none parent)             -->
+<!-- ========================================================================= -->
+<main class="absolute inset-0 z-10 pointer-events-none flex flex-col justify-between p-4 md:p-6">
+<!-- TOP ROW: Brand Anchor + Active Contract Card (Left) & Contract Tracker Card (Right) -->
+<section aria-label="行情核心监视区" class="flex flex-col md:flex-row justify-between items-start gap-3 w-full">
+<!-- TOP-LEFT CLUSTER -->
+<div class="flex flex-col gap-2.5 pointer-events-auto">
+<!-- Brand Link Pill -->
+<a class="apple-glass-pill tap-spring group inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-on-surface hover:text-primary transition-all duration-150" href="#market-overview">
+<span class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary transition-colors">arrow_back</span>
+<span class="font-headline-sm text-[13px] tracking-tight font-bold">SPIKE · 周一1.618</span>
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bull animate-pulse"></span>
+</a>
+<!-- Active Triggered Symbol Master Capsule -->
+<div class="apple-glass-card p-4 rounded-[22px] min-w-[280px] sm:min-w-[320px] transition-all duration-200">
+<div class="flex items-center justify-between gap-3 mb-2">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">BTCUSDT</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-[10px] tracking-wider uppercase">PERP</span>
+</div>
+<!-- Touch Direction Badge -->
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-chart-bull font-label-sm text-[11px] border border-chart-bull/20 font-bold">
+<span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">arrow_upward</span>
+              触及上沿 1.618
+            </span>
+</div>
+<!-- Price & Gain Metric -->
+<div class="flex items-baseline gap-2.5 mb-2.5">
+<span class="font-metric-val text-[32px] font-bold text-on-surface tracking-tight tabular-nums">$96,420.50</span>
+<span class="inline-flex items-center text-chart-bull font-headline-sm text-sm font-bold tabular-nums">
+              +1.84%
+            </span>
+</div>
+<!-- Institutional Metadata Split -->
+<div class="pt-2.5 border-t border-outline-variant/30 flex items-center justify-between text-outline font-body-sm text-[11px]">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+              8m前触发
+            </span>
+<span>纽约自然周定界 (W-1)</span>
+</div>
+</div>
+</div>
+<!-- TOP-RIGHT CLUSTER: Floating Searchable Contracts Drawer Card -->
+<aside aria-label="最新触价标的列表" class="pointer-events-auto w-full md:w-[310px] apple-glass-card rounded-[24px] overflow-hidden transition-all duration-200">
+<!-- Header & Action Bar -->
+<div class="p-3.5 pb-2.5 border-b border-outline-variant/25 flex items-center justify-between gap-2">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[18px]">waterfall_chart</span>
+<span class="font-headline-sm text-sm font-bold text-on-surface">触达监控标的</span>
+<span class="px-1.5 py-0.2 bg-primary-container/15 text-primary rounded-full text-[10px] font-bold" id="contract-count-badge">5</span>
+</div>
+<div class="flex items-center gap-1">
+<!-- Follow Latest Toggle Button -->
+<button class="tap-spring px-2 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1 bg-primary text-white border border-primary/40 shadow-sm" id="toggle-follow-btn" title="跟随最新触价">
+<span class="material-symbols-outlined text-[12px]">sync</span>
+<span>跟随最新</span>
+</button>
+<!-- Collapse Card Button -->
+<button class="tap-spring p-1.5 rounded-full text-outline hover:text-on-surface hover:bg-surface-container-high/60 transition-colors" id="collapse-list-btn" title="折叠列表">
+<span class="material-symbols-outlined text-[18px]" id="collapse-icon">keyboard_arrow_up</span>
+</button>
+</div>
+</div>
+<!-- Collapsible Content Wrapper -->
+<div class="transition-all duration-200 max-h-[380px] overflow-hidden flex flex-col" id="contracts-list-body">
+<!-- Search Bar -->
+<div class="px-3 pt-2 pb-1.5">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-2.5 text-outline text-[16px]">search</span>
+<input class="w-full bg-[#f1f5f9]/80 border border-outline-variant/40 rounded-full pl-8 pr-3 py-1.5 text-[12px] text-on-surface placeholder-outline focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all" id="symbol-search-input" placeholder="搜索触达标的 (e.g. BTC, SOL)..." type="text"/>
+</div>
+</div>
+<!-- Compact Rows (5 Sorted by newest) -->
+<ul class="divide-y divide-outline-variant/20 px-2 py-1 overflow-y-auto max-h-[280px]" id="symbol-list-container">
+<!-- Row 1: BTC (Active Pin) -->
+<li class="symbol-row tap-spring group flex items-center justify-between px-2.5 py-2 rounded-xl bg-primary-container/10 border border-primary/20 cursor-pointer mb-1" data-symbol="BTCUSDT">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-primary" style="font-variation-settings: 'FILL' 1;">push_pin</span>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-[13px] font-bold text-on-surface">BTCUSDT</span>
+<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/15 text-chart-bull">+1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">8m前 · 触及上沿</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$96,420.50</div>
+<div class="text-[10px] text-chart-bull font-bold tabular-nums">+1.84%</div>
+</div>
+</li>
+<!-- Row 2: SOLUSDT -->
+<li class="symbol-row tap-spring group flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-surface-container-high/50 cursor-pointer transition-colors" data-symbol="SOLUSDT">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bull ml-1"></span>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-[13px] font-bold text-on-surface">SOLUSDT</span>
+<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/10 text-chart-bull">+1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">14m前 · 触及上沿</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$182.40</div>
+<div class="text-[10px] text-chart-bull font-bold tabular-nums">+3.22%</div>
+</div>
+</li>
+<!-- Row 3: PEPEUSDT -->
+<li class="symbol-row tap-spring group flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-surface-container-high/50 cursor-pointer transition-colors" data-symbol="PEPEUSDT">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bull ml-1"></span>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-[13px] font-bold text-on-surface">PEPEUSDT</span>
+<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/10 text-chart-bull">+1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">05-21 11:05 · 触及上沿</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$0.0000142</div>
+<div class="text-[10px] text-chart-bull font-bold tabular-nums">+6.81%</div>
+</div>
+</li>
+<!-- Row 4: SUIUSDT -->
+<li class="symbol-row tap-spring group flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-surface-container-high/50 cursor-pointer transition-colors" data-symbol="SUIUSDT">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bear ml-1"></span>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-[13px] font-bold text-on-surface">SUIUSDT</span>
+<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-500/10 text-chart-bear">-1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">05-21 08:41 · 触及下沿</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$3.2840</div>
+<div class="text-[10px] text-chart-bear font-bold tabular-nums">-2.15%</div>
+</div>
+</li>
+<!-- Row 5: TIAUSDT -->
+<li class="symbol-row tap-spring group flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-surface-container-high/50 cursor-pointer transition-colors" data-symbol="TIAUSDT">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bear ml-1"></span>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-[13px] font-bold text-on-surface">TIAUSDT</span>
+<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-500/10 text-chart-bear">-1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">05-20 22:18 · 下沿探底</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$5.1120</div>
+<div class="text-[10px] text-chart-bear font-bold tabular-nums">-4.30%</div>
+</div>
+</li>
+</ul>
+<!-- Status Footer -->
+<div class="p-2 border-t border-outline-variant/20 bg-surface-container-lowest/50 text-center">
+<span class="text-[10px] text-outline font-medium">自动识别最新突破 · 过滤虚假毛刺</span>
+</div>
+</div>
+</aside>
+</section>
+<!-- BOTTOM ROW: Metadata Footnote (Left) & Centered Bottom Glass Dock -->
+<footer class="flex flex-col sm:flex-row items-center justify-between gap-3 w-full pb-1">
+<!-- BOTTOM-LEFT: Tiny discreet metadata info -->
+<div class="pointer-events-auto apple-glass-pill px-3 py-1.5 rounded-full flex items-center gap-2 text-outline font-body-sm text-[11px] shadow-sm">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span class="font-medium text-on-surface-variant">纽约时间周一基准 (2025-05-19) · 全天候逐笔监控</span>
+<span class="text-outline-variant">|</span>
+<span class="font-semibold text-emerald-600 tabular-nums">延迟 18ms</span>
+</div>
+<!-- CENTERED BOTTOM GLASS DOCK -->
+<nav aria-label="壁纸交互工具栏" class="pointer-events-auto mx-auto sm:mr-auto sm:ml-auto apple-glass p-1.5 rounded-full flex items-center gap-1 sm:gap-2 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+<!-- 15m Badge (Fixed supported timeframe indicator) -->
+<div class="px-3 py-1.5 rounded-full bg-surface-container-highest/80 text-on-surface font-label-sm text-[11px] font-bold tracking-wide flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[13px] text-primary">schedule</span>
+<span>15m 定界</span>
+</div>
+<div class="w-px h-4 bg-outline-variant/40"></div>
+<!-- Fit Chart Button -->
+<button class="tap-spring px-3 py-1.5 rounded-full hover:bg-surface-container-high/60 text-on-surface-variant hover:text-on-surface font-label-md text-[12px] flex items-center gap-1.5 transition-colors" id="dock-fit-chart-btn">
+<span class="material-symbols-outlined text-[16px]">fit_screen</span>
+<span class="hidden md:inline">自适应全图</span>
+<span class="md:hidden">全图</span>
+</button>
+<!-- Toggle Internal Fibs Button -->
+<button class="tap-spring px-3 py-1.5 rounded-full hover:bg-surface-container-high/60 text-on-surface-variant hover:text-on-surface font-label-md text-[12px] flex items-center gap-1.5 transition-colors" id="dock-toggle-fibs-btn">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span class="hidden md:inline" id="fib-btn-text">显示内部斐波 / 0.5 EQ</span>
+<span class="md:hidden">斐波</span>
+</button>
+<!-- Follow Active Target Button -->
+<button class="tap-spring px-3.5 py-1.5 rounded-full bg-primary-container text-white font-label-md text-[12px] font-bold flex items-center gap-1.5 shadow-sm" id="dock-follow-active-btn">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">gps_fixed</span>
+<span>跟随最新标的</span>
+</button>
+</nav>
+<!-- Empty spacer balance for desktop symmetrical alignment -->
+<div class="hidden sm:block w-[240px] pointer-events-none"></div>
+</footer>
+</main>
+<!-- ========================================================================= -->
+<!-- 3. LIGHTWEIGHT INLINE JS FOR MICRO-INTERACTIONS                           -->
+<!-- ========================================================================= -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Fibs Toggle Interaction
+      const fibBtn = document.getElementById('dock-toggle-fibs-btn');
+      const fibGroup = document.getElementById('internal-fibs-group');
+      const fibText = document.getElementById('fib-btn-text');
+      let fibsVisible = false;
+
+      fibBtn.addEventListener('click', () => {
+        fibsVisible = !fibsVisible;
+        if (fibsVisible) {
+          fibGroup.setAttribute('opacity', '1');
+          fibBtn.classList.add('bg-primary-container/15', 'text-primary', 'font-semibold');
+          if (fibText) fibText.textContent = '隐藏内部斐波 / 0.5 EQ';
+        } else {
+          fibGroup.setAttribute('opacity', '0');
+          fibBtn.classList.remove('bg-primary-container/15', 'text-primary', 'font-semibold');
+          if (fibText) fibText.textContent = '显示内部斐波 / 0.5 EQ';
+        }
+      });
+
+      // 2. Fit Chart Micro-animation
+      const fitBtn = document.getElementById('dock-fit-chart-btn');
+      const chartSvg = document.getElementById('wallpaper-chart-svg');
+      fitBtn.addEventListener('click', () => {
+        chartSvg.style.transition = 'transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1)';
+        chartSvg.style.transform = 'scale(1.02)';
+        setTimeout(() => {
+          chartSvg.style.transform = 'scale(1)';
+        }, 260);
+      });
+
+      // 3. Follow Latest Toggle
+      const followBtn = document.getElementById('toggle-follow-btn');
+      const dockFollowBtn = document.getElementById('dock-follow-active-btn');
+      let isFollowing = true;
+
+      function updateFollowState() {
+        if (isFollowing) {
+          followBtn.className = 'tap-spring px-2 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1 bg-primary text-white border border-primary/40 shadow-sm';
+          followBtn.innerHTML = '<span class="material-symbols-outlined text-[12px]">sync</span><span>跟随最新</span>';
+          dockFollowBtn.classList.remove('opacity-70');
+        } else {
+          followBtn.className = 'tap-spring px-2 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1 bg-surface-container-high text-on-surface-variant border border-outline-variant/40';
+          followBtn.innerHTML = '<span class="material-symbols-outlined text-[12px]">push_pin</span><span>手动固定</span>';
+          dockFollowBtn.classList.add('opacity-70');
+        }
+      }
+
+      followBtn.addEventListener('click', () => {
+        isFollowing = !isFollowing;
+        updateFollowState();
+      });
+
+      dockFollowBtn.addEventListener('click', () => {
+        isFollowing = true;
+        updateFollowState();
+      });
+
+      // 4. Contract List Collapse / Expand
+      const collapseBtn = document.getElementById('collapse-list-btn');
+      const listBody = document.getElementById('contracts-list-body');
+      const collapseIcon = document.getElementById('collapse-icon');
+      let isCollapsed = false;
+
+      collapseBtn.addEventListener('click', () => {
+        isCollapsed = !isCollapsed;
+        if (isCollapsed) {
+          listBody.style.maxHeight = '0px';
+          collapseIcon.textContent = 'keyboard_arrow_down';
+        } else {
+          listBody.style.maxHeight = '380px';
+          collapseIcon.textContent = 'keyboard_arrow_up';
+        }
+      });
+
+      // 5. Symbol Search Filter
+      const searchInput = document.getElementById('symbol-search-input');
+      const symbolRows = document.querySelectorAll('.symbol-row');
+
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim().toUpperCase();
+        symbolRows.forEach(row => {
+          const sym = row.getAttribute('data-symbol');
+          if (sym.includes(query)) {
+            row.style.display = 'flex';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+
+      // 6. Interactive Symbol Selection Row switch
+      symbolRows.forEach(row => {
+        row.addEventListener('click', () => {
+          symbolRows.forEach(r => {
+            r.classList.remove('bg-primary-container/10', 'border-primary/20');
+            r.classList.add('hover:bg-surface-container-high/50');
+            const pinIcon = r.querySelector('.material-symbols-outlined');
+            if (pinIcon && pinIcon.textContent === 'push_pin') {
+              pinIcon.outerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-chart-bull ml-1"></span>';
+            }
+          });
+          row.classList.add('bg-primary-container/10', 'border-primary/20');
+          row.classList.remove('hover:bg-surface-container-high/50');
+        });
+      });
+    });
+  </script>
+</body></html>

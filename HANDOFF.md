@@ -1,3 +1,9 @@
+## 2026-10-23 · Monday 1.618 full-screen glass workspace
+
+- Owner-requested chart wallpaper now defaults to latest touched contract; Monday H/L and both outer1.618 solid lines, optional internal lines. Compact glass controls; no Telegram module. Manual selection pins the chart; follow resumes latest. Existing backend/subscription untouched.
+- Final Stitch screen `fd410c9bd37443dd8759a713c57e2d47`, model GEMINI_3_8_FLASH. Five movable modules use dedicated grips, viewport bounds, separate desktop/mobile position memory, double-click/Home reset. 18percent white tint/18px blur, reduced-motion support.
+- Source `957306d137`; 48 frontend +2 asset checks pass. Native browser1280/390/320 verified, actual drag/reload/reset and route isolation; touch pointer logic unit-tested, no physical mobile device claim. Temporary IAB1 closed, viewport reset, monitor scan2008/2008 errors0 and four patrols enabled; older patrol rounds still partial. Evidence `artifacts/monday-fib-wallpaper-20261023/receipt.json`; original dirty work preserved.
+
 ## 2026-10-23 · 区间1.618 method 13 order-book depth: rejected, series closed at 13
 
 - Binance bookDepth (touch days only, 2041 archives, 14 missing) for 12 majors 2023-01..2026-09: front/behind notional within 1/2 percent at the last snapshot <= touch-30s. Primary later AUC 0.524 p .091 (early 0.495); model later AUC 0.514, top30 percent 33.5 percent. Evidence `experiments/active/exp-monday-1618-book-20261023-v1/summary.json`; Notion task and knowledge base updated. Thirteen methods across price, structure, confirmation, breadth, volume profile, retest, small bounces, gold history, session, positioning/flow and order book all sit at driftless odds.
