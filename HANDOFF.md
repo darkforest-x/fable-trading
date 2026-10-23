@@ -1,3 +1,9 @@
+## 2026-10-24 · Altcoin N5 payoff and consecutive-stop diagnosis
+
+- Frozen case4-n5-v20:9065signals/620symbols,9041closed/24censored;5578wins/3463losses. Net payoff0.608088,break-evenwin62.1857percent versus61.6967percent observed. Gross+259.810416R minusfees333.054166R givesnet-73.243750R.5685targetsinclude107netlosses;3356SL. Near-Monday full TP andoriginalpinSL unchanged;68.2336percent plannedRRbelow1,median0.547401.
+- Market exit-order longestSL/negativeR streak52 across52symbols,Beijing2025-08-01 03:05to08-02 09:15 exit5minintervals. Allwithinintervalpermutationsbound52/52;singlecoinAUCTION10inbothentry/exitorder. Notfundedaccountdrawdown.144exhaustivetiechecksandcanonicalcount/fee/pairedmetrics pass,noexecution replay. Buildera5bb4c7582 precedesoutputs.
+- Detail source `experiments/active/exp-monday-vectorbt-parameters-20261023-v1/alt-case4-n5-detail-20261024/`:full9065CSV,group/year/month/side/hour/coinmetrics,quantiles,alllossruns,52originalrows,definitions,summary/validation,1.9MBZIP. Notion4028856479af8111b1afdaa5158ce6d2 appendedandreadback. PendingHTMLcontinuationnowreferencesdetaildata;Stitchlistagainshowsunchangedoldreportonly. Learning aboutcrossassetlossordering saved. No newdefault,productionqualification,UIorservicechanges.
+
 ## 2026-10-24 · Explicit Monday HTML update awaiting Stitch
 
 - Owner asked where the HTML is, annotating BTC case4 N5 win65.71%. Default no-unsolicited-report does not cancel the earlier explicit HTML request. Old complete baseline HTML remains `artifacts/monday-cases-report-20261023/monday-1618-report.html`; it lacks subsequent parameter/exit research and must not be presented as current.

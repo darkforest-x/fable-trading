@@ -1,0 +1,13 @@
+{
+  "R": "Initial entry-to-original-stop price distance. All net R use the recorded per-fill fees.",
+  "win_rate": "Net positive closed signals / all closed signals; excludes 24 censored.",
+  "realized_payoff": "Mean net winning R / absolute mean net losing R; not planned RR and not profit factor.",
+  "profit_factor": "Sum net winning R / absolute sum net losing R.",
+  "holding_h_lower": "Entry open to start of exit 5m interval; true exit may occur up to interval end.",
+  "planned_rr": "Entry-to-near-Monday-target distance divided by initial stop distance; before fees.",
+  "reason": "0=censored,1=stop,4=target. TP hit need not be net profitable.",
+  "paired": "Three closed controls per signal, same symbol, actual NY entry week, side, volatility bucket.",
+  "censored": "Retained in all-trade CSV; never counted as realized profit/loss or completed exit.",
+  "streak": "Full details in summary; trade_ids separated by |; timestamps explicitly Beijing/UTC.",
+  "reproduction": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_alt_n5_stats"
+}
