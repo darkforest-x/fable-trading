@@ -1,0 +1,9 @@
+{
+  "install": "npm install --prefix /tmp/spike-tv-candle-probe --ignore-scripts --no-audit --no-fund --save-exact @mathieuc/tradingview@4.0.1 ws@8.22.0",
+  "run": "node experiments/active/exp-tradingview-candle-probe-20261023-v1/probe.mjs /tmp/spike-tv-candle-probe /absolute/new/raw-output-directory",
+  "requires": "Existing local monitor API on 127.0.0.1:8766; Node >=20. Use a new experiment directory for another run because output files refuse overwrite.",
+  "raw_data": "data/probes/tradingview-api-20261023-v1",
+  "package_integrity": "sha512-vY0Y9XtVK0uZ0+0aW9zY7oh9vnniF2X25CncPZ1LYF+E3Uru4YP3H7d9TScQuhd+YSq7VoAzWDa3YsbOTLcPyw==",
+  "dependencies": {"@mathieuc/tradingview": "4.0.1", "ws": "8.22.0"},
+  "limits": ["One short anonymous observation, not a reliability or tick-latency benchmark", "Six symbol/timeframe requests and one 20-second stream", "No production UI, scanner, notification or account changes", "Price parity only; volume units were not normalized", "Monday anchor parity and reconnect behavior were not tested", "No browser was launched; all data sessions stopped and the probe process exited"]
+}

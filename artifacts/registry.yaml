@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: tradingview-candle-probe-20261023-v1
+    source_commit: 868308197e3870a29e2969e67f782f512e174b31
+    generator_commit: 868308197e3870a29e2969e67f782f512e174b31
+    artifact_type: manifest
+    role: tradingview_and_okx_candle_parity_and_intrabar_stream_probe
+    source_repo: darkforest-x/fable-trading
+    source_path: experiments/active/exp-tradingview-candle-probe-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-tradingview-candle-probe-20261023-v1/summary.json
+    holdout_status: not_applicable
+    training_eligible: false
+    production_eligible: false
+    notes: Six anonymous requests, 594 closed bars, 592 OHLC matches; two low discrepancies verified against direct OKX. 20-second watcher produced18snapshots/17intrabar changes then stopped. Does not test renderer UX, Monday anchors, long-run reliability or normalized volume; no production switch.
   - artifact_id: monday-1618-alt-hours-20261023-v1
     artifact_type: manifest
     role: 'Out of sample on Binance alts 2020-01..2025-05: do Beijing 04-08 first 1618 touches hold more often?'

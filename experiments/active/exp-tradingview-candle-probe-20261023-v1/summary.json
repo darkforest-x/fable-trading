@@ -1,0 +1,248 @@
+{
+  "started_at": "2026-10-23T05:11:06.608Z",
+  "node": "v25.5.0",
+  "source_commit": "868308197e3870a29e2969e67f782f512e174b31",
+  "package": {
+    "name": "@mathieuc/tradingview",
+    "version": "4.0.1"
+  },
+  "credentials_used": false,
+  "cases": [
+    {
+      "symbol": "BTC-USDT-SWAP",
+      "period": "15m",
+      "ticker": "OKX:BTCUSDT.P",
+      "timeframe": "15",
+      "tv_count": 100,
+      "tv_initial_ms": 3581,
+      "tv_last": {
+        "time": 1792731600,
+        "open": 81558.3,
+        "high": 81807.4,
+        "low": 81558.3,
+        "close": 81783.2,
+        "volume": 39724922.43764
+      },
+      "comparison": {
+        "closed_tv": 99,
+        "matched": 99,
+        "ohlc_equal_within_tolerance": 98,
+        "unmatched_tv_times": 0,
+        "max_absolute_ohlc_difference": 8.099999999991269,
+        "max_relative_ohlc_difference": 0.00009883496756738188,
+        "mismatch_examples": [
+          {
+            "time": 1792656900,
+            "changes": [
+              "low"
+            ],
+            "tv": {
+              "time": 1792656900,
+              "open": 82185,
+              "high": 82197.4,
+              "low": 81962.9,
+              "close": 82017.9,
+              "volume": 128308704.47192097
+            },
+            "okx": {
+              "time": 1792656900000,
+              "open": 82185,
+              "high": 82197.4,
+              "low": 81954.8,
+              "close": 82017.9,
+              "volume": 186115.47
+            }
+          }
+        ],
+        "negative_control": {
+          "method": "Shift OKX timestamps by one bar",
+          "matched": 99,
+          "close_equal": 0
+        }
+      }
+    },
+    {
+      "symbol": "ETH-USDT-SWAP",
+      "period": "15m",
+      "ticker": "OKX:ETHUSDT.P",
+      "timeframe": "15",
+      "tv_count": 100,
+      "tv_initial_ms": 3501,
+      "tv_last": {
+        "time": 1792731600,
+        "open": 2393.27,
+        "high": 2402.92,
+        "low": 2393.27,
+        "close": 2401.89,
+        "volume": 44143894.37312
+      },
+      "comparison": {
+        "closed_tv": 99,
+        "matched": 99,
+        "ohlc_equal_within_tolerance": 98,
+        "unmatched_tv_times": 0,
+        "max_absolute_ohlc_difference": 1.9600000000000364,
+        "max_relative_ohlc_difference": 0.0008221476510067267,
+        "mismatch_examples": [
+          {
+            "time": 1792681200,
+            "changes": [
+              "low"
+            ],
+            "tv": {
+              "time": 1792681200,
+              "open": 2412.01,
+              "high": 2413.63,
+              "low": 2385.96,
+              "close": 2392.21,
+              "volume": 205037820.8191228
+            },
+            "okx": {
+              "time": 1792681200000,
+              "open": 2412.01,
+              "high": 2413.63,
+              "low": 2384,
+              "close": 2392.21,
+              "volume": 1170366.78
+            }
+          }
+        ],
+        "negative_control": {
+          "method": "Shift OKX timestamps by one bar",
+          "matched": 99,
+          "close_equal": 0
+        }
+      }
+    },
+    {
+      "symbol": "EWJ-USDT-SWAP",
+      "period": "15m",
+      "ticker": "OKX:EWJUSDT.P",
+      "timeframe": "15",
+      "tv_count": 100,
+      "tv_initial_ms": 4550,
+      "tv_last": {
+        "time": 1792731600,
+        "open": 93.83,
+        "high": 93.92,
+        "low": 93.83,
+        "close": 93.87,
+        "volume": 963.2562
+      },
+      "comparison": {
+        "closed_tv": 99,
+        "matched": 99,
+        "ohlc_equal_within_tolerance": 99,
+        "unmatched_tv_times": 0,
+        "max_absolute_ohlc_difference": 0,
+        "max_relative_ohlc_difference": 0,
+        "mismatch_examples": [],
+        "negative_control": {
+          "method": "Shift OKX timestamps by one bar",
+          "matched": 99,
+          "close_equal": 4
+        }
+      }
+    },
+    {
+      "symbol": "BTC-USDT-SWAP",
+      "period": "1m",
+      "ticker": "OKX:BTCUSDT.P",
+      "timeframe": "1",
+      "tv_count": 100,
+      "tv_initial_ms": 3661,
+      "tv_last": {
+        "time": 1792732260,
+        "open": 81807.3,
+        "high": 81807.3,
+        "low": 81783,
+        "close": 81783,
+        "volume": 587331.10455
+      },
+      "comparison": {
+        "closed_tv": 99,
+        "matched": 99,
+        "ohlc_equal_within_tolerance": 99,
+        "unmatched_tv_times": 0,
+        "max_absolute_ohlc_difference": 0,
+        "max_relative_ohlc_difference": 0,
+        "mismatch_examples": [],
+        "negative_control": {
+          "method": "Shift OKX timestamps by one bar",
+          "matched": 99,
+          "close_equal": 1
+        }
+      }
+    },
+    {
+      "symbol": "BTC-USDT-SWAP",
+      "period": "4H",
+      "ticker": "OKX:BTCUSDT.P",
+      "timeframe": "240",
+      "tv_count": 100,
+      "tv_initial_ms": 3330,
+      "tv_last": {
+        "time": 1792728000,
+        "open": 81857,
+        "high": 81857,
+        "low": 81500.5,
+        "close": 81770.7,
+        "volume": 171792736.8061304
+      },
+      "comparison": {
+        "closed_tv": 99,
+        "matched": 99,
+        "ohlc_equal_within_tolerance": 99,
+        "unmatched_tv_times": 0,
+        "max_absolute_ohlc_difference": 0,
+        "max_relative_ohlc_difference": 0,
+        "mismatch_examples": [],
+        "negative_control": {
+          "method": "Shift OKX timestamps by one bar",
+          "matched": 99,
+          "close_equal": 0
+        }
+      }
+    },
+    {
+      "symbol": "BTC-USDT-SWAP",
+      "period": "1D",
+      "ticker": "OKX:BTCUSDT.P",
+      "timeframe": "D",
+      "tv_count": 100,
+      "tv_initial_ms": 3817,
+      "tv_last": {
+        "time": 1792713600,
+        "open": 81380.9,
+        "high": 82010.8,
+        "low": 81088,
+        "close": 81770.6,
+        "volume": 1037771997.8636818
+      },
+      "comparison": {
+        "closed_tv": 99,
+        "matched": 99,
+        "ohlc_equal_within_tolerance": 99,
+        "unmatched_tv_times": 0,
+        "max_absolute_ohlc_difference": 0,
+        "max_relative_ohlc_difference": 0,
+        "mismatch_examples": [],
+        "negative_control": {
+          "method": "Shift OKX timestamps by one bar",
+          "matched": 99,
+          "close_equal": 0
+        }
+      }
+    }
+  ],
+  "raw_directory": "/Users/zhangzc/fable-trading/data/probes/tradingview-api-20261023-v1",
+  "live": {
+    "startup_ms": 2818,
+    "observation_ms": 20000,
+    "updates": 18,
+    "intrabar_changes": 17,
+    "errors": [],
+    "stopped": true
+  },
+  "finished_at": "2026-10-23T05:11:53.022Z"
+}

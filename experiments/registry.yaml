@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-tradingview-candle-probe-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 868308197e3870a29e2969e67f782f512e174b31
+    status: inconclusive
+    question: Can TradingView-API improve the Monday chart data and interaction experience?
+    single_variable: Anonymous TradingView candle source versus existing OKX display candles; production renderer unchanged.
+    result: Six requests returned 100 candles each in 3.33-4.55s. 592 of 594 timestamp-aligned closed bars matched OHLC; BTC and ETH each had one different 15m low, confirmed against fresh OKX reads. A 20s stream returned 18 snapshots and 17 intrabar changes. Data streaming works; no renderer improvement or long-term reliability claim.
+    artifacts:
+    - tradingview-candle-probe-20261023-v1
+    canonical_report: experiments/active/exp-tradingview-candle-probe-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Builder committed before probe. Pinned npm4.0.1/ws8.22.0 in isolated temporary prefix; no credentials, UI or production configuration changes. One-bar-shift negative control had only5of594 equal closes. Raw input in data/probes/tradingview-api-20261023-v1. No trading metrics apply to this data integration trial.
   - experiment_id: exp-monday-1618-alt-hours-20261023-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 4a47f5c641a0cee571b3df46136552c378488ddf

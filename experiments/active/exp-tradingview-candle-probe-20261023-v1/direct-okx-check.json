@@ -1,0 +1,18 @@
+{
+  "purpose": "Fresh exchange reads verify that the two observed low-price differences are not only stale monitor-cache values",
+  "requests": [
+    {
+      "url": "https://www.okx.com/api/v5/market/history-candles?instId=BTC-USDT-SWAP&bar=15m&after=1792656900001&limit=1",
+      "response": {"code":"0","data":[["1792656900000","82185","82197.4","81954.8","82017.9","186115.47","1861.1547","152671233.23457","1"]],"msg":""},
+      "tradingview_low": 81962.9,
+      "monitor_low": 81954.8
+    },
+    {
+      "url": "https://www.okx.com/api/v5/market/history-candles?instId=ETH-USDT-SWAP&bar=15m&after=1792681200001&limit=1",
+      "response": {"code":"0","data":[["1792681200000","2412.01","2413.63","2384","2392.21","1170366.78","117036.678","280121018.84584","1"]],"msg":""},
+      "tradingview_low": 2385.96,
+      "monitor_low": 2384
+    }
+  ],
+  "conclusion": "Direct OKX values agree with the monitor. The cause of TradingView differences is not established. These samples do not test Monday anchors or justify changing alert data."
+}
