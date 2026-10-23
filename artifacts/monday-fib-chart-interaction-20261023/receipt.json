@@ -1,0 +1,118 @@
+{
+  "status": "delivered",
+  "completed_at": "2026-10-23T03:18:17.884306+00:00",
+  "url": "https://spikeok.com/#monday-fib",
+  "source_commit": "76029cdf48f60766ead84a6c4b460eec42b991c5",
+  "stitch": {
+    "project_id": "8978791379095391159",
+    "screen_id": "2ef0866509164e07a536813ee3944d51",
+    "model": "GEMINI_3_8_FLASH",
+    "session_id": "13694057508591844246",
+    "html": "stitch-chart-navigation.html",
+    "screenshot": "stitch-chart-navigation.png",
+    "first_request": "timed out after240seconds; no result recovered through project reads; retry completed with longer timeout"
+  },
+  "diagnosis": {
+    "horizontal_drag_before": "worked",
+    "vertical_drag_before": "ignored while autoScale=true; price lines stayed in place after120px pane gesture",
+    "control": "dragging price axis disabled autoScale, after which pane vertical pan worked",
+    "mobile": "shared vertTouchDrag=false and pan-y pinch-zoom handed gestures to webpage"
+  },
+  "behavior": [
+    "Pane primary pointer unlocks price scale before native LWC mouse/touch handler; no pointer capture or cancellation by wrapper",
+    "Native horizontal/vertical pan, wheel and pinch zoom, axis drag and double-click reset",
+    "Latest-candle button retains time span and restores price fit; does not select another symbol",
+    "Fit, latest, keyboard Home and End recover price range after manual pan",
+    "Initial desktop160 / narrow70-bar logical viewport including right padding; short histories stay onscreen",
+    "Same-symbol polling and internal-level toggle preserve manual view; existing glass grips remain independent"
+  ],
+  "validation": {
+    "frontend_tests": 51,
+    "asset_tests": 2,
+    "logs": [
+      "frontend-tests.txt",
+      "asset-tests.txt"
+    ],
+    "browser": "Codex IAB",
+    "viewports": [
+      "1280x720",
+      "320x740",
+      "390x844"
+    ],
+    "console_errors": 0,
+    "console_warnings": 0,
+    "native_verified": [
+      "vertical pane drag from initial auto-fit",
+      "horizontal pane drag",
+      "mouse wheel zoom",
+      "price axis drag",
+      "time axis drag",
+      "price axis double-click reset",
+      "plus/minus, latest-candle and full-week controls",
+      "Home, +, End keyboard controls",
+      "narrow-screen pane and floating card drag, card reset",
+      "78-second polling window preserves manually shifted chart",
+      "route exit destroys wallpaper and restores body scrolling"
+    ],
+    "mobile_dock_320": {
+      "width": 267.2,
+      "minimum_button_width": 44,
+      "button_height": 44,
+      "overflow": false
+    },
+    "touch_limit": "Pointer touch path unit-tested; vertTouchDrag, pinch and scoped touch-action configured. IAB mouse input tested at narrow widths; no physical mobile multi-touch certification.",
+    "screenshots": [
+      "desktop-final.jpg",
+      "after-vertical-drag.jpg",
+      "after-horizontal-drag.jpg",
+      "after-axis-scale.jpg",
+      "mobile-pan-320.jpg",
+      "mobile-390.jpg",
+      "refresh-view-before.jpg",
+      "refresh-view-after.jpg"
+    ]
+  },
+  "health_after_cleanup": {
+    "service_alive": true,
+    "scan_status": "scanning",
+    "scan_completed": 1669,
+    "scan_total": 2008,
+    "scan_errors": 0,
+    "model_ready": false,
+    "stream_connected": true,
+    "telegram_enabled": true,
+    "patrol_enabled": 4,
+    "patrol_statuses": [
+      "running",
+      "running",
+      "partial",
+      "partial"
+    ],
+    "worker": {
+      "pid": 1266,
+      "heartbeat_ms": 1792725497776,
+      "state": "running",
+      "job_id": "6ba2e7b64df54fcea4285b3f97b08c0b",
+      "symbol": "LIGHT-USDT-SWAP",
+      "windows_done": 2,
+      "windows_total": 6
+    }
+  },
+  "cleanup": {
+    "created_tabs": [
+      "IAB2 chart",
+      "IAB3 Stitch recovery"
+    ],
+    "all_closed": true,
+    "iab_tabs_remaining": 0,
+    "viewport_override_reset": true,
+    "new_browser_processes": 0
+  },
+  "safety": {
+    "subscription_writes": 0,
+    "orders": 0,
+    "service_restarts": 0
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}

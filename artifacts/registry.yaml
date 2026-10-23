@@ -34234,3 +34234,19 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: BTC1745/711andETH962/415 causal5m/15m signals, same matchedcontrols. Trigger-relative retracement, running-peak drawdown, furtherMFE andreturn-entry/next-targetorder distinguishable;clockcaps120minfromentry. ConditionalOHLC/OLHCreachparity,nativefixed/timeexitparity,staticpartialshare/costconservation andyearboundarychecks retained. All17netreturnsnegative; no strategy promotion. Necessary compressedrawledgers remainlocal; config,summary,comparison,conditionaltable andcompletion retained.
+
+  - artifact_id: monday-fib-chart-interaction-20261023
+    source_commit: 8da97c0be2
+    generator_commit: 76029cdf48
+    artifact_type: manifest
+    role: monday_wallpaper_native_navigation_and_timeframes
+    source_repo: darkforest-x/fable-trading
+    source_path: artifacts/monday-fib-chart-interaction-20261023/timeframes-receipt.json
+    storage_uri: repo://artifacts/monday-fib-chart-interaction-20261023/timeframes-receipt.json
+    holdout_status: not_applicable
+    training_eligible: false
+    production_eligible: false
+    notes: Stitch GEMINI_3_8_FLASH screens 2ef0866509164e07a536813ee3944d51 and b6e7cb0ef5c247f7b94bab399a0e5386.
+      Native pane/axis pan and zoom, glass dock controls, seven native OKX periods with fixed NY Monday anchors.
+      54 frontend and 28 Python tests; seven live API periods, desktop/mobile browser checks and cleanup evidence.
+      Daily uses 1Dutc; bounded selected-chart reads do not expand scanner periods or change alerts/trading rules.

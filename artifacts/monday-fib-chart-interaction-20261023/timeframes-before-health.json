@@ -1,0 +1,90 @@
+{
+  "health": {
+    "service_alive": true,
+    "now_ms": 1792726143115,
+    "scan": {
+      "status": "idle",
+      "generation": "bd213caffbd14a93b55194387da5ec89",
+      "worker_pid": 45387,
+      "worker_started_at_ms": 1792679545874,
+      "started_at_ms": 1792726027183,
+      "finished_at_ms": 1792726029169,
+      "completed": 2008,
+      "total": 2008,
+      "errors": 0,
+      "error_samples": [],
+      "isolated": true,
+      "timing_ms": {
+        "cells": 2008,
+        "changed_cells": 0,
+        "unchanged_cells": 2008,
+        "fetch_total": 6.664,
+        "analyze_total": 0.0,
+        "checkpoint_total": 766.594,
+        "analyze_cpu_total": 0.0,
+        "checkpoint_cpu_total": 407.629,
+        "fetch_max": 0.018,
+        "analyze_max": 0.0,
+        "checkpoint_max": 5.3,
+        "analyze_cpu_max": 0.0,
+        "checkpoint_cpu_max": 0.905
+      },
+      "duration_seconds": 1.99,
+      "next_scan_ms": 1792726149169
+    },
+    "market_ready": true,
+    "model_ready": false,
+    "ok": false
+  },
+  "schedules": {
+    "items": [
+      {
+        "id": "bb6ed7784aab48299f01746b9fd7bdfd",
+        "enabled": true,
+        "last_run_status": "partial"
+      },
+      {
+        "id": "52c3acdabe284a34a3624168b7d13ab5",
+        "enabled": true,
+        "last_run_status": "partial"
+      },
+      {
+        "id": "84271a91b5434e67b0ce8b11bcb6f11b",
+        "enabled": true,
+        "last_run_status": "partial"
+      },
+      {
+        "id": "5c945dc3e9f344e68937f24c6a006ff2",
+        "enabled": true,
+        "last_run_status": "partial"
+      }
+    ],
+    "worker": {
+      "pid": 1266,
+      "heartbeat_ms": 1792726142304,
+      "state": "idle"
+    }
+  },
+  "monday": {
+    "week": "2026-10-19",
+    "stream": {
+      "connected": true,
+      "last_message_ms": 1792726143384,
+      "error": null,
+      "catalog_error": null,
+      "catalog_ms": 1792722786814
+    },
+    "telegram": {
+      "enabled": true,
+      "activated_ms": 1792682048630,
+      "generation": 1,
+      "configured": true
+    },
+    "counts": {
+      "total": 507,
+      "ready": 494,
+      "touched": 475,
+      "unavailable": 13
+    }
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "status": "delivered",
+  "delivered_at": "2026-10-23T03:37:41.447571+00:00",
+  "url": "https://spikeok.com/#monday-fib",
+  "source_commit": "8da97c0be2c554ee503f14274a7d1d8a0c8bf6b5",
+  "interaction_source_commit": "76029cdf48f60766ead84a6c4b460eec42b991c5",
+  "design": {
+    "provider": "Google official Stitch MCP",
+    "project_id": "8978791379095391159",
+    "screen_id": "b6e7cb0ef5c247f7b94bab399a0e5386",
+    "model_id": "GEMINI_3_8_FLASH",
+    "html": "stitch-timeframes.html",
+    "screenshot": "stitch-timeframes.png"
+  },
+  "behavior": {
+    "periods": [
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1H",
+      "4H",
+      "1D"
+    ],
+    "daily_native_bar": "1Dutc",
+    "max_closed_candles": 720,
+    "anchors": "NY Monday high/low and mirrored 1.618 from monitor, independent of display period",
+    "loading": "demand-only shared CandleHub, max 2 jobs and 12 cached views",
+    "persistence": "browser localStorage, per user browser",
+    "fit": "all loaded history; no claim of unlimited historical backfill"
+  },
+  "validation": {
+    "frontend_tests": 54,
+    "python_tests": 28,
+    "logs": [
+      "timeframes-frontend-tests.txt",
+      "timeframes-api-tests.txt"
+    ],
+    "live_api": "timeframes-live-api.json",
+    "browser": [
+      "seven option menu",
+      "1m/5m/15m/30m/1H/4H/1D native charts",
+      "UTC daily historical context",
+      "desktop 1280x800 and mobile 320x740",
+      "menu 7x44px targets and zero horizontal overflow",
+      "menu below dock after dragging to top",
+      "Escape/outside click dismissal",
+      "keyboard Home/End/arrow/Enter selection",
+      "refresh remembers period",
+      "5m pane horizontal and vertical native mouse drag at mobile width",
+      "four unchanged solid reference lines",
+      "zero console warnings/errors",
+      "route exit hides menu and tears down wallpaper"
+    ],
+    "mobile_note": "Narrow viewport and native mouse drag verified; physical touchscreen/pinch not independently verified."
+  },
+  "cleanup": {
+    "temporary_iab_tabs_closed": [
+      "2",
+      "3",
+      "4"
+    ],
+    "iab_tabs_remaining": 0,
+    "viewport_override_reset": true,
+    "health": "timeframes-after-health.json",
+    "service_reload": "Graceful SIGTERM/restart of com.fable.impulse-monitor to load read-only endpoint; existing subscription unchanged."
+  },
+  "images": [
+    "timeframes-desktop-final.jpg",
+    "timeframes-mobile-menu.jpg",
+    "timeframes-daily.jpg",
+    "timeframes-mobile-5m-before-pan.jpg",
+    "timeframes-mobile-5m-after-pan.jpg"
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "health": {
+    "service_alive": true,
+    "now_ms": 1792726590693,
+    "scan": {
+      "status": "scanning",
+      "generation": "50faf320094544ebaf984d85b9b2d924",
+      "worker_pid": 6753,
+      "worker_started_at_ms": 1792726177660,
+      "started_at_ms": 1792726400483,
+      "finished_at_ms": null,
+      "completed": 1129,
+      "total": 2008,
+      "errors": 0,
+      "error_samples": [],
+      "isolated": true,
+      "timing_ms": {
+        "cells": 1129,
+        "changed_cells": 564,
+        "unchanged_cells": 565,
+        "fetch_total": 220723.588,
+        "analyze_total": 140255.675,
+        "checkpoint_total": 25587.14,
+        "analyze_cpu_total": 128268.843,
+        "checkpoint_cpu_total": 18652.848,
+        "fetch_max": 2545.842,
+        "analyze_max": 1464.241,
+        "checkpoint_max": 146.401,
+        "analyze_cpu_max": 1000.719,
+        "checkpoint_cpu_max": 93.422
+      }
+    },
+    "market_ready": false,
+    "model_ready": false,
+    "ok": false
+  },
+  "schedules": {
+    "worker": {
+      "pid": 1266,
+      "heartbeat_ms": 1792726690965,
+      "state": "idle"
+    },
+    "items": [
+      {
+        "id": "bb6ed7784aab48299f01746b9fd7bdfd",
+        "enabled": true,
+        "interval_minutes": 15,
+        "next_due_ms": 1792727160000,
+        "error": null,
+        "last_run_status": "partial"
+      },
+      {
+        "id": "52c3acdabe284a34a3624168b7d13ab5",
+        "enabled": true,
+        "interval_minutes": 15,
+        "next_due_ms": 1792727160000,
+        "error": null,
+        "last_run_status": "partial"
+      },
+      {
+        "id": "84271a91b5434e67b0ce8b11bcb6f11b",
+        "enabled": true,
+        "interval_minutes": 240,
+        "next_due_ms": 1792728060000,
+        "error": null,
+        "last_run_status": "partial"
+      },
+      {
+        "id": "5c945dc3e9f344e68937f24c6a006ff2",
+        "enabled": true,
+        "interval_minutes": 1440,
+        "next_due_ms": 1792800060000,
+        "error": null,
+        "last_run_status": "partial"
+      }
+    ]
+  },
+  "monday": {
+    "week": "2026-10-19",
+    "stream": {
+      "connected": true,
+      "last_message_ms": 1792726592017,
+      "error": null,
+      "catalog_error": null,
+      "catalog_ms": 1792726181722
+    },
+    "telegram": {
+      "enabled": true,
+      "activated_ms": 1792682048630,
+      "generation": 1,
+      "configured": true
+    },
+    "counts": {
+      "total": 507,
+      "ready": 492,
+      "touched": 475,
+      "unavailable": 15
+    }
+  },
+  "checked_ms": 1792726590954
+}
