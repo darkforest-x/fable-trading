@@ -1,3 +1,10 @@
+## 2026-10-24 · App 0.8.22 — cached chart and continuous gestures
+
+- Keep the 1.618 Canvas mounted; restore current NY-week public snapshot, selection and period locally. Cached/offline states cannot enable quick entry; old-week anchors disappear. Pause candle feeds while hidden or covered, coalesce bounded candle disk writes into idle time. No execution/risk policy or private-account cache changes.
+- Menu swipes commit without the outgoing timer/remount; chart gestures stay separate. Shared sheets use a wide grab/title area and continue from the current drag offset, with short-drag rebound, no replayed entry animation, reduced-motion support and busy locks. Remove modal/backdrop/dock blur. Stitch timed out after 300s; Owner explicitly waived it for this turn.
+- 64 frontend tests passed. Synthetic 320/390 browser checks: same Canvas on return; 0 hidden/covered streams; cached reload/offline/NY rollover; navigation cancel/chart exclusion; title drag/rebound/Escape/reduced motion; 1R wick=106 and busy dismissal blocked; 0 order writes. Fixed 2s slow network: old return 2327ms, new 48/40/26ms. Browser latency only, not native FPS. Raw QA `output/playwright/app-performance/`.
+- iOS/Android 0.8.22(31) builds and signatures verified; device unavailable, not installed. Web assets updated without backend restart (backend remains 0.8.20). Build receipt `yoyo/discipline_app/releases/build-0.8.22.json`. No live commands. Existing services retained.
+
 ## 2026-10-24 · Monday1618 VectorBT parameter grids completed
 
 - Owner explicitly selected VectorBT and two separate one-variable grids: case2/3/4 confirmation bars1–5; case2 prior-volume10/20/30/40 with confirmation3. Stop pin extreme, target near NYMonday edge, first touch, real OKX fees unchanged; XAU gross only and no case2 volume.

@@ -8,7 +8,7 @@ import { createPortal } from 'react-dom';
 import { CandlestickSeries, HistogramSeries, ColorType, LineStyle, createChart, type IChartApi, type ISeriesApi, type LogicalRange, type UTCTimestamp, type Time } from 'lightweight-charts';
 import { Capacitor, CapacitorHttp } from '@capacitor/core';
 import { candleFetcher } from './candleTransport';
-import { CandleCache, PERIODS, type Candle, type CandlePeriod } from './candleData';
+import { browserCandleCache, PERIODS, type Candle, type CandlePeriod } from './candleData';
 import { CandleSession, type CandleState } from './candleSession';
 import { Icon } from './Icon';
 import { feedback } from './feedback';
@@ -86,21 +86,23 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
  return <><div className="candle-ohlc" ref={legend} aria-label="K线开高低收">开 —　高 —　低 —　收 —</div><div className={`candle-canvas ${fullscreen?'is-fullscreen':''}`} ref={host} role="img" aria-label={`${symbol.replace('-USDT-SWAP','/USDT')} ${PERIODS[period]} K线与成交量`} onTouchStart={e=>e.stopPropagation()}/>{state.historyReady&&<button className="candle-realtime" onClick={()=>{graph.current?.chart.timeScale().scrollToRealTime();feedback('light')}}>回到最新</button>}</>;
 });
 
-export default function CandlePanel({symbol,connection,tick,entry,stop,period,onPeriod,onCollapse,embedded=false,range}:CandleProps&{embedded?:boolean;range?:FibRange;period:CandlePeriod;onPeriod:(period:CandlePeriod)=>void;onCollapse:()=>void}) {
+export default function CandlePanel({symbol,connection,tick,entry,stop,period,onPeriod,onCollapse,embedded=false,range,active=true}:CandleProps&{active?:boolean;embedded?:boolean;range?:FibRange;period:CandlePeriod;onPeriod:(period:CandlePeriod)=>void;onCollapse:()=>void}) {
  const identity=symbol+period;
- const [snapshot,setSnapshot]=useState({identity,state:empty}),[fullscreen,setFullscreen]=useState(false);
+ const [snapshot,setSnapshot]=useState(()=>{const bars=browserCandleCache().read(symbol,period);return {identity,state:bars.length>=2?{...empty,bars,historyReady:true,status:'cached' as const}:empty}}),[fullscreen,setFullscreen]=useState(false);
  // Never paint the previous symbol/period while its replacement effect is starting.
  const state=snapshot.identity===identity?snapshot.state:empty;
  const feed=useRef<CandleSession|null>(null),panel=useRef<HTMLDivElement>(null),fullButton=useRef<HTMLButtonElement>(null);
  const view=useRef<ChartView>({key:'',range:null});
  useEffect(()=>{
-  let disk:Storage|undefined;try{disk=localStorage}catch{}
-  const session=new CandleSession({symbol,period,cache:new CandleCache(disk),fetchPage:candleFetcher({connection,native:Capacitor.isNativePlatform()?options=>CapacitorHttp.request(options):undefined,origin:import.meta.env.VITE_SPIKE_CANDLES_HTTP||'https://www.okx.com'}),socket:()=>new WebSocket(import.meta.env.VITE_SPIKE_CANDLES_WS||'wss://ws.okx.com/ws/v5/business'),onChange:state=>setSnapshot({identity:symbol+period,state})});
-  feed.current=session;setSnapshot({identity:symbol+period,state:empty});
-  const visibility=()=>{if(document.hidden)session.stop();else session.start()};
-  document.addEventListener('visibilitychange',visibility);visibility();
-  return()=>{document.removeEventListener('visibilitychange',visibility);session.stop();feed.current=null};
+  const session=new CandleSession({symbol,period,cache:browserCandleCache(),fetchPage:candleFetcher({connection,native:Capacitor.isNativePlatform()?options=>CapacitorHttp.request(options):undefined,origin:import.meta.env.VITE_SPIKE_CANDLES_HTTP||'https://www.okx.com'}),socket:()=>new WebSocket(import.meta.env.VITE_SPIKE_CANDLES_WS||'wss://ws.okx.com/ws/v5/business'),onChange:state=>setSnapshot({identity:symbol+period,state})});
+  feed.current=session;
+  return()=>{session.stop();feed.current=null};
  },[symbol,period,connection?.url,connection?.token,connection?.accountId]);
+ useEffect(()=>{const session=feed.current;if(!session)return;
+  const visibility=()=>{if(document.hidden||!active)session.stop();else session.start()};
+  document.addEventListener('visibilitychange',visibility);visibility();
+  return()=>{document.removeEventListener('visibilitychange',visibility);session.stop()};
+ },[active,symbol,period,connection?.url,connection?.token,connection?.accountId]);
  useEffect(()=>{
   if(!fullscreen)return;
   const root=document.getElementById('root'),oldInert=root?.inert,overflow=document.body.style.overflow;

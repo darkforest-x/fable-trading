@@ -46,10 +46,11 @@ def main():
             while not stopped.wait(2):quote(book);book.reconcile()
         thread=threading.Thread(target=refresh,daemon=True);thread.start()
         app=create_app(book,TOKEN,market_enabled=False,web_directory=options.web_directory)
-        control=dict(offline=False,empty=False,latest='BTC');started=int(time.time()*1000)
+        control=dict(offline=False,empty=False,latest='BTC',delay_ms=0);started=int(time.time()*1000)
         metrics=dict(streams=0,active=0,auto_stop=0,wick_stop=0)
         class Feed:
             def read(self):
+                time.sleep(control['delay_ms']/1000)
                 if control['offline']:raise FibUnavailable()
                 now=int(time.time()*1000);date=datetime.now(ZoneInfo('America/New_York'));monday=(date-timedelta(days=date.weekday())).replace(hour=0,minute=0,second=0,microsecond=0);week=monday.date().isoformat()
                 rows=[]
@@ -64,6 +65,7 @@ def main():
             if stamp==int(time.time())//step*step-2*step:high,low=(2300,1750) if symbol.startswith('ETH') else (106,94)
             return [str(stamp*1000),str(o),str(high),str(low),str(c),'100','20','2000','1' if stamp+step<=time.time() else '0']
         def candles(instId='BTC-USDT-SWAP',bar='15m',after=0):
+            time.sleep(control['delay_ms']/1000)
             step=STEPS[bar];newest=int(after)//1000-step if after else int(time.time())//step*step
             return dict(code='0',data=[candle(newest-i*step,step,instId) for i in range(300)])
         class History:
@@ -93,6 +95,7 @@ def main():
         def update(name:str,value:str):
             if name in ('empty','offline'):control[name]=value=='true'
             elif name=='latest':control[name]=value
+            elif name=='delay_ms':control[name]=min(5000,max(0,int(value)))
             return control
         try:uvicorn.run(app,host='127.0.0.1',port=18922,access_log=False)
         finally:stopped.set();thread.join(3)

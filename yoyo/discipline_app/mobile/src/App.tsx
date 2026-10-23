@@ -15,7 +15,7 @@ import {PageHeader} from './PageHeader';
 import {DisciplineBudget} from './DisciplineBudget';
 import {PositionCard} from './PositionCard';
 import {MAIN_TABS,useSwipeNav} from './useSwipeNav';
-import {useEffect,useMemo,useRef,useState,type CSSProperties} from 'react';
+import {useCallback,useEffect,useMemo,useRef,useState,type CSSProperties} from 'react';
 import {restoreSession,rememberSession,forgetSession,nativeSession} from './deviceSession';
 import {marginRoom,ticketEstimate,allocatedMargin} from './ticketEstimate';
 import {AccountSettings,type Account} from './AccountSettings';
@@ -277,6 +277,8 @@ export default function App(){
 
  const riskPercent=Number(p?.risk_fraction??0.05)*100;
  const steps=[{r:p?.breakeven_r??'1',label:'成本保本'},{r:p?.take_profits[0][0]??'3',label:`平原始 ${Number(p?.take_profits[0][1]??.6)*100}%`},{r:p?.take_profits.at(-1)?.[0]??'5',label:'全部余仓'}];
+ const quickLatest=useRef(openFibTicket);quickLatest.current=openFibTicket;
+ const stableQuick=useCallback((row:FibContract,period:CandlePeriod)=>quickLatest.current(row,period),[]);
  const swipe=useSwipeNav(tab,fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal||editing||busy,nav);
  const navIcons:Record<Tab,IconName>={'1.618':'trade','合约':'trade','持仓':'positions','统计':'trend','纪律':'shield','设置':'link'};
  const ruleGroups=[
@@ -308,14 +310,14 @@ export default function App(){
 
  return <div className={`app ${tab==='合约'?'trade-page':''} ${tab==='1.618'?'fib-page':''} ${editing?'keyboard-open':''}`}>
   <div inert={fibTicket||!!preview||!!closeTarget||!!error||!!sheet||noticeModal}>
-  <main key={tab} className={`page-transition ${tab==='合约'?'entry-page':''}`} style={{'--page-offset':`${navDirection*12}px`} as CSSProperties} {...swipe}>
-   {tab==='1.618'&&<FibHome connection={connection} state={state} onQuick={openFibTicket} locked={busy||!!pendingEntry}/>}
+  <main className={`page-transition ${tab==='合约'?'entry-page':''}`} style={{'--page-offset':`${navDirection*12}px`} as CSSProperties} {...swipe}>
+   <FibHome connection={connection} state={state} onQuick={stableQuick} locked={busy||!!pendingEntry} active={tab==='1.618'} covered={fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal}/>
    {tab==='合约'&&<>
     <section className="quote-hero" aria-label="合约行情">
      <div className="trade-heading"><button className="symbol-picker" aria-label="选择合约" disabled={ticketLocked} aria-haspopup="dialog" onClick={()=>{setSearch('');setSheet('symbol');feedback('light')}}><CoinLogo key={symbol} coin={small(symbol)}/><b>{small(symbol)}<small>/USDT</small></b><span className="down-chevron"/></button><span className="neutral">永续</span><span className="instrument-mode">{mode}</span></div>
      <div className="price-row"><strong className={!fresh?'stale':''}>{priceFmt(selectedQuote?.last)}</strong><span>USDT</span><span className={`freshness ${fresh?'connected':''}`}><i/>{fresh?'实时':selectedQuote?'待更新':'待连接'}</span></div>
     </section>
-    <CandleModule connection={connection} symbol={symbol} tick={state?.instruments[symbol]?.tick} entry={existing?.entry} stop={existing?.stop}/>
+    <CandleModule active={!sheet&&!preview&&!closeTarget&&!error&&!noticeModal} connection={connection} symbol={symbol} tick={state?.instruments[symbol]?.tick} entry={existing?.entry} stop={existing?.stop}/>
     <DisciplineBudget state={state} online={online} onOpen={()=>nav('纪律')}/>
     {connection&&reason&&<button className="guard-strip" onClick={()=>nav(availability?.tab??'纪律')}><Icon name="lock" size={18}/><span>{reason}</span><Icon name="chevron" size={16}/></button>}
     {closeRecovery.attempt&&closeProgress()}
@@ -356,7 +358,7 @@ export default function App(){
    </>}
   </main>
   {editing&&<div className="keyboard-toolbar"><span>填写完成后继续</span><button onPointerDown={e=>e.preventDefault()} onClick={()=>{(document.activeElement as HTMLElement)?.blur();feedback('light')}}>完成<Icon name="check" size={17}/></button></div>}
-  <nav hidden={editing} className={`bottom-nav ${tab==='设置'?'nav-settings':''}`} style={{'--nav-index':Math.max(0,MAIN_TABS.indexOf(tab as typeof MAIN_TABS[number]))} as CSSProperties} aria-label="主导航">{MAIN_TABS.map(t=><button key={t} aria-current={tab===t?'page':undefined} className={tab===t?'active':''} onClick={()=>nav(t)}><Icon name={navIcons[t]} size={21}/><span>{t}</span></button>)}</nav>
+  <nav {...swipe} hidden={editing} className={`bottom-nav ${tab==='设置'?'nav-settings':''}`} style={{'--nav-index':Math.max(0,MAIN_TABS.indexOf(tab as typeof MAIN_TABS[number]))} as CSSProperties} aria-label="主导航">{MAIN_TABS.map(t=><button key={t} aria-current={tab===t?'page':undefined} className={tab===t?'active':''} onClick={()=>nav(t)}><Icon name={navIcons[t]} size={21}/><span>{t}</span></button>)}</nav>
   </div>
   {fibTicket&&!preview&&!error&&!sheet&&!noticeModal&&<Dialog label="1.618 快捷开单" busy={busy||!!pendingEntry} onDismiss={()=>{automatic.manual();setFibTicket(false);setQuickAuto(null)}}><div className="fib-ticket"><div className="fib-ticket-title"><h2>{small(symbol)}<small> / USDT</small></h2><p>快捷开单 · {existing?'沿用持仓方向与止损':'默认 1R 自动计算'}</p></div>{reason&&<button className="guard-strip" onClick={()=>nav(availability?.tab??'纪律')}><Icon name="lock" size={16}/><span>{reason}</span></button>}{orderTicket}</div></Dialog>}
   {!error&&preview&&<Dialog label={live?'确认实盘订单':'确认模拟订单'} busy={busy} onDismiss={dismissPreview}>{dismiss=><><span className="eyebrow">确认交易计划</span><h2>{live?'确认实盘订单':'确认模拟订单'}</h2>{live&&<span className="badge live-mode">真实资金 · OKX 实盘执行</span>}<div className="position-head"><b>{small(preview.ticket.symbol)}USDT</b><span className={preview.ticket.side==='long'?'long':'short'}>{preview.ticket.side==='long'?'开多':'开空'} · {marginLabel(preview.plan.margin_mode)} {preview.ticket.leverage}x</span></div>{metrics(preview.plan)}{preview.plan.exposure_limited&&<p className="micro">本单已按账户剩余名义仓位额度缩小。</p>}<div className="warning"><Icon name="shield" size={18}/><span>{live?`${preview.ticket.kind==='limit'?'限价挂单等待成交，可在持仓页撤单':'全部成交或取消'}；保护异常会尝试平掉余仓，实际损失可能超出预算。`:'提交时重新校验，这不是实盘订单。'}</span></div>{uncertain&&<p className="error">上次请求结果未确认。可用同一编号重试，服务端会去重。也可先查看持仓核对。</p>}{error&&<p className="error" role="alert">{error}</p>}{live&&confirmTrades&&<label className="live-consent"><input type="checkbox" checked={liveConsent} onChange={e=>setLiveConsent(e.target.checked)}/><span>我确认使用真实资金执行本次交易</span></label>}<button className="primary" disabled={busy||(confirmTrades&&live&&!liveConsent)} onClick={confirm}>{busy?<><Spinner/>正在提交…</>:uncertain?'以同一请求重试':live?'确认实盘开仓':'确认模拟开仓'}</button><button className="plain" disabled={busy} onClick={dismiss}>{uncertain?'先查看服务端持仓':'返回修改'}</button></>}</Dialog>}

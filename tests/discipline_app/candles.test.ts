@@ -11,6 +11,16 @@ class Disk {
  values=new Map<string,string>();get length(){return this.values.size}
  getItem(k:string){return this.values.get(k)??null} setItem(k:string,v:string){this.values.set(k,v)} removeItem(k:string){this.values.delete(k)} key(i:number){return [...this.values.keys()][i]??null}
 }
+
+test('deferred candle persistence reopens from memory without synchronous disk writes',t=>{
+ t.mock.timers.enable({apis:['setTimeout']});
+ const disk=new Disk(),cache=new CandleCache(disk,()=>time*1000,true);
+ cache.write(symbol,'15m',[bar(time-900,100,true),bar()]);
+ assert.equal(disk.length,0);assert.equal(cache.read(symbol,'15m').length,2);
+ cache.write(symbol,'15m',[bar(time-900,100,true),bar(time,103)]);
+ t.mock.timers.tick(300);assert.equal(disk.length,1);
+ assert.equal(new CandleCache(disk,()=>time*1000).read(symbol,'15m').at(-1)?.close,103);
+});
 class Socket {
  readyState=0; sent:string[]=[]; closed=0;
  onopen:(()=>void)|null=null;onclose:(()=>void)|null=null;onerror:(()=>void)|null=null;onmessage:((e:{data:string})=>void)|null=null;

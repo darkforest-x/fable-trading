@@ -1,0 +1,18 @@
+/* Owner waived this turn's Stitch timeout; retain the approved minimal surfaces.
+   Only transform/opacity animate. No continuously resampled backdrop blur. */
+.app .page-transition,.app.fib-page .page-transition{animation:none}
+.fib-home[hidden]{display:none}
+.app main[data-swipe=cancel]{transition:translate 180ms cubic-bezier(.25,1,.5,1)}
+.app .bottom-nav{touch-action:pan-y pinch-zoom}
+.app .modal-backdrop,.app.fib-page .modal-backdrop{backdrop-filter:none;-webkit-backdrop-filter:none;animation-duration:180ms}
+.app .modal,.app.fib-page .modal{background:#fdfdfd;backdrop-filter:none;-webkit-backdrop-filter:none;transition:translate 180ms cubic-bezier(.25,1,.5,1);animation-duration:220ms}
+.app .modal:not(.alert-modal) .sheet-handle{width:calc(100% + 48px);height:38px;margin:-10px -24px 0;padding-top:12px}
+.app .modal .sheet-handle,.app .modal:not(.alert-modal) h2,.app .modal .fib-ticket-title{touch-action:none;user-select:none;-webkit-user-select:none}
+.app .modal.sheet-dragging,.app.fib-page .modal.sheet-dragging{animation:none;transition:none;will-change:translate}
+.app .modal[data-dragged],.app.fib-page .modal[data-dragged]{animation:none}
+.app .dialog-closing .modal:not(.alert-modal),.app.fib-page .dialog-closing .modal:not(.alert-modal){animation:perf-sheet-exit 220ms cubic-bezier(.3,0,.7,1) both;transition:none;will-change:translate}
+.app .dialog-closing,.app.fib-page .dialog-closing{animation:backdrop-leave 220ms ease-out both}
+@keyframes perf-sheet-exit{from{translate:0 var(--sheet-drag,0px)}to{translate:0 var(--sheet-exit,100dvh)}}
+@media(prefers-reduced-motion:reduce){.app .modal,.app.fib-page .modal,.app main[data-swipe]{transition:none;animation:none;translate:none}}
+
+.app .bottom-nav.bottom-nav,.app.fib-page .bottom-nav.bottom-nav{background:#fffffff5;backdrop-filter:none;-webkit-backdrop-filter:none}

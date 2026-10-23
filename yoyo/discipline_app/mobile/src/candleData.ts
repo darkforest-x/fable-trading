@@ -39,9 +39,15 @@ export function mergeCandles(base: Candle[], incoming: Candle[], limit = MAX_CAN
 export class CandleCache {
  private disk?: Disk;
  private now: () => number;
- constructor(disk?: Disk, now = Date.now) { this.disk = disk; this.now = now; }
+ private memory=new Map<string,{at:number;bars:Candle[]}>();
+ private pending=new Map<string,Candle[]>();
+ private queued=false;
+ private deferred:boolean;
+ constructor(disk?: Disk, now = Date.now, deferred=false) { this.disk = disk; this.now = now; this.deferred=deferred; }
  read(symbol: string, period: CandlePeriod): Candle[] {
   if (!validSymbol(symbol) || !Object.hasOwn(PERIODS,period)) return [];
+  const cached=this.memory.get(symbol+':'+period);
+  if(cached&&cached.at<=this.now()&&this.now()-cached.at<7*86400000)return cached.bars;
   try {
    const raw = this.disk?.getItem(PREFIX + symbol + ':' + period);
    if (!raw || raw.length > 200000) return [];
@@ -51,7 +57,20 @@ export class CandleCache {
   } catch { return []; }
  }
  write(symbol: string, period: CandlePeriod, bars: Candle[]) {
-  if (!this.disk || !validSymbol(symbol) || !Object.hasOwn(PERIODS,period) || !bars.length) return;
+  if (!validSymbol(symbol) || !Object.hasOwn(PERIODS,period) || !bars.length) return;
+  const key=symbol+':'+period, bounded=bars.slice(-600);
+  this.memory.delete(key);this.memory.set(key,{at:this.now(),bars:bounded});
+  while(this.memory.size>12)this.memory.delete(this.memory.keys().next().value!);
+  if(!this.deferred){this.writeDisk(symbol,period,bounded);return}
+  this.pending.delete(key);this.pending.set(key,bounded);
+  while(this.pending.size>12)this.pending.delete(this.pending.keys().next().value!);
+  if(this.queued)return;this.queued=true;
+  const flush=()=>{this.queued=false;for(const [key,bars] of this.pending){const [symbol,period]=key.split(':');this.writeDisk(symbol,period as CandlePeriod,bars)}this.pending.clear()};
+  // Do not serialize/prune 12 localStorage entries inside a swipe/unmount handler.
+  if(typeof requestIdleCallback==='function')requestIdleCallback(flush,{timeout:1500});else setTimeout(flush,300);
+ }
+ private writeDisk(symbol:string,period:CandlePeriod,bars:Candle[]){
+  if(!this.disk)return;
   try {
    const key = PREFIX + symbol + ':' + period;
    const entries: { key: string; at: number }[] = [];
@@ -93,4 +112,10 @@ export async function fetchCandles(symbol: string, period: CandlePeriod, options
   url.search = new URLSearchParams({ instId: symbol, bar: period, limit: '300', ...(options.before ? { after: String(options.before * 1000) } : {}) }).toString();
   return decodeCandles(await readJSON(url,controller.signal));
  } finally { clearTimeout(timer); options.signal.removeEventListener('abort', abort); }
+}
+
+let sharedCache:CandleCache|undefined;
+export function browserCandleCache(){
+ if(!sharedCache){let disk:Storage|undefined;try{disk=localStorage}catch{}sharedCache=new CandleCache(disk,Date.now,true)}
+ return sharedCache;
 }

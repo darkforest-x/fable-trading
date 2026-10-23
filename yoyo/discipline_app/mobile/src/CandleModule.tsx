@@ -5,7 +5,7 @@ import { feedback } from './feedback';
 import type { Connection } from './api';
 import { PERIODS, type CandlePeriod } from './candleData';
 const CandlePanel = lazy(() => import('./CandlePanel'));
-export type CandleProps = { symbol: string; connection?: Connection | null; tick?: string; entry?: string; stop?: string };
+export type CandleProps = { symbol: string; connection?: Connection | null; tick?: string; entry?: string; stop?: string; active?:boolean };
 class ChartBoundary extends Component<{children:ReactNode;onClose:()=>void},{failed:boolean}> {
  state = { failed:false };
  static getDerivedStateFromError() { return { failed:true }; }
