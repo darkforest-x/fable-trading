@@ -8,7 +8,7 @@ const snap=(o={})=>({now_ms:Date.now(),week:'2026-10-19',monday_complete:true,st
 const response=(d,ok=true)=>({ok,json:async()=>d});
 function harness(fetchImpl,navigator={}){
  const els=new Map(),timers=new Map();let id=0;
- function el(name){if(!els.has(name))els.set(name,{innerHTML:'',textContent:'',hidden:false,disabled:false,value:'',dataset:{},events:{},attrs:{},addEventListener(t,fn){this.events[t]=fn;},setAttribute(k,v){this.attrs[k]=v;},classList:{toggle(){}},contains(){return false;},focus(){},querySelectorAll(){return [];},querySelector(){return null;}});return els.get(name);}
+ function el(name){if(!els.has(name))els.set(name,{innerHTML:'',textContent:'',hidden:false,disabled:false,value:'',dataset:{},style:{setProperty(){}},events:{},attrs:{},addEventListener(t,fn){this.events[t]=fn;},setAttribute(k,v){this.attrs[k]=v;},classList:{toggle(){}},contains(){return false;},focus(){},querySelectorAll(){return [];},querySelector(){return null;}});return els.get(name);}
  const charts=[];const window={navigator,SpikeMondayFibChart:{show:(host,row,week,options)=>charts.push({symbol:row.symbol,week,...options}),hide(){},fit(){},setInternal(){}}},document={hidden:false,activeElement:null,getElementById:el,events:{},addEventListener(t,fn){this.events[t]=fn;}};
  vm.runInNewContext(source,{window,document,fetch:fetchImpl,AbortController,Date,Intl,URLSearchParams,setTimeout(fn,ms){const n=++id;timers.set(n,{fn,ms});return n;},clearTimeout(n){timers.delete(n);}});
  return {api:window.SpikeMondayFib,el,timers,document,charts};
@@ -37,10 +37,11 @@ test('latest follow advances, manual selection stays pinned, follow resumes and 
  const a=item({symbol:'BTC-USDT-SWAP',touches:{upper:event({observed_ms:100})}}),b=item({symbol:'ETH-USDT-SWAP',touches:{lower:event({observed_ms:200})}}),d=item({symbol:'SOL-USDT-SWAP',touches:{upper:event({observed_ms:300})}});
  let value=snap({items:[a,b]});const c=harness(async()=>response(value));await ready(c);assert.equal(c.charts.at(-1).symbol,b.symbol);
  value=snap({items:[a,b,d]});await c.api.refresh();assert.equal(c.charts.at(-1).symbol,d.symbol);
- c.el('mf-rows').events.click({target:{closest:()=>({dataset:{previewSymbol:a.symbol}})}});assert.equal(c.charts.at(-1).symbol,a.symbol);
+ c.el('mf-rows').events.click({target:{closest:s=>s==='[data-symbol]'?{dataset:{symbol:a.symbol}}:null}});assert.equal(c.charts.at(-1).symbol,a.symbol);
  await c.api.refresh();assert.equal(c.charts.at(-1).symbol,a.symbol);assert.equal(c.el('mf-follow').attrs['aria-pressed'],'false');
+ assert.equal(c.el('mf-watermark-symbol').textContent,'BTCUSDT');assert.equal(c.el('mf-watermark-period').textContent,'15m · USDT 永续');
  c.el('mf-follow').events.click();assert.equal(c.charts.at(-1).symbol,d.symbol);
- c.el('mf-rows').events.click({target:{closest:()=>({dataset:{previewSymbol:a.symbol}})}});
+ c.el('mf-rows').events.click({target:{closest:s=>s==='[data-symbol]'?{dataset:{symbol:a.symbol}}:null}});
  value=snap({week:'2026-10-26',items:[a,b]});await c.api.refresh();assert.equal(c.charts.at(-1).symbol,b.symbol);assert.equal(c.el('mf-follow').attrs['aria-pressed'],'true');c.api.setActive(false);
 });
 test('all matching contracts are scrollable; search resets position without changing wallpaper selection',async()=>{
@@ -89,18 +90,22 @@ test('TradingView URLs match Monday alerts and reject malformed contract names',
  assert.equal(tradingViewURL('1000PEPE-USDT-SWAP'),'https://www.tradingview.com/chart/?symbol=OKX%3A1000PEPEUSDT.P&interval=15');
  for(const symbol of [null,'BTC-USDT','BTC-USDT-SWAP&interval=1','<img>-USDT-SWAP','javascript:alert(1)'])assert.equal(tradingViewURL(symbol),'');
 });
-test('coin links open externally while their sibling preview button alone pins the wallpaper',async()=>{
+test('only the inline coin link opens externally; the rest of each row pins the wallpaper',async()=>{
  const calls=[],a=item({symbol:'BTC-USDT-SWAP',touches:{upper:event({observed_ms:100})}}),b=item({symbol:'ETH-USDT-SWAP',touches:{upper:event({observed_ms:200})}});
  const c=harness(async(u,o)=>{calls.push([u,o]);return response(snap({items:[a,b]}));});await ready(c);
  const html=c.el('mf-rows').innerHTML;
  assert.match(html,/<a class="mf-row-symbol" data-tv-symbol="BTC-USDT-SWAP" href="https:\/\/www.tradingview.com\/chart\/\?symbol=OKX%3ABTCUSDT.P&amp;interval=15" target="_blank" rel="noopener noreferrer"/);
- assert.match(html,/<\/a><button type="button" class="mf-row-value" data-preview-symbol="BTC-USDT-SWAP"/);
+ assert.match(html,/<\/a><small>[^<]+<\/small><\/div><button type="button" class="mf-row-value" data-preview-symbol="BTC-USDT-SWAP"/);
+ assert.ok([...html.matchAll(/<a class="mf-row-symbol"[^>]*>(.*?)<\/a>/g)].every(m=>!m[1].includes('<small>')));
  assert.doesNotMatch(html,/<button[^>]*class="mf-row[" ]/);
  const before=c.charts.length;
- c.el('mf-rows').events.click({target:{closest:selector=>{assert.equal(selector,'[data-preview-symbol]');return null;}}});
+ let stopped=false;
+ c.el('mf-rows').events.click({target:{closest:s=>s==='[data-tv-symbol]'?{dataset:{tvSymbol:a.symbol}}:null},stopPropagation(){stopped=true;}});
+ assert.equal(stopped,true);
  assert.equal(c.charts.length,before);assert.equal(c.el('mf-follow').attrs['aria-pressed'],'true');
- c.el('mf-rows').events.click({target:{closest:()=>({dataset:{previewSymbol:a.symbol}})}});
+ c.el('mf-rows').events.click({target:{closest:s=>s==='[data-symbol]'?{dataset:{symbol:a.symbol}}:null}});
  assert.equal(c.charts.at(-1).symbol,a.symbol);assert.equal(c.el('mf-follow').attrs['aria-pressed'],'false');
+ assert.equal(c.el('mf-watermark-symbol').textContent,'BTCUSDT');assert.equal(c.el('mf-watermark-period').textContent,'15m · USDT 永续');
  assert.ok(calls.every(([u,o])=>u==='/api/monday-fib?compact=true'&&!o.method));c.api.setActive(false);
 });
 test('Windows links use only the local app protocol and preserve independent wallpaper controls',async()=>{
