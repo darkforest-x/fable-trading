@@ -1,0 +1,88 @@
+{
+  "experiment_id": "exp-monday-ma6-retest-20261024-v1",
+  "status": "awaiting_owner_rule_definitions",
+  "run_enabled": false,
+  "source": {
+    "title": "小级别确认",
+    "url": "https://app.notion.com/p/4028856479af80039ef9fa7bf3703760",
+    "page_id": "40288564-79af-8003-9ef9-fa7bf3703760",
+    "last_edited_time": "2026-10-23T20:41:19.090Z",
+    "read_date_local": "2026-10-24",
+    "text": [
+      "第一次跌到 1.618 之后，开始监控",
+      "监控失效原则:  有 3 条 15mink 创新低？",
+      "等 15min 级别站上 6 条均线，且后面 3 根 k 线都没有跌回来",
+      "等回踩 6 条线最高的那条线  如果当前点位回到了周区间内则失效",
+      "入场，止损放最低点那条线下面一点，目标周一高点 和另外一边的 1.618    空头反之"
+    ],
+    "image_blocks": ["40288564-79af-8051-afd5-e15e0ba5c763", "40288564-79af-8096-883a-fcc2033a017b"],
+    "image_review": "Both WIFUSDT 15-minute screenshots viewed on the original Notion page. The second risk box visually ends near the lower MA envelope, above the earlier price low. This is interpretive evidence, not a numeric stop-buffer definition."
+  },
+  "baseline_config": "experiments/active/exp-monday-5m-wick-engulf-20261023-v1/config.json",
+  "crypto_root": "data/crypto/market/kline_preholdout_binance_um5m",
+  "crypto_tail": "data/crypto/market/kline_binance_um5m_forward_20260922/series",
+  "groups": {
+    "first": ["BTCUSDT", "ETHUSDT", "XAUUSD"],
+    "second": "Existing eligible Binance perpetual altcoin universe, excluding BTC/ETH, stablecoins, gold proxies and classified traditional/index assets"
+  },
+  "monday_timezone": "America/New_York",
+  "weekly_levels": "Completed Monday H/L; lower=L-0.618*(H-L), upper=H+0.618*(H-L); freeze the trigger week's anchors",
+  "first_touch": "First observed post-Monday directional touch per NY week; crypto requires an uninterrupted weekly prefix",
+  "signal_minutes": 15,
+  "moving_averages": ["sma20", "sma60", "sma120", "ema20", "ema60", "ema120"],
+  "ma_source": "yoyo.datasets.ma_rope_filter.add_six_mas; completed candles only",
+  "subsequent_confirmation_bars": 3,
+  "pending_definitions": {
+    "new_extreme_invalidation": null,
+    "stop_reference": null,
+    "stop_buffer": null,
+    "target_allocation": null
+  },
+  "implementation_interpretations_to_finalize": {
+    "ma_confirmation": "Proposed: close above the contemporaneous completed-bar six-MA maximum for long, then three subsequent closes remaining above; mirror short",
+    "entry_line": "Proposed: resting limit at the latest completed-bar MA envelope; any repricing becomes effective only afterward, never within the candle that computed the MA",
+    "stop_freeze": "Freeze the owner-defined stop when the associated entry order is submitted; if an unfilled entry is repriced, update its unfilled stop specification causally",
+    "range_invalidation": "Before entry only; exact wick-versus-close observation and ordering must be recorded before replay",
+    "monitor_expiry": "Must explicitly define the anchor transition; do not inherit an unrelated 12h/20h timer",
+    "position_expiry": "No new holding timer is authorized; data boundaries/gaps remain censored"
+  },
+  "target_levels_long": ["trigger_week_monday_high", "trigger_week_upper_1618"],
+  "target_levels_short": ["trigger_week_monday_low", "trigger_week_lower_1618"],
+  "engine": "NautilusTrader",
+  "engine_version": "1.231.0",
+  "runtime": "/Users/zhangzc/.local/bin/nautilus-python",
+  "execution_adapter": "yoyo.layers.l3_backtest.nautilus_independent.run_native",
+  "execution_minutes": 5,
+  "execution_status": "Existing resting-limit entry and target support verified. Dynamic pre-fill repricing and invalidation still need causal adapter integration and regression checks; no historical positions executed.",
+  "parameter_search": "No new grid authorized; any subsequent parameter research must use VectorBT with explicit ranges",
+  "maker_fee": 0.0002,
+  "taker_fee": 0.0005,
+  "fee_read_date": "2026-10-23",
+  "fee_basis": "Current owner-recorded OKX Lv1 scenario on Binance candles; resting limit entry/TP maker, market and protective-stop fills taker; actual per-fill notionals",
+  "gold": "Existing HistData M1 ZIPs, corrected source NY clock and conflict-exclusion adapter; bid-only gross results, unknown spread/broker fees; no fabricated volume",
+  "slippage": "Not modeled; separate from fees",
+  "funding": "Not modeled",
+  "split": "2023-01-01T00:00:00Z",
+  "controls_per_signal": 3,
+  "seed": 20261024,
+  "control_protocol": "Match symbol, NY week, side and causal volatility bucket; explicitly align pending-entry opportunity and execution semantics before replay. Do not call unmatched fills a matched-control result.",
+  "report": {
+    "format": "detailed_portable_html",
+    "template": "reports/monday-1618-cases-20261023",
+    "design_provenance": "artifacts/monday-cases-report-20261023/design/provenance.json",
+    "new_design_required": false,
+    "sections": [
+      "Chinese executable rules and example interpretation",
+      "Data coverage, timezones, quality exclusions and costs",
+      "First-touch / MA reclaim / three confirmations / submitted / invalidated / unfilled / filled funnel",
+      "All opportunity and trade timestamps in UTC and Beijing time",
+      "Win rate, average win/loss, planned and realized payoff, profit factor, fee/gross/net R and notional bp",
+      "MFE/MAE restricted to actual exposure, profitable excursions followed by stop, longest losing/stop streaks",
+      "Year/month/side/asset and chronological period comparisons with matched controls",
+      "Seeded winner/loser/unfilled/invalidated candle samples with six MAs, weekly levels, order and fill annotations",
+      "Full searchable/exportable trade ledger, source provenance and reproduction commands"
+    ]
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}
