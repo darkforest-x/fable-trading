@@ -1,0 +1,16 @@
+{
+  "experiment_id": "exp-monday-top200-review-20261024-v1",
+  "purpose": "Owner requested the200 highest-return completed historical trades rendered as small-timeframe candles in one folder for manual review",
+  "scope": "This conversation's completed Monday1618 study families: case1, canonical cases2-4 parameters, hourly body holds, far targets, partial/breakeven and fixed-duration limit entries",
+  "selection": "200 positive, closed signal trades by cached net_bp descending; exclude random controls, censored trades and non-grid timing bounds",
+  "return": "100*net_PnL/original_entry_notional; no leverage or account-equity denominator; not R ranking",
+  "deduplication": "Same symbol, side, UTC entry timestamp and entry price rounded to12 significant digits; keep highest measured net return, then earliest exit and stable IDs. Different confirmation-time entries remain distinct. Ex-post best-policy selection, not an executable selector.",
+  "gold": "Unknown spread/fees: separate gross ranking CSV, excluded from net top200",
+  "cost": "Reuse existing per-fill OKX scenario maker0.02%/taker0.05%; no new fee, stop, target or execution assumptions",
+  "charts": "One numbered PNG per trade with5m entry/exit candles plus full5m close/range overview. SixMA overlay is descriptive only, not an added strategy condition. All timestamps Beijing; uncertain fill intervals marked.",
+  "execution": "None: frozen native Nautilus/VectorBT results only, no simulation or parameter search",
+  "source_data": "Original registered Binance5m files used by the source experiments; no downloads, synthetic candles or external-disk content hashing",
+  "caveat": "Outcome-selected winners and best tested exits cannot estimate strategy win rate or future profitability",
+  "training_eligible": false,
+  "production_eligible": false
+}
