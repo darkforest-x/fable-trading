@@ -4,7 +4,7 @@
  */
 (() => {
   'use strict';
-  const finite=Number.isFinite,STEP=900000;
+  const finite=Number.isFinite,PERIODS={'1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'1D':86400000};
   const weekOf=ms=>new Intl.DateTimeFormat('sv-SE',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(ms));
   function levels(row){
     const h=row.high,l=row.low,r=h-l;
@@ -21,7 +21,8 @@
       {label:'下 1.618',price:row.lower,kind:'fib',color:'#087f69',lineWidth:2,lineStyle:0},
     ].filter(x=>finite(x.price));
   }
-  function prepare(context,row,week){
+  function prepare(context,row,week,period='15m'){
+    if(!PERIODS[period]||context.bar!==period||(period==='1D'&&context.native_bar!=='1Dutc'))throw Error('K 线周期不匹配');
     if(context.symbol!==row.symbol||context.timezone!=='America/New_York')throw Error('图表币种或时区不匹配');
     if(!context.candles?.length)return {...context,levels:levels(row)};
     const start=context.monday?.start_ms;
@@ -29,56 +30,57 @@
     const boundary=context.last_close_ms;
     if(!finite(boundary))throw Error('K 线收盘边界缺失');
     let previous=-Infinity;
-    const candles=context.candles.filter(x=>x.time>=start);
+    const candles=context.candles;
     for(const b of candles){
-      if(![b.time,b.open,b.high,b.low,b.close].every(finite)||b.time<=previous||b.time+STEP>boundary||b.high<Math.max(b.open,b.close,b.low)||b.low>Math.min(b.open,b.close))throw Error('K 线数据不完整，请稍后重试');
+      if(![b.time,b.open,b.high,b.low,b.close].every(finite)||b.time<=previous||b.time+PERIODS[period]>boundary||b.time%PERIODS[period]!==0||b.high<Math.max(b.open,b.close,b.low)||b.low>Math.min(b.open,b.close))throw Error('K 线数据不完整，请稍后重试');
       previous=b.time;
     }
     return {...context,candles,levels:levels(row),monday:{...context.monday,high:row.high,low:row.low,complete:true}};
   }
-  if(typeof module!=='undefined')module.exports={levels,prepare};
+  if(typeof module!=='undefined')module.exports={levels,prepare,PERIODS};
   if(typeof document==='undefined')return;
-  const view={bars:672,initialBars:160,range:true,fib:true,fitAll:false,showLevels:false,mondayBand:true,wallpaper:true,candleColors:{up:'#169873',down:'#d7355d'}};
+  const view={bars:720,initialBars:160,range:true,fib:true,fitAll:false,showLevels:false,mondayBand:true,wallpaper:true,candleColors:{up:'#169873',down:'#d7355d'}};
   let target=null,controller=null,timer=null,version=0;
   const cache=new Map();
   function stop(){version++;clearTimeout(timer);controller?.abort();controller=null;if(target){window.SpikeRangeChart?.unmount(target.mount);target.host.replaceChildren?.();}target=null;}
   function draw(context,error=''){
     if(!target)return;
     try{
-      const value=prepare(context,target.row,target.week);
+      const value=prepare(context,target.row,target.week,target.period);
       target.context=context;
       if(!target.internal)value.levels=value.levels.filter(l=>['上 1.618','周一高','周一低','下 1.618'].includes(l.label));
-      target.instance=window.SpikeRangeChart.mount(target.mount,value,view,error);
-      message(error||(context.error?'K 线更新失败：'+context.error:context.loading?'正在同步此合约 K 线…':!value.candles?.length?'暂无本周 K 线，请稍后重试':''));
+      target.instance=window.SpikeRangeChart.mount(target.mount,value,{...view,mondayBand:target.period!=='1D'},error);
+      message(error||(context.error?'K 线更新失败：'+context.error:context.loading?'正在同步此合约 K 线…':!value.candles?.length?'暂无此周期 K 线，请稍后重试':''));
     }catch(e){message(e.message);window.SpikeRangeChart.unmount(target.mount);}
   }
   function message(value){if(!target)return;target.state.textContent=value;target.caption.hidden=!value;}
   async function refresh(){
     if(!target||controller||document.hidden)return;
     clearTimeout(timer);const current=target,token=version,c=new AbortController();controller=c;
-    const timeout=setTimeout(()=>c.abort(),12000);let delay=60000;
+    const timeout=setTimeout(()=>c.abort(),12000);let delay=15000;
     try{
-      const r=await fetch('/api/market-sync/context?zone=America%2FNew_York&symbol='+encodeURIComponent(current.row.symbol),{cache:'no-store',credentials:'same-origin',signal:c.signal});
+      const r=await fetch('/api/monday-fib/candles?symbol='+encodeURIComponent(current.row.symbol)+'&period='+encodeURIComponent(current.period),{cache:'no-store',credentials:'same-origin',signal:c.signal});
       const value=await r.json();if(!r.ok)throw Error(typeof value.detail==='string'?value.detail:'图表读取失败');
       if(token!==version||target!==current)return;
-      prepare(value,current.row,current.week);
+      prepare(value,current.row,current.week,current.period);
       cache.delete(current.key);cache.set(current.key,{value,at:Date.now()});while(cache.size>6)cache.delete(cache.keys().next().value);
       draw(value);if(value.loading)delay=3000;else if(value.error||!value.candles?.length)delay=10000;
     }catch(e){if(token===version&&target===current){message((e.name==='AbortError'?'图表读取超时':e.message)+' · 可重新加载');delay=10000;}}
     finally{clearTimeout(timeout);if(controller===c)controller=null;if(token===version&&target===current&&!document.hidden)timer=setTimeout(refresh,delay);}
   }
-  function show(host,row,week,{internal=false}={}){
-    const key=row.symbol+'|'+week;
+  function show(host,row,week,{internal=false,period='15m'}={}){
+    if(!PERIODS[period])period='15m';
+    const key=row.symbol+'|'+week+'|'+period;
     if(target?.host===host&&target.key===key){
       const changed=target.internal!==internal||['high','low','upper','lower'].some(k=>target.row[k]!==row[k]);
       target.row=row;target.internal=internal;if(changed&&target.context)draw(target.context);return;
     }
     stop();if(!host)return;
     host.innerHTML='<div class="mf-chart-caption"><p role="status">正在加载区间 K 线…</p><button type="button" data-mf-chart-retry>重新加载</button></div><div class="mf-chart-mount"></div>';
-    target={host,row,week,key,internal,state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
+    target={host,row,week,key,internal,period,state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
     host.querySelector('[data-mf-chart-retry]').addEventListener('click',()=>refresh());
     const previous=cache.get(key);if(previous)draw(previous.value);
-    if(previous&&Date.now()-previous.at<60000&&!previous.value.loading)timer=setTimeout(refresh,60000-(Date.now()-previous.at));else refresh();
+    if(previous&&Date.now()-previous.at<15000&&!previous.value.loading)timer=setTimeout(refresh,15000-(Date.now()-previous.at));else refresh();
   }
   function setInternal(value){if(!target)return;target.internal=value;if(target.context)draw(target.context);}
   function fit(){const chart=target?.instance?.chart;if(chart){chart.priceScale('right').applyOptions({autoScale:true});chart.timeScale().fitContent();}}

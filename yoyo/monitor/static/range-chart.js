@@ -68,7 +68,7 @@
           handleScale:{mouseWheel:true,pinch:true,axisPressedMouseMove:{time:true,price:true},axisDoubleClickReset:{time:true,price:true}},
           crosshair:{mode:0},timeScale:{rightOffset:10},kineticScroll:{mouse:false,touch:true}});
         this.freePan=bindFreePan(this.chart,this.canvas);
-        this.canvas.setAttribute('aria-label','K 线交互图；拖动自由平移，滚轮或双指缩放，拖动坐标轴缩放，双击价格轴复位；Home 全周，End 最新');
+        this.canvas.setAttribute('aria-label','K 线交互图；拖动自由平移，滚轮或双指缩放，拖动坐标轴缩放，双击价格轴复位；Home 全图，End 最新');
       }
       this.crosshair=T.frame(p=>{if(!this.chart)return;this.hover=p?.time&&p.seriesData?.has(this.series)?p.time:null;this.readout();});
       this.chart.subscribeCrosshairMove(this.crosshair);
@@ -86,7 +86,7 @@
     }
     readout(){const row=this.rows.find(r=>r.time===this.hover)||this.rows.at(-1);this.panel.querySelector('.cv-readout').innerHTML=row?window.SpikeChartTools.readout(row,row.time,row.time!==this.hover):'';}
     draw(data,view,error){
-      const T=window.SpikeChartTools,key=`${data?.symbol||''}|${data?.timezone||''}|${view.bars}`;
+      const T=window.SpikeChartTools,key=`${data?.symbol||''}|${data?.timezone||''}|${data?.bar||'15m'}|${view.bars}`;
       const saved=key===this.key?T.anchor(this.chart.timeScale().getVisibleLogicalRange(),T.times(this.rows)):null;
       // API time is milliseconds. Keep only the API's disclosed, closed candle set.
       this.rows=(data?.candles||[]).slice(-view.bars).map(r=>({...r,time:r.time/1000}));
@@ -99,7 +99,7 @@
       if(view.wallpaper)this.chart.applyOptions({rightPriceScale:{scaleMargins:{top:.25,bottom:.18}},grid:{vertLines:{visible:false},horzLines:{visible:false}}});
       for(const level of levels)this.lines.push(this.series.createPriceLine({price:level.price,color:level.color||colors[level.kind],lineWidth:level.lineWidth||1,lineStyle:level.lineStyle??(level.kind==='range'?0:2),axisLabelVisible:level.axisLabelVisible!==false,title:level.label}));
       this.panel.querySelector('.cv-levels').innerHTML=levels.map(l=>`<span style="color:${l.color||colors[l.kind]}">${esc(l.label)} <b>${T.axisPrice(l.price)}</b></span>`).join('');
-      this.panel.querySelector('[data-range-heading]').textContent=`${(data?.symbol||'').replace('-USDT-SWAP','')} · 已收盘 15min`;
+      this.panel.querySelector('[data-range-heading]').textContent=`${(data?.symbol||'').replace('-USDT-SWAP','')} · 已收盘 ${data?.bar||'15m'}`;
       const status=this.panel.querySelector('.cv-range-status'),warning=error||data?.error||this.rows.length&&data?.stale&&'行情已过期 · 仅供查看历史位置';
       status.classList.toggle('is-warning',!!warning);status.textContent=warning||(!this.rows.length?'正在加载 K 线与关键价位…':`收盘边界：北京 ${clock(data.last_close_ms,true)} · ${data.monday?.complete?'周一区间已冻结':data.monday?.developing?'周一区间形成中':'周一数据不足，暂不画区间'}`);
       const retained=T.restore(saved,T.times(this.rows));

@@ -102,6 +102,7 @@ def create_app(runtime=None, start_monitor=True):
             app.state.paper_desk_worker.start()
             yield
         finally:
+            app.state.monday_candles.close()
             app.state.market_workstation.close()
             app.state.signal_read_cache.close()
             app.state.okx_execution_dashboard.close()
@@ -136,6 +137,8 @@ def create_app(runtime=None, start_monitor=True):
     from yoyo.monitor.vidya_retest_api import install as install_vidya_retest
     install_vidya_retest(app, runtime, vidya_retest)
     install_monday_fib(app, monday_fib)
+    from yoyo.monitor.monday_candles import install as install_monday_candles
+    install_monday_candles(app, runtime)
 
     @app.middleware("http")
     async def headers(request, call_next):

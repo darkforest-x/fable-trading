@@ -157,3 +157,12 @@ body[data-workspace="monday-fib"] {--mf-glass:rgba(255,255,255,.18);--mf-border:
  #monday-fib-root .mf-dock .mf-timeframe {padding:0 5px;}
  #monday-fib-root #mf-fib>.mf-icon,#monday-fib-root #mf-follow>.mf-icon {display:none;}
 }
+
+/* Stitch b6e7cb0ef5c247f7b94bab399a0e5386: anchored native-period glass menu. */
+#monday-fib-root .mf-period-menu {position:absolute;z-index:30;width:144px;max-width:calc(100% - 16px);max-height:calc(100dvh - 16px);overflow:auto;padding:6px;border-radius:18px;animation:mf-arrive .16s var(--mf-ease);background-color:#ffffff80;}
+#monday-fib-root .mf-period-menu button {display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;padding:8px 14px;border-radius:12px;text-align:left;}
+#monday-fib-root .mf-period-menu button>span {visibility:hidden;}
+#monday-fib-root .mf-period-menu [aria-checked="true"] {background:#0071e312;color:var(--mf-blue);font-weight:600;box-shadow:inset 0 0 0 1px #0071e322;}
+#monday-fib-root .mf-period-menu [aria-checked="true"]>span {visibility:visible;}
+#monday-fib-root #mf-timeframe[aria-expanded="true"] {background:#0071e312;color:var(--mf-blue);}
+#monday-fib-root #mf-timeframe {min-width:54px;}

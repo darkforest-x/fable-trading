@@ -9,7 +9,7 @@ const response=(d,ok=true)=>({ok,json:async()=>d});
 function harness(fetchImpl){
  const els=new Map(),timers=new Map();let id=0;
  function el(name){if(!els.has(name))els.set(name,{innerHTML:'',textContent:'',hidden:false,disabled:false,value:'',dataset:{},events:{},attrs:{},addEventListener(t,fn){this.events[t]=fn;},setAttribute(k,v){this.attrs[k]=v;},classList:{toggle(){}},contains(){return false;},focus(){},querySelectorAll(){return [];},querySelector(){return null;}});return els.get(name);}
- const charts=[];const window={SpikeMondayFibChart:{show:(host,row,week)=>charts.push({symbol:row.symbol,week}),hide(){},fit(){},setInternal(){}}},document={hidden:false,activeElement:null,getElementById:el,events:{},addEventListener(t,fn){this.events[t]=fn;}};
+ const charts=[];const window={SpikeMondayFibChart:{show:(host,row,week,options)=>charts.push({symbol:row.symbol,week,...options}),hide(){},fit(){},setInternal(){}}},document={hidden:false,activeElement:null,getElementById:el,events:{},addEventListener(t,fn){this.events[t]=fn;}};
  vm.runInNewContext(source,{window,document,fetch:fetchImpl,AbortController,Date,Intl,URLSearchParams,setTimeout(fn,ms){const n=++id;timers.set(n,{fn,ms});return n;},clearTimeout(n){timers.delete(n);}});
  return {api:window.SpikeMondayFib,el,timers,document,charts};
 }
@@ -62,4 +62,13 @@ test('missing history and escaped symbols remain honest',async()=>{
 });
 test('failed refresh marks old quotes and hidden tabs stop polling',async()=>{
  let fail=false;const c=harness(async()=>{if(fail)throw Error('offline');return response(snap({items:[item({received_ms:Date.now()-100000})]}));});await ready(c);assert.match(c.el('mf-rows').innerHTML,/行情已滞后/);fail=true;await c.api.refresh();assert.match(c.el('mf-notice').textContent,/offline/);c.document.hidden=true;c.document.events.visibilitychange();assert.equal(c.timers.size,0);c.api.setActive(false);
+});
+
+test('period choice reaches the chart without changing pinned symbol or NY anchors',async()=>{
+ const c=harness(async()=>response(snap()));await ready(c);assert.equal(c.charts.at(-1).period,'15m');
+ c.el('mf-period-menu').events.click({target:{closest:()=>({dataset:{period:'4H'}})}});
+ assert.equal(c.charts.at(-1).period,'4H');assert.equal(c.charts.at(-1).symbol,'BTC-USDT-SWAP');assert.equal(c.charts.at(-1).week,'2026-10-19');
+ assert.equal(c.el('mf-period-label').textContent,'4H');assert.equal(c.el('mf-period-menu').hidden,true);
+ await c.api.refresh();assert.equal(c.charts.at(-1).period,'4H');
+ c.el('mf-period-menu').events.click({target:{closest:()=>({dataset:{period:'invalid'}})}});assert.equal(c.charts.at(-1).period,'4H');c.api.setActive(false);
 });

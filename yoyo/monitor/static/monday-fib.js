@@ -91,9 +91,12 @@
       <p class="mf-list-note">按触价时间排序 · 点击切换图表</p>
     </aside>
     <div id="mf-notice" class="mf-notice mf-glass" role="status" hidden></div>
-    <div class="mf-dock mf-glass" data-mf-movable="dock" role="group" aria-label="图表控制">${grip('图表工具')}<span class="mf-timeframe" title="15 分钟已收盘 K 线">15m</span><span class="mf-divider"></span><button id="mf-zoom-out" class="mf-zoom" aria-label="缩小 K 线" title="缩小 K 线（−）"><span aria-hidden="true">−</span></button><button id="mf-zoom-in" class="mf-zoom" aria-label="放大 K 线" title="放大 K 线（+）"><span aria-hidden="true">+</span></button><button id="mf-latest" aria-label="回到当前合约最新 K 线" title="回到当前合约最新 K 线，保留缩放宽度">${icon('chevron-right')}<span>最新 K 线</span></button><button id="mf-fit" aria-label="显示全周并复位" title="恢复价格缩放并显示本周全部 K 线">${icon('maximize')}<span>全周</span></button><button id="mf-fib" aria-pressed="false" title="显示区间内部 0.5 / 0.618 / 0.705">${icon('adjustments-horizontal')}<span>内部线</span></button><span class="mf-divider"></span><button id="mf-follow" aria-pressed="true">${icon('activity')}<span>跟随最新</span></button></div>
+    <div class="mf-dock mf-glass" data-mf-movable="dock" role="group" aria-label="图表控制">${grip('图表工具')}<button id="mf-timeframe" class="mf-timeframe" type="button" aria-label="选择 K 线周期" aria-haspopup="menu" aria-controls="mf-period-menu" aria-expanded="false"><span id="mf-period-label">15m</span><span aria-hidden="true">⌄</span></button><span class="mf-divider"></span><button id="mf-zoom-out" class="mf-zoom" aria-label="缩小 K 线" title="缩小 K 线（−）"><span aria-hidden="true">−</span></button><button id="mf-zoom-in" class="mf-zoom" aria-label="放大 K 线" title="放大 K 线（+）"><span aria-hidden="true">+</span></button><button id="mf-latest" aria-label="回到当前合约最新 K 线" title="回到当前合约最新 K 线，保留缩放宽度">${icon('chevron-right')}<span>最新 K 线</span></button><button id="mf-fit" aria-label="显示全部已加载 K 线并复位" title="恢复价格缩放并显示全部已加载 K 线">${icon('maximize')}<span>全图</span></button><button id="mf-fib" aria-pressed="false" title="显示区间内部 0.5 / 0.618 / 0.705">${icon('adjustments-horizontal')}<span>内部线</span></button><span class="mf-divider"></span><button id="mf-follow" aria-pressed="true">${icon('activity')}<span>跟随最新</span></button></div>
+    <div id="mf-period-menu" class="mf-period-menu mf-glass" role="menu" aria-label="K 线周期" hidden>${['1m','5m','15m','30m','1H','4H','1D'].map(p=>`<button type="button" role="menuitemradio" aria-checked="${p==='15m'}" data-period="${p}" tabindex="-1">${p}<span aria-hidden="true">✓</span></button>`).join('')}</div>
     <footer class="mf-footer"><span id="mf-week">纽约周一 · 读取中</span><span id="mf-updated">15m 已收盘 K 线</span><span class="mf-gesture-hint">拖动平移 · 滚轮缩放 · 双击价格轴复位</span></footer>`;
   const layout=mountLayout(root);
+  const periods=['1m','5m','15m','30m','1H','4H','1D'];
+  let period='15m';try{const saved=window.localStorage?.getItem('spike.monday.timeframe');if(periods.includes(saved))period=saved;}catch{}
   let active=false,data=null,receivedAt=0,error='',timer=null,controller=null,pending=null,revision=0;
   let query='',filter='all',page=0,selected='',selectedWeek='',follow=true,internal=false,lastRows='';
   let listOpen=!!window.matchMedia?.('(min-width: 761px)').matches;
@@ -118,7 +121,20 @@
     $('mf-list-count').textContent=`${rows.length} 个`;
     for(const b of $('mf-filters').querySelectorAll('[data-filter]'))b.setAttribute('aria-pressed',String(b.dataset.filter===filter));
   }
+  function periodMenu(open,focus=false){
+    const menu=$('mf-period-menu'),button=$('mf-timeframe');menu.hidden=!open;button.setAttribute('aria-expanded',String(open));
+    if(open){
+      const rect=button.getBoundingClientRect(),box=menu.getBoundingClientRect(),bounds=root.getBoundingClientRect();
+      menu.style.left=Math.max(8,Math.min(bounds.width-box.width-8,rect.left-bounds.left))+'px';
+      const above=rect.top-bounds.top-box.height-8;
+      menu.style.top=Math.max(8,Math.min(bounds.height-box.height-8,above>=8?above:rect.bottom-bounds.top+8))+'px';
+      if(focus)menu.querySelector('[aria-checked="true"]')?.focus({preventScroll:true});
+    }else if(focus)button.focus({preventScroll:true});
+  }
   function render(){
+    $('mf-period-label').textContent=period;
+    $('mf-updated').textContent=`${period} 已收盘 K 线${period==='1D'?' · UTC 日线':''}`;
+    for(const b of $('mf-period-menu').querySelectorAll('[data-period]'))b.setAttribute('aria-checked',String(b.dataset.period===period));
     const now=nowMs(),connected=data?.stream.connected&&finite(data.stream.last_message_ms)&&now-data.stream.last_message_ms<90000&&!error;
     $('mf-stream').innerHTML=`<i></i><span>${connected?'行情在线':'连接待恢复'}</span>`;$('mf-stream').classList.toggle('mf-online',!!connected);$('mf-stream').title=connected?'OKX 行情在线':'行情连接待恢复';
     const notice=error||data?.stream.catalog_error||data?.stream.error||'';$('mf-notice').hidden=!notice;$('mf-notice').textContent=notice;
@@ -137,7 +153,7 @@
         $('mf-quote-state').hidden=!state;$('mf-quote-state').textContent=state;
         $('mf-mode').textContent=follow?'跟随最新':'已固定';
         if(changed&&root.animate&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)$('mf-selected').animate([{opacity:.55,transform:'translateY(4px)'},{opacity:1,transform:'translateY(0)'}],{duration:220,easing:'ease-out'});
-        if(active&&!document.hidden)window.SpikeMondayFibChart?.show($('mf-wallpaper'),row,data.week,{internal});
+        if(active&&!document.hidden)window.SpikeMondayFibChart?.show($('mf-wallpaper'),row,data.week,{internal,period});
       }else{
         $('mf-empty').textContent=data.monday_complete?'本周尚无 1.618 触价，等待最新行情':'纽约周一区间正在形成，完成后开始监控';
         window.SpikeMondayFibChart?.hide();
@@ -161,7 +177,7 @@
     }catch(e){if(rev===revision&&active){error=e.name==='AbortError'?'数据请求超时，正在重试':e.message;render();}}
     finally{clearTimeout(timeout);if(controller===c)controller=null;if(pending===task)pending=null;if(rev===revision)schedule();}})();pending=task;return task;
   }
-  function cancel(){revision++;controller?.abort();controller=null;pending=null;clearTimeout(timer);window.SpikeMondayFibChart?.hide();}
+  function cancel(){periodMenu(false);revision++;controller?.abort();controller=null;pending=null;clearTimeout(timer);window.SpikeMondayFibChart?.hide();}
   function setActive(value){if(active===value)return;active=value;cancel();layout.setActive(value);if(active){panel(listOpen);render();refresh();}}
   $('mf-search').addEventListener('input',e=>{query=e.target.value;page=0;renderRows();sync();});
   $('mf-filters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;filter=b.dataset.filter;page=0;renderRows();sync();});
@@ -174,7 +190,21 @@
   $('mf-zoom-in').addEventListener('click',()=>window.SpikeMondayFibChart?.zoom(.8));
   $('mf-zoom-out').addEventListener('click',()=>window.SpikeMondayFibChart?.zoom(1.25));
   $('mf-fib').addEventListener('click',()=>{internal=!internal;$('mf-fib').setAttribute('aria-pressed',String(internal));window.SpikeMondayFibChart?.setInternal(internal);});
-  root.addEventListener('keydown',e=>{if(e.key==='Escape'&&listOpen){e.stopPropagation();panel(false,true);}});
+  $('mf-timeframe').addEventListener('click',()=>periodMenu($('mf-period-menu').hidden,true));
+  $('mf-timeframe').addEventListener('keydown',e=>{if(['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();periodMenu(true,true);}});
+  $('mf-period-menu').addEventListener('click',e=>{
+    const value=e.target.closest('[data-period]')?.dataset.period;if(!periods.includes(value))return;
+    period=value;try{window.localStorage?.setItem('spike.monday.timeframe',period);}catch{}
+    periodMenu(false,true);render();
+  });
+  $('mf-period-menu').addEventListener('keydown',e=>{
+    const buttons=Array.from($('mf-period-menu').querySelectorAll('[data-period]')),i=buttons.indexOf(document.activeElement);
+    if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();e.stopPropagation();const n=e.key==='Home'?0:e.key==='End'?buttons.length-1:(i+(e.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length;buttons[n]?.focus();}
+    if(e.key==='Tab')periodMenu(false);
+  });
+  document.addEventListener('pointerdown',e=>{if(!$('mf-period-menu').hidden&&!$('mf-period-menu').contains(e.target)&&!$('mf-timeframe').contains(e.target))periodMenu(false);});
+  window.addEventListener?.('resize',()=>periodMenu(false));
+  root.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('mf-period-menu').hidden){e.stopPropagation();periodMenu(false,true);}else if(e.key==='Escape'&&listOpen){e.stopPropagation();panel(false,true);}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){cancel();layout.setActive(false);}else if(active){layout.setActive(true);render();refresh();}});
   window.SpikeNavigation?.register('monday-fib',p=>{query=p.q||'';filter=Object.hasOwn(FILTERS,p.filter)?p.filter:'all';page=Math.max(0,(Number(p.page)||1)-1);selected=p.symbol||'';follow=!selected;$('mf-search').value=query;if(data)render();});
   panel(listOpen);window.SpikeMondayFib={setActive,refresh};
