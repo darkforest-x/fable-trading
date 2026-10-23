@@ -1,0 +1,11 @@
+#!/bin/sh
+# Use the same isolated Nautilus environment as scripts/backtest-range.
+set -eu
+repo_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+runtime_path="${NAUTILUS_PYTHON:-$HOME/.local/share/crypto-toolkit/venvs/nautilus/bin/python}"
+if [ ! -x "$runtime_path" ]; then
+  echo "Nautilus runtime missing; set NAUTILUS_PYTHON to the existing isolated interpreter." >&2
+  exit 1
+fi
+cd "$repo_dir"
+exec "$runtime_path" -m yoyo.evaluation.monday_5m_wick_study "$@"
