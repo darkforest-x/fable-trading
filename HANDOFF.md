@@ -1,3 +1,8 @@
+## 2026-10-23 · 区间1.618 methods 16-17: implied vol and level/anchor comparison rejected
+
+- DVOL (Deribit public hourly, 2021-03-24..2026-09) on 470 BTC/ETH touches: calm-regime hypothesis wrong sign (AUC 0.481/0.451), model later AUC 0.523. Post hoc only: realized/implied ratio AUC 0.552/0.554, small sample.
+- Same barrier proportions for 1.272/1.414/1.618/2.0/random and Monday NY, Monday UTC, previous-week anchors: Binance alts 2020-2025 (499696 events) and OKX 2025-26 all 28-40 percent; Monday NY 1618 minus rest -0.33pp [-1.5,0.9] and +1.2pp [-1.3,3.6]. The 1618 line is not special. Seventeen methods total; Notion task and knowledge base updated.
+
 ## 2026-10-23 · 区间1.618 methods 14-15: Beijing 04-08 and US release windows rejected
 
 - Binance alts 2020-01..2025-05 (503 USDT perps incl. delisted, 12000 vision archives via yoyo/data/binance_um_vision_listing.py): 40289 touches 36.7 percent; Beijing 04-08 36.4 percent (n5447), gap -0.35pp, p .568. The OKX timing pattern does not replicate.

@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-1618-dvol-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 155781ad3e8e31ca984a93ae1a35559d8a4b1368
+    status: rejected
+    question: 'Does the Deribit implied volatility regime (DVOL) at the touch judge whether the BTC/ETH Monday 1618 holds?'
+    single_variable: 'DVOL percentile (90d), level, 24h change and realized/implied ratio read before the touch; logistic fit before 2024-01.'
+    result: '470 BTC/ETH touches 2021-04..2026-09. Primary calm-regime hypothesis wrong sign: AUC of -dvol_pct90 0.481 early, 0.451 later, p .895. Model later AUC 0.523, top30 percent n29 41.4 percent, p .645. Post hoc only: rv_iv AUC 0.552/0.554.'
+    artifacts:
+    - monday-1618-dvol-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-dvol-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Deribit public DVOL hourly from 2021-03-24 (48385 rows each). Fee 0; Binance 15m conservative labels. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
   - experiment_id: exp-monday-1618-levels-20261023-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 155781ad3e8e31ca984a93ae1a35559d8a4b1368

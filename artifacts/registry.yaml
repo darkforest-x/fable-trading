@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-1618-dvol-20261023-v1
+    artifact_type: manifest
+    role: 'Does the Deribit implied volatility regime (DVOL) at the touch judge whether the BTC/ETH Monday 1618 holds?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 155781ad3e8e31ca984a93ae1a35559d8a4b1368
+    generator_commit: 155781ad3e8e31ca984a93ae1a35559d8a4b1368
+    source_path: experiments/active/exp-monday-1618-dvol-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-dvol-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; 470 BTC/ETH touches 2021-04..2026-09. Primary calm-regime hypothesis wrong sign: AUC of -dvol_pct90 0.481 early, 0.451 later, p .895. Model later AUC '
   - artifact_id: monday-1618-levels-20261023-v1
     artifact_type: manifest
     role: 'Is the Monday NY 1618 more valid than 1.272/1.414/2.0, a random extension, or 1618 of other anchors under identical barrier proportions?'
