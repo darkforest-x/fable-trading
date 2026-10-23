@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+
+<html class="h-full w-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Spike · 全屏1.618 · 可移动透明毛玻璃</title>
+<!-- Google Fonts: Plus Jakarta Sans & Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "tertiary-fixed-dim": "#ffb4ab",
+            "surface-container-lowest": "#ffffff",
+            "chart-bear": "#f43f5e",
+            "error-container": "#ffdad6",
+            "surface-dim": "#d4daea",
+            "surface-tint": "#005cbb",
+            "fib-blue": "#0ea5e9",
+            "on-primary": "#ffffff",
+            "tertiary-container": "#df2828",
+            "on-primary-fixed-variant": "#00458f",
+            "background": "#f9f9ff",
+            "surface-variant": "#dde2f2",
+            "on-background": "#161c27",
+            "chart-bull": "#10b981",
+            "glass-card-bg": "rgba(255, 255, 255, 0.44)",
+            "secondary-container": "#7cf994",
+            "canvas-bg": "#F7F8F6",
+            "glass-bg": "rgba(255, 255, 255, 0.46)",
+            "tertiary-fixed": "#ffdad6",
+            "primary-fixed": "#d7e2ff",
+            "tertiary": "#ba0012",
+            "surface-container-high": "#e2e8f8",
+            "inverse-primary": "#abc7ff",
+            "on-tertiary-fixed": "#410002",
+            "on-error-container": "#93000a",
+            "surface-container-highest": "#dde2f2",
+            "surface-container-low": "#f0f3ff",
+            "on-secondary-fixed": "#002109",
+            "outline": "#717785",
+            "glass-specular": "rgba(255, 255, 255, 0.85)",
+            "error": "#ba1a1a",
+            "on-surface-variant": "#414753",
+            "primary": "#0059b5",
+            "on-tertiary": "#ffffff",
+            "surface-container": "#e8eefe",
+            "on-secondary-container": "#007230",
+            "secondary-fixed-dim": "#62df7d",
+            "on-secondary": "#ffffff",
+            "surface": "#f9f9ff",
+            "inverse-surface": "#2a313d",
+            "device-chassis": "#202227",
+            "on-tertiary-fixed-variant": "#93000b",
+            "on-primary-fixed": "#001b3f",
+            "on-secondary-fixed-variant": "#005320",
+            "on-surface": "#161c27",
+            "secondary-fixed": "#7ffc97",
+            "secondary": "#006e2d",
+            "on-tertiary-container": "#fffaf9",
+            "surface-bright": "#f9f9ff",
+            "on-primary-container": "#fcfbff",
+            "primary-fixed-dim": "#abc7ff",
+            "primary-container": "#0071e3",
+            "inverse-on-surface": "#ecf0ff",
+            "fib-mid": "#94a3b8",
+            "on-error": "#ffffff",
+            "outline-variant": "#c1c6d6"
+          },
+          borderRadius: {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "space-sm": "0.5rem",
+            "gutter-sm": "1rem",
+            "space-xs": "0.25rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "margin-mobile": "1.25rem",
+            "gutter": "1.5rem",
+            "margin": "2rem",
+            "margin-desktop": "3rem",
+            "space-xl": "2.5rem",
+            "gutter-lg": "2rem"
+          },
+          fontFamily: {
+            "body-md": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "label-sm": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "headline-sm": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "display-lg": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "headline-xl": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "body-sm": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "display-lg-mobile": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "headline-lg": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "metric-val": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "body-lg": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "label-md": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "headline-md": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "headline-xl-mobile": ["Plus Jakarta Sans", "system-ui", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Translucent Apple Liquid Glass System (.40 - .52 opacity, 32px blur, specular highlight, subtle shadow) */
+    .apple-glass {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0.38) 100%);
+      backdrop-filter: blur(32px) saturate(175%);
+      -webkit-backdrop-filter: blur(32px) saturate(175%);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      box-shadow:
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.85),
+        inset 1px 0 1px 0 rgba(255, 255, 255, 0.6),
+        0 14px 34px -8px rgba(15, 23, 42, 0.08),
+        0 2px 6px 0 rgba(15, 23, 42, 0.03);
+    }
+    .apple-glass-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.54) 0%, rgba(255, 255, 255, 0.40) 100%);
+      backdrop-filter: blur(34px) saturate(175%);
+      -webkit-backdrop-filter: blur(34px) saturate(175%);
+      border: 1px solid rgba(255, 255, 255, 0.78);
+      box-shadow:
+        inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.9),
+        inset 1px 0 1px 0 rgba(255, 255, 255, 0.65),
+        0 18px 40px -10px rgba(15, 23, 42, 0.11),
+        0 4px 10px -2px rgba(15, 23, 42, 0.04);
+    }
+    .apple-glass-pill {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0.38) 100%);
+      backdrop-filter: blur(28px) saturate(170%);
+      -webkit-backdrop-filter: blur(28px) saturate(170%);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      box-shadow:
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.85),
+        0 8px 24px -4px rgba(15, 23, 42, 0.07);
+    }
+    .tap-spring {
+      transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1), background-color 150ms ease, opacity 150ms ease;
+    }
+    .tap-spring:active {
+      transform: scale(0.95);
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Interactive TradingView Canvas Cursor States */
+    #chart-viewport {
+      cursor: grab;
+      touch-action: none;
+    }
+    #chart-viewport.is-chart-dragging {
+      cursor: grabbing;
+    }
+
+    /* Draggable floating modules style */
+    .draggable-module {
+      touch-action: none;
+      user-select: none;
+      position: absolute;
+      will-change: transform;
+      transition: box-shadow 240ms ease, transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .draggable-module.is-dragging {
+      transform: scale(1.02) !important;
+      box-shadow:
+        inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95),
+        0 28px 56px -12px rgba(15, 23, 42, 0.20),
+        0 8px 20px -2px rgba(15, 23, 42, 0.08) !important;
+      z-index: 50 !important;
+      transition: box-shadow 150ms ease !important;
+    }
+
+    /* 6-dot grip handle styling */
+    .drag-handle {
+      touch-action: none;
+      cursor: grab;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      margin: -10px;
+      border-radius: 9999px;
+      opacity: 0.45;
+      transition: opacity 160ms ease, background-color 160ms ease, transform 160ms ease;
+    }
+    .drag-handle:hover,
+    .draggable-module:hover .drag-handle,
+    .drag-handle:focus-visible {
+      opacity: 0.95;
+      background-color: rgba(255, 255, 255, 0.35);
+    }
+    .drag-handle:active,
+    .draggable-module.is-dragging .drag-handle {
+      cursor: grabbing;
+      opacity: 1;
+      transform: scale(1.06);
+    }
+    @media (hover: none) and (pointer: coarse) {
+      .drag-handle {
+        opacity: 0.75;
+      }
+    }
+    .grip-dots-svg {
+      pointer-events: none;
+    }
+
+    /* Dynamic Crosshair */
+    #chart-crosshair-h, #chart-crosshair-v {
+      pointer-events: none;
+      transition: opacity 120ms ease;
+    }
+
+    /* Mobile Sheet Adaptation for Contacts */
+    @media (max-width: 760px) {
+      .mobile-bottom-sheet {
+        position: fixed !important;
+        left: 12px !important;
+        right: 12px !important;
+        top: auto !important;
+        bottom: 78px !important;
+        width: calc(100% - 24px) !important;
+        max-width: none !important;
+      }
+      .mobile-bottom-sheet > div {
+        width: 100% !important;
+      }
+    }
+  </style>
+</head>
+<body class="h-full w-full overflow-hidden select-none bg-[#F7F8F6] text-on-surface font-body-md antialiased relative">
+<!-- ========================================================================= -->
+<!-- 1. FULL VIEWPORT IMMERSIVE WALLPAPER CANVAS WITH NATIVE PAN & ZOOM        -->
+<!-- ========================================================================= -->
+<div class="absolute inset-0 w-full h-full z-0 overflow-hidden bg-[#F7F8F6]" id="chart-viewport">
+<svg class="w-full h-full block select-none" id="wallpaper-chart-svg" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<!-- Candlestick Gradients -->
+<lineargradient id="bullCandleGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#10b981"></stop>
+<stop offset="100%" stop-color="#059669"></stop>
+</lineargradient>
+<lineargradient id="bearCandleGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#f43f5e"></stop>
+<stop offset="100%" stop-color="#e11d48"></stop>
+</lineargradient>
+<lineargradient id="volBullGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#10b981" stop-opacity="0.28"></stop>
+<stop offset="100%" stop-color="#10b981" stop-opacity="0.05"></stop>
+</lineargradient>
+<lineargradient id="volBearGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#f43f5e" stop-opacity="0.28"></stop>
+<stop offset="100%" stop-color="#f43f5e" stop-opacity="0.05"></stop>
+</lineargradient>
+</defs>
+<!-- Interactive Layer Group (Panned and Scaled dynamically) -->
+<g id="chart-transform-group">
+<!-- Ambient Grid Background -->
+<g id="chart-grid-group" opacity="0.65" stroke="#e2e8f0" stroke-dasharray="2 4" stroke-width="1"></g>
+<!-- Monday High & Low Tinted Band (Light blue rgba(56, 189, 248, 0.08)) -->
+<rect fill="rgba(56, 189, 248, 0.08)" height="280" id="monday-range-band" width="8000" x="-2000" y="290"></rect>
+<!-- Monday Anchor Marker Highlight -->
+<rect fill="#0284c7" fill-opacity="0.04" height="280" width="220" x="180" y="290"></rect>
+<line opacity="0.35" stroke="#0ea5e9" stroke-dasharray="3 3" stroke-width="1.5" x1="180" x2="180" y1="-1000" y2="3000"></line>
+<text fill="#0284c7" font-size="11" font-weight="600" opacity="0.85" x="186" y="280">周一定界起点 00:00 EST</text>
+<!-- 1. Upper 1.618 Expansion Line (Green #10b981, 1.5px solid) -->
+<g id="upper-1618-group">
+<line opacity="1" stroke="#10b981" stroke-width="1.5" x1="-2000" x2="6000" y1="118" y2="118"></line>
+<text fill="#10b981" font-size="12" font-weight="700" x="1170" y="112">触及 +1.618 扩展线</text>
+</g>
+<!-- 2. Monday High Line (Apple Blue #0071e3, 1.5px solid) -->
+<g id="monday-high-group">
+<line opacity="1" stroke="#0071e3" stroke-width="1.5" x1="-2000" x2="6000" y1="290" y2="290"></line>
+<text fill="#0071e3" font-size="11" font-weight="600" x="60" y="284">周一高点 (Monday High)</text>
+</g>
+<!-- Optional Internal Fibs (0.5 EQ / 0.618 / 0.705) -->
+<g class="transition-opacity duration-300" id="internal-fibs-group" opacity="0">
+<line opacity="0.7" stroke="#94a3b8" stroke-dasharray="3 3" stroke-width="1" x1="-2000" x2="6000" y1="372" y2="372"></line>
+<line opacity="0.75" stroke="#0ea5e9" stroke-dasharray="4 2" stroke-width="1.2" x1="-2000" x2="6000" y1="418" y2="418"></line>
+<line opacity="0.85" stroke="#64748b" stroke-dasharray="4 3" stroke-width="1.5" x1="-2000" x2="6000" y1="430" y2="430"></line>
+<text fill="#64748b" font-size="11" font-weight="600" x="60" y="425">中间平衡位 0.5 EQ</text>
+</g>
+<!-- 3. Monday Low Line (Apple Blue #0071e3, 1.5px solid) -->
+<g id="monday-low-group">
+<line opacity="1" stroke="#0071e3" stroke-width="1.5" x1="-2000" x2="6000" y1="570" y2="570"></line>
+<text fill="#0071e3" font-size="11" font-weight="600" x="60" y="564">周一低点 (Monday Low)</text>
+</g>
+<!-- 4. Lower 1.618 Expansion Line (Rose Red #f43f5e, 1.5px solid) -->
+<g id="lower-1618-group">
+<line opacity="1" stroke="#f43f5e" stroke-width="1.5" x1="-2000" x2="6000" y1="742" y2="742"></line>
+<text fill="#f43f5e" font-size="12" font-weight="700" x="1170" y="736">支撑 -1.618 扩展线</text>
+</g>
+<!-- Volume Bars Layer (~160 bars) -->
+<g id="volume-bars-layer" opacity="0.85"></g>
+<!-- Candlesticks Sequence Layer (~160 candles) -->
+<g id="candlesticks-layer"></g>
+<!-- Touch Point Indicator for 1.618 -->
+<g id="touch-highlight-circle">
+<circle cx="1292" cy="118" fill="none" opacity="0.8" r="8" stroke="#10b981" stroke-width="2"></circle>
+<circle cx="1292" cy="118" fill="#10b981" r="3.5"></circle>
+</g>
+<!-- Current Price Forming Dash Line -->
+<line id="live-price-dash" opacity="0.65" stroke="#0071e3" stroke-dasharray="4 3" stroke-width="1" x1="-2000" x2="6000" y1="132" y2="132"></line>
+</g>
+<!-- Dynamic Crosshairs -->
+<line id="chart-crosshair-h" opacity="0" stroke="#64748b" stroke-dasharray="3 3" stroke-width="1" x1="0" x2="1440" y1="0" y2="0"></line>
+<line id="chart-crosshair-v" opacity="0" stroke="#64748b" stroke-dasharray="3 3" stroke-width="1" x1="0" x2="0" y1="0" y2="900"></line>
+<!-- Fixed Right Price Scale Container -->
+<g class="cursor-ns-resize" id="price-axis-group" title="双击价格轴复位视图">
+<rect backdrop-filter="blur(4px)" fill="rgba(247, 248, 246, 0.7)" height="900" id="price-axis-bg" width="92" x="1348" y="0"></rect>
+<line id="price-axis-line" stroke="#cbd5e1" stroke-width="1" x1="1348" x2="1348" y1="0" y2="900"></line>
+<!-- Static / Level Badges -->
+<!-- Upper 1.618 Badge -->
+<g id="badge-upper-1618">
+<rect fill="#10b981" height="22" rx="4" width="80" x="1352" y="107"></rect>
+<text class="tabular-nums" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle" x="1392" y="122">$97,024.80</text>
+</g>
+<!-- Monday High Badge -->
+<g id="badge-monday-high">
+<rect fill="#0071e3" fill-opacity="0.15" height="22" rx="4" stroke="#0071e3" stroke-width="1" width="80" x="1352" y="279"></rect>
+<text class="tabular-nums" fill="#0071e3" font-size="11" font-weight="700" text-anchor="middle" x="1392" y="294">$93,950.00</text>
+</g>
+<!-- Current Live Price Badge -->
+<g id="badge-live-price">
+<rect fill="#0071e3" height="20" rx="4" width="80" x="1352" y="122"></rect>
+<text class="tabular-nums" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle" x="1392" y="136">$96,420.50</text>
+</g>
+<!-- Monday Low Badge -->
+<g id="badge-monday-low">
+<rect fill="#0071e3" fill-opacity="0.15" height="22" rx="4" stroke="#0071e3" stroke-width="1" width="80" x="1352" y="559"></rect>
+<text class="tabular-nums" fill="#0071e3" font-size="11" font-weight="700" text-anchor="middle" x="1392" y="574">$88,975.20</text>
+</g>
+<!-- Lower 1.618 Badge -->
+<g id="badge-lower-1618">
+<rect fill="#f43f5e" height="22" rx="4" width="80" x="1352" y="731"></rect>
+<text class="tabular-nums" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle" x="1392" y="746">$85,900.80</text>
+</g>
+<!-- Price Tick Labels -->
+<g class="tabular-nums" fill="#64748b" font-size="10" font-weight="600" id="price-ticks-group" text-anchor="start">
+<text x="1356" y="60">98,500.00</text>
+<text x="1356" y="210">95,200.00</text>
+<text x="1356" y="340">93,100.00</text>
+<text x="1356" y="470">90,800.00</text>
+<text x="1356" y="650">87,200.00</text>
+<text x="1356" y="820">84,500.00</text>
+</g>
+<!-- Dynamic Price Axis Cursor Pill -->
+<g id="crosshair-price-pill" opacity="0">
+<rect fill="#1e293b" height="20" id="crosshair-price-rect" rx="4" width="80" x="1352" y="0"></rect>
+<text class="tabular-nums" fill="#ffffff" font-size="10" font-weight="700" id="crosshair-price-text" text-anchor="middle" x="1392" y="14">$96,420.50</text>
+</g>
+</g>
+<!-- Bottom Fixed Time Scale -->
+<g id="time-axis-group">
+<line stroke="#e2e8f0" stroke-width="1" x1="0" x2="1440" y1="875" y2="875"></line>
+<g class="tabular-nums" fill="#94a3b8" font-size="10" font-weight="500" id="time-axis-ticks" text-anchor="middle">
+<text x="180" y="890">05-19 00:00 (Mon)</text>
+<text x="360" y="890">05-19 16:00</text>
+<text x="540" y="890">05-20 08:00</text>
+<text x="720" y="890">05-20 20:00</text>
+<text x="920" y="890">05-21 06:00</text>
+<text x="1100" y="890">05-21 14:00</text>
+<text x="1292" y="890">05-21 16:30 (触达)</text>
+</g>
+<!-- Dynamic Time Axis Cursor Pill -->
+<g id="crosshair-time-pill" opacity="0">
+<rect fill="#1e293b" height="18" id="crosshair-time-rect" rx="4" width="94" x="0" y="878"></rect>
+<text class="tabular-nums" fill="#ffffff" font-size="10" font-weight="600" id="crosshair-time-text" text-anchor="middle" x="47" y="891">05-21 16:30</text>
+</g>
+</g>
+</svg>
+</div>
+<!-- ========================================================================= -->
+<!-- 2. REPOSITIONABLE APPLE TRANSLUCENT FROSTED GLASS MODULES                  -->
+<!-- ========================================================================= -->
+<main class="absolute inset-0 z-10 pointer-events-none w-full h-full overflow-hidden" id="workspace-container">
+<!-- MODULE 1: Navigation Pill (Top-Left) -->
+<header class="draggable-module pointer-events-auto select-none" data-default-left="24" data-default-top="20" data-module-id="nav-pill" id="module-nav-pill" style="left: 24px; top: 20px;">
+<div class="apple-glass-pill pl-2 pr-3.5 py-1.5 rounded-full flex items-center gap-2 group hover:shadow-md transition-shadow">
+<!-- 6-Dot Grip Handle -->
+<button aria-label="拖拽移动导航药丸 (双击或按R复位)" class="drag-handle tap-spring focus:outline-none" title="按住拖拽 · 双击复位" type="button">
+<svg class="grip-dots-svg w-3.5 h-3.5 fill-slate-700" viewbox="0 0 10 14">
+<circle cx="2" cy="2" r="1.25"></circle>
+<circle cx="8" cy="2" r="1.25"></circle>
+<circle cx="2" cy="7" r="1.25"></circle>
+<circle cx="8" cy="7" r="1.25"></circle>
+<circle cx="2" cy="12" r="1.25"></circle>
+<circle cx="8" cy="12" r="1.25"></circle>
+</svg>
+</button>
+<a class="flex items-center gap-2 text-on-surface hover:text-primary transition-colors focus:outline-none" href="#market-overview">
+<span class="material-symbols-outlined text-[17px] text-outline group-hover:text-primary transition-colors">arrow_back</span>
+<span class="font-headline-sm text-[13px] tracking-tight font-bold">SPIKE · 周一1.618</span>
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bull animate-pulse"></span>
+</a>
+</div>
+</header>
+<!-- DESKTOP GESTURE HINT (Top Center - Subtle Apple Glass Pill, visible on desktop, hidden on mobile) -->
+<div class="hidden md:flex draggable-module pointer-events-auto select-none" data-default-center="true" data-default-top="20" data-module-id="gesture-hint" id="module-gesture-hint" style="top: 20px;">
+<div class="apple-glass-pill pl-2.5 pr-4 py-1.5 rounded-full flex items-center gap-2 shadow-sm text-slate-700 font-label-md text-[12px] font-semibold border border-white/80">
+<button aria-label="拖拽移动提示 (双击复位)" class="drag-handle tap-spring focus:outline-none" title="按住拖拽 · 双击复位" type="button">
+<svg class="grip-dots-svg w-3 h-3 fill-slate-600" viewbox="0 0 10 14">
+<circle cx="2" cy="2" r="1.25"></circle>
+<circle cx="8" cy="2" r="1.25"></circle>
+<circle cx="2" cy="7" r="1.25"></circle>
+<circle cx="8" cy="7" r="1.25"></circle>
+<circle cx="2" cy="12" r="1.25"></circle>
+<circle cx="8" cy="12" r="1.25"></circle>
+</svg>
+</button>
+<span>💡 拖动平移 · 滚轮缩放 · 双击价格轴复位</span>
+</div>
+</div>
+<!-- MODULE 2: Symbol & Price Card (Top-Left under Nav) -->
+<section aria-label="行情核心数据卡片" class="draggable-module pointer-events-auto select-none" data-default-left="24" data-default-top="76" data-module-id="price-card" id="module-price-card" style="left: 24px; top: 76px;">
+<div class="apple-glass-card p-4 rounded-[24px] w-[285px] sm:w-[320px] transition-all duration-200">
+<!-- Top Line: Handle + Title + Badge -->
+<div class="flex items-center justify-between gap-2 mb-2">
+<div class="flex items-center gap-1.5">
+<!-- 6-Dot Grip Handle -->
+<button aria-label="拖拽移动行情卡片 (双击或按R复位)" class="drag-handle tap-spring focus:outline-none mr-0.5" title="按住拖拽 · 双击复位" type="button">
+<svg class="grip-dots-svg w-3.5 h-3.5 fill-slate-700" viewbox="0 0 10 14">
+<circle cx="2" cy="2" r="1.25"></circle>
+<circle cx="8" cy="2" r="1.25"></circle>
+<circle cx="2" cy="7" r="1.25"></circle>
+<circle cx="8" cy="7" r="1.25"></circle>
+<circle cx="2" cy="12" r="1.25"></circle>
+<circle cx="8" cy="12" r="1.25"></circle>
+</svg>
+</button>
+<span class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface" id="hero-symbol-title">BTCUSDT</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high/70 text-on-surface-variant font-label-sm text-[10px] tracking-wider uppercase backdrop-blur-sm">PERP</span>
+</div>
+<!-- Touch Direction Badge -->
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/15 text-chart-bull font-label-sm text-[11px] border border-chart-bull/20 font-bold backdrop-blur-sm" id="hero-touch-badge">
+<span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">arrow_upward</span>
+          触及上沿 1.618
+        </span>
+</div>
+<!-- Price & Gain Metric -->
+<div class="flex items-baseline gap-2.5 mb-2.5 pl-0.5">
+<span class="font-metric-val text-[32px] font-bold text-on-surface tracking-tight tabular-nums drop-shadow-sm" id="hero-price-display">$96,420.50</span>
+<span class="inline-flex items-center text-chart-bull font-headline-sm text-sm font-bold tabular-nums" id="hero-change-display">
+          +1.84%
+        </span>
+</div>
+<!-- Institutional Metadata Split -->
+<div class="pt-2.5 border-t border-outline-variant/30 flex items-center justify-between text-outline font-body-sm text-[11px]">
+<span class="flex items-center gap-1.5" id="hero-trigger-time">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+          8m前触发
+        </span>
+<span>纽约自然周定界 (W-1)</span>
+</div>
+</div>
+</section>
+<!-- MODULE 3: Touched-Contract List Panel / Launcher (Top-Right / Collapses to bottom on mobile) -->
+<aside aria-label="最新触价标的列表" class="draggable-module mobile-bottom-sheet pointer-events-auto select-none" data-default-right="24" data-default-top="20" data-module-id="contracts-card" id="module-contracts-card" style="right: 24px; top: 20px;">
+<div class="apple-glass-card rounded-[24px] overflow-hidden w-[300px] transition-all duration-200">
+<!-- Header & Action Bar -->
+<div class="p-3 pb-2.5 border-b border-outline-variant/25 flex items-center justify-between gap-1.5">
+<div class="flex items-center gap-1">
+<!-- 6-Dot Grip Handle -->
+<button aria-label="拖拽移动触达列表 (双击或按R复位)" class="drag-handle tap-spring focus:outline-none" title="按住拖拽 · 双击复位" type="button">
+<svg class="grip-dots-svg w-3.5 h-3.5 fill-slate-700" viewbox="0 0 10 14">
+<circle cx="2" cy="2" r="1.25"></circle>
+<circle cx="8" cy="2" r="1.25"></circle>
+<circle cx="2" cy="7" r="1.25"></circle>
+<circle cx="8" cy="7" r="1.25"></circle>
+<circle cx="2" cy="12" r="1.25"></circle>
+<circle cx="8" cy="12" r="1.25"></circle>
+</svg>
+</button>
+<span class="material-symbols-outlined text-primary text-[17px]">waterfall_chart</span>
+<span class="font-headline-sm text-sm font-bold text-on-surface">触达标的</span>
+<span class="px-1.5 py-0.2 bg-primary-container/15 text-primary rounded-full text-[10px] font-bold" id="contract-count-badge">12</span>
+</div>
+<div class="flex items-center gap-1">
+<!-- Follow Latest Toggle Button (Top header pill) -->
+<button class="tap-spring px-2 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1 bg-primary text-white border border-primary/40 shadow-sm" id="toggle-follow-btn" title="自动切换并锁定全市场最新触发1.618的合约">
+<span class="material-symbols-outlined text-[11px]">bolt</span>
+<span>跟随最新</span>
+</button>
+<!-- Collapse Card Button -->
+<button class="tap-spring p-1 rounded-full text-outline hover:text-on-surface hover:bg-white/40 transition-colors" id="collapse-list-btn" title="折叠/展开标的">
+<span class="material-symbols-outlined text-[18px]" id="collapse-icon">keyboard_arrow_up</span>
+</button>
+</div>
+</div>
+<!-- Collapsible Content Wrapper (300px compact list) -->
+<div class="transition-all duration-200 overflow-hidden flex flex-col" id="contracts-list-body">
+<!-- Search Bar -->
+<div class="px-3 pt-2 pb-1.5"><div class="relative flex items-center bg-white/45 border border-outline-variant/35 rounded-full px-2.5 py-1 transition-all backdrop-blur-sm search-container-unified">
+<span class="material-symbols-outlined text-outline text-[16px] shrink-0 mr-1.5 select-none pointer-events-none">search</span>
+<input autocomplete="off" class="w-full bg-transparent border-none p-0 text-[11px] text-on-surface placeholder-outline search-input-unified" id="symbol-search-input" placeholder="搜索触达标的 (BTC, SOL, ETH)..." spellcheck="false" type="text"/>
+</div></div>
+<!-- Compact Rows (5 Sorted by newest) -->
+<div class="px-2.5 pb-1.5 pt-0.5 border-b border-outline-variant/15 flex items-center gap-1 overflow-x-auto select-none" id="symbol-direction-filters">
+<button class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary text-white shrink-0 tap-spring filter-chip" data-filter="all">全部 (12)</button>
+<button class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/40 hover:bg-white/60 text-on-surface-variant hover:text-on-surface shrink-0 tap-spring filter-chip" data-filter="up">上沿触达 (+1.618)</button>
+<button class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/40 hover:bg-white/60 text-on-surface-variant hover:text-on-surface shrink-0 tap-spring filter-chip" data-filter="down">下沿支撑 (-1.618)</button>
+</div>
+<ul class="divide-y divide-outline-variant/15 px-2 py-1 overflow-y-auto custom-glass-scroll max-h-[calc(100vh-320px)] sm:max-h-[340px]" id="symbol-list-container" style="overscroll-behavior: contain;"><!-- Row 1: BTC (Active Pin) -->
+<li class="symbol-row group flex items-stretch justify-between rounded-xl bg-primary-container/15 border border-primary/25 mb-1 backdrop-blur-sm transition-all" data-change="+1.84%" data-dir="up" data-price="$96,420.50" data-symbol="BTCUSDT">
+<a aria-label="在本机 TradingView 打开 BTC 15 分钟图" class="tv-native-link flex items-center gap-2 pl-2.5 pr-2 py-1.5 flex-1 min-h-[44px] rounded-l-xl hover:bg-white/40 focus:outline-none focus:ring-1 focus:ring-primary transition-all group/link text-left" href="spike-tradingview://open?symbol=BTC-USDT-SWAP&amp;timeframe=15m" title="在本机 TradingView 打开 BTC 15 分钟图">
+<span class="material-symbols-outlined text-[13px] text-primary shrink-0" style="font-variation-settings: 'FILL' 1;">push_pin</span>
+<div class="flex flex-col justify-center">
+<div class="flex items-center gap-1">
+<span class="font-headline-sm text-[12px] font-bold text-on-surface group-hover/link:text-primary group-hover/link:underline transition-colors">BTCUSDT</span>
+<svg class="w-2.5 h-2.5 text-outline group-hover/link:text-primary transition-all group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><line x1="7" x2="17" y1="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+<span class="px-1 py-0.2 rounded text-[9px] font-bold bg-emerald-500/20 text-chart-bull">+1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">8m前 · 触及上沿</div>
+</div>
+</a>
+<button aria-label="切换全屏背景K线至 BTCUSDT" class="symbol-switch-btn tap-spring flex flex-col items-end justify-center pl-2 pr-2.5 py-1.5 min-h-[44px] min-w-[80px] rounded-r-xl hover:bg-white/45 focus:outline-none focus:ring-1 focus:ring-primary transition-all text-right shrink-0" title="切换背景 K 线至 BTCUSDT" type="button">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$96,420.50</div>
+<div class="text-[10px] text-chart-bull font-bold tabular-nums flex items-center gap-0.5">+1.84% <span class="material-symbols-outlined text-[11px]">chevron_right</span></div>
+</button>
+</li>
+<!-- Row 2: SOLUSDT -->
+<li class="symbol-row group flex items-stretch justify-between rounded-xl hover:bg-white/20 transition-all" data-change="+3.22%" data-dir="up" data-price="$182.40" data-symbol="SOLUSDT">
+<a aria-label="在本机 TradingView 打开 SOL 15 分钟图" class="tv-native-link flex items-center gap-2 pl-2.5 pr-2 py-1.5 flex-1 min-h-[44px] rounded-l-xl hover:bg-white/40 focus:outline-none focus:ring-1 focus:ring-primary transition-all group/link text-left" href="spike-tradingview://open?symbol=SOL-USDT-SWAP&amp;timeframe=15m" title="在本机 TradingView 打开 SOL 15 分钟图">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bull ml-1 shrink-0"></span>
+<div class="flex flex-col justify-center">
+<div class="flex items-center gap-1">
+<span class="font-headline-sm text-[12px] font-bold text-on-surface group-hover/link:text-primary group-hover/link:underline transition-colors">SOLUSDT</span>
+<svg class="w-2.5 h-2.5 text-outline group-hover/link:text-primary transition-all group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><line x1="7" x2="17" y1="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+<span class="px-1 py-0.2 rounded text-[9px] font-bold bg-emerald-500/15 text-chart-bull">+1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">14m前 · 触及上沿</div>
+</div>
+</a>
+<button aria-label="切换全屏背景K线至 SOLUSDT" class="symbol-switch-btn tap-spring flex flex-col items-end justify-center pl-2 pr-2.5 py-1.5 min-h-[44px] min-w-[80px] rounded-r-xl hover:bg-white/45 focus:outline-none focus:ring-1 focus:ring-primary transition-all text-right shrink-0" title="切换背景 K 线至 SOLUSDT" type="button">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$182.40</div>
+<div class="text-[10px] text-chart-bull font-bold tabular-nums flex items-center gap-0.5">+3.22% <span class="material-symbols-outlined text-[11px]">chevron_right</span></div>
+</button>
+</li>
+<!-- Row 3: ETHUSDT -->
+<li class="symbol-row group flex items-stretch justify-between rounded-xl hover:bg-white/20 transition-all" data-change="+2.45%" data-dir="up" data-price="$3,485.20" data-symbol="ETHUSDT">
+<a aria-label="在本机 TradingView 打开 ETH 15 分钟图" class="tv-native-link flex items-center gap-2 pl-2.5 pr-2 py-1.5 flex-1 min-h-[44px] rounded-l-xl hover:bg-white/40 focus:outline-none focus:ring-1 focus:ring-primary transition-all group/link text-left" href="spike-tradingview://open?symbol=ETH-USDT-SWAP&amp;timeframe=15m" title="在本机 TradingView 打开 ETH 15 分钟图">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bull ml-1 shrink-0"></span>
+<div class="flex flex-col justify-center">
+<div class="flex items-center gap-1">
+<span class="font-headline-sm text-[12px] font-bold text-on-surface group-hover/link:text-primary group-hover/link:underline transition-colors">ETHUSDT</span>
+<svg class="w-2.5 h-2.5 text-outline group-hover/link:text-primary transition-all group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><line x1="7" x2="17" y1="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+<span class="px-1 py-0.2 rounded text-[9px] font-bold bg-emerald-500/15 text-chart-bull">+1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">25m前 · 上沿探顶</div>
+</div>
+</a>
+<button aria-label="切换全屏背景K线至 ETHUSDT" class="symbol-switch-btn tap-spring flex flex-col items-end justify-center pl-2 pr-2.5 py-1.5 min-h-[44px] min-w-[80px] rounded-r-xl hover:bg-white/45 focus:outline-none focus:ring-1 focus:ring-primary transition-all text-right shrink-0" title="切换背景 K 线至 ETHUSDT" type="button">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$3,485.20</div>
+<div class="text-[10px] text-chart-bull font-bold tabular-nums flex items-center gap-0.5">+2.45% <span class="material-symbols-outlined text-[11px]">chevron_right</span></div>
+</button>
+</li>
+<!-- Row 4: PEPEUSDT -->
+<li class="symbol-row group flex items-stretch justify-between rounded-xl hover:bg-white/20 transition-all" data-change="+6.81%" data-dir="up" data-price="$0.0000142" data-symbol="PEPEUSDT">
+<a aria-label="在本机 TradingView 打开 PEPE 15 分钟图" class="tv-native-link flex items-center gap-2 pl-2.5 pr-2 py-1.5 flex-1 min-h-[44px] rounded-l-xl hover:bg-white/40 focus:outline-none focus:ring-1 focus:ring-primary transition-all group/link text-left" href="spike-tradingview://open?symbol=PEPE-USDT-SWAP&amp;timeframe=15m" title="在本机 TradingView 打开 PEPE 15 分钟图">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bull ml-1 shrink-0"></span>
+<div class="flex flex-col justify-center">
+<div class="flex items-center gap-1">
+<span class="font-headline-sm text-[12px] font-bold text-on-surface group-hover/link:text-primary group-hover/link:underline transition-colors">PEPEUSDT</span>
+<svg class="w-2.5 h-2.5 text-outline group-hover/link:text-primary transition-all group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><line x1="7" x2="17" y1="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+<span class="px-1 py-0.2 rounded text-[9px] font-bold bg-emerald-500/15 text-chart-bull">+1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">05-21 11:05 · 上沿</div>
+</div>
+</a>
+<button aria-label="切换全屏背景K线至 PEPEUSDT" class="symbol-switch-btn tap-spring flex flex-col items-end justify-center pl-2 pr-2.5 py-1.5 min-h-[44px] min-w-[80px] rounded-r-xl hover:bg-white/45 focus:outline-none focus:ring-1 focus:ring-primary transition-all text-right shrink-0" title="切换背景 K 线至 PEPEUSDT" type="button">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$0.0000142</div>
+<div class="text-[10px] text-chart-bull font-bold tabular-nums flex items-center gap-0.5">+6.81% <span class="material-symbols-outlined text-[11px]">chevron_right</span></div>
+</button>
+</li>
+<!-- Row 5: SUIUSDT -->
+<li class="symbol-row group flex items-stretch justify-between rounded-xl hover:bg-white/20 transition-all" data-change="-2.15%" data-dir="down" data-price="$3.2840" data-symbol="SUIUSDT">
+<a aria-label="在本机 TradingView 打开 SUI 15 分钟图" class="tv-native-link flex items-center gap-2 pl-2.5 pr-2 py-1.5 flex-1 min-h-[44px] rounded-l-xl hover:bg-white/40 focus:outline-none focus:ring-1 focus:ring-primary transition-all group/link text-left" href="spike-tradingview://open?symbol=SUI-USDT-SWAP&amp;timeframe=15m" title="在本机 TradingView 打开 SUI 15 分钟图">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bear ml-1 shrink-0"></span>
+<div class="flex flex-col justify-center">
+<div class="flex items-center gap-1">
+<span class="font-headline-sm text-[12px] font-bold text-on-surface group-hover/link:text-primary group-hover/link:underline transition-colors">SUIUSDT</span>
+<svg class="w-2.5 h-2.5 text-outline group-hover/link:text-primary transition-all group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><line x1="7" x2="17" y1="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+<span class="px-1 py-0.2 rounded text-[9px] font-bold bg-rose-500/15 text-chart-bear">-1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">05-21 08:41 · 触及下沿</div>
+</div>
+</a>
+<button aria-label="切换全屏背景K线至 SUIUSDT" class="symbol-switch-btn tap-spring flex flex-col items-end justify-center pl-2 pr-2.5 py-1.5 min-h-[44px] min-w-[80px] rounded-r-xl hover:bg-white/45 focus:outline-none focus:ring-1 focus:ring-primary transition-all text-right shrink-0" title="切换背景 K 线至 SUIUSDT" type="button">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$3.2840</div>
+<div class="text-[10px] text-chart-bear font-bold tabular-nums flex items-center gap-0.5">-2.15% <span class="material-symbols-outlined text-[11px]">chevron_right</span></div>
+</button>
+</li>
+<!-- Row 6: TIAUSDT -->
+<li class="symbol-row group flex items-stretch justify-between rounded-xl hover:bg-white/20 transition-all" data-change="-4.30%" data-dir="down" data-price="$5.1120" data-symbol="TIAUSDT">
+<a aria-label="在本机 TradingView 打开 TIA 15 分钟图" class="tv-native-link flex items-center gap-2 pl-2.5 pr-2 py-1.5 flex-1 min-h-[44px] rounded-l-xl hover:bg-white/40 focus:outline-none focus:ring-1 focus:ring-primary transition-all group/link text-left" href="spike-tradingview://open?symbol=TIA-USDT-SWAP&amp;timeframe=15m" title="在本机 TradingView 打开 TIA 15 分钟图">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bear ml-1 shrink-0"></span>
+<div class="flex flex-col justify-center">
+<div class="flex items-center gap-1">
+<span class="font-headline-sm text-[12px] font-bold text-on-surface group-hover/link:text-primary group-hover/link:underline transition-colors">TIAUSDT</span>
+<svg class="w-2.5 h-2.5 text-outline group-hover/link:text-primary transition-all group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><line x1="7" x2="17" y1="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+<span class="px-1 py-0.2 rounded text-[9px] font-bold bg-rose-500/15 text-chart-bear">-1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">05-20 22:18 · 下沿探底</div>
+</div>
+</a>
+<button aria-label="切换全屏背景K线至 TIAUSDT" class="symbol-switch-btn tap-spring flex flex-col items-end justify-center pl-2 pr-2.5 py-1.5 min-h-[44px] min-w-[80px] rounded-r-xl hover:bg-white/45 focus:outline-none focus:ring-1 focus:ring-primary transition-all text-right shrink-0" title="切换背景 K 线至 TIAUSDT" type="button">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$5.1120</div>
+<div class="text-[10px] text-chart-bear font-bold tabular-nums flex items-center gap-0.5">-4.30% <span class="material-symbols-outlined text-[11px]">chevron_right</span></div>
+</button>
+</li>
+<!-- Row 7: AVAXUSDT -->
+<li class="symbol-row group flex items-stretch justify-between rounded-xl hover:bg-white/20 transition-all" data-change="+4.12%" data-dir="up" data-price="$38.45" data-symbol="AVAXUSDT">
+<a aria-label="在本机 TradingView 打开 AVAX 15 分钟图" class="tv-native-link flex items-center gap-2 pl-2.5 pr-2 py-1.5 flex-1 min-h-[44px] rounded-l-xl hover:bg-white/40 focus:outline-none focus:ring-1 focus:ring-primary transition-all group/link text-left" href="spike-tradingview://open?symbol=AVAX-USDT-SWAP&amp;timeframe=15m" title="在本机 TradingView 打开 AVAX 15 分钟图">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bull ml-1 shrink-0"></span>
+<div class="flex flex-col justify-center">
+<div class="flex items-center gap-1">
+<span class="font-headline-sm text-[12px] font-bold text-on-surface group-hover/link:text-primary group-hover/link:underline transition-colors">AVAXUSDT</span>
+<svg class="w-2.5 h-2.5 text-outline group-hover/link:text-primary transition-all group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><line x1="7" x2="17" y1="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+<span class="px-1 py-0.2 rounded text-[9px] font-bold bg-emerald-500/15 text-chart-bull">+1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">05-20 19:30 · 突破上沿</div>
+</div>
+</a>
+<button aria-label="切换全屏背景K线至 AVAXUSDT" class="symbol-switch-btn tap-spring flex flex-col items-end justify-center pl-2 pr-2.5 py-1.5 min-h-[44px] min-w-[80px] rounded-r-xl hover:bg-white/45 focus:outline-none focus:ring-1 focus:ring-primary transition-all text-right shrink-0" title="切换背景 K 线至 AVAXUSDT" type="button">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$38.45</div>
+<div class="text-[10px] text-chart-bull font-bold tabular-nums flex items-center gap-0.5">+4.12% <span class="material-symbols-outlined text-[11px]">chevron_right</span></div>
+</button>
+</li>
+<!-- Row 8: NEARUSDT -->
+<li class="symbol-row group flex items-stretch justify-between rounded-xl hover:bg-white/20 transition-all" data-change="+5.60%" data-dir="up" data-price="$7.240" data-symbol="NEARUSDT">
+<a aria-label="在本机 TradingView 打开 NEAR 15 分钟图" class="tv-native-link flex items-center gap-2 pl-2.5 pr-2 py-1.5 flex-1 min-h-[44px] rounded-l-xl hover:bg-white/40 focus:outline-none focus:ring-1 focus:ring-primary transition-all group/link text-left" href="spike-tradingview://open?symbol=NEAR-USDT-SWAP&amp;timeframe=15m" title="在本机 TradingView 打开 NEAR 15 分钟图">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bull ml-1 shrink-0"></span>
+<div class="flex flex-col justify-center">
+<div class="flex items-center gap-1">
+<span class="font-headline-sm text-[12px] font-bold text-on-surface group-hover/link:text-primary group-hover/link:underline transition-colors">NEARUSDT</span>
+<svg class="w-2.5 h-2.5 text-outline group-hover/link:text-primary transition-all group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><line x1="7" x2="17" y1="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+<span class="px-1 py-0.2 rounded text-[9px] font-bold bg-emerald-500/15 text-chart-bull">+1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">05-20 15:45 · 突破上沿</div>
+</div>
+</a>
+<button aria-label="切换全屏背景K线至 NEARUSDT" class="symbol-switch-btn tap-spring flex flex-col items-end justify-center pl-2 pr-2.5 py-1.5 min-h-[44px] min-w-[80px] rounded-r-xl hover:bg-white/45 focus:outline-none focus:ring-1 focus:ring-primary transition-all text-right shrink-0" title="切换背景 K 线至 NEARUSDT" type="button">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$7.240</div>
+<div class="text-[10px] text-chart-bull font-bold tabular-nums flex items-center gap-0.5">+5.60% <span class="material-symbols-outlined text-[11px]">chevron_right</span></div>
+</button>
+</li>
+<!-- Row 9: DOGEUSDT -->
+<li class="symbol-row group flex items-stretch justify-between rounded-xl hover:bg-white/20 transition-all" data-change="-1.85%" data-dir="down" data-price="$0.1482" data-symbol="DOGEUSDT">
+<a aria-label="在本机 TradingView 打开 DOGE 15 分钟图" class="tv-native-link flex items-center gap-2 pl-2.5 pr-2 py-1.5 flex-1 min-h-[44px] rounded-l-xl hover:bg-white/40 focus:outline-none focus:ring-1 focus:ring-primary transition-all group/link text-left" href="spike-tradingview://open?symbol=DOGE-USDT-SWAP&amp;timeframe=15m" title="在本机 TradingView 打开 DOGE 15 分钟图">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bear ml-1 shrink-0"></span>
+<div class="flex flex-col justify-center">
+<div class="flex items-center gap-1">
+<span class="font-headline-sm text-[12px] font-bold text-on-surface group-hover/link:text-primary group-hover/link:underline transition-colors">DOGEUSDT</span>
+<svg class="w-2.5 h-2.5 text-outline group-hover/link:text-primary transition-all group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><line x1="7" x2="17" y1="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+<span class="px-1 py-0.2 rounded text-[9px] font-bold bg-rose-500/15 text-chart-bear">-1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">05-20 12:10 · 触及下沿</div>
+</div>
+</a>
+<button aria-label="切换全屏背景K线至 DOGEUSDT" class="symbol-switch-btn tap-spring flex flex-col items-end justify-center pl-2 pr-2.5 py-1.5 min-h-[44px] min-w-[80px] rounded-r-xl hover:bg-white/45 focus:outline-none focus:ring-1 focus:ring-primary transition-all text-right shrink-0" title="切换背景 K 线至 DOGEUSDT" type="button">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$0.1482</div>
+<div class="text-[10px] text-chart-bear font-bold tabular-nums flex items-center gap-0.5">-1.85% <span class="material-symbols-outlined text-[11px]">chevron_right</span></div>
+</button>
+</li>
+<!-- Row 10: LINKUSDT -->
+<li class="symbol-row group flex items-stretch justify-between rounded-xl hover:bg-white/20 transition-all" data-change="+3.70%" data-dir="up" data-price="$17.80" data-symbol="LINKUSDT">
+<a aria-label="在本机 TradingView 打开 LINK 15 分钟图" class="tv-native-link flex items-center gap-2 pl-2.5 pr-2 py-1.5 flex-1 min-h-[44px] rounded-l-xl hover:bg-white/40 focus:outline-none focus:ring-1 focus:ring-primary transition-all group/link text-left" href="spike-tradingview://open?symbol=LINK-USDT-SWAP&amp;timeframe=15m" title="在本机 TradingView 打开 LINK 15 分钟图">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bull ml-1 shrink-0"></span>
+<div class="flex flex-col justify-center">
+<div class="flex items-center gap-1">
+<span class="font-headline-sm text-[12px] font-bold text-on-surface group-hover/link:text-primary group-hover/link:underline transition-colors">LINKUSDT</span>
+<svg class="w-2.5 h-2.5 text-outline group-hover/link:text-primary transition-all group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><line x1="7" x2="17" y1="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+<span class="px-1 py-0.2 rounded text-[9px] font-bold bg-emerald-500/15 text-chart-bull">+1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">05-19 23:15 · 触及上沿</div>
+</div>
+</a>
+<button aria-label="切换全屏背景K线至 LINKUSDT" class="symbol-switch-btn tap-spring flex flex-col items-end justify-center pl-2 pr-2.5 py-1.5 min-h-[44px] min-w-[80px] rounded-r-xl hover:bg-white/45 focus:outline-none focus:ring-1 focus:ring-primary transition-all text-right shrink-0" title="切换背景 K 线至 LINKUSDT" type="button">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$17.80</div>
+<div class="text-[10px] text-chart-bull font-bold tabular-nums flex items-center gap-0.5">+3.70% <span class="material-symbols-outlined text-[11px]">chevron_right</span></div>
+</button>
+</li>
+<!-- Row 11: ARBUSDT -->
+<li class="symbol-row group flex items-stretch justify-between rounded-xl hover:bg-white/20 transition-all" data-change="-3.14%" data-dir="down" data-price="$0.9850" data-symbol="ARBUSDT">
+<a aria-label="在本机 TradingView 打开 ARB 15 分钟图" class="tv-native-link flex items-center gap-2 pl-2.5 pr-2 py-1.5 flex-1 min-h-[44px] rounded-l-xl hover:bg-white/40 focus:outline-none focus:ring-1 focus:ring-primary transition-all group/link text-left" href="spike-tradingview://open?symbol=ARB-USDT-SWAP&amp;timeframe=15m" title="在本机 TradingView 打开 ARB 15 分钟图">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bear ml-1 shrink-0"></span>
+<div class="flex flex-col justify-center">
+<div class="flex items-center gap-1">
+<span class="font-headline-sm text-[12px] font-bold text-on-surface group-hover/link:text-primary group-hover/link:underline transition-colors">ARBUSDT</span>
+<svg class="w-2.5 h-2.5 text-outline group-hover/link:text-primary transition-all group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><line x1="7" x2="17" y1="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+<span class="px-1 py-0.2 rounded text-[9px] font-bold bg-rose-500/15 text-chart-bear">-1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">05-19 18:20 · 下沿探底</div>
+</div>
+</a>
+<button aria-label="切换全屏背景K线至 ARBUSDT" class="symbol-switch-btn tap-spring flex flex-col items-end justify-center pl-2 pr-2.5 py-1.5 min-h-[44px] min-w-[80px] rounded-r-xl hover:bg-white/45 focus:outline-none focus:ring-1 focus:ring-primary transition-all text-right shrink-0" title="切换背景 K 线至 ARBUSDT" type="button">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$0.9850</div>
+<div class="text-[10px] text-chart-bear font-bold tabular-nums flex items-center gap-0.5">-3.14% <span class="material-symbols-outlined text-[11px]">chevron_right</span></div>
+</button>
+</li>
+<!-- Row 12: OPUSDT -->
+<li class="symbol-row group flex items-stretch justify-between rounded-xl hover:bg-white/20 transition-all" data-change="+2.88%" data-dir="up" data-price="$2.152" data-symbol="OPUSDT">
+<a aria-label="在本机 TradingView 打开 OP 15 分钟图" class="tv-native-link flex items-center gap-2 pl-2.5 pr-2 py-1.5 flex-1 min-h-[44px] rounded-l-xl hover:bg-white/40 focus:outline-none focus:ring-1 focus:ring-primary transition-all group/link text-left" href="spike-tradingview://open?symbol=OP-USDT-SWAP&amp;timeframe=15m" title="在本机 TradingView 打开 OP 15 分钟图">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bull ml-1 shrink-0"></span>
+<div class="flex flex-col justify-center">
+<div class="flex items-center gap-1">
+<span class="font-headline-sm text-[12px] font-bold text-on-surface group-hover/link:text-primary group-hover/link:underline transition-colors">OPUSDT</span>
+<svg class="w-2.5 h-2.5 text-outline group-hover/link:text-primary transition-all group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><line x1="7" x2="17" y1="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+<span class="px-1 py-0.2 rounded text-[9px] font-bold bg-emerald-500/15 text-chart-bull">+1.618</span>
+</div>
+<div class="text-[10px] text-outline font-medium">05-19 14:02 · 触及上沿</div>
+</div>
+</a>
+<button aria-label="切换全屏背景K线至 OPUSDT" class="symbol-switch-btn tap-spring flex flex-col items-end justify-center pl-2 pr-2.5 py-1.5 min-h-[44px] min-w-[80px] rounded-r-xl hover:bg-white/45 focus:outline-none focus:ring-1 focus:ring-primary transition-all text-right shrink-0" title="切换背景 K 线至 OPUSDT" type="button">
+<div class="font-headline-sm text-[12px] font-bold tabular-nums text-on-surface">$2.152</div>
+<div class="text-[10px] text-chart-bull font-bold tabular-nums flex items-center gap-0.5">+2.88% <span class="material-symbols-outlined text-[11px]">chevron_right</span></div>
+</button>
+</li></ul>
+<!-- Status Footer -->
+<div class="p-1.5 border-t border-outline-variant/20 bg-white/20 text-center"><div class="flex items-center justify-between text-[10px] text-outline font-medium px-1"><span>币种 ↗ 本机 TradingView · 右侧切换背景</span><span class="tabular-nums text-slate-500">共 12 标的</span></div></div>
+</div>
+</div>
+</aside>
+<!-- MODULE 4: Lower-Left NY Timestamp Badge -->
+<aside aria-label="定界基准与延迟状态" class="draggable-module pointer-events-auto select-none" data-default-bottom="24" data-default-left="24" data-module-id="timestamp-badge" id="module-timestamp-badge" style="left: 24px; bottom: 24px;">
+<div class="apple-glass-pill pl-2 pr-3 py-1.5 rounded-full flex items-center gap-2 text-outline font-body-sm text-[11px] shadow-sm">
+<!-- 6-Dot Grip Handle -->
+<button aria-label="拖拽移动时间戳标 (双击或按R复位)" class="drag-handle tap-spring focus:outline-none" title="按住拖拽 · 双击复位" type="button">
+<svg class="grip-dots-svg w-3.5 h-3.5 fill-slate-700" viewbox="0 0 10 14">
+<circle cx="2" cy="2" r="1.25"></circle>
+<circle cx="8" cy="2" r="1.25"></circle>
+<circle cx="2" cy="7" r="1.25"></circle>
+<circle cx="8" cy="7" r="1.25"></circle>
+<circle cx="2" cy="12" r="1.25"></circle>
+<circle cx="8" cy="12" r="1.25"></circle>
+</svg>
+</button>
+<span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+<span class="font-medium text-on-surface-variant truncate max-w-[200px] sm:max-w-none">纽约基准 2025-05-19 · 实时监控</span>
+<span class="text-outline-variant/60">|</span>
+<span class="font-semibold text-emerald-600 tabular-nums shrink-0">延迟 18ms</span>
+</div>
+</aside>
+<!-- MODULE 5: Refined Bottom Floating Glass Dock -->
+<nav aria-label="壁纸交互工具栏" class="draggable-module pointer-events-auto select-none" data-default-bottom="24" data-default-center="true" data-module-id="bottom-dock" id="module-bottom-dock" style="bottom: 24px;">
+<div class="apple-glass pl-2 pr-2.5 py-1.5 rounded-full flex items-center gap-1 sm:gap-2 shadow-[0_12px_36px_rgba(15,23,42,0.12)] max-w-[calc(100vw-24px)]">
+<!-- 6-Dot Grip Handle -->
+<button aria-label="拖拽移动控制坞 (双击或按R复位)" class="drag-handle tap-spring focus:outline-none shrink-0" title="按住拖拽 · 双击复位" type="button">
+<svg class="grip-dots-svg w-3.5 h-3.5 fill-slate-700" viewbox="0 0 10 14">
+<circle cx="2" cy="2" r="1.25"></circle>
+<circle cx="8" cy="2" r="1.25"></circle>
+<circle cx="2" cy="7" r="1.25"></circle>
+<circle cx="8" cy="7" r="1.25"></circle>
+<circle cx="2" cy="12" r="1.25"></circle>
+<circle cx="8" cy="12" r="1.25"></circle>
+</svg>
+</button>
+<!-- Timeframe indicator: 15m 定界 -->
+<div class="relative inline-flex items-center shrink-0" id="timeframe-selector-wrapper"><button aria-expanded="true" aria-haspopup="true" aria-label="切换K线定界周期 (当前 15m)" class="tap-spring px-2.5 py-1 rounded-full bg-white/45 hover:bg-white/65 text-on-surface font-label-sm text-[11px] font-bold tracking-wide flex items-center gap-1.5 backdrop-blur-sm border border-white/60 shrink-0 min-h-[32px] sm:min-h-0 cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary" id="dock-timeframe-btn" title="选择K线周期"><span class="material-symbols-outlined text-[13px] text-primary">schedule</span><span class="whitespace-nowrap" id="dock-active-tf-label">15m 定界</span><span class="material-symbols-outlined text-[14px] text-outline transition-transform duration-200 rotate-180" id="tf-chevron-icon">expand_more</span></button><div aria-label="K线周期选项" class="absolute bottom-full left-0 mb-2 apple-glass-card rounded-2xl p-1.5 w-[150px] shadow-[0_16px_36px_rgba(15,23,42,0.16)] flex flex-col gap-0.5 z-50 animate-in fade-in transition-all" id="dock-timeframe-menu" role="menu"><div class="px-2 py-1 text-[10px] font-semibold text-outline tracking-wider uppercase border-b border-outline-variant/20 mb-0.5">选择定界周期</div><button class="tf-menu-option tap-spring w-full text-left px-2.5 py-2 rounded-xl text-[12px] font-medium flex items-center justify-between hover:bg-white/50 text-on-surface min-h-[36px]" data-tf="1m" role="menuitem" type="button"><span>1m (超短线)</span></button><button class="tf-menu-option tap-spring w-full text-left px-2.5 py-2 rounded-xl text-[12px] font-medium flex items-center justify-between hover:bg-white/50 text-on-surface min-h-[36px]" data-tf="5m" role="menuitem" type="button"><span>5m (短线)</span></button><button class="tf-menu-option tap-spring w-full text-left px-2.5 py-2 rounded-xl text-[12px] font-bold flex items-center justify-between bg-primary-container/15 text-primary border border-primary/25 min-h-[36px]" data-tf="15m" role="menuitem" type="button"><span>15m (标准定界)</span><span class="material-symbols-outlined text-[15px] text-primary">check</span></button><button class="tf-menu-option tap-spring w-full text-left px-2.5 py-2 rounded-xl text-[12px] font-medium flex items-center justify-between hover:bg-white/50 text-on-surface min-h-[36px]" data-tf="30m" role="menuitem" type="button"><span>30m (次级定界)</span></button><button class="tf-menu-option tap-spring w-full text-left px-2.5 py-2 rounded-xl text-[12px] font-medium flex items-center justify-between hover:bg-white/50 text-on-surface min-h-[36px]" data-tf="1H" role="menuitem" type="button"><span>1H (小时级别)</span></button><button class="tf-menu-option tap-spring w-full text-left px-2.5 py-2 rounded-xl text-[12px] font-medium flex items-center justify-between hover:bg-white/50 text-on-surface min-h-[36px]" data-tf="4H" role="menuitem" type="button"><span>4H (大结构)</span></button><button class="tf-menu-option tap-spring w-full text-left px-2.5 py-2 rounded-xl text-[12px] font-medium flex items-center justify-between hover:bg-white/50 text-on-surface min-h-[36px]" data-tf="1D" role="menuitem" type="button"><span>1D (日线周界)</span></button></div></div>
+<div class="w-px h-4 bg-outline-variant/35 shrink-0"></div>
+<!-- Zoom Out Button (hidden <= 760px) -->
+<button class="tap-spring hidden md:flex min-w-[32px] h-[32px] rounded-full hover:bg-white/40 text-on-surface-variant hover:text-on-surface items-center justify-center transition-colors shrink-0" id="dock-zoom-out-btn" title="缩小视口 (-)">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<!-- Zoom In Button (hidden <= 760px) -->
+<button class="tap-spring hidden md:flex min-w-[32px] h-[32px] rounded-full hover:bg-white/40 text-on-surface-variant hover:text-on-surface items-center justify-center transition-colors shrink-0" id="dock-zoom-in-btn" title="放大视口 (+)">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+<!-- Return to Latest Candle Button -->
+<!-- Tooltip strictly: "平移视口回到当前标的最新K线" -->
+<button class="tap-spring min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 px-2.5 py-1 rounded-full hover:bg-white/40 text-on-surface-variant hover:text-on-surface font-label-md text-[12px] flex items-center justify-center gap-1 transition-colors shrink-0" id="dock-return-latest-btn" title="平移视口回到当前标的最新K线">
+<span class="material-symbols-outlined text-[17px]">skip_next</span>
+<span class="hidden md:inline font-semibold">最新K线</span>
+</button>
+<!-- Full-week Reset Button -->
+<button class="tap-spring min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 px-2.5 py-1 rounded-full hover:bg-white/40 text-on-surface-variant hover:text-on-surface font-label-md text-[12px] flex items-center justify-center gap-1 transition-colors shrink-0" id="dock-fit-chart-btn" title="自适应周一至最新全周K线">
+<span class="material-symbols-outlined text-[17px]">crop_free</span>
+<span class="hidden md:inline font-semibold">全周区间</span>
+</button>
+<!-- Toggle Internal Fibs Button -->
+<button class="tap-spring min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 px-2.5 py-1 rounded-full hover:bg-white/40 text-on-surface-variant hover:text-on-surface font-label-md text-[12px] flex items-center justify-center gap-1 transition-colors shrink-0" id="dock-toggle-fibs-btn" title="切换显示 0.5 EQ / 0.618 / 0.705 中间斐波位">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span class="hidden md:inline" id="fib-btn-text">内部斐波 / 0.5 EQ</span>
+<span class="md:hidden">斐波</span>
+</button>
+<!-- Follow Latest Symbol Button (Lightning bolt ⚡) -->
+<!-- Tooltip strictly: "自动切换并锁定全市场最新触发1.618的合约" -->
+<button class="tap-spring min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 px-3 py-1 rounded-full bg-primary-container text-white font-label-md text-[12px] font-bold flex items-center justify-center gap-1.5 shadow-sm shrink-0 whitespace-nowrap" id="dock-follow-active-btn" title="自动切换并锁定全市场最新触发1.618的合约">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="hidden sm:inline">⚡ 跟随最新标的</span>
+<span class="sm:hidden">跟随</span>
+</button>
+</div>
+</nav>
+<div class="hidden fixed top-5 left-1/2 -translate-x-1/2 z-50 pointer-events-auto apple-glass-pill px-3.5 py-2 rounded-full shadow-[0_16px_36px_rgba(15,23,42,0.16)] flex items-center gap-2 text-on-surface text-[12px] font-medium border border-white/80 animate-in fade-in transition-all" id="native-tv-toast"><span class="material-symbols-outlined text-[16px] text-amber-500 shrink-0">info</span><span id="native-tv-toast-msg">未检测到本机 TradingView 客户端协议，请确认已安装桌面端并启用 spike-tradingview:// 协议绑定</span><button aria-label="关闭提示" class="tap-spring p-0.5 rounded-full hover:bg-white/40 text-outline hover:text-on-surface ml-1" id="native-tv-toast-close" type="button"><span class="material-symbols-outlined text-[14px]">close</span></button></div></main>
+<!-- ========================================================================= -->
+<!-- 3. JAVASCRIPT: CANDLE GENERATOR, TRADINGVIEW PAN/ZOOM & GLASS CONTROLS   -->
+<!-- ========================================================================= -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // -----------------------------------------------------------------------
+    // A. Generate ~160 Crisply Rendered Candlesticks & Volume Bars
+    // -----------------------------------------------------------------------
+    const candlesGroup = document.getElementById('candlesticks-layer');
+    const volumeGroup = document.getElementById('volume-bars-layer');
+    const gridGroup = document.getElementById('chart-grid-group');
+
+    // Deterministic pseudo-random sequence for ~160 15m candles
+    // Monday range defined roughly between x: 180 to x: 420 (Low: 88,975.20 -> Y: 570, High: 93,950.00 -> Y: 290)
+    // Surge to +1.618 level at x: 1292 (Y: 118 -> 97,024.80), Live at x: 1320 (Y: 132 -> 96,420.50)
+    const CANDLE_COUNT = 160;
+    const startX = 60;
+    const candleSpacing = 8.0; // ~1280px total span
+
+    let currentPriceY = 560;
+    const candleData = [];
+
+    // Simple seeded pseudo generator
+    let seed = 42;
+    function random() {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    }
+
+    for (let i = 0; i < CANDLE_COUNT; i++) {
+      const x = startX + i * candleSpacing;
+      let targetY;
+
+      // Phase 1: Monday Setup (bars 0-25) ~ x:60 to x:260
+      if (i < 25) {
+        // Drop down to Monday Low (Y=570), then bounce
+        if (i < 8) targetY = 540 + i * 3.5;
+        else if (i === 8) targetY = 570; // Monday low touch
+        else targetY = 570 - (i - 8) * 11; // Rally up toward Monday high
+      }
+      // Phase 2: Monday High set (bars 25-45) ~ x:260 to x:420
+      else if (i < 45) {
+        if (i === 30) targetY = 290; // Monday high
+        else targetY = 320 + Math.sin(i * 0.4) * 35;
+      }
+      // Phase 3: Mid-week consolidation (bars 45-85)
+      else if (i < 85) {
+        targetY = 410 + Math.sin(i * 0.3) * 45 + (random() - 0.5) * 20;
+      }
+      // Phase 4: Breakout retest of Monday high (bars 85-115)
+      else if (i < 115) {
+        targetY = 350 - (i - 85) * 3.2 + (random() - 0.5) * 15;
+      }
+      // Phase 5: Impulse rally to 1.618 expansion line (bars 115-155)
+      else if (i < 155) {
+        if (i === 154) targetY = 118; // Exact touch of 97,024.80 at 1.618
+        else targetY = 250 - (i - 115) * 3.4 + (random() - 0.5) * 12;
+      }
+      // Phase 6: Active forming pullback (bars 155-160)
+      else {
+        targetY = 122 + (i - 155) * 2.2;
+      }
+
+      // Smooth step
+      const step = (targetY - currentPriceY) * 0.35 + (random() - 0.48) * 8;
+      const open = currentPriceY;
+      const close = currentPriceY + step;
+      const isBull = close <= open; // In SVG, smaller Y is higher price
+
+      const high = Math.min(open, close) - random() * 8;
+      const low = Math.max(open, close) + random() * 8;
+      currentPriceY = close;
+
+      // Volume correlates with impulse & touch
+      let volHeight = 15 + Math.abs(open - close) * 2.2 + random() * 20;
+      if (i > 130) volHeight += (i - 130) * 1.8;
+      if (volHeight > 140) volHeight = 140;
+
+      candleData.push({ x, open, close, high, low, isBull, volHeight });
+    }
+
+    // Render Grid
+    let gridSvgHtml = '';
+    for (let y = 80; y <= 820; y += 90) {
+      gridSvgHtml += `<line x1="-2000" x2="6000" y1="${y}" y2="${y}"></line>`;
+    }
+    for (let x = 0; x <= 3000; x += 180) {
+      gridSvgHtml += `<line x1="${x}" x2="${x}" y1="-1000" y2="3000"></line>`;
+    }
+    if (gridGroup) gridGroup.innerHTML = gridSvgHtml;
+
+    // Render Candlesticks and Volume
+    let candlesHtml = '';
+    let volumeHtml = '';
+
+    candleData.forEach(c => {
+      const top = Math.min(c.open, c.close);
+      const height = Math.max(2, Math.abs(c.open - c.close));
+      const wickColor = c.isBull ? '#10b981' : '#f43f5e';
+      const bodyFill = c.isBull ? 'url(#bullCandleGrad)' : 'url(#bearCandleGrad)';
+      const volFill = c.isBull ? 'url(#volBullGrad)' : 'url(#volBearGrad)';
+
+      // Wick
+      candlesHtml += `<line x1="${c.x}" x2="${c.x}" y1="${c.high.toFixed(1)}" y2="${c.low.toFixed(1)}" stroke="${wickColor}" stroke-width="1.2" opacity="0.95"></line>`;
+      // Body (width: 5.5px)
+      candlesHtml += `<rect x="${(c.x - 2.75).toFixed(1)}" y="${top.toFixed(1)}" width="5.5" height="${height.toFixed(1)}" rx="1" fill="${bodyFill}"></rect>`;
+
+      // Volume bar at base y=840
+      volumeHtml += `<rect x="${(c.x - 2.5).toFixed(1)}" y="${(840 - c.volHeight).toFixed(1)}" width="5" height="${c.volHeight.toFixed(1)}" rx="1" fill="${volFill}"></rect>`;
+    });
+
+    if (candlesGroup) candlesGroup.innerHTML = candlesHtml;
+    if (volumeGroup) volumeGroup.innerHTML = volumeHtml;
+
+    // -----------------------------------------------------------------------
+    // B. TradingView-Native Pan & Zoom Navigation Engine
+    // -----------------------------------------------------------------------
+    const viewport = document.getElementById('chart-viewport');
+    const transformGroup = document.getElementById('chart-transform-group');
+    const priceAxisGroup = document.getElementById('price-axis-group');
+
+    // Pan & Zoom Matrix State
+    let scaleX = 1;
+    let scaleY = 1;
+    let panX = 0;
+    let panY = 0;
+
+    let isPanning = false;
+    let startPointX = 0;
+    let startPointY = 0;
+    let currentPanStartX = 0;
+    let currentPanStartY = 0;
+
+    function applyChartTransform(animate = false) {
+      if (!transformGroup) return;
+      if (animate) {
+        transformGroup.style.transition = 'transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1)';
+        setTimeout(() => { transformGroup.style.transition = 'none'; }, 270);
+      } else {
+        transformGroup.style.transition = 'none';
+      }
+      transformGroup.setAttribute('transform', `matrix(${scaleX}, 0, 0, ${scaleY}, ${panX}, ${panY})`);
+    }
+
+    // Viewport pointer pan
+    viewport.addEventListener('pointerdown', (e) => {
+      // Ignore if clicking on interactive floating cards or right axis
+      if (e.target.closest('.draggable-module') || e.target.closest('#price-axis-group')) return;
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
+
+      isPanning = true;
+      viewport.classList.add('is-chart-dragging');
+      startPointX = e.clientX;
+      startPointY = e.clientY;
+      currentPanStartX = panX;
+      currentPanStartY = panY;
+      viewport.setPointerCapture(e.pointerId);
+    });
+
+    viewport.addEventListener('pointermove', (e) => {
+      updateCrosshair(e);
+
+      if (!isPanning) return;
+      const dx = e.clientX - startPointX;
+      const dy = e.clientY - startPointY;
+      panX = currentPanStartX + dx;
+      panY = currentPanStartY + dy;
+      applyChartTransform();
+    });
+
+    function endPan(e) {
+      if (!isPanning) return;
+      isPanning = false;
+      viewport.classList.remove('is-chart-dragging');
+      try { viewport.releasePointerCapture(e.pointerId); } catch (_) {}
+    }
+
+    viewport.addEventListener('pointerup', endPan);
+    viewport.addEventListener('pointercancel', endPan);
+
+    // Mouse Wheel Zooming (Centered on cursor)
+    viewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
+
+      // Anchor zoom to cursor position
+      panX = mouseX - (mouseX - panX) * zoomFactor;
+      panY = mouseY - (mouseY - panY) * zoomFactor;
+      scaleX *= zoomFactor;
+      scaleY *= zoomFactor;
+
+      // Bound zoom levels
+      scaleX = Math.max(0.4, Math.min(3.5, scaleX));
+      scaleY = Math.max(0.4, Math.min(3.5, scaleY));
+
+      applyChartTransform();
+    }, { passive: false });
+
+    // Double-click to reset Pan & Zoom
+    function resetChartView() {
+      scaleX = 1;
+      scaleY = 1;
+      panX = 0;
+      panY = 0;
+      applyChartTransform(true);
+    }
+
+    viewport.addEventListener('dblclick', (e) => {
+      if (e.target.closest('.draggable-module')) return;
+      resetChartView();
+    });
+
+    if (priceAxisGroup) {
+      priceAxisGroup.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        resetChartView();
+      });
+    }
+
+    // -----------------------------------------------------------------------
+    // C. Dynamic Crosshair & Interactive Price/Time Scales
+    // -----------------------------------------------------------------------
+    const crossH = document.getElementById('chart-crosshair-h');
+    const crossV = document.getElementById('chart-crosshair-v');
+    const crossPricePill = document.getElementById('crosshair-price-pill');
+    const crossPriceRect = document.getElementById('crosshair-price-rect');
+    const crossPriceText = document.getElementById('crosshair-price-text');
+    const crossTimePill = document.getElementById('crosshair-time-pill');
+    const crossTimeRect = document.getElementById('crosshair-time-rect');
+    const crossTimeText = document.getElementById('crosshair-time-text');
+
+    function updateCrosshair(e) {
+      const rect = viewport.getBoundingClientRect();
+      const clientX = e.clientX - rect.left;
+      const clientY = e.clientY - rect.top;
+
+      if (clientX < 0 || clientX > window.innerWidth || clientY < 0 || clientY > window.innerHeight) {
+        hideCrosshair();
+        return;
+      }
+
+      // Show crosshair elements
+      if (crossH) {
+        crossH.setAttribute('y1', clientY);
+        crossH.setAttribute('y2', clientY);
+        crossH.setAttribute('x2', window.innerWidth);
+        crossH.style.opacity = '1';
+      }
+      if (crossV) {
+        crossV.setAttribute('x1', clientX);
+        crossV.setAttribute('x2', clientX);
+        crossV.setAttribute('y2', window.innerHeight);
+        crossV.style.opacity = '1';
+      }
+
+      // Calculate price at cursor in relation to current scale & pan
+      const virtualY = (clientY - panY) / scaleY;
+      // Linear mapping: Y=118 -> 97,024.80 ; Y=742 -> 85,900.80
+      const calculatedPrice = 97024.80 - (virtualY - 118) * ((97024.80 - 85900.80) / (742 - 118));
+      const formattedPrice = '$' + calculatedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      if (crossPricePill && crossPriceRect && crossPriceText) {
+        crossPricePill.style.opacity = '1';
+        crossPriceRect.setAttribute('y', Math.max(10, Math.min(window.innerHeight - 30, clientY - 10)));
+        crossPriceText.setAttribute('y', Math.max(24, Math.min(window.innerHeight - 16, clientY + 4)));
+        crossPriceText.textContent = formattedPrice;
+      }
+
+      // Time scale indicator
+      if (crossTimePill && crossTimeRect && crossTimeText) {
+        crossTimePill.style.opacity = '1';
+        const pillX = Math.max(10, Math.min(window.innerWidth - 110, clientX - 47));
+        crossTimeRect.setAttribute('x', pillX);
+        crossTimeText.setAttribute('x', pillX + 47);
+        // Estimate date based on clientX
+        const virtualX = (clientX - panX) / scaleX;
+        const progress = Math.max(0, Math.min(1, (virtualX - 60) / 1280));
+        const hoursOffset = progress * 64; // ~64 hours from Monday 00:00 to Wednesday 16:30
+        const date = new Date(Date.UTC(2025, 4, 19, 0, 0));
+        date.setMinutes(date.getMinutes() + hoursOffset * 60);
+        const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(date.getUTCDate()).padStart(2, '0');
+        const hh = String(date.getUTCHours()).padStart(2, '0');
+        const min = String(Math.floor(date.getUTCMinutes() / 15) * 15).padStart(2, '0');
+        crossTimeText.textContent = `${mm}-${dd} ${hh}:${min}`;
+      }
+    }
+
+    function hideCrosshair() {
+      if (crossH) crossH.style.opacity = '0';
+      if (crossV) crossV.style.opacity = '0';
+      if (crossPricePill) crossPricePill.style.opacity = '0';
+      if (crossTimePill) crossTimePill.style.opacity = '0';
+    }
+
+    viewport.addEventListener('pointerleave', hideCrosshair);
+
+    // -----------------------------------------------------------------------
+    // D. Bottom Dock Action Controls
+    // -----------------------------------------------------------------------
+    // 1. Zoom In Button
+    const zoomInBtn = document.getElementById('dock-zoom-in-btn');
+    if (zoomInBtn) {
+      zoomInBtn.addEventListener('click', () => {
+        const cx = window.innerWidth / 2;
+        const cy = window.innerHeight / 2;
+        scaleX *= 1.25;
+        scaleY *= 1.25;
+        panX = cx - (cx - panX) * 1.25;
+        panY = cy - (cy - panY) * 1.25;
+        applyChartTransform(true);
+      });
+    }
+
+    // 2. Zoom Out Button
+    const zoomOutBtn = document.getElementById('dock-zoom-out-btn');
+    if (zoomOutBtn) {
+      zoomOutBtn.addEventListener('click', () => {
+        const cx = window.innerWidth / 2;
+        const cy = window.innerHeight / 2;
+        scaleX = Math.max(0.4, scaleX * 0.8);
+        scaleY = Math.max(0.4, scaleY * 0.8);
+        panX = cx - (cx - panX) * 0.8;
+        panY = cy - (cy - panY) * 0.8;
+        applyChartTransform(true);
+      });
+    }
+
+    // 3. Return to Latest Candle Button (Viewport pan only, does not change symbol)
+    const returnLatestBtn = document.getElementById('dock-return-latest-btn');
+    if (returnLatestBtn) {
+      returnLatestBtn.addEventListener('click', () => {
+        // Center on latest candles (~x=1300, y=140)
+        scaleX = 1.2;
+        scaleY = 1.1;
+        panX = window.innerWidth - 1380 * scaleX;
+        panY = (window.innerHeight / 2) - 180 * scaleY;
+        applyChartTransform(true);
+      });
+    }
+
+    // 4. Full Week Reset ("全周区间" fit chart)
+    const fitBtn = document.getElementById('dock-fit-chart-btn');
+    if (fitBtn) {
+      fitBtn.addEventListener('click', () => {
+        resetChartView();
+      });
+    }
+
+    // 5. Toggle Internal Fibs Button
+    const fibBtn = document.getElementById('dock-toggle-fibs-btn');
+    const fibGroup = document.getElementById('internal-fibs-group');
+    const fibText = document.getElementById('fib-btn-text');
+    let fibsVisible = false;
+
+    if (fibBtn && fibGroup) {
+      fibBtn.addEventListener('click', () => {
+        fibsVisible = !fibsVisible;
+        if (fibsVisible) {
+          fibGroup.setAttribute('opacity', '1');
+          fibBtn.classList.add('bg-primary-container/20', 'text-primary', 'font-semibold');
+          if (fibText) fibText.textContent = '隐藏内部斐波 / 0.5 EQ';
+        } else {
+          fibGroup.setAttribute('opacity', '0');
+          fibBtn.classList.remove('bg-primary-container/20', 'text-primary', 'font-semibold');
+          if (fibText) fibText.textContent = '内部斐波 / 0.5 EQ';
+        }
+      });
+    }
+
+    // 6. Follow Latest Triggered Symbol Button (Changes symbol)
+    const dockFollowBtn = document.getElementById('dock-follow-active-btn');
+    const headerFollowBtn = document.getElementById('toggle-follow-btn');
+    const heroTitle = document.getElementById('hero-symbol-title');
+    const heroPrice = document.getElementById('hero-price-display');
+    const heroChange = document.getElementById('hero-change-display');
+    const heroBadge = document.getElementById('hero-touch-badge');
+    const heroTrigger = document.getElementById('hero-trigger-time');
+    let isFollowing = true;
+
+    function setFollowState(following) {
+      isFollowing = following;
+      if (isFollowing) {
+        if (dockFollowBtn) {
+          dockFollowBtn.classList.remove('opacity-70');
+          dockFollowBtn.innerHTML = '<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: \'FILL\' 1;">bolt</span><span class="hidden sm:inline">⚡ 跟随最新标的</span><span class="sm:hidden">跟随</span>';
+        }
+        if (headerFollowBtn) {
+          headerFollowBtn.className = 'tap-spring px-2 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1 bg-primary text-white border border-primary/40 shadow-sm';
+          headerFollowBtn.innerHTML = '<span class="material-symbols-outlined text-[11px]">bolt</span><span>跟随最新</span>';
+        }
+      } else {
+        if (dockFollowBtn) {
+          dockFollowBtn.classList.add('opacity-70');
+          dockFollowBtn.innerHTML = '<span class="material-symbols-outlined text-[15px]">push_pin</span><span class="hidden sm:inline">手动锁定</span><span class="sm:hidden">锁定</span>';
+        }
+        if (headerFollowBtn) {
+          headerFollowBtn.className = 'tap-spring px-2 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1 bg-white/60 text-on-surface-variant border border-outline-variant/40';
+          headerFollowBtn.innerHTML = '<span class="material-symbols-outlined text-[11px]">push_pin</span><span>手动固定</span>';
+        }
+      }
+    }
+
+    if (dockFollowBtn) {
+      dockFollowBtn.addEventListener('click', () => {
+        setFollowState(!isFollowing);
+        if (isFollowing) {
+          // Select newest row (first row: BTC)
+          selectSymbolRow(document.querySelector('.symbol-row'));
+        }
+      });
+    }
+
+    if (headerFollowBtn) {
+      headerFollowBtn.addEventListener('click', () => {
+        setFollowState(!isFollowing);
+      });
+    }
+
+    // -----------------------------------------------------------------------
+    // E. Touched Symbol List Selection & Search Filter
+    // -----------------------------------------------------------------------
+    const symbolRows = document.querySelectorAll('.symbol-row');
+
+    function selectSymbolRow(row) {
+      if (!row) return;
+      symbolRows.forEach(r => {
+        r.classList.remove('bg-primary-container/15', 'border-primary/25');
+        r.classList.add('hover:bg-white/40');
+      });
+      row.classList.add('bg-primary-container/15', 'border-primary/25');
+      row.classList.remove('hover:bg-white/40');
+
+      const sym = row.getAttribute('data-symbol');
+      const prc = row.getAttribute('data-price');
+      const chg = row.getAttribute('data-change');
+      const dir = row.getAttribute('data-dir');
+
+      if (heroTitle) heroTitle.textContent = sym;
+      if (heroPrice) heroPrice.textContent = prc;
+      if (heroChange) heroChange.textContent = chg;
+
+      if (heroBadge) {
+        if (dir === 'up') {
+          heroBadge.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/15 text-chart-bull font-label-sm text-[11px] border border-chart-bull/20 font-bold backdrop-blur-sm';
+          heroBadge.innerHTML = '<span class="material-symbols-outlined text-[13px]" style="font-variation-settings: \'FILL\' 1;">arrow_upward</span>触及上沿 1.618';
+        } else {
+          heroBadge.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-500/15 text-chart-bear font-label-sm text-[11px] border border-chart-bear/20 font-bold backdrop-blur-sm';
+          heroBadge.innerHTML = '<span class="material-symbols-outlined text-[13px]" style="font-variation-settings: \'FILL\' 1;">arrow_downward</span>触及下沿 1.618';
+        }
+      }
+    }
+
+    symbolRows.forEach(row => {
+      row.addEventListener('click', () => {
+        selectSymbolRow(row);
+      });
+    });
+
+    const searchInput = document.getElementById('symbol-search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim().toUpperCase();
+        symbolRows.forEach(row => {
+          const sym = row.getAttribute('data-symbol') || '';
+          row.style.display = sym.includes(query) ? 'flex' : 'none';
+        });
+      });
+    }
+
+    // Collapse contracts list
+    const collapseBtn = document.getElementById('collapse-list-btn');
+    const listBody = document.getElementById('contracts-list-body');
+    const collapseIcon = document.getElementById('collapse-icon');
+    let isCollapsed = window.innerWidth <= 760;
+
+    function setCollapseState(collapsed) {
+      isCollapsed = collapsed;
+      if (listBody && collapseIcon) {
+        if (isCollapsed) {
+          listBody.style.maxHeight = '0px';
+          collapseIcon.textContent = 'keyboard_arrow_down';
+        } else {
+          listBody.style.maxHeight = '340px';
+          collapseIcon.textContent = 'keyboard_arrow_up';
+        }
+      }
+    }
+    setCollapseState(isCollapsed);
+
+    if (collapseBtn) {
+      collapseBtn.addEventListener('click', () => {
+        setCollapseState(!isCollapsed);
+      });
+    }
+
+    // -----------------------------------------------------------------------
+    // F. Apple Translucent Glass Draggable Module Positioning Engine
+    // -----------------------------------------------------------------------
+    const isMobile = () => window.innerWidth <= 760;
+    const storagePrefix = () => (isMobile() ? 'spike_pos_m_' : 'spike_pos_d_');
+    const modules = document.querySelectorAll('.draggable-module');
+
+    function clamp(val, min, max) {
+      return Math.max(min, Math.min(val, max));
+    }
+
+    function initModulePosition(el) {
+      const id = el.dataset.moduleId;
+      const key = storagePrefix() + id;
+      const saved = localStorage.getItem(key);
+      const margin = 12;
+
+      const rect = el.getBoundingClientRect();
+      const w = rect.width || 280;
+      const h = rect.height || 48;
+      const maxLeft = window.innerWidth - w - margin;
+      const maxTop = window.innerHeight - h - margin;
+
+      if (saved) {
+        try {
+          const { x, y } = JSON.parse(saved);
+          const finalX = clamp(x, margin, maxLeft);
+          const finalY = clamp(y, margin, maxTop);
+          applyPosition(el, finalX, finalY);
+          return;
+        } catch (e) {
+          console.warn('Position parse error', e);
+        }
+      }
+
+      // Default Canonical positions
+      let x = margin;
+      let y = margin;
+
+      if (el.dataset.defaultCenter === 'true') {
+        x = (window.innerWidth - w) / 2;
+      } else if (el.dataset.defaultRight) {
+        const r = parseInt(el.dataset.defaultRight, 10);
+        x = window.innerWidth - w - r;
+      } else if (el.dataset.defaultLeft) {
+        x = parseInt(el.dataset.defaultLeft, 10);
+      }
+
+      if (el.dataset.defaultBottom) {
+        const b = parseInt(el.dataset.defaultBottom, 10);
+        y = window.innerHeight - h - b;
+      } else if (el.dataset.defaultTop) {
+        y = parseInt(el.dataset.defaultTop, 10);
+      }
+
+      // Mobile responsive specifics
+      if (isMobile()) {
+        if (id === 'bottom-dock') {
+          x = (window.innerWidth - w) / 2;
+          y = window.innerHeight - h - 14;
+        } else if (id === 'timestamp-badge') {
+          x = 12;
+          y = window.innerHeight - h - 74;
+        }
+      }
+
+      x = clamp(x, margin, maxLeft);
+      y = clamp(y, margin, maxTop);
+      applyPosition(el, x, y);
+    }
+
+    function applyPosition(el, x, y) {
+      el.style.left = `${Math.round(x)}px`;
+      el.style.top = `${Math.round(y)}px`;
+      el.style.right = 'auto';
+      el.style.bottom = 'auto';
+    }
+
+    function resetModule(el) {
+      const id = el.dataset.moduleId;
+      localStorage.removeItem('spike_pos_d_' + id);
+      localStorage.removeItem('spike_pos_m_' + id);
+
+      el.style.transition = 'left 320ms cubic-bezier(0.2, 0.8, 0.2, 1), top 320ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 200ms ease';
+      initModulePosition(el);
+      setTimeout(() => {
+        el.style.transition = 'box-shadow 240ms ease, transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1)';
+      }, 340);
+    }
+
+    // Attach drag events to all module handles
+    modules.forEach(el => {
+      initModulePosition(el);
+
+      const handle = el.querySelector('.drag-handle');
+      if (!handle) return;
+
+      let isDragging = false;
+      let startPointerX = 0;
+      let startPointerY = 0;
+      let startElX = 0;
+      let startElY = 0;
+      let pointerId = null;
+
+      handle.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0 && e.pointerType === 'mouse') return;
+
+        isDragging = true;
+        pointerId = e.pointerId;
+        handle.setPointerCapture(pointerId);
+
+        const rect = el.getBoundingClientRect();
+        startElX = rect.left;
+        startElY = rect.top;
+        startPointerX = e.clientX;
+        startPointerY = e.clientY;
+
+        el.classList.add('is-dragging');
+        el.style.transition = 'none';
+        e.preventDefault();
+      });
+
+      handle.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+
+        const dx = e.clientX - startPointerX;
+        const dy = e.clientY - startPointerY;
+
+        const margin = 8;
+        const rect = el.getBoundingClientRect();
+        const maxLeft = window.innerWidth - rect.width - margin;
+        const maxTop = window.innerHeight - rect.height - margin;
+
+        const newX = clamp(startElX + dx, margin, maxLeft);
+        const newY = clamp(startElY + dy, margin, maxTop);
+
+        applyPosition(el, newX, newY);
+      });
+
+      function stopDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+
+        el.classList.remove('is-dragging');
+        el.style.transition = 'box-shadow 240ms ease, transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1)';
+
+        if (pointerId !== null) {
+          try { handle.releasePointerCapture(pointerId); } catch (_) {}
+          pointerId = null;
+        }
+
+        const rect = el.getBoundingClientRect();
+        const pos = { x: rect.left, y: rect.top };
+        localStorage.setItem(storagePrefix() + el.dataset.moduleId, JSON.stringify(pos));
+      }
+
+      handle.addEventListener('pointerup', stopDrag);
+      handle.addEventListener('pointercancel', stopDrag);
+
+      // Double-click grip handle to reset position
+      handle.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        resetModule(el);
+      });
+
+      // Keyboard reset
+      handle.addEventListener('keydown', (e) => {
+        if (e.key === 'Home' || e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          resetModule(el);
+        }
+      });
+    });
+
+    // Handle Window Resize Clamp
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        modules.forEach(el => initModulePosition(el));
+      }, 100);
+    });
+  });
+</script>
+<script id="timeframe-menu-controller">(() => { const tfBtn = document.getElementById('dock-timeframe-btn'); const tfMenu = document.getElementById('dock-timeframe-menu'); const tfIcon = document.getElementById('tf-chevron-icon'); const tfLabel = document.getElementById('dock-active-tf-label'); const options = document.querySelectorAll('.tf-menu-option'); let isOpen = true; function toggleMenu(show) { isOpen = typeof show === 'boolean' ? show : !isOpen; if (tfMenu) { tfMenu.style.display = isOpen ? 'flex' : 'none'; } if (tfIcon) { tfIcon.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)'; } if (tfBtn) { tfBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false'); } } if (tfBtn) { tfBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(); }); } document.addEventListener('click', (e) => { if (!tfMenu || !isOpen) return; if (!tfMenu.contains(e.target) && !tfBtn.contains(e.target)) { toggleMenu(false); } }); document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) { toggleMenu(false); tfBtn.focus(); } }); options.forEach(opt => { opt.addEventListener('click', (e) => { e.stopPropagation(); const tf = opt.getAttribute('data-tf'); options.forEach(o => { o.className = 'tf-menu-option tap-spring w-full text-left px-2.5 py-2 rounded-xl text-[12px] font-medium flex items-center justify-between hover:bg-white/50 text-on-surface min-h-[36px]'; const check = o.querySelector('.material-symbols-outlined'); if (check) check.remove(); }); opt.className = 'tf-menu-option tap-spring w-full text-left px-2.5 py-2 rounded-xl text-[12px] font-bold flex items-center justify-between bg-primary-container/15 text-primary border border-primary/25 min-h-[36px]'; const checkmark = document.createElement('span'); checkmark.className = 'material-symbols-outlined text-[15px] text-primary'; checkmark.textContent = 'check'; opt.appendChild(checkmark); if (tfLabel) { tfLabel.textContent = `${tf} 定界`; } toggleMenu(false); }); }); })();</script></body></html>

@@ -19,9 +19,11 @@
       .sort((a,b)=>touchTime(latestTouch(b))-touchTime(latestTouch(a))||a.symbol.localeCompare(b.symbol));
   }
   function selection(items,symbol,follow){const rows=selectRows(items);return (!follow&&rows.find(r=>r.symbol===symbol))||rows[0]||null;}
-  // Match the Monday alert's chart link, including its fixed 15-minute interval.
-  function tradingViewURL(symbol){
-    if(typeof symbol!=='string'||!/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(symbol))return '';
+  // Stitch 2e8ce287d9fa44cdbf3036bdf6000937: Windows dispatches locally.
+  // Ordinary HTTPS links stay in the browser even with Windows app associations.
+  function tradingViewURL(symbol,platform=''){
+    if(typeof symbol!=='string'||!/^[A-Z0-9]{1,30}-USDT-SWAP$/.test(symbol))return '';
+    if(/^Win/i.test(platform))return 'spike-tradingview://open?symbol='+encodeURIComponent(symbol)+'&timeframe=15m';
     const ticker='OKX:'+symbol.replace('-SWAP','').replaceAll('-','')+'.P';
     return 'https://www.tradingview.com/chart/?symbol='+encodeURIComponent(ticker)+'&interval=15';
   }
@@ -84,6 +86,8 @@
   if(typeof module!=='undefined')module.exports={esc,price,selectRows,selection,latestTouch,touchTime,recentTouch,RECENT_MS,STATES,clampPanel,mountLayout,captureListScroll,restoreListScroll,tradingViewURL};
   if(typeof document==='undefined')return;
   const root=document.getElementById('monday-fib-root');if(!root)return;
+  const platform=window.navigator?.userAgentData?.platform||window.navigator?.platform||'';
+  const windowsDesktop=/^Win/i.test(platform);
   const $=id=>document.getElementById(id);
   const icon=name=>`<span class="mf-icon" aria-hidden="true" style="--mf-icon:url(/static/icons/${name}.svg)"></span>`;
   const grip=label=>`<button class="mf-grip" data-mf-grip type="button" aria-label="移动${label}；方向键移动，Home 复位" title="拖动换位置 · 双击还原"><span aria-hidden="true"></span></button>`;
@@ -103,7 +107,7 @@
       <label class="mf-search">${icon('search')}<input id="mf-search" type="search" placeholder="搜索已触价合约" aria-label="搜索已触价合约" autocomplete="off"></label>
       <div id="mf-filters" class="mf-filters" role="group" aria-label="触价方向">${Object.entries(FILTERS).map(([key,label])=>`<button data-filter="${key}" aria-pressed="${key==='all'}">${label}</button>`).join('')}</div>
       <div id="mf-rows" class="mf-rows" role="region" aria-label="已触价币种滚动列表" tabindex="0"></div>
-      <p class="mf-list-note">币种 ↗ TradingView · 右侧切换背景</p>
+      <p class="mf-list-note">币种 ↗ ${windowsDesktop?'本机 ':''}TradingView · 右侧切换背景</p>
     </aside>
     <div id="mf-notice" class="mf-notice mf-glass" role="status" hidden></div>
     <div class="mf-dock mf-glass" data-mf-movable="dock" role="group" aria-label="图表控制">${grip('图表工具')}<button id="mf-timeframe" class="mf-timeframe" type="button" aria-label="选择 K 线周期" aria-haspopup="menu" aria-controls="mf-period-menu" aria-expanded="false"><span id="mf-period-label">15m</span><span aria-hidden="true">⌄</span></button><span class="mf-divider"></span><button id="mf-zoom-out" class="mf-zoom" aria-label="缩小 K 线" title="缩小 K 线（−）"><span aria-hidden="true">−</span></button><button id="mf-zoom-in" class="mf-zoom" aria-label="放大 K 线" title="放大 K 线（+）"><span aria-hidden="true">+</span></button><button id="mf-latest" aria-label="回到当前合约最新 K 线" title="回到当前合约最新 K 线，保留缩放宽度">${icon('chevron-right')}<span>最新 K 线</span></button><button id="mf-fit" aria-label="显示全部已加载 K 线并复位" title="恢复价格缩放并显示全部已加载 K 线">${icon('maximize')}<span>全图</span></button><button id="mf-fib" aria-pressed="false" title="显示区间内部 0.5 / 0.618 / 0.705">${icon('adjustments-horizontal')}<span>内部线</span></button><span class="mf-divider"></span><button id="mf-follow" aria-pressed="true">${icon('activity')}<span>跟随最新</span></button></div>
@@ -126,9 +130,10 @@
     const rows=selectRows(data?.items||[],query,filter,nowMs());
     const html=rows.map(r=>{
       const e=latestTouch(r),fresh=recentTouch(e,nowMs()),state=quoteState(r),side=e.side==='upper'?'上':'下';
-      const url=tradingViewURL(r.symbol),label=esc(short(r.symbol));
+      const url=tradingViewURL(r.symbol,platform),label=esc(short(r.symbol));
       const name=`<b>${label}</b>${url?'<span class="mf-external" aria-hidden="true">↗</span>':''}<small>${e.source==='history'?'历史 · ':''}${time(touchTime(e))}${fresh?' · 刚触及':''}</small>`;
-      const link=url?`<a class="mf-row-symbol" data-tv-symbol="${esc(r.symbol)}" href="${esc(url)}" target="_blank" rel="noopener noreferrer" aria-label="在 TradingView 查看 ${label} 15 分钟图" title="TradingView · ${label} · 15 分钟">${name}</a>`:`<span class="mf-row-symbol">${name}</span>`;
+      const destination=windowsDesktop?'在本机 TradingView 打开':'在 TradingView 查看';
+      const link=url?`<a class="mf-row-symbol" data-tv-symbol="${esc(r.symbol)}" href="${esc(url)}"${windowsDesktop?'':' target="_blank" rel="noopener noreferrer"'} aria-label="${destination} ${label} 15 分钟图" title="${destination} ${label} 15 分钟图">${name}</a>`:`<span class="mf-row-symbol">${name}</span>`;
       return `<div class="mf-row${fresh?' mf-recent':''}" data-symbol="${esc(r.symbol)}" data-selected="${r.symbol===selected}">${link}<button type="button" class="mf-row-value" data-preview-symbol="${esc(r.symbol)}" aria-pressed="${r.symbol===selected}" aria-label="切换背景 K 线至 ${label}" title="切换背景 K 线 · ${label}"><strong class="mf-${e.side}">${side}沿 1.618</strong><small>${state||price(r.price)}</small></button></div>`;
     }).join('')||`<p class="mf-no-rows">${data?'没有匹配的已触价合约':'正在读取…'}</p>`;
     if(html!==lastRows){

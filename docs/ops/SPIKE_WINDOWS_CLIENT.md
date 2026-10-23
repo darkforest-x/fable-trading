@@ -2,6 +2,48 @@
 
 2026-09-09 Owner 要求 3060 能访问 Spike，并打开 3060 自己的 TradingView。
 
+## 周一 1.618 公网页面币种链接（2026-10-23）
+
+Windows 浏览器访问 `https://spikeok.com/#monday-fib` 时，币种名称使用
+`spike-tradingview://open?symbol=BTC-USDT-SWAP&timeframe=15m`。
+在**正在浏览页面的 Windows 电脑、当前登录用户**安装一次入口后，点击会交给本机
+TradingView Desktop，打开对应 OKX 永续合约的 15 分钟图。右侧数值按钮仍只切换背景 K 线。
+首次点击若出现浏览器的外部应用确认，选择打开 `SpikeChartLink`；没有自动网页回退。
+此入口只覆盖 Windows，其他系统保留普通 TG 图表链接。
+
+安装所需三个文件必须保留仓库相对目录：
+`scripts/windows/install_spike_chart_link.ps1`、`yoyo/monitor/windows_chart_link.cs`、
+`yoyo/monitor/windows_tradingview.ps1`。在 Windows PowerShell 运行：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\install_spike_chart_link.ps1
+```
+
+使用系统自带 .NET Framework 编译器，无需安装 Python 或其他依赖。安装器先检查
+TradingView Desktop，注册当前用户的 `HKCU\Software\Classes\spike-tradingview`，
+程序位于 `%LOCALAPPDATA%\Spike\ChartLink\SpikeChartLink.exe`。
+它复用下文的 `windows_tradingview.ps1`，把经过严格校验的 HTTPS 图表地址作为一个参数
+交给已安装的 TV 程序。无需网关、监听端口、浏览器策略或辅助功能权限。
+读取已有 `%LOCALAPPDATA%\Spike\tradingview-layout.txt`；没有该文件则使用 TG 的通用图表入口。
+URL 不接受外部目标地址、附加参数或命令。其他程序已占用此协议时，安装器拒绝覆盖。
+
+当前已安装到 WIN-ZZC 的 Administrator 用户，源文件保留在
+`C:\fable\spike-client\chart-link-build`。换电脑或 Windows 用户需分别安装。
+`%LOCALAPPDATA%\Spike\tradingview-link-last.json` 只记录打开请求；
+`requested` / `verified:false` 不代表主图已加载，验收必须查看客户端主图的合约与周期。
+
+卸载仅移除本安装器拥有的协议注册，保留文件与布局：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\install_spike_chart_link.ps1 -Uninstall
+```
+
+Windows 参数契约测试（只编译和解析，不启动图表）：
+
+```powershell
+python tests\monitor\test_windows_chart_link.py
+```
+
 ## 当前周期（2026-09-09 22:00，v1.12.0）
 
 六周期5m/15m/30m/1H/4H/日线均在前端展示；只有1H/4H/日线发送Bark原始启动和YOLO追加。

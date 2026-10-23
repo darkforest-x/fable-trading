@@ -6,10 +6,10 @@ const event=(o={})=>({source:'live',observed_ms:Date.now()-60000,candle_ms:Date.
 const item=(o={})=>({symbol:'BTC-USDT-SWAP',state:'ready',stale:false,price:82500,high:83149.8,low:81166,upper:84375.7884,lower:79940.0116,received_ms:Date.now(),distance_pct:1.2,nearest:'upper',touches:{upper:event()},...o});
 const snap=(o={})=>({now_ms:Date.now(),week:'2026-10-19',monday_complete:true,stream:{connected:true,last_message_ms:Date.now()},telegram:{enabled:false,configured:true},counts:{total:1,touched:0},items:[item()],events:[],...o});
 const response=(d,ok=true)=>({ok,json:async()=>d});
-function harness(fetchImpl){
+function harness(fetchImpl,navigator={}){
  const els=new Map(),timers=new Map();let id=0;
  function el(name){if(!els.has(name))els.set(name,{innerHTML:'',textContent:'',hidden:false,disabled:false,value:'',dataset:{},events:{},attrs:{},addEventListener(t,fn){this.events[t]=fn;},setAttribute(k,v){this.attrs[k]=v;},classList:{toggle(){}},contains(){return false;},focus(){},querySelectorAll(){return [];},querySelector(){return null;}});return els.get(name);}
- const charts=[];const window={SpikeMondayFibChart:{show:(host,row,week,options)=>charts.push({symbol:row.symbol,week,...options}),hide(){},fit(){},setInternal(){}}},document={hidden:false,activeElement:null,getElementById:el,events:{},addEventListener(t,fn){this.events[t]=fn;}};
+ const charts=[];const window={navigator,SpikeMondayFibChart:{show:(host,row,week,options)=>charts.push({symbol:row.symbol,week,...options}),hide(){},fit(){},setInternal(){}}},document={hidden:false,activeElement:null,getElementById:el,events:{},addEventListener(t,fn){this.events[t]=fn;}};
  vm.runInNewContext(source,{window,document,fetch:fetchImpl,AbortController,Date,Intl,URLSearchParams,setTimeout(fn,ms){const n=++id;timers.set(n,{fn,ms});return n;},clearTimeout(n){timers.delete(n);}});
  return {api:window.SpikeMondayFib,el,timers,document,charts};
 }
@@ -102,6 +102,24 @@ test('coin links open externally while their sibling preview button alone pins t
  c.el('mf-rows').events.click({target:{closest:()=>({dataset:{previewSymbol:a.symbol}})}});
  assert.equal(c.charts.at(-1).symbol,a.symbol);assert.equal(c.el('mf-follow').attrs['aria-pressed'],'false');
  assert.ok(calls.every(([u,o])=>u==='/api/monday-fib'&&!o.method));c.api.setActive(false);
+});
+test('Windows links use only the local app protocol and preserve independent wallpaper controls',async()=>{
+ for(const navigator of [{platform:'Win32'},{platform:'Win64'},{platform:'Linux',userAgentData:{platform:'Windows'}}]){
+  const calls=[],c=harness(async(u,o)=>{calls.push([u,o]);return response(snap());},navigator);await ready(c);
+  const html=c.el('mf-rows').innerHTML;
+  assert.match(html,/href="spike-tradingview:\/\/open\?symbol=BTC-USDT-SWAP&amp;timeframe=15m"/);
+  assert.match(html,/在本机 TradingView 打开 BTC 15 分钟图/);
+  assert.doesNotMatch(html,/target="_blank"|https:\/\/www.tradingview.com/);
+  const before=c.charts.length;
+  c.el('mf-rows').events.click({target:{closest:()=>null}});
+  assert.equal(c.charts.length,before);
+  assert.ok(calls.every(([u,o])=>u==='/api/monday-fib'&&!o.method));
+  c.api.setActive(false);
+ }
+ assert.equal(tradingViewURL('1000PEPE-USDT-SWAP','Windows'),'spike-tradingview://open?symbol=1000PEPE-USDT-SWAP&timeframe=15m');
+ for(const platform of ['MacIntel','Linux','iPhone',''])assert.match(tradingViewURL('BTC-USDT-SWAP',platform),/^https:/);
+ assert.equal(tradingViewURL('BTC-USDT-SWAP&timeframe=1H','Win32'),'');
+ assert.equal(tradingViewURL('A'.repeat(31)+'-USDT-SWAP','Win32'),'');
 });
 test('a quote refresh retains focus on the same link or preview button',async()=>{
  let value=snap();const c=harness(async()=>response(value));await ready(c);
