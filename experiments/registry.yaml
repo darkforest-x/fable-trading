@@ -13430,3 +13430,17 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     result: "63 firsttouch symbols,53upper/10lower;38upper during23Beijing. BTC upper65432.5044 touched22h17,ETH1938.8884 at20h49;day closes68523.7/2085.16. ETH15m original volume+3bodies qualifies21h45 but native stop1942.79 during22h50-55;net-1.175318R,original3random same mean. Hourly strict/body confirmation fails;BTC15m volume and confirmation fail. GoldMonday conflicts invalidate anchors. No backtest rerun;grid clock uncertainty and controls preserved. Source checks/assertions and chart inspection pass;Notion4028856479af81569831cf3326ab4cf0 verified."
+
+  - experiment_id: exp-monday-sep16-review-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: b06ac01bc9
+    status: completed
+    question: Which covered coins actually touched frozen Monday1.618 on2026-09-16 Beijing, what were the touching candles and subsequent paths?
+    single_variable: None; specified-day descriptive OHLCV review. No new fill simulation, parameter optimization, or default changes.
+    artifacts:
+    - monday-sep16-review-20261024-v1
+    canonical_report: experiments/active/exp-monday-sep16-review-20261024-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    result: "638registered files,505eligible;355coins,332lower/34upper/11both;366coin-side events and5492actual touching5m.198coins/206events firstweekly onday.128flat/zero-volume and5basket/stable/metals excluded.187symbols439824overlapbars agree. Lower4h inward124/332,72h320/332;paired268 lower72h signal11.635percent versus random13.153percent.183wick-first events,175later close outside.732charts,full Chinese HTML and per-bar explorer. Descriptive prices, not net strategy returns. Notion4028856479af81fcaa81f8ba738f2843 read back."

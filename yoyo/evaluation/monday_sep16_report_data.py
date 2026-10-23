@@ -55,6 +55,7 @@ def main():
             if p.exists():images[name]='data:image/png;base64,'+base64.b64encode(p.read_bytes()).decode()
     snapshot=dict(surface='report',title='9月16日：1.618触价之后，哪些收回、哪些继续突破',generatedAt=datetime.now(timezone.utc).isoformat(),status='reviewed',buildStatus='creating',filters=[],queries=queries,report={'asOf':'2026-09-21'})
     if (APP/'src/data.json').exists():snapshot['id']=json.loads((APP/'src/data.json').read_text())['id']
+    elif (APP/'reproduce.json').exists():snapshot['id']=json.loads((APP/'reproduce.json').read_text())['id']
     save(EXP/'report-snapshot.json',snapshot)
     if APP.exists():
         save(APP/'src/data.json',snapshot);save(APP/'src/content/report/chart-images.json',images);save(APP/'src/content/report/field-labels.json',LABELS)
