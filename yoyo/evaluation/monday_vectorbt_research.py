@@ -259,6 +259,19 @@ def main():
     ap=argparse.ArgumentParser();ap.add_argument('--workers',type=int,default=3);ap.add_argument('--symbols',nargs='*');ap.add_argument('--summarize',action='store_true');args=ap.parse_args()
     cfg=json.loads((EXP/'config.json').read_text())
     if subprocess.run(['git','diff','--quiet','HEAD','--',*CODE],cwd=ROOT).returncode:raise RuntimeError('Commit builder before results')
+    completed=EXP/'completion.json'
+    if completed.exists() and not args.summarize:
+        receipt=json.loads(completed.read_text())
+        if receipt['config']!=cfg:raise RuntimeError('Completed study configuration changed; use a new study directory')
+        for stamp in receipt['code']+receipt['inputs']:
+            if file_stamp(stamp['path'])!=stamp:raise RuntimeError('Completed study dependency changed; preserve prior results')
+        if receipt['versions']!={p:version(p) for p in receipt['versions']}:
+            raise RuntimeError('Completed study runtime changed')
+        result=json.loads((EXP/'summary-entry-week.json').read_text())
+        print(json.dumps(dict(status='cached_complete',canonical_summary=str(EXP/'summary-entry-week.json'),
+                              symbols=result['symbols'],configurations=result['configurations'],
+                              new_positions_replayed=0),ensure_ascii=False),flush=True)
+        return
     if args.summarize:summarize(cfg);return
     jobs,_=old.jobs(cfg)
     if args.symbols:jobs=[j for j in jobs if j[0] in args.symbols]
