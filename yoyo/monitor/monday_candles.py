@@ -138,6 +138,8 @@ class MondayCandles:
 def install(app, runtime):
     service = MondayCandles(runtime)
     app.state.monday_candles = service
+    from .monday_order_context import install as install_order_context
+    install_order_context(app)
 
     @app.get('/api/monday-fib/candles')
     def candles(symbol: str = Query(..., pattern=SYMBOL),

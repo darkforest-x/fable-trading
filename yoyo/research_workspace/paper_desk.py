@@ -25,8 +25,14 @@ ENTRY_LEVERAGES = (1, 2, 5, 10, 15, 20, 30, 50, 100)
 POSITION_MULTIPLES = ENTRY_LEVERAGES
 
 
-def symbol_leverage(symbol, value):
+def quick_quote(quote):
+    return bool(quote and json.loads(quote.get('risk_json') or '{}').get('monday_quick'))
+
+
+def symbol_leverage(symbol, value, quote=None):
     leverage_value(value)
+    if quick_quote(quote):
+        return value  # Actual instrument and quantity tier checked by check_open.
     cap = 100 if symbol in {'BTC-USDT-SWAP', 'ETH-USDT-SWAP'} else 20
     if value > cap:
         raise ValueError(f"{symbol.removesuffix('-USDT-SWAP')} 合约最高支持 {cap} 倍杠杆")
@@ -324,7 +330,7 @@ class PaperDesk:
             at = clock_ms()
             account = self.row(db, "accounts", account_id)
             quote = self.row(db, "quotes", quote_id)
-            symbol_leverage(quote['symbol'], leverage)
+            symbol_leverage(quote['symbol'], leverage, quote)
             if not fresh(quote, at):
                 raise ValueError("报价已过期，请刷新报价并重新确认")
             result = self.open_fill(db, account_id, side, qty, quote, note, at, marks, leverage,
@@ -364,8 +370,6 @@ class PaperDesk:
         used. Round base quantity down; confirmation rechecks affordability and
         never silently changes the quantity the owner reviewed.
         """
-        if type(leverage) is not int or leverage not in ENTRY_LEVERAGES:
-            raise ValueError("请选择支持的杠杆档位")
         if side not in {"long", "short"}:
             raise ValueError("方向无效")
         with self.connect() as db:
@@ -373,7 +377,9 @@ class PaperDesk:
             at = clock_ms()
             account = self.row(db, "accounts", account_id)
             quote = self.row(db, "quotes", quote_id)
-            symbol_leverage(quote['symbol'], leverage)
+            if not quick_quote(quote) and (type(leverage) is not int or leverage not in ENTRY_LEVERAGES):
+                raise ValueError('请选择支持的杠杆档位')
+            symbol_leverage(quote['symbol'], leverage, quote)
             if not fresh(quote, at):
                 raise ValueError("报价已过期，请重新获取")
             positions = [dict(r) for r in db.execute("SELECT * FROM positions WHERE account_id=? AND CAST(remaining AS NUMERIC)>0", (account_id,))]
@@ -396,11 +402,14 @@ class PaperDesk:
             if raw > Decimal("1e12"):
                 raise ValueError("仓位数量超过模拟范围，请选择其他合约或账户")
             step = Decimal("1e-12")
-            qty = raw.quantize(step, rounding=ROUND_DOWN)
+            if quick_quote(quote):
+                instrument = marks[quote['symbol']]['risk']['instrument']
+                step = positive(instrument['ctVal'])*positive(instrument['lotSz'])
+            qty = (raw/step).to_integral_value(rounding=ROUND_DOWN)*step
             if position_multiple is None and notional_usdt is None and margin(qty, px, leverage) + qty * px * rate > budget:
                 qty -= step
             positive(qty)
-            self.check_open(db, account_id, quote["symbol"], qty, px, leverage, marks, at, fee_rate=rate)
+            self.check_open(db, account_id, quote["symbol"], qty, px, leverage, marks, at, fee_rate=rate, entry_quote=quote)
             collateral, fee = margin(qty, px, leverage), qty * px * rate
             result = dict(quantity=format(qty, "f"), budget=str(budget),
                           margin=str(collateral), fee=str(fee), execution_price=str(px), fee_rate=str(rate), fee_role='maker' if rate == MAKER_FEE else 'taker', sizing="all_available", **stops)
@@ -414,8 +423,8 @@ class PaperDesk:
                               position_multiple=str(qty * px / equity), available_after=str(budget - collateral - fee))
             return result
 
-    def check_open(self, db, account_id, symbol, qty, px, leverage, marks, at, exclude_order=None, fee_rate=TAKER_FEE):
-        symbol_leverage(symbol, leverage)
+    def check_open(self, db, account_id, symbol, qty, px, leverage, marks, at, exclude_order=None, fee_rate=TAKER_FEE, entry_quote=None):
+        symbol_leverage(symbol, leverage, entry_quote)
         account = self.row(db, "accounts", account_id)
         positions = [dict(r) for r in db.execute("SELECT * FROM positions WHERE account_id=? AND CAST(remaining AS NUMERIC)>0", (account_id,))]
         active = [p for p in positions if number(p["remaining"]) > 0]
@@ -439,6 +448,21 @@ class PaperDesk:
         totals = self.totals(account, positions, marks, at, orders)
         if totals["available"] is None:
             raise ValueError("已有持仓的行情不完整，暂不能核算可用资金")
+        if quick_quote(entry_quote):
+            from .monday_ticket import exposure_budget
+            limits = exposure_budget(symbol, totals, active, opening, marks)
+            if qty*px > number(limits['exposure_remaining']):
+                raise ValueError('超过总权益仓位额度，请重新预览')
+            instrument = (mark or {}).get('risk', {}).get('instrument', {})
+            if instrument.get('instId') != symbol:
+                raise ValueError('交易所合约规格暂不可用')
+            contracts = qty/positive(instrument['ctVal'])
+            if leverage > positive(instrument['lever']):
+                raise ValueError('超过交易所合约最大杠杆')
+            if contracts < positive(instrument['minSz']) or contracts % positive(instrument['lotSz']):
+                raise ValueError('数量不符合交易所最小数量或步长')
+            if contracts > positive(instrument['maxLmtSz'] if json.loads(entry_quote.get('risk_json') or '{}').get('monday_order_type')=='limit' else instrument['maxMktSz']):
+                raise ValueError('数量超过交易所单笔上限')
         if margin(qty, px, leverage) + qty * px * fee_rate > number(totals["available"]):
             raise ValueError("模拟可用资金不足（需覆盖保证金和开仓手续费）")
         return account
@@ -448,7 +472,7 @@ class PaperDesk:
         """Commit a fill within the caller's transaction; price overrides are limit prices only."""
         px = number(quote["ask"] if side == "long" else quote["bid"]) if price is None else number(price)
         stops = stop_prices(side, px, take_profit, stop_loss)
-        account = self.check_open(db, account_id, quote["symbol"], qty, px, leverage, marks, at, exclude_order, fee_rate)
+        account = self.check_open(db, account_id, quote["symbol"], qty, px, leverage, marks, at, exclude_order, fee_rate, entry_quote=quote)
         fee = qty * px * fee_rate
         position = dict(id=uuid.uuid4().hex, account_id=account_id, symbol=quote["symbol"], side=side,
                         quantity=str(qty), remaining=str(qty), entry_price=str(px), realized="0", fees=str(fee),

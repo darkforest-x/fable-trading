@@ -22,3 +22,55 @@
 #monday-fib-root .mf-live-footnote {font-size:11px;color:var(--mf-muted);}
 #monday-fib-root .mf-live-recent {display:grid;gap:6px;}
 #monday-fib-root .mf-live-recent button {text-align:left;padding:8px;border:1px solid #8b9aa02a;border-radius:10px;font-size:12px;}
+/* Stitch 0e1cb04622f444cea23f0fa2a9f46919, shared compact paper/live ticket. */
+#monday-fib-root .mf-live-form {display:flex;flex-direction:column;gap:0;min-height:0;height:100%;overflow:hidden;}
+#monday-fib-root .mf-ticket-scroll {overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;min-height:0;padding:4px 18px 18px;display:grid;gap:14px;scroll-padding:12px;}
+#monday-fib-root .mf-ticket-scroll h3 {font-size:23px;letter-spacing:-.6px;}
+#monday-fib-root .mf-ticket-account {display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--mf-muted);}
+#monday-fib-root .mf-ticket-account label {flex:1;}
+#monday-fib-root .mf-ticket-account select {padding:8px;}
+#monday-fib-root .mf-ticket-segment {display:flex;background:#eaf0f4bd;border-radius:28px;padding:4px;min-width:0;align-items:center;}
+#monday-fib-root .mf-ticket-segment button {flex:1;min-width:0;padding:10px 8px;font-size:14px;white-space:nowrap;border-radius:24px;}
+#monday-fib-root .mf-ticket-segment [aria-pressed=true] {background:var(--mf-blue);color:white;box-shadow:0 3px 9px #0071e31c;}
+#monday-fib-root .mf-ticket-sides [data-fl-side=short][aria-pressed=true],#monday-fib-root [data-side=short] .mf-live-primary {background:#fa386a;}
+#monday-fib-root .mf-ticket-order {align-items:start;grid-template-columns:1fr 1fr;}
+#monday-fib-root .mf-ticket-order label {grid-template-columns:auto 68px;gap:4px;align-items:center;font-size:12px;}
+#monday-fib-root .mf-ticket-order input {padding:8px;font-weight:600;text-align:center;}
+#monday-fib-root .mf-ticket-order [data-fl-maximum] {grid-column:1/-1;font-size:11px;min-height:26px;padding:2px;color:var(--mf-blue);}
+#monday-fib-root .mf-ticket-stop {position:relative;}
+#monday-fib-root .mf-ticket-stop input {font-size:24px;padding:14px;}
+#monday-fib-root .mf-ticket-stop [data-fl-auto-stop] {position:absolute;right:0;top:-12px;font-size:11px;color:var(--mf-blue);}
+#monday-fib-root .mf-ticket-hint {font-size:11px;color:var(--mf-muted);line-height:1.6;overflow-wrap:anywhere;}
+#monday-fib-root .mf-ticket-allocation {display:grid;gap:12px;}
+#monday-fib-root .mf-ticket-between {display:flex;justify-content:space-between;align-items:center;}
+#monday-fib-root .mf-ticket-between strong {font-size:22px;}
+#monday-fib-root .mf-ticket-allocation input[type=range] {padding:0;border:0;background:transparent;accent-color:var(--mf-blue);min-height:30px;}
+#monday-fib-root .mf-ticket-presets {display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+#monday-fib-root .mf-ticket-presets button {border:1px solid #dce4ea;font-size:12px;}
+#monday-fib-root .mf-ticket-presets [aria-pressed=true] {background:#0071e310;color:var(--mf-blue);border-color:#0071e340;}
+#monday-fib-root .mf-ticket-link {font-size:12px;color:var(--mf-blue);}
+#monday-fib-root .mf-ticket-footer {flex-shrink:0;display:grid;gap:8px;padding:12px 18px max(12px,env(safe-area-inset-bottom));border-top:1px solid #dfe5e9;background:#fffffff2;}
+#monday-fib-root .mf-ticket-summary {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+#monday-fib-root .mf-ticket-summary div {display:grid;gap:3px;min-width:0;}
+#monday-fib-root .mf-ticket-summary span,#monday-fib-root .mf-ticket-footer small {font-size:10px;color:var(--mf-muted);}
+#monday-fib-root .mf-ticket-summary strong {font-size:15px;overflow-wrap:anywhere;}
+#monday-fib-root .mf-live-form .mf-live-primary {border-radius:28px;min-height:48px;font-size:15px;}
+#monday-fib-root .mf-live-review [data-fl-edit] {color:var(--mf-blue);font-size:12px;}
+@media(max-width:760px){#monday-fib-root .mf-live-form :is(input,select) {font-size:16px;}#monday-fib-root .mf-ticket-stop input {font-size:23px;}}
+@media(max-height:540px) and (max-width:760px){#monday-fib-root .mf-quick-status,#monday-fib-root .mf-ticket-footer small {display:none;}#monday-fib-root .mf-ticket-footer {padding-top:7px;gap:4px;}#monday-fib-root .mf-ticket-summary {display:none;}}
+@media(max-width:760px){
+ #monday-fib-root .mf-keyboard .mf-quick-status,
+ #monday-fib-root .mf-keyboard .mf-ticket-summary,
+ #monday-fib-root .mf-keyboard .mf-ticket-footer small,
+ #monday-fib-root .mf-keyboard [data-fl-equity] {display:none;}
+ #monday-fib-root .mf-keyboard .mf-ticket-footer {padding:6px 14px max(8px,env(safe-area-inset-bottom));gap:0;}
+ #monday-fib-root .mf-keyboard .mf-sheet-grabber {min-height:16px!important;padding:6px;}
+ #monday-fib-root .mf-keyboard .mf-quick-modes {margin-top:0;}
+ #monday-fib-root .mf-keyboard .mf-ticket-scroll {scroll-padding:8px;padding-bottom:10px;}
+}
+#monday-fib-root .mf-quick-panel {background-color:rgba(250,252,253,.97);}
+#monday-fib-root .mf-ticket-scroll,#monday-fib-root .mf-live-form fieldset {gap:10px;}
+#monday-fib-root .mf-ticket-account label {display:flex;align-items:center;gap:8px;}
+#monday-fib-root .mf-ticket-account select {flex:1;width:0;}
+#monday-fib-root .mf-ticket-allocation {gap:8px;}
+#monday-fib-root .mf-live-form details {padding:8px 12px;}

@@ -19,8 +19,9 @@ class Preview(BaseModel):
     symbol: str = Field(pattern=r'^[A-Z0-9]{1,32}-USDT-SWAP$')
     side: Literal['long', 'short']
     order_type: Literal['market', 'limit']
-    notional_usdt: str = Field(pattern=NUMBER)
-    leverage: str = Field(pattern=r'^\d{1,3}$')
+    notional_usdt: Optional[str] = Field(default=None, pattern=NUMBER)
+    leverage: Optional[str] = Field(default=None, pattern=r'^\d{1,3}$')
+    allocation_percent: str = Field(default='100', pattern=NUMBER)
     limit_price: Optional[str] = Field(default=None, pattern=NUMBER)
     take_profit: Optional[str] = Field(default=None, pattern=NUMBER)
     stop_loss: Optional[str] = Field(default=None, pattern=NUMBER)
@@ -46,6 +47,16 @@ def install(router, service, call):
         if value['state'] == 'preview' and service.clock() >= value['expires_ms']:
             value = dict(value, state='expired')
         return clean(value)
+
+    @router.post('/free/defaults')
+    def defaults(payload: Preview):
+        def run():
+            engine = ready()
+            opener = service.preview_opener() if isinstance(engine.client, Client) else None
+            with preview_engine(engine, service.preview_pacer, opener) as local:
+                local.client.prefetch(payload.symbol, shared=True)
+                return clean(make_plan(local, payload.model_dump(), defaults_only=True))
+        return call(run)
 
     @router.post('/free/preview')
     def preview(payload: Preview):

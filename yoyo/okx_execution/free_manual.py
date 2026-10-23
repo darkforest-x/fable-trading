@@ -19,7 +19,7 @@ from .manual_inventory import policy, pages
 from .risk import D, amount, quantize
 from .store import identifier
 
-REVISION = 'free-manual-20261023-v1'
+REVISION = 'free-manual-20261023-v2'
 PENDING = ('confirmed', 'leverage_pending', 'sending', 'live', 'partially_filled', 'protection_pending')
 
 
@@ -78,6 +78,16 @@ class Tickets:
                 return dict(value, state=row[0])
             if row[0] != 'preview' or not value['created_ms'] <= now < value['expires_ms']:
                 raise ValueError('订单预览已过期或已编辑，请重新预览')
+            if 'exposure_cap' in value:
+                from yoyo.contracts.manual_exposure import pool
+                used = D(value['exchange_exposure_used'])
+                represented = value.get('represented_client_ids', [])
+                for state, encoded in db.execute("SELECT state,value FROM tickets WHERE state IN ('confirmed','leverage_pending','sending','live','partially_filled','protection_pending','unknown')"):
+                    other = json.loads(encoded)
+                    if pool(other['symbol']) == pool(value['symbol']) and other['client_order_id'] not in represented:
+                        used += D(other['notional'])
+                if used + D(value['notional']) > D(value['exposure_cap']):
+                    raise ValueError('仓位额度已被其他委托占用，请重新预览')
             value['confirmed_ms'] = now
             try:
                 db.execute("UPDATE tickets SET state='confirmed',value=? WHERE id=?", (json.dumps(value), identity))
@@ -90,6 +100,11 @@ class Tickets:
             rows = db.execute('SELECT id FROM tickets WHERE state IN ('+','.join('?' for _ in PENDING)+') ORDER BY rowid', PENDING).fetchall()
         return [self.get(r[0]) for r in rows]
 
+    def reserved(self):
+        with self.db() as db:
+            rows = db.execute("SELECT state,value FROM tickets WHERE state IN ('confirmed','leverage_pending','sending','live','partially_filled','protection_pending','unknown')").fetchall()
+        return [dict(json.loads(r[1]), state=r[0]) for r in rows]
+
     def recent(self):
         with self.db() as db:
             rows = db.execute("SELECT id FROM tickets WHERE json_extract(value,'$.confirmed_ms') IS NOT NULL ORDER BY rowid DESC LIMIT 30").fetchall()
@@ -97,7 +112,7 @@ class Tickets:
 
 
 def clean(value):
-    return {k: v for k, v in value.items() if k not in ('account_uid', 'order_body', 'ticket_id')}
+    return {k: v for k, v in value.items() if k not in ('account_uid', 'order_body', 'ticket_id', 'represented_client_ids')}
 
 
 def vacant(engine, account, symbol):
@@ -109,22 +124,30 @@ def vacant(engine, account, symbol):
         raise ValueError('这个币种由均线策略管理，不能混入自由手动订单')
     if any(p['instId'] == symbol and D(p['pos']) != 0 for p in account['positions']):
         raise ValueError('这个币种已有持仓，请先在账户页核对；本入口不改已有仓位的杠杆')
+    inventory = []
     for path, identity, queries in (
         ('/api/v5/trade/orders-pending', 'ordId', [{}]),
         ('/api/v5/trade/orders-algo-pending', 'algoId', [dict(ordType=k) for k in ('conditional', 'oco', 'trigger', 'move_order_stop')]),
     ):
         for query in queries:
-            if any(r['instId'] == symbol for r in pages(engine.client, path, identity, **query)):
+            rows = pages(engine.client, path, identity, **query)
+            inventory.extend(rows)
+            if any(r['instId'] == symbol for r in rows):
                 raise ValueError('这个币种已有挂单或保护单，请先在账户页核对')
+    return inventory
 
 
-def make_plan(engine, terms, *, approved=None):
+def make_plan(engine, terms, *, approved=None, defaults_only=False):
     """Read actual specifications/fees; never resize or change a reviewed order."""
     symbol, side = terms['symbol'], terms['side']
     if side not in ('long', 'short') or terms['order_type'] not in ('market', 'limit'):
         raise ValueError('请选择方向和委托类型')
     account = engine.account()
-    vacant(engine, account, symbol)
+    inventory = vacant(engine, account, symbol)
+    from .free_exposure import budget
+    from yoyo.contracts.manual_exposure import target
+    limits = budget(engine, account, symbol, inventory,
+                    Tickets(engine.store.path.parent).reserved(), approved['id'] if approved else None)
     instrument = one(engine.client.get('/api/v5/account/instruments', instType='SWAP', instId=symbol))
     if (instrument.get('instId') != symbol or instrument.get('instType') != 'SWAP'
             or instrument.get('ctType') != 'linear' or instrument.get('settleCcy') != 'USDT'
@@ -137,7 +160,10 @@ def make_plan(engine, terms, *, approved=None):
     if min(tick, lot, ctval) <= 0:
         raise ValueError('合约规格暂不可用')
     price = D(terms['limit_price'] if terms['order_type'] == 'limit' else ticker['askPx' if side == 'long' else 'bidPx'])
-    leverage, requested = D(terms['leverage']), D(terms['notional_usdt'])
+    requested = D(terms['notional_usdt']) if terms.get('notional_usdt') is not None else target(limits, terms.get('allocation_percent', '100'))
+    leverage = D(terms['leverage']) if terms.get('leverage') is not None else D(1)
+    if requested > D(limits['exposure_remaining']):
+        raise ValueError('超过总权益仓位额度，请刷新账户或降低额度')
     if min(price, leverage, requested) <= 0 or leverage != leverage.to_integral_value():
         raise ValueError('金额和价格必须大于 0，杠杆必须是正整数')
     if terms['order_type'] == 'limit' and price % tick:
@@ -151,8 +177,16 @@ def make_plan(engine, terms, *, approved=None):
     if not matching:
         raise ValueError('委托数量不在交易所支持的持仓档位内')
     max_leverage = min(D(instrument['lever']), *(D(t['maxLever']) for t in matching))
+    if terms.get('leverage') is None:
+        leverage = max_leverage.to_integral_value(rounding='ROUND_FLOOR')
     if leverage > max_leverage:
         raise ValueError(f'该币种在此数量下最高支持 {amount(max_leverage)} 倍杠杆，请调整后重新预览')
+    limits.update(max_leverage=amount(max_leverage), leverage=amount(leverage),
+                  price=amount(price), notional_usdt=amount(requested),
+                  notional=amount(size*ctval*price), size=amount(size),
+                  available=account['available'], tick_size=amount(tick))
+    if defaults_only:
+        return limits
     fee = one(engine.client.get('/api/v5/account/trade-fee', instType='SWAP', instFamily=instrument['instFamily']))
     # Current V5 uses feeGroup; top-level maker/taker are deprecated and are
     # empty for USDT swaps. Match the instrument's group, never guess a fee.
@@ -184,7 +218,7 @@ def make_plan(engine, terms, *, approved=None):
         body['px'] = amount(price)
     if exits:
         body['attachAlgoOrds'] = [dict(exits, attachAlgoClOrdId=identifier(identity, 'free-exits'))]
-    return dict(terms, id=identity, account_uid=account['uid'], account_scope='yolo_manual',
+    return dict({**terms, **limits}, id=identity, account_uid=account['uid'], account_scope='yolo_manual',
                 size=amount(size), base_quantity=amount(size*ctval), price=amount(price),
                 notional=amount(notional), margin=amount(margin), fee_reserve=amount(fee_reserve),
                 required=amount(margin+fee_reserve), available=account['available'],

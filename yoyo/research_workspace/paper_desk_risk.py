@@ -91,7 +91,7 @@ class PublicRisk:
                 continue
             result[symbol] = dict(mark_price=str(positive(mark['markPx'])), mark_source_ms=int(mark['ts']),
                                   risk=dict(contract_size=str(positive(instrument['ctVal']) * positive(instrument['ctMult'])),
-                                            tiers=cached[1], fetched_ms=cached[2]))
+                                            tiers=cached[1], fetched_ms=cached[2], instrument=dict(instrument)))
         return result
 
 

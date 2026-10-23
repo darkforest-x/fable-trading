@@ -53,7 +53,7 @@
     function restore(){
       if(!active||drag)return;
       for(const b of blocks){
-        resetStyle(b);if(!b.getClientRects().length)continue;
+        resetStyle(b);if((surface()==='mobile'&&b.dataset.mfMovable==='quick')||!b.getClientRects().length)continue;
         const p=saved[surface()]?.[b.dataset.mfMovable],r=rect(b);
         if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y))move(b,p.x*(env.innerWidth-r.width),p.y*(env.innerHeight-r.height));
       }
@@ -70,7 +70,7 @@
     const bindings=[];
     for(const block of blocks){
       const handle=block.querySelector('[data-mf-grip]');if(!handle)continue;
-      const down=e=>{if(!active||e.isPrimary===false||(e.button!=null&&e.button!==0))return;e.preventDefault();handle.focus?.({preventScroll:true});const r=rect(block);drag={block,handle,id:e.pointerId,startX:e.clientX,startY:e.clientY,x:r.x,y:r.y,width:r.width,height:r.height,moved:false,before:Object.fromEntries(['left','top','right','bottom','transform'].map(k=>[k,block.style[k]]))};handle.setPointerCapture?.(e.pointerId);};
+      const down=e=>{if((surface()==='mobile'&&block.dataset.mfMovable==='quick')||!active||e.isPrimary===false||(e.button!=null&&e.button!==0))return;e.preventDefault();handle.focus?.({preventScroll:true});const r=rect(block);drag={block,handle,id:e.pointerId,startX:e.clientX,startY:e.clientY,x:r.x,y:r.y,width:r.width,height:r.height,moved:false,before:Object.fromEntries(['left','top','right','bottom','transform'].map(k=>[k,block.style[k]]))};handle.setPointerCapture?.(e.pointerId);};
       const pointer=e=>{if(!drag||drag.handle!==handle||drag.id!==e.pointerId)return;const dx=e.clientX-drag.startX,dy=e.clientY-drag.startY;if(!drag.moved&&Math.hypot(dx,dy)<5)return;drag.moved=true;block.classList.add('mf-dragging');drag.next={x:drag.x+dx,y:drag.y+dy};if(env.requestAnimationFrame){if(dragFrame===null)dragFrame=env.requestAnimationFrame(paintDrag);}else paintDrag();};
       const up=e=>{if(drag?.handle===handle&&drag.id===e.pointerId)finish();};
       const cancel=()=>finish(false);
@@ -113,8 +113,8 @@
       <div id="mf-rows" class="mf-rows" role="region" aria-label="已触价币种滚动列表" tabindex="0"></div>
       <p class="mf-list-note">点击列表切换图表 · 币种名称 ↗ ${windowsDesktop?'本机 ':''}TradingView</p>
     </aside>
-    <aside id="mf-quick-panel" class="mf-quick-panel mf-glass" data-mf-movable="quick" aria-label="快捷开单" hidden>
-      <header class="mf-quick-heading">${grip('快捷开单')}<h2>快捷开单</h2><button type="button" data-quick-close aria-label="关闭快捷开单">${icon('x')}</button></header>
+    <button id="mf-quick-backdrop" class="mf-quick-backdrop" tabindex="-1" aria-label="关闭快捷开单" hidden></button><aside id="mf-quick-panel" class="mf-quick-panel mf-glass" data-mf-movable="quick" aria-label="快捷开单" hidden>
+      <button type="button" class="mf-sheet-grabber" data-quick-grabber aria-label="向下滑动关闭快捷开单"><span></span></button><header class="mf-quick-heading">${grip('快捷开单')}<h2>快捷开单</h2><button type="button" data-quick-close aria-label="关闭快捷开单">${icon('x')}</button></header>
       <div class="mf-quick-modes" role="group" aria-label="交易环境"><button type="button" data-quick-mode="paper" aria-pressed="true">模拟</button><button type="button" data-quick-mode="live" aria-pressed="false">实盘 · 手动</button></div>
       <p data-quick-status class="mf-quick-status"></p><div id="mf-quick-content" class="mf-quick-content"></div>
     </aside>
@@ -132,10 +132,10 @@
   let listOpen=!!window.matchMedia?.('(min-width: 761px)').matches;
   const quick=window.SpikeMondayQuick?.create({
     panel:$('mf-quick-panel'),host:$('mf-quick-content'),trigger:$('mf-quick-toggle'),
-    context:()=>({symbol:selected,timeframe:period}),
+    context:()=>({symbol:selected,timeframe:period,side:latestTouch(data?.items?.find(r=>r.symbol===selected)||{})?.side==='upper'?'short':'long'}),
     visibility:open=>{root.classList.toggle('mf-quick-open',open);layout.refresh();},
-    load:mode=>window.SpikeModules.ensure(mode==='paper'?'paper-desk':'monday-live'),
-    paper:()=>window.SpikePaperDesk,live:()=>window.SpikeMondayLive,
+    load:()=>window.SpikeModules.ensure('monday-live'),
+    paper:()=>window.SpikeMondayPaper,live:()=>window.SpikeMondayLive,
   });
   const nowMs=()=>data?.now_ms?data.now_ms+Math.max(0,Date.now()-receivedAt):Date.now();
   const timeFormat=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});

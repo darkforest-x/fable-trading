@@ -60,7 +60,7 @@ class LimitOrders:
                 rate = limit_fee(side, quote, limit, action)
                 px = number(quote['ask'] if side == 'long' else quote['bid']) if rate == TAKER_FEE else limit
                 stops = stop_prices(side, px, take_profit, stop_loss)
-                account = self.desk.check_open(db, target_id, quote["symbol"], qty, px, leverage, marks or {}, at, fee_rate=rate)
+                account = self.desk.check_open(db, target_id, quote["symbol"], qty, px, leverage, marks or {}, at, fee_rate=rate, entry_quote=quote)
             else:
                 position = self.desk.row(db, "positions", target_id)
                 if position["symbol"] != quote["symbol"]:
@@ -137,6 +137,10 @@ class LimitOrders:
                     if not self.desk.totals(account, positions, marks, at)["marks_complete"]:
                         db.execute("UPDATE limit_orders SET reason=? WHERE id=?", ("触价，等待其他持仓的新鲜行情核算资金", order["id"]))
                         continue
+                from .paper_desk import quick_quote
+                original = self.desk.row(db, 'quotes', order['quote_id'])
+                if quick_quote(original):
+                    mark = dict(mark, risk={**mark.get('risk', {}), 'monday_quick': True, 'monday_order_type':'limit'})
                 quote = self.desk.record_quote(db, mark)
                 order["trigger_quote_id"] = quote["id"]
                 try:

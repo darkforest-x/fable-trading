@@ -23,53 +23,126 @@
   if(typeof module!=='undefined')module.exports={Flow,terminal};
   if(typeof document==='undefined')return;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const num=v=>v==null?'—':Number(v).toLocaleString('en-US',{maximumFractionDigits:8});
-  const labels={preview:'核对订单',confirmed:'已确认 · 等待执行',leverage_pending:'正在核对杠杆',sending:'正在核对交易所回执',live:'限价挂单中',partially_filled:'部分成交',filled:'委托已成交',canceled:'委托已撤销',protection_pending:'成交保护待核对',rejected:'本次未下单',expired:'报价已过期',superseded:'报价已更新',unknown:'原订单需要核对'};
-  let host=null,revision=0,timer,ticketId,symbol;
-  const controllers=new Set();
-  async function request(path,options={}){
-    const confirmation=path.endsWith('/confirm'),c=new AbortController();if(!confirmation)controllers.add(c);
+  const num=v=>v==null||v===''||!Number.isFinite(Number(v))?'—':Number(v).toLocaleString('en-US',{maximumFractionDigits:Math.abs(Number(v))<1?12:4});
+  const labels={preview:'核对订单',confirmed:'已确认 · 等待执行',leverage_pending:'正在核对杠杆',sending:'正在核对回执',live:'限价挂单中',partially_filled:'部分成交',filled:'委托已成交',canceled:'委托已撤销',protection_pending:'成交保护待核对',rejected:'本次未下单',expired:'报价已过期',superseded:'报价已更新',unknown:'原订单需要核对'};
+  let host=null,revision=0,timer,defaultTimer,ticketId,symbol,context,mode,accountId='',limits=null,defaultVersion=0,stopVersion=0,loading=false,autoAmount=true,autoLeverage=true,paperPlan=null,defaultRetries=0;
+  const controllers=new Set(),pendingKey='spike-monday-paper-pending-v1';
+  const $=s=>host?.querySelector(s),field=n=>$('form')?.elements[n];
+  async function http(path,options={}){
+    const mutation=path.endsWith('/confirm')||/\/(open|limit-open)$/.test(path),c=new AbortController();if(!mutation)controllers.add(c);
     const timeout=setTimeout(()=>c.abort(),90000);
-    try{const r=await fetch('/api/manual-live'+path,{cache:'no-store',credentials:'same-origin',...options,signal:c.signal,headers:{'Content-Type':'application/json','X-Fable-Manual':'owner-confirmation'}});
-      const d=await r.json();if(!r.ok)throw Error(typeof d.detail==='string'?d.detail:d.detail?.message||'账户或订单暂不可用，请重试');return d;
+    try{const r=await fetch(path,{cache:'no-store',credentials:'same-origin',...options,signal:c.signal,headers:{'Content-Type':'application/json','X-Fable-Manual':'owner-confirmation'}});
+      const d=await r.json();if(!r.ok){const e=Error(typeof d.detail==='string'?d.detail:d.detail?.message||'账户或订单暂不可用，请重试');e.status=r.status;throw e;}return d;
     }catch(e){if(e.name==='AbortError')throw Error('请求超时，请重试');throw e;}finally{clearTimeout(timeout);controllers.delete(c);}
   }
-  const flow=new Flow(request),$=s=>host?.querySelector(s);
+  const post=(path,body)=>http(path,{method:'POST',body:JSON.stringify(body)});
+  function normalizePaper(q,t){return {...t,...q,state:'preview',base_quantity:q.quantity,size:q.quantity,price:q.execution_price,fee_reserve:q.fee,required:String(Number(q.margin)+Number(q.fee)),maker_fee:'0.0002',taker_fee:'0.0005',protection:t.stop_loss||t.take_profit?'pending':'none',request_id:crypto.randomUUID()};}
+  async function transport(path,options={}){
+    if(mode==='live')return http('/api/manual-live'+path,options);
+    if(path==='/free/preview'){
+      const t=JSON.parse(options.body);delete t.ticket_id;
+      const q=await post('/api/research/paper-desk/quick/preview',{...t,account_id:accountId});
+      return normalizePaper(q,t);
+    }
+    if(path.endsWith('/confirm')){
+      const d={...flow.draft},payload={quantity:d.quantity,quote_id:d.id,request_id:d.request_id,side:d.side,leverage:Number(d.leverage),take_profit:d.take_profit,stop_loss:d.stop_loss,note:'Monday 1.618 manual'};
+      if(d.order_type==='limit')payload.limit_price=d.limit_price;
+      const saved={draft:d,symbol,account_id:d.account_id};sessionStorage.setItem(pendingKey,JSON.stringify(saved));paperPlan=d;
+      const value=await post(`/api/research/paper-desk/accounts/${encodeURIComponent(d.account_id)}/${d.order_type==='limit'?'limit-open':'open'}`,payload);
+      sessionStorage.removeItem(pendingKey);
+      return {...d,state:value.order?.status==='pending'?'live':'filled',protection:d.stop_loss||d.take_profit?'verified':'none'};
+    }
+    const d=paperPlan||flow.draft;
+    const value=await http('/api/research/paper-desk/quick/receipt/'+encodeURIComponent(d.request_id));
+    if(!value.found)return {...d,state:'sending',reason:'正在核对原模拟委托，请勿重复提交'};
+    sessionStorage.removeItem(pendingKey);
+    return {...d,state:value.order?.status==='pending'?'live':value.order?.status==='rejected'?'rejected':'filled',protection:d.stop_loss||d.take_profit?'verified':'none'};
+  }
+  const flow=new Flow(transport);
+  function terms(){const f=$('form');return {ticket_id:ticketId,symbol,side:f.elements.side.value,order_type:f.elements.order_type.value,allocation_percent:field('allocation').value,notional_usdt:autoAmount?null:field('notional_usdt').value.trim(),leverage:autoLeverage?null:field('leverage').value,limit_price:field('order_type').value==='limit'?field('limit_price').value.trim()||null:null,take_profit:field('take_profit').value.trim()||null,stop_loss:field('stop_loss').value.trim()||null};}
+  function invalidate(){if(flow.sent)return;flow.reset();render();}
+  function summary(){if(!host)return;const d=flow.draft,n=Number(d?.notional??field('notional_usdt').value),lev=Number(d?.leverage??field('leverage').value),px=Number(d?.price??limits?.price),stop=Number(d?.stop_loss??field('stop_loss').value);
+    $('[data-fl-notional]').textContent=num(n||null);$('[data-fl-margin]').textContent=num(n&&lev?n/lev:null);$('[data-fl-risk]').textContent=num(n&&px&&stop?n*Math.abs(px-stop)/px:null);
+    $('[data-fl-allocation]').textContent=field('allocation').value+'%';
+    for(const b of host.querySelectorAll('[data-fl-percent]'))b.setAttribute('aria-pressed',String(Number(b.dataset.flPercent)===Number(field('allocation').value)&&autoAmount));
+    for(const b of host.querySelectorAll('[data-fl-side]'))b.setAttribute('aria-pressed',String(b.dataset.flSide===field('side').value));
+    for(const b of host.querySelectorAll('[data-fl-type]'))b.setAttribute('aria-pressed',String(b.dataset.flType===field('order_type').value));
+    $('form').dataset.side=field('side').value;$('[data-fl-limit]').hidden=field('order_type').value!=='limit';
+  }
   function render(){
-    if(!host)return;clearTimeout(timer);
-    const d=flow.draft,expired=d&&Date.now()>=d.expires_ms&&!flow.sent;
-    $('fieldset').disabled=flow.busy||!!flow.sent;
+    if(!host)return;clearTimeout(timer);const d=flow.draft,expired=d&&Date.now()>=d.expires_ms&&!flow.sent;
+    $('fieldset').disabled=flow.busy||!!flow.sent;$('[data-fl-preview]').disabled=flow.busy||!!flow.sent||loading||!limits;
+    $('[data-fl-confirm]').hidden=!d||!!flow.sent||expired;$('[data-fl-confirm]').disabled=!flow.canConfirm();
+    $('[data-fl-preview]').hidden=!!d&&!expired;
+    $('[data-fl-preview]').textContent=flow.busy?'正在核对…':loading?'正在读取额度…':`${mode==='live'?'预览实盘':'预览模拟'}${field('side').value==='long'?'做多':'做空'}`;
+    $('[data-fl-confirm]').textContent=`确认${mode==='live'?'实盘':'模拟'}${d?.side==='long'?'做多':'做空'} · ${num(d?.notional)} USDT`;
     $('[data-fl-notice]').textContent=flow.error||d?.reason||'';
-    $('[data-fl-preview]').disabled=flow.busy||!!flow.sent;
-    $('[data-fl-preview]').textContent=flow.busy?'正在核对…':expired?'更新报价':d?'重新预览':'计算并预览订单';
-    $('[data-fl-confirm]').hidden=!d||!!flow.sent||expired;
-    $('[data-fl-confirm]').disabled=!flow.canConfirm();
-    $('[data-fl-confirm]').textContent=d?`确认实盘${d.side==='long'?'做多':'做空'} · ${num(d.size)} 张`:'确认实盘委托';
-    $('[data-fl-review]').innerHTML=d?`<h3>${esc(expired?'报价已过期':labels[d.state]||d.state)}</h3><dl><div><dt>方向 / 类型</dt><dd>${d.side==='long'?'做多':'做空'} · ${d.order_type==='limit'?'限价':'市价'}</dd></div><div><dt>数量</dt><dd>${num(d.size)} 张 · ${num(d.base_quantity)} ${esc(symbol.split('-')[0])}</dd></div><div><dt>${d.order_type==='limit'?'委托价':'参考价'}</dt><dd>${num(d.price)}</dd></div><div><dt>仓位 / 杠杆</dt><dd>${num(d.notional)} USDT / ${esc(d.leverage)}×</dd></div><div><dt>保证金 + 开仓费预留</dt><dd>${num(d.margin)} + ${num(d.fee_reserve)} USDT</dd></div><div><dt>止盈 / 止损</dt><dd>${num(d.take_profit)} / ${num(d.stop_loss)}</dd></div>${d.filled_size?`<div><dt>已成交 / 均价</dt><dd>${num(d.filled_size)} 张 / ${num(d.average_price)}</dd></div>`:''}</dl><p>费率：maker ${num(Number(d.maker_fee)*100)}% / taker ${num(Number(d.taker_fee)*100)}% · 限价也可能按 taker 成交。</p>${d.order_type==='limit'&&(d.take_profit||d.stop_loss)?'<p>限价部分成交时，附带止盈止损等待整单成交或余单撤销后生效。</p>':''}${d.protection==='verified'?'<p>成交时附带止盈止损已核验。</p>':d.protection==='none'?'<p>本单未设置止盈止损。</p>':flow.sent?'<p>请留意附带止盈止损的交易所状态。</p>':''}<small>固定价格止盈止损 · 全仓 · 自行管理</small>`:'';
+    $('[data-fl-review]').innerHTML=d?`<h3>${esc(expired?'报价已过期':labels[d.state]||d.state)}</h3><dl><div><dt>数量 / 杠杆</dt><dd>${num(d.base_quantity)} ${esc(symbol.split('-')[0])} / ${esc(d.leverage)}×</dd></div><div><dt>仓位金额 / 保证金</dt><dd>${num(d.notional)} / ${num(d.margin)} USDT</dd></div><div><dt>止损 / 止盈</dt><dd>${num(d.stop_loss)} / ${num(d.take_profit)}</dd></div><div><dt>开仓费预留</dt><dd>${num(d.fee_reserve)} USDT</dd></div></dl><small>全仓 · 数量按交易所步长向下取整${mode==='live'&&d.order_type==='limit'&&(d.stop_loss||d.take_profit)?'。限价附带止盈止损等待整单成交或余单撤销后生效':''}</small>${!flow.sent?'<button type="button" data-fl-edit>返回编辑</button>':''}`:'';
+    if($('[data-fl-accounts]'))$('[data-fl-accounts]').disabled=flow.busy||!!flow.sent;
+    $('[data-fl-refresh]').disabled=flow.busy||!!flow.sent;
+    $('[data-fl-edit]')?.addEventListener('click',invalidate);
+    summary();
     if(flow.sent&&!document.hidden&&!terminal.has(d?.state))timer=setTimeout(async()=>{await flow.status();render();},2500);
     else if(d&&!expired&&!flow.sent)timer=setTimeout(render,Math.max(1,d.expires_ms-Date.now()+5));
   }
-  async function account(){const r=revision;const n=$('[data-fl-account]');if(!n)return;n.textContent='正在读取实盘账户…';
-    try{const d=await request('/account');if(r!==revision)return;if(d.account_scope!=='yolo_manual')throw Error('账户来源不匹配');
-      const a=d.account;if(a?.status!=='ready')throw Error('实盘账户暂不可用，请重试');
-      n.textContent=`手动专用账户 · 可用 ${num(a.data?.balance?.availEq)} USDT · 自由手动模式`;
-    }catch(e){if(r===revision)n.textContent=e.message;}}
-  async function recent(){const r=revision;try{const d=await request('/free/recent');if(r!==revision)return;
-    $('[data-fl-recent]').innerHTML=(d.items||[]).filter(x=>x.symbol===symbol).slice(0,4).map(x=>`<button type="button" data-fl-order="${esc(x.id)}">${esc(labels[x.state]||x.state)} · ${x.side==='long'?'多':'空'} ${num(x.size)} 张</button>`).join('');
-    }catch(e){if(r===revision)$('[data-fl-recent]').textContent='历史委托暂不可用';}}
-  function closeQuick(){revision++;clearTimeout(timer);for(const c of controllers)c.abort();controllers.clear();flow.reset();host=null;}
-  function openQuick(target,context){closeQuick();host=target;symbol=context.symbol;ticketId=crypto.randomUUID().replaceAll('-','');
-    host.innerHTML=`<form class="mf-live-form"><h3>${esc(symbol.replace('-USDT-SWAP',' / USDT'))}</h3><div class="mf-live-account"><p data-fl-account role="status"></p><button type="button" data-fl-refresh>刷新账户</button></div><fieldset><div class="mf-live-grid"><label>方向<select name="side"><option value="long">做多</option><option value="short">做空</option></select></label><label>合约杠杆<input name="leverage" type="number" min="1" max="999" step="1" value="20" required></label></div><label>仓位金额（USDT）<input name="notional_usdt" type="text" inputmode="decimal" autocomplete="off" placeholder="输入委托金额" required></label><label>下单方式<select name="order_type"><option value="market">市价委托</option><option value="limit">限价委托</option></select></label><label data-fl-limit hidden>委托价格<input name="limit_price" type="text" inputmode="decimal" autocomplete="off"></label><details><summary>止盈 / 止损 · 选填</summary><div class="mf-live-grid"><label>止盈价格<input name="take_profit" type="text" inputmode="decimal" autocomplete="off"></label><label>止损价格<input name="stop_loss" type="text" inputmode="decimal" autocomplete="off"></label></div></details></fieldset><p data-fl-notice class="mf-live-notice" role="alert"></p><section data-fl-review class="mf-live-review" aria-live="polite"></section><button type="submit" data-fl-preview class="mf-live-primary">计算并预览订单</button><button type="button" data-fl-confirm class="mf-live-primary" hidden>确认实盘委托</button><p class="mf-live-footnote">使用现有手动账户 · 自选金额与固定止盈止损 · 每笔需确认</p><div data-fl-recent class="mf-live-recent"></div><a href="#yolo-detect?tab=account">查看实盘账户与持仓 ↗</a></form>`;
-    const form=$('form');form.addEventListener('input',()=>{if(flow.sent)return;flow.reset();render();});
-    form.addEventListener('change',()=>{$('[data-fl-limit]').hidden=form.elements.order_type.value!=='limit';});
-    form.addEventListener('submit',async e=>{e.preventDefault();if(flow.busy||flow.sent)return;const terms=Object.fromEntries(new FormData(form));
-      terms.ticket_id=ticketId;terms.symbol=symbol;for(const k of ['take_profit','stop_loss','limit_price'])terms[k]=terms[k]?.trim()||null;if(terms.order_type==='market')terms.limit_price=null;
-      const r=revision,p=flow.preview(terms);render();await p;if(r===revision)render();});
-    $('[data-fl-confirm]').onclick=async()=>{const r=revision,p=flow.confirm();render();await p;if(r===revision){render();recent();}};
-    $('[data-fl-refresh]').onclick=()=>account();
-    $('[data-fl-recent]').onclick=async e=>{const b=e.target.closest('[data-fl-order]');if(!b)return;flow.reset();flow.sent=b.dataset.flOrder;await flow.status();render();};
-    account().then(()=>{if(host===target)recent();});render();
+  async function defaults(){
+    if(!host||flow.sent||flow.busy)return;const r=revision,v=++defaultVersion;let retry=false;loading=true;limits=null;render();
+    try{const t=terms();let d;if(mode==='live')d=await post('/api/manual-live/free/defaults',t);else {delete t.ticket_id;d=await post('/api/research/paper-desk/quick/defaults',{...t,account_id:accountId});}
+      if(r!==revision||v!==defaultVersion)return;limits=d;flow.error='';
+      if(autoAmount)field('notional_usdt').value=d.notional_usdt;
+      if(autoLeverage)field('leverage').value=d.leverage;
+      field('leverage').max=d.max_leverage;
+      $('[data-fl-max]').textContent=`交易所上限 ${d.max_leverage}×`;
+      $('[data-fl-equity]').textContent=`总权益 ${num(d.equity)} USDT · 可用 ${num(d.available)}`;
+      $('[data-fl-budget]').textContent=`${d.exposure_pool==='alts'?'山寨共享':symbol.split('-')[0]+' 独立'} ${d.exposure_multiple}× · 已占 ${num(d.exposure_used)} / 上限 ${num(d.exposure_cap)} USDT`;
+    }catch(e){if(r===revision&&v===defaultVersion){flow.error=e.message;if(mode==='paper'&&e.status===503&&defaultRetries++<5){retry=true;defaultTimer=setTimeout(defaults,2000);}}}
+    finally{if(r===revision&&v===defaultVersion){loading=retry;render();}}
   }
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(timer);for(const c of controllers)c.abort();}else if(host){if(flow.sent)flow.status().then(render);else render();}});
-  window.SpikeMondayLive={openQuick,closeQuick};
+  function schedule(){defaultRetries=0;clearTimeout(defaultTimer);defaultVersion++;loading=true;limits=null;render();defaultTimer=setTimeout(defaults,350);}
+  async function stop(){const r=revision,v=++stopVersion,side=field('side').value;$('[data-fl-stop-note]').textContent='正在查找本周最近的插针…';
+    try{const d=await http(`/api/monday-fib/order-context?symbol=${encodeURIComponent(symbol)}&period=${encodeURIComponent(context.timeframe)}&side=${side}`);
+      if(r!==revision||v!==stopVersion||flow.sent||flow.busy)return;
+      field('stop_loss').value=d.stop_loss||'';
+      $('[data-fl-stop-note]').textContent=d.stop_loss?`${context.timeframe} · ${new Date(d.candle_ms).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})} 已收盘影线`:(d.reason||'未找到有效插针，请手动填写');invalidate();
+    }catch(e){if(r===revision&&v===stopVersion)$('[data-fl-stop-note]').textContent=e.message;}}
+  async function recent(){const r=revision;try{const d=await http('/api/manual-live/free/recent');if(r!==revision)return;
+    $('[data-fl-recent]').innerHTML=(d.items||[]).filter(x=>x.symbol===symbol).slice(0,4).map(x=>`<button type="button" data-fl-order="${esc(x.id)}">${esc(labels[x.state]||x.state)} · ${x.side==='long'?'多':'空'} ${num(x.notional)} USDT</button>`).join('');
+    }catch(e){if(r===revision)$('[data-fl-recent]').textContent='历史委托暂不可用，请在账户页核对';}}
+  async function init(){const r=revision;
+    if(mode==='live')recent();
+    if(mode==='paper'){
+      try{const data=await http('/api/research/paper-desk/live');if(r!==revision)return;
+        const select=$('[data-fl-accounts]');select.innerHTML=(data.accounts||[]).map(a=>`<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');accountId=data.active_account_id||data.accounts?.[0]?.id||'';select.value=accountId;
+        if(!accountId)throw Error('请先在模拟账户页创建账户');
+        let pending;try{pending=JSON.parse(sessionStorage.getItem(pendingKey)||'null');}catch{}
+        if(pending){paperPlan=pending.draft;flow.draft=paperPlan;flow.sent=paperPlan.id;flow.error='上一笔模拟委托回执待核对，请勿重复提交';await flow.status();render();return;}
+      }catch(e){if(r===revision){flow.error=e.message;loading=false;render();}return;}
+    }
+    if(r===revision){defaults();stop();}
+  }
+  function closeQuick(){revision++;defaultVersion++;stopVersion++;clearTimeout(timer);clearTimeout(defaultTimer);for(const c of controllers)c.abort();controllers.clear();flow.reset();host=null;}
+  function openQuick(target,ctx,environment){closeQuick();host=target;context=ctx;symbol=ctx.symbol;mode=environment;accountId='';limits=null;autoAmount=true;autoLeverage=true;loading=true;paperPlan=null;defaultRetries=0;ticketId=crypto.randomUUID().replaceAll('-','');
+    host.innerHTML=`<form class="mf-live-form"><div class="mf-ticket-scroll"><div class="mf-ticket-account">${mode==='paper'?'<label><span>账户</span><select data-fl-accounts aria-label="模拟账户"></select></label>':'<span>实盘 · 手动专用账户</span>'}<button type="button" data-fl-refresh>刷新</button></div><fieldset><input type="hidden" name="side" value="${ctx.side==='short'?'short':'long'}"><input type="hidden" name="order_type" value="market"><div class="mf-ticket-segment mf-ticket-sides"><button type="button" data-fl-side="long">做多</button><button type="button" data-fl-side="short">做空</button></div><div class="mf-live-grid mf-ticket-order"><div class="mf-ticket-segment"><button type="button" data-fl-type="market">市价</button><button type="button" data-fl-type="limit">限价</button></div><label>合约杠杆<input name="leverage" type="number" inputmode="numeric" min="1" max="125" step="1" aria-label="合约杠杆"><button type="button" data-fl-maximum data-fl-max>读取交易所上限…</button></label></div><label data-fl-limit hidden>限价 · USDT<input name="limit_price" type="text" inputmode="decimal" autocomplete="off"></label><div class="mf-ticket-stop"><label>初始止损 · USDT<input name="stop_loss" type="text" inputmode="decimal" autocomplete="off" placeholder="自动填入插针极值，可修改"></label><button type="button" data-fl-auto-stop>插针自动</button></div><p data-fl-stop-note class="mf-ticket-hint"></p><section class="mf-ticket-allocation"><div class="mf-ticket-between"><span>剩余额度</span><strong data-fl-allocation>100%</strong></div><input name="allocation" type="range" min="1" max="100" step="1" value="100" aria-label="剩余仓位额度百分比"><div class="mf-ticket-presets">${[25,50,75,100].map(x=>`<button type="button" data-fl-percent="${x}">${x}%</button>`).join('')}</div><details><summary>自定义仓位金额</summary><label>仓位金额 · USDT<input name="notional_usdt" type="text" inputmode="decimal" autocomplete="off" placeholder="按总权益自动计算"></label></details><p data-fl-budget class="mf-ticket-hint">BTC / ETH 各 10× · 山寨共享 5×</p></section><details><summary>止盈 · 选填</summary><label>止盈价格 · USDT<input name="take_profit" type="text" inputmode="decimal" autocomplete="off"></label></details></fieldset><p data-fl-notice class="mf-live-notice" role="alert"></p><section data-fl-review class="mf-live-review" aria-live="polite"></section><div data-fl-recent class="mf-live-recent"></div><a class="mf-ticket-link" href="${mode==='paper'?'#paper-desk':'#yolo-detect?tab=account'}">查看账户与持仓 ↗</a></div><footer class="mf-ticket-footer"><div class="mf-ticket-summary"><div><span>持仓金额</span><strong data-fl-notional>—</strong></div><div><span>保证金</span><strong data-fl-margin>—</strong></div><div><span>预计止损</span><strong data-fl-risk>—</strong></div></div><p data-fl-equity class="mf-ticket-hint">正在读取总权益…</p><button type="submit" data-fl-preview class="mf-live-primary">正在读取额度…</button><button type="button" data-fl-confirm class="mf-live-primary" hidden>确认委托</button><small>金额单位 USDT · 止损预估未计费用与滑点</small></footer></form>`;
+    const form=$('form');
+    form.addEventListener('input',e=>{if(flow.sent)return;const n=e.target.name;
+      if(n==='stop_loss'){stopVersion++;$('[data-fl-stop-note]').textContent='手动止损';}
+      if(n==='leverage')autoLeverage=false;if(n==='notional_usdt')autoAmount=false;if(n==='allocation')autoAmount=true;
+      invalidate();if(['allocation','notional_usdt','limit_price','leverage'].includes(n))schedule();});
+    form.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||flow.sent||flow.busy)return;
+      if(b.dataset.flSide){field('side').value=b.dataset.flSide;invalidate();schedule();stop();}
+      if(b.dataset.flType){field('order_type').value=b.dataset.flType;invalidate();schedule();}
+      if(b.dataset.flPercent){field('allocation').value=b.dataset.flPercent;autoAmount=true;invalidate();schedule();}
+    });
+    form.addEventListener('submit',async e=>{e.preventDefault();if(loading||!limits||flow.busy||flow.sent)return;stopVersion++;const r=revision,p=flow.preview(terms());render();await p;if(r===revision){render();$('[data-fl-review]').scrollIntoView({block:'nearest',behavior:'smooth'});}});
+    $('[data-fl-confirm]').onclick=async()=>{const r=revision,p=flow.confirm();render();await p;if(r===revision)render();};
+    $('[data-fl-refresh]').onclick=()=>{if(flow.sent||flow.busy)return;defaultRetries=0;invalidate();defaults();};
+    $('[data-fl-maximum]').onclick=()=>{autoLeverage=true;invalidate();schedule();};
+    $('[data-fl-auto-stop]').onclick=()=>{if(!flow.sent&&!flow.busy)stop();};
+    $('[data-fl-accounts]')?.addEventListener('change',e=>{if(flow.sent||flow.busy)return;accountId=e.target.value;invalidate();defaults();});
+    $('[data-fl-recent]').onclick=async e=>{const b=e.target.closest('[data-fl-order]');if(!b||flow.busy)return;const r=revision;flow.reset();flow.sent=b.dataset.flOrder;await flow.status();if(r===revision)render();};
+    render();init();
+  }
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)clearTimeout(timer);else if(host){if(flow.sent)flow.status().then(render);else render();}});
+  window.SpikeMondayLive={openQuick:(h,c)=>openQuick(h,c,'live'),closeQuick};
+  window.SpikeMondayPaper={openQuick:(h,c)=>openQuick(h,c,'paper'),closeQuick};
 })();

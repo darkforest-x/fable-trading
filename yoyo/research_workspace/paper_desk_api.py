@@ -251,6 +251,9 @@ def install(api, app, workspace_store):
             if not q.get('risk') or not -5000 <= clock_ms() - q.get('mark_source_ms', 0) <= 15000:
                 raise HTTPException(503, 'OKX 标记价或风险档位暂不可用，暂不新增仓位；已有持仓仍可手动平仓')
 
+    from .monday_ticket import install as install_monday_ticket
+    install_monday_ticket(api, app, desk, marks, entry_risk, invoke)
+
     @api.get("/paper-desk")
     def overview():
         error = None
