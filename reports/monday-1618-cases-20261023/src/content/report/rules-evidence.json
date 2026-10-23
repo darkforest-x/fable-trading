@@ -1,0 +1,44 @@
+{
+  "rows": [
+    {
+      "case": "1 · 5m",
+      "touch": "下沿插针收阴；实体不跌破（可碰线），影线触线",
+      "confirmation": "紧接下一根看涨吞没整个前实体，至少一端严格超过",
+      "first": "不限定首次",
+      "entry": "插针开盘后 10 分钟"
+    },
+    {
+      "case": "2 · 15m",
+      "touch": "首次影线触线收回；开盘可碰线，收盘严格在线内；成交量≥前20根最大",
+      "confirmation": "后3根实体严格在线内（开、收均不碰线），影线可触线",
+      "first": "每纽约周、每方向第一次",
+      "entry": "插针开盘后 60 分钟"
+    },
+    {
+      "case": "3 · 1h",
+      "touch": "只有影线触线，实体严格在线内",
+      "confirmation": "后3根的整个高低范围均不触线",
+      "first": "每纽约周、每方向第一次；已明确确认",
+      "entry": "插针开盘后 4 小时"
+    },
+    {
+      "case": "4 · 4h",
+      "touch": "只有影线触线，实体严格在线内",
+      "confirmation": "后3根收盘不在下沿外（可等于线）；空头不收在上沿外",
+      "first": "本次沿用每纽约周、每方向第一次",
+      "entry": "插针开盘后 16 小时"
+    }
+  ],
+  "source": {
+    "label": "Owner rules and frozen causal candidate builders",
+    "files": [
+      "yoyo/evaluation/monday_5m_wick_engulf.py",
+      "yoyo/evaluation/monday_15m_volume_rejection.py",
+      "yoyo/evaluation/monday_1h_wick_hold.py",
+      "yoyo/evaluation/monday_4h_close_hold.py"
+    ],
+    "caveats": [
+      "Long rules shown; short rules are mirrored. First touch applies to cases2–4, not case1."
+    ]
+  }
+}

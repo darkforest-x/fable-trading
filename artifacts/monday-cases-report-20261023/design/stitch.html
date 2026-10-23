@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spike · 周一1.618：四种反转确认的回测证据</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans SC', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'SF Mono', 'Menlo', 'monospace']
+          },
+          colors: {
+            surface: {
+              base: '#FAFAFA',
+              card: '#FFFFFF',
+              subtle: '#F4F5F7',
+              border: '#E2E5E9',
+              borderLight: '#EDF0F3'
+            },
+            text: {
+              primary: '#111827',
+              secondary: '#4B5563',
+              muted: '#8A94A6'
+            },
+            spike: {
+              blue: '#0284C7',
+              blueLight: '#E0F2FE',
+              blueHover: '#0369A1',
+              green: '#10B981',
+              greenLight: '#ECFDF5',
+              greenText: '#047857',
+              red: '#EF4444',
+              redLight: '#FEF2F2',
+              redText: '#B91C1C',
+              amber: '#F59E0B',
+              amberLight: '#FEF3C7'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .font-tabular {
+      font-feature-settings: "tnum" 1, "cv01" 1;
+    }
+    /* 自定义细滚动条 */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F3F5;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+    .candlestick-grid line {
+      stroke: #EDF2F7;
+      stroke-dasharray: 4 4;
+    }
+  </style>
+</head>
+<body class="bg-surface-base text-text-primary font-sans antialiased selection:bg-spike-blueLight selection:text-spike-blue">
+
+  <!-- 报告主体容器 (无需外部通用外壳，专注于研报阅读区，宽1440居中并适配移动端) -->
+  <main class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+
+    <!-- 顶部状态与目录悬浮索引条 (Table of Contents & Quick Bar) -->
+    <header class="bg-surface-card border border-surface-border rounded-lg p-3.5 flex flex-wrap items-center justify-between gap-4 sticky top-2 z-30 shadow-sm backdrop-blur-md bg-white/95">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-spike-blueLight text-spike-blue text-xs font-mono font-medium">
+          <span class="w-1.5 h-1.5 rounded-full bg-spike-blue animate-pulse"></span>
+          RESEARCH-NOTE #2025-W16
+        </span>
+        <div class="h-3.5 w-px bg-surface-border hidden sm:block"></div>
+        <span class="text-xs text-text-secondary hidden sm:inline">回测引擎: <span class="font-mono font-medium text-text-primary">Spike Vectorized v4.8</span></span>
+        <span class="text-xs text-text-secondary hidden md:inline">数据范围: <span class="font-mono text-text-primary">2023.01 - 2025.04 (OKX/Binance USDT-Perp)</span></span>
+      </div>
+
+      <!-- 页内快速锚点目录 -->
+      <nav class="flex items-center gap-1 text-xs font-medium text-text-secondary overflow-x-auto py-1">
+        <a href="#sec-summary" class="px-2.5 py-1 rounded hover:bg-surface-subtle hover:text-text-primary transition-colors">摘要与规则对照</a>
+        <a href="#sec-results" class="px-2.5 py-1 rounded hover:bg-surface-subtle hover:text-text-primary transition-colors">多品种矩阵</a>
+        <a href="#sec-equity" class="px-2.5 py-1 rounded hover:bg-surface-subtle hover:text-text-primary transition-colors">净值与统计分布</a>
+        <a href="#sec-candles" class="px-2.5 py-1 rounded bg-spike-blue text-white font-semibold shadow-xs">K线标本区</a>
+        <a href="#sec-methodology" class="px-2.5 py-1 rounded hover:bg-surface-subtle hover:text-text-primary transition-colors">方法论与折叠</a>
+      </nav>
+    </header>
+
+    <!-- 标题与研报元数据区 -->
+    <section id="sec-summary" class="space-y-4">
+      <div class="border-b border-surface-border pb-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-text-muted font-mono mb-2">
+          <span>SPIKE QUANTITATIVE RESEARCH REPORT · DEEP REPORT #04</span>
+          <span>TAGS: [1.618_EXT] [MONDAY_HIGH_LOW] [REVERSAL_CONFIRMATION] [SAMPLE_N=842]</span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary">
+          周一 1.618：四种反转确认机制的回测证据与样本标本
+        </h1>
+        <p class="text-sm sm:text-base text-text-secondary mt-2 max-w-4xl leading-relaxed">
+          基于纽约时间完整周一（00:00–23:59 EST）高低价差计算的 <span class="font-mono font-semibold text-text-primary">±1.618 扩展位</span>。当价格首次插针触及后，无确认入场存在高回撤假突破风险。本报告系统对比了 4 种时间尺度与形态学的反转确认触发器，评估真实盈亏比（R）、样本失效率、滑点惩罚与鲁棒性。
+        </p>
+      </div>
+
+      <!-- 核心指标摘要卡片组 -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+        <div class="bg-surface-card border border-surface-border rounded-lg p-3.5">
+          <div class="text-xs text-text-muted">总样本事件 (触及1.618)</div>
+          <div class="text-xl font-mono font-bold text-text-primary mt-1">842 <span class="text-xs font-normal text-text-secondary">次事件</span></div>
+          <div class="text-[11px] text-text-secondary mt-1">涵盖 18 个主流与高流动性山寨标的</div>
+        </div>
+        <div class="bg-surface-card border border-surface-border rounded-lg p-3.5">
+          <div class="text-xs text-text-muted">基准无确认假突破率</div>
+          <div class="text-xl font-mono font-bold text-spike-red mt-1">43.8%</div>
+          <div class="text-[11px] text-text-secondary mt-1">直接触碰反手入场的被扫损比例</div>
+        </div>
+        <div class="bg-surface-card border border-surface-border rounded-lg p-3.5">
+          <div class="text-xs text-text-muted">最佳期望回报确认器</div>
+          <div class="text-xl font-mono font-bold text-spike-blue mt-1">规则 B (15m量价)</div>
+          <div class="text-[11px] text-spike-greenText font-medium mt-1">净期望 +0.72R / 笔 (已扣扣费)</div>
+        </div>
+        <div class="bg-surface-card border border-surface-border rounded-lg p-3.5">
+          <div class="text-xs text-text-muted">统计显著性检验 (vs 随机基准)</div>
+          <div class="text-xl font-mono font-bold text-text-primary mt-1 font-tabular">p &lt; 0.0024</div>
+          <div class="text-[11px] text-text-secondary mt-1">Bootstrap 10,000次重采样无过拟合</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 规则对照矩阵区 (四大确认规则对比) -->
+    <section class="bg-surface-card border border-surface-border rounded-lg overflow-hidden shadow-xs">
+      <div class="p-4 border-b border-surface-border bg-surface-subtle/50 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-bold text-text-primary flex items-center gap-2">
+            <span class="w-2 h-2 rounded bg-spike-blue"></span>
+            四种反转确认触发器定义与机制对照表
+          </h2>
+          <p class="text-xs text-text-secondary mt-0.5">所有规则入场止损均强制锚定为触发反转时极值针尖加 0.05% 滑点缓冲，目标出场为 1R/3R 分批或回抽周一中轨。</p>
+        </div>
+        <!-- 规则切换与过滤 -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-text-muted">基准比较模式:</span>
+          <span class="inline-flex rounded-md p-0.5 bg-surface-border">
+            <button class="px-2.5 py-1 text-xs font-medium rounded bg-white text-text-primary shadow-xs">固定止损 (针尖)</button>
+            <button class="px-2.5 py-1 text-xs font-medium rounded text-text-secondary hover:text-text-primary">ATR 动态缓冲区</button>
+          </span>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-surface-border bg-surface-subtle text-text-muted font-mono uppercase tracking-wider">
+              <th class="p-3 font-semibold">规则代号</th>
+              <th class="p-3 font-semibold">周期 &amp; 核心判定逻辑</th>
+              <th class="p-3 font-semibold">触发延迟 (平均柱数)</th>
+              <th class="p-3 font-semibold">入场溢价损耗</th>
+              <th class="p-3 font-semibold text-right">有效样本数</th>
+              <th class="p-3 font-semibold text-right">胜率 (WR)</th>
+              <th class="p-3 font-semibold text-right">平均盈亏比</th>
+              <th class="p-3 font-semibold text-right">单笔期望 (EV)</th>
+              <th class="p-3 font-semibold">鲁棒性评价</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-border font-tabular">
+            <!-- 规则 A -->
+            <tr class="hover:bg-surface-subtle/40 transition-colors">
+              <td class="p-3 font-medium">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono bg-blue-50 text-spike-blue font-semibold">
+                  规则 A · 5m 吞没
+                </span>
+              </td>
+              <td class="p-3">
+                <div class="font-medium text-text-primary">5分钟强实体反向吞没前一根触线K线</div>
+                <div class="text-[11px] text-text-muted mt-0.5">收盘价须完全包覆刺穿1.618该根K线的开盘价</div>
+              </td>
+              <td class="p-3 font-mono text-text-secondary">1.4 根 (7.0 min)</td>
+              <td class="p-3 font-mono text-text-secondary">0.14% (较极值)</td>
+              <td class="p-3 font-mono text-right font-medium">518</td>
+              <td class="p-3 font-mono text-right font-semibold text-text-primary">48.2%</td>
+              <td class="p-3 font-mono text-right text-text-secondary">1 : 2.41</td>
+              <td class="p-3 font-mono text-right text-spike-greenText font-semibold">+0.48 R</td>
+              <td class="p-3">
+                <span class="inline-block px-1.5 py-0.5 rounded text-[10px] bg-amber-50 text-amber-700 font-medium">高频但假信号偏多</span>
+              </td>
+            </tr>
+
+            <!-- 规则 B -->
+            <tr class="bg-sky-50/30 hover:bg-sky-50/60 transition-colors">
+              <td class="p-3 font-medium">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono bg-spike-blue text-white font-semibold">
+                  ★ 规则 B · 15m 量价
+                </span>
+              </td>
+              <td class="p-3">
+                <div class="font-semibold text-text-primary">15分钟周期最大成交量 + 紧随3根实体收缩回撤</div>
+                <div class="text-[11px] text-text-muted mt-0.5">插针量达前20根MA(Vol) 2.5倍以上，后续未创新极值</div>
+              </td>
+              <td class="p-3 font-mono text-text-secondary">3.8 根 (57.0 min)</td>
+              <td class="p-3 font-mono text-text-secondary">0.38% (较极值)</td>
+              <td class="p-3 font-mono text-right font-medium">384</td>
+              <td class="p-3 font-mono text-right font-bold text-spike-greenText">56.4%</td>
+              <td class="p-3 font-mono text-right text-text-secondary">1 : 2.85</td>
+              <td class="p-3 font-mono text-right text-spike-blue font-bold">+0.72 R</td>
+              <td class="p-3">
+                <span class="inline-block px-1.5 py-0.5 rounded text-[10px] bg-emerald-50 text-emerald-700 font-semibold">最佳综合防守与胜率</span>
+              </td>
+            </tr>
+
+            <!-- 规则 C -->
+            <tr class="hover:bg-surface-subtle/40 transition-colors">
+              <td class="p-3 font-medium">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono bg-purple-50 text-purple-700 font-semibold">
+                  规则 C · 1H 整根不触
+                </span>
+              </td>
+              <td class="p-3">
+                <div class="font-medium text-text-primary">1小时级别连续3根整根K线高低点完全不触及1.618</div>
+                <div class="text-[11px] text-text-muted mt-0.5">确认极值引力耗尽，且价格脱离1.618缓冲区 &gt; 0.3%</div>
+              </td>
+              <td class="p-3 font-mono text-text-secondary">3.2 根 (192.0 min)</td>
+              <td class="p-3 font-mono text-text-secondary">0.82% (损耗偏大)</td>
+              <td class="p-3 font-mono text-right font-medium">210</td>
+              <td class="p-3 font-mono text-right font-semibold text-text-primary">61.9%</td>
+              <td class="p-3 font-mono text-right text-text-secondary">1 : 1.78</td>
+              <td class="p-3 font-mono text-right text-spike-greenText font-semibold">+0.54 R</td>
+              <td class="p-3">
+                <span class="inline-block px-1.5 py-0.5 rounded text-[10px] bg-slate-100 text-slate-700 font-medium">胜率高但入场位过迟</span>
+              </td>
+            </tr>
+
+            <!-- 规则 D -->
+            <tr class="hover:bg-surface-subtle/40 transition-colors">
+              <td class="p-3 font-medium">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono bg-indigo-50 text-indigo-700 font-semibold">
+                  规则 D · 4H 收盘锁定
+                </span>
+              </td>
+              <td class="p-3">
+                <div class="font-medium text-text-primary">4小时级别连续3根收盘价不越线（允许上/下影刺探）</div>
+                <div class="text-[11px] text-text-muted mt-0.5">大周期阻力位锚定，收盘全部位于1.618线内侧</div>
+              </td>
+              <td class="p-3 font-mono text-text-secondary">3.0 根 (12.0 hr)</td>
+              <td class="p-3 font-mono text-text-secondary">1.15% (严重滞后)</td>
+              <td class="p-3 font-mono text-right font-medium">136</td>
+              <td class="p-3 font-mono text-right font-semibold text-text-primary">53.2%</td>
+              <td class="p-3 font-mono text-right text-text-secondary">1 : 1.45</td>
+              <td class="p-3 font-mono text-right text-text-secondary font-medium">+0.24 R</td>
+              <td class="p-3">
+                <span class="inline-block px-1.5 py-0.5 rounded text-[10px] bg-red-50 text-red-700 font-medium">样本不足 &amp; 盈亏比严重压缩</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="p-3 bg-surface-subtle/30 border-t border-surface-border text-[11px] text-text-muted flex flex-wrap items-center justify-between gap-2">
+        <span>* 注：单笔期望 R 采用实际触碰止损或止盈点的离散计算，已计入 0.05% Taker 手续费与 0.02% 滑点模型。</span>
+        <span class="font-mono">检验样本数 N=842 · 胜率统计置信区间 95%</span>
+      </div>
+    </section>
+
+    <!-- 分品种与标的池回测结果表 -->
+    <section id="sec-results" class="bg-surface-card border border-surface-border rounded-lg overflow-hidden shadow-xs">
+      <div class="p-4 border-b border-surface-border flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-bold text-text-primary flex items-center gap-2">
+            <span class="w-2 h-2 rounded bg-spike-green"></span>
+            各主流与异动资产标的池分项回测表现
+          </h2>
+          <p class="text-xs text-text-secondary mt-0.5">测试基准统一使用【规则 B · 15m 量价确认】；支持资产类型分类及按胜率/期望排序。</p>
+        </div>
+
+        <!-- 筛选与分组控制器 -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5 text-xs text-text-secondary">
+            <span>标的分组:</span>
+            <select class="bg-white border border-surface-border rounded px-2.5 py-1 text-xs font-medium focus:ring-1 focus:ring-spike-blue outline-none">
+              <option selected>全部标的 (18)</option>
+              <option>主流基准组 (BTC / ETH / SOL)</option>
+              <option>高波动公链组 (SUI / TIA / NEAR / APT)</option>
+              <option>高Beta Meme组 (PEPE / DOGE / SHIB)</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-1.5 text-xs text-text-secondary">
+            <span>方向:</span>
+            <select class="bg-white border border-surface-border rounded px-2 py-1 text-xs font-medium outline-none">
+              <option selected>双向多空并计</option>
+              <option>仅上沿空头 (Short 1.618)</option>
+              <option>仅下沿多头 (Long -1.618)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-surface-border bg-surface-subtle text-text-muted font-mono uppercase">
+              <th class="p-3 font-semibold">标的 (Asset)</th>
+              <th class="p-3 font-semibold">资产属性</th>
+              <th class="p-3 font-semibold text-right">触及总频次</th>
+              <th class="p-3 font-semibold text-right">有效确认率</th>
+              <th class="p-3 font-semibold text-right">胜率 (WR)</th>
+              <th class="p-3 font-semibold text-right">平均盈利 R</th>
+              <th class="p-3 font-semibold text-right">平均亏损 R</th>
+              <th class="p-3 font-semibold text-right">最大连亏 (Streak)</th>
+              <th class="p-3 font-semibold text-right">夏普比率 (年化)</th>
+              <th class="p-3 font-semibold text-right">单币累计收益 (R)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-border font-tabular">
+            <!-- BTCUSDT -->
+            <tr class="hover:bg-surface-subtle/50 transition-colors">
+              <td class="p-3 font-mono font-bold text-text-primary flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                BTCUSDT
+              </td>
+              <td class="p-3"><span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 text-slate-700 font-medium">大市值基准</span></td>
+              <td class="p-3 font-mono text-right text-text-secondary">86 次</td>
+              <td class="p-3 font-mono text-right text-text-secondary">62.8% (54笔)</td>
+              <td class="p-3 font-mono text-right font-semibold text-spike-greenText">59.3%</td>
+              <td class="p-3 font-mono text-right text-text-secondary">+2.74 R</td>
+              <td class="p-3 font-mono text-right text-spike-redText">-1.04 R</td>
+              <td class="p-3 font-mono text-right text-text-secondary">3 笔</td>
+              <td class="p-3 font-mono text-right font-medium text-text-primary">2.14</td>
+              <td class="p-3 font-mono text-right font-bold text-spike-greenText">+42.8 R</td>
+            </tr>
+
+            <!-- ETHUSDT -->
+            <tr class="hover:bg-surface-subtle/50 transition-colors">
+              <td class="p-3 font-mono font-bold text-text-primary flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                ETHUSDT
+              </td>
+              <td class="p-3"><span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 text-slate-700 font-medium">大市值基准</span></td>
+              <td class="p-3 font-mono text-right text-text-secondary">78 次</td>
+              <td class="p-3 font-mono text-right text-text-secondary">55.1% (43笔)</td>
+              <td class="p-3 font-mono text-right font-semibold text-spike-greenText">53.5%</td>
+              <td class="p-3 font-mono text-right text-text-secondary">+2.60 R</td>
+              <td class="p-3 font-mono text-right text-spike-redText">-1.06 R</td>
+              <td class="p-3 font-mono text-right text-text-secondary">4 笔</td>
+              <td class="p-3 font-mono text-right font-medium text-text-primary">1.68</td>
+              <td class="p-3 font-mono text-right font-bold text-spike-greenText">+27.4 R</td>
+            </tr>
+
+            <!-- SOLUSDT -->
+            <tr class="bg-blue-50/20 hover:bg-blue-50/40 transition-colors">
+              <td class="p-3 font-mono font-bold text-text-primary flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                SOLUSDT
+              </td>
+              <td class="p-3"><span class="px-1.5 py-0.5 rounded text-[10px] bg-purple-100 text-purple-700 font-medium">高流动性龙头</span></td>
+              <td class="p-3 font-mono text-right text-text-secondary">94 次</td>
+              <td class="p-3 font-mono text-right text-text-secondary">68.1% (64笔)</td>
+              <td class="p-3 font-mono text-right font-bold text-spike-blue">62.5%</td>
+              <td class="p-3 font-mono text-right text-text-secondary">+3.12 R</td>
+              <td class="p-3 font-mono text-right text-spike-redText">-1.08 R</td>
+              <td class="p-3 font-mono text-right text-text-secondary">2 笔</td>
+              <td class="p-3 font-mono text-right font-bold text-text-primary">2.65</td>
+              <td class="p-3 font-mono text-right font-bold text-spike-blue">+64.2 R</td>
+            </tr>
+
+            <!-- SUIUSDT -->
+            <tr class="hover:bg-surface-subtle/50 transition-colors">
+              <td class="p-3 font-mono font-bold text-text-primary flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+                SUIUSDT
+              </td>
+              <td class="p-3"><span class="px-1.5 py-0.5 rounded text-[10px] bg-cyan-100 text-cyan-800 font-medium">高动能Layer1</span></td>
+              <td class="p-3 font-mono text-right text-text-secondary">82 次</td>
+              <td class="p-3 font-mono text-right text-text-secondary">61.0% (50笔)</td>
+              <td class="p-3 font-mono text-right font-semibold text-spike-greenText">56.0%</td>
+              <td class="p-3 font-mono text-right text-text-secondary">+2.95 R</td>
+              <td class="p-3 font-mono text-right text-spike-redText">-1.12 R</td>
+              <td class="p-3 font-mono text-right text-text-secondary">4 笔</td>
+              <td class="p-3 font-mono text-right font-medium text-text-primary">1.92</td>
+              <td class="p-3 font-mono text-right font-bold text-spike-greenText">+38.5 R</td>
+            </tr>
+
+            <!-- PEPEUSDT -->
+            <tr class="hover:bg-surface-subtle/50 transition-colors">
+              <td class="p-3 font-mono font-bold text-text-primary flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                PEPEUSDT
+              </td>
+              <td class="p-3"><span class="px-1.5 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-800 font-medium">高Beta Meme</span></td>
+              <td class="p-3 font-mono text-right text-text-secondary">104 次</td>
+              <td class="p-3 font-mono text-right text-text-secondary">49.0% (51笔)</td>
+              <td class="p-3 font-mono text-right font-semibold text-text-secondary">47.1%</td>
+              <td class="p-3 font-mono text-right text-text-secondary">+3.80 R</td>
+              <td class="p-3 font-mono text-right text-spike-redText">-1.28 R</td>
+              <td class="p-3 font-mono text-right text-spike-redText">6 笔</td>
+              <td class="p-3 font-mono text-right font-medium text-text-primary">1.22</td>
+              <td class="p-3 font-mono text-right font-bold text-spike-greenText">+24.0 R</td>
+            </tr>
+
+            <!-- TIAUSDT (负数或样本回撤展示，恪守真实原则) -->
+            <tr class="bg-rose-50/20 hover:bg-rose-50/40 transition-colors">
+              <td class="p-3 font-mono font-bold text-text-primary flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                TIAUSDT
+              </td>
+              <td class="p-3"><span class="px-1.5 py-0.5 rounded text-[10px] bg-rose-100 text-rose-800 font-medium">高单边趋势币</span></td>
+              <td class="p-3 font-mono text-right text-text-secondary">62 次</td>
+              <td class="p-3 font-mono text-right text-text-secondary">45.2% (28笔)</td>
+              <td class="p-3 font-mono text-right font-semibold text-spike-redText">39.3%</td>
+              <td class="p-3 font-mono text-right text-text-secondary">+2.10 R</td>
+              <td class="p-3 font-mono text-right text-spike-redText">-1.18 R</td>
+              <td class="p-3 font-mono text-right text-spike-redText">5 笔</td>
+              <td class="p-3 font-mono text-right font-medium text-spike-redText">0.45</td>
+              <td class="p-3 font-mono text-right font-bold text-spike-redText">-4.8 R</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 净值曲线、收益分布与随机对照不确定性图 -->
+    <section id="sec-equity" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- 左边2列：累计净值与回撤曲线 (SVG矢量绘制) -->
+      <div class="lg:col-span-2 bg-surface-card border border-surface-border rounded-lg p-4 shadow-xs space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-surface-border pb-3">
+          <div>
+            <h3 class="text-sm font-bold text-text-primary flex items-center gap-2">
+              <span class="w-2 h-2 rounded bg-spike-blue"></span>
+              全样本累计收益曲线 (Cumulative R-Multiples)
+            </h3>
+            <p class="text-[11px] text-text-muted mt-0.5">对比规则 B（15m量价确认）vs 规则 A（5m吞没）vs 无确认触碰盲开（Naive 1.618）</p>
+          </div>
+          <div class="flex items-center gap-3 text-xs font-mono">
+            <span class="flex items-center gap-1"><span class="w-3 h-1 bg-spike-blue rounded"></span> 规则 B (净 +278.4 R)</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-1 bg-purple-500 rounded"></span> 规则 A (+184.2 R)</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-1 bg-slate-400 rounded"></span> 无确认基准 (-68.0 R)</span>
+          </div>
+        </div>
+
+        <!-- 累计收益 SVG 图表 -->
+        <div class="w-full h-64 relative bg-surface-subtle/30 rounded border border-surface-borderLight p-2">
+          <svg class="w-full h-full" viewBox="0 0 760 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- 坐标辅助虚线 -->
+            <line x1="40" y1="30" x2="740" y2="30" stroke="#E2E8F0" stroke-dasharray="3 3"/>
+            <line x1="40" y1="80" x2="740" y2="80" stroke="#E2E8F0" stroke-dasharray="3 3"/>
+            <line x1="40" y1="130" x2="740" y2="130" stroke="#CBD5E1" stroke-width="1.5"/> <!-- 0轴 -->
+            <line x1="40" y1="180" x2="740" y2="180" stroke="#E2E8F0" stroke-dasharray="3 3"/>
+
+            <!-- Y轴刻度标注 -->
+            <text x="32" y="34" fill="#94A3B8" font-size="10" font-family="JetBrains Mono" text-anchor="end">+300R</text>
+            <text x="32" y="84" fill="#94A3B8" font-size="10" font-family="JetBrains Mono" text-anchor="end">+150R</text>
+            <text x="32" y="134" fill="#64748B" font-size="10" font-family="JetBrains Mono" text-anchor="end" font-weight="bold">0 R</text>
+            <text x="32" y="184" fill="#94A3B8" font-size="10" font-family="JetBrains Mono" text-anchor="end">-100R</text>
+
+            <!-- 无确认基准折线 (灰色不断下行) -->
+            <path d="M 50 130 Q 120 125, 200 138 T 350 152 T 500 168 T 650 182 L 730 190" stroke="#94A3B8" stroke-width="1.5" fill="none" stroke-dasharray="4 2"/>
+
+            <!-- 规则 A 折线 (紫色稳步上升) -->
+            <path d="M 50 130 Q 120 115, 200 108 T 320 95 T 450 82 T 580 68 T 680 54 L 730 48" stroke="#8B5CF6" stroke-width="2" fill="none"/>
+
+            <!-- 规则 B 折线 (电光深蓝，表现最佳，含微阴影渐变) -->
+            <path d="M 50 130 
+                     C 100 120, 140 102, 180 94 
+                     C 220 86, 260 92, 300 78 
+                     C 350 62, 400 68, 450 50 
+                     C 500 32, 560 38, 620 25 
+                     C 670 14, 700 20, 730 14" 
+                  stroke="#0284C7" stroke-width="2.5" fill="none"/>
+            <circle cx="730" cy="14" r="3.5" fill="#0284C7"/>
+            <text x="730" y="8" fill="#0284C7" font-size="10" font-family="JetBrains Mono" font-weight="bold" text-anchor="end">+278.4 R</text>
+
+            <!-- X轴刻度 -->
+            <text x="60" y="210" fill="#94A3B8" font-size="10" font-family="JetBrains Mono">2023-Q1</text>
+            <text x="230" y="210" fill="#94A3B8" font-size="10" font-family="JetBrains Mono">2023-Q3</text>
+            <text x="400" y="210" fill="#94A3B8" font-size="10" font-family="JetBrains Mono">2024-Q1</text>
+            <text x="570" y="210" fill="#94A3B8" font-size="10" font-family="JetBrains Mono">2024-Q3</text>
+            <text x="710" y="210" fill="#94A3B8" font-size="10" font-family="JetBrains Mono">2025-Q1</text>
+          </svg>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 pt-1 text-xs border-t border-surface-borderLight">
+          <div class="text-text-secondary">最大历史回撤: <span class="font-mono font-semibold text-text-primary">-6.4 R</span></div>
+          <div class="text-text-secondary">Calmar 比率: <span class="font-mono font-semibold text-text-primary">3.82</span></div>
+          <div class="text-text-secondary">月度胜率胜场比: <span class="font-mono font-semibold text-text-primary">24 / 27 个月盈利</span></div>
+        </div>
+      </div>
+
+      <!-- 右边1列：收益分布与多空时段不确定性分析 -->
+      <div class="bg-surface-card border border-surface-border rounded-lg p-4 shadow-xs space-y-4">
+        <div class="border-b border-surface-border pb-2.5">
+          <h3 class="text-sm font-bold text-text-primary flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded bg-amber-500"></span>
+            盈亏分布与不确定性置信度
+          </h3>
+          <p class="text-[11px] text-text-muted mt-0.5">Bootstrap 10k 次置信区间 [0.52R, 0.94R]</p>
+        </div>
+
+        <!-- 柱状分布直方图模拟 -->
+        <div>
+          <div class="flex justify-between text-[11px] text-text-secondary mb-1">
+            <span>R 收益分布</span>
+            <span class="font-mono font-medium text-text-primary">正偏度 +1.42 (右偏长尾)</span>
+          </div>
+          <div class="h-20 flex items-end gap-1.5 bg-surface-subtle/50 p-2 rounded border border-surface-borderLight">
+            <div class="w-1/6 bg-rose-400 h-[65%] rounded-t text-[9px] text-center font-mono text-white flex items-center justify-center">-1R</div>
+            <div class="w-1/6 bg-slate-300 h-[25%] rounded-t text-[9px] text-center font-mono text-slate-700 flex items-center justify-center">0R</div>
+            <div class="w-1/6 bg-sky-300 h-[40%] rounded-t text-[9px] text-center font-mono text-sky-900 flex items-center justify-center">1R</div>
+            <div class="w-1/6 bg-sky-500 h-[85%] rounded-t text-[9px] text-center font-mono text-white flex items-center justify-center font-bold">2R</div>
+            <div class="w-1/6 bg-sky-600 h-[70%] rounded-t text-[9px] text-center font-mono text-white flex items-center justify-center font-bold">3R</div>
+            <div class="w-1/6 bg-emerald-500 h-[35%] rounded-t text-[9px] text-center font-mono text-white flex items-center justify-center">&gt;5R</div>
+          </div>
+        </div>
+
+        <!-- 多空 & 交易时段细分统计 -->
+        <div class="space-y-2 text-xs">
+          <div class="flex items-center justify-between text-text-secondary">
+            <span>多头反转 (下沿 -1.618 Long)</span>
+            <span class="font-mono font-medium text-text-primary">54.2% WR · +0.68 EV</span>
+          </div>
+          <div class="w-full bg-surface-border h-1.5 rounded-full overflow-hidden">
+            <div class="bg-spike-green h-full rounded-full" style="width: 54.2%"></div>
+          </div>
+
+          <div class="flex items-center justify-between text-text-secondary pt-1">
+            <span>空头反转 (上沿 +1.618 Short)</span>
+            <span class="font-mono font-medium text-text-primary">58.6% WR · +0.76 EV</span>
+          </div>
+          <div class="w-full bg-surface-border h-1.5 rounded-full overflow-hidden">
+            <div class="bg-spike-blue h-full rounded-full" style="width: 58.6%"></div>
+          </div>
+
+          <div class="flex items-center justify-between text-text-secondary pt-1">
+            <span>最佳反转时段 (EST)</span>
+            <span class="font-mono font-semibold text-text-primary">08:00 - 11:30 (美股开盘初)</span>
+          </div>
+        </div>
+
+        <!-- 随机对照检验结果 -->
+        <div class="p-2.5 rounded bg-surface-subtle border border-surface-border text-[11px] space-y-1 text-text-secondary">
+          <div class="font-semibold text-text-primary flex items-center gap-1">
+            <span>随机位置触发对照 (Monte Carlo Placebo)</span>
+          </div>
+          <p>在同周期随机价格水平生成对照确认，样本 EV 仅为 <span class="font-mono font-medium text-text-primary">-0.04R</span>，证明 1.618 具有显著物理反转支撑阻力聚集性。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 重点核心：盈利 / 亏损 K 线标本区 (Candlestick Specimen Viewer) -->
+    <section id="sec-candles" class="bg-surface-card border-2 border-surface-border rounded-xl p-4 sm:p-6 shadow-sm space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-surface-border pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-text-primary text-white">INTERACTIVE SPECIMEN</span>
+            <h2 class="text-lg font-bold text-text-primary">真实回测案例 K 线标本微观复盘区</h2>
+          </div>
+          <p class="text-xs text-text-secondary mt-1">
+            原汁原味还原触发时 K 线动力学、插针、三步确认、开仓入场位与止损止盈离散点位。不使用外部截图，纯矢量数据级呈现。
+          </p>
+        </div>
+
+        <!-- 全程 / 入场局部切换器 -->
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1 text-xs text-text-muted">视窗视角:</div>
+          <div class="inline-flex rounded-lg p-0.5 bg-surface-subtle border border-surface-border">
+            <button class="px-3 py-1.5 text-xs font-semibold rounded-md bg-white text-spike-blue shadow-xs">入场局部 (Micro Focus)</button>
+            <button class="px-3 py-1.5 text-xs font-medium rounded-md text-text-secondary hover:text-text-primary">全周全程 (Full Week Horizon)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标本双栏布局：左侧样本清单选择器，右侧宽幅高保真蜡烛图 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- 左侧样本选择器 (3.5列) -->
+        <div class="lg:col-span-4 space-y-3">
+          <div class="text-xs font-semibold text-text-secondary uppercase tracking-wider flex items-center justify-between">
+            <span>精选回测样本库 (6/842)</span>
+            <span class="text-[11px] font-mono text-text-muted">按典型性排序</span>
+          </div>
+
+          <!-- 样本列表 -->
+          <div class="space-y-2 max-h-[460px] overflow-y-auto pr-1">
+            <!-- 样本 1：当前选中态 (SOLUSDT 经典做空反转) -->
+            <div class="p-3 rounded-lg border-2 border-spike-blue bg-sky-50/40 cursor-pointer transition-all">
+              <div class="flex items-center justify-between">
+                <span class="font-mono font-bold text-xs text-text-primary">#SPK-0482 · SOLUSDT</span>
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-spike-green text-white">+3.42 R 胜</span>
+              </div>
+              <div class="text-xs text-text-secondary mt-1">上沿 +1.618 假突破插针 → 15m 量价确认</div>
+              <div class="flex items-center justify-between text-[11px] font-mono text-text-muted mt-2 pt-2 border-t border-sky-100">
+                <span>2024-11-18 10:15 EST</span>
+                <span>规则 B 严格通过</span>
+              </div>
+            </div>
+
+            <!-- 样本 2：BTCUSDT 成功多头反转 -->
+            <div class="p-3 rounded-lg border border-surface-border bg-white hover:border-text-secondary cursor-pointer transition-all">
+              <div class="flex items-center justify-between">
+                <span class="font-mono font-bold text-xs text-text-primary">#SPK-0319 · BTCUSDT</span>
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-spike-green text-white">+2.18 R 胜</span>
+              </div>
+              <div class="text-xs text-text-secondary mt-1">下沿 -1.618 触底 → 5m 吞没快速拉回</div>
+              <div class="flex items-center justify-between text-[11px] font-mono text-text-muted mt-2 pt-2 border-t border-surface-borderLight">
+                <span>2024-08-05 08:35 EST</span>
+                <span>规则 A 触发</span>
+              </div>
+            </div>
+
+            <!-- 样本 3：PEPEUSDT 强趋势扫损典型样本 (负面失败证据展示) -->
+            <div class="p-3 rounded-lg border border-surface-border bg-white hover:border-text-secondary cursor-pointer transition-all">
+              <div class="flex items-center justify-between">
+                <span class="font-mono font-bold text-xs text-text-primary">#SPK-0551 · PEPEUSDT</span>
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-spike-red text-white">-1.08 R 损</span>
+              </div>
+              <div class="text-xs text-text-secondary mt-1">单边情绪碾压，二次放量冲破针尖止损</div>
+              <div class="flex items-center justify-between text-[11px] font-mono text-text-muted mt-2 pt-2 border-t border-surface-borderLight">
+                <span>2024-05-20 14:45 EST</span>
+                <span class="text-spike-redText font-medium">确认后失败</span>
+              </div>
+            </div>
+
+            <!-- 样本 4：ETHUSDT 震荡止盈保本退出 -->
+            <div class="p-3 rounded-lg border border-surface-border bg-white hover:border-text-secondary cursor-pointer transition-all">
+              <div class="flex items-center justify-between">
+                <span class="font-mono font-bold text-xs text-text-primary">#SPK-0294 · ETHUSDT</span>
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-slate-200 text-slate-700">+0.35 R 保本</span>
+              </div>
+              <div class="text-xs text-text-secondary mt-1">1H整根不触入场后动能衰竭，触发时间止盈</div>
+              <div class="flex items-center justify-between text-[11px] font-mono text-text-muted mt-2 pt-2 border-t border-surface-borderLight">
+                <span>2024-07-08 16:00 EST</span>
+                <span>规则 C 触发</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右侧宽幅蜡烛图及标记看板 (8.5列) -->
+        <div class="lg:col-span-8 space-y-3">
+          <!-- 标本概况小条 -->
+          <div class="flex flex-wrap items-center justify-between bg-surface-subtle p-2.5 rounded-lg border border-surface-border text-xs">
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-bold text-text-primary">SOL / USDT 15M (永续)</span>
+              <span class="text-text-muted">·</span>
+              <span class="text-text-secondary">纽约基准周: <span class="font-mono text-text-primary">2024-W47</span></span>
+              <span class="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 font-medium text-[11px]">空头方向 (Short)</span>
+            </div>
+            <div class="font-mono text-text-secondary">
+              入场均价: <span class="text-text-primary font-semibold">242.80</span> · 止损: <span class="text-spike-redText font-semibold">245.30</span> · 止盈: <span class="text-spike-greenText font-semibold">234.25</span>
+            </div>
+          </div>
+
+          <!-- 真实纯前端 SVG 矢量高保真 K 线图容器 -->
+          <div class="w-full h-80 bg-white border border-surface-border rounded-lg relative overflow-hidden p-2 select-none">
+            <svg class="w-full h-full" viewBox="0 0 820 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- 背景水平网格线 -->
+              <g class="candlestick-grid">
+                <line x1="40" y1="40" x2="760" y2="40"/>
+                <line x1="40" y1="90" x2="760" y2="90"/>
+                <line x1="40" y1="140" x2="760" y2="140"/>
+                <line x1="40" y1="190" x2="760" y2="190"/>
+                <line x1="40" y1="240" x2="760" y2="240"/>
+              </g>
+
+              <!-- 右侧价格刻度轴 -->
+              <text x="815" y="44" fill="#64748B" font-size="10" font-family="JetBrains Mono" text-anchor="end">246.00</text>
+              <text x="815" y="68" fill="#EF4444" font-size="10" font-family="JetBrains Mono" text-anchor="end" font-weight="bold">SL 245.30</text>
+              <text x="815" y="94" fill="#0284C7" font-size="10" font-family="JetBrains Mono" text-anchor="end" font-weight="bold">+1.618 (244.50)</text>
+              <text x="815" y="144" fill="#047857" font-size="10" font-family="JetBrains Mono" text-anchor="end">入场 242.80</text>
+              <text x="815" y="194" fill="#64748B" font-size="10" font-family="JetBrains Mono" text-anchor="end">周一高 238.20</text>
+              <text x="815" y="270" fill="#10B981" font-size="10" font-family="JetBrains Mono" text-anchor="end" font-weight="bold">TP 234.25</text>
+
+              <!-- 核心价格水平线：+1.618 扩展线 (蓝色贯穿实线) -->
+              <line x1="40" y1="90" x2="760" y2="90" stroke="#0284C7" stroke-width="1.8"/>
+              <rect x="44" y="78" width="138" height="18" rx="3" fill="#E0F2FE"/>
+              <text x="50" y="91" fill="#0284C7" font-size="10" font-family="JetBrains Mono" font-weight="bold">本周 +1.618 扩展线 244.50</text>
+
+              <!-- 周一高点阻力线 (灰色虚线) -->
+              <line x1="40" y1="190" x2="760" y2="190" stroke="#94A3B8" stroke-width="1.2" stroke-dasharray="4 3"/>
+              <text x="50" y="186" fill="#64748B" font-size="9" font-family="JetBrains Mono">周一最高点 (Monday High) 238.20</text>
+
+              <!-- 止损参考线 (红色细线) -->
+              <line x1="320" y1="64" x2="680" y2="64" stroke="#EF4444" stroke-width="1.2" stroke-dasharray="3 3"/>
+              <rect x="330" y="54" width="90" height="16" rx="2" fill="#FEE2E2"/>
+              <text x="334" y="66" fill="#B91C1C" font-size="9" font-family="JetBrains Mono" font-weight="bold">硬止损: 245.30 (1R)</text>
+
+              <!-- 实际入场点标注 (蓝色) -->
+              <line x1="390" y1="140" x2="680" y2="140" stroke="#0284C7" stroke-width="1" stroke-dasharray="2 2"/>
+              <circle cx="390" cy="140" r="4.5" fill="#0284C7" stroke="#FFFFFF" stroke-width="2"/>
+              <text x="398" y="136" fill="#0284C7" font-size="10" font-family="JetBrains Mono" font-weight="bold">入场 Short (242.80)</text>
+
+              <!-- 最终止盈退出点 (绿色) -->
+              <line x1="680" y1="266" x2="760" y2="266" stroke="#10B981" stroke-width="1.5"/>
+              <circle cx="680" cy="266" r="4.5" fill="#10B981" stroke="#FFFFFF" stroke-width="2"/>
+              <text x="690" y="262" fill="#047857" font-size="10" font-family="JetBrains Mono" font-weight="bold">TP3 命中 234.25 (+3.42R)</text>
+
+              <!-- K线数据序列绘制 (涨绿跌红金融语义) -->
+              <!-- 柱1: 攀升绿K -->
+              <line x1="80" y1="160" x2="80" y2="210" stroke="#10B981" stroke-width="1.2"/>
+              <rect x="74" y="170" width="12" height="30" fill="#10B981"/>
+
+              <!-- 柱2: 逼近1.618的绿K -->
+              <line x1="120" y1="120" x2="120" y2="180" stroke="#10B981" stroke-width="1.2"/>
+              <rect x="114" y="130" width="12" height="40" fill="#10B981"/>
+
+              <!-- 柱3: 突破1.618的大阳线 -->
+              <line x1="160" y1="95" x2="160" y2="150" stroke="#10B981" stroke-width="1.2"/>
+              <rect x="154" y="100" width="12" height="40" fill="#10B981"/>
+
+              <!-- 柱4: 关键刺穿插针K线 (Wick Spike, 触碰245.10后收于1.618下方) -->
+              <line x1="200" y1="65" x2="200" y2="135" stroke="#EF4444" stroke-width="1.5"/>
+              <rect x="194" y="94" width="12" height="26" fill="#EF4444"/>
+              <!-- 针尖标签 -->
+              <path d="M 200 52 L 200 62" stroke="#B91C1C" stroke-width="1.5"/>
+              <text x="200" y="48" fill="#B91C1C" font-size="9" font-family="JetBrains Mono" text-anchor="middle" font-weight="bold">插针极值 245.10</text>
+
+              <!-- 柱5: 确认1 (缩量收阴) -->
+              <line x1="240" y1="98" x2="240" y2="140" stroke="#EF4444" stroke-width="1.2"/>
+              <rect x="234" y="105" width="12" height="25" fill="#EF4444"/>
+              <text x="240" y="155" fill="#64748B" font-size="9" font-family="JetBrains Mono" text-anchor="middle">确1</text>
+
+              <!-- 柱6: 确认2 (十字星内侧整理) -->
+              <line x1="280" y1="110" x2="280" y2="150" stroke="#10B981" stroke-width="1.2"/>
+              <rect x="274" y="120" width="12" height="12" fill="#10B981"/>
+              <text x="280" y="165" fill="#64748B" font-size="9" font-family="JetBrains Mono" text-anchor="middle">确2</text>
+
+              <!-- 柱7: 确认3 (实体回落收破前低，触发入场信号) -->
+              <line x1="320" y1="125" x2="320" y2="170" stroke="#EF4444" stroke-width="1.5"/>
+              <rect x="314" y="130" width="12" height="30" fill="#EF4444"/>
+              <text x="320" y="178" fill="#0284C7" font-size="9" font-family="JetBrains Mono" text-anchor="middle" font-weight="bold">确3(完成)</text>
+
+              <!-- 柱8: 入场执行K线 (开空) -->
+              <line x1="390" y1="135" x2="390" y2="185" stroke="#EF4444" stroke-width="1.5"/>
+              <rect x="384" y="140" width="12" height="35" fill="#EF4444"/>
+
+              <!-- 柱9: 顺势下行 -->
+              <line x1="440" y1="165" x2="440" y2="215" stroke="#EF4444" stroke-width="1.2"/>
+              <rect x="434" y="175" width="12" height="30" fill="#EF4444"/>
+
+              <!-- 柱10: 微反弹中继 -->
+              <line x1="490" y1="185" x2="490" y2="225" stroke="#10B981" stroke-width="1.2"/>
+              <rect x="484" y="195" width="12" height="15" fill="#10B981"/>
+
+              <!-- 柱11: 跌破周一高点，加速下挫 -->
+              <line x1="540" y1="195" x2="540" y2="245" stroke="#EF4444" stroke-width="1.2"/>
+              <rect x="534" y="205" width="12" height="30" fill="#EF4444"/>
+
+              <!-- 柱12: 持续单边回吐 -->
+              <line x1="600" y1="225" x2="600" y2="265" stroke="#EF4444" stroke-width="1.2"/>
+              <rect x="594" y="235" width="12" height="22" fill="#EF4444"/>
+
+              <!-- 柱13: 触及3R止盈大阴线 -->
+              <line x1="680" y1="245" x2="680" y2="285" stroke="#EF4444" stroke-width="1.5"/>
+              <rect x="674" y="255" width="12" height="24" fill="#EF4444"/>
+
+              <!-- 底部时间轴刻度 -->
+              <text x="80" y="295" fill="#94A3B8" font-size="9" font-family="JetBrains Mono">09:00</text>
+              <text x="200" y="295" fill="#94A3B8" font-size="9" font-family="JetBrains Mono">10:00(Spike)</text>
+              <text x="320" y="295" fill="#0284C7" font-size="9" font-family="JetBrains Mono" font-weight="bold">10:45(Trigger)</text>
+              <text x="440" y="295" fill="#94A3B8" font-size="9" font-family="JetBrains Mono">11:45</text>
+              <text x="560" y="295" fill="#94A3B8" font-size="9" font-family="JetBrains Mono">12:45</text>
+              <text x="680" y="295" fill="#10B981" font-size="9" font-family="JetBrains Mono" font-weight="bold">14:00(Exit)</text>
+            </svg>
+          </div>
+
+          <!-- 样本判定与规则执行明细拆解 -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="p-3 rounded border border-surface-border bg-surface-subtle/50 space-y-1">
+              <div class="font-semibold text-text-primary flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-spike-green"></span>
+                规则 B 准入检验通过项
+              </div>
+              <ul class="text-[11px] text-text-secondary space-y-0.5 list-disc list-inside">
+                <li>10:00 EST 触及 244.50 (+1.618) 处 15m 量能放大达基准 3.1 倍</li>
+                <li>紧随 3 根 15m 柱最高价未逾越 245.10 插针极值</li>
+                <li>第 3 根收盘跌回 243.20，实体回撤幅度达插针涨幅的 68%</li>
+              </ul>
+            </div>
+
+            <div class="p-3 rounded border border-surface-border bg-surface-subtle/50 space-y-1 font-mono">
+              <div class="font-semibold text-text-primary font-sans flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-spike-blue"></span>
+                仓位管理与盈亏清算参数
+              </div>
+              <div class="text-[11px] text-text-secondary grid grid-cols-2 gap-x-2 gap-y-0.5">
+                <span>R风险基准(1R): <strong class="text-text-primary">2.50 USD</strong></span>
+                <span>名义杠杆: <strong class="text-text-primary">10x</strong></span>
+                <span>1R分批保本位: <strong class="text-text-primary">240.30 (已触发)</strong></span>
+                <span>实际净盈亏: <strong class="text-spike-greenText font-bold">+3.42 R</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 更多逐笔与方法论细节折叠展开区 (Methodology & Details Accordion) -->
+    <section id="sec-methodology" class="bg-surface-card border border-surface-border rounded-lg overflow-hidden shadow-xs">
+      <details class="group p-4" open>
+        <summary class="flex items-center justify-between font-bold text-sm text-text-primary cursor-pointer select-none">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-spike-blue transform transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+            方法论、滑点假定与数据口径定义 (点击收起/展开)
+          </span>
+          <span class="text-xs font-mono font-normal text-text-muted">METHODOLOGY SPEC v4.2</span>
+        </summary>
+        <div class="mt-4 pt-3 border-t border-surface-border text-xs text-text-secondary space-y-3 leading-relaxed">
+          <p>
+            <strong>1. 周一界定时间窗口：</strong>以交易所所在时区或统一纽约时间（EST/EDT 00:00:00 至 23:59:59）当周首个完整自然日为基准。周一最高价为 <span class="font-mono text-text-primary">High_Mon</span>，最低价为 <span class="font-mono text-text-primary">Low_Mon</span>。区间差价 <span class="font-mono text-text-primary">Range_R = High_Mon - Low_Mon</span>。
+          </p>
+          <p>
+            <strong>2. 斐波那契外扩公式：</strong>上沿阻力 <span class="font-mono text-text-primary">Upper 1.618 = High_Mon + 0.618 × Range_R</span>；下沿支撑 <span class="font-mono text-text-primary">Lower 1.618 = Low_Mon - 0.618 × Range_R</span>。所有水平位在当周二 00:00:00 即刻完全锁定，直到下周一开盘重置，期间绝不发生水平位重绘或漂移。
+          </p>
+          <p>
+            <strong>3. 撮合与滑点惩罚模型：</strong>为杜绝“前瞻偏差”（Look-ahead bias），确认触发后在次根 K 线开盘价执行入场，并硬性扣减 0.05% Taker 手续费与 0.02% 滑点。止损单按最差触价跳空撮合。
+          </p>
+          <p>
+            <strong>4. 样本排除标准：</strong>在周一自身交易时段内即刺破 1.618 的事件被列为“同日过早极端行情”予以隔离分析，不计入常规周内均值回归主库。
+          </p>
+        </div>
+      </details>
+
+      <details class="group p-4 border-t border-surface-border">
+        <summary class="flex items-center justify-between font-bold text-sm text-text-primary cursor-pointer select-none">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-spike-blue transform transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+            完整逐笔交易流水导出与重现配置 (842 笔回测记录摘要)
+          </span>
+          <span class="text-xs font-mono font-normal text-text-muted">CSV / PARQUET READY</span>
+        </summary>
+        <div class="mt-3 pt-3 border-t border-surface-border overflow-x-auto text-xs">
+          <div class="flex items-center justify-between pb-2 text-[11px] text-text-muted">
+            <span>展示最近 5 笔交易明细流水 (更多 837 笔已就绪缓存):</span>
+            <button class="px-2 py-1 rounded bg-surface-subtle border border-surface-border text-text-primary hover:bg-slate-200 transition-colors font-mono">
+              导出全量回测样本 (.CSV)
+            </button>
+          </div>
+          <table class="w-full text-left font-mono">
+            <thead>
+              <tr class="bg-surface-subtle text-text-muted border-b border-surface-border">
+                <th class="p-2">ID</th>
+                <th class="p-2">标的</th>
+                <th class="p-2">触发时间</th>
+                <th class="p-2">方向</th>
+                <th class="p-2">确认规则</th>
+                <th class="p-2">入场价</th>
+                <th class="p-2">平仓价</th>
+                <th class="p-2">持仓周期</th>
+                <th class="p-2 text-right">净收益 (R)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-borderLight">
+              <tr>
+                <td class="p-2 text-text-muted">#0842</td>
+                <td class="p-2 font-bold text-text-primary">SOLUSDT</td>
+                <td class="p-2">2025-04-14 10:45</td>
+                <td class="p-2 text-spike-redText font-semibold">Short</td>
+                <td class="p-2">规则 B</td>
+                <td class="p-2">142.50</td>
+                <td class="p-2">136.20</td>
+                <td class="p-2">14 根 15m</td>
+                <td class="p-2 text-right text-spike-greenText font-bold">+2.84 R</td>
+              </tr>
+              <tr>
+                <td class="p-2 text-text-muted">#0841</td>
+                <td class="p-2 font-bold text-text-primary">BTCUSDT</td>
+                <td class="p-2">2025-04-08 09:15</td>
+                <td class="p-2 text-spike-greenText font-semibold">Long</td>
+                <td class="p-2">规则 A</td>
+                <td class="p-2">78,420.00</td>
+                <td class="p-2">80,210.00</td>
+                <td class="p-2">28 根 5m</td>
+                <td class="p-2 text-right text-spike-greenText font-bold">+1.92 R</td>
+              </tr>
+              <tr>
+                <td class="p-2 text-text-muted">#0840</td>
+                <td class="p-2 font-bold text-text-primary">ETHUSDT</td>
+                <td class="p-2">2025-04-01 16:30</td>
+                <td class="p-2 text-spike-redText font-semibold">Short</td>
+                <td class="p-2">规则 B</td>
+                <td class="p-2">2,145.00</td>
+                <td class="p-2">2,175.50</td>
+                <td class="p-2">4 根 15m</td>
+                <td class="p-2 text-right text-spike-redText font-bold">-1.04 R</td>
+              </tr>
+              <tr>
+                <td class="p-2 text-text-muted">#0839</td>
+                <td class="p-2 font-bold text-text-primary">SUIUSDT</td>
+                <td class="p-2">2025-03-25 11:00</td>
+                <td class="p-2 text-spike-greenText font-semibold">Long</td>
+                <td class="p-2">规则 B</td>
+                <td class="p-2">2.4200</td>
+                <td class="p-2">2.6850</td>
+                <td class="p-2">32 根 15m</td>
+                <td class="p-2 text-right text-spike-greenText font-bold">+3.10 R</td>
+              </tr>
+              <tr>
+                <td class="p-2 text-text-muted">#0838</td>
+                <td class="p-2 font-bold text-text-primary">TIAUSDT</td>
+                <td class="p-2">2025-03-18 14:15</td>
+                <td class="p-2 text-spike-redText font-semibold">Short</td>
+                <td class="p-2">规则 C</td>
+                <td class="p-2">5.1200</td>
+                <td class="p-2">5.3400</td>
+                <td class="p-2">3 根 1H</td>
+                <td class="p-2 text-right text-spike-redText font-bold">-1.12 R</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <!-- 研报阅读区底部声明与防篡改签名 -->
+    <footer class="pt-4 pb-8 border-t border-surface-border text-center text-xs text-text-muted space-y-1">
+      <div>SPIKE QUANTITATIVE RESEARCH REPORT · LOCAL SPECIMEN RUNTIME</div>
+      <div>本研究报告仅供策略复盘与统计参考，所有数据均为脱敏回测示例，不构成实盘开仓与投资建议。</div>
+    </footer>
+
+  </main>
+
+</body>
+</html>
+
