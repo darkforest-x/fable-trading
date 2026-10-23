@@ -1,0 +1,198 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-1618-levels-20261023-v1",
+    "question": "Is the Monday NY 1618 more valid than 1.272/1.414/2.0, a random extension, or 1618 of Monday-UTC and previous-week ranges, under identical barrier proportions?",
+    "binance_alt_inputs": "experiments/active/exp-monday-1618-alt-hours-20261023-v1/inputs",
+    "binance_start": "2020-01-01T00:00:00Z",
+    "binance_end": "2025-06-01T00:00:00Z",
+    "okx_universe_config": "experiments/active/exp-monday-1618-validity-20261023-v1/config.json",
+    "seed": 20261023,
+    "success_criterion": "monday_ny x=0.618 validity minus pooled other levels and random of the same anchor >0 with week-cluster bootstrap 95 lower bound >0 in both Binance alts 2020-2025 and OKX 2025-2026.",
+    "limitations": "15m conservative ordering; fee 0; first touch per anchor-side-level; levels touched in sequence share price paths.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "driftless_pct": 38.2,
+  "results": {
+    "binance_alts": {
+      "events": 499696,
+      "cells": {
+        "monday_ny|0.272": {
+          "n": 53571,
+          "valid_pct": 37.84883612402233
+        },
+        "monday_ny|0.414": {
+          "n": 47584,
+          "valid_pct": 37.82784129119032
+        },
+        "monday_ny|0.618": {
+          "n": 40225,
+          "valid_pct": 36.763206960845245
+        },
+        "monday_ny|1.0": {
+          "n": 29842,
+          "valid_pct": 35.05462100395415
+        },
+        "monday_ny|random": {
+          "n": 38919,
+          "valid_pct": 36.730131812225395
+        },
+        "monday_utc|0.272": {
+          "n": 52926,
+          "valid_pct": 36.98560253939463
+        },
+        "monday_utc|0.414": {
+          "n": 47297,
+          "valid_pct": 37.02137556293211
+        },
+        "monday_utc|0.618": {
+          "n": 40038,
+          "valid_pct": 37.16219591388181
+        },
+        "monday_utc|1.0": {
+          "n": 29085,
+          "valid_pct": 36.1835997937081
+        },
+        "monday_utc|random": {
+          "n": 38462,
+          "valid_pct": 36.70375955488534
+        },
+        "prev_week|0.272": {
+          "n": 25822,
+          "valid_pct": 37.549376500658354
+        },
+        "prev_week|0.414": {
+          "n": 20039,
+          "valid_pct": 36.54872997654574
+        },
+        "prev_week|0.618": {
+          "n": 14134,
+          "valid_pct": 35.750672138106694
+        },
+        "prev_week|1.0": {
+          "n": 7718,
+          "valid_pct": 32.948950505312254
+        },
+        "prev_week|random": {
+          "n": 14034,
+          "valid_pct": 35.4353712412712
+        }
+      },
+      "monday_1618_vs_rest": {
+        "monday_ny": {
+          "diff_pp": -0.33276987476764663,
+          "boot95": [
+            -1.5173300070121547,
+            0.8907608601926558
+          ]
+        },
+        "monday_utc": {
+          "diff_pp": 0.37015919694791677,
+          "boot95": [
+            -0.8628795912359283,
+            1.75885642401939
+          ]
+        },
+        "prev_week": {
+          "diff_pp": -0.5382072194133114,
+          "boot95": [
+            -2.6720160778944706,
+            1.623992531347852
+          ]
+        }
+      }
+    },
+    "okx": {
+      "events": 118773,
+      "cells": {
+        "monday_ny|0.272": {
+          "n": 13182,
+          "valid_pct": 37.42982855408891
+        },
+        "monday_ny|0.414": {
+          "n": 11876,
+          "valid_pct": 38.36308521387672
+        },
+        "monday_ny|0.618": {
+          "n": 10120,
+          "valid_pct": 39.081027667984195
+        },
+        "monday_ny|1.0": {
+          "n": 7501,
+          "valid_pct": 37.50166644447407
+        },
+        "monday_ny|random": {
+          "n": 9635,
+          "valid_pct": 38.1733264141152
+        },
+        "monday_utc|0.272": {
+          "n": 12597,
+          "valid_pct": 38.99341112963404
+        },
+        "monday_utc|0.414": {
+          "n": 11145,
+          "valid_pct": 40.44863167339614
+        },
+        "monday_utc|0.618": {
+          "n": 9275,
+          "valid_pct": 40.37735849056604
+        },
+        "monday_utc|1.0": {
+          "n": 6746,
+          "valid_pct": 37.72605988734065
+        },
+        "monday_utc|random": {
+          "n": 8974,
+          "valid_pct": 38.96813015377758
+        },
+        "prev_week|0.272": {
+          "n": 5732,
+          "valid_pct": 35.25819958129798
+        },
+        "prev_week|0.414": {
+          "n": 4429,
+          "valid_pct": 37.41250846692255
+        },
+        "prev_week|0.618": {
+          "n": 3003,
+          "valid_pct": 36.863136863136866
+        },
+        "prev_week|1.0": {
+          "n": 1547,
+          "valid_pct": 28.054298642533936
+        },
+        "prev_week|random": {
+          "n": 3011,
+          "valid_pct": 35.53636665559615
+        }
+      },
+      "monday_1618_vs_rest": {
+        "monday_ny": {
+          "diff_pp": 1.2059743428668779,
+          "boot95": [
+            -1.3196787389022264,
+            3.5822600181514126
+          ]
+        },
+        "monday_utc": {
+          "diff_pp": 1.195360619196112,
+          "boot95": [
+            -1.5116195568755806,
+            3.7577335795671725
+          ]
+        },
+        "prev_week": {
+          "diff_pp": 1.6569407900340727,
+          "boot95": [
+            -3.082585812005872,
+            6.862908871791223
+          ]
+        }
+      }
+    }
+  },
+  "passed": false,
+  "source_commit": "d9463d3a3f659ff81204b5806351d6f6f6bdc1b2",
+  "training_eligible": false,
+  "production_eligible": false
+}

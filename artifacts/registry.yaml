@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-1618-levels-20261023-v1
+    artifact_type: manifest
+    role: 'Is the Monday NY 1618 more valid than 1.272/1.414/2.0, a random extension, or 1618 of other anchors under identical barrier proportions?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 155781ad3e8e31ca984a93ae1a35559d8a4b1368
+    generator_commit: 155781ad3e8e31ca984a93ae1a35559d8a4b1368
+    source_path: experiments/active/exp-monday-1618-levels-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-levels-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; Binance alts 2020-2025 (499696 events): monday_ny 1618 36.8 vs 1.272 37.8, 1.414 37.8, 2.0 35.1, random 36.7; diff -0.33pp [-1.52,0.89]. OKX 2025-26: '
   - artifact_id: tradingview-candle-probe-20261023-v1
     source_commit: 868308197e3870a29e2969e67f782f512e174b31
     generator_commit: 868308197e3870a29e2969e67f782f512e174b31
