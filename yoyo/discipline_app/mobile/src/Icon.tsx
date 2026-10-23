@@ -1,6 +1,9 @@
 /** Local vector icons matching the Stitch Porcelain & Jade design language. */
-export type IconName='trend'|'trade'|'positions'|'shield'|'link'|'chevron'|'clock'|'check'|'close'|'arrow'|'lock'|'settings';
+export type IconName='star'|'trash'|'refresh'|'trend'|'trade'|'positions'|'shield'|'link'|'chevron'|'clock'|'check'|'close'|'arrow'|'lock'|'settings';
 const paths:Record<IconName,string>={
+ star:'m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z',
+ trash:'M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7',
+ refresh:'M20 7v5h-5M20 12a8 8 0 1 0-2 5M20 7v5',
  settings:'M9 3h6l1 3 3 1 2 5-2 5-3 1-1 3H9l-1-3-3-1-2-5 2-5 3-1zM16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0',
  trend:'M3 17l5-5 4 3 8-10M15 5h5v5',
  trade:'M6 3v18M3 8h6v6H3zM17 3v18M14 6h6v9h-6z',

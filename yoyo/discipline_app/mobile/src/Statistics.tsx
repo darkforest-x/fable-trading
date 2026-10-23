@@ -5,6 +5,7 @@ import {type Connection,type State} from './api';
 import {cachedStatistics,loadStatistics,statisticsKey,type StatisticsData} from './statisticsData';
 import {Icon} from './Icon';
 import {feedback} from './feedback';
+import {REFRESH_EVENT,type RefreshRequest} from './refreshEvent';
 
 const fmt=(value?:string|number|null,d=2)=>value==null?'—':Number(value).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
 const percent=(value?:string|null,d=1)=>value==null?'—':fmt(Number(value)*100,d);
@@ -33,17 +34,22 @@ export function Statistics({connection,overview,online,onConnect}:{connection:Co
  useEffect(()=>{
   setError('');
   if(!connection){setLoading(false);return}
-  let active=true;let running=false;let timer:ReturnType<typeof setTimeout>;
-  const load=async()=>{
-   if(!active||running||document.hidden)return;
-   running=true;setLoading(true);
-   try{const next=await loadStatistics(connection,days,refresh>0);if(active){setResult({key,data:next});setError('')}}
-   catch(e){if(active)setError((e as Error).message)}
-   finally{running=false;if(active){setLoading(false);timer=setTimeout(load,10000)}}
+  let active=true,task:Promise<void>|null=null,timer:ReturnType<typeof setTimeout>;
+  const load=(force=false):Promise<void>=>{
+   if(!active||document.hidden)return Promise.resolve();
+   if(task)return task;
+   clearTimeout(timer);setLoading(true);
+   task=(async()=>{
+    try{const next=await loadStatistics(connection,days,force||refresh>0);if(active){setResult({key,data:next});setError('')}}
+    catch(e){if(active)setError((e as Error).message);throw e}
+    finally{task=null;if(active){setLoading(false);timer=setTimeout(()=>void load().catch(()=>{}),10000)}}
+   })();return task;
   };
-  const visible=()=>{clearTimeout(timer);if(!document.hidden)void load()};
-  document.addEventListener('visibilitychange',visible);void load();
-  return()=>{active=false;clearTimeout(timer);document.removeEventListener('visibilitychange',visible)};
+  const visible=()=>{clearTimeout(timer);if(!document.hidden)void load().catch(()=>{})};
+  const reload=(event:Event)=>(event as CustomEvent<RefreshRequest>).detail.tasks.push(load(true));
+  window.addEventListener(REFRESH_EVENT,reload);
+  document.addEventListener('visibilitychange',visible);void load().catch(()=>{});
+  return()=>{active=false;clearTimeout(timer);window.removeEventListener(REFRESH_EVENT,reload);document.removeEventListener('visibilitychange',visible)};
  },[connection,days,refresh,key]);
  const live=connection?.mode==='okx_live';
  const current=connection&&overview&&overview.mode===connection.mode&&overview.account_id===(connection.accountId??'primary')?overview:null;

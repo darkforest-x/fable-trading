@@ -740,3 +740,6 @@ details[open]>:not(summary) { animation:disclosure-enter var(--motion-disclosure
 .catalog-tabs button,.contract-sort button,.candle-periods button { transition:background-color var(--motion-fast),color var(--motion-fast),transform var(--motion-press); }
 .contract-row { contain:layout style; }
 @media(prefers-reduced-motion:reduce) { .modal { translate:none; } .entry-ticket .stop-applied-mark { animation:none; } }
+
+/* Stitch fbed5138d0304ebf8249e9328f0147a6: dense history, large touch targets. */
+.completed-trade.activity-item{padding:0}.completed-trade summary{min-height:52px;padding:8px 0;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}.completed-trade .activity-title{min-width:0;gap:5px;flex-wrap:nowrap}.completed-trade .activity-title>b:first-child{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.completed-trade .activity-title small{font-size:9px}.completed-trade .activity-pnl{font-size:13px;margin-left:auto;white-space:nowrap}.completed-trade .activity-title>svg{flex:none}.completed-trade .completed-time{font-size:9px;margin:0;max-width:58px;text-align:right;line-height:1.45}.completed-details{padding:3px 0 12px}.completed-details .activity-time{margin-top:7px}

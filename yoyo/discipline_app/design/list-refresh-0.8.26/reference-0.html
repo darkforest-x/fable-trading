@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background antialiased" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>SPIKE 1.618 - Institutional Precision Terminal</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary": "#006e2d",
+            "glass-card-bg": "rgba(255, 255, 255, 0.92)",
+            "surface-container-high": "#e2e8f8",
+            "secondary-fixed-dim": "#62df7d",
+            "on-tertiary-fixed": "#410002",
+            "primary-fixed-dim": "#abc7ff",
+            "device-chassis": "#202227",
+            "surface-bright": "#f9f9ff",
+            "surface-dim": "#d4daea",
+            "surface-container-highest": "#dde2f2",
+            "glass-bg": "rgba(255, 255, 255, 0.76)",
+            "tertiary-container": "#df2828",
+            "surface": "#f9f9ff",
+            "secondary-container": "#7cf994",
+            "surface-variant": "#dde2f2",
+            "on-secondary-container": "#007230",
+            "inverse-on-surface": "#ecf0ff",
+            "outline": "#717785",
+            "on-tertiary-container": "#fffaf9",
+            "on-tertiary-fixed-variant": "#93000b",
+            "canvas-bg": "#F7F8F6",
+            "on-secondary": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-error": "#ffffff",
+            "primary-container": "#0071e3",
+            "tertiary-fixed-dim": "#ffb4ab",
+            "tertiary": "#ba0012",
+            "surface-container-lowest": "#ffffff",
+            "inverse-primary": "#abc7ff",
+            "secondary-fixed": "#7ffc97",
+            "fib-mid": "#94a3b8",
+            "on-primary-fixed": "#001b3f",
+            "error-container": "#ffdad6",
+            "chart-bull": "#16a34a",
+            "on-primary-container": "#fcfbff",
+            "on-surface": "#161c27",
+            "on-surface-variant": "#414753",
+            "inverse-surface": "#2a313d",
+            "outline-variant": "#c1c6d6",
+            "primary": "#0059b5",
+            "on-tertiary": "#ffffff",
+            "on-primary": "#ffffff",
+            "chart-bear": "#dc2626",
+            "error": "#ba1a1a",
+            "background": "#f9f9ff",
+            "glass-specular": "rgba(255, 255, 255, 0.9)",
+            "fib-blue": "#0ea5e9",
+            "surface-container": "#e8eefe",
+            "surface-container-low": "#f0f3ff",
+            "surface-tint": "#005cbb",
+            "on-secondary-fixed": "#002109",
+            "on-primary-fixed-variant": "#00458f",
+            "tertiary-fixed": "#ffdad6",
+            "on-background": "#161c27",
+            "on-secondary-fixed-variant": "#005320",
+            "primary-fixed": "#d7e2ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xs": "0.25rem",
+            "gutter": "1.5rem",
+            "margin-mobile": "1.25rem",
+            "margin": "2rem",
+            "space-md": "1rem",
+            "gutter-lg": "2rem",
+            "space-xl": "2.5rem",
+            "gutter-sm": "1rem",
+            "space-lg": "1.5rem",
+            "margin-desktop": "3rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "label-sm": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "headline-xl-mobile": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "metric-val": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "headline-xl": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "display-lg-mobile": ["34px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "700" }],
+            "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "headline-xl-mobile": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-sm": ["17px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "metric-val": ["28px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "26px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-lg": ["17px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+            "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "label-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "body-md": ["15px", { "lineHeight": "21px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "headline-lg": ["24px", { "lineHeight": "30px", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      line-height: 1;
+      vertical-align: middle;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1;
+    }
+    
+    /* Apple Liquid Glass tokens */
+    .glass-capsule {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.92);
+      box-shadow: 0 4px 20px -2px rgba(26, 27, 31, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
+    }
+    
+    .glass-drawer {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(40px) saturate(190%);
+      -webkit-backdrop-filter: blur(40px) saturate(190%);
+      border-top: 1px solid rgba(255, 255, 255, 0.98);
+      box-shadow: 0 -16px 48px -8px rgba(15, 23, 42, 0.12);
+    }
+
+    /* Spring-damped touch feedback */
+    .touch-spring {
+      transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.15s ease;
+    }
+    .touch-spring:active {
+      transform: scale(0.96);
+    }
+
+    /* Price dashed indicator */
+    .price-dashed-line {
+      stroke-dasharray: 4 4;
+      stroke-linecap: square;
+    }
+
+    /* Custom subtle scrollbar */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="h-full w-full overflow-hidden bg-canvas-bg text-on-surface font-body-md select-none flex justify-center">
+<!-- Mobile Frame Container (Strictly 390px, Responsive down to 320px) -->
+<div class="relative w-full max-w-[390px] h-full overflow-hidden bg-surface-container-lowest flex flex-col shadow-2xl" id="app-viewport">
+<!-- PULL TO REFRESH INDICATOR (Native Apple Top Spring) -->
+<div class="absolute top-2 inset-x-0 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-200" id="pull-refresh-bar">
+<div class="glass-capsule rounded-full px-3 py-1 flex items-center gap-1.5 shadow-sm border border-white/80">
+<span class="material-symbols-outlined text-[15px] text-primary animate-spin">refresh</span>
+<span class="text-label-sm font-label-sm text-outline">释放刷新 1.618 波动区间</span>
+</div>
+</div>
+<!-- ========================================== -->
+<!-- LAYER 0: EDGE-TO-EDGE CANDLESTICK CHART   -->
+<!-- ========================================== -->
+<div class="absolute inset-0 z-0 bg-gradient-to-b from-[#FBFDFB] via-[#F7F8F6] to-[#F1F3EE]">
+<svg class="w-full h-full" fill="none" preserveaspectratio="none" viewbox="0 0 390 844" xmlns="http://www.w3.org/2000/svg">
+<!-- Subtle Institutional Session Grids -->
+<g stroke="#E5E8EB" stroke-opacity="0.65" stroke-width="0.75">
+<line x1="0" x2="390" y1="180" y2="180"></line>
+<line x1="0" x2="390" y1="280" y2="280"></line>
+<line x1="0" x2="390" y1="380" y2="380"></line>
+<line x1="0" x2="390" y1="480" y2="480"></line>
+<line x1="0" x2="390" y1="580" y2="580"></line>
+<!-- Vertical session dividers -->
+<line stroke-dasharray="3 3" x1="97" x2="97" y1="120" y2="700"></line>
+<line stroke-dasharray="3 3" x1="195" x2="195" y1="120" y2="700"></line>
+<line stroke-dasharray="3 3" x1="293" x2="293" y1="120" y2="700"></line>
+</g>
+<!-- INSTITUTIONAL FIBONACCI BOUNDS (Solid Structural Reference Lines) -->
+<!-- 1. +1.618 Extension Level (97025 Solid Green Line) -->
+<line stroke="#16a34a" stroke-width="1.25" x1="0" x2="390" y1="192" y2="192"></line>
+<!-- 2. Current Week High (93950 Solid Slate Line) -->
+<line stroke="#717785" stroke-width="1.2" x1="0" x2="390" y1="274" y2="274"></line>
+<!-- 3. Current Week Low (88975 Solid Slate Line) -->
+<line stroke="#717785" stroke-width="1.2" x1="0" x2="390" y1="472" y2="472"></line>
+<!-- 4. -1.618 Extension Level (85901 Solid Red Line) -->
+<line stroke="#dc2626" stroke-width="1.25" x1="0" x2="390" y1="568" y2="568"></line>
+<!-- Institutional Multi-Period Candlesticks (Synthesized Microstructure) -->
+<g id="candlesticks">
+<!-- Mon Open Expansion -->
+<line stroke="#16a34a" stroke-width="1" x1="36" x2="36" y1="460" y2="505"></line>
+<rect fill="#16a34a" height="28" rx="1" width="6" x="33" y="468"></rect>
+<line stroke="#16a34a" stroke-width="1" x1="56" x2="56" y1="440" y2="480"></line>
+<rect fill="#16a34a" height="24" rx="1" width="6" x="53" y="445"></rect>
+<line stroke="#dc2626" stroke-width="1" x1="76" x2="76" y1="430" y2="465"></line>
+<rect fill="#dc2626" height="18" rx="1" width="6" x="73" y="435"></rect>
+<line stroke="#16a34a" stroke-width="1" x1="96" x2="96" y1="410" y2="450"></line>
+<rect fill="#16a34a" height="26" rx="1" width="6" x="93" y="418"></rect>
+<!-- Midweek Consolidation -->
+<line stroke="#16a34a" stroke-width="1" x1="116" x2="116" y1="390" y2="435"></line>
+<rect fill="#16a34a" height="22" rx="1" width="6" x="113" y="398"></rect>
+<line stroke="#16a34a" stroke-width="1" x1="136" x2="136" y1="360" y2="410"></line>
+<rect fill="#16a34a" height="32" rx="1" width="6" x="133" y="370"></rect>
+<line stroke="#dc2626" stroke-width="1" x1="156" x2="156" y1="350" y2="395"></line>
+<rect fill="#dc2626" height="20" rx="1" width="6" x="153" y="358"></rect>
+<line stroke="#16a34a" stroke-width="1" x1="176" x2="176" y1="330" y2="375"></line>
+<rect fill="#16a34a" height="28" rx="1" width="6" x="173" y="335"></rect>
+<!-- High Volume Impulse Breakout -->
+<line stroke="#16a34a" stroke-width="1" x1="196" x2="196" y1="290" y2="345"></line>
+<rect fill="#16a34a" height="42" rx="1" width="6" x="193" y="295"></rect>
+<line stroke="#16a34a" stroke-width="1" x1="216" x2="216" y1="265" y2="310"></line>
+<rect fill="#16a34a" height="30" rx="1" width="6" x="213" y="270"></rect>
+<line stroke="#dc2626" stroke-width="1" x1="236" x2="236" y1="250" y2="295"></line>
+<rect fill="#dc2626" height="22" rx="1" width="6" x="233" y="258"></rect>
+<line stroke="#16a34a" stroke-width="1" x1="256" x2="256" y1="230" y2="275"></line>
+<rect fill="#16a34a" height="34" rx="1" width="6" x="253" y="235"></rect>
+<line stroke="#16a34a" stroke-width="1" x1="276" x2="276" y1="218" y2="252"></line>
+<rect fill="#16a34a" height="24" rx="1" width="6" x="273" y="222"></rect>
+<!-- Target Spike Candle Piercing +1.618 Expansion -->
+<line stroke="#16a34a" stroke-width="1.2" x1="296" x2="296" y1="188" y2="238"></line>
+<rect fill="#16a34a" height="32" rx="1" width="6" x="293" y="194"></rect>
+<!-- Current Pullback & Stabilization Candle -->
+<line stroke="#dc2626" stroke-width="1" x1="316" x2="316" y1="220" y2="248"></line>
+<rect fill="#dc2626" height="15" rx="1" width="6" x="313" y="225"></rect>
+</g>
+<!-- REAL-TIME PRICE LINE: Slender Dashed (4px dash, 4px space, Apple Blue #0071E3) -->
+<line class="price-dashed-line" stroke="#0071E3" stroke-width="1" x1="0" x2="316" y1="236" y2="236"></line>
+</svg>
+<!-- Structural Boundary Right Badges (Clean Apple Typography) -->
+<!-- +1.618 Tag -->
+<div class="absolute right-3 top-[182px] flex items-center gap-1">
+<span class="text-[10px] font-semibold text-chart-bull bg-secondary-container/50 px-1.5 py-0.5 rounded">
+          +1.618 97025
+        </span>
+</div>
+<!-- Real-time Live Price (Slender Dashed Line Endpoint with bare price number 95280) -->
+<div class="absolute right-3 top-[226px] flex items-center">
+<span class="text-[12px] font-bold text-primary-container tracking-tight">
+          95280
+        </span>
+</div>
+<!-- Mon High Reference -->
+<div class="absolute right-3 top-[264px] flex items-center">
+<span class="text-[10px] font-medium text-outline bg-surface-container-high/60 px-1.5 py-0.5 rounded">
+          高 93950
+        </span>
+</div>
+<!-- Mon Low Reference -->
+<div class="absolute right-3 top-[462px] flex items-center">
+<span class="text-[10px] font-medium text-outline bg-surface-container-high/60 px-1.5 py-0.5 rounded">
+          低 88975
+        </span>
+</div>
+<!-- -1.618 Tag -->
+<div class="absolute right-3 top-[558px] flex items-center">
+<span class="text-[10px] font-semibold text-chart-bear bg-error-container/60 px-1.5 py-0.5 rounded">
+          -1.618 85901
+        </span>
+</div>
+</div>
+<!-- ========================================== -->
+<!-- TOP APP BAR (Shared Components Token)       -->
+<!-- ========================================== -->
+<header class="docked full-width top-0 sticky z-40 bg-background/80 backdrop-blur-md flex justify-between items-center w-full px-4 h-14 max-w-md mx-auto transition-transform">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[22px]">trending_up</span>
+<span class="text-headline-sm font-headline-sm font-bold tracking-tight text-on-surface">SPIKE</span>
+<span class="text-[10px] font-bold text-primary-container bg-primary-fixed px-1.5 py-0.5 rounded-full tracking-wider">1.618 PRO</span>
+</div>
+<div class="flex items-center gap-2">
+<!-- Live WebSocket / Signal Health -->
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-low border border-outline-variant/40">
+<span class="w-2 h-2 rounded-full bg-chart-bull animate-pulse"></span>
+<span class="text-label-sm font-label-sm text-outline">NYC 09:30</span>
+</div>
+<button class="w-9 h-9 rounded-full flex items-center justify-center text-outline hover:bg-surface-container transition-colors touch-spring">
+<span class="material-symbols-outlined text-[20px]">sensors</span>
+</button>
+</div>
+</header>
+<!-- ========================================== -->
+<!-- LAYER 1: FLOATING SYMBOL CAPSULE & CONTROLS -->
+<!-- ========================================== -->
+<div class="relative z-10 px-4 pt-1 flex flex-col gap-2 pointer-events-none">
+<!-- Symbol Info Capsule (Apple Liquid Glass) -->
+<div class="glass-capsule rounded-2xl p-3 flex items-center justify-between pointer-events-auto">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-[#F7931A] text-white flex items-center justify-center font-bold text-sm shadow-sm">
+            ₿
+          </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface">BTCUSDT</span>
+<span class="text-[10px] font-semibold text-outline px-1 rounded bg-surface-container-high">永续</span>
+</div>
+<!-- Alert Pill -->
+<div class="flex items-center gap-1 mt-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bull"></span>
+<span class="text-[11px] font-medium text-chart-bull">已触达 +1.618 扩展区间 (97025)</span>
+</div>
+</div>
+</div>
+<!-- Metric Snapshot -->
+<div class="text-right">
+<div class="text-headline-sm font-headline-sm font-bold text-primary-container">95,280.0</div>
+<div class="text-label-sm font-label-sm text-chart-bull font-semibold">+4.82% 本周</div>
+</div>
+</div>
+<!-- Timeframe Segmented Selector & Quick Action Capsule -->
+<div class="flex items-center justify-between gap-2 pointer-events-auto">
+<!-- Segments -->
+<div class="glass-capsule rounded-full p-1 flex items-center gap-1 shadow-sm">
+<button class="px-2.5 py-1 text-label-sm font-label-sm rounded-full text-outline hover:text-on-surface touch-spring">5m</button>
+<button class="px-2.5 py-1 text-label-sm font-label-sm rounded-full bg-primary-container text-white font-semibold shadow-sm touch-spring">15m</button>
+<button class="px-2.5 py-1 text-label-sm font-label-sm rounded-full text-outline hover:text-on-surface touch-spring">1H</button>
+<button class="px-2.5 py-1 text-label-sm font-label-sm rounded-full text-outline hover:text-on-surface touch-spring">4H</button>
+</div>
+<!-- Drawer Toggle Trigger Capsule -->
+<button class="glass-capsule rounded-full px-3.5 py-1.5 flex items-center gap-1.5 text-on-surface touch-spring shadow-sm border border-primary-container/20" id="drawer-pill-trigger">
+<span class="w-2 h-2 rounded-full bg-chart-bull animate-ping"></span>
+<span class="text-label-sm font-label-sm font-semibold text-primary">已触达 (7)</span>
+<span class="material-symbols-outlined text-[16px] text-primary">expand_less</span>
+</button>
+</div>
+</div>
+<!-- ========================================== -->
+<!-- LAYER 2: TRANSLUCENT OVERLAY & BOTTOM DRAWER -->
+<!-- ========================================== -->
+<!-- Backdrop Blur Scrim (Dismiss trigger on tap) -->
+<div class="absolute inset-0 z-40 bg-on-surface/15 backdrop-blur-[2px] opacity-100 transition-opacity duration-300" id="drawer-backdrop"></div>
+<!-- Bottom Sheet Drawer (Expanded State) -->
+<div class="absolute inset-x-0 bottom-0 z-40 max-h-[82%] h-[74%] glass-drawer rounded-t-[32px] flex flex-col transition-transform duration-300 ease-out translate-y-0" id="bottom-sheet">
+<!-- Interactive Drag Handle Bar (36x4px Pill) -->
+<div class="w-full pt-3 pb-2 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing touch-none" id="drag-handle-zone">
+<div class="w-9 h-1 rounded-full bg-outline-variant/80"></div>
+</div>
+<!-- Drawer Header Bar -->
+<div class="px-5 pt-1 pb-3 flex items-start justify-between">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-headline-md font-headline-md font-bold tracking-tight text-on-surface">已触达合约</h2>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary text-label-sm font-label-sm font-bold">7</span>
+</div>
+<p class="text-body-sm font-body-sm text-outline mt-0.5">纽约时间周一区间 · 本周首次触达</p>
+</div>
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-outline hover:text-on-surface touch-spring" id="btn-close-drawer">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Compact Search & Segmented Filter Pill Tabs -->
+<div class="px-5 pb-3 flex items-center gap-2.5">
+<!-- Segmented Tab -->
+<div class="bg-surface-container-high/80 p-0.5 rounded-full flex items-center shrink-0">
+<button class="px-3 py-1 rounded-full text-label-sm font-label-sm font-semibold bg-white text-on-surface shadow-xs transition-all" id="tab-all">
+            全部 (7)
+          </button>
+<button class="px-3 py-1 rounded-full text-label-sm font-label-sm font-medium text-outline hover:text-on-surface transition-all" id="tab-fav">
+            收藏 (2)
+          </button>
+</div>
+<!-- Search Input (Explicitly without autofocus to prevent accidental keyboard pop) -->
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[16px] text-outline">search</span>
+<input class="w-full bg-surface-container-low/90 border border-outline-variant/30 rounded-full pl-8 pr-3 py-1 text-body-sm font-body-sm placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary-container" id="symbol-search-input" placeholder="搜索合约代码..." type="text"/>
+</div>
+</div>
+<!-- Inline Notification / Undo Dismiss Toast -->
+<div class="hidden mx-5 mb-2 px-3 py-1.5 rounded-xl bg-inverse-surface text-inverse-on-surface flex items-center justify-between text-body-sm shadow-md animate-fade-in" id="inline-toast">
+<div class="flex items-center gap-1.5 text-[12px]">
+<span class="material-symbols-outlined text-[16px] text-secondary-fixed">check_circle</span>
+<span>已从列表隐藏本合约</span>
+</div>
+<button class="text-primary-fixed font-semibold text-[12px] px-2 py-0.5 hover:underline touch-spring" id="btn-toast-undo">撤销</button>
+</div>
+<!-- Contract List (Scrollable Container, Height >= 48px items, 44px touch targets) -->
+<div class="flex-1 overflow-y-auto px-5 divide-y divide-outline-variant/20 no-scrollbar pb-24" id="contract-list-container">
+<!-- 1. BTC / USDT (Favorited) -->
+<div class="contract-row py-3 flex items-center justify-between hover:bg-surface-container-low/40 transition-colors rounded-xl px-1" data-fav="true" data-symbol="BTC">
+<!-- Left: Logo & Meta -->
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-[#FFF2E2] text-[#F7931A] font-bold text-sm flex items-center justify-center border border-[#F7931A]/20 shrink-0">
+              B
+            </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-body-lg font-body-lg font-bold text-on-surface">BTC/USDT</span>
+<span class="text-[10px] text-outline font-semibold">永续</span>
+</div>
+<div class="text-label-sm font-label-sm text-chart-bull flex items-center gap-0.5 mt-0.5">
+<span class="material-symbols-outlined text-[13px]">arrow_upward</span>
+<span>触及上沿 +1.618 · 8m前</span>
+</div>
+</div>
+</div>
+<!-- Middle: Price & Change -->
+<div class="text-right ml-auto mr-3">
+<div class="text-body-md font-body-md font-semibold text-on-surface">95,280.0</div>
+<div class="text-label-sm font-label-sm font-semibold text-chart-bull">+4.82%</div>
+</div>
+<!-- Right: Independent 44px Action Cluster -->
+<div class="flex items-center gap-0.5 shrink-0">
+<!-- Favorite Button -->
+<button aria-label="收藏" class="btn-fav w-11 h-11 flex items-center justify-center rounded-full text-amber-500 hover:bg-surface-container transition-colors touch-spring">
+<span class="material-symbols-outlined text-[20px] fill-icon">star</span>
+</button>
+<!-- Delete / Hide Button -->
+<button aria-label="隐藏" class="btn-delete w-11 h-11 flex items-center justify-center rounded-full text-outline hover:text-tertiary hover:bg-error-container/40 transition-colors touch-spring">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+<!-- 2. ETH / USDT -->
+<div class="contract-row py-3 flex items-center justify-between hover:bg-surface-container-low/40 transition-colors rounded-xl px-1" data-fav="false" data-symbol="ETH">
+<!-- Left -->
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-[#EEF2FE] text-[#627EEA] font-bold text-sm flex items-center justify-center border border-[#627EEA]/20 shrink-0">
+              E
+            </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-body-lg font-body-lg font-bold text-on-surface">ETH/USDT</span>
+<span class="text-[10px] text-outline font-semibold">永续</span>
+</div>
+<div class="text-label-sm font-label-sm text-chart-bull flex items-center gap-0.5 mt-0.5">
+<span class="material-symbols-outlined text-[13px]">arrow_upward</span>
+<span>触及上沿 +1.618 · 22m前</span>
+</div>
+</div>
+</div>
+<!-- Middle -->
+<div class="text-right ml-auto mr-3">
+<div class="text-body-md font-body-md font-semibold text-on-surface">3,640.5</div>
+<div class="text-label-sm font-label-sm font-semibold text-chart-bull">+3.14%</div>
+</div>
+<!-- Right -->
+<div class="flex items-center gap-0.5 shrink-0">
+<button aria-label="收藏" class="btn-fav w-11 h-11 flex items-center justify-center rounded-full text-outline hover:text-amber-500 hover:bg-surface-container transition-colors touch-spring">
+<span class="material-symbols-outlined text-[20px]">star</span>
+</button>
+<button aria-label="隐藏" class="btn-delete w-11 h-11 flex items-center justify-center rounded-full text-outline hover:text-tertiary hover:bg-error-container/40 transition-colors touch-spring">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+<!-- 3. SOL / USDT (Favorited) -->
+<div class="contract-row py-3 flex items-center justify-between hover:bg-surface-container-low/40 transition-colors rounded-xl px-1" data-fav="true" data-symbol="SOL">
+<!-- Left -->
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-[#F3E8FF] text-[#9945FF] font-bold text-sm flex items-center justify-center border border-[#9945FF]/20 shrink-0">
+              S
+            </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-body-lg font-body-lg font-bold text-on-surface">SOL/USDT</span>
+<span class="text-[10px] text-outline font-semibold">永续</span>
+</div>
+<div class="text-label-sm font-label-sm text-chart-bull flex items-center gap-0.5 mt-0.5">
+<span class="material-symbols-outlined text-[13px]">arrow_upward</span>
+<span>触及上沿 +1.618 · 45m前</span>
+</div>
+</div>
+</div>
+<!-- Middle -->
+<div class="text-right ml-auto mr-3">
+<div class="text-body-md font-body-md font-semibold text-on-surface">198.42</div>
+<div class="text-label-sm font-label-sm font-semibold text-chart-bull">+6.75%</div>
+</div>
+<!-- Right -->
+<div class="flex items-center gap-0.5 shrink-0">
+<button aria-label="收藏" class="btn-fav w-11 h-11 flex items-center justify-center rounded-full text-amber-500 hover:bg-surface-container transition-colors touch-spring">
+<span class="material-symbols-outlined text-[20px] fill-icon">star</span>
+</button>
+<button aria-label="隐藏" class="btn-delete w-11 h-11 flex items-center justify-center rounded-full text-outline hover:text-tertiary hover:bg-error-container/40 transition-colors touch-spring">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+<!-- 4. SUI / USDT (Lower Bound Spike) -->
+<div class="contract-row py-3 flex items-center justify-between hover:bg-surface-container-low/40 transition-colors rounded-xl px-1" data-fav="false" data-symbol="SUI">
+<!-- Left -->
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-[#E0F2FE] text-[#0284C7] font-bold text-sm flex items-center justify-center border border-[#0284C7]/20 shrink-0">
+              U
+            </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-body-lg font-body-lg font-bold text-on-surface">SUI/USDT</span>
+<span class="text-[10px] text-outline font-semibold">永续</span>
+</div>
+<div class="text-label-sm font-label-sm text-chart-bear flex items-center gap-0.5 mt-0.5">
+<span class="material-symbols-outlined text-[13px]">arrow_downward</span>
+<span>击穿下沿 -1.618 · 1h前</span>
+</div>
+</div>
+</div>
+<!-- Middle -->
+<div class="text-right ml-auto mr-3">
+<div class="text-body-md font-body-md font-semibold text-on-surface">3.1840</div>
+<div class="text-label-sm font-label-sm font-semibold text-chart-bear">-2.40%</div>
+</div>
+<!-- Right -->
+<div class="flex items-center gap-0.5 shrink-0">
+<button aria-label="收藏" class="btn-fav w-11 h-11 flex items-center justify-center rounded-full text-outline hover:text-amber-500 hover:bg-surface-container transition-colors touch-spring">
+<span class="material-symbols-outlined text-[20px]">star</span>
+</button>
+<button aria-label="隐藏" class="btn-delete w-11 h-11 flex items-center justify-center rounded-full text-outline hover:text-tertiary hover:bg-error-container/40 transition-colors touch-spring">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+<!-- 5. PEPE / USDT -->
+<div class="contract-row py-3 flex items-center justify-between hover:bg-surface-container-low/40 transition-colors rounded-xl px-1" data-fav="false" data-symbol="PEPE">
+<!-- Left -->
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-[#DCFCE7] text-[#16A34A] font-bold text-sm flex items-center justify-center border border-[#16A34A]/20 shrink-0">
+              P
+            </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-body-lg font-body-lg font-bold text-on-surface">PEPE/USDT</span>
+<span class="text-[10px] text-outline font-semibold">永续</span>
+</div>
+<div class="text-label-sm font-label-sm text-chart-bull flex items-center gap-0.5 mt-0.5">
+<span class="material-symbols-outlined text-[13px]">arrow_upward</span>
+<span>触及上沿 +1.618 · 2h前</span>
+</div>
+</div>
+</div>
+<!-- Middle -->
+<div class="text-right ml-auto mr-3">
+<div class="text-body-md font-body-md font-semibold text-on-surface">0.0000194</div>
+<div class="text-label-sm font-label-sm font-semibold text-chart-bull">+11.2%</div>
+</div>
+<!-- Right -->
+<div class="flex items-center gap-0.5 shrink-0">
+<button aria-label="收藏" class="btn-fav w-11 h-11 flex items-center justify-center rounded-full text-outline hover:text-amber-500 hover:bg-surface-container transition-colors touch-spring">
+<span class="material-symbols-outlined text-[20px]">star</span>
+</button>
+<button aria-label="隐藏" class="btn-delete w-11 h-11 flex items-center justify-center rounded-full text-outline hover:text-tertiary hover:bg-error-container/40 transition-colors touch-spring">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+<!-- EMPTY STATE 1: No Search Results (Hidden initially) -->
+<div class="hidden py-8 flex flex-col items-center justify-center text-center" id="empty-search-state">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-outline mb-2">
+<span class="material-symbols-outlined text-[24px]">search_off</span>
+</div>
+<p class="text-body-md font-body-md font-semibold text-on-surface">未找到匹配合约</p>
+<p class="text-label-sm font-label-sm text-outline mt-0.5">请尝试搜索其它代码或清空关键字</p>
+</div>
+<!-- EMPTY STATE 2: Empty Favorites (Demonstrated clean placeholders) -->
+<div class="hidden py-8 flex flex-col items-center justify-center text-center" id="empty-fav-state">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-outline mb-2">
+<span class="material-symbols-outlined text-[24px]">star_border</span>
+</div>
+<p class="text-body-md font-body-md font-semibold text-on-surface">暂无收藏合约</p>
+<p class="text-label-sm font-label-sm text-outline mt-0.5">点击标的右侧星标，快速归档核心关注池</p>
+</div>
+</div>
+</div>
+<!-- ========================================== -->
+<!-- BOTTOM NAV BAR (5 Top-Level Destinations)  -->
+<!-- ========================================== -->
+<nav class="fixed bottom-5 inset-x-4 z-50 flex justify-around items-center h-16 max-w-sm mx-auto px-2 bg-surface-container-lowest/90 backdrop-blur-xl rounded-full shadow-[0_16px_40px_-6px_rgba(23,36,34,0.10)] border border-white/80">
+<!-- 1. 合约 -->
+<button class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-2 py-1.5 transition-colors touch-spring">
+<span class="material-symbols-outlined text-[20px]">candlestick_chart</span>
+<span class="text-label-sm font-label-sm mt-0.5">合约</span>
+</button>
+<!-- 2. 纪律 -->
+<button class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-2 py-1.5 transition-colors touch-spring">
+<span class="material-symbols-outlined text-[20px]">shield_lock</span>
+<span class="text-label-sm font-label-sm mt-0.5">纪律</span>
+</button>
+<!-- 3. 1.618 (ACTIVE SELECTION) -->
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary rounded-full px-4 py-1.5 shadow-sm transition-all touch-spring">
+<span class="material-symbols-outlined text-[20px]">timeline</span>
+<span class="text-label-sm font-label-sm mt-0.5 font-bold">1.618</span>
+</button>
+<!-- 4. 持仓 -->
+<button class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-2 py-1.5 transition-colors touch-spring">
+<span class="material-symbols-outlined text-[20px]">pie_chart</span>
+<span class="text-label-sm font-label-sm mt-0.5">持仓</span>
+</button>
+<!-- 5. 统计 -->
+<button class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-2 py-1.5 transition-colors touch-spring">
+<span class="material-symbols-outlined text-[20px]">monitoring</span>
+<span class="text-label-sm font-label-sm mt-0.5">统计</span>
+</button>
+</nav>
+</div>
+<!-- INTERACTION LOGIC (Pull-to-refresh & Sheet Gesture Guardrails) -->
+<script>
+    (function initSpikeTerminal() {
+      const bottomSheet = document.getElementById('bottom-sheet');
+      const drawerBackdrop = document.getElementById('drawer-backdrop');
+      const dragHandleZone = document.getElementById('drag-handle-zone');
+      const drawerTrigger = document.getElementById('drawer-pill-trigger');
+      const btnCloseDrawer = document.getElementById('btn-close-drawer');
+      const pullBar = document.getElementById('pull-refresh-bar');
+      const viewport = document.getElementById('app-viewport');
+      const searchInput = document.getElementById('symbol-search-input');
+      const tabAll = document.getElementById('tab-all');
+      const tabFav = document.getElementById('tab-fav');
+      const contractRows = document.querySelectorAll('.contract-row');
+      const emptySearchState = document.getElementById('empty-search-state');
+      const emptyFavState = document.getElementById('empty-fav-state');
+      const inlineToast = document.getElementById('inline-toast');
+      const btnToastUndo = document.getElementById('btn-toast-undo');
+
+      let isDrawerOpen = true;
+      let lastHiddenRow = null;
+
+      // Drawer Open / Close Transitions
+      function openDrawer() {
+        bottomSheet.classList.remove('translate-y-full');
+        bottomSheet.classList.add('translate-y-0');
+        drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+        drawerBackdrop.classList.add('opacity-100');
+        isDrawerOpen = true;
+      }
+
+      function closeDrawer() {
+        bottomSheet.classList.remove('translate-y-0');
+        bottomSheet.classList.add('translate-y-full');
+        drawerBackdrop.classList.remove('opacity-100');
+        drawerBackdrop.classList.add('opacity-0', 'pointer-events-none');
+        isDrawerOpen = false;
+      }
+
+      drawerTrigger.addEventListener('click', openDrawer);
+      btnCloseDrawer.addEventListener('click', closeDrawer);
+      drawerBackdrop.addEventListener('click', closeDrawer);
+
+      // Gesture 1: Drag handle 1:1 touch follower on Drawer
+      let startY = 0;
+      let currentY = 0;
+      let isDraggingHandle = false;
+
+      dragHandleZone.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+        isDraggingHandle = true;
+        bottomSheet.style.transition = 'none';
+      }, { passive: true });
+
+      window.addEventListener('touchmove', (e) => {
+        if (!isDraggingHandle) return;
+        currentY = e.touches[0].clientY;
+        const delta = currentY - startY;
+        if (delta > 0) {
+          bottomSheet.style.transform = `translateY(${delta}px)`;
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchend', (e) => {
+        if (!isDraggingHandle) return;
+        isDraggingHandle = false;
+        bottomSheet.style.transition = 'transform 0.25s ease-out';
+        const delta = currentY - startY;
+        if (delta > 90) {
+          closeDrawer();
+        } else {
+          bottomSheet.style.transform = 'translateY(0)';
+        }
+      });
+
+      // Gesture 2: Apple Pull-To-Refresh strictly active ONLY when drawer closed & top scroll boundary
+      let pullStartY = 0;
+      let pullDelta = 0;
+
+      viewport.addEventListener('touchstart', (e) => {
+        if (isDrawerOpen) return; // Prevent during drawer open
+        const touch = e.touches[0];
+        if (touch.clientY < 180) {
+          pullStartY = touch.clientY;
+        } else {
+          pullStartY = 0;
+        }
+      }, { passive: true });
+
+      viewport.addEventListener('touchmove', (e) => {
+        if (isDrawerOpen || pullStartY === 0) return;
+        const touch = e.touches[0];
+        pullDelta = touch.clientY - pullStartY;
+        if (pullDelta > 15 && pullDelta < 90) {
+          pullBar.style.opacity = (pullDelta / 90).toString();
+          pullBar.style.transform = `translateY(${pullDelta * 0.4}px)`;
+        }
+      }, { passive: true });
+
+      viewport.addEventListener('touchend', () => {
+        if (pullDelta > 65) {
+          // Trigger light visual feedback
+          setTimeout(() => {
+            pullBar.style.opacity = '0';
+            pullBar.style.transform = 'translateY(0)';
+            pullDelta = 0;
+          }, 600);
+        } else {
+          pullBar.style.opacity = '0';
+          pullBar.style.transform = 'translateY(0)';
+          pullDelta = 0;
+        }
+      });
+
+      // Independent Star Favorite Toggle (Strictly stops row selection event propagation)
+      document.querySelectorAll('.btn-fav').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const row = btn.closest('.contract-row');
+          const isFav = row.getAttribute('data-fav') === 'true';
+          const icon = btn.querySelector('.material-symbols-outlined');
+          
+          if (isFav) {
+            row.setAttribute('data-fav', 'false');
+            icon.classList.remove('fill-icon');
+            btn.classList.remove('text-amber-500');
+            btn.classList.add('text-outline');
+          } else {
+            row.setAttribute('data-fav', 'true');
+            icon.classList.add('fill-icon');
+            btn.classList.add('text-amber-500');
+            btn.classList.remove('text-outline');
+          }
+          applyFilters();
+        });
+      });
+
+      // Independent Delete / Hide Action with Undo Toast
+      document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const row = btn.closest('.contract-row');
+          lastHiddenRow = row;
+          row.style.display = 'none';
+          
+          inlineToast.classList.remove('hidden');
+          inlineToast.classList.add('flex');
+          applyFilters();
+        });
+      });
+
+      btnToastUndo.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (lastHiddenRow) {
+          lastHiddenRow.style.display = 'flex';
+          lastHiddenRow = null;
+        }
+        inlineToast.classList.add('hidden');
+        inlineToast.classList.remove('flex');
+        applyFilters();
+      });
+
+      // Segmented Tabs: "全部 (7)" vs "收藏 (2)"
+      let activeTab = 'all';
+
+      tabAll.addEventListener('click', () => {
+        activeTab = 'all';
+        tabAll.className = 'px-3 py-1 rounded-full text-label-sm font-label-sm font-semibold bg-white text-on-surface shadow-xs transition-all';
+        tabFav.className = 'px-3 py-1 rounded-full text-label-sm font-label-sm font-medium text-outline hover:text-on-surface transition-all';
+        applyFilters();
+      });
+
+      tabFav.addEventListener('click', () => {
+        activeTab = 'fav';
+        tabFav.className = 'px-3 py-1 rounded-full text-label-sm font-label-sm font-semibold bg-white text-on-surface shadow-xs transition-all';
+        tabAll.className = 'px-3 py-1 rounded-full text-label-sm font-label-sm font-medium text-outline hover:text-on-surface transition-all';
+        applyFilters();
+      });
+
+      // Realtime Client-side Search & Empty State Trigger
+      searchInput.addEventListener('input', applyFilters);
+
+      function applyFilters() {
+        const query = searchInput.value.trim().toUpperCase();
+        let visibleCount = 0;
+        let totalFavCount = 0;
+
+        contractRows.forEach(row => {
+          if (row.style.display === 'none' && row === lastHiddenRow) return;
+
+          const symbol = row.getAttribute('data-symbol');
+          const isFav = row.getAttribute('data-fav') === 'true';
+
+          let matchesQuery = symbol.includes(query);
+          let matchesTab = activeTab === 'all' || (activeTab === 'fav' && isFav);
+
+          if (matchesQuery && matchesTab) {
+            row.style.display = 'flex';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+
+          if (isFav) totalFavCount++;
+        });
+
+        // Toggle Empty Placeholders
+        if (query.length > 0 && visibleCount === 0) {
+          emptySearchState.classList.remove('hidden');
+          emptyFavState.classList.add('hidden');
+        } else if (activeTab === 'fav' && visibleCount === 0) {
+          emptySearchState.classList.add('hidden');
+          emptyFavState.classList.remove('hidden');
+        } else {
+          emptySearchState.classList.add('hidden');
+          emptyFavState.classList.add('hidden');
+        }
+      }
+    })();
+  </script>
+</body></html>

@@ -1,3 +1,4 @@
+import {REFRESH_EVENT,type RefreshRequest} from './refreshEvent';
 import type {FibRange} from './fibData';
 import {FibRangePrimitive} from './FibRangePrimitive';
 /** Stitch 66260b3f29db4baf9dd0f2835a13e25c. One feed and a lazy Canvas chart.
@@ -45,7 +46,7 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
    handleScale:{axisPressedMouseMove:true,mouseWheel:true,pinch:true},
    crosshair:{vertLine:{color:'#8aa99b',labelBackgroundColor:'#47685a'},horzLine:{color:'#8aa99b',labelBackgroundColor:'#47685a'}},
   });
-  const candles=chart.addSeries(CandlestickSeries,{upColor:'#00c990',downColor:'#ff3b69',wickUpColor:'#00c990',wickDownColor:'#ff3b69',borderVisible:false,priceLineColor:'#819b90',priceLineStyle:range?LineStyle.Solid:LineStyle.Dashed});
+  const candles=chart.addSeries(CandlestickSeries,{upColor:'#00c990',downColor:'#ff3b69',wickUpColor:'#00c990',wickDownColor:'#ff3b69',borderVisible:false,priceLineColor:'#819b90',priceLineStyle:LineStyle.Dashed});
   const volume=chart.addSeries(HistogramSeries,{priceFormat:{type:'volume'},priceScaleId:'volume',lastValueVisible:false,priceLineVisible:false});
   volume.priceScale().applyOptions({scaleMargins:{top:.82,bottom:0},visible:false});
   graph.current={chart,candles,volume};
@@ -103,6 +104,7 @@ export default function CandlePanel({symbol,connection,tick,entry,stop,period,on
   document.addEventListener('visibilitychange',visibility);visibility();
   return()=>{document.removeEventListener('visibilitychange',visibility);session.stop()};
  },[active,symbol,period,connection?.url,connection?.token,connection?.accountId]);
+ useEffect(()=>{if(!active)return;const reload=(event:Event)=>{const task=feed.current?.refresh();if(task)(event as CustomEvent<RefreshRequest>).detail.tasks.push(task.then(ok=>{if(ok===false)throw Error('K线刷新失败')}))};window.addEventListener(REFRESH_EVENT,reload);return()=>window.removeEventListener(REFRESH_EVENT,reload)},[active]);
  useEffect(()=>{
   if(!fullscreen)return;
   const root=document.getElementById('root'),oldInert=root?.inert,overflow=document.body.style.overflow;

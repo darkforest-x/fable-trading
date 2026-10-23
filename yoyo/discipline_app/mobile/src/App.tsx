@@ -1,3 +1,5 @@
+import {usePullRefresh} from './usePullRefresh';
+import {refreshVisible} from './refreshEvent';
 import {FibHome} from './FibHome';
 import {fibSide,type FibContract} from './fibData';
 import {PERIODS,type CandlePeriod} from './candleData';
@@ -7,7 +9,6 @@ import {entryAvailability} from './entryAvailability';
 import {TradeProgress,type EntryProgress} from './TradeProgress';
 import {useCloseRecovery} from './useCloseRecovery';
 import {TradeActivity} from './TradeActivity';
-import {ExternalActivity} from './ExternalActivity';
 import {useLiveQuotes} from './useLiveQuotes';
 import {CandleModule} from './CandleModule';
 import {ClosePosition} from './ClosePosition';
@@ -101,6 +102,7 @@ export default function App(){
  const displayState=useMemo(()=>state?{...state,quotes:{...state.quotes,...stream},server_time:Math.max(state.server_time,...Object.values(stream).map(q=>q.time))}:null,[state,stream]);
  const selectedQuote=stream[symbol]??state?.quotes[symbol];
  const existing=state?.positions.find(pos=>pos.symbol===symbol);
+ const inheritedLeverage=state?.shared_leverage?.[symbol];
  const selectedSide=existing?.side==='short'?'short':existing?.side==='long'?'long':direction;
  useEffect(()=>{if(existing){setStop(existing.stop);setLeverage(existing.leverage);setDirection(existing.side==='short'?'short':'long')}},[existing?.id,existing?.stop,existing?.leverage]);
  const priceDecimals=(coin:string)=>Math.min(12,Math.max(2,Math.ceil(-Math.log10(Number(state?.instruments[coin]?.tick??.01)))));
@@ -114,7 +116,7 @@ export default function App(){
  const mode=p?marginLabel(p.margin_mode):'全仓';
  const proposal=state?.policy_proposal;
  const exposureText=p?(p.major_exposure_multiple&&p.alt_exposure_multiple?`BTC / ETH ${p.major_allowance_scope==='independent'?'各 ':''}${p.major_exposure_multiple}倍 · 山寨合计 ${p.alt_exposure_multiple}倍`:'旧规则未配置名义上限'):'BTC / ETH 10倍 · 山寨 5倍';
- useEffect(()=>{setLeverage(existing?.leverage??cap)},[cap,symbol,state?.policy_revision,existing?.leverage]);
+ useEffect(()=>{setLeverage(inheritedLeverage??existing?.leverage??cap)},[cap,symbol,state?.policy_revision,existing?.leverage,inheritedLeverage]);
  const room=useMemo(()=>marginRoom(state,symbol),[state,symbol]);
  const fraction=String(allocatedMargin(room,allocation));
  const stopContext=JSON.stringify([connection?.cacheScope,connection?.accountId,connection?.mode,symbol,selectedSide,kind,price,allocation,leverage,state?.policy_revision,fibTicket?fibPeriod:null]);
@@ -280,6 +282,8 @@ export default function App(){
  const steps=[{r:p?.breakeven_r??'1',label:'成本保本'},{r:p?.take_profits[0][0]??'3',label:`平原始 ${Number(p?.take_profits[0][1]??.6)*100}%`},{r:p?.take_profits.at(-1)?.[0]??'5',label:'全部余仓'}];
  const quickLatest=useRef(openFibTicket);quickLatest.current=openFibTicket;
  const stableQuick=useCallback((row:FibContract,period:CandlePeriod)=>quickLatest.current(row,period),[]);
+ const mainRef=useRef<HTMLElement>(null);
+ const pullStatus=usePullRefresh(mainRef,fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal||editing||busy,async()=>{await Promise.all([refresh(),refreshVisible()])},tab);
  const swipe=useSwipeNav(tab,fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal||editing||busy,nav);
  const navIcons:Record<Tab,IconName>={'1.618':'trade','合约':'trade','持仓':'positions','统计':'trend','纪律':'shield','设置':'link'};
  const ruleGroups=[
@@ -293,7 +297,7 @@ export default function App(){
      {existing&&<p className="scale-in-note">同向加仓 · 沿用当前止损和杠杆</p>}
      <div className="order-options">
      <div className="segment" aria-label="委托类型"><button aria-pressed={kind==='market'} className={kind==='market'?'active':''} disabled={ticketLocked} onClick={()=>{if(kind!=='market')feedback('light');setKind('market');setFieldError(null)}}>市价</button><button aria-pressed={kind==='limit'} className={kind==='limit'?'active':''} disabled={ticketLocked} onClick={()=>{if(kind!=='limit')feedback('light');setKind('limit');setFieldError(null)}}>限价</button></div>
-     <button className="leverage-field" data-field="leverage" disabled={ticketLocked||!!existing} aria-label={`调整杠杆，当前 ${leverage} 倍`} aria-haspopup="dialog" onClick={()=>{setDraftLeverage(leverage);setSheet('leverage');feedback('light')}}><span>杠杆</span><b>{leverage}<small>x</small></b><Icon name="chevron" size={15}/></button></div>
+     <button className="leverage-field" data-field="leverage" disabled={ticketLocked||!!existing||inheritedLeverage!==undefined} aria-label={`调整杠杆，当前 ${leverage} 倍`} aria-haspopup="dialog" onClick={()=>{setDraftLeverage(leverage);setSheet('leverage');feedback('light')}}><span>{inheritedLeverage!==undefined?'沿用':'杠杆'}</span><b>{leverage}<small>x</small></b><Icon name="chevron" size={15}/></button></div>
 
      {kind==='limit'&&<div className="field"><div className="entry-field-heading"><label htmlFor="entry-price">委托价格</label><button type="button" aria-label="使用最新价" className="latest-price" disabled={ticketLocked||!fresh} onClick={useLatestPrice}>最新价</button></div><div className="input-shell entry-input"><input id="entry-price" disabled={ticketLocked} data-field="price" aria-invalid={fieldError?.field==='price'} aria-describedby={fieldError?.field==='price'?'field-price-error':undefined} onBlur={()=>validateField('price')} aria-label="委托价格" inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={e=>{if(e.key==='Enter')e.currentTarget.blur()}} value={price} onChange={e=>{setPrice(e.target.value);setFieldError(null)}} placeholder="输入委托价格"/><span>USDT</span></div>{fieldError?.field==='price'&&<span id="field-price-error" className="field-error" role="status">{fieldError.message}</span>}</div>}
      <div className={`field stop-field ${stopApplied?'stop-applied':''}`}>
@@ -311,7 +315,8 @@ export default function App(){
 
  return <div className={`app ${tab==='合约'?'trade-page':''} ${tab==='1.618'?'fib-page':''} ${editing?'keyboard-open':''}`}>
   <div inert={fibTicket||!!preview||!!closeTarget||!!error||!!sheet||noticeModal}>
-  <main className={`page-transition ${tab==='合约'?'entry-page':''}`} style={{'--page-offset':`${navDirection*12}px`} as CSSProperties} {...swipe}>
+  <main ref={mainRef} className={`page-transition ${tab==='合约'?'entry-page':''}`} style={{'--page-offset':`${navDirection*12}px`} as CSSProperties} {...swipe}>
+   <div className={`pull-refresh ${pullStatus}`} role="status" aria-live="polite"><Icon name={pullStatus==='done'?'check':pullStatus==='error'?'close':'refresh'} size={18}/><span>{({idle:'',pull:'下拉刷新',ready:'松开刷新',loading:'正在刷新',done:'已更新',error:'更新失败，请重试'})[pullStatus]}</span></div>
    <FibHome connection={connection} state={state} onQuick={stableQuick} locked={busy||!!pendingEntry} active={tab==='1.618'} covered={fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal}/>
    {tab==='合约'&&<>
     <section className="quote-hero" aria-label="合约行情">
@@ -333,7 +338,7 @@ export default function App(){
     <TradeProgress entry={activeEntry} state={state} onOpen={()=>document.querySelector('.activity-list')?.scrollIntoView({block:'start'})} onDismiss={()=>setEntryProgress(null)}/>{closeRecovery.attempt&&closeProgress()}{!state?<section className="empty card"><span className="empty-icon"><Icon name="positions" size={32}/></span><h2>连接后查看持仓</h2><p>仓位与保护记录保存在你的服务端。</p><button className="primary" onClick={()=>nav('设置')}>连接纪律服务</button></section>:!state.positions.length&&<section className="empty card"><span className="empty-icon"><Icon name="positions" size={32}/></span><h2>暂时没有 App 持仓</h2><p>先设好止损，再开始一笔有计划的交易。</p><button className="soft-button" onClick={()=>nav('合约')}>查看合约<Icon name="arrow" size={16}/></button></section>}
     {state?.positions.map(pos=><PositionCard key={pos.id} pos={pos} state={displayState!} online={online} busy={busy||!!closeRecovery.attempt} entryStopBusy={action?.kind==='entry-stop'&&action.id===pos.id} onEntryStop={entryStop} onClose={requestClose} onSelectSymbol={openPositionSymbol}/>)}
     {state&&<TradeActivity state={state} busy={busy} cancelling={action?.kind==='cancel'?action.id:undefined} onCancel={cancelOrder} price={priceFmt}/>}
-    {state&&<ExternalActivity state={state} online={online}/>}
+
     <p className="disclaimer">{live?'已确认的交易所止损止盈不依赖手机在线。Mac 离线期间不能执行新的 1R 保本调整或应急指令。':'计划风险固定，实际损失可能超出预算。服务停机期间不会执行自动退出。'}</p>
    </>}
    {tab==='统计'&&<Statistics overview={state} online={online} connection={connection} onConnect={()=>nav('设置')}/>}
@@ -346,7 +351,7 @@ export default function App(){
     {proposal&&<section className="card pending-policy-card"><span className="badge"><Icon name="clock" size={13}/>待生效变更</span><h2>{marginLabel(proposal.policy.margin_mode)} · 单笔风险 {Number(proposal.policy.risk_fraction)*100}%</h2><p>账户名义上限：BTC / ETH {proposal.policy.major_exposure_multiple}倍 · 山寨 {proposal.policy.alt_exposure_multiple}倍</p><p>最早 {new Date(proposal.effective_after*1000).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false})}（北京时间）生效，届时需无持仓、无挂单。</p><small>当前规则、次数和冷静期继续保留。</small></section>}
     {ruleGroups.map(group=><section className="card rule-card" key={group.title}><h2><Icon name={group.icon} size={18}/>{group.title}</h2><div className="rules">{group.rows.map(([k,v])=><div key={k}><span>{k}</span><b>{v}</b></div>)}</div></section>)}
     <section className="card rule-card"><h2><Icon name="clock" size={18}/>当前记录</h2><dl className="metrics"><div><dt>今日已用次数</dt><dd>{state?.daily?.entries??'—'} / {state?.discipline?.entries_limit??p?.max_entries??3}</dd></div><div><dt>今日盈利奖励</dt><dd>+{state?.discipline?.entries_bonus??0} 次</dd></div><div><dt>连续净亏损</dt><dd>{state?.loss_streak??'—'} 笔</dd></div><div><dt>冷静期结束</dt><dd>{!state?'待连接':state.cooldown_until>state.server_time?new Date(state.cooldown_until*1000).toLocaleString('zh-CN'):'未触发'}</dd></div></dl></section>
-    <details className="explainer"><summary>规则计算与运行边界<Icon name="chevron" size={16}/></summary><p>每日按北京时间 00:00 切换。未成交撤单经交易所确认后返还次数，已成交不返还。规则以当前生效版本为准。</p><p>外部交易仅记录，不占用 App 开仓次数、连亏、仓位或保证金额度。日亏只计算 App 管理交易的当日已实现与浮动盈亏；交易所可用资金仍需满足开仓要求。同币种外部交易与 App 仓位可能合并，归属未确认前不混合操作。</p><p>保证金占比按账户净值计算：BTC、ETH 各自不超过 10%，山寨合计不超过 5%；本 App 对应额度池的持仓与挂单占用会扣除，单笔计划止损风险仍不超过净值 5%。名义仓位按当前规则分别核验各额度池。开仓与成交前检查，并预留入场费用与不利价差；行情变化仍可能使已有仓位超过比例上限。</p><p>R 按确认的开仓计划固定，包含费用与滑点预留。止盈比例按原始仓位计算。成本预留费率每边 {Number(p?.fee_rate??.0005)*100}%，滑点预留 {Number(p?.slippage_rate??.001)*100}%，未计资金费，不代表你的实际交易所费率。</p><p>日亏停手线不代替每笔止损，多个持仓风险会叠加。{live?'资金费、滑点与全仓强平仍受交易所规则影响；实盘止损不是最大亏损保证。':'当前模拟不计算交易所真实强平价。'}</p></details>
+    <details className="explainer"><summary>规则计算与运行边界<Icon name="chevron" size={16}/></summary><p>每日按北京时间 00:00 切换。未成交撤单经交易所确认后返还次数，已成交不返还。规则以当前生效版本为准。</p><p>外部交易不显示，不占用 App 开仓次数、连亏、仓位或保证金额度。日亏只计算 App 管理交易的当日已实现与浮动盈亏；交易所可用资金仍需满足开仓要求。同币种沿用交易所当前杠杆，App 只管理自己新增的数量。</p><p>保证金占比按账户净值计算：BTC、ETH 各自不超过 10%，山寨合计不超过 5%；本 App 对应额度池的持仓与挂单占用会扣除，单笔计划止损风险仍不超过净值 5%。名义仓位按当前规则分别核验各额度池。开仓与成交前检查，并预留入场费用与不利价差；行情变化仍可能使已有仓位超过比例上限。</p><p>R 按确认的开仓计划固定，包含费用与滑点预留。止盈比例按原始仓位计算。成本预留费率每边 {Number(p?.fee_rate??.0005)*100}%，滑点预留 {Number(p?.slippage_rate??.001)*100}%，未计资金费，不代表你的实际交易所费率。</p><p>日亏停手线不代替每笔止损，多个持仓风险会叠加。{live?'资金费、滑点与全仓强平仍受交易所规则影响；实盘止损不是最大亏损保证。':'当前模拟不计算交易所真实强平价。'}</p></details>
    </>}
    {tab==='设置'&&<>
     <PageHeader title="设置与账户" subtitle="账户、操作习惯，都在这里。" onBack={()=>nav(settingsOrigin.current)}/>

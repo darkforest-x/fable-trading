@@ -118,7 +118,7 @@ class ManagedOrders:
         merging = current.get('merging')
         if not merging:
             raw_rows = self.client.get('/api/v5/account/positions')
-            raw = next((p for p in raw_rows if p['instId'] == order['instId'] and p['posSide'] == order['posSide'] and dec(p['pos']) > 0), None)
+            raw = self._owned_view(current, raw_rows, instrument)
             if raw is None:
                 self._recover_flat_fill(current, order, parent, instrument)
                 return
@@ -167,7 +167,7 @@ class ManagedOrders:
             generation = stable_id(key, 'fill-'+str(total.normalize()))
             prices = protective_prices(pos['entry'],pos['quantity'],pos['risk'],pos['entry_fee'],policy,pos['side'],instrument['tick'])
             first = floor_step(actual*dec(policy.take_profits[0][1]),dec(instrument['step']))
-            specs = [dict(attachAlgoClOrdId=stable_id(generation,'stop'),sz=str(actual/dec(instrument['contract_value'])+dec(current['payload']['sz'])-total),slTriggerPx=pos['stop'],slOrdPx='-1',slTriggerPxType='last')]
+            specs = [dict(attachAlgoClOrdId=stable_id(generation,'stop'),sz=str(actual/dec(instrument['contract_value'])+(Decimal(0) if current.get('owned_accounting') else dec(current['payload']['sz'])-total)),slTriggerPx=pos['stop'],slOrdPx='-1',slTriggerPxType='last')]
             for i, amount in enumerate((first, actual-first)):
                 specs.append(dict(attachAlgoClOrdId=stable_id(generation,'tp'+str(i)),sz=str(amount/dec(instrument['contract_value'])),tpTriggerPx=prices['targets'][i],tpOrdPx='-1',tpTriggerPxType='last',disabled=amount<dec(instrument['minimum'])))
             merging = dict(position=pos, specs=specs, generation=generation, created=self.clock(), filled=str(total), avg=order['avgPx'], fee=str(-dec(order['fee'])), delta=str(delta))
@@ -179,7 +179,7 @@ class ManagedOrders:
                     next(p for p in state['positions'] if p['id']==root)['protection']='awaiting-exchange'
         pos, specs = merging['position'], merging['specs']
         current_positions=self.client.get('/api/v5/account/positions')
-        if not any(p['instId']==pos['symbol'] and p['posSide']==pos['side'] and dec(p['pos'])>0 for p in current_positions):
+        if self._owned_view(current,current_positions,instrument) is None:
             if order['state'] not in ('filled','canceled'):
                 self._cancel_entry(current, reason='position_closed')
             self._commit_merge(key,root,merging)
@@ -246,14 +246,17 @@ class ManagedOrders:
         prior = dec(root_intent.get('total_filled_contracts',
             root_intent['payload']['sz'] if root != key and not root_intent.get('execution_version') else '0'))
         entered = prior + delta
-        rows = self.client.get('/api/v5/account/positions-history', instType='SWAP', instId=order['instId'], limit='100')
-        matching = [row for row in rows if row.get('posSide') == order['posSide']
-            and int(row['uTime']) / 1000 >= root_intent['created'] and row.get('type') in ('2', '3', '6')
-            and dec(row.get('closeTotalPos', '0')) == entered
-            and (not parent or not parent.get('pos_id') or row['posId'] == parent['pos_id'])]
-        if len(matching) != 1:
-            raise Rejected('成交仓位已归零，等待完整净盈亏结算，暂停新开仓')
-        history = matching[0]
+        if current.get('owned_accounting'):
+            history = self._owned_history(current)
+        else:
+            rows = self.client.get('/api/v5/account/positions-history', instType='SWAP', instId=order['instId'], limit='100')
+            matching = [row for row in rows if row.get('posSide') == order['posSide']
+                and int(row['uTime']) / 1000 >= root_intent['created'] and row.get('type') in ('2', '3', '6')
+                and dec(row.get('closeTotalPos', '0')) == entered
+                and (not parent or not parent.get('pos_id') or row['posId'] == parent['pos_id'])]
+            if len(matching) != 1:
+                raise Rejected('成交仓位已归零，等待完整净盈亏结算，暂停新开仓')
+            history = matching[0]
         quantity = delta * dec(instrument['contract_value'])
         price = (total * dec(order['avgPx']) - previous * dec(current.get('applied_avg', '0'))) / delta
         fee = -dec(order['fee']) - dec(current.get('applied_fee', '0'))
@@ -307,6 +310,8 @@ class ManagedOrders:
                 return
             root_intent=state['intents'][root]
             root_intent['aggregate']=True
+            old_specs = root_intent.get('protection_history', []) + root_intent.get('protection_specs', root_intent['payload']['attachAlgoOrds'])
+            root_intent['protection_history'] = list({s['attachAlgoClOrdId']:s for s in old_specs}.values())
             root_intent['protection_specs']=specs
             root_intent['protection_generation']=merging['generation']
             root_intent['total_filled_contracts']=str(dec(root_intent.get('total_filled_contracts', root_intent['payload']['sz'] if root!=key and not root_intent.get('execution_version') else '0'))+dec(merging['delta']))
@@ -323,7 +328,7 @@ class ManagedOrders:
             instrument=state['instruments'][intent['request']['symbol']]
         if not pos:
             return
-        raw=next((p for p in raw_positions if p['instId']==pos['symbol'] and p['posSide']==pos['side'] and dec(p['pos'])>0),None)
+        raw=self._owned_view(intent,raw_positions,instrument)
         protected=copy.deepcopy(intent)
         protected['payload']['attachAlgoOrds']=intent['protection_specs']
         protected['payload']['sz']=intent['total_filled_contracts']

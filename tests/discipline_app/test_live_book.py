@@ -131,8 +131,7 @@ def test_fee_and_expired_preview_reject_but_other_contract_external_position_doe
     exchange.fee='-0.0005'
     exchange.positions=[dict(instId='ETH-USDT-SWAP',posSide='long',pos='1')]
     assert book.preview(ticket())['plan']
-    with pytest.raises(Rejected,match='该合约有外部交易'):
-        book.preview(ticket(symbol='ETH-USDT-SWAP'))
+    assert book.preview(ticket(symbol='ETH-USDT-SWAP'))['plan']
     exchange.positions=[]
     preview=book.preview(ticket())
     now[0]+=46;quote(book)

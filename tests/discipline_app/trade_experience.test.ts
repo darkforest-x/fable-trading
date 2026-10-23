@@ -33,11 +33,11 @@ test('disabled entry always has a reason and a relevant destination',()=>{
  assert.deepEqual(entryAvailability({...args,state:{...state,cooldown_until:161}}),{text:'冷静期剩余 00:01:01',tab:'纪律'});
 });
 
-test('external activity only blocks its own contract in the entry UI',()=>{
+test('external activity never blocks the matching App contract',()=>{
  const external={...state,external_activity:{current:[{symbol:'ETH-USDT-SWAP'}],recent:[],updated_at:100}} as State;
  const args={state:external,symbol:'BTC-USDT-SWAP',connected:true,online:true,fresh:true,restoring:false,pending:false,room:.1,now:100};
  assert.equal(entryAvailability(args),null);
- assert.deepEqual(entryAvailability({...args,symbol:'ETH-USDT-SWAP'}),{text:'该合约有外部交易 · 仅记录，其他合约可正常开仓',tab:'持仓'});
+ assert.equal(entryAvailability({...args,symbol:'ETH-USDT-SWAP'}),null);
  assert.equal(entryAvailability({...args,symbol:'ETH-USDT-SWAP',state:{...state,external_activity:{current:[],recent:external.external_activity!.current,updated_at:100}}}),null);
 });
 

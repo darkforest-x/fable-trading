@@ -25,6 +25,7 @@ export class CandleSession {
  private nextSnapshotAt = 0;
  private lastSnapshotSuccess = 0;
  private syncing = false;
+ private refreshTask: Promise<boolean | undefined> | null = null;
  private hasOpened = false;
  private duringSync: Candle[] = [];
  constructor(options: Options) {
@@ -35,8 +36,8 @@ export class CandleSession {
  private now() { return (this.options.now ?? Date.now)(); }
  private transportStatus(): CandleStatus {
   if (this.snapshotRequired) return this.state.historyReady ? 'delayed' : this.state.error ? 'offline' : 'loading';
-  if (this.lastData && this.now() - this.lastData < 12000) return 'live';
-  return this.lastSnapshotSuccess && this.now() - this.lastSnapshotSuccess < 15000 ? 'polling' : this.state.historyReady ? 'delayed' : 'offline';
+  if (this.lastData && this.now() - this.lastData < 3000) return 'live';
+  return this.lastSnapshotSuccess && this.now() - this.lastSnapshotSuccess < 6000 ? 'polling' : this.state.historyReady ? 'delayed' : 'offline';
  }
  private emit() { this.options.onChange({ ...this.state }); }
  private persist() { if (this.state.historyReady) this.options.cache.write(this.options.symbol, this.options.period, this.state.bars); }
@@ -58,13 +59,13 @@ export class CandleSession {
    if (this.socket?.readyState === 0 && this.now() - this.connectedAt > 10000) this.socket.close();
    if (this.socket?.readyState === 1) {
     if (this.now() - this.lastMessage > 20000 || this.now() - Math.max(this.lastData, this.connectedAt) > 30000) this.socket.close();
-    else this.socket.send('ping');
+    else if (this.now() - this.lastMessage > 10000) this.socket.send('ping');
    }
    const status = this.transportStatus();
    if (this.state.status !== status) { this.state.status = status; this.emit(); }
    // History repair is independent of a healthy websocket tip.
-   if (this.now() >= this.nextSnapshotAt && (this.snapshotRequired || this.now() - this.lastData >= 12000)) void this.refresh();
-  }, 5000);
+   if (this.now() >= this.nextSnapshotAt && (this.snapshotRequired || this.now() - this.lastData >= 3000)) void this.refresh();
+  }, 1000);
  }
  stop() {
   this.active = false; this.generation++;
@@ -72,7 +73,7 @@ export class CandleSession {
   this.retryTimer = this.cacheTimer = undefined;
   if (this.socket) { this.socket.onclose = this.socket.onmessage = this.socket.onopen = this.socket.onerror = null; this.socket.close(); this.socket = null; }
   for (const read of this.reads) read.abort(); this.reads.clear();
-  this.syncing = false; this.duringSync = []; this.lastData = 0;
+  this.syncing = false; this.refreshTask = null; this.duringSync = []; this.lastData = 0;
   this.state.loadingOlder = false; this.state.status = 'paused'; this.persist();
  }
  private connect() {
@@ -116,8 +117,14 @@ export class CandleSession {
   socket.onerror = () => socket.close();
   socket.onclose = retry;
  }
- async refresh() {
-  if (!this.active || this.syncing) return;
+ refresh(): Promise<boolean | undefined> {
+  if (!this.active) return Promise.resolve(undefined);
+  if (this.refreshTask) return this.refreshTask;
+  const task = this.refreshSnapshot().finally(() => { if (this.refreshTask === task) this.refreshTask = null; });
+  this.refreshTask = task;
+  return task;
+ }
+ private async refreshSnapshot() {
   this.syncing = true; this.duringSync = []; this.lastSnapshot = this.now();
   const generation = this.generation, controller = new AbortController(); this.reads.add(controller);
   try {
@@ -129,18 +136,20 @@ export class CandleSession {
    const gap = prefix.length && fresh[0].time - prefix.at(-1)!.time > PERIOD_SECONDS[this.options.period];
    const base = gap ? this.state.bars.filter(bar => bar.time >= fresh[0].time) : this.state.bars;
    const bars = mergeCandles(mergeCandles(base, fresh), this.duringSync);
-   this.snapshotRequired = false; this.snapshotFailures = 0; this.lastSnapshotSuccess = this.now(); this.nextSnapshotAt = this.now() + 5000;
+   this.snapshotRequired = false; this.snapshotFailures = 0; this.lastSnapshotSuccess = this.now(); this.nextSnapshotAt = this.now() + 2000;
    this.state.historyReady = true;
    if (this.state.errorKind !== 'older') { this.state.error = ''; this.state.errorKind = ''; }
    this.state.status = this.transportStatus();
    this.changed(bars, true);
+   return true;
   } catch {
    if (this.active && generation === this.generation) {
     this.snapshotRequired = true;
-    this.nextSnapshotAt = this.now() + Math.min(30000, 5000 * 2 ** this.snapshotFailures++);
+    this.nextSnapshotAt = this.now() + Math.min(20000, 2000 * 2 ** this.snapshotFailures++);
     this.state.error = this.state.historyReady ? '历史更新延迟 · 点击重试' : '历史暂不可用';
     this.state.errorKind = 'snapshot'; this.state.status = this.transportStatus(); this.emit();
    }
+   return false;
   } finally {
    this.reads.delete(controller);
    if (generation === this.generation) { this.syncing = false; this.duringSync = []; }

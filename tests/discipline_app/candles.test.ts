@@ -2,11 +2,21 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CandleCache, fetchCandles, mergeCandles, parseCandles, type Candle } from '../../yoyo/discipline_app/mobile/src/candleData.ts';
 import { CandleSession, type CandleState } from '../../yoyo/discipline_app/mobile/src/candleSession.ts';
+import {PERIODS,type CandlePeriod} from '../../yoyo/discipline_app/mobile/src/candleData.ts';
 
 const symbol='BTC-USDT-SWAP', time=1700000000;
 const bar=(t=time,close=101,confirmed=false):Candle=>({time:t,open:100,high:Math.max(105,close),low:95,close,volume:10,confirmed});
 const row=(b:Candle)=>[String(b.time*1000),String(b.open),String(b.high),String(b.low),String(b.close),'999',String(b.volume),'1000',b.confirmed?'1':'0'];
 const flush=async()=>{await Promise.resolve();await Promise.resolve()};
+
+test('manual refresh waits for an existing snapshot instead of reporting premature success',async t=>{
+ t.mock.timers.enable({apis:['setTimeout','setInterval']});
+ let resolve!:(bars:Candle[])=>void,reads=0,done=false;
+ const session=new CandleSession({symbol,period:'1m',cache:new CandleCache(),socket:()=>new Socket() as unknown as WebSocket,fetchPage:()=>{reads++;return new Promise(r=>resolve=r)},onChange:()=>{}});
+ session.start();const pending=session.refresh().then(ok=>{done=true;return ok});await flush();
+ assert.equal(reads,1);assert.equal(done,false);resolve([bar(time-60),bar()]);
+ assert.equal(await pending,true);session.stop();
+});
 class Disk {
  values=new Map<string,string>();get length(){return this.values.size}
  getItem(k:string){return this.values.get(k)??null} setItem(k:string,v:string){this.values.set(k,v)} removeItem(k:string){this.values.delete(k)} key(i:number){return [...this.values.keys()][i]??null}
@@ -114,8 +124,33 @@ test('repeated history failure backs off, retains real cache, and stops all back
  const cache=new CandleCache(new Disk());cache.write(symbol,'1m',[bar(time-60),bar()]);let state!:CandleState,reads=0;
  const socket=new Socket();const session=new CandleSession({symbol,period:'1m',cache,socket:()=>socket as unknown as WebSocket,fetchPage:async()=>{reads++;throw Error('offline')},onChange:s=>state=s});
  session.start();socket.open();await flush();
- for(let i=0;i<14;i++){t.mock.timers.tick(1000);socket.bars([bar()]);await flush()}
+ for(let i=0;i<5;i++){t.mock.timers.tick(1000);socket.bars([bar()]);await flush()}
  assert.equal(reads,2);assert.equal(state.historyReady,true);assert.equal(state.status,'delayed');assert.equal(state.errorKind,'snapshot');
  t.mock.timers.tick(1000);await flush();assert.equal(reads,3);
  session.stop();t.mock.timers.tick(120000);await flush();assert.equal(reads,3);
+});
+
+test('a stalled stream falls back after 3 seconds, polls every 2 seconds and yields to live data',async t=>{
+ t.mock.timers.enable({apis:['setTimeout','setInterval','Date'],now:(time+1)*1000});
+ const socket=new Socket();let reads=0,state!:CandleState;
+ const session=new CandleSession({symbol,period:'1m',cache:new CandleCache(),socket:()=>socket as unknown as WebSocket,fetchPage:async()=>{reads++;return [bar(time-60,100,true),bar(time,102)]},onChange:s=>state=s});
+ session.start();socket.open();await flush();socket.bars([bar(time,103)]);
+ t.mock.timers.tick(2000);await flush();assert.equal(reads,1);
+ t.mock.timers.tick(1000);await flush();assert.equal(reads,2);assert.equal(state.status,'polling');
+ t.mock.timers.tick(1000);await flush();assert.equal(reads,2);
+ t.mock.timers.tick(1000);await flush();assert.equal(reads,3);
+ for(let i=0;i<8;i++){socket.bars([bar(time,104)]);t.mock.timers.tick(1000);await flush()}
+ assert.equal(reads,3);assert.equal(state.status,'live');assert.equal(state.bars.at(-1)?.close,104);
+ session.stop();t.mock.timers.tick(20000);await flush();assert.equal(reads,3);
+});
+
+for(const period of Object.keys(PERIODS) as CandlePeriod[])test(`${period} updates its open candle immediately and never downgrades a closed candle`,async t=>{
+ t.mock.timers.enable({apis:['setTimeout','setInterval','Date'],now:(time+1)*1000});
+ const socket=new Socket();let state!:CandleState;
+ const session=new CandleSession({symbol,period,cache:new CandleCache(),socket:()=>socket as unknown as WebSocket,fetchPage:async()=>[bar(time-86400,100,true),bar()],onChange:s=>state=s});
+ session.start();socket.open();await flush();
+ const emit=(b:Candle)=>socket.onmessage?.({data:JSON.stringify({arg:{instId:symbol,channel:'candle'+period},data:[row(b)]})});
+ emit(bar(time,104));assert.equal(state.bars.at(-1)?.close,104);assert.equal(state.bars.at(-1)?.confirmed,false);
+ emit(bar(time,105,true));emit(bar(time,99));assert.equal(state.bars.at(-1)?.close,105);assert.equal(state.bars.at(-1)?.confirmed,true);
+ session.stop();
 });

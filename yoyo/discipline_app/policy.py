@@ -153,7 +153,7 @@ class Policy:
         return 'portfolio' if exposure else ('majors' if major else 'alts')
 
 
-def plan(policy, equity, entry, stop, side, fraction, leverage, instrument, quantity_limit=None, sizing_mode='risk'):
+def plan(policy, equity, entry, stop, side, fraction, leverage, instrument, quantity_limit=None, sizing_mode='risk', inherited_leverage=None):
     """Size from cash loss, independently of the chosen margin leverage.
 
     Uses only the current server quote, explicit initial stop and instrument
@@ -165,7 +165,7 @@ def plan(policy, equity, entry, stop, side, fraction, leverage, instrument, quan
     distance = (entry - stop) * (1 if side == 'long' else -1)
     if distance <= 0:
         raise Rejected('多单止损须低于入场价，空单止损须高于入场价')
-    if type(leverage) is not int or not 1 <= leverage <= min(policy.leverage_cap(instrument['symbol']), int(instrument['max_leverage'])):
+    if type(leverage) is not int or not 1 <= leverage <= min(inherited_leverage if inherited_leverage == leverage else policy.leverage_cap(instrument['symbol']), int(instrument['max_leverage'])):
         raise Rejected('杠杆超过币种或交易所上限')
     tick, step = positive(instrument['tick']), positive(instrument['step'])
     if stop % tick:

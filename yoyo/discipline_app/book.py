@@ -414,6 +414,9 @@ class Book:
             raise Rejected('已有反向持仓，不允许反向加仓')
         return pos
 
+    def inherited_leverage(self, state, symbol):
+        return None
+
     def preview_in(self, state, request, reviewed_plan=None):
         if set(request) - {'sizing_mode', 'add_to'} != {'symbol', 'side', 'kind', 'price', 'stop', 'fraction', 'leverage'}:
             raise Rejected('订单字段不匹配；仓位与权益必须由服务端计算')
@@ -464,7 +467,7 @@ class Book:
             limit = min(bounds + ([limit] if limit is not None else []))
         result = plan(p, self.equity(state), entry, stop, side,
                       request['fraction'], leverage, state['instruments'][symbol],
-                      limit, request.get('sizing_mode', 'risk'))
+                      limit, request.get('sizing_mode', 'risk'), self.inherited_leverage(state, symbol))
         if target:
             result['add_to'] = target['id']
             result['parent_snapshot'] = self.scale_parent_snapshot(target)
@@ -491,7 +494,7 @@ class Book:
             if not instrument or request.get('sizing_mode') != 'margin' or side not in ('long', 'short'):
                 raise Rejected('请选择有效合约和保证金仓位比例')
             leverage, fraction = request['leverage'], positive(request['fraction'])
-            if type(leverage) is not int or not 1 <= leverage <= min(p.leverage_cap(symbol), int(instrument['max_leverage'])):
+            if type(leverage) is not int or not 1 <= leverage <= min(self.inherited_leverage(state, symbol) or p.leverage_cap(symbol), int(instrument['max_leverage'])):
                 raise Rejected('杠杆超过币种或交易所上限')
             if p.margin_cap(symbol) is None or fraction > p.margin_cap(symbol):
                 raise Rejected('保证金比例超过当前币种上限')

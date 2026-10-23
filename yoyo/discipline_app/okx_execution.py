@@ -33,7 +33,7 @@ class OkxExecutionClient:
         '/api/v5/account/leverage-info', '/api/v5/account/trade-fee',
         '/api/v5/trade/orders-pending', '/api/v5/trade/order',
         '/api/v5/trade/orders-algo-pending', '/api/v5/trade/orders-algo-history',
-        '/api/v5/trade/order-algo', '/api/v5/trade/fills'))
+        '/api/v5/trade/order-algo', '/api/v5/trade/fills', '/api/v5/trade/fills-history'))
     WRITE = frozenset(('/api/v5/account/set-leverage', '/api/v5/trade/order',
         '/api/v5/trade/cancel-order', '/api/v5/trade/order-algo', '/api/v5/trade/amend-algos', '/api/v5/trade/cancel-algos'))
 

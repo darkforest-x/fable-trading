@@ -24,3 +24,7 @@
 @media(prefers-reduced-motion:reduce){.app .sheet-backdrop .modal.sheet-settling,.app.fib-page .sheet-backdrop .modal.sheet-settling,.app .sheet-backdrop.sheet-settling::before{transition:none}}
 
 .app .bottom-nav.bottom-nav,.app.fib-page .bottom-nav.bottom-nav{background:#fffffff5;backdrop-filter:none;-webkit-backdrop-filter:none}
+
+/* Stitch list-refresh 0.8.26: lightweight pull indicator, no full-page repaint. */
+html,body{overscroll-behavior-y:contain}.app main{overscroll-behavior-y:contain}.pull-refresh{position:fixed;top:calc(var(--safe-top) + 4px);left:50%;z-index:40;display:flex;align-items:center;gap:7px;min-height:34px;padding:0 12px;border-radius:22px;background:#fffffff5;box-shadow:0 3px 15px #15251d12;color:var(--accent);font-size:11px;pointer-events:none;opacity:0;transform:translate(-50%,calc(var(--pull-distance,0px) - 38px));transition:transform 220ms ease,opacity 150ms ease}.pull-refresh:not(.idle){opacity:1}.app main[data-pulling] .pull-refresh{transition:none}.pull-refresh.loading svg{animation:spin 800ms linear infinite}.pull-refresh.error{color:var(--red)}.fib-refresh-zone{position:absolute;top:0;left:0;right:0;height:calc(var(--safe-top) + 94px);z-index:2;touch-action:none}
+@media(prefers-reduced-motion:reduce){.pull-refresh{transition:none}}

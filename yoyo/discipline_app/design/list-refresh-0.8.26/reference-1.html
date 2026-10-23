@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>SPIKE - 当前持仓</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "secondary": "#006e2d",
+            "glass-card-bg": "rgba(255, 255, 255, 0.92)",
+            "surface-container-high": "#e2e8f8",
+            "secondary-fixed-dim": "#62df7d",
+            "on-tertiary-fixed": "#410002",
+            "primary-fixed-dim": "#abc7ff",
+            "device-chassis": "#202227",
+            "surface-bright": "#f9f9ff",
+            "surface-dim": "#d4daea",
+            "surface-container-highest": "#dde2f2",
+            "glass-bg": "rgba(255, 255, 255, 0.76)",
+            "tertiary-container": "#df2828",
+            "surface": "#f9f9ff",
+            "secondary-container": "#7cf994",
+            "surface-variant": "#dde2f2",
+            "on-secondary-container": "#007230",
+            "inverse-on-surface": "#ecf0ff",
+            "outline": "#717785",
+            "on-tertiary-container": "#fffaf9",
+            "on-tertiary-fixed-variant": "#93000b",
+            "canvas-bg": "#F7F8F6",
+            "on-secondary": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-error": "#ffffff",
+            "primary-container": "#0071e3",
+            "tertiary-fixed-dim": "#ffb4ab",
+            "tertiary": "#ba0012",
+            "surface-container-lowest": "#ffffff",
+            "inverse-primary": "#abc7ff",
+            "secondary-fixed": "#7ffc97",
+            "fib-mid": "#94a3b8",
+            "on-primary-fixed": "#001b3f",
+            "error-container": "#ffdad6",
+            "chart-bull": "#16a34a",
+            "on-primary-container": "#fcfbff",
+            "on-surface": "#161c27",
+            "on-surface-variant": "#414753",
+            "inverse-surface": "#2a313d",
+            "outline-variant": "#c1c6d6",
+            "primary": "#0059b5",
+            "on-tertiary": "#ffffff",
+            "on-primary": "#ffffff",
+            "chart-bear": "#dc2626",
+            "error": "#ba1a1a",
+            "background": "#f9f9ff",
+            "glass-specular": "rgba(255, 255, 255, 0.9)",
+            "fib-blue": "#0ea5e9",
+            "surface-container": "#e8eefe",
+            "surface-container-low": "#f0f3ff",
+            "surface-tint": "#005cbb",
+            "on-secondary-fixed": "#002109",
+            "on-primary-fixed-variant": "#00458f",
+            "tertiary-fixed": "#ffdad6",
+            "on-background": "#161c27",
+            "on-secondary-fixed-variant": "#005320",
+            "primary-fixed": "#d7e2ff"
+          },
+          fontFamily: {
+            "label-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "label-md": ["Plus Jakarta Sans", "sans-serif"],
+            "body-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "body-md": ["Plus Jakarta Sans", "sans-serif"],
+            "body-lg": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-sm-mobile": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-md": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-lg": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-xl": ["Plus Jakarta Sans", "sans-serif"],
+            "display-lg": ["Plus Jakarta Sans", "sans-serif"],
+            "metric-val": ["Plus Jakarta Sans", "sans-serif"]
+          },
+          fontSize: {
+            "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.04em", fontWeight: "600" }],
+            "label-md": ["13px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "500" }],
+            "body-sm": ["13px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "400" }],
+            "body-md": ["15px", { lineHeight: "21px", letterSpacing: "-0.005em", fontWeight: "400" }],
+            "body-lg": ["17px", { lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "400" }],
+            "headline-sm": ["17px", { lineHeight: "22px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "headline-sm-mobile": ["17px", { lineHeight: "22px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "headline-md": ["20px", { lineHeight: "26px", letterSpacing: "-0.015em", fontWeight: "600" }],
+            "headline-lg": ["24px", { lineHeight: "30px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "headline-xl": ["36px", { lineHeight: "44px", letterSpacing: "-0.025em", fontWeight: "600" }],
+            "display-lg": ["48px", { lineHeight: "56px", letterSpacing: "-0.03em", fontWeight: "700" }],
+            "metric-val": ["28px", { lineHeight: "32px", letterSpacing: "-0.02em", fontWeight: "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .font-tabular { font-variant-numeric: tabular-nums; }
+    /* Micro-hairlines for clean physical Apple aesthetic */
+    .hairline-b { border-bottom: 0.5px solid rgba(22, 28, 39, 0.08); }
+    .hairline-t { border-top: 0.5px solid rgba(22, 28, 39, 0.08); }
+    .hairline-card { border: 0.5px solid rgba(22, 28, 39, 0.08); }
+    /* iOS Momentum touch scroll */
+    .smooth-scroll { -webkit-overflow-scrolling: touch; }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#f7f9fa] text-on-surface antialiased font-body-md select-none h-full overflow-hidden flex flex-col justify-center items-center">
+<!-- Mobile Viewport Container: iPhone 390px native, min 320px responsive -->
+<div class="relative w-full max-w-[390px] h-full bg-[#f7f9fa] flex flex-col shadow-[0_0_40px_rgba(0,0,0,0.06)] overflow-hidden">
+<!-- Top Safe Area Header -->
+<header class="sticky top-0 z-40 bg-surface-container-lowest/90 backdrop-blur-md px-4 pt-3 pb-2.5 hairline-b flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<h1 class="text-headline-md font-headline-md text-on-surface tracking-tight font-bold">当前持仓 <span class="text-outline font-normal text-headline-sm">(1)</span></h1>
+<div class="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-container/30 text-secondary text-label-sm font-label-sm border border-secondary/20">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bull animate-pulse mr-1"></span>
+          实时风控已接管
+        </div>
+</div>
+<!-- Right gear is strictly suppressed as requested (settings gear only appears on statistics page) -->
+<div class="flex items-center space-x-1">
+<div class="w-2 h-2 rounded-full bg-chart-bull/60"></div>
+<span class="text-label-sm font-label-sm text-outline font-tabular">MS 18</span>
+</div>
+</header>
+<!-- Pull-to-Refresh Container & Spinner (Controlled via micro-interaction JS) -->
+<div class="w-full flex items-center justify-center overflow-hidden transition-all duration-200 pointer-events-none" id="ptr-indicator-box" style="height: 0px;">
+<div class="w-7 h-7 rounded-full bg-surface-container-lowest hairline-card flex items-center justify-center shadow-sm" id="ptr-icon-wrap">
+<span class="material-symbols-outlined text-[18px] text-primary transition-transform" data-icon="progress_activity" id="ptr-spinner">progress_activity</span>
+</div>
+</div>
+<!-- Scrollable Content Viewport -->
+<main class="flex-1 overflow-y-auto smooth-scroll px-3.5 pt-3 pb-28 space-y-3.5" id="scrollable-container">
+<!-- Status/Alert Banner: Pending reconciliation verification -->
+<div class="rounded-xl bg-surface-container-lowest p-3 hairline-card flex items-start space-x-2.5 shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5" data-icon="sync">sync</span>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-on-surface font-semibold">自管纪律平仓监控正常</span>
+<span class="text-label-sm font-label-sm text-outline">极速通道</span>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-0.5 leading-tight">未检测到外部手动反向平仓冲突，风控核心处于最高守候状态。</p>
+</div>
+</div>
+<!-- Self-Managed Active Position Card -->
+<section class="rounded-2xl bg-surface-container-lowest p-4 hairline-card shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-3.5">
+<!-- Card Header: Symbol, Leverage, Tag -->
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="px-1.5 py-0.5 rounded text-label-sm font-label-sm font-bold bg-secondary-container/40 text-secondary border border-secondary/25">多 LONG</span>
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface">BTC/USDT</span>
+<span class="text-label-sm font-label-sm px-1.5 py-0.5 rounded-full bg-[#f0f2f5] text-on-surface-variant font-tabular">100x 永续</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-label-sm font-label-sm font-semibold border border-primary/20">
+            +1.0R 保本就绪
+          </span>
+</div>
+<!-- Metric PnL Row -->
+<div class="flex items-baseline justify-between pt-1">
+<div>
+<div class="text-label-sm font-label-sm text-outline">浮动未实现盈亏 (USDT)</div>
+<div class="text-[30px] leading-tight font-headline-xl font-bold text-chart-bull font-tabular tracking-tight">
+              +12.30 <span class="text-headline-sm font-headline-sm font-semibold">(+8.20%)</span>
+</div>
+</div>
+<div class="text-right">
+<div class="text-label-sm font-label-sm text-outline">仓位本金 / 名义价值</div>
+<div class="text-headline-sm font-headline-sm text-on-surface font-semibold font-tabular">
+              250.00 <span class="text-outline text-label-sm">/ 25,000 U</span>
+</div>
+</div>
+</div>
+<!-- Key Financial Values Matrix -->
+<div class="grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-[#f8fafb] hairline-card text-label-md font-label-md">
+<div class="flex justify-between items-center">
+<span class="text-outline">开仓均价</span>
+<span class="font-tabular font-semibold text-on-surface">68,100.00</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-outline">最新标记</span>
+<span class="font-tabular font-semibold text-on-surface">68,435.20</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-outline">强制止损 (SL)</span>
+<span class="font-tabular font-semibold text-chart-bear">67,650.00</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-outline">保本触发价</span>
+<span class="font-tabular font-semibold text-primary">68,100.00</span>
+</div>
+</div>
+<!-- Precision Execution Controls: Standard 44px Touch Boundaries -->
+<div class="grid grid-cols-2 gap-2 pt-0.5">
+<button class="h-11 min-h-[44px] px-3 rounded-xl bg-surface-container-low hover:bg-surface-container text-primary font-headline-sm font-semibold text-[14px] hairline-card active:scale-[0.98] transition flex items-center justify-center space-x-1.5 shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="lock_reset">lock_reset</span>
+<span>止损到开仓价</span>
+</button>
+<button class="h-11 min-h-[44px] px-3 rounded-xl bg-tertiary-container/10 hover:bg-tertiary-container/20 text-tertiary font-headline-sm font-semibold text-[14px] border border-tertiary/20 active:scale-[0.98] transition flex items-center justify-center space-x-1.5" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="bolt">bolt</span>
+<span>闪电平仓</span>
+</button>
+</div>
+</section>
+<!-- Pending Orders Section: 待成交委托 (1) -->
+<section class="rounded-2xl bg-surface-container-lowest p-3.5 hairline-card shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1.5">
+<h2 class="text-label-md font-label-md text-on-surface font-bold tracking-tight">待成交委托</h2>
+<span class="px-1.5 py-0.2 rounded-full bg-primary/10 text-primary text-[10px] font-bold">1</span>
+</div>
+<span class="text-label-sm font-label-sm text-outline font-tabular">网关正常</span>
+</div>
+<div class="p-3 rounded-xl bg-[#f8fafb] hairline-card flex items-center justify-between">
+<div class="space-y-1">
+<div class="flex items-center space-x-1.5">
+<span class="text-label-sm font-label-sm px-1.5 py-0.5 rounded bg-secondary-container/40 text-secondary font-bold">买入开多</span>
+<span class="text-body-md font-body-md font-bold text-on-surface">BTC/USDT</span>
+<span class="text-label-sm font-label-sm text-outline">限价</span>
+</div>
+<div class="text-label-sm font-label-sm text-outline font-tabular">
+              委托价 <span class="text-on-surface font-semibold">80,000.00</span> · 数量 <span class="text-on-surface font-semibold">0.05 BTC</span>
+</div>
+</div>
+<!-- 44px tap zone cancel button -->
+<button class="h-11 min-h-[44px] px-3.5 rounded-lg bg-surface-container-lowest hairline-card text-on-surface-variant hover:text-chart-bear text-label-md font-label-md font-semibold active:scale-95 transition flex items-center justify-center" type="button">
+            撤单
+          </button>
+</div>
+</section>
+<!-- Compact Collapsible Order History: 最近完成 (重点精修工效排版) -->
+<section class="rounded-2xl bg-surface-container-lowest p-3.5 hairline-card shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-2">
+<div class="flex items-center justify-between pb-1 hairline-b">
+<h2 class="text-label-md font-label-md text-on-surface font-bold">最近完成</h2>
+<span class="text-label-sm font-label-sm text-outline">北京时间 (UTC+8)</span>
+</div>
+<!-- Record List Container -->
+<div class="divide-y divide-black/[0.04]">
+<!-- Item 1: Expanded state (点击可展开详情，不删减字段) -->
+<div class="history-item cursor-pointer pt-1.5 pb-2" onclick="toggleOrderDetails(this)">
+<!-- Compact summary row: exactly >=44px touch ergonomics -->
+<div class="h-11 min-h-[44px] flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold bg-secondary-container/50 text-secondary">多</span>
+<div>
+<div class="text-body-sm font-body-sm font-bold text-on-surface leading-tight">BTC/USDT</div>
+<div class="text-[10px] text-outline font-tabular leading-tight">10x 永续</div>
+</div>
+</div>
+<div class="text-label-sm font-label-sm text-outline font-tabular">
+                14:12:05
+              </div>
+<div class="flex items-center space-x-1.5">
+<div class="text-right">
+<span class="font-tabular text-chart-bull font-bold text-headline-sm leading-tight block">+12.30</span>
+<span class="text-[10px] text-chart-bull block -mt-0.5">USDT</span>
+</div>
+<span class="arrow-icon material-symbols-outlined text-outline text-[18px] transition-transform duration-200 rotate-180" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Expanded Details Content: complete institutional audit trail -->
+<div class="details-panel mt-2 p-2.5 rounded-xl bg-[#f8fafb] hairline-card space-y-1.5 text-label-sm font-label-sm">
+<div class="flex justify-between text-outline">
+<span>开仓时间 / 平仓时间</span>
+<span class="text-on-surface font-tabular">13:50:22 / 14:12:05</span>
+</div>
+<div class="flex justify-between text-outline">
+<span>开仓成交价 / 最终平仓价</span>
+<span class="text-on-surface font-tabular font-medium">67,900.00 / 68,320.00</span>
+</div>
+<div class="flex justify-between text-outline">
+<span>手续费及执行滑点</span>
+<span class="text-on-surface font-tabular">0.08 USDT (零滑点)</span>
+</div>
+<div class="flex justify-between text-outline">
+<span>平仓离场原因</span>
+<span class="text-chart-bull font-medium flex items-center">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bull mr-1"></span>
+                  3R 分批止盈生效
+                </span>
+</div>
+</div>
+</div>
+<!-- Item 2: Collapsed state (紧凑单行态) -->
+<div class="history-item cursor-pointer pt-1.5 pb-2" onclick="toggleOrderDetails(this)">
+<div class="h-11 min-h-[44px] flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold bg-tertiary-container/15 text-tertiary">空</span>
+<div>
+<div class="text-body-sm font-body-sm font-bold text-on-surface leading-tight">ETH/USDT</div>
+<div class="text-[10px] text-outline font-tabular leading-tight">20x 永续</div>
+</div>
+</div>
+<div class="text-label-sm font-label-sm text-outline font-tabular">
+                11:28:40
+              </div>
+<div class="flex items-center space-x-1.5">
+<div class="text-right">
+<span class="font-tabular text-chart-bear font-bold text-headline-sm leading-tight block">-4.50</span>
+<span class="text-[10px] text-chart-bear block -mt-0.5">USDT</span>
+</div>
+<span class="arrow-icon material-symbols-outlined text-outline text-[18px] transition-transform duration-200" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Collapsed Details Panel (Hidden by default) -->
+<div class="details-panel hidden mt-2 p-2.5 rounded-xl bg-[#f8fafb] hairline-card space-y-1.5 text-label-sm font-label-sm">
+<div class="flex justify-between text-outline">
+<span>开仓时间 / 平仓时间</span>
+<span class="text-on-surface font-tabular">11:15:10 / 11:28:40</span>
+</div>
+<div class="flex justify-between text-outline">
+<span>开仓成交价 / 最终平仓价</span>
+<span class="text-on-surface font-tabular font-medium">3,490.50 / 3,502.10</span>
+</div>
+<div class="flex justify-between text-outline">
+<span>手续费及执行滑点</span>
+<span class="text-on-surface font-tabular">0.12 USDT</span>
+</div>
+<div class="flex justify-between text-outline">
+<span>平仓离场原因</span>
+<span class="text-tertiary font-medium flex items-center">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bear mr-1"></span>
+                  触及硬止损保护离场
+                </span>
+</div>
+</div>
+</div>
+<!-- Item 3: Collapsed state (SOL/USDT) -->
+<div class="history-item cursor-pointer pt-1.5 pb-2" onclick="toggleOrderDetails(this)">
+<div class="h-11 min-h-[44px] flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold bg-secondary-container/50 text-secondary">多</span>
+<div>
+<div class="text-body-sm font-body-sm font-bold text-on-surface leading-tight">SOL/USDT</div>
+<div class="text-[10px] text-outline font-tabular leading-tight">15x 永续</div>
+</div>
+</div>
+<div class="text-label-sm font-label-sm text-outline font-tabular">
+                09:05:12
+              </div>
+<div class="flex items-center space-x-1.5">
+<div class="text-right">
+<span class="font-tabular text-chart-bull font-bold text-headline-sm leading-tight block">+31.80</span>
+<span class="text-[10px] text-chart-bull block -mt-0.5">USDT</span>
+</div>
+<span class="arrow-icon material-symbols-outlined text-outline text-[18px] transition-transform duration-200" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Collapsed Details Panel -->
+<div class="details-panel hidden mt-2 p-2.5 rounded-xl bg-[#f8fafb] hairline-card space-y-1.5 text-label-sm font-label-sm">
+<div class="flex justify-between text-outline">
+<span>开仓时间 / 平仓时间</span>
+<span class="text-on-surface font-tabular">08:22:15 / 09:05:12</span>
+</div>
+<div class="flex justify-between text-outline">
+<span>开仓成交价 / 最终平仓价</span>
+<span class="text-on-surface font-tabular font-medium">178.40 / 184.20</span>
+</div>
+<div class="flex justify-between text-outline">
+<span>手续费及执行滑点</span>
+<span class="text-on-surface font-tabular">0.24 USDT</span>
+</div>
+<div class="flex justify-between text-outline">
+<span>平仓离场原因</span>
+<span class="text-chart-bull font-medium flex items-center">
+<span class="w-1.5 h-1.5 rounded-full bg-chart-bull mr-1"></span>
+                  趋势反转追踪止盈 (Trailing Stop)
+                </span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Micro Note -->
+<div class="text-center pt-1 text-[11px] text-outline font-label-sm">
+        所有交易行为受 SPIKE 纪律合约状态机守护 · 避免情绪化超额交易
+      </div>
+</main>
+<!-- Bottom Navigation Bar: Strict 5 Native Destinations adhering to prompt -->
+<!-- Destinations: 【合约】、【纪律】、【1.618】、【持仓】(Active)、【统计】 -->
+<nav class="fixed bottom-0 inset-x-0 max-w-[390px] mx-auto z-50 bg-surface-container-lowest/95 backdrop-blur-lg hairline-t px-2 pb-5 pt-2 flex justify-between items-center h-16 shadow-[0_-4px_16px_rgba(0,0,0,0.03)]">
+<!-- 1. 合约 -->
+<button class="flex-1 flex flex-col items-center justify-center text-outline hover:text-on-surface transition-colors py-1" type="button">
+<span class="material-symbols-outlined text-[22px]" data-icon="candlestick_chart">candlestick_chart</span>
+<span class="text-[11px] font-label-sm mt-0.5">合约</span>
+</button>
+<!-- 2. 纪律 -->
+<button class="flex-1 flex flex-col items-center justify-center text-outline hover:text-on-surface transition-colors py-1" type="button">
+<span class="material-symbols-outlined text-[22px]" data-icon="shield_lock">shield_lock</span>
+<span class="text-[11px] font-label-sm mt-0.5">纪律</span>
+</button>
+<!-- 3. 1.618 (Fibonacci Golden Ratio Engine) -->
+<button class="flex-1 flex flex-col items-center justify-center text-outline hover:text-on-surface transition-colors py-1" type="button">
+<span class="material-symbols-outlined text-[22px]" data-icon="change_history">change_history</span>
+<span class="text-[11px] font-label-sm mt-0.5">1.618</span>
+</button>
+<!-- 4. 持仓 (Active Tab) -->
+<button class="flex-1 flex flex-col items-center justify-center text-primary font-bold py-1" type="button">
+<span class="material-symbols-outlined text-[22px]" data-icon="pie_chart" style="font-variation-settings: 'FILL' 1;">pie_chart</span>
+<span class="text-[11px] font-label-sm mt-0.5">持仓</span>
+</button>
+<!-- 5. 统计 -->
+<button class="flex-1 flex flex-col items-center justify-center text-outline hover:text-on-surface transition-colors py-1" type="button">
+<span class="material-symbols-outlined text-[22px]" data-icon="leaderboard">leaderboard</span>
+<span class="text-[11px] font-label-sm mt-0.5">统计</span>
+</button>
+</nav>
+</div>
+<!-- Inline Vanilla Script for Micro-interactions: Pull-to-Refresh & Collapsible Accordion -->
+<script>
+    // 1. Expand / Collapse order details smoothly
+    function toggleOrderDetails(element) {
+      const panel = element.querySelector('.details-panel');
+      const arrow = element.querySelector('.arrow-icon');
+      if (!panel) return;
+
+      if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
+        if (arrow) arrow.classList.add('rotate-180');
+      } else {
+        panel.classList.add('hidden');
+        if (arrow) arrow.classList.remove('rotate-180');
+      }
+    }
+
+    // 2. High-precision Pull-to-Refresh (Damping ~0.45, max行程 64px, only fires at scrollTop === 0)
+    (function initPullToRefresh() {
+      const scrollable = document.getElementById('scrollable-container');
+      const ptrBox = document.getElementById('ptr-indicator-box');
+      const ptrSpinner = document.getElementById('ptr-spinner');
+      if (!scrollable || !ptrBox || !ptrSpinner) return;
+
+      let startY = 0;
+      let currentDistance = 0;
+      let isPulling = false;
+      let isRefreshing = false;
+      const MAX_PULL = 64; // Max travel height
+      const DAMPING = 0.45;
+
+      scrollable.addEventListener('touchstart', (e) => {
+        if (scrollable.scrollTop === 0 && !isRefreshing) {
+          startY = e.touches[0].pageY;
+          isPulling = true;
+          ptrBox.style.transition = 'none';
+        }
+      }, { passive: true });
+
+      scrollable.addEventListener('touchmove', (e) => {
+        if (!isPulling || isRefreshing) return;
+        const delta = e.touches[0].pageY - startY;
+        if (delta > 0 && scrollable.scrollTop === 0) {
+          currentDistance = Math.min(delta * DAMPING, MAX_PULL);
+          ptrBox.style.height = `${currentDistance}px`;
+          const rotateAngle = (currentDistance / MAX_PULL) * 360;
+          ptrSpinner.style.transform = `rotate(${rotateAngle}deg)`;
+        } else {
+          currentDistance = 0;
+          ptrBox.style.height = '0px';
+        }
+      }, { passive: true });
+
+      scrollable.addEventListener('touchend', () => {
+        if (!isPulling || isRefreshing) return;
+        isPulling = false;
+        ptrBox.style.transition = 'height 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)';
+
+        if (currentDistance >= 46) {
+          // Trigger mock refresh
+          isRefreshing = true;
+          ptrBox.style.height = '48px';
+          ptrSpinner.classList.add('animate-spin');
+          
+          setTimeout(() => {
+            // Smoothly complete
+            ptrSpinner.classList.remove('animate-spin');
+            ptrBox.style.height = '0px';
+            setTimeout(() => {
+              isRefreshing = false;
+              currentDistance = 0;
+            }, 250);
+          }, 800);
+        } else {
+          ptrBox.style.height = '0px';
+          currentDistance = 0;
+        }
+      });
+    })();
+  </script>
+</body></html>

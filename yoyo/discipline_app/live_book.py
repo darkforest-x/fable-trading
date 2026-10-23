@@ -20,6 +20,7 @@ from .okx_execution import ExchangeRejected, ExchangeUncertain, entry_payload, p
 from .policy import Policy, Rejected, dec, positive, ceil_step, floor_step
 from .closing import close_fraction, close_quantity
 from .managed_orders import ManagedOrders
+from .owned_lots import OwnedLots
 from .external_records import observed_records, persist_observations
 from concurrent.futures import ThreadPoolExecutor
 
@@ -30,7 +31,7 @@ class _Failed:
         self.error = error
 
 
-class LiveBook(ManagedOrders, Book):
+class LiveBook(OwnedLots, ManagedOrders, Book):
     mode = 'okx_live'
 
     def __init__(self, path, client, clock=time.time):
@@ -115,12 +116,40 @@ class LiveBook(ManagedOrders, Book):
             raise Rejected('交易所请求结果尚未核对，暂停开仓')
         return super().entry_guard(state, exclude_pending, add_to)
 
+    def inherited_leverage(self, state, symbol):
+        if symbol in state.get('shared_leverage_errors', []):
+            raise Rejected('该合约当前杠杆尚未核对，请稍后重试')
+        return state.get('shared_leverage', {}).get(symbol)
+
+    def _shared_leverage(self, positions, orders, algos):
+        # Cross leverage is shared across both hedge sides of an instrument.
+        symbols = {row['instId'] for row in [p for p in positions if dec(p.get('pos') or '0')!=0]+orders+algos
+                   if row.get('mgnMode', row.get('tdMode', 'cross'))=='cross'}
+        with self.read_transaction() as (_, state):
+            symbols.intersection_update(state['instruments'])
+        names = sorted(symbols)
+        values = self._read_many([('/api/v5/account/leverage-info', dict(instId=name,mgnMode='cross')) for name in names])
+        shared, errors = {}, []
+        for name, result in zip(names, values):
+            try:
+                rows = self._value(result)
+                rates = {dec(r['lever']) for r in rows}
+                if len(rates)!=1 or not rates or next(iter(rates))<=0 or next(iter(rates))%1:
+                    raise Rejected('Invalid shared leverage')
+                shared[name] = int(next(iter(rates)))
+            except Exception:
+                errors.append(name)
+        with self.transaction() as (_, state):
+            state.update(shared_leverage=shared, shared_leverage_errors=errors)
+            for pos in state['positions']:
+                if pos['symbol'] in shared:
+                    pos['leverage']=shared[pos['symbol']]
+                    pos['margin']=str(dec(pos['remaining'])*dec(pos['entry'])/pos['leverage'])
+
     def preview_in(self, state, request, reviewed_plan=None):
-        # An exchange position/lever setting belongs to a contract, not an App.
-        # Keep external activity on other contracts entirely outside policy;
-        # do not merge into or change leverage on an externally occupied one.
-        if any(row['symbol'] == request['symbol'] for row in state.get('external_activity', {}).get('current', [])):
-            raise Rejected('该合约有外部交易，仅记录；请在 OKX 处理同币仓位，其他合约可正常开仓')
+        inherited = self.inherited_leverage(state, request['symbol'])
+        if inherited is not None and request['leverage'] != inherited:
+            raise Rejected('交易所当前杠杆已变化，请沿用当前杠杆重新预览')
         result = super().preview_in(state, request, reviewed_plan)
         if dec(result['margin']) + dec(result['costs']) > dec(state['available']):
             raise Rejected('OKX 可用保证金不足')
@@ -181,7 +210,10 @@ class LiveBook(ManagedOrders, Book):
                     payload['ordType'] = 'limit'
                 intent = dict(id=key, fingerprint=fingerprint, request=request, plan=sized, payload=payload,
                     policy=self.policy(state).document(), policy_revision=revision, created=self.clock(),
-                    phase='accepted', error=None, entry_day=state['daily']['key'])
+                    phase='accepted', error=None, entry_day=state['daily']['key'], ownership_version=1,
+                    inherited_leverage=self.inherited_leverage(state, request['symbol']),
+                    owned_accounting=any(r['symbol']==request['symbol'] and r.get('margin_mode')=='cross'
+                        for r in state.get('external_activity',{}).get('current',[])))
                 if request['kind']=='limit' or sized.get('add_to'):
                     intent.update(execution_version=2, add_to=sized.get('add_to'))
                 state['intents'][key] = intent
@@ -190,12 +222,14 @@ class LiveBook(ManagedOrders, Book):
                 state['daily']['entries'] += 1
                 self.outbox.prepare(key, '/api/v5/trade/order', payload, db)
                 lever_id = stable_id(key, 'leverage')
-                self.outbox.prepare(lever_id, '/api/v5/account/set-leverage',
-                    dict(instId=request['symbol'], mgnMode='cross', lever=str(request['leverage'])), db)
+                if intent['inherited_leverage'] is None:
+                    self.outbox.prepare(lever_id, '/api/v5/account/set-leverage',
+                        dict(instId=request['symbol'], mgnMode='cross', lever=str(request['leverage'])), db)
                 self.event(db, 'live_intent_accepted', dict(id=key, plan=sized, request=request))
             # Committed reservation precedes either external write.
             try:
-                self.outbox.dispatch(lever_id, self.client)
+                if intent['inherited_leverage'] is None:
+                    self.outbox.dispatch(lever_id, self.client)
                 lever = self.client.get('/api/v5/account/leverage-info', instId=request['symbol'], mgnMode='cross')
                 if not lever or any(dec(row['lever']) != request['leverage'] for row in lever):
                     raise Rejected('交易所杠杆回读不一致，未发送开仓委托')
@@ -266,6 +300,18 @@ class LiveBook(ManagedOrders, Book):
             raise result.error
         return result
 
+    def _pending_pages(self, path, rows, field, **params):
+        """An external order count is not a policy gate; read the full list."""
+        result, page, cursors = list(rows), rows, set()
+        while len(page) == 100:
+            cursor = page[-1][field]
+            if cursor in cursors:
+                raise Rejected('交易所委托分页未推进，等待核对')
+            cursors.add(cursor)
+            page = self.client.get(path, after=cursor, limit='100', **params)
+            result.extend(page)
+        return list({row[field]:row for row in result}.values()) if cursors else result
+
     def _fetch(self):
         reads = [('/api/v5/account/config', {}), ('/api/v5/account/balance', dict(ccy='USDT')),
                  ('/api/v5/account/positions', {}), ('/api/v5/trade/orders-pending', {})]
@@ -282,15 +328,10 @@ class LiveBook(ManagedOrders, Book):
         if not usdt or dec(usdt['eq']) <= 0:
             raise Rejected('OKX 交易账户没有可用 USDT 净值')
         positions = self._value(positions)
-        orders = self._value(orders)
+        orders = self._pending_pages('/api/v5/trade/orders-pending',self._value(orders),'ordId')
         algos = []
-        for rows in algo_rows:
-            rows = self._value(rows)
-            if len(rows) >= 100:
-                raise Rejected('账户委托超出单次核对范围，暂停开仓')
-            algos.extend(rows)
-        if len(orders) >= 100 or len(positions) >= 100:
-            raise Rejected('账户记录超出单次核对范围，暂停开仓')
+        for kind,rows in zip(self.ALGO_KINDS,algo_rows):
+            algos.extend(self._pending_pages('/api/v5/trade/orders-algo-pending',self._value(rows),'algoId',ordType=kind))
         return config, usdt, positions, orders, algos
 
     def _refetch_positions_and_algos(self):
@@ -299,8 +340,8 @@ class LiveBook(ManagedOrders, Book):
         positions, *algo_rows = self._read_many(reads)
         positions = self._value(positions)
         algos = []
-        for rows in algo_rows:
-            algos.extend(self._value(rows))
+        for kind,rows in zip(self.ALGO_KINDS,algo_rows):
+            algos.extend(self._pending_pages('/api/v5/trade/orders-algo-pending',self._value(rows),'algoId',ordType=kind))
         return positions, algos
 
     def reconcile(self):
@@ -310,6 +351,7 @@ class LiveBook(ManagedOrders, Book):
             try:
                 config, usdt, raw_positions, raw_orders, algos = self._fetch()
                 self._resolve_commands()
+                self._shared_leverage(raw_positions, raw_orders, algos)
                 reference = hashlib.sha256(config['uid'].encode()).hexdigest()[:16]
                 with self.transaction() as (_, state):
                     if state['account_reference'] not in (None, reference):
@@ -347,7 +389,7 @@ class LiveBook(ManagedOrders, Book):
                                 if not covered:
                                     try:
                                         self._cancel_entry(intent, reason='protection_unverified')
-                                        self._emergency_close(dict(merging['position'],id=merging['generation']),instrument)
+                                        self._emergency_close(dict(merging['position'],id=merging['generation'],ownership_root=intent.get('add_to') or intent['id']),instrument)
                                     except (Rejected,ExchangeUncertain):
                                         pass  # Durable requests are reconciled next pass.
                 with self.transaction() as (db, state):
@@ -413,7 +455,7 @@ class LiveBook(ManagedOrders, Book):
                         self.outbox.resolve(record['id'],'acknowledged',rows)
                 elif path == '/api/v5/trade/amend-algos':
                     rows = self.client.get('/api/v5/trade/order-algo',algoId=payload['algoId'])
-                    fields = {'newSlTriggerPx':'slTriggerPx','newTpTriggerPx':'tpTriggerPx'}
+                    fields = {'newSlTriggerPx':'slTriggerPx','newTpTriggerPx':'tpTriggerPx','newSz':'sz'}
                     if len(rows)==1 and all(dec(rows[0].get(old,'0'))==dec(payload[new]) for new,old in fields.items() if new in payload):
                         self.outbox.resolve(record['id'],'acknowledged',[dict(sCode='0',algoId=payload['algoId'])])
                 elif path == '/api/v5/trade/cancel-algos':
@@ -463,7 +505,9 @@ class LiveBook(ManagedOrders, Book):
             raise Rejected('全量成交回执尚未确认，暂停开仓')
         if order['feeCcy'] != 'USDT':
             raise Rejected('成交费用币种不匹配，暂停开仓')
-        raw = next((x for x in positions if x['instId']==request['symbol'] and x['posSide']==request['side'] and dec(x['pos'])>0), None)
+        with self.read_transaction() as (_, state):
+            instrument = state['instruments'][request['symbol']]
+        raw = self._owned_view(intent, positions, instrument)
         with self.transaction() as (db, state):
             pos = next((x for x in state['positions'] if x['id']==key), None)
             if pos is None:
@@ -502,6 +546,9 @@ class LiveBook(ManagedOrders, Book):
         if invalid_risk or invalid_liquidation:
             self._emergency_close(pos,instrument)
             raise Rejected('实际成交风险或强平距离不符合计划，已提交减仓保护')
+        if intent.get('owned_active_specs'):
+            intent=copy.deepcopy(intent)
+            intent['payload']['attachAlgoOrds']=intent['owned_active_specs']
         self._protect(intent, pos, algos, instrument)
 
     def _algo(self, identity, current):
@@ -519,7 +566,7 @@ class LiveBook(ManagedOrders, Book):
         record = self.outbox.inspect(identity)
         if record['phase'] == 'attempted':
             row = self._algo(algo['algoClOrdId'], [])
-            mapping = {'newSlTriggerPx':'slTriggerPx','newTpTriggerPx':'tpTriggerPx'}
+            mapping = {'newSlTriggerPx':'slTriggerPx','newTpTriggerPx':'tpTriggerPx','newSz':'sz'}
             if all(dec(row.get(mapping[k], '0')) == dec(v) for k,v in fields.items() if k in mapping):
                 self.outbox.resolve(identity,'acknowledged',[{'sCode':'0','algoId':row['algoId']}])
             else:
@@ -529,7 +576,7 @@ class LiveBook(ManagedOrders, Book):
         # Ack means accepted, not that the exchange has applied it.
         verified = self._algo(algo['algoClOrdId'], [])
         for key, value in fields.items():
-            field = {'newSlTriggerPx':'slTriggerPx','newTpTriggerPx':'tpTriggerPx'}.get(key)
+            field = {'newSlTriggerPx':'slTriggerPx','newTpTriggerPx':'tpTriggerPx','newSz':'sz'}.get(key)
             if field and dec(verified.get(field,'0')) != dec(value):
                 raise Rejected('保护单修改等待交易所回读确认')
         return verified
@@ -551,6 +598,36 @@ class LiveBook(ManagedOrders, Book):
             if self.clock()-pos['opened'] > 20:
                 self._emergency_close(pos,instrument)
             raise Rejected('交易所止损保护待核对，请查看 OKX 持仓')
+        if intent.get('owned_accounting'):
+            remaining_contracts = dec(pos['remaining'])/dec(instrument['contract_value'])
+            if stop.get('closeFraction'):
+                raise Rejected('App 共用仓位止损必须使用明确自有数量')
+            if dec(stop.get('sz') or '0') > remaining_contracts:
+                stop = self._amend(stable_id(stop['algoClOrdId'], 'size-'+str(remaining_contracts.normalize())), stop,
+                                   dict(newSz=str(remaining_contracts)))
+            # Outstanding TP sizes may never exceed the owned remaining lot.
+            room = remaining_contracts
+            for index, algo in enumerate(rows[1:]):
+                if algo is None or algo['state'] != 'live':
+                    continue
+                amount = min(room, dec(algo['sz']))
+                if amount <= 0:
+                    identity = stable_id(algo['algoClOrdId'], 'empty-owned-tp')
+                    self.outbox.prepare(identity,'/api/v5/trade/cancel-algos',[dict(instId=pos['symbol'],algoId=algo['algoId'])])
+                    self.outbox.dispatch(identity,self.client)
+                    rows[index+1] = None
+                    intent['payload']['attachAlgoOrds'][index+1]['disabled'] = True
+                elif amount != dec(algo['sz']):
+                    rows[index+1] = self._amend(stable_id(algo['algoClOrdId'],'size-'+str(amount.normalize())),algo,dict(newSz=str(amount)))
+                intent['payload']['attachAlgoOrds'][index+1]['sz'] = str(amount)
+                room -= amount
+            with self.transaction() as (_, state):
+                owner = state['intents'][pos['id']]
+                if owner.get('aggregate'):
+                    owner['protection_specs'] = copy.deepcopy(intent['payload']['attachAlgoOrds'])
+                else:
+                    # Keep immutable entry payload for replay; active specs are separate.
+                    owner['owned_active_specs'] = copy.deepcopy(intent['payload']['attachAlgoOrds'])
         if dec(stop.get('sz') or '0') < dec(pos['remaining'])/dec(instrument['contract_value']) and stop.get('closeFraction') != '1':
             self._emergency_close(pos,instrument)
             raise Rejected('止损保护数量不足，已提交减仓保护')
@@ -602,19 +679,31 @@ class LiveBook(ManagedOrders, Book):
         try:
             self.outbox.inspect(identity)
         except Rejected:
+            with self.transaction() as (_,state):
+                state.setdefault('owned_exit_commands',{})[identity]=pos.get('ownership_root',pos['id'])
             self.outbox.prepare(identity,'/api/v5/trade/order',dict(instId=pos['symbol'],tdMode='cross',
                 posSide=pos['side'],side='sell' if pos['side']=='long' else 'buy',ordType='market',
                 sz=str(dec(pos['remaining'])/dec(instrument['contract_value'])),clOrdId=stable_id(identity,'close')))
         self.outbox.dispatch(identity,self.client)
 
     def _settle(self, intent, pos, algos):
-        rows = self.client.get('/api/v5/account/positions-history', instType='SWAP', instId=pos['symbol'], limit='100')
-        matching = [row for row in rows if row.get('posSide')==pos['side'] and int(row['uTime'])/1000>=intent['created']
-            and (not pos.get('pos_id') or row['posId']==pos['pos_id']) and row.get('type') in ('2','3','6')
-            and dec(row.get('closeTotalPos','0'))==dec(intent['payload']['sz'])]
-        if len(matching) != 1:
-            raise Rejected('仓位已归零，等待完整净盈亏结算，暂停新开仓')
-        history = matching[0]
+        if intent.get('owned_accounting'):
+            history = self._owned_history(intent)
+        else:
+            rows = self.client.get('/api/v5/account/positions-history', instType='SWAP', instId=pos['symbol'], limit='100')
+            matching = [row for row in rows if row.get('posSide')==pos['side'] and int(row['uTime'])/1000>=intent['created']
+                and (not pos.get('pos_id') or row['posId']==pos['pos_id']) and row.get('type') in ('2','3','6')
+                and dec(row.get('closeTotalPos','0'))==dec(intent['payload']['sz'])]
+            if len(matching) != 1:
+                # A historical exchange lifecycle may also contain external
+                # trades. Recover exact App fills instead of matching its total.
+                with self.read_transaction() as (_,state):
+                    instrument = state['instruments'][pos['symbol']]
+                intent['owned_accounting'] = True
+                self._owned_view(intent, [], instrument)
+                history = self._owned_history(intent)
+            else:
+                history = matching[0]
         # Never allow an old owned exit to affect a subsequent position.
         for attached in intent['payload']['attachAlgoOrds']:
             algo = next((row for row in algos if row.get('algoClOrdId')==attached['attachAlgoClOrdId']),None)
@@ -675,6 +764,8 @@ class LiveBook(ManagedOrders, Book):
                     raise Rejected('持仓不存在或已平仓')
                 if not state.get('account_synced') or not 0 <= self.clock()-state.get('private_at',0) <= 15:
                     raise Rejected('账户状态已过期，不能核定平仓数量')
+                if state['intents'][identity].get('owned_accounting') and state.get('private_error'):
+                    raise Rejected('App 自有数量尚未完成核对，不能提交平仓')
                 instrument=state['instruments'][pos['symbol']]
                 quantity=close_quantity(pos['remaining'],instrument,fraction)
                 size=quantity/dec(instrument['contract_value'])
@@ -813,7 +904,7 @@ class LiveBook(ManagedOrders, Book):
         # its write lock or create a new ledger revision on every phone poll.
         with self.read_transaction() as (_, state):
             result=self.render_snapshot(state)
-        for field in ('intents','previews','account_reference','close_commands','close_fractions','close_abandoned','statistics_return_basis'):
+        for field in ('intents','previews','account_reference','close_commands','close_fractions','close_abandoned','statistics_return_basis','owned_receipts','owned_algo_receipts','owned_exit_commands','external_activity','foreign'):
             result.pop(field,None)
         return result
 
