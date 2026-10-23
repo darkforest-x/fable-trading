@@ -1,0 +1,93 @@
+{
+  "auto_promote": false,
+  "best_iteration": 40,
+  "early_stopping_rounds": 50,
+  "feature_columns": [
+    "ma_spread_pct",
+    "full_spread",
+    "fast_slow_gap",
+    "full_ratio_min48",
+    "spread_mean8",
+    "spread_mean24",
+    "spread_chg8",
+    "spread_chg24",
+    "spread_pos96",
+    "dense_run_len",
+    "dense_frac48",
+    "ext_up",
+    "close_vs_ema55",
+    "close_vs_ema200",
+    "order_score",
+    "slow_slope_12",
+    "volume_ratio",
+    "volume_z",
+    "vol_ratio_mean8",
+    "atr_pct",
+    "atr_pct_ratio96",
+    "pre_range48",
+    "pre_range168",
+    "drawdown24",
+    "ret_4",
+    "ret_12",
+    "ret_24",
+    "ret_48"
+  ],
+  "feature_semantics": "side_aligned_v1",
+  "holdout_rows_read": 0,
+  "input": {
+    "dataset_path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r1_l2_feedback_dataset_pilot3_v1/dataset.csv",
+    "dataset_sha256": "26a05c7053c15daa7971a0cec55d2f069d575705d7b8dc20c5bb1e29b424a830",
+    "manifest_path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r1_l2_feedback_dataset_pilot3_v1/manifest.json",
+    "manifest_sha256": "86e4cc33cfd091ca03ae8e77f4d880d2988de36a0d34e0d46ff37e4df99a96b9"
+  },
+  "input_dataset_protocol": "l2_feedback_dataset_v1",
+  "lightgbm_params": {
+    "bagging_fraction": 0.8,
+    "bagging_freq": 1,
+    "bagging_seed": 42,
+    "data_random_seed": 42,
+    "deterministic": true,
+    "feature_fraction": 0.8,
+    "feature_fraction_seed": 42,
+    "force_col_wise": true,
+    "lambda_l2": 1.0,
+    "learning_rate": 0.03,
+    "metric": "binary_logloss",
+    "min_child_samples": 10,
+    "num_leaves": 15,
+    "num_threads": 1,
+    "objective": "binary",
+    "seed": 42,
+    "verbosity": -1
+  },
+  "num_boost_round": 600,
+  "objective": "binary",
+  "protocol": "l2_feedback_lightgbm_v1",
+  "purge_bars": 162,
+  "schema_version": 1,
+  "side": "short",
+  "splits": {
+    "train": {
+      "class_counts": {
+        "0": 40,
+        "1": 38
+      },
+      "rows": 78,
+      "time_range": [
+        "2026-01-04T08:00:00+00:00",
+        "2026-02-24T02:00:00+00:00"
+      ]
+    },
+    "val": {
+      "class_counts": {
+        "0": 33,
+        "1": 22
+      },
+      "rows": 55,
+      "time_range": [
+        "2026-03-02T11:30:00+00:00",
+        "2026-03-29T00:00:00+00:00"
+      ]
+    }
+  }
+}

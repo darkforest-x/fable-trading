@@ -1,0 +1,97 @@
+{
+  "april_rows_used": 0,
+  "auto_promote": false,
+  "counts": {
+    "outcomes_all_events": {
+      "sl": 3603,
+      "timeout": 472,
+      "tp": 1565
+    },
+    "outcomes_supervised": {
+      "sl": 3603,
+      "tp": 1565
+    },
+    "selected_events_all_outcomes": 5640,
+    "splits_all_events": {
+      "calibration": 1632,
+      "purged": 312,
+      "test": 1860,
+      "train": 1836
+    },
+    "splits_supervised": {
+      "calibration": 1501,
+      "purged": 302,
+      "test": 1681,
+      "train": 1684
+    },
+    "supervised_rows": 5168,
+    "timeouts_excluded_from_supervised_dataset": 472,
+    "train_class_counts": {
+      "0": 1204,
+      "1": 480
+    }
+  },
+  "dataset": {
+    "path": "dataset.csv",
+    "rows": 5168,
+    "sha256": "6890f4becbaa4e1b515eac950d060570d0707a133d7319c852a592ef920ae20f"
+  },
+  "experimental_change": "data_expansion_only",
+  "future_rows_in_features": 0,
+  "holdout_rows_read": 0,
+  "holdout_start": "2026-05-04T00:00:00+00:00",
+  "inner_cutoff": "2026-04-02T00:00:00+00:00",
+  "model_deployable": false,
+  "orders": false,
+  "protocol": "l2_data_expansion_round_v1",
+  "protocol_contract": {
+    "feature_columns": [
+      "ma_spread_pct",
+      "full_spread",
+      "fast_slow_gap",
+      "full_ratio_min48",
+      "spread_mean8",
+      "spread_mean24",
+      "spread_chg8",
+      "spread_chg24",
+      "spread_pos96",
+      "dense_run_len",
+      "dense_frac48",
+      "ext_up",
+      "close_vs_ema55",
+      "close_vs_ema200",
+      "order_score",
+      "slow_slope_12",
+      "volume_ratio",
+      "volume_z",
+      "vol_ratio_mean8",
+      "atr_pct",
+      "atr_pct_ratio96",
+      "pre_range48",
+      "pre_range168",
+      "drawdown24",
+      "ret_4",
+      "ret_12",
+      "ret_24",
+      "ret_48"
+    ],
+    "feature_semantics": "side_aligned_v1",
+    "included_outcomes": {
+      "sl": 0,
+      "sl_ambiguous": 0,
+      "tp": 1
+    },
+    "side": "short",
+    "timeout_in_calibration_test_economics": true,
+    "timeout_supervised": false
+  },
+  "schema_version": 1,
+  "sealed_read": false,
+  "selected_config": {
+    "horizon": 72,
+    "sl_atr": 2.0,
+    "threshold": 0.25,
+    "tp_atr": 5.0
+  },
+  "selected_config_key": "threshold=0.25,tp=5,sl=2,horizon=72"
+}

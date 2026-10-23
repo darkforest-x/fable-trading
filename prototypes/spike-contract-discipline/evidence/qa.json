@@ -1,0 +1,55 @@
+{
+  "scope": "browser interaction prototype; no native binary or live trading",
+  "date": "2026-10-18",
+  "design": {
+    "project_id": "8978791379095391159",
+    "screen_id": "41ab8c418c3043ca9a42076e44e66722"
+  },
+  "unit_tests": {
+    "command": "node --test tests/discipline-demo.test.mjs",
+    "passed": 4,
+    "failed": 0
+  },
+  "manual_browser_scenarios": [
+    "invalid short stop rejected",
+    "cost-inclusive sizing preview",
+    "pending order occupies entry allowance",
+    "simulated pending fill creates local position",
+    "market order creates local position",
+    "entry lock disables both directions",
+    "close remains available while entry is locked",
+    "contract selection updates price and sizing",
+    "input focus then navigation works with one native pointer click",
+    "iPhone and Pixel 10 entry layouts inspected"
+  ],
+  "console_warnings_errors": [],
+  "android_width": {
+    "client": 427,
+    "scroll": 427
+  },
+  "final_native_pointer_flow_scroll_offsets": [],
+  "limitations": [
+    "Phone-frame previews only; no native device execution.",
+    "Screenshots scaled to current desktop viewport; strict one-to-one pixel fidelity not asserted.",
+    "Locator-driven auto-scroll can shift the protected simulated device container; final captures used native pointer input.",
+    "All quotes, equity, policies and fills are synthetic; policies are unapproved.",
+    "No durable server enforcement, exchange protection orders, breakeven manager, partial profit-taking or native installation packages."
+  ],
+  "existing_services": {
+    "monitor_stale": false,
+    "scan_completed": 1960,
+    "scan_total": 1960,
+    "scan_errors": 0,
+    "workbench_heartbeat_age_ms": 1334,
+    "enabled_schedules": 4,
+    "last_schedule_status": "partial (observed at cleanup; no schedule writes performed)"
+  },
+  "artifacts": [
+    "iphone-entry.png",
+    "android-entry.png",
+    "iphone-confirm.png",
+    "iphone-locked-close.png"
+  ],
+  "build": "passed: tsc, vite build, runtime integrity (28 protected files)",
+  "browser_cleanup": "Task-created IAB tab closed; tab inventory empty."
+}

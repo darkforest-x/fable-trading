@@ -127,6 +127,7 @@
     }catch(error){if(records===current)current.error=error.message;}
     finally{if(records===current){current.loading=null;if(state.active)render();}}
   }
+  let quickMount=null;
   const root = () => document.getElementById('paper-desk-workspace');
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   let feedback=[], feedbackSequence=0, backgroundError='';
@@ -224,7 +225,7 @@
     if(risk)risk.innerHTML=`<span>全仓保证金 · ${a.risk_complete?'标记价格风控':'风险数据待更新，自动强平暂不可用'}</span><span>维持保证金 <strong>${money(a.maintenance)} USDT</strong> · 保证金率 <strong>${a.margin_ratio!=null?money(Number(a.margin_ratio)*100)+'%':'—'}</strong></span>`;
   }
   async function loadHistory(force=false) {
-    if(!state.active||!state.account||!window.SpikePaperHistory)return;
+    if(!state.active||quickMount||!state.account||!window.SpikePaperHistory)return;
     const id=state.account,month=historyView.month,revision=state.revision,token=id+':'+month+':'+revision;
     if(historyLoading===token)return;
     if(!force&&historyData?.account_id===id&&Date.now()-historyData.loadedAt<30000&&(!month||historyData.month===month))return;
@@ -621,7 +622,7 @@
       <div class="desk-risk-strip"><span>全仓保证金 · ${a.risk_complete?'标记价格风控':'风险数据待更新，自动强平暂不可用'}</span><span>维持保证金 <strong>${money(a.maintenance)} USDT</strong> · 保证金率 <strong>${a.margin_ratio!=null?money(Number(a.margin_ratio)*100)+'%':'—'}</strong></span></div>
       <div data-desk-history>${historyMarkup()}</div>
       <details class="desk-rules"><summary>模拟规则与费用</summary><p>仓位金额＝账户权益 × 仓位倍数；保证金＝仓位金额 ÷ 合约杠杆。默认仓位 10 倍，BTC / ETH 默认合约 100 倍，其余合约最高 20 倍，另受 OKX 当前持仓档位限制。也可直接输入 USDT 仓位金额；例如权益 1000 USDT 时，10000 USDT 仓位等于 10 倍。两种方式都按合约杠杆计算保证金与费用。同合约可继续挂单；同方向、同杠杆加仓合并均价，不同方向或杠杆分别显示。加仓不填止盈止损则沿用已有保护，填写的价格应用于合并后的全部仓位。</p><p>按 OKX 普通等级模拟：Maker 0.02%，Taker 0.05%；撤单不收手续费。限价单穿过盘口立即以 Taker 成交；其余挂单等待后续新鲜报价触价，以 Maker 按委托价全额成交。历史成交费不改写。止盈止损以可平仓买卖价触发，自动关闭剩余持仓并撤销其平仓挂单。</p><p>全仓风险以 OKX 标记价及对应持仓档位维持保证金率计算：权益不高于维持保证金与预估平仓费之和时，撤销账户全部挂单并模拟平掉所有持仓，记录 Taker 强平费及按档位计算的清算费。价格跳空可能导致负余额，保留实际结算结果。爆仓价是假定其他币价不变的估算，并非交易所保证成交价。服务每 5 秒检查；风险数据过期时暂停强平，服务停机不补历史触发。此简化模拟不包含交易所分档减仓、保险基金、ADL、资金费和盘口深度。</p><p>持仓 USDT 金额按当前可平仓价换算。浮盈未扣平仓费；日历按北京时间统计已实现盈亏及当日费用，权益从上线后采样。成交与历史仓位每页展示 50 条，导出和资金统计包含全部记录。</p></details>`:''}${dialogs||feedbackMarkup()}`;
-    if(window.SpikePaperMarket&&state.active)window.SpikePaperMarket.render(el,markup,{symbol:state.draft.symbol,selector:symbolPicker()});
+    if(window.SpikePaperMarket&&state.active&&!quickMount)window.SpikePaperMarket.render(el,markup,{symbol:state.draft.symbol,selector:symbolPicker()});
     else el.innerHTML=markup;
     restoreRecords(expanded);
     window.SpikeWorkspaceDisplay?.sync();
@@ -796,8 +797,8 @@
       if(target.dataset.deskClose){state.tradeMode='close';state.closeId=target.dataset.deskClose;const position=positions().find(p=>p.id===state.closeId);if(position)state.draft.symbol=position.symbol;state.draft.closePercent='100';state.quote=null;render();el.querySelector('[data-desk-trade]')?.scrollIntoView({block:'center',behavior:'smooth'});}
     });
   }
-  function setActive(active) {
-    document.body?.classList?.toggle('paper-desk-active',active);
+  function activate(active) {
+    document.body?.classList?.toggle('paper-desk-active',active&&!quickMount);
     if(state.active!==active)state.activation++;
     state.active=active;clearInterval(state.timer);state.timer=null;
     if(!active){if(journal){rememberJournal(journal);journal=null;root()?.querySelector('#desk-journal-dialog')?.remove();}journalFocus=null;clearFeedback();backgroundError='';discardAccountDraft();root()?.querySelector('#desk-create-dialog')?.remove();window.SpikeWorkspaceDisplay?.leaveFullscreen();window.SpikePaperMarket?.stop();state.protection=null;root()?.querySelector('#desk-protection-dialog')?.remove();state.quote=null;state.estimateQuote=null;state.estimateLoading=null;state.estimateError='';syncPreviewDialog(false);}
@@ -805,5 +806,33 @@
       if(!document.hidden&&!journal&&!state.pickerOpen&&!state.createOpen&&!state.quote&&!state.pending){refresh(false,true);refreshEstimateQuote();}
     },5000);}
   }
-  window.SpikePaperDesk={setActive,refresh};
+  function closeQuick() {
+    if(!quickMount)return;
+    activate(false);
+    const el=root(),mount=quickMount;quickMount=null;
+    mount.home.insertBefore(el,mount.next?.parentNode===mount.home?mount.next:null);
+    el.classList.remove('desk-quick');
+    el.innerHTML='';
+  }
+  function setActive(active) {
+    // The page router and the floating host share one trading owner. Returning
+    // to the full desk restores its original node before activating the page.
+    if(active&&quickMount)closeQuick();
+    if(!active&&quickMount)return;
+    activate(active);
+  }
+  function openQuick(host,{symbol}={}) {
+    if(quickMount)return;
+    if(state.busy)throw Error('上一笔请求仍在处理中，请稍后再打开。');
+    if(!host||!symbol||!/^[A-Z0-9]{1,24}-USDT-SWAP$/.test(symbol))throw Error('请选择有效合约。');
+    const el=root();if(!el?.parentNode)throw Error('模拟交易模块尚未就绪。');
+    activate(false);
+    quickMount={home:el.parentNode,next:el.nextSibling};
+    host.append(el);el.classList.add('desk-quick');
+    // Never discard a durable, unresolved submission while opening a panel.
+    if(!state.pending){state.draft.symbol=symbol;state.draft.takeProfit='';state.draft.stopLoss='';state.draft.limitPrice='';state.closeId=null;state.tradeMode='open';}
+    state.pickerOpen=false;state.quote=null;state.tab='positions';
+    activate(true);
+  }
+  window.SpikePaperDesk={setActive,refresh,openQuick,closeQuick};
 })();

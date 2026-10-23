@@ -1,0 +1,53 @@
+//@version=6
+// Lines-only edition of monday_range_v1.pine. Prior versions are preserved.
+// Uses chart OHLC/time only: Monday extrema update live, then stay fixed.
+// Intraday uses the selected timezone; daily uses the exchange trading day.
+// Rays begin at each extremum's bar; old weeks end before the next Monday.
+// Time coordinates avoid the bar-index distance limit on small timeframes.
+// https://www.tradingview.com/pine-script-docs/visuals/lines-and-boxes/
+indicator("周一高低点 · 极简 v1.12", shorttitle="Monday HL v1.12", overlay=true, max_lines_count=500)
+
+string tzOpt = input.string("America/New_York", "周一时区",
+     options=["America/New_York", "UTC", "Asia/Shanghai", "交易所时区"])
+color highCol = input.color(#F23645, "高点线")
+color lowCol = input.color(#2962FF, "低点线")
+int lineWidth = input.int(1, "线宽", minval=1, maxval=4)
+int keepWeeks = input.int(12, "保留最近几周", minval=1, maxval=250)
+
+if barstate.isfirst and timeframe.in_seconds() > 86400
+    runtime.error("请在日线或更低周期使用。")
+
+string tz = timeframe.isdaily or tzOpt == "交易所时区" ? syminfo.timezone : tzOpt
+bool isMonday = dayofweek(time, tz) == dayofweek.monday
+int dateKey = year(time, tz) * 10000 + month(time, tz) * 100 + dayofmonth(time, tz)
+bool newMonday = isMonday and (not isMonday[1] or dateKey != dateKey[1])
+
+var array<line> highLines = array.new<line>()
+var array<line> lowLines = array.new<line>()
+var float monHigh = na
+var float monLow = na
+
+if newMonday
+    if highLines.size() > 0
+        for l in array.from(highLines.last(), lowLines.last())
+            l.set_extend(extend.none)
+            l.set_x2(time[1])
+    // Delete in pairs before creation to stay within the 500-line limit.
+    if highLines.size() >= keepWeeks
+        highLines.shift().delete()
+        lowLines.shift().delete()
+    monHigh := high
+    monLow := low
+    highLines.push(line.new(time, high, time_close, high, xloc=xloc.bar_time,
+         extend=extend.right, color=highCol, width=lineWidth))
+    lowLines.push(line.new(time, low, time_close, low, xloc=xloc.bar_time,
+         extend=extend.right, color=lowCol, width=lineWidth))
+else if isMonday and highLines.size() > 0
+    if high > monHigh
+        monHigh := high
+        highLines.last().set_xy1(time, high)
+        highLines.last().set_xy2(time_close, high)
+    if low < monLow
+        monLow := low
+        lowLines.last().set_xy1(time, low)
+        lowLines.last().set_xy2(time_close, low)

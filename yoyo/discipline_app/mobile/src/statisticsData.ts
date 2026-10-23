@@ -2,7 +2,7 @@
 import {api,type Connection} from './api';
 import {DisplayCache} from './readCache';
 type Summary={count:number;wins:number;losses:number;flat:number;net_pnl:string;win_rate:string|null;payoff_ratio:string|null;average_net_r:string|null};
-export type StatisticsData={account_id:string;mode:'paper'|'okx_live';server_time:number;account_updated_at?:number;period_days:number;market_fresh:boolean;account:{equity:string;initial_equity:string|null;realized_pnl:string;unrealized_pnl:string;net_pnl:string|null;return_fraction:string|null;open_positions:number;pending_orders:number};closed:Summary;fees:string;curve:{date:string;pnl:string}[];symbols:(Summary&{symbol:string})[];sides:(Summary&{side:string})[]};
+export type StatisticsData={account_id:string;mode:'paper'|'okx_live';server_time:number;account_updated_at?:number;period_days:number;market_fresh:boolean;account:{equity:string;initial_equity:string|null;realized_pnl:string;unrealized_pnl:string;net_pnl:string|null;return_fraction:string|null;return_method?:'app_managed_fixed_capital'|null;open_positions:number;pending_orders:number};closed:Summary;fees:string;curve:{date:string;pnl:string}[];symbols:(Summary&{symbol:string})[];sides:(Summary&{side:string})[]};
 let storage:Storage|undefined;try{storage=window.localStorage}catch{}
 export const displayCache=new DisplayCache(storage);
 export const statisticsKey=(c:Connection,days:number)=>`${c.cacheScope??'uncached'}:${c.mode}:${c.accountId??'primary'}:statistics:${days}`;

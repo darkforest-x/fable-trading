@@ -1,0 +1,210 @@
+qaLegacyKey(int sourceTime, int sourceEnd, float sourceHigh, float sourceLow, float sourceClose, float sourceVolume) =>
+    var array<float> dh = array.new<float>()
+    var array<float> dl = array.new<float>()
+    var array<float> dc = array.new<float>()
+    var array<float> dv = array.new<float>()
+    var array<NakedPoint> naked = array.new<NakedPoint>()
+    var string packed = ""
+    bool nakedChanged = false
+    var int firstSeen = sourceTime
+    var int lastEnd = na
+    var int activeDay = na
+    var int activeWeek = na
+    var bool dayOK = false
+    var bool weekOK = false
+    var float wh = na
+    var float wl = na
+    var int profileStart = na
+    var int profileEnd = na
+    var float poc = na
+    var float vah = na
+    var float val = na
+    var int priorStart = na
+    var int priorEnd = na
+    var float priorHigh = na
+    var float priorLow = na
+    int ds = dayStart(sourceTime)
+    int de = dayStart(sourceTime, 1)
+    int ws = weekStart(sourceTime)
+    int we = dayStart(ws, 7)
+    bool continuous = not na(lastEnd) and sourceTime == lastEnd
+    bool validBar = sourceEnd - sourceTime == 900000 and not na(sourceHigh) and not na(sourceLow) and sourceHigh >= sourceLow
+    // A gap makes all earlier untouched claims unknown, even if price stayed away.
+    if not continuous or not validBar
+        nakedChanged := naked.size() > 0
+        naked.clear()
+        firstSeen := sourceTime
+    if na(activeDay) or ds != activeDay
+        activeDay := ds
+        dh.clear()
+        dl.clear()
+        dc.clear()
+        dv.clear()
+        dayOK := sourceTime == ds
+    else
+        dayOK := dayOK and continuous
+    if na(activeWeek) or ws != activeWeek
+        activeWeek := ws
+        wh := sourceHigh
+        wl := sourceLow
+        weekOK := sourceTime == ws
+    else
+        wh := math.max(wh, sourceHigh)
+        wl := math.min(wl, sourceLow)
+        weekOK := weekOK and continuous
+    dayOK := dayOK and validBar and not na(sourceVolume) and sourceVolume >= 0
+    weekOK := weekOK and validBar
+    // Existing POCs see this candle. A newly formed POC does not see its own day.
+    int cutoffDay = dayStart(sourceEnd, -nakedDays)
+    int k = naked.size() - 1
+    while k >= 0
+        NakedPoint point = naked.get(k)
+        if point.start < cutoffDay or (sourceLow <= point.price and sourceHigh >= point.price)
+            naked.remove(k)
+            nakedChanged := true
+        k -= 1
+    dh.push(sourceHigh)
+    dl.push(sourceLow)
+    dc.push(sourceClose)
+    dv.push(sourceVolume)
+    // Freeze at the actual local midnight, including 23/25-hour DST days.
+    // No first-bar-of-tomorrow delay, and no partial-day replacement.
+    if sourceEnd == de and dayOK
+        [p, h, l] = estimatedProfile(dh, dl, dc, dv)
+        profileStart := ds
+        profileEnd := de
+        poc := p
+        vah := h
+        val := l
+        if not na(p)
+            naked.push(NakedPoint.new(ds, de, p))
+            nakedChanged := true
+    if sourceEnd == we and weekOK
+        priorStart := ws
+        priorEnd := we
+        priorHigh := wh
+        priorLow := wl
+    lastEnd := sourceEnd
+    if nakedChanged
+        packed := ""
+        for point in naked
+            packed += str.tostring(point.start) + "," + str.tostring(point.finish) + "," + str.tostring(point.price, "#.################") + ";"
+    KeySnapshot.new(sourceEnd, firstSeen, profileStart, profileEnd, poc, vah, val,
+         priorStart, priorEnd, priorHigh, priorLow, packed)
+
+qaLegacyMatch(float hi, float lo, int side, int touchOffset, int arrowOffset) =>
+    float matched = na
+    string name = ""
+    if not na(hi) and hi > lo and bar_index >= arrowOffset + wfPreBars
+        [prices, ratios] = fibPrices(hi, lo, fibLevelsStr)
+        prices.unshift(hi)
+        prices.unshift(lo)
+        ratios.unshift(0.0)
+        ratios.unshift(0.0)
+        for k = 0 to prices.size() - 1
+            float price = prices.get(k)
+            bool levelAllowed = side == 1 ? price <= hi : price >= lo
+            bool clean = levelAllowed and wfWick(side, price, open[touchOffset], high[touchOffset], low[touchOffset], close[touchOffset])
+            for offset = math.min(touchOffset, arrowOffset) to math.max(touchOffset, arrowOffset)
+                clean := clean and wfBodyClear(price, open[offset], close[offset])
+            if wfPreBars > 0
+                for step = 1 to wfPreBars
+                    int offset = arrowOffset + step
+                    clean := clean and wfBodyClear(price, open[offset], close[offset])
+            if clean and na(matched)
+                matched := price
+                name := wfLevelName(ratios.get(k), price, hi, lo)
+    [matched, name]
+
+qaLegacyQuarter() =>
+    string zone = tzOpt == "交易所时区" ? syminfo.timezone : tzOpt
+    bool monday = dayofweek(time, zone) == dayofweek.monday
+    int date = year(time, zone) * 10000 + month(time, zone) * 100 + dayofmonth(time, zone)
+    var int week = 0
+    var float hi = na
+    var float lo = na
+    if monday and date != week
+        week := date
+        hi := na
+        lo := na
+    float knownHigh = hi
+    float knownLow = lo
+    [qEnd, side, unusedAtr] = txSignals()
+    // The signal anchor uses only the original confirmed arrow bar.
+    float signalAnchor = side == 1 ? low : high
+    var array<WfArrow> pending = array.new<WfArrow>()
+    array<string> events = array.new<string>()
+    if side != 0 and week != 0
+        pending.push(WfArrow.new(bar_index, time, side, week, signalAnchor))
+    int i = pending.size() - 1
+    while i >= 0
+        WfArrow a = pending.get(i)
+        int age = bar_index - a.index
+        bool expired = week != a.week or age > wfWaitBars
+        int touchAt = na
+        float matchedPrice = na
+        float touchExtreme = na
+        float touchBodyEdge = na
+        float touchHigh = na
+        float touchLow = na
+        string levelName = ""
+        if not expired and age >= 0
+            // At the arrow close, inspect same-bar then the preceding two bars.
+            // Later closes can only admit a fresh touch on the current candle.
+            // Levels are frozen at each touch, never borrowed from a later range.
+            int oldestOffset = age == 0 ? 2 : 0
+            for offset = 0 to oldestOffset
+                if week[offset] == a.week and na(touchAt)
+                    [candidate, candidateName] = qaLegacyMatch(knownHigh[offset], knownLow[offset], a.side, offset, age)
+                    if not na(candidate)
+                        touchAt := time[offset]
+                        matchedPrice := candidate
+                        touchExtreme := a.side == 1 ? low[offset] : high[offset]
+                        touchBodyEdge := a.side == 1 ? math.min(open[offset], close[offset]) : math.max(open[offset], close[offset])
+                        touchHigh := high[offset]
+                        touchLow := low[offset]
+                        levelName := candidateName
+        if not na(touchAt)
+            events.push(str.tostring(a.side) + "," + str.tostring(a.at) + "," + str.tostring(touchAt) + "," +
+                 str.tostring(a.anchor, format.mintick) + "," + str.tostring(matchedPrice, format.mintick) + "," +
+                 str.tostring(touchExtreme, format.mintick) + "," + levelName + "," + str.tostring(touchBodyEdge, format.mintick) + "," + str.tostring(touchHigh, format.mintick) + "," + str.tostring(touchLow, format.mintick))
+        if expired or not na(touchAt)
+            pending.remove(i)
+        i -= 1
+    if monday
+        hi := na(hi) ? high : math.max(hi, high)
+        lo := na(lo) ? low : math.min(lo, low)
+    // Both pivot functions run on every source bar, regardless of entry events.
+    float pivotHigh = ta.pivothigh(high, 2, 2)
+    float pivotLow = ta.pivotlow(low, 2, 2)
+    [qEnd, array.join(events, ";"), close, pivotHigh, pivotLow, time[2]]
+
+
+// Temporary native parity appendix; remove before delivery/profiling.
+qaEqual(float a, float b) =>
+    (na(a) and na(b)) or a == b
+qaParity() =>
+    [aEnd, aEvents, aEntry, aHigh, aLow, aAt] = qaLegacyQuarter()
+    [bEnd, bEvents, bEntry, bHigh, bLow, bAt] = wfQuarter()
+    KeySnapshot a = qaLegacyKey(time, time_close, high, low, close, volume)
+    KeySnapshot b = keyEngine(time, time_close, high, low, close, volume)
+    bool quarterOK = aEnd == bEnd and aEvents == bEvents and aEntry == bEntry and qaEqual(aHigh, bHigh) and qaEqual(aLow, bLow) and qaEqual(aAt, bAt)
+    bool keyOK = a.closeAt == b.closeAt and a.coverageAt == b.coverageAt and qaEqual(a.profileStart, b.profileStart) and qaEqual(a.profileEnd, b.profileEnd) and qaEqual(a.poc,b.poc) and qaEqual(a.vah,b.vah) and qaEqual(a.val,b.val) and qaEqual(a.weekStart,b.weekStart) and qaEqual(a.weekEnd,b.weekEnd) and qaEqual(a.weekHigh,b.weekHigh) and qaEqual(a.weekLow,b.weekLow) and a.naked == b.naked
+    if not quarterOK or not keyOK
+        runtime.error("V229 parity mismatch at " + str.format_time(time, "yyyy-MM-dd HH:mm", "UTC") + " events=" + str.tostring(quarterOK) + " keys=" + str.tostring(keyOK))
+    var int bars = 0
+    var int events = 0
+    bars += 1
+    if aEvents != ""
+        events += str.split(aEvents, ";").size()
+    if barstate.isfirst
+        array<int> stamps = array.from(timestamp("UTC",2026,3,8,6,45), timestamp("UTC",2026,3,8,7,0), timestamp("UTC",2026,3,9,3,45), timestamp("UTC",2026,3,9,4,0), timestamp("UTC",2026,11,1,5,45), timestamp("UTC",2026,11,1,6,0), timestamp("UTC",2026,11,2,4,45), timestamp("UTC",2026,11,2,5,0), timestamp("UTC",2027,1,1,4,45), timestamp("UTC",2027,1,1,5,0), timestamp("UTC",2026,10,20,12,0))
+        for stamp in stamps
+            [ds, de, ws, we, cutoff] = keyCalendar(stamp, stamp+900000)
+            if ds != dayStart(stamp) or de != dayStart(stamp,1) or ws != weekStart(stamp) or we != dayStart(weekStart(stamp),7) or cutoff != dayStart(stamp+900000,-nakedDays)
+                runtime.error("V229 calendar boundary mismatch")
+    [bars, events, time_close]
+[qaBars, qaEvents, qaThrough] = request.security(syminfo.tickerid, "15", qaParity(), lookahead=barmerge.lookahead_off, calc_bars_count=12000)
+var table qaTable = table.new(position.top_right,1,1,force_overlay=true)
+if barstate.islast
+    table.cell(qaTable,0,0,"V2.29 PARITY PASS · " + str.tostring(qaBars) + " bars / " + str.tostring(qaEvents) + " events · keys + DST PASS", text_color=color.lime,bgcolor=color.black)

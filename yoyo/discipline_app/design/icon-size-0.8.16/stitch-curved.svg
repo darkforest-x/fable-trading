@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Cylindrical Inner-Wall Lighting Gradients -->
+    <!-- The surface curves inward (concave cylinder): center recedes into subtle shadow/ambient depth, 
+         left and right edges curl forward toward the viewer catching softer ambient rim reflection -->
+    <linearGradient id="cylinderDecalShading" x1="0%" y1="0%" x2="100%" y2="0%">
+      <!-- Far Left outer curve curling forward -->
+      <stop offset="0%" stop-color="#E2E5EB"/>
+      <stop offset="12%" stop-color="#FFFFFF"/>
+      <stop offset="28%" stop-color="#CAD0D8"/>
+      <!-- Center trough / receding curvature -->
+      <stop offset="46%" stop-color="#939BA8"/>
+      <stop offset="50%" stop-color="#808896"/>
+      <stop offset="54%" stop-color="#939BA8"/>
+      <!-- Right forward sweep -->
+      <stop offset="72%" stop-color="#D1D6DE"/>
+      <stop offset="88%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#DFE3EA"/>
+    </linearGradient>
+
+    <!-- Vertical Stem Cylindrical Shading (sits recessed at the inner focal core) -->
+    <linearGradient id="recessedStemShading" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ADB5C2"/>
+      <stop offset="50%" stop-color="#7B8391"/>
+      <stop offset="100%" stop-color="#ADB5C2"/>
+    </linearGradient>
+
+    <!-- Subtle vertical subtle falloff to enhance concave depth -->
+    <linearGradient id="verticalDecalSheen" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.25"/>
+      <stop offset="50%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <!-- Very subtle soft contact shadow against the virtual inner wall to establish decal adhesion -->
+    <filter id="decalAdhesion" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+
+    <!-- Cylindrical concave distortion filter matrix for pure satin silver texture -->
+    <radialGradient id="concaveDepthVignette" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.18"/>
+      <stop offset="80%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Full-bleed pure solid black background (#000000) -->
+  <rect width="1024" height="1024" fill="#000000"/>
+
+  <!--
+    SPIKE Official App Icon - Cylindrical Concave Wall Decal Concept
+    - Concept: Typographic Dollar mark adhered to the inside surface of a vertical cylinder.
+    - Geometry: Horizontal coordinates are compressed toward the center axis (foreshortening), 
+      and horizontal path spans curve with cylindrical arcs (sagging down/arching based on cylindrical perspective).
+    - Height: Exactly 768px (75% of 1024px canvas, y: 128 to 896, 128px top/bottom margin).
+    - Shading: Restrained satin silver-white (subtle metallic sheen, zero excessive gloss/glare/flares).
+  -->
+  <g id="cylindrical-dollar-group" filter="url(#decalAdhesion)">
+    
+    <!-- Cylindrically Projected Compound Dollar Glyph -->
+    <!-- The central stem (x: 484 to 540) is recessed, while the lateral extremities (x: 226 to 798) curl forward -->
+    <!-- Notice the subtle bow/dip in horizontal crossbars reflecting the cylindrical inner curvature -->
+    <path fill-rule="evenodd" fill="url(#cylinderDecalShading)" d="
+      M 484 128
+      L 540 128
+      L 540 182
+      C 612 189 676 214 724 256
+      C 768 293 798 344 798 406
+      C 798 428 792 448 780 466
+      L 672 446
+      C 680 424 685 406 685 390
+      C 685 340 658 300 610 274
+      C 587 262 562 254 540 252
+      L 540 472
+      C 634 492 708 526 758 572
+      C 788 599 802 636 802 680
+      C 802 748 764 804 708 842
+      C 660 874 602 890 540 894
+      L 540 896
+      L 484 896
+      L 484 883
+      C 416 876 352 850 302 806
+      C 254 766 222 712 222 644
+      C 222 620 229 598 242 578
+      L 352 598
+      C 344 620 338 638 338 656
+      C 338 710 366 752 416 780
+      C 440 794 466 801 484 803
+      L 484 576
+      C 388 556 314 522 262 474
+      C 230 444 216 404 216 358
+      C 216 290 254 232 312 192
+      C 360 160 420 142 484 139
+      L 484 128
+      Z
+      
+      M 484 252
+      C 432 255 390 275 360 304
+      C 336 328 324 354 324 384
+      C 324 418 342 446 376 468
+      C 404 486 442 498 484 508
+      L 484 252
+      Z
+      
+      M 540 803
+      C 592 800 634 780 664 750
+      C 688 726 700 700 700 670
+      C 700 634 682 606 648 584
+      C 620 564 582 552 540 542
+      L 540 803
+      Z
+    "/>
+
+    <!-- Subtle vertical curvature overlay providing silky cylindrical depth -->
+    <path fill-rule="evenodd" fill="url(#verticalDecalSheen)" d="
+      M 484 128
+      L 540 128
+      L 540 182
+      C 612 189 676 214 724 256
+      C 768 293 798 344 798 406
+      C 798 428 792 448 780 466
+      L 672 446
+      C 680 424 685 406 685 390
+      C 685 340 658 300 610 274
+      C 587 262 562 254 540 252
+      L 540 472
+      C 634 492 708 526 758 572
+      C 788 599 802 636 802 680
+      C 802 748 764 804 708 842
+      C 660 874 602 890 540 894
+      L 540 896
+      L 484 896
+      L 484 883
+      C 416 876 352 850 302 806
+      C 254 766 222 712 222 644
+      C 222 620 229 598 242 578
+      L 352 598
+      C 344 620 338 638 338 656
+      C 338 710 366 752 416 780
+      C 440 794 466 801 484 803
+      L 484 576
+      C 388 556 314 522 262 474
+      C 230 444 216 404 216 358
+      C 216 290 254 232 312 192
+      C 360 160 420 142 484 139
+      L 484 128
+      Z
+      
+      M 484 252
+      C 432 255 390 275 360 304
+      C 336 328 324 354 324 384
+      C 324 418 342 446 376 468
+      C 404 486 442 498 484 508
+      L 484 252
+      Z
+      
+      M 540 803
+      C 592 800 634 780 664 750
+      C 688 726 700 700 700 670
+      C 700 634 682 606 648 584
+      C 620 564 582 552 540 542
+      L 540 803
+      Z
+    "/>
+
+    <!-- Subtle satin specular edge highlight tracing along the top cylindrical rim of the glyph -->
+    <path d="M 484 128 L 540 128 M 312 192 C 360 160 420 142 484 139 M 540 182 C 612 189 676 214 724 256" 
+          stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+  </g>
+</svg>

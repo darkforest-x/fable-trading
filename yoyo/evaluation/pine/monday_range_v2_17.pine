@@ -1,0 +1,1459 @@
+//@version=6
+// V2.17: Tuesday-Friday entry closes only; matched levels must be strictly outside candle bodies.
+// V2.16: independent hollow signal circles, anchored to the original confirmed 15m arrow.
+// V2.15: close review frames at the first confirmed profitable 15m 2/2 pivot; weekdays only.
+// V2.14: optional causal wick/check-cross risk and opportunity-space drawings.
+// V2.13: retain every loaded Monday range and render the visible history.
+// V2.12: key-level history stays at 12000 x 15m with trade references ON or OFF.
+// Removing the shorter shared request does not override TradingView history limits.
+// V2.11: 5m entries observe 15m; 15m entries keep the prior H1 observation.
+// Vertical rays always mark confirmed 15m source signals on every chart.
+// timeframe.main_period stays bound to the chart inside the fixed 5m engine.
+// Source: https://www.tradingview.com/pine-script-docs/concepts/chart-information/
+// 5m structure stops, 15m exit management and armed H1 reverse exits stay fixed.
+// V2.8 reuses unchanged trade drawings and serializes nPOCs only on mutation.
+// Trade transitions and source-history limits remain identical to V2.7.
+// V2.7 exits an armed trade at a confirmed opposite 1H signal close.
+// V2.6 retains the source-window ledger and selects frames by the chart viewport.
+// Viewport selection runs only in chart context; it never gates trade transitions.
+// V2.5 admits every later same-direction 15m signal, independently.
+// Every confirmed 1H arrow refreshes observation, including same-direction arrows.
+// V2.4 made structure-buffer units explicit for cross-symbol price scales.
+// Owner 2026-10-20 selected percentage scaling; default buffer is entry price x 0.05%.
+// Legacy price-point mode remains available with an explicitly chosen amount.
+// V2.2 independent trade frames retain their stop/trailing rules.
+// Owner 2026-10-20: multiple entries per hourly observation are allowed;
+// reverse observation closes only armed frames; unarmed frames keep their stops.
+// No orders are placed.
+// Visual source: Stitch 8978791379095391159/c4f096ebdebb40ada117915437c02108.
+// Existing <=1D range formulas and chart-timeframe Fanshen signals are preserved.
+// Rays annotate the source 15m candle only after its close.
+// Source event accumulation (not sampled booleans) preserves all events on HTF charts.
+indicator("周一高低点区间＋翻身 · V2.17", shorttitle="区间翻身 V2.17", overlay=false,
+     behind_chart=false, max_lines_count=500, max_labels_count=500, max_boxes_count=280, max_polylines_count=40)
+
+// === Fixed 15m signal rays: display settings and reserved object budget =====
+string ray15Group = "15m 勾叉竖射线"
+bool show15mRays = input.bool(true, "显示 15m 勾叉竖射线", group=ray15Group,
+     tooltip="只使用已收盘的15分钟勾叉；绿勾从该K线低点向上，红叉从高点向下。切换周期仍定位在原15m时间。")
+color ray15BullRayColor = input.color(#39F340, "绿勾射线颜色", group=ray15Group)
+color ray15BearRayColor = input.color(#F23645, "红叉射线颜色", group=ray15Group)
+int ray15RayWidth = input.int(1, "射线线宽", minval=1, maxval=4, group=ray15Group)
+int ray15Keep = input.int(100, "保留最近信号数", minval=1, maxval=200, group=ray15Group,
+     tooltip="最多回看12000根15m数据。总线条上限500；优先保留可见区间和射线，超限时缩短最旧的历史Fib。")
+bool ray15Debug = input.bool(false, "记录15m射线快照（核对用）", group=ray15Group, display=display.none)
+int ray15LineReserve = show15mRays ? ray15Keep : 0
+bool rangeChartSupported = timeframe.in_seconds() <= 86400
+
+// === Optional chart-clock trade reference (5m/15m only, default OFF) ===============
+string txGroup = "15m→5m / 1H→15m 交易参考（可选）"
+bool txRequested = input.bool(false, "启用多周期观察交易参考", group=txGroup,
+     tooltip="5分钟图：15m勾叉定方向，之后每个同向5m收盘勾叉独立入场；15分钟图：保留1H观察、15m入场。每个新观察勾叉都刷新方向与起点，同刻收盘不算之后。其他周期只看确认信号和15m射线。进入趋势跟踪后，仍按反向1H勾叉收盘退出；未启动跟踪的旧框继续按自身止损。仅画模型参考，不下单。")
+// Do not use timeframe.period: nested security would rebind it to 5m.
+string txEntryTf = timeframe.main_period
+string txWatchLabel = txEntryTf == "5" ? "15m" : "1H"
+bool txChartSupported = txEntryTf == "5" or txEntryTf == "15"
+bool txEnabled = txRequested and txChartSupported
+int txStopBars = input.int(5, "止损：最近已收盘5m根数", minval=1, maxval=50, group=txGroup)
+string txBufferUnit = input.string("入场价百分比", "结构极值外缓冲单位", options=["价格点", "最小跳动（tick）", "入场价百分比"], group=txGroup,
+     tooltip="价格点：1代表1个报价货币单位，保留旧版口径；tick：1代表该品种最小价格跳动；百分比：1代表入场价的1%。切换币种请核对单位。")
+float txStopBuffer = input.float(0.05, "结构极值外缓冲值", minval=0.0, group=txGroup,
+     tooltip="默认0.05代表入场价的0.05%。按所选单位换算成价格差，再将止损向极值外侧对齐最小跳动。百分比在所选入场信号收盘时冻结，不随后续价格改变。")
+float txArmR = input.float(5.0, "15m收盘启动跟踪（R）", minval=0.5, maxval=50, step=0.5, group=txGroup)
+int txAtrLen = input.int(14, "15m ATR周期", minval=1, maxval=100, group=txGroup)
+float txAtrMult = input.float(4.0, "15m跟踪ATR倍数", minval=0.1, maxval=20, step=0.1, group=txGroup)
+int txKeep = input.int(40, "可见时段最多显示交易框数", minval=1, maxval=40, group=txGroup,
+     tooltip="拖动或缩放图表会重绘与可见时段相交的交易框，包括在左侧入场、跨入当前画面的单。超出容量时优先显示其中较晚入场的框，并提示缩小范围。最多计算30000根5m数据，实际范围受TradingView可用历史限制；未结束的参考一直独立跟踪。每框最多显示最近40次跟踪抬升。")
+color txBull = input.color(#39F340, "收益框", inline="txColors", group=txGroup)
+color txBear = input.color(#F23645, "风险框", inline="txColors", group=txGroup)
+color txTrailColor = input.color(#00C8D7, "跟踪线", inline="txColors", group=txGroup)
+bool txShowPrices = input.bool(false, "交易框显示价格", group=txGroup, tooltip="默认只显示R；开启后在交易框标签附加价格。最大R为持仓期间已确认的有利波动，触及止损的5m K线内路径未知，不计其额外有利极值。")
+int txLabelReserve = txEnabled ? 7 * txKeep : 0
+
+// === Optional 15m level-touch opportunity frames (default OFF) =============
+string wfGroup = "关键位＋15m勾叉 标记（可选）"
+bool wfCirclesEnabled = input.bool(false, "显示多空信号圈", group=wfGroup,
+     tooltip="独立于盈亏框：符合关键位影线触价＋15m同向勾叉条件后，在原勾叉K线的高/低点画空心圈，空头红圈、多头绿圈。只允许周二至周五收盘确认入场。所触关键位必须严格在实体之外，实体贴边也不算；实体触及其他关键位不影响。触价较晚时，圈到两项均确认后才出现。")
+bool wfEnabled = input.bool(false, "显示多空盈利空间框", group=wfGroup,
+     tooltip="周一高低点及0.5/0.618/0.705/1.13/1.27/1.618：方向影线触价，前后2根15m内出现同向勾叉；两项均确认的首个15m收盘入场。周一和周末按所选时区禁止新入场。所触关键位必须严格在实体外，实体贴边也不算。空单取入场后首个有盈利的15m局部低点，多单取局部高点，左右各2根确认；框回标到极值，确认前触及初始止损则止损优先。这是复盘空间，不能按回标价格视为实际成交。")
+float wfBuffer = input.float(0.2, "止损缓冲（入场价%）", minval=0.0, step=0.1, group=wfGroup,
+     tooltip="多单：入场时最近3根已收盘15m最低点下方；空单：最高点上方。缓冲按入场价冻结，止损向外对齐tick。默认0.2%。")
+int wfKeep = input.int(30, "可见时段最多显示框／圈数", minval=1, maxval=40, group=wfGroup,
+     tooltip="历史记录保留在已加载5m数据内；拖动图表会重绘与可见区域相交的框，超出容量时优先显示较晚入场的框。")
+color wfProfitColor = input.color(#089981, "盈利空间", inline="wfColors", group=wfGroup)
+color wfRiskColor = input.color(#F23645, "初始风险", inline="wfColors", group=wfGroup)
+bool wfShowPrices = input.bool(true, "空间框显示价格", group=wfGroup)
+int wfLabelReserve = (wfEnabled ? 3 * wfKeep : 0) + (wfCirclesEnabled ? wfKeep : 0)
+
+// === Monday ranges: unchanged prices, viewport-based historical rendering ===
+string timeGroup = "时间"
+string tzOpt = input.string("America/New_York", "时区（判断周一 / 周末）",
+     options=["America/New_York", "UTC", "Asia/Shanghai", "交易所时区"], group=timeGroup)
+
+string candleGroup = "K线"
+color baseCol = input.color(color.gray, "普通K线", group=candleGroup)
+color mondayCol = input.color(color.green, "周一K线", group=candleGroup)
+color weekendCol = input.color(#B2B5BE, "周六、周日K线", group=candleGroup)
+
+string rayGroup = "周一高低点射线"
+color highCol = input.color(#F23645, "高点射线", group=rayGroup)
+color lowCol = input.color(#2962FF, "低点射线", group=rayGroup)
+int rayWidth = input.int(1, "线宽", minval=1, maxval=4, group=rayGroup)
+string rayStyleOpt = input.string("实线", "线型", options=["实线", "虚线", "点线"], group=rayGroup)
+// All loaded ranges are retained as data; the visible window owns drawings.
+// Source: https://www.tradingview.com/pine-script-docs/writing/limitations/
+bool extendHistory = input.bool(false, "历史周的射线也无限向右延伸", group=rayGroup)
+bool showLabels = input.bool(true, "显示价格标签", group=rayGroup)
+
+string fibGroup = "斐波那契（最新一周的周一区间）"
+bool showFib = input.bool(true, "显示斐波那契", group=fibGroup)
+string fibLevelsStr = input.string("0.5, 0.618, 0.705, 1.13, 1.27, 1.618",
+     "比例（逗号分隔，上下两个方向都画）", group=fibGroup)
+color fibCol = input.color(#787B86A6, "线颜色", group=fibGroup)
+color fibTextCol = input.color(#787B86, "文字颜色", group=fibGroup)
+string fibSizeOpt = input.string("中", "文字大小", options=["小", "中", "大"], group=fibGroup)
+
+string histFibGroup = "斐波那契（历史周，只画周一到周五）"
+bool showHistFib = input.bool(true, "显示历史周斐波那契", group=histFibGroup)
+string histFibLevelsStr = input.string("0.5, 0.618, 0.705",
+     "比例（逗号分隔，上下两个方向都画）", group=histFibGroup)
+color histFibCol = input.color(#787B8659, "线颜色", group=histFibGroup)
+color histFibTextCol = input.color(#787B86A6, "文字颜色", group=histFibGroup)
+
+string keyGroup = "关键价位（固定 15m 估算）"
+bool showPrevPOC = input.bool(true, "昨日 POC", inline="daily", group=keyGroup)
+bool showPrevVA = input.bool(true, "昨日 VAH / VAL", inline="daily", group=keyGroup)
+bool showNPOC = input.bool(true, "未触及 nPOC", inline="naked", group=keyGroup)
+int nakedDays = input.int(14, "回看日数", minval=1, maxval=14, inline="naked", group=keyGroup)
+bool showPrevWeek = input.bool(true, "上周高低点（完整周，含周末）", group=keyGroup)
+bool showKeyLabels = input.bool(true, "显示关键价位标签", group=keyGroup)
+color pocColor = input.color(#D28D2F, "POC", inline="colors", group=keyGroup)
+color vaColor = input.color(#A99570, "VA", inline="colors", group=keyGroup)
+color npocColor = input.color(#AE6B9F, "nPOC", inline="colors", group=keyGroup)
+color priorColor = input.color(#63899B, "上周", inline="colors", group=keyGroup)
+int keyLabelOffset = input.int(8, "关键位标签右移（根）", minval=0, maxval=100, group=keyGroup)
+bool keyDebug = input.bool(false, "记录最后快照到 Pine 日志（核对用）", group=keyGroup, display=display.none)
+
+if barstate.isfirst and not chart.is_standard
+    runtime.error("请使用标准时间 K 线。")
+
+// main_period keeps the original v1.8 daily-timezone exception inside requests.
+string tz = timeframe.in_seconds(timeframe.main_period) >= 86400 or tzOpt == "交易所时区" ? syminfo.timezone : tzOpt
+string rayStyle = rayStyleOpt == "虚线" ? line.style_dashed : rayStyleOpt == "点线" ? line.style_dotted : line.style_solid
+
+int dow = dayofweek(time, tz)
+bool isMonday = rangeChartSupported and dow == dayofweek.monday
+bool isWeekend = rangeChartSupported and (dow == dayofweek.saturday or dow == dayofweek.sunday)
+int dateKey = year(time, tz) * 10000 + month(time, tz) * 100 + dayofmonth(time, tz)
+// The date key also catches back-to-back Mondays when a whole week is missing.
+bool newMonday = isMonday and (not isMonday[1] or dateKey != dateKey[1])
+
+// ---- Candles -------------------------------------------------------------
+color hiddenCol = color.new(color.white, 100)
+color candleCol = isWeekend ? weekendCol : isMonday ? mondayCol : baseCol
+barcolor(rangeChartSupported ? candleCol : na, title="K线着色")
+plotcandle(rangeChartSupported ? open : na, high, low, close, "K线", color=candleCol, wickcolor=candleCol,
+     bordercolor=candleCol, display=display.pane, force_overlay=true)
+
+// ---- Monday range history and visible drawings ----------------------------
+// Coordinates use only bars processed so far. Changing the visible window
+// reruns Pine; stored records retain every loaded week, not only the newest N.
+type MondayRange
+    int startAt
+    int highAt
+    int lowAt
+    int finishAt
+    int labelAt
+    int fibEndAt
+    float hi
+    float lo
+    bool closed
+
+var array<MondayRange> mondayHistory = array.new<MondayRange>()
+var array<line> highLines = array.new<line>()
+var array<line> lowLines = array.new<line>()
+var array<label> highLabels = array.new<label>()
+var array<label> lowLabels = array.new<label>()
+var float monHigh = na
+var float monLow = na
+var int monStartBar = na
+var int lastWeekdayBar = na
+var array<line> histFibLines = array.new<line>()
+var array<label> histFibLabels = array.new<label>()
+string fibSize = fibSizeOpt == "小" ? size.small : fibSizeOpt == "大" ? size.large : size.normal
+
+labelText(string name, float price) =>
+    name + " " + str.tostring(price, format.mintick)
+
+newRayLabel(int at, float price, string name, color col) =>
+    label.new(at, price, labelText(name, price), xloc=xloc.bar_time, style=label.style_label_left,
+         color=hiddenCol, textcolor=col, size=size.small, force_overlay=true)
+
+// Both-end Fib prices of a range, with the ratio behind each price; a ratio
+// whose two prices coincide (0.5) is kept once.
+fibPrices(float hi, float lo, string levels) =>
+    array<float> prices = array.new<float>()
+    array<float> ratios = array.new<float>()
+    float rng = hi - lo
+    array<string> items = str.split(str.replace_all(levels, " ", ""), ",")
+    if items.size() > 12
+        runtime.error("每组 Fib 最多支持 12 个比例，请减少输入。")
+    for item in items
+        float r = str.tonumber(item)
+        if not na(r)
+            float up = lo + r * rng
+            float dn = hi - r * rng
+            prices.push(up)
+            ratios.push(r)
+            if math.abs(up - dn) >= syminfo.mintick
+                prices.push(dn)
+                ratios.push(r)
+    [prices, ratios]
+
+fibText(float r, float price) =>
+    str.tostring(r) + " (" + str.tostring(price, format.mintick) + ")"
+
+if newMonday
+    if mondayHistory.size() > 0
+        MondayRange prior = mondayHistory.last()
+        prior.finishAt := time[1]
+        prior.fibEndAt := lastWeekdayBar
+        prior.closed := true
+    monHigh := high
+    monLow := low
+    monStartBar := time
+    mondayHistory.push(MondayRange.new(time, time, time, time_close, time, na, high, low, false))
+else if isMonday and mondayHistory.size() > 0
+    MondayRange current = mondayHistory.last()
+    if high > monHigh
+        monHigh := high
+        current.hi := high
+        current.highAt := time
+    if low < monLow
+        monLow := low
+        current.lo := low
+        current.lowAt := time
+
+if rangeChartSupported and not isWeekend
+    lastWeekdayBar := time
+if mondayHistory.size() > 0
+    MondayRange current = mondayHistory.last()
+    current.finishAt := time_close
+    current.labelAt := time
+
+int rangeVisibleLeft = chart.left_visible_bar_time
+int rangeVisibleRight = chart.right_visible_bar_time
+var int rangeVisibleTotal = 0
+var int rangeDrawnTotal = 0
+var table rangeInfo = table.new(position.bottom_left, 1, 1, force_overlay=true)
+if barstate.islast
+    // Clear only this module's handles before allocation. Reserve other
+    // modules' peak counts, including the previous realtime draw's objects.
+    for item in highLines
+        item.delete()
+    for item in lowLines
+        item.delete()
+    for item in highLabels
+        item.delete()
+    for item in lowLabels
+        item.delete()
+    for item in histFibLines
+        item.delete()
+    for item in histFibLabels
+        item.delete()
+    highLines.clear()
+    lowLines.clear()
+    highLabels.clear()
+    lowLabels.clear()
+    histFibLines.clear()
+    histFibLabels.clear()
+    int latestFibReserve = showFib ? 24 : 0
+    int rangeLineBudget = 500 - latestFibReserve - 19 - ray15LineReserve
+    int rangeLabelBudget = 500 - latestFibReserve - 19 - txLabelReserve - wfLabelReserve
+    int rangeCapacity = int(math.floor(math.min(rangeLineBudget / 2.0,
+         showLabels ? rangeLabelBudget / 2.0 : rangeLineBudget / 2.0)))
+    array<int> visibleWeeks = array.new<int>()
+    rangeVisibleTotal := 0
+    // Recent visible ranges win only if the viewport itself exceeds the hard
+    // platform limit. Panning left makes older stored ranges eligible again.
+    if mondayHistory.size() > 0
+        for offset = 0 to mondayHistory.size() - 1
+            int i = mondayHistory.size() - 1 - offset
+            MondayRange r = mondayHistory.get(i)
+            bool intersects = r.startAt <= rangeVisibleRight and (extendHistory or r.finishAt >= rangeVisibleLeft)
+            if intersects
+                rangeVisibleTotal += 1
+                if visibleWeeks.size() < rangeCapacity
+                    visibleWeeks.push(i)
+    rangeDrawnTotal := visibleWeeks.size()
+    visibleWeeks.reverse()
+    for i in visibleWeeks
+        MondayRange r = mondayHistory.get(i)
+        string rayExtend = not r.closed or extendHistory ? extend.right : extend.none
+        highLines.push(line.new(r.highAt, r.hi, r.finishAt, r.hi, xloc=xloc.bar_time, extend=rayExtend,
+             color=highCol, style=rayStyle, width=rayWidth, force_overlay=true))
+        lowLines.push(line.new(r.lowAt, r.lo, r.finishAt, r.lo, xloc=xloc.bar_time, extend=rayExtend,
+             color=lowCol, style=rayStyle, width=rayWidth, force_overlay=true))
+        if showLabels
+            highLabels.push(newRayLabel(r.labelAt, r.hi, "周一高", highCol))
+            lowLabels.push(newRayLabel(r.labelAt, r.lo, "周一低", lowCol))
+    // Historical Fib uses the remaining shared line/label capacity. Never
+    // create a partial week's Fib or let GC evict a range boundary.
+    int historyBudget = math.min(rangeLineBudget - 2 * rangeDrawnTotal,
+         rangeLabelBudget - (showLabels ? 2 * rangeDrawnTotal : 0))
+    if showHistFib and visibleWeeks.size() > 0
+        for offset = 0 to visibleWeeks.size() - 1
+            MondayRange r = mondayHistory.get(visibleWeeks.get(visibleWeeks.size() - 1 - offset))
+            if r.closed and not na(r.fibEndAt) and r.fibEndAt >= r.startAt
+                [hp, hr] = fibPrices(r.hi, r.lo, histFibLevelsStr)
+                if histFibLines.size() + hp.size() <= historyBudget
+                    for [i, p] in hp
+                        histFibLines.push(line.new(r.startAt, p, r.fibEndAt, p, xloc=xloc.bar_time,
+                             color=histFibCol, width=1, force_overlay=true))
+                        histFibLabels.push(label.new(r.fibEndAt, p, fibText(hr.get(i), p), xloc=xloc.bar_time,
+                             style=label.style_label_left, color=hiddenCol, textcolor=histFibTextCol, size=fibSize, force_overlay=true))
+    if rangeVisibleTotal > rangeDrawnTotal
+        table.cell(rangeInfo, 0, 0, "可见区间 " + str.tostring(rangeDrawnTotal) + "/" + str.tostring(rangeVisibleTotal) +
+             " · 请放大图表查看更早区间", text_color=chart.fg_color, bgcolor=color.new(chart.bg_color, 10), text_size=size.tiny)
+    else
+        table.clear(rangeInfo, 0, 0)
+
+// ---- Fibonacci on the latest Monday range --------------------------------
+var array<line> fibLines = array.new<line>()
+var array<label> fibLabels = array.new<label>()
+// Fib labels sit right of the Monday labels so the two do not collide.
+int fibLabelOffset = 20
+
+if showFib and barstate.islast and not na(monStartBar)
+    for l in fibLines
+        l.delete()
+    for lb in fibLabels
+        lb.delete()
+    fibLines.clear()
+    fibLabels.clear()
+    float rng = monHigh - monLow
+    array<string> items = str.split(str.replace_all(fibLevelsStr, " ", ""), ",")
+    if items.size() > 12
+        runtime.error("每组 Fib 最多支持 12 个比例，请减少输入。")
+    for item in items
+        float r = str.tonumber(item)
+        if not na(r)
+            float up = monLow + r * rng
+            float dn = monHigh - r * rng
+            array<float> prices = math.abs(up - dn) < syminfo.mintick ? array.from(up) : array.from(up, dn)
+            for p in prices
+                fibLines.push(line.new(monStartBar, p, time_close, p, xloc=xloc.bar_time, extend=extend.right,
+                     color=fibCol, width=1, force_overlay=true))
+                fibLabels.push(label.new(time + int(timeframe.in_seconds()) * 1000 * fibLabelOffset, p, xloc=xloc.bar_time,
+                     text=str.tostring(r) + " (" + str.tostring(p, format.mintick) + ")",
+                     style=label.style_label_left, color=hiddenCol, textcolor=fibTextCol, size=fibSize, force_overlay=true))
+
+// ---- Closed 15m key-level engine -----------------------------------------
+// Same numerical profile contract as yoyo/monitor/market_context.py:
+// uniform high-low volume allocation, 80 bins, contiguous >=70% VA; ties go
+// left and the first largest bin wins. This is NOT a native tick profile.
+// No arrays cross request contexts: the bounded nPOC list is serialized.
+type NakedPoint
+    int start
+    int finish
+    float price
+
+type KeySnapshot
+    int closeAt
+    int coverageAt
+    int profileStart
+    int profileEnd
+    float poc
+    float vah
+    float val
+    int weekStart
+    int weekEnd
+    float weekHigh
+    float weekLow
+    string naked
+
+dayStart(int stamp, int offset = 0) =>
+    timestamp(tz, year(stamp, tz), month(stamp, tz), dayofmonth(stamp, tz) + offset, 0, 0)
+
+weekStart(int stamp) =>
+    int weekdayOffset = (dayofweek(stamp, tz) + 5) % 7
+    dayStart(stamp, -weekdayOffset)
+
+estimatedProfile(array<float> highs, array<float> lows, array<float> closes, array<float> volumes) =>
+    float poc = na
+    float vah = na
+    float val = na
+    float hi = highs.max()
+    float lo = lows.min()
+    if highs.size() > 0 and hi > lo
+        float width = (hi - lo) / 80
+        array<float> bins = array.new<float>(80, 0)
+        for j = 0 to highs.size() - 1
+            float bh = highs.get(j)
+            float bl = lows.get(j)
+            float vol = volumes.get(j)
+            if bh == bl
+                int slot = math.min(79, math.max(0, int((closes.get(j) - lo) / width)))
+                bins.set(slot, bins.get(slot) + vol)
+            else
+                int first = math.max(0, int((bl - lo) / width))
+                int last = math.min(79, int((bh - lo) / width))
+                for i = first to last
+                    float overlap = math.max(0, math.min(bh, lo + (i + 1) * width) - math.max(bl, lo + i * width))
+                    bins.set(i, bins.get(i) + vol * overlap / (bh - bl))
+        float total = bins.sum()
+        if total > 0
+            int point = bins.indexof(bins.max())
+            int a = point
+            int b = point
+            float covered = bins.get(point)
+            while covered < total * 0.70 and (a > 0 or b < 79)
+                float left = a > 0 ? bins.get(a - 1) : -1
+                float right = b < 79 ? bins.get(b + 1) : -1
+                if right > left
+                    b += 1
+                    covered += bins.get(b)
+                else
+                    a -= 1
+                    covered += bins.get(a)
+            poc := lo + (point + 0.5) * width
+            vah := lo + (b + 1) * width
+            val := lo + a * width
+    [poc, vah, val]
+
+keyEngine(int sourceTime, int sourceEnd, float sourceHigh, float sourceLow, float sourceClose, float sourceVolume) =>
+    var array<float> dh = array.new<float>()
+    var array<float> dl = array.new<float>()
+    var array<float> dc = array.new<float>()
+    var array<float> dv = array.new<float>()
+    var array<NakedPoint> naked = array.new<NakedPoint>()
+    var string packed = ""
+    bool nakedChanged = false
+    var int firstSeen = sourceTime
+    var int lastEnd = na
+    var int activeDay = na
+    var int activeWeek = na
+    var bool dayOK = false
+    var bool weekOK = false
+    var float wh = na
+    var float wl = na
+    var int profileStart = na
+    var int profileEnd = na
+    var float poc = na
+    var float vah = na
+    var float val = na
+    var int priorStart = na
+    var int priorEnd = na
+    var float priorHigh = na
+    var float priorLow = na
+    int ds = dayStart(sourceTime)
+    int de = dayStart(sourceTime, 1)
+    int ws = weekStart(sourceTime)
+    int we = dayStart(ws, 7)
+    bool continuous = not na(lastEnd) and sourceTime == lastEnd
+    bool validBar = sourceEnd - sourceTime == 900000 and not na(sourceHigh) and not na(sourceLow) and sourceHigh >= sourceLow
+    // A gap makes all earlier untouched claims unknown, even if price stayed away.
+    if not continuous or not validBar
+        nakedChanged := naked.size() > 0
+        naked.clear()
+        firstSeen := sourceTime
+    if na(activeDay) or ds != activeDay
+        activeDay := ds
+        dh.clear()
+        dl.clear()
+        dc.clear()
+        dv.clear()
+        dayOK := sourceTime == ds
+    else
+        dayOK := dayOK and continuous
+    if na(activeWeek) or ws != activeWeek
+        activeWeek := ws
+        wh := sourceHigh
+        wl := sourceLow
+        weekOK := sourceTime == ws
+    else
+        wh := math.max(wh, sourceHigh)
+        wl := math.min(wl, sourceLow)
+        weekOK := weekOK and continuous
+    dayOK := dayOK and validBar and not na(sourceVolume) and sourceVolume >= 0
+    weekOK := weekOK and validBar
+    // Existing POCs see this candle. A newly formed POC does not see its own day.
+    int cutoffDay = dayStart(sourceEnd, -nakedDays)
+    int k = naked.size() - 1
+    while k >= 0
+        NakedPoint point = naked.get(k)
+        if point.start < cutoffDay or (sourceLow <= point.price and sourceHigh >= point.price)
+            naked.remove(k)
+            nakedChanged := true
+        k -= 1
+    dh.push(sourceHigh)
+    dl.push(sourceLow)
+    dc.push(sourceClose)
+    dv.push(sourceVolume)
+    // Freeze at the actual local midnight, including 23/25-hour DST days.
+    // No first-bar-of-tomorrow delay, and no partial-day replacement.
+    if sourceEnd == de and dayOK
+        [p, h, l] = estimatedProfile(dh, dl, dc, dv)
+        profileStart := ds
+        profileEnd := de
+        poc := p
+        vah := h
+        val := l
+        if not na(p)
+            naked.push(NakedPoint.new(ds, de, p))
+            nakedChanged := true
+    if sourceEnd == we and weekOK
+        priorStart := ws
+        priorEnd := we
+        priorHigh := wh
+        priorLow := wl
+    lastEnd := sourceEnd
+    if nakedChanged
+        packed := ""
+        for point in naked
+            packed += str.tostring(point.start) + "," + str.tostring(point.finish) + "," + str.tostring(point.price, "#.################") + ";"
+    KeySnapshot.new(sourceEnd, firstSeen, profileStart, profileEnd, poc, vah, val,
+         priorStart, priorEnd, priorHigh, priorLow, packed)
+
+// HTF-on-LTF: offset the whole snapshot before lookahead_on, per Pine docs.
+confirmedKeyEngine() =>
+    KeySnapshot value = keyEngine(time, time_close, high, low, close, volume)
+    value[1]
+
+// LTF-on-HTF: the function accumulates EVERY 15m bar within its own context;
+// All 15m modules request the same 12000-bar history, independent of txEnabled.
+// A shorter key-level request previously truncated shared signal coverage.
+// This also covers 10000 completed 15m bars plus warmup for 30000 x 5m.
+// request.security returns its final state, not raw sampled OHLC. A realtime
+// unfinished 15m snapshot is replaced by the preceding complete snapshot.
+keyEnginePair() =>
+    KeySnapshot value = keyEngine(time, time_close, high, low, close, volume)
+    [value, value[1]]
+
+KeySnapshot key = na
+int observedAt = barstate.isrealtime ? timenow : time_close
+if timeframe.in_seconds() < 900
+    key := request.security(syminfo.tickerid, "15", confirmedKeyEngine(), lookahead=barmerge.lookahead_on, calc_bars_count=12000)
+else
+    [latestKey, previousKey] = request.security(syminfo.tickerid, "15", keyEnginePair(), lookahead=barmerge.lookahead_off, calc_bars_count=12000)
+    key := not na(latestKey) and latestKey.closeAt <= observedAt ? latestKey : previousKey
+
+int todayStart = dayStart(observedAt)
+int thisWeekStart = weekStart(observedAt)
+bool hasYesterday = not na(key) and key.profileEnd == todayStart and not na(key.poc)
+bool hasPriorWeek = not na(key) and key.weekEnd == thisWeekStart and not na(key.weekHigh)
+bool keyFresh = not na(key) and observedAt >= key.closeAt and observedAt - key.closeAt <= 900000
+
+var array<line> keyLines = array.new<line>()
+var array<label> keyLabels = array.new<label>()
+
+drawKey(float price, int availableAt, string name, color col, string detail, int column = 0) =>
+    keyLines.push(line.new(availableAt, price, math.max(availableAt + 1, observedAt), price,
+         xloc=xloc.bar_time, extend=extend.right, color=col, style=line.style_dashed, width=1, force_overlay=true))
+    if showKeyLabels
+        int at = time + int(timeframe.in_seconds()) * 1000 * (keyLabelOffset + column)
+        keyLabels.push(label.new(at, price, labelText(name, price), xloc=xloc.bar_time,
+             style=label.style_label_left, color=hiddenCol, textcolor=col, size=size.small, tooltip=detail, force_overlay=true))
+
+if barstate.islast
+    for item in keyLines
+        item.delete()
+    for item in keyLabels
+        item.delete()
+    keyLines.clear()
+    keyLabels.clear()
+    bool yesterdayNaked = false
+    int nakedCount = 0
+    if not na(key) and keyFresh
+        int oldest = dayStart(observedAt, -nakedDays)
+        for row in str.split(key.naked, ";")
+            array<string> fields = str.split(row, ",")
+            if fields.size() == 3
+                int sourceStart = int(str.tonumber(fields.get(0)))
+                int sourceEnd = int(str.tonumber(fields.get(1)))
+                float price = str.tonumber(fields.get(2))
+                if sourceStart >= oldest
+                    nakedCount += 1
+                    bool isYesterday = sourceEnd == todayStart
+                    yesterdayNaked := yesterdayNaked or isYesterday
+                    if showNPOC and not (isYesterday and showPrevPOC and hasYesterday)
+                        string origin = str.format_time(sourceStart, "MM-dd", tz)
+                        drawKey(price, sourceEnd, "nPOC " + origin, npocColor,
+                             "来源日 " + str.format_time(sourceStart, "yyyy-MM-dd", tz) + " · " + tz +
+                             "\n此后完整15m K线未触及；最后检查 " + str.format_time(key.closeAt, "MM-dd HH:mm", tz), 12)
+    if hasYesterday
+        string dayName = str.format_time(key.profileStart, "yyyy-MM-dd", tz)
+        string profileTip = dayName + " · " + tz + "\n固定15m成交量均匀分配至80档，70%价值区；估算值。"
+        if showPrevPOC
+            drawKey(key.poc, key.profileEnd, "昨日 POC" + (showNPOC and yesterdayNaked ? " · nPOC" : ""), pocColor, profileTip)
+        if showPrevVA
+            drawKey(key.vah, key.profileEnd, "昨日 VAH", vaColor, profileTip)
+            drawKey(key.val, key.profileEnd, "昨日 VAL", vaColor, profileTip)
+    if hasPriorWeek and showPrevWeek
+        string weekTip = str.format_time(key.weekStart, "yyyy-MM-dd", tz) + " 至 " + str.format_time(key.weekEnd, "yyyy-MM-dd", tz) + "\n完整自然周（含周末） · " + tz
+        drawKey(key.weekHigh, key.weekEnd, "上周高", priorColor, weekTip, 24)
+        drawKey(key.weekLow, key.weekEnd, "上周低", priorColor, weekTip, 24)
+
+// Data Window exposes source prices for cross-timeframe verification.
+plot(hasYesterday ? key.poc : na, "昨日 POC（15m估算）", display=display.data_window)
+plot(hasYesterday ? key.vah : na, "昨日 VAH（15m估算）", display=display.data_window)
+plot(hasYesterday ? key.val : na, "昨日 VAL（15m估算）", display=display.data_window)
+plot(hasPriorWeek ? key.weekHigh : na, "上周高（15m）", display=display.data_window)
+plot(hasPriorWeek ? key.weekLow : na, "上周低（15m）", display=display.data_window)
+plot(not na(key) ? key.closeAt : na, "关键位最后检查时间（Unix ms）", display=display.data_window)
+if keyDebug and barstate.islastconfirmedhistory and not na(key)
+    log.info("KEY15 close={0} day={1} poc={2} vah={3} val={4} prior={5}/{6} npoc={7}", key.closeAt, key.profileStart, key.poc, key.vah, key.val, key.weekHigh, key.weekLow, key.naked)
+
+// === Fanshen v1.1: unchanged formulas, namespaced identifiers ===============
+fs_periodK = input.int(5, title="%K Length", minval=1)
+fs_smoothK = input.int(3, title="%K Smoothing", minval=1)
+fs_periodD = input.int(3, title="%D Smoothing", minval=1)
+fs_k = ta.sma(ta.stoch(close, high, low, fs_periodK), fs_smoothK)
+fs_d = ta.sma(fs_k, fs_periodD)
+plot(fs_k, title="%K", color=#2962FF, format=format.price, precision=2)
+plot(fs_d, title="%D", color=#FF6D00, format=format.price, precision=2)
+fs_h0 = hline(80, "Upper Band", color=#787B86)
+hline(50, "Middle Band", color=color.new(#787B86, 50))
+fs_h1 = hline(20, "Lower Band", color=#787B86)
+fill(fs_h0, fs_h1, color=color.rgb(33, 150, 243, 90), title="Background")
+fs_crossUp = ta.crossover(fs_k, fs_d)
+fs_oversold = fs_k < 20 and fs_d < 20
+fs_signalLong = fs_crossUp and fs_oversold
+plotshape(fs_signalLong, title="做多", location=location.bottom, style=shape.triangleup, color=color.rgb(57, 243, 64), size=size.tiny, format=format.price, precision=2)
+fs_crossDown = ta.crossunder(fs_k, fs_d)
+fs_overbought = fs_k > 80 and fs_d > 80
+fs_signalShort = fs_crossDown and fs_overbought
+plotshape(fs_signalShort, title="做空", location=location.top, style=shape.triangledown, color=color.rgb(255, 82, 82), size=size.tiny, format=format.price, precision=2)
+
+// === 警报条件（可在TradingView设置报警） ===
+// alertcondition(signalLong, title="Stoch 超卖金叉", message="Stochastic 超卖金叉：买入信号")
+alertcondition(fs_signalShort, title="Stoch 超买死叉", message="Stochastic 超买死叉：卖出信号")
+
+fs_pd = input.int(22, title="LookBack Period Standard Deviation High")
+fs_bbl = input.int(20, title="Bolinger Band Length")
+fs_mult = input.float(2.0, minval=1.0, maxval=5.0, title="Bollinger Band Standard Deviation Up")
+fs_lb = input.int(50, title="Look Back Period Percentile High")
+fs_ph = input.float(0.85, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%")
+fs_pl = input.float(1.01, title="Lowest Percentile - 1.10=90%, 1.05=95%, 1.01=99%")
+fs_hp = input.bool(false, title="Show High Range - Based on Percentile and LookBack Period?")
+fs_sd = input.bool(false, title="Show Standard Deviation Line?")
+
+fs_wvf = ((ta.highest(close, fs_pd) - low) / ta.highest(close, fs_pd)) * 100
+fs_sDev = fs_mult * ta.stdev(fs_wvf, fs_bbl)
+fs_midLine = ta.sma(fs_wvf, fs_bbl)
+fs_lowerBand = fs_midLine - fs_sDev
+fs_upperBand = fs_midLine + fs_sDev
+fs_rangeHigh = ta.highest(fs_wvf, fs_lb) * fs_ph
+fs_rangeLow = ta.lowest(fs_wvf, fs_lb) * fs_pl
+fs_col = (fs_wvf >= fs_upperBand or fs_wvf >= fs_rangeHigh) ? color.lime : color.gray
+plot(fs_hp ? fs_rangeHigh : na, title="Range High Percentile", style=plot.style_line, linewidth=4, color=color.orange, format=format.price, precision=2)
+plot(fs_hp ? fs_rangeLow : na, title="Range Low Percentile", style=plot.style_line, linewidth=4, color=color.orange, format=format.price, precision=2)
+plot(fs_wvf, title="Williams Vix Fix", style=plot.style_histogram, linewidth=4, color=fs_col, format=format.price, precision=2)
+plot(fs_sd ? fs_upperBand : na, title="Upper Band", style=plot.style_line, linewidth=3, color=color.aqua, format=format.price, precision=2)
+
+// 添加柱子为绿色的条件
+fs_wvfGreen = (fs_wvf >= fs_upperBand or fs_wvf >= fs_rangeHigh)
+// 修改后的警报条件：Stoch 超卖金叉 且 WVF 柱子为绿色
+alertcondition(fs_signalLong and fs_wvfGreen, title="Stoch 超卖金叉 + 柱子绿色", message="买入信号：Stochastic 超卖金叉，WVF柱子为绿色")
+
+// V1.1 display-only: mirror the original arrow conditions onto the price pane.
+// Source: owner_fanshen_v1_20250706.pine; owner confirmed red-arrow bars only.
+// Original intrabar behavior, oscillator plots, WVF and alerts are preserved.
+plotchar(fs_signalLong, title="主图绿色勾", char="✓", location=location.belowbar, color=color.rgb(57, 243, 64), size=size.tiny, display=display.pane, force_overlay=true, format=format.price, precision=2)
+plotchar(fs_signalShort, title="主图红色叉", char="×", location=location.abovebar, color=color.rgb(255, 82, 82), size=size.tiny, display=display.pane, force_overlay=true, format=format.price, precision=2)
+
+// === Fixed 15m signal event buffer and vertical rays ========================
+// Only OHLC through this source bar is used. Stoch windows are the existing
+// %K length/smoothing and %D smoothing inputs; WVF is not a check/cross filter.
+// A bounded serialized buffer crosses contexts, avoiding arrays of arrays.
+type QuarterRaySnapshot
+    int closeAt
+    string events
+    int count
+    int oldestAt
+    int newestAt
+
+ray15Record(int sourceAt, int sourceEnd, float sourceLow, float sourceHigh, bool bullish, bool bearish, int capacity) =>
+    var array<string> rows = array.new<string>()
+    var array<int> times = array.new<int>()
+    var int lastRecorded = na
+    var string packed = ""
+    if (bullish or bearish) and (na(lastRecorded) or sourceAt > lastRecorded)
+        int direction = bullish ? 1 : -1
+        float anchor = bullish ? sourceLow : sourceHigh
+        rows.push(str.tostring(sourceAt) + "," + str.tostring(sourceEnd) + "," +
+             str.tostring(anchor, format.mintick) + "," + str.tostring(direction))
+        times.push(sourceAt)
+        while rows.size() > capacity
+            rows.shift()
+            times.shift()
+        packed := array.join(rows, ";")
+        lastRecorded := sourceAt
+    QuarterRaySnapshot.new(sourceEnd, packed, rows.size(),
+         times.size() > 0 ? times.first() : na, times.size() > 0 ? times.last() : na)
+
+ray15Engine() =>
+    float k = ta.sma(ta.stoch(close, high, low, fs_periodK), fs_smoothK)
+    float d = ta.sma(k, fs_periodD)
+    bool crossUp = ta.crossover(k, d)
+    bool crossDown = ta.crossunder(k, d)
+    QuarterRaySnapshot value = ray15Record(time, time_close, low, high, crossUp and k < 20 and d < 20,
+         crossDown and k > 80 and d > 80, ray15Keep)
+    // Only the latest display state crosses contexts. Returning the whole
+    // list on every historical bar duplicates it until Pine runs out of memory.
+    // Include the last historical quarter-hour so [1] works during the open quarter-hour.
+    barstate.islast or barstate.islastconfirmedhistory ? value : na
+
+confirmedRay15Engine() =>
+    QuarterRaySnapshot value = ray15Engine()
+    value[1]
+
+ray15EnginePair() =>
+    QuarterRaySnapshot value = ray15Engine()
+    [value, value[1]]
+
+// On a 4H/day/week/month chart the source function accumulates EVERY quarter-hour.
+// The returned final state therefore contains all retained signals, rather
+// than just the final intrabar's boolean. An unfinished source snapshot is
+// replaced with the preceding completed quarter-hour. Below 15m the entire snapshot
+// is offset before lookahead_on, the documented confirmed-HTF pattern.
+QuarterRaySnapshot ray15 = na
+// Reload/initial executions must not treat a scheduled future chart close as
+// observable time. Replay/historical bars still use their own past close.
+int observedThrough = math.min(timenow, time_close)
+if show15mRays
+    if timeframe.in_seconds() < 900
+        ray15 := request.security(syminfo.tickerid, "15", confirmedRay15Engine(), lookahead=barmerge.lookahead_on, calc_bars_count=12000)
+    else
+        [latestRay15, previousRay15] = request.security(syminfo.tickerid, "15", ray15EnginePair(), lookahead=barmerge.lookahead_off, calc_bars_count=12000)
+        ray15 := not na(latestRay15) and latestRay15.closeAt <= observedThrough ? latestRay15 : previousRay15
+
+var array<line> ray15Lines = array.new<line>()
+var string ray15DrawnEvents = ""
+if barstate.islast and show15mRays and not na(ray15) and ray15.events != ray15DrawnEvents
+    // Delete this feature's own handles before drawing its bounded snapshot.
+    // The Monday/Fib budget reserves ray15Keep slots before any lines are created.
+    for item in ray15Lines
+        item.delete()
+    ray15Lines.clear()
+    for row in str.split(ray15.events, ";")
+        array<string> fields = str.split(row, ",")
+        if fields.size() == 4
+            int at = int(str.tonumber(fields.get(0)))
+            int confirmedAt = int(str.tonumber(fields.get(1)))
+            float anchor = str.tonumber(fields.get(2))
+            int direction = int(str.tonumber(fields.get(3)))
+            if confirmedAt <= observedThrough
+                ray15Lines.push(line.new(at, anchor, at, anchor + direction * syminfo.mintick,
+                     xloc=xloc.bar_time, extend=extend.right, color=direction == 1 ? ray15BullRayColor : ray15BearRayColor,
+                     style=line.style_solid, width=ray15RayWidth, force_overlay=true))
+    ray15DrawnEvents := ray15.events
+
+// Audit fields stay in the Data Window; they do not change oscillator scaling.
+plot(not na(ray15) ? ray15.count : na, "15m竖射线：信号数", display=display.data_window, precision=0)
+plot(not na(ray15) ? ray15.oldestAt : na, "15m竖射线：最早时间（Unix ms）", display=display.data_window, precision=0)
+plot(not na(ray15) ? ray15.newestAt : na, "15m竖射线：最新时间（Unix ms）", display=display.data_window, precision=0)
+plot(not na(ray15) ? ray15.closeAt : na, "15m竖射线：确认至（Unix ms）", display=display.data_window, precision=0)
+if ray15Debug and barstate.islastconfirmedhistory and not na(ray15)
+    log.info("M15_RAYS count={0} through={1} events={2}", ray15.count, ray15.closeAt, ray15.events)
+
+// === V2.2 fixed-timeframe independent trade engine =========================
+// Inputs: native 1H/15m/5m OHLC Stoch, 15m Wilder ATR, and completed 5m OHLC.
+// The source engine visits EVERY 5m bar, even on daily/weekly charts. HTF
+// values are consumed only at their exact closing boundary. No future pivot
+// or candles after the selected entry close contribute to the initial stop.
+type TxTrade
+    int enteredAt
+    int observedAt
+    int side
+    float entry
+    float initialStop
+    float risk
+    float protection
+    float peakR = 0.0
+    float currentR = 0.0
+    bool armed = false
+    int armedAt = 0
+    int endedAt = 0
+    float exitPrice = na
+    int reason = 0
+    string trail = ""
+
+type TxWatch
+    int side = 0
+    int since = 0
+
+type TxSnapshot
+    int closeAt
+    array<string> trades
+    int count
+    int active
+    int watchSide
+    int watchSince
+    int total
+    float lastEntry
+    float lastStop
+    int sourceStart
+
+// Each new confirmed observation arrow refreshes the state, even when its
+// direction repeats. A simultaneous observation/entry close is not after it.
+txObserve(TxWatch watch, int hSide, int hAt) =>
+    if hSide != 0 and hAt > watch.since
+        watch.side := hSide
+        watch.since := hAt
+    watch
+
+txEligible(TxWatch watch, int qSide, int qAt) =>
+    watch.side != 0 and qSide == watch.side and qAt > watch.since
+
+// Observation and reverse-exit clocks are separate: 5m entries use 15m watch,
+// while 15m entries retain H1 watch. Only exact confirmed source closes mutate it.
+txRefreshObservation(TxWatch watch, string entryTf, bool hourClose, int hourSide, int hourAt, bool quarterClose, int quarterSide, int quarterAt) =>
+    if entryTf == "5"
+        if quarterClose
+            txObserve(watch, quarterSide, quarterAt)
+    else if entryTf == "15" and hourClose
+        txObserve(watch, hourSide, hourAt)
+    watch
+
+// Routing affects admission only; quarterClose remains the exit-update clock.
+txEntryEligible(TxWatch watch, string entryTf, bool quarterClose, int fiveSide, int fiveAt, int quarterSide, int quarterAt) =>
+    entryTf == "5" ? txEligible(watch, fiveSide, fiveAt) : quarterClose and txEligible(watch, quarterSide, quarterAt)
+
+// Only the entry close and the symbol tick size are used; no future bars.
+// Percent buffer is resolved once at entry, before the initial risk freezes.
+txBufferPrice(string unit, float amount, float entry, float tick) =>
+    unit == "最小跳动（tick）" ? amount * tick : unit == "入场价百分比" ? entry * amount / 100.0 : amount
+
+txRoundedStop(int side, float extreme, float buffer, float tick) =>
+    float raw = extreme - side * buffer
+    side == 1 ? math.floor(raw / tick + 1e-8) * tick : math.ceil(raw / tick - 1e-8) * tick
+
+txTrailRow(int at, float price) =>
+    str.tostring(at) + ":" + str.tostring(price, format.mintick)
+
+// The protection at BAR OPEN is tested before any close-based ratchet.
+// The entry is the selected signal close, so its preceding 5m wick is never
+// used to hit a not-yet-open position or inflate that position's peak.
+txAdvance(TxTrade trade, int at, int endAt, float o, float h, float l, float c,
+     bool quarterClose, float atr15, float triggerR, float multiplier, float tick) =>
+    if trade.endedAt == 0 and at >= trade.enteredAt
+        bool stopped = trade.side == 1 ? l <= trade.protection : h >= trade.protection
+        if stopped
+            bool gap = trade.side == 1 ? o < trade.protection : o > trade.protection
+            trade.exitPrice := trade.side == 1 ? math.min(o, trade.protection) : math.max(o, trade.protection)
+            trade.endedAt := gap ? at : endAt
+            trade.reason := trade.armed ? 2 : 1
+            trade.currentR := trade.side * (trade.exitPrice - trade.entry) / trade.risk
+        else
+            float favorable = trade.side == 1 ? h : l
+            trade.peakR := math.max(trade.peakR, trade.side * (favorable - trade.entry) / trade.risk)
+            trade.currentR := trade.side * (c - trade.entry) / trade.risk
+            if quarterClose and not na(atr15) and atr15 > 0
+                if not trade.armed and trade.currentR >= triggerR
+                    trade.armed := true
+                    trade.armedAt := endAt
+                if trade.armed
+                    float candidate = txRoundedStop(trade.side, c, multiplier * atr15, tick)
+                    float tightened = trade.side == 1 ? math.max(trade.protection, candidate) : math.min(trade.protection, candidate)
+                    if tightened != trade.protection or trade.trail == ""
+                        trade.protection := tightened
+                        array<string> points = trade.trail == "" ? array.new<string>() : str.split(trade.trail, "@")
+                        points.push(txTrailRow(endAt, tightened))
+                        while points.size() > 40
+                            points.shift()
+                        trade.trail := array.join(points, "@")
+    trade
+
+// Called only on the exact confirmed hourly boundary, AFTER the 5m stop test
+// and 15m close-based arming. A stop already hit during this bar wins; a trade
+// newly armed on this same close is eligible. There is no positive-PnL filter.
+txExitOnH1(TxTrade trade, int signalSide, int confirmedAt, float confirmedClose) =>
+    if trade.endedAt == 0 and trade.armed and signalSide == -trade.side and confirmedAt >= trade.armedAt and confirmedAt > trade.enteredAt
+        trade.exitPrice := confirmedClose
+        trade.endedAt := confirmedAt
+        trade.reason := 3
+        trade.currentR := trade.side * (confirmedClose - trade.entry) / trade.risk
+    trade
+
+txSignals() =>
+    float k = ta.sma(ta.stoch(close, high, low, fs_periodK), fs_smoothK)
+    float d = ta.sma(k, fs_periodD)
+    bool up = ta.crossover(k, d)
+    bool down = ta.crossunder(k, d)
+    int side = up and k < 20 and d < 20 ? 1 : down and k > 80 and d > 80 ? -1 : 0
+    [time_close, side, ta.atr(txAtrLen)]
+
+txPack(TxTrade trade) =>
+    str.tostring(trade.enteredAt) + "," + str.tostring(trade.observedAt) + "," + str.tostring(trade.side) + "," +
+     str.tostring(trade.entry, format.mintick) + "," + str.tostring(trade.initialStop, format.mintick) + "," +
+     str.tostring(trade.protection, format.mintick) + "," + str.tostring(trade.peakR, "#.########") + "," +
+     str.tostring(trade.currentR, "#.########") + "," + str.tostring(trade.armedAt) + "," +
+     str.tostring(trade.endedAt) + "," + str.tostring(trade.exitPrice, format.mintick) + "," + str.tostring(trade.reason) + "," +
+     (trade.trail == "" ? "_" : trade.trail)
+
+// Closed records remain in the archive. Only the execution worklist shrinks;
+// neither viewport membership nor drawing capacity changes a live trade.
+txRemoveClosed(array<TxTrade> live) =>
+    int index = live.size() - 1
+    while index >= 0
+        if live.get(index).endedAt != 0
+            live.remove(index)
+        index -= 1
+    live
+
+txFinish(int entered, int ended, int confirmedThrough) =>
+    math.max(entered + 300000, ended == 0 ? confirmedThrough + 900000 : ended)
+
+// Half-open chart interval includes the ENTIRE rightmost visible candle.
+// A frame spanning the left edge remains visible even if its entry is offscreen.
+txIntersects(int entered, int ended, int confirmedThrough, int left, int rightEnd) =>
+    entered < rightEnd and txFinish(entered, ended, confirmedThrough) >= left
+
+txSelect(array<string> ledger, int confirmedThrough, int left, int rightEnd, int capacity) =>
+    array<string> selected = array.new<string>()
+    int matched = 0
+    for row in ledger
+        array<string> fields = str.split(row, ",")
+        if fields.size() == 13 and txIntersects(int(str.tonumber(fields.get(0))), int(str.tonumber(fields.get(9))), confirmedThrough, left, rightEnd)
+            matched += 1
+            selected.push(row)
+            if selected.size() > capacity
+                selected.shift()
+    [selected, matched]
+
+txEngine() =>
+    // Nested requests run in this FIXED 5m context, not in the user's chart.
+    [hourEnd, hourSide, hourAtr] = request.security(syminfo.tickerid, "60", txSignals(), lookahead=barmerge.lookahead_off, calc_bars_count=12000)
+    [quarterEnd, quarterSide, quarterAtr] = request.security(syminfo.tickerid, "15", txSignals(), lookahead=barmerge.lookahead_off, calc_bars_count=12000)
+    [fiveEnd, fiveSide, fiveAtr] = txSignals()
+    float structureLow = ta.lowest(low, txStopBars)
+    float structureHigh = ta.highest(high, txStopBars)
+    bool hClose = time_close == hourEnd
+    bool qClose = time_close == quarterEnd
+    var TxWatch watch = TxWatch.new()
+    var array<TxTrade> trades = array.new<TxTrade>()
+    var array<TxTrade> live = array.new<TxTrade>()
+    var int total = 0
+    var int sourceStart = time
+    txRefreshObservation(watch, txEntryTf, hClose, hourSide, hourEnd, qClose, quarterSide, quarterEnd)
+    for trade in live
+        txAdvance(trade, time, time_close, open, high, low, close, qClose, quarterAtr, txArmR, txAtrMult, syminfo.mintick)
+        if hClose
+            txExitOnH1(trade, hourSide, hourEnd, close)
+    txRemoveClosed(live)
+    if txEntryEligible(watch, txEntryTf, qClose, fiveSide, fiveEnd, quarterSide, quarterEnd)
+        float bufferPrice = txBufferPrice(txBufferUnit, txStopBuffer, close, syminfo.mintick)
+        float initial = txRoundedStop(watch.side, watch.side == 1 ? structureLow : structureHigh, bufferPrice, syminfo.mintick)
+        float risk = watch.side * (close - initial)
+        if not na(low[txStopBars - 1]) and not na(high[txStopBars - 1]) and initial > 0 and risk >= syminfo.mintick
+            TxTrade entered = TxTrade.new(time_close, watch.since, watch.side, close, initial, risk, initial)
+            trades.push(entered)
+            live.push(entered)
+            total += 1
+    TxSnapshot result = na
+    // Never copy the full event ledger across all 30000 requested source bars.
+    if barstate.islast or barstate.islastconfirmedhistory
+        array<string> rows = array.new<string>()
+        for trade in trades
+            rows.push(txPack(trade))
+        // Separate strings avoid Pine's single-string length limit. The archive
+        // crosses contexts only for the latest two source snapshots, not every bar.
+        result := TxSnapshot.new(time_close, rows, rows.size(), live.size(), watch.side, watch.since,
+             total, trades.size() > 0 ? trades.last().entry : na, trades.size() > 0 ? trades.last().initialStop : na, sourceStart)
+    result
+
+txConfirmed() =>
+    TxSnapshot snapshot = txEngine()
+    snapshot[1]
+
+txPair() =>
+    TxSnapshot snapshot = txEngine()
+    [snapshot, snapshot[1]]
+
+TxSnapshot tx = na
+if txEnabled
+    if timeframe.in_seconds() < 300
+        tx := request.security(syminfo.tickerid, "5", txConfirmed(), lookahead=barmerge.lookahead_on, calc_bars_count=30000)
+    else
+        [currentTx, priorTx] = request.security(syminfo.tickerid, "5", txPair(), lookahead=barmerge.lookahead_off, calc_bars_count=30000)
+        tx := not na(currentTx) and currentTx.closeAt <= observedThrough ? currentTx : priorTx
+
+// The drawing layer only reads serialized confirmed state. It never chooses
+// entries/exits using chart OHLC. Boxes carry horizontal R guides so no new
+// line handles compete with the existing Monday/Fib/15m-ray line budget.
+type TxDrawing
+    string row
+    int finish
+    array<box> boxes
+    array<label> labels
+    array<polyline> polys
+
+var array<TxDrawing> txFrames = array.new<TxDrawing>()
+var table txInfo = table.new(position.top_right, 1, 4, border_width=0, force_overlay=true)
+
+txText(TxDrawing frame, int at, float price, string caption, color tone, string tip, bool before=false) =>
+    frame.labels.push(label.new(at, price, caption, xloc=xloc.bar_time, style=before ? label.style_label_right : label.style_label_left,
+         color=color.new(chart.bg_color, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+
+txGuide(TxDrawing frame, int start, int finish, float price) =>
+    frame.boxes.push(box.new(start, price, finish, price, xloc=xloc.bar_time, border_color=color.new(txBull, 65),
+         border_style=line.style_dotted, bgcolor=color.new(txBull, 100), force_overlay=true))
+
+// Price visibility is a display-only choice; R always uses frozen initial risk.
+txPriceText(float price, bool visible) =>
+    visible ? " · " + str.tostring(price, format.mintick) : ""
+
+txRText(float value) =>
+    (value > 0 ? "+" : "") + str.tostring(value, "#.##") + "R"
+
+txDraw(string row, int confirmedThrough) =>
+    TxDrawing frame = TxDrawing.new(row, 0, array.new<box>(), array.new<label>(), array.new<polyline>())
+    array<string> fields = str.split(row, ",")
+    if fields.size() == 13
+        int entered = int(str.tonumber(fields.get(0)))
+        int observed = int(str.tonumber(fields.get(1)))
+        int side = int(str.tonumber(fields.get(2)))
+        float entry = str.tonumber(fields.get(3))
+        float initial = str.tonumber(fields.get(4))
+        float protection = str.tonumber(fields.get(5))
+        float peak = str.tonumber(fields.get(6))
+        float current = str.tonumber(fields.get(7))
+        int armedAt = int(str.tonumber(fields.get(8)))
+        int ended = int(str.tonumber(fields.get(9)))
+        float exitPrice = str.tonumber(fields.get(10))
+        int reason = int(str.tonumber(fields.get(11)))
+        float risk = side * (entry - initial)
+        bool live = ended == 0
+        int finish = txFinish(entered, ended, confirmedThrough)
+        frame.finish := finish
+        float reward = math.max(syminfo.mintick, entry + side * math.max(5.0, peak) * risk)
+        string detail = txWatchLabel + "观察确认 " + str.format_time(observed, "MM-dd HH:mm", "Asia/Shanghai") +
+             "\n" + txEntryTf + "m信号收盘参考 " + str.format_time(entered, "MM-dd HH:mm", "Asia/Shanghai") +
+             "\n初始风险冻结；1R/3R/5R为参考，不是分批止盈。各框独立，非账户成交。" +
+             "\n止损按5m高低触及；非跳空触及仅知所在5m区间，结束标于该区间收盘。毛R未扣手续费、滑点及资金费。"
+        detail += live or not txShowPrices ? "" : "\n结束参考价 " + str.tostring(exitPrice, format.mintick)
+        detail += "\n最大 " + str.tostring(peak, "#.##") + "R；止损所在5m内的先后路径未知，不计该根额外有利极值。"
+        detail += reason == 3 ? "\n趋势跟踪期间，1H收盘确认反向勾叉退出；按该收盘价记录。" : ""
+        frame.boxes.push(box.new(entered, math.max(entry, initial), finish, math.min(entry, initial), xloc=xloc.bar_time,
+             border_color=color.new(txBear, live ? 45 : 65), bgcolor=color.new(txBear, live ? 92 : 96), force_overlay=true))
+        frame.boxes.push(box.new(entered, math.max(entry, reward), finish, math.min(entry, reward), xloc=xloc.bar_time,
+             border_color=color.new(txBull, live ? 60 : 75), bgcolor=color.new(txBull, live ? 94 : 97), force_overlay=true))
+        txText(frame, entered, entry, (side == 1 ? "多单入场" : "空单入场") + " · 最大 " + str.tostring(peak, "#.##") + "R" + txPriceText(entry, txShowPrices), chart.fg_color, detail, true)
+        string outcome = txRText(current)
+        if armedAt == 0 or math.abs(protection - initial) > syminfo.mintick * 0.5
+            txText(frame, finish, initial, (reason == 1 ? "止损退出 " + outcome : "SL -1R") + txPriceText(reason == 1 ? exitPrice : initial, txShowPrices), txBear, detail)
+        for level in array.from(1, 3, 5)
+            float price = entry + side * risk * level
+            if price > 0
+                txGuide(frame, entered, finish, price)
+                txText(frame, finish, price, str.tostring(level) + "R" + txPriceText(price, txShowPrices), color.new(txBull, 15), detail, true)
+        if armedAt > 0
+            array<chart.point> path = array.new<chart.point>()
+            float priorPrice = na
+            for point in str.split(fields.get(12), "@")
+                array<string> pieces = str.split(point, ":")
+                if pieces.size() == 2
+                    int at = int(str.tonumber(pieces.get(0)))
+                    float price = str.tonumber(pieces.get(1))
+                    if not na(priorPrice)
+                        path.push(chart.point.from_time(at, priorPrice))
+                    path.push(chart.point.from_time(at, price))
+                    priorPrice := price
+            if path.size() > 0
+                path.push(chart.point.from_time(finish, protection))
+                frame.polys.push(polyline.new(path, xloc=xloc.bar_time, line_color=txTrailColor, line_width=1, force_overlay=true))
+            txText(frame, finish, protection, (reason == 2 ? "跟踪退出 " + outcome : "跟踪 " + txRText(side * (protection - entry) / risk)) + txPriceText(reason == 2 ? exitPrice : protection, txShowPrices), txTrailColor,
+                 "15m收盘首次达到 " + str.tostring(txArmR) + "R 后启动；15m ATR(" + str.tostring(txAtrLen) + ") × " + str.tostring(txAtrMult) + "，仅收紧、下根5m生效。")
+
+        if reason == 3
+            txText(frame, finish, exitPrice, "1H反向退出 " + outcome + txPriceText(exitPrice, txShowPrices), txTrailColor, detail)
+
+    frame
+
+// Regular var state and drawing IDs roll back together on realtime ticks.
+// Do not use varip to skip drawing: objects created on a previous tick may
+// have been rolled back even when a varip timestamp says they were drawn.
+txDelete(TxDrawing frame) =>
+    for item in frame.boxes
+        item.delete()
+    for item in frame.labels
+        item.delete()
+    for item in frame.polys
+        item.delete()
+
+txSameDrawing(TxDrawing frame, string row, int confirmedThrough) =>
+    bool same = frame.row == row
+    if same
+        array<string> fields = str.split(row, ",")
+        same := frame.finish == txFinish(int(str.tonumber(fields.get(0))), int(str.tonumber(fields.get(9))), confirmedThrough)
+    same
+
+// Delete changed handles before creating replacements, including capacity
+// shifts. Unchanged closed frames keep their IDs; live frames still extend.
+txSync(array<TxDrawing> frames, array<string> rows, int confirmedThrough) =>
+    int index = frames.size() - 1
+    while index >= 0
+        TxDrawing frame = frames.get(index)
+        if index >= rows.size()
+            txDelete(frame)
+            frames.remove(index)
+        else if not txSameDrawing(frame, rows.get(index), confirmedThrough)
+            txDelete(frame)
+            frames.set(index, na)
+        index -= 1
+    int created = 0
+    int slot = 0
+    for row in rows
+        if slot >= frames.size()
+            frames.push(txDraw(row, confirmedThrough))
+            created += 1
+        else if na(frames.get(slot))
+            frames.set(slot, txDraw(row, confirmedThrough))
+            created += 1
+        slot += 1
+    created
+
+// These globals trigger a full recalculation when the user pans or zooms.
+// Capture actual time_close in CHART context, also correct for month/session bars.
+int txVisibleLeft = chart.left_visible_bar_time
+int txVisibleRight = chart.right_visible_bar_time
+var int txVisibleEnd = na
+if time == txVisibleRight
+    txVisibleEnd := time_close
+array<string> txVisibleRows = array.new<string>()
+int txVisibleTotal = 0
+
+// Seed committed drawings on the last historical bar when a confirmed source
+// snapshot is available. Realtime reconciliation remains rollback-safe.
+if barstate.islast or barstate.islastconfirmedhistory
+    if txEnabled and not na(tx) and tx.closeAt <= observedThrough
+        if not na(txVisibleEnd)
+            [visibleRows, visibleTotal] = txSelect(tx.trades, tx.closeAt, txVisibleLeft, txVisibleEnd, txKeep)
+            txVisibleRows := visibleRows
+            txVisibleTotal := visibleTotal
+        txSync(txFrames, txVisibleRows, tx.closeAt)
+        string observation = tx.watchSide == 0 ? "等待" + txWatchLabel + "勾叉" : txWatchLabel + (tx.watchSide == 1 ? "多头" : "空头") +
+             "观察 · 每个同向" + txEntryTf + "m信号独立入场"
+        table.cell(txInfo, 0, 0, observation, text_color=chart.fg_color, text_size=size.small, bgcolor=color.new(chart.bg_color, 12))
+        table.cell(txInfo, 0, 1, "可见时段 " + str.tostring(txVisibleRows.size()) + "/" + str.tostring(txVisibleTotal) + " 框 · 全源跟踪中 " + str.tostring(tx.active) +
+             " · 15m收盘 " + str.tostring(txArmR) + "R 启动 " + str.tostring(txAtrMult) + "ATR＋1H反向退出", text_color=txTrailColor,
+             text_size=size.tiny, bgcolor=color.new(chart.bg_color, 12))
+        float currentBuffer = txBufferPrice(txBufferUnit, txStopBuffer, close, syminfo.mintick)
+        bool scaleWarning = currentBuffer >= close
+        string bufferInfo = scaleWarning ? "⚠ 缓冲不小于当前币价：请检查缓冲单位／值" : "缓冲 " + str.tostring(txStopBuffer) + " " + txBufferUnit
+        table.cell(txInfo, 0, 2, bufferInfo, text_color=scaleWarning ? txBear : chart.fg_color,
+             text_size=size.tiny, bgcolor=color.new(chart.bg_color, 12))
+        string coverageInfo = "交易数据 " + str.format_time(tx.sourceStart, "MM-dd HH:mm", "Asia/Shanghai") + " 起（UTC+8）"
+        coverageInfo += txVisibleLeft < tx.sourceStart ? " · 更早无5m数据" : ""
+        coverageInfo += txVisibleTotal > txKeep ? " · 超出" + str.tostring(txKeep) + "框，请缩小时间范围" : ""
+        table.cell(txInfo, 0, 3, coverageInfo, text_color=txVisibleTotal > txKeep or txVisibleLeft < tx.sourceStart ? txBear : chart.fg_color,
+             text_size=size.tiny, bgcolor=color.new(chart.bg_color, 12))
+    else
+        txSync(txFrames, array.new<string>(), 0)
+        table.clear(txInfo, 0, 0, 0, 3)
+
+plot(not na(tx) ? txVisibleRows.size() : na, "交易参考：显示框数", display=display.data_window, precision=0)
+plot(not na(tx) ? tx.active : na, "交易参考：源窗口未结束数（含隐藏框）", display=display.data_window, precision=0)
+plot(not na(tx) ? tx.total : na, "交易参考：源窗口入场总数", display=display.data_window, precision=0)
+plot(not na(tx) ? tx.lastEntry : na, "交易参考：最新入场价", display=display.data_window)
+plot(not na(tx) ? tx.lastStop : na, "交易参考：最新初始止损", display=display.data_window)
+plot(not na(tx) ? tx.closeAt : na, "交易参考：确认至（Unix ms）", display=display.data_window, precision=0)
+
+plot(not na(tx) ? tx.sourceStart : na, "交易参考：源数据起点（Unix ms）", display=display.data_window, precision=0)
+
+plot(not na(tx) ? txVisibleTotal : na, "交易参考：可见时段相交总数", display=display.data_window, precision=0)
+
+// === V2.15 level-touch opportunity engine =================================
+// Source features use completed 15m bars only. The Monday range is sampled
+// BEFORE the touch bar; later Monday extrema never rewrite an earlier touch.
+// Outcomes use completed 5m bars; a 15m 2/2 pivot is recognized at confirmation.
+// The retrospective pivot price/time is a review annotation, not a fill.
+// Admission uses the entry CLOSE weekday in the selected Monday-range timezone.
+// The body interval is closed: equality at open/close disqualifies that level only.
+type WfArrow
+    int index
+    int at
+    int side
+    int week
+    float anchor
+
+type WfTrade
+    int entered
+    int signalAt
+    int touchAt
+    int side
+    float entry
+    float stop
+    float peak = 0.0
+    int ended = 0
+    int drawnEnd = 0
+    int reason = 0
+    float signalPrice = na
+
+type WfSnapshot
+    int through
+    int sourceStart
+    array<string> rows
+    int active
+
+wfTouches(float hi, float lo, float o, float h, float l, float c) =>
+    bool bull = false
+    bool bear = false
+    if not na(hi) and hi > lo
+        for r in array.from(0.0, 0.5, 0.618, 0.705, 1.13, 1.27, 1.618)
+            for price in array.from(lo + r * (hi - lo), hi - r * (hi - lo))
+                bull := bull or (l <= price and price < math.min(o, c))
+                bear := bear or (math.max(o, c) < price and price <= h)
+    [bull, bear]
+
+wfTradingDay(int at) =>
+    string zone = tzOpt == "交易所时区" ? syminfo.timezone : tzOpt
+    int day = dayofweek(at, zone)
+    day >= dayofweek.tuesday and day <= dayofweek.friday
+
+wfFinish(int entered, int drawnEnd) =>
+    math.max(entered + 300000, drawnEnd)
+
+wfQuarter() =>
+    string zone = tzOpt == "交易所时区" ? syminfo.timezone : tzOpt
+    bool monday = dayofweek(time, zone) == dayofweek.monday
+    int date = year(time, zone) * 10000 + month(time, zone) * 100 + dayofmonth(time, zone)
+    var int week = 0
+    var float hi = na
+    var float lo = na
+    if monday and date != week
+        week := date
+        hi := na
+        lo := na
+    [bullTouch, bearTouch] = wfTouches(hi, lo, open, high, low, close)
+    [qEnd, side, unusedAtr] = txSignals()
+    // The circle anchor uses only the original confirmed arrow bar.
+    float circleAnchor = side == 1 ? low : high
+    float stopLow = ta.lowest(low, 3)
+    float stopHigh = ta.highest(high, 3)
+    var array<WfArrow> pending = array.new<WfArrow>()
+    array<string> events = array.new<string>()
+    // Previously unmatched arrows get their FIRST later touch, at most two bars.
+    int i = pending.size() - 1
+    while i >= 0
+        WfArrow a = pending.get(i)
+        bool expired = week != a.week or bar_index - a.index > 2
+        bool touched = a.side == 1 ? bullTouch : bearTouch
+        if not expired and touched
+            events.push(str.tostring(a.side) + "," + str.tostring(a.at) + "," + str.tostring(time) + "," +
+                 str.tostring(a.anchor, format.mintick))
+        if expired or touched
+            pending.remove(i)
+        i -= 1
+    if side != 0 and week != 0
+        int touchAt = na
+        // At the arrow close prefer the closest touch already known.
+        for offset = 0 to 2
+            bool touched = side == 1 ? bullTouch[offset] : bearTouch[offset]
+            if na(touchAt) and week[offset] == week and touched
+                touchAt := time[offset]
+        if not na(touchAt)
+            events.push(str.tostring(side) + "," + str.tostring(time) + "," + str.tostring(touchAt) + "," +
+                 str.tostring(circleAnchor, format.mintick))
+        else
+            pending.push(WfArrow.new(bar_index, time, side, week, circleAnchor))
+    if monday
+        hi := na(hi) ? high : math.max(hi, high)
+        lo := na(lo) ? low : math.min(lo, low)
+    // Both pivot functions run on every source bar, regardless of entry events.
+    float pivotHigh = ta.pivothigh(high, 2, 2)
+    float pivotLow = ta.pivotlow(low, 2, 2)
+    [qEnd, array.join(events, ";"), close, not na(low[2]) ? stopLow : na, not na(high[2]) ? stopHigh : na,
+     pivotHigh, pivotLow, time[2]]
+
+wfAdvance(WfTrade trade, int at, int endAt, float o, float h, float l) =>
+    if trade.ended == 0 and at >= trade.entered
+        bool hit = trade.side == 1 ? l <= trade.stop : h >= trade.stop
+        if hit
+            bool gap = trade.side == 1 ? o <= trade.stop : o >= trade.stop
+            trade.ended := gap ? at : endAt
+            trade.drawnEnd := trade.ended
+            trade.reason := 1
+        else
+            // Stop-touch bar is excluded because its intrabar order is unknown.
+            float space = trade.side == 1 ? h - trade.entry : trade.entry - l
+            if space > trade.peak
+                trade.peak := space
+                // Pending frames end at the latest favorable extreme, not today.
+                trade.drawnEnd := at
+    trade
+
+wfPivot(WfTrade trade, int confirmedAt, int pivotAt, float pivotHigh, float pivotLow) =>
+    float price = trade.side == 1 ? pivotHigh : pivotLow
+    float space = trade.side * (price - trade.entry)
+    if trade.ended == 0 and pivotAt >= trade.entered and confirmedAt > pivotAt and not na(price) and space > 0
+        trade.peak := space
+        trade.drawnEnd := pivotAt
+        trade.ended := confirmedAt
+        trade.reason := 2
+    trade
+
+wfPack(WfTrade trade) =>
+    str.tostring(trade.entered) + "," + str.tostring(trade.signalAt) + "," + str.tostring(trade.touchAt) + "," +
+     str.tostring(trade.side) + "," + str.tostring(trade.entry, format.mintick) + "," +
+     str.tostring(trade.stop, format.mintick) + "," + str.tostring(trade.peak, format.mintick) + "," + str.tostring(trade.ended) + "," +
+     str.tostring(trade.drawnEnd) + "," + str.tostring(trade.reason) + "," +
+     str.tostring(trade.signalPrice, format.mintick)
+
+wfEngine() =>
+    [quarterEnd, events, entry, stopLow, stopHigh, pivotHigh, pivotLow, pivotAt] = request.security(syminfo.tickerid, "15", wfQuarter(), lookahead=barmerge.lookahead_off, calc_bars_count=12000)
+    var array<WfTrade> ledger = array.new<WfTrade>()
+    var array<WfTrade> live = array.new<WfTrade>()
+    var int sourceStart = time
+    // Advance old positions first; the entry bar cannot contribute to its MFE.
+    int i = live.size() - 1
+    while i >= 0
+        WfTrade trade = live.get(i)
+        wfAdvance(trade, time, time_close, open, high, low)
+        // A stop reached before or on the confirmation bar takes precedence.
+        if time_close == quarterEnd
+            wfPivot(trade, quarterEnd, pivotAt, pivotHigh, pivotLow)
+        if trade.ended != 0
+            live.remove(i)
+        i -= 1
+    if time_close == quarterEnd and events != "" and wfTradingDay(quarterEnd)
+        for row in str.split(events, ";")
+            array<string> f = str.split(row, ",")
+            if f.size() == 4
+                int side = int(str.tonumber(f.get(0)))
+                float stop = txRoundedStop(side, side == 1 ? stopLow : stopHigh, entry * wfBuffer / 100.0, syminfo.mintick)
+                if stop > 0 and side * (entry - stop) >= syminfo.mintick
+                    WfTrade trade = WfTrade.new(quarterEnd, int(str.tonumber(f.get(1))), int(str.tonumber(f.get(2))), side, entry, stop)
+                    trade.signalPrice := str.tonumber(f.get(3))
+                    ledger.push(trade)
+                    live.push(trade)
+    WfSnapshot result = na
+    if barstate.islast or barstate.islastconfirmedhistory
+        array<string> rows = array.new<string>()
+        for trade in ledger
+            rows.push(wfPack(trade))
+        result := WfSnapshot.new(time_close, sourceStart, rows, live.size())
+    result
+
+wfConfirmed() =>
+    WfSnapshot value = wfEngine()
+    value[1]
+
+wfPair() =>
+    WfSnapshot value = wfEngine()
+    [value, value[1]]
+
+WfSnapshot wf = na
+if wfEnabled or wfCirclesEnabled
+    if timeframe.in_seconds() < 300
+        wf := request.security(syminfo.tickerid, "5", wfConfirmed(), lookahead=barmerge.lookahead_on, calc_bars_count=30000)
+    else
+        [currentWf, priorWf] = request.security(syminfo.tickerid, "5", wfPair(), lookahead=barmerge.lookahead_off, calc_bars_count=30000)
+        wf := not na(currentWf) and currentWf.through <= observedThrough ? currentWf : priorWf
+
+// Draw only visible records. This never changes admission, peaks or stop times.
+// Separate box/label budgets let both optional modules coexist without GC.
+var array<box> wfBoxes = array.new<box>()
+var array<label> wfLabels = array.new<label>()
+var string wfDrawn = ""
+var int wfShown = 0
+var int wfVisible = 0
+var table wfInfo = table.new(position.bottom_right, 1, 2, force_overlay=true)
+if barstate.islast or barstate.islastconfirmedhistory
+    array<string> selected = array.new<string>()
+    wfVisible := 0
+    if wfEnabled and not na(wf) and not na(txVisibleEnd)
+        for row in wf.rows
+            array<string> f = str.split(row, ",")
+            int entered = int(str.tonumber(f.get(0)))
+            int finish = wfFinish(entered, int(str.tonumber(f.get(8))))
+            if entered < txVisibleEnd and finish >= txVisibleLeft
+                wfVisible += 1
+                selected.push(row)
+                if selected.size() > wfKeep
+                    selected.shift()
+    string signature = array.join(selected, ";") + (not na(wf) ? str.tostring(wf.through) : "")
+    if signature != wfDrawn
+        for item in wfBoxes
+            item.delete()
+        for item in wfLabels
+            item.delete()
+        wfBoxes.clear()
+        wfLabels.clear()
+        for row in selected
+            array<string> f = str.split(row, ",")
+            int entered = int(str.tonumber(f.get(0)))
+            int signalAt = int(str.tonumber(f.get(1)))
+            int touchAt = int(str.tonumber(f.get(2)))
+            int side = int(str.tonumber(f.get(3)))
+            float entry = str.tonumber(f.get(4))
+            float stop = str.tonumber(f.get(5))
+            float peak = str.tonumber(f.get(6))
+            int ended = int(str.tonumber(f.get(7)))
+            int finish = wfFinish(entered, int(str.tonumber(f.get(8))))
+            int reason = int(str.tonumber(f.get(9)))
+            float best = entry + side * peak
+            float risk = math.abs(entry - stop)
+            string outcome = reason == 2 ? (side == 1 ? "局部高点" : "局部低点") : "最大空间"
+            string tip = "15m勾叉 " + str.format_time(signalAt, "MM-dd HH:mm", "Asia/Shanghai") +
+                 "\n影线触价 " + str.format_time(touchAt, "MM-dd HH:mm", "Asia/Shanghai") +
+                 "\n入场收盘 " + str.format_time(entered, "MM-dd HH:mm", "Asia/Shanghai") +
+                 "（UTC+8）\n周一和周末不新入场；初始止损：最近3根已收盘15m极值＋入场价" + str.tostring(wfBuffer) + "%缓冲。" +
+                 (reason == 2 ? "\n15m左右各2根确认的首个有利局部极值，回标到极值K线。\n确认时间 " + str.format_time(ended, "MM-dd HH:mm", "Asia/Shanghai") + "（UTC+8）\n绿色为复盘空间，不代表按极值价实际成交。" :
+                  reason == 1 ? "\n局部极值确认前已触初始止损；绿色仅为此前最大空间。" :
+                  "\n等待15m局部极值确认；框暂画至已发生的最有利位置。")
+            wfBoxes.push(box.new(entered, math.max(entry, stop), finish, math.min(entry, stop), xloc=xloc.bar_time,
+                 border_color=color.new(wfRiskColor, 45), bgcolor=color.new(wfRiskColor, 90), force_overlay=true))
+            wfBoxes.push(box.new(entered, math.max(entry, best), finish, math.min(entry, best), xloc=xloc.bar_time,
+                 border_color=color.new(wfProfitColor, 35), bgcolor=color.new(wfProfitColor, 88), force_overlay=true))
+            wfLabels.push(label.new(entered, entry, (side == 1 ? "多" : "空") + txPriceText(entry, wfShowPrices), xloc=xloc.bar_time,
+                 style=label.style_label_right, color=color.new(chart.bg_color, 15), textcolor=chart.fg_color, size=size.tiny, tooltip=tip, force_overlay=true))
+            wfLabels.push(label.new(finish, best, outcome + " " + str.tostring(peak / risk, "#.##") + "R · " + str.tostring(peak / entry * 100, "#.###") + "%" + txPriceText(best, wfShowPrices),
+                 xloc=xloc.bar_time, style=label.style_label_left, color=color.new(wfProfitColor, 20), textcolor=color.white, size=size.tiny, tooltip=tip, force_overlay=true))
+            wfLabels.push(label.new(finish, stop, (reason == 1 ? "已触止损" : "初始止损") + txPriceText(stop, wfShowPrices), xloc=xloc.bar_time,
+                 style=label.style_label_left, color=color.new(wfRiskColor, 20), textcolor=color.white, size=size.tiny, tooltip=tip, force_overlay=true))
+        wfDrawn := signature
+    wfShown := selected.size()
+    if wfEnabled and not na(wf)
+        table.cell(wfInfo, 0, 0, "15m局部极值 · " + str.tostring(wfShown) + "/" + str.tostring(wfVisible) + "框 · 复盘回标", text_color=wfProfitColor, bgcolor=color.new(chart.bg_color, 12), text_size=size.tiny)
+        string coverage = "数据 " + str.format_time(wf.sourceStart, "MM-dd HH:mm", "Asia/Shanghai") + " 起（UTC+8）"
+        coverage += wfVisible > wfKeep ? " · 请放大查看其他框" : ""
+        coverage += txVisibleLeft < wf.sourceStart ? " · 更早无5m数据" : ""
+        table.cell(wfInfo, 0, 1, coverage, text_color=chart.fg_color, bgcolor=color.new(chart.bg_color, 12), text_size=size.tiny)
+    else
+        table.clear(wfInfo, 0, 0, 0, 1)
+
+// === V2.16 independent hollow circles =====================================
+// The same admitted ledger owns both displays; toggles never alter signals.
+// A hollow text glyph stays round under chart zoom, unlike time/price ellipses.
+// Reserve one label per circle before allocating Monday/Fib history labels.
+// Source: https://www.tradingview.com/pine-script-docs/visuals/text-and-shapes/
+var array<label> wfCircles = array.new<label>()
+var string wfCirclesDrawn = ""
+int wfCircleMargin = math.max(900000, int((txVisibleRight - txVisibleLeft) * 0.03))
+if barstate.islast or barstate.islastconfirmedhistory
+    array<string> marks = array.new<string>()
+    if wfCirclesEnabled and not na(wf) and not na(txVisibleEnd)
+        for row in wf.rows
+            array<string> f = str.split(row, ",")
+            int signalAt = int(str.tonumber(f.get(1)))
+            if signalAt + wfCircleMargin >= txVisibleLeft and signalAt - wfCircleMargin < txVisibleEnd
+                marks.push(f.get(1) + "," + f.get(3) + "," + f.get(10))
+                if marks.size() > wfKeep
+                    marks.shift()
+    string signature = array.join(marks, ";")
+    if signature != wfCirclesDrawn
+        for item in wfCircles
+            item.delete()
+        wfCircles.clear()
+        for row in marks
+            array<string> f = str.split(row, ",")
+            int at = int(str.tonumber(f.get(0)))
+            int side = int(str.tonumber(f.get(1)))
+            float price = str.tonumber(f.get(2))
+            wfCircles.push(label.new(at, price, "◯", xloc=xloc.bar_time, yloc=yloc.price,
+                 style=label.style_label_center, color=color.new(color.black, 100),
+                 textcolor=side == 1 ? #39F340 : #FF0000, size=64,
+                 textalign=text.align_center, force_overlay=true))
+        wfCirclesDrawn := signature

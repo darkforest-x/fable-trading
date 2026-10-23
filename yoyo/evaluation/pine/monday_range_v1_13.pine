@@ -1,0 +1,81 @@
+//@version=6
+// Lines-only edition; every loaded Monday is retained. Prior versions preserved.
+// Reuses the viewport drawing policy of monday_range_v2_13.pine.
+// Uses chart OHLC/time only: Monday extrema update live, then stay fixed.
+// Intraday uses the selected timezone; daily uses the exchange trading day.
+// Rays begin at each extremum's bar; old weeks end before the next Monday.
+// Time coordinates avoid the bar-index distance limit on small timeframes.
+// https://www.tradingview.com/pine-script-docs/visuals/lines-and-boxes/
+indicator("周一高低点 · 极简 v1.13", shorttitle="Monday HL v1.13", overlay=true, max_lines_count=500)
+
+string tzOpt = input.string("America/New_York", "周一时区",
+     options=["America/New_York", "UTC", "Asia/Shanghai", "交易所时区"])
+color highCol = input.color(#F23645, "高点线")
+color lowCol = input.color(#2962FF, "低点线")
+int lineWidth = input.int(1, "线宽", minval=1, maxval=4)
+
+if barstate.isfirst and timeframe.in_seconds() > 86400
+    runtime.error("请在日线或更低周期使用。")
+
+string tz = timeframe.isdaily or tzOpt == "交易所时区" ? syminfo.timezone : tzOpt
+bool isMonday = dayofweek(time, tz) == dayofweek.monday
+int dateKey = year(time, tz) * 10000 + month(time, tz) * 100 + dayofmonth(time, tz)
+bool newMonday = isMonday and (not isMonday[1] or dateKey != dateKey[1])
+
+// Historical records are never pruned. Only drawing handles are recycled.
+type MondayRange
+    int startAt
+    int highAt
+    int lowAt
+    int endAt
+    float hi
+    float lo
+    bool closed
+
+var array<MondayRange> history = array.new<MondayRange>()
+var array<line> drawnLines = array.new<line>()
+
+if newMonday
+    if history.size() > 0
+        MondayRange previous = history.last()
+        previous.endAt := time[1]
+        previous.closed := true
+    history.push(MondayRange.new(time, time, time, time_close, high, low, false))
+else if isMonday and history.size() > 0
+    MondayRange current = history.last()
+    if high > current.hi
+        current.hi := high
+        current.highAt := time
+    if low < current.lo
+        current.lo := low
+        current.lowAt := time
+
+if history.size() > 0
+    MondayRange current = history.last()
+    current.endAt := time_close
+
+// These variables make Pine recalculate when the chart is panned or zoomed.
+int visibleLeft = chart.left_visible_bar_time
+int visibleRight = chart.right_visible_bar_time
+int visibleWeeks = 0
+int drawnWeeks = 0
+if barstate.islast
+    for item in drawnLines
+        item.delete()
+    drawnLines.clear()
+    if history.size() > 0
+        for offset = 0 to history.size() - 1
+            MondayRange r = history.get(history.size() - 1 - offset)
+            if r.startAt <= visibleRight and r.endAt >= visibleLeft
+                visibleWeeks += 1
+                // Pine allows 500 simultaneous line objects. Older records
+                // remain intact and become visible again when panning left.
+                if drawnWeeks < 250
+                    string rayExtend = r.closed ? extend.none : extend.right
+                    drawnLines.push(line.new(r.highAt, r.hi, r.endAt, r.hi,
+                         xloc=xloc.bar_time, extend=rayExtend, color=highCol, width=lineWidth))
+                    drawnLines.push(line.new(r.lowAt, r.lo, r.endAt, r.lo,
+                         xloc=xloc.bar_time, extend=rayExtend, color=lowCol, width=lineWidth))
+                    drawnWeeks += 1
+    if visibleWeeks > drawnWeeks
+        log.warning("全部历史已保留；当前画面超过250周，请放大或拖动图表查看较早区间。")

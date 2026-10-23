@@ -13,7 +13,7 @@ import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 from threading import Lock
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from pydantic import BaseModel, ConfigDict, Field
@@ -28,6 +28,7 @@ from .manual_ma import MovingAverages, envelope_stop
 from .engine import one
 from .manual_inventory import policy
 from .manual_queue import Queue, ReadLedger
+from .manual_commands import Commands
 from .manual_readiness import EntryBlocked, entry_status
 from .manual_source import detection_context
 from .preview_reads import PooledOpener, ReadPacer, preview_engine
@@ -47,6 +48,16 @@ class Preview(BaseModel):
 class Confirmation(BaseModel):
     model_config = ConfigDict(extra="forbid")
     acknowledgement: str = Field(pattern=r"^CONFIRM-LIVE-ORDER$")
+
+
+class ClosePreview(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    lot_id: str = Field(pattern=r"^[a-f0-9]{32}$")
+
+
+class CloseConfirmation(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    acknowledgement: Literal["CONFIRM-LIVE-CLOSE"]
 
 
 def guard(request: Request, response: Response):
@@ -136,6 +147,38 @@ class Service:
 
     def readiness(self):
         return entry_status(ReadLedger(self.runtime), self.clock(), worker_lock(self.runtime))
+
+    def close_ready(self):
+        """Management needs a live consumer, independently of new-entry gates."""
+        store = self.engine().store
+        if (store.meta("management_revision") != "owner-management-20261018-v1"
+                or not 0 <= self.clock()-int(store.meta("heartbeat_ms") or 0) < 60_000
+                or not worker_lock(self.runtime)):
+            raise ValueError("实盘管理服务尚未就绪，请稍后核对执行服务")
+
+    @staticmethod
+    def close_view(value):
+        return dict({k: v for k, v in value.items() if k != "account_uid"}, account_scope="yolo_manual")
+
+    def close_preview(self, payload):
+        self.close_ready()
+        # The shared queue is consumed only by the existing locked worker.
+        return self.close_view(Commands(self.runtime).preview(self.engine(), payload.lot_id, "close"))
+
+    def close_status(self, identity):
+        value = Commands(self.runtime).get(identity)
+        if value["action"] != "close":
+            raise ValueError("不是平仓操作")
+        if value["state"] == "preview" and self.clock() >= value["expires_ms"]:
+            value = dict(value, state="expired")
+        return self.close_view(value)
+
+    def close_confirm(self, identity):
+        previous = self.close_status(identity)
+        if previous["state"] in {"confirmed", "processing", "done", "unknown"}:
+            return previous  # Lost response: return the same persisted intent.
+        self.close_ready()
+        return self.close_view(Commands(self.runtime).confirm(identity, self.clock()))
 
     def preview(self, payload):
         key = (payload.job_id, payload.symbol, payload.detection_id)
@@ -253,6 +296,18 @@ def install(app, book, *, service=None):
     @router.post("/preview")
     def preview(payload: Preview):
         return call(service.preview, payload)
+
+    @router.post("/close/preview")
+    def close_preview(payload: ClosePreview):
+        return call(service.close_preview, payload)
+
+    @router.post("/close/{identity}/confirm")
+    def close_confirm(identity: str, payload: CloseConfirmation):
+        return call(service.close_confirm, identity)
+
+    @router.get("/close/{identity}")
+    def close_status(identity: str):
+        return call(service.close_status, identity)
 
     @router.post("/reference")
     def reference(payload: Preview):

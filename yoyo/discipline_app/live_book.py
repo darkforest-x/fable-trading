@@ -740,6 +740,7 @@ class LiveBook(ManagedOrders, Book):
 
     def statistics(self, days=30):
         from .statistics import summarize
+        from .statistics_basis import confirmed_amount
         if type(days) is not int or days not in (0,7,30):
             raise Rejected('统计区间无效')
         with self.read_transaction() as (db,state):
@@ -747,7 +748,15 @@ class LiveBook(ManagedOrders, Book):
             result['mode']=self.mode
             result['scope']='app_managed_trades'
             result['account_updated_at']=state['private_at']
-            result['account'].update(initial_equity=None,net_pnl=None,return_fraction=None)
+            # Only a separately confirmed fixed basis can supply the denominator.
+            # Current equity/cash and daily risk baselines must never substitute.
+            net = self.managed_pnl(state)
+            basis = confirmed_amount(state)
+            result['account'].update(
+                initial_equity=str(basis) if basis is not None else None,
+                net_pnl=str(net),
+                return_fraction=str(net/basis) if basis is not None else None,
+                return_method='app_managed_fixed_capital' if basis is not None else None)
             result['account']['unrealized_pnl'] = str(sum((self.position_pnl(state, p)-dec(p['pnl']) for p in state['positions']), Decimal(0)))
             result['market_fresh']=not state['private_error'] and 0<=self.clock()-state['private_at']<=15
             start=self.clock()-days*86400 if days else 0
@@ -761,7 +770,7 @@ class LiveBook(ManagedOrders, Book):
         # its write lock or create a new ledger revision on every phone poll.
         with self.read_transaction() as (_, state):
             result=self.render_snapshot(state)
-        for field in ('intents','previews','account_reference','close_commands','close_fractions','close_abandoned'):
+        for field in ('intents','previews','account_reference','close_commands','close_fractions','close_abandoned','statistics_return_basis'):
             result.pop(field,None)
         return result
 

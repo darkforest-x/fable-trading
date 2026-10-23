@@ -1,0 +1,1887 @@
+{
+  "artifacts": {
+    "crosssection_eval.json": "8fa0666d2163aee46cb33cb2ba8724d100d2f8b3eb9e7df457467ccb5909abc4",
+    "prereg.json": "7eb0d307621f80d0594b7da209b46b97ac5bd61bd2008bbe20c76ab885e6c824"
+  },
+  "candidate_input": {
+    "candidate_symbols": [
+      "PIEVERSE_USDT_SWAP",
+      "SHIB_USDT_SWAP",
+      "SUI_USDT_SWAP"
+    ],
+    "imgsz": 960,
+    "l1_selected_interval_rows": 1419,
+    "label_end_cropped": 0,
+    "optimization_export": {
+      "inner_end_exclusive": "2026-03-31T07:30:00+00:00",
+      "max_horizon": 72,
+      "min_score": 0.25,
+      "min_score_semantics": "preregistered parameter-grid minimum threshold; does not affect inference or baseline/candidate trade output; Gold is retained",
+      "purge_region_exported": false,
+      "safe_last_decision_time": "2026-05-03T05:45:00+00:00",
+      "sealed_end_exclusive": "2026-05-04T00:00:00+00:00",
+      "sealed_start_inclusive": "2026-04-02T00:00:00+00:00",
+      "selection_algorithm": "interval-max-horizon-label-crop, then per-threshold filter, symbol/decision/event sort, MIN_GAP_BARS=18 earliest dedup, threshold union, then force-include Gold exposure",
+      "thresholds": [
+        0.25
+      ]
+    },
+    "path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r5_l2_confirm3_v1/optimization_inner.jsonl",
+    "renderer": "yoyo.datasets.legacy_gold_migration.renderer.render_w10",
+    "rows": 1419,
+    "sampled_symbols": [
+      "PIEVERSE_USDT_SWAP",
+      "SHIB_USDT_SWAP",
+      "SUI_USDT_SWAP"
+    ],
+    "sha256": "f73bb5d208e91e6de2aaa8b4b77a9d23a8f53a2acc7bc1dd22a827f2176d5ea6",
+    "summary_path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r5_l2_confirm3_v1/summary.json",
+    "summary_sha256": "3dec0be3e0e751b2ad24067cc4c9ec6eb0f869b81cdb09a8c84bf033ef1b6748",
+    "transform": "white_letterbox_full_frame",
+    "weights_path": "/Users/zhangzc/fable-trading/runs/classify/fixed_w10_gold500_short_ownerhn_v1_cls_local_mps_b8_fg/weights/best.pt",
+    "weights_sha256": "f953797c58c0551ae6bafec7bf37d302d35ba3b2e0eb694ab0c8278fff265fce"
+  },
+  "confirmation_candidate_symbols": [
+    "PIEVERSE_USDT_SWAP",
+    "SHIB_USDT_SWAP",
+    "SUI_USDT_SWAP"
+  ],
+  "feature_columns": [
+    "ma_spread_pct",
+    "full_spread",
+    "fast_slow_gap",
+    "full_ratio_min48",
+    "spread_mean8",
+    "spread_mean24",
+    "spread_chg8",
+    "spread_chg24",
+    "spread_pos96",
+    "dense_run_len",
+    "dense_frac48",
+    "ext_up",
+    "close_vs_ema55",
+    "close_vs_ema200",
+    "order_score",
+    "slow_slope_12",
+    "volume_ratio",
+    "volume_z",
+    "vol_ratio_mean8",
+    "atr_pct",
+    "atr_pct_ratio96",
+    "pre_range48",
+    "pre_range168",
+    "drawdown24",
+    "ret_4",
+    "ret_12",
+    "ret_24",
+    "ret_48"
+  ],
+  "feature_semantics": "side_aligned_v1",
+  "frozen_gate": {
+    "artifacts": {
+      "calibration_results.json": "5a306d9acefbe3ddf2bd97b93b1c3c5afb3d7761a287eab341aba74df904ba31",
+      "dataset.csv": "6890f4becbaa4e1b515eac950d060570d0707a133d7319c852a592ef920ae20f",
+      "dataset_manifest.json": "798a488cb9e97b39532bf9021f6e2cfdea8f20906528651416867bce6816b4c4",
+      "feature_importance.csv": "4c2c26047c8930b22e2c4977f99353d839cd9a8cea59b6cc2b4e153db1352bb2",
+      "model.txt": "c7fdd4f48ca5ee7ffd378d5c3f33a5194db6d1bc860119260a2a35bbeab851c2",
+      "prereg.json": "759e416bf1878dd8fc2be21802e2ee4f33ea745d5ce2350b1f2a58678d6a0844",
+      "selection.json": "7ce164304fd77a18b327e186e8e381ed77abf6dbfc6aa036bf0c85c5ee43751c",
+      "test_eval.json": "d8c3a83095f073522e2686ffc77f58d095db99bf6d3c25c39bc3c4c811d6f5a5"
+    },
+    "directory": "/Users/zhangzc/fable-trading/experiments/fixed_w10_evolution_r5_l2_data_expansion_inner12_v1",
+    "frozen_l1_protocol": {
+      "imgsz": 960,
+      "renderer": "yoyo.datasets.legacy_gold_migration.renderer.render_w10",
+      "transform": "white_letterbox_full_frame",
+      "weights_sha256": "f953797c58c0551ae6bafec7bf37d302d35ba3b2e0eb694ab0c8278fff265fce"
+    },
+    "frozen_seen_symbols": [
+      "AERO_USDT_SWAP",
+      "DASH_USDT_SWAP",
+      "EGLD_USDT_SWAP",
+      "GMT_USDT_SWAP",
+      "GPS_USDT_SWAP",
+      "HBAR_USDT_SWAP",
+      "IOTA_USDT_SWAP",
+      "JUP_USDT_SWAP",
+      "MORPHO_USDT_SWAP",
+      "ONE_USDT_SWAP",
+      "ZK_USDT_SWAP",
+      "ZRO_USDT_SWAP"
+    ],
+    "gate_candidate_symbols": [
+      "AERO_USDT_SWAP",
+      "DASH_USDT_SWAP",
+      "EGLD_USDT_SWAP",
+      "GMT_USDT_SWAP",
+      "GPS_USDT_SWAP",
+      "HBAR_USDT_SWAP",
+      "IOTA_USDT_SWAP",
+      "JUP_USDT_SWAP",
+      "MORPHO_USDT_SWAP",
+      "ONE_USDT_SWAP",
+      "ZK_USDT_SWAP",
+      "ZRO_USDT_SWAP"
+    ],
+    "gate_protocol": "l2_data_expansion_round_v1",
+    "inherited_parent_seen_symbols": [
+      "DASH_USDT_SWAP",
+      "EGLD_USDT_SWAP",
+      "GMT_USDT_SWAP",
+      "GPS_USDT_SWAP",
+      "HBAR_USDT_SWAP",
+      "IOTA_USDT_SWAP",
+      "ONE_USDT_SWAP",
+      "ZK_USDT_SWAP",
+      "ZRO_USDT_SWAP"
+    ],
+    "lineage_sha256": "5de01132ce9b3bdf80da6c17f8742c4e68ee043bf37baed2a2292ec5980f2e76",
+    "parent_gate": {
+      "artifacts": {
+        "calibration_results.json": "1e468caf72434ceb348fc312151b882cb2fcfc34357ea659b407fe668487d817",
+        "feature_importance.csv": "8cc3305e28c789649bcc1d40bdd67ebb0097caa0d6e9680d853ce069fdd57c9b",
+        "model.txt": "18230e31a44a011fa4b4b30b7ef50a239f54db5a0948bc7d44842eed9a9e050b",
+        "prereg.json": "3ac0d13fce7141ff879ab97402aaab921e6cc34a5b2607fbc71a3daa2e4ff272",
+        "selection.json": "1470082283f7c77a7fd3ed6400c34d8c74db91fda74e218c3cc196dfead62516",
+        "test_eval.json": "13dcc4ee4269492abaddede303383b47accd83bcf6b1a91b68be33a27464129e"
+      },
+      "candidate_input": {
+        "candidates_path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r3_inner9_merged/candidates.jsonl",
+        "candidates_sha256": "0091de6d9fd9b288d72493cf4494a07a31733b1c2ae00731b2ebf336d5059bd5",
+        "prereg_path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r3_inner9_l1_pool_threshold/prereg.json",
+        "prereg_sha256": "6ae480eb8662a055bfe05a3fc730f85c7d34f4d17b1800ce85f784fb2f289189",
+        "selection_path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r3_inner9_l1_pool_threshold/config_selection.json",
+        "selection_sha256": "7dace665af43e9b55597dca6ffb104fcd6ccb7612cabc2d2f1356378327527d9"
+      },
+      "directory": "/Users/zhangzc/fable-trading/experiments/fixed_w10_evolution_r3_l2_walkforward_inner9_v2_lineagefix",
+      "frozen_l1_protocol": {
+        "imgsz": 960,
+        "renderer": "yoyo.datasets.legacy_gold_migration.renderer.render_w10",
+        "transform": "white_letterbox_full_frame",
+        "weights_sha256": "f953797c58c0551ae6bafec7bf37d302d35ba3b2e0eb694ab0c8278fff265fce"
+      },
+      "frozen_seen_symbols": [
+        "DASH_USDT_SWAP",
+        "EGLD_USDT_SWAP",
+        "GMT_USDT_SWAP",
+        "GPS_USDT_SWAP",
+        "HBAR_USDT_SWAP",
+        "IOTA_USDT_SWAP",
+        "ONE_USDT_SWAP",
+        "ZK_USDT_SWAP",
+        "ZRO_USDT_SWAP"
+      ],
+      "gate_candidate_symbols": [
+        "DASH_USDT_SWAP",
+        "EGLD_USDT_SWAP",
+        "GMT_USDT_SWAP",
+        "GPS_USDT_SWAP",
+        "HBAR_USDT_SWAP",
+        "IOTA_USDT_SWAP",
+        "ONE_USDT_SWAP",
+        "ZK_USDT_SWAP",
+        "ZRO_USDT_SWAP"
+      ],
+      "gate_protocol": "l2_walkforward_gate_v1",
+      "lineage_sha256": "1a5a9e86d1c1cd896a60001c7f4c226cb5eb6e76065688086d722bed2e34e3c2",
+      "training_dataset_path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r3_l2_pool_dataset_inner9_v1/dataset.csv",
+      "training_dataset_sha256": "8076bec595ccc92ba6b959941f09d0c93529b96e388230c41becf8593a1d2756",
+      "training_dataset_symbols": [
+        "DASH_USDT_SWAP",
+        "EGLD_USDT_SWAP",
+        "GMT_USDT_SWAP",
+        "GPS_USDT_SWAP",
+        "HBAR_USDT_SWAP",
+        "IOTA_USDT_SWAP",
+        "ONE_USDT_SWAP",
+        "ZK_USDT_SWAP",
+        "ZRO_USDT_SWAP"
+      ],
+      "training_manifest_path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r3_l2_pool_dataset_inner9_v1/manifest.json",
+      "training_manifest_sha256": "c7685a2d85e1ec46b33f8c5e60b5729132d1f2ae4b13f0cb3d8176afdd8bf329"
+    },
+    "source_symbols": [
+      "AERO_USDT_SWAP",
+      "DASH_USDT_SWAP",
+      "EGLD_USDT_SWAP",
+      "GMT_USDT_SWAP",
+      "GPS_USDT_SWAP",
+      "HBAR_USDT_SWAP",
+      "IOTA_USDT_SWAP",
+      "JUP_USDT_SWAP",
+      "MORPHO_USDT_SWAP",
+      "ONE_USDT_SWAP",
+      "ZK_USDT_SWAP",
+      "ZRO_USDT_SWAP"
+    ],
+    "sources": [
+      {
+        "candidate_symbols": [
+          "HBAR_USDT_SWAP",
+          "ONE_USDT_SWAP",
+          "ZK_USDT_SWAP"
+        ],
+        "imgsz": 960,
+        "l1_selected_interval_rows": 1407,
+        "label_end_cropped": 0,
+        "optimization_export": {
+          "inner_end_exclusive": "2026-03-31T07:30:00+00:00",
+          "max_horizon": 144,
+          "min_score": 0.2,
+          "min_score_semantics": "preregistered parameter-grid minimum threshold; does not affect inference or baseline/candidate trade output; Gold is retained",
+          "purge_region_exported": false,
+          "safe_last_decision_time": "2026-05-02T11:45:00+00:00",
+          "sealed_end_exclusive": "2026-05-04T00:00:00+00:00",
+          "sealed_start_inclusive": "2026-04-02T00:00:00+00:00",
+          "selection_algorithm": "interval-max-horizon-label-crop, then per-threshold filter, symbol/decision/event sort, MIN_GAP_BARS=18 earliest dedup, threshold union, then force-include Gold exposure",
+          "thresholds": [
+            0.2,
+            0.25,
+            0.3,
+            0.35,
+            0.4,
+            0.45,
+            0.5,
+            0.55,
+            0.6
+          ]
+        },
+        "path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r1_inner_pilot3_v2/optimization_inner.jsonl",
+        "renderer": "yoyo.datasets.legacy_gold_migration.renderer.render_w10",
+        "rows": 3775,
+        "sampled_symbols": [
+          "HBAR_USDT_SWAP",
+          "ONE_USDT_SWAP",
+          "ZK_USDT_SWAP"
+        ],
+        "sha256": "d601b9c3e207346b3900dd1cc8794d2800a0e777a4e12cd3b36b44c6ab0661b5",
+        "source_index": 0,
+        "summary_path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r1_inner_pilot3_v2/summary.json",
+        "summary_sha256": "13998be4fc745f563be312c8403444eaca632987b2f8c625e3474f7e85cc9e1f",
+        "transform": "white_letterbox_full_frame",
+        "weights_path": "/Users/zhangzc/fable-trading/runs/classify/fixed_w10_gold500_short_ownerhn_v1_cls_local_mps_b8_fg/weights/best.pt",
+        "weights_sha256": "f953797c58c0551ae6bafec7bf37d302d35ba3b2e0eb694ab0c8278fff265fce"
+      },
+      {
+        "candidate_symbols": [
+          "DASH_USDT_SWAP",
+          "EGLD_USDT_SWAP",
+          "GPS_USDT_SWAP"
+        ],
+        "imgsz": 960,
+        "l1_selected_interval_rows": 1407,
+        "label_end_cropped": 0,
+        "optimization_export": {
+          "inner_end_exclusive": "2026-03-31T07:30:00+00:00",
+          "max_horizon": 144,
+          "min_score": 0.2,
+          "min_score_semantics": "preregistered parameter-grid minimum threshold; does not affect inference or baseline/candidate trade output; Gold is retained",
+          "purge_region_exported": false,
+          "safe_last_decision_time": "2026-05-02T11:45:00+00:00",
+          "sealed_end_exclusive": "2026-05-04T00:00:00+00:00",
+          "sealed_start_inclusive": "2026-04-02T00:00:00+00:00",
+          "selection_algorithm": "interval-max-horizon-label-crop, then per-threshold filter, symbol/decision/event sort, MIN_GAP_BARS=18 earliest dedup, threshold union, then force-include Gold exposure",
+          "thresholds": [
+            0.2,
+            0.25,
+            0.3,
+            0.35,
+            0.4,
+            0.45,
+            0.5,
+            0.55,
+            0.6
+          ]
+        },
+        "path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r1_inner_confirm3_v1/optimization_inner.jsonl",
+        "renderer": "yoyo.datasets.legacy_gold_migration.renderer.render_w10",
+        "rows": 4073,
+        "sampled_symbols": [
+          "DASH_USDT_SWAP",
+          "EGLD_USDT_SWAP",
+          "GPS_USDT_SWAP"
+        ],
+        "sha256": "70cc087654402735ccbe90e61163b301763d821a1cbe502fa95c0f87c7558854",
+        "source_index": 1,
+        "summary_path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r1_inner_confirm3_v1/summary.json",
+        "summary_sha256": "45873fb5760fbcfa388221d6d20a9ff2e15ae25e91a36cd64d3122ea3df29d06",
+        "transform": "white_letterbox_full_frame",
+        "weights_path": "/Users/zhangzc/fable-trading/runs/classify/fixed_w10_gold500_short_ownerhn_v1_cls_local_mps_b8_fg/weights/best.pt",
+        "weights_sha256": "f953797c58c0551ae6bafec7bf37d302d35ba3b2e0eb694ab0c8278fff265fce"
+      },
+      {
+        "candidate_symbols": [
+          "GMT_USDT_SWAP",
+          "IOTA_USDT_SWAP",
+          "ZRO_USDT_SWAP"
+        ],
+        "imgsz": 960,
+        "l1_selected_interval_rows": 1407,
+        "label_end_cropped": 0,
+        "optimization_export": {
+          "inner_end_exclusive": "2026-03-31T07:30:00+00:00",
+          "max_horizon": 144,
+          "min_score": 0.2,
+          "min_score_semantics": "preregistered parameter-grid minimum threshold; does not affect inference or baseline/candidate trade output; Gold is retained",
+          "purge_region_exported": false,
+          "safe_last_decision_time": "2026-05-02T11:45:00+00:00",
+          "sealed_end_exclusive": "2026-05-04T00:00:00+00:00",
+          "sealed_start_inclusive": "2026-04-02T00:00:00+00:00",
+          "selection_algorithm": "interval-max-horizon-label-crop, then per-threshold filter, symbol/decision/event sort, MIN_GAP_BARS=18 earliest dedup, threshold union, then force-include Gold exposure",
+          "thresholds": [
+            0.2,
+            0.25,
+            0.3,
+            0.35,
+            0.4,
+            0.45,
+            0.5,
+            0.55,
+            0.6
+          ]
+        },
+        "path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r2_inner_confirm3_v1/optimization_inner.jsonl",
+        "renderer": "yoyo.datasets.legacy_gold_migration.renderer.render_w10",
+        "rows": 3990,
+        "sampled_symbols": [
+          "GMT_USDT_SWAP",
+          "IOTA_USDT_SWAP",
+          "ZRO_USDT_SWAP"
+        ],
+        "sha256": "a035e989d0d2cb5068349fe1216527250abea4c55660fd0371642501f24002b8",
+        "source_index": 2,
+        "summary_path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r2_inner_confirm3_v1/summary.json",
+        "summary_sha256": "b6518432b7dfb397399df5458fb9fc0f26a8d3afa4b2fdf2f2687f07fdf94df3",
+        "transform": "white_letterbox_full_frame",
+        "weights_path": "/Users/zhangzc/fable-trading/runs/classify/fixed_w10_gold500_short_ownerhn_v1_cls_local_mps_b8_fg/weights/best.pt",
+        "weights_sha256": "f953797c58c0551ae6bafec7bf37d302d35ba3b2e0eb694ab0c8278fff265fce"
+      },
+      {
+        "candidate_symbols": [
+          "AERO_USDT_SWAP",
+          "JUP_USDT_SWAP",
+          "MORPHO_USDT_SWAP"
+        ],
+        "imgsz": 960,
+        "l1_selected_interval_rows": 1419,
+        "label_end_cropped": 0,
+        "optimization_export": {
+          "inner_end_exclusive": "2026-03-31T07:30:00+00:00",
+          "max_horizon": 72,
+          "min_score": 0.25,
+          "min_score_semantics": "preregistered parameter-grid minimum threshold; does not affect inference or baseline/candidate trade output; Gold is retained",
+          "purge_region_exported": false,
+          "safe_last_decision_time": "2026-05-03T05:45:00+00:00",
+          "sealed_end_exclusive": "2026-05-04T00:00:00+00:00",
+          "sealed_start_inclusive": "2026-04-02T00:00:00+00:00",
+          "selection_algorithm": "interval-max-horizon-label-crop, then per-threshold filter, symbol/decision/event sort, MIN_GAP_BARS=18 earliest dedup, threshold union, then force-include Gold exposure",
+          "thresholds": [
+            0.25
+          ]
+        },
+        "path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r4_l2_confirm3_v1/optimization_inner.jsonl",
+        "renderer": "yoyo.datasets.legacy_gold_migration.renderer.render_w10",
+        "rows": 1419,
+        "sampled_symbols": [
+          "AERO_USDT_SWAP",
+          "JUP_USDT_SWAP",
+          "MORPHO_USDT_SWAP"
+        ],
+        "sha256": "49463da5e187fde18796e9f819618bb4a313411efb17e1847181e469cefbc3bd",
+        "source_index": 3,
+        "summary_path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r4_l2_confirm3_v1/summary.json",
+        "summary_sha256": "eeefff9371064622207a528bbac1dfb39d6d42ef7a386772ee47811735c0ab6e",
+        "transform": "white_letterbox_full_frame",
+        "weights_path": "/Users/zhangzc/fable-trading/runs/classify/fixed_w10_gold500_short_ownerhn_v1_cls_local_mps_b8_fg/weights/best.pt",
+        "weights_sha256": "f953797c58c0551ae6bafec7bf37d302d35ba3b2e0eb694ab0c8278fff265fce"
+      }
+    ],
+    "training_dataset_path": "/Users/zhangzc/fable-trading/experiments/fixed_w10_evolution_r5_l2_data_expansion_inner12_v1/dataset.csv",
+    "training_dataset_sha256": "6890f4becbaa4e1b515eac950d060570d0707a133d7319c852a592ef920ae20f",
+    "training_dataset_symbols": [
+      "AERO_USDT_SWAP",
+      "DASH_USDT_SWAP",
+      "EGLD_USDT_SWAP",
+      "GMT_USDT_SWAP",
+      "GPS_USDT_SWAP",
+      "HBAR_USDT_SWAP",
+      "IOTA_USDT_SWAP",
+      "JUP_USDT_SWAP",
+      "MORPHO_USDT_SWAP",
+      "ONE_USDT_SWAP",
+      "ZK_USDT_SWAP",
+      "ZRO_USDT_SWAP"
+    ],
+    "training_manifest_path": "/Users/zhangzc/fable-trading/experiments/fixed_w10_evolution_r5_l2_data_expansion_inner12_v1/dataset_manifest.json",
+    "training_manifest_sha256": "798a488cb9e97b39532bf9021f6e2cfdea8f20906528651416867bce6816b4c4"
+  },
+  "frozen_seen_symbols": [
+    "AERO_USDT_SWAP",
+    "DASH_USDT_SWAP",
+    "EGLD_USDT_SWAP",
+    "GMT_USDT_SWAP",
+    "GPS_USDT_SWAP",
+    "HBAR_USDT_SWAP",
+    "IOTA_USDT_SWAP",
+    "JUP_USDT_SWAP",
+    "MORPHO_USDT_SWAP",
+    "ONE_USDT_SWAP",
+    "ZK_USDT_SWAP",
+    "ZRO_USDT_SWAP"
+  ],
+  "gate_candidate_symbols": [
+    "AERO_USDT_SWAP",
+    "DASH_USDT_SWAP",
+    "EGLD_USDT_SWAP",
+    "GMT_USDT_SWAP",
+    "GPS_USDT_SWAP",
+    "HBAR_USDT_SWAP",
+    "IOTA_USDT_SWAP",
+    "JUP_USDT_SWAP",
+    "MORPHO_USDT_SWAP",
+    "ONE_USDT_SWAP",
+    "ZK_USDT_SWAP",
+    "ZRO_USDT_SWAP"
+  ],
+  "protocol": "frozen_l2_crosssection_v1",
+  "safety": {
+    "auto_promote": false,
+    "future_rows_in_features": 0,
+    "holdout_rows_read": 0,
+    "model_deployable": false,
+    "orders": false,
+    "purge_rows_read": 0,
+    "sealed_read": false,
+    "selection_or_training_performed": false
+  },
+  "schema_version": 1,
+  "side": "short",
+  "snapshot": {
+    "directory": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r1_inner_snapshot_v1/kline_snapshot",
+    "files": [
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "0G_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "cea945f4c82f0d420c2373a92be90e58cc20d6593d249c5eb4ecf42231a3af97",
+        "symbol": "0G_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "1INCH_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "a17dcaca5772d8fd6a36115651116cad4902099308df887aa7d1a907be33e508",
+        "symbol": "1INCH_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "2Z_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "b0e45bfc8972dab57cdcc71e96dac6d50bf826ea43521fe687531cb06a03db6a",
+        "symbol": "2Z_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "AAVE_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "bb325d7349186a63ad3c6688e33e5b7b5af0e4e5ba62b625e4c1330412819967",
+        "symbol": "AAVE_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ACH_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "e5231342f4c701ff72decd07e32c6b9c15bcde3fd25594855574ca86d8b9b6be",
+        "symbol": "ACH_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ADA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "f7b0460a0cbf55f7870412136faa44fcbf3b8c2fadd2fb8207fc5afb296849b9",
+        "symbol": "ADA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "AERO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "3bfc48fc422b39c8e8fe10491c0bbcc5a5259af0b8abbaed4a4f8dca464554f3",
+        "symbol": "AERO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "AEVO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "5a487e60a6248ed4f3e8116d5baa611e114087e5f8cf73f20e124cacd1d768d0",
+        "symbol": "AEVO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "AGLD_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "91274190dfd1a5a4e529577c41e5699ab65701836fa7fef954a32aba8d814555",
+        "symbol": "AGLD_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "AIXBT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "008ae183c246e181fd56a68c71830dc58118ad1b06ef4000eb490c9794724d7a",
+        "symbol": "AIXBT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ALLO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "5c734c94173a482bae216d8a7dfd4688693841d92ba43f66a367163f7cf006ac",
+        "symbol": "ALLO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ANIME_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "e75a371f3517469cd863ebe9e4c83b2b51300d2d3da41bac6d5a2e79aa5251ef",
+        "symbol": "ANIME_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "APE_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "d8985c60241c9739b355d76a9b903af7f5e128edb20110323c106d8fa5556f25",
+        "symbol": "APE_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "API3_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "efc200f5a0c94efd0896837d4bf99295341ef65c945d47cd28d0d80430a72856",
+        "symbol": "API3_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "APR_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "7f981206dbe90a68f5dc58fc4bf6fd1fac3ebe15c649f2bb10e5f98215b9bdbd",
+        "symbol": "APR_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "APT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "2a38f75b1d574b6efc3efd28323af6b0b0b5a249637f9166edfd6cbba4484c41",
+        "symbol": "APT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ARB_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "6600cbf6d9d6a061032154b6948244abfebc6a312c2c979acfd5d2885c20c69e",
+        "symbol": "ARB_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ARKM_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "1ba2c6ea3b0b44c4d1a6a13e40150e5e23d40580204d6e0d25a067c32d4f8d56",
+        "symbol": "ARKM_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ASTER_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "abb94c9400d31ea8239cdb2b9c277bc98488f17fbe04feaa97fcafd75dcb74f4",
+        "symbol": "ASTER_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ATH_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "f228d49b0029fcc1410e6b696e5be3b9dee338c7d3a3b6b4821aacc948d853a7",
+        "symbol": "ATH_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ATOM_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "9805deb8f5856a569adda8bdb1c97b6591ddb43074d72d5bb54bcd35cda0342f",
+        "symbol": "ATOM_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "AT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "4e5a9d289553603f4ca6aa93c3cbe2245e317a373ec6a88c226ac0ffe1ecdfea",
+        "symbol": "AT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "AUCTION_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "a3ab6b9cfba2c1832e1fb1c4558c23f584ad63a48d02daf6ff4f6c85ae599ece",
+        "symbol": "AUCTION_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "AVAX_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "13c66559166625b2d01bdbd2b5a283686c34e6366eff2c3d1d02a553824a1bb7",
+        "symbol": "AVAX_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "AVNT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "8138177148b39df3ecc096e26363a7a7ea4ca231c0f56565b417180b574cbbc7",
+        "symbol": "AVNT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "AXS_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "bae91e0c6b3be31ac624d775a1a2042aa1ef105f91ad5b87fb509f6541b01a44",
+        "symbol": "AXS_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "A_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "57cad226867be67c984c3669726b63ca48a42eed09cc8cac4ce9bce227c6efac",
+        "symbol": "A_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "BAND_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "a6327143bc5534201fd5d78e963efe288a40fed4394223c4a10b07dfc0737ad4",
+        "symbol": "BAND_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "BARD_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "5485dadb85b306a2314695527d5879d160ec1fe7f008ee9928c7579cbb4c3120",
+        "symbol": "BARD_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "BAT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "ea43866a56221abb771af5af0e6050fdbfa2181fd6aa30824552721d54cbec7c",
+        "symbol": "BAT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "BEAT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "63de0ee3b9537441be916ec5bbc2950269649eb187c8f4e3cdef1cb380dfce44",
+        "symbol": "BEAT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "BERA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "fec346d1714decab066a70f8fa4ec0ccd7734e8a7f7ccb1492bfe2bcac31babe",
+        "symbol": "BERA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "BICO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "1c4fa5b4916fd7be316cbdf9bdffe9b8f7695e9da12413bd04f081d5e269b6b6",
+        "symbol": "BICO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "BLUR_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "da44e98e93cfc1bb01d18dcc4376ccf4722ff9249be99f5593f83490cb7775c3",
+        "symbol": "BLUR_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "BNB_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "2a7d32503a956f38ba67f9a5d829a59849519b4b03f06a83f38508683b36dab8",
+        "symbol": "BNB_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "BOME_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "53d3b472ed134366621d81ceca20d5cd7364eff277a5485c56b96ba0575d60f9",
+        "symbol": "BOME_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "BONK_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "7e067b40cb4b483180c400de42427a921058c5409069893f38be096ac6e02b28",
+        "symbol": "BONK_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "BRETT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "9036edb76475343c213ebf993fe88fca05b7b3f16a0407ea434323ad2db5f6c9",
+        "symbol": "BRETT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "CC_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "c1b10587ae0efc313c05b808021a9b6ea0c659f215b091f646128b470509cccd",
+        "symbol": "CC_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "CELO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "fcb2529ac103024074a1d9edd9074e101af76ade505710821e9072f4b01fc070",
+        "symbol": "CELO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "CFX_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "e818aea6f45cb341d1ac8c8f2f773eeeda4d2aba8c8c09bbe32d84ae4960ea82",
+        "symbol": "CFX_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "CHZ_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "67458483a6655950e7fbc853148df13ee47df00e8d5a4f8065e9f38da1d50778",
+        "symbol": "CHZ_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "COAI_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "1bab66ef87e795ed911f632e4a036d1398717b171bb140e5f996466d80d64950",
+        "symbol": "COAI_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "COMP_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "482c8d584f3692ed829b3afdf77f4c7efea316eaadd8d38951467724a26b64ee",
+        "symbol": "COMP_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "CORE_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "d86caa7a6cc4ea96640c11defa97aa672b60c20c18e7e4aab65e79629a3cad37",
+        "symbol": "CORE_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "CRO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "8c4ba31522f9d8e4eb1da48ae88e38561aed3e6922186523f46d46b665bfd026",
+        "symbol": "CRO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "CRV_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "6307f0d6fb3d8f2da3825998bc43caf26a142514425e7d4f31b575b61e7505ea",
+        "symbol": "CRV_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "DASH_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "ecec4f0065f0cfaffafb954731c057d475926f403687c8390cd685c7b7b5d2ce",
+        "symbol": "DASH_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "DOGE_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "80475e1c53f24953181e71eb511ff9fc308c59a0b52a12bddbf13464ff1cf140",
+        "symbol": "DOGE_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "DOOD_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "236a1a10b3e20694fdabe22a0794d3df73fbe07cc1f5a2261e51cd98a28fa75a",
+        "symbol": "DOOD_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "DOT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "239438dc26a934808f9b08a519f77b6e864fd6f10831f353fbb5ff9f9af4865b",
+        "symbol": "DOT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "DYDX_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "4624bc0b6b85272a321996f555317d70dacced22c8890c8ba8cfab4dbc60665e",
+        "symbol": "DYDX_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "EDEN_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "8e96565dd6328b00019520e4eb6548d33df950e452dc143c064b9efb257c79ef",
+        "symbol": "EDEN_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "EGLD_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "2bb947605cc7f70f3da968f53e1072aef4e53616c61b276a35a61f6584902d62",
+        "symbol": "EGLD_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ENA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "017c5efa91867c2023ea7698b23b43765eb5fb559db876ebef3ecb90953afd2b",
+        "symbol": "ENA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ENJ_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "7a0b15ad219b1a5f7f3f05866e616cf1c3cd7b93590b59db6f3db28b73788655",
+        "symbol": "ENJ_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ENSO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "047b5112247b41c80fd5aebf115d8381be5dde84ca71243fd7d991bdbb5af8ea",
+        "symbol": "ENSO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ENS_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "0e43867f4861569c8c103e64789a55163fce438bb7fc556fb5cff27bb4ed589e",
+        "symbol": "ENS_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ETC_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "b6fe7b357db0cf9e711a203b160b2bdad004676b880323b9d99486dc2aacb095",
+        "symbol": "ETC_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ETHFI_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "e72c6eaab8112a8ca60e4cca3bd2ea2137113ffee6ffae539973fb36c0330da1",
+        "symbol": "ETHFI_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ETH_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "ae82c3241a054d2255c9582d664445e182992a15c1cdaa55e8c2ef2aa93b36ec",
+        "symbol": "ETH_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "FARTCOIN_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "7c89d8843e4453353e5ca01d8d554236536f3fd4edbc0ccda9e18070b33939d9",
+        "symbol": "FARTCOIN_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "FIL_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "0d5eca69e2edad6478b5c5dcfb251f9f1cfded9b8c76bb725442a475cf2378ab",
+        "symbol": "FIL_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "FLOKI_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "ebf9212ef69689c9531749c4f1a23ec7fad3093ee65a80b2a7e47f7a5a279cba",
+        "symbol": "FLOKI_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "FLOW_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "c1203a547541202600c7196b31691bf6280170b1cb1fcaa2c049f73ed1a30520",
+        "symbol": "FLOW_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "GALA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "27567b041e1e60d8f88838886bc1632125f027e8a2d66a7ccb2065149ce9d39e",
+        "symbol": "GALA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "GAS_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "d5ac9cdf7f453df6031ddc14922887b2e325138f9243a09af33e14f48167c24f",
+        "symbol": "GAS_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "GIGGLE_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "1c3a2125dd4006236369d5e19fa1c29f835b8329c9c7d96bc00301ba7eb93e4a",
+        "symbol": "GIGGLE_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "GLM_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "cf25ebf37d913f7ac3114d19a7bb76024cba2ae4635e347a95c3d162c98de543",
+        "symbol": "GLM_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "GMT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "0f7e66d7c35fefaf9b9f226b04c5f954b7b307e305c27575eadaad4635e40a7e",
+        "symbol": "GMT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "GMX_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "a2960ee366f2a51f7e998341ef9a7c248c9290b97c492579126cad97cab2fefc",
+        "symbol": "GMX_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "GPS_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "adc8a25b2bf30e7668b1538486070f1614d93268fb1497d5b1eb6f4bc4636e1b",
+        "symbol": "GPS_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "GRT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "a7e31edffa67b3dcced4c99b5c3737ae4a1feb57ebe58c7b02097a233cb96060",
+        "symbol": "GRT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "HBAR_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "3b077c382db2d3f11c18c11fc114e33ccb7b33fbb32a8341f4378660952787bc",
+        "symbol": "HBAR_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "HMSTR_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "771237a59d2f28eaf8b687c6ba558cbd373338a53e7270e60380a49128738491",
+        "symbol": "HMSTR_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "HOME_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "3b1bc791a279fab1da1d7999c50d9695462985fedb036bd9dada82a6ec9cd4cc",
+        "symbol": "HOME_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "HUMA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "cd95d2391ee1f1a89e61ab06946ad7be08eace692ca24f5ad87dad0ea9643805",
+        "symbol": "HUMA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "HYPE_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "f39e001ff5a16d87c8261a30fea8a6d7cfdc9573760535ab28841720ac95e5f1",
+        "symbol": "HYPE_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "H_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "344a6e86b050841e50cd494b30997b28cf7a55c989a1855bf8fb978f5cd98036",
+        "symbol": "H_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ICP_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "c33943d4756449669fd906f07319cb06521b9e5b1c12c254667ee4015fc8fbfb",
+        "symbol": "ICP_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ICX_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "3858d9fdfdbbed82aabebd896d333ac1c45cda52f3b67bd53e6ed2bf0cedc07e",
+        "symbol": "ICX_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "INIT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "4990d30d4d7c384ad2e2781e1776042b154046746c90074f887994fda6c4cfd0",
+        "symbol": "INIT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "INJ_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "f218454dc929576098ccd17f4c08c3ac9874031b75ed4dd6dacdec70ba00e66d",
+        "symbol": "INJ_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "IOST_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "dd3a33599e429967cea5708b45dfca449898ca54c83217b82bec10c68b80c0f0",
+        "symbol": "IOST_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "IOTA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "8f481b64bed84178576e81f658782c2a5e7c4b43fb7548acc7a9b85358c3fb63",
+        "symbol": "IOTA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "JELLYJELLY_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "ea4ccb92c2ef0f33d568a7630c31f9cd0364b8f70273cd34af76cd5a7855da9d",
+        "symbol": "JELLYJELLY_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "JTO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "609151d85fce5783ff790f83d7fcc43f8b47fce1ad4ab8a02c2a8695e9adb210",
+        "symbol": "JTO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "JUP_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "b9cf0042da96b9df3148f1788a6a271691e4a97bd74c4ac183a13523d21fd0db",
+        "symbol": "JUP_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "KAITO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "b2f1e8d7af4db1e02b1eec1bc812408e81a645449ac49353465bf849930372eb",
+        "symbol": "KAITO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "KMNO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "d6de765a4ce300c9057f38e038d4c8c88973b15a2276dcc195305fad180aee6a",
+        "symbol": "KMNO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "KSM_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "5ba99fec9551f4ed74ce163a6f61f1d6406863524c18ce7d7fac864f4c3f3066",
+        "symbol": "KSM_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "LAYER_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "d68d4e28becb90632133abfd08299584a84e24066d8ff8e967053a32ef593023",
+        "symbol": "LAYER_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "LA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "b93d7947faa31d1b4afafaf5a0d63d6a126432bb22968559a2e9b3c472abf139",
+        "symbol": "LA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "LIGHT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "048be2824c9982c050da652525eafca0c24c4a335a6870339c041ec29f0e0657",
+        "symbol": "LIGHT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "LINEA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "3e3ada25aa4940ebadc1c9b00e2307f7caf33b8f215bc33060df9e5d3f482ec0",
+        "symbol": "LINEA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "LINK_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "339f7c8bc0deb77c206c274b4bee238a53bed7b9b8d0fd294040403dce5986dc",
+        "symbol": "LINK_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "LIT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "d976c4ffa146745d03a468912517bf5e4feb5e19a4d7cc7c855899fc10ecb929",
+        "symbol": "LIT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "LPT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "41bfb0d17118764a1cfa9f9cefb2455ad887d48a83ee1ddb2dc900d54fa53da8",
+        "symbol": "LPT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "LQTY_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "5f5e9d1a10362535cdc5445c5798bee126d97454476538ac1821182bb15f941e",
+        "symbol": "LQTY_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "LRC_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "4fb032a4b2b5f7e1ac2fbe0f6beca3a5eeb912d0a529c26a08277d4eaac435e9",
+        "symbol": "LRC_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "LTC_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "771be3ec02c9d83e9147157c21c5841befe501ce08bad024d30d2d6f6140ba2d",
+        "symbol": "LTC_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "LUNA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "7b5a3236a7de4e6fd1745dbf8dd7a2fb13ee7465faeee8de6c096466a5dde44f",
+        "symbol": "LUNA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "MAGIC_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "044ab969dbead68ab5af2e18e76966fffce576e697827b07aad84642efe3b669",
+        "symbol": "MAGIC_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "MANA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "936ca5359d0ffcc320c168ce3ed1d35643876f39a509dc48c26177120ad89d1f",
+        "symbol": "MANA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "MASK_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "31414d08215563b4d3936d2bd4b8125884d0b96e7f2405373ac73d398dfda14f",
+        "symbol": "MASK_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "MEME_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "0ff6abccda7c7906fbd5406635eeb4845e930eb1501262c0440f49fbc9b299fd",
+        "symbol": "MEME_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "MERL_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "b3d2a4c930681c1c09a57aad81972758616d8512d99f65872b4bae5ab671e543",
+        "symbol": "MERL_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "METIS_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "1732fc45ee1758f5c3d83bd8968ebe5c3a0c60dc9988bc68e525d9d99cbc5a1b",
+        "symbol": "METIS_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "MEW_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "b3ea6b95ca9a541929d01e5fbc1517b34e60077d9eb36382d839a917599da9d8",
+        "symbol": "MEW_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "MMT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "cd5d4dc0de743b0cd87835f35db8515a24f05c1584ac7da82840207e75f7d012",
+        "symbol": "MMT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "MON_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "f77cf80859caff7c33ebd7c76f16d1f46deae548d8d92fe7ec0cfd5e24981b7b",
+        "symbol": "MON_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "MOODENG_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "179070fdcec4b14f674ea5c4184e3aeaebe371b504adcfad310a7d7aaa150dab",
+        "symbol": "MOODENG_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "MORPHO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "90cc4dbe127afabb0cde054fff28bcc2a9e747709f186bea39eacf511f7b8f3f",
+        "symbol": "MORPHO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "MOVE_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "f4dfcd07f95ae08b2354c740e12ec7f1626024de4ca3d459c53c4f761bd20652",
+        "symbol": "MOVE_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "MUBARAK_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "74d1ba0e9bde2d69d9e19724d893e00cd3e0894b4bebfa334ecc6c0802a24ddc",
+        "symbol": "MUBARAK_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "NEIRO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "e6e5d0d1100413c11e9de670e85696920c4d1176f3e62bb8aa5503994be555b7",
+        "symbol": "NEIRO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "NEO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "93cf67f3a0971833ce4e2d8ad980485c98b3eec6ffd4b9e0bcae6712cbc16751",
+        "symbol": "NEO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "NIGHT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "d6a8f039556876a54043e6910fa0c3617c6a70fbe2b25633d5640b069818c0ae",
+        "symbol": "NIGHT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "NMR_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "a1e4f4acf12e9f474f7f21aa1d1be4172a258be0b1e5ab22a0f0193feaad8dd2",
+        "symbol": "NMR_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "NOT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "698d0a326c9f002fe5965dd5b52893fb6bf85311e3e717fe34d40e85901a930f",
+        "symbol": "NOT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "OKB_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "bb3826fa43b27b085ef1332a7b7cd72f39680afa5ea82c8ad0852bcc4b37210d",
+        "symbol": "OKB_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "OL_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "27b5f65569fb440c03f9acbc35def89cc0ebd6725fb5268f059bb8e53ece339b",
+        "symbol": "OL_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ONDO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "d32e5088c1105b2fbe43af6c247f6965eb1de5ea8f5c9d09dee599cf1fb49590",
+        "symbol": "ONDO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ONE_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "6aa2d02c91b37d05ea2f000b951dca433e7abc823d08fbdb04337f2efbfcb13a",
+        "symbol": "ONE_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ONT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "65a54bf8bb738571a27efdf4c23b309b2c64939797abfe33a2bc2c7721e5ccee",
+        "symbol": "ONT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "OP_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "85a8f39dce04bd10e461e4db11ca83722019cfa17e1c294969adea8d4ab137ca",
+        "symbol": "OP_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ORDER_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "658fa5e5de7ab9823394cb608b43a4399b59c2d58ba830d8f2855f320559d1ec",
+        "symbol": "ORDER_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ORDI_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "0cd092e3fac7d58c9987ac070d8ce2e1d625ae64eb02d8a3e91f173bf1e03cce",
+        "symbol": "ORDI_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "PARTI_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "f8a32ea530f42893b85d05d304c7b2d966a7cc8238e897face1f002038aef33f",
+        "symbol": "PARTI_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "PENGU_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "ddf75fa8a048928fda382981fd1518e9abf813605c9bbd5c1a27fd1793b0d62d",
+        "symbol": "PENGU_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "PEOPLE_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "29c1bb5b8034d2905ec5ba904790b544716db98b76f3dc71fd82d574e64e5b59",
+        "symbol": "PEOPLE_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "PEPE_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "4376e475029180d3fae02ecf1be29c9beb93d7b4e4f946edfcff3a01bd0e82e0",
+        "symbol": "PEPE_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "PIEVERSE_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "9081a768eccf54ae484cf617494be97737f41da3b7d39b8043f190a1a51929bb",
+        "symbol": "PIEVERSE_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "PIPPIN_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "f7b3aa53e6e8d215015da2596d4917ea8adc4beb5a7445e50f60decae4dce17e",
+        "symbol": "PIPPIN_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "PI_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "11571ff1d33a8c9b5f7982b76ae0fe96e1364ac151c8324786e93d76e97d97f7",
+        "symbol": "PI_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "PLUME_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "ed9b9e346b57d253e28c4c6cdb88e5852149f479cf5b873a87aad76b5134c0e4",
+        "symbol": "PLUME_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "PNUT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "6646cd944ae1ac91b7e62d084252a3fa0829248e9989554a94095363587f4509",
+        "symbol": "PNUT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "PROVE_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "de317de6bf99d14ef5a747fb42384bd5e8f966114ccba3d92fa19d10ebb698a6",
+        "symbol": "PROVE_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "PUMP_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "aea4cf47aebdbb8bd1c5efdb7a594d162e360bdd35bf94352008058d9108214b",
+        "symbol": "PUMP_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "QTUM_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "255378fdea29df4037d4800128572393f459926dfec95726d473d63cabbb36f7",
+        "symbol": "QTUM_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "RAVE_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "c001b23aa297ca13be2d47746cddaaa720b5cbd107a44fc644411e37de915828",
+        "symbol": "RAVE_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "RAY_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "e6b046a8d09637e6775ced72978484a806bdf30b810222a75cfa51c34aeab377",
+        "symbol": "RAY_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "RESOLV_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "ac246ac82e759638d8f760aaf65cec439b38379727347616bc3bccae5ced879a",
+        "symbol": "RESOLV_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "RSR_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "741edd9a6cd5c2703329f7da86db842aca263395754bafcff05ea6edf5b74bbf",
+        "symbol": "RSR_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "RVN_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "f27fc0c7867554c230f1bcb67f21798906ed7949a918f755c0a5ccaba91415b7",
+        "symbol": "RVN_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SAHARA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "3deabd5a8a1032f856a4d68e36682800f2897d5ce1add16a1ede1f1b96e70a1d",
+        "symbol": "SAHARA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SAND_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "1b898bab93e1bcfed0f3b5f1bad80f9c21bb913b73a7e33c2eaa3ec332233ff5",
+        "symbol": "SAND_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SAPIEN_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "89eae97d005eae76f62dceccadc2edaf567ca2a49f6a2d8591b46734a882e552",
+        "symbol": "SAPIEN_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SEI_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "943ebc5fc8f66ae37073816cf009b81c75d4c2431959444866810c068468434a",
+        "symbol": "SEI_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SENT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "ac9b342d37244942cbfbbd09df3658d8fbb034267637d97843140c49f22ca7e8",
+        "symbol": "SENT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SHELL_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "35a1a928f861d2c12a3b69556e386d0cf216dcf171d41f5bd266a54c785ef913",
+        "symbol": "SHELL_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SHIB_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "763d684d5b68ecff1902970d8a9acfec66f425a68c656fda5622f877b7fb4801",
+        "symbol": "SHIB_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SIGN_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "582b0426b09df2366db6a5d2fee059f5365402567d61adb100810aec05b3843a",
+        "symbol": "SIGN_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SKY_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "0a7d004523b18f3f9bf651315d56fb18ecd472095fd6804e35770e2b8c408218",
+        "symbol": "SKY_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SNX_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "500e423f3e88e2fb1b0673e94d51a9a87442b5d95e1a2ba9148cd015bc1ca549",
+        "symbol": "SNX_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SOL_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "34d1e58175e2ba0f2c4f6df1210bbe12c00f3235e4db474381927e43114bfa08",
+        "symbol": "SOL_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SOON_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "434c3f65e3ccb6f65e90e6d32cd517676ee4062ab4b8bf2be175ba33934d41c4",
+        "symbol": "SOON_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SPK_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "1d86f725623c392fd42df223ee6303688c0884b8274560aec79d3881f31b9bff",
+        "symbol": "SPK_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SPX_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "4efa6427bb0143b3d9e44314cb374bc3a00dd31925ad2dcf47f8d4e2f78075d9",
+        "symbol": "SPX_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "STABLE_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "21d10eee6c03e7bcb6850ec03dcac643c9e8154948a0d23dc6e1467b4f66c2cd",
+        "symbol": "STABLE_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "STRK_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "dbf145df2374a42c226b2c5b49174e6ed6171760eeb2833366c86d25d9c3f181",
+        "symbol": "STRK_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "STX_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "d66ad1ad76109e3c6c01a4fc16be013d5d60a45f9da5e7cd75528f2471ad5f4f",
+        "symbol": "STX_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SUI_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "63a6ddf30fd99b416e4917b76c3784ecfa49032196718d009071e3c6d79bcc09",
+        "symbol": "SUI_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SUSHI_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "a8c55b38c6bd6284ae9090ff8ee71aabe0c6e23a2564afb0aa94de11c8abbc66",
+        "symbol": "SUSHI_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "SYRUP_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "4bd21c98586363f16b841719a6f8e63d210bd4b47150fcab1aca4674d4be6663",
+        "symbol": "SYRUP_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "S_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "5a62dd586daac5991e3abba49087b2f0af1ce6a4b6bb51e3c628210540489a07",
+        "symbol": "S_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "TAO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "4f708e30d40c913b253e843af76416c3f5c195776a13fa926a1188b39f23e54a",
+        "symbol": "TAO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "THETA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "17dc76c0a5e4934804b21e1f54408e291e7f737fa41181df4a9e072cf1d1aaf4",
+        "symbol": "THETA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "TIA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "725190f098cd19fef7c8fddadf1f83fc43bf52f1d6cd6600bc43bb4682326f92",
+        "symbol": "TIA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "TRB_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "1ac53bfb93eb7ab78937c17ace428a093c1558f4c2c6b7383bd8fed208790ed2",
+        "symbol": "TRB_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "TRUMP_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "c4da8494e5c47d196415bca60c452dee0f8ace58484f74ea55119852d0a12d3f",
+        "symbol": "TRUMP_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "TRUST_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "010eebdf68d69f7ea8d57f63f28273490c3fd8d78d816c900e10011504a3a295",
+        "symbol": "TRUST_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "TRUTH_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "20208d83bef42db185bd9d1319fac985e9ddfcf2bde6030c23b216e08222ee36",
+        "symbol": "TRUTH_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "TRX_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "0ea45a4c7d0ffd85129a4f51f34e585b9bdc9e8179a9693848ae5e6a5abbeb95",
+        "symbol": "TRX_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "TURBO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "89f40945c7146be71a6ae02adcaa7665127aa7ba37aac6912be0e5e85e9d3552",
+        "symbol": "TURBO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "UMA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "bb13a6f6a80f8c4548edf40817f38286138431028a9c1167f1b6708f74018f41",
+        "symbol": "UMA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "UNI_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "3770e51bf4f91d6865fb4036f3c33c10db2f744f3178e4bdaab261a3e270c899",
+        "symbol": "UNI_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "USELESS_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "43bd45c1712e94d1dd42e9dda5aebaebdf2bf3ad439838783fd998558fcd9919",
+        "symbol": "USELESS_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "VANA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "50f97597ebf38df14bfe58385a72e3491d3d285190306de14e8b48ace6096043",
+        "symbol": "VANA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "WCT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "1d4132cb3424c55e21b9105e3ab372f61d24987c608d6a3016152c36ec99ab4b",
+        "symbol": "WCT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "WET_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "202f8730edcc48020d67db532bbd210f2dc00b67303d00360c209696c5fa8698",
+        "symbol": "WET_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "WIF_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "f824ad798ad17a17e1923a3bed8cdbc037acb49679070b06e047b5f97063b4f3",
+        "symbol": "WIF_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "WLD_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "dc2c7e66f7995d28c173461c74cdc90a8d35c8acbf8f7a37653b707d6b3e5350",
+        "symbol": "WLD_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "WOO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "0245585f9e306d0c113558db08db5b0887090e603dcd7ff354e98a5427b76d54",
+        "symbol": "WOO_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "W_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "bd8180080ad384510d00f9ff0c3567d9acb90d62a746823aff714c190b2598e6",
+        "symbol": "W_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "XLM_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "87147d29d4c8520eea2885ffe65d1beeaf3f7c4cfe92d0351b15e41139d3688c",
+        "symbol": "XLM_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "XRP_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "7354f6a527d653c2a85bcb1c20e0bad5ad7c97fa0dc3588dd4cc3ed682d6aa0f",
+        "symbol": "XRP_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "XTZ_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "142b0e3e175c35f96c87c71ee024e96dd38ffe5b16832462ebf8fb67f2f6a578",
+        "symbol": "XTZ_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "YFI_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "a2f8b6fe5fdda32aacc4de97957db644fe01d26ac54250d8960d3824f99ed8de",
+        "symbol": "YFI_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "YGG_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "baf2ae6fb5c107be85f03c88286b6619c379da6affaf52c6cff33a163646406f",
+        "symbol": "YGG_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ZBT_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "8f3bcd8aa87c0170df9e9f5a4a8dd514f56174a9258eb73a40997f58e98c6531",
+        "symbol": "ZBT_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ZEC_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "f101f089b3a6f77aba1887f12f8e107caefdf38287a29c19ef4537474b3dd177",
+        "symbol": "ZEC_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ZEN_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "1637d56e3ea8486440b909d9648e96c2446e52a20cab98e951c197ab2206b4de",
+        "symbol": "ZEN_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ZETA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "3f72fc5ff854600e9936fd4186dcd63b242fb57c5e390df1e361ce591fccf438",
+        "symbol": "ZETA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ZIL_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "dce7dddc0fe8f4e138be674e504d23e5bb02ea0daeda3d3c3737abea618d3ef8",
+        "symbol": "ZIL_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ZK_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "51316ea2dff42da8a45d338e716ed990bbc9dd54aa74b7b008e8e11bb8cee463",
+        "symbol": "ZK_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ZORA_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "b525636a4d07fae0f437eebca3a97377287a260e99b891070abf8ba8dc0f1d69",
+        "symbol": "ZORA_USDT_SWAP"
+      },
+      {
+        "max_materialized_time": "2026-03-31T07:15:00+00:00",
+        "path": "ZRO_USDT_SWAP.csv",
+        "rows": 8862,
+        "sha256": "bc6d52debbb79cdb7111f9d94602c1de800f2cd656b5e9b981c1ba2fc80d4f57",
+        "symbol": "ZRO_USDT_SWAP"
+      }
+    ],
+    "manifest_path": "/Users/zhangzc/fable-trading/analysis/output/fixed_w10_evolution_r1_inner_snapshot_v1/materialization_manifest.json",
+    "manifest_sha256": "033e394a614a82a6fedb5c20327bd469ceaa2784dd4394f253cbefc8006b49d5",
+    "selected_symbol_files": {
+      "PIEVERSE_USDT_SWAP": {
+        "snapshot_file": "PIEVERSE_USDT_SWAP.csv",
+        "snapshot_file_rows": 8862,
+        "snapshot_file_sha256": "9081a768eccf54ae484cf617494be97737f41da3b7d39b8043f190a1a51929bb",
+        "snapshot_max_materialized_time": "2026-03-31T07:15:00+00:00"
+      },
+      "SHIB_USDT_SWAP": {
+        "snapshot_file": "SHIB_USDT_SWAP.csv",
+        "snapshot_file_rows": 8862,
+        "snapshot_file_sha256": "763d684d5b68ecff1902970d8a9acfec66f425a68c656fda5622f877b7fb4801",
+        "snapshot_max_materialized_time": "2026-03-31T07:15:00+00:00"
+      },
+      "SUI_USDT_SWAP": {
+        "snapshot_file": "SUI_USDT_SWAP.csv",
+        "snapshot_file_rows": 8862,
+        "snapshot_file_sha256": "63a6ddf30fd99b416e4917b76c3784ecfa49032196718d009071e3c6d79bcc09",
+        "snapshot_max_materialized_time": "2026-03-31T07:15:00+00:00"
+      }
+    }
+  },
+  "symbol_overlap": [],
+  "training_dataset_symbols": [
+    "AERO_USDT_SWAP",
+    "DASH_USDT_SWAP",
+    "EGLD_USDT_SWAP",
+    "GMT_USDT_SWAP",
+    "GPS_USDT_SWAP",
+    "HBAR_USDT_SWAP",
+    "IOTA_USDT_SWAP",
+    "JUP_USDT_SWAP",
+    "MORPHO_USDT_SWAP",
+    "ONE_USDT_SWAP",
+    "ZK_USDT_SWAP",
+    "ZRO_USDT_SWAP"
+  ]
+}

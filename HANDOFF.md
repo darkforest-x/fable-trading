@@ -51,7 +51,6 @@
 - Live snapshot507 contracts,494 full Monday anchors,13 missing full Monday. Original scanner alive/errors0; four patrol plans enabled at15/15/240/1440minutes with current worker heartbeat. The older4h/day rounds remain partial, not claimed fully complete. Subscription was off initially, then activation at1792682048630 occurred outside agent actions; current on state preserved. No real test message or agent subscription write. API records natural live notifications separately.
 - Receipt and registry updated; stitch-1-618 follow-up PAUSED, implementation complete. Shared main workspace and other sessions' dirty edits preserved. No formal report generated.
 
-
 ## 2026-10-22 · Monday 1.618 first-touch win rate and failure attribution
 
 - Owner image short84375.8→TP8081923.8→TP2081166 confirms deep-side0.618 target; NYMonday H83149.8/L81166 matchesOKX exactly. Initial provisional Binance result13.48percent preserved separately; screenshot-matched OKX15.73percent is primary.
@@ -83,6 +82,24 @@
 - Only0.618/0.2percent/10R is full-period positive among48ratio/exit cells:205trades+32.23R versusrandom-57.05R; first/later+9.57/+22.65R. Net95percentCI[-78.64,+144.77]R and Holm48p1.0, retain as unvalidated observation, not a promoted strategy.
 - Reused Nautilus1.231.0:56976positions113952fills, all native/oracle identities passed,14244stop-extrema checks,808event/3561matching audits,14prefix checks; initial86tests and final7candidate tests passed. Timestamp-unit empty preparation preserved and fixed before native replay. Commits dda785c122/9e6e41b29d/f99765323d; no unchanged replays.
 - Evidence `experiments/active/exp-btc-range-wick-fanshen-20261021-v1/delivery_receipt.json`; Notion EXP-149 https://app.notion.com/p/3ff8856479af817cb72dd5896e7896bd. IndependentR, not account returns; no funding/slippage/capacity. No Pine/default/live/model change; training/productionfalse. No temporary browser/tab created.
+
+## 2026-10-21 · V2.13 delivered; all loaded Monday history retained
+
+- Owner removed the 12-week limit. New source `yoyo/evaluation/pine/monday_range_v2_13.pine` at `36493d4000` retains all loaded weekly records and redraws the visible period. Shared line/label budgets prioritize boundaries; overflowing viewports show a zoom-in hint without deleting data. V2.12 source/private preserved.
+- BTC15m native retains 18/18 weeks from June22; July1 view shows June29 range. Main-chart history availability remains separate. Common October1–18UTC 72 signals and both signatures unchanged. Daily retains357/357; wide view draws178/289 without GC, then pan to2019 restores28/28 weeks and140 historical Fib lines fromDecember23. Two source-scope checks pass; trading engine unchanged.
+- Private V2.13 revision4 saved01:10:15Shanghai with1146-line clean source; QA removed, BTC15m restored and layout saved, editor/logs closed. No temporary browser/tab or orders. Receipt `output/pine/monday_range_v2_13_delivery.json`; learning `docs/learnings/pine-history-retention-is-separate-from-drawing-retention.md`. No signal-quality or profitability claim.
+
+## 2026-10-21 · Both existing execution sessions recovered after reboot
+
+- Mac reboot at 00:41:20 Asia/Shanghai removed the two session-only jobs; website, monitor and tunnel started normally. Owner approved signal recovery with unchanged parameters, then requested recovery of the separate manual-account service. Original private plists were bootstrapped; signal PID 5467 and manual PID 6810 both have PPID 1, runtime locks and advancing heartbeats. No login autostart was installed.
+- Signal GET-only preflight verified 14 owned positions and 14 stops. Normal scan catch-up cleared OL/POPCAT stale checkpoints without changing gates; errors=[], worker_error=null and accepting_entries=true observed. Manual preflight verified distinct account identity, 2 owned lots/2 OCO protections, 0 unconsumed confirmations and 0 pending management commands. Readiness is ready; the Owner browser displays “可预览订单” and verified COMP/TRUTH TP/SL. External SOL/ZEC remain owner-managed; manual trade count and economic/state fields remained unchanged.
+- Original configurations, cutoffs and per-order manual confirmation preserved. Private backups/receipts: `OKXExecution/recovery-20261021-reboot-1792515039/` and `OKXManualExecution/recovery-20261021-reboot-1792515302/`. YOLO list timeout no longer reproduced: browser auto-updated 2829→2832 findings, error empty; public API 200 in 1.90/3.23s. Four original patrols enabled at 15/15/240/1440min. Exact transient timeout cause unproven; no UI/code changes or temporary browser sessions.
+
+## 2026-10-21 · V2.12 delivered; historical cutoff and CE10246 resolved
+
+- Source commit `e241800e2a`, unchanged trade/signal semantics; both key-level15m requests fixed at12000.20 local tests already pass. BTC15m native old-off3199 bars starts September17 17:00,new-off/on11999 bars starts June18 01:00;retained Monday weeks5→12,first September22→August4. Common October1–18UTC72 signals have identical direction/time/price signatures.5m confirmed request also works,key context June18 while chart data starts September14.
+- Owner-created private V2.12 revision1 had only90 lines,causing CE10246. Full1088-line source restored;final clean revision6 saved00:52:05Shanghai,QA removed. BTC15m displaysV2.12,reference defaultoff,V2.11 source/private preserved and old chart instance hidden. Layout saved;editor/logs closed;no browser sessions/tabs or orders. One accidental code-text drawing created during focus recovery was removed;existing manual drawings preserved.
+- Receipt `output/pine/monday_range_v2_12_delivery.json` now delivered/native validated;raw AX/screenshots retained locally. Requests do not override platform available-history limits. No repeated unsupported-period native test;history-only change is covered by existing local routing regressions. No new signal/profitability/production claim.
 
 ## 2026-10-20 ETH timed BE / RSI scaleouts — completed, no default promotion
 
@@ -235,6 +252,13 @@ Latest separate UI instruction: removeV2.9 entry selector;5m/15m charts automati
 - 98定向/边界测试、123398独立符号价格路径、44单仓队列、176汇总组通过；含费保本浮点尾差分类已修正，总金额与排名不变，初始汇总保留。全库登记存在旧条目spike-v8-total2-1h-native-20260914-delivery缺source_commit，本轮两条登记独立契约通过。
 - Notion任务3fe8856479af8034b989fed2918245c2为Done，知识库实验3fe8856479af81fda7dcf91f09968c2a完成并回读；复现、原始结果及失败收据见实验delivery_receipt.json。training/production=false。无报告/Pine/模型/服务/交易写操作，无新浏览器会话，保留用户TradingView。
 
+## 进行中：Stoch／WVF 独立入场与 Spike 回踩择时（2026-10-19）
+
+- Owner已授权原超卖Stoch金叉、同根WVF绿柱及Spike有效回踩后等待的六组只做多比较；参数、原止损/退出/20bp冻结，独立占仓与匹配随机，不改生产。实验exp-spike-stoch-wvf-entry-20261019-v1。
+- 正式路径正在paths_v1运行（本任务exec20707，主PID13535）；五币smoke_v2路径、独立金额/占仓/配对和57条极端交易通过，116定向/边界测试通过。全量收益尚未查看，不能提前判定有效。
+- 路径builder b63f31f2ab，汇总/独立审计b53f577198，极端审计696a67398f；修复Python3.9审计ISO Z解析，失败收据保留。Notion实验3fe8856479af81ef8ca2d005a453d769运行中；候选3fe8856479af816fa6fcd0d688b8e6dc。完成后需全量汇总、独立核验、极端价格复查、更新登记/Notion及本节。
+- 无下载/哈希/Pine/模型/服务/订单操作，不另建报告。Luna max实际运行档位不可核验，子代理已停止，由主线程执行。其他会话PID52965家族不是本任务，禁止停止。
+
 ## 最新进度：V13.1 规则拆解与启动／过热状态已完成（2026-10-19）
 
 - Owner授权的前两项完成。638个Binance历史USDT永续／2552周期流，12个锚点臂＋3个因果状态各已知/低/中/高，共24队列。原再次突破、止损、反向退出、实际R、2R启动、1H2ATR/其他4ATR与20bp固定。177383原锚点、4489577联合锚点、8978456条路径记录；最终输出experiments/active/exp-spike-v131-rule-state-20261019-v1/paths_final/analysis_v3/。
@@ -244,6 +268,139 @@ Latest separate UI instruction: removeV2.9 entry selector;5m/15m charts automati
 - 所有失败保留：END候选、浮点55%边界、CSV分位点解析、50个缓存NaN/None失败精确重算合并；两次汇总性能重启保留。最终builder记录、复现命令在delivery_receipt.json，完整发现findings.json；额外4条数值/统计/性能经验已保留。Notion3fe8856479af81a2b965d252bcb1d5c9已完成同步回读。历史复用、币池/tick非逐时点，无资金费、额外滑点、共享资金或前向验证。
 - 本轮无下载、内容哈希、新训练、生产/Pine/服务/订单改动，也未额外创建报告。子代理实际模型档位无法核验即停止，由主代理完成。其他已讨论方向（结构退出、交易所/流动性、组合资金、执行/资金费）未在此实验执行；后续优先研究退出与入场追价的配合，当前不改实盘。
 
+## 最新进度：V13.1 四阶段入场完整占仓比较（2026-10-19）
+
+- Owner授权四种入口都试。638币、四周期全量完成；含预热177383原锚点，2023起175009，1418924条阶段/控制结果。原信号、首次突破、首次有效回踩、现有再次突破各自重放占仓；止损、实际R、2R启动、1H2ATR/其他4ATR、20bp保持。
+- 全期净R依次1273.87/3410.60/1475.59/1259.71；2025后-64.11/1634.92/736.61/579.06。统一首次突破总R最高，但约5倍订单、均R由0.05850降至0.03192，已平仓R回撤4090.78对609.00（非账户回撤）。前期按周期选15m/30m突破、1H/4H即入，后期2080.94R；仍未建立新优势。
+- 153077共同成熟配对队列中，首次突破信号3241.97R对随机6141.83R；后期1546.81对4534.09R，超额区间跨零。双方同非周日门、失败不补抽、零成交保留；与完整信号总R分开。没有获准升级，未改生产。
+- 1H重新占仓基线3344笔326.263R；统一Jan2023后旧3338笔313.996R全部保留且逐笔对齐，新接6笔+12.267R。旧3357含19笔Dec2022，不可直接混比。
+- 100定向/边界测试及数值修正后13项复验通过；5760431独立标量、892440占仓、128178旧确认标量、18237序列身份、125506随机身份、7497前缀、32极端案例、120跨汇总核对通过。失败smoke的混合arm与统计BLAS告警已分别在全量/正式统计前修复，保留证据。
+- 实验exp-spike-v131-entry-stages-20261019-v1，代码、原始账本、配置、收据、registry与3条learning保留；无报告、下载、内容哈希、浏览器或服务/订单动作。Notion新记录3fe8856479af81baa0b7cb24537c6042已回读；前轮确认成本待同步恢复为3fe8856479af8174be16e44a0e3344d4。子代理运行模型无法核验即停止，由主代理完成。
+
+## 最新进度：V13.1 确认筛选与追价归因（2026-10-19）
+
+- Owner授权优先研究确认的筛选收益能否支付追价。638币完成；15m/1H成熟原始机会116667，原随机116574，四周期原21547闭合订单另作费用/距离诊断。确认平均追价约0.69/0.71原锚点R；距离、等待根数、费用R分组没有稳定统一过滤门槛。
+- 逐笔分开取消机会、入场/退出价差、费用本金与风险缩量；事后已确认集合的提前入场收益仅为归因桥梁。1H恢复实际2ATR退出，原占仓集合保留；独立重叠事件不是账户组合。零成交随机机会保留，不补抽。
+- 原随机档案允许UTC周日，但后续15m汇总过滤周日。保留原结果，追加双方同非周日门的敏感性；覆盖87.1%/88.8%。后期每原机会配对超额15m +0.00412R（95%[-0.00669,+0.01581]），1H -0.02149R（[-0.03861,-0.00507]）。未建立新策略优势，不改生产。
+- 30定向+71层边界测试通过；2197588独立金额/分组检查、199659退出档案对照、12极端/等待前缀检查通过。结果及复现命令在experiments/active/exp-spike-v131-confirmation-cost-20261019-v1/；无下载/内容哈希/额外报告/服务与订单变更。两条learnings记录归因与控制资格教训。
+- Notion创建返回传输错误，后续唯一键查询也失败，不能确认是否创建；notion_sync_pending.json保留待同步信息，恢复后必须先查重。下一研究候选为确认环节逐层比较，尚未执行。子代理实际模型档位无法核验，已停，由主代理完成。
+
+## 最新进度：V13.1 原始订单浮盈浮亏分布（2026-10-19）
+
+- Owner追问原策略/回测和入场后的浮盈浮亏。复用638币Binance档案、原始未剔除币池四周期闭合订单；实际634币21547笔。21444笔曾毛浮亏、至少21348笔曾毛浮盈，最终7311笔净盈利；10648笔确定曾达1R中3496笔最终净亏。浮盈和浮亏可重叠，不代表先后顺序。
+- 1H仍为固定原入场trail2退出重放，保留19笔2022年12月原交易。旧exit_time是母策略终点，877/3357笔实际更早退出；本次先恢复真实保护触发点，再测路径。MAE在止损/跳空成交截断，止损当根MFE保留下/上界，未编造K线内高低先后。
+- 五项边界测试、21547笔净R/收盘峰值对照及468项标准库独立统计检查通过；各周期原匹配随机收益保留。结果仅描述历史，不证明新退出规则或生产优势，无新参数/服务/订单操作。
+- Builder ae053685db先提交后运行；原始结果experiments/active/exp-spike-v131-excursions-20261019-v1/results_v1/，两个registry与Notion原研究3fa8856479af8152ae1bca1fb534c805补充并回读。经验docs/learnings/exit-policy-archives-need-actual-exit-before-excursion-statistics.md；无下载、内容哈希、浏览器或额外报告。子代理模型档位无法核验后停止，由主代理完成。
+
+## 最新进度：巡检卡片 65% K 线预览与实盘逐笔平仓（2026-10-19）
+
+- 巡检发现卡片打开独立 K 线预览，桌面宽度 65vw、手机底部高度 65dvh；展示原检测快照、六均线、形态框与确认时点，关闭恢复原卡片焦点，可进入完整图表再返回。最新 Stitch 画板 adbadedba9a6456693160ba9eb124961（项目8978791379095391159，GEMINI_3_8_FLASH），代码/截图及来源在 docs/design/stitch-20261019-close-preview/。
+- 实盘账户为数量核对通过的系统分笔增加平仓按钮和本人确认弹窗；复用现有持久化命令与锁定执行器，仅关闭选中 lot。确认回执丢失只查询原指令，不自动重复提交；未归属/状态未核对仓位不开放此操作。平仓 Stitch 请求超时后 Owner 明确允许沿用现有组件。
+- 后端128项相关测试、前端重点44项及桌面/手机浏览器流程通过。最新实测1440px桌面预览宽936px，320×740手机预览高481px；模拟平仓取消不确认、丢失回执仅提交一次并查询到完成。所有交易浏览器请求均拦截为模拟回执，未进行真实平仓。证据 output/playwright/close-preview-20261019/，经验 docs/learnings/manual-close-ui-must-bind-to-owned-lot-and-persisted-command.md。
+- 仅重载网页服务以接入 API，未重启执行器或修改计划。收尾4巡检仍启用、无计划错误，YOLO及两执行器心跳正常；网页扫描1141/1956、errors=0，market_ready/model_ready尚为false，不计完全就绪。本任务浏览器已关闭且8个归属进程退出。共享main混合改动未提交。
+
+## 最新进度：Mac 代理访问 spikeok.com 已恢复（2026-10-18 17:15 北京）
+
+- Owner 要求修复电脑端。按域名的原代理路径 TLS 失败；同一 SNI/证书校验、两个真实公网 IPv4 经代理均200，直接访问其中一个IPv4超时，IPv6失败。只加DNS、仅改直连以及Owner清理Chrome DNS缓存均未独立解决，不冒称已取得代理服务器内部DNS根因。
+- Shadowrocket保留原节点，在default.conf为spikeok.com增加Host DNS server:1.1.1.1、always-real-ip、系统HTTP代理例外和精确PROXY规则；TUN继续代理实际IPv4。关闭该配置IPv6支持（这是全配置开关，其余新增项仅限该域名），不写死网站IP、不关闭证书验证、不启用HTTPS解密。原配置备份在仓外PublicTunnel/shadowrocket-before-spike-direct.conf；该备份已含本轮新增Host DNS项，全轮回滚还需移除该项。
+- 普通域名首页、/api/status、/static/app.js、/api/market-sync均200，1.35–1.83秒；真实Chrome加载BTC行情、K线、六均线、494交易对，无加载占位，控制台warn/error为空。public_tunnel status的public_ready=true；start复用正式隧道身份，已退役Quick Tunnel/ngrok并核对两者LaunchAgent和plist均消失。固定入口仍为https://spikeok.com/#market?tab=overview 。
+- 配置应用时Cloudflare连接发生短暂重连并返回502，随后原进程自动重新注册；验收在重连后进行。原始结果output/spike-domain-20261018/mac-final-health.json。含账户画面的验收截图置于仓外Codex visualizations目录，不加入Git。
+- 收尾：四巡检enabled，周期15/15/240/1440分钟且无计划错误；YOLO13522心跳新鲜，扫描45264推进且errors=0；执行服务running、心跳正常、error_present=false、account ready、blockers=[]。未调用交易写接口或重启执行服务。关闭本任务Chrome675和失败导航留下的空白678，任务标签列表为空，保留用户日常浏览器及其内部DNS页。
+- 本轮没有应用代码/UI改动，只更新运行设置和必要交接；定向网络及浏览器验证通过。经验docs/learnings/proxy-domain-success-needs-browser-and-address-family-checks.md。共享main混合改动未提交；仓内其他实验日志存在既有空白检查问题，不改动那些文件。
+
+## 最新进度：spikeok.com 固定公网已接通，Mac 代理路径仍待恢复（2026-10-18 16:57 北京）
+
+- Owner 完成阿里云 DNS 短信确认和 Cloudflare Tunnel 授权。注册局 active；NS 为 hugh.ns.cloudflare.com / laylah.ns.cloudflare.com；Cloudflare 域名已激活，Free 通用证书有效至 2027-01-16（受管理），已打开“始终使用 HTTPS”。域名仍在阿里云注册续费。
+- 固定入口：https://spikeok.com/#market?tab=overview 。正式隧道 spike-workspace，UUID e9db24b3-a8ae-4675-9551-f82cf84a8dd7；根域 proxied CNAME 指向该 UUID.cfargotunnel.com。仅路由精确主机到原 Caddy 8780，保留同源/本机功能规则。com.spike.public-cloudflare 为 RunAtLoad/KeepAlive LaunchAgent，Mac 登录后启动；Mac 与网络仍需在线。
+- Google 公共 DNS 返回 104.21.80.80 / 172.67.176.83。保留域名 SNI/Host 和正常 TLS 校验，两个节点的首页、/api/status、/static/app.js 共6项200；真实服务 spike Impulse Monitor，扫描错误0。Owner 明确回复“手机能正常打开”。正式隧道重启 PID46387→47558，第二次健康请求成功，同一 UUID/域名保留。原始证据 output/spike-domain-20261018/。
+- Mac 的 Shadowrocket 按域名访问仍出现 TLS EOF/连接关闭，普通 curl/urllib 和 IAB/Chrome未通过。代理/DNS缓存是候选原因，未确认内部根因。没有改 Shadowrocket 配置、重启全局网络或关闭证书校验；VPS交叉请求因SSH握手超时未取得证据，web抓取工具也不可访问，不计为成功。HTTP重定向开关已保存，但本机HTTP探针失败，不冒称重定向端到端验收通过。
+- 私有 named-endpoint.json 已按双节点HTTPS与Owner蜂窝证据记录 activated_at_ms，fixed-endpoint.json/access.txt 指向正式域名；public_ready 仍如实反映本机网络路径。旧 Quick Tunnel 和 ngrok 连接器暂保留；临时地址 https://weather-demo-jvc-explorer.trycloudflare.com/#market?tab=overview 。本机正常路径恢复后执行 .venv/bin/python -m yoyo.monitor.public_tunnel start，会复用正式身份、核验后退役旧连接器，不重新建随机地址。
+- 收尾健康：4组巡检仍 enabled，周期15/15/240/1440分钟，无计划错误；YOLO13522心跳新鲜，扫描1960/1960、errors=0，执行32689与Shadowrocket33402存活且未重启。已关闭本任务Chrome域名详情655和授权/验收665，用户Cloudflare660保留。IAB临时错误页2因data URL策略不能取得关闭句柄，原生Codex也禁止控制；未绕过限制，该页未标记保留，交由工具回合清理，未声称已经核对关闭。
+- 凭据只在 ~/.cloudflared（目录700、文件600）及 ~/Library/Application Support/Fable/PublicTunnel（700、凭据600），未入仓或命令参数。58项定向测试已通过；本轮仅更正状态提示文本、补实际部署记录。学习 docs/learnings/public-provider-migration-needs-pending-state-and-saved-identity.md。共享 main 混合改动未提交；未修改交易、巡检计划或应用界面。
+
+## 最新进度：公网临时隧道再次恢复，固定域名待购买（2026-10-18 16:15 北京）
+
+- Owner要求先恢复公网，再做长期固定地址，并确认尚无域名。ngrok仍实际返回403、`ERR_NGROK_725`；凌晨Quick Tunnel日志持续`Unauthorized: Tunnel not found`。本机8766及带正确Host/HTTPS头的8780状态均200。
+- 仅`kickstart -k com.spike.public-tunnel`，新PID41432。当前入口为 https://weather-demo-jvc-explorer.trycloudflare.com/#market?tab=overview ，首页、状态接口、app.js均200；IAB实页看到行情、六均线和494币，控制台warn/error为空。初次导航工具超时，但随后同一标签加载成功。仅创建的标签1已关闭，IAB余0标签，未启动Chrome。
+- 私有`fallback-endpoint.json`与`access.txt`已更新并保留旧备份；`fixed-endpoint.json`与原ngrok保持。既有`public_tunnel status`仍优先显示故障ngrok，当前临时入口以上述私有文件为准；本轮未修改应用代码。网关35892、网页55539、扫描55546、自动执行32689保持；4巡检enabled且无计划错误，YOLO13522心跳正常。
+- 推荐自有域名 + 正式Cloudflare Tunnel → 现有Caddy网关；待Owner购买域名并完成账号授权后配置，尚未部署。已给出Cloudflare注册入口、核对首年/续费价及邮箱验证步骤；域名只解决固定名称，Mac及网络仍需在线，不承诺免费服务长期可用性。
+- 原始检查`output/public-recovery-20261018-afternoon/`，经验`docs/learnings/stable-public-hostnames-require-persistent-tunnel-identity.md`。无交易操作、UI改动、计划改动或新自动化；共享main混合改动未提交。Luna子代理因工具未返回可核验实际模型档位而停止，由主代理完成。
+
+## 最新进度：信号中心自动执行恢复（2026-10-18）
+
+- Owner明确授权“查清为什么停了，确认没问题后恢复自动开单”，并确认八笔为其手动平仓。执行器在10月17日20:00更新后被放回Codex临时PTY（PID28449、父进程93565、会话54008），原LaunchAgent未接管。最后心跳10月18日00:15:57；对应聊天00:15:55取消订阅、00:16:55记录teardown/Shutdown。根因证据指向临时聊天会话绑定；未取得子进程精确退出信号，不冒称操作系统崩溃或交易所拒绝。
+- 先用只读Client核验账户身份、原配置、时间、可用保证金、两次实际仓位、全部挂单及完整有界订单历史。八笔逐一确认唯一原开仓/手动平仓、方向/数量/时间及USDT费用回执，原始库完整备份后单事务补为closed/owner_manual_close并追加journal；未清账、未改cutoff、未重放订单。剩余USO持仓与止损一致，行情管理窗口可读。对账阶段交易所POST为0。
+- 复用com.fable.okx-execution.session，通过launchctl kickstart恢复。新PID32689、PPID1、锁持有；多轮心跳推进，entries_enabled=true，实测accepting_entries=true，errors=[]、worker_error=null。账户API为running/ready、blockers=[]。原配置、风险参数、凭据、KeepAlive=false及会话级安装不变，不新增开机/登录自动启动。手动账户PID70369保留。
+- 339项执行/边界测试通过；仅有既有LibreSSL警告。恢复后过期信号正常跳过，验收时尚无新增成交，不以服务就绪冒充已完成新单交易。网页服务存活、扫描零错；未启用浏览器测试。
+- 私有原始证据/恢复脚本/账本备份在本机OKXExecution/recovery-20261018/，不入仓；经验docs/learnings/live-workers-must-outlive-chat-sessions.md，README补充独立托管与恢复验收。未改执行算法或界面、未提交共享main混合改动。子代理因无法核验实际模型档位已停止，主代理完成。
+
+## 最新进度：ngrok 月流量耗尽，临时公网入口恢复（2026-10-18 02:05 北京）
+
+- Owner反馈原行情地址挂了。原域名实际HTTP403、`ERR_NGROK_725`，正文为本月网络流量额度耗尽；本机页面及带正确Host/HTTPS头的Caddy状态接口200。原固定域名尚未恢复，重启本机服务不能解除供应商限制。
+- 当前可用临时入口：https://later-bio-monsters-nail.trycloudflare.com/#market?tab=overview 。复用原网关，恢复原 `com.spike.public-tunnel` LaunchAgent，PID68026。原ngrok PID75107、网关35892、网页55539及扫描55546保持。`fixed-endpoint.json`保留；私有运行目录新增 `fallback-endpoint.json`，`access.txt`注明当前入口、原入口故障及临时限制，旧说明另存备份。
+- 公网首页、状态接口、app.js均200；真实IAB看到行情、六均线、494个交易对，控制台error/warn为空。临时标签1已关闭，IAB标签0，无新Chrome。临时隧道重建会换域名，不能视为永久收藏地址；原域名需额度恢复或Owner自行调整套餐。现有 `public_tunnel status`仍优先显示固定入口；临时状态查上述文件和 `com.spike.public-tunnel.log` 最新地址。固定入口恢复后现有start会先核验再退役临时隧道。
+- 四巡检仍enabled、15/15/240/1440分钟，YOLO13522心跳正常；手动21051心跳仍在，但ARX两旧单为position_mismatch并阻塞新开仓；自动执行保持stopped、最后心跳00:15:57，未擅自重启或处理仓位。跟单23135保留。仅恢复公网传输，无交易写请求，无应用代码改动或新AI定时任务。
+- 原始验证 `output/public-recovery-20261018/`；经验 `docs/learnings/public-tunnel-process-liveness-does-not-prove-provider-quota.md`。子代理无法核验实际模型档位后停止，主代理直接完成；共享main混合改动未提交。
+
+## 最新进度：选定 Stitch 原版工作台、导航与公开行情模块落地（2026-10-18）
+
+- Owner 最新纠正要求推翻原功能布局，补首页高密工作台；本条取代下面“尚未选定最终新稿”的状态。最终来源是原项目 8450534110669085172 的 dcabed 市场、b94aba 巡检、89614c 账户及 483fbb 订单画板。四份真实代码已导出到 docs/design/stitch-20261017/selected-terminal/；8978791379095391159 青色方案已标为 superseded 并保留历史。
+- 根 DESIGN.md 是从选定 HTML 提取的落地契约，不冒充原生文档导出：对应 Obsidian 文档节点仍没有可用内容。设计压缩包区分 active / superseded-cyan；当前规范以选中画板的布局、色阶、字体与六均线颜色为准。
+- 新首页为全宽顶部导航、合约行情和六项数据条、左侧全市场/自选、中部六均线图、右侧强平与主动成交、底部共振矩阵与记录。重组为行情工作台、信号与巡检、实盘与风控、研究实验室、交易书架、系统运行六类；全站二级菜单按任务组织。巡检首屏四列12卡、实盘统计与持仓同屏，卡片到图表再返回保留条件；确认信号保留卡片布局。
+- 新只读 /api/market-workstation 使用独立限流公共HTTP池与逐字段缓存，接资金费率、OI、标记/指数、合约面值、最近500笔成交、已发生强平。单位按合约面值换算，时间/去重/新鲜度独立校验，失败不展示旧投影；这是成交样本与历史强平，不是完整时段CVD或预测热图。没有加入执行脉冲，没有变更任何交易阈值或模型门。
+- 修复市场首次挂载空节点、依赖加载顺序、共振表格失去样式、巡检键盘页签顺序、手机账户表格撑宽及隐藏的报价过期标记。公共导航、研究、书架、阅读、运行和VLM Shadow DOM使用共享布局/组件；没有把源截图或示例数字作为产品内容。
+- 验证：461项前端、63项后端测试通过；27个页面入口真实读取，巡检卡片→六均线→返回、494币全市场涨跌/成交额排序、账户/持仓、390px手机菜单和320px账户表格内滚动已检查。全路由入口检查不等于每个写入流程验收。外部TradingView完整组件快速切页出现过contentWindow警告；本地市场Lightweight图表正常，未宣称第三方警告已修复。原始截图、测试与读状态在 output/stitch-redesign-20261017/，未另建报告。
+- 网页通过原LaunchAgent正常重载45793→53878→55539；仅网页服务，本次未预览/确认/撤单/改仓、未启停实盘执行。收尾手动21051和巡检13522运行，四计划仍enabled 15/15/240/1440分钟。自动执行账本显示stopped、最后心跳00:15:57，早于末次网页重载；未擅自重启。网页扫描仍进行中，不能把service_alive等同于market/model已就绪。
+- 本任务IAB18/19及新建Stitch中间标签977882601已关闭，IAB标签列表为空，视口复原；参考服务器18770/PID50963退出，Owner原Stitch与Chrome保留。主代理直接完成、未使用子代理，未切分支/建worktree，未提交共享main混合改动。经验见 docs/learnings/stitch-selection-must-be-verified-before-porting.md 与 public-market-samples-need-units-coverage-and-independent-freshness.md。
+
+## 最新进度：Stitch重新生成全站方案（2026-10-17，Owner纠正）
+
+- Owner明确要求让Stitch重新生成整体设计，并撤掉助手对配色、布局、密度、字体和组件样式的限制；不是直接复刻旧画板。最新要求覆盖本轮助手先前的“Less, but better”约束，尚未选定最终新稿，不按旧稿继续改代码。
+- 已通过Owner已登录Chrome创建独立项目：https://stitch.withgoogle.com/projects/8978791379095391159 。只提供市场、信号、检测、账户交易、研究、学习、运行七类功能和子页面范围，让Stitch自主建立全站设计；要求桌面/手机与DESIGN.md。旧项目8450534110669085172保留。
+- 新项目已生成10张页面画板（首批6张、补充4张）、设计主题板与完整DESIGN.md，覆盖核心交易、账户、研究、学习、运行及手机端。Stitch自行选择深色青色视觉方向；助手未做审美纠偏。生成完成不等于全部生产路由已经重构，现有前端本轮未替换。
+- 输入保存在 `output/stitch-redesign-20261017/fresh-unrestricted-brief.txt` 与 `fresh-completion-brief.txt`。实际画布截图为 `fresh-stitch-account.png`，通过Copy as PNG取得原尺寸账户画板 `fresh-stitch-account-original.png`，均为Stitch示例数据设计。旧 `brief.txt` / `correction.txt` 属于已被Owner否定的受限旧迭代，不能继续当作新设计要求。
+- 主代理直接操作，未委派子代理、未改交易逻辑、未实盘操作、未发布。保留Owner的Chrome新项目标签；临时IAB标签17已关闭，没有新建Chrome测试进程或停止后台服务。
+
+## 最新进度：均线密集结果与实盘同屏、开仓恢复修复（2026-10-17）
+
+- 由主代理直接完成，未委派。检测结果页改为图表 + 288px 实盘侧栏，窄屏在同页纵向排列。权益、可用保证金、浮盈亏、已核算净收益、开平仓笔数、当前持仓、每笔保护和最近订单直接可见；点击持仓看对应周期图表，返回订单定位账户区，保留形态上下文。
+- 新增只读 `dashboard?view=workspace`，返回全部当前持仓/进行中请求及最近五笔记录，不携带交易所历史/原始账本。统计覆盖完整本地手动账本，完整USDT成交费用回执才计入净收益，外部合并平仓标为未归属。现场投影7788B，对照full45264B；这是单次传输大小，不是成交延迟保证。
+- 修复旧预览慢返回作废新报价的服务端并发问题：每个检测引用在保存报价时核对请求代次。前端取消旧读取，实际确认请求不取消/重放。明确的确认前blocked恢复到待审核，GET检查恢复后自动重算预览，仍需逐笔确认。
+- 交易所GET短暂失败、一般账户核验失败和旧单仓位冲突分开表达；本轮现场捕获两账户间歇GET读取异常，后来恢复。未移除真实仓位/成交核验门，也未声称外部网络已根治。已有订单可随时回到检测，状态继续在结果页更新。
+- 修复持仓详情误用预览TTL显示“点位已过期”、状态轮询重建图表、账户刷新收起保护详情/丢失焦点、旧轮询超时取消新请求、持仓币种不在形态筛选内导致上下币失效、图表内外高度不一致。
+- 验证：456项前端回归，329项执行层及层间边界检查通过。真实桌面/390px查看持仓与已有订单；隔离模拟验证预览阻塞恢复、确认前阻塞、无自动确认、立即返回、状态轮询复用图表（6次状态轮询仅2次初始挂载）。真实测试未创建预览、未确认/撤单/改仓。仅重载网页服务，执行和巡检进程保留。
+- 原始验收：`output/ma-workspace-20261017/`。模拟画面独立标明，不作为真实成交证据。未提交共享main的混合改动。
+- 收尾：临时IAB标签15/16已关闭，标签列表为空，视口恢复；隔离模拟服务18769已停止，控制台无error/warn。网页45793、手动21051、自动28449、YOLO13522、copier23135及Owner Chrome1277保留；四组巡检仍启用15/15/240/1440分钟。只读快照及心跳见 `cleanup-health.json`，账户展示缓存与执行就绪状态分开记录。
+
+## 最新进度：全站少即是多与渐进展开（2026-10-17）
+
+- 按 Owner 新要求直接实施，未委派；根 DESIGN.md 新增极简规范，覆盖旧密集参考的布局要求。原功能路由保留，公共导航移除自动本页索引与重复标题；搜索移入功能栏，主题/密度/本机状态统一为菜单。
+- 市场范围与排序合为一行，494币全目录涨幅/跌幅/成交额排序保留；行情行缩至74px，移除重复记录入口。常驻周期/设置/放大，图表辅助开关进入设置；状态缩为一行，详情/提示音按需展开；历史与观察设置进入“更多”。六条源均线与交易数据口径不变。
+- 所有 work-inspector 改为桌面/手机共用的内联展开，记录获得完整宽度，原节点/输入/事件不变；信号搜索和当前条件一直可见，卡片保留。均线密集的图表视角收进现有设置；学习/知识/内容的资料流程收起，重复英雄标题和容器减量；VLM 空态只保留一个上传入口。
+- 新菜单外部点击/焦点离开关闭，Escape 回到入口且不关闭外层手机导航；修复移动菜单仍被旧顶栏样式隐藏、页签间距被高优先级旧规则覆盖，以及市场重挂载时开关/图例没有立即按当前状态初始化的问题。新增3项菜单/折叠状态行为测试，449项前端测试通过。
+- 浏览器巡检27主路由的1440/1024/390px布局均无整页横向溢出；三旧入口可达。实测全市场排序、筛选条件保留、原图表放大/Escape、六均线、历史入口焦点、专用账户只读明细及VLM空态。原始截图、检查JSON、测试结果在 output/frontend-minimal-20261017/。这不等于重跑所有交易写入流程。
+- 快速离页时捕获2次第三方TradingView嵌入脚本的 contentWindow 卸载告警，保留 browser-console.json；未确认正常停留使用受影响，本轮未改模拟开单图表加载器。VLM既有余额不足暂停提示仍明确显示。收尾账户快照状态见 service-health.json，不把服务进程存活冒充行情新鲜。
+- IAB本轮tab14已关闭，核对标签0，viewport恢复；Owner Chrome1277与网页38026/手动21051/自动28449/YOLO13522/copier23135进程保留，四组巡检仍启用15/15/240/1440分钟。无预览/确认/撤单/扫描/计划写入，无服务重启，无整体提交共享main的混合改动。
+
+## 最新进度：信号 / 均线密集 / 账户交互与性能回归（2026-10-17）
+
+- 主代理直接处理，未委派。自动账户从每轮两次整面板替换改为固定控件和分区更新；内容不变不替换明细，变化时保留表格两轴滚动与焦点。页签使用 roving tabindex。读取增加15秒超时，文档隐藏时停止定时器并取消读取，旧响应不能覆盖恢复后的状态；权限拒绝清除隐藏值。过时快照不再显示绿色已连接。
+- 信号表现图先比较数据与尺寸，再生成配置 / resize；观察器仅在可见表现分析子页启用，离开取消待执行帧，闲置60秒释放实例。浏览器离开94秒后 SVG 从2变0，返回恢复2张。读取阶段明确显示读取中，不再暂时显示0笔。统计口径和完整退出序列不变，记录页仍为卡片。
+- 均线密集在首次目录 await 前建立导航版本；逆序响应不能清空后选周期。未检测周期清除旧形态和加载状态，异步切币不再把焦点抢回旧币种。专用账户返回改为同工作台页签操作，保留币种、周期、历史任务和视角，不强制改为最新总览。旧界面实测 CT/15m 变为 AERO/5m；修复后桌面 CT/15m、手机 APR/5m 均原样返回。
+- 验证：446项前端测试通过，4个修改JS语法通过；真实浏览器检查信号搜索/清除/卡片详情/累计R与回撤、图表闲置释放和恢复、六条均线/连续切币切周期、专用账户历史与键盘End页签、自动账户轮询。自动账户表格焦点保留，页签nodeId86跨轮询不变；390px账户与检测页无整页横向溢出，信号两图重排为332px。
+- 原始验收在 output/frontend-high-frequency-20261017/：frontend-tests.txt、browser-checks.json、service-health.json及三张截图。浏览器error/warn为空。IAB临时tab13已关闭并核对列表为空，viewport已恢复；Owner Chrome1277和网页/执行/巡检服务保留，未重启服务，未触发预览/确认/撤单/扫描/计划变更。沿用main，未提交共享混合工作区。
+
+## 最新进度：前端性能专项优化（2026-10-17）
+
+- 完成 Owner 要求的本轮七类性能优化及页面样式按需加载：494 币全市场仅挂载可见行并保留全部排序/搜索、70px 行高、完整滚动范围与键盘 Home/End；缓存上限 chart/context 各16、spark32，离开60秒释放；同 URL 读请求合并并按页面取消。
+- 市场/检测图使用增量 series 更新，无变化不提交，较早历史修正/滚动窗口仍全量正确替换；六条源均线数值不改。检测十字光标使用时间索引，读数按帧合并且同一根数据不重写。日期格式器复用。检测结果不变时跳过币种列表构建。
+- 检测内部模型/历史/巡检页不再轮询账户；结果顶部只读 summary，账户页继续完整读取。GET summary 保留原账户新鲜度及 entry_status，仅返回权益，未改变执行门、逐笔确认或两个账户隔离。实际未压缩响应398B vs full36827B；模型页78秒账户请求0次。
+- 市场主图不等 context/history，研究数据仅打开历史页时读取；区域字符串/解析结果缓存且图表子节点独立保留。浏览器核对切换历史/笔记/最近记录主图 nodeId84不变。全局增强监听收窄到当前页面的结构变化，隐藏运行面板不再周期重建；两份专属CSS改按路由加载并保留原级联位置。
+- 验证：434项前端测试通过，139项手动账户/执行回归与层间边界测试通过；10个JS语法通过。真实桌面与390px检验全市场涨跌排序/搜索/End末尾/移动抽屉选币、六均线、账户摘要到完整账户、市场分区与信号卡片。CSS固定行高在浏览器逐行实测70px；未安装额外解析依赖。
+- 本机全市场空闲采样，原56.08秒主线程任务3195.2ms；最终60.78秒556.3ms，按时长折算约下降84%。初次优化样本61.18秒395.7ms（约89%）；不同页面访问状态有差异，不作为FPS或长期内存泄漏结论。原始结果在 output/frontend-performance-20261017/，无额外报告。
+- 最终截图 `output/frontend-performance-20261017/market-final.png`。IAB 临时 tab12 已关闭并核对列表为空，viewport 已恢复；控制台无 error/warn。收尾再次确认账户/巡检服务可读，原四组周期与 enabled 保持。
+- 网页 LaunchAgent 28425 正常TERM后恢复为38026以启用摘要接口；自动28449、手动21051、YOLO13522、跟单23135与Owner Chrome1277保留。两执行心跳新鲜无错，四巡检仍enabled、15/15/240/1440分钟；扫描1960/1960 idle。未发送预览、下单、确认、撤单或巡检变更请求。本轮主代理直接完成，未委派、未切分支/建worktree、未整体提交共享混合改动。
+
 ## 最新进度：V13.1 30m / 4H 各方向倒数20币（2026-10-17）
 
 - 原15m/1H实验无30m/4H账本，本轮复用已迁移638币Binance5m历史补跑1276流；2023-01-01至2026-09-23 04:00 UTC，Nov2022预热、原回踩/止损/2R/4ATR/20bp。7045闭合、27截断；无下载、无新内容哈希。
@@ -252,16 +409,368 @@ Latest separate UI instruction: removeV2.9 entry selector;5m/15m charts automati
 - 28项测试、BTC/ETH旧15m的59笔和信号中心30m/4H的41笔生命周期对齐；1699逐币方向行、8名单、24比较组及13952独立标量核对通过。全期按名单重放占用，新增/替换均0，保留6575笔、808.406906R。未将30m/4H名单加入信号中心。
 - 结果与80行中文剔除名单在experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/results_v1/；builder31ad577166先提交后跑。原始stream本机保留，合并账本/CSV/收据登记；经验docs/learnings/live-timeframe-support-does-not-prove-backtest-coverage.md。研究与生产资格false，默认不另建报告。
 
+## 2026-10-17 高频模块缺陷修复
+
+- Owner要求继续查高频模块bug与交互细节，主代理直接完成，未委派。范围：市场放大图、信号筛选/页签/卡片、均线检测切币切周期、专用账户只读明细。
+- 实际复现并修复：币种候选第一次向上少选末项；裸信号路由残留旧筛选，pane/layout切换缺少返回步骤；市场放大图的搜索快捷键穿透；账户5秒轮询丢失链接/表格焦点；检测切周期焦点掉到body、切币后展开状态标错。卡片详情按信号身份保留刷新焦点。
+- 市场放大改为原生dialog，移动原图表节点，补币种标题、Esc退出提示、背景滚动/搜索隔离及路由退出清理。信号新增只清搜索的按钮。账户固定标题/入口、保留表格双向滚动与订单按钮身份，金额统一两位展示，表头/币种列固定、手机页签44px；计算和交易逻辑不变。
+- 426项前端测试通过（新增9项），7个JS语法、2个CSS解析、定向diff检查通过。真实浏览器验收默认路由、页签返回、候选首末、清空、图表Esc/返回、桌面与320px、账户轮询焦点/滚动、检测周期焦点与栏状态；证据在 `output/frontend-bugs-20261017/`，未另建报告。
+- 无交易/预览/扫描/巡检变更、无服务重启。核对信号10条、手动6条，手动请求confirmed6/preview11/superseded17不变；账户errors为空，四巡检仍启用15/15/240/1440分钟。没有整体提交共享main的混合改动。测试IAB tab10已关闭，标签数0，viewport恢复；Owner Chrome和后台服务保留。
+
+## 2026-10-17 前端细节再整理
+
+- 本轮按实页问题改市场、信号与均线工作台及共享焦点/读数组件。市场周期移入图表工具栏，搜索清空/Esc/方向键、全市场单 Tab 入口；手机选币后焦点回标题。共享导航焦点包含输入/选择框。
+- 信号筛选移到卡片上方，桌面1487px三列卡片；手机折叠仍显示具体条件，提供清除筛选，卡片显示绝对收盘时间。尊重此前取消 TradingView 跳转的约定，去掉残留“点击展开K线”提示。
+- 均线工作台可收起币种栏并记忆；合并工具栏，跟随行情/重新检测进入设置；手机去掉重复币种下拉与周期标题，页签横向滚动。六均线显示精度变为六位有效数字，源数值/计算不变，完整值在提示。
+- 读取失败提示增加中文自动重试说明，恢复后由原刷新流程清除。验收中服务曾重连，确认后台恢复，未由本任务重启。
+- 417项前端测试通过，JS语法/CSS解析与diff空白检查通过。实测市场494币涨跌排序、清空/Esc/方向键/首末项、信号筛选清除/详情、币种弹窗/焦点/栏展开、图表设置，检查1487/1024/390/320px及信号浅色。证据在 `output/frontend-details-20261017/`。只核验本轮改动路径，不代表重新验收全部业务流。
+- 未提交订单/启动检测/修改巡检。收尾账户 errors=[]，信号10条、手动6条；手动请求 confirmed6/preview11/superseded17，四计划仍启用15/15/240/1440分钟。后台运行保留。
+
+## 最新进度：全站共享动效层（2026-10-17）
+
+- Owner指出整个前端缺少动画。本轮主代理直接完成，未使用子代理。新增 `workspace-motion.js/css` 与共享 120/220/280ms tokens：路由淡入、冷加载首个可用内容、信号最多六卡错峰、任务页签、原生弹窗进出、研究抽屉、导航滑动、说明展开、按压/悬停和加载提示；市场记录分区、信号工作区与 VLM Shadow DOM接入。顺带修正全局搜索框宽度和焦点样式。`DESIGN.md`同步动效契约。
+- 动画不等待业务提交或焦点切换；不克隆表单/图表，不重绘K线，不给报价做数字滚动。轮询不重播卡片入场。快速切页撤销旧动画/首屏观察，减少动态效果覆盖 JS、backdrop、details伪元素；关闭弹窗立即停止拦截指针。
+- 验收：414项前端测试、2项资源缓存测试通过；3份CSS解析及JS语法通过。真实浏览器检查27路由入口及共享动效资源，另实测市场记录、信号卡片与刷新、均线页签/方向键/新建检测弹窗（未启动）、VLM页签、390px导航抽屉/焦点/筛选、原生说明与reduced-motion。保存计算样式中间帧（非仅截图断言），证据 `output/frontend-motion-20261017/browser-motion.json` 及同目录截图/测试。27入口检查不等于重做每页全部业务流程；外部TradingView仍有原有contentWindow异常，未修改其组件。
+- 收尾IAB临时tab7关闭，tabs为空，viewport与媒体模拟恢复；Owner Chrome1277、网页21018、手动21051、自动97511、YOLO13522和跟单23135保留。未重启服务或发交易操作；最终心跳正常、errors为空、4巡检仍enabled且15/15/240/1440分钟。期间运行账本自然变化至自动10/手动6、confirmed6，不能宣称账本未变；本轮没有确认/预览新单。经验 `docs/learnings/motion-must-follow-user-intent-not-polling-renders.md`。共享main混合修改未整体提交。
+
+## 最新进度：均线密集手动开仓阻塞修复（2026-10-17 19:23 北京）
+
+- Owner反馈持续“正在核对账户与原订单”。实际有两层原因：手动worker仍报account-isolation旧revision，而API比较已更新的自动信号revision；另SAND系统212张后被外部加1744张，再以reduce-only单全平1956张，OCO canceled，本地仍exit_needed。真实只读GET确认当前无仓位，没有为修复发交易所POST。
+- 新增manual_reconciliation，只在唯一系统lot、两次账户平仓读、原保护结束、无该币待成交单、入场后的完整reduce-only成交证明均齐备时结束本地旧单；保留完整回执，不分配外部合并平仓价格或PnL。其他冲突继续阻塞。手动与自动revision分离，手动为manual-flat-reconcile-20261017-v1。
+- 新增GET readiness，账户连接/执行就绪/具体阻塞分开显示。工作台顶部常驻账户状态；票据阻塞说明放顶部，转到持仓与订单，GET轮询恢复不自动创建或确认订单。订单风险/保证金/张数移到设置旁，手机先参数与金额再图表。
+- 312项执行层与边界回归、408项前端回归通过；后补2项版本/API测试后的20项对账专项、最终55项前端定向检查通过。真实浏览器FIL两次预览均到可确认按钮，未点击确认；3次原确认、3条执行记录保持，preview11/superseded17由这两次只读报价预览产生。SAND已closed/external_flattened，errors=[]，自动账户9条保持，四巡检15/15/240/1440仍启用。
+- 原手动91058正常SIGINT退出后通过原LaunchAgent启动21051；网页原20789正常退出，KeepAlive重启21018（此前本轮网页19286→20789）。自动97511、YOLO13522、跟单23135、Owner Chrome1277保留。无配置/阈值/仓位/巡检变更，原确认不清空。测试IAB tab6关闭，viewport恢复，临时标签0。截图和健康证据在output/manual-entry-20261017/。未整体提交共享main混合改动，未使用子代理。
+
+## 最新进度：全站终端布局深化与市场第二轮优化（2026-10-17）
+
+- Owner要求继续重构全部页面，并继续优化市场；本轮遵守“暂不使用子代理”，由主代理直接完成。共享 main，无分支/worktree，无服务重启或交易操作。
+- `workspace-terminal.css` 统一主记录区 + 264px 侧栏、表格/详情、阅读画布和移动布局；各模块模板明确布局区域。`workspace-panels.js` 提供稳定 DOM 的任务标签、键盘切换、手机筛选折叠与说明状态记忆。覆盖信号、数据集、模型、因子、实验、回测、策略、YOLO/VLM、知识/内容/书架/阅读、个人交易/模拟/Arthur、通知/运行。平台与运行页分区化，个人交易把当前任务提前；模拟运行设置右置，结果列表有界；Arthur 处理记录与采集依据分栏。没有修改交易参数、准入门或执行逻辑。
+- 市场增加真实 MA/成交量系列开关和重置，优化时间轴、报价层级及记录区；窄图初始/重置显示 60 根，桌面 100 根。继续使用现有真实行情、观察记录和版权标识。修正体系业务入口的 `research` 路由白名单遗漏、历史入口返回路径、手机长状态标签溢出和模型表头列对齐。
+- 验收：401 项前端测试通过，15 个相关 JS 语法、3 个共享 CSS 解析及定向 diff 检查通过。27 个主路由在 1487px / 390px 实际访问，最终两组整页横向溢出均为 0；4 个关键路由另验 1024px。3 个历史入口保留运行管理上下文。实测市场图表开关、平台/运行分区、Arthur 键盘页签、筛选折叠保值、知识草稿跨页保留、深浅主题及模拟区间图；临时草稿通过刷新清理，未保存记录。截图、布局、交互原始记录和测试输出在 `output/site-terminal-20261017/`，无另建报告。
+- 限制：外部 TradingView 嵌入仍出现第三方 `contentWindow` 异常；内置区间图已加载真实 OHLC，测试后恢复原图表偏好。VLM 余额不足与 Arthur 心跳缺失仍按后端实情展示，没有借 UI 调整清除异常。
+- 收尾临时 IAB tab3 已关闭，viewport 已恢复，工具会话无残留测试标签；未新开 Chrome，Owner Chrome PID1277 保留。原 7 个进程仍在，信号/手动账户不同，账本 9/3，confirmed3、preview10、superseded16 均未变化；4 巡检仍 enabled，周期 15/15/240/1440 分钟。手动账本原有归属错误仍保留，未处理仓位。最终健康证据 `final-after-browser.json`。
+- 规范同步到 `DESIGN.md`；必要经验 `docs/learnings/workspace-redesigns-must-preserve-state-and-verify-route-edges.md`。未整体提交共享目录的混合改动。
+
 # HANDOFF — 给下一个会话/模型的执行路线图
 
 ## 最新进度：V13.1 逐币多空历史排名（2026-10-17）
 
+- Owner已明确授权把四组全历史倒数20币用于信号中心（非前期名单/合并名单）。新增`signal-universe-20261017-bottom20-v1`，保留原全周期10币；扫描新记录、通知发送前、自动源、准备/提交和等待重试均按周期方向过滤。旧记录/仓位继续退出，手动账户保留原范围。377项后端、40项前端通过；广门禁另有8项既有文档/归档路径/旧登记失败，证据保留。自动97511已退出，新28449运行新revision；网页原21018已退出，LaunchAgent新28425、扫描28432；手动21051保持。原账户配置、执行/通知切点、10/6条账本及原订单ID保留；四巡检仍enabled，15/15/240/1440分钟。实时API核对四份20币名单、5条旧记录不标新鲜，扫描当时474/1960零错。原始证据`output/signal-bottom20-20261017/`；Notion追加唯一键`signal-center-bottom20-20261017-v1`，研究证据等级保持不确定。无测试订单/通知，无浏览器测试，无整批提交共享混合改动。
 - Owner追问剔除收益倒数20币：按各周期多/空独立全历史名单剔除后，15m多/空+243.22/+658.09R、PF1.080/1.213；1H多/空+212.59/+289.99R、PF1.225/1.395。此为事后删亏损。用2025年前已闭合交易选名单再看后期，总R变化依次+39.06/-15.54/+10.22/-6.97；15m空头平均R/PF仅微升，1H空头均下降，不能冻结为已验证黑名单。另存每周期多空合并一份20币名单的结果。原始bottom20_20261017 JSON/CSV与独立1044项复核同目录，builder先提交b3c4d79a6f；经验`bottom-symbol-exclusions-need-future-period-denominators.md`，无生产规则变更。
 - Owner追问统计含义：已补算集中度与2025切点前后持续性，原始`ranking_diagnostics_20261017.json`及独立复核同目录。15m多头去掉最大单后从+16.71R变-37.21R；1H空头去掉最大1%盈利交易仍+112.50R。前段累计R前十币在后段15m多/空为-10.07/+12.79R，1H多/空为-6.78/+0.11R；前后逐币平均R排名相关-0.146至+0.120。仅描述性回看，匹配对照稀疏，不支持把全历史榜直接变白名单。经验`symbol-profit-ranks-need-chronological-persistence.md`，原资格不变。
 - Owner要求15m/1H按币种、方向汇总并按累计净R降序。复用原始结果，共2307行分组、14502笔已结束交易；15m多/空5372/5773笔、+16.706171/+471.305497R；1H多/空1765/1592笔、+111.077235/+198.932209R。完整CSV与可筛选Excel在`experiments/active/exp-spike-v131-symbol-summary-20261017-v1/results_v1/`，保留原成本20bp，资格均false。
 - 15m只取both/closed，避免重复计单向实验，20笔censored不算收益。1H是原retest/trail2固定入场退出重放，未重放提前退出后的新增入场；原3357笔包含19笔2022年12月入场（-3.986849R），本次保留并注明实际窗口，不能统称2023年起的同窗结果。
 - 原summary对账、独立标准库2307组复算、Excel2311行公式核对及导出结构/视觉检查通过。保留原匹配对照，缺失不补；15m多/空713/787对，1H多/空296/291对。RAVE15m多与ALPINE1H多榜首分别仅3/2笔，主要由单笔53.92R/25.62R贡献，净R公式与原风险对齐，不构成可成交或泛化验证。
 - Builder先提交`1c76f9da4a`再运行；两个registry登记，Notion原研究`3fa8856479af8152ae1bca1fb534c805`追加唯一键补充并回读确认。经验`archive-grouping-must-check-actual-trade-window.md`。未做新行情回测、内容哈希、浏览器测试或运行服务变更；没有新报告。
+
+## 最新进度：按 Owner 重新贴出的终端图纠正市场页构图（2026-10-17）
+
+- Owner 指出上一轮网页与概念图不一致。本轮以 `docs/design/references/linear-owner-target.jpg` 为直接视觉基准，新增 `market-terminal.js/css`，将市场页真正拆为 70px 功能栏 + 280px 行情列表、报价/周期工具栏、主 K 线、右侧依据/价位、底部记录。1487×1058 实测主图 x366/y202、829×536，记录 y754；更新 `DESIGN.md` 明确构图优先于只统一 tokens。本轮纠正的是市场页，不把此前 27 路由测试冒充全站逐图还原。
+- 搜索、自选增删、六币真实报价和趋势、切币、15m/1H/4H/1D、图表缩放/十字线、时间过滤、本地笔记、移动抽屉与返回导航接入现有页面生命周期。15m 复用已有 context 行情；日线仅用六根连续完整 UTC 4H 聚合，MA 不足显示缺样；过期/更新失败有可见状态。保留图表署名及图标许可证，不复制概念价格或示例记录。原观察设置、收益口径和研究功能保留，未修改后端交易/阈值/巡检。
+- 400 项前端测试全过，JS 语法和 CSS 解析通过。实际验收切币/周期、自选、搜索快捷键、笔记保存并恢复空内容、时间过滤、标签浏览器返回、跨工作区回来后自选按钮、390px 抽屉及 1024px 排版；无 console error/warn。修正中屏标题挤压、返回后的重复事件绑定与图表过期提示。最终截图 `output/linear-fidelity-20261017/market-final.png`、`market-mobile.png`，原始布局/测试/健康结果同目录；未生成额外报告。
+- IAB 本次临时 tab2 已关闭，viewport 恢复，核对只剩 Owner tab1；无新 Chrome。原七进程全部保留，两个账户不同，账本仍信号9/手动3、confirmed3；四巡检仍 enabled，15/15/240/1440 分钟。两执行心跳新鲜；手动归属错误 `exchange positions do not match owned signal lots` 仍在 errors 中，未处理仓位或清除记录。未触发下单/确认/撤单或服务重启。
+- 子代理实际模型档位无法核对后停止，主代理完成；共享 main 未整体提交混合改动。经验 `docs/learnings/visual-fidelity-requires-composition-not-only-tokens.md`。
+
+## 最新进度：全站 Linear 工作区结构与交互重构（2026-10-17）
+
+- Owner 选定第二张 Linear 深色概念，要求全部页面一起重构。`DESIGN.md` 已替换先前 NerdWallet 规范；来源固定为 VoltAgent commit `3b605329240ce735b510037cca322f1831fdd7f8`，参考图及源文档在 `docs/design/references/`。这是社区设计分析，不是官方 Linear 组件库。
+- 27 个主要路由改为六个工作区的功能栏 + 上下文菜单，加入菜单过滤、页面索引、分组位置记忆、键盘导航和密度切换。市场改主图 + 右侧判断/价位 + 下方分区；信号改可展开列表；数据集改目录行；研究改主列表/侧流程；知识改列表/编辑双栏；阅读页、通知页、YOLO/VLM 与模拟交易台统一组件和各自布局。VLM Shadow DOM 显式接入共享 tokens。交易台保留图表节点与原表单/账本状态；没有下单、确认、改仓或改变巡检配置。
+- 验收：394 项前端测试通过；14 个相关 JS 语法、共享 CSS 解析与定向 diff 检查通过。27 路由桌面及 390px 实际访问，手机 document width/scrollWidth 全为 390。实测搜索、工作区恢复、移动抽屉/选币、数据集展开/文件详情、知识编辑查看、研究详情/Escape、市场分区浏览器返回及深浅主题。必要截图与原始结果在 `output/linear-ui-20261017/`，最终首屏 `market-final.jpg`、`datasets-final.jpg`、`research-final.jpg`、`paper-desk-final.jpg`；没有另建报告。
+- 外部 TradingView iframe 本次曾返回空白文档，并有第三方脚本 contentWindow 错误；内置区间图正常。增加可见的重载/切换提示，隐藏时延后初始化，重试入口已操作验证；不宣称第三方图表内容已恢复。VLM 原有余额不足 HTTP429 暂停、Arthur 采集心跳缺失、旧数据集索引缺失记录均如实显示，未自动修改这些服务状态。
+- 收尾 Chrome 临时标签 977882588 已关闭，之前的 977882578 也不在列表，viewport 已恢复；使用现有 Chrome，未启动新的浏览器进程。两执行账户仍不同，信号 9 笔/手动 3 笔，确认请求 3；四巡检仍 enabled，周期 15/15/240/1440 分钟。手动 worker 心跳新鲜但报 `exchange positions do not match owned signal lots`，两次只读复查持续存在；没有作为 UI 问题清除或操作仓位。原进程及 Owner Chrome 保留，具体最终心跳见 `final.json`。
+- 共享 main 未整体提交混合改动。子代理调用无法核对实际模型/档位后已停止，由主代理完成。经验：`docs/learnings/ui-rebuilds-need-layout-ownership-and-real-state.md`。
+
+## 最新进度：信号中心小幅时钟领先误拒已修复上线（2026-10-17 16:16 北京）
+
+- Owner问两笔自动实盘失败并继续要求直接市价开单。15:45 IMX15m空头、SAND15m多头反复`retry_pending/quote_stale`，交易所ticker领先本机约0.5–1.9秒，原自动`Engine.prepare`将负年龄统一拒绝；手动入口已有的等待修复未覆盖自动入口。CFX15:30空头同因31次重试后16:00到期。两笔都没有入场intent；SAND曾走到杠杆设置，不等于已经发入场单。
+- 自动入口现对原preflight容差内（≤5秒）的领先有限等待一次，再按原0–5000ms报价年龄及30分钟信号期限重检；保留真实响应/交易所时间，新增校验时间、等待耗时、原始接收年龄。原`ordType=market`/无`px`保持，多空均只发一次；125U/2%、全仓、最高档位、冻结止损、两账户隔离与未知POST只对账保持。
+- 44项定向测试、294项执行层/层间边界回归通过。真实只读IMX/SAND原年龄-1037/-1561ms，等待1043/1566ms后年龄6/5ms，成功计算1373张20倍/109张50倍；这只是当刻只读报价，没有直接发测试单。
+- 16:14:56信号78774正常SIGINT退出并释放锁，原session启动97511，revision=`signal-clock-wait-20261017-v1`。账本未清空，原cutoff=1792158236572及配置逐值相同。第一轮处理时两条15:45信号已过16:15期限，均`skipped/signal_expired`且无intent；没有补开。修复后新自然信号成交尚未验收，不设新AI定时任务。
+- 真实GET确认USO0.15多/STABLE20空入场均market/filled，原SL144.61/0.02753均live且方向/数量/归属匹配。16:16两执行心跳正常无错、UID不同；手动91058、网页91400、扫描91407、YOLO13522、跟单23135、OwnerChrome1277保留。4巡检仍enabled、周期15/15/240/1440分钟；扫描1387/1960零错仍进行，未宣称全轮完成。本轮无浏览器，无新增调度。
+- 代码只改`engine.py`及对应测试/README，保留共享main其他改动，未整体提交。诊断、真实只读准备、重启与保护/健康证据在`output/okx-clock-diagnosis-20261017/`；经验`docs/learnings/clock-lead-fixes-must-cover-each-execution-entry-path.md`。子代理工具此前无法回显实际模型/档位已停止，本轮由主代理完成。
+
+## 最新进度：均线密集工作台改为紧凑列表并接入成熟组件（2026-10-17）
+
+- Owner 要求币种卡片缩小、周期单行、优化整体交互。本轮范围为均线密集工作台与手动预览。桌面币种行实测63px，四个检测周期同一行；统计/账户压为窄条，K线起点从约665px上移至399px，常用看图按钮保留，显示/导出收进设置菜单。重复说明折叠，手动票据减少留白，价格图优先。
+- 实际引入 Bootstrap5.3.8 的按钮/表单/导航/dropdown 与 Tabler Icons3.49.0；`yoyo/monitor/ui/`含锁定依赖与可复现构建，输出本地静态资源，无CDN。CSS限定`.spike-ui`，未导入全站reboot、布局或modal控制器；只加载dropdown+Popper。现有主题token、原生dialog、事件/API与两个账户边界保留。
+- 桌面/390px/深色真实浏览器通过：列表周期单行，宽度无溢出；菜单支持Esc/方向键/外部关闭，勾选不收起；手机选择周期关闭picker并将焦点回图表。修正打开picker自动弹搜索候选遮挡列表，手机输入16px、点击区域38–40px。真实AKE多头只读预览成功，六均线和盈亏框可见，未确认或下单。
+- 70项相关前端测试、JS语法与定向diff检查通过；证据`output/compact-ui-20261017/`，最终桌面`07-final-desktop.png`、手机`03-mobile-picker.png`、深色`04-dark-menu.png`、票据`05-ticket-desktop.png`/`06-ticket-mobile.png`。无浏览器error/warn。后台无需重启；两个执行心跳正常、UID不同、手动账本仍2条旧记录/confirmed仍2，4巡检政策不变；扫描860/1960零错仍运行。未新增定时任务。
+- IAB临时tab11已关闭并核对列表为空，viewport恢复、主题恢复跟随系统，无新Chrome；网页91400/扫描91407、执行78774/91058、YOLO13522、跟单23135和Owner Chrome1277保持。子代理实际模型档位无法核实后停止，主代理完成；共享main未整体提交混合修改。经验`component-adoption-must-preserve-workflow-and-density.md`。
+
+## 最新进度：六均线止损、独立实盘账户与自动回执已上线（2026-10-17）
+
+- Owner 最终确认默认止损为最新已收盘 5m 的 SMA/EMA 20/60/120：多头最低均线减 1 tick，空头最高均线加 1 tick，再向外取整。此前单根 K 线极值、波段 2L/2R 方案均被替代。`manual_ma.py` 复用 workbench close 指标与 1,000 根预热，公共参考、图表和账户报价共用闭合快照；图上显示六线、边界来源及多空盈亏框。确认后的点位不自动漂移，实际成交后仍按固定 SL 重算 3R/5R TP。
+- 均线密集新增独立“实盘账户”页：总权益、可用保证金、浮盈、3% 风险，持仓、普通挂单/保护、最近 7 天最多 100 笔交易所历史、最近 50 条系统开仓记录；历史失败不抹掉有效持仓。复用信号中心展示和安全序列化，明确只读手动 runtime，无信号账户回退。全量非终态自有账本决定归属，原有外部仓位仍显示自行管理。账户自动刷新；弹窗确认后每 3 秒查询，按钮改“查看持仓与订单”，不再要求点刷新。
+- A 与 DOT 两次旧请求均已 skipped，分别因 preview expiry / expiry before leverage；无 entry_price。A 确认后约 95 秒才被处理，旧手动 worker 的空闲串行交易所读取阻塞了队列。现空闲先检查队列，零自有仓且无新确认时不发 GET；有请求仍执行完整新鲜检查。独立 ManualClient 仅对 GET 连接复用、每阶段并行/去重，POST 不重试；信号执行路径不改。真实只读账户+归属读取 3.584 / 2.344 秒，不是完整成交时延承诺。开仓已有 `ordType=market`、无 limit px，增加明确断言。
+- 最终 285 项执行层/边界测试、63 项相关前端测试通过。浏览器真实 CT 空头预览：15:40 收盘 SMA120=0.3757291667 为最高线，tick=0.0001，SL=0.3759；参考价0.3437、3R TP0.2471、16张/20倍/保证金2.7496U。截图 `output/manual-ui-20261017/ma-live-ct.png`；已保存报价来源 `ma-live-preview-last.json`。未确认、无真实交易写请求。模拟长/短、3R/5R、390px及自动状态推进通过，模拟成交不能冒充真实成交。
+- 真实独立账户页与历史/保护已验收，截图 `account-live-final.png`、`account-live-history.png`。自动更新时间从15:45:59推进至15:46:19；期间交易所账户 SAND 在15:45:42出现市价卖出成交，随后只剩 FIL，此为外部账户变化，不是 QA 发单。系统账本仍仅两条旧 skipped；不宣称新手动成交与保护已真实跑通。
+- 手动 worker 80262 正常退出后重启为91058，revision=`responsive-manual-20261017`；主站88237→91093→91400，扫描91407沿用checkpoint。信号78774、YOLO13522、跟单23135、Owner Chrome1277保留。最终两账户UID不同、心跳正常无错，4巡检策略/频率/enabled不变，无新AI定时任务。收尾扫描653/1960、零错，未宣称本轮已完成；证据 `account-ma-final-health.json`。
+- 8769模拟服务90768已精确退出且端口关闭，旧web/scan/手动worker均退出。IAB最终验收tab10已关闭，viewport已恢复，未创建Chrome；重载瞬间tab9成为data错误页，关闭被浏览器URL策略拒绝，未标记保留，待回合自动清理，不能宣称所有临时页已核实关闭。共享main未整体提交混合改动。子代理实际模型/档位无法核实后停止，由主代理完成。
+- 经验：`manual-queue-checks-must-precede-idle-network-reconciliation.md`、`order-ma-boundaries-must-share-the-chart-snapshot.md`、`reuse-account-presentation-without-sharing-account-state.md`。保留每笔Owner确认、远程入口授权及原账户隔离，不接管外部仓位。
+
+## 最新进度：核对5m止损来源并修正时间标注（2026-10-17）
+
+- Owner质疑高低点。当前规则仍是Owner先前选择的“最新一根已收盘5m K线”，不是5m图上的波段高低点。已发异步问题确认其语义，尚未收到答复，不自行改变止损/仓位参数。
+- 对保存的PARTI原报价时间直接读取OKX原始历史数组，15:00–15:05高0.03345、低0.03330，与stop_candle及图表逐值一致；未发现该例OHLC取错。发现提示原只写收盘15:05、横轴用开盘15:00，容易被理解为另一根K线。按钮改“上一根5m K线”，显示完整开闭区间；图上箭头绑定open_ms，只有实际OHLC与止损来源两端一致才标记，缺失或不一致明确提示。
+- 22项针对性前端检查、JS语法通过；真实浏览器PARTI15:05–15:10高0.03352/低0.03337的来源箭头验证通过，未确认订单。静态代码已生效，无服务重启。截图`output/manual-ui-20261017/stop-source-live-parti.png`；原始核对`stop-candle-audit.json`；健康`stop-source-final-health.json`。
+- IAB临时tab8已关闭、未修改viewport或开启Chrome；账户仍隔离，两个执行worker、YOLO、跟单、网页与Owner Chrome保留，四巡检策略/周期不变，无新增AI定时任务。子代理调用未回显实际模型/档位，已停止，由主代理完成。经验`docs/learnings/candle-stop-labels-must-use-the-chart-time-anchor.md`；共享main未整体提交混合修改。
+
+## 最新进度：先显示点位 K 线，资金检查失败也保留图表（2026-10-17）
+
+- Owner反馈PARTI做空的保证金拒绝仍只显示错误，要求先看到K线、止盈止损。新增只读公共`/api/manual-live/reference`，独立于账户/worker资格查询；图表立即开始读取，即使无价格也显示真实K线。公共参考只含展示字段，不创建确认身份或队列记录。失败回执附带该次准确三价，优先于独立公共报价，避免错配。市场越过止损时保留真实市价/止损，不伪造止盈框。
+- 页面在核对资金期间显示参考框，失败后保留图、三价与原因；3R/5R更新、编辑/切币/关闭时废弃旧结果，参考过期明确标记。手机首屏优先图表，390px无横向溢出。成功订单仍需Owner确认，未改风险/杠杆/止损规则或账户隔离。
+- 275项执行层/边界检查、62项相关前端检查通过。浏览器真实PARTI先出现行情图，再返回47,990张超过13,000单笔市价上限（该次参考0.03344、SL0.03345、3R TP0.03341）；截图原单则需388.43U/可用101.23U。先前本轮只读诊断也复现PARTI保证金不足，所需228.55286U、可用105.06694U，随行情不同不可混称原单。独立公共点位冷读13.724s、HTTP复查8.5s；K线暖读可先显示，并非固定秒数承诺。
+- 真实截图`output/manual-ui-20261017/reference-live-parti.png`；图及拒绝详情`reference-live-parti-detail.png`；模拟长短/3R5R/资金延迟和手机证据`reference-*-fixture.png`。真实读取和健康在`reference-live-parti.json`、`reference-http-parti.json`、`reference-final-health.json`。模拟账户不会连接执行器，本轮从未调用确认或交易所写请求。
+- 仅网页86612正常SIGINT重载为88237，扫描88244保留checkpoint；收尾1856/1960零错，不宣称本轮扫描已全部完成。两账户UID不同，心跳正常无错，四巡检策略/周期/enabled保持；78774、80262、13522、23135、Owner Chrome1277保持。IAB tab7关闭、viewport恢复，8769模拟服务88070已精确停止，旧web/scan退出。
+- 注意：收尾账本已有1条并行确认的A做多记录，状态skipped、原因manual preview expired or policy invalid、无entry_price；不能继续沿用上轮“confirmed=0/trade_count=0”的结论。这不是本轮浏览器验收提交的订单；未调整执行期限或管理现有仓位。
+- 经验见`docs/learnings/reference-charts-must-survive-order-eligibility-rejection.md`。共享main未整体提交混合改动，无新增AI定时任务。
+
+## 最新进度：手动订单加入 K 线与多空盈亏框，保证金拒绝显示明细（2026-10-17）
+
+- Owner截图A做多/最近5m提示保证金不足，后又提供CT成功预览截图并要求K线多空框。真实只读复查A：总权益159.6255U、可用90.4515U；买价0.11302、SL0.11247，870张、最高10倍，需98.3274U、差7.8759U。BEAT同轮需119.1272U、可用90.1906U。不是漏用最大杠杆或重复扣减；这些是复查时数字，不能冒充截图时行情。保留3%/原止损/最高档位，不自动缩仓或拆单。
+- 新`InsufficientMarginError`保留原异常文本和拒绝门，结构化409显示预算、张数、最高杠杆、所需/可用保证金及缺口。API仍不发交易写请求。
+- 新`manual_chart.py`和`manual-position-chart.js`：公共显示入口复用shared candle hub，100根已确认连续5m K线，缺口/缺最新失败；预览图默认聚焦最近一小时，可缩放/拖动/还原。盈亏框绑定本次服务端入场/SL/TP，多空自动镜像，3R/5R重预览；不画未来K线。图表与订单并行读取，20秒超时、重试、切币/关窗取消与晚响应隔离，图表失败不延长或改变订单有效期。
+- 后端268项执行层/层间测试、前端50项通过，后续图表超时/视角调整后定向20项再次通过。模拟订单验收多头/空头、5R、错误提示、图表失败、390px深色无横向溢出；真实CT空头默认止损预览成功：398张、20倍、入场0.3499、SL0.3511、3R TP0.3463、保证金69.6301U。真实图表100根至14:50北京，浏览器无error/warn；60秒到期后确认按钮消失，只有更新报价。未确认，手动trade_count=0/confirmed=0。
+- 只重载主站84249→86612，扫描86628，收尾1621/1960零错；信号78774、手动80262、YOLO13522、跟单23135、Owner Chrome1277保持。账户UID不同、心跳正常无错误，四巡检spec/enabled/周期不变，无新增AI定时任务。IAB唯一临时tab6已关闭、viewport已恢复，列表为空；8769隔离服务86428已精确停止、端口关闭，没有新Chrome。
+- 真实截图`output/manual-ui-20261017/position-chart-live-ct.png`，模拟手机截图`position-chart-mobile-fixture.png`，原始诊断`margin-diagnostic-a-beat-cfx.json`，健康`position-chart-final-health.json`。经验`margin-rejections-need-both-risk-and-collateral.md`、`order-charts-must-not-become-execution-inputs.md`。共享main未整体提交；子代理工具未回显实际模型后停止，由主代理完成。
+
+## 最新进度：预览再次提速，BEAT 市价上限提示可核算（2026-10-17）
+
+- Owner反馈5秒仍慢，并报告BEAT做多、最近已收盘5m低点止损预览超单笔市价上限。只读核对合约`ctVal=10 BEAT`、`maxMktSz=7000张`、`lotSz=0.1`，单位没有读错；失败当刻报价未留存，不能声称完整重现原单。实查权益约157.4722U；明确假设买价0.07697、SL0.07691时，3%预算4.724166U需7873.6张，确实超过上限。真实复查时市价已低于默认止损，返回另一正确拒绝。
+- `MarketOrderLimitError`保留原异常文本/拒绝条件，额外返回预算、两价、距离、合约面值、所需张数与上限；API结构化409，页面显示具体计算明细。没有自动降风险、拆单、加宽止损或修改杠杆，两个账户及3%/3R5R规则保持。
+- 预览改为接口级限速（同接口类型/分页共桶），ticker与账户查询重叠；使用时仍检查原0–5000ms年龄，过期重新取价，失败不退回旧报价。连接保活120秒不缓存业务响应，每次仍检查余额/持仓/全量挂单/档位。只读同进程实测冷5.905秒、暖2.068/2.410秒；上线后真实HTTP为6.229/3.442/2.541秒。首次连接与网络尾延迟仍存在，不承诺每次2秒。
+- 261项Python执行层/层间回归、42项前端检查通过，JS语法与定向diff检查通过。模拟BEAT结构化错误的桌面及390px页面验收可读、无横向溢出；截图`output/manual-ui-20261017/beat-limit-explanation-fixture.jpg`明确为模拟数据。真实HTTP只读预览成功，未确认、未发送交易写请求，手动trade_count=0/confirmed=0。
+- 仅主站82208正常SIGINT重载为84249，扫描84257保留checkpoint，收尾1690/1960、零错，未宣称新轮全部完成。信号78774、手动80262、YOLO13522、跟单23135、Owner Chrome1277保留；两账户UID不同、心跳正常无错，四巡检spec/enabled/周期不变。没有新增AI定时任务。
+- 临时IAB tab5已关闭、viewport已恢复，未创建Chrome；8769模拟服务84181已精确停止，端口与旧网页/扫描进程已核实退出。耗时与健康原始证据在`output/manual-ui-20261017/preview-latency-v2-*.json`、`preview-v2-final-health.json`。经验见`preview-concurrency-must-follow-endpoint-budgets.md`与`risk-budget-rejections-need-contract-arithmetic.md`。共享main未整体提交；子代理工具未回显实际模型后停止，由主代理完成核验。
+
+## 最新进度：手动订单预览提速已上线（2026-10-17 14:20）
+
+- Owner反馈“预览做空/做多计算订单太久”。根因是14次串行交易所GET、重复3次余额和反复HTTPS建连，旧耗时约49.4秒。新增`preview_reads.py`，4路并行、同一预览内余额去重、按合约依赖预取档位，ticker最后读取；每次预览重新获取账户/持仓/全量分页挂单，服务只复用连接而不复用业务响应或认证/cookie。
+- `Service.preview`使用独立engine副本，预览缓存不能进入执行器。仍无交易所POST，手动确认、两个runtime/UID、3%/3R5R、闭合5m止损、原报价与确认期限、健康检查和执行前重检保持。连接池通过路由lifespan关闭，兼容主站自定义lifespan。
+- 252项执行层及层间回归通过。真实只读3次耗时7.409/4.838/5.096秒，均12次GET；上线后HTTP为8.073/5.354秒。真实CFX15m页面预览成功（自定义SL仅验算、未确认）；另记录一次查询503后重试恢复，默认止损过近的保证金不足正确拒绝，不宣称网络永不超时。没有真实下单验收。
+- 网页PID80271正常SIGINT重载为82208，扫描子进程82215，checkpoint保留，收尾1473/1960、零错；信号78774、手动80262、YOLO13522、跟单23135保持。两个账户UID不同、心跳正常无错误，手动trade_count=0/confirmed=0，四个巡检spec/enabled/周期不变。未新增AI定时任务。
+- 原始耗时、复现脚本和真实截图在`output/manual-ui-20261017/preview-latency-*`、`measure_preview_latency.py`、`preview-speed-live.jpg`。仅创建IAB临时tab4，已关闭并核实列表为空；前轮遗留错误页也已由回合清理移除，未创建Chrome。共享main不整体提交混合改动。经验见`docs/learnings/preview-latency-is-a-network-dependency-problem.md`。
+
+## 最新进度：信号中心与均线密集已隔离为两个账户，手动入口已重做（2026-10-17）
+
+- Owner纠正：两个入口是两个不同账户，不是替换全站账户。**本节取代下方“新账户替换默认/旧账户只管理”的运行结论**。原信号账户已恢复到 `~/Library/Application Support/Fable/OKXExecution`，原凭据/账本/cutoff=1792158236572及125U/2%策略保持；默认CLI选择Engine，只消费自动信号。`com.fable.okx-execution.session` / PID78774继续开新信号及管理原USO、STABLE。
+- 新凭据仅在 `~/Library/Application Support/Fable/OKXManualExecution`，独立execution.sqlite3/manual.sqlite3、锁、日志、配置与worker；`com.fable.okx-manual-execution.session` / PID80262 / `worker-manual.plist`，只消费逐笔确认。UID绑定 `manual_account_policy` version=1/mode=manual_only_shared；专用runtime缺政策禁止启动，默认信号runtime含手动政策也禁止启动。两账户UID只比较不输出，已确认不同。旧previous目录已恢复回默认，previous管理标签已卸载，不能重新启动遗留plist。
+- Owner确认现有FIL/SAND多仓和BTC/ETH挂单继续自行管理。系统不接管；任意外部仓位/普通单/算法单占用该币种时拒绝新单（含反向仓），系统后续改保护/退出前精确核对自有币种数量和外部订单。分页覆盖全部挂单。并发Owner操作不具备交易所原子预留保证；不得把同币种仓位混合。
+- API与UI独立：信号中心账户接口读原runtime；`/api/manual-live/account`及全部手动预览/确认/回执读新runtime。YOLO增加账户条和图表上方预览按钮。弹窗重做设置/确认/成交保护步骤，3R/5R卡片、风险预算/保证金/三价带、固定底部按钮；修改废旧报价，过期不得确认，未知确认只查询原ID。保留Owner允许远程确认的口径，不新增仅本机限制。
+- 真实GET测得ticker领先本机571ms、public/time领先1.871秒。手动报价在原preflight的5秒时钟容差内有限等待，再按原0–5000ms报价门与原60秒preview截止重检；没有修改30分钟信号门或伪造时间戳。真实只读CFX自定义SL0.0600诊断成功：88张、20倍、参考0.05476、3R目标0.03904、保证金2.40944U、预算4.63389U、报价年龄6ms；仅验证计算，不是交易建议、没有排队/确认/交易写请求。真实UI默认SL当时保证金不足正确拒绝；旧1秒等待版本另一次UI仍误判，最终5秒版本已重载，最后的UI重载遇到临时浏览器错误页，未冒称最终真实UI成功。
+- 回归260项Python通过；最终增加角色防退化与5秒边界后，手动/隔离56项通过；前端51项通过，JS语法/定向diff检查通过。模拟账户桌面及390px浅深色验收覆盖3R/5R、非法/自填SL、报价过期、回执丢失仅一次确认、保护回执、历史返回与焦点恢复。无真实手动成交/止盈止损触发验收；新账户trade_count=0、confirmed=0。
+- 主站最终PID80271，扫描80283。前两次重载等1960/1960零错；最后为加载时钟修正，在新轮128/1960零错时正常SIGINT重载，持久checkpoint保留，收尾新轮已到193/1960零错，尚未完成全轮。原信号执行PID78774、YOLO13522、跟单23135、Owner Chrome1277保留；两个执行心跳正常无错误。四巡检仍5m/15m每15分钟、1H每240分钟、日线每1440分钟，没有新AI定时任务。
+- 必要原始证据在 `output/manual-ui-20261017/`，无密钥/完整UID。8769隔离服务PID79154已精确停止并确认端口关闭；临时IAB tab3已关。临时tab2重载期间成为data错误页，其导航、关闭和viewport reset均被浏览器URL策略拒绝；未标记保留，回合自动清理之前无法确认关闭/恢复，不能声称全部清理成功。未操作Owner日常浏览器。共享main混合改动未整体提交；子代理实际模型无法确认后停止，由主代理完成。
+- 经验：`entry-sources-must-own-distinct-account-runtimes.md`、`manual-tickets-need-visible-commit-and-receipt-states.md`、`subsecond-exchange-clock-lead-can-wait-without-aging-quotes.md`。历史账户替换笔记记录旧误解，不要拿它覆盖本节的Owner纠正。
+
+
+## 最新进度：OKX 新账户已连接，现有仓位管理范围待回复（2026-10-17）
+
+- Owner 明确授权“用刚发的凭据替换当前账户”。新凭据已通过只读身份、账户模式和权限核验，并保存为默认私有 runtime 的 `credentials.json`（目录700、文件600）；无密钥进入仓库或诊断输出。新 UID 与旧账本不同，期货账户/双向持仓、read_only+trade 权限；网页按凭据文件身份自动刷新，无需重启主站。
+- 新账户当时有 FIL、SAND 多仓及对应 OCO，BTC、ETH 买入限价挂单。均未被接管、撤销或更改。新默认账本与手动确认队列为空，未启动新账户执行器，也未伪造账户归属或设置 cutoff 绕过 preflight；不能称为已可开新单。已问 Owner：现有仓位/挂单继续由 Owner 管理、系统仅管理未来确认的新单（推荐），或接管现仓并另指定退出规则。收到回复后继续实现相应归属隔离，不重复询问是否更换凭据。
+- 原默认执行 PID75024 优雅退出、锁释放且无未决执行状态后，完整运行目录保留为 `~/Library/Application Support/Fable/OKXExecution-previous-20261017`，meta/trades/journal 迁移前后逐行一致。原 USO 多0.15张/SL144.61、STABLE 空20张/SL0.02753，交易所保护均live。旧账户在 session LaunchAgent `com.fable.okx-execution.previous-20261017` / PID77446 / `worker-manage-only.plist` 下继续管理，`entries_enabled=false`、心跳正常、无管理错误；不再接收新信号。
+- 新默认 `OKXExecution/worker-session.plist` 保留待启用；旧 `com.fable.okx-execution.session` 已卸载，不能把旧账本复制到新账户或盲目重启旧默认 plist。私有 `account-switch.json` 记录旧目录和标签。自动策略125U/2%、手动3%/3R或5R规则未改；无测试单、无转账、无新的AI巡检任务。经验：`docs/learnings/account-replacement-must-preserve-position-ledger-identity.md`。
+
+## 最新进度：均线密集手动实盘已接入（2026-10-17）
+
+- Owner规则：1R=当前交易账户总权益3%，交易所允许的最大杠杆；默认SL=最新一根已收盘5m K线低点（多）/高点（空），可手填；TP默认3R、可选5R。每笔必须在形态卡片“手动实盘”预览后点击确认。Owner明确取消仅本机限制，原免登录远程工作台也可确认；same-origin不是身份认证，不要误称已做Owner登录。
+- 新增 `manual_source/manual/manual_queue/manual_engine/manual_api.py` 与 `manual-live.js/css`。检测只作为已保存上下文，不promote、不变自动信号资格。网页使用只读交易所客户端，60秒预览冻结账户/风险/数量/保证金/杠杆/SL/R倍数，确认写私有队列；现有单写执行器共用归属账本，附带OCO并按实际成交均价校准TP。未知POST只对账不盲重试；手动单不调用SPIKE反向/跟踪退出。API totalEq为USD，经同回执USDT eq/eqUsd折算，资金账户不纳入。
+- 265项Python（含34项新实盘模拟测试）与48项前端检查通过；测试账户浏览器完成5R确认→成交→双保护核验，桌面/390px手机通过。真实HTTP只读RENDER预览：多752张、20倍、SL1.922、TP1.942、风险预算约3.76197U、保证金72.4552U；没有确认/实盘订单。后续真实UI报价越过默认SL时409阻止预览，符合当前价格核验；手填SL1.90后真实UI预览134张/20倍/风险预算约3.75777U/TP2.012成功，仍未点击确认。交易所曾短暂GET超时，拒绝预览后恢复；不承诺网络永不失败。
+- 执行PID70880→75024，revision=`manual-yolo-20261017-v1`；原cutoff1792158236572、自动配置125U/2%保持。原扫描1960/1960、0错后重载主站26159→75209，扫描子进程75221新轮1960/1960、0错。YOLO13522、跟单23135、Owner Chrome1277保留，4个巡检spec/频率/enabled一致；没有新AI定时任务。原有USO与STABLE两仓继续原策略管理。
+- Owner另贴了一组三段凭据；本节交付时尚未替换，后续已授权并切换，当前状态以顶部账户切换记录为准；禁止复述凭据值。
+- 临时Playwright会话`fable-manual-live-20261017`及其8个进程已退出，8769临时模拟服务已关闭；收尾服务心跳正常、实盘确认0条。原始验收材料：`output/playwright/manual-live-20261017/`；经验：`docs/learnings/manual-confirmation-must-bind-risk-and-share-ownership.md`。没有真实新手动成交/TP或SL触发验收；不要为测试发真实单。共享main混合改动，未做整体提交。子代理模型不可核实，任务由主代理完成。
+
+## 最新进度：MINA 漏开缓存观测时钟已修复上线（2026-10-17 12:22 北京）
+
+- MINA 30m 多头 `9ad61fb8a81087b7e04ac3ec`：11:30收盘、11:33:31.512检测、12:08:46.518首次准备，晚于原12:00到期，被记为 `skipped / signal_expired`，没有订单intent。现有USO 4H持仓管理反复报checkpoint stale：扫描器只在闭合K线变化时写seed，执行器却把seed内容修改时间用于30分钟读健康门，正常4H间隔也会阻断所有新信号。旧日志无时间戳，不声称逐秒重建全部阻断区间。
+- 修复把成功读取观测单独保存在 `candle_observation:{symbol}:{timeframe}`，绑定checkpoint原修改时间与末根收盘时间；内容不变无需重压缩/重放，失败读取不刷新凭证。执行器沿用原30分钟门和缺失已收盘K线检查；没有扩大时限、绕过管理故障或补开历史MINA。错误/恢复日志加时间。212项相关检查通过；1960次轻量观测写在临时库约7.86秒、0外部请求。新revision为 `checkpoint-observation-20261017-v2`。
+- 等原扫描1960/1960、0错完成后，仅重载主站监督的扫描子进程26166→70913；新轮6.27秒完成1960/1960、0错，已保存1960条观测凭证，checkpoint含观测写耗时1.975秒。执行器26035优雅退出后由原session LaunchAgent启动70880，新revision、心跳与无管理错误确认。主站26159、YOLO13522、独立跟单23135保持，四巡检计划enabled/频率不变。无需新增浏览器。运行只读验收保存到 `output/okx-quote-fix-20261017/mina_activation_verification.json`。
+- 12:18左右用只读OKX客户端重新确认 STABLE 30m空头20张（均价0.0262900000000001、止损0.02753）和USO 4H多头0.15张（均价160.866、止损144.61）：入场均filled，附带止损均live，方向、数量、trigger和client id逐项一致。未验证真实止损触发/改价/完整退出。原始回执在 `output/okx-quote-fix-20261017/verified_exchange_entries_and_stops.json`。
+- Owner随后明确“不需要定时任务了，修好了就行，下次有问题我再叫你修”。刚建的heartbeat `automation`「核验下一条实盘信号和止损」已通过automation工具删除，不再自动跟进。该指令取消的是本次AI定时跟进，不影响既有行情/执行/YOLO巡检服务。
+- 本轮服务诊断误输出launchd继承的xAI API key到工具记录，已告知Owner需作废重建；不复制该值，不再输出服务完整环境。OKX凭据未输出。经验：`docs/learnings/unchanged-candle-content-is-not-a-stale-observation.md`。
+
+## 最新进度：OKX 报价误判与入场前重试已修复启用（2026-10-17 02:21 北京）
+
+- Owner 发现新信号没有实盘开仓并要求修复。XLM 01:30/GRASS 02:00 两笔15m空头均被旧进程记为 `skipped / exchange quote is stale`。已修正请求前时钟误判：ticker最后读取、响应后按原5秒门核验；杠杆回读及账户归属复查后重取价并按原2%/冻结止损计算张数，所需杠杆档位变化时本次不发入场单。30分钟信号门与125U/全仓/最高档位等配置保持。
+- 尚无入场intent的暂时GET失败持久化 `retry_pending`，2/4/8/16/30秒退避，在原信号到期后停止；旧skipped/rejected不重开，未知POST只对账不重发。账户表格增加身份回退、失败原因枚举与重试时间，不公开原始API错误。191项Python与10项前端检查通过；只读preflight通过，真实GRASS预览71张/20倍/计划风险2.4921U/报价年龄748ms，无该预览的交易写请求。
+- 旧执行PID76972已退出，修复版PID26035在当前登录会话的 `com.fable.okx-execution.session` 运行，revision=`quote-retry-20261017-v1`、新信号入场已启用。私有runtime内 `worker-session.plist`，KeepAlive=false，没有安装登录/开机启动；日志在同runtime的 `logs/worker-session*.log`。原终端Ctrl-C不再控制新进程；Owner可用 `launchctl bootout gui/$(id -u)/com.fable.okx-execution.session` 停止，停止不会撤掉交易所仓位/保护，具体见模块README。不能再次启动第二执行器。
+- 激活后原cutoff=1792158236572、配置逐值/文件内容、两笔交易行及journal逐行相同，无补单。真实账户125U、0持仓/挂单/保护单；心跳正常、无worker错误。网页PID20498→26159，在1960/1960、零错后优雅重载，新轮同样1960/1960零错；YOLO13522、跟单23135、用户Chrome1277启动时间保持，四巡检spec/频率/enabled相同。仅一临时IAB页，已关闭，浏览器无error/warn；未做实体手机验证。
+- 原始核验 `output/okx-quote-fix-20261017/`（本机git排除）；经验 `docs/learnings/slow-entry-setup-needs-a-fresh-risk-plan-before-intent.md`。当前仍未以真实新入场/附带保护/平仓回执完成端到端验收，等待下一条自然新鲜信号；不要为验收补开旧单或造信号。共享main混合改动未整体提交。
+
+## 最新进度：紧凑顶栏与模拟持仓快捷止损（2026-10-17）
+
+- 顶栏桌面 53px、390px 手机 52px；收起按钮移至侧栏左下角，改线框面板图标；桌面展开时隐藏顶部重复按钮，收起后保留重新展开入口。删除原信号版本图标，手机抽屉关闭及焦点恢复已实测。
+- 模拟持仓增加“止损到开仓价”。前端提交意图与新鲜 quote_id，服务端写事务内读取当前均价并保留 TP；既有更优止损不后移。方向/报价/持仓关闭校验、幂等回执与导出审计保持。明确不含手续费；不修改用户现有持仓。
+- 131 项前端、98 项后端检查通过。隔离账本浏览器实点多空：SL 100，TP 130/70 保留，仅两笔原开仓成交、两条保护回执。手机动作高度 44px、无横向溢出；已修复早期 CSS 优先级导致 36px 的问题。主站嵌入 TradingView 支持链接报一次 403，本站功能验收未发现错误。
+- 监控完成 1960/1960 零错后只重载公共网页进程（13512 → 20498，约 2 秒），新监控扫描 1960/1960 零错。YOLO 13522、执行器 76972、跟单 23135、用户 Chrome 1277 的 PID/启动时间前后不变；四计划 spec/enabled/频率及执行配置不变，用户 accounts/positions/fills/limit_orders 逐行相同。
+- 证据 `output/paper-entry-stop-20261017/`；经验 `docs/learnings/entry-stop-shortcuts-must-resolve-inside-the-ledger-transaction.md`。唯一临时 IAB tab8 已关闭、viewport 恢复，18867 隔离服务和两份临时账本已清理，未开启 Chrome。未做实体手机测试。主代理完成；子代理实际模型无法核验后立即停止。
+
+
+## 最新进度：币种周期标签可直接打开图表（2026-10-17）
+
+- 币种行的周期改为独立按钮，一次选择精确币种/周期；有形态高亮并显示数量，当前周期边框强调。点击恢复完整形态筛选并定位最新框，迟到响应仍由 requestVersion 隔离。
+- 手机周期按钮高 44px，390px/320px 下实测无横向溢出；选中后关闭弹窗、恢复滚动并将焦点交给图表。桌面轮询保留具体周期按钮焦点，Enter/Space 可操作。
+- 34 项前端测试通过；真实 DOS 5m/15m 的识别框 ID 分别与后台结果一致，1H 零形态清除旧框，日线历史不足明确提示，无控制台错误。证据 `output/detection-period-tags-20261017/`；经验 `docs/learnings/period-shortcuts-need-independent-targets-and-focus.md`。
+- 仅前端静态资源变更，无服务重启。巡检计划 spec/频率/enabled 与监控、YOLO、执行器、跟单和用户 Chrome 进程启动时间前后相同；监控 1960/1960、零错误。唯一测试 IAB tab7 已关闭、viewport 已恢复，用户 tab1/2 保留；未开启 Chrome。未验证实体手机。
+
+
+## 最新进度：均线密集检测交互改进已启用（2026-10-17 01:24 北京）
+
+- 按币种合并各周期最新结果。`latest.py` 在只读事务内按 results.rowid 增量投影，以检测截止时间而非完成先后选择最新，保留每个币种/周期的 job 来源。1144 组（286 币 × 4 周期）首次读取 1.43 秒，未变化复查 0.58 毫秒，HTTP 未变响应 65 字节；后续只传变化的组，不解压 K 线、不启动检测。
+- 菜单进入默认最新汇总，显式历史链接仍看原任务；巡检发现直达精确识别框并保留跨周期币种列表。图表可切周期，30m/4H 无检测时复用 `/api/chart` 监控行情，明确标注“尚未检测”，不冒充无形态。
+- 巡检卡片桌面四列、390px 手机两列，约 175 × 132px。共享搜索下拉支持方向键/回车/Escape、弹窗顶层显示、动态表单和多币种格式。检测使用加密币池，信号等使用全市场池；已有模拟开单选择器保留。主题/刷新等操作改图标，来源与版本文字保留在可聚焦的信息提示。
+- 49 项前端、46 项 YOLO 后端测试通过；桌面与 390 × 844 浏览器实测周期切换、对应 K 线框、行情预览、键盘选币、菜单重进最新、发现直达，以及手机无横向溢出、弹窗关闭恢复滚动。未做实体手机键盘或公网长时测试。
+- 主监控 1960/1960、零错后优雅重载网页服务，YOLO 在提交边界恢复；执行器 76972 及配置、独立跟单 23135 未改变。新 01:16 轮 5m/15m 各处理 286 币，failed/pending/remaining 均零，各 1 币历史不足，耗时 329/336 秒。四计划频率与启用状态保持。
+- 原始证据在 `output/detection-ux-20261017/`；只用临时 IAB tab6，未开启 Chrome，收尾关闭并恢复 viewport。经验见 `docs/learnings/latest-result-identity-must-include-timeframe.md`。未提交混合工作区；子代理实际模型未能核验，已停止，由主代理完成。
+
+## 最新进度：六项前端性能优化已启用（2026-10-17 00:58 北京）
+
+- Owner要求先做市场页重复渲染、YOLO轮询、模拟盘历史统计，再完成其余三项；实测后清理浏览器且保留后台巡检与执行。本轮只改当前main共享工作区，未创建分支/worktree、未打包提交其他会话混合修改。
+- 市场刷新等待行情/区间/首次历史一起完成，按稳定顶层区域比对标记；未变区域、焦点和展开状态保留，事件只绑定一次。同一行情窗口实际约38秒13区域全部保留、0替换/0长任务；跨新K线时允许更新图区，早期长样本节点变化不能当作错误或全页重建。
+- YOLO任务列表SQL摘要投影，完整冻结配置仅在打开详情读取；列表/运行详情带revision，按可见页签轮询，已结束任务不重复取详情。实测20条282089→11644字节，未变列表146字节、详情56字节。运行详情未变化仍需计算摘要指纹，尚非推送协议。
+- 模拟盘账户/成交/仓位与权益由SQLite触发器分开版本化，报价和笔记不使统计失效；同一读事务核对版本和数据。账本变更才重算精确Decimal统计，权益只读新增bucket并保留首尾/极值/缺失点，<=1200点；修订、删除、回填强制重建。最多8个账户投影。真实副本64成交/25仓位/5850权益点，统计逐值相同，旧读取3.2–6.5ms、暖读取0.55–0.61ms；额外5万权益样本暖读0.813ms，首次增量构建166ms高于旧全读62ms，不能宣传冷读提速。
+- 模块先preload并行下载脚本，再等CSS并依次执行；浪浪5脚本实测开始时间跨度0.3ms。workspace-runtime提供GET去重、15秒超时、离页取消、失败退避，写入不因离页取消/不自动重试；同步传输异常也释放请求锁。阅读/市场离页60秒清理重型DOM，搜索Worker显式dispose，PDF仅缓存一本且释放Blob（32MiB内嵌上限，较大文件独立阅读器）。笔记、选项保留；真实搜索186结果回收后重建一致。三个隐藏页面DOM=0，Worker创建/终止1/1，Blob创建/释放1/1。仅本轮测试页挂起jobs GET，超时后解除拦截，自动恢复20条且错误提示清除，无须重载。
+- 285项相关Python检查、93项前端检查通过，另做JS语法/定向diff检查。等待主监控1960/1960、0错误后重载，YOLO在提交边界短暂停/恢复，四计划spec/频率/enabled完全相同。主站现PID10427、YOLO10435；执行器PID76972及配置未变、独立跟单23135未动。新一轮主监控1960/1960、0错；00:46轮5m/15m各286处理，372.28/376.83秒，failed/pending/remaining均0，各1币上市历史不足。
+- 无训练/promote、交易参数、下单/撤单、VPS或实盘账本写入。原始验收在`output/frontend-perf-20261017/`，其中bench只在临时副本写测试样本并自动删除；本机短时验证不等于公网弱网或长时内存保证。本轮仅一个临时IAB页（tab5），未启动Chrome；故障拦截已清除，结束关闭测试页，保留用户浏览器。
+- 经验见`view-refreshes-need-stable-regions-and-poll-projections.md`、`analytics-cache-versions-must-follow-ledger-not-quotes.md`、`hidden-workspaces-need-owned-cancellation-and-release.md`。子代理实际模型/推理档位工具未回显，按Owner规则停止，由主代理完成。
+
+
+
+## 最新进度：主站共享 K 线读层已启用（2026-10-17 00:23 北京）
+
+- Owner要求全站同币种周期去重、统一限流、增量更新和同步状态，保留后台巡检/实盘。`yoyo/data/candle_hub.py`在本机运行目录`shared-candles/cache.sqlite3`提供独立公开读缓存；按源站/合约/原生周期/开盘时间唯一保存OKX九字段，确认与形成中K线分开，保留成交量单位和UTC日界。跨进程文件锁合并请求，WAL短事务；只补缺失区间，确认数据冲突失败，缺口不伪造。每组4096根，形成中2秒；缓存不是canonical/VPS写者。
+- `monitor.OKX`及当前8766主站监控、YOLO/图表续接、市场共振/区间、趋势线与VIDYA读者接入；共享K线总额度8次/秒、后台合计3次/秒，监控使用优先额度。Mac Python3.9的monotonic原点不跨进程共享，已改用系统clock_gettime并做错开进程启动测试。`/api/candles/status`和“运行状态 → 全站K线共享”显示新鲜度、历史不足、复用、补数和失败；只读状态接口不触发行情下载。
+- 6个真实并发客户端只发1次OKX请求；跨市场共振适配复用20根既有K线0次外部请求、5.39ms，base/quote量保持。核心115项回归通过，另有VLM/层间边界84项及前端12项通过（含重叠覆盖）。旧daily_enablement/30m_enablement共11项仍与现有周期/接口夹具冲突；没有为它们改变实盘周期或阈值。跟单完整旧套件因主venv缺pydantic_settings未收集，已用独立market适配测试验证其公开读接口；未安装/升级依赖。
+- 等旧扫描1960/1960完成后，YOLO在原子提交边界停/恢复，主站优雅重载。旧扫描有109个网络失败，新进程首轮39.05秒补齐109项、1960/1960且0错。新版本00:16轮5m/15m各286币完成，分别382.58/387.84秒，failed/pending/remaining_endpoints均0，各1币历史不足；四计划及频率不变。状态接口20样本p95 129.4ms，缓存851组约95.3MiB，观测时内存空闲26%。这是本次实测，不代表任意网络/冷启动负载保证。
+- 实盘执行PID76972及配置前后相同，未动实盘账本、风控、下单路径、ACTIVE或VPS；两份不同检测任务的实时续接成功，原检测快照逐值不变。VLM服务在自动审核关闭/无运行任务时重载，原关闭状态保留。TradingView外嵌仍由第三方供数；独立Arthur跟单进程PID23135含真实账户监听，未强制重启，其模拟1m共享适配已写好、待正常维护重启加载。旧8642/18766独立历史工具不计入当前主站接入覆盖。
+- 原始验收在`output/shared-candles-20261016/`（名称沿用开始日期）；手机390px和桌面1280px验证无页面横向溢出，表格独立滚动，搜索/刷新正常。经验`docs/learnings/shared-candles-need-process-wide-identity-and-budget.md`及`cross-process-budgets-need-a-shared-clock-epoch.md`。本次变更留在共享main工作区，未把其他任务的未提交/未跟踪模块整体打包提交。
+
+## 最新进度：YOLO 增量巡检实测并启用（2026-10-16 23:20 北京）
+
+- Owner授权实测后直接启用：全市场5m/15m每15分钟、1H每4小时、UTC日线每天。四计划已启用，旧每小时15m计划移除；API、后台单写锁/心跳和真实页面确认，正常自动轮次已继续运行。日线北京时间08:01触发，各周期保留收盘后60秒到达余量。本机须保持运行，停机积压恢复后补齐。
+- 结果和每币种游标原子提交，每次最多12个新端点，短周期优先轮转；单模型进程、小批次推理、2个后台输入预取线程、共享3次/秒公开请求限流与内存压力暂停。YOLO旧输入缓存仍合入较新的监控闭合K线尾部；32根OHLC块压缩共享，均线及历史检测图精确保留，旧格式可读。
+- 冷启动短周期全286币耗1853秒，原串行暖轮超预算而拒绝启用，失败保留。优化后正常一轮380.711秒、API p95 0.275秒、内存实测1.7GiB、无内存暂停。同轮逻辑结果载荷33.9MiB降至7.0MiB，约79.22%（不含SQLite页/索引与可替换输入缓存）。长周期首次补历史890.995秒、p95 1.659秒；最后一小时积压补扫1032.072秒、p95 0.566秒。暖轮耗时不是冷启动或所有负载保证。
+- 日线7币网络失败保留在原任务；同截止同计划补跑7/7完成21端点。原acceptance回执仍false，独立finalize核对持久化证据后activation=true：2638段结果连续、928个可用币种周期。5m/15m各285可用+1历史不足，1H 273+13，日线85+201；不足来自1240根模型输入要求，不冒充覆盖。原始证据及启用截图 `output/yolo-patrol-incremental-20261016/`。
+- 115项相关Python、22项前端检查通过；实际新结果图/框、行情续接与移动弹窗核验通过，最终新页面无控制台错误。一次浏览器调试超时后新标签页恢复。源码至5773f434ae，无训练/promote/阈值/执行准入变更，未重启实盘执行器。先前监控重载前后6个paper状态相同（排除响应时钟）；最终恢复进度API已加载，无须再次重载。
+- 全站K线目前只部分共享：监控/龙头/模拟信号读者复用monitor checkpoint，YOLO优先读后补缺；其他独立入口仍有各自缓存和限流。跨模块统一请求合并、总预算、版本通知与新鲜度监控尚未实现。经验见docs/learnings的incremental-patrol-cursors、saved-input-prefix及patrol-recovery三条笔记。共享HANDOFF其他修改保留，不整体打包提交。
+
+## 最新进度：模拟账户行情连接池恢复（2026-10-16）
+
+- Owner 报模拟持仓缺新鲜行情、权益/可用资金未知。实际受影响为ETH和BONK，均未被移出扫描池；模拟交易独立读取公开ticker，不用信号扫描名单。22:51日志先报TLS EOF，随后持续PoolTimeout；新建同源HTTPX/requests连接均能读到新鲜报价。
+- 真实httpcore代理隧道的内存网络夹具复现：握手失败占满池，之后持续等待连接槽。`PublicHTTP`遇传输错误淘汰对应池，仅公开GET最多重试一次；旧池引用排空再关闭，迟到异常不影响新池。保留15秒报价有效期和原始时间戳，未恢复时前端列出确切缺失币种。无依赖升级、账本修补或旧价填补。
+- 207项Python检查初次206通过；新代理TLS夹具签名修正后相关7项通过。134项前端检查通过。服务重载后两次真实API核验三个账户marks_complete/risk_complete均true、权益/可用非空，ETH/BONK报价恢复，自动检查error=null。accounts/positions/fills/limit_orders/receipts逐行前后一致。实盘进程和原cutoff保持，未发送交易所写请求。浏览器新页/CDP核验超时，未把API恢复当成实页视觉验收。
+- 经验 `docs/learnings/public-market-pools-must-recover-after-transport-failure.md`；模拟持仓/成交/订单与资金参数保持，原有共享main修改未打包提交。子代理模型档位此前已无法核实，本轮由主代理完成。
+
+## 最新进度：Owner 缩小信号扫描池（2026-10-16）
+
+- Owner 明确移除 XMR、BTCDOM、ARPA、SFP、BIGTIME、HOT、ICP、GMT、EGLD、MAGIC，并追加移除15个非USDT线性永续。共享新增准入规则覆盖全部四周期；当前509个live OKX合约中5个命中指定币种，实际新信号池489个。其余5个仍在排除名单，历史负收益筛选只是Owner范围决策，不标记收益有效。
+- 新增信号与存量管理分开：排除标的不新增事件/通知；已有参考和执行账本未结束标的保留K线。执行归属不可读时保守保留行情，不放开新增。当前GMT有旧参考持仓，行情采集490个/1960个周期单元，其中489个允许新信号。1084条原事件身份完整保留。
+- 已重载监控服务，数据库/API/实际浏览器确认489及排除规则；首轮扫描仍进行中。6个paper条目整体前后一致。Owner此前启动的实盘执行器心跳正常，cutoff=1792158236572未变；本轮没有重启执行器或发送交易写请求。执行器磁盘代码另有准入拦截，但旧进程未加载；即时生效依赖已重载的监控源。生效前排除标的无新鲜待处理信号，已有两条V13历史事件均早于cutoff。
+- 186项Python检查首次184通过、2个新测试夹具未合法登记；改用真实事件构造后相关15项通过，未削弱生产校验。7项前端检查及差异格式检查通过。125U/2%/全仓/最高档位杠杆/四周期/多空等其他配置不变。经验 `docs/learnings/universe-exclusions-must-preserve-position-management.md`；Notion #59已追加实际进度。共享main混合修改保留未整体提交，子代理实际模型档位无法核实后由主代理完成。
+
+## 最新进度：周一高低点区间 v1.11 · 关键价位扩展（2026-10-16）
+
+- Owner纠正目标为优化Pine指标本身，并选择昨日POC、VAH/VAL、nPOC、上周高低点。以v1.8为基线新增 `yoyo/evaluation/pine/monday_range_v1_11.pine`（v1.9/v1.10已占用），保留v1.8源码与私有脚本，不加入迷你图。v1.11已保存为新的TradingView私有指标并加载到WLDUSDT.P主图，恢复5分钟图；不包含策略、报警或订单。
+- 新价位在固定15m请求上下文计算，80档均匀分配成交量、70%价值区，属于估算。自然日/自然周采用所选时区，日线沿用v1.8的交易所时区例外；上周包含周末。nPOC回看最多14个自然日，仅在后续已收盘15m K线触及后移除；缺口使未触及证据失效，覆盖不足会提示。原周一区间和双向Fib公式保持，绘图改用时间坐标并预留对象预算。
+- 本地源码保护与网页既有计算测试共20项通过；原生Pine夹具调用实际函数，日志确认profile/midnight/prior-week/touch/gap/partial-day/DST通过，临时测试代码已移除。WLD同一时刻5m/15m/1h/4h的POC/VAH/VAL/上周高低五值一致；这不是全标的、全周期证明。源代码、夹具与原始核对记录见 `tests/evaluation/test_monday_range_v1_11.py`、`tests/evaluation/monday_range_v1_11_native_checks.pine`、`output/pine/monday_range_v1_11_validation.json`。
+- 经验：`docs/learnings/pine-key-levels-need-closed-source-context.md`。共享main中的其他会话修改保留，本轮未整体打包提交。子代理运行模型档位无法核实后停止，由主代理完成。
+
+
+## 最新进度：信号中心分区、摘要读取与缓存（2026-10-16）
+
+- Owner 要求移除“正在蓄势”、优化存储缓存与卡片之外的界面。该计数属旧版观察状态，已移除信号中心计数与旧观察入口。当前默认信号卡片，信号记录 / 表现分析 / 实盘账户独立展示，页签记入URL；旧历史深链继续保留已结束列表。账户配置说明折叠，等待下一根收盘参考的卡片给出明确原因。
+- 引入 Bootstrap 5.3.8 的局部表单、按钮、导航，源与锁文件在 `tools/signal-ui/`，本地编译CSS约22 KB（gzip约3.5 KB）；无全局reset、CDN或Bootstrap JS。ECharts只在首次进入分析页加载，记录首页省下约1.12 MB脚本（gzip约368 KB）。账户只在账户页轮询，账户页不拉信号账本；相同行不每15秒重建DOM，时间标签按分钟更新。
+- 实测发现市场状态计数仍用SQLite JSON解析约269 MB完整图表页，五次约5.6–12.8秒。改读约5.6 MB事务一致摘要，完整方法（含完整性检查/键联结）复测约11–24毫秒，计数一致；不清理数据库或历史数据。新增HTTP专用信号精简投影缓存，上限8项/16 MB/30秒，SQLite data_version跨写连接失效；日期、未来排除、新鲜度每次重算。当前98条样本的历史账本计算暖缓存约3.0–3.8毫秒，未缓存约4.1–7.8毫秒。端到端HTTP仍有约百毫秒至亚秒波动，不能把查询加速倍数当作整体页面倍数。
+- 127项Python与50项前端检查通过（后续缓存实现/状态联结又定向复测7项）。同步修正旧测试样本仍引用V1切换键/协议的过期fixture，没有放宽生产过滤。桌面1440、390/320px、深浅主题、空筛选/重置/方向周期组合、分析/回撤、账户与页签刷新通过；未发现整页横溢或浏览器错误。证据 `output/playwright/signal-cleanup/`。
+- 本地监控服务重载，前后6个paper状态一致；Owner此前启动的OKX执行器心跳持续正常，无本轮交易写请求、配置变化或执行器启停。共享main的混合修改保留，未整体提交。经验 `docs/learnings/status-counts-must-read-the-compact-storage-projection.md`、`docs/learnings/workspace-tabs-must-own-their-loading-and-polling.md`。子代理实际档位无法核实后停止，由主代理完成。
+
+## 最新进度：Owner 开放 OKX 远程只读展示（2026-10-16）
+
+- Owner明确要求“okx实盘不需要限制只能本机才能看到”，覆盖下方历史本机限定与公网403口径。现有免登录公网入口开放余额、持仓、挂单和执行记录；已说明持有链接即可查看。移除账户接口的loopback/代理标记限制，保留同源浏览器检查、字段白名单、GET-only/no-store；不返回密钥/账户ID/私有路径，不添加交易控制。
+- 20项后端展示/资产与5项前端检查通过。网关实际返回200、read_only=true、Cache-Control=no-store，真实公网浏览器也已显示账户。重载前后6个paper及OKX执行状态一致（当时未启动）。随后验证时已观察到执行器心跳正常、0持仓/0执行记录；本轮未启动该进程或发送交易写请求，不推断首次订单已验收。
+- 证据 `output/playwright/okx-remote-display/`；经验 `docs/learnings/account-visibility-and-execution-permission-are-separate.md`。只修改当前main工作区相关文件，未打包提交其他会话的混合修改。
+
+## 最新进度：Notion #59 · 全仓与信号中心工作区（2026-10-16）
+
+- Owner 最新口径覆盖下方逐仓记录：125U、1R 2%、全仓、全标的四周期多空、交易所档位最高杠杆，无额外仓数/合计风险比例上限。全仓读取币种级 availEq/imr，杠杆按合约双向共享；设置后复查保证金，保护与退出核验同一模式。本机未启动配置已在单写锁内原子更新并保留私有备份，凭据未改。
+- 完整只读 preflight 通过（Futures + long_short_mode）。worker未启动、执行记录0、无交易所POST；真实入场/保护/改单/退出仍未验证。自动实盘须由Owner本人运行 `.venv/bin/python -m yoyo.okx_execution run --ack EXECUTE-125-USDT-LIVE`，首次只接启动后的新信号。125U额度与2%计划风险不是全仓损失隔离。
+- 信号中心现有页面重排为总览/信号记录/实盘账户：账户摘要、前置筛选、重置、完整筛选累计净R/回撤和周期贡献，本地Apache ECharts 6.1.0，保留深浅主题与手机。曲线按退出时间合并同刻记录，缺失R/时间不补零；与真实账户收益分开。只读账户接口仍仅本机，公网网关复核403。
+- 150项Python（执行器/历史统计/资产/启动/层边界）与42项Node检查通过。真实浏览器核验1440/390/320px、搜索空态/重置/详情/卡片/15m多头筛选与曲线一致、深浅主题，无整页横向溢出或console错误。原始证据 `output/playwright/signal-redesign/`，已本机排除git；服务重载前后6个paper状态一致，未重启旧运行。
+- Notion #59保持进行中，已更新实际进度。经验：`docs/learnings/cross-margin-changes-collateral-and-leverage-scope.md`、`docs/learnings/signal-curves-must-use-complete-filtered-exits.md`。共享main混合修改继续保留，不打包提交其他会话；子代理实际档位无法核实，主代理完成。
+
+## 最新进度：形态图续接行情、排序与移动弹窗修复（2026-10-16）
+
+- 当前盘口结果默认跟随最新已收盘K线，可手动更新或关闭；新增“看形态与后续”。只读chart API保留原检测快照/框，按原close/HL2来源续算SMA/EMA，先读既有OKX确认缓存，缺口再读同源公开行情。缺数据明确失败并保留旧图，不写入K线或检测结果、不触发新推理。历史模式默认不续接。
+- 币种支持确认时间、模型分数、数量、名称正反序、关注优先，选择自动记忆；巡检发现支持最新/模型分数/币种排序，先排序再分页。请求过期或切币时不会混入旧回复，更新不抢走手动图表视角。
+- 移动端表单固定关闭/提交，正文独立滚动并适配visualViewport/safe area；大图内币种列表改为嵌套原生弹窗。先锁定页面再移动图表，先恢复内容高度再恢复滚动，修复关闭大图回顶部；图表允许纵向页面触摸滚动。
+- 98项后端/资产/层边界与30项前端检查通过。实际ALGO15m从17:45续至21:00并自动更新到21:15（14根）；320×568、390×700/400弹窗按钮均在可视区，滚动恢复566.5px，浏览器无error/warn。证据 `output/playwright/yolo-live-mobile-20261016/`。这是浏览器尺寸验证，尚非实体iPhone键盘验收。
+- 本地服务已重载；6个paper状态和既有巡检计划前后完全相同，YOLO worker保持。未修改模型/阈值/交易参数、发起检测或改计划。经验见 `docs/learnings/chart-continuation-must-preserve-the-detection-snapshot.md` 与 `docs/learnings/modal-scroll-restoration-requires-stable-content-height.md`。子代理运行档位不可核实后停止，由主代理完成。
+
+## 最新进度：Notion #59 · 信号中心展示 OKX 实盘（2026-10-16）
+
+- 信号中心顶部新增只读实盘区域：账户权益/可用/浮盈、真实持仓、普通挂单及四类策略委托、本机执行记录、进程锁与心跳。配置125U/2%，全标的四周期、逐仓最高档位杠杆，无额外仓数/合计风险比例限制。参考统计仍在下方单独标注。
+- 新 `GET /api/okx-execution/status` 按需独立缓存，只有交易所GET；不初始化执行账本、不启动worker、不加入信号脉冲。缺失是未知，失败保留明确过期的旧快照；收益只取齐全的交易所平仓/USDT手续费回执，不含资金费。公网免登录网关实测403，本机可读，不返回凭据/账户ID/原始错误。
+- 本轮最新只读账户模式已为 `long_short_mode`，覆盖下方历史“待切换”状态；本轮未发模式修改请求。worker仍未启动、执行记录0，真实入场/保护/改单/退出回执尚未验证。不要把账户连通或模式满足当成实盘验收完成。
+- 后端/资产/启动依赖/层边界134项与前端8项检查通过；真实桌面、390/320px和深浅主题检查见 `output/playwright/okx-account-ui/`。本地监控服务已重载，前后6个paper状态一致（原有2个error/4个stopped），未重置/重启这些运行。UI填充态验收仅为浏览器拦截样例，不是实际交易。
+- 经验：`docs/learnings/account-dashboard-must-separate-connectivity-and-execution.md`。共享main已有混合修改，本轮集成保留在原工作区，不整体提交其他会话改动；子代理实际档位无法确认后由主代理完成。
+
+## 最新进度：Notion #59 · Owner 将执行额度改为125U（2026-10-16）
+
+- 本次明确指令覆盖下方历史50U口径：资金配置改为125U，1R仍按 `min(125, USDT权益) × 2%`；权益125U时计划风险2.5U，按合约步长向下取整，非实际亏损保证。全标的/四周期/多空、最高档位杠杆、无额外仓数及组合风险比例限制保持。
+- 已同步代码默认/校验、统一启动确认 `EXECUTE-125-USDT-LIVE`、README与本机私有 `config.json`。更新时取得单写锁，核实无启动cutoff、无运行配置和交易记录，再原子替换配置，仍0600。未读取或修改凭据，未请求交易所API。
+- 42项执行模块测试通过，覆盖125U定仓2.5U、权益下降与上涨封顶、保证金额度不足。Notion已同步；worker仍未启动，上一轮账户单向模式问题仍待Owner切换。此次只是明确参数调整，无新实验或报告。
+
+## 最新进度：Notion #59 · 私有鉴权通过，持仓模式待切换（2026-10-16）
+
+- Owner 提供凭据后，经隐藏终端输入保存到仓外 `~/Library/Application Support/Fable/OKXExecution/credentials.json`（0600，目录0700）。不得在日志、仓库、Notion或回复中复制凭据。当前 private GET 鉴权成功，读取+交易权限，无提现权限；执行配置仍50U/2%，无3仓/6%上限。
+- 账户 `acctLv=2` 已满足 Futures 模式，但 `posMode=net_mode`，与执行器要求双向 `long_short_mode` 不符，完整 preflight 未通过。只读核对 USDT、空仓、普通挂单0，以及 conditional/oco/trigger/move_order_stop 四类挂单均0；账户可交易493个live线性USDT永续。余额细节仅在本机私有联调收据，不写仓库。
+- 未发送任何交易所POST，未下单/撤单/划转/设杠杆/改账户模式，worker仍未启动。下一步Owner在OKX切换双向持仓后继续只读preflight；真实入场、保护、改单、退出回执尚未验收。已建议将聊天中披露的凭据在OKX轮换后本机录入；未擅自修改或撤销key。
+- Notion #59已回写上述状态并保持进行中。仅配置与只读联调，不是实盘运行或收益验证；无需重复申请已授权的只读检查。
+
+## 最新进度：自动巡检直接浏览最新形态（2026-10-16）
+
+- 巡检页以“最新发现”为首页，按首次观察时间列出币种、周期、多空、模型分数、确认时间；同币/周期/方向/冻结契约内合并重叠核心，重复扫描不把旧形态顶成新发现。支持时间、币种、周期、方向筛选，每5秒更新，计划管理折叠在下方。
+- 新只读 `/api/yolo-detect/discoveries` 从已有不可变结果增量投影，不创建任务或重跑推理。真实35条形态观察合并19处；首次读取约0.48秒、温缓存约1毫秒。点击携带job/symbol/box，打开准确K线与框，显式定位优先于旧视角；一键返回发现列表，保留当前筛选。
+- 91项后端/资产/层边界与25项前端检查通过；实页验证BILL精确框、刷新深链、ALGO三轮合并、搜索/空筛选恢复、390/320px无横溢、深浅主题。证据 `output/playwright/yolo-patrol-20261016/`。服务重载前后6个paper条目与既有巡检计划逐项相同；未发起新检测、改计划或模型/交易参数。
+- 经验 `docs/learnings/patrol-discoveries-need-event-clocks-and-exact-chart-links.md`。仅功能验收；列表保存历史发现，不代表形态仍在持续。子代理实际档位无法核实后停止，由主代理完成。
+
+## 最新进度：Notion #59 · 独立 OKX API 执行模块（2026-10-16）
+
+- Owner 选择直接 API、50U、按初始止损定仓 1R=2%、交易所档位最高杠杆，并明确否决最多3仓/合计6%限制。实现跟随 V13.1 全部标的、15m/30m/1H/4H、多空；不加币种白名单、仓数或组合风险比例限制。同币跨周期通过双向逐仓和逐信号 lot 记账，实际同向保证金/强平仍由交易所聚合。
+- 新模块 `yoyo/okx_execution/`：只读监控、Decimal 张数/档位、私有本机凭据入口、签名 REST、独立 SQLite/单写锁、发单前 intent、未知订单不重发、附带止损核验、2R + 1H 2ATR/其他4ATR追踪、原始反向退出、owned-lot 对账。按实际市价成交定义管理R，不承诺复制参考次开价/收益；最高杠杆可能早于策略止损强平，2%不是损失保证。
+- 130项新模块/现有V13.1/层边界检查通过；实际只读82条、73标的、四周期，管理样例16根闭合K线。OKX公开时间/DOGE合约/93个档位返回成功。私有鉴权与真实入场/保护/改单/退出仍未验证；无密钥、无私有请求、未启动worker或启用实盘。
+- 已初始化 `~/Library/Application Support/Fable/OKXExecution/config.json`（50U/live但无执行进程）。下一步 Owner 在本机运行 `.venv/bin/python -m yoyo.okx_execution credentials` 隐藏输入三项凭据，然后做只读 `preflight`/`preview`。独立账户须Futures模式+双向持仓，不接管手动仓位。撤保护到平仓有无保护间隔；未知回执/部分退出/清算差异需对账，不能重置账本后重发。
+- 代码提交 `5225b46e58`，共享main提交前已有5个未推送提交，因此未代推其他会话提交。经验 `docs/learnings/hedged-signal-lots-need-owned-order-reconciliation.md`；Notion #59保持进行中并记录Owner纠正。未重启监控、改生产资格/新鲜度/脉冲或重新pin旧paper；新增yoyo源码会改变paper manifest。子代理运行档位不可核实后停止，由主代理实现核验。
+
+## 最新进度：YOLO 日常交互继续打磨（2026-10-16）
+
+- 增加本浏览器关注币种与当前任务内关注筛选、当前币种换周期检测、形态摘要/多空颜色说明、密集根数/确认根数/模型分数。图表常用操作与显示/导出分开，六条均线提供图例；逐任务/币种保留最近40个图表视角，切币与刷新可恢复。
+- 未提交草稿持续保存；支持 ETH/USDT 等常见输入，提交前检查币种池、历史边界/范围/已收盘时间；可显式一键对齐，不静默更改时间。快速提交曾绕过未加载币种池，保留那条 NOTREAL 失败记录；现等待列表并检查弹窗/草稿生命周期，取消后不继续提交。源不可用时明确提示重试。
+- 实际 ALGO5m 任务 `2d9bc721d1484ed4a3c1080eee20df4e` 完成1/1、6窗口、0形态，仅功能验收。25项前端测试通过；真实页面验证关注/视角/草稿刷新、换周期、输入校验/时间修正、深浅主题与390/320px布局。PNG 从 data URL 改为 Blob 文件下载后浏览器返回下载回执；回执路径工具暂不可读，未声称落盘图片内容已核验。证据 `output/playwright/yolo-comfort-20261016/`。
+- 经验 `docs/learnings/async-preflight-must-respect-the-draft-lifecycle.md`；仅前端与对应测试，既有巡检未更改，测试关注已恢复，不改训练/模型参数/交易准入。子代理无法核实实际档位，主代理完成。
+
+## 最新进度：Notion #59 · OKX 接入可行性（2026-10-16）
+
+- #59 标题为“能否把我们信号中心在跑的策略做到 okx”，已完成可行性核查并写回原页，状态 Done 仅代表问题核查完成；接入开发、账户联调与资金运行未完成。原截图为 OKX 策略页，可评估 Signal Bot；若优先保持现有 V13.1 动态保护，建议独立 API 模拟执行模块，不能承诺显示为 Signal Bot。
+- 实读 `/api/v13/signals` 确认 V13.1、15m/30m/1H/4H、`orders_enabled=false` 与 `is_trade=false`。原生程序直推需按 OKX 官方 §3.4 确认固定 IP 接入；还需补完整退出、交易所保护、跨周期持仓归属、去重恢复与实际成交对账。旧 L4 TP5/SL2 和 Copier 跟单执行契约均不能直接套用。
+- 17 项现有 V13.1 状态机测试通过；原始核查 `output/task59/feasibility_evidence.json`，经验 `docs/learnings/signal-bot-transport-does-not-preserve-execution-semantics.md`。任务 https://app.notion.com/p/3fb8856479af8092b673f3b74ed5d6f4 ，资料 https://app.notion.com/p/3fb8856479af81db85b7ebacf250b3a8 保持待验证。未发 webhook、下单、改参数、重启服务或启用实盘。
+
+## 最新进度：YOLO 检测页使用流程优化（2026-10-16）
+
+- Owner反馈 `/#yolo-detect?job=4f32c06a6a0c441b81c48354df8aff8d` 难用。本轮改为结果优先：有形态币种侧栏/窄屏下拉、上一币/下一币、自动定位密集区、全局/最近视图、大图与原始输入弹窗；检测记录、巡检和模型说明独立页签。
+- 新建检测、巡检草稿与浏览旧结果分离；草稿记忆、单币快捷检测、历史时间预设、深链保留币种与页签。正在看旧快照时明确标识，较新结果仅匹配同模型/周期/范围；历史任务还须同时间段。浅深主题切换保持当前范围。
+- 实际从新表单提交 ETH5m 任务 `0c82b8b149b04b50a2d3c47a83805172`，1/1完成、6窗口、0形态，只验证交互，不代表识别精度。用户原任务285/285、7币有形态作为浏览验收；既有每小时全市场15m巡检未改动。
+- 19项前端、15项相关后端测试通过；浏览器核验切币/刷新、草稿隔离、搜索无命中恢复、记录返回、原图与大图、历史表单、巡检预览、深浅主题、1440/390/320px无横向溢出。证据 `output/playwright/yolo-ux-20261016/`，经验 `docs/learnings/detection-browsing-must-not-share-state-with-scan-drafts.md`。无新训练、模型切换、promote或实盘变更。
+
+## 最新进度：日常 YOLO 检测工作台与菜单直拖（2026-10-16）
+
+- Owner 要求直接拖拽菜单并自动保存、独立找龙头菜单、可视化 YOLO 手动/自动检测。入口 `/#yolo-detect`、`/#auto-leaders`；旧 `#langlang?tab=auto-leaders` 跳转到独立菜单。去掉排序模式按钮，鼠标直拖、触屏握柄与键盘移动，支持跨组持久化。
+- 独立 `yoyo/yolo_workbench/` 队列/进程锁/SQLite，单币或全部加密 USDT 永续，5m/15m/30m/1H/4H/UTC日线，历史逐端点或最新三个收盘端点，定时巡检与取消、部分失败、重启恢复。复用只读已确认行情缓存，不向 forward 脉冲加任务。模型和渲染契约固定；默认既有 Grade-A Close1280，HL2 可选，但没有全周期最佳或生产资格裁决。
+- Lightweight Charts 4.2 全局 K 线、六均线、量、真实框与缩放/点击、原始输入/标注图、结构/原始/方向筛选、币种搜索、PNG/JSON 导出。修复捆绑图表对小数逻辑坐标返回0导致框消失，采用相邻整数 K 线中心插值；保留核心时间、确认窗收盘、首次检出三个不同时间。
+- 核心先提交 `76dc34d074` / `5d0c9d9f08` 再生成实际结果。一次定时全币种15m任务 `204148b553f0436f9ad3031082cf8928` 完成285/285、1710窗口、0失败、9币有结构、29原始框；这只验证功能，不是精度/收益验收。ETH5m、15m历史、日线与FARTCOIN历史有框样本实跑；后者来自已知事件，仅验收可视化。不存在币种的失败记录保留。
+- 109项后端与18项前端检查通过；桌面、390/320px、深浅主题、直拖/跨组刷新、原图/导出、筛选和计划创建/停止实页通过。证据 `output/playwright/yolo-detect-20261016/`。本机服务已重载，原6个模拟运行ID/状态/心跳/错误逐项未变。当前保留账本内已有的每小时全币种15m计划；本轮专门创建的QA计划均删除，没有清空观察记录。
+- 两条经验：`docs/learnings/chart-boxes-need-verified-fractional-coordinate-mapping.md`、`docs/learnings/research-detection-jobs-need-separate-books-and-clocks.md`。共享main，混合接线文件保留工作区；无新训练、promote或实盘变更。子代理返回信息无法确认实际Luna/max后停止，由主代理完成。
+
 
 ## 最新进度：BTC 关键位 5m 插针收回已测试（2026-10-16）
 
@@ -278,12 +787,327 @@ Latest separate UI instruction: removeV2.9 entry selector;5m/15m charts automati
 - Builder/config `a6f99cecb0`先提交后运行；81项相关测试通过，独立verifier `665f1ff105`复算17835条反应、116058对照及8517价位通过。两处源缺口共3分钟，缺失形成窗/路径剔除。实验与原始结果 `experiments/active/exp-btc-key-level-reactions-20261016-v1/`，两个registry登记；Notion研究 https://app.notion.com/p/3fb8856479af81cdb42fd6610c0aab54 。两条learnings保留浮点剖面复现与触及反应/成交利润的区别。
 - 共享main，只提交本轮归属内容；子代理实际档位无法确认后停止，由主代理完成。后续完整挂单策略需先确定退出规则，当前不自动调止盈止损或成本。
 
+## 最新进度：自动找龙头观察 v1 已运行（2026-10-16）
+
+- Owner 要求“实现自动找龙头”。新增独立 `altcoin_leaders.py`／`altcoin_leader_service.py`，只读复用现有 OKX 1H confirmed checkpoint，每小时取得公开合约分类，每分钟检查；不新增全币种行情请求、K线写者或 forward 任务。范围为明确分类的加密币 USDT 线性永续，排除基准／已知稳定币／股票商品与盘前。首轮 283／283 可比较，约4秒；当时 BTC／ETH 均等待启动，显示发现池，未硬凑龙头。
+- 新研究规则显式展示：1H收盘突破此前24收盘启动；首次收低冻结首波；再过首波最高收盘确认恢复；回到起点、恢复后首次回落或120小时终止。本币首波为正、相对基准不弱且仍守起点才进入偏序候选；按本轮相对表现、回吐、收盘最大回撤、恢复耗时分层并保留并列，强弱与行动状态分开。近7天高点只是参考，量比是同币张数，不冒充阻力金标、成交额或主动方向。
+- 工作台 `/#langlang?tab=auto-leaders`，API `/api/altcoin-leaders`、`/history`、`/snapshots/{id}`。独立 `altcoin-leaders-v1.sqlite3` 保存不可变派生快照、首次观察和候选池版本；新加入／缺失／已退出交易池分别保留。A→B→A追加新A，重复轮询不新增。历史不能作当前排名，故障或过期暂停判断。规则未验证收益；真实盘口、订单流、人工关键位、共振与效果检验仍待实现。Notion #50/#53 已回写当前范围，#53仍进行中。
+- 14项后端／API／导入、73项资产交付与层边界、18项前端检查通过；实页验证基准切换、搜索分页、历史回看、283条完整导出对齐、HTTP503暂停与恢复、1440／390／320px和深浅主题。候选分层路径另用明确标注的合成夹具验证，未落入真实账本。初次QA因选择控件标签匹配与缓存旧资源失败，修正标签并刷新后通过；所有注入已撤销。证据 `output/playwright/auto-leaders-20261016/`，经验 `docs/learnings/automatic-leader-ranks-need-shared-clocks-and-observation-history.md`。
+- 核心先提交 `5a054637ec` 再生成真实快照；本机服务已重载且后台运行。原模拟运行在本轮之前已因源码变化处于 error，重载前后运行ID／状态／心跳／错误逐项未变，不声称模拟已恢复。共享 main，新增模块独立提交，其他会话贡献的混合接线文件保留工作区；不改真实交易、通知、成本或风险门。子代理无法确认实际 Luna/max 档位后停止，由主代理完成。
+
+## 最新进度：Notion #50／#53 找龙头流程 v1.1（2026-10-16）
+
+- Owner 要求继续迭代并补找龙头逻辑。`trading-playbooks.js` 的 `leaders()` 扩为 12 节：候选池、共同事件窗口、首波参与、同窗回吐与结构、恢复顺序、并列／降级、合成反例与独立验证；领涨判断和当前行动状态分开。`weekly()` 输出逐字相同。同步更新 Notion #50 与 #53 并回读，原始资料及未知附件块保留；#50 方法完成，#53 实时监控仍进行中。
+- 方法页入口 `http://127.0.0.1:8766/#langlang?tab=leaders`。这是人工方法页，候选数据库、自动排名及实时共振尚未实现。原话定位依据本地字幕与索引，本轮视频取回受限，未冒称重新看完视频；新增公式与名单比较为待验证研究建议。市场接口仍有 HTTP 451 与 stale／ready=false，来源选择沿用已有待决项，不静默换源。
+- 15 项相关前端检查通过，12 节目录与合成例算术复核通过；实页 1440／390／320px 无文档横向溢出，手机表格内可横向滚动，跳转开单检查及返回通过，控制台无错误。修复目录跳转标题被顶部栏遮挡（`trading-playbooks.css` 两处偏移）；浅／深主题可读。证据 `output/playwright/task50-leaders-v11-20261016/`，经验 `docs/learnings/leader-strength-and-entry-readiness-need-separate-states.md`。共享 main，未提交包含其他会话贡献的混合工作区；无交易参数、通知、生产或下单变更。
+
 ## 最新进度：V13.1 15m 到达后前向模拟（2026-10-16）
 
 - Owner 批准执行后，接入独立模拟 worker；实际观察后预定下一未来 15m 开盘，保留原止损并重算风险。原 30min 新鲜度、2R/4ATR、原始反向退出、20bp 不变；只启用 15m，不将 1H 的 2ATR 混用。记录原参考开盘、入场价差、观察/入场延迟；多空和资产类别分组，参考 performance 不参与成交。
 - 北京时间 01:36:14 新建运行 `dc0c7e42add44beb902cafb33ea48424`（`#paper`）。OKX 全部 USDT 永续、多空都保留；分类快照 286 加密/194 股票类/9 商品类，后续新合约未分类。后台心跳正常，初次验收 0 条决策，无历史回填；旧 5 个运行记录逐字段不变。仍为 K 线模拟，未含资金费、盘口滑点和退出指令延迟，无账户组合净值或匹配随机对照，不宣称盈利，不启用实盘。
 - 148 项 Python、7 项前端检查通过；10 条多空退出路径与 canonical V13 回放对照，现有 44 条信号同入场价格全部一致，净 R 最大误差 6.3e-15。这是适配核对，不是新的前向收益。实页 1440/390/320px 无横向溢出，V13.1 仅展示 15m 选项。源码包 1,148 个文件逐一校验，hash 与运行及当前源码一致。
 - Builder `07bc93ab67` 先提交再启动；配置和登记收据在 `experiments/active/exp-spike-v131-observed-paper-20261016-v1/`，两个 registry 已登记；Notion 原观察 `3fa8856479af813db925f29bace95f79` 追加启动状态，原快照保留。经验 `docs/learnings/observed-paper-entry-must-freeze-intent-before-the-fill.md`；截图、原账本备份和验证证据 `output/playwright/paper-v131-20261016/`。共享 main，仅提交本轮归属文件/新增登记段；未改他人工作区，子代理档位无法核实后由主代理完成。
+
+## 最新进度：近期 15m 信号收益诊断（2026-10-16）
+
+- 北京时间 00:59 冻结 44 条信号：41 条已结束、27 胜 14 负、胜率 65.85%、净 +38.4697R、PF3.834；另 3 条未结束、浮动 -0.5891R。空头 32 条 +40.0215R，多头 9 条 -1.5517R。旧 39 条净 R 未变，新 AI/BREV 两条结束增加 +5.4620R。
+- 更正旧观察的资产范围：OKX 扫描全部 live SWAP，按当前官方 instCategory，9 条股票类永续贡献 +24.0945R（62.6%）；32 条加密合约 +14.3752R、胜率 62.5%、PF2.260，不能直接与 Binance 加密合约长历史比较。10/12 入场 27 条贡献 +30.3406R，去掉当天仍有 14 条 +8.1291R。
+- 41 条 API/只读数据库投影、净 R 公式、checkpoint 入场开盘与退出价逐笔核对通过，44 个 ID 唯一。25 条追踪退出 +51.3089R，9 条初始止损 -9.6765R，7 条反向退出 -3.1627R，分解调平。没有本批匹配随机对照，仍只作描述性观察；没有改标的范围、交易规则或生产资格。
+- 原始证据在 `data/monitor_diagnostics/15m-recent-20261016/`；Notion 原观察 `3fa8856479af813db925f29bace95f79` 已追加更正，原快照保留。经验 `docs/learnings/recent-signal-performance-needs-asset-class-and-event-cohorts.md` 已提交。子代理运行档位无法核实，停止后主代理完成。
+
+## 最新进度：15m 历史多空拆分与单向重放（2026-10-16）
+
+- 同一 V13 普通回踩 15m 历史（Binance 638 币，2023-01-01 至 2026-09-23 04:00 UTC）重放双向/只做多/只做空；只改入场方向，原始反向退出、2R/4ATR、0.2% 成本不变。从预热开始重放，638 流源哈希及逐笔双向 parity 通过，单向新增/替换交易均为 0。
+- 多头 5372 笔 +16.71R、PF 1.005；空头 5773 笔 +471.31R、PF 1.142。只做空保留 51.8% 交易与 96.6% 算术净 R，但 2023/2026 空头为负。空头匹配覆盖 13.6%，超额 -6.58bp；前后段均不显著，方向差异周聚类区间跨零，结论 inconclusive，不修改生产。
+- Builder `0569714f1b` 先提交后运行；20 项相关测试及标准库独立复算通过。原始结果 `experiments/active/exp-spike-v13-15m-direction-20261016-v1/results_v1/`，配置、收据、逐笔与汇总完整；已登记两个 registry 及 Notion 研究实验 https://app.notion.com/p/3fa8856479af8152ae1bca1fb534c805 。经验 `docs/learnings/direction-filter-needs-admission-replay-and-side-matched-controls.md`。累计 R 不是账户收益率；当前 OKX 观察与 Binance 历史分开。
+
+
+## 最新进度：Notion #52 磁盘整理与冷文件迁移（2026-10-16）
+
+- **后续分析可继续复用**：原路径软链接与实验/产物登记保留；本轮复查第四批 103 个入口均正常，沿原路径读取行情 CSV.GZ、旧实验事件 CSV.GZ、权益 CSV 和训练 PNG 成功。`AGENTS.md` 已补充主动查登记、跟随选定软链接目录、外盘离线不重建及不做哈希的长期规则；未来分析无需 Owner 重复提供外盘路径。普通递归搜索会跳过软链接，旧脚本的仓内路径限制需按实际任务定向适配。
+
+- **第四批已完成**：103 组（98 个冷数据目录与 5 个单独大文件），796,440 个文件、39,511,886,794 字节（36.80 GiB）已迁至 Elements SE，原路径保留软链接，本机副本已释放。包括研究行情、旧训练/审核图片、实验明细与归档。验收时本机可用 116.07 GiB；历次累计迁出 1,047,635 个源文件、152,705,881,185 字节（142.22 GiB）逻辑数据。硬链接与后台写入会影响实际空间差，不能把逻辑字节数当成物理释放量。
+- **第四批未做哈希**：原生复制、路径集合、数量、大小、时间、后台真实读取均通过。54 个受影响数据集保留身份与统计，最终 126 次文件 HTTP 读取及公网 HTTPS 图片读取通过；全目录仍为 197 个数据集、1,279,110 条索引。原有 7,155 条失效索引未在本轮修复。页面显示部分外接目录，配置/受跟踪标注继续留本机；28 项存储检查、71 项层边界检查、7 项前端检查通过。服务存活；验收时扫描正在运行、market_ready=false、model_ready=false，不把文件可读当作生产就绪。
+- **收据与恢复**：`data/_storage_migrations/20261016-task52-remaining/summary.json` 为最终验收；同目录 `restore_bulk.py 批次名` 支持目录/单文件恢复，已验证保留其他登记、并发元数据、外盘副本与覆盖保护。外盘 `storage-migration-20261016-task52/receipts-remaining/` 保存 1,534 份收据、1,160,449,417 字节，路径/大小/时间核对通过。103 个精确迁移入口的 Git 展开状态为空、试暂存输出为 0，HEAD 可读；共享 main 未提交混合工作区。
+- **保留与经验**：有效 Git 对象、运行环境、当前行情写入目录、运行数据库、活动 Label Studio 图片和受跟踪资产继续留本机。部分目录外接、失败响应保留、身份查询有限重试与硬链接变化核对的经验分别见 `docs/learnings/partial-external-storage-needs-file-level-resolution.md`、`docs/learnings/migration-cutovers-must-retain-http-error-bodies.md`、`docs/learnings/external-volume-lookup-retries-must-preserve-identity-checks.md`、`docs/learnings/migration-hardlinks-need-receipt-backed-change-accounting.md`。读取迁移数据需连接 Elements SE。
+- **追加迁移已完成**：再次盘点后新增迁出 36,722 个文件、12,629,362,094 字节（11.76 GiB）：10 组历史行情 5.60 GiB、6 组冷实验目录 4.53 GiB、5 份压缩明细 1.63 GiB。原路径保留软链接，本机副本已释放；验收时本机可用 103.21 GiB。历次累计迁出 251,195 个文件、113,193,994,391 字节（105.42 GiB）原始数据。
+- **追加批次不做哈希**：10 个新增外盘数据集 ID、路径、文件计数及大小保留，切换时 20 次、最终 19 次 HTTP 文件读取通过；上一批 5 个数据集复查通过，现有 HTTPS 入口实际读取新迁行情成功。全目录仍为 197 个数据集、1,279,110 条索引。新收据及恢复工具在 `data/_storage_migrations/20261016-task52-more/`；外盘 `storage-migration-20261016-task52/receipts-more/` 已保存 293 份收据，路径、大小及时间核对通过。单文件恢复工具通过原路径、大小、权限、纳秒时间、外盘副本保留及覆盖保护小样本验证。追加 21 个精确本机排除项，迁移路径展开状态为空、试暂存为 0。混合结果目录只迁冷数据，跟踪摘要保留本机；经验见 `docs/learnings/cold-migration-boundaries-must-preserve-tracked-and-web-evidence.md`。
+- **后续大数据迁移已完成**：9 组、214,230 个文件、68,577,553,694 字节（63.87 GiB），含三组历史行情 38.61 GiB、四组旧实验结果 22.50 GiB、两组训练样本 2.76 GiB。原路径保留软链接，本机副本均已释放，数据位于 `/Volumes/Elements SE/MacData/zhangzc/fable-trading/` 对应相对目录。加上首批，累计迁出 214,473 个文件、93.66 GiB 原始数据；最终验收时本机可用 93.82 GiB，空间差还受后台写入和 APFS 影响。
+- **Owner 已明确取消哈希检验**。本批使用原生复制成功、路径集合、文件数量/大小/时间和实际后台/网页读取验收；不声称内容逐字节一致。原始记录与恢复工具在 `data/_storage_migrations/20261016-task52-bulk/`，以各批 `.complete.json` 为完成依据；外盘 `storage-migration-20261016-task52/receipts-bulk/` 已保存副本，185 个收据文件的路径集合和大小核对通过。Notion #52 已更新为 Done。
+- 已按 Owner 明确授权给实际 Python 3.9 添加磁盘访问权限；监控 LaunchAgent 改为 Python 启动 `yoyo.monitor.launch_agent`，再以子进程运行 `caffeinate`，避免外层 `caffeinate` 改变 macOS 权限归属。三组行情网页及研究接口读取、两组训练样本网页展开与 PNG/TXT 实际读取通过；五个数据集的 ID、路径、文件计数和逻辑大小保留。两组图像目录仍为 64,003 / 59,242 条索引记录。读取已迁数据需要连接 Elements SE。
+- 相关 21 项目录存储测试、71 项层边界检查、7 项前端检查通过。六个本机迁移软链接入口加入 `.git/info/exclude`，共享 `.gitignore` 未改。经验见 `docs/learnings/background-disk-access-follows-the-responsible-executable.md` 与 `docs/learnings/preflight-removable-storage-before-dataset-discovery.md`。
+
+### 首批记录（Owner 取消哈希检验之前）
+
+- 已迁移 243 个冷文件、31,987,078,603 字节（29.79 GiB）到 `/Volumes/Elements SE/MacData/zhangzc/storage-migration-20261016-task52/`。含 231 份旧临时路径清单、9 份一天前且未打开的 Git 临时打包文件、2 份历史 `upload.tar` 与 1 个视频。有效 Git pack、活跃行情/数据库/模型保留本机。
+- 231 份清单按 SHA 去重为 58 份 gzip，23.19 GB 原字节占外盘 261.48 MB；其中 12 份末尾截断，原字节仍全部保存，不认证为完整可再生清单。外盘全部迁移内容合计 9,063,031,175 字节。两份上传包和视频保留原路径软链接，读取它们需要连接 Elements SE。
+- 原文件身份、时间、属性、SHA、归档路径、脚本及恢复工具在 `data/_storage_migrations/20261016-task52/`，外盘 `receipts/` 有副本。所有内容校验通过，原路径状态逐个验收；恢复工具 5 项小样本检查通过。Git HEAD 可读；看板 HTTP 200、`stale=false`、`refresh_error=null`，`model_ready=false` 仍保留，不能声称模型生产就绪。
+- 本机可用空间由首次约 887 MiB 恢复至约 35 GiB；前后差包含后台活动与 APFS 变化，不全部归因于本轮。Codex 临时 Git 清单持续生成的根因未修复，本轮没有改应用、Git 忽略规则或创建定时清理。经验：`docs/learnings/verified-cold-migration-can-deduplicate-identical-content.md`。
+
+
+## 最新进度：模拟开单按截图精简（2026-10-16）
+
+- Owner 截图要求已实现：方向按钮保留做多/做空与图标；持仓卡的持仓/可平 USDT 金额及保证金四舍五入显示整数，价格/费用/盈亏保留精度；移除加仓快捷按钮，保护按钮统一“止盈止损”。原始金额与交易计算不变。
+- 移除开仓确认开关、旧偏好读取和订单确认弹窗，市价/限价均点击后获取新鲜报价并直接提交；有效期、请求参数固定、防重复、离页取消和幂等重试仍走原直接提交路径。账户与保护价弹窗继续工作。
+- 91 项相关前端检查通过；实页核对显示、方向切换与保护弹窗打开/取消，未提交订单。两份服务静态资源及内容哈希与源码一致，刷新生效，无服务重启。初次测试的两项旧显示断言失败已更新，输出均保留在 `output/playwright/paper-desk-simplify-20261016/`；必要经验见 `docs/learnings/removed-preferences-must-not-control-direct-submission.md`。共享 main，未提交混合工作区；子代理实际档位无法核实，停止后主代理完成。
+
+
+## 最新进度：前端性能、状态恢复与阅读交互（2026-10-16）
+
+- Owner 批准此前列出的七项全部优化：内容哈希缓存与 gzip、按页面加载资源、研究请求合并及按需轮询、URL 子页与会话阅读位置恢复、笔记保存失败反馈和备份、手机折叠概览/目录与章节翻页、转写索引/Worker/分页检索均已实现。
+- 首次公共壳层 JS/CSS 从 46 项、1,059,061 字节未压缩响应，降到 9 项、58,475 字节 gzip 响应（约 1.01 MiB → 57 KiB；不含 HTML/API，不代表页面总耗时）。真实浏览器重复访问 9 项均命中磁盘缓存。HTML/API 继续 no-store，资料重新验证，带匹配内容哈希的脚本/样式才可长期私有缓存。
+- 研究页按当前视图取依赖，60 秒内复用；手动刷新强制重取；仅有排队/运行任务时 4 秒轮询，空闲降为 60 秒，离页/隐藏暂停。按页面代际隔离模块迟到加载，并为失败资源提供重试。逐页独立启动发现并修复市场表格 CSS 和个人系统跨页入口的隐式依赖。
+- 浏览器验收 25 个入口的 320px/1440px 布局，手机文档无横向溢出；交易页等额外等到真实数据完成。章节 Back/Forward/刷新、搜索第 2 页恢复、切页恢复原 847px 阅读位置通过。隔离 localhost 来源实测笔记立即切页保存、模拟配额失败保留草稿、重试成功及刷新后保留；故障注入已还原、测试笔记已清空，未改 127.0.0.1 的用户笔记。390px 阅读另验。
+- 转写 40,806 段、8 组查询与旧逻辑逐条对齐；实页“箱体”186 处，4 页，每页最多 50 个 DOM 结果。253 项前端、42 项相关 Python 检查通过。未做实体手机或公网延迟基准；第三方 TradingView 支持/遥测请求仍有 403/网络失败，图表本体加载，本轮未改外部服务。
+- monitor 与已有公网网关已重载以启用传输策略，未改交易/通知设置或提交订单。原始对照、测试、截图与 HTTP 证据在 `output/playwright/frontend-performance-20261016/`；六条必要经验在 `docs/learnings/`。共享 main，保留并行书架更新，未提交混合工作区。子代理模型档位未获工具确认，停止后主代理完成。
+
+## 最新进度：四本小册深化为图解研读（2026-10-16）
+
+- Owner 指出原小册太浅并接受“深度研读＋图解教材＋案例/反例/练习”方案。安装 `deep-reader`（GitHub `tronghieu/agent-skills` 固定 `f91c8ed82c566c6b3c4a93eabce498ed7dce6021`），应用已有逐章笔记→主题综合→回原文查关键主张的方法，并目视核对图表。四本现在分别为 8/6/7/10 个单元，共 31 单元，对应原 92 章／节；解释正文约 3.5 万字符，65 幅图表/图解（含 8 张公版扫描页）、62 道练习。覆盖和字数不是质量证明，源文与方法验证仍分开。
+- 新增 `trading-books-study.js`：流程、数值表、折线、K线、足迹和公版扫描图；每图标原书/复算/编者构造来源。逐步图的坐标范围、标签和数据表仅用当前可见数据。增加四书对照、术语、答案折叠和含数值的导出；手机宽图在图内滑动。`trading-books.json` 版本 `2026-10-16.1`，最终草稿同步在 `data/reading/task56/deep-study/`。
+- 保留原章节与旧笔记；新单元用 `study-*` ID，chapter/unit/mode 路由分开，刷新和分享恢复单元，原文往返按映射。修复误挂原章节翻页器导致按钮不切单元的问题。订单流原件仍链接作者官网或浏览器本地打开，未公开重托管现代原文。
+- 回原文纠正并保留边界：Graphophone现金差70美元无法调平；债券价差复利年化约12.31%与原口径分开；Valtos ratio/被套术语和策略例冲突保留。Tape横置表旋转后可核对股数、费用和11−7/8−3⅜−1/4=6½点，未当成现金收益率；Two Good Days原书未标年份，删除未经证实的1908。
+- 23项相关前端测试通过；31单元桌面与320px逐一打开，另验390px及深浅主题、揭示/重置、答案、笔记刷新、旧XXIV笔记、导入导出和原文映射。13项公网静态资产逐字节一致；HTTP/2抓取偶发失败，HTTP/1.1复查全通过。证据 `output/playwright/task56/deep-study/`，复现 `node --test tests/monitor/frontend_trading_books.test.cjs tests/monitor/frontend_module_loader.test.cjs`。
+- Notion #56及四本资料页新增新版入口/目录并回读核对，状态仍进行中/待验证。未新增完整来源；15本待全文、5项官方资料待逐节整理，不算完成。经验新增 `ocr-failure-is-not-source-absence.md` 和 `reading-units-need-separate-progress-and-route-identities.md`。两位Luna/max子代理实际运行档位已核对；共享main，未提交混合工作区、未重启服务或改交易参数。
+
+## 最新进度：三本技术书原文与完整小册（2026-10-15）
+
+- Owner 要求每本与首本一样、原文放前端并整理小册。本轮完成 Wyckoff《Studies in Tape Reading》12 章与附录、《How I Trade and Invest in Stocks and Bonds》1925 第五版 14 章、Valtos《Trading Order Flow》2015 版 42 节；现为 4/19 本、共 92 章／节完成。三本完整小册已写回原有 Notion 资料页，回读核对全部标题和末章答案；阅读状态已提炼，方法待验证。#56 仍进行中，15 本待全文，5 项官方资料未逐节整理。
+- 两本公版完整扫描件与 OCR 已保存到前端，逐章标注印刷／PDF 页码、原文要点、编者解释、练习、答案和边界。Valtos 保留作者版权，直接加载官网当前 `/book/TradingOrderFlow768.pdf`，与旧 `/dl/` 文件 SHA 相同；旧地址在浏览器验收中失败，新地址已独立打开。备用按钮可只在当前浏览器读取已下载原件，不上传，哈希不符拒绝；扩展自动选文件受权限限制，改用系统文件选择器完成本地 PDF 打开、哈希验收和第 41 节（PDF 140）实际显示；原件不上传。官网独立打开成功，嵌入加载仍较慢，备用入口保留。
+- 本地 PDF 直接 iframe 被站点防嵌入头挡住，改为按需加载、哈希校验后 Blob 显示，原安全设置保留。订单流教材 COT、trapped 命名、策略案例及 ratio 算术疑点在小册对应节保留。新增 Elder 官方配套资料、Market Wizards 借阅和 Markets in Profile 官方试读，未冒充完整正文。
+- 30 项相关前端检查通过，实页确认威科夫末章扫描定位、同章切换、4 本完整状态及 390/320px 阅读无横向溢出。公网 9 项资源逐字节比对见 `output/playwright/task56/technical-booklets-public-check.json`；来源及图表核对留在 `data/reading/task56/technical-sources/`。经验 `docs/learnings/embedded-originals-need-source-and-reader-verification.md`。共享 main，未重启服务或操作交易。
+
+## 最新进度：全站前端细节巡查与优化（2026-10-15）
+
+- Owner 要求整体梳理优化。巡查 25 个菜单入口的实际加载后页面；修复手机导航背景滚动/焦点泄漏，增加抽屉关闭入口、Tab 闭环与焦点恢复（含选择当前页），手机顶栏保留当前页面名称。`/` 只聚焦当前页可见搜索框，编辑、输入法及弹窗不被抢占。
+- 共享刷新按钮按页面显示 busy，旧请求不能解除新页面的加载状态；研究列表区分首次加载、失败和空结果，共用并发读取 Promise，离页后的读取/任务轮询失败不再污染其他页面。后台刷新不插入跳动提示；因子/实验/任务表重绘按记录身份恢复焦点，实验翻页定位新页首条并避开顶栏。
+- 修复 Bit浪浪七个标签导致的 566px 整页溢出，以及体系流程表单完整选项加载后撑到约 2554px 的问题；收紧嵌套 grid/select 尺寸约束，保留完整选项和研究内容。Bit浪浪手机版统计两列，版本/日期分层，数值与单位保持完整。
+- 最终 232 项前端检查通过（本轮专项 57 项）；并行书架更新过程中曾有 2 项内容断言失败，资料/测试更新后全量复跑通过，原失败输出保留。25 个入口在 320px 下文档宽度均为 320px，另实页检查 1440/390px、深浅主题、搜索空结果、菜单键盘闭环、复选框与翻页焦点、交易页全屏进出。未做实体手机测试；没有写交易/通知设置或重启服务。9 份实际服务静态资源与当前源码一致。
+- 原始截图、宽度记录、测试输出、改动前源码在 `output/playwright/frontend-polish-20261015/`；无额外报告。按 extract-approach 保存导航焦点、请求归属、列表身份与加载后响应式验收四条经验。共享 main，未提交混合工作区；子代理无法核实实际模型档位，停止后由主代理完成。
+
+## 最新进度：新建账户取消流程修复（2026-10-15）
+
+- Owner 反馈表单仍不能取消。此前只修复入口可见性，本次改为原生账户弹窗；取消、右上角关闭、外侧空白与 Esc 均关闭并清空草稿，焦点返回新建账户。空账户不再强制展开表单，关闭后刷新不会重开。
+- 编辑时阻止轮询及打开前发出的后台响应重绘弹窗；离开页面清理弹窗与滚动锁。提交中防止误认为已撤回请求；结果不明时关闭仍保留原幂等请求供核对重试。账户数据、交易参数和真实交易逻辑不变。
+- 92 项账户／行情面板／资金分析前端测试通过；实页验证四种退出、重开空草稿、输入焦点和刷新保持关闭。经验 `docs/learnings/empty-state-must-not-force-a-dismissed-form-open.md`。共享 main，不覆盖其他会话改动。
+
+
+## 最新进度：市场共振证据与行情状态补齐（2026-10-15）
+
+- Owner 对市场次开盘／12h 逻辑要求“那这个要做好啊”。页面现可比较同一批完整事件的 1/4/12/24h，前后时间段和匹配随机对照并列；动态门槛、方向、品种及持有控制已实页核验，390/320px 两段结果都可读。
+- 发现原 v5 退出研究只用 z2/v2/60%，不能直接支持默认 z3/v3/75%。新登记 `exp-market-sync-shock-20261015-v6`，配置先提交 `e54cffc97e`，复用已提交 v5 builder，原8退出、次开盘、0.2%成本、种子和2025切分不变。725个事件与v2严格样本逐条一致，724个完整48h路径，固定持有误差<1.5e-7。
+- 主组1H上涨ETH为72+54=126次：12h净+50.475/+58.139bp，随机-5.226/-3.613bp，相对随机p0.0015/0.0735。其余7种退出在前段全部比12h差，无一种两段都改善；48h跟踪前段反而少16.592bp、后段多59.055bp（p0.5087/0.3648）。仍是看过的历史，不是独立验证。严格/宽松条件分别加载v6/v5；其它筛选明确显示研究不对应。新增记录 https://app.notion.com/p/3fa8856479af81c2b303ebd29e10680c ，原任务#14/#28已更新。新入场方式未测试，不改策略。
+- Binance 451响应体明确为地区访问限制。保持原来源，重试降至30分钟；显示最后成功更新时间及数据源。ready同时检查BTC/ETH因果指标与原协议要求的山寨输入，未知不能显示为无信号；缓存仍停在北京时间10/10 21:00。OKX公共时间接口200已验证；已异步请Owner选择是否改用OKX单独积累，尚无回复，未换源或混用历史。
+- 87项相关Python、7项前端检查通过；全库注册表另4项失败，修改前已有条目缺source_commit（基准e54cffc97e已核对），本次新实验与3个产物单独按契约校验通过，不补造旧来源。公网JS/CSS与本地一致，历史API实际返回v6。原始记录/截图在 `output/playwright/workbench-cleanup/market-*`。复现命令在新config，汇总及receipt留results_v5，未额外出报告。
+- 磁盘再度耗尽，发现Codex后台`codex-workspace-diff`反复生成约100MB临时路径清单。仅清理62份超一天、未打开且格式已核实的可再生产物，释放6.28GB，清单/哈希已保存；没有改应用本体，持续生成问题尚未根治。行情、模型、交易账本未删。
+- 三条经验已保存：退出证据需匹配事件集、数据齐备才算ready、重复差异清单耗尽磁盘。服务已重启载入后端改动，真实下单/通知规则/ACTIVE均未修改；其它会话共享main改动保留。
+
+
+## 最新进度：交易技术书架扩展与原文补查（2026-10-15）
+
+- Owner 要求继续找原文并补威科夫、SMC／ICT、订单流等技术类。书架从 6 项扩展到 19 本书＋5 项官方课程／文档／短篇，新增 18 项已查重登记 Notion；取消技术书千人评分硬门槛，未核对评分留空。增加类型与原文可用性筛选，完整原文、官方资料、试读、借阅与购买入口分开展示。
+- 新增实际完整原文：Wyckoff《Studies in Tape Reading》（1910，204 扫描页）、《How I Trade and Invest in Stocks and Bonds》（原作 1922，实际下载为 1925 Fifth Edition，228 扫描页）、Michael Valtos《Trading Order Flow》（151 页）。作者官网另有 Tom Hougaard 17 页价格行为手册、25 页同名早期文章及 6 页 Part 2；早期文章不冒充 2022《Best Loser Wins》全书。原件、SHA 与 manifest 在 `data/reading/task56/technical-sources/`，现代免费 PDF 前端链接作者原件，不公开重托管。
+- 当前 4 本书全文可读，但只有原有《股票作手回忆录》24 章小册完成。新 3 本尚未逐章研读；15 本书仍待全文；5 项官方资料未逐课／逐节整理。原有现代书补了出版社试读、购买和两项有资格限制的图书馆借阅入口。Notion #56 保持进行中，下一步优先研读已取得的 3 本技术书，新增观点全部待验证。
+- 24 项相关前端检查通过，实页验证主题／类型／可用性筛选、SMC 官方课程、订单流 PDF 入口、未整理小册的真实状态、原有 24 章原文保留，390/320px 无横向溢出。公网静态资源比对留在 `output/playwright/task56/technical-expansion-public-check.json`。经验 `docs/learnings/book-editions-require-the-downloaded-copyright-page.md`：版权页图像纠正目录年份及 OCR 误读。继续共享 main，无服务重启或交易操作。
+
+## 最新进度：工作台 11 项精简与核查（2026-10-15）
+
+- 通知中心移除历史列表及其请求；信号卡片删掉“信号 K 线”起的下半段，信号中心不再跳 TradingView；移除全站页底 V13.1 参考成交提示。其他页面的图表功能不变。
+- 个人原则查明来自 9 月 25 日 Manual-v4 流程草稿。按 Owner 要求删除本地 8 条原则的全部 25 个版本，关闭预置原则模板；备份 `/tmp/fable-workbench-cleanup-before/workspace.sqlite3`，其他 kind 记录数量逐项保持。历史 Notion 来源不删除。
+- 新建账户表单移至页首并自动聚焦；此前被图表/交易区推到首屏下方。在隔离 8878 账本完整创建两个模拟账户，未提交订单，验收后服务已停止。
+- 模型中心 35 项改为可展开目录行；YOLO 记录改为紧凑表格、阶段筛选、20 条分页，运行快照折叠。修正 `gold` 单词误把黄金交易实验归入 YOLO 的问题，现 71 项。实验登记 430 项配中文问题标题、30 条分页；中文标题绑定原 question 哈希，原文/结果/资格不改，详情可展开原始材料。
+- 208 项前端、81 项相关 Python 检查通过；桌面及 390/320px、深浅主题，模型搜索/展开刷新、实验和 YOLO 搜索分页、原则空状态、通知无历史、信号无图表链接均实页检查。15 项公网静态资源与本机匹配。原始验证与截图 `output/playwright/workbench-cleanup/`，不额外生成报告。
+- 市场共振的 ETH 次开盘/12h 是历史比较基线；v5 没有替代退出在前后段同时显著胜出。当前 Binance 返回 451，缓存 K 线停在北京时间 10 月 10 日 21:00，页面诚实显示停更。Arthur 服务在线但采集心跳为空，目标 Chrome Discord 标签页在登录页，最后入库北京时间 10 月 15 日 01:30；需 Owner 登录并保持频道/桥接可用，当前本地模拟账本无成交，不能称跟单已恢复。
+- 15m 快照（20:21 北京）39 笔已结束参考段，25 胜14负、净 +33.0077R、PF3.432。空头30笔 +34.5595R，多头9笔 -1.5517R；北京时间 10/12 入场27笔贡献 +30.3406R。发现延迟均<30min，但同轮行情相关性高、没有匹配对照，非账户收益和稳定优势证明；已按唯一键保存 Notion 描述性观察 `3fa8856479af813db925f29bace95f79`。
+- 验收发现磁盘只剩147MiB，服务持续 SQLite disk I/O error。核对并清理20份无占用、一天前的可再生临时 Git 路径清单，释放2,026,954,512字节后状态快照恢复，TG配置重新正常显示。仍有大量同类临时清单，生成源未查，空间需另行治理；未碰数据库、行情或模型。清理路径/哈希有原始清单。
+- 经验已按 learning law 保存：账户表单邻近入口、中文展示绑定问题原文、工作流歧义词需上下文、SQLite I/O 与临时清单空间。共享 main，未提交其他会话改动；子代理因无法核实实际模型档位停止，由主代理完成。
+
+## 最新进度：交易书架原文／小册标签（2026-10-15）
+
+- Owner 要求 tab 加原文小册。顶部现为「书架／原文／小册／笔记与复习」，原文与小册共用当前章节；已接入《股票作手回忆录》24 章英文正文并保留完整电子版文件，原文按需加载，失败可重试。目录重绘保持当前章可见，原文浏览不标记小册已读。
+- 22 项相关前端检查通过，24 章逐一去空白全文对比一致；实页验证 I、XXIV 原文与小册同章切换及 390px 无横向溢出。经验 `docs/learnings/original-and-booklet-tabs-share-chapter-identity.md`。仍为一本全文、五本待原文；未重启服务或操作交易。
+
+## 最新进度：Notion #56 交易书架与首本完整小册（2026-10-15）
+
+- 任务要求热门高评分书籍原文逐本研读、小册与前端集成。本批选择 6 本（Goodreads ≥4.1、评价 ≥1,000，保留版本、检索日期和来源），入 Spike 交易资料库；前端「学习复盘 → 交易书架」支持搜索、排序、逐章阅读、笔记、间隔复习、小册导出及进度导入导出。
+- 《股票作手回忆录》1923 英文正文 I–XXIV 全部逐章研读；24 章中文分析小册含原文锚点、具体案例、边界、练习与自查，前端与 Notion 同步。原文和 SHA/逐章 manifest 在 `data/reading/task56/`（不入 git）。不复用现代译文，作者故事不当策略验证。
+- 其余五本《以交易为生（新版）》《金融市场技术分析》《交易心理分析》《金融怪杰》《Best Loser Wins》只有书目导读，未取得完整原文；任务附件实页确认是空模板。#56 保留进行中，下一步须取得本人已购/授权全文后逐章补齐，不能把书评或下载状态冒充通读。编者覆盖、Owner 本地已读及知识库验证状态分开记录。
+- 21 项相关前端检查通过；浏览器核验笔记刷新保留、导入冲突与错误保护、完整 24 章导出、待原文无已读按钮、失败重试，以及桌面/390/320px 深浅主题。截图和原始验收在 `output/playwright/task56/`。源码 `trading-books.js/css/json`；经验 `docs/learnings/book-source-coverage-is-not-reader-progress.md`。继续共享 main，未提交其他会话改动，未重启服务或操作交易。
+
+## 最新进度：历史开单仅已结束，并增加全量统计（2026-10-15）
+
+- Owner 纠正“历史开单”定义：只包含已结束记录，盈利、亏损及保本一起列出，无状态筛选。新增后端 `outcome=closed`，先筛选和聚合全部记录，再排序/分页；按退出记录日归属今天/本周，默认最近结束优先。卡片保留原筛选，切换视图更新查询代际并清空旧结果。
+- 历史统计提供结束笔数/胜负保本、累计与平均/中位净 R、胜率、盈利因子、平均盈亏比、平均盈利/亏损、最佳/最差单笔、累计 R 最大回撤、平均持有时长、可判定的连胜/连亏，以及周期/方向/退出原因拆分。净 R 直接使用既有退出投影，不再扣成本；同刻退出合计计算回撤，异号同刻退出不虚构连续顺序。缺失数据、无亏损分母均保持未知；等风险 R 不冒充账户收益率。
+- 16 项后端统计/API/V13.1 集成检查及 40 项前端检查通过，包含超过 2,000 条完整聚合、分页与排序不改统计、跨日退出、空值、保本、全胜全负、同时退出及切换迟到响应。此前旧 V1 分析夹具失败没有通过修改初始化门来绕过。
+- 实页核验历史无状态控件、盈亏都保留、卡片盈利筛选不污染历史、分页统计不变、今天按退出日、详情展开刷新保持；1440/390/320px、深浅主题通过，手机无页面横向溢出。全量 61 笔结束记录逐笔核算与分组对账通过（33 胜/28 负；仅为当时快照）。
+- 服务已重载，备份 `/tmp/fable-before-closed-signal-history-20261015-200746/`；原有 23 条模拟成交逐字段保留，未提交订单、改成本或信号执行。证据在 `output/playwright/signal-history-closed/`；经验 `docs/learnings/closed-history-is-a-cohort-not-a-layout.md`。继续共享 main，未提交他人工作区变更。
+
+## 最新进度：信号中心历史开单列表（2026-10-15）
+
+- 信号记录区默认显示“历史开单”，保留“信号卡片”切换；复用同一全量账本 API、方向/周期/合约/状态筛选、R 排序与每页 24 条分页。列表显示参考入场价/时间、初始止损、退出价、净 R/状态和持仓 K 线数；手机保留四列，完整字段在详情展开。
+- 详情显示完整北京时间、保护价、退出原因、成本、更新时点及记录 ID，保留 TradingView 和个人观察入口。入场与退出只读现有 performance 字段，未知不补零、不用确认收盘价代替入场。按记录 ID 保留展开状态，筛选或翻页清除。
+- 37 项相关前端检查通过。额外 Python 检查 7 通过、8 失败：`test_signal_analytics.py` 旧夹具仍写 `notification_policy:v1_bark_arm`，当前代码要求 V12.8 初始化键；本次未改 Python 文件或初始化门。当前 V13.1 的 5 项集成测试全部通过。
+- 浏览器实页核验 95 条记录的分页、卡片切换、展开与刷新保留、方向/状态筛选、R 排序、空结果和键盘展开收起；1440/390/320px、深浅主题通过，手机无横向溢出。公网 index/app/history CSS 与本机字节一致，无需重启。未提交订单或更改信号/成交数据。
+- 截图与原始验证在 `output/playwright/signal-history/`；经验 `docs/learnings/signal-history-must-share-the-ledger-query-and-projection.md`。共享 main 未提交其他会话改动；子代理因工具无法核实实际模型档位而停止，主代理完成。
+
+## 最新进度：资金摘要移到顶部行情区（2026-10-15）
+
+- 按 Owner 截图将六项账户资金摘要从持仓下方移到顶部行情右侧；桌面三列两行、手机两列三行，24h 行情数据置于下沿。复用原有资金节点与轮询更新，TradingView 容器保持原位。
+- 74 项相关前端检查通过；1440/390/320px 实页核验，窄屏金额不换行且无横向溢出，资金摘要仅出现一次，切换账户即时同步。公网 JS/CSS 与本机一致；截图 `output/playwright/task54/top-balances-mobile.png`。仅前端，未重启服务或操作正式订单。
+
+## 最新进度：移除布局下拉框（2026-10-15）
+
+- 按 Owner 手机截图移除“图表在上 · 持仓在右”布局选择器；保留已保存的排列和图表展开/收起功能。7 项行情前端检查通过，390px 实页无选择器、无横向溢出，公网 JS/CSS 与本机一致。截图 `output/playwright/task54/layout-control-removed.png`；仅前端，未重启服务。
+
+## 最新进度：账户交易统计与移除导出按钮（2026-10-15）
+
+- 移除交易页导出按钮，底部新增每账户全部记录的交易统计：已结算净收益/收益率、完整交易数/胜负持平、胜率、平均盈亏比、盈利因子、总费用/成交额、平均盈利/亏损、最佳/最差单笔、最大余额回撤及平均持仓时长。紧凑桌面四列、手机两列，支持深浅主题。
+- 后端从全部成交按完整仓位生命周期汇总（加仓和分批平仓只算一笔，全部平完后进入胜负统计），费用全扣。回撤按完整余额事件序列计算，不从压缩曲线推断、不冒充浮动权益回撤；统计为账户全生命周期，不随日历月份改变。没有已平仓交易时胜率显示缺失，无亏损不生成无穷比值。
+- 194 项模拟交易 Python 测试和 100 项前端测试通过。额外 `tests/boundaries` 165 通过、8 失败：`test_authoritative_docs` 两项（AGENTS/CLAUDE 差异、文档里的 API 路径）、`test_no_cross_repository_bridges` 一项（`ma_morphology_reuse_recover.py` 旧路径）、teacher 隔离五项（现有产物登记缺 `source_commit`）。这些文件未在本次修改，未绕过门禁或修改研究状态。
+- 三账户只读账本对账通过，浏览器验证切换账户、空统计、1440/390/320、深浅主题和口径说明；公网三个静态资源一致、统计接口成功、后台运行无错误。服务已重载，备份 `/tmp/fable-before-account-statistics-20261015-185506.sqlite3`，原 21 条成交逐字段保留；未提交正式交易。
+- 原始截图/验证 `output/playwright/task54/statistics/`，经验 `docs/learnings/account-statistics-count-complete-position-lifecycles.md`。子代理工具无法核实实际模型档位，已停止，主代理完成；继续共享 main，未提交工作区变更。
+
+## 最新进度：平仓直接提交（2026-10-15）
+
+- Owner 要求去掉平仓确认弹窗。市价平仓、限价平仓均按选定百分比取新鲜报价后直接提交；开仓确认开关独立。复用原冻结数量、幂等回执、重复点击锁和离页取消逻辑。
+- 98 项前端检查通过，本机与固定公网 `paper-desk.js` 与本地一致。仅改前端，未使用正式持仓测试平仓、未重启服务。经验 `docs/learnings/direct-close-uses-the-existing-quote-pipeline.md`；继续共享 main。
+
+## 最新进度：委托展示单位与仓位倍数（2026-10-15）
+
+- 按 Owner 标注固定持仓/委托为 USDT，删除单位切换及历史委托折叠区。沿用前轮紧凑卡片，无等待报价说明与常态检查 footer；真实后台故障提示仍保留。
+- 持仓/委托显示当前名义金额除以当前账户权益的仓位倍数，缺失或非正权益显示“—”。旧账本未保存原始选定倍数，不用合约杠杆或当前表单默认值冒充；已平仓记录的旧杠杆明确标作“合约”。保证金计算和账本不变。
+- 91 项前端检查通过；1440 与 390px 浏览器核验，手机无横向溢出、缩放 1，公网两份静态文件与本机一致。截图/原始验证 `output/playwright/task54/orders-cleanup/`，经验 `docs/learnings/displayed-exposure-needs-equity-not-margin-leverage.md`。未提交/撤销正式订单，未重启后端，继续共享 main。
+
+## 最新进度：资金曲线视觉与交互重整（2026-10-15）
+
+- 修复全局 SVG 图标描边继承到坐标文字的粗糊问题：图表独立重置 stroke，坐标改用稳定 CSS 字号的 HTML 标签。移除英文眉题、压缩数值与周期区，细线配淡色分段面积，收益变化带区间百分比；余额仍为真实阶梯，权益缺失不连线。
+- 去掉原生粗滑杆，鼠标悬停/点选显示日期和金额，触屏点选，键盘左右/Home/End 可选数据点，Escape 恢复最新点。指针仅更新提示节点，缓存几何模型；历史刷新恢复图表键盘焦点。余额/权益、7天/30天/全部及日历功能保留。
+- 90 项前端检查通过，覆盖阶梯/缺口、时间距离选点、区间余额继承、不补权益、零值单点、触控/键盘。浏览器桌面、390/320px、深浅主题与区间切换通过，手机无横向溢出、缩放1；三份公网静态资源与本机一致。仅前端，未提交正式订单、未改账户或保护价。
+- 截图与原始核验 `output/playwright/task54/curve/`；经验 `docs/learnings/icon-svg-defaults-must-not-style-data-charts.md`。前轮止盈止损底部说明已去掉并收紧空白（59 项下单前端检查通过）。继续 main，未提交共享目录改动。
+
+## 最新进度：三面板布局与订单区压缩（2026-10-15）
+
+- 按 Owner 截图去掉委托“等待新鲜报价触价/时间”行和常态自动检查 footer，真实拒单原因及后台异常仍可见。USDT/币数量并入记录标签栏，压缩订单间距、撤单按钮及空状态；资金摘要紧跟记录区，减少下单卡片旁的空白。
+- 行情、下单、持仓改为三个独立布局槽，图表上方“布局”可选四种排列，默认图表在上、下单在左、持仓在右；支持持仓左右换位、图表/下单左右换位，浏览器本地保存。手机单列按对应顺序堆叠，320px 资金卡片两列避免数字断行。
+- TradingView 节点保持连接，切换仅调整 CSS grid-area。85 项前端检查通过；实测四种布局坐标、刷新记忆、1h 周期跨布局及表单重绘保留、单位切换、390/320px 无横向溢出和缩放 1。固定公网原生全屏进入/退出兼容；三份静态资源与本机相同。仅前端修改，未重启后端、未提交订单/撤单或修改保护；验证期间观察到正式订单数变化，本代理未执行订单写操作。
+- 原始截图/检查 `output/playwright/task54/panel-layout/`；经验 `docs/learnings/panel-reordering-should-not-reconnect-live-embeds.md`。TradingView 自身 support 接口仍有 403，图表和周期操作正常；未做实体 iPhone Safari。继续 main，共享工作区未提交。
+
+## 最新进度：交易页全屏、全站侧栏折叠与面板简化（2026-10-15）
+
+- 按 Owner 标注，将账户/新建/刷新/导出工具并入行情卡片右上，去掉币种箭头块与开仓/平仓切换栏。平仓从持仓卡片进入，并有返回开仓；止盈止损默认折叠，输入/展开状态在表单重绘时保留，折叠后已填价格显示“已设置”。统一 select 箭头与右内边距，删除仓位公式说明，保留资金不足错误。
+- 全站顶栏新增侧栏收起/展开按钮，桌面状态保存到本地并跨路由/刷新保留，手机继续临时抽屉。新 `workspace-display.js/css` 独立管理桌面偏好、移动抽屉和全屏；侧栏隐藏时不可键盘聚焦。
+- 交易工具栏“全屏”覆盖原交易根节点（图表、下单、持仓、资金分析都在内，可滚动），支持退出按钮和 Esc。优先浏览器原生全屏，缺失/拒绝时仍可视口铺满；全屏外元素暂设 inert，退出恢复；异步迟到请求不能让已离开的页面重入。整个过程不移动 TradingView iframe。
+- 81 项前端检查通过。浏览器 1440/390/320px 核验原生全屏与退出、Esc、侧栏刷新及切页记忆、手机抽屉、周期 1h 和止盈止损输入保留；320px 无溢出、缩放 1。公网原生全屏实测，8 个页面/静态资源与本机字节一致；自动规则后台正常。未做实体 iPhone Safari 测试，未提交正式订单，后端逻辑与账本结构未改。原始截图和检查 `output/playwright/task54/layout/`。
+- 经验 `docs/learnings/fullscreen-and-sidebar-need-separate-lifecycles.md`。保持 main，未提交共享工作区改动。
+
+## 最新进度：模拟交易行情、TradingView 与历史仓位（2026-10-15）
+
+- 参考 Owner 两张 OKX 手机截图：顶部选择合约、实时 OKX 最新成交价与 24h 涨跌/高低/估算成交额；官方 TradingView Advanced Chart 使用精确 OKX USDT 永续符号，显示 K 线与成交量，保留原生周期/指标。手机先行情图再下单，桌面左右双栏；无订单簿。图表可收起、打开完整图表，跟随明暗主题。
+- 新 `paper-desk-market.js` 保持 iframe 原位，表单/账户轮询不重载图表；切币取消旧行情请求，离页释放轮询。只读 `/market` 每 3 秒复用 OKX 公共缓存，不保存执行报价；超过 15 秒显示过期，不用中间价冒充最新成交。下单仍按独立买卖报价。
+- 历史仓位改为紧凑三列卡片与可展开关联成交；均价来自全部开/平仓成交加权，收益率明确除以累计开仓保证金，避免把最后剩余仓位均价当历史均价。已平仓判定兼容 Decimal 的 `0.00`；不重写成交。
+- 256 项 Python（含边界）与 73 项前端检查通过。真实浏览器核验 BTC/ETH 永续、1h/4h、桌面指标菜单、深浅主题、表单交互及轮询保留周期、关联成交展开保留、390/320px 无溢出与缩放 1。固定公网手机 ETH 图表及报价可见；未做实体 iPhone Safari。TradingView 自身 support incidents 接口 403，不影响本次 K 线和指标菜单加载；外部组件仍依赖网络和其币种覆盖。
+- 正式 8766 已重启；后台自动规则正常，首页和三份新静态资源公网/本机字节一致。备份 `/tmp/fable-task54-before-chart-20261015-173333.sqlite3`；更新时原 3 账户、8 持仓记录、18 成交、62 报价、27 回执、1 委托原行逐条保留。代理未提交正式订单，隔离 8878 已停止；用户后续操作/自动规则继续正常变化。原始验证和截图 `output/playwright/task54/chart/`。
+- 经验：`docs/learnings/market-charts-must-outlive-trading-form-renders.md`、`docs/learnings/closed-position-display-needs-all-fill-history.md`。未切分支或提交共享目录其他修改。
+
+## 最新进度：模拟开单加仓、费率、强平与资金分析（2026-10-15）
+
+- 同合约允许多笔开仓挂单与继续加仓。同方向、同合约杠杆合并，按剩余数量加权均价；不同方向或杠杆独立。持仓默认显示 USDT，可切币数量，新增加仓入口；已有止盈止损及百分比平仓保留。卡片收紧间距，手机输入至少 16px 避免聚焦缩放。
+- 新成交采用 OKX 普通等级 Maker 0.02% / Taker 0.05%；限价立即穿过买卖价按 Taker 与可成交报价，真正挂单成交按 Maker。旧成交费用不回写。BTC/ETH 合约最高 100×、其他币最高 20×，另校验公开风险档位；权益仓位倍数默认 10×，与合约杠杆独立。币种按 24h 成交额估算排序并支持搜索。
+- 显示基于 OKX 标记价、公开维持保证金档位的全仓条件爆仓价（假定其他币价不变）。账户权益触及维持保证金加平仓费用时，后台事务内撤销全部挂单、平掉该账户持仓并记录清算费用/证据；缺失或过期风险数据不伪造价格。当前是全仓一次性强平模拟，未实现 OKX 分档减仓、保险基金、ADL、资金费和深度滑点。
+- 每账户底部新增余额/权益曲线、7/30天/全部范围、数据点查看和北京时间每日净盈亏日历。余额与日历从全部成交及费用重建；浮动权益每分钟采样，历史不存在的数据不补造。导出 schema v6 保存采样、费用角色及清算证据。
+- 176 项账本/API/保护、71 项边界、67 项前端检查通过。隔离 8878 实测同仓加仓合并、持仓并存两笔同币挂单、搜索成交量排序、山寨币 20× 上限；最终 3 笔成交、1 个已平仓合并仓位、2 笔已撤挂单，余额 962.495659769716378 精确对账，仅为功能验收。390/320px 无横向溢出，确认弹窗缩放保持 1；未做真实 iPhone Safari 实机检查。隔离服务已停止，原始证据 `output/playwright/task54/exchange-*`。
+- 正式 8766 已重启，固定公网新界面及三份静态资源一致、后台运行无错误。更新前备份 `/tmp/fable-task54-before-exchange-20261015-160841.sqlite3`；迁移验收时 3 账户、5 持仓记录、9 成交、1 委托、17 回执的原字段逐条未变。本代理未提交正式测试单；用户后续正常操作与自动规则执行会继续改变账本。Notion #54 同步本轮验收与范围。
+- 经验笔记：`additions-must-weight-the-remaining-position.md`、`limit-order-fees-depend-on-liquidity-role.md`、`cross-liquidation-is-an-account-condition.md`、`equity-history-cannot-be-reconstructed-from-fills.md`（均在 `docs/learnings/`）。下方成本与无强平描述是旧版本历史。
+
+## 最新进度：持仓止盈止损管理与百分比平仓（2026-10-15）
+
+- 按 Owner 要求，持仓卡片新增设置/修改止盈止损弹窗，留空或清空后保存可取消；显示剩余仓位的预计净盈亏。修改以新鲜可平仓价格为基准，支持把止损移入盈利区间；部分平仓保留剩余保护。修改生效时间持久化，早于修改的缓存行情不得触发新设置。
+- 平仓改为 1–100% 整数比例与 25/50/75/100% 快捷按钮，市价、限价均支持。后端按当前剩余持仓计算，100% 精确清尾；确认时固定数量并验资/验可平量。已有平仓挂单占用时明确拒绝超量，百分比基数不偷偷缩成可平量。
+- 152 项账本/API/保护测试、71 项层间边界、61 项前端检查通过。隔离 8878 实测 0.01 BTC 设/改/取消保护 → 25% 市价平 0.0025 → 剩余 0.0075 的 50% 限价挂 0.00375 → 超量拒绝 → 撤单 → 100% 平尾仓；3 笔成交逐笔对账。1440 桌面、390/320 手机编辑和保存通过，控制台无警告或错误。原始证据 `output/playwright/task54/management-*`。
+- 正式 8766 已重启且比例报价接口成功，独立后台运行。备份 `/tmp/fable-task54-before-management-20261015-140115.sqlite3`；原账户/持仓/成交/委托/回执的已有字段逐条保留，本代理未提交正式测试订单或改保护价。导出 schema v5 保存保护修改及引用报价；新增时间列兼容旧仓位。
+- 经验 `docs/learnings/position-management-needs-current-price-and-remaining-exposure.md`。原成本、触价按实际观察报价、无深度滑点/资金费/强平等边界保持不变。
+
+## 最新进度：仓位倍数与合约杠杆拆分（2026-10-15）
+
+- Owner 纠正“全仓”的含义：默认合约杠杆 100×、实际仓位为当前账户权益的 10×。两个独立下拉均沿用九档；自动计算数量，保证金为名义金额除以合约杠杆，再加原开仓费验资，资金不足拒绝而非自动缩单。下方显示仓位金额、保证金加费用、下单后可用；止盈止损估算同步使用新的仓位数量。
+- 134 项账本/接口/止盈止损测试、71 项层间边界与 55 项前端检查通过。隔离 8878 浏览器分别通过确认弹窗和直接提交挂两币：权益 1,000、每笔名义 10,000、合约 100×，可用依次 890、780；撤销后恢复 1,000，无成交。390/320px 无横向溢出，控制台无警告/错误。合约 100→50 保持盈亏不变、保证金翻倍；仓位 10→5 则数量和盈亏减半。
+- 正式 8766 已重启，后台运行且新 `equity_multiple` 报价通过；固定公网与本机 JS 字节一致。更新前备份 `/tmp/fable-task54-before-exposure-20261015-134757.sqlite3`。已有订单/持仓/成交/回执原记录保留；Owner 在更新期间操作了正式账户，新增成交与资金变化逐笔一致，不能把整个账本声称为未变。本代理仅在隔离环境下单，正式仅 GET。
+- 原来的 10× BTC 挂单已被撤销，当前账本有 100× 新仓位；以页面实时值为准。旧单不自动改杠杆或数量。原始证据 `output/playwright/task54/exposure-*`；经验 `docs/learnings/exposure-multiple-must-be-independent-of-margin-leverage.md`。下方全可用资金与旧止盈止损数字属于历史版本。
+
+## 最新进度：止盈止损实时净盈亏估算（2026-10-15）
+
+- 按 Owner 要求，止盈、止损价格下方即时显示预计净赚／净亏 USDT；全仓预算包含开仓费，净盈亏再扣平仓费。限价使用委托价，市价多头使用卖一／空头使用买一；不重复乘杠杆。费率沿用后台快照，未调整成本或下单规则。
+- 输入、杠杆与账户资金变化联动；后台只更新估算结果与可用资金，不重建正在编辑的输入框。无资金、缺失费率、错向价格和过期行情明确提示，不编造金额；估算报价独立于提交报价，不会弹窗或下单。
+- 51 项前端检查通过。隔离 8878 浏览器验证 390px 浅色／深色、市价多空与限价、杠杆调整、轮询时保留输入焦点，无横向溢出。截图参数 1,000 USDT、10×、委托 80,960、止盈 81,964、止损 80,678 显示 +102.86 / −54.25 USDT，按开平仓各 0.1% 计费。原始证据 `output/playwright/task54/pnl-*`。
+- 正式服务已即时提供新静态文件，无需重启；本轮未提交测试订单。金额为设定价格下的估算，实际触价跳价会不同。经验：`docs/learnings/live-exit-pnl-must-use-sized-exposure-and-both-fees.md`。
+
+## 最新进度：模拟开单改为固定公网入口（2026-10-15）
+
+- Owner 要求手机收藏后不换链接。复用本机已有 ngrok 账号，固定入口 `https://strifeless-bluffly-channing.ngrok-free.dev/#paper-desk`；显式绑定域名的 `com.spike.public-ngrok` LaunchAgent 已启动，Mac 登录后自启动并自动重连。
+- 仍经原 Caddy 网关保留同源检查、凭据清理和远程桌面动作阻断，沿用 Owner 的整个工作台免登录口径。新地址实测可用后停用旧 Quick Tunnel，旧临时链接已退役；`start/status/stop` 自动识别本机保存的固定入口。
+- 39 项公网网关检查通过；真实公网首页/账户 API/JS 均 200，390px 浏览器显示模拟开单且无横向溢出，重启 ngrok 后同一域名仍返回工作台。未提交测试订单或改动用户挂单。证据 `output/playwright/task54/fixed-public-verification.json` 与 `fixed-public-mobile.jpg`。
+- Mac 与服务必须在线；免费版有 Visit Site 提示（Cookie 隐藏 7 天）及每月 20,000 请求 / 1 GB 配额。固定地址不等于无限额度或常驻云端。凭据未复制入仓库；配置/入口说明保存在用户 Library 下。经验见 `docs/learnings/fixed-public-url-needs-persistent-domain-and-reconnect.md`。
+
+## 最新进度：模拟开单公网手机入口已恢复（2026-10-15）
+
+- Owner 询问手机公网访问。已有 Quick Tunnel 的本机网关正常，但旧连接持续报 `Unauthorized: Tunnel not found`；只重启 `com.spike.public-tunnel` 后重新注册，监控/账本/网关配置未改。
+- 当前临时入口 `https://tabs-sources-orlando-pensions.trycloudflare.com/#paper-desk`；首页、模拟账户 API、最新版 JS 均 200，真实浏览器 390px 显示“区间练习”、开多按钮与确认开关，页面无横向溢出。未提交公网测试订单。
+- 沿用此前 Owner 的整个工作台免登录配置，持有链接即可访问。Mac 与服务需在线；免费域名重建后改变，不保证长期可用。本机 `PublicTunnel/access.txt` 已更新。原始检查 `output/playwright/task54/public-verification.json`；经验 `docs/learnings/tunnel-process-status-is-not-public-reachability.md`。
+
+## 最新进度：任务 54 可选直接开仓（2026-10-15）
+
+- 按 Owner 要求移除界面“预览”字样，按钮为开多/开空（平仓为平多/平空）；新增“开仓前确认”开关，默认开启并在当前浏览器记住选择。关闭后市价/限价开仓取新鲜报价后直接提交，开启时仍走确认弹窗；平仓继续确认。
+- 两种开仓方式共用报价快照与提交函数，保留止盈止损、杠杆、资金检查、请求幂等和失败重试。报价获取期间离开再返回页面会丢弃旧请求，防止迟到报价直接下单。
+- 44 项前端检查通过；隔离 8878 真实行情走通限价挂单/撤销、直接市价开仓和确认平仓，2 笔成交、1 个已平仓仓位、1 笔已撤委托，余额精确对账。正式账本仍为 1 账户、0 持仓/成交/委托、1 回执。1440/390 界面通过，隔离服务已停止。
+- 原始检查、导出、截图 `output/playwright/task54/direct-*`；经验 `docs/learnings/direct-entry-reuses-the-quote-submission-pipeline.md`。仅前端/测试改动；正式浏览器恢复默认开启确认，未提交正式测试订单。
+
+## 最新进度：任务 54 成交确认弹窗与费率说明（2026-10-15）
+
+- Owner 要求预览弹窗，覆盖下方“桌面右侧预览”旧设计。现为居中原生 dialog，价格、保证金、费用、止盈止损分组；返回修改保留表单，Esc/遮罩可关闭，Tab 循环，过期禁用，提交中不可重复操作，结果不确定时退出弹窗显示原请求重试。
+- 36 项前端检查通过；真实浏览器核验 1440 桌面深浅主题、390×844 手机、320×568 小屏滚动及焦点/过期/取消，限价做多和市价做空预览正常，控制台无警告或错误。正式账户未提交测试订单；账本仍为 1 账户、0 持仓/成交/委托、1 回执。
+- 费用展示读取后台 preview fee 与 snapshot fee_rate，明确标注“模拟费率 0.1% · 按名义金额计算”。未改成本：截图 9.901 USDT 来自统一 0.1%；OKX 官方合约示例 Maker 0.02% / Taker 0.05%，该成交额对应约 1.98 / 4.95 USDT，但实际账户等级未知，限价立即成交也可能是 Taker。来源 https://www.okx.com/help/trading-fee-rules-faq 。
+- 原始证据 `output/playwright/task54/modal-*`；经验 `docs/learnings/trade-dialog-must-follow-the-request-lifecycle.md`。仅前端与对应测试调整，后台账本/费率未修改，仍为共享 main，未提交其他会话改动。
+
+## 最新进度：任务 54 交易界面样式优化（2026-10-15）
+
+- 默认开仓杠杆已按 Owner 改为 10 倍；本轮统一资金条、输入框、按钮、明暗主题与记录空状态，突出账户权益；全仓/杠杆/反转同排，止盈止损分组，成交预览移到桌面右侧记录上方，手机依次排列。
+- 27 项前端回归通过；正式页面实测限价预览/取消、方向反转、币种搜索、成交标签、深浅主题，1440/390/320 宽无页面横向溢出；未提交测试订单。截图 `output/playwright/task54/polish-light.jpg`、`polish-dark.jpg`、`polish-mobile.jpg`。初次 `polish-before.jpg` 因 viewport 尚未稳定被裁剪，不用于前后定量对比。
+- 仅 `paper-desk.js/css` 展示层调整，无后端或账本改动；经验见 `docs/learnings/trade-confirmation-belongs-beside-the-ticket.md`。共享 main 未切分支或代提交。
+
+## 最新进度：任务 54 开仓止盈止损已上线（2026-10-15）
+
+- 市价、限价开仓均可选填止盈价和止损价；校验多空方向，限价成交后才启用。后台约每 5 秒按成交后的新鲜买一（多头）/卖一（空头）触发，按实际观察报价平掉剩余仓位，跳价不保证触发价。
+- 自动平仓与同仓位平仓挂单撤销共用 SQLite 事务；部分平仓继续保护剩余数量，手动/自动竞争不会重复平仓。成交记录标注止盈/止损原因，导出 schema v4 保存保护价与报价证据；旧仓位迁移默认空，不擅设保护价。
+- 250 项 Python、27 项前端检查通过。隔离 8878 提交带保护限价单后关闭页面，后台完成入场及自动止损，2 笔成交精确对账；1440 桌面和 390 手机通过，控制台无错误。该跳价场景仅为功能验收。
+- 正式 8766 已重启，自动检查运行；原有 1 个账户、1 个回执逐条未变，持仓/成交仍为 0。备份 `/tmp/fable-task54-before-stops.sqlite3`；原始检查、导出及截图 `output/playwright/task54/stops-*`；Notion #54 已同步。
+- 经验：`docs/learnings/protective-exits-must-share-the-position-transaction.md`。服务停止/行情缺失时不执行、不补历史触价；资金费、深度滑点、强平仍未建模。共享 main 未切分支、未代提交其他会话改动。
+
+## 最新进度：任务 54 紧凑面板、全仓与限价挂单已上线（2026-10-15）
+
+- Owner 最新口径覆盖下方历史 UI：参考其 OKX 截图做简版，压缩头部留白；开仓使用全部可用资金、自动预留手续费计算数量，无数量/理由输入；杠杆仅 1/2/5/10/15/20/30/50/100，默认做多、箭头反转做空。搜索下拉保留，持仓/委托/成交使用标签切换。
+- 持久化限价开仓/平仓与撤单；冻结开仓保证金及费用、锁定平仓数量，SQLite 事务处理并发。独立后台每约 5 秒使用提交后的新鲜 bid/ask 触价，按委托价保守全额模拟成交；关闭页面不影响，停机不补历史触价。仍无强平/资金费/深度滑点/自动止盈止损。导出 schema v3 包含订单与触价证据。
+- 215 项 Python + 22 项前端检查通过；隔离 8878 浏览器实际走通 3 笔限价委托（1 撤销、2 成交）、5 笔成交、2 个已平仓仓位，余额与逐笔盈亏费用精确对账。1440 桌面、390 手机无溢出，明暗主题通过；自动刷新不抢占表单或覆盖预览。
+- 正式 8766 已重启更新，挂单后台正常；原有 1 个账户、0 持仓、0 成交、1 个回执逐条未变。正式测试下单为 0。Notion #54 已同步。原始截图/检查/导出在 `output/playwright/task54/compact-*`；隔离账本 `/tmp/fable-task54-compact-qa`，更新前正式备份 `/tmp/fable-task54-before-compact.sqlite3`。
+- 新增 `paper_desk_limits.py` 与相关测试；三条 learning 记录全仓费用预算、挂单原子冻结、后台刷新不占表单锁。共享 main 未切分支、未代提交其他会话改动。
+
+## 最新进度：任务 54 币种改为搜索下拉（2026-10-15）
+
+- Owner要求币种下拉选择并支持搜索。新增公开OKX instruments目录（live/linear/USDT永续，缓存5分钟），当前483个合约；前端支持缩写、完整合约名、不区分大小写与分隔符，精确匹配排第一，点击/方向键/Enter选择、Escape取消。选币后仍取15秒有效报价，切换币种清除旧确认。
+- 140项Python、21项前端检查通过；桌面ETH搜索→ETH真实报价预览、手机SOL搜索、空结果/取消和390px无溢出已验。正式8766已更新，原账户与成交账本未改变。原始证据 `output/playwright/task54/symbol-search-verification.json`；Notion任务已同步。未提交共享工作区其他改动。
+
+## 最新进度：任务 54 自选杠杆已补齐（2026-10-15）
+
+- Owner补充要求“杠杆也要支持选”。手动开仓现可选1–125倍整数杠杆，默认1倍；保证金=入场名义金额÷杠杆，部分平仓按比例释放，数量/绝对盈亏/手续费不重复乘杠杆。持仓期间固定，旧仓位迁移为1倍，旧请求回执仍可幂等重试。
+- 138项Python、17项前端检查通过；真实浏览器完成10倍开仓→部分平仓→刷新→全部平仓，3笔新增成交与原5笔1倍成交的导出余额精确对账。390px无横向溢出。刷新busy状态未及时禁用按钮导致点击丢失的问题也已修复。
+- 正式8766已更新并实测10倍预览；更新前已存在1个账户，原账户/回执逐条保留，未写正式测试成交。旧段“正式账户为空”为首次上线时的历史状态。Notion任务已更新；原始证据 `output/playwright/task54/leverage-verification.json`，隔离账本 `/tmp/fable-task54-qa`。
+- 仍是本地模拟；1–125不是交易所逐合约上限，不含资金费、深度滑点、强平或自动止盈止损。两条新learning见 `docs/learnings/leverage-changes-collateral-not-base-exposure.md`、`docs/learnings/refresh-busy-state-must-match-visible-controls.md`。没有切分支、训练、promote或合并其他会话改动。
+
+## 最新进度：Notion 任务 54 手动模拟开单已上线（2026-10-15）
+
+- Owner确认范围为现有工作台手动模拟开仓、平仓和查看盈亏。入口 `http://127.0.0.1:8766/#paper-desk`；正式账户为空，由Owner自填初始虚拟资金。
+- 新增独立 `paper_desk.sqlite3`：多空、部分/全部平仓、余额/占用/浮盈、费用、逐笔成交和完整JSON导出。1倍名义占用、每边0.1%成本、确认15秒内OKX公开bid/ask报价；无交易所订单接口，不含资金费、深度滑点、强平或自动止盈止损。
+- 124项Python与14项前端检查通过；隔离8878真实报价走通5笔成交/2仓位并逐笔对账，1440桌面明暗与390手机无页面横向溢出。8766已重启并验证账户及报价接口200；测试账本仅在 `/tmp/fable-task54-qa`，原始导出/截图/代码SHA见 `output/playwright/task54/verification.json`。
+- Notion任务 `https://app.notion.com/p/3fa8856479af80419d7cdcdc01920a57` 已写验收。源码 `yoyo/research_workspace/paper_desk.py`、`paper_desk_api.py` 与前端 `paper-desk.js/css`；learning `docs/learnings/quote-cache-needs-explicit-empty-state.md`。共享main已有大量其他改动，本轮未合并代提交。
 
 ## 最新进度：直接识别测试完成，模型尚未验收（2026-09-26）
 
@@ -299,7 +1123,7 @@ Latest separate UI instruction: removeV2.9 entry selector;5m/15m charts automati
 - 固定阈值0.25的逐图配对：159张test规则正图，pad0→pad0.5为110持续命中、40命中变漏检、4反向改善、5持续漏检；命中150→114。指标区别于上一轮AP；原始标签仍非逐张人工金标。
 - KAIA预先规则选出的诊断案例：原图/加左右16px灰边/恢复分数0.984710/0.004088/0.984710，内容像素一致，恢复逐值一致。固定1312宽度、只改左偏移0/16/32px又为0.001148/0.004088/0.984432，确认真实位置敏感性，不是展示框坐标问题。单例不能证明训练固定位置是全部病因；未修改权重或线上输入。
 - 盲审准备目录：`experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/blind_review_20260926_v1/reviewer/`。23个不同观察窗、18合约、同币可见区间隔离，4隐藏重复，共27任务；仅显示因果原图和K线编号。抽样不读取模型输出，涨幅池选择偏差仍保留。目标24少1个合格1H窗，没有放宽隔离规则。
-- Owner看完page01回复“无”，已按该页R01/R02都无记录；原话和页级范围解释保存在`blind_review_20260926_v1/adjudications/owner_round_0001.json`。仅填写形态有无，其他字段和隐藏重复保持未答。当前2/27任务有判断、25待审；`review_progress.json`与`reviewer/answers.current.json`为当前进度，原全空模板/准备回执保留。下一页`reviewer/page_02.png`对应R03/R04，手机内联展示；不要提前透露模型预测或替Owner填写。
+- Owner盲审已开始。实时进度和下一页必须读取`blind_review_20260926_v1/review_progress.json`，当前答案视图为`reviewer/answers.current.json`，每轮原话和页级范围解释保存在`adjudications/owner_round_*.json`；原空模板/准备回执保持冻结。每次只登记该轮实际回答的字段，不外推隐藏重复，不提前透露模型输出；按`next_page`手机内联展示后续图片。当前新增标注可先本机追加，阶段完成后统一提交，避免每两张图打断审核流程。
 - 入口`early_followup_delivery_20260926.json`，raw配对表/两次张量实验/私有映射均已保存；11项专项检查通过，双机probe SHA一致。Notion EXP-108已追加。维持近右端低延迟目标，不追加未来K线凑位置，不重训、不promote。下一项生产资格缺口是实际盲审标签与稳健性方案，不重复开训。
 
 ## 最新进度：v6低延迟离线回放完成，尚未通过生产验收（2026-09-26）
@@ -326,12 +1150,79 @@ Latest separate UI instruction: removeV2.9 entry selector;5m/15m charts automati
 - 远端数据目录内 `training_job.json` 持久记录运行/失败/完成；`training.log`为日志；结果目录 `training_runs/exp-ma-morphology-v6-threeview-20260925-v1`。入口 `scripts/windows/run_v6_early_training.py` 拒绝重复启动，禁止看到SSH断开就重开。核验回执在实验目录 `early_training_launch_20260926.json`；当前仍在训练，未取得最终权重/评估。
 - 下一步读取上述运行状态；完成后拉回best/last与results并核验，检查实际因果连续回放首次命中延迟、已走价格、漏检和误报，保留pad0/default验证差异。不能只凭mAP放行。下方“训练集尚未完成”等均为已被本条更新的历史进度。
 
+## 最新进度：低延迟逐根对照已生成，训练集尚未完成（2026-09-25）
+
+- 同一批10正+10负已生成120张诊断观察图（核心后0至5根）；本机 `http://127.0.0.1:8879/`，产物 `exp-ma-morphology-v6-threeview-20260925-v1/early_review20_v1/`。原框、每个观察时钟和后续审核图分开显示。六个诊断时点不等于训练六倍扩图，也没有选定固定框后根数。
+- 20个旧后5根原图均逐字节重绘一致；逐截止扰动后续价格不影响当前图/指标。17项相关测试通过，实际浏览器逐根切换与正负筛选通过。原图/标签未改，生成训练标签0，未开训。
+- 所有10个原正例在后0根时原框越过旧画布右缘；没有截框蒙混，图上和manifest均明确标出。早期正负类别均未裁决，旧困难反例“后5根未启动”不能自动决定早期类别。下一步先修复能容纳完整最右K线/核心的因果渲染，再逐案例确定早期标签及最多三视图方案；不能把本次诊断图当训练集。
+
+## 当前目标更正：优先解决 YOLO 发现太晚（2026-09-25）
+
+- Owner明确目标是低延迟识别当前均线密集启动，真实形态应尽量靠近观察窗右端。R5/R8/R11为了分散位置增加等待，方向错误，已从当前训练入口撤下；不能再把右侧集中本身当失败，也不能换一组全体固定框后根数。
+- 新入口 `exp-ma-morphology-v6-threeview-20260925-v1/early_detection_contract_v1.json`：暂无选定训练数据；最多三视图/事件，围绕逐案例最早可识别时点裁剪，原核心几何随真实裁图投影。早期图不能自动继承事后正标签，未来审核图继续分开。旧计划/资产/回执只作历史证据，不删除或改写。
+- 下一步以已有案例的早期真实窗口核对可见形态，验首次发现相对形态/启动的延迟（根数及分钟）、已走价格、漏检和误报，再定新构建方案。此前FIL“主升走完才提案”和确认区依赖教训必须作为设计依据。当前没有重新造图或开训，未改运行模型。
+- 训练入口要求显式 `--dataset-root`；当前计划即使误设资格为true仍拒绝训练，历史preflight只给资产审计结果，不给ready状态和训练命令。下方“准备完成”及“扩大位置分布”的段落是已被本条更正的历史记录。
+
+## 最新裁决：v6训练设计审计未通过（2026-09-25）
+
+- Owner追问“还有其他问题吗”。撤回将文件校验通过表述为学习设计准备完成。当前训练资格仍false，未启动新训练，未改运行模型。
+- 当前三位置数据的正框只有六组横向中心(三位置×两核心长度)、两档框宽；仅用train的裁剪元数据模板就能复现480张test正图的横向框，横向IoU1.0，打乱视图编号对照均值约0.404。这不是检测mAP，也没有证明任何类别/纵向/误报性能。
+- 训练困难负例267/6408张(89事件)，修正版test困难负例0；1841正事件全部仍是3R后验精选规则候选，逐样本人审未确认。通知适配器为Grade-A/CLOSE/绿红/W18-W19；新候选为HL2/蓝紫/W20-W21，不能直接替换。
+- 旧v6A权重17aee567…在已有5250窗原始回放的773框中766框(99.1%)落在post5。原生/对齐padding的val mAP50为0.08650/0.99465，敏感性未解决；不是新模型结果，也不能据此给出无金标的误报率。A/B训练日志40轮分别5908.98/7829.46秒。
+- 原始审计：`exp-ma-morphology-v6-threeview-20260925-v1/learning_design_audit_v1.json`，复现：`.venv/bin/python -m yoyo.datasets.ma_morphology_readiness_audit --output <新JSON路径>`。现有PNG/TXT、计划与旧回执保持不变。精确哈希/事件ID未跨split，视觉近重复与连续行情金标验收仍未完成。下一步先明确目标语义与真实推理输入，设计跨事件位置分布、困难反例和未见位置验收，再决定重建；不能沿用下方历史“准备完成”来直接开训。
+
 ## 最新：SPIKE V13.0 回踩再突破已交付（2026-09-25）
 
 - Owner要求解释回踩逻辑、跨周期详细对照并写V13.0。新源码 `yoyo/evaluation/pine/spike_burst_v13_0.pine`，TradingView另存私有“SPIKE V13.0 · 回踩再突破”修订2，原V12.8源码与私有脚本保留。默认普通多空回踩，可选联合多头或原版参考；保留历史趋势区域。
 - 原候选后依次不同收盘K突破原高低点、触位守住、再破首段极值；24根等待，确认后次开模型参考，保留原绝对止损并重算R。102项本地检查、20项原生核心断言、6种生命周期情景通过；15m/1h图表运行正常，保存源码逐字核对。次开参考在该根收盘核验路径，确认提醒在此前收盘产生；没有创建提醒或下单。
 - 更正“回踩无用”的过度归纳：两月与2023起长历史中，15m普通/联合的胜率与平均净收益均改善；1h非全面改善，≥5R比例下降。2025起长后段15m仍正，2026-08-23起短后段亏损，不能混用窗口。知识库原实验已追加更正，资格仍false。
 - 交付证据 `experiments/active/exp-spike-v130-retest-delivery-20260925-v1/delivery_receipt.json`；首次74plot运行失败与修复留档，原生合成核验不等于Binance档案与TradingView行情逐笔parity。未运行新经济实验、训练、promote或通知替换。
+
+## 最新：真实三位置修正完成，训练尚未启动（2026-09-25）
+
+- 新默认数据集 `datasets/ma_launch_owner1500_morph_v6_positions_ready_20260925_v2/`：13,948图，其中1,841正例事件×3=5,523正图，7,605负图，另保留820张不可变P9评估图。训练10,926图=4,518正+6,408负；618个旧负例事件因扩窗后的形态/保护区冲突被剔除，没有降低阈值凑数。
+- R5=前11/后5、R8=前8/后8、R11=前5/后11，同事件画面等长。原P9实际TXT框经bar/price投影，各图使用自己的真实右端收盘时间；这是延迟形态确认，不是当根启动/tip信号。位置、时间和框绑定已进入强制preflight。
+- Mac与RTX3060全量资产审计相同，manifest SHA `8f29a6bc74a4ce9e3b260503b43a819d8c0c4483fa5366dff9c87fb6dcd28f40`；环境契约一致、远端CUDA可用。107项检查通过，4份pilot清单逐字节相同。原P9 reference350/320及challenge148/2成员/字节/时钟不变。
+- `exp-ma-morphology-v6-threeview-20260925-v1/position_preparation_receipt.json`绑定原始证据。同一批10正例的三位置和未来审核图见`position_review_v1/index.html`（本机8878），图框已与全量数据核对。312份归档恢复1,770份1m有界片段；两次中断的临时PNG/TXT和双机传输ZIP已清理，日志、原数据与恢复片段保留。
+- 完整构建使用已提交源`c64bccb6495b26c08d41bb55580bc0e5046efcbf`；后续等价并行版本经pilot及107测试验证。未开训/未激活；训练资格仍false。固定位置旧数据包是历史版本，不再作为默认训练入口。
+
+## 最新更正：三窗口仍固定后5根，位置增强待修订（2026-09-25）
+
+- Owner发现正例框总在相同右端距离。全量5,523正图的pre/post只有7/5、9/5、11/5，各1,841张；原实现只改变左侧长度，未实现参考Grade-A的右端距离变化。核心末根后固定5根（严格计数为倒数第6根），审核额外40根不属于训练输入。
+- 已确认裁剪设计限制，不能把哈希/环境preflight通过解释为位置增强已验收；先修订窗口方案及逐视图可见时钟，再准备重建与验收。当前数据和标签保持不变，仍未开训。见`docs/learnings/left-context-variation-does-not-vary-right-edge-distance.md`。
+
+## 最新：20 张带未来走势的训练样本审核已生成（2026-09-25）
+
+- Owner要求抽看10正+10负及实际正例框。`exp-ma-morphology-v6-threeview-20260925-v1/review_future20_v2/index.html`提供20图、正负筛选、全尺寸图和原训练图对照；正5多5空，负5困难5背景，均取固定train事件，不按未来收益挑图。红框从真实训练TXT投影，蓝虚线是训练截止，之后额外40根只供审核。
+- 冻结选择`review20_selection_v2.json`，每个原训练PNG重绘SHA均匹配，原PNG/TXT哈希未改。两份缺失1m源只从3060哈希验证归档恢复审核片段。`review_manifest.json`留存几何、时间与来源证据；没有改标签或开训。
+
+## 最新：v6 三窗口完整训练包已备好，尚未开训（2026-09-25）
+
+- Owner要求“整理一下，准备去训练模型了”。完整目录 `datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1/`：4,994事件/14,312图，正1,841事件/5,523图，负8,789图；训练12,522图=4,518正+8,004负，其中975张Grade-A困难负图。共享跨周期模型，pre7/9/11、post5与原核心不变，每事件最多三图。
+- Grade-A 3,129候选中保留1,312事件，新增3,936图；排除1,817事件，逐项原因在`excluded_candidates.jsonl`。按当前完整源SHA冻结新源版本，重算旧指标、CLOSE/HL2规则与全可见完整候选窗；保护原候选/金标，不拿收益判断负例。10,376旧图校验后硬链接复用，新增PNG205,877,617字节；临时805MB传输包两端已清理，原始数据未删。
+- Mac与RTX3060 `C:/fable/datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1/` 的全资产审计相同，manifest SHA `b50fbda5384071bcde5a9f10632c36f9041ff4314ed026479ecac1bec78903d2`。训练清单/data.yaml已在两端生成；torch2.8.0/torchvision0.23.0/ultralytics8.4.89/numpy2.0.2/pandas2.3.3匹配，远端CUDA可用。90项专项及层间检查通过。
+- 固定原P9 val350/test320；新增Grade-A challenge另列148/2事件。P7/P11 reference只有正例，是同事件召回/框稳定性检查，不能与平衡P9的mAP直接比较。最新段新困难负例只有1事件，需后续真实连续回放验误报；此次无模型性能或收益结论。
+- `training_preparation_receipt.json`记录完整证据；训练包代码`yoyo/datasets/ma_morphology_training_package.py`。当前只完成准备，training gate仍false且未启动训练。收到明确开训指令后单独登记本研究训练授权，保留冻结数据/原计划，更新相应计划引用与registry，在新目录重做preflight，再运行显式train；仍用YOLO11s初始权重/1280/40epochs/batch8/seed0/全增强关闭。不能把研究开训变成ACTIVE/promote或通知替换。
+
+## 最新更正：跨周期共用视觉形态模型，不按周期排除负例（2026-09-25）
+
+- Owner明确大小周期可以出现同类均线密集图。之前将Grade-A负例全为15m当作不能复用的理由过强，已撤回：一个共享YOLO可混合周期，周期是溯源及分组验收字段，不是类别，也不强制每个正例必须配同周期负例。统计分布差异需要实测，不能仅凭周期计数断言模型有偏差。
+- 当前以`exp-ma-morphology-v6-threeview-20260925-v1/evaluation_contract_v2.json`与`negative_reuse_audit_v2.json`为准。此前15/58、2/58只是旧采样器约束下的覆盖，不代表视觉负例全部可复用容量。已有5,523张正图及原记录保持不变；后续按形态标签、画面/均线一致性、事件保护与时间切分筛选Grade-A负例，周期不同本身不拦截。没有开训或更换运行模型。
+
+## 最新：v6 三窗口正例已准备，Grade-A 负例不能整包复用（2026-09-25）
+
+- Owner 要求1,841事件最多三倍扩图，并询问沿用Grade-A负例。`datasets/ma_launch_owner1500_morph_v6_threeview_20260925_v1/` 已生成5,523正图：train4,518/val525/test480；pre7/9/11，post固定5，原核心/事件切分/确认时钟不变。4,853张通过哈希核对后硬链接复用，只新增670图；原P9仍是固定评估集，另外两种视图只做同事件稳健性对照。
+- 176个缺失1m源事件从3060现存140份gzip恢复短片段；gzip与完整CSV哈希全部核对，再验证本机片段哈希及重绘旧图/标签一致。仅取回16,942,631字节CSV；新增PNG32,329,733字节。首轮缺源pilot和中止的串行恢复保留；最终pilot6事件18图、全量5,523图检查通过，专项20项及层间边界71项通过。
+- 旧Grade-A负例全为15m，而v6正事件只有58个15m。2,664个旧训练负事件的旧窗口有41个触及当前保护区；422源中48个能对照v6历史SHA并匹配，374个尚无历史预期SHA证据。同源/周期/±7天仅覆盖15/58个15m正例；旧事件只可当候选，须按新图可见信息重新审查与渲染。不能以未来亏损判形态负例，也不能把旧验证事件塞入新训练。
+- 实验`exp-ma-morphology-v6-threeview-20260925-v1`已登记；`delivery_receipt.json`及两个负例审计保留证据。**训练尚未启动，完整训练集未就绪**。下一步确认密集启动的困难负例语义并补同周期负例，再冻结训练清单；沿用原YOLO11s/1280/40epochs配方，保留原填充脆弱性与连续回放验证。未改变运行模型、通知或资格。
+
+## 最新：学习、知识与内容输出加入统一工作台（2026-09-24）
+
+- Owner要求建立学习与知识体系、支持全平台输出。8766新增 `#learning`、`#knowledge`、`#content`，菜单置于“学习与输出”；体系总览增加对应业务线。六个知识领域连接学习问题、复述、复习日期、知识证据、实验引用和内容母稿。
+- 沿用运行目录 `research_workspace/workspace.sqlite3` 的追加版本记录。保存冲突保留草稿；内容保存指定知识版本快照，平台版本独立编辑，支持复制、中文 Markdown 导出、按平台/状态筛选及手动作品链接/时间登记。覆盖知乎、公众号、小红书、X、B站、抖音、YouTube、Telegram和自定义平台；没有外部发布器或付费AI生成调用。
+- 正式库已创建六项待学习计划及一条待验证 DuckDB 候选知识（`knowledge-d3778bcd77054a3b`）；未创建已发布内容。Notion既有中枢增加知识地图与输出流程，仍为正式知识入口；本机草稿通过来源和Notion页面链接关联，尚未自动双向同步。
+- 204项研究工作区/层间边界检查、79项监控前端检查通过；隔离8876实际走通学习创建→知识提炼（自动关联原计划）→知乎版本→保存→导出，390px明暗主题无横向溢出。正式8766已重启并核对API。隔离测试未写生产学习记录、通知或交易；无训练/策略/账户配置变化。
+- 维护原则见 `docs/learnings/content-must-freeze-knowledge-evidence-versions.md`。本轮修改保留在现有main工作目录；共享文件还有先前通知、个人交易等未提交改动，未合并代为提交。
 
 ## 最新：ISRG 再次证明原生与后台元数据口径不一致（2026-09-24）
 
@@ -345,6 +1236,57 @@ Latest separate UI instruction: removeV2.9 entry selector;5m/15m charts automati
 - 后段普通15m原/VWAP/TWAP均净−7.70/−12.67/−10.54bp；1H为−5.37/+18.27/+11.56bp，胜率均未提高。四项同门随机净超额为−5.37/−1.23/−48.56/−38.56bp，Holm p均1；1H VWAP改善区间跨零、仍落后随机，不是验证成功。VWAP原10R赢家保留15m51.7%、1H69.3%；q10诊断四组净收益皆负。联合信号也无对照优势。
 - 1276流无错误、原版逐笔与源账本一致，20项专项测试通过，独立36组统计复算通过。BTC/ETH首次试跑因1H早期98候选不足预设100停止，失败保留；扩至4币后通过，门槛未降低。实验 `exp-spike-v128-vwap-20260924-v1` 的 `delivery_receipt.json` / `run_v1` / `summary_v1` / `audit_v1.json` 已保存；Notion EXP-105 `3e58856479af81f8b856ea75c1399049` 记拒绝。
 - 拒绝范围仅本次UTC日锚定绝对距离门；事件锚定/穿越/回踩与TWAP拆单未测。固定池、既有研究历史与Python/Pine未逐事件对齐限制保留，不能外推OKX通知或实盘收益；训练/生产资格false。Pine、监控及默认策略未改变。
+
+## GEV 通知与原生图不一致：已确认差异，计算尚未对齐（2026-09-24）
+
+- Owner 的 GEV 30m / 15:30 / 942.49 空头 Bark 可追溯到 raw `d1408acce0c386057fedeb00` 和 YOLO `8ecedbee762f61b25343363b`，等待0根；后台闭合1362根重算复现。原生同一15:00开盘K线OHLC完全相同，但V12.8事件码0、确认价空、MD/SB为0/0；后台为−0.07911/−0.00879。原生底层资产字段未知、后台OKX元数据为GEV，Pine未知门明确拒绝。已检查桌面实例非极简/非仅联合，不能归咎于隐藏箭头。
+- 原生面板“最近原始确认”还提示BB未过，但不能当成所选15:00当根的BB证据。具体历史序列/递归起点差异尚未定位，不宣称Python/Pine一致，也不改门槛或猜测底层资产补值。TG/Bark新文案改“后台信号 / 原始信号”，注明“未核验 TradingView 图上信号”；图片与状态说明同步去掉原箭头措辞。
+- 验证7个通知/图片测试文件129通过、20失败；撤去本次展示修改的内存基线复现同样20失败，保留旧测试，未冒充全绿。细节及证据：`docs/learnings/backend-signal-is-not-a-tradingview-arrow.md`。下一步应对齐原生与后台历史输入、元数据和逐根中间值，不能仅修文案后宣布信号一致。
+- 通知文案已随8766服务重启生效（started_at_ms `1790236056484`），Bark/TG/snapshot运行源码哈希与磁盘一致；原GEV两事件两通道仍各sent/attempts=1，没有补发测试或历史提醒。桌面图表已恢复检查前的BTC一小时视图。
+
+## 本机存储：常用行情留本机，原始下载包外移（2026-09-24）
+
+- Owner 授权迁移，并要求直接选择后续方案。最终采用本机保存行情表/元数据、Elements SE 保存原始 ZIP：34,372 个下载包、7,228,496,357 字节（约6.73 GiB）已外移，原 `downloads/` 路径保留指向外接盘的链接。两份数据集为 `data/crypto/market/kline_preholdout_binance_um5m` 与 `...um15m`；根目录已恢复为本机普通目录，`data/kline_*` 兼容入口不变。日常行情读取不依赖外接盘，仅原始压缩包访问需要该盘。
+- 此前整份迁移已逐文件校验，但真实8766 LaunchAgent被macOS拒绝访问移动盘；命令行成功不能代表后台可用。2,562 个常用文件（15,332,415,418 字节）已迁回并逐文件核对原始 SHA-256、权限、原有扩展属性，恢复原始纳秒修改时间；外接盘暂保留这些文件的完整校验副本作备份。没有增加 Python 磁盘权限。已撤回本轮临时外接目录访问代码与登记配置，目录继续沿用原有仓内访问边界。
+- 两数据集 ID 与常用文件逻辑路径保持不变；只更新它们的目录记录，ZIP 不计入网页可用文件，不重建其他数据集。真实后台两组详情/文件接口均 HTTP 200，响应 SHA-256 与原始清单相同，`read_market_data` 两组样本通过；96 项 Python、7 项前端检查通过。最后实测本机空闲约71.5 GB（66.6 GiB），空间变动受系统及其他活动影响，不能全部归因于本次迁移。
+- 操作、完整哈希与原始时间、旧索引备份及运行验收收据在 `data/_storage_migrations/20260924-binance-history/`；最终状态见 `summary.json` 与 `hot-runtime-smoke.json`。先前整份迁移与权限失败保留为历史证据，不能沿用21 GiB净外移的旧结论。外接目标为 `/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/`，分区 UUID `9C313B72-8A2D-4E45-8CEF-51A3E1117FB3`。
+
+## 最新：VLM 超时截图核查与失败状态展示（2026-09-24 13:42）
+
+- Owner 提交 ACU 1H 超时截图。运行 API 与私有配置元数据均确认当前为智谱 `glm-5.3-flash`，配置文件最近保存于 12:37；先前“已切千问”的记录不代表现在仍选中千问。千问北京配置保留，但 Key 仍为空。没有供应商自动回退证据，也无法凭文件时间确定是谁保存；本次未改供应商、密钥或重发请求。
+- ACU run `b44a47e913e74545b70aeca043605363` 在 13:02 发起，13:07 读超时；exchange `cb4ffa60fc5a4f1cb2a25d6dfbc50be4` 为 6 图、约 255 KB、`stream=false`、32,768 token 上限及 max 思考，未捕获完整 HTTP 响应。不能据此断言视觉能力差，远端处理与传输原因仍未分清；超时本身尚未修复。
+- 前端结果卡显式显示该次供应商、模型、时间及人类可读耗时，超时标为“请求超时”；未完成记录不展示方向和空证据/风险块，也不从当前配置补填历史模型。失败候选时间改为观察/结束时间；自动开关开启但无 Key 时显示等待配置并提供设置入口。历史记录与自动调用策略保持原样。
+- 33 项配置/自动队列/原始记录 Python 检查、54 项 VLM 前端 Node 检查通过；统一入口浏览器实测 ACU 显示智谱、13:02、5 分 00 秒和无判断说明。未发起真实模型调用。已询问 Owner 恢复千问等待 Key 或继续排查智谱，尚待回复；不要自行覆盖当前已保存的选择。
+
+## 最新：统一工作台免费公网入口已按 Owner 要求去掉登录（2026-09-24）
+
+- Owner 要求先试免费地址，无域名或账号，之后明确要求“去掉登录”。现采用 Cloudflare Quick Tunnel + Caddy 免登录代理：公网 → 127.0.0.1:8780 → 8766；8771 沿用内部代理。已移除配置生成器中的 Basic Auth、凭据生成与401就绪要求，仅重启 Caddy 生效，监控/扫描/通知服务未重启。
+- 原 URL 保持为 `https://pasta-okay-leading-alleged.trycloudflare.com`；最新地址用 `.venv/bin/python -m yoyo.monitor.public_tunnel status` 查询。管理命令 start/status/stop；停止仅关闭公网两项 LaunchAgent。`~/Library/Application Support/Fable/PublicTunnel/access.txt`（0600）现只记录免登录入口说明，旧 credentials.json 不再读取或使用。持有链接即可访问完整工作台。
+- 所有页面/API免登录；写请求仍先验证公网 HTTPS Origin，之后才重写内部 Host/Origin 并清除 Authorization、Cookie、转发头。公网桌面打开接口封闭，前端远程访问打开当前设备的 TradingView 网页；本机保留原桌面行为。
+- 本次实际 Caddy 集成测试15 passed；匿名GET/同源POST可用，异源写、HTTP、无效Host和远程桌面调用被拒绝。真实公网匿名首页、status、VLM status、JS全部200且无认证挑战，未携带凭据/Cookie。重复start验证两个服务PID均未变、仍免登录，地址未变。未调用付费AI/发通知/写交易记录。此前首次开通的密码模式验证（401后认证200）仅为历史，不代表当前状态；内置浏览器曾被client blocked，本次通过HTTP验证公网链路。
+- Cloudflared 2026.9.1 / Caddy 2.11.4 由 Homebrew 安装；独立 launchd KeepAlive，不改变 Python 依赖契约。Quick Tunnel 无 SLA、地址非永久、Mac 必须在线；当前 VLM 对浏览器返回 JSON，没用 Quick Tunnel 不支持的浏览器 SSE。流程说明见监控 README 与本次 learning。
+
+## 最新：个人交易系统改为原则 → 开单 → 记录（2026-09-24）
+
+- Owner 明确个人交易首先沉淀原则，然后开单，最后才是记录。`#manual` 默认打开交易原则，主导航为三步；具体打法与盘前计划收为辅助入口。体系总览同步口径，监控版本 1.19.0。
+- Principle 独立版本化，待沉淀 / 正在遵守 / 归档；参考文案不自动落库或启用。开单页需核对全部当前启用原则，事务内验证集合与版本并保存不可变快照到原 watching Ticket。只提供 OKX 合约页导航，没有订单调用；准备不记成交。成交、管理、平仓、复盘继续追加事件，旧记录无迁移删除。
+- 复盘心得可带来源转成未保存的原则草稿；原则冲突保留原草稿版本。信号中心可带入合约、方向、周期与来源，不覆盖正在编辑的草稿。原则修改不会追改旧交易快照。
+- 研究工作区 127 项 Python、监控前端 72 项 Node 通过；在独立临时数据库内浏览器走通原则创建、开单核对、成交、平仓、复盘、回流草稿，390px 无横向溢出。验证数值仅在隔离环境，不是交易证据；无真实下单或账户修改。设计边界见 `docs/learnings/principles-should-precede-execution-and-journaling.md`。
+- 扩展 Python 检查 264 passed / 2 failed；失败仅为既有 `test_desktop_client.py` 把 `1D` 和小写合约当非法输入，与 HEAD 中原有规范化行为矛盾。相关实现及测试均无 diff；未改其语义来过关。本机 8766 已重启至 1.19.0，API 与浏览器已核实；生产个人记录仍为 0，测试数据未混入。
+
+## 最新：VLM 已保存千问旗舰最高质量配置，等待 Key（2026-09-24）
+
+- Owner 要求直接用千问最强视觉模型、最高配置，API Key 稍后提供。当前本机 VLM 0.13.0 已保存 `qwen3.8-max` / 北京；`api_key_configured=false`，自动队列等待配置，不回退调用智谱。统一入口 `http://127.0.0.1:8766/#vision` → 模型设置，浏览器已核实已保存模型、质量参数与待配置密钥。
+- 旗舰请求使用 `reasoning_effort=xhigh`、`max_completion_tokens=131072`（含思考）、单图 `max_pixels=16777216`、SSE+usage；不同时传 thinking_budget，不放大原图，不自动重试。保留原始 SSE，对话展示分别拼接思考与最终回答；缺终止标记、length、格式/语义不合格不采纳。固定快照 `qwen3.8-max-0902` 也可选，历史模型和记录保留。
+- 视觉模块 275 项 Python 全套通过；随后新增的两项 SSE API 落库用例随 Qwen 29 项专项通过；前端最终 50 项通过，层间 import 边界 71 项通过。均为离线或本机 UI 验证，没有调用千问真实付费接口、未证明识图效果提升；下一步是提供同地域 DashScope Key 后验证连接与真实图表。详情见实验 README 与 `docs/learnings/maximum-vlm-quality-is-a-model-specific-contract.md`。
+
+## 最新：信号中心已切换 SPIKE V12.8（2026-09-23）
+
+- Owner 要求前端使用最新逻辑。此前主扫描器仍为 V9、突破/联合为 V11.2；现在服务 1.17.0 的普通生产者为 `yoyo/monitor/v128_signals.py`，联合为 `v128_lines.py`，实际 API 已返回各自 v128 协议，启动源码哈希已核验。
+- 15m 使用信号 K 线开盘时已完成的连续 60 根原生 H1，严格 SMA60 方向门；NEIRO 09/23 20:00、SSV 19:45 空头被拒绝，LDO 20:15、ETH-USDT 19:45 保留。联合接 V12.6 有序配对父引擎及 V12.8 原价格退出，不再沿用旧监控 RSI 扩展；趋势线原生 pivot 同值边界仍未完成 TV 逐事件对账。
+- 新旧协议、事件 ID、通知切点分离；普通 V9 归档、联合 V11.2 归档保留，预热历史按新规则重算且不补发。升级前 1,304 条普通/YOLO、1,801 条趋势线/联合 payload 逐条核对零删除、零改写。私有 SQLite 备份在运行目录 `backups/before-v128-20260923T125530Z/`，切点持久且重启不重置。
+- 普通全市场 491 合约 × 4 周期共 1,964 cells、联合/突破 2,455 cells 均完成零错误；首次暴露的单根 4H 历史压缩核边界在适配层处理为 loading，未改冻结研究内核。135 项 Python 专项/层边界与 36 项前端检查通过；真实浏览器确认新版与旧版入口隔离。
+- 只升级本机通知监控；Pine 文件、阈值、新鲜度、成本、训练/ACTIVE 与账户未改。普通 Bark、联合 Bark + TG 延续原设置。详见监控 README 和本次两条时序/短历史 learning，未生成任务报告。
 
 ## 最新：SPIKE + 智谱视觉研究工作台（2026-09-23）
 

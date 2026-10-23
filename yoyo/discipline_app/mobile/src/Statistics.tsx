@@ -1,5 +1,5 @@
 import {PageHeader} from './PageHeader';
-/** Stitch screen 7ef322e0d5404da9a262019d19c701aa; performance states from Stitch 7decfef946554bc0af201b633556a748; account-scoped display cache. */
+/** Stitch dfebf9344d99413aa65056d89f9baab5: confirmed fixed-capital return; account-scoped display cache. */
 import {memo,useEffect,useState} from 'react';
 import {type Connection,type State} from './api';
 import {cachedStatistics,loadStatistics,statisticsKey,type StatisticsData} from './statisticsData';
@@ -7,7 +7,7 @@ import {Icon} from './Icon';
 import {feedback} from './feedback';
 
 const fmt=(value?:string|number|null,d=2)=>value==null?'—':Number(value).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
-const percent=(value?:string|null)=>value==null?'—':fmt(Number(value)*100,1);
+const percent=(value?:string|null,d=1)=>value==null?'—':fmt(Number(value)*100,d);
 const tone=(value?:string|null)=>!value||Number(value)===0?'':Number(value)>0?'long':'short';
 
 const PnlChart=memo(function PnlChart({points}:{points:StatisticsData['curve']}){
@@ -54,7 +54,10 @@ export function Statistics({connection,overview,online,onConnect}:{connection:Co
  const updatedAt=useCurrent?currentAt:cachedAt;
  const stale=!online||!updatedAt||Date.now()/1000-updatedAt>15||(useCurrent&&!!current.private_error);
  const summary=data?.closed,account=data?.account;
- const unrealized=useCurrent?String(Number(current.equity)-Number(current.cash)):account?.unrealized_pnl;
+ const fixedCapital=live&&account?.return_method==='app_managed_fixed_capital'?account.initial_equity:null;
+ // Keep all three PnL values on one managed-ledger snapshot. The newer OKX
+ // equity/cash overview includes external positions and cannot replace it.
+ const unrealized=account?.unrealized_pnl;
  const updateText=updatedAt?`${stale?'上次记录':'截至'} ${new Date(updatedAt*1000).toLocaleTimeString('zh-CN')}${loading?' · 更新中':''}`:loading?'正在读取…':'待连接';
  return <div className="statistics-page">
   <PageHeader title="账户统计" onSettings={onConnect}/>
@@ -63,8 +66,9 @@ export function Statistics({connection,overview,online,onConnect}:{connection:Co
   <section className={`card account-hero ${loading&&equity==null?'is-loading':''}`} aria-busy={loading}>
    <div className="section-heading"><h2>{live?'OKX USDT 当前净值':'当前模拟账户净值'}</h2><span>{updateText}</span></div>
    <div className="account-equity"><strong>{fmt(equity)}</strong><span>USDT</span></div>
-   <p className="account-total">累计净盈亏 <b className={tone(account?.net_pnl)}>{fmt(account?.net_pnl)} <small>USDT</small></b><span>({percent(account?.return_fraction)}%)</span></p>
-   <div className="account-split"><div><span>已实现净盈亏</span><b className={tone(account?.realized_pnl)}>{fmt(account?.realized_pnl)}</b></div><div><span>当前浮动盈亏</span><b className={tone(unrealized)}>{fmt(unrealized)}</b></div></div>
+   <p className="account-total">{live?'App 累计净盈亏':'累计净盈亏'} <b className={tone(account?.net_pnl)}>{fmt(account?.net_pnl)} <small>USDT</small></b>{account?.return_fraction!=null&&<span>({percent(account.return_fraction,2)}%)</span>}</p>
+   <div className="account-split"><div><span>{live?'App 已实现净盈亏':'已实现净盈亏'}</span><b className={tone(account?.realized_pnl)}>{fmt(account?.realized_pnl)}</b></div><div><span>{live?'App 当前浮动盈亏':'当前浮动盈亏'}</span><b className={tone(unrealized)}>{fmt(unrealized)}</b></div></div>
+   {live&&<p className="micro">{fixedCapital!=null&&<>固定本金 {fmt(fixedCapital)} USDT；</>}盈亏仅统计本 App 管理交易，外部仓位不计入。</p>}
    {stale&&equity!=null&&<p className="micro short">当前显示上次记录，等待账户数据更新。</p>}
   </section>
   <div className="segment stats-period" aria-label="统计周期">{[[7,'近 7 天'],[30,'近 30 天'],[0,'全部']].map(([value,label])=><button key={value} className={days===value?'active':''} aria-pressed={days===value} onClick={()=>{if(days!==value)feedback('light');setDays(Number(value))}}>{label}</button>)}</div>
@@ -80,6 +84,6 @@ export function Statistics({connection,overview,online,onConnect}:{connection:Co
   </section>
   <section className="card stats-directions"><h2>多空表现</h2><div className="direction-grid">{['long','short'].map(side=>{const row=data?.sides.find(r=>r.side===side);return <div key={side}><b className={side==='long'?'long':'short'}>{side==='long'?'做多':'做空'}</b><p>{row?.count??'—'} <small>笔 · 胜率 {percent(row?.win_rate)}%</small></p><strong className={tone(row?.net_pnl)}>{fmt(row?.net_pnl)} <small>USDT</small></strong></div>})}</div></section>
   <section className="card stats-symbols"><h2>币种表现</h2>{data?.symbols.length?<table><thead><tr><th>合约</th><th>笔数</th><th>净盈亏</th><th>胜率</th></tr></thead><tbody>{data.symbols.map(row=><tr key={row.symbol}><th>{row.symbol.replace('-USDT-SWAP','')}</th><td>{row.count}</td><td className={tone(row.net_pnl)}>{fmt(row.net_pnl)}</td><td>{percent(row.win_rate)}%</td></tr>)}</tbody></table>:<p className="micro">{data?'暂无已平仓合约':'读取服务后显示'}。净盈亏单位为 USDT。</p>}</section>
-  <details className="explainer"><summary>统计口径<Icon name="chevron" size={16}/></summary><p>账户概览始终显示当前全量数据。周期为最近 7 / 30 个连续自然时长天数；交易归属以完全平仓时刻为准，手续费按当前交易模式的结算记录归集。</p><p>胜率 = 净盈利笔数 ÷ 已平仓笔数，净零也计入分母。盈亏比 = 平均盈利 ÷ 平均亏损绝对值，两侧均有样本才计算。平均净 R = 每笔完整净盈亏 ÷ 各自初始固定风险 R 后的算术平均。</p><p>{live?'实盘仅统计本 App 管理并完成结算的交易，净盈亏包含交易所返回的手续费与资金费；不混入历史订单。未核对全部充提记录，因此不显示累计账户收益率。':'净盈亏已计入模型手续费及成交滑点；没有再次扣除风险预留。未计资金费，不代表交易所账户收益。'}</p></details>
+  <details className="explainer"><summary>统计口径<Icon name="chevron" size={16}/></summary><p>账户概览始终显示当前全量数据。周期为最近 7 / 30 个连续自然时长天数；交易归属以完全平仓时刻为准，手续费按当前交易模式的结算记录归集。</p><p>胜率 = 净盈利笔数 ÷ 已平仓笔数，净零也计入分母。盈亏比 = 平均盈利 ÷ 平均亏损绝对值，两侧均有样本才计算。平均净 R = 每笔完整净盈亏 ÷ 各自初始固定风险 R 后的算术平均。</p><p>{live?'实盘盈亏仅统计本 App 管理交易，已实现净盈亏包含交易所结算的手续费与资金费，浮动盈亏按剩余持仓计价。累计百分比 = App 累计净盈亏 ÷ 本人确认的固定本金；充提、外部交易和统计周期不改变分母。未设置固定本金时不计算百分比；这不是全账户资金加权收益率。':'净盈亏已计入模型手续费及成交滑点；没有再次扣除风险预留。未计资金费，不代表交易所账户收益。'}</p></details>
  </div>;
 }

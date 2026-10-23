@@ -1,0 +1,99 @@
+qaLegacyQuarter() =>
+    string zone = tzOpt == "交易所时区" ? syminfo.timezone : tzOpt
+    bool monday = dayofweek(time, zone) == dayofweek.monday
+    int date = year(time, zone) * 10000 + month(time, zone) * 100 + dayofmonth(time, zone)
+    var int week = 0
+    var float hi = na
+    var float lo = na
+    if monday and date != week
+        week := date
+        hi := na
+        lo := na
+    float knownHigh = hi
+    float knownLow = lo
+    [qEnd, side, unusedAtr] = txSignals()
+    // The signal anchor uses only the original confirmed arrow bar.
+    float signalAnchor = side == 1 ? low : high
+    var array<WfArrow> pending = array.new<WfArrow>()
+    array<string> events = array.new<string>()
+    if side != 0 and week != 0
+        pending.push(WfArrow.new(bar_index, time, side, week, signalAnchor))
+    int i = pending.size() - 1
+    while i >= 0
+        WfArrow a = pending.get(i)
+        int age = bar_index - a.index
+        bool expired = week != a.week or age > wfWaitBars
+        int touchAt = na
+        float matchedPrice = na
+        float touchExtreme = na
+        float touchBodyEdge = na
+        float touchHigh = na
+        float touchLow = na
+        string levelName = ""
+        if not expired and age >= 0
+            // At the arrow close, inspect same-bar then the preceding two bars.
+            // Later closes can only admit a fresh touch on the current candle.
+            // Levels are frozen at each touch, never borrowed from a later range.
+            int oldestOffset = age == 0 ? 2 : 0
+            for offset = 0 to oldestOffset
+                if week[offset] == a.week and na(touchAt)
+                    [candidate, candidateName] = wfMatch(knownHigh[offset], knownLow[offset], a.side, offset, age)
+                    if not na(candidate)
+                        touchAt := time[offset]
+                        matchedPrice := candidate
+                        touchExtreme := a.side == 1 ? low[offset] : high[offset]
+                        touchBodyEdge := a.side == 1 ? math.min(open[offset], close[offset]) : math.max(open[offset], close[offset])
+                        touchHigh := high[offset]
+                        touchLow := low[offset]
+                        levelName := candidateName
+        if not na(touchAt)
+            events.push(str.tostring(a.side) + "," + str.tostring(a.at) + "," + str.tostring(touchAt) + "," +
+                 str.tostring(a.anchor, format.mintick) + "," + str.tostring(matchedPrice, format.mintick) + "," +
+                 str.tostring(touchExtreme, format.mintick) + "," + levelName + "," + str.tostring(touchBodyEdge, format.mintick) + "," + str.tostring(touchHigh, format.mintick) + "," + str.tostring(touchLow, format.mintick))
+        if expired or not na(touchAt)
+            pending.remove(i)
+        i -= 1
+    if monday
+        hi := na(hi) ? high : math.max(hi, high)
+        lo := na(lo) ? low : math.min(lo, low)
+    // Both pivot functions run on every source bar, regardless of entry events.
+    float pivotHigh = ta.pivothigh(high, 2, 2)
+    float pivotLow = ta.pivotlow(low, 2, 2)
+    [qEnd, array.join(events, ";"), close, pivotHigh, pivotLow, time[2]]
+
+// Native regression harness: append only while validating, never while profiling.
+qaEqual(float a, float b) =>
+    (na(a) and na(b)) or a == b
+qaDay(int stamp, string zone) =>
+    [ds, de, wd, dt] = localDay(stamp, zone)
+    bool ok = ds == timestamp(zone, year(stamp,zone),month(stamp,zone),dayofmonth(stamp,zone),0,0) and de == timestamp(zone,year(stamp,zone),month(stamp,zone),dayofmonth(stamp,zone)+1,0,0) and wd == dayofweek(stamp,zone) and dt == year(stamp,zone)*10000+month(stamp,zone)*100+dayofmonth(stamp,zone)
+    if not ok
+        runtime.error("V230 calendar mismatch " + str.tostring(stamp) + " " + zone)
+    ok
+qaParity() =>
+    [aEnd,aEvents,aEntry,aHigh,aLow,aAt] = qaLegacyQuarter()
+    [bEnd,bEvents,bEntry,bHigh,bLow,bAt] = wfQuarter()
+    if aEnd != bEnd or aEvents != bEvents or aEntry != bEntry or not qaEqual(aHigh,bHigh) or not qaEqual(aLow,bLow) or not qaEqual(aAt,bAt)
+        runtime.error("V230 event mismatch " + str.tostring(time))
+    qaDay(time,tzOpt == "交易所时区" ? syminfo.timezone : tzOpt)
+    var int bars=0
+    var int events=0
+    bars+=1
+    if aEvents != ""
+        events+=str.split(aEvents,";").size()
+    [bars,events]
+[qaBars,qaEvents] = request.security(syminfo.tickerid,"15",qaParity(),lookahead=barmerge.lookahead_off,calc_bars_count=12000)
+qaDay(time,tz)
+qaDay(observedAt,tz)
+if todayStart != dayStart(observedAt) or thisWeekStart != weekStart(observedAt) or dow != dayofweek(time,tz) or dateKey != year(time,tz)*10000+month(time,tz)*100+dayofmonth(time,tz)
+    runtime.error("V230 chart date mismatch")
+if barstate.isfirst
+    array<int> stamps = array.from(timestamp("UTC",2026,3,8,6,45), timestamp("UTC",2026,3,8,7,0), timestamp("UTC",2026,3,9,3,45), timestamp("UTC",2026,3,9,4,0), timestamp("UTC",2026,11,1,5,45), timestamp("UTC",2026,11,1,6,0), timestamp("UTC",2026,11,2,4,45), timestamp("UTC",2026,11,2,5,0), timestamp("UTC",2027,1,1,4,45), timestamp("UTC",2027,1,1,5,0), timestamp("UTC",2026,10,20,12,0))
+    for stamp in stamps
+        qaDay(stamp,"America/New_York")
+        qaDay(stamp,"UTC")
+        qaDay(stamp,"Asia/Shanghai")
+        qaDay(stamp,syminfo.timezone)
+var table qaTable=table.new(position.top_right,1,1,force_overlay=true)
+if barstate.islast
+    table.cell(qaTable,0,0,"V2.30 PARITY PASS · "+str.tostring(qaBars)+" bars / "+str.tostring(qaEvents)+" events · dates + DST PASS",text_color=color.lime,bgcolor=color.black)

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SPIKE 独立纪律交易 · 账户统计 (白瓷与软玉)</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary": "#4e5b58",
+            "primary-fixed-dim": "#78d8be",
+            "on-tertiary-fixed-variant": "#3d4947",
+            "tertiary-fixed": "#d8e5e1",
+            "surface-variant": "#e2e3e1",
+            "on-background": "#191c1b",
+            "primary-container": "#087f69",
+            "surface-dim": "#d9dad8",
+            "on-tertiary": "#ffffff",
+            "surface-container-highest": "#e2e3e1",
+            "surface": "#f9faf8",
+            "on-error": "#ffffff",
+            "on-surface": "#191c1b",
+            "on-error-container": "#93000a",
+            "background": "#f9faf8",
+            "surface-container-low": "#f3f4f2",
+            "inverse-on-surface": "#f0f1ef",
+            "on-secondary-fixed": "#400011",
+            "on-surface-variant": "#3e4945",
+            "inverse-surface": "#2e3130",
+            "surface-container": "#edeeec",
+            "primary-fixed": "#94f4d9",
+            "error": "#ba1a1a",
+            "on-primary-fixed-variant": "#005142",
+            "on-tertiary-fixed": "#121e1c",
+            "surface-container-high": "#e7e8e6",
+            "secondary-fixed-dim": "#ffb2bb",
+            "on-secondary-fixed-variant": "#851e36",
+            "secondary-fixed": "#ffd9dc",
+            "on-tertiary-container": "#ecf9f5",
+            "tertiary-fixed-dim": "#bcc9c6",
+            "primary": "#006452",
+            "surface-bright": "#f9faf8",
+            "on-secondary-container": "#730f2a",
+            "on-primary-fixed": "#002019",
+            "surface-container-lowest": "#ffffff",
+            "secondary": "#a5374d",
+            "on-primary-container": "#d3fff0",
+            "inverse-primary": "#78d8be",
+            "error-container": "#ffdad6",
+            "tertiary-container": "#677370",
+            "secondary-container": "#fc7a8f",
+            "outline": "#6e7a75",
+            "on-secondary": "#ffffff",
+            "on-primary": "#ffffff",
+            "surface-tint": "#006b58",
+            "outline-variant": "#bdc9c4"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-2xl": "3rem",
+            "space-sm": "0.5rem",
+            "gutter-tablet": "1.5rem",
+            "gutter": "1rem",
+            "margin": "1.25rem",
+            "space-md": "1rem",
+            "margin-tablet": "2rem",
+            "margin-desktop": "3rem",
+            "gutter-desktop": "2rem",
+            "space-xs": "0.25rem",
+            "space-xl": "2rem",
+            "space-lg": "1.5rem"
+          },
+          "fontFamily": {
+            "headline-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-lg": ["Inter"],
+            "label-lg": ["Inter"],
+            "label-sm": ["Inter"],
+            "numeric-hero-mobile": ["Inter"],
+            "display-lg-mobile": ["Inter"],
+            "display-lg": ["Inter"],
+            "numeric-hero": ["Inter"],
+            "headline-md": ["Inter"],
+            "label-md": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-md": ["Inter"]
+          },
+          "fontSize": {
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "numeric-hero-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "numeric-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      background-color: #F6F7F5;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #172422;
+      -webkit-font-smoothing: antialiased;
+    }
+    .porcelain-card {
+      background-color: #FFFFFF;
+      border-radius: 26px;
+      box-shadow: 0 4px 24px -2px rgba(23, 36, 34, 0.04), 0 1px 3px 0 rgba(8, 127, 105, 0.02);
+    }
+    .recessed-surface {
+      background-color: #EEF1EE;
+    }
+    .jade-pill-shadow {
+      box-shadow: 0 16px 40px -6px rgba(23, 36, 34, 0.10);
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      font-size: 20px;
+    }
+    .filled-symbol {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Hide scrollbar for clean porcelain feel */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased flex justify-center selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Mobile Viewport Shell (390px centered) -->
+<main class="w-full max-w-[390px] min-h-screen relative flex flex-col pb-28">
+<!-- Top Bar Component: Brand & Connection Status -->
+<header class="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-margin h-14 flex items-center justify-between"><div class="flex items-center space-x-2"><span class="material-symbols-outlined text-primary text-xl">trending_up</span><div class="flex items-baseline space-x-1.5"><span class="font-headline-sm-mobile text-headline-sm-mobile font-bold tracking-tight text-on-surface">SPIKE</span><span class="font-label-sm text-label-sm text-outline tracking-wider font-normal">纪律交易</span></div><span class="bg-primary/10 text-primary font-label-sm text-[10px] px-1.5 py-0.5 rounded-full font-medium">OKX 实盘</span></div><div class="flex items-center space-x-2 bg-surface-container-lowest/90 px-2.5 py-1 rounded-full shadow-[0_2px_8px_rgba(23,36,34,0.03)] border border-outline-variant/30"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span><span class="font-label-sm text-label-sm text-on-surface-variant font-medium">OKX #01 · 实盘已连接</span><span class="material-symbols-outlined text-primary text-sm">sensors</span></div></header>
+<!-- Content Canvas Container -->
+<div class="px-margin space-y-space-md pt-2">
+<!-- Section 1: Account Hero Porcelain Island -->
+<section class="porcelain-card p-space-lg relative overflow-hidden"><div class="absolute -top-12 -right-12 w-32 h-32 bg-primary-fixed/20 rounded-full blur-2xl pointer-events-none"></div><div class="flex items-center justify-between mb-1"><div class="flex items-center space-x-1.5"><span class="font-label-md text-label-md text-tertiary">OKX USDT 当前净值（全账户）</span><span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span></div><div class="flex items-center space-x-1 font-label-sm text-[10px] text-outline bg-surface-container/60 px-2 py-0.5 rounded-full"><span class="material-symbols-outlined text-[11px] animate-spin text-primary">sync</span><span>截至 14:28:05 · 实时同步中</span></div></div><div class="flex items-baseline space-x-2 py-1"><span class="font-display-lg-mobile text-display-lg-mobile font-bold tracking-tight text-on-surface">1,000.00</span><span class="font-headline-sm-mobile text-headline-sm-mobile text-outline font-medium">USDT</span></div><div class="flex items-center space-x-1.5 pt-1 pb-3.5"><span class="font-label-sm text-label-sm text-tertiary">App 累计净盈亏</span><span class="font-label-md text-label-md font-semibold text-secondary">-12.00 USDT</span></div><div class="recessed-surface rounded-2xl p-space-sm flex divide-x divide-outline-variant/30 text-center"><div class="flex-1 px-1 py-1"><span class="block font-label-sm text-[10px] text-tertiary mb-0.5">App 已实现净盈亏</span><span class="block font-label-md text-label-md font-semibold text-secondary">-12.00 USDT</span></div><div class="flex-1 px-1 py-1"><span class="block font-label-sm text-[10px] text-tertiary mb-0.5">App 当前浮动盈亏</span><span class="block font-label-md text-label-md font-semibold text-on-surface">0.00 USDT</span></div></div><p class="font-label-sm text-[10px] text-outline leading-relaxed mt-2.5 px-0.5">盈亏仅统计本 App 管理交易，外部仓位不计入；App 累计净盈亏 = 已实现 + 浮动盈亏，以同一时点快照对齐</p></section>
+<!-- Section 2: Time Horizon Segmented Control -->
+<section class="flex justify-center">
+<div class="recessed-surface p-1 rounded-full flex items-center w-full max-w-xs shadow-inner">
+<button class="flex-1 py-1.5 text-center font-label-md text-label-md rounded-full text-tertiary transition-all duration-150 hover:text-on-surface">近 7 天</button>
+<button class="flex-1 py-1.5 text-center font-label-md text-label-md rounded-full bg-surface-container-lowest text-on-surface font-semibold shadow-sm transition-all duration-150">近 30 天</button>
+<button class="flex-1 py-1.5 text-center font-label-md text-label-md rounded-full text-tertiary transition-all duration-150 hover:text-on-surface">全部</button>
+</div>
+</section>
+<!-- Section 3: Closed Trades Statistics (Strict Discipline) -->
+<section class="porcelain-card p-space-lg space-y-space-md"><div class="flex items-center justify-between border-b border-surface-container pb-2.5"><div class="flex items-center space-x-1.5"><span class="w-1.5 h-3.5 bg-primary rounded-full"></span><h3 class="font-headline-sm-mobile text-headline-sm-mobile font-semibold text-on-surface">周期已平仓战绩</h3></div><div class="flex items-center space-x-1 text-[10px] text-outline font-normal"><span class="material-symbols-outlined text-[12px] text-outline animate-spin">progress_activity</span><span>近30天聚合计算中...</span></div></div><div class="grid grid-cols-4 gap-1 text-center pt-1"><div class="space-y-1"><span class="font-label-sm text-[11px] text-tertiary block">已平仓</span><span class="font-headline-sm-mobile text-headline-sm-mobile font-semibold text-on-surface block">14</span><span class="font-label-sm text-[10px] text-outline">笔</span></div><div class="space-y-1 border-l border-surface-container"><span class="font-label-sm text-[11px] text-tertiary block">胜率</span><span class="font-headline-sm-mobile text-headline-sm-mobile font-semibold text-primary block">64.3</span><span class="font-label-sm text-[10px] text-outline">%</span></div><div class="space-y-1 border-l border-surface-container"><span class="font-label-sm text-[11px] text-tertiary block">盈亏比</span><span class="font-headline-sm-mobile text-headline-sm-mobile font-semibold text-on-surface block">2.18</span><span class="font-label-sm text-[9px] text-outline truncate px-0.5 block" title="均盈÷均亏">均盈÷均亏</span></div><div class="space-y-1 border-l border-surface-container"><span class="font-label-sm text-[11px] text-tertiary block">平均净收益</span><span class="font-headline-sm-mobile text-headline-sm-mobile font-semibold text-primary block">+0.85</span><span class="font-label-sm text-[10px] text-outline">R</span></div></div><p class="font-label-sm text-[10px] text-outline bg-surface-container-low/70 px-2.5 py-1.5 rounded-xl leading-relaxed text-center">统计口径：仅计 Spike 纪律托管与计划平仓笔数（不含外部现货/未托管策略）；平均净 R 已扣减初始建仓成本与滑点缓冲。</p><div class="grid grid-cols-2 gap-2 pt-1"><div class="recessed-surface p-2.5 rounded-2xl flex items-center justify-between"><div class="flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-primary"></span><span class="font-label-sm text-label-sm text-tertiary">盈利笔数</span></div><span class="font-label-md text-label-md font-medium text-on-surface">9 笔</span></div><div class="recessed-surface p-2.5 rounded-2xl flex items-center justify-between"><div class="flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="font-label-sm text-label-sm text-tertiary">亏损笔数</span></div><span class="font-label-md text-label-md font-medium text-on-surface">4 笔</span></div><div class="recessed-surface p-2.5 rounded-2xl flex items-center justify-between"><div class="flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-outline"></span><span class="font-label-sm text-label-sm text-tertiary">保本离场</span></div><span class="font-label-md text-label-md font-medium text-on-surface">1 笔</span></div><div class="recessed-surface p-2.5 rounded-2xl flex items-center justify-between"><div class="flex items-center space-x-1.5"><span class="material-symbols-outlined text-[14px] text-tertiary">receipt_long</span><span class="font-label-sm text-label-sm text-tertiary">已结手续费</span></div><span class="font-label-md text-label-md font-medium text-on-surface">18.40 <span class="text-[10px] text-outline">USDT</span></span></div></div></section>
+<!-- Section 4: Closed Cumulative PnL Canvas Card -->
+<section class="porcelain-card p-space-lg space-y-space-sm"><div class="flex items-baseline justify-between"><div><h3 class="font-headline-sm-mobile text-headline-sm-mobile font-semibold text-on-surface">已平仓累计净盈亏</h3><p class="font-label-sm text-[10px] text-outline">仅统计平仓时点净收益累加，非账户历史总净值曲线</p></div><div class="text-right"><span class="font-label-md text-label-md font-semibold text-primary block">+420.50 USDT</span><span class="font-label-sm text-[9px] text-outline">SWR 缓存就绪</span></div></div><div class="w-full h-36 bg-[#F2F4F2] rounded-2xl relative flex flex-col justify-between overflow-hidden p-3 border border-outline-variant/30"><div class="absolute inset-x-0 top-1/2 border-b border-dashed border-outline-variant/60 w-full"></div><span class="absolute right-2 top-[44%] font-label-sm text-[9px] text-outline/80">基准 0.00</span><svg class="w-full h-24 overflow-visible relative z-10" preserveaspectratio="none" viewbox="0 0 300 80"><polyline fill="none" points="0,50 30,50 30,35 70,35 70,42 110,42 110,25 160,25 160,18 210,18 210,22 250,22 250,12 300,12" stroke="#087f69" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></polyline><circle cx="300" cy="12" fill="#087f69" r="3.5"></circle></svg><div class="flex items-center justify-between text-[10px] text-outline pt-1 relative z-10"><span>近30天平仓离场序列</span><span class="inline-flex items-center space-x-1 text-primary font-medium"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span><span>曲线已拉取</span></span></div></div></section>
+<!-- Section 5: Direction & Symbol Breakdown Bento -->
+<section class="space-y-space-md"><div class="porcelain-card p-space-lg space-y-space-sm"><div class="flex items-center justify-between"><h4 class="font-headline-sm-mobile text-headline-sm-mobile font-semibold text-on-surface">多空方向表现对比</h4><span class="font-label-sm text-[10px] text-outline">方向纯粹度</span></div><div class="grid grid-cols-2 gap-3 pt-1"><div class="recessed-surface p-3 rounded-2xl space-y-1.5"><div class="flex items-center space-x-1.5"><span class="font-label-sm text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">做多 LONG</span></div><div class="flex justify-between items-baseline pt-1"><span class="font-label-sm text-label-sm text-tertiary">已平样本</span><span class="font-body-md font-semibold text-on-surface">9 笔</span></div><div class="flex justify-between items-baseline"><span class="font-label-sm text-label-sm text-tertiary">方向胜率</span><span class="font-body-md font-semibold text-primary">66.7 %</span></div></div><div class="recessed-surface p-3 rounded-2xl space-y-1.5"><div class="flex items-center space-x-1.5"><span class="font-label-sm text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-secondary/10 text-secondary">做空 SHORT</span></div><div class="flex justify-between items-baseline pt-1"><span class="font-label-sm text-label-sm text-tertiary">已平样本</span><span class="font-body-md font-semibold text-on-surface">5 笔</span></div><div class="flex justify-between items-baseline"><span class="font-label-sm text-label-sm text-tertiary">方向胜率</span><span class="font-body-md font-semibold text-on-surface">60.0 %</span></div></div></div></div><div class="porcelain-card p-space-lg space-y-space-sm"><div class="flex items-center justify-between"><h4 class="font-headline-sm-mobile text-headline-sm-mobile font-semibold text-on-surface">标的表现归集</h4><span class="font-label-sm text-[10px] text-outline">已平仓净额</span></div><div class="grid grid-cols-12 text-tertiary font-label-sm text-[10px] px-1 py-1 border-b border-surface-container"><span class="col-span-4 text-left">合约标的</span><span class="col-span-3 text-right">交易笔数</span><span class="col-span-3 text-right">净盈亏</span><span class="col-span-2 text-right">胜率</span></div><div class="space-y-1 pt-1"><div class="grid grid-cols-12 items-center py-2 px-1 hover:bg-surface-container-low/50 rounded-xl transition-colors"><div class="col-span-4 flex items-center space-x-1.5"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="font-label-md text-label-md font-medium text-on-surface">BTCUSDT</span></div><span class="col-span-3 text-right font-label-sm text-on-surface font-medium">8 笔</span><span class="col-span-3 text-right font-label-sm font-semibold text-primary">+285.20</span><span class="col-span-2 text-right font-label-sm text-primary font-medium">75.0%</span></div><div class="grid grid-cols-12 items-center py-2 px-1 hover:bg-surface-container-low/50 rounded-xl transition-colors"><div class="col-span-4 flex items-center space-x-1.5"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="font-label-md text-label-md font-medium text-on-surface">ETHUSDT</span></div><span class="col-span-3 text-right font-label-sm text-on-surface font-medium">4 笔</span><span class="col-span-3 text-right font-label-sm font-semibold text-primary">+160.80</span><span class="col-span-2 text-right font-label-sm text-primary font-medium">50.0%</span></div><div class="grid grid-cols-12 items-center py-2 px-1 hover:bg-surface-container-low/50 rounded-xl transition-colors"><div class="col-span-4 flex items-center space-x-1.5"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span><span class="font-label-md text-label-md font-medium text-on-surface">SOLUSDT</span></div><span class="col-span-3 text-right font-label-sm text-on-surface font-medium">2 笔</span><span class="col-span-3 text-right font-label-sm font-semibold text-secondary">-25.50</span><span class="col-span-2 text-right font-label-sm text-secondary font-medium">50.0%</span></div></div></div></section>
+<!-- Section 6: Truthful System Contract & Footnote -->
+<footer class="pt-2 px-1 space-y-2 text-center"><p class="font-label-sm text-[10px] text-outline leading-relaxed">统计口径说明：周期汇总严格以 Spike 纪律托管与计划平仓离场时刻为准；因未接入全量资金出入金记录，不计算累计账户收益率（%）；实时净值采用 SWR 机制毫秒级呈现，复杂统计异步聚合，绝不阻塞账户观察。</p><div class="inline-flex items-center space-x-1.5 bg-surface-container/60 px-3 py-1 rounded-full text-outline font-label-sm text-[10px]"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span>OKX WebSocket 专线心跳健康 · 0 丢包</span></div></footer>
+</div>
+<!-- Section 7: Floating Bottom Navigation Island (Shared Component: BottomNavBar adapted for 5 items) -->
+<!-- Exact style and token alignment: jade-pill dock, centered, 20px off bottom -->
+<nav class="fixed bottom-5 inset-x-4 z-50 flex justify-between items-center h-16 max-w-sm mx-auto px-2.5 rounded-full bg-surface-container-lowest/90 backdrop-blur-xl jade-pill-shadow">
+<!-- Tab 1: 合约 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-2 py-1.5 transition-colors duration-150" href="#futures">
+<span class="material-symbols-outlined text-[20px]">candlestick_chart</span>
+<span class="font-label-sm text-[10px] mt-0.5 tracking-tight font-medium">合约</span>
+</a>
+<!-- Tab 2: 持仓 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-2 py-1.5 transition-colors duration-150" href="#positions">
+<span class="material-symbols-outlined text-[20px]">pie_chart</span>
+<span class="font-label-sm text-[10px] mt-0.5 tracking-tight font-medium">持仓</span>
+</a>
+<!-- Tab 3: 统计 (ACTIVE SELECTED: Primary Jade Pillow) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary rounded-full px-4 py-1.5 transition-all duration-200 active:scale-95 shadow-sm" href="#statistics">
+<span class="material-symbols-outlined text-[20px] filled-symbol">bar_chart</span>
+<span class="font-label-sm text-[10px] mt-0.5 tracking-tight font-semibold">统计</span>
+</a>
+<!-- Tab 4: 纪律 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-2 py-1.5 transition-colors duration-150" href="#discipline">
+<span class="material-symbols-outlined text-[20px]">shield_lock</span>
+<span class="font-label-sm text-[10px] mt-0.5 tracking-tight font-medium">纪律</span>
+</a>
+<!-- Tab 5: 连接 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-2 py-1.5 transition-colors duration-150" href="#connect">
+<span class="material-symbols-outlined text-[20px]">link</span>
+<span class="font-label-sm text-[10px] mt-0.5 tracking-tight font-medium">连接</span>
+</a>
+</nav>
+</main>
+<script>
+    // Lightweight atmospheric micro-interactions for time toggle
+    document.querySelectorAll('section button').forEach(button => {
+      button.addEventListener('click', function() {
+        if (!this.classList.contains('bg-surface-container-lowest')) {
+          this.parentElement.querySelectorAll('button').forEach(btn => {
+            btn.className = "flex-1 py-1.5 text-center font-label-md text-label-md rounded-full text-tertiary transition-all duration-150 hover:text-on-surface";
+          });
+          this.className = "flex-1 py-1.5 text-center font-label-md text-label-md rounded-full bg-surface-container-lowest text-on-surface font-semibold shadow-sm transition-all duration-150";
+        }
+      });
+    });
+  </script>
+</body></html>

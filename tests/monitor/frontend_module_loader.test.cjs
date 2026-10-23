@@ -40,5 +40,5 @@ test('all dependency downloads are preloaded before the first stylesheet resolve
 
 test('Monday Fib loads shared chart before its scoped row controller',async()=>{
  const c=harness();await c.api.ensure('monday-fib');
- assert.deepEqual(c.calls,['/static/monday-fib.css','/static/range-chart.js','/static/monday-fib-chart.js','/static/monday-fib.js']);
+ assert.deepEqual(c.calls,['/static/monday-fib.css','/static/range-chart.js','/static/monday-fib-chart.js','/static/monday-quick.js','/static/monday-fib.js']);
 });

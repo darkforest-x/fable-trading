@@ -1222,3 +1222,47 @@ test('leaving during the fresh quote read cannot submit an entry-stop change',as
  c.snapshot.positions=[heldPosition()];c.api.setActive(true);await flush();dataClick(c,{deskEntryStop:'position-1'});await flush();
  c.api.setActive(false);release();await flush();assert.equal(c.calls.filter(x=>x.method==='POST').length,0);
 });
+
+test('floating ticket uses the original desk and pins its initial symbol across router refreshes',async()=>{
+  const c=harness(()=>{throw Error('opening must not submit');});
+  const classes=new Set();
+  c.el.classList={add:x=>classes.add(x),remove:x=>classes.delete(x)};
+  const home={insertBefore(el){el.parentNode=home;}};
+  const host={append(el){el.parentNode=host;}};
+  c.el.parentNode=home;
+  c.api.openQuick(host,{symbol:'ETH-USDT-SWAP'});await flush();
+  assert.equal(c.el.parentNode,host);
+  assert.equal(classes.has('desk-quick'),true);
+  assert.match(c.el.innerHTML,/value="ETH-USDT-SWAP"/);
+  c.api.setActive(false);c.tick();await flush();
+  assert.equal(c.el.parentNode,host);
+  assert.match(c.el.innerHTML,/value="ETH-USDT-SWAP"/);
+  assert.equal(c.calls.some(x=>x.method==='POST'),false);
+  c.api.closeQuick();assert.equal(c.el.parentNode,home);assert.equal(c.el.innerHTML,'');
+  assert.equal(classes.has('desk-quick'),false);
+  c.api.setActive(true);await flush();assert.match(c.el.innerHTML,/data-desk-trade/);
+});
+
+test('floating ticket returns its node when navigating to the full desk',async()=>{
+  const c=harness(()=>{throw Error('navigation must not submit');});
+  c.el.classList={add(){},remove(){}};
+  const home={insertBefore(el){el.parentNode=home;}};
+  const host={append(el){el.parentNode=host;}};c.el.parentNode=home;
+  c.api.openQuick(host,{symbol:'W-USDT-SWAP'});await flush();
+  c.api.setActive(true);await flush();
+  assert.equal(c.el.parentNode,home);assert.match(c.el.innerHTML,/value="W-USDT-SWAP"/);
+  c.api.closeQuick();assert.match(c.el.innerHTML,/data-desk-trade/);
+  assert.equal(c.calls.some(x=>x.method==='POST'),false);
+});
+
+test('floating ticket sends market entries through the same frozen-quote and idempotent paper endpoint',async()=>{
+  const c=harness(async()=>({ok:true,json:async()=>({fill:{action:'open',quantity:'1',price:'100',fee:'.1'}})}));
+  c.el.classList={add(){},remove(){}};
+  const home={insertBefore(el){el.parentNode=home;}};const host={append(el){el.parentNode=host;}};c.el.parentNode=home;
+  c.api.openQuick(host,{symbol:'BTC-USDT-SWAP'});await flush();
+  await c.submit('trade',{symbol:'BTC-USDT-SWAP',leverage:'100',positionMultiple:'10',orderType:'market'});await flush();
+  const posts=c.calls.filter(x=>x.method==='POST');assert.equal(posts.length,1);
+  assert.equal(posts[0].url,'/api/research/paper-desk/accounts/account-1/open?include_snapshot=true');
+  const payload=JSON.parse(posts[0].body);assert.equal(payload.quote_id,'a'.repeat(32));assert.equal(payload.request_id,'request-uuid-12345678');
+  assert.equal(c.storage.size,0);c.api.closeQuick();
+});

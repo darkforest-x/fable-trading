@@ -184,3 +184,38 @@ body[data-workspace="monday-fib"] {--mf-glass:rgba(255,255,255,.18);--mf-border:
 #monday-fib-root .mf-row :is(a,button):focus-visible {outline:2px solid #0071e380;outline-offset:-1px;}
 #monday-fib-root .mf-external {display:inline-block;font-size:12px;margin-left:4px;opacity:.5;transition:transform .18s,opacity .18s;}
 #monday-fib-root a.mf-row-symbol:is(:hover,:focus-visible) .mf-external {opacity:1;transform:translate(1px,-1px);}
+/* Stitch 978ce337aef8424b9b21d7f2dc5cd0df: shared trade owner in a glass host. */
+#monday-fib-root .mf-quick-toggle {margin-top:12px;width:100%;color:var(--mf-blue);background:#0071e310;min-height:40px;}
+#monday-fib-root .mf-quick-panel {position:absolute;z-index:12;top:84px;right:28px;width:400px;max-width:calc(100% - 24px);max-height:calc(100dvh - 112px);display:flex;flex-direction:column;overflow:hidden;background-color:#ffffffa6;animation:mf-arrive .2s var(--mf-ease);}
+#monday-fib-root .mf-quick-heading {display:flex;align-items:center;gap:6px;padding:10px 12px 4px;flex-shrink:0;}
+#monday-fib-root .mf-quick-heading h2 {flex:1;font-size:15px;}
+#monday-fib-root .mf-quick-heading>[data-quick-close] {display:grid;place-items:center;padding:8px;}
+#monday-fib-root .mf-quick-modes {display:flex;gap:3px;border-radius:14px;background:#59738c0a;margin:8px 16px 0;padding:3px;flex-shrink:0;}
+#monday-fib-root .mf-quick-modes button {flex:1;padding:8px;}
+#monday-fib-root .mf-quick-modes [aria-pressed=true] {background:#ffffffde;color:var(--mf-blue);box-shadow:0 2px 6px #34465a0d;}
+#monday-fib-root .mf-quick-status {font-size:11px;color:var(--mf-muted);padding:10px 18px;flex-shrink:0;}
+#monday-fib-root .mf-quick-panel[data-mode=live] .mf-quick-status {color:#966211;}
+#monday-fib-root .mf-quick-content {padding:0 16px 16px;overflow:auto;overscroll-behavior:contain;min-height:0;}
+#monday-fib-root #paper-desk-workspace.desk-quick {padding:0;min-width:0;gap:12px;background:transparent;}
+#monday-fib-root .desk-quick :is(.desk-toolbar h1,.desk-paper-badge,.desk-fullscreen-button,.desk-metrics,.desk-risk-strip,[data-desk-history],.desk-rules) {display:none;}
+#monday-fib-root .desk-quick .desk-toolbar {display:flex;gap:8px;align-items:center;margin:0 0 12px;}
+#monday-fib-root .desk-quick .desk-toolbar-main {min-width:0;flex:1;}
+#monday-fib-root .desk-quick .desk-toolbar select {width:100%;max-width:100%;margin:0;}
+#monday-fib-root .desk-quick .desk-toolbar-actions {gap:4px;}
+#monday-fib-root .desk-quick .desk-toolbar-actions button {padding:6px 8px;font-size:11px;}
+#monday-fib-root .desk-quick .desk-layout {display:grid;grid-template-columns:minmax(0,1fr);gap:16px;}
+#monday-fib-root .desk-quick :is(.desk-ticket,.desk-ledger) {background:transparent!important;border:0!important;box-shadow:none!important;padding:0;backdrop-filter:none;-webkit-backdrop-filter:none;}
+#monday-fib-root .desk-quick .desk-book {min-width:0;}
+#monday-fib-root .desk-quick .desk-ledger {border-top:1px solid #536b801a!important;padding-top:12px;}
+#monday-fib-root .desk-quick :is(select,input:not([type=checkbox]),textarea) {background:#ffffff80;color:var(--mf-ink);border:1px solid #536b8026;border-radius:12px;min-height:40px;}
+#monday-fib-root .desk-quick :is(select,input,textarea):focus {outline:none;box-shadow:0 0 0 3px #0071e31a;border-color:#0071e399;}
+#monday-fib-root #paper-desk-workspace.desk-quick .desk-submit {color:#fff;background:var(--trade-long);min-height:44px;}
+#monday-fib-root #paper-desk-workspace.desk-quick .desk-submit.desk-short {background:var(--trade-short);}
+#monday-fib-root .desk-quick .desk-sizing-summary {padding:10px 12px;border-radius:14px;background:#e4edf84d;}
+#monday-fib-root .desk-quick .desk-position-card {min-width:0;}
+@media(max-width:760px){
+ #monday-fib-root .mf-quick-toggle {margin-top:8px;min-height:44px;}
+ #monday-fib-root .mf-quick-panel {top:auto;bottom:max(12px,env(safe-area-inset-bottom));left:12px;right:12px;width:auto;max-height:78dvh;border-radius:24px;}
+ #monday-fib-root .mf-quick-panel :is(button,select,input:not([type=checkbox])) {min-height:44px;}
+ #monday-fib-root .mf-quick-panel :is(input,select,textarea) {font-size:16px;}
+}

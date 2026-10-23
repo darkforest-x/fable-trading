@@ -1,0 +1,60 @@
+{
+  "april_rows_used": 0,
+  "auto_promote": false,
+  "calibration_guards": {
+    "max_density_per_symbol_day": 4.0,
+    "mean_net_maker_positive": true,
+    "min_trades": 100
+  },
+  "calibration_start": "2026-02-01T00:00:00+00:00",
+  "experimental_change": "data_expansion_only",
+  "future_rows_in_features": 0,
+  "holdout_rows_read": 0,
+  "l2_threshold_grid": [
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7
+  ],
+  "model_deployable": false,
+  "orders": false,
+  "parent_gate_lineage_sha256": "1a5a9e86d1c1cd896a60001c7f4c226cb5eb6e76065688086d722bed2e34e3c2",
+  "parent_model_deployable": false,
+  "protocol": "l2_data_expansion_round_v1",
+  "purge_bars": 162,
+  "schema_version": 1,
+  "sealed_read": false,
+  "selected_config": {
+    "horizon": 72,
+    "sl_atr": 2.0,
+    "threshold": 0.25,
+    "tp_atr": 5.0
+  },
+  "selected_config_key": "threshold=0.25,tp=5,sl=2,horizon=72",
+  "snapshot_manifest_sha256": "033e394a614a82a6fedb5c20327bd469ceaa2784dd4394f253cbefc8006b49d5",
+  "source_candidate_sha256": [
+    "d601b9c3e207346b3900dd1cc8794d2800a0e777a4e12cd3b36b44c6ab0661b5",
+    "70cc087654402735ccbe90e61163b301763d821a1cbe502fa95c0f87c7558854",
+    "a035e989d0d2cb5068349fe1216527250abea4c55660fd0371642501f24002b8",
+    "49463da5e187fde18796e9f819618bb4a313411efb17e1847181e469cefbc3bd"
+  ],
+  "source_summary_sha256": [
+    "13998be4fc745f563be312c8403444eaca632987b2f8c625e3474f7e85cc9e1f",
+    "45873fb5760fbcfa388221d6d20a9ff2e15ae25e91a36cd64d3122ea3df29d06",
+    "b6518432b7dfb397399df5458fb9fc0f26a8d3afa4b2fdf2f2687f07fdf94df3",
+    "eeefff9371064622207a528bbac1dfb39d6d42ef7a386772ee47811735c0ab6e"
+  ],
+  "test_end_exclusive": "2026-03-31T07:30:00+00:00",
+  "test_inspection_before_selection": false,
+  "test_start": "2026-03-01T00:00:00+00:00",
+  "threshold_policy": "feb_calibration_only"
+}

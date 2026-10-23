@@ -1,0 +1,69 @@
+{
+  "auto_promote": false,
+  "baseline_all_l1_selected": {
+    "density_per_symbol_day": 5.08041237113402,
+    "eligible": null,
+    "guard_violations": [],
+    "max_drawdown_maker": 2.2179291830002814,
+    "mean_net_maker": 0.00044088942812602674,
+    "mean_net_taker": 4.088942812603176e-05,
+    "outcomes": {
+      "sl": 881,
+      "timeout": 133,
+      "tp": 372
+    },
+    "profit_factor_maker": 1.0559026181235638,
+    "threshold": null,
+    "total_net_maker": 0.611072747382673,
+    "total_net_taker": 0.05667274738268002,
+    "trades": 1386,
+    "win_rate_maker": 0.35353535353535354
+  },
+  "calibration_baseline_all_l1_selected": {
+    "density_per_symbol_day": 4.857142857142857,
+    "eligible": null,
+    "guard_violations": [],
+    "max_drawdown_maker": 2.140710864445607,
+    "mean_net_maker": 0.001543022903635145,
+    "mean_net_taker": 0.00114302290363513,
+    "outcomes": {
+      "sl": 765,
+      "timeout": 112,
+      "tp": 347
+    },
+    "profit_factor_maker": 1.1300291448094475,
+    "threshold": null,
+    "total_net_maker": 1.8886600340494175,
+    "total_net_taker": 1.3990600340493993,
+    "trades": 1224,
+    "win_rate_maker": 0.3602941176470588
+  },
+  "future_rows_in_features": 0,
+  "holdout_rows_read": 0,
+  "l2_gate": {
+    "density_per_symbol_day": 3.163344788087056,
+    "eligible": null,
+    "guard_violations": [],
+    "max_drawdown_maker": 1.1498672577077658,
+    "mean_net_maker": 0.0007344896051269473,
+    "mean_net_taker": 0.000334489605126945,
+    "min_test_trades_passed": true,
+    "outcomes": {
+      "sl": 545,
+      "timeout": 75,
+      "tp": 243
+    },
+    "profit_factor_maker": 1.1025353559866966,
+    "threshold": 0.2,
+    "total_net_maker": 0.6338645292245555,
+    "total_net_taker": 0.28866452922455355,
+    "trades": 863,
+    "win_rate_maker": 0.36152954808806487
+  },
+  "orders": false,
+  "protocol": "l2_walkforward_gate_v1",
+  "schema_version": 1,
+  "sealed_read": false,
+  "selected_threshold": 0.2,
+  "test_threshold_grid_output": false
+}

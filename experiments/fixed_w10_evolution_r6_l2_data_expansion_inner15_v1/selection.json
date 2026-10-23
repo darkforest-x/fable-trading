@@ -1,0 +1,36 @@
+{
+  "auto_promote": false,
+  "experimental_change": "data_expansion_only",
+  "model_deployable": false,
+  "protocol": "l2_data_expansion_round_v1",
+  "schema_version": 1,
+  "selected_calibration_metrics": {
+    "density_per_symbol_day": 2.795238095238095,
+    "eligible": true,
+    "exposure_symbol_days": 420.0,
+    "exposure_symbols": 15,
+    "guard_violations": [],
+    "max_drawdown_maker": 1.8855225052630717,
+    "mean_net_maker": 0.0013651720983496427,
+    "mean_net_taker": 0.0009651720983496271,
+    "outcomes": {
+      "sl": 744,
+      "timeout": 75,
+      "tp": 355
+    },
+    "profit_factor_maker": 1.1378269620586294,
+    "threshold": 0.2,
+    "total_net_maker": 1.6027120434624804,
+    "total_net_taker": 1.1331120434624622,
+    "trades": 1174,
+    "win_rate_maker": 0.36030664395229983
+  },
+  "selected_threshold": 0.2,
+  "selection_order": [
+    "highest_pooled_mean_net_maker",
+    "higher_profit_factor",
+    "lower_density_per_symbol_day",
+    "threshold_closest_0.5"
+  ],
+  "test_metrics_available_at_selection": false
+}
