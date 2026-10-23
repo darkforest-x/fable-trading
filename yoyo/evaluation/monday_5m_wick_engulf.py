@@ -37,7 +37,6 @@ import numpy as np
 import pandas as pd
 
 from yoyo.evaluation.range_framework import ROOT, dump, file_stamp
-from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy, run_native
 
 EXP = ROOT/'experiments/active/exp-monday-5m-wick-engulf-20261023-v1'
 OHLC = ['open', 'high', 'low', 'close']
@@ -192,6 +191,7 @@ def barrier_bounds(prices, entries, ends):
 
 def execute(f, entries, symbol, folder, cfg):
     """Native orders on losslessly bounded windows; fees applied per actual fill."""
+    from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy, run_native
     # Use sufficient decimal precision for random scaled geometry without
     # rounding the owner's exact pin/target or historical OHLC tick changes.
     prices = f[OHLC].to_numpy(float)

@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+cd "$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+exec /Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_vectorbt_research "$@"
