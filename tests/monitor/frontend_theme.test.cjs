@@ -98,3 +98,11 @@ test('approved Stitch appearance is stable across old preferences without overwr
  assert.equal(p.attributes['data-theme'],'dark');assert.equal(p.select.value,'dark');assert.equal(p.meta.content,'#0b0e14');assert.equal(p.stored(),'light');
  p.os(false);p.otherTab('system');assert.equal(p.attributes['data-theme'],'dark');assert.equal(p.select.value,'dark');
 });
+
+test('Apple Glass starts light before paint and preserves old user preferences',()=>{
+ const p=page({stored:'dark',dark:true,design:'apple-glass'});p.ready();
+ assert.equal(p.attributes['data-theme'],'light');assert.equal(p.select.value,'light');
+ assert.equal(p.meta.content,'#f7f8f6');assert.equal(p.stored(),'dark');
+ p.os(true);p.otherTab('dark');p.choose('dark');
+ assert.equal(p.attributes['data-theme'],'light');assert.equal(p.stored(),'dark');
+});

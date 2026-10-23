@@ -1,0 +1,203 @@
+/* Production adapters for Stitch df514d3934a043a19f6c8c81bc56f878.
+ * Tokens live in design-tokens.css. This sheet loads after all legacy layout
+ * sheets, including lazy modules. Explicit surface families keep charts,
+ * semantic trade colors, table overflow and form ownership intact.
+ * Backdrop blur is reserved for large surfaces and overlays, never every row. */
+html[data-design=apple-glass] {background:var(--bg);scroll-padding-top:90px;}
+body[data-design=apple-glass] {
+  background:radial-gradient(ellipse at 8% 8%,#0071e30a,transparent 52%),radial-gradient(ellipse at 95% 22%,#0c9e7d0a,transparent 48%),var(--bg);
+  background-attachment:fixed;font:13px/1.55 var(--font-ui);color:var(--text);--row-pad:12px;
+}
+body[data-design=apple-glass] :is(button,input,select,textarea) {font-family:var(--font-ui);}
+body[data-design=apple-glass] ::selection {background:#0071e326;color:var(--text);}
+
+/* A single dock replaces the permanent two-level navigation. The old route
+ * registry stays mounted for lifecycle owners and searchable destinations. */
+body[data-design=apple-glass] :is(#main-sidebar,#nav-toggle,#nav-backdrop) {display:none!important;}
+body[data-design=apple-glass]:not([data-workspace=monday-fib]) .workspace {margin:0!important;width:100%!important;padding:88px 0 24px!important;}
+body[data-design=apple-glass] .workspace>.topbar {
+  position:fixed;inset:16px 24px auto;height:52px;min-height:52px;width:auto;max-width:1600px;margin-inline:auto;padding:6px 12px;gap:12px;
+  border:1px solid var(--glass-edge);border-radius:28px;background:var(--glass-dock);box-shadow:var(--panel-shadow);
+  backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-saturation));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-saturation));
+}
+body[data-design=apple-glass] .topbar :is(#local-clock,.workspace-preferences) {display:none;}
+body[data-design=apple-glass] .topbar>.stitch-brand {display:flex;padding:0 10px 0 2px;gap:5px;}
+body[data-design=apple-glass] .topbar .stitch-brand strong {font-size:14px;letter-spacing:.5px;}
+body[data-design=apple-glass] .topbar .stitch-bolt {color:var(--text);}
+body[data-design=apple-glass] .stitch-primary-nav {justify-content:center;gap:4px;overflow:visible;}
+body[data-design=apple-glass] .topbar .stitch-primary-nav>a {font-size:13px;font-weight:500;min-height:38px;padding:8px 19px;border-radius:22px;}
+body[data-design=apple-glass] .topbar .stitch-primary-nav>a.active {color:var(--brand-primary);background:var(--brand-bg);box-shadow:inset 0 0 0 1px #0071e30d;}
+body[data-design=apple-glass] #workspace-search {display:flex;gap:7px;width:auto;min-width:70px;min-height:38px;padding:7px 12px;background:transparent;color:var(--muted);border-radius:22px;}
+body[data-design=apple-glass] #workspace-search>span {display:inline-block;}
+body[data-design=apple-glass] #workspace-search>.ui-search-icon {display:none;}
+body[data-design=apple-glass] #workspace-search:is(:hover,.active) {color:var(--brand-primary);background:var(--brand-bg);}
+body[data-design=apple-glass] .workspace>#main {max-width:1800px;padding:0 24px;margin-inline:auto;}
+body[data-design=apple-glass] #main>.page-heading {position:static;padding:2px 2px 18px;min-height:0;margin:0;}
+body[data-design=apple-glass] .workspace .page-heading h1 {font-size:21px;line-height:1.4;letter-spacing:-.6px;}
+body[data-design=apple-glass] .page-heading p {font-size:12px;}
+body[data-design=apple-glass] .page-heading .refresh-button {border-radius:50%;min-width:36px;min-height:36px;padding:8px;background:var(--glass-dock);}
+body[data-design=apple-glass] .page-heading .refresh-button span {display:none;}
+body[data-design=apple-glass][data-workspace=signals] #main>.page-heading {display:none;}
+
+/* Large glass planes: distinct from the quiet, inexpensive repeated cards. */
+body[data-design=apple-glass] :is(.panel,.research-objective,.research-table-wrap,.research-flow,.research-recent,.work-inspector,.signal-query-inspector,.signal-history-wrap,.okx-live,.yd-chart-stage,.yd-symbol-panel,.ms-context,.ms-bias,.system-card,.notification-channel-card,.notification-matrix-wrap,.notification-history-wrap,.manual-section,.manual-list-panel,.manual-ticket,.desk-card,.desk-market-widget,.copier-panel,.bk-toc,.bk-reader,.bk-notes,.bk-review,.of-panel,.ll-panel,.rp-panel,.platform-layer,.model-board,.model-family-group,.dataset-filters,.knowledge-editor,.knowledge-edition,.yolo-card,.mt-chart-panel,.mt-intel-card,.mt-evidence,.market-resonance-overview,.market-account-overview,.stitch-market-controls,.stitch-screener-panel) {
+  background:var(--glass-panel)!important;border:1px solid var(--glass-edge)!important;border-radius:var(--radius-panel)!important;box-shadow:var(--panel-shadow)!important;
+  backdrop-filter:blur(18px) saturate(var(--glass-saturation));-webkit-backdrop-filter:blur(18px) saturate(var(--glass-saturation));
+}
+body[data-design=apple-glass] :is(.knowledge-card,.strategy-card,.dataset-card,.dataset-record,.copier-message,.signal-card,.yd-card,.yd-plan-card,.yd-finding,.bk-card,.paper-run-card,.model-record,.pipeline-record,.research-recent article,.system-process,.notification-channel-card) {
+  background:var(--glass-panel)!important;border:1px solid var(--glass-edge)!important;border-radius:16px!important;box-shadow:var(--panel-shadow)!important;
+  transition:background-color var(--motion-fast),border-color var(--motion-fast),box-shadow var(--motion-panel);
+}
+body[data-design=apple-glass] :is(.signal-card,.yd-finding,.dataset-card,.knowledge-card,.bk-card):hover {border-color:var(--card-hover-border)!important;box-shadow:0 10px 28px #34465a12!important;transform:none!important;}
+body[data-design=apple-glass] :is(.research-metrics,.platform-summary,.dataset-summary,.manual-metrics,.desk-metrics,.copier-metrics,.paper-metrics,.okx-metrics,.ledger-metrics,.history-stat-grid)>div {
+  background:var(--glass-dock)!important;border:1px solid var(--glass-edge)!important;border-radius:16px!important;box-shadow:none!important;padding:14px 16px!important;
+}
+body[data-design=apple-glass] :is(.research-metrics,.platform-summary,.dataset-summary,.manual-metrics,.desk-metrics,.copier-metrics,.paper-metrics,.okx-metrics) strong {font-size:24px!important;letter-spacing:-.7px;font-weight:600;}
+body[data-design=apple-glass] :is(.research-hero,.datasets-hero,.platform-hero,.knowledge-hero,.manual-hero,.yolo-hero,.bk-hero) {background:transparent!important;border:0!important;box-shadow:none!important;}
+body[data-design=apple-glass] :is(.research-empty,.empty-state,.okx-empty,.knowledge-empty,.dataset-empty,.desk-empty,.research-loading) {background:transparent!important;padding:32px 18px;border-radius:16px;color:var(--muted);}
+
+/* Controls use one focus surface and maintain semantic button colors. */
+body[data-design=apple-glass]:not([data-workspace=monday-fib]) :is(button,summary,a.research-button) {
+  transition:background-color var(--motion-fast),color var(--motion-fast),border-color var(--motion-fast),box-shadow var(--motion-fast);
+}
+body[data-design=apple-glass]:not([data-workspace=monday-fib]) :is(.research-button,.load-more,.copier-button,.bk-button,.of-button,.ll-button,.rp-btn,.yd-shell button,.manual-tabs button,.okx-live button,.desk-toolbar button,.btn,.work-inspector-toggle) {border-radius:var(--radius-control)!important;min-height:36px;}
+body[data-design=apple-glass] :is(.research-button.primary,.ml-primary,.yd-primary,.btn-primary) {color:var(--on-accent)!important;background:var(--brand-primary)!important;border-color:var(--brand-primary)!important;}
+body[data-design=apple-glass]:not([data-workspace=monday-fib]) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea) {
+  background-color:var(--control-bg)!important;border:1px solid var(--control-border)!important;border-radius:var(--radius-control)!important;color:var(--text)!important;
+  min-height:36px;transition:box-shadow var(--motion-fast),border-color var(--motion-fast);outline:none;
+}
+body[data-design=apple-glass]:not([data-workspace=monday-fib]) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea):focus {
+  outline:none!important;border-color:#0071e399!important;box-shadow:0 0 0 3px var(--focus-glow)!important;
+}
+body[data-design=apple-glass] :is(.search-field,.mt-watch-search,.signal-search-wrap) {border:1px solid var(--control-border)!important;border-radius:var(--radius-control)!important;background:var(--control-bg)!important;}
+body[data-design=apple-glass] :is(.search-field,.mt-watch-search,.signal-search-wrap):focus-within {border-color:#0071e399!important;box-shadow:0 0 0 3px var(--focus-glow)!important;}
+body[data-design=apple-glass] #main :is(.search-field,.mt-watch-search,.signal-search-wrap) input,
+body[data-design=apple-glass] #main :is(.search-field,.mt-watch-search,.signal-search-wrap) input:focus {border:0!important;box-shadow:none!important;outline:none!important;background:transparent!important;}
+body[data-design=apple-glass] :is(.segmented,.mt-periods,.yd-periods,.desk-segments,.desk-chart-periods,.desk-chart-tabs,.mt-watch-tabs,.manual-tabs,.copier-tabs,.okx-tabs,.dataset-category-filter) {background:var(--segment-bg)!important;border:0!important;border-radius:14px!important;padding:3px;gap:3px;}
+body[data-design=apple-glass] :is(.segmented,.mt-periods,.yd-periods,.desk-segments,.desk-chart-periods,.desk-chart-tabs,.mt-watch-tabs,.manual-tabs,.copier-tabs,.okx-tabs,.dataset-category-filter)>button {border-radius:11px!important;min-height:32px;border:0;background:transparent;color:var(--muted);}
+body[data-design=apple-glass] :is(.segmented,.mt-periods,.yd-periods,.desk-segments,.desk-chart-periods,.desk-chart-tabs,.mt-watch-tabs,.manual-tabs,.copier-tabs,.okx-tabs,.dataset-category-filter)>button:is(.active,.selected,[aria-selected=true],[aria-pressed=true]) {background:var(--segment-active-bg)!important;color:var(--brand-primary)!important;box-shadow:0 2px 6px #3040500a!important;}
+body[data-design=apple-glass] :is(.work-panel-tabs,.linear-section-tabs,.yd-toolbar,.signal-workspace-nav,.ms-terminal-tabs) {background:transparent!important;border:0!important;gap:6px!important;padding:0 0 12px!important;}
+body[data-design=apple-glass] :is(.work-panel-tabs,.linear-section-tabs,.yd-toolbar,.signal-workspace-nav,.ms-terminal-tabs) :is(button,.nav-link) {border-radius:12px!important;border:0!important;min-height:36px;padding:8px 13px!important;}
+body[data-design=apple-glass] :is(.work-panel-tabs,.linear-section-tabs,.yd-toolbar,.signal-workspace-nav,.ms-terminal-tabs) :is(.active,[aria-selected=true],[aria-pressed=true]) {background:var(--brand-bg)!important;color:var(--brand-primary)!important;}
+body[data-design=apple-glass] :is(.research-table,.okx-live table,.v130-table,.notification-matrix,.ma-table,.mt-record-table) th {background:var(--control-bg)!important;color:var(--muted);font-size:11px;font-weight:500;}
+body[data-design=apple-glass] :is(.research-table,.okx-live table,.v130-table,.notification-matrix,.ma-table,.mt-record-table) td {border-bottom-color:var(--line-soft);}
+body[data-design=apple-glass] :is(.research-badge,.ms-badge,.okx-badge,.bk-tag) {border-radius:6px;}
+
+/* Sheets have more opacity than floating controls: numbers remain legible. */
+body[data-design=apple-glass] :is(dialog,.quiet-menu-panel,.symbol-picker-popover,.desk-symbol-popover,.mt-symbol-dialog) {
+  background:var(--glass-sheet)!important;color:var(--text);border:1px solid var(--glass-edge)!important;border-radius:24px!important;box-shadow:var(--elevated-shadow)!important;
+  backdrop-filter:blur(24px) saturate(var(--glass-saturation));-webkit-backdrop-filter:blur(24px) saturate(var(--glass-saturation));
+}
+body[data-design=apple-glass] dialog::backdrop {background:var(--dialog-backdrop);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+body[data-design=apple-glass] dialog[open] {animation:glass-sheet-in var(--motion-panel) var(--motion-ease);}
+body[data-design=apple-glass] :is(.quiet-menu>summary,.quiet-menu-panel>button) {border-radius:10px;min-height:36px;}
+body[data-design=apple-glass] .quiet-menu-panel {padding:10px;border-radius:16px!important;}
+body[data-design=apple-glass] :is(.ml-header,.ml-footer,.ml-steps,.desk-confirm-footer,.yd-enlarge-header) {background:transparent!important;}
+body[data-design=apple-glass] :is(.ml-ticket-workspace,.ml-position-chart,.ml-protection,.ml-policy,.desk-confirm-protection) {border-radius:16px!important;background:var(--control-bg)!important;}
+body[data-design=apple-glass] #workspace-command {width:min(760px,calc(100vw - 32px));max-height:calc(100dvh - 100px);margin:84px auto auto;padding:20px;}
+body[data-design=apple-glass] #workspace-command>header {display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+body[data-design=apple-glass] #workspace-command-title {font-size:18px;margin:0;}
+body[data-design=apple-glass] .glass-command-hint {font:11px var(--mono);color:var(--dim);margin-left:auto;}
+body[data-design=apple-glass] #workspace-command-close {border:0;border-radius:10px;color:var(--muted);background:var(--control-bg);min-height:36px;padding:6px 12px;}
+body[data-design=apple-glass] #workspace-command-input {width:100%;padding:10px 14px;min-height:44px;}
+body[data-design=apple-glass] #workspace-command-results {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 18px;max-height:calc(100dvh - 290px);overflow:auto;overscroll-behavior:contain;padding:12px 2px;}
+body[data-design=apple-glass] #workspace-command-results section {min-width:0;}
+body[data-design=apple-glass] #workspace-command-results h3 {font-size:11px;color:var(--dim);margin:8px 10px;font-weight:500;}
+body[data-design=apple-glass] #workspace-command-results button {display:flex;align-items:center;width:100%;padding:9px 10px;min-height:38px;border:0;border-radius:10px;background:transparent;text-align:left;color:var(--text);font-size:12px;}
+body[data-design=apple-glass] #workspace-command-results button small {display:none;}
+body[data-design=apple-glass] #workspace-command-results button:is(:hover,:focus-visible) {background:var(--brand-bg);color:var(--brand-primary);}
+body[data-design=apple-glass] .glass-command-footer {display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--line);color:var(--dim);font-size:11px;}
+body[data-design=apple-glass] #workspace-density {width:auto;min-height:34px;border:0;border-radius:10px;padding:6px 12px;}
+
+/* Market: breathing room around an unchanged live chart and watchlist. */
+body[data-design=apple-glass] :is(.market-overview-strip,.ms-terminal-top,.mt-intelligence,.mt-evidence-blocks) {gap:12px!important;}
+body[data-design=apple-glass] :is(#market-resonance-overview,#market-account-overview) {border-radius:16px!important;background:var(--glass-panel)!important;border:1px solid var(--glass-edge)!important;box-shadow:var(--panel-shadow);}
+body[data-design=apple-glass] #market-resonance-overview {padding:12px 14px;}
+body[data-design=apple-glass] .market-account {border-radius:12px;background:transparent;border-color:var(--line-soft);}
+body[data-design=apple-glass] :is(.mt-quote-panel,.stitch-market-pulse) {background:transparent!important;border:0!important;box-shadow:none!important;padding:12px 4px!important;}
+body[data-design=apple-glass] .mt-chart-panel {overflow:hidden;}
+body[data-design=apple-glass] :is(.mt-chart-surface,.mt-ma-legend,.mt-chart-controls) {background:transparent!important;}
+body[data-design=apple-glass] .mt-watch-row {background:transparent!important;border-radius:10px;border-color:transparent!important;margin:2px 0;}
+body[data-design=apple-glass] .mt-watch-row:is(:hover,.selected) {background:var(--brand-bg)!important;}
+body[data-design=apple-glass] .mt-watch-row.selected {box-shadow:inset 2px 0 var(--brand-primary);}
+body[data-design=apple-glass] .stitch-market-controls {padding:10px!important;margin-bottom:10px;}
+body[data-design=apple-glass] .stitch-screener-panel {padding:8px;}
+body[data-design=apple-glass] .mt-intel-card {padding:12px!important;}
+body[data-design=apple-glass] .mt-evidence {padding:14px!important;}
+
+/* Signal/patrol: filters, real pagination and card previews remain independent. */
+body[data-design=apple-glass] :is(#signals-view.signal-workspace,.signal-card-grid,#yd-findings) {gap:12px!important;}
+body[data-design=apple-glass] :is(.signal-query-inspector,.yd-feed-filters,.yd-patrol-status) {padding:12px!important;border-radius:16px!important;background:var(--glass-panel)!important;border:1px solid var(--glass-edge)!important;margin-bottom:12px!important;}
+body[data-design=apple-glass] :is(.signal-record-toolbar,.yd-feed-meta) {padding:6px 2px!important;margin-bottom:8px!important;}
+body[data-design=apple-glass] #stitch-signal-context {display:none;}
+body[data-design=apple-glass] .signal-analytics {grid-template-columns:minmax(0,1fr)!important;}
+body[data-design=apple-glass] .yd-shell {--yd-green:var(--trade-long);--yd-red:var(--trade-short);}
+body[data-design=apple-glass] .yd-patrol-status:empty {display:none!important;}
+body[data-design=apple-glass] #main .yd-toolbar .nav-link {border:0!important;border-radius:12px!important;}
+body[data-design=apple-glass] #main .yd-toolbar .nav-link[aria-selected=true] {background:var(--brand-bg)!important;}
+body[data-design=apple-glass] #yd-findings .yd-finding {padding:14px!important;}
+body[data-design=apple-glass] .yd-finding-direction {color:var(--trade-short)!important;background:var(--direction-short-bg)!important;}
+body[data-design=apple-glass] .yd-finding.long .yd-finding-direction {color:var(--trade-long)!important;background:var(--direction-long-bg)!important;}
+body[data-design=apple-glass] #signals-view #signal-rows .long .card-direction-group {color:var(--trade-long);background:var(--direction-long-bg);}
+body[data-design=apple-glass] #signals-view #signal-rows .short .card-direction-group {color:var(--trade-short);background:var(--direction-short-bg);}
+body[data-design=apple-glass] :is(.card-direction,.direction-stage,.performance-badge) {border-radius:6px;}
+
+/* Account, registry and reading families share materials, not business logic. */
+body[data-design=apple-glass] :is(.ma-desk,.stitch-account-band) {background:transparent!important;box-shadow:none!important;border:0!important;}
+body[data-design=apple-glass] :is(.ma-desk-metrics>div,.ma-desk-positions,.ma-desk-statistics,.ma-desk-recent) {border-radius:16px!important;background:var(--glass-panel)!important;border:1px solid var(--glass-edge)!important;padding:14px!important;}
+body[data-design=apple-glass] :is(.research-objective,.research-flow,.research-recent,.platform-layer,.knowledge-editor) {padding:18px!important;}
+body[data-design=apple-glass] :is(.research-metrics,.platform-summary,.dataset-summary,.knowledge-grid,.dataset-grid,.bk-grid) {gap:12px!important;}
+body[data-design=apple-glass] :is(.bk-reader,.of-reader,.ll-reader,.rp-reader,.reading-article) {background:var(--glass-panel);border-radius:20px;line-height:1.8;}
+body[data-design=apple-glass] :is(.bk-reader,.of-reader,.ll-reader,.rp-reader) :is(h2,h3) {color:var(--text);}
+body[data-design=apple-glass] :is(.bk-toc,.of-toc,.ll-sidebar,.rp-sidebar) {top:88px!important;}
+body[data-design=apple-glass] #paper-desk-workspace {--desk-radius:20px;--desk-gap:14px;--desk-long:var(--trade-long);}
+body[data-design=apple-glass] :is(.desk-market,.desk-ticket,.desk-ledger) {border-radius:20px!important;}
+body[data-design=apple-glass] .desk-direction.desk-long {color:var(--trade-long);}
+body[data-design=apple-glass] #copier-workspace {grid-template-columns:minmax(0,1fr);min-width:0;}
+body[data-design=apple-glass] #copier-workspace>section {min-width:0;}
+body[data-design=apple-glass] .copier-overview-board {min-width:0;}
+body[data-design=apple-glass] .copier-kpis article {background:var(--glass-panel);border:1px solid var(--glass-edge);border-radius:16px;padding:14px;}
+
+@keyframes glass-sheet-in {from{opacity:0;translate:0 6px}to{opacity:1;translate:0 0}}
+@media(max-width:1000px) {
+  body[data-design=apple-glass] .topbar .stitch-primary-nav>a {padding-inline:12px;}
+  body[data-design=apple-glass] .workspace>.topbar {inset-inline:16px;gap:6px;}
+  body[data-design=apple-glass] .workspace>#main {padding-inline:16px;}
+}
+@media(max-width:700px) {
+  html[data-design=apple-glass] {scroll-padding-top:76px;}
+  body[data-design=apple-glass]:not([data-workspace=monday-fib]) .workspace {padding-top:76px!important;}
+  body[data-design=apple-glass] .workspace>.topbar {top:max(10px,env(safe-area-inset-top));inset-inline:10px;height:52px;padding:4px;gap:0;border-radius:27px;}
+  body[data-design=apple-glass] .topbar>.stitch-brand {display:none;}
+  body[data-design=apple-glass] .topbar .stitch-primary-nav {gap:0;justify-content:space-evenly;}
+  body[data-design=apple-glass] .topbar .stitch-primary-nav>a {min-width:40px;min-height:44px;padding:12px 8px;font-size:12px;text-align:center;justify-content:center;}
+  body[data-design=apple-glass] #workspace-search {min-width:48px;min-height:44px;padding:8px;gap:0;font-size:12px;}
+  body[data-design=apple-glass] #workspace-search>.glass-more-chevron {display:none;}
+  body[data-design=apple-glass] .workspace>#main {padding-inline:12px;}
+  body[data-design=apple-glass] #main>.page-heading {padding-bottom:14px;}
+  body[data-design=apple-glass] .workspace .page-heading h1 {font-size:18px;}
+  body[data-design=apple-glass] :is(.research-button,.load-more,.copier-button,.bk-button,.of-button,.ll-button,.rp-btn,.yd-shell button,.manual-tabs button,.okx-live button,.desk-toolbar button,.work-panel-tabs button,.quiet-menu>summary) {min-height:44px!important;}
+  body[data-design=apple-glass]:not([data-workspace=monday-fib]) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea) {min-height:44px!important;font-size:16px;}
+  body[data-design=apple-glass] #main :is(.search-field,.mt-watch-search,.signal-search-wrap) {min-height:44px;height:auto;}
+  body[data-design=apple-glass] #market-account-overview .market-account dt {font-size:10px;}
+  body[data-design=apple-glass] #workspace-command {margin:72px auto auto;max-height:calc(100dvh - 90px);padding:16px;width:calc(100vw - 24px);}
+  body[data-design=apple-glass] #workspace-command-results {grid-template-columns:repeat(2,minmax(0,1fr));max-height:calc(100dvh - 270px);gap:8px;}
+  body[data-design=apple-glass] #workspace-command-results button {min-height:44px;}
+  body[data-design=apple-glass] :is(.signal-query-inspector,.yd-feed-filters,.yd-patrol-status) {padding:10px!important;}
+  body[data-design=apple-glass] :is(.market-overview-strip,.ms-terminal-top) {gap:10px!important;}
+  body[data-design=apple-glass] #yd-findings .yd-finding {padding:10px!important;}
+  body[data-design=apple-glass] :is(.bk-toc,.of-toc,.ll-sidebar,.rp-sidebar) {top:76px!important;}
+}
+@media(max-width:360px) {
+  body[data-design=apple-glass] .topbar .stitch-primary-nav>a {padding-inline:4px;min-width:36px;font-size:11px;}
+  body[data-design=apple-glass] #workspace-search {min-width:42px;font-size:11px;}
+}
+@supports not (backdrop-filter:blur(1px)) {
+  body[data-design=apple-glass] {--glass-dock:#f8faf9;--glass-panel:#fcfdfc;--glass-sheet:#fff;}
+}
+@media(prefers-reduced-transparency:reduce) {
+  body[data-design=apple-glass] {--glass-dock:#f8faf9;--glass-panel:#fcfdfc;--glass-sheet:#fff;}
+}
+@media(prefers-reduced-motion:reduce) {
+  body[data-design=apple-glass] *,body[data-design=apple-glass] *::before,body[data-design=apple-glass] *::after {animation:none!important;transition:none!important;scroll-behavior:auto!important;}
+}

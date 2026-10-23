@@ -37,6 +37,8 @@
       ['learning','trading-books','orderflow','langlang','rektproof','knowledge','content'].includes(view)?'learning':
       ['system','notifications'].includes(view)?'system':'market';
     document.querySelectorAll('[data-terminal-route]').forEach(a=>{const active=a.dataset.terminalRoute===family;a.classList.toggle('active',active);if(active){a.setAttribute('aria-current','page');a.scrollIntoView?.({block:'nearest',inline:'nearest'});}else a.removeAttribute('aria-current');});
+    const more=document.getElementById('workspace-search');
+    more?.classList.toggle('active',['research','learning','system'].includes(family)||view==='auto-leaders'||view==='paper');
     const link=document.querySelector('[data-primary-accounts]');
     if(link){link.classList.toggle('active',account||['manual','copier'].includes(view));if(link.classList.contains('active'))link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
     if(account){const signal=document.querySelector('.stitch-primary-nav [data-view="signals"]');signal?.classList.remove('active');signal?.removeAttribute('aria-current');}

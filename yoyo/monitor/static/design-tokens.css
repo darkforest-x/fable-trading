@@ -1,46 +1,46 @@
-/* Brand updated from Stitch project 8978791379095391159, screen
- * 220137da7e664be890dcdb5d060b8db2: one mint accent for UI interaction.
- * Chart series and trade direction retain their semantic colors.
- * Original Stitch project 8450534110669085172, board b94aba748c7f4f06b726c8029d3f661c.
- * Source screens: docs/design/stitch-20261017/. Semantic aliases preserve
- * application contracts; no trading logic or data cadence is defined here. */
+/* Spike Web Apple Glass: Stitch 8978791379095391159 / df514d3934a043a19f6c8c81bc56f878.
+ * Source: docs/design/stitch-20261023-web-glass/. Shared semantic aliases are
+ * consumed by lazy modules and the vision shadow root; trading states retain
+ * separate red/green colors. Values never define risk policy or market data. */
 :root,html[data-theme],:host,:host([data-theme]) {
-  color-scheme:dark;
-  --font-ui:'Inter',-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
-  --font:var(--font-ui);--mono:'Geist','JetBrains Mono','SF Mono',Menlo,monospace;
-  --surface-base:#0b0e14;--surface-layer-1:#191c22;--surface-layer-2:#1d2026;--surface-layer-3:#272a31;
-  --brand-primary:#70ffba;--brand-cyan:var(--brand-primary);--signal-accent:var(--brand-primary);--brand-purple:#8083ff;--brand-amber:#f59e0b;
-  --trade-long:#01e599;--trade-short:#ff4f73;--risk-critical:#ef4444;
-  --surface-lowest:#0b0e14;--surface-low:#191c22;--surface-high:#272a31;--surface-highest:#32353c;
-  --bg:#0b0e14;--sidebar:var(--surface-lowest);--surface:var(--surface-low);--surface-2:#1d2026;
-  --line:#4645544d;--line-soft:#46455426;--text:#e1e2eb;--text-secondary:#c7c4d7;--muted:#c7c4d7;--dim:#908fa0;
-  --mint:var(--brand-cyan);--mint-soft:#70ffba14;--brand-on:#072b1b;
-  --red:var(--trade-short);--negative-strong:var(--trade-short);--red-soft:#ff4f731f;--amber:#ffb95f;--blue:#70ffba;
+  color-scheme:light;
+  --font-ui:-apple-system,BlinkMacSystemFont,'SF Pro Text','PingFang SC','Microsoft YaHei',sans-serif;
+  --font:var(--font-ui);--mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --surface-base:#f7f8f6;--surface-layer-1:rgba(255,255,255,.65);--surface-layer-2:rgba(238,243,247,.66);--surface-layer-3:rgba(227,235,243,.7);
+  --brand-primary:#0071e3;--brand-cyan:var(--brand-primary);--signal-accent:var(--brand-primary);--brand-purple:#7356b6;--brand-amber:#a66a13;
+  --trade-long:#087f69;--trade-short:#bd3a52;--risk-critical:#bd3048;
+  --surface-lowest:#f7f8f6;--surface-low:rgba(255,255,255,.65);--surface-high:rgba(229,237,245,.7);--surface-highest:#e4eaf0;
+  --bg:#f7f8f6;--sidebar:var(--surface-lowest);--surface:var(--surface-low);--surface-2:rgba(238,243,247,.66);
+  --line:#304b661a;--line-soft:#304b660d;--text:#18232d;--text-secondary:#465869;--muted:#546577;--dim:#667787;
+  --mint:var(--brand-cyan);--mint-soft:#0071e30c;--brand-on:#fff;
+  --red:var(--trade-short);--negative-strong:var(--trade-short);--red-soft:#bd3a520d;--amber:#936015;--blue:#0071e3;
   --positive-text:var(--trade-long);--negative-text:var(--trade-short);--green:var(--trade-long);
-  --positive-bg:#01e5991f;--warning-bg:#f59e0b1f;--direction-long:var(--trade-long);--direction-long-bg:#01e5991f;
-  --direction-short:var(--trade-short);--direction-short-bg:#ff4f731f;--status-positive:var(--trade-long);
-  --nav-hover:var(--surface-high);--nav-active:#70ffba14;--nav-count:var(--surface-lowest);
-  --control-bg:var(--surface-lowest);--control-border:#46455466;--control-hover:var(--surface-high);
-  --segment-bg:var(--surface-lowest);--segment-active-bg:var(--surface-high);--segment-active-text:var(--brand-primary);
-  --card-bg:var(--surface-low);--card-border:var(--line);--card-hover-bg:var(--surface-2);--card-hover-border:#70ffba4d;--card-selected-bg:#272a3199;
-  --metric-bg:var(--surface-low);--chart-bg:var(--surface-lowest);--chart-grid:#46455420;--chart-text:#908fa0;
+  --positive-bg:#087f690d;--warning-bg:#a66a1312;--direction-long:var(--trade-long);--direction-long-bg:#087f690d;
+  --direction-short:var(--trade-short);--direction-short-bg:#bd3a520d;--status-positive:var(--trade-long);
+  --nav-hover:var(--surface-high);--nav-active:#0071e30c;--nav-count:var(--surface-lowest);
+  --control-bg:rgba(244,247,250,.72);--control-border:#667d9429;--control-hover:var(--surface-high);
+  --segment-bg:#e8eef480;--segment-active-bg:#ffffffb8;--segment-active-text:var(--brand-primary);
+  --card-bg:var(--surface-low);--card-border:#ffffffbf;--card-hover-bg:var(--surface-2);--card-hover-border:#0071e333;--card-selected-bg:#0071e30d;
+  --metric-bg:var(--surface-low);--chart-bg:#f7f9f8;--chart-grid:#304b6610;--chart-text:#667787;
   --text-value:var(--text);--text-muted:var(--muted);--text-placeholder:var(--dim);
-  --focus-border:var(--mint);--focus-glow:#70ffba26;--tag-bg:var(--surface-2);--tag-text:var(--muted);
-  --dialog-backdrop:#050810b8;--dialog-border:#46455480;--separator:var(--line);--scrollbar:#46455488;
-  --brand-bg:#70ffba14;--brand-border:#70ffba4d;--on-accent:#072b1b;
-  --action-text:var(--brand-primary);--action-border:#70ffba4d;--action-hover-text:var(--brand-primary);--action-hover-bg:var(--surface-high);
-  --action-filled-bg:var(--brand-cyan);--action-filled-text:#072b1b;--expand-hover-bg:var(--surface-high);--expand-hover-border:var(--mint);
-  --card-title:var(--text);--card-fresh-bg:var(--surface-low);--card-fresh-border:#70ffba4d;
+  --focus-border:var(--mint);--focus-glow:#0071e31a;--tag-bg:var(--surface-2);--tag-text:var(--muted);
+  --dialog-backdrop:#30405026;--dialog-border:#ffffffcc;--separator:var(--line);--scrollbar:#6f85954d;
+  --brand-bg:#0071e30c;--brand-border:#0071e333;--on-accent:#fff;
+  --action-text:var(--brand-primary);--action-border:#0071e333;--action-hover-text:var(--brand-primary);--action-hover-bg:var(--surface-high);
+  --action-filled-bg:var(--brand-cyan);--action-filled-text:#fff;--expand-hover-bg:var(--surface-high);--expand-hover-border:var(--mint);
+  --card-title:var(--text);--card-fresh-bg:var(--surface-low);--card-fresh-border:#0071e33d;
   --mobile-sidebar:var(--surface-lowest);--mobile-nav-active:var(--nav-active);--empty-icon:var(--dim);
   --watch-selected-bg:var(--card-selected-bg);--watch-selected-border:var(--mint);--watch-hover-border:var(--line);--watch-focus-border:var(--mint);
   --border:var(--line);--border-strong:var(--control-border);--surface-soft:var(--surface-2);--surface-hover:var(--surface-high);
   --text-soft:var(--text-secondary);--accent:var(--mint);--accent-ink:var(--on-accent);--accent-soft:var(--mint-soft);
-  --notice-border:#f59e0b40;--notice-bg:#f59e0b0d;--notice-text:#ffb95f;
+  --notice-border:#a66a132b;--notice-bg:#a66a1308;--notice-text:#936015;
   --toast-bg:var(--surface-high);--toast-text:var(--text);--toast-border:var(--line);
-  --text-caption:11px;--text-label:12px;--control-height:32px;--touch-height:44px;
-  --radius-panel:4px;--radius-control:4px;--radius:4px;
-  --space-xs:2px;--space-sm:4px;--space-md:8px;--space-lg:12px;--space-xl:16px;--space-2xl:24px;
-  --motion-fast:120ms;--motion-panel:180ms;--motion-enter:220ms;
+  --text-caption:11px;--text-label:12px;--control-height:36px;--touch-height:44px;
+  --radius-panel:20px;--radius-control:12px;--radius:20px;
+  --space-xs:4px;--space-sm:6px;--space-md:10px;--space-lg:16px;--space-xl:20px;--space-2xl:28px;
+  --motion-fast:180ms;--motion-panel:220ms;--motion-enter:240ms;
   --motion-ease:cubic-bezier(.22,1,.36,1);--motion-standard:cubic-bezier(.2,.7,.3,1);
-  --panel-shadow:none;--elevated-shadow:0 8px 24px #0006;
+  --glass-dock:rgba(255,255,255,.28);--glass-panel:rgba(255,255,255,.65);--glass-sheet:rgba(255,255,255,.82);
+  --glass-edge:rgba(255,255,255,.75);--glass-blur:20px;--glass-saturation:145%;
+  --panel-shadow:0 8px 28px #34465a0a,inset 0 1px 0 #ffffffb8;--elevated-shadow:0 20px 60px #3040501a,0 3px 12px #30405008;
 }

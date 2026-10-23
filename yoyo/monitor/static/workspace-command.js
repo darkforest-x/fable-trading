@@ -11,15 +11,22 @@
   if(!trigger||!dialog||!input||!results)return;
   let previous=null;
   const aliases={market:'行情 btc eth',signals:'信号 账户 自动', 'yolo-detect':'均线 yolo 检测 账户 手动', 'trading-books':'书籍 阅读', 'paper-desk':'模拟 交易',system:'健康 服务 状态'};
-  const items=()=>Array.from(document.querySelectorAll('.nav-list .nav-item[data-view]')).map(node=>({
-    node, view:node.dataset.view, title:node.getAttribute('aria-label')||node.textContent.trim(),
-    group:({'market':'市场观察','signals':'信号与检测','accounts':'账户与交易','research':'研究工作区','learn':'学习与复盘','manage':'运行管理'})[node.closest('.nav-group')?.dataset.navGroup]||'研究工具'
+  const groups={market:'市场',signals:'信号',accounts:'账户与交易',simulation:'模拟',research:'研究',learn:'学习',manage:'系统'};
+  const primary=new Set(['market','monday-fib','signals','yolo-detect','yolo-detect?tab=account','paper-desk']);
+  const items=()=>Array.from(document.querySelectorAll('.nav-list .nav-item')).map(node=>({
+    node, view:node.dataset.view||node.getAttribute('href')?.slice(1)||'', title:node.getAttribute('aria-label')||node.textContent.trim(),
+    group:groups[node.closest('.nav-group')?.dataset.navGroup]||'其他'
   }));
   function render(){
     const query=input.value.trim().toLocaleLowerCase();
-    const matches=items().filter(item=>(item.title+' '+item.view+' '+(aliases[item.view]||'')).toLocaleLowerCase().includes(query));
+    const matches=items().filter(item=>query?(item.title+' '+item.view+' '+item.group+' '+(aliases[item.view]||'')).toLocaleLowerCase().includes(query):!primary.has(item.view));
     results.replaceChildren();
+    let currentGroup='',section;
     for(const item of matches){
+      if(currentGroup!==item.group){
+        currentGroup=item.group;section=document.createElement('section');
+        const heading=document.createElement('h3');heading.textContent=item.group;section.append(heading);results.append(section);
+      }
       const button=document.createElement('button');button.type='button';
       const title=document.createElement('span');title.textContent=item.title;
       const group=document.createElement('small');group.textContent=item.group;
@@ -29,7 +36,7 @@
         previous=null;dialog.close();item.node.click();
         document.getElementById('main')?.focus({preventScroll:true});
       });
-      results.append(button);
+      section.append(button);
     }
     if(!matches.length){const empty=document.createElement('p');empty.textContent='没有匹配的页面，试试“信号”或“均线”。';results.append(empty);}
   }
@@ -38,6 +45,9 @@
     previous=document.activeElement;input.value='';render();dialog.showModal();input.focus();
   }
   trigger.addEventListener('click',open);
+  // Preserve the existing density control and its owner/listener; only move its surface.
+  document.getElementById('glass-appearance')?.append(document.getElementById('workspace-density'));
+  window.addEventListener('hashchange',()=>{if(dialog.open){previous=null;dialog.close();}});
   document.getElementById('workspace-command-close').addEventListener('click',()=>dialog.close());
   input.addEventListener('input',render);
   dialog.addEventListener('close',()=>{previous?.focus({preventScroll:true});previous=null;});

@@ -510,14 +510,14 @@ test("previous-page control returns to an earlier offset without cursor overlap"
   assert.doesNotMatch(request, /before_close_ms|before_id/);
 });
 
-test("client preserves display-only Bark state, Unicode search, and theme selector", () => {
+test("client preserves display-only Bark state, Unicode search, and the approved glass appearance", () => {
   assert.match(app, /const DISPLAY_ONLY_NOTE = "仅前端 · Bark 已关闭"/);
   assert.match(app, /if \(channel === "bark" && isDisplayOnly\(item\)\) return \[DISPLAY_ONLY_NOTE, "muted"\]/);
   assert.match(app, /normalize\("NFKC"\)\.toUpperCase\(\)\.replace\(\/\[\^\\p\{L\}\\p\{N\}\]\/gu, ""\)/);
   assert.match(page, /id="theme-select"/);
-  assert.match(page, /value="dark"/);
-  assert.match(page, /data-design="stitch-obsidian"/);
-  assert.doesNotMatch(page, /value="light"/);
+  assert.match(page, /value="light"/);
+  assert.match(page, /data-design="apple-glass"/);
+  assert.doesNotMatch(page, /value="dark"/);
 });
 
 
