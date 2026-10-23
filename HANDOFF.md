@@ -1,3 +1,10 @@
+## 2026-10-24 · Detailed Monday HTML delivered using original Stitch template
+
+- Owner explicitly authorized reusing the first Stitch design; no new design required. Reused screen5230353fc774421d9260d60091ad8a89 and original app identity. Added full altcoin N5 diagnosis,12samples24charts,all9065rows with excursions; integrated663prior study metrics,chronological selections,target/BE transitions,BTC35rows6samples12charts andAug19. Original79430rows/60samples120charts retained unchanged.
+- Portable HTML: `artifacts/monday-alt-n5-report-20261024/周一1.618-详细回测分析报告.html` (101572745 bytes). Reproducer `python -m yoyo.evaluation.monday_report_integrate` then installed Data build/export. Source commits3fb9a44765/377821ec5a precede final export. Receipt `html-delivery.json`; no trade replay.
+- Desktop1440/mobile390, source scope, timeframe filters, losses/full gallery, study switches, images anddownload verified. Mobile headergrid corrected.24censored displayCSV outcomes blank; raw ledger preserves boundaryfields with explicitwarning. Browser blocks file protocol: directofflinebrowser check notperformed and no bypass; HTTPpreview verified, exporter confirms self-contained andstaticinspection findsnoexternalscripts.
+- Only addedpullback test remains: entry1.618 versus50percentretracement,andexpiry nextNYMondayrangecompletion versus12h/20h unanswered. No assumedthresholds, no newfills. NativeNautilus fixedcomparison onceafteranswer, originalpinSL/nearTP,allopportunities andR0/newR/costcontrols. Report shows pending; heartbeat must not keepwaitingforStitch.
+
 ## 2026-10-24 · Focused altcoin N5 HTML evidence ready; design and pullback rule pending
 
 - Owner explicitly requested detailedHTML ofalt4hN5 pluswaitingforpullbackentry. Frozen9065rows/9041closed/24censored/620symbols retained withouttrade replay. Addedexit-truncatedMFE/MAE andcomplete-prior-exit-barbounds:3356SL include3230positivegrossMFE,2999fee-positivehypotheticalMFE,489oneR,486oneRincompletepriorbars.2023+2809SL include2700positiveMFE,396oneR/394priorbar. DoesnotestablishBEpolicyimprovement.
