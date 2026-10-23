@@ -1,3 +1,8 @@
+## 2026-10-24 · Hide secondary live-account tabs
+
+- Remove the live-account tabs from Signals and Pattern Patrol, plus the Signals context shortcut; omit the hidden tab from patrol keyboard cycling. Existing account routes, account status bands and execution services remain unchanged.
+- Stitch screens3fd920aaf4534bd5bcda8f681835f676/4592a8c56df3466da2db7651fced8bb7, GEMINI_3_8_FLASH, sources in `yoyo/monitor/design/hidden-live-tabs-20261024/`.51 frontend and5 asset-delivery checks pass. Live local browser at1440/390 verifies both menus and keyboard cycling, no JS errors, zero write requests; raw evidence `output/playwright/hidden-live-tabs/`. Browser17484 closed. Static content versions update without a service restart.
+
 ## 2026-10-24 · App 0.8.23 — My System in Discipline
 
 - Add a local read-only My System card directly below the Discipline heading: only enter outside the range at1.618; wait for signal confirmation; take profit/stop loss promptly or take partial profits. Source: Owner Notion task68, `https://app.notion.com/p/4028856479af80e28a01d52495d5eba0`, edited2026-10-23. No older research draft rules or execution-policy changes.

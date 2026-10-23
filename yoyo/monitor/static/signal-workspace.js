@@ -121,7 +121,7 @@
       if(universe) universe.textContent=policy ? `${policy.scope}。全周期名单：${policy.excluded_bases.join('、')}；分组名单只限制对应周期和方向的新信号、通知与自动开仓。历史记录保留，已有持仓继续跟踪退出。` : '';
       const stats=data?.stats;
       const count=value=>Number.isFinite(value)?value.toLocaleString('zh-CN'):'—';
-      context.innerHTML=`<h3>信号概况</h3><dl><dt>确认信号</dt><dd>${count(stats?.total)}</dd><dt>参考运行中</dt><dd>${count(stats?.active)}</dd><dt>已结束</dt><dd>${count(stats?.closed)}</dd><dt>等待 / 未知</dt><dd>${count(stats?.unknown)}</dd></dl><p>参考信号与账户成交分别记录。模型分数与观察指数不代表胜率。</p><button type="button" data-signal-pane="account">查看自动执行账户 →</button><a href="#yolo-detect?tab=results">均线形态与专用账户 →</a><a href="#notifications">通知订阅 →</a>`;
+      context.innerHTML=`<h3>信号概况</h3><dl><dt>确认信号</dt><dd>${count(stats?.total)}</dd><dt>参考运行中</dt><dd>${count(stats?.active)}</dd><dt>已结束</dt><dd>${count(stats?.closed)}</dd><dt>等待 / 未知</dt><dd>${count(stats?.unknown)}</dd></dl><p>参考信号与账户成交分别记录。模型分数与观察指数不代表胜率。</p><a href="#yolo-detect?tab=results">均线形态与专用账户 →</a><a href="#notifications">通知订阅 →</a>`;
       const summary=document.getElementById('signal-result-summary');
       summary.textContent=stats ? (layout==='history'
         ? `${stats.closed} 条已结束 · 盈利 ${stats.profit} · 亏损 ${stats.loss} · 保本 ${stats.breakeven}`
