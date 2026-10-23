@@ -18,6 +18,30 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-1618-alt-hours-20261023-v1
+    artifact_type: manifest
+    role: 'Out of sample on Binance alts 2020-01..2025-05: do Beijing 04-08 first 1618 touches hold more often?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4a47f5c641a0cee571b3df46136552c378488ddf
+    generator_commit: 4a47f5c641a0cee571b3df46136552c378488ddf
+    source_path: experiments/active/exp-monday-1618-alt-hours-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-alt-hours-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; 40289 touches 36.7 percent. 04-08 Beijing 36.4 percent (n5447, week-boot 32.4-40.7), gap vs other -0.35pp, within-week p .568, mean R -0.046. All six '
+  - artifact_id: monday-1618-macro-20261023-v1
+    artifact_type: manifest
+    role: 'Do first 1618 touches within +-2h of scheduled US CPI, payrolls or FOMC releases break more often?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4a47f5c641a0cee571b3df46136552c378488ddf
+    generator_commit: 4a47f5c641a0cee571b3df46136552c378488ddf
+    source_path: experiments/active/exp-monday-1618-macro-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-macro-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; Frozen direction fails: alt news 42.0 percent (n1473) vs other 36.5, p .9998; XAU news 32.4 (n71) vs 36.3, p .656. Opposite direction seen post hoc in'
   - artifact_id: monday-1618-timing-20261023-v1
     artifact_type: manifest
     role: 'Which touch times (Beijing hour, NY weekday, hours since Monday close) have the highest Monday 1618 validity?'

@@ -1,0 +1,216 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-1618-macro-20261023-v1",
+    "question": "Do first weekly 1618 touches within +-2h of scheduled US CPI, payrolls or FOMC releases break more often?",
+    "window_hours": 2,
+    "seed": 20261023,
+    "events": "inputs/bls_release_dates.json (BLS archive filenames, 08:30 ET) and inputs/fomc*.htm (federalreserve.gov, scheduled decision day 14:00 ET; unscheduled, cancelled and notation votes excluded).",
+    "primaries": [
+      "alt (Binance alts 2020-01..2025-05 from exp-monday-1618-alt-hours)",
+      "xau (XAUUSD spot 2011-2026)"
+    ],
+    "success_criterion": "Per primary: news-window validity below other touches, one-sided within-week permutation Holm p<0.01, and news-window validity below 38.2 percent.",
+    "limitations": "Event times are scheduled times; 2011-2012 FOMC statement times varied (12:30/14:15 ET). Unscheduled events and other releases (PPI, retail sales, PCE) not included.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "events": {
+    "total": 536,
+    "empsit": 201,
+    "cpi": 200,
+    "fomc": 135,
+    "first": "2010-01-08 13:30:00+00:00",
+    "last": "2027-12-08 19:00:00+00:00"
+  },
+  "results": {
+    "alt": {
+      "news": {
+        "n": 1473,
+        "valid_pct": 41.955193482688394,
+        "mean_r": 0.09970006814167336
+      },
+      "other": {
+        "n": 38816,
+        "valid_pct": 36.54936108821104,
+        "mean_r": -0.04227165752968333
+      },
+      "gap_other_minus_news_pp": -5.405832394477344,
+      "within_week_p": 0.9998000399920016,
+      "news_week_boot95": [
+        32.00043365649653,
+        51.344857247281766
+      ],
+      "before": {
+        "n": 243,
+        "valid_pct": 49.382716049382715,
+        "mean_r": 0.29656144862614475
+      },
+      "after": {
+        "n": 1230,
+        "valid_pct": 40.487804878048784,
+        "mean_r": 0.060807941753277785
+      },
+      "by_kind": {
+        "cpi": {
+          "n": 849,
+          "valid_pct": 43.34511189634865,
+          "mean_r": 0.13711182401952907
+        },
+        "empsit": {
+          "n": 170,
+          "valid_pct": 37.64705882352941,
+          "mean_r": -0.014474899907606814
+        },
+        "fomc": {
+          "n": 454,
+          "valid_pct": 40.969162995594715,
+          "mean_r": 0.0724911778951494
+        }
+      },
+      "holm_p": 1.0
+    },
+    "xau": {
+      "news": {
+        "n": 71,
+        "valid_pct": 32.3943661971831,
+        "mean_r": -0.151979942482118
+      },
+      "other": {
+        "n": 614,
+        "valid_pct": 36.31921824104234,
+        "mean_r": -0.03348336080722152
+      },
+      "gap_other_minus_news_pp": 3.9248520438592447,
+      "within_week_p": 0.6562687462507498,
+      "news_week_boot95": [
+        21.913341274568193,
+        43.21658615136875
+      ],
+      "before": {
+        "n": 10,
+        "valid_pct": 40.0,
+        "mean_r": 0.04712041884817135
+      },
+      "after": {
+        "n": 61,
+        "valid_pct": 31.147540983606557,
+        "mean_r": -0.1846193459788867
+      },
+      "by_kind": {
+        "cpi": {
+          "n": 26,
+          "valid_pct": 38.46153846153847,
+          "mean_r": 0.00684655658477814
+        },
+        "empsit": {
+          "n": 17,
+          "valid_pct": 29.411764705882355,
+          "mean_r": -0.23005851555281873
+        },
+        "fomc": {
+          "n": 28,
+          "valid_pct": 28.57142857142857,
+          "mean_r": -0.25205684367988185
+        }
+      },
+      "holm_p": 1.0
+    },
+    "okx": {
+      "news": {
+        "n": 335,
+        "valid_pct": 50.44776119402985,
+        "mean_r": 0.3206364699273568
+      },
+      "other": {
+        "n": 9795,
+        "valid_pct": 38.71362940275651,
+        "mean_r": 0.016630544374400164
+      },
+      "gap_other_minus_news_pp": -11.734131791273338,
+      "within_week_p": 0.999000199960008,
+      "news_week_boot95": [
+        35.85713114850071,
+        61.11204954954955
+      ],
+      "before": {
+        "n": 68,
+        "valid_pct": 36.76470588235294,
+        "mean_r": -0.03757314444102334
+      },
+      "after": {
+        "n": 267,
+        "valid_pct": 53.93258426966292,
+        "mean_r": 0.4118658848226746
+      },
+      "by_kind": {
+        "cpi": {
+          "n": 144,
+          "valid_pct": 34.02777777777778,
+          "mean_r": -0.10918686269990172
+        },
+        "empsit": {
+          "n": 65,
+          "valid_pct": 61.53846153846154,
+          "mean_r": 0.6109544905356421
+        },
+        "fomc": {
+          "n": 126,
+          "valid_pct": 63.49206349206349,
+          "mean_r": 0.6620959029336004
+        }
+      }
+    },
+    "majors": {
+      "news": {
+        "n": 121,
+        "valid_pct": 41.32231404958678,
+        "mean_r": 0.08173596988447149
+      },
+      "other": {
+        "n": 2091,
+        "valid_pct": 35.86800573888092,
+        "mean_r": -0.060351307335537764
+      },
+      "gap_other_minus_news_pp": -5.454308310705858,
+      "within_week_p": 0.9452109578084383,
+      "news_week_boot95": [
+        26.48732377199041,
+        56.36480186480186
+      ],
+      "before": {
+        "n": 13,
+        "valid_pct": 38.46153846153847,
+        "mean_r": 0.006846556584778413
+      },
+      "after": {
+        "n": 108,
+        "valid_pct": 41.66666666666667,
+        "mean_r": 0.09075043630017528
+      },
+      "by_kind": {
+        "cpi": {
+          "n": 66,
+          "valid_pct": 33.33333333333333,
+          "mean_r": -0.12739965095985864
+        },
+        "empsit": {
+          "n": 18,
+          "valid_pct": 55.55555555555556,
+          "mean_r": 0.4543339150669002
+        },
+        "fomc": {
+          "n": 37,
+          "valid_pct": 48.64864864864865,
+          "mean_r": 0.27352483373425723
+        }
+      }
+    }
+  },
+  "passed": {
+    "alt": false,
+    "xau": false
+  },
+  "source_commit": "ac06df552886115b591ab7b9bb6404830bb81ae1",
+  "training_eligible": false,
+  "production_eligible": false
+}
