@@ -98,7 +98,7 @@
     <div id="mf-wallpaper" class="mf-wallpaper" aria-label="所选合约的周一区间 K 线"></div>
     <div id="mf-watermark" class="mf-watermark" aria-hidden="true" hidden><b id="mf-watermark-symbol"></b><span id="mf-watermark-period"></span></div>
     <div id="mf-empty" class="mf-empty-chart" role="status">正在读取最新触价…</div>
-    <header class="mf-nav mf-glass" data-mf-movable="nav">${grip('导航')}<a href="#market" aria-label="返回市场观察">${icon('chevron-left')}<b>SPIKE</b></a><span class="mf-divider"></span><h1>周一 1.618</h1><span id="mf-stream" class="mf-stream" title="行情连接中"><i></i><span>连接中</span></span></header>
+    <header class="mf-nav mf-glass" data-mf-movable="nav">${grip('导航')}<details id="mf-home-menu" class="mf-home-menu"><summary aria-label="打开工作区菜单">☰ <b>SPIKE</b></summary><nav class="mf-glass" aria-label="工作区"><a href="#monday-fib" aria-current="page">1.618 · 首页</a><a href="#signals">信号</a><a href="#yolo-detect">巡检</a><a href="#paper-desk">模拟</a><a href="#yolo-detect?tab=account">实盘账户</a><button id="mf-more" type="button">更多工作区…</button></nav></details><span class="mf-divider"></span><h1>周一 1.618</h1><span id="mf-stream" class="mf-stream" title="行情连接中"><i></i><span>连接中</span></span></header>
     <section id="mf-selected" class="mf-selected mf-glass" data-mf-movable="symbol" aria-label="当前合约" hidden>${grip('币种卡片')}
       <div class="mf-symbol-line"><h2 id="mf-symbol">—</h2><span class="mf-perp">USDT 永续</span></div>
       <div id="mf-price" class="mf-price">—</div>
@@ -115,7 +115,7 @@
     </aside>
     <aside id="mf-quick-panel" class="mf-quick-panel mf-glass" data-mf-movable="quick" aria-label="快捷开单" hidden>
       <header class="mf-quick-heading">${grip('快捷开单')}<h2>快捷开单</h2><button type="button" data-quick-close aria-label="关闭快捷开单">${icon('x')}</button></header>
-      <div class="mf-quick-modes" role="group" aria-label="交易环境"><button type="button" data-quick-mode="paper" aria-pressed="true">模拟</button><button type="button" data-quick-mode="live" aria-pressed="false" disabled title="实盘开单规则待确认">实盘 · 均线手动</button></div>
+      <div class="mf-quick-modes" role="group" aria-label="交易环境"><button type="button" data-quick-mode="paper" aria-pressed="true">模拟</button><button type="button" data-quick-mode="live" aria-pressed="false">实盘 · 手动</button></div>
       <p data-quick-status class="mf-quick-status"></p><div id="mf-quick-content" class="mf-quick-content"></div>
     </aside>
     <div id="mf-notice" class="mf-notice mf-glass" role="status" hidden></div>
@@ -123,6 +123,8 @@
     <div id="mf-period-menu" class="mf-period-menu mf-glass" role="menu" aria-label="K 线周期" hidden>${['1m','5m','15m','30m','1H','4H','1D'].map(p=>`<button type="button" role="menuitemradio" aria-checked="${p==='15m'}" data-period="${p}" tabindex="-1">${p}<span aria-hidden="true">✓</span></button>`).join('')}</div>
     <footer class="mf-footer"><span id="mf-week">纽约周一 · 读取中</span><span id="mf-updated">15m 已收盘 K 线</span><span class="mf-gesture-hint">拖动平移 · 滚轮缩放 · 双击价格轴复位</span></footer>`;
   const layout=mountLayout(root);
+  $('mf-more').addEventListener('click',()=>{$('mf-home-menu').open=false;$('workspace-search')?.click();});
+  $('mf-home-menu').addEventListener('click',e=>{if(e.target.closest('a'))$('mf-home-menu').open=false;});
   const periods=['1m','5m','15m','30m','1H','4H','1D'];
   let period='15m';try{const saved=window.localStorage?.getItem('spike.monday.timeframe');if(periods.includes(saved))period=saved;}catch{}
   let active=false,data=null,receivedAt=0,error='',timer=null,controller=null,pending=null,revision=0;
@@ -217,7 +219,7 @@
         window.SpikeMondayFibChart?.hide();
       }
       $('mf-count').textContent=String(selectRows(data.items).length);
-      $('mf-week').textContent=`纽约周一 ${data.week}${data.monday_complete?'':' · 形成中'}`;
+      $('mf-week').textContent=`本周 · ${data.week} 纽约周一${data.monday_complete?'':' · 形成中'}`;
     }
     $('mf-follow').setAttribute('aria-pressed',String(follow));$('mf-follow').title=follow?'自动显示最近触价的合约':'回到最新触价，并自动跟随';
     for(const id of ['mf-fit','mf-fib','mf-latest','mf-zoom-in','mf-zoom-out','mf-quick-toggle'])$(id).disabled=!selected;

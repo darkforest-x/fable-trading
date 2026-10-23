@@ -55,7 +55,7 @@ def test_native_bar_boundaries_and_complete_history(period):
         service.cache[('BTC-USDT-SWAP', period)] = entry
         snapshot = service.snapshot('BTC-USDT-SWAP', period)
         window = week_window(NOW)
-        assert snapshot['monday'] == dict(start_ms=window['start'], end_ms=window['end'])
+        assert snapshot['monday'] == dict(start_ms=window['start'], end_ms=window['end'], expires_ms=window['expires'])
         assert 'high' not in snapshot['monday']  # Anchors are never recomputed from display bars.
         assert not snapshot['loading'] and len(client.calls) == 3
     finally:

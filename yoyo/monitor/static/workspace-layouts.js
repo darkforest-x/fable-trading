@@ -5,7 +5,7 @@
 (() => {
   'use strict';
   const GROUPS = {
-    market: {title:'市场观察', views:['market','auto-leaders','monday-fib']},
+    market: {title:'1.618', views:['monday-fib','auto-leaders']},
     signals: {title:'信号与检测', views:['signals','yolo-detect']},
     accounts: {title:'账户与交易', views:['manual','copier']},
     simulation: {title:'模拟交易', views:['paper-desk','paper']},

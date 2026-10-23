@@ -126,7 +126,7 @@ class MondayCandles:
         return dict(value, now_ms=now, next_close_ms=bar_open(now, bar)+STEPS[bar],
                     symbol=symbol, bar=period, native_bar=bar, source='OKX',
                     timezone='America/New_York', week=window['week'],
-                    monday=dict(start_ms=window['start'], end_ms=window['end']))
+                    monday=dict(start_ms=window['start'], end_ms=window['end'], expires_ms=window['expires']))
 
     def close(self):
         with self.ready:

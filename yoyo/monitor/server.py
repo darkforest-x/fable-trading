@@ -19,7 +19,7 @@ from yoyo.monitor.asset_delivery import cache_policy, render_index, boot_bundle,
 from yoyo.monitor import FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRAMES, SIGNAL_KIND, SIGNAL_PROTOCOL, SHORT_SIGNAL_PROTOCOL
 from yoyo.monitor import market_sync as market_sync_research
 from yoyo.monitor.market_sync_okx import Observer as MarketSync
-from yoyo.monitor.market_context import MarketContext, market_bias
+from yoyo.monitor.market_context import MarketContext
 from yoyo.monitor.service import Monitor
 from yoyo.monitor.shadow_api import (SHADOW_DATABASE, ShadowBookUnavailable, events as shadow_events,
                                      market_snapshots as shadow_market_snapshots,
@@ -91,8 +91,8 @@ def create_app(runtime=None, start_monitor=True):
             fcntl.flock(lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
             if start_monitor:
                 monitor.start()
-                market_sync.start()
-                market_context.start()
+                # Owner retired the market workspace on 2026-10-23.
+                # Keep shared quotes, Monday monitoring and execution independent.
                 altcoin_leaders.start()
                 vidya_retest.start()
                 monday_fib.start()
@@ -184,15 +184,18 @@ def create_app(runtime=None, start_monitor=True):
 
     @app.get("/api/market-sync")
     def market_sync_snapshot():
-        return market_sync.snapshot()
+        value = market_sync.snapshot()
+        return dict(value, status=dict(value['status'], state='stopped', next_ms=None),
+                    monitoring_enabled=False, stopped_reason="owner_retired_market_workspace",
+                    workers=dict(sync=bool(market_sync._thread and market_sync._thread.is_alive()),
+                                 context=bool(market_context._thread and market_context._thread.is_alive())))
 
     @app.get('/api/market-sync/context')
     def market_context_snapshot(
         zone: str = Query('America/New_York', pattern=r'^(America/New_York|UTC|Asia/Shanghai)$'),
         symbol: str = Query('BTC-USDT-SWAP', pattern=r'^[A-Z0-9]{1,24}-USDT-SWAP$'),
     ):
-        value = market_context.snapshot(zone, symbol)
-        return dict(value, bias=market_bias(value, market_sync.snapshot()) if symbol == 'BTC-USDT-SWAP' else None)
+        raise HTTPException(410, "市场页监控已停用")
 
     @app.get("/api/market-sync/history")
     def market_sync_history(group: str = Query(None, max_length=64)):

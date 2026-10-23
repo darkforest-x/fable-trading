@@ -14,7 +14,7 @@ import re
 import threading
 import time
 
-from fastapi import Query
+from fastapi import HTTPException, Query
 from yoyo.research_workspace.paper_desk_market import PublicHTTP
 
 SYMBOL = r'^[A-Z0-9]{1,24}-USDT-SWAP$'
@@ -193,4 +193,5 @@ def install(app):
 
     @app.get('/api/market-workstation')
     def snapshot(symbol: str = Query('BTC-USDT-SWAP', pattern=SYMBOL)):
-        return service.snapshot(symbol)
+        # Retired tabs must not restart demand-driven market-only collection.
+        raise HTTPException(410, '市场页监控已停用')

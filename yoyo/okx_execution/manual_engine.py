@@ -34,6 +34,16 @@ class ManualEngine(Engine):
         return super().entry_exclusion(event)
 
     def tick(self, *, entries=True):
+        # Existing position protection runs before discretionary entry work.
+        result = self._strategy_tick(entries=entries)
+        if self.queue and policy(self.store):
+            from .free_manual import REVISION, Tickets, consume
+            self.store.set_meta('free_manual_revision', REVISION)
+            consume(self, Tickets(self.queue.path.parent), entries=entries and not self.store.meta('errors'))
+            self.store.set_meta('heartbeat_ms', self.clock())
+        return result
+
+    def _strategy_tick(self, *, entries=True):
         if self.commands is not None:
             from .manual_commands import consume
             self.store.set_meta("management_revision", "owner-management-20261018-v1")

@@ -2,6 +2,22 @@
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const sandbox={window:{},module:{exports:{}},Intl,Date};vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/range-chart.js','utf8'),sandbox);
 const {render,price}=sandbox.module.exports,view={bars:192,range:true,profile:true};
+test('weekly rays start at the current NY Monday and disappear in a previous-week viewport',()=>{
+ const {logicalAt,WeekLevels}=sandbox.module.exports,start=Date.parse('2026-10-19T04:00Z'),end=Date.parse('2026-10-26T04:00Z');
+ const rows=Array.from({length:14},(_,i)=>({time:start/1000-7*86400+i*86400}));
+ assert.equal(logicalAt(rows,start),7);assert.equal(logicalAt(rows,start+43200000),7.5);
+ let offset=0,lines=[];const owner={rows,levelWindow:{start_ms:start,end_ms:end},activeLevels:[{price:100}],chart:{timeScale:()=>({logicalToCoordinate:x=>x*10-offset})},series:{priceToCoordinate:p=>p}};
+ let visible={from:0,to:6};owner.chart.timeScale=()=>({logicalToCoordinate:x=>x*10-offset,getVisibleLogicalRange:()=>visible});
+ assert.deepEqual(Array.from(sandbox.module.exports.Interactive.prototype.scaleLevels.call(owner)),[]);
+ visible={from:7,to:10};assert.deepEqual(Array.from(sandbox.module.exports.Interactive.prototype.scaleLevels.call(owner)),[100]);
+ owner.scaleLevels=()=>sandbox.module.exports.Interactive.prototype.scaleLevels.call(owner);
+ const primitive=new WeekLevels(owner),ctx={save(){},restore(){},beginPath(){},rect(){},clip(){},setLineDash(){},moveTo:(x,y)=>lines.push([x,y]),lineTo:(x,y)=>lines.push([x,y]),stroke(){}};
+ primitive.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:100,height:400}})});assert.deepEqual(lines,[[70,100],[100,100]]);
+ lines=[];offset=-100;primitive.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:100,height:400}})});assert.deepEqual(lines,[]);
+ lines=[];offset=150;primitive.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:100,height:400}})});assert.deepEqual(lines,[]);
+ assert.equal(primitive.priceAxisViews()[0].visible(),true);
+ visible={from:0,to:6};assert.equal(primitive.priceAxisViews()[0].visible(),false);
+});
 test('shared range renderer uses the selected contract identity and small coin precision',()=>{
  const c={symbol:'W-USDT-SWAP',candles:[{time:0,open:.0021,high:.0023,low:.002,close:.0022,volume:10}],levels:[{kind:'range',label:'周一高',price:.0023}]};
  const html=render(c,view);assert.match(html,/OKX WUSDT.P/);assert.match(html,/周一高 0.0023/);assert.doesNotMatch(html,/BTC/);

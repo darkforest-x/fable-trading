@@ -35,7 +35,7 @@
       if(![b.time,b.open,b.high,b.low,b.close].every(finite)||b.time<=previous||b.time+PERIODS[period]>boundary||b.time%PERIODS[period]!==0||b.high<Math.max(b.open,b.close,b.low)||b.low>Math.min(b.open,b.close))throw Error('K 线数据不完整，请稍后重试');
       previous=b.time;
     }
-    return {...context,candles,levels:levels(row),monday:{...context.monday,high:row.high,low:row.low,complete:true}};
+    return {...context,candles,levels:levels(row),level_window:{start_ms:start,end_ms:context.monday.expires_ms},monday:{...context.monday,high:row.high,low:row.low,complete:true}};
   }
   // The display contains closed candles. Refresh at their next close, using
   // server time so a user's clock cannot postpone updates. Lagging tails retry.

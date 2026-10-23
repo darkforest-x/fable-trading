@@ -3,7 +3,7 @@
   "use strict";
 
   const $ = (id) => document.getElementById(id);
-  const DEFAULT_VIEW = "market";
+  const DEFAULT_VIEW = "monday-fib";
   const state = {
     view: DEFAULT_VIEW, signals: [], directSignals: [], performanceSignals: [], rawYoloSignals: [], candidates: [], signalScope: "retest", markets: [], status: null, health: null,
     signalsLoaded: false, directSignalsLoaded: false, directSignalTotal: 0, candidatesLoaded: false, candidateTotal: 0, candidateCounts: null, marketsLoaded: false, marketsLoading: false, marketsRetryTimer: null, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
@@ -296,7 +296,7 @@
     // The accessibility skip target is an anchor, not another application view.
     if (view === "main") { $("main").focus?.({ preventScroll: true }); return; }
     if (["joints", "breaks", "vidya"].includes(view)) {view = "signals"; history.replaceState(null, "", "#signals");}
-    if (!titles[view]) {view = DEFAULT_VIEW; history.replaceState(null, "", `#${view}`);}
+    if (!titles[view] || view === "market") {view = DEFAULT_VIEW; history.replaceState(null, "", `#${view}`);}
     const navigationWasOpen = document.body.classList.contains("nav-open");
     window.SpikeWorkspaceDisplay?.setMobileNavigation(false, { restoreFocus: false });
     document.body.classList.remove("nav-open");

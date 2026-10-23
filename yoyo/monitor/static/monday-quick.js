@@ -12,7 +12,7 @@
     async function select(value){
       if(!open||!['paper','live'].includes(value))return;
       const version=++revision;release();mode=value;sync();
-      status.textContent=value==='live'?'实盘 · 均线手动账户':'模拟交易 · 与模拟开单页共用账户';host.textContent='正在加载开单面板…';
+      status.textContent=value==='live'?'实盘 · 手动下单':'模拟交易 · 与模拟开单页共用账户';host.textContent='正在加载开单面板…';
       try {
         await load(value);
         if(!open||version!==revision)return;

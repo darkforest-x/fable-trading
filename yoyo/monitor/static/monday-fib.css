@@ -22,6 +22,13 @@ body[data-workspace="monday-fib"] :is(.app-shell,.workspace,#main,#monday-fib-vi
 #monday-fib-root .mf-nav {position:absolute;z-index:4;top:24px;left:24px;height:46px;padding:0 14px;display:flex;align-items:center;gap:12px;border-radius:24px;}
 #monday-fib-root .mf-nav a {display:flex;align-items:center;gap:7px;min-height:40px;}
 #monday-fib-root .mf-nav b {font-size:13px;letter-spacing:.7px;}
+#monday-fib-root .mf-home-menu {position:relative;}
+#monday-fib-root .mf-home-menu summary {display:flex;align-items:center;gap:7px;min-height:44px;cursor:pointer;list-style:none;}
+#monday-fib-root .mf-home-menu summary::-webkit-details-marker {display:none;}
+#monday-fib-root .mf-home-menu nav {position:absolute;top:48px;left:-20px;min-width:176px;padding:8px;display:grid;gap:2px;}
+#monday-fib-root .mf-home-menu nav :is(a,button) {padding:10px 14px;text-align:left;min-height:44px;border-radius:12px;}
+#monday-fib-root .mf-home-menu nav a:hover {background:#0071e30c;}
+#monday-fib-root .mf-home-menu [aria-current] {color:var(--mf-blue);background:#0071e30c;}
 #monday-fib-root .mf-nav h1 {font-size:12px;font-weight:500;}
 #monday-fib-root .mf-divider {height:16px;width:1px;flex:none;background:#d9e0e6;}
 #monday-fib-root .mf-stream {display:flex;align-items:center;gap:5px;color:var(--mf-muted);font-size:10px;}

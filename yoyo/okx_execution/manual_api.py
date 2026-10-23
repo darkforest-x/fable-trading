@@ -293,6 +293,9 @@ def install(app, book, *, service=None):
         except (OSError, sqlite3.Error, TransportError, KeyError, TypeError):
             raise HTTPException(503, "账户或行情暂不可用，请稍后重新预览") from None
 
+    from .free_manual_api import install as install_free_manual
+    install_free_manual(router, service, call)
+
     @router.post("/preview")
     def preview(payload: Preview):
         return call(service.preview, payload)
