@@ -7,29 +7,11 @@ to the forward scanner. Missing data stays unavailable instead of fabricating
 a stop or reusing last week's touch.
 """
 import threading
-from decimal import Decimal
+from yoyo.data.monday_wick import wick_stop
 from fastapi import Query
 from yoyo.data.candle_hub import STEPS, bar_open, validate
 from .monday_fib import week_window
 from .monday_candles import SYMBOL
-
-
-def wick_stop(candles, *, period, side, level, window, now):
-    step = STEPS['1Dutc' if period == '1D' else period]
-    level = Decimal(str(level))
-    if not level.is_finite() or level <= 0 or not window['end'] <= now < window['expires']:
-        return None
-    for c in sorted(candles, key=lambda r: r['time'], reverse=True):
-        t = c['time']
-        if not window['end'] <= t < window['expires'] or t+step > now:
-            continue
-        o,h,l,close = (Decimal(str(c[k])) for k in ('open','high','low','close'))
-        if not all(x.is_finite() and x > 0 for x in (o,h,l,close)) or not l <= min(o,close) <= max(o,close) <= h:
-            continue
-        hit = l < min(o,close) and l <= level <= min(o,close) if side == 'long' else h > max(o,close) and max(o,close) <= level <= h
-        if hit:
-            return dict(stop_loss=format(l if side=='long' else h,'f'), candle_ms=t, level=format(level,'f'), timeframe=period)
-    return None
 
 
 def install(app):

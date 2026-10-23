@@ -7,7 +7,7 @@ import {fibSelection,latestFibTouch,parseFibSnapshot,touchLabel,type FibContract
 import type {CandlePeriod} from './candleData';
 import './fib.css';
 const CandlePanel=lazy(()=>import('./CandlePanel'));
-export function FibHome({connection,state,onSettings,onQuick,locked}:{connection:Connection|null;state:State|null;onSettings:()=>void;onQuick:(row:FibContract)=>void;locked:boolean}){
+export function FibHome({connection,state,onSettings,onQuick,locked}:{connection:Connection|null;state:State|null;onSettings:()=>void;onQuick:(row:FibContract,period:CandlePeriod)=>void;locked:boolean}){
  const [data,setData]=useState<FibSnapshot|null>(null),[symbol,setSymbol]=useState(''),[error,setError]=useState('');
  const [period,setPeriod]=useState<CandlePeriod>('15m'),[chooser,setChooser]=useState(false),[search,setSearch]=useState('');
  const [revision,setRevision]=useState(0),[clock,setClock]=useState(Date.now());
@@ -35,7 +35,7 @@ export function FibHome({connection,state,onSettings,onQuick,locked}:{connection
     <div className="fib-selected"><span>{touchLabel(touch,clock)}</span>{error&&<span>连接延迟</span>}</div>
     {recent&&recent.symbol!==symbol&&<button className="fib-new" onClick={()=>select(recent.symbol)}>查看最新触价 · {recent.symbol.replace('-USDT-SWAP','')} <Icon name="arrow" size={12}/></button>}
     <div className="fib-chart"><Suspense fallback={<div className="fib-empty">正在加载图表…</div>}><CandlePanel symbol={symbol} connection={connection} tick={tick} period={period} onPeriod={setPeriod} onCollapse={()=>{}} embedded range={range}/></Suspense></div>
-    <div className="fib-quick"><button disabled={locked||!!error} onClick={()=>onQuick(row)}>快捷开单 <span>· 1R</span><Icon name="arrow" size={17}/></button></div>
+    <div className="fib-quick"><button disabled={locked||!!error} onClick={()=>onQuick(row,period)}>快捷开单 <span>· 1R</span><Icon name="arrow" size={17}/></button></div>
    </>:<div className="fib-empty"><Icon name="trade" size={34}/><h2>{error?'监控暂不可用':data?'本周暂无触价':'正在读取触价记录'}</h2><p>{error?'稍后重试，已有交易保护保持独立运行。':data&&!data.monday_complete?'纽约周一结束后锁定高低点。':'首次触及区间外 1.618 的合约会显示在这里。'}</p>{error&&<button onClick={()=>setRevision(n=>n+1)}>重新加载</button>}</div>}
   </div>
   {chooser&&<Dialog label="已触价合约" busy={false} onDismiss={()=>setChooser(false)}><h2>已触价合约</h2><p className="muted">{data?.week} · 最新触价优先</p><label className="input-shell"><input aria-label="搜索已触价合约" placeholder="搜索合约" value={search} onChange={e=>setSearch(e.target.value)}/></label><div className="fib-choices">{data?.items.filter(r=>r.symbol.includes(search.trim().toUpperCase())).map(r=><button key={r.symbol} aria-pressed={r.symbol===symbol} onClick={()=>select(r.symbol)}><b>{r.symbol.replace('-USDT-SWAP','/USDT')}</b><span>{touchLabel(latestFibTouch(r),clock)}</span></button>)}</div></Dialog>}

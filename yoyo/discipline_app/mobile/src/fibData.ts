@@ -1,4 +1,4 @@
-/** Public monitor facts only. Chart coordinates never enter a trading ticket. */
+/** Public monitor facts. Wick defaults are separately read from closed server candles. */
 export type FibTouch={side:'upper'|'lower';source:'live'|'history';occurred_ms:number};
 export type FibContract={symbol:string;high:number;low:number;upper:number;lower:number;price:number|null;stale:boolean;touches:Partial<Record<'upper'|'lower',FibTouch>>};
 export type FibSnapshot={now_ms:number;week:string;timezone:string;week_start_ms:number;monday_end_ms:number;next_week_ms:number;monday_complete:boolean;connected:boolean;last_message_ms:number|null;items:FibContract[]};

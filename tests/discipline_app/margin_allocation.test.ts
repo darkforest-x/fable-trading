@@ -45,3 +45,17 @@ test('allocation clamps invalid inputs and never rounds above room',()=>{
  assert.equal(allocatedMargin(.1,NaN),0);
  assert.equal(allocatedMargin(Infinity,100),0);
 });
+
+
+test('a fixed wick stop controls size without being reverse-solved from allocation',()=>{
+ const state={equity:'1000',policy:{major_allowance_scope:'independent',major_margin_fraction:'.1',alt_margin_fraction:'.05',major_exposure_multiple:'10',alt_exposure_multiple:'5',risk_fraction:'.05',fee_rate:'.0005',slippage_rate:'.001'},
+  positions:[],pending:[],quotes:{'BTC-USDT-SWAP':{last:'100',ask:'100',bid:'100'}},instruments:{'BTC-USDT-SWAP':{step:'.01'}}} as unknown as State;
+ const ticket={symbol:'BTC-USDT-SWAP',side:'long' as const,kind:'market' as const,price:'',stop:'94',fraction:'.1',leverage:100};
+ const near=ticketEstimate(state,ticket)!,far=ticketEstimate(state,{...ticket,stop:'90'})!;
+ assert.ok(near.quantity>far.quantity);
+ assert.ok(near.risk<=50&&far.risk<=50);
+ assert.equal(ticket.stop,'94');
+ const cap=ticketEstimate(state,{...ticket,stop:'100'})!;
+ assert.ok(cap.notional<=10000&&cap.margin<=100);
+ assert.equal(ticketEstimate(state,{...ticket,stop:'101'}),null);
+});

@@ -3,7 +3,7 @@
 VITE_SPIKE_SERVICE_URL / VITE_SPIKE_CANDLES_HTTP=http://127.0.0.1:18922,
 VITE_SPIKE_CANDLES_WS=ws://127.0.0.1:18922/ws/v5/business,
 VITE_SPIKE_LIVE_QUOTES=off. Uses the existing entry fixture exchange and real
-server-owned reverse-R calculation, never the live service.
+server-owned wick selection and 1R sizing, never the live service.
 """
 import argparse
 import asyncio
@@ -47,7 +47,7 @@ def main():
         thread=threading.Thread(target=refresh,daemon=True);thread.start()
         app=create_app(book,TOKEN,market_enabled=False,web_directory=options.web_directory)
         control=dict(offline=False,empty=False,latest='BTC');started=int(time.time()*1000)
-        metrics=dict(streams=0,active=0,auto_stop=0)
+        metrics=dict(streams=0,active=0,auto_stop=0,wick_stop=0)
         class Feed:
             def read(self):
                 if control['offline']:raise FibUnavailable()
@@ -60,7 +60,9 @@ def main():
         app.state.monday_fib=Feed()
         def candle(stamp,step,symbol):
             base=2000 if symbol.startswith('ETH') else 100;i=stamp//step;o=base*(1+.005*math.sin(i/9));c=o+base*.002*math.cos(i/4)
-            return [str(stamp*1000),str(o),str(max(o,c)+base*.001),str(min(o,c)-base*.001),str(c),'100','20','2000','1' if stamp+step<=time.time() else '0']
+            high,low=max(o,c)+base*.001,min(o,c)-base*.001
+            if stamp==int(time.time())//step*step-2*step:high,low=(2300,1750) if symbol.startswith('ETH') else (106,94)
+            return [str(stamp*1000),str(o),str(high),str(low),str(c),'100','20','2000','1' if stamp+step<=time.time() else '0']
         def candles(instId='BTC-USDT-SWAP',bar='15m',after=0):
             step=STEPS[bar];newest=int(after)//1000-step if after else int(time.time())//step*step
             return dict(code='0',data=[candle(newest-i*step,step,instId) for i in range(300)])
@@ -83,6 +85,7 @@ def main():
         @app.middleware('http')
         async def count(request,call_next):
             if request.url.path=='/v1/auto-stop':metrics['auto_stop']+=1
+            if request.url.path=='/v1/market/monday-wick':metrics['wick_stop']+=1
             return await call_next(request)
         @app.get('/qa/metrics')
         def stats():return dict(**metrics,seed_orders=seed_orders,order_writes=sum(path.endswith('/order') for path,_ in exchange.writes)-seed_orders)

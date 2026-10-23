@@ -19,6 +19,7 @@ from .book import Book
 from .market import PublicMarket
 from .candles import CandleHistory, CandleUnavailable
 from .monday_fib import MondayFibFeed, FibUnavailable
+from .wick_stop import WickStops
 from .policy import Rejected
 
 
@@ -88,10 +89,11 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
             if live:
                 book.stop()
 
-    app = FastAPI(title='SPIKE Discipline', version='0.8.19', lifespan=lifespan,
+    app = FastAPI(title='SPIKE Discipline', version='0.8.20', lifespan=lifespan,
                   docs_url=None, redoc_url=None, openapi_url=None)
     app.state.candle_history = CandleHistory()
     app.state.monday_fib = MondayFibFeed()
+    app.state.wick_stops = WickStops()
     app.add_middleware(CORSMiddleware, allow_origins=list(origins), allow_methods=['GET', 'POST'],
                        allow_headers=['Authorization', 'Content-Type', 'X-Spike-Account'], allow_credentials=False)
     app.add_middleware(GZipMiddleware, minimum_size=1024, compresslevel=5)
@@ -137,7 +139,7 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
 
     @app.get('/health')
     def health():
-        return dict(service='spike-discipline', mode=mode, live_enabled=live and book.client.write_enabled, version='0.8.19')
+        return dict(service='spike-discipline', mode=mode, live_enabled=live and book.client.write_enabled, version='0.8.20')
 
     @app.get('/v1/market/monday-fib')
     def monday_fib():
@@ -146,6 +148,15 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
             return app.state.monday_fib.read()
         except FibUnavailable:
             raise HTTPException(503, '1.618 监控暂不可用，请稍后重试') from None
+
+    @app.get('/v1/market/monday-wick', dependencies=[Depends(auth)])
+    def monday_wick(symbol: str = Query(pattern=r'^[A-Z0-9]{1,40}-USDT-SWAP$'),
+                    period: Literal['1m', '5m', '15m', '1H', '4H', '1D'] = '15m',
+                    side: Literal['long', 'short'] = 'long'):
+        try:
+            return app.state.wick_stops.read(app.state.monday_fib, app.state.candle_history, symbol, period, side)
+        except FibUnavailable as error:
+            raise HTTPException(503, str(error)) from None
 
     @app.get('/v1/market/candles', dependencies=[Depends(auth)])
     def candles(symbol: str = Query(pattern=r'^[A-Z0-9]{1,40}-USDT-SWAP$'),
