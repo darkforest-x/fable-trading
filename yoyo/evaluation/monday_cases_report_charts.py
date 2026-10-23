@@ -57,8 +57,11 @@ def draw(sample,mode):
     if 0<=exitx<n:
         ax.scatter([exitx],[sample['exit_price']],marker='X',s=65,color=C['amber'],zorder=8)
         ax.axvspan(exitx-.5,exitx-.5+5/tf,color=C['amber'],alpha=.18,zorder=2)
-    for x,label in [(p,'插针'),(e,'入场')]+[(p+j,'吞没' if sample['case']==1 else f'确认{j}') for j in range(1,2 if sample['case']==1 else 4)]:
-        if 0<=x<n:ax.text(x,high+pad*(.45 if label in ['插针','入场'] else .12),label,ha='center',fontsize=8,color=C['line'],rotation=45 if n>90 else 0)
+    events=[(p,'P'),*[(p+j,str(j)) for j in range(1,2 if sample['case']==1 else 4)],(e,'E')]
+    for lane,(x,label) in enumerate(events):
+        if 0<=x<n:
+            # Separate adjacent events vertically instead of rotating overlapping text.
+            ax.annotate(label,xy=(x,high),xytext=(x,high+pad*(.15+lane*.16)),ha='center',va='center',fontsize=8,color=C['line'],bbox=dict(boxstyle='circle,pad=.12',fc='white',ec='#b8c4d3',lw=.6),arrowprops=dict(arrowstyle='-',color='#b8c4d3',lw=.6))
     indices=sorted(set([0,n-1]+[round(i*(n-1)/5) for i in range(1,5)]));vol.set_xticks(indices);vol.set_xticklabels([datetime.fromtimestamp(bars[i][0]/1000,timezone(timedelta(hours=8))).strftime('%m/%d\n%H:%M') for i in indices],fontsize=9)
     plt.setp(ax.get_xticklabels(),visible=False)
     ax.grid(axis='y',color=C['grid'],lw=.7);ax.set_ylabel('价格',fontsize=10)
@@ -72,7 +75,7 @@ def draw(sample,mode):
     fig.suptitle(f"情况{sample['case']} · {sample['symbol']} · {tf}m · 做{sample['direction']} · {sample['outcome']} {ret:+.3f}R（{basis}）",x=.075,ha='left',y=.965,fontsize=16,weight='bold')
     fig.text(.075,.91,f"{'入场局部' if mode=='detail' else '持仓全程'}｜{sample['sample_id']}｜北京时间 UTC+8｜{n} 根原周期K线；休市/缺口按已观测K线压缩",fontsize=10,color='#526175')
     fig.text(.075,.065,f"插针开盘 {bjt(sample['pin_time'])}   入场 {bjt(sample['entry_time'])}   退出区间 {bjt(sample['exit_interval_start'])} — {bjt(sample['exit_interval_end'])}",fontsize=9,color='#526175')
-    fig.text(.075,.035,'▲/▼ 入场  × 实际退出  黄底=插针/退出5m区间  蓝底=确认；退出区间内具体秒数未知。历史复盘图含入场后的行情。',fontsize=9,color='#526175')
+    fig.text(.075,.035,'P 插针 · 1/2/3 确认（情况1：1=吞没）· E/▲/▼ 入场 · × 退出 · 黄底=插针/退出5m区间 · 蓝底=确认。含事后行情；退出具体秒数未知。',fontsize=8.5,color='#526175')
     path=OUT/'charts'/f"{sample['sample_id']}-{mode}.png";path.parent.mkdir(exist_ok=True);fig.savefig(path,dpi=125);plt.close(fig)
     return str(path.relative_to(OUT))
 
