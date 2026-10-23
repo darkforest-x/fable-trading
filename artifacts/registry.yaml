@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-1618-timing-20261023-v1
+    artifact_type: manifest
+    role: 'Which touch times (Beijing hour, NY weekday, hours since Monday close) have the highest Monday 1618 validity?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: f8df0432faaa0245c48d5ede68dc9f8f400a17e2
+    generator_commit: f8df0432faaa0245c48d5ede68dc9f8f400a17e2
+    source_path: experiments/active/exp-monday-1618-timing-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-timing-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'inconclusive; OKX 10130: Beijing 04-08 47.5 percent (n1437, week-boot 39.9-54.5, earlier 51.1 later 44.6, +0.25R), 05h 52.5; 08-12 worst 33.7 (08h 24.5). 12-24h aft'
   - artifact_id: monday-fib-wallpaper-20261023
     artifact_type: manifest
     role: Monday Fib full-screen candlestick workspace with draggable translucent glass controls

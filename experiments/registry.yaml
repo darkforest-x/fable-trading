@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-1618-timing-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f8df0432faaa0245c48d5ede68dc9f8f400a17e2
+    status: inconclusive
+    question: 'Which touch times (Beijing hour, NY weekday, hours since Monday close) have the highest Monday 1618 validity?'
+    single_variable: 'Descriptive slicing of frozen touch ledgers by touch-bar open time; no rule selected.'
+    result: 'OKX 10130: Beijing 04-08 47.5 percent (n1437, week-boot 39.9-54.5, earlier 51.1 later 44.6, +0.25R), 05h 52.5; 08-12 worst 33.7 (08h 24.5). 12-24h after Monday close 54.7 but Binance pre-2025 33.2. Binance pre block 04-08 highest 42.9 (n219) yet block heterogeneity p .20; BTC and XAU show no time effect.'
+    artifacts:
+    - monday-1618-timing-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-timing-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Effect is alt-driven (OKX majors+XAU 04-08 37.7 percent n61); week-cluster bootstrap and within-week permutation used. Forward observation only. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
   - experiment_id: exp-monday-1618-book-20261023-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 21fa78489410f9cf2de695c4e66daf55a639ed91
