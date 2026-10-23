@@ -34278,3 +34278,19 @@ artifacts:
       One rounded search focus surface; all matching touched contracts in an independent scrolling body.
       55 frontend tests, 419 live rows, sixty-second stable scroll anchor, search/selection/keyboard and 320px mobile checks.
       No backend restart; temporary browser tab closed and service/worker health retained.
+
+  - artifact_id: monday-fib-tradingview-links-20261023
+    source_commit: f810e7f581
+    generator_commit: f810e7f581
+    artifact_type: manifest
+    role: monday_symbol_tradingview_chart_links
+    source_repo: darkforest-x/fable-trading
+    source_path: artifacts/monday-fib-tradingview-links-20261023/receipt.json
+    storage_uri: repo://artifacts/monday-fib-tradingview-links-20261023/receipt.json
+    holdout_status: not_applicable
+    training_eligible: false
+    production_eligible: false
+    notes: Stitch GEMINI_3_8_FLASH screen 2891896fc30b44949e150b75562a72ea.
+      Coin names use the Monday Telegram chart URL; sibling buttons retain wallpaper selection.
+      58 frontend tests; actual Chrome OKX BTC perpetual 15-minute chart verified, 320px mobile targets and refresh focus checked.
+      Native app takeover not verified. Task browser tabs closed; service, ticker stream and four patrol schedules remain enabled.

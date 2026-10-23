@@ -1,0 +1,32 @@
+{
+  "source_commit": "f810e7f581",
+  "page": "https://spikeok.com/#monday-fib",
+  "stitch_project": "8978791379095391159",
+  "stitch_screen": "2891896fc30b44949e150b75562a72ea",
+  "stitch_model": "GEMINI_3_8_FLASH",
+  "behavior": {
+    "coin_name": "Standard TradingView HTTPS chart link, identical to Monday Telegram alert",
+    "example_url": "https://www.tradingview.com/chart/?symbol=OKX%3ABTCUSDT.P&interval=15",
+    "right_hand_button": "Pins wallpaper to selected contract while retaining chart period",
+    "client_device": "Link is handled by the visiting device; no host-desktop POST"
+  },
+  "validation": {
+    "frontend_tests": {"passed": 58, "failed": 0},
+    "command": "node --test tests/monitor/frontend_monday_fib*.test.cjs tests/monitor/frontend_range_chart.test.cjs tests/monitor/frontend_chart_tools.test.cjs tests/monitor/frontend_module_loader.test.cjs tests/monitor/frontend_shell.test.cjs",
+    "browser": [
+      "Chrome link click opened a new TradingView tab showing OKX:BTCUSDT.P with 15 minutes checked",
+      "External link preserved EWJ wallpaper and follow-latest state",
+      "Separate BTC preview button pinned BTC and retained 1H wallpaper period",
+      "320x740 viewport: no horizontal overflow; link 176x46 and button 80x46 pixels",
+      "Mobile list scrolled to 1480px; keyboard focus moved to SHOP preview; subsequent refresh retained that focus and 1377px scroll position",
+      "Mobile ETH preview selected ETH, retained 1H, and closed the list",
+      "No browser console errors in Monday page",
+      "Restored follow-latest; reset temporary viewport; closed IAB tabs 6 and 7 and Chrome tabs 977883109 and 977883112"
+    ],
+    "limitations": ["Native TradingView application takeover was not verified; tested Mac Chrome opened the web chart", "Phone layout used browser viewport emulation"]
+  },
+  "screenshots": ["desktop-links.jpg", "mobile-links.jpg"],
+  "post_cleanup_health": "health.json",
+  "training_eligible": false,
+  "production_eligible": false
+}
