@@ -1,3 +1,9 @@
+## 2026-10-24 · Notion six-MA retest research awaiting rule definitions
+
+- Owner requested detailed backtest and HTML for Notion page4028856479af80039ef9fa7bf3703760, titled 小级别确认. Text and both WIFUSDT15m images read; preserve exact source in `experiments/active/exp-monday-ma6-retest-20261024-v1/config.json` (source commit d5914b2796). Existing633asset universe and Nautilus1.231.0 available; six MAs are SMA/EMA20/60/120. Do not use the superseded fixedEST gold clock.
+- Three async questions remain unanswered: three new lows/highs cumulative or consecutive; stop reference and numeric buffer; separate full exits at oppositeMondayedge/far1618 versus split allocation. The second image visually favors the lowerMA envelope as long stop reference, but supplies no numerical buffer. `run_enabled=false`; no signal results, fills, profitability or completed HTML yet. Finalize causal pending-limit repricing/range invalidation and monitoring expiry before execution; existing adapter supports fixed resting entries but these new semantics still need integration.
+- Requested deliverable remains detailed portable HTML using the original Stitch template, all opportunities/trades and timestamps, funnel, costs/payoff/PF/streaks/exposure-limited excursions, matched controls and seeded six-MA candle renders. No new design required. Temporary Chrome Notion tab977883141 closed and original two user tabs retained. No trading/service/browser-settings changes.
+
 ## 2026-10-24 · Chinese parameter ranking readout delivered
 
 - Owner found the English metrics table unclear. Added the first16 data rows as Chinese descriptions:5unique configurations,7negative means. Same case/config acrossasset/time/basis is not a distinct strategy; v20 inactive forcase3/4. Top83.33percent are5wins/6goldgross trades, not robust optimum.
