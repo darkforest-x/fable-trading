@@ -430,7 +430,8 @@ class IndependentCloseStrategy(Strategy):
         if state.remaining != 0:
             raise RuntimeError("Final exit left a nonzero runner")
         if phase == "stop":
-            reason = 8 if state.stop_kind == 3 else 5 if state.stop_kind == 1 else 2 if state.arm_i >= 0 else 1
+            reason = (9 if state.stop_kind == 4 else 8 if state.stop_kind == 3 else 5 if state.stop_kind == 1
+                      else 2 if state.arm_i >= 0 else 1)
         elif phase == "target":
             # The native matcher cancels all remaining reduce-only orders for
             # this closed HEDGING position after dispatching the fill. Sending
@@ -542,6 +543,12 @@ class IndependentCloseStrategy(Strategy):
             if i > int(row["entry_i"]):
                 state.peak = max(state.peak, side*((high if side > 0 else low)-entry)/risk)
             old_stop = state.stop
+            update_i = row.get("stop_update_i", -1)
+            if (np.isfinite(update_i) and i == int(update_i)
+                    and side*(row["stop_update"]-state.stop) > self.eps):
+                # One tightening to a price first known at this close (e.g. the
+                # touch bar's wick extreme); it cannot fill retrospectively.
+                state.stop, state.stop_kind = row["stop_update"], 4
             if p.time_breakeven_minutes is not None and self.be_clock[i]:
                 elapsed=(i-int(row["entry_i"]))*self.execution_minutes
                 if state.be_trigger_i < 0 and elapsed >= p.time_breakeven_minutes:
@@ -768,6 +775,12 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             raise ValueError("Entry differs from completed close")
         if r.stop <= 0 or r.risk < tick-tick*1e-7 or abs(r.side*(r.entry-r.stop)-r.risk) > tick*1e-7:
             raise ValueError("Invalid initial risk")
+        update_i = getattr(r, "stop_update_i", -1)
+        if np.isfinite(update_i) and update_i >= 0:
+            update = r.stop_update
+            if (not r.entry_i < update_i < r.end_i or not update > 0
+                    or abs(update/tick-round(update/tick)) > 1e-5):
+                raise ValueError("Stop update must be tick-aligned and inside the trade interval")
         if policy.target_from_entry:
             target = getattr(r, "target_price", None)
             if target is None or np.isinf(target):

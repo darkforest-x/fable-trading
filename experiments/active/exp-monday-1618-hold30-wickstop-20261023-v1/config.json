@@ -1,0 +1,30 @@
+{
+  "experiment_id": "exp-monday-1618-hold30-wickstop-20261023-v1",
+  "question": "Owner 2026-10-23 \"止损改成影线低点重新跑\": limit at the first weekly Monday 1618, hold 30 minutes, market exit, stop at the 15m touch bar wick extreme. Real fees.",
+  "hold_minutes": 30,
+  "maker_fee": 0.0002,
+  "taker_fee": 0.0005,
+  "fee_source": "OKX account trade-fee read-only 2026-10-23: Lv1 swap maker 0.02%, taker 0.05% per side; limit entry maker, timed or stop exit taker.",
+  "null_per_touch": 10,
+  "horizon_days": 14,
+  "seed": 20261023,
+  "split": {
+    "okx_btc_1m": "2025-10-22T00:00:00Z",
+    "binance_majors_1m": "2024-10-01T00:00:00Z",
+    "okx_177_15m": "2026-01-01T00:00:00Z",
+    "binance_alts_15m": "2022-10-01T00:00:00Z"
+  },
+  "success_criterion": "Primary stop_wick15m in both 1m datasets: week-cluster bootstrap 95 lower bound >0 and positive mean in both chronological halves.",
+  "limitations": "Limit fill assumed when price trades the level (no queue); 15m datasets are an approximation (exit 15-30 min after fill); slippage on the market exit not included.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "variants": {
+    "stop_wick15m": {
+      "stop": "stop_far",
+      "update": "stop_wick"
+    }
+  },
+  "primary": "stop_wick15m",
+  "stop_rule": "No stop until the 15m bar containing the first touch closes (price cannot exceed that bar extreme inside it); then one native stop at that bar low (long) / high (short) for the rest of the hold. Taker fee on stop or timed exit.",
+  "single_variable": "Stop: 2.0 extension -> 15m touch-bar wick extreme, versus exp-monday-1618-hold30-20261023-v1 stop_2.0. Entry, hold and fees unchanged; no_stop results are not rerun."
+}
