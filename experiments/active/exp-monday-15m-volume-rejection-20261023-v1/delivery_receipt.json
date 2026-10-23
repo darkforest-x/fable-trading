@@ -1,0 +1,41 @@
+{
+  "experiment_id": "exp-monday-15m-volume-rejection-20261023-v1",
+  "builder_commit": "24f4be90e9",
+  "reproduce": "scripts/backtest-monday-volume --workers 3",
+  "runtime": {
+    "nautilus_trader": "1.231.0",
+    "pandas": "3.0.5",
+    "numpy": "2.5.3"
+  },
+  "completed_symbols": 632,
+  "signals": 11232,
+  "closed_signals": 11225,
+  "censored_signals": 7,
+  "native_positions": 39870,
+  "native_fills": 79740,
+  "oracle_checked": 39870,
+  "unique_native_trade_ids": 39870,
+  "inputs_and_code_stamps_unchanged": true,
+  "volume_and_confirmation_invariants": true,
+  "max_native_oracle_r_error": 7.458922368641652e-12,
+  "unmatched_signals": 1686,
+  "no_signal_symbols": [
+    "OPGUSDT",
+    "GENIUSUSDT",
+    "SPORTFUNUSDT"
+  ],
+  "crypto_end_dates": {
+    "2026-09-22": 226,
+    "2026-04-30": 406
+  },
+  "native_ledgers": "symbols/<symbol>/native_gross.csv.gz and native_fills.csv.gz",
+  "costed_ledgers": "symbols/<symbol>/trades.csv.gz and all_trades.csv.gz",
+  "group1": "BTC/ETH only; XAU unavailable because all original volume values are zero",
+  "independent_R_not_account_return": true,
+  "training_eligible": false,
+  "production_eligible": false,
+  "tests_passed": 16,
+  "cache_reuse_verified": "BTC cached adapter path passed; all632 input/code identities independently verified",
+  "notion_url": "https://app.notion.com/p/4028856479af81a8a5ebc599e387a7c4",
+  "notion_readback_verified": true
+}

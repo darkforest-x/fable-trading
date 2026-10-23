@@ -18,6 +18,32 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-15m-volume-rejection-20261023-v1
+    artifact_type: manifest
+    role: first_15m_wick_peak_volume_three_body_confirmation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 24f4be90e9
+    generator_commit: 24f4be90e9
+    source_path: experiments/active/exp-monday-15m-volume-rejection-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-15m-volume-rejection-20261023-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: '632crypto11232signals,39870native positions79740fills all audited. Existing XAU volume all zero, unavailable. Reproduce scripts/backtest-monday-volume --workers 3; raw fills local, no formal report.'
+
+  - artifact_id: monday-5m-wick-gold-clock-20261023-v2
+    artifact_type: manifest
+    role: corrected_local_gold_clock_case1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f6331cb975
+    generator_commit: f6331cb975
+    source_path: experiments/active/exp-monday-5m-wick-gold-clock-20261023-v2/summary.json
+    storage_uri: repo://experiments/active/exp-monday-5m-wick-gold-clock-20261023-v2/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 'Corrects only case1 gold and combined group1; all crypto original fills unchanged.347gold signals1388native positions2776fills. LocalNY clock independently aligned; fixedEST historical version preserved. Spot gross only.'
+
   - artifact_id: monday-5m-wick-engulf-20261023-v1
     artifact_type: manifest
     role: adjacent_5m_wick_engulf_native_backtest
@@ -33,6 +59,7 @@ artifacts:
       Existing Binance632crypto histories and HistData spot gold; current OKX fee scenario on crypto, unknown spot net.
       XAU conflicts excluded and replay censored. Reproduce scripts/backtest-monday-wick --workers 3; unchanged fills reused.
       Raw ledgers retained locally under symbols/. No new formal report.
+      Gold and combined group1 figures superseded by monday-5m-wick-gold-clock-20261023-v2; old fixedEST clock was incorrect for local source.
 
   - artifact_id: monday-fib-watermark-20261023
     artifact_type: manifest

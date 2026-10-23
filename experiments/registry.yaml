@@ -14,20 +14,36 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-5m-wick-gold-clock-20261023-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: f6331cb975
+    status: rejected
+    question: 'Correct case1 gold source clock using independent UTC gold alignment; preserve all original crypto fills.'
+    single_variable: 'Local XAU archive clock fixedEST to America/New_York; unchanged signal, barriers, source-conflict exclusion and native engine.'
+    result: 'Independent 5706 overlapping returns: NY correlation .945 versus fixedEST -.004. Gold347 signals grossmean-.0224R vsrandom-.1533R; later97 -.6417R. Combined BTC/ETH/gold809 grossmean-.1270R vsrandom-.1285R, paired p.712. No stable profitability.'
+    artifacts:
+    - monday-5m-wick-gold-clock-20261023-v2
+    canonical_report: experiments/active/exp-monday-5m-wick-gold-clock-20261023-v2/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Supersedes only case1 gold and combined group1 figures; old files preserved.1388 native positions/2776fills. Spot costs unknown. Does not repair absent volume for case2.'
   - experiment_id: exp-monday-15m-volume-rejection-20261023-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: active
+    source_commit: 24f4be90e9
+    status: rejected
     question: 'Owner case2: first15m1618 wick,21bar maximum volume,and3subsequent bodies strictly inside.'
     single_variable: 'Owner-defined case2 protocol fixed before replay; same pin SL and Monday-edge TP/cost ascase1; no parameter search.'
-    result: 'Pending native framework results; existing spot XAU volume unavailable(all zero), explicit omission.'
-    artifacts: []
+    result: '632crypto,11232signals,39870native positions. BTC47/ETH40 combined netmean-.03039R vsrandom+.03602R; notional+11.64bp but later45 -4.70bp.630alts11138closed7censored,netwin44.60percent,netmean-.08565R vsrandom-.17696R; matched excess6.27bp CI-5.01..17.87 p.144. XAU volume unavailable. No stable profitability.'
+    artifacts:
+    - monday-15m-volume-rejection-20261023-v1
     canonical_report: experiments/active/exp-monday-15m-volume-rejection-20261023-v1/summary.json
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: 'Nautilus1.231.0 adapter reused at5m execution;15m signal entry after3confirmation closes.632crypto inputs unchanged, base-asset volume.'
+    notes: 'Nautilus1.231.0 adapter reused at5m execution;15m signal entry after3confirmation closes. Base-asset volume21bar maximum ties allowed.2023time split, unmatched1686signals not omitted from absolute results. Current OKX fees on Binance history; no funding/slippage. Notion https://app.notion.com/p/4028856479af81a8a5ebc599e387a7c4 .'
   - experiment_id: exp-monday-5m-wick-engulf-20261023-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 1568de6407
@@ -42,7 +58,7 @@ experiments:
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: 'Nautilus1.231.0; OKX currentfee scenario on Binance history. HistData fixedEST source clock; spotgross only. No holding timer.'
+    notes: 'Gold and combined group1 figures above are superseded by exp-monday-5m-wick-gold-clock-20261023-v2: local source actually NY wall time, prior fixedEST mapping incorrect. Original artifacts preserved; crypto fills unchanged. Nautilus1.231.0; OKX currentfee scenario on Binance history. Spotgross only. No holding timer.'
   - experiment_id: exp-monday-1618-pw-confluence-20261023-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 33e14cb5b354b6490aa20608c77fd5efe89d7920

@@ -1,0 +1,57 @@
+{
+  "reference": {
+    "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_fetched/okx_XAU_USDT_SWAP_15m_41900.csv",
+    "bytes": 3122642,
+    "mtime_ns": 1786683006654628235
+  },
+  "observations": [
+    {
+      "mapping": "fixed_EST",
+      "n": 5706,
+      "correlation": -0.004083448726626457,
+      "by_month": {
+        "6": {
+          "n": 1698,
+          "correlation": -0.004707757556370258
+        },
+        "7": {
+          "n": 2077,
+          "correlation": -0.02013371140001536
+        },
+        "8": {
+          "n": 1911,
+          "correlation": 0.003119719725886416
+        },
+        "9": {
+          "n": 20,
+          "correlation": 0.23780566230872374
+        }
+      }
+    },
+    {
+      "mapping": "local_New_York",
+      "n": 5706,
+      "correlation": 0.9453564429158376,
+      "by_month": {
+        "6": {
+          "n": 1702,
+          "correlation": 0.952297828791757
+        },
+        "7": {
+          "n": 2077,
+          "correlation": 0.948983047566905
+        },
+        "8": {
+          "n": 1911,
+          "correlation": 0.9325177991643093
+        },
+        "9": {
+          "n": 16,
+          "correlation": 0.9550530248111179
+        }
+      }
+    }
+  ],
+  "conclusion": "Local source archive behaves as NY wall time; fixedEST v1 gold and combined-group values superseded",
+  "scope": "Local files only, not a claim about every HistData download"
+}

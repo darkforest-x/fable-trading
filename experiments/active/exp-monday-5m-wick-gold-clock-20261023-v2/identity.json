@@ -1,0 +1,222 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-5m-wick-engulf-20261023-v1",
+    "question": "Owner: 5m wick-only touch of weekly Monday1618 immediately followed by reversal body engulf; BTC/ETH/spot gold vs all available altcoin perpetuals.",
+    "crypto_root": "data/crypto/market/kline_preholdout_binance_um5m",
+    "crypto_tail": "data/crypto/market/kline_binance_um5m_forward_20260922/series",
+    "gold": "Existing HistData XAUUSD M1 ZIPs, fixed EST UTC-5 source timestamps; NY Monday session; bid-only prices",
+    "exclude_symbols": [
+      "USDCUSDT",
+      "BUSDUSDT",
+      "TUSDUSDT",
+      "FDUSDUSDT",
+      "USDPUSDT",
+      "USDEUSDT",
+      "DAIUSDT",
+      "USD1USDT",
+      "PAXGUSDT",
+      "XAUTUSDT",
+      "XAUUSDT",
+      "XAGUSDT",
+      "BTCDOMUSDT",
+      "DEFIUSDT",
+      "FOOTBALLUSDT",
+      "BLUEBIRDUSDT"
+    ],
+    "signal": "Every red lower-wick rejection with body entirely >= lower1618 followed immediately by green engulfing body; mirror for upper1618. Equal body endpoints allowed if at least one strictly engulfs; no wick ratio threshold.",
+    "entry": "Next contiguous 5m open after confirmation close; skip if entry is outside frozen stop/target interval",
+    "stop": "Exact first pin low (long) or high (short), owner confirmed",
+    "target": "Monday low (long) or high (short), owner confirmed, single full-size limit",
+    "holding": "No elapsed expiry, no breakeven/partial/trailing; data boundary or unexpected crypto gap censored separately",
+    "monday": "America/New_York completed Monday; crypto 288 bars, spot >=240 observed5m bars; both pattern bars after Monday close",
+    "split": "2023-01-01T00:00:00Z",
+    "controls_per_signal": 3,
+    "seed": 20261023,
+    "maker_fee": 0.0002,
+    "taker_fee": 0.0005,
+    "fee_read_date": "2026-10-23",
+    "fee_source": "Owner AGENTS: OKX USDT perp Lv1 read-only account trade-fee. Applied as execution-cost scenario to Binance data; market entry/stop/censor taker, TP limit maker, actual fill notionals.",
+    "spot_fee": "Unknown broker/spread; XAU gross only, net null. No OKX perp fee applied to spot.",
+    "intrabar": "Nautilus native O-H-L-C primary, stop-first ambiguity sensitivity",
+    "matching": "Same symbol x NY week x direction x causal prior14bar ATR/open log-volatility bin; identical fractional risk and reward; 3 draws without replacement within pair. Shared-week trend bias remains; not an absolute driftless null.",
+    "metrics": "Independent R and notional bp, not portfolio returns. No trained score: AUC/top-decile/ranking permutation inapplicable; weekly cluster sign-flip tests matched return excess.",
+    "limitations": "Available Binance universe may omit delisted contracts; no claim to all worldwide altcoins. Binance vs OKX venue basis; no funding, slippage, spread or capacity. Spot Bid-only. No physical phone QA.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "source_clock": "America/New_York observed local archives",
+  "inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_2011.zip",
+      "bytes": 3595889,
+      "mtime_ns": 1791899450307193027
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_2012.zip",
+      "bytes": 3999995,
+      "mtime_ns": 1791899472769534643
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_2013.zip",
+      "bytes": 4012416,
+      "mtime_ns": 1791899492333857816
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_2014.zip",
+      "bytes": 3771386,
+      "mtime_ns": 1791899539978804343
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_2015.zip",
+      "bytes": 3759516,
+      "mtime_ns": 1791899423559163397
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_2016.zip",
+      "bytes": 3917648,
+      "mtime_ns": 1791899566128416535
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_2017.zip",
+      "bytes": 3695379,
+      "mtime_ns": 1791899588949777329
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_2018.zip",
+      "bytes": 3634784,
+      "mtime_ns": 1791899620162848113
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_2019.zip",
+      "bytes": 3848654,
+      "mtime_ns": 1791899687814372274
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_2020.zip",
+      "bytes": 4317930,
+      "mtime_ns": 1791899709356336123
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_2021.zip",
+      "bytes": 4252073,
+      "mtime_ns": 1791899740693989371
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_2022.zip",
+      "bytes": 4364035,
+      "mtime_ns": 1791899766072540525
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_2023.zip",
+      "bytes": 3629564,
+      "mtime_ns": 1791899785551827711
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_2024.zip",
+      "bytes": 4358732,
+      "mtime_ns": 1791899807351651976
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_2025.zip",
+      "bytes": 4561311,
+      "mtime_ns": 1791899908178268023
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_20261.zip",
+      "bytes": 398755,
+      "mtime_ns": 1791899916846059678
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_202610.zip",
+      "bytes": 122023,
+      "mtime_ns": 1791900001197818379
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_20262.zip",
+      "bytes": 390184,
+      "mtime_ns": 1791899927109979768
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_20263.zip",
+      "bytes": 438413,
+      "mtime_ns": 1791899937554081568
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_20264.zip",
+      "bytes": 399055,
+      "mtime_ns": 1791899945158853200
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_20265.zip",
+      "bytes": 391663,
+      "mtime_ns": 1791899956849280294
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_20266.zip",
+      "bytes": 413135,
+      "mtime_ns": 1791899965907793671
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_20267.zip",
+      "bytes": 413061,
+      "mtime_ns": 1791899976137234133
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_20268.zip",
+      "bytes": 393838,
+      "mtime_ns": 1791899985808611288
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_20269.zip",
+      "bytes": 394665,
+      "mtime_ns": 1791899994476521386
+    }
+  ],
+  "code": [
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_5m_wick_engulf.py",
+      "bytes": 22379,
+      "mtime_ns": 1792761084737376775
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/tests/evaluation/test_monday_5m_wick_engulf.py",
+      "bytes": 4071,
+      "mtime_ns": 1792761084736993942
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/layers/l3_backtest/nautilus_independent.py",
+      "bytes": 49936,
+      "mtime_ns": 1792761084736872817
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_5m_wick_gold.py",
+      "bytes": 6327,
+      "mtime_ns": 1792761617917748791
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/tests/evaluation/test_monday_5m_wick_gold.py",
+      "bytes": 1565,
+      "mtime_ns": 1792761617918177708
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_5m_wick_gold_clock.py",
+      "bytes": 6150,
+      "mtime_ns": 1792763097903258693
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_15m_volume_rejection.py",
+      "bytes": 13574,
+      "mtime_ns": 1792762769422556213
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/tests/evaluation/test_monday_gold_clock.py",
+      "bytes": 524,
+      "mtime_ns": 1792763097904219696
+    }
+  ],
+  "runtime": {
+    "nautilus_trader": "1.231.0",
+    "pandas": "3.0.5",
+    "numpy": "2.5.3"
+  }
+}
