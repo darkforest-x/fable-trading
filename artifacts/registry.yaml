@@ -34318,3 +34318,20 @@ artifacts:
       Coin names use the Monday Telegram chart URL; sibling buttons retain wallpaper selection.
       58 frontend tests; actual Chrome OKX BTC perpetual 15-minute chart verified, 320px mobile targets and refresh focus checked.
       Native app takeover not verified. Task browser tabs closed; service, ticker stream and four patrol schedules remain enabled.
+
+  - artifact_id: monday-fib-windows-link-20261023
+    source_commit: 27d920c084
+    generator_commit: 27d920c084
+    artifact_type: manifest
+    role: monday_windows_native_tradingview_dispatch
+    source_repo: darkforest-x/fable-trading
+    source_path: artifacts/monday-fib-windows-link-20261023/receipt.json
+    storage_uri: repo://artifacts/monday-fib-windows-link-20261023/receipt.json
+    holdout_status: not_applicable
+    training_eligible: false
+    production_eligible: false
+    notes: Stitch GEMINI_3_8_FLASH screen 2e8ce287d9fa44cdbf3036bdf6000937.
+      Windows links use an installed per-user protocol handler with no web fallback; other OS retain HTTPS.
+      Installed on WIN-ZZC Administrator; 41 frontend, 139 bridge regression tests and 40 compiled Windows parser cases pass.
+      Browser-to-native chart confirmation pending because remote UI input did not reach Windows; no successful chart switch claimed.
+      Task remote connection closed; monitor, stream, four patrol schedules and Windows display client remain running.

@@ -1,0 +1,38 @@
+{
+  "source_commit": "27d920c084",
+  "page": "https://spikeok.com/#monday-fib",
+  "stitch_screen": "2e8ce287d9fa44cdbf3036bdf6000937",
+  "stitch_model": "GEMINI_3_8_FLASH",
+  "behavior": {
+    "windows_coin_link": "spike-tradingview://open?symbol=BTC-USDT-SWAP&timeframe=15m",
+    "dispatch": "Per-user Windows handler validates symbol and period, then reuses windows_tradingview.ps1 to pass one HTTPS chart argument to installed TradingView.exe",
+    "web_fallback": false,
+    "other_operating_systems": "Existing HTTPS chart links",
+    "wallpaper_preview": "Independent right-hand button unchanged"
+  },
+  "installation": {
+    "machine": "WIN-ZZC",
+    "user": "Administrator",
+    "tradingview_version": "3.4.1.8194",
+    "registry": "HKCU\\Software\\Classes\\spike-tradingview",
+    "owner": "Spike.ChartLink.v1",
+    "executable": "%LOCALAPPDATA%\\Spike\\ChartLink\\SpikeChartLink.exe",
+    "compiler": "Windows .NET Framework csc.exe",
+    "registry_command_readback": "passed",
+    "other_machines_require_installation": true
+  },
+  "validation": {
+    "frontend": {"passed": 41, "command": "node --test tests/monitor/frontend_monday_fib*.test.cjs tests/monitor/frontend_module_loader.test.cjs tests/monitor/frontend_shell.test.cjs"},
+    "existing_bridge": {"passed": 139, "command": ".venv/bin/python -m pytest -q tests/monitor/test_windows_tradingview.py tests/monitor/test_tradingview.py"},
+    "real_windows_parser": {"passed": 4, "cases": 40, "command": "python tests/monitor/test_windows_chart_link.py", "notes": "Compiles and executes the C# parser; no UI launch. Uses unittest because the remote venv has no pytest."},
+    "public_javascript": "HTTPS response contains Windows native protocol branch and removes target=_blank on Windows links",
+    "browser_to_native_chart": "pending_manual_confirmation",
+    "blocker": "UU remote viewer showed the live Windows desktop, but CUA mouse and keyboard events did not reach Windows; no native launch or chart-render success is claimed for this run",
+    "dispatch_receipt": "No click receipt existed at the last readback",
+    "cleanup": "Ended the task's UU remote connection through its Exit remote control menu; preserved Windows user browser tabs, TradingView, and existing client task",
+    "windows_client_task": "SpikeDesktopClient Running"
+  },
+  "post_cleanup_health": "health.json",
+  "training_eligible": false,
+  "production_eligible": false
+}
