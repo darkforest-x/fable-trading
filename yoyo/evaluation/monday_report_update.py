@@ -70,6 +70,17 @@ def n5_data():
     cfg = json.loads((old.EXP / 'config.json').read_text())
     paths = dict(old.jobs(cfg)[0])['BTCUSDT']
     frame = volume.load(paths)
+    # New native rows did not persist both Monday edges. Recover those chart
+    # annotations from the original completed NY Monday, and verify barriers.
+    for i, r in g.iterrows():
+        start=pd.Timestamp(r.week).tz_localize('America/New_York').tz_convert('UTC')
+        monday=frame.loc[start:start+pd.Timedelta(days=1)-pd.Timedelta(minutes=5)]
+        assert len(monday)==288
+        hi,lo=float(monday.high.max()),float(monday.low.min())
+        level=lo-.618*(hi-lo) if r.side==1 else hi+.618*(hi-lo)
+        assert np.isclose(level,r.level,rtol=1e-9)
+        assert np.isclose(lo if r.side==1 else hi,r.target_price,rtol=1e-9)
+        g.loc[i,['monday_high','monday_low']]=[hi,lo]
     # Locate the frozen events on the loaded frame rather than assuming a segment offset.
     g['entry_i'] = frame.index.get_indexer(pd.to_datetime(g.entry_time, utc=True))
     g['exit_original_i'] = frame.index.get_indexer(pd.to_datetime(g.exit_interval_start, utc=True))
