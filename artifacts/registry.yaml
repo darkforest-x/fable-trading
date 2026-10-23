@@ -34262,3 +34262,19 @@ artifacts:
       Native pane/axis pan and zoom, glass dock controls, seven native OKX periods with fixed NY Monday anchors.
       54 frontend and 28 Python tests; seven live API periods, desktop/mobile browser checks and cleanup evidence.
       Daily uses 1Dutc; bounded selected-chart reads do not expand scanner periods or change alerts/trading rules.
+
+  - artifact_id: monday-fib-search-scroll-20261023
+    source_commit: f3e1ecdcc5
+    generator_commit: f3e1ecdcc5
+    artifact_type: manifest
+    role: monday_search_focus_and_continuous_symbol_list
+    source_repo: darkforest-x/fable-trading
+    source_path: artifacts/monday-fib-search-scroll-20261023/receipt.json
+    storage_uri: repo://artifacts/monday-fib-search-scroll-20261023/receipt.json
+    holdout_status: not_applicable
+    training_eligible: false
+    production_eligible: false
+    notes: Stitch GEMINI_3_8_FLASH screen 7042ede4016f4429b83e53d4d4a234f2.
+      One rounded search focus surface; all matching touched contracts in an independent scrolling body.
+      55 frontend tests, 419 live rows, sixty-second stable scroll anchor, search/selection/keyboard and 320px mobile checks.
+      No backend restart; temporary browser tab closed and service/worker health retained.

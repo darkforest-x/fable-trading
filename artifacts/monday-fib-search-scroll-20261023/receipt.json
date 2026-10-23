@@ -1,0 +1,43 @@
+{
+  "status": "delivered",
+  "url": "https://spikeok.com/#monday-fib",
+  "at": "2026-10-23T03:50:08.735797+00:00",
+  "source_commit": "f3e1ecdcc5f2a7c8b9855f9937b9d52a42b00ea8",
+  "stitch": {
+    "project_id": "8978791379095391159",
+    "screen_id": "7042ede4016f4429b83e53d4d4a234f2",
+    "model_id": "GEMINI_3_8_FLASH",
+    "html": "stitch-search-scroll.html",
+    "image": "stitch-search-scroll.png"
+  },
+  "changes": [
+    "One rounded search focus surface; no inner blue rectangle",
+    "All matching touched symbols rendered in independent scroll region; no pagination",
+    "Fixed header/search/filters; live quote refresh preserves first visible symbol and pixel offset",
+    "Search/filter reset to top; selection preserves candle period"
+  ],
+  "validation": {
+    "frontend_tests": 55,
+    "desktop": "1280x800",
+    "mobile": [
+      "320x740",
+      "320x480"
+    ],
+    "live_symbols_rendered": 419,
+    "scroll_refresh_proof": "scroll-refresh.json",
+    "native_keyboard_end": "Reached final row at scrollTop 24347.5, scrollHeight 24727",
+    "search_results": "ETH returns ETH and ETHW; unknown query returns honest empty state",
+    "selection": "ETH selected and pinned, 1H retained; follow restored after test",
+    "focus": "Input outline-style none; outer rounded border and glow remain visible; no position or size jump",
+    "horizontal_overflow": false,
+    "console_warnings_or_errors": 0,
+    "physical_touch_tested": false
+  },
+  "cleanup": {
+    "temporary_iab_tab_closed": "5",
+    "remaining_iab_tabs": 0,
+    "viewport_reset": true,
+    "backend_restart_required": false,
+    "health": "health.json"
+  }
+}
