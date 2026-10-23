@@ -1,4 +1,4 @@
-/* Read-only row chart. Reuses the bounded OKX context cache and shared renderer.
+/* Read-only wallpaper chart. Reuses the bounded OKX cache and shared renderer.
  * Monday anchors come from the monitor; candles must match its symbol, NY week,
  * and closed-bar boundary. No trading, alert writes, or synthetic candles.
  */
@@ -10,15 +10,15 @@
     const h=row.high,l=row.low,r=h-l;
     if(!finite(h)||!finite(l)||r<=0)return [];
     return [
-      {label:'上 1.618',price:row.upper,kind:'fib',color:'#c93248',lineWidth:2},
-      {label:'周一高',price:h,kind:'range',color:'#334155'},
+      {label:'上 1.618',price:row.upper,kind:'fib',color:'#c93248',lineWidth:2,lineStyle:0},
+      {label:'周一高',price:h,kind:'range',color:'#528cc1',lineStyle:0},
       {label:'上 0.705',price:l+.705*r,kind:'fib',color:'#408ddd',axisLabelVisible:false},
       {label:'上 0.618',price:l+.618*r,kind:'fib',color:'#408ddd',axisLabelVisible:false},
       {label:'中点 0.5',price:l+.5*r,kind:'range',color:'#718096',lineStyle:2},
       {label:'下 0.618',price:h-.618*r,kind:'fib',color:'#8a6cbd',axisLabelVisible:false},
       {label:'下 0.705',price:h-.705*r,kind:'fib',color:'#8a6cbd',axisLabelVisible:false},
-      {label:'周一低',price:l,kind:'range',color:'#334155'},
-      {label:'下 1.618',price:row.lower,kind:'fib',color:'#087f69',lineWidth:2},
+      {label:'周一低',price:l,kind:'range',color:'#528cc1',lineStyle:0},
+      {label:'下 1.618',price:row.lower,kind:'fib',color:'#087f69',lineWidth:2,lineStyle:0},
     ].filter(x=>finite(x.price));
   }
   function prepare(context,row,week){
@@ -38,18 +38,21 @@
   }
   if(typeof module!=='undefined')module.exports={levels,prepare};
   if(typeof document==='undefined')return;
-  const view={bars:672,range:true,fib:true,fitAll:true,showLevels:true,mondayBand:true,candleColors:{up:'#087f69',down:'#d7355d'}};
+  const view={bars:672,range:true,fib:true,fitAll:false,showLevels:false,mondayBand:true,wallpaper:true,candleColors:{up:'#169873',down:'#d7355d'}};
   let target=null,controller=null,timer=null,version=0;
   const cache=new Map();
-  function stop(){version++;clearTimeout(timer);controller?.abort();controller=null;if(target)window.SpikeRangeChart?.unmount(target.mount);target=null;}
+  function stop(){version++;clearTimeout(timer);controller?.abort();controller=null;if(target){window.SpikeRangeChart?.unmount(target.mount);target.host.replaceChildren?.();}target=null;}
   function draw(context,error=''){
     if(!target)return;
     try{
       const value=prepare(context,target.row,target.week);
-      window.SpikeRangeChart.mount(target.mount,value,view,error);
-      target.state.textContent=error||(context.error?'数据更新失败：'+context.error:context.loading?'正在同步此合约 K 线…':!value.candles?.length?'暂无本周 K 线，请稍后重试':'15m 已收盘 K 线 · 从纽约周一开始；实时触价可能发生在尚未收盘的 K 线内。');
-    }catch(e){target.state.textContent=e.message;window.SpikeRangeChart.unmount(target.mount);}
+      target.context=context;
+      if(!target.internal)value.levels=value.levels.filter(l=>['上 1.618','周一高','周一低','下 1.618'].includes(l.label));
+      target.instance=window.SpikeRangeChart.mount(target.mount,value,view,error);
+      message(error||(context.error?'K 线更新失败：'+context.error:context.loading?'正在同步此合约 K 线…':!value.candles?.length?'暂无本周 K 线，请稍后重试':''));
+    }catch(e){message(e.message);window.SpikeRangeChart.unmount(target.mount);}
   }
+  function message(value){if(!target)return;target.state.textContent=value;target.caption.hidden=!value;}
   async function refresh(){
     if(!target||controller||document.hidden)return;
     clearTimeout(timer);const current=target,token=version,c=new AbortController();controller=c;
@@ -61,18 +64,23 @@
       prepare(value,current.row,current.week);
       cache.delete(current.key);cache.set(current.key,{value,at:Date.now()});while(cache.size>6)cache.delete(cache.keys().next().value);
       draw(value);if(value.loading)delay=3000;else if(value.error||!value.candles?.length)delay=10000;
-    }catch(e){if(token===version&&target===current){current.state.textContent=(e.name==='AbortError'?'图表读取超时':e.message)+' · 可点击重新加载';delay=10000;}}
+    }catch(e){if(token===version&&target===current){message((e.name==='AbortError'?'图表读取超时':e.message)+' · 可重新加载');delay=10000;}}
     finally{clearTimeout(timeout);if(controller===c)controller=null;if(token===version&&target===current&&!document.hidden)timer=setTimeout(refresh,delay);}
   }
-  function show(host,row,week){
+  function show(host,row,week,{internal=false}={}){
     const key=row.symbol+'|'+week;
-    if(target?.host===host&&target.key===key){target.row=row;return;}
+    if(target?.host===host&&target.key===key){
+      const changed=target.internal!==internal||['high','low','upper','lower'].some(k=>target.row[k]!==row[k]);
+      target.row=row;target.internal=internal;if(changed&&target.context)draw(target.context);return;
+    }
     stop();if(!host)return;
     host.innerHTML='<div class="mf-chart-caption"><p role="status">正在加载区间 K 线…</p><button type="button" data-mf-chart-retry>重新加载</button></div><div class="mf-chart-mount"></div>';
-    target={host,row,week,key,state:host.querySelector('[role=status]'),mount:host.querySelector('.mf-chart-mount')};
+    target={host,row,week,key,internal,state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
     host.querySelector('[data-mf-chart-retry]').addEventListener('click',()=>refresh());
     const previous=cache.get(key);if(previous)draw(previous.value);
     if(previous&&Date.now()-previous.at<60000&&!previous.value.loading)timer=setTimeout(refresh,60000-(Date.now()-previous.at));else refresh();
   }
-  window.SpikeMondayFibChart={show,hide:stop};
+  function setInternal(value){if(!target)return;target.internal=value;if(target.context)draw(target.context);}
+  function fit(){const chart=target?.instance?.chart;if(chart){chart.priceScale('right').applyOptions({autoScale:true});chart.timeScale().fitContent();}}
+  window.SpikeMondayFibChart={show,hide:stop,setInternal,fit};
 })();

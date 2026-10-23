@@ -1,6 +1,6 @@
-/* Stitch Apple Glass screen 07032a6d28ba421790a667c5dc50eccc, adapted to
- * the existing read-only OKX API. Opening this page never enables Telegram.
- * Snapshot generations fence late GETs and subscription writes; no trade API.
+/* Stitch wallpaper fd410c9bd37443dd8759a713c57e2d47, adapted to the read-only
+ * Monday monitor. Latest means occurrence time, never history insertion time.
+ * Manual selection pins the chart until follow is resumed; no subscription writes.
  */
 (() => {
   'use strict';
@@ -8,135 +8,171 @@
   const finite=v=>typeof v==='number'&&Number.isFinite(v);
   const price=v=>finite(v)?v.toLocaleString('en-US',{maximumFractionDigits:Math.min(12,Math.max(2,6-Math.floor(Math.log10(Math.abs(v)||1))))}):'—';
   const STATES={loading:'正在同步',developing:'周一尚未结束',missing_monday:'缺少完整周一',missing_history:'历史触价待核对',recovering:'正在核对断线区间',fetch_error:'数据暂不可用',invalid_range:'周一区间无效'};
-  const RECEIPTS={history:'历史触及 · 不补发',muted:'未启用推送',pending:'待发送',sending:'发送中',sent:'TG 服务已接受',skipped:'已跳过',failed:'发送失败',unknown:'结果未知 · 不重发'};
-  const FILTERS={all:'全部已触及',recent:'刚触及 · 15分钟内',upper:'触及上沿',lower:'触及下沿'};
-  // Display emphasis only; does not change notification or execution freshness.
-  const RECENT_MS=15*60000;
+  const FILTERS={all:'全部',upper:'上沿',lower:'下沿'},RECENT_MS=15*60000,PAGE_SIZE=5;
   const touchTime=e=>e?(e.source==='history'?e.candle_ms:e.observed_ms)||0:0;
   const latestTouch=r=>Object.entries(r.touches||{}).map(([side,e])=>({...e,side})).sort((a,b)=>touchTime(b)-touchTime(a))[0]||null;
   const recentTouch=(e,now)=>!!e&&e.source==='live'&&finite(e.observed_ms)&&now>=e.observed_ms&&now-e.observed_ms<RECENT_MS;
-  const available=r=>r.state==='ready'&&!r.stale;
   function selectRows(items,q='',filter='all',now=Date.now()) {
     const query=q.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
     return items.filter(r=>!!latestTouch(r)&&(!query||r.symbol.replace(/[^A-Z0-9]/g,'').includes(query))&&(
-      filter==='recent'?recentTouch(latestTouch(r),now):
-      filter==='upper'||filter==='lower'?!!r.touches?.[filter]:true))
+      filter==='recent'?recentTouch(latestTouch(r),now):filter==='upper'||filter==='lower'?!!r.touches?.[filter]:true))
       .sort((a,b)=>touchTime(latestTouch(b))-touchTime(latestTouch(a))||a.symbol.localeCompare(b.symbol));
   }
-  if(typeof module!=='undefined')module.exports={esc,price,selectRows,latestTouch,touchTime,recentTouch,RECENT_MS,STATES,RECEIPTS};
+  function selection(items,symbol,follow){const rows=selectRows(items);return (!follow&&rows.find(r=>r.symbol===symbol))||rows[0]||null;}
+  // Display coordinates are isolated from chart/data state. Only grip gestures move UI.
+  function clampPanel(x,y,w,h,vw,vh){const gap=8;return {x:Math.max(gap,Math.min(Number.isFinite(x)?x:gap,Math.max(gap,vw-w-gap))),y:Math.max(gap,Math.min(Number.isFinite(y)?y:gap,Math.max(gap,vh-h-gap)))};}
+  function mountLayout(root,env=window){
+    const blocks=Array.from(root.querySelectorAll('[data-mf-movable]')),key='spike:monday-fib:layout:v1';
+    let saved={},drag=null,active=false,frame=null;
+    try{saved=JSON.parse(env.localStorage?.getItem(key)||'{}')||{};if(typeof saved!=='object'||Array.isArray(saved))saved={};}catch{saved={};}
+    const surface=()=>env.innerWidth<=760?'mobile':'desktop';
+    const write=()=>{try{env.localStorage?.setItem(key,JSON.stringify(saved));}catch{/* Storage can be unavailable in private mode. */}};
+    const resetStyle=b=>{for(const k of ['left','top','right','bottom','transform'])b.style[k]='';};
+    const rect=b=>b.getBoundingClientRect();
+    function move(b,x,y){const r=rect(b),p=clampPanel(x,y,r.width,r.height,env.innerWidth,env.innerHeight);Object.assign(b.style,{left:p.x+'px',top:p.y+'px',right:'auto',bottom:'auto',transform:'none'});return p;}
+    function remember(b){const r=rect(b),s=surface();if(!saved[s]||typeof saved[s]!=='object')saved[s]={};saved[s][b.dataset.mfMovable]={x:r.x/Math.max(1,env.innerWidth-r.width),y:r.y/Math.max(1,env.innerHeight-r.height)};write();}
+    function restore(){
+      if(!active||drag)return;
+      for(const b of blocks){
+        resetStyle(b);if(!b.getClientRects().length)continue;
+        const p=saved[surface()]?.[b.dataset.mfMovable],r=rect(b);
+        if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y))move(b,p.x*(env.innerWidth-r.width),p.y*(env.innerHeight-r.height));
+      }
+    }
+    function reset(b){if(saved[surface()])delete saved[surface()][b.dataset.mfMovable];resetStyle(b);write();}
+    function finish(commit=true){
+      if(!drag)return;const d=drag;drag=null;d.block.classList.remove('mf-dragging');
+      d.handle.releasePointerCapture?.(d.id);
+      if(commit&&d.moved)remember(d.block);else if(d.moved){Object.assign(d.block.style,d.before);}
+    }
+    const resize=()=>{finish(false);if(frame)env.cancelAnimationFrame?.(frame);frame=env.requestAnimationFrame?.(()=>{frame=null;restore();});};
+    const bindings=[];
+    for(const block of blocks){
+      const handle=block.querySelector('[data-mf-grip]');if(!handle)continue;
+      const down=e=>{if(!active||e.isPrimary===false||(e.button!=null&&e.button!==0))return;e.preventDefault();handle.focus?.({preventScroll:true});const r=rect(block);drag={block,handle,id:e.pointerId,startX:e.clientX,startY:e.clientY,x:r.x,y:r.y,moved:false,before:Object.fromEntries(['left','top','right','bottom','transform'].map(k=>[k,block.style[k]]))};handle.setPointerCapture?.(e.pointerId);};
+      const pointer=e=>{if(!drag||drag.handle!==handle||drag.id!==e.pointerId)return;const dx=e.clientX-drag.startX,dy=e.clientY-drag.startY;if(!drag.moved&&Math.hypot(dx,dy)<5)return;drag.moved=true;block.classList.add('mf-dragging');move(block,drag.x+dx,drag.y+dy);};
+      const up=e=>{if(drag?.handle===handle&&drag.id===e.pointerId)finish();};
+      const cancel=()=>finish(false);
+      const keyboard=e=>{
+        if(e.key==='Escape'&&drag){e.preventDefault();finish(false);return;}
+        if(e.key==='Home'){e.preventDefault();reset(block);return;}
+        const deltas={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]},d=deltas[e.key];if(!d)return;
+        e.preventDefault();e.stopPropagation();const r=rect(block),step=e.shiftKey?40:12;move(block,r.x+d[0]*step,r.y+d[1]*step);remember(block);
+      };
+      const dbl=()=>reset(block);
+      for(const [event,fn] of [['pointerdown',down],['pointermove',pointer],['pointerup',up],['pointercancel',cancel],['lostpointercapture',cancel],['keydown',keyboard],['dblclick',dbl]]){handle.addEventListener(event,fn);bindings.push([handle,event,fn]);}
+    }
+    const blur=()=>finish(false);
+    return {refresh:restore,setActive(value){active=value;finish(false);if(value){env.addEventListener?.('resize',resize);env.addEventListener?.('blur',blur);restore();}else{env.removeEventListener?.('resize',resize);env.removeEventListener?.('blur',blur);if(frame)env.cancelAnimationFrame?.(frame);frame=null;}},destroy(){this.setActive(false);for(const [h,e,f] of bindings)h.removeEventListener(e,f);}};
+  }
+  if(typeof module!=='undefined')module.exports={esc,price,selectRows,selection,latestTouch,touchTime,recentTouch,RECENT_MS,STATES,clampPanel,mountLayout};
   if(typeof document==='undefined')return;
   const root=document.getElementById('monday-fib-root');if(!root)return;
-  const icon=(name)=>`<span class="mf-icon" aria-hidden="true" style="--mf-icon:url(/static/icons/${name}.svg)"></span>`;
-  root.innerHTML=`
-    <header class="mf-nav mf-glass"><a class="mf-brand" href="#market">${icon('chart-candle')}<b>SPIKE</b><span>RESEARCH</span></a>
-      <nav aria-label="监控页面导航"><a href="#market">市场观察</a><a href="#yolo-detect">均线密集</a><a href="#monday-fib" aria-current="page">周一 1.618</a><a href="#signals">信号中心</a><a href="#research">研究资产</a></nav>
-      <span id="mf-stream" class="mf-badge">连接中</span></header>
-    <div class="mf-heading"><div><p class="mf-eyebrow">WEEKLY RANGE MONITOR <span>每周定界</span></p><h1>周一 1.618 扩展位监控</h1><p id="mf-week">正在读取纽约周一区间…</p></div>
-      <div class="mf-formula mf-glass"><span><b>上沿</b> H + 0.618 × (H − L)</span><span><b>下沿</b> L − 0.618 × (H − L)</span><small>H / L 为纽约时间完整周一的高 / 低点</small></div></div>
-    <div id="mf-notice" class="mf-notice" role="status" hidden></div>
-    <div id="mf-stats" class="mf-stats" aria-label="监控概览"></div>
-    <div class="mf-columns"><div class="mf-market">
-      <div class="mf-toolbar mf-glass"><div class="mf-search-row"><label class="mf-search">${icon('search')}<input id="mf-search" type="search" placeholder="搜索已触及合约，如 BTC、ETH" aria-label="搜索监控合约" autocomplete="off"></label><button id="mf-refresh" class="mf-refresh" title="刷新监控数据" aria-label="刷新监控数据">${icon('refresh')}</button><span class="mf-sort">按最近触价时间排序</span></div><div id="mf-filters" class="mf-filters" role="group" aria-label="筛选合约状态"></div></div>
-      <div class="mf-list mf-glass"><div class="mf-table-head" aria-hidden="true"><span>合约</span><span>最新成交价</span><span>周一 1.618 扩展区间</span><span>距最近点位</span><span>本周触及</span><span></span></div><div id="mf-rows"><p class="mf-empty">正在读取监控数据…</p></div></div>
-      <div class="mf-pagination"><span id="mf-page-info"></span><div><label>每页 <select id="mf-page-size" aria-label="每页合约数"><option value="5">5</option><option value="20">20</option><option value="50">50</option></select></label><button id="mf-prev" aria-label="上一页">上一页</button><span id="mf-page-number"></span><button id="mf-next" aria-label="下一页">下一页</button></div></div>
-    </div><aside class="mf-aside">
-      <section class="mf-tg mf-glass"><div class="mf-card-title"><div><h2>Telegram 触价推送</h2><p>到达点位，及时知晓</p></div><button id="mf-tg-toggle" class="mf-switch" role="switch" aria-label="Telegram 触价推送" aria-checked="false" disabled><span></span></button></div>
-        <div class="mf-tg-status"><span id="mf-tg-state">读取订阅状态…</span><span id="mf-tg-config"></span></div><div id="mf-save-message" role="status" hidden></div>
-        <div class="mf-rule"><b>只推启用后的新触价，不补历史</b><p>每周、每合约、每个方向首次触及推送一次，无需等待 K 线收盘。</p></div><small>“TG 服务已接受”不代表手机已收到或已读。</small></section>
-      <section class="mf-events mf-glass"><div class="mf-card-title"><h2>本周最新触及</h2><span id="mf-event-count" class="mf-secondary"></span></div><div id="mf-events-list"><p class="mf-empty">正在读取记录…</p></div></section>
-      <details class="mf-rules mf-glass"><summary>监控规则与数据说明</summary><p>仅使用 OKX USDT 永续行情。纽约自然周一结束后锁定区间，周二至下周一监控两侧扩展位。</p><p>周一未结束或历史不完整时不启动该合约报警；断线后先核对历史，避免补发旧触价。</p><p>本机服务需持续运行并联网。这里是位置提醒，不会自动下单。</p></details>
-    </aside></div><footer class="mf-footer"><span>OKX · USDT 永续 · America/New_York</span><span id="mf-updated">等待同步</span></footer>`;
   const $=id=>document.getElementById(id);
-  let active=false,data=null,receivedAt=0,revision=0,controller=null,pending=null,timer=null,saving=false,error='',saveMessage='';
-  let query='',filter='all',page=0,pageSize=5;
-  const expanded=new Set();
-  const nowMs=()=>data?data.now_ms+Math.max(0,Date.now()-receivedAt):Date.now();
-  function currentRows(){const now=nowMs();return (data?.items||[]).map(r=>({...r,stale:r.stale||!finite(r.received_ms)||now-r.received_ms>90000}));}
-  const time=(ms,historical=false)=>finite(ms)?new Intl.DateTimeFormat('zh-CN',{timeZone:'America/New_York',month:'2-digit',day:'2-digit',hour:'2-digit',...(historical?{}:{minute:'2-digit'}),hourCycle:'h23'}).format(new Date(ms))+(historical?'内':'')+' 纽约':'—';
-  const status=r=>r.state!=='ready'?STATES[r.state]||'数据待就绪':r.stale?'行情已滞后':'实时观察中';
-  function row(r){
-    const name=r.symbol.replace('-USDT-SWAP',''),good=available(r),t=r.touches||{},key=esc(r.symbol),event=latestTouch(r),recent=recentTouch(event,nowMs());
-    const knownCoin=['BTC','ETH','SOL','BNB','AVAX','LINK'].includes(name);
-    const coin=knownCoin?`<img alt="" src="/static/icons/coins/${name.toLowerCase()}.png">`:icon('chart-candle');
-    const ago=Math.floor(Math.max(0,nowMs()-touchTime(event))/60000),age=ago<1?'刚刚':`${ago} 分钟前`;
-    return `<details class="mf-row${recent?' mf-just-touched':''}" data-symbol="${key}"${expanded.has(r.symbol)?' open':''}><summary data-row="${key}">
-      <span class="mf-symbol"><span class="mf-coin">${coin}</span><span><b>${esc(name)}<small>USDT</small></b><span class="mf-touch-age${recent?' mf-recent-badge':''}">${recent?'刚触及 · '+age:time(touchTime(event),event?.source==='history')}</span><em>${good?(expanded.has(r.symbol)?'收起区间 K 线':'点击展开区间 K 线'):esc(status(r))}</em></span></span>
-      <span class="mf-price"><small>最新成交价${r.stale?' · 非实时':''}</small><strong>${price(r.price)}</strong></span>
-      <span class="mf-trigger"><small>触及${event?.side==='upper'?'上':'下'}沿 1.618</small><strong class="${event?.side==='upper'?'mf-upper-text':'mf-lower-text'}">${price(event?.level??r[event?.side])}</strong><em>${event?.source==='history'?'历史触价':esc(RECEIPTS[event?.status]||'已触及')}${t.upper&&t.lower?' · 两侧均已触及':''}</em></span>${icon('chevron-down')}</summary>
-      <div class="mf-row-detail"><div class="mf-row-meta"><span>周一高点 <b>${price(r.high)}</b></span><span>周一低点 <b>${price(r.low)}</b></span><span>区间宽度 <b>${finite(r.high)&&finite(r.low)?price(r.high-r.low):'—'}</b></span>${['upper','lower'].filter(side=>t[side]).map(side=>`<span>${side==='upper'?'上沿':'下沿'}首次：${time(touchTime(t[side]),t[side].source==='history')} · ${esc(RECEIPTS[t[side].status]||'状态未知')}</span>`).join('')}</div>
-      <div class="mf-chart" data-chart-symbol="${key}"></div></div></details>`;
-  }
-  // Reconcile keyed rows so 5-second quote polling preserves the live chart canvas and zoom.
-  function patchRows(markup){
-    const host=$('mf-rows');if(!document.createElement||!host.replaceChildren){host.innerHTML=markup;return;}
-    const template=document.createElement('template');template.innerHTML=markup;
-    const old=new Map([...host.querySelectorAll(':scope > .mf-row')].map(n=>[n.dataset.symbol,n]));
-    const nodes=[...template.content.childNodes].map(fresh=>{
-      const node=old.get(fresh.dataset?.symbol);if(!node)return fresh;
-      node.className=fresh.className;node.querySelector('summary').innerHTML=fresh.querySelector('summary').innerHTML;
-      node.querySelector('.mf-row-meta').innerHTML=fresh.querySelector('.mf-row-meta').innerHTML;return node;
-    });
-    for(let i=0;i<nodes.length;i++)if(host.childNodes[i]!==nodes[i])host.insertBefore(nodes[i],host.childNodes[i]||null);
-    while(host.childNodes.length>nodes.length)host.lastChild.remove();
-  }
-  function syncChart(){
-    const node=$('mf-rows').querySelector('.mf-row[open]'),r=data?.items.find(x=>x.symbol===node?.dataset.symbol);
-    if(active&&!document.hidden&&node&&r)window.SpikeMondayFibChart?.show(node.querySelector('.mf-chart'),r,data.week);
-    else window.SpikeMondayFibChart?.hide();
-  }
+  const icon=name=>`<span class="mf-icon" aria-hidden="true" style="--mf-icon:url(/static/icons/${name}.svg)"></span>`;
+  const grip=label=>`<button class="mf-grip" data-mf-grip type="button" aria-label="移动${label}；方向键移动，Home 复位" title="拖动换位置 · 双击还原"><span aria-hidden="true"></span></button>`;
+  root.innerHTML=`
+    <div id="mf-wallpaper" class="mf-wallpaper" aria-label="所选合约的周一区间 K 线"></div>
+    <div id="mf-empty" class="mf-empty-chart" role="status">正在读取最新触价…</div>
+    <header class="mf-nav mf-glass" data-mf-movable="nav">${grip('导航')}<a href="#market" aria-label="返回市场观察">${icon('chevron-left')}<b>SPIKE</b></a><span class="mf-divider"></span><h1>周一 1.618</h1><span id="mf-stream" class="mf-stream" title="行情连接中"><i></i><span>连接中</span></span></header>
+    <section id="mf-selected" class="mf-selected mf-glass" data-mf-movable="symbol" aria-label="当前合约" hidden>${grip('币种卡片')}
+      <div class="mf-symbol-line"><h2 id="mf-symbol">—</h2><span class="mf-perp">USDT 永续</span></div>
+      <div id="mf-price" class="mf-price">—</div>
+      <div class="mf-selected-meta"><span id="mf-touch"></span><span id="mf-mode">跟随最新</span></div>
+      <p id="mf-quote-state" class="mf-quote-state" hidden></p>
+    </section>
+    <div class="mf-list-launch mf-glass" data-mf-movable="launcher">${grip('列表入口')}<button id="mf-list-toggle" class="mf-list-toggle" aria-label="打开或收起触价列表" aria-controls="mf-list-panel" aria-expanded="false">${icon('activity')}<span class="mf-list-label">触价列表</span><span id="mf-count">—</span></button></div>
+    <aside id="mf-list-panel" class="mf-list-panel mf-glass" data-mf-movable="list" aria-label="已触价合约" hidden>
+      <div class="mf-list-heading">${grip('触价列表')}<div><h2>最新触价</h2><span id="mf-list-count"></span></div><button id="mf-list-close" aria-label="收起触价列表">${icon('x')}</button></div>
+      <label class="mf-search">${icon('search')}<input id="mf-search" type="search" placeholder="搜索已触价合约" aria-label="搜索已触价合约" autocomplete="off"></label>
+      <div id="mf-filters" class="mf-filters" role="group" aria-label="触价方向">${Object.entries(FILTERS).map(([key,label])=>`<button data-filter="${key}" aria-pressed="${key==='all'}">${label}</button>`).join('')}</div>
+      <div id="mf-rows" class="mf-rows"></div>
+      <div class="mf-pagination"><button id="mf-prev" aria-label="上一页">‹</button><span id="mf-page-number"></span><button id="mf-next" aria-label="下一页">›</button></div>
+      <p class="mf-list-note">按触价时间排序 · 点击切换图表</p>
+    </aside>
+    <div id="mf-notice" class="mf-notice mf-glass" role="status" hidden></div>
+    <div class="mf-dock mf-glass" data-mf-movable="dock" role="group" aria-label="图表控制">${grip('图表工具')}<span class="mf-timeframe" title="15 分钟已收盘 K 线">15m</span><span class="mf-divider"></span><button id="mf-fit" title="恢复价格缩放并显示本周全部 K 线">${icon('maximize')}<span>全周</span></button><button id="mf-fib" aria-pressed="false" title="显示区间内部 0.5 / 0.618 / 0.705">${icon('adjustments-horizontal')}<span>内部线</span></button><span class="mf-divider"></span><button id="mf-follow" aria-pressed="true">${icon('activity')}<span>跟随最新</span></button></div>
+    <footer class="mf-footer"><span id="mf-week">纽约周一 · 读取中</span><span id="mf-updated">15m 已收盘 K 线</span></footer>`;
+  const layout=mountLayout(root);
+  let active=false,data=null,receivedAt=0,error='',timer=null,controller=null,pending=null,revision=0;
+  let query='',filter='all',page=0,selected='',selectedWeek='',follow=true,internal=false,lastRows='';
+  let listOpen=!!window.matchMedia?.('(min-width: 761px)').matches;
+  const nowMs=()=>data?.now_ms?data.now_ms+Math.max(0,Date.now()-receivedAt):Date.now();
+  const time=ms=>ms?new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(ms)):'时间待核对';
+  const short=s=>s.replace('-USDT-SWAP','');
+  function quoteState(r){return STATES[r.state]||((r.stale||!finite(r.received_ms)||nowMs()-r.received_ms>=90000||error)?'行情已滞后':'');}
+  function panel(open,focus=false){listOpen=open;$('mf-list-panel').hidden=!open;$('mf-list-toggle').setAttribute('aria-expanded',String(open));root.classList.toggle('mf-list-open',open);layout.refresh();if(focus)(open?$('mf-search'):$('mf-list-toggle')).focus({preventScroll:true});}
+  function sync(){window.SpikeNavigation?.sync('monday-fib',{q:query||null,filter:filter==='all'?null:filter,page:page?String(page+1):null,symbol:follow?null:selected||null});}
   function renderRows(){
-    const rows=selectRows(currentRows(),query,filter,nowMs()),pages=Math.max(1,Math.ceil(rows.length/pageSize));page=Math.min(page,pages-1);
-    const focus=document.activeElement?.closest?.('[data-row]')?.dataset.row,focusFilter=document.activeElement?.dataset?.filter;
-    patchRows(rows.slice(page*pageSize,(page+1)*pageSize).map(row).join('')||`<p class="mf-empty">${data?(query||filter!=='all'?'没有符合条件的已触及合约':'本周暂无触价，触及后自动出现在这里'):'正在读取监控数据…'}</p>`);
-    if(focus){const el=[...$('mf-rows').querySelectorAll('[data-row]')].find(e=>e.dataset.row===focus);el?.focus({preventScroll:true});}
-    $('mf-page-info').textContent=rows.length?`显示 ${page*pageSize+1}–${Math.min((page+1)*pageSize,rows.length)} / ${rows.length} 个合约`:'0 个合约';
+    const items=data?.items||[],rows=selectRows(items,query,filter,nowMs()),pages=Math.max(1,Math.ceil(rows.length/PAGE_SIZE));page=Math.min(Math.max(0,page),pages-1);
+    const html=rows.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE).map(r=>{
+      const e=latestTouch(r),fresh=recentTouch(e,nowMs()),state=quoteState(r),side=e.side==='upper'?'上':'下';
+      return `<button class="mf-row${fresh?' mf-recent':''}" data-symbol="${esc(r.symbol)}" aria-pressed="${r.symbol===selected}" title="${esc(r.symbol)} · ${time(touchTime(e))} 北京时间"><span class="mf-row-symbol"><b>${esc(short(r.symbol))}</b><small>${e.source==='history'?'历史 · ':''}${time(touchTime(e))}${fresh?' · 刚触及':''}</small></span><span class="mf-row-value"><strong class="mf-${e.side}">${side}沿 1.618</strong><small>${state||price(r.price)}</small></span></button>`;
+    }).join('')||`<p class="mf-no-rows">${data?'没有匹配的已触价合约':'正在读取…'}</p>`;
+    if(html!==lastRows){
+      const focused=$('mf-rows').contains?.(document.activeElement)?document.activeElement?.dataset?.symbol:null;
+      $('mf-rows').innerHTML=html;lastRows=html;
+      if(focused)Array.from($('mf-rows').querySelectorAll('[data-symbol]')).find(b=>b.dataset.symbol===focused)?.focus({preventScroll:true});
+    }
     $('mf-page-number').textContent=`${page+1} / ${pages}`;$('mf-prev').disabled=page===0;$('mf-next').disabled=page>=pages-1;
-    $('mf-filters').innerHTML=Object.entries(FILTERS).map(([k,v])=>`<button type="button" data-filter="${k}" aria-pressed="${k===filter}">${v}<span>${selectRows(currentRows(),query,k,nowMs()).length}</span></button>`).join('');
-    if(focusFilter)$('mf-filters').querySelector(`[data-filter="${focusFilter}"]`)?.focus({preventScroll:true});
-    syncChart();
+    $('mf-list-count').textContent=`${rows.length} 个`;
+    for(const b of $('mf-filters').querySelectorAll('[data-filter]'))b.setAttribute('aria-pressed',String(b.dataset.filter===filter));
   }
   function render(){
-    const rows=currentRows(),ready=rows.filter(available).length,touched=selectRows(rows).length,recent=selectRows(rows,'','recent',nowMs()).length;
-    $('mf-stats').innerHTML=[['监控合约',data?rows.length:'—','全部 USDT 永续'],['本周已触及',data?touched:'—','已触及的合约'],['刚触及',data?recent:'—','最近 15 分钟 · 实时首次触价'],['数据已就绪',data?ready:'—',data?`${rows.length-ready} 个待就绪`:'正在同步']].map(([a,b,c],i)=>`<article class="mf-glass"><p>${a}</p><div class="mf-stat-value mf-stat-${i}">${b}</div><small>${c}</small></article>`).join('');
-    const now=(data?.now_ms||0)+Math.max(0,Date.now()-receivedAt);
-    const connected=data?.stream.connected&&finite(data.stream.last_message_ms)&&now-data.stream.last_message_ms<90000&&!error;
-    $('mf-stream').textContent=connected?'OKX 行情在线':data?'行情连接待恢复':'连接中';$('mf-stream').classList.toggle('mf-online',!!connected);
-    if(data)$('mf-week').textContent=`纽约周一 ${data.week} · ${data.monday_complete?'区间已锁定，监控至下周一 00:00':'自然日尚未结束，区间形成中'}`;
+    const now=nowMs(),connected=data?.stream.connected&&finite(data.stream.last_message_ms)&&now-data.stream.last_message_ms<90000&&!error;
+    $('mf-stream').innerHTML=`<i></i><span>${connected?'行情在线':'连接待恢复'}</span>`;$('mf-stream').classList.toggle('mf-online',!!connected);$('mf-stream').title=connected?'OKX 行情在线':'行情连接待恢复';
     const notice=error||data?.stream.catalog_error||data?.stream.error||'';$('mf-notice').hidden=!notice;$('mf-notice').textContent=notice;
-    const tg=data?.telegram;$('mf-tg-toggle').disabled=!tg||saving||!!error||(!tg.configured&&!tg.enabled);$('mf-tg-toggle').setAttribute('aria-checked',String(!!tg?.enabled));
-    $('mf-tg-state').textContent=saving?'正在保存…':tg?.enabled?'推送已开启':'推送未开启';$('mf-tg-config').textContent=tg?(tg.configured?'通道已配置':'本机尚未配置通道'):'读取中';
-    $('mf-save-message').hidden=!saveMessage;$('mf-save-message').textContent=saveMessage;
-    const events=data?.events||[];$('mf-event-count').textContent=events.length?`最近 ${events.length} 条`:'';
-    $('mf-events-list').innerHTML=events.length?events.map(e=>`<article class="${recentTouch(e,nowMs())?'mf-just-touched':''}"><div><b>${esc(e.symbol.replace('-USDT-SWAP',''))}</b><span class="${e.side==='upper'?'mf-upper-text':'mf-lower-text'}">触及${e.side==='upper'?'上':'下'}沿 ${price(e.level)}</span></div><div><time>${time(e.source==='history'?e.candle_ms:e.observed_ms,e.source==='history')}</time><span class="mf-receipt ${e.status==='sent'?'mf-lower':e.status==='failed'?'mf-upper':''}">${esc(RECEIPTS[e.status]||'状态未知')}</span></div></article>`).join(''):`<p class="mf-empty">${data?'本周暂无触价记录':'正在读取记录…'}</p>`;
-    $('mf-updated').textContent=data?`最近同步 ${new Intl.DateTimeFormat('zh-CN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(new Date(data.now_ms))} · 本地时间`:'等待同步';
-    renderRows();
+    if(data){
+      if(selectedWeek&&selectedWeek!==data.week){selected='';follow=true;}
+      selectedWeek=data.week;
+      const row=selection(data.items,selected,follow);
+      if(!follow&&selected&&!data.items.some(r=>r.symbol===selected&&latestTouch(r)))follow=true;
+      const key=row?.symbol||'',changed=key!==selected;selected=key;
+      $('mf-selected').hidden=!row;$('mf-empty').hidden=!!row;
+      if(row){
+        const e=latestTouch(row),state=quoteState(row);
+        $('mf-symbol').textContent=short(row.symbol);$('mf-price').textContent=price(row.price);
+        $('mf-touch').textContent=`${e.side==='upper'?'上':'下'}沿 1.618 · ${time(touchTime(e))}${e.source==='history'?' 历史':''}`;
+        $('mf-touch').className='mf-'+e.side;
+        $('mf-quote-state').hidden=!state;$('mf-quote-state').textContent=state;
+        $('mf-mode').textContent=follow?'跟随最新':'已固定';
+        if(changed&&root.animate&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)$('mf-selected').animate([{opacity:.55,transform:'translateY(4px)'},{opacity:1,transform:'translateY(0)'}],{duration:220,easing:'ease-out'});
+        if(active&&!document.hidden)window.SpikeMondayFibChart?.show($('mf-wallpaper'),row,data.week,{internal});
+      }else{
+        $('mf-empty').textContent=data.monday_complete?'本周尚无 1.618 触价，等待最新行情':'纽约周一区间正在形成，完成后开始监控';
+        window.SpikeMondayFibChart?.hide();
+      }
+      $('mf-count').textContent=String(selectRows(data.items).length);
+      $('mf-week').textContent=`纽约周一 ${data.week}${data.monday_complete?'':' · 形成中'}`;
+    }
+    $('mf-follow').setAttribute('aria-pressed',String(follow));$('mf-follow').title=follow?'自动显示最近触价的合约':'回到最新触价，并自动跟随';
+    $('mf-fit').disabled=!selected;$('mf-fib').disabled=!selected;
+    renderRows();layout.refresh();
   }
-  function sync(){window.SpikeNavigation?.sync('monday-fib',{q:query||null,filter:filter==='all'?null:filter,page:page?String(page+1):null,size:pageSize===5?null:pageSize});}
-  function schedule(){clearTimeout(timer);if(active&&!document.hidden&&!saving)timer=setTimeout(()=>refresh(),5000);}
-  async function request(url,options={}){const res=await fetch(url,{cache:'no-store',credentials:'same-origin',...options});const d=await res.json();if(!res.ok)throw new Error(typeof d.detail==='string'?d.detail:'监控暂不可用，请稍后重试');if(!Array.isArray(d.items)||!d.telegram||!d.counts||!d.stream)throw new Error('监控数据格式异常');return d;}
+  function schedule(){clearTimeout(timer);if(active&&!document.hidden)timer=setTimeout(refresh,5000);}
   function refresh(){
-    if(!active||document.hidden||saving)return Promise.resolve();if(pending)return pending;
+    if(!active||document.hidden)return Promise.resolve();if(pending)return pending;
     clearTimeout(timer);const rev=revision,c=new AbortController();controller=c;const timeout=setTimeout(()=>c.abort(),12000);
-    const task=(async()=>{try{const d=await request('/api/monday-fib',{signal:c.signal});if(rev!==revision||!active)return;data=d;receivedAt=Date.now();error='';render();}
-      catch(e){if(rev===revision&&active){error=e.name==='AbortError'?'数据请求超时，正在重试':e.message;render();}}
-      finally{clearTimeout(timeout);if(controller===c)controller=null;if(pending===task)pending=null;if(rev===revision)schedule();}})();pending=task;return task;
+    const task=(async()=>{try{
+      const res=await fetch('/api/monday-fib',{cache:'no-store',credentials:'same-origin',signal:c.signal}),d=await res.json();
+      if(!res.ok)throw Error(typeof d.detail==='string'?d.detail:'监控暂不可用，正在重试');
+      if(!Array.isArray(d.items)||!d.stream||!d.week)throw Error('监控数据格式异常');
+      if(rev!==revision||!active)return;data=d;receivedAt=Date.now();error='';render();
+    }catch(e){if(rev===revision&&active){error=e.name==='AbortError'?'数据请求超时，正在重试':e.message;render();}}
+    finally{clearTimeout(timeout);if(controller===c)controller=null;if(pending===task)pending=null;if(rev===revision)schedule();}})();pending=task;return task;
   }
-  async function toggle(){
-    if(!data||saving||$('mf-tg-toggle').disabled)return;
-    const target=!data.telegram.enabled;saving=true;saveMessage='';revision++;controller?.abort();controller=null;pending=null;clearTimeout(timer);render();
-    const c=new AbortController(),timeout=setTimeout(()=>c.abort(),12000);
-    try{const d=await request('/api/monday-fib/telegram',{method:'PUT',headers:{'Content-Type':'application/json','X-Spike-Action':'update-monday-fib-telegram'},body:JSON.stringify({enabled:target}),signal:c.signal});data=d;receivedAt=Date.now();error='';saveMessage=d.telegram.enabled?'已开启，仅推送之后的新触价':'已关闭后续推送';}
-    catch(e){saveMessage=`保存结果未确认：${e.name==='AbortError'?'请求超时':e.message}。正在重新读取实际订阅状态。`;}
-    finally{clearTimeout(timeout);saving=false;if(active){render();await refresh();}}
-  }
-  function setActive(value){if(active===value)return;active=value;revision++;controller?.abort();controller=null;pending=null;clearTimeout(timer);if(active){render();refresh();}else window.SpikeMondayFibChart?.hide();}
+  function cancel(){revision++;controller?.abort();controller=null;pending=null;clearTimeout(timer);window.SpikeMondayFibChart?.hide();}
+  function setActive(value){if(active===value)return;active=value;cancel();layout.setActive(value);if(active){panel(listOpen);render();refresh();}}
   $('mf-search').addEventListener('input',e=>{query=e.target.value;page=0;renderRows();sync();});
-  $('mf-filters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;filter=b.dataset.filter;page=0;renderRows();sync();$('mf-filters').querySelector(`[data-filter="${filter}"]`)?.focus({preventScroll:true});});
-  $('mf-page-size').addEventListener('change',e=>{pageSize=Number(e.target.value);page=0;renderRows();sync();});
+  $('mf-filters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;filter=b.dataset.filter;page=0;renderRows();sync();});
   for(const [id,delta] of [['mf-prev',-1],['mf-next',1]])$(id).addEventListener('click',()=>{page+=delta;renderRows();sync();});
-  $('mf-rows').addEventListener('toggle',e=>{const d=e.target;if(!d.dataset.symbol||!d.isConnected)return;if(d.open){expanded.clear();expanded.add(d.dataset.symbol);for(const other of $('mf-rows').querySelectorAll('.mf-row[open]'))if(other!==d)other.open=false;}else expanded.delete(d.dataset.symbol);syncChart();},true);
-  $('mf-refresh').addEventListener('click',()=>refresh());$('mf-tg-toggle').addEventListener('click',toggle);
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){revision++;controller?.abort();controller=null;pending=null;clearTimeout(timer);window.SpikeMondayFibChart?.hide();}else if(active)refresh();});
-  window.SpikeNavigation?.register('monday-fib',p=>{query=p.q||'';filter=Object.hasOwn(FILTERS,p.filter)?p.filter:'all';page=Math.max(0,(Number(p.page)||1)-1);pageSize=[5,20,50].includes(Number(p.size))?Number(p.size):5;$('mf-search').value=query;$('mf-page-size').value=String(pageSize);if(data)renderRows();});
-  window.SpikeMondayFib={setActive,refresh};
+  $('mf-rows').addEventListener('click',e=>{const b=e.target.closest('[data-symbol]');if(!b)return;selected=b.dataset.symbol;follow=false;render();sync();if(window.matchMedia?.('(max-width: 760px)').matches)panel(false,true);});
+  $('mf-list-toggle').addEventListener('click',()=>panel(!listOpen,true));$('mf-list-close').addEventListener('click',()=>panel(false,true));
+  $('mf-follow').addEventListener('click',()=>{follow=true;render();sync();});
+  $('mf-fit').addEventListener('click',()=>window.SpikeMondayFibChart?.fit());
+  $('mf-fib').addEventListener('click',()=>{internal=!internal;$('mf-fib').setAttribute('aria-pressed',String(internal));window.SpikeMondayFibChart?.setInternal(internal);});
+  root.addEventListener('keydown',e=>{if(e.key==='Escape'&&listOpen){e.stopPropagation();panel(false,true);}});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancel();layout.setActive(false);}else if(active){layout.setActive(true);render();refresh();}});
+  window.SpikeNavigation?.register('monday-fib',p=>{query=p.q||'';filter=Object.hasOwn(FILTERS,p.filter)?p.filter:'all';page=Math.max(0,(Number(p.page)||1)-1);selected=p.symbol||'';follow=!selected;$('mf-search').value=query;if(data)render();});
+  panel(listOpen);window.SpikeMondayFib={setActive,refresh};
 })();

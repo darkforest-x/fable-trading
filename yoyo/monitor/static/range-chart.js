@@ -72,6 +72,7 @@
       for(const line of this.lines)this.series.removePriceLine(line);this.lines=[];
       const colors={range:'#3984b3',fib:'#9774c1',profile:'#cc8d35',npoc:'#b9689e',prior:'#8a969e'};
       const levels=(data?.levels||[]).filter(l=>view[l.kind]&&fin(l.price));this.activeLevels=levels;
+      if(view.wallpaper)this.chart.applyOptions({rightPriceScale:{scaleMargins:{top:.25,bottom:.18}},grid:{vertLines:{visible:false},horzLines:{visible:false}}});
       for(const level of levels)this.lines.push(this.series.createPriceLine({price:level.price,color:level.color||colors[level.kind],lineWidth:level.lineWidth||1,lineStyle:level.lineStyle??(level.kind==='range'?0:2),axisLabelVisible:level.axisLabelVisible!==false,title:level.label}));
       this.panel.querySelector('.cv-levels').innerHTML=levels.map(l=>`<span style="color:${l.color||colors[l.kind]}">${esc(l.label)} <b>${T.axisPrice(l.price)}</b></span>`).join('');
       this.panel.querySelector('[data-range-heading]').textContent=`${(data?.symbol||'').replace('-USDT-SWAP','')} · 已收盘 15min`;
