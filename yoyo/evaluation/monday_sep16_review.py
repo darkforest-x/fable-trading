@@ -170,7 +170,7 @@ def main():
     warnings.filterwarnings('ignore',category=pd.errors.Pandas4Warning)
     if subprocess.run(['git','diff','--quiet','HEAD','--',__file__],cwd=ROOT).returncode:raise RuntimeError('Commit builder before generating')
     for sub in ['contexts','per-symbol','images']:(EXP/sub).mkdir(parents=True,exist_ok=True)
-    paths=sorted(SOURCE.glob('*.csv.gz'));assert len(paths)==635,len(paths)
+    paths=sorted(SOURCE.glob('*.csv.gz'));assert len(paths)==638,len(paths)
     outputs=[]
     with cf.ThreadPoolExecutor(max_workers=4) as pool:
         futures={pool.submit(process,p):p for p in paths if not (EXP/'per-symbol'/f'{p.name}.json').exists()}
