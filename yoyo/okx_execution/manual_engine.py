@@ -38,6 +38,9 @@ class ManualEngine(Engine):
         result = self._strategy_tick(entries=entries)
         if self.queue and policy(self.store):
             from .free_manual import REVISION, Tickets, consume
+            from .free_management import Management, REVISION as MANAGEMENT_REVISION, consume as manage
+            self.store.set_meta('free_management_revision', MANAGEMENT_REVISION)
+            manage(self, Management(self.queue.path.parent))
             self.store.set_meta('free_manual_revision', REVISION)
             consume(self, Tickets(self.queue.path.parent), entries=entries and not self.store.meta('errors'))
             self.store.set_meta('heartbeat_ms', self.clock())

@@ -70,6 +70,7 @@ class ProtectionRequest(Request):
     stop_loss: str | None = Field(default=None, min_length=1, max_length=40)
     quote_id: str | None = Field(default=None, pattern=r"^[0-9a-f]{32}$")
     stop_to_entry: bool = Field(default=False, strict=True)
+    preserve_take_profit: bool = Field(default=False, strict=True)
 
 
 class JournalRequest(BaseModel):
@@ -438,7 +439,8 @@ def install(api, app, workspace_store):
     @api.post("/paper-desk/positions/{position_id}/protection")
     def update_protection(position_id: str, payload: ProtectionRequest, include_snapshot: bool = False):
         return respond(invoke(desk.update_protection, position_id, payload.take_profit, payload.stop_loss,
-                      payload.quote_id, payload.request_id, stop_to_entry=payload.stop_to_entry), include_snapshot)
+                      payload.quote_id, payload.request_id, stop_to_entry=payload.stop_to_entry,
+                      preserve_take_profit=payload.preserve_take_profit), include_snapshot)
 
     @api.post("/paper-desk/accounts/{account_id}/limit-open", status_code=201)
     def limit_open(account_id: str, payload: LimitOpenRequest, include_snapshot: bool = False):

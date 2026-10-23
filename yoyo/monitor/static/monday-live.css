@@ -74,3 +74,44 @@
 #monday-fib-root .mf-ticket-account select {flex:1;width:0;}
 #monday-fib-root .mf-ticket-allocation {gap:8px;}
 #monday-fib-root .mf-live-form details {padding:8px 12px;}
+/* Stitch b8b04caa2ba8475a9efab100e295dff9: one scroll surface, compact inputs. */
+#monday-fib-root .mf-ticket-scroll {display:block;flex:1;min-height:0;padding:4px 16px max(16px,env(safe-area-inset-bottom));}
+#monday-fib-root .mf-live-form {height:auto;overflow:visible;gap:10px;}
+#monday-fib-root .mf-ticket-stop input {height:44px;min-height:44px;font-size:16px;padding:10px 12px;}
+#monday-fib-root .mf-ticket-stop input::placeholder {font-size:16px;color:var(--mf-muted);}
+#monday-fib-root .mf-ticket-footer {padding:12px 0 16px;background:transparent;gap:8px;}
+#monday-fib-root .mf-ticket-link {display:none;}
+#monday-fib-root .mf-ledger {border-top:1px solid #dfe5e9;padding:8px 0 0;font-size:12px;}
+#monday-fib-root .mf-ledger-heading {display:flex;align-items:center;justify-content:space-between;gap:4px;}
+#monday-fib-root .mf-ledger-heading nav {display:flex;gap:4px;}
+#monday-fib-root .mf-ledger-heading button {font-size:13px;padding:8px;}
+#monday-fib-root .mf-ledger-heading [aria-pressed=true] {color:var(--mf-blue);box-shadow:inset 0 -2px var(--mf-blue);border-radius:0;}
+#monday-fib-root .mf-ledger-notice:empty {display:none;}
+#monday-fib-root .mf-ledger-notice {color:#b83d53;line-height:1.5;}
+#monday-fib-root .mf-holdings {display:grid;gap:10px;margin-top:8px;}
+#monday-fib-root .mf-holding {padding:12px;border:1px solid #dfe5e9;border-radius:16px;background:#ffffffb3;min-width:0;}
+#monday-fib-root .mf-holding header {display:flex;justify-content:space-between;align-items:center;gap:8px;}
+#monday-fib-root .mf-holding strong {font-size:14px;overflow-wrap:anywhere;}
+#monday-fib-root .mf-holding em {font-size:11px;font-style:normal;color:#009a79;margin-left:3px;}
+#monday-fib-root .mf-ledger .is-short {color:#d5345b;}
+#monday-fib-root .mf-ledger .is-long {color:#009a79;}
+#monday-fib-root .mf-holding dl {display:flex;gap:12px;margin:12px 0;}
+#monday-fib-root .mf-holding dl div {flex:1;min-width:0;}
+#monday-fib-root .mf-holding dt,#monday-fib-root .mf-holding small {font-size:11px;color:var(--mf-muted);}
+#monday-fib-root .mf-holding dd {margin:4px 0 0;overflow-wrap:anywhere;}
+#monday-fib-root .mf-holding-actions {display:flex;gap:8px;}
+#monday-fib-root .mf-holding-actions button {flex:1;font-size:12px;min-height:44px;border:1px solid #dce4ea;border-radius:12px;padding:8px;}
+#monday-fib-root .mf-holding-actions [data-ledger-confirm] {color:white;background:var(--mf-blue);border-color:transparent;}
+#monday-fib-root .mf-holding-actions button:disabled {opacity:.45;}
+#monday-fib-root .mf-ledger-empty {padding:12px 0;color:var(--mf-muted);}
+#monday-fib-root .mf-ledger-editor {margin-top:12px;padding:12px;border-radius:16px;background:#edf3f8;scroll-margin:8px;}
+#monday-fib-root .mf-ledger-editor label {display:grid;gap:6px;margin:12px 0;color:var(--mf-muted);}
+#monday-fib-root .mf-ledger-editor input {width:100%;min-width:0;box-sizing:border-box;height:44px;padding:10px 12px;border:1px solid #dce4ea;border-radius:12px;background:white;font-size:16px;}
+#monday-fib-root .mf-quick-content .mf-ticket-scroll {overscroll-behavior-y:contain;touch-action:pan-y;}
+@media(max-width:760px){
+ #monday-fib-root .mf-live-form fieldset {gap:10px;}
+ #monday-fib-root .mf-ticket-order {gap:8px;}
+ #monday-fib-root .mf-ticket-order label {grid-template-columns:auto 56px;}
+ #monday-fib-root .mf-ticket-stop [data-fl-auto-stop] {top:-10px;}
+ #monday-fib-root .mf-keyboard .mf-ticket-footer {padding:10px 0;}
+}

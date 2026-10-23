@@ -161,6 +161,7 @@ def pending(client, path, id_field, **query):
 
 def order_row(row, kind):
     result = {key: token(row.get(key)) for key in ("instId", "side", "posSide", "ordType", "state")}
+    result.update({key: token(row.get(key)) for key in ('ordId', 'clOrdId', 'algoId', 'algoClOrdId')})
     result.update({key: number(row.get(key)) for key in ("sz", "px", "accFillSz", "slTriggerPx", "tpTriggerPx", "triggerPx")})
     result.update(kind=kind, created_ms=timestamp(row.get("cTime")))
     return result

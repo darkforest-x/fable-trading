@@ -434,3 +434,13 @@ def test_entry_shortcut_http_intent_origin_and_replay(tmp_path):
         assert result.json()['protection']['take_profit']=='130'
         assert c.post(base,json=payload,headers=headers).json()==result.json()
         assert c.post(base,json=dict(payload,stop_to_entry='yes'),headers=headers).status_code==422
+
+
+def test_stop_only_amend_preserves_current_tp_atomically_and_binds_retry(env):
+    e=env;p=e.opening()['position'];q=e.desk.save_quote(e.mark())
+    e.desk.update_protection(p['id'],'120','90',q['id'],'other-tab-amend-0001')
+    result=e.desk.update_protection(p['id'],None,'95',q['id'],'stop-only-amend-0001',preserve_take_profit=True)
+    assert result['protection']['take_profit']=='120'
+    assert result['protection']['stop_loss']=='95'
+    assert e.desk.update_protection(p['id'],None,'95',q['id'],'stop-only-amend-0001',preserve_take_profit=True)==result
+    with pytest.raises(ValueError):e.desk.update_protection(p['id'],None,'95',q['id'],'stop-only-amend-0001')

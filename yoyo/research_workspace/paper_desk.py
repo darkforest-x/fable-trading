@@ -550,7 +550,7 @@ class PaperDesk:
                         available_to_close=str(remaining - self.pending_close_quantity(db, position_id)),
                         entry_price=p["entry_price"], side=p["side"], leverage=p["leverage"], sizing="position_percentage")
 
-    def update_protection(self, position_id, take_profit, stop_loss, quote_id, request_id, *, stop_to_entry=False):
+    def update_protection(self, position_id, take_profit, stop_loss, quote_id, request_id, *, stop_to_entry=False, preserve_take_profit=False):
         """Amend the remaining position's exits atomically with close/matching.
 
         Validate relative to current executable bid/ask, allowing a profitable
@@ -562,6 +562,10 @@ class PaperDesk:
         tp, sl = optional_price(take_profit), optional_price(stop_loss)
         payload = dict(action="update_protection", position_id=position_id,
                        take_profit=tp, stop_loss=sl, quote_id=quote_id)
+        if preserve_take_profit:
+            if tp is not None or stop_to_entry:
+                raise ValueError("仅改止损不能同时指定止盈或移到开仓价")
+            payload['preserve_take_profit'] = True
         if stop_to_entry:
             if tp is not None or sl is not None:
                 raise ValueError("移到开仓价不能同时指定其他止盈止损价格")
@@ -574,6 +578,8 @@ class PaperDesk:
             p = self.row(db, "positions", position_id)
             if number(p["remaining"]) <= 0:
                 raise ValueError("该持仓已平仓，无法修改止盈止损")
+            if preserve_take_profit:
+                tp = p['take_profit']
             if stop_to_entry:
                 sign = 1 if p["side"] == "long" else -1
                 if p["stop_loss"] is not None and (number(p["stop_loss"]) - number(p["entry_price"])) * sign >= 0:

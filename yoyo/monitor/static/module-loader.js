@@ -18,7 +18,7 @@
     'trading-books': ['research.css','reading-tools.css','reading-tools.js','trading-books.css','trading-books-study.js','trading-books.js'],
     orderflow: ['research.css','market-sync.css','reading-tools.css','reading-tools.js','orderflow.css','orderflow.js'],
     'monday-fib': ['monday-fib.css','range-chart.js','monday-fib-chart.js','monday-quick.js','monday-fib.js'],
-    'monday-live': ['monday-live.css','monday-live.js'],
+    'monday-live': ['monday-live.css','monday-ledger.js','monday-live.js'],
     'auto-leaders': ['research.css','market-sync.css','altcoin-leaders.css','altcoin-leaders.js','leader-page.js'],
     'yolo-detect': ['workbench-bootstrap.css','research.css','yolo-detect.css','okx-execution.css','manual-live.css','manual-account.js','manual-close.js','manual-position-chart.js','manual-live.js','workbench-bootstrap.js','yolo-detect.js','yolo-compact.css'],
     langlang: ['research.css','market-sync.css','reading-tools.css','reading-tools.js','trading-playbooks.css','trading-playbooks.js','altcoin-leaders.css','altcoin-leaders.js','langlang.css','transcript-search.js','langlang.js'],
