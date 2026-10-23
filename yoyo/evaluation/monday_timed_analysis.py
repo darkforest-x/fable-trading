@@ -92,7 +92,7 @@ def groups(f):
 
 
 def summarize(f,c,cfg):
-    metrics=[];inferences=[];yearly=[];directions=[];precision=[]
+    metrics=[];inferences=[];yearly=[];directions=[];precision=[];extremes=[]
     for name,g in groups(f).items():
         basis='gross' if name in ['XAUUSD','GROUP1_GROSS'] else 'net';col=basis+'_bp'
         for common in [True,False]:
@@ -109,6 +109,8 @@ def summarize(f,c,cfg):
                         grid_mean_bp=float(v.mean()),grid_median_bp=float(v.median()),mean_bp_lower=float(lo.mean()),mean_bp_upper=float(hi.mean()),
                         mean_win_bp=float(wins.mean()),mean_loss_bp=float(loss.mean()),payoff_ratio=float(wins.mean()/-loss.mean()) if len(wins) and len(loss) else None,
                         profit_factor=float(wins.sum()/-loss.sum()) if len(loss) else None,worst_reference_bp=float(v.min()),p05_reference_bp=float(v.quantile(.05)),
+                        largest_reference_bp=float(v.max()),mean_without_largest_reference_bp=float((v.sum()-v.max())/(len(v)-1)) if len(v)>1 else None,
+                        largest_share_positive_bp=float(v.max()/wins.sum()) if len(wins) else None,
                         gross_reference_wins=int(s.gross_bp.gt(0).sum()),fees_erase_gross_wins=int((s.gross_bp.gt(0)&s.net_bp.le(0)).sum()) if basis=='net' else None,
                         paired=len(p),paired_signal_bp=float(p[col].mean()),paired_random_bp=float(p.control_bp.mean()),
                         paired_signal_win_rate=float(p[col].gt(0).mean()),paired_random_win_rate=float(p.control_win.mean()),
@@ -119,6 +121,8 @@ def summarize(f,c,cfg):
                         inferences.append(dict(group=name,period=period,horizon=int(horizon),basis=basis,n=len(s),
                             reference_return=bootstrap(s,v,cfg['seed']),reference_vs_random=bootstrap(p,p[col]-p.control_bp,cfg['seed'])))
         for h,x in g[g.common_horizons&g.population.eq('signal')].groupby('horizon',observed=True):
+            for tail,z in [('best',x.nlargest(3,col)),('worst',x.nsmallest(3,col))]:
+                for row in z.to_dict('records'):extremes.append(dict(row,group=name,tail=tail,basis=basis))
             for year,a in x.groupby(pd.to_datetime(x.entry_time,utc=True).dt.year,observed=True):
                 yearly.append(dict(group=name,horizon=int(h),year=int(year),basis=basis,n=len(a),grid_win_rate=float(a[col].gt(0).mean()),grid_mean_bp=float(a[col].mean()),true_win_lower=float(a['lower_'+col].gt(0).mean()),true_win_upper=float(a['upper_'+col].gt(0).mean())))
             for side,a in x.groupby('side',observed=True):
@@ -131,6 +135,7 @@ def summarize(f,c,cfg):
     pd.DataFrame(metrics).to_csv(EXP/'metrics.csv',index=False)
     pd.DataFrame(yearly).to_csv(EXP/'yearly.csv',index=False);pd.DataFrame(directions).to_csv(EXP/'directions.csv',index=False)
     pd.DataFrame(precision).to_csv(EXP/'precision.csv',index=False);dump(EXP/'inference.json',finite(inferences))
+    pd.DataFrame(extremes).to_csv(EXP/'extreme-trades.csv',index=False)
     summary=dict(config=cfg,signal_entries=len(c),shared_signals=int(c.common_horizons.fillna(False).sum()),
         common_all=[x for x in metrics if x['cohort']=='shared_four_horizons' and x['period']=='all'],
         common_later=[x for x in metrics if x['cohort']=='shared_four_horizons' and x['period']=='later'],
