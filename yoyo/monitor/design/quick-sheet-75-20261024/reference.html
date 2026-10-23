@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Spike · 周一1.618 快捷开单与持仓底抽屉 (75% 视口规范版)</title>
+<!-- Material Symbols & Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-fixed": "#d7e2ff",
+            "on-surface-variant": "#414753",
+            "primary": "#0059b5",
+            "on-error-container": "#93000a",
+            "outline": "#717785",
+            "surface-bright": "#f9f9ff",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary-fixed-variant": "#005320",
+            "on-primary-container": "#fcfbff",
+            "error-container": "#ffdad6",
+            "glass-card-bg": "rgba(255, 255, 255, 0.92)",
+            "fib-mid": "#94a3b8",
+            "surface-tint": "#005cbb",
+            "on-primary-fixed": "#001b3f",
+            "error": "#ba1a1a",
+            "surface-variant": "#dde2f2",
+            "on-primary": "#ffffff",
+            "glass-specular": "rgba(255, 255, 255, 0.9)",
+            "glass-bg": "rgba(255, 255, 255, 0.76)",
+            "tertiary-fixed-dim": "#ffb4ab",
+            "primary-fixed-dim": "#abc7ff",
+            "chart-bull": "#16a34a",
+            "outline-variant": "#c1c6d6",
+            "on-secondary-container": "#007230",
+            "on-tertiary-container": "#fffaf9",
+            "secondary-fixed-dim": "#62df7d",
+            "inverse-on-surface": "#ecf0ff",
+            "inverse-surface": "#2a313d",
+            "on-secondary-fixed": "#002109",
+            "canvas-bg": "#F7F8F6",
+            "inverse-primary": "#abc7ff",
+            "tertiary": "#ba0012",
+            "secondary": "#006e2d",
+            "on-background": "#161c27",
+            "on-surface": "#161c27",
+            "on-error": "#ffffff",
+            "surface-container-high": "#e2e8f8",
+            "on-secondary": "#ffffff",
+            "secondary-container": "#7cf994",
+            "fib-blue": "#0ea5e9",
+            "on-primary-fixed-variant": "#00458f",
+            "on-tertiary-fixed-variant": "#93000b",
+            "surface-dim": "#d4daea",
+            "device-chassis": "#202227",
+            "on-tertiary-fixed": "#410002",
+            "tertiary-container": "#df2828",
+            "secondary-fixed": "#7ffc97",
+            "tertiary-fixed": "#ffdad6",
+            "surface-container-highest": "#dde2f2",
+            "on-tertiary": "#ffffff",
+            "background": "#f9f9ff",
+            "surface-container": "#e8eefe",
+            "chart-bear": "#dc2626",
+            "surface-container-low": "#f0f3ff",
+            "primary-container": "#0071e3",
+            "surface": "#f9f9ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter-lg": "2rem",
+            "space-xl": "2.5rem",
+            "gutter-sm": "1rem",
+            "margin": "2rem",
+            "gutter": "1.5rem",
+            "space-sm": "0.5rem",
+            "space-xs": "0.25rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "margin-desktop": "3rem",
+            "margin-mobile": "1.25rem"
+          },
+          "fontFamily": {
+            "body-md": ["Plus Jakarta Sans"],
+            "headline-xl": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "headline-xl-mobile": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "metric-val": ["Plus Jakarta Sans"],
+            "mono": ["JetBrains Mono", "monospace"]
+          },
+          "fontSize": {
+            "body-md": ["15px", { "lineHeight": "21px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "display-lg-mobile": ["34px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "700" }],
+            "headline-lg": ["24px", { "lineHeight": "30px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-lg": ["17px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+            "label-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "headline-xl-mobile": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-sm": ["17px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "headline-md": ["20px", { "lineHeight": "26px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "metric-val": ["28px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Material Symbols setup */
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 450, 'GRAD' 0, 'opsz' 20;
+      font-size: 18px;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    /* Apple Touch Spring Micro-interaction */
+    .touch-bounce {
+      transition: transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .touch-bounce:active {
+      transform: scale(0.96);
+    }
+
+    /* Glass Layering */
+    .glass-capsule {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.95), 0 6px 18px -4px rgba(26, 27, 31, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+    }
+
+    /* Precision subtle range slider */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      height: 4px;
+      background: #dde2f2;
+      border-radius: 9999px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: #0071e3;
+      box-shadow: 0 1px 4px rgba(0, 113, 227, 0.35);
+      cursor: pointer;
+      margin-top: -6px;
+      border: 2px solid #ffffff;
+    }
+
+    /* Custom thin scrollbar */
+    .clean-scroll::-webkit-scrollbar {
+      width: 3px;
+    }
+    .clean-scroll::-webkit-scrollbar-thumb {
+      background: rgba(113, 119, 133, 0.25);
+      border-radius: 4px;
+    }
+
+    /* Smooth transition for release physics */
+    .sheet-transition {
+      transition: transform 380ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .backdrop-transition {
+      transition: opacity 320ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-[#181a1f] min-h-screen flex items-center justify-center p-0 md:p-6 antialiased font-body-md select-none">
+<!-- Mobile Viewport Container: Exactly 390x844px Frame -->
+<main class="relative w-[390px] h-[844px] overflow-hidden bg-canvas-bg rounded-[44px] shadow-[0_25px_70px_rgba(0,0,0,0.45)] border-[7px] border-device-chassis flex flex-col">
+<!-- ========================================== -->
+<!-- UPPER 25% VIEWPORT CANVAS (Height: ~211px) -->
+<!-- ========================================== -->
+<header class="relative w-full h-[211px] overflow-hidden bg-[#0c1017]">
+<!-- Background SVG Chart Layer (Simulating Monday 1.618 Spike Extension) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" preserveaspectratio="none" viewbox="0 0 390 211">
+<defs>
+<lineargradient id="chartGlow" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#0071e3" stop-opacity="0.22"></stop>
+<stop offset="100%" stop-color="#0071e3" stop-opacity="0"></stop>
+</lineargradient>
+<pattern height="24" id="gridPattern" patternunits="userSpaceOnUse" width="24">
+<path d="M 24 0 L 0 0 0 24" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"></path>
+</pattern>
+</defs>
+<!-- Technical Background Grid -->
+<rect fill="url(#gridPattern)" height="100%" width="100%"></rect>
+<!-- Spike Reference Guidelines -->
+<!-- Monday High: 104.20 -->
+<line opacity="0.4" stroke="#94a3b8" stroke-dasharray="3 3" stroke-width="0.8" x1="0" x2="390" y1="52" y2="52"></line>
+<text fill="#94a3b8" font-family="JetBrains Mono" font-size="8.5" opacity="0.8" x="330" y="48">MON HIGH 104.2</text>
+<!-- Spike 1.618 Solid Level: 100.00 Target Level -->
+<line opacity="0.9" stroke="#0ea5e9" stroke-width="1.2" x1="0" x2="390" y1="102" y2="102"></line>
+<text fill="#0ea5e9" font-family="JetBrains Mono" font-size="8.5" font-weight="600" x="314" y="98">1.618 SPIKE 100.0</text>
+<!-- Monday Low: 93.40 -->
+<line opacity="0.4" stroke="#94a3b8" stroke-dasharray="3 3" stroke-width="0.8" x1="0" x2="390" y1="168" y2="168"></line>
+<text fill="#94a3b8" font-family="JetBrains Mono" font-size="8.5" opacity="0.8" x="336" y="164">MON LOW 93.4</text>
+<!-- Area Glow under trajectory -->
+<polygon fill="url(#chartGlow)" points="20,165 60,158 100,165 145,135 190,140 235,95 275,85 305,98 340,102 375,102 390,102 390,211 20,211"></polygon>
+<!-- Candlestick Path Group -->
+<g stroke-linecap="round">
+<!-- Mon Low Wicks & Bars -->
+<line stroke="#dc2626" stroke-width="1" x1="40" x2="40" y1="156" y2="172"></line>
+<rect fill="#dc2626" height="8" rx="0.5" width="6" x="37" y="160"></rect>
+<line stroke="#16a34a" stroke-width="1" x1="75" x2="75" y1="145" y2="168"></line>
+<rect fill="#16a34a" height="12" rx="0.5" width="6" x="72" y="150"></rect>
+<!-- Monday High Volatility Push -->
+<line stroke="#16a34a" stroke-width="1" x1="120" x2="120" y1="55" y2="92"></line>
+<rect fill="#16a34a" height="20" rx="0.5" width="6" x="117" y="62"></rect>
+<line stroke="#dc2626" stroke-width="1" x1="160" x2="160" y1="65" y2="110"></line>
+<rect fill="#dc2626" height="24" rx="0.5" width="6" x="157" y="74"></rect>
+<!-- Rebound towards 1.618 Extension -->
+<line stroke="#16a34a" stroke-width="1" x1="210" x2="210" y1="90" y2="130"></line>
+<rect fill="#16a34a" height="24" rx="0.5" width="6" x="207" y="95"></rect>
+<line stroke="#16a34a" stroke-width="1" x1="260" x2="260" y1="80" y2="114"></line>
+<rect fill="#16a34a" height="20" rx="0.5" width="6" x="257" y="85"></rect>
+<!-- Current Candlestick interacting with 1.618 -->
+<line stroke="#16a34a" stroke-width="1.2" x1="310" x2="310" y1="95" y2="112"></line>
+<rect fill="#16a34a" height="10" rx="1" width="8" x="306" y="98"></rect>
+<circle cx="310" cy="102" fill="#0ea5e9" r="3.5" stroke="#ffffff" stroke-width="1.5"></circle>
+</g>
+</svg>
+<!-- Top Frosted Capsule Bar (TopAppBar Match) -->
+<div class="relative z-20 pt-4 px-4 flex items-center justify-between">
+<div class="glass-capsule rounded-full px-3 py-1.5 flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-chart-bull animate-pulse"></div>
+<span class="font-headline-sm font-bold tracking-tight text-white/95 text-[13px]">SPIKE</span>
+<span class="text-white/40 text-[10px]">|</span>
+<span class="font-mono text-[11px] text-white/90 font-medium">周一 1.618 扩展</span>
+</div>
+<div class="glass-capsule rounded-full px-2.5 py-1 flex items-center gap-1.5 text-white/90">
+<span class="material-symbols-outlined text-[15px] text-fib-blue" data-icon="sensors">sensors</span>
+<span class="font-mono text-[11px] font-semibold tracking-wide">100.00</span>
+<span class="text-[10px] text-chart-bull font-mono font-medium">+1.62%</span>
+</div>
+</div>
+<!-- Live Chart Status Micro Metrics -->
+<div class="absolute bottom-2 left-4 right-4 flex justify-between items-end pointer-events-none z-10">
+<div>
+<div class="text-[9px] text-white/50 tracking-wider font-mono">FIBONACCI LEVEL</div>
+<div class="text-[12px] font-mono text-white/95 font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-fib-blue"></span>
+            1.618 EXT (100.00 USDT)
+          </div>
+</div>
+<div class="text-right">
+<span class="inline-block px-2 py-0.5 rounded-full bg-white/10 backdrop-blur-md text-white/80 font-mono text-[10px]">
+            15m · 强触碰突破
+          </span>
+</div>
+</div>
+</header>
+<!-- Backdrop Mask Overlay for Drag Gesture Feedback -->
+<div class="absolute inset-0 bg-black/55 backdrop-blur-[1px] z-25 pointer-events-none backdrop-transition" id="sheetBackdrop" style="opacity: 0.55;"></div>
+<!-- ============================================================== -->
+<!-- LOWER 75% VIEWPORT BOTTOM SHEET (633px, STRICT 75% VIEWPORT)   -->
+<!-- ============================================================== -->
+<section class="absolute bottom-0 left-0 right-0 h-[633px] rounded-t-[28px] bg-[#fcfdfd] border-t border-slate-100/80 shadow-[0_-12px_40px_rgba(0,0,0,0.18)] flex flex-col z-30 touch-none sheet-transition" id="bottomSheet" style="height: 75vh; height: 75dvh; max-height: 75dvh;">
+<!-- Sheet Drag Header Area (Touch & pointer listener attached here) -->
+<div class="relative shrink-0 pt-2.5 px-4 pb-2 border-b border-black/5 bg-[#fcfdfd]/95 backdrop-blur-md rounded-t-[28px] cursor-grab active:cursor-grabbing select-none" id="sheetDragHandleArea">
+<!-- Centered Sleek Grab Handle: 36x4px rounded-full bg-slate-300 mx-auto mt-2.5 mb-2 -->
+<div class="w-[36px] h-1 rounded-full bg-slate-300 mx-auto mt-0 mb-2"></div>
+<div class="flex items-center justify-between">
+<!-- Symbol & Mode Segment -->
+<div class="flex items-center gap-2">
+<div class="flex items-baseline gap-1.5">
+<span class="font-headline-sm text-on-surface font-bold text-[16px] tracking-tight">BTC / USDT</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-mono text-[10px] font-semibold">永续</span>
+</div>
+<!-- Paper / Live Mode Toggle Segment -->
+<div class="flex items-center bg-surface-variant/60 rounded-full p-0.5 text-[11px] font-medium text-outline">
+<button class="px-2.5 py-0.5 rounded-full bg-surface-container-lowest text-on-surface font-semibold shadow-xs">模拟</button>
+<button class="px-2.5 py-0.5 rounded-full hover:text-on-surface transition-colors">实盘</button>
+</div>
+</div>
+<!-- 44x44px Touch Close Button ✕ -->
+<button aria-label="关闭抽屉" class="w-11 h-11 flex items-center justify-center -mr-2 text-outline hover:text-on-surface touch-bounce rounded-full active:bg-black/5" id="closeSheetBtn">
+<span class="material-symbols-outlined text-[19px]" data-icon="close">close</span>
+</button>
+</div>
+</div>
+<!-- ONE Internal Vertical Scroll Body (Tickets & Positions ledger all together) -->
+<div class="flex-1 overflow-y-auto clean-scroll px-4 pt-3 pb-12 space-y-4 touch-auto overscroll-contain" id="drawerScrollContainer" style="overscroll-behavior: contain; -webkit-overflow-scrolling: touch;">
+<!-- SECTION 1: QUICK ORDER TICKET FORM -->
+<div class="bg-surface-container-low/70 border border-outline-variant/40 rounded-2xl p-3 space-y-3">
+<!-- Direction Segment Selector (买入做多 vs 卖出做空) -->
+<div class="grid grid-cols-2 gap-1.5 p-1 bg-surface-container-high/60 rounded-xl">
+<button class="py-2 rounded-lg text-center font-headline-sm text-[13px] font-semibold bg-primary-container text-on-primary shadow-xs transition-transform active:scale-[0.98] flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="trending_up">trending_up</span>
+              买入做多 (Long)
+            </button>
+<button class="py-2 rounded-lg text-center font-headline-sm text-[13px] font-semibold text-outline hover:text-on-surface transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="trending_down">trending_down</span>
+              卖出做空 (Short)
+            </button>
+</div>
+<!-- Compact Config Row: Order Type & Leverage -->
+<div class="grid grid-cols-2 gap-2">
+<div class="flex items-center justify-between px-3 py-2 bg-surface-container-lowest border border-outline-variant/40 rounded-xl">
+<span class="text-[12px] text-outline font-medium">订单类型</span>
+<div class="flex items-center gap-0.5 font-semibold text-[12px] text-on-surface">
+<span>市价最优</span>
+<span class="material-symbols-outlined text-[14px] text-outline" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<div class="flex items-center justify-between px-3 py-2 bg-surface-container-lowest border border-outline-variant/40 rounded-xl">
+<span class="text-[12px] text-outline font-medium">杠杆倍数</span>
+<div class="flex items-center gap-1 font-mono font-semibold text-[12px] text-primary">
+<span>10x 逐仓</span>
+<span class="material-symbols-outlined text-[14px] text-outline" data-icon="tune">tune</span>
+</div>
+</div>
+</div>
+<!-- Initial Stop Loss Input Container (Standard 44px Height, 16px font-size) -->
+<div class="space-y-1">
+<div class="flex justify-between items-center px-0.5">
+<label class="text-[12px] font-medium text-on-surface-variant flex items-center gap-1" for="stopLossInput">
+                初始止损 (Stop Loss) <span class="text-tertiary">*</span>
+</label>
+<span class="text-[11px] font-mono text-outline">周一低点参考: 95.00</span>
+</div>
+<div class="relative flex items-center h-11 w-full bg-surface-container-lowest border border-outline-variant/70 rounded-xl px-3 focus-within:border-primary-container focus-within:ring-1 focus-within:ring-primary-container transition-all">
+<span class="material-symbols-outlined text-outline text-[18px] mr-2" data-icon="shield_lock">shield_lock</span>
+<input class="w-full h-full bg-transparent p-0 text-[16px] font-mono font-semibold text-on-surface focus:outline-none focus:ring-0 placeholder:text-outline/40 border-0" id="stopLossInput" inputmode="decimal" placeholder="止损价格" type="text" value="95.00"/>
+<div class="flex items-center gap-1.5 shrink-0 pl-1">
+<span class="px-1.5 py-0.5 rounded bg-primary-fixed text-on-primary-fixed-variant text-[11px] font-mono font-bold">1.0 R</span>
+<span class="text-[12px] font-mono text-outline">USDT</span>
+</div>
+</div>
+</div>
+<!-- Allocation Percentage Segment & Dynamic Slider -->
+<div class="space-y-1.5 pt-0.5">
+<div class="flex justify-between text-[11px] text-outline font-medium">
+<span>仓位分配 (可用: 1,000.00 USDT)</span>
+<span class="font-mono text-on-surface font-semibold">100 USDT (10%)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<button class="flex-1 py-1 text-[11px] font-mono font-medium rounded-lg bg-surface-container-lowest border border-outline-variant/50 text-outline hover:text-on-surface active:bg-surface-variant">25%</button>
+<button class="flex-1 py-1 text-[11px] font-mono font-semibold rounded-lg bg-primary-container text-on-primary shadow-xs">50%</button>
+<button class="flex-1 py-1 text-[11px] font-mono font-medium rounded-lg bg-surface-container-lowest border border-outline-variant/50 text-outline hover:text-on-surface active:bg-surface-variant">75%</button>
+<button class="flex-1 py-1 text-[11px] font-mono font-medium rounded-lg bg-surface-container-lowest border border-outline-variant/50 text-outline hover:text-on-surface active:bg-surface-variant">100%</button>
+</div>
+<div class="pt-1">
+<input class="w-full accent-primary-container" max="1000" min="10" type="range" value="100"/>
+</div>
+</div>
+<!-- Optional TP Accordion (Collapsed) -->
+<details class="group border-t border-outline-variant/30 pt-2 text-[12px]">
+<summary class="flex items-center justify-between text-outline cursor-pointer list-none py-0.5">
+<span class="flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[15px]" data-icon="add_circle">add_circle</span>
+                添加阶段止盈 (TP 1 / TP 2 预设)
+              </span>
+<span class="material-symbols-outlined text-[15px] transition-transform group-open:rotate-180" data-icon="expand_more">expand_more</span>
+</summary>
+<div class="pt-2 grid grid-cols-2 gap-2 font-mono text-[11px]">
+<div class="p-2 rounded-lg bg-surface-container-lowest border border-outline-variant/30">
+<div class="text-outline text-[10px]">TP 1 (2.0 R)</div>
+<div class="text-chart-bull font-semibold">110.00 USDT</div>
+</div>
+<div class="p-2 rounded-lg bg-surface-container-lowest border border-outline-variant/30">
+<div class="text-outline text-[10px]">TP 2 (3.24 R)</div>
+<div class="text-chart-bull font-semibold">116.20 USDT</div>
+</div>
+</div>
+</details>
+<!-- Main CTA button: 48px height, rounded-xl bg-blue-600 text-white font-medium -->
+<button class="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-headline-sm text-[14px] font-medium flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/25 touch-bounce">
+<span class="material-symbols-outlined text-[18px]" data-icon="bolt">bolt</span>
+<span>⚡ 预览买入做多 (100 USDT)</span>
+</button>
+</div>
+<!-- ======================================================= -->
+<!-- SECTION 2: POSITIONS & PENDING ORDERS LEDGER            -->
+<!-- ======================================================= -->
+<div class="space-y-2.5 pt-1">
+<!-- Ledger Tab Switcher -->
+<div class="flex items-center justify-between border-b border-black/5 pb-1 px-1">
+<div class="flex items-center gap-4">
+<button class="relative pb-1.5 text-[14px] font-bold text-on-surface">
+                持仓 (1)
+                <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-container rounded-full"></span>
+</button>
+<button class="pb-1.5 text-[14px] font-medium text-outline hover:text-on-surface transition-colors flex items-center gap-1">
+                委托 (1)
+                <span class="w-1.5 h-1.5 rounded-full bg-fib-blue"></span>
+</button>
+</div>
+<span class="text-[11px] text-outline font-mono">净总敞口: 0.010 BTC</span>
+</div>
+<!-- Position Item 1: BTCUSDT Long 10x with Inline Action State -->
+<article class="bg-surface-container-lowest border border-outline-variant/50 rounded-2xl p-3 shadow-xs space-y-2.5">
+<!-- Header row of position item -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-chart-bull"></span>
+<span class="font-headline-sm text-[13px] font-bold text-on-surface">BTCUSDT 多</span>
+<span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-surface-container-high text-on-surface-variant font-semibold">10x 逐仓</span>
+</div>
+<!-- Unr. PnL -->
+<div class="text-right">
+<span class="font-mono text-[14px] font-bold text-chart-bull">+0.85 R</span>
+<span class="text-[11px] font-mono text-chart-bull font-medium ml-1">(+1.70 U)</span>
+</div>
+</div>
+<!-- Position Matrix Metrics Grid -->
+<div class="grid grid-cols-3 gap-1 bg-surface-container-low/60 rounded-xl p-2 font-mono text-[11px]">
+<div>
+<span class="text-[10px] text-outline block">开仓均价</span>
+<span class="font-semibold text-on-surface">100.00</span>
+</div>
+<div>
+<span class="text-[10px] text-outline block">持仓数量</span>
+<span class="font-semibold text-on-surface">0.010 BTC</span>
+</div>
+<div class="text-right">
+<span class="text-[10px] text-outline block">当前止损</span>
+<span class="font-semibold text-tertiary">95.00</span>
+</div>
+</div>
+<!-- Position Action Buttons -->
+<div class="flex items-center gap-2 pt-0.5">
+<button class="flex-1 h-9 rounded-xl border border-outline-variant/70 text-[12px] font-medium text-on-surface hover:bg-surface-container transition-colors flex items-center justify-center gap-1 touch-bounce" id="toggleEditSlBtn">
+<span class="material-symbols-outlined text-[15px] text-outline" data-icon="edit">edit</span>
+                修改止损
+              </button>
+<button class="flex-1 h-9 rounded-xl bg-error-container text-on-error-container text-[12px] font-semibold hover:bg-error-container/80 transition-colors flex items-center justify-center gap-1 touch-bounce" id="toggleClosePosBtn">
+<span class="material-symbols-outlined text-[15px]" data-icon="cancel">cancel</span>
+                平仓
+              </button>
+</div>
+<!-- ACTIVE INLINE STATE: Modify Stop Loss Panel (Unrolled & Active) -->
+<div class="p-2.5 bg-surface-container rounded-xl border border-primary-container/30 space-y-2" id="inlineSlEditor">
+<div class="flex items-center justify-between text-[11px]">
+<span class="font-medium text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="tune">tune</span>
+                  上移保护止损至盈亏平衡位
+                </span>
+<span class="font-mono text-outline">现价: 100.00</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="relative flex-1 h-9 bg-surface-container-lowest border border-primary-container rounded-lg px-2.5 flex items-center">
+<input class="w-full bg-transparent p-0 border-0 font-mono text-[13px] font-bold text-on-surface focus:outline-none focus:ring-0" type="text" value="95.50"/>
+<span class="text-[10px] font-mono text-outline">USDT</span>
+</div>
+<button class="h-9 px-3.5 bg-primary-container text-on-primary rounded-lg text-[12px] font-semibold touch-bounce">
+                  确认
+                </button>
+<button class="h-9 px-2 text-outline hover:text-on-surface text-[12px] font-medium touch-bounce" id="cancelSlBtn">
+                  取消
+                </button>
+</div>
+</div>
+<!-- ACTIVE INLINE CONFIRMATION STATE: Market Close (Toggled via JS / Ready in DOM) -->
+<div class="hidden p-2.5 bg-tertiary-fixed/30 border border-tertiary/30 rounded-xl flex items-center justify-between" id="inlineCloseConfirm">
+<span class="text-[12px] font-semibold text-tertiary">确认以市价最优全平？</span>
+<div class="flex items-center gap-1.5">
+<button class="px-2.5 py-1 rounded-md bg-tertiary text-on-tertiary text-[11px] font-semibold touch-bounce">确认平仓</button>
+<button class="px-2 py-1 text-outline text-[11px] font-medium" id="cancelCloseBtn">返回</button>
+</div>
+</div>
+</article>
+<!-- Pending Limit Order Item (委托单) -->
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-2xl p-3 shadow-xs space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-fib-blue"></span>
+<span class="font-headline-sm text-[13px] font-bold text-on-surface">BTCUSDT 买入限价</span>
+<span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-surface-container-high text-on-surface-variant font-semibold">10x</span>
+</div>
+<span class="text-[11px] font-mono text-fib-blue font-semibold px-2 py-0.5 rounded-full bg-fib-blue/10">待撮合</span>
+</div>
+<div class="grid grid-cols-3 gap-1 bg-surface-container-low/40 rounded-xl p-2 font-mono text-[11px]">
+<div>
+<span class="text-[10px] text-outline block">委托限价</span>
+<span class="font-semibold text-on-surface">98.50 USDT</span>
+</div>
+<div>
+<span class="text-[10px] text-outline block">委托数量</span>
+<span class="font-semibold text-on-surface">0.010 BTC</span>
+</div>
+<div class="text-right">
+<span class="text-[10px] text-outline block">预设止损</span>
+<span class="font-semibold text-tertiary">94.80 USDT</span>
+</div>
+</div>
+<!-- Standard 44px Accessible Touch Target Cancel Action -->
+<div class="flex justify-end pt-0.5">
+<button class="h-11 px-4 rounded-xl border border-outline-variant/70 text-on-surface-variant hover:text-error hover:border-error text-[12px] font-medium transition-colors flex items-center gap-1 touch-bounce">
+<span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+                撤销委托
+              </button>
+</div>
+</article>
+<!-- Subtle bottom clearance safe padding -->
+<div class="h-6"></div>
+</div>
+</div></section>
+</main>
+<!-- Interactive script: 1:1 Gesture Dismissal & Physics + Inline states -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const sheet = document.getElementById('bottomSheet');
+      const backdrop = document.getElementById('sheetBackdrop');
+      const handleArea = document.getElementById('sheetDragHandleArea');
+      const closeBtn = document.getElementById('closeSheetBtn');
+      const scrollContainer = document.getElementById('drawerScrollContainer');
+
+      const toggleEditSlBtn = document.getElementById('toggleEditSlBtn');
+      const inlineSlEditor = document.getElementById('inlineSlEditor');
+      const cancelSlBtn = document.getElementById('cancelSlBtn');
+
+      const toggleClosePosBtn = document.getElementById('toggleClosePosBtn');
+      const inlineCloseConfirm = document.getElementById('inlineCloseConfirm');
+      const cancelCloseBtn = document.getElementById('cancelCloseBtn');
+
+      // Check prefers-reduced-motion
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Gesture tracking state
+      let isDragging = false;
+      let startY = 0;
+      let currentTranslateY = 0;
+      let lastY = 0;
+      let lastTime = 0;
+      let velocity = 0;
+      const sheetHeight = sheet.offsetHeight || 633;
+
+      function updateBackdropOpacity(dragY) {
+        if (!backdrop) return;
+        const progress = Math.min(1, Math.max(0, dragY / (sheetHeight * 0.8)));
+        const newOpacity = 0.55 * (1 - progress);
+        backdrop.style.opacity = newOpacity.toFixed(3);
+      }
+
+      function onPointerDown(e) {
+        // Only trigger drag on handle area directly or its header items (excluding close button)
+        if (e.target.closest('#closeSheetBtn')) return;
+
+        isDragging = true;
+        startY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+        lastY = startY;
+        lastTime = performance.now();
+        velocity = 0;
+
+        // Zero lag: remove transition during active drag
+        sheet.style.transition = 'none';
+        if (backdrop) backdrop.style.transition = 'none';
+
+        // Capture pointer if available
+        if (e.pointerId && handleArea.setPointerCapture) {
+          try { handleArea.setPointerCapture(e.pointerId); } catch(err){}
+        }
+
+        window.addEventListener('pointermove', onPointerMove, { passive: false });
+        window.addEventListener('pointerup', onPointerUp);
+        window.addEventListener('pointercancel', onPointerUp);
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
+        window.addEventListener('touchend', onPointerUp);
+      }
+
+      function handleDragMove(clientY, e) {
+        if (!isDragging) return;
+        const deltaY = clientY - startY;
+        currentTranslateY = Math.max(0, deltaY); // downward only
+
+        if (e && e.cancelable) {
+          e.preventDefault();
+        }
+
+        const now = performance.now();
+        const dt = now - lastTime;
+        if (dt > 8) {
+          velocity = (clientY - lastY) / dt; // px/ms
+          lastY = clientY;
+          lastTime = now;
+        }
+
+        sheet.style.transform = `translateY(${currentTranslateY}px)`;
+        updateBackdropOpacity(currentTranslateY);
+      }
+
+      function onPointerMove(e) {
+        handleDragMove(e.clientY, e);
+      }
+
+      function onTouchMove(e) {
+        if (e.touches && e.touches.length > 0) {
+          handleDragMove(e.touches[0].clientY, e);
+        }
+      }
+
+      function closeSheetAnimated() {
+        if (prefersReducedMotion) {
+          sheet.style.transform = 'translateY(100%)';
+          sheet.style.display = 'none';
+          if (backdrop) {
+            backdrop.style.opacity = '0';
+            backdrop.style.display = 'none';
+          }
+          return;
+        }
+        sheet.style.transition = 'transform 380ms cubic-bezier(0.32, 0.72, 0, 1)';
+        sheet.style.transform = 'translateY(100%)';
+        if (backdrop) {
+          backdrop.style.transition = 'opacity 320ms cubic-bezier(0.32, 0.72, 0, 1)';
+          backdrop.style.opacity = '0';
+        }
+      }
+
+      function snapBackAnimated() {
+        if (prefersReducedMotion) {
+          sheet.style.transform = 'translateY(0px)';
+          if (backdrop) backdrop.style.opacity = '0.55';
+          return;
+        }
+        sheet.style.transition = 'transform 340ms cubic-bezier(0.2, 0.8, 0.2, 1)';
+        sheet.style.transform = 'translateY(0px)';
+        if (backdrop) {
+          backdrop.style.transition = 'opacity 280ms cubic-bezier(0.2, 0.8, 0.2, 1)';
+          backdrop.style.opacity = '0.55';
+        }
+      }
+
+      function onPointerUp() {
+        if (!isDragging) return;
+        isDragging = false;
+
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointercancel', onPointerUp);
+        window.removeEventListener('touchmove', onTouchMove);
+        window.removeEventListener('touchend', onPointerUp);
+
+        // Dismiss threshold: dragged > 120px OR flick velocity > 0.5 px/ms
+        if (currentTranslateY > 120 || velocity > 0.5) {
+          closeSheetAnimated();
+        } else {
+          snapBackAnimated();
+        }
+      }
+
+      // Attach handle listeners
+      if (handleArea) {
+        handleArea.addEventListener('pointerdown', onPointerDown);
+        handleArea.addEventListener('touchstart', (e) => {
+          if (!e.target.closest('#closeSheetBtn')) {
+            onPointerDown(e);
+          }
+        }, { passive: true });
+      }
+
+      // Close button listener
+      if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          closeSheetAnimated();
+        });
+      }
+
+      // Toggle Stop Loss Inline Editor
+      if (toggleEditSlBtn && inlineSlEditor && cancelSlBtn) {
+        toggleEditSlBtn.addEventListener('click', () => {
+          inlineSlEditor.classList.toggle('hidden');
+          inlineCloseConfirm.classList.add('hidden');
+        });
+        cancelSlBtn.addEventListener('click', () => {
+          inlineSlEditor.classList.add('hidden');
+        });
+      }
+
+      // Toggle Market Close Inline Confirmation
+      if (toggleClosePosBtn && inlineCloseConfirm && cancelCloseBtn) {
+        toggleClosePosBtn.addEventListener('click', () => {
+          inlineCloseConfirm.classList.toggle('hidden');
+          inlineSlEditor.classList.add('hidden');
+        });
+        cancelCloseBtn.addEventListener('click', () => {
+          inlineCloseConfirm.classList.add('hidden');
+        });
+      }
+
+      // Initial view scroll: slightly scrolled down so positions are immediately prominently in view
+      if (scrollContainer) {
+        setTimeout(() => {
+          scrollContainer.scrollTo({
+            top: 135,
+            behavior: 'smooth'
+          });
+        }, 300);
+      }
+    });
+  </script>
+</body></html>
