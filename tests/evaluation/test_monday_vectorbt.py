@@ -91,5 +91,12 @@ class MondayVectorBTTest(unittest.TestCase):
         a,_=execute(f,e,'BTCUSDT',CFG)
         assert a.closed.iloc[0] and a.exit_price.iloc[0]==110.
 
+    def test_gap_target_precedes_later_opposite_intrabar_stop(self):
+        f=pd.DataFrame([[100.,101.,99.,100.],[85.,115.,84.,105.]],columns=['open','high','low','close'],
+                       index=pd.date_range('2026-01-01',periods=2,freq='5min',tz='UTC'))
+        e=pd.DataFrame([dict(trade_key='short-gap',entry_i=0,entry=100.,side=-1,stop=110.,target_price=90.,risk=10.,entry_time=str(f.index[0]))])
+        a,_=execute(f,e,'BTCUSDT',CFG)
+        assert a.reason.iloc[0]==4 and a.exit_price.iloc[0]==90.
+
 
 if __name__=='__main__':unittest.main()

@@ -100,7 +100,10 @@ def process(job,cfg):
         for case in cases:
             candidate_path,ledger_path=baseline_files(case,symbol,segment)
             if candidate_path.exists():
-                original=normalized(pd.read_csv(candidate_path,float_precision='round_trip'),decimals)
+                try:
+                    original=normalized(pd.read_csv(candidate_path,float_precision='round_trip'),decimals)
+                except pd.errors.EmptyDataError:
+                    original=pd.DataFrame()
             else:original=pd.DataFrame()
             baseline[case]=original
             if ledger_path.exists():

@@ -39,6 +39,15 @@ def native_exits(open_, high, low, close, starts, ends, sides, sl, tp):
             i = hit[0]
             kind = type_out[i, 0]
             price = price_out[i, 0]
+            # The observed open precedes the O-H segment. For a short whose
+            # open gaps below TP and whose high later crosses SL, the native
+            # OHLC stop-first default would otherwise select that later SL.
+            if kind == StopType.StopLoss and i % 3 == 0:
+                at_open = get_stop_price_nb(sides[k], open_[starts[k], 0], tp[k],
+                                            open_[i, 0], open_[i, 0], open_[i, 0], False)
+                if not np.isnan(at_open):
+                    kind = StopType.TakeProfit
+                    price = open_[starts[k], 0] * (1 + sides[k] * tp[k])
             if kind == StopType.StopLoss:
                 price = get_stop_price_nb(sides[k], open_[starts[k], 0], sl[k],
                                           open_[i, 0], low[i, 0], high[i, 0], True)
@@ -127,7 +136,7 @@ def execute(frame, entries, symbol, cfg):
     e['net_bp'] = np.nan if spot else records.pnl.to_numpy()/entry*10000
     e['fee_entry_rate'] = np.nan if spot else fees[0]
     e['fee_exit_rate'] = np.nan if spot else fees[1]
-    e['engine_origin'] = 'vectorbt_1.2.0_native_stops_and_portfolio'
+    e['engine_origin'] = 'vectorbt_1.2.0_native_stops_and_portfolio_open_priority'
     # Sensitivity uses the already-known first exit candle, not another path
     # search or simulation. It does not influence orders or candidate selection.
     last = prices[e.exit_original_i.to_numpy()]

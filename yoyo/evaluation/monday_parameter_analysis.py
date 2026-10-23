@@ -75,7 +75,9 @@ def main():
     if subprocess.run(['git','diff','--quiet','HEAD','--',__file__],cwd=ROOT).returncode:
         raise RuntimeError('Commit analysis before generating results')
     cfg=json.loads((EXP/'config.json').read_text())
-    f=add_actual_week(pd.read_csv(EXP/'all-trades.csv.gz',float_precision='round_trip'))
+    ledger=EXP/'all-trades-open-priority.csv.gz'
+    if not ledger.exists():raise RuntimeError('Complete open-priority audit/repair first')
+    f=add_actual_week(pd.read_csv(ledger,float_precision='round_trip'))
     rows=[];lookup={}
     for v in cfg['candidates']:
         for name,g in group_data(f[f.config_id.eq(v['config_id'])]).items():
