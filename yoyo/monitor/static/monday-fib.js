@@ -8,7 +8,7 @@
   const finite=v=>typeof v==='number'&&Number.isFinite(v);
   const price=v=>finite(v)?v.toLocaleString('en-US',{maximumFractionDigits:Math.min(12,Math.max(2,6-Math.floor(Math.log10(Math.abs(v)||1))))}):'—';
   const STATES={loading:'正在同步',developing:'周一尚未结束',missing_monday:'缺少完整周一',missing_history:'历史触价待核对',recovering:'正在核对断线区间',fetch_error:'数据暂不可用',invalid_range:'周一区间无效'};
-  const FILTERS={all:'全部',upper:'上沿',lower:'下沿'},RECENT_MS=15*60000,PAGE_SIZE=5;
+  const FILTERS={all:'全部',upper:'上沿',lower:'下沿'},RECENT_MS=15*60000;
   const touchTime=e=>e?(e.source==='history'?e.candle_ms:e.observed_ms)||0:0;
   const latestTouch=r=>Object.entries(r.touches||{}).map(([side,e])=>({...e,side})).sort((a,b)=>touchTime(b)-touchTime(a))[0]||null;
   const recentTouch=(e,now)=>!!e&&e.source==='live'&&finite(e.observed_ms)&&now>=e.observed_ms&&now-e.observed_ms<RECENT_MS;
@@ -19,6 +19,16 @@
       .sort((a,b)=>touchTime(latestTouch(b))-touchTime(latestTouch(a))||a.symbol.localeCompare(b.symbol));
   }
   function selection(items,symbol,follow){const rows=selectRows(items);return (!follow&&rows.find(r=>r.symbol===symbol))||rows[0]||null;}
+  // Anchor the first visible row so live reordering does not move the reader.
+  function captureListScroll(container){
+    const top=container.scrollTop||0;
+    const first=top>0?Array.from(container.querySelectorAll('[data-symbol]')).find(b=>b.offsetTop+b.offsetHeight>top):null;
+    return {top,symbol:first?.dataset.symbol,offset:first?first.offsetTop-top:0};
+  }
+  function restoreListScroll(container,position){
+    const row=position.symbol?Array.from(container.querySelectorAll('[data-symbol]')).find(b=>b.dataset.symbol===position.symbol):null;
+    container.scrollTop=Math.max(0,row?row.offsetTop-position.offset:position.top);
+  }
   // Display coordinates are isolated from chart/data state. Only grip gestures move UI.
   function clampPanel(x,y,w,h,vw,vh){const gap=8;return {x:Math.max(gap,Math.min(Number.isFinite(x)?x:gap,Math.max(gap,vw-w-gap))),y:Math.max(gap,Math.min(Number.isFinite(y)?y:gap,Math.max(gap,vh-h-gap)))};}
   function mountLayout(root,env=window){
@@ -65,7 +75,7 @@
     const blur=()=>finish(false);
     return {refresh:restore,setActive(value){active=value;finish(false);if(value){env.addEventListener?.('resize',resize);env.addEventListener?.('blur',blur);restore();}else{env.removeEventListener?.('resize',resize);env.removeEventListener?.('blur',blur);if(frame)env.cancelAnimationFrame?.(frame);frame=null;}},destroy(){this.setActive(false);for(const [h,e,f] of bindings)h.removeEventListener(e,f);}};
   }
-  if(typeof module!=='undefined')module.exports={esc,price,selectRows,selection,latestTouch,touchTime,recentTouch,RECENT_MS,STATES,clampPanel,mountLayout};
+  if(typeof module!=='undefined')module.exports={esc,price,selectRows,selection,latestTouch,touchTime,recentTouch,RECENT_MS,STATES,clampPanel,mountLayout,captureListScroll,restoreListScroll};
   if(typeof document==='undefined')return;
   const root=document.getElementById('monday-fib-root');if(!root)return;
   const $=id=>document.getElementById(id);
@@ -86,9 +96,8 @@
       <div class="mf-list-heading">${grip('触价列表')}<div><h2>最新触价</h2><span id="mf-list-count"></span></div><button id="mf-list-close" aria-label="收起触价列表">${icon('x')}</button></div>
       <label class="mf-search">${icon('search')}<input id="mf-search" type="search" placeholder="搜索已触价合约" aria-label="搜索已触价合约" autocomplete="off"></label>
       <div id="mf-filters" class="mf-filters" role="group" aria-label="触价方向">${Object.entries(FILTERS).map(([key,label])=>`<button data-filter="${key}" aria-pressed="${key==='all'}">${label}</button>`).join('')}</div>
-      <div id="mf-rows" class="mf-rows"></div>
-      <div class="mf-pagination"><button id="mf-prev" aria-label="上一页">‹</button><span id="mf-page-number"></span><button id="mf-next" aria-label="下一页">›</button></div>
-      <p class="mf-list-note">按触价时间排序 · 点击切换图表</p>
+      <div id="mf-rows" class="mf-rows" role="region" aria-label="已触价币种滚动列表" tabindex="0"></div>
+      <p class="mf-list-note">滚动浏览 · 点击切换图表</p>
     </aside>
     <div id="mf-notice" class="mf-notice mf-glass" role="status" hidden></div>
     <div class="mf-dock mf-glass" data-mf-movable="dock" role="group" aria-label="图表控制">${grip('图表工具')}<button id="mf-timeframe" class="mf-timeframe" type="button" aria-label="选择 K 线周期" aria-haspopup="menu" aria-controls="mf-period-menu" aria-expanded="false"><span id="mf-period-label">15m</span><span aria-hidden="true">⌄</span></button><span class="mf-divider"></span><button id="mf-zoom-out" class="mf-zoom" aria-label="缩小 K 线" title="缩小 K 线（−）"><span aria-hidden="true">−</span></button><button id="mf-zoom-in" class="mf-zoom" aria-label="放大 K 线" title="放大 K 线（+）"><span aria-hidden="true">+</span></button><button id="mf-latest" aria-label="回到当前合约最新 K 线" title="回到当前合约最新 K 线，保留缩放宽度">${icon('chevron-right')}<span>最新 K 线</span></button><button id="mf-fit" aria-label="显示全部已加载 K 线并复位" title="恢复价格缩放并显示全部已加载 K 线">${icon('maximize')}<span>全图</span></button><button id="mf-fib" aria-pressed="false" title="显示区间内部 0.5 / 0.618 / 0.705">${icon('adjustments-horizontal')}<span>内部线</span></button><span class="mf-divider"></span><button id="mf-follow" aria-pressed="true">${icon('activity')}<span>跟随最新</span></button></div>
@@ -98,17 +107,18 @@
   const periods=['1m','5m','15m','30m','1H','4H','1D'];
   let period='15m';try{const saved=window.localStorage?.getItem('spike.monday.timeframe');if(periods.includes(saved))period=saved;}catch{}
   let active=false,data=null,receivedAt=0,error='',timer=null,controller=null,pending=null,revision=0;
-  let query='',filter='all',page=0,selected='',selectedWeek='',follow=true,internal=false,lastRows='';
+  let query='',filter='all',selected='',selectedWeek='',follow=true,internal=false,lastRows='';
   let listOpen=!!window.matchMedia?.('(min-width: 761px)').matches;
   const nowMs=()=>data?.now_ms?data.now_ms+Math.max(0,Date.now()-receivedAt):Date.now();
   const time=ms=>ms?new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(ms)):'时间待核对';
   const short=s=>s.replace('-USDT-SWAP','');
   function quoteState(r){return STATES[r.state]||((r.stale||!finite(r.received_ms)||nowMs()-r.received_ms>=90000||error)?'行情已滞后':'');}
   function panel(open,focus=false){listOpen=open;$('mf-list-panel').hidden=!open;$('mf-list-toggle').setAttribute('aria-expanded',String(open));root.classList.toggle('mf-list-open',open);layout.refresh();if(focus)(open?$('mf-search'):$('mf-list-toggle')).focus({preventScroll:true});}
-  function sync(){window.SpikeNavigation?.sync('monday-fib',{q:query||null,filter:filter==='all'?null:filter,page:page?String(page+1):null,symbol:follow?null:selected||null});}
-  function renderRows(){
-    const items=data?.items||[],rows=selectRows(items,query,filter,nowMs()),pages=Math.max(1,Math.ceil(rows.length/PAGE_SIZE));page=Math.min(Math.max(0,page),pages-1);
-    const html=rows.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE).map(r=>{
+  function sync(){window.SpikeNavigation?.sync('monday-fib',{q:query||null,filter:filter==='all'?null:filter,page:null,symbol:follow?null:selected||null});}
+  function renderRows(resetScroll=false){
+    const container=$('mf-rows'),position=captureListScroll(container);
+    const rows=selectRows(data?.items||[],query,filter,nowMs());
+    const html=rows.map(r=>{
       const e=latestTouch(r),fresh=recentTouch(e,nowMs()),state=quoteState(r),side=e.side==='upper'?'上':'下';
       return `<button class="mf-row${fresh?' mf-recent':''}" data-symbol="${esc(r.symbol)}" aria-pressed="${r.symbol===selected}" title="${esc(r.symbol)} · ${time(touchTime(e))} 北京时间"><span class="mf-row-symbol"><b>${esc(short(r.symbol))}</b><small>${e.source==='history'?'历史 · ':''}${time(touchTime(e))}${fresh?' · 刚触及':''}</small></span><span class="mf-row-value"><strong class="mf-${e.side}">${side}沿 1.618</strong><small>${state||price(r.price)}</small></span></button>`;
     }).join('')||`<p class="mf-no-rows">${data?'没有匹配的已触价合约':'正在读取…'}</p>`;
@@ -117,7 +127,7 @@
       $('mf-rows').innerHTML=html;lastRows=html;
       if(focused)Array.from($('mf-rows').querySelectorAll('[data-symbol]')).find(b=>b.dataset.symbol===focused)?.focus({preventScroll:true});
     }
-    $('mf-page-number').textContent=`${page+1} / ${pages}`;$('mf-prev').disabled=page===0;$('mf-next').disabled=page>=pages-1;
+    restoreListScroll(container,resetScroll?{top:0}:position);
     $('mf-list-count').textContent=`${rows.length} 个`;
     for(const b of $('mf-filters').querySelectorAll('[data-filter]'))b.setAttribute('aria-pressed',String(b.dataset.filter===filter));
   }
@@ -179,9 +189,8 @@
   }
   function cancel(){periodMenu(false);revision++;controller?.abort();controller=null;pending=null;clearTimeout(timer);window.SpikeMondayFibChart?.hide();}
   function setActive(value){if(active===value)return;active=value;cancel();layout.setActive(value);if(active){panel(listOpen);render();refresh();}}
-  $('mf-search').addEventListener('input',e=>{query=e.target.value;page=0;renderRows();sync();});
-  $('mf-filters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;filter=b.dataset.filter;page=0;renderRows();sync();});
-  for(const [id,delta] of [['mf-prev',-1],['mf-next',1]])$(id).addEventListener('click',()=>{page+=delta;renderRows();sync();});
+  $('mf-search').addEventListener('input',e=>{query=e.target.value;renderRows(true);sync();});
+  $('mf-filters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;filter=b.dataset.filter;renderRows(true);sync();});
   $('mf-rows').addEventListener('click',e=>{const b=e.target.closest('[data-symbol]');if(!b)return;selected=b.dataset.symbol;follow=false;render();sync();if(window.matchMedia?.('(max-width: 760px)').matches)panel(false,true);});
   $('mf-list-toggle').addEventListener('click',()=>panel(!listOpen,true));$('mf-list-close').addEventListener('click',()=>panel(false,true));
   $('mf-follow').addEventListener('click',()=>{follow=true;render();sync();});
@@ -206,6 +215,6 @@
   window.addEventListener?.('resize',()=>periodMenu(false));
   root.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('mf-period-menu').hidden){e.stopPropagation();periodMenu(false,true);}else if(e.key==='Escape'&&listOpen){e.stopPropagation();panel(false,true);}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){cancel();layout.setActive(false);}else if(active){layout.setActive(true);render();refresh();}});
-  window.SpikeNavigation?.register('monday-fib',p=>{query=p.q||'';filter=Object.hasOwn(FILTERS,p.filter)?p.filter:'all';page=Math.max(0,(Number(p.page)||1)-1);selected=p.symbol||'';follow=!selected;$('mf-search').value=query;if(data)render();});
+  window.SpikeNavigation?.register('monday-fib',p=>{query=p.q||'';filter=Object.hasOwn(FILTERS,p.filter)?p.filter:'all';$('mf-rows').scrollTop=0;selected=p.symbol||'';follow=!selected;$('mf-search').value=query;if(data)render();});
   panel(listOpen);window.SpikeMondayFib={setActive,refresh};
 })();

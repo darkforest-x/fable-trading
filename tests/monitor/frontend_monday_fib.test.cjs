@@ -43,10 +43,11 @@ test('latest follow advances, manual selection stays pinned, follow resumes and 
  c.el('mf-rows').events.click({target:{closest:()=>({dataset:{symbol:a.symbol}})}});
  value=snap({week:'2026-10-26',items:[a,b]});await c.api.refresh();assert.equal(c.charts.at(-1).symbol,b.symbol);assert.equal(c.el('mf-follow').attrs['aria-pressed'],'true');c.api.setActive(false);
 });
-test('search and paging change the list without changing wallpaper selection',async()=>{
+test('all matching contracts are scrollable; search resets position without changing wallpaper selection',async()=>{
  const c=harness(async()=>response(snap({items:Array.from({length:507},(_,i)=>item({symbol:`C${i}-USDT-SWAP`,touches:{upper:event({observed_ms:2e12-i})}}))})));await ready(c);
- for(let i=0;i<101;i++)c.el('mf-next').events.click();assert.match(c.el('mf-rows').innerHTML,/C506/);assert.equal(c.el('mf-next').disabled,true);
- c.el('mf-search').events.input({target:{value:'C0-USDT-SWAP'}});assert.equal(c.el('mf-page-number').textContent,'1 / 1');assert.match(c.el('mf-rows').innerHTML,/>C0</);
+ assert.match(c.el('mf-rows').innerHTML,/C506/);assert.equal((c.el('mf-rows').innerHTML.match(/data-symbol=/g)||[]).length,507);
+ c.el('mf-rows').scrollTop=620;await c.api.refresh();assert.equal(c.el('mf-rows').scrollTop,620);
+ c.el('mf-search').events.input({target:{value:'C0-USDT-SWAP'}});assert.equal(c.el('mf-rows').scrollTop,0);assert.equal(c.el('mf-list-count').textContent,'1 个');assert.match(c.el('mf-rows').innerHTML,/>C0</);
  assert.equal(c.charts.at(-1).symbol,'C0-USDT-SWAP');c.el('mf-search').events.input({target:{value:'NONE'}});assert.match(c.el('mf-rows').innerHTML,/没有匹配/);assert.equal(c.charts.at(-1).symbol,'C0-USDT-SWAP');c.api.setActive(false);
 });
 test('late snapshot from a departed view is ignored',async()=>{
@@ -71,4 +72,14 @@ test('period choice reaches the chart without changing pinned symbol or NY ancho
  assert.equal(c.el('mf-period-label').textContent,'4H');assert.equal(c.el('mf-period-menu').hidden,true);
  await c.api.refresh();assert.equal(c.charts.at(-1).period,'4H');
  c.el('mf-period-menu').events.click({target:{closest:()=>({dataset:{period:'invalid'}})}});assert.equal(c.charts.at(-1).period,'4H');c.api.setActive(false);
+});
+
+test('live list insertion preserves the same visible symbol and pixel offset',()=>{
+ const {captureListScroll,restoreListScroll}=require('../../yoyo/monitor/static/monday-fib.js');
+ let rows=[{dataset:{symbol:'A'},offsetTop:2,offsetHeight:58},{dataset:{symbol:'B'},offsetTop:62,offsetHeight:58},{dataset:{symbol:'C'},offsetTop:122,offsetHeight:58}];
+ const container={scrollTop:75,querySelectorAll:()=>rows},position=captureListScroll(container);
+ assert.equal(position.symbol,'B');assert.equal(position.offset,-13);
+ rows=rows.map(r=>({...r,offsetTop:r.offsetTop+60}));restoreListScroll(container,position);assert.equal(container.scrollTop,135);
+ rows=[];restoreListScroll(container,position);assert.equal(container.scrollTop,75);
+ container.scrollTop=0;assert.equal(captureListScroll(container).symbol,undefined);
 });
