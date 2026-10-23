@@ -1,3 +1,8 @@
+## 2026-10-23 · 区间1.618 methods 14-15: Beijing 04-08 and US release windows rejected
+
+- Binance alts 2020-01..2025-05 (503 USDT perps incl. delisted, 12000 vision archives via yoyo/data/binance_um_vision_listing.py): 40289 touches 36.7 percent; Beijing 04-08 36.4 percent (n5447), gap -0.35pp, p .568. The OKX timing pattern does not replicate.
+- US CPI/payrolls/FOMC +-2h (536 official events; BLS archive filenames and federalreserve.gov pages saved under exp-monday-1618-macro inputs): frozen "breaks more" fails. Crypto shows the opposite in two time-disjoint sets (Binance alts 42.0 vs 36.5, n1473; OKX 2025-26 50.4 vs 38.7, n335) but it is post hoc; XAU 32.4 vs 36.3 (n71) n.s. Forward observation only. Notion task and two knowledge-base records updated.
+
 ## 2026-10-23 · Monday 1.618 full-screen glass workspace
 
 - Owner-requested chart wallpaper now defaults to latest touched contract; Monday H/L and both outer1.618 solid lines, optional internal lines. Compact glass controls; no Telegram module. Manual selection pins the chart; follow resumes latest. Existing backend/subscription untouched.
