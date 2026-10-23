@@ -25,8 +25,9 @@ def ts(value):return datetime.fromisoformat(value).timestamp()*1000
 def bjt(value):return datetime.fromisoformat(value).astimezone(timezone(timedelta(hours=8))).strftime('%Y-%m-%d %H:%M')
 
 
-def draw(sample,mode):
+def draw(sample,mode,output_dir=None):
     bars=sample[f'{mode}_bars'];n=len(bars);tf=sample['timeframe_minutes'];duration=tf*60000
+    confirmations=sample.get('confirmation_count',1 if sample['case']==1 else 3)
     fig=plt.figure(figsize=(14,7),dpi=125);grid=fig.add_gridspec(5,1,hspace=.03);ax=fig.add_subplot(grid[:4]);vol=fig.add_subplot(grid[4],sharex=ax)
     fig.subplots_adjust(left=.075,right=.78,top=.84,bottom=.14)
     def xpos(value):
@@ -40,7 +41,7 @@ def draw(sample,mode):
     ax.set_ylim(low-pad,high+pad);ax.set_xlim(-1,n)
     p=xpos(sample['pin_time'])+.5;e=xpos(sample['entry_time'])+.5
     ax.axvspan(p-.5,p+.5,color='#e5b858',alpha=.16,zorder=0)
-    for j in range(1,2 if sample['case']==1 else 4):ax.axvspan(p+j-.5,p+j+.5,color='#77a7e9',alpha=.12,zorder=0)
+    for j in range(1,confirmations+1):ax.axvspan(p+j-.5,p+j+.5,color='#77a7e9',alpha=.12,zorder=0)
     for i,b in enumerate(bars):
         _,o,h,l,c,v=b;color=C['up'] if c>=o else C['down']
         ax.vlines(i,l,h,color=color,linewidth=.9,zorder=3)
@@ -57,7 +58,7 @@ def draw(sample,mode):
     if 0<=exitx<n:
         ax.scatter([exitx],[sample['exit_price']],marker='X',s=65,color=C['amber'],zorder=8)
         ax.axvspan(exitx-.5,exitx-.5+5/tf,color=C['amber'],alpha=.18,zorder=2)
-    events=[(p,'P'),*[(p+j,str(j)) for j in range(1,2 if sample['case']==1 else 4)],(e,'E')]
+    events=[(p,'P'),*[(p+j,str(j)) for j in range(1,confirmations+1)],(e,'E')]
     for lane,(x,label) in enumerate(events):
         if 0<=x<n:
             # Separate adjacent events vertically instead of rotating overlapping text.
@@ -72,12 +73,14 @@ def draw(sample,mode):
     if sample['symbol']=='XAUUSD':vol.set_yticks([]);vol.text(.01,.55,'现货历史无有效成交量；不绘制量柱',transform=vol.transAxes,color='#6b7789',fontsize=9)
     else:vol.set_ylabel('原币量',fontsize=9);vol.ticklabel_format(axis='y',style='sci',scilimits=(0,0));vol.yaxis.get_offset_text().set_fontsize(8)
     ret=sample['gross_r'] if sample['net_r'] is None else sample['net_r'];basis='毛' if sample['net_r'] is None else '净'
-    fig.suptitle(f"情况{sample['case']} · {sample['symbol']} · {tf}m · 做{sample['direction']} · {sample['outcome']} {ret:+.3f}R（{basis}）",x=.075,ha='left',y=.965,fontsize=16,weight='bold')
+    config_label=f" · {confirmations}根确认" if 'confirmation_count' in sample else ''
+    fig.suptitle(f"情况{sample['case']}{config_label} · {sample['symbol']} · {tf}m · 做{sample['direction']} · {sample['outcome']} {ret:+.3f}R（{basis}）",x=.075,ha='left',y=.965,fontsize=16,weight='bold')
     fig.text(.075,.91,f"{'入场局部' if mode=='detail' else '持仓全程'}｜{sample['sample_id']}｜北京时间 UTC+8｜{n} 根原周期K线；休市/缺口按已观测K线压缩",fontsize=10,color='#526175')
     fig.text(.075,.065,f"插针开盘 {bjt(sample['pin_time'])}   入场 {bjt(sample['entry_time'])}   退出区间 {bjt(sample['exit_interval_start'])} — {bjt(sample['exit_interval_end'])}",fontsize=9,color='#526175')
-    fig.text(.075,.035,'P 插针 · 1/2/3 确认（情况1：1=吞没）· E/▲/▼ 入场 · × 退出 · 黄底=插针/退出5m区间 · 蓝底=确认。含事后行情；退出具体秒数未知。',fontsize=8.5,color='#526175')
-    path=OUT/'charts'/f"{sample['sample_id']}-{mode}.png";path.parent.mkdir(exist_ok=True);fig.savefig(path,dpi=125);plt.close(fig)
-    return str(path.relative_to(OUT))
+    fig.text(.075,.035,f'P 插针 · 1至{confirmations} 确认（情况1：1=吞没）· E/▲/▼ 入场 · × 退出 · 黄底=插针/退出5m区间 · 蓝底=确认。含事后行情；退出具体秒数未知。',fontsize=8.5,color='#526175')
+    dest=Path(output_dir) if output_dir is not None else OUT
+    path=dest/'charts'/f"{sample['sample_id']}-{mode}.png";path.parent.mkdir(exist_ok=True);fig.savefig(path,dpi=125);plt.close(fig)
+    return str(path.relative_to(dest))
 
 
 def main():
