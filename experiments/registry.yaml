@@ -104,6 +104,36 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'This run also had a direct bar computation (summary.json) that the owner said was redundant; native matches it trade by trade (mean abs diff 0.01/0.43bp). Later runs are framework-only. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-1618-hold30-wickstop-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6d724dd8f2dce5340b0df2d25ca5a7d0180ff272
+    status: rejected
+    question: 'Owner: limit at the first weekly Monday 1618, hold 30 minutes, but stop at the 15m touch-bar wick extreme (low long / high short) instead of the 2.0 extension.'
+    single_variable: 'Stop 2.0 extension -> 15m touch-bar wick extreme (placed at that bar close), versus exp-monday-1618-hold30-20261023-v1 stop_2.0.'
+    result: 'NautilusTrader 1.231.0 only, real fees. OKX BTC n91 gross +5.3bp net -1.7bp win 35.2 CI [-13.2,+10.5], later -6.1; Binance majors n1033 gross +10.2 net +3.2 CI [-6.9,+13.6], earlier +10.2 later -3.2. Stopped 46/91 and 454/1033; median wick risk 18/30bp. Fails.'
+    artifacts:
+    - monday-1618-hold30-wickstop-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-hold30-wickstop-20261023-v1/native_summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Builder identical to 800072e25b (adapter one-time stop tightening; close already at the wick extreme exits at that close). by_wick_ok split uses the touch-bar close, after the fill, so it is not an entry filter. No random null.'
+  - experiment_id: exp-monday-1618-hold50-wickstop-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 136768c3bd9f10447856402120813a5b4a04f805
+    status: rejected
+    question: 'Owner: limit at the first weekly Monday 1618, hold 50 minutes, but stop at the 15m touch-bar wick extreme (low long / high short) instead of the 2.0 extension.'
+    single_variable: 'Stop 2.0 extension -> 15m touch-bar wick extreme (placed at that bar close), versus exp-monday-1618-hold50-20261023-v1 stop_2.0.'
+    result: 'NautilusTrader 1.231.0 only, real fees. OKX BTC n91 gross +4.7bp net -2.3bp win 28.6 CI [-14.9,+11.8], later -11.3; Binance majors n1033 gross +10.0 net +3.0 CI [-7.7,+13.5], earlier +11.4 later -4.6. Stopped 55/91 and 529/1033; median wick risk 18/30bp. Fails.'
+    artifacts:
+    - monday-1618-hold50-wickstop-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-hold50-wickstop-20261023-v1/native_summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Builder identical to 800072e25b (adapter one-time stop tightening; close already at the wick extreme exits at that close). by_wick_ok split uses the touch-bar close, after the fill, so it is not an entry filter. No random null.'
   - experiment_id: exp-monday-1618-hold50-20261023-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 6d8f07330c708fcb268a94a81576ce82cf90d0d0
@@ -13301,3 +13331,16 @@ experiments:
     holdout_consumed: false
     reuse_allowed: true
     notes: Execution via the NautilusTrader 1.231.0 range_framework runner (scripts/backtest-range); builder fe03bd3482 committed before generation. post2 candidates, control times and pivot ledger reproduce exp-range-v221-compare v221_original exactly (asserted). ETH post0 drops3 post2 arrows whose earlier entry close fails the weekday/risk gates. Per-variant matched controls from the shared seed. Strict-tie sensitivity within1.6R. 95 focused tests pass. One known year, no unseen validation; no Pine/live/model/dependency change.
+  - experiment_id: exp-monday-vectorbt-parameters-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 89058b9225
+    status: active
+    question: Do independently varying confirmation counts or prior-volume windows improve the Monday1618 cases2-4?
+    single_variable: Owner authorized confirmations1-5 separately for cases2/3/4, and previous-volume10/20/30/40 for case2 with confirmations3;18 unique configurations. Stops, targets, costs and first-touch rules unchanged.
+    artifacts:
+    - monday-vectorbt-parameters-20261023-v1
+    canonical_report: experiments/active/exp-monday-vectorbt-parameters-20261023-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: VectorBT1.2.0 isolated environment; native stop selection and Portfolio accounting; frozen baseline fills reused, new unique trade geometries simulated once. Earlier meanR selection then later evaluation; matched controls, no fresh holdout claim. XAU gross only and unavailable for volume condition.

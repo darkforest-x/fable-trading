@@ -1,3 +1,9 @@
+## 2026-10-23 · 区间1.618 limit + hold with 15m wick stop rejected (NautilusTrader only)
+
+- Owner: "止损改成影线低点重新跑". Same limit at the first weekly Monday 1618 and 30/50-minute hold; stop = low (long) / high (short) of the 15m bar containing the touch, placed at that bar's close (price cannot pass it inside the bar). Adapter gained a one-time native stop tightening (`stop_update_i`/`stop_update`, reason 9); a close already at the wick extreme exits at that close. 250 adapter tests pass.
+- 30m: OKX BTC n91 net -1.7bp CI[-13.2,10.5], later -6.1; Binance six majors n1033 net +3.2bp CI[-6.9,13.6], later -3.2. 50m: -2.3bp and +3.0bp, later -11.3/-4.6. About half the trades stop out (median wick risk 18/30bp); slightly worse than no stop, better than the 2.0 stop. Fails.
+- Touch bars closing back inside the level earn +24/+47bp and those closing beyond lose -42/-70bp, but that is known only after the fill, so it is not an entry filter. Results `experiments/active/exp-monday-1618-hold{30,50}-wickstop-20261023-v1/native_summary.json`. No live orders, training/production false.
+
 ## 2026-10-23 · App 0.8.21 — minimal Monday chart
 
 - Replace chart-wide price lines and range fill with time-bounded native primitive rays, starting at NY Monday close. Solid lines; plain 高点/低点/1.618 text; faint unlabeled midpoint; no band or reference price-axis labels. Candle/session/1R semantics retained. Settings gear exists only on Statistics; non-chart page background is now solid white.
