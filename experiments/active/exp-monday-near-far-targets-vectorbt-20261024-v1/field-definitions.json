@@ -1,0 +1,15 @@
+{
+  "target_near": "Long original Monday low; short original Monday high.",
+  "target_far": "Long original Monday high; short original Monday low.",
+  "cohort": "Identical original near-eligible entries/stops at each N; does not include additional far-only eligible entries.",
+  "R": "Signed price PnL divided by initial entry-to-stop risk; net subtracts per-fill fees. XAU net unknown.",
+  "realized_payoff_ratio": "Mean profitable trade R / absolute mean losing trade R.",
+  "planned_rr": "Entry-to-target reward / original stop risk.",
+  "paired_stats": "Only signal and three closed matched controls; use paired_signal_r with paired_random_r.",
+  "MFE": "Gross favorable excursion truncated at native execution path; never after stop or TP.",
+  "times": "UTC and explicit Beijing entry column; exit and MFE timestamps are starts of 5-minute intervals, not exact ticks.",
+  "censored": "Data boundary reached without target/stop; do not classify as profit/loss. Paired CSV keeps boundary MTM separately from resolved comparison.",
+  "selection": "Choose N independently for each target/group on pre2023 meanR; evaluate2023+ excluding crossing positions. Not fresh holdout.",
+  "portfolio": "Independent overlapping trades; no common funded capital/equity curve.",
+  "raw_details": "signal-trades.csv.gz and all-trades.csv.gz retain prior-exit-bar bounds and all per-trade diagnostic fields."
+}

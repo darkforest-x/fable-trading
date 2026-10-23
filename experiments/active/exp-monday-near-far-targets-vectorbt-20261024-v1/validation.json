@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "symbols": 633,
+  "near_metric_rows": 75,
+  "target_tests": 7,
+  "new_far_positions": 381149,
+  "positions_checked": 381780,
+  "near_stop_invariance": 213392,
+  "native_fills": 762298,
+  "checks": [
+    "frozen near metrics",
+    "identical entries/stops/control times",
+    "farther targets only",
+    "unchanged near-stop outcomes",
+    "far exits cannot precede near exits",
+    "censor monotonicity",
+    "excursion truncation",
+    "per-fill fee arithmetic",
+    "two native fills per new position",
+    "full universe",
+    "unchanged input/cache/code stamps"
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}
