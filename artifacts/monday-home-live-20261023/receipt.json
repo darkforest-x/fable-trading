@@ -1,0 +1,199 @@
+{
+  "source_commit": "1e194fa0ed2827a8434cd63506d08b466550dbf5",
+  "checked_ms": 1792765671861,
+  "design": {
+    "project_id": "8978791379095391159",
+    "screen_id": "919dd584e7254fcc894df9399f23861e",
+    "model": "GEMINI_3_8_FLASH",
+    "html": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sXzhjNDE5NjczYmFkMDRlZjM5NzczMDdlZTQ0MGZiYTg2EgsSBxCg8tPG9wkYAZIBIwoKcHJvamVjdF9pZBIVQhM4OTc4NzkxMzc5MDk1MzkxMTU5&filename=&opi=96797242",
+    "image": "https://lh3.googleusercontent.com/aida/AEtjO1XgOftNmE7RVLk-6I_KS6IBDEKydWL_o9g2luiEq-Ri8H-ueqmlJGY2FJ3m7897AfCXUiZlRkV2rBzYknwCd354t9zSYn4qD9MydvdfJH0ReTNCevDdZtYE9KXbR35lnAlnxs8_fe6s4R8zaogyerno3XQFhrwaw3RL87ozSlk0LA4B9nxSJw8eCGuzpivRVCu1wZ78cif_bHz-QCMACMG6eEETffAMFTpHoqlkkLh0y98nhxhH9Wn_4qE"
+  },
+  "tests": {
+    "python_passed": 404,
+    "frontend_passed": 52,
+    "python_command": ".venv/bin/python -m pytest -q tests/okx_execution tests/monitor/test_monday_candles.py tests/monitor/test_monday_fib.py tests/monitor/test_asset_delivery.py tests/monitor/test_api_startup_imports.py tests/monitor/test_retired_market.py tests/boundaries/test_layer_imports.py --disable-warnings",
+    "frontend_command": "node --test tests/monitor/frontend_monday*.test.cjs tests/monitor/frontend_range_chart.test.cjs tests/monitor/frontend_startup_hints.test.cjs tests/monitor/frontend_glass_navigation.test.cjs"
+  },
+  "browser": {
+    "checks": {
+      "previews": 3,
+      "confirmations": 1,
+      "statusReads": 1,
+      "blocked": 0,
+      "errors": []
+    },
+    "mobile": {
+      "width": 390,
+      "documentWidth": 390,
+      "panelWidth": 366
+    },
+    "narrow": {
+      "width": 320,
+      "documentWidth": 320,
+      "formWidth": 262,
+      "scrollWidth": 262
+    },
+    "terms": {
+      "symbol": "VICR-USDT-SWAP",
+      "side": "short",
+      "order_type": "limit",
+      "limit_price": "100",
+      "take_profit": "90",
+      "stop_loss": "110"
+    },
+    "marketRequests": []
+  },
+  "chart": {
+    "window": {
+      "start_ms": 1792382400000,
+      "end_ms": 1792987200000
+    },
+    "levels": [
+      {
+        "label": "上 1.618",
+        "price": 223.746
+      },
+      {
+        "label": "周一高",
+        "price": 210.15
+      },
+      {
+        "label": "周一低",
+        "price": 188.15
+      },
+      {
+        "label": "下 1.618",
+        "price": 174.554
+      }
+    ],
+    "labels": [
+      {
+        "text": "上 1.618 223.746",
+        "visible": true
+      },
+      {
+        "text": "周一高 210.15",
+        "visible": true
+      },
+      {
+        "text": "周一低 188.15",
+        "visible": true
+      },
+      {
+        "text": "下 1.618 174.554",
+        "visible": true
+      }
+    ]
+  },
+  "chart_checks": {
+    "before": {
+      "boundaryIndex": 29,
+      "visible": {
+        "from": -1,
+        "to": 64
+      }
+    },
+    "past": {
+      "axisVisible": false,
+      "scalePrices": []
+    },
+    "links": [
+      "1.618 · 首页",
+      "信号",
+      "巡检",
+      "模拟",
+      "实盘账户"
+    ],
+    "oldMarketRoute": "http://127.0.0.1:8766/#monday-fib",
+    "errors": [],
+    "marketRequests": []
+  },
+  "services": {
+    "checked_ms": 1792765502085,
+    "market": {
+      "monitoring_enabled": false,
+      "workers": {
+        "sync": false,
+        "context": false
+      },
+      "stopped_reason": "owner_retired_market_workspace"
+    },
+    "monday_week": "2026-10-19",
+    "patrols_enabled": 4,
+    "patrols_total": 4,
+    "manual_worker": {
+      "errors": [],
+      "free_manual_revision": "free-manual-20261023-v1",
+      "heartbeat_ms": 1792765501613,
+      "worker_error": null
+    },
+    "real_free_tickets": 0,
+    "real_test_orders": 0,
+    "browser_session": "fib-home-live",
+    "browser_closed": true,
+    "scan": {
+      "status": "degraded",
+      "completed": 2012,
+      "total": 2012,
+      "errors": 4,
+      "error_samples": [
+        {
+          "symbol": "TEST002-USDT-SWAP",
+          "timeframe": "1H",
+          "error": "RuntimeError"
+        },
+        {
+          "symbol": "TEST002-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "RuntimeError"
+        },
+        {
+          "symbol": "TEST002-USDT-SWAP",
+          "timeframe": "30m",
+          "error": "RuntimeError"
+        },
+        {
+          "symbol": "TEST002-USDT-SWAP",
+          "timeframe": "4H",
+          "error": "RuntimeError"
+        }
+      ]
+    },
+    "service_alive": true,
+    "model_ready": false,
+    "manual_readiness": {
+      "status": "ready",
+      "code": "ready",
+      "title": "账户已就绪",
+      "message": "可以计算订单预览，实际开仓仍需逐笔确认。",
+      "issues": [],
+      "checked_ms": 1792765671797
+    },
+    "monday_stream_connected": true,
+    "browser_process_exited": true
+  },
+  "real_read_only_plan": {
+    "symbol": "VICR-USDT-SWAP",
+    "notional_usdt": "100",
+    "leverage": "5",
+    "size": "0.56",
+    "result": "passed",
+    "writes_enabled": false,
+    "fee_source": "trade-fee.feeGroup matching instrument.groupId",
+    "invalid_20x": "rejected against venue maximum 10x"
+  },
+  "screenshots": [
+    "output/playwright/monday-home-live-20261023/desktop-live-preview.png",
+    "output/playwright/monday-home-live-20261023/desktop-week-lines.png",
+    "output/playwright/monday-home-live-20261023/previous-week-no-current-lines.png",
+    "output/playwright/monday-home-live-20261023/narrow-live-form.png",
+    "output/playwright/monday-home-live-20261023/mobile-live-receipt.png"
+  ],
+  "limitations": [
+    "No physical mobile device acceptance; browser widths 1440, 390, 320 tested.",
+    "Only synthetic confirmations; no live exchange writes during acceptance.",
+    "Limit attached exits await full fill or cancellation of the unfilled remainder.",
+    "Existing same-symbol positions/orders block discretionary entry to avoid leverage changes.",
+    "Shared scanner TEST002-USDT-SWAP errors retained in service evidence; no model active as expected."
+  ]
+}

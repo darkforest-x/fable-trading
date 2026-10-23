@@ -1,3 +1,10 @@
+## 2026-10-23 · 1.618 homepage, current-week lines and free manual entry
+
+- Owner confirmed current NY Monday range and 1.618, plus free manual orders matching the paper ticket choices. Homepage/old #market redirect to1.618; Market navigation removed. MarketSync/MarketContext no longer start; retired context/workstation routes410 prevent old tabs restarting collection. Shared monitor, Monday stream, four patrols and execution stay enabled.
+- Weekly lines and axis labels use server NY week bounds, including DST; prior-week candles remain accessible without current-week price/scale contamination. VICR actual current-week H210.15/L188.15, outer223.746/174.554 verified.
+- Former live tab was disabled with no module. New explicit preview/confirmation supports side, notional, leverage, market/limit and optional fixedTP/SL in existing manual account. Separate durable ticket ledger, same locked worker, no strategy3percent/3R sizing. Unknown submissions only GET-reconcile; existing same-symbol inventory blocks leverage changes. Actual feeGroup matched to instrument; read-only real plan passed. Native limit exits wait for full fill or remainder cancellation.
+- Code `1e194fa0ed`; Stitch919dd584e7254fcc894df9399f23861e/GEMINI_3_8_FLASH.404Python+52frontend pass; browser1440/390/320, real chart bounds and intercepted order workflow verified. Zero real free tickets/orders. Both services updated; manual readinessready, Monday streamconnected,4patrolsenabled. Shared scan has4TEST002-USDT-SWAP errors; no active model expected. Temporary browserclosed/PIDexited. Evidence `artifacts/monday-home-live-20261023/receipt.json`. Unrelated stagedREADME deletion and MondayBark edits preserved.
+
 ## 2026-10-23 · Case3 hourly wick plus three untouched bars: overall fails, gold exploratory
 
 - Knowledge record https://app.notion.com/p/4028856479af81469da0f0a3173497c2; write/readback confirmed after transient connector recovery.
