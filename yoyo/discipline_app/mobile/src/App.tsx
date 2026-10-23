@@ -13,6 +13,7 @@ import {CandleModule} from './CandleModule';
 import {ClosePosition} from './ClosePosition';
 import {PageHeader} from './PageHeader';
 import {DisciplineBudget} from './DisciplineBudget';
+import {MySystem} from './MySystem';
 import {PositionCard} from './PositionCard';
 import {MAIN_TABS,useSwipeNav} from './useSwipeNav';
 import {useCallback,useEffect,useMemo,useRef,useState,type CSSProperties} from 'react';
@@ -338,6 +339,7 @@ export default function App(){
    {tab==='统计'&&<Statistics overview={state} online={online} connection={connection} onConnect={()=>nav('设置')}/>}
    {tab==='纪律'&&<>
     <PageHeader title="交易纪律" subtitle="把规则提前定好，把执行交给系统。"/>
+    <MySystem/>
     <div className={reason?'warning':'healthy'}><Icon name={reason?'lock':'shield'} size={18}/><span>{reason||'服务端规则生效中'}</span></div>
     <DisciplineBudget state={state} online={online} onOpen={()=>{}}/>
     <section className="card discipline-summary"><span className="badge"><Icon name="lock" size={13}/>{p?'当前生效规则':'连接后读取规则'}</span><div className="summary-grid"><div><b>{p?riskPercent:'—'}<small>%</small></b><span>单笔计划风险</span></div><div><b>{p?.max_entries??'—'}<small>次</small></b><span>每日基础次数</span></div></div><p>{p?.profit_entry_bonus?'盈利全平 +1 次 · 日亏与连亏停手优先':'刷新、退出或换手机，记录依然保留。'}</p></section>

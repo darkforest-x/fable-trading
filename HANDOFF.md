@@ -1,3 +1,9 @@
+## 2026-10-24 · App 0.8.23 — My System in Discipline
+
+- Add a local read-only My System card directly below the Discipline heading: only enter outside the range at1.618; wait for signal confirmation; take profit/stop loss promptly or take partial profits. Source: Owner Notion task68, `https://app.notion.com/p/4028856479af80e28a01d52495d5eba0`, edited2026-10-23. No older research draft rules or execution-policy changes.
+- Stitch GEMINI_3_8_FLASH screen549b2f58f37545b2867dc1d05192e53e; design/code in `yoyo/discipline_app/design/my-system-0.8.23/`. Built assets verified at320/390px, no overflow/blur, offline tab return retains principles, existing discipline sections retained. Vendor-prefixed override ordering fixed and learning saved.
+- TypeScript/Vite, iOS/Android0.8.23(32) builds and signatures pass; native/web asset copies match. Web updated without backend restart. iPhone unavailable, not installed. QA `output/playwright/app-my-system/`, receipt `yoyo/discipline_app/releases/build-0.8.23.json`. Zero order writes/live commands; temporary browser15248 and fixture15153 exited, active streams0. Live heartbeat age1.54s after cleanup.
+
 ## 2026-10-24 · App 0.8.22 — cached chart and continuous gestures
 
 - Keep the 1.618 Canvas mounted; restore current NY-week public snapshot, selection and period locally. Cached/offline states cannot enable quick entry; old-week anchors disappear. Pause candle feeds while hidden or covered, coalesce bounded candle disk writes into idle time. No execution/risk policy or private-account cache changes.

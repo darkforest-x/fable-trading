@@ -1,0 +1,7 @@
+/* Stitch 549b2f58f37545b2867dc1d05192e53e; reuse the app's type and color tokens. */
+.app .card.my-system{background:var(--canvas);border:1px solid var(--border);box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;margin-bottom:18px}
+.app .my-system h2{margin:0;padding-bottom:12px;border-bottom:1px solid var(--border);font-size:16px;font-weight:600;line-height:1.5}
+.app .my-system ol{list-style:none;counter-reset:principle;margin:0;padding:0}
+.app .my-system li{counter-increment:principle;display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--border);font-size:15px;line-height:1.6}
+.app .my-system li::before{content:counter(principle,decimal-leading-zero);color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.app .my-system li:last-child{padding-bottom:0;border-bottom:0}
