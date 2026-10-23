@@ -1,15 +1,30 @@
 {
-  "status": "baseline_analysis_ready_html_and_pullback_pending",
+  "status": "integrating_original_stitch_template",
   "owner_request": "Detailed HTML analysis of altcoin4h+5confirmation high-win-rate candidate, plus a pullback-entry test",
   "baseline": "case4-n5-v20;9065signals620symbols9041closed24censored; original pin SL and nearMonday full TP",
   "app": "reports/monday-1618-cases-20261023",
   "app_id": "report:b2b980f2-70d2-4866-8399-0d8c6aa94a7e",
   "reviewed_queries": "artifacts/monday-alt-n5-report-20261024/reviewed-queries.json",
-  "query_ids": ["alt-n5-stats", "alt-n5-ledger", "alt-n5-excursions", "alt-n5-distributions", "alt-n5-quantiles", "alt-n5-streaks", "alt-n5-samples", "alt-n5-rr-bands"],
+  "query_ids": [
+    "alt-n5-stats",
+    "alt-n5-ledger",
+    "alt-n5-excursions",
+    "alt-n5-distributions",
+    "alt-n5-quantiles",
+    "alt-n5-streaks",
+    "alt-n5-samples",
+    "alt-n5-rr-bands"
+  ],
   "image_module": "reports/monday-1618-cases-20261023/src/content/report/alt-n5-images.js",
   "data_zip": "artifacts/monday-alt-n5-report-20261024/山寨4h五根确认-详细数据与盈亏图.zip",
-  "builders": ["yoyo/evaluation/monday_alt_n5_report.py", "yoyo/evaluation/monday_alt_n5_report_review.py"],
-  "reproduce": ["/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_alt_n5_report --workers 2", "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_alt_n5_report_review"],
+  "builders": [
+    "yoyo/evaluation/monday_alt_n5_report.py",
+    "yoyo/evaluation/monday_alt_n5_report_review.py"
+  ],
+  "reproduce": [
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_alt_n5_report --workers 2",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_alt_n5_report_review"
+  ],
   "no_trade_replay": true,
   "stitch": {
     "project": "8978791379095391159",
@@ -19,7 +34,8 @@
     "result": "300secondtimeout; eight further recovery lists retained only old report image/code",
     "new_screen_id": null,
     "evidence": "stitch-status.json",
-    "instruction": "Recover existing request only. Do not resubmit. Owner requires waiting forStitch. New screenshot andHTML required before UI implementation."
+    "instruction": "Owner2026-10-24 explicitly authorized reuse of original Stitch design as template. Do not wait for or retry new generation.",
+    "template_reuse_authorized": true
   },
   "pullback_test": {
     "run_enabled": false,

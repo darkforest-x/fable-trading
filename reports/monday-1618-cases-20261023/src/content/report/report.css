@@ -364,3 +364,10 @@
 .spike-report .download-row button {border:1px solid var(--border-strong);border-radius:8px;background:var(--control);color:var(--text);font:inherit;padding:12px 18px;cursor:pointer;}
 .spike-report .download-row button:hover {background:var(--control-hover);}
 @media(max-width:800px){.spike-report .analysis-charts{grid-template-columns:1fr}.spike-report .report-hero h1{font-size:28px}.spike-report .specimen-controls{align-items:stretch}}
+
+/* Keep authored evidence titles readable when filter rows wrap on phones. */
+@media(max-width:640px){
+ .spike-report :is(#alt-n5,#latest-research) .component-header.has-controls{flex-direction:column;align-items:stretch;gap:12px;}
+ .spike-report :is(#alt-n5,#latest-research) .component-header.has-controls .component-title{flex:none;width:auto;max-width:none;padding-inline-end:28px;}
+ .spike-report :is(#alt-n5,#latest-research) .component-header-controls{flex-wrap:wrap;justify-content:flex-start;max-width:100%;}
+}
