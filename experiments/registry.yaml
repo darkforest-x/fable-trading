@@ -16,18 +16,19 @@ schema_version: 1
 experiments:
   - experiment_id: exp-monday-1h-wick-hold-20261023-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: active
+    source_commit: 8ca6419d65
+    status: rejected
     question: 'Owner case3: hourly wick-only1618 rejection; next3hourly wicks also avoid level.'
     single_variable: 'Owner-defined case3 protocol fixed before replay; same pin extreme SL and nearMondayedge TP/cost; no volume filter or parameter search.'
-    result: 'Pending native framework result; first weekly-side touch inherited fromcase2, optional clarification offered.'
-    artifacts: []
+    result: '633symbols10662signals41820native positions. BTC49/ETH47 netmean-.29560/-.26860R. XAU66 grossmean+.08766R vsrandom-.26539R but absoluteCI crosses0,cost unknown,later only12. Group1 162grossmean-.08899R.630alts10489closed11censored netwin55.29percent,netmean-.05177R vsrandom-.18013R; matched excess34.94bp p.00050 but absolute net negative both time halves. Overall fails; gold remains exploratory.'
+    artifacts:
+    - monday-1h-wick-hold-20261023-v1
     canonical_report: experiments/active/exp-monday-1h-wick-hold-20261023-v1/summary.json
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: 'Nautilus1.231.0 existing5m execution; corrected NYspot clock, original conflict exclusion. Hourly pin and3confirmations require fully observed minutes.'
+    notes: 'Nautilus1.231.0 existing5m execution; corrected NYspot clock, original conflict exclusion. Hourly pin and3confirmations require fully observed minutes. First weekly-side touch inherited fromcase2; no volume condition. Owner optional clarification had no change before freeze. Current OKX fee scenario on Binance history; spotgross only.'
   - experiment_id: exp-monday-5m-wick-gold-clock-20261023-v2
     source_repo: darkforest-x/fable-trading
     source_commit: f6331cb975

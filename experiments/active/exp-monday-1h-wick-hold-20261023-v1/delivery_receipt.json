@@ -1,0 +1,70 @@
+{
+  "experiment_id": "exp-monday-1h-wick-hold-20261023-v1",
+  "builder_commit": "8ca6419d65",
+  "reproduce": "scripts/backtest-monday-hour --workers 3",
+  "runtime": {
+    "nautilus_trader": "1.231.0",
+    "pandas": "3.0.5",
+    "numpy": "2.5.3"
+  },
+  "completed_symbols": 633,
+  "signals": 10662,
+  "closed_signals": 10651,
+  "censored_signals": 11,
+  "native_positions": 41820,
+  "native_fills": 83640,
+  "oracle_checked": 41820,
+  "unique_native_trade_ids": 41820,
+  "inputs_and_code_stamps_unchanged": true,
+  "confirmation_delay_verified_hours": 4,
+  "max_native_oracle_r_error": 3.659295089164516e-12,
+  "unmatched_signals": 276,
+  "no_signal_symbols": [
+    "OPGUSDT",
+    "42USDT",
+    "GENIUSUSDT",
+    "PRLUSDT",
+    "SPORTFUNUSDT",
+    "MANTRAUSDT",
+    "KATUSDT",
+    "MEGAUSDT"
+  ],
+  "crypto_end_dates": {
+    "2026-09-22": 226,
+    "2026-04-30": 406
+  },
+  "gold_signal_dates": {
+    "min": "2011-01-11 17:00:00+00:00",
+    "max": "2026-03-16 02:00:00+00:00"
+  },
+  "gold_absolute_mean_gross_bp": 3.884734292382798,
+  "gold_absolute_week_cluster_ci95_bp": [
+    -6.517092824193707,
+    14.79905434637226
+  ],
+  "gold_inference": "Exploratory relative-to-random p unadjusted for multiple comparisons; absolute mean gross CI crosses0,net costs unknown,only12later trades",
+  "screenshot_week_binance_example": [
+    {
+      "pin_time": "2026-09-02 10:00:00+00:00",
+      "entry_time": "2026-09-02 14:00:00+00:00",
+      "entry": 77115.0,
+      "stop": 76151.9,
+      "target_price": 77427.2,
+      "level": 76313.9966,
+      "gross_r": 0.3241615616239178,
+      "net_r": 0.2680480323953852
+    }
+  ],
+  "alt_win_mean_net_r": 0.7480908388353996,
+  "alt_loss_mean_net_r": -1.0407560562104952,
+  "tests_passed": 17,
+  "raw_ledgers": "symbols/<symbol>/segment-*/native_gross.csv.gz,native_fills.csv.gz,fills.csv.gz,trades.csv.gz",
+  "not_a_portfolio_return": true,
+  "training_eligible": false,
+  "production_eligible": false,
+  "cache_reuse_verified": [
+    "BTCUSDT",
+    "XAUUSD"
+  ],
+  "notion_status": "create transport failure, outcome unknown; subsequent dedup query also failed; must dedup before any retry"
+}

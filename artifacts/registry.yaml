@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-1h-wick-hold-20261023-v1
+    artifact_type: manifest
+    role: hourly_wick_rejection_three_untouched_confirmation_bars
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8ca6419d65
+    generator_commit: 8ca6419d65
+    source_path: experiments/active/exp-monday-1h-wick-hold-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1h-wick-hold-20261023-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: '633symbols10662signals41820native positions83640fills all checked;17tests. Currentfee crypto negative; XAU66 grosspositive but absoluteCI spans0 and brokercost unknown. Reproduce scripts/backtest-monday-hour --workers 3. Native ledgers retained locally; no formal report.'
+
   - artifact_id: monday-15m-volume-rejection-20261023-v1
     artifact_type: manifest
     role: first_15m_wick_peak_volume_three_body_confirmation

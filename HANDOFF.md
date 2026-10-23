@@ -1,3 +1,10 @@
+## 2026-10-23 · Case3 hourly wick plus three untouched bars: overall fails, gold exploratory
+
+- Inherited first weekly-side touch fromcase2, no volume condition. Pin body strictly inside1618; next3complete contiguous hourly high/low ranges strictly inside. Enter nextopen after thirdclose(pin+4h); stoporiginalpin/targetnearMondayedge.633symbols10662signals10651closed11censored; Nautilus1.231.0 41820positions83640fills all checked,17focusedtests. `scripts/backtest-monday-hour --workers 3`.
+- BTC49 netmean-.29560R vsrandom-.15560R; ETH47-.26860R vsrandom-.09802R. XAU66grossmean+.08766R vsrandom-.26539R; matched grossbp p.00850 is exploratory/unadjusted, absolute meanCI[-6.52,14.80]bp crosses0, brokerfees unknown,2023on only12trades. Group1 combined162grossmean-.08899R,random-.14099R,p.296. No stable net profitability established.
+- 630alts10489closed11censored,netwin55.29percent,mean-.05177R vsrandom-.18013R,mean-12.06bp. Matched10203excess+34.94bpCI[21.28,48.06]p.00050 but absolute net negative in both periods(-.01188/-.06120R). Winners average+.748R,losses-1.041R; high winrate is insufficient. One ambiguous signal,stopfirst total-546.14R vsnative-542.97R.
+- Existing sources/costs unchanged; spot correctedNY clock and conflict handling reused. Eight no-signal assets retained as zero signals, not omitted universe. Raw ledgers,comparison withcases1/2 andreceipt in `experiments/active/exp-monday-1h-wick-hold-20261023-v1/`. No data downloads, dependencies, browser sessions, live orders or model changes. Training/productionfalse; unrelated stagedREADME deletion preserved.
+
 ## 2026-10-23 · Case2 15m volume wick finished; case1 gold clock corrected
 
 - Owner volume rule: pin volume is maximum of itself plus prior20bars, ties allowed. First weekly-side touch, pin body inside,3following closed15m bodies strictly inside, nextopen entry; SLpin extreme/TPnearMondayedge unchanged. Native Nautilus1.231.0 at5m,39870positions79740fills all checked;632crypto11232signals,11225closed7censored. `scripts/backtest-monday-volume --workers 3`.
