@@ -1,0 +1,15 @@
+{
+  "R": "One original entry-to-pin-stop price distance; independent positions, not a shared funded account.",
+  "planned_rr": "Entry-to-fixed-target distance / original risk.",
+  "realized_payoff_ratio": "Mean positive realized R / absolute mean negative realized R; net for crypto, gross for XAU and combined group1.",
+  "profit_factor": "Sum of positive R / absolute sum of negative R.",
+  "fee_r_mean": "Mean of available known fee R only. For GROUP1_GROSS this excludes unknown XAU costs and is not a combined-group fee estimate.",
+  "mfe_r": "Maximum retrospective gross favorable excursion before framework exit, capped at target fill; O-H-L-C assumption within5m.",
+  "mfe_net_taker_r": "Maximum estimated net excursion with entry and hypothetical market exit costs; unknown for XAU.",
+  "mfe_before_exit_bar_r": "Gross favorable excursion using only complete bars before exit bar; conservative path lower bound.",
+  "holding_hours": "Exit5m start minus entry5m open in calendar hours; event may occur within following5minutes.",
+  "time_columns": "UTC source timestamps and Beijing timezone in Chinese export; MFE/MAE times denote5m interval starts, not exact ticks.",
+  "closed": "True only actual SL/TP; boundary settlements censored and excluded from win/loss.",
+  "paired": "Signal with exactly3closed controls matching actual NY entry week/symbol/side/prior ATR bucket.",
+  "selection": "N selected on pre2023 meanR. Later evaluation excludes positions crossing cut. Prior historical exposure acknowledged."
+}
