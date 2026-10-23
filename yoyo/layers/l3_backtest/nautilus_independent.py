@@ -544,11 +544,14 @@ class IndependentCloseStrategy(Strategy):
                 state.peak = max(state.peak, side*((high if side > 0 else low)-entry)/risk)
             old_stop = state.stop
             update_i = row.get("stop_update_i", -1)
+            stop_now = False
             if (np.isfinite(update_i) and i == int(update_i)
                     and side*(row["stop_update"]-state.stop) > self.eps):
                 # One tightening to a price first known at this close (e.g. the
                 # touch bar's wick extreme); it cannot fill retrospectively.
+                # A close already at that price is a triggered stop: market out.
                 state.stop, state.stop_kind = row["stop_update"], 4
+                stop_now = side*(close-state.stop)+self.eps < self.tick
             if p.time_breakeven_minutes is not None and self.be_clock[i]:
                 elapsed=(i-int(row["entry_i"]))*self.execution_minutes
                 if state.be_trigger_i < 0 and elapsed >= p.time_breakeven_minutes:
@@ -605,10 +608,10 @@ class IndependentCloseStrategy(Strategy):
                 pivot_price = self.pivots[0 if side == 1 else 1][i]
                 pivot_exit = (self.pivots[2][i] >= self.frame.index[int(row["entry_i"])].value
                               and np.isfinite(pivot_price) and side*(pivot_price-entry) > 0)
-            if reverse or pivot_exit or i == int(row["end_i"]):
+            if reverse or pivot_exit or stop_now or i == int(row["end_i"]):
                 self.cancel_order(state.stop_order)
                 self._cancel_target(state)
-                self._market(state, reason=7 if pivot_exit else 3 if reverse else 0)
+                self._market(state, reason=9 if stop_now else 7 if pivot_exit else 3 if reverse else 0)
             elif p.rsi_scaleout and self.rsi_side[i] == -side:
                 # Reduce one fifth of ORIGINAL units, only at a fee-positive
                 # opposite strong-diamond close. Losing events consume no slot.

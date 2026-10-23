@@ -37,6 +37,12 @@ class StopUpdateTests(unittest.TestCase):
         self.assertEqual(int(rows.reason.iloc[0]), 9)
         self.assertAlmostEqual(rows.exit_price.iloc[0], 101.)
 
+    def test_close_at_wick_extreme_exits_at_that_close(self):
+        rows, _, _ = replay([[98]*4, [99, 101, 99, 101], [100.5]*4, [100.5]*4], side=-1, update=101.)
+        self.assertEqual(int(rows.reason.iloc[0]), 9)
+        self.assertEqual(int(rows.exit_i.iloc[0]), 1)
+        self.assertAlmostEqual(rows.exit_price.iloc[0], 101.)
+
     def test_no_update_keeps_terminal_exit(self):
         rows, _, _ = replay([[102]*4, [101, 101, 99, 100.5], [100.5, 101, 98.5, 99], [99]*4], update_i=np.nan)
         self.assertEqual(int(rows.reason.iloc[0]), 0)
