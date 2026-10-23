@@ -1,0 +1,14 @@
+{
+  "experiment_id": "exp-tradingview-candle-probe-20261023-v1",
+  "package": "@mathieuc/tradingview",
+  "version": "4.0.1",
+  "documentation_commit": "86dc3c3b7327336c522604a02feb7b3e1c6fd69b",
+  "count": 100,
+  "timeout_ms": 15000,
+  "watch_ms": 20000,
+  "baseline": "http://127.0.0.1:8766/api/monday-fib/candles",
+  "cases": [["BTC-USDT-SWAP", "15m", "15", 900], ["ETH-USDT-SWAP", "15m", "15", 900], ["EWJ-USDT-SWAP", "15m", "15", 900], ["BTC-USDT-SWAP", "1m", "1", 60], ["BTC-USDT-SWAP", "4H", "240", 14400], ["BTC-USDT-SWAP", "1D", "D", 86400]],
+  "credentials": false,
+  "production_eligible": false,
+  "training_eligible": false
+}
