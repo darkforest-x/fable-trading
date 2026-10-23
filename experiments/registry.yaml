@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-15m-volume-rejection-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: active
+    question: 'Owner case2: first15m1618 wick,21bar maximum volume,and3subsequent bodies strictly inside.'
+    single_variable: 'Owner-defined case2 protocol fixed before replay; same pin SL and Monday-edge TP/cost ascase1; no parameter search.'
+    result: 'Pending native framework results; existing spot XAU volume unavailable(all zero), explicit omission.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-15m-volume-rejection-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Nautilus1.231.0 adapter reused at5m execution;15m signal entry after3confirmation closes.632crypto inputs unchanged, base-asset volume.'
   - experiment_id: exp-monday-5m-wick-engulf-20261023-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 1568de6407
