@@ -1,0 +1,133 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-top200-review-20261024-v1",
+    "purpose": "Owner requested the200 highest-return completed historical trades rendered as small-timeframe candles in one folder for manual review",
+    "scope": "This conversation's completed Monday1618 study families: case1, canonical cases2-4 parameters, hourly body holds, far targets, partial/breakeven and fixed-duration limit entries",
+    "selection": "200 positive, closed signal trades by cached net_bp descending; exclude random controls, censored trades and non-grid timing bounds",
+    "return": "100*net_PnL/original_entry_notional; no leverage or account-equity denominator; not R ranking",
+    "deduplication": "Same symbol, side, UTC entry timestamp and entry price rounded to12 significant digits; keep highest measured net return, then earliest exit and stable IDs. Different confirmation-time entries remain distinct. Ex-post best-policy selection, not an executable selector.",
+    "gold": "Unknown spread/fees: separate gross ranking CSV, excluded from net top200",
+    "cost": "Reuse existing per-fill OKX scenario maker0.02%/taker0.05%; no new fee, stop, target or execution assumptions",
+    "charts": "One numbered PNG per trade with5m entry/exit candles plus full5m close/range overview. SixMA overlay is descriptive only, not an added strategy condition. All timestamps Beijing; uncertain fill intervals marked.",
+    "execution": "None: frozen native Nautilus/VectorBT results only, no simulation or parameter search",
+    "source_data": "Original registered Binance5m files used by the source experiments; no downloads, synthetic candles or external-disk content hashing",
+    "caveat": "Outcome-selected winners and best tested exits cannot estimate strategy win rate or future profitability",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "source_commit": "53961e44aeb77bf75e45ac1f76ac00ebb10bacdb",
+  "sources": [
+    {
+      "kind": "case1",
+      "experiment": "exp-monday-5m-wick-engulf-20261023-v1",
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-5m-wick-engulf-20261023-v1/all_trades.csv.gz",
+      "bytes": 23836455,
+      "mtime_ns": 1792762065932848587,
+      "raw_rows": 177273,
+      "signal_configuration_rows": 44033,
+      "closed_rows": 44028,
+      "positive_net_rows": 6538,
+      "gold_gross_positive_rows": 0
+    },
+    {
+      "kind": "gold_corrected",
+      "experiment": "exp-monday-5m-wick-gold-clock-20261023-v2",
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-5m-wick-gold-clock-20261023-v2/gold-trades.csv.gz",
+      "bytes": 155689,
+      "mtime_ns": 1792763335302148278,
+      "raw_rows": 1388,
+      "signal_configuration_rows": 347,
+      "closed_rows": 347,
+      "positive_net_rows": 0,
+      "gold_gross_positive_rows": 61
+    },
+    {
+      "kind": "parameters",
+      "experiment": "exp-monday-vectorbt-parameters-20261023-v1",
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-vectorbt-parameters-20261023-v1/all-trades-open-priority.csv.gz",
+      "bytes": 92746325,
+      "mtime_ns": 1792771635430875444,
+      "raw_rows": 793415,
+      "signal_configuration_rows": 220733,
+      "closed_rows": 220504,
+      "positive_net_rows": 110849,
+      "gold_gross_positive_rows": 272
+    },
+    {
+      "kind": "body",
+      "experiment": "exp-monday-1h-body-hold-vectorbt-20261024-v1",
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-1h-body-hold-vectorbt-20261024-v1/signal-trades.csv.gz",
+      "bytes": 18883630,
+      "mtime_ns": 1792774184673032523,
+      "raw_rows": 110508,
+      "signal_configuration_rows": 99846,
+      "closed_rows": 99755,
+      "positive_net_rows": 46495,
+      "gold_gross_positive_rows": 327
+    },
+    {
+      "kind": "far",
+      "experiment": "exp-monday-near-far-targets-vectorbt-20261024-v1",
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-near-far-targets-vectorbt-20261024-v1/signal-trades.csv.gz",
+      "bytes": 36222039,
+      "mtime_ns": 1792776665882719765,
+      "raw_rows": 199692,
+      "signal_configuration_rows": 99846,
+      "closed_rows": 99574,
+      "positive_net_rows": 19877,
+      "gold_gross_positive_rows": 171
+    },
+    {
+      "kind": "partial",
+      "experiment": "exp-monday-tp1-breakeven-20261024-v1",
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-tp1-breakeven-20261024-v1/signal-trades.csv.gz",
+      "bytes": 6127889,
+      "mtime_ns": 1792780512181539243,
+      "raw_rows": 76192,
+      "signal_configuration_rows": 38096,
+      "closed_rows": 38016,
+      "positive_net_rows": 14587,
+      "gold_gross_positive_rows": 117
+    },
+    {
+      "kind": "timed",
+      "experiment": "exp-monday-limit-timed-vectorbt-20261024-v1",
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-limit-timed-vectorbt-20261024-v1/all-horizons.csv.gz",
+      "bytes": 76499520,
+      "mtime_ns": 1792782746114099304,
+      "raw_rows": 1046025,
+      "signal_configuration_rows": 262716,
+      "closed_rows": 262716,
+      "positive_net_rows": 140503,
+      "gold_gross_positive_rows": 1415
+    }
+  ],
+  "unique_positive_entries": 167617,
+  "gold_unique_positive_entries": 984,
+  "audit": {
+    "selected": 200,
+    "unique_entries": 200,
+    "price_return_checks": 200,
+    "positive_fees": 200
+  },
+  "rank1_net_pct": 353.6917196587067,
+  "rank200_net_pct": 45.80509372453137,
+  "gold_highest_gross_pct": 4.403560123993987,
+  "symbols": 66,
+  "by_source": {
+    "far": 143,
+    "timed": 29,
+    "parameters": 18,
+    "body": 10
+  },
+  "by_side": {
+    "多": 171,
+    "空": 29
+  },
+  "earliest_entry": "2020-03-13 02:25:00+00:00",
+  "latest_exit": "2026-09-19 00:40:00+00:00",
+  "independent_return_not_account_return": true,
+  "selection_only_no_replay": true,
+  "training_eligible": false,
+  "production_eligible": false
+}

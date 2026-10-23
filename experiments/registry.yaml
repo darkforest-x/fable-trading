@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-top200-review-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 53961e44ae
+    status: accepted
+    question: Which 200 distinct winning entries have the highest cached net entry-notional return in the completed Monday1.618 studies, and what do their original5m candles show?
+    single_variable: None; retrospective selection and static chart rendering from frozen Nautilus/VectorBT fills. No new signals, execution or optimization.
+    artifacts:
+    - monday-top200-review-20261024-v1
+    canonical_report: artifacts/monday-top200-review-20261024/delivery.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Accepted denotes completeness of the descriptive review artifact only, not acceptance of a trading strategy. Rank net percentage, not R or leverage. Same symbol/side/UTCentry/entryprice keeps best measured exit policy; other confirmation times remain distinct. Gold unknown costs retained in separate gross CSV. Timed entries use grid reference only, never OHLC best-case bounds. Outcome selection cannot estimate strategy win rate.
+    result: Selected from167617unique positive entries;200rows/66symbols/75symbol-week-direction clusters. All2003200x3200 PNGs rendered with5m trigger,entry,exit and full price paths;all200fill prices and Monday anchors checked.200raw5mCSV files,Chinese review worksheet andZIP retained locally. Six representative charts visually inspected. Three focused tests pass. No source download,simulation replay or qualification.
   - experiment_id: exp-monday-ma6-retest-20261024-v1
     source_repo: darkforest-x/fable-trading
     source_commit: d5914b2796

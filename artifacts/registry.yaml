@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-top200-review-20261024-v1
+    artifact_type: manifest
+    role: ranked_winning_trade_5m_manual_review_gallery
+    source_repo: darkforest-x/fable-trading
+    source_commit: 53961e44ae
+    generator_commit: 870a1dbbf9
+    source_path: artifacts/monday-top200-review-20261024/delivery.json
+    storage_uri: repo://artifacts/monday-top200-review-20261024/delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Explicit owner request for200ranked trades in one folder.200net winners/66coins/75symbol-week-direction groups chosen from167617distinct positive entries;gold gross-only separate. All2003200x3200 PNGs decode,200originalfill/Mondaychecks pass;200raw5mCSV files andChinese notes worksheet plusZIP. Six charts visually reviewed. Local PNG/CSV/ZIP payload is ignored byGit. Retrospective best-tested-exit selection is not an executable policy or strategy win rate.
   - artifact_id: monday-research-html-20261024
     artifact_type: manifest
     role: detailed_monday_research_html_delivery
