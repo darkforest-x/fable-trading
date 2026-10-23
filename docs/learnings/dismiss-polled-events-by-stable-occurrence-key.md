@@ -1,0 +1,7 @@
+# Dismiss polled events by their stable occurrence key
+
+- **问题**：The Monday touch list refreshes every five seconds. Removing a DOM row alone would let the next snapshot resurrect it; hiding the symbol forever would suppress future touches.
+- **死胡同**：Price, receive time and history/live source are mutable presentation fields, so they cannot identify a dismissed occurrence. Deleting server touch history would also conflate a personal list action with monitoring and notification state.
+- **有效路径**：Use the server's uniqueness boundary: New York week, symbol and upper/lower side. Store those dismissed keys locally; filter them before list selection and follow logic. New directions and new weeks can appear. Keep favorites separately by symbol so they survive a week change, and label an untouched favorite honestly. Undo removes only the keys added by that deletion.
+- **通用规则**：Before adding deletion to a polling UI, identify the immutable event key and decide whether removal applies to an occurrence or the entity. Keep user display preferences separate from the source history.
+- **牵连**：`yoyo/monitor/static/monday-fib.js`, `tests/monitor/frontend_monday_fib.test.cjs`; local storage `spike:monday-fib:list:v1`. Browser 320/390/1440 checks cover reload, new side, week rollover, favorite search, independent actions and cross-tab updates with zero API writes. Evidence: `output/playwright/fib-list-actions/`.

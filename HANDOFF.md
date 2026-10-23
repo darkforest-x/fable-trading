@@ -1,3 +1,9 @@
+## 2026-10-24 · Latest-touch list favorites and deletion
+
+- Add independent star/delete buttons to every web Monday touch row and a fourth Favorites filter. Delete locally removes current NY-week/symbol/side occurrences with inline undo; refresh/history reconciliation cannot revive them, while new sides/weeks remain eligible. Favorites persist by symbol, support search and cross-tab updates, and show an honest waiting state before the new week's first touch. Storage failure is visible; no monitoring/subscription or trading mutations.
+- Stitch GEMINI_3_8_FLASH screen `dc72d0d4db4b47c6bb9536892b483641`, references in `yoyo/monitor/design/fib-list-actions-20261024/source.json`.46 relevant frontend tests and5 asset-delivery tests pass. Browser 320/390/1440 verifies40px action targets, zero horizontal overflow, no search autofocus, unchanged chart on favorite, deletion/undo/reload, week rollover and another-tab updates; zero JS errors/API writes. Evidence `output/playwright/fib-list-actions/`; learning saved.
+- Static asset versions update on refresh without backend restart. Personal list preferences are device/browser-local; native App binaries are unchanged. Test browser `fib-list-actions`/PID26362 closed and exited; monitor alive, four patrol schedules enabled, execution heartbeat0.5s old with no errors after cleanup.
+
 ## 2026-10-24 · Near versus far Monday targets on fixed body-confirmation entries
 
 - Owner authorized both TP interpretations. Near: long Monday low / short Monday high. Far: long Monday high / short Monday low. Original NY pin-week anchors frozen. At each N, entries, pin stops, fees and random entry times stay identical; original near-rejected candidates are not added. Native VectorBT limit exits, no expiry, partials, breakeven or new RR/cost filters.

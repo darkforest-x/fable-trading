@@ -6,10 +6,10 @@ const event=(o={})=>({source:'live',observed_ms:Date.now()-60000,candle_ms:Date.
 const item=(o={})=>({symbol:'BTC-USDT-SWAP',state:'ready',stale:false,price:82500,high:83149.8,low:81166,upper:84375.7884,lower:79940.0116,received_ms:Date.now(),distance_pct:1.2,nearest:'upper',touches:{upper:event()},...o});
 const snap=(o={})=>({now_ms:Date.now(),week:'2026-10-19',monday_complete:true,stream:{connected:true,last_message_ms:Date.now()},telegram:{enabled:false,configured:true},counts:{total:1,touched:0},items:[item()],events:[],...o});
 const response=(d,ok=true)=>({ok,json:async()=>d});
-function harness(fetchImpl,navigator={}){
+function harness(fetchImpl,navigator={},localStorage){
  const els=new Map(),timers=new Map();let id=0;
  function el(name){if(!els.has(name))els.set(name,{innerHTML:'',textContent:'',hidden:false,disabled:false,value:'',dataset:{},style:{setProperty(){}},events:{},attrs:{},addEventListener(t,fn){this.events[t]=fn;},setAttribute(k,v){this.attrs[k]=v;},classList:{toggle(){}},contains(){return false;},focus(){},querySelectorAll(){return [];},querySelector(){return null;}});return els.get(name);}
- const charts=[];const window={navigator,SpikeMondayFibChart:{show:(host,row,week,options)=>charts.push({symbol:row.symbol,week,...options}),hide(){},fit(){},setInternal(){}}},document={hidden:false,activeElement:null,getElementById:el,events:{},addEventListener(t,fn){this.events[t]=fn;}};
+ const charts=[];const window={navigator,localStorage,SpikeMondayFibChart:{show:(host,row,week,options)=>charts.push({symbol:row.symbol,week,...options}),hide(){},fit(){},setInternal(){}}},document={hidden:false,activeElement:null,getElementById:el,events:{},addEventListener(t,fn){this.events[t]=fn;}};
  vm.runInNewContext(source,{window,document,fetch:fetchImpl,AbortController,Date,Intl,URLSearchParams,setTimeout(fn,ms){const n=++id;timers.set(n,{fn,ms});return n;},clearTimeout(n){timers.delete(n);}});
  return {api:window.SpikeMondayFib,el,timers,document,charts};
 }
@@ -136,4 +136,46 @@ test('quote-only refresh patches the price without replacing rows or moving focu
  value=snap({items:[{...value.items[0],price:82501}]});await c.api.refresh();
  assert.equal(cell.textContent,'82,501');assert.equal(writes,0);assert.equal(c.document.activeElement,focused);assert.equal(container.scrollTop,620);
  c.api.setActive(false);
+});
+
+const {createListPreferences}=require('../../yoyo/monitor/static/monday-fib.js');
+const storage=()=>{const values=new Map();return {getItem:k=>values.get(k),setItem:(k,v)=>values.set(k,v)};};
+test('deleted occurrences survive refresh/reload; a new side or NY week can appear',()=>{
+ const disk=storage(),p=createListPreferences(disk),a=item(),week='2026-10-19';
+ p.toggle(a.symbol);const undo=p.remove(a,week),again=createListPreferences(disk);
+ assert.equal(again.has(a.symbol),true);assert.equal(again.visible([a],week).length,0);
+ const recovered=item({touches:{upper:event({source:'history',observed_ms:123,candle_ms:100})}});
+ assert.equal(again.visible([recovered],week).length,0);
+ const both=item({touches:{upper:event(),lower:event({observed_ms:1})}});
+ const shown=again.visible([both],week);assert.deepEqual(Object.keys(shown[0].touches),['lower']);
+ assert.equal(latestTouch(shown[0]).side,'lower');assert.equal(again.visible([a],'2026-10-26').length,1);
+ again.undo(undo);assert.equal(again.visible([a],week).length,1);assert.equal(createListPreferences(disk).visible([a],week).length,1);
+ assert.equal(Object.keys(a.touches).length,1);
+});
+test('favorites remain searchable across weeks without inventing a touch',()=>{
+ const p=createListPreferences(storage()),a=item({touches:{}});p.toggle(a.symbol);
+ assert.deepEqual(selectRows([a],'','all'),[]);
+ assert.deepEqual(selectRows([a],'BTC','favorites',Date.now(),p.favorites()),[a]);
+ assert.deepEqual(selectRows([a],'ETH','favorites',Date.now(),p.favorites()),[]);
+ assert.equal(selection([a],a.symbol,false),a);assert.equal(selection([a],a.symbol,true),null);
+ const undo=p.remove(a,'2026-10-26');assert.equal(p.has(a.symbol),false);p.undo(undo);assert.equal(p.has(a.symbol),true);
+});
+test('malformed or blocked local storage does not break the list',()=>{
+ for(const raw of ['{bad','null','{"version":1,"favorites":4,"hidden":"invalid"}']){
+  const p=createListPreferences({getItem:()=>raw,setItem(){throw Error('quota');}});
+  assert.equal(p.has('BTC-USDT-SWAP'),false);p.toggle('BTC-USDT-SWAP');assert.equal(p.has('BTC-USDT-SWAP'),true);assert.equal(p.persistent,false);
+  p.remove(item(),'2026-10-19');assert.equal(p.visible([item()],'2026-10-19').length,0);
+ }
+});
+test('favorite and delete controls keep list open, persist and do not select an unrelated chart',async()=>{
+ const disk=storage(),a=item({symbol:'BTC-USDT-SWAP',touches:{upper:event({observed_ms:100})}}),b=item({symbol:'ETH-USDT-SWAP',touches:{lower:event({observed_ms:200})}});
+ let value=snap({items:[a,b]});const calls=[],c=harness(async(u,o)=>{calls.push(o);return response(value);},{},disk);await ready(c);
+ const click=(key,symbol)=>c.el('mf-rows').events.click({target:{closest:s=>s===`[data-${key}-symbol]`?{dataset:{[key+'Symbol']:symbol}}:null},stopPropagation(){}});
+ const before=c.charts.length;click('favorite',a.symbol);assert.equal(c.charts.length,before);assert.equal(c.el('mf-symbol').textContent,'ETH');
+ c.el('mf-filters').events.click({target:{closest:()=>({dataset:{filter:'favorites'}})}});assert.match(c.el('mf-rows').innerHTML,/>BTC</);assert.doesNotMatch(c.el('mf-rows').innerHTML,/>ETH</);
+ click('delete',a.symbol);await c.api.refresh();assert.doesNotMatch(c.el('mf-rows').innerHTML,/>BTC</);assert.match(c.el('mf-rows').innerHTML,/收藏的合约/);
+ c.el('mf-list-undo').events.click();assert.match(c.el('mf-rows').innerHTML,/>BTC</);
+ c.api.setActive(false);const reopened=harness(async()=>response(value),{},disk);await ready(reopened);assert.match(reopened.el('mf-rows').innerHTML,/data-favorite-symbol="BTC-USDT-SWAP" aria-pressed="true"/);
+ value=snap({week:'2026-10-26',items:[{...a,touches:{}}]});await reopened.api.refresh();reopened.el('mf-filters').events.click({target:{closest:()=>({dataset:{filter:'favorites'}})}});assert.match(reopened.el('mf-rows').innerHTML,/本周尚未触价/);
+ assert.ok(calls.every(o=>!o.method));reopened.api.setActive(false);
 });

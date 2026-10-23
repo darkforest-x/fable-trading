@@ -196,6 +196,20 @@ body[data-workspace="monday-fib"] {--mf-glass:rgba(255,255,255,.18);--mf-border:
 #monday-fib-root .mf-row :is(a,button):focus-visible {outline:2px solid #0071e380;outline-offset:-1px;}
 #monday-fib-root .mf-external {display:inline-block;font-size:12px;margin-left:4px;opacity:.5;transition:transform .18s,opacity .18s;}
 #monday-fib-root a.mf-row-symbol:is(:hover,:focus-visible) .mf-external {opacity:1;transform:translate(1px,-1px);}
+/* Stitch dc72d0d4db4b47c6bb9536892b483641: independent, compact row actions. */
+#monday-fib-root .mf-row {display:grid;grid-template-columns:minmax(0,1fr) 88px;column-gap:6px;row-gap:0;}
+#monday-fib-root .mf-row-info {grid-column:1;grid-row:1 / 3;}
+#monday-fib-root .mf-row-info small {white-space:normal;line-height:1.45;}
+#monday-fib-root .mf-row-value {grid-column:2;grid-row:1;min-height:36px;min-width:0;padding:2px 4px;}
+#monday-fib-root .mf-row-actions {grid-column:2;grid-row:2;display:flex;justify-content:flex-end;gap:4px;}
+#monday-fib-root .mf-row-actions button {width:40px;min-width:40px;height:40px;min-height:40px;display:grid;place-items:center;border-radius:10px;padding:8px;color:var(--mf-muted);}
+#monday-fib-root .mf-row-actions .mf-icon {width:17px;height:17px;}
+#monday-fib-root .mf-row-actions [aria-pressed=true] {color:var(--mf-blue);}
+#monday-fib-root .mf-row-actions button:active {background:#0071e310;}
+#monday-fib-root .mf-row-actions [data-delete-symbol]:is(:hover,:focus-visible) {color:#c83858;background:#c8385808;}
+#monday-fib-root .mf-list-feedback {display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:38px;margin:4px 0;padding:0 8px;border-radius:10px;background:#0071e308;color:var(--mf-muted);font-size:11px;}
+#monday-fib-root #mf-list-undo {min-height:40px;min-width:44px;padding:6px;color:var(--mf-blue);font-size:12px;flex-shrink:0;}
+#monday-fib-root .mf-waiting {color:var(--mf-muted);}
 /* Stitch 978ce337aef8424b9b21d7f2dc5cd0df: shared trade owner in a glass host. */
 #monday-fib-root .mf-quick-toggle {margin-top:12px;width:100%;color:var(--mf-blue);background:#0071e310;min-height:40px;}
 #monday-fib-root .mf-quick-panel {position:absolute;z-index:12;top:84px;right:28px;width:400px;max-width:calc(100% - 24px);max-height:calc(100dvh - 112px);display:flex;flex-direction:column;overflow:hidden;background-color:#ffffffa6;animation:mf-arrive .2s var(--mf-ease);}

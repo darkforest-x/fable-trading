@@ -9,17 +9,51 @@
   const priceFormats=new Map();
   const price=v=>{if(!finite(v))return '—';const digits=Math.min(12,Math.max(2,6-Math.floor(Math.log10(Math.abs(v)||1))));if(!priceFormats.has(digits))priceFormats.set(digits,new Intl.NumberFormat('en-US',{maximumFractionDigits:digits}));return priceFormats.get(digits).format(v);};
   const STATES={loading:'正在同步',developing:'周一尚未结束',missing_monday:'缺少完整周一',missing_history:'历史触价待核对',recovering:'正在核对断线区间',fetch_error:'数据暂不可用',invalid_range:'周一区间无效'};
-  const FILTERS={all:'全部',upper:'上沿',lower:'下沿'},RECENT_MS=15*60000;
+  const FILTERS={all:'全部',upper:'上沿',lower:'下沿',favorites:'收藏'},RECENT_MS=15*60000;
   const touchTime=e=>e?(e.source==='history'?e.candle_ms:e.observed_ms)||0:0;
   const latestTouch=r=>{let result=null;for(const [side,e] of Object.entries(r.touches||{}))if(!result||touchTime(e)>touchTime(result))result={...e,side};return result;};
   const recentTouch=(e,now)=>!!e&&e.source==='live'&&finite(e.observed_ms)&&now>=e.observed_ms&&now-e.observed_ms<RECENT_MS;
-  function selectRows(items,q='',filter='all',now=Date.now()) {
+  function selectRows(items,q='',filter='all',now=Date.now(),favorites=new Set()) {
     const query=q.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
-    return items.map(r=>({row:r,event:latestTouch(r)})).filter(({row:r,event:e})=>e&&(!query||r.symbol.replace(/[^A-Z0-9]/g,'').includes(query))&&(
+    return items.map(r=>({row:r,event:latestTouch(r)})).filter(({row:r,event:e})=>(filter==='favorites'?favorites.has(r.symbol):!!e)&&(!query||r.symbol.replace(/[^A-Z0-9]/g,'').includes(query))&&(
       filter==='recent'?recentTouch(e,now):filter==='upper'||filter==='lower'?!!r.touches?.[filter]:true))
       .sort((a,b)=>touchTime(b.event)-touchTime(a.event)||a.row.symbol.localeCompare(b.row.symbol)).map(x=>x.row);
   }
-  function selection(items,symbol,follow){const rows=selectRows(items);return (!follow&&rows.find(r=>r.symbol===symbol))||rows[0]||null;}
+  function selection(items,symbol,follow){const rows=selectRows(items);return (!follow&&items.find(r=>r.symbol===symbol))||rows[0]||null;}
+  // A server touch is unique by NY week/symbol/side. Quote refreshes and history
+  // reconciliation must not resurrect a locally dismissed occurrence.
+  function createListPreferences(storage){
+    const key='spike:monday-fib:list:v1',valid=s=>typeof s==='string'&&/^[A-Z0-9]{1,30}-USDT-SWAP$/.test(s);
+    let favorites=new Set(),hidden={},persistent=true;
+    function read(){try{
+      const data=JSON.parse(storage?.getItem(key)||'null');if(!data||data.version!==1){favorites=new Set();hidden={};return;}
+      favorites=new Set((Array.isArray(data.favorites)?data.favorites:[]).filter(valid).slice(0,5000));hidden={};
+      for(const week of Object.keys(data.hidden||{}).filter(w=>/^\d{4}-\d{2}-\d{2}$/.test(w)).sort().slice(-4)){
+        hidden[week]=new Set((Array.isArray(data.hidden[week])?data.hidden[week]:[]).filter(s=>typeof s==='string'&&/^[A-Z0-9]{1,30}-USDT-SWAP:(upper|lower)$/.test(s)).slice(0,10000));
+      }
+    }catch{persistent=false;}}
+    function write(){try{
+      if(!storage)throw Error('storage unavailable');
+      hidden=Object.fromEntries(Object.entries(hidden).sort(([a],[b])=>a.localeCompare(b)).slice(-4));
+      storage.setItem(key,JSON.stringify({version:1,favorites:[...favorites],hidden:Object.fromEntries(Object.entries(hidden).map(([w,s])=>[w,[...s]]))}));persistent=true;
+    }catch{persistent=false;}return persistent;}
+    read();
+    return {key,read,get persistent(){return persistent;},favorites:()=>new Set(favorites),has:s=>favorites.has(s),
+      toggle(symbol){if(!valid(symbol))return false;if(favorites.has(symbol))favorites.delete(symbol);else favorites.add(symbol);return write();},
+      visible(items,week){return items.flatMap(row=>{
+        const original=Object.entries(row.touches||{}),touches=Object.fromEntries(original.filter(([side])=>!hidden[week]?.has(row.symbol+':'+side)));
+        return original.length&&!Object.keys(touches).length?[]:[{...row,touches}];
+      });},
+      remove(row,week){if(!valid(row.symbol)||!/^\d{4}-\d{2}-\d{2}$/.test(week))return null;
+        const keys=Object.keys(row.touches||{}).filter(s=>['upper','lower'].includes(s)).map(s=>row.symbol+':'+s);
+        const undo={symbol:row.symbol,week,keys,favorite:!keys.length&&favorites.has(row.symbol)};
+        if(keys.length){hidden[week]??=new Set();undo.keys=keys.filter(k=>!hidden[week].has(k));for(const k of keys)hidden[week].add(k);}
+        else favorites.delete(row.symbol);
+        write();return undo;
+      },
+      undo(value){if(!value)return;for(const k of value.keys)hidden[value.week]?.delete(k);if(value.favorite)favorites.add(value.symbol);write();}
+    };
+  }
   // Stitch 2e8ce287d9fa44cdbf3036bdf6000937: Windows dispatches locally.
   // Ordinary HTTPS links stay in the browser even with Windows app associations.
   function tradingViewURL(symbol,platform=''){
@@ -86,7 +120,7 @@
     const blur=()=>finish(false);
     return {refresh:restore,setActive(value){active=value;finish(false);if(value){env.addEventListener?.('resize',resize);env.addEventListener?.('blur',blur);restore();}else{env.removeEventListener?.('resize',resize);env.removeEventListener?.('blur',blur);if(frame)env.cancelAnimationFrame?.(frame);frame=null;}},destroy(){this.setActive(false);for(const [h,e,f] of bindings)h.removeEventListener(e,f);}};
   }
-  if(typeof module!=='undefined')module.exports={esc,price,selectRows,selection,latestTouch,touchTime,recentTouch,RECENT_MS,STATES,clampPanel,mountLayout,captureListScroll,restoreListScroll,tradingViewURL};
+  if(typeof module!=='undefined')module.exports={esc,price,selectRows,selection,latestTouch,touchTime,recentTouch,RECENT_MS,STATES,clampPanel,mountLayout,captureListScroll,restoreListScroll,tradingViewURL,createListPreferences};
   if(typeof document==='undefined')return;
   const root=document.getElementById('monday-fib-root');if(!root)return;
   const platform=window.navigator?.userAgentData?.platform||window.navigator?.platform||'';
@@ -109,7 +143,8 @@
     <aside id="mf-list-panel" class="mf-list-panel mf-glass" data-mf-movable="list" aria-label="已触价合约" hidden>
       <div class="mf-list-heading">${grip('触价列表')}<div><h2>最新触价</h2><span id="mf-list-count"></span></div><button id="mf-list-close" aria-label="收起触价列表">${icon('x')}</button></div>
       <label class="mf-search">${icon('search')}<input id="mf-search" type="search" placeholder="搜索已触价合约" aria-label="搜索已触价合约" autocomplete="off"></label>
-      <div id="mf-filters" class="mf-filters" role="group" aria-label="触价方向">${Object.entries(FILTERS).map(([key,label])=>`<button data-filter="${key}" aria-pressed="${key==='all'}">${label}</button>`).join('')}</div>
+      <div id="mf-filters" class="mf-filters" role="group" aria-label="触价与收藏筛选">${Object.entries(FILTERS).map(([key,label])=>`<button data-filter="${key}" aria-pressed="${key==='all'}">${label}</button>`).join('')}</div>
+      <div id="mf-list-feedback" class="mf-list-feedback" hidden><span id="mf-list-message" role="status"></span><button type="button" id="mf-list-undo" hidden>撤销</button></div>
       <div id="mf-rows" class="mf-rows" role="region" aria-label="已触价币种滚动列表" tabindex="0"></div>
       <p class="mf-list-note">点击列表切换图表 · 币种名称 ↗ ${windowsDesktop?'本机 ':''}TradingView</p>
     </aside>
@@ -129,10 +164,14 @@
   let period='15m';try{const saved=window.localStorage?.getItem('spike.monday.timeframe');if(periods.includes(saved))period=saved;}catch{}
   let active=false,data=null,receivedAt=0,error='',timer=null,controller=null,pending=null,revision=0;
   let query='',filter='all',selected='',selectedWeek='',follow=true,internal=false,lastRows='';
+  let localStore;try{localStore=window.localStorage;}catch{}
+  const preferences=createListPreferences(localStore);
+  let lastRemoval=null;
+  const visibleItems=()=>preferences.visible(data?.items||[],data?.week);
   let listOpen=!!window.matchMedia?.('(min-width: 761px)').matches;
   const quick=window.SpikeMondayQuick?.create({
     panel:$('mf-quick-panel'),host:$('mf-quick-content'),trigger:$('mf-quick-toggle'),
-    context:()=>({symbol:selected,timeframe:period,side:latestTouch(data?.items?.find(r=>r.symbol===selected)||{})?.side==='upper'?'short':'long'}),
+    context:()=>({symbol:selected,timeframe:period,side:latestTouch(visibleItems().find(r=>r.symbol===selected)||{})?.side==='upper'?'short':'long'}),
     visibility:open=>{root.classList.toggle('mf-quick-open',open);layout.refresh();},
     load:()=>window.SpikeModules.ensure('monday-live'),
     paper:()=>window.SpikeMondayPaper,live:()=>window.SpikeMondayLive,
@@ -147,25 +186,26 @@
   function sync(){window.SpikeNavigation?.sync('monday-fib',{q:query||null,filter:filter==='all'?null:filter,page:null,symbol:follow?null:selected||null});}
   function renderRows(resetScroll=false){
     const container=$('mf-rows');
-    const rows=selectRows(data?.items||[],query,filter,nowMs());
+    const rows=selectRows(visibleItems(),query,filter,nowMs(),preferences.favorites());
     // Prices change frequently; row identity, links and focus usually do not.
-    const structure=JSON.stringify([!!data,selected,rows.map(r=>{const e=latestTouch(r);return [r.symbol,e.side,e.source,touchTime(e),recentTouch(e,nowMs())];})]);
+    const structure=JSON.stringify([!!data,selected,filter,query,rows.map(r=>{const e=latestTouch(r);return [r.symbol,e?.side,e?.source,touchTime(e),recentTouch(e,nowMs()),preferences.has(r.symbol)];})]);
     if(structure!==lastRows){
     const position=captureListScroll(container);
     const html=rows.map(r=>{
-      const e=latestTouch(r),fresh=recentTouch(e,nowMs()),state=quoteState(r),side=e.side==='upper'?'上':'下';
+      const e=latestTouch(r),fresh=recentTouch(e,nowMs()),state=quoteState(r),side=e?.side==='upper'?'上':'下',favorite=preferences.has(r.symbol);
       const url=tradingViewURL(r.symbol,platform),label=esc(short(r.symbol));
       const name=`<b>${label}</b>${url?'<span class="mf-external" aria-hidden="true">↗</span>':''}`;
-      const stamp=`<small>${e.source==='history'?'历史 · ':''}${time(touchTime(e))}${fresh?' · 刚触及':''}</small>`;
+      const stamp=`<small>${e?`${e.source==='history'?'历史 · ':''}${time(touchTime(e))}${fresh?' · 刚触及':''}`:'本周尚未触价'}</small>`;
       const destination=windowsDesktop?'在本机 TradingView 打开':'在 TradingView 查看';
       const link=url?`<a class="mf-row-symbol" data-tv-symbol="${esc(r.symbol)}" href="${esc(url)}"${windowsDesktop?'':' target="_blank" rel="noopener noreferrer"'} aria-label="${destination} ${label} 15 分钟图" title="${destination} ${label} 15 分钟图">${name}</a>`:`<span class="mf-row-symbol">${name}</span>`;
-      return `<div class="mf-row${fresh?' mf-recent':''}" data-symbol="${esc(r.symbol)}" data-selected="${r.symbol===selected}"><div class="mf-row-info">${link}${stamp}</div><button type="button" class="mf-row-value" data-preview-symbol="${esc(r.symbol)}" aria-pressed="${r.symbol===selected}" aria-label="切换背景 K 线至 ${label}" title="切换背景 K 线 · ${label}"><strong class="mf-${e.side}">${side}沿 1.618</strong><small>${state||price(r.price)}</small></button></div>`;
-    }).join('')||`<p class="mf-no-rows">${data?'没有匹配的已触价合约':'正在读取…'}</p>`;
+      return `<div class="mf-row${fresh?' mf-recent':''}" data-symbol="${esc(r.symbol)}" data-selected="${r.symbol===selected}"><div class="mf-row-info">${link}${stamp}</div><button type="button" class="mf-row-value" data-preview-symbol="${esc(r.symbol)}" aria-pressed="${r.symbol===selected}" aria-label="切换背景 K 线至 ${label}" title="切换背景 K 线 · ${label}"><strong class="mf-${e?.side||'waiting'}">${e?side+'沿 1.618':'待触价'}</strong><small>${state||price(r.price)}</small></button><div class="mf-row-actions"><button type="button" data-favorite-symbol="${esc(r.symbol)}" aria-pressed="${favorite}" aria-label="${favorite?'取消收藏':'收藏'} ${label}" title="${favorite?'取消收藏':'收藏'}">${icon(favorite?'star-filled':'star')}</button><button type="button" data-delete-symbol="${esc(r.symbol)}" aria-label="删除 ${label}" title="从列表删除">${icon('trash')}</button></div></div>`;
+    }).join('')||`<p class="mf-no-rows">${!data?'正在读取…':filter==='favorites'?(query?'没有匹配的收藏合约':'收藏的合约会显示在这里'):'没有匹配的已触价合约'}</p>`;
 
       const focused=container.contains?.(document.activeElement)?document.activeElement?.dataset:null;
-      const focusKey=focused?.tvSymbol?'tvSymbol':'previewSymbol',focusSymbol=focused?.[focusKey];
+      const focusKey=['tvSymbol','previewSymbol','favoriteSymbol','deleteSymbol'].find(k=>focused?.[k]),focusSymbol=focused?.[focusKey];
+      const oldIndex=focusSymbol?Array.from(container.querySelectorAll('[data-symbol]')).findIndex(b=>b.dataset.symbol===focusSymbol):-1;
       $('mf-rows').innerHTML=html;lastRows=structure;
-      if(focusSymbol)Array.from(container.querySelectorAll('[data-tv-symbol],[data-preview-symbol]')).find(b=>b.dataset[focusKey]===focusSymbol)?.focus({preventScroll:true});
+      if(focusSymbol){const controls=Array.from(container.querySelectorAll('[data-tv-symbol],[data-preview-symbol],[data-favorite-symbol],[data-delete-symbol]')).filter(b=>b.dataset[focusKey]);(controls.find(b=>b.dataset[focusKey]===focusSymbol)||controls[Math.min(Math.max(0,oldIndex),controls.length-1)]||container).focus({preventScroll:true});}
     restoreListScroll(container,resetScroll?{top:0}:position);
     }else{
       const values=new Map(rows.map(r=>[r.symbol,quoteState(r)||price(r.price)]));
@@ -198,8 +238,8 @@
     if(data){
       if(selectedWeek&&selectedWeek!==data.week){selected='';follow=true;}
       selectedWeek=data.week;
-      const row=selection(data.items,selected,follow);
-      if(!follow&&selected&&!data.items.some(r=>r.symbol===selected&&latestTouch(r)))follow=true;
+      const items=visibleItems(),row=selection(items,selected,follow);
+      if(!follow&&selected&&!items.some(r=>r.symbol===selected))follow=true;
       const key=row?.symbol||'',changed=key!==selected;selected=key;
       $('mf-selected').hidden=!row;$('mf-empty').hidden=!!row;$('mf-watermark').hidden=!row;
       if(row){
@@ -209,21 +249,22 @@
         $('mf-watermark').style.setProperty('--mf-watermark-chars',String(Math.max(7,ticker.length)));
         $('mf-watermark-period').textContent=`${period} · USDT 永续`;
         $('mf-symbol').textContent=short(row.symbol);$('mf-price').textContent=price(row.price);
-        $('mf-touch').textContent=`${e.side==='upper'?'上':'下'}沿 1.618 · ${time(touchTime(e))}${e.source==='history'?' 历史':''}`;
-        $('mf-touch').className='mf-'+e.side;
+        $('mf-touch').textContent=e?`${e.side==='upper'?'上':'下'}沿 1.618 · ${time(touchTime(e))}${e.source==='history'?' 历史':''}`:'本周尚未触价';
+        $('mf-touch').className='mf-'+(e?.side||'waiting');
         $('mf-quote-state').hidden=!state;$('mf-quote-state').textContent=state;
         $('mf-mode').textContent=follow?'跟随最新':'已固定';
         if(changed&&root.animate&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)$('mf-selected').animate([{opacity:.55,transform:'translateY(4px)'},{opacity:1,transform:'translateY(0)'}],{duration:220,easing:'ease-out'});
         if(active&&!document.hidden)window.SpikeMondayFibChart?.show($('mf-wallpaper'),row,data.week,{internal,period});
       }else{
-        $('mf-empty').textContent=data.monday_complete?'本周尚无 1.618 触价，等待最新行情':'纽约周一区间正在形成，完成后开始监控';
+        $('mf-empty').textContent=selectRows(data.items).length?'触价记录已移除，等待新的触价':data.monday_complete?'本周尚无 1.618 触价，等待最新行情':'纽约周一区间正在形成，完成后开始监控';
         window.SpikeMondayFibChart?.hide();
       }
-      $('mf-count').textContent=String(selectRows(data.items).length);
+      $('mf-count').textContent=String(selectRows(items).length);
       $('mf-week').textContent=`本周 · ${data.week} 纽约周一${data.monday_complete?'':' · 形成中'}`;
     }
     $('mf-follow').setAttribute('aria-pressed',String(follow));$('mf-follow').title=follow?'自动显示最近触价的合约':'回到最新触价，并自动跟随';
     for(const id of ['mf-fit','mf-fib','mf-latest','mf-zoom-in','mf-zoom-out','mf-quick-toggle'])$(id).disabled=!selected;
+    $('mf-quick-toggle').disabled=!selected||!latestTouch(visibleItems().find(r=>r.symbol===selected)||{});
     renderRows();
   }
   function schedule(){clearTimeout(timer);if(active&&!document.hidden)timer=setTimeout(refresh,5000);}
@@ -241,15 +282,31 @@
   }
   function cancel(preserveChart=false){periodMenu(false);revision++;controller?.abort();controller=null;pending=null;clearTimeout(timer);if(preserveChart)window.SpikeMondayFibChart?.pause?.();else window.SpikeMondayFibChart?.hide();}
   function setActive(value){if(active===value)return;active=value;if(!value)quick?.close(false);cancel();layout.setActive(value);if(active){panel(listOpen);render();refresh();}}
+  function listFeedback(message,undo=false){
+    $('mf-list-feedback').hidden=false;
+    $('mf-list-message').textContent=message+(preferences.persistent?'':' · 本机存储不可用，刷新后不会保留');
+    $('mf-list-undo').hidden=!undo;
+  }
   $('mf-search').addEventListener('input',e=>{query=e.target.value;renderRows(true);sync();});
   $('mf-filters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;filter=b.dataset.filter;renderRows(true);sync();});
   $('mf-rows').addEventListener('click',e=>{
+    const favorite=e.target.closest('[data-favorite-symbol]'),remove=e.target.closest('[data-delete-symbol]');
+    if(favorite||remove){
+      e.stopPropagation();
+      const symbol=(favorite||remove).dataset[favorite?'favoriteSymbol':'deleteSymbol'];
+      const row=visibleItems().find(r=>r.symbol===symbol);if(!row)return;
+      if(favorite){preferences.toggle(symbol);listFeedback(`${short(symbol)} ${preferences.has(symbol)?'已收藏':'已取消收藏'}`);renderRows();}
+      else{lastRemoval=preferences.remove(row,data.week);if(!lastRemoval)return;listFeedback(`${short(symbol)} 已删除`,true);if(selected===symbol){selected='';follow=true;}render();sync();}
+      return;
+    }
     // The external link owns only its text; dates, gaps and values select locally.
     if(e.target.closest('[data-tv-symbol]')){e.stopPropagation();return;}
     const b=e.target.closest('[data-symbol]');if(!b)return;
     selected=b.dataset.symbol;follow=false;render();sync();
     if(window.matchMedia?.('(max-width: 760px)').matches)panel(false,true);
   });
+  $('mf-list-undo').addEventListener('click',()=>{if(!lastRemoval)return;preferences.undo(lastRemoval);lastRemoval=null;listFeedback('已恢复');render();$('mf-rows').focus({preventScroll:true});});
+  window.addEventListener?.('storage',event=>{if(event.key===preferences.key||event.key===null){preferences.read();lastRemoval=null;$('mf-list-feedback').hidden=true;if(active)render();}});
   $('mf-list-toggle').addEventListener('click',()=>panel(!listOpen,true));$('mf-list-close').addEventListener('click',()=>panel(false,true));
   $('mf-follow').addEventListener('click',()=>{follow=true;render();sync();});
   $('mf-fit').addEventListener('click',()=>window.SpikeMondayFibChart?.fit());
