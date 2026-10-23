@@ -10,9 +10,17 @@
 .app .modal .sheet-handle,.app .modal:not(.alert-modal) h2,.app .modal .fib-ticket-title{touch-action:none;user-select:none;-webkit-user-select:none}
 .app .modal.sheet-dragging,.app.fib-page .modal.sheet-dragging{animation:none;transition:none;will-change:translate}
 .app .modal[data-dragged],.app.fib-page .modal[data-dragged]{animation:none}
-.app .dialog-closing .modal:not(.alert-modal),.app.fib-page .dialog-closing .modal:not(.alert-modal){animation:perf-sheet-exit 220ms cubic-bezier(.3,0,.7,1) both;transition:none;will-change:translate}
 .app .dialog-closing,.app.fib-page .dialog-closing{animation:backdrop-leave 220ms ease-out both}
-@keyframes perf-sheet-exit{from{translate:0 var(--sheet-drag,0px)}to{translate:0 var(--sheet-exit,100dvh)}}
 @media(prefers-reduced-motion:reduce){.app .modal,.app.fib-page .modal,.app main[data-swipe]{transition:none;animation:none;translate:none}}
+
+/* Owner waived Stitch for this refinement. One controller serves every sheet. */
+.app .sheet-backdrop,.app.fib-page .sheet-backdrop{background:transparent}
+.app .sheet-backdrop::before{content:'';position:absolute;inset:0;background:#18202720;opacity:var(--sheet-dim,1);pointer-events:none}
+.app .sheet-backdrop[data-dragged],.app .sheet-backdrop.dialog-closing,.app.fib-page .sheet-backdrop.dialog-closing{animation:none}
+.app .sheet-backdrop .modal,.app.fib-page .sheet-backdrop .modal{translate:0 var(--sheet-drag,0px);transition:none}
+.app .sheet-backdrop .modal[data-dragged],.app .sheet-backdrop.dialog-closing .modal,.app.fib-page .sheet-backdrop.dialog-closing .modal{animation:none;transform:none}
+.app .sheet-backdrop .modal.sheet-settling,.app.fib-page .sheet-backdrop .modal.sheet-settling{transition:translate 240ms cubic-bezier(.22,1,.36,1)}
+.app .sheet-backdrop.sheet-settling::before{transition:opacity 240ms cubic-bezier(.22,1,.36,1)}
+@media(prefers-reduced-motion:reduce){.app .sheet-backdrop .modal.sheet-settling,.app.fib-page .sheet-backdrop .modal.sheet-settling,.app .sheet-backdrop.sheet-settling::before{transition:none}}
 
 .app .bottom-nav.bottom-nav,.app.fib-page .bottom-nav.bottom-nav{background:#fffffff5;backdrop-filter:none;-webkit-backdrop-filter:none}

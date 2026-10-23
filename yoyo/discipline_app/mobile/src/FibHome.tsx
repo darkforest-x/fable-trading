@@ -3,6 +3,7 @@ import {lazy,memo,Suspense,useEffect,useMemo,useRef,useState} from 'react';
 import {api,SERVICE_URL,type Connection,type State} from './api';
 import {Dialog} from './Dialog';
 import {Icon} from './Icon';
+import {feedback} from './feedback';
 import {fibRangeFor,fibSelection,latestFibTouch,parseFibSnapshot,touchLabel,type FibContract,type FibSnapshot} from './fibData';
 import type {CandlePeriod} from './candleData';
 import {browserFibCache,currentFibWeek} from './fibCache';
@@ -31,8 +32,8 @@ export const FibHome=memo(function FibHome({connection,state,onQuick,locked,acti
  const row=current?.items.find(r=>r.symbol===symbol),touch=row?latestFibTouch(row):null;
  const range=useMemo(()=>row&&data?fibRangeFor(row,data):undefined,[symbol,data?.monday_end_ms,data?.next_week_ms,row?.high,row?.low,row?.upper,row?.lower]);
  const live=fresh&&!!current?.connected&&!!current.last_message_ms&&clock-current.last_message_ms<90000&&!error;
- function select(value:string){setSymbol(value);previous.current.symbol=value;setChooser(false);if(current)cache.write(current,value,period)}
- function changePeriod(value:CandlePeriod){setPeriod(value);if(current)cache.write(current,symbol,value)}
+ function select(value:string){if(value!==symbol)feedback('light');setSymbol(value);previous.current.symbol=value;if(current)cache.write(current,value,period)}
+ function changePeriod(value:CandlePeriod){if(value!==period)feedback('light');setPeriod(value);if(current)cache.write(current,symbol,value)}
  const recent=current?.items[0];
  const tick=state?.instruments[symbol]?.tick??(row?String(10**-Math.min(12,Math.max(2,...[row.high,row.low].map(n=>String(n).split('.')[1]?.length??0)))):undefined);
  return <section className="fib-home" aria-label="1.618 行情" hidden={!active} inert={!active} data-no-swipe>
@@ -45,6 +46,6 @@ export const FibHome=memo(function FibHome({connection,state,onQuick,locked,acti
     <div className="fib-quick"><button disabled={locked||!fresh||!live} onClick={()=>onQuick(row,period)}>快捷开单 <span>· 1R</span><Icon name="arrow" size={17}/></button></div>
    </>:<div className="fib-empty"><Icon name="trade" size={34}/><h2>{error?'监控暂不可用':current?'本周暂无触价':'正在读取触价记录'}</h2><p>{error?'稍后重试，已有交易保护保持独立运行。':current&&!current.monday_complete?'纽约周一结束后锁定高低点。':'首次触及区间外 1.618 的合约会显示在这里。'}</p>{error&&<button onClick={()=>setRevision(n=>n+1)}>重新加载</button>}</div>}
   </div>
-  {chooser&&<Dialog label="已触价合约" busy={false} onDismiss={()=>setChooser(false)}><h2>已触价合约</h2><p className="muted">{current?.week} · 最新触价优先</p><label className="input-shell"><input aria-label="搜索已触价合约" placeholder="搜索合约" value={search} onChange={e=>setSearch(e.target.value)}/></label><div className="fib-choices">{current?.items.filter(r=>r.symbol.includes(search.trim().toUpperCase())).map(r=><button key={r.symbol} aria-pressed={r.symbol===symbol} onClick={()=>select(r.symbol)}><b>{r.symbol.replace('-USDT-SWAP','/USDT')}</b><span>{touchLabel(latestFibTouch(r),clock)}</span></button>)}</div></Dialog>}
+  {chooser&&<Dialog label="已触价合约" busy={false} onDismiss={()=>setChooser(false)}>{dismiss=><><h2>已触价合约</h2><p className="muted">{current?.week} · 最新触价优先</p><label className="input-shell"><input aria-label="搜索已触价合约" placeholder="搜索合约" value={search} onChange={e=>setSearch(e.target.value)}/></label><div className="fib-choices">{current?.items.filter(r=>r.symbol.includes(search.trim().toUpperCase())).map(r=><button key={r.symbol} aria-pressed={r.symbol===symbol} onClick={()=>{select(r.symbol);dismiss()}}><b>{r.symbol.replace('-USDT-SWAP','/USDT')}</b><span>{touchLabel(latestFibTouch(r),clock)}</span></button>)}</div></>}</Dialog>}
  </section>;
 });

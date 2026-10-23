@@ -108,6 +108,16 @@ body[data-design=apple-glass] #workspace-command-results button small {display:n
 body[data-design=apple-glass] #workspace-command-results button:is(:hover,:focus-visible) {background:var(--brand-bg);color:var(--brand-primary);}
 body[data-design=apple-glass] .glass-command-footer {display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--line);color:var(--dim);font-size:11px;}
 body[data-design=apple-glass] #workspace-density {width:auto;min-height:34px;border:0;border-radius:10px;padding:6px 12px;}
+body[data-design=apple-glass] #glass-appearance {display:flex;align-items:center;gap:8px;flex-shrink:0;}
+body[data-design=apple-glass] #workspace-haptics {width:auto;min-height:44px;border:0;border-radius:10px;padding:6px 12px;}
+@media(max-width:700px){
+ body[data-design=apple-glass] #workspace-command[open] {display:flex;flex-direction:column;overflow:hidden;}
+ body[data-design=apple-glass] #workspace-command>:not(#workspace-command-results) {flex-shrink:0;}
+ body[data-design=apple-glass] #workspace-command-results {min-height:0;flex:1;}
+ body[data-design=apple-glass] .glass-command-footer {flex-wrap:wrap;gap:6px;}
+ body[data-design=apple-glass] .glass-command-footer>span {display:none;}
+ body[data-design=apple-glass] #glass-appearance {width:100%;justify-content:flex-end;}
+}
 
 /* Market: breathing room around an unchanged live chart and watchlist. */
 body[data-design=apple-glass] :is(.market-overview-strip,.ms-terminal-top,.mt-intelligence,.mt-evidence-blocks) {gap:12px!important;}

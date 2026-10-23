@@ -16,6 +16,7 @@
 <script defer="" src="/static/workspace-navigation.js"></script>
 <script defer="" src="/static/workspace-runtime.js"></script>
 <script defer="" src="/static/workspace-motion.js"></script>
+<script defer="" src="/static/haptics.js"></script>
 <link href="/static/symbol-picker.css" rel="stylesheet"/>
 <script defer="" src="/static/symbol-picker.js"></script>
 <link href="/vision-assets/chart-tools.css" rel="stylesheet"/>
@@ -194,7 +195,7 @@
 <dialog aria-labelledby="workspace-command-title" class="workspace-command" id="workspace-command">
 <header><h2 id="workspace-command-title">更多</h2><span class="glass-command-hint">⌘ / Ctrl K</span><button aria-label="关闭页面搜索" id="workspace-command-close" type="button">Esc</button></header>
 <input aria-label="搜索工作空间页面" autocomplete="off" id="workspace-command-input" placeholder="搜索页面，例如信号、均线、书架…" type="search"/>
-<div class="workspace-command-results" id="workspace-command-results"></div><footer class="glass-command-footer"><span>↑ ↓ 选择 · Enter 打开 · Esc 关闭</span><div id="glass-appearance"></div></footer>
+<div class="workspace-command-results" id="workspace-command-results"></div><footer class="glass-command-footer"><span>↑ ↓ 选择 · Enter 打开 · Esc 关闭</span><div id="glass-appearance"><button type="button" id="workspace-haptics" class="workspace-density" aria-label="震动反馈" aria-pressed="true" hidden>震动 · 开</button></div></footer>
 </dialog>
 </body>
 </html>

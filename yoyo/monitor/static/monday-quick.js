@@ -64,7 +64,7 @@
     const doc=panel.ownerDocument,env=doc?.defaultView,backdrop=doc?.getElementById('mf-quick-backdrop');
     let locked=false,overflow='',blocked=[];
     const mobile=()=>env?.innerWidth<=760;
-    const motion=sheetMotion({panel,backdrop,env,active:()=>open&&!closing&&mobile(),dismiss:()=>close()});
+    const motion=sheetMotion({panel,backdrop,env,active:()=>open&&!closing&&mobile(),dismiss:()=>{env?.SpikeHaptics?.pulse();close();}});
     function viewport(){
       if(!doc)return;
       const v=env.visualViewport;
