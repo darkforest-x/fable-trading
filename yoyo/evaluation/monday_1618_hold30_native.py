@@ -12,7 +12,8 @@ nautilus_independent.run_native, 1m bars indexed by close time):
   primary without a stop (an unreachable 50percent stop), variant with the
   2.0-extension stop. Engine fees are zero; real fees are applied per fill
   afterwards: maker0.02% entry, taker0.05% exit or stop.
-Results are reconciled trade by trade with the bar computation.
+Results are reconciled trade by trade with the bar computation when its
+trades file exists; later runs (hold50 onward) are framework-only.
 """
 from __future__ import annotations
 import argparse
@@ -111,6 +112,8 @@ def run():
             res[name][label] = dict(all=stats(filled, rng), earlier=stats(filled[t < split], rng),
                                     later=stats(filled[t >= split], rng), reasons=filled.reason.value_counts().to_dict(),
                                     by_symbol={s: stats(g, rng) for s, g in filled.groupby('symbol')})
+        if not (EXP/f'trades_{name}.csv.gz').exists():
+            continue  # framework-only run (owner 2026-10-23): no bar computation to reconcile
         quick = pd.read_csv(EXP/f'trades_{name}.csv.gz')
         nat = pd.read_csv(EXP/f'native_trades_{name}_no_stop.csv.gz')
         j = nat.merge(quick, on=['symbol', 'week', 'side'], suffixes=('_native', '_bars'))
