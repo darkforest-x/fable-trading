@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-monday-1618-levels-20261023-v1",
+  "question": "Is the Monday NY 1618 more valid than 1.272/1.414/2.0, a random extension, or 1618 of Monday-UTC and previous-week ranges, under identical barrier proportions?",
+  "binance_alt_inputs": "experiments/active/exp-monday-1618-alt-hours-20261023-v1/inputs",
+  "binance_start": "2020-01-01T00:00:00Z",
+  "binance_end": "2025-06-01T00:00:00Z",
+  "okx_universe_config": "experiments/active/exp-monday-1618-validity-20261023-v1/config.json",
+  "seed": 20261023,
+  "success_criterion": "monday_ny x=0.618 validity minus pooled other levels and random of the same anchor >0 with week-cluster bootstrap 95 lower bound >0 in both Binance alts 2020-2025 and OKX 2025-2026.",
+  "limitations": "15m conservative ordering; fee 0; first touch per anchor-side-level; levels touched in sequence share price paths.",
+  "training_eligible": false,
+  "production_eligible": false
+}

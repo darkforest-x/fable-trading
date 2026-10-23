@@ -1,0 +1,18 @@
+{
+  "experiment_id": "exp-monday-1618-dvol-20261023-v1",
+  "question": "Does the Deribit implied volatility regime (DVOL) at the touch judge whether the BTC/ETH Monday 1618 holds?",
+  "symbols": ["BTCUSDT", "ETHUSDT"],
+  "fetch_start_month": "2021-01",
+  "fetch_end_month": "2026-09",
+  "dvol_start": "2021-03-01T00:00:00Z",
+  "end": "2026-09-30T00:00:00Z",
+  "split": "2024-01-01T00:00:00Z",
+  "horizon_days": 14,
+  "top_fraction": 0.3,
+  "seed": 20261023,
+  "primary_hypothesis": "Lower dvol_pct90 (calm implied-vol regime) -> higher validity: earlier AUC of -dvol_pct90 >0.5 and later one-sided permutation p<0.01.",
+  "success_criterion": "Model on dvol_pct90, dvol, dvol_chg_24h, rv_iv trained before split: later AUC>=0.55, early-threshold top30 percent validity>=38.2 and mean R>0, week-stratified p<0.01.",
+  "limitations": "Only BTC and ETH; DVOL hourly with one-bar lag; Binance 15m conservative labels; fee 0.",
+  "training_eligible": false,
+  "production_eligible": false
+}
