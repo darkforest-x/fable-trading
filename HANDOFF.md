@@ -1,3 +1,10 @@
+## 2026-10-24 · Chinese parameter ranking readout delivered
+
+- Owner found the English metrics table unclear. Added the first16 data rows as Chinese descriptions:5unique configurations,7negative means. Same case/config acrossasset/time/basis is not a distinct strategy; v20 inactive forcase3/4. Top83.33percent are5wins/6goldgross trades, not robust optimum.
+- Reused frozen open-priority fills; all243 canonical metric rows reconciled, addedpayoff/averagewinloss/fees/TPnetloss/holdingtime/singlecoin andmarket streakbounds. No signal or execution replay. Builder7d21a31262 precedes generation. ChineseCSV and reviewedquery in `artifacts/monday-parameter-readout-20261024/`.
+- Same originalStitch report/app; new portableversion `artifacts/monday-alt-n5-report-20261024/周一1.618-详细回测分析报告-中文方案版.html`. PriorHTML preserved. Original79430signals/9065altrows/157images retained. DropdownGROUP1_GROSS corrected; mobile390/desktop1440/tablepagination/periodcomparison verified. File-protocol browser limitation unchanged. BrowserCSVevent succeeded but returnedpath notreadable locally; separatelygenerated localCSVs verified.
+- Pullback entryprice/expiry still unanswered; no changes to execution defaults or qualifications.
+
 ## 2026-10-24 · Detailed Monday HTML delivered using original Stitch template
 
 - Owner explicitly authorized reusing the first Stitch design; no new design required. Reused screen5230353fc774421d9260d60091ad8a89 and original app identity. Added full altcoin N5 diagnosis,12samples24charts,all9065rows with excursions; integrated663prior study metrics,chronological selections,target/BE transitions,BTC35rows6samples12charts andAug19. Original79430rows/60samples120charts retained unchanged.
