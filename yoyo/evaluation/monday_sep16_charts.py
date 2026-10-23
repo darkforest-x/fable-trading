@@ -2,6 +2,7 @@
 from __future__ import annotations
 import json
 import subprocess
+import sys
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -31,8 +32,10 @@ def render(e,f,view):
     for field,label,color in levels:
         price=e[field]
         if view=='full' or low-gap*.2<price<high+gap*.2:
-            ax.axhline(price,color=color,lw=.9,alpha=.9);ax.text(.008,price,f' {label} {price:.8g}',transform=ax.get_yaxis_transform(),va='bottom',fontsize=9,color=color)
+            ax.axhline(price,color=color,lw=.9,alpha=.9,label=f'{label} {price:.8g}')
+            if view=='detail':ax.text(.008,price,f' {label} {price:.8g}',transform=ax.get_yaxis_transform(),va='bottom',fontsize=9,color=color)
             low=min(low,price);high=max(high,price)
+    if view=='full':ax.legend(loc='upper left',fontsize=9,framealpha=.9)
     pi=z.index.get_indexer([t.floor(f'{minutes}min')])[0]
     if pi>=0:
         ax.scatter([pi],[e['level']],color='#c78d29',s=50,zorder=8,edgecolor='white')
@@ -63,7 +66,7 @@ def main():
         f=pd.read_csv(EXP/'contexts'/f'{symbol}.csv.gz',parse_dates=['time_utc']).set_index('time_utc')
         for e in rows.to_dict('records'):
             for v in ['detail','full']:
-                if not (EXP/'images'/f"{e['event_id']}-{v}.png").exists():render(e,f,v)
+                if (v=='full' and '--refresh-full' in sys.argv) or not (EXP/'images'/f"{e['event_id']}-{v}.png").exists():render(e,f,v)
             done+=1
         if done%20==0:print(f'Rendered {done}/{len(events)} events',flush=True)
     print(f'Finished: {len(events)*2} charts',flush=True)
