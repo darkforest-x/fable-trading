@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-alt-n5-html-evidence-20261024
+    artifact_type: manifest
+    role: frozen_altcoin_n5_report_data_excursions_and_seeded_candles
+    source_repo: darkforest-x/fable-trading
+    source_commit: de577c45dd
+    generator_commit: aed4de6b57
+    source_path: artifacts/monday-alt-n5-report-20261024/validation.json
+    storage_uri: repo://artifacts/monday-alt-n5-report-20261024/validation.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: All9065original rows preserved,9041closed excursion diagnostics,620symbols,24unresolved,6519strictmatchedcontrols.3356SL include3230positivegrossMFE/489oneR/486oneRinpriorcompletebars.12seededlong-shortwin-loss samples24PNGs and60confirmation checks. NoengineReplay. Local4.7MBZIP ready; HTMLnotcreated becauseStitchtimedout; pullbackruleandexpiry awaitingowner.
   - artifact_id: monday-smalltf-research-queue-20261024-v1
     artifact_type: manifest
     role: proposed_bounded_framework_parameter_queue

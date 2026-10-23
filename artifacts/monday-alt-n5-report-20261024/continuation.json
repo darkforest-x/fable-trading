@@ -1,0 +1,49 @@
+{
+  "status": "baseline_analysis_ready_html_and_pullback_pending",
+  "owner_request": "Detailed HTML analysis of altcoin4h+5confirmation high-win-rate candidate, plus a pullback-entry test",
+  "baseline": "case4-n5-v20;9065signals620symbols9041closed24censored; original pin SL and nearMonday full TP",
+  "app": "reports/monday-1618-cases-20261023",
+  "app_id": "report:b2b980f2-70d2-4866-8399-0d8c6aa94a7e",
+  "reviewed_queries": "artifacts/monday-alt-n5-report-20261024/reviewed-queries.json",
+  "query_ids": ["alt-n5-stats", "alt-n5-ledger", "alt-n5-excursions", "alt-n5-distributions", "alt-n5-quantiles", "alt-n5-streaks", "alt-n5-samples", "alt-n5-rr-bands"],
+  "image_module": "reports/monday-1618-cases-20261023/src/content/report/alt-n5-images.js",
+  "data_zip": "artifacts/monday-alt-n5-report-20261024/山寨4h五根确认-详细数据与盈亏图.zip",
+  "builders": ["yoyo/evaluation/monday_alt_n5_report.py", "yoyo/evaluation/monday_alt_n5_report_review.py"],
+  "reproduce": ["/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_alt_n5_report --workers 2", "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_alt_n5_report_review"],
+  "no_trade_replay": true,
+  "stitch": {
+    "project": "8978791379095391159",
+    "model": "GEMINI_3_8_FLASH",
+    "new_chapter_title": "山寨4h · 五根确认：高胜率为何仍亏损",
+    "operation": "generate_screen_from_text",
+    "result": "300secondtimeout; eight further recovery lists retained only old report image/code",
+    "new_screen_id": null,
+    "evidence": "stitch-status.json",
+    "instruction": "Recover existing request only. Do not resubmit. Owner requires waiting forStitch. New screenshot andHTML required before UI implementation."
+  },
+  "pullback_test": {
+    "run_enabled": false,
+    "pending_question_1": "After5complete4hconfirmations, return to1.618 limit entry, originalpinSL and nearMondayTP? Alternative owner choice is50percent of distance between baselineentry and1.618.",
+    "pending_question_2": "Expire at nextNYMondayrange completion, or after12h, or after20h?",
+    "answer_received": false,
+    "do_not_assume": "Elapsed time or preselected suggestions are not confirmation. Earlier direct-limit1R query is a different unresolved proposal; do not import its1R target.",
+    "engine": "One fixed-rule NautilusTrader run_native study after rule clarification, not another parametergrid or custom trade engine.",
+    "comparison": "Retain all9065 baseline opportunities, include unfilled/invalid/censored and matched controls. Compare original riskR0 and actual newriskR; no outcome-dependent admission."
+  },
+  "content_requirements": [
+    "Show allhistory and2023onward separately; late7476wins61.2493percent mean-0.012019R, payoff0.613662 andbreak-even61.9709percent",
+    "Explain fullhistory payoff0.608088 andfees: gross259.810416R-fees333.054166R=net-73.243750R;107TPfillsloseafterfees",
+    "Show strictpaired6519 signal-0.017313R/random-0.151992R; subgroups keep their own paired denominators",
+    "Full3356stops:3230hadpositivegrossMFE,2999fee-positivehypotheticalMFE,489reached1R,486reached1Rincompletepriorbars; not proof thatBEimprovesreturns",
+    "Add12seededdirection/outcome samples,24PNGs, exactpin/5confirm/entry/SL/TP and5minexitinterval timestamps",
+    "Longestmarket52stops across52coins versuscoinAUCTION10; independentR notaccountdrawdown",
+    "Allunresolved24rows remain but their data-boundary exit/PnL/duration must not be presented as actual exits/observedcontinuousholding",
+    "Addpullbackresult onlyafterquestionanswers andnativeexecution. Beforethen state pending, never fabricate comparison",
+    "Preserveexistingreportidentity,baselines79430signals/60samples/120images andpreviouslatestqueries; integrate focused chapter afternewStitchdesign"
+  ],
+  "new_html_created": false,
+  "ui_components_changed": false,
+  "prepared_assets_added": true,
+  "training_eligible": false,
+  "production_eligible": false
+}
