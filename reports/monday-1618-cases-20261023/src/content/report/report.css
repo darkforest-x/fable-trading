@@ -367,7 +367,7 @@
 
 /* Keep authored evidence titles readable when filter rows wrap on phones. */
 @media(max-width:640px){
- .spike-report :is(#alt-n5,#latest-research) .component-header.has-controls{flex-direction:column;align-items:stretch;gap:12px;}
+ .spike-report :is(#alt-n5,#latest-research) .component-header.has-controls{display:flex;flex-direction:column;align-items:stretch;gap:12px;}
  .spike-report :is(#alt-n5,#latest-research) .component-header.has-controls .component-title{flex:none;width:auto;max-width:none;padding-inline-end:28px;}
  .spike-report :is(#alt-n5,#latest-research) .component-header-controls{flex-wrap:wrap;justify-content:flex-start;max-width:100%;}
 }
