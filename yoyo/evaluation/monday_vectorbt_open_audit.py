@@ -28,6 +28,10 @@ def audit(symbol,repair):
     frame=pd.read_csv(raw_path,float_precision='round_trip')
     candidates=frame[frame.engine_origin.str.startswith('vectorbt') & frame.side.eq(-1) & frame.reason.eq(1) & frame.exit_path_segment.eq(0)].drop_duplicates('trade_key')
     receipt_path=dest/'open-priority-audit.json'
+    if receipt_path.exists():
+        previous=json.loads(receipt_path.read_text())
+        if previous.get('source_ledger')==file_stamp(raw_path) and (not repair or previous['suspects']==0):
+            return previous
     if candidates.empty:
         out=dict(symbol=symbol,suspects=0,new_short_first_segments=0);dump(receipt_path,out);return out
     identity=json.loads((dest/'identity.json').read_text())
