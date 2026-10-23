@@ -1,0 +1,51 @@
+{
+  "experiment_id": "exp-monday-5m-wick-engulf-20261023-v1",
+  "reproduce": "scripts/backtest-monday-wick --workers 3",
+  "source_commits": [
+    "f6e75ff12b",
+    "491af0dcaf",
+    "713a6c4711",
+    "1568de6407"
+  ],
+  "runtime": {
+    "nautilus_trader": "1.231.0",
+    "pandas": "3.0.5",
+    "numpy": "2.5.3"
+  },
+  "completed_symbols": 633,
+  "native_positions": 177273,
+  "oracle_checked": 177273,
+  "native_fills": 354546,
+  "engines": {
+    "nautilus_trader 1.231.0": 631,
+    "spot aggregate ": 1
+  },
+  "no_signals": [
+    "GENIUSUSDT"
+  ],
+  "crypto_end_dates": {
+    "2026-09-22": 226,
+    "2026-04-30": 406
+  },
+  "tests": {
+    "native_and_signal": 26,
+    "frontend": 61,
+    "asset_and_layer_boundaries": 77
+  },
+  "cache_reuse_verified": true,
+  "inputs_unchanged": true,
+  "native_ledgers": "symbols/<symbol>/native_gross.csv.gz and native_fills.csv.gz; XAU segment subdirectory",
+  "costed_ledgers": "symbols/<symbol>/trades.csv.gz; combined all_trades.csv.gz",
+  "data_quality": "symbols/XAUUSD/data_quality.json",
+  "training_eligible": false,
+  "production_eligible": false,
+  "limitations": "Available Binance universe may omit delisted contracts; no claim to all worldwide altcoins. Binance vs OKX venue basis; no funding, slippage, spread or capacity. Spot Bid-only. No physical phone QA.",
+  "notion_url": "https://app.notion.com/p/4028856479af81e884acd6c1559ecfea",
+  "notion_readback_verified": true,
+  "unique_native_trade_ids": 177273,
+  "max_native_oracle_r_error": 4.661774389681505e-13,
+  "registry_validation": {
+    "new_records": "passed; experiment artifact reference resolves",
+    "full_registry": "pre-existing failure in tradingview-candle-probe-20261023-v1: unsupported not_applicable enum, also present at HEAD before this task registry edit"
+  }
+}

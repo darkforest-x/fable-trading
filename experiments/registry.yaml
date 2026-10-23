@@ -16,12 +16,13 @@ schema_version: 1
 experiments:
   - experiment_id: exp-monday-5m-wick-engulf-20261023-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: active
+    source_commit: 1568de6407
+    status: rejected
     question: 'Owner: adjacent5m wick-only1618 rejection and reversal body engulf; BTC/ETH/spotgold vs available altcoins.'
     single_variable: 'Owner-defined new entry/exit protocol: next-open entry, pin extreme stop, nearMondayedge target; same protocol across groups.'
-    result: 'Pending native framework replay and matched controls.'
-    artifacts: []
+    result: 'Nautilus177273 positions. BTC232/ETH230 netmean -0.784/-0.551R; XAU361 grossmean+0.045R but2023on -0.815R.630alts43566closed5censored,win14.89percent,netmean-0.275R vs random-0.368R; paired excess5.50bp CI2.99..8.06 p.00050, still unprofitable. Group1 grossmean-0.096R, excess p.697.'
+    artifacts:
+    - monday-5m-wick-engulf-20261023-v1
     canonical_report: experiments/active/exp-monday-5m-wick-engulf-20261023-v1/summary.json
     holdout_consumed: false
     training_eligible: false

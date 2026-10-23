@@ -1,3 +1,11 @@
+## 2026-10-23 · Monday5m wick-engulf groups rejected; watermark and click targets delivered
+
+- Owner-confirmed next5m open, exact pin-extreme stop, near Monday edge TP; immediate adjacent engulf, all events. Nautilus1.231.0 reused through `scripts/backtest-monday-wick --workers 3`;177273positions/354546fills, every path audited, unchanged cache rerun verified.
+- BTC232/ETH230 netmean-0.784/-0.551R; XAU361 grossmean+0.045R but2023on103trades-0.815R. Group1 combined823grossmean-0.096R; relative random not significant(p.697).630alts43566closed+5censored: win14.89percent,netmean-0.275R vsrandom-0.368R; matched excess+5.50bp[2.99,8.06],p.00050, absolute net still negative in both time segments. No promotion.
+- Existing Binance UM5m:226symbols through2026-09-22,406through2026-04-30; currentOKX0.02maker/0.05taker percent scenario. HistData fixedEST, not NY source clock;746conflicting minutes/415five-minute intervals excluded;13affected Monday anchors rejected. Spot costs unknown, gross only. Raw fills, quality receipt and summary in `experiments/active/exp-monday-5m-wick-engulf-20261023-v1/`; Notion https://app.notion.com/p/4028856479af81e884acd6c1559ecfea .
+- UI whole-chart symbol/timeframe watermark synced; only tight name-arrow area opensTV, other row areas select chart. Stitch abf5e21f9f8a41ab9b3ddea62b106df4 modelGEMINI_3_8_FLASH.61frontend+77asset/layer+26native/signal tests pass;1440/390/320browser checks and real loaded5m screenshots. Task browser closed;monitor alive,4patrols enabled,final scan ongoing and modelnone expected. Evidence `artifacts/monday-fib-watermark-20261023/receipt.json`.
+- Builders f6e75ff12b/491af0dcaf/713a6c4711/1568de6407. No formal report, no new data, no live orders or model changes; original stagedREADME deletion and unrelated dataset edits preserved.
+
 ## 2026-10-23 · 区间1.618 methods 16-17: implied vol and level/anchor comparison rejected
 
 - DVOL (Deribit public hourly, 2021-03-24..2026-09) on 470 BTC/ETH touches: calm-regime hypothesis wrong sign (AUC 0.481/0.451), model later AUC 0.523. Post hoc only: realized/implied ratio AUC 0.552/0.554, small sample.

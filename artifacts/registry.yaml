@@ -18,6 +18,38 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-5m-wick-engulf-20261023-v1
+    artifact_type: manifest
+    role: adjacent_5m_wick_engulf_native_backtest
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1568de6407
+    generator_commit: 1568de6407
+    source_path: experiments/active/exp-monday-5m-wick-engulf-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-5m-wick-engulf-20261023-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Nautilus1.231.0;177273positions354546fills all native path audits pass.
+      Existing Binance632crypto histories and HistData spot gold; current OKX fee scenario on crypto, unknown spot net.
+      XAU conflicts excluded and replay censored. Reproduce scripts/backtest-monday-wick --workers 3; unchanged fills reused.
+      Raw ledgers retained locally under symbols/. No new formal report.
+
+  - artifact_id: monday-fib-watermark-20261023
+    artifact_type: manifest
+    role: chart_symbol_watermark_and_inline_tv_link
+    source_repo: darkforest-x/fable-trading
+    source_commit: f6e75ff12b
+    generator_commit: f6e75ff12b
+    source_path: artifacts/monday-fib-watermark-20261023/receipt.json
+    storage_uri: repo://artifacts/monday-fib-watermark-20261023/receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Stitch GEMINI_3_8_FLASH screen abf5e21f9f8a41ab9b3ddea62b106df4.
+      Whole chart symbol/period watermark; name-arrow link only opens TV; row date and remainder select chart.
+      61frontend77asset-layer tests;1440/390/320 browser checks; screenshots after actual5m loading. Temporary browser closed.
+      Monitor alive and4patrols enabled; final scan running, not claimed ready; earlier TEST002 scan errors retained.
+
   - artifact_id: monday-1618-pw-confluence-20261023-v1
     artifact_type: manifest
     role: 'When the Monday 1618 coincides with last week high (short) or low (long) within 0.05R, does it hold more often?'
