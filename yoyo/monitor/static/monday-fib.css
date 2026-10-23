@@ -145,3 +145,15 @@ body[data-workspace="monday-fib"] {--mf-glass:rgba(255,255,255,.18);--mf-border:
 }
 @media(pointer:coarse){#monday-fib-root .mf-grip{opacity:.65;}}
 @supports not (backdrop-filter:blur(1px)){#monday-fib-root .mf-glass{background:#ffffffeb;}}
+/* Stitch 2ef0866509164e07a536813ee3944d51: native chart navigation dock. */
+#monday-fib-root .cv-canvas {touch-action:none;overscroll-behavior:contain;cursor:grab;user-select:none;-webkit-user-select:none;}
+#monday-fib-root .cv-canvas.cv-panning {cursor:grabbing;}
+#monday-fib-root .mf-dock .mf-zoom {font-size:20px;font-weight:400;padding:4px;}
+#monday-fib-root .mf-gesture-hint {margin-left:10px;opacity:.75;}
+@media(max-width:760px){
+ #monday-fib-root .mf-dock .mf-zoom,#monday-fib-root #mf-latest>span:not(.mf-icon),#monday-fib-root #mf-fit>span:not(.mf-icon),#monday-fib-root .mf-gesture-hint {display:none;}
+ #monday-fib-root .mf-dock {gap:0;padding:4px 2px;}
+ #monday-fib-root .mf-dock button {padding:6px;flex-shrink:0;}
+ #monday-fib-root .mf-dock .mf-timeframe {padding:0 5px;}
+ #monday-fib-root #mf-fib>.mf-icon,#monday-fib-root #mf-follow>.mf-icon {display:none;}
+}

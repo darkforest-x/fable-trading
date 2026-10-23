@@ -55,6 +55,14 @@ test('latest keeps width; keyboard only handles chart focus; log rejects nonposi
  h.rows[0].low=0;h.buttons.log.click();assert.equal(h.options().mode,0);assert.equal(h.attrs.get('log:aria-pressed'),'false');
  h.binding.destroy();assert.equal(h.handlers.click,undefined);assert.equal(h.keys.keydown,undefined);
 });
+test('Home and latest recover both axes after manual price panning',()=>{
+ const h=controls();h.options().autoScale=false;
+ h.keys.keydown({target:h.canvas,key:'Home',preventDefault(){}});
+ assert.equal(h.options().autoScale,true);assert.equal(h.fits(),1);
+ h.options().autoScale=false;h.keys.keydown({target:h.canvas,key:'End',preventDefault(){}});
+ assert.equal(h.options().autoScale,true);assert.equal(h.range().to-h.range().from,40);assert.equal(h.range().to,124);
+ h.binding.destroy();
+});
 test('resize is coalesced, ignores hidden zero sizes, retains viewport and cleans pending work',()=>{
  const old={raf:global.requestAnimationFrame,caf:global.cancelAnimationFrame,ro:global.ResizeObserver};
  let callback,tick,disconnected=false,range={from:20,to:70},calls=0;

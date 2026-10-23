@@ -25,7 +25,9 @@ test('empty data never invents candles or reuses another symbol',()=>{
 test('row chart makes only selected GETs, ignores retired replies and aborts on close',async()=>{
  const pending=[],draws=[],rendered=[],timers=new Map();let n=0;
  const makeHost=()=>{const state={textContent:''},mount={},button={addEventListener(){}};return {innerHTML:'',querySelector(s){return s==='[role=status]'?state:s==='.mf-chart-mount'?mount:button;}};};
- const sandbox={document:{hidden:false},window:{SpikeRangeChart:{mount:(host,data)=>{draws.push(data.symbol);rendered.push(data);},unmount(){}}},Intl,Date,AbortController,fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve})),setTimeout(fn,ms){timers.set(++n,{fn,ms});return n;},clearTimeout(i){timers.delete(i);}};
+ let range={from:10,to:50},autoScale=false,fits=0;
+ const instance={rows:Array(400),chart:{priceScale:()=>({applyOptions:o=>autoScale=o.autoScale}),timeScale:()=>({getVisibleLogicalRange:()=>range,setVisibleLogicalRange:r=>range=r,fitContent:()=>fits++})}};
+ const sandbox={document:{hidden:false},window:{SpikeRangeChart:{mount:(host,data)=>{draws.push(data.symbol);rendered.push(data);return instance;},unmount(){}}},Intl,Date,AbortController,fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve})),setTimeout(fn,ms){timers.set(++n,{fn,ms});return n;},clearTimeout(i){timers.delete(i);}};
  vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
  const api=sandbox.window.SpikeMondayFibChart,first=makeHost(),second=makeHost();api.show(first,row,'2026-10-19');
  assert.equal(pending.length,1);assert.equal(pending[0].options.method,undefined);assert.match(pending[0].url,/symbol=BTC-USDT-SWAP/);
@@ -34,5 +36,9 @@ test('row chart makes only selected GETs, ignores retired replies and aborts on 
  for(let i=0;i<12;i++)await Promise.resolve();assert.deepEqual(draws,['ETH-USDT-SWAP']);assert.equal(rendered.at(-1).levels.length,4);
  api.setInternal(true);assert.equal(rendered.at(-1).levels.length,9);api.setInternal(false);assert.equal(rendered.at(-1).levels.length,4);
  api.show(second,{...row,symbol:'ETH-USDT-SWAP'},'2026-10-19');assert.equal(pending.length,2);
+ api.latest();assert.equal(range.to-range.from,40);assert.equal(range.to,409);assert.equal(autoScale,true);
+ api.zoom(.8);assert.equal(range.to-range.from,32);assert.equal(range.to,409);
+ api.zoom(1.25);assert.equal(range.to-range.from,40);api.zoom(Infinity);assert.equal(range.to-range.from,40);
+ api.fit();assert.equal(fits,1);assert.equal(pending.length,2);assert.ok(draws.every(s=>s==='ETH-USDT-SWAP'));
  api.hide();assert.equal(timers.size,0);
 });

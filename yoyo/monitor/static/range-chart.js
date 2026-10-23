@@ -5,6 +5,23 @@
   const fin=x=>typeof x==='number'&&Number.isFinite(x);
   const price=x=>fin(x)?x.toLocaleString('zh-CN',{useGrouping:false,maximumFractionDigits:Math.abs(x)>=100?2:Math.abs(x)>=1?4:8}):'—';
   const clock=(ms,year=false)=>ms==null?'—':new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',...(year?{year:'numeric'}:{}),month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(ms));
+  // LWC 4.2 ignores vertical pan while autoScale is on. Unlock before its native
+  // mouse/touch handler starts; do not capture or cancel the library's gestures.
+  function bindFreePan(chart,canvas,env=window){
+    let pointer=null;
+    const end=e=>{if(e?.pointerId!=null&&pointer?.id!==e.pointerId)return;pointer=null;canvas.classList.remove('cv-panning');};
+    const down=e=>{
+      if(e.isPrimary===false||e.button!==0||e.target.closest?.('a,button'))return;
+      const r=canvas.getBoundingClientRect(),left=chart.priceScale('left').width(),x=e.clientX-r.left,y=e.clientY-r.top;
+      if(x<left||x>=left+chart.timeScale().width()||y<0||y>=canvas.clientHeight-chart.timeScale().height())return;
+      chart.priceScale('right').applyOptions({autoScale:false});
+      pointer={id:e.pointerId,x:e.clientX,y:e.clientY};
+    };
+    const move=e=>{if(pointer?.id===e.pointerId&&Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>3)canvas.classList.add('cv-panning');};
+    canvas.addEventListener('pointerdown',down,true);canvas.addEventListener('pointermove',move);
+    for(const event of ['pointerup','pointercancel','blur'])env.addEventListener(event,end);
+    return {destroy(){end();canvas.removeEventListener('pointerdown',down,true);canvas.removeEventListener('pointermove',move);for(const event of ['pointerup','pointercancel','blur'])env.removeEventListener(event,end);}};
+  }
   function render(c, chartView){
     const bars=(c.candles||[]).slice(-chartView.bars);if(!bars.length)return '';
     const levels=(c.levels||[]).filter(l=>chartView[l.kind]&&fin(l.price));
@@ -46,6 +63,13 @@
       this.volume=this.chart.addHistogramSeries({priceScaleId:'volume',priceFormat:{type:'volume'},lastValueVisible:false,priceLineVisible:false});
       this.volume.priceScale().applyOptions({scaleMargins:{top:.85,bottom:0}});
       this.controls=T.bind(this.panel,{chart:()=>this.chart,rows:()=>this.rows,canvas:this.canvas,panel:this.panel});
+      if(this.pending.view.wallpaper){
+        this.chart.applyOptions({handleScroll:{pressedMouseMove:true,mouseWheel:true,horzTouchDrag:true,vertTouchDrag:true},
+          handleScale:{mouseWheel:true,pinch:true,axisPressedMouseMove:{time:true,price:true},axisDoubleClickReset:{time:true,price:true}},
+          crosshair:{mode:0},timeScale:{rightOffset:10},kineticScroll:{mouse:false,touch:true}});
+        this.freePan=bindFreePan(this.chart,this.canvas);
+        this.canvas.setAttribute('aria-label','K 线交互图；拖动自由平移，滚轮或双指缩放，拖动坐标轴缩放，双击价格轴复位；Home 全周，End 最新');
+      }
       this.crosshair=T.frame(p=>{if(!this.chart)return;this.hover=p?.time&&p.seriesData?.has(this.series)?p.time:null;this.readout();});
       this.chart.subscribeCrosshairMove(this.crosshair);
       this.band=document.createElement('div');this.band.className='cv-monday-band';this.band.setAttribute('aria-hidden','true');this.band.hidden=true;this.canvas.append(this.band);
@@ -80,7 +104,8 @@
       status.classList.toggle('is-warning',!!warning);status.textContent=warning||(!this.rows.length?'正在加载 K 线与关键价位…':`收盘边界：北京 ${clock(data.last_close_ms,true)} · ${data.monday?.complete?'周一区间已冻结':data.monday?.developing?'周一区间形成中':'周一数据不足，暂不画区间'}`);
       const retained=T.restore(saved,T.times(this.rows));
       if(retained)this.chart.timeScale().setVisibleLogicalRange(retained);else if(key!==this.key||!saved){
-        if(!view.fitAll&&this.canvas.clientWidth<=700&&this.rows.length>70)this.chart.timeScale().setVisibleLogicalRange({from:this.rows.length-70,to:this.rows.length+3});
+        if(view.initialBars&&this.rows.length){const span=Math.min(this.rows.length+10,this.canvas.clientWidth<=700?70:view.initialBars),to=this.rows.length-1+10;this.chart.timeScale().setVisibleLogicalRange({from:to-span,to});}
+        else if(!view.fitAll&&this.canvas.clientWidth<=700&&this.rows.length>70)this.chart.timeScale().setVisibleLogicalRange({from:this.rows.length-70,to:this.rows.length+3});
         else this.chart.timeScale().fitContent();
       }
       this.key=key;this.readout();this.controls.update();
@@ -98,11 +123,11 @@
       if(a==null||b==null||b<=0||a>=width){this.band.hidden=true;return;}
       this.band.hidden=false;this.band.style.left=Math.max(0,a)+'px';this.band.style.width=Math.max(0,Math.min(width,b)-Math.max(0,a))+'px';this.band.textContent='纽约周一定界';
     }
-    destroy(){this.dead=true;this.bandPaint?.cancel();this.bandResize?.disconnect();this.controls?.destroy();this.crosshair?.cancel();this.resize?.disconnect();this.theme?.disconnect();this.chart?.remove();this.chart=null;this.host.replaceChildren();}
+    destroy(){this.dead=true;this.freePan?.destroy();this.bandPaint?.cancel();this.bandResize?.disconnect();this.controls?.destroy();this.crosshair?.cancel();this.resize?.disconnect();this.theme?.disconnect();this.chart?.remove();this.chart=null;this.host.replaceChildren();}
   }
   const instances=new WeakMap();
   function mount(host,data,view,error=''){let instance=instances.get(host);if(!instance){instance=new Interactive(host);instances.set(host,instance);}instance.update(data,view,error);return instance;}
   function unmount(host){if(!host)return;instances.get(host)?.destroy();instances.delete(host);}
   window.SpikeRangeChart={render,price,clock,mount,unmount};
-  if(typeof module!=='undefined')module.exports={render,price};
+  if(typeof module!=='undefined')module.exports={render,price,bindFreePan};
 })();

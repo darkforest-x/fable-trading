@@ -38,7 +38,7 @@
   }
   if(typeof module!=='undefined')module.exports={levels,prepare};
   if(typeof document==='undefined')return;
-  const view={bars:672,range:true,fib:true,fitAll:false,showLevels:false,mondayBand:true,wallpaper:true,candleColors:{up:'#169873',down:'#d7355d'}};
+  const view={bars:672,initialBars:160,range:true,fib:true,fitAll:false,showLevels:false,mondayBand:true,wallpaper:true,candleColors:{up:'#169873',down:'#d7355d'}};
   let target=null,controller=null,timer=null,version=0;
   const cache=new Map();
   function stop(){version++;clearTimeout(timer);controller?.abort();controller=null;if(target){window.SpikeRangeChart?.unmount(target.mount);target.host.replaceChildren?.();}target=null;}
@@ -82,5 +82,14 @@
   }
   function setInternal(value){if(!target)return;target.internal=value;if(target.context)draw(target.context);}
   function fit(){const chart=target?.instance?.chart;if(chart){chart.priceScale('right').applyOptions({autoScale:true});chart.timeScale().fitContent();}}
-  window.SpikeMondayFibChart={show,hide:stop,setInternal,fit};
+  function latest(){
+    const instance=target?.instance,chart=instance?.chart,n=instance?.rows?.length;if(!chart||!n)return;
+    const scale=chart.timeScale(),range=scale.getVisibleLogicalRange(),span=range?range.to-range.from:view.initialBars,to=n-1+10;
+    chart.priceScale('right').applyOptions({autoScale:true});scale.setVisibleLogicalRange({from:to-span,to});
+  }
+  function zoom(factor){
+    const scale=target?.instance?.chart?.timeScale(),range=scale?.getVisibleLogicalRange();if(!range||!finite(factor)||factor<=0)return;
+    const span=Math.max(8,Math.min(view.bars+20,(range.to-range.from)*factor));scale.setVisibleLogicalRange({from:range.to-span,to:range.to});
+  }
+  window.SpikeMondayFibChart={show,hide:stop,setInternal,fit,latest,zoom};
 })();

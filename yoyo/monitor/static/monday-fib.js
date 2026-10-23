@@ -1,4 +1,4 @@
-/* Stitch wallpaper fd410c9bd37443dd8759a713c57e2d47, adapted to the read-only
+/* Stitch navigation 2ef0866509164e07a536813ee3944d51, adapted to the read-only
  * Monday monitor. Latest means occurrence time, never history insertion time.
  * Manual selection pins the chart until follow is resumed; no subscription writes.
  */
@@ -91,8 +91,8 @@
       <p class="mf-list-note">按触价时间排序 · 点击切换图表</p>
     </aside>
     <div id="mf-notice" class="mf-notice mf-glass" role="status" hidden></div>
-    <div class="mf-dock mf-glass" data-mf-movable="dock" role="group" aria-label="图表控制">${grip('图表工具')}<span class="mf-timeframe" title="15 分钟已收盘 K 线">15m</span><span class="mf-divider"></span><button id="mf-fit" title="恢复价格缩放并显示本周全部 K 线">${icon('maximize')}<span>全周</span></button><button id="mf-fib" aria-pressed="false" title="显示区间内部 0.5 / 0.618 / 0.705">${icon('adjustments-horizontal')}<span>内部线</span></button><span class="mf-divider"></span><button id="mf-follow" aria-pressed="true">${icon('activity')}<span>跟随最新</span></button></div>
-    <footer class="mf-footer"><span id="mf-week">纽约周一 · 读取中</span><span id="mf-updated">15m 已收盘 K 线</span></footer>`;
+    <div class="mf-dock mf-glass" data-mf-movable="dock" role="group" aria-label="图表控制">${grip('图表工具')}<span class="mf-timeframe" title="15 分钟已收盘 K 线">15m</span><span class="mf-divider"></span><button id="mf-zoom-out" class="mf-zoom" aria-label="缩小 K 线" title="缩小 K 线（−）"><span aria-hidden="true">−</span></button><button id="mf-zoom-in" class="mf-zoom" aria-label="放大 K 线" title="放大 K 线（+）"><span aria-hidden="true">+</span></button><button id="mf-latest" aria-label="回到当前合约最新 K 线" title="回到当前合约最新 K 线，保留缩放宽度">${icon('chevron-right')}<span>最新 K 线</span></button><button id="mf-fit" aria-label="显示全周并复位" title="恢复价格缩放并显示本周全部 K 线">${icon('maximize')}<span>全周</span></button><button id="mf-fib" aria-pressed="false" title="显示区间内部 0.5 / 0.618 / 0.705">${icon('adjustments-horizontal')}<span>内部线</span></button><span class="mf-divider"></span><button id="mf-follow" aria-pressed="true">${icon('activity')}<span>跟随最新</span></button></div>
+    <footer class="mf-footer"><span id="mf-week">纽约周一 · 读取中</span><span id="mf-updated">15m 已收盘 K 线</span><span class="mf-gesture-hint">拖动平移 · 滚轮缩放 · 双击价格轴复位</span></footer>`;
   const layout=mountLayout(root);
   let active=false,data=null,receivedAt=0,error='',timer=null,controller=null,pending=null,revision=0;
   let query='',filter='all',page=0,selected='',selectedWeek='',follow=true,internal=false,lastRows='';
@@ -146,7 +146,7 @@
       $('mf-week').textContent=`纽约周一 ${data.week}${data.monday_complete?'':' · 形成中'}`;
     }
     $('mf-follow').setAttribute('aria-pressed',String(follow));$('mf-follow').title=follow?'自动显示最近触价的合约':'回到最新触价，并自动跟随';
-    $('mf-fit').disabled=!selected;$('mf-fib').disabled=!selected;
+    for(const id of ['mf-fit','mf-fib','mf-latest','mf-zoom-in','mf-zoom-out'])$(id).disabled=!selected;
     renderRows();layout.refresh();
   }
   function schedule(){clearTimeout(timer);if(active&&!document.hidden)timer=setTimeout(refresh,5000);}
@@ -170,6 +170,9 @@
   $('mf-list-toggle').addEventListener('click',()=>panel(!listOpen,true));$('mf-list-close').addEventListener('click',()=>panel(false,true));
   $('mf-follow').addEventListener('click',()=>{follow=true;render();sync();});
   $('mf-fit').addEventListener('click',()=>window.SpikeMondayFibChart?.fit());
+  $('mf-latest').addEventListener('click',()=>window.SpikeMondayFibChart?.latest());
+  $('mf-zoom-in').addEventListener('click',()=>window.SpikeMondayFibChart?.zoom(.8));
+  $('mf-zoom-out').addEventListener('click',()=>window.SpikeMondayFibChart?.zoom(1.25));
   $('mf-fib').addEventListener('click',()=>{internal=!internal;$('mf-fib').setAttribute('aria-pressed',String(internal));window.SpikeMondayFibChart?.setInternal(internal);});
   root.addEventListener('keydown',e=>{if(e.key==='Escape'&&listOpen){e.stopPropagation();panel(false,true);}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){cancel();layout.setActive(false);}else if(active){layout.setActive(true);render();refresh();}});

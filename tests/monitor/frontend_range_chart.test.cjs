@@ -34,3 +34,42 @@ test('Monday band uses millisecond calendar boundaries and second chart times',(
  instance.mondayWindow=null;instance.paintMondayBand();assert.equal(instance.band.hidden,true);
  instance.chart={remove(){}};sandbox.window.SpikeRangeChart.unmount(host);
 });
+
+test('free chart pan unlocks only pane gestures before the native handler, without capturing input',()=>{
+ const events=new Map(),globalEvents=new Map(),classes=new Set(),writes=[];
+ const canvas={clientHeight:600,getBoundingClientRect:()=>({left:20,top:30}),classList:{add:x=>classes.add(x),remove:x=>classes.delete(x)},
+  addEventListener:(name,fn,capture)=>events.set(name,{fn,capture}),removeEventListener:name=>events.delete(name)};
+ const env={addEventListener:(name,fn)=>globalEvents.set(name,fn),removeEventListener:name=>globalEvents.delete(name)};
+ const chart={timeScale:()=>({width:()=>900,height:()=>28}),priceScale:side=>({width:()=>side==='left'?40:100,applyOptions:o=>writes.push(o)})};
+ const binding=sandbox.module.exports.bindFreePan(chart,canvas,env);
+ const down=events.get('pointerdown'),event=(o={})=>({pointerId:1,button:0,isPrimary:true,clientX:400,clientY:300,target:{closest:()=>null},...o});
+ assert.equal(down.capture,true);
+ for(const o of [{button:2},{isPrimary:false},{clientX:30},{clientX:1000},{clientY:610},{target:{closest:()=>({})}}])down.fn(event(o));
+ assert.equal(writes.length,0,'axes, secondary pointers and links remain native');
+ down.fn(event());assert.equal(writes.at(-1).autoScale,false);
+ events.get('pointermove').fn(event({clientY:302}));assert.equal(classes.size,0);
+ events.get('pointermove').fn(event({clientY:350}));assert.equal(classes.has('cv-panning'),true);
+ globalEvents.get('pointerup')(event());assert.equal(classes.size,0);
+ down.fn(event({pointerType:'touch'}));events.get('pointermove').fn(event({clientX:450}));globalEvents.get('blur')();assert.equal(classes.size,0);
+ binding.destroy();assert.equal(events.size,0);assert.equal(globalEvents.size,0);
+});
+
+test('wallpaper starts with readable recent candles and refresh retains a manually panned viewport',()=>{
+ const T=require('../../yoyo/vision_research/static/chart-tools.js');
+ sandbox.window.SpikeChartTools={...T,library:()=>new Promise(()=>{})};
+ const host={replaceChildren(){}},instance=sandbox.window.SpikeRangeChart.mount(host,{},view),nodes=new Map();
+ const node=key=>{if(!nodes.has(key))nodes.set(key,{innerHTML:'',textContent:'',classList:{toggle(){}}});return nodes.get(key);};
+ let visible=null,autoScale=true;const scale={getVisibleLogicalRange:()=>visible,setVisibleLogicalRange:r=>visible=r,fitContent:()=>visible={from:0,to:399}};
+ instance.chart={timeScale:()=>scale,applyOptions:o=>{if(o.rightPriceScale?.autoScale!==undefined)autoScale=o.rightPriceScale.autoScale;},remove(){}};
+ instance.series={setData(){},update(){},applyOptions(){},createPriceLine(){},removePriceLine(){}};instance.volume={setData(){},update(){}};
+ instance.canvas={clientWidth:1200};instance.panel={querySelector:node};instance.controls={update(){},destroy(){}};instance.paintMondayBand=()=>{};
+ const data={symbol:'BTC',timezone:'America/New_York',levels:[],candles:Array.from({length:400},(_,i)=>({time:1e12+i*900000,open:100,high:102,low:99,close:101,volume:1}))};
+ const config={...view,bars:672,wallpaper:true,initialBars:160};instance.draw(data,config,'');
+ assert.equal(visible.to-visible.from,160);assert.ok(visible.to>399);
+ visible={from:100.25,to:180.25};autoScale=false;
+ instance.draw({...data,candles:[...data.candles,{...data.candles.at(-1),time:data.candles.at(-1).time+900000}]},config,'');
+ assert.equal(visible.from,100.25);assert.equal(visible.to,180.25);assert.equal(autoScale,false);
+ instance.draw({...data,symbol:'NEW',candles:[data.candles[0]]},config,'');
+ assert.ok(visible.from<=0&&visible.to>=0,'right padding must not push short histories offscreen');
+ sandbox.window.SpikeRangeChart.unmount(host);
+});
