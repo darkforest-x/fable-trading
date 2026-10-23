@@ -99,7 +99,10 @@ def plot(frames,prices):
             fontproperties=font,fontsize=10,arrowprops=dict(arrowstyle='->',color='#444'))
         midnight=pd.Timestamp('2026-08-20',tz='Asia/Shanghai');ax.axvspan(midnight,pd.Timestamp('2026-08-20 04:00',tz='Asia/Shanghai'),color='#8091a5',alpha=.09)
         ax.set_title(f'{symbol} · 15分钟K线 · 8月19日涨幅 {p["day_change_pct"]:+.2f}%',fontproperties=font,fontsize=14,loc='left')
-        ax.xaxis.set_major_locator(md.HourLocator(interval=4,tz=ZoneInfo('Asia/Shanghai')))
+        ymin=min(p['lower'],float(h.low.min()));ymax=max(p['upper'],float(h.high.max()));span=ymax-ymin
+        ax.set_ylim(ymin-.04*span,ymax+.08*span)
+        ax.set_xlim(pd.Timestamp('2026-08-19',tz='Asia/Shanghai'),pd.Timestamp('2026-08-20 04:00',tz='Asia/Shanghai'))
+        ax.xaxis.set_major_locator(md.HourLocator(byhour=[0,4,8,12,16,20],tz=ZoneInfo('Asia/Shanghai')))
         ax.xaxis.set_major_formatter(md.DateFormatter('%m-%d %H:%M',tz=ZoneInfo('Asia/Shanghai')))
         ax.grid(alpha=.12);ax.spines[['top','right']].set_visible(False)
     fig.suptitle('8.19 与周一1.618：短暂回落之后，上沿被突破',fontproperties=font,fontsize=18)
@@ -132,6 +135,13 @@ def main():
     pd.DataFrame(metrics).to_csv(EXP/'cached-statistics.csv',index=False)
     majors=grid[grid.population.eq('signal')&grid.symbol.isin(MAJORS)]
     majors.to_csv(EXP/'major-cached-outcomes.csv',index=False)
+    case2_path=case2.EXP/'symbols/ETHUSDT/trades.csv.gz'
+    oldtrades=pd.read_csv(case2_path,float_precision='round_trip')
+    match=oldtrades[oldtrades.population.eq('signal')&oldtrades.entry_time.eq('2026-08-19 13:45:00+00:00')]
+    assert len(match)==1
+    trace=oldtrades[oldtrades.pair_id.isin(match.pair_id)]
+    assert len(trace)==4 and match.closed.all()
+    trace.to_csv(EXP/'eth-case2-cached-trade-and-controls.csv',index=False)
     frames={};prices={};traces=[]
     for symbol in MAJORS:
         f,p,t=price_review(symbol,c);frames[symbol]=f;prices[symbol]=p;traces+=t
@@ -144,6 +154,7 @@ def main():
     summary=dict(date_beijing=DATE,monday_ny='2026-08-17',monday_window_beijing=['2026-08-17 12:00','2026-08-18 12:00'],
         first_touch_events=len(day),symbols=int(day.symbol.nunique()),upper=int(day.side.eq(-1).sum()),lower=int(day.side.eq(1).sum()),
         upper_at_23h=int((day.side.eq(-1)&ts.loc[day.index].dt.hour.eq(23)).sum()),prices=prices,statistics=metrics,gold=gold,
+        eth_case2=dict(source=file_stamp(case2_path),trade=match.iloc[0].to_dict(),control_mean_net_r=float(trace[trace.population.eq('random')].net_r.mean())),
         native_reruns=0,limitations=['Observed registered universe only; incomplete/delisted histories limit breadth.',
         'Price action is descriptive, not causal proof of Fibonacci or an independent strategy validation.',
         'Cached returns use grid timing reference with separate true-clock bounds; current OKX fees, no funding/slippage/queue/liquidation.',
