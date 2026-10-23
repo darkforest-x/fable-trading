@@ -1,3 +1,11 @@
+## 2026-10-23 · Four Monday reversal cases: requested offline HTML report
+
+- Owner explicitly requested detailed HTML with winning/losing K-line samples. Complete local file `artifacts/monday-cases-report-20261023/monday-1618-report.html` (72.4MB, all figures/data inline); authored app `reports/monday-1618-cases-20261023/`. No public publication.
+- Reused frozen Nautilus1.231.0 results:79430signals,79383closed,47censored,19case/group scopes. Case1 gold corrected347 replaces obsolete361; case2 gold unavailable volume. First touch forcase3 now explicitly owner-confirmed, no semantic change/replay.
+- Detailed rules/entry timestamps,NYMonday/UTCbar alignment,fees/geometry,year/hour/weekday/direction/2023split,weeklyCI,strict3-control matched differences,independentR ledger versus account distinction.60deterministic strata(seed20261023) × local/full =120original-timeframe source PNGs, fullCSV download and filterable ledger.
+- Stitch generation timed out but get_project screenInstances exposed screen5230353fc774421d9260d60091ad8a89 omitted by list_screens; design and HTML recovered with GEMINI_3_8_FLASH, no waiver/retry. Learning saved. Report uses canonical protected Data runtime with authored content/theme only; source aa109b7321.
+- Statistics arithmetic test1passed inisolatedNautilus; counts reconcile,120PNGs decode,desktop/mobile390 checks,loss/full toggle,gold missing-state,offline0resource requests andCSV79430rows verified. Details/cleanup inreceipt. Notion case4 reportnote andcase3 explicitfirsttouchupdated. No source-data downloads/newdeps/nativebacktest reruns/liveorders/training.
+
 ## 2026-10-23 · Mobile Monday order drawer, wick stops and equity exposure
 
 - Owner confirmed current chart timeframe: newest closed current-week lower/upper 1.618 wick supplies long low / short high. Missing history or no eligible wick stays explicit. Demand-only weekly backfill is separate from scanning.

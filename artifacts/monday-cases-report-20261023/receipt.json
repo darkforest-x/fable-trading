@@ -1,0 +1,78 @@
+{
+  "status": "complete",
+  "source_commit": "aa109b7321",
+  "html": "/Users/zhangzc/fable-trading/artifacts/monday-cases-report-20261023/monday-1618-report.html",
+  "html_bytes": 72394966,
+  "app_id": "report:b2b980f2-70d2-4866-8399-0d8c6aa94a7e",
+  "stitch": {
+    "project": "8978791379095391159",
+    "screen": "projects/8978791379095391159/screens/5230353fc774421d9260d60091ad8a89",
+    "model": "GEMINI_3_8_FLASH",
+    "recovery": "generate timed out; get_project screenInstances exposed screen omitted by list_screens; get_screen and both downloads succeeded",
+    "html": "projects/8978791379095391159/files/7cb3ebe9cc3f40b48c582f87a6227cad",
+    "screenshot": "projects/8978791379095391159/files/05d5957cf0f9444ea302bbe2c8942196"
+  },
+  "native_engine": "NautilusTrader 1.231.0 (frozen ledgers; no engine replay)",
+  "counts": {
+    "signals": 79430,
+    "closed": 79383,
+    "censored": 47,
+    "aggregate_rows": 19,
+    "samples": 60,
+    "png_figures": 120
+  },
+  "checks": {
+    "statistics_test": "1 passed in isolated Nautilus environment; main venv lacks Nautilus as intended",
+    "native_totals_reconciled": true,
+    "sample_confirmations_checked": true,
+    "png_dimensions_and_decode": "120 at1750x875",
+    "desktop_widths": [
+      1200,
+      1440
+    ],
+    "mobile_width": 390,
+    "mobile_document_scroll_width": 390,
+    "loss_sample_and_full_path_switched": true,
+    "case2_gold_missing_volume_empty_state": true,
+    "portable_html_external_resource_requests": 0,
+    "portable_status_complete": true,
+    "csv_browser_download_rows": 79430,
+    "csv_columns": 24,
+    "case4_full_sample_switched": true,
+    "browser_console_errors": 0
+  },
+  "limitations": [
+    "Spot broker costs unknown; gold gross only",
+    "47 censored rows excluded from win/loss",
+    "Independent R ledger is not account equity",
+    "Charts retrospective; exit second within observed5m unknown",
+    "Case2 gold unavailable; no synthetic volume",
+    "Week-cluster and matched controls exploratory, unadjusted multiple tests"
+  ],
+  "data_commands": [
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.monday_cases_report_data --reuse-samples",
+    ".venv/bin/python -m yoyo.evaluation.monday_cases_report_charts",
+    "python3 scripts/prepare-monday-cases-report.py"
+  ],
+  "build_commands": [
+    "node <data-plugin>/scripts/data-app.mjs build --project-dir reports/monday-1618-cases-20261023 --separate-data",
+    "node <data-plugin>/scripts/data-app.mjs export-offline --project-dir reports/monday-1618-cases-20261023 --output reports/monday-1618-cases-20261023/.data-app-offline/exports/monday-1618-report.html"
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "cleanup": {
+    "browser_session": "monday-report-20261023",
+    "browser_pid": 99108,
+    "browser_closed": true,
+    "temporary_server_pid": 99077,
+    "temporary_server_terminated": true,
+    "in_app_inventory_tabs": 0,
+    "background_service_alive": true,
+    "patrols_total": 4,
+    "patrols_enabled": 4,
+    "patrol_worker": {
+      "heartbeat_ms": 1792769250095,
+      "state": "idle"
+    }
+  }
+}

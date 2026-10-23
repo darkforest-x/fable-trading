@@ -34498,3 +34498,20 @@ artifacts:
       Desktop/mobile browser mock confirmations and real GET-only preview; no live test orders.
       Same locked manual worker, separate ticket ledger, explicit confirmation and no ambiguous-write retries.
       Market workers stopped; four patrols enabled; manual readiness ready; task browser closed.
+
+  - artifact_id: monday-cases-html-report-20261023
+    artifact_type: report
+    role: four_monday_reversal_cases_offline_evidence_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: aa109b7321
+    generator_commit: aa109b7321
+    source_path: artifacts/monday-cases-report-20261023/receipt.json
+    storage_uri: repo://artifacts/monday-cases-report-20261023/monday-1618-report.html
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Owner explicitly requested HTML; frozen Nautilus ledgers, 79430signals/79383closed/47censored.
+      Corrected gold case1 only; case2 gold unavailable.19scopes,60deterministic stratified samples/120source candle PNGs.
+      Rules/time/fees,matched random controls,weeklyCI,calendar cuts,independentR ledger and complete downloadableCSV.
+      Stitch GEMINI_3_8_FLASH screen5230353fc774421d9260d60091ad8a89 recovered via project screenInstances after timeout.
+      Portable HTML retains all data/figures; no public publication or new simulation. Large generated files local/ignored.
