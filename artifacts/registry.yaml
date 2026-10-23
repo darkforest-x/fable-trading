@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-1618-pw-confluence-20261023-v1
+    artifact_type: manifest
+    role: 'When the Monday 1618 coincides with last week high (short) or low (long) within 0.05R, does it hold more often?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 33e14cb5b354b6490aa20608c77fd5efe89d7920
+    generator_commit: 33e14cb5b354b6490aa20608c77fd5efe89d7920
+    source_path: experiments/active/exp-monday-1618-pw-confluence-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-pw-confluence-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; Binance alts 2020-2025: confluent 32.5 percent (n1331) vs other 36.9, worse. OKX 2025-26: 42.5 (n306) vs 39.0, p .035. Majors 45.1 (n82) vs 35.8, p .1'
   - artifact_id: monday-1618-dvol-20261023-v1
     artifact_type: manifest
     role: 'Does the Deribit implied volatility regime (DVOL) at the touch judge whether the BTC/ETH Monday 1618 holds?'
