@@ -1,0 +1,626 @@
+{
+  "date_beijing": "2026-08-19",
+  "monday_ny": "2026-08-17",
+  "monday_window_beijing": [
+    "2026-08-17 12:00",
+    "2026-08-18 12:00"
+  ],
+  "first_touch_events": 63,
+  "symbols": 63,
+  "upper": 53,
+  "lower": 10,
+  "upper_at_23h": 38,
+  "prices": {
+    "BTCUSDT": {
+      "symbol": "BTCUSDT",
+      "monday_high": 64600.8,
+      "monday_low": 63255.0,
+      "upper": 65432.504400000005,
+      "lower": 62423.2956,
+      "first_upper_interval_bj": "2026-08-19 22:17:00+08:00",
+      "resolution_minutes": 1,
+      "day_open": 64823.9,
+      "day_high": 70450.0,
+      "day_low": 64131.3,
+      "day_close": 68523.7,
+      "high_time_bj": "2026-08-19 23:25:00+08:00",
+      "low_time_bj": "2026-08-19 14:10:00+08:00",
+      "day_change_pct": 5.707462833923893,
+      "upper_touch_bars": 18,
+      "upper_outside_closes": 16,
+      "lower_touch_bars": 0,
+      "first5m": {
+        "open": 65376.1,
+        "high": 65450.0,
+        "low": 65300.0,
+        "close": 65407.4
+      },
+      "next5m": {
+        "open": 65407.3,
+        "high": 65431.3,
+        "low": 65293.5,
+        "close": 65400.3
+      },
+      "rules": {
+        "case1_5m_next_engulf": false,
+        "case2_15m": {
+          "pin": true,
+          "confirmation": false,
+          "qualified": false,
+          "pin_open": "2026-08-19 22:15:00+08:00",
+          "decision_time": "2026-08-19 23:15:00+08:00",
+          "volume_peak": false,
+          "pin_volume": 4504.02,
+          "prior20_max": 11553.349
+        },
+        "case3_1h": {
+          "pin": false,
+          "confirmation": false,
+          "qualified": false,
+          "pin_open": "2026-08-19 22:00:00+08:00",
+          "decision_time": "2026-08-20 02:00:00+08:00"
+        },
+        "case3_body_only": {
+          "pin": false,
+          "confirmation": false,
+          "qualified": false
+        },
+        "case4_4h": {
+          "pin": false,
+          "confirmation": false,
+          "qualified": false,
+          "pin_open": "2026-08-19 20:00:00+08:00",
+          "decision_time": "2026-08-20 12:00:00+08:00"
+        }
+      },
+      "sources": [
+        {
+          "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv",
+          "bytes": 54081964,
+          "mtime_ns": 1788064735000000000
+        },
+        {
+          "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/BTCUSDT.csv",
+          "bytes": 3326725,
+          "mtime_ns": 1790091692000000000
+        }
+      ]
+    },
+    "ETHUSDT": {
+      "symbol": "ETHUSDT",
+      "monday_high": 1918.0,
+      "monday_low": 1884.2,
+      "upper": 1938.8884,
+      "lower": 1863.3116,
+      "first_upper_interval_bj": "2026-08-19 20:49:00+08:00",
+      "resolution_minutes": 1,
+      "day_open": 1916.88,
+      "day_high": 2132.0,
+      "day_low": 1905.2,
+      "day_close": 2085.16,
+      "high_time_bj": "2026-08-19 23:25:00+08:00",
+      "low_time_bj": "2026-08-19 11:05:00+08:00",
+      "day_change_pct": 8.778848962898023,
+      "upper_touch_bars": 20,
+      "upper_outside_closes": 18,
+      "lower_touch_bars": 0,
+      "first5m": {
+        "open": 1932.38,
+        "high": 1942.79,
+        "low": 1931.52,
+        "close": 1941.83
+      },
+      "next5m": {
+        "open": 1941.82,
+        "high": 1942.64,
+        "low": 1934.52,
+        "close": 1935.69
+      },
+      "rules": {
+        "case1_5m_next_engulf": false,
+        "case2_15m": {
+          "pin": true,
+          "confirmation": true,
+          "qualified": true,
+          "pin_open": "2026-08-19 20:45:00+08:00",
+          "decision_time": "2026-08-19 21:45:00+08:00",
+          "volume_peak": true,
+          "pin_volume": 213577.635,
+          "prior20_max": 125817.372
+        },
+        "case3_1h": {
+          "pin": true,
+          "confirmation": false,
+          "qualified": false,
+          "pin_open": "2026-08-19 20:00:00+08:00",
+          "decision_time": "2026-08-20 00:00:00+08:00"
+        },
+        "case3_body_only": {
+          "pin": true,
+          "confirmation": false,
+          "qualified": false
+        },
+        "case4_4h": {
+          "pin": false,
+          "confirmation": false,
+          "qualified": false,
+          "pin_open": "2026-08-19 20:00:00+08:00",
+          "decision_time": "2026-08-20 12:00:00+08:00"
+        }
+      },
+      "sources": [
+        {
+          "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv",
+          "bytes": 53200730,
+          "mtime_ns": 1788065142000000000
+        },
+        {
+          "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHUSDT.csv",
+          "bytes": 3358521,
+          "mtime_ns": 1790092006000000000
+        }
+      ]
+    },
+    "BNBUSDT": {
+      "symbol": "BNBUSDT",
+      "monday_high": 608.33,
+      "monday_low": 602.41,
+      "upper": 611.9885600000001,
+      "lower": 598.7514399999999,
+      "first_upper_interval_bj": "2026-08-19 23:06:00+08:00",
+      "resolution_minutes": 1,
+      "day_open": 603.72,
+      "day_high": 620.44,
+      "day_low": 601.63,
+      "day_close": 616.9,
+      "high_time_bj": "2026-08-19 23:40:00+08:00",
+      "low_time_bj": "2026-08-19 14:00:00+08:00",
+      "day_change_pct": 2.1831312528986846,
+      "upper_touch_bars": 11,
+      "upper_outside_closes": 11,
+      "lower_touch_bars": 0,
+      "first5m": {
+        "open": 610.65,
+        "high": 612.59,
+        "low": 610.62,
+        "close": 612.27
+      },
+      "next5m": {
+        "open": 612.27,
+        "high": 613.0,
+        "low": 611.97,
+        "close": 612.83
+      },
+      "rules": {
+        "case1_5m_next_engulf": false,
+        "case2_15m": {
+          "pin": false,
+          "confirmation": false,
+          "qualified": false,
+          "pin_open": "2026-08-19 23:00:00+08:00",
+          "decision_time": "2026-08-20 00:00:00+08:00",
+          "volume_peak": true,
+          "pin_volume": 38909.880000000005,
+          "prior20_max": 24442.03
+        },
+        "case3_1h": {
+          "pin": false,
+          "confirmation": false,
+          "qualified": false,
+          "pin_open": "2026-08-19 23:00:00+08:00",
+          "decision_time": "2026-08-20 03:00:00+08:00"
+        },
+        "case3_body_only": {
+          "pin": false,
+          "confirmation": false,
+          "qualified": false
+        },
+        "case4_4h": {
+          "pin": false,
+          "confirmation": false,
+          "qualified": false,
+          "pin_open": "2026-08-19 20:00:00+08:00",
+          "decision_time": "2026-08-20 12:00:00+08:00"
+        }
+      },
+      "sources": [
+        {
+          "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_BNBUSDT_5m_654240.csv",
+          "bytes": 49452385,
+          "mtime_ns": 1788064644000000000
+        },
+        {
+          "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/BNBUSDT.csv",
+          "bytes": 3121599,
+          "mtime_ns": 1790091636000000000
+        }
+      ]
+    },
+    "DOGEUSDT": {
+      "symbol": "DOGEUSDT",
+      "monday_high": 0.07057,
+      "monday_low": 0.06955,
+      "upper": 0.07120035999999999,
+      "lower": 0.06891964,
+      "first_upper_interval_bj": "2026-08-19 22:54:00+08:00",
+      "resolution_minutes": 1,
+      "day_open": 0.0703,
+      "day_high": 0.0747,
+      "day_low": 0.06982,
+      "day_close": 0.07248,
+      "high_time_bj": "2026-08-19 23:25:00+08:00",
+      "low_time_bj": "2026-08-19 10:15:00+08:00",
+      "day_change_pct": 3.100995732574674,
+      "upper_touch_bars": 14,
+      "upper_outside_closes": 13,
+      "lower_touch_bars": 0,
+      "first5m": {
+        "open": 0.07075,
+        "high": 0.07121,
+        "low": 0.07075,
+        "close": 0.0712
+      },
+      "next5m": {
+        "open": 0.0712,
+        "high": 0.07141,
+        "low": 0.07113,
+        "close": 0.07125
+      },
+      "rules": {
+        "case1_5m_next_engulf": false,
+        "case2_15m": {
+          "pin": false,
+          "confirmation": false,
+          "qualified": false,
+          "pin_open": "2026-08-19 22:45:00+08:00",
+          "decision_time": "2026-08-19 23:45:00+08:00",
+          "volume_peak": true,
+          "pin_volume": 197501623.0,
+          "prior20_max": 151214336.0
+        },
+        "case3_1h": {
+          "pin": false,
+          "confirmation": false,
+          "qualified": false,
+          "pin_open": "2026-08-19 22:00:00+08:00",
+          "decision_time": "2026-08-20 02:00:00+08:00"
+        },
+        "case3_body_only": {
+          "pin": false,
+          "confirmation": false,
+          "qualified": false
+        },
+        "case4_4h": {
+          "pin": false,
+          "confirmation": false,
+          "qualified": false,
+          "pin_open": "2026-08-19 20:00:00+08:00",
+          "decision_time": "2026-08-20 12:00:00+08:00"
+        }
+      },
+      "sources": [
+        {
+          "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_DOGEUSDT_5m_610740.csv",
+          "bytes": 50432811,
+          "mtime_ns": 1788064967000000000
+        },
+        {
+          "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/DOGEUSDT.csv",
+          "bytes": 3416010,
+          "mtime_ns": 1790091904000000000
+        }
+      ]
+    }
+  },
+  "statistics": [
+    {
+      "group": "all",
+      "horizon": 5,
+      "n": 63,
+      "wins": 25,
+      "win_rate": 0.3968253968253968,
+      "mean_net_bp": -19.623168104950494,
+      "paired": 63,
+      "paired_signal_bp": -19.623168104950494,
+      "control_bp": -5.650871603673446,
+      "lower_wins": 15,
+      "upper_wins": 44
+    },
+    {
+      "group": "all",
+      "horizon": 15,
+      "n": 63,
+      "wins": 37,
+      "win_rate": 0.5873015873015873,
+      "mean_net_bp": 8.289539794850368,
+      "paired": 63,
+      "paired_signal_bp": 8.289539794850368,
+      "control_bp": -5.78779125108466,
+      "lower_wins": 27,
+      "upper_wins": 43
+    },
+    {
+      "group": "all",
+      "horizon": 60,
+      "n": 63,
+      "wins": 34,
+      "win_rate": 0.5396825396825397,
+      "mean_net_bp": 33.2686421164366,
+      "paired": 63,
+      "paired_signal_bp": 33.2686421164366,
+      "control_bp": -25.00615453189924,
+      "lower_wins": 31,
+      "upper_wins": 38
+    },
+    {
+      "group": "all",
+      "horizon": 240,
+      "n": 63,
+      "wins": 35,
+      "win_rate": 0.5555555555555556,
+      "mean_net_bp": 15.808639395496007,
+      "paired": 63,
+      "paired_signal_bp": 15.808639395496007,
+      "control_bp": -57.45729169915367,
+      "lower_wins": 34,
+      "upper_wins": 38
+    },
+    {
+      "group": "altcoins",
+      "horizon": 5,
+      "n": 61,
+      "wins": 24,
+      "win_rate": 0.39344262295081966,
+      "mean_net_bp": -20.267518629008467,
+      "paired": 61,
+      "paired_signal_bp": -20.267518629008467,
+      "control_bp": -5.630046004720042,
+      "lower_wins": 14,
+      "upper_wins": 42
+    },
+    {
+      "group": "altcoins",
+      "horizon": 15,
+      "n": 61,
+      "wins": 35,
+      "win_rate": 0.5737704918032787,
+      "mean_net_bp": 8.085032521774687,
+      "paired": 61,
+      "paired_signal_bp": 8.085032521774687,
+      "control_bp": -6.16905313532001,
+      "lower_wins": 25,
+      "upper_wins": 41
+    },
+    {
+      "group": "altcoins",
+      "horizon": 60,
+      "n": 61,
+      "wins": 33,
+      "win_rate": 0.5409836065573771,
+      "mean_net_bp": 37.32119573063979,
+      "paired": 61,
+      "paired_signal_bp": 37.32119573063979,
+      "control_bp": -25.90116755725243,
+      "lower_wins": 30,
+      "upper_wins": 37
+    },
+    {
+      "group": "altcoins",
+      "horizon": 240,
+      "n": 61,
+      "wins": 35,
+      "win_rate": 0.5737704918032787,
+      "mean_net_bp": 36.1173120584998,
+      "paired": 61,
+      "paired_signal_bp": 36.1173120584998,
+      "control_bp": -59.3419199969011,
+      "lower_wins": 34,
+      "upper_wins": 38
+    },
+    {
+      "group": "upper_short",
+      "horizon": 5,
+      "n": 53,
+      "wins": 16,
+      "win_rate": 0.3018867924528302,
+      "mean_net_bp": -36.548949642550284,
+      "paired": 53,
+      "paired_signal_bp": -36.548949642550284,
+      "control_bp": -7.420629390755679,
+      "lower_wins": 7,
+      "upper_wins": 34
+    },
+    {
+      "group": "upper_short",
+      "horizon": 15,
+      "n": 53,
+      "wins": 27,
+      "win_rate": 0.5094339622641509,
+      "mean_net_bp": -6.522794480155611,
+      "paired": 53,
+      "paired_signal_bp": -6.522794480155611,
+      "control_bp": -9.188779208744393,
+      "lower_wins": 19,
+      "upper_wins": 33
+    },
+    {
+      "group": "upper_short",
+      "horizon": 60,
+      "n": 53,
+      "wins": 26,
+      "win_rate": 0.49056603773584906,
+      "mean_net_bp": 24.418706103320325,
+      "paired": 53,
+      "paired_signal_bp": 24.418706103320325,
+      "control_bp": -29.81701641532945,
+      "lower_wins": 24,
+      "upper_wins": 30
+    },
+    {
+      "group": "upper_short",
+      "horizon": 240,
+      "n": 53,
+      "wins": 29,
+      "win_rate": 0.5471698113207547,
+      "mean_net_bp": 5.064775652473367,
+      "paired": 53,
+      "paired_signal_bp": 5.064775652473367,
+      "control_bp": -69.73147715254989,
+      "lower_wins": 28,
+      "upper_wins": 30
+    },
+    {
+      "group": "lower_long",
+      "horizon": 5,
+      "n": 10,
+      "wins": 9,
+      "win_rate": 0.9,
+      "mean_net_bp": 70.08347404432843,
+      "paired": 10,
+      "paired_signal_bp": 70.08347404432843,
+      "control_bp": 3.728844667862398,
+      "lower_wins": 8,
+      "upper_wins": 10
+    },
+    {
+      "group": "lower_long",
+      "horizon": 15,
+      "n": 10,
+      "wins": 10,
+      "win_rate": 1.0,
+      "mean_net_bp": 86.79491145238208,
+      "paired": 10,
+      "paired_signal_bp": 86.79491145238208,
+      "control_bp": 12.237444924511927,
+      "lower_wins": 8,
+      "upper_wins": 10
+    },
+    {
+      "group": "lower_long",
+      "horizon": 60,
+      "n": 10,
+      "wins": 8,
+      "win_rate": 0.8,
+      "mean_net_bp": 80.17330298595286,
+      "paired": 10,
+      "paired_signal_bp": 80.17330298595286,
+      "control_bp": 0.4914134502809141,
+      "lower_wins": 7,
+      "upper_wins": 8
+    },
+    {
+      "group": "lower_long",
+      "horizon": 240,
+      "n": 10,
+      "wins": 6,
+      "win_rate": 0.6,
+      "mean_net_bp": 72.751117233516,
+      "paired": 10,
+      "paired_signal_bp": 72.751117233516,
+      "control_bp": 7.595891203846383,
+      "lower_wins": 6,
+      "upper_wins": 8
+    }
+  ],
+  "gold": {
+    "status": "unavailable_conflicting_monday",
+    "blocked_weeks": [
+      "2026-08-03",
+      "2026-08-10",
+      "2026-08-17",
+      "2026-08-24",
+      "2026-08-31"
+    ],
+    "source": {
+      "path": "/Users/zhangzc/fable-trading/data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_20268.zip",
+      "bytes": 393838,
+      "mtime_ns": 1791899985808611288
+    },
+    "conflicting_minutes": 98
+  },
+  "eth_case2": {
+    "source": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-15m-volume-rejection-20261023-v1/symbols/ETHUSDT/trades.csv.gz",
+      "bytes": 21695,
+      "mtime_ns": 1792762983888631700
+    },
+    "trade": {
+      "trade_id": "ETHUSDT-697701--1",
+      "pair_id": "ETHUSDT-697701--1",
+      "population": "signal",
+      "symbol": "ETHUSDT",
+      "entry_i": 18108,
+      "pin_i": 697689.0,
+      "side": -1,
+      "entry": 1931.74,
+      "stop": 1942.79,
+      "target_price": 1918.0,
+      "risk": 11.049999999999955,
+      "level": 1938.8884,
+      "week": "2026-08-17",
+      "bucket": -35,
+      "entry_time": "2026-08-19 13:45:00+00:00",
+      "pin_time": "2026-08-19 12:45:00+00:00",
+      "confirmation_close_time": "2026-08-19 13:45:00+00:00",
+      "pin_volume": 213577.63499999998,
+      "prior20_volume_max": 125817.372,
+      "segment": 1,
+      "monday_high": 1918.0,
+      "monday_low": 1884.2,
+      "original_entry_i": 697701,
+      "end_i": 18471,
+      "exit_i": 18135,
+      "exit_price": 1942.79,
+      "reason": 1,
+      "peak_r": 0.3511312217194683,
+      "arm_i": -1,
+      "protection": 1942.79,
+      "steps": 27,
+      "ambiguous": 0,
+      "be_trigger_i": -1,
+      "be_effective_i": -1,
+      "be_price": 1931.74,
+      "stop_kind": 0,
+      "deferred_closes": 0,
+      "gross_r": -1.0,
+      "fee_r": 0.17531809954751204,
+      "net_r": -1.175318099547512,
+      "net_notional_bp": -57.202315011336694,
+      "exit_time": "2026-08-19 14:55:00+00:00",
+      "framework_exit_time": "2026-08-19 14:55:00+00:00",
+      "framework_position_id": "ETHUSDT-697701--1",
+      "framework_commission": 0.0,
+      "quantity": 1.0,
+      "exit_original_i": 697714,
+      "expected_price": 1942.79,
+      "expected_reason": 1,
+      "ambiguous_bar": false,
+      "stop_first_price": 1942.79,
+      "closed": true,
+      "exit_interval_start": "2026-08-19 14:50:00+00:00",
+      "exit_interval_end": "2026-08-19 14:55:00+00:00",
+      "gross_bp": -57.20231501133766,
+      "stop_first_gross_r": -1.0,
+      "fee_entry_rate": 0.0005,
+      "fee_exit_rate": 0.0005,
+      "net_bp": -67.23091616884332,
+      "stop_first_net_r": -1.175318099547512
+    },
+    "control_mean_net_r": -1.1753180967125558
+  },
+  "native_reruns": 0,
+  "limitations": [
+    "Observed registered universe only; incomplete/delisted histories limit breadth.",
+    "Price action is descriptive, not causal proof of Fibonacci or an independent strategy validation.",
+    "Cached returns use grid timing reference with separate true-clock bounds; current OKX fees, no funding/slippage/queue/liquidation.",
+    "Controls match the week, symbol, side and lagged volatility; they need not enter on Aug19."
+  ],
+  "cache": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-limit-timed-vectorbt-20261024-v1/summary.json",
+    "bytes": 84100,
+    "mtime_ns": 1792782775269803805
+  },
+  "source_commit": "08ae155e12be2185969f9a872243fe133a06bc4b",
+  "training_eligible": false,
+  "production_eligible": false
+}

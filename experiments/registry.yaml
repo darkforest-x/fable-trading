@@ -13401,3 +13401,17 @@ experiments:
     reuse_allowed: true
     notes: Owner explicitly confirmed first-touch/no-stop and5m plus15m/1h/4h. VectorBT native crossing and Portfolio fills only; existing1m refinement when OHLC agrees. No fabricated second-level clock; return bounds retained. XAU gross only.
     result: "633 assets,65697 first touches,65644 shared entries,262716 available signal-horizon rows;1531141 native scenario positions/3062282fills audited,13 tests pass.5m reference wins BTC151/289,ETH154/299,XAU gross354/622,alts31080/64434. Alts5/15/60/240m net meanbp -9.5079/-0.0418/+13.9905/+12.9692;1h reference win56.73percent. Intrabar-clock bounds remain wide; exact elapsed5m alt win24.78-78.65percent. ETH largest quote verified against Binance; no silent removal. No profit qualification, defaults or live changes. Notion4028856479af815db17cc08424df4245 read back; analysis5ca58ed85a."
+
+  - experiment_id: exp-monday-aug19-review-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 08ae155e12
+    status: completed
+    question: How did2026-08-19 Beijing price action relate to the frozen NYMonday1.618 levels and original reversal rules?
+    single_variable: None; specified-day descriptive review of existing OHLC and completed native fills, no new execution or optimization.
+    artifacts:
+    - monday-aug19-review-20261024-v1
+    canonical_report: experiments/active/exp-monday-aug19-review-20261024-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    result: "63 firsttouch symbols,53upper/10lower;38upper during23Beijing. BTC upper65432.5044 touched22h17,ETH1938.8884 at20h49;day closes68523.7/2085.16. ETH15m original volume+3bodies qualifies21h45 but native stop1942.79 during22h50-55;net-1.175318R,original3random same mean. Hourly strict/body confirmation fails;BTC15m volume and confirmation fail. GoldMonday conflicts invalidate anchors. No backtest rerun;grid clock uncertainty and controls preserved. Source checks/assertions and chart inspection pass;Notion4028856479af81569831cf3326ab4cf0 verified."
