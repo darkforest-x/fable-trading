@@ -47,7 +47,7 @@ def complete(f,a,b):return f.index.equals(pd.date_range(a,b-STEP,freq=STEP))
 def read(path):
     f=pd.read_csv(path,usecols=['ts']+COLS,float_precision='round_trip')
     f=f[(f.ts>=START.value//1_000_000)&(f.ts<END.value//1_000_000)].copy()
-    f.index=pd.to_datetime(f.pop('ts'),unit='ms',utc=True).as_unit('ns')
+    f.index=pd.DatetimeIndex(pd.to_datetime(f.pop('ts'),unit='ms',utc=True)).as_unit('ns')
     return f.sort_index()
 
 
