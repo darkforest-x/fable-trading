@@ -1,0 +1,66 @@
+{
+  "crypto_root": "data/crypto/market/kline_preholdout_binance_um5m",
+  "crypto_tail": "data/crypto/market/kline_binance_um5m_forward_20260922/series",
+  "exclude_symbols": [
+    "USDCUSDT",
+    "BUSDUSDT",
+    "TUSDUSDT",
+    "FDUSDUSDT",
+    "USDPUSDT",
+    "USDEUSDT",
+    "DAIUSDT",
+    "USD1USDT",
+    "PAXGUSDT",
+    "XAUTUSDT",
+    "XAUUSDT",
+    "XAGUSDT",
+    "BTCDOMUSDT",
+    "DEFIUSDT",
+    "FOOTBALLUSDT",
+    "BLUEBIRDUSDT"
+  ],
+  "maker_fee": 0.0002,
+  "taker_fee": 0.0005,
+  "fee_read_date": "2026-10-23",
+  "seed": 20261023,
+  "split": "2023-01-01T00:00:00Z",
+  "experiment_id": "exp-monday-limit-timed-vectorbt-20261024-v1",
+  "holding_minutes": [
+    5,
+    15,
+    60,
+    240
+  ],
+  "controls_per_signal": 3,
+  "fine_series": {
+    "BTCUSDT": "data/research/ma6_knot_1m_20261011/series/binance_um_BTCUSDT_1m_2059200.csv",
+    "ETHUSDT": "data/research/ma6_knot_1m_20261011/series/binance_um_ETHUSDT_1m_2059200.csv",
+    "SOLUSDT": "data/research/ma6_knot_1m_20261011/series/binance_um_SOLUSDT_1m_2059200.csv",
+    "BNBUSDT": "data/research/ma6_knot_1m_20261011/series/binance_um_BNBUSDT_1m_2059200.csv",
+    "XRPUSDT": "data/research/ma6_knot_1m_20261011/series/binance_um_XRPUSDT_1m_2059200.csv",
+    "DOGEUSDT": "data/research/ma6_knot_1m_20261011/series/binance_um_DOGEUSDT_1m_2059200.csv"
+  },
+  "entry": "Rest at completed NY Monday lower/upper1.618; first weekly directional touch, long lower/short upper; no confirmation.",
+  "exit": "No stop or TP; market exit after5/15/60/240 minutes. Exact intrabar fill clock unknown: report grid reference plus OHLC lower/upper bounds on the true elapsed-time outcome.",
+  "native_engine": "VectorBT1.2.0 native OHLC crossing kernel, native gap-price helper, Portfolio.from_orders independent columns; no per-bar execution loop or second-engine replay.",
+  "timing": "Primary registered5m universe with existing1m refinement when source OHLC agrees. Opening fills have exact grid clocks; intrabar fills lie in their observed1m or5m interval. Grid exit at fill-interval open+horizon is a reference, not exact elapsed h. True elapsed exit belongs to the corresponding future interval; bounds use its low/high. No interpolated tick timestamps.",
+  "costs": "Current OKX Lv1 maker0.02% limit entry / taker0.05% timed exit, actual fill notionals. Gold unknown spread/cost: gross only. No slippage, funding, margin or liquidation.",
+  "cohort": "Report all available horizons and a primary shared cohort with all four expiry intervals observed; retain missing/unfilled cases. No future-return selection.",
+  "controls": "Three random5m opens in same symbol/NY week/side and lagged14bar TR/open volatility bucket; identical horizon and fee schedule. A timing counterfactual, not a matched limit-order queue/fill model.",
+  "owner_authorization": "2026-10-24 owner explicitly confirmed first weekly-side limit touch, no prior stop, timed market exit; selected5m plus15m/1h/4h.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "limitations": [
+    "OHLC bounds do not recover the true second of a passive fill. Grid-reference win rate is not exact elapsed-time win rate.",
+    "Touch assumed fully filled, no queue, spread, slippage, funding, margin/liquidation or capacity. Independent position outcomes are not one funded account.",
+    "Binance historical data with OKX current fees; spot XAU Bid-only gross results have unknown execution costs.",
+    "First observed XAU touch may follow scheduled source closure; incomplete/ambiguous entry or expiry intervals are excluded.",
+    "Available630 altcoins omit unavailable/delisted histories; coverage differs. Historical data already studied;2023+ is not a pristine holdout.",
+    "Matched random opens with same cost are timing controls only; same-week trend conditioning is not an absolute profitability null."
+  ],
+  "price_grid": "Theoretical1.618 price with native floating precision; historical exchange tick-size schedules and lot/min-notional enforcement are unavailable, not a live-order model.",
+  "official_api_sources": [
+    "https://vectorbt.dev/api/signals/nb/#vectorbt.signals.nb.ohlc_stop_choice_nb",
+    "https://vectorbt.dev/api/portfolio/base/#vectorbt.portfolio.base.Portfolio.from_orders"
+  ]
+}

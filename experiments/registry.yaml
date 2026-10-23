@@ -13387,3 +13387,16 @@ experiments:
     reuse_allowed: true
     notes: Owner selected quoted two-arm comparison. Cached native hold-stop mixture; only new BE execution through Nautilus. No filter or default change. XAU gross price BE only.
     result: "633 assets,19048 signals,74161 signal/control parents;33833 new native parents/135332fills;40328 unchanged non-TP1 parents reused.48 tests and complete fee/identity/fill audit pass. Hold to BE meanR BTC -0.14886/-0.14222,ETH -0.23612/-0.28463,XAU gross +0.15616/+0.05158;alts common18698 -0.094484/-0.104707. All win rates rise;5257 alt runner stops protected,2197 eventual far TPs cut. Alt unresolved52/28;24 newly resolved. All15 policy-gain Holm tests1. No default change. Notion4028856479af816d9168dcf69089eb2f verified."
+  - experiment_id: exp-monday-limit-timed-vectorbt-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending_builder_commit
+    status: running
+    question: First weekly directional limit at1.618, no stop, how many profitable after5/15/60/240minutes with actual fees?
+    single_variable: Holding time only; same pending limits, shared entry cohort, fees and matched timing controls. Intrabar fill-clock bounds are uncertainty diagnostics.
+    artifacts:
+    - monday-limit-timed-vectorbt-20261024-v1
+    canonical_report: experiments/active/exp-monday-limit-timed-vectorbt-20261024-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Owner explicitly confirmed first-touch/no-stop and5m plus15m/1h/4h. VectorBT native crossing and Portfolio fills only; existing1m refinement when OHLC agrees. No fabricated second-level clock; return bounds retained. XAU gross only.
