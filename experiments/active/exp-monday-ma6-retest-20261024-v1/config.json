@@ -21,6 +21,9 @@
   "baseline_config": "experiments/active/exp-monday-5m-wick-engulf-20261023-v1/config.json",
   "crypto_root": "data/crypto/market/kline_preholdout_binance_um5m",
   "crypto_tail": "data/crypto/market/kline_binance_um5m_forward_20260922/series",
+  "crypto_recent_supplement": "data/crypto/market/research-spike_v128_recent_20260923/series",
+  "supplement_policy": "Reuse existing recent files for the same eligible universe, subject to exact overlapping OHLCV agreement and continuity checks before merging. Preserve gaps and per-symbol coverage; no downloads or source substitution. WIFUSDT September16 example is absent from the old229-symbol tail but present here.",
+  "example_data_read": "WIFUSDT.csv.gz physically read:89904rows,2025-11-15T00:00:00Z through2026-09-23T03:55:00Z; gaps and cross-source overlaps still need full preflight before signal generation",
   "groups": {
     "first": ["BTCUSDT", "ETHUSDT", "XAUUSD"],
     "second": "Existing eligible Binance perpetual altcoin universe, excluding BTC/ETH, stablecoins, gold proxies and classified traditional/index assets"
