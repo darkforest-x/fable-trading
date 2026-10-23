@@ -13359,3 +13359,16 @@ experiments:
     reuse_allowed: true
     notes: NativeVectorBT fills only for new geometries; immutable frozen results reused. Earlier meanR selection, later historical evaluation, actual-entry-week matched controls. Excursions terminate at the execution event; prior-exit-bar bounds retained. No stop/target parameter sweep.
     result: "633assets completed; newN3 BTC83 net-0.2587R, ETH79 net-0.2522R, XAU136 gross+0.0346R, alts18733 net-0.0867R with17censored. Alts2020trades reached1R thenSL. Pre2023-selected N5 later-0.0688R remains negative and worse than oldstrictN3(-0.0612R).156134new native positions,225540reused;15tests and baseline parity passed. No default change."
+  - experiment_id: exp-monday-near-far-targets-vectorbt-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending_builder_commit
+    status: running
+    question: Does the opposite Monday edge improve exits compared with the near edge on identical hourly body-confirmation entries?
+    single_variable: Owner authorized both targets; compare near versus far at each fixedN, then scanN1-5 separately within each target policy. Entry cohorts, original pin stops, random entry times and costs frozen.
+    artifacts:
+    - monday-near-far-targets-vectorbt-20261024-v1
+    canonical_report: experiments/active/exp-monday-near-far-targets-vectorbt-20261024-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Near outcomes reused. Far entries use the opposite completed NY Monday anchor, controls use the corresponding fractional reward distance, native VectorBT fills only. Explicit censor counts and both-resolved transition comparisons. No new entry filter, breakeven or live change.

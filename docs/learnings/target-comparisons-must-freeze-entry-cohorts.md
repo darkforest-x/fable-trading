@@ -1,0 +1,7 @@
+# Comparing targets requires an unchanged entry cohort
+
+- **Problem**: "Back to Monday high/low" can mean the near or opposite range edge. After several confirmation candles, a near target may leave little reward. Changing TP can also change which entries pass a target-ahead admission check.
+- **Dead end**: Treating near-edge interpretation as explicitly owner-confirmed was unjustified. Regenerating entries with the new target alone would mix an exit change with added signals, obscuring why results differ. These alternatives were identified before the controlled comparison.
+- **Effective path**: Record the owner's 2026-10-24 authorization to test both. Freeze the existing body-confirmation entries, original pin stops and random-control times; map only the target to the opposite completed NY Monday edge. Preserve near outcomes and compute far outcomes once using the existing native framework. Random controls inherit the new fractional target distance.
+- **General rule**: State what "near/far" means per direction. Report both full cohorts and the subset whose two outcomes are resolved, because a farther target can remain censored. Near TP becoming far SL is a meaningful transition; a near SL changing under identical stops is an execution-audit failure.
+- **Scope**: `yoyo/evaluation/monday_target_study.py`; `exp-monday-near-far-targets-vectorbt-20261024-v1`. Entries already beyond the near target were excluded by the original cohort and are explicitly not added here. No minimum-RR filter, breakeven, holding limit or live configuration change.
