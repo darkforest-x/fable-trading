@@ -13373,3 +13373,16 @@ experiments:
     reuse_allowed: true
     notes: Near outcomes reused. Far entries use the opposite completed NY Monday anchor, controls use the corresponding fractional reward distance, native VectorBT fills only. Explicit censor counts and both-resolved transition comparisons. No new entry filter, breakeven or live change.
     result: "633 assets, 10 configs; 381149 new native far positions, 381780 reused near rows. N3 near/far meanR BTC -0.2587/-0.0391, ETH -0.2522/-0.2201, XAU gross +0.0346/+0.2777, alts -0.0867/-0.1004; alts censored17/52. Same-resolved alt cohort -0.0885/-0.1004. All earlier-selected later meanR negative. 7 tests and 75 frozen metric rows pass; entries/stops/fees/excursions audited. No default change. Notion4028856479af81849260fb6d15a6dbf8 verified."
+  - experiment_id: exp-monday-tp1-breakeven-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending_builder_commit
+    status: running
+    question: Does remaining-leg fee breakeven after actual TP1 improve fixed50/50 near/far exits on case3 bodyN3?
+    single_variable: TP1-filled fee breakeven only; same entries, initial stops,50/50 targets, controls and actual fees.
+    artifacts:
+    - monday-tp1-breakeven-20261024-v1
+    canonical_report: experiments/active/exp-monday-tp1-breakeven-20261024-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Owner selected quoted two-arm comparison. Cached native hold-stop mixture; only new BE execution through Nautilus. No filter or default change. XAU gross price BE only.

@@ -70,8 +70,15 @@ class ExitPolicy:
     breakeven_includes_cost: bool = True
     breakeven_on_touch: bool = False
     intrabar_path: str | None = None
+    fill_maker_fee: float | None = None
+    fill_taker_fee: float | None = None
 
     def __post_init__(self):
+        actual = (self.fill_maker_fee, self.fill_taker_fee)
+        if any(v is not None for v in actual):
+            if (any(v is None or not math.isfinite(v) or not 0 <= v < 1 for v in actual)
+                    or self.round_trip_cost != 0):
+                raise ValueError("Actual-fill fees require both rates and zero legacy round-trip cost")
         if self.target_breakeven and not self.target_from_entry:
             raise ValueError("Target breakeven requires per-entry targets and parent groups")
         if self.intrabar_path not in (None, "OHLC", "OLHC"):
@@ -174,6 +181,19 @@ class EntryNotionalFee(FeeModel):
     def get_commission(self, order, fill_qty, fill_px, instrument):
         entry = Decimal(str(self.entries[str(order.client_order_id)]))
         return Money(entry * fill_qty.as_decimal() * self.rate, USDT)
+
+
+class ActualFillFee(FeeModel):
+    """Research resting limits pay maker; market/stop fills pay taker notional."""
+
+    def __init__(self, maker, taker):
+        super().__init__()
+        self.maker, self.taker = Decimal(str(maker)), Decimal(str(taker))
+        self.entries = {}  # Existing submission metadata contract.
+
+    def get_commission(self, order, fill_qty, fill_px, instrument):
+        rate = self.maker if order.order_type == OrderType.LIMIT else self.taker
+        return Money(fill_px.as_decimal() * fill_qty.as_decimal() * rate, USDT)
 
 
 class IndependentLimitFill(FillModel):
@@ -350,6 +370,13 @@ class IndependentCloseStrategy(Strategy):
                 continue
             if state.be_trigger_i < 0:
                 state.be_trigger_i = i
+            if (self.policy.fill_taker_fee is not None
+                    and state.source["side"]*(filled.target_price-state.be_price) < self.tick-self.eps):
+                # A tiny TP1 can lie inside the remaining leg's fee breakeven.
+                # Keep its original stop until a later observed close/open point
+                # makes the new stop executable; never filter this entry away.
+                state.deferred += 1
+                continue
             state.be_effective_i = i
             if state.source["side"]*(state.be_price-state.stop) > self.eps:
                 state.stop, state.stop_kind = state.be_price, 1
@@ -473,6 +500,10 @@ class IndependentCloseStrategy(Strategy):
             framework_position_id=str(event.position_id),
             framework_commission=state.fees, quantity=float(state.quantity),
         )
+        if self.policy.fill_taker_fee is not None:
+            fee_r = state.fees/(float(state.quantity)*risk)
+            row.update(fee_r=fee_r, net_r=gross-fee_r,
+                       net_notional_bp=(gross-fee_r)*risk/entry*10000)
         if self.policy.intrabar_path:
             row.update(intrabar_path=self.policy.intrabar_path, exit_path_phase=point_phase,
                        simulated_event_ns=int(event.ts_event))
@@ -543,6 +574,13 @@ class IndependentCloseStrategy(Strategy):
             if i > int(row["entry_i"]):
                 state.peak = max(state.peak, side*((high if side > 0 else low)-entry)/risk)
             old_stop = state.stop
+            if (p.target_breakeven and p.fill_taker_fee is not None
+                    and state.be_trigger_i >= 0 and state.be_effective_i < 0):
+                if side*(close-state.be_price)+self.eps >= self.tick:
+                    state.be_effective_i = i
+                    state.stop, state.stop_kind = state.be_price, 1
+                else:
+                    state.deferred += 1
             update_i = row.get("stop_update_i", -1)
             stop_now = False
             if (np.isfinite(update_i) and i == int(update_i)
@@ -651,7 +689,11 @@ class IndependentCloseStrategy(Strategy):
             row = dict(source)
             side, entry = row["side"], row["entry"]
             be_cost = p.round_trip_cost if p.breakeven_includes_cost else 0.
-            be_raw = (entry+side*be_cost*entry)/self.tick
+            be_value = entry+side*be_cost*entry
+            if p.fill_taker_fee is not None and p.breakeven_includes_cost:
+                # Cover this leg's allocated market entry and stop exit fees.
+                be_value = entry*(1+side*p.fill_taker_fee)/(1-side*p.fill_taker_fee)
+            be_raw = be_value/self.tick
             be = (math.ceil(be_raw-1e-8) if side > 0 else math.floor(be_raw+1e-8))*self.tick
             units = max(1, int(1000/entry))
             if p.partial_close_r is not None:
@@ -743,7 +785,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             raise ValueError("Target breakeven siblings must share entry and initial risk")
         cost = policy.round_trip_cost if policy.breakeven_includes_cost else 0.
         # Protection must be feasible at every native target fill.
-        if (entries.side*(entries.target_price-entries.entry)-cost*entries.entry < 2*tick).any():
+        if policy.fill_taker_fee is None and (entries.side*(entries.target_price-entries.entry)-cost*entries.entry < 2*tick).any():
             raise ValueError("Target breakeven needs targets beyond cost protection")
     market_tick = tick if market_tick is None else market_tick
     has_targets = policy.fixed_target_r is not None or policy.target_from_entry
@@ -791,7 +833,8 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             if np.isfinite(target) and (target <= 0 or r.side*(target-r.entry) < tick-tick*1e-7
                     or abs(target/tick-round(target/tick)) > 1e-5):
                 raise ValueError("Per-entry target must be favorable and tick-aligned")
-    fee_model = EntryNotionalFee(policy.round_trip_cost)
+    fee_model = (EntryNotionalFee(policy.round_trip_cost) if policy.fill_taker_fee is None
+                 else ActualFillFee(policy.fill_maker_fee, policy.fill_taker_fee))
     fill_model = IndependentLimitFill() if has_targets or limit_entry else None
     engine = BacktestEngine(BacktestEngineConfig(
         logging=LoggingConfig(bypass_logging=True),
@@ -858,6 +901,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             target_from_entry=policy.target_from_entry,
             target_breakeven=policy.target_breakeven,
             breakeven_includes_cost=policy.breakeven_includes_cost,
+            fill_maker_fee=policy.fill_maker_fee, fill_taker_fee=policy.fill_taker_fee,
             breakeven_on_touch=policy.breakeven_on_touch,
             intrabar_path=policy.intrabar_path,
             synthetic_segments_per_bar=4 if policy.intrabar_path else 1,
