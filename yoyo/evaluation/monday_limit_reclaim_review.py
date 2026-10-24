@@ -148,7 +148,8 @@ def charts(grid, best, conc, years, paths, outcomes):
                                (w, 'complete_control_bp', ORANGE, '完整匹配组·随机对照')):
         ax.bar(x+off, [years[y][key] for y in yrs], w*.9, color=col, label=lab)
     ax.axhline(0, color='#c3c2b7', lw=1); ax.set_xticks(x, [f"{y}\n{years[y]['n']}笔" for y in yrs])
-    ax.set_ylabel('每笔扣费后平均（bp）'); ax.legend(frameon=False, ncols=3, loc='upper left')
+    top = max(max(years[y]['all_bp'], years[y]['complete_signal_bp']) for y in yrs)
+    ax.set_ylim(top=top*1.35); ax.set_ylabel('每笔扣费后平均（bp）'); ax.legend(frameon=False, ncols=3, loc='upper left')
     ax.grid(axis='y', color=GRID, lw=.6); ax.set_title(f'按入场年份 · {best}', color=INK, loc='left')
     for s in ('top', 'right'):
         ax.spines[s].set_visible(False)
