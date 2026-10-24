@@ -125,6 +125,8 @@ def main():
             path=f[(f.index>=touch-pd.Timedelta(hours=1))&(f.index<=exit_+pd.Timedelta(hours=1))]
             fig,axes=plt.subplots(5,1,figsize=(18,19),gridspec_kw={'height_ratios':[1,1.15,1,1,.85]})
             marks=[(touch,'首次触价','#2563eb'),(entry,'成交柱/挂单参考','#111827')]
+            if pd.notna(r.get('submitted_at')):
+                marks.append((pd.Timestamp(r['submitted_at'])-pd.Timedelta(nanoseconds=1),'四根确认后提交','#d97706'))
             candles(axes[0],first,'15m 首次触价窗口｜真实六均线；后续画面仅供复盘',line,marks,True)
             candles(axes[1],setup,'15m 入场前后窗口｜首次触价相距较远时，见上方独立窗口',line,marks,True)
             candles(axes[2],zoom,'5m 入场窗口｜限价成交的准确柱内时刻未知',line,marks)
@@ -138,6 +140,9 @@ def main():
             basis='毛' if symbol=='XAUUSD' else '净';value=r.get('return_r',np.nan)
             detail=f'{basis}收益 {value:+.3f}R' if pd.notna(value) else str(r['outcome'])
             fig.suptitle(f'{sid}  {"多头" if r["side"]==1 else "空头"}  {detail}',x=.07,ha='left',fontsize=17,fontweight='bold')
+            fig.text(.07,.953,f'触发周 {r.get("week", "见明细")}  |  首次触价 UTC {touch:%Y-%m-%d %H:%M}  |  '
+                     f'入场/观察参考 北京 {entry.tz_convert("Asia/Shanghai"):%Y-%m-%d %H:%M}  |  '
+                     f'退出/后续参考 北京 {exit_.tz_convert("Asia/Shanghai"):%Y-%m-%d %H:%M}',fontsize=9,color='#475569')
             fig.text(.07,.018,'北京时间用于K线面板；均线仅取已完成15m。成交顺序为框架 O-H-L-C 假设。样本为固定随机种子抽取，不能代替全量统计。',fontsize=9,color='#64748b')
             fig.subplots_adjust(left=.07,right=.89,top=.94,bottom=.055,hspace=.39)
             image=folder/(sid+'.png');fig.savefig(image,dpi=140,facecolor='#fff');plt.close(fig)
