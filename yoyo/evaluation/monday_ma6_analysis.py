@@ -8,6 +8,7 @@ not equal absolute stop distances. Weekly resampling treats common market weeks
 as clusters; all history has been inspected and is not a pristine holdout.
 """
 from __future__ import annotations
+import argparse
 import json
 from pathlib import Path
 import numpy as np
@@ -74,19 +75,19 @@ def infer(p,seed=20261024):
         independent_market_weeks=len(blocks),inference='Market-week bootstrap95%; two-sided clustered sign-flip raw p; three exits, not selection-corrected')
 
 
-def stats(g,with_inference=False):
+def stats(g,with_inference=False,basis=None):
     a=g[g.population.eq('signal')];c=a[a.closed];r=c.return_r
     wins=r[r>0];loss=r[r<0];p=pairs(g)
     ordered=c.sort_values(['exit_interval_end','symbol','trade_id'],kind='stable')
     isstop=ordered.reason.eq(1) if not ordered.policy.eq('half_each').all() else ordered.sl_legs.eq(2)
     floating=(c.interior_mfe_r>0)&(c.reason.eq(1) | c.get('sl_legs',pd.Series(0,index=c.index)).fillna(0).gt(0))
-    basis='gross' if len(g) and g.symbol.eq('XAUUSD').all() else 'net'
+    basis=basis or ('gross' if len(g) and g.symbol.eq('XAUUSD').all() else 'net')
     net=basis=='net'
     result=dict(basis=basis,filled_n=len(a),closed_n=len(c),censored_n=int((~a.closed).sum()),
         wins=len(wins),losses=len(loss),flat=int(r.eq(0).sum()),win_rate=r.gt(0).mean(),
         mean_r=r.mean(),total_r=r.sum() if len(r) else None,median_r=r.median(),mean_bp=c.return_pct.mean()*100,
         mean_gross_r=c.gross_r.mean(),mean_fee_r=c.fee_r.mean() if net else None,
-        mean_net_r=r.mean() if net else None,total_net_r=r.sum() if net else None,
+        mean_net_r=r.mean() if net else None,total_net_r=r.sum() if net and len(r) else None,
         mean_net_bp=c.return_pct.mean()*100 if net else None,
         mean_win_r=wins.mean(),mean_loss_r=loss.mean(),
         payoff=wins.mean()/-loss.mean() if len(loss) else None,
@@ -127,7 +128,7 @@ def enrich(t):
     ix=pd.DatetimeIndex(pd.to_datetime(t.entry_interval_start,utc=True)).tz_convert('America/New_York')
     t['actual_entry_week']=(ix.tz_localize(None).normalize()-pd.to_timedelta(ix.dayofweek,unit='D')).strftime('%Y-%m-%d')
     t['cross_cut']=(pd.to_datetime(t.entry_interval_start,utc=True)<CUT)&(t.exit_interval_end>=CUT)
-    t['period']=np.where(t.entry_time>=CUT,'later','earlier')
+    t['period']=np.where(pd.to_datetime(t.entry_interval_start,utc=True)>=CUT,'later','earlier')
     t['asset_group']=t.symbol.map(group_name);t['exit_mode']=t.policy
     t['year']=t.entry_time.dt.year;t['month']=t.entry_time.dt.strftime('%Y-%m')
     t['entry_price']=t.entry;t['stop_price']=t.stop;t['net_bp']=t.net_notional_bp
@@ -151,14 +152,15 @@ def attempted_pairs(orders,trades,mode,asset,period):
     z=trades[trades.policy.eq(mode)].set_index('parent_id')
     q['attempt_r']=q.trade_id.map(z.return_r)
     q.loc[q.status.ne('filled'),'attempt_r']=0.
-    bad=z.index[(~z.closed)|((z.cross_cut) if period!='all' else False)]
+    crossing=((pd.to_datetime(z.submitted_at,utc=True)<CUT)&(z.exit_interval_end>=CUT))
+    bad=z.index[(~z.closed)|(crossing if period!='all' else False)]
     q.loc[q.trade_id.isin(bad),'attempt_r']=np.nan
     a=q[q.population.eq('signal')].set_index('pair_id')
     b=q[q.population.eq('random')];n=b.groupby('pair_id').attempt_r.count()
     b=b[b.pair_id.isin(n[n.eq(3)].index)]
     means=b.groupby('pair_id').attempt_r.mean()
     p=a.join(means.rename('control_attempt_r'),how='inner').dropna(subset=['attempt_r','control_attempt_r'])
-    return dict(complete_opportunity_pairs=len(p),
+    return dict(opportunity_period_basis='submission time; any filled exposure crossing cutoff excluded',complete_opportunity_pairs=len(p),
         attempt_signal_mean_r=p.attempt_r.mean(),attempt_control_mean_r=p.control_attempt_r.mean(),
         attempt_paired_excess_r=(p.attempt_r-p.control_attempt_r).mean(),
         signal_fill_rate=q[q.population.eq('signal')].status.eq('filled').mean(),
@@ -166,9 +168,11 @@ def attempted_pairs(orders,trades,mode,asset,period):
 
 
 def main():
+    parser=argparse.ArgumentParser();parser.add_argument('--partial',action='store_true')
+    args=parser.parse_args()
     ART.mkdir(exist_ok=True);dest=ART/'report-data';dest.mkdir(exist_ok=True)
     completed=sorted((EXP/'symbols').glob('*/done.json'))
-    if len(completed)!=633:raise RuntimeError(f'Native coverage incomplete: {len(completed)}/633')
+    if len(completed)!=633 and not args.partial:raise RuntimeError(f'Native coverage incomplete: {len(completed)}/633')
     tables={}
     for name in ['opportunities','orders','trades','fills']:
         pieces=[read(p.parent/f'{name}.csv.gz') for p in completed]
@@ -185,16 +189,22 @@ def main():
     o['trigger_level']=o.level
     e['order_id']=e.trade_id;e['limit_price']=e.entry;e['stop_price']=e.stop
     e['exit_mode']='shared_entry'
+    native=t[t.policy.ne('half_each')].set_index('trade_id')
+    for col in ['symbol','asset_group','exit_mode','population','pair_id','parent_id','side','basis']:
+        fills[col]=fills.trade_id.map(native[col])
+    fills['opportunity_id']=fills.pair_id;fills['order_id']=fills.parent_id
     fills['fill_id']=[f'fill-{i}' for i in range(len(fills))]
     fills['time']=pd.to_datetime(fills.ts_ns,utc=True,unit='ns').astype(str)
     fills['notional']=fills.price*fills.quantity
     fills['fee_class']=np.where(fills.phase.isin(['entry','target']),'maker','taker')
     fills['fee_rate']=fills.commission/fills.notional
+    fills.loc[fills.symbol.eq('XAUUSD'),['fee_rate','commission']]=np.nan
+    fills.loc[fills.symbol.eq('XAUUSD'),'fee_class']='unknown_not_modeled'
     summaries=[];cuts=[]
     for (mode,asset),g in t.groupby(['policy','asset_group'],sort=True):
         for period in ['all','earlier','later']:
             x=g if period=='all' else g[g.period.eq(period)&~g.cross_cut]
-            summaries.append(dict(exit_mode=mode,asset_group=asset,period=period,grain='summary',**stats(x,True)))
+            summaries.append(dict(exit_mode=mode,asset_group=asset,period=period,grain='summary',**stats(x,True,basis='gross' if asset=='XAUUSD' else 'net')))
         for dimension in ['year','month','side','symbol']:
             for value,x in g.groupby(dimension,sort=True):
                 cuts.append(dict(exit_mode=mode,asset_group=asset,period='all',grain='slice',
@@ -224,6 +234,8 @@ def main():
                 funnel.append(dict(asset_group=asset,period=period,stage='monitor_'+str(key),n=int(value)))
             sel=summary.asset_group.eq(asset)&summary.period.eq(period)
             summary.loc[sel,'opportunity_n']=len(z)
+            summary.loc[sel,'confirmed_n']=int(z.confirm_i.ge(0).sum())
+            summary.loc[sel,'invalidated_n']=int(z.status.isin(['invalid','invalid_unobservable']).sum())
             summary.loc[sel,'submitted_n']=len(q)
             summary.loc[sel,'canceled_n']=counts['cancelled']
             summary.loc[sel,'unfilled_n']=int(q.status.ne('filled').sum())
@@ -232,7 +244,7 @@ def main():
         d.to_csv(dest/f'{name}.csv.gz',index=False)
         if name in ['summary','metrics','funnel']:d.to_csv(EXP/f'{name}.csv',index=False)
     coverage=[json.loads(p.read_text()) for p in completed]
-    result=dict(experiment_id=EXP.name,coverage=coverage,source_first=min(r['first'] for r in coverage),
+    result=dict(experiment_id=EXP.name,complete=len(completed)==633,expected_symbols=633,completed_symbols=len(completed),coverage=coverage,source_first=min(r['first'] for r in coverage),
         source_last=max(r['last'] for r in coverage),native_positions=sum(r['native_positions'] for r in coverage),
         native_fills=sum(r['native_fills'] for r in coverage),
         source_opportunities=len(o),submitted_orders=len(e),
