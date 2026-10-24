@@ -21,6 +21,7 @@ const FIELD_LABELS = {
   paired_signal_planned_rr: "严格配对策略计划RR均值", paired_control_planned_rr: "严格配对对照计划RR均值",
   mean_gross_r: "毛均R", mean_fee_r: "均费用R", mean_net_r: "净均R", mean_r: "均值R（按basis）",
   median_r: "R中位数（按basis）", total_r: "R总和（按basis）", total_net_r: "净R总和", mean_bp: "均bp（按basis）", mean_net_bp: "净均bp",
+  common_closed_n: "三方案共同闭合笔数", common_mean_r: "共同闭合均R", common_win_rate: "共同闭合胜率", common_mean_bp: "共同闭合均bp", common_mean_fee_r: "共同闭合平均费用R", common_median_holding_hours: "共同闭合持仓中位小时",
   payoff: "平均盈亏比", profit_factor: "盈亏因子",
   unreachable_target_n: "目标非正价的已成交数", same_bar_target_stop_n: "退出柱同时覆盖TP/SL数（单目标）",
   median_holding_hours: "中位持仓小时", p90_holding_hours: "持仓时长P90（小时）",
@@ -77,7 +78,7 @@ const METRIC_FIELDS = [
   "opportunity_n", "invalidated_n", "reclaim_n", "confirmed_n", "submitted_n", "canceled_n",
   "unfilled_n", "filled_n", "closed_n", "censored_n", "unreachable_target_n", "same_bar_target_stop_n", "wins", "losses", "flat", "win_rate",
   "mean_win_r", "mean_loss_r", "planned_rr_median", "mean_gross_r", "mean_fee_r", "mean_net_r",
-  "mean_r", "median_r", "total_r", "total_net_r", "mean_bp", "mean_net_bp", "payoff", "profit_factor", "median_holding_hours",
+  "common_closed_n", "common_mean_r", "common_win_rate", "common_mean_bp", "mean_r", "median_r", "total_r", "total_net_r", "mean_bp", "mean_net_bp", "payoff", "profit_factor", "median_holding_hours",
   "p90_holding_hours", "mfe_r_mean", "mae_r_mean", "profitable_excursion_then_sl_n",
   "fee_positive_excursion_then_sl_n", "tp_legs_then_sl_n", "longest_loss_streak", "longest_stop_streak",
   "loss_streak_span", "longest_single_symbol_loss_streak", "single_symbol_streak_span", "eligible_signal_n",
@@ -126,7 +127,7 @@ function cellText(value, field) {
   if (["status", "reason", "invalidation_reason", "cancel_reason"].includes(field) && reasons[value]) return reasons[value];
   if (labels[field]?.[value]) return labels[field][value];
   if (typeof value === "boolean") return value ? "是" : "否";
-  if (typeof value === "number" && ["win_rate", "rate", "fee_rate", "signal_fill_rate", "random_fill_rate"].includes(field)) {
+  if (typeof value === "number" && ["win_rate", "rate", "fee_rate", "signal_fill_rate", "random_fill_rate", "common_win_rate"].includes(field)) {
     const digits = field === "fee_rate" ? 4 : 2;
     return (value * 100).toLocaleString("zh-CN", {maximumFractionDigits: digits}) + "%";
   }
@@ -165,7 +166,7 @@ function exportRows(rows, filename) {
 }
 function rowFilter(rows, selections) {
   return rows.filter((row) => Object.entries(selections).every(([selection, chosen]) => {
-    if (chosen === "ALL") return true;
+    if (chosen === "ALL" || (selection === "exit" && chosen === "shared_entry")) return true;
     const candidates = {
       exit: ["exit_mode", "exit_policy"], asset: ["asset_group", "group", "asset"],
       period: ["period", "segment", "time_period"], direction: ["direction", "side"],
@@ -260,11 +261,11 @@ function CompactSummary({rows}) {
   }));
   const preferred = [
     "exit_mode_label", "asset_group_label", "basis_label", "closed_n", "win_rate",
-    "mean_win_r", "mean_loss_r", "mean_r", "profit_factor", "random_control_mean_r",
+    "mean_win_r", "mean_loss_r", "mean_r", "profit_factor", "common_closed_n", "common_mean_r", "common_win_rate", "random_control_mean_r",
   ];
   return <EvidenceTable id="compact-summary" title={"全期比较摘要 · " + displayRows.length.toLocaleString("zh-CN") + " 行"}
     queryId="metrics" sourceRows={rows} displayRows={displayRows} preferred={preferred} strictColumns
-    note="仅取 period=all 的 grain=summary 行；R按毛／净 basis 解释。随机对照列为严格3/3成交闭合配对组的对照均R，不与下方提交队列机会期望混用。覆盖3种退出 × 4个品种组；只显示结果文件实际提供的组合，不为缺失组合补造零行。进行中的部分回放不得作方案排名。"/>
+    note="仅取 period=all 的 grain=summary 行；R按毛／净 basis 解释。共同闭合列只比较三个退出均已结束的相同入场，避免未决分母不同。随机对照列为严格3/3成交闭合配对组的对照均R，不与下方提交队列机会期望混用。覆盖3种退出 × 4个品种组；只显示结果文件实际提供的组合，不为缺失组合补造零行。进行中的部分回放不得作方案排名。"/>
 }
 
 function SampleGallery({samples}) {

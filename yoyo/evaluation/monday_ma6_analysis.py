@@ -172,6 +172,25 @@ def attempted_pairs(orders,trades,mode,asset,period):
         random_fill_rate=q[q.population.eq('random')].status.eq('filled').mean())
 
 
+def common_exit_cohort(trades,asset,period):
+    """Compare exits only on shared resolved entries; retain censoring elsewhere.
+
+    This is a retrospective denominator alignment, not an entry filter. Source
+    columns are population/asset_group/period/cross_cut/closed/parent_id/policy
+    and already-computed native return/fee/holding fields; no OHLC is read.
+    """
+    x=trades[trades.population.eq('signal')&trades.asset_group.eq(asset)].copy()
+    if period!='all':x=x[x.period.eq(period)&~x.cross_cut]
+    eligible=x.groupby('parent_id').filter(lambda z:len(z)==3 and z.closed.all() and set(z.policy)==set(POLICIES))
+    result={}
+    for mode in POLICIES:
+        z=eligible[eligible.policy.eq(mode)]
+        result[mode]=dict(common_closed_n=len(z),common_mean_r=z.return_r.mean(),
+            common_win_rate=z.return_r.gt(0).mean(),common_mean_bp=z.return_pct.mean()*100,
+            common_mean_fee_r=z.fee_r.mean(),common_median_holding_hours=z.holding_hours.median())
+    return result
+
+
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--partial',action='store_true')
     args=parser.parse_args()
@@ -220,6 +239,10 @@ def main():
                 cuts.append(dict(exit_mode=mode,asset_group=asset,period='all',grain='slice',
                                  cut_dimension=dimension,cut_value=str(value),**stats(x)))
     summary=pd.DataFrame(summaries);metrics=pd.DataFrame(cuts)
+    for (asset,period),ix in summary.groupby(['asset_group','period']).groups.items():
+        same=common_exit_cohort(t,asset,period)
+        for i in ix:
+            for key,value in same[summary.loc[i,'exit_mode']].items():summary.loc[i,key]=value
     for i,r in summary.iterrows():
         for key,value in attempted_pairs(e,t,r.exit_mode,r.asset_group,r.period).items():summary.loc[i,key]=value
     ps=summary.paired_p.dropna().sort_values();last=0.

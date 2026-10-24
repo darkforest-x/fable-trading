@@ -1,6 +1,6 @@
 """Analysis boundaries must not import post-cutoff outcomes into earlier cohorts."""
 import pandas as pd
-from yoyo.evaluation.monday_ma6_analysis import attempted_pairs
+from yoyo.evaluation.monday_ma6_analysis import attempted_pairs,common_exit_cohort,POLICIES
 
 
 def test_submission_before_cutoff_and_fill_after_is_not_earlier_expectancy():
@@ -17,3 +17,16 @@ def test_submission_before_cutoff_and_fill_after_is_not_earlier_expectancy():
     assert earlier['complete_opportunity_pairs']==0
     assert all_['complete_opportunity_pairs']==1
     assert all_['attempt_paired_excess_r']==2
+
+
+def test_exit_comparison_drops_all_siblings_of_an_unresolved_far_leg():
+    rows=[]
+    for parent in ['resolved','unresolved']:
+        for mode in POLICIES:
+            rows.append(dict(parent_id=parent,policy=mode,population='signal',asset_group='BTC',
+                period='later',cross_cut=False,closed=parent=='resolved' or mode=='monday_full',
+                return_r={'monday_full':1.,'opposite_1618_full':3.,'half_each':2.}[mode],
+                return_pct=.5,fee_r=.03,holding_hours=5.))
+    result=common_exit_cohort(pd.DataFrame(rows),'BTC','all')
+    assert all(r['common_closed_n']==1 for r in result.values())
+    assert result['half_each']['common_mean_r']==2.
