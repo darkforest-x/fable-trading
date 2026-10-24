@@ -29,6 +29,7 @@ from .paper_desk_market import PublicHTTP, MarketRefresh
 from .paper_desk_limits import LimitOrders, LimitOrderWorker
 from .paper_desk_journal import PositionJournal, FIELDS as JOURNAL_FIELDS
 from .paper_desk_images import JournalImages, MAX_BYTES as MAX_IMAGE_BYTES
+from .monday_bulk_retirement import retire_monday_bulk
 
 # OKX also lists one-character bases such as W and S.
 SYMBOL = r"^[A-Z0-9]{1,24}-USDT-SWAP$"
@@ -220,6 +221,9 @@ class PublicQuotes:
 
 def install(api, app, workspace_store):
     desk = PaperDesk(workspace_store.runtime)
+    # Stop persisted universe campaigns before the paper limit worker can start.
+    # The helper only retires Monday 1.618 orders; manual ledger activity remains.
+    retire_monday_bulk(desk)
     app.state.paper_desk = desk
     http = PublicHTTP()
     app.state.paper_desk_quotes = PublicQuotes(PublicRisk(http), http)
@@ -254,8 +258,6 @@ def install(api, app, workspace_store):
 
     from .monday_ticket import install as install_monday_ticket
     install_monday_ticket(api, app, desk, marks, entry_risk, invoke)
-    from .monday_bulk_api import install as install_monday_bulk
-    install_monday_bulk(api, app, desk, limits, invoke)
 
     @api.get("/paper-desk")
     def overview():

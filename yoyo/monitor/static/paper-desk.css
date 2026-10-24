@@ -1,5 +1,5 @@
 /* Compact paper terminal, using the workspace's semantic light/dark tokens. */
-.paper-desk-active .page-heading {display:none}
+body[data-workspace=paper-desk] #main>.page-heading {display:none}
 .paper-desk-active main {padding-top:20px}
 #paper-desk-workspace {
   --desk-gap:16px;--desk-radius:14px;--desk-long:var(--mint);--desk-short:var(--red);
