@@ -1,0 +1,10 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-path-compare-20261025-v1",
+  "question": "Owner 2026-10-25: after replaying the Codex 1.618 limit-reclaim signals under O-L-H-C, do the short same-bar targets survive, and what does the 1000 USDT replay give per intrabar path?",
+  "inputs": "Codex O-H-L-C ledger (exp-monday-limit-reclaim-20261024-v1) and O-L-H-C framework replay (exp-monday-limit-reclaim-olhc-20261025-v1); alts, 60m confirmation, near Monday edge, snapshot symbols",
+  "versions": "ohlc (as recorded), olhc, worst (per trade the worse of the two paths)",
+  "replay": "Same filters and replay as exp-monday-limit-reclaim-filtered-replay-20261025-v1; k 5/10/20/30 percent, gross cap 1x/3x, 10bp exit slippage",
+  "limitations": "Neither global path is the true intrabar order; worst is a pessimistic bound. Filters chosen after seeing the data. No funding, queue, margin or liquidity model.",
+  "training_eligible": false,
+  "production_eligible": false
+}
