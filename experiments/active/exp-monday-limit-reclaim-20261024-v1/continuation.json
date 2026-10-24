@@ -1,24 +1,41 @@
 {
   "experiment_id": "exp-monday-limit-reclaim-20261024-v1",
-  "status": "native_execution_running",
-  "updated_at": "2026-10-24T09:31:00Z",
+  "status": "native_execution_running_postprocess_queued",
+  "updated_at": "2026-10-24T09:42:28.407397+00:00",
   "expected_assets": 633,
   "owner_rule_answers_complete": true,
   "external_disk": "Owner confirmed connected; original-path direct read recovered. No download, remount or content-hash audit.",
   "owned_session_id": 8028,
   "owned_parent_pid_at_launch": 17322,
   "log": "native-resume.log",
-  "frozen_initial_assets": ["BTCUSDT", "1000SHIBUSDT"],
+  "frozen_initial_assets": [
+    "BTCUSDT",
+    "1000SHIBUSDT"
+  ],
   "resume_command": "/Users/zhangzc/.local/bin/nautilus-python -m yoyo.evaluation.monday_limit_reclaim --pending-only --workers 6",
   "no_duplicate_pool": "Check process identity and completion before starting another run; preserve every successful asset.",
   "validation_command": "/Users/zhangzc/.local/bin/nautilus-python -m yoyo.evaluation.monday_limit_reclaim_validate",
   "analysis_module": "yoyo.evaluation.monday_limit_reclaim_analysis",
-  "analysis_status": "Builder being finalized; commit before generating full outputs.",
+  "analysis_status": "Builder346f7f3839 committed; one-shot dependent process validates and analyzes after all633 native successes. Do not duplicate.",
   "notion_task_id": "4038856479af8029a91ec6bfe4a6002f",
   "notion_research_id": "4038856479af815aaf36ed15b2bd3cd7",
-  "next": "Finish native assets; diagnose only failures; validate saved fills; analyze fixed matrix and exact-cohort comparisons; sync results to existing Notion record and task; commit/push scoped files on main.",
+  "next": "Read postprocess-state.json and current done/error markers. If running, preserve both owned processes. If local_results_complete, review full CSVs, update Notion EXP-206/task70 and commit final evidence. If failed, diagnose only the concrete failure; do not replay successes.",
   "report_requested_this_task": false,
   "training_eligible": false,
   "production_eligible": false,
-  "separate_pending_task": "Earlier 4h N5 pullback still lacks entry/expiry definitions; this study does not resolve it or authorize changing its heartbeat."
+  "separate_pending_task": "Earlier 4h N5 pullback still lacks entry/expiry definitions; this study does not resolve it or authorize changing its heartbeat.",
+  "postprocess_session_id": 53243,
+  "postprocess_pid_at_launch": 19856,
+  "postprocess_state": "postprocess-state.json",
+  "partial_analysis": {
+    "assets": 46,
+    "builder": "1b32d7e8c7",
+    "path": "analysis-partial/summary.json"
+  },
+  "validation_partial": {
+    "assets": 38,
+    "positions": 219085,
+    "fills": 438170,
+    "path": "validation-partial.json"
+  }
 }
