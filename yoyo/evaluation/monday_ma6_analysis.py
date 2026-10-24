@@ -194,8 +194,9 @@ def main():
     o['trigger_level']=o.level
     e['order_id']=e.trade_id;e['limit_price']=e.entry;e['stop_price']=e.stop
     e['exit_mode']='shared_entry'
+    e['period']=np.where(pd.to_datetime(e.submitted_at,utc=True)>=CUT,'later','earlier')
     native=t[t.policy.ne('half_each')].set_index('trade_id')
-    for col in ['symbol','asset_group','exit_mode','population','pair_id','parent_id','side','basis']:
+    for col in ['symbol','asset_group','exit_mode','population','pair_id','parent_id','side','basis','period','cross_cut']:
         fills[col]=fills.trade_id.map(native[col])
     fills['opportunity_id']=fills.pair_id;fills['order_id']=fills.parent_id
     if not args.partial:

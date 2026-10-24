@@ -4,7 +4,7 @@ import {
   SectionNavigator, useDataApp,
 } from "../../data-app-public.jsx";
 
-const EXIT_LABELS = {monday_full: "周一对侧全平", opposite_1618_full: "另一侧 1.618 全平", half_each: "两目标各半"};
+const EXIT_LABELS = {monday_full: "周一对侧全平", opposite_1618_full: "另一侧 1.618 全平", half_each: "两目标各半", shared_entry: "三方案共同入场"};
 const ASSET_LABELS = {BTC: "BTC", ETH: "ETH", XAU: "XAUUSD · 黄金", XAUUSD: "XAUUSD · 黄金", ALT: "山寨币", ALTCOINS: "山寨币"};
 const PERIOD_LABELS = {all: "全期", earlier: "前期（切点前）", later: "后期（切点起）", pre_2023: "前期（2023-01-01 UTC前）", post_2023: "后期（2023-01-01 UTC起）"};
 const FIELD_LABELS = {
@@ -50,6 +50,8 @@ const FIELD_LABELS = {
   monitor_start_utc: "监控开始UTC", invalidated_at_utc: "失效UTC", reclaim_time_utc: "首次站回UTC",
   confirmed_at_utc: "确认完成UTC", confirmation_at: "确认完成时点", invalidation_at: "失效时点",
   submitted_at_utc: "提交挂单UTC", submitted_at: "提交挂单时点", canceled_at_utc: "撤单UTC",
+  resolution_interval_start: "订单结果所在柱开始UTC", resolution_interval_end: "订单结果所在柱结束UTC",
+  actual_pending_amendment_count: "实际改单次数", actual_pending_amendments: "实际改单时间与价格",
   cancel_reason: "撤单原因", invalidation_reason: "失效原因", decision_reason: "判定说明", reason: "状态/原因",
   order_id: "订单ID", limit_price: "挂单价", stop_price: "止损价", target_price: "目标价",
   entry_price: "入场/挂单价", entry: "入场/挂单价", stop: "止损价", population: "样本总体",
@@ -90,7 +92,7 @@ const METRIC_FIELDS = [
 ];
 const LEDGER_FIELDS = {
   opportunities: ["opportunity_id", "exit_mode", "asset_group", "symbol", "side", "week", "level", "first_touch_at", "trigger_time", "confirmation_at", "invalidation_at", "reason", "status", "direction", "period", "trigger_week", "touch_time_utc", "monitor_start_utc", "invalidated_at_utc", "reclaim_time_utc", "confirmed_at_utc", "submitted_at_utc", "invalidation_reason", "decision_reason"],
-  orders: ["order_id", "opportunity_id", "exit_mode", "asset_group", "symbol", "side", "submitted_at", "entry_price", "limit_price", "stop_price", "stop", "target_price", "population", "canceled_at_utc", "cancel_reason", "status"],
+  orders: ["order_id", "opportunity_id", "exit_mode", "asset_group", "symbol", "side", "submitted_at", "resolution_interval_start", "resolution_interval_end", "limit_price", "stop_price", "target_price", "population", "actual_pending_amendment_count", "actual_pending_amendments", "canceled_at_utc", "cancel_reason", "status"],
   trades: ["trade_id", "opportunity_id", "exit_mode", "asset_group", "symbol", "side", "entry_interval_start", "entry_time", "exit_time", "entry_price", "stop_price", "return_r", "return_pct", "basis", "net_r", "gross_r", "fee_r", "net_bp", "closed", "censored", "direction", "entry_at_utc", "entry", "stop", "target_price", "exit_at_utc", "exit_price", "outcome", "mfe_r", "mae_r", "profitable_excursion_then_sl", "holding_hours"],
   fills: ["fill_id", "trade_id", "order_id", "opportunity_id", "exit_mode", "asset_group", "symbol", "direction", "side", "time", "timestamp_utc", "price", "quantity", "notional", "commission", "fee_rate", "fee_class", "fee_type", "fee", "fee_r"],
 };
@@ -112,6 +114,18 @@ function labelValue(value, labels) {
 function cellText(value, field) {
   if (value === null || value === undefined || value === "") return "—";
   if (typeof value === "object") return JSON.stringify(value);
+  const labels = {
+    exit_mode: EXIT_LABELS, asset_group: ASSET_LABELS, period: PERIOD_LABELS,
+    side: {1: "多头", "-1": "空头"}, population: {signal: "策略", random: "随机对照"},
+    basis: {gross: "毛收益", net: "扣费后"},
+    outcome: {win: "盈利", loss: "亏损", flat: "持平", censored: "未决"},
+    fee_class: {maker: "挂单费", taker: "吃单费", unknown_not_modeled: "费用未知"},
+    status: {filled: "已成交", expired: "到期未成交", confirmed: "已确认", pending: "观察中", invalid: "已失效", invalid_tick_geometry: "取整后无法挂单"},
+  };
+  const reasons = {third_new_extreme: "累计第三次刷新极值", returned_to_monday_range: "入场前已回周一区间", unknown_crypto_prefix: "本周前缀数据不完整", touch_15m_incomplete: "触价15m柱不完整", invalid_unobservable: "连续行情不可观察", no_causal_volatility_bucket: "缺少因果波动桶", source_gap: "行情缺口", gap_cancel: "数据断档撤单", no_warmup: "均线未预热", no_confirmation: "未形成四根确认", invalid_amendment_geometry: "改单价格不再有效"};
+  if (["status", "reason", "invalidation_reason", "cancel_reason"].includes(field) && reasons[value]) return reasons[value];
+  if (labels[field]?.[value]) return labels[field][value];
+  if (typeof value === "boolean") return value ? "是" : "否";
   if (typeof value === "number" && ["win_rate", "rate", "fee_rate", "signal_fill_rate", "random_fill_rate"].includes(field)) {
     const digits = field === "fee_rate" ? 4 : 2;
     return (value * 100).toLocaleString("zh-CN", {maximumFractionDigits: digits}) + "%";
@@ -158,6 +172,7 @@ function rowFilter(rows, selections) {
     }[selection];
     if (!candidates) return true;
     const field = candidates.find((candidate) => row && row[candidate] !== undefined);
+    if (selection === "exit" && row[field] === "shared_entry") return true;
     return !field || String(row[field]) === chosen;
   }));
 }
@@ -257,7 +272,7 @@ function SampleGallery({samples}) {
   const choiceConfig = {
     exit: filterChoices(samples, ["exit_mode", "exit_policy"], EXIT_LABELS),
     asset: filterChoices(samples, ["asset_group", "group", "asset"], ASSET_LABELS),
-    direction: filterChoices(samples, ["direction", "side"], {long: "多", short: "空", 多: "多", 空: "空"}),
+    direction: filterChoices(samples, ["direction", "side"], {1: "多头", "-1": "空头", long: "多", short: "空", 多: "多", 空: "空"}),
     kind: filterChoices(samples, ["sample_kind", "outcome", "status"], {winner: "盈利", loser: "亏损", unfilled: "未成交", invalidated: "失效"}),
   };
   const matches = samples.filter((row) => {
@@ -377,7 +392,7 @@ export function ReportContent() {
       ["exit", "退出方式", ["exit_mode", "exit_policy"], EXIT_LABELS],
       ["asset", "品种组", ["asset_group", "group", "asset"], ASSET_LABELS],
       ["period", "时段", ["period", "segment", "time_period"], PERIOD_LABELS],
-      ["direction", "方向", ["direction", "side"], {long: "多", short: "空", 多: "多", 空: "空"}],
+      ["direction", "方向", ["direction", "side"], {1: "多头", "-1": "空头", long: "多", short: "空", 多: "多", 空: "空"}],
     ].map(([key, label, fields, labels]) => <Dropdown key={key} label={label} showLabel value={ledgerFilters[key]}
       {...filterChoices(rows, fields, labels)}
       onChange={(value) => setLedgerFilters((state) => ({...state, [key]: value}))}/>)}
@@ -479,12 +494,12 @@ export function ReportContent() {
 
     <Section id="ledgers" title="06 / 全量机会、订单、交易及费用流水">
       <RichNarrative id="ledgers:readme" className="ma6-narrative"
-        value={"下表可搜索、排序和按退出方式、品种组、时段、多空筛选，并可下载当前筛选或完整原始导出。未成交挂单、撤销与失效机会保留为流程结果，不进入交易盈亏分母；截尾持仓单独列出，不能当成正常止盈或止损闭合。"}/>
+        value={"下表可搜索、排序和按退出方式、品种组、时段、多空筛选，并可下载当前筛选或完整原始导出。未成交挂单、撤销与失效机会保留为流程结果，不进入交易盈亏分母；截尾持仓单独列出，不能当成正常止盈或止损闭合。明细时段按各表的事件时间筛选：机会用首次触价，订单用提交，交易和费用用实际入场；跨切点交易保留在明细，前后期汇总会剔除。"}/>
       {Object.entries(ledgers).map(([queryId, rows]) => {
         const titles = {opportunities: "全部机会与失效原因", orders: "提交、改单、撤销与未成交挂单", trades: "实际成交及闭合 / 截尾交易", fills: "逐笔成交与费用类别"};
         return <div className="ma6-ledger-block" key={queryId}>
           <EvidenceTable id={"ledger-" + queryId} title={titles[queryId]} queryId={queryId} sourceRows={rows}
-            displayRows={filteredLedgers[queryId]} preferred={LEDGER_FIELDS[queryId]} controls={ledgerControls(rows)}
+            displayRows={filteredLedgers[queryId]} preferred={LEDGER_FIELDS[queryId]} strictColumns controls={ledgerControls(rows)}
             note={queryId === "fills"
               ? "加密逐笔费用字段按原生成交流水呈现；XAUUSD费用与点差未知，相关汇总只报毛收益，不能把原生账本的commission空值或零值解释为黄金费率。CSV保留源文件的全部字段。"
               : "表中列为常用审查字段；CSV导出保留源文件提供的全部字段。"}/>
