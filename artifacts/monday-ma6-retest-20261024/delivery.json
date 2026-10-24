@@ -1,0 +1,413 @@
+{
+  "status": "complete",
+  "completed_at_utc": "2026-10-24T08:38:22.541042+00:00",
+  "experiment_id": "exp-monday-ma6-retest-20261024-v1",
+  "artifact_id": "report:47be159c-6528-47cf-bc93-e36b3fa13241",
+  "title": "周一1.618六均线回踩：低胜率正均值，优势仍待验证",
+  "owner_answers": {
+    "invalidation": "Cumulative third subsequent strict new adverse 15-minute extreme",
+    "stop": "Lowest MA *0.995 long; highest MA *1.005 short, frozen at fill",
+    "exits": [
+      "Monday opposite edge full",
+      "Opposite 1.618 full",
+      "Equal halves; no breakeven move"
+    ]
+  },
+  "source": "https://app.notion.com/p/4028856479af80039ef9fa7bf3703760",
+  "counts": {
+    "completed_symbols": 633,
+    "expected_symbols": 633,
+    "source_opportunities": 72429,
+    "submitted_orders": 28105,
+    "native_positions": 45186,
+    "native_fills": 90372,
+    "target_policy_rows": 67779
+  },
+  "count_caveat": "Orders, native legs, fills and policy rows include matched random controls; exits are alternative versions, not distinct independent trades.",
+  "all_period_results": [
+    {
+      "asset_group": "ALTCOINS",
+      "exit_mode": "half_each",
+      "basis": "net",
+      "filled_n": "6358",
+      "closed_n": "6353",
+      "censored_n": "5",
+      "wins": "957",
+      "win_rate": "0.15063749409727686",
+      "mean_r": "0.08569970550206277",
+      "payoff": "6.184584837907544",
+      "profit_factor": "1.096858356167072",
+      "mean_bp": "19.303862818436944"
+    },
+    {
+      "asset_group": "BTC",
+      "exit_mode": "half_each",
+      "basis": "net",
+      "filled_n": "33",
+      "closed_n": "33",
+      "censored_n": "0",
+      "wins": "7",
+      "win_rate": "0.21212121212121213",
+      "mean_r": "0.17403519892396438",
+      "payoff": "4.484059470389212",
+      "profit_factor": "1.2072467804894034",
+      "mean_bp": "24.91528632789271"
+    },
+    {
+      "asset_group": "ETH",
+      "exit_mode": "half_each",
+      "basis": "net",
+      "filled_n": "27",
+      "closed_n": "27",
+      "censored_n": "0",
+      "wins": "6",
+      "win_rate": "0.2222222222222222",
+      "mean_r": "0.8010254617133528",
+      "payoff": "6.910511390864845",
+      "profit_factor": "1.9744318259613844",
+      "mean_bp": "190.5695356746473"
+    },
+    {
+      "asset_group": "XAUUSD",
+      "exit_mode": "half_each",
+      "basis": "gross",
+      "filled_n": "16",
+      "closed_n": "16",
+      "censored_n": "0",
+      "wins": "6",
+      "win_rate": "0.375",
+      "mean_r": "0.3957979005392166",
+      "payoff": "2.7221277347712447",
+      "profit_factor": "1.6332766408627468",
+      "mean_bp": "28.58065884803392"
+    },
+    {
+      "asset_group": "ALTCOINS",
+      "exit_mode": "monday_full",
+      "basis": "net",
+      "filled_n": "6358",
+      "closed_n": "6357",
+      "censored_n": "1",
+      "wins": "961",
+      "win_rate": "0.15117193644801008",
+      "mean_r": "0.06776125303083542",
+      "payoff": "6.045274241864979",
+      "profit_factor": "1.0766324215033811",
+      "mean_bp": "15.522972870600032"
+    },
+    {
+      "asset_group": "BTC",
+      "exit_mode": "monday_full",
+      "basis": "net",
+      "filled_n": "33",
+      "closed_n": "33",
+      "censored_n": "0",
+      "wins": "7",
+      "win_rate": "0.21212121212121213",
+      "mean_r": "0.3541419180376121",
+      "payoff": "5.280688120965595",
+      "profit_factor": "1.4217237248753527",
+      "mean_bp": "61.05652671239481"
+    },
+    {
+      "asset_group": "ETH",
+      "exit_mode": "monday_full",
+      "basis": "net",
+      "filled_n": "27",
+      "closed_n": "27",
+      "censored_n": "0",
+      "wins": "6",
+      "win_rate": "0.2222222222222222",
+      "mean_r": "0.5096197045933282",
+      "payoff": "5.669798452857033",
+      "profit_factor": "1.6199424151020094",
+      "mean_bp": "136.11135715565337"
+    },
+    {
+      "asset_group": "XAUUSD",
+      "exit_mode": "monday_full",
+      "basis": "gross",
+      "filled_n": "16",
+      "closed_n": "16",
+      "censored_n": "0",
+      "wins": "6",
+      "win_rate": "0.375",
+      "mean_r": "0.3538259987497532",
+      "payoff": "2.610202663332675",
+      "profit_factor": "1.566121597999605",
+      "mean_bp": "25.092553398714934"
+    },
+    {
+      "asset_group": "ALTCOINS",
+      "exit_mode": "opposite_1618_full",
+      "basis": "net",
+      "filled_n": "6358",
+      "closed_n": "6353",
+      "censored_n": "5",
+      "wins": "720",
+      "win_rate": "0.11333228396033371",
+      "mean_r": "0.1083503702864731",
+      "payoff": "8.741373758078485",
+      "profit_factor": "1.1173067824989367",
+      "mean_bp": "24.089737924902916"
+    },
+    {
+      "asset_group": "BTC",
+      "exit_mode": "opposite_1618_full",
+      "basis": "net",
+      "filled_n": "33",
+      "closed_n": "33",
+      "censored_n": "0",
+      "wins": "4",
+      "win_rate": "0.12121212121212122",
+      "mean_r": "-0.006071520189683252",
+      "payoff": "7.202983670308037",
+      "profit_factor": "0.9935149890080052",
+      "mean_bp": "-11.225954056609403"
+    },
+    {
+      "asset_group": "ETH",
+      "exit_mode": "opposite_1618_full",
+      "basis": "net",
+      "filled_n": "27",
+      "closed_n": "27",
+      "censored_n": "0",
+      "wins": "6",
+      "win_rate": "0.2222222222222222",
+      "mean_r": "1.0924312188333776",
+      "payoff": "8.151224328872658",
+      "profit_factor": "2.3289212368207592",
+      "mean_bp": "245.02771419364126"
+    },
+    {
+      "asset_group": "XAUUSD",
+      "exit_mode": "opposite_1618_full",
+      "basis": "gross",
+      "filled_n": "16",
+      "closed_n": "16",
+      "censored_n": "0",
+      "wins": "5",
+      "win_rate": "0.3125",
+      "mean_r": "0.43776980232867996",
+      "payoff": "3.600863367451776",
+      "profit_factor": "1.6367560761144437",
+      "mean_bp": "32.068764297352914"
+    }
+  ],
+  "html": {
+    "path": "周一1.618-六均线回踩详细回测报告.html",
+    "bytes": 185358923,
+    "offline_export": true,
+    "official_export_source": "reports/monday-ma6-retest-20261024/.data-app-offline/exports/monday-ma6-retest.html"
+  },
+  "full_field_csvs": [
+    {
+      "path": "全部逐笔明细/01_汇总指标.csv",
+      "rows": 36,
+      "columns": 80,
+      "bytes": 55350
+    },
+    {
+      "path": "全部逐笔明细/02_分年分月多空品种指标.csv",
+      "rows": 2445,
+      "columns": 57,
+      "bytes": 1351156
+    },
+    {
+      "path": "全部逐笔明细/03_机会漏斗.csv",
+      "rows": 111,
+      "columns": 4,
+      "bytes": 3209
+    },
+    {
+      "path": "全部逐笔明细/04_全部策略观察机会.csv",
+      "rows": 72429,
+      "columns": 41,
+      "bytes": 29996441
+    },
+    {
+      "path": "全部逐笔明细/05_全部挂单及撤销.csv",
+      "rows": 28105,
+      "columns": 51,
+      "bytes": 30197729
+    },
+    {
+      "path": "全部逐笔明细/06_全部交易含随机和退出版本.csv",
+      "rows": 67779,
+      "columns": 106,
+      "bytes": 92041087
+    },
+    {
+      "path": "全部逐笔明细/07_原生成交与费用.csv",
+      "rows": 90372,
+      "columns": 27,
+      "bytes": 44583951
+    }
+  ],
+  "chart_png_count": 64,
+  "chart_raw_csv_gz_count": 128,
+  "chart_dimensions": [
+    2520,
+    2660
+  ],
+  "chart_sampling": "Fixed seed 20261024; outcomes stratified across assets and exit policies, includes unfilled and invalidated opportunities.",
+  "archive": "周一1.618-六均线回踩完整报告与明细.zip",
+  "execution": {
+    "framework": "NautilusTrader 1.231.0",
+    "native_source_commit": "0dd3963687",
+    "report_generator_commit": "d6d83e952fb0f63c76212b63b93fcea01955dba1",
+    "successful_native_jobs_frozen": true,
+    "failed_only_repair_symbols": [
+      "1000SATSUSDT",
+      "1000SHIBUSDT",
+      "ONTUSDT",
+      "ZECUSDT"
+    ],
+    "repair": "Reject initial orders made non-passive by tick rounding; 629 successful assets not replayed. Each symbol retains its own execution code identity."
+  },
+  "costs": {
+    "crypto_maker": 0.0002,
+    "crypto_taker": 0.0005,
+    "fee_read_date": "2026-10-23",
+    "gold": "gross only; unknown fee/spread, net fields null",
+    "slippage": "not modeled",
+    "funding": "not modeled"
+  },
+  "validation": {
+    "independent_reviewer": {
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "actual_runtime_verified": true,
+      "outcome": "No findings: 12 all-period groups, 36 summaries, 2445 segment metrics, native per-fill fees, equal-half arithmetic and strict control statistics reconciled"
+    },
+    "final_focused_tests": "6 passed: 3 native and 3 analysis; earlier 20 focused and 78 management regressions retained",
+    "ledger_projection_audit": {
+      "opportunities": {
+        "rows": 72429,
+        "retained_columns": 13,
+        "all_values_equal": true
+      },
+      "orders": {
+        "rows": 28105,
+        "retained_columns": 14,
+        "all_values_equal": true
+      },
+      "trades": {
+        "rows": 67779,
+        "retained_columns": 27,
+        "all_values_equal": true
+      },
+      "fills": {
+        "rows": 90372,
+        "retained_columns": 15,
+        "all_values_equal": true
+      }
+    },
+    "all_full_field_csv_rows_read": true,
+    "all_64_pngs_decoded": true,
+    "desktop": "1440x1000 verified",
+    "mobile": "390x844 verified",
+    "trade_filter": "Strategy/ALTCOINS/half_each = 6358 rows, including 5 censored",
+    "gallery_filters": [
+      "winning",
+      "losing",
+      "unfilled",
+      "invalidated"
+    ],
+    "source_inspector": "Overview and Evidence flow verified",
+    "final_browser_console_errors": [],
+    "screenshots": [
+      "qa/desktop-final.png",
+      "qa/mobile-final.png",
+      "qa/desktop-gallery.png",
+      "qa/desktop-filtered-trades.png"
+    ]
+  },
+  "delivery_limits": [
+    "file:// opening is blocked by browser policy; no bypass attempted. HTTP rendering of the same final build was verified.",
+    "Browser CSV-download event returned a path but no file was found; browser download-file success is unconfirmed. Separately verified complete CSV files are delivered in the local folder.",
+    "Independent trade R is not portfolio return. Small BTC/ETH/gold sample sizes; strict random comparisons do not establish statistically significant edge.",
+    "MFE/MAE omit entry and exit 5-minute bars to avoid OHLC sequence leakage; profitable-then-stop counts are lower bounds.",
+    "Gold conflict exclusions and per-symbol periods are retained; no time-based forced exit, censored positions excluded from wins/losses."
+  ],
+  "notion": {
+    "page_id": "40388564-79af-814a-b65c-e6d734c65332",
+    "url": "https://app.notion.com/p/4038856479af814ab65ce6d734c65332",
+    "unique_key": "exp-monday-ma6-retest-20261024-v1",
+    "dedupe_before_create": "no match",
+    "readback_verified": true,
+    "production_eligible": false
+  },
+  "cleanup": {
+    "task_iab_tab_8": "closed",
+    "task_chrome_tab_977883151": "closed",
+    "viewport_override": "reset",
+    "native_workers": "finished",
+    "service_check": {
+      "preview_process_exited": true,
+      "preview_port_8917_listeners": "",
+      "/api/health": {
+        "ok": false,
+        "service_alive": true,
+        "now_ms": 1792831040282,
+        "scan": {
+          "status": "idle",
+          "generation": "4abe5ecb131c46ee956365fd05aaff04",
+          "worker_pid": 30003,
+          "worker_started_at_ms": 1792778665532,
+          "started_at_ms": 1792830656411,
+          "finished_at_ms": 1792830948109,
+          "completed": 2008,
+          "total": 2008,
+          "errors": 0,
+          "error_samples": [],
+          "isolated": true,
+          "timing_ms": {
+            "cells": 2008,
+            "changed_cells": 1004,
+            "unchanged_cells": 1004,
+            "fetch_total": 324703.509,
+            "analyze_total": 213556.577,
+            "checkpoint_total": 35562.81,
+            "analyze_cpu_total": 202208.468,
+            "checkpoint_cpu_total": 30958.622,
+            "fetch_max": 17071.193,
+            "analyze_max": 2091.819,
+            "checkpoint_max": 393.516,
+            "analyze_cpu_max": 605.479,
+            "checkpoint_cpu_max": 70.787
+          },
+          "duration_seconds": 291.7,
+          "next_scan_ms": 1792831068109
+        }
+      },
+      "/api/yolo-detect/schedules": {
+        "worker": {
+          "pid": 1266,
+          "heartbeat_ms": 1792831039727,
+          "state": "idle"
+        },
+        "schedule_count": 4
+      },
+      "health_readiness": {
+        "service_alive": true,
+        "market_ready": true,
+        "model_ready": false,
+        "ok": false
+      }
+    }
+  },
+  "reproduction": {
+    "native_historical_command": "/Users/zhangzc/.local/bin/nautilus-python -m yoyo.evaluation.monday_ma6_retest --workers 2",
+    "native_replay_note": "Completed outputs are frozen. Do not re-execute unchanged jobs; per-symbol identity records document the original code versions.",
+    "analysis_commands": [
+      "/Users/zhangzc/.local/bin/nautilus-python -m yoyo.evaluation.monday_ma6_analysis",
+      "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_ma6_charts",
+      "/Users/zhangzc/.local/bin/nautilus-python -m yoyo.evaluation.monday_ma6_interpretation",
+      "python3 yoyo/evaluation/monday_ma6_report.py --complete"
+    ],
+    "report_project": "reports/monday-ma6-retest-20261024"
+  },
+  "production_eligible": false,
+  "training_eligible": false
+}

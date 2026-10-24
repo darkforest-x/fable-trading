@@ -1,0 +1,53 @@
+{
+  "preview_process_exited": true,
+  "preview_port_8917_listeners": "",
+  "/api/health": {
+    "ok": false,
+    "service_alive": true,
+    "now_ms": 1792831040282,
+    "scan": {
+      "status": "idle",
+      "generation": "4abe5ecb131c46ee956365fd05aaff04",
+      "worker_pid": 30003,
+      "worker_started_at_ms": 1792778665532,
+      "started_at_ms": 1792830656411,
+      "finished_at_ms": 1792830948109,
+      "completed": 2008,
+      "total": 2008,
+      "errors": 0,
+      "error_samples": [],
+      "isolated": true,
+      "timing_ms": {
+        "cells": 2008,
+        "changed_cells": 1004,
+        "unchanged_cells": 1004,
+        "fetch_total": 324703.509,
+        "analyze_total": 213556.577,
+        "checkpoint_total": 35562.81,
+        "analyze_cpu_total": 202208.468,
+        "checkpoint_cpu_total": 30958.622,
+        "fetch_max": 17071.193,
+        "analyze_max": 2091.819,
+        "checkpoint_max": 393.516,
+        "analyze_cpu_max": 605.479,
+        "checkpoint_cpu_max": 70.787
+      },
+      "duration_seconds": 291.7,
+      "next_scan_ms": 1792831068109
+    }
+  },
+  "/api/yolo-detect/schedules": {
+    "worker": {
+      "pid": 1266,
+      "heartbeat_ms": 1792831039727,
+      "state": "idle"
+    },
+    "schedule_count": 4
+  },
+  "health_readiness": {
+    "service_alive": true,
+    "market_ready": true,
+    "model_ready": false,
+    "ok": false
+  }
+}

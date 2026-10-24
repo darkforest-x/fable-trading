@@ -1,0 +1,144 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ Ma6NativeTests.test_subtick_passive_distance_rejects_only_that_order _____
+
+self = <test_monday_ma6_native.Ma6NativeTests testMethod=test_subtick_passive_distance_rejects_only_that_order>
+
+    def test_subtick_passive_distance_rejects_only_that_order(self):
+        f=pd.DataFrame([[.000001]*4,[.000001,.0000011,.0000009,.000001],
+                        [.000001,.0000017,.0000009,.0000015],[.0000015]*4],
+                       columns=['open','high','low','close'],
+                       index=pd.date_range('2026-01-06',periods=4,freq='5min',tz='UTC'))
+        base=dict(pair_id='x',population='signal',symbol='BTCUSDT',side=1,
+                  entry_i=0,stop=.0000008,cancel_boundary=.0000012,
+                  target_monday=.0000015,target_far=.0000016,
+                  expire_i=2,end_i=3,week='2026-01-05')
+        e=pd.DataFrame([dict(base,trade_id='subtick',entry=.000001-1e-15),
+                        dict(base,trade_id='valid',entry=.00000095)])
+        e['risk']=e.entry-e.stop
+>       rows,fills,audit,rejected=normalized_native(f,e,pd.DataFrame(),'BTCUSDT')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/evaluation/test_monday_ma6_native.py:21:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+yoyo/evaluation/monday_ma6_retest.py:126: in normalized_native
+    rows,fills,audit=run_native(close,np.full(len(close),np.nan),np.zeros(len(close)),e,p,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+frame =                                open      high           low     close
+2026-01-06 00:05:00+00:00  0.000001  0.000001  1...00:00  0.000001  0.000002  9.000000e-07  0.000002
+2026-01-06 00:20:00+00:00  0.000002  0.000002  1.500000e-06  0.000002
+atr = array([nan, nan, nan, nan]), hour = array([0., 0., 0., 0.])
+entries =   pair_id population  ... target_price  target_unreachable
+0       x     signal  ...     0.000002               False
+... ...     0.000002               False
+3       x     signal  ...     0.000002               False
+
+[4 rows x 19 columns]
+policy = ExitPolicy(trail_arm_r=1000000000000.0, trail_atr_multiple=4.0, breakeven_r=None, opposite_hour_exit=False, round_trip...keven_includes_cost=True, breakeven_on_touch=False, intrabar_path='OHLC', fill_maker_fee=0.0002, fill_taker_fee=0.0005)
+tick = 1e-09, symbol = 'BTC', market_tick = 1e-09, execution_minutes = 5
+rsi_side = None, entry_order_mode = 'limit', entry_updates = None
+
+    def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", market_tick=None,
+                   *, execution_minutes=5, rsi_side=None, entry_order_mode="market", entry_updates=None):
+        """Execute supplied entries using native orders, fills and HEDGING positions.
+
+        Frame index is UTC close time. ATR is NaN except at completed management
+        closes; hour contains confirmed direction only at completed hourly closes.
+        Entries need unique trade_id, entry_i, side, entry, stop, risk and end_i.
+        No future excursion or expected-exit fields are read by the strategy.
+        """
+        started = time.perf_counter()
+        if entry_order_mode not in ("market", "limit"):
+            raise ValueError("Unknown entry order mode")
+        limit_entry = entry_order_mode == "limit"
+        if limit_entry and policy.target_breakeven:
+            raise ValueError("Target sibling breakeven currently requires completed-close entries")
+        if limit_entry and not (policy.confirmed_pivot_exit or policy.target_from_entry
+                                or policy.fixed_target_r is not None):
+            raise ValueError("Resting entry requires initial-stop/pivot or fixed-target management")
+        if execution_minutes not in (1,5):
+            raise ValueError("Execution resolution must be 1m or 5m")
+        if policy.rsi_scaleout:
+            if (rsi_side is None or len(rsi_side)!=len(frame)
+                    or not np.isin(rsi_side,[-1,0,1]).all()):
+                raise ValueError("RSI policy requires aligned confirmed side events")
+        if nautilus_trader.__version__ != ENGINE_VERSION:
+            raise RuntimeError(f"Expected Nautilus {ENGINE_VERSION}; revalidate before upgrading")
+        if frame.empty or not frame.index.is_monotonic_increasing or frame.index.has_duplicates:
+            raise ValueError("Bars must be nonempty, unique and chronological")
+        if frame.index.tz is None or len(frame) != len(atr) or len(frame) != len(hour):
+            raise ValueError("Close-time features must align with timezone-aware bars")
+        # Pandas 3 can retain microsecond resolution. Nautilus uses nanoseconds.
+        frame = frame.copy()
+        frame.index = frame.index.as_unit("ns")
+        if entries.empty or not entries.trade_id.is_unique:
+            raise ValueError("Need nonempty, uniquely identified independent trades")
+        if entry_updates is not None and len(entry_updates):
+            if not limit_entry:
+                raise ValueError('Pending amendments require limit entries')
+            lookup = entries.set_index('trade_id')
+            if entry_updates.duplicated(['trade_id', 'bar_i']).any():
+                raise ValueError('Duplicate pending amendment at one close')
+            for u in entry_updates.to_dict('records'):
+                if u['trade_id'] not in lookup.index:
+                    raise ValueError('Unknown amended trade')
+                r = lookup.loc[u['trade_id']]
+                if not r.entry_i < u['bar_i'] <= r.expire_i:
+                    raise ValueError('Amendment must follow submission and precede expiry')
+                if u.get('action') != 'cancel':
+                    if (not np.isfinite([u['entry'], u['stop']]).all() or u['stop'] <= 0
+                            or r.side*(u['entry']-u['stop']) < tick-tick*1e-7
+                            or r.side*(r.target_price-u['entry']) < tick-tick*1e-7
+                            or any(abs(u[c]/tick-round(u[c]/tick)) > 1e-5 for c in ('entry','stop'))):
+                        raise ValueError('Invalid pending price geometry')
+        if 'cancel_boundary' in entries:
+            if not limit_entry or policy.intrabar_path is None:
+                raise ValueError('Price boundary cancellation requires explicit path and limit entry')
+            if (entries.side*(entries.cancel_boundary-entries.entry) < tick-tick*1e-7).any():
+                raise ValueError('Cancellation boundary must be beyond the resting approach')
+        if policy.target_breakeven:
+            if "parent_id" not in entries or entries.parent_id.isna().any():
+                raise ValueError("Target breakeven requires explicit parent IDs")
+            shared = ["entry_i", "side", "entry", "stop", "risk", "end_i"]
+            if entries.groupby("parent_id")[shared].nunique().gt(1).any().any():
+                raise ValueError("Target breakeven siblings must share entry and initial risk")
+            cost = policy.round_trip_cost if policy.breakeven_includes_cost else 0.
+            # Protection must be feasible at every native target fill.
+            if policy.fill_taker_fee is None and (entries.side*(entries.target_price-entries.entry)-cost*entries.entry < 2*tick).any():
+                raise ValueError("Target breakeven needs targets beyond cost protection")
+        market_tick = tick if market_tick is None else market_tick
+        has_targets = policy.fixed_target_r is not None or policy.target_from_entry
+        if not 0 < market_tick <= tick or abs(tick/market_tick-round(tick/market_tick)) > 1e-8:
+            raise ValueError("Protection tick must be an integer multiple of the market precision")
+        precision = -Decimal(str(market_tick)).as_tuple().exponent
+        venue = Venue("RESEARCH")
+        instrument = CryptoPerpetual(
+            instrument_id=InstrumentId(Symbol(f"{symbol}-USDT"), venue),
+            raw_symbol=Symbol(f"{symbol}-USDT"),
+            base_currency=Currency.from_str(symbol), quote_currency=USDT,
+            settlement_currency=USDT, is_inverse=False,
+            price_precision=precision, price_increment=Price(market_tick, precision),
+            size_precision=0, size_increment=Quantity.from_int(1),
+            margin_init=Decimal("0"), margin_maint=Decimal("0"),
+            maker_fee=Decimal("0"), taker_fee=Decimal("0"), ts_event=0, ts_init=0,
+        )
+        prices = frame[["open", "high", "low", "close"]].to_numpy()
+        if not np.isfinite(prices).all() or (prices <= 0).any():
+            raise ValueError("Invalid OHLC")
+        if (np.abs(prices/market_tick-np.rint(prices/market_tick)) > 1e-5).any():
+            raise ValueError("OHLC does not lie on the configured tick grid")
+        for r in entries.itertuples():
+            if r.side not in (-1, 1) or not 0 <= r.entry_i < r.end_i < len(frame):
+                raise ValueError("Invalid entry direction or bounded interval")
+            if limit_entry:
+                if (not r.entry_i < r.expire_i <= r.end_i
+                        or r.side*(prices[int(r.entry_i), 3]-r.entry) < tick-tick*1e-7
+                        or abs(r.entry/market_tick-round(r.entry/market_tick)) > 1e-5):
+>                   raise ValueError("Limit must be favorable, tick-aligned, and have a bounded expiry")
+E                   ValueError: Limit must be favorable, tick-aligned, and have a bounded expiry
+
+yoyo/layers/l3_backtest/nautilus_independent.py:883: ValueError
+=========================== short test summary info ============================
+FAILED tests/evaluation/test_monday_ma6_native.py::Ma6NativeTests::test_subtick_passive_distance_rejects_only_that_order
+1 failed, 2 deselected in 5.87s
