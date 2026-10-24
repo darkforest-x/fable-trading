@@ -68,14 +68,17 @@ def replay(t, k, gross=None, slip_bp=0., start=None):
     if start is not None:
         t = t[t.entry >= start]
     net = t.net_bp.to_numpy()/1e4 - np.where(t.reason.to_numpy() == 4, 0., slip_bp/1e4)
-    ev = np.concatenate([np.c_[t.exit.to_numpy(), np.zeros(len(t)), np.arange(len(t))],
+    # Kind 0: exits of earlier trades (free capital first), 1: entries, 2: exits in
+    # the entry's own timestamp (same-bar targets), which must follow their entry.
+    same = t.exit.to_numpy() == t.entry.to_numpy()
+    ev = np.concatenate([np.c_[t.exit.to_numpy(), np.where(same, 2., 0.), np.arange(len(t))],
                          np.c_[t.entry.to_numpy(), np.ones(len(t)), np.arange(len(t))]])
-    ev = ev[np.lexsort((ev[:, 1], ev[:, 0]))]  # exits before entries at the same time
+    ev = ev[np.lexsort((ev[:, 1], ev[:, 0]))]
     eq, peak, dd, expo, notional, opened = 1000., 1000., 0., 0., np.zeros(len(t)), 0.
     path = []
-    for ts, is_entry, j in ev:
+    for ts, kind, j in ev:
         j = int(j)
-        if is_entry:
+        if kind == 1:
             notional[j] = k*eq if gross is None else max(0., min(k*eq, gross*eq-opened))
             opened += notional[j]; expo = max(expo, opened/eq)
         else:
