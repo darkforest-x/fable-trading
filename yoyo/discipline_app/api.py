@@ -83,17 +83,21 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
             if live:
                 book.start()
         yield
+        app.state.replay.stop()
         order_requests.shutdown()
         if market_enabled:
             market.stop()
             if live:
                 book.stop()
 
-    app = FastAPI(title='SPIKE Discipline', version='0.8.20', lifespan=lifespan,
+    app = FastAPI(title='SPIKE Discipline', version='0.9.0', lifespan=lifespan,
                   docs_url=None, redoc_url=None, openapi_url=None)
     app.state.candle_history = CandleHistory()
     app.state.monday_fib = MondayFibFeed()
     app.state.wick_stops = WickStops()
+    from .replay_store import ReplayStore
+    runtime = book.runtime if hasattr(book, 'runtime') else Path(book.path).parent
+    app.state.replay = ReplayStore(runtime / 'replay' / 'sessions.sqlite3')
     app.add_middleware(CORSMiddleware, allow_origins=list(origins), allow_methods=['GET', 'POST'],
                        allow_headers=['Authorization', 'Content-Type', 'X-Spike-Account'], allow_credentials=False)
     app.add_middleware(GZipMiddleware, minimum_size=1024, compresslevel=5)
@@ -102,6 +106,9 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
         value = authorization.removeprefix('Bearer ') if authorization.startswith('Bearer ') else ''
         if not hmac.compare_digest(hashlib.sha256(value.encode()).digest(), digest):
             raise HTTPException(401, '需要有效的服务访问令牌')
+
+    from .replay_api import install as install_replay
+    install_replay(app, auth)
 
     def selected(request: Request, x_spike_account: str = Header(default='')):
         if hasattr(book, 'resolve'):
@@ -139,7 +146,7 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
 
     @app.get('/health')
     def health():
-        return dict(service='spike-discipline', mode=mode, live_enabled=live and book.client.write_enabled, version='0.8.20')
+        return dict(service='spike-discipline', mode=mode, live_enabled=live and book.client.write_enabled, version='0.9.0')
 
     @app.get('/v1/market/monday-fib')
     def monday_fib():

@@ -1,3 +1,10 @@
+
+## 2026-10-24 · App independent historical paper replay 0.9.0
+
+- Owner requested mobile paper accounts, arbitrary historical replay, manual open/close, statistics and one-click historical Monday 1.618. New entry is the 1.618 page top-right. Separate `/v1/replay/*` routes and runtime `replay/sessions.sqlite3`; no real-account resolver or exchange write path. New time/symbol/period creates an independent practice; old accounts restore from an atomic command journal.
+- Native matching uses pinned NautilusTrader 1.231.0 streaming HEDGING and existing native fee/fill adapters. Explicit O-H-L-C path, 1x reserve, maker .0002 / taker .0005, optional user SL/TP; no funding/slippage/liquidation simulation. Historical limit orders expire next New York Monday, conservatively before any bar crossing expiry. Weekly range is unavailable before all Monday hours close; gap/future/source guards fail closed.
+- Stitch GEMINI_3_8_FLASH project8978791379095391159 screen088907fa0dc84836a55940f8fca73b7d supplied design first; provenance `yoyo/discipline_app/design/replay-0.9.0/`. UI and native delegates were verified gpt-6-luna/max. Code/commands/semantics in app README, learning in `docs/learnings/replay-needs-a-durable-causal-command-journal.md`.
+- QA:223 app Python / 86 front-end /14 native /73 boundary tests; real local BTC and public online causal history; native worker durable restore;320/390/desktop browser trading/retry/session tests with0 non-replay writes. Version0.9.0 build36; latest delivery/install/service status lives in `yoyo/discipline_app/releases/build-0.9.0.json`. No backtest rerun, model/live policy or unrelated service changes.
 ## 2026-10-24 · Paper-only all-symbol Monday 1.618 switch
 
 - Owner requested a paper-desk all-symbol limit feature and explicitly chose a persistent weekly switch. Existing UI reuse was authorized after Stitch GEMINI_3_8_FLASH edit timed out and 10 recovery reads found no new design; provenance `docs/design/stitch-20261024-paper-monday-bulk/manifest.json`.

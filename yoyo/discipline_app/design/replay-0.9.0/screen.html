@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SPIKE 模拟盘 · 历史回放</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            porcelain: '#F8F9FA',
+            'porcelain-dim': '#EEF1F4',
+            appleblue: '#0071E3',
+            'appleblue-hover': '#0062C4',
+            tradegreen: '#059669',
+            'tradegreen-light': '#10B981',
+            tradered: '#E11D48',
+            'tradered-light': '#F43F5E',
+            jade: '#087F69',
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'PingFang SC', 'sans-serif'],
+            mono: ['JetBrains Mono', 'SF Mono', 'monospace'],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* Apple Glass blur & borders */
+    .glass-bar {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
+    }
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    .custom-scroll {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .watermark-text {
+      user-select: none;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-porcelain text-slate-900 font-sans antialiased min-h-screen flex justify-center selection:bg-appleblue/15 selection:text-appleblue">
+
+  <!-- Mobile Frame 390px -->
+  <div class="w-full max-w-[390px] min-h-screen bg-[#F6F8F9] flex flex-col relative pb-10 shadow-2xl border-x border-slate-200/80">
+
+    <!-- 1. Top Navigation & Historical Clock Header -->
+    <header class="sticky top-0 z-40 glass-bar px-3.5 pt-3 pb-2.5">
+      <div class="flex items-center justify-between">
+        <!-- Back Button & Mode Badge -->
+        <div class="flex items-center gap-1.5">
+          <button class="w-8 h-8 rounded-full flex items-center justify-center text-slate-700 hover:bg-black/5 active:scale-95 transition-all -ml-1">
+            <span class="material-symbols-outlined text-[22px]">arrow_back_ios_new</span>
+          </button>
+          <div class="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded-full">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+            <span class="text-[11px] font-semibold text-amber-700 tracking-tight">模拟盘·历史回放</span>
+          </div>
+        </div>
+
+        <!-- Right Action: Reset / New Replay -->
+        <button onclick="document.getElementById('newReplayModal').classList.toggle('hidden')" class="flex items-center gap-1 text-[11px] font-medium text-appleblue bg-appleblue/10 hover:bg-appleblue/15 px-2.5 py-1 rounded-full active:scale-95 transition-all">
+          <span class="material-symbols-outlined text-[14px]">history</span>
+          <span>新回放</span>
+        </button>
+      </div>
+
+      <!-- Time Clock Sub-bar -->
+      <div class="mt-2.5 flex items-center justify-between bg-white/70 border border-slate-200/70 rounded-lg px-2.5 py-1.5 shadow-sm">
+        <div class="flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-slate-400 text-[16px]">schedule</span>
+          <span class="text-[10px] text-slate-400 uppercase font-mono">回放截止时钟</span>
+          <span class="text-[12px] font-mono font-bold text-slate-800 tracking-tight ml-0.5">2024-11-18 10:15 EST</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="px-1.5 py-0.2 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-mono font-medium rounded">周一模型就绪</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. Controls & Context Filter Strip -->
+    <div class="px-3.5 py-2 flex items-center justify-between gap-2 border-b border-slate-200/60 bg-white/50">
+      <!-- Symbol Selector -->
+      <button class="flex items-center gap-1.5 bg-white border border-slate-200 shadow-sm px-2.5 py-1 rounded-lg text-xs font-bold text-slate-800 hover:border-slate-300 active:scale-95 transition-all">
+        <span class="w-4 h-4 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center font-black text-[9px]">₿</span>
+        <span>BTCUSDT 永续</span>
+        <span class="material-symbols-outlined text-[14px] text-slate-400">expand_more</span>
+      </button>
+
+      <!-- Timeframe Pills -->
+      <div class="flex items-center bg-slate-200/70 p-0.5 rounded-lg text-[11px] font-mono font-medium">
+        <button class="px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-800">5m</button>
+        <button class="px-2 py-0.5 rounded-md bg-white text-appleblue shadow-sm font-bold">15m</button>
+        <button class="px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-800">1h</button>
+        <button class="px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-800">4h</button>
+      </div>
+
+      <!-- Jump Calendar Trigger -->
+      <button onclick="document.getElementById('newReplayModal').classList.toggle('hidden')" class="w-7 h-7 bg-white border border-slate-200/80 rounded-lg flex items-center justify-center text-slate-600 shadow-sm active:scale-95">
+        <span class="material-symbols-outlined text-[16px]">edit_calendar</span>
+      </button>
+    </div>
+
+    <!-- 3. Immersive Candlestick Chart Area (Rendered up to Historical Clock) -->
+    <div class="relative w-full h-[300px] bg-white border-b border-slate-200/80 overflow-hidden flex flex-col justify-between">
+
+      <!-- Watermark: Large Symbol & Timeframe -->
+      <div class="watermark-text absolute inset-0 flex flex-col items-center justify-center text-center opacity-[0.035] pointer-events-none">
+        <span class="font-black text-7xl tracking-tighter text-slate-900">BTC</span>
+        <span class="font-mono text-xl tracking-widest text-slate-900 uppercase">Monday 1.618 Ext</span>
+      </div>
+
+      <!-- Historical Clock Cutoff Shading Banner (Top overlay info) -->
+      <div class="absolute top-2 left-3 right-3 z-10 flex items-center justify-between pointer-events-none">
+        <div class="flex items-center gap-1.5 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-md border border-slate-200/60 shadow-sm">
+          <span class="text-[10px] text-slate-500">最新收盘:</span>
+          <span class="text-[11px] font-mono font-bold text-tradegreen">91,240.00</span>
+          <span class="text-[9px] text-tradegreen font-mono font-semibold">+2.14%</span>
+        </div>
+        <div class="bg-amber-500/10 backdrop-blur-md px-2 py-0.5 rounded-md border border-amber-500/30 text-[9px] font-mono text-amber-800 font-medium">
+          仅呈现截至回放时刻 K 线
+        </div>
+      </div>
+
+      <!-- Interactive Simulated SVG Chart -->
+      <div class="relative w-full h-full pt-7 pb-5">
+        <svg class="w-full h-full" viewBox="0 0 390 260" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="mondayRangeBg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0071E3" stop-opacity="0.04"/>
+              <stop offset="100%" stop-color="#0071E3" stop-opacity="0.01"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Grid Lines (Horizontal) -->
+          <line x1="0" y1="40" x2="330" y2="40" stroke="#f1f5f9" stroke-width="1" />
+          <line x1="0" y1="95" x2="330" y2="95" stroke="#f1f5f9" stroke-width="1" />
+          <line x1="0" y1="150" x2="330" y2="150" stroke="#f1f5f9" stroke-width="1" />
+          <line x1="0" y1="205" x2="330" y2="205" stroke="#f1f5f9" stroke-width="1" />
+
+          <!-- Monday High-Low Box (NY Monday 00:00 - 23:59 EST) -->
+          <rect x="20" y="85" width="130" height="90" fill="url(#mondayRangeBg)" stroke="#0071E3" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="24" y="97" font-size="8" fill="#0071E3" font-family="JetBrains Mono" font-weight="600">纽约周一界定区间 (已闭环)</text>
+
+          <!-- 1.618 Upper Extension Solid Line (+1.618 = 94,800) -->
+          <line x1="20" y1="42" x2="330" y2="42" stroke="#059669" stroke-width="1.2"/>
+          <text x="22" y="38" font-size="8" fill="#059669" font-family="JetBrains Mono" font-weight="700">+1.618 扩展位 (94,800.00)</text>
+
+          <!-- Monday High Solid Line (91,800) -->
+          <line x1="20" y1="85" x2="330" y2="85" stroke="#0071E3" stroke-width="1"/>
+          <text x="22" y="81" font-size="8" fill="#0071E3" font-family="JetBrains Mono" font-weight="500">周一高点 (91,800.00)</text>
+
+          <!-- Monday Low Solid Line (86,200) -->
+          <line x1="20" y1="175" x2="330" y2="175" stroke="#0071E3" stroke-width="1"/>
+          <text x="22" y="171" font-size="8" fill="#0071E3" font-family="JetBrains Mono" font-weight="500">周一低点 (86,200.00)</text>
+
+          <!-- 1.618 Lower Extension Solid Line (-1.618 = 83,200) -->
+          <line x1="20" y1="228" x2="330" y2="228" stroke="#E11D48" stroke-width="1.2"/>
+          <text x="22" y="224" font-size="8" fill="#E11D48" font-family="JetBrains Mono" font-weight="700">-1.618 扩展位 (83,200.00)</text>
+
+          <!-- Candlesticks (Historical up to 10:15 EST) -->
+          <!-- Mon Session Bars -->
+          <g stroke="#cbd5e1" stroke-width="1">
+            <!-- Candle 1 -->
+            <line x1="35" y1="110" x2="35" y2="155"/>
+            <rect x="31" y="120" width="8" height="25" fill="#059669" stroke="none"/>
+
+            <!-- Candle 2 -->
+            <line x1="50" y1="100" x2="50" y2="160"/>
+            <rect x="46" y="115" width="8" height="30" fill="#E11D48" stroke="none"/>
+
+            <!-- Candle 3 (Reaches Mon Low) -->
+            <line x1="65" y1="125" x2="65" y2="178"/>
+            <rect x="61" y="130" width="8" height="35" fill="#E11D48" stroke="none"/>
+
+            <!-- Candle 4 -->
+            <line x1="80" y1="115" x2="80" y2="165"/>
+            <rect x="76" y="125" width="8" height="28" fill="#059669" stroke="none"/>
+
+            <!-- Candle 5 (Reaches Mon High) -->
+            <line x1="95" y1="80" x2="95" y2="140"/>
+            <rect x="91" y="85" width="8" height="40" fill="#059669" stroke="none"/>
+
+            <!-- Candle 6: Mon End consolidation -->
+            <line x1="110" y1="95" x2="110" y2="150"/>
+            <rect x="106" y="105" width="8" height="30" fill="#E11D48" stroke="none"/>
+
+            <!-- Post-Monday Session Breakout Bars -->
+            <!-- Tuesday Surge -->
+            <line x1="135" y1="90" x2="135" y2="135"/>
+            <rect x="131" y="95" width="8" height="30" fill="#059669" stroke="none"/>
+
+            <line x1="150" y1="80" x2="150" y2="120"/>
+            <rect x="146" y="85" width="8" height="25" fill="#059669" stroke="none"/>
+
+            <line x1="165" y1="70" x2="165" y2="110"/>
+            <rect x="161" y="75" width="8" height="20" fill="#059669" stroke="none"/>
+
+            <line x1="180" y1="60" x2="180" y2="95"/>
+            <rect x="176" y="65" width="8" height="25" fill="#059669" stroke="none"/>
+
+            <!-- Approaching +1.618 Area -->
+            <line x1="195" y1="50" x2="195" y2="85"/>
+            <rect x="191" y="55" width="8" height="20" fill="#059669" stroke="none"/>
+
+            <line x1="210" y1="40" x2="210" y2="75"/>
+            <rect x="206" y="48" width="8" height="18" fill="#059669" stroke="none"/>
+
+            <!-- Spike & Wick touching +1.618! -->
+            <line x1="225" y1="36" x2="225" y2="70"/>
+            <rect x="221" y="45" width="8" height="15" fill="#E11D48" stroke="none"/>
+
+            <!-- Rejection Bar 1 -->
+            <line x1="240" y1="45" x2="240" y2="85"/>
+            <rect x="236" y="50" width="8" height="25" fill="#E11D48" stroke="none"/>
+
+            <!-- Rejection Bar 2 (Current Cutoff Bar: 10:15 EST) -->
+            <line x1="255" y1="60" x2="255" y2="105"/>
+            <rect x="251" y="68" width="8" height="26" fill="#E11D48" stroke="none"/>
+          </g>
+
+          <!-- Current Historical Cutoff Price Marker: Dashed Line (4px dash, 4px gap) -->
+          <line x1="255" y1="94" x2="330" y2="94" stroke="#0071E3" stroke-width="1.2" stroke-dasharray="4 4"/>
+          <circle cx="255" cy="94" r="3" fill="#0071E3"/>
+
+          <!-- Vertical Timeline Indicator at Cutoff (Historical Clock Stop Line) -->
+          <line x1="255" y1="15" x2="255" y2="240" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="2 2"/>
+          <rect x="232" y="10" width="46" height="12" rx="3" fill="#f59e0b"/>
+          <text x="255" y="19" font-size="7" fill="#ffffff" font-family="JetBrains Mono" font-weight="700" text-anchor="middle">NOW 10:15</text>
+
+          <!-- Blank Future Area Hatching (No look-ahead bias) -->
+          <rect x="260" y="20" width="70" height="220" fill="#f8fafc" opacity="0.6"/>
+          <text x="295" y="130" font-size="9" fill="#94a3b8" font-family="JetBrains Mono" text-anchor="middle">未发生</text>
+
+          <!-- Right Y-Axis Narrow Scale Labels -->
+          <g font-family="JetBrains Mono" font-size="8" fill="#64748b" text-anchor="start">
+            <text x="334" y="44">94800</text>
+            <text x="334" y="87">91800</text>
+            <text x="334" y="97" fill="#0071E3" font-weight="700">91240</text>
+            <text x="334" y="177">86200</text>
+            <text x="334" y="230">83200</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Time Axis Footer -->
+      <div class="h-5 px-3 border-t border-slate-100 flex items-center justify-between text-[9px] font-mono text-slate-400 bg-slate-50/50">
+        <span>Mon 00:00</span>
+        <span>Mon 12:00</span>
+        <span>Tue 04:00</span>
+        <span class="text-amber-600 font-bold">10:15(时钟)</span>
+        <span class="text-slate-300">未来</span>
+      </div>
+    </div>
+
+    <!-- 4. Playback Controller Deck (播放/暂停、单步、倍速、跳转) -->
+    <div class="px-3.5 py-2.5 bg-white border-b border-slate-200/70 shadow-sm flex items-center justify-between gap-2">
+      <!-- Main Play / Pause -->
+      <div class="flex items-center gap-1.5">
+        <button id="playBtn" class="w-9 h-9 rounded-full bg-appleblue text-white flex items-center justify-center shadow-md shadow-appleblue/25 active:scale-90 transition-transform">
+          <span class="material-symbols-outlined text-[20px]">play_arrow</span>
+        </button>
+        <!-- Step Forward Button -->
+        <button title="前进一根K线" class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center justify-center active:scale-90 transition-transform">
+          <span class="material-symbols-outlined text-[18px]">skip_next</span>
+        </button>
+      </div>
+
+      <!-- Speed Selector Pills -->
+      <div class="flex items-center bg-slate-100 p-0.5 rounded-lg text-[10px] font-mono font-semibold text-slate-600">
+        <button class="px-1.5 py-0.5 rounded text-slate-500">1x</button>
+        <button class="px-1.5 py-0.5 rounded bg-white text-slate-800 shadow-sm font-bold">5x</button>
+        <button class="px-1.5 py-0.5 rounded text-slate-500">10x</button>
+        <button class="px-1.5 py-0.5 rounded text-slate-500">极速</button>
+      </div>
+
+      <!-- Jump/Step Indicators & Progress -->
+      <div class="flex flex-col items-end">
+        <div class="text-[10px] font-mono text-slate-400">已回放 38 / 120 柱</div>
+        <div class="w-20 bg-slate-200 h-1.5 rounded-full overflow-hidden mt-0.5">
+          <div class="bg-appleblue h-full rounded-full" style="width: 32%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Instant Trade Execution & Monday 1.618 Quick-Deploy Action Strip -->
+    <div class="p-3.5 space-y-2.5">
+
+      <!-- Prominent Feature: 一键挂当时已完成的周一区间上下沿 1.618 -->
+      <div class="glass-card p-3 rounded-xl border border-appleblue/20 bg-gradient-to-br from-blue-50/50 to-white">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-appleblue text-[18px]">auto_awesome</span>
+            <span class="text-xs font-bold text-slate-900">一键部署周一 1.618 限价单</span>
+          </div>
+          <span class="text-[10px] font-mono bg-blue-100 text-appleblue px-1.5 py-0.2 rounded font-semibold">历史已定界</span>
+        </div>
+
+        <div class="text-[11px] text-slate-600 leading-snug mb-2.5">
+          自动读取回放时钟时已锁定的周一区间：上沿 <span class="font-mono text-tradegreen font-semibold">+1.618(94,800)</span> 挂空，下沿 <span class="font-mono text-tradered font-semibold">-1.618(83,200)</span> 挂多。
+        </div>
+
+        <!-- Input Nominal Amount & TP/SL Config -->
+        <div class="grid grid-cols-2 gap-2 mb-2.5">
+          <div>
+            <label class="text-[10px] text-slate-500 block mb-0.5">单笔名义本金 (USDT) *</label>
+            <div class="relative">
+              <input type="number" value="200" class="w-full h-8 px-2 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 focus:outline-none focus:border-appleblue" placeholder="输入金额">
+              <span class="absolute right-2 top-2 text-[9px] text-slate-400 font-mono">U</span>
+            </div>
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-500 block mb-0.5">止盈止损策略 (可选)</label>
+            <select class="w-full h-8 px-2 bg-white border border-slate-200 rounded-lg text-[11px] font-medium text-slate-700 focus:outline-none focus:border-appleblue">
+              <option selected>回抽周一中轨 / 1.0R</option>
+              <option>刺破反向0.5R止损</option>
+              <option>自定义参数...</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <button class="w-full h-9 bg-appleblue hover:bg-appleblue-hover text-white rounded-lg text-xs font-semibold shadow-sm flex items-center justify-center gap-1 active:scale-[0.98] transition-all">
+          <span class="material-symbols-outlined text-[16px]">touch_app</span>
+          <span>挂上下 1.618 双向单 (名义 400 U)</span>
+        </button>
+      </div>
+
+      <!-- Quick Manual Trading Row: 市价做多 / 做空 / 闪电平仓 -->
+      <div class="grid grid-cols-3 gap-2">
+        <button class="h-9 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1 shadow-sm transition-all">
+          <span class="material-symbols-outlined text-[15px]">arrow_upward</span>
+          <span>市价做多</span>
+        </button>
+        <button class="h-9 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1 shadow-sm transition-all">
+          <span class="material-symbols-outlined text-[15px]">arrow_downward</span>
+          <span>市价做空</span>
+        </button>
+        <button class="h-9 bg-slate-800 hover:bg-slate-900 active:scale-95 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1 shadow-sm transition-all">
+          <span class="material-symbols-outlined text-[15px]">close</span>
+          <span>全平当前仓</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 6. Bottom Collapsible Paper Trading Management (持仓 / 委托 / 成交 / 账户统计) -->
+    <div class="mt-1 px-3.5 space-y-2">
+
+      <!-- Tab Header Strip -->
+      <div class="flex items-center justify-between border-b border-slate-200/80 pb-1">
+        <div class="flex items-center gap-4 text-xs font-semibold">
+          <button class="text-appleblue border-b-2 border-appleblue pb-1 font-bold">持仓 (1)</button>
+          <button class="text-slate-500 hover:text-slate-800 pb-1 font-medium">委托 (2)</button>
+          <button class="text-slate-500 hover:text-slate-800 pb-1 font-medium">成交历史</button>
+          <button class="text-slate-500 hover:text-slate-800 pb-1 font-medium">回放总计</button>
+        </div>
+        <button class="text-[11px] text-slate-400 flex items-center hover:text-slate-600">
+          <span class="material-symbols-outlined text-[16px]">unfold_less</span>
+        </button>
+      </div>
+
+      <!-- Tab Content 1: Active Position in Replay -->
+      <div class="glass-card p-3 rounded-xl border border-slate-200/80">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-1.5">
+            <span class="px-1.5 py-0.5 rounded bg-rose-100 text-tradered text-[10px] font-mono font-bold">做空 10x</span>
+            <span class="text-xs font-bold text-slate-800">BTCUSDT 永续</span>
+            <span class="text-[10px] text-slate-400 font-mono">#RP-0914</span>
+          </div>
+          <div class="text-right">
+            <div class="text-xs font-mono font-bold text-tradegreen">+38.40 USDT</div>
+            <div class="text-[9px] font-mono text-tradegreen">+19.20% (ROE)</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-1.5 bg-slate-50/80 rounded-lg p-2 text-[10px] font-mono">
+          <div>
+            <span class="text-slate-400 block">开仓均价</span>
+            <span class="text-slate-700 font-semibold">94,760.00</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block">回放现价</span>
+            <span class="text-slate-700 font-semibold">91,240.00</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block">初始止损</span>
+            <span class="text-tradered font-semibold">95,450.00</span>
+          </div>
+        </div>
+
+        <!-- Position Quick Action -->
+        <div class="mt-2 flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
+          <span class="text-slate-500 text-[10px]">入场逻辑: +1.618 假突破 15m 收线</span>
+          <button class="px-2 py-0.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded font-medium text-[10px] active:scale-95">平此仓</button>
+        </div>
+      </div>
+
+      <!-- Tab Content 2: Replay Account Metrics (余额、净值、净盈亏、胜率、回撤等) -->
+      <div class="glass-card p-3 rounded-xl border border-slate-200/80 bg-white/90">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold text-slate-800 flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px] text-appleblue">query_stats</span>
+            当前回放账户统计
+          </span>
+          <span class="text-[10px] font-mono text-slate-400">初始资金: 1,000.00 U</span>
+        </div>
+
+        <div class="grid grid-cols-4 gap-2 text-center py-1 bg-slate-50/70 rounded-lg border border-slate-100">
+          <div>
+            <div class="text-[9px] text-slate-400">当前净值</div>
+            <div class="text-[11px] font-mono font-bold text-slate-800">1,038.40</div>
+          </div>
+          <div>
+            <div class="text-[9px] text-slate-400">累计净盈亏</div>
+            <div class="text-[11px] font-mono font-bold text-tradegreen">+38.40</div>
+          </div>
+          <div>
+            <div class="text-[9px] text-slate-400">胜率 (已平)</div>
+            <div class="text-[11px] font-mono font-bold text-slate-700">66.7%</div>
+          </div>
+          <div>
+            <div class="text-[9px] text-slate-400">最大回撤</div>
+            <div class="text-[11px] font-mono font-bold text-slate-700">1.8%</div>
+          </div>
+        </div>
+
+        <div class="mt-2 grid grid-cols-3 gap-2 text-[10px] font-mono text-slate-500 pt-1">
+          <div>可用余额: <span class="text-slate-800 font-semibold">838.40 U</span></div>
+          <div>手续费估算: <span class="text-slate-800 font-semibold">0.42 U</span></div>
+          <div>实际盈亏比: <span class="text-slate-800 font-semibold">1:2.4</span></div>
+        </div>
+      </div>
+
+      <!-- System Notice Box -->
+      <div class="text-[10px] text-slate-400 leading-normal px-1 py-1">
+        • 提示：切换或跳转到新的历史时间时将开启一段新的回放会话，绝不倒改回溯已完成交易记录。所有数据均为回放模拟占位。
+      </div>
+
+    </div>
+
+    <!-- Modal: 新增回放 / 设置初始资金与起始时间 (Hidden by default, toggleable) -->
+    <div id="newReplayModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end justify-center">
+      <div class="w-full max-w-[390px] bg-white rounded-t-2xl p-4 shadow-2xl border-t border-slate-200">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-appleblue text-[20px]">add_circle</span>
+            <span class="text-sm font-bold text-slate-900">配置新历史回放会话</span>
+          </div>
+          <button onclick="document.getElementById('newReplayModal').classList.add('hidden')" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <div class="space-y-3 pt-3">
+          <div>
+            <label class="text-xs font-semibold text-slate-700 block mb-1">回放标的</label>
+            <select class="w-full h-9 px-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium">
+              <option selected>BTCUSDT 永续合约</option>
+              <option>ETHUSDT 永续合约</option>
+              <option>SOLUSDT 永续合约</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-700 block mb-1">历史起始日期与时间 (EST)</label>
+            <input type="datetime-local" value="2024-11-18T00:00" class="w-full h-9 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800">
+            <span class="text-[10px] text-slate-400 mt-0.5 block">系统将自动检索对应纽约周一基准模型与 1.618 扩展线。</span>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-700 block mb-1">模拟初始本金 (USDT)</label>
+            <input type="number" value="1000" class="w-full h-9 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800" placeholder="1000">
+          </div>
+
+          <button onclick="document.getElementById('newReplayModal').classList.add('hidden')" class="w-full h-10 bg-appleblue text-white rounded-xl text-xs font-bold shadow-md shadow-appleblue/25 mt-2 active:scale-98 transition-all">
+            开始全新历史回放
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

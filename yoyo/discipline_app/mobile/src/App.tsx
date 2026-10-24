@@ -34,6 +34,8 @@ import {sliderFeedback,feedback,feedbackEnabled,setFeedbackEnabled} from './feed
 import {fieldIssue,issueForMessage,errorCopy,type FieldIssue} from './ticketValidation';
 import {useKeyboard} from './useKeyboard';
 import {api,ApiError,SERVICE_URL,authorizationScope,type Connection,type Plan,type Position,type State,type Ticket} from './api';
+import {ReplayDesk} from './ReplayDesk';
+import './replay.css';
 
 const fmt=(v:string|number|undefined,d=2)=>v===undefined?'—':Number(v).toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d});
 const small=(v:string)=>v.replace('-USDT-SWAP','');
@@ -44,6 +46,7 @@ type ExchangeStatus={connected:boolean;environment:'okx_live'|'okx_demo';executi
 type Preview={plan:Plan;policy_revision:number;ticket:Ticket;request_id:string;preview_id?:string};
 
 export default function App(){
+ const [replayOpen,setReplayOpen]=useState(false);
  const settingsOrigin=useRef<Tab>('统计');
  const [fibTicket,setFibTicket]=useState(false);
  const [fibPeriod,setFibPeriod]=useState<CandlePeriod>('15m');
@@ -69,7 +72,7 @@ export default function App(){
  if(state&&stateReceivedAt.current.time!==state.server_time)stateReceivedAt.current={time:state.server_time,local:Date.now()};
  const displayNow=(state?.server_time??0)+(Date.now()-stateReceivedAt.current.local)/1000;
  void clockTick;
- const closeRecovery=useCloseRecovery(connection,status=>{notify(status==='filled'?'平仓成交已确认':status==='not_received'?'平仓请求未送达，已结束等待':status==='cancelled'?'平仓委托已取消，请查看剩余持仓':'平仓请求被拒绝，请查看持仓','info','toast');void refresh().catch(()=>setOnline(false))});
+ const closeRecovery=useCloseRecovery(replayOpen?null:connection,status=>{notify(status==='filled'?'平仓成交已确认':status==='not_received'?'平仓请求未送达，已结束等待':status==='cancelled'?'平仓委托已取消，请查看剩余持仓':'平仓请求被拒绝，请查看持仓','info','toast');void refresh().catch(()=>setOnline(false))});
  const [liveConsent,setLiveConsent]=useState(false);
  const noticeModal=!!message&&message.presentation!=='toast';
  const [action,setAction]=useState<{kind:'cancel'|'entry-stop';id:string}|null>(null);
@@ -83,7 +86,7 @@ export default function App(){
  const [confirmTrades,setConfirmTrades]=useState(()=>localStorage.getItem('spike-confirm-trades')==='true');
  const [search,setSearch]=useState(''),[contractSort,setContractSort]=useState<ContractSort>('volume');
  const editing=useKeyboard();
- useEffect(()=>{if(connection&&!document.hidden)void loadStatistics(connection,30).catch(()=>{})},[connection]);
+ useEffect(()=>{if(connection&&!replayOpen&&!document.hidden)void loadStatistics(connection,30).catch(()=>{})},[connection,replayOpen]);
  const [exchangeStatus,setExchangeStatus]=useState<ExchangeStatus|null>(null);
  useEffect(()=>{
   setExchangeStatus(null);
@@ -139,7 +142,7 @@ export default function App(){
 
 
  useEffect(()=>{
-  if(!connection)return;
+  if(!connection||replayOpen)return;
   const generation=epoch.current;
   let active=true,running=false;let controller:AbortController|null=null;
   let timer:ReturnType<typeof setTimeout>;
@@ -153,7 +156,7 @@ export default function App(){
   const visibility=()=>{clearTimeout(timer);setOnline(false);if(!document.hidden)void poll()};
   document.addEventListener('visibilitychange',visibility);
   void poll();return()=>{active=false;clearTimeout(timer);controller?.abort();document.removeEventListener('visibilitychange',visibility)};
- },[connection]);
+ },[connection,replayOpen]);
 
  async function refresh(){if(connection){const next=await api<State>(connection,'/v1/state');if(next.mode!==(connection.mode??'paper')||next.account_id!==(connection.accountId??'primary'))throw Error('账户或服务模式已变化，请重新连接');setState(next);setOnline(true)}}
  async function connect(event:React.FormEvent){
@@ -166,7 +169,7 @@ export default function App(){
   }catch(e){setError((e as Error).message);feedback('error')}finally{setBusy(false)}
  }
  useEffect(()=>{
-  if(!connection||!pendingEntry)return;
+  if(!connection||!pendingEntry||replayOpen)return;
   let active=true;let timer:ReturnType<typeof setTimeout>;
   const c=connection,key=pendingKey(c),identity=pendingEntry.id;
   let missingReads=0;
@@ -188,7 +191,7 @@ export default function App(){
    if(active)timer=setTimeout(poll,delay);
   };
   void poll();return()=>{active=false;clearTimeout(timer)};
- },[connection,pendingEntry?.id]);
+ },[connection,pendingEntry?.id,replayOpen]);
  async function submitEntry(order:{ticket:Ticket;request_id:string;policy_revision:number;preview_id?:string}){
   const c=connection!;
   if(live){
@@ -313,11 +316,13 @@ export default function App(){
      {!connection?<button className="primary connect-action" onClick={()=>nav('设置')}><Icon name="link" size={17}/>连接纪律服务<Icon name="arrow" size={17}/></button>:null}
     </section>;
 
+ if(replayOpen)return <ReplayDesk connection={connection} onBack={()=>{setReplayOpen(false);setTab('1.618')}}/>;
+
  return <div className={`app ${tab==='合约'?'trade-page':''} ${tab==='1.618'?'fib-page':''} ${editing?'keyboard-open':''}`}>
   <div inert={fibTicket||!!preview||!!closeTarget||!!error||!!sheet||noticeModal}>
   <main ref={mainRef} className={`page-transition ${tab==='合约'?'entry-page':''}`} style={{'--page-offset':`${navDirection*12}px`} as CSSProperties} {...swipe}>
    <div className={`pull-refresh ${pullStatus}`} role="status" aria-live="polite"><Icon name={pullStatus==='done'?'check':pullStatus==='error'?'close':'refresh'} size={18}/><span>{({idle:'',pull:'下拉刷新',ready:'松开刷新',loading:'正在刷新',done:'已更新',error:'更新失败，请重试'})[pullStatus]}</span></div>
-   <FibHome connection={connection} state={state} onQuick={stableQuick} locked={busy||!!pendingEntry} active={tab==='1.618'} covered={fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal}/>
+   <FibHome connection={connection} state={state} onQuick={stableQuick} onOpenReplay={()=>{setReplayOpen(true);setError('');setMessage(null)}} locked={busy||!!pendingEntry} active={tab==='1.618'} covered={fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal}/>
    {tab==='合约'&&<>
     <section className="quote-hero" aria-label="合约行情">
      <div className="trade-heading"><button className="symbol-picker" aria-label="选择合约" disabled={ticketLocked} aria-haspopup="dialog" onClick={()=>{setSearch('');setSheet('symbol');feedback('light')}}><CoinLogo key={symbol} coin={small(symbol)}/><b>{small(symbol)}<small>/USDT</small></b><span className="down-chevron"/></button><span className="neutral">永续</span><span className="instrument-mode">{mode}</span></div>
