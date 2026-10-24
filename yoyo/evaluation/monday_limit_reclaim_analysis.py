@@ -716,6 +716,8 @@ def _attempt_metrics(counts: pd.DataFrame, pairs: pd.DataFrame,
                     "no_fill_exposure_bp": 0.0,
                     "no_fill_counts_as_win_or_loss": False,
                     "filled_censor_is_unknown": True,
+                    "return_basis": "gross" if scope == "XAUUSD" else "net",
+                    "attempt_expectancy_is_complete_matched_subset": True,
                 }
                 for role in ("signal", "control"):
                     for status in ("filled", "expired", "unknown", "cancelled"):
@@ -728,6 +730,13 @@ def _attempt_metrics(counts: pd.DataFrame, pairs: pd.DataFrame,
                     row[f"{role}_fill_rate"] = (
                         row[f"{role}_filled_attempt_n"] / known_status if known_status else np.nan
                     )
+                signal_total = int(source_rows.loc[
+                    source_rows["role"].eq("signal"), "attempt_n"
+                ].sum()) if len(source_rows) else 0
+                row["signal_attempt_n"] = signal_total
+                row["unpaired_signal_attempt_n"] = signal_total - len(cell)
+                if row["unpaired_signal_attempt_n"] < 0:
+                    raise ValueError("Matched attempt sets exceed signal attempts")
                 records.append(row)
     return pd.DataFrame.from_records(records)
 

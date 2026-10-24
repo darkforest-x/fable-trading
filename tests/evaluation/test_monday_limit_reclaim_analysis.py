@@ -7,6 +7,7 @@ import pandas as pd
 
 from yoyo.evaluation.monday_limit_reclaim_analysis import (
     _cell_stats,
+    _cluster_inference,
     _common_scope_name,
     _attempt_metrics,
     _matched_metrics,
@@ -18,6 +19,7 @@ from yoyo.evaluation.monday_limit_reclaim_analysis import (
     prepare_orders,
     prepare_trades,
     trade_stats,
+    holm_fixed_matrix,
 )
 
 
@@ -278,6 +280,44 @@ class MondayLimitReclaimAnalysisTests(unittest.TestCase):
         self.assertEqual(alt_cell.iloc[0].attempt_known_pair_n, 2)
         self.assertEqual(alt_cell.iloc[0].signal_expired_attempt_n, 2)
         self.assertEqual(alt_cell.iloc[0].control_expired_attempt_n, 6)
+        self.assertEqual(alt_cell.iloc[0].unpaired_signal_attempt_n, 0)
+        self.assertEqual(alt_cell.iloc[0].return_basis, "net")
+        unpaired_signal = count_parts[0].loc[count_parts[0].role.eq("signal")].copy()
+        with_unpaired = _attempt_metrics(
+            pd.concat([*count_parts, unpaired_signal], ignore_index=True),
+            pd.concat(pair_parts, ignore_index=True),
+            "COMMON6_CRYPTO_PARTIAL",
+        )
+        alt = with_unpaired.loc[
+            with_unpaired.analysis_scope.eq("ALTCOINS") & with_unpaired.period.eq("all")
+        ].iloc[0]
+        self.assertEqual(alt.signal_attempt_n, 3)
+        self.assertEqual(alt.attempt_known_pair_n, 2)
+        self.assertEqual(alt.unpaired_signal_attempt_n, 1)
+
+    def test_holm_uses_fixed_25_candidate_family_and_separates_scopes(self):
+        result = holm_fixed_matrix(pd.DataFrame([
+            dict(analysis_scope="BTC", period="all", signflip_p=p)
+            for p in (.001, .01, .2)
+        ] + [dict(analysis_scope="ETH", period="all", signflip_p=.002)]))
+        self.assertEqual(result.holm_family_size.tolist(), [25] * 4)
+        for actual, expected in zip(result.holm_p, [.025, .24, 1., .05]):
+            self.assertAlmostEqual(actual, expected)
+
+    def test_inference_counts_market_weeks_not_duplicate_trade_rows(self):
+        rows = pd.DataFrame({
+            "actual_ny_week": ["2024-01-01"] * 30 + ["2024-01-08"] * 30,
+            "delta_return_bp": [2.] * 60,
+        })
+        result = _cluster_inference(rows, 123)
+        self.assertEqual(result["independent_market_weeks"], 2)
+        self.assertEqual(result["paired_ci_low_bp"], 2.)
+        self.assertEqual(result["paired_ci_high_bp"], 2.)
+        self.assertGreater(result["signflip_p"], .45)
+        self.assertLess(result["signflip_p"], .55)
+        one_week = _cluster_inference(rows.iloc[:30], 123)
+        self.assertEqual(one_week["independent_market_weeks"], 1)
+        self.assertTrue(pd.isna(one_week["signflip_p"]))
 
     def test_chinese_core_metrics_translate_scope_period_target_and_rate_units(self):
         metrics = pd.DataFrame([{

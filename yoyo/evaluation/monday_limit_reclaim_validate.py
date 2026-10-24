@@ -87,8 +87,19 @@ def main():
     folders=sorted(p.parent for p in (EXP/'symbols').glob('*/done.json'))
     if len(folders)!=633 and not args.partial:raise RuntimeError(f'Coverage incomplete {len(folders)}/633')
     rows=[validate(p) for p in folders]
+    common6={'BTCUSDT','ETHUSDT','SOLUSDT','BNBUSDT','XRPUSDT','DOGEUSDT'}
+    verified_common=[]
+    for folder in folders:
+        source=json.loads((folder/'done.json').read_text())
+        if source['symbol'] not in common6:continue
+        assert source['execution_minutes']==1
+        assert pd.Timestamp(source['first'])<=pd.Timestamp('2022-11-01T00:00:00Z')
+        assert pd.Timestamp(source['last'])>=pd.Timestamp('2026-09-30T23:59:00Z')
+        verified_common.append(source['symbol'])
+    if len(rows)==633:assert set(verified_common)==common6
     result=dict(status='complete' if len(rows)==633 else 'partial',validated_assets=len(rows),expected_assets=633,
                 positions=sum(r['positions'] for r in rows),fills=sum(r['fills'] for r in rows),assets=rows,
+                common6_full_source_bounds_verified=sorted(verified_common),
                 execution_replays=0,fee_source='Saved actual native commissions; USDT8decimal monetary precision')
     dump(EXP/('validation-partial.json' if args.partial else 'validation.json'),finite(result))
     print(json.dumps({k:v for k,v in result.items() if k!='assets'}))
