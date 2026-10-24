@@ -198,14 +198,15 @@
       const stamp=`<small>${e?`${e.source==='history'?'历史 · ':''}${time(touchTime(e))}${fresh?' · 刚触及':''}`:'本周尚未触价'}</small>`;
       const destination=windowsDesktop?'在本机 TradingView 打开':'在 TradingView 查看';
       const link=url?`<a class="mf-row-symbol" data-tv-symbol="${esc(r.symbol)}" href="${esc(url)}"${windowsDesktop?'':' target="_blank" rel="noopener noreferrer"'} aria-label="${destination} ${label} 15 分钟图" title="${destination} ${label} 15 分钟图">${name}</a>`:`<span class="mf-row-symbol">${name}</span>`;
-      return `<div class="mf-row${fresh?' mf-recent':''}" data-symbol="${esc(r.symbol)}" data-selected="${r.symbol===selected}"><div class="mf-row-info">${link}${stamp}</div><button type="button" class="mf-row-value" data-preview-symbol="${esc(r.symbol)}" aria-pressed="${r.symbol===selected}" aria-label="切换背景 K 线至 ${label}" title="切换背景 K 线 · ${label}"><strong class="mf-${e?.side||'waiting'}">${e?side+'沿 1.618':'待触价'}</strong><small>${state||price(r.price)}</small></button><div class="mf-row-actions"><button type="button" data-favorite-symbol="${esc(r.symbol)}" aria-pressed="${favorite}" aria-label="${favorite?'取消收藏':'收藏'} ${label}" title="${favorite?'取消收藏':'收藏'}">${icon(favorite?'star-filled':'star')}</button><button type="button" data-delete-symbol="${esc(r.symbol)}" aria-label="删除 ${label}" title="从列表删除">${icon('trash')}</button></div></div>`;
+      const inspect=`<a data-inspect-symbol="${esc(r.symbol)}" href="#yolo-detect?tab=schedules&amp;symbol=${encodeURIComponent(r.symbol)}" aria-label="查看 ${label} 的信号巡检" title="查看 ${label} 的信号巡检">${icon('activity')}</a>`;
+      return `<div class="mf-row${fresh?' mf-recent':''}" data-symbol="${esc(r.symbol)}" data-selected="${r.symbol===selected}"><div class="mf-row-info">${link}${stamp}</div><button type="button" class="mf-row-value" data-preview-symbol="${esc(r.symbol)}" aria-pressed="${r.symbol===selected}" aria-label="切换背景 K 线至 ${label}" title="切换背景 K 线 · ${label}"><strong class="mf-${e?.side||'waiting'}">${e?side+'沿 1.618':'待触价'}</strong><small>${state||price(r.price)}</small></button><div class="mf-row-actions">${inspect}<button type="button" data-favorite-symbol="${esc(r.symbol)}" aria-pressed="${favorite}" aria-label="${favorite?'取消收藏':'收藏'} ${label}" title="${favorite?'取消收藏':'收藏'}">${icon(favorite?'star-filled':'star')}</button><button type="button" data-delete-symbol="${esc(r.symbol)}" aria-label="删除 ${label}" title="从列表删除">${icon('trash')}</button></div></div>`;
     }).join('')||`<p class="mf-no-rows">${!data?'正在读取…':filter==='favorites'?(query?'没有匹配的收藏合约':'收藏的合约会显示在这里'):'没有匹配的已触价合约'}</p>`;
 
       const focused=container.contains?.(document.activeElement)?document.activeElement?.dataset:null;
-      const focusKey=['tvSymbol','previewSymbol','favoriteSymbol','deleteSymbol'].find(k=>focused?.[k]),focusSymbol=focused?.[focusKey];
+      const focusKey=['tvSymbol','previewSymbol','inspectSymbol','favoriteSymbol','deleteSymbol'].find(k=>focused?.[k]),focusSymbol=focused?.[focusKey];
       const oldIndex=focusSymbol?Array.from(container.querySelectorAll('[data-symbol]')).findIndex(b=>b.dataset.symbol===focusSymbol):-1;
       $('mf-rows').innerHTML=html;lastRows=structure;
-      if(focusSymbol){const controls=Array.from(container.querySelectorAll('[data-tv-symbol],[data-preview-symbol],[data-favorite-symbol],[data-delete-symbol]')).filter(b=>b.dataset[focusKey]);(controls.find(b=>b.dataset[focusKey]===focusSymbol)||controls[Math.min(Math.max(0,oldIndex),controls.length-1)]||container).focus({preventScroll:true});}
+      if(focusSymbol){const controls=Array.from(container.querySelectorAll('[data-tv-symbol],[data-preview-symbol],[data-inspect-symbol],[data-favorite-symbol],[data-delete-symbol]')).filter(b=>b.dataset[focusKey]);(controls.find(b=>b.dataset[focusKey]===focusSymbol)||controls[Math.min(Math.max(0,oldIndex),controls.length-1)]||container).focus({preventScroll:true});}
     restoreListScroll(container,resetScroll?{top:0}:position);
     }else{
       const values=new Map(rows.map(r=>[r.symbol,quoteState(r)||price(r.price)]));
@@ -290,6 +291,8 @@
   $('mf-search').addEventListener('input',e=>{query=e.target.value;renderRows(true);sync();});
   $('mf-filters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;filter=b.dataset.filter;renderRows(true);sync();});
   $('mf-rows').addEventListener('click',e=>{
+    // Let the native internal link navigate without pinning the wallpaper.
+    if(e.target.closest('[data-inspect-symbol]')){e.stopPropagation();return;}
     const favorite=e.target.closest('[data-favorite-symbol]'),remove=e.target.closest('[data-delete-symbol]');
     if(favorite||remove){
       e.stopPropagation();

@@ -114,6 +114,23 @@ def test_pages_are_bounded_filtered_and_keep_new_arrivals_out_of_older_pages(tmp
     assert filtered['total']==1 and filtered['items'][0]['detection_id']=='1'
 
 
+def test_full_contract_search_is_exact_while_abbreviated_search_stays_substring(tmp_path):
+    app=FastAPI();install(app,tmp_path,launch_worker=False);client=TestClient(app)
+    book=Book(tmp_path)
+    add(book,'btc',symbol='BTC-USDT-SWAP',observed=100)
+    add(book,'wbtc',symbol='WBTC-USDT-SWAP',observed=200)
+
+    exact=client.get('/api/yolo-detect/discoveries?days=0&q=%20btc-usdt-swap%20&limit=1').json()
+    exact_after_last=client.get('/api/yolo-detect/discoveries?days=0&q=BTC-USDT-SWAP&limit=1&offset=1').json()
+    assert exact['total']==1 and [r['detection_id'] for r in exact['items']]==['btc']
+    assert exact_after_last['total']==1 and exact_after_last['items']==[]
+
+    partial_first=client.get('/api/yolo-detect/discoveries?days=0&q=BTC&limit=1&offset=0').json()
+    partial_second=client.get('/api/yolo-detect/discoveries?days=0&q=BTC&limit=1&offset=1').json()
+    assert partial_first['total']==partial_second['total']==2
+    assert [r['detection_id'] for r in partial_first['items']+partial_second['items']]==['wbtc','btc']
+
+
 def test_page_cutoff_freezes_scores_and_cluster_merges_before_sorting(tmp_path):
     book=Book(tmp_path);feed=Feed(book)
     add(book,'a',observed=100,start=10,end=20,confidence=.9)

@@ -1,0 +1,7 @@
+# Symbol deep links must own the destination filters
+
+- **Problem**: A Monday 1.618 touch should open that contract's inspection discoveries, including small timeframes, without requiring another search.
+- **Rejected shortcut**: The existing `symbol` route opens the result-chart tab, whereas the requested screenshot shows the discovery feed. Reusing it alone would leave feed filters untouched. A substring search for `BTC-USDT-SWAP` also includes `WBTC-USDT-SWAP`.
+- **Effective path**: Link explicitly to the patrol feed with the full contract ID. Restore its query, default seven-day window, all periods/directions and first page from route state; invalidate pending search replies and clear the previous cards while loading. Preserve the filter selection in the URL for refresh and history. Treat full canonical contracts as exact matches before server-side counts and pagination, while retaining substring search for abbreviations.
+- **General rule**: A cross-workspace link must identify both the destination pane and the data identity. Test stale filters, asynchronous replies, empty results, Back, and similarly named instruments; a correct URL alone does not demonstrate correct content.
+- **Scope**: `yoyo/monitor/static/monday-fib.{js,css}`, `yoyo/monitor/static/yolo-detect.js`, `yoyo/yolo_workbench/discoveries.py`. Stitch design `fd29ad2f8a924431aaecb2d7766d1f5d`; no scan, model, account or trading-rule changes.

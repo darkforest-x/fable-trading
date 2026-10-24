@@ -8,6 +8,7 @@ an old shape to the top. The latest observation supplies the exact chart link.
 """
 from contextlib import closing
 import json
+import re
 from threading import Lock
 
 from .store import encode, now
@@ -52,7 +53,7 @@ class Feed:
         self.lock = Lock()
 
     def read(self, *, days=7, query='', timeframe='', side='', limit=30, sort='newest', offset=0, before_ms=None):
-        """Page discoveries as observed at the cutoff, before merging or sorting."""
+        """Page discoveries; full OKX contracts match exactly, abbreviations by substring."""
         with self.lock, closing(self.book.connect()) as db:
             # A snapshot prevents the high-water mark from skipping a concurrent insert.
             db.execute('BEGIN')
@@ -79,12 +80,14 @@ class Feed:
                     self.items = merge_findings(self.rows)
             stamp = now()
             cutoff = min(stamp, before_ms) if before_ms is not None else stamp
+            symbol_query = query.strip().upper()
+            exact_symbol = bool(re.fullmatch(r"[A-Z0-9]{1,32}-USDT-SWAP", symbol_query))
             # Repeat scans may change score or bridge clusters. Freeze raw observations
             # before merging so later pages keep their original membership and order.
             items = merge_findings([r for r in self.rows if r['observed_ms'] <= cutoff]) if before_ms is not None else self.items
             matched = [r for r in items if (not days or r['first_observed_ms'] >= cutoff-days*86400000)
                        and r['first_observed_ms'] <= cutoff
-                       and query.strip().upper() in r['symbol']
+                       and (not symbol_query or (r['symbol'] == symbol_query if exact_symbol else symbol_query in r['symbol']))
                        and (not timeframe or r['timeframe'] == timeframe)
                        and (not side or r['side'] == side)]
             if sort == 'score':

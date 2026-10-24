@@ -5,6 +5,14 @@
   'use strict';
   const steps={'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'1Dutc':86400000};
   const short=s=>(s||'').replace('-USDT-SWAP','');
+  const exactSymbol=value=>/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(String(value||''));
+  // A patrol link owns its filters; stale UI state must not hide another coin.
+  function patrolFilters(p){
+    return {feedQuery:exactSymbol(p.symbol)?p.symbol:String(p.q||'').slice(0,80),
+      feedDays:[0,1,7,30].includes(Number(p.days))?Number(p.days):7,
+      feedPeriod:steps[p.timeframe]?p.timeframe:'',feedSide:['long','short'].includes(p.side)?p.side:'',
+      feedOrder:['newest','score','symbol'].includes(p.sort)?p.sort:'newest'};
+  }
   function filteredSymbols(rows,query='',filter='detected',favorites=[],order='count') {
     return rows.filter(r=>r.symbol.toLowerCase().includes(query.trim().toLowerCase()) && (filter==='all'||(filter==='favorites'?favorites.includes(r.symbol):filter==='detected'?r.count>0:!!r.error)))
       .sort((a,b)=>{
@@ -60,7 +68,7 @@
   function shapeRange(box,first,step){const to=(box.window_end_ms-first)/step+8,from=(box.window_start_ms-first)/step-14;return {from:Math.max(0,Math.min(from,to-64)),to};}
   function patrolProgress(s){const j=s.last_run;if(!j)return '等待首轮检测';const p=j.progress||{},done=p.completed||0;return `${j.status==='running'||j.status==='queued'?'本轮进行中':'最近一轮'} · 已处理 ${done}/${p.total||'—'} 币${p.unavailable?' · '+p.unavailable+' 币历史不足':''}${p.failed?' · '+p.failed+' 币待重试':''}${p.recovered?' · '+p.recovered+' 币已补齐':''}${p.remaining_endpoints?' · '+p.remaining_endpoints+' 个收盘位置待补扫':''}${p.elapsed_seconds?' · '+(p.elapsed_seconds/60).toFixed(1)+' 分钟':''}${s.enabled&&j.cutoff_ms&&Date.now()-j.cutoff_ms>s.interval_minutes*60000?' · 有新收盘待追赶，自动补扫':''}`;}
   function validView(value){return value&&Number.isFinite(value.from)&&Number.isFinite(value.to)&&value.to>value.from&&value.to-value.from<100000?{from:value.from,to:value.to}:null;}
-  if(typeof module!=='undefined')module.exports={aggregateSymbols,periodResult,filteredSymbols,initialSymbol,draftSpec,sameScan,normalizedSymbol,draftProblem,validView,chartRows,patrolProgress,shapeRange};
+  if(typeof module!=='undefined')module.exports={aggregateSymbols,periodResult,filteredSymbols,initialSymbol,draftSpec,sameScan,normalizedSymbol,draftProblem,validView,chartRows,patrolProgress,shapeRange,patrolFilters};
   const root=typeof document!=='undefined'&&document.getElementById('yolo-detect-workspace');if(!root)return;
   const $=id=>root.querySelector('#'+id), BASE='/api/yolo-detect';
   const terminal=new Set(['completed','partial','failed','cancelled','interrupted']);
@@ -201,7 +209,16 @@
       <div class="yd-table-wrap"><table><thead><tr><th>研究版本</th><th>最早事件检出 / 155</th><th>负图误触 / 3,600</th><th>结论</th></tr></thead><tbody>${state.catalog.items.map(m=>`<tr><td>${esc(m.name)}</td><td>${(m.earliest_recall*100).toFixed(2)}%</td><td>${m.negative_fires}</td><td>${esc(m.verdict)}</td></tr>`).join('')}</tbody></table></div>
       <p>这些数据来自已有开发集比较，不能作为独立市场精度或收益验收。模型训练周期是 15m；5m、1H、4H、日线均标记为跨周期研究。每次任务固定模型版本、参数和输入来源。</p>
       <p><a href="#yolo">训练与实验记录 ↗</a> · <a href="#models">模型中心 ↗</a> · 后续迭代：逐样本确认与难负例 → 时间分组验证 → 同输入版本对比 → 更新推荐。新训练仍需通过项目准入。</p></details>`;}
-  function syncRoute(){window.SpikeNavigation?.sync('yolo-detect',{tab:state.tab,job:state.overview&&!state.fromPatrol?null:state.job?.id,symbol:state.symbol,timeframe:state.overview?state.timeframe:null,box:state.fromPatrol?(state.selected||state.focusBox):null,from:state.fromPatrol?'patrol':null});}
+  function syncRoute(){window.SpikeNavigation?.sync('yolo-detect',state.tab==='schedules'
+    ?{tab:state.tab,symbol:exactSymbol(state.feedQuery)?state.feedQuery:null,q:exactSymbol(state.feedQuery)?null:state.feedQuery,days:state.feedDays,timeframe:state.feedPeriod,side:state.feedSide,sort:state.feedOrder}
+    :{tab:state.tab,job:state.overview&&!state.fromPatrol?null:state.job?.id,symbol:state.symbol,timeframe:state.overview?state.timeframe:null,box:state.fromPatrol?(state.selected||state.focusBox):null,from:state.fromPatrol?'patrol':null});}
+  function restorePatrolFilters(p){
+    clearTimeout(feedTimer);feedVersion++;
+    Object.assign(state,patrolFilters(p),{feedPage:0,feedBefore:null,feed:null});
+    for(const [id,key] of [['yd-feed-search','feedQuery'],['yd-feed-days','feedDays'],['yd-feed-period','feedPeriod'],['yd-feed-side','feedSide'],['yd-feed-order','feedOrder']])$(id).value=String(state[key]);
+    $('yd-feed-count').textContent='正在读取巡检形态…';$('yd-feed-updated').textContent='';
+    html('yd-findings','');html('yd-feed-more','');error('','yd-feed-error');
+  }
   function setTab(tab,sync=true){
     if(!['results','account','history','schedules','model'].includes(tab))tab='schedules';if(sync&&tab==='results'&&state.tab!=='results'&&state.overview)state.latestRevision='';state.tab=tab;
     root.querySelectorAll('[data-yd-tab]').forEach(b=>{const yes=b.dataset.ydTab===tab;b.setAttribute('aria-selected',String(yes));b.tabIndex=yes?0:-1;});
@@ -266,8 +283,8 @@
   }
   function bind(){
     const on=(id,event,fn)=>$(id).addEventListener(event,fn);
-    on('yd-feed-search','input',e=>{state.feedQuery=e.target.value;state.feedPage=0;state.feedBefore=null;clearTimeout(feedTimer);feedVersion++;feedTimer=setTimeout(refreshFeed,250);});
-    for(const [id,key] of [['yd-feed-days','feedDays'],['yd-feed-period','feedPeriod'],['yd-feed-side','feedSide'],['yd-feed-order','feedOrder']])on(id,'change',e=>{state[key]=key==='feedDays'?Number(e.target.value):e.target.value;state.feedPage=0;state.feedBefore=null;refreshFeed();});
+    on('yd-feed-search','input',e=>{state.feedQuery=e.target.value;state.feedPage=0;state.feedBefore=null;clearTimeout(feedTimer);feedVersion++;syncRoute();feedTimer=setTimeout(refreshFeed,250);});
+    for(const [id,key] of [['yd-feed-days','feedDays'],['yd-feed-period','feedPeriod'],['yd-feed-side','feedSide'],['yd-feed-order','feedOrder']])on(id,'change',e=>{state[key]=key==='feedDays'?Number(e.target.value):e.target.value;state.feedPage=0;state.feedBefore=null;syncRoute();refreshFeed();});
     root.addEventListener('click',delegate);
     root.addEventListener('change',e=>{if(e.target.matches('[data-yd-feed-size]')){state.feedLimit=Number(e.target.value);state.feedPage=0;state.feedBefore=null;refreshFeed();}});
     root.querySelectorAll('dialog').forEach(d=>d.addEventListener('close',()=>{restoreDialog(d.id);unlockDialogs();}));
@@ -321,7 +338,7 @@
       if('ydLatest'in d){state.timeframe=state.job?.spec.timeframe||state.timeframe;state.fromPatrol=false;$('yd-patrol-return').hidden=true;state.overview=true;state.viewTouched=false;await refreshLatest(true);}
       if('ydFeedRefresh'in d){state.feedPage=0;state.feedBefore=null;await refreshFeed();}
       if('ydFeedPage'in d){state.feedPage=Number(d.ydFeedPage);await refreshFeed();$('yd-findings').scrollIntoView({block:'nearest'});}
-      if('ydFeedClear'in d){state.feedQuery='';state.feedDays=0;state.feedPeriod='';state.feedSide='';state.feedPage=0;state.feedBefore=null;$('yd-feed-search').value='';$('yd-feed-days').value='0';$('yd-feed-period').value=$('yd-feed-side').value='';await refreshFeed();}
+      if('ydFeedClear'in d){state.feedQuery='';state.feedDays=0;state.feedPeriod='';state.feedSide='';state.feedPage=0;state.feedBefore=null;$('yd-feed-search').value='';$('yd-feed-days').value='0';$('yd-feed-period').value=$('yd-feed-side').value='';syncRoute();await refreshFeed();}
       if(d.ydFinding){const item=state.feed?.items.find(r=>r.id===d.ydFinding);if(item)await openFindingPreview(item);}
       if('ydPreviewRetry'in d&&findingPreview)await openFindingPreview(findingPreview);
       if('ydPreviewFull'in d&&findingPreview){const item=findingPreview;closeDialog('yd-preview-dialog');await chooseJob(item.job_id,item.symbol,'results',item.detection_id,true);}
@@ -653,7 +670,7 @@
     updateChartData();tailStatus();
   }
   async function refresh(){
-    if(!state.active||document.hidden||refreshing)return;refreshing=true;const epoch=activationVersion;
+    if(!state.active||document.hidden||refreshing)return;refreshing=true;const epoch=activationVersion,routeAtStart=state.pendingRoute;
     try{
       if(!state.loaded){state.catalog=await api('/catalog');shell();const pool=$('yd-tab-schedules');pool.parentElement.prepend(pool);state.loaded=true;
         loadSymbols().catch(()=>{/* Submission retries and shows source failure explicitly. */});}
@@ -669,6 +686,7 @@
       if(jobs||schedules)jobsView(state.worker,jobs?.now_ms||stamp);if(state.worker?.state==='cooling')$('yd-worker').textContent=state.worker.reason;
       if(state.pendingRoute){
         const p=state.pendingRoute;state.pendingRoute=null;setTab(p.tab||((p.job||p.symbol)?'results':'schedules'),false);
+        if(state.tab==='schedules')restorePatrolFilters(p);
         if(!p.job){state.overview=true;state.timeframe=steps[p.timeframe]?p.timeframe:'';state.symbol=p.symbol||'';if(!p.symbol){state.symbolSearch='';$('yd-result-search').value='';state.resultFilter='detected';}state.job=null;state.viewTouched=false;}
         if(p.job&&(state.overview||p.job!==state.job?.id||p.box!==state.selected))await chooseJob(p.job,p.symbol||'',state.tab,p.box||'',p.from==='patrol');
         else if(p.symbol&&p.symbol!==state.symbol&&state.job)await chooseSymbol(p.symbol,p.box||'');
@@ -680,9 +698,9 @@
       }else if(!state.overview&&!state.job&&!state.attempted&&!state.loadingJob&&state.jobs.length&&state.tab==='results')await chooseJob(state.jobs[0].id);
       if(state.tab==='results'){summary();drawSymbols();}if(state.tab==='schedules')await refreshFeed();else if(state.tab==='results')refreshTail();
       error('');
-    }catch(e){if(epoch===activationVersion&&e.name!=='AbortError')error(/Failed to fetch|NetworkError|Load failed/i.test(e.message)?'连接暂时中断，已保留上次数据；正在自动重试。':e.message);}finally{refreshing=false;if(epoch!==activationVersion&&state.active)Promise.resolve().then(refresh);}
+    }catch(e){if(epoch===activationVersion&&e.name!=='AbortError')error(/Failed to fetch|NetworkError|Load failed/i.test(e.message)?'连接暂时中断，已保留上次数据；正在自动重试。':e.message);}finally{refreshing=false;if((epoch!==activationVersion||(state.pendingRoute&&state.pendingRoute!==routeAtStart))&&state.active)Promise.resolve().then(refresh);}
   }
-  window.SpikeNavigation?.register('yolo-detect',p=>{state.pendingRoute=p;if(state.active)refresh();});
+  window.SpikeNavigation?.register('yolo-detect',p=>{state.pendingRoute=p;clearTimeout(feedTimer);feedVersion++;if(state.active)refresh();});
   document.addEventListener('visibilitychange',()=>{if(state.active&&!document.hidden)refresh();});
   window.addEventListener('pagehide',rememberChart);
   new MutationObserver(()=>{chartNeedsTheme=true;if(chart&&state.active){const style=getComputedStyle(document.documentElement);chart.applyOptions({layout:{background:{color:style.getPropertyValue('--chart-bg').trim()},textColor:style.getPropertyValue('--chart-text').trim()},grid:{vertLines:{color:style.getPropertyValue('--chart-grid').trim()},horzLines:{color:style.getPropertyValue('--chart-grid').trim()}}});chartNeedsTheme=false;}}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});

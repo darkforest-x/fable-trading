@@ -19,6 +19,25 @@ test('sub-bar extrapolation preserves geometry outside the viewport',()=>{
 
 const {filteredSymbols,initialSymbol,draftSpec,sameScan,normalizedSymbol,draftProblem,validView}=require('../../yoyo/monitor/static/yolo-detect.js');
 const summaries=[{symbol:'BTC-USDT-SWAP',count:0},{symbol:'A-USDT-SWAP',count:1},{symbol:'ETH-USDT-SWAP',count:2},{symbol:'BAD-USDT-SWAP',error:'unavailable'}];
+test('patrol symbol deep link resets filters and restores shareable explicit filters',()=>{
+ const {patrolFilters}=require('../../yoyo/monitor/static/yolo-detect.js');
+ assert.deepEqual(patrolFilters({symbol:'BTC-USDT-SWAP'}),{feedQuery:'BTC-USDT-SWAP',feedDays:7,feedPeriod:'',feedSide:'',feedOrder:'newest'});
+ assert.deepEqual(patrolFilters({q:'ETH',days:'0',timeframe:'5m',side:'short',sort:'score'}),{feedQuery:'ETH',feedDays:0,feedPeriod:'5m',feedSide:'short',feedOrder:'score'});
+ assert.equal(patrolFilters({symbol:'BTC<script>',days:'-1',timeframe:'3m'}).feedQuery,'');
+});
+test('opening a new patrol coin clears the previous cards, page and delayed search',()=>{
+ const {patrolFilters}=require('../../yoyo/monitor/static/yolo-detect.js'),nodes=new Map();let cleared;
+ const state={feedQuery:'ETH',feedDays:1,feedPeriod:'4H',feedSide:'short',feedOrder:'score',feedPage:4,feedBefore:123,feed:{items:['ETH']}};
+ const el=id=>{if(!nodes.has(id))nodes.set(id,{});return nodes.get(id);};
+ const context={state,patrolFilters,$:el,clearTimeout:id=>cleared=id,html:(id,value)=>el(id).innerHTML=value,error(){}};
+ const code=source.slice(source.indexOf('  function restorePatrolFilters('),source.indexOf('  function setTab('));
+ const restore=vm.runInNewContext('let feedTimer=123,feedVersion=0;'+code+';restorePatrolFilters',context);
+ restore({symbol:'ZAMA-USDT-SWAP'});
+ assert.equal(cleared,123);assert.equal(state.feedQuery,'ZAMA-USDT-SWAP');assert.equal(el('yd-feed-search').value,'ZAMA-USDT-SWAP');
+ assert.equal(state.feedPage,0);assert.equal(state.feedBefore,null);assert.equal(state.feed,null);
+ assert.equal(el('yd-feed-period').value,'');assert.equal(el('yd-feed-side').value,'');assert.equal(el('yd-feed-days').value,'7');
+ assert.equal(el('yd-findings').innerHTML,'');assert.equal(el('yd-feed-more').innerHTML,'');
+});
 test('default browsing contains detected coins, search and failures remain accessible',()=>{
  assert.deepEqual(filteredSymbols(summaries).map(r=>r.symbol),['ETH-USDT-SWAP','A-USDT-SWAP']);
  assert.deepEqual(filteredSymbols(summaries,' btc ','all').map(r=>r.symbol),['BTC-USDT-SWAP']);
