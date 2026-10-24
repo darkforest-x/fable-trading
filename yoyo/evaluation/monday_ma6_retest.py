@@ -93,6 +93,10 @@ def normalized_native(frame,orders,updates,symbol):
     x['risk']=x.side*(x.entry-x.stop)
     valid=(x.risk>=tick*.999)&(x.side*(x.cancel_boundary-x.entry)>=tick*.999)
     valid&=(x.side*(x.target_monday-x.entry)>=tick*.999)&(x.side*(x.target_far-x.entry)>=tick*.999)
+    # Enforce the native passive-limit requirement after tick quantization.
+    # A strict float inequality before rounding can collapse to equality.
+    submission_close=frame.close.to_numpy()[x.entry_i.to_numpy(dtype=int)].round(decimals)
+    valid&=x.side*(submission_close-x.entry)>=tick*(1-1e-7)
     rejected=x[~valid].copy();rejected['status']='invalid_tick_geometry'
     x=x[valid].copy()
     if x.empty:return pd.DataFrame(),pd.DataFrame(),dict(opportunities=[],positions=0,fills=0),rejected

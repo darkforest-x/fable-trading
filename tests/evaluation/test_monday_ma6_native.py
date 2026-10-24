@@ -6,6 +6,24 @@ from yoyo.evaluation.monday_ma6_retest import normalized_native,describe_exposur
 
 
 class Ma6NativeTests(unittest.TestCase):
+    def test_subtick_passive_distance_rejects_only_that_order(self):
+        f=pd.DataFrame([[.000001]*4,[.000001,.0000011,.0000009,.000001],
+                        [.000001,.0000017,.0000009,.0000015],[.0000015]*4],
+                       columns=['open','high','low','close'],
+                       index=pd.date_range('2026-01-06',periods=4,freq='5min',tz='UTC'))
+        base=dict(pair_id='x',population='signal',symbol='BTCUSDT',side=1,
+                  entry_i=0,stop=.0000008,cancel_boundary=.0000012,
+                  target_monday=.0000015,target_far=.0000016,
+                  expire_i=2,end_i=3,week='2026-01-05')
+        e=pd.DataFrame([dict(base,trade_id='subtick',entry=.000001-1e-15),
+                        dict(base,trade_id='valid',entry=.00000095)])
+        e['risk']=e.entry-e.stop
+        rows,fills,audit,rejected=normalized_native(f,e,pd.DataFrame(),'BTCUSDT')
+        self.assertEqual(set(rejected.trade_id),{'subtick'})
+        self.assertEqual(set(rejected.status),{'invalid_tick_geometry'})
+        self.assertEqual(audit['positions'],2)
+        self.assertEqual(set(rows.parent_id),{'valid'})
+
     def test_tp1_then_stop_keeps_half_costs_and_original_risk(self):
         f=pd.DataFrame([[104]*4,[104,105,100,101],[101,111,99,101],[101,102,97,99],[99]*4],
             columns=['open','high','low','close'],index=pd.date_range('2026-01-06',periods=5,freq='5min',tz='UTC'))
