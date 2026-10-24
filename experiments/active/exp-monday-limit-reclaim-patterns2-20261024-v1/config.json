@@ -1,0 +1,11 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-patterns2-20261024-v1",
+  "question": "Owner 2026-10-24 '还有吗' then '需要等60min吗 太久了 有小级别的吗': more entry-time patterns, and do the patterns hold with 5m/15m confirmation?",
+  "source_snapshot": "output/monday-partial-snapshot-20261024-2224 (536/633 symbols), alts, near Monday edge target; confirmation 5/15/60m (1m/3m exist for only five symbols)",
+  "new_features": "trend4 (symbol Monday mid vs 4 weeks earlier, signed by side), btc4 (BTCUSDT same, from 2022-11), last_week (previous week same side: untouched/won/lost)",
+  "also": "Previous patterns (volatility quintile, opposite side first) and combinations per confirmation; mean result per confirmation x target x volatility quintile",
+  "split": "discovery before 2025-01-01, validation from 2025-01-01",
+  "limitations": "Post hoc on a partial snapshot; no trade re-executed; forward data needed for any filter.",
+  "training_eligible": false,
+  "production_eligible": false
+}
