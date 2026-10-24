@@ -72,6 +72,7 @@ class ExitPolicy:
     intrabar_path: str | None = None
     fill_maker_fee: float | None = None
     fill_taker_fee: float | None = None
+    reclaim_next_bar: bool = False
 
     def __post_init__(self):
         actual = (self.fill_maker_fee, self.fill_taker_fee)
@@ -81,6 +82,11 @@ class ExitPolicy:
                 raise ValueError("Actual-fill fees require both rates and zero legacy round-trip cost")
         if self.target_breakeven and not self.target_from_entry:
             raise ValueError("Target breakeven requires per-entry targets and parent groups")
+        if self.reclaim_next_bar and (not self.target_from_entry or self.intrabar_path is None
+                or self.opposite_hour_exit or self.breakeven_r is not None
+                or self.time_breakeven_minutes is not None or self.target_breakeven
+                or self.breakeven_on_touch or self.breakeven_includes_cost):
+            raise ValueError("Reclaim requires standalone targets, explicit path and entry-price protection")
         if self.intrabar_path not in (None, "OHLC", "OLHC"):
             raise ValueError("Intrabar path must be OHLC or OLHC")
         if self.breakeven_on_touch and (self.breakeven_r is None or self.intrabar_path is None):
@@ -251,6 +257,9 @@ class TradeState:
     rsi_skipped: int = 0
     rsi_seen: int = 0
     structural_updates: int = 0
+    reclaim_due_ns: int = -1
+    reclaim_i: int = -1
+    reclaim_status: str = "not_applicable"
 
     def __post_init__(self):
         self.remaining = int(self.quantity)
@@ -360,6 +369,10 @@ class IndependentCloseStrategy(Strategy):
         if state.target_order is not None and not state.target_order.is_closed:
             self.cancel_order(state.target_order)
 
+    def _cancel_stop(self, state):
+        if state.stop_order is not None and not state.stop_order.is_closed:
+            self.cancel_order(state.stop_order)
+
     def _protect_target_siblings(self, filled, i):
         """A native TP fill immediately protects only its parent's live legs.
 
@@ -426,9 +439,30 @@ class IndependentCloseStrategy(Strategy):
                 # Fixed-point native Price -> float may differ by one ULP at
                 # large notionals; keep tolerance far below one market tick.
                 raise RuntimeError("Entry did not fill at the signal bar close")
-            self.entering_limit_i = i if self.entry_order_mode == "limit" else None
-            self._submit_protective_stop(state)
-            self.entering_limit_i = None
+            if self.policy.reclaim_next_bar:
+                # Fill-derived clock only. The touch timeframe candle and its
+                # immediate successor must both close before protection exists.
+                minutes = int(state.source["reclaim_minutes"])
+                opened = self.frame.index[i]-pd.Timedelta(minutes=self.execution_minutes)
+                due = opened.floor(f"{minutes}min")+pd.Timedelta(minutes=2*minutes)
+                state.reclaim_due_ns = due.value
+                state.reclaim_status = "pending"
+                # Missing pre-confirmation observations make the path unknown,
+                # including scheduled session closures. This administrative
+                # boundary is censored, never scored as an executed stop/TP.
+                # Only timestamps are examined; no future price is consumed.
+                end = min(len(self.frame)-1, int(self.frame.index.searchsorted(due)))
+                times = self.frame.index.asi8[i:end+1]
+                gaps = np.flatnonzero(np.diff(times) != pd.Timedelta(minutes=self.execution_minutes).value)
+                if len(gaps):
+                    boundary = i+int(gaps[0])
+                    if boundary < state.source["end_i"]:
+                        state.source["end_i"] = boundary
+                        state.source["censor_reason"] = "missing_preconfirmation_interval"
+            else:
+                self.entering_limit_i = i if self.entry_order_mode == "limit" else None
+                self._submit_protective_stop(state)
+                self.entering_limit_i = None
             # Synchronous protection can close a just-filled limit immediately.
             # The callback then resumes here with zero remaining exposure.
             if state.remaining > 0:
@@ -530,6 +564,10 @@ class IndependentCloseStrategy(Strategy):
                        pivot_reference_r=side*(pivot_price-entry)/risk)
         if self.policy.structural_pivot_stop:
             row["structural_updates"] = state.structural_updates
+        if self.policy.reclaim_next_bar:
+            row.update(reclaim_due_ns=state.reclaim_due_ns,
+                       reclaim_i=state.reclaim_i, reclaim_status=state.reclaim_status,
+                       normalization="entry_notional_not_initial_risk")
         self.rows.append(row)
         del self.active[row["trade_id"]]
 
@@ -618,6 +656,23 @@ class IndependentCloseStrategy(Strategy):
             entry, side, risk = row["entry"], row["side"], row["risk"]
             if i > int(row["entry_i"]):
                 state.peak = max(state.peak, side*((high if side > 0 else low)-entry)/risk)
+            if (p.reclaim_next_bar and state.reclaim_status == "pending"
+                    and self.frame.index[i].value >= state.reclaim_due_ns):
+                # Source gaps are bounded by the caller. Never silently confirm
+                # on a later candle when the scheduled decision close is absent.
+                if self.frame.index[i].value != state.reclaim_due_ns:
+                    raise RuntimeError("Missing exact reclaim decision close")
+                state.reclaim_i = i
+                if side*(close-entry)+self.eps >= self.tick:
+                    state.reclaim_status = "reclaimed"
+                    state.stop, state.stop_kind = entry, 1
+                    state.be_trigger_i = state.be_effective_i = i
+                    self._submit_protective_stop(state)
+                else:
+                    state.reclaim_status = "failed"
+                    self._cancel_target(state)
+                    self._market(state, reason=11)
+                    continue
             old_stop = state.stop
             if (p.target_breakeven and p.fill_taker_fee is not None
                     and state.be_trigger_i >= 0 and state.be_effective_i < 0):
@@ -692,7 +747,7 @@ class IndependentCloseStrategy(Strategy):
                 pivot_exit = (self.pivots[2][i] >= self.frame.index[int(row["entry_i"])].value
                               and np.isfinite(pivot_price) and side*(pivot_price-entry) > 0)
             if reverse or pivot_exit or stop_now or i == int(row["end_i"]):
-                self.cancel_order(state.stop_order)
+                self._cancel_stop(state)
                 self._cancel_target(state)
                 self._market(state, reason=9 if stop_now else 7 if pivot_exit else 3 if reverse else 0)
             elif p.rsi_scaleout and self.rsi_side[i] == -side:
@@ -785,18 +840,23 @@ def ohlc_path_frame(frame, path):
 
 
 def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", market_tick=None,
-               *, execution_minutes=5, rsi_side=None, entry_order_mode="market", entry_updates=None):
+               *, execution_minutes=5, rsi_side=None, entry_order_mode="market", entry_updates=None,
+               batch_bars=None):
     """Execute supplied entries using native orders, fills and HEDGING positions.
 
     Frame index is UTC close time. ATR is NaN except at completed management
     closes; hour contains confirmed direction only at completed hourly closes.
     Entries need unique trade_id, entry_i, side, entry, stop, risk and end_i.
     No future excursion or expected-exit fields are read by the strategy.
+    Optional batch_bars streams the same native engine across bounded chunks;
+    open orders and positions survive batch boundaries (1.231.0 run docstring).
     """
     started = time.perf_counter()
     if entry_order_mode not in ("market", "limit"):
         raise ValueError("Unknown entry order mode")
     limit_entry = entry_order_mode == "limit"
+    if policy.reclaim_next_bar and not limit_entry:
+        raise ValueError("Reclaim currently requires a resting limit entry")
     if limit_entry and policy.target_breakeven:
         raise ValueError("Target sibling breakeven currently requires completed-close entries")
     if limit_entry and not (policy.confirmed_pivot_exit or policy.target_from_entry
@@ -804,6 +864,8 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         raise ValueError("Resting entry requires initial-stop/pivot or fixed-target management")
     if execution_minutes not in (1,5):
         raise ValueError("Execution resolution must be 1m or 5m")
+    if batch_bars is not None and (not isinstance(batch_bars, int) or batch_bars < 2):
+        raise ValueError("Streaming batch size must be an integer of at least two bars")
     if policy.rsi_scaleout:
         if (rsi_side is None or len(rsi_side)!=len(frame)
                 or not np.isin(rsi_side,[-1,0,1]).all()):
@@ -883,7 +945,13 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
                 raise ValueError("Limit must be favorable, tick-aligned, and have a bounded expiry")
         elif abs(prices[int(r.entry_i), 3]-r.entry) > tick*1e-7:
             raise ValueError("Entry differs from completed close")
-        if r.stop <= 0 or r.risk < tick-tick*1e-7 or abs(r.side*(r.entry-r.stop)-r.risk) > tick*1e-7:
+        if policy.reclaim_next_bar:
+            minutes = getattr(r, "reclaim_minutes", None)
+            if (not isinstance(minutes, (int, np.integer)) or minutes <= 0
+                    or minutes % execution_minutes or not np.isnan(r.stop)
+                    or abs(r.risk-r.entry) > tick*1e-7):
+                raise ValueError("Reclaim needs whole aligned minutes, no initial stop and entry-notional normalization")
+        elif r.stop <= 0 or r.risk < tick-tick*1e-7 or abs(r.side*(r.entry-r.stop)-r.risk) > tick*1e-7:
             raise ValueError("Invalid initial risk")
         update_i = getattr(r, "stop_update_i", -1)
         if np.isfinite(update_i) and update_i >= 0:
@@ -921,7 +989,8 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         )
         engine.add_instrument(instrument)
         bar_type = BarType.from_str(f"{instrument.id}-{execution_minutes}-MINUTE-LAST-EXTERNAL")
-        execution_frame, point_phases = (ohlc_path_frame(frame, policy.intrabar_path)
+        execution_frame, point_phases = ((None, None) if batch_bars is not None else
+            ohlc_path_frame(frame, policy.intrabar_path)
             if policy.intrabar_path else (frame.copy(), None))
         strategy = IndependentCloseStrategy(
             instrument, bar_type, frame, atr, hour, entries, policy, fee_model, tick,
@@ -930,12 +999,30 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         engine.add_strategy(strategy)
         # Synthetic liquidity deliberately decouples each independent entry
         # from other entries. These are unit returns, not capacity estimates.
-        execution_frame["volume"] = 1_000_000_000_000.
-        engine.add_data(BarDataWrangler(bar_type, instrument).process(execution_frame))
         prepared = time.perf_counter()
         with warnings.catch_warnings(record=True) as emitted:
             warnings.simplefilter("always")
-            engine.run()
+            if batch_bars is None:
+                execution_frame["volume"] = 1_000_000_000_000.
+                engine.add_data(BarDataWrangler(bar_type, instrument).process(execution_frame))
+                prepared = time.perf_counter()
+                engine.run()
+            else:
+                for start in range(0, len(frame), batch_bars):
+                    chunk = frame.iloc[start:start+batch_bars]
+                    if policy.intrabar_path:
+                        execution_frame, local_phases = ohlc_path_frame(chunk, policy.intrabar_path)
+                        phases = {t:(start+i, phase) for t,(i,phase) in local_phases.items()}
+                    else:
+                        execution_frame, phases = chunk.copy(), {}
+                    strategy.point_phases = phases
+                    strategy.indices = {int(t):start+i for i,t in enumerate(chunk.index.asi8)}
+                    strategy.indices.update({t:i for t,(i,_) in phases.items()})
+                    execution_frame["volume"] = 1_000_000_000_000.
+                    engine.add_data(BarDataWrangler(bar_type, instrument).process(execution_frame))
+                    engine.run(streaming=True)
+                    engine.clear_data()
+                engine.end()
         if strategy.errors:
             raise RuntimeError(f"Native order errors: {strategy.errors[:3]}")
         expired = sum(r["status"] == "expired" for r in strategy.opportunity_rows)
@@ -969,10 +1056,12 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             breakeven_includes_cost=policy.breakeven_includes_cost,
             fill_maker_fee=policy.fill_maker_fee, fill_taker_fee=policy.fill_taker_fee,
             breakeven_on_touch=policy.breakeven_on_touch,
+            reclaim_next_bar=policy.reclaim_next_bar,
             intrabar_path=policy.intrabar_path,
             synthetic_segments_per_bar=4 if policy.intrabar_path else 1,
             positions=len(positions), fills=len(fills),
             execution_minutes=execution_minutes,
+            streaming_batch_bars=batch_bars,
             rsi_scaleout="five original20percent reductions at fee-positive opposite confirmed strong closes" if policy.rsi_scaleout else "disabled",
             rsi_skip_events=policy.rsi_skip_events,
             timed_be_minutes=policy.time_breakeven_minutes,
@@ -986,12 +1075,13 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             prepare_seconds=prepared-started,
             replay_seconds=time.perf_counter()-prepared,
             runtime_warnings=sorted({str(w.message) for w in emitted}),
-            accounting="independent original-risk R; frozen account; not portfolio returns",
+            accounting=("independent entry-notional fractions; no initial risk stop; not R or portfolio returns"
+                        if policy.reclaim_next_bar else "independent original-risk R; frozen account; not portfolio returns"),
         )
         if limit_entry:
             audit.update(entry_order_mode="limit", opportunities=strategy.opportunity_rows,
                 cancelled=cancelled, pending_amendments=strategy.pending_update_rows,
-                expired=expired, entry_fill="Native resting limit after signal close; fixed limit price even on favorable gaps; OHLC order O-H-L-C; synchronous protection on fill; entry-bar stop book uses stop/adverse open, later stops use native model; expiry after last eligible bar matching", entry_bar_mfe="excluded")
+                expired=expired, entry_fill="Native resting limit after signal close; fixed limit price even on favorable gaps; OHLC order O-H-L-C; protection follows configured policy (reclaim mode has no initial stop); any entry-bar stop book uses stop/adverse open, later stops use native model; expiry after last eligible bar matching", entry_bar_mfe="excluded")
         if policy.structural_pivot_stop:
             audit["protection_updates"] = strategy.protection_updates
         return rows, fills, audit

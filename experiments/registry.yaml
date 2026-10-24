@@ -13486,3 +13486,15 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     result: "638registered files,505eligible;355coins,332lower/34upper/11both;366coin-side events and5492actual touching5m.198coins/206events firstweekly onday.128flat/zero-volume and5basket/stable/metals excluded.187symbols439824overlapbars agree. Lower4h inward124/332,72h320/332;paired268 lower72h signal11.635percent versus random13.153percent.183wick-first events,175later close outside.732charts,full Chinese HTML and per-bar explorer. Descriptive prices, not net strategy returns. Notion4028856479af81fcaa81f8ba738f2843 read back."
+
+  - experiment_id: exp-monday-limit-reclaim-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 33eeb3adbb
+    status: active
+    question: First weekly directional1.618 limit with no initial stop; does next-candle reclaim and exact-entry protection reach five fixed targets?
+    single_variable: Owner-fixed1/3/5/15/60minute confirmation and five separate full-position targets; compare targets within timeframe and timeframes within target. No outcome-selected optimization.
+    canonical_report: experiments/active/exp-monday-limit-reclaim-20261024-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Native633asset source cohort; real1m available for6crypto andspotgold only, others5m. SameNYweek/direction/causal-volatility matched random attempts retained even unfilled. Exactentry stop is not fee breakeven. Entry-notional returns, no initial R. Source page4038856479af8029a91ec6bfe4a6002f andowner answers saved. No newHTML requested in this task.

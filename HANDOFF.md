@@ -1,3 +1,8 @@
+## 2026-10-24 · Notion 1.618 limit/reclaim study rules frozen
+
+- Source task70 `4038856479af8029a91ec6bfe4a6002f` is separate from completed MA6 and pending4hN5 pullback. Owner confirmed: inspect immediate next timeframe candle CLOSE aftertouch; no initial stop duringwait; if strictly reclaimed, arm exactentry stop; otherwise marketexit. Targets separatelyfull: nearMonday,near+.5range,near+.618range,oppositeMonday,opposite1618;shortmirrored. Restingtargets fromfill mayexitbeforeconfirmation andwillbe countedseparately.
+- New experiment `experiments/active/exp-monday-limit-reclaim-20261024-v1/`, immutable originalsources:633assets,6crypto+spotXAU real1m support1/3/5/15/60minutes;626othercrypto5m support5/15/60only. GoldHistData clock/conflict rules reused; unknownfees/grossonly. Actualmaker/taker perfill forcrypto; no initialR, reportentry-notionalbp. Fixedmatrix and3matchedrandom attempts, unfilled/censored retained.15focusedtests pass; native longhistory streamsoneengine perasset. Code/config committedbeforehistoricalrun; successfulidentities cannot silently replay. No model/service/livechange.
+
 ## 2026-10-24 · Notion MA6 retest native study complete; detailed report delivery
 
 - Owner confirmed cumulative third-new-extreme invalidation, lowestMA minus0.5percent/highest plus0.5percent, both single-target exits andequalhalves. Native633/633complete:72429opportunities,28105orders,45186nativelegs,90372fills includingrandom. Frozen successful629assets were not rerun;commit0dd3963687 fixes post-quantization passivegeometry andonly4failed jobs retried. Sixfinalfocusedtests passed;earlier20focused/78management regressions retained. Config's launch-time status text is historical;summary.json is current completion authority.
