@@ -112,9 +112,93 @@ class MondayLimitReclaimInputTests(unittest.TestCase):
 
         self.assertTrue(week["monday_valid"])
         self.assertEqual(week["observed_monday_5m_bins"], 240)
+        self.assertFalse(week["monday_grid_complete"])
+        self.assertEqual(week["monday_grid_status"], "incomplete_grid")
+        grid_audit = inputs._monday_grid_audit(index)
+        self.assertEqual(grid_audit["incomplete_weeks"], ["2026-10-19"])
+        self.assertEqual(grid_audit["weeks"][0]["missing_minutes"], 240)
+        self.assertIn(">=240 observed Monday 5m bins", grid_audit["eligibility_policy"])
         self.assertEqual(week["monitor_start_i"], len(monday))
         self.assertEqual(week["monitor_start_delay_minutes"], 0.0)
         self.assertEqual(week["monitor_cutoff_cause"], "source_end")
+
+    def test_gold_monitor_cuts_at_first_unclassified_minute_gap_and_keeps_audit_segments(self):
+        monday_local = pd.Timestamp("2026-10-19 00:00:00", tz=inputs.TZ)
+        monday_utc = monday_local.tz_convert("UTC")
+        monday = pd.date_range(monday_utc, periods=240 * 5, freq="min")
+        tuesday_utc = (monday_local + pd.DateOffset(days=1)).tz_convert("UTC")
+        monitor = pd.DatetimeIndex([
+            tuesday_utc + pd.Timedelta(minutes=i) for i in [0, 1, 2, 3, 4, 7, 8, 10, 11]
+        ])
+        index = monday.append(monitor)
+        frame = pd.DataFrame({
+            "open": 100.0,
+            "high": 101.0,
+            "low": 99.0,
+            "close": 100.0,
+            "volume": np.nan,
+        }, index=index)
+        frame.attrs["group"] = "spot_gold"
+
+        week = inputs.weekly_context(frame, 1)[0]
+
+        self.assertTrue(week["monday_valid"])
+        self.assertFalse(week["monday_grid_complete"])
+        self.assertEqual(week["monitor_start_reason"], "exact_tuesday_open")
+        self.assertTrue(week["monitor_valid"])
+        self.assertEqual(week["monitor_end_i_exclusive"], len(monday) + 5)
+        self.assertEqual(week["monitor_cutoff_cause"], "unclassified_gold_gap")
+        self.assertEqual(week["monitor_cutoff_time"], str(tuesday_utc + pd.Timedelta(minutes=5)))
+        self.assertEqual(week["monitor_gap_count"], 2)
+        self.assertEqual([gap["reason"] for gap in week["monitor_gaps"]],
+                         ["unclassified_gold_gap", "unclassified_gold_gap"])
+        self.assertEqual(len(week["monitor_segments"]), 3)
+
+    def test_gold_missing_exact_tuesday_open_is_unobservable_for_first_touch(self):
+        monday_local = pd.Timestamp("2026-10-19 00:00:00", tz=inputs.TZ)
+        monday_utc = monday_local.tz_convert("UTC")
+        monday = pd.date_range(monday_utc, periods=240 * 5, freq="min")
+        tuesday_utc = (monday_local + pd.DateOffset(days=1)).tz_convert("UTC")
+        delayed = pd.date_range(tuesday_utc + pd.Timedelta(minutes=1), periods=5, freq="min")
+        frame = pd.DataFrame({
+            "open": 100.0,
+            "high": 101.0,
+            "low": 99.0,
+            "close": 100.0,
+            "volume": np.nan,
+        }, index=monday.append(delayed))
+        frame.attrs["group"] = "spot_gold"
+
+        week = inputs.weekly_context(frame, 1)[0]
+
+        self.assertTrue(week["monday_valid"])
+        self.assertEqual(week["monitor_start_i"], len(monday))
+        self.assertEqual(week["monitor_start_delay_minutes"], 1.0)
+        self.assertEqual(week["monitor_start_reason"], "missing_exact_tuesday_open")
+        self.assertEqual(week["monitor_unobservable_reason"], "missing_exact_tuesday_open")
+        self.assertFalse(week["monitor_valid"])
+        self.assertFalse(week["valid"])
+        self.assertEqual(week["monitor_gaps"][0]["reason"], "missing_exact_tuesday_open")
+
+    def test_gold_with_no_tuesday_bars_is_unobservable(self):
+        monday_local = pd.Timestamp("2026-10-19 00:00:00", tz=inputs.TZ)
+        monday_utc = monday_local.tz_convert("UTC")
+        monday = pd.date_range(monday_utc, periods=240 * 5, freq="min")
+        frame = pd.DataFrame({
+            "open": 100.0,
+            "high": 101.0,
+            "low": 99.0,
+            "close": 100.0,
+            "volume": np.nan,
+        }, index=monday)
+        frame.attrs["group"] = "spot_gold"
+
+        week = inputs.weekly_context(frame, 1)[0]
+
+        self.assertEqual(week["monitor_start_reason"], "missing_exact_tuesday_open")
+        self.assertEqual(week["monitor_cutoff_cause"], "missing_monitor_start")
+        self.assertFalse(week["monitor_valid"])
+        self.assertFalse(week["valid"])
 
 
 if __name__ == "__main__":

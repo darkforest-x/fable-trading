@@ -35,11 +35,11 @@ CODE = ['yoyo/evaluation/monday_limit_reclaim.py',
 def segment_ends(f, job):
     """Data boundaries only, never price-dependent holding deadlines."""
     n=len(f); step=pd.Timedelta(minutes=job['execution_minutes']).value
+    discontinuous=np.diff(f.index.as_unit("ns").asi8)!=step
     if job['symbol']=='XAUUSD':
-        values=f.quality_segment.to_numpy()
-        cuts=np.flatnonzero(np.diff(values)!=0)+1
-    else:
-        cuts=np.flatnonzero(np.diff(f.index.asi8)!=step)+1
+        # Without an audited session calendar no missing minute is assumed safe.
+        discontinuous |= np.diff(f.quality_segment.to_numpy())!=0
+    cuts=np.flatnonzero(discontinuous)+1
     starts=np.r_[0,cuts]; ends=np.r_[cuts,n]-1
     return np.repeat(ends,np.diff(np.r_[starts,n]))
 
@@ -71,7 +71,7 @@ portfolio or an unqualified full-process causal effect.
             common=dict(event_id=event,symbol=job['symbol'],asset_group=('XAUUSD' if job['symbol']=='XAUUSD' else job['symbol'].removesuffix('USDT') if job['symbol'] in ('BTCUSDT','ETHUSDT') else 'ALTCOINS'),source_group=job['group'],week=week,
                         side=side,execution_minutes=job['execution_minutes'])
             if not w.get('valid',False):
-                opportunities.append(dict(common,status='unobservable_week',detail=w.get('monday_exclusion_reason') or w.get('monitor_start_reason') or 'invalid_week'));continue
+                opportunities.append(dict(common,status='unobservable_week',detail=(w.get('monday_exclusion_reason') if not w.get('monday_valid') else w.get('monitor_unobservable_reason') or w.get('monitor_start_reason')) or 'invalid_week'));continue
             hi,lo=float(w['monday_high']),float(w['monday_low']);width=hi-lo
             level=lo-.618*width if side==1 else hi+.618*width
             entry=float(np.floor(level/tick+1e-7)*tick if side==1 else np.ceil(level/tick-1e-7)*tick)

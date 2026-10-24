@@ -2,7 +2,7 @@
 import unittest
 import numpy as np
 import pandas as pd
-from yoyo.evaluation.monday_limit_reclaim import prepare
+from yoyo.evaluation.monday_limit_reclaim import prepare, segment_ends
 
 
 class ReclaimAdmissionTests(unittest.TestCase):
@@ -25,6 +25,11 @@ class ReclaimAdmissionTests(unittest.TestCase):
         self.assertTrue(orders.asset_group.eq('ALTCOINS').all())
         np.testing.assert_allclose(orders.target_price.iloc[:5],[98.,100.,100.472,102.,104.472])
         self.assertEqual(set(orders.reclaim_minutes),{5,15,60})
+
+    def test_gold_postconfirmation_missing_minutes_bound_position(self):
+        f=pd.DataFrame({'quality_segment':[0,0,0,0]},index=pd.to_datetime([
+            '2026-01-06T00:00Z','2026-01-06T00:01Z','2026-01-06T00:11Z','2026-01-06T00:12Z']))
+        np.testing.assert_array_equal(segment_ends(f,dict(symbol='XAUUSD',execution_minutes=1)),[1,1,3,3])
 
     def test_gold_conflicting_monday_blocks_whole_week(self):
         f,job,cfg=self.fixture();f.attrs['group']='spot_gold';f['quality_segment']=0

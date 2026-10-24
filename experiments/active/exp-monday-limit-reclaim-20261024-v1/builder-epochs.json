@@ -1,0 +1,50 @@
+{
+  "initial_builder": "4b4f1e9002",
+  "initial_successful_assets": [
+    "BTCUSDT",
+    "1000SHIBUSDT"
+  ],
+  "followup_change": "Gold-only missing-minute monitoring and position boundary repair before any gold execution; normalize segmentation timestamp units explicitly; improve invalid-week audit reason. Crypto execution unchanged; all real loaders normalize index to ns. Never replay the two completed assets.",
+  "censoring": "All unclassified timestamp gaps end gold monitoring prefix and held exposure; scheduled sessions are not guessed. Gold Monday>=240 five-minute bins remains unchanged, incomplete anchor grids diagnosed.",
+  "initial_results": {
+    "BTCUSDT": {
+      "symbol": "BTCUSDT",
+      "execution_minutes": 1,
+      "confirm_minutes": [
+        1,
+        3,
+        5,
+        15,
+        60
+      ],
+      "rows": 2059200,
+      "first": "2022-11-01 00:00:00+00:00",
+      "last": "2026-09-30 23:59:00+00:00",
+      "opportunities": 410,
+      "touched": 171,
+      "orders": 17100,
+      "positions": 16300,
+      "fills": 32600,
+      "seconds": 284.5554272090085
+    },
+    "1000SHIBUSDT": {
+      "symbol": "1000SHIBUSDT",
+      "execution_minutes": 5,
+      "confirm_minutes": [
+        5,
+        15,
+        60
+      ],
+      "rows": 564893,
+      "first": "2021-05-10 17:35:00+00:00",
+      "last": "2026-09-23 03:55:00+00:00",
+      "opportunities": 562,
+      "touched": 224,
+      "orders": 13395,
+      "positions": 12270,
+      "fills": 24540,
+      "seconds": 136.3331945409882
+    }
+  },
+  "resume_command": "Invoke module with --symbols listing jobs without done.json. Explicit existing-symbol invocation still fails closed on changed builder identity."
+}

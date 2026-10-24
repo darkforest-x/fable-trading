@@ -264,6 +264,7 @@ def load_job(job: dict[str, Any]) -> tuple[pd.DataFrame, dict[str, Any]]:
         frame, quality = _clean_gold_minutes(raw)
         _validate_ohlcv(frame.assign(volume=0.0), "spot_gold")
         frame["volume"] = np.nan
+        quality["monday_grid_audit"] = _monday_grid_audit(frame.index)
     else:
         raise ValueError(f"Unknown source group: {group}")
 
@@ -289,6 +290,36 @@ def _week_mondays(index: pd.DatetimeIndex) -> pd.DatetimeIndex:
     return pd.date_range(first, last, freq="7D")
 
 
+def _monday_grid_audit(index: pd.DatetimeIndex) -> dict[str, Any]:
+    """Report exact NY-Monday 1m-grid completeness without changing gold eligibility."""
+    index = pd.DatetimeIndex(index).tz_convert("UTC").as_unit("ns")
+    rows = []
+    for naive_monday in _week_mondays(index):
+        monday_utc = naive_monday.tz_localize(TZ).tz_convert("UTC")
+        tuesday_utc = (naive_monday.tz_localize(TZ) + pd.DateOffset(days=1)).tz_convert("UTC")
+        left = int(index.searchsorted(monday_utc))
+        right = int(index.searchsorted(tuesday_utc))
+        expected = pd.date_range(monday_utc, tuesday_utc, freq="1min", inclusive="left")
+        observed = index[left:right]
+        complete = bool(observed.equals(expected))
+        rows.append(dict(
+            week=naive_monday.strftime("%Y-%m-%d"),
+            status="complete" if complete else "incomplete_grid",
+            complete=complete,
+            expected_minutes=len(expected),
+            observed_minutes=len(observed),
+            missing_minutes=int(len(expected.difference(observed))),
+        ))
+    incomplete = [row["week"] for row in rows if not row["complete"]]
+    return dict(
+        eligibility_policy="Existing gold anchor threshold remains >=240 observed Monday 5m bins",
+        completeness_policy="Exact NY-Monday 1m grid is diagnostic only; it does not replace the anchor threshold",
+        weeks=rows,
+        incomplete_week_count=len(incomplete),
+        incomplete_weeks=incomplete,
+    )
+
+
 def _segments(index: pd.DatetimeIndex, start_i: int, end_i: int,
               step: pd.Timedelta) -> list[dict[str, Any]]:
     if start_i is None or end_i is None or end_i <= start_i:
@@ -309,7 +340,7 @@ def _monitor_gaps(index: pd.DatetimeIndex, start_i: int, end_i: int,
     gaps = _gap_records(index, step, start_i, end_i)
     if gold:
         for gap in gaps:
-            gap["reason"] = "unclassified_spot_session_or_source_gap"
+            gap["reason"] = "unclassified_gold_gap"
     else:
         for gap in gaps:
             gap["reason"] = "missing_execution_bar"
@@ -324,9 +355,9 @@ def weekly_context(frame: pd.DataFrame, execution_minutes: int,
     anchor-valid only if every expected execution OPEN exists on Monday, and
     monitoring starts only at the exact Tuesday 00:00 NY open. Its range ends
     immediately before the first missing bar. Gold keeps the established
-    >=240 observed Monday 5m-bin threshold; gaps are preserved and reported,
-    since the source includes normal market closures as well as possible data
-    gaps and this layer does not infer a session calendar.
+    >=240 observed Monday 5m-bin threshold, flags incomplete minute grids, and
+    treats every unclassified monitor gap as a cutoff because this layer has no
+    auditable session calendar.
     """
     if execution_minutes not in (1, 5):
         raise ValueError("execution_minutes must be 1 or 5")
@@ -384,24 +415,50 @@ def weekly_context(frame: pd.DataFrame, execution_minutes: int,
         monitor_cutoff_time = None
         monitor_cutoff_cause = None
         monitor_start_reason = None
+        monitor_unobservable_reason = None
 
         if gold:
             if monitor_left < monitor_right:
                 monitor_start_i = monitor_left
-                monitor_end_i = monitor_right
                 monitor_start_time = str(index[monitor_start_i])
                 delay = index[monitor_start_i] - tuesday_utc
                 monitor_start_delay_minutes = delay.total_seconds() / 60
-                monitor_start_reason = "exact_tuesday_open" if delay == pd.Timedelta(0) else "first_observed_after_tuesday_open"
-                if monitor_right < len(index):
+                if delay == pd.Timedelta(0):
+                    monitor_start_reason = "exact_tuesday_open"
+                else:
+                    monitor_start_reason = "missing_exact_tuesday_open"
+                    monitor_unobservable_reason = "missing_exact_tuesday_open"
+
+                segment = index[monitor_left:monitor_right]
+                expected_last = next_monday_utc - step
+                deltas = np.diff(segment.asi8)
+                break_positions = np.flatnonzero(deltas != step.value)
+                if len(break_positions):
+                    first_break = int(break_positions[0])
+                    monitor_end_i = monitor_left + first_break + 1
+                    monitor_cutoff_time = str(index[monitor_end_i - 1] + step)
+                    monitor_cutoff_cause = "unclassified_gold_gap"
+                elif len(segment) and segment[-1] == expected_last:
+                    monitor_end_i = monitor_right
                     monitor_cutoff_time = str(next_monday_utc)
                     monitor_cutoff_cause = "next_monday"
+                elif monitor_right < len(index):
+                    monitor_end_i = monitor_right
+                    monitor_cutoff_time = str(segment[-1] + step) if len(segment) else str(tuesday_utc)
+                    monitor_cutoff_cause = "unclassified_gold_gap"
                 elif len(index) and index[-1] < next_monday_utc:
+                    monitor_end_i = monitor_right
                     monitor_cutoff_time = str(index[-1] + step)
                     monitor_cutoff_cause = "source_end"
                 else:
+                    monitor_end_i = monitor_right
                     monitor_cutoff_time = str(next_monday_utc)
                     monitor_cutoff_cause = "next_monday"
+            else:
+                monitor_start_reason = "missing_exact_tuesday_open"
+                monitor_unobservable_reason = "missing_exact_tuesday_open"
+                monitor_cutoff_time = str(tuesday_utc)
+                monitor_cutoff_cause = "missing_monitor_start"
         else:
             if monitor_left < monitor_right and index[monitor_left] == tuesday_utc:
                 monitor_start_i = monitor_left
@@ -437,8 +494,15 @@ def weekly_context(frame: pd.DataFrame, execution_minutes: int,
         if monitor_start_i is not None and monitor_end_i is not None:
             # Keep all observed breaks in the NY monitoring week for audit, even
             # though crypto's usable prefix ends at its first break.
-            gap_scan_end = monitor_right if not gold else monitor_end_i
+            gap_scan_end = monitor_right
             monitor_gaps = _monitor_gaps(index, monitor_start_i, gap_scan_end, step, gold)
+            if gold and monitor_start_reason == "missing_exact_tuesday_open":
+                monitor_gaps.insert(0, dict(
+                    before_i=None, after_i=monitor_start_i, before=None,
+                    after=str(index[monitor_start_i]), expected_missing=str(tuesday_utc),
+                    elapsed_minutes=monitor_start_delay_minutes,
+                    missing_intervals=None, reason="missing_exact_tuesday_open",
+                ))
             if not gold and monitor_cutoff_cause == "source_end":
                 last_i = monitor_end_i - 1
                 if last_i >= monitor_start_i and index[last_i] + step < next_monday_utc:
@@ -447,26 +511,37 @@ def weekly_context(frame: pd.DataFrame, execution_minutes: int,
                         expected_missing=str(index[last_i] + step), elapsed_minutes=None,
                         missing_intervals=None, reason="source_end_before_next_monday",
                     ))
-            monitor_segments = _segments(index, monitor_start_i, monitor_end_i, step)
+            # Preserve every observed source segment for audit, including data
+            # after the first unclassified gold cutoff.
+            monitor_segments = _segments(index, monitor_start_i,
+                                         monitor_right if gold else monitor_end_i, step)
         else:
             monitor_gaps = []
-            if not gold and monitor_start_reason == "missing_exact_tuesday_open" and monitor_left < monitor_right:
+            if monitor_start_reason == "missing_exact_tuesday_open":
                 monitor_gaps.append(dict(
                     before_i=None, after_i=monitor_left, before=None,
-                    after=str(index[monitor_left]), expected_missing=str(tuesday_utc),
-                    elapsed_minutes=(index[monitor_left] - tuesday_utc).total_seconds() / 60,
+                    after=str(index[monitor_left]) if monitor_left < monitor_right else None,
+                    expected_missing=str(tuesday_utc),
+                    elapsed_minutes=((index[monitor_left] - tuesday_utc).total_seconds() / 60
+                                     if monitor_left < monitor_right else None),
                     missing_intervals=None, reason="missing_exact_tuesday_open",
                 ))
             monitor_segments = []
 
-        monitor_valid = monitor_start_i is not None and monitor_end_i is not None and monitor_end_i > monitor_start_i
+        monitor_valid = (monitor_start_i is not None and monitor_end_i is not None
+                         and monitor_end_i > monitor_start_i
+                         and monitor_start_reason == "exact_tuesday_open")
+        monday_grid_complete = bool(observed.equals(expected))
         rows.append(dict(
             week=week,
             valid=bool(monday_valid and monitor_valid),
             monday_valid=bool(monday_valid),
             monitor_valid=bool(monitor_valid),
             monday_exclusion_reason=monday_exclusion,
+            monday_grid_complete=monday_grid_complete,
+            monday_grid_status="complete" if monday_grid_complete else "incomplete_grid",
             monitor_start_reason=monitor_start_reason,
+            monitor_unobservable_reason=monitor_unobservable_reason,
             monday_high=monday_high,
             monday_low=monday_low,
             monday_start_utc=str(monday_utc),
