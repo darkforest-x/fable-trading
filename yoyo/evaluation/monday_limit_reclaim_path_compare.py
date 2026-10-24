@@ -92,6 +92,7 @@ def run():
         raise RuntimeError('Commit builder first')
     cfg = json.loads((EXP/'config.json').read_text())
     syms = [r['symbol'] for r in json.loads(SNAP.read_text())['studies']['limit-reclaim']]
+    syms += json.loads((OLHC.parent/'config.json').read_text()).get('extension_symbols', [])
     with ProcessPoolExecutor(4) as ex:
         a = pd.concat(list(ex.map(load_ohlc, syms, chunksize=8)), ignore_index=True)
         b = pd.concat(list(ex.map(load_olhc, syms, chunksize=8)), ignore_index=True)
