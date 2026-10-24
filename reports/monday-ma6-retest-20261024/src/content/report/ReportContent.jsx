@@ -270,17 +270,19 @@ function CompactSummary({rows}) {
 }
 
 function SampleGallery({samples}) {
+  const sampleKind = (row) => row.sample_kind === "trade" ? row.outcome : row.sample_kind;
+  const kindLabels = {win: "盈利", loss: "亏损", winner: "盈利", loser: "亏损", unfilled: "未成交", invalidated: "失效", invalidated_monitor: "监控失效"};
   const [filters, setFilters] = useState({exit: "ALL", asset: "ALL", direction: "ALL", kind: "ALL", selected: ""});
   const choiceConfig = {
     exit: filterChoices(samples, ["exit_mode", "exit_policy"], EXIT_LABELS),
     asset: filterChoices(samples, ["asset_group", "group", "asset"], ASSET_LABELS),
     direction: filterChoices(samples, ["direction", "side"], {1: "多头", "-1": "空头", long: "多", short: "空", 多: "多", 空: "空"}),
-    kind: filterChoices(samples, ["sample_kind", "outcome", "status"], {winner: "盈利", loser: "亏损", unfilled: "未成交", invalidated: "失效"}),
+    kind: filterChoices(samples.map((row) => ({kind: sampleKind(row)})), ["kind"], kindLabels),
   };
   const matches = samples.filter((row) => {
     const actual = {
       exit: valueOf(row, ["exit_mode", "exit_policy"]), asset: valueOf(row, ["asset_group", "group", "asset"]),
-      direction: valueOf(row, ["direction", "side"]), kind: valueOf(row, ["sample_kind", "outcome", "status"]),
+      direction: valueOf(row, ["direction", "side"]), kind: sampleKind(row),
     };
     return Object.entries(actual).every(([key, value]) => filters[key] === "ALL" || String(value ?? "") === filters[key]);
   });
@@ -308,7 +310,7 @@ function SampleGallery({samples}) {
           choices={matches.map(idFor)}
           choiceLabels={Object.fromEntries(matches.map((row, index) => {
             const id = idFor(row, index);
-            const kind = labelValue(row.sample_kind ?? row.outcome, {winner: "盈利", loser: "亏损", unfilled: "未成交", invalidated: "失效"});
+            const kind = labelValue(sampleKind(row), kindLabels);
             return [id, id + " · " + (row.symbol || "—") + " · " + kind];
           }))}
           onChange={(value) => setFilters((state) => ({...state, selected: value}))}/>
