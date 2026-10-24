@@ -97,6 +97,8 @@ def table(s, col, labels=None):
         key = h[col] if labels is None else pd.cut(h[col], bins=labels[0], labels=labels[1])
         rows = {}
         for b, g in h.groupby(key, observed=True):
+            if len(g) < 50:
+                continue
             c = g[g.complete]
             rows[str(b)] = dict(n=len(g), win_pct=float(100*(g.net_bp > 0).mean()), mean_bp=float(g.net_bp.mean()),
                                 median_bp=float(g.net_bp.median()), tp_pct_median=float(g.tp_pct.median()),
@@ -128,7 +130,8 @@ def charts(res, mix):
             for sp in ('top', 'right'):
                 ax.spines[sp].set_visible(False)
         axes.flat[0].set_ylabel(ylab); axes.flat[5].set_ylabel(ylab)
-        axes.flat[0].legend(frameon=False, loc='upper left')
+        h, l = axes.flat[0].get_legend_handles_labels()
+        fig.legend(h, l, frameon=False, ncols=2, loc='upper right')
         fig.suptitle(f"{ylab} · 山寨币 1.618 挂单 · 60分钟确认 · 止盈近侧周一边界（只用入场时已知的信息）", color=INK, x=.01, ha='left')
         fig.tight_layout(); fig.savefig(EXP/fname, dpi=120); plt.close(fig)
     fig, ax = plt.subplots(figsize=(9, 3.6))
@@ -145,6 +148,48 @@ def charts(res, mix):
         ax.spines[sp].set_visible(False)
     ax.set_title('确认时间越短，保本出场越多、止盈越少', color=INK, loc='left', pad=28)
     fig.tight_layout(); fig.savefig(EXP/'3_outcome_mix_by_confirm.png', dpi=130); plt.close(fig)
+
+
+COMBOS = (('全部', lambda e: e.net_bp.notna()), ('波动最高20%', lambda e: e.vol_q == '最高'),
+          ('波动前40%', lambda e: e.vol_q.isin(['高', '最高'])), ('另一侧1.618先触及', lambda e: e.opp_first == '是'),
+          ('该币此前胜率≥35%', lambda e: e.prior_win >= .35),
+          ('波动最高 + 周二/周三', lambda e: (e.vol_q == '最高') & e.weekday.isin(['周二', '周三'])),
+          ('波动最高 + 前1h无其他币同向', lambda e: (e.vol_q == '最高') & (e.cluster == 0)),
+          ('波动最高 + 另一侧先触及', lambda e: (e.vol_q == '最高') & (e.opp_first == '是')))
+
+
+def combos(s):
+    out = {}
+    for name, f in COMBOS:
+        m = f(s); out[name] = {}
+        for half, h in (('discovery', s.t < SPLIT), ('validation', s.t >= SPLIT)):
+            g = s[m & h]; c = g[g.complete]
+            out[name][half] = dict(n=len(g), win_pct=float(100*(g.net_bp > 0).mean()), mean_bp=float(g.net_bp.mean()),
+                                   median_bp=float(g.net_bp.median()), excess_bp=float((c.net_bp-c.cm).mean()))
+    return out
+
+
+def combo_chart(cmb):
+    import matplotlib.pyplot as plt
+    fig, axes = plt.subplots(1, 2, figsize=(15, 5.2))
+    names = list(cmb); y = np.arange(len(names)); w = .38
+    for ax, metric, title in ((axes[0], 'win_pct', '胜率 %'), (axes[1], 'mean_bp', '每笔扣费后平均 bp')):
+        for off, half, col, lab in ((-w/2, 'discovery', BLUE, '2025年前'), (w/2, 'validation', ORANGE, '2025年起')):
+            v = [cmb[n][half][metric] for n in names]
+            ax.barh(y+off, v, w*.92, color=col, label=lab)
+            for yy, vv, n in zip(y+off, v, names):
+                txt = f'{vv:.0f}%' if metric == 'win_pct' else f'{vv:+.0f}'
+                if metric == 'win_pct':
+                    txt += f"（{cmb[n][half]['n']}笔）"
+                ax.text(vv, yy, ' '+txt, va='center', ha='left', color=INK, fontsize=8)
+        ax.set_yticks(y, names); ax.invert_yaxis(); ax.set_title(title, color=INK, loc='left')
+        ax.axvline(0, color='#c3c2b7', lw=1); ax.grid(axis='x', color=GRID, lw=.6)
+        for sp in ('top', 'right'):
+            ax.spines[sp].set_visible(False)
+    axes[0].set_xlim(0, 65); axes[1].set_xlim(0, 125); axes[1].set_yticks(y, [''] * len(names))
+    h, l = axes[0].get_legend_handles_labels(); fig.legend(h, l, frameon=False, ncols=2, loc='upper right')
+    fig.suptitle('入场前可知条件的组合 · 两个时间段分别统计（事后挑选，需前向验证）', color=INK, x=.01, ha='left')
+    fig.tight_layout(); fig.savefig(EXP/'4_combos.png', dpi=130); plt.close(fig)
 
 
 def run():
@@ -166,14 +211,18 @@ def run():
     j = ctl.reindex(grp[sig.index]); sig['complete'] = (j.n == 3).to_numpy(); sig['cm'] = j.cm.to_numpy()
     s = features(sig)
     s['vol_q'] = pd.qcut(s.bucket.rank(method='first'), 5, labels=['最低', '低', '中', '高', '最高'])
+    s['side'] = pd.Categorical(s.side.map({1: '做多', -1: '做空'}), ['做多', '做空'])
+    days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+    s['weekday'] = pd.Categorical(s.weekday.map(dict(enumerate(days))), days)
+    s['opp_first'] = pd.Categorical(s.opp_first.map({0: '否', 1: '是'}), ['否', '是'])
     res = {f: table(s, f, BINS.get(f)) for f in ('range_pct', 'range_vs_typical', 'side', 'hours_after', 'weekday',
                                                   'age_weeks', 'vol_q', 'cluster', 'opp_first', 'prior_win')}
     res['hour_utc'] = table(s.assign(h4=(s.hour_utc//6)*6), 'h4')
     EXP.mkdir(exist_ok=True)
     s[['symbol', 'week', 'side', 't', 'net_bp', 'complete', 'cm', 'range_pct', 'tp_pct', 'range_vs_typical', 'hours_after',
        'weekday', 'hour_utc', 'age_weeks', 'vol_q', 'cluster', 'opp_first', 'prior_win']].to_csv(EXP/'events.csv.gz', index=False)
-    charts(res, mix)
-    dump(EXP/'summary.json', dict(config=cfg, n=len(s), outcome_mix_by_confirm=mix, features=res,
+    charts(res, mix); cmb = combos(s); combo_chart(cmb)
+    dump(EXP/'summary.json', dict(config=cfg, n=len(s), outcome_mix_by_confirm=mix, features=res, combos=cmb,
         source_commit=subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip(),
         training_eligible=False, production_eligible=False))
     print(json.dumps(dict(n=len(s), mix=mix), ensure_ascii=False))
