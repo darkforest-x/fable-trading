@@ -1,0 +1,291 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-1618-hold5-20261024-v1",
+    "question": "Owner 2026-10-24: limit at the first weekly Monday 1618, no stop, market exit after 5 minutes. Real fees.",
+    "hold_minutes": 5,
+    "maker_fee": 0.0002,
+    "taker_fee": 0.0005,
+    "fee_source": "OKX account trade-fee read-only 2026-10-23: Lv1 swap maker 0.02%, taker 0.05% per side; limit entry maker, timed or stop exit taker.",
+    "null_per_touch": 10,
+    "horizon_days": 14,
+    "seed": 20261023,
+    "split": {
+      "okx_btc_1m": "2025-10-22T00:00:00Z",
+      "binance_majors_1m": "2024-10-01T00:00:00Z",
+      "okx_177_15m": "2026-01-01T00:00:00Z",
+      "binance_alts_15m": "2022-10-01T00:00:00Z"
+    },
+    "success_criterion": "Both 1m datasets: mean net return >0 with week-cluster bootstrap 95 lower bound >0, and positive in both chronological halves.",
+    "limitations": "Limit fill assumed when price trades the level (no queue); exit at the close of the minute hold-1 after the fill minute, so the realized hold is between hold-1 and hold minutes; market-exit slippage not included.",
+    "training_eligible": false,
+    "production_eligible": false,
+    "variants": {
+      "no_stop": {
+        "stop": "stop_far"
+      }
+    },
+    "primary": "no_stop",
+    "single_variable": "Holding time 30 -> 5 minutes versus exp-monday-1618-hold30-20261023-v1 no_stop; entry, fees and no-stop rule unchanged."
+  },
+  "results": {
+    "okx_btc_1m": {
+      "no_stop": {
+        "all": {
+          "n": 91,
+          "gross_mean_bp": 4.321914826333146,
+          "net_mean_bp": -2.6780851736668527,
+          "net_median_bp": -3.9378728423359424,
+          "win_pct_net": 45.05494505494506,
+          "net_boot95": [
+            -10.691978718532384,
+            4.846906174725479
+          ]
+        },
+        "earlier": {
+          "n": 44,
+          "gross_mean_bp": 10.149095147256018,
+          "net_mean_bp": 3.14909514725602,
+          "net_median_bp": -1.4670736198969099,
+          "win_pct_net": 45.45454545454545,
+          "net_boot95": [
+            -8.787500340365684,
+            15.591815416070942
+          ]
+        },
+        "later": {
+          "n": 47,
+          "gross_mean_bp": -1.1333178145308174,
+          "net_mean_bp": -8.133317814530818,
+          "net_median_bp": -4.0342332040521764,
+          "win_pct_net": 44.680851063829785,
+          "net_boot95": [
+            -19.097052809744273,
+            1.2984769358326904
+          ]
+        },
+        "reasons": {
+          "0": 91
+        },
+        "by_symbol": {
+          "BTC": {
+            "n": 91,
+            "gross_mean_bp": 4.321914826333146,
+            "net_mean_bp": -2.6780851736668527,
+            "net_median_bp": -3.9378728423359424,
+            "win_pct_net": 45.05494505494506,
+            "net_boot95": [
+              -10.856747233980512,
+              5.189123727506052
+            ]
+          }
+        },
+        "by_wick_ok": {
+          "False": {
+            "n": 35,
+            "gross_mean_bp": -22.891574752106656,
+            "net_mean_bp": -29.891574752106653,
+            "net_median_bp": -17.44411364342042,
+            "win_pct_net": 11.428571428571429,
+            "net_boot95": [
+              -45.272964510509816,
+              -17.80028442016319
+            ]
+          },
+          "True": {
+            "n": 56,
+            "gross_mean_bp": 21.33034581285803,
+            "net_mean_bp": 14.33034581285803,
+            "net_median_bp": 4.058365574422824,
+            "win_pct_net": 66.07142857142857,
+            "net_boot95": [
+              3.498150726448365,
+              28.847396834761177
+            ]
+          }
+        },
+        "median_wick_risk_bp": 18.126499173884664
+      }
+    },
+    "binance_majors_1m": {
+      "no_stop": {
+        "all": {
+          "n": 1033,
+          "gross_mean_bp": 11.862861195104438,
+          "net_mean_bp": 4.862861195104438,
+          "net_median_bp": 3.8336342676189545,
+          "win_pct_net": 55.56631171345595,
+          "net_boot95": [
+            -3.714069032820631,
+            12.854161705294048
+          ]
+        },
+        "earlier": {
+          "n": 491,
+          "gross_mean_bp": 17.794948886924914,
+          "net_mean_bp": 10.794948886924914,
+          "net_median_bp": 11.687541342477914,
+          "win_pct_net": 61.5071283095723,
+          "net_boot95": [
+            -3.927524610578045,
+            25.37887128305931
+          ]
+        },
+        "later": {
+          "n": 542,
+          "gross_mean_bp": 6.488958876499542,
+          "net_mean_bp": -0.5110411235004584,
+          "net_median_bp": 0.08765966110660095,
+          "win_pct_net": 50.184501845018445,
+          "net_boot95": [
+            -8.13990483898451,
+            7.1315095035649225
+          ]
+        },
+        "reasons": {
+          "0": 1033
+        },
+        "by_symbol": {
+          "BNB": {
+            "n": 164,
+            "gross_mean_bp": 4.3803988115923085,
+            "net_mean_bp": -2.6196011884076893,
+            "net_median_bp": 0.25789366504631595,
+            "win_pct_net": 51.21951219512195,
+            "net_boot95": [
+              -20.359129310878785,
+              10.91436642883982
+            ]
+          },
+          "BTC": {
+            "n": 170,
+            "gross_mean_bp": 8.566031792524406,
+            "net_mean_bp": 1.5660317925244058,
+            "net_median_bp": -0.7701488746153133,
+            "win_pct_net": 47.647058823529406,
+            "net_boot95": [
+              -6.153657159090048,
+              9.229089004136684
+            ]
+          },
+          "DOGE": {
+            "n": 187,
+            "gross_mean_bp": 27.152171252751717,
+            "net_mean_bp": 20.152171252751714,
+            "net_median_bp": 9.040636278571728,
+            "win_pct_net": 59.35828877005348,
+            "net_boot95": [
+              -2.1136077850265744,
+              45.794592505955386
+            ]
+          },
+          "ETH": {
+            "n": 166,
+            "gross_mean_bp": 10.331977182562282,
+            "net_mean_bp": 3.3319771825622815,
+            "net_median_bp": 7.676278634859303,
+            "win_pct_net": 56.024096385542165,
+            "net_boot95": [
+              -8.19418153081354,
+              15.549879190740102
+            ]
+          },
+          "SOL": {
+            "n": 180,
+            "gross_mean_bp": 12.546673258344253,
+            "net_mean_bp": 5.546673258344256,
+            "net_median_bp": 10.597065161177282,
+            "win_pct_net": 60.0,
+            "net_boot95": [
+              -14.754455850174995,
+              23.043509190284958
+            ]
+          },
+          "XRP": {
+            "n": 166,
+            "gross_mean_bp": 6.197345672534458,
+            "net_mean_bp": -0.8026543274655381,
+            "net_median_bp": 9.432051072462002,
+            "win_pct_net": 58.43373493975904,
+            "net_boot95": [
+              -27.35066642234264,
+              20.957951978493412
+            ]
+          }
+        },
+        "by_wick_ok": {
+          "False": {
+            "n": 390,
+            "gross_mean_bp": -47.892979395736155,
+            "net_mean_bp": -54.89297939573614,
+            "net_median_bp": -28.973147813995432,
+            "win_pct_net": 18.974358974358974,
+            "net_boot95": [
+              -69.64327033530691,
+              -41.85407000825101
+            ]
+          },
+          "True": {
+            "n": 643,
+            "gross_mean_bp": 48.10668363744942,
+            "net_mean_bp": 41.10668363744942,
+            "net_median_bp": 22.634713167170624,
+            "win_pct_net": 77.76049766718506,
+            "net_boot95": [
+              32.80093165721452,
+              50.27095154361643
+            ]
+          }
+        },
+        "median_wick_risk_bp": 29.469548133595787
+      }
+    }
+  },
+  "audits": {
+    "okx_btc_1m|BTC|no_stop": {
+      "engine": "nautilus_trader",
+      "version": "1.231.0",
+      "positions": 91,
+      "fills": 182
+    },
+    "binance_majors_1m|BTC|no_stop": {
+      "engine": "nautilus_trader",
+      "version": "1.231.0",
+      "positions": 170,
+      "fills": 340
+    },
+    "binance_majors_1m|ETH|no_stop": {
+      "engine": "nautilus_trader",
+      "version": "1.231.0",
+      "positions": 166,
+      "fills": 332
+    },
+    "binance_majors_1m|SOL|no_stop": {
+      "engine": "nautilus_trader",
+      "version": "1.231.0",
+      "positions": 180,
+      "fills": 360
+    },
+    "binance_majors_1m|BNB|no_stop": {
+      "engine": "nautilus_trader",
+      "version": "1.231.0",
+      "positions": 164,
+      "fills": 328
+    },
+    "binance_majors_1m|XRP|no_stop": {
+      "engine": "nautilus_trader",
+      "version": "1.231.0",
+      "positions": 166,
+      "fills": 332
+    },
+    "binance_majors_1m|DOGE|no_stop": {
+      "engine": "nautilus_trader",
+      "version": "1.231.0",
+      "positions": 187,
+      "fills": 374
+    }
+  },
+  "passed": false,
+  "source_commit": "3fc5ef3442d30a187b7fdb0638215132c4556afc",
+  "training_eligible": false,
+  "production_eligible": false
+}

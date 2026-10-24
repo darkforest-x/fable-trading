@@ -198,6 +198,42 @@ artifacts:
       61frontend77asset-layer tests;1440/390/320 browser checks; screenshots after actual5m loading. Temporary browser closed.
       Monitor alive and4patrols enabled; final scan running, not claimed ready; earlier TEST002 scan errors retained.
 
+  - artifact_id: monday-1618-hold3-20261024-v1
+    artifact_type: manifest
+    role: 'Limit at the first weekly Monday 1618, 3-minute hold, no stop; NautilusTrader 1m with real fees.'
+    source_repo: darkforest-x/fable-trading
+    source_commit: bf71b316af6e405e6920385ede34e13dce0948ee
+    generator_commit: bf71b316af6e405e6920385ede34e13dce0948ee
+    source_path: experiments/active/exp-monday-1618-hold3-20261024-v1/native_summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-hold3-20261024-v1/native_summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; OKX BTC n91 gross +3.3bp net -3.7bp CI [-11.8,+3.0], later -7.0'
+  - artifact_id: monday-1618-hold5-20261024-v1
+    artifact_type: manifest
+    role: 'Limit at the first weekly Monday 1618, 5-minute hold, no stop; NautilusTrader 1m with real fees.'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3fc5ef3442d30a187b7fdb0638215132c4556afc
+    generator_commit: 3fc5ef3442d30a187b7fdb0638215132c4556afc
+    source_path: experiments/active/exp-monday-1618-hold5-20261024-v1/native_summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-hold5-20261024-v1/native_summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; OKX BTC n91 gross +4.3bp net -2.7bp CI [-10.7,+4.8], later -8.1'
+  - artifact_id: monday-1618-pin-hold-20261024-v1
+    artifact_type: manifest
+    role: '1m pin at the Monday 1618 that holds for an hour: edge-reach rate versus random-walk odds.'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3fc5ef3442d30a187b7fdb0638215132c4556afc
+    generator_commit: 3fc5ef3442d30a187b7fdb0638215132c4556afc
+    source_path: experiments/active/exp-monday-1618-pin-hold-20261024-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-pin-hold-20261024-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; OKX BTC 4/6 vs 63.2 expected; Binance majors 66.4 percent (n116) vs 69.5 expected'
   - artifact_id: monday-1618-hold30-wickstop-20261023-v1
     artifact_type: manifest
     role: 'Limit at the first weekly Monday 1618, 30-minute hold, 15m touch-bar wick stop; NautilusTrader 1m with real fees.'

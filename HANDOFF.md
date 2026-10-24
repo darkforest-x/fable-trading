@@ -1,3 +1,8 @@
+## 2026-10-24 · 区间1.618 3/5-minute hold and 1m pin-hold study rejected
+
+- Limit at the first weekly Monday 1618, no stop, market exit after 3 or 5 minutes (NautilusTrader 1m only, maker .02/taker .05): 3m OKX BTC net -3.7bp, Binance six majors +2.9bp CI[-2.9,8.6] later -1.5; 5m -2.7bp and +4.9bp CI[-3.7,12.9] later -0.5. Fees (7bp) eat the gross; fails like 30/50 minutes.
+- Owner chart (BTC 1m pin through the long 1618 on 2026-10-24, then no retest for an hour): OKX BTC 6/91 first touches qualify, 4/6 reach the Monday edge before 2.0 vs 63.2 random-walk odds from the 1h close; Binance majors 116/1035, 66.4 vs 69.5. The hour only moves price away from the stop. `experiments/active/exp-monday-1618-pin-hold-20261024-v1/summary.json`; hold results under `exp-monday-1618-hold{3,5}-20261024-v1/`. No live orders, training/production false.
+
 ## 2026-10-24 · Web paper desk cleanup
 
 - Owner requested deleting the `区间练习` paper account, removing the entire page-level `模拟开单` title row and retiring the all-symbol Monday 1.618 campaign. The account and dependent ledger rows were removed after a private consistent SQLite backup under the monitor runtime's `research_workspace/backups/owner-account-removal-20261024T120417Z/`. Its two open simulated positions were removed with the account, with no fabricated closing fills. Two other accounts and their surviving database relations were compared against the backup before commit and were unchanged. Maintenance receipt and script remain local, outside Git.

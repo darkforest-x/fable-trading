@@ -174,6 +174,51 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'This run also had a direct bar computation (summary.json) that the owner said was redundant; native matches it trade by trade (mean abs diff 0.01/0.43bp). Later runs are framework-only. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-1618-hold3-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: bf71b316af6e405e6920385ede34e13dce0948ee
+    status: rejected
+    question: 'Owner 2026-10-24: limit at the first weekly Monday 1618, no stop, market exit after 3 minutes. Profitable after real fees?'
+    single_variable: 'Holding time 30 -> 3 minutes versus exp-monday-1618-hold30-20261023-v1 no_stop.'
+    result: 'NautilusTrader 1.231.0 only, maker .02 / taker .05 percent. OKX BTC n91 gross +3.3bp net -3.7bp CI [-11.8,+3.0], later -7.0; Binance majors n1033 gross +9.9 net +2.9 CI [-2.9,+8.6], later -1.5. Fails.'
+    artifacts:
+    - monday-1618-hold3-20261024-v1
+    canonical_report: experiments/active/exp-monday-1618-hold3-20261024-v1/native_summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Builder identical to 37e0aee3aa. Exit at the close of minute hold-1 after the fill minute, so realized hold is between hold-1 and hold minutes. No random null.'
+  - experiment_id: exp-monday-1618-hold5-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3fc5ef3442d30a187b7fdb0638215132c4556afc
+    status: rejected
+    question: 'Owner 2026-10-24: limit at the first weekly Monday 1618, no stop, market exit after 5 minutes. Profitable after real fees?'
+    single_variable: 'Holding time 30 -> 5 minutes versus exp-monday-1618-hold30-20261023-v1 no_stop.'
+    result: 'NautilusTrader 1.231.0 only, maker .02 / taker .05 percent. OKX BTC n91 gross +4.3bp net -2.7bp CI [-10.7,+4.8], later -8.1; Binance majors n1033 gross +11.9 net +4.9 CI [-3.7,+12.9], later -0.5. Fails.'
+    artifacts:
+    - monday-1618-hold5-20261024-v1
+    canonical_report: experiments/active/exp-monday-1618-hold5-20261024-v1/native_summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Builder identical to 37e0aee3aa. Exit at the close of minute hold-1 after the fill minute, so realized hold is between hold-1 and hold minutes. No random null.'
+  - experiment_id: exp-monday-1618-pin-hold-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3fc5ef3442d30a187b7fdb0638215132c4556afc
+    status: rejected
+    question: 'Owner chart 2026-10-24: 1m pin through the Monday 1618 that closes back and does not fall back for 1 hour; how many reach the Monday edge?'
+    single_variable: 'Condition on the touch minute closing back inside and no retrade of the level in the next 60 minutes; existing edge-before-2.0 label.'
+    result: 'OKX BTC 1m: 6 of 91 first touches are a 1m pin that closes back and does not retrade the level for 1h; 4/6 (66.7 percent) reach the Monday edge before 2.0 vs random-walk odds from the 1h close 63.2. Binance BTC/ETH/SOL/BNB/XRP/DOGE: 116/1035 (11.2 percent), 66.4 percent vs 69.5 expected (-3.2pp, CI 57.5-74.4). Holding an hour only moves price away from the stop; no extra information.'
+    artifacts:
+    - monday-1618-pin-hold-20261024-v1
+    canonical_report: experiments/active/exp-monday-1618-pin-hold-20261024-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Descriptive event study, no orders or fees. Every held touch is also a pin (a close beyond the level retrades it next minute). Owner 2026-10-24 BTC example is after the data end.'
   - experiment_id: exp-monday-1618-hold30-wickstop-20261023-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 6d724dd8f2dce5340b0df2d25ca5a7d0180ff272
