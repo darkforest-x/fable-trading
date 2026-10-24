@@ -443,7 +443,8 @@ export function ReportContent() {
 
     <Section id="overview" title="02 / 三种退出方式的结果总览">
       {interpretationMarkdown && <ReportSection id="parent-interpretation" title="结果解读" queryId="metrics"
-        queryIds={["summary", "metrics"]} sourceRowsByQuery={sourceRowsByQuery} showHeading={false}>
+        queryIds={["summary", "metrics", "trades", "funnel", "rules"]}
+        sourceRowsByQuery={{summary, metrics, trades, funnel, rules}} showHeading={false}>
         <RichNarrative id="overview:interpretation" className="ma6-narrative" value={interpretationMarkdown}/>
       </ReportSection>}
       <ReportSection id="overview-explainer" title="结果说明" queryId="metrics" sourceRows={metrics} showHeading={false}>
