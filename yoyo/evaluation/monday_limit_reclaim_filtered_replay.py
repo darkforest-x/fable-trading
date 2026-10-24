@@ -49,7 +49,7 @@ def replay(t, k, gross, slip_bp=0., cap=None):
         j = int(j)
         if is_entry:
             n = max(0., min(k*eq, gross*eq-opened, cap if cap else np.inf))
-            notional[j] = n; opened += n; taken += n > 0
+            notional[j] = n; opened += n; taken += int(n > 0)
         else:
             eq += notional[j]*net[j]; opened -= notional[j]
             peak = max(peak, eq); dd = max(dd, 1-eq/peak); path.append((ts, eq))
