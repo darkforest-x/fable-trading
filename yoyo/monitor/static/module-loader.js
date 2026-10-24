@@ -9,7 +9,7 @@
     datasets: ['research.css','datasets.css','datasets.js'],
     strategies: ['research.css','strategies.css','strategies.js'],
     manual: ['research.css','manual.css','manual.js'],
-    'paper-desk': ['research.css','paper-desk.css','range-chart.css','range-chart.js','paper-desk-analytics.js','paper-desk-market.js','paper-desk.js'],
+    'paper-desk': ['research.css','paper-desk.css','monday-bulk.css','monday-bulk.js','range-chart.css','range-chart.js','paper-desk-analytics.js','paper-desk-market.js','paper-desk.js'],
     notifications: ['research.css','notifications.css','notifications.js'],
     knowledge: ['research.css','knowledge.css','knowledge.js'],
     retest: ['v130.css','v130.js'],

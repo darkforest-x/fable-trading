@@ -29,9 +29,9 @@ def quick_quote(quote):
     return bool(quote and json.loads(quote.get('risk_json') or '{}').get('monday_quick'))
 
 
-def symbol_leverage(symbol, value, quote=None):
+def symbol_leverage(symbol, value, quote=None, allow_unlisted=False):
     leverage_value(value)
-    if quick_quote(quote):
+    if quick_quote(quote) or allow_unlisted:
         return value  # Actual instrument and quantity tier checked by check_open.
     cap = 100 if symbol in {'BTC-USDT-SWAP', 'ETH-USDT-SWAP'} else 20
     if value > cap:
@@ -151,6 +151,16 @@ class PaperDesk:
               position_id TEXT, status TEXT NOT NULL, created_ms INTEGER NOT NULL,
               updated_ms INTEGER NOT NULL, quote_id TEXT NOT NULL,
               trigger_quote_id TEXT, fill_id TEXT UNIQUE, reason TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS monday_bulk_configs (
+              account_id TEXT PRIMARY KEY, settings_json TEXT, enabled INTEGER NOT NULL DEFAULT 0,
+              version INTEGER NOT NULL DEFAULT 0, generation INTEGER NOT NULL DEFAULT 0,
+              armed_week TEXT, last_error TEXT, last_tick_ms INTEGER, updated_ms INTEGER NOT NULL);
+            CREATE TABLE IF NOT EXISTS monday_bulk_items (
+              account_id TEXT NOT NULL, week TEXT NOT NULL, symbol TEXT NOT NULL, side TEXT NOT NULL,
+              generation INTEGER NOT NULL, status TEXT NOT NULL, reason TEXT NOT NULL,
+              entry TEXT, raw_level TEXT, take_profit TEXT, stop_loss TEXT, quantity TEXT,
+              estimated_margin TEXT, fee_rate TEXT, order_id TEXT, updated_ms INTEGER NOT NULL,
+              PRIMARY KEY(account_id,week,symbol,side));
             CREATE INDEX IF NOT EXISTS limit_orders_pending ON limit_orders(status,account_id);
             CREATE INDEX IF NOT EXISTS positions_account ON positions(account_id);
             CREATE INDEX IF NOT EXISTS fills_account ON fills(account_id, created_ms);
@@ -182,13 +192,15 @@ class PaperDesk:
             for table, columns in {
                 'positions': {'exposure_updated_ms': 'INTEGER', 'entry_fees_remaining': 'TEXT'},
                 'fills': {'fee_rate': 'TEXT', 'fee_role': 'TEXT', 'clearance_fee': "TEXT NOT NULL DEFAULT '0'"},
-                'limit_orders': {'fee_rate': 'TEXT'},
                 'quotes': {'mark_price': 'TEXT', 'mark_source_ms': 'INTEGER', 'risk_json': 'TEXT'},
+                'limit_orders': {'fee_rate': 'TEXT', 'bulk_kind': 'TEXT', 'bulk_week': 'TEXT', 'bulk_generation': 'INTEGER',
+                                 'bulk_expires_ms': 'INTEGER', 'bulk_level': 'TEXT'},
             }.items():
                 existing = {r[1] for r in db.execute(f'PRAGMA table_info({table})')}
                 for column, definition in columns.items():
                     if column not in existing:
                         db.execute(f'ALTER TABLE {table} ADD COLUMN {column} {definition}')
+            db.execute("CREATE UNIQUE INDEX IF NOT EXISTS monday_bulk_order_once ON limit_orders(account_id,bulk_week,symbol,side) WHERE bulk_kind='monday_1618'")
             for p in db.execute('SELECT * FROM positions WHERE entry_fees_remaining IS NULL').fetchall():
                 fees = sum((number(r[0]) for r in db.execute("SELECT fee FROM fills WHERE position_id=? AND action='open'", (p['id'],))), Decimal(0))
                 db.execute('UPDATE positions SET entry_fees_remaining=? WHERE id=?',
@@ -362,6 +374,52 @@ class PaperDesk:
         return self._size_entry(account_id, side, quote_id, leverage, marks,
                                 limit_price, take_profit, stop_loss, notional_usdt=positive(notional_usdt))
 
+    def size_bulk_entry(self, account_id, side, quote, leverage, notional_usdt, marks,
+                        limit_price, take_profit=None, stop_loss=None, virtual_orders=()):
+        """Preview a Monday bulk maker order using the same collateral and exchange risk gates."""
+        if side not in {"long", "short"}:
+            raise ValueError("方向无效")
+        leverage_value(leverage)
+        notional = positive(notional_usdt)
+        limit = positive(limit_price)
+        with self.connect() as db:
+            db.execute("BEGIN")
+            at = clock_ms()
+            account = self.row(db, "accounts", account_id)
+            if not fresh(quote, at):
+                raise ValueError("报价已过期，请重新获取")
+            symbol_leverage(quote["symbol"], leverage, quote, allow_unlisted=True)
+            positions = [dict(r) for r in db.execute(
+                "SELECT * FROM positions WHERE account_id=? AND CAST(remaining AS NUMERIC)>0", (account_id,))]
+            orders = self.pending_orders(db, account_id) + list(virtual_orders)
+            totals = self.totals(account, positions, marks, at, orders)
+            if totals["available"] is None:
+                raise ValueError("已有持仓的行情不完整，暂不能核算可用资金")
+            budget = number(totals["available"])
+            px = limit
+            rate = limit_fee(side, quote, px)
+            if rate != MAKER_FEE:
+                raise ValueError("1.618 限价已触及盘口，等待未穿价的新鲜行情")
+            stops = stop_prices(side, px, take_profit, stop_loss)
+            mark = marks.get(quote["symbol"])
+            instrument = (mark or {}).get("risk", {}).get("instrument", {})
+            if not instrument or instrument.get("instId") != quote["symbol"]:
+                raise ValueError("交易所合约规格暂不可用")
+            step = positive(mark['risk']['contract_size']) * positive(instrument["lotSz"])
+            raw = notional / px
+            qty = (raw / step).to_integral_value(rounding=ROUND_DOWN) * step
+            positive(qty)
+            collateral, fee = margin(qty, px, leverage), qty * px * rate
+            if collateral + fee > budget:
+                raise ValueError("模拟可用资金不足（需覆盖保证金和开仓手续费）")
+            self.check_open(db, account_id, quote["symbol"], qty, px, leverage, marks, at,
+                            fee_rate=rate, entry_quote=quote, bulk_authorized=True, side=side,
+                            virtual_orders=virtual_orders)
+            return dict(quantity=format(qty, "f"), budget=str(budget), margin=str(collateral),
+                        fee=str(fee), execution_price=str(px), fee_rate=str(rate),
+                        fee_role="maker", notional=str(qty * px), available_after=str(budget - collateral - fee),
+                        **stops)
+
     def _size_entry(self, account_id, side, quote_id, leverage, marks, limit_price=None,
                     take_profit=None, stop_loss=None, position_multiple=None, notional_usdt=None):
         """Calculate exposure and validate collateral including the entry fee.
@@ -423,16 +481,22 @@ class PaperDesk:
                               position_multiple=str(qty * px / equity), available_after=str(budget - collateral - fee))
             return result
 
-    def check_open(self, db, account_id, symbol, qty, px, leverage, marks, at, exclude_order=None, fee_rate=TAKER_FEE, entry_quote=None):
-        symbol_leverage(symbol, leverage, entry_quote)
+    def check_open(self, db, account_id, symbol, qty, px, leverage, marks, at, exclude_order=None,
+                   fee_rate=TAKER_FEE, entry_quote=None, bulk_authorized=False, virtual_orders=(), side=None):
+        symbol_leverage(symbol, leverage, entry_quote, allow_unlisted=bulk_authorized)
         account = self.row(db, "accounts", account_id)
         positions = [dict(r) for r in db.execute("SELECT * FROM positions WHERE account_id=? AND CAST(remaining AS NUMERIC)>0", (account_id,))]
         active = [p for p in positions if number(p["remaining"]) > 0]
-        orders = self.pending_orders(db, account_id, exclude_order)
+        if bulk_authorized and side in {"long", "short"} and any(
+                p["symbol"] == symbol and p["side"] == side for p in active):
+            raise ValueError("已有同币同向持仓，本周批量委托跳过以保护手动仓位")
+        orders = self.pending_orders(db, account_id, exclude_order) + list(virtual_orders)
         opening = [o for o in orders if o["action"] == "open"]
-        if len({p['symbol'] for p in active} | {o['symbol'] for o in opening} | {symbol}) > 30:
+        if not bulk_authorized and len({p['symbol'] for p in active} | {o['symbol'] for o in opening} | {symbol}) > 30:
             raise ValueError("每个账户最多同时交易 30 个合约")
         mark = marks.get(symbol)
+        if bulk_authorized and (not mark or not mark.get('risk') or not -5000 <= at - mark.get('mark_source_ms', 0) <= 15000):
+            raise ValueError('标记价或维持保证金档位暂不可用，暂不新增仓位')
         if mark and mark.get('risk'):
             from .paper_desk_risk import tier_for, account_risk
             risk = account_risk(account, active, marks, at)
@@ -448,31 +512,37 @@ class PaperDesk:
         totals = self.totals(account, positions, marks, at, orders)
         if totals["available"] is None:
             raise ValueError("已有持仓的行情不完整，暂不能核算可用资金")
-        if quick_quote(entry_quote):
+        if quick_quote(entry_quote) or bulk_authorized:
             from .monday_ticket import exposure_budget
-            limits = exposure_budget(symbol, totals, active, opening, marks)
-            if qty*px > number(limits['exposure_remaining']):
-                raise ValueError('超过总权益仓位额度，请重新预览')
+            if quick_quote(entry_quote) and not bulk_authorized:
+                limits = exposure_budget(symbol, totals, active, opening, marks)
+                if qty*px > number(limits['exposure_remaining']):
+                    raise ValueError('超过总权益仓位额度，请重新预览')
             instrument = (mark or {}).get('risk', {}).get('instrument', {})
             if instrument.get('instId') != symbol:
                 raise ValueError('交易所合约规格暂不可用')
-            contracts = qty/positive(instrument['ctVal'])
+            contract_size = mark['risk']['contract_size'] if bulk_authorized else instrument['ctVal']
+            contracts = qty/positive(contract_size)
             if leverage > positive(instrument['lever']):
                 raise ValueError('超过交易所合约最大杠杆')
             if contracts < positive(instrument['minSz']) or contracts % positive(instrument['lotSz']):
                 raise ValueError('数量不符合交易所最小数量或步长')
-            if contracts > positive(instrument['maxLmtSz'] if json.loads(entry_quote.get('risk_json') or '{}').get('monday_order_type')=='limit' else instrument['maxMktSz']):
+            quote_risk = entry_quote.get('risk') or json.loads(entry_quote.get('risk_json') or '{}')
+            limit_order = bulk_authorized or quote_risk.get('monday_order_type') == 'limit'
+            if contracts > positive(instrument['maxLmtSz'] if limit_order else instrument['maxMktSz']):
                 raise ValueError('数量超过交易所单笔上限')
         if margin(qty, px, leverage) + qty * px * fee_rate > number(totals["available"]):
             raise ValueError("模拟可用资金不足（需覆盖保证金和开仓手续费）")
         return account
 
     def open_fill(self, db, account_id, side, qty, quote, note, at, marks, leverage, price=None, exclude_order=None,
-                  take_profit=None, stop_loss=None, fee_rate=TAKER_FEE):
+                  take_profit=None, stop_loss=None, fee_rate=TAKER_FEE, bulk_identity=None):
         """Commit a fill within the caller's transaction; price overrides are limit prices only."""
         px = number(quote["ask"] if side == "long" else quote["bid"]) if price is None else number(price)
         stops = stop_prices(side, px, take_profit, stop_loss)
-        account = self.check_open(db, account_id, quote["symbol"], qty, px, leverage, marks, at, exclude_order, fee_rate, entry_quote=quote)
+        account = self.check_open(db, account_id, quote["symbol"], qty, px, leverage, marks, at, exclude_order,
+                                  fee_rate, entry_quote=quote, bulk_authorized=bulk_identity is not None,
+                                  side=side)
         fee = qty * px * fee_rate
         position = dict(id=uuid.uuid4().hex, account_id=account_id, symbol=quote["symbol"], side=side,
                         quantity=str(qty), remaining=str(qty), entry_price=str(px), realized="0", fees=str(fee),

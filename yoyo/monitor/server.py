@@ -100,6 +100,7 @@ def create_app(runtime=None, start_monitor=True):
                 app.state.start_yolo_workbench()
             app.state.paper_desk_market.start()
             app.state.paper_desk_worker.start()
+            app.state.paper_monday_bulk.start()
             yield
         finally:
             app.state.monday_candles.close()
@@ -107,6 +108,7 @@ def create_app(runtime=None, start_monitor=True):
             app.state.signal_read_cache.close()
             app.state.okx_execution_dashboard.close()
             app.state.yolo_workbench_supervisor.close()
+            app.state.paper_monday_bulk.close()
             app.state.paper_desk_worker.close()
             app.state.paper_desk_market.close()
             vidya_retest.close()

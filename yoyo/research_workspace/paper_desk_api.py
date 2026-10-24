@@ -254,6 +254,8 @@ def install(api, app, workspace_store):
 
     from .monday_ticket import install as install_monday_ticket
     install_monday_ticket(api, app, desk, marks, entry_risk, invoke)
+    from .monday_bulk_api import install as install_monday_bulk
+    install_monday_bulk(api, app, desk, limits, invoke)
 
     @api.get("/paper-desk")
     def overview():
