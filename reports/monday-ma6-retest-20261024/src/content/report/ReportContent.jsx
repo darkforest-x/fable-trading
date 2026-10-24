@@ -365,7 +365,7 @@ export function ReportContent() {
     : replayComplete === true
       ? "周一 1.618 六均线回踩 · 历史回放已完成"
       : "周一 1.618 六均线回踩策略研究";
-  const heroTitle = canEdit && mode === "edit" && appTitle ? appTitle : displayTitle;
+  const heroTitle = appTitle || displayTitle;
   const deckCopy = isPartialReplay
     ? `${progressLabel}。当前收益与对照统计只包含已完成品种，不作方案排名；完整范围以回放摘要中的 complete 标记为准。`
     : replayComplete === true
