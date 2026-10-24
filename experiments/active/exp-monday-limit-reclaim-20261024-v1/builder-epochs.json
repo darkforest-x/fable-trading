@@ -46,5 +46,8 @@
       "seconds": 136.3331945409882
     }
   },
-  "resume_command": "Invoke module with --symbols listing jobs without done.json. Explicit existing-symbol invocation still fails closed on changed builder identity."
+  "resume_command": "/Users/zhangzc/.local/bin/nautilus-python -m yoyo.evaluation.monday_limit_reclaim --pending-only --workers 6",
+  "resume_builder": "81df87c1f2",
+  "gold_boundary_builder": "18d2da8b34",
+  "resume_policy": "Only start a new pool after confirming the previous owned pool has ended. Completed done.json assets are skipped. Explicit existing-symbol invocation still fails closed on changed builder identity."
 }

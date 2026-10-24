@@ -13489,11 +13489,11 @@ experiments:
 
   - experiment_id: exp-monday-limit-reclaim-20261024-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 33eeb3adbb
+    source_commit: 81df87c1f2
     status: active
     question: First weekly directional1.618 limit with no initial stop; does next-candle reclaim and exact-entry protection reach five fixed targets?
     single_variable: Owner-fixed1/3/5/15/60minute confirmation and five separate full-position targets; compare targets within timeframe and timeframes within target. No outcome-selected optimization.
-    canonical_report: experiments/active/exp-monday-limit-reclaim-20261024-v1/summary.json
+    canonical_report: experiments/active/exp-monday-limit-reclaim-20261024-v1/analysis/summary.json
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
