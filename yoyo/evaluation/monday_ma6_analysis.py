@@ -132,7 +132,8 @@ def enrich(t):
     t['cross_cut']=(pd.to_datetime(t.entry_interval_start,utc=True)<CUT)&(t.exit_interval_end>=CUT)
     t['period']=np.where(pd.to_datetime(t.entry_interval_start,utc=True)>=CUT,'later','earlier')
     t['asset_group']=t.symbol.map(group_name);t['exit_mode']=t.policy
-    t['year']=t.entry_time.dt.year;t['month']=t.entry_time.dt.strftime('%Y-%m')
+    entry_open=pd.to_datetime(t.entry_interval_start,utc=True)
+    t['year']=entry_open.dt.year;t['month']=entry_open.dt.strftime('%Y-%m')
     t['entry_price']=t.entry;t['stop_price']=t.stop;t['net_bp']=t.net_notional_bp
     t['mfe_r']=t.interior_mfe_r;t['mae_r']=t.interior_mae_r
     t['opportunity_id']=t.pair_id;t['order_id']=t.parent_id

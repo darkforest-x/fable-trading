@@ -46,10 +46,18 @@ def candles(ax,frame,title,lines,marks=(),ma=False):
     if ma:
         for col,color in zip(SIX_MA_COLUMNS,COLORS):
             if col in frame:ax.plot(x,frame[col],color=color,lw=.8,label=col)
+    lo,hi=values[:,2].min(),values[:,1].max();span=max(hi-lo,hi*.001)
+    lower,upper=lo-.08*span,hi+.12*span
+    outside=[]
     for price,label,color in lines:
         if np.isfinite(price):
-            ax.axhline(price,color=color,lw=.8,ls='--',alpha=.85)
-            ax.text(1.002,price,label,transform=ax.get_yaxis_transform(),color=color,fontsize=7,va='center')
+            if lower<=price<=upper:
+                ax.axhline(price,color=color,lw=.8,ls='--',alpha=.85)
+                ax.text(1.002,price,f'{label}\n{price:.7g}',transform=ax.get_yaxis_transform(),color=color,fontsize=7,va='center')
+            else:outside.append(f'{label} {price:.7g}')
+    if outside:
+        ax.text(.01,.97,'窗外参考：'+'；'.join(outside),transform=ax.transAxes,fontsize=7,
+                color='#64748b',va='top',bbox=dict(facecolor='white',alpha=.85,edgecolor='none'))
     for when,label,color in marks:
         t=pd.Timestamp(when)
         if frame.index[0]<=t<=frame.index[-1]+pd.Timedelta(minutes=15 if ma else 5):
@@ -57,8 +65,7 @@ def candles(ax,frame,title,lines,marks=(),ma=False):
             ax.axvline(j,color=color,lw=1,ls=':');ax.text(j,.99,label,transform=ax.get_xaxis_transform(),va='top',fontsize=8,color=color)
     positions=np.unique(np.linspace(0,len(frame)-1,min(7,len(frame)),dtype=int))
     ax.set_xticks(positions,frame.index[positions].tz_convert('Asia/Shanghai').strftime('%m-%d %H:%M'),fontsize=7)
-    lo,hi=values[:,2].min(),values[:,1].max();span=max(hi-lo,hi*.001)
-    ax.set_ylim(lo-.08*span,hi+.12*span)
+    ax.set_ylim(lower,upper)
     ax.set_xlim(-1,len(frame));ax.set_title(title,loc='left',fontsize=11,pad=10)
     ax.grid(alpha=.1);ax.tick_params(axis='y',labelsize=8)
     for spine in ax.spines.values():spine.set_color('#d8e0e5')
@@ -99,7 +106,10 @@ def main():
             if tcol is None:raise ValueError('Sample lacks touch timestamp')
             touch=pd.Timestamp(r[tcol])
             if r['sample_kind']=='trade':
-                entry=pd.Timestamp(r['entry_time']);exit_=pd.Timestamp(r['exit_time'])
+                # Native timestamps are close bounds. Mark the observed candle,
+                # never shift its visual marker to the following five-minute bar.
+                entry=pd.Timestamp(r.get('entry_interval_start',pd.Timestamp(r['entry_time'])-pd.Timedelta(minutes=5)))
+                exit_=pd.Timestamp(r['exit_interval_start'])
             else:
                 decision=next((r[c] for c in ['submitted_at','confirmation_at','invalidation_at'] if c in r and pd.notna(r[c]) and r[c]),touch)
                 entry=pd.Timestamp(decision);exit_=entry+pd.Timedelta(hours=12)
@@ -108,20 +118,23 @@ def main():
                                   ('target_monday','周一对侧 TP','#d97706'),('target_far','另一侧 1.618','#8b5cf6'),
                                   ('entry','实际入场/初始挂价','#111827'),('stop','冻结止损','#ef4444')]:
                 if c in r and pd.notna(r[c]):line.append((float(r[c]),label,color))
-            setup=h[(h.index>=touch-pd.Timedelta(hours=18))&(h.index<=entry+pd.Timedelta(hours=3))].tail(220)
+            first=h[(h.index>=touch-pd.Timedelta(hours=12))&(h.index<=touch+pd.Timedelta(hours=8))]
+            setup=h[(h.index>=entry-pd.Timedelta(hours=18))&(h.index<=entry+pd.Timedelta(hours=3))]
             zoom=f[(f.index>=entry-pd.Timedelta(hours=3))&(f.index<=entry+pd.Timedelta(hours=6))]
             end=f[(f.index>=exit_-pd.Timedelta(hours=4))&(f.index<=exit_+pd.Timedelta(hours=2))]
             path=f[(f.index>=touch-pd.Timedelta(hours=1))&(f.index<=exit_+pd.Timedelta(hours=1))]
-            fig,axes=plt.subplots(4,1,figsize=(18,15),gridspec_kw={'height_ratios':[1.15,1,1,.85]})
+            fig,axes=plt.subplots(5,1,figsize=(18,19),gridspec_kw={'height_ratios':[1,1.15,1,1,.85]})
             marks=[(touch,'首次触价','#2563eb'),(entry,'成交柱/挂单参考','#111827')]
-            candles(axes[0],setup,'15m 确认窗口｜真实六均线；未来仅供复盘',line,marks,True)
-            candles(axes[1],zoom,'5m 入场窗口｜限价成交的准确柱内时刻未知',line,marks)
-            candles(axes[2],end,'5m 退出窗口' if r['sample_kind']=='trade' else '5m 后续窗口｜未成交/失效不得当成一笔交易',line,[(exit_,'退出柱','#9b1c31')])
+            candles(axes[0],first,'15m 首次触价窗口｜真实六均线；后续画面仅供复盘',line,marks,True)
+            candles(axes[1],setup,'15m 入场前后窗口｜首次触价相距较远时，见上方独立窗口',line,marks,True)
+            candles(axes[2],zoom,'5m 入场窗口｜限价成交的准确柱内时刻未知',line,marks)
+            exit_marks=[(exit_,'退出柱','#9b1c31')] if r['sample_kind']=='trade' else []
+            candles(axes[3],end,'5m 退出窗口' if r['sample_kind']=='trade' else '5m 后续窗口｜未成交/失效不得当成一笔交易',line,exit_marks)
             if len(path):
-                axes[3].plot(path.index,path.close,lw=.6,color='#2563eb')
-                axes[3].fill_between(path.index,path.low,path.high,color='#93c5fd',alpha=.22)
-            axes[3].set_title('完整观察路径｜原始5m收盘线及高低范围，非压缩K线；横轴UTC',loc='left',fontsize=11)
-            axes[3].grid(alpha=.15);axes[3].tick_params(labelsize=8)
+                axes[4].plot(path.index,path.close,lw=.6,color='#2563eb')
+                axes[4].fill_between(path.index,path.low,path.high,color='#93c5fd',alpha=.22)
+            axes[4].set_title('完整观察路径｜原始5m收盘线及高低范围，非压缩K线；横轴UTC',loc='left',fontsize=11)
+            axes[4].grid(alpha=.15);axes[4].tick_params(labelsize=8)
             basis='毛' if symbol=='XAUUSD' else '净';value=r.get('return_r',np.nan)
             detail=f'{basis}收益 {value:+.3f}R' if pd.notna(value) else str(r['outcome'])
             fig.suptitle(f'{sid}  {"多头" if r["side"]==1 else "空头"}  {detail}',x=.07,ha='left',fontsize=17,fontweight='bold')
@@ -129,7 +142,8 @@ def main():
             fig.subplots_adjust(left=.07,right=.89,top=.94,bottom=.055,hspace=.39)
             image=folder/(sid+'.png');fig.savefig(image,dpi=140,facecolor='#fff');plt.close(fig)
             raw=folder/(sid+'-5m.csv.gz');path.rename_axis('open_time_utc').to_csv(raw)
-            ma=folder/(sid+'-15m-MA.csv.gz');setup.rename_axis('open_time_utc').to_csv(ma)
+            ma=folder/(sid+'-15m-MA.csv.gz')
+            pd.concat([first,setup]).loc[lambda x:~x.index.duplicated()].sort_index().rename_axis('open_time_utc').to_csv(ma)
             records.append(finite(dict(sample_id=sid,**r,image_file=str(image.relative_to(ART)),
                 data_file=str(raw.relative_to(ART)),ma_data_file=str(ma.relative_to(ART)),
                 scope_start=str(path.index[0]) if len(path) else None,scope_end=str(path.index[-1]) if len(path) else None,

@@ -6,6 +6,8 @@
 .monday-ma6-report {
   gap: 28px;
   color: var(--text);
+  box-sizing: border-box;
+  padding: 0 clamp(16px, 3vw, 40px) 48px;
 }
 .monday-ma6-report .ma6-hero {
   gap: 14px;
@@ -32,6 +34,7 @@
 .ma6-hero-heading h1 {
   max-width: 980px;
   font-size: clamp(30px, 4vw, 48px);
+  line-height: 1.25;
 }
 .ma6-status {
   flex: 0 0 auto;
@@ -165,7 +168,7 @@
 .monday-ma6-report [data-reviewed-rows] {
   min-width: 0;
 }
-@media (max-width: 760px) {
+@media (max-width: 1000px) {
   .monday-ma6-report .ma6-hero {
     padding: 22px 18px;
     border-radius: 16px;

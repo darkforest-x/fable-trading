@@ -397,33 +397,33 @@ def _query_source(
         "summary": [
             {"label": "覆盖时间", "definition": "source_last 是所有品种来源尾中的最新时点，不表示每个品种都覆盖到该时间；逐品种 first/last 保留在同一查询的 coverage 明细行。"},
             {"label": "样本覆盖", "definition": "summary.json 中每个 coverage 对象对应一个源品种；全局覆盖条数直接由该列表读取。"},
-            {"label": "回放状态", "definition": "只有 summary.json.complete 为 true 才标记父回放完成；进行中只展示 completed_symbols/expected_symbols，不根据已见品种或行数推断全量完成。"},
+            {"label": "回放状态", "definition": "只有 summary.json.complete 为 true 才标记历史回放完成；进行中只展示 completed_symbols/expected_symbols，不根据已见品种或行数推断全量完成。"},
         ],
         "metrics": [
             {"label": "R / bp", "definition": "mean_r、total_r、mean_bp 按该行 basis 解释；毛与净不可混合。XAUUSD 为 gross basis，mean_fee_r、mean_net_r、total_net_r 与 mean_net_bp 为空，表示费率未知，不是零。"},
-            {"label": "交易统计", "definition": "win_rate 的源单位为 0–1，界面显示为百分比；mean_win_r、mean_loss_r、payoff、计划RR中位数及持仓P90均来自父 analysis 的闭合交易切片。"},
-            {"label": "连亏与止损序列", "definition": "longest_loss_streak、longest_stop_streak 按父 analysis 的时间排序结果展示；loss_streak_span 是跨品种合并序列的最长连亏区间，single_symbol_streak_span 是单品种最长连亏区间，不额外重算。"},
+            {"label": "交易统计", "definition": "win_rate 的源单位为 0–1，界面显示为百分比；mean_win_r、mean_loss_r、payoff、计划RR中位数及持仓P90均来自分析导出 的闭合交易切片。"},
+            {"label": "连亏与止损序列", "definition": "longest_loss_streak、longest_stop_streak 按分析导出 的时间排序结果展示；loss_streak_span 是跨品种合并序列的最长连亏区间，single_symbol_streak_span 是单品种最长连亏区间，不额外重算。"},
             {"label": "闭合交易分期", "definition": "earlier/later 按实际成交柱开始 entry_interval_start 分期；跨切点持仓从前后期排除。全期不做此排除。逐笔 entry_time 是保守入场柱结束时点，不应替代该分期锚。"},
             {"label": "提交队列机会期望", "definition": "attempt_*_r 按 submitted_at 分期，以合格提交信号机会为分母；未成交仅按零暴露纳入机会期望，不计为盈亏交易或逐笔胜率。提交早于切点而退出晚于切点的样本从前后期机会期望排除。"},
             {"label": "严格成交配对", "definition": "matched_*_r 与 paired_excess_r 只使用信号对应的三个随机对照全部成交、闭合且处于同一连续片段的完整3/3组；complete_opportunity_pairs 与机会期望口径分母另行展示。"},
-            {"label": "持仓诊断", "definition": "MFE/MAE仅计实际成交持仓期间；浮盈后止损、最长连亏与持仓时间按父实验导出值展示。"},
+            {"label": "持仓诊断", "definition": "MFE/MAE仅计实际成交持仓期间；浮盈后止损、最长连亏与持仓时间按原生实验导出值展示。"},
         ],
         "funnel": [
-            {"label": "状态漏斗", "definition": "首次触价、失效、站回、确认、提交、撤销、未成交、成交、闭合与截尾分别计数；未成交与失效不作为零R交易。"},
+            {"label": "状态漏斗", "definition": "首次触价、失效、四根收盘确认、提交、撤销、未成交与成交分别计数；仅首次站回但未完成确认的次数没有单独采集。闭合与截尾见交易统计；未成交与失效不作为零R交易。"},
         ],
         "trades": [
             {"label": "闭合与截尾", "definition": "闭合收益与来源结束/数据连续性边界造成的截尾记录分别保留；截尾不作为已实现止盈/止损结果。"},
-            {"label": "两目标各半", "definition": "目标各半由父实验把两条原始数量各半的native目标腿线性合成，没有保本交互，未重复回放。"},
+            {"label": "两目标各半", "definition": "目标各半由原生实验把两条原始数量各半的native目标腿线性合成，没有保本交互，未重复回放。"},
         ],
         "fills": [
-            {"label": "逐次费用", "definition": "fee、fee_type、fee_rate及fee_r从父实验逐笔成交输出读取；本报告不重新计费。"},
+            {"label": "逐次费用", "definition": "fee、fee_type、fee_rate及fee_r从原生实验逐笔成交输出读取；本报告不重新计费。"},
         ],
     }
     source = {
         "label": QUERY_LABELS[query_id],
         "files": [_relative(path) for path in paths],
         "evidenceFlow": (
-            "本报告读取 artifacts/monday-ma6-retest-20261024/report-data 的父分析统一导出；本模块不回放成交、"
+            "本报告读取 artifacts/monday-ma6-retest-20261024/report-data 的统一分析导出；本模块不回放成交、"
             "不重算统计，也不将未成交或未闭合记录作为零收益。"
         ),
         "metricDefinitions": definitions.get(query_id, []),
@@ -582,9 +582,9 @@ def build_snapshot(
         if complete
         else progress_status
         if progress_status
-        else "父回放已标记完成；报告数据已载入，仍需复核。"
+        else "历史回放已标记完成；报告数据已载入，仍需复核。"
         if replay_complete is True and all_required_paths_exist
-        else "父回放已标记完成；报告导出尚待完整装载。"
+        else "历史回放已标记完成；报告导出尚待完整装载。"
         if replay_complete is True
         else "规则来源已审；结果导出已载入待复核。"
         if all_required_paths_exist

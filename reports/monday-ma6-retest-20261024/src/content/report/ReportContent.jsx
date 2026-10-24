@@ -8,6 +8,7 @@ const EXIT_LABELS = {monday_full: "周一对侧全平", opposite_1618_full: "另
 const ASSET_LABELS = {BTC: "BTC", ETH: "ETH", XAU: "XAUUSD · 黄金", XAUUSD: "XAUUSD · 黄金", ALT: "山寨币", ALTCOINS: "山寨币"};
 const PERIOD_LABELS = {all: "全期", earlier: "前期（切点前）", later: "后期（切点起）", pre_2023: "前期（2023-01-01 UTC前）", post_2023: "后期（2023-01-01 UTC起）"};
 const FIELD_LABELS = {
+  section: "策略环节", item: "规则项", long: "多头规则", short: "空头规则", detail: "执行说明",
   exit_mode: "退出方式", exit_policy: "退出方式", exit_mode_label: "退出方式",
   asset_group: "品种组", group: "品种组", asset: "品种组", asset_group_label: "品种组",
   period: "时段", segment: "时段", period_label: "时段", grain: "统计粒度", cut_dimension: "切片维度", cut_value: "切片值",
@@ -65,7 +66,7 @@ const FIELD_LABELS = {
   source_rows: "源K线数", opportunities: "来源机会数", submitted: "来源挂单数",
   native_positions: "原生持仓数", native_fills: "原生成交数", coverage_asset_count: "来源覆盖品种数",
   coverage_assets_ending_before_source_last: "早于全局最新尾部的品种数", record_type: "记录类型",
-  complete: "父回放完成标记", completed_symbols: "已完成品种数", expected_symbols: "预期品种数",
+  complete: "全量回放完成标记", completed_symbols: "已完成品种数", expected_symbols: "预期品种数",
   random_control_mean_r: "严格配对随机对照均R",
 };
 const METRIC_FIELDS = [
@@ -110,8 +111,12 @@ function labelValue(value, labels) {
 function cellText(value, field) {
   if (value === null || value === undefined || value === "") return "—";
   if (typeof value === "object") return JSON.stringify(value);
-  if (field === "win_rate" && typeof value === "number") {
-    return (value * 100).toLocaleString("zh-CN", {maximumFractionDigits: 2}) + "%";
+  if (typeof value === "number" && ["win_rate", "rate", "fee_rate", "signal_fill_rate", "random_fill_rate"].includes(field)) {
+    const digits = field === "fee_rate" ? 4 : 2;
+    return (value * 100).toLocaleString("zh-CN", {maximumFractionDigits: digits}) + "%";
+  }
+  if (typeof value === "number" && ["paired_p", "paired_p_holm", "p_value", "adjusted_p_value"].includes(field)) {
+    return value.toLocaleString("zh-CN", {maximumSignificantDigits: 4, useGrouping: false});
   }
   if (typeof value === "number") {
     const digits = /bp|rate|_p$|pct/i.test(field) ? 3 : 6;
@@ -243,7 +248,7 @@ function CompactSummary({rows}) {
   ];
   return <EvidenceTable id="compact-summary" title={"全期比较摘要 · " + displayRows.length.toLocaleString("zh-CN") + " 行"}
     queryId="metrics" sourceRows={rows} displayRows={displayRows} preferred={preferred} strictColumns
-    note="仅取 period=all 的 grain=summary 行；R按毛／净 basis 解释。随机对照列为严格3/3成交闭合配对组的对照均R，不与下方提交队列机会期望混用。覆盖3种退出 × 4个品种组；只显示父导出实际提供的组合，不为缺失组合补造零行。进行中的部分回放不得作方案排名。"/>
+    note="仅取 period=all 的 grain=summary 行；R按毛／净 basis 解释。随机对照列为严格3/3成交闭合配对组的对照均R，不与下方提交队列机会期望混用。覆盖3种退出 × 4个品种组；只显示结果文件实际提供的组合，不为缺失组合补造零行。进行中的部分回放不得作方案排名。"/>
 }
 
 function SampleGallery({samples}) {
@@ -321,7 +326,7 @@ export function ReportContent() {
   const fills = reviewedRows("fills");
   const samples = reviewedRows("samples");
   const [metricFilters, setMetricFilters] = useState({exit: "ALL", asset: "ALL", period: "all", dimension: "ALL"});
-  const [ledgerFilters, setLedgerFilters] = useState({exit: "ALL", asset: "ALL", period: "all", direction: "ALL"});
+  const [ledgerFilters, setLedgerFilters] = useState({exit: "ALL", asset: "ALL", period: "ALL", direction: "ALL"});
   const ready = Boolean(snapshot && snapshot.report && snapshot.report.resultRowsExist !== undefined
     ? snapshot.report.resultRowsExist : (metrics.length || funnel.length));
   const exportsReady = Boolean(snapshot && snapshot.report && snapshot.report.resultExportsComplete);
@@ -333,10 +338,32 @@ export function ReportContent() {
     ? `历史回放进行中 ${replayProgress.completedSymbols}/${replayProgress.expectedSymbols}`
     : "历史回放进行中";
   const status = isPartialReplay ? `${progressLabel} · 仅已完成品种`
-    : replayComplete === true ? (ready ? "父回放完成 · 报告待复核" : "父回放完成 · 请检查汇总行")
+    : replayComplete === true ? (ready ? "历史回放已完成 · 结果待复核" : "历史回放已完成 · 暂无可显示汇总行")
       : replayCompletionUnconfirmed ? "回放完成状态未确认 · 暂不排名"
       : exportsReady ? (ready ? "结果已载入 · 待复核" : "结果导出已载入 · 请检查汇总行")
-        : ready ? "部分结果已载入 · 待复核" : "规则已确认 · 历史结果待生成";
+        : ready ? "部分结果已载入 · 待复核" : "策略规则与数据范围已整理";
+  const displayTitle = isPartialReplay
+    ? `周一 1.618 六均线回踩 · ${progressLabel}`
+    : replayComplete === true
+      ? "周一 1.618 六均线回踩 · 历史回放已完成"
+      : "周一 1.618 六均线回踩策略研究";
+  const heroTitle = canEdit && mode === "edit" && appTitle ? appTitle : displayTitle;
+  const deckCopy = isPartialReplay
+    ? `${progressLabel}。当前收益与对照统计只包含已完成品种，不作方案排名；完整范围以回放摘要中的 complete 标记为准。`
+    : replayComplete === true
+      ? "历史回放摘要已标记完成。本页展示策略规则、来源覆盖、对照口径、逐笔流水与审查样本；各项收益仍按表中毛／净 basis 和各自分母解释。"
+      : "本页说明周一 1.618 触价后的六均线回踩规则、数据范围与回放状态。只有回放摘要明确标记 complete=true，结果才视为全量；当前没有结果行也不代表零交易或亏损。";
+  const overviewStatusCopy = ready
+    ? isPartialReplay
+      ? `${progressLabel}。当前收益与对照统计只包含已完成品种，不能据此给三种方案排名。闭合交易前后期按实际成交柱开始时间 entry_interval_start 分组并剔除跨切点持仓；提交队列机会期望按 submitted_at 分期；首次触价漏斗按 first_touch_at 分期。三者分母不同，提交队列机会期望不是逐笔胜率。`
+      : "结果表已载入。闭合交易前后期按实际成交柱开始时间 entry_interval_start 分组并剔除跨切点持仓；提交队列机会期望按 submitted_at 分期；首次触价漏斗按 first_touch_at 分期。三者分母不同，提交队列机会期望不是逐笔胜率。全期不做切点剔除；收益按毛／净basis及严格成交配对口径分别解读。"
+    : isPartialReplay
+      ? `${progressLabel}，但结果行尚未载入；这不代表零交易或零收益。当前不能作全池排名。`
+      : replayComplete === true
+        ? "回放摘要标记 complete=true，但当前没有可显示的汇总指标行；请检查结果导出。空表不解释为零交易或亏损。"
+        : exportsReady
+          ? "结果文件已载入，但没有可展示的指标行；请检查汇总导出。空表不解释为零交易或亏损。"
+          : "当前数据包没有可展示的结果行；这不代表零机会、零成交或零收益。结果就绪后会按来源摘要标记完成状态。";
   const ledgers = {opportunities, orders, trades, fills};
   const filteredLedgers = Object.fromEntries(Object.entries(ledgers).map(([key, rows]) => [key, rowFilter(rows, ledgerFilters)]));
   const funnelRows = useMemo(() => rowFilter(funnel, metricFilters), [funnel, metricFilters]);
@@ -362,19 +389,19 @@ export function ReportContent() {
       <div className="ma6-hero-heading">
         <h1 data-data-app-title contentEditable={canEdit && mode === "edit"} suppressContentEditableWarning
           aria-label={canEdit && mode === "edit" ? "编辑报告标题" : undefined}
-          onBlur={canEdit && mode === "edit" ? (event) => setAppTitle(event.currentTarget.textContent.trim() || appTitle) : undefined}>{appTitle}</h1>
+          onBlur={canEdit && mode === "edit" ? (event) => setAppTitle(event.currentTarget.textContent.trim() || displayTitle) : undefined}>{heroTitle}</h1>
         <span className={"ma6-status " + (replayComplete === true && ready ? "ma6-status-ready" : "ma6-status-pending")}>{status}</span>
       </div>
       <RichNarrative id="hero:deck" className="report-deck ma6-deck"
-        value={"本报告以周一 1.618 首次触价作为观察起点，研究15分钟六均线收复后的回踩挂单。当前呈现已确认的策略规则与结果接口；历史回放产物写入前，不对胜率、收益或优劣作结论。规则来源：[Notion「小级别确认」](https://app.notion.com/p/4028856479af80039ef9fa7bf3703760)。"}
+        value={deckCopy + " 策略来源：[Notion「小级别确认」](https://app.notion.com/p/4028856479af80039ef9fa7bf3703760)。"}
         sourcePreviews={{"https://app.notion.com/p/4028856479af80039ef9fa7bf3703760": {title: "小级别确认", summary: "Owner 确认首次周一 1.618 触价后观察；15分钟收盘站回六均线并连续守住三根；回踩均线包络后入场，止损置于包络外；空头镜像。累计失效、止损缓冲及目标配置以本轮研究配置为准。", source: "Notion", date: "2026-10-23", approvedForReport: true}}}/>
     </header>
 
     {(isPartialReplay || replayCompletionUnconfirmed) && <div className="ma6-progress-alert" role="status" data-replay-complete={String(replayComplete)}>
       <strong>{isPartialReplay ? progressLabel : "回放完成状态未确认"}</strong>
       <span>{isPartialReplay
-        ? "当前收益与对照统计仅含已完成品种，不作方案排名；不以尚未完成的品种推断全池表现。父实验 summary.json 将 complete 标记为 true 后，此提示才会清除。"
-        : "数据表虽有行，但父实验 summary.json 尚未提供 complete=true；不能据此称为全量结果或进行全池方案排名。"}</span>
+        ? "当前收益与对照统计仅含已完成品种，不作方案排名；不以尚未完成的品种推断全池表现。回放摘要 complete=true 后，此提示才会清除。"
+        : "数据表虽有行，但回放摘要尚未提供 complete=true；不能据此称为全量结果或进行全池方案排名。"}</span>
     </div>}
 
     <SectionNavigator sections={[
@@ -396,20 +423,17 @@ export function ReportContent() {
     </ReportSection>
 
     <Section id="overview" title="02 / 三种退出方式的结果总览">
-      {interpretationMarkdown && <ReportSection id="parent-interpretation" title="父分析解读" queryId="metrics"
+      {interpretationMarkdown && <ReportSection id="parent-interpretation" title="结果解读" queryId="metrics"
         queryIds={["summary", "metrics"]} sourceRowsByQuery={sourceRowsByQuery} showHeading={false}>
         <RichNarrative id="overview:interpretation" className="ma6-narrative" value={interpretationMarkdown}/>
       </ReportSection>}
       <ReportSection id="overview-explainer" title="结果说明" queryId="metrics" sourceRows={metrics} showHeading={false}>
         <RichNarrative id="overview:status" className="ma6-narrative"
-          value={ready
-            ? (isPartialReplay
-              ? `${progressLabel}。当前收益与对照统计只包含已完成品种，不能据此给三种方案排名。闭合交易指标按实际成交柱开始时间 entry_interval_start 划分前后期，跨切点持仓从前后期剔除；提交队列机会期望按 submitted_at 分期，未成交只在该机会期望中按零暴露处理；首次触价漏斗另按 first_touch_at 分期。三者分母与时间锚不同，提交队列机会期望不是逐笔胜率。全期不做切点剔除。`
-              : "结果表已载入。闭合交易指标按实际成交柱开始时间 entry_interval_start 划分前后期，跨切点持仓从前后期剔除；提交队列机会期望按 submitted_at 分期，未成交只在该机会期望中按零暴露处理；首次触价漏斗另按 first_touch_at 分期。三者分母与时间锚不同，提交队列机会期望不是逐笔胜率。全期不做切点剔除。比较时同时看绝对净值、毛/净R、名义bp与严格配对差异；组间交易数量与费用基础可能不同。")
-            : "历史回放结果尚未提供。下方留出结果位置但保持空白；空表不解释为零交易或亏损。结果仅从父实验导出的 summary 与 metrics 文件进入本报告，报告不重放成交或重算统计。"} />
+          value={overviewStatusCopy}/>
       </ReportSection>
       <EvidenceTable id="global-summary" title="覆盖范围与生成状态" queryId="summary" sourceRows={summary} displayRows={summaryMetadataDisplay}
         preferred={["source_first", "source_last", "coverage_asset_count", "coverage_assets_ending_before_source_last", "complete", "completed_symbols", "expected_symbols", "source_timezone", "status", "generated_at"]}
+        strictColumns
         note="覆盖范围来自 artifact summary.json；报告 asOf 只取其中的 source_last。该值是品种源尾的最新时点，不代表每个品种都覆盖到此时。"/>
       <EvidenceTable id="asset-source-coverage" title={"逐品种源覆盖范围 · " + sourceCoverage.length.toLocaleString("zh-CN") + " 个品种"} queryId="summary" sourceRows={summary} displayRows={sourceCoverage}
         preferred={["symbol", "first", "last", "source_rows", "opportunities", "submitted", "native_positions", "native_fills"]}
@@ -418,7 +442,7 @@ export function ReportContent() {
         rows={metrics} selections={metricFilters} setSelections={setMetricFilters}/>
       <CompactSummary rows={metrics}/>
       <RichNarrative id="overview:definitions" className="ma6-narrative"
-        value={"均值、总和和名义bp按每行 basis 解释，毛收益与扣费净收益分别列出。XAUUSD券商点差及费用未知，因此 net 字段为空、仅报毛收益，不将未知费用记为零。两目标各半由父实验按原始数量各半的两条 native 目标腿线性合计，不存在保本交互，不重复回放。"}/>
+        value={"均值、总和和名义bp按每行 basis 解释，毛收益与扣费净收益分别列出。XAUUSD券商点差及费用未知，因此 net 字段为空、仅报毛收益，不将未知费用记为零。两目标各半由按原始数量各半的两条 native 目标腿线性合计，不存在保本交互，不重复回放。"}/>
     </Section>
 
     <Section id="funnel" title="03 / 从观察机会到成交，以及两种随机对照分母">
@@ -461,8 +485,8 @@ export function ReportContent() {
           <EvidenceTable id={"ledger-" + queryId} title={titles[queryId]} queryId={queryId} sourceRows={rows}
             displayRows={filteredLedgers[queryId]} preferred={LEDGER_FIELDS[queryId]} controls={ledgerControls(rows)}
             note={queryId === "fills"
-              ? "加密逐笔费用字段按父实验成交账本呈现；XAUUSD费用与点差未知，相关汇总只报毛收益，不能把原生账本的commission空值或零值解释为黄金费率。CSV保留父代理提供的全部字段。"
-              : "表中列为常用审查字段；CSV导出保留父代理提供的全部源字段。"}/>
+              ? "加密逐笔费用字段按原生成交流水呈现；XAUUSD费用与点差未知，相关汇总只报毛收益，不能把原生账本的commission空值或零值解释为黄金费率。CSV保留源文件的全部字段。"
+              : "表中列为常用审查字段；CSV导出保留源文件提供的全部字段。"}/>
           <DownloadBar rows={filteredLedgers[queryId]} allRows={rows} filename={"monday-ma6-" + queryId}/>
         </div>;
       })}
@@ -473,7 +497,7 @@ export function ReportContent() {
       sourceRowsByQuery={sourceRowsByQuery} showHeading={false}>
       <Section id="methods" title="07 / 数据来源、六均线暖机与质量边界">
         <RichNarrative id="methods:body" className="ma6-narrative"
-        value={"**可复用数据与补充源。** 本轮沿用已登记的633个合格品种资产池（BTC、ETH、XAUUSD与排除稳定币、黄金代理和传统／指数资产后的山寨组），复用各品种已登记历史行情，不以当前时点当作覆盖终点。逐品种 first/last 保留在覆盖明细表；summary.json 的 source_last 是全体品种中最新的源尾，不能推成每个品种都覆盖到这一时间。多源重叠需按品种和时间戳逐条比对OHLCV；只有完全一致才可去重拼接，冲突必须隔离并报告，不能任选来源覆盖。各品种自然缺口保留，不插值造K线；recent supplement只补同一合格资产池的覆盖尾部，连续性与重叠校验未通过的数据不得生成信号。\n\n**六均线与暖机。** 均线来源为 yoyo.datasets.ma_rope_filter.add_six_mas：SMA由完整窗口rolling mean计算，EMA使用span并以adjust=False递推。信号只读完整15分钟收盘；SMA120至少需要120根有效完整收盘，六条均线齐备前不得确认。缺口两侧不能把此前计数当作连续守线；有效信号起点受各品种覆盖和暖机影响。\n\n**分期时间锚。** 闭合交易前期/后期按 entry_interval_start（实际成交柱开始时间）分组；entry_time 在账本中是保守的入场柱结束时间，跨2023-01-01 UTC切点的持仓从前后期剔除；全期保留完整可闭合样本，不做该切点剔除。attempt_* 是提交队列机会期望，按 submitted_at 分期；提交在切点前、退出跨过切点的样本不进入对应前期/后期机会期望。首次触价漏斗按 first_touch_at 分期。三个时点锚点不同，提交队列期望不是逐笔胜率或交易收益均值。\n\n**黄金时钟和异常。** XAUUSD来自HistData bid-only M1，使用纽约当地时钟解释后按DST转UTC；夏令时歧义或不存在的本地时间不静默挪动。黄金质量适配器排除包含冲突分钟的整个5分钟区间，分段后重新预热和发现周一锚点；受冲突影响的周一不作锚。常规休市和来源缺口仍然可见；成交量、点差与券商费用未知，因此黄金为 gross basis，费用与net指标为空而不是零。\n\n**费用与未建模项。** 加密逐次成交按记录的OKX Lv1研究情景计算：maker 0.02%、taker 0.05%单边。滑点、资金费和容量未建模；Binance历史价格配OKX费率仅是成本情景。half_each由父实验将两条原生数量各半的目标腿线性合成，没有保本交互，不另做第三次成交回放。\n\n**对照、缺失和结论范围。** 全部挂单时机对照保留合格候选的未成交、撤单、失效状态；严格配对仅用三个随机对照均成交、闭合并处于同一连续数据片段的信号组，缺一个就不进配对分母。未成交与未闭合不作为已实现盈亏。绝对净收益、相对随机差异、R与名义bp分别回答不同问题。结果只用于研究，不改变生产准入和默认参数。\n\n本页规则行来自本轮Notion与配置；逐笔来源、汇总文件、样本范围及随机种子均通过来源菜单查看。报告构建器仅装载父代理的结果文件，不重放行情或计算盈亏。"} />
+        value={"**可复用数据与补充源。** 本轮沿用已登记的633个合格品种资产池（BTC、ETH、XAUUSD与排除稳定币、黄金代理和传统／指数资产后的山寨组），复用各品种已登记历史行情，不以当前时点当作覆盖终点。逐品种 first/last 保留在覆盖明细表；summary.json 的 source_last 是全体品种中最新的源尾，不能推成每个品种都覆盖到这一时间。多源重叠需按品种和时间戳逐条比对OHLCV；只有完全一致才可去重拼接，冲突必须隔离并报告，不能任选来源覆盖。各品种自然缺口保留，不插值造K线；recent supplement只补同一合格资产池的覆盖尾部，连续性与重叠校验未通过的数据不得生成信号。\n\n**六均线与暖机。** 均线来源为 yoyo.datasets.ma_rope_filter.add_six_mas：SMA由完整窗口rolling mean计算，EMA使用span并以adjust=False递推。信号只读完整15分钟收盘；SMA120至少需要120根有效完整收盘，六条均线齐备前不得确认。缺口两侧不能把此前计数当作连续守线；有效信号起点受各品种覆盖和暖机影响。\n\n**分期时间锚。** 闭合交易前期/后期按 entry_interval_start（实际成交柱开始时间）分组；entry_time 在账本中是保守的入场柱结束时间，跨2023-01-01 UTC切点的持仓从前后期剔除；全期保留完整可闭合样本，不做该切点剔除。attempt_* 是提交队列机会期望，按 submitted_at 分期；提交在切点前、退出跨过切点的样本不进入对应前期/后期机会期望。首次触价漏斗按 first_touch_at 分期。三个时点锚点不同，提交队列期望不是逐笔胜率或交易收益均值。\n\n**黄金时钟和异常。** XAUUSD来自HistData bid-only M1，使用纽约当地时钟解释后按DST转UTC；夏令时歧义或不存在的本地时间不静默挪动。黄金质量适配器排除包含冲突分钟的整个5分钟区间，分段后重新预热和发现周一锚点；受冲突影响的周一不作锚。常规休市和来源缺口仍然可见；成交量、点差与券商费用未知，因此黄金为 gross basis，费用与net指标为空而不是零。\n\n**费用与未建模项。** 加密逐次成交按记录的OKX Lv1研究情景计算：maker 0.02%、taker 0.05%单边。滑点、资金费和容量未建模；Binance历史价格配OKX费率仅是成本情景。half_each由两条原生数量各半的目标腿线性合成，没有保本交互，不另做第三次成交回放。\n\n**对照、缺失和结论范围。** 全部挂单时机对照保留合格候选的未成交、撤单、失效状态；严格配对仅用三个随机对照均成交、闭合并处于同一连续数据片段的信号组，缺一个就不进配对分母。未成交与未闭合不作为已实现盈亏。绝对净收益、相对随机差异、R与名义bp分别回答不同问题。结果只用于研究，不改变生产准入和默认参数。\n\n本页规则行来自本轮Notion与配置；逐笔来源、汇总文件、样本范围及随机种子均通过来源菜单查看。报告构建器仅装载研究结果导出文件，不重放行情或计算盈亏。"} />
       </Section>
     </ReportSection>
   </article>;
