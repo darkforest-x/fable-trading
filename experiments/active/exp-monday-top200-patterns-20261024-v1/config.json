@@ -1,0 +1,24 @@
+{
+  "experiment_id": "exp-monday-top200-patterns-20261024-v1",
+  "question": "Which candle, volume and six-MA traits occur in the200selected winners, and do three causal admission conditions improve unchanged framework strategies across the entire existing crypto universe?",
+  "owner_request": "Analyze the200trades one by one, derive several entry schemes and verify with the framework.",
+  "scope": "Descriptive200winners plus full crypto ledgers including losses/censored and original matched random controls. Gold is not in the200net ranking and lacks real volume; excluded from this volume/MA validation, previous gross results unchanged.",
+  "baselines": ["Original5m wick plus immediate engulf, near Monday target", "Original1h first touch,3body confirmations, near Monday target", "Same1h entries and stops, far Monday target"],
+  "candidates": {
+    "baseline": "Original causal entry, unchanged",
+    "volume_peak20": "First touching5m candle inside the original pin has positive volume >= each of its20previous contiguous5m candles; this candle must have closed by original entry",
+    "above_six": "Last completed5m close strictly above all SMA/EMA20/60/120 for long, below all for short",
+    "short_ma_retest": "Last completed5m bullish candle: lower wick touches max(SMA20,EMA20), body is entirely at/above it; bearish upper-wick mirror touches min(SMA20,EMA20), body at/below it"
+  },
+  "single_variable": "Each of3filters independently changes only admission relative to each baseline. Never combine filters, optimize cutoffs, wait for a later signal or select exits per trade.",
+  "numeric_basis": "Existing owner-authorized20bar volume window and canonical20/60/120MAs. Equalities and directional signs define the pattern; no new magnitude, stop buffer, TP/SL multiplier or expiry threshold.",
+  "execution": "Reuse frozen Nautilus1.231.0 case1 and VectorBT1.2.0 near/farN3 individual fills. Excluding independent entries cannot change remaining HEDGING fills; zero new simulation. Any later changed entry or order logic must execute once in Nautilus.",
+  "costs": "Unchanged OKX scenario read2026-10-23: taker0.05percent per market entry/SL, maker0.02percent per target; actual notionals. Slippage/funding/spread/capacity absent.",
+  "split": "Earlier entries AND exits before2023-01-01UTC; later entries on/after; crossing positions retained in all only. Already researched history, not untouched out-of-sample.",
+  "controls": "Original3closed random entries, same symbol/actual NYentry week/side/prior14bar volatility bucket, same fractional risk/reward/costs; restrict to admitted signal pairs, do not impose signal filter on random draws.",
+  "inference": "Weekly cluster bootstrap2000 draws; paired one-sided weekly sign-flip2000; Holm across9later ALL_CRYPTO filter comparisons. Descriptive equal-weight75cluster summaries. No AUC or trained ranking exists.",
+  "top200_limitations": "Ex-post net winners with best measured exit retained;200entries only75symbol/week/side groups; these groups themselves can share market shocks. Known fill-clock uncertainty on29timed rows retained. Full touch bar OHLCV unavailable at their entry.",
+  "outputs": "Per-trade primitive features and Chinese narrative CSV; all full-universe signal features/outcomes; metrics, year breakdown, winner/loser feature frequencies, source sizes/mtimes. No new HTML requested.",
+  "training_eligible": false,
+  "production_eligible": false
+}
