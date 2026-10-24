@@ -188,9 +188,9 @@ function filterChoices(rows, fields, labels) {
 }
 function DownloadBar({rows, allRows, filename}) {
   return <div className="ma6-download-row">
-    <button type="button" disabled={!rows.length} onClick={() => exportRows(rows, filename + "-当前筛选.csv")}>下载当前筛选 CSV</button>
+    <button type="button" disabled={!rows.length} onClick={() => exportRows(rows, filename + "-当前下拉筛选.csv")}>下载当前下拉筛选 CSV</button>
     <button type="button" disabled={!allRows.length} onClick={() => exportRows(allRows, filename + "-全部.csv")}>下载全部 CSV</button>
-    <span>搜索、排序与筛选不改写源行；完整下载保留当前报告数据包的所有记录。</span>
+    <span>筛选下载按上方下拉选项导出全部匹配行；表内文字搜索与排序只影响屏幕显示。完整下载保留当前报告数据包的所有记录。</span>
   </div>;
 }
 function EvidenceTable({id, title, queryId, sourceRows, displayRows, preferred, strictColumns = false, controls, note, searchable = true}) {

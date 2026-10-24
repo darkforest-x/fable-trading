@@ -422,10 +422,12 @@ def _query_source(
     source = {
         "label": QUERY_LABELS[query_id],
         "files": [_relative(path) for path in paths],
-        "evidenceFlow": (
-            "本报告读取 artifacts/monday-ma6-retest-20261024/report-data 的统一分析导出；本模块不回放成交、"
-            "不重算统计，也不将未成交或未闭合记录作为零收益。"
-        ),
+        "evidenceFlow": [
+            {"title": "冻结规则与历史行情", "detail": "experiments/active/exp-monday-ma6-retest-20261024-v1/config.json 保存 Notion 原文、Owner 确认及实施口径；各 symbols/*/identity.json 记录实际输入路径、大小、时间与代码身份。"},
+            {"title": "原生成交", "detail": "monday_ma6_retest 调用 NautilusTrader 1.231.0 run_native，逐品种输出机会、挂单、两条独立目标腿及成交事件；各半仓由无交互的两条腿线性合成。"},
+            {"title": "统计与原始导出", "detail": "monday_ma6_analysis 读取已完成原生输出，区分策略/随机、闭合/截尾、共同闭合入场及实际入场分期，生成 artifacts/monday-ma6-retest-20261024/report-data 的 CSV.gz；未成交不进入逐笔胜率。"},
+            {"title": "本报告装载", "detail": "monday_ma6_report 仅装载上述统一分析导出及 monday_ma6_charts 的真实行情图，不重放成交、不重算统计。此组件对应文件见 Sources。"},
+        ],
         "metricDefinitions": definitions.get(query_id, []),
         "caveats": list(caveats or []),
     }
