@@ -44,7 +44,7 @@ const FIELD_LABELS = {
   paired_excess_net_r: "严格配对净超额R", matched_signal_mean_gross_r: "严格配对策略毛均R",
   matched_control_mean_gross_r: "严格配对对照毛均R", paired_p_holm: "多重比较校正p值",
   independent_market_weeks: "独立市场周数", inference: "推断方法说明",
-  paired_excess_r: "配对超额R", paired_ci_low: "配对区间下界R", paired_ci_high: "配对区间上界R", paired_p: "配对p值",
+  paired_excess_r: "配对超额R", paired_ci_low: "配对区间下界R", paired_ci_high: "配对区间上界R", paired_p: "原始配对p值（未校正）",
   opportunity_id: "机会ID", signal_id: "信号ID", trigger_week: "触发周", week: "触发周",
   touch_time_utc: "首次触价UTC", first_touch_at: "首次触价时点", trigger_time: "触发时点",
   level: "触价水平",
@@ -244,7 +244,7 @@ function MetricRows({id, title, rows, selections, setSelections, showCuts = fals
       onChange={(value) => setSelections((state) => ({...state, dimension: value}))}/>}
   </div>;
   const preferred = controlOnly
-    ? ["exit_mode_label", "asset_group_label", "period_label", "basis_label", "eligible_signal_n", "eligible_control_n", "submitted_control_n", "filled_control_n", "closed_control_n", "nonfill_control_n", "complete_opportunity_pairs", "attempt_signal_mean_r", "attempt_control_mean_r", "attempt_paired_excess_r", "fully_matched_signal_n", "complete_control_group_n", "controls_per_signal", "matched_signal_mean_r", "matched_control_mean_r", "paired_excess_r", "paired_ci_low", "paired_ci_high", "paired_p"]
+    ? ["exit_mode_label", "asset_group_label", "period_label", "basis_label", "eligible_signal_n", "eligible_control_n", "submitted_control_n", "filled_control_n", "closed_control_n", "nonfill_control_n", "complete_opportunity_pairs", "attempt_signal_mean_r", "attempt_control_mean_r", "attempt_paired_excess_r", "fully_matched_signal_n", "complete_control_group_n", "controls_per_signal", "matched_signal_mean_r", "matched_control_mean_r", "paired_excess_r", "paired_ci_low", "paired_ci_high", "paired_p_holm", "paired_p", "independent_market_weeks"]
     : ["exit_mode_label", "asset_group_label", "period_label", "basis_label", ...METRIC_FIELDS.slice(4)];
   return <EvidenceTable id={id} title={title} queryId="metrics" sourceRows={sourceRows} displayRows={displayRows}
     preferred={preferred} strictColumns={controlOnly} controls={controls}
