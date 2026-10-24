@@ -58,11 +58,16 @@ def candles(ax,frame,title,lines,marks=(),ma=False):
     if outside:
         ax.text(.01,.97,'窗外参考：'+'；'.join(outside),transform=ax.transAxes,fontsize=7,
                 color='#64748b',va='top',bbox=dict(facecolor='white',alpha=.85,edgecolor='none'))
+    used_markers=[]
     for when,label,color in marks:
         t=pd.Timestamp(when)
         if frame.index[0]<=t<=frame.index[-1]+pd.Timedelta(minutes=15 if ma else 5):
             j=int(frame.index.searchsorted(t,side='right'))-1
-            ax.axvline(j,color=color,lw=1,ls=':');ax.text(j,.99,label,transform=ax.get_xaxis_transform(),va='top',fontsize=8,color=color)
+            nearby=sum(abs(j-old)<5 for old in used_markers)
+            used_markers.append(j)
+            ax.axvline(j,color=color,lw=1,ls=':')
+            ax.text(j,.90-.09*nearby,label,transform=ax.get_xaxis_transform(),va='top',fontsize=8,color=color,
+                    bbox=dict(facecolor='white',alpha=.75,edgecolor='none',pad=.5))
     positions=np.unique(np.linspace(0,len(frame)-1,min(7,len(frame)),dtype=int))
     ax.set_xticks(positions,frame.index[positions].tz_convert('Asia/Shanghai').strftime('%m-%d %H:%M'),fontsize=7)
     ax.set_ylim(lower,upper)
@@ -122,7 +127,10 @@ def main():
             for c,label,color in [('level','触发 1.618','#2563eb'),('cancel_boundary','近侧周一边界','#64748b'),
                                   ('target_monday','周一对侧 TP','#d97706'),('target_far','另一侧 1.618','#8b5cf6'),
                                   ('entry','实际入场/初始挂价','#111827'),('stop','冻结止损','#ef4444')]:
-                if c in r and pd.notna(r[c]):line.append((float(r[c]),label,color))
+                if c in r and pd.notna(r[c]):
+                    if r['sample_kind']!='trade':
+                        label={'entry':'初始挂单价','stop':'候选止损'}.get(c,label)
+                    line.append((float(r[c]),label,color))
             first=h[(h.index>=touch-pd.Timedelta(hours=12))&(h.index<=touch+pd.Timedelta(hours=8))]
             setup=h[(h.index>=entry-pd.Timedelta(hours=18))&(h.index<=entry+pd.Timedelta(hours=3))]
             zoom=f[(f.index>=entry-pd.Timedelta(hours=3))&(f.index<=entry+pd.Timedelta(hours=6))]
@@ -134,7 +142,7 @@ def main():
                 marks.append((pd.Timestamp(r['submitted_at'])-pd.Timedelta(nanoseconds=1),'四根确认后提交','#d97706'))
             candles(axes[0],first,'15m 首次触价窗口｜真实六均线；后续画面仅供复盘',line,marks,True)
             candles(axes[1],setup,'15m 入场前后窗口｜首次触价相距较远时，见上方独立窗口',line,marks,True)
-            candles(axes[2],zoom,'5m 入场窗口｜限价成交的准确柱内时刻未知',line,marks)
+            candles(axes[2],zoom,'5m 入场窗口｜限价成交的准确柱内时刻未知' if r['sample_kind']=='trade' else '5m 挂单/观察参考窗口｜本例未成交',line,marks)
             exit_marks=[(exit_,'退出柱','#9b1c31')] if r['sample_kind']=='trade' else []
             candles(axes[3],end,'5m 退出窗口' if r['sample_kind']=='trade' else '5m 后续窗口｜未成交/失效不得当成一笔交易',line,exit_marks)
             if len(path):
