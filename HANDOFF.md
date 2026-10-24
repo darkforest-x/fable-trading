@@ -1,3 +1,7 @@
+## 2026-10-24 · Limit-reclaim fast-cut hybrids rejected
+
+- Exit at the 5m or 15m check if not reclaimed, otherwise manage by 15m/60m (assembled exactly from framework fills). All alts: 5->60 win 18.6/19.9 percent, +8.9/+14.3bp versus plain 60m 23.7/25.5, +25.0/+19.9; 15->60 is closer but still lower. The early check cuts ~40 percent of trades, including many later reclaims that hit the target; same in the strong entry subgroups. `experiments/active/exp-monday-limit-reclaim-hybrid-20261024-v1/`, builder 3447d8dd74; learning note added; no live action.
+
 ## 2026-10-24 · Limit-reclaim pre-touch price/volume patterns; OHLC same-bar caveat
 
 - Codex 5m bars via load_job (0 ledger mismatches). Volume in the hour before the touch ≥8x normal: 60m win 41/50 percent, +42/+56bp. Reaching the 1618 within 30 minutes of crossing the Monday edge: win 52/64 percent, +164/+160bp overall, but shorts take 32/49 percent of wins inside the fill bar under the fixed O-H-L-C path, so they are likely inflated; longs alone 47/46 percent, +180/+60bp, +116/+71 over random. Monday closing at the far edge and few other coins touching in 24h help a little; liquidity and 24h move are unstable.

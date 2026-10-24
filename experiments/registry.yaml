@@ -187,6 +187,21 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'This run also had a direct bar computation (summary.json) that the owner said was redundant; native matches it trade by trade (mean abs diff 0.01/0.43bp). Later runs are framework-only. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-limit-reclaim-hybrid-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3447d8dd74adc74f9d5c2b062c3b21a7d64f37ed
+    status: rejected
+    question: 'Owner 2026-10-24: 60 minutes is too long; does a fast cut (5/15m reclaim check) with slow breakeven (15/60m) do better?'
+    single_variable: 'Hybrid a->b exit management assembled exactly from recorded framework fills of rules a and b; random controls built the same way.'
+    result: 'All alts: 60m win 23.7/25.5 percent +25.0/+19.9bp; 5->60 hybrid 18.6/19.9 +8.9/+14.3; 15->60 20.9/21.8 +18.0/+16.3; 5->15 15.1/16.0 +5.0/+13.3; the 5m check cuts about 40 percent of trades, many of which reclaim and hit the target later. Same ordering in top-volatility, fast-approach long and volume-spike subgroups. Fast cuts do not help.'
+    artifacts:
+    - monday-limit-reclaim-hybrid-20261024-v1
+    canonical_report: experiments/active/exp-monday-limit-reclaim-hybrid-20261024-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Learning note docs/learnings/fast-failure-cuts-sacrifice-later-reclaims.md. Partial snapshot 536/633; inherits the O-H-L-C intrabar path.'
   - experiment_id: exp-monday-limit-reclaim-patterns3-20261024-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 79a4a9436a7575f4cfeeea0123e3758494ea00f3

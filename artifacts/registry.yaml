@@ -198,6 +198,18 @@ artifacts:
       61frontend77asset-layer tests;1440/390/320 browser checks; screenshots after actual5m loading. Temporary browser closed.
       Monitor alive and4patrols enabled; final scan running, not claimed ready; earlier TEST002 scan errors retained.
 
+  - artifact_id: monday-limit-reclaim-hybrid-20261024-v1
+    artifact_type: manifest
+    role: 'Fast-cut slow-breakeven hybrid comparison for the Codex limit-reclaim rules, with chart.'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3447d8dd74adc74f9d5c2b062c3b21a7d64f37ed
+    generator_commit: 3447d8dd74adc74f9d5c2b062c3b21a7d64f37ed
+    source_path: experiments/active/exp-monday-limit-reclaim-hybrid-20261024-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-limit-reclaim-hybrid-20261024-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; hybrids lower win rate and mean versus plain 60m confirmation'
   - artifact_id: monday-limit-reclaim-patterns3-20261024-v1
     artifact_type: manifest
     role: 'Pre-touch price/volume feature tables and charts for the Codex limit-reclaim ledgers (5/15/60m).'
