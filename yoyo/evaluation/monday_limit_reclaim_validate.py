@@ -77,7 +77,9 @@ def validate(folder):
                 native_fee_precision=8,passed=True,
                 signal_rows=int(t.population.eq('signal').sum()),
                 censored=int(t.reason.eq(0).sum()),
-                before_confirmation_targets=int((t.reason.eq(4)&t.reclaim_status.eq('pending')).sum()))
+                before_confirmation_targets=int((t.reason.eq(4)&t.reclaim_status.eq('pending')).sum()),
+                same_bar_entry_target_n=int((t.reason.eq(4)&t.entry_i.eq(t.exit_i)).sum()),
+                stop_target_ambiguous_n=int(t.ambiguous.gt(0).sum()))
 
 
 def main():
