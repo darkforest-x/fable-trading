@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-olhc-20261025-v1",
+  "question": "Owner 2026-10-25 '去做吧': are the short same-bar targets of the Codex 1.618 limit-reclaim run real? Replay the same signals with the O-L-H-C intrabar path.",
+  "single_variable": "intrabar_path OHLC -> OLHC; everything else from experiments/active/exp-monday-limit-reclaim-20261024-v1/config.json and its frozen pipeline (load_job, prepare, ExitPolicy, fees).",
+  "intrabar_path": "OLHC",
+  "scope": "Alt signal orders, 60m confirmation, near Monday edge target, symbols in output/monday-partial-snapshot-20261024-2224; no random controls.",
+  "engine": "NautilusTrader 1.231.0 via nautilus_independent.run_native, entry_order_mode limit, reclaim_next_bar",
+  "comparison": "Per trade against the Codex O-H-L-C ledger; trades without two-touch bars must match exactly. Per-trade min of the two paths = pessimistic bound.",
+  "maker_fee": 0.0002,
+  "taker_fee": 0.0005,
+  "training_eligible": false,
+  "production_eligible": false
+}
