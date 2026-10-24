@@ -187,6 +187,21 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'This run also had a direct bar computation (summary.json) that the owner said was redundant; native matches it trade by trade (mean abs diff 0.01/0.43bp). Later runs are framework-only. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-limit-reclaim-patterns2-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f2b268aeabac1bb8f1244a476464a02d659789ea
+    status: complete
+    question: 'Owner 2026-10-24: more win-rate patterns, and do they hold with faster 5m/15m confirmation instead of 60m?'
+    single_variable: 'Trend, BTC regime and last-week features plus prior patterns per confirmation period; read-only framework ledgers.'
+    result: 'Patterns hold at 5m and 15m confirmation too. Top-volatility quintile win 18.6/20.2 (5m), 24.4/26.4 (15m), 32.1/36.4 (60m); top-vol + opposite-first 31.5/34.3, 39.7/41.3, 49.3/52.0 percent with +61/+45, +88/+50, +103/+72bp. New: previous week same-side 1618 won raises win rate in both halves (60m 26.7/30.1 vs 22.7/24.4 untouched); symbol 4-week trend with the trade adds ~3-5pp win; BTC 4-week trend flips between halves. Near Monday edge is the most stable target in every volatility quintile; farther targets fade after 2025.'
+    artifacts:
+    - monday-limit-reclaim-patterns2-20261024-v1
+    canonical_report: experiments/active/exp-monday-limit-reclaim-patterns2-20261024-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Post hoc, partial snapshot 536/633; combinations chosen after seeing both halves. 1m/3m confirmation exists only for five symbols. Charts 1, 1b, 2, 3 in the folder.'
   - experiment_id: exp-monday-limit-reclaim-patterns-20261024-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 940fa4fc9d2bcf5eb2b348d9616ccedbbe710493

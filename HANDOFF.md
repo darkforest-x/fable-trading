@@ -1,3 +1,8 @@
+## 2026-10-24 · Limit-reclaim patterns at 5m/15m confirmation, trend and last-week features
+
+- Owner wants faster confirmation than 60m. Same alts ledgers, split 2025-01-01: top pre-touch volatility win 19/20 (5m), 24/26 (15m), 32/36 percent (60m); plus opposite 1618 already filled 32/34, 40/41, 49/52 percent (+61/+45, +88/+50, +103/+72bp). Shorter confirmation lowers win rate because breakeven arms earlier, but the ordering holds.
+- New: previous week's same-side 1618 won → higher win rate in both halves; coin 4-week trend with the trade adds a few points; BTC 4-week trend is unstable. Near Monday edge stays the most stable target at every volatility level. `experiments/active/exp-monday-limit-reclaim-patterns2-20261024-v1/`, builder f2b268aeab; no live action.
+
 ## 2026-10-24 · Win-rate patterns in Codex 1.618 limit-reclaim (alts, 60m, near edge)
 
 - Eleven entry-time features, split at 2025-01-01. Holds in both halves: high prior-14-bar volatility at the touch (top fifth win 32/36 percent vs 19/21 bottom, +82/+70bp, beats vol-matched random by +54/+75); the opposite 1618 already filled this week (win 36/35 vs 22/24); the coin's earlier win rate >=35 percent (27/33). Monday range <3 percent of price loses after fees; wider ranges win less but earn more because the target is 0.618 of the range away.
