@@ -5,7 +5,7 @@ import pandas as pd
 from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy, run_native
 
 
-def replay(bars, updates=(), side=1, entry=100., stop=98., boundary=108., target=112.):
+def replay(bars, updates=(), side=1, entry=100., stop=98., boundary=108., target=112., tick=.1):
     f = pd.DataFrame(bars, columns=['open','high','low','close'],
         index=pd.date_range('2026-01-06 00:05', periods=len(bars), freq='5min', tz='UTC'))
     e = pd.DataFrame([dict(trade_id='x', entry_i=0, side=side, entry=entry,
@@ -15,7 +15,7 @@ def replay(bars, updates=(), side=1, entry=100., stop=98., boundary=108., target
         ExitPolicy(trail_arm_r=1e12, opposite_hour_exit=False, round_trip_cost=0,
                    target_from_entry=True, intrabar_path='OHLC',
                    fill_maker_fee=.0002,fill_taker_fee=.0005),
-        tick=.1, symbol='TEST',entry_order_mode='limit',
+        tick=tick, symbol='TEST',entry_order_mode='limit',
         entry_updates=pd.DataFrame(updates) if updates else None)
 
 
@@ -54,6 +54,13 @@ class PendingMaTests(unittest.TestCase):
                     side=-1,stop=102.,boundary=92.,target=88.)
         self.assertEqual(r.iloc[0].entry,100.)
         self.assertEqual(r.iloc[0].exit_price,88.)
+
+    def test_subtick_fixed_point_float_rounding_at_large_notional(self):
+        r,f,a=replay([[3100]*4,[3100,3101,3080,3090],[3090,3141,3085,3140],[3140]*4],
+                    entry=3082.631858,stop=3070.,boundary=3130.,target=3140.,tick=.000001)
+        self.assertEqual(len(r),1)
+        self.assertLess(abs(f.iloc[0].price-r.iloc[0].entry),.000001/1000000)
+        self.assertEqual(r.iloc[0].reason,4)
 
     def test_marketable_amendment_cancelled(self):
         r,f,a=replay([[104]*4,[104,105,101,102],[102]*4,[102]*4],

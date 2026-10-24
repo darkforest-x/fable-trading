@@ -409,7 +409,7 @@ class IndependentCloseStrategy(Strategy):
                 row = state.source
                 if not row["entry_i"] < i <= row["expire_i"]:
                     raise RuntimeError("Limit filled before submission or after expiry")
-                if abs(price-row["entry"]) > self.eps:
+                if abs(price-row["entry"]) > max(self.eps, 2*math.ulp(price), 2*math.ulp(row["entry"])):
                     raise RuntimeError("Limit fill differs from conservative resting price")
                 row["signal_entry_i"] = row["entry_i"]
                 row["signal_entry_time"] = str(self.frame.index[row["entry_i"]])
