@@ -22,6 +22,7 @@ const FIELD_LABELS = {
   mean_gross_r: "毛均R", mean_fee_r: "均费用R", mean_net_r: "净均R", mean_r: "均值R（按basis）",
   median_r: "R中位数（按basis）", total_r: "R总和（按basis）", total_net_r: "净R总和", mean_bp: "均bp（按basis）", mean_net_bp: "净均bp",
   payoff: "平均盈亏比", profit_factor: "盈亏因子",
+  unreachable_target_n: "目标非正价的已成交数", same_bar_target_stop_n: "退出柱同时覆盖TP/SL数（单目标）",
   median_holding_hours: "中位持仓小时", p90_holding_hours: "持仓时长P90（小时）",
   mfe_r_mean: "MFE均值R（持仓内）", mae_r_mean: "MAE均值R（持仓内）",
   profitable_excursion_then_sl_n: "先有盈利浮盈后止损数", longest_loss_streak: "最长连亏数",
@@ -72,7 +73,7 @@ const FIELD_LABELS = {
 const METRIC_FIELDS = [
   "exit_mode", "asset_group", "period", "basis", "opportunity_period_basis", "grain", "cut_dimension", "cut_value",
   "opportunity_n", "invalidated_n", "reclaim_n", "confirmed_n", "submitted_n", "canceled_n",
-  "unfilled_n", "filled_n", "closed_n", "censored_n", "wins", "losses", "flat", "win_rate",
+  "unfilled_n", "filled_n", "closed_n", "censored_n", "unreachable_target_n", "same_bar_target_stop_n", "wins", "losses", "flat", "win_rate",
   "mean_win_r", "mean_loss_r", "planned_rr_median", "mean_gross_r", "mean_fee_r", "mean_net_r",
   "mean_r", "median_r", "total_r", "total_net_r", "mean_bp", "mean_net_bp", "payoff", "profit_factor", "median_holding_hours",
   "p90_holding_hours", "mfe_r_mean", "mae_r_mean", "profitable_excursion_then_sl_n",

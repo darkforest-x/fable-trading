@@ -84,6 +84,8 @@ def stats(g,with_inference=False,basis=None):
     basis=basis or ('gross' if len(g) and g.symbol.eq('XAUUSD').all() else 'net')
     net=basis=='net'
     result=dict(basis=basis,filled_n=len(a),closed_n=len(c),censored_n=int((~a.closed).sum()),
+        unreachable_target_n=int(a.target_unreachable.fillna(False).astype(bool).sum()),
+        same_bar_target_stop_n=int(c.ambiguous.fillna(0).gt(0).sum()) if not a.policy.eq('half_each').all() else None,
         wins=len(wins),losses=len(loss),flat=int(r.eq(0).sum()),win_rate=r.gt(0).mean(),
         mean_r=r.mean(),total_r=r.sum() if len(r) else None,median_r=r.median(),mean_bp=c.return_pct.mean()*100,
         mean_gross_r=c.gross_r.mean(),mean_fee_r=c.fee_r.mean() if net else None,
