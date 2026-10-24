@@ -1,0 +1,10 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-filtered-replay-20261025-v1",
+  "question": "Owner 2026-10-25: compound 1000 USDT on the Codex 1.618 limit-reclaim trades filtered by the strong entry conditions.",
+  "rule": "Alts, 60m confirmation, near Monday edge target; snapshot output/monday-partial-snapshot-20261024-2224 (536/633 symbols)",
+  "filters": "vol_top (pre-2025 80th percentile of the prior-14-bar TR/close bucket, fixed), vol_spike (last hour >= 8x), fast_long (longs within 30 min of crossing the Monday low), opp_first, any_strong (union), vol_top_opp",
+  "sizing_grid": "k in 5/10/20/30 percent of realized equity per trade; gross open notional cap 1x or 3x equity; extra slippage 0/10/30bp on non-target exits; one run with a 20000 USDT per-trade cap",
+  "limitations": "Filters were chosen after seeing 2020-2026 data (post hoc); arithmetic on recorded framework fills; no funding, queue misses, margin on unrealized losses, liquidity or liquidation; inherits the O-H-L-C intrabar path.",
+  "training_eligible": false,
+  "production_eligible": false
+}
