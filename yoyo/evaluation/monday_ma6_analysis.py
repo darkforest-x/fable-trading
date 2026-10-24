@@ -276,7 +276,15 @@ def main():
                    ('opportunities',o),('orders',e),('trades',t),('fills',fills)]:
         d.to_csv(dest/f'{name}.csv.gz',index=False)
         if name in ['summary','metrics','funnel']:d.to_csv(EXP/f'{name}.csv',index=False)
-    coverage=[json.loads(p.read_text()) for p in completed]
+    coverage=[]
+    for p in completed:
+        item=json.loads(p.read_text())
+        quality=json.loads((p.parent/'data-quality.json').read_text())
+        item['unexpected_gap_count']=quality.get('unexpected_gap_count')
+        item['blocked_monday_weeks']=len(quality.get('blocked_weeks',[]))
+        item['conflicting_minutes']=quality.get('conflicting_minutes',0)
+        item['excluded_five_minute_bars']=quality.get('excluded_five_minute_bars',0)
+        coverage.append(item)
     result=dict(experiment_id=EXP.name,complete=len(completed)==633,expected_symbols=633,completed_symbols=len(completed),coverage=coverage,source_first=min(r['first'] for r in coverage),
         source_last=max(r['last'] for r in coverage),native_positions=sum(r['native_positions'] for r in coverage),
         native_fills=sum(r['native_fills'] for r in coverage),

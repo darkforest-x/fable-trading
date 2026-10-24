@@ -72,6 +72,9 @@ def main():
     far=all_[all_.exit_mode.eq('opposite_1618_full')]
     lines.append(f'另一侧1.618数学目标落在非正价格的已成交交易共 {int(far.unreachable_target_n.sum()):,} 笔；这些目标不可达，原始记录保留并标注，不能虚构止盈。两种单目标方案的退出柱同时覆盖TP与SL共 {int(all_[all_.exit_mode.ne("half_each")].same_bar_target_stop_n.sum()):,} 条目标腿；本轮采用框架O-H-L-C顺序，不能据此还原真实柱内先后。')
     lines.append('加密数据来自既有Binance历史，费用采用2026-10-23记录的OKX Lv1情景：挂单入场/目标0.02%，保护止损及边界结算0.05%，每次成交分别计费。未模拟滑点、资金费、排队与容量。黄金为清理冲突后的HistData bid-only数据，未知成交量、买卖价差和费用。各品种来源截止时间不同，下面保留逐品种覆盖；全局最新时间不能当作所有品种共同终点。')
+    gold=next(x for x in payload['coverage'] if x['symbol']=='XAUUSD')
+    gaps=sum(x.get('unexpected_gap_count') or 0 for x in payload['coverage'] if x['symbol']!='XAUUSD')
+    lines.append(f'数据质量记录中，加密共有 {gaps:,} 处非连续5分钟间隔；信号和持仓按已声明的数据连续性边界处理，不补造K线。黄金检测到 {gold["conflicting_minutes"]:,} 个冲突分钟，排除其覆盖的 {gold["excluded_five_minute_bars"]:,} 根5分钟柱，{gold["blocked_monday_weeks"]} 个受影响周一不作锚；这些排除发生在信号与收益计算之前。')
     lines.append('这轮只验证已确认的固定规则与三种退出，没有参数搜索，也没有调整生产资格。详细逐笔、盈亏样本及匹配随机一起保留，任何后续入场或保本改动都需要按新的交易语义另行验证。')
     payload['interpretation_markdown']='\n\n'.join(lines)
     for dest in [ART/'summary.json',EXP/'summary.json']:dump(dest,payload)

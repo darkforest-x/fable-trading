@@ -67,6 +67,7 @@ const FIELD_LABELS = {
   count: "数量", n: "数量", stage: "漏斗阶段", stage_order: "阶段顺序", denominator: "分母", rate: "比例",
   evidence_as_of: "证据截止日期", source_first: "行情覆盖起点", source_last: "行情覆盖终点",
   first_time_utc: "覆盖起点UTC", last_time_utc: "覆盖终点UTC", first: "品种覆盖起点UTC", last: "品种覆盖终点UTC",
+  unexpected_gap_count: "5m非连续间隔数", blocked_monday_weeks: "不可用周一数", conflicting_minutes: "冲突分钟数", excluded_five_minute_bars: "排除5m柱数",
   source_rows: "源K线数", opportunities: "来源机会数", submitted: "来源挂单数",
   native_positions: "原生持仓数", native_fills: "原生成交数", coverage_asset_count: "来源覆盖品种数",
   coverage_assets_ending_before_source_last: "早于全局最新尾部的品种数", record_type: "记录类型",
