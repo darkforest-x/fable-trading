@@ -1,0 +1,12 @@
+{
+  "experiment_id": "exp-monday-1618-pin-hold-20261024-v1",
+  "question": "Owner 2026-10-24 (OKX BTC 1m chart, long 1618 79940): of the first weekly Monday 1618 touches, how many are a 1m pin that closes back inside and then does not trade the level again for 1 hour, and how many of those reach the Monday near edge?",
+  "hold_minutes": 60,
+  "seed": 20261024,
+  "outcome": "Existing label: Monday near edge before the 2.0 extension, 1m resolution, 14-day horizon (exp-monday-1618-oos-1m refine).",
+  "null": "Random-walk barrier odds from the close 60 minutes after the touch minute, averaged over the same events; held touches without a pin.",
+  "datasets": "OKX BTC 1m 2024-10..2026-10 (touches rebuilt with the same functions); Binance UM BTC/ETH/SOL/BNB/XRP/DOGE 1m 2022-11..2026-09 (existing touches_1m ledger).",
+  "limitations": "Descriptive event study, no fees or orders; conditional on surviving one hour, so the raw rate must be read against the random-walk odds. The owner's 2026-10-24 BTC example is after the data end.",
+  "training_eligible": false,
+  "production_eligible": false
+}
