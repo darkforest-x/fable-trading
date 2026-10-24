@@ -1,5 +1,6 @@
 /* Result-first YOLO workbench. Browsing and new scan drafts have separate state.
  * Frozen model inference, observation books, and trading gates are unchanged.
+ * Read-only patrol cleanup: Stitch screen d43ec70ea6664a098900cff4ce2af956.
  */
 (() => {
   'use strict';
@@ -164,12 +165,12 @@
       <p id="yd-error" class="yd-error" role="alert" hidden></p>
       <section id="yd-panel-results" role="tabpanel" aria-labelledby="yd-tab-results">
         <div id="yd-patrol-return" class="yd-patrol-return" hidden><button data-yd-patrol-back>← 返回最新发现</button><span>查看巡检保存的 K 线与识别框</span></div><div id="yd-run-progress" class="yd-run-progress" aria-live="polite" hidden></div>
-        <aside id="yd-manual-account" class="ma-desk stitch-account-band" aria-label="均线密集实盘统计与持仓"></aside><div class="yd-results-layout"><div class="yd-browser"><div id="yd-symbol-home"><aside id="yd-symbol-panel" class="yd-symbol-panel" aria-label="各周期检测币种"><header><h2>多周期检测结果</h2><span id="yd-symbol-total"></span></header>
+        <div class="yd-results-layout"><div class="yd-browser"><div id="yd-symbol-home"><aside id="yd-symbol-panel" class="yd-symbol-panel" aria-label="各周期检测币种"><header><h2>多周期检测结果</h2><span id="yd-symbol-total"></span></header>
           <input class="form-control form-control-sm" id="yd-result-search" aria-label="搜索检测币种" placeholder="搜索币种…"><div class="yd-symbol-filters" role="group" aria-label="筛选币种"><button data-yd-filter="detected">有形态 <span id="yd-hit-count">0</span></button><button data-yd-filter="all">全部</button><button data-yd-filter="favorites">关注 <span id="yd-favorite-count">0</span></button><button data-yd-filter="failed" id="yd-failed-filter">失败</button></div>
           <label class="yd-symbol-sort"><span class="visually-hidden">币种排序</span><select class="form-select form-select-sm" id="yd-symbol-sort" aria-label="币种排序"><option value="latest">最新形态</option><option value="score">模型分数</option><option value="count">形态数量</option><option value="name">名称 A–Z</option><option value="name-desc">名称 Z–A</option><option value="favorites">关注币种优先</option></select></label><div id="yd-summary" class="yd-summary"></div><div id="yd-symbol-list" class="yd-symbol-list"></div></aside></div>
           <div id="yd-stage-home"><section class="yd-chart-stage" id="yd-chart-stage">
             <header class="yd-chart-head"><div><div class="yd-title-line"><h2 id="yd-chart-title" tabindex="-1">选择币种查看 K 线</h2><button id="yd-favorite" aria-pressed="false" title="保存在当前浏览器">☆ 关注</button></div><p id="yd-chart-sub">运行检测后，在这里查看形态。</p></div><div class="yd-switcher"><select id="yd-quick-symbol" aria-label="切换查看的币种"></select><button class="yd-mobile-filter" data-yd-symbols-toggle aria-expanded="false" aria-controls="yd-symbol-dialog">币种列表</button><button id="yd-prev" aria-label="上一个币种" title="上一个币种"><span class="ui-icon ui-chevron-left" aria-hidden="true"></span></button><span id="yd-symbol-index"></span><button id="yd-next" aria-label="下一个币种" title="下一个币种"><span class="ui-icon ui-chevron-right" aria-hidden="true"></span></button></div></header>
-            <div class="yd-chart-commandbar"><div class="yd-context-actions"><div id="yd-periods" class="yd-periods" role="group" aria-label="K 线周期"></div><div id="yd-trade-action" class="yd-trade-action" hidden></div><select id="yd-change-period" aria-label="K 线周期" hidden>${Object.entries(periods).map(([v,n])=>`<option value="${v}">${n}</option>`).join('')}</select></div>
+            <div class="yd-chart-commandbar"><div class="yd-context-actions"><div id="yd-periods" class="yd-periods" role="group" aria-label="K 线周期"></div><select id="yd-change-period" aria-label="K 线周期" hidden>${Object.entries(periods).map(([v,n])=>`<option value="${v}">${n}</option>`).join('')}</select></div>
             <div class="yd-chart-tools">
               <div class="yd-display-tools">${chartTools.toolbar()}<div class="yd-live-chart"><button id="yd-tail-refresh" class="btn btn-sm btn-outline-secondary yd-icon" title="更新 K 线" aria-label="更新 K 线"><span class="ui-icon ui-refresh" aria-hidden="true"></span></button></div><button id="yd-expand" class="btn btn-sm btn-outline-secondary yd-icon" title="放大图表" aria-label="放大图表"><span class="ui-icon ui-maximize" aria-hidden="true"></span></button>
               <div class="dropdown"><button class="btn btn-sm btn-outline-secondary yd-options-button" id="yd-options-toggle" aria-label="图表设置" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-controls="yd-chart-options"><span class="ui-icon ui-adjustments" aria-hidden="true"></span><span>图表设置</span></button>
@@ -188,9 +189,9 @@
         <div id="yd-patrol-status" class="yd-patrol-status" role="status"></div>
         <div class="yd-feed-filters"><input id="yd-feed-search" aria-label="搜索巡检形态币种" placeholder="搜索币种，如 BTC"><select id="yd-feed-days" aria-label="发现时间范围"><option value="1">最近 1 天</option><option value="7" selected>最近 7 天</option><option value="30">最近 30 天</option><option value="0">全部发现</option></select><select id="yd-feed-period" aria-label="巡检形态周期"><option value="">全部周期</option>${Object.entries(periods).map(([v,n])=>`<option value="${v}">${n}</option>`).join('')}</select><select id="yd-feed-order" aria-label="巡检发现排序"><option value="newest">最新发现优先</option><option value="score">模型分数从高到低</option><option value="symbol">币种 A → Z</option></select><select id="yd-feed-side" aria-label="巡检形态方向"><option value="">多空方向</option><option value="long">多头</option><option value="short">空头</option></select><button data-yd-feed-refresh class="yd-icon" title="刷新发现" aria-label="刷新发现">↻</button></div>
         <div class="yd-feed-meta"><span id="yd-feed-count">正在读取形态…</span><span id="yd-feed-updated"></span></div>
-        <p id="yd-feed-error" class="yd-error" role="alert" hidden></p><header class="yd-radar-heading"><h2>形态雷达</h2><span>点击卡片查看 K 线与订单预览</span></header><div id="yd-findings" class="yd-findings" aria-label="巡检发现的形态"></div><div id="yd-feed-more" class="yd-pagination"></div>
+        <p id="yd-feed-error" class="yd-error" role="alert" hidden></p><header class="yd-radar-heading"><h2>形态雷达</h2><span>点击卡片查看 K 线与均线形态</span></header><div id="yd-findings" class="yd-findings" aria-label="巡检发现的形态"></div><div id="yd-feed-more" class="yd-pagination"></div>
         <p class="yd-footnote">按首次发现排序，重复扫描合并显示。发现时间是巡检保存结果的时间，确认时间是模型看见形态的 K 线收盘时间；列表包含过去发现，不代表形态仍在持续。</p>
-        <div id="yd-overview-account"></div><details class="yd-patrol-plans"><summary>管理巡检计划 <span id="yd-plan-summary-count"></span></summary><p class="yd-help">关闭网页后继续扫描；本机电脑与服务需要保持运行。停止计划后，已有发现仍然保留。</p><div id="yd-schedules"></div></details>
+        <details class="yd-patrol-plans"><summary>管理巡检计划 <span id="yd-plan-summary-count"></span></summary><p class="yd-help">关闭网页后继续扫描；本机电脑与服务需要保持运行。停止计划后，已有发现仍然保留。</p><div id="yd-schedules"></div></details>
       </section>
       <section id="yd-panel-account" role="tabpanel" aria-label="实盘账户" hidden><div id="yd-account-detail"></div></section>
       <section id="yd-panel-model" role="tabpanel" aria-labelledby="yd-tab-model" hidden>${training()}</section>
@@ -225,7 +226,7 @@
     const title=root.querySelector('.yd-workspace-title');if(title)title.textContent=tab==='account'?'实盘与风控':'形态巡检';
     for(const name of ['results','account','history','schedules','model'])$('yd-panel-'+name).hidden=name!==tab;
     if(tab==='results'&&state.result&&(!chart||chartNeedsTheme))renderChart(chart?.timeScale().getVisibleLogicalRange()).catch(e=>error(e.message));
-    const account=$('yd-manual-account');account.hidden=!['results','schedules'].includes(tab);if(tab==='schedules')$('yd-overview-account').append(account);else if(tab==='results')$('yd-panel-results').insertBefore(account,$('yd-panel-results').querySelector('.yd-results-layout'));root.dataset.detectionPane=tab;
+    root.dataset.detectionPane=tab;
     window.SpikeManualAccount?.setActive(state.active,tab);
     if(tab!=='results')destroyChart();
     if(sync)syncRoute();
@@ -306,7 +307,7 @@
       catch(e){error(e.message,'yd-plan-error');}finally{scheduleSubmitting=false;$('yd-plan-submit').disabled=false;}
     });
     on('yd-result-search','symbolselect',e=>{const symbol=e.detail.symbol;if(allSymbolRows().some(r=>r.symbol===symbol)){if(!symbolRows().some(r=>r.symbol===symbol))state.resultFilter='all';chooseSymbol(symbol);}});
-    window.SpikeManualAccount?.bind($('yd-account-detail'),$('yd-manual-account'));
+    window.SpikeManualAccount?.bind($('yd-account-detail'));
     on('yd-result-search','input',e=>{state.symbolSearch=e.target.value;drawSymbols();});
     on('yd-symbol-list','keydown',e=>{if(!['ArrowDown','ArrowUp'].includes(e.key)||!e.target.closest('[data-yd-symbol]'))return;e.preventDefault();moveSymbol(e.key==='ArrowDown'?1:-1,true);});
     for(const [id,key] of [['yd-boxes','boxes'],['yd-side','side']])on(id,'change',e=>{state[key]=e.target.value;state.page=0;state.selected=null;drawBoxes();if(boxes().length)selectBox(boxes()[0].id);});
@@ -330,8 +331,6 @@
     const b=e.target.closest('button');if(!b)return;const d=b.dataset;
     try{
       if(d.ydTab)setTab(d.ydTab);
-      if('ydManualHistory' in d)await window.SpikeManualLive.history();
-      if(d.ydLive){const box=boxes().find(x=>x.id===d.ydLive);if(box&&state.job)await window.SpikeManualLive.open({job_id:state.job.id,symbol:state.symbol,detection_id:box.id,side:box.side,timeframe:state.result?.timeframe});}
       if(d.ydPosition){if(state.tab!=='results')setTab('results');state.overview=true;state.symbol=d.ydPosition;state.resultFilter='all';await switchPeriod(state.timeframe||'15m');if(state.active&&state.tab==='results'&&state.symbol===d.ydPosition){$('yd-chart-title').focus({preventScroll:true});$('yd-chart-stage').scrollIntoView({block:'start',behavior:'smooth'});}return;}
       if(d.ydPairPeriod){await chooseSymbolPeriod(d.ydPairSymbol,d.ydPairPeriod);return;}
       if(d.ydPeriod)await switchPeriod(d.ydPeriod);
@@ -533,10 +532,8 @@
     html('yd-insight',state.result?`<div><strong>${rows.length?`找到 ${rows.length} 处${state.boxes==='raw'?'模型提案':'密集形态'}`:'这段行情暂无符合筛选的形态'}</strong><span>${rows.length?[longs?'多头 '+longs+' 处':'',shorts?'空头 '+shorts+' 处':''].filter(Boolean).join(' · '):'可切换周期或币种'}</span></div><p>${rows.length?'绿色框为多头，红色框为空头。点击下方形态可定位，查看原图可核对。':''}${!rows.length&&state.result.raw_detections.length?` <button data-yd-show-raw>查看 ${state.result.raw_detections.length} 个原始提案</button>`:''}</p>`:'');
     const page=rows.slice(state.page*20,(state.page+1)*20);
     const selected=rows.find(b=>b.id===state.selected)||rows[0];
-    $('yd-trade-action').hidden=!selected||!!state.result?.preview;
     $('yd-insight').hidden=!!selected&&!state.result?.preview;
-    if(selected)html('yd-trade-action',`<button title="均线密集专用账户 · 预览后手动确认" class="${selected.side}" data-yd-live="${selected.id}">预览${selected.side==='long'?'做多':'做空'}</button>`);
-    html('yd-box-list',page.length?page.map(b=>`<article class="yd-detection ${b.side} ${state.selected===b.id?'selected':''}"><button class="yd-box-focus" data-yd-box="${b.id}" aria-pressed="${state.selected===b.id}"><b>${b.side==='long'?'多头':'空头'}密集</b><span>确认 ${fmt(b.detected_at_ms)}</span><span class="yd-score" title="模型置信度，不是交易胜率"><small>模型分数</small>${(b.confidence*100).toFixed(1)}%</span></button><button class="yd-input-link" data-yd-input="${b.id}">查看原图</button><button class="yd-live-link" data-yd-live="${b.id}">预览开仓</button><small>密集 ${b.core_bars} 根 · 之后 ${b.post_bars} 根确认${!b.structural_pass?' · 未通过结构筛选':''}</small></article>`).join('')+(rows.length>20?`<div class="yd-pagination"><button data-yd-page="-1" ${state.page===0?'disabled':''}>上一页</button><span>${state.page+1}/${Math.ceil(rows.length/20)}</span><button data-yd-page="1" ${(state.page+1)*20>=rows.length?'disabled':''}>下一页</button></div>`:''):`<p class="yd-empty">${state.result?(state.result.raw_detections.length?'暂无符合筛选条件的形态，可切换“全部原始框”查看提案。':'这段行情未检出形态。可以换周期检测，或切换其他币种。'):'选择检测结果后，这里显示识别到的形态。'}</p>`);
+    html('yd-box-list',page.length?page.map(b=>`<article class="yd-detection ${b.side} ${state.selected===b.id?'selected':''}"><button class="yd-box-focus" data-yd-box="${b.id}" aria-pressed="${state.selected===b.id}"><b>${b.side==='long'?'多头':'空头'}密集</b><span>确认 ${fmt(b.detected_at_ms)}</span><span class="yd-score" title="模型置信度，不是交易胜率"><small>模型分数</small>${(b.confidence*100).toFixed(1)}%</span></button><button class="yd-input-link" data-yd-input="${b.id}">查看原图</button><small>密集 ${b.core_bars} 根 · 之后 ${b.post_bars} 根确认${!b.structural_pass?' · 未通过结构筛选':''}</small></article>`).join('')+(rows.length>20?`<div class="yd-pagination"><button data-yd-page="-1" ${state.page===0?'disabled':''}>上一页</button><span>${state.page+1}/${Math.ceil(rows.length/20)}</span><button data-yd-page="1" ${(state.page+1)*20>=rows.length?'disabled':''}>下一页</button></div>`:''):`<p class="yd-empty">${state.result?(state.result.raw_detections.length?'暂无符合筛选条件的形态，可切换“全部原始框”查看提案。':'这段行情未检出形态。可以换周期检测，或切换其他币种。'):'选择检测结果后，这里显示识别到的形态。'}</p>`);
     if(state.result?.preview){$('yd-box-count').textContent='—';html('yd-insight','<strong>行情预览 · 这个周期尚未检测</strong><p>复用监控已保存的 K 线与均线；检测后才会显示识别框。</p>');html('yd-box-list','<p class="yd-empty">尚未运行 YOLO 检测，不能据此判断有无形态。</p>');}
     $('yd-export-json').disabled=!state.result||state.result.preview;$('yd-export-png').disabled=!chart;
   }

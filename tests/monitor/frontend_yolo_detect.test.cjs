@@ -32,10 +32,10 @@ test('opening a new patrol coin clears the previous cards, page and delayed sear
  const context={state,patrolFilters,$:el,clearTimeout:id=>cleared=id,html:(id,value)=>el(id).innerHTML=value,error(){}};
  const code=source.slice(source.indexOf('  function restorePatrolFilters('),source.indexOf('  function setTab('));
  const restore=vm.runInNewContext('let feedTimer=123,feedVersion=0;'+code+';restorePatrolFilters',context);
- restore({symbol:'ZAMA-USDT-SWAP'});
+ restore({symbol:'ZAMA-USDT-SWAP',timeframe:'5m'});
  assert.equal(cleared,123);assert.equal(state.feedQuery,'ZAMA-USDT-SWAP');assert.equal(el('yd-feed-search').value,'ZAMA-USDT-SWAP');
  assert.equal(state.feedPage,0);assert.equal(state.feedBefore,null);assert.equal(state.feed,null);
- assert.equal(el('yd-feed-period').value,'');assert.equal(el('yd-feed-side').value,'');assert.equal(el('yd-feed-days').value,'7');
+ assert.equal(el('yd-feed-period').value,'5m');assert.equal(el('yd-feed-side').value,'');assert.equal(el('yd-feed-days').value,'7');
  assert.equal(el('yd-findings').innerHTML,'');assert.equal(el('yd-feed-more').innerHTML,'');
 });
 test('default browsing contains detected coins, search and failures remain accessible',()=>{
@@ -346,11 +346,22 @@ test('returning from account preserves historical job and selected symbol instea
  assert.equal(state.overview,false);assert.equal(state.job.id,'historical');assert.equal(state.symbol,'CT-USDT-SWAP');assert.equal(state.timeframe,'5m');
 });
 
-test('discovery overview keeps a single account panel and uses the lightweight read mode',()=>{
- const moves=[],state={tab:'results',overview:true,active:true,loaded:false,result:null},elements=new Map();
- const context={state,root:{dataset:{},querySelector:()=>null,querySelectorAll:()=>[]},$:id=>{if(!elements.has(id))elements.set(id,{querySelector:()=>null,insertBefore:el=>moves.push([id,el]),append:el=>moves.push([id,el])});return elements.get(id)},chart:null,window:{SpikeManualAccount:{setActive:(active,tab)=>moves.push(['poll',active,tab])}},destroyChart(){},syncRoute(){},refresh(){}};
+test('patrol and chart views omit embedded accounts while the dedicated account route remains',()=>{
+ const modes=[],state={tab:'results',overview:true,active:true,loaded:false,result:null},elements=new Map();
+ const context={state,root:{dataset:{},querySelector:()=>null,querySelectorAll:()=>[]},$:id=>{if(!elements.has(id))elements.set(id,{});return elements.get(id)},chart:null,window:{SpikeManualAccount:{setActive:(active,tab)=>modes.push([active,tab])}},destroyChart(){},syncRoute(){},refresh(){}};
  const fn=vm.runInNewContext(source.slice(source.indexOf('  function setTab('),source.indexOf('  function draftFromJob('))+';setTab',context);
- fn('schedules');assert.equal(context.root.dataset.detectionPane,'schedules');assert.equal(elements.get('yd-manual-account').hidden,false);assert.equal(moves[0][0],'yd-overview-account');
- fn('results');assert.equal(moves[2][0],'yd-panel-results');assert.equal(moves[0][1],moves[2][1]);
- fn('model');assert.equal(elements.get('yd-manual-account').hidden,true);
+ for(const tab of ['schedules','results','account']){
+  fn(tab);assert.equal(context.root.dataset.detectionPane,tab);assert.equal(elements.get('yd-panel-'+tab).hidden,false);
+ }
+ assert.equal(elements.has('yd-manual-account'),false);assert.equal(elements.has('yd-overview-account'),false);
+ assert.deepEqual(modes,[[true,'schedules'],[true,'results'],[true,'account']]);
+});
+test('shape cards keep chart and source-image actions without opening-order actions',()=>{
+ const nodes=new Map(),row={id:'shape',side:'short',confidence:.8,detected_at_ms:100,core_bars:8,post_bars:3,structural_pass:true};
+ const context={state:{page:0,selected:'shape',boxes:'structure',result:{raw_detections:[row]}},chart:{},boxes:()=>[row],fmt:()=> 'date',$:id=>{if(!nodes.has(id))nodes.set(id,{});return nodes.get(id)},html:(id,value)=>context.$(id).innerHTML=value};
+ vm.runInNewContext(source.slice(source.indexOf('  function listBoxes('),source.indexOf('  function drawBoxes('))+';listBoxes()',context);
+ assert.match(nodes.get('yd-box-list').innerHTML,/data-yd-box="shape"/);
+ assert.match(nodes.get('yd-box-list').innerHTML,/data-yd-input="shape"/);
+ assert.doesNotMatch(nodes.get('yd-box-list').innerHTML,/data-yd-live|预览开仓/);
+ assert.equal(nodes.has('yd-trade-action'),false);
 });

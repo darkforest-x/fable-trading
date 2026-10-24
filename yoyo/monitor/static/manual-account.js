@@ -8,7 +8,8 @@
   const side=v=>({long:'多头',short:'空头',buy:'买入',sell:'卖出',net:'净持仓'}[v]||v||'—');
   const states={queued:'已确认 · 等待执行',prepared:'准备市价开仓',leverage_pending:'核对杠杆',entry_pending:'核对市价成交',protecting:'核对止盈止损',manual_tp_pending:'按成交价校准止盈',active:'持仓中',closed:'已平仓',skipped:'未开仓',rejected:'交易所拒绝',filled:'已成交',canceled:'已撤销',live:'待成交',partially_filled:'部分成交',exit_needed:'准备退出',cancel_stop_pending:'处理本笔保护单',exit_pending:'核对平仓成交',stop_executing:'核对止盈止损成交'};
   const reasons={manual_expired:'执行前报价已过期，本次未开仓。请重新预览并确认。',manual_repreview_required:'订单条件已变化，本次未开仓。打开详情核对原因后重新预览。',stop_crossed:'价格已越过止损点',insufficient_margin:'可用保证金不足',quote_stale:'报价已过期'};
-  const pollMode=(active,tab,hidden)=>active&&!hidden?(tab==='account'?'full':['results','schedules'].includes(tab)?'workspace':null):null;
+  // Only the dedicated account route owns account polling, never patrol charts.
+  const pollMode=(active,tab,hidden)=>active&&!hidden&&tab==='account'?'full':null;
   const tabs=[['positions','当前持仓'],['orders','挂单与保护'],['history','历史订单'],['executions','开仓记录']];
   class Poller {
     constructor(request,render,{set=(fn,ms)=>setTimeout(fn,ms),clear=id=>clearTimeout(id)}={}){Object.assign(this,{request,render,set,clear,version:0,active:false});}

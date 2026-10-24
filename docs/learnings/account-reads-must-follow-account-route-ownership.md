@@ -1,0 +1,7 @@
+# Account reads must follow account route ownership
+
+- **Problem**: Patrol discoveries and their result charts still displayed the legacy live-account summary and order-preview actions. The account detail page shares the same JavaScript workspace, so removing the whole account module would also break the independent account route.
+- **Rejected shortcut**: Hiding the summary with CSS would leave five-second account requests running. Removing the module from the loader would break the existing account navigation and position-management detail view. Neither shortcut was applied.
+- **Effective path**: Remove the patrol/result summary mount and opening-order actions at their composition points. Restrict account polling to the visible `tab=account` route, preserving that route and its existing management functions. Keep read-only candlestick previews and source-image controls separate from order previews.
+- **General rule**: When removing a panel, trace its mount, delegated actions, and polling owner together. A shared workspace does not mean every tab should activate every data source. Verify that leaving the account view stops its reads and that the dedicated account view still works.
+- **Scope**: `yoyo/monitor/static/yolo-detect.js`, `manual-account.js`; existing polling and chart regressions, desktop and 390px browser verification. Stitch screen `d43ec70ea6664a098900cff4ce2af956`. No account records, orders, service configuration, or scanning plans changed.

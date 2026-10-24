@@ -39,9 +39,9 @@ test('order row refresh restores the same order action instead of stealing outsi
  updateTable(panel,'one',focused);assert.equal(same.focused,true);assert.equal(other.focused,undefined);
  same.focused=false;updateTable(panel,'two',{dataset:{}});assert.equal(same.focused,false);
 });
-test('only visible discovery, results and account views own account reads',()=>{
+test('only the visible dedicated account view owns account reads',()=>{
  const {pollMode}=require('../../yoyo/monitor/static/manual-account.js');
- assert.equal(pollMode(true,'account',false),'full');assert.equal(pollMode(true,'results',false),'workspace');assert.equal(pollMode(true,'schedules',false),'workspace');
+ assert.equal(pollMode(true,'account',false),'full');assert.equal(pollMode(true,'results',false),null);assert.equal(pollMode(true,'schedules',false),null);
  for(const tab of ['model','history'])assert.equal(pollMode(true,tab,false),null);
  for(const tab of ['account','results','schedules']){assert.equal(pollMode(false,tab,false),null);assert.equal(pollMode(true,tab,true),null);}
 });

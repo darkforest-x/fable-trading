@@ -110,7 +110,7 @@ test('only the inline coin link opens externally; the rest of each row pins the 
 });
 test('inspection link targets the exact coin patrol feed without pinning the chart',async()=>{
  const c=harness(async()=>response(snap()));await ready(c);
- assert.match(c.el('mf-rows').innerHTML,/<a data-inspect-symbol="BTC-USDT-SWAP" href="#yolo-detect\?tab=schedules&amp;symbol=BTC-USDT-SWAP" aria-label="查看 BTC 的信号巡检"/);
+ assert.match(c.el('mf-rows').innerHTML,/<a data-inspect-symbol="BTC-USDT-SWAP" href="#yolo-detect\?tab=schedules&amp;symbol=BTC-USDT-SWAP&amp;timeframe=5m" aria-label="查看 BTC 的信号巡检"/);
  const before=c.charts.length;let stopped=false;
  c.el('mf-rows').events.click({target:{closest:s=>s==='[data-inspect-symbol]'?{dataset:{inspectSymbol:'BTC-USDT-SWAP'}}:s==='[data-symbol]'?{dataset:{symbol:'BTC-USDT-SWAP'}}:null},stopPropagation(){stopped=true;}});
  assert.equal(stopped,true);assert.equal(c.charts.length,before);assert.equal(c.el('mf-follow').attrs['aria-pressed'],'true');
