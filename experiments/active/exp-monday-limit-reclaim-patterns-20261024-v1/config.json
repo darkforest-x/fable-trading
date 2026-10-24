@@ -1,0 +1,11 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-patterns-20261024-v1",
+  "question": "Owner 2026-10-24: how to raise the win rate of the Codex 1.618 limit-reclaim rule; which entry-time patterns hold?",
+  "source_snapshot": "output/monday-partial-snapshot-20261024-2224 (536/633 symbols), alts, 60m confirmation, near Monday edge target",
+  "features": "range_pct, range_vs_typical, side, hours_after, weekday, hour_utc, age_weeks, vol_q, cluster, opp_first, prior_win; all known at the fill time",
+  "split": "discovery fills before 2025-01-01, validation from 2025-01-01; a pattern counts only if it has the same direction in both halves and beats its own random controls",
+  "win": "net return > 0 (target fill in practice)",
+  "limitations": "Post hoc look at 11 fixed features on a partial snapshot of one rule; any filter chosen here needs forward data. No trade re-executed.",
+  "training_eligible": false,
+  "production_eligible": false
+}
