@@ -1,11 +1,16 @@
 {
   "experiment_id": "exp-monday-reclaim-fee-be-20261024-v1",
-  "status": "validated_not_started",
+  "status": "majors_native_running",
   "notion_research_id": "4038856479af81039916f31141ac9dab",
   "baseline_experiment": "exp-monday-limit-reclaim-20261024-v1",
   "owner_rule_answer_complete": true,
   "full_command": "/Users/zhangzc/.local/bin/nautilus-python -m yoyo.evaluation.monday_reclaim_fee --workers 2 --wait-pids 17322 23567",
   "validation": "33focusedtests passed",
   "production_eligible": false,
-  "training_eligible": false
+  "training_eligible": false,
+  "source_commit": "3e24a3b218",
+  "native_parent_pid": 58356,
+  "native_session_id": 98841,
+  "native_command": "/Users/zhangzc/.local/bin/nautilus-python -m yoyo.evaluation.monday_reclaim_fee --symbols BTCUSDT ETHUSDT --workers 1",
+  "next": "After majors complete, run remaining cohort once with full_command; new variant only, preserve original baseline and completed variant symbols. Gold remains excluded. Read state.json; do not launch duplicate pool."
 }
