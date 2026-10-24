@@ -190,7 +190,7 @@ function DownloadBar({rows, allRows, filename}) {
   return <div className="ma6-download-row">
     <button type="button" disabled={!rows.length} onClick={() => exportRows(rows, filename + "-当前下拉筛选.csv")}>下载当前下拉筛选 CSV</button>
     <button type="button" disabled={!allRows.length} onClick={() => exportRows(allRows, filename + "-全部.csv")}>下载全部 CSV</button>
-    <span>筛选下载按上方下拉选项导出全部匹配行；表内文字搜索与排序只影响屏幕显示。完整下载保留当前报告数据包的所有记录。</span>
+    <span>按下拉选项导出全部匹配行及页面审查列；文字搜索与排序只影响屏幕。原始全字段CSV在交付文件夹“全部逐笔明细”。</span>
   </div>;
 }
 function EvidenceTable({id, title, queryId, sourceRows, displayRows, preferred, strictColumns = false, controls, note, searchable = true}) {
@@ -504,8 +504,8 @@ export function ReportContent() {
           <EvidenceTable id={"ledger-" + queryId} title={titles[queryId]} queryId={queryId} sourceRows={rows}
             displayRows={filteredLedgers[queryId]} preferred={LEDGER_FIELDS[queryId]} strictColumns controls={ledgerControls(rows)}
             note={queryId === "fills"
-              ? "加密逐笔费用字段按原生成交流水呈现；XAUUSD费用与点差未知，相关汇总只报毛收益，不能把原生账本的commission空值或零值解释为黄金费率。CSV保留源文件的全部字段。"
-              : "表中列为常用审查字段；CSV导出保留源文件提供的全部字段。"}/>
+              ? "加密逐笔费用字段按原生成交流水呈现；XAUUSD费用与点差未知，相关汇总只报毛收益。页面保留全部记录的审查列；原始全字段CSV在交付文件夹‘全部逐笔明细’。"
+              : "保留源文件全部记录的常用审查列。页面CSV下载同口径；原始全字段及全部改单历史在交付文件夹‘全部逐笔明细’，可按ID关联。"}/>
           <DownloadBar rows={filteredLedgers[queryId]} allRows={rows} filename={"monday-ma6-" + queryId}/>
         </div>;
       })}

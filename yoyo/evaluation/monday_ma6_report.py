@@ -30,6 +30,15 @@ DEFAULT_SAMPLES_PATH = REPO_ROOT / "artifacts/monday-ma6-retest-20261024/samples
 REPORT_TABLES = ("summary", "metrics", "funnel", "opportunities", "orders", "trades", "fills")
 CSV_QUERIES = tuple(query_id for query_id in REPORT_TABLES if query_id not in {"summary", "metrics"})
 
+# Keep every row in the browser, but avoid repeating engine internals and alias
+# columns across millions of cells. The unprojected CSV exports remain intact.
+REVIEW_COLUMNS = {
+    "opportunities": "opportunity_id symbol asset_group side week level first_touch_at confirmation_at invalidation_at status reason new_extremes period".split(),
+    "orders": "order_id population symbol asset_group side exit_mode period submitted_at resolution_interval_start resolution_interval_end limit_price stop_price status actual_pending_amendment_count".split(),
+    "trades": "trade_id population symbol asset_group side exit_mode period entry_interval_start exit_time entry_price stop_price target_monday target_far exit_price basis return_r return_pct gross_r fee_r net_r closed censored outcome mfe_r mae_r profitable_excursion_then_sl holding_hours".split(),
+    "fills": "trade_id population symbol asset_group side exit_mode period time phase price quantity notional commission fee_rate fee_class".split(),
+}
+
 # Stable display schema. A column is shown only when at least one reviewed row
 # actually contains it; raw source rows remain available in the source panel
 # and CSV exports. These are aliases supplied by the upstream summary builder.
@@ -534,17 +543,23 @@ def build_snapshot(
 
     queries = snapshot.setdefault("queries", {})
     for query_id in REPORT_TABLES:
+        rows=loaded[query_id]
+        projected=query_id in REVIEW_COLUMNS
+        if projected:
+            rows=[{key:row[key] for key in REVIEW_COLUMNS[query_id] if key in row} for row in rows]
         queries[query_id] = {
-            "rows": loaded[query_id],
+            "rows": rows,
             "source": _query_source(
                 query_id,
                 loaded_paths[query_id],
                 pending=not bool(loaded_paths[query_id]),
                 replay_progress=replay_progress_note,
+                caveats=["保留源文件全部行；页面仅投影常用审查列，原始全部字段见交付文件夹‘全部逐笔明细’及report-data。页面CSV下载为此投影，不是原始全字段CSV。"] if projected else [],
             ),
         }
     queries["samples"] = {
         "rows": samples,
+        "payloadColumns": ["image_data_url"],
         "source": _query_source(
             "samples",
             sample_paths,
