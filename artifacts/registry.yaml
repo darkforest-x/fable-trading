@@ -198,6 +198,18 @@ artifacts:
       61frontend77asset-layer tests;1440/390/320 browser checks; screenshots after actual5m loading. Temporary browser closed.
       Monitor alive and4patrols enabled; final scan running, not claimed ready; earlier TEST002 scan errors retained.
 
+  - artifact_id: monday-limit-reclaim-patterns-20261024-v1
+    artifact_type: manifest
+    role: 'Entry-time feature tables, combinations and charts for the Codex Monday 1618 limit-reclaim ledgers.'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 940fa4fc9d2bcf5eb2b348d9616ccedbbe710493
+    generator_commit: 940fa4fc9d2bcf5eb2b348d9616ccedbbe710493
+    source_path: experiments/active/exp-monday-limit-reclaim-patterns-20261024-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-limit-reclaim-patterns-20261024-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'complete; volatility-before-touch and opposite-side-first raise win rate in both halves'
   - artifact_id: monday-limit-reclaim-review-20261024-v1
     artifact_type: manifest
     role: 'Review of the Codex Monday 1618 limit-reclaim snapshot: grid, concentration, matched controls, equity replay, charts.'

@@ -1,0 +1,3 @@
+/Users/zhangzc/fable-trading/yoyo/evaluation/monday_limit_reclaim_patterns.py:74: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  ent = g.t.astype('int64').to_numpy(); ex = pd.to_datetime(g.exit_time, utc=True).astype('int64').to_numpy()
+{"n": 59276, "mix": {"5": {"止盈": 13.685577441985968, "收回后保本出场": 45.896856449001625, "没收回止损": 40.41756610901241}, "15": {"止盈": 17.796781702256855, "收回后保本出场": 42.52774685423203, "没收回止损": 39.67547144351112}, "60": {"止盈": 24.726702206626626, "收回后保本出场": 35.214926783183756, "没收回止损": 40.05837101018962}}}

@@ -1,3 +1,8 @@
+## 2026-10-24 · Win-rate patterns in Codex 1.618 limit-reclaim (alts, 60m, near edge)
+
+- Eleven entry-time features, split at 2025-01-01. Holds in both halves: high prior-14-bar volatility at the touch (top fifth win 32/36 percent vs 19/21 bottom, +82/+70bp, beats vol-matched random by +54/+75); the opposite 1618 already filled this week (win 36/35 vs 22/24); the coin's earlier win rate >=35 percent (27/33). Monday range <3 percent of price loses after fees; wider ranges win less but earn more because the target is 0.618 of the range away.
+- Top-volatility plus opposite-side-first: win 49/52 percent, +103/+72bp (n964/1507), chosen after seeing both halves. Side, hours since Monday and UTC hour are unstable. Shorter confirmation converts targets into breakeven exits (target 14/18/25 percent at 5/15/60m). `experiments/active/exp-monday-limit-reclaim-patterns-20261024-v1/`. Builder 940fa4fc9d; no live action.
+
 ## 2026-10-24 · Review of Codex 1.618 limit-reclaim snapshot (536/633)
 
 - Read-only over the framework ledgers in `output/monday-partial-snapshot-20261024-2224` (Codex run still going). Alts 5/15/60m confirmation x 5 targets: mean net +5 to +22bp per trade, median -7bp; best 60m + near Monday edge +22.1bp, 25 percent targets (+467bp), 35 percent breakeven (-7bp), 40 percent failed reclaim (-227bp). Top 1 percent of trades = 70 percent of profit; complete matched groups +5.7 vs random -25.2.

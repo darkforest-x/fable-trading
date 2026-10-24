@@ -187,6 +187,21 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'This run also had a direct bar computation (summary.json) that the owner said was redundant; native matches it trade by trade (mean abs diff 0.01/0.43bp). Later runs are framework-only. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-limit-reclaim-patterns-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 940fa4fc9d2bcf5eb2b348d9616ccedbbe710493
+    status: complete
+    question: 'Owner 2026-10-24: how to raise the win rate of the Codex 1.618 limit-reclaim rule; which entry-time patterns hold?'
+    single_variable: 'Eleven fixed entry-time features on the framework ledgers, discovery before 2025 vs validation from 2025; no trade re-executed.'
+    result: 'Alts 60m + near edge, 59276 fills, split 2025-01-01. Same direction in both halves: prior-14-bar volatility top quintile win 32.1/36.4 percent vs bottom 19.1/20.8, mean +82/+70bp, excess over vol-matched random +54/+75; opposite 1618 already filled this week win 35.7/35.1 vs 21.8/23.6; symbol prior win rate >=35 percent 26.8/32.5; Monday range <3 percent of price negative (-12/-19bp) while wider ranges win less but earn more. Top-vol + opposite-first win 49.3/52.0 percent, +103/+72bp (n964/1507). Side, hours after Monday and UTC hour flip between halves. Shorter confirmation turns targets into breakeven exits (target 14/18/25 percent for 5/15/60m).'
+    artifacts:
+    - monday-limit-reclaim-patterns-20261024-v1
+    canonical_report: experiments/active/exp-monday-limit-reclaim-patterns-20261024-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Post hoc on a partial snapshot (536/633); the volatility bucket is Codex prior-14-bar TR/close at the bar before the touch (causal) and controls are matched on it. Combinations are chosen after seeing both halves; forward data needed. Charts 1-4 in the folder.'
   - experiment_id: exp-monday-limit-reclaim-review-20261024-v1
     source_repo: darkforest-x/fable-trading
     source_commit: eef486024fa5b0607d9df04ac3c79dbcf8bd6c7b
