@@ -14,7 +14,9 @@ fees); no trade is re-executed. Reported:
   Monday edge, chosen after seeing the grid);
   an equity replay of those framework trades from 1000 USDT with a fixed
   fraction k of realized equity as notional per trade (overlaps allowed),
-  optional extra taker slippage and a per-trade notional cap. This is
+  optional extra taker slippage and a cap on total open notional (gross
+  exposure, a multiple of realized equity; trades beyond it are cut or
+  skipped). This is
   arithmetic on recorded fills, not a new backtest; it ignores unrealized
   losses, funding, queue misses and liquidity.
 """
@@ -36,6 +38,8 @@ TARGET_ZH = dict(near_monday_edge='近侧周一边界', **{'range_0.5': '区间0
                  opposite_monday_edge='远侧周一边界', opposite_1618='对侧1.618')
 INK, INK2, MUTED, GRID, SURF = '#0b0b0b', '#52514e', '#898781', '#e1e0d9', '#fcfcfb'
 BLUE, ORANGE, AQUA, YELLOW = '#2a78d6', '#eb6834', '#1baf7a', '#eda100'
+PATH_LABELS = (('每笔 2% 权益，不限总仓位', BLUE), ('每笔 5% 权益，不限总仓位', ORANGE),
+               ('每笔 2%，总仓位 ≤ 1 倍（不加杠杆）', AQUA), ('每笔 2%，总仓位 ≤ 3 倍，平仓滑点 10bp', YELLOW))
 
 
 def load(symbol):
@@ -59,8 +63,8 @@ def cell(x):
                 incomplete_signal_bp=float(sig.net_bp.to_numpy()[~full].mean()))
 
 
-def replay(t, k, cap=None, slip_bp=0., start=None):
-    """Realized-equity path from 1000 USDT; notional=min(k*equity, cap) at entry."""
+def replay(t, k, gross=None, slip_bp=0., start=None):
+    """Realized-equity path from 1000 USDT; notional=k*equity, within the gross cap."""
     if start is not None:
         t = t[t.entry >= start]
     net = t.net_bp.to_numpy()/1e4 - np.where(t.reason.to_numpy() == 4, 0., slip_bp/1e4)
@@ -72,7 +76,7 @@ def replay(t, k, cap=None, slip_bp=0., start=None):
     for ts, is_entry, j in ev:
         j = int(j)
         if is_entry:
-            notional[j] = min(k*eq, cap) if cap else k*eq
+            notional[j] = k*eq if gross is None else max(0., min(k*eq, gross*eq-opened))
             opened += notional[j]; expo = max(expo, opened/eq)
         else:
             eq += notional[j]*net[j]; opened -= notional[j]
@@ -151,14 +155,16 @@ def charts(grid, best, conc, years, paths, outcomes):
     fig.tight_layout(); fig.savefig(EXP/'4_years.png', dpi=130); plt.close(fig)
     # 5. Equity replays (log scale).
     fig, ax = plt.subplots(figsize=(11, 5))
-    for (lab, col, ls), path in zip((('每笔名义 = 权益 10%', BLUE, '-'), ('10% + 平仓滑点 10bp', ORANGE, '-'),
-                                     ('10% + 单笔上限 2 万U', AQUA, '-'), ('每笔名义 = 权益 2%', YELLOW, '-')), paths):
+    for (lab, col), path in zip(PATH_LABELS, paths):
         p = np.array(path)
-        ax.plot(pd.to_datetime(p[:, 0]), p[:, 1], color=col, lw=2, ls=ls, label=lab)
+        ax.plot(pd.to_datetime(p[:, 0]), p[:, 1], color=col, lw=2, label=lab)
     ax.set_yscale('log'); ax.axhline(1000, color='#c3c2b7', lw=1)
+    right = ax.get_xlim()[1]
     for mult in (100, 1000, 10000):
-        ax.axhline(1000*mult, color=GRID, lw=.8, ls='--'); ax.text(ax.get_xlim()[0], 1000*mult, f' {mult}倍', color=MUTED, va='bottom')
-    ax.set_ylabel('已实现权益（USDT，对数）'); ax.legend(frameon=False, loc='upper left')
+        ax.axhline(1000*mult, color=GRID, lw=.8, ls='--')
+        ax.text(right, 1000*mult, f'{mult}倍 ', color=MUTED, va='bottom', ha='right')
+    ax.set_ylabel('已实现权益（USDT，对数）')
+    ax.legend(frameon=False, loc='upper left', ncols=2, bbox_to_anchor=(0, 1.0))
     ax.set_title(f'1000U 按历史成交复利（理想成交、无资金费、无排队）· {best}', color=INK, loc='left')
     for s in ('top', 'right'):
         ax.spines[s].set_visible(False)
@@ -196,12 +202,12 @@ def run():
                     exit=pd.to_datetime(sig.exit_time, utc=True).astype('int64'))
     start24 = pd.Timestamp('2024-01-01', tz='UTC').value
     runs, paths = {}, []
-    for name, kw in (('k10', dict(k=.10)), ('k10_slip10', dict(k=.10, slip_bp=10)), ('k10_cap20000', dict(k=.10, cap=2e4)),
-                     ('k02', dict(k=.02)), ('k05', dict(k=.05)), ('k25', dict(k=.25)), ('k50', dict(k=.50)),
-                     ('k10_slip20', dict(k=.10, slip_bp=20)), ('k10_from2024', dict(k=.10, start=start24)),
-                     ('k10_slip10_cap20000', dict(k=.10, slip_bp=10, cap=2e4))):
+    for name, kw in (('k02', dict(k=.02)), ('k05', dict(k=.05)), ('k02_gross1', dict(k=.02, gross=1)),
+                     ('k02_gross3_slip10', dict(k=.02, gross=3, slip_bp=10)), ('k10', dict(k=.10)), ('k25', dict(k=.25)),
+                     ('k02_gross3', dict(k=.02, gross=3)), ('k05_gross3', dict(k=.05, gross=3)),
+                     ('k02_slip10', dict(k=.02, slip_bp=10)), ('k02_from2024', dict(k=.02, start=start24))):
         runs[name], path = replay(tr, **kw)
-        if name in ('k10', 'k10_slip10', 'k10_cap20000', 'k02'):
+        if len(paths) < len(PATH_LABELS):
             paths.append(path[::max(1, len(path)//3000)])
     EXP.mkdir(exist_ok=True)
     charts(grid, best, conc, years, paths, outcomes)
