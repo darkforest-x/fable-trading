@@ -1,0 +1,28 @@
+{
+  "folder": "/Users/zhangzc/fable-trading/artifacts/monday-top200-review-20261024/收益率前200笔_5分钟复盘",
+  "archive": "/Users/zhangzc/fable-trading/artifacts/monday-top200-review-20261024/前200笔_逐笔分析与框架验证.zip",
+  "archive_bytes": 172830,
+  "files": [
+    "/Users/zhangzc/fable-trading/artifacts/monday-top200-review-20261024/收益率前200笔_5分钟复盘/01_逐笔K线成交量均线分析.csv",
+    "/Users/zhangzc/fable-trading/artifacts/monday-top200-review-20261024/收益率前200笔_5分钟复盘/02_三类入场条件框架验证.csv",
+    "/Users/zhangzc/fable-trading/artifacts/monday-top200-review-20261024/收益率前200笔_5分钟复盘/03_去除两大集中行情周的敏感性.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-monday-top200-patterns-20261024-v1/config.json",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-monday-top200-patterns-20261024-v1/summary.json",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-monday-top200-patterns-20261024-v1/validation.json",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-monday-top200-patterns-20261024-v1/top200-features.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-monday-top200-patterns-20261024-v1/top200-summary.json",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-monday-top200-patterns-20261024-v1/concentration.json",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-monday-top200-patterns-20261024-v1/metrics.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-monday-top200-patterns-20261024-v1/year-metrics.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-monday-top200-patterns-20261024-v1/winner-loser-features.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-monday-top200-patterns-20261024-v1/concentration-sensitivity.csv"
+  ],
+  "reproduce": [
+    ".venv/bin/python -m yoyo.evaluation.monday_top200_patterns review",
+    ".venv/bin/python -m yoyo.evaluation.monday_top200_patterns collect --workers 3",
+    ".venv/bin/python -m yoyo.evaluation.monday_top200_patterns summarize",
+    ".venv/bin/python -m yoyo.evaluation.monday_top200_pattern_delivery"
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}

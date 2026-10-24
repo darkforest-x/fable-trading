@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-top200-patterns-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ddce57695b
+    status: inconclusive
+    question: Which causal small-timeframe candle, volume and six-MA traits explain the selected200winners, and do three entry-admission ideas improve complete historical framework strategies?
+    single_variable: Each of volume peak20, last5m close beyond all six MAs, and last5m wick retest of the20MA pair is independently added to fixed5m-engulf-near or1h-bodyN3-near/far baselines. Frozen independent fills, stops, targets and fees unchanged; no later-entry timing search.
+    artifacts:
+    - monday-top200-patterns-20261024-v1
+    canonical_report: experiments/active/exp-monday-top200-patterns-20261024-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    result: 200quantitative per-trade reviews complete;147volume peaks,18pre-entry six-MA reclaims,111against all six.75coin-week-side groups span38weeks;113rows in2weeks.631cryptoassets81857configuration signals/62923unique entries,323105frozen framework rows including controls.9newadmission variants allnegative mean netR after2023.5mengulf+volume improves-.292to-.178R;1hnear+sixMA wins64.68percent butpayoff.432 andmean-.073R. Removing2concentrated weeks leaves all9negative. No profitable strategy confirmed.
+    notes: Reused Nautilus1.231.0 andVectorBT1.2.0 fills without replay.6focusedtests;81857financial-row equality checks;18original aggregate baseline comparisons;62review/full-source MA observations agree. Chinese200row review,144metricrows,36sensitivityrows andsmall companionZIP added tooriginal image folder.29timed-entry touch bars are unavailable atentry andmarked retrospective. No newHTML,parameters,training,production orlivechanges. Notion4038856479af816aaaf5c6ab29a738ab readbackverified.
   - experiment_id: exp-monday-top200-review-20261024-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 53961e44ae

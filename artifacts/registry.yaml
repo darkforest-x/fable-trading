@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-top200-patterns-20261024-v1
+    artifact_type: manifest
+    role: causal_winner_gallery_review_and_frozen_framework_admission_comparisons
+    source_repo: darkforest-x/fable-trading
+    source_commit: ddce57695b
+    generator_commit: 80463288e1
+    source_path: experiments/active/exp-monday-top200-patterns-20261024-v1/delivery.json
+    storage_uri: repo://experiments/active/exp-monday-top200-patterns-20261024-v1/delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 200Chinese row-by-row quantitative candle/volume/MA reviews;all original images preserved.631assets81857configuration signals,62923distinct entries andoriginal matched controls;3independent filters on3fixed baselines.144metricrows/36concentration-sensitivityrows.9newvariants negative after2023. Exact sourcefinancial fields andbaseline reconciliation;no fillengine replay. Local CSV/GZ/ZIP ignored;small metadata and reproducible builders tracked. Outcome-selected winners andalreadyresearched laterhistory cannot establish a deployable policy.
   - artifact_id: monday-top200-review-20261024-v1
     artifact_type: manifest
     role: ranked_winning_trade_5m_manual_review_gallery
