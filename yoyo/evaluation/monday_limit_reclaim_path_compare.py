@@ -1,7 +1,10 @@
 """O-H-L-C versus O-L-H-C outcomes of the Codex limit-reclaim signals and the 1000U replay (owner2026-10-25).
 
 Joins the Codex ledger (O-H-L-C, exp-monday-limit-reclaim-20261024-v1) with the
-same signals replayed natively under O-L-H-C (exp-monday-limit-reclaim-olhc-20261025-v1),
+same signals replayed natively under O-L-H-C with monotone segments
+(exp-monday-limit-reclaim-olhc-20261025-v2; v1 was invalid). A 20-symbol O-H-L-C
+rerun with monotone segments (exp-monday-limit-reclaim-ohlc-check-20261025-v1)
+checks that the Codex ledger is unaffected by the segment-order defect;
 trade by trade: alts, 60m confirmation, near Monday edge target, snapshot symbols.
 Reports how many trades change, whether the short same-bar targets survive, and
 per-side means for O-H-L-C, O-L-H-C and the per-trade minimum (pessimistic: each
@@ -20,12 +23,17 @@ from yoyo.evaluation.monday_limit_reclaim_patterns import SRC, SNAP, SPLIT, INK,
 from yoyo.evaluation.monday_limit_reclaim_filtered_replay import COLS, replay, yearly, NAMES, FEAT
 
 EXP = ROOT/'experiments/active/exp-monday-limit-reclaim-path-compare-20261025-v1'
-OLHC = ROOT/'experiments/active/exp-monday-limit-reclaim-olhc-20261025-v1/symbols'
+OLHC = ROOT/'experiments/active/exp-monday-limit-reclaim-olhc-20261025-v2/symbols'
+CHECK = ROOT/'experiments/active/exp-monday-limit-reclaim-ohlc-check-20261025-v1'
 VARIANTS = {'ohlc': '按原记录（开→高→低→收）', 'olhc': '开→低→高→收', 'worst': '悲观（每笔取两种顺序中较差的）'}
 
 
 def load_olhc(symbol):
-    path = OLHC/symbol/'trades.csv.gz'
+    return load_olhc_from(OLHC, symbol)
+
+
+def load_olhc_from(root, symbol):
+    path = root/symbol/'trades.csv.gz'
     if not path.exists():
         return pd.DataFrame()
     t = pd.read_csv(path, usecols=['trade_id', 'reason', 'entry_time', 'exit_time', 'net_notional_bp'])
@@ -89,6 +97,9 @@ def run():
         b = pd.concat(list(ex.map(load_olhc, syms, chunksize=8)), ignore_index=True)
     t = a.merge(b, on='trade_id', how='inner')
     missing = len(a)-len(t)
+    chk_syms = json.loads((CHECK/'config.json').read_text())['symbols']
+    chk = pd.concat([load_olhc_from(CHECK/'symbols', s) for s in chk_syms], ignore_index=True).merge(a, on='trade_id')
+    parity = dict(trades=len(chk), identical=int(np.isclose(chk.net_olhc, chk.net_bp, atol=1e-6).sum()))
     t['changed'] = ~np.isclose(t.net_bp, t.net_olhc, atol=1e-6)
     t['same_bar_ohlc'] = (t.reason == 4) & (t.exit_time == t.entry_time)
     t['same_bar_olhc'] = (t.reason_olhc == 4) & (t.exit_time_olhc == t.entry_time_olhc)
@@ -132,10 +143,10 @@ def run():
                         paths[f'{v}|{name}'] = path; years[f'{v}|{name}'] = yearly(path)
     EXP.mkdir(exist_ok=True)
     charts(res, paths, table)
-    dump(EXP/'summary.json', dict(config=cfg, vol_bucket_threshold=thr, comparison=res, sets=sets, replays=table,
+    dump(EXP/'summary.json', dict(config=cfg, vol_bucket_threshold=thr, ohlc_parity=parity, comparison=res, sets=sets, replays=table,
         yearly_k10_gross1_slip10=years, source_commit=subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip(),
         training_eligible=False, production_eligible=False))
-    print(json.dumps(res, ensure_ascii=False, indent=1))
+    print(json.dumps(dict(parity=parity, **res), ensure_ascii=False, indent=1))
 
 
 if __name__ == '__main__':
