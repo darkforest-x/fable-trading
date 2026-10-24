@@ -95,8 +95,8 @@ const METRIC_FIELDS = [
 const LEDGER_FIELDS = {
   opportunities: ["opportunity_id", "exit_mode", "asset_group", "symbol", "side", "week", "level", "first_touch_at", "trigger_time", "confirmation_at", "invalidation_at", "reason", "status", "direction", "period", "trigger_week", "touch_time_utc", "monitor_start_utc", "invalidated_at_utc", "reclaim_time_utc", "confirmed_at_utc", "submitted_at_utc", "invalidation_reason", "decision_reason"],
   orders: ["order_id", "opportunity_id", "exit_mode", "asset_group", "symbol", "side", "submitted_at", "resolution_interval_start", "resolution_interval_end", "limit_price", "stop_price", "target_price", "population", "actual_pending_amendment_count", "actual_pending_amendments", "canceled_at_utc", "cancel_reason", "status"],
-  trades: ["trade_id", "opportunity_id", "exit_mode", "asset_group", "symbol", "side", "entry_interval_start", "entry_time", "exit_time", "entry_price", "stop_price", "return_r", "return_pct", "basis", "net_r", "gross_r", "fee_r", "net_bp", "closed", "censored", "direction", "entry_at_utc", "entry", "stop", "target_price", "exit_at_utc", "exit_price", "outcome", "mfe_r", "mae_r", "profitable_excursion_then_sl", "holding_hours"],
-  fills: ["fill_id", "trade_id", "order_id", "opportunity_id", "exit_mode", "asset_group", "symbol", "direction", "side", "time", "timestamp_utc", "price", "quantity", "notional", "commission", "fee_rate", "fee_class", "fee_type", "fee", "fee_r"],
+  trades: ["trade_id", "opportunity_id", "population", "exit_mode", "asset_group", "symbol", "side", "entry_interval_start", "entry_time", "exit_time", "entry_price", "stop_price", "return_r", "return_pct", "basis", "net_r", "gross_r", "fee_r", "net_bp", "closed", "censored", "direction", "entry_at_utc", "entry", "stop", "target_price", "exit_at_utc", "exit_price", "outcome", "mfe_r", "mae_r", "profitable_excursion_then_sl", "holding_hours"],
+  fills: ["fill_id", "trade_id", "order_id", "opportunity_id", "population", "exit_mode", "asset_group", "symbol", "direction", "side", "time", "timestamp_utc", "price", "quantity", "notional", "commission", "fee_rate", "fee_class", "fee_type", "fee", "fee_r"],
 };
 
 function valueOf(row, fields) {
@@ -170,7 +170,7 @@ function rowFilter(rows, selections) {
     if (chosen === "ALL" || (selection === "exit" && chosen === "shared_entry")) return true;
     const candidates = {
       exit: ["exit_mode", "exit_policy"], asset: ["asset_group", "group", "asset"],
-      period: ["period", "segment", "time_period"], direction: ["direction", "side"],
+      period: ["period", "segment", "time_period"], direction: ["direction", "side"], population: ["population"],
     }[selection];
     if (!candidates) return true;
     const field = candidates.find((candidate) => row && row[candidate] !== undefined);
@@ -344,7 +344,7 @@ export function ReportContent() {
   const fills = reviewedRows("fills");
   const samples = reviewedRows("samples");
   const [metricFilters, setMetricFilters] = useState({exit: "ALL", asset: "ALL", period: "all", dimension: "ALL"});
-  const [ledgerFilters, setLedgerFilters] = useState({exit: "ALL", asset: "ALL", period: "ALL", direction: "ALL"});
+  const [ledgerFilters, setLedgerFilters] = useState({exit: "ALL", asset: "ALL", period: "ALL", direction: "ALL", population: "ALL"});
   const ready = Boolean(snapshot && snapshot.report && snapshot.report.resultRowsExist !== undefined
     ? snapshot.report.resultRowsExist : (metrics.length || funnel.length));
   const exportsReady = Boolean(snapshot && snapshot.report && snapshot.report.resultExportsComplete);
@@ -395,6 +395,7 @@ export function ReportContent() {
       ["asset", "品种组", ["asset_group", "group", "asset"], ASSET_LABELS],
       ["period", "时段", ["period", "segment", "time_period"], PERIOD_LABELS],
       ["direction", "方向", ["direction", "side"], {1: "多头", "-1": "空头", long: "多", short: "空", 多: "多", 空: "空"}],
+      ["population", "策略或对照", ["population"], {signal: "策略", random: "随机对照"}],
     ].map(([key, label, fields, labels]) => <Dropdown key={key} label={label} showLabel value={ledgerFilters[key]}
       {...filterChoices(rows, fields, labels)}
       onChange={(value) => setLedgerFilters((state) => ({...state, [key]: value}))}/>)}
@@ -496,7 +497,7 @@ export function ReportContent() {
 
     <Section id="ledgers" title="06 / 全量机会、订单、交易及费用流水">
       <RichNarrative id="ledgers:readme" className="ma6-narrative"
-        value={"下表可搜索、排序和按退出方式、品种组、时段、多空筛选，并可下载当前筛选或完整原始导出。未成交挂单、撤销与失效机会保留为流程结果，不进入交易盈亏分母；截尾持仓单独列出，不能当成正常止盈或止损闭合。明细时段按各表的事件时间筛选：机会用首次触价，订单用提交，交易和费用用实际入场；跨切点交易保留在明细，前后期汇总会剔除。"}/>
+        value={"下表保留策略与随机对照两类记录，可搜索、排序和按退出方式、品种组、时段、多空、策略或对照筛选，并可下载当前筛选或完整原始导出。未成交挂单、撤销与失效机会保留为流程结果，不进入交易盈亏分母；截尾持仓单独列出，不能当成正常止盈或止损闭合。明细时段按各表的事件时间筛选：机会用首次触价，订单用提交，交易和费用用实际入场；跨切点交易保留在明细，前后期汇总会剔除。"}/>
       {Object.entries(ledgers).map(([queryId, rows]) => {
         const titles = {opportunities: "全部机会与失效原因", orders: "提交、改单、撤销与未成交挂单", trades: "实际成交及闭合 / 截尾交易", fills: "逐笔成交与费用类别"};
         return <div className="ma6-ledger-block" key={queryId}>
