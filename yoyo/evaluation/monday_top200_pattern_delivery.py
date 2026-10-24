@@ -24,7 +24,7 @@ def main():
         raise RuntimeError('Commit delivery builder before producing evidence')
     m=pd.read_csv(EXP/'metrics.csv',float_precision='round_trip')
     x=pd.read_csv(EXP/'top200-features.csv',float_precision='round_trip')
-    s=pd.read_csv(EXP/'all-signal-features-outcomes.csv.gz',float_precision='round_trip')
+    s=pd.read_csv(EXP/'all-signal-features-outcomes.csv.gz',float_precision='round_trip',low_memory=False)
     f,stamps=ledgers()
     frozen=json.loads((EXP/'coverage.json').read_text())['ledgers']
     assert stamps==frozen
@@ -83,7 +83,7 @@ def main():
         baseline_checks=checks,local_review_vs_full_source_comparisons=len(joined),
         per_trade_chinese_rows=len(pd.read_csv(DELIVERY/'01_逐笔K线成交量均线分析.csv')),
         all_new_filter_rows_subset_of_baselines=True,additional_simulations=0,
-        visual_scope='Original delivery six representative charts visually inspected;200 row-by-row analyses are quantitative, not a claim of200manual image inspections.',
+        visual_scope='Original delivery ranks1/38/51/100/136/200 and this turn ranks6/73 visually inspected;200 row-by-row analyses are quantitative, not a claim of200manual image inspections.',
         limitations=['Three predeclared admission-only ideas across three fixed original strategies; no wait-for-later MA entry is simulated.',
                      'Winner-derived patterns, already explored historical periods, current-venue costs on Binance data; no untouched validation or live eligibility.',
                      'Matched random uses same admitted signal geometry; absolute strategy means and strict paired means have different denominators.',
@@ -91,6 +91,28 @@ def main():
                      'Longest market stop run sorts equal exit timestamps by symbol/ID and is not a tick-exact ordering or funded-account statistic.',
                      'MAE/MFE in top200 review exclude both endpoint candles and represent conservative lower bounds, not exact intrabar excursions.'])
     dump(EXP/'validation.json',validation)
+    names={'base':'基线','filter':'入场条件','group':'组别','period':'时段','signals':'机会数','closed':'已平仓',
+        'censored':'未决','symbols':'币种数','wins':'盈利笔数','win_rate':'胜率_小数','mean_r':'平均净R',
+        'total_r':'累计独立净R','median_r':'中位净R','mean_net_pct':'平均净价格收益百分比',
+        'mean_win_r':'平均盈利净R','mean_loss_r':'平均亏损净R','payoff':'实际盈亏比','profit_factor':'盈利因子',
+        'median_planned_rr':'计划止盈止损距离比中位数','mean_fee_r':'平均手续费R','stop_first_mean_r':'同K止损优先平均净R',
+        'tp':'止盈次数','sl':'止损次数','tp_net_loss':'止盈后扣费不盈利次数',
+        'longest_market_stop_run':'全市场按退出时间排序最长连续止损_同刻按币名排序',
+        'paired':'完整三随机配对数','paired_signal_r':'配对策略净R','paired_random_r':'配对随机净R',
+        'paired_excess_r':'配对超额净R','holding_hours_median':'持仓小时中位数',
+        'absolute_ci_low':'平均净R周聚类95区间下界','absolute_ci_high':'平均净R周聚类95区间上界',
+        'excess_ci_low':'超额净R周聚类95区间下界','excess_ci_high':'超额净R周聚类95区间上界',
+        'p_raw':'匹配超额单侧p值','holm_p_9':'九比较Holm校正p值','excluded_pin_weeks':'剔除触价周'}
+    for raw,name in [(m,'02_三类入场条件框架验证.csv'),(pd.DataFrame(slices),'03_去除两大集中行情周的敏感性.csv')]:
+        table=raw.rename(columns=names).copy()
+        table['入场条件']=table['入场条件'].map(LABELS)
+        table['基线']=table['基线'].map({'engulf5m-near':'5m插针紧接吞没_近侧全平',
+            'body1h3-near':'1h首次插针后三根实体守线_近侧全平',
+            'body1h3-far':'1h首次插针后三根实体守线_远侧全平'})
+        table['时段']=table['时段'].map({'all':'全历史','earlier':'2023年前且入出场不跨界','later':'2023年起'})
+        if '组别' in table:
+            table['组别']=table['组别'].replace({'ALL_CRYPTO':'全部加密','ALTCOINS':'山寨'})
+        table.to_csv(DELIVERY/name,index=False,encoding='utf-8-sig')
     # Companion evidence archive; the175MB image archive remains immutable.
     archive=TOP/'前200笔_逐笔分析与框架验证.zip'
     payload=[DELIVERY/n for n in ['01_逐笔K线成交量均线分析.csv','02_三类入场条件框架验证.csv','03_去除两大集中行情周的敏感性.csv']]
