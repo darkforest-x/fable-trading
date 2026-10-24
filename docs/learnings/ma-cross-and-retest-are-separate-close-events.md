@@ -1,0 +1,7 @@
+# A moving-average cross and its retest must be separate completed events
+
+- **Problem**: The owner defined a5m SMA50 retest after the first Monday1618 touch. The screenshot illustrates the idea but does not specify an executable intrabar path or when rejection is knowable.
+- **Dead end**: Reusing the earlier15m six-MA pending-limit strategy unchanged would silently import four confirmation closes, dynamic line repricing and a0.5percent MA stop. Treating the first cross candle as its own later retest would collapse two requested events into one.
+- **Effective path**: Read the original Momentum1.0 Pine to establish SMA50(close), then obtain owner answers for close-confirmed rejection and weekly expiry. Require a completed cross followed by a later completed touch-and-reject candle; submit at that confirmation close with a taker fee. The fixed original-touch stop and opposite Monday target go directly to the existing Nautilus engine.
+- **General rule**: Separate reference-line computation, event ordering, decision time and execution semantics. A screenshot's profitable path cannot define missing event order, costs or thresholds. Unit tests should ensure entry-bar pre-decision wicks never stop out a position that does not yet exist.
+- **Connections**: `yoyo/evaluation/monday_ma50_signals.py`, `monday_ma50_retest.py`, `tests/test_monday_ma50_native.py`; owner-confirmed close-price execution is a zero-latency research assumption, not a live fill guarantee. No new production eligibility.
