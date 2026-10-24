@@ -125,8 +125,26 @@ def stats(g,with_inference=False,basis=None):
     return result
 
 
+def annotate_split_prices(t):
+    """Describe native leg prices without inventing a single split target/fill.
+
+    Same-entry, same-quantity legs are asserted by the frozen native producer.
+    Equal allocation therefore has an arithmetic mean exit price, while its
+    final exit time still belongs to the last leg. This changes no returns.
+    """
+    t=t.copy();half=t.policy.eq('half_each')
+    t['last_leg_target_price']=np.nan;t['last_leg_exit_price']=np.nan
+    t.loc[half,'last_leg_target_price']=t.loc[half,'target_price']
+    t.loc[half,'last_leg_exit_price']=t.loc[half,'exit_price']
+    legs=t[~half].groupby('parent_id').exit_price.mean()
+    t.loc[half,'exit_price']=t.loc[half,'parent_id'].map(legs)
+    t.loc[half,'target_price']=np.nan
+    t['exit_price_scope']=np.where(half,'Equal-weight mean of two native leg exits; exit_time is final leg','Single native target leg')
+    return t
+
+
 def enrich(t):
-    t=t.copy();t['closed']=t.closed.astype(str).str.lower().isin(['true','1','1.0'])
+    t=annotate_split_prices(t);t['closed']=t.closed.astype(str).str.lower().isin(['true','1','1.0'])
     for c in ['entry_time','exit_interval_start','exit_interval_end']:
         t[c]=pd.to_datetime(t[c],utc=True,format='mixed')
     ix=pd.DatetimeIndex(pd.to_datetime(t.entry_interval_start,utc=True)).tz_convert('America/New_York')

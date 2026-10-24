@@ -58,7 +58,7 @@ const FIELD_LABELS = {
   entry_price: "入场/挂单价", entry: "入场/挂单价", stop: "止损价", population: "样本总体",
   trade_id: "交易ID", fill_id: "成交ID", entry_at_utc: "入场UTC",
   entry_interval_start: "实际成交柱开始时点（分期锚）", entry_time: "保守入场柱结束时点",
-  exit_at_utc: "退出UTC", exit_time: "退出时点", exit_price: "退出价", closed: "是否闭合", censored: "是否截尾",
+  exit_at_utc: "退出UTC", exit_time: "退出时点", exit_price: "退出价（各半为两腿均价）", target_monday: "周一对侧目标", target_far: "另一侧1.618目标", exit_price_scope: "退出价格口径", closed: "是否闭合", censored: "是否截尾",
   gross_r: "毛R", fee_r: "费用R", net_r: "净R", return_r: "收益R", return_pct: "收益百分比", net_bp: "净收益bp",
   mfe_r: "MFE R（持仓内）", mae_r: "MAE R（持仓内）", mfe_r_mean: "MFE均值R（持仓内）", mae_r_mean: "MAE均值R（持仓内）",
   profitable_excursion_then_sl: "先有盈利浮盈后止损", holding_hours: "持仓小时", timestamp_utc: "成交时点UTC",
@@ -95,7 +95,7 @@ const METRIC_FIELDS = [
 const LEDGER_FIELDS = {
   opportunities: ["opportunity_id", "exit_mode", "asset_group", "symbol", "side", "week", "level", "first_touch_at", "trigger_time", "confirmation_at", "invalidation_at", "reason", "status", "direction", "period", "trigger_week", "touch_time_utc", "monitor_start_utc", "invalidated_at_utc", "reclaim_time_utc", "confirmed_at_utc", "submitted_at_utc", "invalidation_reason", "decision_reason"],
   orders: ["order_id", "opportunity_id", "exit_mode", "asset_group", "symbol", "side", "submitted_at", "resolution_interval_start", "resolution_interval_end", "limit_price", "stop_price", "target_price", "population", "actual_pending_amendment_count", "actual_pending_amendments", "canceled_at_utc", "cancel_reason", "status"],
-  trades: ["trade_id", "opportunity_id", "population", "exit_mode", "asset_group", "symbol", "side", "entry_interval_start", "entry_time", "exit_time", "entry_price", "stop_price", "return_r", "return_pct", "basis", "net_r", "gross_r", "fee_r", "net_bp", "closed", "censored", "direction", "entry_at_utc", "entry", "stop", "target_price", "exit_at_utc", "exit_price", "outcome", "mfe_r", "mae_r", "profitable_excursion_then_sl", "holding_hours"],
+  trades: ["trade_id", "opportunity_id", "population", "exit_mode", "asset_group", "symbol", "side", "entry_interval_start", "entry_time", "exit_time", "entry_price", "stop_price", "return_r", "return_pct", "basis", "net_r", "gross_r", "fee_r", "net_bp", "closed", "censored", "direction", "entry_at_utc", "entry", "stop", "target_price", "target_monday", "target_far", "exit_at_utc", "exit_price", "outcome", "mfe_r", "mae_r", "profitable_excursion_then_sl", "holding_hours"],
   fills: ["fill_id", "trade_id", "order_id", "opportunity_id", "population", "exit_mode", "asset_group", "symbol", "direction", "side", "time", "timestamp_utc", "price", "quantity", "notional", "commission", "fee_rate", "fee_class", "fee_type", "fee", "fee_r"],
 };
 

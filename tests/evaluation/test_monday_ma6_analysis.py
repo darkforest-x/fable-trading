@@ -1,6 +1,16 @@
 """Analysis boundaries must not import post-cutoff outcomes into earlier cohorts."""
 import pandas as pd
-from yoyo.evaluation.monday_ma6_analysis import attempted_pairs,common_exit_cohort,POLICIES
+from yoyo.evaluation.monday_ma6_analysis import attempted_pairs,common_exit_cohort,annotate_split_prices,POLICIES
+
+
+def test_split_exit_price_is_two_leg_mean_without_a_fake_single_target():
+    t=pd.DataFrame(dict(parent_id=['x']*3,policy=POLICIES,
+        target_price=[110.,120.,120.],exit_price=[110.,98.,98.],return_r=[5.,-1.,2.]))
+    out=annotate_split_prices(t);h=out[out.policy.eq('half_each')].iloc[0]
+    assert h.exit_price==104.
+    assert pd.isna(h.target_price)
+    assert h.last_leg_exit_price==98.
+    assert out.return_r.equals(t.return_r)
 
 
 def test_submission_before_cutoff_and_fill_after_is_not_earlier_expectancy():
