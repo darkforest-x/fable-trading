@@ -27,6 +27,9 @@ def main():
     s=read(ART/'report-data/summary.csv.gz');f=read(ART/'report-data/funnel.csv.gz')
     all_=s[s.period.eq('all')]
     lines=[
+        '## 核心结果',
+        'BTC、ETH和山寨三组没有同一个最优退出。BTC的全期平均R以周一对侧全平最高，ETH和山寨以另一侧1.618全平最高；黄金也以远目标毛均值最高，但费用未知。各半方案的平均收益位于两种全平之间，不能从本轮推断TP1后保本更好。',
+        '山寨组表现为低胜率、少数较大盈利覆盖多数止损，而不是高胜率策略。全期及2023年后的三种退出均为正均值，但严格匹配随机对照的差值区间仍跨零，多重比较校正后也不显著；尚不足以认定确认条件具有稳定优势。BTC、ETH、黄金各自只有几十笔或更少，结论尤其容易受少数交易影响。',
         '## 这次究竟测试了什么',
         '1.618首次触价只启动观察。首次完整15分钟收盘越过六均线，后面连续三根收盘仍在同侧，再回踩最高均线（空头为最低均线）挂单。累计第三根刷新不利极值、入场前已回周一区间等条件会终止尚未成交的机会。均线挂价和止损只在完整15分钟收盘后更新，成交后止损冻结。',
         '**本轮是三种退出比较：** 周一对侧边界全平、另一侧1.618全平、两个目标各平一半。多头目标是周一高点及上方1.618，空头目标是周一低点及下方1.618。余仓保持原止损，没有TP1后保本，也没有固定持仓时间止盈。未成交挂单到下个纽约周一00:00失效；已成交仓位仍使用原周锚点。',
@@ -45,6 +48,15 @@ def main():
         lines.append(f'该组全期已闭合均R最高的是“{LABEL[best]}”，但这只是本次固定三方案的描述性排序。按该方案实际平均盈亏比，维持同等盈亏幅度时的打平胜率约 {pct(threshold)}；实际胜率为 {pct(r.win_rate)}。'+('黄金的券商费用、买卖价差未知，不能把毛均值当作净盈利。' if asset=='XAUUSD' else f'其平均成交手续费为 {number(r.mean_fee_r)}R，毛均值 {number(r.mean_gross_r)}R，净均值 {number(r.mean_r)}R。'))
         later=s[(s.asset_group.eq(asset))&s.period.eq('later')&s.exit_mode.eq(best)].iloc[0]
         lines.append(f'同一退出方式在2023年起的后期：{int(later.closed_n):,} 笔、胜率 {pct(later.win_rate)}、平均 {number(later.mean_r)}R；前后期按实际入场柱开始时间划分，跨切点持仓剔除。所有历史此前均可用于研究，这不是未使用过的新留出集。')
+    trades=read(ART/'report-data/trades.csv.gz')
+    alt=trades[trades.population.eq('signal') & trades.asset_group.eq('ALTCOINS') & trades.closed]
+    lines += ['## 山寨正收益是否完全来自极少数大单',
+        '以下只对已完成的山寨策略成交做描述性集中度检查，不删改原始交易，也不以事后剔除结果选择参数。按净R排序的前十笔与其余全部交易分开观察。']
+    for mode in LABEL:
+        g=alt[alt.exit_mode.eq(mode)]
+        best=g.nlargest(10,'return_r'); remaining=g.drop(best.index)
+        lines.append(f'- **{LABEL[mode]}：** 前十笔合计 {number(best.return_r.sum(),2)}R；全体合计 {number(g.return_r.sum(),2)}R。剔除这十笔后仍有 {len(remaining):,} 笔，平均 {number(remaining.return_r.mean())}R。')
+    lines.append('这说明山寨全期正均值并非完全由十笔最大盈利撑起，但相邻币种可能共享同一市场行情，逐笔数量不能当成独立事件数；统计不确定性仍以按市场周聚类的对照结果为准。')
     lines += ['## 分批止盈到底改变了什么',
         '为排除远端目标尚未结束造成的分母差异，下面只比较三种退出都已闭合的相同入场。排除未决只用于这个对齐比较；全部未决记录仍在明细和上一节保留。']
     for asset in ASSET:
