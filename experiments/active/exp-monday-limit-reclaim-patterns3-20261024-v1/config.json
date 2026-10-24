@@ -1,0 +1,10 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-patterns3-20261024-v1",
+  "question": "Owner 2026-10-24 '还有吗' (third round): price and volume patterns before the touch for the Codex 1.618 limit-reclaim rule, at 5/15/60m confirmation.",
+  "source_snapshot": "output/monday-partial-snapshot-20261024-2224 (536/633 symbols); 5m bars loaded with Codex load_job from each symbol identity.json",
+  "features": "vol_ratio (last hour quote volume / 7-day median hourly), approach_min (near Monday edge cross to touch), monday_close_side, liquidity (7-day mean daily quote volume), toward24 (24h move toward the level), cluster24 (other symbols same side in prior 24h)",
+  "split": "discovery before 2025-01-01, validation from 2025-01-01",
+  "limitations": "Post hoc on a partial snapshot; read-only; forward data needed for any filter.",
+  "training_eligible": false,
+  "production_eligible": false
+}
