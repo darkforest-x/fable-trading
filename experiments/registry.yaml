@@ -187,6 +187,21 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'This run also had a direct bar computation (summary.json) that the owner said was redundant; native matches it trade by trade (mean abs diff 0.01/0.43bp). Later runs are framework-only. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-limit-reclaim-filtered-replay-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6327c20bd3b829b15f9085673160edc6f8b8e3fa
+    status: inconclusive
+    question: 'Owner 2026-10-25: compound 1000 USDT on the Codex 1.618 limit-reclaim trades filtered by the strong entry conditions.'
+    single_variable: 'Filter x per-trade fraction x gross cap x exit slippage, as recorded vs without short same-bar targets; arithmetic on framework fills.'
+    result: 'Alts 60m near edge, 1000 USDT 2020-2026, 10bp exit slippage. As recorded: unfiltered 10 percent per trade gross<=1x 97x; vol_top 121x; any_strong 266x; vol_spike 21x; fast_long 2.2x (<=3x 4.9x). Conservative (drop 1536 short same-bar targets, 47 percent of recorded profit): unfiltered 0.43x, vol_spike 0.26x, opp_first 0.43x, any_strong 1.7x, vol_top 8.6x (2021 crash year 0.11), fast_long unchanged 2.2x (<=3x 4.9x, every year >=1.04). The 100x question depends on whether short same-bar targets are real; needs a framework replay with adverse intrabar order.'
+    artifacts:
+    - monday-limit-reclaim-filtered-replay-20261025-v1
+    canonical_report: experiments/active/exp-monday-limit-reclaim-filtered-replay-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Filters chosen after seeing the data. vol_top threshold fixed at the pre-2025 80th percentile (TR/close about 0.78 percent). Later-bar O-H-L-C order also favors longs (target before breakeven), unquantified. No funding, queue, margin or liquidity model.'
   - experiment_id: exp-monday-limit-reclaim-hybrid-20261024-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 3447d8dd74adc74f9d5c2b062c3b21a7d64f37ed
@@ -253,7 +268,7 @@ experiments:
     status: complete
     question: 'Owner 2026-10-24: analyze the Codex limit-reclaim partial snapshot with charts; can 1000 USDT reach 100x/1000x/10000x?'
     single_variable: 'Read-only review of framework ledgers; no new trades. Best cell chosen after the grid (optimistic).'
-    result: 'Snapshot 536/633 symbols, alts 5/15/60m x 5 targets. All-signal mean net +5 to +22bp per trade (best 60m near edge +22.1, median -7, win 24.7 percent); top 1 percent of trades = 70 percent of profit, top 25 percent = 522 percent; without the top 1 percent +6.6bp. Complete matched groups: signal +5.7 vs random -25.2 (signal beats random in every cell by 10-31bp but is about 0 in absolute terms). Equity replay from 1000 USDT 2020-2026: 2 percent of equity per trade 2.6x with up to 31x gross exposure; gross <=1x 0.98x; <=3x 1.25x (1.08x with 10bp exit slippage); 10 percent per trade 0.44x, 25 percent ruined. 100x not supported.'
+    result: 'Snapshot 536/633 symbols, alts 5/15/60m x 5 targets. All-signal mean net +5 to +22bp per trade (best 60m near edge +22.1, median -7, win 24.7 percent); top 1 percent of trades = 70 percent of profit, top 25 percent = 522 percent; without the top 1 percent +6.6bp. Complete matched groups: signal +5.7 vs random -25.2 (signal beats random in every cell by 10-31bp but is about 0 in absolute terms). CORRECTED 2026-10-25 (replay booked same-timestamp exits before their entries, zeroing 1868 same-bar targets = 58 percent of profit; fixed in 6327c20bd3): 2 percent per trade 11.8x, gross <=1x 8.1x, <=3x 11.0x (4.5x with 10bp exit slippage), 5 percent <=3x 148x, 10 percent 824x with 98 percent drawdown, 25 percent ruined. But shorts filling and hitting the target in the same bar (1536 trades) carry 47 percent of recorded profit and depend on the O-H-L-C path; without them the mean is +12.1bp and the all-trade replays lose (see exp-monday-limit-reclaim-filtered-replay-20261025-v1).'
     artifacts:
     - monday-limit-reclaim-review-20261024-v1
     canonical_report: experiments/active/exp-monday-limit-reclaim-review-20261024-v1/summary.json

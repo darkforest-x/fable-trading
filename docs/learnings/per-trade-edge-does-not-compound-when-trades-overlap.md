@@ -5,3 +5,15 @@
 - **有效路径**：按入场和出场的真实时间，用框架成交记录逐笔重放已实现权益，并限制总名义仓位。结果（2020–2026）：总仓位不超过 1 倍时为 0.98 倍；不超过 3 倍时为 1.25 倍，加 10bp 平仓滑点后 1.08 倍；不限总仓位、每笔 2% 为 2.6 倍，但要承受最高 31 倍的总仓位。
 - **通用规则**：判断"能复利多少倍"时，先看最大同时持仓数和最大总仓位倍数，再做限制总仓位的按时间顺序权益重放；同时报告前 1% 交易的利润占比，以及去掉它们后的均值。不能用每笔均值、胜率或按独立交易算的凯利来推算账户增长。
 - **牵连**：`yoyo/evaluation/monday_limit_reclaim_review.py` 中的 `replay()`（参数 gross 为总仓位上限）；`experiments/active/exp-monday-limit-reclaim-review-20261024-v1/summary.json`。重放没有计入未实现亏损、资金费、排队未成交和流动性，真实结果只会更差。相关笔记：[admission-filters-need-tail-retention-relative-to-trade-retention.md](admission-filters-need-tail-retention-relative-to-trade-retention.md)。
+
+## 更正（2026-10-25）
+
+上面的权益重放数字有误：同一根 K 线内开仓又止盈的单子，平仓被排在开仓之前处理，利润按 0 结算。这类单子 1,868 笔，占 58% 的利润。见 [equity-replays-must-book-same-bar-exits-after-their-entry.md](equity-replays-must-book-same-bar-exits-after-their-entry.md)。
+
+修复后按记录重放：
+- 每笔 2%：11.8 倍；总仓位 ≤ 1 倍：8.1 倍；≤ 3 倍：11.0 倍。
+- 每笔 5%、总仓位 ≤ 3 倍：148 倍。
+
+但其中 47% 的利润来自做空的同K止盈，这部分依赖 O-H-L-C 顺序假设。去掉它们后，全部交易的重放是亏的。
+
+所以"不能复利"的结论不成立，"能复利"也没有被证实，要等框架按不利顺序重放之后再下结论。"总仓位重叠等于暗含高杠杆""收益靠尾部"这两点仍然成立。

@@ -1,3 +1,9 @@
+## 2026-10-25 · Limit-reclaim 1000U replay: bug fixed, result hinges on short same-bar targets
+
+- My equity replays booked exits sharing their entry timestamp before the entry, zeroing 1868 same-bar targets (58 percent of profit). Fixed in 6327c20bd3; the 2026-10-24 review numbers (0.98x/1.25x) are superseded: as recorded, 2 percent per trade gives 11.8x, 5 percent with gross<=3x 148x.
+- But 1536 shorts that fill and hit the target in the same 5m bar carry 47 percent of recorded profit and rely on Codex's fixed O-H-L-C path. Filtered replays (10 percent per trade, gross<=1x, 10bp): as recorded unfiltered 97x, vol_top 121x, any_strong 266x; conservative (without those shorts) unfiltered 0.43x, vol_top 8.6x, any_strong 1.7x, fast_long 2.2x (unaffected; <=3x 4.9x, positive every year).
+- Decisive next step: framework replay with adverse intrabar order before trusting any multiple. `experiments/active/exp-monday-limit-reclaim-filtered-replay-20261025-v1/`; learning notes updated. No live action.
+
 ## 2026-10-24 · Limit-reclaim fast-cut hybrids rejected
 
 - Exit at the 5m or 15m check if not reclaimed, otherwise manage by 15m/60m (assembled exactly from framework fills). All alts: 5->60 win 18.6/19.9 percent, +8.9/+14.3bp versus plain 60m 23.7/25.5, +25.0/+19.9; 15->60 is closer but still lower. The early check cuts ~40 percent of trades, including many later reclaims that hit the target; same in the strong entry subgroups. `experiments/active/exp-monday-limit-reclaim-hybrid-20261024-v1/`, builder 3447d8dd74; learning note added; no live action.
