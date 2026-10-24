@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-ma50-retest-20261024-v1
+    artifact_type: config
+    role: fixed_sma50_retest_native_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: aab81a7be1
+    source_path: experiments/active/exp-monday-ma50-retest-20261024-v1/config.json
+    storage_uri: repo://experiments/active/exp-monday-ma50-retest-20261024-v1/config.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Ownerconfirmed5mclosecross/laterretest/firstweeklytouch/currentweekexpiry. Source1.618ma50Notion4038856479af80fe93cfe1675ac5b80c andMomentum1.0SMA50sourceverified.13focused tests passed beforehistory. Localper-symbol nativeledgers andstatistics preserved; no newHTML requested.
   - artifact_id: monday-ma6-retest-20261024-v1
     artifact_type: manifest
     role: native_ma6_retest_three_exit_comparison_and_detailed_html

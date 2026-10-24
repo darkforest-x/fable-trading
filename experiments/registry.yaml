@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-ma50-retest-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: aab81a7be1
+    status: active
+    question: Does first weekly1618 touch followed by a5m SMA50 close cross and later rejection produce net returns beyond matched timing controls?
+    single_variable: One owner-confirmed fixed entry setup; originaltouch extremeSL andoppositeMondayedge fullTP, no parameter grid or management variants.
+    artifacts:
+    - monday-ma50-retest-20261024-v1
+    canonical_report: experiments/active/exp-monday-ma50-retest-20261024-v1/config.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    result: Rules/source image/MomentumSMA50 verified and13focused tests pass. Native633asset run prepared; no historical results claimed atregistration.
+    notes: ExistingMA6 source identities reused without downloads/hashes. Crypto per-fill OKXLv1fees; XAUgrossonly. Entry confirmationclose taker, TPmaker, OHLC order, no slippage/funding. Missing data and source boundaries censored. Firstcross andlaterretest must be distinctbars. NotionEXP-2074038856479af81758f5cea9648662569. Separate fromEXP-206 limit/reclaim andolder4hN5pullback.
   - experiment_id: exp-monday-top200-patterns-20261024-v1
     source_repo: darkforest-x/fable-trading
     source_commit: ddce57695b

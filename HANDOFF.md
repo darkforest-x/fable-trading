@@ -1,3 +1,9 @@
+## 2026-10-24 · Notion task71 SMA50 retest rules confirmed and native study prepared
+
+- Owner task71 `4038856479af80fe93cfe1675ac5b80c` andoriginalETH5mimage read. Momentum1.0source`3d68856479af80519a3df8b7282ffaac` defaultsSMA50(close). Ownerconfirmed laterbar wicktouchMA/closeinside, entryatthatclose withtakerfee, firstweeklydirectiontouch andexpiry nextNYMonday00exclusive. ShortSL originaltouch5mhigh, TPoppositeMondaylow; longmirrored. No newvolume/oscillator/body thresholds, no BE/split.
+- Builder`aab81a7be1` precedeshistory. `experiments/active/exp-monday-ma50-retest-20261024-v1/` containsfixedconfig; runner`monday_ma50_retest` reuses633frozenMA6 sourceidentities andexistingNautilus1.231.0, withledger-only`monday_ma50_analysis`.13focusedtests pass. Crypto gap/SMAreset/weeklyprefix andgoldquality boundaries retained; no-confirmation/invalidentity/uncensored opportunities kept. Completed-close price iszero-latency assumption; independentRnotaccountreturns.
+- Read `continuation.json` and `run-state.json` beforelaunch/resume. New study hasitsownprocesslock andsuccessmarkers; do not touch runninglimit/reclaimEXP-206. NotionresearchEXP-207`4038856479af81758f5cea9648662569` created/readback; initialstatusplanned. Ownerrequestedtestonly; no newHTML. Originalbrowserresearchtab977883163closed, allfourusertabs retained. No live/model/productionchanges.
+
 ## 2026-10-24 · Notion 1.618 limit/reclaim study running after external-disk recovery
 
 - Source task70 `4038856479af8029a91ec6bfe4a6002f` is separate from completed MA6 and pending4hN5 pullback. Owner confirmed: inspect immediate next timeframe candle CLOSE aftertouch; no initial stop duringwait; if strictly reclaimed, arm exactentry stop; otherwise marketexit. Targets separatelyfull: nearMonday,near+.5range,near+.618range,oppositeMonday,opposite1618;shortmirrored. Restingtargets fromfill mayexitbeforeconfirmation andwillbe countedseparately.
