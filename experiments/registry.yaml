@@ -187,6 +187,21 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'This run also had a direct bar computation (summary.json) that the owner said was redundant; native matches it trade by trade (mean abs diff 0.01/0.43bp). Later runs are framework-only. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-limit-reclaim-patterns3-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 79a4a9436a7575f4cfeeea0123e3758494ea00f3
+    status: complete
+    question: 'Owner 2026-10-24 (third round): price and volume patterns before the touch for the Codex limit-reclaim rule at 5/15/60m confirmation.'
+    single_variable: 'Six pre-touch features from Codex 5m bars (load_job), same ledgers, split 2025-01-01; read-only.'
+    result: '0 ledger bar mismatches, 58.7k/59.3k events with price features. 60m: last-hour quote volume >=8x normal win 40.9/49.9 percent (+42/+56bp); price from Monday edge to 1618 within 30 minutes win 51.5/63.7, +164/+160bp, but shorts have 32/49 percent same-bar targets under the OHLC path (likely inflated); longs alone 47.2/46.3 percent, +180/+60bp, +116/+71 over random. Monday close at the far side and few other symbols touching in 24h raise win rate modestly; liquidity and 24h move are unstable.'
+    artifacts:
+    - monday-limit-reclaim-patterns3-20261024-v1
+    canonical_report: experiments/active/exp-monday-limit-reclaim-patterns3-20261024-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Fast-spike shorts need a framework replay with adverse intrabar order before use; see docs/learnings/same-bar-target-fills-under-ohlc-path-inflate-fast-spike-shorts.md. Post hoc, partial snapshot 536/633.'
   - experiment_id: exp-monday-limit-reclaim-patterns2-20261024-v1
     source_repo: darkforest-x/fable-trading
     source_commit: f2b268aeabac1bb8f1244a476464a02d659789ea

@@ -1,0 +1,3 @@
+/Users/zhangzc/fable-trading/yoyo/evaluation/monday_limit_reclaim_patterns.py:74: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  ent = g.t.astype('int64').to_numpy(); ex = pd.to_datetime(g.exit_time, utc=True).astype('int64').to_numpy()
+{"bad": 0, "cover": {"5": {"events": 59296, "with_price_features": 58752}, "15": {"events": 59286, "with_price_features": 58742}, "60": {"events": 59276, "with_price_features": 58732}}}

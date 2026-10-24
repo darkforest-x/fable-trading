@@ -1,3 +1,8 @@
+## 2026-10-24 · Limit-reclaim pre-touch price/volume patterns; OHLC same-bar caveat
+
+- Codex 5m bars via load_job (0 ledger mismatches). Volume in the hour before the touch ≥8x normal: 60m win 41/50 percent, +42/+56bp. Reaching the 1618 within 30 minutes of crossing the Monday edge: win 52/64 percent, +164/+160bp overall, but shorts take 32/49 percent of wins inside the fill bar under the fixed O-H-L-C path, so they are likely inflated; longs alone 47/46 percent, +180/+60bp, +116/+71 over random. Monday closing at the far edge and few other coins touching in 24h help a little; liquidity and 24h move are unstable.
+- Next before any use: framework replay of the fast-spike subset with adverse intrabar order. Learning note added. `experiments/active/exp-monday-limit-reclaim-patterns3-20261024-v1/`, builder 79a4a9436a; no live action.
+
 ## 2026-10-24 · Limit-reclaim patterns at 5m/15m confirmation, trend and last-week features
 
 - Owner wants faster confirmation than 60m. Same alts ledgers, split 2025-01-01: top pre-touch volatility win 19/20 (5m), 24/26 (15m), 32/36 percent (60m); plus opposite 1618 already filled 32/34, 40/41, 49/52 percent (+61/+45, +88/+50, +103/+72bp). Shorter confirmation lowers win rate because breakeven arms earlier, but the ordering holds.

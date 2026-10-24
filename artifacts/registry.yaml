@@ -198,6 +198,18 @@ artifacts:
       61frontend77asset-layer tests;1440/390/320 browser checks; screenshots after actual5m loading. Temporary browser closed.
       Monitor alive and4patrols enabled; final scan running, not claimed ready; earlier TEST002 scan errors retained.
 
+  - artifact_id: monday-limit-reclaim-patterns3-20261024-v1
+    artifact_type: manifest
+    role: 'Pre-touch price/volume feature tables and charts for the Codex limit-reclaim ledgers (5/15/60m).'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 79a4a9436a7575f4cfeeea0123e3758494ea00f3
+    generator_commit: 79a4a9436a7575f4cfeeea0123e3758494ea00f3
+    source_path: experiments/active/exp-monday-limit-reclaim-patterns3-20261024-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-limit-reclaim-patterns3-20261024-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'complete; volume spike and fast approach raise win rate; fast-spike shorts inflated by OHLC same-bar targets'
   - artifact_id: monday-limit-reclaim-patterns2-20261024-v1
     artifact_type: manifest
     role: 'Trend, BTC regime, last-week and exit-by-volatility tables for 5/15/60m confirmation of the Codex limit-reclaim ledgers.'
