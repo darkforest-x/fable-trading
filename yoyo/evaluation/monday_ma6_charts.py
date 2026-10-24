@@ -91,6 +91,11 @@ def sample_rows():
             for i in rng.choice(g.index,size=min(2,len(g)),replace=False):
                 r=g.loc[i].to_dict();r.update(sample_kind='invalidated_monitor',outcome=r['status'],exit_mode='shared_entry',sampling_pool=len(g),seed=20261024)
                 chosen.append(r)
+    native=t[t.policy.ne('half_each')]
+    for r in chosen:
+        if r.get('policy')=='half_each':
+            siblings=native[native.parent_id.eq(r['parent_id'])]
+            r['leg_exits']=siblings[['policy','exit_interval_start','exit_price','reason']].to_dict('records')
     return chosen
 
 
@@ -135,6 +140,20 @@ def main():
             if len(path):
                 axes[4].plot(path.index,path.close,lw=.6,color='#2563eb')
                 axes[4].fill_between(path.index,path.low,path.high,color='#93c5fd',alpha=.22)
+                for price,label,color in line:
+                    if path.low.min()<=price<=path.high.max():
+                        axes[4].axhline(price,color=color,lw=.65,ls='--',label=label)
+                axes[4].axvline(entry,color='#111827',lw=.8,ls=':')
+                if r['sample_kind']=='trade':
+                    for leg in r.get('leg_exits',[dict(exit_interval_start=exit_,exit_price=r.get('exit_price'),policy=r['exit_mode'],reason=r.get('reason'))]):
+                        when=pd.Timestamp(leg['exit_interval_start']);price=leg.get('exit_price')
+                        if price is not None and np.isfinite(price):
+                            text=('周一目标腿' if leg['policy']=='monday_full' else '远侧目标腿') if r.get('leg_exits') else '退出'
+                            suffix={1:'止损',4:'止盈',0:'边界未决'}.get(int(leg['reason']),'')
+                            axes[4].scatter([when],[price],s=18,color='#9b1c31',zorder=4)
+                            axes[4].annotate(text+suffix,(when,price),xytext=(3,8),textcoords='offset points',fontsize=7,color='#9b1c31')
+                handles,labels=axes[4].get_legend_handles_labels()
+                if handles:axes[4].legend(loc='upper right',fontsize=6,ncol=3,framealpha=.8)
             axes[4].set_title('完整观察路径｜原始5m收盘线及高低范围，非压缩K线；横轴UTC',loc='left',fontsize=11)
             axes[4].grid(alpha=.15);axes[4].tick_params(labelsize=8)
             basis='毛' if symbol=='XAUUSD' else '净';value=r.get('return_r',np.nan)
