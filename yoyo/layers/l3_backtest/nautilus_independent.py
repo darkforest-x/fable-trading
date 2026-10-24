@@ -73,6 +73,10 @@ class ExitPolicy:
     fill_maker_fee: float | None = None
     fill_taker_fee: float | None = None
     reclaim_next_bar: bool = False
+    # Process each synthetic intrabar segment monotonically (adaptive bar
+    # ordering). Without it a rising segment is replayed open-high-low-close
+    # and revisits its low after its high (owner 2026-10-25 OLHC short check).
+    monotone_segments: bool = False
 
     def __post_init__(self):
         actual = (self.fill_maker_fee, self.fill_taker_fee)
@@ -89,6 +93,8 @@ class ExitPolicy:
             raise ValueError("Reclaim requires standalone targets, explicit path and entry-price protection")
         if self.intrabar_path not in (None, "OHLC", "OLHC"):
             raise ValueError("Intrabar path must be OHLC or OLHC")
+        if self.monotone_segments and self.intrabar_path is None:
+            raise ValueError("Monotone segments require an explicit intrabar path")
         if self.breakeven_on_touch and (self.breakeven_r is None or self.intrabar_path is None):
             raise ValueError("Touch breakeven requires an R trigger and explicit intrabar path")
         if self.breakeven_on_touch and self.breakeven_includes_cost:
@@ -984,7 +990,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             use_message_queue=not (limit_entry or policy.target_breakeven),
             reject_stop_orders=not limit_entry,
             fill_model=fill_model,
-            bar_execution=True, bar_adaptive_high_low_ordering=False,
+            bar_execution=True, bar_adaptive_high_low_ordering=policy.monotone_segments,
             liquidity_consumption=False,
         )
         engine.add_instrument(instrument)
