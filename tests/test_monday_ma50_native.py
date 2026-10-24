@@ -9,7 +9,7 @@ from yoyo.evaluation.monday_ma50_analysis import enrich, validate, summarize
 
 
 def fixture(symbol='BTCUSDT'):
-    frame = pd.DataFrame(dict(open=[100., 100., 100., 103.], high=[101., 110., 105., 104.],
+    frame = pd.DataFrame(dict(open=[100., 101., 100., 103.], high=[101., 110., 105., 104.],
                               low=[99., 90., 99., 102.], close=[100., 100., 103., 103.]),
                          index=pd.date_range('2024-01-03', periods=4, freq='5min', tz='UTC'))
     entries = pd.DataFrame([dict(trade_id='s', pair_id='s', population='signal', symbol=symbol,
@@ -39,7 +39,7 @@ def test_close_entry_has_no_preentry_wick_exit_and_real_fee_classes(tmp_path):
     assert summarize(enriched)['closed_n'] == 1
 
 
-def test_gold_net_unknown_and_boundary_censored():
+def test_gold_net_unknown_and_boundary_censored(tmp_path):
     frame, entries = fixture('XAUUSD')
     entries['target_price'] = 120.
     rows, fills, _, _ = execute(frame, entries, 'XAUUSD')
@@ -47,6 +47,11 @@ def test_gold_net_unknown_and_boundary_censored():
     assert result.iloc[0].reason == 0 and not result.iloc[0].closed
     assert result.net_r.isna().all() and result.fee_r.isna().all()
     assert fills.commission.eq(0).all()
+    assert len(fills) == 2  # Native boundary close is excluded economically, not absent.
+    for name, table in [('trades', result), ('fills', fills), ('entries', entries), ('invalid', pd.DataFrame())]:
+        table.to_csv(tmp_path/f'{name}.csv.gz', index=False)
+    (tmp_path/'done.json').write_text(json.dumps(dict(symbol='XAUUSD',positions=1,fills=2,entries=1)))
+    assert validate(tmp_path)['passed']
     summary = summarize(enrich(result))
     assert summary['closed_n'] == 0 and summary['censored_n'] == 1
     assert summary['fee_positive_excursion_then_sl_n'] is None

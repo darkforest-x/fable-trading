@@ -1,8 +1,8 @@
-## 2026-10-24 · Notion task71 SMA50 retest rules confirmed and native study prepared
+## 2026-10-24 · Notion task71 SMA50 retest native study running
 
 - Owner task71 `4038856479af80fe93cfe1675ac5b80c` andoriginalETH5mimage read. Momentum1.0source`3d68856479af80519a3df8b7282ffaac` defaultsSMA50(close). Ownerconfirmed laterbar wicktouchMA/closeinside, entryatthatclose withtakerfee, firstweeklydirectiontouch andexpiry nextNYMonday00exclusive. ShortSL originaltouch5mhigh, TPoppositeMondaylow; longmirrored. No newvolume/oscillator/body thresholds, no BE/split.
 - Builder`aab81a7be1` precedeshistory. `experiments/active/exp-monday-ma50-retest-20261024-v1/` containsfixedconfig; runner`monday_ma50_retest` reuses633frozenMA6 sourceidentities andexistingNautilus1.231.0, withledger-only`monday_ma50_analysis`.13focusedtests pass. Crypto gap/SMAreset/weeklyprefix andgoldquality boundaries retained; no-confirmation/invalidentity/uncensored opportunities kept. Completed-close price iszero-latency assumption; independentRnotaccountreturns.
-- Read `continuation.json` and `run-state.json` beforelaunch/resume. New study hasitsownprocesslock andsuccessmarkers; do not touch runninglimit/reclaimEXP-206. NotionresearchEXP-207`4038856479af81758f5cea9648662569` created/readback; initialstatusplanned. Ownerrequestedtestonly; no newHTML. Originalbrowserresearchtab977883163closed, allfourusertabs retained. No live/model/productionchanges.
+- NativePID23567/session27105 launched2workers at10:13UTC from68f911fc40, withautomatic633asset ledger validation/analysis. Read `continuation.json` and `run-state.json` beforelaunch/resume. New study hasitsownprocesslock andsuccessmarkers; do not touch runninglimit/reclaimEXP-206. NotionresearchEXP-207`4038856479af81758f5cea9648662569` created/readback; nativebatchnowrunning, no fullresults yet. Ownerrequestedtestonly; no newHTML. Originalbrowserresearchtab977883163closed, allfourusertabs retained. No live/model/productionchanges.
 
 ## 2026-10-24 · Notion 1.618 limit/reclaim study running after external-disk recovery
 

@@ -1,6 +1,6 @@
 {
   "experiment_id": "exp-monday-ma50-retest-20261024-v1",
-  "status": "builder_committed_ready_for_native",
+  "status": "native_running_auto_analysis_enabled",
   "builder_commit": "aab81a7be1",
   "owner_rule_answers_complete": true,
   "expected_assets": 633,
@@ -12,9 +12,13 @@
   "validation": "analysis/validation.json",
   "notion_task_id": "4038856479af80fe93cfe1675ac5b80c",
   "notion_research_id": "4038856479af81758f5cea9648662569",
-  "next": "Launch afterintegration checks; whenlocal_results_complete, inspect fullmetrics andledger validation, update sameNotionrecord/task andfinal registry. Onfailure diagnoseonlyfailedassets; neverrepeat successfulnative fills.",
+  "next": "Read run-state.json/native.log anddone/failure markers first. Nativepool23567 runs2workers, thenautomaticallyvalidatesandanalysesall633. Do not launchanotherpool. Onlocal_results_complete, review fullmetrics/validation, updateEXP-207/task71 andregistries, commit final evidence. Onfailure diagnoseonlyfailedassets; successfulnativefillsstayfrozen.",
   "separate_tasks": "Leave runningEXP-206 limit/reclaim17322 andpostprocessor19856 intact. Earlier4hN5pullbackstillpending anditsheartbeat unchanged.",
   "report_requested": false,
   "training_eligible": false,
-  "production_eligible": false
+  "production_eligible": false,
+  "session_id": 27105,
+  "parent_pid": 23567,
+  "launch_commit": "68f911fc40648ae860011c4d1d2a0565be5b16a4",
+  "started_at": "2026-10-24T10:13:27Z"
 }
