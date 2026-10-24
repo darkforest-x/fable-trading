@@ -1,0 +1,11 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-hybrid-20261024-v1",
+  "question": "Owner 2026-10-24: 60 minutes is too long, what else? Fast cut (5/15m reclaim check) with slow breakeven (15/60m) hybrids of the Codex limit-reclaim rules.",
+  "construction": "Rules a<b are identical until the a-minute confirmation close. Hybrid a->b takes rule a's recorded outcome when its check fails, otherwise rule b's recorded outcome. Exact framework fills; random controls built the same way per control id.",
+  "source_snapshot": "output/monday-partial-snapshot-20261024-2224 (536/633 symbols), alts, near Monday edge target",
+  "split": "discovery before 2025-01-01, validation from 2025-01-01",
+  "subgroups": "volatility top quintile, fast approach longs, volume >=8x (features from exp-monday-limit-reclaim-patterns3-20261024-v1)",
+  "limitations": "Post hoc; partial snapshot; inherits the fixed O-H-L-C intrabar path of the source ledgers.",
+  "training_eligible": false,
+  "production_eligible": false
+}
