@@ -1,3 +1,8 @@
+## 2026-10-24 · Review of Codex 1.618 limit-reclaim snapshot (536/633)
+
+- Read-only over the framework ledgers in `output/monday-partial-snapshot-20261024-2224` (Codex run still going). Alts 5/15/60m confirmation x 5 targets: mean net +5 to +22bp per trade, median -7bp; best 60m + near Monday edge +22.1bp, 25 percent targets (+467bp), 35 percent breakeven (-7bp), 40 percent failed reclaim (-227bp). Top 1 percent of trades = 70 percent of profit; complete matched groups +5.7 vs random -25.2.
+- Equity replay of those fills from 1000 USDT (2020-2026): 2 percent per trade 2.6x but needs up to 31x gross exposure; gross capped at 1x 0.98x, 3x 1.25x (1.08x with 10bp exit slippage); 10 percent per trade 0.44x; 25 percent ruined. Charts and summary `experiments/active/exp-monday-limit-reclaim-review-20261024-v1/`. Builder eef486024f. No live action.
+
 ## 2026-10-24 · 区间1.618 3/5-minute hold and 1m pin-hold study rejected
 
 - Limit at the first weekly Monday 1618, no stop, market exit after 3 or 5 minutes (NautilusTrader 1m only, maker .02/taker .05): 3m OKX BTC net -3.7bp, Binance six majors +2.9bp CI[-2.9,8.6] later -1.5; 5m -2.7bp and +4.9bp CI[-3.7,12.9] later -0.5. Fees (7bp) eat the gross; fails like 30/50 minutes.

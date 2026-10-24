@@ -187,6 +187,21 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'This run also had a direct bar computation (summary.json) that the owner said was redundant; native matches it trade by trade (mean abs diff 0.01/0.43bp). Later runs are framework-only. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-limit-reclaim-review-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: eef486024fa5b0607d9df04ac3c79dbcf8bd6c7b
+    status: complete
+    question: 'Owner 2026-10-24: analyze the Codex limit-reclaim partial snapshot with charts; can 1000 USDT reach 100x/1000x/10000x?'
+    single_variable: 'Read-only review of framework ledgers; no new trades. Best cell chosen after the grid (optimistic).'
+    result: 'Snapshot 536/633 symbols, alts 5/15/60m x 5 targets. All-signal mean net +5 to +22bp per trade (best 60m near edge +22.1, median -7, win 24.7 percent); top 1 percent of trades = 70 percent of profit, top 25 percent = 522 percent; without the top 1 percent +6.6bp. Complete matched groups: signal +5.7 vs random -25.2 (signal beats random in every cell by 10-31bp but is about 0 in absolute terms). Equity replay from 1000 USDT 2020-2026: 2 percent of equity per trade 2.6x with up to 31x gross exposure; gross <=1x 0.98x; <=3x 1.25x (1.08x with 10bp exit slippage); 10 percent per trade 0.44x, 25 percent ruined. 100x not supported.'
+    artifacts:
+    - monday-limit-reclaim-review-20261024-v1
+    canonical_report: experiments/active/exp-monday-limit-reclaim-review-20261024-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Partial snapshot while exp-monday-limit-reclaim-20261024-v1 still runs; numbers may move at 633. Replay ignores unrealized losses, funding, queue misses and liquidity. Charts 1_grid..5_equity.png in the experiment folder.'
   - experiment_id: exp-monday-1618-hold3-20261024-v1
     source_repo: darkforest-x/fable-trading
     source_commit: bf71b316af6e405e6920385ede34e13dce0948ee
