@@ -1,0 +1,90 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-20261024-v1",
+  "completion_status": "partial",
+  "partial_requested": true,
+  "assets_done": 46,
+  "assets_expected": 633,
+  "assets_missing": 587,
+  "trade_rows": 263050,
+  "signal_rows": 71280,
+  "strict_match_pairs": 55374,
+  "source_groups": [
+    {
+      "source_minutes": 1,
+      "symbols_done": 1,
+      "trade_rows": 16300,
+      "signal_rows": 4275
+    },
+    {
+      "source_minutes": 5,
+      "symbols_done": 45,
+      "trade_rows": 246750,
+      "signal_rows": 67005
+    }
+  ],
+  "altcoin_coverage": {
+    "confirm_minutes_1_and_3_expected": 4,
+    "confirm_minutes_1_and_3_present": 0,
+    "confirm_minutes_5_15_and_60_expected": 630,
+    "confirm_minutes_5_15_and_60_present": 45
+  },
+  "analysis_outputs": [
+    "metrics.csv",
+    "year_side_coin.csv",
+    "conditions.csv",
+    "attempts.csv",
+    "matches.csv.gz",
+    "core_metrics_zh.csv"
+  ],
+  "split_cut_utc": "2023-01-01T00:00:00+00:00",
+  "split_policy": "entry timestamp; exclude holdings crossing the cut from pre/post rows; all retains them",
+  "common6_scope": {
+    "analysis_scope": "COMMON6_CRYPTO_PARTIAL",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "SOLUSDT",
+      "BNBUSDT",
+      "XRPUSDT",
+      "DOGEUSDT"
+    ],
+    "expected_symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "SOLUSDT",
+      "BNBUSDT",
+      "XRPUSDT",
+      "DOGEUSDT"
+    ],
+    "expected_symbol_count": 6,
+    "present_symbols": [
+      "BTCUSDT"
+    ],
+    "present_symbol_count": 1,
+    "missing_symbols": [
+      "BNBUSDT",
+      "DOGEUSDT",
+      "ETHUSDT",
+      "SOLUSDT",
+      "XRPUSDT"
+    ],
+    "complete": false,
+    "source_group": "crypto_1m",
+    "event_start_utc_inclusive": "2022-11-01T00:00:00+00:00",
+    "event_end_utc_exclusive": "2026-10-01T00:00:00+00:00"
+  },
+  "matched_control_rule": "same symbol, actual New York week, side, volatility bucket, and entry period; signal plus exactly three closed controls",
+  "matched_inference": "market-week cluster bootstrap 95% CI and two-sided cluster sign-flip p; Holm family is the fixed 5x5 timeframe/target matrix per scope and period",
+  "attempt_control_rule": "expired orders contribute zero exposure to attempt expectancy and never count as wins/losses; filled censored orders remain unknown",
+  "attempt_period_basis": "filled orders use actual entry time; unfilled orders use intended entry time",
+  "condition_rule": "touch-wick-only and next-close-inside tables are post-hoc descriptions, not causal entry strategies",
+  "return_basis": "return_bp is native net for crypto and native gross for XAUUSD; no initial R exists",
+  "scope_definitions": {
+    "CRYPTO_ALL": "crypto assets only; XAUUSD is reported separately because its return basis is gross",
+    "ALTCOINS": "1/3-minute confirmation uses the four 1-minute-source alts; 5/15/60 combines all 630 alts",
+    "COMMON6_CRYPTO": "BTC, ETH, SOL, BNB, XRP, DOGE; crypto_1m source and 2022-11-01 through 2026-09-30 entries",
+    "COMMON6_CRYPTO_PARTIAL": "the same six-symbol scope with only currently completed 1-minute-source symbols present"
+  },
+  "backtest_executed": false,
+  "raw_symbol_results_modified": false
+}
