@@ -8,3 +8,13 @@
   - 同时要记住：成交后的后续 K 线里，O-H-L-C 让做多先碰止盈、做空先碰保本，方向偏差正好相反。
 - **通用规则**：凡是挂单入场、止盈可能在成交那根 K 线内触发的研究，先按方向统计同K止盈的占比。占比明显高于平均时，要么用不利顺序（做多 O-H-L-C、做空 O-L-H-C）重放，要么只在收盘价越过止盈的情况下才认可同K止盈，不能直接采信。
 - **牵连**：`experiments/active/exp-monday-limit-reclaim-20261024-v1/config.json` 中的 `intrabar_path: OHLC`；`yoyo/evaluation/monday_limit_reclaim_patterns3.py`；`experiments/active/exp-monday-limit-reclaim-patterns3-20261024-v1/`。相关笔记：[exit-bar-mfe-needs-intrabar-bounds.md](exit-bar-mfe-needs-intrabar-bounds.md)。
+
+## 结果（2026-10-25）
+
+用框架按单调的 O-L-H-C 重跑全部 626 个 5m 山寨币（60 分钟确认，止盈近侧周一边界）：
+- 1,792 笔做空同K止盈里，只有 247 笔在 O-L-H-C 下仍是同K止盈，这批单子的平均收益从 +398bp 变成 −51bp。
+- 做空每笔从 +24.8bp 降到 +1.4bp。
+- 每笔取两种顺序里较差的结果，整体只剩 +9.7bp（原记录 +21.3bp）。
+- 1000U 复利（每笔 10%、总仓位 ≤ 1 倍）：不过滤时为 0.12 倍；只有"触及前波动最高"（5.6 倍）和"急速插针只做多"（2.2 倍）还为正。
+
+另外，第一次重跑被适配器的合成路径段 bug 掩盖，看起来做空毫无变化，见 [synthetic-intrabar-segments-must-replay-monotonically.md](synthetic-intrabar-segments-must-replay-monotonically.md)。

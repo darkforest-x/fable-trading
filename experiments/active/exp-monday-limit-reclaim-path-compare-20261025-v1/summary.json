@@ -1,0 +1,2200 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-reclaim-path-compare-20261025-v1",
+    "question": "Owner 2026-10-25: after replaying the Codex 1.618 limit-reclaim signals under O-L-H-C, do the short same-bar targets survive, and what does the 1000 USDT replay give per intrabar path?",
+    "inputs": "Codex O-H-L-C ledger (exp-monday-limit-reclaim-20261024-v1), O-L-H-C framework replay with monotone segments (exp-monday-limit-reclaim-olhc-20261025-v2) and a 20-symbol O-H-L-C monotone parity rerun (exp-monday-limit-reclaim-ohlc-check-20261025-v1); alts, 60m confirmation, near Monday edge, snapshot symbols",
+    "versions": "ohlc (as recorded), olhc, worst (per trade the worse of the two paths)",
+    "replay": "Same filters and replay as exp-monday-limit-reclaim-filtered-replay-20261025-v1; k 5/10/20/30 percent, gross cap 1x/3x, 10bp exit slippage",
+    "limitations": "Neither global path is the true intrabar order; worst is a pessimistic bound. Filters chosen after seeing the data. No funding, queue, margin or liquidity model.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "vol_bucket_threshold": -27.0,
+  "ohlc_parity": {
+    "trades": 3158,
+    "identical": 3158
+  },
+  "comparison": {
+    "trades": 69990,
+    "missing": 536,
+    "changed": 1650,
+    "short_same_bar_ohlc": 1792,
+    "short_same_bar_still_target_olhc": 1154,
+    "short_same_bar_still_same_bar_olhc": 247,
+    "short_same_bar_mean_ohlc": 398.31311732544316,
+    "short_same_bar_mean_olhc": -50.89008647188522,
+    "by_side": {
+      "-1": {
+        "n": 34303,
+        "changed": 638,
+        "mean_ohlc": 24.820233062489844,
+        "mean_olhc": 1.3537099827355252,
+        "mean_worst": 1.3537099827355252,
+        "win_ohlc": 28.047109582252283,
+        "win_olhc": 26.187213946302073,
+        "win_worst": 26.187213946302073
+      },
+      "1": {
+        "n": 35687,
+        "changed": 1012,
+        "mean_ohlc": 17.828611647011193,
+        "mean_olhc": 39.14089905902006,
+        "mean_worst": 17.755604944872193,
+        "win_ohlc": 21.369126012273377,
+        "win_olhc": 24.171266847871774,
+        "win_worst": 21.352313167259787
+      }
+    }
+  },
+  "sets": {
+    "ohlc|all": {
+      "n": 69990,
+      "win_pct": 24.64209172738963,
+      "mean_bp": 21.255295307750785
+    },
+    "ohlc|vol_top": {
+      "n": 12995,
+      "win_pct": 34.682570219315124,
+      "mean_bp": 73.24301789194702
+    },
+    "ohlc|vol_spike": {
+      "n": 8293,
+      "win_pct": 46.65380441336067,
+      "mean_bp": 51.22194096691191
+    },
+    "ohlc|fast_long": {
+      "n": 1935,
+      "win_pct": 46.821705426356594,
+      "mean_bp": 133.90951674735004
+    },
+    "ohlc|opp_first": {
+      "n": 8970,
+      "win_pct": 35.32887402452619,
+      "mean_bp": 28.852425373419432
+    },
+    "ohlc|any_strong": {
+      "n": 23407,
+      "win_pct": 34.60930490878797,
+      "mean_bp": 48.86481607312696
+    },
+    "ohlc|vol_top_opp": {
+      "n": 2323,
+      "win_pct": 51.82953077916488,
+      "mean_bp": 86.29134582421216
+    },
+    "olhc|all": {
+      "n": 69990,
+      "win_pct": 25.159308472638948,
+      "mean_bp": 20.62091124813582
+    },
+    "olhc|vol_top": {
+      "n": 12995,
+      "win_pct": 35.236629472874185,
+      "mean_bp": 71.98155541510084
+    },
+    "olhc|vol_spike": {
+      "n": 8293,
+      "win_pct": 46.85879657542505,
+      "mean_bp": 30.45388863047102
+    },
+    "olhc|fast_long": {
+      "n": 1935,
+      "win_pct": 71.78294573643412,
+      "mean_bp": 320.93152494495484
+    },
+    "olhc|opp_first": {
+      "n": 8970,
+      "win_pct": 37.02341137123746,
+      "mean_bp": 34.447428795522654
+    },
+    "olhc|any_strong": {
+      "n": 23407,
+      "win_pct": 35.89951723843295,
+      "mean_bp": 47.50911880957775
+    },
+    "olhc|vol_top_opp": {
+      "n": 2323,
+      "win_pct": 52.776582006026686,
+      "mean_bp": 90.67316571077741
+    },
+    "worst|all": {
+      "n": 69990,
+      "win_pct": 23.721960280040005,
+      "mean_bp": 9.716825077945854
+    },
+    "worst|vol_top": {
+      "n": 12995,
+      "win_pct": 33.47441323585995,
+      "mean_bp": 52.373590822492474
+    },
+    "worst|vol_spike": {
+      "n": 8293,
+      "win_pct": 42.192210297841555,
+      "mean_bp": -12.545106941508097
+    },
+    "worst|fast_long": {
+      "n": 1935,
+      "win_pct": 46.821705426356594,
+      "mean_bp": 133.90951674735004
+    },
+    "worst|opp_first": {
+      "n": 8970,
+      "win_pct": 33.6231884057971,
+      "mean_bp": 8.416396311748896
+    },
+    "worst|any_strong": {
+      "n": 23407,
+      "win_pct": 32.62271969923527,
+      "mean_bp": 20.542541132984176
+    },
+    "worst|vol_top_opp": {
+      "n": 2323,
+      "win_pct": 49.28971157985364,
+      "mean_bp": 44.75647784741442
+    }
+  },
+  "replays": [
+    {
+      "variant": "ohlc",
+      "filter": "all",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 11.899726735981286,
+      "max_drawdown_pct": 39.38799981543486,
+      "trades_taken": 52950,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "all",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 18.133133604264756,
+      "max_drawdown_pct": 58.14094602404103,
+      "trades_taken": 64077,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "all",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 150.0857870600537,
+      "max_drawdown_pct": 50.11916003746704,
+      "trades_taken": 43821,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "all",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 2722,
+      "ruined": true
+    },
+    {
+      "variant": "ohlc",
+      "filter": "all",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 3930.4589959567516,
+      "max_drawdown_pct": 52.911095547731726,
+      "trades_taken": 32910,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "all",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 8.165971494090144,
+      "max_drawdown_pct": 99.93845867014059,
+      "trades_taken": 49470,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "all",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 43245.41577603998,
+      "max_drawdown_pct": 63.659794410333106,
+      "trades_taken": 27818,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "all",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 12755.797383250063,
+      "max_drawdown_pct": 96.15197486096135,
+      "trades_taken": 43825,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_top",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 12.501363117550765,
+      "max_drawdown_pct": 35.896532170275464,
+      "trades_taken": 11419,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_top",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 26.245703158970585,
+      "max_drawdown_pct": 56.32062714970636,
+      "trades_taken": 12597,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_top",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 84.61137893321718,
+      "max_drawdown_pct": 38.831408076667465,
+      "trades_taken": 10546,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_top",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 987,
+      "ruined": true
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_top",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 1376.3016239770188,
+      "max_drawdown_pct": 45.00296281755297,
+      "trades_taken": 9708,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_top",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 19.174308666567935,
+      "max_drawdown_pct": 99.8914823964083,
+      "trades_taken": 11050,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_top",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 6277.313351564591,
+      "max_drawdown_pct": 61.85592353253377,
+      "trades_taken": 9169,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_top",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 17919.833314759777,
+      "max_drawdown_pct": 94.45175942396924,
+      "trades_taken": 10509,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_spike",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 4.960610285265201,
+      "max_drawdown_pct": 17.77071004830477,
+      "trades_taken": 7715,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_spike",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 5.986377045572331,
+      "max_drawdown_pct": 20.748245687643106,
+      "trades_taken": 8075,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_spike",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 21.374093053891286,
+      "max_drawdown_pct": 33.07579318213061,
+      "trades_taken": 7502,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_spike",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 24.40139523226908,
+      "max_drawdown_pct": 34.01490138730444,
+      "trades_taken": 7852,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_spike",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 216.76376488178565,
+      "max_drawdown_pct": 59.138225102951814,
+      "trades_taken": 7225,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_spike",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 373.10468200351715,
+      "max_drawdown_pct": 59.19392460902024,
+      "trades_taken": 7624,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_spike",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 1367.2017017082626,
+      "max_drawdown_pct": 69.03584393200725,
+      "trades_taken": 7017,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_spike",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 2689.779817196243,
+      "max_drawdown_pct": 76.87462947418989,
+      "trades_taken": 7496,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "fast_long",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 2.099852293257779,
+      "max_drawdown_pct": 14.010574290218791,
+      "trades_taken": 1409,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "fast_long",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 2.5645802768701786,
+      "max_drawdown_pct": 14.223027465910265,
+      "trades_taken": 1723,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "fast_long",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 2.223550340425701,
+      "max_drawdown_pct": 26.984505601663187,
+      "trades_taken": 1162,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "fast_long",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 4.937972969760876,
+      "max_drawdown_pct": 26.58480749270068,
+      "trades_taken": 1533,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "fast_long",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 1.511939736762419,
+      "max_drawdown_pct": 55.70028465428805,
+      "trades_taken": 893,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "fast_long",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 9.281101516320604,
+      "max_drawdown_pct": 46.93296093949326,
+      "trades_taken": 1306,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "fast_long",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 1.0788632253606818,
+      "max_drawdown_pct": 74.46047004762015,
+      "trades_taken": 829,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "fast_long",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 8.947214250854895,
+      "max_drawdown_pct": 64.38949002517941,
+      "trades_taken": 1153,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "opp_first",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 2.154549599135222,
+      "max_drawdown_pct": 22.369132871101037,
+      "trades_taken": 8311,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "opp_first",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 2.6024361509620006,
+      "max_drawdown_pct": 25.332551098772925,
+      "trades_taken": 8798,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "opp_first",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 2.9645650174986504,
+      "max_drawdown_pct": 34.94875865009828,
+      "trades_taken": 7691,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "opp_first",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 4.709746181080117,
+      "max_drawdown_pct": 42.65247681819064,
+      "trades_taken": 8571,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "opp_first",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 10.311940821235611,
+      "max_drawdown_pct": 44.72265853980885,
+      "trades_taken": 6799,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "opp_first",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 7.212543766945325,
+      "max_drawdown_pct": 73.53788187645642,
+      "trades_taken": 8079,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "opp_first",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 32.93057380105728,
+      "max_drawdown_pct": 42.84905393140127,
+      "trades_taken": 6407,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "opp_first",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 5.072565637301237,
+      "max_drawdown_pct": 86.18773743768055,
+      "trades_taken": 7687,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "any_strong",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 20.476584387418153,
+      "max_drawdown_pct": 36.57319130738678,
+      "trades_taken": 20465,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "any_strong",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 38.230073416316316,
+      "max_drawdown_pct": 56.32062714970636,
+      "trades_taken": 22483,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "any_strong",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 270.70930784337054,
+      "max_drawdown_pct": 39.53025261783716,
+      "trades_taken": 18840,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "any_strong",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 1185,
+      "ruined": true
+    },
+    {
+      "variant": "ohlc",
+      "filter": "any_strong",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 14300.684836088858,
+      "max_drawdown_pct": 52.778534092842655,
+      "trades_taken": 16754,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "any_strong",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 87.31373830628318,
+      "max_drawdown_pct": 99.90172015694283,
+      "trades_taken": 19816,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "any_strong",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 215926.06344319752,
+      "max_drawdown_pct": 61.72749548799348,
+      "trades_taken": 15477,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "any_strong",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 214524.05092210375,
+      "max_drawdown_pct": 94.73693362675962,
+      "trades_taken": 18836,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_top_opp",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 2.186796454046877,
+      "max_drawdown_pct": 15.239164056887821,
+      "trades_taken": 2232,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_top_opp",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 2.49149196700083,
+      "max_drawdown_pct": 15.193829827613992,
+      "trades_taken": 2323,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_top_opp",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 3.1547708300491735,
+      "max_drawdown_pct": 30.38350118325073,
+      "trades_taken": 2103,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_top_opp",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 5.193542371018049,
+      "max_drawdown_pct": 29.607903027059322,
+      "trades_taken": 2280,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_top_opp",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 9.849181146138251,
+      "max_drawdown_pct": 35.89265593896438,
+      "trades_taken": 1957,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_top_opp",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 13.02912294390347,
+      "max_drawdown_pct": 58.10247703803837,
+      "trades_taken": 2187,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_top_opp",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 27.067512146880695,
+      "max_drawdown_pct": 37.66340037987958,
+      "trades_taken": 1912,
+      "ruined": false
+    },
+    {
+      "variant": "ohlc",
+      "filter": "vol_top_opp",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 10.050371597534264,
+      "max_drawdown_pct": 82.4560146497466,
+      "trades_taken": 2104,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "all",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 1.9416198350688882,
+      "max_drawdown_pct": 50.94402170727814,
+      "trades_taken": 53127,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "all",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 9.542302284204423,
+      "max_drawdown_pct": 57.23303828635669,
+      "trades_taken": 64263,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "all",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 3.06917347524014,
+      "max_drawdown_pct": 67.55688878647138,
+      "trades_taken": 43867,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "all",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 2735,
+      "ruined": true
+    },
+    {
+      "variant": "olhc",
+      "filter": "all",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 2.0602821034942385,
+      "max_drawdown_pct": 86.83643926248715,
+      "trades_taken": 32923,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "all",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.0016772707962523063,
+      "max_drawdown_pct": 99.9913254337959,
+      "trades_taken": 49577,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "all",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 4634,
+      "ruined": true
+    },
+    {
+      "variant": "olhc",
+      "filter": "all",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 6124,
+      "ruined": true
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_top",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 10.575232340694466,
+      "max_drawdown_pct": 35.133615299482244,
+      "trades_taken": 11470,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_top",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 23.391049437738552,
+      "max_drawdown_pct": 56.32062714970638,
+      "trades_taken": 12630,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_top",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 30.497750908572865,
+      "max_drawdown_pct": 48.99446530817063,
+      "trades_taken": 10587,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_top",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 998,
+      "ruined": true
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_top",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 83.5662421205617,
+      "max_drawdown_pct": 77.70926815826256,
+      "trades_taken": 9673,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_top",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 2.7822493988813424,
+      "max_drawdown_pct": 99.94398134169286,
+      "trades_taken": 11068,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_top",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 1583,
+      "ruined": true
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_top",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 1862,
+      "ruined": true
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_spike",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 1.5295869458440938,
+      "max_drawdown_pct": 20.312138280579482,
+      "trades_taken": 7739,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_spike",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 2.1021734769371028,
+      "max_drawdown_pct": 22.251914729534626,
+      "trades_taken": 8096,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_spike",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 1.8179416719552286,
+      "max_drawdown_pct": 37.62607481216311,
+      "trades_taken": 7524,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_spike",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 2.410837350095897,
+      "max_drawdown_pct": 37.91249939420413,
+      "trades_taken": 7877,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_spike",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.7037873571385894,
+      "max_drawdown_pct": 69.94837127443515,
+      "trades_taken": 7230,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_spike",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 2.2677695240140117,
+      "max_drawdown_pct": 64.78029407634045,
+      "trades_taken": 7649,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_spike",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.21134043305435168,
+      "max_drawdown_pct": 89.54226347667267,
+      "trades_taken": 7019,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_spike",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 1.4842784992675173,
+      "max_drawdown_pct": 82.47103829935931,
+      "trades_taken": 7526,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "fast_long",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 9.21410715449413,
+      "max_drawdown_pct": 2.6377212253690274,
+      "trades_taken": 1491,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "fast_long",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 15.361589497391742,
+      "max_drawdown_pct": 2.8339076235083804,
+      "trades_taken": 1788,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "fast_long",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 34.760569758804465,
+      "max_drawdown_pct": 5.253718762001814,
+      "trades_taken": 1240,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "fast_long",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 119.93718635597187,
+      "max_drawdown_pct": 5.253718762001824,
+      "trades_taken": 1611,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "fast_long",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 217.97453552404474,
+      "max_drawdown_pct": 10.421607469402405,
+      "trades_taken": 982,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "fast_long",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 2642.5326817484133,
+      "max_drawdown_pct": 10.421607469402405,
+      "trades_taken": 1386,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "fast_long",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 616.019194661539,
+      "max_drawdown_pct": 15.761156286005495,
+      "trades_taken": 909,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "fast_long",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 30848.85917111848,
+      "max_drawdown_pct": 15.505752390169047,
+      "trades_taken": 1240,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "opp_first",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 2.1816408454231984,
+      "max_drawdown_pct": 18.29918200398135,
+      "trades_taken": 8336,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "opp_first",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 2.8945433803128022,
+      "max_drawdown_pct": 18.988684920322974,
+      "trades_taken": 8800,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "opp_first",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 2.647377618379739,
+      "max_drawdown_pct": 34.40632857742422,
+      "trades_taken": 7729,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "opp_first",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 5.162225106832177,
+      "max_drawdown_pct": 34.2508626208357,
+      "trades_taken": 8583,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "opp_first",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 4.361622327152865,
+      "max_drawdown_pct": 49.495913256392875,
+      "trades_taken": 6833,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "opp_first",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 8.87370765824979,
+      "max_drawdown_pct": 60.75312242004085,
+      "trades_taken": 8127,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "opp_first",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 5.51782900069499,
+      "max_drawdown_pct": 61.981367001943525,
+      "trades_taken": 6428,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "opp_first",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 5.175066648800638,
+      "max_drawdown_pct": 85.3798574653114,
+      "trades_taken": 7714,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "any_strong",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 7.654406096462402,
+      "max_drawdown_pct": 38.376561938379574,
+      "trades_taken": 20614,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "any_strong",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 25.002381282905606,
+      "max_drawdown_pct": 56.32062714970634,
+      "trades_taken": 22593,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "any_strong",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 14.317829660579704,
+      "max_drawdown_pct": 62.0667897790555,
+      "trades_taken": 18983,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "any_strong",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 1198,
+      "ruined": true
+    },
+    {
+      "variant": "olhc",
+      "filter": "any_strong",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 10.767053099343752,
+      "max_drawdown_pct": 88.83947728425034,
+      "trades_taken": 16932,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "any_strong",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.41429740243027874,
+      "max_drawdown_pct": 99.972408628518,
+      "trades_taken": 19942,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "any_strong",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 2054,
+      "ruined": true
+    },
+    {
+      "variant": "olhc",
+      "filter": "any_strong",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 2371,
+      "ruined": true
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_top_opp",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 2.2828950722031136,
+      "max_drawdown_pct": 15.266917426510618,
+      "trades_taken": 2236,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_top_opp",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 2.624391164287739,
+      "max_drawdown_pct": 15.266917426510618,
+      "trades_taken": 2323,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_top_opp",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 3.6104491739809452,
+      "max_drawdown_pct": 30.06801628375545,
+      "trades_taken": 2125,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_top_opp",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 5.592733620447512,
+      "max_drawdown_pct": 29.675069206238447,
+      "trades_taken": 2283,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_top_opp",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 8.401560010795416,
+      "max_drawdown_pct": 35.89265593896438,
+      "trades_taken": 2001,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_top_opp",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 15.854436195780123,
+      "max_drawdown_pct": 56.70737257652804,
+      "trades_taken": 2199,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_top_opp",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 17.044184033822056,
+      "max_drawdown_pct": 38.27509374431861,
+      "trades_taken": 1929,
+      "ruined": false
+    },
+    {
+      "variant": "olhc",
+      "filter": "vol_top_opp",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 17.91464889088896,
+      "max_drawdown_pct": 81.82826782025144,
+      "trades_taken": 2134,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "all",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.22476533878944122,
+      "max_drawdown_pct": 84.26966174321004,
+      "trades_taken": 52911,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "all",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.3252124053542357,
+      "max_drawdown_pct": 84.5705993138686,
+      "trades_taken": 64058,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "all",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.1189650704964479,
+      "max_drawdown_pct": 92.85732751750257,
+      "trades_taken": 43718,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "all",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 2721,
+      "ruined": true
+    },
+    {
+      "variant": "worst",
+      "filter": "all",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.03021513900429055,
+      "max_drawdown_pct": 98.16011641487857,
+      "trades_taken": 32650,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "all",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 6.564366420845362e-07,
+      "max_drawdown_pct": 99.99998059745967,
+      "trades_taken": 49362,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "all",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 4621,
+      "ruined": true
+    },
+    {
+      "variant": "worst",
+      "filter": "all",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 6109,
+      "ruined": true
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_top",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 3.2080780008986296,
+      "max_drawdown_pct": 35.89653217027544,
+      "trades_taken": 11411,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_top",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 6.557209568968618,
+      "max_drawdown_pct": 56.32062714970631,
+      "trades_taken": 12598,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_top",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 5.62758680427526,
+      "max_drawdown_pct": 56.91042258724784,
+      "trades_taken": 10514,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_top",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 987,
+      "ruined": true
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_top",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 5.406805872874375,
+      "max_drawdown_pct": 81.26805933122908,
+      "trades_taken": 9701,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_top",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.04100729239293797,
+      "max_drawdown_pct": 99.96171470550945,
+      "trades_taken": 11046,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_top",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 1578,
+      "ruined": true
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_top",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 1840,
+      "ruined": true
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_spike",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.35197522958991884,
+      "max_drawdown_pct": 68.38422942054939,
+      "trades_taken": 7707,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_spike",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.41195238223954084,
+      "max_drawdown_pct": 66.59593880586026,
+      "trades_taken": 8075,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_spike",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.10499534315667818,
+      "max_drawdown_pct": 91.53490761992764,
+      "trades_taken": 7495,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_spike",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.11850350928602701,
+      "max_drawdown_pct": 90.97788972084669,
+      "trades_taken": 7846,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_spike",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.005212037615464323,
+      "max_drawdown_pct": 99.64897103191456,
+      "trades_taken": 7172,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_spike",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.007866073843570551,
+      "max_drawdown_pct": 99.47784345902765,
+      "trades_taken": 7608,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_spike",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.00027751590001823484,
+      "max_drawdown_pct": 99.9821664403959,
+      "trades_taken": 6989,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_spike",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.00020450014750780874,
+      "max_drawdown_pct": 99.9885860070566,
+      "trades_taken": 7501,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "fast_long",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 2.099852293257779,
+      "max_drawdown_pct": 14.010574290218791,
+      "trades_taken": 1409,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "fast_long",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 2.5645802768701786,
+      "max_drawdown_pct": 14.223027465910265,
+      "trades_taken": 1723,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "fast_long",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 2.223550340425701,
+      "max_drawdown_pct": 26.984505601663187,
+      "trades_taken": 1162,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "fast_long",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 4.937972969760876,
+      "max_drawdown_pct": 26.58480749270068,
+      "trades_taken": 1533,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "fast_long",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 1.511939736762419,
+      "max_drawdown_pct": 55.70028465428805,
+      "trades_taken": 893,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "fast_long",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 9.281101516320604,
+      "max_drawdown_pct": 46.93296093949326,
+      "trades_taken": 1306,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "fast_long",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 1.0788632253606818,
+      "max_drawdown_pct": 74.46047004762015,
+      "trades_taken": 829,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "fast_long",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 8.947214250854895,
+      "max_drawdown_pct": 64.38949002517941,
+      "trades_taken": 1153,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "opp_first",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.8523172273488377,
+      "max_drawdown_pct": 35.705785808503606,
+      "trades_taken": 8303,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "opp_first",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 1.0276750720385626,
+      "max_drawdown_pct": 39.901412386202416,
+      "trades_taken": 8797,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "opp_first",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.46799905312657597,
+      "max_drawdown_pct": 59.852240093095574,
+      "trades_taken": 7660,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "opp_first",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.7347590453162062,
+      "max_drawdown_pct": 62.57036302227852,
+      "trades_taken": 8566,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "opp_first",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.2671938328459994,
+      "max_drawdown_pct": 79.91797205005135,
+      "trades_taken": 6841,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "opp_first",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.1684704113700637,
+      "max_drawdown_pct": 89.62980511989709,
+      "trades_taken": 8088,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "opp_first",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.1788492126725198,
+      "max_drawdown_pct": 86.31879010842627,
+      "trades_taken": 6399,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "opp_first",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.018009559530070846,
+      "max_drawdown_pct": 98.7333038724676,
+      "trades_taken": 7655,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "any_strong",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.7363630078752917,
+      "max_drawdown_pct": 54.71389238496533,
+      "trades_taken": 20452,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "any_strong",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 1.3410019285690327,
+      "max_drawdown_pct": 57.038234003289645,
+      "trades_taken": 22485,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "any_strong",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.32981024866430186,
+      "max_drawdown_pct": 85.70163999281479,
+      "trades_taken": 18818,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "any_strong",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 1185,
+      "ruined": true
+    },
+    {
+      "variant": "worst",
+      "filter": "any_strong",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.020959080620008112,
+      "max_drawdown_pct": 99.34441787030134,
+      "trades_taken": 16665,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "any_strong",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 6.058544016679351e-05,
+      "max_drawdown_pct": 99.9987871383725,
+      "trades_taken": 19803,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "any_strong",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 2038,
+      "ruined": true
+    },
+    {
+      "variant": "worst",
+      "filter": "any_strong",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.0,
+      "max_drawdown_pct": 100.0,
+      "trades_taken": 2361,
+      "ruined": true
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_top_opp",
+      "k": 0.05,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 1.3420271701722593,
+      "max_drawdown_pct": 15.393339753560786,
+      "trades_taken": 2229,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_top_opp",
+      "k": 0.05,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 1.5290174390914695,
+      "max_drawdown_pct": 15.193829827614024,
+      "trades_taken": 2323,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_top_opp",
+      "k": 0.1,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 1.1813461461481183,
+      "max_drawdown_pct": 33.34270536522029,
+      "trades_taken": 2099,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_top_opp",
+      "k": 0.1,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 1.944331340571009,
+      "max_drawdown_pct": 29.607903027059347,
+      "trades_taken": 2282,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_top_opp",
+      "k": 0.2,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 1.3457106313390659,
+      "max_drawdown_pct": 46.38219742793205,
+      "trades_taken": 1964,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_top_opp",
+      "k": 0.2,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 1.780234651282155,
+      "max_drawdown_pct": 58.10247703803844,
+      "trades_taken": 2188,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_top_opp",
+      "k": 0.3,
+      "gross": 1,
+      "slip_bp": 10,
+      "final_multiple": 1.4496855391848378,
+      "max_drawdown_pct": 63.74373506524302,
+      "trades_taken": 1912,
+      "ruined": false
+    },
+    {
+      "variant": "worst",
+      "filter": "vol_top_opp",
+      "k": 0.3,
+      "gross": 3,
+      "slip_bp": 10,
+      "final_multiple": 0.48790535025454196,
+      "max_drawdown_pct": 87.15850694982461,
+      "trades_taken": 2105,
+      "ruined": false
+    }
+  ],
+  "yearly_k10_gross1_slip10": {
+    "ohlc|all": {
+      "2020": 1.2197271348851262,
+      "2021": 0.9276061208609608,
+      "2022": 1.2351866351735012,
+      "2023": 2.664031459757539,
+      "2024": 1.882416167278255,
+      "2025": 3.813925515634582,
+      "2026": 5.615048235648657
+    },
+    "ohlc|vol_top": {
+      "2020": 1.3345787375363956,
+      "2021": 1.2925568396790945,
+      "2022": 1.0976327137446082,
+      "2023": 1.7412226181782582,
+      "2024": 1.5780872426641346,
+      "2025": 4.394562877542822,
+      "2026": 3.700640415130671
+    },
+    "ohlc|vol_spike": {
+      "2020": 1.0954972976511035,
+      "2021": 1.088439387007105,
+      "2022": 0.9950310099635036,
+      "2023": 1.4125697074110495,
+      "2024": 1.331995420379522,
+      "2025": 4.5883056746749205,
+      "2026": 2.0867506487645815
+    },
+    "ohlc|fast_long": {
+      "2020": 1.1535759411379982,
+      "2021": 1.2330731374207544,
+      "2022": 1.0522993391940043,
+      "2023": 1.4335168775536626,
+      "2024": 1.0229644905422997,
+      "2025": 0.9697283678669332,
+      "2026": 1.044622010741246
+    },
+    "ohlc|opp_first": {
+      "2020": 1.0761192461699924,
+      "2021": 0.7015002821930308,
+      "2022": 1.0387977700222366,
+      "2023": 1.5358496260002552,
+      "2024": 1.2559217788457469,
+      "2025": 1.064276921667079,
+      "2026": 1.8415172417355494
+    },
+    "ohlc|any_strong": {
+      "2020": 1.3491980190325799,
+      "2021": 1.1931840312941553,
+      "2022": 1.0526683940238326,
+      "2023": 2.3995766577931428,
+      "2024": 1.8304557387230749,
+      "2025": 7.200436939970137,
+      "2026": 5.05098135915703
+    },
+    "ohlc|vol_top_opp": {
+      "2020": 1.1070845175433353,
+      "2021": 0.823444779955504,
+      "2022": 1.1065451863741227,
+      "2023": 1.1641099113950748,
+      "2024": 1.2831297851980827,
+      "2025": 1.3198890557453913,
+      "2026": 1.586285681874767
+    },
+    "olhc|all": {
+      "2020": 1.2877489910744233,
+      "2021": 0.7502042142916411,
+      "2022": 0.6992716540397893,
+      "2023": 2.083652164345444,
+      "2024": 1.1630381651372808,
+      "2025": 0.7720276803235931,
+      "2026": 2.428358123404137
+    },
+    "olhc|vol_top": {
+      "2020": 1.3387839671163053,
+      "2021": 1.4495241591123094,
+      "2022": 0.6352891950086844,
+      "2023": 1.6964723308336447,
+      "2024": 1.5732580746865927,
+      "2025": 2.3895721259092046,
+      "2026": 3.8787651901834495
+    },
+    "olhc|vol_spike": {
+      "2020": 1.113680411018106,
+      "2021": 1.003642890320886,
+      "2022": 0.9443621680299799,
+      "2023": 1.140037641094746,
+      "2024": 1.0613090986662437,
+      "2025": 1.402479791070134,
+      "2026": 1.0149482072774787
+    },
+    "olhc|fast_long": {
+      "2020": 1.213131278491825,
+      "2021": 1.5442435057403763,
+      "2022": 1.154926770971372,
+      "2023": 1.982768310800797,
+      "2024": 1.5747355294976535,
+      "2025": 2.453041132909692,
+      "2026": 2.0976084696551425
+    },
+    "olhc|opp_first": {
+      "2020": 1.07158663533659,
+      "2021": 0.7276269041044966,
+      "2022": 1.028646536998476,
+      "2023": 1.6434406959321408,
+      "2024": 1.189192530606867,
+      "2025": 1.0611045201639828,
+      "2026": 1.5916563744871546
+    },
+    "olhc|any_strong": {
+      "2020": 1.3781822191711621,
+      "2021": 1.0497051130632766,
+      "2022": 0.633909781285194,
+      "2023": 2.3521135380200136,
+      "2024": 1.3509475981440178,
+      "2025": 1.883751978599145,
+      "2026": 2.608286397957258
+    },
+    "olhc|vol_top_opp": {
+      "2020": 1.1003680670883575,
+      "2021": 0.9023351405188492,
+      "2022": 1.0816765852587926,
+      "2023": 1.1622152199550475,
+      "2024": 1.189524856020793,
+      "2025": 1.3387580444538014,
+      "2026": 1.8163342988494295
+    },
+    "worst|all": {
+      "2020": 1.1769740373528081,
+      "2021": 0.6832953381576052,
+      "2022": 0.6361796223286491,
+      "2023": 1.650105926573992,
+      "2024": 0.9768423505010875,
+      "2025": 0.2590619081207174,
+      "2026": 0.5568324131722251
+    },
+    "worst|vol_top": {
+      "2020": 1.3264821271811007,
+      "2021": 1.238798860282745,
+      "2022": 0.627829196138771,
+      "2023": 1.5981804327102103,
+      "2024": 1.2664660622244885,
+      "2025": 1.4588372283512583,
+      "2026": 1.847363215195128
+    },
+    "worst|vol_spike": {
+      "2020": 1.0829069484585767,
+      "2021": 0.9562521349787771,
+      "2022": 0.9329538821361375,
+      "2023": 1.0252122951385403,
+      "2024": 0.8355910334097042,
+      "2025": 0.4898749624583092,
+      "2026": 0.2589724007320165
+    },
+    "worst|fast_long": {
+      "2020": 1.1535759411379982,
+      "2021": 1.2330731374207544,
+      "2022": 1.0522993391940043,
+      "2023": 1.4335168775536626,
+      "2024": 1.0229644905422997,
+      "2025": 0.9697283678669332,
+      "2026": 1.044622010741246
+    },
+    "worst|opp_first": {
+      "2020": 1.0567073693996996,
+      "2021": 0.655624790964881,
+      "2022": 0.9729183371706309,
+      "2023": 1.4240890961318635,
+      "2024": 0.9831449097581796,
+      "2025": 0.577069885829036,
+      "2026": 0.8593604742415907
+    },
+    "worst|any_strong": {
+      "2020": 1.3139208321734206,
+      "2021": 0.965980891560238,
+      "2022": 0.5607344972644971,
+      "2023": 1.6532546722546182,
+      "2024": 0.9926174548943288,
+      "2025": 0.5368004048258909,
+      "2026": 0.5260592195488691
+    },
+    "worst|vol_top_opp": {
+      "2020": 1.1003680670883575,
+      "2021": 0.8145291701589724,
+      "2022": 1.0816765852587928,
+      "2023": 1.1176073686306744,
+      "2024": 1.1089549092523587,
+      "2025": 0.838265242739861,
+      "2026": 1.172871722965173
+    }
+  },
+  "source_commit": "35d25045ae8c9a3719a39523941957109eb770b2",
+  "training_eligible": false,
+  "production_eligible": false
+}

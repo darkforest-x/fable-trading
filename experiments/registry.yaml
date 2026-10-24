@@ -187,6 +187,64 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'This run also had a direct bar computation (summary.json) that the owner said was redundant; native matches it trade by trade (mean abs diff 0.01/0.43bp). Later runs are framework-only. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-limit-reclaim-olhc-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0cb6794b171bb1a2da07fb93935aa601dcbdfa74
+    status: void
+    question: 'O-L-H-C framework replay of the Codex 1.618 limit-reclaim signals (alts, 60m, near edge).'
+    single_variable: 'intrabar_path OHLC -> OLHC.'
+    result: 'Invalid and stopped at 305 symbols: the adapter replayed rising synthetic segments open-high-low-close, so O-L-H-C shorts still hit targets below the close (0 of 15022 shorts changed). Outputs moved out of the repo; superseded by v2.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-reclaim-olhc-20261025-v1/config.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: 'See docs/learnings/synthetic-intrabar-segments-must-replay-monotonically.md and adapter commit ca571cf122.'
+  - experiment_id: exp-monday-limit-reclaim-olhc-20261025-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1e0c7e8794f2bb2bce7cf01591c36629b6514241
+    status: complete
+    question: 'O-L-H-C framework replay with monotone intrabar segments of the Codex 1.618 limit-reclaim signals (all 626 5m alt symbols, 60m, near edge).'
+    single_variable: 'intrabar_path OHLC -> OLHC with monotone_segments=True; Codex frozen pipeline otherwise.'
+    result: 'NautilusTrader 1.231.0, 626 symbols, 0 errors. Feeds exp-monday-limit-reclaim-path-compare-20261025-v1.'
+    artifacts:
+    - monday-limit-reclaim-olhc-20261025-v2
+    canonical_report: experiments/active/exp-monday-limit-reclaim-path-compare-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Builder 7c9f3128ed (config extended to all alts in 1e0c7e8794). Four alts with 1m sources (SOL/BNB/XRP/DOGE) not replayed.'
+  - experiment_id: exp-monday-limit-reclaim-ohlc-check-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7c9f3128ed9b5f3efc078786902df23582b4c8ab
+    status: complete
+    question: 'Is the Codex O-H-L-C ledger affected by the non-monotone segment replay?'
+    single_variable: 'monotone_segments False -> True under O-H-L-C, 20 evenly spaced alt symbols.'
+    result: '3158 of 3158 closed signal trades identical to the Codex ledger. The Codex O-H-L-C results stand as recorded.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-reclaim-path-compare-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'ohlc_parity block of the path-compare summary.'
+  - experiment_id: exp-monday-limit-reclaim-path-compare-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 35d25045ae8c9a3719a39523941957109eb770b2
+    status: rejected
+    question: 'Do the Codex short same-bar targets survive an O-L-H-C replay, and what does the 1000 USDT replay give per intrabar path?'
+    single_variable: 'Intrabar path (ohlc / olhc / per-trade worst) on identical signals; replay grid as the filtered replay.'
+    result: 'Alts 60m near edge, 69990 trades. Short same-bar targets 1792: only 247 stay same-bar under O-L-H-C, mean +398 -> -51bp. Shorts +24.8 -> +1.4bp; longs +17.8 (O-H-L-C) vs +39.1 (O-L-H-C). Worst path per trade: +9.7bp, win 23.7 percent. 1000 USDT 10 percent per trade gross<=1x 10bp: as recorded 150x; worst 0.12x unfiltered, vol_top 5.6x (DD 57 percent), fast_long 2.2x (<=3x 4.9x), any_strong 0.33x, vol_spike 0.11x. 100x not supported under the adverse path.'
+    artifacts:
+    - monday-limit-reclaim-path-compare-20261025-v1
+    canonical_report: experiments/active/exp-monday-limit-reclaim-path-compare-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Worst = adverse fill-bar order for each side (shorts O-L-H-C, longs O-H-L-C), the realistic order for spikes into the level. Filters chosen after seeing the data. No funding, queue, margin or liquidity model.'
   - experiment_id: exp-monday-limit-reclaim-filtered-replay-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 6327c20bd3b829b15f9085673160edc6f8b8e3fa

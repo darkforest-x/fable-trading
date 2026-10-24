@@ -1,3 +1,9 @@
+## 2026-10-25 · Codex 1.618 limit-reclaim: short same-bar targets fail the O-L-H-C replay
+
+- Adapter defect fixed (ca571cf122): rising synthetic intrabar segments were replayed open-high-low-close, so an O-L-H-C replay changed nothing for shorts. New opt-in `monotone_segments`; default unchanged; 297 adapter tests pass. O-H-L-C parity sample: 3158/3158 trades identical to Codex.
+- Monotone O-L-H-C replay of all 626 5m alt symbols (60m, near edge): of 1792 short same-bar targets only 247 stay same-bar; their mean +398bp -> -51bp. Shorts +24.8 -> +1.4bp per trade; worst path per trade +9.7bp overall (Codex as recorded +21.3).
+- 1000 USDT, 10 percent per trade, gross<=1x, 10bp: as recorded 150x; worst path unfiltered 0.12x, any_strong 0.33x, vol_spike 0.11x, vol_top 5.6x (DD 57 percent), fast_long 2.2x (<=3x 4.9x). 100x not supported. `experiments/active/exp-monday-limit-reclaim-path-compare-20261025-v1/`. No live action.
+
 ## 2026-10-25 · Limit-reclaim 1000U replay: bug fixed, result hinges on short same-bar targets
 
 - My equity replays booked exits sharing their entry timestamp before the entry, zeroing 1868 same-bar targets (58 percent of profit). Fixed in 6327c20bd3; the 2026-10-24 review numbers (0.98x/1.25x) are superseded: as recorded, 2 percent per trade gives 11.8x, 5 percent with gross<=3x 148x.
