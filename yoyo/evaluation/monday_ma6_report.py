@@ -2,8 +2,9 @@
 
 This module is an artifact loader only: it does not discover opportunities,
 calculate returns, replay orders, or infer a common evidence cutoff. It reads
-the parent researcher's report-data exports and embeds the reviewed rows into
-the existing report snapshot while preserving the app's stable identity.
+the parent's explicit artifacts/monday-ma6-retest-20261024/report-data exports
+and embeds reviewed rows into the existing report snapshot while preserving
+the app's stable identity.
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_EXPERIMENT_DIR = REPO_ROOT / "experiments/active/exp-monday-ma6-retest-20261024-v1"
 DEFAULT_PROJECT_DIR = REPO_ROOT / "reports/monday-ma6-retest-20261024"
+DEFAULT_REPORT_DATA_DIR = REPO_ROOT / "artifacts/monday-ma6-retest-20261024/report-data"
 DEFAULT_SUMMARY_PATH = REPO_ROOT / "artifacts/monday-ma6-retest-20261024/summary.json"
 DEFAULT_SAMPLES_PATH = REPO_ROOT / "artifacts/monday-ma6-retest-20261024/samples.json"
 
@@ -32,17 +34,26 @@ CSV_QUERIES = tuple(query_id for query_id in REPORT_TABLES if query_id not in {"
 # actually contains it; raw source rows remain available in the source panel
 # and CSV exports. These are aliases supplied by the upstream summary builder.
 METRIC_COLUMNS = (
-    "exit_mode", "asset_group", "period", "basis", "grain", "cut_dimension", "cut_value",
+    "exit_mode", "asset_group", "period", "basis", "opportunity_period_basis",
+    "grain", "cut_dimension", "cut_value",
     "opportunity_n", "invalidated_n", "reclaim_n", "confirmed_n", "submitted_n",
     "canceled_n", "unfilled_n", "filled_n", "closed_n", "censored_n",
-    "wins", "losses", "flat", "win_rate", "mean_gross_r", "mean_fee_r", "mean_net_r",
-    "mean_r", "total_r", "mean_bp", "payoff", "profit_factor", "median_holding_hours",
-    "mfe_r_mean", "mae_r_mean", "profitable_excursion_then_sl_n", "longest_loss_streak",
+    "wins", "losses", "flat", "win_rate", "mean_win_r", "mean_loss_r",
+    "mean_gross_r", "mean_fee_r", "mean_net_r", "total_net_r", "mean_net_bp",
+    "mean_r", "total_r", "median_r", "mean_bp", "payoff", "profit_factor",
+    "planned_rr_median", "median_holding_hours", "p90_holding_hours",
+    "mfe_r_mean", "mae_r_mean", "profitable_excursion_then_sl_n",
+    "fee_positive_excursion_then_sl_n", "tp_legs_then_sl_n", "longest_loss_streak",
+    "longest_stop_streak", "loss_streak_span", "longest_single_symbol_loss_streak",
+    "single_symbol_streak_span",
     "eligible_signal_n", "fully_matched_signal_n", "complete_control_group_n",
     "controls_per_signal", "matched_signal_mean_r", "matched_control_mean_r",
-    "paired_excess_r", "paired_ci_low", "paired_ci_high", "paired_p",
+    "paired_excess_r", "paired_signal_planned_rr", "paired_control_planned_rr",
+    "matched_signal_mean_net_r", "matched_control_mean_net_r", "paired_excess_net_r",
+    "matched_signal_mean_gross_r", "matched_control_mean_gross_r",
+    "paired_ci_low", "paired_ci_high", "paired_p", "paired_p_holm", "independent_market_weeks",
     "complete_opportunity_pairs", "attempt_signal_mean_r", "attempt_control_mean_r",
-    "attempt_paired_excess_r",
+    "attempt_paired_excess_r", "signal_fill_rate", "random_fill_rate",
 )
 
 OPPORTUNITY_COLUMNS = (
@@ -61,7 +72,8 @@ TRADE_COLUMNS = (
     "trade_id", "opportunity_id", "exit_mode", "asset_group", "symbol", "direction",
     "entry_at_utc", "entry", "stop", "target_price", "exit_at_utc", "exit_price",
     "outcome", "closed", "censored", "basis", "gross_r", "fee_r", "net_r", "mean_r",
-    "mfe_r", "mae_r", "profitable_excursion_then_sl", "holding_hours", "entry_time",
+    "mfe_r", "mae_r", "profitable_excursion_then_sl", "holding_hours",
+    "entry_interval_start", "entry_time",
     "exit_time", "entry_price", "stop_price", "return_r", "return_pct", "side", "net_bp",
 )
 FILL_COLUMNS = (
@@ -76,7 +88,7 @@ SAMPLE_COLUMNS = (
 )
 
 QUERY_LABELS = {
-    "summary": "全局范围与生成状态",
+    "summary": "全局范围与品种来源覆盖",
     "metrics": "退出策略 × 品种组 × 时段及分解结果",
     "funnel": "机会与成交漏斗",
     "opportunities": "全部策略机会",
@@ -88,7 +100,6 @@ QUERY_LABELS = {
 
 NULL_WORDS = {"", "null", "none", "nan", "na"}
 NUMERIC_RE = re.compile(r"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$")
-DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})")
 
 
 def _parse_cell(value: str | None, key: str = "") -> Any:
@@ -324,17 +335,76 @@ def _source_last(summary_metadata: dict[str, Any]) -> str | None:
     return str(value)
 
 
+def _summary_progress(metadata: dict[str, Any]) -> tuple[bool | None, int | None, int | None]:
+    """Read explicit replay progress without inferring completion from row counts."""
+    complete = metadata.get("complete")
+    if complete is not None and not isinstance(complete, bool):
+        raise ValueError("artifact summary.json complete must be a JSON boolean")
+
+    def count(name: str) -> int | None:
+        value = metadata.get(name)
+        if value in (None, ""):
+            return None
+        if isinstance(value, bool):
+            raise ValueError(f"artifact summary.json {name} must be a non-negative integer")
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"artifact summary.json {name} must be a non-negative integer") from exc
+        if parsed < 0 or str(value).strip() not in {str(parsed), f"{parsed}.0"}:
+            raise ValueError(f"artifact summary.json {name} must be a non-negative integer")
+        return parsed
+
+    return complete, count("completed_symbols"), count("expected_symbols")
+
+
+def _summary_query_rows(payload: dict[str, Any]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Split global metadata from the source's per-symbol coverage ledger."""
+    coverage = payload.get("coverage", [])
+    if coverage is None:
+        coverage = []
+    if not isinstance(coverage, list) or any(not isinstance(row, dict) for row in coverage):
+        raise ValueError("artifact summary.json coverage must be a list of JSON objects")
+
+    metadata_payload = {key: value for key, value in payload.items() if key != "coverage"}
+    metadata = _flatten_metadata(metadata_payload)
+    metadata["record_type"] = "global"
+    metadata["coverage_asset_count"] = len(coverage)
+    source_last = payload.get("source_last")
+    if coverage and source_last not in (None, "") and all(row.get("last") not in (None, "") for row in coverage):
+        metadata["coverage_assets_ending_before_source_last"] = sum(
+            str(row["last"]) != str(source_last) for row in coverage
+        )
+    if "source_first" in payload:
+        metadata.setdefault("first_time_utc", payload["source_first"])
+    if "source_last" in payload:
+        metadata.setdefault("last_time_utc", payload["source_last"])
+
+    rows = [metadata]
+    rows.extend({"record_type": "asset", **_flatten_metadata(row)} for row in coverage)
+    return rows, metadata
+
+
 def _query_source(
     query_id: str,
     paths: list[Path],
     *,
     pending: bool,
     caveats: list[str] | None = None,
+    replay_progress: str | None = None,
 ) -> dict[str, Any]:
     definitions = {
+        "summary": [
+            {"label": "覆盖时间", "definition": "source_last 是所有品种来源尾中的最新时点，不表示每个品种都覆盖到该时间；逐品种 first/last 保留在同一查询的 coverage 明细行。"},
+            {"label": "样本覆盖", "definition": "summary.json 中每个 coverage 对象对应一个源品种；全局覆盖条数直接由该列表读取。"},
+            {"label": "回放状态", "definition": "只有 summary.json.complete 为 true 才标记父回放完成；进行中只展示 completed_symbols/expected_symbols，不根据已见品种或行数推断全量完成。"},
+        ],
         "metrics": [
-            {"label": "R / bp", "definition": "mean_r、total_r、mean_bp 按该行 basis 解释；毛与净不可混合。XAUUSD 未知点差/费用时，net 字段为空，不写作零。"},
-            {"label": "挂单时机机会期望", "definition": "attempt_*_r 以全部合格信号机会为分母；未成交只按零暴露计入该机会期望，不计为盈亏交易，也不进入胜率、交易均值或止损统计。"},
+            {"label": "R / bp", "definition": "mean_r、total_r、mean_bp 按该行 basis 解释；毛与净不可混合。XAUUSD 为 gross basis，mean_fee_r、mean_net_r、total_net_r 与 mean_net_bp 为空，表示费率未知，不是零。"},
+            {"label": "交易统计", "definition": "win_rate 的源单位为 0–1，界面显示为百分比；mean_win_r、mean_loss_r、payoff、计划RR中位数及持仓P90均来自父 analysis 的闭合交易切片。"},
+            {"label": "连亏与止损序列", "definition": "longest_loss_streak、longest_stop_streak 按父 analysis 的时间排序结果展示；loss_streak_span 是跨品种合并序列的最长连亏区间，single_symbol_streak_span 是单品种最长连亏区间，不额外重算。"},
+            {"label": "闭合交易分期", "definition": "earlier/later 按实际成交柱开始 entry_interval_start 分期；跨切点持仓从前后期排除。全期不做此排除。逐笔 entry_time 是保守入场柱结束时点，不应替代该分期锚。"},
+            {"label": "提交队列机会期望", "definition": "attempt_*_r 按 submitted_at 分期，以合格提交信号机会为分母；未成交仅按零暴露纳入机会期望，不计为盈亏交易或逐笔胜率。提交早于切点而退出晚于切点的样本从前后期机会期望排除。"},
             {"label": "严格成交配对", "definition": "matched_*_r 与 paired_excess_r 只使用信号对应的三个随机对照全部成交、闭合且处于同一连续片段的完整3/3组；complete_opportunity_pairs 与机会期望口径分母另行展示。"},
             {"label": "持仓诊断", "definition": "MFE/MAE仅计实际成交持仓期间；浮盈后止损、最长连亏与持仓时间按父实验导出值展示。"},
         ],
@@ -353,12 +423,14 @@ def _query_source(
         "label": QUERY_LABELS[query_id],
         "files": [_relative(path) for path in paths],
         "evidenceFlow": (
-            "本报告读取 parent experiment 的 report-data 统一导出；本模块不回放成交、"
+            "本报告读取 artifacts/monday-ma6-retest-20261024/report-data 的父分析统一导出；本模块不回放成交、"
             "不重算统计，也不将未成交或未闭合记录作为零收益。"
         ),
         "metricDefinitions": definitions.get(query_id, []),
         "caveats": list(caveats or []),
     }
+    if replay_progress:
+        source["caveats"].append(replay_progress)
     if pending:
         source["caveats"].append("结果导出尚未提供；空行不代表零机会、零成交或零收益。")
     return source
@@ -369,6 +441,7 @@ def build_snapshot(
     experiment_dir: Path = DEFAULT_EXPERIMENT_DIR,
     samples_path: Path = DEFAULT_SAMPLES_PATH,
     *,
+    report_data_dir: Path = DEFAULT_REPORT_DATA_DIR,
     summary_path: Path = DEFAULT_SUMMARY_PATH,
     complete: bool = False,
 ) -> dict[str, Any]:
@@ -379,7 +452,6 @@ def build_snapshot(
     if snapshot.get("surface") != "report" or not snapshot.get("id"):
         raise ValueError("report app must retain its prepared report surface and stable id")
 
-    report_data_dir = experiment_dir / "report-data"
     original_rules = snapshot.get("queries", {}).get("rules", {})
     config_path = experiment_dir / "config.json"
     if config_path.is_file():
@@ -408,14 +480,25 @@ def build_snapshot(
         payload = json.loads(summary_path.read_text(encoding="utf-8"))
         if not isinstance(payload, dict):
             raise ValueError("artifact summary.json must contain a JSON object")
-        summary_metadata = _flatten_metadata(payload)
-        if "source_first" in payload:
-            summary_metadata.setdefault("first_time_utc", payload["source_first"])
-        if "source_last" in payload:
-            summary_metadata.setdefault("last_time_utc", payload["source_last"])
-        loaded["summary"] = [summary_metadata]
+        loaded["summary"], summary_metadata = _summary_query_rows(payload)
         summary_paths = [summary_path]
     loaded_paths["summary"] = summary_paths
+
+    replay_complete, completed_symbols, expected_symbols = _summary_progress(summary_metadata)
+    report_exports_present = any(_csv_candidates(report_data_dir, name) for name in REPORT_TABLES)
+    if summary_paths and (replay_complete is True or (completed_symbols or 0) > 0) and not report_exports_present:
+        raise FileNotFoundError(
+            "artifact summary.json reports replay progress, but the explicit report-data directory "
+            f"contains no CSV exports: {report_data_dir}"
+        )
+    if replay_complete is False and completed_symbols is not None and expected_symbols is not None:
+        replay_progress_note = (
+            f"历史回放进行中 {completed_symbols}/{expected_symbols}；当前统计仅含已完成品种，不作方案排名。"
+        )
+    elif replay_complete is False:
+        replay_progress_note = "历史回放尚未标记完成；当前表不得作为全量方案排名。"
+    else:
+        replay_progress_note = None
 
     sample_paths = [samples_path] if samples_path.is_file() else []
     samples = _load_sample_rows(samples_path, sample_paths)
@@ -428,6 +511,8 @@ def build_snapshot(
         and bool(sample_paths)
     )
     result_rows_exist = bool(loaded["metrics"] or loaded["funnel"])
+    if complete and replay_complete is not True:
+        raise ValueError("cannot mark report complete unless artifact summary.json complete is true")
     if complete:
         missing = [query_id for query_id in required_csvs if not loaded_paths.get(query_id)]
         if not grouped_paths:
@@ -453,6 +538,7 @@ def build_snapshot(
                 query_id,
                 loaded_paths[query_id],
                 pending=not bool(loaded_paths[query_id]),
+                replay_progress=replay_progress_note,
             ),
         }
     queries["samples"] = {
@@ -462,6 +548,7 @@ def build_snapshot(
             sample_paths,
             pending=not bool(sample_paths),
             caveats=["图像和 plot_data 由 samples.json 引用或内嵌；本模块不绘图、不挑选样本。"],
+            replay_progress=replay_progress_note,
         ),
     }
     # Preserve the reviewed Notion/config rule rows and bindings from the
@@ -482,9 +569,23 @@ def build_snapshot(
 
     report = snapshot.setdefault("report", {})
     cutoff = _source_last(summary_metadata)
+    if replay_complete is False:
+        progress_status = (
+            f"历史回放进行中 {completed_symbols}/{expected_symbols}，当前统计仅为已完成品种，不作方案排名。"
+            if completed_symbols is not None and expected_symbols is not None
+            else "历史回放进行中；当前统计仅供检查，不作全量方案排名。"
+        )
+    else:
+        progress_status = None
     report["scopeStatus"] = (
         "规则、数据结果与样本已载入报告，构建器未执行任何成交回放或统计。"
         if complete
+        else progress_status
+        if progress_status
+        else "父回放已标记完成；报告数据已载入，仍需复核。"
+        if replay_complete is True and all_required_paths_exist
+        else "父回放已标记完成；报告导出尚待完整装载。"
+        if replay_complete is True
         else "规则来源已审；结果导出已载入待复核。"
         if all_required_paths_exist
         else "部分结果表已载入，其他导出仍待提供。"
@@ -500,6 +601,13 @@ def build_snapshot(
     report["resultRowsExist"] = result_rows_exist
     report["sampleCount"] = len(samples)
     report["resultExportsComplete"] = all_required_paths_exist
+    report["replayComplete"] = replay_complete
+    report["completedSymbols"] = completed_symbols
+    report["expectedSymbols"] = expected_symbols
+    interpretation = summary_metadata.get("interpretation_markdown")
+    if interpretation not in (None, "") and not isinstance(interpretation, str):
+        raise ValueError("artifact summary.json interpretation_markdown must be a string")
+    report["interpretationMarkdown"] = interpretation or None
     report["sources"] = report.get("sources", [])
     source_paths = [config_meta]
     for paths in loaded_paths.values():
@@ -522,6 +630,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project-dir", type=Path, default=DEFAULT_PROJECT_DIR)
     parser.add_argument("--experiment-dir", type=Path, default=DEFAULT_EXPERIMENT_DIR)
+    parser.add_argument("--report-data-dir", type=Path, default=DEFAULT_REPORT_DATA_DIR)
     parser.add_argument("--summary-json", type=Path, default=DEFAULT_SUMMARY_PATH)
     parser.add_argument("--samples-path", type=Path, default=DEFAULT_SAMPLES_PATH)
     parser.add_argument("--complete", action="store_true", help="mark the app complete after required evidence is present and reviewed")
@@ -529,6 +638,7 @@ def main() -> None:
 
     snapshot = build_snapshot(
         args.project_dir.resolve(), args.experiment_dir.resolve(), args.samples_path.resolve(),
+        report_data_dir=args.report_data_dir.resolve(),
         summary_path=args.summary_json.resolve(), complete=args.complete
     )
     output = args.project_dir / "src/data.json"

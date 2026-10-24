@@ -96,6 +96,8 @@ def stats(g,with_inference=False,basis=None):
         p90_holding_hours=c.holding_hours.quantile(.9),mfe_r_mean=c.interior_mfe_r.mean(),
         mae_r_mean=c.interior_mae_r.mean(),profitable_excursion_then_sl_n=int(floating.sum()),
         fee_positive_excursion_then_sl_n=int((floating&c.interior_fee_positive_mfe.astype(bool)).sum()),
+        losing_profitable_then_sl_n=int((floating&r.lt(0)).sum()),
+        losing_fee_positive_then_sl_n=int((floating&r.lt(0)&c.interior_fee_positive_mfe.astype(bool)).sum()),
         longest_loss_streak=streak(ordered.return_r<0),longest_stop_streak=streak(isstop),
         fully_matched_signal_n=len(p),complete_control_group_n=len(p),controls_per_signal=3,
         matched_signal_mean_r=p.return_r.mean() if len(p) else None,
@@ -193,8 +195,12 @@ def main():
     for col in ['symbol','asset_group','exit_mode','population','pair_id','parent_id','side','basis']:
         fills[col]=fills.trade_id.map(native[col])
     fills['opportunity_id']=fills.pair_id;fills['order_id']=fills.parent_id
+    if not args.partial:
+        from yoyo.evaluation.monday_ma6_order_timeline import enrich_orders
+        e=enrich_orders(e,t,completed)
     fills['fill_id']=[f'fill-{i}' for i in range(len(fills))]
     fills['time']=pd.to_datetime(fills.ts_ns,utc=True,unit='ns').astype(str)
+    fills['time_basis']='Synthetic OHLC path timestamp, not an observed trade tick'
     fills['notional']=fills.price*fills.quantity
     fills['fee_class']=np.where(fills.phase.isin(['entry','target']),'maker','taker')
     fills['fee_rate']=fills.commission/fills.notional
@@ -226,7 +232,7 @@ def main():
             z=g if period=='all' else g[g.period.eq(period)]
             ids=set(z.opportunity_id)
             q=e[e.population.eq('signal')&e.pair_id.isin(ids)]
-            counts={'first_touch':len(z),'submitted':len(q),'filled':int(q.status.eq('filled').sum()),
+            counts={'first_touch':len(z),'confirmed':int(z.confirm_i.ge(0).sum()),'submitted':len(q),'filled':int(q.status.eq('filled').sum()),
                     'expired':int(q.status.eq('expired').sum()),
                     'cancelled':int((~q.status.isin(['filled','expired'])).sum())}
             for key,value in counts.items():funnel.append(dict(asset_group=asset,period=period,stage=key,n=value))
