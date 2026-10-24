@@ -145,13 +145,13 @@ def main():
                         axes[4].axhline(price,color=color,lw=.65,ls='--',label=label)
                 axes[4].axvline(entry,color='#111827',lw=.8,ls=':')
                 if r['sample_kind']=='trade':
-                    for leg in r.get('leg_exits',[dict(exit_interval_start=exit_,exit_price=r.get('exit_price'),policy=r['exit_mode'],reason=r.get('reason'))]):
+                    for leg_index,leg in enumerate(r.get('leg_exits',[dict(exit_interval_start=exit_,exit_price=r.get('exit_price'),policy=r['exit_mode'],reason=r.get('reason'))])):
                         when=pd.Timestamp(leg['exit_interval_start']);price=leg.get('exit_price')
                         if price is not None and np.isfinite(price):
                             text=('周一目标腿' if leg['policy']=='monday_full' else '远侧目标腿') if r.get('leg_exits') else '退出'
                             suffix={1:'止损',4:'止盈',0:'边界未决'}.get(int(leg['reason']),'')
                             axes[4].scatter([when],[price],s=18,color='#9b1c31',zorder=4)
-                            axes[4].annotate(text+suffix,(when,price),xytext=(3,8),textcoords='offset points',fontsize=7,color='#9b1c31')
+                            axes[4].annotate(text+suffix,(when,price),xytext=(-3,8+12*leg_index),ha='right',textcoords='offset points',fontsize=7,color='#9b1c31')
                 handles,labels=axes[4].get_legend_handles_labels()
                 if handles:axes[4].legend(loc='upper right',fontsize=6,ncol=3,framealpha=.8)
             axes[4].set_title('完整观察路径｜原始5m收盘线及高低范围，非压缩K线；横轴UTC',loc='left',fontsize=11)
