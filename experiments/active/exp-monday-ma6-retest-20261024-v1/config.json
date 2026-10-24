@@ -1,7 +1,7 @@
 {
   "experiment_id": "exp-monday-ma6-retest-20261024-v1",
-  "status": "awaiting_owner_rule_definitions",
-  "run_enabled": false,
+  "status": "owner_rules_confirmed_preparing_native_replay",
+  "run_enabled": true,
   "parent_research": {
     "title": "最近主要分析区间外 1.618 附近小级别的规律",
     "url": "https://app.notion.com/p/4028856479af8093b122e52fa6efa873",
@@ -31,7 +31,10 @@
       "等回踩 6 条线最高的那条线  如果当前点位回到了周区间内则失效",
       "入场，止损放最低点那条线下面一点，目标周一高点 和另外一边的 1.618    空头反之"
     ],
-    "image_blocks": ["40288564-79af-8051-afd5-e15e0ba5c763", "40288564-79af-8096-883a-fcc2033a017b"],
+    "image_blocks": [
+      "40288564-79af-8051-afd5-e15e0ba5c763",
+      "40288564-79af-8096-883a-fcc2033a017b"
+    ],
     "image_review": "Both WIFUSDT 15-minute screenshots viewed on the original Notion page. The second risk box visually ends near the lower MA envelope, above the earlier price low. This is interpretive evidence, not a numeric stop-buffer definition."
   },
   "baseline_config": "experiments/active/exp-monday-5m-wick-engulf-20261023-v1/config.json",
@@ -41,38 +44,42 @@
   "supplement_policy": "Reuse existing recent files for the same eligible universe, subject to exact overlapping OHLCV agreement and continuity checks before merging. Preserve gaps and per-symbol coverage; no downloads or source substitution. WIFUSDT September16 example is absent from the old229-symbol tail but present here.",
   "example_data_read": "WIFUSDT.csv.gz physically read:89904rows,2025-11-15T00:00:00Z through2026-09-23T03:55:00Z; gaps and cross-source overlaps still need full preflight before signal generation",
   "groups": {
-    "first": ["BTCUSDT", "ETHUSDT", "XAUUSD"],
+    "first": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "XAUUSD"
+    ],
     "second": "Existing eligible Binance perpetual altcoin universe, excluding BTC/ETH, stablecoins, gold proxies and classified traditional/index assets"
   },
   "monday_timezone": "America/New_York",
   "weekly_levels": "Completed Monday H/L; lower=L-0.618*(H-L), upper=H+0.618*(H-L); freeze the trigger week's anchors",
   "first_touch": "First observed post-Monday directional touch per NY week; crypto requires an uninterrupted weekly prefix",
   "signal_minutes": 15,
-  "moving_averages": ["sma20", "sma60", "sma120", "ema20", "ema60", "ema120"],
+  "moving_averages": [
+    "sma20",
+    "sma60",
+    "sma120",
+    "ema20",
+    "ema60",
+    "ema120"
+  ],
   "ma_source": "yoyo.datasets.ma_rope_filter.add_six_mas; completed candles only",
   "subsequent_confirmation_bars": 3,
-  "pending_definitions": {
-    "new_extreme_invalidation": null,
-    "stop_reference": null,
-    "stop_buffer": null,
-    "target_allocation": null
-  },
-  "implementation_interpretations_to_finalize": {
-    "ma_confirmation": "Proposed: close above the contemporaneous completed-bar six-MA maximum for long, then three subsequent closes remaining above; mirror short",
-    "entry_line": "Proposed: resting limit at the latest completed-bar MA envelope; any repricing becomes effective only afterward, never within the candle that computed the MA",
-    "stop_freeze": "Freeze the owner-defined stop when the associated entry order is submitted; if an unfilled entry is repriced, update its unfilled stop specification causally",
-    "range_invalidation": "Before entry only; exact wick-versus-close observation and ordering must be recorded before replay",
-    "monitor_expiry": "Must explicitly define the anchor transition; do not inherit an unrelated 12h/20h timer",
-    "position_expiry": "No new holding timer is authorized; data boundaries/gaps remain censored"
-  },
-  "target_levels_long": ["trigger_week_monday_high", "trigger_week_upper_1618"],
-  "target_levels_short": ["trigger_week_monday_low", "trigger_week_lower_1618"],
+  "pending_definitions": {},
+  "target_levels_long": [
+    "trigger_week_monday_high",
+    "trigger_week_upper_1618"
+  ],
+  "target_levels_short": [
+    "trigger_week_monday_low",
+    "trigger_week_lower_1618"
+  ],
   "engine": "NautilusTrader",
   "engine_version": "1.231.0",
   "runtime": "/Users/zhangzc/.local/bin/nautilus-python",
   "execution_adapter": "yoyo.layers.l3_backtest.nautilus_independent.run_native",
   "execution_minutes": 5,
-  "execution_status": "Existing resting-limit entry and target support verified. Dynamic pre-fill repricing and invalidation still need causal adapter integration and regression checks; no historical positions executed.",
+  "execution_status": "Native pending amendments and OHLC-segment boundary cancellation implemented; synthetic tests passed, historical replay not started.",
   "parameter_search": "No new grid authorized; any subsequent parameter research must use VectorBT with explicit ranges",
   "maker_fee": 0.0002,
   "taker_fee": 0.0005,
@@ -84,7 +91,7 @@
   "split": "2023-01-01T00:00:00Z",
   "controls_per_signal": 3,
   "seed": 20261024,
-  "control_protocol": "Match symbol, NY week, side and causal volatility bucket; explicitly align pending-entry opportunity and execution semantics before replay. Do not call unmatched fills a matched-control result.",
+  "control_protocol": "Three random alternative eligible15m submission closes per signal: same symbol, actual NY week, side, existing lagged14bar ATR/open volatility bucket; after first touch, before invalidation, complete/warmed, close beyond six MAs, valid resting geometry. Same contemporaneous MA repricing/0.5% stop/weekly target rules and costs, without requiring four consecutive reclaim closes. These are matched eligible-order-timing controls, not identical absolute risk-distance controls. Pair only when all three are filled, closed and in the same chronological segment; retain all missing/nonfills.",
   "report": {
     "format": "detailed_portable_html",
     "template": "reports/monday-1618-cases-20261023",
@@ -103,5 +110,28 @@
     ]
   },
   "training_eligible": false,
-  "production_eligible": false
+  "production_eligible": false,
+  "owner_clarification": {
+    "new_extremes": "累计",
+    "stop": "最低均线 0.5%",
+    "target_allocation": "两种都测试",
+    "date": "2026-10-24"
+  },
+  "stop_buffer": 0.005,
+  "target_policies": [
+    "monday_full",
+    "opposite_1618_full",
+    "half_each"
+  ],
+  "implementation_interpretations": {
+    "new_extremes": "First complete15m touch candle establishes running adverse extreme. Each later complete15m candle strictly refreshing it adds one; cumulative third invalidates only still-pending monitoring/orders at that close.",
+    "ma_confirmation": "First complete15m close strictly beyond all six MAs plus three subsequent consecutive closes still beyond; reset consecutive count on failure. Only first sequence per weekly directional monitor.",
+    "entry_line": "Long maximum, short minimum of completed15m six-MA envelope. Reprice only after a later complete15m close; marketable/invalid revised limits are cancelled, not retrospectively filled.",
+    "stop_freeze": "Long minMA*0.995, short maxMA*1.005 at latest unfilled amendment; freeze upon native fill. No breakeven, trail or post-fill new-extreme cancellation.",
+    "range_invalidation": "Before fill, first price touch back into near Monday boundary cancels. Native O-H-L-C execution segments arbitrate boundary versus limit ordering. Monitoring before submission uses the same stated path.",
+    "monitor_expiry": "Only current trigger NY week; unfilled orders expire at next NY Monday00:00 close. Positions keep original anchors and have no elapsed/weekly timeout.",
+    "position_expiry": "Source end or unexpected crypto gap/spot conflict boundary marks unresolved; boundary liquidation only for native accounting, excluded from closed trade win/return metrics.",
+    "half_each": "Equal original quantities at Monday opposite edge and opposite1618. Sum half of each native independent leg payoff and per-fill cost; no interaction/breakeven, therefore no duplicate replay is needed."
+  },
+  "matching_volatility_feature": "Existing log2 volatility bucket boundaries, but measured at the completed submission5m bar: previous14 completed5m true ranges divided by that same submission bar open. Never divide by the next bar open, which is not known at submission."
 }

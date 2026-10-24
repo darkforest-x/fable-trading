@@ -87,11 +87,10 @@ class ExitPolicy:
             raise ValueError("Touch breakeven requires an R trigger and explicit intrabar path")
         if self.breakeven_on_touch and self.breakeven_includes_cost:
             raise ValueError("Touch breakeven currently supports entry-price protection only")
-        if self.intrabar_path is not None and (self.fixed_target_r is None
+        if self.intrabar_path is not None and ((self.fixed_target_r is None and not self.target_from_entry)
                 or self.opposite_hour_exit or self.partial_close_r is not None
                 or self.time_breakeven_minutes is not None or self.rsi_scaleout
-                or self.confirmed_pivot_exit or self.structural_pivot_stop
-                or self.target_from_entry):
+                or self.confirmed_pivot_exit or self.structural_pivot_stop):
             raise ValueError("Explicit intrabar path supports standalone fixed-target management")
         pivot_management = self.confirmed_pivot_exit or self.structural_pivot_stop
         if self.confirmed_pivot_exit and self.structural_pivot_stop:
@@ -260,7 +259,7 @@ class TradeState:
 class IndependentCloseStrategy(Strategy):
     def __init__(self, instrument, bar_type, frame, atr, hour, entries, policy, fees,
                  protection_tick, execution_minutes=5, rsi_side=None, entry_order_mode="market",
-                 entry_fill_model=None, point_phases=None):
+                 entry_fill_model=None, point_phases=None, entry_updates=None):
         super().__init__(StrategyConfig(
             oms_type="HEDGING", log_events=False, log_commands=False,
         ))
@@ -272,6 +271,11 @@ class IndependentCloseStrategy(Strategy):
         self.execution_minutes = execution_minutes
         self.entry_order_mode = entry_order_mode
         self.pending, self.opportunity_rows = {}, []
+        self.pending_updates = {}
+        self.pending_update_rows = []
+        if entry_updates is not None:
+            for update in entry_updates.to_dict('records'):
+                self.pending_updates.setdefault(int(update['bar_i']), []).append(update)
         self.entry_fill_model = entry_fill_model
         self.entering_limit_i = None
         self.rsi_side = np.zeros(len(frame)) if rsi_side is None else np.asarray(rsi_side)
@@ -541,9 +545,50 @@ class IndependentCloseStrategy(Strategy):
     def on_order_cancel_rejected(self, event):
         self.errors.append(str(event))
 
+    def _cancel_pending(self, key, i, status):
+        state, order = self.pending.pop(key)
+        self.cancel_order(order)
+        self.opportunity_rows.append(dict(trade_id=key, status=status,
+            submitted_i=state.source['entry_i'], fill_i=-1,
+            expire_i=state.source['expire_i'], cancelled_i=i))
+
+    def _update_pending(self, i):
+        """Apply amendments only after their calculation candle has closed.
+
+        Native matching of the old resting order has already finished. A
+        marketable revision is cancelled rather than filled retrospectively
+        at the newly calculated moving average.
+        """
+        for update in self.pending_updates.get(i, []):
+            key = update['trade_id']
+            if key not in self.pending:
+                continue
+            if update.get('action') == 'cancel':
+                self._cancel_pending(key, i, str(update['status']))
+                continue
+            state, order = self.pending[key]
+            side = state.source['side']
+            entry, stop = float(update['entry']), float(update['stop'])
+            if side*(self.prices[i, 3]-entry) < self.tick-self.eps:
+                self._cancel_pending(key, i, 'amendment_not_resting')
+                continue
+            state.source.update(entry=entry, stop=stop, risk=side*(entry-stop),
+                                last_amendment_i=i)
+            state.stop = stop
+            self.pending_update_rows.append(dict(update))
+            if abs(float(order.price)-entry) > self.eps:
+                self.modify_order(order, price=self.instrument.make_price(entry))
+
     def on_bar(self, bar):
         i = self.indices[bar.ts_event]
         if self.policy.intrabar_path:
+            # Native matching precedes this callback at each OHLC segment.
+            # The boundary lies beyond the favorable approach to the limit;
+            # reaching it cancels only entries that are still pending.
+            for key, (state, _) in list(self.pending.items()):
+                boundary = state.source.get('cancel_boundary', float('nan'))
+                if np.isfinite(boundary) and state.source['side']*(float(bar.close)-boundary) >= -self.eps:
+                    self._cancel_pending(key, i, 'returned_to_monday_range')
             # Only the current path endpoint is visible here. The full parent
             # bar's features/entries are consumed at its final close, not early.
             if self.policy.breakeven_on_touch:
@@ -680,11 +725,8 @@ class IndependentCloseStrategy(Strategy):
                                   trigger_price=self.instrument.make_price(state.stop))
         for key, (state, order) in list(self.pending.items()):
             if i >= int(state.source["expire_i"]):
-                self.cancel_order(order)
-                self.opportunity_rows.append(dict(trade_id=key, status="expired",
-                    submitted_i=state.source["entry_i"], fill_i=-1,
-                    expire_i=state.source["expire_i"]))
-                del self.pending[key]
+                self._cancel_pending(key, i, 'expired')
+        self._update_pending(i)
         for source in self.by_entry.get(i, []):
             row = dict(source)
             side, entry = row["side"], row["entry"]
@@ -743,7 +785,7 @@ def ohlc_path_frame(frame, path):
 
 
 def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", market_tick=None,
-               *, execution_minutes=5, rsi_side=None, entry_order_mode="market"):
+               *, execution_minutes=5, rsi_side=None, entry_order_mode="market", entry_updates=None):
     """Execute supplied entries using native orders, fills and HEDGING positions.
 
     Frame index is UTC close time. ATR is NaN except at completed management
@@ -777,6 +819,29 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     frame.index = frame.index.as_unit("ns")
     if entries.empty or not entries.trade_id.is_unique:
         raise ValueError("Need nonempty, uniquely identified independent trades")
+    if entry_updates is not None and len(entry_updates):
+        if not limit_entry:
+            raise ValueError('Pending amendments require limit entries')
+        lookup = entries.set_index('trade_id')
+        if entry_updates.duplicated(['trade_id', 'bar_i']).any():
+            raise ValueError('Duplicate pending amendment at one close')
+        for u in entry_updates.to_dict('records'):
+            if u['trade_id'] not in lookup.index:
+                raise ValueError('Unknown amended trade')
+            r = lookup.loc[u['trade_id']]
+            if not r.entry_i < u['bar_i'] <= r.expire_i:
+                raise ValueError('Amendment must follow submission and precede expiry')
+            if u.get('action') != 'cancel':
+                if (not np.isfinite([u['entry'], u['stop']]).all() or u['stop'] <= 0
+                        or r.side*(u['entry']-u['stop']) < tick-tick*1e-7
+                        or r.side*(r.target_price-u['entry']) < tick-tick*1e-7
+                        or any(abs(u[c]/tick-round(u[c]/tick)) > 1e-5 for c in ('entry','stop'))):
+                    raise ValueError('Invalid pending price geometry')
+    if 'cancel_boundary' in entries:
+        if not limit_entry or policy.intrabar_path is None:
+            raise ValueError('Price boundary cancellation requires explicit path and limit entry')
+        if (entries.side*(entries.cancel_boundary-entries.entry) < tick-tick*1e-7).any():
+            raise ValueError('Cancellation boundary must be beyond the resting approach')
     if policy.target_breakeven:
         if "parent_id" not in entries or entries.parent_id.isna().any():
             raise ValueError("Target breakeven requires explicit parent IDs")
@@ -812,7 +877,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         if r.side not in (-1, 1) or not 0 <= r.entry_i < r.end_i < len(frame):
             raise ValueError("Invalid entry direction or bounded interval")
         if limit_entry:
-            if (not r.entry_i < r.expire_i < r.end_i
+            if (not r.entry_i < r.expire_i <= r.end_i
                     or r.side*(prices[int(r.entry_i), 3]-r.entry) < tick-tick*1e-7
                     or abs(r.entry/market_tick-round(r.entry/market_tick)) > 1e-5):
                 raise ValueError("Limit must be favorable, tick-aligned, and have a bounded expiry")
@@ -860,7 +925,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             if policy.intrabar_path else (frame.copy(), None))
         strategy = IndependentCloseStrategy(
             instrument, bar_type, frame, atr, hour, entries, policy, fee_model, tick,
-            execution_minutes,rsi_side,entry_order_mode,fill_model if limit_entry else None,point_phases,
+            execution_minutes,rsi_side,entry_order_mode,fill_model if limit_entry else None,point_phases,entry_updates,
         )
         engine.add_strategy(strategy)
         # Synthetic liquidity deliberately decouples each independent entry
@@ -874,7 +939,8 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         if strategy.errors:
             raise RuntimeError(f"Native order errors: {strategy.errors[:3]}")
         expired = sum(r["status"] == "expired" for r in strategy.opportunity_rows)
-        expected_positions = len(entries)-expired
+        cancelled = sum(r['status'] not in ('filled', 'expired') for r in strategy.opportunity_rows)
+        expected_positions = len(entries)-expired-cancelled
         if strategy.active or strategy.pending or len(strategy.rows) != expected_positions:
             raise RuntimeError("Missing or open independent trades")
         positions = engine.cache.positions()
@@ -924,6 +990,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         )
         if limit_entry:
             audit.update(entry_order_mode="limit", opportunities=strategy.opportunity_rows,
+                cancelled=cancelled, pending_amendments=strategy.pending_update_rows,
                 expired=expired, entry_fill="Native resting limit after signal close; fixed limit price even on favorable gaps; OHLC order O-H-L-C; synchronous protection on fill; entry-bar stop book uses stop/adverse open, later stops use native model; expiry after last eligible bar matching", entry_bar_mfe="excluded")
         if policy.structural_pivot_stop:
             audit["protection_updates"] = strategy.protection_updates

@@ -1,3 +1,8 @@
+## 2026-10-24 · Notion MA6 retest rules confirmed; native study in progress
+
+- Owner clarified cumulative three new15m extremes, lowest MA minus0.5percent long/highest plus0.5percent short, and all three exit allocations. Config updated; original pending version retained. Native causal pending amendments and O-H-L-C price-boundary cancellation added;20focused and78existing management regressions passed. Historical results are not yet available. Separate earlier4hN5 pullback entry/expiry definitions remain unanswered.
+- Study `experiments/active/exp-monday-ma6-retest-20261024-v1/`; newreport app `reports/monday-ma6-retest-20261024/` reuses approved firstStitch style. Do not overwrite existing report histories. No model/training/livechange.
+
 ## 2026-10-24 · Top200 causal pattern review and three admission comparisons completed
 
 - Owner asked for200per-trade small-timeframe candle/volume/MA analyses, candidate entry schemes andframework validation. `experiments/active/exp-monday-top200-patterns-20261024-v1/` contains frozen config,source-size/mtime coverage,200features,ninevariant results,year breakdown andconcentration sensitivity. Original image folder nowalsohas `01_逐笔K线成交量均线分析.csv` (200rows), `02_三类入场条件框架验证.csv` (144rows), `03_去除两大集中行情周的敏感性.csv` (36rows). Small companionZIP inparent; original200images/ZIP untouched. No newHTML requested.
