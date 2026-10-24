@@ -356,7 +356,7 @@ export function ReportContent() {
     ? `历史回放进行中 ${replayProgress.completedSymbols}/${replayProgress.expectedSymbols}`
     : "历史回放进行中";
   const status = isPartialReplay ? `${progressLabel} · 仅已完成品种`
-    : replayComplete === true ? (ready ? "历史回放已完成 · 结果待复核" : "历史回放已完成 · 暂无可显示汇总行")
+    : replayComplete === true ? (ready ? (snapshot.buildStatus === "complete" ? "历史回放与报告核验已完成" : "历史回放已完成 · 结果待复核") : "历史回放已完成 · 暂无可显示汇总行")
       : replayCompletionUnconfirmed ? "回放完成状态未确认 · 暂不排名"
       : exportsReady ? (ready ? "结果已载入 · 待复核" : "结果导出已载入 · 请检查汇总行")
         : ready ? "部分结果已载入 · 待复核" : "策略规则与数据范围已整理";

@@ -264,8 +264,8 @@ def _rule_rows(config: dict[str, Any]) -> list[dict[str, Any]]:
         },
         {
             "section": "均线", "item": "20 / 60 / 120 SMA 与 EMA",
-            "long": "SMA20、SMA60、SMA120",
-            "short": "EMA20、EMA60、EMA120",
+            "long": "SMA20/60/120 与 EMA20/60/120，共六条",
+            "short": "SMA20/60/120 与 EMA20/60/120，共六条",
             "detail": "由 yoyo.datasets.ma_rope_filter.add_six_mas 计算，只使用完成K线收盘；SMA为完整窗口均值。",
         },
         {
