@@ -1,0 +1,10 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-review-20261024-v1",
+  "question": "Owner 2026-10-24: analyze the Codex limit-reclaim partial snapshot in detail with charts; can 1000 USDT reach 100x/1000x/10000x?",
+  "source_snapshot": "output/monday-partial-snapshot-20261024-2224 (536/633 symbols); ledgers experiments/active/exp-monday-limit-reclaim-20261024-v1/symbols/*/trades.csv.gz",
+  "scope": "Altcoins, confirmation 5/15/60 minutes (1/3 minutes exist only for 5 symbols). Read-only; no trade re-executed.",
+  "best_cell_note": "60m confirmation + near Monday edge is the highest mean of 15 cells, selected after seeing the grid; treat as optimistic.",
+  "equity_replay": "1000 USDT; notional per trade = k x realized equity at entry (overlapping positions allowed), PnL at recorded exit; variants add taker slippage on non-target exits, a 20000 USDT per-trade cap, or start 2024-01-01. Ignores unrealized losses, funding, queue misses, liquidity and liquidation.",
+  "training_eligible": false,
+  "production_eligible": false
+}
