@@ -194,7 +194,7 @@ def process(job,cfg):
     dump(dest/'done.json',finite(done));return done
 
 
-def run(symbols=None,workers=2):
+def run(symbols=None,workers=2,pending_only=False):
     from yoyo.evaluation.monday_limit_reclaim_inputs import jobs
     cfg=json.loads((EXP/'config.json').read_text())
     if not cfg['run_enabled']:raise RuntimeError('Configuration not enabled')
@@ -203,6 +203,9 @@ def run(symbols=None,workers=2):
             raise RuntimeError('Commit builders and configuration first')
     work=jobs(cfg)
     if symbols:work=[j for j in work if j['symbol'] in symbols]
+    if pending_only:
+        # Preserve completed source epochs. Each successful symbol keeps its own identity.
+        work=[j for j in work if not (EXP/'symbols'/j['symbol']/'done.json').exists()]
     with ProcessPoolExecutor(max_workers=workers) as pool:
         pending={pool.submit(process,j,cfg):j for j in work}
         for k,future in enumerate(as_completed(pending),1):
@@ -215,4 +218,6 @@ def run(symbols=None,workers=2):
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--workers',type=int,default=2)
-    parser.add_argument('--symbols',nargs='*');args=parser.parse_args();run(args.symbols,args.workers)
+    parser.add_argument('--symbols',nargs='*')
+    parser.add_argument('--pending-only',action='store_true',help='Skip successful frozen symbol outputs without replay')
+    args=parser.parse_args();run(args.symbols,args.workers,args.pending_only)
