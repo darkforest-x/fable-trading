@@ -187,6 +187,34 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'This run also had a direct bar computation (summary.json) that the owner said was redundant; native matches it trade by trade (mean abs diff 0.01/0.43bp). Later runs are framework-only. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-limit-reclaim-exits-ohlc-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: e9609718ee85f66f749db81d3ec5c82e83e7af8c
+    status: complete
+    question: 'Closer targets (50/75/100 percent of the entry-to-near-edge distance) for the Codex limit-reclaim alt signals, OHLC with monotone segments.'
+    single_variable: 'Target fraction; Codex frozen pipeline otherwise.'
+    result: '626 symbols, 0 errors; 100 percent legs reproduce the Codex ledger. Feeds exp-monday-limit-reclaim-optimize-20261025-v1.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-reclaim-optimize-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Builder yoyo/evaluation/monday_limit_reclaim_exit_variants.py.'
+  - experiment_id: exp-monday-limit-reclaim-exits-olhc-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: e9609718ee85f66f749db81d3ec5c82e83e7af8c
+    status: complete
+    question: 'Closer targets (50/75/100 percent of the entry-to-near-edge distance) for the Codex limit-reclaim alt signals, OLHC with monotone segments.'
+    single_variable: 'Target fraction; Codex frozen pipeline otherwise.'
+    result: '626 symbols, 0 errors; 100 percent legs reproduce the Codex ledger. Feeds exp-monday-limit-reclaim-optimize-20261025-v1.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-reclaim-optimize-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Builder yoyo/evaluation/monday_limit_reclaim_exit_variants.py.'
   - experiment_id: exp-monday-limit-reclaim-fail-samples-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: b1a369c7b25985ff51276c647667f51204e4fd29
@@ -219,9 +247,9 @@ experiments:
     source_repo: darkforest-x/fable-trading
     source_commit: 15d33a2519ef267c0f05ee85ece9a91073473b0e
     status: complete
-    question: 'Owner 2026-10-25 sub-page 策略优化: R units and per-coin score sizing (target variants pending framework runs).'
+    question: 'Owner 2026-10-25 sub-page 策略优化: R units, closer or partial take-profit, and per-coin score sizing.'
     single_variable: 'Worst intrabar path per trade, 10bp exit slippage; logistic score fitted before 2025, judged from 2025.'
-    result: 'Near-edge worst path +2.1bp per trade (pre-2025 +8.3, 2025+ -2.7). Score valid AUC 0.654 (train 0.650); 2025+ top quintile win 44.3 percent +25.7bp, quintiles 1-3 negative. 1000 USDT from 2025, gross<=1x: equal 10 percent 0.15x, top-40 percent only 4.0x (DD 33 percent), quintile-weighted 1.29x. R units: breakeven exits peak 0.74R median, failed reclaims -0.82R mean.'
+    result: 'Targets (worst path, 10bp slippage, 70020 trades): 50 percent win 42.0 mean -1.5bp, 75 percent 30.3 / +0.5, 100 percent 23.7 / +2.1, 50/50 partial 41.0 / +0.3; all negative from 2025 (-6.4/-4.6/-2.6/-4.5); 1000U vol_top 10 percent gross<=1x: 2.0x/3.5x/5.4x/3.3x. Closer or partial targets raise win rate but lower the mean; keep the near edge. Near-edge worst path +2.1bp per trade (pre-2025 +8.3, 2025+ -2.7). Score valid AUC 0.654 (train 0.650); 2025+ top quintile win 44.3 percent +25.7bp, quintiles 1-3 negative. 1000 USDT from 2025, gross<=1x: equal 10 percent 0.15x, top-40 percent only 4.0x (DD 33 percent), quintile-weighted 1.29x. R units: breakeven exits peak 0.74R median, failed reclaims -0.82R mean.'
     artifacts: []
     canonical_report: experiments/active/exp-monday-limit-reclaim-optimize-20261025-v1/summary_score.json
     holdout_consumed: false
