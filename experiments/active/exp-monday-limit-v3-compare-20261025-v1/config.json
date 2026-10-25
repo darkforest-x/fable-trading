@@ -1,0 +1,11 @@
+{
+  "experiment_id": "exp-monday-limit-v3-compare-20261025-v1",
+  "question": "Owner 2026-10-25: does the v3 candidate beat the current v2 rule, and which part does the work?",
+  "single_variable": "Variant (current / near_P20 / target_only / v3) and entry threshold (0.226 / 0.5); framework fills of exp-monday-limit-v3-20261025-v1.",
+  "path_rule": "worse of the two intrabar paths per trade",
+  "slippage_bp_non_target_exit": 10,
+  "fees": {"maker_bp": 2, "taker_bp": 5, "backstop_exit": "taker", "read_on": "2026-10-23 OKX Lv1"},
+  "sizing": {"equal": "10 percent", "linear": "0.05 * (score - 0.226) / mean excess score of 2025 top-40 fills, cap 0.5", "gross_cap": 1.0},
+  "dropped_events": {"BABYUSDT:2026-06-01:-1": "source bar 2026-06-05 09:30 UTC high 1.30 from 0.012; OKX bar high 0.01871"},
+  "tie_orders": 20
+}
