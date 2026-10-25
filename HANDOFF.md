@@ -1,3 +1,10 @@
+## 2026-10-25 · Patrol charts show detection-week Monday levels
+
+- Owner requested Monday high/low and upper/lower 1.618 on patrol K-line previews. Both the popup and selected-shape full chart now draw the four native price lines with a wrapping value legend. Default preserves candle detail; “完整区间” fits distant levels. Short mobile screens expand the sheet to preserve chart height.
+- Stored detection close time owns the NY week; reuse `monday_fib.week_window` / `baseline` and the shared public candle hub, one selected Monday 24-hour read. Developing or incomplete Monday is explicit and unplotted. No scanner tasks, model inputs, alerts or trading semantics changed. Stale/closed chart replies are discarded and overlays removed.
+- Stitch GEMINI_3_8_FLASH screen `85b777925254414792e48fd5e95308f4`, project `8978791379095391159`; design source in `docs/design/stitch-20261025-patrol-levels/`. Implementation commit `d2139c7033`. Learning: `docs/learnings/historical-chart-overlays-must-use-detection-clock.md`.
+- Validation: 134 Python and 56 frontend tests passed. BAT 5m 2026-10-25 13:05 Beijing: high0.20091, low0.17062, upper0.21962922, lower0.15190078 exactly match the existing 1.618 page. Desktop1440/mobile390/small320, all-level fit, failed-read retry and close cleanup checked; public mobile screenshot and raw checks under `output/playwright/patrol-levels-*`. Public and local level APIs match. Service reloaded after2008/2008,0errors; new scanner PID31230 completed another2008/2008,0errors. Four patrol schedules unchanged; independent worker PID1266 heartbeat advanced.
+
 ## 2026-10-25 · Limit-reclaim: failed-stop samples, post-exit recovery, score sizing
 
 - Failed reclaims: median -0.46R, mean -0.82R, 8 percent worse than -2R. After the exit, price returns to the entry as often as it moves the same distance further (51 vs 50 percent within 2h), so no re-entry edge.
