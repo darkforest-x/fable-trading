@@ -1,3 +1,8 @@
+## 2026-10-25 · Limit-reclaim v2: other targets, partial exits and 5m confirmation rejected
+
+- Owner asked whether targets other than the near Monday edge, partial exits across them, and the 5m confirmation were tested. Framework O-L-H-C replay finished (626/626), worst path per trade, 10bp slippage, frozen entry score. `experiments/active/exp-monday-limit-reclaim-allexits-20261025-v1/`.
+- 60m, top-40 percent score, from 2025: near edge +13.2bp, win 35.6 percent, 1000U 3.80x, the best compounding; far targets keep a similar mean (+10.6..+16.0bp) with win rates down to 11 percent and 2.1..3.5x; six equal-weight partials +11.6..+14.1bp, 2.0..3.3x. Last five months every variant 1.26..1.55x. Far targets only help longs. 5m confirmation is worse for every target (near 1.11x from 2025, 1.02x last five months). Rule unchanged: 60m confirmation, near-edge target. The 5m paper track stays research only. No live action.
+
 ## 2026-10-25 · Monday paper monitor becomes a full viewport chart
 
 - `#signals?pane=reclaim` now uses the Monday chart as a full viewport background. Compact glass navigation, trade context, collapsed account disclosure, collapsible records and a bottom chart dock replace the dashboard. Default follows the latest funded fill in the selected 60m / 5m track; selecting a record pins its ID. Periods 5m/15m/1H/4H, six MA off by default, full view and latest candles remain available.

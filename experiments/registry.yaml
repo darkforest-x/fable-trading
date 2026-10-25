@@ -271,6 +271,34 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Notion v2 full description https://app.notion.com/p/4048856479af81d3bfc5c73c26ed7e35'
+  - experiment_id: exp-monday-limit-reclaim-olhc-allexits-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4001d335d1
+    status: complete
+    question: 'Owner 2026-10-25: O-L-H-C (monotone) framework replay of the Codex signal orders for 5m x 5 targets and 60m x 4 non-near targets.'
+    single_variable: 'intrabar_path OHLC -> OLHC with monotone segments; 60m near edge is in exp-monday-limit-reclaim-olhc-20261025-v2.'
+    result: '626/626 symbols done, every output readable with rows equal to positions; 699813 trades matched to the Codex O-H-L-C ledger together with v2.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-reclaim-allexits-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Input of exp-monday-limit-reclaim-allexits-20261025-v1.'
+  - experiment_id: exp-monday-limit-reclaim-allexits-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: b9ebeec091
+    status: complete
+    question: 'Owner 2026-10-25: other targets (range 0.5 / 0.618, far Monday edge, opposite 1.618), partial exits across them, and 5m confirmation for the v2 rule.'
+    single_variable: 'Target choice (single or equal-weight partial) for 60m and 5m confirmation; frozen entry score; worst path, 10bp slippage on non-target exits.'
+    result: '60m, top-40 percent score, from 2025: near edge win 35.6 percent +13.2bp 1000U 3.80x (DD 34); range0.5 +12.8bp 3.45x; range0.618 +11.6 3.41x; far edge +10.6 2.13x; opposite1618 +16.0bp but win 10.6 percent 2.51x (DD 38); six partials +11.6..+14.1bp, 1.97..3.32x. Last five months all variants 1.26..1.55x (near 1.48x). Far targets help longs only (opp1618 long +24.1 vs near long +16.2 from 2025; shorts negative for far targets in the last five months). 5m confirmation worse for every target (near from 2025 +5.8bp 1.11x, last five months 1.02x; target hits 19.7 vs 35.6 percent). Keep 60m near edge. Parity: last-five-months near top-40 n 3724 +22.5bp equals the recent study; replay 1.48x vs 1.44x there from timestamp-tie order.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-reclaim-allexits-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Charts 1_targets_mean.png, 2_last5m_equity.png. Side-dependent target (long far, short near) is a post-hoc idea, not adopted.'
   - experiment_id: exp-monday-reclaim-paper-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 791941594f
