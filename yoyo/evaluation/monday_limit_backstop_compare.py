@@ -11,8 +11,8 @@ top-40 trades, and linear 0.05 * (score - threshold) / m with m the mean excess
 score of 2025 top-40 fills, capped at 0.5; gross <= 1x. The backstop is chosen
 on 2025 by the linear-sizing final multiple (also among backstops only, since
 the owner requires one) and judged on 2026 and the last five months; a
-score-band variant picks one backstop per score band (60-80 / 80-90 / 90-100
-training percentiles) by 2025 mean net per trade. Each replay is repeated over TIES random orders of same-time
+score-band variant picks one backstop per fixed score band (0.226 / 0.30 /
+0.375 / 0.45 / 0.50 / 0.60 / 0.70 / 0.80) by 2025 mean net per trade. Each replay is repeated over TIES random orders of same-time
 fills (medians reported). Read-only arithmetic on framework fills.
 """
 from __future__ import annotations
@@ -133,16 +133,21 @@ def run():
     # Owner requires a backstop: the recommendation is chosen among backstop configs only ('far' = none).
     res['chosen_backstop_on_2025_linear'] = max((k for k in res['configs'] if k != 'far'),
                                                 key=lambda k: res['configs'][k]['selection_2025']['linear']['final_median'])
-    # Score-dependent backstop: per score band (training-score percentiles 60-80 / 80-90 / 90-100 of the
-    # sizing study), the config with the best 2025 mean net per top-40 trade among backstops (owner requires one), frozen for 2026.
-    meta = json.loads((A/'exp-monday-limit-reclaim-sizing-20261025-v1/summary.json').read_text())['results']['shape_meta']
-    edges = [cut, meta['p80'], meta['p90']]
+    # Score-dependent backstop: per fixed score band (owner asked for finer bands, as in
+    # monday_limit_reclaim_score_detail), the config with the best 2025 mean net per top-40 trade among
+    # backstops (owner requires one), frozen for 2026; paired difference to no backstop with its standard error.
+    edges = [cut, .30, .375, .45, .50, .60, .70, .80]
     tops = m[m.score >= cut].copy()
     tops['band'] = np.digitize(tops.score, edges[1:])
+    far_net = tops[tops.config == 'far'].set_index('event').net
     bands = {}
     for b, y in tops.groupby('band'):
         table = {c: {per: float(g[within(g.t)].net.mean()) for per, within in periods.items()} for c, g in y.groupby('config')}
+        for c, g in y[y.t >= SEL[0]].groupby('config'):
+            d = g.net.to_numpy()-far_net.reindex(g.event).to_numpy()
+            table[c] |= dict(diff_vs_none_from_2025=float(np.nanmean(d)), diff_se=float(np.nanstd(d, ddof=1)/np.sqrt(np.isfinite(d).sum())))
         bands[int(b)] = dict(low=float(edges[int(b)]), n_2025=int(periods['selection_2025'](y[y.config == 'far'].t).sum()),
+                             n_2026=int(periods['test_2026'](y[y.config == 'far'].t).sum()),
                              chosen=max((c for c in table if c != 'far'), key=lambda c: table[c]['selection_2025']),
                              best_including_none=max(table, key=lambda c: table[c]['selection_2025']), mean_bp_by_config=table)
     pick = tops[tops.config == tops.band.map({b: v['chosen'] for b, v in bands.items()})]
