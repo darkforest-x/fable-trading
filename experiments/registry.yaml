@@ -271,6 +271,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Notion v2 full description https://app.notion.com/p/4048856479af81d3bfc5c73c26ed7e35'
+  - experiment_id: exp-monday-reclaim-paper-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 791941594f
+    status: running
+    question: 'Owner 2026-10-25: run the v2 limit-reclaim rule as simulated live trading in the signal center; 60m track recommended, 5m track isolated for research.'
+    single_variable: 'Forward paper only. Same rule as the backtest (limit at Monday 1.618, confirmation close inside -> stop to entry, else exit at that close, target = near Monday edge as a resting limit), frozen entry score from exp-monday-limit-reclaim-recent-20261025-v1 (top-40 threshold 0.2262), alts only, 1000U per track, 10 percent per trade, gross <= 1x, maker 2bp / taker 5bp, 10bp slippage reported separately.'
+    result: 'Started 2026-10-25 16:40 CST in the impulse monitor (yoyo/monitor/monday_reclaim_paper.py, API /api/monday-reclaim-paper); the 2026-10-19 week stays live until the NY Monday open. First paper trade 16:46: LIGHT long at the lower 1.618 0.193739 during a 40 percent three-minute crash, fill-minute close 0.212 beyond the Monday-low target 0.2027 (checked against OKX 1m), net +458.5bp, both tracks 1000 -> 1004.59. Its score 0.936 extrapolates far beyond training (volume 109x median, 14-bar TR 4.4 percent). Low-score signals are tracked as shadow (taken=0) without touching equity.'
+    artifacts: []
+    canonical_report: '~/Library/Application Support/Fable/ImpulseMonitor/monday-reclaim-paper.sqlite3 (local runtime, not in git)'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Paper only, no orders. UI pending Codex + Stitch (owner 2026-10-25). Forward fresh samples are the only confirmation-level evidence.'
   - experiment_id: exp-monday-limit-reclaim-fail-samples-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: b1a369c7b25985ff51276c647667f51204e4fd29
