@@ -1,0 +1,12 @@
+{
+  "experiment_id": "exp-monday-limit-backstop-compare-20261025-v1",
+  "question": "Owner 2026-10-25: which backstop (initial stop) distance gives the highest return for the v2 rule?",
+  "single_variable": "Backstop distance; everything else as the v2 rule.",
+  "inputs": ["experiments/active/exp-monday-limit-backstop-ohlc-20261025-v1", "experiments/active/exp-monday-limit-backstop-olhc-20261025-v1"],
+  "path_rule": "worse of the two intrabar paths per trade",
+  "slippage_bp_non_target_exit": 10,
+  "fees": {"maker_bp": 2, "taker_bp": 5, "backstop_exit": "taker", "read_on": "2026-10-23 OKX Lv1"},
+  "sizing": {"equal": "10 percent per top-40 trade", "linear": "0.05 * (score - threshold) / mean excess score of 2025 top-40 fills, cap 0.5", "gross_cap": 1.0},
+  "selection": "best 2025 median final multiple under linear sizing",
+  "tie_orders": 20
+}
