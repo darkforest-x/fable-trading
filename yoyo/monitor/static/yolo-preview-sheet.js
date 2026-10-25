@@ -5,7 +5,7 @@
  */
 (() => {
   'use strict';
-  function bind({panel,dismiss,env=window}){
+  function bind({panel,dismiss,env=window,isOpen=()=>panel.open}){
     const mobile=env.matchMedia('(max-width:700px)'),reduced=env.matchMedia('(prefers-reduced-motion: reduce)');
     const interactive='button,a,input,select,textarea,[role="button"],[contenteditable="true"]';
     let gesture=null,frame=null,timer=null,offset=0,height=1,completion=null,closing=false,suppressClick=false;
@@ -32,7 +32,7 @@
     function cancel(){if(gesture)settle(0);}
     function down(e){
       suppressClick=false;
-      if(!panel.open||!mobile.matches||closing)return;
+      if(!isOpen()||!mobile.matches||closing)return;
       if(e.isPrimary===false){cancel();return;}
       if((e.button!=null&&e.button!==0)||!e.target.closest?.('[data-yd-sheet-drag]')||e.target.closest(interactive))return;
       freeze();height=panel.getBoundingClientRect().height||1;
@@ -54,7 +54,7 @@
       const dy=e.clientY-g.y,dx=e.clientX-g.x,velocity=e.timeStamp-g.at<100?g.velocity:0;
       offset=Math.max(0,Math.min(height+32,g.base+dy));
       if(dy>Math.abs(dx)*1.5&&(offset>=90||(dy>=28&&velocity>=.65))){
-        closing=true;settle(height+32,()=>{reset();if(panel.open)dismiss();});
+        closing=true;settle(height+32,()=>{reset();if(isOpen())dismiss();});
       }else settle(0);
     }
     listen(panel,'pointerdown',down);listen(panel,'pointermove',move);listen(panel,'pointerup',up);

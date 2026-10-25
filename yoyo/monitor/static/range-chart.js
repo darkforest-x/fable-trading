@@ -193,6 +193,7 @@
         else this.chart.timeScale().fitContent();
       }
       this.key=key;this.readout();this.controls.update();
+      view.decorate?.(this,data);
       if(view.showLevels)this.panel.querySelector('.cv-level-details').open=true;
       this.mondayWindow=view.mondayBand?data?.monday:null;
       this.bandIndices=this.mondayWindow?this.rows.map((r,i)=>r.time*1000>=this.mondayWindow.start_ms&&r.time*1000<this.mondayWindow.end_ms?i:-1).filter(i=>i>=0):[];this.paintMondayBand();

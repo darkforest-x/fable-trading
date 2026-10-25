@@ -335,6 +335,9 @@ class ReclaimPaper:
                     open_rows.append(r)
                 tracks[str(m)] = dict(confirm_minutes=m, equity=t["equity"], start_equity=START_EQUITY, started_ms=t["started_ms"],
                     open=open_rows, closed=closed[:100],
+                    # Latest fill is independent of the exit-ordered history page.
+                    latest_funded=max((r for r in open_rows + closed if r["taken"] == 1 and r["notional"] > 0),
+                                      key=lambda r: (r["fill_ms"], r["id"]), default=None),
                     stats=dict(taken_closed=len(taken), wins=sum(r["net_bp"] > 0 for r in taken),
                                mean_net_bp=(sum(r["net_bp"] for r in taken)/len(taken)) if taken else None,
                                shadow_closed=len(closed), shadow_mean_net_bp=(sum(r["net_bp"] for r in closed)/len(closed)) if closed else None))

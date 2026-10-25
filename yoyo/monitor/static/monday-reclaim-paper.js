@@ -1,7 +1,7 @@
 /* Read-only Monday limit-reclaim v2 monitor.
  * Contract: monday_reclaim_paper.py snapshot(); position allocation owns P&L,
  * signal.taken only records the score gate. API equity excludes floating P&L.
- * Design: Stitch 481ac4e5b140422aaa749326a582b43d (synthetic examples only).
+ * Design: Stitch 9b7f625827da4e60a41b5bf1361c7829 (synthetic examples only).
  */
 (() => {
   'use strict';
@@ -37,7 +37,7 @@
   }
   function route(params={}) {
     return {track:params.track === '5' ? '5' : '60',tab:['open','closed','events'].includes(params.tab) ? params.tab : 'open',
-      scope:['funded','shadow','all'].includes(params.scope) ? params.scope : 'funded',q:String(params.q || '').slice(0,80)};
+      scope:['funded','shadow','all'].includes(params.scope) ? params.scope : 'funded',q:String(params.q || '').slice(0,80),period:['5m','15m','1H','4H'].includes(params.period)?params.period:'5m',trade:/^\d+$/.test(String(params.trade||''))?String(params.trade):''};
   }
   function chartLink(symbol, track) {
     return validSymbol(symbol) ? '#monday-fib?' + new URLSearchParams({symbol,timeframe:track === '5' ? '5m' : '1H'}) : '#monday-fib';
@@ -110,36 +110,49 @@
           +detail('净收益',bp(row.net_bp))+detail('滑点情景净收益',bp(row.net_slip_bp))
           : detail('后台参考报价',price(row.mark))+detail('入场分数',finite(row.score)?num(row.score,4):'—'))
         +(row.note?detail('记录说明',esc(row.note==='no_capacity'?'通过评分，但轨道可用额度不足，按影子记录跟踪。':row.note)):'');
-    return `<details class="rp-row" data-rp-row="${esc(key)}"><summary>${coinHTML(row,state.track)}${fields}<span class="rp-expand" aria-hidden="true">⌄</span></summary><div class="rp-row-detail"><dl>${more}</dl><a class="rp-chart-link" href="${esc(chartLink(row.symbol,state.track))}">查看 ${esc(base(row.symbol))} 的 1.618 图表 ↗</a></div></details>`;
+    const selectButton=event?'':`<button type="button" class="rp-select-trade" data-rp-trade="${esc(row.id)}" aria-pressed="${String(state.trade===String(row.id))}" aria-label="查看 ${esc(base(row.symbol))} ${sideLabel(row)} ${date(row.fill_ms)} 开仓图"><span><b>${esc(base(row.symbol))}</b><small class="${row.side===1?'rp-positive':'rp-negative'}">${sideLabel(row)} · ${esc(stage(row,now))}</small></span><span class="rp-row-value ${closed?tone(row.pnl):tone(row.unrealized_bp)}">${value}<small>${date(row.fill_ms)}</small></span></button>`;
+    return `<article class="rp-record">${selectButton}<details class="rp-row" data-rp-row="${esc(key)}"><summary>${event?coinHTML(row,state.track):`<span>开仓 ${price(row.entry)}</span><span>${esc(allocation(row))}</span>`}<span class="rp-expand">${event?'详情':'明细'} ⌄</span></summary><div class="rp-row-detail"><div class="rp-detail-fields">${fields}</div><dl>${more}</dl><a class="rp-chart-link" href="${esc(chartLink(row.symbol,state.track))}">查看 ${esc(base(row.symbol))} 的 1.618 图表 ↗</a></div></details></article>`;
   }
   const api={finite,esc,num,signed,bp,price,funded,targetLabel,stage,signalStatus,allocation,route,chartLink,validate,summary,rows,createFeed,rowHTML};
   if(typeof module!=='undefined' && module.exports){module.exports=api;return;}
   const root=document.getElementById('monday-reclaim-paper');
   if(!root)return;
-  let state=route(), pageActive=false, mounted=false, shown=50, signature='';
+  let state=route(), pageActive=false, mounted=false, shown=50, signature='', chart=null, pinned=null, ma=false, recordsOpen=false, sheet=null;
   const requests=window.SpikeRuntime.createRequests();
   const feed=createFeed({read:()=>requests.json('/api/monday-reclaim-paper'),cancel:()=>requests.cancel(),change:render});
   const el=id=>root.querySelector(`[data-rp="${id}"]`);
   function mount(){
     if(mounted)return;mounted=true;
-    root.innerHTML=`<header class="rp-heading"><div><div class="rp-title"><h2>1.618 模拟盘</h2><span class="rp-badge">模拟运行</span></div><p data-rp="status" role="status">正在连接模拟盘…</p></div><button type="button" class="rp-refresh" data-rp-action="refresh"><span aria-hidden="true">↻</span> 刷新</button></header>
-      <div class="rp-alert" data-rp="error" role="alert" hidden></div>
-      <div class="rp-tracks" role="group" aria-label="选择模拟轨道">${['60','5'].map(track=>`<button type="button" class="rp-track" data-rp-track="${track}" aria-pressed="false"><span class="rp-track-title"><strong>${track} 分钟确认</strong><span>${track==='60'?'主轨':'研究轨'}</span></span><span class="rp-track-description">${track==='60'?'按小时收盘确认':'独立资金 · 快速确认对照'}</span><span class="rp-track-values" data-rp="track-${track}"></span></button>`).join('')}</div>
-      <section class="rp-metrics" data-rp="metrics" aria-label="当前轨道已结束交易统计"></section>
-      <section class="rp-records" aria-label="模拟盘记录"><div class="rp-toolbar"><div class="rp-tabs" role="group" aria-label="记录类型">${[['open','持仓'],['closed','已结束'],['events','触价记录']].map(([tab,label])=>`<button type="button" data-rp-tab="${tab}" aria-pressed="false">${label}<span data-rp="count-${tab}"></span></button>`).join('')}</div><div class="rp-filters"><label class="rp-search"><span aria-hidden="true">⌕</span><input type="search" placeholder="搜索币种" aria-label="搜索模拟盘币种" maxlength="80" autocomplete="off" data-rp="search"></label><label class="rp-scope" data-rp="scope-label"><select aria-label="记录资金范围" data-rp="scope"><option value="funded">计入资金</option><option value="shadow">影子记录</option><option value="all">全部记录</option></select></label></div></div>
-      <p class="rp-record-caption" data-rp="caption"></p><div data-rp="rows" class="rp-rows"></div><button type="button" data-rp-action="more" class="rp-more" hidden>再显示 50 条</button><p class="rp-footnote" data-rp="record-note"></p></section>
-      <details class="rp-rules"><summary>规则与统计口径 <span>Limit-reclaim v2</span></summary><div data-rp="rules"></div></details>`;
+    root.innerHTML=`<div class="rp-wallpaper" data-rp="chart"></div><div class="rp-watermark" aria-hidden="true" data-rp="watermark"></div><p class="rp-chart-notice rp-glass" data-rp="chart-notice" role="status" hidden></p>
+      <header class="rp-heading rp-glass"><details class="rp-navigation"><summary aria-label="打开模拟盘导航"><b>ϟ SPIKE</b> <span class="rp-badge">模拟</span> ⌄</summary><nav class="rp-glass"><a href="#monday-fib">1.618 图表</a><a href="#signals?pane=records">信号记录</a><a href="#signals?pane=overview">表现分析</a><a href="#yolo-detect">形态巡检</a></nav></details><span class="rp-nav-title">1.618 模拟盘</span><button type="button" class="rp-refresh" data-rp-action="refresh" aria-label="刷新模拟盘" title="刷新模拟盘">↻</button></header>
+      <section class="rp-context rp-glass"><div class="rp-context-line" data-rp="selection">等待模拟交易</div><div class="rp-context-tools"><div class="rp-tracks" role="group" aria-label="选择模拟轨道">${['60','5'].map(track=>`<button type="button" data-rp-track="${track}" aria-pressed="false">${track==='60'?'60m 主轨':'5m 研究轨'}</button>`).join('')}</div><button type="button" data-rp-action="records" aria-controls="rp-record-panel" aria-expanded="false">交易簿 <span data-rp="total">—</span></button></div></section>
+      <details class="rp-account rp-glass"><summary><span>已实现净值 <b data-rp="equity">—</b><small> USDT</small></span><span data-rp="pnl"></span><span aria-hidden="true">⌄</span></summary><div class="rp-account-body"><section data-rp="metrics" class="rp-metrics"></section><p data-rp="status" role="status"></p><details class="rp-rules"><summary>规则与统计口径</summary><div data-rp="rules"></div></details></div></details>
+      <div class="rp-alert rp-glass" data-rp="error" role="alert" hidden></div>
+      <section id="rp-record-panel" class="rp-records rp-glass" aria-label="模拟交易簿" aria-hidden="true" inert><header class="rp-record-heading" data-yd-sheet-drag><strong>模拟交易簿</strong><button type="button" data-rp-action="close-records" aria-label="收起交易簿">×</button></header><div class="rp-toolbar"><div class="rp-tabs" role="group" aria-label="记录类型">${[['open','持仓'],['closed','已结束'],['events','触价']].map(([tab,label])=>`<button type="button" data-rp-tab="${tab}" aria-pressed="false">${label}<span data-rp="count-${tab}"></span></button>`).join('')}</div><div class="rp-filters"><label class="rp-search"><input type="search" placeholder="搜索币种" aria-label="搜索模拟盘币种" maxlength="80" autocomplete="off" data-rp="search"></label><label class="rp-scope" data-rp="scope-label"><select aria-label="记录资金范围" data-rp="scope"><option value="funded">计入资金</option><option value="shadow">影子记录</option><option value="all">全部记录</option></select></label></div></div><p class="rp-record-caption" data-rp="caption"></p><div class="rp-record-scroll"><div data-rp="rows" class="rp-rows"></div><button type="button" data-rp-action="more" class="rp-more" hidden>再显示 50 条</button><p class="rp-footnote" data-rp="record-note"></p></div></section>
+      <nav class="rp-dock rp-glass" aria-label="模拟盘图表工具"><select data-rp="period" aria-label="K 线周期">${['5m','15m','1H','4H'].map(v=>`<option value="${v}">${v}</option>`).join('')}</select><button type="button" data-rp-action="ma" aria-pressed="false" title="SMA / EMA 20、60、120">六均线</button><button type="button" data-rp-action="fit" title="显示全部已加载 K 线">全图</button><button type="button" data-rp-action="latest" title="回到最新 K 线">最新 K</button><button type="button" data-rp-action="follow" aria-pressed="true">跟随最新单</button></nav><span class="rp-chart-foot">本周 1.618 区间 · 开平仓按实际成交标记</span>`;
+    chart=window.SpikeReclaimChart.create(el('chart'),text=>{el('chart-notice').textContent=text;el('chart-notice').hidden=!text;});
+    sheet=window.SpikeYoloPreviewSheet.bind({panel:root.querySelector('.rp-records'),isOpen:()=>recordsOpen,dismiss:()=>setRecords(false)});
+    el('period').addEventListener('change',event=>{state.period=event.target.value;sync();render(feed.getState());});
+    root.addEventListener('keydown',event=>{if(event.key==='Escape'&&recordsOpen)setRecords(false);});
     root.addEventListener('click',event=>{
       const button=event.target.closest('button');if(!button)return;
-      if(button.dataset.rpTrack){state.track=button.dataset.rpTrack;shown=50;sync();render(feed.getState());}
+      if(button.dataset.rpTrack){state.track=button.dataset.rpTrack;state.trade='';pinned=null;shown=50;sync();render(feed.getState());}
       if(button.dataset.rpTab){state.tab=button.dataset.rpTab;shown=50;sync();render(feed.getState());}
-      if(button.dataset.rpAction==='refresh')feed.refresh();
+      if(button.dataset.rpTrade){state.trade=button.dataset.rpTrade;pinned=window.SpikeReclaimChart.select(feed.getState().data?.tracks[state.track],state.trade);chart.resetFocus();sync();render(feed.getState());if(matchMedia('(max-width:700px)').matches)setRecords(false);}
+      const action=button.dataset.rpAction;
+      if(action==='records')setRecords(!recordsOpen);
+      if(action==='close-records')setRecords(false);
+      if(action==='fit')chart.fit();if(action==='latest')chart.latest();
+      if(action==='ma'){ma=!ma;render(feed.getState());}
+      if(action==='follow'){state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());}
+      if(action==='refresh'){chart.retry();feed.refresh();}
       if(button.dataset.rpAction==='more'){shown+=50;render(feed.getState());}
     });
     el('scope').addEventListener('change',event=>{state.scope=event.target.value;shown=50;sync();render(feed.getState());});
     el('search').addEventListener('input',event=>{state.q=event.target.value;shown=50;sync();render(feed.getState());});
     root.addEventListener('error',event=>{if(event.target.tagName==='IMG')event.target.hidden=true;},true);
   }
+  function setRecords(value){sheet?.reset();recordsOpen=value;const panel=root.querySelector('.rp-records');panel.classList.toggle('is-open',value);panel.inert=!value;panel.setAttribute('aria-hidden',String(!value));root.querySelector('[data-rp-action="records"]').setAttribute('aria-expanded',String(value));if(!value)root.querySelector('[data-rp-action="records"]').focus({preventScroll:true});}
   function sync(){window.SpikeNavigation?.sync('signals',{pane:'reclaim',...state});}
   function replace(id,html){const node=el(id);if(node.innerHTML!==html)node.innerHTML=html;}
   function render(current){
@@ -155,11 +168,16 @@
     root.querySelectorAll('[data-rp-tab]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.rpTab===state.tab)));
     if(el('search').value!==state.q)el('search').value=state.q;
     el('scope').value=state.scope;el('scope-label').hidden=state.tab==='events';
-    for(const key of ['60','5']){
-      const value=summary(data?.tracks[key]);
-      replace(`track-${key}`,cell('已实现账户净值',`${num(value.equity)} <small>USDT</small>`)+cell('已实现盈亏',`${signed(value.pnl)} <small>USDT</small>`,tone(value.pnl))+cell('初始资金',`${num(value.start)} <small>USDT</small>`));
-    }
-    replace('metrics',`<article>${cell('累计已平仓',`${num(stats.count,0)} <small>笔</small>`)}<small>当前轨道 · 仅计入资金</small></article><article>${cell('已平仓胜率',finite(stats.winRate)?`${num(stats.winRate,1)}%`:'—')}<small>${finite(stats.count)&&stats.count>0?`${num(stats.wins,0)} 胜 / ${num(stats.count,0)} 笔`:'等待已结束交易'}</small></article><article>${cell('平均单笔净收益',bp(stats.mean),tone(stats.mean))}<small>按名义本金 · 已扣手续费</small></article>`);
+    const selected=window.SpikeReclaimChart.select(track,state.trade,pinned);if(state.trade&&selected)pinned=selected;
+    chart.show(selected?{...selected,asof_ms:data.now_ms}:null,state.period,ma);el('period').value=state.period;
+    if(!selected&&state.trade){el('chart-notice').textContent='该交易不在当前返回记录中，请点击跟随最新单。';el('chart-notice').hidden=false;}
+    root.querySelector('[data-rp-action="ma"]').setAttribute('aria-pressed',String(ma));
+    root.querySelector('[data-rp-action="follow"]').setAttribute('aria-pressed',String(!state.trade));
+    replace('selection',selected?`<strong>${esc(base(selected.symbol))}<small> / USDT</small></strong><span class="${selected.side===1?'rp-positive':'rp-negative'}">${sideLabel(selected)} · ${esc(stage(selected,data.now_ms))}</span><small>${state.trade?'已固定交易':'跟随最新资金交易'} · ${date(selected.fill_ms)} 开仓</small>`:'<strong>1.618 模拟盘</strong><small>等待资金交易</small>');
+    el('watermark').textContent=selected?base(selected.symbol)+' / USDT':'';
+    el('total').textContent=track?String(track.open.filter(funded).length):'—';
+    replace('equity',num(stats.equity));replace('pnl',`<b class="${tone(stats.pnl)}">${signed(stats.pnl)}</b>`);
+    replace('metrics',cell('已实现盈亏',`${signed(stats.pnl)} USDT`,tone(stats.pnl))+cell('累计已平仓',`${num(stats.count,0)} 笔`)+cell('已平仓胜率',finite(stats.winRate)?`${num(stats.winRate,1)}%`:'—')+cell('平均单笔净收益',bp(stats.mean),tone(stats.mean))+cell('初始资金',`${num(stats.start)} USDT`));
     for(const tab of ['open','closed','events'])el(`count-${tab}`).textContent=data ? String(rows(data,{...state,tab}).length) : '—';
     const items=data?rows(data,state):[], visible=items.slice(0,shown);
     el('caption').textContent=!data ? (error?'记录暂时不可用':'正在读取记录…') : state.tab==='events' ? `两轨共用触价记录 · ${items.length} 条符合筛选 · 最近最多 100 条` : `${state.track==='60'?'60 分钟主轨':'5 分钟研究轨'} · ${{funded:'计入资金',shadow:'影子记录',all:'全部记录'}[state.scope]} · ${items.length} 条${state.tab==='closed'?'符合筛选 · 最近最多 100 条':'持仓'}`;
@@ -173,14 +191,15 @@
       container.querySelectorAll('details').forEach(node=>{node.open=open.has(node.dataset.rpRow);if(node.dataset.rpRow===focusedRow)node.querySelector(focusLink?(focusDetail?'.rp-chart-link':'summary a'):'summary')?.focus({preventScroll:true});});
       signature=rowSignature;
     }
+    root.querySelectorAll('[data-rp-trade]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.rpTrade===String(selected?.id))));
     root.querySelector('[data-rp-action="more"]').hidden=items.length<=shown;
     el('record-note').textContent=state.tab==='events' ? '通过评分不等于已分配资金；分配结果请查看各轨道交易记录。' : state.tab==='open' ? '参考浮动收益未扣费；后台未提供报价时间。账户净值不包含浮盈。' : '净收益已扣手续费；滑点情景仅供对照，不重复扣入账户净值。';
     replace('rules',`<p>两轨分别记账，初始资金各 ${num(data?.sizing?.start_equity)} USDT；每笔最多按当时净值的 ${finite(data?.sizing?.fraction)?num(data.sizing.fraction*100,0):'—'}% 分配名义本金，总名义敞口上限 ${num(data?.sizing?.gross,1)} 倍，按剩余额度分配。影子记录不占用资金、不改变净值。</p><p>1.618 限价入场；做多目标为周一低点，做空目标为周一高点。确认 K 线收回后启用入场价止损，否则按确认收盘退出。入场价止损仍产生手续费。</p><p>Maker ${finite(data?.fees_bp?.maker)?num(data.fees_bp.maker/100):'—'}% / Taker ${finite(data?.fees_bp?.taker)?num(data.fees_bp.taker/100):'—'}%（单边）；退出滑点情景 ${finite(data?.fees_bp?.report_slippage)?num(data.fees_bp.report_slippage/100):'—'}%。成交费用以每条记录为准。</p><p>入场分数门槛 ${num(data?.model?.threshold,4)}，分数不代表胜率。模型训练截止 ${esc(data?.model?.trained_before || '—')}；训练行情与当前 OKX 行情存在来源差异。BTC、ETH、XAU、XAG、PAXG、XAUT 仅记录触价，不开模拟仓。</p><p>上方统计为所选轨道全部已结束资金交易；结束与触价列表各最多返回最近 100 条，列表筛选不改变累计统计。此页面只读取模拟盘状态。</p>`);
   }
-  document.addEventListener('visibilitychange',()=>feed.setActive(pageActive && !document.hidden));
+  document.addEventListener('visibilitychange',()=>{feed.setActive(pageActive && !document.hidden);chart?.setActive(pageActive && !document.hidden);});
   window.SpikeReclaimPaper={
-    setActive(value){pageActive=value;root.hidden=!value;if(value){mount();render(feed.getState());}feed.setActive(value && !document.hidden);},
+    setActive(value){pageActive=value;root.hidden=!value;if(value)mount();else sheet?.reset();chart?.setActive(value && !document.hidden);if(value)render(feed.getState());feed.setActive(value && !document.hidden);},
     refresh:()=>feed.refresh(),route:()=>({...state}),
-    restore(params){state=route(params);shown=50;render(feed.getState());}
+    restore(params){const next=route(params);if(next.track!==state.track||next.trade!==state.trade)pinned=null;state=next;shown=50;render(feed.getState());}
   };
 })();

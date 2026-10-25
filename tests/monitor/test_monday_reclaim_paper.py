@@ -134,6 +134,21 @@ class PaperTests(unittest.TestCase):
         exp = ROOT/"experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/score_model.json"
         self.assertEqual(json.loads(MODEL.read_text()), json.loads(exp.read_text()))
 
+    def test_latest_funded_fill_survives_the_exit_ordered_history_cap(self):
+        e = self.engine(-1.)
+        e.handle_touch(self.levels, "ABC-USDT-SWAP", "lower", 93.8, self.touch+500, self.touch)
+        with e.db() as db:
+            db.execute("UPDATE positions SET stage='closed', exit_ms=?, net_bp=1 WHERE track=60", (self.touch+1000,))
+            for i in range(101):
+                db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,stage,taken,notional,exit_ms,net_bp) "
+                           "VALUES (?,60,'SHADOW-USDT-SWAP',-1,120,110,?,'closed',0,0,?,1)",
+                           (1000+i, self.touch+2000+i, self.touch+3000+i))
+        data = e.snapshot()
+        self.assertEqual(len(data['tracks']['60']['closed']), 100)
+        self.assertTrue(all(r['taken'] == 0 for r in data['tracks']['60']['closed']))
+        self.assertEqual(data['tracks']['60']['latest_funded']['symbol'], 'ABC-USDT-SWAP')
+        self.assertEqual(data['tracks']['5']['latest_funded']['stage'], 'pending_confirm')
+
 
 if __name__ == "__main__":
     unittest.main()

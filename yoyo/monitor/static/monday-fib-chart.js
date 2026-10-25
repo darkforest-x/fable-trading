@@ -55,7 +55,8 @@
   }
   if(typeof module!=='undefined')module.exports={levels,prepare,PERIODS,refreshDelay};
   if(typeof document==='undefined')return;
-  const view={bars:720,initialBars:160,range:true,fib:true,fitAll:false,showLevels:false,mondayBand:true,wallpaper:true};
+  function create({decorate}={}){
+  const view={decorate,bars:720,initialBars:160,range:true,fib:true,fitAll:false,showLevels:false,mondayBand:true,wallpaper:true};
   let target=null,controller=null,timer=null,version=0,paused=false;
   const cache=new Map(),levelCache=new Map();
   function pause(){paused=true;version++;clearTimeout(timer);controller?.abort();controller=null;target?.feed?.stop();if(target)target.feed=null;}
@@ -67,6 +68,7 @@
       if(!target.levels)value.levels=[];
       value=window.SpikeMondayCandleFeed?.mergeDisplay(value,target.live,target.period)||value;
       target.context=context;
+      value.paperTrade=target.trade;
       if(!target.internal)value.levels=value.levels.filter(l=>['上 1.618','周一高','周一低','下 1.618'].includes(l.label));
       target.instance=window.SpikeRangeChart.mount(target.mount,value,{...view,ma:target.ma,mondayBand:target.period!=='1D'},error);
       message(error||target.levelError||(context.error?'K 线更新失败：'+context.error:context.loading?'正在同步此合约 K 线…':!value.candles?.length?'暂无此周期 K 线，请稍后重试':target.live?.error||''));
@@ -106,18 +108,18 @@
     }catch(e){if(token===version&&target===current){message((e.name==='AbortError'?'图表读取超时':e.message)+' · 可重新加载');delay=10000;}}
     finally{clearTimeout(timeout);if(controller===c)controller=null;if(token===version&&target===current&&!document.hidden)timer=setTimeout(refresh,delay);}
   }
-  function show(host,row,week,{internal=false,ma=false,period='15m'}={}){
+  function show(host,row,week,{internal=false,ma=false,period='15m',trade=null}={}){
     if(!PERIODS[period])period='15m';
     const key=row.symbol+'|'+week+'|'+period;
     if(target?.host===host&&target.key===key){
-      const changed=target.internal!==internal||target.ma!==ma||['high','low','upper','lower'].some(k=>target.row[k]!==row[k]);
-      target.row=row;target.internal=internal;target.ma=ma;if(changed&&target.context)draw(target.context);if(paused){paused=false;startFeed();const previous=cache.get(key);if(previous&&previous.due>Date.now())timer=setTimeout(refresh,previous.due-Date.now());else refresh();}return;
+      const changed=target.internal!==internal||target.ma!==ma||JSON.stringify(target.trade)!==JSON.stringify(trade)||['high','low','upper','lower'].some(k=>target.row[k]!==row[k]);
+      target.row=row;target.trade=trade;target.internal=internal;target.ma=ma;if(changed&&target.context)draw(target.context);if(paused){paused=false;startFeed();const previous=cache.get(key);if(previous&&previous.due>Date.now())timer=setTimeout(refresh,previous.due-Date.now());else refresh();}return;
     }
     const reuse=target?.host===host?target:null;
     if(reuse){version++;clearTimeout(timer);controller?.abort();controller=null;target.feed?.stop();}else stop();
     if(!host)return;paused=false;
     if(!reuse)host.innerHTML='<div class="mf-chart-caption"><p role="status">正在加载区间 K 线…</p><button type="button" data-mf-chart-retry>重新加载</button></div><div class="mf-chart-mount"></div>';
-    target={host,row,week,key,internal,ma,period,levels:levelCache.get(row.symbol+'|'+week),state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
+    target={host,row,week,key,internal,ma,period,trade,levels:levelCache.get(row.symbol+'|'+week),state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
     if(!reuse)host.querySelector('[data-mf-chart-retry]').addEventListener('click',()=>refresh());
     const previous=cache.get(key);
     if(previous)draw(previous.value);
@@ -142,5 +144,7 @@
     const scale=target?.instance?.chart?.timeScale(),range=scale?.getVisibleLogicalRange();if(!range||!finite(factor)||factor<=0)return;
     const span=Math.max(8,Math.min(view.bars+20,(range.to-range.from)*factor));scale.setVisibleLogicalRange({from:range.to-span,to:range.to});
   }
-  window.SpikeMondayFibChart={show,hide:stop,pause,setInternal,setMa,fit,latest,zoom};
+  return {show,hide:stop,pause,setInternal,setMa,fit,latest,zoom};
+  }
+  window.SpikeMondayFibChart=Object.assign(create(),{create});
 })();

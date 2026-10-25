@@ -102,8 +102,8 @@
     document.getElementById('signal-pane-title').textContent=pane==='overview'?'信号表现':layout==='history'?'已结束的信号':'确认信号';
     document.getElementById('signal-pane-description').textContent=pane==='overview'?'按退出顺序观察累计 R、回撤与周期差异。':layout==='history'?'核对每条信号的参考入场、退出与净 R。':'查看已收盘确认信号、参考表现与形态说明。';
     window.SpikeOKXExecution?.setActive(active && pane==='account');
-    window.SpikeReclaimPaper?.setActive(active && pane==='reclaim');
     document.body.classList.toggle('reclaim-paper-active',active && pane==='reclaim');
+    window.SpikeReclaimPaper?.setActive(active && pane==='reclaim');
     if(changed)window.SpikeMotion?.enter(root,{kind:'route'});
     document.getElementById('signal-visuals').hidden=layout!=='history';
     ownCharts();schedule();

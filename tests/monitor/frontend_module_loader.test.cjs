@@ -8,7 +8,7 @@ function harness(){
  vm.runInNewContext(source,{window,document});return {api:window.SpikeModules,calls,nodes,preloads,fail(name){fail=name;}};
 }
 test('signals defer ECharts until analysis and shared dependencies execute once',async()=>{
- const c=harness();await c.api.ensure('signals');assert.deepEqual(c.calls,['/static/signal-history.css','/static/signal-components.css','/static/okx-execution.css','/static/signal-workspace.css','/static/monday-reclaim-paper.css','/static/okx-execution.js','/static/monday-reclaim-paper.js','/static/signal-workspace.js']);
+ const c=harness();await c.api.ensure('signals');assert.deepEqual(c.calls,['/static/signal-history.css','/static/signal-components.css','/static/okx-execution.css','/static/signal-workspace.css','/static/monday-reclaim-paper.css','/static/okx-execution.js','/static/range-chart.js','/static/monday-candle-feed.js','/static/monday-fib-chart.js','/static/yolo-preview-sheet.js','/static/reclaim-chart.js','/static/monday-reclaim-paper.js','/static/signal-workspace.js']);
  await Promise.all([c.api.ensure('signal-charts'),c.api.ensure('signal-charts')]);
  assert.equal(c.calls.filter(x=>x.includes('echarts')).length,1);
  await Promise.all([c.api.ensure('langlang'),c.api.ensure('rektproof')]);
