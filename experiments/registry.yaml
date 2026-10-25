@@ -313,6 +313,34 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'First run with an unstable sort (outputs not kept in repo) gave the same ranking: linear 2.06x DD 20.6 vs current 1.42x DD 28.9 in 2026. Realized-equity drawdown only; no mark-to-market. Paper engine still uses equal 10 percent.'
+  - experiment_id: exp-monday-limit-reclaim-target-bands-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: d2f6364a7e
+    status: complete
+    question: 'Owner 2026-10-25: should the take-profit depend on the score?'
+    single_variable: 'Target or partial per score band (60-80 / 80-90 / 90-100 training percentiles); no backstop.'
+    result: 'Per-band best 2025 mean picked opposite 1618 for every band. 2026 linear sizing: current near 1.95x DD 21; chosen 1.99x DD 37; a near+far 50/50 split for the top band (an assumption of mine, not the owner request) 1.59x DD 32. Superseded by the key-level ladder study.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-reclaim-target-bands-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'The owner clarified the request (ladders across key levels); see exp-monday-limit-reclaim-ladders-20261025-v1.'
+  - experiment_id: exp-monday-limit-reclaim-ladders-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 655389f1cd
+    status: complete
+    question: 'Owner 2026-10-25: key levels (Monday high/low, range 0.5, 0.618, opposite 1618): reach rates and laddered take-profit by score.'
+    single_variable: 'Take-profit ladder across the five key levels per score band; framework fills, worst path, no backstop.'
+    result: 'From 2025, top-40, reach rates near/0.5/0.618/far/opp1618: score 0.226-0.30 26.5/14.6/13.1/9.8/7.3 percent; 0.30-0.375 34.5/19.6/17.9/13.7/9.8; >=0.375 52.0/32.4/29.3/22.6/17.2. Given the previous level, continuation is the same in every band (about 55-62 to 0.5, 90 to 0.618, 75 to far, 72-76 to opp1618): the score predicts reclaiming, not running further. High scores reach levels much faster (median 0.2h to near, 15h to opp1618 vs 1.9h and 46h). 2026 means per trade: low band negative for every ladder; middle band near +8.5bp best; top band all ladders +35..+41bp (near +38.5). Replays 2026 linear sizing: near 1.95x DD 21 versus ladders 1.52-1.78x DD 25-34 and per-band choice 1.97x DD 37; last five months far-weighted targets 1.85-2.03x vs near 1.59x. Not adopted: no ladder beats near-only consistently.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-reclaim-ladders-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Charts 1_level_reach.png, 2_ladders_by_band.png. Ladder legs share the breakeven stop; no backstop in these fills.'
   - experiment_id: exp-monday-reclaim-paper-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 791941594f
