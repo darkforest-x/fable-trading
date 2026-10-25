@@ -1,0 +1,10 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-fail-recovery-20261025-v1",
+  "question": "Owner 2026-10-25: after a failed-reclaim exit, how often does price return to the 1.618 entry within the next hours?",
+  "source": "Failed-reclaim alt trades from exp-monday-limit-reclaim-mfe-20261025-v1 (Codex O-H-L-C ledger, 60m, near edge); Codex 5m bars via load_job",
+  "horizons_hours": [1, 2, 4, 8, 24, 72],
+  "control": "Same distance further against the trade from the exit price (symmetric excursion)",
+  "limitations": "Descriptive; no re-entry is executed; the exit bar itself is excluded.",
+  "training_eligible": false,
+  "production_eligible": false
+}
