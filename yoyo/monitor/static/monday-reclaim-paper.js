@@ -121,7 +121,11 @@
   if(!root)return;
   let state=route(), pageActive=false, mounted=false, shown=50, signature='', chart=null, pinned=null, ma=false, recordsOpen=false, sheet=null, watch=null, chartSymbol='', closer=null, analytics=null;
   const requests=window.SpikeRuntime.createRequests();
-  const feed=createFeed({read:()=>requests.json('/api/monday-reclaim-paper'),cancel:()=>requests.cancel(),change:render});
+  let startupRead=null;
+  const feed=createFeed({read:async()=>{
+    const c=new AbortController();startupRead=c;
+    try{const pending=window.SpikeStartup?.take('paper-snapshot',c.signal),warm=pending?await pending:null;if(c.signal.aborted)throw Error('cancelled');return warm?.value||await requests.json('/api/monday-reclaim-paper');}finally{if(startupRead===c)startupRead=null}
+  },cancel:()=>{startupRead?.abort();startupRead=null;requests.cancel();},change:render});
   const el=id=>root.querySelector(`[data-rp="${id}"]`);
   function mount(){
     if(mounted)return;mounted=true;

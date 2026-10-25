@@ -104,3 +104,45 @@ test('late anchor replies cannot paint a retired symbol and pending anchors draw
  assert.equal(rendered.length,count);assert.equal(rendered.at(-1).symbol,'ETH-USDT-SWAP');
  assert.equal(rendered.at(-1).levels.length,4);assert.equal(rendered.at(-1).levels[0].start_ms,start+3600000);api.hide();
 });
+
+function cachedChart(){
+ const pending=[],restores=[],levelRestores=[],rendered=[],saved=[];
+ const shared={candles:new Map(),levels:new Map(),saveCandles:v=>saved.push(v),saveLevels(){},restoreCandles:key=>new Promise(resolve=>restores.push({key,resolve})),restoreLevels:key=>new Promise(resolve=>levelRestores.push({key,resolve}))};
+ const host=()=>{const state={textContent:''},caption={},mount={};return {innerHTML:'',replaceChildren(){},querySelector:s=>s==='[role=status]'?state:s==='.mf-chart-caption'?caption:s==='.mf-chart-mount'?mount:{addEventListener(){}}};};
+ const sandbox={document:{hidden:false},window:{SpikePublicChartCache:shared,SpikeRangeChart:{mount:(h,d)=>rendered.push(d),unmount(){}}},Intl,Date,AbortController,setTimeout:()=>1,clearTimeout(){},fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve}))};
+ vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
+ return {api:sandbox.window.SpikeMondayFibChart,pending,restores,levelRestores,rendered,saved,host,settle:async()=>{for(let i=0;i<20;i++)await Promise.resolve();}};
+}
+test('disk history paints before HTTP, remains marked stale through empty loading replies, and never enters persistence again',async()=>{
+ const h=cachedChart(),anchors=anchorReply('/?symbol='+row.symbol);
+ h.api.show(h.host(),row,'2026-10-19',{anchors});
+ assert.equal(h.pending.length,1,'provided Monday anchors avoid a duplicate levels GET');
+ h.restores[0].resolve(context());await h.settle();
+ assert.equal(h.rendered.at(-1).candles.length,3);assert.equal(h.rendered.at(-1).stale,true);
+ h.pending[0].resolve({ok:true,json:async()=>({...context(),candles:[],loading:true})});await h.settle();
+ assert.equal(h.rendered.at(-1).candles.length,3);assert.equal(h.rendered.at(-1).stale,true);assert.equal(h.saved.length,0);h.api.hide();
+});
+test('late disk reads cannot overwrite fresh HTTP candles or a different selected coin',async()=>{
+ const h=cachedChart(),host=h.host();h.api.show(host,row,'2026-10-19',{anchors:anchorReply('/?symbol='+row.symbol)});
+ const fresh={...context(),candles:[{...bar(start),close:82080}]};
+ h.pending[0].resolve({ok:true,json:async()=>fresh});await h.settle();const n=h.rendered.length;
+ h.restores[0].resolve(context());await h.settle();assert.equal(h.rendered.length,n);assert.equal(h.rendered.at(-1).candles[0].close,82080);assert.ok(!h.rendered.at(-1).stale);
+ h.api.show(host,{...row,symbol:'ETH-USDT-SWAP'},'2026-10-19');h.api.show(host,{...row,symbol:'SOL-USDT-SWAP'},'2026-10-19');const m=h.rendered.length;
+ h.restores[1].resolve(context('ETH-USDT-SWAP'));await h.settle();assert.equal(h.rendered.length,m);assert.equal(h.rendered.at(-1).symbol,'SOL-USDT-SWAP');h.api.hide();
+});
+test('independent page charts reuse fresh public history without re-fetching it or sharing paper overlays',async()=>{
+ const h=cachedChart(),a=h.api,b=a.create(),anchors=anchorReply('/?symbol='+row.symbol);
+ a.show(h.host(),row,'2026-10-19',{anchors,trade:{id:5}});
+ h.pending[0].resolve({ok:true,json:async()=>({...context(),now_ms:start+1800000})});await h.settle();
+ b.show(h.host(),row,'2026-10-19',{anchors});
+ assert.equal(h.pending.length,1);assert.equal(h.rendered.at(-1).candles.length,3);assert.equal(h.rendered.at(-1).paperTrade,null);
+ a.hide();b.hide();
+});
+test('Monday restores exact cached anchor rays and retains them when their revalidation fails',async()=>{
+ const h=cachedChart();h.api.show(h.host(),row,'2026-10-19');
+ h.restores[0].resolve(context());h.levelRestores[0].resolve(anchorReply('/?symbol='+row.symbol));await h.settle();
+ assert.equal(h.rendered.at(-1).levels.length,4);assert.equal(h.rendered.at(-1).levels[0].start_ms,start+3600000);
+ h.pending.find(p=>p.url.includes('/levels?')).resolve({ok:false});
+ h.pending.find(p=>p.url.includes('/candles?')).resolve({ok:true,json:async()=>context()});await h.settle();
+ assert.equal(h.rendered.at(-1).levels.length,4);h.api.hide();
+});

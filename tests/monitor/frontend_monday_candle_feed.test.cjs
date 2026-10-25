@@ -60,3 +60,10 @@ test('REST fallback, reconnect repair, daily UTC, cancellation and stale warning
  const n=f.states.length;late({data:JSON.stringify({arg:{instId:'BTC-USDT-SWAP',channel:'candle1Dutc'},data:[raw(f.boundary)]})});
  f.requests[1].resolve({ok:true,json:async()=>f.value()});await f.flush();assert.equal(f.states.length,n);assert.equal(f.timers.size,0);assert.equal(f.intervals.size,0);
 });
+
+test('identical snapshots and heartbeats skip redraws while price, volume and stale status still update',()=>{
+ const f=fixture();f.feed.start();const s=f.sockets[0];s.readyState=1;s.onopen();f.message([raw(f.boundary)]);f.run(100);const count=f.states.length;
+ f.message([raw(f.boundary)]);f.run(100);for(const t of f.intervals.values())t.fn();assert.equal(f.states.length,count);
+ const changed=raw(f.boundary);changed[5]='5';f.message([changed]);f.run(100);assert.equal(f.states.length,count+1);
+ f.advance(16000);for(const t of f.intervals.values())t.fn();assert.match(f.states.at(-1).error,/延迟/);f.feed.stop();
+});

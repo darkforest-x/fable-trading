@@ -14,10 +14,17 @@
     }
     return best;
   }
-  if(typeof module!=='undefined')module.exports={initialSymbol};
+  function paperSymbol(data,params){
+    const pinned=params.get('symbol');if(pinned)return /^[A-Z0-9]{1,32}-USDT-SWAP$/.test(pinned)?pinned:null;
+    const track=data?.tracks?.[params.get('track')==='5'?'5':'60'],id=params.get('trade');
+    const rows=[...(track?.open||[]),...(track?.closed||[]),...(track?.latest_funded?[track.latest_funded]:[])].filter(p=>/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(p.symbol)&&[1,-1].includes(p.side)&&Number.isFinite(p.fill_ms)&&p.fill_ms>0&&Number.isFinite(p.entry)&&p.entry>0);
+    return (id?rows.find(p=>String(p.id)===id):rows.filter(p=>p.taken===1&&p.notional>0).sort((a,b)=>b.fill_ms-a.fill_ms||b.id-a.id)[0])?.symbol||null;
+  }
+  if(typeof module!=='undefined')module.exports={initialSymbol,paperSymbol};
   if(typeof document==='undefined')return;
   const route=window.location.hash.slice(1).split('?');
-  if(route[0]!=='monday-fib'||document.hidden)return;
+  const params=new URLSearchParams(route[1]||''),paper=!route[0]||route[0]==='market'||route[0]==='signals'&&params.get('pane')==='reclaim';
+  if((route[0]!=='monday-fib'&&!paper)||document.hidden)return;
   let versions={};try{versions=JSON.parse(document.getElementById('asset-versions')?.textContent||'{}');}catch{}
   const slots=new Map();let cancelled=false;
   function start(key,url){
@@ -37,18 +44,28 @@
   }
   window.SpikeStartup={take};
   window.addEventListener('pagehide',cancel,{once:true});
-  window.addEventListener('hashchange',()=>{if(window.location.hash.slice(1).split('?')[0]!=='monday-fib')cancel();});
+  window.addEventListener('hashchange',()=>{const [view,query]=window.location.hash.slice(1).split('?');const herePaper=!view||view==='market'||view==='signals'&&new URLSearchParams(query||'').get('pane')==='reclaim';if(paper?!herePaper:view!=='monday-fib')cancel();});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)cancel();});
   setTimeout(cancel,15000);
-  start('monday-snapshot','/api/monday-fib?compact=true')?.then(packet=>{
-    const symbol=initialSymbol(packet?.value?.items,new URLSearchParams(route[1]||'').get('symbol')||'');
-    if(!symbol||!/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(symbol))return;
-    let period='15m';try{period=window.localStorage.getItem('spike.monday.timeframe')||period;}catch{}
-    if(!['1m','5m','15m','30m','1H','4H','1D'].includes(period))period='15m';
-    start(symbol+'|'+period,'/api/monday-fib/candles?symbol='+encodeURIComponent(symbol)+'&period='+period+'&wait_ms=8000');
-  });
+  if(paper){
+    start('paper-snapshot','/api/monday-reclaim-paper')?.then(packet=>{
+      const symbol=paperSymbol(packet?.value,params);if(!symbol)return;
+      const candidate=params.get('period'),period=['5m','15m','1H','4H'].includes(candidate)?candidate:'5m';
+      start('levels:'+symbol,'/api/monday-fib/levels?symbol='+encodeURIComponent(symbol));
+      start(symbol+'|'+period,'/api/monday-fib/candles?symbol='+encodeURIComponent(symbol)+'&period='+period+'&wait_ms=8000');
+    });
+  }else{
+    start('monday-snapshot','/api/monday-fib?compact=true')?.then(packet=>{
+      const symbol=initialSymbol(packet?.value?.items,params.get('symbol')||'');
+      if(!symbol||!/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(symbol))return;
+      let period='15m';try{period=window.localStorage.getItem('spike.monday.timeframe')||period;}catch{}
+      if(!['1m','5m','15m','30m','1H','4H','1D'].includes(period))period='15m';
+      start(symbol+'|'+period,'/api/monday-fib/candles?symbol='+encodeURIComponent(symbol)+'&period='+period+'&wait_ms=8000');
+    });
+  }
   const critical=['workspace-base.css','workspace-shell.css','workspace-polish.css','workspace-boot.js'];
-  const names=[...critical,'monday-fib.css','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','monday-quick.js','monday-list-model.js','monday-fib.js','/vision-assets/vendor/lightweight-charts.standalone.production.js'];
+  const page=paper?['monday-reclaim-paper.css','reclaim-chart.js','reclaim-watchlist.js','reclaim-analytics.js','reclaim-close.js','monday-reclaim-paper.js','signal-workspace.js']:['monday-fib.css','monday-quick.js','monday-fib.js'];
+  const names=[...critical,...page,'public-chart-cache.js','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','monday-list-model.js','/vision-assets/vendor/lightweight-charts.standalone.production.js'];
   for(const name of names){
     if(!versions[name])continue;
     const link=document.createElement('link');link.rel='preload';link.as=name.endsWith('.css')?'style':'script';

@@ -35,13 +35,16 @@
     later=setTimeout,cancel=clearTimeout,repeat=setInterval,clearRepeat=clearInterval}){
     const channel='candle'+nativeBar(period),bars=new Map();
     let active=false,ws=null,retry=null,beat=null,paint=null,read=null,readTimeout=null;
-    let offset=0,lastData=0,lastSuccess=0,lastMessage=0,connectedAt=0,startedAt=0,attempts=0,revision=0,opened=false;
+    let offset=0,lastData=0,lastSuccess=0,lastMessage=0,connectedAt=0,startedAt=0,attempts=0,revision=0,opened=false,lastPaint='';
     const clock=()=>now()+offset;
     function emit(){
       cancel(paint);paint=null;if(!active)return;
       const time=clock();for(const [t,b] of bars)if(!valid(b,period,time))bars.delete(t);
-      onChange({bars:[...bars.values()].sort((a,b)=>a.time-b.time),now_ms:time,
-        error:now()-Math.max(lastSuccess,startedAt)>15000?'实时 K 线更新延迟，正在重连':''});
+      const ordered=[...bars.values()].sort((a,b)=>a.time-b.time),error=now()-Math.max(lastSuccess,startedAt)>15000?'实时 K 线更新延迟，正在重连':'';
+      // Heartbeats and repeated exchange snapshots must not recompute 720 bars
+      // and six averages when the visible OHLC/volume/status is unchanged.
+      const fingerprint=JSON.stringify([ordered,error]);if(fingerprint===lastPaint)return;
+      lastPaint=fingerprint;onChange({bars:ordered,now_ms:time,error});
     }
     function changed(next){
       for(const b of next){const old=bars.get(b.time);if(!old?.confirmed||b.confirmed)bars.set(b.time,b);}

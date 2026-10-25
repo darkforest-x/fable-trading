@@ -8,7 +8,7 @@ function harness(){
  vm.runInNewContext(source,{window,document});return {api:window.SpikeModules,calls,nodes,preloads,fail(name){fail=name;}};
 }
 test('signals defer ECharts until analysis and shared dependencies execute once',async()=>{
- const c=harness();await c.api.ensure('signals');assert.deepEqual(c.calls,['/static/signal-history.css','/static/signal-components.css','/static/okx-execution.css','/static/signal-workspace.css','/static/monday-reclaim-paper.css','/static/okx-execution.js','/static/range-chart.js','/static/monday-candle-feed.js','/static/monday-fib-chart.js','/static/yolo-preview-sheet.js','/static/reclaim-chart.js','/static/monday-list-model.js','/static/reclaim-watchlist.js','/static/reclaim-analytics.js','/static/reclaim-close.js','/static/monday-reclaim-paper.js','/static/signal-workspace.js']);
+ const c=harness();await c.api.ensure('signals');assert.deepEqual(c.calls,['/static/signal-history.css','/static/signal-components.css','/static/okx-execution.css','/static/signal-workspace.css','/static/monday-reclaim-paper.css','/static/okx-execution.js','/static/public-chart-cache.js','/static/range-chart.js','/static/monday-candle-feed.js','/static/monday-fib-chart.js','/static/yolo-preview-sheet.js','/static/reclaim-chart.js','/static/monday-list-model.js','/static/reclaim-watchlist.js','/static/reclaim-analytics.js','/static/reclaim-close.js','/static/monday-reclaim-paper.js','/static/signal-workspace.js']);
  await Promise.all([c.api.ensure('signal-charts'),c.api.ensure('signal-charts')]);
  assert.equal(c.calls.filter(x=>x.includes('echarts')).length,1);
  await Promise.all([c.api.ensure('langlang'),c.api.ensure('rektproof')]);
@@ -40,7 +40,7 @@ test('all dependency downloads are preloaded before the first stylesheet resolve
 
 test('Monday Fib loads shared chart before its scoped row controller',async()=>{
  const c=harness();await c.api.ensure('monday-fib');
- assert.deepEqual(c.calls,['/static/monday-fib.css','/static/range-chart.js','/static/monday-candle-feed.js','/static/monday-fib-chart.js','/static/monday-quick.js','/static/monday-list-model.js','/static/monday-fib.js']);
+ assert.deepEqual(c.calls,['/static/monday-fib.css','/static/public-chart-cache.js','/static/range-chart.js','/static/monday-candle-feed.js','/static/monday-fib-chart.js','/static/monday-quick.js','/static/monday-list-model.js','/static/monday-fib.js']);
 });
 test('patrol loads reference overlay before charts can mount',async()=>{
  const c=harness();await c.api.ensure('yolo-detect');

@@ -47,6 +47,7 @@
   if(typeof module!=='undefined'&&module.exports){module.exports={latest,select,valid,candleIndex,geometry,TradeDrawing};return;}
   function create(host,notice){
     let active=true,request=null,epoch=0,desired=null,anchor=null,received=0,pinnedFocus='';
+    const shared=window.SpikePublicChartCache;
     const chart=window.SpikeMondayFibChart.create({decorate:(instance,data)=>{
       const p=data.paperTrade,step=periods[data.bar];
       if(!instance.paperDrawing){instance.paperDrawing=new TradeDrawing(instance);instance.series.attachPrimitive(instance.paperDrawing);}
@@ -58,19 +59,23 @@
       }
       notice(!draw.shape||draw.shape.entry===-1?'开仓时间不在当前已加载 K 线内；可切换更大周期查看。':'');
     }});
-    function paint(){if(active&&anchor&&desired)chart.show(host,anchor,anchor.week,{period:desired.period,ma:desired.ma,trade:desired.trade});}
+    function paint(){if(active&&anchor&&desired)chart.show(host,anchor,anchor.week,{period:desired.period,ma:desired.ma,trade:desired.trade,anchors:anchor});}
     async function show(trade,period='5m',ma=false,symbol=trade?.symbol||''){
       const changed=desired?.symbol!==symbol;desired={trade:valid(trade)&&trade.symbol===symbol?trade:null,period,ma,symbol};
       if(changed){epoch++;request?.abort();request=null;anchor=null;chart.hide();pinnedFocus='';}
       if(!active)return;
       if(!/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(symbol)){chart.hide();notice('尚无资金交易，可从监控币种选择 K 线。');return;}
+      const levelKey=shared?symbol+'|'+shared.weekAt(Date.now()):'';
+      if(!anchor&&shared){anchor=shared.levels.get(levelKey)||null;const generation=epoch;
+        if(!anchor)shared.restoreLevels(levelKey).then(a=>{if(a&&active&&epoch===generation&&!anchor){anchor=a;paint();}});}
       if(anchor)paint();
       if(request||(anchor&&Date.now()-received<60000))return;
       const revision=epoch,c=new AbortController();request=c;const timeout=setTimeout(()=>c.abort(),15000);
       if(!anchor)notice('正在加载 '+symbol.replace('-USDT-SWAP','')+' 的 1.618 K 线…');
-      try{const r=await fetch('/api/monday-fib/levels?symbol='+encodeURIComponent(symbol),{signal:c.signal,cache:'no-store'});if(!r.ok)throw Error('周一区间读取失败');const a=await r.json();if(revision!==epoch||!active)return;
+      try{const warming=window.SpikeStartup?.take('levels:'+symbol,c.signal),warm=warming?await warming:null;let a=warm?.value;
+        if(!a){const r=await fetch('/api/monday-fib/levels?symbol='+encodeURIComponent(symbol),{signal:c.signal,cache:'no-store'});if(!r.ok)throw Error('周一区间读取失败');a=await r.json();}if(revision!==epoch||!active)return;
         if(a.symbol!==symbol||a.timezone!=='America/New_York'||!a.week)throw Error('周一区间币种或时间不匹配');
-        anchor=a;received=Date.now();notice('');paint();
+        anchor=a;received=Date.now();if(shared?.saveLevels){shared.saveLevels(a);if(a.state==='ready'){shared.levels.set(symbol+'|'+a.week,a);while(shared.levels.size>32)shared.levels.delete(shared.levels.keys().next().value);}}notice('');paint();
       }catch(e){if(revision===epoch&&active)notice((e.name==='AbortError'?'图表读取超时':e.message)+' · 点击刷新重试');}
       finally{clearTimeout(timeout);if(request===c)request=null;}
     }
