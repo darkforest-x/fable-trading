@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const groups = {
-    signals: ['signal-history.css','signal-components.css','okx-execution.css','signal-workspace.css','monday-reclaim-paper.css','okx-execution.js','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','yolo-preview-sheet.js','reclaim-chart.js','monday-reclaim-paper.js','signal-workspace.js'],
+    signals: ['signal-history.css','signal-components.css','okx-execution.css','signal-workspace.css','monday-reclaim-paper.css','okx-execution.js','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','yolo-preview-sheet.js','reclaim-chart.js','reclaim-watchlist.js','reclaim-close.js','monday-reclaim-paper.js','signal-workspace.js'],
     'signal-charts': ['echarts-6.1.0.min.js'],
     research: ['research.css','research.js'],
     platform: ['research.css','platform.css','platform.js'],

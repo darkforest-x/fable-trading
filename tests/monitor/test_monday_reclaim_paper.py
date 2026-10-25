@@ -4,10 +4,12 @@ import math
 import tempfile
 import threading
 import unittest
+import uuid
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from yoyo.monitor.monday_fib import FibBook, week_window
-from yoyo.monitor.monday_reclaim_paper import MODEL, ReclaimPaper, features, settle, bars
+from yoyo.monitor.monday_reclaim_paper import MODEL, ReclaimPaper, PaperCloseError, features, settle, bars, install
 
 ROOT = Path(__file__).resolve().parents[2]
 MIN, H5, H1 = 60_000, 300_000, 3_600_000
@@ -37,6 +39,7 @@ class FakeClient:
 class FakeFib:
     def __init__(self, runtime, client):
         self.client, self.book, self.lock, self.quotes = client, FibBook(runtime), threading.Lock(), {}
+        self.connected = True
 
 
 class PaperTests(unittest.TestCase):
@@ -148,6 +151,138 @@ class PaperTests(unittest.TestCase):
         self.assertTrue(all(r['taken'] == 0 for r in data['tracks']['60']['closed']))
         self.assertEqual(data['tracks']['60']['latest_funded']['symbol'], 'ABC-USDT-SWAP')
         self.assertEqual(data['tracks']['5']['latest_funded']['stage'], 'pending_confirm')
+
+    def manual_fixture(self, side='lower'):
+        e = self.engine(-1.)
+        if side == 'upper':
+            self.client.override[("5m", self.touch//H5*H5-30*MIN)] = (105., 111., 104., 106.)
+        e.handle_touch(self.levels, 'ABC-USDT-SWAP', side, 94., self.touch+500, self.touch)
+        price = 94.5 if side == 'lower' else 115.
+        e.fib.quotes['ABC-USDT-SWAP'] = dict(price=price, high=price, low=price,
+            candle_ms=self.touch, received_ms=self.client.now)
+        p = self.rows(e, 'SELECT * FROM positions WHERE track=60')[0]
+        return e, p
+
+    def test_partial_then_full_preserves_original_trade_and_total_cost(self):
+        for side in ['lower', 'upper']:
+            with self.subTest(side=side):
+                if side == 'upper':
+                    self.tmp.cleanup(); self.tmp = tempfile.TemporaryDirectory()
+                e, p = self.manual_fixture(side)
+                a = e.close_position(p['id'], 25, 0, str(uuid.uuid4()))
+                self.assertEqual(a['remaining_notional'], 75)
+                partial = e.snapshot()['tracks']['60']['open'][0]
+                self.assertEqual(partial['notional'], 100)
+                self.assertEqual(partial['remaining_notional'], 75)
+                self.assertEqual(partial['stage'], 'pending_confirm')
+                self.assertEqual(len(partial['exits']), 1)
+                b = e.close_position(p['id'], 50, 1, str(uuid.uuid4()))
+                self.assertEqual(b['closed_notional'], 37.5)
+                c = e.close_position(p['id'], 100, 2, str(uuid.uuid4()))
+                self.assertEqual(c['remaining_notional'], 0)
+                track = e.snapshot()['tracks']['60']; closed = track['closed'][0]
+                self.assertEqual(closed['reason'], 'manual')
+                self.assertAlmostEqual(closed['fee_bp'], 7)
+                self.assertAlmostEqual(closed['pnl'], sum(x['pnl'] for x in [a,b,c]))
+                self.assertAlmostEqual(track['equity'], 1000+closed['pnl'])
+                self.assertEqual(track['stats']['taken_closed'], 1)
+                self.assertEqual(e.snapshot()['tracks']['5']['equity'], 1000)
+
+    def test_partial_then_automatic_target_settles_only_remaining_and_keeps_weighted_stats(self):
+        e, p = self.manual_fixture()
+        first = e.close_position(p['id'], 25, 0, str(uuid.uuid4()))
+        e.handle_quote(p['symbol'], dict(candle_ms=self.touch+MIN, price=100.5, high=100.5, low=99.))
+        track = e.snapshot()['tracks']['60']; closed = track['closed'][0]
+        expected = first['pnl']+75*settle(1, p['entry'], p['target'], 'target')[2]/1e4
+        self.assertAlmostEqual(closed['pnl'], expected)
+        self.assertAlmostEqual(closed['fee_bp'], 7*.25+4*.75)
+        self.assertAlmostEqual(track['equity'], 1000+expected)
+        e.handle_quote(p['symbol'], dict(candle_ms=self.touch+2*MIN, price=101, high=101, low=99))
+        self.assertAlmostEqual(e.snapshot()['tracks']['60']['equity'], track['equity'])
+
+    def test_duplicate_requests_are_idempotent_across_threads_and_restarts(self):
+        e, p = self.manual_fixture(); key = str(uuid.uuid4())
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            results = list(pool.map(lambda _: e.close_position(p['id'], 25, 0, key), range(2)))
+        self.assertEqual(results[0], results[1])
+        restarted = self.engine(-1.)
+        self.assertEqual(restarted.close_position(p['id'], 25, 0, key), results[0])
+        self.assertEqual(len(self.rows(e, 'SELECT * FROM exits')), 1)
+        with self.assertRaises(PaperCloseError): e.close_position(p['id'], 50, 0, key)
+        with self.assertRaises(PaperCloseError): e.close_position(p['id'], 25, 0, str(uuid.uuid4()))
+
+    def test_invalid_stale_and_shadow_closes_leave_account_unchanged(self):
+        e, p = self.manual_fixture()
+        for pct in [0, -1, 101, float('nan'), True, '25']:
+            with self.assertRaises(PaperCloseError): e.close_position(p['id'], pct, 0, str(uuid.uuid4()))
+        e.fib.quotes[p['symbol']]['received_ms'] -= 16000
+        with self.assertRaises(PaperCloseError): e.close_position(p['id'], 100, 0, str(uuid.uuid4()))
+        e.fib.quotes[p['symbol']]['received_ms'] = self.client.now
+        e.fib.connected = False
+        with self.assertRaises(PaperCloseError): e.close_position(p['id'], 100, 0, str(uuid.uuid4()))
+        with e.db() as db: db.execute('UPDATE positions SET taken=0 WHERE id=?', (p['id'],))
+        e.fib.connected = True
+        with self.assertRaises(PaperCloseError): e.close_position(p['id'], 100, 0, str(uuid.uuid4()))
+        self.assertEqual(e.snapshot()['tracks']['60']['equity'], 1000)
+        self.assertEqual(self.rows(e, 'SELECT COUNT(*) n FROM exits')[0]['n'], 0)
+
+    def test_automatic_exit_wins_and_old_quotes_do_not_backdate_manual_remainder(self):
+        e, p = self.manual_fixture()
+        e.close_position(p['id'], 25, 0, str(uuid.uuid4()))
+        e.handle_quote(p['symbol'], dict(price=101, high=101, low=99, candle_ms=self.touch,
+                                       received_ms=self.client.now-1))
+        self.assertEqual(e.snapshot()['tracks']['60']['open'][0]['remaining_notional'], 75)
+        e.fib.quotes[p['symbol']].update(price=101, high=101, low=99)
+        with self.assertRaises(PaperCloseError): e.close_position(p['id'], 100, 1, str(uuid.uuid4()))
+        self.assertEqual(e.snapshot()['tracks']['60']['closed'][0]['reason'], 'target')
+        self.assertGreaterEqual(e.snapshot()['tracks']['60']['closed'][0]['exit_ms'], self.client.now)
+
+    def test_due_unresolved_confirmation_blocks_a_later_manual_fill(self):
+        e, p = self.manual_fixture()
+        self.client.now = p['decision_ms']+5000
+        self.client.get = lambda *args: []
+        e.fib.quotes[p['symbol']].update(candle_ms=self.client.now//MIN*MIN, received_ms=self.client.now)
+        with self.assertRaisesRegex(PaperCloseError, '确认结算'):
+            e.close_position(p['id'], 25, 0, str(uuid.uuid4()))
+        self.assertEqual(e.snapshot()['tracks']['60']['equity'], 1000)
+
+    def test_close_http_requires_same_origin_action_and_valid_body(self):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+        e, p = self.manual_fixture(); app = FastAPI(); install(app, e)
+        client = TestClient(app)
+        url = f'/api/monday-reclaim-paper/positions/{p["id"]}/close'
+        body = dict(percentage=25, expected_revision=0, request_id=str(uuid.uuid4()))
+        self.assertEqual(client.post(url, json=body).status_code, 403)
+        headers = {'origin':'http://testserver', 'x-spike-action':'close-reclaim-paper'}
+        self.assertEqual(client.post(url, json=body, headers={**headers,'origin':'https://evil.invalid'}).status_code, 403)
+        self.assertEqual(client.post(url, json={**body,'percentage':True}, headers=headers).status_code, 422)
+        response = client.post(url, json=body, headers=headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['remaining_notional'], 75)
+        self.assertEqual(client.post(url, json=body, headers=headers).json(), response.json())
+
+    def test_partial_releases_capacity_using_remaining_not_original_notional(self):
+        e, p = self.manual_fixture()
+        for i in range(9):
+            e.handle_touch(self.levels, f'ALT{i}-USDT-SWAP', 'lower', 94., self.touch+500, self.touch)
+        result = e.close_position(p['id'], 25, 0, str(uuid.uuid4()))
+        e.handle_touch(self.levels, 'NEW-USDT-SWAP', 'lower', 94., self.touch+500, self.touch)
+        allocated = self.rows(e, "SELECT notional FROM positions WHERE symbol='NEW-USDT-SWAP' AND track=60")[0]['notional']
+        self.assertAlmostEqual(allocated, 25+result['pnl'])
+
+    def test_automatic_and_manual_writers_cannot_realize_more_than_original_position(self):
+        e, p = self.manual_fixture()
+        def manual():
+            try: return e.close_position(p['id'], 50, 0, str(uuid.uuid4()))
+            except PaperCloseError: return None
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            a = pool.submit(manual)
+            b = pool.submit(e.handle_quote, p['symbol'], dict(candle_ms=self.touch+MIN, price=101, high=101, low=99))
+            a.result(); b.result()
+        exits = self.rows(e, f'SELECT * FROM exits WHERE position_id={p["id"]}')
+        self.assertAlmostEqual(sum(x['notional'] for x in exits), 100)
+        self.assertAlmostEqual(e.snapshot()['tracks']['60']['equity'], 1000+sum(x['pnl'] for x in exits))
 
 
 if __name__ == "__main__":

@@ -134,3 +134,62 @@ body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-headi
 @media(max-width:360px){#monday-reclaim-paper .rp-nav-title {display:none;}#monday-reclaim-paper .rp-context {max-width:calc(100% - 86px);}#monday-reclaim-paper .rp-dock button {padding:5px 6px;}#monday-reclaim-paper .rp-context-tools>button {padding:4px;}#monday-reclaim-paper .rp-tracks button {padding:4px 6px;}}
 @media(prefers-reduced-motion:reduce){#monday-reclaim-paper *,#monday-reclaim-paper *::before {transition:none!important;animation:none!important;scroll-behavior:auto!important;}}
 @supports not (backdrop-filter:blur(1px)){#monday-reclaim-paper .rp-glass {background:#f9fbfcef;}}
+/* Complete monitored universe, distinct from the execution ledger. */
+#monday-reclaim-paper .rp-watch-trigger {color:#0071e3;font-weight:600;white-space:nowrap;}
+#monday-reclaim-paper .rp-watch-trigger span {margin-left:4px;padding:2px 5px;border-radius:6px;background:#0071e310;font-size:10px;}
+#monday-reclaim-paper .rp-watch-panel {position:absolute;z-index:7;right:100px;top:84px;bottom:148px;width:280px;display:flex;flex-direction:column;overflow:hidden;background-color:#ffffff85;opacity:0;visibility:hidden;transform:translateX(18px);transition:opacity .2s,transform .24s var(--rp-ease),visibility .24s;}
+#monday-reclaim-paper .rp-watch-panel.is-open {opacity:1;visibility:visible;transform:translateX(0);}
+#monday-reclaim-paper .rp-watch-panel .rp-record-heading strong span {font-size:10px;color:#0071e3;margin-left:5px;}
+#monday-reclaim-paper .rp-watch-tools {padding:0 10px;flex:none;}
+#monday-reclaim-paper .rp-watch-tools input {margin-top:6px;}
+#monday-reclaim-paper .rp-watch-sort {color:#7b8d9a;font-size:9px;padding:7px 2px;}
+#monday-reclaim-paper .rp-watch-scroll {min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 8px;flex:1;}
+#monday-reclaim-paper .rp-watch-row {display:flex;align-items:center;width:100%;gap:8px;min-height:62px;padding:8px;text-align:left;border:1px solid transparent;border-radius:14px;}
+#monday-reclaim-paper .rp-watch-row[aria-pressed=true] {border-color:#0071e333;background:#e5f1ff99;}
+#monday-reclaim-paper .rp-watch-row .rp-avatar {flex:none;width:27px;height:27px;font-size:11px;}
+#monday-reclaim-paper .rp-watch-name {flex:1;min-width:0;}
+#monday-reclaim-paper .rp-watch-name b {display:block;overflow:hidden;text-overflow:ellipsis;}
+#monday-reclaim-paper .rp-watch-row small {display:block;color:#7b8d9a;font-size:9px;margin-top:3px;white-space:nowrap;}
+#monday-reclaim-paper .rp-watch-quote {text-align:right;font-size:11px;flex:none;}
+#monday-reclaim-paper .rp-watch-status {flex:none;border-top:1px solid #9bafbf25;padding:10px 12px;color:#758897;font-size:9px;}
+@media(min-width:701px) and (max-width:900px){#monday-reclaim-paper .rp-watch-panel {top:138px;right:85px;width:265px;}}
+@media(max-width:700px){
+ #monday-reclaim-paper .rp-heading {gap:2px;padding-left:9px;}
+ #monday-reclaim-paper .rp-watch-trigger {font-size:10px;padding:5px;}
+ #monday-reclaim-paper .rp-watch-trigger span {font-size:9px;margin-left:2px;padding:2px 3px;}
+ #monday-reclaim-paper .rp-watch-panel {top:auto;bottom:112px;left:10px;right:10px;width:auto;height:75dvh;max-height:calc(100dvh - 132px);transform:translateY(30px);background-color:#ffffffcc;}
+ #monday-reclaim-paper .rp-watch-panel.is-open {transform:translateY(var(--yd-sheet-offset,0px));}
+ #monday-reclaim-paper .rp-watch-panel.yd-sheet-dragging {transition:none;}
+ #monday-reclaim-paper .rp-watch-panel.yd-sheet-settling {transition:transform .24s cubic-bezier(.2,.8,.2,1);}
+}
+@media(max-width:360px){#monday-reclaim-paper .rp-heading .rp-badge {display:none;}}
+/* Manual paper reductions use the same glass, palette and touch physics. */
+#monday-reclaim-paper .rp-position-actions {display:flex;align-items:center;justify-content:space-between;padding:0 8px;gap:6px;font-size:9px;color:#718494;}
+#monday-reclaim-paper .rp-position-actions button {color:#0071e3;background:#ffffff66;border:1px solid #ffffffad;padding:5px 14px;}
+#monday-reclaim-paper .rp-exits {border-top:1px solid #9bafbf25;padding-top:8px;font-size:10px;}
+#monday-reclaim-paper .rp-exits p {padding:6px 0;color:#718494;}
+#monday-reclaim-paper .rp-close {position:fixed;width:390px;max-width:calc(100vw - 20px);max-height:85dvh;margin:auto;padding:8px;overflow:auto;color:#182b39;background-color:#ffffffdc;box-shadow:0 25px 90px #25466230;}
+#monday-reclaim-paper .rp-close[open] {animation:rp-close-in .2s var(--rp-ease);}
+#monday-reclaim-paper .rp-close::backdrop {background:#22354b20;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+#monday-reclaim-paper .rp-close-body {padding:0 12px 12px;}
+#monday-reclaim-paper .rp-close-body>p:first-child {display:flex;gap:10px;align-items:center;margin:4px 0 16px;font-size:13px;}
+#monday-reclaim-paper .rp-close-body small {font-size:10px;color:#718494;}
+#monday-reclaim-paper .rp-close-presets {display:flex;gap:5px;padding:3px;background:#e8eff466;border-radius:16px;}
+#monday-reclaim-paper .rp-close-presets button {flex:1;padding:5px;}
+#monday-reclaim-paper .rp-close-percent {display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 0;font-size:11px;color:#718494;}
+#monday-reclaim-paper .rp-close-percent input {width:90px;text-align:right;color:#182b39;}
+#monday-reclaim-paper .rp-close dl {padding:12px;background:#e9f0f566;border:1px solid #ffffffbb;border-radius:16px;}
+#monday-reclaim-paper .rp-close dl>div {display:flex;justify-content:space-between;gap:10px;padding:6px 0;font-size:11px;}
+#monday-reclaim-paper .rp-close dt {color:#718494;}
+#monday-reclaim-paper .rp-close dd {margin:0;text-align:right;overflow-wrap:anywhere;}
+#monday-reclaim-paper .rp-close-hint {font-size:10px;color:#718494;}
+#monday-reclaim-paper .rp-close [role=status] {font-size:11px;color:#446781;margin:10px 0;}
+#monday-reclaim-paper .rp-close-actions {display:flex;gap:8px;margin-top:16px;}
+#monday-reclaim-paper .rp-close-actions button {flex:1;background:#ffffff80;border:1px solid #dbe5ed80;}
+#monday-reclaim-paper .rp-close-actions [data-close-action=submit] {background:#0071e3;color:white;border-color:transparent;}
+@keyframes rp-close-in {from {opacity:0;translate:0 12px;}to {opacity:1;translate:0 0;}}
+@media(max-width:700px){
+ #monday-reclaim-paper .rp-close {top:auto;bottom:10px;left:0;right:0;margin:0 auto;max-height:80dvh;padding-bottom:max(8px,env(safe-area-inset-bottom));transform:translateY(var(--yd-sheet-offset,0px));}
+ #monday-reclaim-paper .rp-close.yd-sheet-dragging {transition:none;}
+ #monday-reclaim-paper .rp-close.yd-sheet-settling {transition:transform .24s cubic-bezier(.2,.8,.2,1);}
+}

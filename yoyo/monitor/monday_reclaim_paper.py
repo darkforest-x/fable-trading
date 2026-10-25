@@ -22,16 +22,24 @@ stop beats a target; the fill minute can only reach the target if it closes
 beyond it. Live features come from OKX, the model from Binance history, and
 cluster24 counts OKX symbols, so the score is approximate. No account, key or
 order endpoint is used.
+
+Owner 2026-10-25: manual partial/full paper closes keep an immutable entry,
+realize tranches at a fresh public quote and serialize with automatic exits.
 """
 from __future__ import annotations
 
 from contextlib import contextmanager
 import json
+from functools import wraps
+import uuid
 import math
 from pathlib import Path
 import queue
 import sqlite3
 import threading
+
+from fastapi import HTTPException, Request
+from pydantic import BaseModel, ConfigDict, Field
 
 from yoyo.data.candle_hub import validate
 
@@ -40,7 +48,30 @@ TRACKS = (60, 5)
 MAKER_BP, TAKER_BP, SLIP_BP = 2.0, 5.0, 10.0
 START_EQUITY, FRACTION, GROSS = 1000.0, 0.10, 1.0
 EXCLUDE = {"BTC", "ETH", "XAU", "XAG", "PAXG", "XAUT"}
+MANUAL_QUOTE_MAX_MS = 15_000
 MIN5, HOUR, DAY = 300_000, 3_600_000, 86_400_000
+
+
+def serialized(method):
+    """Quote exits, confirmation and manual reductions share one writer lock."""
+    @wraps(method)
+    def call(self, *args, **kwargs):
+        with self.write_lock:
+            return method(self, *args, **kwargs)
+    return call
+
+
+class PaperCloseError(ValueError):
+    def __init__(self, message, status=409):
+        super().__init__(message)
+        self.status = status
+
+
+class CloseRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    percentage: float = Field(gt=0, le=100, strict=True, allow_inf_nan=False)
+    expected_revision: int = Field(ge=0, strict=True)
+    request_id: uuid.UUID
 
 
 class ScoreModel:
@@ -99,6 +130,7 @@ def settle(side, entry, exit_price, reason):
 
 class ReclaimPaper:
     def __init__(self, runtime, fib, model_path=MODEL):
+        self.write_lock = threading.RLock()
         self.fib, self.client, self.model = fib, fib.client, ScoreModel(model_path)
         self.path = Path(runtime)/"monday-reclaim-paper.sqlite3"
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -120,8 +152,24 @@ class ReclaimPaper:
                     taken INTEGER, notional REAL, last_seen_ms INTEGER, exit_ms INTEGER, exit_price REAL,
                     reason TEXT, gross_bp REAL, fee_bp REAL, net_bp REAL, net_slip_bp REAL, pnl REAL,
                     note TEXT, UNIQUE(signal_id, track));
+                CREATE TABLE IF NOT EXISTS exits (
+                    id INTEGER PRIMARY KEY, position_id INTEGER NOT NULL, notional REAL NOT NULL,
+                    exit_ms INTEGER NOT NULL, price REAL NOT NULL, reason TEXT NOT NULL,
+                    gross_bp REAL, fee_bp REAL, net_bp REAL, net_slip_bp REAL, pnl REAL);
+                CREATE TABLE IF NOT EXISTS manual_requests (
+                    request_id TEXT PRIMARY KEY, position_id INTEGER, percentage REAL,
+                    expected_revision INTEGER, response TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS tracks (track INTEGER PRIMARY KEY, equity REAL, started_ms INTEGER);
             """)
+            columns = {r["name"] for r in db.execute("PRAGMA table_info(positions)")}
+            for name, spec in {"remaining_notional": "REAL", "realized_pnl": "REAL NOT NULL DEFAULT 0",
+                               "close_revision": "INTEGER NOT NULL DEFAULT 0", "manual_exit_ms": "INTEGER"}.items():
+                if name not in columns:
+                    db.execute(f"ALTER TABLE positions ADD COLUMN {name} {spec}")
+            db.execute("UPDATE positions SET remaining_notional=CASE WHEN stage='closed' THEN 0 ELSE notional END "
+                       "WHERE remaining_notional IS NULL")
+            if "realized_pnl" not in columns:
+                db.execute("UPDATE positions SET realized_pnl=COALESCE(pnl,0) WHERE stage='closed'")
             for m in TRACKS:
                 db.execute("INSERT OR IGNORE INTO tracks VALUES (?,?,?)", (m, START_EQUITY, self.client.clock()))
         self._refresh_watch()
@@ -199,6 +247,7 @@ class ReclaimPaper:
                                  "AND candle_ms>=? AND candle_ms<?", (side_text, symbol, candle_ms-DAY, candle_ms)).fetchone()["n"]
         return bool(opp and opp["candle_ms"] < candle_ms), cluster
 
+    @serialized
     def handle_touch(self, levels, symbol, side_text, price, observed_ms, candle_ms):
         side = 1 if side_text == "lower" else -1
         level = levels[side_text]
@@ -232,29 +281,119 @@ class ReclaimPaper:
                 notional, note = 0., None
                 if taken:
                     equity = db.execute("SELECT equity FROM tracks WHERE track=?", (m,)).fetchone()["equity"]
-                    opened = db.execute("SELECT COALESCE(SUM(notional),0) s FROM positions WHERE track=? AND stage<>'closed' "
+                    opened = db.execute("SELECT COALESCE(SUM(COALESCE(remaining_notional,notional)),0) s FROM positions WHERE track=? AND stage<>'closed' "
                                         "AND taken=1", (m,)).fetchone()["s"]
                     notional = max(0., min(FRACTION*equity, GROSS*equity-opened))
                     if notional <= 0:
                         note = "no_capacity"
                 db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,decision_ms,stage,"
-                           "taken,notional,last_seen_ms,note) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                           "taken,notional,last_seen_ms,note,remaining_notional) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                            (sid, m, symbol, side, level, target, candle_ms, decision, "pending_confirm",
-                            int(taken and notional > 0), notional, candle_ms, note))
+                            int(taken and notional > 0), notional, candle_ms, note, notional))
         self._refresh_watch()
 
-    def _close(self, db, p, exit_ms, price, reason):
+    def _record_exit(self, db, p, amount, exit_ms, price, reason):
+        """Allocate original entry cost once across each realized tranche."""
         gross, fee, net, net_slip = settle(p["side"], p["entry"], price, reason)
-        pnl = p["notional"]*net/1e4 if p["taken"] else 0.
-        db.execute("UPDATE positions SET stage='closed',exit_ms=?,exit_price=?,reason=?,gross_bp=?,fee_bp=?,net_bp=?,"
-                   "net_slip_bp=?,pnl=? WHERE id=?", (exit_ms, price, reason, gross, fee, net, net_slip, pnl, p["id"]))
-        if p["taken"]:
-            db.execute("UPDATE tracks SET equity=equity+? WHERE track=?", (pnl, p["track"]))
+        pnl = amount*net/1e4
+        cur = db.execute("INSERT INTO exits (position_id,notional,exit_ms,price,reason,gross_bp,fee_bp,net_bp,net_slip_bp,pnl) "
+                         "VALUES (?,?,?,?,?,?,?,?,?,?)", (p["id"], amount, exit_ms, price, reason, gross, fee, net, net_slip, pnl))
+        remaining = max(0., p["remaining_notional"]-amount)
+        db.execute("UPDATE positions SET remaining_notional=?,realized_pnl=realized_pnl+?,close_revision=close_revision+1 "
+                   "WHERE id=?", (remaining, pnl, p["id"]))
+        db.execute("UPDATE tracks SET equity=equity+? WHERE track=?", (pnl, p["track"]))
+        if remaining == 0:
+            totals = db.execute("SELECT SUM(notional*gross_bp)/? gross,SUM(notional*fee_bp)/? fee,"
+                                "SUM(notional*net_bp)/? net,SUM(notional*net_slip_bp)/? slip,SUM(pnl) pnl "
+                                "FROM exits WHERE position_id=?", (p["notional"],)*4+(p["id"],)).fetchone()
+            db.execute("UPDATE positions SET stage='closed',exit_ms=?,exit_price=?,reason=?,gross_bp=?,fee_bp=?,net_bp=?,"
+                       "net_slip_bp=?,pnl=? WHERE id=?", (exit_ms, price, reason, totals["gross"], totals["fee"],
+                       totals["net"], totals["slip"], totals["pnl"], p["id"]))
+        return dict(exit_id=cur.lastrowid, position_id=p["id"], symbol=p["symbol"], track=p["track"],
+                    closed_notional=amount, closed_quantity=amount/p["entry"], price=price, exit_ms=exit_ms,
+                    fee=amount*fee/1e4, pnl=pnl, remaining_notional=remaining, remaining_quantity=remaining/p["entry"],
+                    revision=p["close_revision"]+1, fully_closed=remaining == 0, paper_only=True)
 
+    def _close(self, db, p, exit_ms, price, reason):
+        # Re-read under the writer lock, never settle a stale selected row twice.
+        p = db.execute("SELECT * FROM positions WHERE id=?", (p["id"],)).fetchone()
+        if p["stage"] == "closed":
+            return
+        if p["taken"] and p["notional"] > 0:
+            self._record_exit(db, p, p["remaining_notional"], exit_ms, price, reason)
+        else:
+            gross, fee, net, net_slip = settle(p["side"], p["entry"], price, reason)
+            db.execute("UPDATE positions SET stage='closed',exit_ms=?,exit_price=?,reason=?,gross_bp=?,fee_bp=?,net_bp=?,"
+                       "net_slip_bp=?,pnl=0,remaining_notional=0 WHERE id=?", (exit_ms, price, reason, gross, fee, net, net_slip, p["id"]))
+
+    @serialized
+    def close_position(self, position_id, percentage, expected_revision, request_id):
+        """Paper-only reduction at a fresh public quote; no exchange order IO.
+
+        Percentage applies to remaining entry notional. Maker entry cost is
+        allocated pro rata; manual exits use the existing taker/slippage model.
+        Durable request IDs make uncertain retries safe across process restarts.
+        """
+        if (isinstance(percentage, bool) or not isinstance(percentage, (float, int))
+                or not math.isfinite(percentage) or not 0 < percentage <= 100
+                or type(expected_revision) is not int or expected_revision < 0):
+            raise PaperCloseError("平仓比例或仓位版本无效", 422)
+        try:
+            request_id = str(uuid.UUID(str(request_id)))
+        except ValueError:
+            raise PaperCloseError("平仓请求标识无效", 422)
+        with self.db() as db:
+            previous = db.execute("SELECT * FROM manual_requests WHERE request_id=?", (request_id,)).fetchone()
+            if previous:
+                if (previous["position_id"], previous["percentage"], previous["expected_revision"]) != (position_id, percentage, expected_revision):
+                    raise PaperCloseError("该请求标识已用于另一笔平仓")
+                return json.loads(previous["response"])
+            p = db.execute("SELECT * FROM positions WHERE id=?", (position_id,)).fetchone()
+        if not p:
+            raise PaperCloseError("模拟持仓不存在", 404)
+        if p["stage"] == "closed" or not p["taken"] or not p["remaining_notional"]:
+            raise PaperCloseError("该记录已平仓或未分配模拟资金")
+        if p["close_revision"] != expected_revision:
+            raise PaperCloseError("仓位已变化，请刷新后重新选择平仓比例")
+        now = self.client.clock()
+        with self.fib.lock:
+            q = dict(self.fib.quotes.get(p["symbol"], {}))
+            connected = self.fib.connected
+        if (not connected or not isinstance(q.get("price"), (int, float)) or not math.isfinite(q["price"])
+                or q["price"] <= 0 or not 0 <= now-q.get("received_ms", 0) <= MANUAL_QUOTE_MAX_MS
+                or not 0 <= now-q.get("candle_ms", 0) < 120_000):
+            raise PaperCloseError("行情未连接或报价过期，暂不能模拟平仓")
+        # Existing automatic exits have priority over a later manual request.
+        self.decide(now, p["symbol"])
+        self.handle_quote(p["symbol"], q)
+        now = self.client.clock()
+        if now-q["received_ms"] > MANUAL_QUOTE_MAX_MS:
+            raise PaperCloseError("报价已过期，请重试")
+        with self.db() as db:
+            db.execute("BEGIN IMMEDIATE")
+            p = db.execute("SELECT * FROM positions WHERE id=?", (position_id,)).fetchone()
+            if p["stage"] == "closed" or p["close_revision"] != expected_revision:
+                raise PaperCloseError("仓位已自动退出或发生变化，请刷新持仓")
+            if p["stage"] == "pending_confirm" and p["decision_ms"]+3000 <= now:
+                raise PaperCloseError("此前的确认结算尚未完成，请稍后重试")
+            amount = p["remaining_notional"] if percentage == 100 else p["remaining_notional"]*percentage/100
+            if (amount <= 0 or p["remaining_notional"]-amount == p["remaining_notional"]
+                    or amount == p["remaining_notional"] and percentage != 100):
+                raise PaperCloseError("平仓比例过小或精度不足", 422)
+            result = self._record_exit(db, p, amount, now, q["price"], "manual")
+            db.execute("UPDATE positions SET manual_exit_ms=? WHERE id=?", (now, position_id))
+            db.execute("INSERT INTO manual_requests VALUES (?,?,?,?,?)", (request_id, position_id, percentage, expected_revision, json.dumps(result)))
+        self._refresh_watch()
+        return result
+
+    @serialized
     def handle_quote(self, symbol, q):
         """One 1m candle update (cumulative minute high/low, latest close)."""
         with self.db() as db:
             for p in db.execute("SELECT * FROM positions WHERE symbol=? AND stage<>'closed'", (symbol,)).fetchall():
+                if p["manual_exit_ms"] and (q["candle_ms"] < p["manual_exit_ms"]//60_000*60_000
+                        or q.get("received_ms", p["manual_exit_ms"]) < p["manual_exit_ms"]):
+                    continue
                 minute = p["fill_ms"]//60_000*60_000
                 if q["candle_ms"] < minute:
                     continue
@@ -264,14 +403,19 @@ class ReclaimPaper:
                 closes_beyond = (q["price"] >= target) if s == 1 else (q["price"] <= target)
                 stop = (p["stage"] == "breakeven" and q["candle_ms"] >= p["be_from_ms"]
                         and ((q["low"] <= entry) if s == 1 else (q["high"] >= entry)))
+                exit_ms = q["candle_ms"]
+                if p["manual_exit_ms"] and exit_ms <= p["manual_exit_ms"]:
+                    # A same-minute automatic fill cannot predate a partial fill.
+                    exit_ms = max(p["manual_exit_ms"], q.get("received_ms", exit_ms+60_000))
                 if stop:
-                    self._close(db, p, q["candle_ms"], entry, "breakeven")
+                    self._close(db, p, exit_ms, entry, "breakeven")
                 elif reached and (after_fill or closes_beyond):
-                    self._close(db, p, q["candle_ms"], target, "target")
+                    self._close(db, p, exit_ms, target, "target")
                 else:
                     db.execute("UPDATE positions SET last_seen_ms=MAX(last_seen_ms,?) WHERE id=?", (q["candle_ms"], p["id"]))
         self._refresh_watch()
 
+    @serialized
     def decide(self, due_by, symbol=None):
         """Confirmation at the close of the m-minute candle after the touch candle."""
         now = self.client.clock()
@@ -301,6 +445,7 @@ class ReclaimPaper:
                     self._close(db, cur, p["decision_ms"], close, "failed_reclaim")
         self._refresh_watch()
 
+    @serialized
     def _catch_up(self):
         """Replay completed 1m candles missed while the stream or process was down."""
         now = self.client.clock()
@@ -321,16 +466,24 @@ class ReclaimPaper:
         with self.fib.lock:
             quotes = dict(self.fib.quotes)
         with self.db() as db:
+            db.execute("BEGIN")
+            exits = {}
+            for row in db.execute("SELECT * FROM exits ORDER BY exit_ms,id"):
+                exits.setdefault(row["position_id"], []).append(dict(row))
             tracks = {}
             for t in db.execute("SELECT * FROM tracks ORDER BY track DESC").fetchall():
                 m = t["track"]
                 closed = [dict(r) for r in db.execute("SELECT * FROM positions WHERE track=? AND stage='closed' ORDER BY exit_ms DESC", (m,))]
+                for r in closed:
+                    r["exits"] = exits.get(r["id"], [])
                 taken = [r for r in closed if r["taken"]]
                 open_rows = []
                 for r in db.execute("SELECT p.*, s.score FROM positions p JOIN signals s ON s.id=p.signal_id "
                                     "WHERE p.track=? AND p.stage<>'closed' ORDER BY p.fill_ms DESC", (m,)):
                     r = dict(r); q = quotes.get(r["symbol"], {})
                     r["mark"] = q.get("price")
+                    r["quote_ms"] = q.get("received_ms")
+                    r["exits"] = exits.get(r["id"], [])
                     r["unrealized_bp"] = r["side"]*(q["price"]-r["entry"])/r["entry"]*1e4 if q.get("price") else None
                     open_rows.append(r)
                 tracks[str(m)] = dict(confirm_minutes=m, equity=t["equity"], start_equity=START_EQUITY, started_ms=t["started_ms"],
@@ -354,6 +507,17 @@ class ReclaimPaper:
 
 def install(app, engine):
     app.state.monday_reclaim_paper = engine
+
+    @app.post("/api/monday-reclaim-paper/positions/{position_id}/close")
+    def close_position(position_id: int, payload: CloseRequest, request: Request):
+        if (request.headers.get("origin") != f"{request.url.scheme}://{request.url.netloc}"
+                or request.headers.get("sec-fetch-site", "same-origin") != "same-origin"
+                or request.headers.get("x-spike-action") != "close-reclaim-paper"):
+            raise HTTPException(403, "请从模拟盘页面提交平仓")
+        try:
+            return engine.close_position(position_id, payload.percentage, payload.expected_revision, str(payload.request_id))
+        except PaperCloseError as err:
+            raise HTTPException(err.status, str(err)) from err
 
     @app.get("/api/monday-reclaim-paper")
     def snapshot():

@@ -39,6 +39,9 @@ test('trade drawings label both directions and activate the entry stop only at i
   draw.trade={...p,be_from_ms:900001};draw.shape=geometry(draw.trade,rows,step,950000);texts.length=0;
   draw.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:500,height:500}})});
   assert.ok(texts.some(x=>x.includes('入场价止损已启用')));
+  draw.trade={...p,exits:[{reason:'manual',notional:25,price:122,exit_ms:900001}]};draw.shape=geometry(draw.trade,rows,step,950000);texts.length=0;
+  draw.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:500,height:500}})});
+  assert.ok(texts.some(x=>x.includes('减仓 25.0%')));
  }
 });
 test('Monday chart factories own separate requests, canvases and timers',()=>{
@@ -51,4 +54,19 @@ test('Monday chart factories own separate requests, canvases and timers',()=>{
  assert.equal(pending.length,4);assert.ok(pending.every(p=>!p.options.signal.aborted));
  a.hide();assert.ok(pending.slice(0,2).every(p=>p.options.signal.aborted));assert.ok(pending.slice(2).every(p=>!p.options.signal.aborted));assert.equal(unmounts.length,1);
  b.pause();assert.ok(pending.every(p=>p.options.signal.aborted));
+});
+test('untraded symbols load their own real chart without inheriting an execution overlay',async()=>{
+ const calls=[],requests=[],notices=[];let decorate;
+ const chart={show:(...args)=>calls.push(args),hide(){},pause(){}};
+ const sandbox={window:{SpikeMondayFibChart:{create:options=>{decorate=options.decorate;return chart;}}},Date,AbortController,setTimeout,clearTimeout,
+  fetch:async url=>{requests.push(url);return {ok:true,json:async()=>({symbol:decodeURIComponent(url.split('=')[1]),timezone:'America/New_York',week:'2026-10-19'})};}};
+ vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/reclaim-chart.js','utf8'),sandbox);
+ const api=sandbox.window.SpikeReclaimChart.create({clientWidth:1200},s=>notices.push(s));
+ await api.show(pos());assert.equal(calls.at(-1)[3].trade.symbol,'SOL-USDT-SWAP');
+ await api.show(null,'1H',false,'BTC-USDT-SWAP');assert.match(requests.at(-1),/BTC-USDT-SWAP/);assert.equal(calls.at(-1)[3].trade,null);
+ const instance={rows,series:{attachPrimitive(){}},paperDrawing:{shape:{old:true}}};
+ decorate(instance,{paperTrade:null,bar:'1H',now_ms:1000000});assert.equal(instance.paperDrawing.shape,null);assert.equal(notices.at(-1),'');
+ await api.show(pos(),'1H',false,'BTC-USDT-SWAP');assert.equal(calls.at(-1)[3].trade,null);
+ api.setActive(false);const n=calls.length;await api.show(null,'5m',false,'DOGE-USDT-SWAP');assert.equal(calls.length,n);
+ api.setActive(true);await new Promise(r=>setImmediate(r));assert.match(requests.at(-1),/DOGE-USDT-SWAP/);api.destroy();
 });

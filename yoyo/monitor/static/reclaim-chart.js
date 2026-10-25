@@ -38,7 +38,8 @@
         if(g.stop!=null){const i=candleIndex(o.rows,g.stop,this.step),sx=i>=0?x(i):g.stop<o.rows[0].time*1000?0:null;if(sx!=null)line(p.entry,'入场价止损已启用','#8b6ab1',Math.max(0,sx),[3,4]);}
         const marker=(i,value,label,up,tone)=>{const xx=x(i),yy=y(value);if(xx==null||yy==null||xx<0||xx>s.width)return;const dir=up?1:-1;ctx.setLineDash([]);ctx.fillStyle=tone;ctx.beginPath();ctx.moveTo(xx,yy);ctx.lineTo(xx-5,yy+dir*9);ctx.lineTo(xx+5,yy+dir*9);ctx.closePath();ctx.fill();const text=label+' · '+format(value),w=ctx.measureText(text).width+16,bx=Math.max(4,Math.min(s.width-w-4,xx-w/2)),by=yy+dir*26-11>(s.height-125)?yy-39:yy+dir*26-11;ctx.beginPath();ctx.roundRect(bx,by,w,22,6);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(text,bx+w/2,by+11);};
         if(g.entry>=0)marker(g.entry,p.entry,p.side===1?'多头开仓':'空头开仓',p.side===1,color);
-        if(g.exit>=0&&fin(p.exit_price))marker(g.exit,p.exit_price,'平仓',p.side!==1,'#617488');
+        for(const fill of p.exits||[]){if(fill.reason!=='manual'||(p.stage==='closed'&&fill===p.exits.at(-1)))continue;const i=candleIndex(o.rows,fill.exit_ms,this.step);if(i>=0)marker(i,fill.price,'减仓 '+(fill.notional/p.notional*100).toFixed(1)+'%',p.side!==1,'#617488');}
+        if(g.exit>=0&&fin(p.exit_price))marker(g.exit,p.exit_price,p.reason==='manual'?'手动平仓':'平仓',p.side!==1,'#617488');
         ctx.restore();
       });
     }
@@ -50,7 +51,7 @@
       const p=data.paperTrade,step=periods[data.bar];
       if(!instance.paperDrawing){instance.paperDrawing=new TradeDrawing(instance);instance.series.attachPrimitive(instance.paperDrawing);}
       const draw=instance.paperDrawing;draw.trade=p;draw.step=step;draw.shape=geometry(p,instance.rows,step,Math.max(data.now_ms,p?.asof_ms||0));draw.requestUpdate?.();
-      if(!p)return;
+      if(!p){notice('');return;}
       const focusKey=p.id+'|'+data.bar;
       if(draw.shape&&pinnedFocus!==focusKey){pinnedFocus=focusKey;
         if(draw.shape.entry>=0){const i=draw.shape.entry,span=host.clientWidth<700?55:115;instance.chart.priceScale('right').applyOptions({autoScale:true});instance.chart.timeScale().setVisibleLogicalRange({from:i-span*.7,to:i+span*.3});}
@@ -58,23 +59,23 @@
       notice(!draw.shape||draw.shape.entry===-1?'开仓时间不在当前已加载 K 线内；可切换更大周期查看。':'');
     }});
     function paint(){if(active&&anchor&&desired)chart.show(host,anchor,anchor.week,{period:desired.period,ma:desired.ma,trade:desired.trade});}
-    async function show(trade,period='5m',ma=false){
-      const changed=desired?.trade?.symbol!==trade?.symbol;desired={trade,period,ma};
-      if(!active)return;
+    async function show(trade,period='5m',ma=false,symbol=trade?.symbol||''){
+      const changed=desired?.symbol!==symbol;desired={trade:valid(trade)&&trade.symbol===symbol?trade:null,period,ma,symbol};
       if(changed){epoch++;request?.abort();request=null;anchor=null;chart.hide();pinnedFocus='';}
-      if(!valid(trade)){chart.hide();notice('尚无计入资金的模拟交易，成交后自动显示 K 线。');return;}
+      if(!active)return;
+      if(!/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(symbol)){chart.hide();notice('尚无资金交易，可从监控币种选择 K 线。');return;}
       if(anchor)paint();
       if(request||(anchor&&Date.now()-received<60000))return;
       const revision=epoch,c=new AbortController();request=c;const timeout=setTimeout(()=>c.abort(),15000);
-      if(!anchor)notice('正在加载 '+trade.symbol.replace('-USDT-SWAP','')+' 的 1.618 K 线…');
-      try{const r=await fetch('/api/monday-fib/levels?symbol='+encodeURIComponent(trade.symbol),{signal:c.signal,cache:'no-store'});if(!r.ok)throw Error('周一区间读取失败');const a=await r.json();if(revision!==epoch||!active)return;
-        if(a.symbol!==trade.symbol||a.timezone!=='America/New_York'||!a.week)throw Error('周一区间币种或时间不匹配');
+      if(!anchor)notice('正在加载 '+symbol.replace('-USDT-SWAP','')+' 的 1.618 K 线…');
+      try{const r=await fetch('/api/monday-fib/levels?symbol='+encodeURIComponent(symbol),{signal:c.signal,cache:'no-store'});if(!r.ok)throw Error('周一区间读取失败');const a=await r.json();if(revision!==epoch||!active)return;
+        if(a.symbol!==symbol||a.timezone!=='America/New_York'||!a.week)throw Error('周一区间币种或时间不匹配');
         anchor=a;received=Date.now();notice('');paint();
       }catch(e){if(revision===epoch&&active)notice((e.name==='AbortError'?'图表读取超时':e.message)+' · 点击刷新重试');}
       finally{clearTimeout(timeout);if(request===c)request=null;}
     }
-    return {show,fit:chart.fit,latest:chart.latest,zoom:chart.zoom,retry(){received=0;if(desired)show(desired.trade,desired.period,desired.ma);},
-      setActive(value){active=value;if(!value){epoch++;request?.abort();request=null;chart.pause();}else if(desired)show(desired.trade,desired.period,desired.ma);},
+    return {show,fit:chart.fit,latest:chart.latest,zoom:chart.zoom,retry(){received=0;if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol);},
+      setActive(value){active=value;if(!value){epoch++;request?.abort();request=null;chart.pause();}else if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol);},
       resetFocus(){pinnedFocus='';},destroy(){active=false;epoch++;request?.abort();chart.hide();}};
   }
   window.SpikeReclaimChart={create,latest,select,valid};
