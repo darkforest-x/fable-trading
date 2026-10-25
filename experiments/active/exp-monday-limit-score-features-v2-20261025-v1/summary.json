@@ -1,0 +1,161 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-score-features-v2-20261025-v1",
+    "question": "Owner 2026-10-25: feature table v2 for the entry score (current 10 + market context + volatility expansion + MA structure + per-coin history + range structure).",
+    "single_variable": "None (feature build); every feature uses bars before the touch bar or earlier exited events; see the builder docstring for columns and windows.",
+    "population": "alt signal fills, 60m confirmation, near Monday edge (Codex ledger), all history since 2020",
+    "labels": "worst-path near-target net (10bp slippage on non-target exits), win, reclaim, worst-path hits of range 0.5 / 0.618 / far edge / opposite 1618",
+    "workers": 4
+  },
+  "rows": 69990,
+  "symbols": 626,
+  "groups": {
+    "A": [
+      "bucket",
+      "log_vol_ratio",
+      "log_approach",
+      "opp_first",
+      "monday_close_side",
+      "log_liquidity",
+      "toward24",
+      "cluster24",
+      "side",
+      "range_pct"
+    ],
+    "B": [
+      "mkt_toward_1h",
+      "mkt_toward_24h",
+      "mkt_breadth_toward",
+      "mkt_disp_1h",
+      "liq_rank",
+      "cluster1h"
+    ],
+    "C": [
+      "atr_exp_1d",
+      "atr_exp_7d",
+      "rng12_vs_288"
+    ],
+    "D": [
+      "l2_ma_spread_pct",
+      "l2_full_spread",
+      "l2_fast_slow_gap",
+      "l2_full_ratio_min48",
+      "l2_spread_mean8",
+      "l2_spread_mean24",
+      "l2_spread_chg8",
+      "l2_spread_chg24",
+      "l2_spread_pos96",
+      "l2_dense_run_len",
+      "l2_dense_frac48",
+      "l2_ext_up",
+      "l2_close_vs_ema55",
+      "l2_close_vs_ema200",
+      "l2_order_score",
+      "l2_slow_slope_12",
+      "l2_volume_ratio",
+      "l2_volume_z",
+      "l2_vol_ratio_mean8",
+      "l2_atr_pct",
+      "l2_atr_pct_ratio96",
+      "l2_pre_range48",
+      "l2_pre_range168",
+      "l2_drawdown24",
+      "l2_ret_4",
+      "l2_ret_12",
+      "l2_ret_24",
+      "l2_ret_48"
+    ],
+    "E": [
+      "prior_fills",
+      "prior_reclaim_rate",
+      "prior_win_rate",
+      "coin_age_days"
+    ],
+    "F": [
+      "range_rel",
+      "hours_since_monday",
+      "dow",
+      "dist7d_R"
+    ]
+  },
+  "coverage": {
+    "A": {
+      "bucket": 1.0,
+      "log_vol_ratio": 0.8391484497785398,
+      "log_approach": 0.8392627518216889,
+      "opp_first": 1.0,
+      "monday_close_side": 0.8392627518216889,
+      "log_liquidity": 0.8391627375339334,
+      "toward24": 0.8392627518216889,
+      "cluster24": 0.8392627518216889,
+      "side": 1.0,
+      "range_pct": 1.0
+    },
+    "B": {
+      "mkt_toward_1h": 1.0,
+      "mkt_toward_24h": 1.0,
+      "mkt_breadth_toward": 1.0,
+      "mkt_disp_1h": 1.0,
+      "liq_rank": 0.9999857122446064,
+      "cluster1h": 1.0
+    },
+    "C": {
+      "atr_exp_1d": 1.0,
+      "atr_exp_7d": 1.0,
+      "rng12_vs_288": 1.0
+    },
+    "D": {
+      "l2_ma_spread_pct": 0.9998999857122446,
+      "l2_full_spread": 0.9998999857122446,
+      "l2_fast_slow_gap": 0.9998999857122446,
+      "l2_full_ratio_min48": 0.9998999857122446,
+      "l2_spread_mean8": 0.9998999857122446,
+      "l2_spread_mean24": 0.9998999857122446,
+      "l2_spread_chg8": 0.9998999857122446,
+      "l2_spread_chg24": 0.9998999857122446,
+      "l2_spread_pos96": 0.9998999857122446,
+      "l2_dense_run_len": 0.9998999857122446,
+      "l2_dense_frac48": 0.9998999857122446,
+      "l2_ext_up": 0.9998999857122446,
+      "l2_close_vs_ema55": 0.9998999857122446,
+      "l2_close_vs_ema200": 0.9998999857122446,
+      "l2_order_score": 0.9998999857122446,
+      "l2_slow_slope_12": 0.9998999857122446,
+      "l2_volume_ratio": 0.9998999857122446,
+      "l2_volume_z": 0.9998999857122446,
+      "l2_vol_ratio_mean8": 0.9998999857122446,
+      "l2_atr_pct": 0.9998999857122446,
+      "l2_atr_pct_ratio96": 0.9998999857122446,
+      "l2_pre_range48": 0.9998999857122446,
+      "l2_pre_range168": 0.9998999857122446,
+      "l2_drawdown24": 0.9998999857122446,
+      "l2_ret_4": 0.9998999857122446,
+      "l2_ret_12": 0.9998999857122446,
+      "l2_ret_24": 0.9998999857122446,
+      "l2_ret_48": 0.9998999857122446
+    },
+    "E": {
+      "prior_fills": 1.0,
+      "prior_reclaim_rate": 0.9910130018574081,
+      "prior_win_rate": 0.9910130018574081,
+      "coin_age_days": 1.0
+    },
+    "F": {
+      "range_rel": 0.9824689241320188,
+      "hours_since_monday": 1.0,
+      "dow": 1.0,
+      "dist7d_R": 1.0
+    }
+  },
+  "time_range": [
+    "2020-01-10 15:00:00+00:00",
+    "2026-09-23 02:55:00+00:00"
+  ],
+  "label_rates": {
+    "win": 0.23721960280040005,
+    "reclaim": 0.5917988284040577
+  },
+  "source_commit": "73adeed499defff41d3faa49659ea5874047da77",
+  "training_eligible": false,
+  "production_eligible": false
+}

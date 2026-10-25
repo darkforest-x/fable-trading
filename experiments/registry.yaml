@@ -425,6 +425,90 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Score bands 0.5 / 0.6 were chosen after seeing 2025-2026, so these are optimistic. BABYUSDT:2026-06-01:-1 dropped (bad source bar).'
+  - experiment_id: exp-monday-limit-v3-grid-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0edef614ba
+    status: complete
+    question: 'Owner 2026-10-25: full-history native replay of backstop (none, -10..-30 percent) x target rule (near / opposite 1618 from score 0.6), top-40 fills since 2020.'
+    single_variable: '16 variants per event, both intrabar paths.'
+    result: '626/626 per path, no errors. near_far parity: two bad source bars, BABYUSDT 2026-06-05 09:30 UTC (high 1.30) and DASHUSDT 2020-04-14 07:35 UTC (low 0.10 from 73).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-v3-grid-compare-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Input of the grid and ladder comparisons.'
+  - experiment_id: exp-monday-limit-v3-levels-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 07ca7d8988
+    status: complete
+    question: 'Owner 2026-10-25: native replay of range 0.5 / 0.618 / far edge / opposite 1618 targets x 8 backstops for fills with score >= 0.5, since 2020.'
+    single_variable: '32 variants per event, both intrabar paths.'
+    result: '626/626 per path, no errors; opp1618 legs equal the grid run v3t legs (0 mismatches).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-v3-ladder-compare-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Legs for laddered take-profits.'
+  - experiment_id: exp-monday-limit-v3-grid-compare-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: aa3ea5e399
+    status: complete
+    question: 'Owner 2026-10-25: best backstop and target rule over the whole history, thresholds 0.226 / 0.5, caps.'
+    single_variable: 'Backstop x target rule; linear sizing, caps; 10 tie orders; two bad bars dropped.'
+    result: 'Linear sizing, threshold 0.226, 2020-24 / 2025 / 2026 / last five months: near none 4.58 / 3.18 / 2.14 / 1.73; near -20 percent 2.93 / 2.97 / 2.00 / 1.80; near -30 percent 3.35 / 2.24 / 1.85 / 1.89; tighter stops (-10 to -18) worse in every period. Opposite-1618-from-0.6 none 6.31 / 6.65 / 2.62 / 3.17 (DD 41 in 2026), with -30 percent 4.29 / 5.55 / 2.26 / 3.27. Threshold 0.5 cuts drawdown in every variant (near -20 percent 2026 2.42x DD 16).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-v3-grid-compare-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Far target gain also holds in 2020-2024 (out of sample for the band edges), at higher drawdown.'
+  - experiment_id: exp-monday-limit-v3-ladder-compare-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: aa3ea5e399
+    status: complete
+    question: 'Owner 2026-10-25: laddered take-profits at key levels x backstop x fine score band (score >= 0.5), whole history.'
+    single_variable: '12 take-profit schemes x 8 backstops x 4 bands; per-band choice on 2020-24 and on 2025.'
+    result: 'Per-band choice: on 2020-24 opposite 1618 in every band; on 2025 range 0.618 for 0.5-0.6 and opposite 1618 from 0.6, for every backstop. Linear sizing 2020-24 / 2025 / 2026 / last five months (DD): no stop chosen-on-2025 4.73 (9) / 9.68 (20) / 3.17 (34) / 3.09 (18); -30 percent chosen-on-2025 3.74 (13) / 8.97 (19) / 2.56 (34) / 2.96 (17); -20 percent 3.13 / 8.92 / 2.37 (33) / 2.60; no stop all near 2.90 (8) / 3.57 (21) / 2.48 (16) / 1.82 (11); no stop all range 0.5 3.61 / 5.94 / 2.79 (22) / 2.52. Equal ladders sit between near and opposite 1618 and never beat the single far target on return.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-v3-ladder-compare-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Choice on 2025 is in-sample for 2025; 2026 and last five months are out of sample for it.'
+  - experiment_id: exp-monday-limit-score-features-v2-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4bf19b769b
+    status: complete
+    question: 'Owner 2026-10-25: entry-score feature table v2.'
+    single_variable: 'Feature build; groups A base, B market, C volatility expansion, D MA structure (L2), E coin history, F range structure.'
+    result: '69990 fills 2020-01-10..2026-09-23; 11258 lack some base feature (not in events_60m); range_rel has 14 infinite ratios.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-score-features-v2-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'features_v2.csv.gz (28 MB) stays local, not in git; rebuild with the committed builder.'
+  - experiment_id: exp-monday-limit-score-v2-train-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: e6a9986e41
+    status: complete
+    question: 'Owner 2026-10-25: logistic vs LightGBM and feature-group ablations, walk-forward by year.'
+    single_variable: 'Model x feature set; fills with all base features; thresholds from training scores.'
+    result: 'Walk-forward logistic on the base 10 reproduces the frozen score in 2025 exactly (top 20 percent +25.9bp, 2967 fills). Adding all groups raises AUC (0.65 to 0.67-0.68) and top-20 net in 2023 (70 to 100bp) and 2024 (56 to 81bp) but not reliably in 2025-2026. Refits that include 2025 do worse on 2026 (top 20 +10.6bp vs frozen +25.6). LightGBM has the highest AUC but lower top-band profit (overfit to rank, not to the tail). Quick check trained before 2025: market + coin history adds +7bp top-20 in 2025 but -1bp in 2026. Keep the frozen score.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-score-v2-train-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'AUC gains did not become top-band profit; drift in 2025 is the open question.'
   - experiment_id: exp-monday-reclaim-paper-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 791941594f
