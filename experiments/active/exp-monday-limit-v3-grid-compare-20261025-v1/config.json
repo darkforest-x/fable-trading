@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-monday-limit-v3-grid-compare-20261025-v1",
+  "question": "Owner 2026-10-25: best-return combination of backstop percent and target rule over the whole history, with thresholds and position caps.",
+  "single_variable": "Backstop (none, -10/-12/-15/-18/-20/-25/-30 percent) x target rule (near everywhere / opposite 1618 from score 0.6); threshold 0.226 / 0.5 and sizing caps at analysis.",
+  "inputs": "experiments/active/exp-monday-limit-v3-grid-20261025-v1",
+  "periods": ["2020-2024 (score training period, in-sample)", "2025", "2026", "last five months"],
+  "path_rule": "worse of the two intrabar paths per trade",
+  "slippage_bp_non_target_exit": 10,
+  "fees": {"maker_bp": 2, "taker_bp": 5, "backstop_exit": "taker", "read_on": "2026-10-23 OKX Lv1"},
+  "sizing": {"equal": "10 percent", "linear": "0.05 * (score - 0.226) / mean excess score of 2025 top-40 fills, caps 50 / 20 / 15 / 10 percent", "gross_cap": 1.0},
+  "dropped_events": {"BABYUSDT:2026-06-01:-1": "source bar 2026-06-05 09:30 UTC high 1.30 from 0.012; OKX bar high 0.01871"},
+  "tie_orders": 10
+}
