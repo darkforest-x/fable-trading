@@ -3,7 +3,8 @@
 Inputs: exp-monday-limit-backstop-{ohlc,olhc}-20261025-v1 (framework fills of the
 backstop grid, weeks from 2024-12-30). Every per-symbol output is checked
 (readable, rows equal to recorded positions). Parity: config "far" must equal
-the existing ledgers (Codex O-H-L-C, monotone O-L-H-C v2) trade for trade.
+the existing ledgers (Codex O-H-L-C, monotone O-L-H-C v2) trade for trade; mismatches
+are reported and 'far' then takes the ledgers' no-stop outcome (one bad source bar).
 Per trade the worse path is kept; 10bp slippage on every non-target exit
 (backstop exits included). Frozen entry score; top-40 percent threshold.
 Sizing as in exp-monday-limit-reclaim-sizing-20261025-v1: equal 10 percent of
@@ -72,6 +73,17 @@ def run():
         par = np.array(list(ex.map(parity, syms, chunksize=8)))
     issues = {k: [i for _, i in v if i] for k, v in got.items()}
     o = pd.concat([t for t, _ in got['o']], ignore_index=True); l = pd.concat([t for t, _ in got['l']], ignore_index=True)
+    # 'far' stands for the current rule without a stop. One source bar (BABYUSDT 2026-06-05 09:30 UTC,
+    # high 1.30 from 0.012; OKX's bar high 0.01871) crossed even the 50x 'far' stop, so after the parity
+    # check 'far' takes the existing no-stop ledgers' outcome trade for trade.
+    with ProcessPoolExecutor(4) as ex:
+        ref_o = pd.concat(list(ex.map(opt.codex_rows, syms, chunksize=8)), ignore_index=True)
+        ref_l = pd.concat(list(ex.map(opt.load_path, [(ax.V2.parent, s) for s in syms], chunksize=8)), ignore_index=True)
+    for x, ref in ((o, ref_o), (l, ref_l)):
+        far = x.config == 'far'
+        r = ref.set_index('trade_id').reindex(x.loc[far, 'trade_id'].str.rsplit(':bs_', n=1).str[0])
+        for c in ('net_notional_bp', 'reason', 'entry_time', 'exit_time'):
+            x.loc[far, c] = r[c].to_numpy()
     m = o.merge(l[['trade_id', 'net_notional_bp', 'reason', 'entry_time', 'exit_time']], on='trade_id', suffixes=('_o', '_l'))
     no = m.net_notional_bp_o-np.where(m.reason_o == 4, 0., opt.SLIP); nl = m.net_notional_bp_l-np.where(m.reason_l == 4, 0., opt.SLIP)
     worse = (nl < no).to_numpy()
