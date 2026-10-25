@@ -9,8 +9,10 @@ Per trade the worse path is kept; 10bp slippage on every non-target exit
 Sizing as in exp-monday-limit-reclaim-sizing-20261025-v1: equal 10 percent of
 top-40 trades, and linear 0.05 * (score - threshold) / m with m the mean excess
 score of 2025 top-40 fills, capped at 0.5; gross <= 1x. The backstop is chosen
-on 2025 by the linear-sizing final multiple and judged on 2026 and the last
-five months. Each replay is repeated over TIES random orders of same-time
+on 2025 by the linear-sizing final multiple (also among backstops only, since
+the owner requires one) and judged on 2026 and the last five months; a
+score-band variant picks one backstop per score band (60-80 / 80-90 / 90-100
+training percentiles) by 2025 mean net per trade. Each replay is repeated over TIES random orders of same-time
 fills (medians reported). Read-only arithmetic on framework fills.
 """
 from __future__ import annotations
@@ -29,7 +31,7 @@ A = ROOT/'experiments/active'
 RUNS = {'o': A/'exp-monday-limit-backstop-ohlc-20261025-v1', 'l': A/'exp-monday-limit-backstop-olhc-20261025-v1'}
 SEL = (pd.Timestamp('2025-01-01', tz='UTC'), pd.Timestamp('2026-01-01', tz='UTC'))
 TIES = 20
-ZH = dict(far='不设（现行）', R1='1R', R2='2R', R3='3R', R5='5R', R8='8R', P5='5%', P10='10%', P20='20%', P30='30%')
+ZH = dict(far='不设（现行）', R1='1R', R2='2R', R3='3R', R5='5R', R8='8R', P5='5%', P10='10%', P20='20%', P30='30%', by_score='按分数分段')
 
 
 def load(args):
@@ -96,7 +98,9 @@ def run():
                            far_parity_mismatches=dict(ohlc=int(par[:, 0].sum()), olhc=int(par[:, 1].sum()))),
                linear_mean_excess=mexcess, threshold=cut, configs={})
     paths = {}
-    for name, g in m.groupby('config'):
+
+    def evaluate(g, name):
+        """Per-period stats of top-40 trades and equal/linear replays over random tie orders."""
         g = g.sort_values(['entry', 'event'], kind='mergesort').reset_index(drop=True)
         r = {}
         for per, within in periods.items():
@@ -120,14 +124,35 @@ def run():
                                       final_p90=float(np.quantile(f, .9)), dd_median=float(np.median(dd)))
                 if per == 'test_2026':
                     paths[f'{name}|{sizing}'] = path
-        res['configs'][name] = r
+        return r
+
+    for name, g in m.groupby('config'):
+        res['configs'][name] = evaluate(g, name)
     best = max(res['configs'], key=lambda k: res['configs'][k]['selection_2025']['linear']['final_median'])
     res['chosen_on_2025_linear'] = best
+    # Owner requires a backstop: the recommendation is chosen among backstop configs only ('far' = none).
+    res['chosen_backstop_on_2025_linear'] = max((k for k in res['configs'] if k != 'far'),
+                                                key=lambda k: res['configs'][k]['selection_2025']['linear']['final_median'])
+    # Score-dependent backstop: per score band (training-score percentiles 60-80 / 80-90 / 90-100 of the
+    # sizing study), the config with the best 2025 mean net per top-40 trade among backstops (owner requires one), frozen for 2026.
+    meta = json.loads((A/'exp-monday-limit-reclaim-sizing-20261025-v1/summary.json').read_text())['results']['shape_meta']
+    edges = [cut, meta['p80'], meta['p90']]
+    tops = m[m.score >= cut].copy()
+    tops['band'] = np.digitize(tops.score, edges[1:])
+    bands = {}
+    for b, y in tops.groupby('band'):
+        table = {c: {per: float(g[within(g.t)].net.mean()) for per, within in periods.items()} for c, g in y.groupby('config')}
+        bands[int(b)] = dict(low=float(edges[int(b)]), n_2025=int(periods['selection_2025'](y[y.config == 'far'].t).sum()),
+                             chosen=max((c for c in table if c != 'far'), key=lambda c: table[c]['selection_2025']),
+                             best_including_none=max(table, key=lambda c: table[c]['selection_2025']), mean_bp_by_config=table)
+    pick = tops[tops.config == tops.band.map({b: v['chosen'] for b, v in bands.items()})]
+    res['score_bands'] = bands
+    res['configs']['by_score'] = evaluate(pick, 'by_score')
     EXP.mkdir(exist_ok=True)
     charts(res, paths)
     dump(EXP/'summary.json', dict(config=cfg, results=res, source_commit=subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip(),
                                   training_eligible=False, production_eligible=False))
-    print(json.dumps(dict(checks=res['checks'], chosen=best), ensure_ascii=False))
+    print(json.dumps(dict(checks=res['checks'], chosen=best, chosen_backstop=res['chosen_backstop_on_2025_linear'], bands={b: (v['low'], v['chosen'], v['n_2025']) for b, v in res['score_bands'].items()}), ensure_ascii=False))
     for name, r in res['configs'].items():
         print(name, *(f"{per}: n{r[per]['n']} win{r[per]['win_pct']:.1f} mean{r[per]['mean_bp']:.1f} p1 {r[per]['p1_bp']:.0f} min {r[per]['min_bp']:.0f} "
                       f"bs{r[per]['backstop_exit_pct']:.1f}% lostwin {r[per]['far_winners_stopped']} eq {r[per]['equal']['final_median']:.2f}/{r[per]['equal']['dd_median']:.0f} "
