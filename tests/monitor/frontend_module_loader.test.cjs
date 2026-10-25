@@ -42,3 +42,8 @@ test('Monday Fib loads shared chart before its scoped row controller',async()=>{
  const c=harness();await c.api.ensure('monday-fib');
  assert.deepEqual(c.calls,['/static/monday-fib.css','/static/range-chart.js','/static/monday-candle-feed.js','/static/monday-fib-chart.js','/static/monday-quick.js','/static/monday-fib.js']);
 });
+test('patrol loads reference overlay before charts can mount',async()=>{
+ const c=harness();await c.api.ensure('yolo-detect');
+ assert.ok(c.calls.indexOf('/static/yolo-chart-levels.js')>=0);
+ assert.ok(c.calls.indexOf('/static/yolo-chart-levels.js')<c.calls.indexOf('/static/yolo-detect.js'));
+});

@@ -94,6 +94,7 @@
   const validating=new Set();
   const resultCache=new Map();
   let findingPreview=null,previewVersion=0,previewRequest=null,previewChartInstance=null,previewResize=null;
+  let previewLevels=null,chartLevels=null;
   const readSaved=(key,fallback,session=false)=>{try{return JSON.parse((session?sessionStorage:localStorage).getItem(key))??fallback;}catch{return fallback;}};
   const save=(key,value,session=false)=>{try{(session?sessionStorage:localStorage).setItem(key,JSON.stringify(value));}catch{/* Storage may be unavailable; the current session remains usable. */}};
   state.symbolOrder=readSaved('spike.yolo.symbol-sort.v1','latest');if(!['latest','score','count','name','name-desc','favorites'].includes(state.symbolOrder))state.symbolOrder='latest';
@@ -132,7 +133,7 @@
   function restoreDialog(id){
     if(id==='yd-preview-dialog'){
       if($(id).open)return;
-      previewVersion++;previewRequest?.abort();previewRequest=null;previewResize?.disconnect();previewResize=null;previewChartInstance?.remove();previewChartInstance=null;
+      previewVersion++;previewLevels?.destroy();previewLevels=null;previewRequest?.abort();previewRequest=null;previewResize?.disconnect();previewResize=null;previewChartInstance?.remove();previewChartInstance=null;
       if(findingPreview&&state.active){const id=findingPreview.id;findingPreview=null;root.querySelector(`[data-yd-finding="${CSS.escape(id)}"]`)?.focus({preventScroll:true});}
     }
     if(id==='yd-enlarge-dialog'&&$('yd-chart-stage').parentElement!==$('yd-stage-home')){$('yd-stage-home').append($('yd-chart-stage'));$('yd-chart-stage').classList.remove('is-expanded');$('yd-expand').innerHTML='<span class="ui-icon ui-maximize" aria-hidden="true"></span>';}
@@ -177,6 +178,7 @@
                 <div id="yd-chart-options" class="dropdown-menu dropdown-menu-end yd-chart-options"><div class="yd-options-label">图表视角</div><div class="yd-view-modes btn-group" role="group" aria-label="图表视角"><button class="btn btn-sm btn-outline-secondary" id="yd-focus" title="聚焦当前形态">形态</button><button class="btn btn-sm btn-outline-secondary" id="yd-after" title="查看形态与后续行情">含后续</button></div><div class="dropdown-divider"></div><div class="yd-options-checks"><label class="form-check"><input class="form-check-input" type="checkbox" id="yd-follow" checked><span>跟随最新行情</span></label><label class="form-check"><input class="form-check-input" type="checkbox" id="yd-ma" checked><span>六条均线</span></label><label class="form-check"><input class="form-check-input" type="checkbox" id="yd-volume" checked><span>成交量</span></label></div><div class="yd-ma-legend">${Object.entries(colors).map(([name,color])=>`<span><i style="background:${color}"></i>${name.toUpperCase()}</span>`).join('')}</div><div class="dropdown-divider"></div><button class="dropdown-item" id="yd-scan-symbol">重新检测当前币种</button><div class="dropdown-divider"></div><button class="dropdown-item" id="yd-export-png">保存图片</button><button class="dropdown-item" id="yd-export-json">导出数据</button></div>
               </div></div></div></div><div id="yd-insight" class="yd-insight" role="status" aria-live="polite"></div>
             <div class="yd-chart-readout"><div id="yd-ohlc" class="yd-ohlc cv-readout"></div><div id="yd-six-ma" class="chart-ma-legend" aria-label="六条均线数值"></div></div>
+            <div id="yd-chart-levels" class="yd-range-levels" aria-label="周一区间与1.618价位" aria-live="polite"></div>
             <div id="yd-chart-wrap"><div id="yd-chart-empty" class="yd-chart-empty" role="status">正在读取检测结果…</div><div id="yd-chart"></div></div>
             <footer class="yd-chart-foot"><span id="yd-crosshair">北京时间 · 滚轮缩放，拖拽平移</span><span id="yd-tail-status" role="status">检测时快照</span><a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView Lightweight Charts™</a></footer>
             <div class="yd-detections"><header><h3>密集形态 <span id="yd-box-count">0</span></h3><div><select id="yd-boxes" aria-label="结果口径"><option value="structure">已筛选形态</option><option value="raw">全部原始框</option></select><select id="yd-side" aria-label="检测方向"><option value="all">多空</option><option value="long">多头</option><option value="short">空头</option></select></div></header><div id="yd-box-list" class="yd-box-list"></div></div>
@@ -196,7 +198,7 @@
       <section id="yd-panel-account" role="tabpanel" aria-label="实盘账户" hidden><div id="yd-account-detail"></div></section>
       <section id="yd-panel-model" role="tabpanel" aria-labelledby="yd-tab-model" hidden>${training()}</section>
       <datalist id="yd-symbols"></datalist>
-      <dialog id="yd-preview-dialog" class="yd-preview-dialog" aria-labelledby="yd-preview-title"><header><div><h2 id="yd-preview-title">K 线预览</h2><p id="yd-preview-context"></p></div><button type="button" data-yd-close="yd-preview-dialog" aria-label="关闭 K 线预览">× <small>Esc</small></button></header><p id="yd-preview-confirmation"></p><div id="yd-preview-legend" class="yd-six-ma"></div><div class="yd-preview-stage"><div id="yd-preview-chart"></div><p id="yd-preview-message" role="status">正在读取检测快照…</p></div><footer><span>检测时快照 · 可拖动、缩放</span><button type="button" data-yd-preview-retry hidden>重新加载</button><button type="button" data-yd-preview-full>查看完整图表 ↗</button></footer></dialog>
+      <dialog id="yd-preview-dialog" class="yd-preview-dialog" aria-labelledby="yd-preview-title"><header><div><h2 id="yd-preview-title">K 线预览</h2><p id="yd-preview-context"></p></div><button type="button" data-yd-close="yd-preview-dialog" aria-label="关闭 K 线预览">× <small>Esc</small></button></header><p id="yd-preview-confirmation"></p><div id="yd-preview-legend" class="yd-six-ma"></div><div id="yd-preview-levels" class="yd-range-levels" aria-label="周一区间与1.618价位" aria-live="polite"></div><div class="yd-preview-stage"><div id="yd-preview-chart"></div><p id="yd-preview-message" role="status">正在读取检测快照…</p></div><footer><span>检测时快照 · 可拖动、缩放</span><button type="button" data-yd-preview-retry hidden>重新加载</button><button type="button" data-yd-preview-full>查看完整图表 ↗</button></footer></dialog>
       <dialog id="yd-scan-dialog" class="yd-dialog" aria-labelledby="yd-scan-heading"><header><h2 id="yd-scan-heading">新建检测</h2><button data-yd-close="yd-scan-dialog" aria-label="关闭新建检测">×</button></header><form id="yd-scan-form" novalidate><div class="yd-form-body"><div class="yd-mode-options" role="group" aria-label="检测模式"><button type="button" data-yd-mode="latest">当前盘口<span>查看最新收盘附近的形态</span></button><button type="button" data-yd-mode="history">历史识别<span>检查指定时间段的形态</span></button></div>${selectionFields('yd')}
         <div id="yd-dates"><label>检测时间段 · 北京时间</label><div class="yd-presets"><button type="button" data-yd-days="1">最近 1 天</button><button type="button" data-yd-days="3">最近 3 天</button><button type="button" data-yd-days="7">最近 7 天</button></div><div class="yd-form-grid"><label>开始<input type="datetime-local" id="yd-start"></label><label>结束<input type="datetime-local" id="yd-end"></label></div><div class="yd-date-help"><p class="yd-help">均为北京时间；日线按每天 08:00 划分。</p><button type="button" id="yd-align-dates">对齐收盘时间</button></div></div>
         <p id="yd-scan-estimate" class="yd-help"></p><p id="yd-scan-error" class="yd-error" role="alert" hidden></p></div><footer><span id="yd-submit-summary"></span><button type="submit" id="yd-submit" class="yd-primary">开始检测</button></footer></form></dialog>
@@ -310,7 +312,7 @@
     window.SpikeManualAccount?.bind($('yd-account-detail'));
     on('yd-result-search','input',e=>{state.symbolSearch=e.target.value;drawSymbols();});
     on('yd-symbol-list','keydown',e=>{if(!['ArrowDown','ArrowUp'].includes(e.key)||!e.target.closest('[data-yd-symbol]'))return;e.preventDefault();moveSymbol(e.key==='ArrowDown'?1:-1,true);});
-    for(const [id,key] of [['yd-boxes','boxes'],['yd-side','side']])on(id,'change',e=>{state[key]=e.target.value;state.page=0;state.selected=null;drawBoxes();if(boxes().length)selectBox(boxes()[0].id);});
+    for(const [id,key] of [['yd-boxes','boxes'],['yd-side','side']])on(id,'change',e=>{state[key]=e.target.value;state.page=0;state.selected=null;drawBoxes();if(boxes().length)selectBox(boxes()[0].id);else{chartLevels?.destroy();chartLevels=null;}});
     on('yd-ma','change',e=>{state.ma=e.target.checked;maSeries.forEach(s=>s.applyOptions({visible:state.ma}));$('yd-six-ma').hidden=!state.ma;});
     on('yd-volume','change',e=>{state.volume=e.target.checked;volume?.applyOptions({visible:state.volume});series?.priceScale().applyOptions({scaleMargins:{top:.1,bottom:state.volume?.2:.08}});});
     $('yd-chart-stage').addEventListener('click',e=>{if(e.target.closest('[data-cv]'))state.viewTouched=true;});on('yd-after','click',()=>{state.viewTouched=true;followupRange();});
@@ -540,6 +542,7 @@
   function drawBoxes(){listBoxes();if(primitive){primitive.boxes=boxes();primitive.request?.();}}
   function selectBox(id,focus=true){
     const b=boxes().find(b=>b.id===id);if(!b)return;state.selected=id;state.focusBox=null;chartSelection=id;state.page=Math.floor(boxes().findIndex(b=>b.id===id)/20);drawBoxes();syncRoute();
+    chartLevels?.destroy();chartLevels=series?mountLevels(series,$('yd-chart-levels'),state.job.id,state.result.symbol,b):null;
     const first=state.result.candles[0].t,step=steps[state.result.timeframe];if(focus)chart?.timeScale().setVisibleLogicalRange(shapeRange(b,first,step));
   }
   function openInspection(id){
@@ -551,15 +554,19 @@
     showDialog('yd-inspection');
   }
   function chartLibrary(){return chartTools.library();}
+  function mountLevels(target,host,job,symbol,box){
+    return window.SpikeYoloChartLevels.mount({series:target,host,symbol,detection:box.id,at:box.detected_at_ms,
+      url:`${BASE}/jobs/${job}/results/${encodeURIComponent(symbol)}/levels/${encodeURIComponent(box.id)}`,format:chartTools.axisPrice});
+  }
   async function openFindingPreview(item){
     const dialog=$('yd-preview-dialog');
-    previewRequest?.abort();previewResize?.disconnect();previewChartInstance?.remove();previewResize=previewChartInstance=null;
+    previewLevels?.destroy();previewLevels=null;previewRequest?.abort();previewResize?.disconnect();previewChartInstance?.remove();previewResize=previewChartInstance=null;
     findingPreview=item;const version=++previewVersion,controller=previewRequest=new AbortController();
     const current=()=>version===previewVersion&&dialog.open&&state.active;
     $('yd-preview-title').textContent=`${short(item.symbol)} / USDT · ${periods[item.timeframe]}`;
     $('yd-preview-context').textContent=`${item.side==='long'?'多头':'空头'}密集 · 模型分数 ${(item.confidence*100).toFixed(1)}%`;
     $('yd-preview-confirmation').textContent=`形态确认 ${fmt(item.detected_at_ms,true)} 北京`;
-    $('yd-preview-legend').innerHTML='';
+    $('yd-preview-legend').innerHTML='';$('yd-preview-levels').replaceChildren();
     const message=$('yd-preview-message');message.hidden=false;message.textContent='正在读取检测快照…';
     dialog.querySelector('[data-yd-preview-retry]').hidden=true;
     if(!dialog.open)showDialog('yd-preview-dialog');
@@ -589,6 +596,7 @@
       const legend=row=>{$('yd-preview-legend').innerHTML=chartStyle.legend(row);};legend(rows.at(-1));
       c.subscribeCrosshairMove(p=>{if(current())legend(lookup.get(p.time)||rows.at(-1));});
       previewResize=chartTools.resize(c,host);message.hidden=true;
+      previewLevels=mountLevels(candles,$('yd-preview-levels'),item.job_id,result.symbol,box);
     }catch(e){if(current()){message.textContent=e.name==='AbortError'?'图表读取超时，请重新加载':e.message;dialog.querySelector('[data-yd-preview-retry]').hidden=false;}}
     finally{clearTimeout(timeout);}
   }
@@ -603,7 +611,7 @@
     rect(b){return [this.x(b.x_start_ms),this.series.priceToCoordinate(b.price_high),this.x(b.x_end_ms),this.series.priceToCoordinate(b.price_low)];}
     draw(ctx){for(const b of this.boxes){const [x,y,x2,y2]=this.rect(b);if([x,y,x2,y2].some(v=>v==null)||x2<0||x>this.chart.timeScale().width())continue;const color=b.side==='long'?'#01e599':'#ff4f73';ctx.save();ctx.fillStyle=b.side==='long'?'rgba(35,159,133,.09)':'rgba(217,101,117,.09)';ctx.strokeStyle=color;ctx.lineWidth=state.selected===b.id?2.5:1.2;ctx.setLineDash(b.structural_pass?[]:[4,3]);ctx.fillRect(x,y,x2-x,y2-y);ctx.strokeRect(x,y,x2-x,y2-y);if(x2-x>35){ctx.fillStyle=color;ctx.font='11px system-ui';ctx.fillText(`${b.side==='long'?'L':'S'} ${(b.confidence*100).toFixed(0)}%`,Math.max(2,x+3),Math.max(12,y-4));}ctx.restore();}}
   }
-  function destroyChart(){rememberChart();chartControls?.destroy();chartControls=null;hoverTime=null;crosshair.cancel();chartLookup.clear();displayRows=[];lastReadout='';lastMarkers='';clearTimeout(viewTimer);resize?.disconnect();resize=null;chart?.remove();chart=null;chartIdentity=null;chartSelection=null;series=null;primitive=null;maSeries=[];volume=null;}
+  function destroyChart(){chartLevels?.destroy();chartLevels=null;rememberChart();chartControls?.destroy();chartControls=null;hoverTime=null;crosshair.cancel();chartLookup.clear();displayRows=[];lastReadout='';lastMarkers='';clearTimeout(viewTimer);resize?.disconnect();resize=null;chart?.remove();chart=null;chartIdentity=null;chartSelection=null;series=null;primitive=null;maSeries=[];volume=null;}
   function tailStatus(){
     const tail=state.tail,original=state.result?.cutoff_ms;
     $('yd-tail-refresh').disabled=!state.result||state.tailLoading;$('yd-after').disabled=!state.tail?.candles.length;$('yd-follow').disabled=!state.result;

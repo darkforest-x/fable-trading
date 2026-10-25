@@ -64,6 +64,8 @@ def install(app,runtime,launch_worker=True):
     latest=Latest(book)
     from .chart_tail import ChartTail
     charts=ChartTail(runtime)
+    from .chart_levels import ChartLevels
+    levels=ChartLevels(runtime)
     router=APIRouter(prefix='/api/yolo-detect',dependencies=[Depends(same_origin)])
     def launch():
         if launch_worker:
@@ -127,6 +129,12 @@ def install(app,runtime,launch_worker=True):
         if value.get('error') or not value.get('candles'):raise HTTPException(409,'该币种没有可续接的K线')
         try:return charts.read(identity,value)
         except Exception as exc:raise HTTPException(503,'行情更新失败：'+str(exc)[:180]) from exc
+    @router.get('/jobs/{identity}/results/{symbol}/levels/{detection}')
+    def chart_levels(identity:str,symbol:str,detection:str):
+        value=result(identity,symbol)
+        try:return levels.read(value,detection)
+        except KeyError:raise HTTPException(404,'检测框不存在') from None
+        except Exception as exc:raise HTTPException(503,'周一区间暂不可用，请重试') from exc
     @router.get('/schedules')
     def schedules():
         items=[]
