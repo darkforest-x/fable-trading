@@ -1,0 +1,9 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-recent-20261025-v1",
+  "question": "Owner 2026-10-25: how did the v2 rule (60m confirmation, near Monday edge target, top-40 percent entry score) do over the last five months of data? Freeze the score for the paper monitor.",
+  "inputs": "Codex O-H-L-C ledger + monotone O-L-H-C v2 replay (worst per trade, 10bp exit slippage); score features from exp-monday-limit-reclaim-patterns3-20261024-v1 events (2026-10-24 snapshot symbols)",
+  "score": "Logistic regression refitted exactly as exp-monday-limit-reclaim-optimize-20261025-v1 on fills before 2025-01-01; top-40 percent threshold = 60th percentile of training scores; frozen to score_model.json",
+  "window": "Fills from five months before the last exit in the data",
+  "training_eligible": false,
+  "production_eligible": false
+}
