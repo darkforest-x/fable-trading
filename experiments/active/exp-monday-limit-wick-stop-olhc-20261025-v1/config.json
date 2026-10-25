@@ -1,0 +1,11 @@
+{
+  "experiment_id": "exp-monday-limit-wick-stop-olhc-20261025-v1",
+  "question": "Owner 2026-10-25 (MUBARAK 5m example, about 20R): 1.618 limit with the stop at the 5m fill bar's wick extreme and the near Monday edge target, no reclaim rule or breakeven.",
+  "rule": "Codex frozen signal orders (alts, first weekly-side 1.618 resting limit, near Monday edge target, same window and fees); stop = low (long) / high (short) of the 5m fill bar, placed at that bar's close; exit at target, stop or window end.",
+  "intrabar_path": "OLHC",
+  "monotone_segments": true,
+  "R": "entry-to-wick distance",
+  "scope": "All 626 5m alt symbols of the completed Codex run",
+  "training_eligible": false,
+  "production_eligible": false
+}
