@@ -13,7 +13,8 @@ for a long's later bars, favourable for the opposite; per-trade min of the two
 paths is reported downstream as the pessimistic bound.
 v1 (2026-10-25) is invalid: without monotone segments the adapter replayed a
 rising segment open-high-low-close, so an O-L-H-C short could still reach a
-target below the close. Configs now set intrabar_path and monotone_segments;
+target below the close. Configs now set intrabar_path, monotone_segments and optional combos
+([confirmation minutes, exit mode] pairs, default 60m near Monday edge);
 outputs go next to the config (v2 = O-L-H-C, ohlc-check = O-H-L-C sample).
 """
 from __future__ import annotations
@@ -33,7 +34,7 @@ KEEP = ['trade_id', 'side', 'entry', 'exit_price', 'reason', 'entry_time', 'exit
         'reclaim_status', 'net_notional_bp', 'exit_path_phase']
 
 
-def process(symbol, intrabar, monotone, root):
+def process(symbol, intrabar, monotone, root, combos=None):
     from yoyo.evaluation.monday_limit_reclaim import prepare
     from yoyo.evaluation.monday_limit_reclaim_inputs import load_job
     from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy, run_native
@@ -44,7 +45,11 @@ def process(symbol, intrabar, monotone, root):
     t0 = time.perf_counter()
     f, quality = load_job(job)
     p, e, _, _, tick = prepare(f, job, cfg, quality)
-    e = e[(e.population == 'signal') & (e.reclaim_minutes == 60) & (e.exit_mode == 'near_monday_edge')]
+    combos = combos or [[60, 'near_monday_edge']]
+    keep = pd.Series(False, index=e.index)
+    for minutes, mode in combos:
+        keep |= (e.reclaim_minutes == minutes) & (e.exit_mode == mode)
+    e = e[(e.population == 'signal') & keep]
     out = Path(root)/'symbols'/symbol
     out.mkdir(parents=True, exist_ok=True)
     if e.empty:
@@ -76,7 +81,8 @@ def run(workers=3, symbols=None):
     syms = symbols or cfg.get('symbols') or [r['symbol'] for r in json.loads(SNAP.read_text())['studies']['limit-reclaim']]
     todo = [s for s in syms if not (EXP/'symbols'/s/'done.json').exists()]
     with ProcessPoolExecutor(workers) as ex:
-        futs = {ex.submit(process, s, cfg['intrabar_path'], cfg.get('monotone_segments', False), str(EXP)): s for s in todo}
+        futs = {ex.submit(process, s, cfg['intrabar_path'], cfg.get('monotone_segments', False), str(EXP), cfg.get('combos')): s
+                for s in todo}
         for k, fu in enumerate(as_completed(futs), 1):
             try:
                 r = fu.result()
