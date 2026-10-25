@@ -24,6 +24,11 @@ last-five-months window, frozen c, compared with the current rule. The full
 c grid is kept as a return/drawdown frontier for both periods. Drawdown is on
 realized equity at exits (no mark-to-market), ties at a timestamp keep
 row order.
+Because many alts fill at the same bar time and the 1x gross cap then decides
+which of them get capital, the whole procedure (selection and test) is also
+repeated for TIES random orders of fills sharing a timestamp; medians and
+10-90 percent ranges are reported and the share of orders in which each shape
+beats the current rule in the test.
 """
 from __future__ import annotations
 import json
@@ -39,6 +44,7 @@ from yoyo.evaluation import monday_limit_reclaim_optimize as opt
 EXP = ROOT/'experiments/active/exp-monday-limit-reclaim-sizing-20261025-v1'
 SEL = (pd.Timestamp('2025-01-01', tz='UTC'), pd.Timestamp('2026-01-01', tz='UTC'))
 GRID_C = [.25, .5, .75, 1., 1.25, 1.5, 1.75, 2., 2.5, 3., 4., 5.]
+TIES = 20
 SHAPES = ['equal', 'tier', 'linear', 'kelly_top40', 'kelly_all']
 ZH = dict(equal='现行：等额每笔10%', tier='分档 1/2/3 倍', linear='按超出门槛的分数线性加仓',
           kelly_top40='按分数段凯利比例（只做前40%）', kelly_all='按分数段凯利比例（全部分数段）')
@@ -54,7 +60,7 @@ def near_trades():
     score, cut = ax.scores()
     d = d.join(score.rename('score'), how='inner')
     d['t'] = pd.to_datetime(d.entry, utc=True)
-    return d.sort_values(['entry']).reset_index(), cut
+    return d.reset_index().sort_values(['entry', 'event'], kind='mergesort').reset_index(drop=True), cut
 
 
 def shapes(d, cut, sel):
@@ -85,18 +91,9 @@ def replay(d, mask, k):
     return out, path, x
 
 
-def run():
-    p = 'yoyo/evaluation/monday_limit_reclaim_sizing.py'
-    if subprocess.run(['git','diff','--quiet','HEAD','--',p], cwd=ROOT).returncode or \
-       subprocess.run(['git','ls-files','--error-unmatch',p], cwd=ROOT, capture_output=True).returncode:
-        raise RuntimeError('Commit builder first')
-    cfg = json.loads((EXP/'config.json').read_text())
-    d, cut = near_trades()
-    sel = ((d.t >= SEL[0]) & (d.t < SEL[1])).to_numpy()
-    window = pd.Timestamp(json.loads((ax.RECENT/'summary.json').read_text())['results']['window'][0])
-    periods = dict(selection_2025=sel, test_2026=(d.t >= SEL[1]).to_numpy(), test_last5m=(d.t >= window).to_numpy())
-    w, meta = shapes(d, cut, sel)
-    res = dict(n={k: int(v.sum()) for k, v in periods.items()}, threshold=cut, shape_meta=meta, frontier={}, chosen={}, test={})
+def evaluate(d, w, periods):
+    """Frontier on both periods, scale chosen on 2025 under the current rule's drawdown, frozen test."""
+    res = dict(frontier={}, chosen={}, test={})
     paths = {}
     for name in SHAPES:
         for per in ('selection_2025', 'test_2026'):
@@ -114,11 +111,45 @@ def run():
                                                     mean_bp=float(x.net.mean()), weighted_mean_bp=float((x.net*kk).sum()/kk.sum()))
             paths[f'{name}|{per}'] = path
     res['selection_drawdown_limit_pct'] = limit
+    return res, paths
+
+
+def run():
+    p = 'yoyo/evaluation/monday_limit_reclaim_sizing.py'
+    if subprocess.run(['git','diff','--quiet','HEAD','--',p], cwd=ROOT).returncode or \
+       subprocess.run(['git','ls-files','--error-unmatch',p], cwd=ROOT, capture_output=True).returncode:
+        raise RuntimeError('Commit builder first')
+    cfg = json.loads((EXP/'config.json').read_text())
+    d, cut = near_trades()
+    sel = ((d.t >= SEL[0]) & (d.t < SEL[1])).to_numpy()
+    window = pd.Timestamp(json.loads((ax.RECENT/'summary.json').read_text())['results']['window'][0])
+    periods = dict(selection_2025=sel, test_2026=(d.t >= SEL[1]).to_numpy(), test_last5m=(d.t >= window).to_numpy())
+    w, meta = shapes(d, cut, sel)
+    res, paths = evaluate(d, w, periods)
+    res.update(n={k: int(v.sum()) for k, v in periods.items()}, threshold=cut, shape_meta=meta)
+    rng = np.random.default_rng(20261025)
+    runs = []
+    for _ in range(TIES):
+        order = np.lexsort((rng.random(len(d)), d.entry.to_numpy()))
+        r, _ = evaluate(d.iloc[order].reset_index(drop=True), {k: v[order] for k, v in w.items()}, {k: v[order] for k, v in periods.items()})
+        runs.append(r)
+    rob = {}
+    for name in SHAPES:
+        row = {'chosen_c': [r['chosen'][name]['c'] for r in runs]}
+        for per in ('test_2026', 'test_last5m'):
+            f = np.array([r['test'][f'{name}|{per}']['final_multiple'] for r in runs])
+            dd = np.array([r['test'][f'{name}|{per}']['max_drawdown_pct'] for r in runs])
+            base = np.array([r['test'][f'equal|{per}']['final_multiple'] for r in runs])
+            row[per] = dict(final_median=float(np.median(f)), final_p10=float(np.quantile(f, .1)), final_p90=float(np.quantile(f, .9)),
+                            dd_median=float(np.median(dd)), dd_p90=float(np.quantile(dd, .9)), beats_current_share=float((f > base).mean()))
+        rob[name] = row
+    res['tie_order_robustness'] = dict(orders=TIES, by_shape=rob)
     EXP.mkdir(exist_ok=True)
     charts(res, paths)
     dump(EXP/'summary.json', dict(config=cfg, results=res, source_commit=subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip(),
                                   training_eligible=False, production_eligible=False))
-    print(json.dumps(dict(n=res['n'], limit=limit, chosen=res['chosen'], test=res['test'], meta=meta), ensure_ascii=False, indent=1))
+    print(json.dumps(dict(n=res['n'], limit=res['selection_drawdown_limit_pct'], chosen=res['chosen'], test=res['test'],
+                          robustness=rob, meta=meta), ensure_ascii=False, indent=1))
 
 
 def charts(res, paths):
@@ -131,7 +162,9 @@ def charts(res, paths):
     fig, axes = plt.subplots(1, 2, figsize=(15, 5.6))
     for ax_, per, title in zip(axes, ('selection_2025', 'test_2026'), ('2025年（选参数）', '2026年（检验，参数冻结）')):
         for name in SHAPES:
-            f = res['frontier'][f'{name}|{per}']
+            if name == 'kelly_all' and res['frontier']['kelly_all|selection_2025'] == res['frontier']['kelly_top40|selection_2025']:
+                continue
+            f = [r for r in res['frontier'][f'{name}|{per}'] if r['c'] <= 2.]
             ax_.plot([r['max_drawdown_pct'] for r in f], [r['final_multiple'] for r in f], color=COLOR[name], lw=2, marker='o', ms=4, label=ZH[name])
             ch = res['chosen'][name]['c']
             pt = next(r for r in f if r['c'] == ch)
@@ -142,11 +175,13 @@ def charts(res, paths):
         for sp in ('top', 'right'):
             ax_.spines[sp].set_visible(False)
     axes[0].legend(frameon=False, loc='upper left', fontsize=9)
-    fig.suptitle('按分数加仓 · 同样回撤下的收益 · 每条线是同一方案从小仓位到大仓位，空心圈=按2025年回撤上限选定的仓位，虚线=现行方案2025年回撤',
+    fig.suptitle('按分数加仓 · 同样回撤下的收益 · 每条线是同一方案仓位系数0.25→2，空心圈=按2025年回撤上限选定的仓位，虚线=现行方案2025年回撤',
                  color=INK, x=.01, ha='left', fontsize=10)
     fig.tight_layout(); fig.savefig(EXP/'1_frontier.png', dpi=130); plt.close(fig)
     fig, ax_ = plt.subplots(figsize=(11, 5))
     for name in SHAPES:
+        if name == 'kelly_all' and res['frontier']['kelly_all|selection_2025'] == res['frontier']['kelly_top40|selection_2025']:
+            continue
         pp = np.array(paths.get(f'{name}|test_2026') or [])
         if len(pp):
             ax_.plot(pd.to_datetime(pp[:, 0]), pp[:, 1], color=COLOR[name], lw=2, label=f"{ZH[name]}（仓位系数 {res['chosen'][name]['c']}）")
