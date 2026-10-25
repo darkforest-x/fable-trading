@@ -1,0 +1,7 @@
+# Flexible layout must not silently expand an external link
+
+- **问题**：The paper touch list opened TradingView when clicking apparently empty space beside a coin name. Browser measurement showed a 145px-wide anchor around only 46px of text; a native click in the extra area reproduced the external popup.
+- **死胡同**：Checking click bubbling alone cannot solve this failure. The browser was correctly following an anchor whose `flex:1` layout owned the blank area; the row handler intentionally ignored anchors. Rendering tests alone did not cover that geometry.
+- **有效路径**：Make coin identity and price one local chart-selection button; give TradingView its own explicit, fixed 44px action beside inspection/favorite/remove. Keep the remaining row blank area local. Verify both a coordinate click beyond the coin text and the explicit TV button in a real browser. Patch keyed rows in place during polling so live prices cannot replace a focused or pressed control.
+- **通用规则**：When a blank area performs an unexpected action, inspect the actual hit target and its bounding box before changing event propagation. Separate external navigation from selection semantically and geometrically, then verify positive and negative click cases.
+- **牵连**：`reclaim-watchlist.js`, `monday-reclaim-paper.css`, `frontend_reclaim_watchlist.test.cjs`; raw before-hitbox/browser evidence in `output/playwright/reclaim-compact-20261025/`. Shared Monday membership and execution/analytics semantics remain unchanged.

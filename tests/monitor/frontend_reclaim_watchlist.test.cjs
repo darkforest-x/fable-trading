@@ -26,6 +26,26 @@ test('row exposes separate chart, TradingView, exact inspection, favorite and re
  assert.match(html,/data-watch-select="SOL-USDT-SWAP"/);assert.match(html,/tradingview.com/);assert.match(html,/#yolo-detect\?tab=results&amp;symbol=SOL-USDT-SWAP&amp;timeframe=1H/);
  assert.match(html,/data-watch-action="favorite" aria-pressed="true"/);assert.match(html,/data-watch-action="remove"/);assert.match(html,/>—</);
 });
+test('coin identity and quote share a local button; external navigation is an explicit TV action',()=>{
+ const html=ui.rowHTML(coin('SOL'), 'SOL-USDT-SWAP');
+ const local=html.match(/<button[^>]*data-watch-select="SOL-USDT-SWAP"[^>]*>([\s\S]*?)<\/button>/);
+ assert.ok(local);assert.match(local[1],/rp-watch-name/);assert.match(local[1],/rp-watch-quote/);
+ assert.doesNotMatch(local[1],/<a\b|<button\b/);
+ const links=[...html.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/g)];
+ assert.equal(links.length,2);
+ const external=links.filter(link=>/tradingview/.test(link[1]));
+ assert.equal(external.length,1);assert.match(external[0][1],/class="rp-watch-tv"/);assert.equal(external[0][2],'TV ↗');
+ assert.doesNotMatch(external[0][1],/rp-watch-name|data-watch-select/);
+});
+test('recent strip is newest five visible touches, independent of search and favorites',()=>{
+ const data=snapshot(Array.from({length:8},(_,i)=>coin('C'+i,{touches:{lower:{source:'history',candle_ms:1000+i*1000,observed_ms:20000-i}}})).concat(coin('BTC')));
+ const prefs=list.createListPreferences(disk());prefs.toggle('BTC-USDT-SWAP');
+ assert.deepEqual(ui.recentRows(data,prefs).map(x=>x.symbol),['C7','C6','C5','C4','C3'].map(x=>x+'-USDT-SWAP'));
+ const undo=prefs.remove(data.items[7],data.week);
+ assert.deepEqual(ui.recentRows(data,prefs).map(x=>x.symbol),['C6','C5','C4','C3','C2'].map(x=>x+'-USDT-SWAP'));
+ prefs.undo(undo);assert.equal(ui.recentRows(data,prefs)[0].symbol,'C7-USDT-SWAP');
+ assert.deepEqual(ui.recentRows(null,prefs),[]);
+});
 test('coin selection never borrows another symbol or a shadow fill and honors fill chronology',()=>{
  const old=position('SOL'),latest=position('SOL',{id:2,fill_ms:3000}),shadow=position('SOL',{id:3,fill_ms:5000,taken:0});
  assert.equal(ui.coinTrade({open:[old,shadow],closed:[latest]},'SOL-USDT-SWAP'),latest);

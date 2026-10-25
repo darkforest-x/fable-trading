@@ -1,0 +1,7 @@
+# Stitch completion text does not prove that a design was revised
+
+- **问题**：A timed-out edit eventually showed a completion narrative in Stitch, but the selected screen still displayed the previous right-side watchlist. Its downloaded HTML was byte-identical to the prior export.
+- **死胡同**：Neither an omitted list result nor a successful-looking agent log settles whether the requested design exists. The former can miss screens, while the latter can describe changes that did not reach the visible canvas/export.
+- **有效路径**：Inspect the actual loaded project canvas, selected screen, screenshot and exported HTML together. After confirming the old export was unchanged, request one explicit delivery repair. New screen `7a1de01ec1304ac6baa2e941ce351cfd` supplied visibly different left-panel/recent-chip markup and a matching PNG before implementation. This establishes artifact delivery, not an unproven claim about the backend cause of the timeout.
+- **通用规则**：Judge design readiness by rendered and exported artifacts tied to the current request. Keep timeout, listing omission, narrative completion and artifact completion as separate facts; investigate disagreement instead of inferring success or failure.
+- **牵连**：Official project `8978791379095391159`, explicit `GEMINI_3_8_FLASH`, `docs/design/stitch-20261025-reclaim-compact/source.json`; see also [listing omission does not prove failure](stitch-listing-omission-does-not-prove-generation-failure.md). No private account data was supplied to Stitch.
