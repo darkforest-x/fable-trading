@@ -42,6 +42,8 @@ class MondayFibService:
         self.catalog_error = None
         self.stream_error = None
         self.attempts = {}
+        # Read-only observers (paper engines); they must only enqueue and never raise.
+        self.listeners = []
 
     def start(self):
         if self.threads:
@@ -127,6 +129,11 @@ class MondayFibService:
             return
         self.book.touch(levels, symbol, side, price, now, candle_ms, source, known_after_ms=known_after_ms)
         self.consumed.add(key)
+        for listener in self.listeners:
+            try:
+                listener.on_touch(levels, symbol, side, price, now, candle_ms, source)
+            except Exception:
+                pass
 
     def _check(self, levels, symbol, quote, source, known_after_ms=None):
         if not levels["end"] <= quote["candle_ms"] < levels["expires"]:
@@ -150,6 +157,11 @@ class MondayFibService:
                 return
             self.quotes[symbol] = quote
             self.last_message_ms = now
+            for listener in self.listeners:
+                try:
+                    listener.on_quote(symbol, quote)
+                except Exception:
+                    pass
             levels = self.levels.get(symbol, {})
             if (levels.get("state") != "ready" or levels.get("epoch") != self.epoch
                     or levels.get("week") != week_window(now)["week"]):

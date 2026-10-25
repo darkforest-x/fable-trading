@@ -83,6 +83,9 @@ def create_app(runtime=None, start_monitor=True):
     vidya_retest = VidyaRetestService(runtime)
     from yoyo.monitor.monday_fib_service import MondayFibService, install as install_monday_fib
     monday_fib = MondayFibService(runtime)
+    from yoyo.monitor.monday_reclaim_paper import ReclaimPaper, install as install_reclaim_paper
+    reclaim_paper = ReclaimPaper(runtime, monday_fib)
+    monday_fib.listeners.append(reclaim_paper)
 
     @asynccontextmanager
     async def lifespan(app):
@@ -96,6 +99,7 @@ def create_app(runtime=None, start_monitor=True):
                 altcoin_leaders.start()
                 vidya_retest.start()
                 monday_fib.start()
+                reclaim_paper.start()
             if start_monitor:
                 app.state.start_yolo_workbench()
             app.state.paper_desk_market.start()
@@ -110,6 +114,7 @@ def create_app(runtime=None, start_monitor=True):
             app.state.paper_desk_worker.close()
             app.state.paper_desk_market.close()
             vidya_retest.close()
+            reclaim_paper.close()
             monday_fib.close()
             market_context.close()
             market_sync.close()
@@ -137,6 +142,7 @@ def create_app(runtime=None, start_monitor=True):
     from yoyo.monitor.vidya_retest_api import install as install_vidya_retest
     install_vidya_retest(app, runtime, vidya_retest)
     install_monday_fib(app, monday_fib)
+    install_reclaim_paper(app, reclaim_paper)
     from yoyo.monitor.monday_candles import install as install_monday_candles
     install_monday_candles(app, runtime)
 
