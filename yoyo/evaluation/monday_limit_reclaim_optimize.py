@@ -41,7 +41,8 @@ def load_path(args):
     p = root/'symbols'/symbol/'trades.csv.gz'
     if not p.exists():
         return pd.DataFrame()
-    t = pd.read_csv(p, usecols=['trade_id', 'side', 'entry', 'target_price', 'reason', 'entry_time', 'exit_time', 'net_notional_bp'])
+    want = {'trade_id', 'side', 'entry', 'target_price', 'reason', 'entry_time', 'exit_time', 'net_notional_bp'}
+    t = pd.read_csv(p, usecols=lambda c: c in want)
     t['leg'] = t.trade_id.str.rsplit(':', n=1).str[-1]
     t['base'] = t.trade_id.str.rsplit(':', n=1).str[0]
     t['symbol'] = symbol
@@ -80,18 +81,40 @@ def stats(x, col='net'):
     return dict(n=len(x), win_pct=float(100*(v > 0).mean()), mean_bp=float(v.mean()), median_bp=float(v.median()))
 
 
-def run():
+def tp100_from_ledgers():
+    """Near-edge trades from the Codex ledger (O-H-L-C) and the monotone O-L-H-C v2 replay."""
+    v2 = A/'exp-monday-limit-reclaim-olhc-20261025-v2/symbols'
+    syms = sorted(d.name for d in v2.iterdir() if (d/'done.json').exists())
+    with ProcessPoolExecutor(4) as ex:
+        o = pd.concat(list(ex.map(codex_rows, syms, chunksize=8)), ignore_index=True)
+        l = pd.concat(list(ex.map(load_path, [(v2.parent, s) for s in syms], chunksize=8)), ignore_index=True)
+        extra = pd.concat(list(ex.map(ledger_extra, syms, chunksize=8)), ignore_index=True)
+    return o, l.drop(columns=['leg', 'base']).assign(leg='tp100', base=l.trade_id), extra
+
+
+def codex_rows(symbol):
+    t = pd.read_csv(SRC/symbol/'trades.csv.gz', usecols=['trade_id', 'population', 'reclaim_minutes', 'exit_mode', 'closed',
+                                                          'side', 'reason', 'entry_time', 'exit_time', 'net_bp'])
+    t = t[(t.population == 'signal') & (t.reclaim_minutes == 60) & (t.exit_mode == 'near_monday_edge') & t.closed]
+    return t.rename(columns={'net_bp': 'net_notional_bp'}).assign(leg='tp100', base=t.trade_id, symbol=symbol)[
+        ['trade_id', 'side', 'reason', 'entry_time', 'exit_time', 'net_notional_bp', 'leg', 'base', 'symbol']]
+
+
+def run(part='all'):
     p = 'yoyo/evaluation/monday_limit_reclaim_optimize.py'
     if subprocess.run(['git','diff','--quiet','HEAD','--',p], cwd=ROOT).returncode or \
        subprocess.run(['git','ls-files','--error-unmatch',p], cwd=ROOT, capture_output=True).returncode:
         raise RuntimeError('Commit builder first')
     cfg = json.loads((EXP/'config.json').read_text())
-    ro, rl = A/'exp-monday-limit-reclaim-exits-ohlc-20261025-v1', A/'exp-monday-limit-reclaim-exits-olhc-20261025-v1'
-    syms = sorted(d.name for d in (ro/'symbols').iterdir())
-    with ProcessPoolExecutor(4) as ex:
-        o = pd.concat(list(ex.map(load_path, [(ro, s) for s in syms], chunksize=8)), ignore_index=True)
-        l = pd.concat(list(ex.map(load_path, [(rl, s) for s in syms], chunksize=8)), ignore_index=True)
-        extra = pd.concat(list(ex.map(ledger_extra, syms, chunksize=8)), ignore_index=True)
+    if part == 'score':
+        o, l, extra = tp100_from_ledgers()
+    else:
+        ro, rl = A/'exp-monday-limit-reclaim-exits-ohlc-20261025-v1', A/'exp-monday-limit-reclaim-exits-olhc-20261025-v1'
+        syms = sorted(d.name for d in (ro/'symbols').iterdir())
+        with ProcessPoolExecutor(4) as ex:
+            o = pd.concat(list(ex.map(load_path, [(ro, s) for s in syms], chunksize=8)), ignore_index=True)
+            l = pd.concat(list(ex.map(load_path, [(rl, s) for s in syms], chunksize=8)), ignore_index=True)
+            extra = pd.concat(list(ex.map(ledger_extra, syms, chunksize=8)), ignore_index=True)
     for d in (o, l):
         d['net_s'] = d.net_notional_bp-np.where(d.reason == 4, 0., SLIP)
         d['entry_ns'] = pd.to_datetime(d.entry_time, utc=True).astype('int64'); d['exit_ns'] = pd.to_datetime(d.exit_time, utc=True).astype('int64')
@@ -100,17 +123,19 @@ def run():
     m['net'] = np.where(worse, m.net_s_l, m.net_s_o)
     m['entry'] = np.where(worse, m.entry_ns_l, m.entry_ns_o); m['exit'] = np.where(worse, m.exit_ns_l, m.exit_ns_o)
     m['reason_w'] = np.where(worse, m.reason_l, m.reason_o)
-    legs = {leg: m[m.leg == leg].set_index('base') for leg in LEGS}
-    common = legs['tp50'].index.intersection(legs['tp100'].index)
-    part = {}
-    for suf in ('o', 'l'):
-        a, b = legs['tp50'].loc[common], legs['tp100'].loc[common]
-        part[suf] = (a[f'net_s_{suf}']+b[f'net_s_{suf}'])/2
-    pw = part['l'] < part['o']
-    partial = legs['tp100'].loc[common].copy()
-    partial['net'] = np.where(pw, part['l'], part['o'])
-    partial['exit'] = np.maximum(legs['tp50'].loc[common, 'exit'], legs['tp100'].loc[common, 'exit'])
-    variants = {**legs, 'partial': partial}
+    legs = {leg: m[m.leg == leg].set_index('base') for leg in (LEGS if part != 'score' else ('tp100',))}
+    variants = dict(legs)
+    if part != 'score':
+        common = legs['tp50'].index.intersection(legs['tp100'].index)
+        halves = {}
+        for suf in ('o', 'l'):
+            a, b = legs['tp50'].loc[common], legs['tp100'].loc[common]
+            halves[suf] = (a[f'net_s_{suf}']+b[f'net_s_{suf}'])/2
+        pw = halves['l'] < halves['o']
+        partial = legs['tp100'].loc[common].copy()
+        partial['net'] = np.where(pw, halves['l'], halves['o'])
+        partial['exit'] = np.maximum(legs['tp50'].loc[common, 'exit'], legs['tp100'].loc[common, 'exit'])
+        variants['partial'] = partial
     ex_ = extra.set_index('trade_id')
     t100 = variants['tp100']
     base_ids = t100.index
@@ -169,20 +194,20 @@ def run():
     score['valid_sizing_replay_from_2025'] = sizing
     res['score'] = score
     EXP.mkdir(exist_ok=True)
-    charts(res, paths)
-    dump(EXP/'summary.json', dict(config=cfg, vol_bucket_threshold=thr, results=res,
+    charts(res, paths, part)
+    dump(EXP/('summary_score.json' if part == 'score' else 'summary.json'), dict(config=cfg, part=part, vol_bucket_threshold=thr, results=res,
         source_commit=subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip(), training_eligible=False, production_eligible=False))
     print(json.dumps(res, ensure_ascii=False, indent=1)[:6000])
 
 
-def charts(res, paths):
+def charts(res, paths, part='all'):
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     plt.rcParams.update({'font.sans-serif': ['PingFang SC', 'Heiti SC', 'Arial Unicode MS'], 'axes.unicode_minus': False,
                          'axes.edgecolor': '#c3c2b7', 'axes.labelcolor': INK2, 'xtick.color': MUTED, 'ytick.color': MUTED,
                          'axes.facecolor': SURF, 'figure.facecolor': SURF})
-    names = list(VAR_ZH)
+    names = [n for n in VAR_ZH if n in res['variants']]
     fig, axes = plt.subplots(1, 2, figsize=(15, 4.6))
     for ax, metric, title in ((axes[0], 'win_pct', '胜率 %'), (axes[1], 'mean_bp', '每笔扣费、滑点后平均 bp')):
         x = np.arange(len(names)); w = .38
@@ -197,7 +222,10 @@ def charts(res, paths):
             ax.spines[sp].set_visible(False)
     h, l = axes[0].get_legend_handles_labels(); fig.legend(h, l, frameon=False, ncols=2, loc='upper right')
     fig.suptitle('止盈放近一点 / 分批止盈 · 每笔取两种K线顺序中较差的结果 · 山寨币 60分钟确认', color=INK, x=.01, ha='left')
-    fig.tight_layout(); fig.savefig(EXP/'1_targets.png', dpi=130); plt.close(fig)
+    fig.tight_layout()
+    if part != 'score':
+        fig.savefig(EXP/'1_targets.png', dpi=130)
+    plt.close(fig)
     q = res['score']['valid_by_quintile']; ks = sorted(q, key=int)
     fig, axes = plt.subplots(1, 2, figsize=(14, 4.4))
     axes[0].bar([str(k) for k in ks], [q[k]['win_pct'] for k in ks], color=BLUE)
@@ -222,4 +250,5 @@ def charts(res, paths):
 
 
 if __name__ == '__main__':
-    run()
+    import sys
+    run('score' if '--score-only' in sys.argv else 'all')
