@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+
+<html class="h-full w-full overflow-hidden" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>SPIKE 全站浅深色 · 单图标切换</title>
+<!-- Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-container-low": "var(--bg-card-subtle)",
+            "primary-fixed": "#d7e2ff",
+            "surface-container-highest": "var(--bg-card-subtle)",
+            "on-background": "var(--text-main)",
+            "surface-dim": "#cbdbf5",
+            "surface-container": "var(--bg-panel)",
+            "surface-bright": "#f8f9ff",
+            "on-tertiary-fixed-variant": "#92002a",
+            "primary-container": "var(--color-primary-container)",
+            "tertiary-fixed": "#ffdadb",
+            "on-tertiary-container": "#fffaf9",
+            "tertiary-container": "#db2b4e",
+            "tertiary": "#b70438",
+            "inverse-on-surface": "#eaf1ff",
+            "surface": "var(--bg-panel)",
+            "on-tertiary-fixed": "#40000d",
+            "secondary-fixed": "#94f4d9",
+            "error": "#ba1a1a",
+            "outline-variant": "var(--border-subtle)",
+            "surface-container-high": "var(--bg-card-subtle)",
+            "background": "var(--bg-main)",
+            "inverse-surface": "#213145",
+            "on-primary-container": "#fcfbff",
+            "secondary-fixed-dim": "#78d8be",
+            "primary-fixed-dim": "#abc7ff",
+            "on-primary-fixed": "#001b3f",
+            "on-primary": "#ffffff",
+            "on-secondary-fixed-variant": "#005142",
+            "on-tertiary": "#ffffff",
+            "error-container": "#ffdad6",
+            "surface-variant": "var(--bg-panel)",
+            "on-secondary": "#ffffff",
+            "on-primary-fixed-variant": "#00458f",
+            "secondary-container": "#92f2d7",
+            "on-secondary-fixed": "#002019",
+            "surface-container-lowest": "var(--bg-card)",
+            "on-error": "#ffffff",
+            "primary": "var(--color-primary)",
+            "tertiary-fixed-dim": "#ffb2b7",
+            "outline": "var(--text-muted)",
+            "on-surface-variant": "var(--text-muted)",
+            "on-surface": "var(--text-main)",
+            "on-secondary-container": "#00705c",
+            "on-error-container": "#93000a",
+            "inverse-primary": "#abc7ff",
+            "secondary": "#006b58",
+            "surface-tint": "#005cbb",
+            // Custom trade tokens matching specification
+            "candle-up": "#169873",
+            "candle-down": "#d7355d",
+            "candle-up-vol": "rgba(22, 152, 115, 0.22)",
+            "candle-down-vol": "rgba(215, 53, 93, 0.22)",
+          },
+          fontFamily: {
+            "headline-md": ["Inter"],
+            "display": ["Inter"],
+            "label-numeric-md": ["JetBrains Mono"],
+            "body-lg": ["Inter"],
+            "headline-sm": ["Inter"],
+            "label-numeric-sm": ["JetBrains Mono"],
+            "body-sm": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "headline-lg": ["Inter"],
+            "label-numeric-lg": ["JetBrains Mono"],
+            "label-caps": ["Inter"],
+            "body-md": ["Inter"]
+          },
+          fontSize: {
+            "headline-md": ["20px", { lineHeight: "28px", letterSpacing: "-0.015em", fontWeight: "600" }],
+            "display": ["36px", { lineHeight: "44px", letterSpacing: "-0.025em", fontWeight: "600" }],
+            "label-numeric-md": ["14px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "500" }],
+            "body-lg": ["16px", { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "400" }],
+            "headline-sm": ["17px", { lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "label-numeric-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.02em", fontWeight: "500" }],
+            "body-sm": ["12px", { lineHeight: "16px", letterSpacing: "0.005em", fontWeight: "400" }],
+            "headline-lg-mobile": ["24px", { lineHeight: "32px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "headline-lg": ["28px", { lineHeight: "36px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "label-numeric-lg": ["20px", { lineHeight: "26px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "label-caps": ["10px", { lineHeight: "12px", letterSpacing: "0.08em", fontWeight: "600" }],
+            "body-md": ["14px", { lineHeight: "20px", letterSpacing: "0em", fontWeight: "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* CSS SEMANTIC VARIABLES: LIGHT (DEFAULT) & DEEP CHARCOAL DARK */
+    :root {
+      --bg-main: #f8f9fc;
+      --bg-panel: rgba(255, 255, 255, 0.75);
+      --bg-panel-border: rgba(255, 255, 255, 0.85);
+      --bg-card: rgba(255, 255, 255, 0.92);
+      --bg-card-subtle: rgba(220, 233, 255, 0.35);
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --color-primary: #0059b5;
+      --color-primary-container: #0071e3;
+      --border-subtle: rgba(193, 198, 214, 0.4);
+      --canvas-bg-radial: radial-gradient(ellipse at 50% -15%, #DAE7F6 0%, #EBF1F9 55%, #F3F6FB 100%);
+      --grid-line-color: rgba(193, 198, 214, 0.18);
+      --chart-axis-text: #717785;
+      --chart-grid-stroke: rgba(193, 198, 214, 0.28);
+      --panel-shadow: 0 12px 36px -4px rgba(11, 28, 48, 0.08), 0 4px 12px -2px rgba(11, 28, 48, 0.04);
+    }
+
+    html.dark {
+      --bg-main: #101318;
+      --bg-panel: rgba(28, 34, 44, 0.72);
+      --bg-panel-border: rgba(255, 255, 255, 0.09);
+      --bg-card: rgba(22, 27, 36, 0.88);
+      --bg-card-subtle: rgba(35, 43, 56, 0.45);
+      --text-main: #e8edf4;
+      --text-muted: #9aaabc;
+      --color-primary: #5aa9ff;
+      --color-primary-container: #5aa9ff;
+      --border-subtle: rgba(255, 255, 255, 0.10);
+      --canvas-bg-radial: radial-gradient(ellipse at 50% -15%, #18202d 0%, #12161f 55%, #101318 100%);
+      --grid-line-color: rgba(255, 255, 255, 0.04);
+      --chart-axis-text: #8e9eaf;
+      --chart-grid-stroke: rgba(255, 255, 255, 0.07);
+      --panel-shadow: 0 16px 40px -6px rgba(0, 0, 0, 0.5), 0 4px 14px -2px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Apple Glass Physical Specular Highlights & Optics */
+    .apple-glass {
+      background: var(--bg-panel);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid var(--bg-panel-border);
+      box-shadow: var(--panel-shadow);
+    }
+    .apple-glass-pill {
+      background: var(--bg-panel);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--bg-panel-border);
+    }
+    .apple-glass-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid var(--bg-panel-border);
+      box-shadow: var(--panel-shadow);
+    }
+
+    /* Crosshair & Chart cursor */
+    #chart-canvas {
+      cursor: crosshair;
+    }
+
+    /* Custom thin scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(113, 119, 133, 0.25);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(113, 119, 133, 0.45);
+    }
+
+    /* Theme icon rotation transition */
+    .theme-icon-transition {
+      transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .theme-icon-transition {
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="w-screen h-screen overflow-hidden font-body-md text-on-surface bg-[var(--bg-main)] select-none relative transition-colors duration-200">
+<!-- Level 0: Atmosphere Canvas Background -->
+<div class="absolute inset-0 pointer-events-none z-0" id="atmosphere-bg" style="background: var(--canvas-bg-radial);"></div>
+<!-- Ambient Micro Grid Matrix (Trading Desk Atmosphere) -->
+<div class="absolute inset-0 pointer-events-none z-0 opacity-40" id="matrix-grid" style="background-image: linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px); background-size: 48px 48px;"></div>
+<!-- 100vw x 100dvh Wallpaper Candlestick Canvas -->
+<div class="absolute inset-0 w-full h-full z-0 overflow-hidden" id="chart-container">
+<canvas class="w-full h-full block" id="chart-canvas"></canvas>
+</div>
+<!-- Interactive Crosshair Labels (Dynamic Overlay) -->
+<div class="pointer-events-none absolute right-0 z-10 hidden font-label-numeric-sm text-on-primary bg-[#0b1c30] dark:bg-[#1a2230] px-2 py-0.5 rounded-l text-[10px] shadow-sm transform -translate-y-1/2 border border-white/20" id="crosshair-y-label">
+  184.50
+</div>
+<div class="pointer-events-none absolute bottom-0 z-10 hidden font-label-numeric-sm text-on-primary bg-[#0b1c30] dark:bg-[#1a2230] px-2 py-0.5 rounded-t text-[10px] shadow-sm transform -translate-x-1/2 border border-white/20" id="crosshair-x-label">
+  10-24 14:00
+</div>
+<!-- TOP VIEWPORT CONTAINER: FLOATING CAPSULES -->
+<header class="absolute top-0 inset-x-0 z-30 p-2 sm:p-4 pointer-events-none flex flex-col md:flex-row justify-between items-start gap-2">
+<!-- Brand & Binary Theme Button Strip -->
+<div class="pointer-events-auto apple-glass rounded-2xl px-2.5 py-1.5 flex items-center gap-2 shadow-sm">
+<div class="w-6 h-6 rounded-lg bg-primary-container flex items-center justify-center text-on-primary shadow-xs">
+<span class="material-symbols-outlined text-[16px] leading-none">show_chart</span>
+</div>
+<span class="font-headline-sm text-[14px] font-bold text-on-surface tracking-tight">SPIKE</span>
+<span class="font-label-caps text-[9px] px-1.5 py-0.2 rounded-md bg-primary-container/10 text-primary border border-primary-container/20 font-bold">模拟</span>
+<div class="h-3.5 w-[1px] bg-outline-variant/40 ml-0.5"></div>
+<button class="w-6 h-6 rounded-lg text-outline hover:text-on-surface flex items-center justify-center transition-colors" onclick="resetToLatestTrade()" title="刷新最新行情">
+<span class="material-symbols-outlined text-[15px]">refresh</span>
+</button>
+<div class="h-3.5 w-[1px] bg-outline-variant/40 ml-0.5"></div>
+<!-- OWNER NEW SPEC: EXACTLY ONE 44PX ICON-ONLY SUN/MOON TOGGLE BUTTON -->
+<button aria-label="切换浅色与深色主题" class="w-[44px] h-[44px] rounded-xl text-on-surface hover:text-primary hover:bg-surface-container-highest/60 flex items-center justify-center transition-all active:scale-95" id="theme-toggle-btn" onclick="toggleBinaryTheme()" title="点击切换深色/浅色外观">
+<!-- In light mode: shows moon (click to switch to dark) -->
+<!-- In dark mode: shows sun (click to switch to light) -->
+<span class="material-symbols-outlined text-[20px] theme-icon-transition" id="theme-toggle-icon">dark_mode</span>
+</button>
+</div>
+<!-- Recent Touched Chips Strip -->
+<div class="pointer-events-auto apple-glass rounded-2xl px-2 py-1 flex items-center gap-1.5 max-w-full overflow-x-auto shadow-sm select-none" id="recent-touch-chips-strip">
+<span class="text-[10px] font-label-caps text-outline pl-1 pr-0.5 hidden sm:inline flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[12px] text-primary">history</span>触价
+    </span>
+<button class="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-surface-container-lowest/90 hover:bg-surface-container-lowest border border-primary/30 text-on-surface transition-all active:scale-95 shadow-xs" onclick="selectUniverseCoin('SOL/USDT', 184.50, true, 'short', 'BE Armed', 188.00, 168.00, 198.50, 156.20, '+0.42%')">
+<span class="w-4 h-4 rounded-full bg-primary-container/15 text-primary text-[8px] font-bold flex items-center justify-center">S</span>
+<span class="font-bold text-[11px]">SOL</span>
+<span class="text-[10px] text-tertiary font-label-numeric-sm font-semibold">↑198.5</span>
+<span class="text-[9px] text-outline font-label-numeric-sm hidden xs:inline">10m前</span>
+</button>
+<button class="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-surface-container-lowest/60 hover:bg-surface-container-lowest border border-white/40 dark:border-white/10 text-on-surface transition-all active:scale-95" onclick="selectUniverseCoin('BTC/USDT', 67800.00, true, 'long', '待确认', 68400.00, 66500.00, 69500.00, 65300.00, '-0.85%')">
+<span class="w-4 h-4 rounded-full bg-surface-container-high text-[8px] font-bold flex items-center justify-center">B</span>
+<span class="font-bold text-[11px]">BTC</span>
+<span class="text-[10px] text-candle-up font-label-numeric-sm font-semibold">↓65.3k</span>
+<span class="text-[9px] text-outline font-label-numeric-sm hidden xs:inline">44m前</span>
+</button>
+<button class="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-surface-container-lowest/60 hover:bg-surface-container-lowest border border-white/40 dark:border-white/10 text-on-surface transition-all active:scale-95" onclick="selectUniverseCoin('ETH/USDT', 2504.00, false, null, null, 2640.00, 2480.00, 2730.00, 2390.00, '+1.18%')">
+<span class="w-4 h-4 rounded-full bg-surface-container-high text-[8px] font-bold flex items-center justify-center">E</span>
+<span class="font-bold text-[11px]">ETH</span>
+<span class="text-[10px] text-tertiary font-label-numeric-sm font-semibold">↑2,730</span>
+<span class="text-[9px] text-outline font-label-numeric-sm hidden xs:inline">2h前</span>
+</button>
+<button class="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-surface-container-lowest/60 hover:bg-surface-container-lowest border border-white/40 dark:border-white/10 text-on-surface transition-all active:scale-95" onclick="selectUniverseCoin('SUI/USDT', 2.05, false, null, null, 2.25, 1.95, 2.45, 1.80, '+3.80%')">
+<span class="w-4 h-4 rounded-full bg-surface-container-high text-[8px] font-bold flex items-center justify-center">S</span>
+<span class="font-bold text-[11px]">SUI</span>
+<span class="text-[10px] text-tertiary font-label-numeric-sm font-semibold">↑2.45</span>
+<span class="text-[9px] text-outline font-label-numeric-sm hidden xs:inline">4h前</span>
+</button>
+<button class="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-surface-container-lowest/60 hover:bg-surface-container-lowest border border-white/40 dark:border-white/10 text-on-surface transition-all active:scale-95" onclick="selectUniverseCoin('DOGE/USDT', 0.142, false, null, null, 0.155, 0.132, 0.168, 0.125, '+2.14%')">
+<span class="w-4 h-4 rounded-full bg-surface-container-high text-[8px] font-bold flex items-center justify-center">D</span>
+<span class="font-bold text-[11px]">DOGE</span>
+<span class="text-[10px] text-candle-up font-label-numeric-sm font-semibold">↓0.132</span>
+<span class="text-[9px] text-outline font-label-numeric-sm hidden xs:inline">6h前</span>
+</button>
+</div>
+<!-- Top-right compact account strip & Analytics trigger -->
+<div class="pointer-events-auto apple-glass rounded-2xl p-1.5 sm:px-3 sm:py-1.5 flex items-center gap-2.5 sm:gap-3.5 max-w-full shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-caps text-[9px] text-on-surface-variant leading-none">净值</span>
+<span class="font-label-numeric-md text-[13px] font-bold text-on-surface">1,048.60 <span class="text-[9px] font-normal text-on-surface-variant">U</span></span>
+</div>
+<div class="h-5 w-[1px] bg-outline-variant/40"></div>
+<div class="flex flex-col">
+<span class="font-label-caps text-[9px] text-on-surface-variant leading-none">已结盈亏</span>
+<span class="font-label-numeric-md text-[13px] font-semibold text-secondary dark:text-[#78d8be]">+48.60</span>
+</div>
+<div class="h-5 w-[1px] bg-outline-variant/40 hidden sm:block"></div>
+<div class="hidden sm:flex flex-col">
+<span class="font-label-caps text-[9px] text-on-surface-variant leading-none">胜率</span>
+<span class="font-label-numeric-sm text-[12px] font-bold text-secondary dark:text-[#78d8be]">66.7%</span>
+</div>
+<div class="h-5 w-[1px] bg-outline-variant/40"></div>
+<button class="h-7 px-2.5 rounded-xl bg-primary-container/10 hover:bg-primary-container/20 text-primary border border-primary-container/30 flex items-center gap-1 text-[11px] font-semibold active:scale-95 transition-all shadow-xs" id="analytics-open-btn" onclick="openAnalyticsModal()" title="查看 1.618 模拟盘综合统计分析">
+<span class="material-symbols-outlined text-[15px] text-primary">analytics</span>
+<span>统计分析</span>
+</button>
+<button class="h-7 w-7 rounded-xl bg-surface-container-highest/50 hover:bg-surface-container-highest text-on-surface flex items-center justify-center active:scale-95 transition-all border border-outline-variant/30 hidden lg:flex" onclick="toggleMobilePreviewDrawer()" title="查看 390px 移动端视口预览">
+<span class="material-symbols-outlined text-[16px]">smartphone</span>
+</button>
+</div>
+</header>
+<!-- FLOATING SIDEBAR: SLIM COLLAPSIBLE GLASS RECORDS PANEL (~290px) -->
+<div class="absolute z-30 top-16 sm:top-20 left-3 sm:left-4 w-[calc(100vw-1.5rem)] sm:w-[290px] apple-glass rounded-2xl p-2.5 shadow-xl border border-white/60 dark:border-white/10 flex flex-col gap-2 transition-all" id="selected-coin-context-card">
+<div class="flex items-center justify-between">
+<button class="flex items-center gap-1.5 group text-left" onclick="toggleTouchesPanel()" title="点击展开/折叠最近触价列表">
+<span class="font-headline-sm text-[15px] font-bold text-on-surface group-hover:text-primary transition-colors" id="active-symbol-badge">SOL/USDT</span>
+<span class="material-symbols-outlined text-[16px] text-outline group-hover:text-primary transition-transform duration-200" id="coin-dropdown-chevron">expand_more</span>
+<span class="font-label-numeric-sm text-[10px] text-on-surface-variant bg-surface-container-high/60 px-1 py-0.2 rounded">永续</span>
+</button>
+<span class="flex items-center gap-1 px-1.5 py-0.5 rounded-full font-label-caps text-[9px] bg-tertiary-container/10 text-tertiary font-semibold border border-tertiary-container/20" id="active-trade-pill">
+<span class="w-1.5 h-1.5 rounded-full bg-candle-down animate-pulse"></span>做空 · 浮盈中
+    </span>
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-numeric-sm text-on-surface-variant bg-surface-container-high/30 rounded-xl px-2 py-1 border border-outline-variant/15">
+<span>入场: <span class="font-bold text-on-surface">184.50</span></span>
+<span class="text-outline">|</span>
+<span>现价: <span class="font-bold text-candle-up" id="live-card-price">184.50</span></span>
+<span class="text-outline">|</span>
+<span class="text-secondary dark:text-[#78d8be] font-medium">+0.42%</span>
+</div>
+<div class="flex items-center justify-between gap-1 pt-0.5">
+<div class="flex items-center p-0.5 rounded-xl bg-surface-container-high/40 border border-outline-variant/25 text-[10px] font-body-sm">
+<button class="px-2 py-0.5 rounded-lg bg-surface-container-lowest text-primary font-bold shadow-xs transition-all" id="track-60m" onclick="switchTrack('60m')">60m 主轨</button>
+<button class="px-2 py-0.5 rounded-lg text-on-surface-variant hover:text-on-surface font-medium transition-all" id="track-5m" onclick="switchTrack('5m')">5m 研究轨</button>
+</div>
+<button class="h-6 px-2 rounded-xl bg-surface-container-lowest/80 text-on-surface hover:text-primary flex items-center gap-1 text-[10px] font-medium border border-white/40 dark:border-white/10 shadow-xs active:scale-95 transition-all" onclick="toggleRecordsPanel()" title="展开/收起交易清单">
+<span class="material-symbols-outlined text-[13px]">table_chart</span>
+<span>持仓与记录</span>
+<span class="px-1 py-0.1 rounded-full text-[9px] font-label-numeric-sm bg-primary text-on-primary font-semibold" id="open-trades-badge">2</span>
+</button>
+</div>
+</div>
+<!-- FLOATING DRAWER: RECORDS & TRADES PANEL -->
+<aside class="absolute z-20 top-[182px] bottom-20 sm:bottom-24 left-3 sm:left-4 w-[calc(100vw-1.5rem)] sm:w-[290px] apple-glass rounded-2xl flex flex-col overflow-hidden transition-all duration-300 transform -translate-x-[115%] shadow-2xl border border-white/60 dark:border-white/10" id="records-panel">
+<!-- Panel Header & Quick Controls -->
+<div class="p-3 border-b border-white/60 dark:border-white/10 flex items-center justify-between bg-surface-container-lowest/40">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="receipt_long">receipt_long</span>
+<span class="font-headline-sm text-[14px] font-bold text-on-surface">1.618 模拟交易簿</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="px-2 py-0.5 rounded-full bg-primary-container/10 hover:bg-primary-container/20 text-primary text-[10px] font-medium transition-all" onclick="resetToLatestTrade()" title="回到最新开仓标的">
+        返回最新交易
+      </button>
+<button class="w-6 h-6 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 flex items-center justify-center transition-all" onclick="toggleRecordsPanel()">
+<span class="material-symbols-outlined text-[16px]" data-icon="close">close</span>
+</button>
+</div>
+</div>
+<!-- Tabs: 持仓 / 已结束 / 触价记录 -->
+<div class="p-2 border-b border-outline-variant/20 flex items-center gap-1 bg-surface-container-low/30">
+<button class="flex-1 py-1 px-2 rounded-lg text-[12px] font-semibold bg-surface-container-lowest text-primary shadow-sm border border-white/50 dark:border-white/10 text-center transition-all" id="tab-btn-active" onclick="switchRecordTab('active')">
+      持仓 (2)
+    </button>
+<button class="flex-1 py-1 px-2 rounded-lg text-[12px] font-medium text-on-surface-variant hover:text-on-surface text-center transition-all" id="tab-btn-closed" onclick="switchRecordTab('closed')">
+      已结束 (100)
+    </button>
+<button class="flex-1 py-1 px-2 rounded-lg text-[12px] font-medium text-on-surface-variant hover:text-on-surface text-center transition-all" id="tab-btn-touches" onclick="switchRecordTab('touches')">
+      触价记录 (100)
+    </button>
+</div>
+<!-- Filters & Search Bar -->
+<div class="p-2.5 space-y-2 border-b border-outline-variant/15 bg-surface-container-lowest/20">
+<div class="flex items-center gap-1 text-[10px]">
+<span class="text-on-surface-variant px-1 font-label-caps">口径:</span>
+<button class="px-2 py-0.5 rounded-full bg-primary text-on-primary font-medium shadow-xs">计入资金 (资金轨)</button>
+<button class="px-2 py-0.5 rounded-full bg-surface-container-highest/60 text-on-surface-variant hover:text-on-surface font-normal">影子记录</button>
+</div>
+</div>
+<!-- Scrollable Trade Rows List -->
+<div class="flex-1 overflow-y-auto p-2 space-y-2" id="trades-list-container">
+<div class="trade-row p-2.5 rounded-xl border border-primary/40 bg-surface-container-lowest/90 hover:shadow-md transition-all relative overflow-hidden group" id="pos-card-sol">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-candle-up"></div>
+<div class="flex items-center justify-between mb-1 pl-1">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="font-headline-sm text-[13px] font-bold text-on-surface">SOL/USDT</span>
+<span class="px-1.5 py-0.2 rounded text-[9px] font-label-caps bg-candle-up/10 text-candle-up font-bold">多 LONG</span>
+<span class="px-1.5 py-0.2 rounded text-[9px] font-label-caps bg-secondary-container/40 text-secondary dark:text-[#78d8be] font-bold">已减仓25%</span>
+</div>
+<div class="text-right">
+<span class="font-label-numeric-sm text-[11px] font-bold text-candle-up">+12.40 USDT</span>
+<span class="text-[9px] text-candle-up font-label-numeric-sm block">(+1.26%)</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-1 text-[10px] pl-1 font-label-numeric-sm text-on-surface-variant my-1.5 py-1 bg-surface-container-high/30 rounded-lg px-2 border border-outline-variant/20">
+<div>开仓: <span class="font-semibold text-on-surface">123.45</span></div>
+<div>当前: <span class="font-semibold text-on-surface" id="sol-live-price">125.00</span></div>
+<div class="text-right">持仓: <span class="font-semibold text-on-surface" id="sol-remain-qty">6.00</span> SOL</div>
+</div>
+<div class="mt-1 pt-1.5 border-t border-outline-variant/20 flex items-center justify-between text-[10px] pl-1">
+<button class="text-primary hover:underline flex items-center gap-1 font-medium" onclick="selectTrade('SOL/USDT', 123.45, 'long', '减仓25%持仓中', 128.00, 118.00, 134.50, 112.20)">
+<span class="material-symbols-outlined text-[13px]">candlestick_chart</span> 查看定位
+        </button>
+<button class="h-6 px-3 text-[11px] font-medium rounded-full bg-surface-container-lowest hover:bg-surface-container-high/60 text-on-surface border border-outline-variant/40 shadow-xs active:scale-95 transition-all flex items-center gap-1" onclick="openCloseModal('SOL/USDT', 'long', 6.00, 125.00, 123.45, '60m 主轨', 12.40)">
+<span class="material-symbols-outlined text-[12px] text-tertiary">cancel</span>平仓
+        </button>
+</div>
+</div>
+</div>
+</aside>
+<!-- FLOATING DRAWER: LATEST TOUCHES LIST -->
+<aside class="absolute z-20 top-[182px] bottom-20 sm:bottom-24 left-3 sm:left-4 w-[calc(100vw-1.5rem)] sm:w-[290px] apple-glass rounded-2xl flex flex-col overflow-hidden transition-all duration-300 transform translate-x-0 shadow-2xl border border-white/60 dark:border-white/10" id="touches-panel">
+<div class="p-2.5 border-b border-white/60 dark:border-white/10 flex items-center justify-between bg-surface-container-lowest/40">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">notifications_active</span>
+<span class="font-headline-sm text-[13px] font-bold text-on-surface">最新触达</span>
+<span class="px-1.5 py-0.2 rounded-full text-[9px] font-label-numeric-sm bg-primary/10 text-primary font-bold border border-primary/20" id="header-touch-badge">42</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="w-6 h-6 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 flex items-center justify-center transition-all" onclick="toggleTouchesPanel()" title="收起最新触价列表">
+<span class="material-symbols-outlined text-[15px]">close</span>
+</button>
+</div>
+</div>
+<div class="p-1.5 border-b border-outline-variant/20 flex items-center gap-1 bg-surface-container-low/30">
+<button class="flex-1 py-1 px-1 rounded-lg text-[10px] font-semibold bg-surface-container-lowest text-primary shadow-xs border border-white/50 dark:border-white/10 text-center transition-all" id="touch-tab-all" onclick="switchTouchTab('all')">全部(42)</button>
+<button class="flex-1 py-1 px-1 rounded-lg text-[10px] font-medium text-on-surface-variant hover:text-on-surface text-center transition-all" id="touch-tab-upper" onclick="switchTouchTab('upper')">上沿(28)</button>
+<button class="flex-1 py-1 px-1 rounded-lg text-[10px] font-medium text-on-surface-variant hover:text-on-surface text-center transition-all" id="touch-tab-lower" onclick="switchTouchTab('lower')">下沿(14)</button>
+<button class="flex-1 py-1 px-1 rounded-lg text-[10px] font-medium text-on-surface-variant hover:text-on-surface text-center transition-all" id="touch-tab-fav" onclick="switchTouchTab('fav')">收藏(5)</button>
+</div>
+<div class="p-2 border-b border-outline-variant/15 bg-surface-container-lowest/20">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2 top-1.5 text-[13px] text-outline">search</span>
+<input class="w-full bg-surface-container-lowest/70 border border-outline-variant/30 rounded-xl pl-6 pr-2 py-0.5 text-[11px] text-on-surface placeholder:text-outline focus:outline-none focus:border-primary" oninput="filterTouchedCoins(this.value)" placeholder="搜索触达币种..." type="text"/>
+</div>
+</div>
+<!-- Touches contract items -->
+<div class="flex-1 overflow-y-auto p-1.5 space-y-1 text-[11px]" id="touches-list-container">
+<div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-lowest/80 hover:bg-surface-container-lowest border border-white/50 dark:border-white/10 cursor-pointer transition-all" onclick="selectUniverseCoin('SOL/USDT', 184.50, true, 'short', 'BE Armed', 188.00, 168.00, 198.50, 156.20)">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-candle-down"></span>
+<span class="font-bold text-on-surface">SOL/USDT</span>
+<span class="text-[9px] px-1 py-0.2 rounded bg-tertiary-container/15 text-tertiary font-bold">上1.618</span>
+</div>
+<div class="text-right font-label-numeric-sm">
+<span class="font-bold text-on-surface block">184.50</span>
+<span class="text-[9px] text-outline">10m前</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-lowest/50 hover:bg-surface-container-lowest border border-white/30 dark:border-white/10 cursor-pointer transition-all" onclick="selectUniverseCoin('BTC/USDT', 67800.00, true, 'long', '待确认', 68400.00, 66500.00, 69500.00, 65300.00)">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-candle-up"></span>
+<span class="font-bold text-on-surface">BTC/USDT</span>
+<span class="text-[9px] px-1 py-0.2 rounded bg-candle-up/15 text-candle-up font-bold">下1.618</span>
+</div>
+<div class="text-right font-label-numeric-sm">
+<span class="font-bold text-on-surface block">67,800.0</span>
+<span class="text-[9px] text-outline">44m前</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-lowest/50 hover:bg-surface-container-lowest border border-white/30 dark:border-white/10 cursor-pointer transition-all" onclick="selectUniverseCoin('ETH/USDT', 2504.00, false, null, null, 2640.00, 2480.00, 2730.00, 2390.00)">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-candle-down"></span>
+<span class="font-bold text-on-surface">ETH/USDT</span>
+<span class="text-[9px] px-1 py-0.2 rounded bg-tertiary-container/15 text-tertiary font-bold">上1.618</span>
+</div>
+<div class="text-right font-label-numeric-sm">
+<span class="font-bold text-on-surface block">2,504.0</span>
+<span class="text-[9px] text-outline">2h前</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- ON-SCREEN ACTIVE CANDLE HOVER HUD (Glass Tooltip) -->
+<div class="absolute top-20 right-4 sm:right-6 pointer-events-none z-20 apple-glass-pill px-3 py-1.5 rounded-xl flex items-center gap-3 text-[11px] font-label-numeric-sm shadow-sm transition-opacity duration-200 opacity-90" id="candle-hud">
+<div class="flex items-center gap-1 font-bold text-on-surface">
+<span id="hud-symbol">SOLUSDT.P</span>
+</div>
+<div class="text-on-surface-variant">开: <span class="font-semibold text-on-surface" id="hud-open">184.20</span></div>
+<div class="text-on-surface-variant">高: <span class="font-semibold text-candle-up" id="hud-high">185.80</span></div>
+<div class="text-on-surface-variant">低: <span class="font-semibold text-candle-down" id="hud-low">183.10</span></div>
+<div class="text-on-surface-variant">收: <span class="font-semibold text-on-surface" id="hud-close">184.50</span></div>
+<div class="text-on-surface-variant hidden md:block">幅: <span class="font-semibold text-secondary dark:text-[#78d8be]" id="hud-pct">+0.16%</span></div>
+</div>
+<!-- FLOATING BOTTOM-CENTER DOCK: Apple Glass Controls -->
+<footer class="absolute bottom-3 sm:bottom-5 inset-x-0 z-30 pointer-events-none flex justify-center px-2">
+<div class="pointer-events-auto apple-glass rounded-2xl p-1.5 sm:p-2 flex flex-wrap items-center justify-between sm:justify-center gap-1.5 sm:gap-3 max-w-full shadow-xl">
+<!-- Timeframe Selector -->
+<div class="flex items-center p-0.5 rounded-xl bg-surface-container-highest/40 border border-outline-variant/30 text-[11px]">
+<button class="tf-btn px-2.5 py-1 rounded-lg text-on-surface-variant hover:text-on-surface font-medium transition-all" onclick="setTimeframe('5m')">5m</button>
+<button class="tf-btn px-2.5 py-1 rounded-lg text-on-surface-variant hover:text-on-surface font-medium transition-all" onclick="setTimeframe('15m')">15m</button>
+<button class="tf-btn px-2.5 py-1 rounded-lg bg-surface-container-lowest text-primary font-bold shadow-xs transition-all" onclick="setTimeframe('1h')">1h</button>
+<button class="tf-btn px-2.5 py-1 rounded-lg text-on-surface-variant hover:text-on-surface font-medium transition-all" onclick="setTimeframe('4h')">4h</button>
+<button class="tf-btn px-2.5 py-1 rounded-lg text-on-surface-variant hover:text-on-surface font-medium transition-all" onclick="setTimeframe('1D')">1D</button>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant/50 hidden sm:block"></div>
+<!-- Six MA Toggle (DEFAULT OFF) -->
+<button class="h-8 px-2.5 rounded-xl bg-surface-container-lowest/60 hover:bg-surface-container-lowest text-on-surface-variant hover:text-on-surface border border-outline-variant/30 flex items-center gap-1.5 text-[11px] font-medium transition-all active:scale-95" id="ma-toggle-btn" onclick="toggleSixMA()" title="显示或隐藏 SMA20/60/120 及 EMA20/60/120 曲线">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="timeline" id="ma-icon">timeline</span>
+<span>六均线</span>
+<span class="font-label-caps text-[9px] px-1 py-0.2 rounded bg-surface-container-high text-outline" id="ma-status-badge">OFF</span>
+</button>
+<div class="h-4 w-[1px] bg-outline-variant/50 hidden sm:block"></div>
+<!-- Chart Zoom & Navigation View Controls -->
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 rounded-xl bg-surface-container-lowest/60 hover:bg-surface-container-lowest text-on-surface flex items-center justify-center border border-white/50 dark:border-white/10 active:scale-95 transition-all" onclick="zoomChart(-1)" title="缩小 K 线">
+<span class="material-symbols-outlined text-[16px]" data-icon="zoom_out">zoom_out</span>
+</button>
+<button class="w-8 h-8 rounded-xl bg-surface-container-lowest/60 hover:bg-surface-container-lowest text-on-surface flex items-center justify-center border border-white/50 dark:border-white/10 active:scale-95 transition-all" onclick="zoomChart(1)" title="放大 K 线">
+<span class="material-symbols-outlined text-[16px]" data-icon="zoom_in">zoom_in</span>
+</button>
+<button class="h-8 px-2.5 rounded-xl bg-surface-container-lowest/60 hover:bg-surface-container-lowest text-on-surface flex items-center gap-1 text-[11px] font-medium border border-white/50 dark:border-white/10 active:scale-95 transition-all" onclick="resetChartFit()" title="自适应全部K线与1.618区域">
+<span class="material-symbols-outlined text-[14px]" data-icon="fit_screen">fit_screen</span>
+<span class="hidden sm:inline">自适应全图</span>
+</button>
+<button class="h-8 px-2.5 rounded-xl bg-primary-container text-on-primary flex items-center gap-1 text-[11px] font-semibold shadow-sm hover:brightness-105 active:scale-95 transition-all" onclick="resetToLatestTrade()" title="立即跟随当前激活交易位置">
+<span class="material-symbols-outlined text-[14px]" data-icon="my_location">my_location</span>
+<span>跟随最新单</span>
+</button>
+</div>
+<!-- Attribution -->
+<div class="hidden lg:flex items-center text-[10px] text-outline font-label-caps pl-1">
+      SPIKE ENGINE · 1.618 PAPER
+    </div>
+</div>
+</footer>
+<!-- 390PX MOBILE PREVIEW DRAWER (Side-by-side or Overlaid showcase) -->
+<div class="fixed right-4 top-20 bottom-20 z-40 w-[390px] max-w-[90vw] apple-glass rounded-[40px] p-3 flex flex-col shadow-2xl border-4 border-outline-variant/40 dark:border-white/20 transition-all duration-300 transform translate-x-[120%] hidden lg:flex overflow-hidden" id="mobile-preview-container">
+<!-- Phone Bezel Top Bar & Safe Area -->
+<div class="flex items-center justify-between px-3 py-1.5 border-b border-outline-variant/20">
+<div class="flex items-center gap-1">
+<span class="w-2.5 h-2.5 rounded-full bg-candle-up"></span>
+<span class="text-[11px] font-bold text-on-surface">390px 移动视口</span>
+</div>
+<div class="w-16 h-4 bg-outline-variant/30 rounded-full mx-auto"></div>
+<button class="text-outline hover:text-on-surface" onclick="toggleMobilePreviewDrawer()">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Mobile Content Inner -->
+<div class="flex-1 overflow-hidden flex flex-col relative bg-[var(--bg-main)] rounded-2xl p-2.5 space-y-2.5">
+<!-- Mobile Navigation Bar with 44px Theme Button -->
+<div class="flex items-center justify-between apple-glass rounded-2xl px-2 py-1 border border-white/40 dark:border-white/10">
+<div class="flex items-center gap-1.5">
+<div class="w-6 h-6 rounded-lg bg-primary-container flex items-center justify-center text-on-primary text-[11px] font-bold">S</div>
+<span class="text-[13px] font-bold text-on-surface">SOL/USDT</span>
+</div>
+<!-- 44px Touch Target Theme Button in Mobile Nav -->
+<button aria-label="移动端主题切换" class="w-[44px] h-[44px] rounded-xl text-on-surface flex items-center justify-center bg-surface-container-highest/40 border border-outline-variant/20 active:scale-95" onclick="toggleBinaryTheme()">
+<span class="material-symbols-outlined text-[20px] mobile-theme-icon">dark_mode</span>
+</button>
+</div>
+<!-- Mobile Mini Candlestick Simulation Box -->
+<div class="h-32 w-full rounded-xl bg-surface-container-low/50 border border-outline-variant/20 flex flex-col justify-between p-2">
+<div class="flex justify-between items-center text-[10px] text-outline font-label-numeric-sm">
+<span>1.618 关键位 198.50</span>
+<span class="text-tertiary font-bold">空头已触发</span>
+</div>
+<div class="flex items-center justify-center text-[13px] font-label-numeric-md font-bold text-candle-up">
+        现价 184.50 USDT (+0.42%)
+      </div>
+<div class="flex justify-between text-[9px] text-outline">
+<span>周一低 168.00</span>
+<span>周一高 188.00</span>
+</div>
+</div>
+<!-- Mobile 75dvh Drag Bottom Sheet for Touched Contracts & Paper Ledger -->
+<div class="flex-1 rounded-t-2xl apple-glass border border-white/60 dark:border-white/10 p-2.5 flex flex-col space-y-2">
+<div class="w-8 h-1 rounded-full bg-outline-variant/60 mx-auto"></div>
+<div class="flex items-center justify-between text-[11px] font-bold text-on-surface">
+<span>触达币种与持仓清单</span>
+<span class="text-[10px] text-primary">75dvh 手势抽屉</span>
+</div>
+<div class="space-y-1.5 overflow-y-auto pr-0.5 text-[10px]">
+<div class="p-2 rounded-xl bg-surface-container-lowest/80 border border-outline-variant/20 flex justify-between items-center">
+<div>
+<div class="font-bold text-on-surface">SOL/USDT 多单</div>
+<div class="text-outline">入场 123.45 · 剩 6.00 SOL</div>
+</div>
+<div class="text-right">
+<span class="font-bold text-candle-up block">+12.40 U</span>
+<button class="px-2 py-0.5 rounded bg-primary text-on-primary font-semibold text-[9px]">平仓</button>
+</div>
+</div>
+<div class="p-2 rounded-xl bg-surface-container-lowest/80 border border-outline-variant/20 flex justify-between items-center">
+<div>
+<div class="font-bold text-on-surface">BTC/USDT 触价</div>
+<div class="text-outline">触及下1.618 · 65,300</div>
+</div>
+<div class="text-right">
+<span class="font-bold text-secondary dark:text-[#78d8be]">待确认</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SUCCESS TOAST BANNER -->
+<div class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 opacity-0 -translate-y-2 flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary text-on-primary shadow-xl font-body-sm text-[12px]" id="close-success-toast">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span id="toast-message">已成功平仓 2.00 SOL · 剩余 4.00 SOL</span>
+</div>
+<!-- MODAL: STATISTICAL ANALYTICS -->
+<div class="fixed inset-0 z-40 bg-on-background/25 backdrop-blur-md hidden transition-opacity duration-200 opacity-0 flex items-end sm:items-center justify-center p-0 sm:p-4" id="analytics-modal-overlay" onclick="closeAnalyticsIfClickedOutside(event)">
+<div class="w-full sm:w-[560px] max-h-[88vh] apple-glass rounded-t-3xl sm:rounded-2xl p-4 sm:p-5 flex flex-col shadow-2xl border border-white/60 dark:border-white/10 transition-all duration-200 transform translate-y-full sm:translate-y-0 sm:scale-95 overflow-hidden" id="analytics-modal-card">
+<div class="w-10 h-1 rounded-full bg-outline-variant/60 mx-auto mb-3 sm:hidden cursor-pointer"></div>
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/20">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">analytics</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-[16px] font-bold text-on-surface">1.618 模拟盘 · 统计分析</span>
+<span class="px-1.5 py-0.2 rounded text-[10px] font-label-caps bg-primary text-on-primary font-bold">实时核算</span>
+</div>
+<p class="text-[11px] text-on-surface-variant">计入资金的模拟交易 (已排除影子记录与未挂单)</p>
+</div>
+</div>
+<button class="w-7 h-7 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 flex items-center justify-center transition-all" onclick="closeAnalyticsModal()">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto space-y-3.5 pr-1 pt-3 pb-1">
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+<div class="p-2.5 rounded-xl bg-surface-container-lowest/80 border border-white/60 dark:border-white/10 shadow-xs">
+<div class="text-[10px] text-on-surface-variant font-label-caps">已实现净盈亏</div>
+<div class="font-label-numeric-md text-[14px] font-bold text-candle-up mt-0.5">+48.60 <span class="text-[10px] font-normal">USDT</span></div>
+<div class="text-[9px] text-candle-up font-label-numeric-sm">+4.86% · 含分批减仓</div>
+</div>
+<div class="p-2.5 rounded-xl bg-surface-container-lowest/80 border border-white/60 dark:border-white/10 shadow-xs">
+<div class="text-[10px] text-on-surface-variant font-label-caps">参考浮盈 (2单)</div>
+<div class="font-label-numeric-md text-[14px] font-bold text-secondary dark:text-[#78d8be] mt-0.5">+12.40 <span class="text-[10px] font-normal">USDT</span></div>
+<div class="text-[9px] text-outline font-label-numeric-sm">实时行情刷新 12s前</div>
+</div>
+<div class="p-2.5 rounded-xl bg-surface-container-lowest/80 border border-white/60 dark:border-white/10 shadow-xs">
+<div class="text-[10px] text-on-surface-variant font-label-caps">已结算手续费</div>
+<div class="font-label-numeric-md text-[14px] font-bold text-on-surface mt-0.5">-2.85 <span class="text-[10px] font-normal">USDT</span></div>
+<div class="text-[9px] text-outline font-label-numeric-sm">按成交比例实分</div>
+</div>
+<div class="p-2.5 rounded-xl bg-surface-container-lowest/80 border border-white/60 dark:border-white/10 shadow-xs">
+<div class="text-[10px] text-on-surface-variant font-label-caps">交易胜率</div>
+<div class="font-label-numeric-md text-[14px] font-bold text-secondary dark:text-[#78d8be] mt-0.5">66.7%</div>
+<div class="text-[9px] text-outline font-label-numeric-sm">12 胜 · 6 负</div>
+</div>
+</div>
+</div>
+<div class="pt-2 border-t border-outline-variant/20 flex justify-end">
+<button class="h-8 px-4 rounded-xl bg-surface-container-lowest hover:bg-surface-container-high/60 border border-outline-variant/30 text-[12px] font-medium text-on-surface transition-all" onclick="closeAnalyticsModal()">关闭窗口</button>
+</div>
+</div>
+</div>
+<!-- MODAL: MANUAL CLOSE SIMULATION -->
+<div class="fixed inset-0 z-40 bg-on-background/25 backdrop-blur-md hidden transition-opacity duration-200 opacity-0 flex items-end sm:items-center justify-center p-0 sm:p-4" id="paper-close-modal-overlay">
+<div class="w-full sm:w-[380px] max-w-full apple-glass rounded-t-3xl sm:rounded-2xl p-4 sm:p-5 flex flex-col shadow-2xl border border-white/60 dark:border-white/10 transition-all duration-200 transform translate-y-full sm:translate-y-0 sm:scale-95" id="paper-close-card">
+<div class="w-10 h-1 rounded-full bg-outline-variant/60 mx-auto mb-3 sm:hidden cursor-pointer"></div>
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/20">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-tertiary-container/10 border border-tertiary-container/20 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[18px]">exit_to_app</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-[15px] font-bold text-on-surface">模拟平仓</span>
+<span class="font-headline-sm text-[13px] font-bold text-primary" id="modal-coin-name">SOL/USDT</span>
+</div>
+<div class="flex items-center gap-1 mt-0.5">
+<span class="px-1.5 py-0.2 rounded text-[9px] font-label-caps bg-candle-up/10 text-candle-up font-bold" id="modal-side-badge">多 LONG</span>
+<span class="px-1.5 py-0.2 rounded text-[9px] font-label-caps bg-surface-container-high text-on-surface-variant" id="modal-track-badge">60m 主轨</span>
+</div>
+</div>
+</div>
+<button class="w-7 h-7 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 flex items-center justify-center transition-all" onclick="closeCloseModal()">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Preset Ratio Pills -->
+<div class="py-3 space-y-1.5">
+<div class="flex items-center justify-between text-[11px] text-on-surface-variant font-medium">
+<span>平仓比例</span>
+</div>
+<div class="grid grid-cols-4 gap-1.5">
+<button class="ratio-btn py-1.5 rounded-lg text-[12px] font-medium bg-surface-container-low/60 hover:bg-surface-container-high border border-outline-variant/30 text-on-surface transition-all text-center" data-ratio="25" onclick="setClosePercent(25)" type="button">25%</button>
+<button class="ratio-btn py-1.5 rounded-lg text-[12px] font-medium bg-surface-container-low/60 hover:bg-surface-container-high border border-outline-variant/30 text-on-surface transition-all text-center" data-ratio="50" onclick="setClosePercent(50)" type="button">50%</button>
+<button class="ratio-btn py-1.5 rounded-lg text-[12px] font-medium bg-surface-container-low/60 hover:bg-surface-container-high border border-outline-variant/30 text-on-surface transition-all text-center" data-ratio="75" onclick="setClosePercent(75)" type="button">75%</button>
+<button class="ratio-btn py-1.5 rounded-lg text-[12px] font-bold bg-primary text-on-primary shadow-xs border border-primary transition-all text-center active-ratio" data-ratio="100" onclick="setClosePercent(100)" type="button">全平 100%</button>
+</div>
+</div>
+<!-- Metrics Breakdown Panel -->
+<div class="p-2.5 rounded-xl bg-surface-container-low/40 border border-outline-variant/20 space-y-1.5 text-[11px] font-label-numeric-sm">
+<div class="flex justify-between items-center text-on-surface-variant">
+<span>拟平仓数量:</span>
+<span class="font-bold text-primary" id="m-close-qty">6.00 SOL</span>
+</div>
+<div class="flex justify-between items-center text-on-surface-variant">
+<span>参考市价:</span>
+<span class="font-semibold text-on-surface"><span id="m-ref-price">125.00</span> USDT</span>
+</div>
+<div class="flex justify-between items-center text-on-surface-variant pt-0.5">
+<span class="font-semibold text-on-surface">预估已实现净盈亏:</span>
+<span class="font-bold text-candle-up text-[12px]" id="m-pnl">+12.40 USDT</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="grid grid-cols-2 gap-2 pt-2">
+<button class="h-9 rounded-xl border border-outline-variant/40 bg-surface-container-lowest/80 text-on-surface-variant hover:text-on-surface text-[12px] font-medium transition-all" onclick="closeCloseModal()" type="button">取消</button>
+<button class="h-9 rounded-xl bg-primary hover:brightness-105 active:scale-95 text-on-primary text-[12px] font-semibold shadow-sm transition-all" onclick="executeSimulatedClose()" type="button">确认模拟平仓</button>
+</div>
+</div>
+</div>
+<!-- SCRIPT: CORE APP LOGIC & BINARY THEME SWITCHER -->
+<script>
+  // ==========================================
+  // BINARY LIGHT/DARK THEME CONTROLLER
+  // ==========================================
+  const THEME_STORAGE_KEY = 'spike-theme-binary';
+
+  function initBinaryTheme() {
+    // Default to 'light', zero OS system dependency
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || 'light';
+    applyTheme(savedTheme, false);
+  }
+
+  function applyTheme(theme, animateIcon = true) {
+    const isDark = theme === 'dark';
+    const root = document.documentElement;
+    const icon = document.getElementById('theme-toggle-icon');
+    const mobileIcon = document.querySelector('.mobile-theme-icon');
+
+    if (isDark) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+
+    // Update icon: in dark mode show 'light_mode' (sun) to switch to light;
+    // in light mode show 'dark_mode' (moon) to switch to dark.
+    const iconName = isDark ? 'light_mode' : 'dark_mode';
+
+    if (icon) {
+      if (animateIcon) {
+        icon.style.transform = 'rotate(45deg) scale(0.85)';
+        icon.style.opacity = '0.5';
+        setTimeout(() => {
+          icon.innerText = iconName;
+          icon.style.transform = 'rotate(0deg) scale(1)';
+          icon.style.opacity = '1';
+        }, 100);
+      } else {
+        icon.innerText = iconName;
+      }
+    }
+
+    if (mobileIcon) {
+      mobileIcon.innerText = iconName;
+    }
+
+    // Persist explicitly
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+
+    // Redraw chart canvas to use updated dark/light theme strokes without resetting zoom or state
+    if (typeof renderChart === 'function') {
+      renderChart();
+    }
+  }
+
+  function toggleBinaryTheme() {
+    const isCurrentlyDark = document.documentElement.classList.contains('dark');
+    applyTheme(isCurrentlyDark ? 'light' : 'dark', true);
+  }
+
+  function toggleMobilePreviewDrawer() {
+    const drawer = document.getElementById('mobile-preview-container');
+    if (!drawer) return;
+    if (drawer.classList.contains('hidden')) {
+      drawer.classList.remove('hidden');
+      setTimeout(() => drawer.classList.remove('translate-x-[120%]'), 10);
+    } else if (drawer.classList.contains('translate-x-[120%]')) {
+      drawer.classList.remove('translate-x-[120%]');
+    } else {
+      drawer.classList.add('translate-x-[120%]');
+      setTimeout(() => drawer.classList.add('hidden'), 300);
+    }
+  }
+
+  // State Model
+  const state = {
+    symbol: 'SOL/USDT',
+    timeframe: '1h',
+    track: '60m',
+    sixMAVisible: false,
+    recordsOpen: false,
+    touchesOpen: true,
+    scale: 1.0,
+    panOffset: 0,
+    zoomLevel: 1.0,
+
+    trade: {
+      symbol: 'SOL/USDT',
+      side: 'short',
+      fillPrice: 184.50,
+      status: 'BE Armed',
+      mondayHigh: 188.00,
+      mondayLow: 168.00,
+      upper1618: 198.50,
+      lower1618: 156.20,
+      fillCandleIndex: 26,
+      beCandleIndex: 31
+    },
+
+    candles: []
+  };
+
+  function generateSyntheticCandles() {
+    const candles = [];
+    let currentPrice = 172.00;
+    const baseTime = Date.now() - 48 * 3600 * 1000;
+
+    for (let i = 0; i < 46; i++) {
+      const time = new Date(baseTime + i * 3600 * 1000);
+      let open = currentPrice;
+      let delta = (Math.random() - 0.47) * 3.8;
+
+      if (i >= 10 && i <= 15) {
+        delta = Math.abs(delta) + 1.2;
+      } else if (i === 26) {
+        open = 183.00;
+        delta = 1.50;
+      } else if (i > 26 && i < 34) {
+        delta = - (Math.abs(delta) + 0.8);
+      }
+
+      let close = open + delta;
+      let high = Math.max(open, close) + Math.random() * 1.6;
+      let low = Math.min(open, close) - Math.random() * 1.5;
+
+      if (i === 14) {
+        high = 188.00;
+        close = 186.20;
+      }
+      if (i === 8) {
+        low = 168.00;
+        open = 170.50;
+        close = 169.20;
+      }
+      if (i === 26) {
+        high = 185.80;
+        close = 184.50;
+      }
+
+      candles.push({
+        time,
+        open,
+        high,
+        low,
+        close,
+        vol: Math.floor(Math.random() * 25000 + 8000),
+        isUp: close >= open
+      });
+      currentPrice = close;
+    }
+    return candles;
+  }
+
+  state.candles = generateSyntheticCandles();
+
+  const canvas = document.getElementById('chart-canvas');
+  const ctx = canvas.getContext('2d');
+  let width, height;
+
+  function resizeCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    width = window.innerWidth;
+    height = window.innerHeight;
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+
+    ctx.resetTransform();
+    ctx.scale(dpr, dpr);
+    renderChart();
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+
+  function getPriceY(price, minPrice, maxPrice, chartTop, chartBottom) {
+    return chartBottom - ((price - minPrice) / (maxPrice - minPrice)) * (chartBottom - chartTop);
+  }
+
+  function renderChart() {
+    if (!ctx) return;
+    ctx.clearRect(0, 0, width, height);
+
+    const isDarkMode = document.documentElement.classList.contains('dark');
+
+    const paddingRight = 72;
+    const paddingBottom = 42;
+    const paddingTop = 84;
+    const chartWidth = width - paddingRight;
+    const chartTop = paddingTop;
+    const chartBottom = height - paddingBottom;
+
+    const visibleCandles = state.candles;
+    let minP = Infinity;
+    let maxP = -Infinity;
+
+    visibleCandles.forEach(c => {
+      if (c.low < minP) minP = c.low;
+      if (c.high > maxP) maxP = c.high;
+    });
+
+    minP = Math.min(minP, state.trade.lower1618 - 3, state.trade.mondayLow - 2);
+    maxP = Math.max(maxP, state.trade.upper1618 + 3, state.trade.mondayHigh + 2);
+
+    const priceBuffer = (maxP - minP) * 0.08;
+    minP -= priceBuffer;
+    maxP += priceBuffer;
+
+    const count = visibleCandles.length;
+    const candleSlotWidth = (chartWidth - 40) / count;
+    const candleBodyWidth = Math.max(candleSlotWidth * 0.65, 3.5);
+
+    // Grid lines & labels responsive to theme
+    const priceStep = (maxP - minP) / 8;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = isDarkMode ? 'rgba(255, 255, 255, 0.06)' : 'rgba(193, 198, 214, 0.28)';
+    ctx.fillStyle = isDarkMode ? '#8e9eaf' : '#717785';
+    ctx.font = '500 11px "JetBrains Mono"';
+    ctx.textAlign = 'left';
+
+    for (let i = 0; i <= 8; i++) {
+      const p = minP + i * priceStep;
+      const y = getPriceY(p, minP, maxP, chartTop, chartBottom);
+
+      ctx.beginPath();
+      ctx.setLineDash([4, 4]);
+      ctx.moveTo(0, y);
+      ctx.lineTo(chartWidth, y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillText(p.toFixed(2), chartWidth + 10, y + 4);
+    }
+
+    // Time Axis Ticks
+    for (let i = 0; i < count; i += 6) {
+      const c = visibleCandles[i];
+      const x = 30 + i * candleSlotWidth + candleSlotWidth / 2;
+      const timeStr = `${c.time.getHours().toString().padStart(2, '0')}:00`;
+      ctx.fillStyle = isDarkMode ? '#8e9eaf' : '#717785';
+      ctx.fillText(timeStr, x - 14, height - 16);
+    }
+
+    // Monday 1.618 Rays (Anchored at occurrence time, drawing RIGHTWARDS ONLY)
+    const mondayStartIndex = 14;
+    const rayStartX = 30 + mondayStartIndex * candleSlotWidth + candleSlotWidth / 2;
+    const rayEndX = chartWidth;
+
+    function drawRay(price, label, strokeColor, bgColor, textColor, isBold = false) {
+      const y = getPriceY(price, minP, maxP, chartTop, chartBottom);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = isBold ? 1.5 : 1.2;
+      ctx.setLineDash([6, 4]);
+      ctx.moveTo(rayStartX, y);
+      ctx.lineTo(rayEndX, y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.beginPath();
+      ctx.arc(rayStartX, y, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = strokeColor;
+      ctx.fill();
+
+      const text = `${label} ${price.toFixed(2)}`;
+      ctx.font = '600 11px "Inter", "JetBrains Mono"';
+      const metrics = ctx.measureText(text);
+      const textW = metrics.width;
+      const pillX = rayStartX + 16;
+      const pillY = y - 10;
+
+      ctx.fillStyle = bgColor;
+      roundRect(ctx, pillX, pillY, textW + 16, 20, 6);
+      ctx.fill();
+
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 1;
+      roundRect(ctx, pillX, pillY, textW + 16, 20, 6);
+      ctx.stroke();
+
+      ctx.fillStyle = textColor;
+      ctx.fillText(text, pillX + 8, pillY + 14);
+      ctx.restore();
+    }
+
+    const pillBgUpper = isDarkMode ? 'rgba(56, 18, 28, 0.90)' : 'rgba(255, 235, 238, 0.92)';
+    const pillBgLower = isDarkMode ? 'rgba(16, 44, 38, 0.90)' : 'rgba(230, 248, 243, 0.92)';
+    const pillBgMonday = isDarkMode ? 'rgba(30, 38, 50, 0.90)' : 'rgba(240, 244, 255, 0.92)';
+    const pillTextMonday = isDarkMode ? '#e8edf4' : '#0b1c30';
+
+    drawRay(state.trade.upper1618, '上1.618', '#b70438', pillBgUpper, '#ff8099', true);
+    drawRay(state.trade.mondayHigh, '周一高', isDarkMode ? '#8291a5' : '#414753', pillBgMonday, pillTextMonday);
+    drawRay(state.trade.mondayLow, '周一低', isDarkMode ? '#8291a5' : '#414753', pillBgMonday, pillTextMonday);
+    drawRay(state.trade.lower1618, '下1.618', '#006b58', pillBgLower, '#4ade80', true);
+
+    if (state.sixMAVisible) {
+      drawMovingAverages(visibleCandles, candleSlotWidth, minP, maxP, chartTop, chartBottom);
+    }
+
+    // Draw Candlesticks & Volume
+    const maxVol = Math.max(...visibleCandles.map(c => c.vol));
+    const volAreaHeight = 70;
+
+    visibleCandles.forEach((c, idx) => {
+      const xCenter = 30 + idx * candleSlotWidth + candleSlotWidth / 2;
+      const yOpen = getPriceY(c.open, minP, maxP, chartTop, chartBottom);
+      const yClose = getPriceY(c.close, minP, maxP, chartTop, chartBottom);
+      const yHigh = getPriceY(c.high, minP, maxP, chartTop, chartBottom);
+      const yLow = getPriceY(c.low, minP, maxP, chartTop, chartBottom);
+
+      const color = c.isUp ? '#169873' : '#d7355d';
+      const volColor = c.isUp ? 'rgba(22, 152, 115, 0.22)' : 'rgba(215, 53, 93, 0.22)';
+
+      const volHeight = (c.vol / maxVol) * volAreaHeight;
+      const volY = chartBottom - volHeight;
+      ctx.fillStyle = volColor;
+      ctx.fillRect(xCenter - candleBodyWidth / 2, volY, candleBodyWidth, volHeight);
+
+      ctx.beginPath();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.25;
+      ctx.moveTo(xCenter, yHigh);
+      ctx.lineTo(xCenter, yLow);
+      ctx.stroke();
+
+      const bodyTop = Math.min(yOpen, yClose);
+      const bodyH = Math.max(Math.abs(yClose - yOpen), 1.5);
+      ctx.fillStyle = color;
+      ctx.fillRect(xCenter - candleBodyWidth / 2, bodyTop, candleBodyWidth, bodyH);
+    });
+
+    // Trade Fill Marker
+    const fillIdx = state.trade.fillCandleIndex;
+    if (fillIdx < count) {
+      const fillX = 30 + fillIdx * candleSlotWidth + candleSlotWidth / 2;
+      const fillY = getPriceY(state.trade.fillPrice, minP, maxP, chartTop, chartBottom);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = state.trade.side === 'short' ? '#d7355d' : '#169873';
+      ctx.lineWidth = 1.4;
+      ctx.setLineDash([3, 2]);
+      ctx.moveTo(fillX, fillY);
+      ctx.lineTo(chartWidth, fillY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const isShort = state.trade.side === 'short';
+      ctx.beginPath();
+      ctx.fillStyle = isShort ? '#d7355d' : '#169873';
+      if (isShort) {
+        ctx.moveTo(fillX, fillY - 2);
+        ctx.lineTo(fillX - 5, fillY - 10);
+        ctx.lineTo(fillX + 5, fillY - 10);
+      } else {
+        ctx.moveTo(fillX, fillY + 2);
+        ctx.lineTo(fillX - 5, fillY + 10);
+        ctx.lineTo(fillX + 5, fillY + 10);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      const pillText = `${isShort ? '空头开仓' : '多头开仓'} · ${state.trade.fillPrice.toFixed(2)}`;
+      ctx.font = '600 11px "Inter", "JetBrains Mono"';
+      const pWidth = ctx.measureText(pillText).width + 16;
+      const pillLeft = fillX - pWidth / 2;
+      const pillTop = isShort ? fillY - 34 : fillY + 12;
+
+      ctx.fillStyle = isShort ? 'rgba(215, 53, 93, 0.95)' : 'rgba(22, 152, 115, 0.95)';
+      roundRect(ctx, pillLeft, pillTop, pWidth, 22, 6);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(pillText, pillLeft + 8, pillTop + 15);
+      ctx.restore();
+
+      if (state.trade.status === 'BE Armed') {
+        const beIdx = state.trade.beCandleIndex;
+        const beX = 30 + beIdx * candleSlotWidth + candleSlotWidth / 2;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.strokeStyle = '#00705c';
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([2, 2]);
+        ctx.moveTo(beX, fillY);
+        ctx.lineTo(chartWidth, fillY);
+        ctx.stroke();
+
+        const beText = '入场价保本 (BE Armed)';
+        ctx.font = '600 10px "Inter"';
+        const beW = ctx.measureText(beText).width + 12;
+        const bePillX = beX + 6;
+        const bePillY = fillY - 10;
+
+        ctx.fillStyle = isDarkMode ? 'rgba(16, 44, 38, 0.90)' : '#e6f8f3';
+        roundRect(ctx, bePillX, bePillY, beW, 18, 4);
+        ctx.fill();
+        ctx.strokeStyle = '#00705c';
+        ctx.lineWidth = 1;
+        roundRect(ctx, bePillX, bePillY, beW, 18, 4);
+        ctx.stroke();
+
+        ctx.fillStyle = isDarkMode ? '#4ade80' : '#00705c';
+        ctx.fillText(beText, bePillX + 6, bePillY + 13);
+        ctx.restore();
+      }
+    }
+
+    // Active Candle Price Ray
+    const lastCandle = visibleCandles[visibleCandles.length - 1];
+    const curY = getPriceY(lastCandle.close, minP, maxP, chartTop, chartBottom);
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = lastCandle.isUp ? '#169873' : '#d7355d';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.moveTo(0, curY);
+    ctx.lineTo(chartWidth, curY);
+    ctx.stroke();
+
+    ctx.fillStyle = lastCandle.isUp ? '#169873' : '#d7355d';
+    roundRect(ctx, chartWidth + 2, curY - 10, paddingRight - 8, 20, 4);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '600 11px "JetBrains Mono"';
+    ctx.fillText(lastCandle.close.toFixed(2), chartWidth + 6, curY + 4);
+    ctx.restore();
+  }
+
+  function drawMovingAverages(candles, slotW, minP, maxP, chartTop, chartBottom) {
+    const periods = [20, 60, 120];
+    const colors = ['#f59e0b', '#3b82f6', '#8b5cf6'];
+
+    periods.forEach((p, pIdx) => {
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = colors[pIdx];
+      ctx.lineWidth = 1.2;
+
+      let started = false;
+      for (let i = 0; i < candles.length; i++) {
+        if (i < 5) continue;
+        const slice = candles.slice(Math.max(0, i - p + 1), i + 1);
+        const avg = slice.reduce((acc, val) => acc + val.close, 0) / slice.length;
+        const x = 30 + i * slotW + slotW / 2;
+        const y = getPriceY(avg, minP, maxP, chartTop, chartBottom);
+
+        if (!started) {
+          ctx.moveTo(x, y);
+          started = true;
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+
+  function roundRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  }
+
+  // Crosshair
+  const crosshairY = document.getElementById('crosshair-y-label');
+  const crosshairX = document.getElementById('crosshair-x-label');
+
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    crosshairY.style.display = 'block';
+    crosshairY.style.top = mouseY + 'px';
+
+    const chartTop = 84;
+    const chartBottom = height - 42;
+    const visibleCandles = state.candles;
+    let minP = Math.min(state.trade.lower1618 - 3, 150);
+    let maxP = Math.max(state.trade.upper1618 + 3, 205);
+    const estPrice = maxP - ((mouseY - chartTop) / (chartBottom - chartTop)) * (maxP - minP);
+    crosshairY.innerText = estPrice.toFixed(2);
+
+    const count = visibleCandles.length;
+    const candleSlotWidth = (width - 72 - 40) / count;
+    const candleIdx = Math.floor((mouseX - 30) / candleSlotWidth);
+
+    if (candleIdx >= 0 && candleIdx < count) {
+      const c = visibleCandles[candleIdx];
+      crosshairX.style.display = 'block';
+      crosshairX.style.left = mouseX + 'px';
+      const d = c.time;
+      crosshairX.innerText = `${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')} ${d.getHours().toString().padStart(2,'0')}:00`;
+
+      document.getElementById('hud-open').innerText = c.open.toFixed(2);
+      document.getElementById('hud-high').innerText = c.high.toFixed(2);
+      document.getElementById('hud-low').innerText = c.low.toFixed(2);
+      document.getElementById('hud-close').innerText = c.close.toFixed(2);
+      const pct = ((c.close - c.open) / c.open * 100);
+      const hudPct = document.getElementById('hud-pct');
+      hudPct.innerText = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+      hudPct.className = `font-semibold ${pct >= 0 ? 'text-secondary dark:text-[#78d8be]' : 'text-candle-down'}`;
+    }
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    crosshairY.style.display = 'none';
+    crosshairX.style.display = 'none';
+  });
+
+  function toggleSixMA() {
+    state.sixMAVisible = !state.sixMAVisible;
+    const badge = document.getElementById('ma-status-badge');
+    const btn = document.getElementById('ma-toggle-btn');
+    const icon = document.getElementById('ma-icon');
+
+    if (state.sixMAVisible) {
+      badge.innerText = 'ON';
+      badge.className = 'font-label-caps text-[9px] px-1 py-0.2 rounded bg-primary text-on-primary font-bold';
+      btn.classList.add('border-primary/50');
+      icon.classList.add('text-primary');
+    } else {
+      badge.innerText = 'OFF';
+      badge.className = 'font-label-caps text-[9px] px-1 py-0.2 rounded bg-surface-container-high text-outline';
+      btn.classList.remove('border-primary/50');
+      icon.classList.remove('text-primary');
+    }
+    renderChart();
+  }
+
+  function toggleRecordsPanel() {
+    const panel = document.getElementById('records-panel');
+    state.recordsOpen = !state.recordsOpen;
+    if (state.recordsOpen) {
+      panel.classList.remove('-translate-x-[115%]');
+      panel.classList.add('translate-x-0');
+    } else {
+      panel.classList.remove('translate-x-0');
+      panel.classList.add('-translate-x-[115%]');
+    }
+  }
+
+  function toggleTouchesPanel() {
+    const p = document.getElementById('touches-panel');
+    if (!p) return;
+    if (p.classList.contains('translate-x-0')) {
+      p.classList.remove('translate-x-0');
+      p.classList.add('-translate-x-[115%]');
+    } else {
+      p.classList.remove('-translate-x-[115%]');
+      p.classList.add('translate-x-0');
+    }
+  }
+
+  function switchTrack(track) {
+    state.track = track;
+    const b60 = document.getElementById('track-60m');
+    const b5 = document.getElementById('track-5m');
+    if (track === '60m') {
+      b60.className = 'px-2 py-0.5 rounded-lg bg-surface-container-lowest text-primary font-bold shadow-xs transition-all';
+      b5.className = 'px-2 py-0.5 rounded-lg text-on-surface-variant hover:text-on-surface font-medium transition-all';
+    } else {
+      b5.className = 'px-2 py-0.5 rounded-lg bg-surface-container-lowest text-primary font-bold shadow-xs transition-all';
+      b60.className = 'px-2 py-0.5 rounded-lg text-on-surface-variant hover:text-on-surface font-medium transition-all';
+    }
+  }
+
+  function setTimeframe(tf) {
+    state.timeframe = tf;
+    document.querySelectorAll('.tf-btn').forEach(b => {
+      if (b.innerText.trim() === tf) {
+        b.className = 'tf-btn px-2.5 py-1 rounded-lg bg-surface-container-lowest text-primary font-bold shadow-xs transition-all';
+      } else {
+        b.className = 'tf-btn px-2.5 py-1 rounded-lg text-on-surface-variant hover:text-on-surface font-medium transition-all';
+      }
+    });
+    state.candles = generateSyntheticCandles();
+    renderChart();
+  }
+
+  function switchRecordTab(tab) {
+    ['active', 'closed', 'touches'].forEach(t => {
+      const b = document.getElementById('tab-btn-' + t);
+      if (!b) return;
+      if (t === tab) {
+        b.className = 'flex-1 py-1 px-2 rounded-lg text-[12px] font-semibold bg-surface-container-lowest text-primary shadow-sm border border-white/50 dark:border-white/10 text-center transition-all';
+      } else {
+        b.className = 'flex-1 py-1 px-2 rounded-lg text-[12px] font-medium text-on-surface-variant hover:text-on-surface text-center transition-all';
+      }
+    });
+  }
+
+  function switchTouchTab(tab) {
+    ['all', 'upper', 'lower', 'fav'].forEach(t => {
+      const b = document.getElementById('touch-tab-' + t);
+      if (!b) return;
+      if (t === tab) {
+        b.className = 'flex-1 py-1 px-1 rounded-lg text-[10px] font-semibold bg-surface-container-lowest text-primary shadow-xs border border-white/50 dark:border-white/10 text-center transition-all';
+      } else {
+        b.className = 'flex-1 py-1 px-1 rounded-lg text-[10px] font-medium text-on-surface-variant hover:text-on-surface text-center transition-all';
+      }
+    });
+  }
+
+  function filterTouchedCoins(val) {
+    const query = val.trim().toUpperCase();
+    document.querySelectorAll('#touches-list-container > div').forEach(row => {
+      row.style.display = row.innerText.toUpperCase().includes(query) ? 'flex' : 'none';
+    });
+  }
+
+  function selectUniverseCoin(symbol, fillPrice, hasActive, side, status, mHigh, mLow, u1618, l1618) {
+    selectTrade(symbol, fillPrice, side || 'short', status || '已触达', mHigh, mLow, u1618, l1618);
+  }
+
+  function selectTrade(symbol, fillPrice, side, status, mHigh, mLow, u1618, l1618) {
+    state.trade = {
+      symbol,
+      fillPrice,
+      side,
+      status,
+      mondayHigh: mHigh,
+      mondayLow: mLow,
+      upper1618: u1618,
+      lower1618: l1618,
+      fillCandleIndex: 26,
+      beCandleIndex: 31
+    };
+
+    document.getElementById('active-symbol-badge').innerText = symbol;
+    document.getElementById('hud-symbol').innerText = symbol.replace('/', '') + '.P';
+
+    const tradePill = document.getElementById('active-trade-pill');
+    if (side === 'short') {
+      tradePill.className = 'flex items-center gap-1 px-1.5 py-0.5 rounded-full font-label-caps text-[9px] bg-tertiary-container/10 text-tertiary font-semibold border border-tertiary-container/20';
+      tradePill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-candle-down animate-pulse"></span> 做空 · ${status}`;
+    } else {
+      tradePill.className = 'flex items-center gap-1 px-1.5 py-0.5 rounded-full font-label-caps text-[9px] bg-secondary-container/20 text-secondary dark:text-[#78d8be] font-semibold border border-secondary/20';
+      tradePill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-candle-up animate-pulse"></span> 做多 · ${status}`;
+    }
+
+    state.candles = generateSyntheticCandles();
+    renderChart();
+  }
+
+  function resetToLatestTrade() {
+    selectTrade('SOL/USDT', 184.50, 'short', 'BE Armed', 188.00, 168.00, 198.50, 156.20);
+  }
+
+  function zoomChart(dir) { renderChart(); }
+  function resetChartFit() { renderChart(); }
+
+  // Modal Controls
+  function openAnalyticsModal() {
+    const o = document.getElementById('analytics-modal-overlay');
+    const c = document.getElementById('analytics-modal-card');
+    if (!o || !c) return;
+    o.classList.remove('hidden');
+    setTimeout(() => {
+      o.classList.remove('opacity-0');
+      c.classList.remove('translate-y-full', 'sm:scale-95');
+      c.classList.add('translate-y-0', 'sm:scale-100');
+    }, 10);
+  }
+
+  function closeAnalyticsModal() {
+    const o = document.getElementById('analytics-modal-overlay');
+    const c = document.getElementById('analytics-modal-card');
+    if (!o || !c) return;
+    c.classList.add('translate-y-full', 'sm:scale-95');
+    c.classList.remove('translate-y-0', 'sm:scale-100');
+    o.classList.add('opacity-0');
+    setTimeout(() => o.classList.add('hidden'), 200);
+  }
+
+  function closeAnalyticsIfClickedOutside(e) {
+    if (e.target.id === 'analytics-modal-overlay') closeAnalyticsModal();
+  }
+
+  function openCloseModal(symbol, side, currentQty, refPrice, entryPrice, track, pnl) {
+    document.getElementById('modal-coin-name').innerText = symbol;
+    document.getElementById('m-close-qty').innerText = `${currentQty.toFixed(2)} SOL`;
+    document.getElementById('m-ref-price').innerText = refPrice.toFixed(2);
+    const o = document.getElementById('paper-close-modal-overlay');
+    const c = document.getElementById('paper-close-card');
+    o.classList.remove('hidden');
+    setTimeout(() => {
+      o.classList.remove('opacity-0');
+      c.classList.remove('translate-y-full', 'sm:scale-95');
+      c.classList.add('translate-y-0', 'sm:scale-100');
+    }, 10);
+  }
+
+  function closeCloseModal() {
+    const o = document.getElementById('paper-close-modal-overlay');
+    const c = document.getElementById('paper-close-card');
+    c.classList.add('translate-y-full', 'sm:scale-95');
+    c.classList.remove('translate-y-0', 'sm:scale-100');
+    o.classList.add('opacity-0');
+    setTimeout(() => o.classList.add('hidden'), 200);
+  }
+
+  function setClosePercent(pct) {
+    document.querySelectorAll('.ratio-btn').forEach(btn => {
+      if (parseInt(btn.getAttribute('data-ratio')) === pct) {
+        btn.className = 'ratio-btn py-1.5 rounded-lg text-[12px] font-bold bg-primary text-on-primary shadow-xs border border-primary transition-all text-center';
+      } else {
+        btn.className = 'ratio-btn py-1.5 rounded-lg text-[12px] font-medium bg-surface-container-low/60 hover:bg-surface-container-high border border-outline-variant/30 text-on-surface transition-all text-center';
+      }
+    });
+  }
+
+  function executeSimulatedClose() {
+    closeCloseModal();
+    showToast('已成功模拟平仓 · 订单已结清');
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('close-success-toast');
+    const msgEl = document.getElementById('toast-message');
+    msgEl.innerText = msg;
+    toast.classList.remove('opacity-0', '-translate-y-2');
+    toast.classList.add('opacity-100', 'translate-y-0');
+    setTimeout(() => {
+      toast.classList.remove('opacity-100', 'translate-y-0');
+      toast.classList.add('opacity-0', '-translate-y-2');
+    }, 3000);
+  }
+
+  // Initialize theme and canvas
+  window.addEventListener('DOMContentLoaded', () => {
+    initBinaryTheme();
+    resizeCanvas();
+  });
+</script>
+</body></html>

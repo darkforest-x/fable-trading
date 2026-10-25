@@ -1,36 +1,25 @@
-/* Apply appearance before CSS paints; preference never changes research state.
- * Sources: MDN Window.matchMedia, Window.localStorage and DOMContentLoaded.
- * A same-origin script keeps the existing Content Security Policy intact.
- */
-"use strict";
-
+/* Binary appearance, applied before CSS paints. No data or account side effects.
+ * Stitch 2acc1f5244714b8bb6ca736e54b25bc7; one sun/moon action across lazy routes. */
 (() => {
-  const key = "rotation.appearance";
-  const choices = new Set(["system", "light", "dark"]);
-  const system = window.matchMedia("(prefers-color-scheme: dark)");
-  let preference = "system";
-  try {
-    const saved = window.localStorage.getItem(key);
-    if (choices.has(saved)) preference = saved;
-  } catch (_) { /* Restricted storage still allows an in-session choice. */ }
-
-  function apply() {
-    document.documentElement.dataset.theme = preference === "system"
-      ? (system.matches ? "dark" : "light") : preference;
+  'use strict';
+  const key='spike.theme';
+  const valid=value=>value==='dark'?'dark':'light';
+  function read(){try{return valid(window.localStorage.getItem(key))}catch{return 'light'}}
+  let current=read();
+  function apply(){
+    document.documentElement.setAttribute('data-theme',current);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',current==='dark'?'#101318':'#f7f8f6');
   }
+  function toggle(){
+    current=current==='dark'?'light':'dark';
+    try{window.localStorage.setItem(key,current)}catch{/* Switching still works with restricted storage. */}
+    apply();
+  }
+  window.SpikeTheme=Object.freeze({get:()=>current,toggle});
   apply();
-  system.addEventListener("change", () => {
-    if (preference === "system") apply();
+  document.addEventListener('click',event=>{
+    const button=event.target.closest?.('[data-theme-toggle]');
+    if(button&&!button.disabled)toggle();
   });
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const select = document.getElementById("theme-select");
-    select.value = preference;
-    select.addEventListener("change", () => {
-      preference = choices.has(select.value) ? select.value : "system";
-      apply();
-      try { window.localStorage.setItem(key, preference); }
-      catch (_) { /* Do not interrupt the dashboard when storage is unavailable. */ }
-    });
-  });
+  window.addEventListener('storage',event=>{if(event.key===key||event.key===null){current=read();apply()}});
 })();

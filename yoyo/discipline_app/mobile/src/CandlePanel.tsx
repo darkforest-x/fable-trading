@@ -1,3 +1,4 @@
+import {observeChartAppearance} from './chartAppearance';
 import {REFRESH_EVENT,type RefreshRequest} from './refreshEvent';
 import type {FibRange} from './fibData';
 import {FibRangePrimitive} from './FibRangePrimitive';
@@ -46,6 +47,7 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
    handleScale:{axisPressedMouseMove:true,mouseWheel:true,pinch:true},
    crosshair:{vertLine:{color:'#8aa99b',labelBackgroundColor:'#47685a'},horzLine:{color:'#8aa99b',labelBackgroundColor:'#47685a'}},
   });
+  const stopAppearance=observeChartAppearance(chart);
   const candles=chart.addSeries(CandlestickSeries,{upColor:'#00c990',downColor:'#ff3b69',wickUpColor:'#00c990',wickDownColor:'#ff3b69',borderVisible:false,priceLineColor:'#819b90',priceLineStyle:LineStyle.Dashed});
   const volume=chart.addSeries(HistogramSeries,{priceFormat:{type:'volume'},priceScaleId:'volume',lastValueVisible:false,priceLineVisible:false});
   volume.priceScale().applyOptions({scaleMargins:{top:.82,bottom:0},visible:false});
@@ -53,7 +55,7 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
   const observer=new ResizeObserver(entries=>{const box=entries[0]?.contentRect;if(box&&box.width>0&&box.height>0)chart.resize(Math.floor(box.width),Math.floor(box.height))});observer.observe(host.current);
   chart.subscribeCrosshairMove(event=>{const row=event.seriesData.get(candles);hovering.current=!!event.point&&!!row;if(row&&'open'in row)showBar({...row,volume:0,confirmed:false,time:Number(row.time)});else showBar(latest.current.state.bars.at(-1))});
   chart.timeScale().subscribeVisibleLogicalRangeChange(range=>{if(range&&range.from<12&&previous.current.bars.length>=55&&latest.current.state.historyReady&&!latest.current.state.error)latest.current.onOlder()});
-  return()=>{view.current={key:symbol+period,range:chart.timeScale().getVisibleLogicalRange()};observer.disconnect();chart.remove();graph.current=null;previous.current={bars:[],reset:-1}};
+  return()=>{view.current={key:symbol+period,range:chart.timeScale().getVisibleLogicalRange()};observer.disconnect();stopAppearance();chart.remove();graph.current=null;previous.current={bars:[],reset:-1}};
  },[symbol,period,showBar,view]);
  useEffect(()=>{graph.current?.candles.applyOptions({priceFormat:{type:'price',precision,minMove:Number(tick)||.01}})},[precision,tick]);
  useEffect(()=>{

@@ -10,10 +10,10 @@
     const response = await fetch('/vision-assets/index.html');
     if (!response.ok) throw new Error('VLM 工作流界面暂不可读');
     const page = new DOMParser().parseFromString(await response.text(), 'text/html');
-    page.querySelectorAll('script, .skip-link, .brand, .sidebar-bottom').forEach((el) => el.remove());
+    page.querySelectorAll('script, .skip-link, .brand, .sidebar-bottom, [data-theme-toggle]').forEach((el) => el.remove());
     shadow = host.attachShadow({ mode: 'open' });
     const style = native.createElement('style');
-    style.textContent = `:host{display:block;min-width:0;color-scheme:light}
+    style.textContent = `:host{display:block;min-width:0;color-scheme:inherit}
       .vision-body{font:12px/1.6 var(--font-ui);color:var(--text);background:var(--bg)}
       .app-frame,.main-content{display:block;max-width:none;padding:0}.app-sidebar{display:block;position:static;width:auto;height:auto;padding:0;margin:0 0 8px;background:var(--surface);border:1px solid var(--line);border-radius:4px}
       .primary-nav{display:flex;flex-direction:row;flex-wrap:nowrap;overflow:auto;gap:4px;margin:0;padding:0 8px}.nav-tab{flex-direction:row;font-size:12px;min-height:36px;padding:8px 10px;border-radius:0;border:0;border-bottom:2px solid transparent;background:none;color:var(--muted)}.nav-tab.active{border-bottom-color:var(--mint);color:var(--mint);background:none}

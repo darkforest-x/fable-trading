@@ -17,7 +17,7 @@
   if(typeof module!=='undefined')module.exports={initialSymbol};
   if(typeof document==='undefined')return;
   const route=window.location.hash.slice(1).split('?');
-  if(!['','market','monday-fib'].includes(route[0])||document.hidden)return;
+  if(route[0]!=='monday-fib'||document.hidden)return;
   let versions={};try{versions=JSON.parse(document.getElementById('asset-versions')?.textContent||'{}');}catch{}
   const slots=new Map();let cancelled=false;
   function start(key,url){

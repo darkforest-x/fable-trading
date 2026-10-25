@@ -13,7 +13,8 @@
     <link rel="stylesheet" href="/chart-tools.css" />
     <script src="/chart-tools.js"></script>
     <script type="module" src="/app.js"></script>
-  </head>
+  <link rel="stylesheet" href="/theme-toggle.css"/>
+</head>
   <body>
     <a class="skip-link" href="#main-content">跳到主要内容</a>
     <div class="app-frame">
@@ -30,7 +31,7 @@
           <button class="nav-tab" id="tab-settings-button" type="button" role="tab" aria-selected="false" aria-controls="tab-settings" data-tab="settings" tabindex="-1"><span class="ui-icon icon-settings" aria-hidden="true"></span><span>模型设置</span></button>
         </nav>
         <div class="sidebar-bottom">
-          <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换到深色模式" title="切换到深色模式"><span class="theme-icon ui-icon icon-sun" aria-hidden="true"></span><span class="theme-label">浅色</span></button>
+          <button type="button" class="theme-toggle" data-theme-toggle aria-label="切换浅色或深色" title="切换浅色或深色"></button>
           <span class="sidebar-caption">本机研究工作台</span>
         </div>
       </aside>

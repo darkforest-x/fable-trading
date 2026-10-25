@@ -26,8 +26,8 @@ test('startup chooses the same event and pinned symbol as the monitor',()=>{
 test('other pages and hidden documents make no speculative market request',()=>{
  for(const options of [{hash:'#signals'},{hidden:true}]){const h=harness(options);assert.equal(h.calls.length,0);assert.equal(h.links.length,0);}
 });
-test('home and retired market bookmarks warm only the new Monday homepage',()=>{
- for(const hash of ['','#market']){const h=harness({hash});assert.equal(h.calls.length,1);assert.equal(h.calls[0].url,'/api/monday-fib?compact=true');}
+test('home and retired market bookmarks do not warm an unrelated chart',()=>{
+ for(const hash of ['','#market']){const h=harness({hash});assert.equal(h.calls.length,0);}
 });
 test('startup overlaps code and data, preserves receipt time, and consumes each response once',async()=>{
  const h=harness(),signal=new AbortController().signal;

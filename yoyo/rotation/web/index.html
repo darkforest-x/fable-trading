@@ -9,6 +9,7 @@
   <script src="/static/theme.js"></script>
   <link rel="stylesheet" href="/static/styles.css">
   <script defer src="/static/app.js"></script>
+<link rel="stylesheet" href="/static/theme-toggle.css"/>
 </head>
 <body>
   <a class="skip-link" href="#candidates">跳到候选池</a>
@@ -21,7 +22,7 @@
       <a href="#overview">市场概览</a><a href="#candidates">候选池</a><a href="#journal">观察日志</a>
     </nav>
     <div class="topbar-actions">
-      <label class="theme-control"><span class="visually-hidden">外观模式</span><select id="theme-select" aria-label="外观模式"><option value="system">跟随系统</option><option value="light">浅色模式</option><option value="dark">深色模式</option></select></label>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="切换浅色或深色" title="切换浅色或深色"></button>
       <span class="connection" id="connection"><span class="status-dot"></span><span id="connection-text">正在连接</span></span>
     </div>
   </header>

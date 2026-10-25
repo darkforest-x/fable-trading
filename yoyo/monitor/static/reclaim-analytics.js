@@ -33,7 +33,7 @@
       section('退出原因',['原因','成交批次','已实现 USDT'],d.by_reason.map(r=>`<tr><th scope="row">${reason(r.reason)}</th><td>${r.exit_count}</td><td class="${tone(r.realized_pnl)}">${signed(r.realized_pnl)}</td></tr>`),'所选时间内尚无平仓成交')+
       section('币种表现 · 按盈亏影响排序',['币种','结清 / 胜率','已实现 USDT'],d.by_symbol.map(r=>tradeRow(esc(r.symbol.replace('-USDT-SWAP','')),r)),'所选时间内尚无已实现盈亏');
   }
-  function chartOptions(d){return {animation:false,grid:{left:58,right:12,top:18,bottom:32},tooltip:{trigger:'axis',confine:true,formatter:rows=>{const p=d.curve[rows[0]?.dataIndex];return p?`${time(p.time_ms)} 北京<br>已实现净值 ${num(p.equity)} USDT<br>区间净盈亏 ${signed(p.pnl)} USDT`:'';}},xAxis:{type:'time',axisLabel:{fontSize:10,color:'#748493',hideOverlap:true,formatter:v=>d.now_ms-d.start_ms<172800000?time(v).slice(6):time(v).slice(0,5)},axisLine:{lineStyle:{color:'#cbd9e4'}},axisTick:{show:false},splitLine:{show:false}},yAxis:{type:'value',scale:true,axisLabel:{fontSize:10,color:'#748493',formatter:v=>num(v)},splitNumber:3,splitLine:{lineStyle:{color:'#a1b5c322',type:'dashed'}}},series:[{type:'line',step:'end',showSymbol:false,data:d.curve.map(p=>[p.time_ms,p.equity]),lineStyle:{width:2,color:'#0071e3'},itemStyle:{color:'#0071e3'},areaStyle:{color:'#0071e3',opacity:.055}}]};}
+  function chartOptions(d,dark=false){const muted=dark?'#9aaabc':'#748493',line=dark?'#ffffff1a':'#cbd9e4',grid=dark?'#ffffff12':'#a1b5c322',accent=dark?'#5aa9ff':'#0071e3';return {animation:false,grid:{left:58,right:12,top:18,bottom:32},tooltip:{trigger:'axis',confine:true,backgroundColor:dark?'#1c222c':'#ffffff',borderColor:line,textStyle:{color:dark?'#e8edf4':'#182b39'},formatter:rows=>{const p=d.curve[rows[0]?.dataIndex];return p?`${time(p.time_ms)} 北京<br>已实现净值 ${num(p.equity)} USDT<br>区间净盈亏 ${signed(p.pnl)} USDT`:'';}},xAxis:{type:'time',axisLabel:{fontSize:10,color:muted,hideOverlap:true,formatter:v=>d.now_ms-d.start_ms<172800000?time(v).slice(6):time(v).slice(0,5)},axisLine:{lineStyle:{color:line}},axisTick:{show:false},splitLine:{show:false}},yAxis:{type:'value',scale:true,axisLabel:{fontSize:10,color:muted,formatter:v=>num(v)},splitNumber:3,splitLine:{lineStyle:{color:grid,type:'dashed'}}},series:[{type:'line',step:'end',showSymbol:false,data:d.curve.map(p=>[p.time_ms,p.equity]),lineStyle:{width:2,color:accent},itemStyle:{color:accent},areaStyle:{color:accent,opacity:.055}}]};}
   const api={validate,metricsHTML,breakdownHTML,chartOptions,pf};
   if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}
   function create({root,createFeed,onOpen,onTrack}){
@@ -59,7 +59,7 @@
       if(!active||!open)return;
       if(!window.echarts){if(chartLoading||chartError)return;chartLoading=true;try{await window.SpikeModules.ensure('signal-charts');chartError='';}catch{chartError='曲线暂未加载，点击刷新统计重试';}finally{chartLoading=false;}if(active&&open)render();return;}
       if(lastChartData===d&&chart)return;
-      chart??=window.echarts.init(el('.rp-equity-chart'),null,{renderer:'canvas'});chart.setOption(chartOptions(d),true);lastChartData=d;
+      chart??=window.echarts.init(el('.rp-equity-chart'),null,{renderer:'canvas'});chart.setOption(chartOptions(d,document.documentElement.dataset.theme==='dark'),true);lastChartData=d;
     }
     function render(){
       if(!open)return;
@@ -81,6 +81,7 @@
     panel.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.analysisTrack)onTrack(b.dataset.analysisTrack);if(b.dataset.analysisDays!==undefined){const n=Number(b.dataset.analysisDays);if(n!==days){days=n;newFeed();}}if(b.dataset.analysisAction==='close')setOpen(false);if(b.dataset.analysisAction==='refresh'){chartError='';feed.refresh();}});
     panel.addEventListener('keydown',e=>{if(e.key==='Escape'&&open){e.stopPropagation();setOpen(false);}});
     new ResizeObserver(()=>chart?.resize()).observe(el('.rp-equity-chart'));
+    new MutationObserver(()=>{lastChartData=null;if(active&&open)render();}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
     newFeed();setOpen(false,false);
     return {setOpen,toggle:()=>setOpen(!open),setTrack(value){if(value!==track){track=value;newFeed();}},refresh:()=>feed.refresh(),setActive(value){active=value;if(!value){sheet.reset();stopChart();}feed.setActive(value&&open);if(value)render();}};
   }

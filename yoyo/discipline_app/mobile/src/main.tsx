@@ -4,4 +4,6 @@ import App from './App';
 import './style.css';
 import './appleGlass.css';
 import './performance.css';
+import '../../../monitor/static/theme-toggle.css';
+import './nightMode.css';
 createRoot(document.getElementById('root')!).render(<React.StrictMode><App/></React.StrictMode>);

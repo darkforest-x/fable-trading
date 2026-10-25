@@ -33,8 +33,8 @@ function harness(fetchImpl = async () => response(status())) {
   const location = { hash: "#signals" };
   const document = { body: element(), hidden: false, getElementById: get, querySelectorAll: (selector) => selector === "[data-view]" ? nav : [] };
   const sandbox = { AbortController, Date, Intl, Map, Set, Promise, Number, String, Boolean, Array, Object,
-    Math, RegExp, Error, TypeError, JSON, encodeURIComponent, location, document,
-    history: { pushState: (_, __, hash) => { history.push(hash); location.hash = hash; } },
+    Math, RegExp, Error, TypeError, JSON, URLSearchParams, encodeURIComponent, location, document,
+    history: { replaceState: (_, __, hash) => { location.hash = hash; }, pushState: (_, __, hash) => { history.push(hash); location.hash = hash; } },
     window: { scrollTo() {}, SpikePaper: { setActive() {}, refresh: async () => {} } },
     fetch: async (...args) => { calls.push(args[0]); return fetchImpl(...args); },
     setTimeout: (...args) => { const timer = setTimeout(...args); timer.unref(); return timer; }, clearTimeout,
@@ -43,7 +43,7 @@ function harness(fetchImpl = async () => response(status())) {
     renderSignals = renderWatch = () => {};
     globalThis.client = { state, setView, refreshShellStatus, refresh, renderStatus };
   })();`, sandbox);
-  return { ...sandbox.client, get, calls, history, nav, document, window:sandbox.window };
+  return { ...sandbox.client, get, calls, history, nav, document, window:sandbox.window, location };
 }
 
 test("direct workspace entry loads shared status without downloading a signal ledger", async () => {
@@ -177,4 +177,9 @@ test('Monday Fib has an independent route, lifecycle and manual refresh',async()
  assert.equal(active.at(-1),true);
  await c.refresh();assert.equal(refreshes,1);
  c.setView('research',false);assert.equal(active.at(-1),false);
+});
+
+// Root entry must not restore an old workspace or pin a previous coin.
+test('empty and unknown routes land on the latest funded 1.618 paper view',()=>{
+ for(const route of ['', 'unknown', 'market']){const c=harness();c.setView(route,false);assert.equal(c.state.view,'signals');const p=new URLSearchParams(c.location.hash.split('?')[1]);assert.equal(p.get('pane'),'reclaim');assert.equal(p.get('track'),'60');assert.equal(p.get('symbol'),null);assert.equal(p.get('trade'),null);}
 });

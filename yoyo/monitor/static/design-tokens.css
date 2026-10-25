@@ -44,3 +44,27 @@
   --glass-edge:rgba(255,255,255,.75);--glass-blur:20px;--glass-saturation:145%;
   --panel-shadow:0 8px 28px #34465a0a,inset 0 1px 0 #ffffffb8;--elevated-shadow:0 20px 60px #3040501a,0 3px 12px #30405008;
 }
+
+/* Binary dark palette from Stitch 2acc1f5244714b8bb6ca736e54b25bc7.
+ * Canvas colors are opaque; glass belongs to floating surfaces only. */
+html[data-theme=dark],:host([data-theme=dark]){
+ color-scheme:dark;
+ --surface-base:#101318;--surface-lowest:#101318;--bg:#101318;
+ --surface-layer-1:rgba(28,34,44,.72);--surface-layer-2:rgba(35,43,56,.7);--surface-layer-3:#293342;
+ --surface-low:var(--surface-layer-1);--surface-high:var(--surface-layer-2);--surface-highest:#303c4d;--surface-2:var(--surface-layer-2);
+ --brand-primary:#5aa9ff;--brand-purple:#ba97ef;--brand-amber:#e6b567;
+ --trade-long:#55c7a5;--trade-short:#f57e98;--risk-critical:#ff8798;
+ --line:#ffffff1a;--line-soft:#ffffff0d;--text:#e8edf4;--text-secondary:#bcc9d8;--muted:#9aaabc;--dim:#8e9eaf;
+ --mint-soft:#5aa9ff18;--red-soft:#f57e9815;--amber:#e6b567;--blue:#5aa9ff;
+ --positive-bg:#55c7a514;--warning-bg:#e6b56718;--direction-long-bg:#55c7a514;--direction-short-bg:#f57e9815;
+ --nav-active:#5aa9ff18;--control-bg:#232b38b3;--control-border:#ffffff1f;
+ --segment-bg:#10131866;--segment-active-bg:#334156;
+ --card-border:#ffffff17;--card-hover-border:#5aa9ff55;--card-selected-bg:#5aa9ff18;
+ --chart-bg:#101318;--chart-grid:#ffffff0d;--chart-text:#9aaabc;
+ --focus-glow:#5aa9ff26;--dialog-backdrop:#00000080;--dialog-border:#ffffff24;--scrollbar:#9aaabc55;
+ --brand-bg:#5aa9ff18;--brand-border:#5aa9ff40;--on-accent:#101318;--brand-on:#101318;
+ --action-border:#5aa9ff40;--action-filled-text:#101318;--card-fresh-border:#5aa9ff55;
+ --notice-border:#e6b56740;--notice-bg:#e6b56712;--notice-text:#e6b567;
+ --glass-dock:rgba(28,34,44,.72);--glass-panel:rgba(28,34,44,.78);--glass-sheet:rgba(22,27,36,.96);--glass-edge:#ffffff17;
+ --panel-shadow:0 12px 32px -6px #00000066,inset 0 1px 0 #ffffff08;--elevated-shadow:0 20px 60px #00000080;
+}

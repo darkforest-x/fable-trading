@@ -1,3 +1,4 @@
+import {ThemeToggle} from './ThemeToggle';
 /** App-only paper replay desk. Every request stays under /v1/replay/*.
  * Replay sessions are independent snapshots and never use live order/position APIs.
  */
@@ -232,7 +233,7 @@ export function ReplayDesk({connection,onBack}:{connection:Connection|null;onBac
 
  return <div className="app replay-app" data-no-swipe>
   <main className="replay-main" data-no-swipe>
-   <header className="replay-header"><button className="replay-back" aria-label="返回 1.618" onClick={onBack}><Icon name="chevron" size={20}/></button><div><span className="replay-kicker">独立模拟盘</span><h1>模拟盘 · 历史回放</h1></div><span className="replay-badge"><i/>仅模拟</span></header>
+   <header className="replay-header"><button className="replay-back" aria-label="返回 1.618" onClick={onBack}><Icon name="chevron" size={20}/></button><div><span className="replay-kicker">独立模拟盘</span><h1>模拟盘 · 历史回放</h1></div><ThemeToggle/><span className="replay-badge"><i/>仅模拟</span></header>
    <section className="replay-disclaimer"><Icon name="shield" size={17}/><span>初始资金不是实盘余额。1x 名义本金；OHLC 顺序 O → H → L → C；限价 maker 0.02%，市价/止损 taker 0.05%；不含滑点、资金费与真实盘口队列。</span></section>
 
    <section className="replay-session-picker card">

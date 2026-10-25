@@ -1,0 +1,53 @@
+/* Stitch 2acc1f5244714b8bb6ca736e54b25bc7. Shared binary appearance, no OS listener. */
+:root{color-scheme:light;--chart-text:#657281;--chart-grid:#e4eae6;--chart-label:#47685a}
+.app .theme-toggle{color:var(--ink);background:var(--glass-subtle);border:var(--glass-border);box-shadow:var(--shadow)}
+.app .trade-heading .symbol-picker{min-width:0}.app .trade-heading .symbol-picker b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app .trade-heading .instrument-mode{margin-left:auto;flex:none}.app .trade-heading>.theme-toggle{margin-left:0}
+.app .fib-top>.theme-toggle{position:fixed;right:max(102px,calc((100vw - 480px)/2 + 104px));top:calc(var(--safe-top) + 17px);z-index:5}
+.app .fib-top .fib-symbol{max-width:calc(min(100vw,480px) - 174px)}
+.replay-header .theme-toggle{flex:0 0 44px}.replay-header h1{white-space:normal}
+html[data-theme=dark]{
+ color-scheme:dark;--canvas:#101318;--card:rgba(28,34,44,.72);--recessed:rgba(35,43,56,.7);--ink:#e8edf4;--muted:#9aaabc;--border:#ffffff17;
+ --shadow:inset 0 1px 0 #ffffff09,0 12px 32px -6px #0006;--glass-subtle:rgba(28,34,44,.72);--glass-elevated:rgba(22,27,36,.96);--glass-border:1px solid #ffffff17;
+ --accent:#5aa9ff;--accent-soft:#5aa9ff18;--green:#55c7a5;--green-soft:#55c7a518;--red:#f57e98;--red-soft:#f57e9818;
+ --chart-text:#9aaabc;--chart-grid:#ffffff0d;--chart-label:#334156;
+ color:var(--ink);background:var(--canvas);
+}
+html[data-theme=dark] .app:not(.fib-page){background:radial-gradient(ellipse at 12% 10%,#5aa9ff0c,transparent 44%),radial-gradient(ellipse at 92% 28%,#55c7a508,transparent 42%),var(--canvas)}
+html[data-theme=dark] .app :is(.settings-gear,.page-back,.connection-indicator){color:var(--muted)}
+html[data-theme=dark] .app :is(.input-shell,.input-shell:focus-within,.segment,.catalog-tabs,.allocation-presets button,.position-lite-actions button,.haptics-setting>i){background:var(--recessed);border-color:var(--border);box-shadow:none}
+html[data-theme=dark] .app :is(.segment .active,.segment button[aria-pressed=true],.catalog-tabs button[aria-selected=true],.fib-filter button[aria-pressed=true]){background:#334156;color:var(--accent);box-shadow:none}
+html[data-theme=dark] .app .entry-ticket .order-options .order-type::before{background:#334156;box-shadow:inset 0 1px 0 #ffffff0a,0 2px 8px #0003}
+html[data-theme=dark] .app .entry-ticket .order-options .order-type button{background:transparent}
+html[data-theme=dark] .app :is(.bottom-nav,.modal){background:var(--glass-elevated);border:var(--glass-border);box-shadow:var(--shadow)}
+html[data-theme=dark] .app .bottom-nav{background:var(--card)}
+html[data-theme=dark] .app .buy:disabled{background:var(--green-soft);color:var(--muted)}
+html[data-theme=dark] .app .sell:disabled{background:var(--red-soft);color:var(--muted)}
+html[data-theme=dark] .app .modal-backdrop{background:#0009}
+html[data-theme=dark] .app :is(.primary,.bottom-nav button.active,.contract-sort button[aria-pressed=true],.fib-chart .candle-periods button[aria-pressed=true]){color:#101318}
+html[data-theme=dark] .app :is(.warning,.guard-strip,.discipline-budget.halted,.pending-policy-card,.close-recovery){background:#e6b56715;color:#e6b567;border-color:#e6b56740}
+html[data-theme=dark] .app :is(.exposure-note,.account-switch-list button,.position-lite-head>span:not(.coin-logo)){background:var(--recessed);color:var(--muted)}
+html[data-theme=dark] .app .contract-row{background:var(--glass-subtle)}
+html[data-theme=dark] .app :is(.contract-row.selected,.contract-option.selected){background:var(--accent-soft);border-color:var(--accent);box-shadow:none}
+html[data-theme=dark] .app .status-toast{background:var(--glass-elevated);color:var(--ink)}
+html[data-theme=dark] .app :is(.is-loading .account-equity strong,.is-loading .account-split b){background:linear-gradient(100deg,#232b38 25%,#334156 45%,#232b38 65%);background-size:200% 100%}
+html[data-theme=dark] .app :is(.fib-top button,.fib-chart .candle-periods,.fib-quick>button,.fib-new){border-color:var(--border);box-shadow:var(--shadow)}
+html[data-theme=dark] :is(.fib-top button,.fib-quick>button){color:var(--ink)}
+html[data-theme=dark] :is(.fib-selected,.fib-symbol small,.fib-symbol>svg,.fib-chart .candle-periods button,.fib-chart .candle-ohlc,.fib-chart .candle-footer>span){color:var(--muted);text-shadow:none}
+html[data-theme=dark] :is(.fib-selected>span,.fib-chart .candle-credit,.fib-chart .candle-error){background:var(--glass-elevated)}
+html[data-theme=dark] :is(.fib-empty,.fib-chart .candle-empty,.candle-fullscreen){background:var(--canvas);color:var(--muted)}
+html[data-theme=dark] .app .fib-top .fib-replay-launcher{background:var(--glass-subtle);color:var(--accent);border-color:var(--border)}
+html[data-theme=dark] .app.replay-app,html[data-theme=dark] .app.replay-app::before{background:var(--canvas);color:var(--ink)}
+html[data-theme=dark] .replay-header{background:#101318ed}
+html[data-theme=dark] :is(.replay-back,.replay-field input,.replay-field select,.replay-chart-card,.replay-chart-empty,.replay-account-grid>div){background:var(--canvas);color:var(--ink);border-color:var(--border)}
+html[data-theme=dark] :is(.replay-disclaimer,.replay-icon-button,.replay-field-note,.replay-clock-card,.replay-range-week,.replay-levels>div,.replay-speed,.replay-segment,.replay-metric,.replay-step){background:var(--recessed);color:var(--muted);border-color:var(--border)}
+html[data-theme=dark] :is(.replay-kicker,.replay-eyebrow,.replay-section-heading h2 small,.replay-field>span,.replay-session-meta,.replay-new-session summary small,.replay-local-hint,.replay-field-note,.replay-clock-card>span,.replay-clock-card>small,.replay-chart-meta,.replay-ohlc,.replay-chart-legend,.replay-levels small,.replay-range-card>p,.replay-speed button,.replay-progress,.replay-account-grid small,.replay-account-grid i,.replay-segment button,.replay-empty-copy,.replay-position-values>span,.replay-order-row small,.replay-order-history>summary,.replay-order-history>summary span,.replay-order-status,.replay-metric small,.replay-fill-row small,.replay-loading,.replay-footer,.replay-footer button,.replay-speed-note){color:var(--muted)}
+html[data-theme=dark] :is(.replay-chart-meta span:first-child,.replay-position-values b,.replay-metric b){color:var(--ink)}
+html[data-theme=dark] :is(.replay-session-picker,.replay-new-session,.replay-range-card,.replay-controls,.replay-order-entry,.replay-monday-entry,.replay-position-list,.replay-order-list,.replay-statistics,.replay-ledger,.replay-chart-legend,.replay-order-history,.replay-order-row,.replay-position,.replay-fill-row){border-color:var(--border)}
+html[data-theme=dark] :is(.replay-notice,.replay-secondary,.replay-new-session-button,.replay-position-actions button){background:var(--green-soft);color:var(--green);border-color:var(--border)}
+html[data-theme=dark] :is(.replay-error,.replay-order-row>button){background:var(--red-soft);color:var(--red)}
+html[data-theme=dark] :is(.replay-badge,.replay-uncertain,.replay-uncertain button){background:#e6b56718;color:#e6b567}
+html[data-theme=dark] :is(.replay-position-title b.long,.replay-position-title>span,.replay-fill-row>span.profit){color:var(--green)}
+html[data-theme=dark] :is(.replay-position-title b.short,.replay-fill-row>span.loss){color:var(--red)}
+html[data-theme=dark] .replay-watermark{color:#ffffff08}
+@media(max-width:350px){.app .trade-heading{gap:4px}.app .trade-heading>.neutral{display:none}.replay-header .replay-badge{display:none}}

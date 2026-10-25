@@ -1,0 +1,50 @@
+/* Stitch 2acc1f5244714b8bb6ca736e54b25bc7: binary appearance, same layout and data. */
+body:not([data-yolo-wallpaper]) .yd-theme-toggle{display:none!important}
+#signals-view[data-signal-pane=reclaim]>:not(#monday-reclaim-paper){display:none!important}
+#monday-reclaim-paper .rp-recent{left:310px;max-width:calc(100% - 860px)}
+html[data-theme=dark] body[data-workspace=monday-fib]{--mf-bg:#101318;--mf-ink:var(--text);--mf-muted:var(--muted);--mf-blue:var(--brand-primary);--mf-glass:var(--glass-panel);--mf-border:var(--glass-edge);--mf-shadow:var(--panel-shadow);color-scheme:dark}
+html[data-theme=dark] #monday-fib-root{--surface:#101318;--line-soft:#ffffff0d;--muted:#9aaabc;--text:#e8edf4}
+html[data-theme=dark] #monday-fib-root :is(.mf-glass,.ml-dialog){box-shadow:var(--panel-shadow)}
+html[data-theme=dark] #monday-fib-root :is(.mf-perp,#mf-count,.mf-search,.mf-row[data-selected=true]){background:var(--control-bg);border-color:var(--control-border)}
+html[data-theme=dark] #monday-fib-root .mf-divider{background:var(--line)}
+html[data-theme=dark] #monday-fib-root :is(.mf-upper,.rp-negative){color:var(--trade-short)}
+html[data-theme=dark] #monday-fib-root :is(.mf-lower,.rp-positive){color:var(--trade-long)}
+html[data-theme=dark] #monday-fib-root :is(.mf-quote-state,.mf-notice){background:var(--notice-bg);color:var(--notice-text);border-color:var(--notice-border)}
+html[data-theme=dark] #monday-fib-root :is(.mf-list-note,.mf-search,.mf-row-bottom,.mf-row-price){color:var(--muted)}
+html[data-theme=dark] #monday-fib-root .mf-watermark{color:#ffffff06}
+html[data-theme=dark] :is(#monday-fib-root .cv-readout,#monday-fib-root .cv-ma-legend,.mf-chart-caption,.cv-range-status){background:#101318cc;color:var(--muted)}
+html[data-theme=dark] #monday-fib-root .cv-readout b{color:var(--text)}
+html[data-theme=dark] :is(.ml-dialog input,.ml-dialog select,.ml-dialog footer){background:var(--control-bg);color:var(--text);border-color:var(--line)}
+html[data-theme=dark] body.reclaim-paper-active{background:var(--bg);color-scheme:dark}
+html[data-theme=dark] #monday-reclaim-paper{
+ --rp-canvas:#101318;--rp-ink:#e8edf4;--rp-muted:#9aaabc;--rp-blue:#5aa9ff;--rp-accent:#5aa9ff;
+ --rp-selected:#5aa9ff18;--rp-recessed:#232b3873;--rp-panel:rgba(28,34,44,.88);--rp-edge:#ffffff17;
+ --rp-readout:#101318bb;--rp-positive:#55c7a5;--rp-negative:#f57e98;--rp-warning:#e6b567;--rp-warning-bg:#e6b56715;--rp-avatar:#293342;--rp-watermark:#ffffff05;
+ --line-soft:#ffffff0d;--muted:#9aaabc;
+}
+html[data-theme=dark] #monday-reclaim-paper .rp-glass{background:linear-gradient(130deg,#ffffff04,transparent 65%,#5aa9ff04),var(--glass-panel);border-color:var(--glass-edge);box-shadow:var(--panel-shadow)}
+html[data-theme=dark] #monday-reclaim-paper :is(.rp-close,.rp-account[open]){background:var(--glass-sheet)}
+html[data-theme=dark] #monday-reclaim-paper .rp-close::backdrop{background:var(--dialog-backdrop)}
+html[data-theme=dark] #monday-reclaim-paper .rp-close-actions [data-close-action=submit]{color:var(--on-accent)}
+html[data-theme=dark] body[data-yolo-wallpaper]{--yd-glass:var(--glass-panel);--yd-glass-edge:var(--glass-edge);--yd-glass-shadow:var(--panel-shadow)}
+html[data-theme=dark] body[data-yolo-wallpaper] :is(.yd-view-tabs .active,.yd-view-tabs [aria-selected=true]){background:var(--segment-active-bg)!important;color:var(--brand-primary)!important;box-shadow:none!important}
+html[data-theme=dark] :is(.yd-readout,.yd-ma-legend,.yd-chart-summary){background:var(--glass-panel);color:var(--muted)}
+html[data-theme=dark] :is(.pb-hero,.pb-section,.pb-body,.rp-ref-image-wrap){background:var(--glass-panel);border-color:var(--line)}
+@media(max-width:700px){
+ #monday-reclaim-paper .rp-recent{left:10px;max-width:calc(100% - 86px)}
+ #monday-fib-root .mf-nav{gap:6px;padding-block:0;min-height:46px}
+ #monday-fib-root .mf-nav h1{display:none}
+ body[data-yolo-wallpaper] .yd-toolbar{gap:0;padding:2px;max-width:calc(100% - 24px)}
+ body[data-yolo-wallpaper] .yd-view-tabs button{padding-inline:7px;font-size:11px}
+}
+@media(max-width:360px){
+ body[data-yolo-wallpaper] .yd-home-link{display:none}
+ #monday-reclaim-paper .rp-heading{gap:0;padding-left:7px}
+}
+
+html[data-theme=dark] #monday-fib-root .mf-glass{background:var(--mf-glass)}
+html[data-theme=dark] #monday-reclaim-paper .rp-analysis-section{border-color:var(--line)}
+html[data-theme=dark] #monday-reclaim-paper .rp-analysis-warning{background:var(--notice-bg);color:var(--notice-text)}
+@media(min-width:701px) and (max-width:1100px){#monday-reclaim-paper .rp-recent{left:20px;max-width:calc(100% - 120px)}}
+
+@media(min-width:361px) and (max-width:700px){#monday-reclaim-paper .rp-badge{font-size:0}#monday-reclaim-paper .rp-badge::after{content:"模拟";font-size:10px}}

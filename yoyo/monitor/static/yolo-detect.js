@@ -178,7 +178,7 @@
   function selectionFields(prefix){return `<div class="yd-form-grid"><label>检测范围<select id="${prefix}-scope"><option value="selected">单个币种</option><option value="all">全市场加密币</option></select></label><label id="${prefix}-symbol-label">币种<input id="${prefix}-symbol" list="yd-symbols" aria-label="币种" autocomplete="off" placeholder="例如 ETH 或 BTC" aria-describedby="${prefix}-symbol-help"><small id="${prefix}-symbol-help">支持 ETH、ETHUSDT、ETH/USDT</small></label><label>K 线周期<select id="${prefix}-timeframe">${Object.entries(periods).map(([v,n])=>`<option value="${v}">${n}</option>`).join('')}</select></label></div><details class="yd-advanced"><summary>模型选择 <span>默认使用推荐版本</span></summary><label>检测模型<select id="${prefix}-model">${modelOptions()}</select></label><p>15 分钟为原训练周期，其他周期可检测，效果尚需独立验证。</p></details>`;}
   function shell(){
     root.innerHTML=`<div class="yd-shell spike-ui">
-      <div class="yd-toolbar"><a class="yd-home-link" href="#monday-fib" aria-label="SPIKE 首页">S</a><h2 class="yd-workspace-title">形态巡检</h2><div class="yd-view-tabs nav nav-underline" role="tablist" aria-label="检测工作台"><button class="nav-link" role="tab" id="yd-tab-results" data-yd-tab="results" aria-controls="yd-panel-results">K 线详情</button><button class="nav-link" role="tab" id="yd-tab-history" data-yd-tab="history" aria-controls="yd-panel-history">检测记录</button><button class="nav-link" role="tab" id="yd-tab-schedules" data-yd-tab="schedules" aria-controls="yd-panel-schedules">形态巡检池 <span id="yd-plan-count"></span></button><button class="nav-link" role="tab" id="yd-tab-model" data-yd-tab="model" aria-controls="yd-panel-model">模型说明</button></div><button class="yd-primary btn btn-sm btn-primary" data-yd-new>新建检测</button></div>
+      <div class="yd-toolbar"><a class="yd-home-link" href="#signals?pane=reclaim" aria-label="SPIKE 首页">S</a><h2 class="yd-workspace-title">形态巡检</h2><button type="button" class="theme-toggle yd-theme-toggle" data-theme-toggle aria-label="切换浅色或深色" title="切换浅色或深色"></button><div class="yd-view-tabs nav nav-underline" role="tablist" aria-label="检测工作台"><button class="nav-link" role="tab" id="yd-tab-results" data-yd-tab="results" aria-controls="yd-panel-results">K 线详情</button><button class="nav-link" role="tab" id="yd-tab-schedules" data-yd-tab="schedules" aria-controls="yd-panel-schedules">形态巡检池 <span id="yd-plan-count"></span></button></div><button class="yd-primary btn btn-sm btn-primary" data-yd-new>新建检测</button></div>
       <p id="yd-error" class="yd-error" role="alert" hidden></p>
       <section id="yd-panel-results" role="tabpanel" aria-labelledby="yd-tab-results">
         <div id="yd-patrol-return" class="yd-patrol-return" hidden><button data-yd-patrol-back>← 返回最新发现</button><span>查看巡检保存的 K 线与识别框</span></div><div id="yd-run-progress" class="yd-run-progress" aria-live="polite" hidden></div>
@@ -238,7 +238,7 @@
     html('yd-findings','');html('yd-feed-more','');error('','yd-feed-error');
   }
   function setTab(tab,sync=true){
-    if(!['results','account','history','schedules','model'].includes(tab))tab='schedules';if(sync&&tab==='results'&&state.tab!=='results'&&state.overview)state.latestRevision='';state.tab=tab;wallpaper();
+    if(!['results','account','schedules'].includes(tab))tab='schedules';if(sync&&tab==='results'&&state.tab!=='results'&&state.overview)state.latestRevision='';state.tab=tab;wallpaper();
     root.querySelectorAll('[data-yd-tab]').forEach(b=>{const yes=b.dataset.ydTab===tab;b.setAttribute('aria-selected',String(yes));b.tabIndex=yes?0:-1;});
     const title=root.querySelector('.yd-workspace-title');if(title)title.textContent=tab==='account'?'实盘与风控':'形态巡检';
     for(const name of ['results','account','history','schedules','model'])$('yd-panel-'+name).hidden=name!==tab;
@@ -318,7 +318,7 @@
     on('yd-symbol-sort','change',e=>{state.symbolOrder=e.target.value;save('spike.yolo.symbol-sort.v2',state.symbolOrder);drawSymbols();});
     on('yd-follow','change',e=>{state.follow=e.target.checked;tailVersion++;state.tailLoading=false;state.tailError='';if(state.follow)refreshTail(true);else{state.tail=null;updateChartData();if(state.selected)selectBox(state.selected);else recentRange();tailStatus();}});
     on('yd-tail-refresh','click',()=>{state.follow=true;$('yd-follow').checked=true;refreshTail(true);});
-    root.querySelector('.yd-view-tabs').addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const tabs=['schedules','results','history','model'];setTab(tabs[(tabs.indexOf(state.tab)+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length]);$('yd-tab-'+state.tab).focus();});
+    root.querySelector('.yd-view-tabs').addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const tabs=['schedules','results'];setTab(tabs[(tabs.indexOf(state.tab)+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length]);$('yd-tab-'+state.tab).focus();});
     for(const prefix of ['yd','ys'])for(const key of ['scope','symbol','timeframe','model'])on(prefix+'-'+key,key==='symbol'?'input':'change',e=>{
       const d=prefix==='yd'?state.draft:state.scheduleDraft;d[key]=e.target.value;draftContext(prefix);e.target.removeAttribute('aria-invalid');error('',prefix==='yd'?'yd-scan-error':'yd-plan-error');if(prefix==='yd')saveDraft();
     });
@@ -743,7 +743,7 @@
   window.SpikeNavigation?.register('yolo-detect',p=>{state.pendingRoute=p;clearTimeout(feedTimer);feedVersion++;if(state.active)refresh();});
   document.addEventListener('visibilitychange',()=>{if(state.active&&!document.hidden)refresh();});
   window.addEventListener('pagehide',rememberChart);
-  new MutationObserver(()=>{chartNeedsTheme=true;if(chart&&state.active){const style=getComputedStyle(document.documentElement);chart.applyOptions({layout:{background:{color:style.getPropertyValue('--chart-bg').trim()},textColor:style.getPropertyValue('--chart-text').trim()},grid:{vertLines:{color:style.getPropertyValue('--chart-grid').trim()},horzLines:{color:style.getPropertyValue('--chart-grid').trim()}}});chartNeedsTheme=false;}}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  new MutationObserver(()=>{chartNeedsTheme=true;const style=getComputedStyle(document.documentElement),options={layout:{background:{color:style.getPropertyValue('--chart-bg').trim()},textColor:style.getPropertyValue('--chart-text').trim()},grid:{vertLines:{color:style.getPropertyValue('--chart-grid').trim()},horzLines:{color:style.getPropertyValue('--chart-grid').trim()}}};if(chart&&state.active){chart.applyOptions(options);chartNeedsTheme=false;}previewChartInstance?.applyOptions(options);}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
   window.SpikeYoloDetect={refresh,setActive(value){
     if(state.active!==value)activationVersion++;state.active=value;wallpaper();window.SpikeManualAccount?.setActive(value,state.tab);clearInterval(timer);
     if(value){refresh();if(state.tab==='results'&&state.result&&!chart)renderChart().then(drawBoxes).catch(e=>error(e.message));timer=setInterval(()=>{if(!document.hidden)refresh();},5000);}

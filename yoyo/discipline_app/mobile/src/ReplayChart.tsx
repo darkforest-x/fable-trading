@@ -1,3 +1,4 @@
+import {observeChartAppearance} from './chartAppearance';
 /** Historical replay canvas. It renders only bars in the selected server snapshot. */
 import {useEffect,useMemo,useRef} from 'react';
 import {CandlestickSeries,ColorType,HistogramSeries,LineStyle,createChart,type IChartApi,type ISeriesApi,type Time,type UTCTimestamp} from 'lightweight-charts';
@@ -24,13 +25,14 @@ export function ReplayChart({snapshot}:{snapshot:ReplaySnapshot}){
    handleScale:{axisPressedMouseMove:true,mouseWheel:true,pinch:true},
    crosshair:{vertLine:{color:'#86a291',labelBackgroundColor:'#527360'},horzLine:{color:'#86a291',labelBackgroundColor:'#527360'}},
   });
+  const stopAppearance=observeChartAppearance(chart);
   const candles=chart.addSeries(CandlestickSeries,{upColor:'#1caf83',downColor:'#f05d63',wickUpColor:'#1caf83',wickDownColor:'#f05d63',borderVisible:false,priceLineColor:'#6f927e',priceLineStyle:LineStyle.Dashed,priceFormat:{type:'price',precision:4,minMove:.0001}});
   const volume=chart.addSeries(HistogramSeries,{priceFormat:{type:'volume'},priceScaleId:'volume',lastValueVisible:false,priceLineVisible:false});
   volume.priceScale().applyOptions({scaleMargins:{top:.82,bottom:0},visible:false});
   graph.current={chart,candles,volume};
   const observer=new ResizeObserver(entries=>{const box=entries[0]?.contentRect;if(box&&box.width>0&&box.height>0)chart.resize(Math.floor(box.width),Math.floor(box.height))});
   observer.observe(host.current);
-  return()=>{observer.disconnect();chart.remove();graph.current=null};
+  return()=>{observer.disconnect();stopAppearance();chart.remove();graph.current=null};
  },[]);
  useEffect(()=>{
   const current=graph.current;if(!current)return;

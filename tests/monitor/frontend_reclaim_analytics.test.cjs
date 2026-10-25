@@ -16,6 +16,14 @@ test('curve uses saved realized equity in steps with truthful zero and hover val
  assert.match(o.tooltip.formatter([{dataIndex:1}]),/1,010.00 USDT/);assert.match(o.tooltip.formatter([{dataIndex:1}]),/\+10.00/);
  assert.match(o.tooltip.formatter([{dataIndex:0}]),/0.00 USDT/);assert.equal(o.tooltip.formatter([]),'');
 });
+test('appearance changes recolor analytics without changing money, timing or hover values',()=>{
+ const light=ui.chartOptions(data),dark=ui.chartOptions(data,true);
+ assert.deepEqual(dark.series[0].data,light.series[0].data);
+ assert.equal(dark.series[0].step,light.series[0].step);
+ assert.equal(dark.tooltip.formatter([{dataIndex:1}]),light.tooltip.formatter([{dataIndex:1}]));
+ assert.notEqual(dark.tooltip.backgroundColor,light.tooltip.backgroundColor);
+ assert.notEqual(dark.xAxis.axisLabel.color,light.xAxis.axisLabel.color);
+});
 test('breakdowns label tranche counts separately and escape unexpected symbols',()=>{
  const html=ui.breakdownHTML({...data,by_reason:[{reason:'manual',exit_count:2,realized_pnl:-3}],by_symbol:[{symbol:'<img>-USDT-SWAP',closed_count:0,win_rate:null,realized_pnl:2}]});
  assert.match(html,/成交批次/);assert.match(html,/结清 \/ 胜率/);assert.match(html,/&lt;img&gt;/);assert.doesNotMatch(html,/<img>/);

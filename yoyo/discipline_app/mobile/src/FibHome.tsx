@@ -1,3 +1,4 @@
+import {ThemeToggle} from './ThemeToggle';
 /** Stitch 29ef83710fe44599b3efc0c0be7e49ab: default, chart-first Monday workspace. */
 import {lazy,memo,Suspense,useEffect,useMemo,useRef,useState} from 'react';
 import {api,SERVICE_URL,type Connection,type State} from './api';
@@ -49,7 +50,7 @@ export const FibHome=memo(function FibHome({connection,state,onQuick,onOpenRepla
  const tick=state?.instruments[selectedSymbol]?.tick??(row?String(10**-Math.min(12,Math.max(2,...[row.high,row.low].map(n=>String(n).split('.')[1]?.length??0)))):undefined);
  return <section className="fib-home" aria-label="1.618 行情" hidden={!active} inert={!active} data-no-swipe>
   <div className="fib-screen" inert={chooser}><div className="fib-refresh-zone" aria-hidden="true"/>
-   <header className="fib-top"><button className="fib-symbol" aria-label="选择已触价合约" onClick={()=>setChooser(true)} disabled={!current}><i className={live?'live':''}/><b>{row?selectedSymbol.replace('-USDT-SWAP',''):'1.618'}<small>{row?'/USDT':''}</small></b><Icon name="chevron" size={13}/></button><button className="fib-replay-launcher" onClick={onOpenReplay}><Icon name="clock" size={15}/>模拟盘</button></header>
+   <header className="fib-top"><button className="fib-symbol" aria-label="选择已触价合约" onClick={()=>setChooser(true)} disabled={!current}><i className={live?'live':''}/><b>{row?selectedSymbol.replace('-USDT-SWAP',''):'1.618'}<small>{row?'/USDT':''}</small></b><Icon name="chevron" size={13}/></button><ThemeToggle/><button className="fib-replay-launcher" onClick={onOpenReplay}><Icon name="clock" size={15}/>模拟盘</button></header>
    {row&&touch?<>
     <div className="fib-selected"><span>{touchLabel(touch,clock)}</span>{!fresh&&<span role="status">{error?'离线缓存':'缓存 · 更新中'}</span>}</div>
     {recent&&recent.symbol!==selectedSymbol&&<button className="fib-new" onClick={()=>select(recent.symbol)}>查看最新触价 · {recent.symbol.replace('-USDT-SWAP','')} <Icon name="arrow" size={12}/></button>}
