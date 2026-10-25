@@ -59,9 +59,9 @@
       }
       notice(!draw.shape||draw.shape.entry===-1?'开仓时间不在当前已加载 K 线内；可切换更大周期查看。':'');
     }});
-    function paint(){if(active&&anchor&&desired)chart.show(host,anchor,anchor.week,{period:desired.period,ma:desired.ma,trade:desired.trade,anchors:anchor});}
-    async function show(trade,period='5m',ma=false,symbol=trade?.symbol||''){
-      const changed=desired?.symbol!==symbol;desired={trade:valid(trade)&&trade.symbol===symbol?trade:null,period,ma,symbol};
+    function paint(){if(active&&anchor&&desired)chart.show(host,anchor,anchor.week,{period:desired.period,ma:desired.ma,internal:desired.internal,trade:desired.trade,anchors:anchor});}
+    async function show(trade,period='5m',ma=false,symbol=trade?.symbol||'',internal=false){
+      const changed=desired?.symbol!==symbol;desired={trade:valid(trade)&&trade.symbol===symbol?trade:null,period,ma,symbol,internal};
       if(changed){epoch++;request?.abort();request=null;anchor=null;chart.hide();pinnedFocus='';}
       if(!active)return;
       if(!/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(symbol)){chart.hide();notice('尚无资金交易，可从监控币种选择 K 线。');return;}
@@ -79,8 +79,8 @@
       }catch(e){if(revision===epoch&&active)notice((e.name==='AbortError'?'图表读取超时':e.message)+' · 点击刷新重试');}
       finally{clearTimeout(timeout);if(request===c)request=null;}
     }
-    return {show,fit:chart.fit,latest:chart.latest,zoom:chart.zoom,retry(){received=0;if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol);},
-      setActive(value){active=value;if(!value){epoch++;request?.abort();request=null;chart.pause();}else if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol);},
+    return {show,fit:chart.fit,latest:chart.latest,zoom:chart.zoom,retry(){received=0;if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal);},
+      setActive(value){active=value;if(!value){epoch++;request?.abort();request=null;chart.pause();}else if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal);},
       resetFocus(){pinnedFocus='';},destroy(){active=false;epoch++;request?.abort();chart.hide();}};
   }
   window.SpikeReclaimChart={create,latest,select,valid};

@@ -11,7 +11,7 @@ test('chart uses monitor anchors and the exact mirrored nine price levels',()=>{
  for(const label of ['上 1.618','周一高','周一低','下 1.618'])assert.equal(a.find(x=>x.label===label).lineStyle,0);
  assert.ok(a.every(x=>x.axisLabelVisible===false),'reference levels must not widen the price axis');
  for(const label of ['上 1.618','周一高','周一低','下 1.618'])assert.equal(a.find(x=>x.label===label).inlinePriceVisible,true);
- for(const label of ['上 0.705','上 0.618','下 0.618','下 0.705'])assert.equal(a.find(x=>x.label===label).inlinePriceVisible,false,'dense optional lines keep their existing quiet presentation');
+ for(const label of ['上 0.705','上 0.618','下 0.618','下 0.705'])assert.equal(a.find(x=>x.label===label).inlinePriceVisible,true,'optional Fibonacci lines retain their numeric prices');
  for(const [label,value] of [['中点 0.5',82157.9],['上 0.618',82391.9884],['下 0.618',81923.8116],['上 0.705',82564.579],['下 0.705',81751.221]])assert.ok(Math.abs(a.find(x=>x.label===label).price-value)<1e-7);
  assert.equal(levels({...row,high:null}).length,0);
 });

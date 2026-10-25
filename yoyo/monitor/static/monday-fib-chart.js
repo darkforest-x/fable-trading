@@ -22,7 +22,7 @@
       {label:'下 1.618',price:row.lower,kind:'fib',color:'#087f69',lineWidth:2,lineStyle:0},
     ].filter(x=>finite(x.price)).map(level=>({...level,
       // Inline names and prices stay on the ray; the axis keeps room for OHLC.
-      inlinePriceVisible:level.axisLabelVisible!==false,inlineNameVisible:true,axisLabelVisible:false,
+      inlinePriceVisible:true,inlineNameVisible:true,axisLabelVisible:false,
       ...(anchors?{start_ms:['上 1.618','周一高'].includes(level.label)?anchors.high_ms:['周一低','下 1.618'].includes(level.label)?anchors.low_ms:Math.max(anchors.high_ms,anchors.low_ms)}:{}),
     }));
   }

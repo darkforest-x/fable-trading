@@ -39,9 +39,9 @@ test('inline names and prices stay inside their anchored ray, without axis badge
  const primitive=new WeekLevels(owner),ctx={save(){},restore(){},beginPath(){},rect(){},clip(){},setLineDash(){},moveTo:(x,y)=>lines.push([x,y]),lineTo:(x,y)=>lines.push([x,y]),stroke(){},arc(){},fill(){},roundRect(...args){rectangles?.push(args);},measureText:()=>({width:65}),fillText:(...args)=>texts.push(args),fillRect:(...args)=>rectangles.push(args)};
  const paint=()=>primitive.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:180,height:100}})});
  assert.equal(primitive.priceAxisViews().length,0);paint();
- assert.deepEqual(lines,[[0,40],[180,40]]);assert.deepEqual(texts,[['上 1.618  0.13668908',170,40]]);assert.equal(rectangles.length,1);
+ assert.deepEqual(lines,[[0,40],[180,40]]);assert.deepEqual(texts,[['上 1.618 (0.13668908)',174,36]]);assert.equal(rectangles.length,0,'plain Fibonacci text must never paint a filled label');
  texts.length=0;offset=160;paint();assert.deepEqual(texts,[],'a short visible ray must not crop its number');
- offset=0;y=10;paint();assert.deepEqual(texts,[],'top clipping must not leave a partial label');
+ offset=0;y=16;paint();assert.deepEqual(texts,[],'top clipping must not leave a partial label');
  y=120;paint();assert.deepEqual(texts,[],'offscreen levels must not acquire floating labels');
  y=40;offset=-200;paint();assert.deepEqual(texts,[],'a future interval does not draw prices over history');
 });

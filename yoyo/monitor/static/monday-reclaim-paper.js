@@ -119,7 +119,7 @@
   if(typeof module!=='undefined' && module.exports){module.exports=api;return;}
   const root=document.getElementById('monday-reclaim-paper');
   if(!root)return;
-  let state=route(), pageActive=false, mounted=false, shown=50, signature='', chart=null, pinned=null, ma=false, recordsOpen=false, sheet=null, watch=null, chartSymbol='', closer=null, analytics=null;
+  let state=route(), pageActive=false, mounted=false, shown=50, signature='', chart=null, pinned=null, ma=false, internal=false, indicatorsOpen=false, recordsOpen=false, sheet=null, watch=null, chartSymbol='', closer=null, analytics=null;
   const requests=window.SpikeRuntime.createRequests();
   let startupRead=null;
   const feed=createFeed({read:async()=>{
@@ -130,19 +130,21 @@
   function mount(){
     if(mounted)return;mounted=true;
     root.innerHTML=`<div class="rp-wallpaper" data-rp="chart"></div><div class="rp-watermark" aria-hidden="true" data-rp="watermark"></div><p class="rp-chart-notice rp-glass" data-rp="chart-notice" role="status" hidden></p>
-      <header class="rp-heading rp-glass"><details class="rp-navigation"><summary aria-label="打开模拟盘导航"><b>ϟ SPIKE</b><span aria-hidden="true">⌄</span></summary><nav class="rp-glass"><a href="#monday-fib">1.618 图表</a><a href="#signals?pane=records">信号记录</a><a href="#signals?pane=overview">表现分析</a><a href="#yolo-detect">形态巡检</a></nav></details></header><button type="button" class="rp-theme-toggle theme-toggle rp-glass" data-theme-toggle aria-label="切换浅色或深色" title="切换浅色或深色"></button>
+      <header class="rp-heading rp-glass"><details class="rp-navigation"><summary aria-label="打开模拟盘导航"><b>ϟ SPIKE</b></summary><nav class="rp-glass"><a href="#monday-fib">1.618 图表</a><a href="#signals?pane=records">信号记录</a><a href="#signals?pane=overview">表现分析</a><a href="#yolo-detect">形态巡检</a></nav></details></header><button type="button" class="rp-theme-toggle theme-toggle rp-glass" data-theme-toggle aria-label="切换浅色或深色" title="切换浅色或深色"></button>
       <section class="rp-context rp-glass"><div class="rp-context-line"><button type="button" class="rp-symbol-trigger" data-rp-action="watch" aria-controls="rp-watch-panel" aria-expanded="false"><strong data-rp="symbol-label">选择币种</strong><span aria-hidden="true">⌄</span></button><span data-rp="selection-status"></span></div><small class="rp-selection-note" data-rp="selection-note"></small><div class="rp-context-tools"><div class="rp-tracks" role="group" aria-label="选择模拟轨道">${['60','5'].map(track=>`<button type="button" data-rp-track="${track}" aria-pressed="false">${track==='60'?'60m 主轨':'5m 研究轨'}</button>`).join('')}</div><button type="button" data-rp-action="records" aria-controls="rp-record-panel" aria-expanded="false">交易簿 <span data-rp="total">—</span></button></div></section>
       <details class="rp-account rp-glass"><summary><span>已实现净值 <b data-rp="equity">—</b><small> USDT</small></span><span data-rp="pnl"></span><span aria-hidden="true">⌄</span></summary><div class="rp-account-body"><section data-rp="metrics" class="rp-metrics"></section><p data-rp="status" role="status"></p><details class="rp-rules"><summary>规则与统计口径</summary><div data-rp="rules"></div></details></div></details><button class="rp-analysis-trigger rp-glass" data-rp-action="analytics" aria-controls="rp-analysis-panel" aria-expanded="false">统计分析 ↗</button>
       <div class="rp-alert rp-glass" data-rp="error" role="alert" hidden></div>
       <section id="rp-record-panel" class="rp-records rp-glass" aria-label="模拟交易簿" aria-hidden="true" inert><header class="rp-record-heading" data-yd-sheet-drag><strong>模拟交易簿</strong><button type="button" data-rp-action="close-records" aria-label="收起交易簿">×</button></header><div class="rp-toolbar"><div class="rp-tabs" role="group" aria-label="记录类型">${[['open','持仓'],['closed','已结束'],['events','触价']].map(([tab,label])=>`<button type="button" data-rp-tab="${tab}" aria-pressed="false">${label}<span data-rp="count-${tab}"></span></button>`).join('')}</div><div class="rp-filters"><label class="rp-search"><input type="search" placeholder="搜索币种" aria-label="搜索模拟盘币种" maxlength="80" autocomplete="off" data-rp="search"></label><label class="rp-scope" data-rp="scope-label"><select aria-label="记录资金范围" data-rp="scope"><option value="funded">计入资金</option><option value="shadow">影子记录</option><option value="all">全部记录</option></select></label></div></div><p class="rp-record-caption" data-rp="caption"></p><div class="rp-record-scroll"><div data-rp="rows" class="rp-rows"></div><button type="button" data-rp-action="more" class="rp-more" hidden>再显示 50 条</button><p class="rp-footnote" data-rp="record-note"></p></div></section>
-      <nav class="rp-dock rp-glass" aria-label="模拟盘图表工具"><select data-rp="period" aria-label="K 线周期">${['5m','15m','1H','4H'].map(v=>`<option value="${v}">${v}</option>`).join('')}</select><button type="button" data-rp-action="ma" aria-pressed="false" title="SMA / EMA 20、60、120">六均线</button><button type="button" data-rp-action="fit" title="显示全部已加载 K 线">全图</button><button type="button" data-rp-action="latest" title="回到最新 K 线">最新 K</button><button type="button" data-rp-action="follow" aria-pressed="true">跟随最新单</button></nav><span class="rp-chart-foot">本周 1.618 区间 · 开平仓按实际成交标记</span>`;
+      <nav class="rp-dock" aria-label="模拟盘图表工具"><select data-rp="period" aria-label="K 线周期">${['5m','15m','1H','4H'].map(v=>`<option value="${v}">${v}</option>`).join('')}</select><div class="rp-indicators"><button type="button" data-rp-action="indicators" aria-label="图表指标" aria-controls="rp-indicator-panel" aria-expanded="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="var(--rp-canvas)"/><circle cx="15" cy="17" r="3" fill="var(--rp-canvas)"/></svg>指标<span data-rp="indicator-count" hidden></span></button><section id="rp-indicator-panel" class="rp-indicator-panel rp-glass" aria-label="图表指标" aria-hidden="true" inert><strong>图表指标</strong><button type="button" data-rp-action="ma" role="switch" aria-checked="false" aria-label="六均线"><span>六均线<small>SMA / EMA · 20、60、120</small></span><i aria-hidden="true"></i></button><button type="button" data-rp-action="internal" role="switch" aria-checked="false" aria-label="区间点位"><span>区间点位<small>0.5 · 0.618 · 0.705</small></span><i aria-hidden="true"></i></button></section></div><button type="button" data-rp-action="fit" title="显示全部已加载 K 线">全图</button><button type="button" data-rp-action="latest" title="回到最新 K 线">最新 K</button><button type="button" data-rp-action="follow" aria-pressed="true">跟随最新单</button></nav><span class="rp-chart-foot">本周 1.618 区间 · 开平仓按实际成交标记</span>`;
     chart=window.SpikeReclaimChart.create(el('chart'),text=>{el('chart-notice').textContent=text;el('chart-notice').hidden=!text;});
     sheet=window.SpikeYoloPreviewSheet.bind({panel:root.querySelector('.rp-records'),isOpen:()=>recordsOpen,dismiss:()=>setRecords(false)});
     closer=window.SpikeReclaimClose.create({root,onChanged:()=>{feed.refresh();watch?.refresh();analytics?.refresh();}});
     watch=window.SpikeReclaimWatchlist.create({root,createFeed,getContext:()=>({track:feed.getState().data?.tracks[state.track],symbol:chartSymbol,period:state.period}),onOpen:()=>{analytics?.setOpen(false,false);if(recordsOpen)setRecords(false,false);},onSelect:symbol=>{state.symbol=symbol;state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());}});
     analytics=window.SpikeReclaimAnalytics.create({root,createFeed,onOpen:()=>{watch.setOpen(false,false);if(matchMedia('(max-width:700px)').matches)setRecords(false,false);},onTrack:track=>{state.track=track;state.trade='';pinned=null;shown=50;sync();render(feed.getState());}});
     el('period').addEventListener('change',event=>{state.period=event.target.value;sync();render(feed.getState());});
-    root.addEventListener('keydown',event=>{if(event.key==='Escape'&&recordsOpen)setRecords(false);});
+    root.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(indicatorsOpen){event.stopPropagation();setIndicators(false,true);}else if(recordsOpen)setRecords(false);});
+    document.addEventListener('pointerdown',event=>{if(indicatorsOpen&&!event.target.closest('.rp-indicators'))setIndicators(false);},true);
+    root.addEventListener('focusin',event=>{if(indicatorsOpen&&!event.target.closest('.rp-indicators'))setIndicators(false);});
     root.addEventListener('click',event=>{
       const button=event.target.closest('button');if(!button)return;
       if(button.dataset.rpClose){const p=feed.getState().data?.tracks[state.track].open.find(p=>String(p.id)===button.dataset.rpClose);if(p)closer.open(p);}
@@ -155,13 +157,21 @@
       if(action==='records')setRecords(!recordsOpen);
       if(action==='close-records')setRecords(false);
       if(action==='fit')chart.fit();if(action==='latest')chart.latest();
+      if(action==='indicators')setIndicators(!indicatorsOpen);
       if(action==='ma'){ma=!ma;render(feed.getState());}
+      if(action==='internal'){internal=!internal;render(feed.getState());}
       if(action==='follow'){state.symbol='';state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());}
       if(button.dataset.rpAction==='more'){shown+=50;render(feed.getState());}
     });
     el('scope').addEventListener('change',event=>{state.scope=event.target.value;shown=50;sync();render(feed.getState());});
     el('search').addEventListener('input',event=>{state.q=event.target.value;shown=50;sync();render(feed.getState());});
     root.addEventListener('error',event=>{if(event.target.tagName==='IMG')event.target.hidden=true;},true);
+  }
+  function setIndicators(value,focus=false){
+    indicatorsOpen=value;const panel=root.querySelector('.rp-indicator-panel');if(!panel)return;
+    panel.classList.toggle('is-open',value);panel.inert=!value;panel.setAttribute('aria-hidden',String(!value));
+    const trigger=root.querySelector('[data-rp-action="indicators"]');trigger.setAttribute('aria-expanded',String(value));
+    if(focus)trigger.focus({preventScroll:true});
   }
   function setRecords(value,focus=true){if(value&&matchMedia('(max-width:700px)').matches)analytics?.setOpen(false,false);if(value)watch?.setOpen(false,false);sheet?.reset();recordsOpen=value;const panel=root.querySelector('.rp-records');panel.classList.toggle('is-open',value);panel.inert=!value;panel.setAttribute('aria-hidden',String(!value));root.querySelector('[data-rp-action="records"]').setAttribute('aria-expanded',String(value));if(!value&&focus)root.querySelector('[data-rp-action="records"]').focus({preventScroll:true});}
   function sync(){window.SpikeNavigation?.sync('signals',{pane:'reclaim',...state});}
@@ -181,9 +191,11 @@
     const selected=state.symbol&&!state.trade?window.SpikeReclaimWatchlist.coinTrade(track,state.symbol):window.SpikeReclaimChart.select(track,state.trade,pinned);if(state.trade&&selected)pinned=selected;
     chartSymbol=state.symbol||selected?.symbol||'';
     analytics?.setTrack(state.track);
-    chart.show(selected?{...selected,asof_ms:data.now_ms}:null,state.period,ma,chartSymbol);watch?.render();el('period').value=state.period;
+    chart.show(selected?{...selected,asof_ms:data.now_ms}:null,state.period,ma,chartSymbol,internal);watch?.render();el('period').value=state.period;
     if(!selected&&state.trade){el('chart-notice').textContent='该交易不在当前返回记录中，请点击跟随最新单。';el('chart-notice').hidden=false;}
-    root.querySelector('[data-rp-action="ma"]').setAttribute('aria-pressed',String(ma));
+    root.querySelector('[data-rp-action="ma"]').setAttribute('aria-checked',String(ma));
+    root.querySelector('[data-rp-action="internal"]').setAttribute('aria-checked',String(internal));
+    el('indicator-count').textContent=String(Number(ma)+Number(internal));el('indicator-count').hidden=!ma&&!internal;
     root.querySelector('[data-rp-action="follow"]').setAttribute('aria-pressed',String(!state.trade&&!state.symbol));
     replace('symbol-label',chartSymbol?`${esc(base(chartSymbol))}<small> / USDT</small>`:'选择币种');
     replace('selection-status',selected?`<span class="${selected.side===1?'rp-positive':'rp-negative'}">${sideLabel(selected)} · ${esc(stage(selected,data.now_ms))}</span>`:'');
@@ -212,7 +224,7 @@
   }
   document.addEventListener('visibilitychange',()=>{feed.setActive(pageActive && !document.hidden);chart?.setActive(pageActive && !document.hidden);watch?.setActive(pageActive && !document.hidden);analytics?.setActive(pageActive && !document.hidden);});
   window.SpikeReclaimPaper={
-    setActive(value){pageActive=value;root.hidden=!value;if(value)mount();else{sheet?.reset();closer?.hide();}chart?.setActive(value && !document.hidden);if(value)render(feed.getState());feed.setActive(value && !document.hidden);watch?.setActive(value && !document.hidden);analytics?.setActive(value && !document.hidden);},
+    setActive(value){pageActive=value;root.hidden=!value;if(value)mount();else{setIndicators(false);sheet?.reset();closer?.hide();}chart?.setActive(value && !document.hidden);if(value)render(feed.getState());feed.setActive(value && !document.hidden);watch?.setActive(value && !document.hidden);analytics?.setActive(value && !document.hidden);},
     refresh:()=>{watch?.refresh();analytics?.refresh();return feed.refresh();},route:()=>({...state}),
     restore(params){const next=route(params);if(next.track!==state.track||next.trade!==state.trade||next.symbol!==state.symbol)pinned=null;state=next;shown=50;render(feed.getState());}
   };

@@ -70,3 +70,21 @@ test('untraded symbols load their own real chart without inheriting an execution
  api.setActive(false);const n=calls.length;await api.show(null,'5m',false,'DOGE-USDT-SWAP');assert.equal(calls.length,n);
  api.setActive(true);await new Promise(r=>setImmediate(r));assert.match(requests.at(-1),/DOGE-USDT-SWAP/);api.destroy();
 });
+
+test('paper indicator changes reuse the chart and anchors across polling, periods and resume',async()=>{
+ const calls=[],requests=[];
+ const chart={show:(...args)=>calls.push(args),hide(){},pause(){}};
+ const sandbox={window:{SpikeMondayFibChart:{create:()=>chart}},Date,AbortController,setTimeout,clearTimeout,
+  fetch:async url=>{requests.push(url);return {ok:true,json:async()=>({symbol:'SOL-USDT-SWAP',timezone:'America/New_York',week:'2026-10-19'})};}};
+ vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/reclaim-chart.js','utf8'),sandbox);
+ const api=sandbox.window.SpikeReclaimChart.create({clientWidth:1200},()=>{});
+ await api.show(pos());assert.equal(calls.at(-1)[3].internal,false);assert.equal(calls.at(-1)[3].ma,false);
+ await api.show(pos(),'5m',true,'SOL-USDT-SWAP',true);
+ assert.equal(calls.at(-1)[3].internal,true);assert.equal(calls.at(-1)[3].ma,true);
+ assert.equal(requests.length,1,'display switches must not refetch anchors');
+ await api.show(pos(),'1H',false,'SOL-USDT-SWAP',true);
+ assert.equal(calls.at(-1)[3].internal,true);assert.equal(calls.at(-1)[3].period,'1H');assert.equal(calls.at(-1)[3].ma,false);
+ api.setActive(false);api.setActive(true);await new Promise(setImmediate);
+ assert.equal(calls.at(-1)[3].internal,true);assert.equal(requests.length,1);
+ await api.show(pos(),'1H',false,'SOL-USDT-SWAP',false);assert.equal(calls.at(-1)[3].internal,false);api.destroy();
+});

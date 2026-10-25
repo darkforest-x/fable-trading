@@ -85,14 +85,14 @@
           const color=l.color||'#528cc1';ctx.strokeStyle=color;ctx.lineWidth=l.lineWidth||1;ctx.setLineDash(l.lineStyle===2?[4,4]:[]);
           ctx.beginPath();ctx.moveTo(a,y);ctx.lineTo(b,y);ctx.stroke();
           if(start>=0&&start<b){ctx.beginPath();ctx.arc(start,y,2.5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();}
-          if(l.inlinePriceVisible&&y>=12&&y<=mediaSize.height-12){
-            const number=window.SpikeChartTools?.axisPrice(l.price)??price(l.price),text=l.inlineNameVisible?`${l.label}  ${number}`:number;
-            ctx.font='11px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';
+          if(l.inlinePriceVisible&&y>=18&&y<=mediaSize.height-12){
+            const number=window.SpikeChartTools?.axisPrice(l.price)??price(l.price),text=l.inlineNameVisible?`${l.label} (${number})`:number;
+            ctx.font='11px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';ctx.textAlign='right';ctx.textBaseline='bottom';
             const width=ctx.measureText(text).width+12;
             if(width<=b-a){
-              ctx.setLineDash([]);ctx.fillStyle=color;ctx.globalAlpha=.95;
-              ctx.beginPath();ctx.roundRect(b-width-4,y-10,width,20,5);ctx.fill();ctx.globalAlpha=1;
-              ctx.fillStyle='#fff';ctx.fillText(text,b-10,y);
+              // Fibonacci-style text leaves candles visible through the ray.
+              ctx.fillStyle=typeof document!=='undefined'&&document.documentElement.dataset.theme==='dark'?'#a1adbd':'#627487';
+              ctx.fillText(text,b-6,y-4);
             }
           }
         }
