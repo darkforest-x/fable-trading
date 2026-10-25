@@ -219,6 +219,6 @@
   const instances=new WeakMap();
   function mount(host,data,view,error=''){let instance=instances.get(host);if(!instance){instance=new Interactive(host);instances.set(host,instance);}instance.update(data,view,error);return instance;}
   function unmount(host){if(!host)return;instances.get(host)?.destroy();instances.delete(host);}
-  window.SpikeRangeChart={render,price,clock,mount,unmount,WeekLevels};
+  window.SpikeRangeChart={render,price,clock,mount,unmount,WeekLevels,bindFreePan};
   if(typeof module!=='undefined')module.exports={render,price,bindFreePan,Interactive,logicalAt,coordinateAt,WeekLevels};
 })();

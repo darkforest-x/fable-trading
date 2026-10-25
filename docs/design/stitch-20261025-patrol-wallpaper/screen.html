@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SPIKE · 巡检全屏K线 · 成交额币种面板</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'PingFang SC', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'SF Mono', 'Menlo', 'monospace']
+          },
+          colors: {
+            brand: {
+              blue: '#0071E3',
+              blueHover: '#0062C4',
+              teal: '#087F69',
+              red: '#C93248',
+              up: '#10B981',
+              down: '#F43F5E',
+              amber: '#F59E0B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Apple Glassmorphism Core Specs */
+    .apple-glass {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.52) 100%);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.08), 0 2px 6px 0 rgba(15, 23, 42, 0.04), inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    .apple-glass-subtle {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.45) 100%);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.06), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
+    }
+    .apple-glass-card {
+      background: rgba(255, 255, 255, 0.62);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+    }
+    .apple-glass-pill {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+    }
+
+    /* Custom Scrollbar for side panel */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.25);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.45);
+    }
+
+    /* Transitions & Reduced Motion */
+    .panel-transition {
+      transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .panel-transition {
+        transition: none !important;
+      }
+    }
+
+    /* Touch shielding utility */
+    .touch-pan-chart {
+      touch-action: pan-x pan-y pinch-zoom;
+    }
+  </style>
+</head>
+<body class="h-full w-full overflow-hidden select-none bg-[#F4F6F9] font-sans text-slate-800 antialiased">
+
+  <!-- ========================================================================= -->
+  <!-- 1. FULLSCREEN 100vw x 100dvh WALLPAPER CANDLESTICK CANVAS                 -->
+  <!-- ========================================================================= -->
+  <div id="canvas-container" class="absolute inset-0 w-full h-full overflow-hidden touch-pan-chart cursor-crosshair">
+    <!-- SVG Vector Candlestick Chart (Crisp, High Retina, Fully Responsive) -->
+    <svg id="chart-svg" class="w-full h-full" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1440 900">
+      <defs>
+        <!-- Gradients -->
+        <linearGradient id="bgAmbient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#F9FAFC"/>
+          <stop offset="50%" stop-color="#F2F5F9"/>
+          <stop offset="100%" stop-color="#EAF0F6"/>
+        </linearGradient>
+
+        <linearGradient id="nyRangeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#0071E3" stop-opacity="0.04"/>
+          <stop offset="100%" stop-color="#0071E3" stop-opacity="0.01"/>
+        </linearGradient>
+
+        <linearGradient id="volGreen" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#10B981" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#10B981" stop-opacity="0.08"/>
+        </linearGradient>
+
+        <linearGradient id="volRed" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#F43F5E" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#F43F5E" stop-opacity="0.08"/>
+        </linearGradient>
+
+        <!-- Glow Filters -->
+        <filter id="subtleGlow" x="-10%" y="-10%" width="120%" height="120%">
+          <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000000" flood-opacity="0.06"/>
+        </filter>
+      </defs>
+
+      <!-- Background Layer -->
+      <rect width="1440" height="900" fill="url(#bgAmbient)"/>
+
+      <!-- Subtle Grid Lines (Restrained Financial Engineering Grid) -->
+      <g stroke="#E2E8F0" stroke-width="1" opacity="0.65" stroke-dasharray="3,3">
+        <!-- Horizontal Grid Lines -->
+        <line x1="0" y1="140" x2="1440" y2="140"/>
+        <line x1="0" y1="240" x2="1440" y2="240"/>
+        <line x1="0" y1="340" x2="1440" y2="340"/>
+        <line x1="0" y1="440" x2="1440" y2="440"/>
+        <line x1="0" y1="540" x2="1440" y2="540"/>
+        <line x1="0" y1="640" x2="1440" y2="640"/>
+        <line x1="0" y1="740" x2="1440" y2="740"/>
+
+        <!-- Vertical Time Grid Lines -->
+        <line x1="220" y1="0" x2="220" y2="900"/>
+        <line x1="420" y1="0" x2="420" y2="900"/>
+        <line x1="620" y1="0" x2="620" y2="900"/>
+        <line x1="820" y1="0" x2="820" y2="900"/>
+        <line x1="1020" y1="0" x2="1020" y2="900"/>
+        <line x1="1220" y1="0" x2="1220" y2="900"/>
+      </g>
+
+      <!-- NY Monday Anchor Zone (EST/EDT) -->
+      <g id="ny-anchor-zone">
+        <rect x="220" y="80" width="160" height="740" fill="url(#nyRangeGrad)"/>
+        <line x1="220" y1="80" x2="220" y2="820" stroke="#0071E3" stroke-width="1.2" stroke-dasharray="4,4" opacity="0.5"/>
+        <line x1="380" y1="80" x2="380" y2="820" stroke="#0071E3" stroke-width="1.2" stroke-dasharray="4,4" opacity="0.3"/>
+        <text x="226" y="105" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#0071E3" opacity="0.65" letter-spacing="0.04em">纽约周一定界区 (EST)</text>
+      </g>
+
+      <!-- 6 MOVING AVERAGES (6-MA Patrol Cluster) -->
+      <!-- SMA 20, 60, 120 (Warm/Primary) & EMA 20, 60, 120 (Cool/Secondary) -->
+      <g id="moving-averages" class="transition-opacity duration-300">
+        <!-- MA20 (#EAB308 Amber) -->
+        <path d="M 60 620 C 180 610, 260 590, 360 560 C 460 530, 580 490, 680 450 C 780 410, 880 340, 980 290 C 1080 240, 1200 220, 1400 185" fill="none" stroke="#D97706" stroke-width="1.6" opacity="0.85"/>
+        <!-- MA60 (#8B5CF6 Purple) -->
+        <path d="M 60 645 C 180 640, 260 625, 360 600 C 460 575, 580 540, 680 500 C 780 460, 880 395, 980 350 C 1080 305, 1200 270, 1400 240" fill="none" stroke="#7C3AED" stroke-width="1.6" opacity="0.85"/>
+        <!-- MA120 (#0284C7 Sky) -->
+        <path d="M 60 680 C 180 675, 260 665, 360 650 C 460 635, 580 610, 680 580 C 780 550, 880 500, 980 460 C 1080 420, 1200 380, 1400 340" fill="none" stroke="#0284C7" stroke-width="1.8" opacity="0.85"/>
+        <!-- EMA20 (#DC2626 Coral Red) -->
+        <path d="M 60 610 C 180 595, 260 575, 360 540 C 460 505, 580 470, 680 420 C 780 370, 880 300, 980 250 C 1080 200, 1200 180, 1400 150" fill="none" stroke="#DC2626" stroke-width="1.4" stroke-dasharray="6,3" opacity="0.75"/>
+        <!-- EMA60 (#2563EB Royal) -->
+        <path d="M 60 635 C 180 630, 260 615, 360 590 C 460 565, 580 525, 680 485 C 780 445, 880 380, 980 330 C 1080 285, 1200 250, 1400 220" fill="none" stroke="#2563EB" stroke-width="1.4" stroke-dasharray="6,3" opacity="0.75"/>
+        <!-- EMA120 (#059669 Teal) -->
+        <path d="M 60 670 C 180 665, 260 655, 360 640 C 460 620, 580 595, 680 565 C 780 535, 880 485, 980 445 C 1080 405, 1200 365, 1400 325" fill="none" stroke="#059669" stroke-width="1.4" stroke-dasharray="6,3" opacity="0.75"/>
+      </g>
+
+      <!-- YOLO DETECTION BOX: 6-MA Convergence Cluster Recognition Zone -->
+      <g id="yolo-patrol-box">
+        <rect x="520" y="475" width="170" height="95" rx="6" fill="#0071E3" fill-opacity="0.04" stroke="#0071E3" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <g transform="translate(520, 452)">
+          <rect width="168" height="20" rx="4" fill="#0071E3" fill-opacity="0.95"/>
+          <text x="8" y="14" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="600" fill="#FFFFFF">六轨收敛突破 (MDI 0.42%)</text>
+        </g>
+        <line x1="690" y1="480" x2="710" y2="440" stroke="#0071E3" stroke-width="1.2" stroke-dasharray="2,2"/>
+        <circle cx="710" cy="440" r="3" fill="#0071E3"/>
+      </g>
+
+      <!-- CANDLESTICKS (Real Financial Candlestick Array with Volume) -->
+      <g id="candlestick-array">
+        <!-- 1: 100 -->
+        <line x1="100" y1="630" x2="100" y2="670" stroke="#F43F5E" stroke-width="1.5"/>
+        <rect x="94" y="640" width="12" height="24" rx="1.5" fill="#F43F5E"/>
+        <rect x="94" y="800" width="12" height="30" fill="url(#volRed)" rx="1"/>
+
+        <!-- 2: 130 -->
+        <line x1="130" y1="620" x2="130" y2="660" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="124" y="628" width="12" height="22" rx="1.5" fill="#10B981"/>
+        <rect x="124" y="795" width="12" height="35" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 3: 160 -->
+        <line x1="160" y1="610" x2="160" y2="650" stroke="#F43F5E" stroke-width="1.5"/>
+        <rect x="154" y="620" width="12" height="20" rx="1.5" fill="#F43F5E"/>
+        <rect x="154" y="805" width="12" height="25" fill="url(#volRed)" rx="1"/>
+
+        <!-- 4: 190 -->
+        <line x1="190" y1="600" x2="190" y2="640" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="184" y="605" width="12" height="25" rx="1.5" fill="#10B981"/>
+        <rect x="184" y="790" width="12" height="40" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 5: 220 (Monday VAL Occurrence Point - $0.06400) -->
+        <line x1="220" y1="590" x2="220" y2="665" stroke="#F43F5E" stroke-width="1.5"/>
+        <rect x="214" y="600" width="12" height="45" rx="1.5" fill="#F43F5E"/>
+        <rect x="214" y="775" width="12" height="55" fill="url(#volRed)" rx="1"/>
+        <!-- VAL Point Marker -->
+        <circle cx="220" cy="665" r="4" fill="#0071E3" stroke="#FFFFFF" stroke-width="2"/>
+
+        <!-- 6: 250 -->
+        <line x1="250" y1="580" x2="250" y2="640" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="244" y="590" width="12" height="35" rx="1.5" fill="#10B981"/>
+        <rect x="244" y="785" width="12" height="45" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 7: 280 -->
+        <line x1="280" y1="560" x2="280" y2="620" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="274" y="570" width="12" height="38" rx="1.5" fill="#10B981"/>
+        <rect x="274" y="770" width="12" height="60" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 8: 310 -->
+        <line x1="310" y1="550" x2="310" y2="600" stroke="#F43F5E" stroke-width="1.5"/>
+        <rect x="304" y="560" width="12" height="28" rx="1.5" fill="#F43F5E"/>
+        <rect x="304" y="790" width="12" height="40" fill="url(#volRed)" rx="1"/>
+
+        <!-- 9: 340 (Monday VAH Occurrence Point - $0.07450) -->
+        <line x1="340" y1="365" x2="340" y2="570" stroke="#10B981" stroke-width="1.8"/>
+        <rect x="334" y="380" width="12" height="150" rx="1.5" fill="#10B981"/>
+        <rect x="334" y="710" width="12" height="120" fill="url(#volGreen)" rx="1"/>
+        <!-- VAH Point Marker -->
+        <circle cx="340" cy="365" r="4" fill="#0071E3" stroke="#FFFFFF" stroke-width="2"/>
+
+        <!-- 10: 370 -->
+        <line x1="370" y1="480" x2="370" y2="550" stroke="#F43F5E" stroke-width="1.5"/>
+        <rect x="364" y="490" width="12" height="45" rx="1.5" fill="#F43F5E"/>
+        <rect x="364" y="780" width="12" height="50" fill="url(#volRed)" rx="1"/>
+
+        <!-- 11: 400 -->
+        <line x1="400" y1="490" x2="400" y2="560" stroke="#F43F5E" stroke-width="1.5"/>
+        <rect x="394" y="500" width="12" height="40" rx="1.5" fill="#F43F5E"/>
+        <rect x="394" y="795" width="12" height="35" fill="url(#volRed)" rx="1"/>
+
+        <!-- 12: 430 -->
+        <line x1="430" y1="480" x2="430" y2="550" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="424" y="490" width="12" height="45" rx="1.5" fill="#10B981"/>
+        <rect x="424" y="775" width="12" height="55" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 13: 460 -->
+        <line x1="460" y1="470" x2="460" y2="540" stroke="#F43F5E" stroke-width="1.5"/>
+        <rect x="454" y="480" width="12" height="40" rx="1.5" fill="#F43F5E"/>
+        <rect x="454" y="790" width="12" height="40" fill="url(#volRed)" rx="1"/>
+
+        <!-- Convergence Cluster Bars: 490 - 670 -->
+        <!-- 14: 490 -->
+        <line x1="490" y1="480" x2="490" y2="545" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="484" y="490" width="12" height="40" rx="1.5" fill="#10B981"/>
+        <rect x="484" y="795" width="12" height="35" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 15: 520 (Inside Patrol Box) -->
+        <line x1="520" y1="495" x2="520" y2="535" stroke="#F43F5E" stroke-width="1.5"/>
+        <rect x="514" y="502" width="12" height="24" rx="1.5" fill="#F43F5E"/>
+        <rect x="514" y="810" width="12" height="20" fill="url(#volRed)" rx="1"/>
+
+        <!-- 16: 550 (Inside Patrol Box) -->
+        <line x1="550" y1="490" x2="550" y2="540" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="544" y="498" width="12" height="28" rx="1.5" fill="#10B981"/>
+        <rect x="544" y="805" width="12" height="25" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 17: 580 (Inside Patrol Box) -->
+        <line x1="580" y1="485" x2="580" y2="530" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="574" y="492" width="12" height="26" rx="1.5" fill="#10B981"/>
+        <rect x="574" y="808" width="12" height="22" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 18: 610 (Inside Patrol Box) -->
+        <line x1="610" y1="480" x2="610" y2="525" stroke="#F43F5E" stroke-width="1.5"/>
+        <rect x="604" y="488" width="12" height="25" rx="1.5" fill="#F43F5E"/>
+        <rect x="604" y="812" width="12" height="18" fill="url(#volRed)" rx="1"/>
+
+        <!-- 19: 640 (Inside Patrol Box - Breakout Seed) -->
+        <line x1="640" y1="470" x2="640" y2="520" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="634" y="478" width="12" height="32" rx="1.5" fill="#10B981"/>
+        <rect x="634" y="795" width="12" height="35" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 20: 670 (Breakout Ignition) -->
+        <line x1="670" y1="430" x2="670" y2="495" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="664" y="440" width="12" height="45" rx="1.5" fill="#10B981"/>
+        <rect x="664" y="760" width="12" height="70" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 21: 700 (Massive Volume Thrust) -->
+        <line x1="700" y1="380" x2="700" y2="460" stroke="#10B981" stroke-width="1.8"/>
+        <rect x="694" y="390" width="12" height="60" rx="1.5" fill="#10B981"/>
+        <rect x="694" y="730" width="12" height="100" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 22: 730 -->
+        <line x1="730" y1="360" x2="730" y2="420" stroke="#F43F5E" stroke-width="1.5"/>
+        <rect x="724" y="370" width="12" height="35" rx="1.5" fill="#F43F5E"/>
+        <rect x="724" y="775" width="12" height="55" fill="url(#volRed)" rx="1"/>
+
+        <!-- 23: 760 -->
+        <line x1="760" y1="330" x2="760" y2="400" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="754" y="340" width="12" height="48" rx="1.5" fill="#10B981"/>
+        <rect x="754" y="750" width="12" height="80" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 24: 790 -->
+        <line x1="790" y1="310" x2="790" y2="380" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="784" y="320" width="12" height="50" rx="1.5" fill="#10B981"/>
+        <rect x="784" y="740" width="12" height="90" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 25: 820 -->
+        <line x1="820" y1="320" x2="820" y2="390" stroke="#F43F5E" stroke-width="1.5"/>
+        <rect x="814" y="330" width="12" height="45" rx="1.5" fill="#F43F5E"/>
+        <rect x="814" y="770" width="12" height="60" fill="url(#volRed)" rx="1"/>
+
+        <!-- 26: 850 -->
+        <line x1="850" y1="280" x2="850" y2="350" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="844" y="290" width="12" height="50" rx="1.5" fill="#10B981"/>
+        <rect x="844" y="735" width="12" height="95" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 27: 880 -->
+        <line x1="880" y1="250" x2="880" y2="330" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="874" y="260" width="12" height="55" rx="1.5" fill="#10B981"/>
+        <rect x="874" y="720" width="12" height="110" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 28: 910 -->
+        <line x1="910" y1="230" x2="910" y2="300" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="904" y="240" width="12" height="50" rx="1.5" fill="#10B981"/>
+        <rect x="904" y="730" width="12" height="100" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 29: 940 (Upper 1.618 Spike Touch - $0.080989) -->
+        <line x1="940" y1="210" x2="940" y2="280" stroke="#F43F5E" stroke-width="1.8"/>
+        <rect x="934" y="225" width="12" height="45" rx="1.5" fill="#F43F5E"/>
+        <rect x="934" y="715" width="12" height="115" fill="url(#volRed)" rx="1"/>
+
+        <!-- 30: 970 -->
+        <line x1="970" y1="220" x2="970" y2="290" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="964" y="230" width="12" height="48" rx="1.5" fill="#10B981"/>
+        <rect x="964" y="740" width="12" height="90" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 31: 1000 -->
+        <line x1="1000" y1="235" x2="1000" y2="310" stroke="#F43F5E" stroke-width="1.5"/>
+        <rect x="994" y="245" width="12" height="45" rx="1.5" fill="#F43F5E"/>
+        <rect x="994" y="760" width="12" height="70" fill="url(#volRed)" rx="1"/>
+
+        <!-- 32: 1030 -->
+        <line x1="1030" y1="240" x2="1030" y2="320" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="1024" y="250" width="12" height="52" rx="1.5" fill="#10B981"/>
+        <rect x="1024" y="750" width="12" height="80" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 33: 1060 -->
+        <line x1="1060" y1="260" x2="1060" y2="340" stroke="#F43F5E" stroke-width="1.5"/>
+        <rect x="1054" y="270" width="12" height="50" rx="1.5" fill="#F43F5E"/>
+        <rect x="1054" y="765" width="12" height="65" fill="url(#volRed)" rx="1"/>
+
+        <!-- 34: 1090 -->
+        <line x1="1090" y1="280" x2="1090" y2="360" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="1084" y="290" width="12" height="55" rx="1.5" fill="#10B981"/>
+        <rect x="1084" y="755" width="12" height="75" fill="url(#volGreen)" rx="1"/>
+
+        <!-- 35: 1120 (Latest Realtime Bar - Active Oscillating) -->
+        <line x1="1120" y1="270" x2="1120" y2="340" stroke="#10B981" stroke-width="1.8"/>
+        <rect x="1114" y="280" width="12" height="40" rx="1.5" fill="#10B981"/>
+        <rect x="1114" y="745" width="12" height="85" fill="url(#volGreen)" rx="1"/>
+      </g>
+
+      <!-- ===================================================================== -->
+      <!-- 4 MONDAY ANCHOR HORIZONTAL BOUNDED RAYS WITH LABELS                   -->
+      <!-- Strictly start from occurrence time x (NEVER to the left)              -->
+      <!-- ===================================================================== -->
+      <g id="monday-reference-rays">
+        <!-- 1. 上 1.618 扩展位 (Upper Extension): $0.080989 -->
+        <!-- Starts at Monday High Anchor x=340, extends rightward -->
+        <line x1="340" y1="225" x2="1440" y2="225" stroke="#C93248" stroke-width="2" stroke-linecap="round"/>
+        <g transform="translate(1260, 210)" filter="url(#subtleGlow)">
+          <rect width="168" height="24" rx="4" fill="#C93248"/>
+          <text x="8" y="16" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">上1.618 0.080989</text>
+        </g>
+
+        <!-- 2. 周一高点 (Monday High VAH): $0.07450 -->
+        <!-- Strictly starts at occurrence bar x=340, extends rightward -->
+        <line x1="340" y1="365" x2="1440" y2="365" stroke="#0071E3" stroke-width="2" stroke-linecap="round"/>
+        <g transform="translate(1276, 350)" filter="url(#subtleGlow)">
+          <rect width="152" height="24" rx="4" fill="#0071E3"/>
+          <text x="8" y="16" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">周一高 0.07450</text>
+        </g>
+
+        <!-- 3. 周一低点 (Monday Low VAL): $0.06400 -->
+        <!-- Strictly starts at occurrence bar x=220, extends rightward -->
+        <line x1="220" y1="665" x2="1440" y2="665" stroke="#0071E3" stroke-width="2" stroke-linecap="round"/>
+        <g transform="translate(1276, 650)" filter="url(#subtleGlow)">
+          <rect width="152" height="24" rx="4" fill="#0071E3"/>
+          <text x="8" y="16" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">周一低 0.06400</text>
+        </g>
+
+        <!-- 4. 下 1.618 扩展位 (Lower Extension): $0.057511 -->
+        <!-- Starts at Monday Low Anchor x=220, extends rightward -->
+        <line x1="220" y1="785" x2="1440" y2="785" stroke="#087F69" stroke-width="2" stroke-linecap="round"/>
+        <g transform="translate(1260, 770)" filter="url(#subtleGlow)">
+          <rect width="168" height="24" rx="4" fill="#087F69"/>
+          <text x="8" y="16" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">下1.618 0.057511</text>
+        </g>
+
+        <!-- Current Realtime Price Dashed Line (4px dash, 4px gap) - $0.07280 -->
+        <line x1="0" y1="410" x2="1440" y2="410" stroke="#0071E3" stroke-width="1.4" stroke-dasharray="4,4"/>
+        <g transform="translate(1292, 396)" filter="url(#subtleGlow)">
+          <rect width="136" height="22" rx="4" fill="#0071E3"/>
+          <text x="8" y="15" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">现价 0.07280</text>
+        </g>
+      </g>
+
+      <!-- Right Bare Price Scale Track -->
+      <g font-family="'JetBrains Mono', monospace" font-size="10" font-weight="500" fill="#64748B" text-anchor="end">
+        <text x="1432" y="144">0.08500</text>
+        <text x="1432" y="244">0.08000</text>
+        <text x="1432" y="344">0.07500</text>
+        <text x="1432" y="444">0.07000</text>
+        <text x="1432" y="544">0.06500</text>
+        <text x="1432" y="644">0.06000</text>
+        <text x="1432" y="744">0.05500</text>
+      </g>
+
+      <!-- Bottom Time Scale Track -->
+      <g font-family="'JetBrains Mono', monospace" font-size="10" font-weight="500" fill="#64748B" text-anchor="middle">
+        <text x="220" y="880">05-19 00:00 (Mon)</text>
+        <text x="420" y="880">05-19 12:00</text>
+        <text x="620" y="880">05-20 00:00 (Tue)</text>
+        <text x="820" y="880">05-20 12:00</text>
+        <text x="1020" y="880">05-21 00:00 (Wed)</text>
+        <text x="1220" y="880">05-21 14:28 (当前5m)</text>
+      </g>
+    </svg>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- 2. TOP-LEFT FLOATING WORKSPACE & NAVIGATION CAPSULE                       -->
+  <!-- Tiny workspace nav capsule: 巡检池, K线详情(selected), 检测记录, 模型说明 -->
+  <!-- ========================================================================= -->
+  <header class="absolute top-4 left-4 z-40 flex items-center gap-2 pointer-events-auto">
+    <!-- Brand Mark & Workspace Hub -->
+    <div class="apple-glass rounded-full px-3 py-1.5 flex items-center gap-2 shadow-lg">
+      <div class="w-6 h-6 rounded-full bg-slate-900 flex items-center justify-center text-white font-black text-xs tracking-tighter">
+        S
+      </div>
+      <span class="font-bold text-xs tracking-tight text-slate-900 hidden sm:inline-block">SPIKE</span>
+      <span class="w-px h-3.5 bg-slate-300"></span>
+
+      <!-- 4 Core Navigation Capsules (Never drop 检测记录 or 模型说明) -->
+      <nav class="flex items-center gap-1" aria-label="核心工作区">
+        <!-- 1. 巡检池 -->
+        <a href="#patrol-pool" class="px-2.5 py-1 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-full transition-all">
+          巡检池
+        </a>
+
+        <!-- 2. K线详情 (Selected Active State) -->
+        <div class="px-2.5 py-1 text-xs font-semibold text-brand-blue bg-white/90 shadow-sm rounded-full flex items-center gap-1.5 border border-brand-blue/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-brand-blue animate-pulse"></span>
+          K线详情
+        </div>
+
+        <!-- 3. 检测记录 (Must retain) -->
+        <a href="#patrol-records" class="px-2.5 py-1 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-full transition-all">
+          检测记录
+        </a>
+
+        <!-- 4. 模型说明 (Must retain) -->
+        <button id="btn-toggle-model-info" class="px-2.5 py-1 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-full transition-all flex items-center gap-1">
+          <span>模型说明</span>
+          <svg class="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Collapsible Coin Panel Trigger Button -->
+    <button id="btn-toggle-coin-panel" class="apple-glass rounded-full px-3 py-1.5 flex items-center gap-2 hover:bg-white/80 active:scale-95 transition-all text-xs font-semibold text-slate-800 shadow-md">
+      <svg class="w-3.5 h-3.5 text-brand-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+      </svg>
+      <span class="hidden sm:inline">标的池</span>
+      <span class="bg-brand-blue/10 text-brand-blue text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full">148</span>
+    </button>
+  </header>
+
+
+  <!-- ========================================================================= -->
+  <!-- 3. TOP-CENTER COMPACT ACTIVE COIN CHIP                                    -->
+  <!-- Logo, Symbol, Favorite Star, Current Period, Direct Link 1.618 ↗           -->
+  <!-- ========================================================================= -->
+  <div class="absolute top-4 left-1/2 -translate-x-1/2 z-40 pointer-events-auto">
+    <div class="apple-glass rounded-full px-3.5 py-1.5 flex items-center gap-2.5 shadow-lg border border-white/80">
+      <!-- Coin Logo -->
+      <div class="w-5 h-5 rounded-full bg-[#E5F2FF] text-brand-blue font-mono font-bold text-[10px] flex items-center justify-center border border-brand-blue/20">
+        B
+      </div>
+
+      <!-- Coin Symbol & Contract Type -->
+      <div class="flex items-baseline gap-1.5">
+        <span class="font-bold text-xs tracking-tight text-slate-900 font-mono">BTCUSDT</span>
+        <span class="text-[10px] font-medium text-slate-500 uppercase">永续</span>
+      </div>
+
+      <!-- Favorite Star Toggle -->
+      <button id="top-star-toggle" class="text-amber-400 hover:scale-110 active:scale-95 transition-transform" title="收藏当前币种">
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+        </svg>
+      </button>
+
+      <!-- Active Period Badge -->
+      <span class="bg-slate-900 text-white font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full">
+        5m
+      </span>
+
+      <!-- Latest Price & 24h Pct -->
+      <div class="flex items-baseline gap-1 font-mono text-xs">
+        <span class="font-bold text-slate-900">96,420.50</span>
+        <span class="text-brand-up font-semibold text-[11px]">+2.40%</span>
+      </div>
+
+      <span class="w-px h-3 bg-slate-300/80"></span>
+
+      <!-- Jump Link to 1.618 Screen (Maintains Symbol + Timeframe) -->
+      <a href="#jump-1.618" class="text-brand-blue hover:text-brand-blueHover font-medium text-xs flex items-center gap-0.5 hover:underline" title="在周一 1.618 行情壁纸中打开此币种">
+        <span>1.618</span>
+        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
+      </a>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- 4. TOP-RIGHT LIVE TELEMETRY & 6-MA LEGEND PILL                             -->
+  <!-- ========================================================================= -->
+  <aside class="absolute top-4 right-4 z-40 hidden md:flex items-center gap-2 pointer-events-auto">
+    <!-- Compact 6-MA Legend Pill -->
+    <div id="ma-legend-pill" class="apple-glass rounded-full px-3 py-1 flex items-center gap-2.5 text-[10px] font-mono font-medium text-slate-700 shadow-md">
+      <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#D97706]"></span>MA20 <span class="font-semibold text-slate-900">96,180</span></span>
+      <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#7C3AED]"></span>MA60 <span class="font-semibold text-slate-900">95,840</span></span>
+      <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#0284C7]"></span>MA120 <span class="font-semibold text-slate-900">95,200</span></span>
+      <span class="w-px h-2.5 bg-slate-300"></span>
+      <span class="flex items-center gap-1 text-slate-500">EMA20/60/120</span>
+    </div>
+
+    <!-- Realtime Connection Status -->
+    <div class="apple-glass rounded-full px-2.5 py-1 flex items-center gap-1.5 text-[10px] font-mono text-slate-600 shadow-md">
+      <span class="w-1.5 h-1.5 rounded-full bg-brand-up animate-pulse"></span>
+      <span>18ms WS</span>
+    </div>
+  </aside>
+
+
+  <!-- ========================================================================= -->
+  <!-- 5. COLLAPSIBLE LEFT FLOATING COIN PANEL (Max 300px, 24h Volume Sorted)     -->
+  <!-- Translucent Glass, Embedded Search without Overlapping Dropdown,          -->
+  <!-- Tabs: 有形态 / 全部 / 收藏 / 异常, Coin Logo, Symbol, 24h Volume, Star,    -->
+  <!-- Detected Period Badge, and Direct 1.618 Jump Link                         -->
+  <!-- ========================================================================= -->
+  <aside id="coin-panel" class="absolute top-16 left-4 bottom-20 z-40 w-[290px] max-w-[calc(100vw-32px)] apple-glass rounded-2xl flex flex-col overflow-hidden shadow-2xl border border-white/90 panel-transition pointer-events-auto">
+    <!-- Panel Header: Title + Close Button -->
+    <div class="px-3.5 pt-3 pb-2 flex items-center justify-between border-b border-white/60">
+      <div class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-brand-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        </svg>
+        <h2 class="text-xs font-bold text-slate-900 tracking-tight">巡检标的池</h2>
+        <span class="text-[10px] font-mono text-slate-400">· 24h 成交额降序</span>
+      </div>
+      <button id="btn-close-coin-panel" class="w-6 h-6 rounded-full hover:bg-slate-200/50 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors" title="收起标的池面板">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Embedded Search Input (Strictly WITHOUT native autocomplete/dropdown overlap) -->
+    <div class="p-2.5 pb-1">
+      <div class="relative w-full">
+        <input 
+          type="text" 
+          id="coin-search-input" 
+          placeholder="搜索代币代码 (如 BTC, SOL)..." 
+          autocomplete="off" 
+          autocorrect="off" 
+          spellcheck="false"
+          class="w-full h-8 pl-8 pr-7 text-xs bg-white/70 border border-white/80 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-blue/50 focus:bg-white transition-all font-mono"
+        />
+        <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <button id="search-clear-btn" class="absolute right-2.5 top-2 text-slate-300 hover:text-slate-500 hidden">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- 4 Filter Tabs: 有形态 / 全部 / 收藏 / 异常 -->
+    <div class="px-2.5 py-1.5 flex items-center gap-1 border-b border-white/50 text-[11px] font-medium text-slate-600">
+      <button class="filter-tab px-2 py-1 rounded-md bg-white text-brand-blue font-semibold shadow-xs" data-filter="pattern">
+        有形态 <span class="text-[9px] font-mono font-bold bg-brand-blue/10 px-1 rounded-full">12</span>
+      </button>
+      <button class="filter-tab px-2 py-1 rounded-md hover:bg-white/60 hover:text-slate-900 transition-colors" data-filter="all">
+        全部 <span class="text-[9px] font-mono text-slate-400">148</span>
+      </button>
+      <button class="filter-tab px-2 py-1 rounded-md hover:bg-white/60 hover:text-slate-900 transition-colors flex items-center gap-1" data-filter="favorites">
+        <svg class="w-2.5 h-2.5 text-amber-400 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+        收藏 <span class="text-[9px] font-mono text-slate-400">4</span>
+      </button>
+      <button class="filter-tab px-2 py-1 rounded-md hover:bg-white/60 hover:text-slate-900 transition-colors" data-filter="abnormal">
+        异常 <span class="text-[9px] font-mono text-brand-amber font-bold">1</span>
+      </button>
+    </div>
+
+    <!-- Coin List Scroll Container (Sorted by 24h USDT Volume Descending) -->
+    <div id="coin-list" class="flex-1 overflow-y-auto p-1.5 space-y-1">
+      
+      <!-- Item 1: BTC (Active Selected) -->
+      <div class="coin-row group p-2 rounded-xl bg-white/95 border border-brand-blue/30 shadow-xs flex items-center justify-between cursor-pointer transition-all hover:bg-white" data-symbol="BTCUSDT">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-6 h-6 rounded-full bg-[#FFF4E6] text-[#D97706] font-mono font-bold text-[10px] flex items-center justify-center shrink-0 border border-[#FDE68A]">
+            ₿
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-xs text-slate-900 font-mono">BTCUSDT</span>
+              <span class="text-[9px] font-mono font-semibold text-brand-up bg-emerald-50 px-1 rounded border border-emerald-100">5m突破</span>
+            </div>
+            <div class="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+              <span>$24.18B</span>
+              <span class="text-brand-up font-semibold">+2.40%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button class="star-btn p-1 text-amber-400 hover:scale-110 active:scale-95 transition-transform" title="收藏">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          </button>
+          <a href="#jump-1.618-btc" class="p-1 text-slate-400 hover:text-brand-blue active:scale-90 transition-transform" title="直达 1.618 周一图表">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Item 2: ETH -->
+      <div class="coin-row group p-2 rounded-xl hover:bg-white/70 border border-transparent hover:border-white/90 flex items-center justify-between cursor-pointer transition-all" data-symbol="ETHUSDT">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-6 h-6 rounded-full bg-[#EFF6FF] text-[#2563EB] font-mono font-bold text-[10px] flex items-center justify-center shrink-0 border border-[#BFDBFE]">
+            Ξ
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-xs text-slate-900 font-mono">ETHUSDT</span>
+              <span class="text-[9px] font-mono text-slate-500 bg-slate-100 px-1 rounded">15m收敛</span>
+            </div>
+            <div class="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+              <span>$12.45B</span>
+              <span class="text-brand-up font-semibold">+1.85%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button class="star-btn p-1 text-amber-400 hover:scale-110 active:scale-95 transition-transform" title="收藏">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          </button>
+          <a href="#jump-1.618-eth" class="p-1 text-slate-400 hover:text-brand-blue active:scale-90 transition-transform" title="直达 1.618 周一图表">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Item 3: SOL -->
+      <div class="coin-row group p-2 rounded-xl hover:bg-white/70 border border-transparent hover:border-white/90 flex items-center justify-between cursor-pointer transition-all" data-symbol="SOLUSDT">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-6 h-6 rounded-full bg-[#18181B] text-[#A855F7] font-mono font-bold text-[9px] flex items-center justify-center shrink-0">
+            S
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-xs text-slate-900 font-mono">SOLUSDT</span>
+              <span class="text-[9px] font-mono font-semibold text-brand-up bg-emerald-50 px-1 rounded border border-emerald-100">1h破位</span>
+            </div>
+            <div class="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+              <span>$6.82B</span>
+              <span class="text-brand-up font-semibold">+5.62%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button class="star-btn p-1 text-slate-300 hover:text-amber-400 hover:scale-110 active:scale-95 transition-transform" title="收藏">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          </button>
+          <a href="#jump-1.618-sol" class="p-1 text-slate-400 hover:text-brand-blue active:scale-90 transition-transform" title="直达 1.618 周一图表">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Item 4: SUI -->
+      <div class="coin-row group p-2 rounded-xl hover:bg-white/70 border border-transparent hover:border-white/90 flex items-center justify-between cursor-pointer transition-all" data-symbol="SUIUSDT">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-6 h-6 rounded-full bg-[#E0F2FE] text-[#0284C7] font-mono font-bold text-[9px] flex items-center justify-center shrink-0 border border-[#BAE6FD]">
+            SUI
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-xs text-slate-900 font-mono">SUIUSDT</span>
+              <span class="text-[9px] font-mono font-semibold text-brand-up bg-emerald-50 px-1 rounded border border-emerald-100">5m突破</span>
+            </div>
+            <div class="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+              <span>$2.94B</span>
+              <span class="text-brand-up font-semibold">+8.42%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button class="star-btn p-1 text-slate-300 hover:text-amber-400 hover:scale-110 active:scale-95 transition-transform" title="收藏">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          </button>
+          <a href="#jump-1.618-sui" class="p-1 text-slate-400 hover:text-brand-blue active:scale-90 transition-transform" title="直达 1.618 周一图表">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Item 5: DOGE -->
+      <div class="coin-row group p-2 rounded-xl hover:bg-white/70 border border-transparent hover:border-white/90 flex items-center justify-between cursor-pointer transition-all" data-symbol="DOGEUSDT">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-6 h-6 rounded-full bg-[#FEF3C7] text-[#B45309] font-mono font-bold text-[10px] flex items-center justify-center shrink-0 border border-[#FDE68A]">
+            Ð
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-xs text-slate-900 font-mono">DOGEUSDT</span>
+              <span class="text-[9px] font-mono text-slate-400 bg-slate-100 px-1 rounded">震荡</span>
+            </div>
+            <div class="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+              <span>$1.85B</span>
+              <span class="text-brand-down font-semibold">-1.20%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button class="star-btn p-1 text-slate-300 hover:text-amber-400 hover:scale-110 active:scale-95 transition-transform" title="收藏">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          </button>
+          <a href="#jump-1.618-doge" class="p-1 text-slate-400 hover:text-brand-blue active:scale-90 transition-transform" title="直达 1.618 周一图表">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Item 6: APT (Abnormal Data Sample) -->
+      <div class="coin-row group p-2 rounded-xl hover:bg-white/70 border border-transparent hover:border-white/90 flex items-center justify-between cursor-pointer transition-all" data-symbol="APTUSDT">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-6 h-6 rounded-full bg-[#ECFDF5] text-[#059669] font-mono font-bold text-[9px] flex items-center justify-center shrink-0 border border-[#A7F3D0]">
+            APT
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-xs text-slate-900 font-mono">APTUSDT</span>
+              <span class="text-[9px] font-mono font-semibold text-brand-amber bg-amber-50 px-1 rounded border border-amber-200">待定界</span>
+            </div>
+            <div class="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+              <span>$840M</span>
+              <span class="text-slate-500 font-semibold">0.00%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button class="star-btn p-1 text-slate-300 hover:text-amber-400 hover:scale-110 active:scale-95 transition-transform" title="收藏">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          </button>
+          <a href="#jump-1.618-apt" class="p-1 text-slate-400 hover:text-brand-blue active:scale-90 transition-transform" title="直达 1.618 周一图表">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel Footer Status Summary -->
+    <div class="px-3 py-2 bg-white/40 border-t border-white/60 flex items-center justify-between text-[10px] font-mono text-slate-500">
+      <span>已巡检 148 合约</span>
+      <span class="text-brand-teal font-semibold">● 算法就绪</span>
+    </div>
+  </aside>
+
+
+  <!-- ========================================================================= -->
+  <!-- 6. BOTTOM-CENTER COMPACT FLOATING GLASS TOOLBAR                           -->
+  <!-- Timeframe (5m/15m/1h/4h/1D), Zoom (±), Latest, Fit, Six MA Switch,       -->
+  <!-- Settings, and Bounded Pattern List Trigger                                -->
+  <!-- ========================================================================= -->
+  <footer class="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 pointer-events-auto max-w-[calc(100vw-32px)]">
+    <div class="apple-glass rounded-full px-3 py-1.5 flex items-center gap-2 shadow-2xl border border-white/90">
+      <!-- Timeframe Selector Segmented Pills -->
+      <div class="flex items-center gap-0.5 bg-slate-200/50 p-0.5 rounded-full text-xs font-mono font-medium">
+        <button class="tf-btn px-2.5 py-1 rounded-full bg-white text-brand-blue font-bold shadow-xs">5m</button>
+        <button class="tf-btn px-2.5 py-1 rounded-full text-slate-600 hover:text-slate-900 transition-colors">15m</button>
+        <button class="tf-btn px-2.5 py-1 rounded-full text-slate-600 hover:text-slate-900 transition-colors">1h</button>
+        <button class="tf-btn px-2.5 py-1 rounded-full text-slate-600 hover:text-slate-900 transition-colors">4h</button>
+        <button class="tf-btn px-2.5 py-1 rounded-full text-slate-600 hover:text-slate-900 transition-colors hidden sm:inline-block">1D</button>
+      </div>
+
+      <span class="w-px h-4 bg-slate-300"></span>
+
+      <!-- Zoom Controls (±) -->
+      <div class="flex items-center gap-1 font-mono text-xs">
+        <button id="btn-zoom-out" class="w-7 h-7 rounded-full hover:bg-white/80 active:scale-90 flex items-center justify-center text-slate-700 transition-all" title="缩小图表">
+          -
+        </button>
+        <button id="btn-zoom-in" class="w-7 h-7 rounded-full hover:bg-white/80 active:scale-90 flex items-center justify-center text-slate-700 transition-all" title="放大图表">
+          +
+        </button>
+      </div>
+
+      <span class="w-px h-4 bg-slate-300"></span>
+
+      <!-- Latest Candle Follow & Fit View -->
+      <div class="flex items-center gap-1">
+        <button id="btn-fit-chart" class="px-2.5 py-1 rounded-full hover:bg-white/80 text-xs font-medium text-slate-700 active:scale-95 transition-all flex items-center gap-1" title="适应全图范围">
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+          </svg>
+          <span class="hidden sm:inline">自适应</span>
+        </button>
+
+        <button id="btn-latest-candle" class="px-2.5 py-1 rounded-full bg-brand-blue text-white text-xs font-medium shadow-sm active:scale-95 transition-all flex items-center gap-1" title="回到最新K线">
+          <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+          <span>最新</span>
+        </button>
+      </div>
+
+      <span class="w-px h-4 bg-slate-300"></span>
+
+      <!-- Six Moving Averages Switch (Default ON in Patrol mode, toggleable) -->
+      <button id="btn-toggle-ma" class="px-2.5 py-1 rounded-full bg-white/80 border border-slate-200 text-xs font-semibold text-slate-800 hover:bg-white active:scale-95 transition-all flex items-center gap-1.5" title="切换六均线显隐">
+        <span class="w-2 h-2 rounded-full bg-brand-teal"></span>
+        <span>六均线</span>
+      </button>
+
+      <!-- Pattern List Bounded Floating Panel Trigger -->
+      <button id="btn-toggle-pattern-panel" class="px-2.5 py-1 rounded-full bg-slate-900 text-white text-xs font-semibold shadow-md active:scale-95 transition-all flex items-center gap-1.5 hover:bg-slate-800">
+        <svg class="w-3.5 h-3.5 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+        </svg>
+        <span>形态研判 (12)</span>
+      </button>
+    </div>
+  </footer>
+
+
+  <!-- ========================================================================= -->
+  <!-- 7. BOUNDED FLOATING PATTERN LIST PANEL                                    -->
+  <!-- Floating bounded panel (NOT document below chart)                         -->
+  <!-- ========================================================================= -->
+  <section id="pattern-panel" class="absolute bottom-20 right-4 z-40 w-[340px] max-w-[calc(100vw-32px)] apple-glass rounded-2xl flex flex-col overflow-hidden shadow-2xl border border-white/90 panel-transition pointer-events-auto">
+    <!-- Panel Header -->
+    <div class="px-3.5 py-2.5 flex items-center justify-between border-b border-white/60 bg-white/40">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-brand-up"></span>
+        <h3 class="text-xs font-bold text-slate-900">形态巡检研判记录</h3>
+      </div>
+      <button id="btn-close-pattern-panel" class="w-5 h-5 rounded-full hover:bg-slate-200/60 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors">
+        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Active Selected Pattern Telemetry Card -->
+    <div class="p-3 border-b border-white/60 bg-white/50">
+      <div class="flex items-center justify-between mb-1.5">
+        <span class="font-bold text-xs text-slate-900">当前判定: 密集扇出突破</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-brand-up font-mono text-[10px] font-bold">胜率参考 94%</span>
+      </div>
+      <div class="grid grid-cols-2 gap-2 text-[10px] font-mono text-slate-600">
+        <div class="p-1.5 rounded-lg bg-white/60">
+          <div class="text-slate-400">均线离散 MDI</div>
+          <div class="font-bold text-slate-800">0.42% (极度收敛)</div>
+        </div>
+        <div class="p-1.5 rounded-lg bg-white/60">
+          <div class="text-slate-400">突破确认时间</div>
+          <div class="font-bold text-slate-800">14:28:10 (5m)</div>
+        </div>
+        <div class="p-1.5 rounded-lg bg-white/60">
+          <div class="text-slate-400">周一阻力锚点</div>
+          <div class="font-bold text-brand-red">上1.618: 0.080989</div>
+        </div>
+        <div class="p-1.5 rounded-lg bg-white/60">
+          <div class="text-slate-400">周一支撑锚点</div>
+          <div class="font-bold text-brand-teal">下1.618: 0.057511</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Triggered Detections List (Scrollable) -->
+    <div class="max-h-48 overflow-y-auto p-2 space-y-1.5 text-xs">
+      <div class="p-2 rounded-xl bg-white/80 border border-brand-blue/20 flex items-center justify-between cursor-pointer hover:bg-white transition-all">
+        <div>
+          <div class="font-bold text-slate-900 font-mono text-[11px]">BTCUSDT · 5m 临界突破</div>
+          <div class="text-[9px] font-mono text-slate-400">突破价 $96,420 · 确认于 14:28:10</div>
+        </div>
+        <span class="text-[10px] font-mono font-bold text-brand-blue">查看 ↗</span>
+      </div>
+
+      <div class="p-2 rounded-xl bg-white/50 hover:bg-white/80 border border-transparent hover:border-white/80 flex items-center justify-between cursor-pointer transition-all">
+        <div>
+          <div class="font-bold text-slate-900 font-mono text-[11px]">SOLUSDT · 1h 向上扇出</div>
+          <div class="text-[9px] font-mono text-slate-400">突破价 $184.92 · 确认于 14:10:00</div>
+        </div>
+        <span class="text-[10px] font-mono text-slate-400">查看 ↗</span>
+      </div>
+
+      <div class="p-2 rounded-xl bg-white/50 hover:bg-white/80 border border-transparent hover:border-white/80 flex items-center justify-between cursor-pointer transition-all">
+        <div>
+          <div class="font-bold text-slate-900 font-mono text-[11px]">SUIUSDT · 5m 极度密集</div>
+          <div class="text-[9px] font-mono text-slate-400">突破价 $2.8720 · 确认于 13:45:00</div>
+        </div>
+        <span class="text-[10px] font-mono text-slate-400">查看 ↗</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ========================================================================= -->
+  <!-- 8. MODEL EXPLANATION MODAL (Retained & Bounded)                            -->
+  <!-- ========================================================================= -->
+  <div id="model-info-modal" class="fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="apple-glass rounded-2xl w-full max-w-lg p-5 shadow-2xl border border-white/90 scale-95 transition-transform duration-200" id="model-modal-card">
+      <div class="flex items-center justify-between mb-3 border-b border-white/60 pb-2">
+        <div class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-full bg-brand-blue text-white flex items-center justify-center text-xs font-bold font-mono">
+            M
+          </div>
+          <h3 class="text-sm font-bold text-slate-900">SPIKE 巡检模型与周一定界机制说明</h3>
+        </div>
+        <button id="btn-close-model-modal" class="w-6 h-6 rounded-full hover:bg-slate-200/50 flex items-center justify-center text-slate-400 hover:text-slate-700">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-700 leading-relaxed max-h-[60vh] overflow-y-auto pr-1">
+        <div class="p-2.5 rounded-xl bg-white/70 border border-white/80">
+          <div class="font-bold text-slate-900 mb-1 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span>
+            1. 6 均线收敛与扇出检测 (6-MA Patrol Engine)
+          </div>
+          <p class="text-slate-600 text-[11px]">
+            终端实时计算 SMA 20/60/120 与 EMA 20/60/120 的相对离散系数（MDI）。当 MDI &lt; 0.8% 且持续时间超过 36 根 K 线，判定为临界收敛区；一旦放量突破并呈现顺势多头排列，触发形态研判信号。
+          </p>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-white/70 border border-white/80">
+          <div class="font-bold text-slate-900 mb-1 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
+            2. 纽约周一锚点有界射线 (Monday Extrema Anchoring)
+          </div>
+          <p class="text-slate-600 text-[11px]">
+            每周一 EST 00:00 - 23:59 的高低点自动锁定为 VAH 与 VAL，并在实际高低点发生时刻向右绘制水平射线，绝不向左逆向外推。上 1.618 与下 1.618 扩展线作为波段空间极值，提供只读阻力与支撑基准。
+          </p>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-white/70 border border-white/80">
+          <div class="font-bold text-slate-900 mb-1 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-900"></span>
+            3. 24h 成交额排序与标的筛选原则
+          </div>
+          <p class="text-slate-600 text-[11px]">
+            标的池按 24h USDT 成交额动态降序排列，优先展示具备最高全市场流动性与真实深度的合约，防范长尾虚假假突破，点击任意行即时无感切换全屏 K 线。
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-white/60 flex items-center justify-between text-[11px] font-mono text-slate-500">
+        <span>SPIKE ENGINE V2.4 PRO</span>
+        <button id="btn-modal-got-it" class="px-4 py-1.5 rounded-full bg-slate-900 text-white font-sans font-semibold text-xs hover:bg-slate-800 transition-colors">
+          已知晓
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- 9. JAVASCRIPT: INTERACTION DYNAMICS & GESTURES                            -->
+  <!-- ========================================================================= -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Panel Toggles
+      const coinPanel = document.getElementById('coin-panel');
+      const btnToggleCoinPanel = document.getElementById('btn-toggle-coin-panel');
+      const btnCloseCoinPanel = document.getElementById('btn-close-coin-panel');
+
+      const patternPanel = document.getElementById('pattern-panel');
+      const btnTogglePatternPanel = document.getElementById('btn-toggle-pattern-panel');
+      const btnClosePatternPanel = document.getElementById('btn-close-pattern-panel');
+
+      const modelModal = document.getElementById('model-info-modal');
+      const modelModalCard = document.getElementById('model-modal-card');
+      const btnToggleModelInfo = document.getElementById('btn-toggle-model-info');
+      const btnCloseModelModal = document.getElementById('btn-close-model-modal');
+      const btnModalGotIt = document.getElementById('btn-modal-got-it');
+
+      // Toggle Coin Panel
+      btnToggleCoinPanel.addEventListener('click', () => {
+        const isHidden = coinPanel.classList.contains('-translate-x-[320px]');
+        if (isHidden) {
+          coinPanel.classList.remove('-translate-x-[320px]', 'opacity-0', 'pointer-events-none');
+        } else {
+          coinPanel.classList.add('-translate-x-[320px]', 'opacity-0', 'pointer-events-none');
+        }
+      });
+
+      btnCloseCoinPanel.addEventListener('click', () => {
+        coinPanel.classList.add('-translate-x-[320px]', 'opacity-0', 'pointer-events-none');
+      });
+
+      // Toggle Pattern Panel
+      btnTogglePatternPanel.addEventListener('click', () => {
+        patternPanel.classList.toggle('hidden');
+      });
+
+      btnClosePatternPanel.addEventListener('click', () => {
+        patternPanel.classList.add('hidden');
+      });
+
+      // Model Explanation Modal
+      function openModelModal() {
+        modelModal.classList.remove('opacity-0', 'pointer-events-none');
+        modelModalCard.classList.remove('scale-95');
+      }
+      function closeModelModal() {
+        modelModal.classList.add('opacity-0', 'pointer-events-none');
+        modelModalCard.classList.add('scale-95');
+      }
+
+      btnToggleModelInfo.addEventListener('click', openModelModal);
+      btnCloseModelModal.addEventListener('click', closeModelModal);
+      btnModalGotIt.addEventListener('click', closeModelModal);
+      modelModal.addEventListener('click', (e) => {
+        if (e.target === modelModal) closeModelModal();
+      });
+
+      // 2. Six MA Toggle Switch
+      const btnToggleMa = document.getElementById('btn-toggle-ma');
+      const maLayer = document.getElementById('moving-averages');
+      const maLegendPill = document.getElementById('ma-legend-pill');
+      let maVisible = true;
+
+      btnToggleMa.addEventListener('click', () => {
+        maVisible = !maVisible;
+        if (maVisible) {
+          maLayer.classList.remove('opacity-0');
+          if (maLegendPill) maLegendPill.classList.remove('opacity-40');
+          btnToggleMa.classList.remove('opacity-60');
+          btnToggleMa.querySelector('span:first-child').classList.add('bg-brand-teal');
+          btnToggleMa.querySelector('span:first-child').classList.remove('bg-slate-300');
+        } else {
+          maLayer.classList.add('opacity-0');
+          if (maLegendPill) maLegendPill.classList.add('opacity-40');
+          btnToggleMa.classList.add('opacity-60');
+          btnToggleMa.querySelector('span:first-child').classList.remove('bg-brand-teal');
+          btnToggleMa.querySelector('span:first-child').classList.add('bg-slate-300');
+        }
+      });
+
+      // 3. Timeframe Buttons
+      const tfButtons = document.querySelectorAll('.tf-btn');
+      tfButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tfButtons.forEach(b => {
+            b.classList.remove('bg-white', 'text-brand-blue', 'font-bold', 'shadow-xs');
+            b.classList.add('text-slate-600');
+          });
+          btn.classList.add('bg-white', 'text-brand-blue', 'font-bold', 'shadow-xs');
+          btn.classList.remove('text-slate-600');
+        });
+      });
+
+      // 4. Coin Rows Selection
+      const coinRows = document.querySelectorAll('.coin-row');
+      coinRows.forEach(row => {
+        row.addEventListener('click', (e) => {
+          // If clicked on star or jump link, don't re-select row
+          if (e.target.closest('.star-btn') || e.target.closest('a')) return;
+
+          coinRows.forEach(r => {
+            r.classList.remove('bg-white/95', 'border-brand-blue/30', 'shadow-xs');
+            r.classList.add('hover:bg-white/70');
+          });
+          row.classList.add('bg-white/95', 'border-brand-blue/30', 'shadow-xs');
+          row.classList.remove('hover:bg-white/70');
+        });
+      });
+
+      // 5. Star Buttons Toggle
+      const starBtns = document.querySelectorAll('.star-btn, #top-star-toggle');
+      starBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const svg = btn.querySelector('svg');
+          if (btn.classList.contains('text-amber-400')) {
+            btn.classList.remove('text-amber-400');
+            btn.classList.add('text-slate-300');
+          } else {
+            btn.classList.add('text-amber-400');
+            btn.classList.remove('text-slate-300');
+          }
+        });
+      });
+
+      // 6. Search Filter
+      const searchInput = document.getElementById('coin-search-input');
+      const searchClearBtn = document.getElementById('search-clear-btn');
+      searchInput.addEventListener('input', () => {
+        const query = searchInput.value.trim().toLowerCase();
+        if (query) {
+          searchClearBtn.classList.remove('hidden');
+        } else {
+          searchClearBtn.classList.add('hidden');
+        }
+        coinRows.forEach(row => {
+          const sym = row.getAttribute('data-symbol').toLowerCase();
+          if (sym.includes(query)) {
+            row.classList.remove('hidden');
+          } else {
+            row.classList.add('hidden');
+          }
+        });
+      });
+
+      searchClearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        searchClearBtn.classList.add('hidden');
+        coinRows.forEach(row => row.classList.remove('hidden'));
+        searchInput.focus();
+      });
+
+      // 7. Filter Tabs in Coin Panel
+      const filterTabs = document.querySelectorAll('.filter-tab');
+      filterTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          filterTabs.forEach(t => {
+            t.classList.remove('bg-white', 'text-brand-blue', 'font-semibold', 'shadow-xs');
+            t.classList.add('hover:bg-white/60', 'text-slate-600');
+          });
+          tab.classList.add('bg-white', 'text-brand-blue', 'font-semibold', 'shadow-xs');
+          tab.classList.remove('hover:bg-white/60', 'text-slate-600');
+        });
+      });
+
+      // 8. Mobile 75dvh Sheet Adaptation
+      const checkMobile = () => {
+        if (window.innerWidth <= 768) {
+          // On mobile, convert left panel to 75dvh bottom drawer style
+          coinPanel.classList.add('fixed', 'inset-x-2', 'bottom-2', 'top-auto', 'h-[75dvh]', 'max-w-none', 'w-auto');
+        } else {
+          coinPanel.classList.remove('fixed', 'inset-x-2', 'bottom-2', 'top-auto', 'h-[75dvh]', 'max-w-none', 'w-auto');
+        }
+      };
+      window.addEventListener('resize', checkMobile);
+      checkMobile();
+    });
+  </script>
+</body>
+</html>

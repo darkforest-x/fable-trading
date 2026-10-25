@@ -1,3 +1,12 @@
+## 2026-10-25 · Patrol K-line wallpaper and volume-ranked coin browser
+
+- Stitch first: official project `8978791379095391159`, screen `d70c4b10a20f478bae161de14e5e5c49`, explicit `GEMINI_3_8_FLASH`; design image/HTML retained in `docs/design/stitch-20261025-patrol-wallpaper/`. A 300s edit timeout was recovered from the completed browser board and the refreshed official screen list; no duplicate generation.
+- Results chart fills the viewport beneath floating glass navigation, coin browser, title and tool dock. History and model menus remain fully available; history loaded 1–20 of 1766 records during QA. Panels animate without resizing the canvas. Mobile coin sheet is 75dvh and follows touch movement, with rebound/dismissal.
+- Public 24h USDT turnover drives default coin ordering; logos, per-row favorites, embedded search and exact-contract/timeframe Monday links are connected. Missing pinned Monday data no longer silently selects another contract. Existing anchored Monday/1.618 price rays remain.
+- 138 relevant Node tests passed. Browser QA: desktop1470×671 canvas equals viewport, panel collapse preserves dimensions; 390×844 sheet633px, 45/120px touch movement matches transforms, short rebound/long dismiss; 320×740 no document overflow; search, favorites, same-coin1H link, chart touch pan, settings and retained menus checked. Screenshots/raw log in `output/playwright/patrol-wallpaper-20261025/`.
+- `https://spikeok.com/` serves the updated CSS byte-for-byte and the real public chart was verified. Static update needs refresh, no service restart. Independent patrol worker1266 alive, four plans enabled. Other task's Monday/Bark Python changes are excluded from this UI commit.
+- Learnings: `wallpaper-chart-layout-must-decouple-canvas-and-panels.md`, `chart-deep-links-must-preserve-explicit-selection.md`.
+
 ## 2026-10-25 · 5m wick stop versus 60m reclaim: wick stop rejected
 
 - Owner's MUBARAK example (stop under the 5m wick, about 20R). Framework replay of all 626 alts, both intrabar paths, worst per trade: win 15.6 percent, per notional -13.5bp (60m reclaim +2.1). R edge exists only for stops under 0.3 percent and collapses with slippage: mean +4.09R at 10bp, +2.15R at 20bp, +0.21R at 30bp. 1000U at 1 percent risk: 1.8e17x with 99.7 percent drawdown at 10bp, ruined at 20bp. Not adopted; the near-edge 60m reclaim with the entry score stays the draft.

@@ -20,7 +20,7 @@
     'monday-fib': ['monday-fib.css','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','monday-quick.js','monday-fib.js'],
     'monday-live': ['monday-live.css','monday-ledger.js','monday-live.js'],
     'auto-leaders': ['research.css','market-sync.css','altcoin-leaders.css','altcoin-leaders.js','leader-page.js'],
-    'yolo-detect': ['workbench-bootstrap.css','research.css','yolo-detect.css','okx-execution.css','manual-live.css','manual-account.js','manual-close.js','manual-position-chart.js','manual-live.js','workbench-bootstrap.js','range-chart.js','yolo-chart-levels.js','yolo-preview-sheet.js','yolo-detect.js','yolo-compact.css'],
+    'yolo-detect': ['workbench-bootstrap.css','research.css','yolo-detect.css','okx-execution.css','manual-live.css','manual-account.js','manual-close.js','manual-position-chart.js','manual-live.js','workbench-bootstrap.js','range-chart.js','yolo-chart-levels.js','yolo-preview-sheet.js','yolo-market.js','yolo-detect.js','yolo-compact.css','yolo-wallpaper.css'],
     langlang: ['research.css','market-sync.css','reading-tools.css','reading-tools.js','trading-playbooks.css','trading-playbooks.js','altcoin-leaders.css','altcoin-leaders.js','langlang.css','transcript-search.js','langlang.js'],
     rektproof: ['research.css','market-sync.css','reading-tools.css','reading-tools.js','trading-playbooks.css','trading-playbooks.js','rektproof.css','rektproof-core.js','rektproof-study.js','rektproof.js'],
     yolo: ['research.css','research.js','yolo-workflow.css','yolo-workflow.js'],

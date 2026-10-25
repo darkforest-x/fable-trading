@@ -14,7 +14,7 @@
   }
   if(typeof module!=='undefined')module.exports={base,matches,selection,nextIndex};
   if(typeof document==='undefined')return;
-  const selector='#symbol-search,#watch-search,#lines-search,#candle-symbol-search,#yd-result-search,#yd-feed-search,#yd-symbol,#ys-symbol,#v130-search,#vr-trade-search,#vr-market-search,input[name="symbols"],input[name="paper_symbols"],#langlang-workspace input[name="symbol"],[data-symbol-picker]';
+  const selector='#symbol-search,#watch-search,#lines-search,#candle-symbol-search,#yd-feed-search,#yd-symbol,#ys-symbol,#v130-search,#vr-trade-search,#vr-market-search,input[name="symbols"],input[name="paper_symbols"],#langlang-workspace input[name="symbol"],[data-symbol-picker]';
   const options=new WeakMap(),requests=window.SpikeRuntime?.createRequests();const catalogs=new Map(),inflight=new Map();let active=null,list=null,index=-1,shown=[],version=0;
   const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function load(scope='detect'){

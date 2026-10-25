@@ -208,7 +208,7 @@ test('polling only reads visible panels and keeps completed job configuration',a
  const calls=[],state={active:true,loaded:true,tab:'model',jobs:[],schedules:[],jobOffset:0,job:{id:'done',status:'completed',spec:{model_id:'frozen'}},pendingRoute:null};
  const context={state,document:{hidden:false},refreshing:false,activationVersion:0,jobsRevision:'',jobsOffset:-1,jobsAt:0,schedulesAt:0,Date,encodeURIComponent,
   $:()=>({open:false}),terminal:new Set(['completed']),api:async path=>{calls.push(path);return path==='/schedules'?{items:[],worker:{}}:{items:[],total:0,revision:'r1',worker:{}};},
-  jobsView(){},summary(){},drawSymbols(){},refreshTail(){},refreshFeed(){},error(e){if(e)throw Error(e);}};
+  jobsView(){},summary(){},drawSymbols(){},loadMarket(){},refreshTail(){},refreshFeed(){},error(e){if(e)throw Error(e);}};
  const fn=source.slice(source.indexOf('  async function refresh(){'),source.indexOf('  window.SpikeNavigation?.register'));
  const refresh=vm.runInNewContext(fn+';refresh',context);
  await refresh();assert.deepEqual(calls,['/schedules']);calls.length=0;
@@ -300,12 +300,12 @@ test('shape focus keeps at least 64 context bars without moving the detection bo
 });
 
 test('period controls preserve keyboard focus when their selected markup changes',()=>{
- const focused={dataset:{ydPeriod:'1H'}},document={activeElement:focused};let restored=false;
+ const focused={dataset:{ydPeriod:'1H'}},document={activeElement:focused},select={value:'5m'};let restored=false;
  const state={overview:true,timeframe:'1H',symbol:'BTC-USDT-SWAP',latest:[]};
  const context={state,document,periods:{'5m':'5 分钟','1H':'1 小时'},periodResult:()=>null,CSS:{escape:x=>x},
- html(){document.activeElement={dataset:{}};},$:()=>({querySelector:selector=>selector==='[data-yd-period="1H"]'?{focus(){restored=true;}}:null})};
+ html(){document.activeElement={dataset:{}};},$:id=>id==='yd-change-period'?select:({querySelector:selector=>selector==='[data-yd-period="1H"]'?{focus(){restored=true;}}:null})};
  vm.runInNewContext(source.slice(source.indexOf('  function drawPeriods(){'),source.indexOf('  async function switchPeriod('))+';drawPeriods()',context);
- assert.equal(restored,true);
+ assert.equal(restored,true);assert.equal(select.value,'1H');
 });
 test('desktop symbol expansion state stays true after changing a coin; mobile follows its dialog',()=>{
  const attrs={},panel={hidden:false,closest:()=>({classList:{toggle(){}}})},button={setAttribute:(k,v)=>attrs[k]=v};
@@ -341,14 +341,14 @@ test('catalog response after leaving results does not start hidden chart work',a
 
 test('returning from account preserves historical job and selected symbol instead of becoming latest overview',()=>{
  const state={tab:'account',overview:false,active:true,loaded:false,result:null,job:{id:'historical'},symbol:'CT-USDT-SWAP',timeframe:'5m'},elements=new Map();
- const context={state,root:{dataset:{},querySelector:()=>null,querySelectorAll:()=>[]},$:id=>{if(!elements.has(id))elements.set(id,{querySelector:()=>null,insertBefore(){},append(){}});return elements.get(id)},chart:null,window:{SpikeManualAccount:{setActive(){}}},destroyChart(){},syncRoute(){},refresh(){}};
+ const context={state,root:{dataset:{},querySelector:()=>null,querySelectorAll:()=>[]},$:id=>{if(!elements.has(id))elements.set(id,{querySelector:()=>null,insertBefore(){},append(){}});return elements.get(id)},chart:null,window:{SpikeManualAccount:{setActive(){}}},destroyChart(){},wallpaper(){},syncRoute(){},refresh(){}};
  vm.runInNewContext(source.slice(source.indexOf('  function setTab('),source.indexOf('  function draftFromJob('))+';setTab("results")',context);
  assert.equal(state.overview,false);assert.equal(state.job.id,'historical');assert.equal(state.symbol,'CT-USDT-SWAP');assert.equal(state.timeframe,'5m');
 });
 
 test('patrol and chart views omit embedded accounts while the dedicated account route remains',()=>{
  const modes=[],state={tab:'results',overview:true,active:true,loaded:false,result:null},elements=new Map();
- const context={state,root:{dataset:{},querySelector:()=>null,querySelectorAll:()=>[]},$:id=>{if(!elements.has(id))elements.set(id,{});return elements.get(id)},chart:null,window:{SpikeManualAccount:{setActive:(active,tab)=>modes.push([active,tab])}},destroyChart(){},syncRoute(){},refresh(){}};
+ const context={state,root:{dataset:{},querySelector:()=>null,querySelectorAll:()=>[]},$:id=>{if(!elements.has(id))elements.set(id,{});return elements.get(id)},chart:null,window:{SpikeManualAccount:{setActive:(active,tab)=>modes.push([active,tab])}},destroyChart(){},wallpaper(){},syncRoute(){},refresh(){}};
  const fn=vm.runInNewContext(source.slice(source.indexOf('  function setTab('),source.indexOf('  function draftFromJob('))+';setTab',context);
  for(const tab of ['schedules','results','account']){
   fn(tab);assert.equal(context.root.dataset.detectionPane,tab);assert.equal(elements.get('yd-panel-'+tab).hidden,false);
