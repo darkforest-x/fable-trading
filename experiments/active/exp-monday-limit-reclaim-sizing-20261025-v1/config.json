@@ -1,0 +1,17 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-sizing-20261025-v1",
+  "question": "Owner 2026-10-25: give higher-score trades larger positions; at the same total drawdown, which sizing earns the most?",
+  "single_variable": "Per-trade position size as a function of the frozen entry score; fills, exits, costs and score unchanged.",
+  "trades": "60m confirmation, near Monday edge target, worst intrabar path, 10bp slippage on non-target exits (exp-monday-limit-reclaim-allexits-20261025-v1 inputs)",
+  "score": "experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/score_model.json",
+  "shapes": ["equal", "tier", "linear", "kelly_top40", "kelly_all"],
+  "base_fraction": 0.10,
+  "scale_grid": [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0, 4.0, 5.0],
+  "per_trade_cap": 0.5,
+  "gross_cap": 1.0,
+  "selection_period": ["2025-01-01", "2026-01-01"],
+  "selection_rule": "highest final multiple with max drawdown <= current rule (equal, scale 1) in the selection period",
+  "test_periods": ["2026-01-01 onward", "last five months window of exp-monday-limit-reclaim-recent-20261025-v1"],
+  "fees": {"maker_bp": 2, "taker_bp": 5, "read_on": "2026-10-23 OKX Lv1"},
+  "slippage_bp_non_target_exit": 10
+}
