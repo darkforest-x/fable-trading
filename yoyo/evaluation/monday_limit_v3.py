@@ -10,7 +10,8 @@ threshold. Each variant maps score bands (lower edge -> target mode, backstop
 kind, backstop value; kinds as in monday_limit_backstop.stops) to one
 independent HEDGING position per event; variant "current" (near target,
 'far' backstop) must reproduce the existing ledgers (parity). Scores come from
-scores.csv.gz next to the config, written once from the frozen model.
+scores.csv.gz next to the config, written once from the frozen model. An optional
+min_score in the config raises the score floor (default: the top-40 threshold).
 """
 from __future__ import annotations
 import argparse
@@ -95,7 +96,7 @@ def run(config, workers, intrabar):
             raise RuntimeError('Commit builder and config first')
     if not (exp/'scores.csv.gz').exists():
         write_scores(exp)
-    threshold = json.loads((exp/'scores.json').read_text())['threshold']
+    threshold = max(json.loads((exp/'scores.json').read_text())['threshold'], cfg.get('min_score', 0.))
     root = exp/intrabar.lower()
     todo = [s for s in cfg['symbols'] if not (root/'symbols'/s/'done.json').exists()]
     with ProcessPoolExecutor(workers) as ex:
