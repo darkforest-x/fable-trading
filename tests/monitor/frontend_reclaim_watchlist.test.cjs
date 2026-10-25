@@ -37,12 +37,12 @@ test('coin identity and quote share a local button; external navigation is an ex
  assert.equal(external.length,1);assert.match(external[0][1],/class="rp-watch-tv"/);assert.equal(external[0][2],'TV ↗');
  assert.doesNotMatch(external[0][1],/rp-watch-name|data-watch-select/);
 });
-test('recent strip is newest five visible touches, independent of search and favorites',()=>{
+test('recent strip preserves visible occurrence order independently of pinned shortcuts',()=>{
  const data=snapshot(Array.from({length:8},(_,i)=>coin('C'+i,{touches:{lower:{source:'history',candle_ms:1000+i*1000,observed_ms:20000-i}}})).concat(coin('BTC')));
  const prefs=list.createListPreferences(disk());prefs.toggle('BTC-USDT-SWAP');
- assert.deepEqual(ui.recentRows(data,prefs).map(x=>x.symbol),['C7','C6','C5','C4','C3'].map(x=>x+'-USDT-SWAP'));
+ assert.deepEqual(ui.recentRows(data,prefs).map(x=>x.symbol),['C7','C6','C5','C4','C3','C2','C1','C0'].map(x=>x+'-USDT-SWAP'));
  const undo=prefs.remove(data.items[7],data.week);
- assert.deepEqual(ui.recentRows(data,prefs).map(x=>x.symbol),['C6','C5','C4','C3','C2'].map(x=>x+'-USDT-SWAP'));
+ assert.deepEqual(ui.recentRows(data,prefs).map(x=>x.symbol),['C6','C5','C4','C3','C2','C1','C0'].map(x=>x+'-USDT-SWAP'));
  prefs.undo(undo);assert.equal(ui.recentRows(data,prefs)[0].symbol,'C7-USDT-SWAP');
  assert.deepEqual(ui.recentRows(null,prefs),[]);
 });
@@ -64,4 +64,34 @@ test('touch list feed retains its last good snapshot on schema failure and stops
  feed.setActive(true);await feed.refresh();assert.equal(feed.getState().data,good);
  next={};await feed.refresh();assert.equal(feed.getState().data,good);assert.match(feed.getState().error,/格式/);
  feed.setActive(false);await feed.refresh();assert.equal(reads,2);assert.equal(cancels,1);
+});
+
+test('fixed shortcuts exist before data and remain unique even when touched or hidden',()=>{
+ assert.deepEqual(ui.PINNED,['BTC-USDT-SWAP','ETH-USDT-SWAP','XAU-USDT-SWAP']);
+ const html=ui.pinnedHTML('ETH-USDT-SWAP');
+ assert.equal((html.match(/data-watch-select=/g)||[]).length,3);
+ assert.match(html,/data-watch-select="ETH-USDT-SWAP" aria-pressed="true"/);
+ assert.equal((html.match(/<img /g)||[]).length,3);assert.doesNotMatch(html,/<a |tradingview|XAUT|PAXG/);
+ const data=snapshot(['BTC','ETH','XAU','SOL'].map(symbol=>coin(symbol,{touches:{upper:{source:'live',observed_ms:9000}}})));
+ const prefs=list.createListPreferences(disk());
+ assert.deepEqual(ui.recentRows(data,prefs).map(i=>i.symbol),['SOL-USDT-SWAP']);
+ prefs.remove(data.items[0],data.week);assert.match(ui.pinnedHTML(''),/BTC-USDT-SWAP/);
+ assert.equal(ui.recentRows(snapshot(Array.from({length:30},(_,i)=>coin('C'+i,{touches:{upper:{source:'live',observed_ms:i+1}}}))),prefs).length,20);
+});
+test('horizontal dragging suppresses pointer clicks but keeps taps and keyboard selection',()=>{
+ const target=()=>{const handlers={};return {handlers,addEventListener:(name,fn)=>(handlers[name]??=[]).push(fn),fire(name,x={}){let stopped=false;const e={type:name,preventDefault(){this.prevented=true;},stopImmediatePropagation(){stopped=true;},...x};for(const fn of handlers[name]||[])fn(e);return {stopped,e};}};};
+ const lane=target(),events=target();let time=100;
+ Object.assign(lane,{scrollLeft:60,classList:{add(){},remove(){}}});
+ const reset=ui.bindRecentDrag(lane,events,()=>time);
+ const down={pointerId:1,pointerType:'mouse',button:0,clientX:100};
+ lane.fire('pointerdown',down);events.fire('pointermove',{pointerId:1,clientX:50});
+ assert.equal(lane.scrollLeft,110);events.fire('pointerup',{pointerId:1});
+ assert.equal(lane.fire('click',{detail:1}).stopped,true);
+ assert.equal(lane.fire('click',{detail:0}).stopped,false);
+ time=900;assert.equal(lane.fire('click',{detail:1}).stopped,false);
+ lane.fire('pointerdown',down);events.fire('pointermove',{pointerId:1,clientX:98});events.fire('pointerup',{pointerId:1});
+ assert.equal(lane.fire('click',{detail:1}).stopped,false);
+ lane.fire('pointerdown',{...down,pointerType:'touch'});events.fire('pointermove',{pointerId:1,clientX:40});
+ assert.equal(lane.scrollLeft,110);events.fire('pointercancel',{pointerId:1});
+ assert.equal(lane.fire('click',{detail:1}).stopped,true);reset();assert.equal(lane.fire('click',{detail:1}).stopped,false);
 });

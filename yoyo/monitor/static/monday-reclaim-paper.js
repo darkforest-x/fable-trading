@@ -130,7 +130,7 @@
   function mount(){
     if(mounted)return;mounted=true;
     root.innerHTML=`<div class="rp-wallpaper" data-rp="chart"></div><div class="rp-watermark" aria-hidden="true" data-rp="watermark"></div><p class="rp-chart-notice rp-glass" data-rp="chart-notice" role="status" hidden></p>
-      <header class="rp-heading rp-glass"><details class="rp-navigation"><summary aria-label="打开模拟盘导航"><b>ϟ SPIKE</b> <span class="rp-badge">1.618 模拟盘</span> ⌄</summary><nav class="rp-glass"><a href="#monday-fib">1.618 图表</a><a href="#signals?pane=records">信号记录</a><a href="#signals?pane=overview">表现分析</a><a href="#yolo-detect">形态巡检</a></nav></details><button type="button" class="rp-refresh" data-rp-action="refresh" aria-label="刷新模拟盘" title="刷新模拟盘">↻</button><button type="button" class="theme-toggle" data-theme-toggle aria-label="切换浅色或深色" title="切换浅色或深色"></button></header>
+      <header class="rp-heading rp-glass"><details class="rp-navigation"><summary aria-label="打开模拟盘导航"><b>ϟ SPIKE</b><span aria-hidden="true">⌄</span></summary><nav class="rp-glass"><a href="#monday-fib">1.618 图表</a><a href="#signals?pane=records">信号记录</a><a href="#signals?pane=overview">表现分析</a><a href="#yolo-detect">形态巡检</a></nav></details></header><button type="button" class="rp-theme-toggle theme-toggle rp-glass" data-theme-toggle aria-label="切换浅色或深色" title="切换浅色或深色"></button>
       <section class="rp-context rp-glass"><div class="rp-context-line"><button type="button" class="rp-symbol-trigger" data-rp-action="watch" aria-controls="rp-watch-panel" aria-expanded="false"><strong data-rp="symbol-label">选择币种</strong><span aria-hidden="true">⌄</span></button><span data-rp="selection-status"></span></div><small class="rp-selection-note" data-rp="selection-note"></small><div class="rp-context-tools"><div class="rp-tracks" role="group" aria-label="选择模拟轨道">${['60','5'].map(track=>`<button type="button" data-rp-track="${track}" aria-pressed="false">${track==='60'?'60m 主轨':'5m 研究轨'}</button>`).join('')}</div><button type="button" data-rp-action="records" aria-controls="rp-record-panel" aria-expanded="false">交易簿 <span data-rp="total">—</span></button></div></section>
       <details class="rp-account rp-glass"><summary><span>已实现净值 <b data-rp="equity">—</b><small> USDT</small></span><span data-rp="pnl"></span><span aria-hidden="true">⌄</span></summary><div class="rp-account-body"><section data-rp="metrics" class="rp-metrics"></section><p data-rp="status" role="status"></p><details class="rp-rules"><summary>规则与统计口径</summary><div data-rp="rules"></div></details></div></details><button class="rp-analysis-trigger rp-glass" data-rp-action="analytics" aria-controls="rp-analysis-panel" aria-expanded="false">统计分析 ↗</button>
       <div class="rp-alert rp-glass" data-rp="error" role="alert" hidden></div>
@@ -157,7 +157,6 @@
       if(action==='fit')chart.fit();if(action==='latest')chart.latest();
       if(action==='ma'){ma=!ma;render(feed.getState());}
       if(action==='follow'){state.symbol='';state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());}
-      if(action==='refresh'){chart.retry();feed.refresh();watch.refresh();analytics.refresh();}
       if(button.dataset.rpAction==='more'){shown+=50;render(feed.getState());}
     });
     el('scope').addEventListener('change',event=>{state.scope=event.target.value;shown=50;sync();render(feed.getState());});
@@ -171,11 +170,10 @@
     if(!pageActive)return;mount();
     const {data,error,busy}=current, track=data?.tracks?.[state.track], stats=summary(track);
     root.setAttribute('aria-busy',String(busy && !data));
-    root.querySelector('[data-rp-action="refresh"]').disabled=busy;
     const worker=data?.worker, workerIssue=worker && (worker.alive!==true || worker.error);
     el('status').textContent=data ? `${error?'上次记录':'更新于'} ${date(data.now_ms)} · 北京时间 · ${workerIssue?'后台需要检查':busy?'同步中…':'每 10 秒同步'}${worker?.queue>0?` · 等待处理 ${worker.queue} 条`:''}` : busy?'正在读取模拟盘…':'尚未读取到模拟盘数据';
     el('error').hidden=!error && !workerIssue;
-    el('error').textContent=error ? `同步失败：${error}。${data?'保留上次记录，请刷新重试。':'请刷新重试。'}` : workerIssue ? `后台状态异常：${worker.error || '处理线程未运行'}。当前展示已保存的记录。` : '';
+    el('error').textContent=error ? `同步失败：${error}。${data?'保留上次记录，正在自动重试。':'正在自动重试。'}` : workerIssue ? `后台状态异常：${worker.error || '处理线程未运行'}。当前展示已保存的记录。` : '';
     root.querySelectorAll('[data-rp-track]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.rpTrack===state.track)));
     root.querySelectorAll('[data-rp-tab]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.rpTab===state.tab)));
     if(el('search').value!==state.q)el('search').value=state.q;
@@ -198,7 +196,7 @@
     const items=data?rows(data,state):[], visible=items.slice(0,shown);
     el('caption').textContent=!data ? (error?'记录暂时不可用':'正在读取记录…') : state.tab==='events' ? `两轨共用触价记录 · ${items.length} 条符合筛选 · 最近最多 100 条` : `${state.track==='60'?'60 分钟主轨':'5 分钟研究轨'} · ${{funded:'计入资金',shadow:'影子记录',all:'全部记录'}[state.scope]} · ${items.length} 条${state.tab==='closed'?'符合筛选 · 最近最多 100 条':'持仓'}`;
     const rowSignature=visible.length ? visible.map(row=>rowHTML(row,state,data.now_ms)).join('')
-      : `<div class="rp-empty"><span aria-hidden="true">${data?'◌':'⋯'}</span><strong>${!data?(error?'暂时无法读取':'正在读取模拟盘'):state.q?'没有匹配的币种':state.tab==='open'?'当前没有持仓':state.tab==='closed'?'当前没有已结束记录':'还没有触价记录'}</strong><p>${data?(state.q?'换一个币种或清空搜索。':state.scope==='shadow'&&state.tab!=='events'?'未计入资金的模拟交易会出现在这里。':'后台产生新记录后会自动更新。'):'请稍候，也可以点击刷新重试。'}</p></div>`;
+      : `<div class="rp-empty"><span aria-hidden="true">${data?'◌':'⋯'}</span><strong>${!data?(error?'暂时无法读取':'正在读取模拟盘'):state.q?'没有匹配的币种':state.tab==='open'?'当前没有持仓':state.tab==='closed'?'当前没有已结束记录':'还没有触价记录'}</strong><p>${data?(state.q?'换一个币种或清空搜索。':state.scope==='shadow'&&state.tab!=='events'?'未计入资金的模拟交易会出现在这里。':'后台产生新记录后会自动更新。'):'请稍候，数据会自动重试同步。'}</p></div>`;
     if(rowSignature!==signature){
       const container=el('rows'),open=new Set(Array.from(container.querySelectorAll('details[open]'),node=>node.dataset.rpRow));
       const focused=document.activeElement, focusedRow=focused?.closest?.('[data-rp-row]')?.dataset.rpRow;
