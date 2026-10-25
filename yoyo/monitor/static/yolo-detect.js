@@ -94,7 +94,7 @@
   const validating=new Set();
   const resultCache=new Map();
   let findingPreview=null,previewVersion=0,previewRequest=null,previewChartInstance=null,previewResize=null;
-  let previewLevels=null,chartLevels=null;
+  let previewLevels=null,chartLevels=null,previewSheet=null;
   const readSaved=(key,fallback,session=false)=>{try{return JSON.parse((session?sessionStorage:localStorage).getItem(key))??fallback;}catch{return fallback;}};
   const save=(key,value,session=false)=>{try{(session?sessionStorage:localStorage).setItem(key,JSON.stringify(value));}catch{/* Storage may be unavailable; the current session remains usable. */}};
   state.symbolOrder=readSaved('spike.yolo.symbol-sort.v1','latest');if(!['latest','score','count','name','name-desc','favorites'].includes(state.symbolOrder))state.symbolOrder='latest';
@@ -126,6 +126,7 @@
   symbolPanelMedia.addEventListener('change',()=>{if($('yd-symbol-dialog')?.open)closeDialog('yd-symbol-dialog');syncSymbolPanel();});
   function dialogViewport(){const v=window.visualViewport;root.style.setProperty('--yd-dialog-height',Math.max(140,(v?.height||innerHeight)-24)+'px');root.style.setProperty('--yd-dialog-top',(v?.offsetTop||0)+12+'px');}
   function showDialog(id){
+    if(id==='yd-preview-dialog')previewSheet?.reset();
     if(!dialogOrigin){const b=document.body;dialogOrigin={x:scrollX,y:scrollY,position:b.style.position,top:b.style.top,width:b.style.width,overflow:b.style.overflow};b.style.position='fixed';b.style.top=-dialogOrigin.y+'px';b.style.width='100%';b.style.overflow='hidden';}
     dialogViewport();$(id).showModal();
   }
@@ -133,6 +134,7 @@
   function restoreDialog(id){
     if(id==='yd-preview-dialog'){
       if($(id).open)return;
+      previewSheet?.reset();
       previewVersion++;previewLevels?.destroy();previewLevels=null;previewRequest?.abort();previewRequest=null;previewResize?.disconnect();previewResize=null;previewChartInstance?.remove();previewChartInstance=null;
       if(findingPreview&&state.active){const id=findingPreview.id;findingPreview=null;root.querySelector(`[data-yd-finding="${CSS.escape(id)}"]`)?.focus({preventScroll:true});}
     }
@@ -198,7 +200,7 @@
       <section id="yd-panel-account" role="tabpanel" aria-label="实盘账户" hidden><div id="yd-account-detail"></div></section>
       <section id="yd-panel-model" role="tabpanel" aria-labelledby="yd-tab-model" hidden>${training()}</section>
       <datalist id="yd-symbols"></datalist>
-      <dialog id="yd-preview-dialog" class="yd-preview-dialog" aria-labelledby="yd-preview-title"><header><div><h2 id="yd-preview-title">K 线预览</h2><p id="yd-preview-context"></p></div><button type="button" data-yd-close="yd-preview-dialog" aria-label="关闭 K 线预览">× <small>Esc</small></button></header><p id="yd-preview-confirmation"></p><div id="yd-preview-legend" class="yd-six-ma"></div><div id="yd-preview-levels" class="yd-range-levels" aria-label="周一区间与1.618价位" aria-live="polite"></div><div class="yd-preview-stage"><div id="yd-preview-chart"></div><p id="yd-preview-message" role="status">正在读取检测快照…</p></div><footer><span>检测时快照 · 可拖动、缩放</span><button type="button" data-yd-preview-retry hidden>重新加载</button><button type="button" data-yd-preview-full>查看完整图表 ↗</button></footer></dialog>
+      <dialog id="yd-preview-dialog" class="yd-preview-dialog" aria-labelledby="yd-preview-title"><div class="yd-preview-grip" data-yd-sheet-drag aria-hidden="true"><span></span></div><header data-yd-sheet-drag><div><h2 id="yd-preview-title">K 线预览</h2><p id="yd-preview-context"></p></div><button type="button" data-yd-close="yd-preview-dialog" aria-label="关闭 K 线预览">× <small>Esc</small></button></header><p id="yd-preview-confirmation" data-yd-sheet-drag></p><div id="yd-preview-legend" class="yd-six-ma" data-yd-sheet-drag></div><div id="yd-preview-levels" class="yd-range-levels" data-yd-sheet-drag aria-label="周一区间与1.618价位" aria-live="polite"></div><div class="yd-preview-stage"><div id="yd-preview-chart"></div><p id="yd-preview-message" role="status">正在读取检测快照…</p></div><footer><span>检测时快照 · 可拖动、缩放</span><button type="button" data-yd-preview-retry hidden>重新加载</button><button type="button" data-yd-preview-full>查看完整图表 ↗</button></footer></dialog>
       <dialog id="yd-scan-dialog" class="yd-dialog" aria-labelledby="yd-scan-heading"><header><h2 id="yd-scan-heading">新建检测</h2><button data-yd-close="yd-scan-dialog" aria-label="关闭新建检测">×</button></header><form id="yd-scan-form" novalidate><div class="yd-form-body"><div class="yd-mode-options" role="group" aria-label="检测模式"><button type="button" data-yd-mode="latest">当前盘口<span>查看最新收盘附近的形态</span></button><button type="button" data-yd-mode="history">历史识别<span>检查指定时间段的形态</span></button></div>${selectionFields('yd')}
         <div id="yd-dates"><label>检测时间段 · 北京时间</label><div class="yd-presets"><button type="button" data-yd-days="1">最近 1 天</button><button type="button" data-yd-days="3">最近 3 天</button><button type="button" data-yd-days="7">最近 7 天</button></div><div class="yd-form-grid"><label>开始<input type="datetime-local" id="yd-start"></label><label>结束<input type="datetime-local" id="yd-end"></label></div><div class="yd-date-help"><p class="yd-help">均为北京时间；日线按每天 08:00 划分。</p><button type="button" id="yd-align-dates">对齐收盘时间</button></div></div>
         <p id="yd-scan-estimate" class="yd-help"></p><p id="yd-scan-error" class="yd-error" role="alert" hidden></p></div><footer><span id="yd-submit-summary"></span><button type="submit" id="yd-submit" class="yd-primary">开始检测</button></footer></form></dialog>
@@ -291,6 +293,7 @@
     root.addEventListener('click',delegate);
     root.addEventListener('change',e=>{if(e.target.matches('[data-yd-feed-size]')){state.feedLimit=Number(e.target.value);state.feedPage=0;state.feedBefore=null;refreshFeed();}});
     root.querySelectorAll('dialog').forEach(d=>d.addEventListener('close',()=>{restoreDialog(d.id);unlockDialogs();}));
+    previewSheet=window.SpikeYoloPreviewSheet.bind({panel:$('yd-preview-dialog'),dismiss:()=>closeDialog('yd-preview-dialog')});
     on('yd-preview-dialog','click',e=>{if(e.target!==$('yd-preview-dialog'))return;const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeDialog('yd-preview-dialog');});
     on('yd-symbol-sort','change',e=>{state.symbolOrder=e.target.value;save('spike.yolo.symbol-sort.v1',state.symbolOrder);drawSymbols();});
     on('yd-follow','change',e=>{state.follow=e.target.checked;tailVersion++;state.tailLoading=false;state.tailError='';if(state.follow)refreshTail(true);else{state.tail=null;updateChartData();if(state.selected)selectBox(state.selected);else recentRange();tailStatus();}});

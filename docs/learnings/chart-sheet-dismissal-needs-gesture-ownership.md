@@ -1,0 +1,7 @@
+# Chart sheet dismissal needs explicit gesture ownership
+
+- **Problem**: The patrol chart preview must follow a downward finger drag while retaining candle panning, pinch zoom, control clicks and the existing dialog cleanup.
+- **Dead ends**: Binding dismissal to every point in the dialog would compete with chart gestures. Merely hiding a translated sheet would leave chart instances, reference-line requests and the body scroll lock alive. These approaches were excluded before implementation; no production failure is claimed.
+- **Effective path**: Mark the grip, header and noninteractive metadata as drag origins; exclude controls and the chart. Capture one pointer, paint its offset once per animation frame, rebound short pulls, and send a completed exit through the existing close handler. Reset pending frames, timers and capture on close/reopen or viewport changes. Regrabbing a rebound starts from its computed visual position.
+- **General rule**: Decide which surface owns each gesture before adding movement. Animation completion requests a lifecycle transition; it must not replace the component's cleanup. Validate with real touch events as well as isolated cancellation tests.
+- **Connections**: `yoyo/monitor/static/yolo-preview-sheet.js`, `yolo-detect.js`, `yolo-compact.css`; `tests/monitor/frontend_yolo_preview_sheet.test.cjs`. Mobile geometry is exactly 75dvh, including short screens; reduced motion removes settling animations. Stitch source: `docs/design/stitch-20261025-patrol-sheet/`.

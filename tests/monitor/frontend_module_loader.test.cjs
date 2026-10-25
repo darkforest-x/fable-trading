@@ -46,4 +46,6 @@ test('patrol loads reference overlay before charts can mount',async()=>{
  const c=harness();await c.api.ensure('yolo-detect');
  assert.ok(c.calls.indexOf('/static/yolo-chart-levels.js')>=0);
  assert.ok(c.calls.indexOf('/static/yolo-chart-levels.js')<c.calls.indexOf('/static/yolo-detect.js'));
+ assert.ok(c.calls.indexOf('/static/yolo-preview-sheet.js')>=0);
+ assert.ok(c.calls.indexOf('/static/yolo-preview-sheet.js')<c.calls.indexOf('/static/yolo-detect.js'));
 });

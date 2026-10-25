@@ -1,3 +1,9 @@
+## 2026-10-25 · Mobile patrol preview uses 75% height and swipe dismissal
+
+- Owner requested exactly 75% screen height and finger-following dismissal. The preview now uses 75dvh on mobile, including short screens. Grip/header/noninteractive metadata follow downward drags; short pulls rebound, long pulls or quick flicks close through the existing dialog lifecycle. Chart pan/pinch, controls, Escape and backdrop dismissal remain functional; desktop geometry is unchanged.
+- Stitch GEMINI_3_8_FLASH screen `57a4f7f2e33e46b3b0ecf390afe4f2b5`, project `8978791379095391159`; source in `docs/design/stitch-20261025-patrol-sheet/`. Gesture ownership and cancellation learning: `docs/learnings/chart-sheet-dismissal-needs-gesture-ownership.md`.
+- Validation: 66 focused frontend tests passed; real Chromium touch events verified 50px rebound, 150px dismissal, quick flick, chart pan and two-finger zoom. Mobile390x844/375x667/320x568 render633/500.25/426px sheets without overflow; desktop1440 stays936px wide. Close removes canvases/levels, unlocks scrolling and restores focus; reopen resets position. Public `spikeok.com` serves the new sheet and four reference levels. Screenshots and checks: `output/playwright/patrol-sheet-*`. Static-only change; no service restart or patrol schedule mutation required.
+
 ## 2026-10-25 · Patrol charts show detection-week Monday levels
 
 - Owner requested Monday high/low and upper/lower 1.618 on patrol K-line previews. Both the popup and selected-shape full chart now draw the four native price lines with a wrapping value legend. Default preserves candle detail; “完整区间” fits distant levels. Short mobile screens expand the sheet to preserve chart height.
