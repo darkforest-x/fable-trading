@@ -1,0 +1,66 @@
+{
+  "features": [
+    "bucket",
+    "log_vol_ratio",
+    "log_approach",
+    "opp_first",
+    "monday_close_side",
+    "log_liquidity",
+    "toward24",
+    "cluster24",
+    "side",
+    "range_pct"
+  ],
+  "mean": [
+    -30.17573238321457,
+    1.1248661348298132,
+    6.4448405942139155,
+    0.13800475059382422,
+    0.5685677255242574,
+    7.532410678450596,
+    8.468845233945238,
+    30.03946951702296,
+    -0.016468725257323832,
+    8.355507754499726
+  ],
+  "scale": [
+    3.284208021098482,
+    0.8023658416783487,
+    1.895678861321617,
+    0.3449049715608063,
+    0.25486278722644184,
+    0.5720209451410443,
+    5.9592565015287455,
+    35.256666428746705,
+    0.99986438134799,
+    5.090110905355566
+  ],
+  "coef": [
+    0.3229812653520211,
+    0.22679851819400423,
+    -0.24225106866915397,
+    0.17646553250716412,
+    -0.02445925622547999,
+    -0.025199938075037884,
+    -0.3343622026346066,
+    -0.08190818567477383,
+    5.823079854028483e-05,
+    -0.01567638498009045
+  ],
+  "intercept": -1.2887103118422483,
+  "top40_threshold": 0.22621664169752762,
+  "trained_before": "2025-01-01 00:00:00+00:00",
+  "train_n": 25260,
+  "feature_notes": {
+    "bucket": "floor(log2(mean 14-bar TR / close of the 5m bar before the touch)*4)",
+    "log_vol_ratio": "log of last-hour quote volume / median hourly quote volume of the prior 7 days",
+    "log_approach": "log1p(minutes from the first post-Monday cross of the near Monday edge to the touch bar)",
+    "opp_first": "1 if the opposite 1.618 of the same symbol-week filled earlier",
+    "monday_close_side": "Monday close position, 0 = edge away from this touch, 1 = edge this touch extends",
+    "log_liquidity": "log10 mean daily quote volume of the prior 7 days (USDT)",
+    "toward24": "percent move toward the level over the prior 24h",
+    "cluster24": "other symbols filling the same side in the prior 24h",
+    "side": "1 long, -1 short",
+    "range_pct": "Monday range / level, percent"
+  }
+}

@@ -257,6 +257,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Learning note docs/learnings/tiny-stop-r-multiples-hinge-on-slippage.md.'
+  - experiment_id: exp-monday-limit-reclaim-recent-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: b90dbfb7eca7769774c2a11a9dfa38597c60a252
+    status: complete
+    question: 'Owner 2026-10-25: last five months of the v2 rule; freeze the entry score for the paper monitor.'
+    single_variable: 'Window = last five months; score refitted as in the optimize study and frozen.'
+    result: 'Window 2026-04-23..2026-09-23 (worst path, 10bp). All trades n9164 win 27.3 percent mean +9.6bp, 1000U 0.65x; top-40 percent score n3724 win 38.5 mean +22.5bp, 1000U 1.44x (DD 27 percent); May negative; long +57.6 vs short +2.4bp in top-40. Score frozen to score_model.json for the paper monitor.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Notion v2 full description https://app.notion.com/p/4048856479af81d3bfc5c73c26ed7e35'
   - experiment_id: exp-monday-limit-reclaim-fail-samples-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: b1a369c7b25985ff51276c647667f51204e4fd29

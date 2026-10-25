@@ -1,0 +1,134 @@
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:200: RuntimeWarning: divide by zero encountered in matmul
+  raw_prediction = X @ weights + intercept
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:200: RuntimeWarning: overflow encountered in matmul
+  raw_prediction = X @ weights + intercept
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:200: RuntimeWarning: invalid value encountered in matmul
+  raw_prediction = X @ weights + intercept
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:330: RuntimeWarning: divide by zero encountered in matmul
+  grad[:n_features] = X.T @ grad_pointwise + l2_reg_strength * weights
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:330: RuntimeWarning: overflow encountered in matmul
+  grad[:n_features] = X.T @ grad_pointwise + l2_reg_strength * weights
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:330: RuntimeWarning: invalid value encountered in matmul
+  grad[:n_features] = X.T @ grad_pointwise + l2_reg_strength * weights
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: divide by zero encountered in matmul
+  ret = a @ b
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: overflow encountered in matmul
+  ret = a @ b
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: invalid value encountered in matmul
+  ret = a @ b
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: divide by zero encountered in matmul
+  ret = a @ b
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: overflow encountered in matmul
+  ret = a @ b
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: invalid value encountered in matmul
+  ret = a @ b
+{
+ "window": [
+  "2026-04-23 04:00:00+00:00",
+  "2026-09-23 04:00:00+00:00"
+ ],
+ "all": {
+  "n": 9164,
+  "win_pct": 27.26975120034919,
+  "mean_bp": 9.648259705304664,
+  "median_bp": -17.000000015297047,
+  "replay_k10_g1": {
+   "final_multiple": 0.6465055265489463,
+   "max_drawdown_pct": 45.201473679910805
+  },
+  "by_month": {
+   "2026-04": {
+    "n": 386,
+    "win_pct": 31.088082901554404,
+    "mean_bp": 29.436463410294298
+   },
+   "2026-05": {
+    "n": 1883,
+    "win_pct": 21.77376526818906,
+    "mean_bp": -15.420573296027849
+   },
+   "2026-06": {
+    "n": 1835,
+    "win_pct": 25.39509536784741,
+    "mean_bp": 16.074865536332194
+   },
+   "2026-07": {
+    "n": 1563,
+    "win_pct": 30.58221369161868,
+    "mean_bp": 21.200028243379734
+   },
+   "2026-08": {
+    "n": 1757,
+    "win_pct": 31.189527603870232,
+    "mean_bp": 15.25302143960772
+   },
+   "2026-09": {
+    "n": 1740,
+    "win_pct": 27.413793103448274,
+    "mean_bp": 9.57387098074477
+   }
+  },
+  "by_side": {
+   "-1": {
+    "n": 4398,
+    "mean_bp": -10.240294722006881
+   },
+   "1": {
+    "n": 4766,
+    "mean_bp": 28.00114731993248
+   }
+  }
+ },
+ "top40": {
+  "n": 3724,
+  "win_pct": 38.45327604726101,
+  "mean_bp": 22.525916607434862,
+  "median_bp": -16.99999999398957,
+  "replay_k10_g1": {
+   "final_multiple": 1.4369095747424943,
+   "max_drawdown_pct": 26.53444504418019
+  },
+  "by_month": {
+   "2026-04": {
+    "n": 166,
+    "win_pct": 43.97590361445783,
+    "mean_bp": 70.29943541460034
+   },
+   "2026-05": {
+    "n": 703,
+    "win_pct": 33.712660028449505,
+    "mean_bp": -10.698336411583574
+   },
+   "2026-06": {
+    "n": 806,
+    "win_pct": 32.754342431761785,
+    "mean_bp": 18.94438835641476
+   },
+   "2026-07": {
+    "n": 618,
+    "win_pct": 39.80582524271845,
+    "mean_bp": 26.164803746964044
+   },
+   "2026-08": {
+    "n": 736,
+    "win_pct": 45.65217391304348,
+    "mean_bp": 44.17823184389411
+   },
+   "2026-09": {
+    "n": 695,
+    "win_pct": 39.71223021582734,
+    "mean_bp": 22.710119851232896
+   }
+  },
+  "by_side": {
+   "-1": {
+    "n": 2367,
+    "mean_bp": 2.430653222189822
+   },
+   "1": {
+    "n": 1357,
+    "mean_bp": 57.577860920533595
+   }
+  }
+ }
+}
