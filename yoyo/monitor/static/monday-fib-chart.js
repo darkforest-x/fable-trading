@@ -55,7 +55,7 @@
   }
   if(typeof module!=='undefined')module.exports={levels,prepare,PERIODS,refreshDelay};
   if(typeof document==='undefined')return;
-  const view={bars:720,initialBars:160,range:true,fib:true,fitAll:false,showLevels:false,mondayBand:true,wallpaper:true,candleColors:{up:'#169873',down:'#d7355d'}};
+  const view={bars:720,initialBars:160,range:true,fib:true,fitAll:false,showLevels:false,mondayBand:true,wallpaper:true};
   let target=null,controller=null,timer=null,version=0,paused=false;
   const cache=new Map(),levelCache=new Map();
   function pause(){paused=true;version++;clearTimeout(timer);controller?.abort();controller=null;target?.feed?.stop();if(target)target.feed=null;}

@@ -3,7 +3,7 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const source=fs.readFileSync(path.join(__dirname,'../../yoyo/monitor/static/yolo-detect.js'),'utf8');
 // Exercise the shipped primitive with the bundled 4.2 integer-only scale behavior.
 const code=source.slice(source.indexOf('class DetectionPrimitive{'),source.indexOf('  function destroyChart'));
-const Primitive=vm.runInNewContext(code+';DetectionPrimitive');
+const Primitive=vm.runInNewContext(code+';DetectionPrimitive',{chartTools:require('../../yoyo/vision_research/static/chart-tools.js')});
 function primitive(){
  const p=new Primitive([],100000,1000);
  const scale={logicalToCoordinate:i=>Number.isInteger(i)?30+8*i:0,width:()=>1000};
@@ -46,6 +46,7 @@ test('default browsing contains detected coins, search and failures remain acces
 });
 test('URL coin wins even without detections; fallback preserves error-only jobs',()=>{
  assert.equal(initialSymbol(summaries,'BTC-USDT-SWAP'),'BTC-USDT-SWAP');
+ assert.equal(initialSymbol(summaries,'UNLISTED-USDT-SWAP'),'UNLISTED-USDT-SWAP');
  assert.equal(initialSymbol(summaries,'deleted'),'A-USDT-SWAP');
  assert.equal(initialSymbol([summaries[3]]),'BAD-USDT-SWAP');
  assert.equal(initialSymbol([]),'');
@@ -224,6 +225,16 @@ test('coin overview retains 5m and 15m independently when selecting a period',()
  const rows=aggregateSymbols(items);assert.equal(rows.length,2);assert.equal(rows[0].count,2);assert.equal(rows[0].periods.length,2);
  assert.equal(periodResult(items,'ETH-USDT-SWAP','15m').job_id,'quarter');assert.equal(periodResult(items,'ETH-USDT-SWAP','4H'),undefined);
  assert.equal(filteredSymbols(rows,'','detected').length,2);assert.equal(items[0].count,0);
+});
+
+test('new chart deep link clears the previous coin before awaiting its catalog',async()=>{
+ const state={active:true,loaded:true,overview:true,tab:'results',pendingRoute:{tab:'results',symbol:'NEW-USDT-SWAP',timeframe:'1H'},symbol:'ETH-USDT-SWAP',timeframe:'15m',result:{symbol:'ETH-USDT-SWAP',timeframe:'15m'},tail:{candles:[{}]},selected:'old',tailChecked:Date.now(),tailLoading:true,tailError:'old error'};
+ let destroyed=0,read=false;
+ const context={state,document:{hidden:false},refreshing:false,activationVersion:0,schedulesAt:Date.now(),Date,steps:{'1H':3600000},tailVersion:0,$:()=>({open:false}),
+  setTab:tab=>state.tab=tab,destroyChart(){destroyed++;},emptyChart(){},summary(){},drawSymbols(){},loadMarket(){},refreshTail(){},error(e){if(e)throw Error(e);},
+  async refreshLatest(){read=true;assert.equal(state.symbol,'NEW-USDT-SWAP');assert.equal(state.timeframe,'1H');assert.equal(state.result,null);assert.equal(state.tail,null);assert.equal(state.tailChecked,0);assert.equal(state.tailLoading,false);assert.equal(state.tailError,'');}};
+ const fn=source.slice(source.indexOf('  async function refresh(){'),source.indexOf('  window.SpikeNavigation?.register'));
+ await vm.runInNewContext(fn+';refresh',context)();assert.equal(read,true);assert.equal(destroyed,1);
 });
 
 function previewHarness(){

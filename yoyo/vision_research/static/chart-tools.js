@@ -11,7 +11,8 @@
     {key:'sma120',label:'SMA 120',color:'#cbd5e1',period:120},{key:'ema20',label:'EMA 20',color:'#9d7cff',period:20},
     {key:'ema60',label:'EMA 60',color:'#f59e0b',period:60},{key:'ema120',label:'EMA 120',color:'#ff3366',period:120},
   ]);
-  const colors={up:'#01e599',down:'#ff4f73'};
+  // Shared display palette, matched to the approved Monday 1.618 chart.
+  const colors=Object.freeze({up:'#169873',down:'#d7355d',volumeUp:'#16987338',volumeDown:'#d7355d38'});
   const price=v=>finite(v)?v.toLocaleString('en-US',{maximumFractionDigits:Math.abs(v)>=100?2:Math.abs(v)>=1?4:10}):'—';
   const axisPrice=v=>finite(v)?v.toLocaleString('en-US',{maximumFractionDigits:10}):'—';
   // Compact axis labels are display-only. Full OHLC readouts use axisPrice.

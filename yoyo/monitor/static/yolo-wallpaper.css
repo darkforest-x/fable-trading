@@ -1,4 +1,5 @@
 /* Stitch d70c4b10a20f478bae161de14e5e5c49: full-viewport chart and floating glass.
+ * Density revision: dd8d13e22c2541e193ed1c35e9c3e4ad.
  * The canvas never changes size when either side panel opens or closes. */
 body[data-yolo-wallpaper]{overflow:hidden;--yd-glass:linear-gradient(145deg,rgba(255,255,255,.78),rgba(240,247,251,.56));--yd-edge:rgba(255,255,255,.88);--yd-shadow:inset 0 1px 1px #fff,0 10px 32px -12px #243e5640;--yd-motion:220ms cubic-bezier(.2,.8,.2,1)}
 body[data-yolo-wallpaper] .workspace{padding:0!important;margin:0!important}
@@ -160,3 +161,29 @@ body[data-yolo-wallpaper] #yolo-detect-workspace [hidden]{display:none!important
 @media(prefers-reduced-motion:reduce){body[data-yolo-wallpaper] #yolo-detect-workspace :is(button,#yd-symbol-home,#yd-pattern-panel,#yd-symbol-dialog){transition:none!important}}
 html[data-theme=dark] body[data-yolo-wallpaper]{--yd-glass:linear-gradient(145deg,rgba(28,39,52,.86),rgba(20,32,43,.7));--yd-edge:#d2e2ff24;--yd-shadow:inset 0 1px 1px #ffffff15,0 10px 32px -12px #0008}
 html[data-theme=dark] body[data-yolo-wallpaper] #yolo-detect-workspace :is(.yd-symbol.selected,.yd-chart-readout,#yd-insight){background:#283b4be0!important}
+
+/* Two compact rows; touch controls keep 44px targets on phones. */
+body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-panel{padding:8px}
+body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-panel>header{min-height:28px;margin:0 3px 4px}
+body[data-yolo-wallpaper] #yolo-detect-workspace #yd-result-search{height:34px;min-height:34px;padding:6px 10px}
+body[data-yolo-wallpaper] #yolo-detect-workspace .yd-symbol-filters{margin:4px 0 1px}
+body[data-yolo-wallpaper] #yolo-detect-workspace .yd-symbol-filters button{min-height:28px}
+body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-sort{height:26px;min-height:26px}
+body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-list{display:block;padding:0}
+body[data-yolo-wallpaper] #yolo-detect-workspace .yd-symbol{display:block;min-height:68px;padding:5px 7px;margin:1px 0;border-radius:11px;contain-intrinsic-size:auto 68px}
+body[data-yolo-wallpaper] #yolo-detect-workspace .yd-symbol-main{min-height:32px;gap:7px}
+body[data-yolo-wallpaper] #yolo-detect-workspace .yd-symbol .yd-coin-logo{width:24px;height:24px;flex-basis:24px}
+body[data-yolo-wallpaper] #yolo-detect-workspace .yd-coin-copy{gap:0;line-height:1.3}
+body[data-yolo-wallpaper] #yolo-detect-workspace .yd-coin-copy small{font-size:10px;margin:0}
+body[data-yolo-wallpaper] #yolo-detect-workspace :is(.yd-row-star,.yd-row-monday){min-height:32px}
+body[data-yolo-wallpaper] #yolo-detect-workspace .yd-period-badges{display:flex;gap:4px;margin:3px 0 0 31px;padding:0;min-height:0}
+body[data-yolo-wallpaper] #yolo-detect-workspace .yd-period-badges:empty{display:none}
+body[data-yolo-wallpaper] #yolo-detect-workspace .yd-period-badges button{flex:0 0 auto;min-width:40px;min-height:22px;padding:1px 6px;border-radius:6px!important}
+body[data-yolo-wallpaper] #yolo-detect-workspace .yd-coin-empty{display:block;margin:3px 0 0 31px;font-size:10px;color:var(--muted);line-height:22px}
+@media(max-width:700px){
+ body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-dialog .yd-symbol{min-height:98px;padding:4px 7px}
+ body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-dialog .yd-symbol-main{min-height:44px}
+ body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-dialog .yd-period-badges{margin-top:0}
+ body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-dialog .yd-period-badges button{min-width:44px}
+ body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-dialog :is(.yd-row-star,.yd-row-monday,.yd-period-badges button,.yd-symbol-filters button){min-height:44px}
+}

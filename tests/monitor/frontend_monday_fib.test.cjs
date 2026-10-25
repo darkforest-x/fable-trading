@@ -120,12 +120,16 @@ test('only the inline coin link opens externally; the rest of each row pins the 
  assert.equal(c.el('mf-watermark-symbol').textContent,'BTCUSDT');assert.equal(c.el('mf-watermark-period').textContent,'15m · USDT 永续');
  assert.ok(calls.every(([u,o])=>u==='/api/monday-fib?compact=true'&&!o.method));c.api.setActive(false);
 });
-test('inspection link targets the exact coin patrol feed without pinning the chart',async()=>{
+test('inspection link targets exact coin K-line detail and updates when its period changes',async()=>{
  const c=harness(async()=>response(snap()));await ready(c);
- assert.match(c.el('mf-rows').innerHTML,/<a data-inspect-symbol="BTC-USDT-SWAP" href="#yolo-detect\?tab=schedules&amp;symbol=BTC-USDT-SWAP&amp;timeframe=5m" aria-label="查看 BTC 的信号巡检"/);
+ assert.match(c.el('mf-rows').innerHTML,/<a data-inspect-symbol="BTC-USDT-SWAP" href="#yolo-detect\?tab=results&amp;symbol=BTC-USDT-SWAP&amp;timeframe=15m" aria-label="查看 BTC 的巡检 K 线详情"/);
  const before=c.charts.length;let stopped=false;
  c.el('mf-rows').events.click({target:{closest:s=>s==='[data-inspect-symbol]'?{dataset:{inspectSymbol:'BTC-USDT-SWAP'}}:s==='[data-symbol]'?{dataset:{symbol:'BTC-USDT-SWAP'}}:null},stopPropagation(){stopped=true;}});
  assert.equal(stopped,true);assert.equal(c.charts.length,before);assert.equal(c.el('mf-follow').attrs['aria-pressed'],'true');
+ c.el('mf-period-menu').events.click({target:{closest:()=>({dataset:{period:'4H'}})}});
+ assert.match(c.el('mf-rows').innerHTML,/tab=results&amp;symbol=BTC-USDT-SWAP&amp;timeframe=4H/);
+ c.el('mf-period-menu').events.click({target:{closest:()=>({dataset:{period:'1D'}})}});
+ assert.match(c.el('mf-rows').innerHTML,/tab=results&amp;symbol=BTC-USDT-SWAP&amp;timeframe=1Dutc/);
  c.api.setActive(false);
 });
 test('Windows links use only the local app protocol and preserve independent wallpaper controls',async()=>{

@@ -1,7 +1,14 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
-const sandbox={window:{},module:{exports:{}},Intl,Date};vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/range-chart.js','utf8'),sandbox);
+const sandbox={window:{SpikeChartTools:require('../../yoyo/vision_research/static/chart-tools.js')},module:{exports:{}},Intl,Date};vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/range-chart.js','utf8'),sandbox);
 const {render,price}=sandbox.module.exports,view={bars:192,range:true,profile:true};
+test('range fallback and interactive defaults share the Monday candle palette',()=>{
+ const colors=sandbox.window.SpikeChartTools.colors;
+ assert.equal(colors.up,'#169873');assert.equal(colors.down,'#d7355d');
+ const svg=render({symbol:'BTC',candles:[{time:0,open:10,high:12,low:9,close:11},{time:900000,open:11,high:12,low:9,close:10}]},view);
+ assert.match(svg,/fill="#169873"/);assert.match(svg,/fill="#d7355d"/);
+ assert.equal(colors.volumeUp,colors.up+'38');assert.equal(colors.volumeDown,colors.down+'38');
+});
 test('weekly rays start at the current NY Monday and disappear in a previous-week viewport',()=>{
  const {logicalAt,WeekLevels}=sandbox.module.exports,start=Date.parse('2026-10-19T04:00Z'),end=Date.parse('2026-10-26T04:00Z');
  const rows=Array.from({length:14},(_,i)=>({time:start/1000-7*86400+i*86400}));

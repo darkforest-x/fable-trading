@@ -6,6 +6,11 @@
   'use strict';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const finite=v=>typeof v==='number'&&Number.isFinite(v);
+  function inspectionURL(symbol,period){
+    if(!/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(symbol||''))return '#yolo-detect?tab=results';
+    const timeframe=period==='1D'?'1Dutc':['5m','15m','30m','1H','4H','1Dutc'].includes(period)?period:'5m';
+    return '#yolo-detect?'+new URLSearchParams({tab:'results',symbol,timeframe});
+  }
   const priceFormats=new Map();
   const price=v=>{if(!finite(v))return '—';const digits=Math.min(12,Math.max(2,6-Math.floor(Math.log10(Math.abs(v)||1))));if(!priceFormats.has(digits))priceFormats.set(digits,new Intl.NumberFormat('en-US',{maximumFractionDigits:digits}));return priceFormats.get(digits).format(v);};
   const STATES={loading:'正在同步',developing:'周一尚未结束',missing_monday:'缺少完整周一',missing_history:'历史触价待核对',recovering:'正在核对断线区间',fetch_error:'数据暂不可用',invalid_range:'周一区间无效'};
@@ -120,7 +125,7 @@
     const blur=()=>finish(false);
     return {refresh:restore,setActive(value){active=value;finish(false);if(value){env.addEventListener?.('resize',resize);env.addEventListener?.('blur',blur);restore();}else{env.removeEventListener?.('resize',resize);env.removeEventListener?.('blur',blur);if(frame)env.cancelAnimationFrame?.(frame);frame=null;}},destroy(){this.setActive(false);for(const [h,e,f] of bindings)h.removeEventListener(e,f);}};
   }
-  if(typeof module!=='undefined')module.exports={esc,price,selectRows,selection,latestTouch,touchTime,recentTouch,RECENT_MS,STATES,clampPanel,mountLayout,captureListScroll,restoreListScroll,tradingViewURL,createListPreferences};
+  if(typeof module!=='undefined')module.exports={esc,price,selectRows,selection,latestTouch,touchTime,recentTouch,RECENT_MS,STATES,clampPanel,mountLayout,captureListScroll,restoreListScroll,tradingViewURL,createListPreferences,inspectionURL};
   if(typeof document==='undefined')return;
   const root=document.getElementById('monday-fib-root');if(!root)return;
   const platform=window.navigator?.userAgentData?.platform||window.navigator?.platform||'';
@@ -188,7 +193,7 @@
     const container=$('mf-rows');
     const rows=selectRows(visibleItems(),query,filter,nowMs(),preferences.favorites());
     // Prices change frequently; row identity, links and focus usually do not.
-    const structure=JSON.stringify([!!data,selected,filter,query,rows.map(r=>{const e=latestTouch(r);return [r.symbol,e?.side,e?.source,touchTime(e),recentTouch(e,nowMs()),preferences.has(r.symbol)];})]);
+    const structure=JSON.stringify([!!data,selected,period,filter,query,rows.map(r=>{const e=latestTouch(r);return [r.symbol,e?.side,e?.source,touchTime(e),recentTouch(e,nowMs()),preferences.has(r.symbol)];})]);
     if(structure!==lastRows){
     const position=captureListScroll(container);
     const html=rows.map(r=>{
@@ -198,7 +203,7 @@
       const stamp=`<small>${e?`${e.source==='history'?'历史 · ':''}${time(touchTime(e))}${fresh?' · 刚触及':''}`:'本周尚未触价'}</small>`;
       const destination=windowsDesktop?'在本机 TradingView 打开':'在 TradingView 查看';
       const link=url?`<a class="mf-row-symbol" data-tv-symbol="${esc(r.symbol)}" href="${esc(url)}"${windowsDesktop?'':' target="_blank" rel="noopener noreferrer"'} aria-label="${destination} ${label} 15 分钟图" title="${destination} ${label} 15 分钟图">${name}</a>`:`<span class="mf-row-symbol">${name}</span>`;
-      const inspect=`<a data-inspect-symbol="${esc(r.symbol)}" href="#yolo-detect?tab=schedules&amp;symbol=${encodeURIComponent(r.symbol)}&amp;timeframe=5m" aria-label="查看 ${label} 的信号巡检" title="查看 ${label} 的信号巡检">${icon('activity')}</a>`;
+      const inspect=`<a data-inspect-symbol="${esc(r.symbol)}" href="${esc(inspectionURL(r.symbol,period))}" aria-label="查看 ${label} 的巡检 K 线详情" title="巡检 K 线详情 · ${esc(period==='1m'?'5m':period)}">${icon('activity')}</a>`;
       return `<div class="mf-row${fresh?' mf-recent':''}" data-symbol="${esc(r.symbol)}" data-selected="${r.symbol===selected}"><div class="mf-row-info">${link}${stamp}</div><button type="button" class="mf-row-value" data-preview-symbol="${esc(r.symbol)}" aria-pressed="${r.symbol===selected}" aria-label="切换背景 K 线至 ${label}" title="切换背景 K 线 · ${label}"><strong class="mf-${e?.side||'waiting'}">${e?side+'沿 1.618':'待触价'}</strong><small>${state||price(r.price)}</small></button><div class="mf-row-actions">${inspect}<button type="button" data-favorite-symbol="${esc(r.symbol)}" aria-pressed="${favorite}" aria-label="${favorite?'取消收藏':'收藏'} ${label}" title="${favorite?'取消收藏':'收藏'}">${icon(favorite?'star-filled':'star')}</button><button type="button" data-delete-symbol="${esc(r.symbol)}" aria-label="删除 ${label}" title="从列表删除">${icon('trash')}</button></div></div>`;
     }).join('')||`<p class="mf-no-rows">${!data?'正在读取…':filter==='favorites'?(query?'没有匹配的收藏合约':'收藏的合约会显示在这里'):'没有匹配的已触价合约'}</p>`;
 

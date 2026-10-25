@@ -1,3 +1,12 @@
+## 2026-10-25 · Shared candle palette, compact patrol list and exact inspection links
+
+- Stitch first: project `8978791379095391159`, screen `dd8d13e22c2541e193ed1c35e9c3e4ad`, explicit `GEMINI_3_8_FLASH`; HTML/image/provenance in `docs/design/stitch-20261025-candle-unification/`. A timed-out edit was recovered from the completed browser board and official screen list (187→188), without duplicate generation.
+- Shared display palette now matches Monday: green `#169873`, rose `#d7355d`, including wicks and volume. Patrol details/previews, market, position and range/research views use the same definition; frozen model rendering and risk annotation semantics are unchanged.
+- Patrol rows reduced from 120px to 69px on desktop, 98px on mobile with 44px touch targets. Repeated scores and empty period buttons removed; public turnover order, logos, favorites and chart links remain.
+- Monday inspection links open `tab=results` with the exact contract/current period; row cache invalidates on period changes. Explicit missing contracts cannot silently fall back to another coin; previous chart/tail state is cleared before loading a new selection.
+- 145 relevant frontend tests pass. Real Monday LIGHT/1H click reached LIGHT/1H details. Public USELESS/1H chart verified; public CSS matches local. 390×844 sheet=633px, 320×740 sheet=555px, no overflow. Evidence/screenshots in `output/playwright/patrol-color-20261025/`. Initial latest-catalog read after another task's monitor restart timed out, then automatic retry recovered; no backend change or restart in this UI task.
+- Learnings: `derived-chart-links-must-invalidate-on-period-change.md`, `display-candle-palette-needs-one-shared-source.md`.
+
 ## 2026-10-25 · Limit-reclaim v2 paper engine live; signal-center UI pending Codex + Stitch
 
 - Owner: run the v2 rule as simulated live trading in the signal center, 60m confirmation (recommended) plus an isolated 5m research track, both resting the limit at the Monday 1.618. Owner split the work: backend paper engine and API here; **UI goes to Codex with Stitch first** (project `8978791379095391159`, explicit `GEMINI_3_8_FLASH`), then integration. No UI was written here.

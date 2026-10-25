@@ -38,6 +38,7 @@
   }
   function periodResult(items,symbol,timeframe){return items.find(r=>r.symbol===symbol&&r.timeframe===timeframe);}
   function initialSymbol(rows,preferred) {
+    if(exactSymbol(preferred))return preferred;
     return (rows.find(r=>r.symbol===preferred)||rows.find(r=>!r.error&&r.count>0)||rows.find(r=>!r.error)||rows[0])?.symbol||'';
   }
   function normalizedSymbol(value) {
@@ -407,6 +408,7 @@
     const all=allSymbolRows(),key=[state.overview?state.latestRevision:JSON.stringify(state.job?.results),state.symbol,state.timeframe,state.symbolSearch,state.resultFilter,state.symbolOrder,favorites.join(','),state.loadingJob,state.job?.status,marketRevision].join('|');
     if(key===symbolRenderKey)return;symbolRenderKey=key;
     const rows=filteredSymbols(all,state.symbolSearch,state.resultFilter,favorites,state.symbolOrder),hit=all.filter(r=>r.count>0).length,failed=all.filter(r=>r.error).length;
+    $('yd-market-state').hidden=!marketError&&quotes.size>0;
     $('yd-market-state').textContent=marketError?(quotes.size?'成交额更新失败 · 显示上次数据':'成交额暂不可用 · 将自动重试'):quotes.size?'24h 成交额（约） · USDT':'正在读取公开成交额…';
     html('yd-title-logo',state.symbol?avatar(state.symbol):'');$('yd-monday-link').href=market.mondayLink(state.symbol,state.timeframe||state.result?.timeframe);$('yd-monday-link').setAttribute('aria-label',`查看 ${short(state.symbol)} 的 1.618 图表`);
     drawPeriods();$('yd-symbol-total').textContent=all.length+' 币';$('yd-hit-count').textContent=hit;$('yd-failed-filter').textContent='异常 '+failed;$('yd-failed-filter').hidden=!failed;
@@ -417,11 +419,11 @@
     const focused=document.activeElement,focus=focused?.closest('#yd-symbol-list')?{...focused.dataset}:null,list=$('yd-symbol-list'),scrollTop=list.scrollTop;
     html('yd-symbol-list',rows.length?rows.map(r=>{
       const current=r.symbol===state.symbol;
-      const badges=r.periods?`<div class="yd-period-badges" role="group" aria-label="${esc(short(r.symbol))} 的检测周期">${r.periods.map(p=>{
+      const badges=r.periods?`<div class="yd-period-badges" role="group" aria-label="${esc(short(r.symbol))} 的检测周期">${r.periods.filter(p=>p.count>0||(current&&p.timeframe===state.timeframe)).map(p=>{
         const status=p.availability==='insufficient_history'?'历史不足':p.error?'未能检测':p.count+' 个形态';
         return `<button type="button" data-yd-pair-symbol="${esc(r.symbol)}" data-yd-pair-period="${esc(p.timeframe)}" class="${p.count?'has-shape':''}" aria-pressed="${current&&p.timeframe===state.timeframe}" aria-label="查看 ${esc(short(r.symbol))} ${esc(periods[p.timeframe])} K 线，${status}" title="${esc(periods[p.timeframe])} · ${status}">${p.timeframe==='1Dutc'?'日线':esc(p.timeframe)}${p.error||p.count?`<b aria-hidden="true">${p.error?'!':p.count}</b>`:''}</button>`;
       }).join('')}</div>`:'';
-      return `<div class="yd-symbol ${current?'selected':''}"><div class="yd-coin-row"><button type="button" data-yd-symbol="${esc(r.symbol)}" class="yd-symbol-main" aria-pressed="${current}">${avatar(r.symbol)}<span class="yd-coin-copy"><strong>${esc(short(r.symbol))}</strong><small title="24h 成交额（约），USDT">${market.amount(r.volume_usdt_24h)} <span>USDT</span></small></span></button><button type="button" class="yd-row-star" data-yd-favorite="${esc(r.symbol)}" aria-label="${favorites.includes(r.symbol)?'取消收藏':'收藏'} ${esc(short(r.symbol))}" aria-pressed="${favorites.includes(r.symbol)}"><span class="ui-icon ${favorites.includes(r.symbol)?'ui-star-filled':'ui-star'}" aria-hidden="true"></span></button><a class="yd-row-monday" href="${market.mondayLink(r.symbol,state.timeframe||state.result?.timeframe)}" aria-label="查看 ${esc(short(r.symbol))} 的 1.618 图表" title="1.618">↗</a></div>${badges}<div class="stitch-detection-meta"><span>${r.error?'数据待补齐':r.count?esc(r.count)+' 个形态':'未检出形态'}</span><span>${r.count&&Number.isFinite(r.max_confidence)?'分数 '+(r.max_confidence*100).toFixed(1)+'%':''}</span></div></div>`;
+      return `<div class="yd-symbol ${current?'selected':''}"><div class="yd-coin-row"><button type="button" data-yd-symbol="${esc(r.symbol)}" class="yd-symbol-main" aria-pressed="${current}">${avatar(r.symbol)}<span class="yd-coin-copy"><strong>${esc(short(r.symbol))}</strong><small title="24h 成交额（约），USDT">${market.amount(r.volume_usdt_24h)} <span>USDT</span></small></span></button><button type="button" class="yd-row-star" data-yd-favorite="${esc(r.symbol)}" aria-label="${favorites.includes(r.symbol)?'取消收藏':'收藏'} ${esc(short(r.symbol))}" aria-pressed="${favorites.includes(r.symbol)}"><span class="ui-icon ${favorites.includes(r.symbol)?'ui-star-filled':'ui-star'}" aria-hidden="true"></span></button><a class="yd-row-monday" href="${market.mondayLink(r.symbol,state.timeframe||state.result?.timeframe)}" aria-label="查看 ${esc(short(r.symbol))} 的 1.618 图表" title="1.618">↗</a></div>${badges}${!r.count?`<span class="yd-coin-empty">${r.error?'数据待补齐':'暂无形态'}</span>`:''}</div>`;
     }).join(''):`<div class="yd-empty"><p>${state.loadingJob?'正在读取…':state.resultFilter==='favorites'?'暂无符合搜索的收藏，点击币种旁的星标即可收藏。':all.length?'没有符合条件的币种':terminal.has(state.job?.status)?'本次没有可浏览的币种':'结果会在检测完成后出现'}</p>${all.length?`<button data-yd-clear-search>${state.resultFilter==='all'?'清空搜索':state.symbolSearch?'在全部币种中搜索':'查看全部币种'}</button>`:''}</div>`);
     list.scrollTop=scrollTop;
     if(focus){const selector=focus.ydFavorite?`[data-yd-favorite="${CSS.escape(focus.ydFavorite)}"]`:focus.ydPairPeriod?`[data-yd-pair-symbol="${CSS.escape(focus.ydPairSymbol)}"][data-yd-pair-period="${CSS.escape(focus.ydPairPeriod)}"]`:focus.ydSymbol?`[data-yd-symbol="${CSS.escape(focus.ydSymbol)}"]`:null;if(selector)root.querySelector(selector)?.focus({preventScroll:true});}
@@ -482,7 +484,10 @@
     const row=periodResult(state.latest,symbol,state.timeframe);
     if(symbol&&(!state.timeframe||row)&&(!state.job||state.symbol!==symbol||row&&row.job_id!==state.job.id&&!state.viewTouched)&&!state.loadingResult)await chooseSymbol(symbol);
     if(symbol&&state.timeframe&&!row&&!state.result&&!state.tailLoading&&Date.now()-state.tailChecked>=30000&&['15m','30m','1H','4H'].includes(state.timeframe))await previewChart(symbol,state.timeframe);
-    if(!rows.length){emptyChart('还没有检测结果，可新建检测或等待巡检完成。');}
+    if(!state.result&&symbol&&!row&&!['15m','30m','1H','4H'].includes(state.timeframe)){
+      $('yd-chart-title').textContent=short(symbol)+' / USDT';
+      emptyChart('当前币种的这个周期尚无检测记录，可切换周期查看。');
+    }else if(!rows.length&&!state.result){emptyChart('还没有检测结果，可新建检测或等待巡检完成。');}
   }
   async function refreshFeed(){
     if(!state.active||state.tab!=='schedules')return;
@@ -610,13 +615,13 @@
       const rows=result.candles,host=$('yd-preview-chart'),style=getComputedStyle(document.documentElement),step=steps[result.timeframe];
       const c=previewChartInstance=window.LightweightCharts.createChart(host,{...chartTools.interaction,width:host.clientWidth,height:host.clientHeight,layout:{background:{color:style.getPropertyValue('--chart-bg').trim()},textColor:style.getPropertyValue('--chart-text').trim(),fontSize:10},grid:{vertLines:{visible:false},horzLines:{color:style.getPropertyValue('--chart-grid').trim()}},rightPriceScale:{scaleMargins:{top:.12,bottom:.2}},timeScale:{timeVisible:true,secondsVisible:false},localization:{locale:'zh-CN',priceFormatter:chartTools.axisPrice,timeFormatter:t=>fmt(t*1000,true)}});
       const precision=chartTools.priceFormat(rows).precision;
-      const candles=c.addCandlestickSeries({upColor:'#01e599',downColor:'#ff4f73',borderVisible:false,wickUpColor:'#01e599',wickDownColor:'#ff4f73',priceFormat:{type:'price',precision,minMove:10**-precision}});
+      const candles=c.addCandlestickSeries({upColor:chartTools.colors.up,downColor:chartTools.colors.down,borderVisible:false,wickUpColor:chartTools.colors.up,wickDownColor:chartTools.colors.down,priceFormat:{type:'price',precision,minMove:10**-precision}});
       candles.setData(rows.map(r=>({time:r.t/1000,open:r.open,high:r.high,low:r.low,close:r.close})));
       for(const [key,color] of Object.entries(colors)){const line=c.addLineSeries({color,lineWidth:1,lastValueVisible:false,priceLineVisible:false,crosshairMarkerVisible:false});line.setData(rows.filter(r=>Number.isFinite(r[key])).map(r=>({time:r.t/1000,value:r[key]})));}
-      const vol=c.addHistogramSeries({priceScaleId:'volume',priceFormat:{type:'volume'},lastValueVisible:false,priceLineVisible:false});vol.priceScale().applyOptions({scaleMargins:{top:.85,bottom:0}});vol.setData(rows.map(r=>({time:r.t/1000,value:r.volume,color:r.close>=r.open?'#239f854d':'#d965754d'})));
+      const vol=c.addHistogramSeries({priceScaleId:'volume',priceFormat:{type:'volume'},lastValueVisible:false,priceLineVisible:false});vol.priceScale().applyOptions({scaleMargins:{top:.85,bottom:0}});vol.setData(rows.map(r=>({time:r.t/1000,value:r.volume,color:r.close>=r.open?chartTools.colors.volumeUp:chartTools.colors.volumeDown})));
       candles.attachPrimitive(new DetectionPrimitive([box],rows[0].t,step));
       const confirm=box.detected_at_ms-step;
-      if(rows.some(r=>r.t===confirm))candles.setMarkers([{time:confirm/1000,position:'aboveBar',color:box.side==='long'?'#01e599':'#ff4f73',shape:'arrowDown',text:'确认'}]);
+      if(rows.some(r=>r.t===confirm))candles.setMarkers([{time:confirm/1000,position:'aboveBar',color:box.side==='long'?chartTools.colors.up:chartTools.colors.down,shape:'arrowDown',text:'确认'}]);
       c.timeScale().setVisibleLogicalRange(shapeRange(box,rows[0].t,step));
       const lookup=new Map(rows.map(r=>[r.t/1000,r]));
       const legend=(row,live=true)=>{$('yd-preview-legend').innerHTML=chartStyle.legend(row);$('yd-preview-ohlc').innerHTML=chartTools.readout(row,row.t/1000,live);};legend(rows.at(-1));
@@ -636,7 +641,7 @@
     // adjacent bar centers to preserve the model's exact sub-bar box boundaries.
     x(ms){const index=(ms-this.first)/this.step,left=Math.floor(index),scale=this.chart.timeScale();const a=scale.logicalToCoordinate(left),b=scale.logicalToCoordinate(left+1);return a==null||b==null?null:a+(b-a)*(index-left);}
     rect(b){return [this.x(b.x_start_ms),this.series.priceToCoordinate(b.price_high),this.x(b.x_end_ms),this.series.priceToCoordinate(b.price_low)];}
-    draw(ctx){for(const b of this.boxes){const [x,y,x2,y2]=this.rect(b);if([x,y,x2,y2].some(v=>v==null)||x2<0||x>this.chart.timeScale().width())continue;const color=b.side==='long'?'#01e599':'#ff4f73';ctx.save();ctx.fillStyle=b.side==='long'?'rgba(35,159,133,.09)':'rgba(217,101,117,.09)';ctx.strokeStyle=color;ctx.lineWidth=state.selected===b.id?2.5:1.2;ctx.setLineDash(b.structural_pass?[]:[4,3]);ctx.fillRect(x,y,x2-x,y2-y);ctx.strokeRect(x,y,x2-x,y2-y);if(x2-x>35){ctx.fillStyle=color;ctx.font='11px system-ui';ctx.fillText(`${b.side==='long'?'L':'S'} ${(b.confidence*100).toFixed(0)}%`,Math.max(2,x+3),Math.max(12,y-4));}ctx.restore();}}
+    draw(ctx){for(const b of this.boxes){const [x,y,x2,y2]=this.rect(b);if([x,y,x2,y2].some(v=>v==null)||x2<0||x>this.chart.timeScale().width())continue;const color=b.side==='long'?chartTools.colors.up:chartTools.colors.down;ctx.save();ctx.fillStyle=b.side==='long'?'#16987317':'#d7355d17';ctx.strokeStyle=color;ctx.lineWidth=state.selected===b.id?2.5:1.2;ctx.setLineDash(b.structural_pass?[]:[4,3]);ctx.fillRect(x,y,x2-x,y2-y);ctx.strokeRect(x,y,x2-x,y2-y);if(x2-x>35){ctx.fillStyle=color;ctx.font='11px system-ui';ctx.fillText(`${b.side==='long'?'L':'S'} ${(b.confidence*100).toFixed(0)}%`,Math.max(2,x+3),Math.max(12,y-4));}ctx.restore();}}
   }
   function destroyChart(){freePan?.destroy();freePan=null;chartLevels?.destroy();chartLevels=null;rememberChart();chartControls?.destroy();chartControls=null;hoverTime=null;crosshair.cancel();chartLookup.clear();displayRows=[];lastReadout='';lastMarkers='';clearTimeout(viewTimer);resize?.disconnect();resize=null;chart?.remove();chart=null;chartIdentity=null;chartSelection=null;series=null;primitive=null;maSeries=[];volume=null;}
   function tailStatus(){
@@ -657,7 +662,7 @@
     const range=chartTools.anchor(chart.timeScale().getVisibleLogicalRange(),chartTools.times(displayRows));displayRows=rows;chartLookup=new Map(rows.map(r=>[r.t,r]));
     syncSeries(series,rows.map(r=>({time:r.t/1000,open:r.open,high:r.high,low:r.low,close:r.close})));
     Object.keys(colors).forEach((name,i)=>maSeries[i]&&syncSeries(maSeries[i],rows.filter(r=>Number.isFinite(r[name])).map(r=>({time:r.t/1000,value:r[name]}))));
-    volume&&syncSeries(volume,rows.map(r=>({time:r.t/1000,value:r.volume,color:r.close>=r.open?'rgba(35,159,133,.3)':'rgba(217,101,117,.3)'})));
+    volume&&syncSeries(volume,rows.map(r=>({time:r.t/1000,value:r.volume,color:r.close>=r.open?chartTools.colors.volumeUp:chartTools.colors.volumeDown})));
     const markers=state.tail?.candles.length?[{time:state.result.candles.at(-1).t/1000,position:'aboveBar',color:'#a18c57',shape:'circle',text:'原检测截止'}]:[],markerKey=JSON.stringify(markers);if(markerKey!==lastMarkers){series.setMarkers(markers);lastMarkers=markerKey;}
     paintChartReadout(chartLookup.get(hoverTime)||rows.at(-1));const retained=chartTools.restore(range,chartTools.times(rows));if(retained)chart.timeScale().setVisibleLogicalRange(retained);
   }
@@ -685,10 +690,10 @@
     freePan=window.SpikeRangeChart.bindFreePan(chart,host);
     chartControls=chartTools.bind($('yd-chart-stage'),{chart:()=>chart,rows:()=>displayRows,canvas:host});
     const precision=chartTools.priceFormat(rows).precision;
-    series=chart.addCandlestickSeries({upColor:'#01e599',downColor:'#ff4f73',borderVisible:false,wickUpColor:'#01e599',wickDownColor:'#ff4f73',priceFormat:{type:'price',precision,minMove:10**-precision}});
+    series=chart.addCandlestickSeries({upColor:chartTools.colors.up,downColor:chartTools.colors.down,borderVisible:false,wickUpColor:chartTools.colors.up,wickDownColor:chartTools.colors.down,priceFormat:{type:'price',precision,minMove:10**-precision}});
     syncSeries(series,rows.map(r=>({time:r.t/1000,open:r.open,high:r.high,low:r.low,close:r.close})));
     for(const [name,color] of Object.entries(colors)){const line=chart.addLineSeries({color,lineWidth:1,lastValueVisible:false,priceLineVisible:false,crosshairMarkerVisible:false,visible:state.ma});syncSeries(line,rows.filter(r=>Number.isFinite(r[name])).map(r=>({time:r.t/1000,value:r[name]})));maSeries.push(line);}
-    volume=chart.addHistogramSeries({priceScaleId:'volume',priceFormat:{type:'volume'},lastValueVisible:false,priceLineVisible:false,visible:state.volume});volume.priceScale().applyOptions({scaleMargins:{top:.85,bottom:0}});syncSeries(volume,rows.map(r=>({time:r.t/1000,value:r.volume,color:r.close>=r.open?'rgba(35,159,133,.3)':'rgba(217,101,117,.3)'})));
+    volume=chart.addHistogramSeries({priceScaleId:'volume',priceFormat:{type:'volume'},lastValueVisible:false,priceLineVisible:false,visible:state.volume});volume.priceScale().applyOptions({scaleMargins:{top:.85,bottom:0}});syncSeries(volume,rows.map(r=>({time:r.t/1000,value:r.volume,color:r.close>=r.open?chartTools.colors.volumeUp:chartTools.colors.volumeDown})));
     primitive=new DetectionPrimitive(boxes(),result.candles[0].t,steps[result.timeframe]);series.attachPrimitive(primitive);
     const target=boxes().find(b=>b.id===state.focusBox);if(target)savedRange=null;
     const selected=target||boxes().find(b=>b.id===(state.selected||saved?.selected))||boxes()[0];if(selected)selectBox(selected.id,!savedRange);else if(!savedRange)recentRange();
@@ -720,7 +725,9 @@
       if(state.pendingRoute){
         const p=state.pendingRoute;state.pendingRoute=null;setTab(p.tab||((p.job||p.symbol)?'results':'schedules'),false);
         if(state.tab==='schedules')restorePatrolFilters(p);
-        if(!p.job){state.overview=true;state.timeframe=steps[p.timeframe]?p.timeframe:'';state.symbol=p.symbol||'';if(!p.symbol){state.symbolSearch='';$('yd-result-search').value='';state.resultFilter='detected';}state.job=null;state.viewTouched=false;}
+        if(!p.job){state.overview=true;state.timeframe=steps[p.timeframe]?p.timeframe:'';state.symbol=p.symbol||'';if(!p.symbol){state.symbolSearch='';$('yd-result-search').value='';state.resultFilter='detected';}state.job=null;state.viewTouched=false;
+          if(state.result&&(state.result.symbol!==state.symbol||(state.timeframe&&state.result.timeframe!==state.timeframe))){state.result=null;state.tail=null;state.selected=null;state.tailChecked=0;state.tailLoading=false;state.tailError='';tailVersion++;destroyChart();emptyChart('正在读取所选币种…');}
+        }
         if(p.job&&(state.overview||p.job!==state.job?.id||p.box!==state.selected))await chooseJob(p.job,p.symbol||'',state.tab,p.box||'',p.from==='patrol');
         else if(p.symbol&&p.symbol!==state.symbol&&state.job)await chooseSymbol(p.symbol,p.box||'');
       }

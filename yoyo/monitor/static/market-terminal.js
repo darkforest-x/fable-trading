@@ -247,7 +247,7 @@
       maSeries.forEach(m=>m.series.applyOptions({visible:showMA}));volumeSeries.applyOptions({visible:showVolume});candleSeries.priceScale().applyOptions({scaleMargins:{top:.08,bottom:showVolume?.24:.08}});$('.mt-ma-legend').hidden=!showMA;$('.mt-volume-label').hidden=!showVolume;$('[data-chart-ma]').setAttribute('aria-pressed',String(showMA));$('[data-chart-volume]').setAttribute('aria-pressed',String(showVolume));
       const last=rows.at(-1),precision=Math.min(10,Math.max(2,Math.ceil(-Math.log10(Math.min(...rows.map(r=>r.close))))+4));candleSeries.applyOptions({priceFormat:{type:'price',precision,minMove:10**-precision}});maSeries.forEach(m=>m.series.applyOptions({priceFormat:{type:'price',precision,minMove:10**-precision}}));if(dataChanged)syncSeries(candleSeries,rows);
       if(dataChanged){
-      syncSeries(volumeSeries,rows.map(r=>({time:r.time,value:r.volume,color:r.close>=r.open?'#01e59955':'#ff4f7355'})));
+      syncSeries(volumeSeries,rows.map(r=>({time:r.time,value:r.volume,color:r.close>=r.open?chartTools.colors.volumeUp:chartTools.colors.volumeDown})));
       maValues=new Map(rows.map(r=>[r.time,{...r}]));
       for(const m of maSeries){const values=p==='1D'?(m.key.startsWith('sma')?average:exponential)(rows,m.period,PERIODS[p]/1000):rows.filter(r=>finite(r[m.key])).map(r=>({time:r.time,value:r[m.key]}));syncSeries(m.series,values);for(const v of values)maValues.get(v.time)[m.key]=v.value;}
       chartData=rows;

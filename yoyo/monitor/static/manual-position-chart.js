@@ -105,7 +105,7 @@
           localization:{locale:'zh-CN',priceFormatter:chartTools.axisPrice,timeFormatter:time},handleScroll:{vertTouchDrag:false,horzTouchDrag:true},crosshair:{mode:0}});
         const precision=Math.min(10,Math.max(2,Math.ceil(-Math.log10(Math.min(...rows.map(r=>r.close))))+4,...[draft.price,draft.initial_stop,draft.take_profit].map(p=>(String(p).split('.')[1]||'').length)));
         this.controls=chartTools.bind(host,{chart:()=>this.chart,rows:()=>rows,panel:host,canvas});
-        const series=chart.addCandlestickSeries({upColor:green,downColor:red,wickUpColor:green,wickDownColor:red,borderVisible:false,priceLineVisible:false,lastValueVisible:false,
+        const series=chart.addCandlestickSeries({upColor:chartTools.colors.up,downColor:chartTools.colors.down,wickUpColor:chartTools.colors.up,wickDownColor:chartTools.colors.down,borderVisible:false,priceLineVisible:false,lastValueVisible:false,
           priceFormat:{type:'price',precision,minMove:10**-precision},autoscaleInfoProvider:original=>{const a=original();if(!values)return a;return {priceRange:{minValue:Math.min(a?.priceRange.minValue??values.stop,values.stop,values.target),maxValue:Math.max(a?.priceRange.maxValue??values.target,values.stop,values.target)}};}});
         series.setData(rows);
         const boundary=maBoundary(draft,rows);
