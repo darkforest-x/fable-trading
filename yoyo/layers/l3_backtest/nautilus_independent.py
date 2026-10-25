@@ -77,6 +77,10 @@ class ExitPolicy:
     # ordering). Without it a rising segment is replayed open-high-low-close
     # and revisits its low after its high (owner 2026-10-25 OLHC short check).
     monotone_segments: bool = False
+    # Reclaim with a resting initial stop (the entry's stop) from the fill
+    # until the confirmation close: a reclaim moves it to entry, a failed
+    # reclaim cancels it before the market exit (owner 2026-10-25 backstop).
+    reclaim_backstop: bool = False
 
     def __post_init__(self):
         actual = (self.fill_maker_fee, self.fill_taker_fee)
@@ -95,6 +99,8 @@ class ExitPolicy:
             raise ValueError("Intrabar path must be OHLC or OLHC")
         if self.monotone_segments and self.intrabar_path is None:
             raise ValueError("Monotone segments require an explicit intrabar path")
+        if self.reclaim_backstop and not self.reclaim_next_bar:
+            raise ValueError("Backstop requires the reclaim rule")
         if self.breakeven_on_touch and (self.breakeven_r is None or self.intrabar_path is None):
             raise ValueError("Touch breakeven requires an R trigger and explicit intrabar path")
         if self.breakeven_on_touch and self.breakeven_includes_cost:
@@ -465,6 +471,10 @@ class IndependentCloseStrategy(Strategy):
                     if boundary < state.source["end_i"]:
                         state.source["end_i"] = boundary
                         state.source["censor_reason"] = "missing_preconfirmation_interval"
+                if self.policy.reclaim_backstop:
+                    self.entering_limit_i = i
+                    self._submit_protective_stop(state)
+                    self.entering_limit_i = None
             else:
                 self.entering_limit_i = i if self.entry_order_mode == "limit" else None
                 self._submit_protective_stop(state)
@@ -673,10 +683,14 @@ class IndependentCloseStrategy(Strategy):
                     state.reclaim_status = "reclaimed"
                     state.stop, state.stop_kind = entry, 1
                     state.be_trigger_i = state.be_effective_i = i
-                    self._submit_protective_stop(state)
+                    if state.stop_order is not None and not state.stop_order.is_closed:
+                        self.modify_order(state.stop_order, trigger_price=self.instrument.make_price(state.stop))
+                    else:
+                        self._submit_protective_stop(state)
                 else:
                     state.reclaim_status = "failed"
                     self._cancel_target(state)
+                    self._cancel_stop(state)
                     self._market(state, reason=11)
                     continue
             old_stop = state.stop
@@ -863,6 +877,10 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     limit_entry = entry_order_mode == "limit"
     if policy.reclaim_next_bar and not limit_entry:
         raise ValueError("Reclaim currently requires a resting limit entry")
+    if policy.reclaim_backstop:
+        st, en, sd = (entries[c].to_numpy(float) for c in ('stop', 'entry', 'side'))
+        if not (np.isfinite(st).all() and (sd*(en-st) > 0).all()):
+            raise ValueError("Backstop needs a finite stop beyond every entry")
     if limit_entry and policy.target_breakeven:
         raise ValueError("Target sibling breakeven currently requires completed-close entries")
     if limit_entry and not (policy.confirmed_pivot_exit or policy.target_from_entry
@@ -954,9 +972,10 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         if policy.reclaim_next_bar:
             minutes = getattr(r, "reclaim_minutes", None)
             if (not isinstance(minutes, (int, np.integer)) or minutes <= 0
-                    or minutes % execution_minutes or not np.isnan(r.stop)
+                    or minutes % execution_minutes or np.isnan(r.stop) == policy.reclaim_backstop
                     or abs(r.risk-r.entry) > tick*1e-7):
-                raise ValueError("Reclaim needs whole aligned minutes, no initial stop and entry-notional normalization")
+                raise ValueError("Reclaim needs whole aligned minutes, an initial stop only as a backstop, "
+                                 "and entry-notional normalization")
         elif r.stop <= 0 or r.risk < tick-tick*1e-7 or abs(r.side*(r.entry-r.stop)-r.risk) > tick*1e-7:
             raise ValueError("Invalid initial risk")
         update_i = getattr(r, "stop_update_i", -1)
