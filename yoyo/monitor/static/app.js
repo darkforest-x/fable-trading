@@ -712,6 +712,10 @@
   }
   let signalRowsSignature = null;
   function renderSignals() {
+    if (state.view === "signals" && state.signalPane === "reclaim") {
+      window.SpikeSignalWorkspace?.render(null, state.signalLayout, "reclaim");
+      return;
+    }
     const items = sourceItems(), data = state.ledger;
     const history = state.signalLayout === "history";
     $("signal-outcome-control").classList.toggle("hidden", history);
@@ -773,10 +777,10 @@
     if (focused?.signalDetail) Array.from($("signal-rows").querySelectorAll("[data-signal-detail]")).find((button) => button.dataset.signalDetail === focused.signalDetail)?.focus({ preventScroll: true });
   }
   function changeSignalPane(pane) {
-    if (!['records','overview','account'].includes(pane) || pane === state.signalPane) return;
+    if (!['records','overview','account','reclaim'].includes(pane) || pane === state.signalPane) return;
     if (state.signalPane === 'records') state.recordLayout = state.signalLayout;
     state.signalPane = pane;
-    if (pane !== 'account') state.signalLayout = pane === 'overview' ? 'history' : state.recordLayout;
+    if (pane !== 'account' && pane !== 'reclaim') state.signalLayout = pane === 'overview' ? 'history' : state.recordLayout;
     state.page = 0;
     invalidateSignalQuery();
     window.SpikeSignalWorkspace?.render(null, state.signalLayout, pane);
@@ -929,6 +933,9 @@
     state.page = 0; invalidateSignalQuery(); refresh();
   }
   function syncSignalLocation(){
+    if(state.view==='signals' && state.signalPane==='reclaim'){
+      window.SpikeNavigation?.sync('signals',{pane:'reclaim',...window.SpikeReclaimPaper?.route()});return;
+    }
     if(signalView())window.SpikeNavigation?.sync(state.view,{pane:state.signalPane,layout:state.signalLayout,q:state.search,timeframe:state.timeframe,side:state.side,period:state.period,outcome:state.outcome,sort:state.sort,scope:state.signalScope,source:state.signalSource,page:state.page});
   }
   function invalidateSignalQuery() {
@@ -1243,6 +1250,11 @@
       await Promise.allSettled([refreshShellStatus(trigger === "manual"), window.SpikeV130?.refresh()]);
       return;
     }
+    if (state.view === "signals" && state.signalPane === "reclaim") {
+      window.SpikeSignalWorkspace?.render(null, state.signalLayout, 'reclaim');
+      await Promise.allSettled([refreshShellStatus(trigger === "manual"), trigger === "manual" ? window.SpikeReclaimPaper?.refresh() : null]);
+      return;
+    }
     if (state.view === "signals" && state.signalPane === "account") {
       await Promise.allSettled([refreshShellStatus(trigger === "manual"), trigger === "manual" ? window.SpikeOKXExecution?.refresh() : null]);
       return;
@@ -1519,6 +1531,13 @@
   window.addEventListener("hashchange", () => setView(location.hash.slice(1), false));
   document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh("periodic"); });
   function restoreSignalRoute(p) {
+    if(p.pane==='reclaim' && state.view==='signals'){
+      const changed=state.signalPane!=='reclaim';
+      state.signalPane='reclaim';
+      window.SpikeReclaimPaper?.restore(p);
+      if(changed)invalidateSignalQuery();
+      renderSignals();return;
+    }
     const previous=JSON.stringify([state.search,state.page,state.timeframe,state.side,state.period,state.outcome,state.sort,state.signalScope,state.signalSource,state.signalLayout,state.signalPane]);
     state.signalLayout=['history','cards'].includes(p.layout)?p.layout:'cards';
     state.signalPane=['records','overview','account'].includes(p.pane)?p.pane:'records';

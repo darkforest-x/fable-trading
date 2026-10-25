@@ -120,6 +120,31 @@ test('account pane pauses ledger requests and analysis restores the records layo
   assert.equal(query(client.ledgerPath()).get('outcome'),'all');
 });
 
+test('reclaim pane owns its reads and deep link without querying the legacy ledger',async()=>{
+  const requests=[],routes=[],panes=[];let refreshes=0;
+  const client=harness(async path=>{requests.push(path);return jsonResponse({});},{
+    SpikeNavigation:{sync:(view,params)=>routes.push({view,params})},
+    SpikeReclaimPaper:{route:()=>({track:'5',tab:'closed',scope:'shadow',q:'SOL'}),refresh:()=>{refreshes++;return Promise.resolve();}},
+    SpikeSignalWorkspace:{render:(data,layout,pane)=>panes.push(pane)}
+  });
+  client.changeSignalPane('reclaim');await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(client.state.signalPane,'reclaim');assert.equal(client.state.signalLayout,'cards');
+  assert.ok(requests.every(path=>path==='/api/status'));assert.equal(panes.at(-1),'reclaim');
+  assert.deepEqual(JSON.parse(JSON.stringify(routes.at(-1))),{view:'signals',params:{pane:'reclaim',track:'5',tab:'closed',scope:'shadow',q:'SOL'}});
+  await client.refresh('manual');assert.equal(refreshes,1);
+  await client.refresh('periodic');assert.equal(refreshes,1);
+});
+
+test('reclaim URL restores its own filters before invalidation without touching ledger controls',()=>{
+  const state={view:'signals',signalPane:'records',search:'ETH',signalLayout:'history'},events=[];
+  const context={state,window:{SpikeReclaimPaper:{restore:p=>events.push(['restore',p])}},invalidateSignalQuery:()=>events.push(['invalidate']),renderSignals:()=>events.push(['render'])};
+  const code=app.slice(app.indexOf('  function restoreSignalRoute('),app.indexOf("  for(const view of ['signals','warmup'])"));
+  const restore=vm.runInNewContext(code+';restoreSignalRoute',context);
+  restore({pane:'reclaim',track:'5',tab:'events',q:'SOL'});
+  assert.equal(state.signalPane,'reclaim');assert.equal(state.search,'ETH');assert.equal(events[0][0],'restore');assert.equal(events[1][0],'invalidate');
+  restore({pane:'reclaim',track:'60'});assert.equal(events.filter(x=>x[0]==='invalidate').length,1);
+});
+
 test('unchanged signal rows preserve DOM while changed facts replace the content', () => {
   const client=harness(async()=>jsonResponse({})), rows=client.getElement('signal-rows');
   let writes=0, html='';

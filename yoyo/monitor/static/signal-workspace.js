@@ -95,13 +95,15 @@
     document.getElementById('signal-curve-caption').textContent=!ledger?'正在读取信号表现…':`信号参考，非账户收益 · ${stats?.total??0} 笔 · 按退出时间（北京）${ledger?.as_of_ms?' · 更新 '+date(ledger.as_of_ms):''}`;
   }
   function selectPane(value){
-    if(!['overview','records','account'].includes(value)) return;
+    if(!['overview','records','account','reclaim'].includes(value)) return;
     const changed=pane!==value;
     pane=value;root.dataset.signalPane=pane;
     root.querySelectorAll('.signal-workspace-nav [data-signal-pane]').forEach(button=>{const selected=button.dataset.signalPane===pane;button.classList.toggle('selected',selected);button.classList.toggle('active',selected);button.setAttribute('aria-pressed',String(selected));});
     document.getElementById('signal-pane-title').textContent=pane==='overview'?'信号表现':layout==='history'?'已结束的信号':'确认信号';
     document.getElementById('signal-pane-description').textContent=pane==='overview'?'按退出顺序观察累计 R、回撤与周期差异。':layout==='history'?'核对每条信号的参考入场、退出与净 R。':'查看已收盘确认信号、参考表现与形态说明。';
     window.SpikeOKXExecution?.setActive(active && pane==='account');
+    window.SpikeReclaimPaper?.setActive(active && pane==='reclaim');
+    document.body.classList.toggle('reclaim-paper-active',active && pane==='reclaim');
     if(changed)window.SpikeMotion?.enter(root,{kind:'route'});
     document.getElementById('signal-visuals').hidden=layout!=='history';
     ownCharts();schedule();
@@ -114,9 +116,10 @@
   });
   document.addEventListener('visibilitychange',()=>{ownCharts();schedule();});
   window.SpikeSignalWorkspace={
-    setActive(value){active=value;document.body.classList.toggle('signal-workspace-active',value);root.classList.toggle('signal-workspace',value);if(value) selectPane(pane);else{window.SpikeOKXExecution?.setActive(false);ownCharts();}},
+    setActive(value){active=value;document.body.classList.toggle('signal-workspace-active',value);root.classList.toggle('signal-workspace',value);if(value) selectPane(pane);else{window.SpikeOKXExecution?.setActive(false);window.SpikeReclaimPaper?.setActive(false);document.body.classList.toggle('reclaim-paper-active',false);ownCharts();}},
     render(data,display,selectedPane='records'){
       ledger=data;layout=display;selectPane(selectedPane);
+      if(selectedPane==='reclaim')return;
       const universe=document.getElementById('signal-universe-note'), policy=data?.entry_universe;
       if(universe) universe.textContent=policy ? `${policy.scope}。全周期名单：${policy.excluded_bases.join('、')}；分组名单只限制对应周期和方向的新信号、通知与自动开仓。历史记录保留，已有持仓继续跟踪退出。` : '';
       const stats=data?.stats;
