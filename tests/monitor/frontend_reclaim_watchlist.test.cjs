@@ -4,22 +4,27 @@ const ui=require('../../yoyo/monitor/static/reclaim-watchlist.js');
 const {createFeed,route}=require('../../yoyo/monitor/static/monday-reclaim-paper.js');
 const coin=(symbol,x={})=>({symbol:symbol+'-USDT-SWAP',state:'ready',price:100,upper:110,lower:90,stale:false,touches:{},...x});
 const position=(symbol,x={})=>({id:1,symbol:symbol+'-USDT-SWAP',taken:1,notional:100,entry:100,side:1,fill_ms:1000,...x});
-test('universe includes untraded contracts while holding filter belongs to the selected funded track',()=>{
- const data={items:[coin('SOL'),coin('BTC'),coin('DOGE',{touches:{lower:{candle_ms:1}}})]},track={open:[position('SOL'),position('DOGE',{taken:0,notional:0})]};
- const all=ui.model(data,track);assert.equal(all.total,3);assert.equal(all.holding,1);assert.equal(all.touched,1);
- assert.deepEqual(ui.model(data,track,{filter:'holding'}).items.map(i=>i.symbol),['SOL-USDT-SWAP']);
- assert.deepEqual(ui.model(data,track,{filter:'touched'}).items.map(i=>i.symbol),['DOGE-USDT-SWAP']);
- assert.equal(ui.model(data,{open:[]},{filter:'holding'}).items.length,0);
- assert.equal(ui.model(data,track,{q:' btc '}).items[0].observe,true);
+const list=require('../../yoyo/monitor/static/monday-list-model.js');
+const disk=()=>{const store=new Map();return {getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)};};
+const snapshot=items=>({items,now_ms:10000,week:'2026-10-19'});
+test('paper list is identical to Monday policy across every filter, history and favorites',()=>{
+ const data=snapshot([coin('SOL',{touches:{upper:{source:'live',observed_ms:9000}}}),coin('DOGE',{touches:{lower:{source:'history',observed_ms:10000,candle_ms:1000}}}),coin('BTC')]);
+ const prefs=list.createListPreferences(disk());prefs.toggle('BTC-USDT-SWAP');
+ for(const filter of Object.keys(list.FILTERS))for(const q of ['', 'btc', 'USDT'])assert.deepEqual(ui.model(data,prefs,{q,filter}).items,list.selectRows(data.items,q,filter,data.now_ms,prefs.favorites()));
+ assert.equal(ui.model(data,prefs).total,2);assert.deepEqual(ui.model(data,prefs).items.map(r=>r.symbol),['SOL-USDT-SWAP','DOGE-USDT-SWAP']);
+ assert.equal(ui.model(data,prefs,{filter:'favorites'}).items[0].symbol,'BTC-USDT-SWAP');
 });
-test('distance sorting preserves exact touches and moves stale/missing quotes last without inventing prices',()=>{
- const data={items:[coin('STALE',{stale:true,upper:100}),coin('FAR'),coin('TOUCH',{upper:100}),coin('NONE',{price:null}),coin('MISSING',{state:'missing_monday',upper:100}),coin('NEAR',{upper:101})]};
- const items=ui.model(data,{}).items;assert.deepEqual(items.slice(0,3).map(i=>i.symbol),['TOUCH-USDT-SWAP','NEAR-USDT-SWAP','FAR-USDT-SWAP']);assert.equal(items[0].nearest.distance,0);
- for(const value of [null,0,-1,NaN,Infinity,'100'])assert.equal(ui.nearest(coin('BAD',{price:value})),null);
- assert.equal(ui.nearest(coin('BAD',{upper:null,lower:null})),null);
- assert.match(ui.rowHTML(ui.model({items:[coin('NONE',{price:null})]},{}).items[0],''),/>—</);
- assert.match(ui.rowHTML(ui.model({items:[coin('BTC')]},{}).items[0],''),/仅观察/);
- assert.equal(data.items[0].symbol,'STALE-USDT-SWAP');
+test('shared storage removes the same weekly touch on both pages and supports undo',()=>{
+ const storage=disk(),p=list.createListPreferences(storage),other=list.createListPreferences(storage),item=coin('SOL',{touches:{upper:{source:'live',observed_ms:9000}}}),data=snapshot([item]);
+ p.toggle(item.symbol);other.read();assert.equal(other.has(item.symbol),true);
+ const undo=p.remove(item,data.week);other.read();assert.equal(ui.model(data,other).total,0);
+ other.undo(undo);p.read();assert.equal(ui.model(data,p).total,1);
+});
+test('row exposes separate chart, TradingView, exact inspection, favorite and removal actions',()=>{
+ const item=coin('SOL',{price:null,touches:{lower:{source:'live',observed_ms:1000}}});
+ const html=ui.rowHTML(item,'',{period:'1H',favorite:true,now:5000});
+ assert.match(html,/data-watch-select="SOL-USDT-SWAP"/);assert.match(html,/tradingview.com/);assert.match(html,/#yolo-detect\?tab=results&amp;symbol=SOL-USDT-SWAP&amp;timeframe=1H/);
+ assert.match(html,/data-watch-action="favorite" aria-pressed="true"/);assert.match(html,/data-watch-action="remove"/);assert.match(html,/>—</);
 });
 test('coin selection never borrows another symbol or a shadow fill and honors fill chronology',()=>{
  const old=position('SOL'),latest=position('SOL',{id:2,fill_ms:3000}),shadow=position('SOL',{id:3,fill_ms:5000,taken:0});
@@ -29,12 +34,12 @@ test('coin selection never borrows another symbol or a shadow fill and honors fi
  assert.equal(ui.coinTrade({open:[position('SOL',{entry:null})]},'SOL-USDT-SWAP'),null);
  assert.equal(route({symbol:'BTC-USDT-SWAP'}).symbol,'BTC-USDT-SWAP');assert.equal(route({symbol:'<script>'}).symbol,'');
 });
-test('universe validates symbol identities and rejects duplicate or malformed records',()=>{
- const d={now_ms:1000,items:[coin('SOL')]};assert.equal(ui.validate(d),d);
+test('touch list validates symbol identities and rejects duplicate or malformed records',()=>{
+ const d=snapshot([coin('SOL')]);assert.equal(ui.validate(d),d);
  for(const bad of [{},{...d,items:[null]},{...d,items:[coin('SOL'),coin('SOL')]},{...d,items:[{symbol:'<img>',state:'ready'}]}])assert.throws(()=>ui.validate(bad));
 });
-test('universe feed retains its last good snapshot on schema failure and stops on leave',async()=>{
- const good={now_ms:1000,items:[coin('SOL')]};let next=good,reads=0,cancels=0;
+test('touch list feed retains its last good snapshot on schema failure and stops on leave',async()=>{
+ const good=snapshot([coin('SOL')]);let next=good,reads=0,cancels=0;
  const feed=createFeed({read:async()=>{reads++;return next;},validateData:ui.validate,cancel:()=>cancels++,schedule:()=>1,unschedule(){}});
  feed.setActive(true);await feed.refresh();assert.equal(feed.getState().data,good);
  next={};await feed.refresh();assert.equal(feed.getState().data,good);assert.match(feed.getState().error,/格式/);

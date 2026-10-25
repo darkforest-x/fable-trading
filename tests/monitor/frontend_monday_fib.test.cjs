@@ -9,7 +9,7 @@ const response=(d,ok=true)=>({ok,json:async()=>d});
 function harness(fetchImpl,navigator={},localStorage){
  const els=new Map(),timers=new Map();let id=0;
  function el(name){if(!els.has(name))els.set(name,{innerHTML:'',textContent:'',hidden:false,disabled:false,value:'',dataset:{},style:{setProperty(){}},events:{},attrs:{},addEventListener(t,fn){this.events[t]=fn;},setAttribute(k,v){this.attrs[k]=v;},classList:{toggle(){}},contains(){return false;},focus(){},querySelectorAll(){return [];},querySelector(){return null;}});return els.get(name);}
- const routes={};const charts=[];const window={navigator,localStorage,SpikeNavigation:{register(name,fn){routes[name]=fn;},sync(){}},SpikeMondayFibChart:{show:(host,row,week,options)=>charts.push({symbol:row.symbol,week,...options}),hide(){},fit(){},setInternal(){}}},document={hidden:false,activeElement:null,getElementById:el,events:{},addEventListener(t,fn){this.events[t]=fn;}};
+ const routes={};const charts=[];const window={SpikeMondayList:require('../../yoyo/monitor/static/monday-list-model.js'),navigator,localStorage,SpikeNavigation:{register(name,fn){routes[name]=fn;},sync(){}},SpikeMondayFibChart:{show:(host,row,week,options)=>charts.push({symbol:row.symbol,week,...options}),hide(){},fit(){},setInternal(){}}},document={hidden:false,activeElement:null,getElementById:el,events:{},addEventListener(t,fn){this.events[t]=fn;}};
  vm.runInNewContext(source,{window,document,fetch:fetchImpl,AbortController,Date,Intl,URLSearchParams,setTimeout(fn,ms){const n=++id;timers.set(n,{fn,ms});return n;},clearTimeout(n){timers.delete(n);}});
  return {api:window.SpikeMondayFib,el,timers,document,charts,routes};
 }

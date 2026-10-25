@@ -37,6 +37,7 @@ from pathlib import Path
 import queue
 import sqlite3
 import threading
+from typing import Literal
 
 from fastapi import HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
@@ -462,6 +463,18 @@ class ReclaimPaper:
                     self.decide(ts, row["symbol"])  # arm or fail confirmations due before this minute
                     self.handle_quote(row["symbol"], {"candle_ms": ts, "high": h, "low": l, "price": c})
 
+    def analytics(self, track=60, days=0):
+        from .reclaim_analytics import build_analytics
+        with self.fib.lock:
+            quotes, connected = dict(self.fib.quotes), self.fib.connected
+        with self.db() as db:
+            db.execute("BEGIN")
+            account = dict(db.execute("SELECT * FROM tracks WHERE track=?", (track,)).fetchone())
+            positions = [dict(r) for r in db.execute("SELECT * FROM positions WHERE track=?", (track,))]
+            exits = [dict(r) for r in db.execute("SELECT e.* FROM exits e JOIN positions p ON p.id=e.position_id WHERE p.track=?", (track,))]
+        account["start_equity"] = START_EQUITY
+        return build_analytics(positions, exits, account, quotes, self.client.clock(), days, connected)
+
     def snapshot(self):
         with self.fib.lock:
             quotes = dict(self.fib.quotes)
@@ -507,6 +520,10 @@ class ReclaimPaper:
 
 def install(app, engine):
     app.state.monday_reclaim_paper = engine
+
+    @app.get("/api/monday-reclaim-paper/analytics")
+    def analytics(track: Literal["60", "5"] = "60", days: Literal["0", "7", "30"] = "0"):
+        return engine.analytics(int(track), int(days))
 
     @app.post("/api/monday-reclaim-paper/positions/{position_id}/close")
     def close_position(position_id: int, payload: CloseRequest, request: Request):

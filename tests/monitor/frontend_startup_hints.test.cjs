@@ -13,7 +13,7 @@ const flush=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
 function harness({hash='#monday-fib',hidden=false,period='1H'}={}){
  const calls=[],links=[],timers=new Map(),events={};let sequence=0;
  const window={location:{hash},localStorage:{getItem:()=>period},addEventListener:(k,fn)=>events[k]=fn};
- const document={hidden,addEventListener:(k,fn)=>events[k]=fn,createElement:()=>({}),head:{append:el=>links.push(el)},getElementById:()=>({textContent:JSON.stringify({'monday-fib.css':'css-v','monday-fib.js':'js-v','/vision-assets/vendor/lightweight-charts.standalone.production.js':'lib-v'})})};
+ const document={hidden,addEventListener:(k,fn)=>events[k]=fn,createElement:()=>({}),head:{append:el=>links.push(el)},getElementById:()=>({textContent:JSON.stringify({'monday-fib.css':'css-v','monday-fib.js':'js-v','monday-list-model.js':'list-v','/vision-assets/vendor/lightweight-charts.standalone.production.js':'lib-v'})})};
  const sandbox={window,document,URLSearchParams,AbortController,Date,Intl,fetch:(url,options)=>new Promise(resolve=>calls.push({url,options,resolve})),setTimeout(fn,ms){timers.set(++sequence,{fn,ms});return sequence;},clearTimeout:id=>timers.delete(id)};
  vm.runInNewContext(source,sandbox);
  return {window,document,sandbox,calls,links,timers,events};
@@ -33,7 +33,7 @@ test('startup overlaps code and data, preserves receipt time, and consumes each 
  const h=harness(),signal=new AbortController().signal;
  assert.equal(h.calls.length,1);assert.equal(h.calls[0].url,'/api/monday-fib?compact=true');
  assert.equal(h.calls[0].options.cache,'no-store');assert.equal(h.calls[0].options.credentials,'same-origin');
- assert.equal(h.links.length,3);assert.match(h.links[2].href,/production.js\?v=lib-v/);
+ assert.equal(h.links.length,4);assert.match(h.links[1].href,/monday-list-model.js\?v=list-v/);assert.match(h.links[3].href,/production.js\?v=lib-v/);
  h.calls[0].resolve({ok:true,json:async()=>({items})});await flush();
  assert.equal(h.calls.length,2);assert.match(h.calls[1].url,/symbol=ADA-USDT-SWAP&period=1H&wait_ms=8000$/);
  const packet=await h.window.SpikeStartup.take('monday-snapshot',signal);
@@ -49,7 +49,7 @@ test('leaving before snapshot completion cancels early work and cannot start a c
  h.calls[0].resolve({ok:true,json:async()=>({items})});await flush();
  assert.equal(h.calls.length,1);assert.equal(h.window.SpikeStartup.take('monday-snapshot',new AbortController().signal),null);
 });
-test('chart consumes a matching startup response without an extra GET and preserves identity guards',async()=>{
+test('chart reuses warmed candles while fetching the required Monday anchors',async()=>{
  const h=harness({period:'15m'}),draws=[];
  const now=Date.parse('2026-10-23T04:00:00Z'),start=Date.parse('2026-10-19T04:00:00Z');
  h.calls[0].resolve({ok:true,json:async()=>({items})});await flush();
@@ -59,6 +59,8 @@ test('chart consumes a matching startup response without an extra GET and preser
  vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),h.sandbox);
  const nodes={};const host={querySelector:s=>nodes[s]||(nodes[s]={addEventListener(){}})};
  h.window.SpikeMondayFibChart.show(host,{symbol:'ADA-USDT-SWAP',high:12,low:9},'2026-10-19');await flush();
- assert.equal(h.calls.length,2);assert.equal(draws.length,1);assert.equal(draws[0].symbol,'ADA-USDT-SWAP');
+ assert.equal(h.calls.filter(c=>c.url.includes('/candles?')).length,1);
+ assert.equal(h.calls.length,3);assert.match(h.calls[2].url,/\/levels\?symbol=ADA-USDT-SWAP$/);
+ assert.equal(draws.length,1);assert.equal(draws[0].symbol,'ADA-USDT-SWAP');
  h.window.SpikeMondayFibChart.hide();
 });

@@ -246,6 +246,26 @@ class PaperTests(unittest.TestCase):
             e.close_position(p['id'], 25, 0, str(uuid.uuid4()))
         self.assertEqual(e.snapshot()['tracks']['60']['equity'], 1000)
 
+    def test_analytics_http_is_read_only_and_rejects_unknown_track_or_period(self):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+        e = self.engine(-1.)
+        e.handle_touch(self.levels, "ABC-USDT-SWAP", "lower", 93.8, self.touch+500, self.touch)
+        app = FastAPI(); install(app, e)
+        before = self.rows(e, "SELECT * FROM positions")
+        account = self.rows(e, "SELECT * FROM tracks")
+        with TestClient(app) as client:
+            for track in [60, 5]:
+                for days in [0, 7, 30]:
+                    r = client.get(f"/api/monday-reclaim-paper/analytics?track={track}&days={days}")
+                    self.assertEqual(r.status_code, 200)
+                    self.assertEqual(r.json()["track"], str(track))
+                    self.assertEqual(r.json()["summary"]["open_count"], 1)
+            for query in ["track=15", "days=-1", "days=365", "track=abc"]:
+                self.assertEqual(client.get("/api/monday-reclaim-paper/analytics?"+query).status_code, 422)
+        self.assertEqual(self.rows(e, "SELECT * FROM positions"), before)
+        self.assertEqual(self.rows(e, "SELECT * FROM tracks"), account)
+
     def test_close_http_requires_same_origin_action_and_valid_body(self):
         from fastapi import FastAPI
         from fastapi.testclient import TestClient

@@ -4,10 +4,11 @@
 (() => {
   'use strict';
   function initialSymbol(items,pinned=''){
+    // A pinned symbol may be an untouched favorite; never warm another coin.
+    if(pinned)return (items||[]).find(row=>row.symbol===pinned)?.symbol;
     let best=null,latest=-Infinity;
     for(const row of items||[]){
       const events=Object.values(row.touches||{});if(!events.length)continue;
-      if(row.symbol===pinned)return pinned;
       const time=Math.max(...events.map(e=>(e?.source==='history'?e.candle_ms:e?.observed_ms)||0));
       if(time>latest||(time===latest&&row.symbol.localeCompare(best)<0)){best=row.symbol;latest=time;}
     }
@@ -47,7 +48,7 @@
     start(symbol+'|'+period,'/api/monday-fib/candles?symbol='+encodeURIComponent(symbol)+'&period='+period+'&wait_ms=8000');
   });
   const critical=['workspace-base.css','workspace-shell.css','workspace-polish.css','workspace-boot.js'];
-  const names=[...critical,'monday-fib.css','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','monday-quick.js','monday-fib.js','/vision-assets/vendor/lightweight-charts.standalone.production.js'];
+  const names=[...critical,'monday-fib.css','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','monday-quick.js','monday-list-model.js','monday-fib.js','/vision-assets/vendor/lightweight-charts.standalone.production.js'];
   for(const name of names){
     if(!versions[name])continue;
     const link=document.createElement('link');link.rel='preload';link.as=name.endsWith('.css')?'style':'script';
