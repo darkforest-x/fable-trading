@@ -215,6 +215,48 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Builder yoyo/evaluation/monday_limit_reclaim_exit_variants.py.'
+  - experiment_id: exp-monday-limit-wick-stop-ohlc-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: de5a1b628c66afc7e7f009be005258c67ff51a69
+    status: complete
+    question: 'Monday 1.618 limit with a 5m fill-bar wick stop and the near Monday edge target, OHLC with monotone segments.'
+    single_variable: 'Stop = fill-bar wick extreme placed at that bar close; no reclaim rule or breakeven.'
+    result: '626 symbols, 0 errors, every output checked readable with rows equal to positions. Feeds exp-monday-limit-wick-compare-20261025-v1.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-wick-compare-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Two schedulers overlapped about 12 minutes on 2026-10-25; outputs verified afterwards.'
+  - experiment_id: exp-monday-limit-wick-stop-olhc-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: de5a1b628c66afc7e7f009be005258c67ff51a69
+    status: complete
+    question: 'Monday 1.618 limit with a 5m fill-bar wick stop and the near Monday edge target, OLHC with monotone segments.'
+    single_variable: 'Stop = fill-bar wick extreme placed at that bar close; no reclaim rule or breakeven.'
+    result: '626 symbols, 0 errors, every output checked readable with rows equal to positions. Feeds exp-monday-limit-wick-compare-20261025-v1.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-wick-compare-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Two schedulers overlapped about 12 minutes on 2026-10-25; outputs verified afterwards.'
+  - experiment_id: exp-monday-limit-wick-compare-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 90691262f39af811dd5328b88762b8b3483d685a
+    status: rejected
+    question: 'Owner 2026-10-25 (MUBARAK 20R example): is a 5m wick stop better than the 60m reclaim rule?'
+    single_variable: 'Exit management: wick stop vs 60m reclaim; slippage 10/20/30bp on stop exits.'
+    result: '70018 alt trades, worst path. 10bp stop slippage: win 15.6 percent, mean -13.5bp per notional (60m reclaim +2.1), mean +4.09R but median -1.41R; R edge only in tiny stops (<0.15 percent: +13.65R mean, -3.32R median; 0.15-0.3 percent: +0.68R; >=0.6 percent negative). 20bp: +2.15R mean; 30bp: +0.21R. 1000U equal risk 1 percent (per-trade notional <=3x, total <=5x): 10bp slippage 1.8e17x with 99.7 percent drawdown, 20bp ruined; equal notional 10 percent 0.005x. Fragile to slippage and leverage; not adopted.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-wick-compare-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Learning note docs/learnings/tiny-stop-r-multiples-hinge-on-slippage.md.'
   - experiment_id: exp-monday-limit-reclaim-fail-samples-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: b1a369c7b25985ff51276c647667f51204e4fd29

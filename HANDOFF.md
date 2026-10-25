@@ -1,3 +1,8 @@
+## 2026-10-25 · 5m wick stop versus 60m reclaim: wick stop rejected
+
+- Owner's MUBARAK example (stop under the 5m wick, about 20R). Framework replay of all 626 alts, both intrabar paths, worst per trade: win 15.6 percent, per notional -13.5bp (60m reclaim +2.1). R edge exists only for stops under 0.3 percent and collapses with slippage: mean +4.09R at 10bp, +2.15R at 20bp, +0.21R at 30bp. 1000U at 1 percent risk: 1.8e17x with 99.7 percent drawdown at 10bp, ruined at 20bp. Not adopted; the near-edge 60m reclaim with the entry score stays the draft.
+- Closer targets also rejected: 50 percent target win 42 percent but mean -1.5bp; 100 percent target stays best. `experiments/active/exp-monday-limit-wick-compare-20261025-v1/`, `exp-monday-limit-reclaim-optimize-20261025-v1/`. No live action.
+
 ## 2026-10-25 · App 0.9.1 UI complete; native installation pending device
 
 - Recovered actual Stitch screen `f5d3f95247be479983f598ecb45c032b` from Owner browser, then official get_screen/download_file. Earlier “not ready” conclusion was incorrect; saved HTML/screenshot in `yoyo/discipline_app/design/glass-0.9.1/`. No repeat generation or waiver.
