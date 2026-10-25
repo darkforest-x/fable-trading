@@ -1,0 +1,12 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-exits-ohlc-20261025-v1",
+  "question": "Owner 2026-10-25 strategy-optimization sub-page: does a closer take-profit (or a 50/50 partial) beat the near Monday edge target for the Codex 1.618 limit-reclaim signals?",
+  "single_variable": "Target at 50, 75 or 100 percent of the entry-to-near-Monday-edge distance; Codex frozen pipeline otherwise (alts, 60m confirmation, reclaim and breakeven rules, maker 0.02 / taker 0.05 percent).",
+  "intrabar_path": "OHLC",
+  "monotone_segments": true,
+  "target_fractions": [0.5, 0.75, 1.0],
+  "scope": "All 626 5m alt symbols of the completed Codex run",
+  "partial": "50/50 partial take-profit = mean of the 0.5 and 1.0 legs per trade (independent positions, identical entry and stop rules)",
+  "training_eligible": false,
+  "production_eligible": false
+}
