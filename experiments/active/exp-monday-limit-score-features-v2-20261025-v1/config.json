@@ -1,0 +1,8 @@
+{
+  "experiment_id": "exp-monday-limit-score-features-v2-20261025-v1",
+  "question": "Owner 2026-10-25: feature table v2 for the entry score (current 10 + market context + volatility expansion + MA structure + per-coin history + range structure).",
+  "single_variable": "None (feature build); every feature uses bars before the touch bar or earlier exited events; see the builder docstring for columns and windows.",
+  "population": "alt signal fills, 60m confirmation, near Monday edge (Codex ledger), all history since 2020",
+  "labels": "worst-path near-target net (10bp slippage on non-target exits), win, reclaim, worst-path hits of range 0.5 / 0.618 / far edge / opposite 1618",
+  "workers": 4
+}
