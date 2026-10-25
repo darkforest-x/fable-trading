@@ -110,6 +110,8 @@ def run():
             res['replays'][f'{name}|slip{slip}'] = out
             if slip == 10:
                 paths[name] = path
+            if slip == 20 and name.startswith('wick_risk1pct'):
+                paths[name+'|slip20'] = path
     EXP.mkdir(exist_ok=True)
     charts(res, paths)
     dump(EXP/'summary.json', dict(config=cfg, results=res, source_commit=subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip(),
@@ -143,13 +145,16 @@ def charts(res, paths):
              'wick_risk1pct': ('影线止损，每笔风险1%（单笔≤3倍、总≤5倍）', ORANGE),
              'wick_risk1pct_stop0.15-0.6': ('同上，只做止损0.15%-0.6%', '#1baf7a')}
     for k, (lab, col) in names.items():
-        pp = np.array(paths[k][::max(1, len(paths[k])//3000)])
-        ax.plot(pd.to_datetime(pp[:, 0]), pp[:, 1], color=col, lw=2, label=lab)
+        for key, ls, suffix in ((k, '-', '（滑点10bp）'), (k+'|slip20', '--', '（滑点20bp）')):
+            if key not in paths:
+                continue
+            pp = np.array(paths[key][::max(1, len(paths[key])//3000)])
+            ax.plot(pd.to_datetime(pp[:, 0]), np.maximum(pp[:, 1], 1e-2), color=col, lw=2, ls=ls, label=lab+suffix)
     ax.set_yscale('log'); ax.axhline(1000, color='#c3c2b7', lw=1); ax.legend(frameon=False, loc='upper left', fontsize=9)
     ax.set_ylabel('已实现权益（USDT，对数）')
     for sp in ('top', 'right'):
         ax.spines[sp].set_visible(False)
-    ax.set_title('1000U · 止损滑点 10bp · 较差K线顺序 · 2020–2026', color=INK, loc='left')
+    ax.set_title('1000U · 较差K线顺序 · 2020–2026（虚线=止损滑点20bp；按风险等额的曲线只在滑点10bp时上天，20bp直接归零）', color=INK, loc='left', fontsize=10)
     fig.tight_layout(); fig.savefig(EXP/'2_wick_equity.png', dpi=130); plt.close(fig)
 
 
