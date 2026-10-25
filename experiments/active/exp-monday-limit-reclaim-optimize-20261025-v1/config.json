@@ -1,0 +1,12 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-optimize-20261025-v1",
+  "question": "Owner 2026-10-25 sub-page 策略优化: floating profit in R, closer or partial take-profit, and per-coin score sizing for the Codex 1.618 limit-reclaim rule.",
+  "inputs": "exp-monday-limit-reclaim-exits-{ohlc,olhc}-20261025-v1 (targets 50/75/100 percent, monotone segments), exp-monday-limit-reclaim-mfe-20261025-v1, exp-monday-limit-reclaim-patterns3-20261024-v1 events",
+  "worst_path": "Per trade the worse of O-H-L-C and O-L-H-C; partial 50/50 = mean of 50 and 100 percent legs per path, then the worse path",
+  "R_definition": "1R = distance from the 1.618 to the 2.0 extension (0.382 of the Monday range); near-edge target = 1.618R",
+  "slippage_bp": 10,
+  "score": "Logistic regression on features known at the fill (bucket, log vol_ratio, log approach, opp_first, monday_close_side, log liquidity, toward24, cluster24, side, range_pct), fitted on fills before 2025-01-01 with win = worst net > 0 (near-edge target); judged from 2025-01-01 by AUC, quintiles (cuts from training scores) and 1000 USDT replays: equal 10 percent, top-40 percent only, quintile-weighted 2-10 percent; gross <= 1x.",
+  "limitations": "Score features exist only for the 2026-10-24 snapshot symbols; no funding, queue, margin or liquidity model.",
+  "training_eligible": false,
+  "production_eligible": false
+}
