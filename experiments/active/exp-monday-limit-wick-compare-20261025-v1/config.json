@@ -1,0 +1,11 @@
+{
+  "experiment_id": "exp-monday-limit-wick-compare-20261025-v1",
+  "question": "Owner 2026-10-25: is a 5m wick stop (owner's 20R MUBARAK example) better than the 60m reclaim rule for the Monday 1.618 limit?",
+  "inputs": "exp-monday-limit-wick-stop-{ohlc,olhc}-20261025-v1 and the tp100 legs of exp-monday-limit-reclaim-exits-{ohlc,olhc}-20261025-v1",
+  "checks": "Every per-symbol trades file must be readable with rows equal to recorded positions (two schedulers overlapped briefly).",
+  "worst_path": "Per trade the worse of O-H-L-C and O-L-H-C",
+  "slippage_bp": [10, 20, 30],
+  "replays": "1000 USDT: equal notional 10 percent (gross <= 1x); equal risk 1 percent of equity (per-trade notional <= 3x, total <= 5x); same restricted to stops 0.15-0.6 percent (post hoc); 60m reclaim equal notional for comparison",
+  "training_eligible": false,
+  "production_eligible": false
+}
