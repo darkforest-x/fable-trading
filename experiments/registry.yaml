@@ -299,6 +299,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Charts 1_targets_mean.png, 2_last5m_equity.png. Side-dependent target (long far, short near) is a post-hoc idea, not adopted.'
+  - experiment_id: exp-monday-limit-reclaim-sizing-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 57dfd5c6fa
+    status: complete
+    question: 'Owner 2026-10-25: give higher-score trades larger positions; at the same total drawdown, which sizing earns the most?'
+    single_variable: 'Per-trade size as a function of the frozen entry score (equal / tier 1-2-3 / linear in score minus threshold / per-decile Kelly); scale chosen on 2025 under the current rule drawdown, tested on 2026; 1x gross cap, 50 percent per-trade cap.'
+    result: '2025 score deciles: only the top decile clearly positive (+47.8bp), deciles 6-8 near zero. Linear sizing, position = 0.46 percent of equity per 0.01 of score above 0.226 (scale 0.5), was chosen without exceeding the current 2025 drawdown (33.0 vs 33.4 percent). Test 2026: 2.07x DD 20.5 vs current 1.54x DD 27.0; last five months 1.69x DD 17.6 vs 1.44x DD 26.5. Over 20 random orders of same-time fills: 2026 median 2.04x vs 1.48x, better in 20/20; last five months 1.67x vs 1.40x, better in 17/20. 2026 by score: 0.226-0.30 -0.4bp, 0.30-0.375 +7.4bp, >=0.375 +38.6bp win 54.4 percent. Tier and per-decile Kelly lost to the current rule in 2026 (Kelly overfit 2025 deciles). Mean position 5.7 percent, max 32.4 percent.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-reclaim-sizing-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'First run with an unstable sort (outputs not kept in repo) gave the same ranking: linear 2.06x DD 20.6 vs current 1.42x DD 28.9 in 2026. Realized-equity drawdown only; no mark-to-market. Paper engine still uses equal 10 percent.'
   - experiment_id: exp-monday-reclaim-paper-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 791941594f

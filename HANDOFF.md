@@ -1,3 +1,8 @@
+## 2026-10-25 · Limit-reclaim v2: score-weighted sizing beats equal sizing at a lower drawdown
+
+- Owner: larger positions for higher scores, best return at the same total drawdown. `experiments/active/exp-monday-limit-reclaim-sizing-20261025-v1/` (arithmetic on framework fills; scale chosen on 2025, tested on 2026; 20 random orders of same-time fills).
+- Linear sizing, position = 0.46 percent of equity for every 0.01 of score above 0.226 (score 0.30 -> 3.4 percent, 0.375 -> 6.8, 0.45 -> 10.3, 0.60 -> 17.2): 2026 median 2.04x with DD 20.6 percent versus current equal 10 percent 1.48x with DD 27.8; better in 20/20 orders; last five months 1.67x vs 1.40x (17/20). Tier 1/2/3 and per-decile Kelly lost. Paper engine unchanged (equal 10 percent) pending owner decision. Gross stays <= 1x; single positions reached 32 percent; extrapolated scores such as LIGHT 0.936 would get 33 percent.
+
 ## 2026-10-25 · Paper monitor universe and manual partial/full exits
 
 - Added the missing monitored-universe list to `#signals?pane=reclaim`: 507 contracts from public Monday compact snapshots, logos, search, all/touched/current-track funded holdings, nearest 1.618 distance and honest stale/missing states. Desktop defaults open; mobile uses a 75dvh sheet with direct finger tracking. Symbol selection is independent of execution history, pins its real chart, and clears unrelated trade overlays. Follow-latest restores latest funded fill.
