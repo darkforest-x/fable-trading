@@ -1,0 +1,9 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-mfe-20261025-v1",
+  "question": "Owner 2026-10-25: how many Codex 1.618 limit-reclaim trades were in floating profit before exiting at breakeven or on a failed reclaim?",
+  "scope": "Codex O-H-L-C ledger, all 626 5m alt symbols, signal trades, 60m confirmation, near Monday edge target",
+  "measure": "Best unrealized move from Codex 5m bars: strict = bars strictly between the fill bar and the exit bar; loose = also the exit bar. Percent of entry and fraction of the distance to the target.",
+  "limitations": "Read-only; the fill and exit bars are ambiguous intrabar; no trade re-executed.",
+  "training_eligible": false,
+  "production_eligible": false
+}
