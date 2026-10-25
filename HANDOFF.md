@@ -1,3 +1,17 @@
+## 2026-10-25 · App 0.9.1 UI complete; native installation pending device
+
+- Recovered actual Stitch screen `f5d3f95247be479983f598ecb45c032b` from Owner browser, then official get_screen/download_file. Earlier “not ready” conclusion was incorrect; saved HTML/screenshot in `yoyo/discipline_app/design/glass-0.9.1/`. No repeat generation or waiver.
+- Implemented continuous page/pill swipes, offscreen content exchange, re-grab, edge resistance, velocity release and reduced-motion tracking; equal-width market/limit with sliding highlight; exact-price high/low and upper/lower 1.618 labels; ambient canvas and translucent cards/dock/sheets. No additional hidden chart subscriptions, order or risk changes.
+- 88 frontend tests passed; 320/390/1280 browser QA and actual touch dispatch verified drag, commit, rebound, edge, re-grab, chart pan/pinch, reduced motion and sheet dragging. Fixture order writes0; visible chart streams1, hidden0. No console errors. Raw checks/screenshots: `output/playwright/app-glass-0.9.1/`.
+- iOS/Android0.9.1(37) build/signature verified; all437 production web assets identical in both native bundles. Mac web `http://127.0.0.1:8897/` serves new assets. Existing public API health works; its root is not a public web preview. iPhone Air unavailable; **not installed**, no device frame-rate claim. Receipt `releases/build-0.9.1.json`.
+- Stitch waiting heartbeat `app` paused after recovery. Task-created browser977883211 and fixture39645 closed; Owner tabs retained. Four patrol schedules enabled with no schedule errors; worker1266 heartbeat current. Independent App service36025 preserved. Statistics reset below remains complete: do not repeat it.
+- Learnings: `generation-list-absence-is-not-generation-failure.md`, `gesture-capture-transfers-are-not-cancellations.md`.
+
+## 2026-10-25 · Correction: Stitch draft recovered; App UI implementation resumed
+
+- Prior “new design not ready” claim was incorrect. Owner showed the completed board in the existing browser. DOM ID `f5d3f95247be479983f598ecb45c032b` resolves through official get_screen; design and HTML saved under `yoyo/discipline_app/design/glass-0.9.1/`. No new generation or waiver. Four UI fixes are now in progress. Statistics reset below remains complete; do not repeat it.
+- Learning: `generation-list-absence-is-not-generation-failure.md`.
+
 ## 2026-10-25 · App statistics reset delivered; UI waiting for Stitch
 
 - Owner requested clearing App data plus finger-following menu navigation, prices on 1.618 lines, a corrected market/limit segment and stronger glass. Reset scope announced as statistics and completed records, preserving the real account, execution ledger and confirmed fixed capital. Source commit `4105b3a723` pushed; 16 historical closed records archived privately and excluded through a display epoch. **Do not repeat the reset.** Receipt: `~/Library/Application Support/SpikeDiscipline/statistics-reset-20261025-receipt.json`.

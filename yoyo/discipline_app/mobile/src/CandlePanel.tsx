@@ -37,7 +37,7 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
  useEffect(()=>{
   if(!host.current)return;
   const chart=createChart(host.current,{
-   layout:{background:{type:ColorType.Solid,color:'#ffffff'},textColor:'#75847d',fontSize:10,attributionLogo:true},
+   layout:{background:{type:ColorType.Solid,color:'#f0f4f8'},textColor:'#657281',fontSize:10,attributionLogo:true},
    grid:{vertLines:{visible:false},horzLines:{visible:!range,color:'#f0f3f0'}},
    rightPriceScale:{borderVisible:false,minimumWidth:58,scaleMargins:{top:.1,bottom:.27}},
    timeScale:{borderVisible:false,timeVisible:true,secondsVisible:false,minimumHeight:range?34:26,barSpacing:6,rightOffset:4,lockVisibleTimeRangeOnResize:true,tickMarkFormatter:(time:Time,type:number)=>type<3?dateLabel(time):timeLabel(time)},
@@ -81,7 +81,7 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
  },[entry,stop,symbol,period,showBar]);
  useEffect(()=>{
   const series=graph.current?.candles;if(!series||!range)return;
-  const primitive=new FibRangePrimitive(range);series.attachPrimitive(primitive);
+  const primitive=new FibRangePrimitive(range,format);series.attachPrimitive(primitive);
   return()=>{if(graph.current?.candles===series)series.detachPrimitive(primitive)};
  },[range,symbol,period,showBar]);
  return <><div className="candle-ohlc" ref={legend} aria-label="K线开高低收">开 —　高 —　低 —　收 —</div><div className={`candle-canvas ${fullscreen?'is-fullscreen':''}`} ref={host} role="img" aria-label={`${symbol.replace('-USDT-SWAP','/USDT')} ${PERIODS[period]} K线与成交量`} onTouchStart={e=>e.stopPropagation()}/>{state.historyReady&&<button className="candle-realtime" onClick={()=>{graph.current?.chart.timeScale().scrollToRealTime();feedback('light')}}>回到最新</button>}</>;

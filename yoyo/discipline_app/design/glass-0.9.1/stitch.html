@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SPIKE · 移动端 Apple Glass 与物理手势动力学规范画板 (生产交付版)</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-surface": "#0b1c30",
+            "inverse-surface": "#213145",
+            "surface-bright": "#f8f9ff",
+            "on-error-container": "#93000a",
+            "on-secondary-container": "#00705c",
+            "secondary-fixed-dim": "#78d8be",
+            "on-tertiary-container": "#fffaf9",
+            "primary-fixed": "#d7e2ff",
+            "inverse-primary": "#abc7ff",
+            "surface-container-low": "#eff4ff",
+            "tertiary-fixed": "#ffdadb",
+            "surface-tint": "#005cbb",
+            "outline-variant": "#c1c6d6",
+            "surface-container-lowest": "#ffffff",
+            "on-primary": "#ffffff",
+            "on-surface-variant": "#414753",
+            "on-primary-container": "#fcfbff",
+            "on-primary-fixed-variant": "#00458f",
+            "surface": "#f8f9ff",
+            "inverse-on-surface": "#eaf1ff",
+            "on-tertiary-fixed-variant": "#92002a",
+            "on-primary-fixed": "#001b3f",
+            "primary": "#0059b5",
+            "primary-container": "#0071e3",
+            "on-error": "#ffffff",
+            "on-secondary-fixed": "#002019",
+            "on-secondary-fixed-variant": "#005142",
+            "secondary": "#006b58",
+            "tertiary-fixed-dim": "#ffb2b7",
+            "outline": "#717785",
+            "surface-container": "#e5eeff",
+            "error-container": "#ffdad6",
+            "surface-variant": "#d3e4fe",
+            "on-secondary": "#ffffff",
+            "primary-fixed-dim": "#abc7ff",
+            "tertiary": "#b70438",
+            "secondary-container": "#92f2d7",
+            "surface-container-highest": "#d3e4fe",
+            "secondary-fixed": "#94f4d9",
+            "surface-container-high": "#dce9ff",
+            "background": "#f8f9ff",
+            "error": "#ba1a1a",
+            "on-tertiary": "#ffffff",
+            "tertiary-container": "#db2b4e",
+            "on-tertiary-fixed": "#40000d",
+            "surface-dim": "#cbdbf5",
+            "on-background": "#0b1c30"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "1rem",
+            "margin-tablet": "1.5rem",
+            "space-xl": "1.5rem",
+            "gutter-desktop": "1.5rem",
+            "space-sm": "0.5rem",
+            "gutter-tablet": "1rem",
+            "margin-desktop": "2.5rem",
+            "space-lg": "1rem",
+            "space-md": "0.75rem",
+            "gutter": "0.75rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "headline-lg-mobile": ["Inter"],
+            "body-md": ["Inter"],
+            "label-caps": ["Inter"],
+            "label-numeric-sm": ["JetBrains Mono"],
+            "headline-lg": ["Inter"],
+            "display": ["Inter"],
+            "label-numeric-lg": ["JetBrains Mono"],
+            "body-sm": ["Inter"],
+            "headline-sm": ["Inter"],
+            "label-numeric-md": ["JetBrains Mono"],
+            "headline-md": ["Inter"],
+            "body-lg": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-caps": ["10px", { "lineHeight": "12px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+            "label-numeric-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "label-numeric-lg": ["20px", { "lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+            "headline-sm": ["17px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-numeric-md": ["14px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient Atmosphere Canvas */
+    .bg-ambient-atmosphere {
+      background: radial-gradient(circle at 18% 12%, rgba(0, 113, 227, 0.08) 0%, transparent 40%),
+                  radial-gradient(circle at 82% 8%, rgba(8, 127, 105, 0.06) 0%, transparent 36%),
+                  radial-gradient(circle at 50% 90%, rgba(219, 43, 78, 0.04) 0%, transparent 50%),
+                  #F0F4F8;
+    }
+
+    /* Liquid Apple Glass Level 1 & Level 2 Specs */
+    .glass-l1 {
+      background: rgba(255, 255, 255, 0.64);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95),
+                  inset 0 -1px 1px 0 rgba(255, 255, 255, 0.2),
+                  0 8px 32px -4px rgba(15, 23, 42, 0.06),
+                  0 2px 8px -2px rgba(15, 23, 42, 0.02);
+    }
+
+    .glass-l2 {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(28px) saturate(200%);
+      -webkit-backdrop-filter: blur(28px) saturate(200%);
+      border: 1px solid rgba(255, 255, 255, 0.92);
+      box-shadow: inset 0 1px 1.5px 0 rgba(255, 255, 255, 1),
+                  0 12px 36px -6px rgba(15, 23, 42, 0.09);
+    }
+
+    .glass-tabbar {
+      background: rgba(255, 255, 255, 0.74);
+      backdrop-filter: blur(28px) saturate(210%);
+      -webkit-backdrop-filter: blur(28px) saturate(210%);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 16px 44px -8px rgba(15, 23, 42, 0.16),
+                  inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
+    }
+
+    /* Candlestick line styling */
+    .line-fibo-top {
+      border-top: 1.5px solid #F43F5E;
+    }
+    .line-monday-high {
+      border-top: 1px solid #0071E3;
+    }
+    .line-monday-low {
+      border-top: 1px solid #0071E3;
+    }
+    .line-fibo-bottom {
+      border-top: 1.5px solid #087F69;
+    }
+    .line-current-price {
+      border-top: 1px dashed #717785;
+    }
+
+    /* Custom scrollbar for desktop spec pane */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(113, 119, 133, 0.25);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(113, 119, 133, 0.45);
+    }
+
+    /* Safe hardware deceleration curve */
+    .ease-kinetic {
+      transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Touch tracking viewport transition handle */
+    #prototype-viewport {
+      touch-action: pan-y;
+      user-select: none;
+    }
+  </style>
+</head>
+<body class="bg-ambient-atmosphere text-on-surface antialiased min-h-screen selection:bg-primary-fixed selection:text-primary">
+<!-- Desktop Engineering Specification Header -->
+<header class="w-full border-b border-white/60 bg-white/40 backdrop-blur-md sticky top-0 z-50">
+<div class="max-w-[1440px] mx-auto px-margin-tablet lg:px-margin-desktop py-space-sm flex items-center justify-between">
+<div class="flex items-center space-x-space-md">
+<div class="w-9 h-9 rounded-xl glass-l2 flex items-center justify-center text-primary-container shadow-sm">
+<span class="material-symbols-outlined" data-icon="candlestick_chart">candlestick_chart</span>
+</div>
+<div>
+<div class="flex items-center space-x-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface font-extrabold tracking-tight">SPIKE</span>
+<span class="px-space-xs py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary uppercase">v2.4 Pro-Glass</span>
+<span class="px-space-xs py-0.5 rounded-full text-[10px] font-medium bg-secondary-fixed text-on-secondary-fixed">Continuous Gesture Ready</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant hidden sm:block">移动端 Apple Glass 与物理手势动力学规范画板 (生产交付版)</p>
+</div>
+</div>
+<div class="flex items-center space-x-space-sm">
+<div class="hidden md:flex items-center space-x-1.5 px-space-md py-1.5 glass-l1 rounded-full text-xs font-label-numeric-sm text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed-dim animate-pulse"></span>
+<span>PHYSICS ENGINE: 60FPS TRACKING</span>
+</div>
+<button class="px-space-md py-2 glass-l2 hover:bg-white/90 text-on-surface rounded-full text-xs font-headline-sm flex items-center space-x-1 transition-all active:scale-95 shadow-sm" id="resetDemoBtn">
+<span class="material-symbols-outlined text-[16px]" data-icon="refresh">refresh</span>
+<span>重置视口动力学</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Multi-Column Master Board Layout -->
+<main class="max-w-[1440px] mx-auto px-margin lg:px-margin-desktop py-space-lg">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop items-start">
+<!-- LEFT COLUMN: Mobile Prototype Viewport (390 x 844 iPhone Frame) -->
+<section class="lg:col-span-5 flex flex-col items-center justify-start sticky lg:top-20">
+<!-- Interactive Frame Label Badge -->
+<div class="mb-3 flex items-center justify-between w-full max-w-[390px] px-2">
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-primary text-[16px]" data-icon="touch_app">touch_app</span>
+<span class="font-headline-sm text-xs font-semibold text-on-surface">可交互真机手势容器</span>
+</div>
+<span class="font-label-numeric-sm text-[11px] text-outline">390 × 844 pt (iPhone 14/15)</span>
+</div>
+<!-- Mobile Phone Chassis Frame -->
+<div class="relative w-[390px] h-[844px] rounded-[52px] bg-slate-900 p-[10px] shadow-[0_24px_64px_-12px_rgba(15,23,42,0.35),0_0_0_1px_rgba(255,255,255,0.4)]">
+<!-- Glass Reflection Glare on Bezel -->
+<div class="absolute inset-x-8 top-0 h-1 rounded-b-full bg-white/20"></div>
+<!-- Dynamic Island / Speaker cutout -->
+<div class="absolute top-[16px] left-1/2 -translate-x-1/2 w-[124px] h-[34px] bg-black rounded-full z-50 flex items-center justify-between px-3">
+<div class="w-3 h-3 rounded-full bg-[#081b2c] flex items-center justify-center">
+<div class="w-1.5 h-1.5 rounded-full bg-blue-900/60"></div>
+</div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#112438]"></div>
+</div>
+<!-- Device Display Canvas (Internal 370 x 824) -->
+<div class="relative w-full h-full rounded-[42px] overflow-hidden bg-gradient-to-b from-[#EBF3FC] via-[#F3F7FD] to-[#E9EFF7] flex flex-col select-none" id="prototype-viewport">
+<!-- Atmospheric ambient gradients inside screen -->
+<div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+<div class="absolute top-1/2 -right-20 w-60 h-60 rounded-full bg-secondary/10 blur-3xl pointer-events-none"></div>
+<!-- Mobile Status Bar -->
+<div class="w-full pt-3 px-7 flex items-center justify-between text-xs font-semibold text-slate-800 z-40">
+<span class="font-label-numeric-sm tracking-tight text-[13px]" id="phoneClock">09:41</span>
+<div class="flex items-center space-x-1.5 text-slate-700">
+<span class="material-symbols-outlined text-[15px]" data-icon="signal_cellular_alt">signal_cellular_alt</span>
+<span class="material-symbols-outlined text-[15px]" data-icon="wifi">wifi</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="battery_full">battery_full</span>
+</div>
+</div>
+<!-- TopAppBar Component (from Shared Components JSON) -->
+<header class="bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-xl text-primary dark:text-inverse-primary docked full-width top-0 z-40 border-b border-outline-variant/30 dark:border-outline/20 shadow-sm dark:shadow-none flex justify-between items-center w-full px-margin py-space-sm max-w-md mx-auto">
+<div class="flex items-center space-x-2">
+<div class="p-1 rounded-lg hover:bg-surface-container/60 dark:hover:bg-surface-variant/40 transition-colors active:scale-95 duration-150 transition-transform cursor-pointer">
+<span class="material-symbols-outlined text-primary" data-icon="candlestick_chart">candlestick_chart</span>
+</div>
+<span class="text-headline-md font-headline-md font-bold tracking-tight text-on-surface dark:text-inverse-on-surface">SPIKE</span>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-label-numeric-sm bg-primary/10 text-primary font-bold">ETH/USDT</span>
+</div>
+<div class="flex items-center space-x-1">
+<button class="p-1.5 rounded-full hover:bg-surface-container/60 dark:hover:bg-surface-variant/40 transition-colors active:scale-95 duration-150 transition-transform text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications">notifications</span>
+</button>
+<button class="p-1.5 rounded-full hover:bg-surface-container/60 dark:hover:bg-surface-variant/40 transition-colors active:scale-95 duration-150 transition-transform text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]" data-icon="tune">tune</span>
+</button>
+</div>
+</header>
+<!-- Screen Slide Viewport Container (5 Panes: 合约, 纪律, 1.618, 持仓, 统计) -->
+<div class="relative flex-1 w-full overflow-hidden">
+<div class="absolute inset-0 flex w-[500%] h-full ease-kinetic" id="gestureRail" style="transform: translateX(0%);">
+<!-- PANE 0: 【合约】 CONTRACT TICKET (Screen 1) -->
+<div class="w-[20%] h-full overflow-y-auto px-4 pt-3 pb-24 space-y-3" data-pane-index="0">
+<!-- Pair Summary Glass Card -->
+<div class="glass-l1 rounded-2xl p-space-md">
+<div class="flex items-center justify-between">
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">ETH · 永续合约</span>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-label-caps bg-primary/10 text-primary font-bold">逐仓</span>
+</div>
+<div class="flex items-baseline space-x-2 mt-0.5">
+<span class="font-label-numeric-lg text-headline-lg font-bold text-on-surface">0.07280</span>
+<span class="font-label-numeric-sm text-xs font-semibold text-secondary flex items-center">
+                            +2.48% <span class="material-symbols-outlined text-[14px]" data-icon="arrow_drop_up">arrow_drop_up</span>
+</span>
+</div>
+</div>
+<!-- Standalone Leverage Control -->
+<button class="touch-stop flex items-center space-x-1 px-3 py-1.5 glass-l2 rounded-full border border-primary/20 text-xs font-label-numeric-sm text-primary font-semibold shadow-sm active:scale-95 transition-transform">
+<span>10x 逐仓</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</div>
+<!-- Market / Limit 50/50 Balanced Segmented Capsule (Specification Anchor) -->
+<div class="glass-l1 rounded-2xl p-space-md space-y-3">
+<div class="flex items-center justify-between">
+<span class="text-xs font-label-caps text-on-surface-variant font-semibold uppercase tracking-wider">执行策略</span>
+<span class="text-[11px] font-label-numeric-sm text-outline">盘口价 0.07280 USDT</span>
+</div>
+<!-- The 50/50 Capsule Slider Control -->
+<div class="touch-stop relative w-full h-[44px] bg-slate-200/50 backdrop-blur-md rounded-full p-1 flex items-center shadow-inner">
+<!-- Active sliding white pill indicator -->
+<div class="absolute top-1 left-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-full shadow-sm transition-transform duration-200 ease-kinetic" id="orderTypeIndicator"></div>
+<button class="relative z-10 w-1/2 h-full rounded-full text-xs font-headline-sm font-semibold text-slate-900 flex items-center justify-center transition-colors" id="typeMarketBtn">
+                        市价单
+                      </button>
+<button class="relative z-10 w-1/2 h-full rounded-full text-xs font-headline-sm font-medium text-slate-500 flex items-center justify-center transition-colors" id="typeLimitBtn">
+                        限价单
+                      </button>
+</div>
+<!-- Numeric Entry Fields -->
+<div class="space-y-2">
+<div class="touch-stop flex items-center justify-between h-[48px] px-3.5 rounded-xl glass-l2 border border-white/80 focus-within:ring-2 focus-within:ring-primary/40 transition-all">
+<span class="text-xs font-body-sm text-outline">价格</span>
+<div class="flex items-center space-x-1.5">
+<input class="text-right font-label-numeric-md text-xs font-semibold bg-transparent border-0 p-0 text-slate-800 focus:ring-0 w-36" readonly="" type="text" value="市价最优 (0.07280)"/>
+<span class="text-[11px] font-label-numeric-sm text-outline">USDT</span>
+</div>
+</div>
+<div class="touch-stop flex items-center justify-between h-[48px] px-3.5 rounded-xl glass-l2 border border-white/80 focus-within:ring-2 focus-within:ring-primary/40 transition-all">
+<span class="text-xs font-body-sm text-outline">数量 / 仓位</span>
+<div class="flex items-center space-x-1.5">
+<input class="text-right font-label-numeric-md text-sm font-bold bg-transparent border-0 p-0 text-slate-900 focus:ring-0 w-24" type="text" value="1,500"/>
+<span class="text-[11px] font-label-numeric-sm text-outline">ETH</span>
+</div>
+</div>
+</div>
+<!-- Risk Percentage Slider (Touch-stop enabled) -->
+<div class="touch-stop pt-1">
+<div class="flex justify-between items-center text-[11px] font-label-numeric-sm text-outline mb-1.5">
+<span>风险仓位占比</span>
+<span class="font-bold text-primary">25% (1.00R)</span>
+</div>
+<input class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-primary" max="100" min="5" type="range" value="25"/>
+</div>
+<!-- Initial Stop Loss with 1R auto calculation tag -->
+<div class="touch-stop flex items-center justify-between p-2.5 rounded-xl bg-slate-100/70 border border-white/60">
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-[16px] text-tertiary" data-icon="shield">shield</span>
+<span class="text-xs font-body-sm text-slate-700">初始止损 (SL)</span>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="font-label-numeric-sm text-xs font-bold text-slate-900">0.06900 USDT</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-label-numeric-sm bg-tertiary/10 text-tertiary font-bold">-1.00R</span>
+</div>
+</div>
+<!-- Long / Short Dual Buttons (Style Guidance Specs) -->
+<div class="grid grid-cols-2 gap-2 pt-1">
+<button class="touch-stop h-[46px] rounded-xl bg-gradient-to-r from-[#087F69] to-[#10B981] text-white font-headline-sm text-xs font-bold shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_6px_20px_-4px_rgba(8,127,105,0.4)] active:scale-95 transition-transform flex flex-col items-center justify-center leading-tight">
+<span>做多 (买入)</span>
+<span class="font-label-numeric-sm text-[10px] font-normal opacity-90">0.07280</span>
+</button>
+<button class="touch-stop h-[46px] rounded-xl bg-gradient-to-r from-[#E11D48] to-[#F43F5E] text-white font-headline-sm text-xs font-bold shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_6px_20px_-4px_rgba(244,63,94,0.4)] active:scale-95 transition-transform flex flex-col items-center justify-center leading-tight">
+<span>做空 (卖出)</span>
+<span class="font-label-numeric-sm text-[10px] font-normal opacity-90">0.07280</span>
+</button>
+</div>
+</div>
+</div>
+<!-- PANE 1: 【纪律】 DISCIPLINE & RISK ENGINE -->
+<div class="w-[20%] h-full overflow-y-auto px-4 pt-3 pb-24 space-y-3" data-pane-index="1">
+<div class="glass-l1 rounded-2xl p-space-md space-y-3">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">1R 风险防暴控规</span>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-label-caps bg-secondary-fixed text-on-secondary-fixed font-bold">已启用</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                      每笔交易最大回撤限定为系统账户净值的固定 1.00R (10.00 USDT)。禁止任意上调敞口。
+                    </p>
+<div class="space-y-2 pt-1">
+<div class="flex items-center justify-between p-2 rounded-xl bg-white/70 text-xs">
+<span class="text-slate-600">单笔最大亏损上限</span>
+<span class="font-label-numeric-sm font-bold text-slate-900">10.00 USDT (1R)</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-xl bg-white/70 text-xs">
+<span class="text-slate-600">日内熔断门槛 (Max DD)</span>
+<span class="font-label-numeric-sm font-bold text-tertiary">-3.00 R</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-xl bg-white/70 text-xs">
+<span class="text-slate-600">强制入场冷却期</span>
+<span class="font-label-numeric-sm font-bold text-slate-900">15 分钟</span>
+</div>
+</div>
+</div>
+<div class="glass-l1 rounded-2xl p-space-md">
+<div class="flex items-center space-x-2 text-primary font-semibold text-xs mb-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="verified_user">verified_user</span>
+<span>交易执行宪章</span>
+</div>
+<ul class="text-[12px] text-slate-600 space-y-1.5 list-disc list-inside">
+<li>不追涨杀跌，仅在斐波那契极值区与周一区间边界埋伏</li>
+<li>入场必须同时落单硬止损，严禁裸奔开仓</li>
+<li>浮盈达 1.5R 时自动推移保本止损 (Breakeven)</li>
+</ul>
+</div>
+</div>
+<!-- PANE 2: 【1.618】 IMMERSIVE CANDLESTICK CHART (Screen 2) -->
+<div class="w-[20%] h-full overflow-y-auto px-4 pt-3 pb-24 space-y-3" data-pane-index="2">
+<!-- Chart Header Pill Bar -->
+<div class="flex items-center justify-between glass-l1 rounded-2xl px-3 py-2">
+<div class="flex items-center space-x-2">
+<span class="text-xs font-bold text-on-surface">1.618 极值共振锚点</span>
+<span class="text-[10px] font-label-numeric-sm px-1.5 py-0.5 rounded bg-slate-200/60 text-slate-700">15M</span>
+</div>
+<div class="flex items-center space-x-1 text-[11px] font-label-numeric-sm text-outline">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>实时推流中</span>
+</div>
+</div>
+<!-- Candlestick Visualizer Frame -->
+<div class="touch-stop relative glass-l2 rounded-2xl p-3 h-[380px] flex flex-col justify-between overflow-hidden shadow-sm">
+<!-- 4 Precise Reference Lines with Unobstructed Floating Price Tags -->
+<!-- 1. 上1.618: 0.07890 (Red #F43F5E solid 1.5px) -->
+<div class="relative w-full line-fibo-top flex items-center justify-between pt-1">
+<div class="px-2 py-0.5 rounded bg-[#F43F5E]/15 text-[#c93248] text-[10px] font-label-numeric-sm font-bold flex items-center space-x-1">
+<span>上1.618 0.07890</span>
+</div>
+<span class="text-[10px] font-label-numeric-sm text-[#c93248] font-semibold">阻力拓展</span>
+</div>
+<!-- 2. 周一高点: 0.07450 (Blue #0071E3 solid 1px) -->
+<div class="relative w-full line-monday-high flex items-center justify-between pt-1">
+<div class="px-2 py-0.5 rounded bg-[#0071E3]/15 text-primary font-label-numeric-sm text-[10px] font-semibold">
+<span>高点 0.07450</span>
+</div>
+<span class="text-[10px] font-label-numeric-sm text-primary">周一高 (VAH)</span>
+</div>
+<!-- Realtime Price Line: 0.07280 (Dashed line) -->
+<div class="relative w-full line-current-price flex items-center justify-between pt-0.5">
+<div class="px-1.5 py-0.5 rounded bg-slate-800 text-white font-label-numeric-sm text-[9px] font-bold">
+<span>现价 0.07280 USDT</span>
+</div>
+<span class="text-[9px] font-label-numeric-sm text-slate-500">点差 0.00001</span>
+</div>
+<!-- 3. 周一低点: 0.07050 (Blue #0071E3 solid 1px) -->
+<div class="relative w-full line-monday-low flex items-center justify-between pt-1">
+<div class="px-2 py-0.5 rounded bg-[#0071E3]/15 text-primary font-label-numeric-sm text-[10px] font-semibold">
+<span>低点 0.07050</span>
+</div>
+<span class="text-[10px] font-label-numeric-sm text-primary">周一低 (VAL)</span>
+</div>
+<!-- 4. 下1.618: 0.06790 (Emerald Green #087F69 solid 1.5px) -->
+<div class="relative w-full line-fibo-bottom flex items-center justify-between pt-1 pb-1">
+<div class="px-2 py-0.5 rounded bg-[#087F69]/15 text-[#087F69] text-[10px] font-label-numeric-sm font-bold flex items-center space-x-1">
+<span>下1.618 0.06790</span>
+</div>
+<span class="text-[10px] font-label-numeric-sm text-[#087F69] font-semibold">买盘黄金区</span>
+</div>
+<!-- Atmospheric Candlestick Bars Background Mockup -->
+<div class="absolute inset-0 px-6 py-12 flex items-end justify-between pointer-events-none opacity-30">
+<div class="w-2.5 h-20 bg-secondary rounded-sm relative flex justify-center"><div class="absolute -top-3 w-0.5 h-26 bg-secondary"></div></div>
+<div class="w-2.5 h-14 bg-secondary rounded-sm relative flex justify-center"><div class="absolute -top-2 w-0.5 h-18 bg-secondary"></div></div>
+<div class="w-2.5 h-28 bg-tertiary rounded-sm relative flex justify-center"><div class="absolute -top-4 w-0.5 h-36 bg-tertiary"></div></div>
+<div class="w-2.5 h-16 bg-secondary rounded-sm relative flex justify-center"><div class="absolute -top-2 w-0.5 h-20 bg-secondary"></div></div>
+<div class="w-2.5 h-22 bg-secondary rounded-sm relative flex justify-center"><div class="absolute -top-3 w-0.5 h-28 bg-secondary"></div></div>
+<div class="w-2.5 h-12 bg-tertiary rounded-sm relative flex justify-center"><div class="absolute -top-3 w-0.5 h-18 bg-tertiary"></div></div>
+<div class="w-2.5 h-32 bg-secondary rounded-sm relative flex justify-center"><div class="absolute -top-4 w-0.5 h-40 bg-secondary"></div></div>
+<div class="w-2.5 h-24 bg-tertiary rounded-sm relative flex justify-center"><div class="absolute -top-2 w-0.5 h-30 bg-tertiary"></div></div>
+</div>
+</div>
+<div class="glass-l1 rounded-2xl p-2.5 text-[11px] font-body-sm text-slate-600 flex items-center space-x-2">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="info">info</span>
+<span>价格处于周一区间中轴震荡，未触发 1.618 边界挂单。</span>
+</div>
+</div>
+<!-- PANE 3: 【持仓】 ACTIVE POSITIONS -->
+<div class="w-[20%] h-full overflow-y-auto px-4 pt-3 pb-24 space-y-3" data-pane-index="3">
+<div class="glass-l1 rounded-2xl p-space-md space-y-2">
+<div class="flex items-center justify-between">
+<span class="text-xs font-label-caps text-outline uppercase font-semibold">当前活跃仓位 (0)</span>
+<span class="text-xs font-label-numeric-sm text-primary font-semibold">历史记录</span>
+</div>
+<div class="py-8 flex flex-col items-center justify-center text-center">
+<div class="w-12 h-12 rounded-full glass-l2 flex items-center justify-center text-slate-400 mb-2">
+<span class="material-symbols-outlined text-[24px]" data-icon="inbox">inbox</span>
+</div>
+<p class="font-headline-sm text-xs font-semibold text-slate-700">暂无任何持仓</p>
+<p class="font-body-sm text-[11px] text-outline mt-0.5">请前往【合约】界面依纪律构建首单</p>
+</div>
+</div>
+<div class="glass-l1 rounded-2xl p-3 flex items-center justify-between">
+<span class="text-xs font-body-sm text-slate-600">委托中的挂单</span>
+<span class="font-label-numeric-sm text-xs font-bold text-slate-800">0 笔</span>
+</div>
+</div>
+<!-- PANE 4: 【统计】 ZERO-RECORD STATS CARD (Screen 3) -->
+<div class="w-[20%] h-full overflow-y-auto px-4 pt-3 pb-24 space-y-3" data-pane-index="4">
+<!-- Account Equity Main Glass Card -->
+<div class="glass-l2 rounded-2xl p-space-md relative overflow-hidden">
+<div class="absolute -right-4 -bottom-4 w-28 h-28 rounded-full bg-primary/10 blur-xl"></div>
+<span class="text-xs font-label-caps text-on-surface-variant font-semibold uppercase tracking-wider">当前模拟净值 (Equity)</span>
+<div class="flex items-baseline space-x-2 mt-1">
+<span class="font-label-numeric-lg text-2xl font-extrabold text-on-surface">1,000.00</span>
+<span class="font-label-numeric-sm text-xs font-semibold text-primary">USDT</span>
+</div>
+<div class="mt-2 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px] font-label-numeric-sm text-outline">
+<span>初始本金: 1,000.00 USDT</span>
+<span class="text-slate-700 font-semibold">无未实现盈亏</span>
+</div>
+</div>
+<!-- Professional Grid Statistics Matrix -->
+<div class="grid grid-cols-2 gap-2.5">
+<div class="glass-l1 rounded-2xl p-3">
+<span class="text-[11px] font-body-sm text-outline">累计已平仓</span>
+<div class="mt-1 font-label-numeric-lg text-lg font-bold text-slate-900">0 笔</div>
+<span class="text-[10px] text-slate-400">已闭环样本数</span>
+</div>
+<div class="glass-l1 rounded-2xl p-3">
+<span class="text-[11px] font-body-sm text-outline">交易胜率</span>
+<div class="mt-1 font-label-numeric-lg text-lg font-bold text-slate-500">— %</div>
+<span class="text-[10px] text-slate-400">需完成首笔结算</span>
+</div>
+<div class="glass-l1 rounded-2xl p-3">
+<span class="text-[11px] font-body-sm text-outline">盈亏比 (RR)</span>
+<div class="mt-1 font-label-numeric-lg text-lg font-bold text-slate-500">—</div>
+<span class="text-[10px] text-slate-400">暂无亏损样本</span>
+</div>
+<div class="glass-l1 rounded-2xl p-3">
+<span class="text-[11px] font-body-sm text-outline">平均净收益</span>
+<div class="mt-1 font-label-numeric-lg text-lg font-bold text-slate-500">— R</div>
+<span class="text-[10px] text-slate-400">期望值 (Expectancy)</span>
+</div>
+</div>
+<div class="glass-l1 rounded-2xl p-3 flex items-center space-x-2 text-[11px] text-slate-500">
+<span class="material-symbols-outlined text-[16px] text-slate-400" data-icon="analytics">analytics</span>
+<span>数据均为 DEMO 模拟测试环境，无真实资金风险。</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Continuous Gesture BottomNavBar (Shared Components JSON Anchor) -->
+<nav class="fixed bottom-3 left-4 right-4 z-50 glass-tabbar rounded-full h-[62px] px-2 flex items-center justify-between" id="floatingBottomNav">
+<!-- Sliding Indicator Capsule -->
+<div class="absolute top-1.5 bottom-1.5 rounded-full bg-white/90 shadow-[0_4px_16px_rgba(0,113,227,0.15)] border border-white ease-kinetic pointer-events-none" id="navIndicator" style="width: 64px; transform: translateX(4px);"></div>
+<!-- 5 Interactive Navigation Tabs -->
+<button class="nav-tab-item relative z-10 flex-1 flex flex-col items-center justify-center py-1 text-primary transition-colors" data-tab="0">
+<span class="material-symbols-outlined text-[20px]" data-icon="swap_horiz">swap_horiz</span>
+<span class="text-[10px] font-headline-sm font-semibold tracking-tight mt-0.5">合约</span>
+</button>
+<button class="nav-tab-item relative z-10 flex-1 flex flex-col items-center justify-center py-1 text-on-surface-variant/70 hover:text-primary transition-colors" data-tab="1">
+<span class="material-symbols-outlined text-[20px]" data-icon="gavel">gavel</span>
+<span class="text-[10px] font-headline-sm font-medium tracking-tight mt-0.5">纪律</span>
+</button>
+<button class="nav-tab-item relative z-10 flex-1 flex flex-col items-center justify-center py-1 text-on-surface-variant/70 hover:text-primary transition-colors" data-tab="2">
+<span class="material-symbols-outlined text-[20px]" data-icon="show_chart">show_chart</span>
+<span class="text-[10px] font-headline-sm font-medium tracking-tight mt-0.5">1.618</span>
+</button>
+<button class="nav-tab-item relative z-10 flex-1 flex flex-col items-center justify-center py-1 text-on-surface-variant/70 hover:text-primary transition-colors" data-tab="3">
+<span class="material-symbols-outlined text-[20px]" data-icon="work">work</span>
+<span class="text-[10px] font-headline-sm font-medium tracking-tight mt-0.5">持仓</span>
+</button>
+<button class="nav-tab-item relative z-10 flex-1 flex flex-col items-center justify-center py-1 text-on-surface-variant/70 hover:text-primary transition-colors" data-tab="4">
+<span class="material-symbols-outlined text-[20px]" data-icon="analytics">analytics</span>
+<span class="text-[10px] font-headline-sm font-medium tracking-tight mt-0.5">统计</span>
+</button>
+</nav>
+<!-- Bottom Home Indicator Bar -->
+<div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 rounded-full bg-slate-900/30 z-50 pointer-events-none"></div>
+</div>
+</div>
+<!-- Gesture Telemetry Diagnostic Badge -->
+<div class="mt-4 flex items-center space-x-3 text-xs font-label-numeric-sm text-outline">
+<span>当前索引: <strong class="text-primary font-bold" id="telemetryIndex">0 (合约)</strong></span>
+<span>·</span>
+<span>实时偏移: <strong class="text-slate-800 font-bold" id="telemetryOffset">0.0 px</strong></span>
+<span>·</span>
+<span>阻尼抗性: <strong class="text-secondary font-bold" id="telemetryResistance">1.00 (无损)</strong></span>
+</div>
+</section>
+<!-- RIGHT COLUMN: Engineering Design System & Code Delivery Specifications -->
+<section class="lg:col-span-7 space-y-space-lg">
+<!-- SECTION 1: Liquid Apple Glass System Specification Token Matrix -->
+<div class="glass-l1 rounded-3xl p-space-xl border border-white/90">
+<div class="flex items-center justify-between mb-space-md pb-space-sm border-b border-white/70">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-bold">1. 视觉光学与材质分层规范 (Token Matrix)</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">杜绝纯白不透明图层，以双层高斯模糊与内切高光折射物理边界</p>
+</div>
+<span class="px-2.5 py-1 rounded-full text-xs font-label-caps bg-primary/10 text-primary font-bold">GLASSMORPHISM</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-xs font-body-sm">
+<thead>
+<tr class="text-outline border-b border-slate-200/60 font-semibold font-label-caps">
+<th class="pb-2">层级 (Elevation)</th>
+<th class="pb-2">背景材质 (Surface)</th>
+<th class="pb-2">滤镜折射 (Blur / Sat)</th>
+<th class="pb-2">内沿高光 (Specular Rim)</th>
+<th class="pb-2">环境阴影 (Atmosphere Shadow)</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-200/40 font-label-numeric-sm">
+<tr>
+<td class="py-2.5 font-bold text-slate-800">Level 0 (Canvas)</td>
+<td class="text-slate-600">#F0F4F8 ~ #E6EDF5</td>
+<td class="text-slate-600">None (径向环境光斑)</td>
+<td class="text-slate-400">None</td>
+<td class="text-slate-400">None</td>
+</tr>
+<tr>
+<td class="py-2.5 font-bold text-primary">Level 1 (Dock &amp; Card)</td>
+<td class="text-slate-700">rgba(255, 255, 255, 0.64)</td>
+<td class="text-slate-700">blur(24px) sat(190%)</td>
+<td class="text-slate-700">inset 0 1px 1px #FFF(0.95)</td>
+<td class="text-slate-600">0 8px 32px -4px rgba(15,23,42,0.06)</td>
+</tr>
+<tr>
+<td class="py-2.5 font-bold text-secondary">Level 2 (Active Panels)</td>
+<td class="text-slate-700">rgba(255, 255, 255, 0.82)</td>
+<td class="text-slate-700">blur(28px) sat(200%)</td>
+<td class="text-slate-700">inset 0 1.5px 1px #FFF(1.0)</td>
+<td class="text-slate-600">0 12px 36px -6px rgba(15,23,42,0.09)</td>
+</tr>
+<tr>
+<td class="py-2.5 font-bold text-tertiary">Level 3 (Floating Bar)</td>
+<td class="text-slate-700">rgba(255, 255, 255, 0.74)</td>
+<td class="text-slate-700">blur(28px) sat(210%)</td>
+<td class="text-slate-700">inset 0 1px 1px #FFF(0.95)</td>
+<td class="text-slate-600">0 16px 44px -8px rgba(15,23,42,0.16)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- SECTION 2: Component Architecture & Critical Rules -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-desktop">
+<!-- Component Spec: 44px Market/Limit Capsule -->
+<div class="glass-l1 rounded-3xl p-space-lg space-y-space-md border border-white/90">
+<div class="flex items-center space-x-2 text-primary font-bold">
+<span class="material-symbols-outlined text-[20px]" data-icon="toggle_on">toggle_on</span>
+<h3 class="font-headline-sm text-sm">44px 50/50 胶囊滑块组件规范</h3>
+</div>
+<p class="text-xs text-on-surface-variant font-body-sm leading-relaxed">
+              针对单手握持设计，采用完全对称的 50/50 几何占比，避免市价与限价切换出现尺寸跳动与触达死角。
+            </p>
+<div class="bg-white/70 rounded-xl p-3 space-y-1.5 font-label-numeric-sm text-xs border border-white">
+<div class="flex justify-between text-slate-700">
+<span>外框总高 / 圆角</span>
+<span class="font-bold">44.0px / rounded-full</span>
+</div>
+<div class="flex justify-between text-slate-700">
+<span>滑块内衬与间隙</span>
+<span class="font-bold">p-1 (4.0px 边界安全垫)</span>
+</div>
+<div class="flex justify-between text-slate-700">
+<span>激活状态指示器</span>
+<span class="font-bold">w-[calc(50%-4px)] bg-white</span>
+</div>
+<div class="flex justify-between text-slate-700">
+<span>独立杠杆组件</span>
+<span class="font-bold">右侧独立浮动 Capsule，防误触</span>
+</div>
+</div>
+</div>
+<!-- Component Spec: 1.618 Immersion Chart Lines -->
+<div class="glass-l1 rounded-3xl p-space-lg space-y-space-md border border-white/90">
+<div class="flex items-center space-x-2 text-primary font-bold">
+<span class="material-symbols-outlined text-[20px]" data-icon="straighten">straighten</span>
+<h3 class="font-headline-sm text-sm">1.618 斐波那契参考线系规范</h3>
+</div>
+<p class="text-xs text-on-surface-variant font-body-sm leading-relaxed">
+              严格采用固定颜色标识空间极值，标签悬浮于烛线上层，禁止被交互滑块或悬浮栏遮挡。
+            </p>
+<div class="bg-white/70 rounded-xl p-3 space-y-1.5 font-label-numeric-sm text-xs border border-white">
+<div class="flex justify-between text-[#c93248]">
+<span>上 1.618 (阻力极值)</span>
+<span class="font-bold">0.07890 · 1.5px 实线</span>
+</div>
+<div class="flex justify-between text-primary">
+<span>周一高点 (VAH)</span>
+<span class="font-bold">0.07450 · 1.0px 实线</span>
+</div>
+<div class="flex justify-between text-primary">
+<span>周一低点 (VAL)</span>
+<span class="font-bold">0.07050 · 1.0px 实线</span>
+</div>
+<div class="flex justify-between text-[#087F69]">
+<span>下 1.618 (买盘极值)</span>
+<span class="font-bold">0.06790 · 1.5px 实线</span>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 3: Touch Dynamics & Gesture Physics Engine -->
+<div class="glass-l1 rounded-3xl p-space-xl border border-white/90 space-y-space-md">
+<div class="flex items-center justify-between pb-space-sm border-b border-white/70">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-bold">3. 连续指尖追踪物理动力学规范 (Gesture Engine)</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                实时响应 touchmove 像素位移，拒绝突兀翻页与跳变，提供 iOS 原生质感的橡皮筋边界阻尼。
+              </p>
+</div>
+<span class="px-2.5 py-1 rounded-full text-xs font-label-caps bg-secondary-fixed text-on-secondary-fixed font-bold">SPRING PHYSICS</span>
+</div>
+<!-- Kinetic Flow Steps -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<div class="bg-white/80 rounded-2xl p-4 border border-white space-y-2">
+<div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs font-label-numeric-sm">01</div>
+<h4 class="font-headline-sm text-xs font-bold text-slate-800">方向锁 (Directional Lock)</h4>
+<p class="text-[11px] font-body-sm text-slate-600 leading-normal">
+                首个 10px 触控样本中，若 <code class="font-label-numeric-sm text-primary">|dy| &gt; |dx|</code> 则判定为垂直滚动，立即冻结水平拖拽，避免误滑翻页。
+              </p>
+</div>
+<div class="bg-white/80 rounded-2xl p-4 border border-white space-y-2">
+<div class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center font-bold text-xs font-label-numeric-sm">02</div>
+<h4 class="font-headline-sm text-xs font-bold text-slate-800">橡皮筋阻尼 (Rubber-band)</h4>
+<p class="text-[11px] font-body-sm text-slate-600 leading-normal">
+                在首末边缘（Tab 0 向左或 Tab 4 向右）施加抗性系数：<code class="font-label-numeric-sm text-secondary">dx * 0.35</code>，松手时无损回弹至原位。
+              </p>
+</div>
+<div class="bg-white/80 rounded-2xl p-4 border border-white space-y-2">
+<div class="w-8 h-8 rounded-lg bg-tertiary/10 text-tertiary flex items-center justify-center font-bold text-xs font-label-numeric-sm">03</div>
+<h4 class="font-headline-sm text-xs font-bold text-slate-800">速度阈值 (Flick Release)</h4>
+<p class="text-[11px] font-body-sm text-slate-600 leading-normal">
+                当末速度 <code class="font-label-numeric-sm text-tertiary">velocity &gt; 0.45 px/ms</code> 或拖拽距离 &gt; 75px 时，以 260ms <code class="font-label-numeric-sm text-primary">cubic-bezier(0.16, 1, 0.3, 1)</code> 完成过渡。
+              </p>
+</div>
+</div>
+<!-- Component Shield Rules -->
+<div class="bg-slate-100/80 rounded-2xl p-4 border border-slate-200/60 flex items-start space-x-3">
+<span class="material-symbols-outlined text-primary text-[20px] mt-0.5" data-icon="security">security</span>
+<div class="text-xs space-y-1">
+<div class="font-headline-sm font-bold text-slate-800">组件手势防冲突隔离带 (Touch Shielding)</div>
+<p class="text-slate-600 font-body-sm">
+                所有包含滑块 (Slider)、数值输入框 (Inputs)、烛线图 (Chart Canvas) 及点击按钮的交互区域均赋予 <code class="px-1.5 py-0.5 rounded bg-white font-label-numeric-sm text-primary font-semibold">.touch-stop</code> 阻断类，确保细粒度微调与系统级全局翻页手势物理隔离。
+              </p>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Interactive Continuous Finger-Tracking Physics Engine Script -->
+<script>
+    (function () {
+      // Prototype References
+      const viewport = document.getElementById('prototype-viewport');
+      const rail = document.getElementById('gestureRail');
+      const navIndicator = document.getElementById('navIndicator');
+      const navTabs = document.querySelectorAll('.nav-tab-item');
+      const telemetryIndex = document.getElementById('telemetryIndex');
+      const telemetryOffset = document.getElementById('telemetryOffset');
+      const telemetryResistance = document.getElementById('telemetryResistance');
+      const resetBtn = document.getElementById('resetDemoBtn');
+
+      // Segmented Market/Limit Controls
+      const typeMarketBtn = document.getElementById('typeMarketBtn');
+      const typeLimitBtn = document.getElementById('typeLimitBtn');
+      const orderTypeIndicator = document.getElementById('orderTypeIndicator');
+
+      const tabLabels = ['0 (合约)', '1 (纪律)', '2 (1.618)', '3 (持仓)', '4 (统计)'];
+      const TOTAL_TABS = 5;
+      let currentIndex = 0;
+
+      // Gesture State Variables
+      let startX = 0;
+      let startY = 0;
+      let currentX = 0;
+      let isDragging = false;
+      let isDirectionLocked = false;
+      let isHorizontal = false;
+      let startTime = 0;
+
+      // Single slide width percentage inside rail
+      const PANE_PERCENT = 20; // 100% / 5 tabs
+
+      // Calculate Nav Tab Indicator Position
+      function updateNavIndicator(index, progress = 0) {
+        if (!navTabs.length) return;
+        const targetTab = navTabs[index];
+        const nextIndex = Math.min(Math.max(index + (progress > 0 ? 1 : -1), 0), TOTAL_TABS - 1);
+        const nextTab = navTabs[nextIndex];
+        
+        const currentLeft = targetTab.offsetLeft;
+        const currentWidth = targetTab.offsetWidth;
+        
+        let interpLeft = currentLeft;
+        let interpWidth = currentWidth;
+
+        if (progress !== 0 && nextTab) {
+          const p = Math.abs(progress);
+          interpLeft = currentLeft + (nextTab.offsetLeft - currentLeft) * p;
+          interpWidth = currentWidth + (nextTab.offsetWidth - currentWidth) * p;
+        }
+
+        navIndicator.style.transform = `translateX(${interpLeft}px)`;
+        navIndicator.style.width = `${interpWidth}px`;
+
+        // Update active tab text color states
+        navTabs.forEach((tab, i) => {
+          if (i === index) {
+            tab.classList.remove('text-on-surface-variant/70');
+            tab.classList.add('text-primary');
+          } else {
+            tab.classList.remove('text-primary');
+            tab.classList.add('text-on-surface-variant/70');
+          }
+        });
+      }
+
+      // Move Rail to Specific Tab
+      function goToTab(index, animate = true) {
+        currentIndex = Math.max(0, Math.min(index, TOTAL_TABS - 1));
+        
+        if (animate) {
+          rail.classList.add('ease-kinetic');
+          rail.style.transitionDuration = '260ms';
+        } else {
+          rail.classList.remove('ease-kinetic');
+          rail.style.transitionDuration = '0ms';
+        }
+
+        const targetPercent = -(currentIndex * PANE_PERCENT);
+        rail.style.transform = `translateX(${targetPercent}%)`;
+        updateNavIndicator(currentIndex, 0);
+
+        // Update diagnostics
+        if (telemetryIndex) telemetryIndex.textContent = tabLabels[currentIndex];
+        if (telemetryOffset) telemetryOffset.textContent = '0.0 px';
+        if (telemetryResistance) telemetryResistance.textContent = '1.00 (无损)';
+      }
+
+      // Initialize Bottom Nav Pill size & position
+      setTimeout(() => {
+        updateNavIndicator(0, 0);
+      }, 50);
+
+      window.addEventListener('resize', () => {
+        updateNavIndicator(currentIndex, 0);
+      });
+
+      // Bottom Bar Direct Tap Handler
+      navTabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+          const tabIndex = parseInt(tab.getAttribute('data-tab'), 10);
+          goToTab(tabIndex, true);
+        });
+      });
+
+      // 50/50 Market/Limit Capsule Switcher
+      if (typeMarketBtn && typeLimitBtn && orderTypeIndicator) {
+        typeMarketBtn.addEventListener('click', () => {
+          orderTypeIndicator.style.transform = 'translateX(0%)';
+          typeMarketBtn.classList.add('text-slate-900', 'font-semibold');
+          typeMarketBtn.classList.remove('text-slate-500', 'font-medium');
+          typeLimitBtn.classList.remove('text-slate-900', 'font-semibold');
+          typeLimitBtn.classList.add('text-slate-500', 'font-medium');
+        });
+
+        typeLimitBtn.addEventListener('click', () => {
+          orderTypeIndicator.style.transform = 'translateX(100%)';
+          typeLimitBtn.classList.add('text-slate-900', 'font-semibold');
+          typeLimitBtn.classList.remove('text-slate-500', 'font-medium');
+          typeMarketBtn.classList.remove('text-slate-900', 'font-semibold');
+          typeMarketBtn.classList.add('text-slate-500', 'font-medium');
+        });
+      }
+
+      // Reset Board Button
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          goToTab(0, true);
+          if (typeMarketBtn) typeMarketBtn.click();
+        });
+      }
+
+      // Continuous Finger-Tracking Physics Engine on Prototype Viewport
+      viewport.addEventListener('touchstart', (e) => {
+        // Respect touch shield zone
+        if (e.target.closest('.touch-stop') || e.target.closest('#floatingBottomNav')) {
+          return;
+        }
+
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        currentX = startX;
+        startTime = Date.now();
+        isDragging = true;
+        isDirectionLocked = false;
+        isHorizontal = false;
+
+        rail.classList.remove('ease-kinetic');
+        rail.style.transitionDuration = '0ms';
+      }, { passive: true });
+
+      viewport.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+
+        const touch = e.touches[0];
+        const dx = touch.clientX - startX;
+        const dy = touch.clientY - startY;
+
+        // Direction Lock Algorithm (First 10px movement sample)
+        if (!isDirectionLocked) {
+          if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+            isDirectionLocked = true;
+            if (Math.abs(dx) > Math.abs(dy)) {
+              isHorizontal = true;
+            } else {
+              isHorizontal = false;
+              isDragging = false;
+              return;
+            }
+          }
+        }
+
+        if (!isHorizontal) return;
+
+        // Continuous horizontal tracking
+        currentX = touch.clientX;
+        const viewportWidth = viewport.offsetWidth || 370;
+        let deltaX = dx;
+
+        // Rubber-band resistance at boundary edges
+        let resistanceFactor = 1.0;
+        if ((currentIndex === 0 && dx > 0) || (currentIndex === TOTAL_TABS - 1 && dx < 0)) {
+          resistanceFactor = 0.35;
+          deltaX = dx * resistanceFactor;
+        }
+
+        const deltaPercent = (deltaX / viewportWidth) * PANE_PERCENT;
+        const currentRailPercent = -(currentIndex * PANE_PERCENT);
+        const continuousPosition = currentRailPercent + deltaPercent;
+
+        rail.style.transform = `translateX(${continuousPosition}%)`;
+
+        // Continuous interpolation for bottom navigation pill
+        const progress = -deltaX / viewportWidth;
+        updateNavIndicator(currentIndex, progress);
+
+        // Update real-time telemetry diagnostics
+        if (telemetryOffset) telemetryOffset.textContent = `${deltaX.toFixed(1)} px`;
+        if (telemetryResistance) telemetryResistance.textContent = resistanceFactor.toFixed(2);
+      }, { passive: true });
+
+      viewport.addEventListener('touchend', (e) => {
+        if (!isDragging || !isHorizontal) {
+          isDragging = false;
+          return;
+        }
+
+        isDragging = false;
+        const dx = currentX - startX;
+        const dt = Math.max(Date.now() - startTime, 1);
+        const velocity = Math.abs(dx) / dt; // px per ms
+        const viewportWidth = viewport.offsetWidth || 370;
+
+        let targetIndex = currentIndex;
+
+        // Velocity-aware release threshold
+        const FLICK_VELOCITY = 0.45;
+        const DISTANCE_THRESHOLD = 75;
+
+        if (velocity > FLICK_VELOCITY || Math.abs(dx) > DISTANCE_THRESHOLD) {
+          if (dx < 0 && currentIndex < TOTAL_TABS - 1) {
+            targetIndex = currentIndex + 1;
+          } else if (dx > 0 && currentIndex > 0) {
+            targetIndex = currentIndex - 1;
+          }
+        }
+
+        goToTab(targetIndex, true);
+      });
+
+      // Update phone live time
+      function refreshTime() {
+        const timeEl = document.getElementById('phoneClock');
+        if (!timeEl) return;
+        const now = new Date();
+        const hrs = String(now.getHours()).padStart(2, '0');
+        const mins = String(now.getMinutes()).padStart(2, '0');
+        timeEl.textContent = `${hrs}:${mins}`;
+      }
+      setInterval(refreshTime, 1000);
+      refreshTime();
+
+    })();
+  </script>
+</body></html>

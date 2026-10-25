@@ -2,7 +2,7 @@
 .app.fib-page{--fib-glass:var(--card);--fib-edge:var(--glass-border);--fib-shadow:var(--shadow);--fib-ease:var(--motion-ease);--fib-blue:var(--accent)}
 .app.fib-page main{padding:0;height:100dvh;min-height:0;position:relative;overflow:hidden;animation:none;touch-action:none}
 .fib-page::before{display:none}.fib-home,.fib-screen{display:block;position:absolute;inset:0;height:100%;min-height:0}
-.fib-chart{position:absolute;inset:0;min-height:0;background:#ffffff}
+.fib-chart{position:absolute;inset:0;min-height:0;background:var(--canvas)}
 .fib-chart .candle-panel{position:absolute;inset:0;padding:0;display:block;background:transparent;border:0;border-radius:0;box-shadow:none;animation:none}
 .fib-chart .candle-plot{position:absolute;inset:0;display:block;min-height:0}.fib-chart .candle-canvas{position:absolute;inset:0;height:100%;width:100%;min-height:0;touch-action:none}.fib-chart .candle-heading{display:none}
 .fib-top{position:absolute;top:calc(var(--safe-top) + 16px);left:16px;right:72px;z-index:4;display:flex;align-items:center;justify-content:space-between;pointer-events:none}

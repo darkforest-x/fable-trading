@@ -1,6 +1,6 @@
 /** Solid levels and bare text, clipped to the completed NY Monday range.
  * Uses Lightweight Charts 5.2 ISeriesPrimitive / media-coordinate renderer API.
- * Stitch 332e4a5b46a14da5b5787c27cd1d5b50. No fill or axis-label backgrounds.
+ * Stitch f5d3f95247be479983f598ecb45c032b. No fill or axis-label backgrounds.
  */
 import type {ISeriesPrimitive,SeriesAttachedParameter,IPrimitivePaneView,IPrimitivePaneRenderer,UTCTimestamp} from 'lightweight-charts';
 import {fibLevels,type FibRange} from './fibData.ts';
@@ -8,7 +8,7 @@ export class FibRangePrimitive implements ISeriesPrimitive {
  private context?:SeriesAttachedParameter;
  private views:IPrimitivePaneView[];
  private range:FibRange;
- constructor(range:FibRange){
+ constructor(range:FibRange,formatPrice:(price:number)=>string=price=>String(price)){
   this.range=range;
   const renderer:IPrimitivePaneRenderer={draw:target=>target.useMediaCoordinateSpace(({context:ctx,mediaSize})=>{
    const source=this.context;if(!source)return;
@@ -32,7 +32,9 @@ export class FibRangePrimitive implements ISeriesPrimitive {
    for(const level of fibLevels(this.range)){
     const y=source.series.priceToCoordinate(level.price);if(y===null||y<0||y>mediaSize.height)continue;
     ctx.strokeStyle=level.color;ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.stroke();
-    if(level.title&&x2-x1>ctx.measureText(level.title).width+8){ctx.fillStyle=level.color;ctx.fillText(level.title,x2-4,y-4)}
+    const name=level.title==='1.618'?(level.price===this.range.upper?'上 1.618':'下 1.618'):level.title;
+    const label=name?`${name} ${formatPrice(level.price)}`:'';
+    if(label&&x2-x1>ctx.measureText(label).width+8){ctx.fillStyle=level.color;ctx.fillText(label,x2-4,Math.max(14,y-4))}
    }
    ctx.restore();
   })};
