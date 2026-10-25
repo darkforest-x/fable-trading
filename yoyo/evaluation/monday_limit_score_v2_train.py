@@ -12,7 +12,8 @@ come from each fold's training scores, never from the test year. Pooled
 2025-2026 predictions (each from its own fold) are also replayed from 1000
 USDT: equal 10 percent on the top 40 percent, and linear in the training
 percentile above 0.6 (0 to 25 percent per trade), gross <= 1x, medians over
-TIES random orders of same-time fills. Infinite ratios (zero denominators) count as missing. The frozen current score is evaluated on
+TIES random orders of same-time fills. Infinite ratios (zero denominators) count as missing. Only fills with all ten base
+features are used, so every model and the frozen score rank the same rows. The frozen current score is evaluated on
 the same 2025-2026 rows as the reference. Read-only arithmetic.
 """
 from __future__ import annotations
@@ -30,6 +31,7 @@ FEAT = ROOT/'experiments/active/exp-monday-limit-score-features-v2-20261025-v1'
 FROZEN = ROOT/'experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/score_model.json'
 YEARS = [2022, 2023, 2024, 2025, 2026]
 TIES = 10
+BASE = ['bucket', 'log_vol_ratio', 'log_approach', 'opp_first', 'monday_close_side', 'log_liquidity', 'toward24', 'cluster24', 'side', 'range_pct']  # rows the current score can score (16 percent of fills lack some base feature)
 
 
 def feature_sets(groups):
@@ -49,7 +51,7 @@ T = None
 def _init(path):
     global T
     T = pd.read_csv(path, parse_dates=['touch', 'exit_time']).dropna(subset=['win', 'net']).sort_values('touch').reset_index(drop=True)
-    T = T.replace([np.inf, -np.inf], np.nan)
+    T = T.replace([np.inf, -np.inf], np.nan).dropna(subset=BASE).reset_index(drop=True)
     T['year'] = T.touch.dt.year
 
 
@@ -113,7 +115,7 @@ def run():
     groups = json.loads((FEAT/'summary.json').read_text())['groups']
     groups['A'] = [c for c in groups['A'] if c != 'side']+['side']
     t = pd.read_csv(FEAT/'features_v2.csv.gz', parse_dates=['touch', 'exit_time'])
-    t = t.dropna(subset=['win', 'net']).sort_values('touch').reset_index(drop=True).replace([np.inf, -np.inf], np.nan)
+    t = t.dropna(subset=['win', 'net']).sort_values('touch').replace([np.inf, -np.inf], np.nan).dropna(subset=BASE).reset_index(drop=True)
     t['year'] = t.touch.dt.year
     t['entry'] = t.touch.astype('int64'); t['exit'] = t.exit_time.astype('int64')
     sets = feature_sets(groups)
