@@ -17,8 +17,8 @@ def stamp(iso):
 def fixture(at='2026-10-25T05:05:00+00:00', symbol='BAT-USDT-SWAP'):
     at = stamp(at)
     window = week_window(at)
-    raw = [[str(t), '100', str(110+i), '90', '105', '1', '1', '1', '1']
-           for i, t in enumerate(range(window['start'], window['end'], HOUR))]
+    raw = [[str(t), '100', str(110+i//12), '90', '105', '1', '1', '1', '1']
+           for i, t in enumerate(range(window['start'], window['end'], 300_000))]
     snapshot = dict(symbol=symbol, episodes=[dict(id='box', detected_at_ms=at)])
     calls = []
     client = SimpleNamespace(get=lambda path, params: (calls.append((path, params)), raw)[1])
@@ -28,12 +28,14 @@ def fixture(at='2026-10-25T05:05:00+00:00', symbol='BAT-USDT-SWAP'):
 def test_levels_match_existing_monitor_and_request_only_selected_monday():
     snapshot, raw, calls, service = fixture()
     value = service.read(snapshot, 'box')
-    reference = baseline(raw, snapshot['episodes'][0]['detected_at_ms'])
+    reference = baseline(raw[::12], snapshot['episodes'][0]['detected_at_ms'])
     assert reference['state'] == 'missing_history'
     assert value['state'] == 'ready'
     assert [value[k] for k in ('high', 'low', 'upper', 'lower')] == [reference[k] for k in ('high', 'low', 'upper', 'lower')]
     assert value['high'] == 133 and value['low'] == 90
-    assert calls == [('/api/v5/market/history-candles', dict(instId='BAT-USDT-SWAP', bar='1H', limit='24', after=str(value['end_ms'])))]
+    assert value['high_ms'] == value['start_ms'] + 23*HOUR
+    assert value['low_ms'] == value['start_ms']
+    assert calls == [('/api/v5/market/history-candles', dict(instId='BAT-USDT-SWAP', bar='5m', limit='300', after=str(value['end_ms'])))]
     assert value['as_of_ms'] == snapshot['episodes'][0]['detected_at_ms']
 
 

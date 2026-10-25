@@ -270,3 +270,27 @@ def test_waiting_clients_are_bounded_and_shutdown_releases_a_cold_waiter():
         assert not thread.is_alive() and result[0]['candles'] == []
     finally:
         release.set(); service.close()
+
+
+def test_extrema_api_is_read_only_validates_symbol_and_hides_upstream_errors(tmp_path, monkeypatch):
+    from yoyo.monitor.monday_chart_levels import MondayChartLevels
+    seen = []
+    def read(self, symbol, at):
+        seen.append((symbol, at))
+        if symbol == 'ETH-USDT-SWAP':
+            raise RuntimeError('private upstream detail')
+        return dict(symbol=symbol, state='ready', high_ms=123, low_ms=456)
+    monkeypatch.setattr(MondayChartLevels, 'read', read)
+    app = FastAPI(); install(app, tmp_path)
+    service = app.state.monday_candles
+    monkeypatch.setattr(service.client, 'clock', lambda: NOW)
+    service.close()
+    with TestClient(app) as client:
+        response = client.get('/api/monday-fib/levels?symbol=BTC-USDT-SWAP')
+        assert response.status_code == 200 and response.json()['high_ms'] == 123
+        assert seen == [('BTC-USDT-SWAP', NOW)]
+        assert client.get('/api/monday-fib/levels?symbol=https://bad').status_code == 422
+        assert len(seen) == 1
+        failure = client.get('/api/monday-fib/levels?symbol=ETH-USDT-SWAP')
+        assert failure.status_code == 503 and 'private' not in failure.text
+        assert client.post('/api/monday-fib/levels?symbol=BTC-USDT-SWAP').status_code == 405

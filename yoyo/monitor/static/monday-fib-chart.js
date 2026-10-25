@@ -7,7 +7,7 @@
   'use strict';
   const finite=Number.isFinite,PERIODS={'1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'1D':86400000};
   const weekOf=ms=>new Intl.DateTimeFormat('sv-SE',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(ms));
-  function levels(row){
+  function levels(row,anchors){
     const h=row.high,l=row.low,r=h-l;
     if(!finite(h)||!finite(l)||r<=0)return [];
     return [
@@ -21,11 +21,12 @@
       {label:'周一低',price:l,kind:'range',color:'#528cc1',lineStyle:0},
       {label:'下 1.618',price:row.lower,kind:'fib',color:'#087f69',lineWidth:2,lineStyle:0},
     ].filter(x=>finite(x.price)).map(level=>({...level,
-      // Keep names for data/inspection; only bare prices belong on the chart.
-      inlinePriceVisible:level.axisLabelVisible!==false,axisLabelVisible:false,
+      // Inline names and prices stay on the ray; the axis keeps room for OHLC.
+      inlinePriceVisible:level.axisLabelVisible!==false,inlineNameVisible:true,axisLabelVisible:false,
+      ...(anchors?{start_ms:['上 1.618','周一高'].includes(level.label)?anchors.high_ms:['周一低','下 1.618'].includes(level.label)?anchors.low_ms:Math.max(anchors.high_ms,anchors.low_ms)}:{}),
     }));
   }
-  function prepare(context,row,week,period='15m'){
+  function prepare(context,row,week,period='15m',anchors){
     if(!PERIODS[period]||context.bar!==period||(period==='1D'&&context.native_bar!=='1Dutc'))throw Error('K 线周期不匹配');
     if(context.symbol!==row.symbol||context.timezone!=='America/New_York')throw Error('图表币种或时区不匹配');
     if(!context.candles?.length)return {...context,levels:levels(row)};
@@ -39,7 +40,7 @@
       if(![b.time,b.open,b.high,b.low,b.close].every(finite)||b.time<=previous||b.time+PERIODS[period]>boundary||b.time%PERIODS[period]!==0||b.high<Math.max(b.open,b.close,b.low)||b.low>Math.min(b.open,b.close))throw Error('K 线数据不完整，请稍后重试');
       previous=b.time;
     }
-    return {...context,candles,levels:levels(row),level_window:{start_ms:start,end_ms:context.monday.expires_ms},monday:{...context.monday,high:row.high,low:row.low,complete:true}};
+    return {...context,candles,levels:levels(row,anchors),level_window:{start_ms:start,end_ms:context.monday.expires_ms},monday:{...context.monday,high:row.high,low:row.low,complete:true}};
   }
   // The display contains closed candles. Refresh at their next close, using
   // server time so a user's clock cannot postpone updates. Lagging tails retry.
@@ -56,18 +57,19 @@
   if(typeof document==='undefined')return;
   const view={bars:720,initialBars:160,range:true,fib:true,fitAll:false,showLevels:false,mondayBand:true,wallpaper:true,candleColors:{up:'#169873',down:'#d7355d'}};
   let target=null,controller=null,timer=null,version=0,paused=false;
-  const cache=new Map();
+  const cache=new Map(),levelCache=new Map();
   function pause(){paused=true;version++;clearTimeout(timer);controller?.abort();controller=null;target?.feed?.stop();if(target)target.feed=null;}
   function stop(){pause();if(target){window.SpikeRangeChart?.unmount(target.mount);target.host.replaceChildren?.();}target=null;}
   function draw(context,error=''){
     if(!target)return;
     try{
-      let value=prepare(context,target.row,target.week,target.period);
+      let value=prepare(context,target.row,target.week,target.period,target.levels);
+      if(!target.levels)value.levels=[];
       value=window.SpikeMondayCandleFeed?.mergeDisplay(value,target.live,target.period)||value;
       target.context=context;
       if(!target.internal)value.levels=value.levels.filter(l=>['上 1.618','周一高','周一低','下 1.618'].includes(l.label));
-      target.instance=window.SpikeRangeChart.mount(target.mount,value,{...view,mondayBand:target.period!=='1D'},error);
-      message(error||(context.error?'K 线更新失败：'+context.error:context.loading?'正在同步此合约 K 线…':!value.candles?.length?'暂无此周期 K 线，请稍后重试':target.live?.error||''));
+      target.instance=window.SpikeRangeChart.mount(target.mount,value,{...view,ma:target.ma,mondayBand:target.period!=='1D'},error);
+      message(error||target.levelError||(context.error?'K 线更新失败：'+context.error:context.loading?'正在同步此合约 K 线…':!value.candles?.length?'暂无此周期 K 线，请稍后重试':target.live?.error||''));
     }catch(e){message(e.message);window.SpikeRangeChart.unmount(target.mount);}
   }
   function message(value){if(!target)return;target.state.textContent=value;target.caption.hidden=!value;}
@@ -84,7 +86,8 @@
   async function refresh(){
     if(!target||controller||document.hidden)return;
     clearTimeout(timer);const current=target,token=version,c=new AbortController();controller=c;
-    const timeout=setTimeout(()=>c.abort(),12000);let delay=15000;
+    const timeout=setTimeout(()=>c.abort(),15000);let delay=15000;
+    const anchorRequest=current.levels?null:fetch('/api/monday-fib/levels?symbol='+encodeURIComponent(current.row.symbol),{signal:c.signal,cache:'no-store'}).then(async r=>{if(!r.ok)throw Error('周一锚点读取失败');const a=await r.json();if(a.symbol!==current.row.symbol||a.week!==current.week||a.state!=='ready'||![a.high_ms,a.low_ms].every(t=>finite(t)&&t>=a.start_ms&&t<a.end_ms)||['high','low','upper','lower'].some(k=>!finite(a[k])||Math.abs(a[k]-current.row[k])>Math.max(1e-12,Math.abs(a[k])*1e-8)))throw Error('周一锚点待同步');return a;}).catch(()=>null);
     try{
       const warming=window.SpikeStartup?.take(current.row.symbol+'|'+current.period,c.signal),warm=warming?await warming:null;
       let value=warm?.value;
@@ -95,21 +98,26 @@
       delay=Math.max(0,refreshDelay(value,current.period)-(warm?Date.now()-warm.receivedAt:0));
       cache.delete(current.key);cache.set(current.key,{value,due:Date.now()+delay});while(cache.size>6)cache.delete(cache.keys().next().value);
       draw(value);
+      if(anchorRequest){const anchors=await anchorRequest;if(token!==version||target!==current)return;
+        current.levels=anchors;current.levelError=anchors?'':'周一锚点暂不可用，稍后重试';
+        if(anchors){levelCache.set(current.row.symbol+'|'+current.week,anchors);while(levelCache.size>32)levelCache.delete(levelCache.keys().next().value);}else delay=10000;
+        cache.set(current.key,{value,due:Date.now()+delay});
+        draw(value);}
     }catch(e){if(token===version&&target===current){message((e.name==='AbortError'?'图表读取超时':e.message)+' · 可重新加载');delay=10000;}}
     finally{clearTimeout(timeout);if(controller===c)controller=null;if(token===version&&target===current&&!document.hidden)timer=setTimeout(refresh,delay);}
   }
-  function show(host,row,week,{internal=false,period='15m'}={}){
+  function show(host,row,week,{internal=false,ma=false,period='15m'}={}){
     if(!PERIODS[period])period='15m';
     const key=row.symbol+'|'+week+'|'+period;
     if(target?.host===host&&target.key===key){
-      const changed=target.internal!==internal||['high','low','upper','lower'].some(k=>target.row[k]!==row[k]);
-      target.row=row;target.internal=internal;if(changed&&target.context)draw(target.context);if(paused){paused=false;startFeed();const previous=cache.get(key);if(previous&&previous.due>Date.now())timer=setTimeout(refresh,previous.due-Date.now());else refresh();}return;
+      const changed=target.internal!==internal||target.ma!==ma||['high','low','upper','lower'].some(k=>target.row[k]!==row[k]);
+      target.row=row;target.internal=internal;target.ma=ma;if(changed&&target.context)draw(target.context);if(paused){paused=false;startFeed();const previous=cache.get(key);if(previous&&previous.due>Date.now())timer=setTimeout(refresh,previous.due-Date.now());else refresh();}return;
     }
     const reuse=target?.host===host?target:null;
     if(reuse){version++;clearTimeout(timer);controller?.abort();controller=null;target.feed?.stop();}else stop();
     if(!host)return;paused=false;
     if(!reuse)host.innerHTML='<div class="mf-chart-caption"><p role="status">正在加载区间 K 线…</p><button type="button" data-mf-chart-retry>重新加载</button></div><div class="mf-chart-mount"></div>';
-    target={host,row,week,key,internal,period,state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
+    target={host,row,week,key,internal,ma,period,levels:levelCache.get(row.symbol+'|'+week),state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
     if(!reuse)host.querySelector('[data-mf-chart-retry]').addEventListener('click',()=>refresh());
     const previous=cache.get(key);
     if(previous)draw(previous.value);
@@ -120,9 +128,10 @@
       message('正在加载区间 K 线…');
     }
     startFeed();
-    if(previous&&Date.now()<previous.due&&!previous.value.loading&&!previous.value.error)timer=setTimeout(refresh,previous.due-Date.now());else refresh();
+    if(target.levels&&previous&&Date.now()<previous.due&&!previous.value.loading&&!previous.value.error)timer=setTimeout(refresh,previous.due-Date.now());else refresh();
   }
   function setInternal(value){if(!target)return;target.internal=value;if(target.context)draw(target.context);}
+  function setMa(value){if(!target)return;target.ma=!!value;if(target.context)draw(target.context);}
   function fit(){const chart=target?.instance?.chart;if(chart){chart.priceScale('right').applyOptions({autoScale:true});chart.timeScale().fitContent();}}
   function latest(){
     const instance=target?.instance,chart=instance?.chart,n=instance?.rows?.length;if(!chart||!n)return;
@@ -133,5 +142,5 @@
     const scale=target?.instance?.chart?.timeScale(),range=scale?.getVisibleLogicalRange();if(!range||!finite(factor)||factor<=0)return;
     const span=Math.max(8,Math.min(view.bars+20,(range.to-range.from)*factor));scale.setVisibleLogicalRange({from:range.to-span,to:range.to});
   }
-  window.SpikeMondayFibChart={show,hide:stop,pause,setInternal,fit,latest,zoom};
+  window.SpikeMondayFibChart={show,hide:stop,pause,setInternal,setMa,fit,latest,zoom};
 })();

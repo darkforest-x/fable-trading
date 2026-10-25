@@ -154,7 +154,7 @@
       <p data-quick-status class="mf-quick-status"></p><div id="mf-quick-content" class="mf-quick-content"></div>
     </aside>
     <div id="mf-notice" class="mf-notice mf-glass" role="status" hidden></div>
-    <div class="mf-dock mf-glass" data-mf-movable="dock" role="group" aria-label="图表控制">${grip('图表工具')}<button id="mf-timeframe" class="mf-timeframe" type="button" aria-label="选择 K 线周期" aria-haspopup="menu" aria-controls="mf-period-menu" aria-expanded="false"><span id="mf-period-label">15m</span><span aria-hidden="true">⌄</span></button><span class="mf-divider"></span><button id="mf-zoom-out" class="mf-zoom" aria-label="缩小 K 线" title="缩小 K 线（−）"><span aria-hidden="true">−</span></button><button id="mf-zoom-in" class="mf-zoom" aria-label="放大 K 线" title="放大 K 线（+）"><span aria-hidden="true">+</span></button><button id="mf-latest" aria-label="回到当前合约最新 K 线" title="回到当前合约最新 K 线，保留缩放宽度">${icon('chevron-right')}<span>最新 K 线</span></button><button id="mf-fit" aria-label="显示全部已加载 K 线并复位" title="恢复价格缩放并显示全部已加载 K 线">${icon('maximize')}<span>全图</span></button><button id="mf-fib" aria-pressed="false" title="显示区间内部 0.5 / 0.618 / 0.705">${icon('adjustments-horizontal')}<span>内部线</span></button><span class="mf-divider"></span><button id="mf-follow" aria-pressed="true">${icon('activity')}<span>跟随最新</span></button></div>
+    <div class="mf-dock mf-glass" data-mf-movable="dock" role="group" aria-label="图表控制">${grip('图表工具')}<button id="mf-timeframe" class="mf-timeframe" type="button" aria-label="选择 K 线周期" aria-haspopup="menu" aria-controls="mf-period-menu" aria-expanded="false"><span id="mf-period-label">15m</span><span aria-hidden="true">⌄</span></button><span class="mf-divider"></span><button id="mf-zoom-out" class="mf-zoom" aria-label="缩小 K 线" title="缩小 K 线（−）"><span aria-hidden="true">−</span></button><button id="mf-zoom-in" class="mf-zoom" aria-label="放大 K 线" title="放大 K 线（+）"><span aria-hidden="true">+</span></button><button id="mf-latest" aria-label="回到当前合约最新 K 线" title="回到当前合约最新 K 线，保留缩放宽度">${icon('chevron-right')}<span>最新 K 线</span></button><button id="mf-fit" aria-label="显示全部已加载 K 线并复位" title="恢复价格缩放并显示全部已加载 K 线">${icon('maximize')}<span>全图</span></button><button id="mf-fib" aria-pressed="false" title="显示区间内部 0.5 / 0.618 / 0.705">${icon('adjustments-horizontal')}<span>内部线</span></button><button id="mf-ma" class="mf-ma-toggle" role="switch" aria-checked="false" title="SMA / EMA 20、60、120"><span>六均线</span><i aria-hidden="true"></i></button><span class="mf-divider"></span><button id="mf-follow" aria-pressed="true">${icon('activity')}<span>跟随最新</span></button></div>
     <div id="mf-period-menu" class="mf-period-menu mf-glass" role="menu" aria-label="K 线周期" hidden>${['1m','5m','15m','30m','1H','4H','1D'].map(p=>`<button type="button" role="menuitemradio" aria-checked="${p==='15m'}" data-period="${p}" tabindex="-1">${p}<span aria-hidden="true">✓</span></button>`).join('')}</div>
     <footer class="mf-footer"><span id="mf-week">纽约周一 · 读取中</span><span id="mf-updated">15m 实时 K 线</span><span class="mf-gesture-hint">拖动平移 · 滚轮缩放 · 双击价格轴复位</span></footer>`;
   const layout=mountLayout(root);
@@ -163,7 +163,7 @@
   const periods=['1m','5m','15m','30m','1H','4H','1D'];
   let period='15m';try{const saved=window.localStorage?.getItem('spike.monday.timeframe');if(periods.includes(saved))period=saved;}catch{}
   let active=false,data=null,receivedAt=0,error='',timer=null,controller=null,pending=null,revision=0;
-  let query='',filter='all',selected='',selectedWeek='',follow=true,internal=false,lastRows='';
+  let query='',filter='all',selected='',selectedWeek='',follow=true,internal=false,ma=false,lastRows='';
   let localStore;try{localStore=window.localStorage;}catch{}
   const preferences=createListPreferences(localStore);
   let lastRemoval=null;
@@ -255,7 +255,7 @@
         $('mf-quote-state').hidden=!state;$('mf-quote-state').textContent=state;
         $('mf-mode').textContent=follow?'跟随最新':'已固定';
         if(changed&&root.animate&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)$('mf-selected').animate([{opacity:.55,transform:'translateY(4px)'},{opacity:1,transform:'translateY(0)'}],{duration:220,easing:'ease-out'});
-        if(active&&!document.hidden)window.SpikeMondayFibChart?.show($('mf-wallpaper'),row,data.week,{internal,period});
+        if(active&&!document.hidden)window.SpikeMondayFibChart?.show($('mf-wallpaper'),row,data.week,{internal,ma,period});
       }else{
         $('mf-empty').textContent=selectRows(data.items).length?'触价记录已移除，等待新的触价':data.monday_complete?'本周尚无 1.618 触价，等待最新行情':'纽约周一区间正在形成，完成后开始监控';
         window.SpikeMondayFibChart?.hide();
@@ -316,6 +316,7 @@
   $('mf-latest').addEventListener('click',()=>window.SpikeMondayFibChart?.latest());
   $('mf-zoom-in').addEventListener('click',()=>window.SpikeMondayFibChart?.zoom(.8));
   $('mf-zoom-out').addEventListener('click',()=>window.SpikeMondayFibChart?.zoom(1.25));
+  $('mf-ma').addEventListener('click',()=>{ma=!ma;$('mf-ma').setAttribute('aria-checked',String(ma));window.SpikeMondayFibChart?.setMa(ma);});
   $('mf-fib').addEventListener('click',()=>{internal=!internal;$('mf-fib').setAttribute('aria-pressed',String(internal));window.SpikeMondayFibChart?.setInternal(internal);});
   $('mf-timeframe').addEventListener('click',()=>periodMenu($('mf-period-menu').hidden,true));
   $('mf-timeframe').addEventListener('keydown',e=>{if(['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();periodMenu(true,true);}});

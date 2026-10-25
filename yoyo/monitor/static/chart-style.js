@@ -1,4 +1,4 @@
-/* Shared presentation for the six source-owned SMA/EMA series. No trading calculations. */
+/* Shared six-line presentation and display-only causal close averages. */
 (() => {
   'use strict';
   const lines=Object.freeze([
@@ -14,7 +14,22 @@
   function legend(row={}) {
     return lines.map(line=>`<span class="chart-ma-value" style="--ma-color:${line.color}" title="${line.label} · ${Number.isFinite(row[line.key])?row[line.key]:'历史不足'}"><i aria-hidden="true"></i><span>${line.label}</span><b>${legendPrice(row[line.key])}</b></span>`).join('');
   }
-  const api={lines,price,legend,legendPrice};
+  // Causal close-only averages. A gap resets the contiguous warm-up; no partial windows.
+  function averages(rows,step){
+    const state=lines.map(()=>({sum:0,count:0,ema:null,closes:[]}));let previous;
+    return rows.map(row=>{
+      const point={...row},stamp=row.time??row.t;
+      lines.forEach((line,i)=>{
+        const s=state[i],n=line.period;
+        if(!Number.isFinite(row.close)||(previous!==undefined&&stamp-previous!==step)){s.sum=0;s.count=0;s.ema=null;s.closes=[];}
+        if(!Number.isFinite(row.close)){point[line.key]=null;return;}
+        s.count++;s.sum+=row.close;s.closes.push(row.close);if(s.closes.length>n)s.sum-=s.closes.shift();
+        s.ema=s.ema==null?row.close:2/(n+1)*row.close+(1-2/(n+1))*s.ema;
+        point[line.key]=s.count>=n?(line.key.startsWith('sma')?s.sum/n:s.ema):null;
+      });previous=stamp;return point;
+    });
+  }
+  const api={lines,price,legend,legendPrice,averages};
   if(typeof window!=='undefined')window.SpikeChartStyle=api;
   if(typeof module!=='undefined')module.exports=api;
 })();

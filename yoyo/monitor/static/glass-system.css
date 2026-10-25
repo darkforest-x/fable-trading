@@ -211,3 +211,51 @@ body[data-design=apple-glass] .copier-kpis article {background:var(--glass-panel
 @media(prefers-reduced-motion:reduce) {
   body[data-design=apple-glass] *,body[data-design=apple-glass] *::before,body[data-design=apple-glass] *::after {animation:none!important;transition:none!important;scroll-behavior:auto!important;}
 }
+
+/* Stitch b845bc7cedc348af88c7223b08929c3d: compact patrol console and chart chrome. */
+body[data-design=apple-glass] #yolo-detect-workspace .yd-toolbar{padding:0!important;min-height:38px;margin-bottom:8px}
+body[data-design=apple-glass] #yolo-detect-workspace .yd-patrol-console{padding:8px 12px;border:1px solid var(--glass-edge);border-radius:18px;background:color-mix(in srgb,var(--glass-panel) 82%,transparent);box-shadow:inset 0 1px 1px #fff9,0 6px 24px #102a4310;backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%)}
+body[data-design=apple-glass] #yolo-detect-workspace .yd-patrol-bar{display:flex;align-items:center;gap:10px;min-width:0}
+body[data-design=apple-glass] #yolo-detect-workspace .yd-patrol-status{flex:1;min-width:0;margin:0!important;padding:0!important;gap:10px;border:0!important;background:transparent!important;border-radius:0!important;min-height:32px}
+body[data-design=apple-glass] #yolo-detect-workspace .yd-patrol-status>div{gap:6px 10px}
+body[data-design=apple-glass] #yolo-detect-workspace .yd-patrol-status strong{font-size:12px;white-space:nowrap}
+body[data-design=apple-glass] #yolo-detect-workspace .yd-patrol-status button{margin:0;min-height:32px;font-size:11px;background:transparent;color:var(--brand-primary)}
+body[data-design=apple-glass] #yolo-detect-workspace .yd-plan-add{flex-shrink:0;min-height:32px;padding:5px 10px;border:1px solid var(--brand-border);border-radius:10px;background:var(--brand-bg);color:var(--brand-primary);font-size:11px}
+body[data-design=apple-glass] #yolo-detect-workspace .yd-feed-filters{margin:5px 0 0!important;padding:6px 0 0!important;border:0!important;border-top:1px solid var(--line-soft)!important;border-radius:0!important;background:transparent!important;gap:6px}
+body[data-design=apple-glass] #yolo-detect-workspace .yd-feed-filters :is(input,select,button){height:32px;min-height:32px;border-radius:9px;font-size:11px;background:color-mix(in srgb,var(--surface) 50%,transparent)}
+body[data-design=apple-glass] #yolo-detect-workspace .yd-feed-meta{margin:4px 0!important;padding:4px 2px!important}
+body[data-design=apple-glass] #yd-preview-dialog{background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(32px) saturate(190%);-webkit-backdrop-filter:blur(32px) saturate(190%);box-shadow:-12px 0 36px -8px #102a4320}
+body[data-design=apple-glass] #yd-preview-dialog header{padding:10px 16px}
+body[data-design=apple-glass] #yd-preview-dialog header p{margin-top:3px}
+body[data-design=apple-glass] #yd-preview-dialog button{border-radius:10px}
+body[data-design=apple-glass] #yd-preview-dialog .yd-preview-stage{border-color:var(--line-soft);border-radius:10px;overflow:hidden}
+body[data-design=apple-glass] #yd-preview-dialog footer{padding:8px 16px max(8px,env(safe-area-inset-bottom))}
+body[data-design=apple-glass] #yd-preview-dialog #yd-preview-confirmation{padding:6px 16px}
+body[data-design=apple-glass] #yd-preview-dialog #yd-preview-legend{padding-bottom:5px}
+body[data-design=apple-glass] .yd-range-levels{gap:4px 10px;padding-top:0;padding-bottom:5px}
+body[data-design=apple-glass] .yd-range-week{flex-basis:auto;font-size:10px}
+body[data-design=apple-glass] .yd-preview-tools{display:flex;align-items:center;gap:4px;padding:0 12px 6px;flex-shrink:0}
+body[data-design=apple-glass] #yd-preview-dialog .yd-preview-tools button{padding:3px 9px;min-height:32px;font-size:11px;white-space:nowrap;background:var(--glass-panel);border-color:var(--line-soft)}
+body[data-design=apple-glass] #yd-preview-ohlc{font-size:10px;margin:0 0 0 auto;display:flex;flex-wrap:wrap;gap:3px 7px;justify-content:flex-end;color:var(--muted)}
+body[data-design=apple-glass] #yd-preview-ohlc .cv-time{display:none}
+@media(max-width:700px){
+ body[data-design=apple-glass] #yolo-detect-workspace .yd-patrol-console{padding:8px;border-radius:15px}
+ body[data-design=apple-glass] #yolo-detect-workspace .yd-patrol-bar{align-items:flex-start;gap:4px}
+ body[data-design=apple-glass] #yolo-detect-workspace .yd-patrol-status{display:flex;align-items:flex-start;flex-wrap:wrap;gap:0}
+ body[data-design=apple-glass] #yolo-detect-workspace .yd-patrol-status>div{display:block;line-height:1.5}
+ body[data-design=apple-glass] #yolo-detect-workspace .yd-patrol-status>div>span{display:block;font-size:10px}
+ body[data-design=apple-glass] #yolo-detect-workspace :is(.yd-plan-add,.yd-patrol-status button){min-height:44px}
+ body[data-design=apple-glass] #yolo-detect-workspace .yd-feed-filters{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+ body[data-design=apple-glass] #yolo-detect-workspace .yd-feed-filters :is(input,select,button){min-height:44px;height:44px;font-size:12px}
+ body[data-design=apple-glass] #yolo-detect-workspace .yd-feed-filters>[data-yd-feed-refresh]{top:7px;right:1px;min-width:44px}
+ body[data-design=apple-glass] #yd-preview-dialog header{padding:4px 12px}
+ body[data-design=apple-glass] #yd-preview-dialog .yd-preview-grip{flex-basis:26px}
+ body[data-design=apple-glass] #yd-preview-dialog #yd-preview-confirmation{padding:3px 12px;font-size:10px}
+ body[data-design=apple-glass] #yd-preview-dialog .yd-range-week{font-size:9px}
+ body[data-design=apple-glass] #yd-preview-dialog .yd-range-price{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ body[data-design=apple-glass] #yd-preview-dialog .yd-range-levels{gap:2px 7px}
+ body[data-design=apple-glass] #yd-preview-dialog .yd-range-levels button{margin-left:auto;min-height:44px}
+ body[data-design=apple-glass] .yd-preview-tools{padding:0 8px 4px;gap:2px;flex-wrap:wrap}
+ body[data-design=apple-glass] #yd-preview-dialog .yd-preview-tools button{min-height:44px;min-width:44px;padding:3px 8px}
+ body[data-design=apple-glass] #yd-preview-ohlc{flex-basis:100%;justify-content:flex-start;font-size:9px;white-space:nowrap;overflow:hidden;margin:0 4px;line-height:14px}
+}

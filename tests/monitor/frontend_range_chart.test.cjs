@@ -6,12 +6,12 @@ test('weekly rays start at the current NY Monday and disappear in a previous-wee
  const {logicalAt,WeekLevels}=sandbox.module.exports,start=Date.parse('2026-10-19T04:00Z'),end=Date.parse('2026-10-26T04:00Z');
  const rows=Array.from({length:14},(_,i)=>({time:start/1000-7*86400+i*86400}));
  assert.equal(logicalAt(rows,start),7);assert.equal(logicalAt(rows,start+43200000),7.5);
- let offset=0,lines=[];const owner={rows,levelWindow:{start_ms:start,end_ms:end},activeLevels:[{price:100}],chart:{timeScale:()=>({logicalToCoordinate:x=>x*10-offset})},series:{priceToCoordinate:p=>p}};
+ let offset=0,lines=[],rectangles=[];const owner={rows,levelWindow:{start_ms:start,end_ms:end},activeLevels:[{price:100}],chart:{timeScale:()=>({logicalToCoordinate:x=>x*10-offset})},series:{priceToCoordinate:p=>p}};
  let visible={from:0,to:6};owner.chart.timeScale=()=>({logicalToCoordinate:x=>x*10-offset,getVisibleLogicalRange:()=>visible});
  assert.deepEqual(Array.from(sandbox.module.exports.Interactive.prototype.scaleLevels.call(owner)),[]);
  visible={from:7,to:10};assert.deepEqual(Array.from(sandbox.module.exports.Interactive.prototype.scaleLevels.call(owner)),[100]);
  owner.scaleLevels=()=>sandbox.module.exports.Interactive.prototype.scaleLevels.call(owner);
- const primitive=new WeekLevels(owner),ctx={save(){},restore(){},beginPath(){},rect(){},clip(){},setLineDash(){},moveTo:(x,y)=>lines.push([x,y]),lineTo:(x,y)=>lines.push([x,y]),stroke(){}};
+ const primitive=new WeekLevels(owner),ctx={save(){},restore(){},beginPath(){},rect(){},clip(){},setLineDash(){},moveTo:(x,y)=>lines.push([x,y]),lineTo:(x,y)=>lines.push([x,y]),stroke(){},arc(){},fill(){},roundRect(...args){rectangles?.push(args);}};
  primitive.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:100,height:400}})});assert.deepEqual(lines,[[70,100],[100,100]]);
  lines=[];offset=-100;primitive.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:100,height:400}})});assert.deepEqual(lines,[]);
  lines=[];offset=150;primitive.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:100,height:400}})});assert.deepEqual(lines,[]);
@@ -23,16 +23,16 @@ test('shared range renderer uses the selected contract identity and small coin p
  const html=render(c,view);assert.match(html,/OKX WUSDT.P/);assert.match(html,/周一高 0.0023/);assert.doesNotMatch(html,/BTC/);
  assert.equal(price(.00001234),'0.00001234');assert.equal(price(null),'—');
 });
-test('inline reference prices use plain numbers inside their visible ray, without axis badges',()=>{
+test('inline names and prices stay inside their anchored ray, without axis badges',()=>{
  const {WeekLevels}=sandbox.module.exports,lines=[],texts=[],rectangles=[];
  let offset=0,y=40;
  const owner={rows:[{time:0},{time:100}],levelWindow:{start_ms:0,end_ms:100000},
-  activeLevels:[{label:'上 1.618',price:.13668908,axisLabelVisible:false,inlinePriceVisible:true,color:'#c93248'}],
+  activeLevels:[{label:'上 1.618',price:.13668908,axisLabelVisible:false,inlinePriceVisible:true,inlineNameVisible:true,color:'#c93248'}],
   chart:{timeScale:()=>({logicalToCoordinate:x=>x*200-offset})},series:{priceToCoordinate:()=>y}};
- const primitive=new WeekLevels(owner),ctx={save(){},restore(){},beginPath(){},rect(){},clip(){},setLineDash(){},moveTo:(x,y)=>lines.push([x,y]),lineTo:(x,y)=>lines.push([x,y]),stroke(){},measureText:()=>({width:65}),fillText:(...args)=>texts.push(args),fillRect:(...args)=>rectangles.push(args)};
+ const primitive=new WeekLevels(owner),ctx={save(){},restore(){},beginPath(){},rect(){},clip(){},setLineDash(){},moveTo:(x,y)=>lines.push([x,y]),lineTo:(x,y)=>lines.push([x,y]),stroke(){},arc(){},fill(){},roundRect(...args){rectangles?.push(args);},measureText:()=>({width:65}),fillText:(...args)=>texts.push(args),fillRect:(...args)=>rectangles.push(args)};
  const paint=()=>primitive.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:180,height:100}})});
  assert.equal(primitive.priceAxisViews().length,0);paint();
- assert.deepEqual(lines,[[0,40],[180,40]]);assert.deepEqual(texts,[['0.13668908',174,36]]);assert.deepEqual(rectangles,[]);
+ assert.deepEqual(lines,[[0,40],[180,40]]);assert.deepEqual(texts,[['上 1.618  0.13668908',170,40]]);assert.equal(rectangles.length,1);
  texts.length=0;offset=160;paint();assert.deepEqual(texts,[],'a short visible ray must not crop its number');
  offset=0;y=10;paint();assert.deepEqual(texts,[],'top clipping must not leave a partial label');
  y=120;paint();assert.deepEqual(texts,[],'offscreen levels must not acquire floating labels');
@@ -111,4 +111,16 @@ test('wallpaper starts with readable recent candles and refresh retains a manual
  instance.draw({...data,candles:[...older,...data.candles]},config,'');
  assert.equal(visible.from,340.25);assert.equal(visible.to,420.25,'background history prepends must keep the same candle timestamps in view');
  sandbox.window.SpikeRangeChart.unmount(host);
+});
+
+test('each Monday ray starts at its actual extreme even between display bars',()=>{
+ const {coordinateAt,WeekLevels}=sandbox.module.exports,lines=[];
+ const scale={logicalToCoordinate:i=>Math.trunc(i)*100,getVisibleLogicalRange:()=>({from:0,to:1})};
+ assert.equal(coordinateAt(scale,.25),25);
+ const owner={rows:[{time:0},{time:100}],levelWindow:{start_ms:0,end_ms:100000},activeLevels:[{price:30,start_ms:25000},{price:60,start_ms:75000}],chart:{timeScale:()=>scale},series:{priceToCoordinate:p=>p}};
+ const ctx={save(){},restore(){},beginPath(){},rect(){},clip(){},setLineDash(){},moveTo:(x,y)=>lines.push([x,y]),lineTo:(x,y)=>lines.push([x,y]),stroke(){},arc(){},fill(){}};
+ new WeekLevels(owner).paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:100,height:100}})});
+ assert.deepEqual(lines,[[25,30],[100,30],[75,60],[100,60]]);
+ scale.getVisibleLogicalRange=()=>({from:0,to:.5});
+ assert.deepEqual(Array.from(sandbox.module.exports.Interactive.prototype.scaleLevels.call(owner)),[30]);
 });

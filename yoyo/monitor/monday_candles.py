@@ -12,7 +12,7 @@ from copy import deepcopy
 import re
 import threading
 
-from fastapi import Query
+from fastapi import HTTPException, Query
 from yoyo.data.candle_hub import STEPS, bar_open, validate
 from yoyo.monitor.monday_fib import week_window
 from yoyo.monitor.okx import OKX
@@ -174,6 +174,16 @@ class MondayCandles:
 def install(app, runtime):
     service = MondayCandles(runtime)
     app.state.monday_candles = service
+    from .monday_chart_levels import MondayChartLevels
+    chart_levels = MondayChartLevels(runtime)
+
+    @app.get('/api/monday-fib/levels')
+    def levels(symbol: str = Query(..., pattern=SYMBOL)):
+        try:
+            return chart_levels.read(symbol, service.client.clock())
+        except Exception:
+            raise HTTPException(503, '周一区间暂不可用，请重试') from None
+
     from .monday_order_context import install as install_order_context
     install_order_context(app)
 

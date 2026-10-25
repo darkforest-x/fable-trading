@@ -94,7 +94,7 @@
   const validating=new Set();
   const resultCache=new Map();
   let findingPreview=null,previewVersion=0,previewRequest=null,previewChartInstance=null,previewResize=null;
-  let previewLevels=null,chartLevels=null,previewSheet=null;
+  let previewLevels=null,chartLevels=null,previewSheet=null,previewControls=null,previewCrosshair=null;
   const readSaved=(key,fallback,session=false)=>{try{return JSON.parse((session?sessionStorage:localStorage).getItem(key))??fallback;}catch{return fallback;}};
   const save=(key,value,session=false)=>{try{(session?sessionStorage:localStorage).setItem(key,JSON.stringify(value));}catch{/* Storage may be unavailable; the current session remains usable. */}};
   state.symbolOrder=readSaved('spike.yolo.symbol-sort.v1','latest');if(!['latest','score','count','name','name-desc','favorites'].includes(state.symbolOrder))state.symbolOrder='latest';
@@ -135,7 +135,7 @@
     if(id==='yd-preview-dialog'){
       if($(id).open)return;
       previewSheet?.reset();
-      previewVersion++;previewLevels?.destroy();previewLevels=null;previewRequest?.abort();previewRequest=null;previewResize?.disconnect();previewResize=null;previewChartInstance?.remove();previewChartInstance=null;
+      previewVersion++;previewControls?.destroy();previewControls=null;previewCrosshair?.cancel();previewCrosshair=null;previewLevels?.destroy();previewLevels=null;previewRequest?.abort();previewRequest=null;previewResize?.disconnect();previewResize=null;previewChartInstance?.remove();previewChartInstance=null;
       if(findingPreview&&state.active){const id=findingPreview.id;findingPreview=null;root.querySelector(`[data-yd-finding="${CSS.escape(id)}"]`)?.focus({preventScroll:true});}
     }
     if(id==='yd-enlarge-dialog'&&$('yd-chart-stage').parentElement!==$('yd-stage-home')){$('yd-stage-home').append($('yd-chart-stage'));$('yd-chart-stage').classList.remove('is-expanded');$('yd-expand').innerHTML='<span class="ui-icon ui-maximize" aria-hidden="true"></span>';}
@@ -189,9 +189,8 @@
       </section>
       <section id="yd-panel-history" class="yd-card" role="tabpanel" aria-labelledby="yd-tab-history" hidden><header><div><h2>检测记录</h2><p>手动检测和定时巡检都保留在这里。点击一条记录，直接回到看图。</p></div><span id="yd-worker"></span></header><div id="yd-jobs-list"></div><div id="yd-jobs-pages" class="yd-pagination"></div></section>
       <section id="yd-panel-schedules" role="tabpanel" aria-labelledby="yd-tab-schedules" hidden>
-        <div class="yd-overview-actions"><button data-yd-plan-new>＋ 添加巡检</button><a href="#yolo-detect?tab=history">检测记录 ↗</a></div>
-        <div id="yd-patrol-status" class="yd-patrol-status" role="status"></div>
-        <div class="yd-feed-filters"><input id="yd-feed-search" aria-label="搜索巡检形态币种" placeholder="搜索币种，如 BTC"><select id="yd-feed-days" aria-label="发现时间范围"><option value="1">最近 1 天</option><option value="7" selected>最近 7 天</option><option value="30">最近 30 天</option><option value="0">全部发现</option></select><select id="yd-feed-period" aria-label="巡检形态周期"><option value="">全部周期</option>${Object.entries(periods).map(([v,n])=>`<option value="${v}">${n}</option>`).join('')}</select><select id="yd-feed-order" aria-label="巡检发现排序"><option value="newest">最新发现优先</option><option value="score">模型分数从高到低</option><option value="symbol">币种 A → Z</option></select><select id="yd-feed-side" aria-label="巡检形态方向"><option value="">多空方向</option><option value="long">多头</option><option value="short">空头</option></select><button data-yd-feed-refresh class="yd-icon" title="刷新发现" aria-label="刷新发现">↻</button></div>
+        <div class="yd-patrol-console"><div class="yd-patrol-bar"><div id="yd-patrol-status" class="yd-patrol-status" role="status"></div><button class="yd-plan-add" data-yd-plan-new>＋ 添加巡检</button></div>
+        <div class="yd-feed-filters"><input id="yd-feed-search" aria-label="搜索巡检形态币种" placeholder="搜索币种，如 BTC"><select id="yd-feed-days" aria-label="发现时间范围"><option value="1">最近 1 天</option><option value="7" selected>最近 7 天</option><option value="30">最近 30 天</option><option value="0">全部发现</option></select><select id="yd-feed-period" aria-label="巡检形态周期"><option value="">全部周期</option>${Object.entries(periods).map(([v,n])=>`<option value="${v}">${n}</option>`).join('')}</select><select id="yd-feed-order" aria-label="巡检发现排序"><option value="newest">最新发现优先</option><option value="score">模型分数从高到低</option><option value="symbol">币种 A → Z</option></select><select id="yd-feed-side" aria-label="巡检形态方向"><option value="">多空方向</option><option value="long">多头</option><option value="short">空头</option></select><button data-yd-feed-refresh class="yd-icon" title="刷新发现" aria-label="刷新发现">↻</button></div></div>
         <div class="yd-feed-meta"><span id="yd-feed-count">正在读取形态…</span><span id="yd-feed-updated"></span></div>
         <p id="yd-feed-error" class="yd-error" role="alert" hidden></p><header class="yd-radar-heading"><h2>形态雷达</h2><span>点击卡片查看 K 线与均线形态</span></header><div id="yd-findings" class="yd-findings" aria-label="巡检发现的形态"></div><div id="yd-feed-more" class="yd-pagination"></div>
         <p class="yd-footnote">按首次发现排序，重复扫描合并显示。发现时间是巡检保存结果的时间，确认时间是模型看见形态的 K 线收盘时间；列表包含过去发现，不代表形态仍在持续。</p>
@@ -200,7 +199,7 @@
       <section id="yd-panel-account" role="tabpanel" aria-label="实盘账户" hidden><div id="yd-account-detail"></div></section>
       <section id="yd-panel-model" role="tabpanel" aria-labelledby="yd-tab-model" hidden>${training()}</section>
       <datalist id="yd-symbols"></datalist>
-      <dialog id="yd-preview-dialog" class="yd-preview-dialog" aria-labelledby="yd-preview-title"><div class="yd-preview-grip" data-yd-sheet-drag aria-hidden="true"><span></span></div><header data-yd-sheet-drag><div><h2 id="yd-preview-title">K 线预览</h2><p id="yd-preview-context"></p></div><button type="button" data-yd-close="yd-preview-dialog" aria-label="关闭 K 线预览">× <small>Esc</small></button></header><p id="yd-preview-confirmation" data-yd-sheet-drag></p><div id="yd-preview-legend" class="yd-six-ma" data-yd-sheet-drag></div><div id="yd-preview-levels" class="yd-range-levels" data-yd-sheet-drag aria-label="周一区间与1.618价位" aria-live="polite"></div><div class="yd-preview-stage"><div id="yd-preview-chart"></div><p id="yd-preview-message" role="status">正在读取检测快照…</p></div><footer><span>检测时快照 · 可拖动、缩放</span><button type="button" data-yd-preview-retry hidden>重新加载</button><button type="button" data-yd-preview-full>查看完整图表 ↗</button></footer></dialog>
+      <dialog id="yd-preview-dialog" class="yd-preview-dialog" aria-labelledby="yd-preview-title"><div class="yd-preview-grip" data-yd-sheet-drag aria-hidden="true"><span></span></div><header data-yd-sheet-drag><div><h2 id="yd-preview-title">K 线预览</h2><p id="yd-preview-context"></p></div><button type="button" data-yd-close="yd-preview-dialog" aria-label="关闭 K 线预览">× <small>Esc</small></button></header><p id="yd-preview-confirmation" data-yd-sheet-drag></p><div id="yd-preview-legend" class="yd-six-ma" data-yd-sheet-drag></div><div id="yd-preview-levels" class="yd-range-levels" data-yd-sheet-drag aria-label="周一区间与1.618价位" aria-live="polite"></div><div class="yd-preview-tools" role="group" aria-label="预览图表控制"><button type="button" data-yd-preview-zoom="1.25" aria-label="缩小预览 K 线">−</button><button type="button" data-yd-preview-zoom="0.8" aria-label="放大预览 K 线">＋</button><button type="button" data-cv="reset">定位形态</button><button type="button" data-cv="latest">最新 K 线</button><div id="yd-preview-ohlc" class="cv-readout"></div></div><div class="yd-preview-stage"><div id="yd-preview-chart"></div><p id="yd-preview-message" role="status">正在读取检测快照…</p></div><footer><span>检测时快照 · 可拖动、缩放</span><button type="button" data-yd-preview-retry hidden>重新加载</button><button type="button" data-yd-preview-full>查看完整图表 ↗</button></footer></dialog>
       <dialog id="yd-scan-dialog" class="yd-dialog" aria-labelledby="yd-scan-heading"><header><h2 id="yd-scan-heading">新建检测</h2><button data-yd-close="yd-scan-dialog" aria-label="关闭新建检测">×</button></header><form id="yd-scan-form" novalidate><div class="yd-form-body"><div class="yd-mode-options" role="group" aria-label="检测模式"><button type="button" data-yd-mode="latest">当前盘口<span>查看最新收盘附近的形态</span></button><button type="button" data-yd-mode="history">历史识别<span>检查指定时间段的形态</span></button></div>${selectionFields('yd')}
         <div id="yd-dates"><label>检测时间段 · 北京时间</label><div class="yd-presets"><button type="button" data-yd-days="1">最近 1 天</button><button type="button" data-yd-days="3">最近 3 天</button><button type="button" data-yd-days="7">最近 7 天</button></div><div class="yd-form-grid"><label>开始<input type="datetime-local" id="yd-start"></label><label>结束<input type="datetime-local" id="yd-end"></label></div><div class="yd-date-help"><p class="yd-help">均为北京时间；日线按每天 08:00 划分。</p><button type="button" id="yd-align-dates">对齐收盘时间</button></div></div>
         <p id="yd-scan-estimate" class="yd-help"></p><p id="yd-scan-error" class="yd-error" role="alert" hidden></p></div><footer><span id="yd-submit-summary"></span><button type="submit" id="yd-submit" class="yd-primary">开始检测</button></footer></form></dialog>
@@ -293,6 +292,7 @@
     root.addEventListener('click',delegate);
     root.addEventListener('change',e=>{if(e.target.matches('[data-yd-feed-size]')){state.feedLimit=Number(e.target.value);state.feedPage=0;state.feedBefore=null;refreshFeed();}});
     root.querySelectorAll('dialog').forEach(d=>d.addEventListener('close',()=>{restoreDialog(d.id);unlockDialogs();}));
+    root.querySelectorAll('[data-yd-preview-zoom]').forEach(b=>b.addEventListener('click',()=>{const scale=previewChartInstance?.timeScale(),r=scale?.getVisibleLogicalRange();if(!r)return;const span=Math.max(8,Math.min(6000,(r.to-r.from)*Number(b.dataset.ydPreviewZoom)));scale.setVisibleLogicalRange({from:r.to-span,to:r.to});}));
     previewSheet=window.SpikeYoloPreviewSheet.bind({panel:$('yd-preview-dialog'),dismiss:()=>closeDialog('yd-preview-dialog')});
     on('yd-preview-dialog','click',e=>{if(e.target!==$('yd-preview-dialog'))return;const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeDialog('yd-preview-dialog');});
     on('yd-symbol-sort','change',e=>{state.symbolOrder=e.target.value;save('spike.yolo.symbol-sort.v1',state.symbolOrder);drawSymbols();});
@@ -474,7 +474,7 @@
   function drawFeed(){
     const data=state.feed;if(!data)return;const j=data.latest_job,progress=j?.progress||{};
     const activePlans=state.schedules.filter(s=>s.enabled).length,online=activePlans>0;
-    html('yd-patrol-status',`<div><strong>${online?activePlans+' 个巡检计划已启用':state.schedules.some(s=>s.validation)?'正在验证巡检配置，通过后自动启用':'当前没有启用的巡检计划'}</strong><span>${j?`最近一轮 ${fmt(j.created_ms)} · <span class="yd-status ${j.status}">${names[j.status]}</span> · 已处理 ${progress.completed||0}/${progress.total||'—'} 币${progress.unavailable?' · '+progress.unavailable+' 币历史不足':''}${progress.failed?' · '+progress.failed+' 币失败':''}`:'启用巡检后，发现的形态会自动出现在这里。'}</span>${j?.error?`<span class="yd-error-text">${esc(j.error)}</span>`:''}${state.worker?.state==='cooling'?`<span class="yd-error-text">${esc(state.worker.reason)}</span>`:''}</div>${j?`<button data-yd-job="${j.id}">${['failed','partial','interrupted'].includes(j.status)?'查看本轮异常':'查看本轮进度'}</button>`:''}`);
+    html('yd-patrol-status',`<div><strong>${online?activePlans+' 个巡检中':state.schedules.some(s=>s.validation)?'正在验证巡检配置，通过后自动启用':'当前没有启用的巡检计划'}</strong><span>${j?`最近一轮 ${fmt(j.created_ms)} · <span class="yd-status ${j.status}">${names[j.status]}</span> · 已处理 ${progress.completed||0}/${progress.total||'—'} 币${progress.unavailable?' · '+progress.unavailable+' 币历史不足':''}${progress.failed?' · '+progress.failed+' 币失败':''}`:'启用巡检后，发现的形态会自动出现在这里。'}</span>${j?.error?`<span class="yd-error-text">${esc(j.error)}</span>`:''}${state.worker?.state==='cooling'?`<span class="yd-error-text">${esc(state.worker.reason)}</span>`:''}</div>${j?`<button data-yd-job="${j.id}">${['failed','partial','interrupted'].includes(j.status)?'查看本轮异常':'查看本轮进度'}</button>`:''}`);
     $('yd-feed-count').textContent=`${data.total} 处形态 · ${state.feedDays?'最近 '+state.feedDays+' 天':'全部发现'} · ${{newest:'首次发现从新到旧',score:'模型分数从高到低',symbol:'币种 A → Z'}[state.feedOrder]}`;
     $('yd-feed-updated').textContent=`${fmt(data.now_ms)} 更新 · 每 5 秒刷新`;
     const focused=document.activeElement?.dataset?.ydFinding;
@@ -557,19 +557,19 @@
     showDialog('yd-inspection');
   }
   function chartLibrary(){return chartTools.library();}
-  function mountLevels(target,host,job,symbol,box){
-    return window.SpikeYoloChartLevels.mount({series:target,host,symbol,detection:box.id,at:box.detected_at_ms,
+  function mountLevels(target,host,job,symbol,box,owner=chart,rows=()=>displayRows){
+    return window.SpikeYoloChartLevels.mount({chart:owner,getRows:()=>rows().map(r=>({...r,time:r.t/1000})),series:target,host,symbol,detection:box.id,at:box.detected_at_ms,
       url:`${BASE}/jobs/${job}/results/${encodeURIComponent(symbol)}/levels/${encodeURIComponent(box.id)}`,format:chartTools.axisPrice});
   }
   async function openFindingPreview(item){
     const dialog=$('yd-preview-dialog');
-    previewLevels?.destroy();previewLevels=null;previewRequest?.abort();previewResize?.disconnect();previewChartInstance?.remove();previewResize=previewChartInstance=null;
+    previewControls?.destroy();previewControls=null;previewCrosshair?.cancel();previewCrosshair=null;previewLevels?.destroy();previewLevels=null;previewRequest?.abort();previewResize?.disconnect();previewChartInstance?.remove();previewResize=previewChartInstance=null;
     findingPreview=item;const version=++previewVersion,controller=previewRequest=new AbortController();
     const current=()=>version===previewVersion&&dialog.open&&state.active;
     $('yd-preview-title').textContent=`${short(item.symbol)} / USDT · ${periods[item.timeframe]}`;
     $('yd-preview-context').textContent=`${item.side==='long'?'多头':'空头'}密集 · 模型分数 ${(item.confidence*100).toFixed(1)}%`;
     $('yd-preview-confirmation').textContent=`形态确认 ${fmt(item.detected_at_ms,true)} 北京`;
-    $('yd-preview-legend').innerHTML='';$('yd-preview-levels').replaceChildren();
+    $('yd-preview-legend').innerHTML='';$('yd-preview-levels').replaceChildren();$('yd-preview-ohlc').replaceChildren();
     const message=$('yd-preview-message');message.hidden=false;message.textContent='正在读取检测快照…';
     dialog.querySelector('[data-yd-preview-retry]').hidden=true;
     if(!dialog.open)showDialog('yd-preview-dialog');
@@ -596,10 +596,11 @@
       if(rows.some(r=>r.t===confirm))candles.setMarkers([{time:confirm/1000,position:'aboveBar',color:box.side==='long'?'#01e599':'#ff4f73',shape:'arrowDown',text:'确认'}]);
       c.timeScale().setVisibleLogicalRange(shapeRange(box,rows[0].t,step));
       const lookup=new Map(rows.map(r=>[r.t/1000,r]));
-      const legend=row=>{$('yd-preview-legend').innerHTML=chartStyle.legend(row);};legend(rows.at(-1));
-      c.subscribeCrosshairMove(p=>{if(current())legend(lookup.get(p.time)||rows.at(-1));});
+      const legend=(row,live=true)=>{$('yd-preview-legend').innerHTML=chartStyle.legend(row);$('yd-preview-ohlc').innerHTML=chartTools.readout(row,row.t/1000,live);};legend(rows.at(-1));
+      previewCrosshair=chartTools.frame(p=>{if(current())legend(lookup.get(p.time)||rows.at(-1),!lookup.has(p.time));});c.subscribeCrosshairMove(previewCrosshair);
+      previewControls=chartTools.bind(dialog,{chart:()=>c,rows:()=>rows,canvas:host,reset:()=>c.timeScale().setVisibleLogicalRange(shapeRange(box,rows[0].t,step))});
       previewResize=chartTools.resize(c,host);message.hidden=true;
-      previewLevels=mountLevels(candles,$('yd-preview-levels'),item.job_id,result.symbol,box);
+      previewLevels=mountLevels(candles,$('yd-preview-levels'),item.job_id,result.symbol,box,c,()=>rows);
     }catch(e){if(current()){message.textContent=e.name==='AbortError'?'图表读取超时，请重新加载':e.message;dialog.querySelector('[data-yd-preview-retry]').hidden=false;}}
     finally{clearTimeout(timeout);}
   }

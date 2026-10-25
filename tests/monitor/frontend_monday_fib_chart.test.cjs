@@ -3,6 +3,7 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const {levels,prepare}=require('../../yoyo/monitor/static/monday-fib-chart.js');
 const start=Date.parse('2026-10-19T04:00:00Z');
 const row={symbol:'BTC-USDT-SWAP',high:83149.8,low:81166,upper:84375.7884,lower:79940.0116};
+const anchorReply=url=>({...row,symbol:new URL(url,'http://test').searchParams.get('symbol'),timezone:'America/New_York',week:'2026-10-19',state:'ready',start_ms:start,end_ms:start+86400000,expires_ms:start+7*86400000,high_ms:start+3600000,low_ms:start+7200000});
 const bar=time=>({time,open:82000,high:82100,low:81900,close:82050,volume:10});
 const context=(symbol=row.symbol)=>({symbol,bar:'15m',timezone:'America/New_York',monday:{start_ms:start,end_ms:start+86400000},last_close_ms:start+1800000,candles:[bar(start-900000),bar(start),bar(start+900000)]});
 test('chart uses monitor anchors and the exact mirrored nine price levels',()=>{
@@ -26,17 +27,18 @@ test('empty data never invents candles or reuses another symbol',()=>{
  assert.throws(()=>prepare({...c,symbol:'ETH-USDT-SWAP'},row,'2026-10-19'),/币种/);
 });
 test('row chart makes only selected GETs, ignores retired replies and aborts on close',async()=>{
- const pending=[],draws=[],rendered=[],timers=new Map();let n=0;
+ const pending=[],draws=[],rendered=[],views=[],timers=new Map();let n=0;
  const makeHost=()=>{const state={textContent:''},mount={},button={addEventListener(){}};return {innerHTML:'',querySelector(s){return s==='[role=status]'?state:s==='.mf-chart-mount'?mount:button;}};};
  let range={from:10,to:50},autoScale=false,fits=0;
  const instance={rows:Array(400),chart:{priceScale:()=>({applyOptions:o=>autoScale=o.autoScale}),timeScale:()=>({getVisibleLogicalRange:()=>range,setVisibleLogicalRange:r=>range=r,fitContent:()=>fits++})}};
- const sandbox={document:{hidden:false},window:{SpikeRangeChart:{mount:(host,data)=>{draws.push(data.symbol);rendered.push(data);return instance;},unmount(){}}},Intl,Date,AbortController,fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve})),setTimeout(fn,ms){timers.set(++n,{fn,ms});return n;},clearTimeout(i){timers.delete(i);}};
+ const sandbox={document:{hidden:false},window:{SpikeRangeChart:{mount:(host,data,view)=>{views.push(view);draws.push(data.symbol);rendered.push(data);return instance;},unmount(){}}},Intl,Date,AbortController,fetch:(url,options)=>url.includes('/levels?')?Promise.resolve({ok:true,json:async()=>anchorReply(url)}):new Promise(resolve=>pending.push({url,options,resolve})),setTimeout(fn,ms){timers.set(++n,{fn,ms});return n;},clearTimeout(i){timers.delete(i);}};
  vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
  const api=sandbox.window.SpikeMondayFibChart,first=makeHost(),second=makeHost();api.show(first,row,'2026-10-19');
  assert.equal(pending.length,1);assert.equal(pending[0].options.method,undefined);assert.match(pending[0].url,/symbol=BTC-USDT-SWAP/);
  api.show(second,{...row,symbol:'ETH-USDT-SWAP'},'2026-10-19');assert.equal(pending[0].options.signal.aborted,true);
  pending[0].resolve({ok:true,json:async()=>context()});pending[1].resolve({ok:true,json:async()=>context('ETH-USDT-SWAP')});
- for(let i=0;i<12;i++)await Promise.resolve();assert.deepEqual(draws,['ETH-USDT-SWAP']);assert.equal(rendered.at(-1).levels.length,4);
+ for(let i=0;i<12;i++)await Promise.resolve();assert.ok(draws.length&&draws.every(s=>s==='ETH-USDT-SWAP'));assert.equal(rendered.at(-1).levels.length,4);
+ assert.equal(views.at(-1).ma,false);api.setMa(true);assert.equal(views.at(-1).ma,true);assert.deepEqual(range,{from:10,to:50});api.setMa(false);assert.equal(views.at(-1).ma,false);
  api.setInternal(true);assert.equal(rendered.at(-1).levels.length,9);api.setInternal(false);assert.equal(rendered.at(-1).levels.length,4);
  api.show(second,{...row,symbol:'ETH-USDT-SWAP'},'2026-10-19');assert.equal(pending.length,2);
  api.latest();assert.equal(range.to-range.from,40);assert.equal(range.to,409);assert.equal(autoScale,true);
@@ -60,16 +62,16 @@ test('native timeframe is validated and daily candles retain context beyond NY M
 test('rapid timeframe switching aborts old loads and keeps responses and cache isolated',async()=>{
  const pending=[],draws=[];const state={textContent:''},mount={},button={addEventListener(){}};
  const host={innerHTML:'',replaceChildren(){},querySelector:s=>s==='[role=status]'?state:s==='.mf-chart-mount'?mount:button};
- const sandbox={document:{hidden:false},window:{SpikeRangeChart:{mount:(h,d)=>{if(d.candles.length)draws.push(d.bar);},unmount(){}}},Intl,Date,AbortController,fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve})),setTimeout:()=>1,clearTimeout(){}};
+ const sandbox={document:{hidden:false},window:{SpikeRangeChart:{mount:(h,d)=>{if(d.candles.length)draws.push(d.bar);},unmount(){}}},Intl,Date,AbortController,fetch:(url,options)=>url.includes('/levels?')?Promise.resolve({ok:true,json:async()=>anchorReply(url)}):new Promise(resolve=>pending.push({url,options,resolve})),setTimeout:()=>1,clearTimeout(){}};
  vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
  const api=sandbox.window.SpikeMondayFibChart;
  api.show(host,row,'2026-10-19',{period:'15m'});api.show(host,row,'2026-10-19',{period:'5m'});
  assert.equal(pending[0].options.signal.aborted,true);assert.match(pending[1].url,/period=5m/);
  pending[1].resolve({ok:true,json:async()=>({...context(),bar:'5m'})});
  pending[0].resolve({ok:true,json:async()=>context()});for(let i=0;i<12;i++)await Promise.resolve();
- assert.deepEqual(draws,['5m']);
+ assert.ok(draws.length&&draws.every(s=>s==='5m'));
  api.show(host,row,'2026-10-19',{period:'1H'});assert.match(pending[2].url,/period=1H/);
- api.show(host,row,'2026-10-19',{period:'5m'});assert.deepEqual(draws,['5m','5m']);assert.equal(pending[2].options.signal.aborted,true);api.hide();
+ api.show(host,row,'2026-10-19',{period:'5m'});assert.ok(draws.every(s=>s==='5m'));assert.equal(pending[2].options.signal.aborted,true);api.hide();
 });
 
 test('closed candle scheduling follows server boundaries and retries incomplete tails',()=>{
@@ -82,4 +84,23 @@ test('closed candle scheduling follows server boundaries and retries incomplete 
   assert.equal(refreshDelay({...ready,loading:true},period),1500);
   assert.equal(refreshDelay({...ready,error:'offline'},period),10000);
  }
+});
+
+test('late anchor replies cannot paint a retired symbol and pending anchors draw no rays',async()=>{
+ const pending=[],rendered=[];const state={textContent:''},mount={},button={addEventListener(){}};
+ const host={innerHTML:'',replaceChildren(){},querySelector:s=>s==='[role=status]'?state:s==='.mf-chart-mount'?mount:button};
+ const sandbox={document:{hidden:false},window:{SpikeRangeChart:{mount:(h,d)=>{rendered.push(d);},unmount(){}}},Intl,Date,AbortController,fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve})),setTimeout:()=>1,clearTimeout(){}};
+ vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
+ const api=sandbox.window.SpikeMondayFibChart,settle=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
+ api.show(host,row,'2026-10-19');
+ const first=[...pending];first.find(p=>p.url.includes('/candles?')).resolve({ok:true,json:async()=>context()});await settle();
+ assert.equal(rendered.at(-1).levels.length,0,'waiting for anchors must not draw chart-wide placeholder lines');
+ api.show(host,{...row,symbol:'ETH-USDT-SWAP'},'2026-10-19');
+ const second=pending.slice(2);
+ second.find(p=>p.url.includes('/candles?')).resolve({ok:true,json:async()=>context('ETH-USDT-SWAP')});
+ second.find(p=>p.url.includes('/levels?')).resolve({ok:true,json:async()=>anchorReply('/?symbol=ETH-USDT-SWAP')});await settle();
+ const count=rendered.length;
+ first.find(p=>p.url.includes('/levels?')).resolve({ok:true,json:async()=>anchorReply('/?symbol=BTC-USDT-SWAP')});await settle();
+ assert.equal(rendered.length,count);assert.equal(rendered.at(-1).symbol,'ETH-USDT-SWAP');
+ assert.equal(rendered.at(-1).levels.length,4);assert.equal(rendered.at(-1).levels[0].start_ms,start+3600000);api.hide();
 });

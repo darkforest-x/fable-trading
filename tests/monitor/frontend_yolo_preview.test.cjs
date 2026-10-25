@@ -4,9 +4,9 @@ const source=fs.readFileSync(require('node:path').join(__dirname,'../../yoyo/mon
 const code=source.slice(source.indexOf('  async function openFindingPreview('),source.indexOf('  class DetectionPrimitive'));
 function harness(){
  const nodes=new Map(),retry={hidden:true},requests=[];let ready;
- const node=id=>{if(!nodes.has(id))nodes.set(id,{open:false,hidden:false,textContent:'',innerHTML:'',querySelector:()=>retry});return nodes.get(id);};
+ const node=id=>{if(!nodes.has(id))nodes.set(id,{open:false,hidden:false,textContent:'',innerHTML:'',replaceChildren(){},querySelector:()=>retry});return nodes.get(id);};
  const c=vm.createContext({AbortController,BASE:'/api/yolo-detect',state:{active:true},$:node,short:s=>s,periods:{'15m':'15 分钟'},fmt:String,showDialog:id=>node(id).open=true,setTimeout:()=>1,clearTimeout:()=>{},resultCache:new Map(),chartLibrary:()=>new Promise(r=>ready=r),fetch:(url,options)=>new Promise(resolve=>requests.push({url,options,resolve}))});
- vm.runInContext('let findingPreview=null,previewVersion=0,previewRequest=null,previewResize=null,previewChartInstance=null;'+code,c);
+ vm.runInContext('let findingPreview=null,previewVersion=0,previewRequest=null,previewResize=null,previewChartInstance=null,previewControls=null,previewCrosshair=null,previewLevels=null;'+code,c);
  const item={id:'finding',job_id:'job',symbol:'ETH-USDT-SWAP',timeframe:'15m',side:'long',confidence:.8,detected_at_ms:900000,detection_id:'box'};
  return {c,node,retry,requests,item,open:i=>c.openFindingPreview(i||item),ready:()=>ready?.(),close:()=>{node('yd-preview-dialog').open=false;vm.runInContext('previewVersion++;previewRequest.abort()',c);}};
 }

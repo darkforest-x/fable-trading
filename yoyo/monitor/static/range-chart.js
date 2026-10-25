@@ -46,6 +46,12 @@
     for(let i=1;i<n;i++)if(t<=rows[i].time)return i-1+(t-rows[i-1].time)/(rows[i].time-rows[i-1].time);
     return n-1+(t-rows[n-1].time)/(n>1?rows[n-1].time-rows[n-2].time:step);
   }
+  // LWC 4.2 truncates fractional logical coordinates; interpolate adjacent bars.
+  function coordinateAt(scale,index){
+    if(index==null)return null;
+    const left=Math.floor(index),a=scale.logicalToCoordinate(left),b=scale.logicalToCoordinate(left+1);
+    return a==null||b==null?null:a+(b-a)*(index-left);
+  }
   class WeekLevels {
     constructor(owner){this.owner=owner;this.view={zOrder:()=> 'normal',renderer:()=>({draw:target=>this.paint(target)})};}
     attached({requestUpdate}){this.requestUpdate=requestUpdate;}
@@ -67,18 +73,26 @@
     updateAllViews(){}
     paint(target){
       const o=this.owner,w=o.levelWindow;if(!w||!fin(w.start_ms)||!fin(w.end_ms)||!o.rows.length)return;
-      const scale=o.chart.timeScale(),start=scale.logicalToCoordinate(logicalAt(o.rows,w.start_ms)),end=scale.logicalToCoordinate(logicalAt(o.rows,w.end_ms));
-      if(start==null||end==null)return;
+      const scale=o.chart.timeScale(),end=coordinateAt(scale,logicalAt(o.rows,w.end_ms));
+      if(end==null)return;
       target.useMediaCoordinateSpace(({context:ctx,mediaSize})=>{
-        const a=Math.max(0,start),b=Math.min(mediaSize.width,end);if(a>=b)return;
+        const b=Math.min(mediaSize.width,end);
         ctx.save();ctx.beginPath();ctx.rect(0,0,mediaSize.width,mediaSize.height);ctx.clip();
-        for(const l of o.activeLevels||[]){const y=o.series.priceToCoordinate(l.price);if(y==null)continue;
-          ctx.strokeStyle=l.color||'#528cc1';ctx.lineWidth=l.lineWidth||1;ctx.setLineDash(l.lineStyle===2?[4,4]:[]);
+        for(const l of o.activeLevels||[]){
+          const start=coordinateAt(scale,logicalAt(o.rows,l.start_ms??w.start_ms)),a=Math.max(0,start??b);
+          const y=o.series.priceToCoordinate(l.price);if(y==null||a>=b)continue;
+          const color=l.color||'#528cc1';ctx.strokeStyle=color;ctx.lineWidth=l.lineWidth||1;ctx.setLineDash(l.lineStyle===2?[4,4]:[]);
           ctx.beginPath();ctx.moveTo(a,y);ctx.lineTo(b,y);ctx.stroke();
-          if(l.inlinePriceVisible&&y>=16&&y<=mediaSize.height){
-            const text=window.SpikeChartTools?.axisPrice(l.price)??price(l.price);
-            ctx.font='11px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';ctx.textAlign='right';ctx.textBaseline='bottom';
-            if(ctx.measureText(text).width+12<=b-a){ctx.fillStyle=l.color||'#528cc1';ctx.fillText(text,b-6,y-4);}
+          if(start>=0&&start<b){ctx.beginPath();ctx.arc(start,y,2.5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();}
+          if(l.inlinePriceVisible&&y>=12&&y<=mediaSize.height-12){
+            const number=window.SpikeChartTools?.axisPrice(l.price)??price(l.price),text=l.inlineNameVisible?`${l.label}  ${number}`:number;
+            ctx.font='11px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';
+            const width=ctx.measureText(text).width+12;
+            if(width<=b-a){
+              ctx.setLineDash([]);ctx.fillStyle=color;ctx.globalAlpha=.95;
+              ctx.beginPath();ctx.roundRect(b-width-4,y-10,width,20,5);ctx.fill();ctx.globalAlpha=1;
+              ctx.fillStyle='#fff';ctx.fillText(text,b-10,y);
+            }
           }
         }
         ctx.restore();
@@ -103,7 +117,7 @@
     }
     create(){
       const T=window.SpikeChartTools;
-      this.host.innerHTML=`<section class="cv-range"><div class="cv-range-header"><strong data-range-heading>已收盘 K 线 · 15min</strong>${T.toolbar({expand:true})}</div><p class="cv-range-status" role="status"></p><div class="cv-readout"></div><div class="cv-canvas"></div><details class="cv-level-details"><summary>关键价位 · 完整价格</summary><div class="cv-levels" aria-label="关键价位"></div></details></section>`;
+      this.host.innerHTML=`<section class="cv-range"><div class="cv-range-header"><strong data-range-heading>已收盘 K 线 · 15min</strong>${T.toolbar({expand:true})}</div><p class="cv-range-status" role="status"></p><div class="cv-readout"></div><div class="cv-ma-legend chart-ma-legend" aria-label="六条均线数值" hidden></div><div class="cv-canvas"></div><details class="cv-level-details"><summary>关键价位 · 完整价格</summary><div class="cv-levels" aria-label="关键价位"></div></details></section>`;
       this.panel=this.host.firstElementChild;this.canvas=this.panel.querySelector('.cv-canvas');
       this.chart=window.LightweightCharts.createChart(this.canvas,{...T.interaction,width:this.canvas.clientWidth||600,height:this.canvas.clientHeight||420,
         rightPriceScale:{scaleMargins:{top:.08,bottom:.2}},localization:{locale:'zh-CN',priceFormatter:T.axisPrice,timeFormatter:T.clock},
@@ -130,7 +144,7 @@
     scaleLevels(){
       const w=this.levelWindow,r=this.chart?.timeScale().getVisibleLogicalRange();
       if(w&&r&&(r.to<logicalAt(this.rows,w.start_ms)||r.from>=logicalAt(this.rows,w.end_ms)))return [];
-      return this.activeLevels?.map(l=>l.price)||[];
+      return this.activeLevels?.filter(l=>!w||!r||r.to>=logicalAt(this.rows,l.start_ms??w.start_ms)).map(l=>l.price)||[];
     }
     applyTheme(){
       const style=getComputedStyle(this.panel),dark=document.documentElement.dataset.theme==='dark';
@@ -138,7 +152,7 @@
       this.chart.applyOptions({layout:{background:{type:'solid',color:value('--surface',dark?'#0b0e14':'#fff')},textColor:value('--muted',dark?'#c7c4d7':'#64748b'),fontSize:11},
         grid:{vertLines:{color:value('--line-soft',dark?'#20232b':'#eef1f5')},horzLines:{color:value('--line-soft',dark?'#20232b':'#eef1f5')}}});
     }
-    readout(){const row=this.rowByTime?.get(this.hover)||this.rows.at(-1),html=row?window.SpikeChartTools.readout(row,row.time,row.time!==this.hover):'';if(html!==this.readoutHTML){this.panel.querySelector('.cv-readout').innerHTML=html;this.readoutHTML=html;}}
+    readout(){const row=this.rowByTime?.get(this.hover)||this.rows.at(-1),html=row?window.SpikeChartTools.readout(row,row.time,row.time!==this.hover):'';if(html!==this.readoutHTML){this.panel.querySelector('.cv-readout').innerHTML=html;this.readoutHTML=html;}if(this.maSeries?.length)this.panel.querySelector('.cv-ma-legend').innerHTML=window.SpikeChartStyle.legend(row);}
     draw(data,view,error){
       const T=window.SpikeChartTools,key=`${data?.symbol||''}|${data?.timezone||''}|${data?.bar||'15m'}|${view.bars}`;
       const oldTimes=T.times(this.rows),oldRange=this.chart.timeScale().getVisibleLogicalRange();
@@ -147,7 +161,9 @@
       const saved=key===this.key?T.anchor(oldRange,oldTimes):null;
       // API time is milliseconds. Display-only live tips are explicitly merged
       // by their owning chart; analytical consumers keep their closed series.
-      this.rows=(data?.candles||[]).slice(-view.bars).map(r=>({...r,time:r.time/1000}));
+      const raw=data?.candles||[],step={'1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'1D':86400000}[data?.bar]||900000;
+      this.rows=(view.ma?window.SpikeChartStyle.averages(raw,step):raw).slice(-view.bars).map(r=>({...r,time:r.time/1000}));
+      this.syncAverages(!!view.ma);
       this.rowByTime=new Map(this.rows.map(r=>[r.time,r]));
       const newTimes=T.times(this.rows),timeChanged=oldTimes.length!==newTimes.length||oldTimes.some((t,i)=>t!==newTimes[i]);
       this.sync(this.series,this.rows.map(({time,open,high,low,close})=>({time,open,high,low,close})));
@@ -180,6 +196,13 @@
       this.mondayWindow=view.mondayBand?data?.monday:null;
       this.bandIndices=this.mondayWindow?this.rows.map((r,i)=>r.time*1000>=this.mondayWindow.start_ms&&r.time*1000<this.mondayWindow.end_ms?i:-1).filter(i=>i>=0):[];this.paintMondayBand();
     }
+    syncAverages(visible){
+      const legend=this.panel.querySelector('.cv-ma-legend');if(legend)legend.hidden=!visible;
+      if(!visible){for(const line of this.maSeries||[])this.chart.removeSeries(line);this.maSeries=[];return;}
+      const style=window.SpikeChartStyle;
+      if(!this.maSeries?.length)this.maSeries=style.lines.map(m=>this.chart.addLineSeries({color:m.color,lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false}));
+      style.lines.forEach((m,i)=>this.sync(this.maSeries[i],this.rows.map(r=>fin(r[m.key])?{time:r.time,value:r[m.key]}:{time:r.time})));
+    }
     paintMondayBand(){
       if(!this.band)return;const scale=this.chart?.timeScale();
       const indices=this.bandIndices||[];
@@ -196,6 +219,6 @@
   const instances=new WeakMap();
   function mount(host,data,view,error=''){let instance=instances.get(host);if(!instance){instance=new Interactive(host);instances.set(host,instance);}instance.update(data,view,error);return instance;}
   function unmount(host){if(!host)return;instances.get(host)?.destroy();instances.delete(host);}
-  window.SpikeRangeChart={render,price,clock,mount,unmount};
-  if(typeof module!=='undefined')module.exports={render,price,bindFreePan,Interactive,logicalAt,WeekLevels};
+  window.SpikeRangeChart={render,price,clock,mount,unmount,WeekLevels};
+  if(typeof module!=='undefined')module.exports={render,price,bindFreePan,Interactive,logicalAt,coordinateAt,WeekLevels};
 })();
