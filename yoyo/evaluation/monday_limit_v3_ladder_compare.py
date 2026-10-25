@@ -61,8 +61,9 @@ def load(symbol):
         legs['path'] = path
         out.append(legs)
     t = pd.concat(out, ignore_index=True)
-    t['event'] = t.trade_id.str.split(':').str[:3].str.join(':')
-    t[['leg', 'stop']] = t.variant.str.rsplit('_', n=1, expand=True)
+    t['event'] = t.trade_id.astype(str).str.split(':').str[:3].str.join(':')
+    parts = t.variant.astype(str).str.rsplit('_', n=1)
+    t['leg'], t['stop'] = parts.str[0], parts.str[1]
     return t.assign(symbol=symbol), par
 
 
@@ -73,6 +74,8 @@ def compose(legs):
     legs['exit_ns'] = pd.to_datetime(legs.exit_time, utc=True).astype('int64')
     legs['entry_ns'] = pd.to_datetime(legs.entry_time, utc=True).astype('int64')
     wide = legs.pivot_table(index=['event', 'stop'], columns=['leg', 'path'], values=['net_s', 'exit_ns'], aggfunc='first')
+    need = pd.MultiIndex.from_product([['net_s', 'exit_ns'], list(dict.fromkeys(lg for w in LADDERS.values() for lg in w)), ['ohlc', 'olhc']])
+    wide = wide.reindex(columns=need)
     meta = legs.drop_duplicates(['event', 'stop']).set_index(['event', 'stop'])[['score', 'entry_ns']]
     rows = []
     for name, w in LADDERS.items():
@@ -158,11 +161,12 @@ def run():
             plans[f'{s}|all_{k}'] = {bn: k for bn in BNAMES}
         for basis in ('y2020_2024', 'y2025'):
             plans[f'{s}|chosen_on_{basis}'] = chosen[f'{s}|{basis}']
-    keyed = lad.set_index(['stop', 'ladder'])
+    groups = {k: g for k, g in lad.groupby(['stop', 'ladder'])}
+    empty = lad.iloc[:0]
     jobs = []
     for i, (pname, plan) in enumerate(plans.items()):
         s = pname.split('|')[0]
-        parts = [keyed.loc[(s, plan[bn])].reset_index(drop=True).pipe(lambda x, b=b: x[x.band == b]) for b, bn in enumerate(BNAMES)]
+        parts = [groups.get((s, plan[bn]), empty).pipe(lambda x, b=b: x[x.band == b]) for b, bn in enumerate(BNAMES)]
         x = pd.concat(parts, ignore_index=True)[['event', 'score', 'entry', 'exit', 'net', 't']]
         jobs.append((pname, x, cut, mexcess, window, 20261025+i))
     with ProcessPoolExecutor(4) as ex:
