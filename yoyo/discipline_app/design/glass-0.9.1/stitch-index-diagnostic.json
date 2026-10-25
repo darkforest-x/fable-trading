@@ -1,0 +1,84 @@
+{
+  "project_id": "8978791379095391159",
+  "target_screen_id": "f5d3f95247be479983f598ecb45c032b",
+  "checked_at_utc": "2026-10-25T06:46:50Z",
+  "original_call": {
+    "tool": "edit_screens",
+    "source_screen_id": "9cd418117dd24ff0802728fdeb596a18",
+    "model": "GEMINI_3_8_FLASH",
+    "submitted_at_utc": "2026-10-25T05:58:25.011Z",
+    "wait_result_at_utc": "2026-10-25T06:04:35.564Z",
+    "wait_result": "timed out awaiting tools/call after 300s"
+  },
+  "before_browser": {
+    "returned_at_utc": "2026-10-25T06:17:42.803Z",
+    "list_count": 178,
+    "project_update_time": "2026-10-25T05:58:26.653708Z",
+    "target_in_list": false,
+    "target_in_project": false,
+    "known_completed_screens_omitted": [
+      "57a4f7f2e33e46b3b0ecf390afe4f2b5",
+      "85b777925254414792e48fd5e95308f4"
+    ],
+    "known_completion_evidence": "Patrol sheet design/HTML download completed before 05:50:43Z, preceding the old list reads. Both raw text and structuredContent omit these IDs.",
+    "response_keys": [
+      "screens"
+    ],
+    "pagination_exposed": false
+  },
+  "after_browser": {
+    "user_screenshot_at_utc": "2026-10-25T06:20:05.359Z",
+    "project_update_time": "2026-10-25T06:19:30.580867Z",
+    "list_count": 185,
+    "target_in_list": true,
+    "target_in_project": true,
+    "target_get_screen_success": true,
+    "added_screens": [
+      {
+        "name": "projects/8978791379095391159/screens/fd29ad2f8a924431aaecb2d7766d1f5d",
+        "title": "Spike · 周一1.618 · 触达列表 (新增信号巡检图标与双端交互规范)"
+      },
+      {
+        "name": "projects/8978791379095391159/screens/d43ec70ea6664a098900cff4ce2af956",
+        "title": "Spike - 均线密集形态巡检 (纯形态只读与Apple Glass规范版)"
+      },
+      {
+        "name": "projects/8978791379095391159/screens/57a4f7f2e33e46b3b0ecf390afe4f2b5",
+        "title": "Spike · 均线密集巡检 · K线预览底抽屉 (75dvh 物理跟手下拉规范版)"
+      },
+      {
+        "name": "projects/8978791379095391159/screens/088907fa0dc84836a55940f8fca73b7d",
+        "title": "SPIKE · 模拟盘·历史回放 (390px 移动端规范版)"
+      },
+      {
+        "name": "projects/8978791379095391159/screens/85b777925254414792e48fd5e95308f4",
+        "title": "Spike · 均线密集巡检 · K线预览底抽屉 (周一1.618参考线移动端版)"
+      },
+      {
+        "name": "projects/8978791379095391159/screens/f5d3f95247be479983f598ecb45c032b",
+        "title": "SPIKE · 移动端 Apple Glass 与物理手势动力学规范画板 (生产交付版)"
+      },
+      {
+        "name": "projects/8978791379095391159/screens/9d136e91264048a1a7ac3114d42e2a45",
+        "title": "Spike · 模拟交易工作台 (紧凑纯净版)"
+      }
+    ],
+    "removed_screens": 0
+  },
+  "findings": {
+    "confirmed": "The old API list and project canvas membership were incomplete, including previously completed screens. This was not only an assistant title filter or an empty structuredContent parse.",
+    "supported_inference": "The observed before/after browser-open behavior matches Google's documented generation-to-MCP state synchronization defect. There is no server trace to establish the exact completion time or internal commit for this particular generated screen.",
+    "assistant_errors": [
+      "Treated missing list membership as a generation-status oracle despite known completed omissions.",
+      "Re-read only the old source screen ID after edit_screens, which produces a separate result screen.",
+      "Treated an about:blank inner browser frame as adequate website verification.",
+      "Repeated the same polling instead of investigating the known synchronization defect."
+    ]
+  },
+  "sources": [
+    "https://discuss.ai.google.dev/t/list-screens-returns-empty-after-generate-screen-from-text-until-project-is-opened-in-browser/123348",
+    "https://github.com/google-labs-code/stitch-sdk/issues/149",
+    "https://github.com/google-labs-code/stitch-sdk/pull/377"
+  ],
+  "recovery_rule": "Persist IDs from generation results; on timeout or missing membership, validate the index against already-known generated IDs, verify a fully loaded authenticated web canvas, then get_screen/download_file by the resulting ID. Do not infer failure, regenerate or seek a waiver from list absence."
+}
