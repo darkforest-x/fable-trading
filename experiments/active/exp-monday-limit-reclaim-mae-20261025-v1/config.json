@@ -1,0 +1,9 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-mae-20261025-v1",
+  "question": "Owner 2026-10-25: did winning trades go through a floating loss first, and how deep?",
+  "single_variable": "None; descriptive max adverse excursion on Codex 5m bars for the v2 rule's trades.",
+  "trades": "alt signals, 60m confirmation, near Monday edge target; outcome = worse of Codex O-H-L-C and monotone O-L-H-C v2, 10bp slippage on non-target exits",
+  "score": "experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/score_model.json",
+  "R": "target distance / 1.618 = 0.382 Monday range",
+  "thresholds": {"R": [1, 2, 3, 5, 8], "percent": [5, 10, 20, 30]}
+}
