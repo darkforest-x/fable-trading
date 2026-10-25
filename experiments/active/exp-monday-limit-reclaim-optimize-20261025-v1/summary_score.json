@@ -1,0 +1,149 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-reclaim-optimize-20261025-v1",
+    "question": "Owner 2026-10-25 sub-page 策略优化: floating profit in R, closer or partial take-profit, and per-coin score sizing for the Codex 1.618 limit-reclaim rule.",
+    "inputs": "exp-monday-limit-reclaim-exits-{ohlc,olhc}-20261025-v1 (targets 50/75/100 percent, monotone segments), exp-monday-limit-reclaim-mfe-20261025-v1, exp-monday-limit-reclaim-patterns3-20261024-v1 events",
+    "worst_path": "Per trade the worse of O-H-L-C and O-L-H-C; partial 50/50 = mean of 50 and 100 percent legs per path, then the worse path",
+    "R_definition": "1R = distance from the 1.618 to the 2.0 extension (0.382 of the Monday range); near-edge target = 1.618R",
+    "slippage_bp": 10,
+    "score": "Logistic regression on features known at the fill (bucket, log vol_ratio, log approach, opp_first, monday_close_side, log liquidity, toward24, cluster24, side, range_pct), fitted on fills before 2025-01-01 with win = worst net > 0 (near-edge target); judged from 2025-01-01 by AUC, quintiles (cuts from training scores) and 1000 USDT replays: equal 10 percent, top-40 percent only, quintile-weighted 2-10 percent; gross <= 1x.",
+    "limitations": "Score features exist only for the 2026-10-24 snapshot symbols; no funding, queue, margin or liquidity model.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "part": "score",
+  "vol_bucket_threshold": -27.0,
+  "results": {
+    "variants": {
+      "tp100": {
+        "all": {
+          "n": 69990,
+          "win_pct": 23.721960280040005,
+          "mean_bp": 2.0890211059498585,
+          "median_bp": -17.000000028451307
+        },
+        "discovery": {
+          "n": 30458,
+          "win_pct": 22.956201983058637,
+          "mean_bp": 8.259991829500274,
+          "median_bp": -17.00000002800915
+        },
+        "validation": {
+          "n": 39532,
+          "win_pct": 24.311949812809875,
+          "mean_bp": -2.6654923590379624,
+          "median_bp": -17.000000029388712
+        }
+      }
+    },
+    "replays": {
+      "tp100|all|k10|g1": {
+        "final_multiple": 0.11896507049644774,
+        "max_drawdown_pct": 92.85732751750258
+      },
+      "tp100|all|k10|g3": {
+        "final_multiple": 0.0,
+        "max_drawdown_pct": 100.0
+      },
+      "tp100|vol_top|k10|g1": {
+        "final_multiple": 5.62758680427526,
+        "max_drawdown_pct": 56.91042258724784
+      },
+      "tp100|vol_top|k10|g3": {
+        "final_multiple": 0.0,
+        "max_drawdown_pct": 100.0
+      }
+    },
+    "r_units": {
+      "止盈": {
+        "n": 17247,
+        "mfe_R_median": 1.4819936115664374,
+        "mfe_R_p75": 1.5651086267202796,
+        "net_R_mean": 1.5997493995077785,
+        "net_R_median": 1.6015123365690593
+      },
+      "收回后保本出场": {
+        "n": 24656,
+        "mfe_R_median": 0.7368789351318463,
+        "mfe_R_p75": 1.0725577130528565,
+        "net_R_mean": -0.028813930966174312,
+        "net_R_median": -0.025741771783343498
+      },
+      "没收回止损": {
+        "n": 28087,
+        "mfe_R_median": 0.21865840865974764,
+        "mfe_R_p75": 0.41916509131456714,
+        "net_R_mean": -0.823003576862203,
+        "net_R_median": -0.45935714775253544
+      },
+      "全部": {
+        "n": 69990,
+        "mfe_R_median": 0.5509238114055734,
+        "net_R_mean": 0.05378968635633608,
+        "R_pct_median": 2.594620385255893
+      }
+    },
+    "score": {
+      "train_n": 25260,
+      "valid_n": 33472,
+      "train_auc": 0.6495803973856136,
+      "valid_auc": 0.6543708759207092,
+      "coefficients_standardized": {
+        "bucket": 0.323,
+        "log_vol_ratio": 0.227,
+        "log_approach": -0.242,
+        "opp_first": 0.176,
+        "monday_close_side": -0.024,
+        "log_liquidity": -0.025,
+        "toward24": -0.334,
+        "cluster24": -0.082,
+        "side": 0.0,
+        "range_pct": -0.016
+      },
+      "valid_by_quintile": {
+        "1": {
+          "n": 8409,
+          "win_pct": 14.936377690569627,
+          "mean_bp": -14.253494739601017
+        },
+        "2": {
+          "n": 6355,
+          "win_pct": 17.907159716758457,
+          "mean_bp": -8.863006213196313
+        },
+        "3": {
+          "n": 6102,
+          "win_pct": 21.238938053097346,
+          "mean_bp": -11.747691785379219
+        },
+        "4": {
+          "n": 6173,
+          "win_pct": 26.486311355904746,
+          "mean_bp": 0.18215464692223454
+        },
+        "5": {
+          "n": 6433,
+          "win_pct": 44.27172392351935,
+          "mean_bp": 25.745953326076073
+        }
+      },
+      "valid_sizing_replay_from_2025": {
+        "等额每笔10%": {
+          "final_multiple": 0.15291109096918443,
+          "max_drawdown_pct": 85.29971893139715
+        },
+        "只做分数前40%": {
+          "final_multiple": 3.994941713647812,
+          "max_drawdown_pct": 33.38652421074685
+        },
+        "按分数分档2%-10%": {
+          "final_multiple": 1.285224340939068,
+          "max_drawdown_pct": 44.005080749752835
+        }
+      }
+    }
+  },
+  "source_commit": "15d33a2519ef267c0f05ee85ece9a91073473b0e",
+  "training_eligible": false,
+  "production_eligible": false
+}

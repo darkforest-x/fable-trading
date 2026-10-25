@@ -1,3 +1,9 @@
+## 2026-10-25 · Limit-reclaim: failed-stop samples, post-exit recovery, score sizing
+
+- Failed reclaims: median -0.46R, mean -0.82R, 8 percent worse than -2R. After the exit, price returns to the entry as often as it moves the same distance further (51 vs 50 percent within 2h), so no re-entry edge.
+- Entry score (logistic, fitted before 2025 on worst-path wins; volatility, volume spike, approach speed, opposite side first, 24h move, other coins touching): 2025+ AUC 0.654; top quintile +25.7bp, bottom three negative; 1000U from 2025 trading only the top 40 percent 4.0x (DD 33 percent) versus all 0.15x.
+- Running in background: target 50/75/100 percent replays and a 5m wick-stop near-edge replay (owner MUBARAK 20R example), both intrabar paths. No live action.
+
 ## 2026-10-25 · Owner-requested audit: execution completion is not strategy validation
 
 - Independent cached-ledger reconciliation confirms 626 5m alts / 69,990 unique matched trades: OHLC +21.2553bp, OLHC +20.6209bp, per-trade minimum +9.7168bp. Shorts +24.8202 -> +1.3537bp. Of 1,792 original short same-bar targets, 247 remain same-bar but 1,154 eventually hit target. Stored monotone-OHLC parity is 3,158/3,158; four monotone-segment regression tests pass. No historical rerun.

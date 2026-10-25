@@ -1,0 +1,154 @@
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:200: RuntimeWarning: divide by zero encountered in matmul
+  raw_prediction = X @ weights + intercept
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:200: RuntimeWarning: overflow encountered in matmul
+  raw_prediction = X @ weights + intercept
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:200: RuntimeWarning: invalid value encountered in matmul
+  raw_prediction = X @ weights + intercept
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:330: RuntimeWarning: divide by zero encountered in matmul
+  grad[:n_features] = X.T @ grad_pointwise + l2_reg_strength * weights
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:330: RuntimeWarning: overflow encountered in matmul
+  grad[:n_features] = X.T @ grad_pointwise + l2_reg_strength * weights
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:330: RuntimeWarning: invalid value encountered in matmul
+  grad[:n_features] = X.T @ grad_pointwise + l2_reg_strength * weights
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: divide by zero encountered in matmul
+  ret = a @ b
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: overflow encountered in matmul
+  ret = a @ b
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: invalid value encountered in matmul
+  ret = a @ b
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: divide by zero encountered in matmul
+  ret = a @ b
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: overflow encountered in matmul
+  ret = a @ b
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: invalid value encountered in matmul
+  ret = a @ b
+{
+ "variants": {
+  "tp100": {
+   "all": {
+    "n": 69990,
+    "win_pct": 23.721960280040005,
+    "mean_bp": 2.0890211059498585,
+    "median_bp": -17.000000028451307
+   },
+   "discovery": {
+    "n": 30458,
+    "win_pct": 22.956201983058637,
+    "mean_bp": 8.259991829500274,
+    "median_bp": -17.00000002800915
+   },
+   "validation": {
+    "n": 39532,
+    "win_pct": 24.311949812809875,
+    "mean_bp": -2.6654923590379624,
+    "median_bp": -17.000000029388712
+   }
+  }
+ },
+ "replays": {
+  "tp100|all|k10|g1": {
+   "final_multiple": 0.11896507049644774,
+   "max_drawdown_pct": 92.85732751750258
+  },
+  "tp100|all|k10|g3": {
+   "final_multiple": 0.0,
+   "max_drawdown_pct": 100.0
+  },
+  "tp100|vol_top|k10|g1": {
+   "final_multiple": 5.62758680427526,
+   "max_drawdown_pct": 56.91042258724784
+  },
+  "tp100|vol_top|k10|g3": {
+   "final_multiple": 0.0,
+   "max_drawdown_pct": 100.0
+  }
+ },
+ "r_units": {
+  "止盈": {
+   "n": 17247,
+   "mfe_R_median": 1.4819936115664374,
+   "mfe_R_p75": 1.5651086267202796,
+   "net_R_mean": 1.5997493995077785,
+   "net_R_median": 1.6015123365690593
+  },
+  "收回后保本出场": {
+   "n": 24656,
+   "mfe_R_median": 0.7368789351318463,
+   "mfe_R_p75": 1.0725577130528565,
+   "net_R_mean": -0.028813930966174312,
+   "net_R_median": -0.025741771783343498
+  },
+  "没收回止损": {
+   "n": 28087,
+   "mfe_R_median": 0.21865840865974764,
+   "mfe_R_p75": 0.41916509131456714,
+   "net_R_mean": -0.823003576862203,
+   "net_R_median": -0.45935714775253544
+  },
+  "全部": {
+   "n": 69990,
+   "mfe_R_median": 0.5509238114055734,
+   "net_R_mean": 0.05378968635633608,
+   "R_pct_median": 2.594620385255893
+  }
+ },
+ "score": {
+  "train_n": 25260,
+  "valid_n": 33472,
+  "train_auc": 0.6495803973856136,
+  "valid_auc": 0.6543708759207092,
+  "coefficients_standardized": {
+   "bucket": 0.323,
+   "log_vol_ratio": 0.227,
+   "log_approach": -0.242,
+   "opp_first": 0.176,
+   "monday_close_side": -0.024,
+   "log_liquidity": -0.025,
+   "toward24": -0.334,
+   "cluster24": -0.082,
+   "side": 0.0,
+   "range_pct": -0.016
+  },
+  "valid_by_quintile": {
+   "1": {
+    "n": 8409,
+    "win_pct": 14.936377690569627,
+    "mean_bp": -14.253494739601017
+   },
+   "2": {
+    "n": 6355,
+    "win_pct": 17.907159716758457,
+    "mean_bp": -8.863006213196313
+   },
+   "3": {
+    "n": 6102,
+    "win_pct": 21.238938053097346,
+    "mean_bp": -11.747691785379219
+   },
+   "4": {
+    "n": 6173,
+    "win_pct": 26.486311355904746,
+    "mean_bp": 0.18215464692223454
+   },
+   "5": {
+    "n": 6433,
+    "win_pct": 44.27172392351935,
+    "mean_bp": 25.745953326076073
+   }
+  },
+  "valid_sizing_replay_from_2025": {
+   "等额每笔10%": {
+    "final_multiple": 0.15291109096918443,
+    "max_drawdown_pct": 85.29971893139715
+   },
+   "只做分数前40%": {
+    "final_multiple": 3.994941713647812,
+    "max_drawdown_pct": 33.38652421074685
+   },
+   "按分数分档2%-10%": {
+    "final_multiple": 1.285224340939068,
+    "max_drawdown_pct": 44.005080749752835
+   }
+  }
+ }
+}

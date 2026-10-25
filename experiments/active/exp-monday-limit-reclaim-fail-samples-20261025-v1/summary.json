@@ -1,0 +1,88 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-reclaim-fail-samples-20261025-v1",
+    "question": "Owner 2026-10-25: what do failed-reclaim exits look like? Sample charts.",
+    "source": "exp-monday-limit-reclaim-mfe-20261025-v1 trades (Codex O-H-L-C ledger, alts, 60m confirmation, near Monday edge), Codex 5m bars via load_job",
+    "groups": "typical loss -0.6R..-0.35R, large loss <= -2R, floating profit >= 0.4R first; three each, fixed seed",
+    "seed": 20261025,
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "failed_n": 28087,
+  "net_R_quantiles": {
+    "0.1": -1.785594250761868,
+    "0.25": -0.940874451710231,
+    "0.5": -0.45935714775253544,
+    "0.75": -0.2070519162197914,
+    "0.9": -0.0936898087549156
+  },
+  "net_R_mean": -0.823003576862203,
+  "share_worse_than_minus1R": 0.2308897354648058,
+  "share_worse_than_minus2R": 0.08153238152882117,
+  "samples": [
+    {
+      "group": "典型亏损",
+      "trade_id": "ONDOUSDT:2026-09-07:+1:m60:near_monday_edge:c0",
+      "net_R": -0.39273947683862925,
+      "mfe_R": 0.5093050657156059,
+      "net_bp": -80.93204049652176
+    },
+    {
+      "group": "典型亏损",
+      "trade_id": "BANDUSDT:2024-10-28:+1:m60:near_monday_edge:c0",
+      "net_R": -0.5449056614555052,
+      "mfe_R": 0.04227783770825958,
+      "net_bp": -183.45442667475535
+    },
+    {
+      "group": "典型亏损",
+      "trade_id": "BCHUSDT:2026-03-09:-1:m60:near_monday_edge:c0",
+      "net_R": -0.48841511683652594,
+      "mfe_R": 1.0241378928551397,
+      "net_bp": -53.26596211139853
+    },
+    {
+      "group": "大亏",
+      "trade_id": "OGUSDT:2026-04-13:-1:m60:near_monday_edge:c0",
+      "net_R": -7.235147324548447,
+      "mfe_R": 0.41320004582295616,
+      "net_bp": -1119.328127722688
+    },
+    {
+      "group": "大亏",
+      "trade_id": "PENDLEUSDT:2024-01-15:-1:m60:near_monday_edge:c0",
+      "net_R": -2.0017667290863126,
+      "mfe_R": 0.0,
+      "net_bp": -628.7731141431639
+    },
+    {
+      "group": "大亏",
+      "trade_id": "DIAUSDT:2025-07-14:-1:m60:near_monday_edge:c0",
+      "net_R": -2.163669732370985,
+      "mfe_R": 0.818453462008022,
+      "net_bp": -840.2366490415627
+    },
+    {
+      "group": "先有浮盈再失败",
+      "trade_id": "LRCUSDT:2025-10-06:-1:m60:near_monday_edge:c0",
+      "net_R": -1.6935530009612965,
+      "mfe_R": 0.8453161413562549,
+      "net_bp": -249.81883443052453
+    },
+    {
+      "group": "先有浮盈再失败",
+      "trade_id": "AEVOUSDT:2026-07-13:-1:m60:near_monday_edge:c0",
+      "net_R": -0.22663810159077113,
+      "mfe_R": 0.8770217988642593,
+      "net_bp": -23.9610456006028
+    },
+    {
+      "group": "先有浮盈再失败",
+      "trade_id": "XAIUSDT:2025-12-08:-1:m60:near_monday_edge:c0",
+      "net_R": -3.2722579277431048,
+      "mfe_R": 0.6037721799469364,
+      "net_bp": -769.2025584912759
+    }
+  ],
+  "source_commit": "b1a369c7b25985ff51276c647667f51204e4fd29"
+}

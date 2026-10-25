@@ -187,6 +187,48 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'This run also had a direct bar computation (summary.json) that the owner said was redundant; native matches it trade by trade (mean abs diff 0.01/0.43bp). Later runs are framework-only. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-limit-reclaim-fail-samples-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: b1a369c7b25985ff51276c647667f51204e4fd29
+    status: complete
+    question: 'Owner 2026-10-25: what do failed-reclaim exits look like? Nine sample charts.'
+    single_variable: 'Fixed-seed samples: typical, large and floating-profit-first failures; Codex 5m bars; read-only.'
+    result: 'Failed reclaims 28087: loss quantiles 10/25/50/75/90 percent = -1.79/-0.94/-0.46/-0.21/-0.09R, mean -0.82R; 23 percent worse than -1R, 8 percent worse than -2R (spikes that keep running past the 2.0 extension). Chart fail_samples.png.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-reclaim-fail-samples-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Codex limit-reclaim follow-up; read-only over framework fills.'
+  - experiment_id: exp-monday-limit-reclaim-fail-recovery-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: d98401d88381bf0051c74638500c8b576457a404
+    status: complete
+    question: 'Owner 2026-10-25: after a failed-reclaim exit, how often does price return to the 1.618 entry?'
+    single_variable: 'Bars after the exit over 1/2/4/8/24/72 hours; symmetric control = same distance further against the trade.'
+    result: 'Back to entry 41.6/51.0/59.9/68.1/79.0/86.0 percent at 1/2/4/8/24/72h versus the same distance further against 41.2/49.6/59.2/67.1/78.0/84.8: no asymmetry, so re-entering after a return has no edge by itself. Monday edge reached after the exit: 0.8 percent in 1h, 29 percent in 24h, 51 percent in 72h. Small losses (<0.3R) come back 75 percent within 1h.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-reclaim-fail-recovery-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Codex limit-reclaim follow-up; read-only over framework fills.'
+  - experiment_id: exp-monday-limit-reclaim-optimize-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 15d33a2519ef267c0f05ee85ece9a91073473b0e
+    status: complete
+    question: 'Owner 2026-10-25 sub-page 策略优化: R units and per-coin score sizing (target variants pending framework runs).'
+    single_variable: 'Worst intrabar path per trade, 10bp exit slippage; logistic score fitted before 2025, judged from 2025.'
+    result: 'Near-edge worst path +2.1bp per trade (pre-2025 +8.3, 2025+ -2.7). Score valid AUC 0.654 (train 0.650); 2025+ top quintile win 44.3 percent +25.7bp, quintiles 1-3 negative. 1000 USDT from 2025, gross<=1x: equal 10 percent 0.15x, top-40 percent only 4.0x (DD 33 percent), quintile-weighted 1.29x. R units: breakeven exits peak 0.74R median, failed reclaims -0.82R mean.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-reclaim-optimize-20261025-v1/summary_score.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Codex limit-reclaim follow-up; read-only over framework fills.'
   - experiment_id: exp-monday-limit-reclaim-mfe-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: f53ea69f5ec3a5da10e52459e052f757583f0708
