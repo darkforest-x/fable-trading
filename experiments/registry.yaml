@@ -341,6 +341,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Charts 1_level_reach.png, 2_ladders_by_band.png. Ladder legs share the breakeven stop; no backstop in these fills.'
+  - experiment_id: exp-monday-limit-reclaim-score-detail-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 90c4215577
+    status: complete
+    question: 'Owner 2026-10-25: finer score bands (0.5, 0.6, 0.9 ...) for key-level reach and take-profit ladders.'
+    single_variable: 'Score band edges 0.226/0.30/0.375/0.45/0.50/0.60/0.70/0.80/1; same fills as the ladder study (no backstop).'
+    result: 'From 2025, near-edge mean per trade by band: 0.226-0.30 0bp (n6128), 0.30-0.375 +3, 0.375-0.45 0, 0.45-0.50 -8, 0.50-0.60 +79 (n745), 0.60-0.70 +116 (n390), 0.70-0.80 +150 (n153), 0.80-1 +299 (n73); 2025 and 2026 agree for every band >= 0.50. Below 0.50 farther targets lose (0.375-0.45 -19..-22bp vs near, > 2 SE). From 0.60 continuation rises with score (near to 0.5: 55 percent below 0.5, 77-86 percent from 0.6) and opposite 1618 beats near by +92 +-40 / +173 +-71 / +393 +-137bp in the three top bands, the 2025 choice holding in 2026. Corrects the coarse-band claim that continuation does not depend on the score.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-reclaim-score-detail-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Bands chosen by the owner after the coarse study; 2026 is not a clean test of the band edges. Charts 1_reach_by_fine_band.png, 2_ladder_grid_by_fine_band.png.'
   - experiment_id: exp-monday-reclaim-paper-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 791941594f
