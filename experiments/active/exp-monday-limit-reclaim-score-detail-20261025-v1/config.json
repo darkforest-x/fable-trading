@@ -1,0 +1,8 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-score-detail-20261025-v1",
+  "question": "Owner 2026-10-25: finer score bands (0.5, 0.6, 0.9 ...) for key-level reach and take-profit ladders.",
+  "single_variable": "Score band granularity: edges 0.226 / 0.30 / 0.375 / 0.45 / 0.50 / 0.60 / 0.70 / 0.80 / 1.",
+  "inputs": "same framework fills as exp-monday-limit-reclaim-ladders-20261025-v1 (60m, worst path, 10bp slippage on non-target exits, no backstop)",
+  "statistics": "reach and continuation per level, median hours to reach, mean net per ladder for 2025 / 2026 / from 2025, paired difference to the near-edge target with standard error",
+  "fees": {"maker_bp": 2, "taker_bp": 5, "read_on": "2026-10-23 OKX Lv1"}
+}
