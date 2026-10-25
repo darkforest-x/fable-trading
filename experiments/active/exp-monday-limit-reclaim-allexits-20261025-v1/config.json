@@ -1,0 +1,11 @@
+{
+  "experiment_id": "exp-monday-limit-reclaim-allexits-20261025-v1",
+  "question": "Owner 2026-10-25: other targets (range 0.5, range 0.618, far Monday edge, opposite 1.618), partial exits across them, and the 5m confirmation track of the v2 limit-reclaim rule.",
+  "single_variable": "Target choice (single or equal-weight partial) for 60m and 5m confirmation; everything else as the v2 rule.",
+  "inputs": ["experiments/active/exp-monday-limit-reclaim-20261024-v1 (O-H-L-C)", "experiments/active/exp-monday-limit-reclaim-olhc-allexits-20261025-v1 (O-L-H-C)", "experiments/active/exp-monday-limit-reclaim-olhc-20261025-v2 (O-L-H-C, 60m near edge)", "experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/score_model.json"],
+  "path_rule": "worse of the two intrabar paths per trade",
+  "fees": {"maker_bp": 2, "taker_bp": 5, "limit_entry_and_target": "maker", "confirmation_exit_and_breakeven_stop": "taker", "read_on": "2026-10-23 OKX Lv1"},
+  "slippage_bp_non_target_exit": 10,
+  "partials": {"near+r05": ["near", "r05"], "near+far": ["near", "far"], "near+opp1618": ["near", "opp1618"], "r05+far": ["r05", "far"], "near+r05+far": ["near", "r05", "far"], "all5": ["near", "r05", "r0618", "far", "opp1618"]},
+  "replay": {"start_usdt": 1000, "fraction": 0.10, "gross_cap": 1.0}
+}
