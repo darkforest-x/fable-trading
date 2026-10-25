@@ -37,7 +37,7 @@ STOPS = ['far', 'P10', 'P12', 'P15', 'P18', 'P20', 'P25', 'P30']
 SZH = dict(far='不设', P10='-10%', P12='-12%', P15='-15%', P18='-18%', P20='-20%', P25='-25%', P30='-30%')
 EDGES = [.6, .7, .8]
 BNAMES = ['0.5-0.6', '0.6-0.7', '0.7-0.8', '0.8-1']
-BAD_EVENTS = {'BABYUSDT:2026-06-01:-1'}
+BAD_EVENTS = {'BABYUSDT:2026-06-01:-1', 'DASHUSDT:2020-04-13:+1'}  # bad source bars: BABY high 1.30 from 0.012 (OKX 0.01871), DASH 2020-04-14 07:35 UTC low 0.10 from 73
 B = (pd.Timestamp('2025-01-01', tz='UTC'), pd.Timestamp('2026-01-01', tz='UTC'))
 TIES = 10
 COLS = ['trade_id', 'net_notional_bp', 'reason', 'entry_time', 'exit_time', 'score', 'variant']

@@ -29,7 +29,7 @@ from yoyo.evaluation import monday_limit_reclaim_optimize as opt
 EXP = ROOT/'experiments/active/exp-monday-limit-v3-grid-compare-20261025-v1'
 RUN = ROOT/'experiments/active/exp-monday-limit-v3-grid-20261025-v1'
 TIES = 10
-BAD_EVENTS = {'BABYUSDT:2026-06-01:-1'}
+BAD_EVENTS = {'BABYUSDT:2026-06-01:-1', 'DASHUSDT:2020-04-13:+1'}  # bad source bars: BABY high 1.30 from 0.012 (OKX 0.01871), DASH 2020-04-14 07:35 UTC low 0.10 from 73
 STOPS = ['far', 'P10', 'P12', 'P15', 'P18', 'P20', 'P25', 'P30']
 SZH = dict(far='不设', P10='-10%', P12='-12%', P15='-15%', P18='-18%', P20='-20%', P25='-25%', P30='-30%')
 SIZINGS = {'equal': None, 'linear': .5, 'linear_cap20': .2, 'linear_cap15': .15, 'linear_cap10': .10}
