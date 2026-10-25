@@ -355,6 +355,76 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Bands chosen by the owner after the coarse study; 2026 is not a clean test of the band edges. Charts 1_reach_by_fine_band.png, 2_ladder_grid_by_fine_band.png.'
+  - experiment_id: exp-monday-limit-backstop-ohlc-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0ccc4abf44
+    status: complete
+    question: 'Owner 2026-10-25: backstop grid (O-H-L-C path) for the v2 rule.'
+    single_variable: 'Backstop far / 1,2,3,5,8 R / 5,10,20,30 percent; weeks from 2024-12-30; adapter ExitPolicy.reclaim_backstop.'
+    result: '626/626 symbols, no errors. far parity: one mismatch, BABYUSDT 2026-06-05 09:30 UTC source bar high 1.30 from 0.012 (OKX high 0.01871) crossed even the 50x far stop.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-backstop-compare-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Input of exp-monday-limit-backstop-compare-20261025-v1.'
+  - experiment_id: exp-monday-limit-backstop-olhc-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0ccc4abf44
+    status: complete
+    question: 'Owner 2026-10-25: backstop grid (monotone O-L-H-C path) for the v2 rule.'
+    single_variable: 'As the O-H-L-C run with the other intrabar path.'
+    result: '626/626 symbols, no errors; same BABY parity exception.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-backstop-compare-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Input of exp-monday-limit-backstop-compare-20261025-v1.'
+  - experiment_id: exp-monday-limit-backstop-compare-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 280b8bf580
+    status: complete
+    question: 'Owner 2026-10-25: which backstop distance earns the most (top-40 score, near target, linear sizing)?'
+    single_variable: 'Backstop distance; chosen on 2025, tested on 2026; per fine score band as a variant.'
+    result: 'Linear sizing 2025 / 2026 / last five months: none 3.18x / 2.05x / 1.69x (worst trade -91 percent); -20 percent 2.96 / 1.95 / 1.77 (cap -20.2, 2.2 percent of trades stopped); -30 percent 2.23 / 1.81 / 1.85; -10 percent 1.66 / 1.04 / 1.01; 1R 1.02 / 0.77 / 0.82. Per-band choice equals -20 percent. Tighter stops kill spikes that reclaim later.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-backstop-compare-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'far takes the no-stop ledgers after the parity check (BABY bad bar). Only weeks from 2024-12-30; the full-history finer grid is exp-monday-limit-v3-grid-20261025-v1.'
+  - experiment_id: exp-monday-limit-v3-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: df3e3b3dc4
+    status: complete
+    question: 'Owner 2026-10-25: v3 candidate framework replay (current, near_P20, target_only, v3), weeks from 2024-12-30.'
+    single_variable: 'Variant per event; runner monday_limit_v3.'
+    result: '626/626 per path; current matches the ledgers except the BABY bad bar.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-v3-compare-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Input of exp-monday-limit-v3-compare-20261025-v1.'
+  - experiment_id: exp-monday-limit-v3-compare-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4b6a46b2b7
+    status: complete
+    question: 'Owner 2026-10-25: does v3 (opposite 1618 from score 0.6, -20 percent backstop) beat v2, and which part does the work?'
+    single_variable: 'Variant x threshold 0.226 / 0.5; linear sizing; 20 tie orders.'
+    result: 'Linear sizing 2025 / 2026 / last five months (DD): current 0.226 3.16 / 2.14 (21) / 1.74; current 0.5 3.57 / 2.51 (16) / 1.81; target_only 0.226 6.68 / 2.63 (42) / 3.21; target_only 0.5 9.48 / 3.17 (35) / 3.47; v3 0.226 6.97 / 2.07 (47) / 2.92; v3 0.5 7.40 / 2.59 (33) / 3.11. The far target drives the gain but 2026 equity stayed under water from February to August and recovered in September spikes; drawdown doubles. Threshold 0.5 raises return and cuts drawdown in every variant. The -20 percent backstop costs about a fifth of the far-target gain in 2026.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-v3-compare-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Score bands 0.5 / 0.6 were chosen after seeing 2025-2026, so these are optimistic. BABYUSDT:2026-06-01:-1 dropped (bad source bar).'
   - experiment_id: exp-monday-reclaim-paper-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 791941594f
