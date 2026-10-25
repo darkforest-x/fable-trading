@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>SPIKE · 模拟交易簿与模型分浮层</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "tertiary": "#ffffff",
+            "background": "#0e131e",
+            "on-primary": "#003822",
+            "secondary-fixed": "#ffd9dc",
+            "tertiary-fixed": "#9cf0ff",
+            "surface-variant": "#303540",
+            "surface-container-low": "#171c26",
+            "on-primary-fixed": "#002112",
+            "on-surface-variant": "#bbcabf",
+            "surface-container-lowest": "#090e18",
+            "tertiary-container": "#9cf0ff",
+            "on-background": "#dee2f1",
+            "on-tertiary-fixed-variant": "#004f58",
+            "surface-tint": "#4cdf9d",
+            "outline-variant": "#3c4a41",
+            "on-primary-fixed-variant": "#005234",
+            "surface-container-highest": "#303540",
+            "primary-fixed-dim": "#4cdf9d",
+            "on-secondary-container": "#ffb7be",
+            "on-error-container": "#ffdad6",
+            "surface-container-high": "#252a35",
+            "error-container": "#93000a",
+            "inverse-on-surface": "#2b303c",
+            "secondary": "#ffb2ba",
+            "on-error": "#690005",
+            "on-primary-container": "#00734b",
+            "inverse-surface": "#dee2f1",
+            "outline": "#86948a",
+            "on-tertiary-container": "#006f7c",
+            "on-surface": "#dee2f1",
+            "tertiary-fixed-dim": "#00daf3",
+            "surface-container": "#1b202a",
+            "on-tertiary-fixed": "#001f24",
+            "inverse-primary": "#006c46",
+            "surface-bright": "#343945",
+            "primary": "#ffffff",
+            "on-tertiary": "#00363d",
+            "on-secondary": "#670020",
+            "error": "#ffb4ab",
+            "on-secondary-fixed": "#400011",
+            "primary-fixed": "#6dfcb7",
+            "surface": "#0e131e",
+            "on-secondary-fixed-variant": "#910031",
+            "primary-container": "#6dfcb7",
+            "secondary-container": "#ab013b",
+            "surface-dim": "#0e131e",
+            "secondary-fixed-dim": "#ffb2ba",
+            // Custom model layer tokens
+            "spike-blue": "#5aa9ff",
+            "spike-profit": "#70ffba",
+            "spike-loss": "#ff4f73"
+          },
+          borderRadius: {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "2xl": "0.75rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "margin": "0.5rem",
+            "space-xs": "0.125rem",
+            "space-sm": "0.25rem",
+            "margin-mobile": "0.25rem",
+            "space-lg": "0.75rem",
+            "gutter": "0.25rem",
+            "gutter-mobile": "0.25rem",
+            "space-xl": "1rem",
+            "space-md": "0.5rem"
+          },
+          fontFamily: {
+            "headline-md": ["Space Grotesk", "sans-serif"],
+            "body-sm": ["Geist", "sans-serif"],
+            "headline-sm": ["Space Grotesk", "sans-serif"],
+            "body-md": ["Geist", "sans-serif"],
+            "micro-tag": ["JetBrains Mono", "monospace"],
+            "headline-lg": ["Space Grotesk", "sans-serif"],
+            "micro-tag-caps": ["JetBrains Mono", "monospace"],
+            "data-mono-sm": ["JetBrains Mono", "monospace"],
+            "data-mono": ["JetBrains Mono", "monospace"]
+          },
+          fontSize: {
+            "headline-md": ["1.25rem", { lineHeight: "1.5rem", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "body-sm": ["0.75rem", { lineHeight: "1rem", letterSpacing: "0.01em", fontWeight: "400" }],
+            "headline-sm": ["1rem", { lineHeight: "1.25rem", letterSpacing: "0em", fontWeight: "600" }],
+            "body-md": ["0.8125rem", { lineHeight: "1.125rem", letterSpacing: "0em", fontWeight: "400" }],
+            "micro-tag": ["0.6875rem", { lineHeight: "0.75rem", letterSpacing: "0.04em", fontWeight: "600" }],
+            "headline-lg": ["1.5rem", { lineHeight: "1.75rem", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "micro-tag-caps": ["0.6875rem", { lineHeight: "0.75rem", letterSpacing: "0.06em", fontWeight: "700" }],
+            "data-mono-sm": ["0.75rem", { lineHeight: "0.875rem", letterSpacing: "-0.01em", fontWeight: "400" }],
+            "data-mono": ["0.8125rem", { lineHeight: "1rem", letterSpacing: "-0.01em", fontWeight: "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    :root {
+      --spike-bg: #0b0e14;
+      --spike-glass: rgba(22, 28, 38, 0.88);
+      --spike-glass-border: rgba(255, 255, 255, 0.08);
+      --spike-glass-highlight: rgba(255, 255, 255, 0.03);
+      --spike-text-primary: #e1e2eb;
+      --spike-text-muted: #8c92a4;
+      --spike-panel-backdrop: blur(28px);
+      --spike-card-hover: rgba(255, 255, 255, 0.03);
+    }
+    
+    html:not(.dark) {
+      --spike-bg: #f4f6fa;
+      --spike-glass: rgba(255, 255, 255, 0.88);
+      --spike-glass-border: rgba(0, 0, 0, 0.08);
+      --spike-glass-highlight: rgba(0, 0, 0, 0.02);
+      --spike-text-primary: #0f172a;
+      --spike-text-muted: #64748b;
+      --spike-card-hover: rgba(0, 0, 0, 0.03);
+    }
+
+    body {
+      background-color: var(--spike-bg);
+      color: var(--spike-text-primary);
+      overflow: hidden;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .apple-glass {
+      background: var(--spike-glass);
+      backdrop-filter: var(--spike-panel-backdrop);
+      -webkit-backdrop-filter: var(--spike-panel-backdrop);
+      border: 1px solid var(--spike-glass-border);
+      box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.55), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .apple-glass-pill {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    html:not(.dark) .apple-glass-pill {
+      background: rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    /* Custom Scrollbar for Ledger */
+    .trade-ledger-scroll::-webkit-scrollbar {
+      width: 3px;
+    }
+    .trade-ledger-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .trade-ledger-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 9999px;
+    }
+    html:not(.dark) .trade-ledger-scroll::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    /* Responsive Transitions */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body class="w-screen h-screen relative font-body-sm overflow-hidden select-none">
+<!-- 1. FULL-VIEWPORT CANDLESTICK WALLPAPER -->
+<div class="absolute inset-0 w-full h-full pointer-events-auto bg-[#0b0e14] z-0 overflow-hidden" id="chart-viewport">
+<canvas class="w-full h-full block" id="candlestick-canvas"></canvas>
+<!-- Watermark / Symbol Status Indicator (Background Instrument) -->
+<div class="absolute bottom-16 right-8 pointer-events-none opacity-[0.035] font-headline-lg font-black text-8xl md:text-[14rem] tracking-tighter leading-none text-white select-none">
+      SOLUSDT
+    </div>
+</div>
+<!-- 2. TOP BAR & NAVIGATION -->
+<header class="w-full flex items-center justify-between px-3 h-11 border-b border-white/[0.06] bg-[#0b0e14]/85 backdrop-blur-xl z-30 fixed top-0 left-0">
+<!-- Left: Compact SPIKE Logo Pill -->
+<div class="flex items-center space-x-2">
+<button aria-label="SPIKE Platform Engine" class="w-[110px] h-[34px] flex items-center justify-center space-x-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.98] transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-spike-profit/60">
+<span class="text-spike-profit font-black text-sm tracking-widest font-headline-md">ϟ SPIKE</span>
+<span class="text-[9px] font-micro-tag uppercase tracking-wider text-slate-400 bg-white/[0.05] px-1 py-0.5 rounded">V4.2</span>
+</button>
+<!-- Navigation Link Strip (from TopNavBar blueprint) -->
+<nav class="hidden lg:flex items-center space-x-1 pl-2 text-data-mono-sm">
+<a class="text-white border-b border-white font-medium py-1 px-2.5" href="#workbench">Workbench</a>
+<a class="text-slate-400 hover:text-slate-200 py-1 px-2 transition-colors" href="#orderflow">Order Flow</a>
+<a class="text-slate-400 hover:text-slate-200 py-1 px-2 transition-colors" href="#algomatrix">Algo Matrix</a>
+<a class="text-slate-400 hover:text-slate-200 py-1 px-2 transition-colors" href="#backtest">Backtest</a>
+<a class="text-slate-400 hover:text-slate-200 py-1 px-2 transition-colors" href="#riskguard">Risk Guard</a>
+</nav>
+</div>
+<!-- Center: Extended Recent-Touch Strip (740px max) -->
+<div class="hidden xl:flex items-center h-full max-w-[760px] overflow-x-auto no-scrollbar py-1">
+<div class="flex items-center space-x-1.5 px-1 font-data-mono-sm text-[11px]">
+<!-- 5 Altcoin Chips -->
+<button class="flex items-center space-x-1 px-2 py-1 rounded bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] transition-all text-slate-300">
+<span class="font-bold text-white">SOL</span>
+<span class="text-spike-profit flex items-center">↑198.5</span>
+<span class="text-[9px] text-slate-500">10m前</span>
+</button>
+<button class="flex items-center space-x-1 px-2 py-1 rounded bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] transition-all text-slate-300">
+<span class="font-bold text-white">SUI</span>
+<span class="text-spike-profit flex items-center">↑2.45</span>
+<span class="text-[9px] text-slate-500">4h前</span>
+</button>
+<button class="flex items-center space-x-1 px-2 py-1 rounded bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] transition-all text-slate-300">
+<span class="font-bold text-white">DOGE</span>
+<span class="text-spike-loss flex items-center">↓0.132</span>
+<span class="text-[9px] text-slate-500">1h前</span>
+</button>
+<button class="flex items-center space-x-1 px-2 py-1 rounded bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] transition-all text-slate-300">
+<span class="font-bold text-white">AVAX</span>
+<span class="text-spike-profit flex items-center">↑33.2</span>
+<span class="text-[9px] text-slate-500">25m前</span>
+</button>
+<button class="flex items-center space-x-1 px-2 py-1 rounded bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] transition-all text-slate-300">
+<span class="font-bold text-white">NEAR</span>
+<span class="text-spike-profit flex items-center">↑6.42</span>
+<span class="text-[9px] text-slate-500">2h前</span>
+</button>
+<!-- Hairline Separator -->
+<div class="h-3.5 w-[1px] bg-white/10 mx-1"></div>
+<!-- Stationary Fixed Group -->
+<button class="flex items-center space-x-1 px-1.5 py-1 text-slate-400 hover:text-slate-200">
+<span class="font-medium">BTC</span>
+<span class="text-slate-500">67,420</span>
+</button>
+<button class="flex items-center space-x-1 px-1.5 py-1 text-slate-400 hover:text-slate-200">
+<span class="font-medium">ETH</span>
+<span class="text-slate-500">3,492</span>
+</button>
+<button class="flex items-center space-x-1 px-1.5 py-1 text-slate-400 hover:text-slate-200">
+<span class="font-medium">XAU</span>
+<span class="text-slate-500">2,684</span>
+</button>
+</div>
+</div>
+<!-- Right: Account Summary & Actions -->
+<div class="flex items-center space-x-2">
+<div class="hidden sm:flex items-center space-x-2 text-data-mono-sm bg-white/[0.02] border border-white/[0.06] rounded-md px-2.5 py-1">
+<span class="text-slate-400 text-[11px]">净值</span>
+<span class="font-semibold text-white">1,048.60 U</span>
+<span class="text-slate-600">|</span>
+<span class="text-slate-400 text-[11px]">已结</span>
+<span class="text-spike-profit font-medium">+48.60</span>
+<span class="text-slate-600">|</span>
+<span class="text-slate-400 text-[11px]">胜率</span>
+<span class="text-white font-medium">66.7%</span>
+</div>
+<button class="h-[30px] px-2.5 rounded bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.08] text-[11px] font-medium text-slate-200 flex items-center space-x-1 transition-colors">
+<span class="material-symbols-outlined text-[14px]">analytics</span>
+<span class="hidden md:inline">统计分析</span>
+</button>
+<!-- Theme Switcher: Circular 44px hit-box target -->
+<button aria-label="切换浅色/深色主题" class="w-11 h-11 flex items-center justify-center rounded-full hover:bg-white/[0.08] active:scale-95 transition-all cursor-pointer text-slate-300" id="theme-toggle-btn">
+<span class="material-symbols-outlined text-[18px]" id="theme-icon">light_mode</span>
+</button>
+</div>
+</header>
+<!-- 3. LEFT SELECTED-COIN CONTEXT CARD (~290px wide) -->
+<aside class="fixed top-14 left-3 z-20 w-[290px] rounded-xl apple-glass p-3 select-none pointer-events-auto">
+<div class="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+<div class="flex items-center space-x-1.5">
+<span class="font-headline-sm text-sm font-bold text-white tracking-wide">SOL/USDT</span>
+<span class="material-symbols-outlined text-[14px] text-slate-400">expand_more</span>
+</div>
+<div class="flex items-center space-x-1">
+<span class="font-micro-tag text-[10px] uppercase px-1.5 py-0.5 rounded bg-spike-loss/10 text-spike-loss border border-spike-loss/30">永续 · 空</span>
+<span class="font-data-mono-sm text-[11px] font-bold text-spike-profit">+7.34%</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2 pt-2 text-data-mono-sm">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-400 uppercase font-micro-tag">入场价格</span>
+<span class="text-xs text-slate-200 font-medium">184.50</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-[10px] text-slate-400 uppercase font-micro-tag">实时现价</span>
+<span class="text-xs font-semibold text-spike-profit">170.96</span>
+</div>
+</div>
+<!-- Sub-row: 60m 主轨 / 5m 研究轨 & Ledger Toggle -->
+<div class="mt-2.5 pt-2 border-t border-white/[0.06] flex items-center justify-between">
+<!-- Track Switcher -->
+<div class="flex p-0.5 rounded-lg bg-black/40 border border-white/[0.06]">
+<button class="px-2 py-0.5 text-[10px] font-medium rounded text-white bg-white/[0.12] shadow-sm">60m 主轨</button>
+<button class="px-2 py-0.5 text-[10px] font-medium rounded text-slate-400 hover:text-slate-200">5m 研究轨</button>
+</div>
+<!-- Toggle Ledger Button with 44px min hit box -->
+<button aria-expanded="true" class="h-8 px-2.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.12] border border-white/[0.1] text-xs font-medium text-white flex items-center space-x-1.5 transition-colors cursor-pointer" id="toggle-ledger-btn">
+<span class="material-symbols-outlined text-[14px] text-spike-profit">receipt_long</span>
+<span>持仓与记录</span>
+<span class="w-4 h-4 rounded-full bg-spike-profit text-[#0b0e14] text-[10px] font-bold flex items-center justify-center">2</span>
+</button>
+</div>
+</aside>
+<!-- 4. CORE FOCUS: SIMULATED TRADE LEDGER & MODEL SCORES PANEL (模拟交易簿与模型分浮层) -->
+<!-- Strict width: 300px desktop. Responsive: Mobile drawer 75dvh -->
+<section class="fixed top-[182px] left-3 z-20 w-[300px] h-[calc(100vh-242px)] max-h-[640px] rounded-2xl apple-glass flex flex-col transition-all duration-200 ease-out shadow-2xl overflow-hidden max-md:fixed max-md:left-0 max-md:right-0 max-md:bottom-0 max-md:top-auto max-md:w-full max-md:h-[768px] max-md:max-h-none max-md:rounded-b-none border-white/[0.09]" id="trade-ledger-panel">
+<!-- Drag Handle / Header -->
+<div class="px-3 py-2.5 border-b border-white/[0.07] flex items-center justify-between bg-white/[0.02]">
+<div class="flex items-center space-x-2">
+<span class="w-2 h-2 rounded-full bg-spike-profit animate-pulse" title="推理引擎同步就绪"></span>
+<h2 class="text-[13px] font-headline-md font-bold tracking-tight text-slate-100">模拟交易簿</h2>
+<span class="font-micro-tag text-[9px] text-slate-400 px-1 py-0.2 rounded border border-white/[0.08] bg-black/30">L2 CORE</span>
+</div>
+<!-- Close Action (44px hit-box) -->
+<button aria-label="关闭面板" class="w-11 h-11 -mr-2.5 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer rounded-full active:scale-90" id="close-ledger-btn">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<!-- Understated Single-Row Tab Strip -->
+<div class="px-2 pt-2 pb-1 border-b border-white/[0.06] bg-black/20">
+<div class="grid grid-cols-3 gap-1 p-0.5 rounded-lg bg-black/40 border border-white/[0.05] text-[11px] font-medium">
+<button class="py-1 rounded-md text-slate-400 hover:text-slate-200 flex items-center justify-center space-x-1 transition-all">
+<span>持仓</span>
+<span class="text-[9px] font-data-mono-sm px-1 py-0.2 rounded-full bg-white/[0.06] text-slate-400">2</span>
+</button>
+<button class="py-1 rounded-md text-slate-400 hover:text-slate-200 flex items-center justify-center space-x-1 transition-all">
+<span>已结束</span>
+<span class="text-[9px] font-data-mono-sm px-1 py-0.2 rounded-full bg-white/[0.06] text-slate-400">14</span>
+</button>
+<!-- Active Tab: 触价 (4) -->
+<button class="py-1 rounded-md text-white bg-white/[0.14] shadow-sm flex items-center justify-center space-x-1 transition-all font-semibold">
+<span>触价</span>
+<span class="text-[9px] font-data-mono-sm px-1 py-0.2 rounded-full bg-spike-blue/20 text-spike-blue font-bold">4</span>
+</button>
+</div>
+</div>
+<!-- Compact Search & Filter Controls -->
+<div class="p-2.5 pb-2 space-y-2 border-b border-white/[0.06]">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-2 text-[15px] text-slate-400 pointer-events-none">search</span>
+<!-- 16px font-size on mobile prevents auto-zoom on iOS -->
+<input class="w-full h-[28px] pl-7 pr-2 rounded-md bg-black/40 border border-white/[0.08] text-[12px] max-md:text-[16px] text-white placeholder-slate-500 focus:outline-none focus:border-spike-blue/60 focus:ring-0 font-body-sm transition-colors" placeholder="快速过滤标的..." type="text"/>
+</div>
+<!-- Filter chips -->
+<div class="flex items-center justify-between text-[10px] font-data-mono-sm">
+<div class="flex items-center space-x-1">
+<button class="px-1.5 py-0.5 rounded bg-white/[0.12] text-white border border-white/[0.1] font-medium">全部 4</button>
+<button class="px-1.5 py-0.5 rounded bg-white/[0.03] text-slate-400 hover:text-slate-200 border border-transparent">仅 &gt;0.5 2</button>
+<button class="px-1.5 py-0.5 rounded bg-white/[0.03] text-slate-400 hover:text-slate-200 border border-transparent">高分优先</button>
+</div>
+</div>
+<!-- Brief Status & Tooltip line -->
+<div class="flex items-center justify-between pt-0.5 text-[10px] text-slate-400 font-body-sm">
+<div class="flex items-center space-x-1">
+<span>共 4 笔触价记录 · 模型算力评分</span>
+<div class="group relative flex items-center cursor-pointer">
+<span class="material-symbols-outlined text-[13px] text-slate-400 hover:text-slate-200">info</span>
+<!-- Apple-Glass Tooltip -->
+<div class="absolute left-0 bottom-full mb-1.5 hidden group-hover:flex flex-col w-48 p-2 rounded-lg bg-[#141a24] text-[10px] text-slate-300 border border-white/10 shadow-2xl z-50 pointer-events-none leading-relaxed backdrop-blur-md">
+<span class="font-semibold text-white mb-0.5">模型评分释义</span>
+              模型原始推断分 (0–1)，基于多周期订单流共振与触价波幅，非胜率或实际概率指标。
+            </div>
+</div>
+</div>
+<span class="font-micro-tag text-[9px] text-slate-500">LIVE SYNC</span>
+</div>
+</div>
+<!-- Smoothly Scrolling Record List -->
+<div class="flex-1 overflow-y-auto trade-ledger-scroll divide-y divide-white/[0.04] p-1.5 space-y-1">
+<!-- Record 1: ALPHA (SOL/USDT) - Raw Score 0.8234 (>0.5 Tasteful Blue) -->
+<article class="p-2 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] transition-all cursor-pointer group border border-white/[0.03] active:scale-[0.99] min-h-[44px]">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-spike-blue" title="高置信评分"></span>
+<span class="font-bold text-xs text-white">SOL/USDT</span>
+<span class="font-micro-tag text-[9px] px-1 py-0.2 rounded bg-spike-loss/10 text-spike-loss border border-spike-loss/20">空头 · 下触</span>
+</div>
+<!-- Model Raw Score > 0.5 -->
+<div class="flex items-center space-x-1">
+<span class="text-[10px] text-slate-400">Score</span>
+<span class="font-data-mono-sm text-xs font-bold text-spike-blue">0.8234</span>
+<span class="material-symbols-outlined text-[13px] text-spike-blue opacity-80">trending_up</span>
+</div>
+</div>
+<div class="flex items-center justify-between mt-1 text-data-mono-sm text-[10px] text-slate-400">
+<span>触价标号: #TR-1092</span>
+<div class="flex items-center space-x-1">
+<span>14:22:05</span>
+<span class="material-symbols-outlined text-[12px] text-slate-500 group-hover:text-slate-300 group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</div>
+</div>
+</article>
+<!-- Record 2: BETA (BTC/USDT) - Raw Score exactly 0.5000 (Neutral text) -->
+<article class="p-2 rounded-xl bg-white/[0.015] hover:bg-white/[0.05] transition-all cursor-pointer group border border-transparent active:scale-[0.99] min-h-[44px]">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+<span class="font-bold text-xs text-white">BTC/USDT</span>
+<span class="font-micro-tag text-[9px] px-1 py-0.2 rounded bg-spike-loss/10 text-spike-loss border border-spike-loss/20">空头 · 下触</span>
+</div>
+<!-- Score exactly 0.5000 is neutral -->
+<div class="flex items-center space-x-1">
+<span class="text-[10px] text-slate-500">Score</span>
+<span class="font-data-mono-sm text-xs font-medium text-slate-400">0.5000</span>
+</div>
+</div>
+<div class="flex items-center justify-between mt-1 text-data-mono-sm text-[10px] text-slate-400">
+<span>触价标号: #TR-1088</span>
+<div class="flex items-center space-x-1">
+<span>13:48:12</span>
+<span class="material-symbols-outlined text-[12px] text-slate-500 group-hover:text-slate-300 group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</div>
+</div>
+</article>
+<!-- Record 3: GAMMA (ETH/USDT) - Raw Score 0.3278 (<0.5 Neutral muted text) -->
+<article class="p-2 rounded-xl bg-white/[0.015] hover:bg-white/[0.05] transition-all cursor-pointer group border border-transparent active:scale-[0.99] min-h-[44px]">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
+<span class="font-bold text-xs text-white">ETH/USDT</span>
+<span class="font-micro-tag text-[9px] px-1 py-0.2 rounded bg-spike-profit/10 text-spike-profit border border-spike-profit/20">多头 · 上触</span>
+</div>
+<!-- Score < 0.5 in neutral muted text -->
+<div class="flex items-center space-x-1">
+<span class="text-[10px] text-slate-500">Score</span>
+<span class="font-data-mono-sm text-xs font-normal text-[#9aaabc]">0.3278</span>
+</div>
+</div>
+<div class="flex items-center justify-between mt-1 text-data-mono-sm text-[10px] text-slate-400">
+<span>触价标号: #TR-1085</span>
+<div class="flex items-center space-x-1">
+<span>12:15:30</span>
+<span class="material-symbols-outlined text-[12px] text-slate-500 group-hover:text-slate-300 group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</div>
+</div>
+</article>
+<!-- Record 4: DELTA (SUI/USDT) - Missing Score ("—") displayed cleanly -->
+<article class="p-2 rounded-xl bg-white/[0.015] hover:bg-white/[0.05] transition-all cursor-pointer group border border-transparent active:scale-[0.99] min-h-[44px]">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
+<span class="font-bold text-xs text-white">SUI/USDT</span>
+<span class="font-micro-tag text-[9px] px-1 py-0.2 rounded bg-spike-loss/10 text-spike-loss border border-spike-loss/20">空头 · 下触</span>
+</div>
+<!-- Missing score as em-dash -->
+<div class="flex items-center space-x-1">
+<span class="text-[10px] text-slate-500">Score</span>
+<span class="font-data-mono-sm text-xs font-normal text-slate-500">—</span>
+</div>
+</div>
+<div class="flex items-center justify-between mt-1 text-data-mono-sm text-[10px] text-slate-400">
+<span>触价标号: #TR-1079</span>
+<div class="flex items-center space-x-1">
+<span>10:04:18</span>
+<span class="material-symbols-outlined text-[12px] text-slate-500 group-hover:text-slate-300 group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</div>
+</div>
+</article>
+</div>
+<!-- Footnote / Discreet Footer -->
+<footer class="p-2.5 bg-black/30 border-t border-white/[0.06] text-[10.5px] leading-tight text-slate-400">
+<p class="font-body-sm tracking-tight text-slate-500">
+        模型评分仅用于信号序位评估，不作为实盘胜率或收益承诺。
+      </p>
+</footer>
+</section>
+<!-- 5. BOTTOM CONTROL DOCK & POPOVER -->
+<footer class="fixed bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-1 px-2 py-1.5 rounded-2xl apple-glass shadow-2xl border border-white/[0.08] select-none">
+<!-- Timeframe Selector -->
+<div class="flex items-center space-x-0.5 p-0.5 rounded-xl bg-black/40 border border-white/[0.06] text-data-mono-sm text-[11px]">
+<button class="px-2 py-1 rounded-lg text-slate-400 hover:text-white transition-colors">5m</button>
+<button class="px-2 py-1 rounded-lg text-slate-400 hover:text-white transition-colors">15m</button>
+<button class="px-2 py-1 rounded-lg text-white font-bold bg-white/[0.12] shadow-sm">1h</button>
+<button class="px-2 py-1 rounded-lg text-slate-400 hover:text-white transition-colors">4h</button>
+<button class="px-2 py-1 rounded-lg text-slate-400 hover:text-white transition-colors">1D</button>
+</div>
+<div class="h-4 w-[1px] bg-white/10 mx-1"></div>
+<!-- Indicators Button (Triggers Popover) -->
+<div class="relative">
+<button class="h-8 px-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.09] active:scale-95 text-xs font-medium text-slate-200 flex items-center space-x-1 transition-all cursor-pointer" id="indicator-toggle-btn">
+<span class="material-symbols-outlined text-[15px] text-spike-blue">tune</span>
+<span>指标</span>
+</button>
+<!-- Indicators Popover Card -->
+<div class="hidden absolute bottom-full mb-3 left-0 w-64 p-3 rounded-2xl apple-glass border border-white/10 shadow-2xl z-40 text-xs space-y-2.5" id="indicator-popover">
+<div class="flex items-center justify-between pb-1.5 border-b border-white/[0.07]">
+<span class="font-headline-sm font-bold text-white text-[12px]">图表层参考线配置</span>
+<span class="material-symbols-outlined text-[14px] text-slate-400 cursor-pointer hover:text-white" id="indicator-popover-close">close</span>
+</div>
+<label class="flex items-center justify-between cursor-pointer">
+<span class="text-slate-300">Monday High (188.00)</span>
+<input checked="" class="rounded border-white/20 bg-black/40 text-spike-profit focus:ring-0" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between cursor-pointer">
+<span class="text-slate-300">Monday Low (168.00)</span>
+<input checked="" class="rounded border-white/20 bg-black/40 text-spike-profit focus:ring-0" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between cursor-pointer">
+<span class="text-slate-300">1.618 Fib 延伸轨</span>
+<input checked="" class="rounded border-white/20 bg-black/40 text-spike-blue focus:ring-0" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between cursor-pointer">
+<span class="text-slate-300">保本损 BE (184.50)</span>
+<input checked="" class="rounded border-white/20 bg-black/40 text-spike-profit focus:ring-0" type="checkbox"/>
+</label>
+</div>
+</div>
+<!-- Zoom Controls -->
+<div class="flex items-center space-x-0.5">
+<button class="w-8 h-8 flex items-center justify-center rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 text-slate-300 transition-colors" id="zoom-in" title="放大">
+<span class="material-symbols-outlined text-[15px]">add</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 text-slate-300 transition-colors" id="zoom-out" title="缩小">
+<span class="material-symbols-outlined text-[15px]">remove</span>
+</button>
+</div>
+<div class="h-4 w-[1px] bg-white/10 mx-1"></div>
+<!-- Live Follow Track Button -->
+<button class="h-8 px-2.5 rounded-xl bg-spike-profit/15 hover:bg-spike-profit/25 border border-spike-profit/40 text-spike-profit active:scale-95 text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer">
+<span class="w-1.5 h-1.5 rounded-full bg-spike-profit animate-ping"></span>
+<span>跟随最新单</span>
+</button>
+</footer>
+<!-- JAVASCRIPT: CANDLESTICK RENDERING & INTERACTIVE DYNAMICS -->
+<script>
+    // 1. Theme Switcher Logic
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    const themeIcon = document.getElementById('theme-icon');
+    const html = document.documentElement;
+
+    themeBtn.addEventListener('click', () => {
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        themeIcon.textContent = 'dark_mode';
+      } else {
+        html.classList.add('dark');
+        themeIcon.textContent = 'light_mode';
+      }
+      renderChart(); // Redraw chart for theme adjustments
+    });
+
+    // 2. Ledger Visibility Toggle
+    const toggleLedgerBtn = document.getElementById('toggle-ledger-btn');
+    const closeLedgerBtn = document.getElementById('close-ledger-btn');
+    const ledgerPanel = document.getElementById('trade-ledger-panel');
+
+    function toggleLedger() {
+      const isHidden = ledgerPanel.classList.contains('translate-x-[-120%]') || ledgerPanel.classList.contains('max-md:translate-y-full');
+      if (isHidden) {
+        ledgerPanel.classList.remove('translate-x-[-120%]', 'max-md:translate-y-full', 'opacity-0', 'pointer-events-none');
+        toggleLedgerBtn.setAttribute('aria-expanded', 'true');
+      } else {
+        ledgerPanel.classList.add('translate-x-[-120%]', 'max-md:translate-y-full', 'opacity-0', 'pointer-events-none');
+        toggleLedgerBtn.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    toggleLedgerBtn.addEventListener('click', toggleLedger);
+    closeLedgerBtn.addEventListener('click', toggleLedger);
+
+    // 3. Indicator Popover Toggle
+    const indicatorToggleBtn = document.getElementById('indicator-toggle-btn');
+    const indicatorPopover = document.getElementById('indicator-popover');
+    const indicatorPopoverClose = document.getElementById('indicator-popover-close');
+
+    indicatorToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      indicatorPopover.classList.toggle('hidden');
+    });
+
+    indicatorPopoverClose.addEventListener('click', () => {
+      indicatorPopover.classList.add('hidden');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!indicatorPopover.contains(e.target) && e.target !== indicatorToggleBtn) {
+        indicatorPopover.classList.add('hidden');
+      }
+    });
+
+    // 4. Interactive Fullscreen Candlestick Engine (SOL/USDT 1h context)
+    const canvas = document.getElementById('candlestick-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let candles = [];
+    const NUM_CANDLES = 65;
+    let basePrice = 178.50;
+
+    // Generate Synthetic Candlestick Series matching SOL/USDT 184.50 -> 170.96 drop
+    function generateCandles() {
+      candles = [];
+      let current = 166.0;
+      for (let i = 0; i < NUM_CANDLES; i++) {
+        let change = (Math.random() - 0.47) * 2.8;
+        // Shape trajectory to peak around 188-190 (Monday High & Short Entry 184.50) then slope to 170.96
+        if (i > 30 && i < 45) {
+          change += 1.4; // Pump to 188
+        } else if (i >= 45) {
+          change -= 1.35; // Selloff down to 170.96
+        }
+        let open = current;
+        let close = open + change;
+        let high = Math.max(open, close) + Math.random() * 1.8;
+        let low = Math.min(open, close) - Math.random() * 1.8;
+        current = close;
+        candles.push({ open, high, low, close });
+      }
+      // Force last candle close to exact 170.96
+      candles[candles.length - 1].close = 170.96;
+      candles[candles.length - 1].low = Math.min(candles[candles.length - 1].low, 170.40);
+    }
+    generateCandles();
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      ctx.scale(dpr, dpr);
+      renderChart();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function renderChart() {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const isDark = html.classList.contains('dark');
+
+      ctx.clearRect(0, 0, width, height);
+
+      // Canvas background
+      ctx.fillStyle = isDark ? '#0b0e14' : '#f4f6fa';
+      ctx.fillRect(0, 0, width, height);
+
+      // Price Boundaries
+      const minPrice = 152.0;
+      const maxPrice = 202.0;
+      const priceToY = (p) => height - 60 - ((p - minPrice) / (maxPrice - minPrice)) * (height - 140);
+
+      // Background Grid Lines
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.035)' : 'rgba(0, 0, 0, 0.05)';
+      
+      const gridLevels = [156.20, 168.00, 170.96, 184.50, 188.00, 198.50];
+      gridLevels.forEach(price => {
+        const y = priceToY(price);
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      });
+
+      // Volume & Candlestick Plotting
+      const chartStartX = Math.max(320, width * 0.22);
+      const chartEndX = width - 70;
+      const availableWidth = chartEndX - chartStartX;
+      const candleWidth = Math.max(4, availableWidth / NUM_CANDLES * 0.65);
+      const candleSpacing = availableWidth / NUM_CANDLES;
+
+      candles.forEach((c, idx) => {
+        const x = chartStartX + idx * candleSpacing;
+        const openY = priceToY(c.open);
+        const closeY = priceToY(c.close);
+        const highY = priceToY(c.high);
+        const lowY = priceToY(c.low);
+        const isUp = c.close >= c.open;
+
+        const bullColor = '#70ffba';
+        const bearColor = '#ff4f73';
+
+        // Draw Wick
+        ctx.strokeStyle = isUp ? bullColor : bearColor;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(x + candleWidth / 2, highY);
+        ctx.lineTo(x + candleWidth / 2, lowY);
+        ctx.stroke();
+
+        // Draw Candle Body
+        ctx.fillStyle = isUp ? bullColor : bearColor;
+        const bodyTop = Math.min(openY, closeY);
+        const bodyHeight = Math.max(2, Math.abs(closeY - openY));
+        ctx.fillRect(x, bodyTop, candleWidth, bodyHeight);
+
+        // Subtle volume bars at bottom
+        const volHeight = Math.abs(c.close - c.open) * 8 + 4;
+        ctx.fillStyle = isUp 
+          ? (isDark ? 'rgba(112, 255, 186, 0.12)' : 'rgba(16, 185, 129, 0.18)') 
+          : (isDark ? 'rgba(255, 79, 115, 0.12)' : 'rgba(239, 68, 68, 0.18)');
+        ctx.fillRect(x, height - 70 - volHeight, candleWidth, volHeight);
+      });
+
+      // Draw Key Benchmark Levels
+      function drawHLine(price, label, strokeStyle, isDashed = false, textColor = strokeStyle) {
+        const y = priceToY(price);
+        ctx.save();
+        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = strokeStyle;
+        if (isDashed) {
+          ctx.setLineDash([5, 4]);
+        }
+        ctx.beginPath();
+        ctx.moveTo(chartStartX - 30, y);
+        ctx.lineTo(width - 5, y);
+        ctx.stroke();
+
+        // Label Badge on the right
+        ctx.setLineDash([]);
+        ctx.fillStyle = isDark ? '#141822' : '#ffffff';
+        ctx.fillRect(width - 65, y - 9, 60, 18);
+        ctx.strokeStyle = strokeStyle;
+        ctx.strokeRect(width - 65, y - 9, 60, 18);
+
+        ctx.font = '500 10.5px JetBrains Mono';
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'right';
+        ctx.fillText(price.toFixed(2), width - 10, y + 3.5);
+
+        // Left Label Descriptor
+        ctx.font = '600 10px Space Grotesk';
+        ctx.textAlign = 'left';
+        ctx.fillText(label, chartStartX - 26, y - 4);
+        ctx.restore();
+      }
+
+      // Upper 1.618 Fib Extension (198.50 Solid Red Line)
+      drawHLine(198.50, 'UPPER 1.618 (198.50)', '#ff4f73');
+
+      // Monday High (188.00 Solid Dark Line)
+      drawHLine(188.00, 'MONDAY HIGH (188.00)', isDark ? '#4a5568' : '#94a3b8');
+
+      // Short Entry & BE Armed (184.50)
+      drawHLine(184.50, 'SHORT ENTRY & BE ARMED (184.50)', '#5aa9ff', true);
+
+      // Live Current Price (170.96 Thin Dashed)
+      drawHLine(170.96, 'LIVE 170.96', '#70ffba', true);
+
+      // Monday Low (168.00 Solid Dark Line)
+      drawHLine(168.00, 'MONDAY LOW (168.00)', isDark ? '#4a5568' : '#94a3b8');
+
+      // Lower 1.618 Fib Extension (156.20 Solid Green Line)
+      drawHLine(156.20, 'LOWER 1.618 (156.20)', '#70ffba');
+    }
+
+    // Initial setup
+    resizeCanvas();
+
+    // Zoom buttons micro-interaction
+    document.getElementById('zoom-in').addEventListener('click', () => {
+      candles.push({
+        open: 170.96,
+        close: 170.96 + (Math.random() - 0.5) * 0.4,
+        high: 171.20,
+        low: 170.60
+      });
+      renderChart();
+    });
+
+    document.getElementById('zoom-out').addEventListener('click', () => {
+      if (candles.length > 25) {
+        candles.pop();
+        renderChart();
+      }
+    });
+  </script>
+</body></html>

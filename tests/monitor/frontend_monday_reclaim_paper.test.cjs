@@ -32,6 +32,23 @@ test('missing scores and quotes stay missing while real zeroes survive formattin
   const html=ui.rowHTML({id:3,symbol:'ALT-USDT-SWAP',status:'feature_error',score:null,error:'unavailable'},ui.route({tab:'events'}),10000);
   assert.match(html,/特征读取失败/);assert.match(html,/入场分数<\/small><strong>—/);assert.doesNotMatch(html,/0\.0000/);
 });
+test('collapsed touch rows expose the raw score without opening details',()=>{
+  const collapsed=score=>ui.rowHTML({id:9,symbol:'SOL-USDT-SWAP',side:1,status:'scored',score},ui.route({tab:'events'}),10000).split('</summary>')[0];
+  assert.match(collapsed(.8234),/评分<\/small><strong>0\.8234<\/strong>/);
+  assert.match(collapsed(0),/评分<\/small><strong>0\.0000<\/strong>/);
+  for(const score of [null,undefined,NaN,Infinity,'0.9']) {
+    assert.match(collapsed(score),/评分<\/small><strong>—<\/strong>/);
+    assert.doesNotMatch(collapsed(score),/rp-score is-high/);
+  }
+});
+test('score accent uses a strict raw >0.5 boundary, independent of the entry gate',()=>{
+  const collapsed=(score,taken)=>ui.rowHTML({id:9,symbol:'SOL-USDT-SWAP',side:1,status:'scored',score,taken},ui.route({tab:'events'}),10000).split('</summary>')[0];
+  for(const score of [.5,.5-Number.EPSILON,.2356,0])assert.doesNotMatch(collapsed(score,1),/rp-score is-high/);
+  for(const score of [.5+Number.EPSILON,.50001,.9356])assert.match(collapsed(score,0),/rp-score is-high/);
+  // A rounded boundary value must not visually contradict its accent.
+  assert.match(collapsed(.50001,0),/<strong>0\.50001<\/strong>/);
+  assert.match(collapsed(.5,1),/<strong>0\.5000<\/strong>/);
+});
 test('lists filter independently without mutating or mixing track totals and shared events',()=>{
   const d=snapshot();d.tracks[60].open=[position(),position({id:2,symbol:'SUI-USDT-SWAP',taken:0,notional:0}),position({id:3,fill_ms:3000})];
   d.tracks[5].open=[position({id:4,symbol:'DOGE-USDT-SWAP'})];d.signals=[{id:5,symbol:'SOL-USDT-SWAP',status:'excluded',candle_ms:1}];
