@@ -101,6 +101,8 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
             raise Rejected('实盘执行尚未启用')
         if state.get('private_error') or not 0 <= self.clock()-state.get('private_at', 0) <= 15:
             raise Rejected(state.get('private_error') or '账户状态已过期，暂停开仓')
+        if self.equity(state) <= 0:
+            raise Rejected('OKX 交易账户没有可用 USDT 净值')
         if any(p['protection'] != 'exchange-verified' for p in state['positions']):
             raise Rejected('持仓保护尚未核对完成，暂停开仓')
         for pending in state['pending']:
@@ -324,9 +326,16 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
         if 'trade' not in permissions or 'withdraw' in permissions:
             raise Rejected('API 必须具有读取和交易权限，且不能具有提币权限')
         balance = self._value(balance)[0]
-        usdt = next((row for row in balance['details'] if row['ccy']=='USDT'), None)
-        if not usdt or dec(usdt['eq']) <= 0:
-            raise Rejected('OKX 交易账户没有可用 USDT 净值')
+        details = balance['details']
+        if not isinstance(details, list):
+            raise Rejected('OKX 账户余额响应格式异常')
+        usdt = next((row for row in details if row['ccy']=='USDT'), None)
+        # OKX GET balance omits currencies whose cashBal and eq are both zero.
+        # A valid empty balance is a fresh observation, not a connection error.
+        # Nonpositive equity is blocked by entry_guard, while reads/protection
+        # continue. Missing/malformed responses still fail above or on parsing.
+        if usdt is None:
+            usdt = dict(ccy='USDT', eq='0', cashBal='0', availEq='0')
         positions = self._value(positions)
         orders = self._pending_pages('/api/v5/trade/orders-pending',self._value(orders),'ordId')
         algos = []
@@ -875,9 +884,11 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
     def statistics(self, days=30):
         from .statistics import summarize
         from .statistics_basis import confirmed_amount
+        from .statistics_reset import display_state, history_epoch
         if type(days) is not int or days not in (0,7,30):
             raise Rejected('统计区间无效')
         with self.read_transaction() as (db,state):
+            state=display_state(state)
             result=summarize(state,self.equity(state),[],self.clock(),days)
             result['mode']=self.mode
             result['scope']='app_managed_trades'
@@ -893,9 +904,12 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
                 return_method='app_managed_fixed_capital' if basis is not None else None)
             result['account']['unrealized_pnl'] = str(sum((self.position_pnl(state, p)-dec(p['pnl']) for p in state['positions']), Decimal(0)))
             result['market_fresh']=not state['private_error'] and 0<=self.clock()-state['private_at']<=15
-            start=self.clock()-days*86400 if days else 0
+            epoch=history_epoch(state)
+            start=max(self.clock()-days*86400 if days else 0,epoch.get('started_at',0))
+            result['statistics_started_at']=epoch.get('started_at')
             # Fees are complete-lifecycle fees at settlement; no double-counted entry.
-            fees=[json.loads(body)['fee'] for timestamp,body in db.execute("SELECT time,body FROM journal WHERE kind='live_closed'") if timestamp>=start]
+            visible_ids={row['id'] for row in state['closed']}
+            fees=[json.loads(body)['fee'] for timestamp,body in db.execute("SELECT time,body FROM journal WHERE kind='live_closed'") if timestamp>=start and (not epoch or json.loads(body)['id'] in visible_ids)]
             result['fees']=str(sum((dec(fee) for fee in fees),Decimal(0)))
             return result
 
@@ -904,6 +918,10 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
         # its write lock or create a new ledger revision on every phone poll.
         with self.read_transaction() as (_, state):
             result=self.render_snapshot(state)
+            from .statistics_reset import display_state, history_epoch
+            result['closed']=display_state(state)['closed'][-30:]
+            result['statistics_started_at']=history_epoch(state).get('started_at')
+            result.pop('statistics_history_epoch',None)
         for field in ('intents','previews','account_reference','close_commands','close_fractions','close_abandoned','statistics_return_basis','owned_receipts','owned_algo_receipts','owned_exit_commands','external_activity','foreign'):
             result.pop(field,None)
         return result
