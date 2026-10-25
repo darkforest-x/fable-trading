@@ -187,6 +187,21 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'This run also had a direct bar computation (summary.json) that the owner said was redundant; native matches it trade by trade (mean abs diff 0.01/0.43bp). Later runs are framework-only. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-limit-reclaim-mfe-20261025-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f53ea69f5ec3a5da10e52459e052f757583f0708
+    status: complete
+    question: 'Owner 2026-10-25: how many Codex 1.618 limit-reclaim trades were in floating profit before exiting at breakeven or on a failed reclaim?'
+    single_variable: 'Descriptive maximum favorable excursion from Codex 5m bars between fill and exit; read-only.'
+    result: '69990 alt trades (60m, near edge, Codex O-H-L-C ledger, 626 symbols). Breakeven exits 24656: 96 percent reached >=+0.5 percent, 82 percent >=+1 percent, 47 percent >=+2 percent before returning to entry (median peak +1.92 percent); 44 percent reached half the distance to the target, 17 percent three quarters, 6 percent 90 percent. Failed reclaims 28087: 54 percent >=+0.5 percent, 29 percent >=+1 percent, 6 percent half way. Measured on bars strictly between fill and exit.'
+    artifacts:
+    - monday-limit-reclaim-mfe-20261025-v1
+    canonical_report: experiments/active/exp-monday-limit-reclaim-mfe-20261025-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'A closer target or profit lock would change exits; that needs a framework run, not this excursion count. Earlier partial-close and breakeven studies lost tail winners (docs/learnings/break-even-benefit-must-pay-for-sacrificed-tail-winners.md).'
   - experiment_id: exp-monday-limit-reclaim-olhc-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 0cb6794b171bb1a2da07fb93935aa601dcbdfa74

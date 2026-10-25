@@ -1,3 +1,7 @@
+## 2026-10-25 · Limit-reclaim floating profit before breakeven exits
+
+- 69,990 alt trades (60m, near edge): 24,656 breakeven exits, of which 96 percent were at least +0.5 percent in profit and 82 percent at least +1 percent before returning to entry (median peak +1.92 percent); 44 percent had covered half the distance to the target, 6 percent 90 percent. Failed reclaims: 29 percent reached +1 percent, 6 percent half way. Measured between fill and exit bars only. A closer target or profit lock needs a framework run. `experiments/active/exp-monday-limit-reclaim-mfe-20261025-v1/`, builder f53ea69f5e.
+
 ## 2026-10-25 · Codex 1.618 limit-reclaim: short same-bar targets fail the O-L-H-C replay
 
 - Adapter defect fixed (ca571cf122): rising synthetic intrabar segments were replayed open-high-low-close, so an O-L-H-C replay changed nothing for shorts. New opt-in `monotone_segments`; default unchanged; 297 adapter tests pass. O-H-L-C parity sample: 3158/3158 trades identical to Codex.

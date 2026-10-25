@@ -1,0 +1,132 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-reclaim-mfe-20261025-v1",
+    "question": "Owner 2026-10-25: how many Codex 1.618 limit-reclaim trades were in floating profit before exiting at breakeven or on a failed reclaim?",
+    "scope": "Codex O-H-L-C ledger, all 626 5m alt symbols, signal trades, 60m confirmation, near Monday edge target",
+    "measure": "Best unrealized move from Codex 5m bars: strict = bars strictly between the fill bar and the exit bar; loose = also the exit bar. Percent of entry and fraction of the distance to the target.",
+    "limitations": "Read-only; the fill and exit bars are ambiguous intrabar; no trade re-executed.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "results": {
+    "trades": 69990,
+    "symbols": 626,
+    "by_reason_strict": {
+      "止盈": {
+        "n": 17247,
+        ">=25%": 14251,
+        ">=50%": 13906,
+        ">=75%": 12721,
+        ">=90%": 9449,
+        "median": 0.9159416635144855
+      },
+      "收回后保本出场": {
+        "n": 24656,
+        ">=25%": 20033,
+        ">=50%": 10805,
+        ">=75%": 4116,
+        ">=90%": 1415,
+        "median": 0.4554257942718457
+      },
+      "没收回止损": {
+        "n": 28087,
+        ">=25%": 7432,
+        ">=50%": 1681,
+        ">=75%": 356,
+        ">=90%": 92,
+        "median": 0.13514116728043735
+      }
+    },
+    "by_reason_loose": {
+      "止盈": {
+        "n": 17247,
+        ">=25%": 15053,
+        ">=50%": 15053,
+        ">=75%": 15053,
+        ">=90%": 15053,
+        "median": 1.0380237775355536
+      },
+      "收回后保本出场": {
+        "n": 24656,
+        ">=25%": 20067,
+        ">=50%": 10820,
+        ">=75%": 4123,
+        ">=90%": 1417,
+        "median": 0.4557812004181099
+      },
+      "没收回止损": {
+        "n": 28087,
+        ">=25%": 7437,
+        ">=50%": 1682,
+        ">=75%": 356,
+        ">=90%": 92,
+        "median": 0.13529916946827478
+      }
+    },
+    "be_mfe_pct_quantiles": {
+      "0.5": 1.9155912851814427,
+      "0.75": 3.072239972294258,
+      "0.9": 4.591126399037937,
+      "0.95": 5.913232629184351
+    },
+    "nontp_half_way": 12486,
+    "nontp_n": 52743,
+    "by_side": {
+      "-1": {
+        "止盈": {
+          "n": 9621,
+          ">=25%": 7462,
+          ">=50%": 7223,
+          ">=75%": 6452,
+          ">=90%": 4557,
+          "median": 0.8892436693302216
+        },
+        "收回后保本出场": {
+          "n": 10836,
+          ">=25%": 9086,
+          ">=50%": 5019,
+          ">=75%": 1971,
+          ">=90%": 682,
+          "median": 0.4752094620035041
+        },
+        "没收回止损": {
+          "n": 13846,
+          ">=25%": 4293,
+          ">=50%": 1082,
+          ">=75%": 241,
+          ">=90%": 66,
+          "median": 0.15330774441183065
+        }
+      },
+      "1": {
+        "止盈": {
+          "n": 7626,
+          ">=25%": 6789,
+          ">=50%": 6683,
+          ">=75%": 6269,
+          ">=90%": 4892,
+          "median": 0.9386784143835635
+        },
+        "收回后保本出场": {
+          "n": 13820,
+          ">=25%": 10947,
+          ">=50%": 5786,
+          ">=75%": 2145,
+          ">=90%": 733,
+          "median": 0.43947373987351146
+        },
+        "没收回止损": {
+          "n": 14241,
+          ">=25%": 3139,
+          ">=50%": 599,
+          ">=75%": 115,
+          ">=90%": 26,
+          "median": 0.1178705607898758
+        }
+      }
+    }
+  },
+  "source_commit": "f53ea69f5ec3a5da10e52459e052f757583f0708",
+  "training_eligible": false,
+  "production_eligible": false
+}
