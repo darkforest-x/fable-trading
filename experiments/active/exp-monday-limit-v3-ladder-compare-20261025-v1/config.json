@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-monday-limit-v3-ladder-compare-20261025-v1",
+  "question": "Owner 2026-10-25: laddered take-profits at key levels, for every backstop and fine score band, whole history.",
+  "single_variable": "Ladder (5 single levels, equal 2/3/4/5-level ladders, 40/30/20/10 front, 30/25/20/15/10 front, 10/15/20/25/30 back) x backstop x score band; events with score >= 0.5.",
+  "inputs": ["experiments/active/exp-monday-limit-v3-grid-20261025-v1 (near_<stop> legs)", "experiments/active/exp-monday-limit-v3-levels-20261025-v1 (other levels)"],
+  "selection": "per backstop, per-band ladder chosen on 2020-2024 and separately on 2025",
+  "path_rule": "weighted legs per intrabar path, then the worse path",
+  "slippage_bp_non_target_exit": 10,
+  "fees": {"maker_bp": 2, "taker_bp": 5, "backstop_exit": "taker", "read_on": "2026-10-23 OKX Lv1"},
+  "sizing": {"linear": "0.05 * (score - 0.226) / 0.1088 (2025 top-40 mean excess), caps 50 / 15 percent", "gross_cap": 1.0},
+  "dropped_events": {"BABYUSDT:2026-06-01:-1": "bad source bar"},
+  "tie_orders": 10
+}
