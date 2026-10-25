@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-monday-limit-score-v2-train-20261025-v1",
+  "question": "Owner 2026-10-25: does a richer feature set or LightGBM beat the current logistic entry score?",
+  "single_variable": "Model (logistic / LightGBM) x feature set (A, A+one group, all, all minus one group), walk-forward by year.",
+  "input": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "label": "win = worst-path near-target net > 0 (10bp slippage on non-target exits)",
+  "test_years": [2022, 2023, 2024, 2025, 2026],
+  "training": "expanding window, fills before 1 January of the test year; LightGBM early-stops on the last 15 percent of training rows by time",
+  "thresholds": "top 10 / 20 / 40 percent from each fold's training scores",
+  "replay": "pooled 2025-2026, 1000 USDT, equal 10 percent on top 40 percent and linear 0-25 percent above the 60th training percentile, gross <= 1x, 10 tie orders",
+  "reference": "frozen score experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/score_model.json",
+  "workers": 4
+}
