@@ -1,3 +1,16 @@
+## 2026-10-26 · Limit-reclaim: full-history backstop / ladder / entry-score v2 results
+
+- All trades are framework fills (NautilusTrader, both intrabar paths, worst per trade, 10bp slippage on non-target exits). Two bad source bars were dropped from every variant: BABYUSDT 2026-06-05 09:30 UTC (high 1.30) and DASHUSDT 2020-04-14 07:35 UTC (low 0.10).
+- Backstop, full history: no stop is best in every period. Among stops, -20 to -30 percent are close and -10 to -18 percent are worse everywhere. Near target, threshold 0.226, linear sizing, 2020-24 / 2025 / 2026: -20 percent gives 2.93 / 2.97 / 2.00, and no stop gives 4.58 / 3.18 / 2.14. Threshold 0.5 cuts drawdown in every variant.
+- Take-profit by score band (score >= 0.5):
+  - Choosing the target on 2020-24 picks the opposite 1618 in every band.
+  - Choosing on 2025 picks range 0.618 for 0.5-0.6 and the opposite 1618 from 0.6.
+  - Equal ladders across key levels land between the near target and the single far target, and never beat the far target on return.
+  - Best plan with a backstop: -30 percent stop, range 0.618 for 0.5-0.6, opposite 1618 from 0.6. Results 2020-24 / 2025 / 2026 / last five months: 3.74 / 8.97 / 2.56 / 2.96, drawdown up to 34 percent.
+  - The more balanced option, range 0.5 for every band: 3.08 / 5.60 / 2.42 / 2.45 with drawdown at most 27 percent.
+- Entry-score v2: the richer feature groups and LightGBM raise AUC but not top-band profit in 2025-2026. Refits that include 2025 do worse on 2026. Keep the frozen 10-factor score. Learnings: `richer-score-features-raised-auc-not-top-band-profit.md`, `far-stop-parity-exposes-bad-source-bars.md`.
+- Pending owner decision: freeze v3 and add it as an isolated paper track. Paper engine still runs v2 (equal 10 percent, near target, no backstop). No live action.
+
 ## 2026-10-26 · Compact paper ledger and visible touch scores
 
 - Owner paused the iPhone reinstall and requested the screenshot's paper-ledger fix. Header search and title now share one row; isolated ledger tabs avoid old global `.rp-tabs` styles; scope remains available and explanations move below the records. Measured top occupation 175.4px → 107px, preserving 44px controls and 16px mobile search.
