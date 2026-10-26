@@ -1,0 +1,7 @@
+# Inline search collapse must own the browser's Escape default
+
+- **问题**：A compact watchlist search hides inside the title row. After typing a nonmatching query and pressing Escape, Chromium cleared the search input while the JavaScript filter retained the query. Reopening showed an empty field above an empty filtered list.
+- **死胡同**：Stopping event propagation and hiding the input only controlled application handlers. It did not cancel the native `input[type=search]` Escape action. Filling the already-empty input with an empty string in QA did not emit a new input event, exposing the stale filter.
+- **有效路径**：The open watchlist owns Escape: call `preventDefault()` before collapsing search, preserve both input and query, return focus to the search trigger, and indicate an active collapsed query. Clearing the field explicitly removes the filter. Stop other overlay handlers from also handling the same key.
+- **通用规则**：When reusing native form controls inside collapsible UI, test native default actions as well as application events. Verify type → Escape → reopen → clear, including input value, filtered rows and focus; visual collapse alone is insufficient evidence.
+- **牵连**：`yoyo/monitor/static/reclaim-watchlist.js`; browser regression in `output/playwright/reclaim-compact-20261026/qa.js`; official Stitch screen `85d6bca11ccc4eeda602a85fa14a4590`. No data-source or execution changes.

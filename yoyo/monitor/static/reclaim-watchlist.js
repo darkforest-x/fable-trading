@@ -57,11 +57,11 @@
   function coinTrade(track,symbol){
     return [...(track?.open||[]),...(track?.closed||[]),...(track?.latest_funded?[track.latest_funded]:[])].filter(p=>p.symbol===symbol&&p.taken===1&&positive(p.notional)&&[1,-1].includes(p.side)&&positive(p.fill_ms)&&positive(p.entry)).sort((a,b)=>b.fill_ms-a.fill_ms||b.id-a.id)[0]||null;
   }
-  function rowHTML(item,selected,{favorite=false,now=Date.now(),error=false,platform='',period='5m'}={}){
+  function rowHTML(item,selected,{favorite=false,expanded=false,now=Date.now(),error=false,platform='',period='5m'}={}){
     const coin=base(item.symbol),event=latestTouch(item),stamp=touchTime(event),side=event?.side;
     const warning=STATES[item.state]||((item.stale||!Number.isFinite(item.received_ms)||now-item.received_ms>=90000||error)?'行情已滞后':'');
     const icon=name=>`<span class="rp-watch-icon" aria-hidden="true" style="--watch-icon:url(/static/icons/${name}.svg)"></span>`;
-    return `<article class="rp-watch-row" data-symbol="${esc(item.symbol)}" data-selected="${item.symbol===selected}"><button type="button" class="rp-watch-select" data-watch-select="${esc(item.symbol)}" aria-label="查看 ${esc(coin)} K 线" aria-pressed="${item.symbol===selected}">${avatar(coin)}<span class="rp-watch-name">${esc(coin)}</span><span class="rp-watch-quote"><span class="${touchTone(side)}">${touchLabel(side)}${side?' 1.618':''}</span><b>${price(item.price)}</b></span></button><div class="rp-watch-bottom"><span class="rp-watch-time" title="${esc(warning|| (stamp?date.format(stamp)+' 北京':'收藏币种'))}">${warning|| (stamp?date.format(stamp):'收藏币种')}</span><a class="rp-watch-tv" href="${esc(tradingViewURL(item.symbol,platform))}" target="_blank" rel="noopener" aria-label="在 TradingView 打开 ${esc(coin)}" title="TradingView">TV ↗</a><a href="${esc(inspectionURL(item.symbol,period))}" aria-label="查看 ${esc(coin)} 形态巡检" title="形态巡检">${icon('activity')}</a><button data-watch-action="favorite" aria-pressed="${favorite}" aria-label="${favorite?'取消收藏':'收藏'} ${esc(coin)}">${icon('star')}</button><button data-watch-action="remove" aria-label="从本周列表移除 ${esc(coin)}" title="从本周列表移除">${icon('trash')}</button></div></article>`;
+    return `<article class="rp-watch-row" data-symbol="${esc(item.symbol)}" data-selected="${item.symbol===selected}"><div class="rp-watch-main"><button type="button" class="rp-watch-select" data-watch-select="${esc(item.symbol)}" aria-label="查看 ${esc(coin)} K 线" aria-pressed="${item.symbol===selected}">${avatar(coin)}<span class="rp-watch-identity"><b class="rp-watch-name">${esc(coin)}</b><small class="rp-watch-time" title="${esc(warning|| (stamp?date.format(stamp)+' 北京':'收藏币种'))}">${warning|| (stamp?date.format(stamp):'收藏币种')}</small></span><span class="rp-watch-quote"><span class="${touchTone(side)}">${touchLabel(side)}${side?' 1.618':''}</span><b>${price(item.price)}</b></span></button><button type="button" class="rp-watch-disclosure" data-watch-action="details" aria-expanded="${expanded}" aria-controls="rp-watch-actions-${esc(item.symbol)}" aria-label="${expanded?'收起':'展开'} ${esc(coin)} 操作"><span aria-hidden="true">⌄</span></button></div><div class="rp-watch-bottom" id="rp-watch-actions-${esc(item.symbol)}"${expanded?'':' hidden'}><a class="rp-watch-tv" href="${esc(tradingViewURL(item.symbol,platform))}" target="_blank" rel="noopener" aria-label="在 TradingView 打开 ${esc(coin)}" title="TradingView">TV ↗</a><a href="${esc(inspectionURL(item.symbol,period))}" aria-label="查看 ${esc(coin)} 形态巡检" title="形态巡检">${icon('activity')}</a><button data-watch-action="favorite" aria-pressed="${favorite}" aria-label="${favorite?'取消收藏':'收藏'} ${esc(coin)}">${icon('star')}</button><button data-watch-action="remove" aria-label="从本周列表移除 ${esc(coin)}" title="从本周列表移除">${icon('trash')}</button></div></article>`;
   }
   const api={validSymbol,validate,model,recentRows,PINNED,pinnedHTML,bindRecentDrag,coinTrade,rowHTML};
   if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}
@@ -91,26 +91,33 @@
   function create({root,createFeed,getContext,onSelect,onOpen}){
     const trigger=root.querySelector('[data-rp-action="watch"]'),panel=document.createElement('section');
     panel.id='rp-watch-panel';panel.className='rp-watch-panel rp-glass';panel.setAttribute('aria-label','最新触价币种列表');
-    panel.innerHTML=`<header class="rp-record-heading" data-yd-sheet-drag><strong>最新触价 <span data-watch="total">—</span></strong><button type="button" data-watch-action="close" aria-label="收起触价列表">×</button></header><div class="rp-watch-tools"><div class="rp-tabs" role="group" aria-label="触价与收藏筛选">${Object.entries(FILTERS).map(([key,label])=>`<button type="button" data-watch-filter="${key}" aria-pressed="false">${label}</button>`).join('')}</div><input type="search" placeholder="搜索已触价合约" aria-label="搜索已触价合约" maxlength="80" autocomplete="off"><div class="rp-watch-feedback" hidden><span role="status"></span><button data-watch-action="undo">撤销</button></div></div><div class="rp-watch-scroll"><div data-watch="rows"></div><button type="button" data-watch-action="more" hidden>再显示 50 个</button></div><p class="rp-watch-status" role="status"></p>`;
+    panel.innerHTML=`<header class="rp-record-heading rp-watch-heading" data-yd-sheet-drag><strong>最新触价 <span data-watch="total">—</span></strong><label class="rp-search" hidden><input type="search" placeholder="搜索币种" aria-label="搜索已触价合约" maxlength="80" autocomplete="off"></label><button type="button" data-watch-action="search" aria-label="搜索币种" aria-expanded="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></button><button type="button" data-watch-action="close" aria-label="收起触价列表">×</button></header><div class="rp-watch-tools"><div class="rp-tabs" role="group" aria-label="触价与收藏筛选">${Object.entries(FILTERS).map(([key,label])=>`<button type="button" data-watch-filter="${key}" aria-pressed="false">${label}</button>`).join('')}</div><div class="rp-watch-feedback" hidden><span role="status"></span><button data-watch-action="undo">撤销</button></div></div><div class="rp-watch-scroll"><div data-watch="rows"></div><button type="button" data-watch-action="more" hidden>再显示 50 个</button></div><p class="rp-watch-status" role="status"></p>`;
     const recent=document.createElement('nav');recent.className='rp-recent rp-glass';recent.setAttribute('aria-label','最近触价币种');
     recent.innerHTML='<span class="rp-recent-label">触价</span><div class="rp-recent-scroll" aria-label="滑动查看最近触价"></div><div class="rp-pinned" role="group" aria-label="固定快捷币种"></div>';
     root.append(panel,recent);
     const lane=recent.querySelector('.rp-recent-scroll'),resetDrag=bindRecentDrag(lane,document);
     let storage;try{storage=window.localStorage;}catch{}
     const preferences=createListPreferences(storage),platform=navigator.userAgentData?.platform||navigator.platform||'';
-    let open=false,filter='all',q='',shown=50,lastRemoval=null;
+    let open=false,filter='all',q='',shown=50,lastRemoval=null,expandedSymbol='',searching=false;
     const pointers=new Set();
     const requests=window.SpikeRuntime.createRequests();
     const feed=createFeed({read:()=>requests.json('/api/monday-fib/display'),validateData:validate,cancel:()=>requests.cancel(),change:render});
     const sheet=window.SpikeYoloPreviewSheet.bind({panel,isOpen:()=>open,dismiss:()=>setOpen(false)});
     const el=id=>panel.querySelector(`[data-watch="${id}"]`),scroll=panel.querySelector('.rp-watch-scroll');
     function setOpen(value,focus=true){sheet.reset();open=value;panel.classList.toggle('is-open',value);panel.inert=!value;panel.setAttribute('aria-hidden',String(!value));trigger.setAttribute('aria-expanded',String(value));if(value){preferences.read();onOpen?.();render();}else if(focus)trigger.focus({preventScroll:true});}
+    function setSearch(value){
+      searching=value;const heading=panel.querySelector('.rp-watch-heading'),button=heading.querySelector('[data-watch-action="search"]');
+      heading.classList.toggle('is-searching',value);heading.querySelector('.rp-search').hidden=!value;
+      button.setAttribute('aria-expanded',String(value));button.setAttribute('aria-label',value?'收起搜索':'搜索币种');
+      (value?heading.querySelector('input'):button).focus({preventScroll:true});
+    }
     function feedback(text,undo=false){const box=panel.querySelector('.rp-watch-feedback');box.hidden=!text;box.querySelector('span').textContent=text;box.querySelector('button').hidden=!undo;}
     function render(){
       const {data,error,busy}=feed.getState(),context=getContext(),view=model(data,preferences,{q,filter});
       recent.dataset.previous=String(!!data?.display_previous);recent.querySelector('.rp-recent-label').textContent=data?.display_previous?'上周':'触价';recent.title=data?.display_previous?'本周周一区间形成中，保留上周触价记录':'';
       trigger.title=`选择币种 · 最新触价 ${data?view.total:'—'} 个`;el('total').textContent=data?view.items.length:'—';
       panel.querySelectorAll('[data-watch-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.watchFilter===filter)));
+      panel.querySelector('[data-watch-action="search"]').classList.toggle('has-query',!!q);
       panel.querySelector('.rp-watch-status').textContent=error?`同步失败 · ${error}${data?' · 保留上次记录':''}`:!data?busy?'正在读取最新触价…':'等待触价数据':`${data.stream?.connected?'行情在线':'行情重连中'} · 最新触价优先 · ${view.items.length} 个`;
       // Keep live controls in place, including while a finger is held down.
       if(pointers.size)return;
@@ -118,7 +125,7 @@
       const offset=lane.scrollLeft;reconcile(lane,chips);lane.scrollLeft=offset;
       reconcile(recent.querySelector('.rp-pinned'),pinnedHTML(context.symbol));
       if(!open)return;
-      const html=view.items.slice(0,shown).map(item=>rowHTML(item,context.symbol,{favorite:preferences.has(item.symbol),now:data.now_ms,error,platform,period:context.period})).join('')||`<div class="rp-empty">${!data?(error?'读取失败，请刷新重试':'正在读取…'):q?'没有匹配的币种':filter==='favorites'?'尚未收藏币种':'本周暂无符合筛选的触价币种'}</div>`;
+      const html=view.items.slice(0,shown).map(item=>rowHTML(item,context.symbol,{favorite:preferences.has(item.symbol),expanded:expandedSymbol===item.symbol,now:data.now_ms,error,platform,period:context.period})).join('')||`<div class="rp-empty">${!data?(error?'读取失败，请刷新重试':'正在读取…'):q?'没有匹配的币种':filter==='favorites'?'尚未收藏币种':'本周暂无符合筛选的触价币种'}</div>`;
       const position=captureListScroll(scroll);reconcile(el('rows'),html);restoreListScroll(scroll,position);
       panel.querySelector('[data-watch-action="more"]').hidden=view.items.length<=shown;
     }
@@ -127,14 +134,16 @@
       const b=event.target.closest('button'),row=event.target.closest('[data-symbol]');
       if(b?.dataset.watchFilter){filter=b.dataset.watchFilter;shown=50;scroll.scrollTop=0;render();return;}
       const action=b?.dataset.watchAction;
+      if(action==='search'){setSearch(!searching);return;}
+      if(action==='details'){expandedSymbol=expandedSymbol===row.dataset.symbol?'':row.dataset.symbol;render();return;}
       if(action==='favorite'){preferences.toggle(row.dataset.symbol);feedback(preferences.persistent?'':'收藏暂未保存，仅本次有效');render();return;}
       if(action==='remove'){const data=feed.getState().data,item=data.items.find(i=>i.symbol===row.dataset.symbol);lastRemoval=preferences.remove(item,data.display_week||data.week);feedback(preferences.persistent?'已从本周列表移除':'暂未保存，仅本次移除',!!lastRemoval);render();return;}
       if(action==='undo'){preferences.undo(lastRemoval);lastRemoval=null;feedback('');render();return;}
       if(action==='close')setOpen(false);if(action==='more'){shown+=50;render();}
-      if(row&&!event.target.closest('a')&&!action){onSelect(row.dataset.symbol);setOpen(false);}
+      if(row&&!event.target.closest('a,.rp-watch-bottom')&&!action){onSelect(row.dataset.symbol);setOpen(false);}
     });
     recent.addEventListener('click',event=>{const b=event.target.closest('[data-watch-select]');if(b){onSelect(b.dataset.watchSelect);setOpen(false,false);}});
-    root.addEventListener('keydown',event=>{if(event.key==='Escape'&&open){event.stopPropagation();setOpen(false);}});
+    root.addEventListener('keydown',event=>{if(event.key==='Escape'&&open){event.preventDefault();event.stopImmediatePropagation();if(searching)setSearch(false);else setOpen(false);}});
     root.addEventListener('pointerdown',event=>{if(panel.contains(event.target)||recent.contains(event.target))pointers.add(event.pointerId);else if(open&&!trigger.contains(event.target))setOpen(false,false);});
     const release=event=>{if(pointers.delete(event.pointerId))setTimeout(render,0);};
     document.addEventListener('pointerup',release);document.addEventListener('pointercancel',release);

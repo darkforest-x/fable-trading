@@ -184,7 +184,7 @@
     preferences=list.createListPreferences(storage);platform=navigator.userAgentData?.platform||navigator.platform||'';
     root.innerHTML=`<div class="rp-wallpaper" data-rp="chart"></div><div class="rp-watermark" aria-hidden="true" data-rp="watermark"></div><p class="rp-chart-notice rp-glass" data-rp="chart-notice" role="status" hidden></p>
       <header class="rp-heading rp-glass"><details class="rp-navigation"><summary aria-label="打开模拟盘导航"><b>ϟ SPIKE</b></summary><nav class="rp-glass"><a href="#signals?pane=reclaim" aria-current="page">1.618 首页</a><a href="#signals?pane=records">信号记录</a><a href="#signals?pane=overview">表现分析</a><a href="#yolo-detect">形态巡检</a></nav></details></header><button type="button" class="rp-theme-toggle theme-toggle rp-glass" data-theme-toggle aria-label="切换浅色或深色" title="切换浅色或深色"></button>
-      <section class="rp-context rp-glass"><div class="rp-context-line"><button type="button" class="rp-symbol-trigger" data-rp-action="watch" aria-controls="rp-watch-panel" aria-expanded="false"><strong data-rp="symbol-label">选择币种</strong><span aria-hidden="true">⌄</span></button><span data-rp="selection-status"></span></div><small class="rp-selection-note" data-rp="selection-note"></small><div class="rp-context-tools"><small>独立模拟账户</small><button type="button" data-rp-action="records" aria-controls="rp-record-panel" aria-expanded="false">交易簿 <span data-rp="total">—</span></button></div><div class="rp-tracks" role="group" aria-label="选择模拟账户">${TRACKS.map(track=>`<button type="button" data-rp-track="${track}" aria-pressed="false">${trackLabel(track)}</button>`).join('')}</div></section>
+      <section class="rp-context rp-glass"><div class="rp-context-line"><button type="button" class="rp-symbol-trigger" data-rp-action="watch" aria-controls="rp-watch-panel" aria-expanded="false"><strong data-rp="symbol-label">选择币种</strong><span aria-hidden="true">⌄</span></button><span data-rp="selection-status"></span></div><small class="rp-selection-note" data-rp="selection-note"></small><div class="rp-context-tools"><label class="rp-track-picker"><span>模拟账户</span><select data-rp="track" aria-label="选择模拟账户">${TRACKS.map(track=>`<option value="${track}">${trackLabel(track)}</option>`).join('')}</select></label><button type="button" data-rp-action="records" aria-controls="rp-record-panel" aria-expanded="false">交易簿 <span data-rp="total">—</span></button></div></section>
       <details class="rp-account rp-glass"><summary><span><small data-rp="account-label">60m 模拟</small> · 已实现净值 <b data-rp="equity">—</b><small> USDT</small></span><span data-rp="pnl"></span><span aria-hidden="true">⌄</span></summary><div class="rp-account-body"><section data-rp="metrics" class="rp-metrics"></section><p data-rp="status" role="status"></p><details class="rp-rules"><summary>规则与统计口径</summary><div data-rp="rules"></div></details></div></details><button class="rp-analysis-trigger rp-glass" data-rp-action="analytics" aria-controls="rp-analysis-panel" aria-expanded="false">统计分析 ↗</button>
       <div class="rp-alert rp-glass" data-rp="error" role="alert" hidden></div>
       <section id="rp-record-panel" class="rp-records rp-glass" aria-label="模拟交易簿" aria-hidden="true" inert><header class="rp-record-heading rp-ledger-heading" data-yd-sheet-drag><strong data-rp="ledger-label">60m</strong><div class="rp-ledger-tabs" role="group" aria-label="记录类型">${[['open','持仓'],['closed','已结束'],['events','触价']].map(([tab,label])=>`<button type="button" data-rp-tab="${tab}" aria-pressed="false">${label}<span data-rp="count-${tab}"></span></button>`).join('')}</div><label class="rp-scope" data-rp="scope-label" title="记录资金范围"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg><select aria-label="记录资金范围" data-rp="scope"><option value="funded">计入资金</option><option value="shadow">影子记录</option><option value="all">全部记录</option></select></label><label class="rp-search" hidden><input type="search" placeholder="搜索币种" aria-label="搜索模拟盘币种" maxlength="80" autocomplete="off" data-rp="search"></label><button type="button" data-rp-action="search" aria-label="搜索币种" aria-expanded="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></button><button type="button" data-rp-action="close-records" aria-label="收起交易簿">×</button></header><div class="rp-record-scroll"><div data-rp="rows" class="rp-rows"></div><button type="button" data-rp-action="more" class="rp-more" hidden>再显示 50 条</button><div data-rp="pending"></div><p class="rp-record-caption" data-rp="caption"></p><p class="rp-footnote" data-rp="record-note"></p></div></section>
@@ -194,7 +194,8 @@
     sheet=window.SpikeYoloPreviewSheet.bind({panel:root.querySelector('.rp-records'),isOpen:()=>recordsOpen,dismiss:()=>setRecords(false)});
     closer=window.SpikeReclaimClose.create({root,onChanged:()=>{feed.refresh();watch?.refresh();analytics?.refresh();}});
     watch=window.SpikeReclaimWatchlist.create({root,createFeed,getContext:()=>({track:feed.getState().data?.tracks[state.track],symbol:chartSymbol,period:state.period}),onOpen:()=>{analytics?.setOpen(false,false);if(recordsOpen)setRecords(false,false);},onSelect:symbol=>{state.symbol=symbol;state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());}});
-    analytics=window.SpikeReclaimAnalytics.create({root,createFeed,onOpen:()=>{watch.setOpen(false,false);if(matchMedia('(max-width:700px)').matches)setRecords(false,false);},onTrack:track=>{state.track=track;state.trade='';pinned=null;shown=50;sync();render(feed.getState());}});
+    analytics=window.SpikeReclaimAnalytics.create({root,createFeed,onOpen:()=>{watch.setOpen(false,false);if(matchMedia('(max-width:700px)').matches)setRecords(false,false);},onTrack:selectTrack});
+    el('track').addEventListener('change',event=>selectTrack(event.target.value));
     el('period').addEventListener('change',event=>{state.period=event.target.value;sync();render(feed.getState());});
     root.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(root.querySelector('.rp-ledger-heading').classList.contains('is-searching')){event.stopPropagation();setSearch(false);}else if(indicatorsOpen){event.stopPropagation();setIndicators(false,true);}else if(recordsOpen)setRecords(false);});
     document.addEventListener('pointerdown',event=>{if(indicatorsOpen&&!event.target.closest('.rp-indicators'))setIndicators(false);},true);
@@ -208,7 +209,6 @@
       if(button.dataset.rpSymbol){state.symbol=button.dataset.rpSymbol;state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());if(matchMedia('(max-width:700px)').matches)setRecords(false);return;}
 
       if(button.dataset.rpClose){const p=feed.getState().data?.tracks[state.track]?.open.find(p=>String(p.id)===button.dataset.rpClose);if(p)closer.open(p);}
-      if(button.dataset.rpTrack){state.track=button.dataset.rpTrack;state.trade='';pinned=null;shown=50;sync();render(feed.getState());}
       if(button.dataset.rpTab){state.tab=button.dataset.rpTab;shown=50;sync();render(feed.getState());}
       if(button.dataset.rpTrade){state.symbol='';state.trade=button.dataset.rpTrade;pinned=window.SpikeReclaimChart.select(feed.getState().data?.tracks[state.track],state.trade);chart.resetFocus();sync();render(feed.getState());if(matchMedia('(max-width:700px)').matches)setRecords(false);}
       const action=button.dataset.rpAction;
@@ -227,6 +227,10 @@
     el('scope').addEventListener('change',event=>{state.scope=event.target.value;shown=50;sync();render(feed.getState());});
     el('search').addEventListener('input',event=>{state.q=event.target.value;shown=50;sync();render(feed.getState());});
     root.addEventListener('error',event=>{if(event.target.tagName==='IMG')event.target.hidden=true;},true);
+  }
+  function selectTrack(track){
+    if(!TRACKS.includes(track)||track===state.track)return;
+    state.track=track;state.trade='';pinned=null;shown=50;sync();render(feed.getState());
   }
   function setSearch(value){
     const heading=root.querySelector('.rp-ledger-heading'),button=heading.querySelector('[data-rp-action="search"]');
@@ -254,7 +258,7 @@
     el('status').textContent=data ? `${error?'上次记录':'更新于'} ${date(data.now_ms)} · 北京时间 · ${workerIssue?'后台需要检查':busy?'同步中…':'每 10 秒同步'}${worker?.queue>0?` · 等待处理 ${worker.queue} 条`:''}` : busy?'正在读取模拟盘…':'尚未读取到模拟盘数据';
     el('error').hidden=!error && !workerIssue && !missingTrack;
     el('error').textContent=error ? `同步失败：${error}。${data?'保留上次记录，正在自动重试。':'正在自动重试。'}` : workerIssue ? `后台状态异常：${worker.error || '处理线程未运行'}。当前展示已保存的记录。` : missingTrack ? `${trackLabel(state.track)} 账户暂未返回，无法显示该账户数据。` : '';
-    root.querySelectorAll('[data-rp-track]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.rpTrack===state.track)));
+    el('track').value=state.track;
     root.querySelectorAll('[data-rp-tab]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.rpTab===state.tab)));
     if(el('search').value!==state.q)el('search').value=state.q;
     root.querySelector('[data-rp-action="search"]').classList.toggle('has-query',!!state.q);

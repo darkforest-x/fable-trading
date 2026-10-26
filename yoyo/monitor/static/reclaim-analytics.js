@@ -39,7 +39,7 @@
   function create({root,createFeed,onOpen,onTrack}){
     const trigger=root.querySelector('[data-rp-action="analytics"]'),panel=document.createElement('section');
     panel.id='rp-analysis-panel';panel.className='rp-analysis rp-glass';panel.setAttribute('aria-label','模拟盘统计分析');
-    panel.innerHTML=`<header class="rp-record-heading" data-yd-sheet-drag><div><strong data-analysis-title>统计分析</strong><small>仅计入资金的模拟交易</small></div><button data-analysis-action="close" aria-label="收起统计分析">×</button></header><div class="rp-analysis-filters"><div class="rp-tabs" role="group" aria-label="统计轨道">${['60','5','v3','v3add'].map(t=>`<button data-analysis-track="${t}" aria-pressed="false">${t==='60'?'60m':t==='5'?'5m':t}</button>`).join('')}</div><div class="rp-tabs" role="group" aria-label="统计时段">${[[7,'近 7 天'],[30,'近 30 天'],[0,'全部']].map(([n,l])=>`<button data-analysis-days="${n}" aria-pressed="false">${l}</button>`).join('')}</div></div><p class="rp-analysis-status" role="status"></p><div class="rp-analysis-body"><div class="rp-analysis-warning" role="alert" hidden></div><div class="rp-analysis-grid"></div><section class="rp-analysis-section"><h3>已实现资金曲线 <small>USDT</small></h3><div class="rp-equity-chart" role="img" aria-label="已实现资金曲线"></div><p class="rp-curve-note"></p></section><div class="rp-analysis-breakdowns"></div><p class="rp-analysis-note">盈亏与手续费按每次平仓的成交时间计入，包含部分平仓；胜率与盈利因子按整笔最终结清时间统计。资金曲线不含浮动盈亏。手续费包含已平份额对应的开仓费与平仓费，未平份额不计入已结算费用。影子记录和待成交加仓不参与统计。v3add 的主单与已成交加仓分别计笔，共属一个账户。</p></div><footer class="rp-analysis-footer"><span>完整账本 · 北京时间</span><button data-analysis-action="refresh">刷新统计</button></footer>`;
+    panel.innerHTML=`<header class="rp-record-heading" data-yd-sheet-drag><div><strong data-analysis-title>统计分析</strong><small>仅计入资金的模拟交易</small></div><button data-analysis-action="close" aria-label="收起统计分析">×</button></header><div class="rp-analysis-filters"><label class="rp-track-picker"><span>账户</span><select data-analysis-track aria-label="统计模拟账户">${['60','5','v3','v3add'].map(t=>`<option value="${t}">${t==='60'?'60m':t==='5'?'5m':t}</option>`).join('')}</select></label><div class="rp-tabs" role="group" aria-label="统计时段">${[[7,'近 7 天'],[30,'近 30 天'],[0,'全部']].map(([n,l])=>`<button data-analysis-days="${n}" aria-pressed="false">${l}</button>`).join('')}</div></div><p class="rp-analysis-status" role="status"></p><div class="rp-analysis-body"><div class="rp-analysis-warning" role="alert" hidden></div><div class="rp-analysis-grid"></div><section class="rp-analysis-section"><h3>已实现资金曲线 <small>USDT</small></h3><div class="rp-equity-chart" role="img" aria-label="已实现资金曲线"></div><p class="rp-curve-note"></p></section><div class="rp-analysis-breakdowns"></div><p class="rp-analysis-note">盈亏与手续费按每次平仓的成交时间计入，包含部分平仓；胜率与盈利因子按整笔最终结清时间统计。资金曲线不含浮动盈亏。手续费包含已平份额对应的开仓费与平仓费，未平份额不计入已结算费用。影子记录和待成交加仓不参与统计。v3add 的主单与已成交加仓分别计笔，共属一个账户。</p></div><footer class="rp-analysis-footer"><span>完整账本 · 北京时间</span><button data-analysis-action="refresh">刷新统计</button></footer>`;
     root.append(panel);
     let track='60',days=0,active=false,open=false,feed=null,chart=null,chartLoading=false,chartError='',signature='',lastChartData=null;
     const requests=window.SpikeRuntime.createRequests(),el=s=>panel.querySelector(s);
@@ -65,7 +65,7 @@
       if(!open)return;
       el('[data-analysis-title]').textContent='统计分析 · '+({60:'60m',5:'5m'}[track]||track);
       const {data,error,busy}=feed?.getState()||{};
-      panel.querySelectorAll('[data-analysis-track]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.analysisTrack===track)));
+      el('[data-analysis-track]').value=track;
       panel.querySelectorAll('[data-analysis-days]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.analysisDays)===days)));
       el('.rp-analysis-status').textContent=error?`${error}${data?' · 保留上次统计':''}`:data?`${time(data.start_ms)} 至 ${time(data.now_ms)} · ${busy?'同步中':'每 10 秒同步'}`:'正在读取完整账本…';
       el('[data-analysis-action="refresh"]').disabled=busy;
@@ -79,7 +79,8 @@
       el('.rp-equity-chart').setAttribute('aria-label',`已实现资金曲线，从 ${num(s.period_start_equity)} 到 ${num(data.curve.at(-1)?.equity)} USDT`);
       paint(data);
     }
-    panel.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.analysisTrack)onTrack(b.dataset.analysisTrack);if(b.dataset.analysisDays!==undefined){const n=Number(b.dataset.analysisDays);if(n!==days){days=n;newFeed();}}if(b.dataset.analysisAction==='close')setOpen(false);if(b.dataset.analysisAction==='refresh'){chartError='';feed.refresh();}});
+    panel.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.analysisDays!==undefined){const n=Number(b.dataset.analysisDays);if(n!==days){days=n;newFeed();}}if(b.dataset.analysisAction==='close')setOpen(false);if(b.dataset.analysisAction==='refresh'){chartError='';feed.refresh();}});
+    el('[data-analysis-track]').addEventListener('change',e=>onTrack(e.target.value));
     panel.addEventListener('keydown',e=>{if(e.key==='Escape'&&open){e.stopPropagation();setOpen(false);}});
     new ResizeObserver(()=>chart?.resize()).observe(el('.rp-equity-chart'));
     new MutationObserver(()=>{lastChartData=null;if(active&&open)render();}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});

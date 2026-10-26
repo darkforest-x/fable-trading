@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>SPIKE · 信号中心 · 1.618 紧凑模拟盘 (Apple Glass)</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary-fixed-variant": "#00458f",
+            "inverse-on-surface": "#eaf1ff",
+            "surface-container-highest": "#d3e4fe",
+            "surface-container-lowest": "#ffffff",
+            "secondary-container": "#92f2d7",
+            "surface-variant": "#d3e4fe",
+            "on-tertiary-container": "#fffaf9",
+            "tertiary-fixed-dim": "#ffb2b7",
+            "on-tertiary": "#ffffff",
+            "on-primary-container": "#fcfbff",
+            "primary-container": "#0071e3",
+            "on-secondary-fixed": "#002019",
+            "inverse-primary": "#abc7ff",
+            "error": "#ba1a1a",
+            "background": "#f8f9ff",
+            "surface-bright": "#f8f9ff",
+            "secondary-fixed": "#94f4d9",
+            "on-secondary": "#ffffff",
+            "tertiary-fixed": "#ffdadb",
+            "surface-dim": "#cbdbf5",
+            "on-secondary-fixed-variant": "#005142",
+            "outline": "#717785",
+            "inverse-surface": "#213145",
+            "on-tertiary-fixed": "#40000d",
+            "on-secondary-container": "#00705c",
+            "secondary-fixed-dim": "#78d8be",
+            "on-primary-fixed": "#001b3f",
+            "surface-container": "#e5eeff",
+            "primary": "#0059b5",
+            "primary-fixed-dim": "#abc7ff",
+            "outline-variant": "#c1c6d6",
+            "primary-fixed": "#d7e2ff",
+            "surface-tint": "#005cbb",
+            "surface-container-low": "#eff4ff",
+            "on-tertiary-fixed-variant": "#92002a",
+            "surface": "#f8f9ff",
+            "error-container": "#ffdad6",
+            "on-primary": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-surface-variant": "#414753",
+            "tertiary-container": "#db2b4e",
+            "tertiary": "#b70438",
+            "surface-container-high": "#dce9ff",
+            "secondary": "#006b58",
+            "on-background": "#0b1c30",
+            "on-error": "#ffffff",
+            "on-surface": "#0b1c30"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin-desktop": "2.5rem",
+            "space-sm": "0.5rem",
+            "margin": "1rem",
+            "gutter": "0.75rem",
+            "space-xs": "0.25rem",
+            "gutter-tablet": "1rem",
+            "space-md": "0.75rem",
+            "margin-tablet": "1.5rem",
+            "gutter-desktop": "1.5rem",
+            "space-xl": "1.5rem",
+            "space-lg": "1rem"
+          },
+          "fontFamily": {
+            "label-numeric-lg": ["JetBrains Mono"],
+            "headline-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "display": ["Inter"],
+            "body-lg": ["Inter"],
+            "label-numeric-sm": ["JetBrains Mono"],
+            "label-numeric-md": ["JetBrains Mono"],
+            "body-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "label-caps": ["Inter"],
+            "headline-sm": ["Inter"]
+          },
+          "fontSize": {
+            "label-numeric-lg": ["20px", {"lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+            "headline-lg": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+            "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+            "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+            "display": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "600"}],
+            "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400"}],
+            "label-numeric-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+            "label-numeric-md": ["14px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "500"}],
+            "body-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400"}],
+            "headline-md": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+            "label-caps": ["10px", {"lineHeight": "12px", "letterSpacing": "0.08em", "fontWeight": "600"}],
+            "headline-sm": ["17px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .glass-base {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), 0 8px 32px -4px rgba(15, 23, 42, 0.06);
+    }
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 1);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(113, 119, 133, 0.25);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="h-full w-full bg-background text-on-surface overflow-hidden select-none font-body-sm text-body-sm relative">
+<!-- =====================================================================
+       FULL VIEWPORT CANDLESTICK CHART CANVAS (WALLPAPER)
+       ===================================================================== -->
+<div class="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-none bg-gradient-to-b from-[#eaf1fb] via-[#f2f6fc] to-[#f8f9ff]">
+<!-- Candlestick chart simulation -->
+<svg class="w-full h-full" fill="none" preserveaspectratio="none" viewbox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<pattern height="45" id="chart-grid" patternunits="userSpaceOnUse" width="72">
+<path d="M 72 0 L 0 0 0 45" fill="none" stroke="#d7e2ff" stroke-opacity="0.35" stroke-width="0.8"></path>
+</pattern>
+<lineargradient id="volGradUp" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#006b58" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#006b58" stop-opacity="0.05"></stop>
+</lineargradient>
+<lineargradient id="volGradDown" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#b70438" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#b70438" stop-opacity="0.03"></stop>
+</lineargradient>
+</defs>
+<rect fill="url(#chart-grid)" height="900" width="1440"></rect>
+<!-- Horizontal Level Lines & Projections -->
+<!-- Upper 1.618 Fib line: 198.50 -->
+<g opacity="0.85">
+<line stroke="#b70438" stroke-dasharray="4 4" stroke-width="1.2" x1="0" x2="1440" y1="168" y2="168"></line>
+<rect fill="#ffdad6" height="20" rx="3" width="90" x="1350" y="156"></rect>
+<text fill="#ba1a1a" font-family="JetBrains Mono" font-size="11" font-weight="600" x="1356" y="170">上沿 198.50</text>
+</g>
+<!-- Monday High: 188.00 -->
+<g opacity="0.8">
+<line stroke="#717785" stroke-dasharray="6 3" stroke-width="1" x1="0" x2="1440" y1="265" y2="265"></line>
+<rect fill="#e5eeff" height="19" rx="3" width="94" x="1346" y="254"></rect>
+<text fill="#414753" font-family="JetBrains Mono" font-size="10.5" font-weight="600" x="1352" y="268">周一高 188.00</text>
+</g>
+<!-- Short Entry line: 184.50 -->
+<g>
+<line stroke="#0071e3" stroke-width="1.5" x1="0" x2="1440" y1="318" y2="318"></line>
+<rect fill="#0071e3" height="22" rx="4" width="112" x="420" y="306"></rect>
+<text fill="#ffffff" font-family="JetBrains Mono" font-size="10.5" font-weight="600" x="428" y="321">空单入场 184.50</text>
+<!-- BE Armed marker -->
+<circle cx="560" cy="318" fill="#006b58" r="5" stroke="#ffffff" stroke-width="1.5"></circle>
+<rect fill="#92f2d7" height="20" rx="3" width="86" x="572" y="307"></rect>
+<text fill="#005142" font-family="Inter" font-size="10" font-weight="700" x="578" y="321">BE 已激活 (保本)</text>
+</g>
+<!-- Live Price Dashed Line: 184.50 (current market) -->
+<g>
+<line stroke="#0059b5" stroke-dasharray="3 3" stroke-width="1.5" x1="0" x2="1440" y1="324" y2="324"></line>
+<rect fill="#0059b5" height="22" rx="4" width="88" x="1352" y="313"></rect>
+<text fill="#ffffff" font-family="JetBrains Mono" font-size="11" font-weight="700" x="1360" y="328">现价 184.50</text>
+</g>
+<!-- Monday Low: 168.00 -->
+<g opacity="0.8">
+<line stroke="#717785" stroke-dasharray="6 3" stroke-width="1" x1="0" x2="1440" y1="520" y2="520"></line>
+<rect fill="#e5eeff" height="19" rx="3" width="94" x="1346" y="509"></rect>
+<text fill="#414753" font-family="JetBrains Mono" font-size="10.5" font-weight="600" x="1352" y="523">周一低 168.00</text>
+</g>
+<!-- Lower 1.618 Fib line: 156.20 -->
+<g opacity="0.85">
+<line stroke="#006b58" stroke-dasharray="4 4" stroke-width="1.2" x1="0" x2="1440" y1="670" y2="670"></line>
+<rect fill="#92f2d7" height="20" rx="3" width="90" x="1350" y="658"></rect>
+<text fill="#005142" font-family="JetBrains Mono" font-size="11" font-weight="600" x="1356" y="672">下沿 156.20</text>
+</g>
+<!-- Candlesticks generation simulating SOL / USDT structure -->
+<!-- Green (Bull) candlesticks -->
+<g fill="#006b58" stroke="#006b58" stroke-width="1.2">
+<!-- 1 --> <line x1="90" x2="90" y1="410" y2="510"></line><rect height="60" rx="1.5" width="10" x="85" y="430"></rect>
+<!-- 2 --> <line x1="126" x2="126" y1="390" y2="480"></line><rect height="45" rx="1.5" width="10" x="121" y="405"></rect>
+<!-- 3 --> <line x1="162" x2="162" y1="360" y2="440"></line><rect height="40" rx="1.5" width="10" x="157" y="375"></rect>
+<!-- 5 --> <line x1="234" x2="234" y1="310" y2="410"></line><rect height="60" rx="1.5" width="10" x="229" y="325"></rect>
+<!-- 6 --> <line x1="270" x2="270" y1="280" y2="360"></line><rect height="45" rx="1.5" width="10" x="265" y="290"></rect>
+<!-- 8 --> <line x1="342" x2="342" y1="210" y2="300"></line><rect height="50" rx="1.5" width="10" x="337" y="230"></rect>
+<!-- 9 Spike up to 198.50 Upper band -->
+<line stroke="#b70438" stroke-width="1.6" x1="378" x2="378" y1="166" y2="280"></line>
+<rect fill="#006b58" height="60" rx="1.5" width="10" x="373" y="190"></rect>
+<!-- Reversal candles start dropping -->
+<line x1="450" x2="450" y1="230" y2="300"></line><rect height="25" rx="1.5" width="10" x="445" y="245"></rect>
+<line x1="522" x2="522" y1="260" y2="320"></line><rect height="25" rx="1.5" width="10" x="517" y="270"></rect>
+<line x1="594" x2="594" y1="280" y2="350"></line><rect height="30" rx="1.5" width="10" x="589" y="300"></rect>
+<line x1="666" x2="666" y1="290" y2="360"></line><rect height="30" rx="1.5" width="10" x="661" y="305"></rect>
+<line x1="738" x2="738" y1="285" y2="345"></line><rect height="30" rx="1.5" width="10" x="733" y="295"></rect>
+<line x1="810" x2="810" y1="310" y2="370"></line><rect height="25" rx="1.5" width="10" x="805" y="325"></rect>
+<line x1="882" x2="882" y1="305" y2="360"></line><rect height="20" rx="1.5" width="10" x="877" y="318"></rect>
+<line x1="954" x2="954" y1="312" y2="355"></line><rect height="15" rx="1.5" width="10" x="949" y="322"></rect>
+<line x1="1026" x2="1026" y1="310" y2="350"></line><rect height="15" rx="1.5" width="10" x="1021" y="318"></rect>
+</g>
+<!-- Red (Bear) candlesticks -->
+<g fill="#b70438" stroke="#b70438" stroke-width="1.2">
+<!-- 4 Pullback --> <line x1="198" x2="198" y1="350" y2="430"></line><rect height="35" rx="1.5" width="10" x="193" y="360"></rect>
+<!-- 7 Pullback --> <line x1="306" x2="306" y1="270" y2="340"></line><rect height="30" rx="1.5" width="10" x="301" y="280"></rect>
+<!-- Rejection from Upper 1.618 Spike Pin Bar -->
+<line stroke-width="2" x1="414" x2="414" y1="168" y2="270"></line>
+<rect height="45" rx="1.5" width="10" x="409" y="210"></rect>
+<!-- Bear breakdown sequence -->
+<line x1="486" x2="486" y1="240" y2="320"></line><rect height="40" rx="1.5" width="10" x="481" y="255"></rect>
+<line x1="558" x2="558" y1="275" y2="340"></line><rect height="40" rx="1.5" width="10" x="553" y="285"></rect>
+<line x1="630" x2="630" y1="300" y2="370"></line><rect height="35" rx="1.5" width="10" x="625" y="312"></rect>
+<line x1="702" x2="702" y1="310" y2="365"></line><rect height="32" rx="1.5" width="10" x="697" y="318"></rect>
+<line x1="774" x2="774" y1="315" y2="375"></line><rect height="34" rx="1.5" width="10" x="769" y="322"></rect>
+<line x1="846" x2="846" y1="320" y2="380"></line><rect height="30" rx="1.5" width="10" x="841" y="328"></rect>
+<line x1="918" x2="918" y1="315" y2="370"></line><rect height="28" rx="1.5" width="10" x="913" y="324"></rect>
+<line x1="990" x2="990" y1="318" y2="360"></line><rect height="22" rx="1.5" width="10" x="985" y="323"></rect>
+<!-- Current live candle -->
+<line stroke="#0071e3" stroke-width="1.8" x1="1062" x2="1062" y1="316" y2="345"></line>
+<rect fill="#0071e3" height="15" rx="1.5" width="10" x="1057" y="320"></rect>
+</g>
+<!-- Volume bars at footer -->
+<g y="720">
+<rect fill="url(#volGradUp)" height="60" width="10" x="85" y="780"></rect>
+<rect fill="url(#volGradUp)" height="70" width="10" x="121" y="770"></rect>
+<rect fill="url(#volGradUp)" height="90" width="10" x="157" y="750"></rect>
+<rect fill="url(#volGradDown)" height="50" width="10" x="193" y="790"></rect>
+<rect fill="url(#volGradUp)" height="100" width="10" x="229" y="740"></rect>
+<rect fill="url(#volGradUp)" height="110" width="10" x="265" y="730"></rect>
+<rect fill="url(#volGradDown)" height="55" width="10" x="301" y="785"></rect>
+<rect fill="url(#volGradUp)" height="120" width="10" x="337" y="720"></rect>
+<rect fill="url(#volGradUp)" height="140" width="10" x="373" y="700"></rect>
+<rect fill="url(#volGradDown)" height="150" width="10" x="409" y="690"></rect>
+<rect fill="url(#volGradDown)" height="80" width="10" x="445" y="760"></rect>
+<rect fill="url(#volGradDown)" height="90" width="10" x="481" y="750"></rect>
+<rect fill="url(#volGradUp)" height="60" width="10" x="517" y="780"></rect>
+<rect fill="url(#volGradDown)" height="70" width="10" x="553" y="770"></rect>
+</g>
+</svg>
+</div>
+<!-- =====================================================================
+       TOP APP BAR / UNIVERSAL SYSTEM HEADER (docked full-width top-0 sticky)
+       ===================================================================== -->
+<header class="docked full-width top-0 sticky z-50 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.03)] h-14 md:h-16 px-space-md md:px-space-lg flex items-center justify-between">
+<!-- Left branding & shortcuts cluster -->
+<div class="flex items-center gap-space-md min-w-0">
+<div class="flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
+<span class="text-primary-container text-xl md:text-2xl font-bold flex items-center">⚡</span>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface leading-none">SPIKE</span>
+<span class="font-label-caps text-label-caps text-primary tracking-wider scale-95 origin-left">1.618 模拟盘</span>
+</div>
+</div>
+<!-- Divider -->
+<div class="hidden md:block h-6 w-px bg-outline-variant/40 mx-1"></div>
+<!-- Quick Altcoin touch chips + BTC/ETH/XAU shortcuts (Scrollable on small screens) -->
+<nav aria-label="Quick symbols" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 text-label-sm font-label-sm">
+<button class="px-2.5 py-1 rounded-full bg-primary-container/10 border border-primary-container/30 text-primary-container font-semibold flex items-center gap-1 hover:bg-primary-container/20 transition-all flex-shrink-0">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
+          SOL <span class="font-label-numeric-sm text-label-numeric-sm">184.50</span>
+</button>
+<button class="px-2.5 py-1 rounded-full bg-surface-container-lowest/60 border border-outline-variant/30 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-all flex-shrink-0">
+          BTC <span class="font-label-numeric-sm text-label-numeric-sm text-secondary">67,420</span>
+</button>
+<button class="px-2.5 py-1 rounded-full bg-surface-container-lowest/60 border border-outline-variant/30 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-all flex-shrink-0">
+          ETH <span class="font-label-numeric-sm text-label-numeric-sm text-secondary">2,618.5</span>
+</button>
+<button class="hidden lg:flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest/60 border border-outline-variant/30 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-all flex-shrink-0">
+          XAU <span class="font-label-numeric-sm text-label-numeric-sm text-tertiary">2,735.2</span>
+</button>
+<button class="hidden xl:flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest/60 border border-outline-variant/30 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-all flex-shrink-0">
+          SUI <span class="font-label-numeric-sm text-label-numeric-sm text-secondary">2.084</span>
+</button>
+</nav>
+</div>
+<!-- Right equity summary & actions -->
+<div class="flex items-center gap-2 md:gap-space-md flex-shrink-0">
+<!-- Account equity summary pill with compact dropdown -->
+<div class="glass-pill px-2.5 py-1 md:px-3 md:py-1.5 rounded-lg flex items-center gap-2 border border-outline-variant/30">
+<div class="flex flex-col text-right">
+<span class="font-label-caps text-label-caps text-outline leading-tight hidden sm:inline">已实现净值</span>
+<div class="flex items-center gap-1">
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-on-surface">1,048.60</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant font-medium">USDT</span>
+</div>
+</div>
+<div class="h-5 w-px bg-outline-variant/40"></div>
+<!-- Compact Account selector dropdown -->
+<div class="relative group">
+<button aria-expanded="false" aria-haspopup="listbox" class="flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold text-primary hover:bg-primary-container/10 transition-colors">
+<span>账户: v3add</span>
+<span class="material-symbols-outlined text-[16px] leading-none" data-icon="expand_more">expand_more</span>
+</button>
+<!-- Hover/Click Dropdown Menu -->
+<div class="absolute right-0 top-full mt-1.5 w-32 bg-surface-container-lowest/95 backdrop-blur-xl border border-outline-variant/40 rounded-lg shadow-lg py-1 hidden group-hover:block z-50">
+<div class="px-2.5 py-1 text-[11px] text-outline font-medium">切换模拟账户</div>
+<button class="w-full text-left px-2.5 py-1 text-xs hover:bg-surface-container text-on-surface font-normal">v3 (单币种)</button>
+<button class="w-full text-left px-2.5 py-1 text-xs bg-primary-container/10 text-primary font-semibold flex items-center justify-between">
+              v3add <span>✓</span>
+</button>
+<button class="w-full text-left px-2.5 py-1 text-xs hover:bg-surface-container text-on-surface font-normal">60m 全局波段</button>
+<button class="w-full text-left px-2.5 py-1 text-xs hover:bg-surface-container text-on-surface font-normal">5m 高频动量</button>
+</div>
+</div>
+</div>
+<!-- 统计分析 Action Button -->
+<button class="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-lowest/80 border border-outline-variant/40 text-on-surface hover:bg-surface-container-low transition-all font-body-sm text-body-sm font-medium">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="analytics">analytics</span>
+<span>统计分析</span>
+</button>
+<!-- Toggle Coin List visibility button on mobile -->
+<button class="md:hidden w-10 h-10 rounded-lg glass-pill flex items-center justify-center text-primary-container" onclick="toggleCoinList()" title="最新触达列表">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+</button>
+</div>
+</header>
+<!-- =====================================================================
+       MAIN WORKSPACE CANVAS (CONTAINER FOR COMPACT GLASS OVERLAYS)
+       ===================================================================== -->
+<main class="relative w-full h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)] p-2 md:p-space-lg overflow-hidden">
+<!-- ===================================================================
+         1. TOP-LEFT SELECTED-SYMBOL CONTEXT CARD
+         Requirements:
+         - Fixed compact size approximately 290px wide and 115px tall
+         - Positioned top: 68px (top: 16px relative to main container), left: 24px
+         - Clean compact layout:
+           Row 1: 'SOL/USDT 永续' + status chip '做空 SHORT · 浮盈中' + live price '184.50 (+0.42%)'
+           Row 2: '入场 184.50' + '目标 156.20'
+           Row 3: Replaces 4 wide buttons with ONE compact dropdown selector '模拟账户: v3add ▾' (60m, 5m, v3, v3add)
+                  + '交易簿 (2)' button with 44px touch target placed side-by-side in exact same row.
+         =================================================================== -->
+<section class="absolute top-3 left-3 md:top-4 md:left-6 w-[290px] h-[115px] glass-base rounded-xl p-2.5 flex flex-col justify-between z-30 select-none shadow-[0_8px_24px_-4px_rgba(0,0,0,0.06)] border border-white/80">
+<!-- ROW 1: Symbol + Short chip + live price -->
+<div class="flex items-center justify-between leading-none">
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="font-headline-sm text-[15px] font-bold tracking-tight text-on-surface">SOL/USDT</span>
+<span class="text-[10px] font-semibold text-outline-variant uppercase px-1 py-0.5 rounded bg-surface-container/60">永续</span>
+</div>
+<div class="flex items-center gap-1 flex-shrink-0">
+<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-tertiary/10 text-tertiary border border-tertiary/20">做空 SHORT · 浮盈中</span>
+</div>
+</div>
+<!-- ROW 2: Live price with change & Entry / Target levels -->
+<div class="flex items-center justify-between text-[11px] leading-tight text-on-surface-variant font-label-numeric-sm pt-0.5">
+<div class="flex items-center gap-1">
+<span class="font-bold text-on-surface text-[13px] font-label-numeric-md">184.50</span>
+<span class="text-secondary font-medium text-[10.5px]">(+0.42%)</span>
+</div>
+<div class="flex items-center gap-2 text-outline">
+<span>入场 <strong class="text-on-surface font-semibold">184.50</strong></span>
+<span class="text-outline-variant">|</span>
+<span>目标 <strong class="text-secondary font-semibold">156.20</strong></span>
+</div>
+</div>
+<!-- ROW 3: Single dropdown selector '模拟账户: v3add ▾' + side-by-side '交易簿 (2)' button -->
+<div class="flex items-center gap-2 pt-1 border-t border-white/70">
+<!-- Compact custom dropdown selector -->
+<div class="relative flex-1">
+<label class="sr-only" for="account-selector-select">选择模拟账户</label>
+<div class="flex items-center justify-between w-full h-[32px] px-2 rounded-lg bg-surface-container-lowest/80 border border-outline-variant/40 hover:border-primary-container text-on-surface transition-all cursor-pointer">
+<span class="text-[11px] font-medium truncate text-primary font-headline-sm">模拟账户: v3add</span>
+<span class="material-symbols-outlined text-[16px] text-outline flex-shrink-0" data-icon="expand_more">expand_more</span>
+</div>
+<!-- Accessible native selector overlay for mobile touch support -->
+<select class="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-xs" id="account-selector-select" title="选择模拟账户">
+<option selected="" value="v3add">模拟账户: v3add</option>
+<option value="v3">模拟账户: v3</option>
+<option value="60m">模拟账户: 60m 全局波段</option>
+<option value="5m">模拟账户: 5m 高频动量</option>
+</select>
+</div>
+<!-- Side-by-side '交易簿 (2)' button with 44px min touch target footprint -->
+<button class="relative h-[32px] px-2.5 rounded-lg bg-primary-container text-white flex items-center justify-center gap-1 shadow-sm hover:brightness-110 active:scale-95 transition-all flex-shrink-0 min-w-[44px]" title="查看当前交易簿">
+<span class="material-symbols-outlined text-[14px]" data-icon="receipt_long">receipt_long</span>
+<span class="text-[11px] font-semibold tracking-tight">交易簿</span>
+<span class="w-4 h-4 rounded-full bg-white/20 text-[10px] font-bold flex items-center justify-center font-label-numeric-sm leading-none">2</span>
+<!-- Touch target invisible hit-box expansion -->
+<span class="absolute inset-0 -m-1"></span>
+</button>
+</div>
+</section>
+<!-- ===================================================================
+         2. FLOATING LATEST-TOUCH COIN LIST POPOVER (最新触价)
+         Requirements:
+         - Positioned right or center-right, about 300px wide, sleek frosted glass.
+         - Single 44px top header: '最新触达 42' + search icon button + close button (×).
+           Search icon toggles INLINE in that same header, replacing title temporarily!
+         - Below header: compact 36px filter tabs '全部 (42)', '上沿 (28)', '下沿 (14)', '收藏 (5)' (NO standalone search box).
+         - Coin rows: ~52-56px tall so 7+ symbols fit easily without cramming.
+         - Content: small avatar, symbol (SOL, BTC, ETH, SUI, DOGE, AVAX, NEAR), tiny touch timestamp,
+           upper/lower tag ('上沿 198.50' / '下沿 65,300') + price + 44px touch chevron/more.
+         - One row (SOL/USDT) expanded with actions tray: TradingView external (TV ↗), inspection radar, favorite star, remove/hide.
+         - All other 6+ rows densely collapsed.
+         =================================================================== -->
+<aside class="absolute top-3 right-3 md:top-4 md:right-6 w-[310px] max-w-[calc(100vw-1.5rem)] h-[calc(100vh-6.5rem)] md:h-[610px] glass-base rounded-2xl flex flex-col z-30 shadow-[0_12px_40px_-6px_rgba(15,23,42,0.12)] border border-white/90 overflow-hidden transition-all duration-300" id="coinListPopover">
+<!-- 44px Top Header with inline expandable search -->
+<div class="h-11 px-3 flex items-center justify-between border-b border-outline-variant/30 flex-shrink-0 relative bg-white/30" id="popoverHeader">
+<!-- Normal state view -->
+<div class="flex items-center gap-1.5 min-w-0" id="headerTitleView">
+<span class="material-symbols-outlined text-primary-container text-[18px]" data-icon="sensors">sensors</span>
+<span class="font-headline-sm text-[13.5px] font-bold text-on-surface">最新触达</span>
+<span class="px-1.5 py-0.2 rounded-full bg-primary-container/10 text-primary-container text-[11px] font-label-numeric-sm font-semibold">42</span>
+</div>
+<!-- Inline search input container (hidden initially, replaces header text on click) -->
+<div class="hidden absolute inset-x-2 inset-y-1.5 items-center bg-surface-container-lowest/90 rounded-lg px-2 border border-primary-container/40 z-10" id="inlineSearchContainer">
+<span class="material-symbols-outlined text-[16px] text-primary-container mr-1" data-icon="search">search</span>
+<input class="w-full bg-transparent border-none p-0 text-xs text-on-surface focus:ring-0 placeholder:text-outline font-body-sm" id="inlineSearchInput" placeholder="搜索币种或代码..." type="text"/>
+<button class="p-1 text-outline hover:text-on-surface" onclick="toggleInlineSearch(false)" title="关闭搜索">
+<span class="material-symbols-outlined text-[16px]" data-icon="close">close</span>
+</button>
+</div>
+<!-- Header actions: Search icon button (44px target) + Close button (44px target) -->
+<div class="flex items-center -mr-1" id="headerActions">
+<button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors" onclick="toggleInlineSearch(true)" title="快速搜索">
+<span class="material-symbols-outlined text-[18px]" data-icon="search">search</span>
+</button>
+<button class="w-9 h-9 rounded-lg flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container-low transition-colors" onclick="toggleCoinList()" title="收起列表">
+<span class="material-symbols-outlined text-[18px]" data-icon="close">close</span>
+</button>
+</div>
+</div>
+<!-- Compact 36px filter tabs (No standalone search box) -->
+<div class="h-9 px-2 flex items-center gap-1 border-b border-outline-variant/20 bg-surface-container-low/40 flex-shrink-0 text-[11.5px]">
+<button class="px-2.5 py-1 rounded-md bg-white text-primary font-semibold shadow-xs border border-white flex-shrink-0">
+          全部 (42)
+        </button>
+<button class="px-2 py-1 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-white/50 transition-colors flex-shrink-0">
+          上沿 (28)
+        </button>
+<button class="px-2 py-1 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-white/50 transition-colors flex-shrink-0">
+          下沿 (14)
+        </button>
+<button class="px-2 py-1 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-white/50 transition-colors flex-shrink-0">
+          收藏 (5)
+        </button>
+</div>
+<!-- Scrollable Coin Rows List (approx 52-56px per collapsed row) -->
+<div class="flex-1 overflow-y-auto custom-scroll divide-y divide-outline-variant/15">
+<!-- ROW 1 (EXPANDED): SOL/USDT with actions tray -->
+<div class="bg-primary-container/[0.04] border-l-2 border-primary-container transition-all">
+<div class="h-[54px] px-2.5 flex items-center justify-between cursor-pointer hover:bg-primary-container/[0.08]" onclick="selectSymbol('SOL')">
+<div class="flex items-center gap-2 min-w-0">
+<!-- Token avatar -->
+<div class="w-7 h-7 rounded-full bg-gradient-to-tr from-[#9945FF] to-[#14F195] flex items-center justify-center text-[11px] font-bold text-white shadow-xs flex-shrink-0">
+                S
+              </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1">
+<span class="font-headline-sm text-xs font-bold text-on-surface">SOL/USDT</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+</div>
+<span class="text-[10px] text-primary-container font-label-numeric-sm truncate">14:22:05 · 10m前触碰</span>
+</div>
+</div>
+<!-- Price & Upper Fib Tag -->
+<div class="flex items-center gap-1.5 text-right flex-shrink-0">
+<div class="flex flex-col items-end">
+<span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-tertiary/10 text-tertiary font-label-numeric-sm">
+                  上沿 198.50
+                </span>
+<span class="font-label-numeric-sm text-xs font-bold text-on-surface mt-0.5">184.50</span>
+</div>
+<!-- Accessible Chevron/More -->
+<button class="w-8 h-8 rounded flex items-center justify-center text-primary-container hover:bg-white/60" title="收起详情">
+<span class="material-symbols-outlined text-[18px]" data-icon="expand_less">expand_less</span>
+</button>
+</div>
+</div>
+<!-- Expanded in-row actions tray for SOL/USDT -->
+<div class="px-3 py-1.5 bg-surface-container-lowest/90 border-t border-outline-variant/20 flex items-center justify-between">
+<span class="text-[10.5px] text-outline">已选定主屏壁纸</span>
+<div class="flex items-center gap-1">
+<!-- TradingView external link -->
+<button class="h-7 px-2 rounded bg-surface-container text-on-surface hover:text-primary flex items-center gap-1 text-[11px] font-medium transition-colors" title="在 TradingView 打开">
+<span>TV</span>
+<span class="material-symbols-outlined text-[13px]" data-icon="open_in_new">open_in_new</span>
+</button>
+<!-- Inspection radar -->
+<button class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors" title="多周期雷达透视">
+<span class="material-symbols-outlined text-[16px]" data-icon="radar">radar</span>
+</button>
+<!-- Favorite star -->
+<button class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center text-amber-500 transition-colors" title="取消收藏">
+<span class="material-symbols-outlined text-[16px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<!-- Remove / Hide -->
+<button class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center text-outline hover:text-error transition-colors" title="隐藏此信号">
+<span class="material-symbols-outlined text-[16px]" data-icon="visibility_off">visibility_off</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ROW 2: BTC/USDT (Collapsed 52-56px) -->
+<div class="h-[54px] px-2.5 flex items-center justify-between cursor-pointer hover:bg-surface-container-low/60 transition-colors" onclick="selectSymbol('BTC')">
+<div class="flex items-center gap-2 min-w-0">
+<div class="w-7 h-7 rounded-full bg-[#f7931a] flex items-center justify-center text-[11px] font-bold text-white shadow-xs flex-shrink-0">
+              ₿
+            </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-xs font-bold text-on-surface truncate">BTC/USDT</span>
+<span class="text-[10px] text-outline font-label-numeric-sm truncate">14:18:30 · 14m前</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 text-right flex-shrink-0">
+<div class="flex flex-col items-end">
+<span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-secondary/10 text-secondary font-label-numeric-sm">
+                下沿 65,300
+              </span>
+<span class="font-label-numeric-sm text-xs font-bold text-on-surface mt-0.5">67,420</span>
+</div>
+<button class="w-8 h-8 rounded flex items-center justify-center text-outline hover:text-on-surface" title="更多操作">
+<span class="material-symbols-outlined text-[18px]" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</div>
+<!-- ROW 3: ETH/USDT (Collapsed 52-56px) -->
+<div class="h-[54px] px-2.5 flex items-center justify-between cursor-pointer hover:bg-surface-container-low/60 transition-colors" onclick="selectSymbol('ETH')">
+<div class="flex items-center gap-2 min-w-0">
+<div class="w-7 h-7 rounded-full bg-[#627eea] flex items-center justify-center text-[11px] font-bold text-white shadow-xs flex-shrink-0">
+              Ξ
+            </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-xs font-bold text-on-surface truncate">ETH/USDT</span>
+<span class="text-[10px] text-outline font-label-numeric-sm truncate">14:02:11 · 30m前</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 text-right flex-shrink-0">
+<div class="flex flex-col items-end">
+<span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-tertiary/10 text-tertiary font-label-numeric-sm">
+                上沿 2,740.0
+              </span>
+<span class="font-label-numeric-sm text-xs font-bold text-on-surface mt-0.5">2,618.5</span>
+</div>
+<button class="w-8 h-8 rounded flex items-center justify-center text-outline hover:text-on-surface" title="更多操作">
+<span class="material-symbols-outlined text-[18px]" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</div>
+<!-- ROW 4: SUI/USDT (Collapsed 52-56px) -->
+<div class="h-[54px] px-2.5 flex items-center justify-between cursor-pointer hover:bg-surface-container-low/60 transition-colors" onclick="selectSymbol('SUI')">
+<div class="flex items-center gap-2 min-w-0">
+<div class="w-7 h-7 rounded-full bg-[#4ba3f5] flex items-center justify-center text-[11px] font-bold text-white shadow-xs flex-shrink-0">
+              💧
+            </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-xs font-bold text-on-surface truncate">SUI/USDT</span>
+<span class="text-[10px] text-outline font-label-numeric-sm truncate">13:58:22 · 34m前</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 text-right flex-shrink-0">
+<div class="flex flex-col items-end">
+<span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-secondary/10 text-secondary font-label-numeric-sm">
+                下沿 1.9420
+              </span>
+<span class="font-label-numeric-sm text-xs font-bold text-on-surface mt-0.5">2.0840</span>
+</div>
+<button class="w-8 h-8 rounded flex items-center justify-center text-outline hover:text-on-surface" title="更多操作">
+<span class="material-symbols-outlined text-[18px]" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</div>
+<!-- ROW 5: DOGE/USDT (Collapsed 52-56px) -->
+<div class="h-[54px] px-2.5 flex items-center justify-between cursor-pointer hover:bg-surface-container-low/60 transition-colors" onclick="selectSymbol('DOGE')">
+<div class="flex items-center gap-2 min-w-0">
+<div class="w-7 h-7 rounded-full bg-[#c2a633] flex items-center justify-center text-[11px] font-bold text-white shadow-xs flex-shrink-0">
+              Ð
+            </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-xs font-bold text-on-surface truncate">DOGE/USDT</span>
+<span class="text-[10px] text-tertiary font-label-numeric-sm truncate">13:40:02 · 延迟警告</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 text-right flex-shrink-0">
+<div class="flex flex-col items-end">
+<span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-tertiary/10 text-tertiary font-label-numeric-sm">
+                上沿 0.1480
+              </span>
+<span class="font-label-numeric-sm text-xs font-bold text-on-surface mt-0.5">0.1392</span>
+</div>
+<button class="w-8 h-8 rounded flex items-center justify-center text-outline hover:text-on-surface" title="更多操作">
+<span class="material-symbols-outlined text-[18px]" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</div>
+<!-- ROW 6: AVAX/USDT (Collapsed 52-56px) -->
+<div class="h-[54px] px-2.5 flex items-center justify-between cursor-pointer hover:bg-surface-container-low/60 transition-colors" onclick="selectSymbol('AVAX')">
+<div class="flex items-center gap-2 min-w-0">
+<div class="w-7 h-7 rounded-full bg-[#e84142] flex items-center justify-center text-[11px] font-bold text-white shadow-xs flex-shrink-0">
+              ▲
+            </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-xs font-bold text-on-surface truncate">AVAX/USDT</span>
+<span class="text-[10px] text-outline font-label-numeric-sm truncate">13:12:45 · 1h前</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 text-right flex-shrink-0">
+<div class="flex flex-col items-end">
+<span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-secondary/10 text-secondary font-label-numeric-sm">
+                下沿 26.80
+              </span>
+<span class="font-label-numeric-sm text-xs font-bold text-on-surface mt-0.5">28.45</span>
+</div>
+<button class="w-8 h-8 rounded flex items-center justify-center text-outline hover:text-on-surface" title="更多操作">
+<span class="material-symbols-outlined text-[18px]" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</div>
+<!-- ROW 7: NEAR/USDT (Collapsed 52-56px) -->
+<div class="h-[54px] px-2.5 flex items-center justify-between cursor-pointer hover:bg-surface-container-low/60 transition-colors" onclick="selectSymbol('NEAR')">
+<div class="flex items-center gap-2 min-w-0">
+<div class="w-7 h-7 rounded-full bg-[#000000] flex items-center justify-center text-[11px] font-bold text-white shadow-xs flex-shrink-0">
+              N
+            </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-xs font-bold text-on-surface truncate">NEAR/USDT</span>
+<span class="text-[10px] text-outline font-label-numeric-sm truncate">12:49:10 · 1.5h前</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 text-right flex-shrink-0">
+<div class="flex flex-col items-end">
+<span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-tertiary/10 text-tertiary font-label-numeric-sm">
+                上沿 5.120
+              </span>
+<span class="font-label-numeric-sm text-xs font-bold text-on-surface mt-0.5">4.890</span>
+</div>
+<button class="w-8 h-8 rounded flex items-center justify-center text-outline hover:text-on-surface" title="更多操作">
+<span class="material-symbols-outlined text-[18px]" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Popover Footer Status Indicator -->
+<div class="h-7 px-3 bg-surface-container-low/60 border-t border-outline-variant/30 flex items-center justify-between text-[10.5px] text-outline flex-shrink-0">
+<span class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span>
+          WebSocket 实时流
+        </span>
+<span>延迟 18ms</span>
+</div>
+</aside>
+<!-- ===================================================================
+         3. BOTTOM FLOATING CONTROL DOCK
+         Requirements:
+         - Timeframes: 5m, 15m, 1h, 4h, 1D
+         - '指标' button
+         - Zoom & fit-screen controls
+         - '跟随最新单' action toggle
+         =================================================================== -->
+<div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 w-[calc(100%-1.5rem)] max-w-[760px]">
+<div class="glass-base rounded-2xl px-2.5 py-1.5 md:px-4 md:py-2 flex items-center justify-between gap-1 shadow-[0_10px_30px_-5px_rgba(15,23,42,0.1)] border border-white/80 overflow-x-auto no-scrollbar">
+<!-- Timeframe selector -->
+<div class="flex items-center bg-surface-container-low/80 p-0.5 rounded-lg border border-outline-variant/30 text-xs font-semibold">
+<button class="px-2 py-1 rounded text-on-surface-variant hover:text-on-surface">5m</button>
+<button class="px-2 py-1 rounded bg-white text-primary shadow-xs">15m</button>
+<button class="px-2 py-1 rounded text-on-surface-variant hover:text-on-surface">1h</button>
+<button class="px-2 py-1 rounded text-on-surface-variant hover:text-on-surface">4h</button>
+<button class="px-2 py-1 rounded text-on-surface-variant hover:text-on-surface">1D</button>
+</div>
+<!-- Vertical hairline separator -->
+<div class="h-5 w-px bg-outline-variant/40 mx-1 flex-shrink-0"></div>
+<!-- Indicators & Tools -->
+<div class="flex items-center gap-1 flex-shrink-0">
+<button class="h-8 px-2.5 rounded-lg bg-surface-container-lowest/80 border border-outline-variant/30 hover:bg-surface-container text-on-surface flex items-center gap-1 text-xs font-medium">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="tune">tune</span>
+<span>指标 (1.618)</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-container-lowest/80 border border-outline-variant/30 hover:bg-surface-container text-on-surface-variant flex items-center justify-center" title="放大">
+<span class="material-symbols-outlined text-[16px]" data-icon="zoom_in">zoom_in</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-container-lowest/80 border border-outline-variant/30 hover:bg-surface-container text-on-surface-variant flex items-center justify-center" title="缩小">
+<span class="material-symbols-outlined text-[16px]" data-icon="zoom_out">zoom_out</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-container-lowest/80 border border-outline-variant/30 hover:bg-surface-container text-on-surface-variant flex items-center justify-center" title="全屏自适应">
+<span class="material-symbols-outlined text-[16px]" data-icon="fit_screen">fit_screen</span>
+</button>
+</div>
+<!-- Vertical hairline separator -->
+<div class="h-5 w-px bg-outline-variant/40 mx-1 flex-shrink-0"></div>
+<!-- Follow latest order active toggle -->
+<button class="h-8 px-2.5 rounded-lg bg-primary-container text-white flex items-center gap-1.5 text-xs font-semibold shadow-xs hover:brightness-105 active:scale-95 transition-all flex-shrink-0">
+<span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+<span>跟随最新单</span>
+</button>
+</div>
+</div>
+</main>
+<!-- =====================================================================
+       LIGHTWEIGHT CLIENT-SIDE INTERACTION LOGIC
+       ===================================================================== -->
+<script>
+    // Inline Header Search Toggle
+    function toggleInlineSearch(show) {
+      const searchBox = document.getElementById('inlineSearchContainer');
+      const input = document.getElementById('inlineSearchInput');
+      if (show) {
+        searchBox.classList.remove('hidden');
+        searchBox.classList.add('flex');
+        input.focus();
+      } else {
+        searchBox.classList.add('hidden');
+        searchBox.classList.remove('flex');
+        input.value = '';
+      }
+    }
+
+    // Toggle Mobile Popover List
+    function toggleCoinList() {
+      const popover = document.getElementById('coinListPopover');
+      popover.classList.toggle('hidden');
+    }
+
+    // Symbol Selection Simulation
+    function selectSymbol(ticker) {
+      console.log('Selected symbol:', ticker);
+      // Feedback pulse on chart
+    }
+
+    // Auto-adjust layout for compact mobile testing
+    window.addEventListener('resize', () => {
+      const popover = document.getElementById('coinListPopover');
+      if (window.innerWidth < 768) {
+        // preserve state or keep responsive
+      }
+    });
+  </script>
+</body></html>
