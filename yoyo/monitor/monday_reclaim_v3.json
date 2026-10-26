@@ -1,0 +1,28 @@
+{
+  "rule": "monday_1618_limit_reclaim_v3",
+  "frozen_on": "2026-10-26",
+  "owner_decision": "Owner 2026-10-26: freeze v3 as recommended and add it to the paper engine as a separate track next to v2.",
+  "confirm_minutes": 60,
+  "min_score": 0.5,
+  "far_score": 0.6,
+  "targets": {
+    "0.5-0.6": "range 0.618: long Monday low + 0.618 range, short Monday high - 0.618 range",
+    ">=0.6": "opposite 1.618: long Monday high + 0.618 range, short Monday low - 0.618 range",
+    "<0.5 (shadow only)": "near Monday edge"
+  },
+  "backstop_pct": 30,
+  "sizing": {
+    "rule": "notional = min(fraction * (score - cut) / mean_excess, cap) * equity, gross <= 1x equity",
+    "fraction": 0.05,
+    "cut": 0.22621664169752762,
+    "mean_excess": 0.10882239418547587,
+    "cap": 0.5
+  },
+  "evidence": [
+    "experiments/active/exp-monday-limit-v3-grid-compare-20261025-v1",
+    "experiments/active/exp-monday-limit-v3-ladder-compare-20261025-v1",
+    "experiments/active/exp-monday-limit-reclaim-sizing-20261025-v1",
+    "experiments/active/exp-monday-limit-reclaim-score-detail-20261025-v1"
+  ],
+  "backtest_2020_24_2025_2026_last5m": "3.74x / 8.97x / 2.56x / 2.96x (linear sizing, worst intrabar path, max drawdown 34 percent); score bands chosen after seeing 2025-2026, so forward paper is the test"
+}

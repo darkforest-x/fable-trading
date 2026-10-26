@@ -25,6 +25,16 @@ order endpoint is used.
 
 Owner 2026-10-25: manual partial/full paper closes keep an immutable entry,
 realize tranches at a fresh public quote and serialize with automatic exits.
+
+Owner 2026-10-26: a separate v3 track (API key "v3", frozen in
+monday_reclaim_v3.json) runs next to v2 with its own 1000 USDT: 60m
+confirmation, entries only at score >= 0.5, target range 0.618 for scores
+0.5-0.6 and the opposite 1.618 from 0.6, a resting -30 percent backstop from
+the fill until the confirmation (a reclaim replaces it with the entry stop),
+and notional linear in score. Lower scores are kept as v3 shadow rows with the
+near target. Intrabar order as in the backtest: in any minute, the backstop or
+breakeven stop beats a target, and the fill minute's extreme counts against the
+backstop.
 """
 from __future__ import annotations
 
@@ -45,7 +55,10 @@ from pydantic import BaseModel, ConfigDict, Field
 from yoyo.data.candle_hub import validate
 
 MODEL = Path(__file__).with_name("monday_reclaim_score.json")
+V3 = Path(__file__).with_name("monday_reclaim_v3.json")
 TRACKS = (60, 5)
+V3_TRACK = 1060  # internal id of the v3 rule; API key "v3"
+CONFIRM = {60: 60, 5: 5, V3_TRACK: 60}
 MAKER_BP, TAKER_BP, SLIP_BP = 2.0, 5.0, 10.0
 START_EQUITY, FRACTION, GROSS = 1000.0, 0.10, 1.0
 EXCLUDE = {"BTC", "ETH", "XAU", "XAG", "PAXG", "XAUT"}
@@ -60,6 +73,14 @@ def serialized(method):
         with self.write_lock:
             return method(self, *args, **kwargs)
     return call
+
+
+def track_key(track):
+    return "v3" if track == V3_TRACK else str(track)
+
+
+def track_id(key):
+    return V3_TRACK if str(key) == "v3" else int(key)
 
 
 class PaperCloseError(ValueError):
@@ -130,9 +151,10 @@ def settle(side, entry, exit_price, reason):
 
 
 class ReclaimPaper:
-    def __init__(self, runtime, fib, model_path=MODEL):
+    def __init__(self, runtime, fib, model_path=MODEL, v3_path=V3, enable_v3=True):
         self.write_lock = threading.RLock()
         self.fib, self.client, self.model = fib, fib.client, ScoreModel(model_path)
+        self.v3 = json.loads(Path(v3_path).read_text()) if enable_v3 else None
         self.path = Path(runtime)/"monday-reclaim-paper.sqlite3"
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.events = queue.Queue(maxsize=200_000)
@@ -164,14 +186,15 @@ class ReclaimPaper:
             """)
             columns = {r["name"] for r in db.execute("PRAGMA table_info(positions)")}
             for name, spec in {"remaining_notional": "REAL", "realized_pnl": "REAL NOT NULL DEFAULT 0",
-                               "close_revision": "INTEGER NOT NULL DEFAULT 0", "manual_exit_ms": "INTEGER"}.items():
+                               "close_revision": "INTEGER NOT NULL DEFAULT 0", "manual_exit_ms": "INTEGER",
+                               "backstop": "REAL"}.items():
                 if name not in columns:
                     db.execute(f"ALTER TABLE positions ADD COLUMN {name} {spec}")
             db.execute("UPDATE positions SET remaining_notional=CASE WHEN stage='closed' THEN 0 ELSE notional END "
                        "WHERE remaining_notional IS NULL")
             if "realized_pnl" not in columns:
                 db.execute("UPDATE positions SET realized_pnl=COALESCE(pnl,0) WHERE stage='closed'")
-            for m in TRACKS:
+            for m in TRACKS+((V3_TRACK,) if self.v3 else ()):
                 db.execute("INSERT OR IGNORE INTO tracks VALUES (?,?,?)", (m, START_EQUITY, self.client.clock()))
         self._refresh_watch()
 
@@ -291,7 +314,36 @@ class ReclaimPaper:
                            "taken,notional,last_seen_ms,note,remaining_notional) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                            (sid, m, symbol, side, level, target, candle_ms, decision, "pending_confirm",
                             int(taken and notional > 0), notional, candle_ms, note, notional))
+            if self.v3:
+                self._open_v3(db, sid, levels, symbol, side, level, candle_ms, score)
         self._refresh_watch()
+
+    def _open_v3(self, db, sid, levels, symbol, side, level, candle_ms, score):
+        """v3 row: score-dependent target, -30 percent backstop, notional linear in score."""
+        v3, width = self.v3, levels["high"]-levels["low"]
+        if score is not None and score >= v3["far_score"]:
+            target = levels["upper"] if side == 1 else levels["lower"]
+        elif score is not None and score >= v3["min_score"]:
+            target = levels["low"]+.618*width if side == 1 else levels["high"]-.618*width
+        else:
+            target = levels["low"] if side == 1 else levels["high"]
+        step = v3["confirm_minutes"]*60_000
+        decision = candle_ms//step*step+2*step
+        notional, note = 0., None
+        if score is not None and score >= v3["min_score"]:
+            sz = v3["sizing"]
+            k = min(sz["fraction"]*(score-sz["cut"])/sz["mean_excess"], sz["cap"])
+            equity = db.execute("SELECT equity FROM tracks WHERE track=?", (V3_TRACK,)).fetchone()["equity"]
+            opened = db.execute("SELECT COALESCE(SUM(COALESCE(remaining_notional,notional)),0) s FROM positions WHERE track=? "
+                                "AND stage<>'closed' AND taken=1", (V3_TRACK,)).fetchone()["s"]
+            notional = max(0., min(k*equity, GROSS*equity-opened))
+            if notional <= 0:
+                note = "no_capacity"
+        backstop = level*(1-side*v3["backstop_pct"]/100)
+        db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,decision_ms,stage,"
+                   "taken,notional,last_seen_ms,note,remaining_notional,backstop) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                   (sid, V3_TRACK, symbol, side, level, target, candle_ms, decision, "pending_confirm",
+                    int(notional > 0), notional, candle_ms, note, notional, backstop))
 
     def _record_exit(self, db, p, amount, exit_ms, price, reason):
         """Allocate original entry cost once across each realized tranche."""
@@ -404,12 +456,17 @@ class ReclaimPaper:
                 closes_beyond = (q["price"] >= target) if s == 1 else (q["price"] <= target)
                 stop = (p["stage"] == "breakeven" and q["candle_ms"] >= p["be_from_ms"]
                         and ((q["low"] <= entry) if s == 1 else (q["high"] >= entry)))
+                bs = p["backstop"]
+                backstop = (bs is not None and p["stage"] == "pending_confirm"
+                            and ((q["low"] <= bs) if s == 1 else (q["high"] >= bs)))
                 exit_ms = q["candle_ms"]
                 if p["manual_exit_ms"] and exit_ms <= p["manual_exit_ms"]:
                     # A same-minute automatic fill cannot predate a partial fill.
                     exit_ms = max(p["manual_exit_ms"], q.get("received_ms", exit_ms+60_000))
                 if stop:
                     self._close(db, p, exit_ms, entry, "breakeven")
+                elif backstop:
+                    self._close(db, p, exit_ms, bs, "backstop")
                 elif reached and (after_fill or closes_beyond):
                     self._close(db, p, exit_ms, target, "target")
                 else:
@@ -424,8 +481,8 @@ class ReclaimPaper:
             due = db.execute("SELECT * FROM positions WHERE stage='pending_confirm' AND decision_ms+3000<=? "
                              "AND (? IS NULL OR symbol=?)", (due_by, symbol, symbol)).fetchall()
         for p in due:
-            step = p["track"]*60_000
-            bar = "1H" if p["track"] == 60 else "5m"
+            step = CONFIRM[p["track"]]*60_000
+            bar = "1H" if CONFIRM[p["track"]] == 60 else "5m"
             limit = str(min(300, (now-p["decision_ms"])//step+3))
             try:
                 rows = bars(self.client.get("/api/v5/market/candles", {"instId": p["symbol"], "bar": bar, "limit": limit}), bar, now)
@@ -465,6 +522,7 @@ class ReclaimPaper:
 
     def analytics(self, track=60, days=0):
         from .reclaim_analytics import build_analytics
+        track = track_id(track)
         with self.fib.lock:
             quotes, connected = dict(self.fib.quotes), self.fib.connected
         with self.db() as db:
@@ -499,7 +557,8 @@ class ReclaimPaper:
                     r["exits"] = exits.get(r["id"], [])
                     r["unrealized_bp"] = r["side"]*(q["price"]-r["entry"])/r["entry"]*1e4 if q.get("price") else None
                     open_rows.append(r)
-                tracks[str(m)] = dict(confirm_minutes=m, equity=t["equity"], start_equity=START_EQUITY, started_ms=t["started_ms"],
+                tracks[track_key(m)] = dict(confirm_minutes=CONFIRM.get(m, m), rule="v3" if m == V3_TRACK else "v2",
+                    equity=t["equity"], start_equity=START_EQUITY, started_ms=t["started_ms"],
                     open=open_rows, closed=closed[:100],
                     # Latest fill is independent of the exit-ordered history page.
                     latest_funded=max((r for r in open_rows + closed if r["taken"] == 1 and r["notional"] > 0),
@@ -512,7 +571,7 @@ class ReclaimPaper:
             s["features"] = json.loads(s["features"]) if s["features"] else None
         return dict(now_ms=self.client.clock(), strategy="monday_1618_limit_reclaim_v2", paper_only=True,
                     model=dict(threshold=self.model.threshold, trained_before=self.model.trained_before, features=self.model.features),
-                    sizing=dict(start_equity=START_EQUITY, fraction=FRACTION, gross=GROSS),
+                    sizing=dict(start_equity=START_EQUITY, fraction=FRACTION, gross=GROSS), v3=self.v3,
                     fees_bp=dict(maker=MAKER_BP, taker=TAKER_BP, report_slippage=SLIP_BP),
                     worker=dict(alive=bool(self.thread and self.thread.is_alive()), queue=self.events.qsize(), error=self.error),
                     tracks=tracks, signals=signals)
@@ -522,8 +581,8 @@ def install(app, engine):
     app.state.monday_reclaim_paper = engine
 
     @app.get("/api/monday-reclaim-paper/analytics")
-    def analytics(track: Literal["60", "5"] = "60", days: Literal["0", "7", "30"] = "0"):
-        return engine.analytics(int(track), int(days))
+    def analytics(track: Literal["60", "5", "v3"] = "60", days: Literal["0", "7", "30"] = "0"):
+        return engine.analytics(track, int(days))
 
     @app.post("/api/monday-reclaim-paper/positions/{position_id}/close")
     def close_position(position_id: int, payload: CloseRequest, request: Request):

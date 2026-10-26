@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from yoyo.monitor.monday_fib import FibBook, week_window
-from yoyo.monitor.monday_reclaim_paper import MODEL, ReclaimPaper, PaperCloseError, features, settle, bars, install
+from yoyo.monitor.monday_reclaim_paper import MODEL, V3, V3_TRACK, ReclaimPaper, PaperCloseError, features, settle, bars, install
 
 ROOT = Path(__file__).resolve().parents[2]
 MIN, H5, H1 = 60_000, 300_000, 3_600_000
@@ -42,7 +42,7 @@ class FakeFib:
         self.connected = True
 
 
-class PaperTests(unittest.TestCase):
+class PaperFixture(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.win = week_window(1_792_000_000_000)
@@ -55,10 +55,10 @@ class PaperTests(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def engine(self, threshold):
+    def engine(self, threshold, enable_v3=False):
         spec = json.loads(MODEL.read_text()); spec["top40_threshold"] = threshold
         path = Path(self.tmp.name)/"model.json"; path.write_text(json.dumps(spec))
-        return ReclaimPaper(self.tmp.name, FakeFib(self.tmp.name, self.client), model_path=path)
+        return ReclaimPaper(self.tmp.name, FakeFib(self.tmp.name, self.client), model_path=path, enable_v3=enable_v3)
 
     def rows(self, e, sql):
         with e.db() as db:
@@ -71,6 +71,8 @@ class PaperTests(unittest.TestCase):
         self.client.now = self.touch//H1*H1+2*H1+5000
         e.decide(self.client.now)
 
+
+class PaperTests(PaperFixture):
     def test_reclaim_then_target(self):
         e = self.engine(-1.)
         e.handle_touch(self.levels, "ABC-USDT-SWAP", "lower", 93.8, self.touch+500, self.touch)
@@ -303,6 +305,72 @@ class PaperTests(unittest.TestCase):
         exits = self.rows(e, f'SELECT * FROM exits WHERE position_id={p["id"]}')
         self.assertAlmostEqual(sum(x['notional'] for x in exits), 100)
         self.assertAlmostEqual(e.snapshot()['tracks']['60']['equity'], 1000+sum(x['pnl'] for x in exits))
+
+
+class V3TrackTests(PaperFixture):
+    """v3: score-dependent target, -30 percent backstop, linear notional, isolated equity."""
+
+    def v3(self, score):
+        e = self.engine(-1., enable_v3=True)
+        e.model.score = lambda feats: score
+        e.handle_touch(self.levels, "ABC-USDT-SWAP", "lower", 93.8, self.touch+500, self.touch)
+        return e, self.rows(e, f"SELECT * FROM positions WHERE track={V3_TRACK}")[0]
+
+    def test_far_target_and_linear_notional_from_score_0_6(self):
+        e, p = self.v3(.7)
+        sz = json.loads(V3.read_text())["sizing"]
+        self.assertEqual((p["taken"], p["target"]), (1, 116.18))
+        self.assertAlmostEqual(p["notional"], 1000*min(sz["fraction"]*(.7-sz["cut"])/sz["mean_excess"], sz["cap"]))
+        self.assertAlmostEqual(p["backstop"], 93.82*.7)
+        self.assertEqual(set(e.snapshot()["tracks"]), {"60", "5", "v3"})
+
+    def test_range_0618_target_between_0_5_and_0_6(self):
+        _, p = self.v3(.55)
+        self.assertEqual(p["taken"], 1); self.assertAlmostEqual(p["target"], 106.18)
+
+    def test_below_0_5_is_a_near_target_shadow(self):
+        e, p = self.v3(.45)
+        self.assertEqual((p["taken"], p["notional"], p["target"]), (0, 0., 100.))
+        self.confirm(e, 93.0)
+        self.assertEqual(e.snapshot()["tracks"]["v3"]["equity"], 1000)
+
+    def test_backstop_exits_before_confirmation_at_taker(self):
+        e, p = self.v3(.7)
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch+MIN, "high": 94., "low": 60., "price": 62.})
+        c = self.rows(e, f"SELECT * FROM positions WHERE track={V3_TRACK}")[0]
+        self.assertEqual((c["reason"], c["exit_price"]), ("backstop", p["backstop"]))
+        self.assertEqual(c["fee_bp"], 7)
+        net = settle(1, 93.82, p["backstop"], "backstop")[2]
+        self.assertAlmostEqual(e.snapshot()["tracks"]["v3"]["equity"], 1000+p["notional"]*net/1e4)
+        self.assertEqual(e.snapshot()["tracks"]["60"]["equity"], 1000)
+
+    def test_backstop_counts_in_the_fill_minute_and_beats_the_target(self):
+        e, p = self.v3(.7)
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch, "high": 120., "low": 60., "price": 118.})
+        c = self.rows(e, f"SELECT * FROM positions WHERE track={V3_TRACK}")[0]
+        self.assertEqual(c["reason"], "backstop")
+
+    def test_reclaim_replaces_backstop_with_entry_stop(self):
+        e, p = self.v3(.7)
+        self.confirm(e, 94.5)
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch//H1*H1+3*H1, "high": 96., "low": 93.5, "price": 95.})
+        c = self.rows(e, f"SELECT * FROM positions WHERE track={V3_TRACK}")[0]
+        self.assertEqual((c["reason"], c["exit_price"]), ("breakeven", 93.82))
+
+    def test_far_target_after_reclaim(self):
+        e, p = self.v3(.7)
+        self.confirm(e, 94.5)
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch//H1*H1+3*H1, "high": 117., "low": 95., "price": 116.5})
+        c = self.rows(e, f"SELECT * FROM positions WHERE track={V3_TRACK}")[0]
+        self.assertEqual((c["reason"], c["exit_price"]), ("target", 116.18))
+
+    def test_analytics_and_api_accept_v3(self):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+        e, _ = self.v3(.7)
+        app = FastAPI(); install(app, e)
+        r = TestClient(app).get("/api/monday-reclaim-paper/analytics?track=v3")
+        self.assertEqual(r.status_code, 200)
 
 
 if __name__ == "__main__":
