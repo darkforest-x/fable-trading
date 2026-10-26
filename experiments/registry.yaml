@@ -14,6 +14,32 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-12h-partial-recovery-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9087b740a2
+    status: inconclusive
+    question: Owner no-backstop outer1618 touch12H recovery with70/15/15 original Monday
+      targets on OKX BTC ETH XAU.
+    single_variable: Owner-authorized fixed new baseline across three instruments; no
+      stop optimization. Per-asset full and common histories; same actualfees and management.
+    result: BTC/ETH/XAU full n171/118/66; realized+69.7585/+97.6492/+12.5420R, open
+      marks-490.2579/-95.5992/-17.8941R; total-420.4994/+2.0500/-5.3521R. Common2025-04-14
+      total-24.9645/-51.9280/-5.3521R; all matched excessCI spanszero.
+    artifacts:
+    - monday-12h-partial-recovery-20261026-v1
+    - monday-12h-partial-recovery-data-20261026-v1
+    - xau-monday-recovery-data-20261026-v1
+    canonical_report: experiments/active/exp-monday-12h-partial-recovery-20261026-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 3936nativelegs7872fills includingcontrols;355signalparents;7behavioral tests
+      pass;170boundarypass8existingfail outside change. Realized winners conceal unresolved
+      no-stop tails. 1R=entry1percent not actualrisk; no margin/liquidation/funding/slippage.
+      Three static legs weighted from nativeorders, no customfills. TVdefault Beijing08/20.
+      Notion4058856479af81dfa870d53c060ff658. Extreme BTC ETH XAU sourcebars verified
+      nativeAPI; matched controls conditional full3fills only.
   - experiment_id: exp-xau-monday-recovery-20261026-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 029afa5c76

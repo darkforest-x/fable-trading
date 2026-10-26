@@ -18,6 +18,33 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-12h-partial-recovery-20261026-v1
+    artifact_type: manifest
+    role: native_no_backstop_12h_weighted_three_target_recovery
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9087b740a2
+    source_path: experiments/active/exp-monday-12h-partial-recovery-20261026-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-12h-partial-recovery-20261026-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: BTC/ETH/XAU full n171/118/66; realized+69.7585/+97.6492/+12.5420R, open marks-490.2579/-95.5992/-17.8941R;
+      total-420.4994/+2.0500/-5.3521R. Common2025-04-14 total-24.9645/-51.9280/-5.3521R;
+      all matched excessCI spanszero. See validation.json; noaccountprofitclaim, censoredmarks
+      separate.
+  - artifact_id: monday-12h-partial-recovery-data-20261026-v1
+    artifact_type: dataset
+    role: registered_OKX_BTC_ETH_5m_cache_and_native_tail
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0142728fb3
+    source_path: experiments/active/exp-monday-12h-partial-recovery-20261026-v1/data_receipts.json
+    storage_uri: repo://data/crypto/market/exp-monday-12h-partial-recovery-20261026-v1/
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: BTC410676/ETH296628 continuous5m, native endpoints sampled first/middle/last;
+      reuse archives and onlyfetch tails9492each plusoneBTCgapbar. Gold162780bars reused
+      priorartifact. End2026-10-26T15Z exclusive;pathsizesmtime receipts,nohash.
   - artifact_id: xau-monday-recovery-20261026-v1
     artifact_type: manifest
     role: gold_native_limit_recovery_fixed_1h_4h_entry_matrix

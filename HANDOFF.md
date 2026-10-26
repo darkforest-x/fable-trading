@@ -1,3 +1,11 @@
+## 2026-10-26 — 12H BTC/ETH/XAU partial recovery baseline completed
+
+- Native Nautilus1.231.0, no initial backstop, touch12H Beijing08/20, original Monday70/15/15 targets; failed close waits fee recovery. Current maker2bp/taker5bp.
+- BTC/ETH/XAU full n171/118/66; realized+69.7585/+97.6492/+12.5420R, open marks-490.2579/-95.5992/-17.8941R; total-420.4994/+2.0500/-5.3521R. Common2025-04-14 total-24.9645/-51.9280/-5.3521R; all matched excessCI spanszero.
+- PureBE145/98/58; currently underwater4/4/1. Worst priceMAE-618.27/-166.79/-32.61R; sourceextremes verified. Highclosedwin rates do not imply safe return. No initialrisk budget, leverage or accountreturn; funding/margin/liquidation unmodeled.
+- Results `experiments/active/exp-monday-12h-partial-recovery-20261026-v1/`; positions.csv/legs.csv.gz/fills.csv.gz retained. 3936nativelegs7872fills reconciled.7behavioralpass; broadboundaries170pass8unrelatedexistingfail, causes in validation.json. No historical rerun needed.
+- Notion https://app.notion.com/p/4058856479af81dfa870d53c060ff658 ; no production eligibility. Owner wants data first, backstop study later; no stop sweep run.
+
 ## 2026-10-26 · OKX gold recovery limits: 1H/4H and Monday-edge comparison
 
 - Owner fixed XAU-USDT-SWAP, first weekly-side resting outer1618, touch-candle4H close; added1H then Monday-edge entries. Same1percent backstop/far Monday target. Reclaimed closes protect fee-neutral STOP_MARKET; failed reclaim waits at fee-neutral LIMIT with backstop. Fee-band recovery is recorded; equal fee-stop closes exit by native market after a rejected-amendment minimal reproduction.

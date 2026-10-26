@@ -1,0 +1,32 @@
+{
+  "commit": "adc86b522384c0cdddf74bd3e975fbe3b46c0c5e",
+  "input": "data/crypto/market/exp-xau-monday-recovery-20261026-v1",
+  "receipt": {
+    "instrument": "XAU-USDT-SWAP",
+    "first": "2025-04-09 10:00:00+00:00",
+    "last": "2026-10-26 14:55:00+00:00",
+    "rows": 162780,
+    "cached_rows": 30334,
+    "source_path": "data/kline_deep_1m/okx_XAU_USDT_SWAP_1m_151674.csv",
+    "source_size": 11152085,
+    "source_mtime_ns": 1789572078000000000,
+    "gaps": 0,
+    "fetched_at": "2026-10-26 15:03:43.440283+00:00",
+    "api": "https://www.okx.com/api/v5/market/history-candles",
+    "raw_pages": "pages/",
+    "content_hashing": false
+  },
+  "framework": "NautilusTrader 1.231.0",
+  "code": [
+    {
+      "path": "yoyo/evaluation/monday_12h_recovery.py",
+      "size": 12652,
+      "mtime_ns": 1793029263589025776
+    },
+    {
+      "path": "yoyo/layers/l3_backtest/nautilus_touch_recovery.py",
+      "size": 4992,
+      "mtime_ns": 1793029145644815689
+    }
+  ]
+}

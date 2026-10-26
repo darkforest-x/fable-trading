@@ -1,0 +1,62 @@
+{
+  "assets": {
+    "BTC": {
+      "native_positions": 1884,
+      "native_fills": 3768,
+      "native_accounting_checked": 1884,
+      "max_fee_error": 7.105427357601002e-15,
+      "all_weight_sums_one": true,
+      "all_breakevens_fee_nonnegative": true,
+      "all_censored_at_source_end": true,
+      "all_legs_have_two_native_fills": true
+    },
+    "ETH": {
+      "native_positions": 1308,
+      "native_fills": 2616,
+      "native_accounting_checked": 1308,
+      "max_fee_error": 4.440892098500626e-16,
+      "all_weight_sums_one": true,
+      "all_breakevens_fee_nonnegative": true,
+      "all_censored_at_source_end": true,
+      "all_legs_have_two_native_fills": true
+    },
+    "XAU": {
+      "native_positions": 744,
+      "native_fills": 1488,
+      "native_accounting_checked": 744,
+      "max_fee_error": 4.440892098500626e-16,
+      "all_weight_sums_one": true,
+      "all_breakevens_fee_nonnegative": true,
+      "all_censored_at_source_end": true,
+      "all_legs_have_two_native_fills": true
+    }
+  },
+  "native_positions": 3936,
+  "native_fills": 7872,
+  "behavioral_tests": {
+    "passed": 7,
+    "failed": 0,
+    "command": "PYTHONPATH=. /Users/zhangzc/.local/bin/nautilus-python -m unittest discover -s tests/evaluation -p test_touch_recovery.py -v"
+  },
+  "repository_boundaries": {
+    "passed": 170,
+    "failed": 8,
+    "unrelated_existing_causes": [
+      "Charter API URL mistaken for file path",
+      "websockets absent constraints pin",
+      "ma_morphology_reuse_recover archived path",
+      "preexisting unstaged tradingview-candle-probe artifact holdout_status not_applicable rejected by schema; five dependent tests"
+    ]
+  },
+  "conclusions": "Independent equal-notional R; no initial risk budget or account returns; source-end estimates include hypothetical taker exit; no funding margin liquidation or slippage.",
+  "replay_commands": [
+    "/Users/zhangzc/.local/bin/nautilus-python -m yoyo.evaluation.monday_12h_recovery BTC",
+    "/Users/zhangzc/.local/bin/nautilus-python -m yoyo.evaluation.monday_12h_recovery ETH",
+    "/Users/zhangzc/.local/bin/nautilus-python -m yoyo.evaluation.monday_12h_recovery XAU"
+  ],
+  "snapshot_command": ".venv/bin/python -m yoyo.evaluation.monday_12h_history",
+  "replay_safety": "Existing results refuse replay; use new experiment directory for altered rules",
+  "notion_page": "4058856479af81dfa870d53c060ff658",
+  "extreme_native_api_checks": 3,
+  "new_registry_records_schema_valid": true
+}

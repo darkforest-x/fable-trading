@@ -1,0 +1,52 @@
+{
+  "commit": "adc86b522384c0cdddf74bd3e975fbe3b46c0c5e",
+  "input": "data/crypto/market/exp-monday-12h-partial-recovery-20261026-v1/ETH",
+  "receipt": {
+    "instrument": "ETH-USDT-SWAP",
+    "first": "2023-12-31 16:00:00+00:00",
+    "last": "2026-10-26 14:55:00+00:00",
+    "rows": 296628,
+    "gaps": 0,
+    "sources": [
+      {
+        "path": "data/crypto/market/kline_lowtf_20260922/okx_ETH_USDT_SWAP_1m_1402560.csv",
+        "size": 111173334,
+        "mtime_ns": 1790086886000000000,
+        "retained_rows": 280512
+      },
+      {
+        "path": "data/crypto/market/kline_lowtf_20260922/okx_api_ETH_USDT_SWAP_1m_20260831T1600_20260922T1400.csv",
+        "size": 2516418,
+        "mtime_ns": 1790087679000000000,
+        "retained_rows": 6312
+      },
+      {
+        "path": "data/crypto/market/research-spike_v128_bb_slope_20260924/okx_api_ETH_USDT_SWAP_1m_20260922T1359_20260923T1600.csv",
+        "size": 124550,
+        "mtime_ns": 1790180359099056929,
+        "retained_rows": 312
+      }
+    ],
+    "fetched_rows": 9492,
+    "api": "https://www.okx.com/api/v5/market/history-candles",
+    "content_hashing": false,
+    "native_api_ohlc_sample_checks": [
+      "2023-12-31 16:00:00+00:00",
+      "2025-05-29 15:30:00+00:00",
+      "2026-10-26 14:55:00+00:00"
+    ]
+  },
+  "framework": "NautilusTrader 1.231.0",
+  "code": [
+    {
+      "path": "yoyo/evaluation/monday_12h_recovery.py",
+      "size": 12652,
+      "mtime_ns": 1793029263589025776
+    },
+    {
+      "path": "yoyo/layers/l3_backtest/nautilus_touch_recovery.py",
+      "size": 4992,
+      "mtime_ns": 1793029145644815689
+    }
+  ]
+}

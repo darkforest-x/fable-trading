@@ -1,0 +1,94 @@
+{
+  "BTC": {
+    "instrument": "BTC-USDT-SWAP",
+    "first": "2022-11-30 16:00:00+00:00",
+    "last": "2026-10-26 14:55:00+00:00",
+    "rows": 410676,
+    "gaps": 0,
+    "sources": [
+      {
+        "path": "data/crypto/market/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+        "size": 27913401,
+        "mtime_ns": 1788499115848665300,
+        "retained_rows": 341567
+      },
+      {
+        "path": "data/crypto/market/kline_holdout_btc5m/okx_BTC_USDT_SWAP_5m_52992.csv",
+        "size": 4366838,
+        "mtime_ns": 1789617815003923847,
+        "retained_rows": 52992
+      },
+      {
+        "path": "data/crypto/market/kline_lowtf_20260922/okx_api_BTC_USDT_SWAP_1m_20260831T1600_20260922T1400.csv",
+        "size": 2518199,
+        "mtime_ns": 1790088374000000000,
+        "retained_rows": 6312
+      },
+      {
+        "path": "data/crypto/market/research-spike_v128_bb_slope_20260924/okx_api_BTC_USDT_SWAP_1m_20260922T1359_20260923T1600.csv",
+        "size": 124855,
+        "mtime_ns": 1790180386999486528,
+        "retained_rows": 312
+      }
+    ],
+    "fetched_rows": 9492,
+    "api": "https://www.okx.com/api/v5/market/history-candles",
+    "content_hashing": false,
+    "repaired_rows": 1,
+    "native_api_ohlc_sample_checks": [
+      "2022-11-30 16:00:00+00:00",
+      "2024-11-12 15:30:00+00:00",
+      "2026-10-26 14:55:00+00:00"
+    ]
+  },
+  "ETH": {
+    "instrument": "ETH-USDT-SWAP",
+    "first": "2023-12-31 16:00:00+00:00",
+    "last": "2026-10-26 14:55:00+00:00",
+    "rows": 296628,
+    "gaps": 0,
+    "sources": [
+      {
+        "path": "data/crypto/market/kline_lowtf_20260922/okx_ETH_USDT_SWAP_1m_1402560.csv",
+        "size": 111173334,
+        "mtime_ns": 1790086886000000000,
+        "retained_rows": 280512
+      },
+      {
+        "path": "data/crypto/market/kline_lowtf_20260922/okx_api_ETH_USDT_SWAP_1m_20260831T1600_20260922T1400.csv",
+        "size": 2516418,
+        "mtime_ns": 1790087679000000000,
+        "retained_rows": 6312
+      },
+      {
+        "path": "data/crypto/market/research-spike_v128_bb_slope_20260924/okx_api_ETH_USDT_SWAP_1m_20260922T1359_20260923T1600.csv",
+        "size": 124550,
+        "mtime_ns": 1790180359099056929,
+        "retained_rows": 312
+      }
+    ],
+    "fetched_rows": 9492,
+    "api": "https://www.okx.com/api/v5/market/history-candles",
+    "content_hashing": false,
+    "native_api_ohlc_sample_checks": [
+      "2023-12-31 16:00:00+00:00",
+      "2025-05-29 15:30:00+00:00",
+      "2026-10-26 14:55:00+00:00"
+    ]
+  },
+  "XAU": {
+    "instrument": "XAU-USDT-SWAP",
+    "first": "2025-04-09 10:00:00+00:00",
+    "last": "2026-10-26 14:55:00+00:00",
+    "rows": 162780,
+    "cached_rows": 30334,
+    "source_path": "data/kline_deep_1m/okx_XAU_USDT_SWAP_1m_151674.csv",
+    "source_size": 11152085,
+    "source_mtime_ns": 1789572078000000000,
+    "gaps": 0,
+    "fetched_at": "2026-10-26 15:03:43.440283+00:00",
+    "api": "https://www.okx.com/api/v5/market/history-candles",
+    "raw_pages": "pages/",
+    "content_hashing": false
+  }
+}
