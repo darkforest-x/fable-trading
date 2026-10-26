@@ -1,0 +1,7 @@
+# A tiny ex-post wick denominator can make average R disagree with money returns
+
+- **Problem**: The 2026-10-26 5m 1.618 study's full-history best finite-stop arm returned +4.413 wick-R per trade while losing 5.914bp per equal-notional trade after fees and the existing 10bp non-target exit slippage.
+- **Dead end**: Selecting by average or summed wick-R would suggest success. But wick R is unknown at the resting-limit fill, so this is not implementable fixed-risk position sizing. Moreover, targets cannot be installed before the touch close.
+- **Effective approach**: Keep entry notional constant and select on framework P&L divided by entry notional. Inspect the R denominator and activation-time market fills separately. The top 1% of R outcomes contribute 83.9% of summed net R; median net R is -0.251. TACUSDT:2025-10-27:+1 has a tiny level-to-low distance and closes far past its newly available target, producing about 39,617R but only 3.618% after-cost notional profit. Reading the actual source touch candle and framework accounting confirms the denominator effect without replaying the history.
+- **General rule**: An ex-post normalization unit is not automatically capital at risk. Check both return units, their weighting, the largest contributors, and when the denominator becomes known before selecting parameters.
+- **Related**: `yoyo/evaluation/monday_wick_r_diagnostics.py`; `experiments/active/exp-monday-5m-wick-r-20261026-v1/diagnostics.json`; `wick-risk-is-not-known-at-touch-entry.md`. No production or score changes follow from this study.
