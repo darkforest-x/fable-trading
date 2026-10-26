@@ -147,14 +147,12 @@
     const reuse=target?.host===host?target:null;
     if(reuse){version++;clearTimeout(timer);controller?.abort();controller=null;target.feed?.stop();target.history?.pause();}else stop();
     if(!host)return;paused=false;
-    if(!reuse)host.innerHTML='<div class="mf-chart-caption"><p role="status">正在加载区间 K 线…</p><button type="button" data-mf-chart-retry>重新加载</button></div><div class="mf-chart-mount"></div><div class="mf-history-status"><button type="button" data-mf-history-retry disabled aria-live="polite"></button><small></small></div>';
+    if(!reuse)host.innerHTML='<div class="mf-chart-caption"><p role="status">正在加载区间 K 线…</p><button type="button" data-mf-chart-retry>重新加载</button></div><div class="mf-chart-mount"></div>';
     target={host,row,week,key,internal,ma,period,trade,trades,levels:levelCache.get(row.symbol+'|'+week),state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
-    if(!reuse)host.querySelector('[data-mf-chart-retry]').addEventListener('click',()=>refresh());
+    if(!reuse)host.querySelector('[data-mf-chart-retry]').addEventListener('click',()=>{target?.history?.retry();refresh();});
     const owner=target;
     target.history=window.SpikeChartHistory?.create({symbol:row.symbol,period,
-      changed:value=>{if(target!==owner||paused)return;const old=cache.get(key);cache.set(key,{value,due:old?.due||0});draw(value);},
-      status:value=>{if(target!==owner)return;const button=host.querySelector('[data-mf-history-retry]');if(!button)return;button.textContent=value.text;button.disabled=!value.retry;host.querySelector('.mf-history-status small').textContent=value.count?`${value.count.toLocaleString()} 根`:'';}});
-    if(!reuse)host.querySelector('[data-mf-history-retry]')?.addEventListener('click',()=>target?.history?.retry());
+      changed:value=>{if(target!==owner||paused)return;const old=cache.get(key);cache.set(key,{value,due:old?.due||0});draw(value);}});
     const previous=cache.get(key);
     if(previous){const value=target.history?.merge(previous.value)||previous.value;draw(previous.due>Date.now()?value:{...value,display_cached:true});}
     else if(reuse){

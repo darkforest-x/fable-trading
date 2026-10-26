@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>⚡ SPIKE - 全市场插针报警 (Market-Wide Spike Alarm)</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter & JetBrains Mono Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed": "#40000d",
+            "on-background": "#0b1c30",
+            "inverse-surface": "#213145",
+            "secondary-container": "#92f2d7",
+            "on-primary": "#ffffff",
+            "tertiary-fixed-dim": "#ffb2b7",
+            "secondary": "#006b58",
+            "on-error-container": "#93000a",
+            "on-primary-fixed": "#001b3f",
+            "on-primary-container": "#fcfbff",
+            "surface-tint": "#005cbb",
+            "surface-container-lowest": "#ffffff",
+            "tertiary-fixed": "#ffdadb",
+            "surface-dim": "#cbdbf5",
+            "surface-container-high": "#dce9ff",
+            "surface": "#f8f9ff",
+            "on-tertiary-fixed-variant": "#92002a",
+            "surface-variant": "#d3e4fe",
+            "on-tertiary-container": "#fffaf9",
+            "tertiary": "#b70438",
+            "on-surface": "#0b1c30",
+            "inverse-primary": "#abc7ff",
+            "surface-container": "#e5eeff",
+            "surface-container-low": "#eff4ff",
+            "primary-fixed-dim": "#abc7ff",
+            "inverse-on-surface": "#eaf1ff",
+            "primary-fixed": "#d7e2ff",
+            "on-error": "#ffffff",
+            "outline-variant": "#c1c6d6",
+            "outline": "#717785",
+            "background": "#f8f9ff",
+            "tertiary-container": "#db2b4e",
+            "on-secondary-fixed-variant": "#005142",
+            "error": "#ba1a1a",
+            "surface-bright": "#f8f9ff",
+            "primary-container": "#0071e3",
+            "on-secondary": "#ffffff",
+            "secondary-fixed": "#94f4d9",
+            "on-surface-variant": "#414753",
+            "surface-container-highest": "#d3e4fe",
+            "primary": "#0059b5",
+            "on-tertiary": "#ffffff",
+            "on-secondary-container": "#00705c",
+            "error-container": "#ffdad6",
+            "on-primary-fixed-variant": "#00458f",
+            "secondary-fixed-dim": "#78d8be",
+            "on-secondary-fixed": "#002019"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-sm": "0.5rem",
+            "gutter": "0.75rem",
+            "space-xs": "0.25rem",
+            "margin-tablet": "1.5rem",
+            "space-md": "0.75rem",
+            "margin": "1rem",
+            "space-xl": "1.5rem",
+            "margin-desktop": "2.5rem",
+            "gutter-tablet": "1rem",
+            "space-lg": "1rem",
+            "gutter-desktop": "1.5rem"
+          },
+          "fontFamily": {
+            "label-caps": ["Inter", "sans-serif"],
+            "headline-md": ["Inter", "sans-serif"],
+            "display": ["Inter", "sans-serif"],
+            "body-lg": ["Inter", "sans-serif"],
+            "label-numeric-lg": ["JetBrains Mono", "monospace"],
+            "label-numeric-md": ["JetBrains Mono", "monospace"],
+            "headline-lg-mobile": ["Inter", "sans-serif"],
+            "body-sm": ["Inter", "sans-serif"],
+            "label-numeric-sm": ["JetBrains Mono", "monospace"],
+            "headline-lg": ["Inter", "sans-serif"],
+            "headline-sm": ["Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"]
+          },
+          "fontSize": {
+            "label-caps": ["10px", { "lineHeight": "12px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "label-numeric-lg": ["20px", { "lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "label-numeric-md": ["14px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+            "label-numeric-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-sm": ["17px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+
+    /* Apple Glass Rim Highlight & Glow Physics */
+    .glass-panel-rim {
+      box-shadow:
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 -1px 1px 0 rgba(255, 255, 255, 0.05),
+        0 25px 60px -15px rgba(0, 0, 0, 0.8),
+        0 0 45px -5px rgba(225, 29, 72, 0.15);
+    }
+
+    .glass-subtle-rim {
+      box-shadow:
+        inset 0 1px 0.5px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0.5px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    /* Ambient pulse for alert badge */
+    @keyframes soft-pulse-amber {
+      0%, 100% { opacity: 0.9; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.96); }
+    }
+    .animate-pulse-subtle {
+      animation: soft-pulse-amber 2.4s infinite ease-in-out;
+    }
+
+    /* Custom thin scrollbar */
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 9999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 9999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+  </style>
+</head>
+<body class="h-full bg-[#0a0d14] text-white font-body-md text-body-md antialiased overflow-hidden select-none">
+<!-- ========================================================================= -->
+<!-- 1. BASE CANVASES & WORKSPACE (Visible underneath dark frosted scrim)      -->
+<!-- ========================================================================= -->
+<div class="fixed inset-0 pointer-events-none flex flex-col bg-[#0b0f19] opacity-80 filter blur-[1px]">
+<!-- Underlay Fake TopBar -->
+<header class="h-12 w-full flex items-center justify-between px-4 border-b border-white/5 bg-[#121722]/80">
+<div class="flex items-center space-x-3">
+<span class="text-amber-400 font-headline-md text-headline-md tracking-wider">⚡ SPIKE</span>
+<span class="text-xs text-slate-400 font-label-numeric-sm text-label-numeric-sm px-2 py-0.5 rounded bg-white/5">PRO QUANT V4.8</span>
+</div>
+<div class="flex items-center space-x-6 text-slate-400 text-xs">
+<span class="text-white font-medium">BTC/USDT 永续</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-emerald-400">$84,320.50</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-rose-400">-3.42% 24H</span>
+</div>
+</header>
+<!-- Synthetic Apple Glass Trading Workspace Grid Mockup -->
+<div class="flex-1 grid grid-cols-12 gap-2 p-3 overflow-hidden">
+<!-- Left Depth Chart / Candlestick Area -->
+<div class="col-span-9 bg-[#111622]/90 rounded-2xl border border-white/5 p-4 flex flex-col justify-between">
+<div class="flex justify-between items-center text-xs text-slate-400 border-b border-white/5 pb-2">
+<div class="flex space-x-3 font-label-numeric-sm text-label-numeric-sm">
+<span class="text-cyan-400 bg-cyan-950/40 px-2 py-0.5 rounded">15m</span>
+<span>1H</span>
+<span>4H</span>
+<span>1D</span>
+<span class="text-slate-300">指标: Fibonacci + Spike Hunter v2</span>
+</div>
+<span class="text-slate-500 font-label-numeric-sm text-label-numeric-sm">MA(7): 84,110.2 · MA(25): 85,920.0</span>
+</div>
+<!-- Synthetic Candlesticks representation -->
+<div class="flex-1 flex items-end justify-between py-6 px-4 space-x-1.5 opacity-40">
+<div class="w-2.5 h-32 bg-emerald-500/70 rounded-xs relative"><div class="absolute -top-4 left-1 w-0.5 h-40 bg-emerald-500/40"></div></div>
+<div class="w-2.5 h-24 bg-emerald-500/70 rounded-xs relative"><div class="absolute -top-3 left-1 w-0.5 h-32 bg-emerald-500/40"></div></div>
+<div class="w-2.5 h-44 bg-rose-500/70 rounded-xs relative"><div class="absolute -top-6 left-1 w-0.5 h-56 bg-rose-500/40"></div></div>
+<div class="w-2.5 h-28 bg-rose-500/70 rounded-xs relative"><div class="absolute -top-2 left-1 w-0.5 h-34 bg-rose-500/40"></div></div>
+<div class="w-2.5 h-52 bg-rose-600/90 rounded-xs relative"><div class="absolute -top-10 left-1 w-0.5 h-72 bg-rose-500/60"></div></div>
+<div class="w-2.5 h-36 bg-emerald-500/70 rounded-xs relative"><div class="absolute -top-4 left-1 w-0.5 h-44 bg-emerald-500/40"></div></div>
+<div class="w-2.5 h-48 bg-rose-600/80 rounded-xs relative"><div class="absolute -top-8 left-1 w-0.5 h-64 bg-rose-500/50"></div></div>
+<div class="w-2.5 h-64 bg-rose-600/90 rounded-xs relative"><div class="absolute -top-12 left-1 w-0.5 h-84 bg-rose-500/70"></div></div>
+<!-- The Spike Wick Pointing down -->
+<div class="w-2.5 h-16 bg-rose-500/90 rounded-xs relative">
+<div class="absolute top-0 left-1 w-0.5 h-48 bg-rose-400"></div>
+<div class="absolute -bottom-10 -left-6 text-[10px] text-rose-400 font-label-numeric-sm text-label-numeric-sm bg-rose-950/80 px-1 py-0.5 rounded border border-rose-800">1.618 刺穿</div>
+</div>
+<div class="w-2.5 h-20 bg-emerald-500/70 rounded-xs"></div>
+<div class="w-2.5 h-32 bg-emerald-500/70 rounded-xs"></div>
+</div>
+<div class="h-6 flex justify-between items-center text-[10px] text-slate-500 font-label-numeric-sm text-label-numeric-sm">
+<span>14:00</span>
+<span>14:15</span>
+<span>14:30</span>
+<span class="text-rose-400 font-semibold">14:38 (异常峰值)</span>
+<span>14:45</span>
+</div>
+</div>
+<!-- Right Order Book & Execution Dock Mockup -->
+<div class="col-span-3 bg-[#111622]/90 rounded-2xl border border-white/5 p-3 flex flex-col justify-between">
+<div class="text-xs font-semibold text-slate-300 pb-2 border-b border-white/5 flex justify-between">
+<span>全市场多空情绪</span>
+<span class="text-rose-400 font-label-numeric-sm text-label-numeric-sm">极度超卖 14.8</span>
+</div>
+<div class="space-y-1.5 py-2 font-label-numeric-sm text-label-numeric-sm text-xs">
+<div class="flex justify-between text-rose-400"><span>84,335.0</span><span>14.82 BTC</span></div>
+<div class="flex justify-between text-rose-400"><span>84,330.0</span><span>42.10 BTC</span></div>
+<div class="flex justify-between text-rose-400"><span>84,325.0</span><span>89.44 BTC</span></div>
+<div class="border-t border-white/10 my-1"></div>
+<div class="flex justify-between text-emerald-400"><span>84,320.0</span><span>112.50 BTC</span></div>
+<div class="flex justify-between text-emerald-400"><span>84,315.0</span><span>76.80 BTC</span></div>
+<div class="flex justify-between text-emerald-400"><span>84,310.0</span><span>230.12 BTC</span></div>
+</div>
+<div class="text-[11px] text-slate-500 bg-white/5 p-2 rounded-xl text-center">
+          持仓风控锁定中 · 等待主控仲裁
+        </div>
+</div>
+</div>
+</div>
+<!-- ========================================================================= -->
+<!-- 2. PERSISTENT COMPACT BELL & AUDIO STATUS CONTROL (Top-Right Dock)         -->
+<!-- ========================================================================= -->
+<div class="fixed top-3 right-4 z-40 flex items-center space-x-2">
+<!-- Audio & Alert Connection Status Pill -->
+<div class="relative group">
+<button aria-label="报警系统状态" class="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#181d28]/85 hover:bg-[#202736] text-white border border-white/15 backdrop-blur-xl shadow-lg transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/80 min-h-[44px]" id="alarmStatusBtn" type="button">
+<!-- Pulsing green/amber connection dot -->
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+</span>
+<span class="font-body-sm text-body-sm font-medium flex items-center gap-1.5" id="bellStatusLabel">
+<span class="text-sm">🔔</span>
+<span>报警 · 声音已开</span>
+</span>
+<span class="material-symbols-outlined text-sm text-slate-400 transition-transform group-hover:rotate-180" data-icon="expand_more">expand_more</span>
+</button>
+<!-- Expandable Floating Settings Popover -->
+<div class="absolute right-0 top-12 w-80 rounded-2xl p-4 bg-[#141822]/95 border border-white/15 shadow-2xl backdrop-blur-2xl transition-all duration-200 opacity-0 pointer-events-none transform -translate-y-2 group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0 hover:opacity-100 hover:pointer-events-auto hover:translate-y-0 z-50" id="settingsPopover">
+<div class="flex items-center justify-between pb-3 border-b border-white/10">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-cyan-400 text-lg" data-icon="tune">tune</span>
+<span class="font-headline-sm text-headline-sm text-white">报警通道监控</span>
+</div>
+<span class="text-[11px] font-label-numeric-sm text-label-numeric-sm text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full">正常运转</span>
+</div>
+<div class="py-3 space-y-3">
+<!-- Toggle Audio Switch -->
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm font-medium text-slate-200">全局报警声音</span>
+<span class="text-[11px] text-slate-400">蜂鸣器循环警报 (82dB)</span>
+</div>
+<button aria-checked="true" class="w-12 h-6 bg-cyan-600 rounded-full transition-colors relative p-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400" id="popoverAudioToggle" role="switch" type="button">
+<span class="block w-5 h-5 bg-white rounded-full transition-transform translate-x-6 shadow-sm"></span>
+</button>
+</div>
+<!-- Connection Status Details -->
+<div class="p-2.5 rounded-xl bg-white/5 border border-white/5 text-xs space-y-1.5">
+<div class="flex justify-between items-center text-slate-300">
+<span class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                WebSocket 报警专线
+              </span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-emerald-400">16ms · 心跳活跃</span>
+</div>
+<div class="flex justify-between items-center text-slate-400 text-[11px]">
+<span>自动播放权限</span>
+<span class="text-slate-300">已授权 (AudioContext)</span>
+</div>
+</div>
+<!-- Manual Test Trigger Button -->
+<div class="pt-1">
+<button class="w-full flex items-center justify-center space-x-2 py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-medium border border-white/10 transition-colors active:scale-98 min-h-[44px]" id="triggerTestAlarmBtn" type="button">
+<span class="material-symbols-outlined text-sm text-amber-400" data-icon="notification_important">notification_important</span>
+<span>重新呼出全市场报警模态</span>
+</button>
+<p class="text-[10px] text-center text-slate-500 mt-1">本地沙盒验证，不影响交易所策略</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ========================================================================= -->
+<!-- 3. PRODUCTION-GRADE FULL-VIEWPORT MODAL OVERLAY (Market Spike Alarm)      -->
+<!-- ========================================================================= -->
+<div aria-describedby="alarmModalDesc" aria-labelledby="alarmModalTitle" aria-modal="true" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/65 backdrop-blur-2xl transition-opacity duration-300" id="spikeAlarmOverlay" role="dialog">
+<!-- Atmospheric Deep Glow Ambient Backdrop -->
+<div class="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
+<div class="w-[500px] h-[500px] sm:w-[680px] sm:h-[680px] bg-rose-600/12 rounded-full blur-[140px] transform scale-110"></div>
+<div class="w-[320px] h-[320px] bg-amber-500/10 rounded-full blur-[100px] transform -translate-y-24"></div>
+</div>
+<!-- The Floating Apple Glass Card Container -->
+<div class="relative w-full max-w-xl mx-auto rounded-3xl p-5 sm:p-7 bg-[#151922]/90 text-white border border-white/15 glass-panel-rim transition-all duration-300 flex flex-col max-h-[942px] overflow-hidden">
+<!-- Top Multi-Alert Bar & Test Pill Cluster -->
+<div class="flex items-center justify-between gap-2 pb-4 border-b border-white/10">
+<!-- Multi-Alert Tabs/Pills Navigation -->
+<div aria-label="待确认警报列表" class="flex items-center space-x-2 overflow-x-auto py-0.5" role="tablist">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30 whitespace-nowrap">
+            待确认 2 条
+          </span>
+<!-- Tab 1 (Active) -->
+<button aria-selected="true" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-white/15 text-white border border-white/20 shadow-sm flex items-center space-x-1 min-h-[36px] transition-all" id="tabAlert1" role="tab" type="button">
+<span class="text-rose-400 font-label-numeric-sm text-label-numeric-sm">[1]</span>
+<span>14:38 急跌插针</span>
+<span class="text-[10px] text-cyan-300 font-normal">(当前)</span>
+</button>
+<!-- Tab 2 -->
+<button aria-selected="false" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 border border-transparent transition-all min-h-[36px]" id="tabAlert2" role="tab" type="button">
+<span class="font-label-numeric-sm text-label-numeric-sm">[2]</span>
+<span>14:32 震荡破位</span>
+</button>
+</div>
+<!-- Simulated Test Badge with Subtle Pulse Dot -->
+<div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-medium shrink-0">
+<span class="h-2 w-2 rounded-full bg-amber-400 animate-pulse-subtle"></span>
+<span>测试报警</span>
+</div>
+</div>
+<!-- Modal Main Body Header & Typography -->
+<div class="pt-4 pb-2 space-y-2.5">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<h2 class="font-headline-lg text-headline-lg sm:text-[30px] font-bold text-white tracking-tight flex items-center gap-2" id="alarmModalTitle">
+<span class="material-symbols-outlined text-rose-400 text-2xl sm:text-3xl" data-icon="electric_bolt" data-weight="fill">electric_bolt</span>
+<span>全市场插针报警</span>
+</h2>
+<!-- Directional Subtitle Badge: 急跌 · 做多方向 -->
+<div class="inline-flex items-center space-x-1.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-3.5 py-1 rounded-full text-xs sm:text-sm font-semibold shadow-sm">
+<span class="material-symbols-outlined text-sm font-bold" data-icon="trending_down">trending_down</span>
+<span>急跌 · 反弹做多方向</span>
+</div>
+</div>
+<!-- Metric Highlight: 25 个币 / 5 分钟内触及下方 1.618 -->
+<div class="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-rose-400 text-xl" data-icon="crisis_alert">crisis_alert</span>
+</div>
+<div>
+<div class="text-xs text-slate-400">异常共振阈值命中</div>
+<div class="font-label-numeric-lg text-label-numeric-lg text-white font-bold tracking-tight">
+                25 <span class="font-body-md text-body-md text-slate-300 font-normal">个标的币种</span>
+<span class="text-xs font-normal text-slate-400 mx-1">/</span>
+                5 <span class="font-body-md text-body-md text-slate-300 font-normal">分钟内刺穿下方</span>
+<span class="text-cyan-300 font-mono">1.618</span>
+</div>
+</div>
+</div>
+<div class="text-[11px] text-slate-400 font-label-numeric-sm text-label-numeric-sm sm:text-right">
+<span>触及率 </span><span class="text-rose-400 font-semibold">89.4%</span>
+<div class="text-slate-500">波幅标准差: 3.8σ</div>
+</div>
+</div>
+<!-- Timestamp UTC+8 -->
+<div class="flex items-center justify-between text-xs text-slate-400 px-1 pt-0.5">
+<div class="flex items-center space-x-1.5 font-label-numeric-sm text-label-numeric-sm">
+<span class="material-symbols-outlined text-sm text-slate-500" data-icon="schedule">schedule</span>
+<span>触发时间: 2026-03-30 14:38:22 (北京时间 UTC+8)</span>
+</div>
+<span class="text-slate-500 text-[11px]">延迟: +142ms</span>
+</div>
+</div>
+<!-- Scrollable Coin Chips Grid Container -->
+<div class="py-2.5">
+<div class="flex items-center justify-between text-xs text-slate-300 pb-2">
+<span class="font-medium flex items-center gap-1.5">
+<span>触发币种列表</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-slate-400 text-[11px]">(共 25 对交易对)</span>
+</span>
+<span class="text-[11px] text-slate-500">滑动查看完整列表</span>
+</div>
+<div aria-label="受影响交易对列表" class="max-h-36 sm:max-h-40 overflow-y-auto pr-1 grid grid-cols-2 sm:grid-cols-4 gap-2 custom-scroll" tabindex="0">
+<!-- Coin Chip BTC -->
+<div class="flex items-center justify-between p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 transition-colors">
+<div class="flex flex-col">
+<span class="font-label-numeric-sm text-label-numeric-sm font-bold text-white">BTC/USDT</span>
+<span class="text-[10px] text-rose-300">破下沿 1.618</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-xs font-bold text-rose-400">-3.2%</span>
+</div>
+<!-- Coin Chip SOL -->
+<div class="flex items-center justify-between p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 transition-colors">
+<div class="flex flex-col">
+<span class="font-label-numeric-sm text-label-numeric-sm font-bold text-white">SOL/USDT</span>
+<span class="text-[10px] text-rose-300">超跌极值</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-xs font-bold text-rose-400">-5.8%</span>
+</div>
+<!-- Coin Chip ETH -->
+<div class="flex items-center justify-between p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 transition-colors">
+<div class="flex flex-col">
+<span class="font-label-numeric-sm text-label-numeric-sm font-bold text-white">ETH/USDT</span>
+<span class="text-[10px] text-rose-300">触及强撑</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-xs font-bold text-rose-400">-4.1%</span>
+</div>
+<!-- Coin Chip SUI -->
+<div class="flex items-center justify-between p-2 rounded-xl bg-white/[0.06] hover:bg-white/10 border border-white/10 transition-colors">
+<div class="flex flex-col">
+<span class="font-label-numeric-sm text-label-numeric-sm font-bold text-slate-200">SUI/USDT</span>
+<span class="text-[10px] text-slate-400">大额爆仓</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-xs font-bold text-rose-400">-6.4%</span>
+</div>
+<!-- Coin Chip DOGE -->
+<div class="flex items-center justify-between p-2 rounded-xl bg-white/[0.06] hover:bg-white/10 border border-white/10 transition-colors">
+<div class="flex flex-col">
+<span class="font-label-numeric-sm text-label-numeric-sm font-bold text-slate-200">DOGE/USDT</span>
+<span class="text-[10px] text-slate-400">插针回升</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-xs font-bold text-rose-400">-4.9%</span>
+</div>
+<!-- Coin Chip AVAX -->
+<div class="flex items-center justify-between p-2 rounded-xl bg-white/[0.06] hover:bg-white/10 border border-white/10 transition-colors">
+<div class="flex flex-col">
+<span class="font-label-numeric-sm text-label-numeric-sm font-bold text-slate-200">AVAX/USDT</span>
+<span class="text-[10px] text-slate-400">下破通道</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-xs font-bold text-rose-400">-5.2%</span>
+</div>
+<!-- Coin Chip NEAR -->
+<div class="flex items-center justify-between p-2 rounded-xl bg-white/[0.06] hover:bg-white/10 border border-white/10 transition-colors">
+<div class="flex flex-col">
+<span class="font-label-numeric-sm text-label-numeric-sm font-bold text-slate-200">NEAR/USDT</span>
+<span class="text-[10px] text-slate-400">触底试探</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-xs font-bold text-rose-400">-4.6%</span>
+</div>
+<!-- Coin Chip LINK -->
+<div class="flex items-center justify-between p-2 rounded-xl bg-white/[0.06] hover:bg-white/10 border border-white/10 transition-colors">
+<div class="flex flex-col">
+<span class="font-label-numeric-sm text-label-numeric-sm font-bold text-slate-200">LINK/USDT</span>
+<span class="text-[10px] text-slate-400">偏离度 2.2</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-xs font-bold text-rose-400">-3.9%</span>
+</div>
+<!-- Extra Coins in scroll -->
+<div class="flex items-center justify-between p-2 rounded-xl bg-white/[0.04] border border-white/10">
+<span class="font-label-numeric-sm text-label-numeric-sm font-medium text-slate-300">APT/USDT</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-xs text-rose-400">-5.1%</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-xl bg-white/[0.04] border border-white/10">
+<span class="font-label-numeric-sm text-label-numeric-sm font-medium text-slate-300">OP/USDT</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-xs text-rose-400">-6.2%</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-xl bg-white/[0.04] border border-white/10">
+<span class="font-label-numeric-sm text-label-numeric-sm font-medium text-slate-300">ARB/USDT</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-xs text-rose-400">-4.7%</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-xl bg-white/[0.04] border border-white/10">
+<span class="font-label-numeric-sm text-label-numeric-sm font-medium text-slate-300">TIA/USDT</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-xs text-rose-400">-7.1%</span>
+</div>
+</div>
+</div>
+<!-- Secondary Audio Control Bar Inside Modal -->
+<div class="pt-2 pb-3">
+<div class="flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.04] border border-white/10">
+<div class="flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-cyan-400 text-xl" data-icon="volume_up" id="modalAudioIcon">volume_up</span>
+<div class="flex flex-col">
+<span class="text-xs font-semibold text-white" id="modalAudioStateText">声音已启用 · 循环播放中</span>
+<span class="text-[11px] text-slate-400">当前活跃待确认报警保持低分贝提示</span>
+</div>
+</div>
+<button class="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-xs font-medium text-white border border-white/15 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 min-h-[44px]" id="toggleModalAudioBtn" type="button">
+<span>静音此提示</span>
+</button>
+</div>
+</div>
+<!-- Primary Action & Interactive Mock States ('知道了') -->
+<div class="pt-1 space-y-2">
+<!-- Big High-Contrast Action Button -->
+<button class="relative w-full py-3.5 px-6 rounded-2xl bg-primary-container hover:bg-blue-600 active:scale-[0.98] text-white font-headline-sm text-headline-sm font-semibold tracking-wide shadow-lg border border-white/25 transition-all duration-150 flex items-center justify-center space-x-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 min-h-[52px]" id="confirmDismissBtn" type="button">
+<!-- Normal state content -->
+<span class="flex items-center space-x-2" id="btnContentNormal">
+<span class="material-symbols-outlined text-xl" data-icon="check_circle">check_circle</span>
+<span>知道了 (确认并解除当前警报)</span>
+</span>
+<!-- Confirming Spinner State (hidden by default) -->
+<span class="hidden items-center space-x-2" id="btnContentLoading">
+<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewbox="0 0 24 24">
+<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+<path class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" fill="currentColor"></path>
+</svg>
+<span>确认中… 本地仲裁风控提交</span>
+</span>
+</button>
+<!-- Retryable Failure Fallback Notice (hidden initially) -->
+<div class="hidden p-2 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-between" id="retryFailureNotice">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm" data-icon="warning">warning</span>
+<span>网络抖动，风控心跳未同步，请重试确认</span>
+</span>
+<button class="underline font-semibold hover:text-white px-2 py-1" id="retryBtn" type="button">重试</button>
+</div>
+<!-- Hard constraint alert policy: explicit acknowledgment required -->
+<p class="text-[11px] text-center text-slate-400">
+          ⚠️ 严重风控告警：已禁用点击背景或 Esc 键关闭，须执行主动确认
+        </p>
+</div>
+<!-- Concise Footer Note -->
+<div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-sm text-cyan-400" data-icon="shield">shield</span>
+<span class="font-medium text-slate-300">只通知，不动仓位</span>
+</div>
+<div class="flex items-center space-x-1.5 text-slate-500 text-[11px]">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+<span>本地仲裁风控 · 守护正常</span>
+</div>
+</div>
+</div>
+</div>
+<!-- ========================================================================= -->
+<!-- 4. FLOATING TOAST NOTIFICATION FOR USER ACTIONS                           -->
+<!-- ========================================================================= -->
+<div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-[#1c2230]/95 border border-white/20 text-white text-xs shadow-2xl backdrop-blur-xl flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-4" id="toastNotification">
+<span class="material-symbols-outlined text-emerald-400 text-sm" data-icon="done_all">done_all</span>
+<span id="toastMessage">已确认告警</span>
+</div>
+<!-- ========================================================================= -->
+<!-- 5. JAVASCRIPT CONTROLLER & STATE LOGIC                                    -->
+<!-- ========================================================================= -->
+<script>
+    // State management
+    const modalOverlay = document.getElementById('spikeAlarmOverlay');
+    const confirmBtn = document.getElementById('confirmDismissBtn');
+    const btnContentNormal = document.getElementById('btnContentNormal');
+    const btnContentLoading = document.getElementById('btnContentLoading');
+    const retryNotice = document.getElementById('retryFailureNotice');
+    const retryBtn = document.getElementById('retryBtn');
+
+    const tab1 = document.getElementById('tabAlert1');
+    const tab2 = document.getElementById('tabAlert2');
+
+    const toggleModalAudioBtn = document.getElementById('toggleModalAudioBtn');
+    const modalAudioIcon = document.getElementById('modalAudioIcon');
+    const modalAudioStateText = document.getElementById('modalAudioStateText');
+
+    const alarmStatusBtn = document.getElementById('alarmStatusBtn');
+    const bellStatusLabel = document.getElementById('bellStatusLabel');
+    const popoverAudioToggle = document.getElementById('popoverAudioToggle');
+    const triggerTestAlarmBtn = document.getElementById('triggerTestAlarmBtn');
+
+    const toast = document.getElementById('toastNotification');
+    const toastMessage = document.getElementById('toastMessage');
+
+    let audioEnabled = true;
+    let currentAlertIndex = 1;
+
+    // Toast helper
+    function showToast(msg) {
+      toastMessage.textContent = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2600);
+    }
+
+    // Toggle Audio Functionality
+    function updateAudioUI(enabled) {
+      audioEnabled = enabled;
+      if (enabled) {
+        modalAudioIcon.textContent = 'volume_up';
+        modalAudioIcon.className = 'material-symbols-outlined text-cyan-400 text-xl';
+        modalAudioStateText.textContent = '声音已启用 · 循环播放中';
+        toggleModalAudioBtn.innerHTML = '<span>静音此提示</span>';
+        bellStatusLabel.innerHTML = '<span class="text-sm">🔔</span> <span>报警 · 声音已开</span>';
+
+        popoverAudioToggle.setAttribute('aria-checked', 'true');
+        popoverAudioToggle.classList.remove('bg-slate-700');
+        popoverAudioToggle.classList.add('bg-cyan-600');
+        popoverAudioToggle.firstElementChild.classList.remove('translate-x-0');
+        popoverAudioToggle.firstElementChild.classList.add('translate-x-6');
+      } else {
+        modalAudioIcon.textContent = 'volume_off';
+        modalAudioIcon.className = 'material-symbols-outlined text-slate-400 text-xl';
+        modalAudioStateText.textContent = '报警声音已静音';
+        toggleModalAudioBtn.innerHTML = '<span>开启报警音</span>';
+        bellStatusLabel.innerHTML = '<span class="text-sm">🔕</span> <span>报警 · 已静音</span>';
+
+        popoverAudioToggle.setAttribute('aria-checked', 'false');
+        popoverAudioToggle.classList.remove('bg-cyan-600');
+        popoverAudioToggle.classList.add('bg-slate-700');
+        popoverAudioToggle.firstElementChild.classList.remove('translate-x-6');
+        popoverAudioToggle.firstElementChild.classList.add('translate-x-0');
+      }
+    }
+
+    toggleModalAudioBtn.addEventListener('click', () => {
+      updateAudioUI(!audioEnabled);
+      showToast(audioEnabled ? '已开启报警循环音效' : '已静音当前报警');
+    });
+
+    popoverAudioToggle.addEventListener('click', () => {
+      updateAudioUI(!audioEnabled);
+      showToast(audioEnabled ? '已全局开启报警声音' : '已全局静音');
+    });
+
+    // Alert Tabs Navigation
+    tab1.addEventListener('click', () => {
+      currentAlertIndex = 1;
+      tab1.className = 'px-2.5 py-1 rounded-lg text-xs font-medium bg-white/15 text-white border border-white/20 shadow-sm flex items-center space-x-1 min-h-[36px] transition-all';
+      tab2.className = 'px-2.5 py-1 rounded-lg text-xs font-medium bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 border border-transparent transition-all min-h-[36px]';
+      document.getElementById('alarmModalTitle').lastElementChild.textContent = '全市场插针报警';
+    });
+
+    tab2.addEventListener('click', () => {
+      currentAlertIndex = 2;
+      tab2.className = 'px-2.5 py-1 rounded-lg text-xs font-medium bg-white/15 text-white border border-white/20 shadow-sm flex items-center space-x-1 min-h-[36px] transition-all';
+      tab1.className = 'px-2.5 py-1 rounded-lg text-xs font-medium bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 border border-transparent transition-all min-h-[36px]';
+      document.getElementById('alarmModalTitle').lastElementChild.textContent = '全市场震荡破位告警';
+    });
+
+    // Confirm & Dismiss Action Handling
+    function handleDismiss() {
+      // Toggle to confirming spinner state
+      btnContentNormal.classList.add('hidden');
+      btnContentLoading.classList.remove('hidden');
+      btnContentLoading.classList.add('flex');
+      confirmBtn.disabled = true;
+      confirmBtn.classList.add('opacity-90', 'cursor-not-allowed');
+
+      setTimeout(() => {
+        // Simulation: successfully confirmed
+        btnContentLoading.classList.add('hidden');
+        btnContentLoading.classList.remove('flex');
+        btnContentNormal.classList.remove('hidden');
+        confirmBtn.disabled = false;
+        confirmBtn.classList.remove('opacity-90', 'cursor-not-allowed');
+
+        // Close modal
+        modalOverlay.classList.add('opacity-0', 'pointer-events-none');
+        showToast('已确认 [1] 14:38 插针报警，风控仲裁已入库');
+      }, 700);
+    }
+
+    confirmBtn.addEventListener('click', handleDismiss);
+    retryBtn.addEventListener('click', handleDismiss);
+
+    // Reopen Modal from docked button
+    triggerTestAlarmBtn.addEventListener('click', () => {
+      modalOverlay.classList.remove('opacity-0', 'pointer-events-none');
+      showToast('已唤出测试插针报警');
+    });
+
+    // HARD CONSTRAINT: Prevent accidental backdrop click dismiss
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        // Visual nudge to show requirement of explicit button confirmation
+        const card = modalOverlay.querySelector('.glass-panel-rim');
+        card.classList.add('ring-2', 'ring-rose-500/80');
+        setTimeout(() => {
+          card.classList.remove('ring-2', 'ring-rose-500/80');
+        }, 300);
+      }
+    });
+
+    // HARD CONSTRAINT: Prevent Escape key dismissal for critical risk alarms
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modalOverlay.classList.contains('pointer-events-none')) {
+        e.preventDefault();
+        showToast('风控安全策略: 须点击「知道了」明确确认解除');
+      }
+    });
+  </script>
+</body></html>

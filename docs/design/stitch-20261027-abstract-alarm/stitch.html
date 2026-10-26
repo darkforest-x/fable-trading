@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>⚡ SPIKE - 全市场插针报警 (Market-Wide Spike Alarm)</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter & JetBrains Mono Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          burgundy: {
+            950: '#120307',
+            900: '#1e050c',
+            800: '#2b0712',
+            700: '#3d0a19'
+          }
+        },
+        fontFamily: {
+          'jetbrains': ['"JetBrains Mono"', 'monospace'],
+          'inter': ['Inter', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1;
+  }
+
+  /* Siren Light Sweeps Left and Right */
+  @keyframes siren-sweep {
+    0% {
+      transform: translate(-50%, -50%) rotate(-38deg) scaleX(1);
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 0.65;
+    }
+    100% {
+      transform: translate(-50%, -50%) rotate(38deg) scaleX(1.1);
+      opacity: 0.35;
+    }
+  }
+
+  /* Translucent Crimson Waves Expand Outward */
+  @keyframes siren-pulse-ripple {
+    0% {
+      transform: translate(-50%, -50%) scale(0.65);
+      opacity: 0.8;
+    }
+    60% {
+      opacity: 0.35;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1.6);
+      opacity: 0;
+    }
+  }
+
+  /* Secondary Staggered Wave */
+  @keyframes siren-pulse-ripple-delayed {
+    0% {
+      transform: translate(-50%, -50%) scale(0.45);
+      opacity: 0.7;
+    }
+    50% {
+      opacity: 0.25;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1.4);
+      opacity: 0;
+    }
+  }
+
+  /* Ambient Deep Breath for Glow Core */
+  @keyframes atmospheric-ambient-glow {
+    0%, 100% {
+      opacity: 0.55;
+      transform: translate(-50%, -50%) scale(0.95);
+    }
+    50% {
+      opacity: 0.85;
+      transform: translate(-50%, -50%) scale(1.08);
+    }
+  }
+
+  .animate-siren-sweep {
+    animation: siren-sweep 3.2s ease-in-out infinite alternate;
+  }
+
+  .animate-ripple-1 {
+    animation: siren-pulse-ripple 2.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+
+  .animate-ripple-2 {
+    animation: siren-pulse-ripple-delayed 2.8s cubic-bezier(0.16, 1, 0.3, 1) infinite 0.9s;
+  }
+
+  .animate-ambient-glow {
+    animation: atmospheric-ambient-glow 3.6s ease-in-out infinite;
+  }
+
+  /* Custom thin crimson scrollbar */
+  .custom-crimson-scroll::-webkit-scrollbar {
+    height: 5px;
+    width: 5px;
+  }
+  .custom-crimson-scroll::-webkit-scrollbar-track {
+    background: rgba(225, 29, 72, 0.06);
+    border-radius: 9999px;
+  }
+  .custom-crimson-scroll::-webkit-scrollbar-thumb {
+    background: rgba(244, 63, 94, 0.3);
+    border-radius: 9999px;
+  }
+  .custom-crimson-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(244, 63, 94, 0.55);
+  }
+
+  /* Subtle crimson button box glow */
+  .ruby-glow {
+    box-shadow: 0 0 35px -5px rgba(225, 29, 72, 0.65), 0 0 15px rgba(239, 68, 68, 0.4);
+  }
+</style>
+</head>
+<body class="h-full bg-black text-white font-inter antialiased overflow-hidden select-none">
+<!-- ========================================================================= -->
+<!-- 1. BASE CANVASES & WORKSPACE (Visible underneath when alert is dismissed)  -->
+<!-- ========================================================================= -->
+<div class="fixed inset-0 flex flex-col bg-[#0b0f19] select-none pointer-events-auto">
+<!-- Underlay Fake TopBar -->
+<header class="h-12 w-full flex items-center justify-between px-4 border-b border-white/5 bg-[#121722]">
+<div class="flex items-center space-x-3">
+<span class="text-rose-400 font-bold text-lg tracking-wider">⚡ SPIKE</span>
+<span class="text-xs text-slate-400 font-jetbrains px-2 py-0.5 rounded bg-white/5">PRO QUANT V4.8</span>
+</div>
+<div class="flex items-center space-x-6 text-slate-400 text-xs">
+<span class="text-white font-medium">BTC/USDT 永续</span>
+<span class="font-jetbrains text-emerald-400">$84,320.50</span>
+<span class="font-jetbrains text-rose-400">-3.42% 24H</span>
+</div>
+</header>
+<!-- Synthetic Trading Workspace Grid Mockup -->
+<div class="flex-1 grid grid-cols-12 gap-2 p-3 overflow-hidden opacity-60">
+<!-- Left Depth Chart / Candlestick Area -->
+<div class="col-span-9 bg-[#111622] rounded-2xl border border-white/5 p-4 flex flex-col justify-between">
+<div class="flex justify-between items-center text-xs text-slate-400 border-b border-white/5 pb-2">
+<div class="flex space-x-3 font-jetbrains">
+<span class="text-rose-400 bg-rose-950/40 px-2 py-0.5 rounded">15m</span>
+<span>1H</span>
+<span>4H</span>
+<span>1D</span>
+<span class="text-slate-300">指标: Fibonacci + Spike Hunter v2</span>
+</div>
+<span class="text-slate-500 font-jetbrains">MA(7): 84,110.2 · MA(25): 85,920.0</span>
+</div>
+<!-- Synthetic Candlesticks representation -->
+<div class="flex-1 flex items-end justify-between py-6 px-4 space-x-1.5 opacity-40">
+<div class="w-2.5 h-32 bg-emerald-500/70 rounded-xs relative"><div class="absolute -top-4 left-1 w-0.5 h-40 bg-emerald-500/40"></div></div>
+<div class="w-2.5 h-24 bg-emerald-500/70 rounded-xs relative"><div class="absolute -top-3 left-1 w-0.5 h-32 bg-emerald-500/40"></div></div>
+<div class="w-2.5 h-44 bg-rose-500/70 rounded-xs relative"><div class="absolute -top-6 left-1 w-0.5 h-56 bg-rose-500/40"></div></div>
+<div class="w-2.5 h-28 bg-rose-500/70 rounded-xs relative"><div class="absolute -top-2 left-1 w-0.5 h-34 bg-rose-500/40"></div></div>
+<div class="w-2.5 h-52 bg-rose-600/90 rounded-xs relative"><div class="absolute -top-10 left-1 w-0.5 h-72 bg-rose-500/60"></div></div>
+<div class="w-2.5 h-36 bg-emerald-500/70 rounded-xs relative"><div class="absolute -top-4 left-1 w-0.5 h-44 bg-emerald-500/40"></div></div>
+<div class="w-2.5 h-48 bg-rose-600/80 rounded-xs relative"><div class="absolute -top-8 left-1 w-0.5 h-64 bg-rose-500/50"></div></div>
+<div class="w-2.5 h-64 bg-rose-600/90 rounded-xs relative"><div class="absolute -top-12 left-1 w-0.5 h-84 bg-rose-500/70"></div></div>
+<div class="w-2.5 h-16 bg-rose-500/90 rounded-xs relative">
+<div class="absolute top-0 left-1 w-0.5 h-48 bg-rose-400"></div>
+<div class="absolute -bottom-10 -left-6 text-[10px] text-rose-400 font-jetbrains bg-rose-950/80 px-1 py-0.5 rounded border border-rose-800">1.618 刺穿</div>
+</div>
+<div class="w-2.5 h-20 bg-emerald-500/70 rounded-xs"></div>
+<div class="w-2.5 h-32 bg-emerald-500/70 rounded-xs"></div>
+</div>
+<div class="h-6 flex justify-between items-center text-[10px] text-slate-500 font-jetbrains">
+<span>14:00</span>
+<span>14:15</span>
+<span>14:30</span>
+<span class="text-rose-400 font-semibold">14:38 (异常峰值)</span>
+<span>14:45</span>
+</div>
+</div>
+<!-- Right Order Book & Execution Dock Mockup -->
+<div class="col-span-3 bg-[#111622] rounded-2xl border border-white/5 p-3 flex flex-col justify-between">
+<div class="text-xs font-semibold text-slate-300 pb-2 border-b border-white/5 flex justify-between">
+<span>全市场多空情绪</span>
+<span class="text-rose-400 font-jetbrains">极度超卖 14.8</span>
+</div>
+<div class="space-y-1.5 py-2 font-jetbrains text-xs">
+<div class="flex justify-between text-rose-400"><span>84,335.0</span><span>14.82 BTC</span></div>
+<div class="flex justify-between text-rose-400"><span>84,330.0</span><span>42.10 BTC</span></div>
+<div class="flex justify-between text-rose-400"><span>84,325.0</span><span>89.44 BTC</span></div>
+<div class="border-t border-white/10 my-1"></div>
+<div class="flex justify-between text-emerald-400"><span>84,320.0</span><span>112.50 BTC</span></div>
+<div class="flex justify-between text-emerald-400"><span>84,315.0</span><span>76.80 BTC</span></div>
+<div class="flex justify-between text-emerald-400"><span>84,310.0</span><span>230.12 BTC</span></div>
+</div>
+<div class="text-[11px] text-slate-500 bg-white/5 p-2 rounded-xl text-center">
+        持仓风控锁定中 · 等待主控仲裁
+      </div>
+</div>
+</div>
+</div>
+<!-- ========================================================================= -->
+<!-- 2. NORMAL PAGE FLOATING ENTRY (Only ONE bell/siren in 44px circular button)-->
+<!-- ========================================================================= -->
+<div class="fixed top-3 right-4 z-30">
+<button aria-label="报警系统" class="w-11 h-11 rounded-full bg-[#1e050c]/90 hover:bg-[#2b0712] border border-rose-500/30 backdrop-blur-xl shadow-lg flex items-center justify-center text-rose-400 transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-rose-500/50" id="floatingAlarmTriggerBtn" type="button">
+<span class="material-symbols-outlined text-xl">notifications_active</span>
+</button>
+<!-- Compact popover when clicked from normal page -->
+<div class="hidden absolute right-0 top-13 w-64 rounded-2xl p-3 bg-[#18040a]/95 border border-rose-500/25 shadow-2xl backdrop-blur-2xl text-xs space-y-2 z-40" id="quickAlarmPopover">
+<div class="flex items-center justify-between text-rose-300 font-medium pb-1 border-b border-rose-500/15">
+<span>警报控制</span>
+<span class="text-[10px] text-rose-400/80">通道正常</span>
+</div>
+<button class="w-full py-2 px-3 rounded-xl bg-rose-600/30 hover:bg-rose-600/50 border border-rose-500/30 text-rose-200 text-center font-medium transition-colors" id="openImmersionAlarmBtn">
+      呼出全屏警报
+    </button>
+</div>
+</div>
+<!-- ========================================================================= -->
+<!-- 3. FULL VIEWPORT IMMERSIVE RED SIREN SCREEN (100vw × 100dvh)              -->
+<!-- ========================================================================= -->
+<div class="fixed inset-0 z-50 w-screen h-[100dvh] flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#120307] via-[#1a040b] to-[#1e050c] select-none transition-opacity duration-300 edge-curtain-glow" id="immersiveSirenScreen">
+<!-- ATMOSPHERIC LIGHTING & ANIMATED BEACON SYSTEM -->
+<div class="absolute inset-0 pointer-events-none overflow-hidden z-0"><!-- Deep Dark Obsidian-Burgundy Contrast Center Vignette -->
+<div class="absolute inset-0 bg-radial from-transparent via-[#0b0104]/80 to-[#160207] pointer-events-none z-10"></div>
+<!-- Intense Radial Atmospheric Blooms -->
+<div class="absolute top-[38%] left-1/2 w-[700px] sm:w-[1100px] h-[700px] sm:h-[1100px] bg-gradient-radial from-rose-600/40 via-red-900/20 to-transparent rounded-full blur-[110px] -translate-x-1/2 -translate-y-1/2 animate-ambient-glow"></div>
+<div class="absolute top-0 left-1/2 w-[600px] h-[350px] bg-rose-600/25 rounded-full blur-[100px] -translate-x-1/2"></div>
+<div class="absolute bottom-0 left-1/2 w-[900px] h-[400px] bg-rose-950/60 rounded-full blur-[130px] -translate-x-1/2"></div>
+<!-- Horizontal Luminous Shockwave Sweep Beam -->
+<div class="absolute top-[40%] left-1/2 w-[1400px] h-[300px] bg-gradient-to-r from-transparent via-rose-500/25 to-transparent rounded-full blur-[45px] shockwave-sweep-wave origin-center pointer-events-none"></div>
+<!-- Concentric Staggered Shockwave Rings Expanding Behind Typography -->
+<div class="absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] sm:w-[460px] sm:h-[460px] rounded-full border-2 border-rose-500/60 shockwave-ring-1 pointer-events-none shadow-[0_0_40px_rgba(244,63,94,0.4)]"></div>
+<div class="absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] sm:w-[460px] sm:h-[460px] rounded-full border border-rose-500/50 shockwave-ring-2 pointer-events-none shadow-[0_0_35px_rgba(244,63,94,0.3)]"></div>
+<div class="absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] sm:w-[460px] sm:h-[460px] rounded-full border border-rose-600/40 shockwave-ring-3 pointer-events-none shadow-[0_0_30px_rgba(225,29,72,0.25)]"></div>
+<!-- Static Luminous Core Rings -->
+<div class="absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[220px] h-[220px] sm:w-[300px] sm:h-[300px] rounded-full border border-rose-400/40 bg-rose-600/10 shadow-[0_0_60px_rgba(225,29,72,0.5)] pointer-events-none"></div>
+<div class="absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] sm:w-[680px] sm:h-[680px] rounded-full border border-rose-500/20 pointer-events-none"></div></div>
+<!-- TOP DISCREET BADGES (Edge-to-edge layout, strictly warm/crimson) -->
+<header class="relative z-10 w-full px-4 sm:px-8 pt-4 sm:pt-6 flex items-center justify-between shrink-0">
+<!-- Top-Left Badge -->
+<div class="flex items-center space-x-2">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-rose-950/80 text-rose-300 border border-rose-500/35 backdrop-blur-md shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-400 mr-1.5"></span>
+        待确认 2 条
+      </span>
+</div>
+<!-- Top-Right Badge -->
+<div class="flex items-center space-x-2">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-950/50 text-amber-200/90 border border-amber-600/35 backdrop-blur-md shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 animate-ping"></span>
+        测试报警
+      </span>
+</div>
+</header>
+<!-- MAIN CORE BODY CONTENT (Centered, Commanding, perfectly stable text) -->
+<main class="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-2 max-w-4xl mx-auto w-full text-center">
+<!-- Siren Line Icon Beacon in Center Upper Region -->
+<!-- Abstract Sleek Angular Pulse Shockwave Crest Glyph (No literal police lamp/beacon fixture) -->
+<div class="relative mb-3 flex items-center justify-center">
+<div class="flex items-center space-x-2 px-3 py-1 rounded-full bg-rose-950/70 border border-rose-500/30 backdrop-blur-md shadow-[0_0_20px_rgba(244,63,94,0.3)] text-rose-300">
+<span class="material-symbols-outlined text-lg text-rose-400">show_chart</span>
+<span class="font-jetbrains text-[10px] tracking-widest uppercase font-semibold text-rose-200/90">SHOCKWAVE DETECTED</span>
+</div>
+</div>
+<!-- Centered Small Eyebrow -->
+<p class="text-[11px] sm:text-xs tracking-[0.25em] text-[#fecdd3]/80 uppercase font-semibold mb-1">
+      全市场异动
+    </p>
+<!-- Huge Commanding Chinese Headline -->
+<h1 class="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white mb-3 drop-shadow-[0_2px_20px_rgba(225,29,72,0.6)]">
+      全市场插针报警
+    </h1>
+<!-- Direction Pill (STRICTLY RED/CRIMSON GLASS PILL, NO GREEN) -->
+<div class="mb-4 sm:mb-6">
+<span class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-rose-950/85 text-rose-200 border border-rose-500/40 shadow-[0_0_20px_rgba(244,63,94,0.25)] backdrop-blur-lg">
+<span class="material-symbols-outlined text-rose-400 text-base">trending_down</span>
+<span>急跌 · 做多方向</span>
+</span>
+</div>
+<!-- Dramatic Metric Callout -->
+<div class="mb-3 sm:mb-4 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-3">
+<span class="font-jetbrains text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-white drop-shadow-[0_0_25px_rgba(244,63,94,0.5)]">
+        25
+      </span>
+<span class="text-sm sm:text-lg md:text-xl text-rose-200/90 font-medium text-center sm:text-left">
+        个币 · 5分钟内触及下方 1.618
+      </span>
+</div>
+<!-- Event Timestamp UTC+8 -->
+<div class="text-xs text-rose-300/70 font-jetbrains mb-5 sm:mb-6 flex items-center justify-center space-x-2">
+<span class="material-symbols-outlined text-sm text-rose-400/80">schedule</span>
+<span>2026-03-30 14:38:22 北京时间 UTC+8 · 延迟 +142ms</span>
+</div>
+<!-- Scrollable Coin Chips (TEST0 through TEST24) -->
+<div class="w-full max-w-2xl px-2">
+<div class="flex items-center justify-between text-[11px] text-rose-300/70 px-1 pb-1.5">
+<span>触发币种 (25对)</span>
+<span>左右滑动查看全部</span>
+</div>
+<div class="w-full overflow-x-auto custom-crimson-scroll pb-2 pt-1">
+<div class="flex flex-nowrap gap-2">
+<!-- Synthetic Tokens TEST0 to TEST24 -->
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST0</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-3.2%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST1</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-5.8%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST2</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-4.1%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST3</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-6.4%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST4</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-4.9%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST5</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-5.2%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST6</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-4.6%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST7</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-3.9%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST8</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-7.1%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST9</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-5.5%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST10</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-4.8%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST11</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-6.0%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST12</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-3.7%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST13</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-5.3%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST14</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-4.4%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST15</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-6.8%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST16</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-5.0%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST17</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-4.2%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST18</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-3.8%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST19</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-5.9%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST20</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-6.1%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST21</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-4.5%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST22</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-5.4%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST23</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-3.6%</span>
+</div>
+<div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-950/70 border border-rose-500/30 text-xs shrink-0">
+<span class="font-jetbrains font-semibold text-rose-100">TEST24</span>
+<span class="font-jetbrains text-rose-400 font-bold bg-rose-900/50 px-1.5 py-0.5 rounded text-[11px]">-7.0%</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FOOTER ACTION CLUSTER & DISCLAIMER -->
+<footer class="relative z-10 w-full px-4 sm:px-8 pb-5 sm:pb-8 pt-2 flex flex-col items-center shrink-0">
+<div class="flex items-center justify-center gap-3 w-full max-w-md">
+<!-- Wide Powerful Red Gradient Primary Button '知道了' -->
+<button class="flex-1 py-4 px-8 rounded-2xl bg-gradient-to-r from-red-600 via-rose-600 to-red-600 hover:from-red-500 hover:via-rose-500 hover:to-red-500 active:scale-[0.98] text-white text-base sm:text-lg font-bold tracking-wider ruby-glow border border-rose-300/30 transition-all duration-200 flex items-center justify-center space-x-2" id="dismissSirenBtn" type="button">
+<span class="material-symbols-outlined text-xl sm:text-2xl">check_circle</span>
+<span>知道了</span>
+</button>
+<!-- Compact 44px Audio Icon Button (Bell/Volume) with subtle state -->
+<button aria-label="报警声音切换" class="w-12 h-12 sm:w-13 sm:h-13 rounded-2xl bg-rose-950/80 hover:bg-rose-900/80 border border-rose-500/40 text-rose-300 backdrop-blur-xl flex items-center justify-center transition-all duration-150 active:scale-95 shrink-0" id="sirenAudioToggleBtn" title="切换声音: 循环播放中" type="button">
+<span class="material-symbols-outlined text-xl sm:text-2xl text-rose-300" id="audioIcon">volume_up</span>
+</button>
+</div>
+<!-- Subtle audio status label -->
+<div class="text-[11px] text-rose-300/60 mt-2 font-jetbrains" id="audioStatusText">
+      声音已开启 · 蜂鸣提示
+    </div>
+<!-- Footer Disclaimer -->
+<p class="text-[11px] sm:text-xs text-rose-400/50 mt-2 text-center tracking-wide">
+      只通知 · 不动仓位 · 本地仲裁风控正常
+    </p>
+</footer>
+</div>
+<!-- ========================================================================= -->
+<!-- 4. FLOATING TOAST NOTIFICATION                                             -->
+<!-- ========================================================================= -->
+<div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-[#1c040b]/95 border border-rose-500/30 text-rose-100 text-xs shadow-2xl backdrop-blur-xl flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-4" id="toastNotification">
+<span class="material-symbols-outlined text-rose-400 text-sm">done_all</span>
+<span id="toastMessage">已确认告警</span>
+</div>
+<!-- ========================================================================= -->
+<!-- 5. JAVASCRIPT CONTROLLER & STATE LOGIC                                    -->
+<!-- ========================================================================= -->
+<script>
+  const immersiveScreen = document.getElementById('immersiveSirenScreen');
+  const dismissBtn = document.getElementById('dismissSirenBtn');
+  const sirenAudioToggleBtn = document.getElementById('sirenAudioToggleBtn');
+  const audioIcon = document.getElementById('audioIcon');
+  const audioStatusText = document.getElementById('audioStatusText');
+  const floatingAlarmTriggerBtn = document.getElementById('floatingAlarmTriggerBtn');
+  const quickAlarmPopover = document.getElementById('quickAlarmPopover');
+  const openImmersionAlarmBtn = document.getElementById('openImmersionAlarmBtn');
+  const toast = document.getElementById('toastNotification');
+  const toastMessage = document.getElementById('toastMessage');
+
+  let audioPlaying = true;
+
+  function showToast(msg) {
+    toastMessage.textContent = msg;
+    toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+    toast.classList.add('opacity-100', 'translate-y-0');
+    setTimeout(() => {
+      toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+      toast.classList.remove('opacity-100', 'translate-y-0');
+    }, 2400);
+  }
+
+  // Audio Toggle
+  sirenAudioToggleBtn.addEventListener('click', () => {
+    audioPlaying = !audioPlaying;
+    if (audioPlaying) {
+      audioIcon.textContent = 'volume_up';
+      audioIcon.classList.remove('text-slate-400');
+      audioIcon.classList.add('text-rose-300');
+      audioStatusText.textContent = '声音已开启 · 蜂鸣提示';
+      sirenAudioToggleBtn.title = '切换声音: 循环播放中';
+      showToast('报警声音已开启');
+    } else {
+      audioIcon.textContent = 'volume_off';
+      audioIcon.classList.remove('text-rose-300');
+      audioIcon.classList.add('text-slate-400');
+      audioStatusText.textContent = '报警音已静音';
+      sirenAudioToggleBtn.title = '切换声音: 已静音';
+      showToast('报警声音已静音');
+    }
+  });
+
+  // Dismiss Action
+  dismissBtn.addEventListener('click', () => {
+    dismissBtn.innerHTML = `
+      <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span>确认中...</span>
+    `;
+    setTimeout(() => {
+      immersiveScreen.classList.add('opacity-0', 'pointer-events-none');
+      dismissBtn.innerHTML = `
+        <span class="material-symbols-outlined text-xl sm:text-2xl">check_circle</span>
+        <span>知道了</span>
+      `;
+      showToast('已确认插针报警，主控仲裁正常');
+    }, 450);
+  });
+
+  // Re-open from floating single-bell button
+  floatingAlarmTriggerBtn.addEventListener('click', () => {
+    quickAlarmPopover.classList.toggle('hidden');
+  });
+
+  openImmersionAlarmBtn.addEventListener('click', () => {
+    quickAlarmPopover.classList.add('hidden');
+    immersiveScreen.classList.remove('opacity-0', 'pointer-events-none');
+  });
+</script>
+</body></html>

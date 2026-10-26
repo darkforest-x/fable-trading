@@ -67,6 +67,10 @@ test('page fullscreen preserves browser chrome and restores focus and surroundin
   c.enter();assert.equal(c.root.classList.contains('is-workspace-fullscreen'),false);
   assert.equal(c.topbar.inert,false);assert.equal(c.sidebar.inert,false);assert.equal(c.button.focused,true);
 });
+test('global alarm remains interactive above a fullscreen workspace',()=>{
+  const c=harness();c.other.hasAttribute=name=>name==='data-global-alert';c.enter();
+  assert.equal(c.other.inert,false);assert.equal(c.topbar.inert,true);c.enter();assert.equal(c.other.inert,false);
+});
 test('denied native fullscreen retains an escapable viewport layout and prior sidebar preference',async()=>{
   const c=harness({native:'denied',stored:'true'});c.enter();await flush();
   assert.equal(c.root.classList.contains('is-workspace-fullscreen'),true);assert.equal(c.document.fullscreenElement,null);

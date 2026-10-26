@@ -82,7 +82,7 @@
   function isolate(element) {
     for(let node=element;node.parentElement;node=node.parentElement){
       for(const sibling of node.parentElement.children){
-        if(sibling===node||['SCRIPT','STYLE','LINK','HEAD'].includes(sibling.tagName))continue;
+        if(sibling===node||sibling.hasAttribute?.('data-global-alert')||['SCRIPT','STYLE','LINK','HEAD'].includes(sibling.tagName))continue;
         isolated.push([sibling,sibling.inert]);sibling.inert=true;
       }
     }
