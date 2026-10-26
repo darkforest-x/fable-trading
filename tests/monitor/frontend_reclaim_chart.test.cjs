@@ -25,7 +25,7 @@ test('confirmation cannot invent an initial stop or extend an ended position int
  assert.equal(geometry(pos({fill_ms:100000,stage:'closed',exit_ms:200000}),rows,step,1000000),null);
  assert.equal(geometry(pos({stage:'closed',exit_ms:500000}),rows,step,1000000),null);
 });
-test('trade drawings label both directions and activate the entry stop only at its backend timestamp',()=>{
+test('trade drawings retain directional triangles without event badges and time protection correctly',()=>{
  const sandbox={window:{SpikeChartTools:{axisPrice:String}},module:{exports:{}}};
  vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/reclaim-chart.js','utf8'),sandbox);
  const texts=[],arrows=[];let path=[];
@@ -34,14 +34,18 @@ test('trade drawings label both directions and activate the entry stop only at i
  for(const side of [1,-1]){
   const p=pos({side}),draw=new sandbox.module.exports.TradeDrawing(owner);draw.trade=p;draw.step=step;draw.shape=geometry(p,rows,step,950000);
   texts.length=0;arrows.length=0;draw.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:500,height:500}})});
-  assert.ok(texts.includes(`${side===1?'多头':'空头'}开仓 · 120`));assert.ok(!texts.some(x=>x.includes('止损')));
+  assert.ok(!texts.some(x=>x.includes('开仓 ·')));assert.ok(!texts.some(x=>x.includes('止损')));
   assert.equal(Math.sign(arrows[0][1][1]-arrows[0][0][1]),side);
   draw.trade={...p,be_from_ms:900001};draw.shape=geometry(draw.trade,rows,step,950000);texts.length=0;
   draw.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:500,height:500}})});
   assert.ok(texts.some(x=>x.includes('入场价止损已启用')));
   draw.trade={...p,exits:[{reason:'manual',notional:25,price:122,exit_ms:900001}]};draw.shape=geometry(draw.trade,rows,step,950000);texts.length=0;
   draw.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:500,height:500}})});
-  assert.ok(texts.some(x=>x.includes('减仓 25.0%')));
+  assert.ok(!texts.some(x=>x.includes('减仓')));
+  assert.equal(arrows.length,4,'entry plus partial-exit triangles remain across the two paints');
+  draw.trade={...p,stage:'closed',exit_ms:900001,exit_price:122,reason:'manual'};draw.shape=geometry(draw.trade,rows,step,950000);texts.length=0;arrows.length=0;
+  draw.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:500,height:500}})});
+  assert.equal(arrows.length,2);assert.ok(!texts.some(x=>/平仓|开仓 ·|减仓/.test(x)));
  }
 });
 test('Monday chart factories own separate requests, canvases and timers',()=>{

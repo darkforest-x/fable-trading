@@ -39,10 +39,10 @@
         const stopX=g.stop==null?null:stopIndex>=0?at(stopIndex,g.stop):g.stop<o.rows[0].time*1000?0:null;
         if(fin(p.backstop))line(p.backstop,'确认前兜底止损','#d7355d',left,[3,4],g.stop==null?right:Math.min(right,stopX??left));
         if(stopX!=null)line(fin(p.be_price)?p.be_price:p.entry,fin(p.be_price)?'保本保护止损':'入场价止损已启用','#8b6ab1',Math.max(0,stopX),[3,4]);
-        const marker=(i,value,label,up,tone)=>{const xx=x(i),yy=y(value);if(xx==null||yy==null||xx<0||xx>s.width)return;const dir=up?1:-1;ctx.setLineDash([]);ctx.fillStyle=tone;ctx.beginPath();ctx.moveTo(xx,yy);ctx.lineTo(xx-5,yy+dir*9);ctx.lineTo(xx+5,yy+dir*9);ctx.closePath();ctx.fill();const text=label+' · '+format(value),w=ctx.measureText(text).width+16,bx=Math.max(4,Math.min(s.width-w-4,xx-w/2)),by=yy+dir*26-11>(s.height-125)?yy-39:yy+dir*26-11;ctx.beginPath();ctx.roundRect(bx,by,w,22,6);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(text,bx+w/2,by+11);};
-        if(g.entry>=0)marker(g.entry,p.entry,p.side===1?'多头开仓':'空头开仓',p.side===1,color);
-        for(const fill of p.exits||[]){if(fill.reason!=='manual'||(p.stage==='closed'&&fill===p.exits.at(-1)))continue;const i=candleIndex(o.rows,fill.exit_ms,this.step);if(i>=0)marker(i,fill.price,'减仓 '+(fill.notional/p.notional*100).toFixed(1)+'%',p.side!==1,'#617488');}
-        if(g.exit>=0&&fin(p.exit_price))marker(g.exit,p.exit_price,p.reason==='manual'?'手动平仓':'平仓',p.side!==1,'#617488');
+        const marker=(i,value,up,tone)=>{const xx=x(i),yy=y(value);if(xx==null||yy==null||xx<0||xx>s.width)return;const dir=up?1:-1;ctx.setLineDash([]);ctx.fillStyle=tone;ctx.beginPath();ctx.moveTo(xx,yy);ctx.lineTo(xx-4,yy+dir*7);ctx.lineTo(xx+4,yy+dir*7);ctx.closePath();ctx.fill();};
+        if(g.entry>=0)marker(g.entry,p.entry,p.side===1,color);
+        for(const fill of p.exits||[]){if(fill.reason!=='manual'||(p.stage==='closed'&&fill===p.exits.at(-1)))continue;const i=candleIndex(o.rows,fill.exit_ms,this.step);if(i>=0)marker(i,fill.price,p.side!==1,'#617488');}
+        if(g.exit>=0&&fin(p.exit_price))marker(g.exit,p.exit_price,p.side!==1,'#617488');
         ctx.restore();
       });
     }
@@ -53,6 +53,8 @@
     const shared=window.SpikePublicChartCache;
     const chart=window.SpikeMondayFibChart.create({decorate:(instance,data)=>{
       const p=data.paperTrade,step=periods[data.bar];
+      instance.chart?.applyOptions?.({handleScale:{axisDoubleClickReset:false}});
+      instance.canvas?.setAttribute('aria-label','K 线交互图；双击或双点任意图表位置隐藏／恢复悬浮组件；拖动平移，滚轮或双指缩放；Home 全图，End 最新');
       const trades=new Map([...(data.paperTrades||[]),...(p?[p]:[])].filter(t=>valid(t)&&t.symbol===data.symbol).map(t=>[String(t.id),t]));
       instance.paperDrawings ||= new Map();
       for(const [id,old] of instance.paperDrawings)if(!trades.has(id)){old.shape=null;instance.series.detachPrimitive?.(old);instance.paperDrawings.delete(id);}

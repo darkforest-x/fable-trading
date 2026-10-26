@@ -1,0 +1,16 @@
+{
+  "project_id": "8978791379095391159",
+  "source_screen_id": "7908551d2e9a4ccc8a684a8da56dd952",
+  "screen_id": "86d19d3dabb141408620cf1ad0ce4553",
+  "model": "GEMINI_3_8_FLASH",
+  "request": {
+    "projectId": "8978791379095391159",
+    "selectedScreenIds": [
+      "7908551d2e9a4ccc8a684a8da56dd952"
+    ],
+    "modelId": "GEMINI_3_8_FLASH",
+    "deviceType": "MOBILE",
+    "prompt": "Refine the existing SPIKE clear-glass full-screen candlestick workspace, produce a new MOBILE 390px screen AND HTML code. Keep existing navigation, compact account/context, coin shortcuts, bottom tools, menus and sheet structure. Use ONLY synthetic placeholder data, no live account facts. Requested small changes: (1) remove ALL large trade-event text badges on candles (long/short entry, partial close, close). Keep only tiny directional triangles and thin trading/weekly price lines, no new badges. (2) double-click/double-tap anywhere in the candlestick layout toggles ALL floating UI hidden/restored, including header/navigation, context, coin menu, status, bottom tools and open sheets; focus mode leaves just chart and axes. Restore the prior component state on second double tap. Do not add a persistent focus-mode label or extra floating toggle. (3) every floating component uses markedly clearer iPhone-style glass: white base opacity 0.12–0.20, dark base 0.16–0.24; subtle 12–16px blur, saturation 160–180%, fine specular border and soft small shadow. Avoid layered opaque fills; selected controls remain legible with dark text. Show candles visibly transmitting through the glass. Include Safari -webkit-backdrop-filter and a readable no-backdrop fallback. Preserve existing visual vocabulary and compact density. Show the normal state with transparent floating components in main design; include HTML dblclick and touch toggle for focus mode. Do not change trading behavior or strategy text. Name this design SPIKE · 轻透玻璃与双击专注."
+  },
+  "adaptation": "Keep existing paper workspace layout and accounts. Reuse clearer glass tokens; remove trade-event badges; double click/tap toggles floating chrome while preserving chart and panel state. Do not copy synthetic design data, trading semantics or generated gestures without safeguards."
+}

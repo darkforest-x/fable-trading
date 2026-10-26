@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SPIKE · 轻透玻璃与双击专注</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            spike: {
+              bg: '#f8fafd',
+              card: 'rgba(255, 255, 255, 0.16)',
+              border: 'rgba(255, 255, 255, 0.45)',
+              specular: 'rgba(255, 255, 255, 0.75)',
+              cyan: '#0071e3',
+              green: '#0ea371',
+              red: '#e53e5d',
+              darkbg: '#090c10',
+              darkcard: 'rgba(18, 24, 38, 0.20)',
+              darkborder: 'rgba(255, 255, 255, 0.12)'
+            }
+          },
+          fontFamily: {
+            mono: ['"SF Mono"', 'Monaco', 'Menlo', 'Consolas', 'monospace'],
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"PingFang SC"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Material Symbols Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <style>
+    /* Ultra-clear Apple Glass (iPhone spec: opacity 0.12-0.20, blur 14px, saturation 170%, specular edge) */
+    .apple-glass {
+      background: rgba(255, 255, 255, 0.16);
+      -webkit-backdrop-filter: blur(14px) saturate(175%);
+      backdrop-filter: blur(14px) saturate(175%);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), inset 0 1px 1px 0 rgba(255, 255, 255, 0.7);
+    }
+    .dark .apple-glass {
+      background: rgba(15, 20, 30, 0.22);
+      -webkit-backdrop-filter: blur(14px) saturate(175%);
+      backdrop-filter: blur(14px) saturate(175%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    /* Fallback if backdrop-filter is not supported */
+    @supports not ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
+      .apple-glass {
+        background: rgba(248, 250, 253, 0.90);
+      }
+      .dark .apple-glass {
+        background: rgba(14, 18, 26, 0.92);
+      }
+    }
+
+    /* Glass Pills for inner controls */
+    .apple-pill {
+      background: rgba(255, 255, 255, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .dark .apple-pill {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    /* Active Selected State in Glass */
+    .apple-pill-active {
+      background: rgba(0, 113, 227, 0.15);
+      border: 1px solid rgba(0, 113, 227, 0.4);
+      color: #0071e3;
+      font-weight: 600;
+    }
+    .dark .apple-pill-active {
+      background: rgba(0, 229, 255, 0.16);
+      border: 1px solid rgba(0, 229, 255, 0.45);
+      color: #00e5ff;
+    }
+
+    /* Focus Mode UI Hiding Transition */
+    .floating-ui-layer {
+      transition: opacity 0.26s cubic-bezier(0.16, 1, 0.3, 1), transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.26s;
+      will-change: opacity, transform;
+    }
+
+    .ui-hidden {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transform: translateY(-8px) scale(0.98);
+      visibility: hidden !important;
+    }
+
+    .ui-hidden-bottom {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transform: translateY(16px) scale(0.98);
+      visibility: hidden !important;
+    }
+
+    /* Smooth Candle Glow */
+    .candle-shadow-up {
+      filter: drop-shadow(0 2px 4px rgba(14, 163, 113, 0.15));
+    }
+    .candle-shadow-down {
+      filter: drop-shadow(0 2px 4px rgba(229, 62, 93, 0.15));
+    }
+
+    /* Custom Scrollbar for horizontal chips */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="h-full w-full bg-[#f6f8fb] dark:bg-[#080b11] text-slate-800 dark:text-slate-100 font-sans select-none overflow-hidden touch-manipulation">
+
+  <!-- Mobile Viewport Frame (390px portrait simulation container) -->
+  <div class="relative w-full h-full max-w-[430px] mx-auto overflow-hidden bg-[#f4f7fb] dark:bg-[#070a10] flex flex-col justify-between" id="appRoot">
+
+    <!-- ========================================== -->
+    <!-- 1. FULL VIEWPORT IMMERSIVE WALLPAPER CHART -->
+    <!-- (Candlesticks visually transmit beneath floating glass) -->
+    <!-- ========================================== -->
+    <div id="chartContainer" class="absolute inset-0 z-0 w-full h-full cursor-crosshair overflow-hidden">
+      <!-- Full-bleed SVG Candlestick Engine -->
+      <svg id="candlestickSvg" class="w-full h-full block" viewBox="0 0 390 844" preserveAspectRatio="none">
+        <defs>
+          <!-- Grid linear pattern -->
+          <pattern id="chartGrid" width="65" height="48" patternUnits="userSpaceOnUse">
+            <path d="M 65 0 L 0 0 0 48" fill="none" stroke="currentColor" class="text-slate-200/50 dark:text-slate-800/40" stroke-width="0.75" stroke-dasharray="3,3"/>
+          </pattern>
+          <!-- Price fill gradient -->
+          <linearGradient id="volGradUp" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0ea371" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#0ea371" stop-opacity="0.05"/>
+          </linearGradient>
+          <linearGradient id="volGradDown" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e53e5d" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#e53e5d" stop-opacity="0.05"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Background grid -->
+        <rect width="100%" height="100%" fill="url(#chartGrid)"/>
+
+        <!-- Subtle Watermark Symbol centered in chart -->
+        <text x="180" y="440" font-size="78" font-weight="900" text-anchor="middle" fill="currentColor" class="text-slate-900/[0.03] dark:text-white/[0.025] tracking-widest pointer-events-none">SOL 1H</text>
+
+        <!-- ================= FIBONACCI & WEEKLY HORIZONTAL REFERENCE LINES ================= -->
+        <!-- Upper 1.618 Extension Level (198.50) - Solid Thin Line -->
+        <line x1="0" y1="168" x2="338" y2="168" stroke="#e53e5d" stroke-width="1.2" opacity="0.85"/>
+        <line x1="338" y1="168" x2="390" y2="168" stroke="#e53e5d" stroke-width="1" stroke-dasharray="2,2" opacity="0.5"/>
+
+        <!-- Monday High Reference Line (188.00) - Solid Thin Line -->
+        <line x1="0" y1="312" x2="338" y2="312" stroke="#64748b" stroke-width="1.2" opacity="0.7" stroke-dasharray="4,3"/>
+
+        <!-- Entry Trade Baseline (184.50) - Thin Precision Line -->
+        <line x1="160" y1="384" x2="338" y2="384" stroke="#0071e3" stroke-width="1" opacity="0.8"/>
+
+        <!-- Dynamic Real-time Price Line (170.96) - Delicate 4px/4px Dashed Line -->
+        <line x1="0" y1="562" x2="338" y2="562" stroke="#e53e5d" stroke-width="1.2" stroke-dasharray="4,4" opacity="0.95"/>
+
+        <!-- Monday Low Reference Line (168.00) - Solid Thin Line -->
+        <line x1="0" y1="610" x2="338" y2="610" stroke="#64748b" stroke-width="1.2" opacity="0.7" stroke-dasharray="4,3"/>
+
+        <!-- Lower 1.618 Extension Level (156.20) - Solid Thin Line -->
+        <line x1="0" y1="738" x2="338" y2="738" stroke="#0ea371" stroke-width="1.2" opacity="0.85"/>
+        <line x1="338" y1="738" x2="390" y2="738" stroke="#0ea371" stroke-width="1" stroke-dasharray="2,2" opacity="0.5"/>
+
+        <!-- ================= CANDLESTICKS WITH VISIBLE GLASS TRANSMISSION ================= -->
+        <!-- Candles passing directly beneath top bar, shortcuts, middle and bottom sheet -->
+        <g id="candlesGroup">
+          <!-- 1. SOL 1H Past sequence (Left side) -->
+          <line x1="18" y1="630" x2="18" y2="690" stroke="#0ea371" stroke-width="1.5"/>
+          <rect x="13" y="640" width="10" height="42" fill="#0ea371" rx="1.5"/>
+
+          <line x1="36" y1="590" x2="36" y2="665" stroke="#0ea371" stroke-width="1.5"/>
+          <rect x="31" y="605" width="10" height="48" fill="#0ea371" rx="1.5"/>
+
+          <line x1="54" y1="540" x2="54" y2="620" stroke="#0ea371" stroke-width="1.5"/>
+          <rect x="49" y="555" width="10" height="52" fill="#0ea371" rx="1.5"/>
+
+          <line x1="72" y1="460" x2="72" y2="580" stroke="#0ea371" stroke-width="1.5"/>
+          <rect x="67" y="480" width="10" height="75" fill="#0ea371" rx="1.5"/>
+
+          <line x1="90" y1="360" x2="90" y2="510" stroke="#0ea371" stroke-width="1.5"/>
+          <rect x="85" y="385" width="10" height="98" fill="#0ea371" rx="1.5"/>
+
+          <!-- Top wick touches Monday High -->
+          <line x1="108" y1="305" x2="108" y2="400" stroke="#0ea371" stroke-width="1.5"/>
+          <rect x="103" y="325" width="10" height="60" fill="#0ea371" rx="1.5"/>
+
+          <!-- Small pullbacks near Monday High -->
+          <line x1="126" y1="320" x2="126" y2="395" stroke="#e53e5d" stroke-width="1.5"/>
+          <rect x="121" y="335" width="10" height="38" fill="#e53e5d" rx="1.5"/>
+
+          <line x1="144" y1="340" x2="144" y2="415" stroke="#e53e5d" stroke-width="1.5"/>
+          <rect x="139" y="358" width="10" height="34" fill="#e53e5d" rx="1.5"/>
+
+          <line x1="162" y1="330" x2="162" y2="398" stroke="#0ea371" stroke-width="1.5"/>
+          <rect x="157" y="345" width="10" height="35" fill="#0ea371" rx="1.5"/>
+
+          <!-- Breakout upward test towards upper 1.618 -->
+          <line x1="180" y1="285" x2="180" y2="360" stroke="#0ea371" stroke-width="1.5"/>
+          <rect x="175" y="300" width="10" height="42" fill="#0ea371" rx="1.5"/>
+
+          <line x1="198" y1="240" x2="198" y2="320" stroke="#0ea371" stroke-width="1.5"/>
+          <rect x="193" y="260" width="10" height="45" fill="#0ea371" rx="1.5"/>
+
+          <!-- Peak candle touching upper 1.618 (Pinbar reversal) -->
+          <line x1="216" y1="168" x2="216" y2="295" stroke="#0ea371" stroke-width="1.5"/>
+          <rect x="211" y="235" width="10" height="32" fill="#0ea371" rx="1.5"/>
+
+          <!-- Trade Entry Candle (Down reversal) -->
+          <line x1="234" y1="230" x2="234" y2="340" stroke="#e53e5d" stroke-width="1.5"/>
+          <rect x="229" y="250" width="10" height="60" fill="#e53e5d" rx="1.5"/>
+
+          <!-- ================= ONLY TINY DIRECTIONAL TRIANGLE (NO TEXT BADGE) ================= -->
+          <!-- Short Entry indicator: tiny crisp red downward triangle at top of entry candle -->
+          <polygon points="234,220 230,212 238,212" fill="#e53e5d"/>
+          <!-- Break-even safety Armed: tiny blue diamond mark -->
+          <polygon points="252,380 255,384 252,388 249,384" fill="#0071e3"/>
+
+          <!-- Sustained downward cascade -->
+          <line x1="252" y1="300" x2="252" y2="400" stroke="#e53e5d" stroke-width="1.5"/>
+          <rect x="247" y="325" width="10" height="62" fill="#e53e5d" rx="1.5"/>
+
+          <line x1="270" y1="365" x2="270" y2="465" stroke="#e53e5d" stroke-width="1.5"/>
+          <rect x="265" y="380" width="10" height="70" fill="#e53e5d" rx="1.5"/>
+
+          <!-- Tiny take-profit partial trigger indicator: tiny upward triangle -->
+          <polygon points="270,474 266,482 274,482" fill="#0ea371"/>
+
+          <line x1="288" y1="440" x2="288" y2="520" stroke="#e53e5d" stroke-width="1.5"/>
+          <rect x="283" y="455" width="10" height="52" fill="#e53e5d" rx="1.5"/>
+
+          <line x1="306" y1="495" x2="306" y2="585" stroke="#e53e5d" stroke-width="1.5"/>
+          <rect x="301" y="515" width="10" height="58" fill="#e53e5d" rx="1.5"/>
+
+          <!-- Current active forming candle (170.96) -->
+          <line x1="324" y1="545" x2="324" y2="598" stroke="#0ea371" stroke-width="1.5"/>
+          <rect x="319" y="555" width="10" height="30" fill="#0ea371" rx="1.5"/>
+
+          <!-- Pulsing current price point at 170.96 -->
+          <circle cx="324" cy="562" r="3.5" fill="#e53e5d" class="animate-ping" opacity="0.75"/>
+          <circle cx="324" cy="562" r="2.5" fill="#e53e5d"/>
+        </g>
+
+        <!-- Bottom Volume Sub-Chart Transmitting into bottom glass -->
+        <g opacity="0.35" class="dark:opacity-0.25">
+          <rect x="13" y="775" width="10" height="35" fill="url(#volGradUp)"/>
+          <rect x="31" y="765" width="10" height="45" fill="url(#volGradUp)"/>
+          <rect x="49" y="750" width="10" height="60" fill="url(#volGradUp)"/>
+          <rect x="67" y="730" width="10" height="80" fill="url(#volGradUp)"/>
+          <rect x="85" y="710" width="10" height="100" fill="url(#volGradUp)"/>
+          <rect x="103" y="755" width="10" height="55" fill="url(#volGradUp)"/>
+          <rect x="121" y="770" width="10" height="40" fill="url(#volGradDown)"/>
+          <rect x="139" y="780" width="10" height="30" fill="url(#volGradDown)"/>
+          <rect x="157" y="760" width="10" height="50" fill="url(#volGradUp)"/>
+          <rect x="175" y="740" width="10" height="70" fill="url(#volGradUp)"/>
+          <rect x="193" y="725" width="10" height="85" fill="url(#volGradUp)"/>
+          <rect x="211" y="695" width="10" height="115" fill="url(#volGradUp)"/>
+          <rect x="229" y="705" width="10" height="105" fill="url(#volGradDown)"/>
+          <rect x="247" y="715" width="10" height="95" fill="url(#volGradDown)"/>
+          <rect x="265" y="728" width="10" height="82" fill="url(#volGradDown)"/>
+          <rect x="283" y="745" width="10" height="65" fill="url(#volGradDown)"/>
+          <rect x="301" y="735" width="10" height="75" fill="url(#volGradDown)"/>
+          <rect x="319" y="758" width="10" height="52" fill="url(#volGradUp)"/>
+        </g>
+
+        <!-- Right Side Precision Price Axis (Always accessible & transparent) -->
+        <g class="text-[10px] font-mono select-none" fill="currentColor">
+          <!-- 198.50 Upper 1.618 -->
+          <rect x="340" y="159" width="46" height="18" rx="3" fill="#e53e5d" opacity="0.15"/>
+          <text x="344" y="172" fill="#e53e5d" font-weight="700">198.50</text>
+
+          <!-- 188.00 Mon High -->
+          <text x="344" y="316" class="text-slate-500 dark:text-slate-400" font-weight="500">188.00</text>
+
+          <!-- 184.50 Entry -->
+          <text x="344" y="388" fill="#0071e3" font-weight="600">184.50</text>
+
+          <!-- 170.96 Real-time Price -->
+          <rect x="338" y="552" width="48" height="20" rx="3" fill="#e53e5d"/>
+          <text x="342" y="566" fill="#ffffff" font-weight="700">170.96</text>
+
+          <!-- 168.00 Mon Low -->
+          <text x="344" y="614" class="text-slate-500 dark:text-slate-400" font-weight="500">168.00</text>
+
+          <!-- 156.20 Lower 1.618 -->
+          <rect x="340" y="729" width="46" height="18" rx="3" fill="#0ea371" opacity="0.15"/>
+          <text x="344" y="742" fill="#0ea371" font-weight="700">156.20</text>
+        </g>
+
+        <!-- Time Axis Labels across bottom -->
+        <g class="text-[9px] font-mono text-slate-400 dark:text-slate-500" fill="currentColor">
+          <text x="25" y="828">03:00</text>
+          <text x="95" y="828">09:00</text>
+          <text x="165" y="828">15:00</text>
+          <text x="235" y="828">21:00</text>
+          <text x="305" y="828">04:00</text>
+        </g>
+      </svg>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. ULTRA-CLEAR IPHONE APPLE GLASS OVERLAYS -->
+    <!-- (All hide simultaneously on double-click/tap) -->
+    <!-- ========================================== -->
+
+    <!-- TOP SECTION: HEADER + COIN SHORTCUTS + CONTEXT BAR -->
+    <div id="topOverlayGroup" class="floating-ui-layer relative z-20 w-full pt-2 px-3 flex flex-col gap-2">
+
+      <!-- Header Row: Spike Brand + State Capsule + Account Summary + Theme Toggle -->
+      <div class="apple-glass rounded-2xl h-11 px-3 flex items-center justify-between">
+        <!-- Brand / Mode Indicator -->
+        <div class="flex items-center gap-1.5">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center text-white shadow-xs">
+            <span class="material-symbols-outlined text-[15px] font-bold">show_chart</span>
+          </div>
+          <span class="text-xs font-black tracking-wider text-slate-900 dark:text-white">SPIKE</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-cyan-400 font-mono font-medium border border-blue-500/20">模拟盘</span>
+        </div>
+
+        <!-- Right Quick Status & Theme Switcher -->
+        <div class="flex items-center gap-2">
+          <!-- Synthetic Account Capsule -->
+          <div class="flex items-center gap-1 text-[11px] font-mono text-slate-600 dark:text-slate-300 bg-white/20 dark:bg-white/5 px-2 py-1 rounded-xl border border-white/30 dark:border-white/10">
+            <span class="text-slate-400 text-[10px]">净值</span>
+            <span class="font-bold text-slate-900 dark:text-white">1,048.60</span>
+            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">+48.60</span>
+          </div>
+
+          <!-- Light/Dark Mode Button (44px touch target) -->
+          <button id="themeToggleBtn" aria-label="切换深浅主题" class="w-8 h-8 rounded-full apple-pill flex items-center justify-center text-slate-700 dark:text-slate-200 active:scale-95">
+            <span class="material-symbols-outlined text-[17px] dark:hidden">dark_mode</span>
+            <span class="material-symbols-outlined text-[17px] hidden dark:block">light_mode</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Coin Strip (Horizontal Scroll, 5 Coins Shortcuts) -->
+      <div class="apple-glass rounded-2xl p-1.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+        <!-- SOL (Active) -->
+        <button class="apple-pill apple-pill-active rounded-xl px-2.5 py-1 flex items-center gap-1.5 text-xs whitespace-nowrap active:scale-95">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#0071e3] dark:bg-[#00e5ff] animate-pulse"></span>
+          <span class="font-bold">SOL</span>
+          <span class="font-mono text-[11px] text-red-500 font-semibold">↑198.5</span>
+        </button>
+        <!-- BTC -->
+        <button class="apple-pill rounded-xl px-2.5 py-1 flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300 whitespace-nowrap active:scale-95">
+          <span class="font-medium">BTC</span>
+          <span class="font-mono text-[11px] text-emerald-600 dark:text-emerald-400">↓65.3k</span>
+        </button>
+        <!-- ETH -->
+        <button class="apple-pill rounded-xl px-2.5 py-1 flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300 whitespace-nowrap active:scale-95">
+          <span class="font-medium">ETH</span>
+          <span class="font-mono text-[11px] text-red-500">↑2,730</span>
+        </button>
+        <!-- SUI -->
+        <button class="apple-pill rounded-xl px-2.5 py-1 flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300 whitespace-nowrap active:scale-95">
+          <span class="font-medium">SUI</span>
+          <span class="font-mono text-[11px] text-emerald-600 dark:text-emerald-400">↑2.45</span>
+        </button>
+        <!-- DOGE -->
+        <button class="apple-pill rounded-xl px-2.5 py-1 flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300 whitespace-nowrap active:scale-95">
+          <span class="font-medium">DOGE</span>
+          <span class="font-mono text-[11px] text-slate-500">0.132</span>
+        </button>
+      </div>
+
+      <!-- Current Coin Context Card (Compact, Transparent, Showing Position & Range status) -->
+      <div class="apple-glass rounded-2xl p-2.5 flex items-center justify-between shadow-xs">
+        <div class="flex items-center gap-2">
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-sm font-bold tracking-tight text-slate-900 dark:text-white">SOL/USDT</span>
+              <span class="text-[10px] px-1 py-0.2 rounded bg-slate-200/50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 font-medium">永续</span>
+              <!-- Position state badge -->
+              <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 font-medium border border-red-500/20 flex items-center gap-1">
+                <span class="w-1 h-1 rounded-full bg-red-500"></span>
+                做空 · 浮盈中
+              </span>
+            </div>
+            <div class="flex items-center gap-2 mt-0.5 text-[11px] font-mono">
+              <span class="text-slate-500">入场 <span class="font-semibold text-slate-800 dark:text-slate-200">184.50</span></span>
+              <span class="text-slate-400">|</span>
+              <span class="text-slate-500">现价 <span class="font-bold text-red-600 dark:text-red-400">170.96</span></span>
+              <span class="text-emerald-600 dark:text-emerald-400 font-bold">+7.34%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Access: Latest Touches & Orders Sheet Trigger -->
+        <button id="touchesBtn" class="apple-pill px-2.5 py-1.5 rounded-xl flex items-center gap-1 text-xs text-blue-600 dark:text-cyan-400 font-medium active:scale-95">
+          <span class="material-symbols-outlined text-[15px]">notifications_active</span>
+          <span>最新触达</span>
+          <span class="w-4 h-4 rounded-full bg-blue-600 dark:bg-cyan-400 text-white dark:text-slate-950 text-[10px] flex items-center justify-center font-bold">42</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. EXPANDABLE LATEST TOUCHES SHEET (OVERLAY) -->
+    <!-- ========================================== -->
+    <div id="touchContractsSheet" class="floating-ui-layer absolute top-44 left-3 right-3 z-30 apple-glass rounded-2xl p-3 shadow-lg border border-white/60 dark:border-white/15 flex flex-col gap-2 transition-all">
+      <div class="flex items-center justify-between pb-1 border-b border-white/30 dark:border-white/10">
+        <div class="flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-blue-600 dark:text-cyan-400 text-base">radar</span>
+          <span class="text-xs font-bold text-slate-900 dark:text-white">最近触价标的</span>
+          <span class="text-[10px] font-mono text-slate-400">(42)</span>
+        </div>
+        <button id="closeSheetBtn" class="w-5 h-5 rounded-full apple-pill flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white">
+          <span class="material-symbols-outlined text-xs">close</span>
+        </button>
+      </div>
+
+      <!-- Contracts item list (Ultra clean, showing underlying candles) -->
+      <div class="flex flex-col gap-1.5 text-xs max-h-40 overflow-y-auto pr-1">
+        <!-- SOL Row (Current) -->
+        <div class="apple-pill apple-pill-active rounded-xl p-2 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-600 dark:text-cyan-300 font-bold text-[10px] flex items-center justify-center font-mono">S</span>
+            <div>
+              <div class="font-bold flex items-center gap-1">SOL/USDT <span class="text-[10px] text-red-500 font-mono font-normal">↑198.50</span></div>
+              <div class="text-[10px] text-slate-500">触碰上 1.618 · 10m前</div>
+            </div>
+          </div>
+          <span class="text-[10px] px-2 py-0.5 rounded-lg bg-blue-500/20 text-blue-600 dark:text-cyan-400 font-semibold">主屏中</span>
+        </div>
+
+        <!-- BTC Row -->
+        <div class="apple-pill rounded-xl p-2 flex items-center justify-between text-slate-700 dark:text-slate-300 hover:bg-white/30">
+          <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 font-bold text-[10px] flex items-center justify-center font-mono">B</span>
+            <div>
+              <div class="font-bold flex items-center gap-1">BTC/USDT <span class="text-[10px] text-emerald-600 font-mono font-normal">↓65,300</span></div>
+              <div class="text-[10px] text-slate-400">触碰下 1.618 · 44m前</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-slate-400 text-sm">open_in_new</span>
+        </div>
+
+        <!-- ETH Row -->
+        <div class="apple-pill rounded-xl p-2 flex items-center justify-between text-slate-700 dark:text-slate-300 hover:bg-white/30">
+          <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-600 font-bold text-[10px] flex items-center justify-center font-mono">E</span>
+            <div>
+              <div class="font-bold flex items-center gap-1">ETH/USDT <span class="text-[10px] text-red-500 font-mono font-normal">↑2,730</span></div>
+              <div class="text-[10px] text-slate-400">触碰上 1.618 · 2h前</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-slate-400 text-sm">open_in_new</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 4. BOTTOM FLOATING TOOLS & NAVIGATION DOCK -->
+    <!-- ========================================== -->
+    <div id="bottomOverlayGroup" class="floating-ui-layer relative z-20 w-full pb-4 px-3 flex flex-col gap-2">
+
+      <!-- Candlestick Timeframe Tools & Indicator Toggles -->
+      <div class="apple-glass rounded-2xl h-11 px-2.5 flex items-center justify-between shadow-sm">
+        <!-- Timeframe selector -->
+        <div class="flex items-center gap-1">
+          <button class="apple-pill rounded-lg px-2 py-1 text-xs text-slate-600 dark:text-slate-300 active:scale-95">5m</button>
+          <button class="apple-pill rounded-lg px-2 py-1 text-xs text-slate-600 dark:text-slate-300 active:scale-95">15m</button>
+          <button class="apple-pill apple-pill-active rounded-lg px-2 py-1 text-xs font-bold active:scale-95">1h</button>
+          <button class="apple-pill rounded-lg px-2 py-1 text-xs text-slate-600 dark:text-slate-300 active:scale-95">4h</button>
+          <button class="apple-pill rounded-lg px-2 py-1 text-xs text-slate-600 dark:text-slate-300 active:scale-95">1D</button>
+        </div>
+
+        <!-- Chart Actions -->
+        <div class="flex items-center gap-1.5">
+          <!-- MA6 Toggle -->
+          <button id="maToggleBtn" class="apple-pill rounded-lg px-2 py-1 text-[11px] text-slate-600 dark:text-slate-300 flex items-center gap-1 active:scale-95">
+            <span class="material-symbols-outlined text-[14px]">timeline</span>
+            <span>六均线</span>
+            <span class="text-[9px] text-slate-400">OFF</span>
+          </button>
+
+          <!-- Follow Latest Single Action -->
+          <button class="rounded-lg px-2.5 py-1 text-[11px] bg-[#0071e3] text-white font-medium flex items-center gap-1 active:scale-95 shadow-xs">
+            <span class="material-symbols-outlined text-[13px]">my_location</span>
+            <span>最新单</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Navigation Dock (Standard 5 Core Items) -->
+      <div class="apple-glass rounded-2xl h-14 px-3 flex items-center justify-around shadow-md">
+        <!-- 合约 -->
+        <button class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 active:scale-95">
+          <span class="material-symbols-outlined text-[20px]">currency_exchange</span>
+          <span class="text-[10px] mt-0.5">合约</span>
+        </button>
+
+        <!-- 巡检 -->
+        <button class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 active:scale-95">
+          <span class="material-symbols-outlined text-[20px]">troubleshoot</span>
+          <span class="text-[10px] mt-0.5">巡检</span>
+        </button>
+
+        <!-- 1.618 核心聚焦 (Active Center Indicator) -->
+        <button class="flex flex-col items-center justify-center text-[#0071e3] dark:text-[#00e5ff] font-semibold active:scale-95">
+          <div class="w-8 h-8 rounded-full apple-pill apple-pill-active flex items-center justify-center shadow-xs">
+            <span class="material-symbols-outlined text-[19px]">candlestick_chart</span>
+          </div>
+          <span class="text-[10px] mt-0.5">1.618</span>
+        </button>
+
+        <!-- 持仓 (含数字徽标) -->
+        <button class="relative flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 active:scale-95">
+          <span class="material-symbols-outlined text-[20px]">pie_chart</span>
+          <span class="text-[10px] mt-0.5">持仓</span>
+          <span class="absolute 1 top-0 right-1 w-3.5 h-3.5 rounded-full bg-red-500 text-white text-[8px] font-bold flex items-center justify-center font-mono">1</span>
+        </button>
+
+        <!-- 统计分析 -->
+        <button class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 active:scale-95">
+          <span class="material-symbols-outlined text-[20px]">query_stats</span>
+          <span class="text-[10px] mt-0.5">统计</span>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 5. INTERACTION CONTROLLER: DOUBLE TAP FOCUS MODE & THEMES -->
+  <!-- ========================================== -->
+  <script>
+    (function initSpikeFocusApp() {
+      const appRoot = document.getElementById('appRoot');
+      const chartContainer = document.getElementById('chartContainer');
+      const topOverlayGroup = document.getElementById('topOverlayGroup');
+      const bottomOverlayGroup = document.getElementById('bottomOverlayGroup');
+      const touchContractsSheet = document.getElementById('touchContractsSheet');
+      const touchesBtn = document.getElementById('touchesBtn');
+      const closeSheetBtn = document.getElementById('closeSheetBtn');
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      const maToggleBtn = document.getElementById('maToggleBtn');
+
+      // State Memory
+      let isFocusMode = false;
+      let sheetWasOpenBeforeFocus = true;
+
+      // 1. Toggle Latest Touches Drawer
+      touchesBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        touchContractsSheet.classList.toggle('hidden');
+      });
+
+      closeSheetBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        touchContractsSheet.classList.add('hidden');
+      });
+
+      // 2. Light / Dark Theme Toggle
+      themeToggleBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.documentElement.classList.toggle('dark');
+      });
+
+      // 3. MA6 Toggle Demo
+      maToggleBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const span = maToggleBtn.querySelector('span:last-child');
+        if (span.textContent === 'OFF') {
+          span.textContent = 'ON';
+          span.className = 'text-[9px] text-[#0071e3] dark:text-[#00e5ff] font-bold';
+        } else {
+          span.textContent = 'OFF';
+          span.className = 'text-[9px] text-slate-400';
+        }
+      });
+
+      // 4. DOUBLE CLICK / DOUBLE TAP FOCUS MODE TOGGLE
+      // (Hides all floating UI layers completely, leaving only clean chart & axes)
+      function toggleFocusMode() {
+        isFocusMode = !isFocusMode;
+
+        if (isFocusMode) {
+          // Record current sheet state
+          sheetWasOpenBeforeFocus = !touchContractsSheet.classList.contains('hidden');
+
+          // Hide all floating layers with silky scale & opacity
+          topOverlayGroup.classList.add('ui-hidden');
+          bottomOverlayGroup.classList.add('ui-hidden-bottom');
+          touchContractsSheet.classList.add('ui-hidden');
+        } else {
+          // Restore prior floating components exactly
+          topOverlayGroup.classList.remove('ui-hidden');
+          bottomOverlayGroup.classList.remove('ui-hidden-bottom');
+          if (sheetWasOpenBeforeFocus) {
+            touchContractsSheet.classList.remove('ui-hidden');
+          }
+        }
+      }
+
+      // Desktop Double Click
+      chartContainer.addEventListener('dblclick', (e) => {
+        toggleFocusMode();
+      });
+
+      // Mobile Double Tap detection
+      let lastTapTime = 0;
+      chartContainer.addEventListener('touchend', (e) => {
+        const currentTime = new Date().getTime();
+        const tapInterval = currentTime - lastTapTime;
+        if (tapInterval < 300 && tapInterval > 0) {
+          // Double tap detected!
+          e.preventDefault();
+          toggleFocusMode();
+        }
+        lastTapTime = currentTime;
+      });
+
+    })();
+  </script>
+</body>
+</html>

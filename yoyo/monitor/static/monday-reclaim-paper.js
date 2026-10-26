@@ -181,7 +181,7 @@
   if(typeof module!=='undefined' && module.exports){module.exports=api;return;}
   const root=document.getElementById('monday-reclaim-paper');
   if(!root)return;
-  let state=route(), pageActive=false, mounted=false, shown=50, signature='', chart=null, pinned=null, ma=false, internal=false, indicatorsOpen=false, recordsOpen=false, sheet=null, watch=null, chartSymbol='', closer=null, analytics=null,preferences=null,platform='';
+  let state=route(), pageActive=false, mounted=false, shown=50, signature='', chart=null, pinned=null, ma=false, internal=false, indicatorsOpen=false, recordsOpen=false, sheet=null, watch=null, chartSymbol='', closer=null, analytics=null,preferences=null,platform='',focus=null;
   const requests=window.SpikeRuntime.createRequests();
   let startupRead=null;
   const feed=createFeed({read:async()=>{
@@ -208,9 +208,10 @@
     analytics=window.SpikeReclaimAnalytics.create({root,createFeed,onOpen:()=>{watch.setOpen(false,false);if(matchMedia('(max-width:700px)').matches)setRecords(false,false);},onTrack:selectTrack});
     el('track').addEventListener('change',event=>selectTrack(event.target.value));
     el('period').addEventListener('change',event=>{state.period=event.target.value;sync();render(feed.getState());});
+    focus=window.SpikeChartFocus.bind(root);
     root.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(root.querySelector('.rp-ledger-heading').classList.contains('is-searching')){event.stopPropagation();setSearch(false);}else if(indicatorsOpen){event.stopPropagation();setIndicators(false,true);}else if(recordsOpen)setRecords(false);});
-    document.addEventListener('pointerdown',event=>{if(indicatorsOpen&&!event.target.closest('.rp-indicators'))setIndicators(false);},true);
-    root.addEventListener('focusin',event=>{if(indicatorsOpen&&!event.target.closest('.rp-indicators'))setIndicators(false);});
+    document.addEventListener('pointerdown',event=>{if(!focus?.hidden&&indicatorsOpen&&!event.target.closest('.rp-indicators'))setIndicators(false);},true);
+    root.addEventListener('focusin',event=>{if(!focus?.hidden&&indicatorsOpen&&!event.target.closest('.rp-indicators'))setIndicators(false);});
     root.addEventListener('click',event=>{
       const record=event.target.closest('[data-rp-record]');
       if(record&&!event.target.closest('a,button,input,select,.rp-row-detail')){record.querySelector('.rp-row-select').click();return;}
@@ -314,7 +315,7 @@
   }
   document.addEventListener('visibilitychange',()=>{feed.setActive(pageActive && !document.hidden);chart?.setActive(pageActive && !document.hidden);watch?.setActive(pageActive && !document.hidden);analytics?.setActive(pageActive && !document.hidden);});
   window.SpikeReclaimPaper={
-    setActive(value){pageActive=value;root.hidden=!value;if(value)mount();else{setIndicators(false);sheet?.reset();closer?.hide();}chart?.setActive(value && !document.hidden);if(value)render(feed.getState());feed.setActive(value && !document.hidden);watch?.setActive(value && !document.hidden);analytics?.setActive(value && !document.hidden);},
+    setActive(value){pageActive=value;root.hidden=!value;if(value)mount();else{focus?.reset();setIndicators(false);sheet?.reset();closer?.hide();}chart?.setActive(value && !document.hidden);if(value)render(feed.getState());feed.setActive(value && !document.hidden);watch?.setActive(value && !document.hidden);analytics?.setActive(value && !document.hidden);},
     refresh:()=>{watch?.refresh();analytics?.refresh();return feed.refresh();},route:()=>({...state}),
     restore(params){const next=route(params);if(next.track!==state.track||next.trade!==state.trade||next.symbol!==state.symbol)pinned=null;state=next;shown=50;render(feed.getState());}
   };

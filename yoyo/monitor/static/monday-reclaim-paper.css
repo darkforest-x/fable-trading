@@ -4,7 +4,7 @@ body.reclaim-paper-active {overflow:hidden;color-scheme:light;background:var(--r
 #signals-view.signal-workspace[data-signal-pane="reclaim"] > :not(#monday-reclaim-paper){display:none!important;}
 body.reclaim-paper-active .primary-metrics{display:none!important;}
 body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-heading,.sidebar-backdrop,.signal-workspace-topbar){display:none!important;}
-#monday-reclaim-paper {position:fixed;inset:0;z-index:10;isolation:isolate;height:100dvh;overflow:hidden;background:var(--rp-canvas,#f7f8f6);color:var(--rp-ink,#182b39);--surface:var(--rp-canvas,#f7f8f6);--muted:var(--rp-muted,#718494);--rp-blue:var(--rp-accent,#0071e3);--rp-ease:cubic-bezier(.2,.8,.2,1);--rp-glass-tint:rgb(255 255 255 / .22);--rp-panel:rgb(255 255 255 / .52);--rp-glass-edge:rgb(255 255 255 / .65);--rp-glass-highlight:rgb(255 255 255 / .7);--rp-glass-shadow:0 8px 30px -4px rgb(15 23 42 / .08);--rp-glass-fallback:#f2f6fa;--rp-recessed:rgb(255 255 255 / .2);--rp-selected:rgb(0 113 227 / .1);font:12px/1.5 -apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;font-variant-numeric:tabular-nums;}
+#monday-reclaim-paper {position:fixed;inset:0;z-index:10;isolation:isolate;height:100dvh;overflow:hidden;background:var(--rp-canvas,#f7f8f6);color:var(--rp-ink,#182b39);--surface:var(--rp-canvas,#f7f8f6);--muted:var(--rp-muted,#718494);--rp-blue:var(--rp-accent,#0071e3);--rp-ease:cubic-bezier(.2,.8,.2,1);--rp-glass-tint:rgb(255 255 255 / .16);--rp-panel:rgb(255 255 255 / .18);--rp-glass-edge:rgb(255 255 255 / .45);--rp-glass-highlight:rgb(255 255 255 / .7);--rp-glass-shadow:0 4px 20px -2px rgb(15 23 42 / .05);--rp-glass-fallback:#f2f6fa;--rp-recessed:rgb(255 255 255 / .08);--rp-selected:rgb(0 113 227 / .1);font:12px/1.5 -apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;font-variant-numeric:tabular-nums;}
 #monday-reclaim-paper *,#monday-reclaim-paper *::before {box-sizing:border-box;}
 #monday-reclaim-paper[hidden],#monday-reclaim-paper [hidden] {display:none!important;}
 #monday-reclaim-paper :is(p,h2){margin:0;}
@@ -19,8 +19,8 @@ body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-headi
 #monday-reclaim-paper a {color:var(--rp-accent,#0071e3);text-decoration:none;}
 #monday-reclaim-paper summary {list-style:none;cursor:pointer;min-height:44px;}
 #monday-reclaim-paper summary::-webkit-details-marker {display:none;}
-#monday-reclaim-paper .rp-glass,#monday-reclaim-paper .rp-dock::before {background:var(--rp-material,var(--rp-glass-tint));border:1px solid var(--rp-glass-edge);box-shadow:var(--rp-glass-shadow),inset 0 1px 1px var(--rp-glass-highlight);border-radius:22px;backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);}
-#monday-reclaim-paper :is(.rp-context,.rp-records,.rp-watch-panel,.rp-analysis,.rp-close,.rp-account[open],.rp-navigation nav,.rp-indicator-panel){--rp-material:var(--rp-panel);backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);}
+#monday-reclaim-paper .rp-glass,#monday-reclaim-paper .rp-dock::before {background:var(--rp-material,var(--rp-glass-tint));border:1px solid var(--rp-glass-edge);box-shadow:var(--rp-glass-shadow),inset 0 1px 1px var(--rp-glass-highlight);border-radius:22px;backdrop-filter:blur(14px) saturate(175%);-webkit-backdrop-filter:blur(14px) saturate(175%);}
+#monday-reclaim-paper :is(.rp-context,.rp-records,.rp-watch-panel,.rp-analysis,.rp-close,.rp-account[open],.rp-navigation nav,.rp-indicator-panel){--rp-material:var(--rp-panel);backdrop-filter:blur(14px) saturate(175%);-webkit-backdrop-filter:blur(14px) saturate(175%);}
 #monday-reclaim-paper .rp-theme-toggle {position:absolute;z-index:6;right:100px;top:23px;border-radius:50%;padding:0;}
 #monday-reclaim-paper .rp-wallpaper {position:absolute;inset:0;z-index:0;}
 #monday-reclaim-paper :is(.mf-chart-mount,.cv-range,.cv-canvas) {position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;min-height:0;border:0;border-radius:0;background:transparent;}
@@ -63,7 +63,7 @@ body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-headi
 #monday-reclaim-paper .rp-rules {margin-top:8px;border-top:1px solid #9bafbf25;}
 #monday-reclaim-paper .rp-rules summary {display:flex;align-items:center;font-weight:600;}
 #monday-reclaim-paper .rp-rules p {font-size:11px;color:var(--rp-muted,#627787);line-height:1.8;margin-bottom:10px;}
-#monday-reclaim-paper .rp-alert {position:absolute;top:80px;right:100px;z-index:6;padding:10px 14px;max-width:320px;color:var(--rp-warning,#98611d);font-size:11px;background-color:var(--rp-warning-bg,#fff2dcbd);}
+#monday-reclaim-paper .rp-alert {position:absolute;top:80px;right:100px;z-index:6;padding:10px 14px;max-width:320px;color:var(--rp-warning,#98611d);font-size:11px;background-color:var(--rp-warning-bg,#fff2dc2e);}
 #monday-reclaim-paper .rp-records {position:absolute;z-index:7;left:20px;top:220px;bottom:100px;width:300px;display:flex;flex-direction:column;overflow:hidden;opacity:0;visibility:hidden;transform:translateX(-18px);transition:opacity .2s,transform .24s var(--rp-ease),visibility .24s;}
 #monday-reclaim-paper .rp-records.is-open {opacity:1;visibility:visible;transform:translateX(0);}
 #monday-reclaim-paper .rp-record-heading {display:flex;align-items:center;justify-content:space-between;padding:2px 8px 0 16px;flex:none;}
@@ -411,3 +411,27 @@ body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-headi
 @media(min-width:1421px){#monday-reclaim-paper .rp-watch-panel {top:calc(96px + var(--rp-context-height,115px));}}
 @media(min-width:701px) and (max-width:1420px){#monday-reclaim-paper .rp-watch-panel {top:calc(154px + var(--rp-context-height,115px));}}
 @media(prefers-reduced-motion:reduce){#monday-reclaim-paper .rp-watch-disclosure span {transition:none;}}
+
+/* Stitch 86d19d3dabb141408620cf1ad0ce4553: clearer glass and chart focus.
+ * Visibility preserves geometry, scroll offsets, disclosures and live feeds. */
+#monday-reclaim-paper {touch-action:manipulation;--rp-readout:var(--rp-glass-tint);outline:none;}
+#monday-reclaim-paper :is(.cv-readout,.cv-ma-legend,.cv-range-status,.mf-history-status,.mf-chart-caption) {background:var(--rp-glass-tint);backdrop-filter:blur(14px) saturate(175%);-webkit-backdrop-filter:blur(14px) saturate(175%);}
+/* Global dialog polish must not put an opaque sheet above this glass layer. */
+body[data-design=apple-glass] #monday-reclaim-paper .rp-close {background:var(--rp-panel)!important;border-color:var(--rp-glass-edge)!important;box-shadow:var(--rp-glass-shadow)!important;backdrop-filter:blur(14px) saturate(175%);-webkit-backdrop-filter:blur(14px) saturate(175%);}
+#monday-reclaim-paper.is-chart-focused > :not(.rp-wallpaper),
+#monday-reclaim-paper.is-chart-focused > :not(.rp-wallpaper) *,
+#monday-reclaim-paper.is-chart-focused :is(.cv-readout,.cv-ma-legend,.cv-range-status,.mf-history-status,.mf-chart-caption),
+#monday-reclaim-paper.is-chart-focused :is(.mf-history-status,.mf-chart-caption) * {visibility:hidden!important;pointer-events:none!important;}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+ #monday-reclaim-paper :is(.cv-readout,.cv-ma-legend,.cv-range-status,.mf-history-status,.mf-chart-caption),
+ body[data-design=apple-glass] #monday-reclaim-paper .rp-close {background:var(--rp-glass-fallback)!important;}
+}
+
+/* The global settings dock is chart chrome too; an active alarm stays independent. */
+body:has(#monday-reclaim-paper.is-chart-focused:not([hidden])) #spike-alarm-dock,
+body:has(#monday-reclaim-paper.is-chart-focused:not([hidden])) #spike-alarm-dock * {visibility:hidden!important;pointer-events:none!important;}
+body.reclaim-paper-active #spike-alarm-dock :is(.sa-trigger,.sa-settings) {background:rgb(255 255 255 / .16);border-color:rgb(255 255 255 / .45);box-shadow:0 4px 20px -2px #0f172a0d;backdrop-filter:blur(14px) saturate(175%);-webkit-backdrop-filter:blur(14px) saturate(175%);}
+html[data-theme=dark] body.reclaim-paper-active #spike-alarm-dock :is(.sa-trigger,.sa-settings) {background:rgb(28 34 44 / .22);border-color:#ffffff1f;}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+ body.reclaim-paper-active #spike-alarm-dock :is(.sa-trigger,.sa-settings) {background:var(--surface);}
+}
