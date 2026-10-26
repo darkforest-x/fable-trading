@@ -6,7 +6,8 @@ v2_be17 of exp-monday-limit-be-scalein-20261026-v1 (limit at the Monday 1618, 60
 +0.17 percent, near Monday edge target, no backstop), worse intrabar path per trade with 10bp slippage on non-target
 exits as saved in exp-monday-limit-time-news-20261026-v1, filtered to score >= 0.6 and l2_order_score > 0 (causal
 feature table exp-monday-limit-score-features-v2-20261025-v1). The filter was found on the same history.
-Statistics: counts, outcome mix, net quantiles, holding time, side and year. Charts: eight trades drawn with a fixed
+Statistics: counts, outcome mix, net quantiles, holding time, side and year; added after the first run showed a
+median holding time of zero: trades that fill and exit inside the same 5m bar (flash wicks) versus the rest. Charts: eight trades drawn with a fixed
 seed (three targets, two breakevens, two failed reclaims, plus the worst trade), 15m candles from the Codex 5m
 inputs (load_job) with EMA 8/13/21/34/55 as in yoyo.data.indicators (ewm span, adjust=False), the 1618 entry, the
 Monday edges, the touch and the 60m confirmation candle; the order score is recomputed from those EMAs at the last
@@ -131,6 +132,9 @@ def run(config):
                year={str(y): stats(g) for y, g in t.groupby('year')},
                order={str(int(o)): stats(g) for o, g in t.groupby('order')},
                symbols=int(t.event.str.split(':').str[0].nunique()), weeks=int(t.week.nunique()))
+    same = t.exit_t == t.t
+    res['same_bar'] = dict(all=dict(yes=stats(t[same]), no=stats(t[~same])), early=dict(yes=stats(t[same & early]), no=stats(t[~same & early])),
+                           late=dict(yes=stats(t[same & ~early]), no=stats(t[~same & ~early])))
     rng = np.random.default_rng(cfg['seed'])
     picks = []
     for reason, k in ((4, 3), (5, 2), (11, 2)):
@@ -152,7 +156,7 @@ def run(config):
     res['samples'] = samples
     dump(exp/'summary.json', dict(config=cfg, results=res, source_commit=subprocess.check_output(['git','rev-parse','HEAD'], cwd=ROOT, text=True).strip(),
                                  training_eligible=False, production_eligible=False))
-    print(json.dumps({k: res[k] for k in ('all', 'early', 'late', 'symbols', 'weeks')}, ensure_ascii=False))
+    print(json.dumps({k: res[k] for k in ('all', 'early', 'late', 'symbols', 'weeks', 'same_bar')}, ensure_ascii=False))
     for s in samples:
         print(s['trade_id'], s['reason'], round(s['net_bp']), s['order_feature'], s['order_recomputed'])
 
