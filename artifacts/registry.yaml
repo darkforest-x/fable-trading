@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-high-low-1618-pine-20261026-v1
+    artifact_type: manifest
+    role: standalone_monday_high_low_1618_private_tradingview_indicator
+    source_repo: darkforest-x/fable-trading
+    source_commit: e8a86e52e1b78ec211cbf217644b6f48b4b109a3
+    source_path: artifacts/monday-high-low-1618-pine-20261026/delivery.json
+    storage_uri: repo://artifacts/monday-high-low-1618-pine-20261026/delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Private Pine V1.0 saved and compiled in native TradingView. Four weekly levels; NY calendar and complete intrabar coverage; historical viewport drawing. Frozen5m/4h/1D prices and timestamps match. Existing scripts preserved; no orders or alerts created.
   - artifact_id: monday-5m-confirmed-score-20261026-v1
     artifact_type: manifest
     role: confirmed_5m_market_entry_known_pin_r_and_frozen_score_parameter_research

@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-26",
+  "title": "周一高低点 · 1.618 V1.0",
+  "source": "yoyo/evaluation/pine/monday_high_low_1618_v1_0.pine",
+  "source_commit": "e8a86e52e1b78ec211cbf217644b6f48b4b109a3",
+  "destination": "TradingView private script",
+  "layout": "https://cn.tradingview.com/chart/AlGc61US/",
+  "native_compile": "passed",
+  "cloud_save_observed": "2026-10-26 22:37 Asia/Shanghai",
+  "final_layout": "saved; original MUBARAKUSDT.P 5m and indicator panes restored; diagnostics off",
+  "validation": {
+    "screenshot_formulas": "3 ranges / 6 extension prices match",
+    "native_timeframes": [
+      "5m",
+      "4h",
+      "1D"
+    ],
+    "symbol": "OKX:MUBARAKUSDT.P",
+    "frozen_week": "2026-10-19",
+    "high": 0.055126,
+    "low": 0.052237,
+    "upper": 0.056911402,
+    "lower": 0.050451598,
+    "complete_5m_bars": 288,
+    "all_frozen_prices_and_timestamps_match": true,
+    "visual": "historical weekly segments and live developing dashed lines inspected"
+  },
+  "evidence_dir": "output/playwright/monday-1618-pine-20261026",
+  "limitations": [
+    "Continuous Monday source coverage required; incomplete or session-gapped Mondays are skipped.",
+    "Lower-timeframe history availability depends on TradingView data and plan.",
+    "Final values are drawn back to Monday extrema for review; developing values can change."
+  ],
+  "browser_cleanup": "Used pre-existing native TradingView; no temporary browser or tab created.",
+  "training_eligible": false,
+  "production_eligible": false
+}
