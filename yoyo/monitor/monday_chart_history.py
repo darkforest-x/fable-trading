@@ -38,7 +38,7 @@ class ChartHistory:
 
     def read(self, symbol, period, before_ms):
         client = self.candles.client
-        bar = '1Dutc' if period == '1D' else period
+        bar = {'12H': '12Hutc', '1D': '1Dutc'}.get(period, period)
         now, step = client.clock(), STEPS[bar]
         before_ms = min(before_ms, bar_open(now, bar))
         value = dict(symbol=symbol, bar=period, native_bar=bar, source='OKX',
@@ -91,7 +91,7 @@ def install(app, candles, levels):
 
     @app.get('/api/monday-fib/history')
     def history(symbol: str = Query(..., pattern=symbol_pattern),
-                period: str = Query('15m', pattern=r'^(1m|5m|15m|30m|1H|4H|1D)$'),
+                period: str = Query('15m', pattern=r'^(1m|5m|15m|30m|1H|4H|12H|1D)$'),
                 before_ms: int = Query(..., gt=0)):
         return service.read(symbol, period, before_ms)
 

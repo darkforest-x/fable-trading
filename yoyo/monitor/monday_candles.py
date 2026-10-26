@@ -1,7 +1,7 @@
 """Demand-only native candles for the Monday wallpaper, separate from scanning.
 
 OKX bar/confirm contract: https://app.okx.com/docs-v5/en/#order-book-trading-market-data
-Daily candles use 1Dutc; NY Monday anchors still come from MondayFibService.
+Half-day/daily candles use 12Hutc/1Dutc (UTC 00/12 and 00 boundaries); NY Monday anchors still come from MondayFibService.
 Only the selected symbol/period is read through the shared public candle hub.
 Two history jobs, two live-tail readers and twelve cached history views cannot
 expand the monitor universe. Closed snapshots remain separate from live tails.
@@ -17,7 +17,7 @@ from yoyo.data.candle_hub import STEPS, bar_open, validate
 from yoyo.monitor.monday_fib import week_window
 from yoyo.monitor.okx import OKX
 
-PERIODS = ('1m', '5m', '15m', '30m', '1H', '4H', '1D')
+PERIODS = ('1m', '5m', '15m', '30m', '1H', '4H', '12H', '1D')
 SYMBOL = r'^[A-Z0-9]{1,32}-USDT-SWAP$'
 
 
@@ -38,7 +38,7 @@ class MondayCandles:
         self.closed = False
 
     def _fetch(self, symbol, period, entry):
-        bar = '1Dutc' if period == '1D' else period
+        bar = {'12H': '12Hutc', '1D': '1Dutc'}.get(period, period)
         now = self.client.clock()
         boundary = bar_open(now, bar)
         try:
@@ -104,7 +104,7 @@ class MondayCandles:
         """
         if not re.fullmatch(SYMBOL, symbol) or period not in PERIODS:
             raise ValueError('unsupported_chart_query')
-        bar = '1Dutc' if period == '1D' else period
+        bar = {'12H': '12Hutc', '1D': '1Dutc'}.get(period, period)
         value = dict(symbol=symbol, bar=period, native_bar=bar,
                      closed_candles=[], forming_candle=None, error=None)
         if self.closed or not self.live_slots.acquire(False):
@@ -131,7 +131,7 @@ class MondayCandles:
         if not re.fullmatch(SYMBOL, symbol) or period not in PERIODS:
             raise ValueError('unsupported_chart_query')
         now = self.client.clock()
-        bar = '1Dutc' if period == '1D' else period
+        bar = {'12H': '12Hutc', '1D': '1Dutc'}.get(period, period)
         with self.ready:
             key = (symbol, period)
             entry = self.cache.setdefault(key, dict(candles=[], loading=False, last_close_ms=0))
@@ -196,11 +196,11 @@ def install(app, runtime):
 
     @app.get('/api/monday-fib/candles')
     def candles(symbol: str = Query(..., pattern=SYMBOL),
-                period: str = Query('15m', pattern=r'^(1m|5m|15m|30m|1H|4H|1D)$'),
+                period: str = Query('15m', pattern=r'^(1m|5m|15m|30m|1H|4H|12H|1D)$'),
                 wait_ms: int = Query(0, ge=0, le=8000)):
         return service.snapshot(symbol, period, wait_ms)
 
     @app.get('/api/monday-fib/live-candles')
     def live_candles(symbol: str = Query(..., pattern=SYMBOL),
-                     period: str = Query('15m', pattern=r'^(1m|5m|15m|30m|1H|4H|1D)$')):
+                     period: str = Query('15m', pattern=r'^(1m|5m|15m|30m|1H|4H|12H|1D)$')):
         return service.recent(symbol, period)

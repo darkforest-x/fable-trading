@@ -30,3 +30,14 @@ test('disk storage is bounded and blocked storage falls back without blocking th
  assert.equal(await a.restoreCandles('C0-USDT-SWAP|2026-10-19|5m'),null);
  for(const indexedDB of [null,disk({fail:true}),{open(){throw Error('denied')}}]){const b=create({indexedDB,now:()=>now});b.saveCandles(candles());assert.equal(await b.restoreCandles('BTC-USDT-SWAP|2026-10-19|5m'),null);}
 });
+
+test('12H cache restores UTC bars without mixing periods or accepting local boundaries',async()=>{
+ const db=disk(),value={...candles(),bar:'12H',native_bar:'12Hutc'};
+ value.candles[0].time=now-43200000;
+ const a=create({indexedDB:db,now:()=>now});a.saveCandles(value);await flush();
+ const b=create({indexedDB:db,now:()=>now});
+ assert.equal((await b.restoreCandles('BTC-USDT-SWAP|2026-10-19|12H')).candles[0].time,now-43200000);
+ assert.equal(await b.restoreCandles('BTC-USDT-SWAP|2026-10-19|1D'),null);
+ assert.equal(clean('candles',{...value,native_bar:'12H'}),null);
+ value.candles[0].time-=8*3600000;assert.equal(clean('candles',value),null);
+});

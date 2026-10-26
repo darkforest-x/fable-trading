@@ -199,3 +199,8 @@ test('spike rules use its own sizing, threshold and target without v2 gross cap'
  for(const pattern of [/最多 10 个资金仓位/,/5 倍杠杆/,/净值 ÷ 10/,/入场分 ≥ 0.60/,/排列分 ≥ 3/,/18% 兜底止损/,/确认周期 60 分钟/,/OKX · 15m/,/币安排列线尚未接入/])assert.match(text,pattern);
  assert.doesNotMatch(text,/总名义敞口上限|按评分线性分配|NaN|undefined/);
 });
+
+test('paper 12H bookmark survives route parsing and invalid periods keep the default',()=>{
+ assert.equal(ui.route({track:'spike',period:'12H'}).period,'12H');
+ assert.equal(ui.route({period:'12Hutc'}).period,'5m');
+});

@@ -5,7 +5,7 @@
 (() => {
   'use strict';
   const full=symbol=>['BTC-USDT-SWAP','ETH-USDT-SWAP','XAU-USDT-SWAP'].includes(symbol);
-  const steps={'1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'1D':86400000},DAY=86400000;
+  const steps={'1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000},DAY=86400000;
   const weekAt=typeof window==='undefined'?require('./public-chart-cache.js').weekAt:window.SpikePublicChartCache.weekAt;
   function mergeRows(oldRows,newRows,limit=Infinity){
     const rows=new Map(oldRows.map(r=>[r.time,r]));for(const row of newRows)rows.set(row.time,row);
@@ -21,7 +21,7 @@
   }
   function create({symbol,period,request=(url,options)=>fetch(url,options),changed=()=>{},status=()=>{},now=Date.now}={}){
     const weeks=new Map(),attempts=new Map(),active=new Map();let context=null,instance=null,paused=false,more=true,historyError='',weekError='',weekBlocked=false;
-    const native=period==='1D'?'1Dutc':period,step=steps[period];
+    const native=({'12H':'12Hutc','1D':'1Dutc'}[period]||period),step=steps[period];
     function publish(){
       const detail=historyError||weekError,error=detail&&!detail.includes('重试')?detail+' · 点击重试':detail;
       status({text:error|| (active.has('history')?'正在加载更早 K 线…':active.has('weeks')?'正在补齐历史周线…':full(symbol)?more?'← 回看历史，自动加载':'已到此合约最早 K 线':'最近 720 根 · 逐周区间'),retry:!!error,count:context?.candles?.length||0});

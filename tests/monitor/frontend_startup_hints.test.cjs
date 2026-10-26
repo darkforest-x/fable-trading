@@ -96,3 +96,10 @@ test('spike cold links warm only its funded row and never fall back when absent'
  assert.equal(paperSymbol(d,new URLSearchParams('track=spike&trade=3002')),'ETH-USDT-SWAP');
  delete d.tracks.spike;assert.equal(paperSymbol(d,new URLSearchParams('track=spike')),null);
 });
+
+for(const period of ['12H','1D'])test(`paper cold ${period} link warms the selected native period`,async()=>{
+ const h=harness({hash:'#signals?pane=reclaim&track=spike&symbol=BTC-USDT-SWAP&period='+period});
+ h.calls[0].resolve({ok:true,json:async()=>({tracks:{spike:{open:[]}}})});await flush();
+ assert.equal(h.calls.length,3);assert.match(h.calls[2].url,new RegExp('period='+period+'&wait_ms=8000$'));
+ assert.equal(h.calls.filter(c=>c.url.includes('period=5m')).length,0);
+});

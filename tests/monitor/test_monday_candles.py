@@ -43,7 +43,7 @@ def test_native_bar_boundaries_and_complete_history(period):
     service = MondayCandles(client=client)
     try:
         entry = run_fetch(service, period)
-        native = '1Dutc' if period == '1D' else period
+        native = {'12H': '12Hutc', '1D': '1Dutc'}.get(period, period)
         step = STEPS[native]
         assert len(entry['candles']) == 720
         assert all(b['time'] % step == 0 for b in entry['candles'])
@@ -65,7 +65,7 @@ def test_native_bar_boundaries_and_complete_history(period):
 @pytest.mark.parametrize('period', PERIODS)
 def test_live_display_tail_never_enters_the_closed_snapshot(period):
     client = Client()
-    native = '1Dutc' if period == '1D' else period
+    native = {'12H': '12Hutc', '1D': '1Dutc'}.get(period, period)
     step = STEPS[native]
     boundary = bar_open(NOW, native)
     class Live(Client):

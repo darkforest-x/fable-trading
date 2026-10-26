@@ -5,7 +5,7 @@
  */
 (() => {
   'use strict';
-  const finite=Number.isFinite,PERIODS={'1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'1D':86400000};
+  const finite=Number.isFinite,PERIODS={'1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000};
   const weekOf=ms=>new Intl.DateTimeFormat('sv-SE',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(ms));
   function levels(row,anchors){
     const h=row.high,l=row.low,r=h-l;
@@ -27,7 +27,7 @@
     }));
   }
   function prepare(context,row,week,period='15m',anchors){
-    if(!PERIODS[period]||context.bar!==period||(period==='1D'&&context.native_bar!=='1Dutc'))throw Error('K 线周期不匹配');
+    if(!PERIODS[period]||context.bar!==period||(['12H','1D'].includes(period)&&context.native_bar!==period+'utc'))throw Error('K 线周期不匹配');
     if(context.symbol!==row.symbol||context.timezone!=='America/New_York')throw Error('图表币种或时区不匹配');
     if(!context.candles?.length)return {...context,levels:levels(row)};
     const start=context.monday?.start_ms;
@@ -51,8 +51,11 @@
     const ranges=new Map((value.weekly_ranges||[]).filter(w=>w.symbol===value.symbol&&w.state==='ready').map(w=>[w.week,w]));
     if(anchors)ranges.set(anchors.week,anchors);
     if(!ranges.size)return {...value,levels:[]};
-    const values=[...ranges.values()];
-    return {...value,levels:values.flatMap(w=>levels(w,w).map(l=>({...l,end_ms:w.expires_ms,historical:w.week!==week,week:w.week}))),
+    // Stitch edc75895cf3640c090680fdeb1e1fd18: old weeks keep their lines only.
+    // Label the API-selected display range, including Monday's prior-week fallback.
+    const values=[...ranges.values()],labelWeek=anchors?.week||week;
+    return {...value,levels:values.flatMap(w=>levels(w,w).map(l=>({...l,end_ms:w.expires_ms,historical:w.week!==week,week:w.week,
+      inlinePriceVisible:w.week===labelWeek,inlineNameVisible:w.week===labelWeek}))),
       level_window:{start_ms:Math.min(...values.map(w=>w.start_ms)),end_ms:Math.max(...values.map(w=>w.expires_ms))}};
   }
   // The display contains closed candles. Refresh at their next close, using

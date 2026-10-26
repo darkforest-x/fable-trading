@@ -64,6 +64,17 @@ def test_all_three_shortcuts_and_alt_no_io():
     assert len(client.calls) == before
 
 
+def test_half_day_history_uses_utc_native_pages_and_aligned_cursor():
+    history, client = service()
+    cursor = bar_open(NOW, '12Hutc')
+    page = history.read('BTC-USDT-SWAP', '12H', cursor)
+    assert page['native_bar'] == '12Hutc'
+    assert len(page['candles']) == 300
+    assert page['next_before_ms'] == cursor - 300 * STEPS['12Hutc']
+    assert all(b['time'] % STEPS['12Hutc'] == 0 for b in page['candles'])
+    assert client.calls[-1][1]['bar'] == '12Hutc'
+
+
 def test_empty_page_and_busy_budget_are_retryable_not_false_exhaustion():
     history, client = service()
     client.empty = True

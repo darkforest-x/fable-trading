@@ -44,6 +44,16 @@ test('each historical range has its own expiry and current anchors are deduplica
  assert.equal(value.levels.length,18);
  assert.ok(value.levels.filter(l=>l.week===b.week).every(l=>l.historical&&l.end_ms===start&&l.start_ms<start));
  assert.ok(value.levels.filter(l=>l.week===a.week).every(l=>!l.historical&&l.end_ms===a.expires_ms));
+ assert.ok(value.levels.filter(l=>l.week===b.week).every(l=>!l.inlinePriceVisible&&!l.inlineNameVisible));
+ assert.ok(value.levels.filter(l=>l.week===a.week).every(l=>l.inlinePriceVisible&&l.inlineNameVisible));
+ // While Monday forms, the selected last-completed range retains its labels.
+ const pending=withWeeks({symbol:a.symbol,weekly_ranges:[a,b]},a,'2026-10-26');
+ assert.equal(pending.levels.filter(l=>l.inlinePriceVisible).length,9);
+ assert.ok(pending.levels.filter(l=>l.inlinePriceVisible).every(l=>l.week===a.week));
+ const next={...a,week:'2026-10-26',start_ms:start+7*86400000,end_ms:start+8*86400000,expires_ms:start+14*86400000};
+ const rolled=withWeeks({symbol:a.symbol,weekly_ranges:[a,b]},next,next.week);
+ assert.equal(rolled.levels.length,27);
+ assert.ok(rolled.levels.filter(l=>l.week!==next.week).every(l=>!l.inlinePriceVisible&&!l.inlineNameVisible));
 });
 test('year-spanning ranges and million-bar precision avoid argument-stack limits',()=>{
  const rows=Array.from({length:150000},(_,i)=>({time:i*60,low:.00012,high:.00015,close:.00014}));
@@ -51,4 +61,19 @@ test('year-spanning ranges and million-bar precision avoid argument-stack limits
  const times=rows.map(r=>r.time),saved=T.anchor({from:100,to:149000},times);
  assert.deepEqual(T.restore(saved,[-120,-60,...times]),{from:102,to:149002});
  assert.deepEqual(H.weekKeys(Date.parse('2026-03-02T05:00Z'),Date.parse('2026-03-16T04:00Z')),['2026-03-16','2026-03-09','2026-03-02']);
+});
+
+test('12H historical pages require native UTC identity and half-day timestamps',async()=>{
+ const symbol='BTC-USDT-SWAP',boundary=Date.parse('2026-10-19T00:00:00Z'),half=43200000;
+ for(const native of ['12Hutc','12H']){
+  let value,status;
+  const h=H.create({symbol,period:'12H',changed:v=>value=v,status:v=>status=v,request:async url=>{
+   assert.match(url,/period=12H/);
+   return reply({symbol,bar:'12H',native_bar:native,state:'ready',has_more:true,next_before_ms:boundary-half,candles:[candle(boundary-half)]});
+  }});
+  h.merge({symbol,bar:'12H',candles:[candle(boundary)]});await h.older();
+  if(native==='12Hutc'){assert.equal(value.candles.length,2);assert.equal(status.retry,false);}
+  else{assert.equal(value,undefined);assert.equal(status.retry,true);}
+  h.pause();
+ }
 });

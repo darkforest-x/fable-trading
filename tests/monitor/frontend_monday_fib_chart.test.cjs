@@ -50,14 +50,14 @@ test('row chart makes only selected GETs, ignores retired replies and aborts on 
  api.hide();assert.equal(timers.size,0);
 });
 
-test('native timeframe is validated and daily candles retain context beyond NY Monday',()=>{
+for(const [period,step] of [['12H',43200000],['1D',86400000]])test(`${period} validates native UTC identity and retains context beyond NY Monday`,()=>{
  const day=Date.parse('2026-10-18T00:00:00Z');
- const d={...context(),bar:'1D',native_bar:'1Dutc',last_close_ms:day+4*86400000,candles:[bar(day),bar(day+86400000)]};
- assert.equal(prepare(d,row,'2026-10-19','1D').candles.length,2);
- assert.deepEqual(prepare(d,row,'2026-10-19','1D').levels,levels(row));
+ const d={...context(),bar:period,native_bar:period+'utc',last_close_ms:day+4*step,candles:[bar(day),bar(day+step)]};
+ assert.equal(prepare(d,row,'2026-10-19',period).candles.length,2);
+ assert.deepEqual(prepare(d,row,'2026-10-19',period).levels,levels(row));
  assert.throws(()=>prepare(d,row,'2026-10-19','5m'),/周期/);
- assert.throws(()=>prepare({...d,native_bar:'1D'},row,'2026-10-19','1D'),/周期/);
- assert.throws(()=>prepare({...d,last_close_ms:day+86400000},row,'2026-10-19','1D'),/K 线数据/);
+ assert.throws(()=>prepare({...d,native_bar:period},row,'2026-10-19',period),/周期/);
+ assert.throws(()=>prepare({...d,last_close_ms:day+step},row,'2026-10-19',period),/K 线数据/);
 });
 test('rapid timeframe switching aborts old loads and keeps responses and cache isolated',async()=>{
  const pending=[],draws=[];const state={textContent:''},mount={},button={addEventListener(){}};

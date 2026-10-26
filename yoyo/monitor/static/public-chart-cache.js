@@ -4,7 +4,7 @@
  */
 (() => {
  'use strict';
- const STEPS={'1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'1D':86400000};
+ const STEPS={'1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000};
  const finite=Number.isFinite,DAY=86400000,symbolOK=s=>typeof s==='string'&&/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(s);
  function weekAt(now){const day=new Date(new Intl.DateTimeFormat('sv-SE',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(now)+'T00:00:00Z');day.setUTCDate(day.getUTCDate()-(day.getUTCDay()+6)%7);return day.toISOString().slice(0,10);}
  function sanitize(kind,value){
@@ -14,7 +14,7 @@
    return Object.fromEntries(['symbol','timezone','week','state','start_ms','end_ms','expires_ms','anchor_bar','high_ms','low_ms','high','low','upper','lower'].map(k=>[k,v[k]]));
   }
   const v=value,step=STEPS[v.bar],m=v.monday;
-  if(!step||v.bar==='1D'&&v.native_bar!=='1Dutc'||v.error||!finite(v.now_ms)||!finite(v.last_close_ms)||!m||![m.start_ms,m.end_ms,m.expires_ms].every(finite)||!Array.isArray(v.candles)||!v.candles.length||v.candles.length>720)return null;
+  if(!step||['12H','1D'].includes(v.bar)&&v.native_bar!==v.bar+'utc'||v.error||!finite(v.now_ms)||!finite(v.last_close_ms)||!m||![m.start_ms,m.end_ms,m.expires_ms].every(finite)||!Array.isArray(v.candles)||!v.candles.length||v.candles.length>720)return null;
   if(v.last_close_ms>v.now_ms||weekAt(m.start_ms)!==v.week)return null;
   let previous=-Infinity;const candles=[];
   for(const r of v.candles){if(![r.time,r.open,r.high,r.low,r.close,r.volume].every(finite)||r.time<=previous||r.time%step||r.time+step>v.last_close_ms||Math.min(r.open,r.high,r.low,r.close)<=0||r.volume<0||r.high<Math.max(r.open,r.close,r.low)||r.low>Math.min(r.open,r.close))return null;previous=r.time;candles.push(Object.fromEntries(['time','open','high','low','close','volume'].map(k=>[k,r[k]])));}

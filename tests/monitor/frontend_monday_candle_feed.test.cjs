@@ -6,7 +6,7 @@ const raw=(t,confirm='0',close='11')=>[String(t),'10','14','8',close,'4','40','4
 const obj=(t,confirmed=false,close=11)=>({time:t,open:10,high:14,low:8,close,volume:4,confirmed});
 for(const [period,step] of Object.entries(PERIODS))test(`${period}: exact native live OHLC, confirmed-only history, boundary rollover`,()=>{
  const boundary=Math.floor(NOW/step)*step;
- assert.equal(nativeBar(period),period==='1D'?'1Dutc':period);
+ assert.equal(nativeBar(period),({'12H':'12Hutc','1D':'1Dutc'}[period]||period));
  const rows=parse([raw(boundary),raw(boundary-step,'1')],period,NOW);
  assert.equal(rows.length,2);assert.equal(rows[1].confirmed,false);
  assert.deepEqual(parse([raw(boundary,'1'),raw(boundary-step),raw(boundary+step),raw(boundary+1)],period,NOW),[]);
@@ -37,6 +37,13 @@ function fixture(period='1H'){
  const flush=async()=>{for(let i=0;i<12;i++)await Promise.resolve();};
  return {feed,sockets,requests,states,timers,intervals,value,message,run,flush,boundary,advance:ms=>now+=ms,repairs:()=>repairs};
 }
+test('12H subscribes to UTC candles and ignores the Hong Kong half-day channel',()=>{
+ const f=fixture('12H');f.feed.start();const s=f.sockets[0];s.readyState=1;s.onopen();
+ assert.equal(JSON.parse(s.sent[0]).args[0].channel,'candle12Hutc');
+ f.message([raw(f.boundary,'0','12')]);f.run(100);
+ f.message([raw(f.boundary,'0','9')],s,'BTC-USDT-SWAP','candle12H');f.run(100);
+ assert.equal(f.states.at(-1).bars.at(-1).close,12);f.feed.stop();
+});
 test('socket supersedes slow REST, ignores other identities and cannot reopen a confirmed candle',async()=>{
  const f=fixture();f.feed.start();const s=f.sockets[0];s.readyState=1;s.onopen();
  assert.deepEqual(JSON.parse(s.sent[0]),{op:'subscribe',args:[{channel:'candle1H',instId:'BTC-USDT-SWAP'}]});

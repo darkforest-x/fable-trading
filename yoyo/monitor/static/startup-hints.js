@@ -50,7 +50,7 @@
   if(paper){
     start('paper-snapshot','/api/monday-reclaim-paper')?.then(packet=>{
       const symbol=paperSymbol(packet?.value,params);if(!symbol)return;
-      const candidate=params.get('period'),period=['5m','15m','1H','4H'].includes(candidate)?candidate:'5m';
+      const candidate=params.get('period'),period=['5m','15m','1H','4H','12H','1D'].includes(candidate)?candidate:'5m';
       start('levels:'+symbol,'/api/monday-fib/levels?symbol='+encodeURIComponent(symbol));
       start(symbol+'|'+period,'/api/monday-fib/candles?symbol='+encodeURIComponent(symbol)+'&period='+period+'&wait_ms=8000');
     });
