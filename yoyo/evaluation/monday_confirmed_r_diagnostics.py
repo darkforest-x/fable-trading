@@ -49,7 +49,7 @@ def main():
         z=t[t.population.eq('signal')&t.side.eq(side)&t.score.ge(gate)]
         for (tp,be),g in z.groupby(['target_r','be_mode']):
             c=g[g.closed];b=c[c.reason.eq(5)];sl=c[c.reason.eq(1)]
-            fee_pre_slip=b.net_bp+b.exit_slip_bp
+            fee_pre_slip=(b.side*(b.exit_quote-b.entry)-.0005*(b.entry+b.exit_quote))/b.entry*10000
             wins=c[c.net_bp>0].groupby('symbol').net_bp.sum().sort_values(ascending=False)
             out.append(dict(direction=d,target_r=int(tp),be_mode=be,**metrics(g),
                 mean_risk_pct=float(g.risk_pct.mean()),median_risk_pct=float(g.risk_pct.median()),
