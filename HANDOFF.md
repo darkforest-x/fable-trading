@@ -73,8 +73,9 @@
   - Each alert carries `id, side (lower/upper), n, symbols, first_ms, last_ms, created_ms, text, telegram, bark, ack_ms, test`.
   - `POST /api/spike-alerts/{id}/ack` with same-origin headers and `x-spike-action: ack-spike-alert` is idempotent and shared by every open page.
   - `POST /api/spike-alerts/test` with `x-spike-action: test-spike-alert` creates a local-only alert: never pushed, no cooldown, `test=1`.
+- Owner rejected 5-second polling and asked not to load the backend. Commit `ff2535d47d` adds `GET /api/spike-alerts/stream` (server-sent events). It pushes `event: alerts` with `{version, now_ms, active}` on connect and on every create, ack or test, plus a `: ping` comment every 25 s. Pages wait on asyncio queues woken by the alert thread, so there is no polling; at most 20 streams.
 - Page contract for Codex:
-  - poll `GET /api/spike-alerts` about every 5 s; when `active` is non-empty, show a full-screen overlay over every page;
+  - open one `EventSource('/api/spike-alerts/stream')` (it reconnects by itself) and do not poll; when `active` is non-empty, show a full-screen overlay over every page;
   - show direction (lower = 急跌做多方向, upper = 急涨做空方向), coin count, coin names, Beijing time and "只通知，不动仓位";
   - loop an alarm sound until the user clicks 知道了, which posts the ack;
   - browsers block autoplay audio, so the page needs a one-time "启用报警声音" click per session and must show that state;
