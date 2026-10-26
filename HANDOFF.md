@@ -48,6 +48,24 @@
 - Median notional per100USDTplannedrisk5077to5511;99percentile~22k;maximum~30.8k. Same entry/stop implies exactly same size regardless of target. Recorded overlap as high as137positions and~471600USDTnotional across fixed-target arms; this is independent exposure, not a feasible cashaccount. Stops ordinarily lose100USDT, observed worst~101.50 fromgaps. Funding/margin/capacity remain unmodeled. Originalentry-week targets do not roll nextweek; sourcegap/end censoring preserved.
 - Results and reproduction `experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/`; Notion `4058856479af81bfac30ddc49688ef3e`. Learning `fixed-risk-sizing-must-include-fill-costs.md`. All production/training flagsfalse; no live/score changes, no additional report. Luna delegate actualmodel/effort could not be verified from tool output and was stopped; main performed work.
 
+## 2026-10-26 · spike-HW v1: booklet and fifth paper account
+
+- Owner asked for a booklet on the highest win-rate version and for it to join paper trading next to the four existing accounts.
+- Rule (frozen in `exp-monday-limit-spike-hw-20261026-v1/config.json`):
+  - entry score ≥0.6 and 15m EMA order score ≥3;
+  - near Monday edge target, 60m confirmation, −18 percent backstop (inside the 5x liquidation distance);
+  - 10 slots at 5x, margin = equity / 10, loss capped at the margin.
+- Backtest (existing near_P18 fills, worse path):
+  - 219 trades over 181 symbols and 73 weeks; only 6 before 2023.
+  - Win rate 85.4 percent (92.6 / 78.8 / 84.7 / 85.7 for 2020-24 / 2025 / 2026 / last five months). Mean +2.41 percent, profit factor 2.51, max losing streak 3.
+  - 63 percent of trades fill and hit the target in the same 5m bar.
+  - 1000U continuous: 4.65x, max DD 21 percent.
+  - In sample.
+- Booklet outside the public repo: `~/Documents/Codex/2026-10-26/spike-hw/outputs/index.html` (rebuild `python3 work/build.py outputs`).
+- Paper: account `spike` (track 3060) in `yoyo/monitor/monday_reclaim_paper.py`, commit `fe704bfd56`. The EMA order score is computed from OKX 15m candles and every signal now stores `ema_order`.
+  - Monitor restarted; all five accounts respond, worker alive. 53 paper and analytics tests and 5 frontend tests pass.
+  - UI tab for v3 / v3add / spike still pending Codex + Stitch.
+
 ## 2026-10-26 · Spike subset: more win-rate levers; plan A against order ≥3
 
 - Inside score ≥0.6 + order > 0, near target 60m, win rate by EMA order score: 1 = 75 percent, 2 = 73, 3 = 88, 4 = 89. Order ≥3 by period: 94 / 80 / 92 / 94 percent, 219 trades.

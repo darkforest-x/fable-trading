@@ -581,6 +581,34 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Backtest 2020-24 / 2025 / 2026 / last five months 3.74x / 8.97x / 2.56x / 2.96x, DD up to 34 percent; band edges were chosen after seeing 2025-2026, so the forward record is the test. UI pending Codex + Stitch.'
+  - experiment_id: exp-monday-limit-spike-hw-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1d5b6ea8b3
+    status: complete
+    question: 'Owner 2026-10-26: booklet for the highest win-rate spike rule (spike-HW v1): how many backtest trades, detailed statistics.'
+    single_variable: 'Rule frozen in config: score >= 0.6, 15m EMA order >= 3, near Monday edge, 60m confirmation, -18 percent backstop; 10 slots at 5x (margin = equity / 10, loss capped at the margin, MAE >= 19 percent liquidates). Existing near_P18 fills, worse path.'
+    result: '219 trades, 181 symbols, 73 weeks, 2020-03 to 2026-09 (only 6 before 2023). Win 85.4 percent (2020-24 92.6, 2025 78.8, 2026 84.7, last5m 85.7); mean +2.41 percent per trade, median +3.70, average win +4.68, average loss -10.88, profit factor 2.51; exits: target 187, backstop 15, failed reclaim 14, breakeven 3; max losing streak 3; 63 percent fill and hit the target in the same 5m bar. 1000 USDT continuous 2020-2026: 4.65x, max DD 21 percent, 1 liquidation, 53 fills skipped; yearly 2023 +29, 2024 +16, 2025 +66, 2026 to Sep +84 percent. Order >= 1 comparison: 7.74x, DD 27, win 76.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-spike-hw-20261026-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'In sample. Booklet outside the public repo at ~/Documents/Codex/2026-10-26/spike-hw/outputs/index.html (python3 work/build.py outputs).'
+  - experiment_id: exp-monday-reclaim-paper-spike-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: fe704bfd56
+    status: running
+    question: 'Owner 2026-10-26: add the spike-HW v1 rule to paper trading as a fifth account next to v2 60m, v2 5m, v3 and v3add.'
+    single_variable: 'Forward paper only, OKX data until Binance is reachable. Account track 3060 (API key spike, own 1000 USDT): score >= 0.6 and 15m EMA order >= 3 (computed from OKX 15m candles before the touch), near target, 60m confirmation, -18 percent backstop, breakeven +0.17 percent, 10 slots at 5x, loss capped at the slot margin; other score >= 0.6 touches kept as shadow rows. Every signal stores ema_order.'
+    result: 'Started 2026-10-26 evening (monitor restart); all five accounts respond, worker alive. No spike trades yet (new week arms Beijing 2026-10-27 12:00).'
+    artifacts: []
+    canonical_report: '~/Library/Application Support/Fable/ImpulseMonitor/monday-reclaim-paper.sqlite3 (track 3060; local runtime, not in git)'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'OKX lists about a third of the backtest coins and its wicks are shallower; compare per-trade results with the OKX-listed backtest subset. UI tab pending Codex + Stitch.'
   - experiment_id: exp-monday-limit-spike-more-20261026-v1
     source_repo: darkforest-x/fable-trading
     source_commit: f0e4cbb764
