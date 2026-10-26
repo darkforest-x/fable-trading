@@ -315,9 +315,24 @@ class IndependentCloseStrategy(Strategy):
         self.indices = {int(t): i for i, t in enumerate(frame.index.asi8)}
         self.point_phases = {} if point_phases is None else point_phases
         self.indices.update({t: i for t, (i, _) in self.point_phases.items()})
+        # Pyramid legs (entry column 'pyramid_parent', owner 2026-10-27 滚仓): stop
+        # entries in the trade's favour at 'entry', armed only once the parent's
+        # reclaim succeeds; each fill moves the stop of the parent and of every
+        # filled leg to its 'ratchet' price (tighten only); legs share the
+        # parent's target and end. Unarmed or unfilled legs are opportunities.
+        self.pyramids, self.pyr_pending, self.pyr_armed, self.pyr_active = {}, {}, set(), {}
+        if "pyramid_parent" in entries:
+            for row in entries.to_dict("records"):
+                parent = row.get("pyramid_parent")
+                if isinstance(parent, str) and parent:
+                    self.pyramids.setdefault(parent, []).append(row)
+            for legs in self.pyramids.values():
+                legs.sort(key=lambda r: int(r["pyramid_step"]))
+        pyramid_ids = {r["trade_id"] for legs in self.pyramids.values() for r in legs}
         self.by_entry = {}
         for row in entries.to_dict("records"):
-            self.by_entry.setdefault(int(row["entry_i"]), []).append(row)
+            if row["trade_id"] not in pyramid_ids:
+                self.by_entry.setdefault(int(row["entry_i"]), []).append(row)
         self.active, self.order_map = {}, {}
         self.rows, self.fill_rows, self.errors = [], [], []
         self.protection_updates = []
@@ -419,6 +434,57 @@ class IndependentCloseStrategy(Strategy):
                 self.modify_order(state.stop_order,
                                   trigger_price=self.instrument.make_price(state.stop))
 
+    def _pyramid_opportunity(self, src, status, i, submitted=-1):
+        self.pyr_armed.add(src["trade_id"])
+        self.opportunity_rows.append(dict(trade_id=src["trade_id"], status=status, submitted_i=submitted,
+                                          fill_i=-1, expire_i=int(src["end_i"]), cancelled_i=i))
+
+    def _arm_pyramids(self, parent_state, i, close):
+        """Submit the parent's pyramid stop entries at its successful reclaim close."""
+        for src in self.pyramids.get(parent_state.source["trade_id"], ()):
+            row, side = dict(src), int(src["side"])
+            trigger = float(row["entry"])
+            if side*(trigger-close) < self.tick-self.eps:
+                # Already beyond this level at the decision close: no late add.
+                self._pyramid_opportunity(row, "pyramid_passed", i, i)
+                continue
+            self.pyr_armed.add(row["trade_id"])
+            state = TradeState(row, PositionId(row["trade_id"]), self.instrument.make_qty(max(1, int(1000/trigger))),
+                               parent_state.stop, parent_state.stop)
+            order = self.order_factory.stop_market(
+                self.instrument.id, OrderSide.BUY if side > 0 else OrderSide.SELL, state.quantity,
+                trigger_price=self.instrument.make_price(trigger))
+            self.pyr_pending[row["trade_id"]] = (state, order)
+            self._submit(order, state, "pyr_entry")
+
+    def _fill_pyramid(self, state, i, price):
+        row, side = state.source, int(state.source["side"])
+        parent_id = row["pyramid_parent"]
+        self.pyr_pending.pop(row["trade_id"])
+        # Returns are per this leg's own notional at its actual (possibly gapped) fill.
+        row.update(trigger=row["entry"], entry=price, risk=price, signal_entry_i=i, entry_i=i,
+                   entry_time=str(self.frame.index[i]), signal_entry_time=str(self.frame.index[i]),
+                   entry_interval_start=str(self.frame.index[i]-pd.Timedelta(minutes=self.execution_minutes)))
+        self.active[row["trade_id"]] = state
+        self.opportunity_rows.append(dict(trade_id=row["trade_id"], status="filled", submitted_i=i,
+                                          fill_i=i, expire_i=int(row["end_i"])))
+        parent = self.active.get(parent_id)
+        group = ([parent] if parent is not None else []) + [self.active[t] for t in self.pyr_active.get(parent_id, ()) if t in self.active]
+        self.pyr_active.setdefault(parent_id, set()).add(row["trade_id"])
+        stop = parent.stop if parent is not None else state.stop
+        ratchet = float(row["ratchet"])
+        if side*(ratchet-stop) > self.eps:
+            stop = ratchet
+            for member in group:
+                member.stop, member.stop_kind = stop, 10
+                if member.stop_order is not None and not member.stop_order.is_closed:
+                    self.modify_order(member.stop_order, trigger_price=self.instrument.make_price(stop))
+        # A leg filling after a deeper leg already ratcheted the group joins that stop.
+        state.stop, state.stop_kind = stop, (10 if abs(stop-ratchet) <= self.eps or (parent is not None and parent.stop_kind == 10) else 1)
+        self._submit_protective_stop(state)
+        if state.remaining > 0:
+            self._submit_target(state)
+
     def on_order_filled(self, event):
         state, phase, requested = self.order_map[str(event.client_order_id)]
         i = self.indices[event.ts_event]
@@ -436,6 +502,9 @@ class IndependentCloseStrategy(Strategy):
                 f"Partial fill for {state.source['trade_id']} ({phase}): "
                 f"got {event.last_qty}, requested {requested}, bar {i}"
             )
+        if phase == "pyr_entry":
+            self._fill_pyramid(state, i, price)
+            return
         if phase == "entry":
             if self.entry_order_mode == "limit":
                 row = state.source
@@ -529,8 +598,8 @@ class IndependentCloseStrategy(Strategy):
         if state.remaining != 0:
             raise RuntimeError("Final exit left a nonzero runner")
         if phase == "stop":
-            reason = (9 if state.stop_kind == 4 else 8 if state.stop_kind == 3 else 5 if state.stop_kind == 1
-                      else 2 if state.arm_i >= 0 else 1)
+            reason = (13 if state.stop_kind == 10 else 9 if state.stop_kind == 4 else 8 if state.stop_kind == 3
+                      else 5 if state.stop_kind == 1 else 2 if state.arm_i >= 0 else 1)
         elif phase == "target":
             # The native matcher cancels all remaining reduce-only orders for
             # this closed HEDGING position after dispatching the fill. Sending
@@ -607,6 +676,13 @@ class IndependentCloseStrategy(Strategy):
         for child in self.children.get(row["trade_id"], ()):
             if child in self.pending:
                 self._cancel_pending(child, i, "parent_closed")
+        for src in self.pyramids.get(row["trade_id"], ()):
+            if src["trade_id"] in self.pyr_pending:
+                _, order = self.pyr_pending.pop(src["trade_id"])
+                self.cancel_order(order)
+                self._pyramid_opportunity(src, "parent_closed", i, i)
+            elif src["trade_id"] not in self.pyr_armed:
+                self._pyramid_opportunity(src, "pyramid_not_armed", i)
 
     def on_order_rejected(self, event):
         self.errors.append(str(event))
@@ -626,6 +702,9 @@ class IndependentCloseStrategy(Strategy):
         self.opportunity_rows.append(dict(trade_id=key, status=status,
             submitted_i=state.source['entry_i'], fill_i=-1,
             expire_i=state.source['expire_i'], cancelled_i=i))
+        for src in self.pyramids.get(key, ()):
+            if src["trade_id"] not in self.pyr_armed:
+                self._pyramid_opportunity(src, "pyramid_not_armed", i)
 
     def _update_pending(self, i):
         """Apply amendments only after their calculation candle has closed.
@@ -722,6 +801,7 @@ class IndependentCloseStrategy(Strategy):
                         self.modify_order(state.stop_order, trigger_price=self.instrument.make_price(state.stop))
                     else:
                         self._submit_protective_stop(state)
+                    self._arm_pyramids(state, i, close)
                 else:
                     state.reclaim_status = "failed"
                     self._cancel_target(state)
@@ -932,6 +1012,29 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
                     or not r.side*(par.entry-r.entry) > 0 or abs(float(r.reclaim_ref)-float(par.entry)) > 1e-12
                     or int(r.entry_i) != int(par.entry_i) or int(r.expire_i) != int(par.expire_i)):
                 raise ValueError("Scale-in leg must deepen its parent's side, reference its entry and share its window")
+    pyramid = (entries.pyramid_parent.map(lambda v: isinstance(v, str) and bool(v)).to_numpy()
+               if "pyramid_parent" in entries else np.zeros(len(entries), bool))
+    if pyramid.any():
+        if not (policy.reclaim_next_bar and limit_entry and policy.target_from_entry):
+            raise ValueError("Pyramid legs require the reclaim rule, resting entries and per-entry targets")
+        by_id = entries.set_index("trade_id")
+        legs = entries[pyramid]
+        if legs.duplicated(["pyramid_parent", "pyramid_step"]).any():
+            raise ValueError("Pyramid steps must be unique per parent")
+        for r in legs.itertuples():
+            if r.pyramid_parent not in by_id.index:
+                raise ValueError("Pyramid leg references an unknown parent")
+            par = by_id.loc[r.pyramid_parent]
+            nested = any(isinstance(par.get(c), str) and par.get(c) for c in ("pyramid_parent", "parent"))
+            side = int(par.side)
+            if (nested or r.side != side or int(r.end_i) != int(par.end_i) or int(r.entry_i) != int(par.entry_i)
+                    or side*(r.entry-par.entry) < tick-tick*1e-7
+                    or side*(r.ratchet-par.entry) < -tick*1e-7 or side*(r.entry-r.ratchet) < tick-tick*1e-7
+                    or not np.isfinite(r.target_price) or abs(r.target_price-par.target_price) > tick*1e-7
+                    or side*(r.target_price-r.entry) < tick-tick*1e-7
+                    or any(abs(v/tick-round(v/tick)) > 1e-5 for v in (r.entry, r.ratchet))):
+                raise ValueError("Pyramid leg must trigger beyond its primary parent's entry, ratchet between that "
+                                 "entry and its trigger, and share target, submission bar and end")
     if limit_entry and policy.target_breakeven:
         raise ValueError("Target sibling breakeven currently requires completed-close entries")
     if limit_entry and not (policy.confirmed_pivot_exit or policy.target_from_entry
@@ -1010,9 +1113,11 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         raise ValueError("Invalid OHLC")
     if (np.abs(prices/market_tick-np.rint(prices/market_tick)) > 1e-5).any():
         raise ValueError("OHLC does not lie on the configured tick grid")
-    for r in entries.itertuples():
+    for k, r in enumerate(entries.itertuples()):
         if r.side not in (-1, 1) or not 0 <= r.entry_i < r.end_i < len(frame):
             raise ValueError("Invalid entry direction or bounded interval")
+        if pyramid[k]:
+            continue  # validated above; stop entries rest beyond the price, not limits
         if limit_entry:
             if (not r.entry_i < r.expire_i <= r.end_i
                     or r.side*(prices[int(r.entry_i), 3]-r.entry) < tick-tick*1e-7
