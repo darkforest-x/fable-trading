@@ -153,5 +153,27 @@ class SpikeAlertTests(unittest.TestCase):
         self.assertEqual(a.events.qsize(), 1)
 
 
+    def test_stream_pushes_on_connect_and_on_change_only(self):
+        import asyncio
+        a = self.alert()
+        async def collect():
+            out, gone = [], [False]
+            async def disconnected():
+                return gone[0]
+            stream = a.event_stream(disconnected, heartbeat=.05)
+            out.append(await stream.__anext__())          # snapshot on connect
+            self.assertEqual(len(a.subscribers), 1)
+            out.append(await stream.__anext__())          # nothing changed: heartbeat only
+            self.touch(a, 8)                              # an alert arrives while the page is connected
+            out.append(await stream.__anext__())
+            gone[0] = True
+            await stream.aclose()
+            return out
+        chunks = asyncio.run(collect())
+        data = [json.loads(c.split("data: ", 1)[1]) for c in chunks if c.startswith("event: alerts")]
+        self.assertEqual([len(d["active"]) for d in data], [0, 1])
+        self.assertEqual(chunks[1], ": ping\n\n")
+        self.assertEqual(a.subscribers, set())
+
 if __name__ == "__main__":
     unittest.main()

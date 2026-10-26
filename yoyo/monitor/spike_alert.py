@@ -13,10 +13,15 @@ fire about twice a week on OKX-listed coins; 25+ marks the extreme crashes where
 Owner 2026-10-27: the web page should show a full-screen alarm with sound. The page itself goes through Stitch and
 Codex; this module only serves the data: unacknowledged alerts of the last ACTIVE_MS are "active", a same-origin POST
 acknowledges one (shared by every open page), and a same-origin test alert (local only, never pushed) lets the page
-be checked without waiting for a crash.
+be checked without waiting for a crash. Owner 2026-10-27: no 5-second polling; GET /api/spike-alerts/stream is a
+server-sent event stream that pushes the active list on connect and whenever an alert is created, acknowledged or
+tested. Owner then asked not to load the backend: each open page waits on its own asyncio queue that the alert
+thread wakes with call_soon_threadsafe, so an idle page costs one sleeping coroutine and a comment heartbeat every
+25 seconds; the database is read only on connect and on change. At most MAX_STREAMS pages stream at once.
 """
 from __future__ import annotations
 
+import asyncio
 from collections import deque
 from contextlib import contextmanager
 from datetime import datetime
@@ -29,12 +34,14 @@ import time
 from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException, Request
+from fastapi.responses import StreamingResponse
 import requests
 
 MINUTE = 60_000
 WINDOW_MS, THRESHOLD, COOLDOWN_MS = 5*MINUTE, 25, 30*MINUTE
 SIDE_TEXT = {"lower": "下方 1.618（急跌，做多方向）", "upper": "上方 1.618（急涨，做空方向）"}
 ACTIVE_MS = 6*60*MINUTE
+MAX_STREAMS = 20
 
 
 def alert_text(alert):
@@ -61,6 +68,8 @@ class SpikeAlert:
         self.events = queue.Queue(maxsize=1000)
         self.stop = threading.Event()
         self.thread = None
+        self.version = 0  # bumped on every create, acknowledge or test
+        self.subscribers = set()  # (event loop, asyncio.Queue) per open stream
         with self.db() as db:
             db.execute("""CREATE TABLE IF NOT EXISTS alerts (id INTEGER PRIMARY KEY, side TEXT, first_ms INTEGER, last_ms INTEGER,
                           n INTEGER, symbols TEXT, created_ms INTEGER, telegram TEXT, bark TEXT, error TEXT)""")
@@ -99,6 +108,7 @@ class SpikeAlert:
             alert["id"] = db.execute("INSERT INTO alerts (side,first_ms,last_ms,n,symbols,created_ms,telegram,bark) VALUES (?,?,?,?,?,?,?,?)",
                                      (side, alert["first_ms"], candle_ms, alert["n"], json.dumps(symbols), self.clock(),
                                       "pending" if self.telegram_creds else "no_channel", "pending" if self.bark_key else "no_channel")).lastrowid
+        self._changed()
         try:
             self.events.put_nowait(alert)
         except queue.Full:
@@ -170,7 +180,13 @@ class SpikeAlert:
                 return None
             if row["ack_ms"] is None:
                 db.execute("UPDATE alerts SET ack_ms=? WHERE id=?", (self.clock(), alert_id))
-            return dict(db.execute("SELECT id, ack_ms FROM alerts WHERE id=?", (alert_id,)).fetchone())
+                changed = True
+            else:
+                changed = False
+            out = dict(db.execute("SELECT id, ack_ms FROM alerts WHERE id=?", (alert_id,)).fetchone())
+        if changed:
+            self._changed()
+        return out
 
     def test_alert(self, side="lower"):
         """Local-only alert for checking the page; never pushed and never starts the cooldown."""
@@ -179,7 +195,41 @@ class SpikeAlert:
         with self.db() as db:
             aid = db.execute("INSERT INTO alerts (side,first_ms,last_ms,n,symbols,created_ms,telegram,bark,test) VALUES (?,?,?,?,?,?,?,?,1)",
                              (side, now, now, len(symbols), json.dumps(symbols), now, "test", "test")).lastrowid
+        self._changed()
         return dict(id=aid, test=True)
+
+    def _changed(self):
+        """Wake every open stream from any thread; nothing runs when no page is open."""
+        self.version += 1
+        for loop, q in list(self.subscribers):
+            try:
+                loop.call_soon_threadsafe(q.put_nowait, self.version)
+            except RuntimeError:  # loop already closed
+                self.subscribers.discard((loop, q))
+
+    def _payload(self):
+        snap = self.snapshot(limit=20)
+        data = json.dumps(dict(version=self.version, now_ms=snap["now_ms"], active=snap["active"]), ensure_ascii=False)
+        return f"event: alerts\ndata: {data}\n\n"
+
+    async def event_stream(self, disconnected, heartbeat=25.0):
+        """Server-sent events: the active list on connect and on every change, a comment heartbeat otherwise."""
+        q = asyncio.Queue()
+        entry = (asyncio.get_running_loop(), q)
+        self.subscribers.add(entry)
+        try:
+            yield self._payload()
+            while not await disconnected():
+                try:
+                    await asyncio.wait_for(q.get(), timeout=heartbeat)
+                except asyncio.TimeoutError:
+                    yield ": ping\n\n"
+                    continue
+                while not q.empty():
+                    q.get_nowait()
+                yield self._payload()
+        finally:
+            self.subscribers.discard(entry)
 
 
 def install(app, engine):
@@ -194,6 +244,13 @@ def install(app, engine):
     @app.get("/api/spike-alerts")
     def snapshot():
         return engine.snapshot()
+
+    @app.get("/api/spike-alerts/stream")
+    async def stream(request: Request):
+        if len(engine.subscribers) >= MAX_STREAMS:
+            raise HTTPException(503, "报警推送连接已满")
+        return StreamingResponse(engine.event_stream(request.is_disconnected), media_type="text/event-stream",
+                                 headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
     @app.post("/api/spike-alerts/{alert_id}/ack")
     def acknowledge(alert_id: int, request: Request):
