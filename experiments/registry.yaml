@@ -551,6 +551,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Backtest 2020-24 / 2025 / 2026 / last five months 3.74x / 8.97x / 2.56x / 2.96x, DD up to 34 percent; band edges were chosen after seeing 2025-2026, so the forward record is the test. UI pending Codex + Stitch.'
+  - experiment_id: exp-monday-reclaim-paper-v3add-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: cb1410f351
+    status: running
+    question: 'Owner 2026-10-26: add a separate "v3 + add at -5% drawdown" paper account (scores >= 0.6) next to the original v3, and move every paper breakeven to entry +0.17 percent.'
+    single_variable: 'Forward paper only. v3add = frozen v3 plus, for scores >= 0.6, an equal-notional limit 5 percent beyond the entry resting from the fill until the parent confirmation close; it shares the parent reclaim test (parent entry), breakeven, backstop and target and is cancelled when the parent closes first (except a same-minute parent backstop, which lies beyond the add). Own 1000 USDT, gross <= 1x across both legs. All tracks (60, 5, v3, v3add): breakeven = entry * (1 + side * 17bp) for confirmations decided after the restart; a reclaim close short of it exits at that close (reclaimed_inside_be).'
+    result: 'Started 2026-10-26 in the impulse monitor (API key tracks.v3add, analytics?track=v3add; account track 2060, add legs track 2061). At restart 60m 998.87, 5m 1003.42, v3 and v3add 1000, no open positions; breakevens armed before the restart keep the entry stop.'
+    artifacts: []
+    canonical_report: '~/Library/Application Support/Fable/ImpulseMonitor/monday-reclaim-paper.sqlite3 (tracks 2060/2061; local runtime, not in git)'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Backtest (exp-monday-limit-be-scalein-compare-20261026-v1) 2020-24 / 2025 / 2026 / last five months 4.46x / 11.86x / 3.29x / 5.23x against v3 3.64 / 8.93 / 2.63 / 2.96, DD 2026 50 vs 34 percent. Paper only; UI tab pending Codex + Stitch.'
   - experiment_id: exp-monday-limit-v3-slots-20261026-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2900be6275

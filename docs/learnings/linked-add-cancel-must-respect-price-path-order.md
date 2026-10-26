@@ -1,0 +1,9 @@
+# "Cancel the add when the parent closes" is wrong when the parent's exit lies beyond the add
+
+- **Problem**: The paper engine's v3add account rests an add 5 percent beyond a v3 entry. The add shares the parent's exits and is cancelled when the parent closes first. Each 1m update is processed parent first.
+- **Dead ends**:
+  - Cancelling the add whenever the parent row is already closed looks like the backtest rule ("parent_closed"). For a long, though, the -30 percent backstop lies below the -5 percent add. A minute whose low reaches the backstop has passed through the add on the way down. Cancelling it there drops a real loss from the account.
+  - Processing the add before the parent avoids that case but breaks the target case: a parent target hit in the fill minute would leave an add filled on a path that never existed.
+- **What worked**: Keep parent-first order. Cancel by default when the parent is closed. As the one exception, fill the add when the parent closed by backstop in this same minute and the minute reached the add price, then let the add's own backstop check settle it at the same price. Expire the add at the parent's decision bar on both paths (quote time and the decision run), as in the backtest adapter.
+- **General rule**: Before writing a linked-order cancel rule, place every exit of the parent on the price axis relative to the child. Exits beyond the child imply the child filled first; exits on the other side imply it never did. Test one same-minute case for each side.
+- **Related**: `yoyo/monitor/monday_reclaim_paper.py` (`_try_fill_add`), `tests/monitor/test_monday_reclaim_paper.py` (V3AddTests), [linked-orders-race-inside-one-bar.md](linked-orders-race-inside-one-bar.md), [paper-engine-must-reuse-backtest-intrabar-conventions.md](paper-engine-must-reuse-backtest-intrabar-conventions.md).

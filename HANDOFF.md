@@ -1,3 +1,12 @@
+## 2026-10-26 · Paper: breakeven at entry +0.17 percent and a separate v3add account
+
+- Owner: move the paper breakeven to entry +0.17 percent for v2 and v3, and add a separate "v3 + add at -5 percent" account for scores >= 0.6 while the original v3 keeps running. Commit `cb1410f351`; monitor restarted, worker alive, queue 0, no error.
+- Breakeven: every track (60, 5, v3, v3add) arms its stop at entry × (1 ± 17bp) for confirmations decided after the restart. A reclaim close that has not cleared that price exits at the close (`reclaimed_inside_be`, taker + slippage). Stops armed before the restart keep the entry price (`be_price` null).
+- v3add has its own 1000 USDT (account track 2060; add legs are track 2061). The entry rules are frozen v3. For scores >= 0.6 an equal-notional limit rests 5 percent beyond the entry from the fill until the parent's confirmation close. The add shares the parent's reclaim test (on the parent entry), breakeven, backstop and target. It is cancelled when the parent closes first, except when the parent backstop fires in the minute that reaches the add. Gross across both legs is capped at 1x.
+- API: `tracks.v3add` (rule `v3add`, resting adds in `pending_adds`, unfilled adds left out of `closed`); `analytics?track=v3add`; `breakeven_offset_bp` and `v3add` in the snapshot. At restart 60m 998.87, 5m 1003.42, v3 and v3add 1000; there were no open positions.
+- UI: the frontend still reads only 60 and 5. A v3/v3add view goes through Codex + Stitch; the contract is the four track keys above plus `pending_adds`.
+- Tests: 46 paper and analytics tests and 5 reclaim frontend tests pass. Registry `exp-monday-reclaim-paper-v3add-20261026-v1`; learning `linked-add-cancel-must-respect-price-path-order.md`.
+
 ## 2026-10-26 · Fee-covering breakeven and high-score scale-in tested (native, full history)
 
 - Adapter: the reclaim rule now accepts per-entry `be_offset_bp`. A reclaim close that has not cleared the offset price exits at that close (reason 12). Scale-in legs (`parent`, `reclaim_ref`) share the parent's confirmation clock, reclaim test, breakeven, backstop and target. They expire at the parent's decision and are cancelled when the parent closes unfilled. Commits `0975b885fb`, `274542d217` (same-bar race fix); 9 tests; regression 860 passed (4 old unrelated failures).
@@ -7,7 +16,7 @@
   - Replays 2020-24 / 2025 / 2026 / last5m: 4.46 / 11.86 / 3.29 / 5.23, against v3 alone at 3.64 / 8.93 / 2.63 / 2.96.
   - The cost is drawdown: 2026 rises from 34 to 50 percent.
   - The -10 percent add fills less (15-22 percent) and gains less.
-- Paper engine unchanged (v2 tracks breakeven at entry; v3 as frozen). Adopting a fee-covering breakeven or the scale-in is an owner decision; neither is live. `experiments/active/exp-monday-limit-be-scalein-compare-20261026-v1/`.
+- Paper engine unchanged at the time (v2 tracks breakeven at entry; v3 as frozen). The owner adopted both for paper the same day; see the entry above. `experiments/active/exp-monday-limit-be-scalein-compare-20261026-v1/`.
 
 ## 2026-10-26 · Confirmed 5m entry, known pin R and frozen score filter
 
