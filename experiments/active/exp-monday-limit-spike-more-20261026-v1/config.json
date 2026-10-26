@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-monday-limit-spike-more-20261026-v1",
+  "question": "Owner 2026-10-26: after plan A (near target, -20 percent backstop, 10 slots, 5x), can the spike subset be optimized further and its win rate raised?",
+  "trades": "experiments/active/exp-monday-limit-time-news-20261026-v1/trades.csv.gz",
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "min_score": 0.6,
+  "levers": ["EMA order score 1-4 and >= 3", "score band", "side", "5m versus 60m confirmation (near target)", "plan A slots with order >= 3"],
+  "ties": 10,
+  "seed": 20261101,
+  "in_sample": "All levers inspected on the same history after the subset was chosen.",
+  "training_eligible": false,
+  "production_eligible": false
+}
