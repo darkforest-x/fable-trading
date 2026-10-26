@@ -1,0 +1,27 @@
+{
+  "experiment_id": "exp-monday-limit-spike-hw-20261026-v1",
+  "question": "Owner 2026-10-26: booklet and paper track for the highest win-rate spike rule; how many backtest trades and detailed statistics.",
+  "rule": {
+    "name": "spike-HW v1 (插针高胜率版)",
+    "entry": "limit at the NY Monday 1.618, first weekly touch per side, alts; frozen entry score >= 0.6; 15m EMA order score >= 3",
+    "confirm": "next 60m candle close: back inside -> breakeven stop, otherwise exit at that close",
+    "target": "near Monday edge (resting limit)",
+    "stop": "-18 percent backstop from fill until confirmation",
+    "sizing": "10 slots x 5x: margin = realized equity / 10, notional = 5 x margin, at most 10 open; floating loss >= 19 percent liquidates the slot margin",
+    "fees": "maker 0.02 percent (entry, target), taker 0.05 percent (stops, exits), 10bp slippage on non-target exits"
+  },
+  "subset_trades": "experiments/active/exp-monday-limit-time-news-20261026-v1/trades.csv.gz",
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "sources": {"exp-monday-limit-v3-grid-20261025-v1": ["near_P18", "near_far", "near_P30"]},
+  "variant": "near_P18",
+  "compare_variants": ["near_P18", "near_far", "near_P30"],
+  "min_score": 0.6,
+  "min_order": 3,
+  "sizing": {"slots": 10, "leverage": 5, "liq_pct": 19.0},
+  "win_bp": 1.0,
+  "ties": 20,
+  "seed": 20261102,
+  "in_sample": "The order filter and the stop were chosen on the same history; forward paper data is the test.",
+  "training_eligible": false,
+  "production_eligible": false
+}
