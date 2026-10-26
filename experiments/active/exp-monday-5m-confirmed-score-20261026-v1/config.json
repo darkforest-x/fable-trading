@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-monday-5m-confirmed-score-20261026-v1",
+  "authorization": "Owner2026-10-26 requests confirmed5m market entry, R from entry to bearish pin low, and current scoring filter. Prior target and BE research retained. Opposite long/short candle mirror reported separately.",
+  "entry": "First weekly-side original touch candle must have opposite polarity and a real adverse wick. Immediately next complete5m close must reclaim original touch limit; enter following open as taker with10bp adverse slippage. Missing close/open or quote beyond pin stop rejects before trade.",
+  "risk": "Actual simulated market fill to original completed pin low(long) or high(short), known before entry. Initial stop exactly1 geometricR. No percent backstop needed.",
+  "target_r": [1,2,3,5,7,10],
+  "be_modes": ["fixed_stop", "fee_close"],
+  "be": "Only after entry: first completed5m close strictly beyond fee-neutral price arms stop for the following bar. Fee neutral uses taker entry and taker stop. Gaps and10bp stop slippage remain losses.",
+  "maker_fee": 0.0002,
+  "taker_fee": 0.0005,
+  "fee_read_date": "2026-10-23",
+  "market_slippage": 0.001,
+  "fees": "OKXLv1: market entry and protective stop taker5bp per fill; resting TP maker2bp.10bp per market fill separate, not a measured spread. Funding not modeled.",
+  "score": "Frozen monday_reclaim_score.json pre2025 fit and threshold0.22621664169752762. Recompute deployed pre-touch windows without final touch close/volume. No retraining or threshold scan. Actual Binance quote volume approximated by base volume times close; distinct historical universe, not exact liveOKX parity.",
+  "score_cohorts": ["all", "scorable", "score_gate"],
+  "controls": "Frozen3 random submissions matched symbol/week/side/prior volatility bucket, own pin/confirmation/next-open/R; no replacement. Selected signal IDs take corresponding admitted controls; no extra control score filter. Report conditional matched1+ and full3 subsets.",
+  "engine": "VectorBT1.2.0 native OHLC first-hit stop-first, open gaps first, independent native portfolios; no handcrafted barfill loop or second-framework replay.",
+  "selection": "Equal-notional mean netbp,2025choose/2026check. Descriptive fullperiod best separately. Long primary and short mirror; combined secondary. All history previously exposed. IndependentR not funded account equity.",
+  "source": "Prior632crypto frozen candidate/events and OHLC. No downloads/hashes. Preserve known source gaps/corrupt boundaries; unmatched end positions censored.",
+  "production_eligible": false,
+  "training_eligible": false
+}

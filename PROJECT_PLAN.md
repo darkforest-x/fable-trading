@@ -229,3 +229,16 @@ state and live execution remain out of scope.
 ## Owner授权记录：MA3R负例修复（2026-09-22）
 
 Owner在“训练图片没加负样本？”后明确“重新做吧”。按原1500启动门槛与两组3060训练授权，开启独立 exp-ma-profit3r-negatives-20260922-v2，仅补同一冻结训练候选总体的已解析收益目标反例。旧正例/val/test/成本/障碍/配方保留，零负例拒绝开训，人工旧标签不自动重解释。P0/P1全局资格、promote和生产纪律不变。原positive-only是助手误解，不是Owner要求。见新实验plan及analysis/p1_ma_profit3r_negatives_redo_20260922.md。
+
+## Owner-authorized confirmed-entry/score comparison (2026-10-26)
+
+Owner asked to replace touch-limit entry with completed5m confirmation entry,
+use actual entry-to-bearish-pin-low as1R, and include the existing score filter.
+The bounded research jointly changes entry timing and its now-known risk;
+1/2/3/5/7/10R targets and fixed versus post-entry fee-protection are enumerated
+before execution. Frozen5m score coefficients and threshold are compared with
+unfiltered and scorable-only cohorts, never retrained or optimized. Long is
+primary, short is the explicit mirrored supplementary cohort. Existing matched
+random submissions, fees and data are reused; market entry incurs taker fees
+and separately stated10bp adverse slippage. Select2025/check2026, independent
+R/notional outcomes only, no funded-account or deployment change.
