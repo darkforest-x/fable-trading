@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-5m-confirmed-keypoints-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ddf687dd06
+    status: rejected
+    question: Do original Monday key targets improve confirmed5m pin-stop profit when positions use the same planned loss budget?
+    single_variable: Only replace fixedR targets with5frozen Monday target prices; entry/pin stop/score/two BEpolicies unchanged. Quantity budgets entry+stop fees and stop slippage; cached Rbaseline reweighted without replay.
+    artifacts:
+    - monday-5m-confirmed-keypoints-20261026-v1
+    canonical_report: experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    result: 632assets/106346events/1063460opportunity columns;1058088native positions/2116176fills. Scoredlong fixed-pin five targets all lose18.63to22.65USDT per100plannedrisk perclosedtrade;2026lose19.38to33.25.2025choosesopposite1618feeBE;2026peropportunity-23.09USDT vs cached5RfeeBE-20.89. Same-risk bigger sizing does not rescue profit. All10scoredlong policies negative in fullhistory/2025/2026 budgetR.
+    notes: Exact original order targets and random scaling reused; passed/fee-insufficient targets skipped beforeentry. Scoredlong median notional5077to5511per100risk, same quantity as Rtargets when entry/stop equal.2026chosen matched excess+16.36USDT but absolute-23.09;95percentCIabsolute-30.74to-16.67. Funding/margin/capacity/accountcapital unmodeled, overlapping137positions observed.8behavioral tests;allclosednativeaccountingreconciles. Notion4058856479af81bfac30ddc49688ef3e.
   - experiment_id: exp-monday-5m-confirmed-score-20261026-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 758bbc5a83
@@ -551,6 +565,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Backtest 2020-24 / 2025 / 2026 / last five months 3.74x / 8.97x / 2.56x / 2.96x, DD up to 34 percent; band edges were chosen after seeing 2025-2026, so the forward record is the test. UI pending Codex + Stitch.'
+  - experiment_id: exp-monday-limit-time-news-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: c9f2e377b8
+    status: complete
+    question: 'Owner 2026-10-26: win rate by weekday and hour of day, and whether it depends on time windows and major US news (CPI, payrolls, FOMC).'
+    single_variable: 'Grouping only (Beijing weekday / hour, NY weekday, +-2h news window, event day, held through an event); existing NautilusTrader fills of v2_be17 and v3_be17, worse path, 10bp slippage; win = net > 1bp.'
+    result: 'v2 22708 trades 33.0 percent, v3 2108 trades 36.7 percent. Week-preserving cluster permutations: weekday p .13 / .19, hour p .06 / .18, 4h block p .27 / .12 (v2 / v3); bucket ranks between 2020-24 and 2025-26 anti-correlated (Spearman -0.07 to -0.43). Worst 3h window chosen on 2020-24 does not hold in 2025-26 (v2 05h -4.4pp then +7.1pp, p .98; v3 16h -28pp then -0.4pp, p .64). Post hoc only: Beijing 21-24h (US cash open) is lower in both periods (v2 -3.4 / -8.3pp, v3 -12.7 / -6.7pp). News +-2h: v2 35.2 vs 33.0 percent (p .51), v3 35.8 vs 36.7 (n53, p .98); FOMC 45.2 percent (38 weeks) and CPI 29.6 percent are post hoc and flip by period for payrolls; event day p .36 / .97.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-time-news-20261026-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'No time or news filter adopted; Beijing 21-24h and the FOMC window are forward-observation candidates only. Events reuse exp-monday-1618-macro-20261023-v1 (official BLS / Fed calendars).'
   - experiment_id: exp-monday-reclaim-paper-v3add-20261026-v1
     source_repo: darkforest-x/fable-trading
     source_commit: cb1410f351
