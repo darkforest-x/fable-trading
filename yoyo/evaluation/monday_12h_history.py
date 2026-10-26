@@ -74,6 +74,23 @@ def build(symbol):
 
 def main():
     DATA.mkdir(parents=True,exist_ok=True);(DATA/'pages').mkdir(exist_ok=True)
-    for symbol in ['BTC','ETH']:build(symbol)
+    for symbol in ['BTC','ETH']:
+        build(symbol)
+        # Repair only missing registered intervals using exact native candles.
+        # Preserve receipts and raw repair pages; never interpolate absent data.
+        out=DATA/symbol;f=pd.read_csv(out/'candles.csv.gz',index_col='open_time',parse_dates=True)
+        d=f.index.to_series().diff();missing=[]
+        for t in d[d>pd.Timedelta(minutes=5)].index:
+            missing.extend(fetch(symbol,t-d.loc[t]+pd.Timedelta(minutes=5),t))
+        if missing:
+            r=pd.DataFrame(missing,columns=['ts',*OHLC,'volume','base','quote','confirm'])
+            r.index=pd.to_datetime(r.ts.astype('int64'),unit='ms',utc=True)
+            r=r[[*OHLC,'volume']].astype(float);r['source']='OKX_native_5m_gap_repair'
+            f=pd.concat([f,r]).sort_index()
+            if f.index.has_duplicates:raise RuntimeError('Repair overlaps source')
+            f.index.name='open_time';f.to_csv(out/'candles.csv.gz')
+            meta=json.loads((out/'receipt.json').read_text());meta.update(repaired_rows=len(r),rows=len(f),
+                gaps=int(f.index.to_series().diff().dropna().ne(pd.Timedelta(minutes=5)).sum()))
+            (out/'receipt.json').write_text(json.dumps(meta,indent=2)+'\n');print(json.dumps(meta),flush=True)
 
 if __name__=='__main__':main()
