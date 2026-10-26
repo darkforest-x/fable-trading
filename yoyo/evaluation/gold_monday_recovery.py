@@ -74,7 +74,7 @@ def prepare(f,cfg):
                             entry_i=j,expire_i=expiry,end_i=end,entry=price,stop=stop,risk=side*(price-stop),
                             target_price=target,near_edge=float(n),confirmation_minutes=minutes,
                             matched_controls_available=len(chosen),volatility_bucket=int(bucket[j]),
-                            censor_reason='source_end' if end==len(f)-1 else 'missing_source_interval')))
+                            censor_reason='source_end' if end==len(f)-1 else 'missing_source_interval'))
     return pd.DataFrame(orders),pd.DataFrame(opps),weeks
 
 
