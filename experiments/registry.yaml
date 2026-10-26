@@ -565,6 +565,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Backtest 2020-24 / 2025 / 2026 / last five months 3.74x / 8.97x / 2.56x / 2.96x, DD up to 34 percent; band edges were chosen after seeing 2025-2026, so the forward record is the test. UI pending Codex + Stitch.'
+  - experiment_id: exp-monday-limit-winrate-levers-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: beb7282731
+    status: complete
+    question: 'Owner 2026-10-26: what else can raise the win rate? Detailed analysis of the backtested trades.'
+    single_variable: 'Grouping only on existing NautilusTrader fills (v3_be17, v2_be17, v3 add legs; worse path, 10bp slippage, win = net > 1bp) joined to the causal entry feature table v2; select on 2020-24, confirm on 2025-26 with week-block bootstrap and Holm.'
+    result: 'v3 early / late win 39.9 / 35.0 percent, flat (breakeven) 33 / 32, failed reclaim 24 / 29, backstop 0.5 / 2.4. Target choice dominates: the same score >= 0.5 events with the near Monday edge win 67 / 65 percent (mean 189 / 114bp) versus v3 far targets 40 / 35 percent (353 / 176bp). Strongest entry lever: 15m EMA order score before the touch (side-aligned, > 0 means the move into the level came before the short EMAs turned): v3 late 35.0 -> 45.3 percent keeping 505 of 1366, mean 176 -> 308bp, order 4 63.7 percent; v2 late 34.5 -> 54.4; higher in every score band and every year 2020-2026. Score >= 0.6 with order > 0 and the near target: 89.5 / 77.5 percent (n143 / 306). Smaller confirmed levers: 15m volume-ratio mean, close vs EMA200, 12-bar return, approach speed, 24h drawdown. Win rate and mean can diverge: v2 score 0.375-0.5 with order > 0 wins more but loses money late (-100 / -43bp). Deeper -5 percent legs win 84 / 71 percent but fill on 39 / 46 percent of score >= 0.6 events. Side is not a lever (flips by period).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-winrate-levers-20261026-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'No rule adopted. Next: equity replay on the existing fills with the order score as filter or size multiplier, record the order score on live paper touches, and a framework run of a post-reclaim profit lock for the 32 percent breakeven exits.'
   - experiment_id: exp-monday-limit-time-news-20261026-v1
     source_repo: darkforest-x/fable-trading
     source_commit: c9f2e377b8

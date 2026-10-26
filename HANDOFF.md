@@ -15,6 +15,22 @@
 - Median notional per100USDTplannedrisk5077to5511;99percentile~22k;maximum~30.8k. Same entry/stop implies exactly same size regardless of target. Recorded overlap as high as137positions and~471600USDTnotional across fixed-target arms; this is independent exposure, not a feasible cashaccount. Stops ordinarily lose100USDT, observed worst~101.50 fromgaps. Funding/margin/capacity remain unmodeled. Originalentry-week targets do not roll nextweek; sourcegap/end censoring preserved.
 - Results and reproduction `experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/`; Notion `4058856479af81bfac30ddc49688ef3e`. Learning `fixed-risk-sizing-must-include-fill-costs.md`. All production/training flagsfalse; no live/score changes, no additional report. Luna delegate actualmodel/effort could not be verified from tool output and was stopped; main performed work.
 
+## 2026-10-26 · Win-rate levers from the backtested trades
+
+- Owner asked what else raises the win rate. Read-only analysis of existing fills joined to the causal feature table v2. Builder `yoyo/evaluation/monday_limit_winrate_levers.py`; results `experiments/active/exp-monday-limit-winrate-levers-20261026-v1/`.
+- v3 trades (early / late): win 39.9 / 35.0 percent, breakeven flat 33 / 32, failed reclaim 24 / 29, backstop 0.5 / 2.4. The target dominates win rate. The same score ≥0.5 events with the near edge win 67 / 65 percent at 189 / 114bp, against 40 / 35 percent at 353 / 176bp for the v3 far targets.
+- Strongest entry lever: the 15m EMA order score before the touch (side-aligned; > 0 means price reached the level before the short EMAs turned).
+  - v3 late win rate 35.0 → 45.3 percent, keeping 37 percent of trades; mean 176 → 308bp. Order score 4 wins 63.7 percent.
+  - v2 late 34.5 → 54.4 percent.
+  - Higher in every score band and every year. Timing checked: the last 15m bar closes at or before the fill bar opens.
+  - With score ≥0.6 and the near target: 89.5 / 77.5 percent.
+- Smaller confirmed levers: 15m volume-ratio mean, close vs EMA200, 12-bar return, approach speed, 24h drawdown. Side flips by period. Deeper −5 percent legs win 84 / 71 percent but fill on 39 / 46 percent of score ≥0.6 events.
+- Win rate and mean can diverge: v2 score 0.375-0.5 with order > 0 wins more but loses money late. Nothing adopted. Next candidates:
+  - an equity replay of the order score as a filter or size multiplier on the existing fills;
+  - logging the order score on paper touches;
+  - a framework run of a post-reclaim profit lock for the 32 percent breakeven exits.
+- Learning `win-rate-levers-and-profit-levers-are-different.md`.
+
 ## 2026-10-26 · Notion overview of the 1.618 system
 
 - Owner asked for one page that consolidates every 1.618 test, what works, what is worth more research, and the logic now running. Notion page `4058856479af81e6bbdbf1d39bd4875a` (under task 1.618挂单策略, marked pending validation) groups the work in three lines: the level itself (rejected), candle-confirmation entries (rejected or inconclusive), and limit + reclaim (current, partly effective). The v2 page links to it. No code or experiment changes.
