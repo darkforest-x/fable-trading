@@ -1,0 +1,50 @@
+{
+  "symbols": [
+    "BTC",
+    "ETH",
+    "XAU"
+  ],
+  "venue": "OKX USDT perpetual",
+  "ticks": {
+    "BTC": 0.1,
+    "ETH": 0.01,
+    "XAU": 0.1
+  },
+  "maker_fee": 0.0002,
+  "taker_fee": 0.0005,
+  "fee_read_at": "2026-10-26",
+  "fee_level": "Lv1",
+  "fee_group": "4",
+  "fee_endpoint": "GET /api/v5/account/trade-fee",
+  "fee_timestamps_ms": [
+    1793029002223,
+    1793029005279,
+    1793029007457
+  ],
+  "seed": 20261026,
+  "controls_per_signal": 3,
+  "weights": [
+    0.7,
+    0.15,
+    0.15
+  ],
+  "confirmation": "Touch candle12H UTC00/12; Beijing08/20; TradingView OKX BTC data-window verified current candle20:00 at23:35 Beijing",
+  "monday": "America/New_York Monday00:00 to Tuesday00:00",
+  "entry": "First weekly side outer1618; independent positions; retain entry-week levels",
+  "target_long": [
+    "low+.618range",
+    "high",
+    "high+.618range"
+  ],
+  "failed_reclaim": "Cancel remaining targets and wait for maker fee-neutral recovery limit",
+  "reclaimed": "Stop remaining legs at maker-entry plus taker-exit fee neutral price",
+  "fee_band": "Wait at taker-neutral resting limit if reclaimed close cannot host protective stop",
+  "initial_stop": null,
+  "r_unit": "1percent entry notional, not initial risk",
+  "data_end_exclusive": "2026-10-26T15:00:00Z",
+  "path": "Native monotone O-H-L-C on5m; no second replay",
+  "funding": false,
+  "slippage": 0,
+  "training_eligible": false,
+  "production_eligible": false
+}
