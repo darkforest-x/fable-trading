@@ -32,7 +32,7 @@ LAB = {4: 'target', 5: 'breakeven', 11: 'failed_reclaim', 12: 'reclaimed_inside_
 
 
 def load(symbol):
-    out, issues, par = {}, [], [0, 0]
+    out, issues, par = {}, [], [[], []]
     for k, path in enumerate(('ohlc', 'olhc')):
         d = RUN/path/'symbols'/symbol
         done = json.loads((d/'done.json').read_text())
