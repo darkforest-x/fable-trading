@@ -9,11 +9,11 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from yoyo.monitor.monday_fib import FibBook, week_window
-from yoyo.monitor.monday_reclaim_paper import (MODEL, V3, V3_TRACK, V3ADD_TRACK, V3ADD_LEG, BE_OFFSET_BP, ReclaimPaper,
-                                               PaperCloseError, features, settle, bars, install)
+from yoyo.monitor.monday_reclaim_paper import (MODEL, V3, V3_TRACK, V3ADD_TRACK, V3ADD_LEG, BE_OFFSET_BP, SPIKE_TRACK, ReclaimPaper,
+                                               PaperCloseError, features, settle, bars, install, ema_order)
 
 ROOT = Path(__file__).resolve().parents[2]
-MIN, H5, H1 = 60_000, 300_000, 3_600_000
+MIN, H5, H1, M15 = 60_000, 300_000, 3_600_000, 900_000
 BE = 93.82*(1+BE_OFFSET_BP/1e4)  # breakeven stop after a reclaim, entry +0.17 percent
 
 
@@ -28,7 +28,7 @@ class FakeClient:
         return self.now
 
     def get(self, path, params):
-        step = {"5m": H5, "1H": H1, "1m": MIN}[params["bar"]]
+        step = {"5m": H5, "1H": H1, "1m": MIN, "15m": M15}[params["bar"]]
         last = self.now//step*step
         rows = []
         for k in range(int(params["limit"])):
@@ -57,11 +57,11 @@ class PaperFixture(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def engine(self, threshold, enable_v3=False, enable_v3add=False):
+    def engine(self, threshold, enable_v3=False, enable_v3add=False, enable_spike=False):
         spec = json.loads(MODEL.read_text()); spec["top40_threshold"] = threshold
         path = Path(self.tmp.name)/"model.json"; path.write_text(json.dumps(spec))
         return ReclaimPaper(self.tmp.name, FakeFib(self.tmp.name, self.client), model_path=path, enable_v3=enable_v3,
-                            enable_v3add=enable_v3add)
+                            enable_v3add=enable_v3add, enable_spike=enable_spike)
 
     def rows(self, e, sql):
         with e.db() as db:
@@ -492,6 +492,76 @@ class V3AddTests(PaperFixture):
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.json()["summary"]["open_count"], 2)
         self.assertEqual(TestClient(app).get("/api/monday-reclaim-paper/analytics?track=v3").json()["summary"]["open_count"], 1)
+
+
+
+class SpikeTrackTests(PaperFixture):
+    """spike-HW v1: score >= 0.6 and 15m EMA order >= 3, near target, -18 percent backstop, 10 slots at 5x."""
+
+    def spike(self, score, symbol="ABC-USDT-SWAP"):
+        e = getattr(self, "_e", None) or self.engine(-1., enable_spike=True)
+        self._e = e
+        e.model.score = lambda feats: score
+        e.handle_touch(self.levels, symbol, "lower", 93.8, self.touch+500, self.touch)
+        rows = self.rows(e, f"SELECT * FROM positions WHERE track={SPIKE_TRACK} AND symbol='{symbol}'")
+        return e, (rows[0] if rows else None)
+
+    def falling_15m(self):
+        last = (self.touch//H5*H5)//M15*M15-M15
+        for k in range(300):
+            c = 100.+k*.2  # older bars higher: a falling market into the touch
+            self.client.override[("15m", last-k*M15)] = (c, c, c, c)
+
+    def test_ema_order_counts_side_aligned_pairs(self):
+        rising = [(k*M15, 0, 0, 0, 100.+k, 0) for k in range(300)]
+        self.assertEqual((ema_order(rising, 1, 400*M15), ema_order(rising, -1, 400*M15)), (4, 0))
+        with self.assertRaises(ValueError):
+            ema_order(rising[:50], 1, 400*M15)
+
+    def test_qualifying_touch_takes_a_slot_at_five_times_margin(self):
+        e, p = self.spike(.7)
+        self.assertEqual((p["taken"], p["target"], p["note"]), (1, 100., None))
+        self.assertAlmostEqual(p["notional"], 1000/10*5)
+        self.assertAlmostEqual(p["backstop"], 93.82*.82)
+        self.assertEqual(self.rows(e, "SELECT ema_order FROM signals"), [{"ema_order": 4}])
+        self.assertIn("spike", e.snapshot()["tracks"])
+
+    def test_low_order_is_a_shadow_row(self):
+        self.falling_15m()
+        e, p = self.spike(.7)
+        self.assertEqual((p["taken"], p["notional"], p["note"]), (0, 0., "order_0"))
+        self.assertEqual(self.rows(e, "SELECT ema_order FROM signals"), [{"ema_order": 0}])
+
+    def test_no_row_below_score_0_6(self):
+        e, p = self.spike(.55)
+        self.assertIsNone(p)
+
+    def test_ten_slots_then_skip(self):
+        for k in range(11):
+            e, p = self.spike(.7, f"A{k}-USDT-SWAP")
+        rows = self.rows(e, f"SELECT taken, note FROM positions WHERE track={SPIKE_TRACK} ORDER BY id")
+        self.assertEqual(sum(r["taken"] for r in rows), 10)
+        self.assertEqual(rows[-1], {"taken": 0, "note": "no_slot"})
+
+    def test_backstop_exit_and_loss_capped_at_margin(self):
+        e, p = self.spike(.7)
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch+MIN, "high": 94., "low": 70., "price": 72.})
+        c = self.rows(e, f"SELECT * FROM positions WHERE track={SPIKE_TRACK}")[0]
+        self.assertEqual((c["reason"], c["exit_price"]), ("backstop", p["backstop"]))
+        self.assertAlmostEqual(c["pnl"], 500*settle(1, 93.82, p["backstop"], "backstop")[2]/1e4)
+        e2, q = self.spike(.7, "XYZ-USDT-SWAP")
+        self.confirm(e2, 60.)  # failed reclaim far beyond the margin
+        c = self.rows(e2, f"SELECT * FROM positions WHERE track={SPIKE_TRACK} AND symbol='XYZ-USDT-SWAP'")[0]
+        self.assertEqual(c["reason"], "failed_reclaim")
+        self.assertAlmostEqual(c["pnl"], -c["notional"]/5)  # margin = equity after the first loss / 10
+
+    def test_analytics_and_api_accept_spike(self):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+        e, _ = self.spike(.7)
+        app = FastAPI(); install(app, e)
+        r = TestClient(app).get("/api/monday-reclaim-paper/analytics?track=spike")
+        self.assertEqual((r.status_code, r.json()["summary"]["open_count"]), (200, 1))
 
 
 if __name__ == "__main__":

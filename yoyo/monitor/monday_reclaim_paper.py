@@ -45,6 +45,14 @@ the entry from the fill until the parent's confirmation close. The add shares
 the parent's reclaim test (parent entry), breakeven price, backstop and target;
 it is cancelled if the parent closes first, except when the parent's backstop
 fires in the minute that also reaches the add (the add filled on the way).
+
+Owner 2026-10-26 (booklet spike-HW v1, exp-monday-limit-spike-hw-20261026-v1): a fifth account "spike" (own
+1000 USDT) takes score >= 0.6 touches whose 15m EMA order score is >= 3 (EMA 8/13/21/34/55, ewm adjust=False,
+on 15m candles closed before the touch's 5m bar, side-aligned as in yoyo.data.indicators); near Monday edge
+target, 60m confirmation, -18 percent backstop until the confirmation, breakeven +0.17 percent; 10 slots at 5x:
+margin = realized equity / 10, notional = 5 x margin, at most 10 open, a loss never exceeds the margin (the stop
+sits inside the 19 percent liquidation distance; liquidation itself is not simulated). Score >= 0.6 touches that
+fail the order filter or find no free slot are kept as shadow rows. Every signal stores its EMA order score.
 """
 from __future__ import annotations
 
@@ -73,6 +81,10 @@ CONFIRM = {60: 60, 5: 5, V3_TRACK: 60, V3ADD_TRACK: 60, V3ADD_LEG: 60}
 BE_OFFSET_BP = 17.0
 ADD = dict(from_score=.6, drawdown_pct=5.)
 ACCOUNT = {V3ADD_LEG: V3ADD_TRACK}
+SPIKE_TRACK = 3060  # spike-HW v1 account; API key "spike"
+CONFIRM[SPIKE_TRACK] = 60
+SPIKE = dict(min_score=.6, min_order=3, backstop_pct=18., slots=10, leverage=5.)
+EMA_SPANS = (8, 13, 21, 34, 55)
 MAKER_BP, TAKER_BP, SLIP_BP = 2.0, 5.0, 10.0
 START_EQUITY, FRACTION, GROSS = 1000.0, 0.10, 1.0
 EXCLUDE = {"BTC", "ETH", "XAU", "XAG", "PAXG", "XAUT"}
@@ -90,11 +102,26 @@ def serialized(method):
 
 
 def track_key(track):
-    return {V3_TRACK: "v3", V3ADD_TRACK: "v3add", V3ADD_LEG: "v3add"}.get(track, str(track))
+    return {V3_TRACK: "v3", V3ADD_TRACK: "v3add", V3ADD_LEG: "v3add", SPIKE_TRACK: "spike"}.get(track, str(track))
 
 
 def track_id(key):
-    return {"v3": V3_TRACK, "v3add": V3ADD_TRACK}.get(str(key)) or int(key)
+    return {"v3": V3_TRACK, "v3add": V3ADD_TRACK, "spike": SPIKE_TRACK}.get(str(key)) or int(key)
+
+
+def ema_order(m15, side, candle_ms):
+    """Side-aligned count of ordered EMA pairs on the last 15m candle closed before the touch's 5m bar."""
+    touch_bar = candle_ms//MIN5*MIN5
+    closes = [b[4] for b in m15 if b[0]+3*MIN5 <= touch_bar]
+    if len(closes) < 200:
+        raise ValueError("short_history")
+    last = []
+    for span in EMA_SPANS:
+        a, e = 2/(span+1), closes[0]
+        for c in closes[1:]:
+            e += a*(c-e)
+        last.append(e)
+    return sum((last[i] >= last[i+1]) if side == 1 else (last[i] <= last[i+1]) for i in range(4))
 
 
 def account(track):
@@ -173,11 +200,12 @@ def settle(side, entry, exit_price, reason):
 
 
 class ReclaimPaper:
-    def __init__(self, runtime, fib, model_path=MODEL, v3_path=V3, enable_v3=True, enable_v3add=True):
+    def __init__(self, runtime, fib, model_path=MODEL, v3_path=V3, enable_v3=True, enable_v3add=True, enable_spike=True):
         self.write_lock = threading.RLock()
         self.fib, self.client, self.model = fib, fib.client, ScoreModel(model_path)
         self.v3 = json.loads(Path(v3_path).read_text()) if enable_v3 else None
         self.add = dict(ADD) if self.v3 and enable_v3add else None
+        self.spike = dict(SPIKE) if enable_spike else None
         self.path = Path(runtime)/"monday-reclaim-paper.sqlite3"
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.events = queue.Queue(maxsize=200_000)
@@ -213,11 +241,13 @@ class ReclaimPaper:
                                "backstop": "REAL", "be_price": "REAL", "parent_id": "INTEGER", "reclaim_ref": "REAL"}.items():
                 if name not in columns:
                     db.execute(f"ALTER TABLE positions ADD COLUMN {name} {spec}")
+            if "ema_order" not in {r["name"] for r in db.execute("PRAGMA table_info(signals)")}:
+                db.execute("ALTER TABLE signals ADD COLUMN ema_order INTEGER")
             db.execute("UPDATE positions SET remaining_notional=CASE WHEN stage='closed' THEN 0 ELSE notional END "
                        "WHERE remaining_notional IS NULL")
             if "realized_pnl" not in columns:
                 db.execute("UPDATE positions SET realized_pnl=COALESCE(pnl,0) WHERE stage='closed'")
-            for m in TRACKS+((V3_TRACK,) if self.v3 else ())+((V3ADD_TRACK,) if self.add else ()):
+            for m in TRACKS+((V3_TRACK,) if self.v3 else ())+((V3ADD_TRACK,) if self.add else ())+((SPIKE_TRACK,) if self.spike else ()):
                 db.execute("INSERT OR IGNORE INTO tracks VALUES (?,?,?)", (m, START_EQUITY, self.client.clock()))
         self._refresh_watch()
 
@@ -299,7 +329,7 @@ class ReclaimPaper:
         side = 1 if side_text == "lower" else -1
         level = levels[side_text]
         target = levels["low"] if side == 1 else levels["high"]
-        status, score, taken, feats, error = "scored", None, 0, None, None
+        status, score, taken, feats, error, order = "scored", None, 0, None, None, None
         if symbol.split("-")[0] in EXCLUDE:
             status = "excluded"
         else:
@@ -313,12 +343,17 @@ class ReclaimPaper:
                 taken = int(score >= self.model.threshold)
             except Exception as err:
                 status, error = "feature_error", f"{type(err).__name__}: {err}"[:200]
+            try:
+                m15 = bars(self.client.get("/api/v5/market/candles", {"instId": symbol, "bar": "15m", "limit": "300"}), "15m", self.client.clock())
+                order = ema_order(m15, side, candle_ms)
+            except Exception:
+                order = None
         with self.db() as db:
             db.execute("BEGIN IMMEDIATE")
             cur = db.execute("INSERT OR IGNORE INTO signals (week,symbol,side,level,target,high,low,candle_ms,observed_ms,"
-                             "status,score,taken,features,error) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                             "status,score,taken,features,error,ema_order) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                              (levels["week"], symbol, side, level, target, levels["high"], levels["low"], candle_ms,
-                              observed_ms, status, score, taken, json.dumps(feats) if feats else None, error))
+                              observed_ms, status, score, taken, json.dumps(feats) if feats else None, error, order))
             if cur.rowcount != 1 or status == "excluded":
                 return
             sid = cur.lastrowid
@@ -347,7 +382,31 @@ class ReclaimPaper:
                                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                                (sid, V3ADD_LEG, symbol, side, level*(1-side*self.add["drawdown_pct"]/100), target3, candle_ms,
                                 decision3, "pending_fill", 0, 0., candle_ms, "add_pending", 0., backstop3, pid, level))
+            if self.spike and score is not None and score >= self.spike["min_score"]:
+                self._open_spike(db, sid, symbol, side, level, target, candle_ms, order)
         self._refresh_watch()
+
+    def _open_spike(self, db, sid, symbol, side, level, target, candle_ms, order):
+        """spike-HW v1 row: near target, -18 percent backstop, margin = equity / slots at the given leverage."""
+        sp = self.spike
+        notional, note = 0., None
+        if order is None:
+            note = "order_missing"
+        elif order < sp["min_order"]:
+            note = f"order_{order}"
+        else:
+            busy = db.execute("SELECT COUNT(*) n FROM positions WHERE track=? AND stage<>'closed' AND taken=1", (SPIKE_TRACK,)).fetchone()["n"]
+            if busy >= sp["slots"]:
+                note = "no_slot"
+            else:
+                equity = db.execute("SELECT equity FROM tracks WHERE track=?", (SPIKE_TRACK,)).fetchone()["equity"]
+                notional = max(0., equity/sp["slots"]*sp["leverage"])
+        decision = candle_ms//HOUR*HOUR+2*HOUR
+        backstop = level*(1-side*sp["backstop_pct"]/100)
+        db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,decision_ms,stage,"
+                   "taken,notional,last_seen_ms,note,remaining_notional,backstop) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                   (sid, SPIKE_TRACK, symbol, side, level, target, candle_ms, decision, "pending_confirm",
+                    int(notional > 0), notional, candle_ms, note, notional, backstop))
 
     def _open_v3(self, db, sid, levels, symbol, side, level, candle_ms, score, track=V3_TRACK):
         """v3 row: score-dependent target, -30 percent backstop, notional linear in score."""
@@ -415,6 +474,8 @@ class ReclaimPaper:
         """Allocate original entry cost once across each realized tranche."""
         gross, fee, net, net_slip = settle(p["side"], p["entry"], price, reason)
         pnl = amount*net/1e4
+        if p["track"] == SPIKE_TRACK and self.spike:
+            pnl = max(pnl, -amount/self.spike["leverage"])  # a leveraged slot cannot lose more than its margin
         cur = db.execute("INSERT INTO exits (position_id,notional,exit_ms,price,reason,gross_bp,fee_bp,net_bp,net_slip_bp,pnl) "
                          "VALUES (?,?,?,?,?,?,?,?,?,?)", (p["id"], amount, exit_ms, price, reason, gross, fee, net, net_slip, pnl))
         remaining = max(0., p["remaining_notional"]-amount)
@@ -648,7 +709,7 @@ class ReclaimPaper:
                     r["exits"] = exits.get(r["id"], [])
                     r["unrealized_bp"] = r["side"]*(q["price"]-r["entry"])/r["entry"]*1e4 if q.get("price") else None
                     open_rows.append(r)
-                tracks[track_key(m)] = dict(confirm_minutes=CONFIRM.get(m, m), rule={V3_TRACK: "v3", V3ADD_TRACK: "v3add"}.get(m, "v2"),
+                tracks[track_key(m)] = dict(confirm_minutes=CONFIRM.get(m, m), rule={V3_TRACK: "v3", V3ADD_TRACK: "v3add", SPIKE_TRACK: "spike"}.get(m, "v2"),
                     equity=t["equity"], start_equity=START_EQUITY, started_ms=t["started_ms"],
                     open=open_rows, closed=closed[:100], pending_adds=pending_adds,
                     # Latest fill is independent of the exit-ordered history page.
@@ -662,7 +723,7 @@ class ReclaimPaper:
             s["features"] = json.loads(s["features"]) if s["features"] else None
         return dict(now_ms=self.client.clock(), strategy="monday_1618_limit_reclaim_v2", paper_only=True,
                     model=dict(threshold=self.model.threshold, trained_before=self.model.trained_before, features=self.model.features),
-                    sizing=dict(start_equity=START_EQUITY, fraction=FRACTION, gross=GROSS), v3=self.v3, v3add=self.add,
+                    sizing=dict(start_equity=START_EQUITY, fraction=FRACTION, gross=GROSS), v3=self.v3, v3add=self.add, spike=self.spike,
                     breakeven_offset_bp=BE_OFFSET_BP,
                     fees_bp=dict(maker=MAKER_BP, taker=TAKER_BP, report_slippage=SLIP_BP),
                     worker=dict(alive=bool(self.thread and self.thread.is_alive()), queue=self.events.qsize(), error=self.error),
@@ -673,7 +734,7 @@ def install(app, engine):
     app.state.monday_reclaim_paper = engine
 
     @app.get("/api/monday-reclaim-paper/analytics")
-    def analytics(track: Literal["60", "5", "v3", "v3add"] = "60", days: Literal["0", "7", "30"] = "0"):
+    def analytics(track: Literal["60", "5", "v3", "v3add", "spike"] = "60", days: Literal["0", "7", "30"] = "0"):
         return engine.analytics(track, int(days))
 
     @app.post("/api/monday-reclaim-paper/positions/{position_id}/close")
