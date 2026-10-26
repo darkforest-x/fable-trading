@@ -1,0 +1,576 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-be-scalein-compare-20261026-v1",
+    "question": "Owner 2026-10-26: does a fee-covering breakeven (+7 / +17bp) or a -5 / -10 percent equal-size add on high scores improve the rule?",
+    "single_variable": "Breakeven offset per family; scale-in depth for v3 score >= 0.6.",
+    "input": "experiments/active/exp-monday-limit-be-scalein-20261026-v1",
+    "path_rule": "worse intrabar path per trade; for scale-in, per event on the combined parent + child result",
+    "slippage_bp_non_target_exit": 10,
+    "fees": {
+      "maker_bp": 2,
+      "taker_bp": 5,
+      "read_on": "2026-10-23 OKX Lv1"
+    },
+    "sizing": "linear in score, 0.05 * (score - 0.226) / 0.1088, cap 0.5, gross <= 1x; a child takes its parent's fraction at its own fill",
+    "periods": [
+      "2020-2024 (score training period)",
+      "2025",
+      "2026",
+      "last five months"
+    ],
+    "dropped_events": [
+      "BABYUSDT:2026-06-01:-1",
+      "DASHUSDT:2020-04-13:+1"
+    ],
+    "tie_orders": 10
+  },
+  "results": {
+    "checks": {
+      "missing": 0,
+      "row_issues": [],
+      "parity_mismatch_events": {
+        "ohlc": [],
+        "olhc": []
+      }
+    },
+    "offsets": {
+      "v2_be0": {
+        "y2020_2024": {
+          "n": 10103,
+          "mean_bp": 42.32326706809117,
+          "win_pct": 32.5447886766307,
+          "reasons": {
+            "failed_reclaim": 36.662377511630204,
+            "target": 32.5447886766307,
+            "breakeven": 30.79283381173909
+          }
+        },
+        "y2025": {
+          "n": 6124,
+          "mean_bp": 13.141950918676393,
+          "win_pct": 32.88700195950359,
+          "reasons": {
+            "failed_reclaim": 39.50032658393207,
+            "target": 32.88700195950359,
+            "breakeven": 27.612671456564335
+          }
+        },
+        "y2026": {
+          "n": 6481,
+          "mean_bp": 13.859234429885001,
+          "win_pct": 38.09597284369696,
+          "reasons": {
+            "target": 38.09597284369696,
+            "failed_reclaim": 36.39870390371856,
+            "breakeven": 25.50532325258448
+          }
+        },
+        "last5m": {
+          "n": 3723,
+          "mean_bp": 23.486801189913507,
+          "win_pct": 38.463604619930166,
+          "reasons": {
+            "target": 38.463604619930166,
+            "failed_reclaim": 35.24039752887456,
+            "breakeven": 26.295997851195274
+          }
+        }
+      },
+      "v2_be17": {
+        "y2020_2024": {
+          "n": 10103,
+          "mean_bp": 42.54532866355133,
+          "win_pct": 46.1051172918935,
+          "reasons": {
+            "failed_reclaim": 36.662377511630204,
+            "target": 31.287736315945757,
+            "breakeven": 29.06067504701574,
+            "reclaimed_inside_offset": 2.9892111254082945
+          }
+        },
+        "y2025": {
+          "n": 6124,
+          "mean_bp": 13.248290711545884,
+          "win_pct": 44.44807315480078,
+          "reasons": {
+            "failed_reclaim": 39.50032658393207,
+            "target": 31.743958197256696,
+            "breakeven": 25.685826257348136,
+            "reclaimed_inside_offset": 3.069888961463096
+          }
+        },
+        "y2026": {
+          "n": 6481,
+          "mean_bp": 14.1816466701876,
+          "win_pct": 50.56318469372011,
+          "reasons": {
+            "target": 37.01589260916525,
+            "failed_reclaim": 36.39870390371856,
+            "breakeven": 23.59203826569974,
+            "reclaimed_inside_offset": 2.993365221416448
+          }
+        },
+        "last5m": {
+          "n": 3723,
+          "mean_bp": 23.887534305105188,
+          "win_pct": 51.00725221595488,
+          "reasons": {
+            "target": 37.28176201987644,
+            "failed_reclaim": 35.24039752887456,
+            "breakeven": 24.308353478377654,
+            "reclaimed_inside_offset": 3.1694869728713404
+          }
+        }
+      },
+      "v2_be7": {
+        "y2020_2024": {
+          "n": 10103,
+          "mean_bp": 42.67951186047652,
+          "win_pct": 32.0993764228447,
+          "reasons": {
+            "failed_reclaim": 36.662377511630204,
+            "target": 32.0993764228447,
+            "breakeven": 30.060378105513212,
+            "reclaimed_inside_offset": 1.1778679600118775
+          }
+        },
+        "y2025": {
+          "n": 6124,
+          "mean_bp": 13.610381589074839,
+          "win_pct": 32.511430437622465,
+          "reasons": {
+            "failed_reclaim": 39.50032658393207,
+            "target": 32.511430437622465,
+            "breakeven": 26.665578053559763,
+            "reclaimed_inside_offset": 1.3226649248856956
+          }
+        },
+        "y2026": {
+          "n": 6481,
+          "mean_bp": 13.948085723214275,
+          "win_pct": 37.67937046752044,
+          "reasons": {
+            "target": 37.67937046752044,
+            "failed_reclaim": 36.39870390371856,
+            "breakeven": 24.81098595895695,
+            "reclaimed_inside_offset": 1.1109396698040426
+          }
+        },
+        "last5m": {
+          "n": 3723,
+          "mean_bp": 23.43229555507292,
+          "win_pct": 37.9532634971797,
+          "reasons": {
+            "target": 37.9532634971797,
+            "failed_reclaim": 35.24039752887456,
+            "breakeven": 25.65135643298415,
+            "reclaimed_inside_offset": 1.1549825409615901
+          }
+        }
+      },
+      "v3_be0": {
+        "y2020_2024": {
+          "n": 742,
+          "mean_bp": 352.64608468448097,
+          "win_pct": 40.56603773584906,
+          "reasons": {
+            "target": 40.56603773584906,
+            "breakeven": 34.50134770889488,
+            "failed_reclaim": 24.393530997304584,
+            "backstop": 0.5390835579514826
+          }
+        },
+        "y2025": {
+          "n": 537,
+          "mean_bp": 214.81042064100728,
+          "win_pct": 36.49906890130354,
+          "reasons": {
+            "target": 36.49906890130354,
+            "breakeven": 33.70577281191806,
+            "failed_reclaim": 27.932960893854748,
+            "backstop": 1.86219739292365
+          }
+        },
+        "y2026": {
+          "n": 829,
+          "mean_bp": 150.44861698034066,
+          "win_pct": 34.74065138721351,
+          "reasons": {
+            "target": 34.25814234016888,
+            "breakeven": 32.68998793727383,
+            "failed_reclaim": 29.794933655006034,
+            "backstop": 2.7744270205066344,
+            "0": 0.48250904704463204
+          }
+        },
+        "last5m": {
+          "n": 450,
+          "mean_bp": 262.1887679479506,
+          "win_pct": 40.666666666666664,
+          "reasons": {
+            "target": 39.77777777777778,
+            "breakeven": 29.333333333333332,
+            "failed_reclaim": 28.000000000000004,
+            "backstop": 2.0,
+            "0": 0.8888888888888888
+          }
+        }
+      },
+      "v3_be17": {
+        "y2020_2024": {
+          "n": 742,
+          "mean_bp": 352.6765897073348,
+          "win_pct": 55.121293800539085,
+          "reasons": {
+            "target": 39.892183288409704,
+            "breakeven": 33.42318059299191,
+            "failed_reclaim": 24.393530997304584,
+            "reclaimed_inside_offset": 1.7520215633423182,
+            "backstop": 0.5390835579514826
+          }
+        },
+        "y2025": {
+          "n": 537,
+          "mean_bp": 218.96036912050914,
+          "win_pct": 62.01117318435754,
+          "reasons": {
+            "target": 36.312849162011176,
+            "breakeven": 32.774674115456236,
+            "failed_reclaim": 27.932960893854748,
+            "backstop": 1.86219739292365,
+            "reclaimed_inside_offset": 1.1173184357541899
+          }
+        },
+        "y2026": {
+          "n": 829,
+          "mean_bp": 147.38283343958244,
+          "win_pct": 52.47285886610374,
+          "reasons": {
+            "target": 33.775633293124244,
+            "breakeven": 32.32810615199035,
+            "failed_reclaim": 29.794933655006034,
+            "backstop": 2.7744270205066344,
+            "reclaimed_inside_offset": 0.9650180940892641,
+            "0": 0.3618817852834741
+          }
+        },
+        "last5m": {
+          "n": 450,
+          "mean_bp": 257.68651016766097,
+          "win_pct": 61.111111111111114,
+          "reasons": {
+            "target": 39.55555555555556,
+            "breakeven": 29.11111111111111,
+            "failed_reclaim": 28.000000000000004,
+            "backstop": 2.0,
+            "0": 0.6666666666666667,
+            "reclaimed_inside_offset": 0.6666666666666667
+          }
+        }
+      },
+      "v3_be7": {
+        "y2020_2024": {
+          "n": 742,
+          "mean_bp": 351.4334995222247,
+          "win_pct": 40.16172506738545,
+          "reasons": {
+            "target": 40.16172506738545,
+            "breakeven": 34.50134770889488,
+            "failed_reclaim": 24.393530997304584,
+            "backstop": 0.5390835579514826,
+            "reclaimed_inside_offset": 0.40431266846361186
+          }
+        },
+        "y2025": {
+          "n": 537,
+          "mean_bp": 217.15613754053172,
+          "win_pct": 36.49906890130354,
+          "reasons": {
+            "target": 36.49906890130354,
+            "breakeven": 33.33333333333333,
+            "failed_reclaim": 27.932960893854748,
+            "backstop": 1.86219739292365,
+            "reclaimed_inside_offset": 0.37243947858473
+          }
+        },
+        "y2026": {
+          "n": 829,
+          "mean_bp": 147.586742073149,
+          "win_pct": 34.499396863691196,
+          "reasons": {
+            "target": 34.13751507840772,
+            "breakeven": 32.68998793727383,
+            "failed_reclaim": 29.794933655006034,
+            "backstop": 2.7744270205066344,
+            "0": 0.3618817852834741,
+            "reclaimed_inside_offset": 0.24125452352231602
+          }
+        },
+        "last5m": {
+          "n": 450,
+          "mean_bp": 254.78571918944587,
+          "win_pct": 40.22222222222222,
+          "reasons": {
+            "target": 39.55555555555556,
+            "breakeven": 29.555555555555557,
+            "failed_reclaim": 28.000000000000004,
+            "backstop": 2.0,
+            "0": 0.6666666666666667,
+            "reclaimed_inside_offset": 0.2222222222222222
+          }
+        }
+      }
+    },
+    "scale_in": {
+      "add5": {
+        "y2020_2024": {
+          "events": 223,
+          "child_fill_pct": 39.01345291479821,
+          "parent_mean_bp": 641.2279126038844,
+          "child_mean_bp_when_filled": 953.0451022965767,
+          "combined_mean_bp_per_parent_notional": 1013.0437148451499,
+          "parent_mean_bp_when_child_filled": 399.9180186944706
+        },
+        "y2025": {
+          "events": 235,
+          "child_fill_pct": 39.57446808510638,
+          "parent_mean_bp": 334.7343413233115,
+          "child_mean_bp_when_filled": 367.1413540053306,
+          "combined_mean_bp_per_parent_notional": 480.02857929137855,
+          "parent_mean_bp_when_child_filled": -110.00334575461441
+        },
+        "y2026": {
+          "events": 384,
+          "child_fill_pct": 49.73958333333333,
+          "parent_mean_bp": 244.19526255290376,
+          "child_mean_bp_when_filled": 506.28201656573617,
+          "combined_mean_bp_per_parent_notional": 496.01782808429857,
+          "parent_mean_bp_when_child_filled": -13.590300221608887
+        },
+        "last5m": {
+          "events": 204,
+          "child_fill_pct": 50.98039215686274,
+          "parent_mean_bp": 481.58516745093885,
+          "child_mean_bp_when_filled": 875.2849909976574,
+          "combined_mean_bp_per_parent_notional": 927.8088883517054,
+          "parent_mean_bp_when_child_filled": 356.8058803875451
+        }
+      },
+      "add10": {
+        "y2020_2024": {
+          "events": 223,
+          "child_fill_pct": 15.246636771300448,
+          "parent_mean_bp": 644.9991295532355,
+          "child_mean_bp_when_filled": 1111.682859131718,
+          "combined_mean_bp_per_parent_notional": 814.4933771338563,
+          "parent_mean_bp_when_child_filled": -19.12946185399698
+        },
+        "y2025": {
+          "events": 235,
+          "child_fill_pct": 22.127659574468083,
+          "parent_mean_bp": 334.7343413233115,
+          "child_mean_bp_when_filled": 323.9637396543675,
+          "combined_mean_bp_per_parent_notional": 406.41993477874604,
+          "parent_mean_bp_when_child_filled": -637.1863730981131
+        },
+        "y2026": {
+          "events": 384,
+          "child_fill_pct": 21.875,
+          "parent_mean_bp": 244.19526255290376,
+          "child_mean_bp_when_filled": 588.9435449863298,
+          "combined_mean_bp_per_parent_notional": 373.02666301866344,
+          "parent_mean_bp_when_child_filled": -453.15632607283067
+        },
+        "last5m": {
+          "events": 204,
+          "child_fill_pct": 21.07843137254902,
+          "parent_mean_bp": 481.58516745093885,
+          "child_mean_bp_when_filled": 1129.9277312558374,
+          "combined_mean_bp_per_parent_notional": 719.7562088431005,
+          "parent_mean_bp_when_child_filled": 102.52545613518534
+        }
+      }
+    },
+    "replays": {
+      "v2_be0": {
+        "y2020_2024": {
+          "n": 10103,
+          "final_median": 4.614147701948612,
+          "dd_median": 11.998819563428231
+        },
+        "y2025": {
+          "n": 6124,
+          "final_median": 3.16346006777839,
+          "dd_median": 32.97410977827576
+        },
+        "y2026": {
+          "n": 6481,
+          "final_median": 2.121917088519081,
+          "dd_median": 20.555511295523566
+        },
+        "last5m": {
+          "n": 3723,
+          "final_median": 1.7315305793425781,
+          "dd_median": 17.57622850362967
+        }
+      },
+      "v2_be17": {
+        "y2020_2024": {
+          "n": 10103,
+          "final_median": 4.569014955390748,
+          "dd_median": 11.804211212919435
+        },
+        "y2025": {
+          "n": 6124,
+          "final_median": 3.219020364843721,
+          "dd_median": 32.750705330560656
+        },
+        "y2026": {
+          "n": 6481,
+          "final_median": 2.1763752670937446,
+          "dd_median": 20.736698205581305
+        },
+        "last5m": {
+          "n": 3723,
+          "final_median": 1.7556437295780807,
+          "dd_median": 17.154899447946715
+        }
+      },
+      "v2_be7": {
+        "y2020_2024": {
+          "n": 10103,
+          "final_median": 4.639612071380654,
+          "dd_median": 11.996777871112158
+        },
+        "y2025": {
+          "n": 6124,
+          "final_median": 3.1873659602803475,
+          "dd_median": 32.69682511701129
+        },
+        "y2026": {
+          "n": 6481,
+          "final_median": 2.158722946809121,
+          "dd_median": 20.64582778043571
+        },
+        "last5m": {
+          "n": 3723,
+          "final_median": 1.7361999616392225,
+          "dd_median": 17.437882597667596
+        }
+      },
+      "v3_be0": {
+        "y2020_2024": {
+          "n": 742,
+          "final_median": 3.638526647280549,
+          "dd_median": 13.298328247652785
+        },
+        "y2025": {
+          "n": 537,
+          "final_median": 8.932659980973792,
+          "dd_median": 18.779347218018327
+        },
+        "y2026": {
+          "n": 829,
+          "final_median": 2.634679280680658,
+          "dd_median": 33.534870609061244
+        },
+        "last5m": {
+          "n": 450,
+          "final_median": 2.9591750764815368,
+          "dd_median": 16.847229772051065
+        }
+      },
+      "v3_be17": {
+        "y2020_2024": {
+          "n": 742,
+          "final_median": 3.8055056191356447,
+          "dd_median": 12.934834354263579
+        },
+        "y2025": {
+          "n": 537,
+          "final_median": 9.16695465264354,
+          "dd_median": 18.62618431402854
+        },
+        "y2026": {
+          "n": 829,
+          "final_median": 2.61491625648235,
+          "dd_median": 33.5529724012025
+        },
+        "last5m": {
+          "n": 450,
+          "final_median": 2.9424083863757904,
+          "dd_median": 16.600725449310204
+        }
+      },
+      "v3_be7": {
+        "y2020_2024": {
+          "n": 742,
+          "final_median": 3.7524936679481495,
+          "dd_median": 13.143766192285284
+        },
+        "y2025": {
+          "n": 537,
+          "final_median": 8.892989793612127,
+          "dd_median": 18.711097610953953
+        },
+        "y2026": {
+          "n": 829,
+          "final_median": 2.5094754982491443,
+          "dd_median": 34.06268449507958
+        },
+        "last5m": {
+          "n": 450,
+          "final_median": 2.921200789221178,
+          "dd_median": 16.74578632140872
+        }
+      },
+      "v3_be0_plus_add5": {
+        "y2020_2024": {
+          "n": 829,
+          "final_median": 4.460769186362942,
+          "dd_median": 15.396498074058679
+        },
+        "y2025": {
+          "n": 630,
+          "final_median": 11.857161063724211,
+          "dd_median": 28.005081883193316
+        },
+        "y2026": {
+          "n": 1020,
+          "final_median": 3.285278328401123,
+          "dd_median": 49.782160163252655
+        },
+        "last5m": {
+          "n": 554,
+          "final_median": 5.2272643105729415,
+          "dd_median": 16.570285894414294
+        }
+      },
+      "v3_be0_plus_add10": {
+        "y2020_2024": {
+          "n": 776,
+          "final_median": 4.235269547219943,
+          "dd_median": 13.32528634261358
+        },
+        "y2025": {
+          "n": 589,
+          "final_median": 11.689044015945303,
+          "dd_median": 24.100228396154012
+        },
+        "y2026": {
+          "n": 913,
+          "final_median": 3.0948179265000713,
+          "dd_median": 47.807480705703924
+        },
+        "last5m": {
+          "n": 493,
+          "final_median": 4.776697486652236,
+          "dd_median": 14.741974635785137
+        }
+      }
+    }
+  },
+  "source_commit": "8694ab73a91927192c3ac9ff415bf9a610c8c209",
+  "training_eligible": false,
+  "production_eligible": false
+}

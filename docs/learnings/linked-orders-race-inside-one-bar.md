@@ -1,0 +1,9 @@
+# Orders linked to a parent can still match in the same bar the parent exits; bound them by time, not only by a cancel
+
+- **Problem**: In the Monday 1.618 reclaim replay, each scale-in leg is a resting limit 5 or 10 percent beyond its parent and is meant to share the parent's exits. Two symbols (FIOUSDT, NAORISUSDT) failed with "Missing exact reclaim decision close".
+- **Dead ends**:
+  - Cancelling the child when the parent closes was not enough. NautilusTrader matches every resting order against the same bar segment, so the parent's breakeven stop and the deeper child limit can both trigger in one bar after the parent's decision close. The child then filled before the cancel took effect and carried a confirmation time that was already in the past.
+  - Treating a late child as a zero-gross exit would have invented trades that cannot happen.
+- **What worked**: When the parent fills and its decision time becomes known, set the child's expiry to the parent's decision bar. A child can then fill only before or during the parent's confirmation candle. A cancel on parent exit remains for earlier exits, such as a target hit before the decision. A unit test covers the same-bar case, and only the two failed symbols were rerun, because the fix changes nothing in runs that did not raise.
+- **General rule**: Linked orders need a time bound derived from the parent's state machine, not only an event-driven cancel. Inside one bar, the native matcher processes all orders before the strategy callback can react. Add a same-bar test in which the parent exit and the child trigger share one segment.
+- **Related**: `yoyo/layers/l3_backtest/nautilus_independent.py` (children, reclaim_due_by_trade), `tests/evaluation/test_nautilus_reclaim_scalein.py`, [far-stop-parity-exposes-bad-source-bars.md](far-stop-parity-exposes-bad-source-bars.md).

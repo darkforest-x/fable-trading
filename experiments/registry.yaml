@@ -565,6 +565,34 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Liquidation at floating loss >= 100/L - 1 percent on last-price wicks; funding and liquidation fees not modelled; a slot that cannot be refilled after resize stays idle. Bit浪浪 transcripts say split positions and at most 5x on alts.'
+  - experiment_id: exp-monday-limit-be-scalein-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3bc582deb3
+    status: complete
+    question: 'Owner 2026-10-26: native replay of breakeven offsets 0 / 7 / 17bp (v2 and v3 families) and equal-size scale-in legs at -5 / -10 percent for v3 scores >= 0.6, all history.'
+    single_variable: 'Breakeven offset and scale-in depth; adapter ExitPolicy reclaim with be_offset_bp and parent-linked legs.'
+    result: '626/626 per path. Offset-0 rows equal the earlier ledgers (0 mismatches). FIOUSDT and NAORISUSDT first failed: a child could match in the same bar as its parent breakeven exit after the decision; fixed in 274542d217 (children expire at the parent decision) and only those two symbols were rerun; the fix only changes cases that previously raised.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-be-scalein-compare-20261026-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Input of exp-monday-limit-be-scalein-compare-20261026-v1.'
+  - experiment_id: exp-monday-limit-be-scalein-compare-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8694ab73a9
+    status: complete
+    question: 'Owner 2026-10-26: does a fee-covering breakeven help, and should high-score trades add on drawdown?'
+    single_variable: 'Breakeven offset per family; scale-in depth for v3 score >= 0.6; linear sizing, 10 tie orders.'
+    result: 'Breakeven offset barely matters: v2 (2020-24 / 2025 / 2026 / last5m) 0bp 4.61 / 3.16 / 2.12 / 1.73, 7bp 4.64 / 3.19 / 2.16 / 1.74, 17bp 4.57 / 3.22 / 2.18 / 1.76; v3 0bp 3.64 / 8.93 / 2.63 / 2.96, 17bp 3.81 / 9.17 / 2.61 / 2.94; the offset closes 1-3 percent of trades at a reclaim close inside it. Scale-in at -5 percent fills 39-51 percent of score >= 0.6 events; the add earns +3.7 to +9.5 percent per filled add while those parents average -1.1 to +4.0 percent; combined per parent notional 2020-24 +10.1 vs +6.4, 2025 +4.8 vs +3.3, 2026 +5.0 vs +2.4, last5m +9.3 vs +4.8 percent. Replays: v3 + add5 4.46 / 11.86 / 3.29 / 5.23 with drawdown 15 / 28 / 50 / 17 vs v3 3.64 / 8.93 / 2.63 / 2.96 with 13 / 19 / 34 / 17; add10 fills 15-22 percent, 4.24 / 11.69 / 3.09 / 4.78.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-be-scalein-compare-20261026-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Adds share the parent exits by construction (breakeven at the parent entry pays the add the full drawdown distance); exposure doubles in the deepest spikes, so 2026 drawdown rises from 34 to 50 percent. Score bands were chosen after seeing 2025-2026.'
   - experiment_id: exp-monday-reclaim-paper-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 791941594f
