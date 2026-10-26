@@ -70,7 +70,7 @@
 - Owner asked which threshold makes the trades after the alert more accurate. Cluster size at fill against trade outcomes (`exp-monday-spike-alert-quality-20261027-v1`):
   - v2 near-target trades are not better in clusters (2025+ worse at ≥8);
   - v3 and spike-HW trades are better mainly in the largest market-wide crashes (50+ coins on Binance, about 25+ on OKX-listed coins). Example: OKX v3 ≥25 wins 50 vs 30 percent at +6.1 vs +1.3 percent per trade, but only 21 episodes (6 since 2025).
-- Recommendation: 25 on the live OKX count. The alert stays notify-only and the threshold stays at the owner's 8 until changed.
+- Recommendation: 25 on the live OKX count. Owner approved: threshold now 25 (commit `05d2f592f3`; monitor restarted, `/api/spike-alerts` shows threshold 25, Telegram and Bark on, worker alive). Still notify-only.
 
 ## 2026-10-27 · Market-wide spike alert (notify only)
 
