@@ -3,28 +3,40 @@
  */
 (() => {
   'use strict';
+  let pointerMenu=null;
   function close(menu,restore=false){
     if(!menu)return;
     menu.open=false;
     if(restore)menu.querySelector('summary')?.focus();
   }
   document.addEventListener('pointerdown',event=>{
+    pointerMenu=event.target.closest?.('details.quiet-menu,details.rp-navigation,details.mf-home-menu')||null;
     document.querySelectorAll('details.quiet-menu[open], details.rp-navigation[open], details.mf-home-menu[open]').forEach(menu=>{
       if(!menu.contains(event.target))close(menu);
     });
   },true);
-  document.addEventListener('click',event=>{const menu=event.target.closest?.('details.rp-navigation,details.mf-home-menu');if(menu&&event.target.closest('a'))close(menu);},true);
+  document.addEventListener('pointercancel',()=>{pointerMenu=null;},true);
+  document.addEventListener('click',event=>{
+    const menu=event.target.closest?.('details.rp-navigation,details.mf-home-menu');
+    const selected=menu&&event.target.closest('a'),pressed=pointerMenu;
+    if(!selected&&!pressed)return;
+    // Native anchor activation follows click dispatch, including same-route links.
+    setTimeout(()=>{if(selected)close(menu);if(pointerMenu===pressed)pointerMenu=null;},0);
+  },true);
   document.addEventListener('keydown',event=>{
+    pointerMenu=null;
     if(event.key!=='Escape')return;
     const menu=document.querySelector('details.quiet-menu[open], details.rp-navigation[open], details.mf-home-menu[open]');
     if(menu){event.preventDefault();event.stopPropagation();close(menu,true);}
   },true);
   document.addEventListener('focusin',event=>{
     document.querySelectorAll('details.quiet-menu[open], details.rp-navigation[open], details.mf-home-menu[open]').forEach(menu=>{
-      if(!menu.contains(event.target))close(menu);
+      // Safari taps can focus the containing main between mousedown and click.
+      // Hiding the menu here retargets that click to the background.
+      if(menu!==pointerMenu&&!menu.contains(event.target))close(menu);
     });
   });
-  window.addEventListener('hashchange',()=>document.querySelectorAll('details.quiet-menu[open], details.rp-navigation[open], details.mf-home-menu[open]').forEach(menu=>close(menu)));
+  window.addEventListener('hashchange',()=>{pointerMenu=null;document.querySelectorAll('details.quiet-menu[open], details.rp-navigation[open], details.mf-home-menu[open]').forEach(menu=>close(menu));});
 })();
 /* Account navigation stays distinct from signal records despite a shared module. */
 (() => {

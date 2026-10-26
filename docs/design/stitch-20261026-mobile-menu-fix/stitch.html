@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SPIKE · 移动端主导航菜单展开态规范 (390px Apple Glass)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              blue: '#0071E3',
+              dark: '#1D1D1F',
+              cyan: '#00E5FF',
+            },
+            trade: {
+              up: '#169873',
+              down: '#d7355d',
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"', 'Inter', 'sans-serif'],
+            mono: ['"SF Mono"', 'ui-monospace', 'Menlo', 'Monaco', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* 严格移动视口容器 */
+    body {
+      margin: 0;
+      padding: 0;
+      background: #eef2f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #mobile-frame {
+      width: 390px;
+      height: 844px;
+      position: relative;
+      overflow: hidden;
+      background: #f7f9fc;
+      border-radius: 46px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.25), 0 0 0 10px #1e2430;
+    }
+
+    /* Apple Glass Tokens */
+    .apple-glass-card {
+      background: rgba(255, 255, 255, 0.76);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.08), 0 2px 8px -2px rgba(0, 0, 0, 0.04);
+    }
+
+    .apple-glass-menu {
+      background: rgba(255, 255, 255, 0.90);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.16), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+    }
+
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    /* 原生 details/summary 纯净无标记 */
+    details#spike-menu summary {
+      list-style: none;
+      outline: none;
+    }
+    details#spike-menu summary::-webkit-details-marker {
+      display: none;
+    }
+
+    /* 遮罩层平滑出现 */
+    .backdrop-scrim {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.20);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      z-index: 40;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    details[open] ~ .backdrop-scrim {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* 数字防抖 */
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 390px 视口容器 -->
+  <div id="mobile-frame" class="relative select-none text-slate-800 flex flex-col justify-between">
+
+    <!-- 1. 背景全屏壁纸K线 (Wallpaper Candlestick Chart Layer) -->
+    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+      <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 390 844">
+        <defs>
+          <linearGradient id="volGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#169873" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#169873" stop-opacity="0.02"/>
+          </linearGradient>
+        </defs>
+
+        <!-- 细网格参考线 -->
+        <line x1="0" y1="180" x2="390" y2="180" stroke="#000000" stroke-opacity="0.04" stroke-width="1"/>
+        <line x1="0" y1="320" x2="390" y2="320" stroke="#000000" stroke-opacity="0.04" stroke-width="1"/>
+        <line x1="0" y1="460" x2="390" y2="460" stroke="#000000" stroke-opacity="0.04" stroke-width="1"/>
+        <line x1="0" y1="600" x2="390" y2="600" stroke="#000000" stroke-opacity="0.04" stroke-width="1"/>
+
+        <!-- 周一上沿 1.618 扩展线 (粉红实线 198.50) -->
+        <line x1="0" y1="210" x2="390" y2="210" stroke="#d7355d" stroke-width="1" stroke-dasharray="3 3" opacity="0.65"/>
+        <text x="340" y="206" fill="#d7355d" font-size="10" font-family="'SF Mono', monospace" opacity="0.8">198.50</text>
+
+        <!-- 入场保本参考线 (蓝色细线 184.50) -->
+        <line x1="0" y1="365" x2="390" y2="365" stroke="#0071E3" stroke-width="1" opacity="0.6"/>
+        <text x="340" y="361" fill="#0071E3" font-size="10" font-family="'SF Mono', monospace" opacity="0.8">184.50</text>
+
+        <!-- 周一下沿 1.618 扩展线 (绿色实线 156.20) -->
+        <line x1="0" y1="675" x2="390" y2="675" stroke="#169873" stroke-width="1" opacity="0.5"/>
+        <text x="340" y="671" fill="#169873" font-size="10" font-family="'SF Mono', monospace" opacity="0.8">156.20</text>
+
+        <!-- 蜡烛实体与影线 (SOL/USDT 示例走势) -->
+        <!-- Candle 1 (绿) -->
+        <line x1="45" y1="480" x2="45" y2="550" stroke="#169873" stroke-width="1"/>
+        <rect x="42" y="495" width="6" height="40" fill="#169873" rx="0.5"/>
+
+        <!-- Candle 2 (绿) -->
+        <line x1="65" y1="440" x2="65" y2="520" stroke="#169873" stroke-width="1"/>
+        <rect x="62" y="455" width="6" height="50" fill="#169873" rx="0.5"/>
+
+        <!-- Candle 3 (绿) -->
+        <line x1="85" y1="380" x2="85" y2="470" stroke="#169873" stroke-width="1"/>
+        <rect x="82" y="400" width="6" height="58" fill="#169873" rx="0.5"/>
+
+        <!-- Candle 4 (绿冲顶) -->
+        <line x1="105" y1="210" x2="105" y2="380" stroke="#169873" stroke-width="1"/>
+        <rect x="102" y="235" width="6" height="150" fill="#169873" rx="0.5"/>
+
+        <!-- Candle 5 (红回落) -->
+        <line x1="125" y1="205" x2="125" y2="330" stroke="#d7355d" stroke-width="1"/>
+        <rect x="122" y="235" width="6" height="80" fill="#d7355d" rx="0.5"/>
+
+        <!-- Candle 6 (红) -->
+        <line x1="145" y1="290" x2="145" y2="370" stroke="#d7355d" stroke-width="1"/>
+        <rect x="142" y="300" width="6" height="60" fill="#d7355d" rx="0.5"/>
+
+        <!-- Candle 7 (绿微涨) -->
+        <line x1="165" y1="330" x2="165" y2="390" stroke="#169873" stroke-width="1"/>
+        <rect x="162" y="340" width="6" height="40" fill="#169873" rx="0.5"/>
+
+        <!-- Candle 8 (红触入场价) -->
+        <line x1="185" y1="335" x2="185" y2="420" stroke="#d7355d" stroke-width="1"/>
+        <rect x="182" y="350" width="6" height="55" fill="#d7355d" rx="0.5"/>
+
+        <!-- Candle 9 (绿测试) -->
+        <line x1="205" y1="355" x2="205" y2="430" stroke="#169873" stroke-width="1"/>
+        <rect x="202" y="370" width="6" height="45" fill="#169873" rx="0.5"/>
+
+        <!-- Candle 10 (红) -->
+        <line x1="225" y1="360" x2="225" y2="450" stroke="#d7355d" stroke-width="1"/>
+        <rect x="222" y="380" width="6" height="50" fill="#d7355d" rx="0.5"/>
+
+        <!-- Candle 11 (红破位) -->
+        <line x1="245" y1="390" x2="245" y2="490" stroke="#d7355d" stroke-width="1"/>
+        <rect x="242" y="405" width="6" height="65" fill="#d7355d" rx="0.5"/>
+
+        <!-- Candle 12 (绿小反抽) -->
+        <line x1="265" y1="410" x2="265" y2="470" stroke="#169873" stroke-width="1"/>
+        <rect x="262" y="420" width="6" height="35" fill="#169873" rx="0.5"/>
+
+        <!-- Candle 13 (红阴线下跌) -->
+        <line x1="285" y1="415" x2="285" y2="520" stroke="#d7355d" stroke-width="1"/>
+        <rect x="282" y="430" width="6" height="75" fill="#d7355d" rx="0.5"/>
+
+        <!-- Candle 14 (当前柱，测试 184.50 区域) -->
+        <line x1="305" y1="420" x2="305" y2="490" stroke="#169873" stroke-width="1"/>
+        <rect x="302" y="435" width="6" height="40" fill="#169873" rx="0.5"/>
+
+        <!-- 底部微透明成交量柱状体 -->
+        <rect x="42" y="730" width="6" height="30" fill="url(#volGrad)"/>
+        <rect x="62" y="720" width="6" height="40" fill="url(#volGrad)"/>
+        <rect x="82" y="700" width="6" height="60" fill="url(#volGrad)"/>
+        <rect x="102" y="660" width="6" height="100" fill="url(#volGrad)"/>
+        <rect x="122" y="690" width="6" height="70" fill="url(#volGrad)"/>
+        <rect x="142" y="715" width="6" height="45" fill="url(#volGrad)"/>
+        <rect x="162" y="735" width="6" height="25" fill="url(#volGrad)"/>
+        <rect x="182" y="725" width="6" height="35" fill="url(#volGrad)"/>
+        <rect x="202" y="740" width="6" height="20" fill="url(#volGrad)"/>
+        <rect x="222" y="720" width="6" height="40" fill="url(#volGrad)"/>
+        <rect x="242" y="710" width="6" height="50" fill="url(#volGrad)"/>
+        <rect x="262" y="730" width="6" height="30" fill="url(#volGrad)"/>
+        <rect x="282" y="695" width="6" height="65" fill="url(#volGrad)"/>
+        <rect x="302" y="725" width="6" height="35" fill="url(#volGrad)"/>
+      </svg>
+    </div>
+
+    <!-- 2. 全局点击外部区域快速收起的点击遮罩 (Backdrop Scrim) -->
+    <div id="menu-scrim" class="backdrop-scrim" onclick="closeMenu()"></div>
+
+    <!-- 3. 顶部导航栏 (Top Header with SPIKE Menu Trigger) -->
+    <header class="relative z-50 pt-11 px-4 flex items-center justify-between pointer-events-auto">
+
+      <!-- 左上角主导航菜单组件 (基于原生 details/summary 实现) -->
+      <div class="relative">
+        <details id="spike-menu" class="group" open>
+          <!-- 触发按钮: 规范 44px 触控热区 -->
+          <summary class="h-11 px-3.5 glass-pill rounded-full flex items-center gap-2 cursor-pointer shadow-sm active:scale-95 transition-all duration-150 group-open:bg-white/90 group-open:border-brand-blue/30 group-open:shadow-md">
+            <span class="w-5 h-5 rounded-full bg-amber-400 flex items-center justify-center text-white shadow-xs">
+              <span class="material-symbols-outlined text-[15px] font-bold">bolt</span>
+            </span>
+            <span class="font-bold text-[15px] tracking-tight text-slate-900">SPIKE</span>
+            <span class="material-symbols-outlined text-[18px] text-slate-400 transition-transform duration-200 group-open:rotate-180 group-open:text-brand-blue">expand_more</span>
+          </summary>
+
+          <!-- 展开态下拉菜单 (Apple Glass Floating Menu) -->
+          <!-- 严格四项目标链接: 1.618 首页, 信号记录, 表现分析, 形态巡检 -->
+          <nav id="menu-dropdown" class="absolute left-0 top-12 w-[220px] apple-glass-menu rounded-2xl p-1.5 z-50 origin-top-left transition-all duration-200 animate-in fade-in zoom-in-95">
+            
+            <div class="px-3 py-1.5 border-b border-slate-200/60 mb-1 flex items-center justify-between">
+              <span class="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">主要导航 · 四航标</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-blue-50 text-brand-blue font-mono font-medium">390px 规范</span>
+            </div>
+
+            <!-- 目标 1: 1.618 首页 (#signals?pane=reclaim) - 当前高亮态 -->
+            <a href="#signals?pane=reclaim" 
+               onclick="handleNavClick(event, this, '#signals?pane=reclaim')"
+               class="nav-destination-link flex items-center justify-between h-11 px-3 rounded-xl bg-blue-50/80 text-brand-blue font-semibold text-[14px] transition-colors active:scale-[0.98]">
+              <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-[19px] text-brand-blue">candlestick_chart</span>
+                <span>1.618 首页</span>
+              </div>
+              <span class="material-symbols-outlined text-[16px] text-brand-blue">check</span>
+            </a>
+
+            <!-- 目标 2: 信号记录 (#signals?pane=records) -->
+            <a href="#signals?pane=records" 
+               onclick="handleNavClick(event, this, '#signals?pane=records')"
+               class="nav-destination-link flex items-center justify-between h-11 px-3 rounded-xl text-slate-700 hover:bg-slate-100/70 active:bg-slate-200/60 font-medium text-[14px] transition-colors active:scale-[0.98]">
+              <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-[19px] text-slate-400">history_edu</span>
+                <span>信号记录</span>
+              </div>
+              <span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">42</span>
+            </a>
+
+            <!-- 目标 3: 表现分析 (#signals?pane=overview) -->
+            <a href="#signals?pane=overview" 
+               onclick="handleNavClick(event, this, '#signals?pane=overview')"
+               class="nav-destination-link flex items-center justify-between h-11 px-3 rounded-xl text-slate-700 hover:bg-slate-100/70 active:bg-slate-200/60 font-medium text-[14px] transition-colors active:scale-[0.98]">
+              <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-[19px] text-slate-400">monitoring</span>
+                <span>表现分析</span>
+              </div>
+              <span class="text-[11px] font-mono text-emerald-600 font-semibold">+4.8%</span>
+            </a>
+
+            <!-- 目标 4: 形态巡检 (#yolo-detect) -->
+            <a href="#yolo-detect" 
+               onclick="handleNavClick(event, this, '#yolo-detect')"
+               class="nav-destination-link flex items-center justify-between h-11 px-3 rounded-xl text-slate-700 hover:bg-slate-100/70 active:bg-slate-200/60 font-medium text-[14px] transition-colors active:scale-[0.98]">
+              <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-[19px] text-slate-400">radar</span>
+                <span>形态巡检</span>
+              </div>
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            </a>
+
+            <div class="mt-1 pt-1.5 border-t border-slate-200/50 px-2.5 flex items-center justify-between text-[10px] text-slate-400">
+              <span>ESC / 点击外部即收起</span>
+              <span class="font-mono">v4.12</span>
+            </div>
+          </nav>
+        </details>
+      </div>
+
+      <!-- 右上角: 紧凑账户净值与日夜模式切换 -->
+      <div class="flex items-center gap-2">
+        <div class="h-10 px-3 glass-pill rounded-full flex items-center gap-1.5 shadow-xs">
+          <span class="text-[11px] text-slate-500 font-medium">净值</span>
+          <span class="text-[13px] font-bold font-mono text-slate-900 tabular-nums">1,048.60</span>
+          <span class="text-[10px] font-mono text-slate-400">U</span>
+        </div>
+
+        <button type="button" aria-label="切换浅色深色主题" class="w-10 h-10 glass-pill rounded-full flex items-center justify-center text-slate-700 hover:text-slate-900 active:scale-95 transition-transform shadow-xs">
+          <span class="material-symbols-outlined text-[19px]">light_mode</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 4. 页面主体内容 (Underlying UI Context) -->
+    <!-- 左上角选币卡片 (约 290px × 115px，保持与 SCREEN_7 一致) -->
+    <div class="relative z-10 px-4 mt-3 pointer-events-auto">
+      <div class="w-[280px] apple-glass-card rounded-2xl p-3 shadow-sm border border-white/80">
+        <!-- 标的与状态 -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5">
+            <span class="font-bold text-[15px] text-slate-900 tracking-tight">SOL/USDT</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">永续</span>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-trade-down border border-rose-100">
+            做空 SHORT · 浮盈中
+          </span>
+        </div>
+
+        <!-- 价格排版 -->
+        <div class="mt-1 flex items-baseline gap-2 text-xs">
+          <span class="font-bold text-[15px] font-mono text-slate-900 tabular-nums">184.50</span>
+          <span class="text-trade-up font-mono font-medium text-[11px] tabular-nums">(+0.42%)</span>
+          <span class="text-slate-400 text-[10px] ml-auto">入场 184.50 | 目标 156.20</span>
+        </div>
+
+        <!-- 下拉账户选择器与交易簿入口 (同单行) -->
+        <div class="mt-2.5 pt-2 border-t border-slate-200/50 flex items-center justify-between">
+          <div class="flex items-center gap-1 text-[11px] text-slate-600 bg-white/70 px-2 py-1 rounded-lg border border-slate-200/60">
+            <span>模拟:</span>
+            <span class="font-semibold text-slate-900 font-mono">v3add</span>
+            <span class="material-symbols-outlined text-[13px] text-slate-400">unfold_more</span>
+          </div>
+
+          <button type="button" class="h-7 px-2.5 rounded-lg bg-brand-blue text-white text-[11px] font-semibold flex items-center gap-1 shadow-xs active:scale-95 transition-transform">
+            <span class="material-symbols-outlined text-[13px]">menu_book</span>
+            <span>交易簿 2</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 中部图表操作悬浮指示区 (只读占位) -->
+    <div class="relative z-10 px-4 mt-auto mb-3 pointer-events-auto">
+      <!-- 底部控制坞 (Timeframe Dock) -->
+      <div class="apple-glass-card rounded-2xl p-1.5 shadow-lg flex items-center justify-between border border-white/80">
+        <div class="flex items-center gap-1">
+          <button type="button" class="h-8 px-2.5 rounded-xl text-[12px] font-medium text-slate-600 hover:bg-slate-100/50">5m</button>
+          <button type="button" class="h-8 px-2.5 rounded-xl text-[12px] font-semibold bg-white text-brand-blue shadow-xs">15m</button>
+          <button type="button" class="h-8 px-2.5 rounded-xl text-[12px] font-medium text-slate-600 hover:bg-slate-100/50">1h</button>
+          <button type="button" class="h-8 px-2.5 rounded-xl text-[12px] font-medium text-slate-600 hover:bg-slate-100/50">4h</button>
+          <button type="button" class="h-8 px-2.5 rounded-xl text-[12px] font-medium text-slate-600 hover:bg-slate-100/50">1D</button>
+        </div>
+
+        <div class="h-4 w-[1px] bg-slate-200 mx-1"></div>
+
+        <button type="button" class="h-8 px-2.5 rounded-xl bg-blue-50 text-brand-blue text-[11px] font-semibold flex items-center gap-1 active:scale-95">
+          <span class="w-1.5 h-1.5 rounded-full bg-brand-blue animate-ping"></span>
+          <span>跟随最新</span>
+        </button>
+      </div>
+
+      <!-- 规范提示小注 (Engineering Notice) -->
+      <div class="mt-2 text-center">
+        <span class="text-[10px] text-slate-400 font-mono tracking-tight bg-white/50 px-2 py-0.5 rounded-full border border-white/60">
+          维护规范：details/summary + a[href] · 44px 热区 · 路由跳转优先
+        </span>
+      </div>
+    </div>
+
+    <!-- 底部安全区衬垫 -->
+    <div class="h-5 w-full shrink-0"></div>
+  </div>
+
+  <!-- 原生轻量交互脚本: 保证 iOS Safari 路由跳转与关闭契约 -->
+  <script>
+    const menuDetails = document.getElementById('spike-menu');
+    const menuScrim = document.getElementById('menu-scrim');
+
+    // 1. 关闭菜单函数
+    function closeMenu() {
+      if (menuDetails && menuDetails.hasAttribute('open')) {
+        menuDetails.removeAttribute('open');
+      }
+    }
+
+    // 2. 键盘 ESC 关闭
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        closeMenu();
+      }
+    });
+
+    // 3. 点击外部区域 (Outside Tap) 关闭
+    document.addEventListener('click', (e) => {
+      if (!menuDetails) return;
+      if (menuDetails.hasAttribute('open')) {
+        const isClickInside = menuDetails.contains(e.target);
+        if (!isClickInside) {
+          closeMenu();
+        }
+      }
+    });
+
+    // 4. 关键导航契约: 确保所选链接在菜单关闭前完成跳转 (尤其是 iOS Safari)
+    function handleNavClick(event, element, targetHash) {
+      // 阻止默认同步闪退，保证哈希变更与事件触发先行
+      // 在移动端原生场景中，显式设定 location.hash 确保微任务完成
+      window.location.hash = targetHash;
+      
+      // 更新视觉选中高亮
+      document.querySelectorAll('.nav-destination-link').forEach(link => {
+        link.classList.remove('bg-blue-50/80', 'text-brand-blue', 'font-semibold');
+        link.classList.add('text-slate-700', 'font-medium');
+        const checkIcon = link.querySelector('.material-symbols-outlined:last-child');
+        if (checkIcon && checkIcon.textContent.trim() === 'check') {
+          checkIcon.remove();
+        }
+      });
+      element.classList.remove('text-slate-700', 'font-medium');
+      element.classList.add('bg-blue-50/80', 'text-brand-blue', 'font-semibold');
+
+      // 稍作微任务微延迟后收起菜单，确保 Safari 历史栈与路由监听已捕获
+      setTimeout(() => {
+        closeMenu();
+      }, 80);
+    }
+
+    // 5. 监听 hashchange 确保成功路由后菜单关闭
+    window.addEventListener('hashchange', () => {
+      closeMenu();
+    });
+  </script>
+</body>
+</html>

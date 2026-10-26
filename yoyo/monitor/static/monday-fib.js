@@ -45,7 +45,7 @@
     <footer class="mf-footer"><span id="mf-week">纽约周一 · 读取中</span><span id="mf-updated">15m 实时 K 线</span><span class="mf-gesture-hint">拖动平移 · 滚轮缩放 · 双击价格轴复位</span></footer>`;
   const layout=mountLayout(root,window);
   $('mf-more').addEventListener('click',()=>{$('mf-home-menu').open=false;$('workspace-search')?.click();});
-  $('mf-home-menu').addEventListener('click',e=>{if(e.target.closest('a'))$('mf-home-menu').open=false;});
+  // Shared navigation dismissal preserves native anchor activation on Safari.
   const periods=['1m','5m','15m','30m','1H','4H','1D'];
   let period='15m';try{const saved=window.localStorage?.getItem('spike.monday.timeframe');if(periods.includes(saved))period=saved;}catch{}
   let active=false,data=null,receivedAt=0,error='',timer=null,controller=null,pending=null,revision=0;
