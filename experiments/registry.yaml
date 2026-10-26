@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-5m-wick-r-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 689fb5d130
+    status: rejected
+    question: Owner2026-10-26 wants wick-R targets1/2/3/5/7/10, initial percent stops and fee-inclusive post-confirmation breakeven for5m1618.
+    single_variable: Owner-authorized target x initial-stop grid; touch entry fixed, wickR becomes known at completed touch5m close only, next5m confirmation fixed.60 combinations; all first-touch signals, no score optimization.
+    artifacts:
+    - monday-5m-wick-r-20261026-v1
+    canonical_report: experiments/active/exp-monday-5m-wick-r-20261026-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    result: Completed632crypto/71060signals. Alt70722 full best finite20percentSL+5R gives fee-only+2.0414bp but after10bp exit slippage-5.9137bp per trade, versus original+1.1197bp.2025 selects20percent+3R;2026-3.6088bp vs original+5.9699bp. Matched timing edge exists but absolute returns lose. Ex-post tinywickR inflates mean+4.413R;not valid fixed-risk sizing. All60arms retained;no promotion.
+    notes: Prior633asset native ledger reused; gold excluded for unknown costs. ActualOKXLv1maker2bp/taker5bp and separate10bp non-target slippage. No second-framework replay, score changes, production switch or funded-equity claim. Notion4058856479af8147bd92f6fb9259b44e.
   - experiment_id: exp-monday-reclaim-fee-be-20261024-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 3e24a3b218

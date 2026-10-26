@@ -1,0 +1,73 @@
+{
+  "finite_full_best": {
+    "n": 70722,
+    "closed_n": 70705,
+    "censored_n": 17,
+    "mean_bp": -5.913745439177424,
+    "sum_bp": -418131.37127703975,
+    "mean_fee_only_bp": 2.041420390679022,
+    "mean_r": 4.413457919752547,
+    "sum_r": 312053.5422161039,
+    "win_pct": 32.75440209320416,
+    "pf": 0.9012707982630149,
+    "tp_n": 24317,
+    "initial_stop_n": 337,
+    "failed_confirm_n": 26701,
+    "fee_be_n": 17098,
+    "entry_stop_fee_loss_n": 2252,
+    "fee_be_armed_n": 23122,
+    "confirmed_n": 25437,
+    "ambiguous_n": 417,
+    "period": "all",
+    "cohort": "altcoins",
+    "stop_pct": 20.0,
+    "target_r": 5,
+    "matched_n": 54455,
+    "matched_signal_bp": -14.084653140734273,
+    "matched_random_bp": -19.587424394198067,
+    "excess_bp": 5.50277125346379
+  },
+  "target_table_stop_pct": 20.0,
+  "r_distribution": {
+    "mean": 4.413457919752547,
+    "median": -0.25103208830702645,
+    "quantiles": {
+      "0.01": -14.090651841798655,
+      "0.1": -2.6417190233209826,
+      "0.25": -1.044019205438708,
+      "0.5": -0.25103208830702645,
+      "0.75": 4.518066666666611,
+      "0.9": 4.974135659144756,
+      "0.99": 56.39349635898591,
+      "1.0": 39616.74880367144
+    },
+    "largest": 39616.74880367144,
+    "largest_event": "TACUSDT:2025-10-27:+1",
+    "top1percent_contribution_to_net_r": 0.8391785945232957,
+    "mean_without_top1percent": 0.7169577159475108,
+    "market_at_touch_close_r_contribution": 1.0184346009050753
+  },
+  "same_closed_baseline": {
+    "n": 70701,
+    "new_mean_bp": -5.918363108007265,
+    "old_mean_bp": 1.0205799707949743,
+    "paired_delta_bp": -6.9389430788022395,
+    "unambiguous_new_mean_bp": -5.887174749576309,
+    "unambiguous_old_mean_bp": 0.9959230105193403
+  },
+  "selected_2026_matched_week_sign_p": 0.0007999200079992001,
+  "full_best_finite_by_side": [
+    {
+      "side": -1,
+      "n": 34668,
+      "mean_bp": -12.16145461974097,
+      "mean_fee_only_bp": -4.251566538513325
+    },
+    {
+      "side": 1,
+      "n": 36037,
+      "mean_bp": 0.09662118045731374,
+      "mean_fee_only_bp": 8.095344714602774
+    }
+  ]
+}

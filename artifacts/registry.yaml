@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-5m-wick-r-20261026-v1
+    artifact_type: manifest
+    role: causal_5m_wick_r_target_initial_stop_parameter_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 689fb5d130
+    source_path: experiments/active/exp-monday-5m-wick-r-20261026-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-5m-wick-r-20261026-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-authorized60-arm nativeVectorBT study; actual fills and fees, no score optimization. No reports requested; rawParquet fills/events and JSONreceipts local. 11behavioral checks and632symbol execution passed; 31338840native fill records. Fullbestfinite20percent+5R loses5.9137bp afterfees/slippage; target-outcomes.csv separates zero-fee-loss BE from gaps. Full history previously exposed,2025select/2026check. Independentnotional return, not cashaccount or pre-entry riskR sizing.
   - artifact_id: monday-ma50-retest-20261024-v1
     artifact_type: config
     role: fixed_sma50_retest_native_research

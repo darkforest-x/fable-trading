@@ -1,0 +1,48 @@
+{
+  "behavioral_checks_passed": 11,
+  "command": "/Users/zhangzc/.local/bin/vectorbt-python -c \"import runpy; m=runpy.run_path('tests/evaluation/test_monday_wick_r_engine.py'); [v() for k,v in m.items() if k.startswith('test_')]\"",
+  "reproduce": [
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_wick_r_study run --workers 2",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_wick_r_study summarize",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_wick_r_diagnostics",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_wick_r_sides"
+  ],
+  "builder_commits": [
+    "125180181b",
+    "689fb5d130"
+  ],
+  "initial_preparation_failure": "Pandas read-only NumPy view, before any completed historical outcomes; fixed by explicit boundary copy. Original error logs retained.",
+  "framework": "VectorBT1.2.0",
+  "checks": [
+    "No retrospective touch-bar TP",
+    "Activation-time taker exit",
+    "Percent initial SL unaffected by final wick",
+    "Fee-neutral long and short algebra",
+    "Fee-room delay and losing entry stop",
+    "Stop-first ambiguous OHLC",
+    "Open TP before later SL",
+    "Gap SL price",
+    "Censored mark excluded from closed profits",
+    "Broadcast/scalar equality",
+    "Ledger immutability and data-gap boundary"
+  ],
+  "registry_own_entries_valid": true,
+  "global_registry_existing_failure": "tradingview-candle-probe-20261023-v1 has unsupported holdout_status='not_applicable'; unrelated entry unchanged.",
+  "historical_execution": {
+    "symbols": 632,
+    "signals": 71060,
+    "events_including_filled_controls": 261157,
+    "independent_parameter_positions": 15669420,
+    "native_fill_records": 31338840,
+    "errors": 0
+  },
+  "arithmetic_checks": {
+    "ADA_all60_counts_identical": true,
+    "ADA_max_net_minus_gross_plus_fees_abs_bp": 1.1368683772161603e-13,
+    "BTC_1m_and_BABY_causal_target_protection_checks": true,
+    "largest_R_original_touch_candle_read": true,
+    "largest_R_event": "TACUSDT:2025-10-27:+1",
+    "full_backtest_replays": 0,
+    "notion_result_updated": true
+  }
+}
