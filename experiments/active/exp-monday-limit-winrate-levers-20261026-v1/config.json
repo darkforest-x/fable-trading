@@ -1,0 +1,18 @@
+{
+  "experiment_id": "exp-monday-limit-winrate-levers-20261026-v1",
+  "question": "Owner 2026-10-26: what else can raise the win rate? Detailed analysis of the backtested trades.",
+  "trades": "experiments/active/exp-monday-limit-time-news-20261026-v1/trades.csv.gz",
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "ledgers": "experiments/active/exp-monday-limit-be-scalein-20261026-v1 (v3_be0 parents, v3_add5 / v3_add10 legs)",
+  "variants": ["v3_be17", "v2_be17"],
+  "score_steps": {"v3_be17": [0.5, 0.55, 0.6, 0.7, 0.8, 0.9], "v2_be17": [0.226, 0.3, 0.375, 0.45, 0.5, 0.6]},
+  "add_from_score": 0.6,
+  "split": "2025-01-01",
+  "win_bp": 1.0,
+  "min_bin": 30,
+  "seed": 20261027,
+  "boot_draws": 2000,
+  "exploratory": "Select on 2020-2024, confirm on 2025-2026; no rule adopted without its own framework run and forward data.",
+  "training_eligible": false,
+  "production_eligible": false
+}
