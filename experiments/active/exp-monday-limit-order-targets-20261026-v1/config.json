@@ -1,0 +1,16 @@
+{
+  "experiment_id": "exp-monday-limit-order-targets-20261026-v1",
+  "question": "Owner 2026-10-26: give the score >= 0.6 + EMA order > 0 trades a backstop; how many trades and what win rate in 2026; can the target be farther?",
+  "sources": ["experiments/active/exp-monday-limit-v3-grid-20261025-v1 (near target x backstop)", "experiments/active/exp-monday-limit-v3-levels-20261025-v1 (range 0.5 / 0.618 / far edge / opposite 1618 x backstop)"],
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "targets": ["near", "r05", "r0618", "far", "opp1618"],
+  "stops": ["far", "P20", "P30"],
+  "populations": {"order_pos": "score >= 0.6 and l2_order_score > 0", "all_ge06": "score >= 0.6 (reference)"},
+  "win_bp": 1.0,
+  "ties": 20,
+  "seed": 20261030,
+  "breakeven": "at entry in these runs; +0.17 percent changed results by less than tie noise",
+  "in_sample": "The order-score filter was found on the same history.",
+  "training_eligible": false,
+  "production_eligible": false
+}
