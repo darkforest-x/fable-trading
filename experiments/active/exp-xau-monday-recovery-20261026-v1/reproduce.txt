@@ -1,0 +1,16 @@
+Existing results must be reused. Do not replay a completed snapshot.
+
+Data snapshot (already present; command refuses replacement):
+PYTHONPATH=. /Users/zhangzc/.local/bin/nautilus-python -m yoyo.evaluation.gold_research_history
+
+Behavior and boundaries:
+PYTHONPATH=. /Users/zhangzc/.local/bin/nautilus-python tests/evaluation/test_gold_recovery.py -v
+PYTHONPATH=. .venv/bin/python -m pytest tests/boundaries/test_layer_imports.py -q
+
+Historical run (only when restoring committed code/config into an empty output checkout):
+PYTHONPATH=. /Users/zhangzc/.local/bin/nautilus-python -m yoyo.evaluation.gold_monday_recovery
+
+Actual successful execution used builder 029afa5c76. Source data receipt contains path/size/mtime, not hashes.
+The failed equal-stop amendment run is retained in failed-equal-stop.log. It produced no accepted result.
+summary.json and validation.json contain results; native trades/fills ledgers remain alongside them.
+Only source-end administrative closes would be censored. No signal position is unresolved in this snapshot.

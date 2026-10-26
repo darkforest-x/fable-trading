@@ -1,3 +1,11 @@
+## 2026-10-26 · OKX gold recovery limits: 1H/4H and Monday-edge comparison
+
+- Owner fixed XAU-USDT-SWAP, first weekly-side resting outer1618, touch-candle4H close; added1H then Monday-edge entries. Same1percent backstop/far Monday target. Reclaimed closes protect fee-neutral STOP_MARKET; failed reclaim waits at fee-neutral LIMIT with backstop. Fee-band recovery is recorded; equal fee-stop closes exit by native market after a rejected-amendment minimal reproduction.
+- NativeNautilus1.231.0:1360positions2720fills checked,366signalrows,183distinct signals,allresolved.8behavioral+75boundarychecks pass. Initialnative execution failed on equalquote amendment;failed-equal-stop.log retained. Corrected builder029afa5c76 preceded valid history run; no secondengine.
+- 1618 4H/1H net-9.331/-5.273R(n66each),backstops15/9,BE48/55,TP3/2. Mondayedge4H/1H net-1.827/+0.208R(n117each),backstops27/19,BE75/88,TP15/10. Every absolute mean weekCI spanszero. Edge1H isflat and has no matchedrandom edge;1618 beats random relatively while stilllosing absolutely.
+- ExactOKX data2025-04-09..2026-10-26,162780continuous5m,30334cached minute-derivedbins reused. Public instrumenttick0.1 and fee group4 Lv1maker2bp/taker5bp readOct26.1R=entry1percent;independentR,not fundedaccount. No funding/slippage/capacity;OHLC syntheticpath,zero samebarSL/TP ambiguities. Data loader moved from data to evaluation to preserve lower-layer importboundary;no data replay.
+- Results `experiments/active/exp-xau-monday-recovery-20261026-v1/`;Notion4058856479af81808638d7bdc4be437e. Learning `docs/learnings/recovery-limit-and-protective-stop-have-different-fee-prices.md`. Alltraining/productionfalse;no services,models or liveorders changed. Luna return couldnotverify model/effort;delegate stopped and primarycompleted work.
+
 ## 2026-10-26 · Native chart history and every visible NY week
 
 - BTC/ETH/XAU now page native OKX history on left-edge browsing without a total candle cap; other symbols retain 720 closed candles. Shared analytical/latest snapshots and bounded IndexedDB storage remain unchanged. Home adds native UTC daily bars for long-range browsing. No order, account, notification or strategy setting changes.

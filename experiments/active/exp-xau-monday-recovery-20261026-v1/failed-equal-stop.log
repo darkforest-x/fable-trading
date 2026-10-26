@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/gold_monday_recovery.py", line 155, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/gold_monday_recovery.py", line 144, in main
+    rows,fills,audit=run_gold_recovery(frame,e,policy,tick=cfg['tick'],market_tick=.01,symbol='XAU',execution_minutes=5,batch_bars=24000)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zhangzc/fable-trading/yoyo/layers/l3_backtest/nautilus_gold_recovery.py", line 88, in run_gold_recovery
+    return _run(frame,np.full(len(frame),np.nan),np.zeros(len(frame)),entries,policy,entry_order_mode='limit',**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zhangzc/fable-trading/yoyo/layers/l3_backtest/nautilus_independent.py", line 1103, in run_native
+    raise RuntimeError(f"Native order errors: {strategy.errors[:3]}")
+RuntimeError: Native order errors: ["OrderModifyRejected(instrument_id=XAU-USDT.RESEARCH, client_order_id=O-20250513-053959-001-000-253, venue_order_id=RESEARCH-1-253, account_id=RESEARCH-001, reason='STOP_MARKET SELL order new stop px of 3258.60 was in the market: bid=3258.60, ask=3258.60', ts_event=1747116000000000000)", "OrderModifyRejected(instrument_id=XAU-USDT.RESEARCH, client_order_id=O-20250611-121459-001-000-513, venue_order_id=RESEARCH-1-513, account_id=RESEARCH-001, reason='STOP_MARKET BUY order new stop px of 3329.30 was in the market: bid=3329.30, ask=3329.30', ts_event=1749657600000000000)", "OrderModifyRejected(instrument_id=XAU-USDT.RESEARCH, client_order_id=O-20250617-143959-001-000-544, venue_order_id=RESEARCH-1-544, account_id=RESEARCH-001, reason='STOP_MARKET SELL order new stop px of 3383.00 was in the market: bid=3383.00, ask=3383.00', ts_event=1750176000000000000)"]

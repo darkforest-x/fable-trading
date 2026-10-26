@@ -14,6 +14,22 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-xau-monday-recovery-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 029afa5c76
+    status: inconclusive
+    question: Can OKX gold limit entries at outer1618 or Monday edges earn with touch-candle1H/4H fee breakeven,1percent backstop and opposite Monday target?
+    single_variable: Owner-requested fixed2x2 entry-level and confirmation-clock comparison; paired comparisons change one factor. All other rules and actualfees identical.
+    result: '1618 4H/1H n66each net-9.331/-5.273R; edge4H/1H n117each net-1.827/+0.208R. Backstops15/9/27/19;BE48/55/75/88;farTP3/2/15/10. Allsignalpositions resolved. Every absolute mean weekCI spanszero;bestedge1H is essentiallyflat and doesnotbeat matchedrandom. No stableprofitability established.'
+    artifacts:
+    - xau-monday-recovery-20261026-v1
+    - xau-monday-recovery-data-20261026-v1
+    canonical_report: experiments/active/exp-xau-monday-recovery-20261026-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'NativeNautilus1.231.0;1360positions2720fills allfees/PnL checked,8behavioral75boundarytests. Data162780continuous5m 2025-04-09..2026-10-26,30334cachedbins reused. Firstexecution failed on equalquote stopamend;failure retained and repaired before validrun. 1R=entry1percent;actualmaker2bp/taker5bp readOct26 goldgroup4;no funding/slippage/capacity. Notion4058856479af81808638d7bdc4be437e. NativeOHLC syntheticpaths,not ticks;nosignaldualhitbars. IndependentR,not accountreturns.'
   - experiment_id: exp-monday-5m-confirmed-keypoints-20261026-v1
     source_repo: darkforest-x/fable-trading
     source_commit: ddf687dd06

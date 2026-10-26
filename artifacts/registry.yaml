@@ -18,6 +18,28 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: xau-monday-recovery-20261026-v1
+    artifact_type: manifest
+    role: gold_native_limit_recovery_fixed_1h_4h_entry_matrix
+    source_repo: darkforest-x/fable-trading
+    source_commit: 029afa5c76
+    source_path: experiments/active/exp-xau-monday-recovery-20261026-v1/summary.json
+    storage_uri: repo://experiments/active/exp-xau-monday-recovery-20261026-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: All4ownerfixedarms;actualfee nativefills,MAE/MFE stop at exit;strictmatchedrandom and chronological2025/2026 kept. Results mostlynegative orflat;noaccountprofitclaim. Rawledgers andfailedinitialexecution local;validation.json has all1360positions2720fills checked. No separate report.
+  - artifact_id: xau-monday-recovery-data-20261026-v1
+    artifact_type: dataset
+    role: exact_OKX_XAU_USDT_SWAP_confirmed_5m_history
+    source_repo: darkforest-x/fable-trading
+    source_commit: f3490d1fd6
+    source_path: data/crypto/market/exp-xau-monday-recovery-20261026-v1/receipt.json
+    storage_uri: repo://data/crypto/market/exp-xau-monday-recovery-20261026-v1/receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: NativeOKX5m plus30334completebins fromregistered1m archive verified at3nativepoints;162780bars2025-04-09T10Z..2026-10-26T14:55Z,zero5mgaps. Sourcepathsizesmtime only,nohash. Builder movedto yoyo/evaluation/gold_research_history.py forlayerboundary;dataunchanged.
   - artifact_id: monday-high-low-1618-pine-20261026-v1
     artifact_type: manifest
     role: standalone_monday_high_low_1618_private_tradingview_indicator
