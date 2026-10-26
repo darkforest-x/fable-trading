@@ -16,7 +16,9 @@ Added after the owner asked about the near-target subset (same day), on the v2_b
   near_ge05       score >= 0.5 (the v3 events with the near target);
   near_ge06       score >= 0.6;
   near_ge06_order score >= 0.6 and order score > 0 (89.5 / 77.5 percent win rate in the lever study).
-These run after the first four plans so the earlier tie draws are unchanged.
+These run after the first four plans so the earlier tie draws are unchanged. Exposure controls for order_x2, added
+last for the same reason: all_x2 (2k for every v3 trade) and order0_x2 (2k only when the order score is 0), so the
+doubling of the order > 0 trades is compared with doubling the same rule elsewhere.
 Periods restart at 1000 USDT: 2020-2024, 2025, 2026, last five months. Medians over TIES random orders of same-time
 fills (opt.replay_w books exits before entries at the same timestamp except a trade's own same-bar exit).
 The order score was found on the same 2020-2026 history (exp-monday-limit-winrate-levers-20261026-v1), so these
@@ -86,6 +88,9 @@ def run(config):
     pn = {'y2020_2024': near.t < B[0], 'y2025': (near.t >= B[0]) & (near.t < B[1]), 'y2026': near.t >= B[1], 'last5m': near.t >= window}
     for name, keep in (('near_ge05', near.score >= .5), ('near_ge06', near.score >= .6), ('near_ge06_order', (near.score >= .6) & (near.order > 0))):
         res['replays'][name] = {per: replay(near, keep.to_numpy(), kn, w.to_numpy(), cfg['ties'], rng) for per, w in pn.items()}
+    pos = (t.order > 0).to_numpy(); k3 = np.minimum(.05*(t.score.to_numpy()-cut)/mexcess, .5)
+    for name, kk in (('all_x2', 2*k3), ('order0_x2', np.where(pos, k3, 2*k3))):
+        res['replays'][name] = {per: replay(t, np.ones(len(t), bool), kk, w.to_numpy(), cfg['ties'], rng) for per, w in pers.items()}
     prev = json.loads((A/'exp-monday-limit-be-scalein-compare-20261026-v1/summary.json').read_text())['results']['replays']['v3_be17']
     res['parity_v3_vs_be_scalein_compare'] = {per: dict(here=res['replays']['v3'][per]['final_median'], before=prev[per]['final_median'],
                                                         n_here=res['replays']['v3'][per]['n'], n_before=prev[per]['n']) for per in pers}
