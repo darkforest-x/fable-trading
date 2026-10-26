@@ -5,7 +5,9 @@ exp-monday-limit-spike-hw-20261026-v1 (219 worse-path framework trades, before s
 calendar days of the fill. Outputs 4_frequency.png and frequency.json next to the trades: monthly counts split
 into winners and the rest, a daily stem plot of fills per day (cluster days labelled), cumulative trades, and
 counts per year, per active week and per day, gaps between trading days, share on the busiest days, and how many
-fills a 10-slot account could take on the busiest days.
+fills a 10-slot account could take on the busiest days. Added: the expected forward pace since 2025 on the full
+Binance universe and on symbols with a current OKX USDT swap (okx_swaps.json saved by
+exp-monday-limit-okx-wick-check-20261026-v1), i.e. how long 50 paper trades should take.
 """
 from __future__ import annotations
 import json
@@ -48,6 +50,13 @@ def run():
                busiest_days={str(d.date()): dict(n=int(n), wins=int(days.wins[d]), taken_by_10_slots=int(min(n, 10))) for d, n in top.items()},
                share_on_top5_days=float(100*top.head(5).sum()/len(t)),
                months_with_trades=int(t.month.nunique()))
+    listed = set(json.loads((ROOT/'experiments/active/exp-monday-limit-okx-wick-check-20261026-v1/inputs/okx_swaps.json').read_text()))
+    recent = t[t.entry_t >= pd.Timestamp('2025-01-01', tz='UTC')]
+    weeks = (recent.entry_t.max()-pd.Timestamp('2025-01-01', tz='UTC')).days/7
+    on_okx = recent.symbol.map(lambda s_: f"{s_.removesuffix('USDT')}-USDT-SWAP" in listed)
+    res['forward_pace_since_2025'] = dict(weeks=float(weeks), trades=int(len(recent)), per_week=float(len(recent)/weeks),
+                                          okx_listed_trades=int(on_okx.sum()), okx_per_week=float(on_okx.sum()/weeks),
+                                          weeks_to_50_binance=float(50/(len(recent)/weeks)), weeks_to_50_okx=float(50/max(on_okx.sum()/weeks, 1e-9)))
     dump(EXP/'frequency.json', res)
     import matplotlib
     matplotlib.use('Agg')
