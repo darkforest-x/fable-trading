@@ -292,6 +292,13 @@ class IndependentCloseStrategy(Strategy):
         self.execution_minutes = execution_minutes
         self.entry_order_mode = entry_order_mode
         self.pending, self.opportunity_rows = {}, []
+        # Reclaim scale-in legs (entry column 'parent'): they share the parent's
+        # confirmation clock and are cancelled when the parent closes unfilled.
+        self.children, self.reclaim_due_by_trade = {}, {}
+        if "parent" in entries:
+            for tid, parent in zip(entries.trade_id, entries.parent):
+                if isinstance(parent, str) and parent:
+                    self.children.setdefault(parent, []).append(tid)
         self.pending_updates = {}
         self.pending_update_rows = []
         if entry_updates is not None:
@@ -457,6 +464,10 @@ class IndependentCloseStrategy(Strategy):
                 minutes = int(state.source["reclaim_minutes"])
                 opened = self.frame.index[i]-pd.Timedelta(minutes=self.execution_minutes)
                 due = opened.floor(f"{minutes}min")+pd.Timedelta(minutes=2*minutes)
+                parent = row.get("parent")
+                if isinstance(parent, str) and parent in self.reclaim_due_by_trade:
+                    due = pd.Timestamp(self.reclaim_due_by_trade[parent], tz="UTC")
+                self.reclaim_due_by_trade[row["trade_id"]] = due.value
                 state.reclaim_due_ns = due.value
                 state.reclaim_status = "pending"
                 # Missing pre-confirmation observations make the path unknown,
@@ -586,6 +597,9 @@ class IndependentCloseStrategy(Strategy):
                        normalization="entry_notional_not_initial_risk")
         self.rows.append(row)
         del self.active[row["trade_id"]]
+        for child in self.children.get(row["trade_id"], ()):
+            if child in self.pending:
+                self._cancel_pending(child, i, "parent_closed")
 
     def on_order_rejected(self, event):
         self.errors.append(str(event))
@@ -679,9 +693,23 @@ class IndependentCloseStrategy(Strategy):
                 if self.frame.index[i].value != state.reclaim_due_ns:
                     raise RuntimeError("Missing exact reclaim decision close")
                 state.reclaim_i = i
-                if side*(close-entry)+self.eps >= self.tick:
+                ref = row.get("reclaim_ref", float("nan"))
+                ref = entry if not (isinstance(ref, (int, float)) and math.isfinite(ref)) else float(ref)
+                offset = row.get("be_offset_bp", 0.)
+                offset = float(offset) if isinstance(offset, (int, float)) and math.isfinite(offset) else 0.
+                be_raw = ref*(1+side*offset/1e4)/self.tick
+                be = (math.ceil(be_raw-1e-8) if side > 0 else math.floor(be_raw+1e-8))*self.tick if offset else ref
+                if side*(close-ref)+self.eps >= self.tick and side*(close-be)+self.eps < self.tick:
+                    # Reclaimed, but the close has not cleared the fee-covering
+                    # breakeven price: a stop there would already be crossed.
+                    state.reclaim_status = "reclaimed_inside_be"
+                    self._cancel_target(state)
+                    self._cancel_stop(state)
+                    self._market(state, reason=12)
+                    continue
+                if side*(close-ref)+self.eps >= self.tick:
                     state.reclaim_status = "reclaimed"
-                    state.stop, state.stop_kind = entry, 1
+                    state.stop, state.stop_kind = be, 1
                     state.be_trigger_i = state.be_effective_i = i
                     if state.stop_order is not None and not state.stop_order.is_closed:
                         self.modify_order(state.stop_order, trigger_price=self.instrument.make_price(state.stop))
@@ -881,6 +909,22 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         st, en, sd = (entries[c].to_numpy(float) for c in ('stop', 'entry', 'side'))
         if not (np.isfinite(st).all() and (sd*(en-st) > 0).all()):
             raise ValueError("Backstop needs a finite stop beyond every entry")
+    if any(c in entries for c in ("be_offset_bp", "reclaim_ref", "parent")) and not policy.reclaim_next_bar:
+        raise ValueError("Breakeven offsets and scale-in legs require the reclaim rule")
+    if "be_offset_bp" in entries:
+        off = entries.be_offset_bp.to_numpy(float)
+        if not (np.isfinite(off).all() and (off >= 0).all()):
+            raise ValueError("Breakeven offset must be a finite non-negative bp value")
+    if "parent" in entries:
+        by_id = entries.set_index("trade_id")
+        for r in entries[entries.parent.map(lambda v: isinstance(v, str) and bool(v))].itertuples():
+            if r.parent not in by_id.index:
+                raise ValueError("Scale-in leg references an unknown parent")
+            par = by_id.loc[r.parent]
+            if (par.side != r.side or isinstance(par.get("parent"), str) and par.get("parent")
+                    or not r.side*(par.entry-r.entry) > 0 or abs(float(r.reclaim_ref)-float(par.entry)) > 1e-12
+                    or int(r.entry_i) != int(par.entry_i) or int(r.expire_i) != int(par.expire_i)):
+                raise ValueError("Scale-in leg must deepen its parent's side, reference its entry and share its window")
     if limit_entry and policy.target_breakeven:
         raise ValueError("Target sibling breakeven currently requires completed-close entries")
     if limit_entry and not (policy.confirmed_pivot_exit or policy.target_from_entry
