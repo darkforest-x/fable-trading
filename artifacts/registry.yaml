@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-5m-confirmed-score-20261026-v1
+    artifact_type: manifest
+    role: confirmed_5m_market_entry_known_pin_r_and_frozen_score_parameter_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 758bbc5a83
+    source_path: experiments/active/exp-monday-5m-confirmed-score-20261026-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-5m-confirmed-score-20261026-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 10behavioral checks and all1276152position accounting reconciliations passed;2552304native fillrecords including flagged boundary marks. One framework execution, rawparquet local; no report requested. Predeclared2025selection fails2026. FeeBE3971fee-neutral-before-slippage+149gaploss among4120long5RBEexits;actual average-10.1839bp. Source identities by path/size/mtime, nohash. Reproduce.json recordscommands/limitations.
   - artifact_id: monday-5m-wick-r-20261026-v1
     artifact_type: manifest
     role: causal_5m_wick_r_target_initial_stop_parameter_research

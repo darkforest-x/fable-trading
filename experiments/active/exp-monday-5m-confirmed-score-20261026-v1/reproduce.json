@@ -1,0 +1,16 @@
+{
+  "cwd": "/Users/zhangzc/fable-trading",
+  "runtime": "/Users/zhangzc/.local/bin/vectorbt-python",
+  "builder_commit": "758bbc5a83",
+  "commands": [
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_confirmed_r_study run --workers 2",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_confirmed_r_study summarize",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_confirmed_r_diagnostics",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_confirmed_r_audit"
+  ],
+  "reuse": "Completed shards are immutable and reused after exact path/size/mtime/config identity comparison. Raw632 symbol admissions/events/native fills/trades remain local. No data downloads, content hashes or second-framework simulation.",
+  "tests": "runpy.run_path('tests/evaluation/test_monday_confirmed_r.py'); invoke every test_ function in isolated vectorbt-python.10 passed before historical execution.",
+  "boundaries": "Full-history rows include closed trades across year boundaries; select2025 excludes trades crossing2026, pre2025 excludes trades crossing2025. Source-gap/end cases are censored and never booked as closed wins.",
+  "short_target_boundary": "A nonpositive short TP price is physically unreachable; the original pin stop remains, and any unclosed outcome is censored. Long is the primary user-requested cohort.",
+  "notion": "https://app.notion.com/p/4058856479af81178a95f4fd1978a123"
+}

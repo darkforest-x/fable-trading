@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-5m-confirmed-score-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 758bbc5a83
+    status: rejected
+    question: Does next5m confirmation followed by market entry, known pin-low R and current frozen score filtering improve1618 outcomes?
+    single_variable: Owner-authorized entry and known-risk change; targets1/2/3/5/7/10R x fixed or post-entry feeBE. Frozen5m score threshold0.22621664169752762 versus unfiltered/scorable; no retraining.
+    artifacts:
+    - monday-5m-confirmed-score-20261026-v1
+    canonical_report: experiments/active/exp-monday-5m-confirmed-score-20261026-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    result: Completed632assets,33860admitted signals,106346signal+control events,1276152native positions. Eligiblealts33688admitted/12619scorepassed; long18401admitted/5883scorepassed. Longfullbest7Rfixed+74.8282bp but meanR-0.19792;2025-112.7441bp/2026-52.3246bp.2025selected5RfeeBE loses31.5647bp in2026, matched excess-0.4136bp. All12scorelongarms have negative fullhistorymeanR and negative2025/2026meanbp. No stable profitable candidate.
+    notes: Frozen deployed pre-touch feature windows replace inconsistent old cached touch-close inputs. Binance quote-volume approximation and historical universe remain; earlyyears overlap score fit. Marketentry/stop taker5bp,TPmaker2bp,10bp adverse permarketfill; funding unmodeled. Long7Rmedianhold220min,p99~58.6days;65censored. Conditionalrandommatched subsets, no funded account. Notion4058856479af81178a95f4fd1978a123.
   - experiment_id: exp-monday-5m-wick-r-20261026-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 689fb5d130
