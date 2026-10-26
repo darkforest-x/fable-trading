@@ -1,0 +1,18 @@
+{
+  "experiment_id": "exp-monday-limit-lottery-20261027-v1",
+  "question": "Owner 2026-10-27: a very high payoff version for a small stake; blow-ups acceptable (about 5 in six months), aiming to catch moves worth tens to thousands of times the stake.",
+  "trades": "experiments/active/exp-monday-limit-time-news-20261026-v1/trades.csv.gz",
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "fractions": [1.0, 0.5],
+  "leverage": [3, 5, 10, 20],
+  "first_window": "2023-01-01",
+  "last_window": "2026-03-01",
+  "window_weeks": 26,
+  "stake_usdt": 1000,
+  "blowup_below_fraction_of_stake": 0.1,
+  "ties": 10,
+  "seed": 20261104,
+  "in_sample": "Filters and targets come from the same history; probabilities are descriptive, not forecasts.",
+  "training_eligible": false,
+  "production_eligible": false
+}
