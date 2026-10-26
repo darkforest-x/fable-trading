@@ -1,0 +1,19 @@
+{
+  "experiment_id": "exp-monday-limit-be-lock-compare-20261027-v1",
+  "question": "Owner 2026-10-27 (return-first version, unfinished item): does locking profit at the reclaim decision (breakeven +50 / 100 / 200bp) beat 0 / 7 / 17bp per trade and in the return-first sizing?",
+  "base_variants": ["v2_be0", "v2_be7", "v2_be17", "v3_be0", "v3_be7", "v3_be17"],
+  "lock_variants": ["v2_be50", "v2_be100", "v2_be200", "v3_be50", "v3_be100", "v3_be200"],
+  "sized": ["v3_be0", "v3_be17", "v3_be50", "v3_be100", "v3_be200"],
+  "fraction": 0.05,
+  "cap": 0.5,
+  "linear_leverage": [1, 2, 3],
+  "slots": [5, 10, 20],
+  "slot_leverage": [2, 3, 5],
+  "max_dd": 40,
+  "top": 12,
+  "ties": 10,
+  "seed": 20261103,
+  "in_sample": "Offsets are compared on the same history that chose v3; v3add add legs were not rerun with the lock.",
+  "training_eligible": false,
+  "production_eligible": false
+}
