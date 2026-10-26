@@ -55,7 +55,10 @@ def load(symbol):
 
 
 def worse(o, l):
-    m = o.merge(l[['trade_id', 'net_notional_bp', 'reason', 'entry_time', 'exit_time']], on='trade_id', how='outer', suffixes=('_o', '_l'))
+    # A scale-in leg can fill under one intrabar path only (its parent may exit first in the other).
+    m = o.merge(l[['trade_id', 'net_notional_bp', 'reason', 'entry_time', 'exit_time', 'score']], on='trade_id', how='outer', suffixes=('_o', '_l'))
+    m['score'] = m.score_o.fillna(m.score_l)
+    m['variant'] = m.trade_id.str.rsplit(':v_', n=1).str[-1]
     for s in ('o', 'l'):
         m[f'net_{s}'] = m[f'net_notional_bp_{s}']-np.where(m[f'reason_{s}'] == 4, 0., opt.SLIP)
     return m
