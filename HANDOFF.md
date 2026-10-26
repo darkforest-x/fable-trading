@@ -56,6 +56,14 @@
 - Median notional per100USDTplannedrisk5077to5511;99percentile~22k;maximum~30.8k. Same entry/stop implies exactly same size regardless of target. Recorded overlap as high as137positions and~471600USDTnotional across fixed-target arms; this is independent exposure, not a feasible cashaccount. Stops ordinarily lose100USDT, observed worst~101.50 fromgaps. Funding/margin/capacity remain unmodeled. Originalentry-week targets do not roll nextweek; sourcegap/end censoring preserved.
 - Results and reproduction `experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/`; Notion `4058856479af81bfac30ddc49688ef3e`. Learning `fixed-risk-sizing-must-include-fill-costs.md`. All production/training flagsfalse; no live/score changes, no additional report. Luna delegate actualmodel/effort could not be verified from tool output and was stopped; main performed work.
 
+## 2026-10-27 · spike-HW trade frequency
+
+- 219 backtest trades on 111 Beijing trading days. Only 6 before 2023. Since 2023, 35 percent of weeks have a trade; active weeks average 3.2.
+- 84 percent of trading days have one trade. The top five days (2026-08-22: 37, 2024-02-29: 30, 2023-11-10: 16, 2024-01-03: 7, 2025-10-11: 6) hold 44 percent of all trades. The 10-slot cap binds only on the top three.
+- Gap between trading days: median 5.5 days, 90th percentile 51.
+- Forward pace since 2025: 1.7 trades a week on the Binance universe (50 trades in about 30 weeks), but only 0.5 a week on OKX-listed coins (about 97 weeks). The OKX paper account alone cannot reach the 50-trade review in reasonable time, which is another reason to get Binance data.
+- Chart `experiments/active/exp-monday-limit-spike-hw-20261026-v1/4_frequency.png`, numbers in `frequency.json`.
+
 ## 2026-10-27 · Decision: no other-level backtest; wait for forward paper data
 
 - Owner: "先不跑其他点位，等模拟盘前向数据". Rules stay frozen (v2 60m/5m, v3, v3add, spike).
