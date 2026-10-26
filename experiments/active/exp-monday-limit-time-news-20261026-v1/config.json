@@ -1,0 +1,18 @@
+{
+  "experiment_id": "exp-monday-limit-time-news-20261026-v1",
+  "question": "Owner 2026-10-26: win rate by weekday and hour of day, and whether it depends on time windows and major US news releases.",
+  "source": "experiments/active/exp-monday-limit-be-scalein-20261026-v1 (NautilusTrader fills, both intrabar paths); worse path per trade, 10bp slippage on non-target exits",
+  "variants": ["v3_be17", "v2_be17"],
+  "events": "experiments/active/exp-monday-1618-macro-20261023-v1/events.csv",
+  "window_hours": 2,
+  "split": "2025-01-01",
+  "seed": 20261026,
+  "boot_draws": 2000,
+  "perm_draws": 2000,
+  "win_bp": 1.0,
+  "win": "net > 1bp after maker/taker fees and slippage; breakeven exits (entry +0.17 percent) net about 0 and count as flat",
+  "time_keys": "fill time; Beijing weekday/hour (UTC+8), NY weekday; news = fill clock hour overlapping +-2h of CPI / Employment Situation 08:30 ET or scheduled FOMC 14:00 ET",
+  "exploratory": "Buckets not pre-registered; no filter is adopted without forward confirmation.",
+  "training_eligible": false,
+  "production_eligible": false
+}
