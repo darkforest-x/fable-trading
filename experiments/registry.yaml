@@ -645,7 +645,7 @@ experiments:
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: 'Forward runs overlap and pass through the same 2025 streak; in sample. Pyramiding (滚仓) needs an adapter extension and is next.'
+    notes: 'Forward runs overlap and pass through the same 2025 streak; in sample. Pyramiding (滚仓) tested in exp-monday-limit-pyramid-20261027-v1: rejected.'
   - experiment_id: exp-monday-limit-lottery-20261027-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 5c9d89354f
@@ -954,6 +954,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'In sample. The win rate is the share of reclaim closes beyond entry plus costs, so it is the same for all three locks. v3add add legs were not rerun with a lock.'
+  - experiment_id: exp-monday-limit-pyramid-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3b17b453a3
+    status: complete
+    question: 'Owner 2026-10-27: can pyramiding (滚仓) give the high-payoff version a higher payoff and a shorter time to 10x / 100x?'
+    single_variable: 'Pyramid legs only (adapter 894c24f3fa): v3 score >= 0.6 opposite-1618 events, parent unchanged (-30 percent backstop, breakeven +17bp); equal-size stop entries armed at the reclaim at near / mid / far (/ opp1618), each fill ratchets the group stop to the previous level; targets opp1618 or opp2618. Leg weights applied after the run: equal, halving, zero (step stop only). Worse path per group, 10bp slippage, liquidation from the summed open legs; Langlang / all-in replay from each month 2023-01 .. 2026-08, 5 tie orders.'
+    result: '397/397 symbols per path, no errors; base_opp1618 reproduces the 842-trade set of the Langlang study. Per event (one leg notional): base opp1618 mean 372bp, 31.3R; with legs 338bp, 28.5R; step stop only 340bp, 28.6R. Base opp2618 453bp, 38.1R; with legs 408bp, 34.4R; step stop only 379bp, 31.9R. Legs fill in 39-45 percent of events and win 18-27 percent of those (-3 / +65bp per event); the step stop loses money every year except 2022 (-2.7R / -6.2R in total). Time to 100x is not shorter: base opp1618 all-in 3x reaches it from 94.5 percent of starts, median 566 days, 2 blow-ups; all-in 5x 402 days, 7 blow-ups; the pyramid variants reach it from 0-97 percent with median 173-999 days and no better trade-off. Liquidation share at 5x unchanged (7.0 percent).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-pyramid-20261027-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'In sample; negative, so no matched random control was run. Near-edge legs are usually already passed at the reclaim close and are skipped (no late add at market).'
   - experiment_id: exp-monday-reclaim-paper-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 791941594f

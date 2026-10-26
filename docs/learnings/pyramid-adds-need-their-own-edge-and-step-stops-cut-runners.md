@@ -1,0 +1,11 @@
+# Pyramid adds pay only if continuation past the add level has its own edge; check that the step stop is not hurting the parent
+
+- **Problem**: The owner asked whether pyramiding (滚仓) could give the high-payoff Monday 1618 version bigger wins and a shorter time to 100x. The rule tested: equal-size stop entries at the Monday edge, mid and far edge (and the opposite 1618), each fill moving the group stop to the previous level. Data: 842 score ≥0.6 events.
+- **Dead ends**:
+  - Judging pyramiding by the best groups. The 99th percentile per event rose from 3248 to 4178bp (5855 vs 4547 with the 2618 target), but the total fell by 2.8R and 3.7R.
+  - Reading the pyramid as one change. It is two changes: added size and a step stop. With the legs at zero weight (step stop only), the total fell from 31.3 to 28.6R and from 38.1 to 31.9R. The added legs themselves were close to zero: they fill in 39-45 percent of events, win 18-27 percent of those, and average -3 / +65bp. They need continuation beyond the range, and that continuation has no edge here. That agrees with the earlier finding that 1618 extensions behave like a random walk.
+- **What worked**:
+  - Leg weights were applied after one framework run. A leg's size changes no exit, because the ratchet fires on its fill whatever its size. One run therefore gives equal, halving and zero weights, and zero weight isolates the stop's own effect.
+  - Liquidation was measured on the summed open legs per 5m bar. Ratcheting to the previous level kept the 5x liquidation share unchanged at 7.0 percent, so the added risk is small at ≤5x.
+- **General rule**: Before adding size on strength, test whether the continuation beyond the add level beats the parent's own exit. Report the same rule with zero-size legs, so the stop change is not credited to the adds. A fatter right tail with a lower total is not a higher payoff.
+- **Related**: `yoyo/layers/l3_backtest/nautilus_independent.py` (pyramid legs), `yoyo/evaluation/monday_limit_pyramid.py`, `yoyo/evaluation/monday_limit_pyramid_compare.py`, `experiments/active/exp-monday-limit-pyramid-20261027-v1/`, [win-rate-levers-and-profit-levers-are-different.md](win-rate-levers-and-profit-levers-are-different.md), [lottery-odds-from-overlapping-windows-can-be-one-streak.md](lottery-odds-from-overlapping-windows-can-be-one-streak.md).
