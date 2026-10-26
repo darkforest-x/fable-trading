@@ -468,6 +468,13 @@ class IndependentCloseStrategy(Strategy):
                 if isinstance(parent, str) and parent in self.reclaim_due_by_trade:
                     due = pd.Timestamp(self.reclaim_due_by_trade[parent], tz="UTC")
                 self.reclaim_due_by_trade[row["trade_id"]] = due.value
+                # Scale-in legs may only fill up to the parent's decision close;
+                # afterwards the parent is at its breakeven or closed.
+                due_i = int(self.frame.index.searchsorted(due))
+                for child in self.children.get(row["trade_id"], ()):
+                    if child in self.pending:
+                        src = self.pending[child][0].source
+                        src["expire_i"] = min(int(src["expire_i"]), max(due_i, i))
                 state.reclaim_due_ns = due.value
                 state.reclaim_status = "pending"
                 # Missing pre-confirmation observations make the path unknown,

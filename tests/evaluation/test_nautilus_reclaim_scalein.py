@@ -63,10 +63,20 @@ class ScaleInTests(unittest.TestCase):
         self.assertEqual(r.loc['c', 'entry_i'], 2)
 
     def test_unfilled_child_is_cancelled_when_the_parent_closes(self):
-        r, _, audit = replay([[102]*4, [102, 103, 99, 101], [101, 103, 100.5, 102], [102, 102, 99.5, 99.6], [99.6, 99.6, 90, 91], [91]*4],
-                             [PARENT, CHILD])
+        # Parent fills at bar 1 and reaches its target inside bar 2, before the decision close.
+        r, _, audit = replay([[102]*4, [102, 103, 99, 101], [101, 104, 100.5, 102], [102, 102, 90, 91], [91]*4, [91]*4],
+                             [PARENT | dict(target_price=103.), CHILD | dict(target_price=103.)])
+        self.assertEqual(r.loc['p', 'reason'], 4)
         self.assertNotIn('c', r.index)
         self.assertIn('parent_closed', {o['status'] for o in audit['opportunities'] if o['trade_id'] == 'c'})
+
+    def test_child_cannot_fill_after_the_parent_decision(self):
+        # Reclaimed at bar 2; bar 4 drops through the parent breakeven and the child price in one bar.
+        r, _, audit = replay([[102]*4, [102, 103, 99, 101], [101, 103, 100.5, 102], [102]*4, [102, 102, 90, 91], [91]*4, [91]*4],
+                             [PARENT, CHILD])
+        self.assertEqual((r.loc['p', 'reason'], r.loc['p', 'exit_price']), (5, 100.))
+        self.assertNotIn('c', r.index)
+        self.assertTrue({o['status'] for o in audit['opportunities'] if o['trade_id'] == 'c'} & {'expired', 'parent_closed'})
 
     def test_invalid_children_are_rejected(self):
         with self.assertRaises(ValueError):
