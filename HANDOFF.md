@@ -40,6 +40,20 @@
 - Median notional per100USDTplannedrisk5077to5511;99percentile~22k;maximum~30.8k. Same entry/stop implies exactly same size regardless of target. Recorded overlap as high as137positions and~471600USDTnotional across fixed-target arms; this is independent exposure, not a feasible cashaccount. Stops ordinarily lose100USDT, observed worst~101.50 fromgaps. Funding/margin/capacity remain unmodeled. Originalentry-week targets do not roll nextweek; sourcegap/end censoring preserved.
 - Results and reproduction `experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/`; Notion `4058856479af81bfac30ddc49688ef3e`. Learning `fixed-risk-sizing-must-include-fill-costs.md`. All production/training flagsfalse; no live/score changes, no additional report. Luna delegate actualmodel/effort could not be verified from tool output and was stopped; main performed work.
 
+## 2026-10-26 · Order-score subset with backstop and larger targets; OKX cross-check
+
+- Score ≥0.6 and order > 0, from existing grid/levels fills, worse path, linear sizing. Trades: 143 (2020-24), 131 (2025), 175 (2026). With a −30 percent backstop (2020-24 / 2025 / 2026 / last five months):
+  - near target: 89.5 / 72.5 / 80.6 / 87.1 percent win, 1.52 / 1.37 / 1.31 / 1.36x;
+  - opposite 1618: 60 / 40 / 49 / 64 percent win, 2.70 / 2.72 / 2.13 / 2.50x, DD 11 / 13 / 32 / 10.
+  - Farther targets earn more and win less. Full v3 still earns more (2026 2.59x).
+- OKX check of the 2026 same-bar trades:
+  - Most of them are on coins without an OKX swap (60 of 102).
+  - Of the checked ones, the OKX wick reached the entry in 33 of 40 and also closed beyond the target in 25.
+  - 2026-08-22 05:10 UTC was a real flash crash on both venues, shallower on OKX.
+  - Only about a third of v3 trades are on coins OKX lists now. Per-trade results on those are similar.
+- Owner asked to use whichever exchange earns most. On current evidence that is Binance (the backtest venue, about 3x the coins). No OKX-history backtest exists. Binance REST returns 451 from this machine. Real-money venue and any paper-engine data switch are owner decisions.
+- Experiments `exp-monday-limit-order-targets-20261026-v1`, `exp-monday-limit-okx-wick-check-20261026-v1`; learning `backtest-venue-universe-is-not-the-trading-venue.md`.
+
 ## 2026-10-26 · EMA order score: equity replays and the near-target subset
 
 - 1000U replays on the existing v3_be17 fills (worse path, linear sizing, gross ≤1x, 20 tie orders), 2020-24 / 2025 / 2026 / last five months:

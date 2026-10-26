@@ -565,6 +565,34 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Backtest 2020-24 / 2025 / 2026 / last five months 3.74x / 8.97x / 2.56x / 2.96x, DD up to 34 percent; band edges were chosen after seeing 2025-2026, so the forward record is the test. UI pending Codex + Stitch.'
+  - experiment_id: exp-monday-limit-order-targets-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7243b38986
+    status: complete
+    question: 'Owner 2026-10-26: give the score >= 0.6 + EMA order > 0 trades a backstop; how many trades and what win rate in 2026; can the target be farther?'
+    single_variable: 'Target (near / range 0.5 / 0.618 / far edge / opposite 1618) x backstop (none / -20 / -30 percent) on existing v3-grid and v3-levels NautilusTrader fills (breakeven at entry), worse path, 10bp slippage, linear sizing replays.'
+    result: '2026: 175 trades (2025 131, 2020-24 143). With -30 percent backstop, 2020-24 / 2025 / 2026 / last5m: near win 89.5 / 72.5 / 80.6 / 87.1 percent, 1.52 / 1.37 / 1.31 / 1.36x, DD about 10-15, 4 backstops in 2026; range 0.5 76 / 58 / 68 / 78, 1.83 / 1.91 / 1.48 / 1.70x; range 0.618 73 / 53 / 64 / 78, 1.93 / 1.88 / 1.35 / 1.83x; far edge 70 / 45 / 58 / 76, 2.39 / 1.99 / 1.64 / 2.21x; opposite 1618 60 / 40 / 49 / 64, 2.70 / 2.72 / 2.13 / 2.50x, DD 11 / 13 / 32 / 10. Backstop caps the worst trade at -30 percent and costs a little return (near 2026 1.46 -> 1.31x).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-order-targets-20261026-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'In sample (order filter found on the same history). Breakeven exits count as small losses here (entry-level breakeven). Full v3 still earns more in money (2026 2.59x) because it keeps all trades.'
+  - experiment_id: exp-monday-limit-okx-wick-check-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7243b38986
+    status: complete
+    question: 'Owner 2026-10-26: would OKX have filled the 2026 same-bar flash-wick trades, and which exchange should be used?'
+    single_variable: 'OKX public 5m candles of the fill bars of 2026 same-bar fill-and-target trades (score >= 0.6, order > 0) versus the Binance-derived entry and target; current OKX swap listing split for the subset and all v3_be17 trades.'
+    result: 'Near target, -30 percent backstop: 102 same-bar trades in 2026, 60 on symbols with no OKX swap, 40 checked: OKX wick reached the entry in 33 and also closed beyond the target in 25 (net 9338 of 14319bp). Opposite 1618: 30, 16 not on OKX, 14 checked, 9 reached, 7 both. 2026-08-22 05:10 UTC was a real market-wide flash crash on both venues (OKX wicks shallower, e.g. 1INCH low 0.08108 vs Binance 0.07597). v3_be17 trades on currently OKX-listed symbols: 2020-24 307 of 742, 2025 138 of 537, 2026 263 of 829; per-trade means similar (2026 153 vs 145bp).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-okx-wick-check-20261026-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'The backtest universe and wick depths are Binance USDT-M; OKX trades about a third of the same coins. No OKX-history backtest exists. Venue choice for real money is an owner decision; the paper engine still uses OKX.'
   - experiment_id: exp-monday-limit-order-replay-20261026-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 249f14e5bb
