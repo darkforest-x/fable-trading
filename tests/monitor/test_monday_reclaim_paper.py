@@ -9,10 +9,12 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from yoyo.monitor.monday_fib import FibBook, week_window
-from yoyo.monitor.monday_reclaim_paper import MODEL, V3, V3_TRACK, ReclaimPaper, PaperCloseError, features, settle, bars, install
+from yoyo.monitor.monday_reclaim_paper import (MODEL, V3, V3_TRACK, V3ADD_TRACK, V3ADD_LEG, BE_OFFSET_BP, ReclaimPaper,
+                                               PaperCloseError, features, settle, bars, install)
 
 ROOT = Path(__file__).resolve().parents[2]
 MIN, H5, H1 = 60_000, 300_000, 3_600_000
+BE = 93.82*(1+BE_OFFSET_BP/1e4)  # breakeven stop after a reclaim, entry +0.17 percent
 
 
 class FakeClient:
@@ -55,10 +57,11 @@ class PaperFixture(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def engine(self, threshold, enable_v3=False):
+    def engine(self, threshold, enable_v3=False, enable_v3add=False):
         spec = json.loads(MODEL.read_text()); spec["top40_threshold"] = threshold
         path = Path(self.tmp.name)/"model.json"; path.write_text(json.dumps(spec))
-        return ReclaimPaper(self.tmp.name, FakeFib(self.tmp.name, self.client), model_path=path, enable_v3=enable_v3)
+        return ReclaimPaper(self.tmp.name, FakeFib(self.tmp.name, self.client), model_path=path, enable_v3=enable_v3,
+                            enable_v3add=enable_v3add)
 
     def rows(self, e, sql):
         with e.db() as db:
@@ -101,6 +104,24 @@ class PaperTests(PaperFixture):
         e.handle_touch(self.levels, "ABC-USDT-SWAP", "lower", 93.8, self.touch+500, self.touch)
         self.confirm(e, 94.5)
         e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch//H1*H1+3*H1, "high": 101., "low": 93.5, "price": 96.})
+        self.assertEqual({(p["reason"], p["exit_price"]) for p in self.rows(e, "SELECT * FROM positions")}, {("breakeven", BE)})
+
+    def test_reclaim_close_inside_the_fee_band_exits_at_the_close(self):
+        e = self.engine(-1.)
+        e.handle_touch(self.levels, "ABC-USDT-SWAP", "lower", 93.8, self.touch+500, self.touch)
+        self.confirm(e, 93.9)
+        pos = self.rows(e, "SELECT * FROM positions")
+        self.assertEqual({(p["reason"], p["exit_price"], p["fee_bp"]) for p in pos}, {("reclaimed_inside_be", 93.9, 7)})
+
+    def test_breakeven_armed_before_the_offset_keeps_the_entry_stop(self):
+        e = self.engine(-1.)
+        e.handle_touch(self.levels, "ABC-USDT-SWAP", "lower", 93.8, self.touch+500, self.touch)
+        self.confirm(e, 94.5)
+        with e.db() as db:
+            db.execute("UPDATE positions SET be_price=NULL")
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch//H1*H1+3*H1, "high": 96., "low": 93.9, "price": 95.})
+        self.assertEqual({p["stage"] for p in self.rows(e, "SELECT * FROM positions")}, {"breakeven"})
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch//H1*H1+3*H1+MIN, "high": 96., "low": 93.5, "price": 95.})
         self.assertEqual({(p["reason"], p["exit_price"]) for p in self.rows(e, "SELECT * FROM positions")}, {("breakeven", 93.82)})
 
     def test_fill_minute_target_needs_close_beyond(self):
@@ -357,7 +378,7 @@ class V3TrackTests(PaperFixture):
         self.confirm(e, 94.5)
         e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch//H1*H1+3*H1, "high": 96., "low": 93.5, "price": 95.})
         c = self.rows(e, f"SELECT * FROM positions WHERE track={V3_TRACK}")[0]
-        self.assertEqual((c["reason"], c["exit_price"]), ("breakeven", 93.82))
+        self.assertEqual((c["reason"], c["exit_price"]), ("breakeven", BE))
 
     def test_far_target_after_reclaim(self):
         e, p = self.v3(.7)
@@ -373,6 +394,104 @@ class V3TrackTests(PaperFixture):
         app = FastAPI(); install(app, e)
         r = TestClient(app).get("/api/monday-reclaim-paper/analytics?track=v3")
         self.assertEqual(r.status_code, 200)
+
+
+class V3AddTests(PaperFixture):
+    """v3add: v3 plus an equal-notional add 5 percent beyond the entry for scores >= 0.6, sharing the parent's exits."""
+
+    def v3add(self, score):
+        e = self.engine(-1., enable_v3=True, enable_v3add=True)
+        e.model.score = lambda feats: score
+        e.handle_touch(self.levels, "ABC-USDT-SWAP", "lower", 93.8, self.touch+500, self.touch)
+        return e
+
+    def legs(self, e):
+        parent, = self.rows(e, f"SELECT * FROM positions WHERE track={V3ADD_TRACK}")
+        child = self.rows(e, f"SELECT * FROM positions WHERE track={V3ADD_LEG}")
+        return parent, (child[0] if child else None)
+
+    def equity(self, e, key):
+        return e.snapshot()["tracks"][key]["equity"]
+
+    def test_no_add_below_score_0_6(self):
+        self.assertIsNone(self.legs(self.v3add(.55))[1])
+
+    def test_add_rests_from_score_0_6(self):
+        e = self.v3add(.7)
+        parent, child = self.legs(e)
+        self.assertAlmostEqual(child["entry"], 93.82*.95)
+        self.assertEqual((child["stage"], child["taken"], child["notional"], child["parent_id"]), ("pending_fill", 0, 0., parent["id"]))
+        self.assertEqual((child["target"], child["backstop"], child["decision_ms"]), (parent["target"], parent["backstop"], parent["decision_ms"]))
+        snap = e.snapshot()["tracks"]
+        self.assertEqual(set(snap), {"60", "5", "v3", "v3add"})
+        self.assertEqual((len(snap["v3add"]["open"]), len(snap["v3add"]["pending_adds"])), (1, 1))
+
+    def test_filled_add_exits_with_the_parent_at_its_breakeven(self):
+        e = self.v3add(.7)
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch+MIN, "high": 94., "low": 89., "price": 90.})
+        parent, child = self.legs(e)
+        self.assertEqual((child["stage"], child["taken"]), ("pending_confirm", 1))
+        self.assertAlmostEqual(child["notional"], parent["notional"])
+        self.confirm(e, 94.5)
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch//H1*H1+3*H1, "high": 96., "low": 93.5, "price": 95.})
+        parent, child = self.legs(e)
+        self.assertEqual({(p["reason"], p["exit_price"]) for p in (parent, child)}, {("breakeven", BE)})
+        self.assertGreater(child["net_bp"], 500)
+        self.assertAlmostEqual(self.equity(e, "v3add"), 1000+parent["pnl"]+child["pnl"])
+        v3, = self.rows(e, f"SELECT * FROM positions WHERE track={V3_TRACK}")
+        self.assertAlmostEqual(self.equity(e, "v3"), 1000+v3["pnl"])
+        self.assertEqual(len(e.snapshot()["tracks"]["v3add"]["closed"]), 2)
+
+    def test_failed_reclaim_is_judged_on_the_parent_entry(self):
+        e = self.v3add(.7)
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch+MIN, "high": 94., "low": 89., "price": 90.})
+        self.confirm(e, 93.0)
+        parent, child = self.legs(e)
+        self.assertEqual({(p["reason"], p["exit_price"]) for p in (parent, child)}, {("failed_reclaim", 93.0)})
+        self.assertGreater(child["gross_bp"], 0); self.assertLess(parent["gross_bp"], 0)
+
+    def test_unfilled_add_expires_at_the_parent_decision(self):
+        e = self.v3add(.7)
+        parent, _ = self.legs(e)
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": parent["decision_ms"], "high": 94., "low": 85., "price": 93.})
+        _, child = self.legs(e)
+        self.assertEqual((child["stage"], child["reason"], child["taken"]), ("closed", "add_expired", 0))
+        snap = e.snapshot()["tracks"]["v3add"]
+        self.assertEqual((snap["pending_adds"], [r["track"] for r in snap["closed"]]), ([], []))
+
+    def test_unfilled_add_is_cancelled_by_the_decision_run(self):
+        e = self.v3add(.7)
+        self.confirm(e, 94.5)
+        parent, child = self.legs(e)
+        self.assertEqual((parent["stage"], child["reason"]), ("breakeven", "add_expired"))
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch//H1*H1+3*H1, "high": 94., "low": 85., "price": 86.})
+        parent, child = self.legs(e)
+        self.assertEqual((parent["reason"], child["taken"], child["pnl"]), ("breakeven", 0, 0))
+
+    def test_add_is_cancelled_when_the_parent_reaches_its_target_first(self):
+        e = self.v3add(.7)
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch+MIN, "high": 117., "low": 95., "price": 116.5})
+        parent, child = self.legs(e)
+        self.assertEqual((parent["reason"], child["reason"], child["taken"]), ("target", "add_cancelled", 0))
+
+    def test_add_fills_on_the_way_to_the_parent_backstop(self):
+        e = self.v3add(.7)
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch+MIN, "high": 94., "low": 60., "price": 62.})
+        parent, child = self.legs(e)
+        self.assertEqual({(p["reason"], p["exit_price"]) for p in (parent, child)}, {("backstop", parent["backstop"])})
+        self.assertAlmostEqual(child["notional"], parent["notional"])
+        self.assertAlmostEqual(self.equity(e, "v3add"), 1000+parent["pnl"]+child["pnl"])
+
+    def test_analytics_counts_both_legs_in_the_v3add_account(self):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+        e = self.v3add(.7)
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch+MIN, "high": 94., "low": 89., "price": 90.})
+        app = FastAPI(); install(app, e)
+        r = TestClient(app).get("/api/monday-reclaim-paper/analytics?track=v3add")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.json()["summary"]["open_count"], 2)
+        self.assertEqual(TestClient(app).get("/api/monday-reclaim-paper/analytics?track=v3").json()["summary"]["open_count"], 1)
 
 
 if __name__ == "__main__":

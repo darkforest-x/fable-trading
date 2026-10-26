@@ -35,6 +35,16 @@ and notional linear in score. Lower scores are kept as v3 shadow rows with the
 near target. Intrabar order as in the backtest: in any minute, the backstop or
 breakeven stop beats a target, and the fill minute's extreme counts against the
 backstop.
+
+Owner 2026-10-26 (exp-monday-limit-be-scalein-compare-20261026-v1): every track
+moves its breakeven to entry +0.17 percent (fees and slippage) for confirmations
+decided from now on; a reclaim close that has not cleared that price exits at
+the close ("reclaimed_inside_be"). A separate "v3add" account (own 1000 USDT)
+runs v3 plus, for scores >= 0.6, an equal-notional add resting 5 percent beyond
+the entry from the fill until the parent's confirmation close. The add shares
+the parent's reclaim test (parent entry), breakeven price, backstop and target;
+it is cancelled if the parent closes first, except when the parent's backstop
+fires in the minute that also reaches the add (the add filled on the way).
 """
 from __future__ import annotations
 
@@ -58,7 +68,11 @@ MODEL = Path(__file__).with_name("monday_reclaim_score.json")
 V3 = Path(__file__).with_name("monday_reclaim_v3.json")
 TRACKS = (60, 5)
 V3_TRACK = 1060  # internal id of the v3 rule; API key "v3"
-CONFIRM = {60: 60, 5: 5, V3_TRACK: 60}
+V3ADD_TRACK, V3ADD_LEG = 2060, 2061  # v3 + scale-in account and its add legs; API key "v3add"
+CONFIRM = {60: 60, 5: 5, V3_TRACK: 60, V3ADD_TRACK: 60, V3ADD_LEG: 60}
+BE_OFFSET_BP = 17.0
+ADD = dict(from_score=.6, drawdown_pct=5.)
+ACCOUNT = {V3ADD_LEG: V3ADD_TRACK}
 MAKER_BP, TAKER_BP, SLIP_BP = 2.0, 5.0, 10.0
 START_EQUITY, FRACTION, GROSS = 1000.0, 0.10, 1.0
 EXCLUDE = {"BTC", "ETH", "XAU", "XAG", "PAXG", "XAUT"}
@@ -76,11 +90,19 @@ def serialized(method):
 
 
 def track_key(track):
-    return "v3" if track == V3_TRACK else str(track)
+    return {V3_TRACK: "v3", V3ADD_TRACK: "v3add", V3ADD_LEG: "v3add"}.get(track, str(track))
 
 
 def track_id(key):
-    return V3_TRACK if str(key) == "v3" else int(key)
+    return {"v3": V3_TRACK, "v3add": V3ADD_TRACK}.get(str(key)) or int(key)
+
+
+def account(track):
+    return ACCOUNT.get(track, track)
+
+
+def members(acct):
+    return (acct, V3ADD_LEG) if acct == V3ADD_TRACK else (acct,)
 
 
 class PaperCloseError(ValueError):
@@ -151,10 +173,11 @@ def settle(side, entry, exit_price, reason):
 
 
 class ReclaimPaper:
-    def __init__(self, runtime, fib, model_path=MODEL, v3_path=V3, enable_v3=True):
+    def __init__(self, runtime, fib, model_path=MODEL, v3_path=V3, enable_v3=True, enable_v3add=True):
         self.write_lock = threading.RLock()
         self.fib, self.client, self.model = fib, fib.client, ScoreModel(model_path)
         self.v3 = json.loads(Path(v3_path).read_text()) if enable_v3 else None
+        self.add = dict(ADD) if self.v3 and enable_v3add else None
         self.path = Path(runtime)/"monday-reclaim-paper.sqlite3"
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.events = queue.Queue(maxsize=200_000)
@@ -187,14 +210,14 @@ class ReclaimPaper:
             columns = {r["name"] for r in db.execute("PRAGMA table_info(positions)")}
             for name, spec in {"remaining_notional": "REAL", "realized_pnl": "REAL NOT NULL DEFAULT 0",
                                "close_revision": "INTEGER NOT NULL DEFAULT 0", "manual_exit_ms": "INTEGER",
-                               "backstop": "REAL"}.items():
+                               "backstop": "REAL", "be_price": "REAL", "parent_id": "INTEGER", "reclaim_ref": "REAL"}.items():
                 if name not in columns:
                     db.execute(f"ALTER TABLE positions ADD COLUMN {name} {spec}")
             db.execute("UPDATE positions SET remaining_notional=CASE WHEN stage='closed' THEN 0 ELSE notional END "
                        "WHERE remaining_notional IS NULL")
             if "realized_pnl" not in columns:
                 db.execute("UPDATE positions SET realized_pnl=COALESCE(pnl,0) WHERE stage='closed'")
-            for m in TRACKS+((V3_TRACK,) if self.v3 else ()):
+            for m in TRACKS+((V3_TRACK,) if self.v3 else ())+((V3ADD_TRACK,) if self.add else ()):
                 db.execute("INSERT OR IGNORE INTO tracks VALUES (?,?,?)", (m, START_EQUITY, self.client.clock()))
         self._refresh_watch()
 
@@ -316,9 +339,17 @@ class ReclaimPaper:
                             int(taken and notional > 0), notional, candle_ms, note, notional))
             if self.v3:
                 self._open_v3(db, sid, levels, symbol, side, level, candle_ms, score)
+            if self.add:
+                pid, notional, target3, decision3, backstop3 = self._open_v3(db, sid, levels, symbol, side, level, candle_ms, score, V3ADD_TRACK)
+                if notional > 0 and score is not None and score >= self.add["from_score"]:
+                    db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,decision_ms,stage,taken,"
+                               "notional,last_seen_ms,note,remaining_notional,backstop,parent_id,reclaim_ref) "
+                               "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                               (sid, V3ADD_LEG, symbol, side, level*(1-side*self.add["drawdown_pct"]/100), target3, candle_ms,
+                                decision3, "pending_fill", 0, 0., candle_ms, "add_pending", 0., backstop3, pid, level))
         self._refresh_watch()
 
-    def _open_v3(self, db, sid, levels, symbol, side, level, candle_ms, score):
+    def _open_v3(self, db, sid, levels, symbol, side, level, candle_ms, score, track=V3_TRACK):
         """v3 row: score-dependent target, -30 percent backstop, notional linear in score."""
         v3, width = self.v3, levels["high"]-levels["low"]
         if score is not None and score >= v3["far_score"]:
@@ -333,17 +364,52 @@ class ReclaimPaper:
         if score is not None and score >= v3["min_score"]:
             sz = v3["sizing"]
             k = min(sz["fraction"]*(score-sz["cut"])/sz["mean_excess"], sz["cap"])
-            equity = db.execute("SELECT equity FROM tracks WHERE track=?", (V3_TRACK,)).fetchone()["equity"]
-            opened = db.execute("SELECT COALESCE(SUM(COALESCE(remaining_notional,notional)),0) s FROM positions WHERE track=? "
-                                "AND stage<>'closed' AND taken=1", (V3_TRACK,)).fetchone()["s"]
-            notional = max(0., min(k*equity, GROSS*equity-opened))
+            equity = db.execute("SELECT equity FROM tracks WHERE track=?", (track,)).fetchone()["equity"]
+            notional = max(0., min(k*equity, GROSS*equity-self._opened(db, track)))
             if notional <= 0:
                 note = "no_capacity"
         backstop = level*(1-side*v3["backstop_pct"]/100)
-        db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,decision_ms,stage,"
-                   "taken,notional,last_seen_ms,note,remaining_notional,backstop) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                   (sid, V3_TRACK, symbol, side, level, target, candle_ms, decision, "pending_confirm",
-                    int(notional > 0), notional, candle_ms, note, notional, backstop))
+        cur = db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,decision_ms,stage,"
+                         "taken,notional,last_seen_ms,note,remaining_notional,backstop) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                         (sid, track, symbol, side, level, target, candle_ms, decision, "pending_confirm",
+                          int(notional > 0), notional, candle_ms, note, notional, backstop))
+        return cur.lastrowid, notional, target, decision, backstop
+
+    def _opened(self, db, acct):
+        tracks = members(acct)
+        return db.execute(f"SELECT COALESCE(SUM(COALESCE(remaining_notional,notional)),0) s FROM positions WHERE track IN "
+                          f"({','.join('?'*len(tracks))}) AND stage<>'closed' AND taken=1", tracks).fetchone()["s"]
+
+    def _cancel_add(self, db, p, ms, reason):
+        db.execute("UPDATE positions SET stage='closed',exit_ms=?,reason=?,taken=0,notional=0,remaining_notional=0,pnl=0 "
+                   "WHERE id=? AND stage='pending_fill'", (ms, reason, p["id"]))
+
+    def _try_fill_add(self, db, p, q):
+        """Fill a resting add leg from one 1m update, or cancel it; returns the live row or None."""
+        parent = db.execute("SELECT * FROM positions WHERE id=?", (p["parent_id"],)).fetchone()
+        s = p["side"]
+        reached = (q["low"] <= p["entry"]) if s == 1 else (q["high"] >= p["entry"])
+        if q["candle_ms"] < p["fill_ms"]//60_000*60_000:
+            return None
+        if parent is None or parent["stage"] == "closed":
+            # The parent's backstop lies beyond the add: in that minute the add filled on the way down.
+            if not (parent is not None and parent["reason"] == "backstop" and parent["exit_ms"] == q["candle_ms"] and reached):
+                self._cancel_add(db, p, q["candle_ms"], "add_cancelled")
+                return None
+        elif q["candle_ms"] >= p["decision_ms"]:
+            self._cancel_add(db, p, q["candle_ms"], "add_expired")
+            return None
+        if not reached:
+            db.execute("UPDATE positions SET last_seen_ms=MAX(last_seen_ms,?) WHERE id=?", (q["candle_ms"], p["id"]))
+            return None
+        equity = db.execute("SELECT equity FROM tracks WHERE track=?", (account(p["track"]),)).fetchone()["equity"]
+        notional = max(0., min(parent["notional"], GROSS*equity-self._opened(db, account(p["track"]))))
+        if notional <= 0:
+            self._cancel_add(db, p, q["candle_ms"], "add_no_capacity")
+            return None
+        db.execute("UPDATE positions SET stage='pending_confirm',taken=1,notional=?,remaining_notional=?,fill_ms=?,last_seen_ms=?,"
+                   "note=NULL WHERE id=?", (notional, notional, q["candle_ms"], q["candle_ms"], p["id"]))
+        return db.execute("SELECT * FROM positions WHERE id=?", (p["id"],)).fetchone()
 
     def _record_exit(self, db, p, amount, exit_ms, price, reason):
         """Allocate original entry cost once across each realized tranche."""
@@ -354,7 +420,7 @@ class ReclaimPaper:
         remaining = max(0., p["remaining_notional"]-amount)
         db.execute("UPDATE positions SET remaining_notional=?,realized_pnl=realized_pnl+?,close_revision=close_revision+1 "
                    "WHERE id=?", (remaining, pnl, p["id"]))
-        db.execute("UPDATE tracks SET equity=equity+? WHERE track=?", (pnl, p["track"]))
+        db.execute("UPDATE tracks SET equity=equity+? WHERE track=?", (pnl, account(p["track"])))
         if remaining == 0:
             totals = db.execute("SELECT SUM(notional*gross_bp)/? gross,SUM(notional*fee_bp)/? fee,"
                                 "SUM(notional*net_bp)/? net,SUM(notional*net_slip_bp)/? slip,SUM(pnl) pnl "
@@ -443,7 +509,12 @@ class ReclaimPaper:
     def handle_quote(self, symbol, q):
         """One 1m candle update (cumulative minute high/low, latest close)."""
         with self.db() as db:
-            for p in db.execute("SELECT * FROM positions WHERE symbol=? AND stage<>'closed'", (symbol,)).fetchall():
+            for p in db.execute("SELECT * FROM positions WHERE symbol=? AND stage<>'closed' ORDER BY (parent_id IS NOT NULL), id",
+                                (symbol,)).fetchall():
+                if p["stage"] == "pending_fill":
+                    p = self._try_fill_add(db, p, q)
+                    if p is None:
+                        continue
                 if p["manual_exit_ms"] and (q["candle_ms"] < p["manual_exit_ms"]//60_000*60_000
                         or q.get("received_ms", p["manual_exit_ms"]) < p["manual_exit_ms"]):
                     continue
@@ -454,8 +525,9 @@ class ReclaimPaper:
                 after_fill = q["candle_ms"] > minute
                 reached = (q["high"] >= target) if s == 1 else (q["low"] <= target)
                 closes_beyond = (q["price"] >= target) if s == 1 else (q["price"] <= target)
+                be = p["be_price"] if p["be_price"] is not None else entry
                 stop = (p["stage"] == "breakeven" and q["candle_ms"] >= p["be_from_ms"]
-                        and ((q["low"] <= entry) if s == 1 else (q["high"] >= entry)))
+                        and ((q["low"] <= be) if s == 1 else (q["high"] >= be)))
                 bs = p["backstop"]
                 backstop = (bs is not None and p["stage"] == "pending_confirm"
                             and ((q["low"] <= bs) if s == 1 else (q["high"] >= bs)))
@@ -464,7 +536,7 @@ class ReclaimPaper:
                     # A same-minute automatic fill cannot predate a partial fill.
                     exit_ms = max(p["manual_exit_ms"], q.get("received_ms", exit_ms+60_000))
                 if stop:
-                    self._close(db, p, exit_ms, entry, "breakeven")
+                    self._close(db, p, exit_ms, be, "breakeven")
                 elif backstop:
                     self._close(db, p, exit_ms, bs, "backstop")
                 elif reached and (after_fill or closes_beyond):
@@ -492,15 +564,24 @@ class ReclaimPaper:
             if not window:
                 continue
             close = window[0][4]
-            inside = close > p["entry"] if p["side"] == 1 else close < p["entry"]
+            ref = p["reclaim_ref"] if p["reclaim_ref"] is not None else p["entry"]
+            be = ref*(1+p["side"]*BE_OFFSET_BP/1e4)
+            inside = close > ref if p["side"] == 1 else close < ref
+            beyond_be = close > be if p["side"] == 1 else close < be
             with self.db() as db:
                 cur = db.execute("SELECT * FROM positions WHERE id=?", (p["id"],)).fetchone()
                 if cur["stage"] != "pending_confirm":
                     continue
-                if inside:
-                    db.execute("UPDATE positions SET stage='breakeven',be_from_ms=? WHERE id=?", (p["decision_ms"], p["id"]))
+                if inside and beyond_be:
+                    db.execute("UPDATE positions SET stage='breakeven',be_from_ms=?,be_price=? WHERE id=?", (p["decision_ms"], be, p["id"]))
+                elif inside:
+                    self._close(db, cur, p["decision_ms"], close, "reclaimed_inside_be")
                 else:
                     self._close(db, cur, p["decision_ms"], close, "failed_reclaim")
+        with self.db() as db:
+            for p in db.execute("SELECT * FROM positions WHERE stage='pending_fill' AND decision_ms+3000<=? AND (? IS NULL OR symbol=?)",
+                                (due_by, symbol, symbol)).fetchall():
+                self._cancel_add(db, p, p["decision_ms"], "add_expired")
         self._refresh_watch()
 
     @serialized
@@ -523,15 +604,16 @@ class ReclaimPaper:
     def analytics(self, track=60, days=0):
         from .reclaim_analytics import build_analytics
         track = track_id(track)
+        tracks = members(track); marks = ",".join("?"*len(tracks))
         with self.fib.lock:
             quotes, connected = dict(self.fib.quotes), self.fib.connected
         with self.db() as db:
             db.execute("BEGIN")
-            account = dict(db.execute("SELECT * FROM tracks WHERE track=?", (track,)).fetchone())
-            positions = [dict(r) for r in db.execute("SELECT * FROM positions WHERE track=?", (track,))]
-            exits = [dict(r) for r in db.execute("SELECT e.* FROM exits e JOIN positions p ON p.id=e.position_id WHERE p.track=?", (track,))]
-        account["start_equity"] = START_EQUITY
-        return build_analytics(positions, exits, account, quotes, self.client.clock(), days, connected)
+            acct = dict(db.execute("SELECT * FROM tracks WHERE track=?", (track,)).fetchone())
+            positions = [dict(r, track=track) for r in db.execute(f"SELECT * FROM positions WHERE track IN ({marks})", tracks)]
+            exits = [dict(r) for r in db.execute(f"SELECT e.* FROM exits e JOIN positions p ON p.id=e.position_id WHERE p.track IN ({marks})", tracks)]
+        acct["start_equity"] = START_EQUITY
+        return build_analytics(positions, exits, acct, quotes, self.client.clock(), days, connected)
 
     def snapshot(self):
         with self.fib.lock:
@@ -544,25 +626,31 @@ class ReclaimPaper:
             tracks = {}
             for t in db.execute("SELECT * FROM tracks ORDER BY track DESC").fetchall():
                 m = t["track"]
+                tr = members(m); marks = ",".join("?"*len(tr))
                 # Read the original entry score even after its signal has left the
                 # recent-touch page. LEFT JOIN preserves legacy position records.
+                # Add legs that never filled are bookkeeping only and are left out.
                 closed = [dict(r) for r in db.execute("SELECT p.*, s.score FROM positions p LEFT JOIN signals s ON s.id=p.signal_id "
-                                                     "WHERE p.track=? AND p.stage='closed' ORDER BY p.exit_ms DESC", (m,))]
+                                                     f"WHERE p.track IN ({marks}) AND p.stage='closed' "
+                                                     "AND NOT (p.parent_id IS NOT NULL AND p.taken=0) ORDER BY p.exit_ms DESC", tr)]
                 for r in closed:
                     r["exits"] = exits.get(r["id"], [])
                 taken = [r for r in closed if r["taken"]]
-                open_rows = []
+                open_rows, pending_adds = [], []
                 for r in db.execute("SELECT p.*, s.score FROM positions p JOIN signals s ON s.id=p.signal_id "
-                                    "WHERE p.track=? AND p.stage<>'closed' ORDER BY p.fill_ms DESC", (m,)):
+                                    f"WHERE p.track IN ({marks}) AND p.stage<>'closed' ORDER BY p.fill_ms DESC", tr):
                     r = dict(r); q = quotes.get(r["symbol"], {})
+                    if r["stage"] == "pending_fill":  # resting add order, not a position yet
+                        pending_adds.append(r)
+                        continue
                     r["mark"] = q.get("price")
                     r["quote_ms"] = q.get("received_ms")
                     r["exits"] = exits.get(r["id"], [])
                     r["unrealized_bp"] = r["side"]*(q["price"]-r["entry"])/r["entry"]*1e4 if q.get("price") else None
                     open_rows.append(r)
-                tracks[track_key(m)] = dict(confirm_minutes=CONFIRM.get(m, m), rule="v3" if m == V3_TRACK else "v2",
+                tracks[track_key(m)] = dict(confirm_minutes=CONFIRM.get(m, m), rule={V3_TRACK: "v3", V3ADD_TRACK: "v3add"}.get(m, "v2"),
                     equity=t["equity"], start_equity=START_EQUITY, started_ms=t["started_ms"],
-                    open=open_rows, closed=closed[:100],
+                    open=open_rows, closed=closed[:100], pending_adds=pending_adds,
                     # Latest fill is independent of the exit-ordered history page.
                     latest_funded=max((r for r in open_rows + closed if r["taken"] == 1 and r["notional"] > 0),
                                       key=lambda r: (r["fill_ms"], r["id"]), default=None),
@@ -574,7 +662,8 @@ class ReclaimPaper:
             s["features"] = json.loads(s["features"]) if s["features"] else None
         return dict(now_ms=self.client.clock(), strategy="monday_1618_limit_reclaim_v2", paper_only=True,
                     model=dict(threshold=self.model.threshold, trained_before=self.model.trained_before, features=self.model.features),
-                    sizing=dict(start_equity=START_EQUITY, fraction=FRACTION, gross=GROSS), v3=self.v3,
+                    sizing=dict(start_equity=START_EQUITY, fraction=FRACTION, gross=GROSS), v3=self.v3, v3add=self.add,
+                    breakeven_offset_bp=BE_OFFSET_BP,
                     fees_bp=dict(maker=MAKER_BP, taker=TAKER_BP, report_slippage=SLIP_BP),
                     worker=dict(alive=bool(self.thread and self.thread.is_alive()), queue=self.events.qsize(), error=self.error),
                     tracks=tracks, signals=signals)
@@ -584,7 +673,7 @@ def install(app, engine):
     app.state.monday_reclaim_paper = engine
 
     @app.get("/api/monday-reclaim-paper/analytics")
-    def analytics(track: Literal["60", "5", "v3"] = "60", days: Literal["0", "7", "30"] = "0"):
+    def analytics(track: Literal["60", "5", "v3", "v3add"] = "60", days: Literal["0", "7", "30"] = "0"):
         return engine.analytics(track, int(days))
 
     @app.post("/api/monday-reclaim-paper/positions/{position_id}/close")
