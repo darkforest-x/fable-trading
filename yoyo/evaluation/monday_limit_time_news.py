@@ -13,7 +13,10 @@ Trades are clustered (many alts fill in the same market move), so:
   - heterogeneity p-values permute bucket labels between clusters inside each NY week (weekday: Beijing dates;
     hour and news window: clock hours), statistic = n-weighted squared deviation of bucket rates from the pooled rate;
   - stability = Spearman of bucket rates between 2020-2024 and 2025-2026;
-  - score-adjusted excess = observed win rate minus the rate expected from the trade's side x score decile.
+  - score-adjusted excess = observed win rate minus the rate expected from the trade's side x score decile;
+  - select then confirm (added after the first run showed Beijing 21-24h low in both periods, a post-hoc pick):
+    the worst 3h Beijing window chosen on 2020-2024 alone with a scan-corrected p, then the same window on
+    2025-2026 with a one-sided within-week permutation; the post-hoc 21-24h window is reported for both periods.
 Exploratory: buckets were not chosen in advance, so no bucket is a filter until forward data confirm it.
 """
 from __future__ import annotations
@@ -132,6 +135,32 @@ def spearman(a, b):
     return dict(rho=float(np.corrcoef(x, y)[0, 1]), buckets=len(ok))
 
 
+def window_gaps(h, n, s, width):
+    nb, sb = np.bincount(h, n, 24), np.bincount(h, s, 24)
+    out = np.empty(24)
+    for k in range(24):
+        w = np.zeros(24, bool); w[[(k+j) % 24 for j in range(width)]] = True
+        out[k] = 100*(sb[w].sum()/nb[w].sum()-sb[~w].sum()/nb[~w].sum())
+    return out
+
+
+def select_confirm(m, early, rng, draws, width=3, posthoc=21):
+    def clusters(x):
+        c = x.groupby('hour_key').agg(week=('week', 'first'), h=('bj_hour', 'first'), n=('win', 'size'), s=('win', 'sum'))
+        return pd.factorize(c.week)[0], c.h.to_numpy(), c.n.to_numpy(float), c.s.to_numpy(float)
+    def shuffle(wk, h):
+        L = h[np.argsort(wk, kind='stable')]; order = np.lexsort((rng.random(len(wk)), wk))
+        new = np.empty_like(h); new[order] = L
+        return new
+    wk, h, n, s = clusters(m[early]); g = window_gaps(h, n, s, width); k = int(np.argmin(g))
+    scan = (1+sum(window_gaps(shuffle(wk, h), n, s, width).min() <= g.min() for _ in range(draws)))/(draws+1)
+    wk2, h2, n2, s2 = clusters(m[~early]); g2 = window_gaps(h2, n2, s2, width)
+    conf = (1+sum(window_gaps(shuffle(wk2, h2), n2, s2, width)[k] <= g2[k] for _ in range(draws)))/(draws+1)
+    return dict(width_hours=width, selected_start_hour=k, early_gap_pp=float(g[k]), early_scan_p=float(scan),
+                late_gap_pp=float(g2[k]), late_one_sided_p=float(conf),
+                posthoc_start_hour=posthoc, posthoc_early_gap_pp=float(g[posthoc]), posthoc_late_gap_pp=float(g2[posthoc]))
+
+
 def table(m, key, labels):
     return {lab: stats(m[m[key] == lab]) for lab in labels}
 
@@ -153,6 +182,7 @@ def family(m, cfg, rng, ev):
                         perm_p_mean=perm_p(m, cluster, key, rng, cfg['perm_draws'], 'net'),
                         early=table(m[early], key, labels), late=table(m[~early], key, labels))
         out[key]['stability'] = spearman(out[key]['early'], out[key]['late'])
+    out['select_confirm'] = select_confirm(m, early, rng, cfg['scan_draws'])
     m['news_any'] = np.where(m.news == 'none', 'none', 'news')
     out['news'] = dict(window_hours=cfg['window_hours'], table=table(m, 'news_any', ['news', 'none']),
                        ci=week_boot(m, 'news_any', ['news', 'none'], rng, cfg['boot_draws']),
@@ -220,6 +250,7 @@ def run(config):
         for key in ('bj_day', 'bj_hour', 'block'):
             print(' ', key, 'p_win', r[key]['perm_p_win'], 'p_mean', r[key]['perm_p_mean'], 'stability', r[key]['stability'])
         print('  news', json.dumps(r['news']['table'], ensure_ascii=False), 'p', r['news']['perm_p_win'], r['news']['perm_p_mean'])
+        print('  select_confirm', json.dumps(r['select_confirm']))
 
 
 if __name__ == '__main__':
