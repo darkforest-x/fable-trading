@@ -581,6 +581,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Backtest 2020-24 / 2025 / 2026 / last five months 3.74x / 8.97x / 2.56x / 2.96x, DD up to 34 percent; band edges were chosen after seeing 2025-2026, so the forward record is the test. UI pending Codex + Stitch.'
+  - experiment_id: exp-monday-limit-spike-more-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f0e4cbb764
+    status: complete
+    question: 'Owner 2026-10-26: after plan A (near target, -20 percent backstop, 10 slots, 5x), can the spike subset be optimized further and its win rate raised?'
+    single_variable: 'Grouping of existing fills inside score >= 0.6 + EMA order > 0 (order 1-4, score band, side, same-bar), 5m vs 60m confirmation, and plan A slot replays with order >= 3.'
+    result: 'Near target 60m, all 2020-26: order 1 74.8 percent win (+154bp), order 2 72.8 (+122), order 3 88.2 (+342), order 4 89.3 (+316); order >= 3 by period 94.1 / 80.3 / 91.8 / 94.3 (2020-24 / 2025 / 2026 / last5m), n 219. Score >= 0.8 89.9 percent (n69). Side flips by period. 5m confirmation lowers win rate (67.7 vs 81.3). Same-bar fills 100 percent winners; the rest 47-54 percent win and negative mean in 2025-26. Plan A (10 slots, 5x): 4.43 / 3.30 / 3.22 / 3.11x, DD 12 / 15 / 20 / 22, win 72-86; with order >= 3: 2.44 / 3.09 / 3.19 / 2.69x, DD 18 / 9 / 11 / 13, win 80-88.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-spike-more-20261026-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'In sample. At 5x the 20 percent backstop sits beyond liquidation (about 19 percent), so liquidation acts as the stop; an 18 percent stop or 4x would exit first (not run). Not adopted; candidates for a Binance paper shadow line.'
   - experiment_id: exp-monday-limit-spike-stops-20261026-v1
     source_repo: darkforest-x/fable-trading
     source_commit: a88421ea33

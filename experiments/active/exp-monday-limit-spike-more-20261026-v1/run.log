@@ -1,0 +1,49 @@
+  t=pd.to_datetime(m.entry_time, utc=True), exit_t=pd.to_datetime(pd.Series(np.where(w, m.exit_time_l, m.exit_time_o)), utc=True)))
+order 1 y2020_2024: n43 win 86.0 mean 262 | y2025: n34 win 67.6 mean 169 | y2026: n50 win 70.0 mean 52 | last5m: n18 win 72.2 mean 180 | all: n127 win 74.8 mean 154
+order 2 y2020_2024: n32 win 84.4 mean 342 | y2025: n31 win 61.3 mean -110 | y2026: n40 win 72.5 mean 125 | last5m: n13 win 69.2 mean 36 | all: n103 win 72.8 mean 122
+order 3 y2020_2024: n17 win 100.0 mean 450 | y2025: n21 win 85.7 mean 301 | y2026: n13 win 76.9 mean 266 | last5m: n8 win 87.5 mean 527 | all: n51 win 88.2 mean 342
+order 4 y2020_2024: n51 win 92.2 mean 334 | y2025: n45 win 77.8 mean 190 | y2026: n72 win 94.4 mean 382 | last5m: n62 win 95.2 mean 381 | all: n168 win 89.3 mean 316
+score 0.6-0.7 y2020_2024: n94 win 87.2 mean 274 | y2025: n55 win 69.1 mean 126 | y2026: n91 win 75.8 mean 181 | last5m: n50 win 82.0 mean 291 | all: n240 win 78.8 mean 205
+score 0.7-0.8 y2020_2024: n44 win 93.2 mean 416 | y2025: n44 win 70.5 mean 114 | y2026: n52 win 80.8 mean 181 | last5m: n29 win 86.2 mean 280 | all: n140 win 81.4 mean 234
+score 0.8-1.01 y2020_2024: n5 win 100.0 mean 561 | y2025: n32 win 81.2 mean 165 | y2026: n32 win 96.9 mean 394 | last5m: n22 win 100.0 mean 402 | all: n69 win 89.9 mean 300
+side long y2020_2024: n117 win 93.2 mean 416 | y2025: n55 win 54.5 mean -121 | y2026: n109 win 79.8 mean 239 | last5m: n68 win 83.8 mean 324 | all: n281 win 80.4 mean 243
+side short y2020_2024: n26 win 73.1 mean -71 | y2025: n76 win 85.5 mean 314 | y2026: n66 win 83.3 mean 189 | last5m: n33 win 93.9 mean 289 | all: n168 win 82.7 mean 205
+same_bar yes y2020_2024: n58 win 100.0 mean 467 | y2025: n63 win 100.0 mean 400 | y2026: n103 win 100.0 mean 420 | last5m: n64 win 100.0 mean 449 | all: n224 win 100.0 mean 426
+same_bar no y2020_2024: n85 win 82.4 mean 233 | y2025: n68 win 47.1 mean -118 | y2026: n72 win 54.2 mean -65 | last5m: n37 win 64.9 mean 77 | all: n225 win 62.7 mean 32
+order_ge3 y2020_2024: n68 win 94.1 mean 363 | y2025: n66 win 80.3 mean 226 | y2026: n85 win 91.8 mean 364 | last5m: n70 win 94.3 mean 398 | all: n219 win 89.0 mean 322
+confirm_60m all y2020_2024: n143 win 89.5 mean 328 | y2025: n131 win 72.5 mean 131 | y2026: n175 win 81.1 mean 220 | last5m: n101 win 87.1 mean 312 | all: n449 win 81.3 mean 229
+confirm_60m order_ge3 y2020_2024: n68 win 94.1 mean 363 | y2025: n66 win 80.3 mean 226 | y2026: n85 win 91.8 mean 364 | last5m: n70 win 94.3 mean 398 | all: n219 win 89.0 mean 322
+confirm_5m all y2020_2024: n143 win 77.6 mean 263 | y2025: n131 win 54.2 mean 156 | y2026: n175 win 69.7 mean 209 | last5m: n101 win 76.2 mean 266 | all: n449 win 67.7 mean 211
+confirm_5m order_ge3 y2020_2024: n68 win 85.3 mean 369 | y2025: n66 win 66.7 mean 221 | y2026: n85 win 84.7 mean 318 | last5m: n70 win 90.0 mean 362 | all: n219 win 79.5 mean 305
+order_ge1|N10|L3|y2020_2024  x3.37 dd 6 liq 0 win 85.5 taken 110 skip 33
+order_ge1|N10|L3|y2025       x2.70 dd 10 liq 0 win 72.5 taken 131 skip 0
+order_ge1|N10|L3|y2026       x2.63 dd 13 liq 0 win 75.9 taken 133 skip 42
+order_ge1|N10|L3|last5m      x2.56 dd 14 liq 0 win 81.1 taken 74 skip 27
+order_ge1|N10|L5|y2020_2024  x4.43 dd 12 liq 2 win 85.5 taken 110 skip 33
+order_ge1|N10|L5|y2025       x3.30 dd 15 liq 3 win 72.5 taken 131 skip 0
+order_ge1|N10|L5|y2026       x3.22 dd 20 liq 2 win 75.9 taken 133 skip 42
+order_ge1|N10|L5|last5m      x3.11 dd 22 liq 0 win 81.1 taken 74 skip 27
+order_ge1|N5|L3|y2020_2024   x3.99 dd 11 liq 0 win 83.2 taken 95 skip 48
+order_ge1|N5|L3|y2025        x3.40 dd 19 liq 0 win 72.5 taken 131 skip 0
+order_ge1|N5|L3|y2026        x2.98 dd 26 liq 0 win 75.6 taken 123 skip 52
+order_ge1|N5|L3|last5m       x2.92 dd 27 liq 0 win 79.7 taken 69 skip 32
+order_ge1|N5|L5|y2020_2024   x5.81 dd 38 liq 2 win 83.2 taken 95 skip 48
+order_ge1|N5|L5|y2025        x5.17 dd 30 liq 3 win 72.5 taken 131 skip 0
+order_ge1|N5|L5|y2026        x3.87 dd 35 liq 2 win 75.6 taken 123 skip 52
+order_ge1|N5|L5|last5m       x3.90 dd 40 liq 0 win 79.7 taken 69 skip 32
+order_ge3|N10|L3|y2020_2024  x2.31 dd 8 liq 0 win 88.1 taken 42 skip 26
+order_ge3|N10|L3|y2025       x2.57 dd 6 liq 0 win 80.3 taken 66 skip 0
+order_ge3|N10|L3|y2026       x2.63 dd 7 liq 0 win 84.5 taken 58 skip 27
+order_ge3|N10|L3|last5m      x2.29 dd 4 liq 0 win 86.0 taken 43 skip 27
+order_ge3|N10|L5|y2020_2024  x2.44 dd 18 liq 2 win 88.1 taken 42 skip 26
+order_ge3|N10|L5|y2025       x3.09 dd 9 liq 0 win 80.3 taken 66 skip 0
+order_ge3|N10|L5|y2026       x3.19 dd 11 liq 1 win 84.5 taken 58 skip 27
+order_ge3|N10|L5|last5m      x2.69 dd 13 liq 1 win 86.0 taken 43 skip 27
+order_ge3|N5|L3|y2020_2024   x2.13 dd 16 liq 0 win 84.4 taken 32 skip 36
+order_ge3|N5|L3|y2025        x3.15 dd 12 liq 0 win 80.3 taken 66 skip 0
+order_ge3|N5|L3|y2026        x2.89 dd 14 liq 0 win 84.0 taken 53 skip 32
+order_ge3|N5|L3|last5m       x2.43 dd 8 liq 0 win 84.2 taken 38 skip 32
+order_ge3|N5|L5|y2020_2024   x1.75 dd 31 liq 2 win 79.4 taken 24 skip 44
+order_ge3|N5|L5|y2025        x4.27 dd 19 liq 0 win 80.3 taken 66 skip 0
+order_ge3|N5|L5|y2026        x3.77 dd 21 liq 0 win 84.0 taken 53 skip 32
+order_ge3|N5|L5|last5m       x2.86 dd 25 liq 1 win 84.2 taken 38 skip 32

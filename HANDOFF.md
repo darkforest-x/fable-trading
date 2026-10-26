@@ -48,6 +48,15 @@
 - Median notional per100USDTplannedrisk5077to5511;99percentile~22k;maximum~30.8k. Same entry/stop implies exactly same size regardless of target. Recorded overlap as high as137positions and~471600USDTnotional across fixed-target arms; this is independent exposure, not a feasible cashaccount. Stops ordinarily lose100USDT, observed worst~101.50 fromgaps. Funding/margin/capacity remain unmodeled. Originalentry-week targets do not roll nextweek; sourcegap/end censoring preserved.
 - Results and reproduction `experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/`; Notion `4058856479af81bfac30ddc49688ef3e`. Learning `fixed-risk-sizing-must-include-fill-costs.md`. All production/training flagsfalse; no live/score changes, no additional report. Luna delegate actualmodel/effort could not be verified from tool output and was stopped; main performed work.
 
+## 2026-10-26 · Spike subset: more win-rate levers; plan A against order ≥3
+
+- Inside score ≥0.6 + order > 0, near target 60m, win rate by EMA order score: 1 = 75 percent, 2 = 73, 3 = 88, 4 = 89. Order ≥3 by period: 94 / 80 / 92 / 94 percent, 219 trades.
+- Not levers: 5m confirmation (win rate 68 vs 81 percent) and side (flips by period). Score ≥0.8 wins 90 percent but has only 69 trades.
+- Plan A (near target, −20 percent stop, 10 slots, 5x): 4.43 / 3.30 / 3.22 / 3.11x, DD 12-22, win 72-86 percent. The same plan with order ≥3: 2.44 / 3.09 / 3.19 / 2.69x, DD 9-18, win 80-88 percent.
+- At 5x the −20 percent stop lies beyond liquidation (about 19 percent), so liquidation acts as the stop; an 18 percent stop or 4x would exit first (not run).
+- The weak half is still the trades that do not fill and hit the target in the same 5m bar (2025-26 win about 50 percent, negative mean).
+- In sample; candidates for a Binance paper shadow line. `exp-monday-limit-spike-more-20261026-v1`.
+
 ## 2026-10-26 · Spike subset: floating loss, tighter backstops, slots and leverage
 
 - Spike subset = score ≥0.6 and EMA order > 0, 449 trades, Binance 5m.
