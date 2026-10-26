@@ -26,15 +26,17 @@ function harness(){
  const instance=mount({chart:{},getRows:()=>[],...identity,url:'/levels',format:String,series,host,fetcher});
  return {host,series,instance,requests,added,removed,options,scale};
 }
-test('successful response draws once, fit toggles scale, destroy removes lines and listener',async()=>{
+test('initial view preserves candle scale and manual pan; explicit range fit toggles scale',async()=>{
  const h=harness();h.requests[0].resolve(value);await flush();
  assert.equal(h.added.length,4);assert.match(h.host.innerHTML,/周一高/);
- assert.equal(h.options.at(-1).autoscaleInfoProvider(()=>({priceRange:{minValue:101,maxValue:105}})).priceRange.maxValue,116.18);
+ assert.equal(h.options.at(-1).autoscaleInfoProvider(()=>({priceRange:{minValue:101,maxValue:105}})).priceRange.maxValue,105);
+ assert.equal(h.scale.length,0);
  const button={setAttribute(k,v){this[k]=v;}};
  h.host.click({target:{closest:s=>s==='[data-range-fit]'?button:null}});
- assert.equal(button['aria-pressed'],'false');assert.equal(h.scale.length,2);
- h.host.click({target:{closest:s=>s==='[data-range-fit]'?button:null}});assert.equal(button['aria-pressed'],'true');
+ assert.equal(button['aria-pressed'],'true');assert.equal(h.scale.length,1);
  assert.equal(h.options.at(-1).autoscaleInfoProvider(()=>({priceRange:{minValue:101,maxValue:105}})).priceRange.maxValue,116.18);
+ h.host.click({target:{closest:s=>s==='[data-range-fit]'?button:null}});assert.equal(button['aria-pressed'],'false');
+ assert.equal(h.options.at(-1).autoscaleInfoProvider(()=>({priceRange:{minValue:101,maxValue:105}})).priceRange.maxValue,105);
  h.instance.destroy();assert.equal(h.removed.length,4);assert.equal(h.host.innerHTML,'');assert.equal(h.host.click,null);assert.equal(h.requests[0].init.signal.aborted,true);
 });
 test('response after close cannot repaint a disposed or reused host',async()=>{

@@ -140,7 +140,7 @@
     window.addEventListener('blur',()=>{pointers.clear();resetDrag();render();});
     window.addEventListener('storage',event=>{if(event.key===preferences.key){preferences.read();render();}});
     setOpen(open,false);
-    return {render,setOpen,toggle:()=>setOpen(!open),refresh:feed.refresh,setActive(value){if(value)preferences.read();else{pointers.clear();resetDrag();setOpen(false,false);}feed.setActive(value);render();}};
+    return {render,refreshPreferences(){preferences.read();render();},setOpen,toggle:()=>setOpen(!open),refresh:feed.refresh,setActive(value){if(value)preferences.read();else{pointers.clear();resetDrag();setOpen(false,false);}feed.setActive(value);render();}};
   }
   window.SpikeReclaimWatchlist={...api,create};
 })();

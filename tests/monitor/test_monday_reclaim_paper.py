@@ -183,6 +183,8 @@ class PaperTests(PaperFixture):
                 c = e.close_position(p['id'], 100, 2, str(uuid.uuid4()))
                 self.assertEqual(c['remaining_notional'], 0)
                 track = e.snapshot()['tracks']['60']; closed = track['closed'][0]
+                self.assertEqual(closed['score'], partial['score'])
+                self.assertIsInstance(closed['score'], float)
                 self.assertEqual(closed['reason'], 'manual')
                 self.assertAlmostEqual(closed['fee_bp'], 7)
                 self.assertAlmostEqual(closed['pnl'], sum(x['pnl'] for x in [a,b,c]))

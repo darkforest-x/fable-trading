@@ -2,6 +2,9 @@
 (() => {
   'use strict';
   const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const wallpaperInteraction={handleScroll:{pressedMouseMove:true,mouseWheel:true,horzTouchDrag:true,vertTouchDrag:true},
+          handleScale:{mouseWheel:true,pinch:true,axisPressedMouseMove:{time:true,price:true},axisDoubleClickReset:{time:true,price:true}},
+          crosshair:{mode:0},timeScale:{rightOffset:10},kineticScroll:{mouse:false,touch:true}};
   const fin=x=>typeof x==='number'&&Number.isFinite(x);
   const price=x=>fin(x)?x.toLocaleString('zh-CN',{useGrouping:false,maximumFractionDigits:Math.abs(x)>=100?2:Math.abs(x)>=1?4:8}):'—';
   const clock=(ms,year=false)=>ms==null?'—':new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',...(year?{year:'numeric'}:{}),month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(ms));
@@ -128,9 +131,7 @@
       this.volume.priceScale().applyOptions({scaleMargins:{top:.85,bottom:0}});
       this.controls=T.bind(this.panel,{chart:()=>this.chart,rows:()=>this.rows,canvas:this.canvas,panel:this.panel});
       if(this.pending.view.wallpaper){
-        this.chart.applyOptions({handleScroll:{pressedMouseMove:true,mouseWheel:true,horzTouchDrag:true,vertTouchDrag:true},
-          handleScale:{mouseWheel:true,pinch:true,axisPressedMouseMove:{time:true,price:true},axisDoubleClickReset:{time:true,price:true}},
-          crosshair:{mode:0},timeScale:{rightOffset:10},kineticScroll:{mouse:false,touch:true}});
+        this.chart.applyOptions(wallpaperInteraction);
         this.freePan=bindFreePan(this.chart,this.canvas);
         this.canvas.setAttribute('aria-label','K 线交互图；拖动自由平移，滚轮或双指缩放，拖动坐标轴缩放，双击价格轴复位；Home 全图，End 最新');
       }
@@ -221,6 +222,6 @@
   const instances=new WeakMap();
   function mount(host,data,view,error=''){let instance=instances.get(host);if(!instance){instance=new Interactive(host);instances.set(host,instance);}instance.update(data,view,error);return instance;}
   function unmount(host){if(!host)return;instances.get(host)?.destroy();instances.delete(host);}
-  window.SpikeRangeChart={render,price,clock,mount,unmount,WeekLevels,bindFreePan};
-  if(typeof module!=='undefined')module.exports={render,price,bindFreePan,Interactive,logicalAt,coordinateAt,WeekLevels};
+  window.SpikeRangeChart={render,price,clock,mount,unmount,WeekLevels,bindFreePan,wallpaperInteraction};
+  if(typeof module!=='undefined')module.exports={render,price,bindFreePan,Interactive,logicalAt,coordinateAt,WeekLevels,wallpaperInteraction};
 })();

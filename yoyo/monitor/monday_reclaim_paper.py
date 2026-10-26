@@ -544,7 +544,10 @@ class ReclaimPaper:
             tracks = {}
             for t in db.execute("SELECT * FROM tracks ORDER BY track DESC").fetchall():
                 m = t["track"]
-                closed = [dict(r) for r in db.execute("SELECT * FROM positions WHERE track=? AND stage='closed' ORDER BY exit_ms DESC", (m,))]
+                # Read the original entry score even after its signal has left the
+                # recent-touch page. LEFT JOIN preserves legacy position records.
+                closed = [dict(r) for r in db.execute("SELECT p.*, s.score FROM positions p LEFT JOIN signals s ON s.id=p.signal_id "
+                                                     "WHERE p.track=? AND p.stage='closed' ORDER BY p.exit_ms DESC", (m,))]
                 for r in closed:
                     r["exits"] = exits.get(r["id"], [])
                 taken = [r for r in closed if r["taken"]]

@@ -1,6 +1,6 @@
 /* Read-only patrol overlays, Stitch screen b845bc7cedc348af88c7223b08929c3d.
  * The stored detection owns the NY week; delayed responses never own a new chart.
- * Extrema-anchored rays show all four levels first; detail fit is explicit.
+ * Extrema-anchored rays never force far-away levels into the initial candle scale.
  */
 (() => {
   'use strict';
@@ -22,7 +22,7 @@
     return {...info,priceRange:{minValue:Math.min(info.priceRange.minValue,...rows.map(r=>r.price)),maxValue:Math.max(info.priceRange.maxValue,...rows.map(r=>r.price))}};
   }
   function mount({chart,getRows,series,host,url,symbol,detection,at,format,fetcher=fetch}){
-    let disposed=false,controller=null,primitive=null,rows=[],fit=true;
+    let disposed=false,controller=null,primitive=null,rows=[],fit=false;
     const identity={symbol,detection,at};
     const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const autoscale=base=>fitRange(base(),rows,fit);
@@ -30,7 +30,7 @@
     const paint=(text,retry=false)=>{host.innerHTML=`<span class="yd-range-state">${escape(text)}</span>${retry?'<button type="button" data-range-retry>重试区间</button>':''}`;};
     async function load(){
       controller?.abort();const request=controller=new AbortController();
-      clear();fit=true;series.applyOptions({autoscaleInfoProvider:autoscale});paint('正在读取形态所在周的区间…');
+      clear();fit=false;series.applyOptions({autoscaleInfoProvider:autoscale});paint('正在读取形态所在周的区间…');
       const timeout=setTimeout(()=>request.abort(),15000);
       try{
         const response=await fetcher(url,{signal:request.signal,cache:'no-store'});
@@ -41,8 +41,8 @@
         if(!rows.length){paint(value.state==='developing'?'形态确认时周一区间尚未形成':'该周周一数据不完整，暂不画区间',value.state!=='developing');return;}
         const owner={chart,series,get rows(){return getRows();},levelWindow:{start_ms:value.start_ms,end_ms:value.expires_ms},activeLevels:rows.map(r=>({...r,axisLabelVisible:false,inlinePriceVisible:true,inlineNameVisible:true})),scaleLevels:()=>rows};
         primitive=new window.SpikeRangeChart.WeekLevels(owner);series.attachPrimitive(primitive);
-        series.applyOptions({autoscaleInfoProvider:autoscale});series.priceScale().applyOptions({autoScale:true});
-        host.innerHTML=`<span class="yd-range-week">周一区间 ${escape(value.week)} · 纽约</span>`+rows.map(r=>`<span class="yd-range-price" style="color:${r.color}"><i aria-hidden="true"></i>${r.label} <b>${escape(format(r.price))}</b></span>`).join('')+'<button type="button" data-range-fit aria-pressed="true">形态细节</button>';
+        series.applyOptions({autoscaleInfoProvider:autoscale});
+        host.innerHTML=`<span class="yd-range-week">周一区间 ${escape(value.week)} · 纽约</span>`+rows.map(r=>`<span class="yd-range-price" style="color:${r.color}"><i aria-hidden="true"></i>${r.label} <b>${escape(format(r.price))}</b></span>`).join('')+'<button type="button" data-range-fit aria-pressed="false">完整区间</button>';
       }catch(e){if(!disposed&&request===controller)paint(e.name==='AbortError'?'区间读取超时，K 线仍可查看':e.message,true);}
       finally{clearTimeout(timeout);}
     }

@@ -88,22 +88,29 @@ body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-headi
 #monday-reclaim-paper .rp-record-caption {color:var(--rp-muted,#758897);font-size:9px;padding:10px 3px 0;}
 #monday-reclaim-paper .rp-record-scroll {overflow:auto;min-height:0;padding:0 10px 10px;overscroll-behavior:contain;}
 #monday-reclaim-paper .rp-record {border-top:1px solid #8fa5b320;padding:5px 0;}
-#monday-reclaim-paper .rp-select-trade {display:flex;justify-content:space-between;gap:10px;text-align:left;width:100%;padding:8px;}
-#monday-reclaim-paper .rp-select-trade b {font-size:13px;}
-#monday-reclaim-paper .rp-select-trade small {display:block;font-size:9px;font-weight:400;color:var(--rp-muted,#7b8d9a);margin-top:3px;}
-#monday-reclaim-paper .rp-row-value {text-align:right;font-size:12px;white-space:nowrap;}
-#monday-reclaim-paper .rp-row>summary {display:flex;align-items:center;justify-content:space-between;gap:5px;padding:4px 8px;color:var(--rp-muted,#738796);font-size:10px;}
-#monday-reclaim-paper .rp-event-summary .rp-coin {flex:1;min-width:0;}
-#monday-reclaim-paper .rp-event-summary .rp-coin>span:last-child {min-width:0;}
-#monday-reclaim-paper .rp-event-summary .rp-coin a {display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-#monday-reclaim-paper .rp-event-summary .rp-avatar {flex:none;}
-#monday-reclaim-paper .rp-expand {flex:none;white-space:nowrap;}
+/* The background selects locally; explicit links/buttons own their own hit areas. */
+#monday-reclaim-paper .rp-record {position:relative;display:grid;grid-template-columns:minmax(0,1fr) 88px;border-radius:12px;transition:background-color .16s;}
+#monday-reclaim-paper .rp-record[data-selected=true] {background:var(--rp-selected,#0071e314);box-shadow:inset 2px 0 var(--rp-blue);}
+#monday-reclaim-paper .rp-record-main {position:relative;display:flex;align-items:center;gap:8px;padding:0 4px 0 8px;min-height:60px;min-width:0;}
+#monday-reclaim-paper .rp-row-select {position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:10px;background:transparent;}
+#monday-reclaim-paper .rp-record-main>.rp-coin {flex:1;min-width:0;position:relative;pointer-events:none;}
+#monday-reclaim-paper .rp-coin>span:last-child {min-width:0;}
+#monday-reclaim-paper .rp-coin a {display:flex;align-items:center;min-height:44px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:auto;font-weight:600;}
+#monday-reclaim-paper .rp-coin .rp-avatar {flex:none;}
+#monday-reclaim-paper .rp-record-main>.rp-score {position:relative;pointer-events:none;}
+#monday-reclaim-paper .rp-record-bottom {display:flex;align-items:center;min-height:44px;padding:0;gap:0;}
+#monday-reclaim-paper .rp-record-meta {display:none;flex:1;min-width:0;color:var(--rp-muted);font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#monday-reclaim-paper .rp-record-bottom :is(a,button) {display:grid;place-items:center;flex:none;width:44px;min-height:44px;padding:0;text-decoration:none;color:var(--rp-muted);border:0;background:transparent;}
+#monday-reclaim-paper .rp-record-bottom [aria-pressed=true] {color:var(--rp-blue);}
+#monday-reclaim-paper [data-rp-detail] span {transition:transform .18s;}
+#monday-reclaim-paper [data-rp-detail][aria-expanded=true] span {transform:rotate(180deg);}
+#monday-reclaim-paper .rp-row-detail[hidden] {display:none;}
 #monday-reclaim-paper .rp-score {flex:none;max-width:88px;min-width:56px;text-align:right;margin-right:4px;}
 #monday-reclaim-paper .rp-score small {display:block;font-size:9px;font-weight:400;color:var(--rp-muted,#718494);}
 #monday-reclaim-paper .rp-score strong {position:relative;font-size:12px;font-weight:500;overflow-wrap:anywhere;}
 #monday-reclaim-paper .rp-score.is-high strong {color:var(--rp-blue);font-weight:700;}
 #monday-reclaim-paper .rp-score.is-high strong::before {content:"";position:absolute;left:-8px;top:50%;width:4px;height:4px;border-radius:50%;background:currentColor;transform:translateY(-50%);}
-#monday-reclaim-paper .rp-row-detail {padding:8px;background:var(--rp-recessed,#ffffff55);border-radius:12px;}
+#monday-reclaim-paper .rp-row-detail {grid-column:1/-1;padding:8px;background:var(--rp-recessed,#ffffff55);border-radius:12px;}
 #monday-reclaim-paper .rp-detail-fields {display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 #monday-reclaim-paper .rp-row-detail dl {margin:12px 0;font-size:10px;}
 #monday-reclaim-paper .rp-row-detail dl div {display:flex;justify-content:space-between;gap:14px;padding:5px 0;}
@@ -310,3 +317,9 @@ body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-headi
  #monday-reclaim-paper .rp-pinned-chip .rp-avatar {width:17px;height:17px;}
 }
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){#monday-reclaim-paper .rp-glass,#monday-reclaim-paper .rp-dock::before {background:var(--rp-glass-fallback);}}
+
+#monday-reclaim-paper .rp-position-actions {grid-column:1/-1;}
+@media(prefers-reduced-motion:reduce){#monday-reclaim-paper :is(.rp-record,[data-rp-detail] span){transition:none;}}
+
+#monday-reclaim-paper .rp-coin small {white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#monday-reclaim-paper .rp-detail-favorite {display:flex;align-items:center;gap:7px;margin-bottom:8px;color:var(--rp-blue);}

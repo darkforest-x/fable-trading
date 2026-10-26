@@ -5,54 +5,7 @@
 (() => {
   'use strict';
   const {esc,finite,price,selectRows,selection,latestTouch,touchTime,recentTouch,RECENT_MS,STATES,FILTERS,captureListScroll,restoreListScroll,tradingViewURL,createListPreferences,inspectionURL}=typeof module!=='undefined'&&module.exports?require('./monday-list-model.js'):window.SpikeMondayList;
-  // Display coordinates are isolated from chart/data state. Only grip gestures move UI.
-  function clampPanel(x,y,w,h,vw,vh){const gap=8;return {x:Math.max(gap,Math.min(Number.isFinite(x)?x:gap,Math.max(gap,vw-w-gap))),y:Math.max(gap,Math.min(Number.isFinite(y)?y:gap,Math.max(gap,vh-h-gap)))};}
-  function mountLayout(root,env=window){
-    const blocks=Array.from(root.querySelectorAll('[data-mf-movable]')),key='spike:monday-fib:layout:v1';
-    let saved={},drag=null,active=false,frame=null,dragFrame=null;
-    try{saved=JSON.parse(env.localStorage?.getItem(key)||'{}')||{};if(typeof saved!=='object'||Array.isArray(saved))saved={};}catch{saved={};}
-    const surface=()=>env.innerWidth<=760?'mobile':'desktop';
-    const write=()=>{try{env.localStorage?.setItem(key,JSON.stringify(saved));}catch{/* Storage can be unavailable in private mode. */}};
-    const resetStyle=b=>{for(const k of ['left','top','right','bottom','transform'])b.style[k]='';};
-    const rect=b=>b.getBoundingClientRect();
-    function move(b,x,y,r=rect(b)){const p=clampPanel(x,y,r.width,r.height,env.innerWidth,env.innerHeight);Object.assign(b.style,{left:p.x+'px',top:p.y+'px',right:'auto',bottom:'auto',transform:'none'});return p;}
-    function remember(b){const r=rect(b),s=surface();if(!saved[s]||typeof saved[s]!=='object')saved[s]={};saved[s][b.dataset.mfMovable]={x:r.x/Math.max(1,env.innerWidth-r.width),y:r.y/Math.max(1,env.innerHeight-r.height)};write();}
-    function restore(){
-      if(!active||drag)return;
-      for(const b of blocks){
-        resetStyle(b);if((surface()==='mobile'&&b.dataset.mfMovable==='quick')||!b.getClientRects().length)continue;
-        const p=saved[surface()]?.[b.dataset.mfMovable],r=rect(b);
-        if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y))move(b,p.x*(env.innerWidth-r.width),p.y*(env.innerHeight-r.height));
-      }
-    }
-    function reset(b){if(saved[surface()])delete saved[surface()][b.dataset.mfMovable];resetStyle(b);write();}
-    function paintDrag(){dragFrame=null;if(drag?.next)move(drag.block,drag.next.x,drag.next.y,drag);}
-    function finish(commit=true){
-      if(dragFrame!==null){env.cancelAnimationFrame?.(dragFrame);dragFrame=null;if(commit)paintDrag();}
-      if(!drag)return;const d=drag;drag=null;d.block.classList.remove('mf-dragging');
-      d.handle.releasePointerCapture?.(d.id);
-      if(commit&&d.moved)remember(d.block);else if(d.moved){Object.assign(d.block.style,d.before);}
-    }
-    const resize=()=>{finish(false);if(frame)env.cancelAnimationFrame?.(frame);frame=env.requestAnimationFrame?.(()=>{frame=null;restore();});};
-    const bindings=[];
-    for(const block of blocks){
-      const handle=block.querySelector('[data-mf-grip]');if(!handle)continue;
-      const down=e=>{if((surface()==='mobile'&&block.dataset.mfMovable==='quick')||!active||e.isPrimary===false||(e.button!=null&&e.button!==0))return;e.preventDefault();handle.focus?.({preventScroll:true});const r=rect(block);drag={block,handle,id:e.pointerId,startX:e.clientX,startY:e.clientY,x:r.x,y:r.y,width:r.width,height:r.height,moved:false,before:Object.fromEntries(['left','top','right','bottom','transform'].map(k=>[k,block.style[k]]))};handle.setPointerCapture?.(e.pointerId);};
-      const pointer=e=>{if(!drag||drag.handle!==handle||drag.id!==e.pointerId)return;const dx=e.clientX-drag.startX,dy=e.clientY-drag.startY;if(!drag.moved&&Math.hypot(dx,dy)<5)return;drag.moved=true;block.classList.add('mf-dragging');drag.next={x:drag.x+dx,y:drag.y+dy};if(env.requestAnimationFrame){if(dragFrame===null)dragFrame=env.requestAnimationFrame(paintDrag);}else paintDrag();};
-      const up=e=>{if(drag?.handle===handle&&drag.id===e.pointerId)finish();};
-      const cancel=()=>finish(false);
-      const keyboard=e=>{
-        if(e.key==='Escape'&&drag){e.preventDefault();finish(false);return;}
-        if(e.key==='Home'){e.preventDefault();reset(block);return;}
-        const deltas={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]},d=deltas[e.key];if(!d)return;
-        e.preventDefault();e.stopPropagation();const r=rect(block),step=e.shiftKey?40:12;move(block,r.x+d[0]*step,r.y+d[1]*step);remember(block);
-      };
-      const dbl=()=>reset(block);
-      for(const [event,fn] of [['pointerdown',down],['pointermove',pointer],['pointerup',up],['pointercancel',cancel],['lostpointercapture',cancel],['keydown',keyboard],['dblclick',dbl]]){handle.addEventListener(event,fn);bindings.push([handle,event,fn]);}
-    }
-    const blur=()=>finish(false);
-    return {refresh:restore,setActive(value){active=value;finish(false);if(value){env.addEventListener?.('resize',resize);env.addEventListener?.('blur',blur);restore();}else{env.removeEventListener?.('resize',resize);env.removeEventListener?.('blur',blur);if(frame)env.cancelAnimationFrame?.(frame);frame=null;}},destroy(){this.setActive(false);for(const [h,e,f] of bindings)h.removeEventListener(e,f);}};
-  }
+  const {clampPanel,mountLayout}=typeof module!=='undefined'&&module.exports?require('./floating-layout.js'):window.SpikeFloatingLayout;
   if(typeof module!=='undefined')module.exports={esc,price,selectRows,selection,latestTouch,touchTime,recentTouch,RECENT_MS,STATES,clampPanel,mountLayout,captureListScroll,restoreListScroll,tradingViewURL,createListPreferences,inspectionURL};
   if(typeof document==='undefined')return;
   const root=document.getElementById('monday-fib-root');if(!root)return;
@@ -65,7 +18,7 @@
     <div id="mf-wallpaper" class="mf-wallpaper" aria-label="所选合约的周一区间 K 线"></div>
     <div id="mf-watermark" class="mf-watermark" aria-hidden="true" hidden><b id="mf-watermark-symbol"></b><span id="mf-watermark-period"></span></div>
     <div id="mf-empty" class="mf-empty-chart" role="status">正在读取最新触价…</div>
-    <header class="mf-nav mf-glass" data-mf-movable="nav">${grip('导航')}<details id="mf-home-menu" class="mf-home-menu"><summary aria-label="打开工作区菜单">☰ <b>SPIKE</b></summary><nav class="mf-glass" aria-label="工作区"><a href="#signals?pane=reclaim">1.618 模拟盘 · 首页</a><a href="#monday-fib" aria-current="page">1.618 图表</a><a href="#signals">信号</a><a href="#yolo-detect">巡检</a><a href="#paper-desk">模拟</a><a href="#yolo-detect?tab=account">实盘账户</a><button id="mf-more" type="button">更多工作区…</button></nav></details><span class="mf-divider"></span><h1>周一 1.618</h1><button type="button" class="theme-toggle" data-theme-toggle aria-label="切换浅色或深色" title="切换浅色或深色"></button><span id="mf-stream" class="mf-stream" title="行情连接中"><i></i><span>连接中</span></span></header>
+    <header class="mf-nav mf-glass" data-mf-movable="nav">${grip('导航')}<details id="mf-home-menu" class="mf-home-menu"><summary aria-label="打开工作区菜单">☰ <b>SPIKE</b></summary><nav class="mf-glass" aria-label="工作区"><a href="#signals?pane=reclaim">1.618 模拟盘 · 首页</a><a href="#signals">信号</a><a href="#yolo-detect">巡检</a><a href="#paper-desk">模拟</a><a href="#yolo-detect?tab=account">实盘账户</a><button id="mf-more" type="button">更多工作区…</button></nav></details><span class="mf-divider"></span><h1>周一 1.618</h1><button type="button" class="theme-toggle" data-theme-toggle aria-label="切换浅色或深色" title="切换浅色或深色"></button><span id="mf-stream" class="mf-stream" title="行情连接中"><i></i><span>连接中</span></span></header>
     <section id="mf-selected" class="mf-selected mf-glass" data-mf-movable="symbol" aria-label="当前合约" hidden>${grip('币种卡片')}
       <div class="mf-symbol-line"><h2 id="mf-symbol">—</h2><span class="mf-perp">USDT 永续</span></div>
       <div id="mf-price" class="mf-price">—</div>
@@ -90,7 +43,7 @@
     <div class="mf-dock mf-glass" data-mf-movable="dock" role="group" aria-label="图表控制">${grip('图表工具')}<button id="mf-timeframe" class="mf-timeframe" type="button" aria-label="选择 K 线周期" aria-haspopup="menu" aria-controls="mf-period-menu" aria-expanded="false"><span id="mf-period-label">15m</span><span aria-hidden="true">⌄</span></button><span class="mf-divider"></span><button id="mf-zoom-out" class="mf-zoom" aria-label="缩小 K 线" title="缩小 K 线（−）"><span aria-hidden="true">−</span></button><button id="mf-zoom-in" class="mf-zoom" aria-label="放大 K 线" title="放大 K 线（+）"><span aria-hidden="true">+</span></button><button id="mf-latest" aria-label="回到当前合约最新 K 线" title="回到当前合约最新 K 线，保留缩放宽度">${icon('chevron-right')}<span>最新 K 线</span></button><button id="mf-fit" aria-label="显示全部已加载 K 线并复位" title="恢复价格缩放并显示全部已加载 K 线">${icon('maximize')}<span>全图</span></button><button id="mf-fib" aria-pressed="false" title="显示区间内部 0.5 / 0.618 / 0.705">${icon('adjustments-horizontal')}<span>内部线</span></button><button id="mf-ma" class="mf-ma-toggle" role="switch" aria-checked="false" title="SMA / EMA 20、60、120"><span>六均线</span><i aria-hidden="true"></i></button><span class="mf-divider"></span><button id="mf-follow" aria-pressed="true">${icon('activity')}<span>跟随最新</span></button></div>
     <div id="mf-period-menu" class="mf-period-menu mf-glass" role="menu" aria-label="K 线周期" hidden>${['1m','5m','15m','30m','1H','4H','1D'].map(p=>`<button type="button" role="menuitemradio" aria-checked="${p==='15m'}" data-period="${p}" tabindex="-1">${p}<span aria-hidden="true">✓</span></button>`).join('')}</div>
     <footer class="mf-footer"><span id="mf-week">纽约周一 · 读取中</span><span id="mf-updated">15m 实时 K 线</span><span class="mf-gesture-hint">拖动平移 · 滚轮缩放 · 双击价格轴复位</span></footer>`;
-  const layout=mountLayout(root);
+  const layout=mountLayout(root,window);
   $('mf-more').addEventListener('click',()=>{$('mf-home-menu').open=false;$('workspace-search')?.click();});
   $('mf-home-menu').addEventListener('click',e=>{if(e.target.closest('a'))$('mf-home-menu').open=false;});
   const periods=['1m','5m','15m','30m','1H','4H','1D'];

@@ -6,6 +6,7 @@
  */
 (() => {
   'use strict';
+  const list=typeof module!=='undefined'&&module.exports?require('./monday-list-model.js'):window.SpikeMondayList;
   const finite = value => typeof value === 'number' && Number.isFinite(value);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const num = (value, digits=2) => finite(value) ? value.toLocaleString('en-US', {minimumFractionDigits:digits,maximumFractionDigits:digits}) : '—';
@@ -63,7 +64,7 @@
     const query=state.q.trim().toUpperCase();
     return source.filter(row => (!query || String(row.symbol).toUpperCase().includes(query))
       && (state.tab === 'events' || state.scope === 'all' || (state.scope === 'funded' ? funded(row) : !funded(row))))
-      .slice().sort((a,b) => (b[state.tab==='events'?'candle_ms':state.tab==='closed'?'exit_ms':'fill_ms']||0)-(a[state.tab==='events'?'candle_ms':state.tab==='closed'?'exit_ms':'fill_ms']||0));
+      .slice().sort((a,b) => (Number(finite(b.score))-Number(finite(a.score))) || (finite(a.score)&&finite(b.score)?b.score-a.score:0) || (b[state.tab==='events'?'candle_ms':state.tab==='closed'?'exit_ms':'fill_ms']||0)-(a[state.tab==='events'?'candle_ms':state.tab==='closed'?'exit_ms':'fill_ms']||0) || Number(b.id)-Number(a.id));
   }
   // One visible page owns the GET, timer and cancellation generation. Failed
   // reads retain the last successful snapshot; late responses cannot revive it.
@@ -88,10 +89,10 @@
       if(!active){pending=null;cancel();emit({busy:false});}else refresh();
     }};
   }
-  function coinHTML(row, track) {
-    const symbol=base(row.symbol), href=chartLink(row.symbol,track);
+  function coinHTML(row, platform='',subtitle='') {
+    const symbol=base(row.symbol), href=list.tradingViewURL(row.symbol,platform);
     const logo=validSymbol(row.symbol) ? `https://static.okx.com/cdn/oksupport/asset/currency/icon/${encodeURIComponent(symbol.toLowerCase())}.png` : '';
-    return `<span class="rp-coin"><span class="rp-avatar" aria-hidden="true"><span>${esc(symbol.slice(0,1))}</span>${logo?`<img src="${esc(logo)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:''}</span><span><a href="${esc(href)}" title="查看 ${esc(symbol)} 1.618 图表">${esc(symbol)} <span aria-hidden="true">↗</span></a><small class="${row.side===1?'rp-positive':row.side===-1?'rp-negative':''}">${sideLabel(row)} · USDT</small></span></span>`;
+    return `<span class="rp-coin"><span class="rp-avatar" aria-hidden="true"><span>${esc(symbol.slice(0,1))}</span>${logo?`<img src="${esc(logo)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:''}</span><span><a href="${esc(href)}" data-rp-focus="tv" target="_blank" rel="noopener noreferrer" title="在 TradingView 打开 ${esc(symbol)}" aria-label="在 TradingView 打开 ${esc(symbol)}">${esc(symbol)} <span aria-hidden="true">↗</span></a><small class="${row.side===1?'rp-positive':row.side===-1?'rp-negative':''}">${subtitle||sideLabel(row)+' · USDT'}</small></span></span>`;
   }
   const cell=(label,value,cls='')=>`<span class="rp-cell ${cls}"><small>${esc(label)}</small><strong>${value}</strong></span>`;
   const detail=(label,value)=>`<div><dt>${esc(label)}</dt><dd>${value}</dd></div>`;
@@ -102,7 +103,7 @@
     const label=known&&score!==0.5&&rounded==='0.5000'?String(score):rounded;
     return `<span class="rp-score${high?' is-high':''}" title="${known?`入场评分 ${esc(score)}`:'暂无评分'} · 大于 0.5 高亮"><small>评分</small><strong>${esc(label)}</strong></span>`;
   }
-  function rowHTML(row, state, now) {
+  function rowHTML(row, state, now, {favorite=false,platform=''}={}) {
     const event=state.tab==='events', closed=state.tab==='closed', isFunded=funded(row);
     const key=`${state.tab}-${row.id}`;
     const value=closed ? (isFunded?`${signed(row.pnl)} <small>USDT</small>`:'不计入资金') : bp(row.unrealized_bp);
@@ -120,14 +121,16 @@
         +(row.note?detail('记录说明',esc(row.note==='no_capacity'?'通过评分，但轨道可用额度不足，按影子记录跟踪。':row.note)):'');
     const closeButton=!event&&!closed&&isFunded&&finite(row.remaining_notional)&&row.remaining_notional>0?`<div class="rp-position-actions"><span>剩余 ${price(row.remaining_notional/row.entry)} ${esc(base(row.symbol))}${row.remaining_notional<row.notional?` · 已减 ${num((1-row.remaining_notional/row.notional)*100,1)}%`:''}</span><button type="button" data-rp-close="${esc(row.id)}" aria-label="模拟平仓 ${esc(base(row.symbol))}">平仓</button></div>`:'';
     const exits=Array.isArray(row.exits)&&row.exits.length?`<div class="rp-exits"><strong>逐笔平仓</strong>${row.exits.map(x=>`<p>${date(x.exit_ms)} · ${esc(reason(x.reason))} · ${price(x.notional/row.entry)} ${esc(base(row.symbol))}<br>成交 ${price(x.price)} · 净盈亏 ${signed(x.pnl)} USDT</p>`).join('')}</div>`:'';
-    const selectButton=event?'':`<button type="button" class="rp-select-trade" data-rp-trade="${esc(row.id)}" aria-pressed="${String(state.trade===String(row.id))}" aria-label="查看 ${esc(base(row.symbol))} ${sideLabel(row)} ${date(row.fill_ms)} 开仓图"><span><b>${esc(base(row.symbol))}</b><small class="${row.side===1?'rp-positive':'rp-negative'}">${sideLabel(row)} · ${esc(stage(row,now))}</small></span><span class="rp-row-value ${closed?tone(row.pnl):tone(row.unrealized_bp)}">${value}<small>${date(row.fill_ms)}</small></span></button>`;
-    return `<article class="rp-record">${selectButton}${closeButton}<details class="rp-row" data-rp-row="${esc(key)}"><summary${event?' class="rp-event-summary"':''}>${event?coinHTML(row,state.track)+scoreHTML(row.score):`<span>开仓 ${price(row.entry)}</span><span>${esc(allocation(row))}</span>`}<span class="rp-expand">${event?'详情':'明细'} ⌄</span></summary><div class="rp-row-detail"><div class="rp-detail-fields">${fields}</div><dl>${more}</dl>${exits}<a class="rp-chart-link" href="${esc(chartLink(row.symbol,state.track))}">查看 ${esc(base(row.symbol))} 的 1.618 图表 ↗</a></div></details></article>`;
+    const selected=event?state.symbol===row.symbol:state.trade===String(row.id);
+    const selectAttr=event?`data-rp-symbol="${esc(row.symbol)}"`:`data-rp-trade="${esc(row.id)}"`;
+    const meta=event?date(row.candle_ms):value;
+    return `<article class="rp-record" data-rp-record="${esc(key)}" data-symbol="${esc(row.symbol)}" data-selected="${selected}"><div class="rp-record-main"><button type="button" class="rp-row-select" ${selectAttr} data-rp-focus="select" aria-pressed="${selected}" aria-label="查看 ${esc(base(row.symbol))} ${event?'触价':'开仓'} K 线"></button>${coinHTML(row,platform,event?sideLabel(row)+' · '+date(row.candle_ms):sideLabel(row)+' · '+value)}${scoreHTML(row.score)}</div><div class="rp-record-bottom"><span class="rp-record-meta ${event?'':closed?tone(row.pnl):tone(row.unrealized_bp)}">${meta}</span><a href="${esc(list.inspectionURL(row.symbol,state.period))}" data-rp-focus="patrol" aria-label="查看 ${esc(base(row.symbol))} 巡检 K 线详情" title="巡检 K 线详情"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></a><button type="button" data-rp-detail="${esc(key)}" data-rp-focus="detail" aria-label="展开 ${esc(base(row.symbol))} 明细" aria-expanded="false" aria-controls="rp-detail-${esc(key)}"><span aria-hidden="true">⌄</span></button></div>${closeButton}<section id="rp-detail-${esc(key)}" class="rp-row-detail" hidden><button type="button" data-rp-favorite="${esc(row.symbol)}" data-rp-focus="favorite" class="rp-detail-favorite" aria-pressed="${favorite}" aria-label="${favorite?'取消收藏':'收藏'} ${esc(base(row.symbol))}"><svg width="17" height="17" viewBox="0 0 24 24" fill="${favorite?'currentColor':'none'}" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/></svg><span>${favorite?'取消收藏':'收藏币种'}</span></button><div class="rp-detail-fields">${fields}</div><dl>${more}</dl>${exits}<a class="rp-chart-link" data-rp-focus="chart" href="${esc(chartLink(row.symbol,state.track))}">查看 ${esc(base(row.symbol))} 的 1.618 图表 ↗</a></section></article>`;
   }
   const api={finite,esc,num,signed,bp,price,funded,targetLabel,stage,signalStatus,allocation,route,chartLink,validate,summary,rows,createFeed,rowHTML};
   if(typeof module!=='undefined' && module.exports){module.exports=api;return;}
   const root=document.getElementById('monday-reclaim-paper');
   if(!root)return;
-  let state=route(), pageActive=false, mounted=false, shown=50, signature='', chart=null, pinned=null, ma=false, internal=false, indicatorsOpen=false, recordsOpen=false, sheet=null, watch=null, chartSymbol='', closer=null, analytics=null;
+  let state=route(), pageActive=false, mounted=false, shown=50, signature='', chart=null, pinned=null, ma=false, internal=false, indicatorsOpen=false, recordsOpen=false, sheet=null, watch=null, chartSymbol='', closer=null, analytics=null,preferences=null,platform='';
   const requests=window.SpikeRuntime.createRequests();
   let startupRead=null;
   const feed=createFeed({read:async()=>{
@@ -137,8 +140,10 @@
   const el=id=>root.querySelector(`[data-rp="${id}"]`);
   function mount(){
     if(mounted)return;mounted=true;
+    let storage;try{storage=window.localStorage;}catch{}
+    preferences=list.createListPreferences(storage);platform=navigator.userAgentData?.platform||navigator.platform||'';
     root.innerHTML=`<div class="rp-wallpaper" data-rp="chart"></div><div class="rp-watermark" aria-hidden="true" data-rp="watermark"></div><p class="rp-chart-notice rp-glass" data-rp="chart-notice" role="status" hidden></p>
-      <header class="rp-heading rp-glass"><details class="rp-navigation"><summary aria-label="打开模拟盘导航"><b>ϟ SPIKE</b></summary><nav class="rp-glass"><a href="#monday-fib">1.618 图表</a><a href="#signals?pane=records">信号记录</a><a href="#signals?pane=overview">表现分析</a><a href="#yolo-detect">形态巡检</a></nav></details></header><button type="button" class="rp-theme-toggle theme-toggle rp-glass" data-theme-toggle aria-label="切换浅色或深色" title="切换浅色或深色"></button>
+      <header class="rp-heading rp-glass"><details class="rp-navigation"><summary aria-label="打开模拟盘导航"><b>ϟ SPIKE</b></summary><nav class="rp-glass"><a href="#signals?pane=reclaim" aria-current="page">1.618 首页</a><a href="#signals?pane=records">信号记录</a><a href="#signals?pane=overview">表现分析</a><a href="#yolo-detect">形态巡检</a></nav></details></header><button type="button" class="rp-theme-toggle theme-toggle rp-glass" data-theme-toggle aria-label="切换浅色或深色" title="切换浅色或深色"></button>
       <section class="rp-context rp-glass"><div class="rp-context-line"><button type="button" class="rp-symbol-trigger" data-rp-action="watch" aria-controls="rp-watch-panel" aria-expanded="false"><strong data-rp="symbol-label">选择币种</strong><span aria-hidden="true">⌄</span></button><span data-rp="selection-status"></span></div><small class="rp-selection-note" data-rp="selection-note"></small><div class="rp-context-tools"><div class="rp-tracks" role="group" aria-label="选择模拟轨道">${['60','5'].map(track=>`<button type="button" data-rp-track="${track}" aria-pressed="false">${track==='60'?'60m 主轨':'5m 研究轨'}</button>`).join('')}</div><button type="button" data-rp-action="records" aria-controls="rp-record-panel" aria-expanded="false">交易簿 <span data-rp="total">—</span></button></div></section>
       <details class="rp-account rp-glass"><summary><span>已实现净值 <b data-rp="equity">—</b><small> USDT</small></span><span data-rp="pnl"></span><span aria-hidden="true">⌄</span></summary><div class="rp-account-body"><section data-rp="metrics" class="rp-metrics"></section><p data-rp="status" role="status"></p><details class="rp-rules"><summary>规则与统计口径</summary><div data-rp="rules"></div></details></div></details><button class="rp-analysis-trigger rp-glass" data-rp-action="analytics" aria-controls="rp-analysis-panel" aria-expanded="false">统计分析 ↗</button>
       <div class="rp-alert rp-glass" data-rp="error" role="alert" hidden></div>
@@ -154,7 +159,13 @@
     document.addEventListener('pointerdown',event=>{if(indicatorsOpen&&!event.target.closest('.rp-indicators'))setIndicators(false);},true);
     root.addEventListener('focusin',event=>{if(indicatorsOpen&&!event.target.closest('.rp-indicators'))setIndicators(false);});
     root.addEventListener('click',event=>{
+      const record=event.target.closest('[data-rp-record]');
+      if(record&&!event.target.closest('a,button,input,select,.rp-row-detail')){record.querySelector('.rp-row-select').click();return;}
       const button=event.target.closest('button');if(!button)return;
+      if(button.dataset.rpDetail){const detail=document.getElementById(button.getAttribute('aria-controls'));detail.hidden=!detail.hidden;button.setAttribute('aria-expanded',String(!detail.hidden));return;}
+      if(button.dataset.rpFavorite){preferences.toggle(button.dataset.rpFavorite);watch?.refreshPreferences();render(feed.getState());return;}
+      if(button.dataset.rpSymbol){state.symbol=button.dataset.rpSymbol;state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());if(matchMedia('(max-width:700px)').matches)setRecords(false);return;}
+
       if(button.dataset.rpClose){const p=feed.getState().data?.tracks[state.track].open.find(p=>String(p.id)===button.dataset.rpClose);if(p)closer.open(p);}
       if(button.dataset.rpTrack){state.track=button.dataset.rpTrack;state.trade='';pinned=null;shown=50;sync();render(feed.getState());}
       if(button.dataset.rpTab){state.tab=button.dataset.rpTab;shown=50;sync();render(feed.getState());}
@@ -214,18 +225,21 @@
     replace('metrics',cell('已实现盈亏',`${signed(stats.pnl)} USDT`,tone(stats.pnl))+cell('累计已平仓',`${num(stats.count,0)} 笔`)+cell('已平仓胜率',finite(stats.winRate)?`${num(stats.winRate,1)}%`:'—')+cell('平均单笔净收益',bp(stats.mean),tone(stats.mean))+cell('初始资金',`${num(stats.start)} USDT`));
     for(const tab of ['open','closed','events'])el(`count-${tab}`).textContent=data ? String(rows(data,{...state,tab}).length) : '—';
     const items=data?rows(data,state):[], visible=items.slice(0,shown);
-    el('caption').textContent=!data ? (error?'记录暂时不可用':'正在读取记录…') : state.tab==='events' ? `两轨共用触价记录 · ${items.length} 条符合筛选 · 最近最多 100 条` : `${state.track==='60'?'60 分钟主轨':'5 分钟研究轨'} · ${{funded:'计入资金',shadow:'影子记录',all:'全部记录'}[state.scope]} · ${items.length} 条${state.tab==='closed'?'符合筛选 · 最近最多 100 条':'持仓'}`;
-    const rowSignature=visible.length ? visible.map(row=>rowHTML(row,state,data.now_ms)).join('')
+    el('caption').textContent=!data ? (error?'记录暂时不可用':'正在读取记录…') : state.tab==='events' ? `触价记录 · 评分优先 · ${items.length} 条符合筛选 · 最近最多 100 条` : `${state.track==='60'?'60 分钟主轨':'5 分钟研究轨'} · ${{funded:'计入资金',shadow:'影子记录',all:'全部记录'}[state.scope]} · 评分优先 · ${items.length} 条${state.tab==='closed'?'符合筛选 · 最近最多 100 条':'持仓'}`;
+    preferences?.read();
+    const rowSignature=visible.length ? visible.map(row=>rowHTML(row,{...state,trade:String(selected?.id||state.trade),symbol:chartSymbol},data.now_ms,{favorite:preferences?.has(row.symbol),platform})).join('')
       : `<div class="rp-empty"><span aria-hidden="true">${data?'◌':'⋯'}</span><strong>${!data?(error?'暂时无法读取':'正在读取模拟盘'):state.q?'没有匹配的币种':state.tab==='open'?'当前没有持仓':state.tab==='closed'?'当前没有已结束记录':'还没有触价记录'}</strong><p>${data?(state.q?'换一个币种或清空搜索。':state.scope==='shadow'&&state.tab!=='events'?'未计入资金的模拟交易会出现在这里。':'后台产生新记录后会自动更新。'):'请稍候，数据会自动重试同步。'}</p></div>`;
     if(rowSignature!==signature){
-      const container=el('rows'),open=new Set(Array.from(container.querySelectorAll('details[open]'),node=>node.dataset.rpRow));
-      const focused=document.activeElement, focusedRow=focused?.closest?.('[data-rp-row]')?.dataset.rpRow;
-      const focusLink=focused?.tagName==='A',focusDetail=!!focused?.closest?.('.rp-row-detail');
+      const container=el('rows'),open=new Set(Array.from(container.querySelectorAll('[data-rp-detail][aria-expanded="true"]'),node=>node.dataset.rpDetail));
+      const focused=document.activeElement,focusedRow=focused?.closest?.('[data-rp-record]')?.dataset.rpRecord,focusKind=focused?.dataset?.rpFocus;
+      const scroll=container.parentElement,top=scroll.scrollTop;
       container.innerHTML=rowSignature;
-      container.querySelectorAll('details').forEach(node=>{node.open=open.has(node.dataset.rpRow);if(node.dataset.rpRow===focusedRow)node.querySelector(focusLink?(focusDetail?'.rp-chart-link':'summary a'):'summary')?.focus({preventScroll:true});});
+      container.querySelectorAll('[data-rp-detail]').forEach(button=>{if(open.has(button.dataset.rpDetail)){button.setAttribute('aria-expanded','true');document.getElementById(button.getAttribute('aria-controls')).hidden=false;}});
+      if(focusedRow&&focusKind)Array.from(container.querySelectorAll('[data-rp-record]')).find(node=>node.dataset.rpRecord===focusedRow)?.querySelector(`[data-rp-focus="${focusKind}"]`)?.focus({preventScroll:true});
+      scroll.scrollTop=top;
       signature=rowSignature;
     }
-    root.querySelectorAll('[data-rp-trade]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.rpTrade===String(selected?.id))));
+
     root.querySelector('[data-rp-action="more"]').hidden=items.length<=shown;
     el('record-note').textContent=state.tab==='events' ? '评分 > 0.5 高亮，非胜率；资金分配见各轨道交易记录。' : state.tab==='open' ? '参考浮动收益未扣费；账户净值包含已减仓盈亏，不包含余仓浮盈。' : '净收益已扣手续费；滑点情景仅供对照，不重复扣入账户净值。';
     replace('rules',`<p>两轨分别记账，初始资金各 ${num(data?.sizing?.start_equity)} USDT；每笔最多按当时净值的 ${finite(data?.sizing?.fraction)?num(data.sizing.fraction*100,0):'—'}% 分配名义本金，总名义敞口上限 ${num(data?.sizing?.gross,1)} 倍，按剩余额度分配。影子记录不占用资金、不改变净值。</p><p>1.618 限价入场；做多目标为周一低点，做空目标为周一高点。确认 K 线收回后启用入场价止损，否则按确认收盘退出。入场价止损仍产生手续费。</p><p>Maker ${finite(data?.fees_bp?.maker)?num(data.fees_bp.maker/100):'—'}% / Taker ${finite(data?.fees_bp?.taker)?num(data.fees_bp.taker/100):'—'}%（单边）；退出滑点情景 ${finite(data?.fees_bp?.report_slippage)?num(data.fees_bp.report_slippage/100):'—'}%。成交费用以每条记录为准。</p><p>入场分数门槛 ${num(data?.model?.threshold,4)}，分数不代表胜率。模型训练截止 ${esc(data?.model?.trained_before || '—')}；训练行情与当前 OKX 行情存在来源差异。BTC、ETH、XAU、XAG、PAXG、XAUT 仅记录触价，不开模拟仓。</p><p>上方统计为所选轨道全部已结束资金交易；结束与触价列表各最多返回最近 100 条，列表筛选不改变累计统计。手动平仓仅影响模拟资金；部分平仓立即计入已实现盈亏，已平仓统计仅计完全结束的整笔交易。</p>`);

@@ -103,3 +103,21 @@ test('failed initial read shows an error and successful empty data remains disti
   c.feed.setActive(true);await flush();assert.equal(c.feed.getState().data,null);assert.equal(c.feed.getState().error,'网络暂时不可用');
   fail=false;await c.feed.refresh();assert.ok(c.feed.getState().data);assert.equal(c.feed.getState().error,null);assert.equal(c.feed.getState().data.tracks[60].open.length,0);c.feed.setActive(false);
 });
+
+// Ordering applies only to the displayed page; account totals and fills are untouched.
+test('every ledger tab ranks raw scores descending, missing last, then newest on ties',()=>{
+  const data=snapshot(),input=[.5,null,.9,.4,.50001,0,.9].map((score,i)=>position({id:i+1,score,fill_ms:i,exit_ms:i,candle_ms:i}));
+  data.signals=input;data.tracks[60].open=input;data.tracks[60].closed=input;
+  for(const tab of ['events','open','closed']){
+    assert.deepEqual(ui.rows(data,ui.route({tab})).map(r=>r.id),[7,3,5,1,4,6,2]);
+    const html=ui.rowHTML(input[2],ui.route({tab,period:'15m'}),10000);
+    assert.match(html,/rp-score is-high/);
+    assert.match(html,/https:\/\/www.tradingview.com\/chart\/\?symbol=OKX%3ASOLUSDT.P/);
+    assert.match(html,/#yolo-detect\?tab=results&amp;symbol=SOL-USDT-SWAP&amp;timeframe=15m/);
+    assert.match(html,tab==='events'?/data-rp-symbol="SOL-USDT-SWAP"/:/data-rp-trade="3"/);
+    assert.match(html,/data-rp-detail=/);
+    // Links must be sibling actions, never descendants of the background button.
+    assert.doesNotMatch(html,/<button[^>]*class="rp-row-select"[^>]*>[^<]*<a/);
+  }
+  assert.deepEqual(input.map(r=>r.id),[1,2,3,4,5,6,7]);
+});
