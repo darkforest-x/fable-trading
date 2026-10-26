@@ -14,7 +14,10 @@ Analyses, each split 2020-2024 (early) / 2025-2026 (late):
      win rate because a filter can raise one and lower the other;
   4. target distance (percent of entry and in units of the 14-bar ATR percent) against win rate;
   5. deeper entries: the -5 / -10 percent scale-in legs of score >= 0.6 v3 events taken alone (worse path per leg,
-     an unfilled leg counts as no trade), fill rate, win rate and mean net.
+     an unfilled leg counts as no trade), fill rate, win rate and mean net;
+  6. added after the first run put the 15m EMA order score (l2_order_score, side-aligned, bars before the touch)
+     far ahead: order score > 0 versus = 0 inside each score band, for both families (v2_be17 at score >= 0.5 is the
+     near-target version of the v3 events).
 Exploratory: no rule is adopted from this; a confirmed lever still needs a framework run of its own.
 """
 from __future__ import annotations
@@ -169,6 +172,10 @@ def run(config):
         q = pd.qcut(g.f_target_pct.rank(method='first'), 5, labels=False)
         r['target_pct'] = {f"Q{k+1} {g.f_target_pct[q == k].min():.1f}-{g.f_target_pct[q == k].max():.1f}%": periods(g[q == k], early[q == k]) for k in range(5)}
         r['screen'] = screen(g, early, rng, cfg)
+        cuts = cfg['score_steps'][v]+[1.01]
+        r['order_x_score'] = {f"{lo}-{hi} order{'>0' if pos else '=0'}": periods(g[sel], early[sel.to_numpy()])
+                              for lo, hi in zip(cuts[:-1], cuts[1:]) for pos in (True, False)
+                              for sel in [(g.score >= lo) & (g.score < hi) & ((g.f_l2_order_score > 0) == pos)]}
         res[v] = r
     dump(exp/'summary.json', dict(config=cfg, results=res, source_commit=subprocess.check_output(['git','rev-parse','HEAD'], cwd=ROOT, text=True).strip(),
                                  training_eligible=False, production_eligible=False))
