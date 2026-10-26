@@ -40,6 +40,21 @@
 - Median notional per100USDTplannedrisk5077to5511;99percentile~22k;maximum~30.8k. Same entry/stop implies exactly same size regardless of target. Recorded overlap as high as137positions and~471600USDTnotional across fixed-target arms; this is independent exposure, not a feasible cashaccount. Stops ordinarily lose100USDT, observed worst~101.50 fromgaps. Funding/margin/capacity remain unmodeled. Originalentry-week targets do not roll nextweek; sourcegap/end censoring preserved.
 - Results and reproduction `experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/`; Notion `4058856479af81bfac30ddc49688ef3e`. Learning `fixed-risk-sizing-must-include-fill-costs.md`. All production/training flagsfalse; no live/score changes, no additional report. Luna delegate actualmodel/effort could not be verified from tool output and was stopped; main performed work.
 
+## 2026-10-26 · EMA order score: equity replays and the near-target subset
+
+- 1000U replays on the existing v3_be17 fills (worse path, linear sizing, gross ≤1x, 20 tie orders), 2020-24 / 2025 / 2026 / last five months:
+  - v3 as is: 3.87 / 9.31 / 2.59 / 2.97x, DD 13 / 19 / 33 / 17. Reproduces the earlier replay.
+  - Only order score > 0: 3.02 / 3.59 / 1.81 / 2.44x, DD 10 / 14 / 35 / 10. Lower return in every period.
+  - Double size when order score > 0: 4.94 / 17.12 / 3.01 / 5.19x, DD 21 / 27 / 51 / 19.
+  - Controls: doubling the order = 0 trades gives 4.35 / 16.40 / 3.09 / 3.25x (DD 17 / 27 / 51 / 32); doubling everything gives 5.59 / 29.11 / 3.39 / 4.64x (DD 25 / 35 / 58 / 28).
+  - Reading: a sizing tilt, not a filter, and in-sample.
+- Near target, score ≥0.6, order > 0 (v2_be17 fills): 449 trades over 300 symbols and 117 weeks.
+  - Win 81 percent, mean +229bp, average loss −760bp, worst −42.5 percent (no backstop).
+  - 1000U only 1.68 / 1.49 / 1.48 / 1.34x.
+  - Half the trades fill and hit the target inside the same 5m bar (flash wicks, 100 percent win). The rest won 50.7 percent at −90bp in 2025-26.
+  - Depends on Binance wick fills; needs an OKX cross-check and forward paper data.
+- Samples chart `experiments/active/exp-monday-limit-near-order-samples-20261026-v1/samples.png`. Learning `high-win-rate-subsets-can-be-same-bar-flash-wicks.md`. Nothing adopted.
+
 ## 2026-10-26 · Win-rate levers from the backtested trades
 
 - Owner asked what else raises the win rate. Read-only analysis of existing fills joined to the causal feature table v2. Builder `yoyo/evaluation/monday_limit_winrate_levers.py`; results `experiments/active/exp-monday-limit-winrate-levers-20261026-v1/`.

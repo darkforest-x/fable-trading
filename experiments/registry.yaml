@@ -565,6 +565,34 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Backtest 2020-24 / 2025 / 2026 / last five months 3.74x / 8.97x / 2.56x / 2.96x, DD up to 34 percent; band edges were chosen after seeing 2025-2026, so the forward record is the test. UI pending Codex + Stitch.'
+  - experiment_id: exp-monday-limit-order-replay-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 249f14e5bb
+    status: complete
+    question: 'Owner 2026-10-26: 1000 USDT replays on existing framework fills: v3 as is, only EMA order score > 0, order score > 0 at double size; multiples and drawdowns by period.'
+    single_variable: 'Sizing / admission by l2_order_score on the v3_be17 fills (worse path, 10bp slippage), linear score sizing, gross <= 1x, 20 tie orders; controls all_x2 and order0_x2; near-target subsets on v2_be17.'
+    result: 'Parity: v3 3.87 / 9.31 / 2.59 / 2.97 vs earlier 3.81 / 9.17 / 2.61 / 2.94 (2020-24 / 2025 / 2026 / last5m). Filter only: 3.02 / 3.59 / 1.81 / 2.44, DD 10 / 14 / 35 / 10 vs 13 / 19 / 33 / 17, lower return every period. Double order > 0: 4.94 / 17.12 / 3.01 / 5.19, DD 21 / 27 / 51 / 19; doubling order = 0 instead 4.35 / 16.40 / 3.09 / 3.25, DD 17 / 27 / 51 / 32; doubling all 5.59 / 29.11 / 3.39 / 4.64, DD 25 / 35 / 58 / 28. Near target score >= 0.6 and order > 0: win 89.5 / 72.5 / 81.1 / 87.1 percent but only 1.68 / 1.49 / 1.48 / 1.34x, DD 10 / 16 / 11 / 11.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-order-replay-20261026-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'In sample: the order score was found on the same history. The order score works as a sizing tilt (better than doubling the other trades, clearly in the last five months), not as a filter. 2026 drawdown about 51 percent with any doubling.'
+  - experiment_id: exp-monday-limit-near-order-samples-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 249f14e5bb
+    status: complete
+    question: 'Owner 2026-10-26: what is the near-target, score >= 0.6, EMA order > 0 subset; how many trades; sampled charts.'
+    single_variable: 'Description only of v2_be17 fills (near Monday edge, no backstop, breakeven +0.17 percent, worse path) filtered to score >= 0.6 and l2_order_score > 0.'
+    result: '449 trades, 300 symbols, 117 weeks (143 in 2020-24, 306 in 2025-26): target 365, failed reclaim 68, breakeven 14; win 81.3 percent, mean +229bp, average win +431bp, average loss -760bp, worst -42.5 percent (no backstop). Half (224) fill and hit the target inside the same 5m bar (flash wicks, 100 percent win, +426bp); the other 225 win 62.7 percent at +32bp, and in 2025-26 50.7 percent at -90bp. Order score recomputed from 15m EMAs matches the feature table on all 8 samples. Chart samples.png.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-near-order-samples-20261026-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'The high win rate depends on Binance 5m flash-wick fills; OKX wicks differ and a resting limit may not fill at the wick extreme. Needs an OKX cross-check and forward paper data.'
   - experiment_id: exp-monday-limit-winrate-levers-20261026-v1
     source_repo: darkforest-x/fable-trading
     source_commit: beb7282731
