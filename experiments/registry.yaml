@@ -632,6 +632,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Backtest 2020-24 / 2025 / 2026 / last five months 3.74x / 8.97x / 2.56x / 2.96x, DD up to 34 percent; band edges were chosen after seeing 2025-2026, so the forward record is the test. UI pending Codex + Stitch.'
+  - experiment_id: exp-monday-spike-alert-quality-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: eff412e425
+    status: complete
+    question: 'Owner 2026-10-27: which spike alert threshold makes the trades after the alert more accurate?'
+    single_variable: 'Cluster size at fill (distinct same-side 1.618 touches in the prior 5 minutes, 5m resolution) against v2_be17, v3_be17 and spike-HW trade outcomes; Binance universe and OKX-listed only.'
+    result: 'v2 (near target): no gain, 2025+ cluster >= 8 win 24.0 vs 37.5 percent below. v3: cluster >= 8 win 47.1 vs 32.8 percent, mean +5.4 vs +1.2 percent, driven by 50+ coin clusters (52 percent, +6.3, 29 episodes); 2025+ 38.8 vs 34.3 percent (25 episodes). Spike-HW >= 8: 92.9 vs 79.2 percent (16 episodes). OKX universe v3 >= 25: 50 vs 30 percent, +6.1 vs +1.3 percent (21 episodes), 2025+ 34 vs 30 (6 episodes). Middle buckets (15-24) are not better. Effect rests on a few dozen market-wide episodes.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-spike-alert-quality-20261027-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Recommendation: about 25 coins on the OKX count marks the extreme crashes where v3 and spike-HW trades did better; no threshold improves the near-target v2 trades.'
   - experiment_id: exp-monday-spike-alert-history-20261027-v1
     source_repo: darkforest-x/fable-trading
     source_commit: ca47b4eebb

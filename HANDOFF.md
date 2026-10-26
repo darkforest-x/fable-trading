@@ -65,6 +65,13 @@
 - Median notional per100USDTplannedrisk5077to5511;99percentile~22k;maximum~30.8k. Same entry/stop implies exactly same size regardless of target. Recorded overlap as high as137positions and~471600USDTnotional across fixed-target arms; this is independent exposure, not a feasible cashaccount. Stops ordinarily lose100USDT, observed worst~101.50 fromgaps. Funding/margin/capacity remain unmodeled. Originalentry-week targets do not roll nextweek; sourcegap/end censoring preserved.
 - Results and reproduction `experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/`; Notion `4058856479af81bfac30ddc49688ef3e`. Learning `fixed-risk-sizing-must-include-fill-costs.md`. All production/training flagsfalse; no live/score changes, no additional report. Luna delegate actualmodel/effort could not be verified from tool output and was stopped; main performed work.
 
+## 2026-10-27 · Spike alert threshold against trade quality
+
+- Owner asked which threshold makes the trades after the alert more accurate. Cluster size at fill against trade outcomes (`exp-monday-spike-alert-quality-20261027-v1`):
+  - v2 near-target trades are not better in clusters (2025+ worse at ≥8);
+  - v3 and spike-HW trades are better mainly in the largest market-wide crashes (50+ coins on Binance, about 25+ on OKX-listed coins). Example: OKX v3 ≥25 wins 50 vs 30 percent at +6.1 vs +1.3 percent per trade, but only 21 episodes (6 since 2025).
+- Recommendation: 25 on the live OKX count. The alert stays notify-only and the threshold stays at the owner's 8 until changed.
+
 ## 2026-10-27 · Market-wide spike alert (notify only)
 
 - Owner rule: ≥8 coins touching the same-side 1.618 within 5 minutes triggers a push.
