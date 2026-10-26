@@ -65,6 +65,21 @@
 - Median notional per100USDTplannedrisk5077to5511;99percentile~22k;maximum~30.8k. Same entry/stop implies exactly same size regardless of target. Recorded overlap as high as137positions and~471600USDTnotional across fixed-target arms; this is independent exposure, not a feasible cashaccount. Stops ordinarily lose100USDT, observed worst~101.50 fromgaps. Funding/margin/capacity remain unmodeled. Originalentry-week targets do not roll nextweek; sourcegap/end censoring preserved.
 - Results and reproduction `experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/`; Notion `4058856479af81bfac30ddc49688ef3e`. Learning `fixed-risk-sizing-must-include-fill-costs.md`. All production/training flagsfalse; no live/score changes, no additional report. Luna delegate actualmodel/effort could not be verified from tool output and was stopped; main performed work.
 
+## 2026-10-27 · Full-screen spike alarm: backend ready, page pending Codex + Stitch
+
+- Owner wants the spike alert as a full-screen alarm with sound on the web page. UI goes through Stitch (`GEMINI_3_8_FLASH`, project 8978791379095391159) and Codex. Claude did not write UI.
+- Backend (commit `2f54a8f757`, monitor restarted, verified):
+  - `GET /api/spike-alerts` returns `active` (unacknowledged alerts of the last 6 hours) and `alerts` (last 50).
+  - Each alert carries `id, side (lower/upper), n, symbols, first_ms, last_ms, created_ms, text, telegram, bark, ack_ms, test`.
+  - `POST /api/spike-alerts/{id}/ack` with same-origin headers and `x-spike-action: ack-spike-alert` is idempotent and shared by every open page.
+  - `POST /api/spike-alerts/test` with `x-spike-action: test-spike-alert` creates a local-only alert: never pushed, no cooldown, `test=1`.
+- Page contract for Codex:
+  - poll `GET /api/spike-alerts` about every 5 s; when `active` is non-empty, show a full-screen overlay over every page;
+  - show direction (lower = 急跌做多方向, upper = 急涨做空方向), coin count, coin names, Beijing time and "只通知，不动仓位";
+  - loop an alarm sound until the user clicks 知道了, which posts the ack;
+  - browsers block autoplay audio, so the page needs a one-time "启用报警声音" click per session and must show that state;
+  - test with the test endpoint.
+
 ## 2026-10-27 · Spike alert threshold against trade quality
 
 - Owner asked which threshold makes the trades after the alert more accurate. Cluster size at fill against trade outcomes (`exp-monday-spike-alert-quality-20261027-v1`):
