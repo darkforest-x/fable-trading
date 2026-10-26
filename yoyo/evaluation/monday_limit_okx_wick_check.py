@@ -7,7 +7,9 @@ public endpoint GET /api/v5/market/history-candles (read-only market data, no ke
 compared with the Binance-derived prices: did the OKX wick reach the entry (low <= entry for longs, high >= entry for
 shorts), and did the OKX bar close beyond the target (the same-bar target rule). Levels are not recomputed from OKX
 Monday ranges, so this checks the wick depth only. Symbols with a 1000x Binance prefix or no OKX swap are reported
-as unmapped. Read-only.
+as unmapped. Added after the first run: OKX answers 51001 for symbols it does not list, so those are reported as
+not_on_okx (errors are no longer cached), and the current OKX USDT swap list (GET /api/v5/public/instruments) splits
+the whole subset and all v3_be17 trades into OKX-listed and not listed (current listing, not historical). Read-only.
 """
 from __future__ import annotations
 import argparse
@@ -34,6 +36,8 @@ def okx_bar(inst, open_ms):
             d = json.load(urllib.request.urlopen(req, timeout=15))
             if d.get('code') == '0':
                 return d['data'][0] if d['data'] and int(d['data'][0][0]) == open_ms else None
+            if d.get('code') == '51001':
+                return 'not_on_okx'
         except Exception:
             time.sleep(1+attempt)
     return 'error'
@@ -57,12 +61,25 @@ def run(config):
     m['x'] = pd.to_datetime(pd.Series(np.where(w, m.exit_time_l, m.exit_time_o)), utc=True).to_numpy()
     f = pd.read_csv(ROOT/cfg['features'], usecols=['event', 'l2_order_score']).rename(columns={'l2_order_score': 'order'})
     m = m.merge(f, on='event', how='left')
-    m = m[(m.order > 0) & (m.t >= B[1]) & (m.x == m.t) & (m.reason == 4)].copy()
-    m['symbol'] = m.event.str.split(':').str[0]
-    m['bar_open'] = m.t-pd.Timedelta(minutes=5)  # ledger times are bar closes
     (exp/'inputs').mkdir(exist_ok=True)
+    sw = exp/'inputs'/'okx_swaps.json'
+    if not sw.exists():
+        req = urllib.request.Request('https://www.okx.com/api/v5/public/instruments?instType=SWAP', headers={'User-Agent': 'Mozilla/5.0'})
+        sw.write_text(json.dumps([r['instId'] for r in json.load(urllib.request.urlopen(req, timeout=20))['data']]))
+    listed = set(json.loads(sw.read_text()))
+    on_okx = lambda sym: f"{sym.removesuffix('USDT')}-USDT-SWAP" in listed
+    m['symbol'] = m.event.str.split(':').str[0]; m['on_okx'] = m.symbol.map(on_okx)
+    st = lambda x: dict(n=int(len(x)), win_pct=float(100*(x.net > 1).mean()) if len(x) else None, mean_bp=float(x.net.mean()) if len(x) else None)
+    sub = m[(m.order > 0) & (m.t >= B[1])]
+    listing = {v: {('on_okx' if k else 'not_on_okx'): st(g) for k, g in sub[sub.variant == v].groupby('on_okx')} for v in cfg['variants']}
+    v3 = pd.read_csv(ROOT/cfg['v3_trades'], parse_dates=['t'])
+    v3 = v3[v3.variant == 'v3_be17']; v3['on_okx'] = v3.event.str.split(':').str[0].map(on_okx)
+    v3['per'] = np.where(v3.t < B[0], 'y2020_2024', np.where(v3.t < B[1], 'y2025', 'y2026'))
+    listing['v3_be17_all'] = {f"{per}_{'on_okx' if k else 'not_on_okx'}": st(g) for (per, k), g in v3.groupby(['per', 'on_okx'])}
+    m = m[(m.order > 0) & (m.t >= B[1]) & (m.x == m.t) & (m.reason == 4)].copy()
+    m['bar_open'] = m.t-pd.Timedelta(minutes=5)  # ledger times are bar closes
     cache_path = exp/'inputs'/'okx_5m_fill_bars.json'
-    cache = json.loads(cache_path.read_text()) if cache_path.exists() else {}
+    cache = {k: v for k, v in (json.loads(cache_path.read_text()) if cache_path.exists() else {}).items() if v != 'error'}
     rows = []
     for r in m.itertuples():
         base = r.symbol.removesuffix('USDT')
@@ -72,8 +89,8 @@ def run(config):
         if key not in cache:
             cache[key] = okx_bar(f'{base}-USDT-SWAP', int(r.bar_open.timestamp()*1000)); time.sleep(cfg['sleep_s'])
         bar = cache[key]
-        if bar in (None, 'error'):
-            rows.append(dict(trade_id=r.trade_id, status='no_okx_bar' if bar is None else 'error')); continue
+        if bar in (None, 'error', 'not_on_okx'):
+            rows.append(dict(trade_id=r.trade_id, status={None: 'no_okx_bar'}.get(bar, bar))); continue
         o, h, l, c = map(float, bar[1:5])
         s = int(r.side)
         reached = (l <= r.entry) if s == 1 else (h >= r.entry)
@@ -93,6 +110,7 @@ def run(config):
                       okx_reached=int(ok.okx_reached.sum()), okx_reached_and_closed_beyond=int((ok.okx_reached & ok.okx_closed_beyond).sum()),
                       net_bp_checked=float(ok.net_bp.sum()), net_bp_okx_both=float(ok.net_bp[ok.okx_reached & ok.okx_closed_beyond].sum()),
                       bar_opens=x.bar_open.value_counts().head(5).to_dict() if 'bar_open' in x else {})
+    res['listing_current_okx_swaps'] = listing
     dump(exp/'summary.json', dict(config=cfg, results=res, source_commit=subprocess.check_output(['git','rev-parse','HEAD'], cwd=ROOT, text=True).strip(),
                                  training_eligible=False, production_eligible=False))
     print(json.dumps(res, ensure_ascii=False, indent=1))
