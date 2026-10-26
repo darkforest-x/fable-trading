@@ -78,3 +78,12 @@ test('paper warmup chooses exact funded latest fill, preserves pins and overlaps
  const warm=await h.window.SpikeStartup.take('paper-snapshot',new AbortController().signal);assert.equal(warm.value,data);
  h.window.location.hash='#signals?pane=records';h.events.hashchange();assert.ok(h.calls.slice(1).every(c=>c.options.signal.aborted));
 });
+
+test('cold named-account bookmarks warm only that account actual fill, not 60m or pending adds',()=>{
+ const p=(id,symbol)=>({id,symbol,fill_ms:100,entry:10,side:1,taken:1,notional:100});
+ const d={tracks:{60:{open:[p(1,'BTC-USDT-SWAP')]},v3:{open:[p(2,'SOL-USDT-SWAP')]},v3add:{open:[p(3,'SUI-USDT-SWAP')],pending_adds:[p(4,'DOGE-USDT-SWAP')]}}};
+ assert.equal(paperSymbol(d,new URLSearchParams('track=v3')),'SOL-USDT-SWAP');
+ assert.equal(paperSymbol(d,new URLSearchParams('track=v3add')),'SUI-USDT-SWAP');
+ assert.equal(paperSymbol(d,new URLSearchParams('track=v3add&trade=4')),null);
+ delete d.tracks.v3;assert.equal(paperSymbol(d,new URLSearchParams('track=v3')),null);
+});

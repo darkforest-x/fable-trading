@@ -45,7 +45,7 @@
     const field=(label,value)=>`<div><dt>${label}</dt><dd>${value}</dd></div>`;
     function render(){
       const pct=Number(input.value),e=estimate(position,pct),base=position?.symbol.replace('-USDT-SWAP','')||'';
-      el('identity').innerHTML=`<b>${esc(base)} / USDT</b> <span class="${position?.side===1?'rp-positive':'rp-negative'}">${position?.side===1?'做多':'做空'}</span> <small>${position?.track===60?'60m 主轨':'5m 研究轨'}</small>`;
+      el('identity').innerHTML=`<b>${esc(base)} / USDT</b> <span class="${position?.side===1?'rp-positive':'rp-negative'}">${position?.side===1?'做多':'做空'}</span> <small>${({60:'60m',5:'5m',1060:'v3',2060:'v3add · 主单',2061:'v3add · 加仓'}[position?.track]||'未知账户')} 模拟</small>`;
       dialog.querySelectorAll('[data-close-percent]').forEach(b=>{b.setAttribute('aria-pressed',String(Number(b.dataset.closePercent)===pct));b.disabled=busy||success;});
       input.disabled=busy||success;
       el('estimate').innerHTML=field('当前持仓',`${number(position?.remaining_notional/position?.entry)} ${esc(base)}`)+field('拟平仓数量',`${number(e?.quantity)} ${esc(base)}`)+field('平仓后剩余',`${number(e?.remaining)} ${esc(base)}`)+field('参考价格',`${number(position?.mark)} USDT`)+field('预计平仓费 · Taker 0.05%',`${number(e?.exitFee)} USDT`)+field('分摊开仓费 · Maker 0.02%',`${number(e?.entryFee)} USDT`)+field('预计已实现净盈亏',`<b class="${e?.pnl>0?'rp-positive':e?.pnl<0?'rp-negative':''}">${money(e?.pnl)} USDT</b>`);

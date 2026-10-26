@@ -130,3 +130,36 @@ test('position amount is USDT and loss color never inherits the long direction',
  const open=api.rowHTML(p,{tab:'open',track:'60',period:'5m'},1);
  assert.match(open,/持仓 75.00 USDT/);assert.doesNotMatch(open,/剩余 15 SOL/);assert.match(open,/data-rp-close="71"/);
 });
+
+test('four account routes isolate positions and unavailable accounts never fall back to v2',()=>{
+ const d=snapshot();d.tracks.v3=track({open:[position({id:1060})]});d.tracks.v3add=track({open:[position({id:2060})],pending_adds:[]});
+ for(const key of ['v3','v3add']){assert.equal(ui.route({track:key}).track,key);assert.equal(ui.rows(d,ui.route({track:key}))[0].id,key==='v3'?1060:2060);}
+ delete d.tracks.v3;assert.deepEqual(ui.rows(d,ui.route({track:'v3'})),[]);assert.equal(ui.summary(d.tracks.v3).equity,undefined);
+ assert.equal(ui.validate(d),d);assert.throws(()=>ui.validate({...d,tracks:{...d.tracks,v3:track({open:null})}}));
+ assert.throws(()=>ui.validate({...d,tracks:{...d.tracks,v3add:track({pending_adds:[null]})}}));
+});
+test('v3 targets respect score bands while each stop uses its stored price, including linked adds',()=>{
+ for(const [score,label] of [[.49,'周一低点'],[.5,'区间 0.618'],[.59999,'区间 0.618'],[.6,'对侧 1.618'],[null,'止盈目标']])assert.equal(ui.targetLabel(position({score}), 'v3'),label);
+ const p=position({id:9,track:2061,parent_id:8,entry:95,reclaim_ref:100,backstop:70,be_price:100.17,be_from_ms:10000,stage:'breakeven'});
+ assert.equal(ui.stopPrice(p),100.17);assert.equal(ui.stopPrice({...p,be_price:null}),95);assert.equal(ui.stopPrice({...p,be_from_ms:null}),70);
+ const html=ui.rowHTML(p,ui.route({track:'v3add'}),12000);
+ assert.match(html,/加仓 · 主单 #8/);assert.match(html,/加仓入场价/);assert.match(html,/100.17/);assert.match(html,/主单确认参考价/);
+ assert.equal(ui.stage({...p,stage:'closed',reason:'backstop'},12000),'兜底止损');
+ assert.equal(ui.stage({...p,stage:'closed',reason:'reclaimed_inside_be'},12000),'收回但未越过保本价');
+});
+test('pending adds use parent original notional as a ceiling and stay out of fills, shadows and PnL',()=>{
+ const parent=position({id:8,notional:200,remaining_notional:50}),pending=position({id:9,parent_id:8,entry:114,stage:'pending_fill',taken:0,notional:0});
+ const t=track({open:[parent],pending_adds:[pending]}),state=ui.route({track:'v3add'}),d=snapshot();d.tracks.v3add=t;
+ assert.deepEqual(ui.rows(d,state).map(p=>p.id),[8]);
+ const html=ui.pendingHTML(t,state,10000);
+ assert.match(html,/主单 #8/);assert.match(html,/200.00 USDT/);assert.match(html,/待成交加仓/);assert.doesNotMatch(html,/data-rp-close|data-rp-trade|参考浮动收益/);
+ for(const change of [{track:'v3'},{tab:'closed'},{scope:'shadow'}])assert.equal(ui.pendingHTML(t,{...state,...change},10000),'');
+ assert.doesNotMatch(ui.pendingHTML(t,{...state,q:'BTC'},10000),/rp-pending-order/);
+ assert.match(ui.pendingHTML({...t,open:[]},state,10000),/计划本金上限<\/dt><dd>—/);
+});
+test('account rule copy reads frozen configuration and does not promise net breakeven',()=>{
+ const d=snapshot();d.tracks.v3add=track({confirm_minutes:60});d.v3={min_score:.5,far_score:.6,backstop_pct:30,sizing:{fraction:.05,cut:.2262,mean_excess:.1088,cap:.5}};d.v3add={from_score:.6,drawdown_pct:5};d.breakeven_offset_bp=17;
+ const text=ui.rulesHTML(d,'v3add');
+ for(const pattern of [/独立模拟账户/,/区间 0.618/,/对侧 1.618/,/30% 兜底/,/0.17%/,/确认周期 60 分钟/,/主单与已成交加仓分别计笔/])assert.match(text,pattern);
+ assert.doesNotMatch(text,/彻底覆盖|保证|NaN|undefined/);
+});

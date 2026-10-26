@@ -102,3 +102,18 @@ test('same-symbol historical positions persist independently of selected trade a
  assert.equal(attached.length,2);assert.equal(instance.paperDrawings.get('2').shape.to,old.exit_ms);assert.equal(instance.paperDrawings.get('1').shape.to,1100000);
  decorate(instance,{symbol:'BTC-USDT-SWAP',paperTrade:null,paperTrades:[],bar:'5m',now_ms:1100000});assert.equal(instance.paperDrawings.size,0);assert.equal(detached.length,2);
 });
+
+test('chart uses recorded parent-based protection and ends the backstop at exact BE activation',()=>{
+ const sandbox={window:{SpikeChartTools:{axisPrice:String}},module:{exports:{}}};
+ vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/reclaim-chart.js','utf8'),sandbox);
+ const strokes=[],texts=[];let path=[];
+ const ctx={save(){},restore(){},beginPath(){path=[];},rect(){},clip(){},setLineDash(){},moveTo:(...v)=>path.push(v),lineTo:(...v)=>path.push(v),stroke(){strokes.push(path.slice());},closePath(){},fill(){},roundRect(){},fillRect(){},measureText:t=>({width:t.length*2}),fillText:t=>texts.push(t)};
+ const owner={rows,chart:{timeScale:()=>({logicalToCoordinate:i=>i*100,width:()=>600})},series:{priceToCoordinate:p=>p}};
+ const draw=new sandbox.module.exports.TradeDrawing(owner),p=pos({entry:95,parent_id:9,reclaim_ref:100,backstop:70,be_price:100.17,be_from_ms:750000,stage:'breakeven'});
+ draw.trade=p;draw.step=step;draw.shape=geometry(p,rows,step,950000);
+ draw.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:600,height:600}})});
+ assert.ok(texts.includes('保本保护止损 100.17'));
+ assert.ok(strokes.some(path=>path[0][1]===70&&path[1][0]===150));
+ assert.ok(strokes.some(path=>path[0][1]===100.17&&path[0][0]===150));
+ assert.equal(draw.autoscaleInfo(0,3).priceRange.maxValue,125);
+});

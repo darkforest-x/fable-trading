@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>SPIKE // QUANT · 信号中心 · 1.618 模拟盘 (v3add 加仓工作台)</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "canvas-dark": "#101318",
+            "pine-gain": "#169873",
+            "on-primary-container": "#003d6c",
+            "tertiary": "#ffb2bb",
+            "surface-bright": "#36393f",
+            "on-error-container": "#ffdad6",
+            "text-primary": "#f5f7fa",
+            "crimson-loss": "#d7355d",
+            "tertiary-container": "#ff7c92",
+            "primary": "#a1c9ff",
+            "pine-gain-surface": "rgba(22, 152, 115, 0.15)",
+            "surface-variant": "#32353a",
+            "surface-container-highest": "#32353a",
+            "on-background": "#e1e2e9",
+            "inverse-primary": "#0060a7",
+            "tertiary-fixed-dim": "#ffb2bb",
+            "surface-container-low": "#191c21",
+            "surface-container": "#1d2025",
+            "on-secondary-fixed": "#002116",
+            "glass-border-subtle": "rgba(255, 255, 255, 0.08)",
+            "on-primary-fixed-variant": "#004880",
+            "on-tertiary-fixed": "#400012",
+            "primary-fixed-dim": "#a1c9ff",
+            "secondary-container": "#2aa37d",
+            "outline": "#8a919d",
+            "secondary": "#6adbb1",
+            "inverse-surface": "#e1e2e9",
+            "on-error": "#690005",
+            "on-tertiary": "#670022",
+            "on-secondary-container": "#003122",
+            "outline-variant": "#404751",
+            "error-container": "#93000a",
+            "error": "#ffb4ab",
+            "on-secondary-fixed-variant": "#00513b",
+            "on-secondary": "#003828",
+            "electric-cyan": "#5aa9ff",
+            "surface-obsidian": "rgba(16, 19, 24, 0.85)",
+            "surface-container-high": "#272a2f",
+            "on-tertiary-fixed-variant": "#910033",
+            "text-tertiary": "#556070",
+            "tertiary-fixed": "#ffd9dd",
+            "surface-tint": "#a1c9ff",
+            "surface-container-lowest": "#0b0e13",
+            "background": "#101319",
+            "on-primary-fixed": "#001c37",
+            "surface": "#101319",
+            "secondary-fixed-dim": "#6adbb1",
+            "primary-fixed": "#d2e4ff",
+            "primary-container": "#5aa9ff",
+            "surface-glass-light": "rgba(255, 255, 255, 0.25)",
+            "inverse-on-surface": "#2e3036",
+            "on-surface": "#e1e2e9",
+            "on-primary": "#00325a",
+            "crimson-loss-surface": "rgba(215, 53, 93, 0.15)",
+            "text-secondary": "#8c96a5",
+            "secondary-fixed": "#88f7cc",
+            "on-surface-variant": "#c0c7d3",
+            "surface-dim": "#101319",
+            "glass-specular-edge": "rgba(255, 255, 255, 0.4)",
+            "on-tertiary-container": "#7b002a"
+          },
+          fontFamily: {
+            "headline-md": ["Inter"],
+            "numeric-md": ["JetBrains Mono"],
+            "numeric-lg": ["JetBrains Mono"],
+            "body-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "micro-tag-caps": ["JetBrains Mono"],
+            "display": ["Inter"],
+            "body-md": ["Inter"],
+            "numeric-sm": ["JetBrains Mono"],
+            "headline-lg-mobile": ["Inter"],
+            "headline-lg": ["Inter"],
+            "headline-sm": ["Inter"]
+          },
+          fontSize: {
+            "headline-md": ["18px", { lineHeight: "24px", letterSpacing: "-0.015em", fontWeight: "600" }],
+            "numeric-md": ["13px", { lineHeight: "16px", letterSpacing: "0em", fontWeight: "500" }],
+            "numeric-lg": ["20px", { lineHeight: "24px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "body-sm": ["11px", { lineHeight: "15px", letterSpacing: "0.005em", fontWeight: "400" }],
+            "body-lg": ["14px", { lineHeight: "20px", letterSpacing: "-0.005em", fontWeight: "400" }],
+            "micro-tag-caps": ["10px", { lineHeight: "12px", letterSpacing: "0.06em", fontWeight: "600" }],
+            "display": ["32px", { lineHeight: "38px", letterSpacing: "-0.025em", fontWeight: "600" }],
+            "body-md": ["13px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "400" }],
+            "numeric-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.01em", fontWeight: "500" }],
+            "headline-lg-mobile": ["20px", { lineHeight: "26px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "headline-lg": ["24px", { lineHeight: "30px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "headline-sm": ["15px", { lineHeight: "20px", letterSpacing: "-0.01em", fontWeight: "600" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      vertical-align: middle;
+      display: inline-block;
+      line-height: 1;
+    }
+    .material-symbols-outlined.filled {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+    }
+    /* Hairline Specular Edge Refraction */
+    .specular-border {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    .specular-border-strong {
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+  </style>
+</head>
+<body class="bg-canvas-dark text-on-surface select-none overflow-hidden h-screen w-screen font-body-md antialiased relative">
+<!-- =====================================================================
+       SHARED COMPONENT: TopNavBar (Exact JSON Spec & Execution)
+       ===================================================================== -->
+<header class="w-full flex items-center justify-between px-3 h-10 border-b border-outline-variant/30 bg-surface-container-lowest fixed top-0 left-0 right-0 z-50">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5 cursor-pointer">
+<span class="text-electric-cyan font-black text-headline-md leading-none">ϟ</span>
+<span class="text-headline-md font-headline-md font-black tracking-wider text-primary">SPIKE // QUANT</span>
+</div>
+<!-- Quick Ticker Strip (BTC/ETH/XAU + 5 Hot Vol Coins) -->
+<div class="hidden lg:flex items-center gap-2 pl-3 border-l border-outline-variant/30 text-numeric-sm font-numeric-sm">
+<span class="text-text-secondary text-body-sm">触价监控:</span>
+<div class="flex items-center gap-1.5">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-text-primary">BTC <span class="text-pine-gain">64,280</span></span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-text-primary">ETH <span class="text-pine-gain">3,492</span></span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-text-primary">XAU <span class="text-crimson-loss">2,388</span></span>
+<span class="h-3 w-[1px] bg-outline-variant/40 mx-1"></span>
+<span class="px-1.5 py-0.5 rounded bg-electric-cyan/20 border border-electric-cyan/40 text-electric-cyan font-semibold">SOL 170.96</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-text-secondary hover:text-text-primary cursor-pointer">AVAX 28.4</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-text-secondary hover:text-text-primary cursor-pointer">NEAR 5.12</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-text-secondary hover:text-text-primary cursor-pointer">INJ 22.8</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-text-secondary hover:text-text-primary cursor-pointer">SUI 1.84</span>
+</div>
+</div>
+</div>
+<!-- Navigation Links & Trailing Status -->
+<div class="flex items-center gap-3">
+<nav class="hidden md:flex items-center gap-1 text-body-sm font-body-sm">
+<a class="text-primary border-b border-primary font-medium py-2 px-2" href="#workbench">Workbench</a>
+<a class="text-on-surface-variant hover:text-on-surface py-2 px-2 transition-colors" href="#orderflow">Order Flow</a>
+<a class="text-on-surface-variant hover:text-on-surface py-2 px-2 transition-colors" href="#algomatrix">Algo Matrix</a>
+<a class="text-on-surface-variant hover:text-on-surface py-2 px-2 transition-colors" href="#telemetry">Backtest Telemetry</a>
+<a class="text-on-surface-variant hover:text-on-surface py-2 px-2 transition-colors" href="#riskguard">Risk Guard</a>
+</nav>
+<!-- Top-right Net Equity Title Badge -->
+<div class="flex items-center gap-2 pl-2 border-l border-outline-variant/30">
+<div class="flex items-center gap-1.5 bg-surface-obsidian px-2 py-0.5 rounded border border-outline-variant/40 text-numeric-sm font-numeric-sm">
+<span class="text-text-secondary text-body-sm">净值 · <span class="text-electric-cyan font-semibold" id="top-account-badge">v3add</span>:</span>
+<span class="text-text-primary font-semibold">1,048.60</span>
+<span class="text-pine-gain text-micro-tag-caps font-micro-tag-caps">+4.86%</span>
+</div>
+<button class="px-2 py-0.5 rounded bg-surface-container text-text-secondary hover:text-text-primary text-body-sm font-body-sm border border-glass-border-subtle">
+          Paper Sim
+        </button>
+<!-- System Icons & Theme Switch -->
+<div class="flex items-center gap-1 text-on-surface-variant">
+<button class="p-1 hover:text-text-primary rounded hover:bg-surface-container transition-colors" id="theme-toggle" title="切换深色/浅色">
+<span class="material-symbols-outlined text-[18px]">light_mode</span>
+</button>
+<button class="p-1 hover:text-text-primary rounded hover:bg-surface-container transition-colors" title="Engine Console">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+</button>
+<button class="p-1 hover:text-text-primary rounded hover:bg-surface-container transition-colors relative" title="Notifications">
+<span class="material-symbols-outlined text-[18px]">notifications</span>
+<span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-electric-cyan"></span>
+</button>
+</div>
+</div>
+</div>
+</header>
+<!-- =====================================================================
+       SHARED COMPONENT: SideNavBar (Exact Condensed Rail Spec & Execution)
+       ===================================================================== -->
+<aside class="fixed left-0 top-10 bottom-0 w-12 flex flex-col justify-between items-center py-2 border-r border-outline-variant/30 bg-surface-container-lowest z-40">
+<div class="flex flex-col items-center w-full gap-2">
+<!-- Engine Status Avatar/Indicator -->
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center border border-glass-border-subtle" title="Engine Status Active (v4.2.0-core)">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pine-gain opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-pine-gain"></span>
+</span>
+</div>
+<!-- Navigation Tabs: Active 'Terminal' matches primary intent -->
+<nav class="flex flex-col w-full mt-2 gap-1 text-label-numeric-sm font-label-numeric-sm">
+<a class="text-primary bg-surface-container border-l-2 border-primary flex flex-col items-center justify-center py-2.5 cursor-pointer transition-all duration-150" href="#terminal" title="Terminal">
+<span class="material-symbols-outlined text-[20px]">candlestick_chart</span>
+<span class="text-[9px] mt-0.5 tracking-tight scale-90">Terminal</span>
+</a>
+<a class="text-on-surface-variant flex flex-col items-center justify-center py-2.5 hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer" href="#strategy" title="Strategy">
+<span class="material-symbols-outlined text-[20px]">memory</span>
+<span class="text-[9px] mt-0.5 tracking-tight scale-90">Strategy</span>
+</a>
+<button class="text-on-surface-variant flex flex-col items-center justify-center py-2.5 hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer w-full" id="nav-analytics-btn" title="Analytics Drawer">
+<span class="material-symbols-outlined text-[20px]">query_stats</span>
+<span class="text-[9px] mt-0.5 tracking-tight scale-90">Analytics</span>
+</button>
+<a class="text-on-surface-variant flex flex-col items-center justify-center py-2.5 hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer" href="#logs" title="Logs">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+<span class="text-[9px] mt-0.5 tracking-tight scale-90">Logs</span>
+</a>
+<a class="text-on-surface-variant flex flex-col items-center justify-center py-2.5 hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer" href="#settings" title="Settings">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="text-[9px] mt-0.5 tracking-tight scale-90">Settings</span>
+</a>
+</nav>
+</div>
+<!-- Rail Footer -->
+<div class="flex flex-col items-center w-full gap-2 text-label-numeric-sm font-label-numeric-sm">
+<button class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-text-secondary hover:text-primary transition-colors" title="API Health: 12ms WebSocket">
+<span class="material-symbols-outlined text-[18px]">wifi_tethering</span>
+</button>
+<button class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-text-secondary hover:text-primary transition-colors" title="Docs &amp; Spec">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+</button>
+<div class="text-[8px] text-text-tertiary font-mono tracking-tighter">4.2.0</div>
+</div>
+</aside>
+<!-- =====================================================================
+       FULL-VIEWPORT 100vw x 100dvh CANDLESTICK CHART WALLPAPER (SVG ENGINE)
+       ===================================================================== -->
+<main class="absolute inset-0 pl-12 pt-10 h-screen w-screen overflow-hidden bg-canvas-dark z-0 select-none">
+<!-- SVG Chart Background: Realistic SOL/USDT 1h Candles & Levels -->
+<svg class="w-full h-full block" preserveaspectratio="none" viewbox="0 0 1600 900">
+<defs>
+<!-- Grid Gradients & Fills -->
+<lineargradient id="chart-bg" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#12161f"></stop>
+<stop offset="100%" stop-color="#0b0e13"></stop>
+</lineargradient>
+<lineargradient id="zone-fill" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#5aa9ff" stop-opacity="0.08"></stop>
+<stop offset="100%" stop-color="#5aa9ff" stop-opacity="0.01"></stop>
+</lineargradient>
+</defs>
+<!-- Background Wash -->
+<rect fill="url(#chart-bg)" height="900" width="1600"></rect>
+<!-- Vertical Hour/Day Grid Lines -->
+<g stroke="rgba(255,255,255,0.03)" stroke-width="1">
+<line x1="160" x2="160" y1="0" y2="860"></line>
+<line x1="320" x2="320" y1="0" y2="860"></line>
+<line x1="480" x2="480" y1="0" y2="860"></line>
+<line x1="640" x2="640" y1="0" y2="860"></line>
+<line x1="800" x2="800" y1="0" y2="860"></line>
+<line x1="960" x2="960" y1="0" y2="860"></line>
+<line x1="1120" x2="1120" y1="0" y2="860"></line>
+<line x1="1280" x2="1280" y1="0" y2="860"></line>
+<line x1="1440" x2="1440" y1="0" y2="860"></line>
+</g>
+<!-- Horizontal Price Grid Lines & Axis Markers -->
+<g stroke="rgba(255,255,255,0.04)" stroke-width="1">
+<line x1="0" x2="1540" y1="120" y2="120"></line>
+<line x1="0" x2="1540" y1="210" y2="210"></line>
+<line x1="0" x2="1540" y1="300" y2="300"></line>
+<line x1="0" x2="1540" y1="410" y2="410"></line>
+<line x1="0" x2="1540" y1="520" y2="520"></line>
+<line x1="0" x2="1540" y1="640" y2="640"></line>
+<line x1="0" x2="1540" y1="760" y2="760"></line>
+</g>
+<!-- 30% CATASTROPHE EMERGENCY HARD STOP-LOSS (Rule Spec: Entry 184.50 * 1.30 = 239.85 short cap) -->
+<g>
+<line stroke="#d7355d" stroke-dasharray="8 4" stroke-opacity="0.8" stroke-width="1.5" x1="0" x2="1540" y1="70" y2="70"></line>
+<rect fill="rgba(215, 53, 93, 0.2)" height="22" rx="4" stroke="rgba(215, 53, 93, 0.6)" stroke-width="1" width="180" x="1350" y="58"></rect>
+<text fill="#ffb4ab" font-family="JetBrains Mono" font-size="10" font-weight="600" x="1360" y="73">30% 兜底止损 239.85</text>
+</g>
+<!-- UPPER 1.618 EXTENSION RAY: 198.50 -->
+<g>
+<line stroke="#ffb2bb" stroke-opacity="0.7" stroke-width="1.2" x1="0" x2="1540" y1="180" y2="180"></line>
+<rect fill="rgba(255, 178, 187, 0.15)" height="20" rx="3" stroke="rgba(255, 178, 187, 0.4)" stroke-width="1" width="170" x="1360" y="169"></rect>
+<text fill="#ffd9dd" font-family="JetBrains Mono" font-size="10" font-weight="600" x="1370" y="183">Upper 1.618 · 198.50</text>
+</g>
+<!-- MONDAY HIGH: 188.00 -->
+<g>
+<line stroke="#8a919d" stroke-opacity="0.8" stroke-width="1.2" x1="0" x2="1540" y1="260" y2="260"></line>
+<rect fill="#1d2025" height="20" rx="3" stroke="#404751" stroke-width="1" width="160" x="1370" y="249"></rect>
+<text fill="#c0c7d3" font-family="JetBrains Mono" font-size="10" font-weight="500" x="1380" y="263">Monday High · 188.00</text>
+</g>
+<!-- ENTRY PRICE REF & ACTUAL PROTECTIVE STOP-LOSS LINE (BE+0.17% = 184.19) -->
+<!-- Pure Entry: 184.50 (Dashed subtle) -->
+<line stroke="#5aa9ff" stroke-dasharray="3 3" stroke-opacity="0.4" stroke-width="1" x1="420" x2="1540" y1="290" y2="290"></line>
+<text fill="#8c96a5" font-family="JetBrains Mono" font-size="9" x="430" y="286">主单入场 184.50</text>
+<!-- Accurate Active Protective Stop Line: 184.19 (BE+0.17% Short shift into profit direction) -->
+<g>
+<line stroke="#169873" stroke-dasharray="5 3" stroke-width="1.8" x1="380" x2="1540" y1="294" y2="294"></line>
+<rect fill="rgba(22, 152, 115, 0.25)" height="22" rx="4" stroke="#169873" stroke-width="1" width="260" x="1270" y="283"></rect>
+<text fill="#88f7cc" font-family="JetBrains Mono" font-size="10" font-weight="600" x="1280" y="298">当前保护止损 (BE+0.17%: 184.19)</text>
+</g>
+<!-- PENDING SCALE-IN LIMIT ORDER PRICE LINE (193.72 · 逆向 5%) -->
+<g>
+<line stroke="#5aa9ff" stroke-dasharray="4 4" stroke-opacity="0.85" stroke-width="1.4" x1="560" x2="1540" y1="215" y2="215"></line>
+<rect fill="rgba(90, 169, 255, 0.18)" height="22" rx="4" stroke="#5aa9ff" stroke-width="1" width="240" x="1290" y="204"></rect>
+<text fill="#d2e4ff" font-family="JetBrains Mono" font-size="10" font-weight="600" x="1300" y="219">待成交加仓 逆向5% · 193.72</text>
+</g>
+<!-- CURRENT LIVE PRICE DASHED LINE: 170.96 -->
+<g>
+<line stroke="#5aa9ff" stroke-dasharray="6 3" stroke-width="1.5" x1="0" x2="1540" y1="410" y2="410"></line>
+<rect fill="#003d6c" height="24" rx="4" stroke="#5aa9ff" stroke-width="1.2" width="140" x="1390" y="398"></rect>
+<text fill="#ffffff" font-family="JetBrains Mono" font-size="12" font-weight="700" x="1400" y="414">170.96 ▲</text>
+</g>
+<!-- MONDAY LOW: 168.00 -->
+<g>
+<line stroke="#8a919d" stroke-opacity="0.8" stroke-width="1.2" x1="0" x2="1540" y1="440" y2="440"></line>
+<rect fill="#1d2025" height="20" rx="3" stroke="#404751" stroke-width="1" width="160" x="1370" y="430"></rect>
+<text fill="#c0c7d3" font-family="JetBrains Mono" font-size="10" font-weight="500" x="1380" y="444">Monday Low · 168.00</text>
+</g>
+<!-- LOWER 1.618 EXTENSION (TP TARGET): 156.20 -->
+<g>
+<line stroke="#169873" stroke-opacity="0.9" stroke-width="1.5" x1="0" x2="1540" y1="560" y2="560"></line>
+<rect fill="rgba(22, 152, 115, 0.25)" height="22" rx="4" stroke="#169873" stroke-width="1" width="170" x="1360" y="549"></rect>
+<text fill="#6adbb1" font-family="JetBrains Mono" font-size="10" font-weight="600" x="1370" y="564">Lower 1.618 · 156.20 (TP)</text>
+</g>
+<!-- CANDLESTICKS GENERATION (1h Candles - Realistic Quantitative Pattern) -->
+<!-- Cluster 1: Monday Swings -->
+<g id="candles">
+<!-- Candlestick #1 (Bull) -->
+<line stroke="#169873" stroke-width="1.2" x1="80" x2="80" y1="360" y2="450"></line>
+<rect fill="#169873" height="50" width="12" x="74" y="380"></rect>
+<!-- Candlestick #2 (Bull) -->
+<line stroke="#169873" stroke-width="1.2" x1="110" x2="110" y1="330" y2="410"></line>
+<rect fill="#169873" height="48" width="12" x="104" y="340"></rect>
+<!-- Candlestick #3 (Bear) -->
+<line stroke="#d7355d" stroke-width="1.2" x1="140" x2="140" y1="320" y2="390"></line>
+<rect fill="#d7355d" height="40" width="12" x="134" y="340"></rect>
+<!-- Candlestick #4 (Bull Spike to Mon High) -->
+<line stroke="#169873" stroke-width="1.2" x1="170" x2="170" y1="250" y2="350"></line>
+<rect fill="#169873" height="75" width="12" x="164" y="260"></rect>
+<!-- Candlestick #5 (Rejection Doji) -->
+<line stroke="#c0c7d3" stroke-width="1.2" x1="200" x2="200" y1="240" y2="280"></line>
+<rect fill="#c0c7d3" height="6" width="12" x="194" y="258"></rect>
+<!-- Candlestick #6 (Bear Selloff) -->
+<line stroke="#d7355d" stroke-width="1.2" x1="230" x2="230" y1="260" y2="370"></line>
+<rect fill="#d7355d" height="85" width="12" x="224" y="270"></rect>
+<!-- Candlestick #7 (Bear) -->
+<line stroke="#d7355d" stroke-width="1.2" x1="260" x2="260" y1="340" y2="430"></line>
+<rect fill="#d7355d" height="60" width="12" x="254" y="355"></rect>
+<!-- Candlestick #8 (Pinbar at Mon Low 168) -->
+<line stroke="#169873" stroke-width="1.2" x1="290" x2="290" y1="390" y2="465"></line>
+<rect fill="#169873" height="24" width="12" x="284" y="400"></rect>
+<!-- Candlestick #9 (Bull Relief) -->
+<line stroke="#169873" stroke-width="1.2" x1="320" x2="320" y1="360" y2="420"></line>
+<rect fill="#169873" height="40" width="12" x="314" y="370"></rect>
+<!-- Candlestick #10 (Bear test) -->
+<line stroke="#d7355d" stroke-width="1.2" x1="350" x2="350" y1="350" y2="410"></line>
+<rect fill="#d7355d" height="28" width="12" x="344" y="375"></rect>
+<!-- MAIN SHORT SIGNAL BAR #TR-1092 Entry at 184.50 (Model Score 0.68) -->
+<line stroke="#d7355d" stroke-width="1.5" x1="380" x2="380" y1="280" y2="380"></line>
+<rect fill="#d7355d" height="70" stroke="#5aa9ff" stroke-width="1.5" width="12" x="374" y="290"></rect>
+<!-- Entry Signal Marker Circle -->
+<circle cx="380" cy="290" fill="#5aa9ff" r="4"></circle>
+<text fill="#5aa9ff" font-family="JetBrains Mono" font-size="9" font-weight="600" x="360" y="270">入场 #TR-1092</text>
+<!-- Candlestick #12 (Bear continuation) -->
+<line stroke="#d7355d" stroke-width="1.2" x1="410" x2="410" y1="340" y2="400"></line>
+<rect fill="#d7355d" height="42" width="12" x="404" y="350"></rect>
+<!-- Candlestick #13 (Bear continuation) -->
+<line stroke="#d7355d" stroke-width="1.2" x1="440" x2="440" y1="380" y2="430"></line>
+<rect fill="#d7355d" height="35" width="12" x="434" y="390"></rect>
+<!-- Candlestick #14 (Consolidation) -->
+<line stroke="#169873" stroke-width="1.2" x1="470" x2="470" y1="390" y2="440"></line>
+<rect fill="#169873" height="20" width="12" x="464" y="405"></rect>
+<!-- Candlestick #15 (Live Forming Candle) -->
+<line stroke="#169873" stroke-width="1.5" x1="500" x2="500" y1="395" y2="435"></line>
+<rect fill="#169873" height="18" stroke="#88f7cc" stroke-width="1" width="12" x="494" y="402"></rect>
+</g>
+<!-- Right Y-Axis Numeric Rulers -->
+<g fill="#8a919d" font-family="JetBrains Mono" font-size="10" text-anchor="start">
+<text x="1546" y="73">240.00</text>
+<text x="1546" y="183">198.50</text>
+<text x="1546" y="218">193.72</text>
+<text x="1546" y="263">188.00</text>
+<text fill="#88f7cc" x="1546" y="297">184.19</text>
+<text fill="#5aa9ff" font-weight="700" x="1546" y="413">170.96</text>
+<text x="1546" y="443">168.00</text>
+<text fill="#6adbb1" x="1546" y="563">156.20</text>
+<text x="1546" y="763">140.00</text>
+</g>
+</svg>
+</main>
+<!-- =====================================================================
+       LEFT COIN CONTEXT CARD (Around 300px, Dedicated 4-Account Row)
+       ===================================================================== -->
+<section class="fixed top-12 left-14 w-[310px] z-30 flex flex-col gap-2 pointer-events-auto">
+<!-- Card Frame (Frosted Glass Obsidian) -->
+<div class="bg-surface-obsidian backdrop-blur-xl rounded-xl specular-border p-3 flex flex-col gap-2.5">
+<!-- Coin Header & Price Line -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-[#1e232d] border border-glass-border-subtle flex items-center justify-center font-bold text-[11px] text-electric-cyan">
+            SOL
+          </div>
+<div>
+<div class="flex items-center gap-1.5 leading-none">
+<span class="text-headline-sm font-headline-sm text-text-primary tracking-tight">SOL / USDT</span>
+<span class="px-1 py-0.2 rounded text-micro-tag-caps font-micro-tag-caps bg-surface-container-high text-text-secondary border border-glass-border-subtle">1H</span>
+</div>
+<div class="text-numeric-sm font-numeric-sm text-text-secondary mt-0.5">
+              Vol: <span class="text-text-primary">14.8M</span> · 高 188.4 / 低 167.9
+            </div>
+</div>
+</div>
+<!-- Ledger Open Button cleanly positioned on top row -->
+<button class="px-2.5 py-1 rounded-lg bg-surface-container-high hover:bg-surface-bright text-electric-cyan border border-glass-border-subtle text-body-sm font-body-sm flex items-center gap-1 transition-all active:scale-95 shadow-sm" id="toggle-ledger-btn">
+<span class="material-symbols-outlined text-[15px]">table_rows</span>
+<span id="ledger-button-label">交易簿 (2+1)</span>
+</button>
+</div>
+<!-- Live Price / Directional Bar -->
+<div class="flex items-baseline justify-between pt-1 border-t border-outline-variant/30">
+<div class="flex items-baseline gap-2">
+<span class="text-numeric-lg font-numeric-lg text-text-primary font-bold">170.96</span>
+<span class="text-pine-gain text-numeric-sm font-numeric-sm font-semibold">+6.42%</span>
+</div>
+<div class="flex items-center gap-1 text-micro-tag-caps font-micro-tag-caps text-text-secondary">
+<span>距TP:</span>
+<span class="text-pine-gain font-semibold">-8.63% (156.20)</span>
+</div>
+</div>
+<!-- DEDICATED HORIZONTAL ROW: FOUR INDEPENDENT SIMULATED ACCOUNTS SWITCHER -->
+<div class="pt-1 border-t border-outline-variant/30 flex flex-col gap-1">
+<div class="flex items-center justify-between text-micro-tag-caps font-micro-tag-caps text-text-secondary">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-electric-cyan">account_balance_wallet</span>
+            独立模拟账户
+          </span>
+<span class="text-text-tertiary">四轨并行隔离</span>
+</div>
+<!-- Segmented 4-Account Pill Switch (Default v3add) -->
+<div class="grid grid-cols-4 p-0.5 rounded-lg bg-surface-container-lowest/80 border border-outline-variant/40 text-body-sm font-body-sm">
+<button class="account-pill-btn py-1 text-center rounded-md text-text-secondary hover:text-text-primary transition-all" data-account="60m">
+            60m
+          </button>
+<button class="account-pill-btn py-1 text-center rounded-md text-text-secondary hover:text-text-primary transition-all" data-account="5m">
+            5m
+          </button>
+<button class="account-pill-btn py-1 text-center rounded-md text-text-secondary hover:text-text-primary transition-all" data-account="v3">
+            v3
+          </button>
+<button class="account-pill-btn active py-1 text-center rounded-md bg-electric-cyan text-canvas-dark font-semibold shadow transition-all" data-account="v3add">
+            v3add
+          </button>
+</div>
+</div>
+<!-- Selected Account Summary Cardlet (Syncs with Active Tab) -->
+<div class="bg-surface-container/60 rounded-lg p-2 border border-glass-border-subtle flex flex-col gap-1.5 text-body-sm">
+<div class="flex items-center justify-between">
+<span class="text-text-secondary text-micro-tag-caps font-micro-tag-caps">当前激活环境</span>
+<span class="px-1.5 py-0.5 rounded text-micro-tag-caps font-micro-tag-caps bg-electric-cyan/20 border border-electric-cyan/40 text-electric-cyan font-bold" id="active-account-card-badge">
+            v3add · 自动加仓轨
+          </span>
+</div>
+<div class="grid grid-cols-2 gap-2 text-numeric-sm font-numeric-sm pt-1">
+<div>
+<div class="text-text-tertiary text-[10px]">账户权益 (USDT)</div>
+<div class="text-text-primary font-bold">1,048.60 U</div>
+</div>
+<div>
+<div class="text-text-tertiary text-[10px]">持仓名义本金</div>
+<div class="text-pine-gain font-bold">200.00 U <span class="text-text-tertiary font-normal text-[9px]">(1x限额)</span></div>
+</div>
+</div>
+</div>
+<!-- QUANTITATIVE RULE ENGINE DRAWER TRIGGER BUTTON -->
+<button class="w-full py-1.5 px-2 rounded-lg bg-surface-container-high/60 hover:bg-surface-container-high text-on-surface-variant hover:text-primary border border-glass-border-subtle flex items-center justify-between text-body-sm font-body-sm transition-colors" id="open-rules-btn">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-electric-cyan">verified</span>
+<span>v3 / v3add 策略执行规则</span>
+</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- =====================================================================
+       FLOATING 300px 交易簿 (TRADE LEDGER) PANEL
+       Strict Requirements: Header 52px, v3add Positions, Pending Scale-in
+       ===================================================================== -->
+<aside class="fixed top-12 right-3 w-[340px] max-w-[calc(100vw-1.5rem)] z-40 bg-surface-obsidian backdrop-blur-2xl rounded-xl specular-border-strong flex flex-col shadow-2xl transition-all duration-300 pointer-events-auto h-[calc(100vh-6.5rem)]" id="trade-ledger-panel">
+<!-- 52px Compact Single-row Header -->
+<div class="h-[52px] px-3 border-b border-outline-variant/30 flex items-center justify-between gap-1 flex-shrink-0">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-electric-cyan text-[20px]">assignment</span>
+<div class="flex items-baseline gap-1.5">
+<h2 class="text-headline-sm font-headline-sm text-text-primary tracking-tight">交易簿</h2>
+<span class="px-1.5 py-0.5 rounded text-micro-tag-caps font-micro-tag-caps bg-electric-cyan/20 border border-electric-cyan/40 text-electric-cyan font-bold" id="ledger-account-badge">
+            v3add
+          </span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<!-- Compact Search Toggle -->
+<button class="p-1 rounded text-text-secondary hover:text-text-primary hover:bg-surface-container transition-colors" title="快速筛选订单">
+<span class="material-symbols-outlined text-[18px]">search</span>
+</button>
+<!-- 44px Minimum Tap Target Close Button -->
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-surface-container-high transition-colors" id="close-ledger-btn" title="收起交易簿">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+<!-- Ledger Tabs [持仓 (2+1) / 已结束 (14) / 触价 (4)] -->
+<div class="flex items-center border-b border-outline-variant/20 px-3 bg-surface-container-lowest/60 flex-shrink-0">
+<button class="py-2 px-2 text-body-sm font-body-sm text-electric-cyan border-b-2 border-electric-cyan font-medium flex items-center gap-1">
+<span>持仓</span>
+<span class="text-micro-tag-caps font-micro-tag-caps bg-electric-cyan/20 px-1 rounded text-electric-cyan">2+1</span>
+</button>
+<button class="py-2 px-2 text-body-sm font-body-sm text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1">
+<span>已结束</span>
+<span class="text-micro-tag-caps font-micro-tag-caps bg-surface-container-high px-1 rounded text-text-secondary">14</span>
+</button>
+<button class="py-2 px-2 text-body-sm font-body-sm text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1">
+<span>触价记录</span>
+<span class="text-micro-tag-caps font-micro-tag-caps bg-surface-container-high px-1 rounded text-text-secondary">4</span>
+</button>
+</div>
+<!-- Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto p-2.5 flex flex-col gap-3">
+<!-- SECTION 1: FILLED ACTIVE POSITIONS -->
+<div>
+<div class="flex items-center justify-between text-micro-tag-caps font-micro-tag-caps text-text-secondary mb-1.5 px-0.5">
+<span class="flex items-center gap-1 font-semibold text-text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-pine-gain"></span>
+            在场持仓 (已成交 2 笔)
+          </span>
+<span class="text-pine-gain font-numeric-sm">+24.15 U (+12.0%)</span>
+</div>
+<!-- Position Card 1: MAIN ORDER (主单) -->
+<div class="rounded-lg bg-surface-container-low/90 border border-outline-variant/40 p-2.5 flex flex-col gap-2 mb-2 hover:border-glass-specular-edge transition-all">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="px-1.5 py-0.5 rounded text-micro-tag-caps font-micro-tag-caps bg-primary/20 text-electric-cyan font-bold border border-primary/30">主单</span>
+<span class="text-body-sm font-semibold text-text-primary">SOL / USDT 空单</span>
+<span class="text-micro-tag-caps font-micro-tag-caps text-text-tertiary">#TR-1092</span>
+</div>
+<span class="text-numeric-sm font-numeric-sm text-pine-gain font-bold">+32.40 U</span>
+</div>
+<!-- Price & Breakeven Grid -->
+<div class="grid grid-cols-3 gap-1 bg-surface-container-lowest/80 p-1.5 rounded border border-glass-border-subtle text-[10px] font-numeric-sm">
+<div>
+<div class="text-text-tertiary">入场价</div>
+<div class="text-text-primary">184.50</div>
+</div>
+<div>
+<div class="text-text-tertiary">保护止损</div>
+<div class="text-pine-gain font-semibold">184.19</div>
+</div>
+<div>
+<div class="text-text-tertiary">TP 目标</div>
+<div class="text-text-primary font-semibold">156.20</div>
+</div>
+</div>
+<!-- Notional, Model Score & Market Close -->
+<div class="flex items-center justify-between pt-1 border-t border-glass-border-subtle text-body-sm">
+<div class="flex items-center gap-2">
+<span class="text-text-secondary text-micro-tag-caps">持仓本金: <strong class="text-text-primary font-numeric-sm">100.00 USDT</strong></span>
+<span class="px-1 rounded bg-electric-cyan/15 text-electric-cyan text-micro-tag-caps font-micro-tag-caps border border-electric-cyan/30" title="Model Score &gt;= 0.50 Threshold">Score 0.68</span>
+</div>
+<button class="h-7 px-2.5 rounded bg-crimson-loss/20 hover:bg-crimson-loss text-crimson-loss hover:text-white border border-crimson-loss/40 text-body-sm font-medium transition-all active:scale-95" title="以市价立即平仓">
+              平仓
+            </button>
+</div>
+</div>
+<!-- Position Card 2: SCALE-IN ORDER (加仓已成交) -->
+<div class="rounded-lg bg-surface-container-low/90 border border-outline-variant/40 p-2.5 flex flex-col gap-2 hover:border-glass-specular-edge transition-all">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="px-1.5 py-0.5 rounded text-micro-tag-caps font-micro-tag-caps bg-pine-gain/20 text-pine-gain font-bold border border-pine-gain/30">加仓</span>
+<span class="text-body-sm font-semibold text-text-primary">SOL / USDT 空单</span>
+<span class="text-micro-tag-caps font-micro-tag-caps text-text-tertiary">联结 #TR-1092</span>
+</div>
+<span class="text-numeric-sm font-numeric-sm text-crimson-loss font-bold">-8.25 U</span>
+</div>
+<!-- Price & Breakeven Grid -->
+<div class="grid grid-cols-3 gap-1 bg-surface-container-lowest/80 p-1.5 rounded border border-glass-border-subtle text-[10px] font-numeric-sm">
+<div>
+<div class="text-text-tertiary">加仓入场</div>
+<div class="text-text-primary">189.60</div>
+</div>
+<div>
+<div class="text-text-tertiary">保护止损</div>
+<div class="text-pine-gain font-semibold">184.19</div>
+</div>
+<div>
+<div class="text-text-tertiary">TP 目标</div>
+<div class="text-text-primary font-semibold">156.20</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1 border-t border-glass-border-subtle text-body-sm">
+<div class="flex items-center gap-2">
+<span class="text-text-secondary text-micro-tag-caps">持仓本金: <strong class="text-text-primary font-numeric-sm">100.00 USDT</strong></span>
+<span class="px-1 rounded bg-surface-container-high text-text-secondary text-micro-tag-caps font-micro-tag-caps">共用确认</span>
+</div>
+<button class="h-7 px-2.5 rounded bg-crimson-loss/20 hover:bg-crimson-loss text-crimson-loss hover:text-white border border-crimson-loss/40 text-body-sm font-medium transition-all active:scale-95">
+              平仓
+            </button>
+</div>
+</div>
+</div>
+<!-- SECTION 2: DEDICATED DISTINCT PENDING SCALE-IN LIMIT ORDERS -->
+<div class="pt-2 border-t border-outline-variant/30">
+<div class="flex items-center justify-between text-micro-tag-caps font-micro-tag-caps text-text-secondary mb-1.5 px-0.5">
+<span class="flex items-center gap-1 font-semibold text-electric-cyan">
+<span class="w-1.5 h-1.5 rounded-full bg-electric-cyan animate-pulse"></span>
+            待成交加仓 (挂单队列 1 笔)
+          </span>
+<span class="text-text-tertiary">未入场 · 不计盈亏</span>
+</div>
+<!-- Pending Order Card (Explicitly styled as pending limit order) -->
+<div class="rounded-lg bg-surface-container-lowest/90 border border-electric-cyan/30 p-2.5 flex flex-col gap-2 relative overflow-hidden">
+<div class="absolute -right-6 top-1.5 rotate-45 bg-electric-cyan/20 text-electric-cyan text-[8px] font-mono px-6 py-0.5 border border-electric-cyan/30">
+            PENDING
+          </div>
+<div class="flex items-center justify-between pr-4">
+<div class="flex items-center gap-1.5">
+<span class="px-1.5 py-0.5 rounded text-micro-tag-caps font-micro-tag-caps bg-surface-container-high text-electric-cyan font-bold border border-electric-cyan/30">
+                逆向 5% 挂单
+              </span>
+<span class="text-body-sm font-semibold text-text-primary">SOL / USDT</span>
+</div>
+</div>
+<div class="text-[11px] text-text-secondary">
+            关联主单: <span class="text-text-primary font-numeric-sm font-medium">#TR-1092</span>
+</div>
+<!-- Pending Limit Order Parameters -->
+<div class="grid grid-cols-2 gap-1.5 bg-surface-container/70 p-2 rounded border border-glass-border-subtle text-numeric-sm font-numeric-sm">
+<div>
+<div class="text-[10px] text-text-tertiary">挂单限价 (逆向5%)</div>
+<div class="text-electric-cyan font-bold">193.72 USDT</div>
+</div>
+<div>
+<div class="text-[10px] text-text-tertiary">计划名义本金</div>
+<div class="text-text-primary font-bold">100.00 USDT</div>
+</div>
+</div>
+<!-- Expiration and Status Notice -->
+<div class="flex items-center justify-between pt-1 border-t border-glass-border-subtle text-[10px] text-text-secondary">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-electric-cyan">timer</span>
+<span>有效截止: 主单4H收盘前 <strong class="text-text-primary font-mono">01:42:00</strong></span>
+</span>
+<span class="text-text-tertiary italic">待成交 · 未入场</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- =====================================================================
+       STATISTICAL ANALYSIS DRAWER (统计分析抽屉)
+       Shares exact same four-account tab switcher; displays metrics for v3add
+       ===================================================================== -->
+<div class="fixed inset-y-0 right-0 w-[420px] max-w-full bg-surface-obsidian backdrop-blur-2xl border-l border-outline-variant/30 z-50 transform translate-x-full transition-transform duration-300 flex flex-col shadow-2xl" id="analytics-drawer">
+<!-- Drawer Header -->
+<div class="h-12 px-4 border-b border-outline-variant/30 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-electric-cyan">query_stats</span>
+<h3 class="text-headline-sm font-headline-sm text-text-primary">统计分析 · 绩效回测</h3>
+</div>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-surface-container-high transition-colors" id="close-analytics-btn">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<!-- 4-Account Switcher (Synchronized with Global Active Account) -->
+<div class="p-3 border-b border-outline-variant/20 bg-surface-container-lowest/40">
+<div class="text-micro-tag-caps font-micro-tag-caps text-text-secondary mb-1">切换查看对应独立账户绩效</div>
+<div class="grid grid-cols-4 p-0.5 rounded-lg bg-surface-container-lowest border border-outline-variant/40 text-body-sm font-body-sm">
+<button class="drawer-account-pill py-1 text-center rounded-md text-text-secondary hover:text-text-primary" data-account="60m">60m</button>
+<button class="drawer-account-pill py-1 text-center rounded-md text-text-secondary hover:text-text-primary" data-account="5m">5m</button>
+<button class="drawer-account-pill py-1 text-center rounded-md text-text-secondary hover:text-text-primary" data-account="v3">v3</button>
+<button class="drawer-account-pill active py-1 text-center rounded-md bg-electric-cyan text-canvas-dark font-semibold shadow" data-account="v3add">v3add</button>
+</div>
+</div>
+<!-- Analytics Body for Currently Active Account (v3add) -->
+<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div>
+<div class="text-body-sm text-text-secondary">当前账户累积净值</div>
+<div class="text-headline-lg font-numeric-lg text-text-primary font-bold">1,048.60 <span class="text-pine-gain text-body-md">+4.86%</span></div>
+</div>
+<div class="text-right">
+<div class="text-body-sm text-text-secondary">最大回撤 (MDD)</div>
+<div class="text-numeric-md font-numeric-md text-crimson-loss font-semibold">-2.14%</div>
+</div>
+</div>
+<!-- Mini PnL Curve Chartlet -->
+<div class="bg-surface-container-low rounded-xl p-3 border border-glass-border-subtle flex flex-col gap-2">
+<div class="flex items-center justify-between text-micro-tag-caps font-micro-tag-caps text-text-secondary">
+<span>v3add 账户净值走势 (近30日)</span>
+<span class="text-electric-cyan">夏普比率: 2.84</span>
+</div>
+<svg class="w-full h-24" viewbox="0 0 300 80">
+<defs>
+<lineargradient id="pnl-grad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#5aa9ff" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#5aa9ff" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,70 L25,65 L50,68 L80,55 L110,60 L140,42 L180,48 L220,30 L260,24 L300,12 L300,80 L0,80 Z" fill="url(#pnl-grad)"></path>
+<path d="M0,70 L25,65 L50,68 L80,55 L110,60 L140,42 L180,48 L220,30 L260,24 L300,12" fill="none" stroke="#5aa9ff" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Performance Grid -->
+<div class="grid grid-cols-2 gap-2 text-numeric-sm font-numeric-sm">
+<div class="bg-surface-container-low p-2.5 rounded-lg border border-glass-border-subtle">
+<div class="text-text-secondary text-[11px]">胜率 (Win Rate)</div>
+<div class="text-headline-sm font-bold text-pine-gain mt-0.5">72.4% <span class="text-[10px] text-text-secondary font-normal">(21/29)</span></div>
+</div>
+<div class="bg-surface-container-low p-2.5 rounded-lg border border-glass-border-subtle">
+<div class="text-text-secondary text-[11px]">盈亏比 (Profit Factor)</div>
+<div class="text-headline-sm font-bold text-text-primary mt-0.5">2.68</div>
+</div>
+<div class="bg-surface-container-low p-2.5 rounded-lg border border-glass-border-subtle">
+<div class="text-text-secondary text-[11px]">加仓成交转化率</div>
+<div class="text-headline-sm font-bold text-electric-cyan mt-0.5">41.8% <span class="text-[10px] text-text-secondary font-normal">(12/29)</span></div>
+</div>
+<div class="bg-surface-container-low p-2.5 rounded-lg border border-glass-border-subtle">
+<div class="text-text-secondary text-[11px]">平均持仓周期</div>
+<div class="text-headline-sm font-bold text-text-primary mt-0.5">5.4h</div>
+</div>
+</div>
+</div>
+</div>
+<!-- =====================================================================
+       QUANTITATIVE RULE ENGINE SPECIFICATION MODAL (v3 & v3add)
+       ===================================================================== -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-canvas-dark/80 backdrop-blur-md hidden" id="rules-modal">
+<div class="bg-surface-obsidian w-full max-w-lg rounded-2xl specular-border-strong p-5 flex flex-col gap-4 shadow-2xl max-h-[921px] overflow-y-auto">
+<div class="flex items-center justify-between border-b border-outline-variant/30 pb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-electric-cyan text-[24px]">developer_guide</span>
+<h2 class="text-headline-md font-headline-md text-text-primary">v3 / v3add 策略执行规则规范</h2>
+</div>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-surface-container transition-colors" id="close-rules-btn">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-3 text-body-md font-body-md text-on-surface-variant leading-relaxed">
+<!-- Rule 1: Model Score & Target -->
+<div class="bg-surface-container-low p-3 rounded-xl border border-glass-border-subtle flex flex-col gap-1.5">
+<div class="text-text-primary font-semibold flex items-center gap-1.5">
+<span class="text-electric-cyan font-mono">01.</span> 模型触发与目标阶梯
+          </div>
+<p class="text-body-sm text-text-secondary">
+            当模型置信度评分 <strong class="text-electric-cyan font-mono">Score ≥ 0.5</strong> 时触发建仓：
+          </p>
+<ul class="text-body-sm list-disc list-inside text-text-secondary space-y-1">
+<li><span class="text-text-primary font-medium">0.50 ≤ Score &lt; 0.60</span>：目标平仓位锁定于 Monday 0.618 分位。</li>
+<li><span class="text-text-primary font-medium">Score ≥ 0.60</span>：目标平仓位直接穿透至对向 1.618 斐波那契扩展位。</li>
+</ul>
+</div>
+<!-- Rule 2: Risk Management & Breakeven Shift -->
+<div class="bg-surface-container-low p-3 rounded-xl border border-glass-border-subtle flex flex-col gap-1.5">
+<div class="text-text-primary font-semibold flex items-center gap-1.5">
+<span class="text-crimson-loss font-mono">02.</span> 兜底止损与保本滑移位 (+0.17%)
+          </div>
+<ul class="text-body-sm space-y-1.5 text-text-secondary">
+<li><strong class="text-crimson-loss">确认前：</strong> 执行 <span class="font-mono text-text-primary">30% 灾难性硬兜底止损</span>，抵御黑天鹅极端插针。</li>
+<li><strong class="text-pine-gain">确认后：</strong> 止损位动态滑移至主单入场价顺势位移 <span class="font-mono text-text-primary font-bold">+0.17%</span>（空单为 <span class="font-mono">Entry × (1 - 0.0017)</span>，多单为 <span class="font-mono">Entry × (1 + 0.0017)</span>），严密覆盖交易手续费与滑点成本，达成绝对真保本。已入场各单保留各自成交价。</li>
+</ul>
+</div>
+<!-- Rule 3: v3add Extension & Limits -->
+<div class="bg-surface-container-low p-3 rounded-xl border border-glass-border-subtle flex flex-col gap-1.5">
+<div class="text-text-primary font-semibold flex items-center gap-1.5">
+<span class="text-secondary font-mono">03.</span> v3add 逆向加仓机制与名义限额
+          </div>
+<p class="text-body-sm text-text-secondary">
+            继承全部 v3 规则。当 <strong class="text-electric-cyan font-mono">Score ≥ 0.60</strong> 时，系统自动在逆向 5%（空单向上 5%，多单向下 5%）挂出等额名义本金限价单：
+          </p>
+<ul class="text-body-sm space-y-1 text-text-secondary">
+<li>挂单有效期严格限制于主单确认 K 线收盘前，超时未成交自动撤单。</li>
+<li>共用主单确认状态、保护性止损 (+0.17%) 及目标止盈位。</li>
+<li>账户总名义持仓头寸严格限制于 <strong class="text-text-primary font-mono">≤ 1x 杠杆</strong>，严禁过度加杠杆。</li>
+</ul>
+</div>
+</div>
+<div class="flex justify-end pt-2 border-t border-outline-variant/30">
+<button class="px-4 py-2 rounded-lg bg-electric-cyan hover:opacity-90 text-canvas-dark font-semibold text-body-sm transition-all" id="rules-confirm-btn">
+          理解并确认
+        </button>
+</div>
+</div>
+</div>
+<!-- =====================================================================
+       BOTTOM DOCK CONTROLS (5m/15m/1h/4h/1D, Indicators Popover, Follow Mode)
+       ===================================================================== -->
+<footer class="fixed bottom-0 left-12 right-0 h-10 bg-surface-obsidian/90 backdrop-blur-xl border-t border-outline-variant/30 px-3 flex items-center justify-between z-30 select-none">
+<!-- Timeframe Interval Selector -->
+<div class="flex items-center gap-1 text-numeric-sm font-numeric-sm">
+<span class="text-text-secondary text-[11px] mr-1 hidden sm:inline">周期:</span>
+<button class="px-2 py-0.5 rounded text-text-secondary hover:text-text-primary transition-colors">5m</button>
+<button class="px-2 py-0.5 rounded text-text-secondary hover:text-text-primary transition-colors">15m</button>
+<button class="px-2 py-0.5 rounded bg-surface-container-high text-electric-cyan font-semibold border border-glass-border-subtle">1h</button>
+<button class="px-2 py-0.5 rounded text-text-secondary hover:text-text-primary transition-colors">4h</button>
+<button class="px-2 py-0.5 rounded text-text-secondary hover:text-text-primary transition-colors">1D</button>
+</div>
+<!-- Center Status / Touch Coordinates -->
+<div class="hidden md:flex items-center gap-3 text-numeric-sm font-numeric-sm text-text-tertiary">
+<span>坐标: <strong class="text-text-primary font-mono">170.96</strong></span>
+<span>|</span>
+<span>斐波那契 1.618 跟踪引擎: <span class="text-pine-gain">NORMAL</span></span>
+</div>
+<!-- Right Controls: Indicators Popover & Follow Active Order -->
+<div class="flex items-center gap-2">
+<!-- Indicators Popover Trigger -->
+<div class="relative">
+<button class="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high text-text-secondary hover:text-text-primary text-body-sm font-body-sm border border-glass-border-subtle flex items-center gap-1 transition-colors" id="indicators-btn">
+<span class="material-symbols-outlined text-[15px]">tune</span>
+<span>指标层 (3)</span>
+</button>
+<!-- Popover Menu -->
+<div class="absolute bottom-full right-0 mb-2 w-48 bg-surface-obsidian backdrop-blur-xl border border-outline-variant/40 rounded-lg p-2 flex flex-col gap-1.5 shadow-xl hidden" id="indicators-popover">
+<div class="text-[10px] text-text-secondary font-mono border-b border-glass-border-subtle pb-1">叠加图表指标</div>
+<label class="flex items-center gap-2 text-body-sm text-text-primary cursor-pointer">
+<input checked="" class="rounded border-outline-variant bg-surface-container-lowest text-electric-cyan focus:ring-0" type="checkbox"/>
+<span>Monday High / Low</span>
+</label>
+<label class="flex items-center gap-2 text-body-sm text-text-primary cursor-pointer">
+<input checked="" class="rounded border-outline-variant bg-surface-container-lowest text-electric-cyan focus:ring-0" type="checkbox"/>
+<span>1.618 扩展射线</span>
+</label>
+<label class="flex items-center gap-2 text-body-sm text-text-primary cursor-pointer">
+<input checked="" class="rounded border-outline-variant bg-surface-container-lowest text-electric-cyan focus:ring-0" type="checkbox"/>
+<span>保护止损位 (+0.17%)</span>
+</label>
+</div>
+</div>
+<!-- Follow Latest Order Toggle -->
+<button class="px-2.5 py-1 rounded bg-electric-cyan/20 hover:bg-electric-cyan/30 text-electric-cyan text-body-sm font-body-sm border border-electric-cyan/40 flex items-center gap-1 transition-colors" id="follow-toggle-btn">
+<span class="w-1.5 h-1.5 rounded-full bg-electric-cyan"></span>
+<span>跟随最新单</span>
+</button>
+</div>
+</footer>
+<!-- =====================================================================
+       CLIENT-SIDE INTERACTIVITY LOGIC (Synchronized Four Accounts & Ledger)
+       ===================================================================== -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Four Accounts State: '60m' | '5m' | 'v3' | 'v3add' (Default: 'v3add')
+      let activeAccount = 'v3add';
+
+      const accountPills = document.querySelectorAll('.account-pill-btn');
+      const drawerAccountPills = document.querySelectorAll('.drawer-account-pill');
+      const topBadge = document.getElementById('top-account-badge');
+      const ledgerBadge = document.getElementById('ledger-account-badge');
+      const activeCardBadge = document.getElementById('active-account-card-badge');
+
+      function setAccount(accountName) {
+        activeAccount = accountName;
+
+        // Sync Left context pill switcher
+        accountPills.forEach(btn => {
+          if (btn.dataset.account === accountName) {
+            btn.className = 'account-pill-btn active py-1 text-center rounded-md bg-electric-cyan text-canvas-dark font-semibold shadow transition-all';
+          } else {
+            btn.className = 'account-pill-btn py-1 text-center rounded-md text-text-secondary hover:text-text-primary transition-all';
+          }
+        });
+
+        // Sync Drawer pill switcher
+        drawerAccountPills.forEach(btn => {
+          if (btn.dataset.account === accountName) {
+            btn.className = 'drawer-account-pill active py-1 text-center rounded-md bg-electric-cyan text-canvas-dark font-semibold shadow';
+          } else {
+            btn.className = 'drawer-account-pill py-1 text-center rounded-md text-text-secondary hover:text-text-primary';
+          }
+        });
+
+        // Update Badges across all panels
+        if (topBadge) topBadge.textContent = accountName;
+        if (ledgerBadge) ledgerBadge.textContent = accountName;
+        if (activeCardBadge) {
+          if (accountName === 'v3add') {
+            activeCardBadge.textContent = 'v3add · 自动加仓轨';
+          } else if (accountName === 'v3') {
+            activeCardBadge.textContent = 'v3 · 标准模型轨';
+          } else if (accountName === '60m') {
+            activeCardBadge.textContent = '60m · 趋势主轨';
+          } else {
+            activeCardBadge.textContent = '5m · 微观研究轨';
+          }
+        }
+      }
+
+      accountPills.forEach(btn => {
+        btn.addEventListener('click', () => setAccount(btn.dataset.account));
+      });
+      drawerAccountPills.forEach(btn => {
+        btn.addEventListener('click', () => setAccount(btn.dataset.account));
+      });
+
+      // Trade Ledger Panel Toggle
+      const ledgerPanel = document.getElementById('trade-ledger-panel');
+      const toggleLedgerBtn = document.getElementById('toggle-ledger-btn');
+      const closeLedgerBtn = document.getElementById('close-ledger-btn');
+
+      if (toggleLedgerBtn && ledgerPanel) {
+        toggleLedgerBtn.addEventListener('click', () => {
+          ledgerPanel.classList.toggle('translate-x-[400px]');
+          ledgerPanel.classList.toggle('opacity-0');
+          ledgerPanel.classList.toggle('pointer-events-none');
+        });
+      }
+      if (closeLedgerBtn && ledgerPanel) {
+        closeLedgerBtn.addEventListener('click', () => {
+          ledgerPanel.classList.add('translate-x-[400px]', 'opacity-0', 'pointer-events-none');
+        });
+      }
+
+      // Statistical Analysis Drawer Toggle
+      const analyticsBtn = document.getElementById('nav-analytics-btn');
+      const analyticsDrawer = document.getElementById('analytics-drawer');
+      const closeAnalyticsBtn = document.getElementById('close-analytics-btn');
+
+      if (analyticsBtn && analyticsDrawer) {
+        analyticsBtn.addEventListener('click', () => {
+          analyticsDrawer.classList.remove('translate-x-full');
+        });
+      }
+      if (closeAnalyticsBtn && analyticsDrawer) {
+        closeAnalyticsBtn.addEventListener('click', () => {
+          analyticsDrawer.classList.add('translate-x-full');
+        });
+      }
+
+      // Quantitative Rule Engine Modal
+      const openRulesBtn = document.getElementById('open-rules-btn');
+      const rulesModal = document.getElementById('rules-modal');
+      const closeRulesBtn = document.getElementById('close-rules-btn');
+      const rulesConfirmBtn = document.getElementById('rules-confirm-btn');
+
+      function toggleRules(show) {
+        if (!rulesModal) return;
+        if (show) rulesModal.classList.remove('hidden');
+        else rulesModal.classList.add('hidden');
+      }
+
+      if (openRulesBtn) openRulesBtn.addEventListener('click', () => toggleRules(true));
+      if (closeRulesBtn) closeRulesBtn.addEventListener('click', () => toggleRules(false));
+      if (rulesConfirmBtn) rulesConfirmBtn.addEventListener('click', () => toggleRules(false));
+
+      // Indicators Popover
+      const indicatorsBtn = document.getElementById('indicators-btn');
+      const indicatorsPopover = document.getElementById('indicators-popover');
+      if (indicatorsBtn && indicatorsPopover) {
+        indicatorsBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          indicatorsPopover.classList.toggle('hidden');
+        });
+        document.addEventListener('click', (e) => {
+          if (!indicatorsPopover.contains(e.target) && !indicatorsBtn.contains(e.target)) {
+            indicatorsPopover.classList.add('hidden');
+          }
+        });
+      }
+
+      // Light / Dark Mode Toggle
+      const themeToggleBtn = document.getElementById('theme-toggle');
+      if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+          document.documentElement.classList.toggle('dark');
+        });
+      }
+    });
+  </script>
+</body></html>

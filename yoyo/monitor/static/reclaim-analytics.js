@@ -8,10 +8,10 @@
   const signed=v=>finite(v)?(v>0?'+':'')+num(v):'—';
   const tone=v=>finite(v)&&v!==0?(v>0?'rp-positive':'rp-negative'):'';
   const rate=v=>finite(v)?num(v,1)+'%':'—';
-  const reason=v=>({target:'到达目标',breakeven:'入场价止损',failed_reclaim:'确认未收回',manual:'手动平仓'}[v]||'其他退出');
+  const reason=v=>({target:'到达目标',breakeven:'保本止损',backstop:'兜底止损',reclaimed_inside_be:'收回但未越过保本价',failed_reclaim:'确认未收回',manual:'手动平仓'}[v]||'其他退出');
   const time=v=>new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(v);
   function validate(d,track,days){
-    if(d?.paper_only!==true||d.track!==track||d.days!==days||!finite(d.now_ms)||!d.summary||!d.coverage||!['curve','by_side','by_symbol','by_reason'].every(k=>Array.isArray(d[k]))||!d.curve.every(p=>finite(p.time_ms)&&finite(p.equity)))throw Error('统计返回格式不完整');
+    if(d?.paper_only!==true||d.track!==({v3:'1060',v3add:'2060'}[track]||track)||d.days!==days||!finite(d.now_ms)||!d.summary||!d.coverage||!['curve','by_side','by_symbol','by_reason'].every(k=>Array.isArray(d[k]))||!d.curve.every(p=>finite(p.time_ms)&&finite(p.equity)))throw Error('统计返回格式不完整');
     return d;
   }
   const pf=s=>s.profit_factor_state==='no_losses'?'∞':num(s.profit_factor);
@@ -39,7 +39,7 @@
   function create({root,createFeed,onOpen,onTrack}){
     const trigger=root.querySelector('[data-rp-action="analytics"]'),panel=document.createElement('section');
     panel.id='rp-analysis-panel';panel.className='rp-analysis rp-glass';panel.setAttribute('aria-label','模拟盘统计分析');
-    panel.innerHTML=`<header class="rp-record-heading" data-yd-sheet-drag><div><strong>统计分析</strong><small>仅计入资金的模拟交易</small></div><button data-analysis-action="close" aria-label="收起统计分析">×</button></header><div class="rp-analysis-filters"><div class="rp-tabs" role="group" aria-label="统计轨道">${['60','5'].map(t=>`<button data-analysis-track="${t}" aria-pressed="false">${t==='60'?'60m 主轨':'5m 研究轨'}</button>`).join('')}</div><div class="rp-tabs" role="group" aria-label="统计时段">${[[7,'近 7 天'],[30,'近 30 天'],[0,'全部']].map(([n,l])=>`<button data-analysis-days="${n}" aria-pressed="false">${l}</button>`).join('')}</div></div><p class="rp-analysis-status" role="status"></p><div class="rp-analysis-body"><div class="rp-analysis-warning" role="alert" hidden></div><div class="rp-analysis-grid"></div><section class="rp-analysis-section"><h3>已实现资金曲线 <small>USDT</small></h3><div class="rp-equity-chart" role="img" aria-label="已实现资金曲线"></div><p class="rp-curve-note"></p></section><div class="rp-analysis-breakdowns"></div><p class="rp-analysis-note">盈亏与手续费按每次平仓的成交时间计入，包含部分平仓；胜率与盈利因子按整笔最终结清时间统计。资金曲线不含浮动盈亏。手续费包含已平份额对应的开仓费与平仓费，未平份额不计入已结算费用。影子记录不参与统计。</p></div><footer class="rp-analysis-footer"><span>完整账本 · 北京时间</span><button data-analysis-action="refresh">刷新统计</button></footer>`;
+    panel.innerHTML=`<header class="rp-record-heading" data-yd-sheet-drag><div><strong data-analysis-title>统计分析</strong><small>仅计入资金的模拟交易</small></div><button data-analysis-action="close" aria-label="收起统计分析">×</button></header><div class="rp-analysis-filters"><div class="rp-tabs" role="group" aria-label="统计轨道">${['60','5','v3','v3add'].map(t=>`<button data-analysis-track="${t}" aria-pressed="false">${t==='60'?'60m':t==='5'?'5m':t}</button>`).join('')}</div><div class="rp-tabs" role="group" aria-label="统计时段">${[[7,'近 7 天'],[30,'近 30 天'],[0,'全部']].map(([n,l])=>`<button data-analysis-days="${n}" aria-pressed="false">${l}</button>`).join('')}</div></div><p class="rp-analysis-status" role="status"></p><div class="rp-analysis-body"><div class="rp-analysis-warning" role="alert" hidden></div><div class="rp-analysis-grid"></div><section class="rp-analysis-section"><h3>已实现资金曲线 <small>USDT</small></h3><div class="rp-equity-chart" role="img" aria-label="已实现资金曲线"></div><p class="rp-curve-note"></p></section><div class="rp-analysis-breakdowns"></div><p class="rp-analysis-note">盈亏与手续费按每次平仓的成交时间计入，包含部分平仓；胜率与盈利因子按整笔最终结清时间统计。资金曲线不含浮动盈亏。手续费包含已平份额对应的开仓费与平仓费，未平份额不计入已结算费用。影子记录和待成交加仓不参与统计。v3add 的主单与已成交加仓分别计笔，共属一个账户。</p></div><footer class="rp-analysis-footer"><span>完整账本 · 北京时间</span><button data-analysis-action="refresh">刷新统计</button></footer>`;
     root.append(panel);
     let track='60',days=0,active=false,open=false,feed=null,chart=null,chartLoading=false,chartError='',signature='',lastChartData=null;
     const requests=window.SpikeRuntime.createRequests(),el=s=>panel.querySelector(s);
@@ -63,6 +63,7 @@
     }
     function render(){
       if(!open)return;
+      el('[data-analysis-title]').textContent='统计分析 · '+({60:'60m',5:'5m'}[track]||track);
       const {data,error,busy}=feed?.getState()||{};
       panel.querySelectorAll('[data-analysis-track]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.analysisTrack===track)));
       panel.querySelectorAll('[data-analysis-days]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.analysisDays)===days)));

@@ -21,7 +21,7 @@
     attached({requestUpdate}){this.requestUpdate=requestUpdate;}
     detached(){this.requestUpdate=null;}
     paneViews(){return [this.view];}updateAllViews(){}
-    autoscaleInfo(from,to){const g=this.shape,p=this.trade;if(!g||to<g.entry||(g.exit>=0&&from>g.exit))return null;const values=[p.entry,p.target,p.exit_price].filter(fin);return {priceRange:{minValue:Math.min(...values),maxValue:Math.max(...values)}};}
+    autoscaleInfo(from,to){const g=this.shape,p=this.trade;if(!g||to<g.entry||(g.exit>=0&&from>g.exit))return null;const values=[p.entry,p.target,p.exit_price,g.stop!=null?p.be_price:null].filter(fin);return {priceRange:{minValue:Math.min(...values),maxValue:Math.max(...values)}};}
     paint(target){
       const o=this.owner,p=this.trade,g=this.shape;if(!g)return;
       const scale=o.chart.timeScale(),x=i=>scale.logicalToCoordinate(i),y=v=>o.series.priceToCoordinate(v),entry=y(p.entry),targetY=fin(p.target)?y(p.target):null;
@@ -33,9 +33,12 @@
       target.useMediaCoordinateSpace(({context:ctx,mediaSize:s})=>{
         ctx.save();ctx.beginPath();ctx.rect(0,0,s.width,s.height);ctx.clip();ctx.font='11px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';ctx.textBaseline='middle';
         const left=Math.max(0,a),right=Math.min(s.width,b);
-        const line=(value,label,tone,start=left,dash=[])=>{const yy=y(value);if(yy==null||start>right)return;ctx.strokeStyle=tone;ctx.lineWidth=1.4;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(start,yy);ctx.lineTo(right,yy);ctx.stroke();ctx.setLineDash([]);const text=label+' '+format(value),w=ctx.measureText(text).width+14;if(right-start>w){ctx.fillStyle=dark?'#1c222cee':'#f7faf8ee';ctx.fillRect(right-w,yy+3,w,19);ctx.fillStyle=dark?({'#169873':'#55c7a5','#d7355d':'#f57e98','#8b6ab1':'#ba97ef'}[tone]||'#e8edf4'):tone;ctx.textAlign='right';ctx.fillText(text,right-6,yy+12);}};
+        const line=(value,label,tone,start=left,dash=[],finish=right)=>{const yy=y(value);if(yy==null||start>finish)return;ctx.strokeStyle=tone;ctx.lineWidth=1.4;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(start,yy);ctx.lineTo(finish,yy);ctx.stroke();ctx.setLineDash([]);const text=label+' '+format(value),w=ctx.measureText(text).width+14;if(finish-start>w){ctx.fillStyle=dark?'#1c222cee':'#f7faf8ee';ctx.fillRect(finish-w,yy+3,w,19);ctx.fillStyle=dark?({'#169873':'#55c7a5','#d7355d':'#f57e98','#8b6ab1':'#ba97ef'}[tone]||'#e8edf4'):tone;ctx.textAlign='right';ctx.fillText(text,finish-6,yy+12);}};
         if(right>=left){if(targetY!=null){ctx.fillStyle=color;ctx.globalAlpha=.065;ctx.fillRect(left,Math.min(entry,targetY),right-left,Math.abs(entry-targetY));ctx.globalAlpha=1;line(p.target,'目标',color,left,[4,4]);}line(p.entry,'开仓',color);}
-        if(g.stop!=null){const i=candleIndex(o.rows,g.stop,this.step),sx=i>=0?x(i):g.stop<o.rows[0].time*1000?0:null;if(sx!=null)line(p.entry,'入场价止损已启用','#8b6ab1',Math.max(0,sx),[3,4]);}
+        const stopIndex=g.stop!=null?candleIndex(o.rows,g.stop,this.step):-1;
+        const stopX=g.stop==null?null:stopIndex>=0?at(stopIndex,g.stop):g.stop<o.rows[0].time*1000?0:null;
+        if(fin(p.backstop))line(p.backstop,'确认前兜底止损','#d7355d',left,[3,4],g.stop==null?right:Math.min(right,stopX??left));
+        if(stopX!=null)line(fin(p.be_price)?p.be_price:p.entry,fin(p.be_price)?'保本保护止损':'入场价止损已启用','#8b6ab1',Math.max(0,stopX),[3,4]);
         const marker=(i,value,label,up,tone)=>{const xx=x(i),yy=y(value);if(xx==null||yy==null||xx<0||xx>s.width)return;const dir=up?1:-1;ctx.setLineDash([]);ctx.fillStyle=tone;ctx.beginPath();ctx.moveTo(xx,yy);ctx.lineTo(xx-5,yy+dir*9);ctx.lineTo(xx+5,yy+dir*9);ctx.closePath();ctx.fill();const text=label+' · '+format(value),w=ctx.measureText(text).width+16,bx=Math.max(4,Math.min(s.width-w-4,xx-w/2)),by=yy+dir*26-11>(s.height-125)?yy-39:yy+dir*26-11;ctx.beginPath();ctx.roundRect(bx,by,w,22,6);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(text,bx+w/2,by+11);};
         if(g.entry>=0)marker(g.entry,p.entry,p.side===1?'多头开仓':'空头开仓',p.side===1,color);
         for(const fill of p.exits||[]){if(fill.reason!=='manual'||(p.stage==='closed'&&fill===p.exits.at(-1)))continue;const i=candleIndex(o.rows,fill.exit_ms,this.step);if(i>=0)marker(i,fill.price,'减仓 '+(fill.notional/p.notional*100).toFixed(1)+'%',p.side!==1,'#617488');}
