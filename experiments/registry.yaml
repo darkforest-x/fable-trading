@@ -701,7 +701,7 @@ experiments:
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: 'In sample. Profit-lock offsets (exp-monday-limit-be-lock-20261027-v1) still running. Live resting-order margin for hundreds of 1.618 levels is not modeled.'
+    notes: 'In sample. Profit locks (exp-monday-limit-be-lock-compare-20261027-v1) raise the win rate but not the multiples. Live resting-order margin for hundreds of 1.618 levels is not modeled.'
   - experiment_id: exp-monday-limit-spike-controls-20261027-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 26da9d3a18
@@ -926,6 +926,34 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Adds share the parent exits by construction (breakeven at the parent entry pays the add the full drawdown distance); exposure doubles in the deepest spikes, so 2026 drawdown rises from 34 to 50 percent. Score bands were chosen after seeing 2025-2026.'
+  - experiment_id: exp-monday-limit-be-lock-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1602366222
+    status: complete
+    question: 'Owner 2026-10-27 (return-first version, unfinished item): native replay of profit locks at the reclaim decision, breakeven +50 / 100 / 200bp, v2 and v3 families.'
+    single_variable: 'Breakeven offset only (runner monday_limit_be_scalein, no scale-in legs); a reclaim close short of the locked price exits at that close.'
+    result: '490/490 symbols per path, no errors.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-be-lock-compare-20261027-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Input of exp-monday-limit-be-lock-compare-20261027-v1.'
+  - experiment_id: exp-monday-limit-be-lock-compare-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 04d4d51798
+    status: complete
+    question: 'Owner 2026-10-27: does a profit lock at the reclaim (+50 / 100 / 200bp) beat breakeven 0 / 7 / 17bp per trade and in the return-first sizing?'
+    single_variable: 'Breakeven offset; worse path per trade, 10bp slippage on non-target exits; v3 sizing grid of monday_limit_return_opt (linear 1-3x, 5 / 10 / 20 slots at 2-5x), 10 tie orders.'
+    result: 'Win rate rises, return does not. v3 win (2020-24 / 2025 / 2026 / last5m) 40 / 36 / 34 / 40 percent at +17bp against 73 / 69 / 66 / 69 at +50 to +200bp; mean 353 / 219 / 147 / 258bp against 342 / 219 / 152 / 264 (+50) and 330 / 212 / 158 / 264 (+200); sum within 1R per period. v2 win 31-38 to 57-62 percent, mean unchanged (2025 lower by 3-6bp). Sizing: v3 10 slots 2x 8.53 / 9.43 / 3.93 / 4.36x at +17bp against 7.86-8.17 / 8.41-9.42 / 4.00-4.12 / 4.52-4.60x with locks; 20 slots 3x 9.08 / 6.69 / 4.02 / 4.07x against 8.45-8.59 / 6.53-6.79 / 4.17-4.30 / 4.20-4.28x; drawdown and liquidations unchanged.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-be-lock-compare-20261027-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'In sample. The win rate is the share of reclaim closes beyond entry plus costs, so it is the same for all three locks. v3add add legs were not rerun with a lock.'
   - experiment_id: exp-monday-reclaim-paper-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 791941594f

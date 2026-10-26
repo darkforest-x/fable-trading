@@ -157,7 +157,8 @@
   - v3add, 20 slots × 3x: 12.6 / 9.3 / 5.4 / 6.2x, DD 9 / 19 / 39 / 9;
   - v3, 20 slots × 3x: 9.1 / 6.7 / 4.0 / 4.1x, DD 11 / 12 / 30 / 8;
   - compare v3 at 1x: 3.9 / 9.3 / 2.5 / 3.0x.
-  - The profit-lock run (breakeven +50 / 100 / 200bp, `exp-monday-limit-be-lock-20261027-v1`) is running in the background.
+  - Profit lock at the reclaim (breakeven +50 / 100 / 200bp, `exp-monday-limit-be-lock-compare-20261027-v1`) raises the v3 win rate from 34-40 to 66-73 percent. Mean per trade and the sizing multiples stay the same (v3 20 slots × 3x: 9.1 / 6.7 / 4.0 / 4.1x at +17bp, 8.5-8.6 / 6.5-6.8 / 4.2-4.3 / 4.2-4.3x with a lock). The return-first rule therefore keeps its +17bp breakeven. A lock is an option only for the win rate.
+  - Pyramiding (滚仓) for the high-payoff version: adapter legs in 894c24f3fa, runner `monday_limit_pyramid`, combiner `monday_limit_pyramid_compare`; the framework run `exp-monday-limit-pyramid-20261027-v1` is in progress.
 - Cluster days of the spike rule:
   - each filled inside a single 5m bar: 2026-08-22 13:10, 2024-02-29 01:30, 2023-11-10 00:10 (Beijing; all longs, market-wide flash crashes); 2024-01-03 20:05 (mixed); 2025-10-11 05:25 (6 shorts during the crash rebound).
   - 70-85 percent of those fills hit the target in the same 5m bar.
