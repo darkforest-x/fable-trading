@@ -14,6 +14,31 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-12h-wick3-limit-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5e6868710b
+    status: inconclusive
+    question: Owner 2026-10-27 OKX BTC 12H rule - after three wick-only touches of a weekly
+      NY-Monday 1.618, does a limit for the fourth touch with four-candle-extreme 1USD stop,
+      opposite-1618 wick-close target and 7-day exit earn after real fees?
+    single_variable: Owner-specified fixed rule, run once; no parameter search. Matched
+      controls share week, side and 5m TR bucket with scaled geometry and identical rules.
+    result: 2022-11-30..2026-10-26 16 submissions, 15 fills (8 long 7 short); win 33%,
+      +62.35R, +22.77% summed entry notional. Owner screenshot week 2026-08-10 long alone
+      +48.32R/+23.33%; without it +14.03R/-0.56%. Long +62.20R/+28.67%, short +0.15R/-5.91%.
+      2025 four trades all lose (-17.52%). Per-submission excess vs3 matched controls
+      +3.32R, bootstrap95 [-0.17,+9.72] spans zero. No stable edge established.
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-12h-wick3-limit-20261027-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: NautilusTrader 1.231.0 single run, 64 limit orders incl. controls; all native
+      fills equal predicted fourth-touch bars; exits only stop/close-time market. Maker
+      2bp entry, taker 5bp exits (Lv1 read 2026-10-26); no funding/slippage. R uses the
+      real four-candle stop set at the fill-candle close (50% placeholder before). 1USD
+      buffer read from owner's drawn stop. 2025-10-10 crash fill candle gave a 16.4% stop.
   - experiment_id: exp-monday-12h-partial-recovery-20261026-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 9087b740a2
