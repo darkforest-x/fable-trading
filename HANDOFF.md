@@ -65,6 +65,14 @@
 - Median notional per100USDTplannedrisk5077to5511;99percentile~22k;maximum~30.8k. Same entry/stop implies exactly same size regardless of target. Recorded overlap as high as137positions and~471600USDTnotional across fixed-target arms; this is independent exposure, not a feasible cashaccount. Stops ordinarily lose100USDT, observed worst~101.50 fromgaps. Funding/margin/capacity remain unmodeled. Originalentry-week targets do not roll nextweek; sourcegap/end censoring preserved.
 - Results and reproduction `experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/`; Notion `4058856479af81bfac30ddc49688ef3e`. Learning `fixed-risk-sizing-must-include-fill-costs.md`. All production/training flagsfalse; no live/score changes, no additional report. Luna delegate actualmodel/effort could not be verified from tool output and was stopped; main performed work.
 
+## 2026-10-27 · Market-wide spike alert (notify only)
+
+- Owner rule: ≥8 coins touching the same-side 1.618 within 5 minutes triggers a push.
+- `yoyo/monitor/spike_alert.py` listens to live Monday-fib touches and pushes once per side per 30 minutes (Telegram + Bark). It keeps its own book (`spike-alerts.sqlite3`); `GET /api/spike-alerts` is read-only. Commit `19fcf17878`; monitor restarted, worker alive, both channels configured; 8 tests pass.
+- Unrelated `tests/monitor/test_market_sync.py::test_observer_cycle_and_api` fails as before (market sync was retired on 2026-10-23).
+- History (`exp-monday-spike-alert-history-20261027-v1`): at threshold 8 the alert would fire about twice a week on OKX-listed coins (2025: 97, 2026 to Sep: 75). Extreme events are clusters of 25 or more coins, about ten in 2026.
+- Owner noted a human cannot react in time and wants the system to act. Entries already rest as limit orders (automatic in paper). Real-money execution needs an owner-approved automated program (Binance trade key, margin plan for many resting orders, kill switch). Claude does not place or change real positions.
+
 ## 2026-10-27 · Return-first version (in progress) and the cluster days
 
 - Return-first sizing on existing v3 / v3add fills (`exp-monday-limit-return-opt-20261027-v1`). Settings chosen as the best 2020-24 multiple under the 40 percent limit broke in 2026 (DD 60-76). Settings that stay ≤40 percent drawdown in all four periods (in sample):
