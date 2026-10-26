@@ -11,6 +11,12 @@ Plans, all with linear sizing k = min(0.05 * (score - cut) / mean_excess, 0.5) a
   order_only  only trades with order score > 0, at k;
   order_x2    every trade, 2k when order score > 0 (single-trade cap 1.0);
   order_x2c   every trade, min(2k, 0.5) when order score > 0 (single-trade cap kept), a sensitivity.
+Added after the owner asked about the near-target subset (same day), on the v2_be17 fills of the same events
+(near Monday edge target, no backstop, breakeven +0.17 percent), same linear sizing:
+  near_ge05       score >= 0.5 (the v3 events with the near target);
+  near_ge06       score >= 0.6;
+  near_ge06_order score >= 0.6 and order score > 0 (89.5 / 77.5 percent win rate in the lever study).
+These run after the first four plans so the earlier tie draws are unchanged.
 Periods restart at 1000 USDT: 2020-2024, 2025, 2026, last five months. Medians over TIES random orders of same-time
 fills (opt.replay_w books exits before entries at the same timestamp except a trade's own same-bar exit).
 The order score was found on the same 2020-2026 history (exp-monday-limit-winrate-levers-20261026-v1), so these
@@ -60,12 +66,12 @@ def run(config):
            subprocess.run(['git','ls-files','--error-unmatch',p], cwd=ROOT, capture_output=True).returncode:
             raise RuntimeError('Commit builder and config first')
     cfg = json.loads(config.read_text())
-    t = pd.read_csv(ROOT/cfg['trades'], parse_dates=['t', 'exit_t'])
-    t = t[t.variant == cfg['variant']]
+    t_all = pd.read_csv(ROOT/cfg['trades'], parse_dates=['t', 'exit_t'])
     f = pd.read_csv(ROOT/cfg['features'], usecols=['event', 'l2_order_score']).rename(columns={'l2_order_score': 'order'})
-    t = t.merge(f, on='event', how='left')
-    t['entry'] = t.t.astype('int64'); t['exit'] = t.exit_t.astype('int64'); t['tid'] = t.trade_id
-    t = t.sort_values(['entry', 'tid'], kind='mergesort').reset_index(drop=True)
+    t_all = t_all.merge(f, on='event', how='left')
+    t_all['entry'] = t_all.t.astype('int64'); t_all['exit'] = t_all.exit_t.astype('int64'); t_all['tid'] = t_all.trade_id
+    t_all = t_all.sort_values(['entry', 'tid'], kind='mergesort').reset_index(drop=True)
+    t = t_all[t_all.variant == cfg['variant']].reset_index(drop=True)
     cut = json.loads((RUN/'scores.json').read_text())['threshold']
     mexcess = json.loads((A/'exp-monday-limit-v3-compare-20261025-v1/summary.json').read_text())['results']['linear_mean_excess']
     window = pd.Timestamp(json.loads((A/'exp-monday-limit-reclaim-recent-20261025-v1/summary.json').read_text())['results']['window'][0])
@@ -75,6 +81,11 @@ def run(config):
                cut=cut, mean_excess=mexcess, window_start=str(window), replays={})
     for name, (keep, k) in plans(t, cut, mexcess).items():
         res['replays'][name] = {per: replay(t, keep, k, w.to_numpy(), cfg['ties'], rng) for per, w in pers.items()}
+    near = t_all[t_all.variant == cfg['near_variant']].reset_index(drop=True)
+    kn = np.minimum(.05*(near.score.to_numpy()-cut)/mexcess, .5)
+    pn = {'y2020_2024': near.t < B[0], 'y2025': (near.t >= B[0]) & (near.t < B[1]), 'y2026': near.t >= B[1], 'last5m': near.t >= window}
+    for name, keep in (('near_ge05', near.score >= .5), ('near_ge06', near.score >= .6), ('near_ge06_order', (near.score >= .6) & (near.order > 0))):
+        res['replays'][name] = {per: replay(near, keep.to_numpy(), kn, w.to_numpy(), cfg['ties'], rng) for per, w in pn.items()}
     prev = json.loads((A/'exp-monday-limit-be-scalein-compare-20261026-v1/summary.json').read_text())['results']['replays']['v3_be17']
     res['parity_v3_vs_be_scalein_compare'] = {per: dict(here=res['replays']['v3'][per]['final_median'], before=prev[per]['final_median'],
                                                         n_here=res['replays']['v3'][per]['n'], n_before=prev[per]['n']) for per in pers}
@@ -83,7 +94,7 @@ def run(config):
                                  training_eligible=False, production_eligible=False))
     print(json.dumps({k: v for k, v in res.items() if k != 'replays'}))
     for name, r in res['replays'].items():
-        print(f'{name:11s}', *(f"{per}: n{x['n']} win {x['win_pct']:.1f} mean {x['mean_bp']:.0f} x{x['final_median']:.2f} [{x['final_min']:.2f}-{x['final_max']:.2f}] dd {x['dd_median']:.0f}/{x['dd_max']:.0f}" for per, x in r.items()))
+        print(f'{name:15s}', *(f"{per}: n{x['n']} win {x['win_pct']:.1f} mean {x['mean_bp']:.0f} x{x['final_median']:.2f} [{x['final_min']:.2f}-{x['final_max']:.2f}] dd {x['dd_median']:.0f}/{x['dd_max']:.0f}" for per, x in r.items()))
 
 
 if __name__ == '__main__':
