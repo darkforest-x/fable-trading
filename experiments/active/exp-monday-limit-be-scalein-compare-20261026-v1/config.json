@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-monday-limit-be-scalein-compare-20261026-v1",
+  "question": "Owner 2026-10-26: does a fee-covering breakeven (+7 / +17bp) or a -5 / -10 percent equal-size add on high scores improve the rule?",
+  "single_variable": "Breakeven offset per family; scale-in depth for v3 score >= 0.6.",
+  "input": "experiments/active/exp-monday-limit-be-scalein-20261026-v1",
+  "path_rule": "worse intrabar path per trade; for scale-in, per event on the combined parent + child result",
+  "slippage_bp_non_target_exit": 10,
+  "fees": {"maker_bp": 2, "taker_bp": 5, "read_on": "2026-10-23 OKX Lv1"},
+  "sizing": "linear in score, 0.05 * (score - 0.226) / 0.1088, cap 0.5, gross <= 1x; a child takes its parent's fraction at its own fill",
+  "periods": ["2020-2024 (score training period)", "2025", "2026", "last five months"],
+  "dropped_events": ["BABYUSDT:2026-06-01:-1", "DASHUSDT:2020-04-13:+1"],
+  "tie_orders": 10
+}
