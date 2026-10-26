@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp-monday-limit-spike-opt-20261026-v1",
+  "question": "Owner 2026-10-26: spike subset (score >= 0.6, EMA order > 0): floating-loss distribution, tighter backstops, slots with higher leverage; account drawdown <= 40 percent, high win rate and high total return.",
+  "subset_trades": "experiments/active/exp-monday-limit-time-news-20261026-v1/trades.csv.gz",
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "min_score": 0.6,
+  "sources": {
+    "exp-monday-limit-v3-grid-20261025-v1": ["near_far", "near_P10", "near_P12", "near_P15", "near_P18", "near_P20", "near_P25", "near_P30"],
+    "exp-monday-limit-v3-levels-20261025-v1": ["r05_far", "r05_P10", "r05_P15", "r05_P20", "r05_P30"],
+    "exp-monday-limit-spike-stops-20261026-v1": ["near_P3", "near_P5", "near_P7", "r05_P3", "r05_P5", "r05_P7"]
+  },
+  "mae_marks": [3, 5, 7, 10, 15, 20, 30],
+  "slot_variants": ["near_P3", "near_P5", "near_P7", "near_P10", "near_P15", "near_P20", "near_P30", "near_far", "r05_P5", "r05_P10", "r05_P20", "r05_P30"],
+  "slots": [3, 5, 10],
+  "leverage": [1, 2, 3, 5, 10, 20],
+  "schemes": ["extract_resize", "no_extract"],
+  "max_dd": 40,
+  "top": 12,
+  "win_bp": 1.0,
+  "ties": 10,
+  "seed": 20261031,
+  "in_sample": "The order-score filter was found on the same history; settings are chosen on 2020-2024 and checked on 2025, 2026 and the last five months.",
+  "training_eligible": false,
+  "production_eligible": false
+}
