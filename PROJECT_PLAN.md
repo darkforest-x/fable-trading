@@ -242,3 +242,17 @@ primary, short is the explicit mirrored supplementary cohort. Existing matched
 random submissions, fees and data are reused; market entry incurs taker fees
 and separately stated10bp adverse slippage. Select2025/check2026, independent
 R/notional outcomes only, no funded-account or deployment change.
+
+## Owner-authorized Monday keypoints with known stop risk (2026-10-26)
+
+Owner requests the existing Monday key targets instead of fixedR targets,
+retaining confirmed5m market entry and the known bearish pin low stop, and
+asks whether the larger same-risk position increases profit. Reuse all prior
+admitted events/scores, exact5m order-ledger targets and matched controls.
+Five targets x the two unchanged BE policies; native framework quantities use
+an illustrative100USDT planned stop loss including both commissions and stop
+slippage. No account risk fraction is assumed. Frozen R-target fills supply
+the unchanged baseline by linear risk normalization only, without replay.
+Primary objective is2025 mean PnL per planned risk per resolved opportunity;
+pre-entry target-passed/fee-insufficient skips count zero, boundaries remain
+missing, and2026 is checked without reselection. Research only.
