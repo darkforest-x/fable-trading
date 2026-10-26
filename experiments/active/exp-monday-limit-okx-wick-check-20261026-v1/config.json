@@ -1,0 +1,11 @@
+{
+  "experiment_id": "exp-monday-limit-okx-wick-check-20261026-v1",
+  "question": "Owner 2026-10-26 (flash wicks): would OKX have filled the 2026 same-bar fill-and-target trades of the score >= 0.6 + EMA order > 0 subset?",
+  "variants": ["near_P30", "opp1618_P30"],
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "okx_endpoint": "GET https://www.okx.com/api/v5/market/history-candles (public, read-only)",
+  "sleep_s": 0.25,
+  "limits": "Wick depth only; levels stay Binance-derived; 1000x-prefixed symbols unmapped.",
+  "training_eligible": false,
+  "production_eligible": false
+}
