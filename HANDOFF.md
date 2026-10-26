@@ -56,6 +56,16 @@
 - Median notional per100USDTplannedrisk5077to5511;99percentile~22k;maximum~30.8k. Same entry/stop implies exactly same size regardless of target. Recorded overlap as high as137positions and~471600USDTnotional across fixed-target arms; this is independent exposure, not a feasible cashaccount. Stops ordinarily lose100USDT, observed worst~101.50 fromgaps. Funding/margin/capacity remain unmodeled. Originalentry-week targets do not roll nextweek; sourcegap/end censoring preserved.
 - Results and reproduction `experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/`; Notion `4058856479af81bfac30ddc49688ef3e`. Learning `fixed-risk-sizing-must-include-fill-costs.md`. All production/training flagsfalse; no live/score changes, no additional report. Luna delegate actualmodel/effort could not be verified from tool output and was stopped; main performed work.
 
+## 2026-10-27 · Overfitting check: spike subsets against matched random entries
+
+- Owner asked whether the strategy is overfit. Codex's ledger has up to three matched random controls per signal: same symbol, NY week, direction and volatility bucket, same limit distance and target percentage (O-H-L-C path only, 60m, near target). Paired excess per trade:
+  - all signals +32bp, CI [25, 39];
+  - score ≥0.6 +127bp, CI [80, 172], significant in 2020-24 and 2025-26;
+  - spike-HW events (score ≥0.6, order ≥3) only +70bp, CI [−26, 170], p .07 (2025-26 p .19), with control win rate 75 percent.
+- Reading: the order ≥3 cut mostly selects favourable weeks, not better entry moments.
+- Booklet updated with this section. Registry `exp-monday-limit-spike-controls-20261027-v1`; learning `high-win-filters-can-select-good-weeks-not-good-entries.md`.
+- Owner also asked whether other range levels (Monday edge, 0.618) work. The earlier hold-rate study found 1.618 no different from 1.272 / 1.414 / 2.0 or random levels. The limit-reclaim P&L at other levels has not been run: the Codex runner hard-codes 0.618 extension in `monday_limit_reclaim.prepare`.
+
 ## 2026-10-26 · spike-HW v1: booklet and fifth paper account
 
 - Owner asked for a booklet on the highest win-rate version and for it to join paper trading next to the four existing accounts.

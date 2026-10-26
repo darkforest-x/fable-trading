@@ -1,0 +1,198 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-spike-controls-20261027-v1",
+    "question": "Owner 2026-10-27 (overfitting): do the spike subsets beat matched random entries in the same symbol, week, direction and volatility bucket?",
+    "ledger": "experiments/active/exp-monday-limit-reclaim-20261024-v1 (O-H-L-C, controls_per_signal 3)",
+    "scores": "experiments/active/exp-monday-limit-be-scalein-20261026-v1/scores.csv.gz",
+    "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+    "population": "60m confirmation, near Monday edge target, no backstop, closed rows",
+    "win_bp": 1.0,
+    "boot": 2000,
+    "seed": 20261027,
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "results": {
+    "signals": 71030,
+    "paired": 69374,
+    "all_signals": {
+      "y2020_2024": {
+        "n": 30188,
+        "weeks": 261,
+        "signal_mean_bp": 16.859053965045465,
+        "control_mean_bp": -17.469130667482315,
+        "diff_bp": 34.32818463252779,
+        "diff_ci95": [
+          22.707275736561378,
+          45.43677218649975
+        ],
+        "p_le0": 0.0,
+        "signal_win_pct": 22.740824168543792,
+        "control_win_pct": 14.244622587341546
+      },
+      "y2025_2026": {
+        "n": 39186,
+        "weeks": 92,
+        "signal_mean_bp": 14.39611785128587,
+        "control_mean_bp": -16.08908448968297,
+        "diff_bp": 30.485202340968844,
+        "diff_ci95": [
+          21.316157430556757,
+          39.11449570975401
+        ],
+        "p_le0": 0.0,
+        "signal_win_pct": 24.47047414893074,
+        "control_win_pct": 16.080998315725004
+      },
+      "all": {
+        "n": 69374,
+        "weeks": 352,
+        "signal_mean_bp": 15.467861089417946,
+        "control_mean_bp": -16.68960967225002,
+        "diff_bp": 32.157470761667966,
+        "diff_ci95": [
+          25.26328140925055,
+          39.28048388903064
+        ],
+        "p_le0": 0.0,
+        "signal_win_pct": 23.71781935595468,
+        "control_win_pct": 15.281901961349591
+      }
+    },
+    "score_ge06": {
+      "y2020_2024": {
+        "n": 174,
+        "weeks": 67,
+        "signal_mean_bp": 259.5984932217744,
+        "control_mean_bp": 118.1004392254456,
+        "diff_bp": 141.4980539963288,
+        "diff_ci95": [
+          71.76058626650783,
+          219.42503029707672
+        ],
+        "p_le0": 0.0,
+        "signal_win_pct": 82.75862068965517,
+        "control_win_pct": 54.40613026819923
+      },
+      "y2025_2026": {
+        "n": 499,
+        "weeks": 83,
+        "signal_mean_bp": 176.37475910674786,
+        "control_mean_bp": 54.553616578455426,
+        "diff_bp": 121.82114252829243,
+        "diff_ci95": [
+          62.05289423354097,
+          174.9800361169885
+        ],
+        "p_le0": 0.0,
+        "signal_win_pct": 73.34669338677354,
+        "control_win_pct": 49.498997995991985
+      },
+      "all": {
+        "n": 673,
+        "weeks": 150,
+        "signal_mean_bp": 197.89174236977107,
+        "control_mean_bp": 70.98325571749895,
+        "diff_bp": 126.90848665227212,
+        "diff_ci95": [
+          80.15677569461249,
+          171.6960493376758
+        ],
+        "p_le0": 0.0,
+        "signal_win_pct": 75.78008915304606,
+        "control_win_pct": 50.76770678553739
+      }
+    },
+    "score_ge06_order_ge1": {
+      "y2020_2024": {
+        "n": 102,
+        "weeks": 40,
+        "signal_mean_bp": 356.1352656893889,
+        "control_mean_bp": 160.53571428930735,
+        "diff_bp": 195.59955140008157,
+        "diff_ci95": [
+          112.77675346208494,
+          307.95480559773017
+        ],
+        "p_le0": 0.0,
+        "signal_win_pct": 93.13725490196079,
+        "control_win_pct": 63.56209150326797
+      },
+      "y2025_2026": {
+        "n": 226,
+        "weeks": 69,
+        "signal_mean_bp": 190.98699633932532,
+        "control_mean_bp": 118.79778634533525,
+        "diff_bp": 72.18920999399008,
+        "diff_ci95": [
+          -12.580288594650648,
+          155.72445444553716
+        ],
+        "p_le0": 0.044,
+        "signal_win_pct": 78.31858407079646,
+        "control_win_pct": 57.227138643067846
+      },
+      "all": {
+        "n": 328,
+        "weeks": 109,
+        "signal_mean_bp": 242.3440801006256,
+        "control_mean_bp": 131.77726393766804,
+        "diff_bp": 110.56681616295754,
+        "diff_ci95": [
+          50.69419511062384,
+          178.08213409447845
+        ],
+        "p_le0": 0.0,
+        "signal_win_pct": 82.92682926829268,
+        "control_win_pct": 59.197154471544714
+      }
+    },
+    "score_ge06_order_ge3": {
+      "y2020_2024": {
+        "n": 39,
+        "weeks": 12,
+        "signal_mean_bp": 430.85392169054626,
+        "control_mean_bp": 311.4782037015168,
+        "diff_bp": 119.37571798902955,
+        "diff_ci95": [
+          26.721401535999956,
+          374.2929862503425
+        ],
+        "p_le0": 0.0025,
+        "signal_win_pct": 97.43589743589743,
+        "control_win_pct": 85.47008547008545
+      },
+      "y2025_2026": {
+        "n": 97,
+        "weeks": 53,
+        "signal_mean_bp": 306.07504593749934,
+        "control_mean_bp": 256.45633821926066,
+        "diff_bp": 49.618707718238696,
+        "diff_ci95": [
+          -74.64194225780825,
+          170.69764804263636
+        ],
+        "p_le0": 0.186,
+        "signal_win_pct": 86.5979381443299,
+        "control_win_pct": 71.30584192439862
+      },
+      "all": {
+        "n": 136,
+        "weeks": 65,
+        "signal_mean_bp": 341.8572235431526,
+        "control_mean_bp": 272.23466729137823,
+        "diff_bp": 69.62255625177431,
+        "diff_ci95": [
+          -25.622240132614227,
+          169.80118381027313
+        ],
+        "p_le0": 0.068,
+        "signal_win_pct": 89.70588235294117,
+        "control_win_pct": 75.36764705882352
+      }
+    }
+  },
+  "source_commit": "26da9d3a182c26e69ca86c03b5d549891df12917",
+  "training_eligible": false,
+  "production_eligible": false
+}

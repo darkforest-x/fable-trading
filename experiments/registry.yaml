@@ -607,6 +607,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Backtest 2020-24 / 2025 / 2026 / last five months 3.74x / 8.97x / 2.56x / 2.96x, DD up to 34 percent; band edges were chosen after seeing 2025-2026, so the forward record is the test. UI pending Codex + Stitch.'
+  - experiment_id: exp-monday-limit-spike-controls-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 26da9d3a18
+    status: complete
+    question: 'Owner 2026-10-27 (overfitting): do the spike subsets beat matched random entries (same symbol, NY week, direction, volatility bucket)?'
+    single_variable: 'Paired signal minus mean of filled matched random controls in the Codex ledger (O-H-L-C, 60m, near target, no backstop), NY-week block bootstrap.'
+    result: 'All signals +32bp per trade over controls, 95 percent CI [25, 39], both periods positive. Score >= 0.6: +127bp [80, 172], 2025-26 +122 [62, 175], win 76 vs 51 percent. Score >= 0.6 and order >= 1: +111 [51, 178], 2025-26 +72 [-13, 156]. Spike-HW events (score >= 0.6, order >= 3, n136 paired): +70bp [-26, 170], p .07; 2025-26 +50 [-75, 171], p .19; controls also win 75 percent (signal 90). The order filter mostly selects weeks where random entries do well too.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-spike-controls-20261027-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Controls exist only on the O-H-L-C path. The score filter has a robust timing edge; the order >= 3 cut raises absolute results through regime selection but not a significant timing edge.'
   - experiment_id: exp-monday-limit-spike-hw-20261026-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 1d5b6ea8b3
