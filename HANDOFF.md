@@ -7,6 +7,10 @@
 - Median notional per100USDTplannedrisk5077to5511;99percentile~22k;maximum~30.8k. Same entry/stop implies exactly same size regardless of target. Recorded overlap as high as137positions and~471600USDTnotional across fixed-target arms; this is independent exposure, not a feasible cashaccount. Stops ordinarily lose100USDT, observed worst~101.50 fromgaps. Funding/margin/capacity remain unmodeled. Originalentry-week targets do not roll nextweek; sourcegap/end censoring preserved.
 - Results and reproduction `experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/`; Notion `4058856479af81bfac30ddc49688ef3e`. Learning `fixed-risk-sizing-must-include-fill-costs.md`. All production/training flagsfalse; no live/score changes, no additional report. Luna delegate actualmodel/effort could not be verified from tool output and was stopped; main performed work.
 
+## 2026-10-26 · Notion overview of the 1.618 system
+
+- Owner asked for one page that consolidates every 1.618 test, what works, what is worth more research, and the logic now running. Notion page `4058856479af81e6bbdbf1d39bd4875a` (under task 1.618挂单策略, marked pending validation) groups the work in three lines: the level itself (rejected), candle-confirmation entries (rejected or inconclusive), and limit + reclaim (current, partly effective). The v2 page links to it. No code or experiment changes.
+
 ## 2026-10-26 · Win rate by weekday, hour and US news: no stable effect
 
 - Owner asked which weekdays and hours win most, and whether news matters. Read-only grouping of the existing NautilusTrader fills: v2_be17 (22,708 trades, 33.0 percent) and v3_be17 (2,108 trades, 36.7 percent). Worse path, 10bp slippage, win = net > 1bp (breakevens at +0.17 percent are flat). Builder `yoyo/evaluation/monday_limit_time_news.py`.
