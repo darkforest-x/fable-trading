@@ -1,6 +1,6 @@
 /* Paper fills decorate an independent instance of the Monday wallpaper chart.
  * Price/time geometry uses actual fills, exits and activated entry stops only.
- * Current Monday rays stay current even when a historical trade is selected.
+ * Weekly rays and every loaded same-symbol fill retain independent lifetimes.
  */
 (() => {
   'use strict';
@@ -50,8 +50,14 @@
     const shared=window.SpikePublicChartCache;
     const chart=window.SpikeMondayFibChart.create({decorate:(instance,data)=>{
       const p=data.paperTrade,step=periods[data.bar];
-      if(!instance.paperDrawing){instance.paperDrawing=new TradeDrawing(instance);instance.series.attachPrimitive(instance.paperDrawing);}
-      const draw=instance.paperDrawing;draw.trade=p;draw.step=step;draw.shape=geometry(p,instance.rows,step,Math.max(data.now_ms,p?.asof_ms||0));draw.requestUpdate?.();
+      const trades=new Map([...(data.paperTrades||[]),...(p?[p]:[])].filter(t=>valid(t)&&t.symbol===data.symbol).map(t=>[String(t.id),t]));
+      instance.paperDrawings ||= new Map();
+      for(const [id,old] of instance.paperDrawings)if(!trades.has(id)){old.shape=null;instance.series.detachPrimitive?.(old);instance.paperDrawings.delete(id);}
+      for(const [id,t] of trades){let drawing=instance.paperDrawings.get(id);
+        if(!drawing){drawing=new TradeDrawing(instance);instance.paperDrawings.set(id,drawing);instance.series.attachPrimitive(drawing);}
+        drawing.trade=t;drawing.step=step;drawing.shape=geometry(t,instance.rows,step,Math.max(data.now_ms,p?.asof_ms||0));drawing.requestUpdate?.();
+      }
+      const draw=instance.paperDrawings.get(String(p?.id));instance.paperDrawing=draw||{shape:null};
       if(!p){notice('');return;}
       const focusKey=p.id+'|'+data.bar;
       if(draw.shape&&pinnedFocus!==focusKey){pinnedFocus=focusKey;
@@ -59,9 +65,9 @@
       }
       notice(!draw.shape||draw.shape.entry===-1?'开仓时间不在当前已加载 K 线内；可切换更大周期查看。':'');
     }});
-    function paint(){if(active&&anchor&&desired)chart.show(host,anchor,anchor.week,{period:desired.period,ma:desired.ma,internal:desired.internal,trade:desired.trade,anchors:anchor});}
-    async function show(trade,period='5m',ma=false,symbol=trade?.symbol||'',internal=false){
-      const changed=desired?.symbol!==symbol;desired={trade:valid(trade)&&trade.symbol===symbol?trade:null,period,ma,symbol,internal};
+    function paint(){if(active&&anchor&&desired)chart.show(host,anchor,anchor.current_week||anchor.week,{period:desired.period,ma:desired.ma,internal:desired.internal,trade:desired.trade,trades:desired.trades,anchors:anchor});}
+    async function show(trade,period='5m',ma=false,symbol=trade?.symbol||'',internal=false,trades=[]){
+      const changed=desired?.symbol!==symbol;desired={trade:valid(trade)&&trade.symbol===symbol?trade:null,period,ma,symbol,internal,trades};
       if(changed){epoch++;request?.abort();request=null;anchor=null;chart.hide();pinnedFocus='';}
       if(!active)return;
       if(!/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(symbol)){chart.hide();notice('尚无资金交易，可从监控币种选择 K 线。');return;}
@@ -79,8 +85,8 @@
       }catch(e){if(revision===epoch&&active)notice((e.name==='AbortError'?'图表读取超时':e.message)+' · 点击刷新重试');}
       finally{clearTimeout(timeout);if(request===c)request=null;}
     }
-    return {show,fit:chart.fit,latest:chart.latest,zoom:chart.zoom,retry(){received=0;if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal);},
-      setActive(value){active=value;if(!value){epoch++;request?.abort();request=null;chart.pause();}else if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal);},
+    return {show,fit:chart.fit,latest:chart.latest,zoom:chart.zoom,retry(){received=0;if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
+      setActive(value){active=value;if(!value){epoch++;request?.abort();request=null;chart.pause();}else if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
       resetFocus(){pinnedFocus='';},destroy(){active=false;epoch++;request?.abort();chart.hide();}};
   }
   window.SpikeReclaimChart={create,latest,select,valid};

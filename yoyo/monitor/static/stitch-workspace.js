@@ -8,22 +8,23 @@
     menu.open=false;
     if(restore)menu.querySelector('summary')?.focus();
   }
-  document.addEventListener('click',event=>{
-    document.querySelectorAll('details.quiet-menu[open]').forEach(menu=>{
+  document.addEventListener('pointerdown',event=>{
+    document.querySelectorAll('details.quiet-menu[open], details.rp-navigation[open], details.mf-home-menu[open]').forEach(menu=>{
       if(!menu.contains(event.target))close(menu);
     });
-  });
+  },true);
+  document.addEventListener('click',event=>{const menu=event.target.closest?.('details.rp-navigation,details.mf-home-menu');if(menu&&event.target.closest('a'))close(menu);},true);
   document.addEventListener('keydown',event=>{
     if(event.key!=='Escape')return;
-    const menu=event.target.closest?.('details.quiet-menu[open]');
+    const menu=document.querySelector('details.quiet-menu[open], details.rp-navigation[open], details.mf-home-menu[open]');
     if(menu){event.preventDefault();event.stopPropagation();close(menu,true);}
   },true);
   document.addEventListener('focusin',event=>{
-    document.querySelectorAll('details.quiet-menu[open]').forEach(menu=>{
+    document.querySelectorAll('details.quiet-menu[open], details.rp-navigation[open], details.mf-home-menu[open]').forEach(menu=>{
       if(!menu.contains(event.target))close(menu);
     });
   });
-  window.addEventListener('hashchange',()=>document.querySelectorAll('details.quiet-menu[open]').forEach(menu=>close(menu)));
+  window.addEventListener('hashchange',()=>document.querySelectorAll('details.quiet-menu[open], details.rp-navigation[open], details.mf-home-menu[open]').forEach(menu=>close(menu)));
 })();
 /* Account navigation stays distinct from signal records despite a shared module. */
 (() => {
@@ -31,7 +32,8 @@
     const raw=location.hash.slice(1),[view,query]=raw.split('?');
     const account=view==='signals'&&new URLSearchParams(query||'').get('pane')==='account';
     const maAccount=view==='yolo-detect'&&new URLSearchParams(query||'').get('tab')==='account';
-    const family=view==='monday-fib'?'monday-fib':account||maAccount||['manual','copier'].includes(view)?'yolo-detect?tab=account':
+    const home=view==='signals'&&new URLSearchParams(query||'').get('pane')==='reclaim';
+    const family=home?'reclaim':view==='monday-fib'?'reclaim':account||maAccount||['manual','copier'].includes(view)?'yolo-detect?tab=account':
       ['paper-desk','paper'].includes(view)?'paper-desk':view==='signals'?'signals':view==='yolo-detect'?'yolo-detect':
       ['platform','research','datasets','factors','models','strategies','yolo','vision','experiments','backtests'].includes(view)?'research':
       ['learning','trading-books','orderflow','langlang','rektproof','knowledge','content'].includes(view)?'learning':

@@ -55,7 +55,7 @@
       start(symbol+'|'+period,'/api/monday-fib/candles?symbol='+encodeURIComponent(symbol)+'&period='+period+'&wait_ms=8000');
     });
   }else{
-    start('monday-snapshot','/api/monday-fib?compact=true')?.then(packet=>{
+    start('monday-snapshot','/api/monday-fib/display')?.then(packet=>{
       const symbol=initialSymbol(packet?.value?.items,params.get('symbol')||'');
       if(!symbol||!/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(symbol))return;
       let period='15m';try{period=window.localStorage.getItem('spike.monday.timeframe')||period;}catch{}

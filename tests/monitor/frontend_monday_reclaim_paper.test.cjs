@@ -121,3 +121,12 @@ test('every ledger tab ranks raw scores descending, missing last, then newest on
   }
   assert.deepEqual(input.map(r=>r.id),[1,2,3,4,5,6,7]);
 });
+
+test('position amount is USDT and loss color never inherits the long direction',()=>{
+ const api=require('../../yoyo/monitor/static/monday-reclaim-paper.js');
+ const p={id:71,symbol:'SOL-USDT-SWAP',side:1,taken:1,notional:100,remaining_notional:75,entry:5,pnl:-3.25};
+ const closed=api.rowHTML(p,{tab:'closed',track:'60',period:'5m'},1);
+ assert.match(closed,/<span class="rp-positive">做多<\/span> · <span class="rp-negative">-3.25/);
+ const open=api.rowHTML(p,{tab:'open',track:'60',period:'5m'},1);
+ assert.match(open,/持仓 75.00 USDT/);assert.doesNotMatch(open,/剩余 15 SOL/);assert.match(open,/data-rp-close="71"/);
+});

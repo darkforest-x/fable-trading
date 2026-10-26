@@ -40,7 +40,12 @@
       if(![b.time,b.open,b.high,b.low,b.close].every(finite)||b.time<=previous||b.time+PERIODS[period]>boundary||b.time%PERIODS[period]!==0||b.high<Math.max(b.open,b.close,b.low)||b.low>Math.min(b.open,b.close))throw Error('K 线数据不完整，请稍后重试');
       previous=b.time;
     }
-    return {...context,candles,levels:levels(row,anchors),level_window:{start_ms:start,end_ms:context.monday.expires_ms},monday:{...context.monday,high:row.high,low:row.low,complete:true}};
+    const prior=anchors?.display_previous===true;
+    if(anchors&&(anchors.symbol!==row.symbol||anchors.state!=='ready'||(prior
+      ? anchors.current_week!==week||anchors.expires_ms!==start||anchors.end_ms>start
+      : anchors.week!==week)||![anchors.high_ms,anchors.low_ms].every(t=>finite(t)&&t>=anchors.start_ms&&t<anchors.end_ms)))throw Error('周一区间锚点不匹配');
+    const range=anchors||row;
+    return {...context,candles,levels:levels(range,anchors),level_window:{start_ms:anchors?.start_ms??start,end_ms:anchors?.expires_ms??context.monday.expires_ms},monday:{...context.monday,high:range.high,low:range.low,complete:!prior&&range.state!=='developing'}};
   }
   // The display contains closed candles. Refresh at their next close, using
   // server time so a user's clock cannot postpone updates. Lagging tails retry.
@@ -68,7 +73,7 @@
       if(!target.levels)value.levels=[];
       value=window.SpikeMondayCandleFeed?.mergeDisplay(value,target.live,target.period)||value;
       target.context=context;
-      value.paperTrade=target.trade;
+      value.paperTrade=target.trade;value.paperTrades=target.trades;
       if(context.display_cached)value.stale=true;
       if(!target.internal)value.levels=value.levels.filter(l=>['上 1.618','周一高','周一低','下 1.618'].includes(l.label));
       target.instance=window.SpikeRangeChart.mount(target.mount,value,{...view,ma:target.ma,mondayBand:target.period!=='1D'},error);
@@ -90,40 +95,47 @@
     if(!target||controller||document.hidden)return;
     clearTimeout(timer);const current=target,token=version,c=new AbortController();controller=c;
     const timeout=setTimeout(()=>c.abort(),15000);let delay=15000;
-    const anchorRequest=current.levels?null:fetch('/api/monday-fib/levels?symbol='+encodeURIComponent(current.row.symbol),{signal:c.signal,cache:'no-store'}).then(async r=>{if(!r.ok)throw Error('周一锚点读取失败');const a=await r.json();if(a.symbol!==current.row.symbol||a.week!==current.week||a.state!=='ready'||![a.high_ms,a.low_ms].every(t=>finite(t)&&t>=a.start_ms&&t<a.end_ms)||['high','low','upper','lower'].some(k=>!finite(a[k])||Math.abs(a[k]-current.row[k])>Math.max(1e-12,Math.abs(a[k])*1e-8)))throw Error('周一锚点待同步');return a;}).catch(()=>null);
+    const anchorRequest=current.levels&&!current.levels.display_previous?null:fetch('/api/monday-fib/levels?symbol='+encodeURIComponent(current.row.symbol),{signal:c.signal,cache:'no-store'}).then(async r=>{
+      if(!r.ok)throw Error('周一锚点读取失败');const a=await r.json();
+      if(a.symbol!==current.row.symbol||(a.current_week||a.week)!==current.week)throw Error('周一锚点待同步');
+      if(a.state==='developing')return a;
+      if(a.state!=='ready'||![a.high_ms,a.low_ms].every(t=>finite(t)&&t>=a.start_ms&&t<a.end_ms)||!['high','low','upper','lower'].every(k=>finite(a[k])))throw Error('周一锚点待同步');
+      return a;
+    }).catch(()=>null);
     try{
       const warming=window.SpikeStartup?.take(current.row.symbol+'|'+current.period,c.signal),warm=warming?await warming:null;
       let value=warm?.value;
       if(!warm){const r=await fetch('/api/monday-fib/candles?symbol='+encodeURIComponent(current.row.symbol)+'&period='+encodeURIComponent(current.period)+'&wait_ms=8000',{cache:'no-store',credentials:'same-origin',signal:c.signal});value=await r.json();if(!r.ok)throw Error(typeof value.detail==='string'?value.detail:'图表读取失败');}
       if(token!==version||target!==current)return;
-      prepare(value,current.row,current.week,current.period);
+      prepare(value,current.row,current.week,current.period,current.levels);
       current.feed?.setClock(value.now_ms+(warm?Date.now()-warm.receivedAt:0));
       delay=Math.max(0,refreshDelay(value,current.period)-(warm?Date.now()-warm.receivedAt:0));
+      if(current.levels?.display_previous)delay=Math.min(delay,60000);
       if(!value.candles?.length&&current.context?.candles?.length)value={...current.context,display_cached:true,loading:false,error:value.error||null};
       cache.delete(current.key);cache.set(current.key,{value,due:Date.now()+delay});while(cache.size>12)cache.delete(cache.keys().next().value);
       if(!value.display_cached)shared?.saveCandles(value);
       draw(value);
       if(anchorRequest){const anchors=await anchorRequest;if(token!==version||target!==current)return;
-        current.levels=anchors||current.levels;current.levelError=anchors?'':'周一锚点暂不可用，稍后重试';
-        if(anchors){shared?.saveLevels(anchors);levelCache.set(current.row.symbol+'|'+current.week,anchors);while(levelCache.size>32)levelCache.delete(levelCache.keys().next().value);}else delay=10000;
+        current.levels=anchors?.state==='ready'?anchors:current.levels;current.levelError=anchors?'':'周一锚点暂不可用，稍后重试';
+        if(anchors?.state==='ready'){shared?.saveLevels(anchors);levelCache.set(current.row.symbol+'|'+current.week,anchors);while(levelCache.size>32)levelCache.delete(levelCache.keys().next().value);}else delay=10000;
         cache.set(current.key,{value,due:Date.now()+delay});
         draw(value);}
     }catch(e){if(token===version&&target===current){message((e.name==='AbortError'?'图表读取超时':e.message)+' · 可重新加载');delay=10000;}}
     finally{clearTimeout(timeout);if(controller===c)controller=null;if(token===version&&target===current&&!document.hidden)timer=setTimeout(refresh,delay);}
   }
-  function show(host,row,week,{internal=false,ma=false,period='15m',trade=null,anchors=null}={}){
+  function show(host,row,week,{internal=false,ma=false,period='15m',trade=null,trades=[],anchors=null}={}){
     if(!PERIODS[period])period='15m';
     const key=row.symbol+'|'+week+'|'+period;
-    if(anchors?.symbol===row.symbol&&anchors.week===week&&anchors.state==='ready'){levelCache.set(row.symbol+'|'+week,anchors);shared?.saveLevels(anchors);}
+    if(anchors?.symbol===row.symbol&&(anchors.current_week||anchors.week)===week&&anchors.state==='ready'){levelCache.set(row.symbol+'|'+week,anchors);shared?.saveLevels(anchors);}
     if(target?.host===host&&target.key===key){
-      const changed=target.internal!==internal||target.ma!==ma||JSON.stringify(target.trade)!==JSON.stringify(trade)||['high','low','upper','lower'].some(k=>target.row[k]!==row[k]);
-      target.row=row;target.levels=levelCache.get(row.symbol+'|'+week)||target.levels;target.trade=trade;target.internal=internal;target.ma=ma;if(changed&&target.context)draw(target.context);if(paused){paused=false;startFeed();const previous=cache.get(key);if(previous&&previous.due>Date.now())timer=setTimeout(refresh,previous.due-Date.now());else refresh();}return;
+      const changed=target.internal!==internal||target.ma!==ma||JSON.stringify(target.trade)!==JSON.stringify(trade)||JSON.stringify(target.trades)!==JSON.stringify(trades)||['high','low','upper','lower'].some(k=>target.row[k]!==row[k]);
+      target.row=row;target.levels=levelCache.get(row.symbol+'|'+week)||target.levels;target.trade=trade;target.trades=trades;target.internal=internal;target.ma=ma;if(changed&&target.context)draw(target.context);if(paused){paused=false;startFeed();const previous=cache.get(key);if(previous&&previous.due>Date.now())timer=setTimeout(refresh,previous.due-Date.now());else refresh();}return;
     }
     const reuse=target?.host===host?target:null;
     if(reuse){version++;clearTimeout(timer);controller?.abort();controller=null;target.feed?.stop();}else stop();
     if(!host)return;paused=false;
     if(!reuse)host.innerHTML='<div class="mf-chart-caption"><p role="status">正在加载区间 K 线…</p><button type="button" data-mf-chart-retry>重新加载</button></div><div class="mf-chart-mount"></div>';
-    target={host,row,week,key,internal,ma,period,trade,levels:levelCache.get(row.symbol+'|'+week),state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
+    target={host,row,week,key,internal,ma,period,trade,trades,levels:levelCache.get(row.symbol+'|'+week),state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
     if(!reuse)host.querySelector('[data-mf-chart-retry]').addEventListener('click',()=>refresh());
     const previous=cache.get(key);
     if(previous)draw(previous.due>Date.now()?previous.value:{...previous.value,display_cached:true});
@@ -140,7 +152,7 @@
       }
     });
     if(!previous)shared?.restoreCandles(key).then(value=>{
-      if(value&&target===current&&!paused&&!current.context?.candles?.length){try{prepare(value,row,week,period);draw({...value,display_cached:true})}catch{/* Invalid local history cannot paint. */}}
+      if(value&&target===current&&!paused&&!current.context?.candles?.length){try{prepare(value,row,week,period,current.levels);draw({...value,display_cached:true})}catch{/* Invalid local history cannot paint. */}}
     });
     startFeed();
     if(target.levels&&previous&&Date.now()<previous.due&&!previous.value.loading&&!previous.value.error)timer=setTimeout(refresh,previous.due-Date.now());else refresh();

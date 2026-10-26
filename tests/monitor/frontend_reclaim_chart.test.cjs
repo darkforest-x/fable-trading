@@ -88,3 +88,17 @@ test('paper indicator changes reuse the chart and anchors across polling, period
  assert.equal(calls.at(-1)[3].internal,true);assert.equal(requests.length,1);
  await api.show(pos(),'1H',false,'SOL-USDT-SWAP',false);assert.equal(calls.at(-1)[3].internal,false);api.destroy();
 });
+
+test('same-symbol historical positions persist independently of selected trade and detach on switch',()=>{
+ let decorate;const attached=[],detached=[];
+ const sandbox={window:{SpikeMondayFibChart:{create:o=>{decorate=o.decorate;return {};}}}};
+ vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/reclaim-chart.js','utf8'),sandbox);
+ sandbox.window.SpikeReclaimChart.create({clientWidth:390},()=>{});
+ const instance={rows,series:{attachPrimitive:p=>attached.push(p),detachPrimitive:p=>detached.push(p)},chart:{priceScale:()=>({applyOptions(){}}),timeScale:()=>({setVisibleLogicalRange(){}})}};
+ const old=pos({id:2,stage:'closed',fill_ms:300001,exit_ms:600002}),current=pos();
+ decorate(instance,{symbol:current.symbol,paperTrade:current,paperTrades:[old,current,old,pos({symbol:'BTC-USDT-SWAP',id:3})],bar:'5m',now_ms:1000000});
+ assert.equal(instance.paperDrawings.size,2);assert.equal(attached.length,2);assert.equal(instance.paperDrawings.get('2').shape.to,old.exit_ms);
+ decorate(instance,{symbol:current.symbol,paperTrade:old,paperTrades:[current,old],bar:'5m',now_ms:1100000});
+ assert.equal(attached.length,2);assert.equal(instance.paperDrawings.get('2').shape.to,old.exit_ms);assert.equal(instance.paperDrawings.get('1').shape.to,1100000);
+ decorate(instance,{symbol:'BTC-USDT-SWAP',paperTrade:null,paperTrades:[],bar:'5m',now_ms:1100000});assert.equal(instance.paperDrawings.size,0);assert.equal(detached.length,2);
+});

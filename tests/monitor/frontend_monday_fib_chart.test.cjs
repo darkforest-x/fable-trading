@@ -146,3 +146,23 @@ test('Monday restores exact cached anchor rays and retains them when their reval
  h.pending.find(p=>p.url.includes('/candles?')).resolve({ok:true,json:async()=>context()});await h.settle();
  assert.equal(h.rendered.at(-1).levels.length,4);h.api.hide();
 });
+
+test('prior completed rays stop exactly at the new Monday while candles remain current',()=>{
+ const previous=anchorReply('/levels?symbol=BTC-USDT-SWAP'),next=start+7*86400000;
+ const c={...context(),monday:{start_ms:next,end_ms:next+86400000,expires_ms:next+7*86400000},last_close_ms:next+1800000,candles:[bar(next-900000),bar(next)]};
+ const a={...previous,display_previous:true,current_week:'2026-10-26'};
+ const result=prepare(c,{symbol:row.symbol,state:'developing'},'2026-10-26','15m',a);
+ assert.equal(result.levels.length,9);assert.equal(result.level_window.start_ms,start);assert.equal(result.level_window.end_ms,next);
+ assert.equal(result.monday.start_ms,next);assert.equal(result.monday.complete,false);assert.equal(result.candles.length,2);
+ assert.throws(()=>prepare(c,row,'2026-10-26','15m',previous),/锚点/);
+ assert.throws(()=>prepare(c,row,'2026-10-26','15m',{...a,expires_ms:next+1}),/锚点/);
+});
+
+test('a developing anchor response keeps live candles visible without a false error',async()=>{
+ const messages={textContent:''},draws=[];const host={querySelector:s=>s==='[role=status]'?messages:{addEventListener(){}},replaceChildren(){}};
+ const sandbox={document:{hidden:false},window:{SpikeRangeChart:{mount:(h,d)=>{draws.push(d);},unmount(){}}},Intl,Date,AbortController,setTimeout:()=>1,clearTimeout(){},fetch:async url=>({ok:true,json:async()=>url.includes('/levels?')?{symbol:row.symbol,week:'2026-10-19',state:'developing'}:context()})};
+ vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
+ sandbox.window.SpikeMondayFibChart.show(host,{symbol:row.symbol,state:'developing'},'2026-10-19');
+ for(let i=0;i<25;i++)await Promise.resolve();
+ assert.ok(draws.length>0);assert.equal(draws.at(-1).levels.length,0);assert.equal(messages.textContent,'');sandbox.window.SpikeMondayFibChart.hide();
+});

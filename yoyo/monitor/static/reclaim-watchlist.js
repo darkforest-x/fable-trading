@@ -12,7 +12,7 @@
     return data;
   }
   function model(data,preferences,{q='',filter='all'}={}){
-    const visible=preferences.visible(data?.items||[],data?.week),favorites=preferences.favorites();
+    const visible=preferences.visible(data?.items||[],data?.display_week||data?.week),favorites=preferences.favorites();
     return {total:selectRows(visible).length,items:selectRows(visible,q,filter,data?.now_ms,favorites)};
   }
   const PINNED=Object.freeze(['BTC-USDT-SWAP','ETH-USDT-SWAP','XAU-USDT-SWAP']);
@@ -101,13 +101,14 @@
     let open=false,filter='all',q='',shown=50,lastRemoval=null;
     const pointers=new Set();
     const requests=window.SpikeRuntime.createRequests();
-    const feed=createFeed({read:()=>requests.json('/api/monday-fib?compact=true'),validateData:validate,cancel:()=>requests.cancel(),change:render});
+    const feed=createFeed({read:()=>requests.json('/api/monday-fib/display'),validateData:validate,cancel:()=>requests.cancel(),change:render});
     const sheet=window.SpikeYoloPreviewSheet.bind({panel,isOpen:()=>open,dismiss:()=>setOpen(false)});
     const el=id=>panel.querySelector(`[data-watch="${id}"]`),scroll=panel.querySelector('.rp-watch-scroll');
     function setOpen(value,focus=true){sheet.reset();open=value;panel.classList.toggle('is-open',value);panel.inert=!value;panel.setAttribute('aria-hidden',String(!value));trigger.setAttribute('aria-expanded',String(value));if(value){preferences.read();onOpen?.();render();}else if(focus)trigger.focus({preventScroll:true});}
     function feedback(text,undo=false){const box=panel.querySelector('.rp-watch-feedback');box.hidden=!text;box.querySelector('span').textContent=text;box.querySelector('button').hidden=!undo;}
     function render(){
       const {data,error,busy}=feed.getState(),context=getContext(),view=model(data,preferences,{q,filter});
+      recent.dataset.previous=String(!!data?.display_previous);recent.querySelector('.rp-recent-label').textContent=data?.display_previous?'上周':'触价';recent.title=data?.display_previous?'本周周一区间形成中，保留上周触价记录':'';
       trigger.title=`选择币种 · 最新触价 ${data?view.total:'—'} 个`;el('total').textContent=data?view.items.length:'—';
       panel.querySelectorAll('[data-watch-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.watchFilter===filter)));
       panel.querySelector('.rp-watch-status').textContent=error?`同步失败 · ${error}${data?' · 保留上次记录':''}`:!data?busy?'正在读取最新触价…':'等待触价数据':`${data.stream?.connected?'行情在线':'行情重连中'} · 最新触价优先 · ${view.items.length} 个`;
@@ -127,7 +128,7 @@
       if(b?.dataset.watchFilter){filter=b.dataset.watchFilter;shown=50;scroll.scrollTop=0;render();return;}
       const action=b?.dataset.watchAction;
       if(action==='favorite'){preferences.toggle(row.dataset.symbol);feedback(preferences.persistent?'':'收藏暂未保存，仅本次有效');render();return;}
-      if(action==='remove'){const data=feed.getState().data,item=data.items.find(i=>i.symbol===row.dataset.symbol);lastRemoval=preferences.remove(item,data.week);feedback(preferences.persistent?'已从本周列表移除':'暂未保存，仅本次移除',!!lastRemoval);render();return;}
+      if(action==='remove'){const data=feed.getState().data,item=data.items.find(i=>i.symbol===row.dataset.symbol);lastRemoval=preferences.remove(item,data.display_week||data.week);feedback(preferences.persistent?'已从本周列表移除':'暂未保存，仅本次移除',!!lastRemoval);render();return;}
       if(action==='undo'){preferences.undo(lastRemoval);lastRemoval=null;feedback('');render();return;}
       if(action==='close')setOpen(false);if(action==='more'){shown+=50;render();}
       if(row&&!event.target.closest('a')&&!action){onSelect(row.dataset.symbol);setOpen(false);}

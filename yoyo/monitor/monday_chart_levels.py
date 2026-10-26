@@ -55,3 +55,17 @@ class MondayChartLevels:
             return dict(result, **value)
         finally:
             self.slots.release()
+
+    def read_display(self, symbol, at):
+        """Use the last completed NY Monday for display while this one forms.
+
+        The causal reader and execution context remain current-week only. The
+        prior range keeps its original expiry, including across DST changes.
+        """
+        current = self.read(symbol, at)
+        if current['state'] != 'developing':
+            return current
+        previous = self.read(symbol, current['start_ms'] - 1)
+        if previous['state'] != 'ready':
+            return current
+        return dict(previous, display_previous=True, current_week=current['week'])

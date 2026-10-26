@@ -31,7 +31,7 @@ test('home and retired market bookmarks warm only the paper snapshot before choo
 });
 test('startup overlaps code and data, preserves receipt time, and consumes each response once',async()=>{
  const h=harness(),signal=new AbortController().signal;
- assert.equal(h.calls.length,1);assert.equal(h.calls[0].url,'/api/monday-fib?compact=true');
+ assert.equal(h.calls.length,1);assert.equal(h.calls[0].url,'/api/monday-fib/display');
  assert.equal(h.calls[0].options.cache,'no-store');assert.equal(h.calls[0].options.credentials,'same-origin');
  assert.equal(h.links.length,4);assert.ok(h.links.some(l=>/monday-list-model.js\?v=list-v/.test(l.href)));assert.match(h.links[3].href,/production.js\?v=lib-v/);
  h.calls[0].resolve({ok:true,json:async()=>({items})});await flush();

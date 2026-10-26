@@ -53,7 +53,7 @@
   let localStore;try{localStore=window.localStorage;}catch{}
   const preferences=createListPreferences(localStore);
   let lastRemoval=null;
-  const visibleItems=()=>preferences.visible(data?.items||[],data?.week);
+  const visibleItems=()=>preferences.visible(data?.items||[],data?.display_week||data?.week);
   let listOpen=!!window.matchMedia?.('(min-width: 761px)').matches;
   const quick=window.SpikeMondayQuick?.create({
     panel:$('mf-quick-panel'),host:$('mf-quick-content'),trigger:$('mf-quick-toggle'),
@@ -146,7 +146,7 @@
         window.SpikeMondayFibChart?.hide();
       }
       $('mf-count').textContent=String(selectRows(items).length);
-      $('mf-week').textContent=`本周 · ${data.week} 纽约周一${data.monday_complete?'':' · 形成中'}`;
+      $('mf-week').textContent=data.display_previous?`上周 · ${data.display_week} · 本周区间形成中`:`本周 · ${data.week} 纽约周一${data.monday_complete?'':' · 形成中'}`;
     }
     $('mf-follow').setAttribute('aria-pressed',String(follow));$('mf-follow').title=follow?'自动显示最近触价的合约':'回到最新触价，并自动跟随';
     for(const id of ['mf-fit','mf-fib','mf-latest','mf-zoom-in','mf-zoom-out','mf-quick-toggle'])$(id).disabled=!selected;
@@ -160,7 +160,7 @@
     const task=(async()=>{try{
       const warming=window.SpikeStartup?.take('monday-snapshot',c.signal),warm=warming?await warming:null;
       let d=warm?.value;
-      if(!warm){const res=await fetch('/api/monday-fib?compact=true',{cache:'no-store',credentials:'same-origin',signal:c.signal});d=await res.json();if(!res.ok)throw Error(typeof d.detail==='string'?d.detail:'监控暂不可用，正在重试');}
+      if(!warm){const res=await fetch('/api/monday-fib/display',{cache:'no-store',credentials:'same-origin',signal:c.signal});d=await res.json();if(!res.ok)throw Error(typeof d.detail==='string'?d.detail:'监控暂不可用，正在重试');}
       if(!Array.isArray(d.items)||!d.stream||!d.week)throw Error('监控数据格式异常');
       if(rev!==revision||!active)return;data=d;receivedAt=warm?.receivedAt||Date.now();error='';render();
     }catch(e){if(rev===revision&&active){error=e.name==='AbortError'?'数据请求超时，正在重试':e.message;render();}}
@@ -184,7 +184,7 @@
       const symbol=(favorite||remove).dataset[favorite?'favoriteSymbol':'deleteSymbol'];
       const row=visibleItems().find(r=>r.symbol===symbol);if(!row)return;
       if(favorite){preferences.toggle(symbol);listFeedback(`${short(symbol)} ${preferences.has(symbol)?'已收藏':'已取消收藏'}`);renderRows();}
-      else{lastRemoval=preferences.remove(row,data.week);if(!lastRemoval)return;listFeedback(`${short(symbol)} 已删除`,true);if(selected===symbol){selected='';follow=true;}render();sync();}
+      else{lastRemoval=preferences.remove(row,data.display_week||data.week);if(!lastRemoval)return;listFeedback(`${short(symbol)} 已删除`,true);if(selected===symbol){selected='';follow=true;}render();sync();}
       return;
     }
     // The external link owns only its text; dates, gaps and values select locally.

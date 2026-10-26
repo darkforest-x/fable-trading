@@ -323,3 +323,35 @@ body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-headi
 
 #monday-reclaim-paper .rp-coin small {white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 #monday-reclaim-paper .rp-detail-favorite {display:flex;align-items:center;gap:7px;margin-bottom:8px;color:var(--rp-blue);}
+
+/* Stitch 6798eaf559a24559819826c8c01df7e7: one-row, inline-search ledger. */
+#monday-reclaim-paper .rp-records {width:360px;}
+#monday-reclaim-paper .rp-ledger-heading {position:relative;display:flex;gap:0;padding:4px;min-height:52px;flex:none;}
+#monday-reclaim-paper .rp-ledger-heading>strong {font-size:10px;padding:0 5px;}
+#monday-reclaim-paper .rp-ledger-heading .rp-ledger-tabs {padding:0;background:transparent;}
+#monday-reclaim-paper .rp-ledger-tabs button {font-size:10px;padding:0 3px;}
+#monday-reclaim-paper .rp-ledger-tabs button span {margin-left:3px;}
+#monday-reclaim-paper .rp-ledger-heading>button {width:44px;min-width:44px;height:44px;display:grid;place-items:center;}
+#monday-reclaim-paper .rp-ledger-heading .rp-scope {position:relative;width:44px;height:44px;display:grid;place-items:center;flex:none;}
+#monday-reclaim-paper .rp-ledger-heading .rp-scope[hidden] {display:none;}
+#monday-reclaim-paper .rp-ledger-heading .rp-scope select {position:absolute;inset:0;width:44px;height:44px;opacity:0;cursor:pointer;}
+#monday-reclaim-paper .rp-ledger-heading .rp-scope:focus-within {outline:2px solid var(--rp-blue);border-radius:12px;}
+#monday-reclaim-paper .rp-ledger-heading .rp-search {flex:1;min-width:0;}
+#monday-reclaim-paper .rp-ledger-heading.is-searching>:is(strong,.rp-ledger-tabs,.rp-scope) {display:none;}
+#monday-reclaim-paper .rp-ledger-heading .has-query {color:var(--rp-blue);background:var(--rp-selected);}
+#monday-reclaim-paper .rp-record {padding:3px 0;}
+#monday-reclaim-paper .rp-record-main {min-height:48px;}
+#monday-reclaim-paper .rp-coin a {min-height:32px;}
+#monday-reclaim-paper .rp-position-actions {min-height:38px;padding:0 6px 0 8px;}
+#monday-reclaim-paper .rp-position-actions button {min-height:44px;padding:0 12px;background:transparent;}
+#monday-reclaim-paper .rp-position-actions>span {font-variant-numeric:tabular-nums;font-size:10px;}
+#monday-reclaim-paper .rp-coin small>span {display:inline;}
+#monday-reclaim-paper .rp-coin small small {display:inline;}
+#monday-reclaim-paper .rp-coin>span:last-child>small {white-space:normal;overflow:visible;}
+#monday-reclaim-paper .rp-coin small>span {white-space:nowrap;}
+@media(max-width:700px){
+ #monday-reclaim-paper .rp-records {width:auto;}
+ #monday-reclaim-paper .rp-ledger-heading>strong {display:none;}
+ #monday-reclaim-paper .rp-ledger-heading .rp-ledger-tabs button {font-size:11px;}
+ #monday-reclaim-paper .rp-recent[data-previous=true] .rp-recent-label {display:block;font-size:8px;padding:0 3px;}
+}

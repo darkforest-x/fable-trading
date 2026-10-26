@@ -180,9 +180,14 @@ def install(app, runtime):
     @app.get('/api/monday-fib/levels')
     def levels(symbol: str = Query(..., pattern=SYMBOL)):
         try:
-            return chart_levels.read(symbol, service.client.clock())
+            return chart_levels.read_display(symbol, service.client.clock())
         except Exception:
             raise HTTPException(503, '周一区间暂不可用，请重试') from None
+
+    @app.get('/api/monday-fib/display')
+    def display():
+        from .monday_display import snapshot
+        return snapshot(app.state.monday_fib)
 
     from .monday_order_context import install as install_order_context
     install_order_context(app)
