@@ -61,6 +61,15 @@ def worse(o, l):
     return m
 
 
+def clean(x):
+    """NaN means no rows in a period; store it as null."""
+    if isinstance(x, dict):
+        return {k: clean(v) for k, v in x.items()}
+    if isinstance(x, list):
+        return [clean(v) for v in x]
+    return None if isinstance(x, float) and not np.isfinite(x) else x
+
+
 def periods(window):
     return {'y2020_2024': lambda t: t < B[0], 'y2025': lambda t: (t >= B[0]) & (t < B[1]), 'y2026': lambda t: t >= B[1], 'last5m': lambda t: t >= window}
 
@@ -154,6 +163,7 @@ def run():
         res['replays'] = dict(ex.map(replay_job, jobs))
     EXP.mkdir(exist_ok=True)
     charts(res)
+    res = clean(res)
     dump(EXP/'summary.json', dict(config=cfg, results=res, source_commit=subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip(),
                                   training_eligible=False, production_eligible=False))
     print(json.dumps(res['checks'], ensure_ascii=False))
