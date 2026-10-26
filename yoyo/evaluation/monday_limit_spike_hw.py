@@ -95,8 +95,8 @@ def charts(t, paths, exp):
             ax.spines[sp].set_visible(False)
     fig, ax = plt.subplots(figsize=(11, 4.2))
     for k, (name, p) in enumerate(paths.items()):
-        d = pd.DataFrame(p, columns=['ts', 'eq']); d['ts'] = pd.to_datetime(d.ts, utc=True)
-        ax.plot(d.ts, d.eq, color=('#2a78d6', '#898781')[k], lw=1.6 if k == 0 else 1.1, label=name)
+        d = pd.DataFrame(p, columns=['ts', 'equity']); d['ts'] = pd.to_datetime(d.ts, utc=True)
+        ax.plot(d.ts, d.equity, color=('#2a78d6', '#898781')[k], lw=1.6 if k == 0 else 1.1, label=name)
     ax.set_yscale('log'); ax.axhline(1000, color='#c3c2b7', lw=1); ax.legend(frameon=False)
     style(ax, '1000U 资金曲线（2020-01 至 2026-09，连续复利，已实现权益，对数坐标）')
     fig.tight_layout(); fig.savefig(exp/'1_equity.png', dpi=130); plt.close(fig)
@@ -174,8 +174,8 @@ def run(config):
                 med = np.argsort([r[0]['final_multiple'] for r in reps])[len(reps)//2]
                 paths[name] = reps[med][1]
                 if name.startswith('规则'):
-                    d = pd.DataFrame(reps[med][1], columns=['ts', 'eq']); d['ts'] = pd.to_datetime(d.ts, utc=True)
-                    yearly = d.groupby(d.ts.dt.year).eq.last()
+                    d = pd.DataFrame(reps[med][1], columns=['ts', 'equity']); d['ts'] = pd.to_datetime(d.ts, utc=True)
+                    yearly = d.groupby(d.ts.dt.year).equity.last()
                     start = pd.concat([pd.Series({yearly.index[0]-1: 1000.}), yearly])
                     res['equity_yearly_return_pct'] = {str(y): float(100*(yearly[y]/start[y-1]-1)) for y in yearly.index}
     charts(rule, paths, exp)
