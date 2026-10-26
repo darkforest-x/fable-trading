@@ -61,6 +61,14 @@ class GoldRecoveryTests(unittest.TestCase):
         self.assertEqual(r.iloc[0].exit_kind,'fee_recovery')
         self.assertGreaterEqual(r.iloc[0].net_r,0)
 
+    def test_exact_fee_neutral_close_exits_with_actual_taker_fee(self):
+        r,f,_=self.run_case([[101]*4,[101,101,99.8,100.01],[100.01,100.08,99.9,100.08],[100.08]*4])
+        self.assertEqual(r.iloc[0].exit_kind,'fee_stop')
+        self.assertEqual(r.iloc[0].reason,13)
+        self.assertEqual(r.iloc[0].exit_i,2)
+        self.assertGreaterEqual(r.iloc[0].net_r,0)
+        self.assertAlmostEqual(f.iloc[-1].commission,.5004,places=6)
+
     def test_entry_matrix_keeps_same_admissions_for_both_clocks(self):
         index=pd.date_range('2026-10-19T04:00Z',periods=340,freq='5min')
         f=pd.DataFrame(dict(open=100.,high=102.,low=98.,close=100.,volume=1.),index=index)

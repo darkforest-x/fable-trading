@@ -39,7 +39,7 @@ class GoldRecoveryStrategy(native.IndependentCloseStrategy):
         else:
             self.observe(state,float(event.last_px))
             r['exit_kind']=('fee_recovery' if phase=='target' and r['decision_status'] in ('failed_wait','fee_band_wait') else
-                            'far_target' if phase=='target' else 'fee_stop' if phase=='stop' and state.stop_kind==1 else
+                            'far_target' if phase=='target' else 'fee_stop' if phase==13 or phase=='stop' and state.stop_kind==1 else
                             'backstop' if phase=='stop' else 'censored')
         super().on_order_filled(event)
 
@@ -63,7 +63,15 @@ class GoldRecoveryStrategy(native.IndependentCloseStrategy):
                     state.stop,state.stop_kind=r['fee_stop'],1
                     state.be_price=r['fee_stop']
                     state.be_trigger_i=state.be_effective_i=i
-                    self.modify_order(state.stop_order,trigger_price=self.instrument.make_price(state.stop))
+                    if abs(close-r['fee_stop']) <= self.eps:
+                        # An amendment exactly at the current quote is rejected
+                        # by Nautilus. At this observed close a market exit is
+                        # already fee neutral and uses the actual taker fee.
+                        self._cancel_target(state)
+                        self._cancel_stop(state)
+                        self._market(state,reason=13)
+                    else:
+                        self.modify_order(state.stop_order,trigger_price=self.instrument.make_price(state.stop))
                 else:
                     r['decision_status']='fee_band_wait' if reclaimed else 'failed_wait'
                     self._cancel_target(state)
