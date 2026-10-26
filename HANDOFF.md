@@ -65,6 +65,18 @@
 - Median notional per100USDTplannedrisk5077to5511;99percentile~22k;maximum~30.8k. Same entry/stop implies exactly same size regardless of target. Recorded overlap as high as137positions and~471600USDTnotional across fixed-target arms; this is independent exposure, not a feasible cashaccount. Stops ordinarily lose100USDT, observed worst~101.50 fromgaps. Funding/margin/capacity remain unmodeled. Originalentry-week targets do not roll nextweek; sourcegap/end censoring preserved.
 - Results and reproduction `experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/`; Notion `4058856479af81bfac30ddc49688ef3e`. Learning `fixed-risk-sizing-must-include-fill-costs.md`. All production/training flagsfalse; no live/score changes, no additional report. Luna delegate actualmodel/effort could not be verified from tool output and was stopped; main performed work.
 
+## 2026-10-27 · Return-first version (in progress) and the cluster days
+
+- Return-first sizing on existing v3 / v3add fills (`exp-monday-limit-return-opt-20261027-v1`). Settings chosen as the best 2020-24 multiple under the 40 percent limit broke in 2026 (DD 60-76). Settings that stay ≤40 percent drawdown in all four periods (in sample):
+  - v3add, 20 slots × 3x: 12.6 / 9.3 / 5.4 / 6.2x, DD 9 / 19 / 39 / 9;
+  - v3, 20 slots × 3x: 9.1 / 6.7 / 4.0 / 4.1x, DD 11 / 12 / 30 / 8;
+  - compare v3 at 1x: 3.9 / 9.3 / 2.5 / 3.0x.
+  - The profit-lock run (breakeven +50 / 100 / 200bp, `exp-monday-limit-be-lock-20261027-v1`) is running in the background.
+- Cluster days of the spike rule:
+  - each filled inside a single 5m bar: 2026-08-22 13:10, 2024-02-29 01:30, 2023-11-10 00:10 (Beijing; all longs, market-wide flash crashes); 2024-01-03 20:05 (mixed); 2025-10-11 05:25 (6 shorts during the crash rebound).
+  - 70-85 percent of those fills hit the target in the same 5m bar.
+- An alert cannot help the entry; only resting orders catch it. Live trading would need margin for many resting 1.618 orders at once, which no backtest models yet.
+
 ## 2026-10-27 · spike-HW trade frequency
 
 - 219 backtest trades on 111 Beijing trading days. Only 6 before 2023. Since 2023, 35 percent of weeks have a trade; active weeks average 3.2.

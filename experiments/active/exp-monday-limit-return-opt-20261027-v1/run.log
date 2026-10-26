@@ -1,0 +1,28 @@
+  exit_t=pd.to_datetime(pd.Series(np.where(w, l.exit_time, o.exit_time), index=o.index), utc=True)), index=o.index))
+{"rows": {"v3": 2108, "v3add": 2481}, "mae_q": {"v3": {"q50": 3.1687766559048756, "q90": 13.822024992778818, "q95": 18.336831623846788, "q99": 28.2104015677056}, "v3add": {"q50": 3.319598763904455, "q90": 14.0333850931677, "q95": 18.921524047062157, "q99": 27.93802623731865}}}
+== baseline
+v3|linear|L1 x3.86 dd13 liq0 win51 | x9.31 dd19 liq0 win62 | x2.47 dd34 liq0 win56 | x2.95 dd17 liq0 win58
+v3add|linear|L1 x4.69 dd16 liq0 win33 | x13.26 dd28 liq0 win41 | x3.64 dd50 liq0 win38 | x5.48 dd17 liq0 win41
+== selected on 2020-24
+v3add|slots|N10|L5           x65.54 dd30 liq18 win35 | x1.31 dd46 liq8 win30 | x0.85 dd60 liq30 win33 | x1.38 dd32 liq2 win27
+v3|slots|N10|L5              x44.46 dd32 liq16 win32 | x77.49 dd33 liq27 win36 | x1.11 dd50 liq23 win30 | x1.30 dd36 liq2 win20
+v3add|slots|N5|L3            x43.76 dd37 liq1 win33 | x239.37 dd66 liq1 win41 | x1.26 dd78 liq4 win35 | x40.21 dd40 liq0 win41
+v3|linear|L3                 x37.57 dd36 liq1 win51 | x356.75 dd49 liq1 win62 | x6.87 dd76 liq4 win56 | x17.20 dd44 liq0 win58
+v3|slots|N5|L3               x35.72 dd35 liq1 win30 | x160.30 dd47 liq1 win37 | x1.51 dd55 liq4 win32 | x14.52 dd31 liq0 win35
+v3add|slots|N20|L5           x28.86 dd29 liq22 win37 | x21.06 dd28 liq37 win40 | x1.24 dd40 liq30 win34 | x8.74 dd28 liq19 win42
+v3add|slots|N10|L3           x23.91 dd19 liq1 win35 | x35.28 dd37 liq1 win41 | x4.07 dd66 liq4 win38 | x13.04 dd22 liq0 win42
+v3_tilt|linear|L2            x23.67 dd38 liq0 win51 | x129.50 dd46 liq1 win62 | x3.85 dd84 liq1 win55 | x17.89 dd37 liq0 win57
+v3add|linear|L2              x18.03 dd31 liq0 win33 | x106.00 dd51 liq1 win41 | x7.86 dd78 liq1 win38 | x23.57 dd33 liq0 win41
+v3|slots|N10|L3              x17.75 dd23 liq1 win32 | x21.43 dd23 liq1 win36 | x5.49 dd49 liq4 win33 | x6.69 dd15 liq0 win35
+v3add|slots|N5|L2            x16.90 dd27 liq0 win33 | x54.27 dd52 liq1 win41 | x5.76 dd60 liq1 win38 | x16.48 dd22 liq0 win41
+v3|slots|N20|L5              x15.64 dd30 liq20 win34 | x14.02 dd18 liq27 win36 | x1.28 dd42 liq26 win28 | x5.81 dd27 liq16 win36
+v3|linear|L2                 x12.97 dd25 liq0 win51 | x61.67 dd35 liq1 win62 | x4.52 dd59 liq1 win56 | x7.60 dd31 liq0 win58
+v3add|slots|N20|L3           x12.62 dd9 liq1 win38 | x9.29 dd19 liq1 win41 | x5.43 dd39 liq4 win39 | x6.19 dd9 liq0 win43
+v3|slots|N5|L2               x12.58 dd32 liq0 win30 | x36.04 dd32 liq1 win37 | x5.32 dd58 liq1 win33 | x7.33 dd21 liq0 win35
+== dd <= 40 in all periods (in-sample)
+v3add|slots|N20|L3           g7.92 x12.62 dd9 liq1 win38 | x9.29 dd19 liq1 win41 | x5.43 dd39 liq4 win39 | x6.19 dd9 liq0 win43
+v3|slots|N10|L2              g6.09 x8.53 dd16 liq0 win32 | x9.43 dd16 liq1 win36 | x3.93 dd38 liq1 win33 | x4.36 dd10 liq0 win35
+v3|slots|N20|L3              g5.62 x9.08 dd11 liq1 win34 | x6.69 dd12 liq1 win36 | x4.02 dd30 liq4 win34 | x4.07 dd8 liq0 win37
+v3add|slots|N20|L2           g5.05 x7.06 dd6 liq0 win38 | x5.79 dd13 liq1 win41 | x3.86 dd28 liq1 win39 | x4.11 dd7 liq0 win43
+v3|slots|N20|L2              g4.14 x6.01 dd7 liq0 win34 | x4.41 dd8 liq1 win36 | x3.30 dd22 liq1 win34 | x3.34 dd5 liq0 win37
+v3|linear|L1                 g4.02 x3.86 dd13 liq0 win51 | x9.31 dd19 liq0 win62 | x2.47 dd34 liq0 win56 | x2.95 dd17 liq0 win58

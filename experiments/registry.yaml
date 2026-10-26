@@ -632,6 +632,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Backtest 2020-24 / 2025 / 2026 / last five months 3.74x / 8.97x / 2.56x / 2.96x, DD up to 34 percent; band edges were chosen after seeing 2025-2026, so the forward record is the test. UI pending Codex + Stitch.'
+  - experiment_id: exp-monday-limit-return-opt-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: cc6e6bf27e
+    status: complete
+    question: 'Owner 2026-10-27: return-first version; maximize total return with account drawdown <= 40 percent (single liquidations acceptable).'
+    single_variable: 'Sizing only on existing v3 / v3add fills (worse path, MAE from 5m bars): linear margin x leverage 1-5 with optional EMA-order tilt, and slot schemes (5 / 10 / 20 slots, 2-5x); selection on 2020-24, check on 2025 / 2026 / last5m.'
+    result: 'Baselines 1x: v3 3.86 / 9.31 / 2.47 / 2.95x, DD 13 / 19 / 34 / 17; v3add 4.69 / 13.26 / 3.64 / 5.48x, DD 16 / 28 / 50 / 17. Best on 2020-24 under DD 40 fails later (v3add 10 slots 5x 65.5x then 2026 0.85x DD 60; v3 linear 3x 2026 DD 76). Settings with DD <= 40 in all four periods (in-sample): v3add 20 slots 3x 12.6 / 9.3 / 5.4 / 6.2x, DD 9 / 19 / 39 / 9, 1-4 liquidations; v3 10 slots 2x 8.5 / 9.4 / 3.9 / 4.4x, DD 16 / 16 / 38 / 10; v3 20 slots 3x 9.1 / 6.7 / 4.0 / 4.1x, DD 11 / 12 / 30 / 8.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-return-opt-20261027-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'In sample. Profit-lock offsets (exp-monday-limit-be-lock-20261027-v1) still running. Live resting-order margin for hundreds of 1.618 levels is not modeled.'
   - experiment_id: exp-monday-limit-spike-controls-20261027-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 26da9d3a18
