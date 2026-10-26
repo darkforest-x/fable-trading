@@ -56,6 +56,12 @@
 - Median notional per100USDTplannedrisk5077to5511;99percentile~22k;maximum~30.8k. Same entry/stop implies exactly same size regardless of target. Recorded overlap as high as137positions and~471600USDTnotional across fixed-target arms; this is independent exposure, not a feasible cashaccount. Stops ordinarily lose100USDT, observed worst~101.50 fromgaps. Funding/margin/capacity remain unmodeled. Originalentry-week targets do not roll nextweek; sourcegap/end censoring preserved.
 - Results and reproduction `experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/`; Notion `4058856479af81bfac30ddc49688ef3e`. Learning `fixed-risk-sizing-must-include-fill-costs.md`. All production/training flagsfalse; no live/score changes, no additional report. Luna delegate actualmodel/effort could not be verified from tool output and was stopped; main performed work.
 
+## 2026-10-27 · Decision: no other-level backtest; wait for forward paper data
+
+- Owner: "先不跑其他点位，等模拟盘前向数据". Rules stay frozen (v2 60m/5m, v3, v3add, spike).
+- No parameter changes until forward data accumulate. Review per account at about 50 funded closed trades (spike first). Compare win rate and mean per trade with the backtest restricted to OKX-listed coins, and check ema_order on all signals.
+- Binance paper line still blocked by the network (US proxy exit 451, VPS unreachable).
+
 ## 2026-10-27 · Overfitting check: spike subsets against matched random entries
 
 - Owner asked whether the strategy is overfit. Codex's ledger has up to three matched random controls per signal: same symbol, NY week, direction and volatility bucket, same limit distance and target percentage (O-H-L-C path only, 60m, near target). Paired excess per trade:
