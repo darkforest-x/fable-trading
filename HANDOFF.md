@@ -1,3 +1,16 @@
+## 2026-10-26 · v3 frozen and paper-traded as a separate track; UI still v2-only
+
+- Owner: freeze v3 as recommended and run it next to v2. `yoyo/monitor/monday_reclaim_v3.json` holds every v3 parameter:
+  - entries only at score >= 0.5;
+  - target at range 0.618 for scores 0.5-0.6 and at the opposite 1.618 from 0.6;
+  - a -30 percent backstop until the 60m confirmation, which a reclaim replaces with the entry stop;
+  - notional `min(0.05*(score-0.226)/0.1088, 0.5)` of v3 equity, gross <= 1x.
+- Lower scores are kept as v3 shadow rows with the near target. `yoyo/monitor/monday_reclaim_paper.py` (commit `f6a97f8c63`) stores v3 under internal track id 1060.
+- API: snapshot `tracks.v3` (plus `rule`, `confirm_minutes`, positions carry `backstop`; exit reason `backstop`), top-level `v3` config, `/api/monday-reclaim-paper/analytics?track=v3` (its `track` field reads "1060").
+- v2 tracks and their tests are unchanged. 8 new v3 tests; 35 Python + 37 frontend reclaim tests pass. The monitor was restarted (Monday stream reconnected, 507 contracts, worker alive) and v3 started at 1000 USDT.
+- UI: the signal-center page still shows only the 60m and 5m tracks. Adding a v3 view goes through Codex + Stitch (project `8978791379095391159`, `GEMINI_3_8_FLASH`). Mark v3 paper only and show the backstop and the score-dependent target.
+- Registered as `exp-monday-reclaim-paper-v3-20261026-v1`. Paper only, no orders.
+
 ## 2026-10-26 · Limit-reclaim: full-history backstop / ladder / entry-score v2 results
 
 - All trades are framework fills (NautilusTrader, both intrabar paths, worst per trade, 10bp slippage on non-target exits). Two bad source bars were dropped from every variant: BABYUSDT 2026-06-05 09:30 UTC (high 1.30) and DASHUSDT 2020-04-14 07:35 UTC (low 0.10).

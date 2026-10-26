@@ -509,6 +509,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'AUC gains did not become top-band profit; drift in 2025 is the open question.'
+  - experiment_id: exp-monday-reclaim-paper-v3-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f6a97f8c63
+    status: running
+    question: 'Owner 2026-10-26: freeze v3 and paper-trade it as a separate track next to v2.'
+    single_variable: 'Forward paper only. v3 = 60m confirmation, entries at score >= 0.5, target range 0.618 for 0.5-0.6 and opposite 1618 from 0.6, -30 percent backstop until the confirmation (reclaim replaces it with the entry stop), notional = min(0.05 * (score - 0.226) / 0.1088, 0.5) * equity, gross <= 1x; frozen in yoyo/monitor/monday_reclaim_v3.json.'
+    result: 'Started 2026-10-26 ~03:43 CST in the impulse monitor (API key tracks.v3, own 1000 USDT); v2 tracks unchanged (60m 997.40, 5m 1003.49 at restart). Lower scores are v3 shadow rows with the near target.'
+    artifacts: []
+    canonical_report: '~/Library/Application Support/Fable/ImpulseMonitor/monday-reclaim-paper.sqlite3 (track 1060; local runtime, not in git)'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Backtest 2020-24 / 2025 / 2026 / last five months 3.74x / 8.97x / 2.56x / 2.96x, DD up to 34 percent; band edges were chosen after seeing 2025-2026, so the forward record is the test. UI pending Codex + Stitch.'
   - experiment_id: exp-monday-reclaim-paper-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 791941594f
