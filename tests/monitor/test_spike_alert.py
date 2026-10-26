@@ -111,5 +111,47 @@ class SpikeAlertTests(unittest.TestCase):
         self.assertTrue(r.json()["notify_only"])
 
 
+    def test_active_until_acknowledged_by_any_page(self):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+        a = self.alert()
+        self.touch(a, 8)
+        app = FastAPI(); install(app, a); client = TestClient(app)
+        snap = client.get("/api/spike-alerts").json()
+        self.assertEqual(len(snap["active"]), 1)
+        self.assertIn("全市场插针报警", snap["active"][0]["text"])
+        aid = snap["active"][0]["id"]
+        url = f"/api/spike-alerts/{aid}/ack"
+        self.assertEqual(client.post(url).status_code, 403)
+        headers = {"origin": "http://testserver", "x-spike-action": "ack-spike-alert"}
+        self.assertEqual(client.post(url, headers={**headers, "origin": "https://evil.invalid"}).status_code, 403)
+        first = client.post(url, headers=headers).json()
+        self.assertEqual(client.post(url, headers=headers).json(), first)
+        self.assertEqual(client.get("/api/spike-alerts").json()["active"], [])
+        self.assertEqual(client.post("/api/spike-alerts/999/ack", headers=headers).status_code, 404)
+
+    def test_active_expires_after_six_hours(self):
+        now = [T0]
+        a = SpikeAlert(self.tmp.name, threshold=8, telegram_creds=("t", "c"), bark_key="", sender=self.sender, clock=lambda: now[0])
+        self.touch(a, 8)
+        self.assertEqual(len(a.snapshot()["active"]), 1)
+        now[0] += 6*60*MIN+1
+        self.assertEqual(a.snapshot()["active"], [])
+
+    def test_test_alert_is_local_and_keeps_the_cooldown_free(self):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+        a = self.alert()
+        app = FastAPI(); install(app, a); client = TestClient(app)
+        headers = {"origin": "http://testserver", "x-spike-action": "test-spike-alert"}
+        self.assertEqual(client.post("/api/spike-alerts/test").status_code, 403)
+        r = client.post("/api/spike-alerts/test", headers=headers).json()
+        row = client.get("/api/spike-alerts").json()["active"][0]
+        self.assertEqual((row["id"], row["test"], row["telegram"], row["bark"]), (r["id"], 1, "test", "test"))
+        self.assertEqual((a.events.qsize(), self.sent), (0, []))
+        self.touch(a, 8)
+        self.assertEqual(a.events.qsize(), 1)
+
+
 if __name__ == "__main__":
     unittest.main()

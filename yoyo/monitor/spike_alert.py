@@ -10,6 +10,10 @@ alert per side per 30 minutes, kept across restarts. Callbacks only enqueue; a w
 outcomes are recorded as unknown and never retried automatically, like the other channels.
 Owner 2026-10-27: threshold raised from 8 to 25 coins after exp-monday-spike-alert-quality-20261027-v1 (at 8 it would
 fire about twice a week on OKX-listed coins; 25+ marks the extreme crashes where v3 and spike-HW trades did better).
+Owner 2026-10-27: the web page should show a full-screen alarm with sound. The page itself goes through Stitch and
+Codex; this module only serves the data: unacknowledged alerts of the last ACTIVE_MS are "active", a same-origin POST
+acknowledges one (shared by every open page), and a same-origin test alert (local only, never pushed) lets the page
+be checked without waiting for a crash.
 """
 from __future__ import annotations
 
@@ -24,11 +28,13 @@ import threading
 import time
 from zoneinfo import ZoneInfo
 
+from fastapi import HTTPException, Request
 import requests
 
 MINUTE = 60_000
 WINDOW_MS, THRESHOLD, COOLDOWN_MS = 5*MINUTE, 25, 30*MINUTE
 SIDE_TEXT = {"lower": "下方 1.618（急跌，做多方向）", "upper": "上方 1.618（急涨，做空方向）"}
+ACTIVE_MS = 6*60*MINUTE
 
 
 def alert_text(alert):
@@ -58,7 +64,11 @@ class SpikeAlert:
         with self.db() as db:
             db.execute("""CREATE TABLE IF NOT EXISTS alerts (id INTEGER PRIMARY KEY, side TEXT, first_ms INTEGER, last_ms INTEGER,
                           n INTEGER, symbols TEXT, created_ms INTEGER, telegram TEXT, bark TEXT, error TEXT)""")
-            self.last_alert = {s: (db.execute("SELECT MAX(last_ms) m FROM alerts WHERE side=?", (s,)).fetchone()["m"] or -10**15)
+            columns = {r["name"] for r in db.execute("PRAGMA table_info(alerts)")}
+            for name, spec in {"ack_ms": "INTEGER", "test": "INTEGER NOT NULL DEFAULT 0"}.items():
+                if name not in columns:
+                    db.execute(f"ALTER TABLE alerts ADD COLUMN {name} {spec}")
+            self.last_alert = {s: (db.execute("SELECT MAX(last_ms) m FROM alerts WHERE side=? AND test=0", (s,)).fetchone()["m"] or -10**15)
                                for s in SIDE_TEXT}
 
     @contextmanager
@@ -142,16 +152,58 @@ class SpikeAlert:
         return status
 
     def snapshot(self, limit=50):
+        now = self.clock()
         with self.db() as db:
-            rows = [dict(r, symbols=json.loads(r["symbols"])) for r in db.execute("SELECT * FROM alerts ORDER BY id DESC LIMIT ?", (limit,))]
-        return dict(threshold=self.threshold, window_minutes=self.window_ms//MINUTE, cooldown_minutes=self.cooldown_ms//MINUTE,
-                    channels=dict(telegram=bool(self.telegram_creds), bark=bool(self.bark_key)), notify_only=True,
-                    worker_alive=bool(self.thread and self.thread.is_alive()), alerts=rows)
+            rows = [dict(r, symbols=json.loads(r["symbols"]), text=None) for r in db.execute("SELECT * FROM alerts ORDER BY id DESC LIMIT ?", (limit,))]
+        for r in rows:
+            r["text"] = alert_text(r)
+            r["active"] = r["ack_ms"] is None and now-r["created_ms"] <= ACTIVE_MS
+        return dict(now_ms=now, threshold=self.threshold, window_minutes=self.window_ms//MINUTE, cooldown_minutes=self.cooldown_ms//MINUTE,
+                    active_hours=ACTIVE_MS//(60*MINUTE), channels=dict(telegram=bool(self.telegram_creds), bark=bool(self.bark_key)),
+                    notify_only=True, worker_alive=bool(self.thread and self.thread.is_alive()),
+                    active=[r for r in rows if r["active"]], alerts=rows)
+
+    def acknowledge(self, alert_id):
+        with self.db() as db:
+            row = db.execute("SELECT * FROM alerts WHERE id=?", (alert_id,)).fetchone()
+            if row is None:
+                return None
+            if row["ack_ms"] is None:
+                db.execute("UPDATE alerts SET ack_ms=? WHERE id=?", (self.clock(), alert_id))
+            return dict(db.execute("SELECT id, ack_ms FROM alerts WHERE id=?", (alert_id,)).fetchone())
+
+    def test_alert(self, side="lower"):
+        """Local-only alert for checking the page; never pushed and never starts the cooldown."""
+        now = self.clock()
+        symbols = [f"TEST{k}-USDT-SWAP" for k in range(self.threshold)]
+        with self.db() as db:
+            aid = db.execute("INSERT INTO alerts (side,first_ms,last_ms,n,symbols,created_ms,telegram,bark,test) VALUES (?,?,?,?,?,?,?,?,1)",
+                             (side, now, now, len(symbols), json.dumps(symbols), now, "test", "test")).lastrowid
+        return dict(id=aid, test=True)
 
 
 def install(app, engine):
     app.state.spike_alert = engine
 
+    def same_origin(request, action):
+        if (request.headers.get("origin") != f"{request.url.scheme}://{request.url.netloc}"
+                or request.headers.get("sec-fetch-site", "same-origin") != "same-origin"
+                or request.headers.get("x-spike-action") != action):
+            raise HTTPException(403, "请从监控页面操作")
+
     @app.get("/api/spike-alerts")
     def snapshot():
         return engine.snapshot()
+
+    @app.post("/api/spike-alerts/{alert_id}/ack")
+    def acknowledge(alert_id: int, request: Request):
+        same_origin(request, "ack-spike-alert")
+        result = engine.acknowledge(alert_id)
+        if result is None:
+            raise HTTPException(404, "报警不存在")
+        return result
+
+    @app.post("/api/spike-alerts/test")
+    def test_alert(request: Request):
+        same_origin(request, "test-spike-alert")
+        return engine.test_alert()
