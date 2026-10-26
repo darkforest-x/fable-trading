@@ -40,6 +40,19 @@
 - Median notional per100USDTplannedrisk5077to5511;99percentile~22k;maximum~30.8k. Same entry/stop implies exactly same size regardless of target. Recorded overlap as high as137positions and~471600USDTnotional across fixed-target arms; this is independent exposure, not a feasible cashaccount. Stops ordinarily lose100USDT, observed worst~101.50 fromgaps. Funding/margin/capacity remain unmodeled. Originalentry-week targets do not roll nextweek; sourcegap/end censoring preserved.
 - Results and reproduction `experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/`; Notion `4058856479af81bfac30ddc49688ef3e`. Learning `fixed-risk-sizing-must-include-fill-costs.md`. All production/training flagsfalse; no live/score changes, no additional report. Luna delegate actualmodel/effort could not be verified from tool output and was stopped; main performed work.
 
+## 2026-10-26 · Spike subset: floating loss, tighter backstops, slots and leverage
+
+- Spike subset = score ≥0.6 and EMA order > 0, 449 trades, Binance 5m.
+- New native fills: 3 / 5 / 7 percent backstops for near and range 0.5 targets, 300 symbols per path, no errors (`exp-monday-limit-spike-stops-20261026-v1`). Analysis in `exp-monday-limit-spike-opt-20261026-v1`.
+- Winners' floating loss before confirmation: median 2-4 percent, 75th 5-8, 90th 10-14. Losers' median 7.5-12.
+- Near target, 2026 win rate and 1x multiple by backstop: none 81 percent / 1.53x, 30 percent 81 / 1.32, 20 percent 78 / 1.33, 15 percent 76 / 1.33, 10 percent 69 / 1.09, 7 percent 60 / 1.11, 5 percent 50 / 1.02, 3 percent 35 / 0.90. Stops under 15 percent kill winners.
+- Slots and leverage that stay ≤40 percent drawdown in all four periods (in sample), 2020-24 / 2025 / 2026 / last5m:
+  - near, 20 percent stop, 10 slots, 5x: 4.44 / 3.30 / 3.17 / 2.94x, DD 12-22, win 73-85 percent, 1-3 liquidations;
+  - near, 20 percent stop, 5 slots, 5x: 4.77 / 5.17 / 3.85 / 3.56x, DD 30-40;
+  - range 0.5, 30 percent stop, 5 slots, 3x: 6.66 / 5.57 / 3.92 / 4.96x, DD 22-30, win 58-70, no liquidations.
+- Strict selection on 2020-24 picked 3 slots at 5x, which had a 63 percent drawdown in 2026. Nothing adopted.
+- Learning `flash-wick-entries-need-room-and-leverage-picks-overfit.md`.
+
 ## 2026-10-26 · Live venue will be Binance; paper stays on OKX for now
 
 - Owner: live trading of the 1.618 strategy will use Binance USDT-M. Paper trading stays on OKX until Binance data is reachable ("模拟盘暂时就用 okx"). After that, a Binance paper line is added and the OKX line kept as the comparison.
