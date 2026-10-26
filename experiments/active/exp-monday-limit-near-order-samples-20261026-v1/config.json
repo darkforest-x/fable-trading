@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-monday-limit-near-order-samples-20261026-v1",
+  "question": "Owner 2026-10-26: what is the score >= 0.6 + EMA order score > 0 + near-target subset, was it backtested, how many trades; sampled charts with explanations.",
+  "trades": "experiments/active/exp-monday-limit-time-news-20261026-v1/trades.csv.gz",
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "variant": "v2_be17",
+  "min_score": 0.6,
+  "samples": "fixed seed: 3 targets, 2 breakevens, 2 failed reclaims, plus the worst trade",
+  "seed": 20261029,
+  "in_sample": "The filter was found on the same history; forward paper data is the test.",
+  "training_eligible": false,
+  "production_eligible": false
+}
