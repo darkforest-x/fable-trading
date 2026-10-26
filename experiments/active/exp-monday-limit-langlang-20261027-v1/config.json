@@ -1,0 +1,15 @@
+{
+  "experiment_id": "exp-monday-limit-langlang-20261027-v1",
+  "question": "Owner 2026-10-27: high-payoff version with Langlang three-share fixed-amount sizing; how fast can 1000 USDT reach 10x / 100x, with as few blow-ups as possible.",
+  "trades": "experiments/active/exp-monday-limit-time-news-20261026-v1/trades.csv.gz",
+  "sets": {"v3": "v3_be17 (score >= 0.5)", "v3_ge06_opp1618": "score >= 0.6, opposite 1618 target, -30 percent backstop"},
+  "schemes": ["langlang", "allin"],
+  "leverage": [2, 3, 5, 10, 20],
+  "first_start": "2023-01-01",
+  "last_start": "2026-08-01",
+  "ties": 5,
+  "seed": 20261105,
+  "in_sample": "Filters and targets come from the same history; times are descriptive.",
+  "training_eligible": false,
+  "production_eligible": false
+}
