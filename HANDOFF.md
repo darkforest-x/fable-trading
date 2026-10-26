@@ -40,6 +40,13 @@
 - Median notional per100USDTplannedrisk5077to5511;99percentile~22k;maximum~30.8k. Same entry/stop implies exactly same size regardless of target. Recorded overlap as high as137positions and~471600USDTnotional across fixed-target arms; this is independent exposure, not a feasible cashaccount. Stops ordinarily lose100USDT, observed worst~101.50 fromgaps. Funding/margin/capacity remain unmodeled. Originalentry-week targets do not roll nextweek; sourcegap/end censoring preserved.
 - Results and reproduction `experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/`; Notion `4058856479af81bfac30ddc49688ef3e`. Learning `fixed-risk-sizing-must-include-fill-costs.md`. All production/training flagsfalse; no live/score changes, no additional report. Luna delegate actualmodel/effort could not be verified from tool output and was stopped; main performed work.
 
+## 2026-10-26 · Live venue will be Binance; paper stays on OKX for now
+
+- Owner: live trading of the 1.618 strategy will use Binance USDT-M. Paper trading stays on OKX until Binance data is reachable ("模拟盘暂时就用 okx"). After that, a Binance paper line is added and the OKX line kept as the comparison.
+- Blocker: from this machine fapi.binance.com returns 451, because the proxy exit is Los Angeles. Both VPS hosts time out on SSH and port 8642. Fix needs the owner (proxy rule for Binance domains through a non-US node, or VPS repair). Do not use www.binance.com/fapi to get around the regional block.
+- Comparisons of OKX paper with the backtest must restrict the backtest to OKX-listed coins (2026 v3: 263 of 829 trades) and compare per-trade results.
+- Fee assumption stays OKX Lv1 (maker 0.02 / taker 0.05 percent). The Binance account tier must be read before live trading. The CLAUDE.md fee rule names OKX, so update it with the owner when the Binance tier is known.
+
 ## 2026-10-26 · Order-score subset with backstop and larger targets; OKX cross-check
 
 - Score ≥0.6 and order > 0, from existing grid/levels fills, worse path, linear sizing. Trades: 143 (2020-24), 131 (2025), 175 (2026). With a −30 percent backstop (2020-24 / 2025 / 2026 / last five months):
