@@ -1,0 +1,1263 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-lottery-20261027-v1",
+    "question": "Owner 2026-10-27: a very high payoff version for a small stake; blow-ups acceptable (about 5 in six months), aiming to catch moves worth tens to thousands of times the stake.",
+    "trades": "experiments/active/exp-monday-limit-time-news-20261026-v1/trades.csv.gz",
+    "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+    "fractions": [
+      1.0,
+      0.5
+    ],
+    "leverage": [
+      3,
+      5,
+      10,
+      20
+    ],
+    "first_window": "2023-01-01",
+    "last_window": "2026-03-01",
+    "window_weeks": 26,
+    "stake_usdt": 1000,
+    "blowup_below_fraction_of_stake": 0.1,
+    "ties": 10,
+    "detail": [
+      "A_v3_ge06_opp1618_P30|f1.0|L5",
+      "A_v3_ge06_opp1618_P30|f0.5|L5",
+      "A_v3_ge06_opp1618_P30|f1.0|L3"
+    ],
+    "seed": 20261104,
+    "in_sample": "Filters and targets come from the same history; probabilities are descriptive, not forecasts.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "results": {
+    "sets": {
+      "A_v3_ge06_opp1618_P30": {
+        "n": 842,
+        "win_pct": 38.00475059382423,
+        "mean_bp": 374.616835560522,
+        "mae_q90": 15.178487283266982
+      },
+      "B_v3_ge06_opp1618_nostop": {
+        "n": 842,
+        "win_pct": 38.242280285035626,
+        "mean_bp": 398.80259193150016,
+        "mae_q90": 15.649242069142806
+      },
+      "C_order_ge3_opp1618_P30": {
+        "n": 219,
+        "win_pct": 65.75342465753424,
+        "mean_bp": 889.1877912731137,
+        "mae_q90": 16.042976019956516
+      },
+      "D_score_ge08_opp1618_P30": {
+        "n": 78,
+        "win_pct": 60.256410256410255,
+        "mean_bp": 742.6253161325318,
+        "mae_q90": 16.127301027894585
+      },
+      "E_spike_hw_near_P18": {
+        "n": 219,
+        "win_pct": 85.38812785388129,
+        "mean_bp": 240.59803611640748,
+        "mae_q90": 13.889696272112737
+      }
+    },
+    "windows": 39,
+    "grid": {
+      "A_v3_ge06_opp1618_P30|f1.0|L3": {
+        "p_peak_10x": 23.076923076923077,
+        "p_peak_100x": 8.461538461538462,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.7435897435897436,
+        "blowups_p90": 3.0,
+        "net_median": 0.27755994857172284,
+        "net_mean": 11.0773267356153,
+        "p_net_positive": 57.692307692307686,
+        "final_median": 1.6070352925850004,
+        "peak_median": 4.698983983975877
+      },
+      "A_v3_ge06_opp1618_P30|f1.0|L5": {
+        "p_peak_10x": 46.666666666666664,
+        "p_peak_100x": 15.384615384615385,
+        "p_peak_1000x": 10.256410256410255,
+        "blowups_mean": 3.792307692307692,
+        "blowups_p90": 13.100000000000023,
+        "net_median": 0.28394964618132823,
+        "net_mean": 47.57596123065511,
+        "p_net_positive": 53.333333333333336,
+        "final_median": 2.0258661917513554,
+        "peak_median": 8.979835939090897
+      },
+      "A_v3_ge06_opp1618_P30|f1.0|L10": {
+        "p_peak_10x": 57.948717948717956,
+        "p_peak_100x": 16.153846153846153,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 9.987179487179487,
+        "blowups_p90": 28.0,
+        "net_median": -3.9110646933004714,
+        "net_mean": -4.464895620325915,
+        "p_net_positive": 27.94871794871795,
+        "final_median": 2.0867466898220286,
+        "peak_median": 13.488925128958478
+      },
+      "A_v3_ge06_opp1618_P30|f1.0|L20": {
+        "p_peak_10x": 68.71794871794872,
+        "p_peak_100x": 22.564102564102566,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 19.743589743589745,
+        "blowups_p90": 46.0,
+        "net_median": -11.516999999971839,
+        "net_mean": -10.756769574798879,
+        "p_net_positive": 6.153846153846154,
+        "final_median": 1.0,
+        "peak_median": 21.390963861302406
+      },
+      "A_v3_ge06_opp1618_P30|f0.5|L3": {
+        "p_peak_10x": 16.41025641025641,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.028205128205128206,
+        "blowups_p90": 0.0,
+        "net_median": 0.6085598100898855,
+        "net_mean": 3.7573894832353885,
+        "p_net_positive": 74.61538461538461,
+        "final_median": 1.6354862434419721,
+        "peak_median": 2.3109642538721498
+      },
+      "A_v3_ge06_opp1618_P30|f0.5|L5": {
+        "p_peak_10x": 24.871794871794872,
+        "p_peak_100x": 11.025641025641026,
+        "p_peak_1000x": 1.5384615384615385,
+        "blowups_mean": 0.3871794871794872,
+        "blowups_p90": 2.0,
+        "net_median": 0.7855741533406854,
+        "net_mean": 31.732070650067364,
+        "p_net_positive": 70.25641025641025,
+        "final_median": 1.7855741533406855,
+        "peak_median": 3.6678141883324886
+      },
+      "A_v3_ge06_opp1618_P30|f0.5|L10": {
+        "p_peak_10x": 25.128205128205128,
+        "p_peak_100x": 8.205128205128204,
+        "p_peak_1000x": 2.051282051282051,
+        "blowups_mean": 0.8076923076923077,
+        "blowups_p90": 3.0,
+        "net_median": -0.17574911607775345,
+        "net_mean": 39.70021946686207,
+        "p_net_positive": 46.41025641025641,
+        "final_median": 1.277892812471053,
+        "peak_median": 3.821274078500439
+      },
+      "A_v3_ge06_opp1618_P30|f0.5|L20": {
+        "p_peak_10x": 36.41025641025641,
+        "p_peak_100x": 6.666666666666667,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 2.3205128205128207,
+        "blowups_p90": 6.100000000000023,
+        "net_median": -1.4606105467526542,
+        "net_mean": 1.2545414175331004,
+        "p_net_positive": 24.102564102564102,
+        "final_median": 0.9664607409595053,
+        "peak_median": 3.417702687577993
+      },
+      "B_v3_ge06_opp1618_nostop|f1.0|L3": {
+        "p_peak_10x": 23.076923076923077,
+        "p_peak_100x": 10.256410256410255,
+        "p_peak_1000x": 0.2564102564102564,
+        "blowups_mean": 0.6923076923076923,
+        "blowups_p90": 3.0,
+        "net_median": 0.31127109086764404,
+        "net_mean": 10.936221598898591,
+        "p_net_positive": 60.51282051282051,
+        "final_median": 1.7077697642242233,
+        "peak_median": 4.698983983975877
+      },
+      "B_v3_ge06_opp1618_nostop|f1.0|L5": {
+        "p_peak_10x": 46.666666666666664,
+        "p_peak_100x": 15.384615384615385,
+        "p_peak_1000x": 10.256410256410255,
+        "blowups_mean": 3.7564102564102564,
+        "blowups_p90": 13.100000000000023,
+        "net_median": 0.2839496461915114,
+        "net_mean": 47.61185866655254,
+        "p_net_positive": 53.84615384615385,
+        "final_median": 2.0258661917513554,
+        "peak_median": 8.979835939090897
+      },
+      "B_v3_ge06_opp1618_nostop|f1.0|L10": {
+        "p_peak_10x": 57.948717948717956,
+        "p_peak_100x": 15.384615384615385,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 9.951282051282051,
+        "blowups_p90": 28.0,
+        "net_median": -3.9110646933004714,
+        "net_mean": -4.42899818442848,
+        "p_net_positive": 27.94871794871795,
+        "final_median": 2.0867466898220286,
+        "peak_median": 12.07229361255567
+      },
+      "B_v3_ge06_opp1618_nostop|f1.0|L20": {
+        "p_peak_10x": 68.71794871794872,
+        "p_peak_100x": 22.564102564102566,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 19.543589743589745,
+        "blowups_p90": 46.10000000000002,
+        "net_median": -11.516999999971839,
+        "net_mean": -10.55676957479888,
+        "p_net_positive": 6.153846153846154,
+        "final_median": 1.0,
+        "peak_median": 21.390963861302406
+      },
+      "B_v3_ge06_opp1618_nostop|f0.5|L3": {
+        "p_peak_10x": 18.974358974358974,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.002564102564102564,
+        "blowups_p90": 0.0,
+        "net_median": 0.7377827245974466,
+        "net_mean": 3.9064365143454105,
+        "p_net_positive": 76.41025641025641,
+        "final_median": 1.7377827245974466,
+        "peak_median": 2.2157781782812185
+      },
+      "B_v3_ge06_opp1618_nostop|f0.5|L5": {
+        "p_peak_10x": 23.333333333333332,
+        "p_peak_100x": 11.025641025641026,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.3871794871794872,
+        "blowups_p90": 2.0,
+        "net_median": 0.7855741533406854,
+        "net_mean": 17.59813223544375,
+        "p_net_positive": 70.0,
+        "final_median": 1.7855741533406855,
+        "peak_median": 3.6678141883324886
+      },
+      "B_v3_ge06_opp1618_nostop|f0.5|L10": {
+        "p_peak_10x": 23.076923076923077,
+        "p_peak_100x": 3.3333333333333335,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.8179487179487179,
+        "blowups_p90": 3.0,
+        "net_median": -0.2194452220531875,
+        "net_mean": 11.595345705870491,
+        "p_net_positive": 46.15384615384615,
+        "final_median": 1.277892812471053,
+        "peak_median": 3.5644410489978817
+      },
+      "B_v3_ge06_opp1618_nostop|f0.5|L20": {
+        "p_peak_10x": 35.64102564102564,
+        "p_peak_100x": 5.128205128205128,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 2.3153846153846156,
+        "blowups_p90": 6.100000000000023,
+        "net_median": -1.442801252179236,
+        "net_mean": 1.0970520422128933,
+        "p_net_positive": 24.102564102564102,
+        "final_median": 0.9664607409595053,
+        "peak_median": 3.656953360622546
+      },
+      "C_order_ge3_opp1618_P30|f1.0|L3": {
+        "p_peak_10x": 6.923076923076923,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.18205128205128204,
+        "blowups_p90": 1.0,
+        "net_median": 0.4158277972291051,
+        "net_mean": 1.1579597839586506,
+        "p_net_positive": 73.07692307692307,
+        "final_median": 1.507133860426526,
+        "peak_median": 2.2908678563442537
+      },
+      "C_order_ge3_opp1618_P30|f1.0|L5": {
+        "p_peak_10x": 23.589743589743588,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 1.4307692307692308,
+        "blowups_p90": 4.0,
+        "net_median": 0.31637207439493076,
+        "net_mean": 1.5885793911915158,
+        "p_net_positive": 53.84615384615385,
+        "final_median": 1.5282989816765506,
+        "peak_median": 3.3413383910838914
+      },
+      "C_order_ge3_opp1618_P30|f1.0|L10": {
+        "p_peak_10x": 40.76923076923077,
+        "p_peak_100x": 12.82051282051282,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 4.323076923076923,
+        "blowups_p90": 11.0,
+        "net_median": -0.03371100002797023,
+        "net_mean": -0.8531235120192993,
+        "p_net_positive": 45.38461538461539,
+        "final_median": 2.017682011891641,
+        "peak_median": 4.460221381477999
+      },
+      "C_order_ge3_opp1618_P30|f1.0|L20": {
+        "p_peak_10x": 41.02564102564102,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 7.420512820512821,
+        "blowups_p90": 17.0,
+        "net_median": -2.0,
+        "net_mean": -3.922423237615735,
+        "p_net_positive": 33.07692307692307,
+        "final_median": 1.0,
+        "peak_median": 6.3837879698052244
+      },
+      "C_order_ge3_opp1618_P30|f0.5|L3": {
+        "p_peak_10x": 2.8205128205128207,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.0,
+        "blowups_p90": 0.0,
+        "net_median": 0.30899801418889794,
+        "net_mean": 1.0398678018619132,
+        "p_net_positive": 88.46153846153845,
+        "final_median": 1.308998014188898,
+        "peak_median": 1.5257519448851402
+      },
+      "C_order_ge3_opp1618_P30|f0.5|L5": {
+        "p_peak_10x": 7.948717948717948,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.05128205128205128,
+        "blowups_p90": 0.0,
+        "net_median": 0.26761109427320307,
+        "net_mean": 1.9995683794358432,
+        "p_net_positive": 73.07692307692307,
+        "final_median": 1.267611094273203,
+        "peak_median": 1.6793805827127315
+      },
+      "C_order_ge3_opp1618_P30|f0.5|L10": {
+        "p_peak_10x": 13.58974358974359,
+        "p_peak_100x": 2.8205128205128207,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.31794871794871793,
+        "blowups_p90": 1.0,
+        "net_median": 0.32765716027616665,
+        "net_mean": 5.443196126054084,
+        "p_net_positive": 58.97435897435898,
+        "final_median": 1.5282989816765506,
+        "peak_median": 1.903590392573857
+      },
+      "C_order_ge3_opp1618_P30|f0.5|L20": {
+        "p_peak_10x": 9.487179487179487,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.7615384615384615,
+        "blowups_p90": 2.0,
+        "net_median": -0.7368790972797208,
+        "net_mean": -0.3529760633573803,
+        "p_net_positive": 33.84615384615385,
+        "final_median": 1.0,
+        "peak_median": 2.414977888361965
+      },
+      "D_score_ge08_opp1618_P30|f1.0|L3": {
+        "p_peak_10x": 16.41025641025641,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.1794871794871795,
+        "blowups_p90": 1.0,
+        "net_median": 0.0,
+        "net_mean": 2.5437942128788107,
+        "p_net_positive": 46.92307692307692,
+        "final_median": 1.3627987663178358,
+        "peak_median": 1.4632670346448193
+      },
+      "D_score_ge08_opp1618_P30|f1.0|L5": {
+        "p_peak_10x": 20.51282051282051,
+        "p_peak_100x": 1.7948717948717947,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.4641025641025641,
+        "blowups_p90": 2.0,
+        "net_median": 0.0,
+        "net_mean": 3.201101713123669,
+        "p_net_positive": 38.205128205128204,
+        "final_median": 1.0,
+        "peak_median": 1.7721117244080324
+      },
+      "D_score_ge08_opp1618_P30|f1.0|L10": {
+        "p_peak_10x": 41.02564102564102,
+        "p_peak_100x": 23.076923076923077,
+        "p_peak_1000x": 5.128205128205128,
+        "blowups_mean": 2.082051282051282,
+        "blowups_p90": 6.0,
+        "net_median": 0.0,
+        "net_mean": 18.469610795111443,
+        "p_net_positive": 48.205128205128204,
+        "final_median": 2.4990431200055303,
+        "peak_median": 9.601185667394246
+      },
+      "D_score_ge08_opp1618_P30|f1.0|L20": {
+        "p_peak_10x": 33.589743589743584,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 4.028205128205128,
+        "blowups_p90": 10.0,
+        "net_median": -1.0,
+        "net_mean": -1.5299353808309348,
+        "p_net_positive": 18.205128205128204,
+        "final_median": 1.0,
+        "peak_median": 7.327146557498372
+      },
+      "D_score_ge08_opp1618_P30|f0.5|L3": {
+        "p_peak_10x": 0.0,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.0,
+        "blowups_p90": 0.0,
+        "net_median": 0.23163351732240978,
+        "net_mean": 0.7958243357677796,
+        "p_net_positive": 53.84615384615385,
+        "final_median": 1.2316335173224098,
+        "peak_median": 1.2316335173224098
+      },
+      "D_score_ge08_opp1618_P30|f0.5|L5": {
+        "p_peak_10x": 8.717948717948717,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.0,
+        "blowups_p90": 0.0,
+        "net_median": 0.3860558622040162,
+        "net_mean": 1.7734531683320143,
+        "p_net_positive": 53.84615384615385,
+        "final_median": 1.3860558622040162,
+        "peak_median": 1.3860558622040162
+      },
+      "D_score_ge08_opp1618_P30|f0.5|L10": {
+        "p_peak_10x": 20.256410256410255,
+        "p_peak_100x": 2.564102564102564,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.1794871794871795,
+        "blowups_p90": 1.0,
+        "net_median": 0.0,
+        "net_mean": 9.771913310524459,
+        "p_net_positive": 48.717948717948715,
+        "final_median": 1.7721117244080324,
+        "peak_median": 1.7721117244080324
+      },
+      "D_score_ge08_opp1618_P30|f0.5|L20": {
+        "p_peak_10x": 14.871794871794872,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.39487179487179486,
+        "blowups_p90": 1.0,
+        "net_median": 0.0,
+        "net_mean": 1.1862417635352458,
+        "p_net_positive": 35.38461538461539,
+        "final_median": 1.0,
+        "peak_median": 2.0119787109138687
+      },
+      "E_spike_hw_near_P18|f1.0|L3": {
+        "p_peak_10x": 4.358974358974359,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.0,
+        "blowups_p90": 0.0,
+        "net_median": 0.2051695110329037,
+        "net_mean": 0.922354107233561,
+        "p_net_positive": 69.23076923076923,
+        "final_median": 1.2051695110329037,
+        "peak_median": 1.5876424863504628
+      },
+      "E_spike_hw_near_P18|f1.0|L5": {
+        "p_peak_10x": 14.102564102564102,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.4307692307692308,
+        "blowups_p90": 1.0,
+        "net_median": 0.12691882310240277,
+        "net_mean": 0.7168278077673278,
+        "p_net_positive": 58.97435897435898,
+        "final_median": 1.371926141904526,
+        "peak_median": 2.096311833503791
+      },
+      "E_spike_hw_near_P18|f1.0|L10": {
+        "p_peak_10x": 25.64102564102564,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 3.9076923076923076,
+        "blowups_p90": 10.0,
+        "net_median": -1.098786840308395,
+        "net_mean": -0.48083171382605155,
+        "p_net_positive": 42.82051282051282,
+        "final_median": 1.8146688869667598,
+        "peak_median": 2.613597950002362
+      },
+      "E_spike_hw_near_P18|f1.0|L20": {
+        "p_peak_10x": 18.71794871794872,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 6.825641025641025,
+        "blowups_p90": 17.0,
+        "net_median": -4.0,
+        "net_mean": -5.732997675429708,
+        "p_net_positive": 15.128205128205128,
+        "final_median": 1.620595345981876,
+        "peak_median": 4.760888236138162
+      },
+      "E_spike_hw_near_P18|f0.5|L3": {
+        "p_peak_10x": 0.0,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.0,
+        "blowups_p90": 0.0,
+        "net_median": 0.14196996546032792,
+        "net_mean": 0.42364775061633664,
+        "p_net_positive": 79.48717948717949,
+        "final_median": 1.141969965460328,
+        "peak_median": 1.2672975019663415
+      },
+      "E_spike_hw_near_P18|f0.5|L5": {
+        "p_peak_10x": 0.0,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.0,
+        "blowups_p90": 0.0,
+        "net_median": 0.17340057819770327,
+        "net_mean": 0.77855113690384,
+        "p_net_positive": 74.35897435897436,
+        "final_median": 1.1734005781977033,
+        "peak_median": 1.4745258115741442
+      },
+      "E_spike_hw_near_P18|f0.5|L10": {
+        "p_peak_10x": 7.179487179487179,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.2512820512820513,
+        "blowups_p90": 1.0,
+        "net_median": -0.1661212026207159,
+        "net_mean": 0.057548694037618454,
+        "p_net_positive": 45.8974358974359,
+        "final_median": 1.1269188231024028,
+        "peak_median": 1.6447880160298296
+      },
+      "E_spike_hw_near_P18|f0.5|L20": {
+        "p_peak_10x": 0.0,
+        "p_peak_100x": 0.0,
+        "p_peak_1000x": 0.0,
+        "blowups_mean": 0.6256410256410256,
+        "blowups_p90": 2.0,
+        "net_median": -0.6995826124121507,
+        "net_mean": -0.7843804853906796,
+        "p_net_positive": 18.974358974358974,
+        "final_median": 0.6551488364954691,
+        "peak_median": 2.356115564308278
+      }
+    },
+    "detail": {
+      "A_v3_ge06_opp1618_P30|f1.0|L3": {
+        "2023-01-01": {
+          "peak_median": 5.347283540129637,
+          "peak_max": 5.347283540129637,
+          "final_median": 5.347283540129637,
+          "blowups_mean": 0.0
+        },
+        "2023-02-01": {
+          "peak_median": 7.638954603450393,
+          "peak_max": 7.638954603450393,
+          "final_median": 7.638954603450393,
+          "blowups_mean": 0.0
+        },
+        "2023-03-01": {
+          "peak_median": 5.189205393832998,
+          "peak_max": 5.189205393832998,
+          "final_median": 4.320761172329325,
+          "blowups_mean": 0.0
+        },
+        "2023-04-01": {
+          "peak_median": 5.155413318039915,
+          "peak_max": 5.155413318039915,
+          "final_median": 3.6769139938443742,
+          "blowups_mean": 0.0
+        },
+        "2023-05-01": {
+          "peak_median": 2.897391216472458,
+          "peak_max": 2.897391216472458,
+          "final_median": 2.6915283550976783,
+          "blowups_mean": 0.0
+        },
+        "2023-06-01": {
+          "peak_median": 3.6331422706426624,
+          "peak_max": 4.234570136373925,
+          "final_median": 2.40067323932145,
+          "blowups_mean": 0.0
+        },
+        "2023-07-01": {
+          "peak_median": 1.6904123732469838,
+          "peak_max": 1.9269330553688906,
+          "final_median": 1.5000545746267124,
+          "blowups_mean": 0.0
+        },
+        "2023-08-01": {
+          "peak_median": 1.1695733320401553,
+          "peak_max": 1.5374847176243225,
+          "final_median": 1.0364436786349076,
+          "blowups_mean": 0.0
+        },
+        "2023-09-01": {
+          "peak_median": 1.9223016788380407,
+          "peak_max": 2.576953097068891,
+          "final_median": 1.9223016788380407,
+          "blowups_mean": 0.0
+        },
+        "2023-10-01": {
+          "peak_median": 5.525559098122889,
+          "peak_max": 7.113673651787341,
+          "final_median": 4.073938018770354,
+          "blowups_mean": 0.0
+        },
+        "2023-11-01": {
+          "peak_median": 4.9699231811653135,
+          "peak_max": 8.6388130904673,
+          "final_median": 4.601216673903759,
+          "blowups_mean": 0.0
+        },
+        "2023-12-01": {
+          "peak_median": 6.676245310299498,
+          "peak_max": 8.699063224979138,
+          "final_median": 3.2190253068054178,
+          "blowups_mean": 0.0
+        },
+        "2024-01-01": {
+          "peak_median": 4.836637278178914,
+          "peak_max": 6.300693536530385,
+          "final_median": 0.975228709151782,
+          "blowups_mean": 0.0
+        },
+        "2024-02-01": {
+          "peak_median": 3.4171115055635806,
+          "peak_max": 6.642982048423211,
+          "final_median": 0.6932158565929029,
+          "blowups_mean": 0.0
+        },
+        "2024-03-01": {
+          "peak_median": 2.6377891674055007,
+          "peak_max": 3.5989869626635036,
+          "final_median": 0.5323887242630296,
+          "blowups_mean": 0.0
+        },
+        "2024-04-01": {
+          "peak_median": 1.4372034517599956,
+          "peak_max": 1.4372034517599956,
+          "final_median": 0.29007280856396894,
+          "blowups_mean": 0.0
+        },
+        "2024-05-01": {
+          "peak_median": 1.0,
+          "peak_max": 1.0,
+          "final_median": 0.2883928776148265,
+          "blowups_mean": 0.0
+        },
+        "2024-06-01": {
+          "peak_median": 1.3309604476366639,
+          "peak_max": 1.3309604476366639,
+          "final_median": 1.2775599485596059,
+          "blowups_mean": 0.0
+        },
+        "2024-07-01": {
+          "peak_median": 1.337783141670603,
+          "peak_max": 1.337783141670603,
+          "final_median": 1.2775599485717228,
+          "blowups_mean": 0.0
+        },
+        "2024-08-01": {
+          "peak_median": 1.5984124581527028,
+          "peak_max": 1.5984124581527028,
+          "final_median": 1.590260554627179,
+          "blowups_mean": 0.0
+        },
+        "2024-09-01": {
+          "peak_median": 3.1408520203780395,
+          "peak_max": 3.1408520203780395,
+          "final_median": 0.2922989730386266,
+          "blowups_mean": 0.0
+        },
+        "2024-10-01": {
+          "peak_median": 3.1408520203780395,
+          "peak_max": 3.1408520203780395,
+          "final_median": 0.7568405825156751,
+          "blowups_mean": 1.0
+        },
+        "2024-11-01": {
+          "peak_median": 2.374262342039098,
+          "peak_max": 2.374262342039098,
+          "final_median": 0.2259170855840738,
+          "blowups_mean": 1.0
+        },
+        "2024-12-01": {
+          "peak_median": 2.4608888387747028,
+          "peak_max": 2.4608888387747028,
+          "final_median": 0.7230884761738744,
+          "blowups_mean": 1.0
+        },
+        "2025-01-01": {
+          "peak_median": 2.4608888387747028,
+          "peak_max": 2.4608888387747028,
+          "final_median": 1.2247535987430165,
+          "blowups_mean": 1.0
+        },
+        "2025-02-01": {
+          "peak_median": 1.964982194920548,
+          "peak_max": 4.818832157638401,
+          "final_median": 1.1516629407379089,
+          "blowups_mean": 1.0
+        },
+        "2025-03-01": {
+          "peak_median": 7.010746821232027,
+          "peak_max": 7.010746821232027,
+          "final_median": 6.655225680383578,
+          "blowups_mean": 1.0
+        },
+        "2025-04-01": {
+          "peak_median": 9.263175077014086,
+          "peak_max": 9.263175077014086,
+          "final_median": 8.346050165225472,
+          "blowups_mean": 0.0
+        },
+        "2025-05-01": {
+          "peak_median": 11.929945795686274,
+          "peak_max": 49.66315537650459,
+          "final_median": 1.7527204443209552,
+          "blowups_mean": 0.0
+        },
+        "2025-06-01": {
+          "peak_median": 21.22876188480871,
+          "peak_max": 81.64248353810437,
+          "final_median": 21.22876188480871,
+          "blowups_mean": 0.1
+        },
+        "2025-07-01": {
+          "peak_median": 125.1082131280293,
+          "peak_max": 185.2668073324331,
+          "final_median": 100.64264438246714,
+          "blowups_mean": 0.0
+        },
+        "2025-08-01": {
+          "peak_median": 54.98460138366711,
+          "peak_max": 369.1511398322395,
+          "final_median": 1.895217845500442,
+          "blowups_mean": 1.2
+        },
+        "2025-09-01": {
+          "peak_median": 63.80572790422584,
+          "peak_max": 369.1511398322395,
+          "final_median": 0.3630456196244871,
+          "blowups_mean": 2.6
+        },
+        "2025-10-01": {
+          "peak_median": 369.1511398322395,
+          "peak_max": 369.1511398322395,
+          "final_median": 0.9246712188344628,
+          "blowups_mean": 2.8
+        },
+        "2025-11-01": {
+          "peak_median": 63.87316716242922,
+          "peak_max": 63.87316716242922,
+          "final_median": 0.9948999999798922,
+          "blowups_mean": 3.3
+        },
+        "2025-12-01": {
+          "peak_median": 6.786220974284262,
+          "peak_max": 6.786220974284262,
+          "final_median": 1.1482346228858524,
+          "blowups_mean": 4.0
+        },
+        "2026-01-01": {
+          "peak_median": 6.786220974284262,
+          "peak_max": 6.786220974284262,
+          "final_median": 5.27458838798944,
+          "blowups_mean": 5.0
+        },
+        "2026-02-01": {
+          "peak_median": 22.183923174713392,
+          "peak_max": 22.183923174713392,
+          "final_median": 22.183923174713392,
+          "blowups_mean": 2.0
+        },
+        "2026-03-01": {
+          "peak_median": 258.6675975120579,
+          "peak_max": 331.20996207141195,
+          "final_median": 258.6675975120579,
+          "blowups_mean": 2.0
+        }
+      },
+      "A_v3_ge06_opp1618_P30|f1.0|L5": {
+        "2023-01-01": {
+          "peak_median": 11.743214896954013,
+          "peak_max": 11.743214896954013,
+          "final_median": 11.743214896954013,
+          "blowups_mean": 0.0
+        },
+        "2023-02-01": {
+          "peak_median": 20.24204448520559,
+          "peak_max": 20.24204448520559,
+          "final_median": 20.24204448520559,
+          "blowups_mean": 0.0
+        },
+        "2023-03-01": {
+          "peak_median": 11.34585594066686,
+          "peak_max": 11.34585594066686,
+          "final_median": 8.191681177993152,
+          "blowups_mean": 0.0
+        },
+        "2023-04-01": {
+          "peak_median": 11.910881504570364,
+          "peak_max": 11.910881504570364,
+          "final_median": 6.557103447745711,
+          "blowups_mean": 0.0
+        },
+        "2023-05-01": {
+          "peak_median": 4.828724927857132,
+          "peak_max": 4.828724927857132,
+          "final_median": 3.9937596436307556,
+          "blowups_mean": 0.0
+        },
+        "2023-06-01": {
+          "peak_median": 6.0086566620567545,
+          "peak_max": 7.371223570514418,
+          "final_median": 2.61146734943964,
+          "blowups_mean": 0.0
+        },
+        "2023-07-01": {
+          "peak_median": 1.9614237555639473,
+          "peak_max": 2.3237797766902824,
+          "final_median": 1.3362350606516649,
+          "blowups_mean": 0.0
+        },
+        "2023-08-01": {
+          "peak_median": 1.1220286794649534,
+          "peak_max": 1.6216806390652874,
+          "final_median": 0.7624218463457575,
+          "blowups_mean": 0.0
+        },
+        "2023-09-01": {
+          "peak_median": 1.9631281954490283,
+          "peak_max": 3.104386041995807,
+          "final_median": 1.9631281954490283,
+          "blowups_mean": 0.0
+        },
+        "2023-10-01": {
+          "peak_median": 9.818468458190033,
+          "peak_max": 13.524759846241109,
+          "final_median": 5.528127540460708,
+          "blowups_mean": 0.0
+        },
+        "2023-11-01": {
+          "peak_median": 7.775649476516282,
+          "peak_max": 16.468047234355172,
+          "final_median": 6.346941637888351,
+          "blowups_mean": 0.0
+        },
+        "2023-12-01": {
+          "peak_median": 15.308467373536356,
+          "peak_max": 25.574970507328004,
+          "final_median": 2.5494906300353275,
+          "blowups_mean": 0.0
+        },
+        "2024-01-01": {
+          "peak_median": 9.624010169417843,
+          "peak_max": 14.607600873366108,
+          "final_median": 0.9830722499962368,
+          "blowups_mean": 1.0
+        },
+        "2024-02-01": {
+          "peak_median": 5.351715036667796,
+          "peak_max": 14.068541538114987,
+          "final_median": 0.8823315621829522,
+          "blowups_mean": 1.0
+        },
+        "2024-03-01": {
+          "peak_median": 4.002784261091157,
+          "peak_max": 6.365525951974852,
+          "final_median": 0.8748317439291047,
+          "blowups_mean": 1.0
+        },
+        "2024-04-01": {
+          "peak_median": 1.7710082480573688,
+          "peak_max": 1.7710082480573688,
+          "final_median": 0.8748317439291047,
+          "blowups_mean": 1.0
+        },
+        "2024-05-01": {
+          "peak_median": 1.3637239400560281,
+          "peak_max": 1.3637239400560281,
+          "final_median": 1.3406391621199911,
+          "blowups_mean": 1.0
+        },
+        "2024-06-01": {
+          "peak_median": 1.375414967263419,
+          "peak_max": 1.375414967263419,
+          "final_median": 1.283949646171145,
+          "blowups_mean": 0.0
+        },
+        "2024-07-01": {
+          "peak_median": 1.3872062201544677,
+          "peak_max": 1.3872062201544677,
+          "final_median": 1.2839496461915114,
+          "blowups_mean": 0.0
+        },
+        "2024-08-01": {
+          "peak_median": 2.0432336779907243,
+          "peak_max": 2.0432336779907243,
+          "final_median": 2.0258661917513554,
+          "blowups_mean": 0.0
+        },
+        "2024-09-01": {
+          "peak_median": 5.65576736465606,
+          "peak_max": 5.65576736465606,
+          "final_median": 1.0,
+          "blowups_mean": 1.0
+        },
+        "2024-10-01": {
+          "peak_median": 5.65576736465606,
+          "peak_max": 5.65576736465606,
+          "final_median": 1.0,
+          "blowups_mean": 3.0
+        },
+        "2024-11-01": {
+          "peak_median": 3.690661116489547,
+          "peak_max": 3.690661116489547,
+          "final_median": 1.147564192515021,
+          "blowups_mean": 4.0
+        },
+        "2024-12-01": {
+          "peak_median": 6.230795666568142,
+          "peak_max": 6.230795666568142,
+          "final_median": 6.230795666568142,
+          "blowups_mean": 4.0
+        },
+        "2025-01-01": {
+          "peak_median": 19.47122961405406,
+          "peak_max": 19.47122961405406,
+          "final_median": 4.162662702843114,
+          "blowups_mean": 5.5
+        },
+        "2025-02-01": {
+          "peak_median": 19.47122961405406,
+          "peak_max": 21.580945668318577,
+          "final_median": 4.448571950156958,
+          "blowups_mean": 5.6
+        },
+        "2025-03-01": {
+          "peak_median": 30.105263521459825,
+          "peak_max": 30.105263521459825,
+          "final_median": 25.41877623217711,
+          "blowups_mean": 4.4
+        },
+        "2025-04-01": {
+          "peak_median": 30.105263521459825,
+          "peak_max": 30.105263521459825,
+          "final_median": 23.275902155845042,
+          "blowups_mean": 2.3
+        },
+        "2025-05-01": {
+          "peak_median": 16.96744264160123,
+          "peak_max": 55.83102717498814,
+          "final_median": 4.912980581804119,
+          "blowups_mean": 3.8
+        },
+        "2025-06-01": {
+          "peak_median": 245.89588574771332,
+          "peak_max": 245.89588574771332,
+          "final_median": 245.89588574771332,
+          "blowups_mean": 3.9
+        },
+        "2025-07-01": {
+          "peak_median": 2299.3928862299995,
+          "peak_max": 2299.3928862299995,
+          "final_median": 1574.603902623224,
+          "blowups_mean": 2.2
+        },
+        "2025-08-01": {
+          "peak_median": 2299.3928862299995,
+          "peak_max": 2299.3928862299995,
+          "final_median": 2.4920297425007365,
+          "blowups_mean": 6.1
+        },
+        "2025-09-01": {
+          "peak_median": 2299.3928862299995,
+          "peak_max": 2299.3928862299995,
+          "final_median": 0.2828945399836784,
+          "blowups_mean": 9.5
+        },
+        "2025-10-01": {
+          "peak_median": 2299.3928862299995,
+          "peak_max": 2299.3928862299995,
+          "final_median": 0.8744520313907713,
+          "blowups_mean": 14.1
+        },
+        "2025-11-01": {
+          "peak_median": 321.6186507775823,
+          "peak_max": 321.6186507775823,
+          "final_median": 0.8452606530559407,
+          "blowups_mean": 13.0
+        },
+        "2025-12-01": {
+          "peak_median": 9.351083200266123,
+          "peak_max": 9.351083200266123,
+          "final_median": 1.4109461148534266,
+          "blowups_mean": 16.1
+        },
+        "2026-01-01": {
+          "peak_median": 6.92970936433809,
+          "peak_max": 6.92970936433809,
+          "final_median": 1.108902419567396,
+          "blowups_mean": 18.3
+        },
+        "2026-02-01": {
+          "peak_median": 6.92970936433809,
+          "peak_max": 6.92970936433809,
+          "final_median": 3.5109716762369736,
+          "blowups_mean": 14.0
+        },
+        "2026-03-01": {
+          "peak_median": 62.895360934557345,
+          "peak_max": 91.5708326534393,
+          "final_median": 62.895360934557345,
+          "blowups_mean": 12.1
+        }
+      },
+      "A_v3_ge06_opp1618_P30|f0.5|L5": {
+        "2023-01-01": {
+          "peak_median": 4.240450456125356,
+          "peak_max": 4.240450456125356,
+          "final_median": 4.240450456125356,
+          "blowups_mean": 0.0
+        },
+        "2023-02-01": {
+          "peak_median": 5.749958291889572,
+          "peak_max": 5.749958291889572,
+          "final_median": 5.749958291889572,
+          "blowups_mean": 0.0
+        },
+        "2023-03-01": {
+          "peak_median": 4.125547139800419,
+          "peak_max": 4.125547139800419,
+          "final_median": 3.5497082880018835,
+          "blowups_mean": 0.0
+        },
+        "2023-04-01": {
+          "peak_median": 4.0735784216839885,
+          "peak_max": 4.0735784216839885,
+          "final_median": 3.085367821004266,
+          "blowups_mean": 0.0
+        },
+        "2023-05-01": {
+          "peak_median": 2.5001544421449315,
+          "peak_max": 2.5001544421449315,
+          "final_median": 2.3713834158410685,
+          "blowups_mean": 0.0
+        },
+        "2023-06-01": {
+          "peak_median": 3.08531529658235,
+          "peak_max": 3.5353066152424004,
+          "final_median": 2.213123661986948,
+          "blowups_mean": 0.0
+        },
+        "2023-07-01": {
+          "peak_median": 1.5925544018315039,
+          "peak_max": 1.7909046514201905,
+          "final_median": 1.469457142009703,
+          "blowups_mean": 0.0
+        },
+        "2023-08-01": {
+          "peak_median": 1.162213172883527,
+          "peak_max": 1.4812076240821184,
+          "final_median": 1.0711253909180696,
+          "blowups_mean": 0.0
+        },
+        "2023-09-01": {
+          "peak_median": 1.8151024341934576,
+          "peak_max": 2.3305459524341177,
+          "final_median": 1.8151024341934576,
+          "blowups_mean": 0.0
+        },
+        "2023-10-01": {
+          "peak_median": 4.483813974916538,
+          "peak_max": 5.642710139930697,
+          "final_median": 3.4799524396414405,
+          "blowups_mean": 0.0
+        },
+        "2023-11-01": {
+          "peak_median": 4.171085277015704,
+          "peak_max": 6.809628673872787,
+          "final_median": 3.9132163878467514,
+          "blowups_mean": 0.0
+        },
+        "2023-12-01": {
+          "peak_median": 5.217803947914231,
+          "peak_max": 6.40212946874374,
+          "final_median": 2.9387362153339,
+          "blowups_mean": 0.0
+        },
+        "2024-01-01": {
+          "peak_median": 3.9587521133598655,
+          "peak_max": 5.026399788271167,
+          "final_median": 1.1053550270069992,
+          "blowups_mean": 0.0
+        },
+        "2024-02-01": {
+          "peak_median": 2.944116445980055,
+          "peak_max": 5.334559143506111,
+          "final_median": 0.8378638437021202,
+          "blowups_mean": 0.0
+        },
+        "2024-03-01": {
+          "peak_median": 2.338615653268801,
+          "peak_max": 3.1036098463944657,
+          "final_median": 0.6627162714659108,
+          "blowups_mean": 0.0
+        },
+        "2024-04-01": {
+          "peak_median": 1.359020197705768,
+          "peak_max": 1.359020197705768,
+          "final_median": 0.3851187761492808,
+          "blowups_mean": 0.0
+        },
+        "2024-05-01": {
+          "peak_median": 1.0,
+          "peak_max": 1.0,
+          "final_median": 0.38353988952800183,
+          "blowups_mean": 0.0
+        },
+        "2024-06-01": {
+          "peak_median": 1.2942004183504248,
+          "peak_max": 1.2942004183504248,
+          "final_median": 1.2508691790904387,
+          "blowups_mean": 0.0
+        },
+        "2024-07-01": {
+          "peak_median": 1.2997242464068994,
+          "peak_max": 1.2997242464068994,
+          "final_median": 1.2508691791003173,
+          "blowups_mean": 0.0
+        },
+        "2024-08-01": {
+          "peak_median": 1.492397730254764,
+          "peak_max": 1.492397730254764,
+          "final_median": 1.4860550399097827,
+          "blowups_mean": 0.0
+        },
+        "2024-09-01": {
+          "peak_median": 2.6623004263173105,
+          "peak_max": 2.6623004263173105,
+          "final_median": 1.3148672023124577,
+          "blowups_mean": 0.0
+        },
+        "2024-10-01": {
+          "peak_median": 2.6623004263173105,
+          "peak_max": 2.6623004263173105,
+          "final_median": 0.3303816021107848,
+          "blowups_mean": 0.0
+        },
+        "2024-11-01": {
+          "peak_median": 2.0966720694902268,
+          "peak_max": 2.0966720694902268,
+          "final_median": 1.1186017581435095,
+          "blowups_mean": 1.0
+        },
+        "2024-12-01": {
+          "peak_median": 3.055124399718211,
+          "peak_max": 3.055124399718211,
+          "final_median": 3.055124399718211,
+          "blowups_mean": 1.0
+        },
+        "2025-01-01": {
+          "peak_median": 7.688902502469394,
+          "peak_max": 9.647524292292767,
+          "final_median": 5.69284889729432,
+          "blowups_mean": 1.0
+        },
+        "2025-02-01": {
+          "peak_median": 5.730280712646021,
+          "peak_max": 21.1446863570345,
+          "final_median": 3.7934014586874087,
+          "blowups_mean": 1.0
+        },
+        "2025-03-01": {
+          "peak_median": 29.893948776040375,
+          "peak_max": 29.893948776040375,
+          "final_median": 28.89767862028127,
+          "blowups_mean": 1.0
+        },
+        "2025-04-01": {
+          "peak_median": 10.36140110177339,
+          "peak_max": 10.36140110177339,
+          "final_median": 9.590816666157211,
+          "blowups_mean": 0.0
+        },
+        "2025-05-01": {
+          "peak_median": 20.26497179410396,
+          "peak_max": 127.45117503937892,
+          "final_median": 19.801968048025117,
+          "blowups_mean": 0.0
+        },
+        "2025-06-01": {
+          "peak_median": 173.73888184095085,
+          "peak_max": 890.5104368231213,
+          "final_median": 173.73888184095085,
+          "blowups_mean": 0.0
+        },
+        "2025-07-01": {
+          "peak_median": 1057.505297461119,
+          "peak_max": 1492.934738510816,
+          "final_median": 883.749301623092,
+          "blowups_mean": 0.0
+        },
+        "2025-08-01": {
+          "peak_median": 470.61344009447475,
+          "peak_max": 559.1555111149645,
+          "final_median": 63.930701545383265,
+          "blowups_mean": 0.0
+        },
+        "2025-09-01": {
+          "peak_median": 243.54690309870156,
+          "peak_max": 283.4872470606894,
+          "final_median": 4.6373795437075565,
+          "blowups_mean": 0.0
+        },
+        "2025-10-01": {
+          "peak_median": 206.44006086306086,
+          "peak_max": 307.57643602480704,
+          "final_median": 0.7475910375385553,
+          "blowups_mean": 0.0
+        },
+        "2025-11-01": {
+          "peak_median": 37.645885803340086,
+          "peak_max": 37.645885803340086,
+          "final_median": 0.9216811969570387,
+          "blowups_mean": 1.0
+        },
+        "2025-12-01": {
+          "peak_median": 3.6678141883324886,
+          "peak_max": 3.6678141883324886,
+          "final_median": 0.2128128191882678,
+          "blowups_mean": 2.1
+        },
+        "2026-01-01": {
+          "peak_median": 2.1030576728160137,
+          "peak_max": 2.639414587415371,
+          "final_median": 0.4720541697238434,
+          "blowups_mean": 3.0
+        },
+        "2026-02-01": {
+          "peak_median": 1.7647845180847193,
+          "peak_max": 1.7647845180847193,
+          "final_median": 0.8256693979062212,
+          "blowups_mean": 2.0
+        },
+        "2026-03-01": {
+          "peak_median": 21.651817885621227,
+          "peak_max": 27.908044178771366,
+          "final_median": 21.651817885621227,
+          "blowups_mean": 2.0
+        }
+      }
+    }
+  },
+  "source_commit": "5c9d89354f16b417e2df218182ef9a8928c2ba22",
+  "training_eligible": false,
+  "production_eligible": false
+}

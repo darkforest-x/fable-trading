@@ -65,6 +65,19 @@
 - Median notional per100USDTplannedrisk5077to5511;99percentile~22k;maximum~30.8k. Same entry/stop implies exactly same size regardless of target. Recorded overlap as high as137positions and~471600USDTnotional across fixed-target arms; this is independent exposure, not a feasible cashaccount. Stops ordinarily lose100USDT, observed worst~101.50 fromgaps. Funding/margin/capacity remain unmodeled. Originalentry-week targets do not roll nextweek; sourcegap/end censoring preserved.
 - Results and reproduction `experiments/active/exp-monday-5m-confirmed-keypoints-20261026-v1/`; Notion `4058856479af81bfac30ddc49688ef3e`. Learning `fixed-risk-sizing-must-include-fill-costs.md`. All production/training flagsfalse; no live/score changes, no additional report. Luna delegate actualmodel/effort could not be verified from tool output and was stopped; main performed work.
 
+## 2026-10-27 · Lottery version (very high payoff, blow-ups accepted)
+
+- Owner wants a small-stake version: blow-ups acceptable (about 5 in six months), aiming at runs of tens to thousands of times the stake. Replays use existing fills (`exp-monday-limit-lottery-20261027-v1`): one position at a time, all-in or half-in margin at 3-20x, restart after a blow-up, 39 rolling half-year windows from 2023.
+- Best family: v3 score ≥0.6, opposite 1618 target, −30 percent backstop.
+  - All-in 5x reaches 10x / 100x / 1000x in 47 / 15 / 10 percent of windows, with 3.8 blow-ups on average (13 at p90).
+  - Half-in 5x: 25 / 11 / 1.5 percent with 0.4 blow-ups.
+  - 10-20x blows up 10-20 times per window and loses.
+- Caveats:
+  - all 100x+ cases come from one streak in mid to late 2025; held accounts gave it back with many blow-ups;
+  - 2023-2024 windows peak at 1.4-25x;
+  - a withdrawal rule is needed and was not modeled yet.
+- Learning `lottery-odds-from-overlapping-windows-can-be-one-streak.md`.
+
 ## 2026-10-27 · Full-screen spike alarm: backend ready, page pending Codex + Stitch
 
 - Owner wants the spike alert as a full-screen alarm with sound on the web page. UI goes through Stitch (`GEMINI_3_8_FLASH`, project 8978791379095391159) and Codex. Claude did not write UI.

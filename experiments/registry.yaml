@@ -632,6 +632,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Backtest 2020-24 / 2025 / 2026 / last five months 3.74x / 8.97x / 2.56x / 2.96x, DD up to 34 percent; band edges were chosen after seeing 2025-2026, so the forward record is the test. UI pending Codex + Stitch.'
+  - experiment_id: exp-monday-limit-lottery-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5c9d89354f
+    status: complete
+    question: 'Owner 2026-10-27: a very high payoff version for a small stake; blow-ups acceptable (about 5 in six months) if one run can multiply the stake tens to thousands of times.'
+    single_variable: 'Sizing only: one position at a time, margin = account x f (1.0 / 0.5) at 3-20x, liquidation at MAE >= 100/L - 1 percent, restart with a fresh stake after a blow-up; 39 overlapping 26-week windows from 2023-01, 10 tie orders; existing fills.'
+    result: 'v3 score >= 0.6, opposite 1618, -30 percent backstop: all-in 5x reaches 10x in 47 percent of windows, 100x in 15, 1000x in 10, mean 3.8 blow-ups (p90 13), median net +0.28 stakes. Half-in 5x: 25 / 11 / 1.5 percent, 0.4 blow-ups. All-in 10x / 20x: 10 / 20 blow-ups per window, median net negative. Per-window detail: every 100x-1000x outcome comes from one streak in the windows starting 2025-05 to 2025-10 (peak 2299x all-in 5x); those accounts end near 0.3-1.6x with 9-18 blow-ups when held, and the 2023-2024 windows peak at 1.4-25x. Spike-HW near target never reaches 100x.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-lottery-20261027-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Overlapping windows: the 1000x probability is one 2025 streak, not a repeatable rate. Profit withdrawal was not modeled; held accounts give the peaks back. In sample, Binance fills, funding not modeled.'
   - experiment_id: exp-monday-spike-alert-quality-20261027-v1
     source_repo: darkforest-x/fable-trading
     source_commit: eff412e425

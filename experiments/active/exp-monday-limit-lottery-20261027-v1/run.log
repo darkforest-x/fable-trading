@@ -1,0 +1,47 @@
+/Users/zhangzc/fable-trading/yoyo/evaluation/monday_limit_spike_opt.py:57: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  entry_t=pd.to_datetime(o.entry_time, utc=True),
+/Users/zhangzc/fable-trading/yoyo/evaluation/monday_limit_spike_opt.py:57: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  entry_t=pd.to_datetime(o.entry_time, utc=True),
+/Users/zhangzc/fable-trading/yoyo/evaluation/monday_limit_spike_opt.py:57: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  entry_t=pd.to_datetime(o.entry_time, utc=True),
+{"A_v3_ge06_opp1618_P30": {"n": 842, "win_pct": 38.00475059382423, "mean_bp": 374.616835560522, "mae_q90": 15.178487283266982}, "B_v3_ge06_opp1618_nostop": {"n": 842, "win_pct": 38.242280285035626, "mean_bp": 398.80259193150016, "mae_q90": 15.649242069142806}, "C_order_ge3_opp1618_P30": {"n": 219, "win_pct": 65.75342465753424, "mean_bp": 889.1877912731137, "mae_q90": 16.042976019956516}, "D_score_ge08_opp1618_P30": {"n": 78, "win_pct": 60.256410256410255, "mean_bp": 742.6253161325318, "mae_q90": 16.127301027894585}, "E_spike_hw_near_P18": {"n": 219, "win_pct": 85.38812785388129, "mean_bp": 240.59803611640748, "mae_q90": 13.889696272112737}} 39
+A_v3_ge06_opp1618_P30|f1.0|L3      P>=10x  23.1 P>=100x   8.5 P>=1000x   0.0 blow 0.7/3 net med 0.28 mean 11.08 P(net>0) 58
+A_v3_ge06_opp1618_P30|f1.0|L5      P>=10x  46.7 P>=100x  15.4 P>=1000x  10.3 blow 3.8/13 net med 0.28 mean 47.58 P(net>0) 53
+A_v3_ge06_opp1618_P30|f1.0|L10     P>=10x  57.9 P>=100x  16.2 P>=1000x   0.0 blow 10.0/28 net med -3.91 mean -4.46 P(net>0) 28
+A_v3_ge06_opp1618_P30|f1.0|L20     P>=10x  68.7 P>=100x  22.6 P>=1000x   0.0 blow 19.7/46 net med -11.52 mean -10.76 P(net>0) 6
+A_v3_ge06_opp1618_P30|f0.5|L3      P>=10x  16.4 P>=100x   0.0 P>=1000x   0.0 blow 0.0/0 net med 0.61 mean 3.76 P(net>0) 75
+A_v3_ge06_opp1618_P30|f0.5|L5      P>=10x  24.9 P>=100x  11.0 P>=1000x   1.5 blow 0.4/2 net med 0.79 mean 31.73 P(net>0) 70
+A_v3_ge06_opp1618_P30|f0.5|L10     P>=10x  25.1 P>=100x   8.2 P>=1000x   2.1 blow 0.8/3 net med -0.18 mean 39.70 P(net>0) 46
+A_v3_ge06_opp1618_P30|f0.5|L20     P>=10x  36.4 P>=100x   6.7 P>=1000x   0.0 blow 2.3/6 net med -1.46 mean 1.25 P(net>0) 24
+B_v3_ge06_opp1618_nostop|f1.0|L3   P>=10x  23.1 P>=100x  10.3 P>=1000x   0.3 blow 0.7/3 net med 0.31 mean 10.94 P(net>0) 61
+B_v3_ge06_opp1618_nostop|f1.0|L5   P>=10x  46.7 P>=100x  15.4 P>=1000x  10.3 blow 3.8/13 net med 0.28 mean 47.61 P(net>0) 54
+B_v3_ge06_opp1618_nostop|f1.0|L10  P>=10x  57.9 P>=100x  15.4 P>=1000x   0.0 blow 10.0/28 net med -3.91 mean -4.43 P(net>0) 28
+B_v3_ge06_opp1618_nostop|f1.0|L20  P>=10x  68.7 P>=100x  22.6 P>=1000x   0.0 blow 19.5/46 net med -11.52 mean -10.56 P(net>0) 6
+B_v3_ge06_opp1618_nostop|f0.5|L3   P>=10x  19.0 P>=100x   0.0 P>=1000x   0.0 blow 0.0/0 net med 0.74 mean 3.91 P(net>0) 76
+B_v3_ge06_opp1618_nostop|f0.5|L5   P>=10x  23.3 P>=100x  11.0 P>=1000x   0.0 blow 0.4/2 net med 0.79 mean 17.60 P(net>0) 70
+B_v3_ge06_opp1618_nostop|f0.5|L10  P>=10x  23.1 P>=100x   3.3 P>=1000x   0.0 blow 0.8/3 net med -0.22 mean 11.60 P(net>0) 46
+B_v3_ge06_opp1618_nostop|f0.5|L20  P>=10x  35.6 P>=100x   5.1 P>=1000x   0.0 blow 2.3/6 net med -1.44 mean 1.10 P(net>0) 24
+C_order_ge3_opp1618_P30|f1.0|L3    P>=10x   6.9 P>=100x   0.0 P>=1000x   0.0 blow 0.2/1 net med 0.42 mean 1.16 P(net>0) 73
+C_order_ge3_opp1618_P30|f1.0|L5    P>=10x  23.6 P>=100x   0.0 P>=1000x   0.0 blow 1.4/4 net med 0.32 mean 1.59 P(net>0) 54
+C_order_ge3_opp1618_P30|f1.0|L10   P>=10x  40.8 P>=100x  12.8 P>=1000x   0.0 blow 4.3/11 net med -0.03 mean -0.85 P(net>0) 45
+C_order_ge3_opp1618_P30|f1.0|L20   P>=10x  41.0 P>=100x   0.0 P>=1000x   0.0 blow 7.4/17 net med -2.00 mean -3.92 P(net>0) 33
+C_order_ge3_opp1618_P30|f0.5|L3    P>=10x   2.8 P>=100x   0.0 P>=1000x   0.0 blow 0.0/0 net med 0.31 mean 1.04 P(net>0) 88
+C_order_ge3_opp1618_P30|f0.5|L5    P>=10x   7.9 P>=100x   0.0 P>=1000x   0.0 blow 0.1/0 net med 0.27 mean 2.00 P(net>0) 73
+C_order_ge3_opp1618_P30|f0.5|L10   P>=10x  13.6 P>=100x   2.8 P>=1000x   0.0 blow 0.3/1 net med 0.33 mean 5.44 P(net>0) 59
+C_order_ge3_opp1618_P30|f0.5|L20   P>=10x   9.5 P>=100x   0.0 P>=1000x   0.0 blow 0.8/2 net med -0.74 mean -0.35 P(net>0) 34
+D_score_ge08_opp1618_P30|f1.0|L3   P>=10x  16.4 P>=100x   0.0 P>=1000x   0.0 blow 0.2/1 net med 0.00 mean 2.54 P(net>0) 47
+D_score_ge08_opp1618_P30|f1.0|L5   P>=10x  20.5 P>=100x   1.8 P>=1000x   0.0 blow 0.5/2 net med 0.00 mean 3.20 P(net>0) 38
+D_score_ge08_opp1618_P30|f1.0|L10  P>=10x  41.0 P>=100x  23.1 P>=1000x   5.1 blow 2.1/6 net med 0.00 mean 18.47 P(net>0) 48
+D_score_ge08_opp1618_P30|f1.0|L20  P>=10x  33.6 P>=100x   0.0 P>=1000x   0.0 blow 4.0/10 net med -1.00 mean -1.53 P(net>0) 18
+D_score_ge08_opp1618_P30|f0.5|L3   P>=10x   0.0 P>=100x   0.0 P>=1000x   0.0 blow 0.0/0 net med 0.23 mean 0.80 P(net>0) 54
+D_score_ge08_opp1618_P30|f0.5|L5   P>=10x   8.7 P>=100x   0.0 P>=1000x   0.0 blow 0.0/0 net med 0.39 mean 1.77 P(net>0) 54
+D_score_ge08_opp1618_P30|f0.5|L10  P>=10x  20.3 P>=100x   2.6 P>=1000x   0.0 blow 0.2/1 net med 0.00 mean 9.77 P(net>0) 49
+D_score_ge08_opp1618_P30|f0.5|L20  P>=10x  14.9 P>=100x   0.0 P>=1000x   0.0 blow 0.4/1 net med 0.00 mean 1.19 P(net>0) 35
+E_spike_hw_near_P18|f1.0|L3        P>=10x   4.4 P>=100x   0.0 P>=1000x   0.0 blow 0.0/0 net med 0.21 mean 0.92 P(net>0) 69
+E_spike_hw_near_P18|f1.0|L5        P>=10x  14.1 P>=100x   0.0 P>=1000x   0.0 blow 0.4/1 net med 0.13 mean 0.72 P(net>0) 59
+E_spike_hw_near_P18|f1.0|L10       P>=10x  25.6 P>=100x   0.0 P>=1000x   0.0 blow 3.9/10 net med -1.10 mean -0.48 P(net>0) 43
+E_spike_hw_near_P18|f1.0|L20       P>=10x  18.7 P>=100x   0.0 P>=1000x   0.0 blow 6.8/17 net med -4.00 mean -5.73 P(net>0) 15
+E_spike_hw_near_P18|f0.5|L3        P>=10x   0.0 P>=100x   0.0 P>=1000x   0.0 blow 0.0/0 net med 0.14 mean 0.42 P(net>0) 79
+E_spike_hw_near_P18|f0.5|L5        P>=10x   0.0 P>=100x   0.0 P>=1000x   0.0 blow 0.0/0 net med 0.17 mean 0.78 P(net>0) 74
+E_spike_hw_near_P18|f0.5|L10       P>=10x   7.2 P>=100x   0.0 P>=1000x   0.0 blow 0.3/1 net med -0.17 mean 0.06 P(net>0) 46
+E_spike_hw_near_P18|f0.5|L20       P>=10x   0.0 P>=100x   0.0 P>=1000x   0.0 blow 0.6/2 net med -0.70 mean -0.78 P(net>0) 19
