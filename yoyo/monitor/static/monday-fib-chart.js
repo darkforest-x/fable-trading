@@ -1,4 +1,4 @@
-/* Read-only wallpaper chart. Reuses the bounded OKX cache and shared renderer.
+/* Read-only wallpaper chart. Keeps bounded live snapshots and demand-only history.
  * Monday anchors come from the monitor; candles must match its symbol, NY week,
  * and closed-bar boundary. A separate display-only feed supplies the live tip.
  * No trading, alert writes, or synthetic candles.
@@ -47,6 +47,14 @@
     const range=anchors||row;
     return {...context,candles,levels:levels(range,anchors),level_window:{start_ms:anchors?.start_ms??start,end_ms:anchors?.expires_ms??context.monday.expires_ms},monday:{...context.monday,high:range.high,low:range.low,complete:!prior&&range.state!=='developing'}};
   }
+  function withWeeks(value,anchors,week){
+    const ranges=new Map((value.weekly_ranges||[]).filter(w=>w.symbol===value.symbol&&w.state==='ready').map(w=>[w.week,w]));
+    if(anchors)ranges.set(anchors.week,anchors);
+    if(!ranges.size)return {...value,levels:[]};
+    const values=[...ranges.values()];
+    return {...value,levels:values.flatMap(w=>levels(w,w).map(l=>({...l,end_ms:w.expires_ms,historical:w.week!==week,week:w.week}))),
+      level_window:{start_ms:Math.min(...values.map(w=>w.start_ms)),end_ms:Math.max(...values.map(w=>w.expires_ms))}};
+  }
   // The display contains closed candles. Refresh at their next close, using
   // server time so a user's clock cannot postpone updates. Lagging tails retry.
   function refreshDelay(context,period){
@@ -58,25 +66,25 @@
     if(context.last_close_ms<boundary)return 3000;
     return Math.max(1000,boundary+step-now+1500);
   }
-  if(typeof module!=='undefined')module.exports={levels,prepare,PERIODS,refreshDelay};
+  if(typeof module!=='undefined')module.exports={levels,prepare,withWeeks,PERIODS,refreshDelay};
   if(typeof document==='undefined')return;
   const shared=window.SpikePublicChartCache,cache=shared?.candles||new Map(),levelCache=shared?.levels||new Map();
   function create({decorate}={}){
   const view={decorate,bars:720,initialBars:160,range:true,fib:true,fitAll:false,showLevels:false,mondayBand:true,wallpaper:true};
   let target=null,controller=null,timer=null,version=0,paused=false;
-  function pause(){paused=true;version++;clearTimeout(timer);controller?.abort();controller=null;target?.feed?.stop();if(target)target.feed=null;}
+  function pause(){paused=true;version++;clearTimeout(timer);controller?.abort();controller=null;target?.feed?.stop();target?.history?.pause();if(target)target.feed=null;}
   function stop(){pause();if(target){window.SpikeRangeChart?.unmount(target.mount);target.host.replaceChildren?.();}target=null;}
   function draw(context,error=''){
     if(!target)return;
     try{
       let value=prepare(context,target.row,target.week,target.period,target.levels);
-      if(!target.levels)value.levels=[];
+      value=withWeeks(value,target.levels,target.week);
       value=window.SpikeMondayCandleFeed?.mergeDisplay(value,target.live,target.period)||value;
       target.context=context;
       value.paperTrade=target.trade;value.paperTrades=target.trades;
       if(context.display_cached)value.stale=true;
       if(!target.internal)value.levels=value.levels.filter(l=>['上 1.618','周一高','周一低','下 1.618'].includes(l.label));
-      target.instance=window.SpikeRangeChart.mount(target.mount,value,{...view,ma:target.ma,mondayBand:target.period!=='1D'},error);
+      target.instance=window.SpikeRangeChart.mount(target.mount,value,{...view,bars:window.SpikeChartHistory?.full(target.row.symbol)?Infinity:720,ma:target.ma,mondayBand:target.period!=='1D',onVisibleRange:instance=>target?.history?.observe(instance)},error);
       message(error||target.levelError||(context.error?'K 线更新失败：'+context.error:context.loading?'正在同步此合约 K 线…':!value.candles?.length?'暂无此周期 K 线，请稍后重试':target.live?.error||''));
     }catch(e){message(e.message);window.SpikeRangeChart.unmount(target.mount);}
   }
@@ -112,12 +120,14 @@
       delay=Math.max(0,refreshDelay(value,current.period)-(warm?Date.now()-warm.receivedAt:0));
       if(current.levels?.display_previous)delay=Math.min(delay,60000);
       if(!value.candles?.length&&current.context?.candles?.length)value={...current.context,display_cached:true,loading:false,error:value.error||null};
+      value=current.history?.merge(value)||value;
       cache.delete(current.key);cache.set(current.key,{value,due:Date.now()+delay});while(cache.size>12)cache.delete(cache.keys().next().value);
-      if(!value.display_cached)shared?.saveCandles(value);
+      if(!value.display_cached)shared?.saveCandles({...value,candles:value.candles.slice(-720)});
       draw(value);
       if(anchorRequest){const anchors=await anchorRequest;if(token!==version||target!==current)return;
         current.levels=anchors?.state==='ready'?anchors:current.levels;current.levelError=anchors?'':'周一锚点暂不可用，稍后重试';
         if(anchors?.state==='ready'){shared?.saveLevels(anchors);levelCache.set(current.row.symbol+'|'+current.week,anchors);while(levelCache.size>32)levelCache.delete(levelCache.keys().next().value);}else delay=10000;
+        value=current.history?.merge(value)||value;
         cache.set(current.key,{value,due:Date.now()+delay});
         draw(value);}
     }catch(e){if(token===version&&target===current){message((e.name==='AbortError'?'图表读取超时':e.message)+' · 可重新加载');delay=10000;}}
@@ -129,16 +139,21 @@
     if(anchors?.symbol===row.symbol&&(anchors.current_week||anchors.week)===week&&anchors.state==='ready'){levelCache.set(row.symbol+'|'+week,anchors);shared?.saveLevels(anchors);}
     if(target?.host===host&&target.key===key){
       const changed=target.internal!==internal||target.ma!==ma||JSON.stringify(target.trade)!==JSON.stringify(trade)||JSON.stringify(target.trades)!==JSON.stringify(trades)||['high','low','upper','lower'].some(k=>target.row[k]!==row[k]);
-      target.row=row;target.levels=levelCache.get(row.symbol+'|'+week)||target.levels;target.trade=trade;target.trades=trades;target.internal=internal;target.ma=ma;if(changed&&target.context)draw(target.context);if(paused){paused=false;startFeed();const previous=cache.get(key);if(previous&&previous.due>Date.now())timer=setTimeout(refresh,previous.due-Date.now());else refresh();}return;
+      target.row=row;target.levels=levelCache.get(row.symbol+'|'+week)||target.levels;target.trade=trade;target.trades=trades;target.internal=internal;target.ma=ma;if(changed&&target.context)draw(target.context);if(paused){paused=false;target.history?.resume();startFeed();const previous=cache.get(key);if(previous&&previous.due>Date.now())timer=setTimeout(refresh,previous.due-Date.now());else refresh();}return;
     }
     const reuse=target?.host===host?target:null;
-    if(reuse){version++;clearTimeout(timer);controller?.abort();controller=null;target.feed?.stop();}else stop();
+    if(reuse){version++;clearTimeout(timer);controller?.abort();controller=null;target.feed?.stop();target.history?.pause();}else stop();
     if(!host)return;paused=false;
-    if(!reuse)host.innerHTML='<div class="mf-chart-caption"><p role="status">正在加载区间 K 线…</p><button type="button" data-mf-chart-retry>重新加载</button></div><div class="mf-chart-mount"></div>';
+    if(!reuse)host.innerHTML='<div class="mf-chart-caption"><p role="status">正在加载区间 K 线…</p><button type="button" data-mf-chart-retry>重新加载</button></div><div class="mf-chart-mount"></div><div class="mf-history-status"><button type="button" data-mf-history-retry disabled aria-live="polite"></button><small></small></div>';
     target={host,row,week,key,internal,ma,period,trade,trades,levels:levelCache.get(row.symbol+'|'+week),state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
     if(!reuse)host.querySelector('[data-mf-chart-retry]').addEventListener('click',()=>refresh());
+    const owner=target;
+    target.history=window.SpikeChartHistory?.create({symbol:row.symbol,period,
+      changed:value=>{if(target!==owner||paused)return;const old=cache.get(key);cache.set(key,{value,due:old?.due||0});draw(value);},
+      status:value=>{if(target!==owner)return;const button=host.querySelector('[data-mf-history-retry]');if(!button)return;button.textContent=value.text;button.disabled=!value.retry;host.querySelector('.mf-history-status small').textContent=value.count?`${value.count.toLocaleString()} 根`:'';}});
+    if(!reuse)host.querySelector('[data-mf-history-retry]')?.addEventListener('click',()=>target?.history?.retry());
     const previous=cache.get(key);
-    if(previous)draw(previous.due>Date.now()?previous.value:{...previous.value,display_cached:true});
+    if(previous){const value=target.history?.merge(previous.value)||previous.value;draw(previous.due>Date.now()?value:{...value,display_cached:true});}
     else if(reuse){
       // Clear the previous identity synchronously while keeping its canvas and
       // per-symbol viewport cache. Never label the old candles as a new symbol.
@@ -152,7 +167,7 @@
       }
     });
     if(!previous)shared?.restoreCandles(key).then(value=>{
-      if(value&&target===current&&!paused&&!current.context?.candles?.length){try{prepare(value,row,week,period,current.levels);draw({...value,display_cached:true})}catch{/* Invalid local history cannot paint. */}}
+      if(value&&target===current&&!paused&&!current.context?.candles?.length){try{prepare(value,row,week,period,current.levels);draw(current.history?.merge({...value,display_cached:true})||{...value,display_cached:true})}catch{/* Invalid local history cannot paint. */}}
     });
     startFeed();
     if(target.levels&&previous&&Date.now()<previous.due&&!previous.value.loading&&!previous.value.error)timer=setTimeout(refresh,previous.due-Date.now());else refresh();
@@ -167,7 +182,7 @@
   }
   function zoom(factor){
     const scale=target?.instance?.chart?.timeScale(),range=scale?.getVisibleLogicalRange();if(!range||!finite(factor)||factor<=0)return;
-    const span=Math.max(8,Math.min(view.bars+20,(range.to-range.from)*factor));scale.setVisibleLogicalRange({from:range.to-span,to:range.to});
+    const span=Math.max(8,Math.min((target.instance?.rows?.length||view.bars)+20,(range.to-range.from)*factor));scale.setVisibleLogicalRange({from:range.to-span,to:range.to});
   }
   return {show,hide:stop,pause,setInternal,setMa,fit,latest,zoom};
   }

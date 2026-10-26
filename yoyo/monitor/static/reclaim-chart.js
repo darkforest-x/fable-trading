@@ -4,7 +4,7 @@
  */
 (() => {
   'use strict';
-  const fin=Number.isFinite,periods={'5m':300000,'15m':900000,'1H':3600000,'4H':14400000};
+  const fin=Number.isFinite,periods={'5m':300000,'15m':900000,'1H':3600000,'4H':14400000,'1D':86400000};
   const valid=p=>p && /^[A-Z0-9]{1,32}-USDT-SWAP$/.test(p.symbol) && [1,-1].includes(p.side) && fin(p.fill_ms) && p.fill_ms>0 && fin(p.entry) && p.entry>0;
   function latest(track){return [...(track?.open||[]),...(track?.closed||[]),...(track?.latest_funded?[track.latest_funded]:[])].filter(p=>valid(p)&&p.taken===1&&p.notional>0).sort((a,b)=>b.fill_ms-a.fill_ms||b.id-a.id)[0]||null;}
   function select(track,id,pinned){return id ? [...(track?.open||[]),...(track?.closed||[]),...(track?.latest_funded?[track.latest_funded]:[])].find(p=>String(p.id)===id&&valid(p)) || (pinned&&String(pinned.id)===id?pinned:null) : latest(track);}

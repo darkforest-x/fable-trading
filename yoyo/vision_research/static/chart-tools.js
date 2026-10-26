@@ -26,7 +26,7 @@
   const date=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});
   const clock=t=>finite(t)?date.format(new Date(t*1000)):'—';
   const times=rows=>rows.map(r=>r.time??r.t/1000);
-  const validRange=r=>r&&finite(r.from)&&finite(r.to)&&r.to>r.from&&r.to-r.from<100000;
+  const validRange=r=>r&&finite(r.from)&&finite(r.to)&&r.to>r.from;
   function at(index,ts){const last=ts.length-1,i=Math.max(0,Math.min(last-1,Math.floor(index))),step=ts.length>1?ts[i+1]-ts[i]:1;return ts[i]+(index-i)*step;}
   function indexAt(t,ts){if(ts.length===1)return t-ts[0];let lo=0,hi=ts.length-1;while(lo+1<hi){const m=(lo+hi)>>1;if(ts[m]<=t)lo=m;else hi=m;}return lo+(t-ts[lo])/(ts[hi]-ts[lo]);}
   function anchor(range,ts){if(!validRange(range)||!ts.length)return null;return {from:at(range.from,ts),to:at(range.to,ts),span:range.to-range.from,right:range.to-(ts.length-1),follow:range.to>=ts.length-1&&range.from<ts.length};}
@@ -36,7 +36,11 @@
     save(key,range,ts){const value=anchor(range,ts);if(!key||!value)return;this.values.delete(key);this.values.set(key,value);while(this.values.size>this.limit)this.values.delete(this.values.keys().next().value);}
     get(key,ts){return restore(this.values.get(key),ts);}
   }
-  function priceFormat(rows,extra=[]){const prices=rows.flatMap(r=>[r.low??r.l,r.high??r.h,r.close??r.c]).concat(extra).filter(v=>finite(v)&&v>0),min=prices.length?Math.min(...prices):1,precision=Math.min(10,Math.max(2,4-Math.floor(Math.log10(min))));return {type:'price',precision,minMove:10**-precision};}
+  function priceFormat(rows,extra=[]){
+    let min=Infinity;const take=v=>{if(finite(v)&&v>0&&v<min)min=v;};
+    for(const r of rows){take(r.low??r.l);take(r.high??r.h);take(r.close??r.c);}for(const v of extra)take(v);
+    if(!finite(min))min=1;const precision=Math.min(10,Math.max(2,4-Math.floor(Math.log10(min))));return {type:'price',precision,minMove:10**-precision};
+  }
   function frame(fn){let id=null,args;const run=(...values)=>{args=values;if(id===null)id=requestAnimationFrame(()=>{id=null;fn(...args);});};run.cancel=()=>{if(id!==null)cancelAnimationFrame(id);id=null;};return run;}
   function resize(chart,host,{compactAxis=false}={}){
     let w=0,h=0,narrow;

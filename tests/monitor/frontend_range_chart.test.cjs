@@ -2,6 +2,15 @@
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const sandbox={window:{SpikeChartTools:require('../../yoyo/vision_research/static/chart-tools.js')},module:{exports:{}},Intl,Date};vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/range-chart.js','utf8'),sandbox);
 const {render,price}=sandbox.module.exports,view={bars:192,range:true,profile:true};
+test('multiple weekly lines stop and autoscale at their own expiry',()=>{
+ const lines=[],owner={rows:[{time:0},{time:100},{time:200},{time:300}],levelWindow:{start_ms:0,end_ms:300000},
+  activeLevels:[{price:10,start_ms:0,end_ms:100000,historical:true},{price:20,start_ms:100000,end_ms:300000}],
+  chart:{timeScale:()=>({logicalToCoordinate:x=>x*100,getVisibleLogicalRange:()=>({from:1.2,to:2.5})})},series:{priceToCoordinate:p=>p}};
+ assert.deepEqual(Array.from(sandbox.module.exports.Interactive.prototype.scaleLevels.call(owner)),[20]);
+ const ctx={save(){},restore(){},beginPath(){},rect(){},clip(){},setLineDash(){},moveTo:(x,y)=>lines.push([x,y]),lineTo:(x,y)=>lines.push([x,y]),stroke(){},arc(){},fill(){}};
+ new sandbox.module.exports.WeekLevels(owner).paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:400,height:100}})});
+ assert.deepEqual(lines,[[0,10],[100,10],[100,20],[300,20]]);
+});
 test('range fallback and interactive defaults share the Monday candle palette',()=>{
  const colors=sandbox.window.SpikeChartTools.colors;
  assert.equal(colors.up,'#169873');assert.equal(colors.down,'#d7355d');

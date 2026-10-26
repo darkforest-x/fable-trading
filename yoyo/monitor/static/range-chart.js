@@ -47,7 +47,7 @@
     if(!rows.length||!fin(stamp))return null;
     const t=stamp/1000,n=rows.length,step=n>1?rows[1].time-rows[0].time:86400;
     if(t<=rows[0].time)return (t-rows[0].time)/step;
-    for(let i=1;i<n;i++)if(t<=rows[i].time)return i-1+(t-rows[i-1].time)/(rows[i].time-rows[i-1].time);
+    if(t<=rows[n-1].time){let lo=0,hi=n-1;while(lo+1<hi){const m=Math.floor((lo+hi)/2);if(rows[m].time<t)lo=m;else hi=m;}return lo+(t-rows[lo].time)/(rows[hi].time-rows[lo].time);}
     return n-1+(t-rows[n-1].time)/(n>1?rows[n-1].time-rows[n-2].time:step);
   }
   // LWC 4.2 truncates fractional logical coordinates; interpolate adjacent bars.
@@ -77,14 +77,15 @@
     updateAllViews(){}
     paint(target){
       const o=this.owner,w=o.levelWindow;if(!w||!fin(w.start_ms)||!fin(w.end_ms)||!o.rows.length)return;
-      const scale=o.chart.timeScale(),end=coordinateAt(scale,logicalAt(o.rows,w.end_ms));
-      if(end==null)return;
+      const scale=o.chart.timeScale();
       target.useMediaCoordinateSpace(({context:ctx,mediaSize})=>{
-        const b=Math.min(mediaSize.width,end);
         ctx.save();ctx.beginPath();ctx.rect(0,0,mediaSize.width,mediaSize.height);ctx.clip();
         for(const l of o.activeLevels||[]){
+          const end=coordinateAt(scale,logicalAt(o.rows,l.end_ms??w.end_ms));if(end==null)continue;
+          const b=Math.min(mediaSize.width,end);
           const start=coordinateAt(scale,logicalAt(o.rows,l.start_ms??w.start_ms)),a=Math.max(0,start??b);
           const y=o.series.priceToCoordinate(l.price);if(y==null||a>=b)continue;
+          ctx.globalAlpha=l.historical ? .45 : 1;
           const color=l.color||'#528cc1';ctx.strokeStyle=color;ctx.lineWidth=l.lineWidth||1;ctx.setLineDash(l.lineStyle===2?[4,4]:[]);
           ctx.beginPath();ctx.moveTo(a,y);ctx.lineTo(b,y);ctx.stroke();
           if(start>=0&&start<b){ctx.beginPath();ctx.arc(start,y,2.5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();}
@@ -138,7 +139,7 @@
       this.crosshair=T.frame(p=>{if(!this.chart)return;this.hover=p?.time&&p.seriesData?.has(this.series)?p.time:null;this.readout();});
       this.chart.subscribeCrosshairMove(this.crosshair);
       this.band=document.createElement('div');this.band.className='cv-monday-band';this.band.setAttribute('aria-hidden','true');this.band.hidden=true;this.canvas.append(this.band);
-      this.bandPaint=T.frame(()=>this.paintMondayBand());this.chart.timeScale().subscribeVisibleLogicalRangeChange(this.bandPaint);
+      this.bandPaint=T.frame(()=>{this.paintMondayBand();this.visibleRange?.(this);});this.chart.timeScale().subscribeVisibleLogicalRangeChange(this.bandPaint);
       this.bandResize=new ResizeObserver(this.bandPaint);this.bandResize.observe(this.canvas);
       this.resize=T.resize(this.chart,this.canvas,{compactAxis:true});
       this.theme=new MutationObserver(()=>this.applyTheme());this.theme.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});this.applyTheme();
@@ -146,7 +147,7 @@
     scaleLevels(){
       const w=this.levelWindow,r=this.chart?.timeScale().getVisibleLogicalRange();
       if(w&&r&&(r.to<logicalAt(this.rows,w.start_ms)||r.from>=logicalAt(this.rows,w.end_ms)))return [];
-      return this.activeLevels?.filter(l=>!w||!r||r.to>=logicalAt(this.rows,l.start_ms??w.start_ms)).map(l=>l.price)||[];
+      return this.activeLevels?.filter(l=>!w||!r||r.to>=logicalAt(this.rows,l.start_ms??w.start_ms)&&r.from<logicalAt(this.rows,l.end_ms??w.end_ms)).map(l=>l.price)||[];
     }
     applyTheme(){
       const style=getComputedStyle(this.panel),dark=document.documentElement.dataset.theme==='dark';
@@ -181,7 +182,7 @@
       const levelKey=JSON.stringify([levels,this.levelWindow]);
       if(levelKey!==this.levelKey){
       for(const line of this.lines)this.series.removePriceLine(line);this.lines=[];
-      for(const level of levels)this.lines.push(this.series.createPriceLine({price:level.price,color:level.color||colors[level.kind],lineWidth:level.lineWidth||1,lineStyle:level.lineStyle??(level.kind==='range'?0:2),lineVisible:!this.levelWindow,axisLabelVisible:!this.levelWindow&&level.axisLabelVisible!==false,title:level.label}));
+      if(!this.levelWindow)for(const level of levels)this.lines.push(this.series.createPriceLine({price:level.price,color:level.color||colors[level.kind],lineWidth:level.lineWidth||1,lineStyle:level.lineStyle??(level.kind==='range'?0:2),lineVisible:true,axisLabelVisible:level.axisLabelVisible!==false,title:level.label}));
       this.panel.querySelector('.cv-levels').innerHTML=levels.map(l=>`<span style="color:${l.color||colors[l.kind]}">${esc(l.label)} <b>${T.axisPrice(l.price)}</b></span>`).join('');
       this.levelKey=levelKey;}
       this.panel.querySelector('[data-range-heading]').textContent=`${(data?.symbol||'').replace('-USDT-SWAP','')} · ${data?.display_live?'实时':'已收盘'} ${data?.bar||'15m'}`;
@@ -198,6 +199,7 @@
       if(view.showLevels)this.panel.querySelector('.cv-level-details').open=true;
       this.mondayWindow=view.mondayBand?data?.monday:null;
       this.bandIndices=this.mondayWindow?this.rows.map((r,i)=>r.time*1000>=this.mondayWindow.start_ms&&r.time*1000<this.mondayWindow.end_ms?i:-1).filter(i=>i>=0):[];this.paintMondayBand();
+      this.visibleRange=view.onVisibleRange;this.bandPaint?.();
     }
     syncAverages(visible){
       const legend=this.panel.querySelector('.cv-ma-legend');if(legend)legend.hidden=!visible;

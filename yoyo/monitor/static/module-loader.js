@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const groups = {
-    signals: ['signal-history.css','signal-components.css','okx-execution.css','signal-workspace.css','monday-reclaim-paper.css','okx-execution.js','public-chart-cache.js','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','yolo-preview-sheet.js','reclaim-chart.js','monday-list-model.js','reclaim-watchlist.js','reclaim-analytics.js','reclaim-close.js','monday-reclaim-paper.js','signal-workspace.js'],
+    signals: ['signal-history.css','signal-components.css','okx-execution.css','signal-workspace.css','monday-reclaim-paper.css','okx-execution.js','public-chart-cache.js','chart-history.css','chart-history.js','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','yolo-preview-sheet.js','reclaim-chart.js','monday-list-model.js','reclaim-watchlist.js','reclaim-analytics.js','reclaim-close.js','monday-reclaim-paper.js','signal-workspace.js'],
     'signal-charts': ['echarts-6.1.0.min.js'],
     research: ['research.css','research.js'],
     platform: ['research.css','platform.css','platform.js'],
@@ -17,7 +17,7 @@
     market: ['market-terminal.css','research.css','v130.css','market-sync.css','market-accounts.css','range-chart.css','range-chart.js','market-accounts.js','market-intelligence.js','market-terminal.js','market-sync.js'],
     'trading-books': ['research.css','reading-tools.css','reading-tools.js','trading-books.css','trading-books-study.js','trading-books.js'],
     orderflow: ['research.css','market-sync.css','reading-tools.css','reading-tools.js','orderflow.css','orderflow.js'],
-    'monday-fib': ['floating-layout.js','monday-fib.css','public-chart-cache.js','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','monday-quick.js','monday-list-model.js','monday-fib.js'],
+    'monday-fib': ['floating-layout.js','monday-fib.css','public-chart-cache.js','chart-history.css','chart-history.js','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','monday-quick.js','monday-list-model.js','monday-fib.js'],
     'monday-live': ['monday-live.css','monday-ledger.js','monday-live.js'],
     'auto-leaders': ['research.css','market-sync.css','altcoin-leaders.css','altcoin-leaders.js','leader-page.js'],
     'yolo-detect': ['floating-layout.js','workbench-bootstrap.css','research.css','yolo-detect.css','okx-execution.css','manual-live.css','manual-account.js','manual-close.js','manual-position-chart.js','manual-live.js','workbench-bootstrap.js','range-chart.js','yolo-chart-levels.js','yolo-preview-sheet.js','yolo-market.js','yolo-detect.js','yolo-compact.css','yolo-wallpaper.css'],

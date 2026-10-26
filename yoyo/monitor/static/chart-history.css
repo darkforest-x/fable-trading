@@ -1,0 +1,6 @@
+/* Stitch b6adf7933bf9478c8113d8d2d9a20660: quiet glass history status. */
+.mf-history-status{position:absolute;z-index:3;left:14px;bottom:142px;max-width:calc(100% - 90px);display:flex;align-items:center;gap:8px;padding:5px 10px;border:1px solid var(--line-soft,#dbe4ed);border-radius:20px;background:color-mix(in srgb,var(--surface,#fff) 86%,transparent);backdrop-filter:blur(12px);color:var(--muted,#627487);font-size:11px;pointer-events:none}
+.mf-history-status button{border:0;background:none;color:inherit;font:inherit;padding:3px 0;text-align:left;pointer-events:auto;cursor:pointer}
+.mf-history-status button:disabled{cursor:default;pointer-events:none;opacity:1;min-height:0;line-height:1.35}
+.mf-history-status small{font-size:10px;white-space:nowrap;opacity:.75}
+@media(max-width:700px){.mf-history-status{left:8px;bottom:154px;gap:5px;padding:4px 8px;font-size:10px}.mf-history-status button:not(:disabled){min-height:36px}.mf-history-status small{display:none}}
