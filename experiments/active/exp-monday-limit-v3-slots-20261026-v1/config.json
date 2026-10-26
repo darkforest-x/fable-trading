@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-monday-limit-v3-slots-20261026-v1",
+  "question": "Owner 2026-10-26: v3 trades per day, floating loss of winners, and a 3-slot leveraged sizing scheme with profit extraction (Bit浪浪-style as described by the owner).",
+  "single_variable": "Sizing scheme only (slots, leverage, extraction, resize); v3 fills unchanged.",
+  "trades": "exp-monday-limit-v3-levels-20261025-v1, score >= 0.5, range 0.618 target for 0.5-0.6 and opposite 1618 from 0.6, -30 percent backstop, worse intrabar path, 10bp slippage on non-target exits",
+  "liquidation": "floating loss >= 100/L - 1 percent (maintenance margin 1 percent) loses the slot margin; last price wicks count",
+  "slots": 3,
+  "leverage": [1, 2, 3, 5, 10, 20],
+  "variants": {"extract_resize": "slot at 2b sends profit above b to the reserve; total doubles -> b = total/3", "no_extract": "no extraction, resize on doubling", "extract_fixed": "extraction, b fixed at 1000/3"},
+  "not_modelled": "funding fees, exchange liquidation fees, partial liquidation, slippage beyond 10bp",
+  "dropped_events": ["BABYUSDT:2026-06-01:-1", "DASHUSDT:2020-04-13:+1"],
+  "tie_orders": 10
+}
