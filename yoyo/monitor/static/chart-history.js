@@ -24,7 +24,7 @@
     const native=period==='1D'?'1Dutc':period,step=steps[period];
     function publish(){
       const detail=historyError||weekError,error=detail&&!detail.includes('重试')?detail+' · 点击重试':detail;
-      status({text:error|| (active.has('history')?'正在加载更早 K 线…':active.has('weeks')?'正在补齐历史周线…':full(symbol)?more?'← 向左拖动加载历史':'已到此合约最早 K 线':'最近 720 根 · 逐周区间'),retry:!!error,count:context?.candles?.length||0});
+      status({text:error|| (active.has('history')?'正在加载更早 K 线…':active.has('weeks')?'正在补齐历史周线…':full(symbol)?more?'← 回看历史，自动加载':'已到此合约最早 K 线':'最近 720 根 · 逐周区间'),retry:!!error,count:context?.candles?.length||0});
     }
     function merge(value){
       if(value.symbol!==symbol||value.bar!==period)throw Error('历史 K 线身份不匹配');
