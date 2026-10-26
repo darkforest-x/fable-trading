@@ -56,6 +56,9 @@ class LimitOrders:
                 return previous
             at = clock_ms()
             quote = self.desk.row(db, "quotes", quote_id)
+            from yoyo.contracts.monday_order import check_quote
+            if action == 'open':
+                check_quote(quote, side, limit, at)
             if not fresh(quote, at):
                 raise ValueError("报价已过期，请重新获取后确认挂单")
             if bulk_identity is not None:
@@ -72,6 +75,8 @@ class LimitOrders:
             stops = dict(take_profit=None, stop_loss=None)
             if action == "open":
                 rate = limit_fee(side, quote, limit, action)
+                if json.loads(quote.get('risk_json') or '{}').get('monday_bound') and rate != MAKER_FEE:
+                    raise ValueError('1.618 已触及盘口，请重新预览挂单')
                 if bulk_identity is not None and rate != MAKER_FEE:
                     raise ValueError("1.618 限价已触及盘口，拒绝转为市价成交")
                 px = number(quote['ask'] if side == 'long' else quote['bid']) if rate == TAKER_FEE else limit

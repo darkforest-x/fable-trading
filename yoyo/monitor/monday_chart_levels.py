@@ -59,7 +59,7 @@ class MondayChartLevels:
     def read_display(self, symbol, at):
         """Use the last completed NY Monday for display while this one forms.
 
-        The causal reader and execution context remain current-week only. The
+        The causal reader and automatic execution remain current-week only. The
         prior range keeps its original expiry, including across DST changes.
         """
         current = self.read(symbol, at)
@@ -69,3 +69,14 @@ class MondayChartLevels:
         if previous['state'] != 'ready':
             return current
         return dict(previous, display_previous=True, current_week=current['week'])
+
+    def read_ticket(self, symbol, at):
+        """Manual tickets follow the completed range shown by the home chart.
+
+        Monday's previous range is valid only until the current Monday closes.
+        This explicit manual context does not alter causal scanners or alerts.
+        """
+        value = self.read_display(symbol, at)
+        current = week_window(at)
+        return dict(value, ticket_from_ms=current['start'] if value.get('display_previous') else value['end_ms'],
+                    ticket_until_ms=current['end'] if value.get('display_previous') else value['expires_ms'])

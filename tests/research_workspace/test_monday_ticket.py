@@ -29,6 +29,27 @@ def open_order(e,q,key='quick-open-request'):
     return e.c.post(f'/paper-desk/accounts/{e.account}/open',json=dict(quantity=q['quantity'],quote_id=q['id'],request_id=key,side='long',leverage=int(q['leverage']),stop_loss=q['stop_loss']))
 
 
+def test_home_defaults_and_preview_bind_server_range_through_confirmation(env):
+    now=clock_ms()
+    levels=dict(state='ready',symbol='BTC-USDT-SWAP',week='2026-10-26',end_ms=now-1000,expires_ms=now+86400000,high=110,low=90)
+    env.app.state.monday_chart_levels=SimpleNamespace(read_ticket=lambda s,at:levels)
+    terms=dict(account_id=env.account,symbol=levels['symbol'],side='long',order_type='limit',entry_policy='monday_1618',allocation_percent='10')
+    d=env.c.post('/paper-desk/quick/defaults',json=terms)
+    assert d.status_code==200,d.text
+    assert d.json()['limit_price']=='77.6' and d.json()['target_0618']=='102.4'
+    terms.update(limit_price='77.6',range_week=levels['week'])
+    q=env.c.post('/paper-desk/quick/preview',json=terms).json()
+    assert open_order(env,q).status_code==409
+    payload=dict(quantity=q['quantity'],quote_id=q['id'],request_id='home-bound-order',side='long',leverage=int(q['leverage']),limit_price='80')
+    url=f'/paper-desk/accounts/{env.account}/limit-open'
+    assert env.c.post(url,json=payload).status_code==409
+    payload['limit_price']='77.6'
+    r=env.c.post(url,json=payload)
+    assert r.status_code==201,r.text
+    assert r.json()['order']['status']=='pending'
+    assert not env.desk.export(env.account)['fills']
+
+
 def test_auto_total_equity_actual_max_and_stop_independent(env):
     a=preview(env);b=preview(env,stop_loss='50');c=preview(env,leverage='60')
     assert D(a['notional'])==10000 and a['notional']==b['notional']==c['notional']

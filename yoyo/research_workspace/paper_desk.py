@@ -343,6 +343,8 @@ class PaperDesk:
             account = self.row(db, "accounts", account_id)
             quote = self.row(db, "quotes", quote_id)
             symbol_leverage(quote['symbol'], leverage, quote)
+            from yoyo.contracts.monday_order import check_quote
+            check_quote(quote, side, None, at)
             if not fresh(quote, at):
                 raise ValueError("报价已过期，请刷新报价并重新确认")
             result = self.open_fill(db, account_id, side, qty, quote, note, at, marks, leverage,

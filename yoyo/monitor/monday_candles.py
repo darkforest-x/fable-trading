@@ -176,6 +176,7 @@ def install(app, runtime):
     app.state.monday_candles = service
     from .monday_chart_levels import MondayChartLevels
     chart_levels = MondayChartLevels(runtime)
+    app.state.monday_chart_levels = chart_levels
     from .monday_chart_history import install as install_history
     install_history(app, service, chart_levels)
 

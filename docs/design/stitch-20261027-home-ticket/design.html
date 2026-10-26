@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SPIKE · 1.618 全屏清透玻璃图表与极简挂单抽屉</title>
+  <!-- Google Fonts & Tailwind CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            glass: {
+              surface: 'rgba(255, 255, 255, 0.17)',
+              surfaceDark: 'rgba(18, 22, 31, 0.22)',
+              border: 'rgba(255, 255, 255, 0.45)',
+              borderDark: 'rgba(255, 255, 255, 0.10)',
+              sheet: 'rgba(255, 255, 255, 0.72)',
+              sheetDark: 'rgba(17, 21, 30, 0.78)',
+            },
+            long: '#10b981',
+            short: '#f43f5e',
+            brand: '#0071e3',
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Plus Jakarta Sans"', 'PingFang SC', 'sans-serif'],
+            mono: ['"JetBrains Mono"', '"SF Mono"', 'Menlo', 'monospace'],
+          },
+          boxShadow: {
+            apple: '0 8px 32px 0 rgba(0, 0, 0, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.65)',
+            sheet: '0 -10px 40px -4px rgba(0, 0, 0, 0.12), inset 0 1px 0 0 rgba(255, 255, 255, 0.8)',
+            dock: '0 12px 36px -2px rgba(0, 0, 0, 0.10), inset 0 1px 0 0 rgba(255, 255, 255, 0.6)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Ultra-Clear iPhone Frosted Glass Spec: 16-18% opacity, blur 14px, saturate 175% */
+    .apple-glass {
+      background: rgba(255, 255, 255, 0.17);
+      -webkit-backdrop-filter: blur(14px) saturate(175%);
+      backdrop-filter: blur(14px) saturate(175%);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 0.65);
+    }
+    .dark .apple-glass {
+      background: rgba(18, 22, 31, 0.22);
+      -webkit-backdrop-filter: blur(14px) saturate(175%);
+      backdrop-filter: blur(14px) saturate(175%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    }
+
+    /* Bottom Sheet Apple Glass Spec: <= 82dvh, rounded-t-3xl, clear specular rim */
+    .apple-sheet-glass {
+      background: rgba(255, 255, 255, 0.80);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      backdrop-filter: blur(28px) saturate(190%);
+      border-top: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.12);
+    }
+    .dark .apple-sheet-glass {
+      background: rgba(17, 21, 30, 0.84);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      backdrop-filter: blur(28px) saturate(190%);
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.45);
+    }
+
+    /* Fallback if backdrop-filter is unsupported */
+    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+      .apple-glass {
+        background: rgba(248, 249, 252, 0.94);
+      }
+      .dark .apple-glass {
+        background: rgba(15, 19, 28, 0.95);
+      }
+      .apple-sheet-glass {
+        background: rgba(255, 255, 255, 0.98);
+      }
+      .dark .apple-sheet-glass {
+        background: rgba(15, 19, 28, 0.98);
+      }
+    }
+
+    /* Smooth focus toggle transition */
+    .focus-fade {
+      transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.28s;
+    }
+    .focus-hidden {
+      opacity: 0 !important;
+      transform: scale(0.97) translateY(8px) !important;
+      pointer-events: none !important;
+      visibility: hidden !important;
+    }
+
+    /* Custom thin scrollbar */
+    .thin-scroll::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .thin-scroll::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.12);
+      border-radius: 9999px;
+    }
+    .dark .thin-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Custom range input */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 18px;
+      width: 18px;
+      border-radius: 50%;
+      background: #0071e3;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+      cursor: pointer;
+      margin-top: -6px;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 6px;
+      cursor: pointer;
+      background: rgba(0, 0, 0, 0.08);
+      border-radius: 9999px;
+    }
+    .dark input[type=range]::-webkit-slider-runnable-track {
+      background: rgba(255, 255, 255, 0.12);
+    }
+  </style>
+</head>
+<body class="bg-[#f7f8fb] dark:bg-[#0c0f17] text-[#1c1d22] dark:text-[#f0f2f7] min-h-screen overflow-hidden select-none font-sans relative antialiased">
+
+  <!-- ========================================================================= -->
+  <!-- 1. FULL VIEWPORT CANDLESTICK WALLPAPER (Canvas & Pure Chart Engine)       -->
+  <!-- ========================================================================= -->
+  <div id="chartContainer" class="absolute inset-0 z-0 cursor-crosshair">
+    <!-- SVG / Canvas Layer for Responsive Wallpaper K-Line -->
+    <svg id="chartSvg" class="w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="gridPattern" width="80" height="60" patternUnits="userSpaceOnUse">
+          <path d="M 80 0 L 0 0 0 60" fill="none" stroke="currentColor" stroke-opacity="0.04" stroke-width="1"/>
+        </pattern>
+        <!-- Subtle gradient for current volume/area -->
+        <linearGradient id="volGreen" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#10b981" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#10b981" stop-opacity="0.04"/>
+        </linearGradient>
+        <linearGradient id="volRed" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#f43f5e" stop-opacity="0.04"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Background Grid -->
+      <rect width="100%" height="100%" fill="url(#gridPattern)" class="text-[#0f172a] dark:text-white" />
+
+      <!-- Horizontal 1.618 / Monday Reference Lines -->
+      <!-- 上方 1.618 (198.50) - Solid Thin Reddish Line -->
+      <g opacity="0.85">
+        <line x1="0" y1="18%" x2="100%" y2="18%" stroke="#f43f5e" stroke-width="1.2" stroke-dasharray="none"/>
+        <text x="96%" y="17.4%" font-size="10.5" font-family="'JetBrains Mono', monospace" font-weight="600" fill="#f43f5e" text-anchor="end">上1.618 · 198.50</text>
+      </g>
+
+      <!-- 周一高点 (188.00) - Thin Neutral Solid -->
+      <g opacity="0.6">
+        <line x1="0" y1="31%" x2="100%" y2="31%" stroke="#64748b" stroke-width="1" stroke-dasharray="none"/>
+        <text x="96%" y="30.4%" font-size="10" font-family="'JetBrains Mono', monospace" fill="#64748b" text-anchor="end">周一高 · 188.00</text>
+      </g>
+
+      <!-- 实时跟随最新价格 (170.96) - 4px/4px Fine Dashed Line -->
+      <g id="livePriceLineGroup">
+        <line x1="0" y1="52%" x2="100%" y2="52%" stroke="#f43f5e" stroke-width="1.2" stroke-dasharray="4,4"/>
+        <!-- Right Axis Price Badge -->
+        <rect x="calc(100% - 74px)" y="calc(52% - 11px)" width="68" height="22" rx="4" fill="#f43f5e" />
+        <text x="calc(100% - 40px)" y="calc(52% + 4px)" font-size="11" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#ffffff" text-anchor="middle">170.96</text>
+      </g>
+
+      <!-- 周一低点 (168.00) - Thin Neutral Solid -->
+      <g opacity="0.6">
+        <line x1="0" y1="67%" x2="100%" y2="67%" stroke="#64748b" stroke-width="1" stroke-dasharray="none"/>
+        <text x="96%" y="66.4%" font-size="10" font-family="'JetBrains Mono', monospace" fill="#64748b" text-anchor="end">周一低 · 168.00</text>
+      </g>
+
+      <!-- 下方 1.618 (156.20) - Solid Thin Emerald Line (Target Buy Floor) -->
+      <g opacity="0.85">
+        <line x1="0" y1="82%" x2="100%" y2="82%" stroke="#10b981" stroke-width="1.2" stroke-dasharray="none"/>
+        <text x="96%" y="81.4%" font-size="10.5" font-family="'JetBrains Mono', monospace" font-weight="600" fill="#10b981" text-anchor="end">下1.618 · 156.20</text>
+      </g>
+
+      <!-- Synthetic Candlesticks & Volumes Transmitting visibly through glass -->
+      <!-- Candles array (SOL/USDT 1h synthetic path) -->
+      <g id="candlestickLayer" class="transition-opacity duration-300">
+        <!-- Candle 1: Bullish Green -->
+        <line x1="5%" y1="74%" x2="5%" y2="82%" stroke="#10b981" stroke-width="1.2"/>
+        <rect x="calc(5% - 5px)" y="76%" width="10" height="5%" fill="#10b981" rx="1.5"/>
+
+        <!-- Candle 2: Bullish Green -->
+        <line x1="11%" y1="69%" x2="11%" y2="78%" stroke="#10b981" stroke-width="1.2"/>
+        <rect x="calc(11% - 5px)" y="71%" width="10" height="6%" fill="#10b981" rx="1.5"/>
+
+        <!-- Candle 3: Bearish Red -->
+        <line x1="17%" y1="68%" x2="17%" y2="75%" stroke="#f43f5e" stroke-width="1.2"/>
+        <rect x="calc(17% - 5px)" y="70%" width="10" height="4%" fill="#f43f5e" rx="1.5"/>
+
+        <!-- Candle 4: Bullish Green -->
+        <line x1="23%" y1="60%" x2="23%" y2="72%" stroke="#10b981" stroke-width="1.2"/>
+        <rect x="calc(23% - 5px)" y="62%" width="10" height="9%" fill="#10b981" rx="1.5"/>
+
+        <!-- Candle 5: Bullish Green (Piercing Monday Low) -->
+        <line x1="29%" y1="52%" x2="29%" y2="65%" stroke="#10b981" stroke-width="1.2"/>
+        <rect x="calc(29% - 5px)" y="54%" width="10" height="9%" fill="#10b981" rx="1.5"/>
+
+        <!-- Candle 6: Bullish Green -->
+        <line x1="35%" y1="44%" x2="35%" y2="56%" stroke="#10b981" stroke-width="1.2"/>
+        <rect x="calc(35% - 5px)" y="46%" width="10" height="9%" fill="#10b981" rx="1.5"/>
+
+        <!-- Candle 7: Small Red consolidation -->
+        <line x1="41%" y1="42%" x2="41%" y2="48%" stroke="#f43f5e" stroke-width="1.2"/>
+        <rect x="calc(41% - 5px)" y="43%" width="10" height="4%" fill="#f43f5e" rx="1.5"/>
+
+        <!-- Candle 8: Bullish impulse toward Upper 1.618 -->
+        <line x1="47%" y1="28%" x2="47%" y2="44%" stroke="#10b981" stroke-width="1.2"/>
+        <rect x="calc(47% - 5px)" y="30%" width="10" height="13%" fill="#10b981" rx="1.5"/>
+
+        <!-- Candle 9: Peak Spike Touch at Upper 1.618 with high upper shadow -->
+        <line x1="53%" y1="17.2%" x2="53%" y2="34%" stroke="#f43f5e" stroke-width="1.2"/>
+        <rect x="calc(53% - 5px)" y="23%" width="10" height="9%" fill="#f43f5e" rx="1.5"/>
+        <!-- Clean tiny directional downward short marker (No big badge) -->
+        <polygon points="calc(53% - 4px),16.2% calc(53% + 4px),16.2% 53%,19.5%" fill="#f43f5e" />
+
+        <!-- Candle 10: Heavy Bearish dump -->
+        <line x1="59%" y1="26%" x2="59%" y2="45%" stroke="#f43f5e" stroke-width="1.2"/>
+        <rect x="calc(59% - 5px)" y="28%" width="10" height="14%" fill="#f43f5e" rx="1.5"/>
+
+        <!-- Candle 11: Bearish -->
+        <line x1="65%" y1="36%" x2="65%" y2="52%" stroke="#f43f5e" stroke-width="1.2"/>
+        <rect x="calc(65% - 5px)" y="38%" width="10" height="12%" fill="#f43f5e" rx="1.5"/>
+
+        <!-- Candle 12: Bearish consolidation -->
+        <line x1="71%" y1="46%" x2="71%" y2="58%" stroke="#f43f5e" stroke-width="1.2"/>
+        <rect x="calc(71% - 5px)" y="48%" width="10" height="8%" fill="#f43f5e" rx="1.5"/>
+
+        <!-- Candle 13: Green bounce attempt -->
+        <line x1="77%" y1="49%" x2="77%" y2="60%" stroke="#10b981" stroke-width="1.2"/>
+        <rect x="calc(77% - 5px)" y="51%" width="10" height="6%" fill="#10b981" rx="1.5"/>
+
+        <!-- Candle 14: Bearish drop back to 170.96 -->
+        <line x1="83%" y1="48%" x2="83%" y2="55%" stroke="#f43f5e" stroke-width="1.2"/>
+        <rect x="calc(83% - 5px)" y="50%" width="10" height="4%" fill="#f43f5e" rx="1.5"/>
+
+        <!-- Candle 15 (Active tick): Oscillating at 170.96 -->
+        <line x1="89%" y1="50%" x2="89%" y2="54%" stroke="#f43f5e" stroke-width="1.2"/>
+        <rect x="calc(89% - 5px)" y="51%" width="10" height="2.4%" fill="#f43f5e" rx="1.5"/>
+
+        <!-- Volume Bars at Bottom (Translucent) -->
+        <rect x="calc(5% - 4px)" y="89%" width="8" height="4%" fill="url(#volGreen)"/>
+        <rect x="calc(11% - 4px)" y="87%" width="8" height="6%" fill="url(#volGreen)"/>
+        <rect x="calc(17% - 4px)" y="91%" width="8" height="2%" fill="url(#volRed)"/>
+        <rect x="calc(23% - 4px)" y="86%" width="8" height="7%" fill="url(#volGreen)"/>
+        <rect x="calc(29% - 4px)" y="84%" width="8" height="9%" fill="url(#volGreen)"/>
+        <rect x="calc(35% - 4px)" y="88%" width="8" height="5%" fill="url(#volGreen)"/>
+        <rect x="calc(41% - 4px)" y="92%" width="8" height="1%" fill="url(#volRed)"/>
+        <rect x="calc(47% - 4px)" y="83%" width="8" height="10%" fill="url(#volGreen)"/>
+        <rect x="calc(53% - 4px)" y="80%" width="8" height="13%" fill="url(#volRed)"/>
+        <rect x="calc(59% - 4px)" y="82%" width="8" height="11%" fill="url(#volRed)"/>
+        <rect x="calc(65% - 4px)" y="85%" width="8" height="8%" fill="url(#volRed)"/>
+        <rect x="calc(71% - 4px)" y="88%" width="8" height="5%" fill="url(#volRed)"/>
+        <rect x="calc(77% - 4px)" y="90%" width="8" height="3%" fill="url(#volGreen)"/>
+        <rect x="calc(83% - 4px)" y="89%" width="8" height="4%" fill="url(#volRed)"/>
+        <rect x="calc(89% - 4px)" y="91%" width="8" height="2%" fill="url(#volRed)"/>
+      </g>
+    </svg>
+
+    <!-- Faint Watermark Symbol -->
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.035] dark:opacity-[0.05]">
+      <span class="text-[28vw] md:text-[20vw] font-black tracking-tighter">SOL 1H</span>
+    </div>
+
+    <!-- Double Tap Tip Toast (Appears briefly on double tap) -->
+    <div id="focusToast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-3.5 py-1.5 rounded-full text-xs font-medium apple-glass pointer-events-none transition-all duration-300 opacity-0 -translate-y-4">
+      <span class="text-brand font-semibold">● 双击已切换专注模式</span> (双击任意处复原)
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. FLOATING TOP INTERACTION BAR (Compact Apple Glass)                    -->
+  <!-- ========================================================================= -->
+  <header id="floatingHeader" class="focus-fade fixed top-3 left-3 right-3 md:left-6 md:right-6 z-30 flex items-center justify-between pointer-events-none">
+    <!-- Left: App Identity & Active Account Pill -->
+    <div class="flex items-center gap-2 pointer-events-auto">
+      <div class="apple-glass h-10 px-3.5 rounded-full flex items-center gap-2">
+        <div class="w-6 h-6 rounded-full bg-brand/15 text-brand flex items-center justify-center font-black text-xs">
+          ⚡
+        </div>
+        <span class="font-bold tracking-tight text-sm">SPIKE</span>
+        <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-brand/12 text-brand">模拟盘</span>
+      </div>
+
+      <!-- Net Worth Status Pill -->
+      <div class="apple-glass h-10 px-3.5 rounded-full hidden sm:flex items-center gap-2 font-mono text-xs">
+        <span class="text-xs text-slate-500 dark:text-slate-400">净值</span>
+        <span class="font-bold">1,048.60</span>
+        <span class="text-long font-semibold text-[11px]">+48.60</span>
+      </div>
+    </div>
+
+    <!-- Right: Theme Switch + Sound Warning + Account Link -->
+    <div class="flex items-center gap-2 pointer-events-auto">
+      <!-- Theme Toggle Button (44px target) -->
+      <button id="themeToggleBtn" aria-label="切换深浅主题" class="apple-glass w-10 h-10 rounded-full flex items-center justify-center active:scale-95 transition-transform text-slate-600 dark:text-slate-300">
+        <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        <svg class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      </button>
+
+      <!-- Persistent Bell Alarm State (44px target) -->
+      <button aria-label="报警设置" class="apple-glass w-10 h-10 rounded-full flex items-center justify-center active:scale-95 transition-transform text-slate-600 dark:text-slate-300 relative">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        <span class="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-short animate-pulse"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- 3. TOP QUICK COIN SHORTCUTS (Clear Floating Pill Strip)                  -->
+  <!-- ========================================================================= -->
+  <div id="coinShortcutBar" class="focus-fade fixed top-16 left-3 right-3 md:left-6 md:right-auto md:w-auto z-20 pointer-events-none flex items-center justify-start">
+    <div class="apple-glass p-1 rounded-full flex items-center gap-1 overflow-x-auto thin-scroll pointer-events-auto max-w-full">
+      <button class="px-3 py-1.5 rounded-full text-xs font-semibold bg-white/70 dark:bg-white/15 shadow-sm text-brand flex items-center gap-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-brand"></span>
+        <span>SOL</span>
+        <span class="font-mono text-[11px] text-long">↑198.5</span>
+      </button>
+      <button class="px-3 py-1.5 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-white/40 dark:hover:bg-white/5 transition-colors flex items-center gap-1.5">
+        <span>BTC</span>
+        <span class="font-mono text-[11px] text-long">↓65.3k</span>
+      </button>
+      <button class="px-3 py-1.5 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-white/40 dark:hover:bg-white/5 transition-colors flex items-center gap-1.5">
+        <span>ETH</span>
+        <span class="font-mono text-[11px] text-long">↑2,730</span>
+      </button>
+      <button class="px-3 py-1.5 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-white/40 dark:hover:bg-white/5 transition-colors hidden sm:flex items-center gap-1.5">
+        <span>SUI</span>
+        <span class="font-mono text-[11px] text-long">↑2.45</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 4. FLOATING CONTEXT CARD (SOL/USDT 1.618 Position / Alert Pill)           -->
+  <!-- ========================================================================= -->
+  <div id="symbolContextCard" class="focus-fade fixed top-28 left-3 md:left-6 z-20 pointer-events-none">
+    <div class="apple-glass p-3 rounded-2xl flex flex-col gap-1 pointer-events-auto min-w-[210px] max-w-[280px]">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-1.5">
+          <span class="font-bold text-sm">SOL/USDT</span>
+          <span class="text-[10px] px-1 rounded bg-black/5 dark:bg-white/10 text-slate-500 font-mono">永续</span>
+        </div>
+        <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-short/10 text-short font-semibold flex items-center gap-1">
+          <span class="w-1 h-1 rounded-full bg-short"></span>做空·浮盈中
+        </span>
+      </div>
+      <div class="flex items-baseline justify-between text-xs font-mono pt-1 text-slate-500 dark:text-slate-400">
+        <span>入场 <strong class="text-slate-800 dark:text-slate-200">184.50</strong></span>
+        <span>现价 <strong class="text-short font-bold">170.96</strong></span>
+        <span class="text-long font-bold">+7.34%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 5. USER REQUEST: 44PX FLOATING ORDER ICON (Minimal, No permanent label)   -->
+  <!-- ========================================================================= -->
+  <!-- Positioned comfortably near right-bottom or floating anchor -->
+  <div class="focus-fade fixed bottom-24 right-4 md:right-8 md:bottom-24 z-30 pointer-events-auto">
+    <button id="floatingOrderBtn"
+            aria-label="打开 1.618 挂单抽屉"
+            title="1.618 挂单"
+            class="apple-glass w-[44px] h-[44px] rounded-full flex items-center justify-center text-brand active:scale-95 transition-all duration-200 shadow-dock hover:bg-white/30 dark:hover:bg-white/10 group relative">
+      <!-- Order / Limit Icon SVG -->
+      <svg class="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+      </svg>
+      <!-- Discreet active order indicator dot (1 active limit order) -->
+      <span class="absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-brand ring-2 ring-white dark:ring-[#0c0f17]"></span>
+    </button>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 6. BOTTOM TIMEFRAME & DOCK BAR (Apple Glass Dock)                        -->
+  <!-- ========================================================================= -->
+  <div id="chartDockBar" class="focus-fade fixed bottom-3 left-3 right-3 md:left-auto md:right-auto md:left-1/2 md:-translate-x-1/2 z-20 pointer-events-none flex justify-center">
+    <div class="apple-glass px-2.5 py-1.5 rounded-full flex items-center gap-1.5 pointer-events-auto shadow-dock">
+      <!-- Timeframe selectors -->
+      <div class="flex items-center font-mono text-xs font-medium">
+        <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">5m</button>
+        <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">15m</button>
+        <button class="px-2 py-1 rounded-full bg-brand/15 text-brand font-bold">1h</button>
+        <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">4h</button>
+        <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">1D</button>
+      </div>
+
+      <div class="w-px h-3.5 bg-black/10 dark:bg-white/10 mx-1"></div>
+
+      <!-- 6EMA Toggle -->
+      <button class="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] text-slate-500 hover:text-slate-900 dark:hover:text-white">
+        <span>六均线</span>
+        <span class="font-mono text-[9px] px-1 rounded bg-black/5 dark:bg-white/10">OFF</span>
+      </button>
+
+      <!-- Follow Latest Tick button -->
+      <button class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-brand text-white text-[11px] font-medium active:scale-95 transition-transform shadow-sm">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        <span>跟随最新单</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 7. PRIMARY COMPONENT: COMPACT TRANSLUCENT GLASS ORDER SHEET               -->
+  <!-- Mobile: <= 82dvh Bottom Sheet | Desktop: Floating Right Glass Panel      -->
+  <!-- ========================================================================= -->
+  <div id="orderSheetOverlay" class="fixed inset-0 z-40 bg-black/25 dark:bg-black/45 backdrop-blur-[2px] transition-opacity duration-300 opacity-100 flex flex-col justify-end md:justify-start md:items-end md:p-6 md:pointer-events-none">
+
+    <!-- Sheet / Card Container: rounded-t-3xl on mobile, rounded-2xl on desktop -->
+    <div id="orderSheetPanel"
+         class="apple-sheet-glass md:apple-glass w-full md:w-[420px] max-h-[82dvh] md:max-h-[88vh] rounded-t-[26px] md:rounded-[22px] flex flex-col pointer-events-auto transition-transform duration-300 transform translate-y-0 shadow-sheet md:shadow-2xl overflow-hidden border-t md:border border-white/60 dark:border-white/15">
+
+      <!-- Drag Handle for Mobile & Sheet Header -->
+      <div class="w-full pt-2.5 pb-2 px-5 flex flex-col items-center border-b border-black/5 dark:border-white/10 relative shrink-0">
+        <!-- Physical Drag pill (mobile visual affordance) -->
+        <div class="w-10 h-1.5 rounded-full bg-black/20 dark:bg-white/25 mb-2.5 md:hidden cursor-grab"></div>
+
+        <div class="w-full flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <h2 class="font-bold text-base tracking-tight flex items-center gap-1.5">
+              <span>1.618 挂单</span>
+            </h2>
+            <!-- Selected placeholder symbol -->
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-brand/12 text-brand">SOL/USDT</span>
+            <span class="text-[10px] text-slate-400 font-mono">永续·限价</span>
+          </div>
+
+          <!-- Close Icon (44px touch friendly) -->
+          <button id="closeOrderSheetBtn" aria-label="关闭挂单面板" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 active:scale-95 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Top Small Segments: [模拟 / 实盘] and [开单 / 持仓] -->
+        <div class="w-full grid grid-cols-2 gap-2 mt-2.5">
+          <!-- Segment A: 模拟 / 实盘 -->
+          <div class="bg-black/5 dark:bg-white/10 p-0.5 rounded-lg flex items-center text-xs font-medium">
+            <button id="modeSimBtn" class="flex-1 py-1 rounded-[6px] text-center font-bold bg-white dark:bg-white/20 text-brand shadow-sm transition-all">
+              模拟盘
+            </button>
+            <button id="modeLiveBtn" class="flex-1 py-1 rounded-[6px] text-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all">
+              实盘
+            </button>
+          </div>
+
+          <!-- Segment B: 开单 / 持仓 -->
+          <div class="bg-black/5 dark:bg-white/10 p-0.5 rounded-lg flex items-center text-xs font-medium">
+            <button id="tabOrderBtn" class="flex-1 py-1 rounded-[6px] text-center font-bold bg-white dark:bg-white/20 text-slate-900 dark:text-white shadow-sm transition-all">
+              开单
+            </button>
+            <button id="tabPositionsBtn" class="flex-1 py-1 rounded-[6px] text-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all flex items-center justify-center gap-1">
+              <span>持仓</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-short"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- TAB 1 CONTENT: 1.618 LIMIT ORDER FORM (开单)                         -->
+      <!-- ===================================================================== -->
+      <div id="orderFormView" class="p-4 overflow-y-auto thin-scroll flex-1 flex flex-col gap-3.5">
+
+        <!-- Direction Selection Segment: 做多·下方1.618 / 做空·上方1.618 -->
+        <div>
+          <label class="text-[11px] font-semibold text-slate-400 block mb-1">方向与基准扩展位</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="dirLongBtn" class="p-2.5 rounded-xl border border-black/10 dark:border-white/10 text-left transition-all hover:bg-white/40 dark:hover:bg-white/5 active:scale-[0.99] flex flex-col gap-0.5">
+              <div class="flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-300">
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-long"></span>做多</span>
+                <span class="text-[10px] font-mono px-1 py-0.2 rounded bg-long/10 text-long">下方1.618</span>
+              </div>
+              <span class="font-mono text-[13px] font-bold text-slate-800 dark:text-slate-100">156.20</span>
+            </button>
+
+            <button id="dirShortBtn" class="p-2.5 rounded-xl border-2 border-short bg-short/10 text-left transition-all active:scale-[0.99] flex flex-col gap-0.5 shadow-sm">
+              <div class="flex items-center justify-between text-xs font-bold text-short">
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-short"></span>做空</span>
+                <span class="text-[10px] font-mono px-1 py-0.2 rounded bg-short/15 text-short">上方1.618</span>
+              </div>
+              <span class="font-mono text-[13px] font-bold text-short">198.50</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Non-editable Entry Price Notice (Strict Requirement: Fixed noneditable, Limit only) -->
+        <div class="bg-black/[0.03] dark:bg-white/[0.04] rounded-xl p-2.5 flex items-center justify-between text-xs">
+          <div class="flex flex-col">
+            <span class="text-[10px] text-slate-400">预设限价挂单入场点位</span>
+            <span class="font-mono font-bold text-slate-900 dark:text-white text-sm" id="entryPriceDisplay">198.50 USDT</span>
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-mono text-slate-600 dark:text-slate-300">仅限价·非市价</span>
+            <span class="block text-[9px] text-slate-400 mt-0.5">周末触价有效入场</span>
+          </div>
+        </div>
+
+        <!-- Position Allocation & Leverage (Compact Slider + Presets) -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-slate-500">拟开仓量 / 杠杆</span>
+            <div class="flex items-center gap-1 font-mono text-xs">
+              <span class="text-slate-400">杠杆</span>
+              <span class="font-bold text-brand px-1.5 py-0.2 rounded bg-brand/10">10x</span>
+            </div>
+          </div>
+
+          <!-- Allocation Slider -->
+          <div class="bg-black/[0.03] dark:bg-white/[0.04] p-3 rounded-xl space-y-2">
+            <div class="flex items-center justify-between">
+              <input type="range" id="sizeRange" min="10" max="100" value="25" step="5" class="w-full mr-3">
+              <span class="font-mono font-bold text-xs shrink-0 w-12 text-right text-brand" id="sizePercentDisplay">25%</span>
+            </div>
+            <div class="flex items-center justify-between text-[11px] font-mono text-slate-500 pt-0.5 border-t border-black/5 dark:border-white/5">
+              <span>保证金: <strong class="text-slate-800 dark:text-slate-200">50.00 U</strong></span>
+              <span>名义价值: <strong class="text-slate-800 dark:text-slate-200">500.00 U</strong></span>
+              <span>≈ 2.52 SOL</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Optional Custom Take Profit (Two Presets: 区间0.618 and 周一高点/低点) -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-slate-500">止盈目标 (TP)</span>
+            <span class="text-[10px] text-slate-400">单选快捷靶区</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <!-- Chip 1: 区间 0.618 (Symmetric 0.618 for short = 176.40) -->
+            <button id="tpChip1" class="px-2.5 py-2 rounded-xl border border-black/10 dark:border-white/10 text-left hover:bg-white/40 dark:hover:bg-white/5 transition-all text-xs flex flex-col">
+              <div class="flex items-center justify-between text-[10px] text-slate-400">
+                <span>区间 0.618</span>
+                <span class="text-long font-mono font-semibold">+11.1%</span>
+              </div>
+              <span class="font-mono font-bold text-slate-800 dark:text-slate-100 mt-0.5">176.40</span>
+            </button>
+
+            <!-- Chip 2: 周一低点 (Short uses Monday Low = 168.00; Long uses Monday High) -->
+            <button id="tpChip2" class="px-2.5 py-2 rounded-xl border-2 border-brand bg-brand/10 text-left transition-all text-xs flex flex-col shadow-sm">
+              <div class="flex items-center justify-between text-[10px] text-brand font-semibold">
+                <span id="tpChip2Label">周一低点</span>
+                <span class="text-long font-mono font-bold">+15.3%</span>
+              </div>
+              <span id="tpChip2Value" class="font-mono font-bold text-brand mt-0.5">168.00</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Optional Manual Stop Loss (SL) Input -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-slate-500">防守止损 (可选 SL)</span>
+            <span class="text-[10px] text-slate-400">建议影线高点 +0.5%</span>
+          </div>
+          <div class="relative">
+            <input type="text"
+                   value="202.40"
+                   placeholder="输入止损价格 (例如 202.40)"
+                   class="w-full h-10 px-3 pr-16 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-brand/40">
+            <span class="absolute right-3 top-2.5 text-[11px] font-mono text-slate-400">USDT</span>
+          </div>
+        </div>
+
+        <!-- Primary Action: 预览挂单 (Triggers Explicit Confirmation) -->
+        <div class="pt-1">
+          <button id="btnPreviewOrder" class="w-full h-11 rounded-xl bg-brand text-white font-bold text-sm tracking-wide active:scale-[0.98] transition-transform shadow-md flex items-center justify-center gap-1.5">
+            <span>预览挂单</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+          <p class="text-center text-[10px] text-slate-400 mt-1.5">限价挂单需手动二次确认 · 绝不自动静默报单</p>
+        </div>
+
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- TAB 2 CONTENT: POSITIONS & OUTSTANDING ORDERS (持仓与撤单)           -->
+      <!-- ===================================================================== -->
+      <div id="positionsView" class="p-4 overflow-y-auto thin-scroll flex-1 hidden flex flex-col gap-3.5">
+
+        <!-- Active Holding Summary Card -->
+        <div class="apple-glass p-3 rounded-2xl border border-black/10 dark:border-white/10 flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-short"></span>
+              <span class="font-bold text-xs">SOL/USDT 永续</span>
+              <span class="text-[10px] px-1 rounded bg-short/15 text-short font-bold">空头 10x</span>
+            </div>
+            <span class="font-mono text-xs font-bold text-long">+14.28 USDT (+7.34%)</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-1 py-1.5 border-y border-black/5 dark:border-white/5 text-[11px] font-mono">
+            <div>
+              <span class="text-[9px] text-slate-400 block">开仓均价</span>
+              <span class="font-bold">184.50</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-slate-400 block">持仓数量</span>
+              <span class="font-bold">2.50 SOL</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-slate-400 block">标记价格</span>
+              <span class="font-bold text-short">170.96</span>
+            </div>
+          </div>
+
+          <!-- Edit TP / SL Actions -->
+          <div class="flex items-center justify-between text-xs pt-0.5">
+            <div class="flex items-center gap-1 text-[11px] font-mono text-slate-500">
+              <span>TP: <strong class="text-brand">168.00</strong></span>
+              <span class="text-slate-300">|</span>
+              <span>SL: <strong class="text-slate-700 dark:text-slate-300">保本 184.50</strong></span>
+            </div>
+            <button class="text-xs font-bold text-brand hover:underline">编辑止盈止损</button>
+          </div>
+
+          <!-- Manual Partial Close Presets (25%, 50%, 75%, 100%, Custom) -->
+          <div class="pt-1.5 border-t border-black/5 dark:border-white/5">
+            <span class="text-[10px] font-semibold text-slate-400 block mb-1.5">手动分批平仓</span>
+            <div class="grid grid-cols-5 gap-1 font-mono text-xs">
+              <button class="py-1 rounded-lg bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-center font-bold">25%</button>
+              <button class="py-1 rounded-lg bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-center font-bold">50%</button>
+              <button class="py-1 rounded-lg bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-center font-bold">75%</button>
+              <button class="py-1 rounded-lg bg-short/15 text-short hover:bg-short/25 text-center font-bold">100%</button>
+              <button class="py-1 rounded-lg bg-black/5 dark:bg-white/10 hover:bg-black/10 text-center text-[10px] text-slate-500">自定义</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Outstanding Limit Orders Section (Can be canceled with confirmation) -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-500">
+            <span>当前挂单 (1)</span>
+            <span class="text-[10px] text-slate-400">1.618 斐波限价挂单</span>
+          </div>
+
+          <div class="p-3 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/10 flex items-center justify-between">
+            <div class="flex flex-col">
+              <div class="flex items-center gap-1.5 text-xs font-bold">
+                <span class="text-long font-mono">做多 · 下1.618</span>
+                <span class="text-[10px] px-1 rounded bg-black/5 dark:bg-white/10">10x</span>
+              </div>
+              <div class="flex items-center gap-2 text-[11px] font-mono text-slate-500 mt-1">
+                <span>价格: <strong class="text-slate-800 dark:text-slate-200">156.20</strong></span>
+                <span>数量: <strong>2.00 SOL</strong></span>
+              </div>
+            </div>
+
+            <!-- Cancel Button with confirmation -->
+            <button id="btnCancelOrder" class="px-3 py-1.5 rounded-lg border border-short/30 text-short text-xs font-bold hover:bg-short/10 active:scale-95 transition-all">
+              撤单
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-auto pt-2 text-center text-[10px] text-slate-400">
+          全量数据均为模拟合成占位符 · 不包含任何真实交易所私密凭证
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 8. EXPLICIT ORDER CONFIRMATION MODAL (Never auto submit)                  -->
+  <!-- ========================================================================= -->
+  <div id="confirmOrderModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-md hidden items-center justify-center p-4 transition-all">
+    <div class="apple-glass max-w-sm w-full p-5 rounded-2xl shadow-2xl flex flex-col gap-3 bg-white/95 dark:bg-[#151922]/95 border border-white/60 dark:border-white/15">
+      <div class="flex items-center justify-between pb-2 border-b border-black/5 dark:border-white/10">
+        <h3 class="font-bold text-sm">核验并确认 1.618 挂单</h3>
+        <button id="closeConfirmModalBtn" class="text-slate-400 hover:text-slate-800 dark:hover:text-white">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="space-y-2 text-xs font-mono py-1">
+        <div class="flex justify-between">
+          <span class="text-slate-500">标的与方向</span>
+          <span class="font-bold text-short">SOL/USDT · 做空 10x</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">入场限价 (上方1.618)</span>
+          <span class="font-bold">198.50 USDT</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">保证金占用</span>
+          <span>50.00 USDT</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">止盈目标 (周一低点)</span>
+          <span class="font-bold text-long">168.00 USDT (+15.3%)</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">防守止损</span>
+          <span class="text-short font-bold">202.40 USDT (-1.9%)</span>
+        </div>
+      </div>
+
+      <div class="p-2 rounded-lg bg-brand/10 text-brand text-[11px] leading-relaxed">
+        提示：该订单将在触及 198.50 时自动提交至撮合模拟内核，可随时撤单或调整止盈。
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 pt-2">
+        <button id="btnCancelConfirm" class="h-10 rounded-xl bg-black/5 dark:bg-white/10 font-bold text-xs hover:bg-black/10 active:scale-95 transition-all">
+          返回修改
+        </button>
+        <button id="btnFinalSubmit" class="h-10 rounded-xl bg-brand text-white font-bold text-xs active:scale-95 transition-all shadow-md">
+          确认挂单
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 9. TOAST NOTIFICATION                                                     -->
+  <!-- ========================================================================= -->
+  <div id="actionToast" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-xs font-bold apple-glass pointer-events-none transition-all duration-300 opacity-0 translate-y-4 shadow-lg flex items-center gap-1.5">
+    <span class="w-2 h-2 rounded-full bg-long"></span>
+    <span id="toastMsg">操作成功</span>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 10. JAVASCRIPT: INTERACTION ENGINE & FOCUS DOUBLE-TAP CONCEPT             -->
+  <!-- ========================================================================= -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Double Click / Double Tap Focus Mode Logic
+      let isFocusMode = false;
+      let lastTouchTime = 0;
+      const chartContainer = document.getElementById('chartContainer');
+      const focusElements = [
+        document.getElementById('floatingHeader'),
+        document.getElementById('coinShortcutBar'),
+        document.getElementById('symbolContextCard'),
+        document.getElementById('chartDockBar')
+      ];
+      const orderOverlay = document.getElementById('orderSheetOverlay');
+      const focusToast = document.getElementById('focusToast');
+
+      function toggleFocusMode() {
+        isFocusMode = !isFocusMode;
+        focusElements.forEach(el => {
+          if (el) {
+            if (isFocusMode) {
+              el.classList.add('focus-hidden');
+            } else {
+              el.classList.remove('focus-hidden');
+            }
+          }
+        });
+
+        // Show brief toast
+        if (focusToast) {
+          focusToast.classList.remove('opacity-0', '-translate-y-4');
+          focusToast.classList.add('opacity-100', 'translate-y-0');
+          setTimeout(() => {
+            focusToast.classList.remove('opacity-100', 'translate-y-0');
+            focusToast.classList.add('opacity-0', '-translate-y-4');
+          }, 1800);
+        }
+      }
+
+      // Double-click for desktop
+      chartContainer.addEventListener('dblclick', (e) => {
+        toggleFocusMode();
+      });
+
+      // Double-tap for mobile touch
+      chartContainer.addEventListener('touchend', (e) => {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTouchTime;
+        if (tapLength < 320 && tapLength > 0) {
+          toggleFocusMode();
+          e.preventDefault();
+        }
+        lastTouchTime = currentTime;
+      });
+
+      // 2. Open / Close Order Sheet Panel Logic
+      const floatingOrderBtn = document.getElementById('floatingOrderBtn');
+      const closeOrderSheetBtn = document.getElementById('closeOrderSheetBtn');
+      const orderSheetPanel = document.getElementById('orderSheetPanel');
+
+      function openOrderSheet() {
+        orderOverlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+        orderOverlay.classList.add('flex', 'opacity-100');
+        orderSheetPanel.classList.remove('translate-y-full');
+        orderSheetPanel.classList.add('translate-y-0');
+      }
+
+      function closeOrderSheet() {
+        orderSheetPanel.classList.remove('translate-y-0');
+        orderSheetPanel.classList.add('translate-y-full');
+        orderOverlay.classList.remove('opacity-100');
+        orderOverlay.classList.add('opacity-0', 'pointer-events-none');
+        setTimeout(() => {
+          orderOverlay.classList.remove('flex');
+          orderOverlay.classList.add('hidden');
+        }, 280);
+      }
+
+      floatingOrderBtn.addEventListener('click', () => {
+        if (orderOverlay.classList.contains('hidden') || orderOverlay.classList.contains('pointer-events-none')) {
+          openOrderSheet();
+        } else {
+          closeOrderSheet();
+        }
+      });
+
+      closeOrderSheetBtn.addEventListener('click', closeOrderSheet);
+
+      // Close on backdrop click (outside panel on desktop or dark area)
+      orderOverlay.addEventListener('click', (e) => {
+        if (e.target === orderOverlay) {
+          closeOrderSheet();
+        }
+      });
+
+      // 3. Mode & Tab Toggle
+      const tabOrderBtn = document.getElementById('tabOrderBtn');
+      const tabPositionsBtn = document.getElementById('tabPositionsBtn');
+      const orderFormView = document.getElementById('orderFormView');
+      const positionsView = document.getElementById('positionsView');
+
+      tabOrderBtn.addEventListener('click', () => {
+        tabOrderBtn.className = "flex-1 py-1 rounded-[6px] text-center font-bold bg-white dark:bg-white/20 text-slate-900 dark:text-white shadow-sm transition-all";
+        tabPositionsBtn.className = "flex-1 py-1 rounded-[6px] text-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all flex items-center justify-center gap-1";
+        orderFormView.classList.remove('hidden');
+        positionsView.classList.add('hidden');
+      });
+
+      tabPositionsBtn.addEventListener('click', () => {
+        tabPositionsBtn.className = "flex-1 py-1 rounded-[6px] text-center font-bold bg-white dark:bg-white/20 text-slate-900 dark:text-white shadow-sm transition-all flex items-center justify-center gap-1";
+        tabOrderBtn.className = "flex-1 py-1 rounded-[6px] text-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all";
+        positionsView.classList.remove('hidden');
+        orderFormView.classList.add('hidden');
+      });
+
+      // 4. Direction Selector (做多·下方1.618 / 做空·上方1.618)
+      const dirLongBtn = document.getElementById('dirLongBtn');
+      const dirShortBtn = document.getElementById('dirShortBtn');
+      const entryPriceDisplay = document.getElementById('entryPriceDisplay');
+      const tpChip2Label = document.getElementById('tpChip2Label');
+      const tpChip2Value = document.getElementById('tpChip2Value');
+
+      dirLongBtn.addEventListener('click', () => {
+        dirLongBtn.className = "p-2.5 rounded-xl border-2 border-long bg-long/10 text-left transition-all active:scale-[0.99] flex flex-col gap-0.5 shadow-sm";
+        dirShortBtn.className = "p-2.5 rounded-xl border border-black/10 dark:border-white/10 text-left transition-all hover:bg-white/40 dark:hover:bg-white/5 active:scale-[0.99] flex flex-col gap-0.5";
+        entryPriceDisplay.textContent = "156.20 USDT";
+        entryPriceDisplay.className = "font-mono font-bold text-long text-sm";
+        tpChip2Label.textContent = "周一高点";
+        tpChip2Value.textContent = "188.00";
+      });
+
+      dirShortBtn.addEventListener('click', () => {
+        dirShortBtn.className = "p-2.5 rounded-xl border-2 border-short bg-short/10 text-left transition-all active:scale-[0.99] flex flex-col gap-0.5 shadow-sm";
+        dirLongBtn.className = "p-2.5 rounded-xl border border-black/10 dark:border-white/10 text-left transition-all hover:bg-white/40 dark:hover:bg-white/5 active:scale-[0.99] flex flex-col gap-0.5";
+        entryPriceDisplay.textContent = "198.50 USDT";
+        entryPriceDisplay.className = "font-mono font-bold text-short text-sm";
+        tpChip2Label.textContent = "周一低点";
+        tpChip2Value.textContent = "168.00";
+      });
+
+      // 5. Size Slider
+      const sizeRange = document.getElementById('sizeRange');
+      const sizePercentDisplay = document.getElementById('sizePercentDisplay');
+      sizeRange.addEventListener('input', (e) => {
+        sizePercentDisplay.textContent = e.target.value + '%';
+      });
+
+      // 6. TP Chip Single Selection
+      const tpChip1 = document.getElementById('tpChip1');
+      const tpChip2 = document.getElementById('tpChip2');
+      tpChip1.addEventListener('click', () => {
+        tpChip1.className = "px-2.5 py-2 rounded-xl border-2 border-brand bg-brand/10 text-left transition-all text-xs flex flex-col shadow-sm";
+        tpChip2.className = "px-2.5 py-2 rounded-xl border border-black/10 dark:border-white/10 text-left hover:bg-white/40 dark:hover:bg-white/5 transition-all text-xs flex flex-col";
+      });
+      tpChip2.addEventListener('click', () => {
+        tpChip2.className = "px-2.5 py-2 rounded-xl border-2 border-brand bg-brand/10 text-left transition-all text-xs flex flex-col shadow-sm";
+        tpChip1.className = "px-2.5 py-2 rounded-xl border border-black/10 dark:border-white/10 text-left hover:bg-white/40 dark:hover:bg-white/5 transition-all text-xs flex flex-col";
+      });
+
+      // 7. Explicit Confirmation Modal (Never auto submit)
+      const btnPreviewOrder = document.getElementById('btnPreviewOrder');
+      const confirmOrderModal = document.getElementById('confirmOrderModal');
+      const closeConfirmModalBtn = document.getElementById('closeConfirmModalBtn');
+      const btnCancelConfirm = document.getElementById('btnCancelConfirm');
+      const btnFinalSubmit = document.getElementById('btnFinalSubmit');
+      const actionToast = document.getElementById('actionToast');
+      const toastMsg = document.getElementById('toastMsg');
+
+      function showToast(msg) {
+        toastMsg.textContent = msg;
+        actionToast.classList.remove('opacity-0', 'translate-y-4');
+        actionToast.classList.add('opacity-100', 'translate-y-0');
+        setTimeout(() => {
+          actionToast.classList.remove('opacity-100', 'translate-y-0');
+          actionToast.classList.add('opacity-0', 'translate-y-4');
+        }, 2200);
+      }
+
+      btnPreviewOrder.addEventListener('click', () => {
+        confirmOrderModal.classList.remove('hidden');
+        confirmOrderModal.classList.add('flex');
+      });
+
+      function closeConfirmModal() {
+        confirmOrderModal.classList.remove('flex');
+        confirmOrderModal.classList.add('hidden');
+      }
+
+      closeConfirmModalBtn.addEventListener('click', closeConfirmModal);
+      btnCancelConfirm.addEventListener('click', closeConfirmModal);
+
+      btnFinalSubmit.addEventListener('click', () => {
+        closeConfirmModal();
+        closeOrderSheet();
+        showToast("已成功提交 1.618 限价挂单");
+      });
+
+      // Cancel Outstanding Order
+      const btnCancelOrder = document.getElementById('btnCancelOrder');
+      if (btnCancelOrder) {
+        btnCancelOrder.addEventListener('click', () => {
+          if (confirm("确定撤销该笔 1.618 挂单吗？")) {
+            btnCancelOrder.parentElement.remove();
+            showToast("已成功撤销挂单");
+          }
+        });
+      }
+
+      // 8. Theme Switch Toggle
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      themeToggleBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+      });
+    });
+  </script>
+</body>
+</html>

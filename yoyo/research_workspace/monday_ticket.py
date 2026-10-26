@@ -38,6 +38,8 @@ class Terms(BaseModel):
     limit_price: Optional[str] = None
     take_profit: Optional[str] = None
     stop_loss: Optional[str] = None
+    entry_policy: Optional[Literal['monday_1618']] = None
+    range_week: Optional[str] = None
 
 
 def install(api, app, desk, marks, entry_risk, invoke):
@@ -56,6 +58,18 @@ def install(api, app, desk, marks, entry_risk, invoke):
         quotes = marks(sorted(set(desk.symbols(payload.account_id)) | {payload.symbol}))
         entry_risk(quotes, payload.symbol)
         value = quotes[payload.symbol]
+        targets = {}
+        bound = None
+        if payload.entry_policy:
+            from yoyo.contracts.monday_order import bind
+            reader = getattr(app.state, 'monday_chart_levels', None)
+            if reader is None:
+                raise ValueError('周一区间服务尚未就绪')
+            context = reader.read_ticket(payload.symbol, clock_ms())
+            terms, targets = bind({**payload.model_dump(), 'monday_range': context},
+                                  value['risk']['instrument']['tickSz'], clock_ms(), defaults=not preview)
+            payload = payload.model_copy(update={'limit_price': terms['limit_price'], 'range_week': terms['range_week']})
+            bound = dict(side=payload.side, limit_price=payload.limit_price, expires_ms=context.get('ticket_until_ms',context['expires_ms']))
         with desk.connect() as db:
             db.execute('BEGIN')
             a = desk.row(db,'accounts',payload.account_id)
@@ -70,6 +84,8 @@ def install(api, app, desk, marks, entry_risk, invoke):
             raise ValueError('请输入限价')
         price = positive(payload.limit_price) if payload.order_type=='limit' else positive(value['ask' if payload.side=='long' else 'bid'])
         if payload.order_type=='limit' and limit_fee(payload.side,value,price)==TAKER_FEE:
+            if preview and payload.entry_policy:
+                raise ValueError('1.618 已越过当前盘口，请等待价格回到可挂单一侧')
             price = positive(value['ask' if payload.side=='long' else 'bid'])
         instrument = value['risk'].get('instrument',{})
         if instrument.get('instId') != payload.symbol or instrument.get('ctValCcy') != payload.symbol.split('-')[0]:
@@ -87,12 +103,15 @@ def install(api, app, desk, marks, entry_risk, invoke):
         leverage = number(payload.leverage) if payload.leverage is not None else number(maximum)
         if leverage != int(leverage) or not 1 <= leverage <= maximum:
             raise ValueError('杠杆超出此数量对应的交易所上限')
-        result = dict(limits, max_leverage=str(maximum), leverage=str(leverage), price=str(price),
+        result = dict(limits, **targets, max_leverage=str(maximum), leverage=str(leverage), price=str(price),
                       notional_usdt=str(requested), notional=str(qty*price), available=totals['available'],
                       tick_size=instrument['tickSz'])
         if not preview:
             return result
-        quote = desk.save_quote(dict(value,risk={**value['risk'],'monday_quick':True,'monday_order_type':payload.order_type}))
+        quote = desk.save_quote(dict(value,risk={**value['risk'],'monday_quick':True,'monday_order_type':payload.order_type,
+                                               'monday_bound':bound}))
+        if bound:
+            quote['expires_ms'] = min(quote['expires_ms'], bound['expires_ms'])
         sizing = desk.size_by_notional(payload.account_id,payload.side,quote['id'],int(leverage),str(requested),quotes,
                                       payload.limit_price if payload.order_type=='limit' else None,payload.take_profit,payload.stop_loss)
         return {**result,**quote,**sizing,'account_id':payload.account_id,'leverage':str(leverage)}

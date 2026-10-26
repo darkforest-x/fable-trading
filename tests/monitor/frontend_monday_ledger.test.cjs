@@ -34,3 +34,8 @@ test('unknown entry receipts remain visible and cannot be canceled blindly',()=>
  const d=normalize({account_scope:'yolo_manual',account:{status:'ready',data:{orders:[{ordId:'o',clOrdId:'c'}]}},management_ready:true,free_tickets:[{id:'t',client_order_id:'c',symbol:'BTC',state:'unknown'}]},'live');
  assert.equal(d.orders.length,1);assert.equal(d.orders[0].id,'t');assert.equal(d.orders[0].status,'unknown');assert.equal(d.orders[0].canManage,false);
 });
+test('partial fill retains free-ticket ownership only for the exact recorded remainder',()=>{
+ const d={account_scope:'yolo_manual',account:{status:'ready',data:{positions:[{instId:'BTC',posSide:'long',pos:'75'}]}},management_ready:true,free_tickets:[{id:'part',symbol:'BTC',side:'long',state:'filled',filled_size:'100',management_closed_size:'25',take_profit:'120',stop_loss:'90'}]};
+ const p=normalize(d,'live').positions[0];assert.equal(p.id,'part');assert.equal(p.canManage,true);assert.equal(p.takeProfit,'120');
+ d.account.data.positions[0].pos='74';assert.equal(normalize(d,'live').positions[0].canManage,false);
+});

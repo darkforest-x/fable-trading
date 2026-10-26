@@ -72,9 +72,9 @@ class ManualEngine(Engine):
             with self.client.read_scope([("/api/v5/account/"+p, {}) for p in ("config", "balance", "positions")]) as reads:
                 local = copy(self)
                 local.client = reads
-                account = Engine.account(local)
+                account = Engine.account(local, allow_empty_usdt=True)
         else:
-            account = super().account()
+            account = super().account(allow_empty_usdt=True)
         rules = policy(self.store)
         if rules and account["uid"] != rules["account_uid"]:
             raise ValueError("manual account policy belongs to a different account")

@@ -14,10 +14,10 @@ from .engine import one, TERMINAL
 from .free_manual import Tickets, clean
 from .manual_commands import Commands
 from .manual_inventory import pages
-from .risk import D, amount
+from .risk import D, amount, quantize
 from .store import identifier
 
-REVISION = 'free-management-20261024-v1'
+REVISION = 'free-management-20261027-v2'
 
 
 def confirmed_tickets(runtime):
@@ -31,12 +31,15 @@ def entry(engine, ticket):
     order = one(engine.client.get('/api/v5/trade/order', instId=ticket['symbol'], clOrdId=ticket['client_order_id']))
     body = ticket['order_body']
     if (any(order.get(k) != body[k] for k in ('instId', 'clOrdId', 'side', 'posSide', 'ordType', 'tdMode'))
-            or D(order['sz']) != D(body['sz'])):
+            or D(order['sz']) != D(body['sz'])
+            or 'px' in body and D(order.get('px') or '0') != D(body['px'])):
         raise ValueError('原委托归属不匹配，请核对账户')
     return order
 
 
 def algo_client_id(ticket):
+    if ticket.get('management_no_protection'):
+        return None
     attached = ticket['order_body'].get('attachAlgoOrds', [])
     return ticket.get('management_algo_client_id') or (attached[0]['attachAlgoClOrdId'] if attached else None)
 
@@ -53,7 +56,7 @@ def protection(engine, ticket):
     return row
 
 
-def read_plan(engine, ticket, action, stop=None):
+def read_plan(engine, ticket, action, stop=None, percentage='100', take_profit=None):
     latest = next((t for t in confirmed_tickets(engine.store.path.parent) if t['symbol'] == ticket['symbol']), None)
     if not latest or latest['id'] != ticket['id'] or ticket.get('management_closed_ms'):
         raise ValueError('该记录不是当前持仓对应的最新委托')
@@ -69,13 +72,13 @@ def read_plan(engine, ticket, action, stop=None):
         if order['state'] not in ('live', 'partially_filled'):
             raise ValueError('原委托已结束，请刷新列表')
         return dict(plan, size=order['sz'], filled_size=order.get('accFillSz') or '0')
-    if action not in ('close', 'stop') or order['state'] not in ('filled', 'canceled'):
+    if action not in ('close', 'stop', 'protection') or order['state'] not in ('filled', 'canceled'):
         raise ValueError('请先撤销未成交委托，再管理已成交持仓')
     if ticket['state'] not in ('filled', 'canceled'):
         raise ValueError('原委托或保护回执仍在核对，请稍后刷新')
     rows = [p for p in account['positions'] if p['instId'] == ticket['symbol'] and D(p['pos']) != 0]
     if (len(rows) != 1 or rows[0].get('posSide') != ticket['side'] or rows[0].get('mgnMode') != 'cross'
-            or D(rows[0]['pos']) != D(order.get('accFillSz') or '0') or D(rows[0]['pos']) <= 0):
+            or D(rows[0]['pos']) != D(order.get('accFillSz') or '0')-D(ticket.get('management_closed_size') or '0') or D(rows[0]['pos']) <= 0):
         raise ValueError('当前持仓与原委托数量不一致，请核对交易所持仓')
     position = rows[0]
     if position.get('avgPx') and order.get('avgPx') and D(position['avgPx']) != D(order['avgPx']):
@@ -90,25 +93,45 @@ def read_plan(engine, ticket, action, stop=None):
         for r in pages(engine.client, '/api/v5/trade/orders-algo-pending', 'algoId', ordType=kind, instId=ticket['symbol']):
             if r['instId'] == ticket['symbol'] and (not algo or r['algoId'] != algo['algoId']):
                 raise ValueError('该合约存在其他保护单，请先核对')
-    plan.update(size=position['pos'], position_id=position.get('posId'),
+    plan.update(size=position['pos'], position_size=position['pos'], position_id=position.get('posId'),
                 algo_id=algo['algoId'] if algo else None, algo_client_id=algo_client_id(ticket),
                 old_stop=(algo.get('slTriggerPx') or None) if algo else None,
                 take_profit=(algo.get('tpTriggerPx') or None) if algo else None,
-                stop_type=(algo.get('slTriggerPxType') or 'last') if algo else 'last')
-    if action == 'stop':
+                old_take_profit=(algo.get('tpTriggerPx') or None) if algo else None,
+                stop_type=(algo.get('slTriggerPxType') or 'last') if algo else 'last',
+                tp_type=(algo.get('tpTriggerPxType') or 'last') if algo else 'last')
+    if action in ('stop', 'protection', 'close'):
         instrument = one(engine.client.get('/api/v5/account/instruments', instType='SWAP', instId=ticket['symbol']))
+        if instrument.get('instId') != ticket['symbol']:
+            raise ValueError('合约规格暂不可用')
+    if action == 'close':
+        pct = D(percentage)
+        if not pct.is_finite() or not 0 < pct <= 100:
+            raise ValueError('平仓比例须大于 0 且不超过 100%')
+        size = quantize(D(position['pos'])*pct/100, D(instrument['lotSz']))
+        if size < D(instrument['minSz']) or size > D(instrument['maxMktSz']):
+            raise ValueError('本次平仓数量不符合交易所最小数量或市价单上限')
+        plan.update(size=amount(size), percentage=amount(pct), remaining_size=amount(D(position['pos'])-size),
+                    closed_size_before=ticket.get('management_closed_size') or '0')
+    if action in ('stop', 'protection'):
         ticker = one(engine.client.get('/api/v5/market/ticker', instId=ticket['symbol']))
         if instrument.get('instId') != ticket['symbol'] or ticker.get('instId') != ticket['symbol'] or not 0 <= engine.clock()-int(ticker['ts']) < 5000:
             raise ValueError('合约规格或报价暂不可用')
-        value = D(stop)
-        if value <= 0 or value % D(instrument['tickSz']):
-            raise ValueError('止损必须大于零并符合最小报价单位')
         quote = D(ticker['bidPx' if ticket['side'] == 'long' else 'askPx'])
-        if (value >= quote if ticket['side'] == 'long' else value <= quote):
-            raise ValueError('止损已越过当前价格，请使用平仓操作')
-        if plan['take_profit'] and (value >= D(plan['take_profit']) if ticket['side'] == 'long' else value <= D(plan['take_profit'])):
-            raise ValueError('止损与现有止盈冲突')
-        plan['stop'] = amount(value)
+        if action == 'stop' and stop is None:
+            raise ValueError('请输入止损价格')
+        desired_tp = plan['take_profit'] if action == 'stop' else take_profit
+        for value, kind in ((stop, '止损'), (desired_tp, '止盈')):
+            if value is None:
+                continue
+            px = D(value)
+            if not px.is_finite() or px <= 0 or px % D(instrument['tickSz']):
+                raise ValueError(kind+'必须大于零并符合最小报价单位')
+            profitable = px > quote if ticket['side']=='long' else px < quote
+            if (kind == '止损' and profitable) or (kind == '止盈' and not profitable) or px == quote:
+                raise ValueError(kind+'已越过当前价格，请使用平仓操作')
+        plan.update(stop=amount(D(stop)) if stop is not None else None,
+                    take_profit=amount(D(desired_tp)) if desired_tp is not None else None)
     return plan
 
 
@@ -124,11 +147,11 @@ class Management(Commands):
             db.commit()
         self.path.chmod(0o600)
 
-    def preview(self, engine, ticket_id, action, stop=None):
+    def preview(self, engine, ticket_id, action, stop=None, percentage='100', take_profit=None):
         ticket = Tickets(self.path.parent).get(ticket_id)
         if not ticket.get('confirmed_ms'):
             raise ValueError('只能管理已确认的原委托')
-        plan = read_plan(engine, ticket, action, stop)
+        plan = read_plan(engine, ticket, action, stop, percentage, take_profit)
         now = engine.clock()
         plan.update(id=uuid.uuid4().hex, created_ms=now, expires_ms=now+60000)
         with self.db() as db:
@@ -153,12 +176,13 @@ def post_once(engine, commands, command, phase, path, body):
         # OKX explicitly states 50004 is ambiguous, not a rejection.
         # https://www.okx.com/en-us/help/api-faq (2026-10-24).
         if error.code not in ('50004', 'malformed'):
-            commands.save(dict(value, reason=f'交易所拒绝操作（{error.code}），请刷新核对'), 'rejected')
+            commands.save(dict(value, reason=f'交易所拒绝操作（{error.code}），请刷新核对'),
+                          'processing' if phase in ('resize_protection', 'replacement_cancel') else 'rejected')
     return commands.get(command['id'])
 
 
 def same_plan(current, original):
-    keys = ('account_uid', 'symbol', 'side', 'entry_id', 'client_order_id', 'size', 'position_id', 'algo_id', 'algo_client_id', 'old_stop', 'take_profit', 'stop_type', 'stop')
+    keys = ('account_uid', 'symbol', 'side', 'entry_id', 'client_order_id', 'size', 'position_size', 'position_id', 'algo_id', 'algo_client_id', 'old_stop', 'old_take_profit', 'take_profit', 'stop_type', 'tp_type', 'stop', 'remaining_size')
     return all(current.get(k) == original.get(k) for k in keys)
 
 
@@ -177,7 +201,7 @@ def consume(engine, commands):
         if cmd['state'] == 'confirmed':
             if not cmd.get('confirmed_ms') or not cmd['created_ms'] <= cmd['confirmed_ms'] <= engine.clock() < cmd['expires_ms']:
                 raise ValueError('操作预览已过期，请重新核对')
-            current = read_plan(engine, ticket, cmd['action'], cmd.get('stop'))
+            current = read_plan(engine, ticket, cmd['action'], cmd.get('stop'), cmd.get('percentage','100'), cmd.get('take_profit'))
             if not same_plan(current, cmd):
                 raise ValueError('持仓或保护已经变化，请重新预览')
             if cmd['action'] == 'cancel':
@@ -185,12 +209,17 @@ def consume(engine, commands):
             elif cmd['action'] == 'close':
                 body = dict(instId=cmd['symbol'], tdMode='cross', posSide=cmd['side'], side='sell' if cmd['side']=='long' else 'buy', ordType='market', sz=cmd['size'], clOrdId=identifier(cmd['id'], 'free-close'))
                 cmd = post_once(engine, commands, cmd, 'close', '/api/v5/trade/order', body)
+            elif cmd['action'] == 'protection':
+                cmd = update_protection(engine, commands, cmd)
             elif cmd['algo_id']:
                 cmd = post_once(engine, commands, cmd, 'stop', '/api/v5/trade/amend-algos', dict(instId=cmd['symbol'], algoId=cmd['algo_id'], reqId=identifier(cmd['id'], 'free-amend'), newSlTriggerPx=cmd['stop'], newSlOrdPx='-1', newSlTriggerPxType=cmd['stop_type'], cxlOnFail=False))
             else:
                 body = dict(instId=cmd['symbol'], tdMode='cross', posSide=cmd['side'], side='sell' if cmd['side']=='long' else 'buy', ordType='conditional', sz=cmd['size'], algoClOrdId=identifier(cmd['id'], 'free-stop'), slTriggerPx=cmd['stop'], slOrdPx='-1', slTriggerPxType='last')
                 cmd = post_once(engine, commands, cmd, 'new_stop', '/api/v5/trade/order-algo', body)
         if cmd['state'] != 'processing':
+            return
+        if cmd['phase'] in ('protection', 'replace_protection', 'remove_protection', 'replacement_created', 'replacement_cancel'):
+            reconcile_protection(engine, commands, book, ticket, cmd)
             return
         if cmd['phase'] == 'cancel':
             row = entry(engine, ticket)
@@ -203,7 +232,7 @@ def consume(engine, commands):
             valid = (algo.get('algoClOrdId') == identity and algo.get('instId') == cmd['symbol'] and algo.get('posSide') == cmd['side'] and algo.get('tdMode') == 'cross' and algo.get('side') == ('sell' if cmd['side']=='long' else 'buy') and D(algo.get('sz') or '0') == D(cmd['size']) and D(algo.get('slTriggerPx') or '0') == D(cmd['stop']) and algo.get('slOrdPx') == '-1' and D(algo.get('tpTriggerPx') or '0') == D(cmd['take_profit'] or '0'))
             valid = valid and algo.get('slTriggerPxType') == cmd['stop_type']
             if valid and algo['state'] in ('live', 'effective'):
-                book.save(dict(ticket, stop_loss=cmd['stop'], management_algo_client_id=identity), ticket['state'])
+                book.save(dict(ticket, stop_loss=cmd['stop'], management_algo_client_id=identity, management_no_protection=False), ticket['state'])
                 commands.save(dict(cmd, reason='止损已核对'), 'done')
             return
         if cmd['phase'] == 'close':
@@ -211,6 +240,23 @@ def consume(engine, commands):
             if (row.get('clOrdId') != identifier(cmd['id'], 'free-close') or row.get('instId') != cmd['symbol'] or row.get('posSide') != cmd['side'] or row.get('side') != ('sell' if cmd['side']=='long' else 'buy') or row.get('tdMode') != 'cross' or row.get('ordType') != 'market' or D(row['sz']) != D(cmd['size'])):
                 return
             if row['state'] != 'filled' or D(row.get('accFillSz') or '0') != D(cmd['size']):
+                return
+            if D(cmd.get('remaining_size','0')) > 0:
+                if not remaining_matches(engine, cmd):
+                    return
+                # Persist the accepted fill once, before the separate resize boundary.
+                book.save(dict(ticket, management_closed_size=amount(D(cmd['closed_size_before'])+D(cmd['size']))), ticket['state'])
+                if not cmd['algo_id']:
+                    commands.save(dict(cmd, reason='部分平仓成交已核对'), 'done')
+                    return
+                algo = protection(engine, ticket)
+                if algo['state']=='live' and algo['algoId']==cmd['algo_id'] and exits_match(algo, cmd, old=True):
+                    if D(algo['sz']) == D(cmd['remaining_size']):
+                        commands.save(dict(cmd, reason='部分平仓与剩余保护已核对'), 'done')
+                    elif D(algo['sz']) == D(cmd['position_size']):
+                        cmd = post_once(engine, commands, cmd, 'resize_protection', '/api/v5/trade/amend-algos',
+                                        dict(instId=cmd['symbol'], algoId=cmd['algo_id'], newSz=cmd['remaining_size'],
+                                             reqId=identifier(cmd['id'],'free-resize'), cxlOnFail=False))
                 return
             if not cmd['algo_id']:
                 book.save(dict(ticket, management_closed_ms=engine.clock()), ticket['state'])
@@ -228,8 +274,91 @@ def consume(engine, commands):
             if algo['state'] in ('canceled', 'effective', 'order_failed'):
                 book.save(dict(ticket, management_closed_ms=engine.clock()), ticket['state'])
                 commands.save(dict(cmd, reason='平仓与原保护单已核对'), 'done')
+        if cmd['state']=='processing' and cmd['phase']=='resize_protection':
+            algo = protection(engine, ticket)
+            if (remaining_matches(engine, cmd) and algo['state']=='live' and algo['algoId']==cmd['algo_id']
+                    and D(algo['sz'])==D(cmd['remaining_size']) and exits_match(algo, cmd, old=True)):
+                commands.save(dict(cmd, reason='部分平仓与剩余保护已核对'), 'done')
     except (TransportError, APIError):
         return  # Never replay an exchange mutation, including after restart.
     except (ValueError, KeyError, TypeError) as error:
         if commands.get(cmd['id'])['state'] == 'confirmed':
             commands.save(dict(cmd, reason=str(error)), 'rejected')
+
+
+def remaining_matches(engine, cmd):
+    account = engine.account()
+    rows = [p for p in account['positions'] if p['instId']==cmd['symbol'] and D(p['pos']) != 0]
+    return (account['uid']==cmd['account_uid'] and len(rows)==1 and rows[0].get('posSide')==cmd['side']
+            and rows[0].get('posId')==cmd['position_id'] and D(rows[0]['pos'])==D(cmd['remaining_size']))
+
+
+def exits_match(algo, cmd, *, old=False):
+    for prefix, key, basis in (('sl', 'old_stop' if old else 'stop', 'stop_type'),
+                               ('tp', 'old_take_profit' if old else 'take_profit', 'tp_type')):
+        value = cmd.get(key)
+        if D(algo.get(prefix+'TriggerPx') or '0') != D(value or '0'):
+            return False
+        if value and (algo.get(prefix+'OrdPx')!='-1' or algo.get(prefix+'TriggerPxType','last')!=cmd[basis]):
+            return False
+    return True
+
+
+def protection_body(cmd):
+    body = dict(instId=cmd['symbol'],tdMode='cross',posSide=cmd['side'],side='sell' if cmd['side']=='long' else 'buy',
+                sz=cmd['size'],ordType='oco' if cmd['stop'] and cmd['take_profit'] else 'conditional',
+                algoClOrdId=identifier(cmd['id'],'free-protect'))
+    for prefix,key,basis in (('sl','stop','stop_type'),('tp','take_profit','tp_type')):
+        if cmd[key]:
+            body.update({prefix+'TriggerPx':cmd[key],prefix+'OrdPx':'-1',prefix+'TriggerPxType':cmd[basis]})
+    return body
+
+
+def update_protection(engine, commands, cmd):
+    desired = bool(cmd['stop'])+bool(cmd['take_profit'])
+    original = bool(cmd['old_stop'])+bool(cmd['old_take_profit'])
+    if cmd['algo_id'] and not desired:
+        return post_once(engine, commands, cmd, 'remove_protection',
+                         '/api/v5/trade/cancel-algos',[dict(instId=cmd['symbol'],algoId=cmd['algo_id'])])
+    if cmd['algo_id'] and (original!=desired or bool(cmd['stop'])!=bool(cmd['old_stop'])):
+        # Keep the original protection until replacement protection is verified.
+        # Both are closing sides in long/short mode and cannot reverse exposure.
+        return post_once(engine, commands, cmd, 'replacement_created',
+                         '/api/v5/trade/order-algo',protection_body(cmd))
+    if not cmd['algo_id']:
+        if not desired:
+            return commands.save(dict(cmd, reason='当前未设置止盈止损'), 'done')
+        return post_once(engine, commands, cmd, 'replace_protection','/api/v5/trade/order-algo',protection_body(cmd))
+    body=dict(instId=cmd['symbol'],algoId=cmd['algo_id'],reqId=identifier(cmd['id'],'free-protect'),cxlOnFail=False)
+    for prefix,key,basis in (('Sl','stop','stop_type'),('Tp','take_profit','tp_type')):
+        if cmd[key] or cmd['old_stop' if prefix=='Sl' else 'old_take_profit']:
+            body.update({'new'+prefix+'TriggerPx':cmd[key] or '0','new'+prefix+'OrdPx':'-1' if cmd[key] else '0',
+                         'new'+prefix+'TriggerPxType':cmd[basis]})
+    return post_once(engine, commands, cmd, 'protection','/api/v5/trade/amend-algos',body)
+
+
+def reconcile_protection(engine, commands, book, ticket, cmd):
+    if cmd['phase']=='remove_protection':
+        algo=protection(engine,ticket)
+        if algo['state']!='canceled':
+            return
+        book.save(dict(ticket,stop_loss=None,take_profit=None,management_algo_client_id='',management_no_protection=True),ticket['state'])
+        commands.save(dict(cmd,reason='止盈止损已取消'),'done')
+        return
+    identity=cmd['algo_client_id'] if cmd['phase']=='protection' else identifier(cmd['id'],'free-protect')
+    algo=one(engine.client.get('/api/v5/trade/order-algo',algoClOrdId=identity))
+    if (algo.get('algoClOrdId')==identity and algo.get('instId')==cmd['symbol'] and algo.get('posSide')==cmd['side']
+            and algo.get('side')==('sell' if cmd['side']=='long' else 'buy') and algo.get('tdMode')=='cross'
+            and D(algo['sz'])==D(cmd['size']) and algo['state'] in ('live','effective') and exits_match(algo,cmd)):
+        if cmd['phase']=='replacement_created':
+            old=protection(engine,ticket)
+            if old['state']=='live':
+                cmd=post_once(engine,commands,cmd,'replacement_cancel','/api/v5/trade/cancel-algos',
+                              [dict(instId=cmd['symbol'],algoId=cmd['algo_id'])])
+            elif old['state'] not in ('canceled','effective','order_failed'):
+                return
+        if cmd['phase']=='replacement_cancel' and protection(engine,ticket)['state'] not in ('canceled','effective','order_failed'):
+            return
+        book.save(dict(ticket,stop_loss=cmd['stop'],take_profit=cmd['take_profit'],management_algo_client_id=identity,
+                       management_no_protection=False),ticket['state'])
+        commands.save(dict(cmd,reason='止盈止损已核对'),'done')

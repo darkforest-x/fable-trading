@@ -19,7 +19,7 @@ from .manual_inventory import policy, pages
 from .risk import D, amount, quantize
 from .store import identifier
 
-REVISION = 'free-manual-20261023-v2'
+REVISION = 'free-manual-20261027-v3'
 PENDING = ('confirmed', 'leverage_pending', 'sending', 'live', 'partially_filled', 'protection_pending')
 
 
@@ -143,6 +143,8 @@ def make_plan(engine, terms, *, approved=None, defaults_only=False):
     if side not in ('long', 'short') or terms['order_type'] not in ('market', 'limit'):
         raise ValueError('请选择方向和委托类型')
     account = engine.account()
+    if D(account['available']) <= 0:
+        raise ValueError('实盘账户暂无可用 USDT，当前无法挂单')
     inventory = vacant(engine, account, symbol)
     from .free_exposure import budget
     from yoyo.contracts.manual_exposure import target
@@ -159,6 +161,8 @@ def make_plan(engine, terms, *, approved=None, defaults_only=False):
     tick, lot, ctval = (D(instrument[k]) for k in ('tickSz', 'lotSz', 'ctVal'))
     if min(tick, lot, ctval) <= 0:
         raise ValueError('合约规格暂不可用')
+    from yoyo.contracts.monday_order import bind
+    terms, range_targets = bind(terms, tick, engine.clock(), defaults=defaults_only)
     price = D(terms['limit_price'] if terms['order_type'] == 'limit' else ticker['askPx' if side == 'long' else 'bidPx'])
     requested = D(terms['notional_usdt']) if terms.get('notional_usdt') is not None else target(limits, terms.get('allocation_percent', '100'))
     leverage = D(terms['leverage']) if terms.get('leverage') is not None else D(1)
@@ -185,8 +189,11 @@ def make_plan(engine, terms, *, approved=None, defaults_only=False):
                   price=amount(price), notional_usdt=amount(requested),
                   notional=amount(size*ctval*price), size=amount(size),
                   available=account['available'], tick_size=amount(tick))
+    limits.update(range_targets)
     if defaults_only:
         return limits
+    if terms.get('entry_policy') == 'monday_1618' and (price >= D(ticker['askPx']) if side=='long' else price <= D(ticker['bidPx'])):
+        raise ValueError('1.618 已越过当前盘口，请等待价格回到可挂单一侧')
     fee = one(engine.client.get('/api/v5/account/trade-fee', instType='SWAP', instFamily=instrument['instFamily']))
     # Current V5 uses feeGroup; top-level maker/taker are deprecated and are
     # empty for USDT swaps. Match the instrument's group, never guess a fee.
@@ -216,6 +223,8 @@ def make_plan(engine, terms, *, approved=None, defaults_only=False):
                 ordType=terms['order_type'], sz=amount(size), clOrdId=identifier(identity, 'free-entry'))
     if terms['order_type'] == 'limit':
         body['px'] = amount(price)
+        if terms.get('entry_policy') == 'monday_1618':
+            body['ordType'] = 'post_only'
     if exits:
         body['attachAlgoOrds'] = [dict(exits, attachAlgoClOrdId=identifier(identity, 'free-exits'))]
     return dict({**terms, **limits}, id=identity, account_uid=account['uid'], account_scope='yolo_manual',
@@ -223,7 +232,8 @@ def make_plan(engine, terms, *, approved=None, defaults_only=False):
                 notional=amount(notional), margin=amount(margin), fee_reserve=amount(fee_reserve),
                 required=amount(margin+fee_reserve), available=account['available'],
                 maker_fee=amount(maker), taker_fee=amount(taker), fee_read_ms=now,
-                created_ms=now, expires_ms=now+60000, quote_ms=int(ticker['ts']), order_body=body,
+                created_ms=now, expires_ms=min(now+60000, terms.get('monday_range',{}).get('ticket_until_ms',
+                    terms.get('monday_range',{}).get('expires_ms',now+60000))), quote_ms=int(ticker['ts']), order_body=body,
                 client_order_id=body['clOrdId'], protection='pending' if exits else 'none')
 
 
@@ -240,7 +250,7 @@ def reconcile(engine, book, ticket):
     body = ticket['order_body']
     if (any(order.get(k) != body[k] for k in ('instId', 'clOrdId', 'side', 'posSide', 'ordType', 'tdMode'))
             or D(order['sz']) != D(body['sz'])
-            or (body['ordType'] == 'limit' and D(order.get('px') or '0') != D(body['px']))):
+            or (body['ordType'] in ('limit','post_only') and D(order.get('px') or '0') != D(body['px']))):
         book.save(dict(ticket, reason='订单回执与确认内容不一致，请在交易所核对'), 'unknown')
         return
     state = order.get('state')
@@ -299,8 +309,9 @@ def consume(engine, book, *, entries):
                 ticket = book.save(dict(ticket, leverage_sent_ms=engine.clock()), 'leverage_pending')
                 try:
                     engine.client.post('/api/v5/account/set-leverage', dict(instId=ticket['symbol'], mgnMode='cross', lever=ticket['leverage']))
-                except APIError:
-                    book.save(dict(ticket, reason='交易所拒绝所选杠杆，本次未下单'), 'rejected')
+                except APIError as error:
+                    if error.code not in ('50004','malformed'):
+                        book.save(dict(ticket, reason='交易所拒绝所选杠杆，本次未下单'), 'rejected')
                     continue
             rows = engine.client.get('/api/v5/account/leverage-info', instId=ticket['symbol'], mgnMode='cross')
             if not rows or any(r.get('instId') != ticket['symbol'] or r.get('mgnMode') != 'cross' or D(r['lever']) != D(ticket['leverage']) for r in rows):
@@ -315,7 +326,8 @@ def consume(engine, book, *, entries):
             try:
                 engine.client.post('/api/v5/trade/order', ticket['order_body'])
             except APIError as error:
-                book.save(dict(ticket, reason=f'交易所拒绝委托（{error.code}）'), 'rejected')
+                if error.code not in ('50004','malformed'):
+                    book.save(dict(ticket, reason=f'交易所拒绝委托（{error.code}）'), 'rejected')
                 continue
             reconcile(engine, book, ticket)
         except (TransportError, APIError):

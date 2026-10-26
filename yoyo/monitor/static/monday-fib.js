@@ -23,7 +23,7 @@
       <div class="mf-symbol-line"><h2 id="mf-symbol">—</h2><span class="mf-perp">USDT 永续</span></div>
       <div id="mf-price" class="mf-price">—</div>
       <div class="mf-selected-meta"><span id="mf-touch"></span><span id="mf-mode">跟随最新</span></div>
-      <p id="mf-quote-state" class="mf-quote-state" hidden></p><button id="mf-quick-toggle" class="mf-quick-toggle" aria-expanded="false" aria-controls="mf-quick-panel" disabled>快捷开单 ↗</button>
+      <p id="mf-quote-state" class="mf-quote-state" hidden></p>
     </section>
     <div class="mf-list-launch mf-glass" data-mf-movable="launcher">${grip('列表入口')}<button id="mf-list-toggle" class="mf-list-toggle" aria-label="打开或收起触价列表" aria-controls="mf-list-panel" aria-expanded="false">${icon('activity')}<span class="mf-list-label">触价列表</span><span id="mf-count">—</span></button></div>
     <aside id="mf-list-panel" class="mf-list-panel mf-glass" data-mf-movable="list" aria-label="已触价合约" hidden>
@@ -33,11 +33,6 @@
       <div id="mf-list-feedback" class="mf-list-feedback" hidden><span id="mf-list-message" role="status"></span><button type="button" id="mf-list-undo" hidden>撤销</button></div>
       <div id="mf-rows" class="mf-rows" role="region" aria-label="已触价币种滚动列表" tabindex="0"></div>
       <p class="mf-list-note">点击列表切换图表 · 币种名称 ↗ ${windowsDesktop?'本机 ':''}TradingView</p>
-    </aside>
-    <button id="mf-quick-backdrop" class="mf-quick-backdrop" tabindex="-1" aria-label="关闭快捷开单" hidden></button><aside id="mf-quick-panel" class="mf-quick-panel mf-glass" data-mf-movable="quick" aria-label="快捷开单" hidden>
-      <button type="button" class="mf-sheet-grabber" data-quick-grabber aria-label="向下滑动关闭快捷开单"><span></span></button><header class="mf-quick-heading">${grip('快捷开单')}<h2>快捷开单</h2><button type="button" data-quick-close aria-label="关闭快捷开单">${icon('x')}</button></header>
-      <div class="mf-quick-modes" role="group" aria-label="交易环境"><button type="button" data-quick-mode="paper" aria-pressed="true">模拟</button><button type="button" data-quick-mode="live" aria-pressed="false">实盘 · 手动</button></div>
-      <p data-quick-status class="mf-quick-status"></p><div id="mf-quick-content" class="mf-quick-content"></div>
     </aside>
     <div id="mf-notice" class="mf-notice mf-glass" role="status" hidden></div>
     <div class="mf-dock mf-glass" data-mf-movable="dock" role="group" aria-label="图表控制">${grip('图表工具')}<button id="mf-timeframe" class="mf-timeframe" type="button" aria-label="选择 K 线周期" aria-haspopup="menu" aria-controls="mf-period-menu" aria-expanded="false"><span id="mf-period-label">15m</span><span aria-hidden="true">⌄</span></button><span class="mf-divider"></span><button id="mf-zoom-out" class="mf-zoom" aria-label="缩小 K 线" title="缩小 K 线（−）"><span aria-hidden="true">−</span></button><button id="mf-zoom-in" class="mf-zoom" aria-label="放大 K 线" title="放大 K 线（+）"><span aria-hidden="true">+</span></button><button id="mf-latest" aria-label="回到当前合约最新 K 线" title="回到当前合约最新 K 线，保留缩放宽度">${icon('chevron-right')}<span>最新 K 线</span></button><button id="mf-fit" aria-label="显示全部已加载 K 线并复位" title="恢复价格缩放并显示全部已加载 K 线">${icon('maximize')}<span>全图</span></button><button id="mf-fib" aria-pressed="false" title="显示区间内部 0.5 / 0.618 / 0.705">${icon('adjustments-horizontal')}<span>内部线</span></button><button id="mf-ma" class="mf-ma-toggle" role="switch" aria-checked="false" title="SMA / EMA 20、60、120"><span>六均线</span><i aria-hidden="true"></i></button><span class="mf-divider"></span><button id="mf-follow" aria-pressed="true">${icon('activity')}<span>跟随最新</span></button></div>
@@ -55,13 +50,6 @@
   let lastRemoval=null;
   const visibleItems=()=>preferences.visible(data?.items||[],data?.display_week||data?.week);
   let listOpen=!!window.matchMedia?.('(min-width: 761px)').matches;
-  const quick=window.SpikeMondayQuick?.create({
-    panel:$('mf-quick-panel'),host:$('mf-quick-content'),trigger:$('mf-quick-toggle'),
-    context:()=>({symbol:selected,timeframe:period,side:latestTouch(visibleItems().find(r=>r.symbol===selected)||{})?.side==='upper'?'short':'long'}),
-    visibility:open=>{root.classList.toggle('mf-quick-open',open);layout.refresh();},
-    load:()=>window.SpikeModules.ensure('monday-live'),
-    paper:()=>window.SpikeMondayPaper,live:()=>window.SpikeMondayLive,
-  });
   const nowMs=()=>data?.now_ms?data.now_ms+Math.max(0,Date.now()-receivedAt):Date.now();
   const timeFormat=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
   const time=ms=>ms?timeFormat.format(new Date(ms)):'时间待核对';
@@ -149,8 +137,8 @@
       $('mf-week').textContent=data.display_previous?`上周 · ${data.display_week} · 本周区间形成中`:`本周 · ${data.week} 纽约周一${data.monday_complete?'':' · 形成中'}`;
     }
     $('mf-follow').setAttribute('aria-pressed',String(follow));$('mf-follow').title=follow?'自动显示最近触价的合约':'回到最新触价，并自动跟随';
-    for(const id of ['mf-fit','mf-fib','mf-latest','mf-zoom-in','mf-zoom-out','mf-quick-toggle'])$(id).disabled=!selected;
-    $('mf-quick-toggle').disabled=!selected||!latestTouch(visibleItems().find(r=>r.symbol===selected)||{});
+    for(const id of ['mf-fit','mf-fib','mf-latest','mf-zoom-in','mf-zoom-out'])$(id).disabled=!selected;
+
     renderRows();
   }
   function schedule(){clearTimeout(timer);if(active&&!document.hidden)timer=setTimeout(refresh,5000);}
@@ -167,7 +155,7 @@
     finally{clearTimeout(timeout);if(controller===c)controller=null;if(pending===task)pending=null;if(rev===revision)schedule();}})();pending=task;return task;
   }
   function cancel(preserveChart=false){periodMenu(false);revision++;controller?.abort();controller=null;pending=null;clearTimeout(timer);if(preserveChart)window.SpikeMondayFibChart?.pause?.();else window.SpikeMondayFibChart?.hide();}
-  function setActive(value){if(active===value)return;active=value;if(!value)quick?.close(false);cancel();layout.setActive(value);if(active){preferences.read();panel(listOpen);render();refresh();}}
+  function setActive(value){if(active===value)return;active=value;if(!value)cancel();layout.setActive(value);if(active){preferences.read();panel(listOpen);render();refresh();}}
   function listFeedback(message,undo=false){
     $('mf-list-feedback').hidden=false;
     $('mf-list-message').textContent=message+(preferences.persistent?'':' · 本机存储不可用，刷新后不会保留');

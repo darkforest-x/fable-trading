@@ -28,11 +28,19 @@ def setup(h, *, pending=False, protection=True, side='long'):
     def write(path,body):
         v.posts.append((path,deepcopy(body)))
         if v.accept_management:
-            if path.endswith('/amend-algos'):v.algo.update(slTriggerPx=body['newSlTriggerPx'],slOrdPx=body['newSlOrdPx'])
+            if path.endswith('/amend-algos'):
+                for key, value in body.items():
+                    if key.startswith('new'):
+                        target = key[3:4].lower()+key[4:]
+                        v.algo[target] = value
             elif path.endswith('/cancel-order'):v.order['state']='canceled'
             elif path.endswith('/cancel-algos'):v.algo['state']='canceled'
             elif path.endswith('/order-algo'):v.algo=dict(body,algoId='newalgo',state='live')
-            elif path.endswith('/order'):v.close_order=dict(body,ordId='close1',accFillSz=body['sz'],state='filled');v.positions=[]
+            elif path.endswith('/order'):
+                from decimal import Decimal
+                v.close_order=dict(body,ordId='close1',accFillSz=body['sz'],state='filled')
+                remaining=Decimal(v.positions[0]['pos'])-Decimal(body['sz'])
+                v.positions=[dict(v.positions[0],pos=str(remaining))] if remaining else []
             else:raise AssertionError(path)
         if v.fail_management==path:raise TransportError('lost reply')
         return [dict(sCode='0')]

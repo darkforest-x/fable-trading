@@ -45,13 +45,21 @@ class Engine:
         return dict(attachAlgoClOrdId=trade["algo_client_id"],
                     slTriggerPx=trade["initial_stop"], slOrdPx="-1", slTriggerPxType="last")
 
-    def account(self):
+    def account(self, *, allow_empty_usdt=False):
         settings = one(self.client.get("/api/v5/account/config"))
         if settings.get("posMode") != "long_short_mode" or settings.get("acctLv") != "2":
             raise ValueError("use futures account mode and long/short position mode; settings are not changed automatically")
         balance = one(self.client.get("/api/v5/account/balance", ccy="USDT"))
-        usdt = one([r for r in balance.get("details", []) if r.get("ccy") == "USDT"])
         positions = [r for r in self.client.get("/api/v5/account/positions") if D(r["pos"]) != 0]
+        details = balance.get('details')
+        usdt_rows = [r for r in details or [] if r.get('ccy') == 'USDT']
+        # OKX's balance endpoint omits zero-balance currencies. Only the manual
+        # idle worker opts in, and only a valid receipt with no positions can
+        # mean zero. Missing/malformed details and exposed accounts fail closed.
+        # https://app.okx.com/docs-v5/en/#trading-account-rest-api-get-balance
+        usdt = (dict(eq='0',availEq='0',imr='0')
+                if allow_empty_usdt and isinstance(details,list) and not usdt_rows and not positions
+                else one(usdt_rows))
         # Futures cross uses available equity, not the isolated/spot balance.
         # Currency-level IMR is in USDT; position/account-level IMR can be USD.
         allocated = usdt.get("imr")

@@ -129,5 +129,5 @@
     return {close,isOpen:()=>open};
   }
   if(typeof module!=='undefined')module.exports={create,sheetMotion};
-  if(typeof window!=='undefined')window.SpikeMondayQuick={create};
+  if(typeof window!=='undefined')window.SpikeMondayQuick={create,sheetMotion};
 })();
