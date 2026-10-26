@@ -632,6 +632,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Backtest 2020-24 / 2025 / 2026 / last five months 3.74x / 8.97x / 2.56x / 2.96x, DD up to 34 percent; band edges were chosen after seeing 2025-2026, so the forward record is the test. UI pending Codex + Stitch.'
+  - experiment_id: exp-monday-limit-langlang-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 53d9a01b9f
+    status: complete
+    question: 'Owner 2026-10-27: Langlang three-share fixed-amount sizing for the high-payoff version; how fast can 1000 USDT reach 10x / 100x with as few blow-ups as possible (no fixed six-month window).'
+    single_variable: 'Sizing only on existing fills (v3_be17; score >= 0.6 opposite 1618 with -30 percent backstop): Langlang (one of three shares at L, losses topped up, gains returned, resize on doubling) versus all-in, L 2-20, forward runs from each month 2023-01 .. 2026-08, 5 tie orders.'
+    result: 'v3 Langlang 5x: 10x reached from 80 percent of starts, median 429 days (17 percent within 180 days), 100x from 77 percent, median 552 days (25 percent within a year), median 0 whole-stake blow-ups; 10x Langlang 10x lev: 10x median 298 days, 100x 507 days, 1 blow-up. Score >= 0.6 opposite 1618 all-in 3x: 10x from all starts, median 319 days (30 percent within 180), 100x 96 percent, median 600 days (31 percent within a year), 1-2 blow-ups; all-in 5x: 10x 247 days, 100x 402 days, 6-8 blow-ups before 100x. 10-20x leverage rarely reaches 100x (1-6 percent of starts).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-langlang-20261027-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Forward runs overlap and pass through the same 2025 streak; in sample. Pyramiding (滚仓) needs an adapter extension and is next.'
   - experiment_id: exp-monday-limit-lottery-20261027-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 5c9d89354f
