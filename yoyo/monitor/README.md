@@ -101,6 +101,24 @@ DNS/实名审核尚未就绪时返回 `pending_activation=true`，保留旧入�
 并退役旧 Quick Tunnel 和 ngrok。固定名称不能保证源站永远在线；Mac 与网络仍需可用。
 来源：[Cloudflare 本机管理隧道](https://developers.cloudflare.com/tunnel/features/locally-managed-tunnels/create-local-tunnel/)。
 
+### 持续 1033 的有限自动恢复（2026-10-26）
+
+`com.spike.public-tunnel-health` 独立于行情/巡检进程，每 60 秒检查本机源站、带正确 Host
+的网关和公网 `/api/status`。只有三次连续 Cloudflare 1033、且前两层健康，才重启已经加载的
+`com.spike.public-cloudflare`。不以 PID 或连接器 `/ready` 作为公网可达证明。
+DNS/超时/403/502、源站异常及手动停止的连接器均不触发重启。重启尝试先落盘，冷却 10 分钟，
+每小时最多 3 次；长期离线或检查间隔超过 90 秒后重新累计。没有修改代理、协议、凭据或交易服务。
+
+```bash
+.venv/bin/python -m yoyo.monitor.tunnel_watchdog install
+.venv/bin/python -m yoyo.monitor.tunnel_watchdog status
+.venv/bin/python -m yoyo.monitor.tunnel_watchdog stop
+```
+
+最后一条只停止自动恢复检查。原公网连接器停止后，检查会显示 `connector_disabled`，不会重新启动它。
+状态与有限日志保存在原私有 `PublicTunnel/` 目录。自动恢复是应对失联的保护，不代表已证明底层网络
+故障原因或永久消除断线。连续三次检查通常约 2–3 分钟，另加连接器启动与 Cloudflare 重连时间。
+
 ## 原 ngrok 固定公网访问（2026-10-15）
 
 当前使用现有 ngrok 账号的固定 Dev Domain → Caddy `127.0.0.1:8780` → 工作台 `127.0.0.1:8766`。
