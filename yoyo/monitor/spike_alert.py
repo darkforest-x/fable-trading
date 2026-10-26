@@ -8,6 +8,8 @@ whose touch candle falls in the last 5 one-minute candles; at >= 8 an alert is w
 sent once to Telegram (local credentials, as monday_fib) and Bark (this monitor's bark.json when enabled). One
 alert per side per 30 minutes, kept across restarts. Callbacks only enqueue; a worker thread sends. Uncertain HTTP
 outcomes are recorded as unknown and never retried automatically, like the other channels.
+Owner 2026-10-27: threshold raised from 8 to 25 coins after exp-monday-spike-alert-quality-20261027-v1 (at 8 it would
+fire about twice a week on OKX-listed coins; 25+ marks the extreme crashes where v3 and spike-HW trades did better).
 """
 from __future__ import annotations
 
@@ -25,7 +27,7 @@ from zoneinfo import ZoneInfo
 import requests
 
 MINUTE = 60_000
-WINDOW_MS, THRESHOLD, COOLDOWN_MS = 5*MINUTE, 8, 30*MINUTE
+WINDOW_MS, THRESHOLD, COOLDOWN_MS = 5*MINUTE, 25, 30*MINUTE
 SIDE_TEXT = {"lower": "下方 1.618（急跌，做多方向）", "upper": "上方 1.618（急涨，做空方向）"}
 
 

@@ -3,7 +3,7 @@ import json
 import tempfile
 import unittest
 
-from yoyo.monitor.spike_alert import SpikeAlert, alert_text, install
+from yoyo.monitor.spike_alert import THRESHOLD, SpikeAlert, alert_text, install
 
 MIN = 60_000
 T0 = 1_792_000_000_000 // MIN * MIN
@@ -29,8 +29,17 @@ class SpikeAlertTests(unittest.TestCase):
         self.sent.append((url, json))
         return FakeResponse(200, {"ok": True, "result": {"message_id": 1}} if "telegram" in url else {"code": 200, "timestamp": 1})
 
-    def alert(self, **kw):
-        return SpikeAlert(self.tmp.name, telegram_creds=("token", "chat"), bark_key="k"*22, sender=self.sender, clock=lambda: T0, **kw)
+    def alert(self, threshold=8, **kw):
+        return SpikeAlert(self.tmp.name, threshold=threshold, telegram_creds=("token", "chat"), bark_key="k"*22, sender=self.sender,
+                          clock=lambda: T0, **kw)
+
+    def test_owner_threshold_is_25_coins(self):
+        self.assertEqual(THRESHOLD, 25)
+        a = SpikeAlert(self.tmp.name, telegram_creds=("t", "c"), bark_key="", sender=self.sender, clock=lambda: T0)
+        self.touch(a, 24)
+        self.assertEqual(a.events.qsize(), 0)
+        self.touch(a, 1, start=24, minute=3)
+        self.assertEqual((a.events.qsize(), a.snapshot()["threshold"]), (1, 25))
 
     def touch(self, a, n, side="lower", start=0, minute=0, source="live"):
         for k in range(start, start+n):
@@ -81,7 +90,7 @@ class SpikeAlertTests(unittest.TestCase):
     def test_uncertain_delivery_is_recorded_not_retried(self):
         def flaky(url, json=None, **kw):
             raise TimeoutError("slow")
-        a = SpikeAlert(self.tmp.name, telegram_creds=("t", "c"), bark_key="", sender=flaky, clock=lambda: T0)
+        a = SpikeAlert(self.tmp.name, threshold=8, telegram_creds=("t", "c"), bark_key="", sender=flaky, clock=lambda: T0)
         self.touch(a, 8)
         self.assertEqual(a.deliver(a.events.get_nowait()), {"telegram": "unknown"})
         row = a.snapshot()["alerts"][0]
