@@ -1,3 +1,14 @@
+## 2026-10-26 · Fee-covering breakeven and high-score scale-in tested (native, full history)
+
+- Adapter: the reclaim rule now accepts per-entry `be_offset_bp`. A reclaim close that has not cleared the offset price exits at that close (reason 12). Scale-in legs (`parent`, `reclaim_ref`) share the parent's confirmation clock, reclaim test, breakeven, backstop and target. They expire at the parent's decision and are cancelled when the parent closes unfilled. Commits `0975b885fb`, `274542d217` (same-bar race fix); 9 tests; regression 860 passed (4 old unrelated failures).
+- Breakeven offset barely matters. v2 2026 goes from 2.12x (0bp) to 2.18x (17bp); v3 is flat (2.63 vs 2.61). The offset closes 1-3 percent of trades at the reclaim close. Covering fees is harmless and turns the -0.07 / -0.17 percent breakeven exits into about zero.
+- Scale-in at -5 percent for v3 scores >= 0.6 fills on 39-51 percent of events.
+  - The add earns +3.7 to +9.5 percent per fill, even though those parents average negative.
+  - Replays 2020-24 / 2025 / 2026 / last5m: 4.46 / 11.86 / 3.29 / 5.23, against v3 alone at 3.64 / 8.93 / 2.63 / 2.96.
+  - The cost is drawdown: 2026 rises from 34 to 50 percent.
+  - The -10 percent add fills less (15-22 percent) and gains less.
+- Paper engine unchanged (v2 tracks breakeven at entry; v3 as frozen). Adopting a fee-covering breakeven or the scale-in is an owner decision; neither is live. `experiments/active/exp-monday-limit-be-scalein-compare-20261026-v1/`.
+
 ## 2026-10-26 · Confirmed 5m entry, known pin R and frozen score filter
 
 - Owner asked why the prior39617R trade only earned3.62percent, then requested confirmed5m market entry, entry-to-bearish-pin-low1R and existing score filtering. Interpretation used immediate next5m close reclaim after the pin, followed by next open entry; long bearish pin/lower wick, short green/upper mirror separately. Stop remains original pin extreme; pre-entry confirmation cannot immediately arm BE. Six R targets x fixed/first post-entry completed5m fee-room protection.
