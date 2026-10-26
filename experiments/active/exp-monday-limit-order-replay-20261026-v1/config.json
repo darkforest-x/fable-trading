@@ -1,0 +1,15 @@
+{
+  "experiment_id": "exp-monday-limit-order-replay-20261026-v1",
+  "question": "Owner 2026-10-26: 1000 USDT equity replays on existing framework fills: v3 as is, only order score > 0, order score > 0 at double size; multiples and drawdowns by period.",
+  "trades": "experiments/active/exp-monday-limit-time-news-20261026-v1/trades.csv.gz",
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "variant": "v3_be17",
+  "plans": {"v3": "all trades, linear k", "order_only": "order score > 0 only, linear k", "order_x2": "2k when order score > 0 (cap 1.0)", "order_x2c": "min(2k, 0.5) when order score > 0"},
+  "sizing": "k = min(0.05 * (score - cut) / mean_excess, 0.5), gross <= 1x equity, realized equity",
+  "periods": ["2020-2024", "2025", "2026", "last five months"],
+  "ties": 20,
+  "seed": 20261028,
+  "in_sample": "The order score lever was found on the same history; these replays do not validate it.",
+  "training_eligible": false,
+  "production_eligible": false
+}
