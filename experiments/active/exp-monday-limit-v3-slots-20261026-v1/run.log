@@ -1,0 +1,140 @@
+/Users/zhangzc/fable-trading/yoyo/evaluation/monday_limit_v3_slots.py:51: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  entry_t=pd.to_datetime(o.entry_time, utc=True), exit_t=pd.to_datetime(np.where(worse, l.exit_time, o.exit_time), utc=True)),
+/Users/zhangzc/fable-trading/yoyo/evaluation/monday_limit_v3_slots.py:51: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  entry_t=pd.to_datetime(o.entry_time, utc=True), exit_t=pd.to_datetime(np.where(worse, l.exit_time, o.exit_time), utc=True)),
+{
+ "frequency": {
+  "all": {
+   "days": 2412,
+   "trades": 2108,
+   "mean_per_day": 0.8739635157545605,
+   "median_per_day": 0.0,
+   "p90_per_day": 2.0,
+   "max_per_day": 126,
+   "max_day": "2026-01-19",
+   "zero_day_pct": 70.27363184079603,
+   "top_days": {
+    "2026-01-19": 126,
+    "2024-02-29": 69,
+    "2026-08-22": 54,
+    "2023-11-10": 45,
+    "2024-01-03": 32
+   }
+  },
+  "from_2025": {
+   "days": 631,
+   "trades": 1366,
+   "mean_per_day": 2.1648177496038037,
+   "median_per_day": 1.0,
+   "p90_per_day": 5.0,
+   "max_per_day": 126,
+   "max_day": "2026-01-19",
+   "zero_day_pct": 30.269413629160063,
+   "top_days": {
+    "2026-01-19": 126,
+    "2026-08-22": 54,
+    "2025-11-11": 15,
+    "2026-03-17": 13,
+    "2025-10-11": 12
+   }
+  },
+  "last5m": {
+   "days": 154,
+   "trades": 450,
+   "mean_per_day": 2.9220779220779223,
+   "median_per_day": 2.0,
+   "p90_per_day": 6.0,
+   "max_per_day": 54,
+   "max_day": "2026-08-22",
+   "zero_day_pct": 14.935064935064934,
+   "top_days": {
+    "2026-08-22": 54,
+    "2026-09-10": 12,
+    "2026-07-02": 9,
+    "2026-09-01": 9,
+    "2026-09-18": 9
+   }
+  }
+ },
+ "concurrency": {
+  "all": {
+   "max_open": 123,
+   "share_fills_with_more_than_3_open": 37.618595825426944,
+   "hold_hours_median": 1.9166666666666667
+  },
+  "from_2025": {
+   "max_open": 123,
+   "share_fills_with_more_than_3_open": 31.625183016105417,
+   "hold_hours_median": 1.9166666666666667
+  },
+  "last5m": {
+   "max_open": 19,
+   "share_fills_with_more_than_3_open": 34.66666666666667,
+   "hold_hours_median": 1.75
+  }
+ }
+}
+mae all|winners {'n': 785, 'q50': 2.21, 'q75': 4.93, 'q90': 9.15, 'q95': 12.89, 'q99': 20.27}
+mae all|losers {'n': 1323, 'q50': 4.23, 'q75': 9.31, 'q90': 15.83, 'q95': 21.01, 'q99': 29.18}
+mae all|all {'n': 2108, 'q50': 3.17, 'q75': 7.54, 'q90': 13.82, 'q95': 18.34, 'q99': 28.21}
+mae from_2025|winners {'n': 484, 'q50': 2.17, 'q75': 5.13, 'q90': 9.32, 'q95': 14.41, 'q99': 23.85}
+mae from_2025|losers {'n': 882, 'q50': 4.88, 'q75': 9.97, 'q90': 16.46, 'q95': 21.58, 'q99': 29.82}
+mae from_2025|all {'n': 1366, 'q50': 3.64, 'q75': 8.32, 'q90': 14.74, 'q95': 19.82, 'q99': 28.85}
+mae last5m|winners {'n': 183, 'q50': 2.69, 'q75': 6.36, 'q90': 12.87, 'q95': 17.92, 'q99': 25.84}
+mae last5m|losers {'n': 267, 'q50': 4.64, 'q75': 9.52, 'q90': 14.45, 'q95': 18.17, 'q99': 28.57}
+mae last5m|all {'n': 450, 'q50': 3.78, 'q75': 8.41, 'q90': 14.13, 'q95': 18.02, 'q99': 27.85}
+liq {"2": {"threshold_pct": 49.0, "all": 0.14641288433382138, "winners": 0.0}, "3": {"threshold_pct": 32.333333333333336, "all": 0.36603221083455345, "winners": 0.0}, "5": {"threshold_pct": 19.0, "all": 5.490483162518302, "winners": 2.479338842975207}, "10": {"threshold_pct": 9.0, "all": 22.32796486090776, "winners": 11.776859504132231}, "20": {"threshold_pct": 4.0, "all": 47.43777452415813, "winners": 32.64462809917356}, "50": {"threshold_pct": 1.0, "all": 78.7701317715959, "winners": 70.24793388429752}}
+from_2025|L1|extract_resize      final_multiple 31.82 max_drawdown_pct 52.13 liquidations 0.00 skipped 312.00 taken 1054.00
+from_2025|L1|no_extract          final_multiple 20.82 max_drawdown_pct 60.46 liquidations 0.00 skipped 312.00 taken 1054.00
+from_2025|L1|extract_fixed       final_multiple 6.14 max_drawdown_pct 14.13 liquidations 0.00 skipped 312.00 taken 1054.00
+from_2025|L2|extract_resize      final_multiple 107.22 max_drawdown_pct 69.78 liquidations 2.00 skipped 684.50 taken 681.50
+from_2025|L2|no_extract          final_multiple 89.68 max_drawdown_pct 91.46 liquidations 2.00 skipped 313.00 taken 1053.00
+from_2025|L2|extract_fixed       final_multiple 10.35 max_drawdown_pct 25.56 liquidations 2.00 skipped 312.00 taken 1054.00
+from_2025|L3|extract_resize      final_multiple 78.77 max_drawdown_pct 86.81 liquidations 4.00 skipped 740.00 taken 626.00
+from_2025|L3|no_extract          final_multiple 205.04 max_drawdown_pct 94.22 liquidations 5.00 skipped 535.00 taken 831.00
+from_2025|L3|extract_fixed       final_multiple 14.93 max_drawdown_pct 35.04 liquidations 5.00 skipped 312.00 taken 1054.00
+from_2025|L5|extract_resize      final_multiple 1.92 max_drawdown_pct 42.88 liquidations 3.00 skipped 1332.00 taken 34.00
+from_2025|L5|no_extract          final_multiple 1.18 max_drawdown_pct 66.53 liquidations 4.00 skipped 1319.00 taken 47.00
+from_2025|L5|extract_fixed       final_multiple 20.88 max_drawdown_pct 45.12 liquidations 61.50 skipped 312.00 taken 1054.00
+from_2025|L10|extract_resize     final_multiple 1.29 max_drawdown_pct 73.43 liquidations 5.00 skipped 1341.00 taken 25.00
+from_2025|L10|no_extract         final_multiple 0.00 max_drawdown_pct 100.00 liquidations 11.00 skipped 8.00 taken 38.00
+from_2025|L10|extract_fixed      final_multiple 0.50 max_drawdown_pct 81.59 liquidations 17.00 skipped 1306.00 taken 60.00
+from_2025|L20|extract_resize     final_multiple 1.66 max_drawdown_pct 69.51 liquidations 9.00 skipped 1342.00 taken 24.00
+from_2025|L20|no_extract         final_multiple 0.33 max_drawdown_pct 96.45 liquidations 13.00 skipped 1340.00 taken 26.00
+from_2025|L20|extract_fixed      final_multiple 0.59 max_drawdown_pct 86.22 liquidations 22.00 skipped 1322.00 taken 44.00
+last5m|L1|extract_resize         final_multiple 3.59 max_drawdown_pct 18.22 liquidations 0.00 skipped 94.00 taken 356.00
+last5m|L1|no_extract             final_multiple 3.55 max_drawdown_pct 18.22 liquidations 0.00 skipped 94.00 taken 356.00
+last5m|L1|extract_fixed          final_multiple 2.80 max_drawdown_pct 18.22 liquidations 0.00 skipped 94.00 taken 356.00
+last5m|L2|extract_resize         final_multiple 6.90 max_drawdown_pct 34.79 liquidations 0.00 skipped 94.00 taken 356.00
+last5m|L2|no_extract             final_multiple 5.81 max_drawdown_pct 34.79 liquidations 0.00 skipped 94.00 taken 356.00
+last5m|L2|extract_fixed          final_multiple 3.93 max_drawdown_pct 34.79 liquidations 0.00 skipped 94.00 taken 356.00
+last5m|L3|extract_resize         final_multiple 13.75 max_drawdown_pct 52.08 liquidations 0.00 skipped 94.00 taken 356.00
+last5m|L3|no_extract             final_multiple 5.35 max_drawdown_pct 52.08 liquidations 0.00 skipped 94.00 taken 356.00
+last5m|L3|extract_fixed          final_multiple 5.01 max_drawdown_pct 52.08 liquidations 0.00 skipped 94.00 taken 356.00
+last5m|L5|extract_resize         final_multiple 0.45 max_drawdown_pct 78.29 liquidations 1.00 skipped 422.00 taken 28.00
+last5m|L5|no_extract             final_multiple 0.45 max_drawdown_pct 78.29 liquidations 1.00 skipped 422.00 taken 28.00
+last5m|L5|extract_fixed          final_multiple 0.95 max_drawdown_pct 54.34 liquidations 2.00 skipped 417.00 taken 33.00
+last5m|L10|extract_resize        final_multiple 0.33 max_drawdown_pct 75.00 liquidations 5.00 skipped 440.00 taken 10.00
+last5m|L10|no_extract            final_multiple 0.33 max_drawdown_pct 75.00 liquidations 5.00 skipped 440.00 taken 10.00
+last5m|L10|extract_fixed         final_multiple 0.33 max_drawdown_pct 75.00 liquidations 5.00 skipped 440.00 taken 10.00
+last5m|L20|extract_resize        final_multiple 0.00 max_drawdown_pct 100.00 liquidations 8.00 skipped 18.00 taken 16.00
+last5m|L20|no_extract            final_multiple 0.33 max_drawdown_pct 75.00 liquidations 6.00 skipped 439.00 taken 11.00
+last5m|L20|extract_fixed         final_multiple 0.00 max_drawdown_pct 100.00 liquidations 10.00 skipped 10.00 taken 24.00
+all|L1|extract_resize            final_multiple 111.63 max_drawdown_pct 54.34 liquidations 0.00 skipped 601.00 taken 1507.00
+all|L1|no_extract                final_multiple 62.56 max_drawdown_pct 38.63 liquidations 0.00 skipped 601.00 taken 1507.00
+all|L1|extract_fixed             final_multiple 8.07 max_drawdown_pct 10.54 liquidations 0.00 skipped 601.00 taken 1507.00
+all|L2|extract_resize            final_multiple 2519.53 max_drawdown_pct 80.00 liquidations 2.00 skipped 611.00 taken 1497.00
+all|L2|no_extract                final_multiple 818.04 max_drawdown_pct 87.08 liquidations 2.00 skipped 1018.00 taken 1090.00
+all|L2|extract_fixed             final_multiple 14.20 max_drawdown_pct 13.08 liquidations 2.00 skipped 601.00 taken 1507.00
+all|L3|extract_resize            final_multiple 386.75 max_drawdown_pct 76.63 liquidations 4.50 skipped 1146.50 taken 961.50
+all|L3|no_extract                final_multiple 13399.05 max_drawdown_pct 97.10 liquidations 4.00 skipped 1097.00 taken 1011.00
+all|L3|extract_fixed             final_multiple 20.67 max_drawdown_pct 16.53 liquidations 6.00 skipped 601.00 taken 1507.00
+all|L5|extract_resize            final_multiple 3.53 max_drawdown_pct 48.22 liquidations 2.50 skipped 2065.50 taken 42.50
+all|L5|no_extract                final_multiple 2.96 max_drawdown_pct 56.32 liquidations 3.00 skipped 2066.00 taken 42.00
+all|L5|extract_fixed             final_multiple 28.91 max_drawdown_pct 32.37 liquidations 75.00 skipped 601.00 taken 1507.00
+all|L10|extract_resize           final_multiple 10.55 max_drawdown_pct 46.50 liquidations 4.00 skipped 2073.00 taken 35.00
+all|L10|no_extract               final_multiple 0.00 max_drawdown_pct 100.00 liquidations 8.00 skipped 11.50 taken 43.00
+all|L10|extract_fixed            final_multiple 34.03 max_drawdown_pct 47.27 liquidations 293.00 skipped 601.00 taken 1507.00
+all|L20|extract_resize           final_multiple 9.36 max_drawdown_pct 69.40 liquidations 7.00 skipped 2084.00 taken 24.00
+all|L20|no_extract               final_multiple 0.00 max_drawdown_pct 100.00 liquidations 12.00 skipped 20.00 taken 34.00
+all|L20|extract_fixed            final_multiple 24.14 max_drawdown_pct 59.34 liquidations 623.50 skipped 601.00 taken 1507.00

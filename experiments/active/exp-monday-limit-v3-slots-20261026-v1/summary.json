@@ -1,0 +1,661 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-v3-slots-20261026-v1",
+    "question": "Owner 2026-10-26: v3 trades per day, floating loss of winners, and a 3-slot leveraged sizing scheme with profit extraction (Bit浪浪-style as described by the owner).",
+    "single_variable": "Sizing scheme only (slots, leverage, extraction, resize); v3 fills unchanged.",
+    "trades": "exp-monday-limit-v3-levels-20261025-v1, score >= 0.5, range 0.618 target for 0.5-0.6 and opposite 1618 from 0.6, -30 percent backstop, worse intrabar path, 10bp slippage on non-target exits",
+    "liquidation": "floating loss >= 100/L - 1 percent (maintenance margin 1 percent) loses the slot margin; last price wicks count",
+    "slots": 3,
+    "leverage": [
+      1,
+      2,
+      3,
+      5,
+      10,
+      20
+    ],
+    "variants": {
+      "extract_resize": "slot at 2b sends profit above b to the reserve; total doubles -> b = total/3",
+      "no_extract": "no extraction, resize on doubling",
+      "extract_fixed": "extraction, b fixed at 1000/3"
+    },
+    "not_modelled": "funding fees, exchange liquidation fees, partial liquidation, slippage beyond 10bp",
+    "dropped_events": [
+      "BABYUSDT:2026-06-01:-1",
+      "DASHUSDT:2020-04-13:+1"
+    ],
+    "tie_orders": 10
+  },
+  "results": {
+    "n": 2108,
+    "time_range": [
+      "2020-02-15 16:40:00+00:00",
+      "2026-09-22 18:55:00+00:00"
+    ],
+    "frequency": {
+      "all": {
+        "days": 2412,
+        "trades": 2108,
+        "mean_per_day": 0.8739635157545605,
+        "median_per_day": 0.0,
+        "p90_per_day": 2.0,
+        "max_per_day": 126,
+        "max_day": "2026-01-19",
+        "zero_day_pct": 70.27363184079603,
+        "top_days": {
+          "2026-01-19": 126,
+          "2024-02-29": 69,
+          "2026-08-22": 54,
+          "2023-11-10": 45,
+          "2024-01-03": 32
+        }
+      },
+      "from_2025": {
+        "days": 631,
+        "trades": 1366,
+        "mean_per_day": 2.1648177496038037,
+        "median_per_day": 1.0,
+        "p90_per_day": 5.0,
+        "max_per_day": 126,
+        "max_day": "2026-01-19",
+        "zero_day_pct": 30.269413629160063,
+        "top_days": {
+          "2026-01-19": 126,
+          "2026-08-22": 54,
+          "2025-11-11": 15,
+          "2026-03-17": 13,
+          "2025-10-11": 12
+        }
+      },
+      "last5m": {
+        "days": 154,
+        "trades": 450,
+        "mean_per_day": 2.9220779220779223,
+        "median_per_day": 2.0,
+        "p90_per_day": 6.0,
+        "max_per_day": 54,
+        "max_day": "2026-08-22",
+        "zero_day_pct": 14.935064935064934,
+        "top_days": {
+          "2026-08-22": 54,
+          "2026-09-10": 12,
+          "2026-07-02": 9,
+          "2026-09-01": 9,
+          "2026-09-18": 9
+        }
+      }
+    },
+    "concurrency": {
+      "all": {
+        "max_open": 123,
+        "share_fills_with_more_than_3_open": 37.618595825426944,
+        "hold_hours_median": 1.9166666666666667
+      },
+      "from_2025": {
+        "max_open": 123,
+        "share_fills_with_more_than_3_open": 31.625183016105417,
+        "hold_hours_median": 1.9166666666666667
+      },
+      "last5m": {
+        "max_open": 19,
+        "share_fills_with_more_than_3_open": 34.66666666666667,
+        "hold_hours_median": 1.75
+      }
+    },
+    "mae": {
+      "all|winners": {
+        "n": 785,
+        "q50": 2.2076860179885647,
+        "q75": 4.930950039236691,
+        "q90": 9.148542936758757,
+        "q95": 12.892417085395657,
+        "q99": 20.27388334965939
+      },
+      "all|losers": {
+        "n": 1323,
+        "q50": 4.23002991389803,
+        "q75": 9.305731137520713,
+        "q90": 15.834921978415284,
+        "q95": 21.012560213476757,
+        "q99": 29.176634914361504
+      },
+      "all|all": {
+        "n": 2108,
+        "q50": 3.1687766559048756,
+        "q75": 7.5442932573458945,
+        "q90": 13.822024992778818,
+        "q95": 18.336831623846788,
+        "q99": 28.2104015677056
+      },
+      "from_2025|winners": {
+        "n": 484,
+        "q50": 2.1650506614134075,
+        "q75": 5.130143649818269,
+        "q90": 9.32177680148629,
+        "q95": 14.410217133973324,
+        "q99": 23.848918671259316
+      },
+      "from_2025|losers": {
+        "n": 882,
+        "q50": 4.882352155967656,
+        "q75": 9.971740170523011,
+        "q90": 16.4613737369251,
+        "q95": 21.582798769604086,
+        "q99": 29.816668383400117
+      },
+      "from_2025|all": {
+        "n": 1366,
+        "q50": 3.6423352666401083,
+        "q75": 8.316037456246116,
+        "q90": 14.738326734330013,
+        "q95": 19.817012744922152,
+        "q99": 28.84855594309663
+      },
+      "last5m|winners": {
+        "n": 183,
+        "q50": 2.6874453662012154,
+        "q75": 6.363969702535508,
+        "q90": 12.874157801078598,
+        "q95": 17.92348210497086,
+        "q99": 25.836016006555166
+      },
+      "last5m|losers": {
+        "n": 267,
+        "q50": 4.64103671596351,
+        "q75": 9.518828944787249,
+        "q90": 14.453558080695371,
+        "q95": 18.17370552984496,
+        "q99": 28.566108319169384
+      },
+      "last5m|all": {
+        "n": 450,
+        "q50": 3.7802598480581437,
+        "q75": 8.413328800395208,
+        "q90": 14.126180454436241,
+        "q95": 18.0239313448377,
+        "q99": 27.850855890526645
+      }
+    },
+    "liquidation_share": {
+      "all": {
+        "2": {
+          "threshold_pct": 49.0,
+          "all": 0.09487666034155598,
+          "winners": 0.0
+        },
+        "3": {
+          "threshold_pct": 32.333333333333336,
+          "all": 0.2846299810246679,
+          "winners": 0.0
+        },
+        "5": {
+          "threshold_pct": 19.0,
+          "all": 4.554079696394687,
+          "winners": 1.6560509554140128
+        },
+        "10": {
+          "threshold_pct": 9.0,
+          "all": 20.20872865275142,
+          "winners": 10.70063694267516
+        },
+        "20": {
+          "threshold_pct": 4.0,
+          "all": 44.25996204933587,
+          "winners": 32.35668789808917
+        },
+        "50": {
+          "threshold_pct": 1.0,
+          "all": 77.03984819734345,
+          "winners": 70.06369426751591
+        }
+      },
+      "from_2025": {
+        "2": {
+          "threshold_pct": 49.0,
+          "all": 0.14641288433382138,
+          "winners": 0.0
+        },
+        "3": {
+          "threshold_pct": 32.333333333333336,
+          "all": 0.36603221083455345,
+          "winners": 0.0
+        },
+        "5": {
+          "threshold_pct": 19.0,
+          "all": 5.490483162518302,
+          "winners": 2.479338842975207
+        },
+        "10": {
+          "threshold_pct": 9.0,
+          "all": 22.32796486090776,
+          "winners": 11.776859504132231
+        },
+        "20": {
+          "threshold_pct": 4.0,
+          "all": 47.43777452415813,
+          "winners": 32.64462809917356
+        },
+        "50": {
+          "threshold_pct": 1.0,
+          "all": 78.7701317715959,
+          "winners": 70.24793388429752
+        }
+      },
+      "last5m": {
+        "2": {
+          "threshold_pct": 49.0,
+          "all": 0.0,
+          "winners": 0.0
+        },
+        "3": {
+          "threshold_pct": 32.333333333333336,
+          "all": 0.0,
+          "winners": 0.0
+        },
+        "5": {
+          "threshold_pct": 19.0,
+          "all": 4.222222222222222,
+          "winners": 3.825136612021858
+        },
+        "10": {
+          "threshold_pct": 9.0,
+          "all": 23.11111111111111,
+          "winners": 15.846994535519126
+        },
+        "20": {
+          "threshold_pct": 4.0,
+          "all": 47.77777777777778,
+          "winners": 40.43715846994536
+        },
+        "50": {
+          "threshold_pct": 1.0,
+          "all": 76.88888888888889,
+          "winners": 69.94535519125684
+        }
+      }
+    },
+    "slots": {
+      "from_2025|L1|extract_resize": {
+        "final_multiple": 31.823919536613875,
+        "max_drawdown_pct": 52.13453800761195,
+        "liquidations": 0.0,
+        "skipped": 312.0,
+        "taken": 1054.0
+      },
+      "from_2025|L1|no_extract": {
+        "final_multiple": 20.815583578930617,
+        "max_drawdown_pct": 60.46379039281912,
+        "liquidations": 0.0,
+        "skipped": 312.0,
+        "taken": 1054.0
+      },
+      "from_2025|L1|extract_fixed": {
+        "final_multiple": 6.142168956939096,
+        "max_drawdown_pct": 14.13341708488235,
+        "liquidations": 0.0,
+        "skipped": 312.0,
+        "taken": 1054.0
+      },
+      "from_2025|L2|extract_resize": {
+        "final_multiple": 107.2161073216804,
+        "max_drawdown_pct": 69.78079182341799,
+        "liquidations": 2.0,
+        "skipped": 684.5,
+        "taken": 681.5
+      },
+      "from_2025|L2|no_extract": {
+        "final_multiple": 89.6816181989202,
+        "max_drawdown_pct": 91.46113100906231,
+        "liquidations": 2.0,
+        "skipped": 313.0,
+        "taken": 1053.0
+      },
+      "from_2025|L2|extract_fixed": {
+        "final_multiple": 10.35327124720799,
+        "max_drawdown_pct": 25.556459814120146,
+        "liquidations": 2.0,
+        "skipped": 312.0,
+        "taken": 1054.0
+      },
+      "from_2025|L3|extract_resize": {
+        "final_multiple": 78.76598919741288,
+        "max_drawdown_pct": 86.80617909596542,
+        "liquidations": 4.0,
+        "skipped": 740.0,
+        "taken": 626.0
+      },
+      "from_2025|L3|no_extract": {
+        "final_multiple": 205.04435752935538,
+        "max_drawdown_pct": 94.22310141137186,
+        "liquidations": 5.0,
+        "skipped": 535.0,
+        "taken": 831.0
+      },
+      "from_2025|L3|extract_fixed": {
+        "final_multiple": 14.93455690485874,
+        "max_drawdown_pct": 35.037392531749845,
+        "liquidations": 5.0,
+        "skipped": 312.0,
+        "taken": 1054.0
+      },
+      "from_2025|L5|extract_resize": {
+        "final_multiple": 1.9195352988748584,
+        "max_drawdown_pct": 42.87842833481304,
+        "liquidations": 3.0,
+        "skipped": 1332.0,
+        "taken": 34.0
+      },
+      "from_2025|L5|no_extract": {
+        "final_multiple": 1.179732000194388,
+        "max_drawdown_pct": 66.53268679853733,
+        "liquidations": 4.0,
+        "skipped": 1319.0,
+        "taken": 47.0
+      },
+      "from_2025|L5|extract_fixed": {
+        "final_multiple": 20.883702881812617,
+        "max_drawdown_pct": 45.11709560098053,
+        "liquidations": 61.5,
+        "skipped": 312.0,
+        "taken": 1054.0
+      },
+      "from_2025|L10|extract_resize": {
+        "final_multiple": 1.2907118176237786,
+        "max_drawdown_pct": 73.42637344608323,
+        "liquidations": 5.0,
+        "skipped": 1341.0,
+        "taken": 25.0
+      },
+      "from_2025|L10|no_extract": {
+        "final_multiple": 0.0,
+        "max_drawdown_pct": 100.0,
+        "liquidations": 11.0,
+        "skipped": 8.0,
+        "taken": 38.0
+      },
+      "from_2025|L10|extract_fixed": {
+        "final_multiple": 0.5001200053119099,
+        "max_drawdown_pct": 81.59383142331879,
+        "liquidations": 17.0,
+        "skipped": 1306.0,
+        "taken": 60.0
+      },
+      "from_2025|L20|extract_resize": {
+        "final_multiple": 1.6645082029717309,
+        "max_drawdown_pct": 69.50972321872688,
+        "liquidations": 9.0,
+        "skipped": 1342.0,
+        "taken": 24.0
+      },
+      "from_2025|L20|no_extract": {
+        "final_multiple": 0.3333333333333333,
+        "max_drawdown_pct": 96.45278841258262,
+        "liquidations": 13.0,
+        "skipped": 1340.0,
+        "taken": 26.0
+      },
+      "from_2025|L20|extract_fixed": {
+        "final_multiple": 0.5896754072508302,
+        "max_drawdown_pct": 86.21981213354466,
+        "liquidations": 22.0,
+        "skipped": 1322.0,
+        "taken": 44.0
+      },
+      "last5m|L1|extract_resize": {
+        "final_multiple": 3.5942136909008973,
+        "max_drawdown_pct": 18.215520883149438,
+        "liquidations": 0.0,
+        "skipped": 94.0,
+        "taken": 356.0
+      },
+      "last5m|L1|no_extract": {
+        "final_multiple": 3.5515123509397446,
+        "max_drawdown_pct": 18.215520883149438,
+        "liquidations": 0.0,
+        "skipped": 94.0,
+        "taken": 356.0
+      },
+      "last5m|L1|extract_fixed": {
+        "final_multiple": 2.8019225435371142,
+        "max_drawdown_pct": 18.215520883149438,
+        "liquidations": 0.0,
+        "skipped": 94.0,
+        "taken": 356.0
+      },
+      "last5m|L2|extract_resize": {
+        "final_multiple": 6.895985059527963,
+        "max_drawdown_pct": 34.7897025564881,
+        "liquidations": 0.0,
+        "skipped": 94.0,
+        "taken": 356.0
+      },
+      "last5m|L2|no_extract": {
+        "final_multiple": 5.807889766811847,
+        "max_drawdown_pct": 34.7897025564881,
+        "liquidations": 0.0,
+        "skipped": 94.0,
+        "taken": 356.0
+      },
+      "last5m|L2|extract_fixed": {
+        "final_multiple": 3.9343301588276094,
+        "max_drawdown_pct": 34.7897025564881,
+        "liquidations": 0.0,
+        "skipped": 94.0,
+        "taken": 356.0
+      },
+      "last5m|L3|extract_resize": {
+        "final_multiple": 13.751338902747529,
+        "max_drawdown_pct": 52.07791028681316,
+        "liquidations": 0.0,
+        "skipped": 94.0,
+        "taken": 356.0
+      },
+      "last5m|L3|no_extract": {
+        "final_multiple": 5.353695067358144,
+        "max_drawdown_pct": 52.07791028681316,
+        "liquidations": 0.0,
+        "skipped": 94.0,
+        "taken": 356.0
+      },
+      "last5m|L3|extract_fixed": {
+        "final_multiple": 5.010744701129506,
+        "max_drawdown_pct": 52.07791028681316,
+        "liquidations": 0.0,
+        "skipped": 94.0,
+        "taken": 356.0
+      },
+      "last5m|L5|extract_resize": {
+        "final_multiple": 0.4514075447079373,
+        "max_drawdown_pct": 78.2903158239138,
+        "liquidations": 1.0,
+        "skipped": 422.0,
+        "taken": 28.0
+      },
+      "last5m|L5|no_extract": {
+        "final_multiple": 0.4514075447079373,
+        "max_drawdown_pct": 78.2903158239138,
+        "liquidations": 1.0,
+        "skipped": 422.0,
+        "taken": 28.0
+      },
+      "last5m|L5|extract_fixed": {
+        "final_multiple": 0.9494475774462624,
+        "max_drawdown_pct": 54.33792082176056,
+        "liquidations": 2.0,
+        "skipped": 417.0,
+        "taken": 33.0
+      },
+      "last5m|L10|extract_resize": {
+        "final_multiple": 0.3333333333333333,
+        "max_drawdown_pct": 75.0,
+        "liquidations": 5.0,
+        "skipped": 440.0,
+        "taken": 10.0
+      },
+      "last5m|L10|no_extract": {
+        "final_multiple": 0.3333333333333333,
+        "max_drawdown_pct": 75.0,
+        "liquidations": 5.0,
+        "skipped": 440.0,
+        "taken": 10.0
+      },
+      "last5m|L10|extract_fixed": {
+        "final_multiple": 0.3333333333333333,
+        "max_drawdown_pct": 75.0,
+        "liquidations": 5.0,
+        "skipped": 440.0,
+        "taken": 10.0
+      },
+      "last5m|L20|extract_resize": {
+        "final_multiple": 0.0,
+        "max_drawdown_pct": 100.0,
+        "liquidations": 8.0,
+        "skipped": 18.0,
+        "taken": 16.0
+      },
+      "last5m|L20|no_extract": {
+        "final_multiple": 0.3333333333333333,
+        "max_drawdown_pct": 75.0,
+        "liquidations": 6.0,
+        "skipped": 439.0,
+        "taken": 11.0
+      },
+      "last5m|L20|extract_fixed": {
+        "final_multiple": 0.0,
+        "max_drawdown_pct": 100.0,
+        "liquidations": 10.0,
+        "skipped": 10.0,
+        "taken": 24.0
+      },
+      "all|L1|extract_resize": {
+        "final_multiple": 111.62911749941068,
+        "max_drawdown_pct": 54.3384919019112,
+        "liquidations": 0.0,
+        "skipped": 601.0,
+        "taken": 1507.0
+      },
+      "all|L1|no_extract": {
+        "final_multiple": 62.56143239903251,
+        "max_drawdown_pct": 38.629572550941475,
+        "liquidations": 0.0,
+        "skipped": 601.0,
+        "taken": 1507.0
+      },
+      "all|L1|extract_fixed": {
+        "final_multiple": 8.065442742619163,
+        "max_drawdown_pct": 10.54210728000275,
+        "liquidations": 0.0,
+        "skipped": 601.0,
+        "taken": 1507.0
+      },
+      "all|L2|extract_resize": {
+        "final_multiple": 2519.5323629405157,
+        "max_drawdown_pct": 79.99548110071603,
+        "liquidations": 2.0,
+        "skipped": 611.0,
+        "taken": 1497.0
+      },
+      "all|L2|no_extract": {
+        "final_multiple": 818.0443858355624,
+        "max_drawdown_pct": 87.07877365011619,
+        "liquidations": 2.0,
+        "skipped": 1018.0,
+        "taken": 1090.0
+      },
+      "all|L2|extract_fixed": {
+        "final_multiple": 14.199818818568136,
+        "max_drawdown_pct": 13.083012711808617,
+        "liquidations": 2.0,
+        "skipped": 601.0,
+        "taken": 1507.0
+      },
+      "all|L3|extract_resize": {
+        "final_multiple": 386.753389585558,
+        "max_drawdown_pct": 76.62970318150127,
+        "liquidations": 4.5,
+        "skipped": 1146.5,
+        "taken": 961.5
+      },
+      "all|L3|no_extract": {
+        "final_multiple": 13399.048761846872,
+        "max_drawdown_pct": 97.09583357115318,
+        "liquidations": 4.0,
+        "skipped": 1097.0,
+        "taken": 1011.0
+      },
+      "all|L3|extract_fixed": {
+        "final_multiple": 20.672894928968287,
+        "max_drawdown_pct": 16.526632018294528,
+        "liquidations": 6.0,
+        "skipped": 601.0,
+        "taken": 1507.0
+      },
+      "all|L5|extract_resize": {
+        "final_multiple": 3.525470744232059,
+        "max_drawdown_pct": 48.21944529357346,
+        "liquidations": 2.5,
+        "skipped": 2065.5,
+        "taken": 42.5
+      },
+      "all|L5|no_extract": {
+        "final_multiple": 2.9621424795743687,
+        "max_drawdown_pct": 56.3198919788713,
+        "liquidations": 3.0,
+        "skipped": 2066.0,
+        "taken": 42.0
+      },
+      "all|L5|extract_fixed": {
+        "final_multiple": 28.914863833777233,
+        "max_drawdown_pct": 32.37301728349961,
+        "liquidations": 75.0,
+        "skipped": 601.0,
+        "taken": 1507.0
+      },
+      "all|L10|extract_resize": {
+        "final_multiple": 10.552149379169576,
+        "max_drawdown_pct": 46.50207854710162,
+        "liquidations": 4.0,
+        "skipped": 2073.0,
+        "taken": 35.0
+      },
+      "all|L10|no_extract": {
+        "final_multiple": 0.0,
+        "max_drawdown_pct": 100.0,
+        "liquidations": 8.0,
+        "skipped": 11.5,
+        "taken": 43.0
+      },
+      "all|L10|extract_fixed": {
+        "final_multiple": 34.03380982918728,
+        "max_drawdown_pct": 47.270514292847466,
+        "liquidations": 293.0,
+        "skipped": 601.0,
+        "taken": 1507.0
+      },
+      "all|L20|extract_resize": {
+        "final_multiple": 9.355159791030548,
+        "max_drawdown_pct": 69.39843174667284,
+        "liquidations": 7.0,
+        "skipped": 2084.0,
+        "taken": 24.0
+      },
+      "all|L20|no_extract": {
+        "final_multiple": 0.0,
+        "max_drawdown_pct": 100.0,
+        "liquidations": 12.0,
+        "skipped": 20.0,
+        "taken": 34.0
+      },
+      "all|L20|extract_fixed": {
+        "final_multiple": 24.14354220686666,
+        "max_drawdown_pct": 59.34363744966505,
+        "liquidations": 623.5,
+        "skipped": 601.0,
+        "taken": 1507.0
+      }
+    }
+  },
+  "source_commit": "2900be6275becca55e7e6495e04072911acd6bfc",
+  "training_eligible": false,
+  "production_eligible": false
+}

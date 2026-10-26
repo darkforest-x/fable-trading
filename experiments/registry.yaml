@@ -523,6 +523,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Backtest 2020-24 / 2025 / 2026 / last five months 3.74x / 8.97x / 2.56x / 2.96x, DD up to 34 percent; band edges were chosen after seeing 2025-2026, so the forward record is the test. UI pending Codex + Stitch.'
+  - experiment_id: exp-monday-limit-v3-slots-20261026-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2900be6275
+    status: complete
+    question: 'Owner 2026-10-26: v3 trades per day, floating loss of winners, 3-slot leveraged sizing with profit extraction (owner-described Bit浪浪 style).'
+    single_variable: 'Sizing scheme (slots 3, leverage 1/2/3/5/10/20, extraction, resize); v3 framework fills unchanged.'
+    result: 'Score >= 0.5 since 2025: 1366 fills over 631 days, mean 2.2 per day, median 1, p90 5, max 126 on 2026-01-19 (also 54 on 2026-08-22); 30 percent of days without a fill; up to 123 open at once, 32 percent of fills meet more than 3 open. Floating loss of winners since 2025: median 2.2 percent, 75th 5.1, 90th 9.3, 95th 14.4, 99th 23.9. Share of all fills whose floating loss crosses liquidation: 2x 0.15 percent, 3x 0.37, 5x 5.5, 10x 22, 20x 47. Slots from 2025 (multiple / max DD): 1x extract+resize 31.8 / 52, 2x 107 / 70, 3x 79 / 87; extract with fixed slot 1x 6.1 / 14, 2x 10.4 / 26, 3x 14.9 / 35, 5x 20.9 / 45 (61 liquidations); 10x and 20x lose in every variant. Last five months: 1x 3.6 / 18, 2x 6.9 / 35, 3x 13.8 / 52, 5x and above blow up.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-v3-slots-20261026-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Liquidation at floating loss >= 100/L - 1 percent on last-price wicks; funding and liquidation fees not modelled; a slot that cannot be refilled after resize stays idle. Bit浪浪 transcripts say split positions and at most 5x on alts.'
   - experiment_id: exp-monday-reclaim-paper-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 791941594f
