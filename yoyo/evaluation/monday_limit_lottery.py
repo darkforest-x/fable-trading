@@ -17,6 +17,8 @@ exits, the two bad source bars dropped; MAE from Codex 5m bars as in monday_limi
          blow-ups, peak account and final account in stakes, net result = final - stakes used.
 Reported per set x f x L: probability that the account ever reaches 10x / 100x / 1000x one stake within the window,
 mean blow-ups, median and mean net result in stakes. In-sample: filters and targets come from the same history.
+Added after the first run: per-window medians for the settings listed in cfg['detail'], to show which half-years
+carry the 100x / 1000x outcomes.
 """
 from __future__ import annotations
 import argparse
@@ -86,6 +88,12 @@ def run(config):
                     for r in range(cfg['ties']):
                         rows.append(window(y, f, L, cfg['seed']+1000*k+r))
                 d = pd.DataFrame(rows)
+                key = f'{name}|f{f}|L{L}'
+                if key in cfg.get('detail', []):
+                    d['start'] = np.repeat([str(s0.date()) for s0 in starts], cfg['ties'])
+                    res.setdefault('detail', {})[key] = {k: dict(peak_median=float(g.peak.median()), peak_max=float(g.peak.max()),
+                                                                  final_median=float(g.final.median()), blowups_mean=float(g.blowups.mean()))
+                                                         for k, g in d.groupby('start')}
                 res['grid'][f'{name}|f{f}|L{L}'] = dict(
                     p_peak_10x=float(100*(d.peak >= 10).mean()), p_peak_100x=float(100*(d.peak >= 100).mean()),
                     p_peak_1000x=float(100*(d.peak >= 1000).mean()), blowups_mean=float(d.blowups.mean()), blowups_p90=float(d.blowups.quantile(.9)),
