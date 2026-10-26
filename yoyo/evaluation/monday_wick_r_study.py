@@ -68,7 +68,7 @@ Existing matched controls learn their OWN touch wick at their OWN close.
         if len(bad_i):
             b=int(bad_i[0]);bad_events=t.loc[(t.population=='signal')&(t.entry_i==b),'event_id'].tolist()
             gaps=np.unique(np.r_[gaps,b-1])
-    ends=t.end_i.to_numpy(int)
+    ends=t.end_i.to_numpy(dtype=int,copy=True)
     pos=np.searchsorted(gaps,a)
     ok=pos<len(gaps)
     ends[ok]=np.minimum(ends[ok],gaps[pos[ok]])

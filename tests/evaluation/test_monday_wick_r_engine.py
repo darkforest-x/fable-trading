@@ -68,3 +68,14 @@ def test_broadcast_columns_match_individual_framework_calls():
         single,_=execute(f,e,[r.stop_pct/100],[r.target_r])
         assert single.iloc[0].reason==r.reason
         assert abs(single.iloc[0].net_bp-r.net_bp)<1e-8
+
+
+def test_prepare_preserves_ledger_and_censors_gaps():
+    from yoyo.evaluation.monday_wick_r_study import prepare
+    f=pd.DataFrame([[101,101,99,100.5],[101,102,100.5,101]],columns=['open','high','low','close'],
+                   index=pd.DatetimeIndex(['2026-01-01T00:00Z','2026-01-01T00:10Z']))
+    ledger=pd.DataFrame([dict(trade_id='a',event_id='a',reclaim_minutes=5,exit_mode='near_monday_edge',
+        entry_i=0,end_i=1,side=1,entry=100.,population='signal',net_bp=0.,reason=0,exit_i=1,closed=False)])
+    e,a=prepare(f,ledger,dict(symbol='SYNTH',execution_minutes=5))
+    assert ledger.end_i.iloc[0]==1 and e.end_i.iloc[0]==0
+    assert e.confirm_i.iloc[0]>e.end_i.iloc[0]
