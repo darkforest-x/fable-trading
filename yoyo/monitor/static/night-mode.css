@@ -42,3 +42,53 @@ html[data-theme=dark] :is(.pb-hero,.pb-section,.pb-body,.rp-ref-image-wrap){back
 html[data-theme=dark] #monday-fib-root .mf-glass{background:var(--mf-glass)}
 html[data-theme=dark] #monday-reclaim-paper .rp-analysis-section{border-color:var(--line)}
 html[data-theme=dark] #monday-reclaim-paper .rp-analysis-warning{background:var(--notice-bg);color:var(--notice-text)}
+
+/* Stitch efac7ed28cc04934b5eeefbd6f6ff584: lazy controls, nested sheets and
+ * fallback materials use the same live palette as their containing page. */
+html[data-theme=dark] :is(option,optgroup){background:var(--glass-opaque-panel);color:var(--text)}
+html[data-theme=dark] :is(input,textarea)::placeholder{color:var(--text-placeholder);opacity:1}
+html[data-theme=dark] .search-field kbd{color:var(--muted);background:var(--control-bg);border-color:var(--line)}
+html[data-theme=dark] :is(#signals-view.signal-workspace,.spike-ui) :is(.btn-outline-primary,.btn-outline-secondary,.btn-outline-success,.btn-outline-danger,.btn-outline-warning){
+ --bs-btn-color:var(--brand-primary);--bs-btn-border-color:var(--control-border);
+ --bs-btn-hover-color:var(--bs-btn-color);--bs-btn-hover-bg:var(--control-hover);--bs-btn-hover-border-color:var(--bs-btn-color);
+ --bs-btn-active-color:var(--bs-btn-color);--bs-btn-active-bg:var(--segment-active-bg);--bs-btn-active-border-color:var(--bs-btn-color);
+ --bs-btn-disabled-color:var(--dim);--bs-btn-disabled-border-color:var(--line);
+}
+html[data-theme=dark] :is(#signals-view.signal-workspace,.spike-ui) .btn-outline-secondary{--bs-btn-color:var(--muted)}
+html[data-theme=dark] :is(#signals-view.signal-workspace,.spike-ui) .btn-outline-success{--bs-btn-color:var(--trade-long)}
+html[data-theme=dark] :is(#signals-view.signal-workspace,.spike-ui) .btn-outline-danger{--bs-btn-color:var(--trade-short)}
+html[data-theme=dark] :is(#signals-view.signal-workspace,.spike-ui) .btn-outline-warning{--bs-btn-color:var(--amber)}
+html[data-theme=dark] :is(#signals-view.signal-workspace,.spike-ui) .form-select{
+ --bs-form-select-bg-img:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%239aaabc' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+html[data-theme=dark] .spike-ui .dropdown-menu{
+ --bs-dropdown-bg:var(--glass-sheet);--bs-dropdown-color:var(--text);--bs-dropdown-border-color:var(--line);
+ --bs-dropdown-link-color:var(--text);--bs-dropdown-link-hover-color:var(--text);--bs-dropdown-link-hover-bg:var(--control-hover);
+ --bs-dropdown-link-active-color:var(--on-accent);--bs-dropdown-link-active-bg:var(--brand-primary);
+ --bs-dropdown-link-disabled-color:var(--dim);--bs-dropdown-header-color:var(--muted);--bs-dropdown-divider-bg:var(--line);
+}
+html[data-theme=dark] body[data-yolo-wallpaper] #yolo-detect-workspace #yd-insight{background:var(--glass-panel);color:var(--text-secondary)}
+html[data-theme=dark] body[data-yolo-wallpaper] #yolo-detect-workspace .yd-chart-readout{background:var(--glass-panel);color:var(--muted)}
+html[data-theme=dark] body[data-yolo-wallpaper] #yd-symbol-dialog::backdrop{background:var(--dialog-backdrop)}
+html[data-theme=dark] #monday-fib-root :is(.mf-live-form details,.mf-holding,.mf-ledger-editor,.mf-ticket-footer){background:var(--control-bg);border-color:var(--line)}
+html[data-theme=dark] #monday-fib-root :is(.mf-live-form input,.mf-live-form select,.mf-ledger-editor input){background:var(--control-bg);color:var(--text);border-color:var(--control-border)}
+html[data-theme=dark] #monday-fib-root :is(.mf-quick-modes [aria-pressed=true],a.mf-row-symbol:is(:hover,:focus-visible)){background:var(--segment-active-bg)}
+html[data-theme=dark] :is(#monday-fib-root,#monday-reclaim-paper) :is(.mf-live-notice,.mf-ledger-notice,.is-short){color:var(--trade-short)}
+html[data-theme=dark] :is(#monday-fib-root,#monday-reclaim-paper) :is(.mf-holding em,.is-long){color:var(--trade-long)}
+html[data-theme=dark] #monday-reclaim-paper .rp-order-panel :is([data-fl-side=long][aria-pressed=true],.mf-holding em){color:var(--trade-long)}
+html[data-theme=dark] #monday-reclaim-paper .rp-order-panel :is([data-fl-side=short][aria-pressed=true],[data-quick-mode=live][aria-pressed=true],.mf-live-notice,.mf-ledger-notice){color:var(--trade-short)}
+
+/* An opaque fallback is a theme-specific material, never a hard-coded white
+ * card. Keep graph pixels and the independent crimson alarm untouched. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+ html[data-theme] #monday-reclaim-paper{--rp-glass-tint:var(--rp-glass-fallback);--rp-panel:var(--rp-glass-fallback)}
+ html[data-theme] #monday-fib-root .mf-glass{background:var(--glass-opaque-panel)}
+ html[data-theme] body[data-yolo-wallpaper]{--yd-glass:var(--glass-opaque-panel)}
+ html[data-theme] body.reclaim-paper-active #spike-alarm-dock :is(.sa-trigger,.sa-settings){background:var(--glass-opaque-panel)}
+}
+@media(prefers-reduced-transparency:reduce){
+ html[data-theme] #monday-reclaim-paper{--rp-glass-tint:var(--rp-glass-fallback);--rp-panel:var(--rp-glass-fallback)}
+ html[data-theme] #monday-fib-root .mf-glass{background:var(--glass-opaque-panel)}
+ html[data-theme] body[data-yolo-wallpaper]{--yd-glass:var(--glass-opaque-panel)}
+ html[data-theme] body.reclaim-paper-active #spike-alarm-dock :is(.sa-trigger,.sa-settings){background:var(--glass-opaque-panel)}
+}

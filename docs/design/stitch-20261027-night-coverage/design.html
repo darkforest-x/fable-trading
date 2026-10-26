@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SPIKE // QUANT - Dark Theme System &amp; Specimen Coverage</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter & JetBrains Mono Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration verbatim as required -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "electric-cyan": "#5aa9ff",
+            "surface-bright": "#36393f",
+            "inverse-surface": "#e1e2e9",
+            "outline": "#8a919d",
+            "on-error": "#690005",
+            "surface-dim": "#101319",
+            "pine-gain-surface": "rgba(22, 152, 115, 0.15)",
+            "inverse-primary": "#0060a7",
+            "surface-glass-light": "rgba(255, 255, 255, 0.25)",
+            "on-tertiary-fixed": "#400012",
+            "on-secondary": "#003828",
+            "secondary-container": "#2aa37d",
+            "outline-variant": "#404751",
+            "surface-variant": "#32353a",
+            "error": "#ffb4ab",
+            "on-primary-fixed-variant": "#004880",
+            "on-background": "#e1e2e9",
+            "text-secondary": "#8c96a5",
+            "tertiary-fixed": "#ffd9dd",
+            "on-tertiary-container": "#7b002a",
+            "crimson-loss": "#d7355d",
+            "surface-obsidian": "rgba(16, 19, 24, 0.85)",
+            "surface": "#101319",
+            "on-primary-fixed": "#001c37",
+            "surface-container-lowest": "#0b0e13",
+            "on-tertiary": "#670022",
+            "on-primary": "#00325a",
+            "text-primary": "#f5f7fa",
+            "crimson-loss-surface": "rgba(215, 53, 93, 0.15)",
+            "secondary": "#6adbb1",
+            "on-secondary-container": "#003122",
+            "on-primary-container": "#003d6c",
+            "glass-border-subtle": "rgba(255, 255, 255, 0.08)",
+            "pine-gain": "#169873",
+            "surface-container-high": "#272a2f",
+            "text-tertiary": "#556070",
+            "on-tertiary-fixed-variant": "#910033",
+            "surface-tint": "#a1c9ff",
+            "inverse-on-surface": "#2e3036",
+            "tertiary-container": "#ff7c92",
+            "primary-container": "#5aa9ff",
+            "on-error-container": "#ffdad6",
+            "glass-specular-edge": "rgba(255, 255, 255, 0.4)",
+            "secondary-fixed": "#88f7cc",
+            "surface-container-low": "#191c21",
+            "surface-container-highest": "#32353a",
+            "tertiary": "#ffb2bb",
+            "surface-container": "#1d2025",
+            "secondary-fixed-dim": "#6adbb1",
+            "primary-fixed": "#d2e4ff",
+            "background": "#101319",
+            "tertiary-fixed-dim": "#ffb2bb",
+            "canvas-dark": "#101318",
+            "primary": "#a1c9ff",
+            "on-surface": "#e1e2e9",
+            "primary-fixed-dim": "#a1c9ff",
+            "error-container": "#93000a",
+            "on-secondary-fixed": "#002116",
+            "on-surface-variant": "#c0c7d3",
+            "on-secondary-fixed-variant": "#00513b"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xs": "0.25rem",
+            "space-xl": "1rem",
+            "space-md": "0.5rem",
+            "space-sm": "0.375rem",
+            "gutter-desktop": "1rem",
+            "margin-tablet": "1rem",
+            "gutter": "0.5rem",
+            "gutter-tablet": "0.75rem",
+            "margin-mobile": "0.5rem",
+            "margin": "0.75rem",
+            "space-lg": "0.75rem",
+            "margin-desktop": "1.5rem"
+          },
+          "fontFamily": {
+            "micro-tag-caps": ["JetBrains Mono"],
+            "display": ["Inter"],
+            "numeric-lg": ["JetBrains Mono"],
+            "headline-lg-mobile": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-sm": ["Inter"],
+            "body-md": ["Inter"],
+            "numeric-sm": ["JetBrains Mono"],
+            "numeric-md": ["JetBrains Mono"],
+            "headline-md": ["Inter"],
+            "body-sm": ["Inter"]
+          },
+          "fontSize": {
+            "micro-tag-caps": ["10px", { "lineHeight": "12px", "letterSpacing": "0.06em", "fontWeight": "600" }],
+            "display": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "numeric-lg": ["20px", { "lineHeight": "24px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-lg-mobile": ["20px", { "lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-lg": ["24px", { "lineHeight": "30px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "headline-sm": ["15px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "numeric-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "numeric-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "headline-md": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-sm": ["11px", { "lineHeight": "15px", "letterSpacing": "0.005em", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    /* Custom Scrollbar for dense telemetry */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b0e13;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #272a2f;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #404751;
+    }
+
+    /* Precision Specular Highlights */
+    .glass-panel {
+      background: rgba(16, 19, 24, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    .glass-panel-elevated {
+      background: rgba(21, 25, 34, 0.92);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .glass-dock {
+      background: rgba(16, 19, 24, 0.80);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+  </style>
+</head>
+<body class="bg-canvas-dark text-on-surface antialiased font-body-md text-body-md select-none min-h-screen overflow-x-hidden">
+<!-- ========================================================================= -->
+<!-- TopNavBar (Shared Component JSON Blueprint - Fully Implemented)          -->
+<!-- ========================================================================= -->
+<header class="w-full flex items-center justify-between px-3 h-10 border-b border-outline-variant/30 bg-surface-container-lowest sticky top-0 z-50">
+<!-- Left: Brand + Quick Search Pill -->
+<div class="flex items-center space-x-3">
+<div class="flex items-center space-x-1.5 cursor-pointer">
+<span class="w-2 h-2 rounded-full bg-electric-cyan shadow-[0_0_8px_#5aa9ff]"></span>
+<span class="text-headline-md font-headline-md font-black tracking-wider text-primary">SPIKE // QUANT</span>
+</div>
+<div class="hidden sm:flex items-center text-text-tertiary">|</div>
+<!-- Quick Telemetry Ticker Pills -->
+<div class="hidden md:flex items-center space-x-2">
+<div class="flex items-center space-x-1.5 px-2 py-0.5 rounded bg-surface-container-low border border-glass-border-subtle text-body-sm font-body-sm">
+<span class="text-text-secondary font-medium">SOL</span>
+<span class="text-pine-gain font-numeric-sm font-semibold">184.50</span>
+<span class="text-pine-gain font-micro-tag-caps text-[9px] bg-pine-gain-surface px-1 rounded">+3.42%</span>
+</div>
+<div class="flex items-center space-x-1.5 px-2 py-0.5 rounded bg-surface-container-low border border-glass-border-subtle text-body-sm font-body-sm">
+<span class="text-text-secondary font-medium">BTC</span>
+<span class="text-crimson-loss font-numeric-sm font-semibold">63,412.00</span>
+<span class="text-crimson-loss font-micro-tag-caps text-[9px] bg-crimson-loss-surface px-1 rounded">-0.88%</span>
+</div>
+<div class="flex items-center space-x-1.5 px-2 py-0.5 rounded bg-surface-container-low border border-glass-border-subtle text-body-sm font-body-sm">
+<span class="text-text-secondary font-medium">ETH</span>
+<span class="text-pine-gain font-numeric-sm font-semibold">3,492.15</span>
+<span class="text-pine-gain font-micro-tag-caps text-[9px] bg-pine-gain-surface px-1 rounded">+1.15%</span>
+</div>
+</div>
+</div>
+<!-- Center Navigation Links from JSON (Exact Casing) -->
+<nav class="hidden lg:flex items-center space-x-1 text-body-sm font-body-sm h-full">
+<!-- Active Link: Algo Matrix -->
+<a class="text-on-surface-variant hover:text-on-surface py-2 px-2 transition-colors cursor-pointer" href="#workbench">Workbench</a>
+<a class="text-on-surface-variant hover:text-on-surface py-2 px-2 transition-colors cursor-pointer" href="#orderflow">Order Flow</a>
+<a class="text-primary border-b border-primary font-medium py-2 px-2 cursor-pointer flex items-center gap-1" href="#algomatrix">
+<span>Algo Matrix</span>
+<span class="w-1 h-1 rounded-full bg-electric-cyan"></span>
+</a>
+<a class="text-on-surface-variant hover:text-on-surface py-2 px-2 transition-colors cursor-pointer" href="#backtest">Backtest Telemetry</a>
+<a class="text-on-surface-variant hover:text-on-surface py-2 px-2 transition-colors cursor-pointer" href="#riskguard">Risk Guard</a>
+</nav>
+<!-- Right Controls: Quick Search Cmd+K, Sun/Moon, Trailing Actions, Trailing Icons -->
+<div class="flex items-center space-x-2">
+<!-- Cmd+K Trigger Button -->
+<button class="flex items-center space-x-1.5 px-2 py-1 rounded bg-surface-container border border-outline-variant/40 hover:border-primary text-text-secondary hover:text-text-primary text-body-sm font-body-sm transition-all duration-150" onclick="document.getElementById('cmdk-modal').classList.toggle('hidden')">
+<span class="material-symbols-outlined text-[14px]">search</span>
+<span class="hidden sm:inline">Search Matrix</span>
+<kbd class="font-numeric-sm text-[10px] bg-surface-container-high px-1 py-0.2 rounded border border-outline-variant/30 text-text-tertiary">⌘K</kbd>
+</button>
+<!-- Connection Status indicator -->
+<div class="hidden xl:flex items-center space-x-1 px-1.5 py-0.5 rounded bg-surface-container-lowest border border-outline-variant/30">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-numeric-sm text-body-sm text-secondary">3ms (HFT)</span>
+</div>
+<!-- Quick 44px Sun / Moon Toggle Button (Exact spec token) -->
+<button class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded border border-glass-border-subtle bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors" id="theme-toggle" title="Toggle Theme (Anti-FOUC Engine)">
+<span class="material-symbols-outlined text-[17px] text-electric-cyan" data-icon="dark_mode">dark_mode</span>
+</button>
+<!-- Trailing JSON Action Buttons -->
+<button class="hidden sm:inline-flex items-center px-2 py-1 rounded border border-glass-border-subtle bg-surface-container-high text-on-surface text-body-sm font-body-sm hover:border-outline transition-colors">
+        Paper Sim
+      </button>
+<button class="inline-flex items-center px-2.5 py-1 rounded bg-electric-cyan text-on-primary-fixed text-body-sm font-headline-sm font-semibold hover:opacity-90 shadow-[0_0_12px_rgba(90,169,255,0.35)] transition-all">
+        Deploy Algo
+      </button>
+<!-- JSON Trailing Icon Actions: tune, notifications, terminal, fullscreen -->
+<div class="flex items-center border-l border-outline-variant/30 pl-1.5 ml-1 space-x-0.5 text-text-secondary">
+<button class="p-1 hover:text-primary transition-colors" title="tune"><span class="material-symbols-outlined text-[18px]">tune</span></button>
+<button class="p-1 hover:text-primary transition-colors relative" title="notifications">
+<span class="material-symbols-outlined text-[18px]">notifications</span>
+<span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-crimson-loss"></span>
+</button>
+<button class="p-1 hover:text-primary transition-colors hidden sm:block" title="terminal"><span class="material-symbols-outlined text-[18px]">terminal</span></button>
+<button class="p-1 hover:text-primary transition-colors hidden sm:block" title="fullscreen"><span class="material-symbols-outlined text-[18px]">fullscreen</span></button>
+</div>
+<!-- Profile Avatar -->
+<div class="w-6 h-6 rounded bg-gradient-to-tr from-surface-container-highest to-surface-bright border border-glass-border-subtle flex items-center justify-center text-electric-cyan text-[10px] font-bold font-numeric-sm">
+        Q4
+      </div>
+</div>
+</header>
+<!-- ========================================================================= -->
+<!-- SideNavBar Rail (Docked Left - Condensed Rail)                           -->
+<!-- ========================================================================= -->
+<aside class="fixed left-0 top-10 bottom-0 w-12 flex flex-col justify-between items-center py-2 border-r border-outline-variant/30 bg-surface-container-lowest z-40">
+<!-- Top Branding / CTA -->
+<div class="flex flex-col items-center space-y-2 w-full">
+<div class="w-8 h-8 rounded flex flex-col items-center justify-center bg-surface-container border border-outline-variant/40 cursor-pointer hover:border-electric-cyan transition-colors" title="SPIKE v4.2.0-core">
+<span class="text-[9px] font-black text-electric-cyan tracking-tighter">SPK</span>
+<span class="w-1.5 h-0.5 bg-pine-gain rounded-full"></span>
+</div>
+<!-- CTA Action: New Run -->
+<button class="w-8 h-8 rounded bg-primary-container text-on-primary-container flex items-center justify-center hover:opacity-90 transition-all shadow-[0_0_8px_rgba(90,169,255,0.4)]" title="New Run">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+</button>
+<div class="w-6 h-px bg-outline-variant/30 my-1"></div>
+<!-- 5 Main Rail Tabs from JSON: Terminal, Strategy, Analytics, Logs, Settings -->
+<nav class="flex flex-col space-y-1 w-full">
+<!-- Terminal (Inactive) -->
+<a class="text-on-surface-variant flex flex-col items-center justify-center py-2 hover:text-on-surface hover:bg-surface-container-high transition-colors" href="#terminal" title="Terminal">
+<span class="material-symbols-outlined text-[18px]">candlestick_chart</span>
+<span class="text-[9px] font-body-sm scale-90">Term</span>
+</a>
+<!-- Strategy (Active Specimen) -->
+<a class="text-primary bg-surface-container border-l-2 border-primary flex flex-col items-center justify-center py-2 transition-colors" href="#strategy" title="Strategy">
+<span class="material-symbols-outlined text-[18px]">memory</span>
+<span class="text-[9px] font-body-sm scale-90 font-medium">Strat</span>
+</a>
+<!-- Analytics -->
+<a class="text-on-surface-variant flex flex-col items-center justify-center py-2 hover:text-on-surface hover:bg-surface-container-high transition-colors" href="#analytics" title="Analytics">
+<span class="material-symbols-outlined text-[18px]">query_stats</span>
+<span class="text-[9px] font-body-sm scale-90">Data</span>
+</a>
+<!-- Logs -->
+<a class="text-on-surface-variant flex flex-col items-center justify-center py-2 hover:text-on-surface hover:bg-surface-container-high transition-colors" href="#logs" title="Logs">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+<span class="text-[9px] font-body-sm scale-90">Logs</span>
+</a>
+<!-- Settings -->
+<a class="text-on-surface-variant flex flex-col items-center justify-center py-2 hover:text-on-surface hover:bg-surface-container-high transition-colors" href="#settings" title="Settings">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+<span class="text-[9px] font-body-sm scale-90">Conf</span>
+</a>
+</nav>
+</div>
+<!-- Footer Tabs from JSON: API Health, Docs -->
+<div class="flex flex-col items-center space-y-2 w-full pt-2 border-t border-outline-variant/30">
+<button class="w-8 h-8 rounded flex items-center justify-center text-text-secondary hover:text-secondary hover:bg-surface-container-high transition-colors" title="API Health">
+<span class="material-symbols-outlined text-[16px]">wifi_tethering</span>
+</button>
+<button class="w-8 h-8 rounded flex items-center justify-center text-text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Docs">
+<span class="material-symbols-outlined text-[16px]">menu_book</span>
+</button>
+<div class="w-2 h-2 rounded-full bg-pine-gain mb-1" title="Cluster Nominal"></div>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- Main Content Canvas (Left offset 48px / 12-rem rail safe space)           -->
+<!-- ========================================================================= -->
+<main class="ml-12 p-3 sm:p-5 lg:p-6 space-y-6 max-w-[1720px]">
+<!-- System Header Banner: Dark Theme Specimen Board Introduction -->
+<div class="glass-panel p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 border border-outline-variant/30">
+<div>
+<div class="flex items-center space-x-2">
+<span class="px-2 py-0.5 text-micro-tag-caps font-micro-tag-caps uppercase rounded bg-electric-cyan/10 border border-electric-cyan/30 text-electric-cyan">Design System v4.2</span>
+<span class="px-2 py-0.5 text-micro-tag-caps font-micro-tag-caps uppercase rounded bg-pine-gain-surface border border-pine-gain/30 text-pine-gain">Production Obsidian Spec</span>
+<span class="text-text-tertiary text-body-sm">|</span>
+<span class="text-text-secondary font-numeric-sm text-body-sm font-medium">Compliance: 100% Contrast &amp; Anti-FOUC Ready</span>
+</div>
+<h1 class="text-headline-lg font-headline-lg text-text-primary font-bold mt-1 tracking-tight">
+          SPIKE 全站深色规范与全组件覆盖设计板
+        </h1>
+<p class="text-text-secondary text-body-md font-body-md max-w-4xl mt-0.5">
+          Ultra-calibrated financial computing interface. Synthesizing Apple frosted glass depth with dark obsidian telemetry (#101318). Monospace alignment, 1px specular perimeters, zero pure-white card artifacts, and deterministic color semantics.
+        </p>
+</div>
+<!-- Quick Metrics Strip -->
+<div class="flex items-center gap-3">
+<div class="bg-surface-container-low/80 border border-glass-border-subtle p-2.5 rounded-lg flex items-center space-x-3">
+<div class="text-right">
+<div class="text-text-secondary text-micro-tag-caps font-micro-tag-caps">ENGINE LATENCY</div>
+<div class="text-pine-gain font-numeric-md font-semibold">120µs ± 4µs</div>
+</div>
+<span class="material-symbols-outlined text-pine-gain text-[20px]">speed</span>
+</div>
+<div class="bg-surface-container-low/80 border border-glass-border-subtle p-2.5 rounded-lg flex items-center space-x-3">
+<div class="text-right">
+<div class="text-text-secondary text-micro-tag-caps font-micro-tag-caps">SIMULATED CAPITAL</div>
+<div class="text-text-primary font-numeric-md font-semibold">100,000.00 USDT</div>
+</div>
+<span class="material-symbols-outlined text-electric-cyan text-[20px]">account_balance_wallet</span>
+</div>
+</div>
+</div>
+<!-- Offline / Emergency Incident Banner Specimen -->
+<div class="rounded-lg bg-crimson-loss/10 border border-crimson-loss/40 p-2.5 px-3.5 flex items-center justify-between text-body-sm font-body-sm shadow-[0_0_16px_rgba(215,53,93,0.15)]">
+<div class="flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-crimson-loss text-[18px] animate-pulse">cloud_off</span>
+<span class="text-crimson-loss font-semibold">WebSocket 1006 异常断开</span>
+<span class="text-text-secondary hidden sm:inline">— 行情流中断已持续 1.4 秒 (Feed: wss://gateway.spike.quant/stream/l2)</span>
+</div>
+<div class="flex items-center space-x-2">
+<button class="px-2.5 py-1 rounded bg-crimson-loss text-white font-medium text-body-sm hover:opacity-90 transition-opacity">
+          点击重连 (Retry)
+        </button>
+<button class="text-text-secondary hover:text-text-primary p-0.5">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+</div>
+<!-- ========================================================================= -->
+<!-- SECTION 1: Trading & Execution Workbench (Bento Layout)                  -->
+<!-- ========================================================================= -->
+<section class="grid grid-cols-1 xl:grid-cols-12 gap-5">
+<!-- Module 1: Compact Limit Order Form Ticket (4 Cols on XL) -->
+<div class="xl:col-span-4 glass-panel rounded-xl p-4 flex flex-col justify-between space-y-3">
+<div>
+<!-- Header -->
+<div class="flex items-center justify-between pb-2 border-b border-glass-border-subtle">
+<div class="flex items-center space-x-2">
+<span class="font-headline-sm font-semibold text-text-primary">Limit Ticket</span>
+<span class="font-micro-tag-caps text-[9px] px-1.5 py-0.5 rounded bg-surface-container border border-outline-variant/40 text-text-secondary">CROSS 20X</span>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-pine-gain"></span>
+<span class="text-body-sm text-text-secondary">Fee Rate: 0.02%</span>
+</div>
+</div>
+<!-- 50/50 Long / Short Segmented Pills -->
+<div class="grid grid-cols-2 gap-1.5 p-1 bg-surface-container-lowest rounded-lg border border-glass-border-subtle mt-3">
+<button class="py-1.5 text-center rounded font-headline-sm text-pine-gain bg-pine-gain-surface border border-pine-gain/40 font-semibold shadow-sm transition-all flex items-center justify-center space-x-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>做多 / LONG</span>
+</button>
+<button class="py-1.5 text-center rounded font-headline-sm text-text-secondary hover:text-crimson-loss hover:bg-crimson-loss-surface border border-transparent transition-all flex items-center justify-center space-x-1">
+<span class="material-symbols-outlined text-[14px]">trending_down</span>
+<span>做空 / SHORT</span>
+</button>
+</div>
+<!-- Order Type Native / Glass Select -->
+<div class="mt-3 space-y-1">
+<label class="text-body-sm text-text-secondary flex justify-between">
+<span>Execution Type</span>
+<span class="text-electric-cyan cursor-pointer hover:underline">Post-Only</span>
+</label>
+<div class="relative">
+<select class="w-full bg-surface-container-low border border-glass-border-subtle rounded px-2.5 py-1.5 text-text-primary text-body-md font-body-md focus:border-electric-cyan focus:ring-1 focus:ring-electric-cyan appearance-none cursor-pointer">
+<option>Limit GTC (Good-Til-Cancelled)</option>
+<option>Market FOK (Fill or Kill)</option>
+<option>TWAP Volume-Weighted</option>
+<option>Trailing Algorithmic Spike</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-2 text-[18px] text-text-secondary pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Readonly Entry Price Field -->
+<div class="mt-3 space-y-1">
+<div class="flex justify-between text-body-sm">
+<span class="text-text-secondary">Entry Price (SOL/USDT)</span>
+<span class="text-text-tertiary">Index: 184.48</span>
+</div>
+<div class="flex items-center bg-surface-container-low border border-glass-border-subtle rounded px-3 py-1.5 focus-within:border-electric-cyan focus-within:shadow-[0_0_8px_rgba(90,169,255,0.25)]">
+<input class="w-full bg-transparent text-text-primary font-numeric-md font-semibold outline-none cursor-default" readonly="" type="text" value="184.50"/>
+<span class="font-micro-tag-caps text-text-secondary">USDT</span>
+</div>
+</div>
+<!-- Leverage Chips Grid -->
+<div class="mt-3 space-y-1">
+<span class="text-body-sm text-text-secondary">Leverage Factor</span>
+<div class="grid grid-cols-5 gap-1.5">
+<button class="py-1 text-center rounded bg-surface-container text-body-sm font-numeric-sm border border-glass-border-subtle text-text-secondary hover:text-text-primary">5x</button>
+<button class="py-1 text-center rounded bg-surface-container text-body-sm font-numeric-sm border border-glass-border-subtle text-text-secondary hover:text-text-primary">10x</button>
+<button class="py-1 text-center rounded bg-electric-cyan/20 border border-electric-cyan text-electric-cyan font-numeric-sm font-semibold">20x</button>
+<button class="py-1 text-center rounded bg-surface-container text-body-sm font-numeric-sm border border-glass-border-subtle text-text-secondary hover:text-text-primary">50x</button>
+<button class="py-1 text-center rounded bg-surface-container text-body-sm font-numeric-sm border border-glass-border-subtle text-text-secondary hover:text-text-primary">100x</button>
+</div>
+</div>
+<!-- 100% Slider & Stepper -->
+<div class="mt-3 space-y-1.5">
+<div class="flex justify-between text-body-sm">
+<span class="text-text-secondary">Allocation Size</span>
+<span class="font-numeric-sm text-electric-cyan font-medium">75% (750.00 USDT)</span>
+</div>
+<input class="w-full h-1 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-electric-cyan" max="100" min="0" type="range" value="75"/>
+<div class="flex justify-between text-[10px] font-numeric-sm text-text-tertiary">
+<span>0%</span>
+<span>25%</span>
+<span>50%</span>
+<span>75%</span>
+<span>100%</span>
+</div>
+</div>
+<!-- 1R Risk & Stop Calculation Card -->
+<div class="mt-3 p-2.5 rounded bg-surface-container-low border border-glass-border-subtle space-y-1 font-numeric-sm text-body-sm">
+<div class="flex justify-between">
+<span class="text-text-secondary">Expected 1R Stop Loss:</span>
+<span class="text-crimson-loss font-semibold">181.25 (-1.76%)</span>
+</div>
+<div class="flex justify-between">
+<span class="text-text-secondary">Target 2R TP:</span>
+<span class="text-pine-gain font-semibold">191.00 (+3.52%)</span>
+</div>
+<div class="flex justify-between pt-1 border-t border-glass-border-subtle/50 text-[10px]">
+<span class="text-text-tertiary">Est. Liquidation Price:</span>
+<span class="text-text-secondary font-medium">176.12 USDT</span>
+</div>
+</div>
+</div>
+<!-- Submit Button -->
+<button class="w-full py-2.5 rounded bg-pine-gain hover:opacity-95 text-white font-headline-sm font-semibold tracking-wide border border-glass-specular-edge shadow-[0_0_14px_rgba(22,152,115,0.4)] flex items-center justify-center space-x-2 transition-all">
+<span>确认开多 (Buy / Long 4.06 SOL)</span>
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+</button>
+</div>
+<!-- Module 2: Synthetic Position & Paper Ledger Table (8 Cols on XL) -->
+<div class="xl:col-span-8 glass-panel rounded-xl p-4 flex flex-col justify-between">
+<div>
+<!-- Tabular Header -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-glass-border-subtle gap-2">
+<div class="flex items-center space-x-3">
+<h2 class="font-headline-sm font-semibold text-text-primary">Position &amp; Paper Ledger</h2>
+<span class="px-2 py-0.5 rounded text-micro-tag-caps font-micro-tag-caps bg-pine-gain-surface text-pine-gain border border-pine-gain/30">2 ACTIVE RUNS</span>
+</div>
+<div class="flex items-center space-x-2">
+<button class="px-2 py-1 rounded bg-surface-container border border-glass-border-subtle text-text-secondary hover:text-text-primary text-body-sm flex items-center space-x-1">
+<span class="material-symbols-outlined text-[14px]">filter_alt</span>
+<span>All Pairs</span>
+</button>
+<button class="px-2 py-1 rounded bg-surface-container border border-glass-border-subtle text-text-secondary hover:text-text-primary text-body-sm flex items-center space-x-1">
+<span class="material-symbols-outlined text-[14px]">download</span>
+<span>Export CSV</span>
+</button>
+</div>
+</div>
+<!-- High Density Table -->
+<div class="overflow-x-auto mt-2">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-glass-border-subtle text-text-tertiary text-micro-tag-caps font-micro-tag-caps tracking-wider uppercase h-7">
+<th class="py-1 pr-2">Instrument</th>
+<th class="py-1 px-2">Side</th>
+<th class="py-1 px-2 text-right">Size (Qty)</th>
+<th class="py-1 px-2 text-right">Entry Price</th>
+<th class="py-1 px-2 text-right">Mark Price</th>
+<th class="py-1 px-2 text-right">Liq. Price</th>
+<th class="py-1 px-2 text-right">PnL (ROE)</th>
+<th class="py-1 pl-2 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-glass-border-subtle font-numeric-sm text-body-sm">
+<!-- Row 1: SOL/USDT Long -->
+<tr class="hover:bg-surface-container-high/40 transition-colors h-9">
+<td class="py-1.5 pr-2 font-headline-sm text-text-primary flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-pine-gain"></span>
+<span class="font-bold">SOL/USDT</span>
+<span class="text-text-tertiary text-micro-tag-caps">PERP 20x</span>
+</td>
+<td class="py-1.5 px-2">
+<span class="px-1.5 py-0.5 rounded text-micro-tag-caps font-micro-tag-caps bg-pine-gain-surface border border-pine-gain/30 text-pine-gain">LONG</span>
+</td>
+<td class="py-1.5 px-2 text-right font-medium text-text-primary">150.00 SOL</td>
+<td class="py-1.5 px-2 text-right text-text-secondary">178.20</td>
+<td class="py-1.5 px-2 text-right text-text-primary font-semibold">184.50</td>
+<td class="py-1.5 px-2 text-right text-text-tertiary">170.15</td>
+<td class="py-1.5 px-2 text-right text-pine-gain font-bold">
+                    +945.00 USDT <span class="text-micro-tag-caps font-normal">(+70.7%)</span>
+</td>
+<td class="py-1.5 pl-2 text-right">
+<button class="px-2 py-0.5 rounded bg-surface-container border border-outline-variant/40 hover:border-crimson-loss hover:text-crimson-loss text-text-secondary transition-colors text-[10px]">
+                      平仓 (Close)
+                    </button>
+</td>
+</tr>
+<!-- Row 2: BTC/USDT Short -->
+<tr class="hover:bg-surface-container-high/40 transition-colors h-9">
+<td class="py-1.5 pr-2 font-headline-sm text-text-primary flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-crimson-loss"></span>
+<span class="font-bold">BTC/USDT</span>
+<span class="text-text-tertiary text-micro-tag-caps">PERP 10x</span>
+</td>
+<td class="py-1.5 px-2">
+<span class="px-1.5 py-0.5 rounded text-micro-tag-caps font-micro-tag-caps bg-crimson-loss-surface border border-crimson-loss/30 text-crimson-loss">SHORT</span>
+</td>
+<td class="py-1.5 px-2 text-right font-medium text-text-primary">1.25 BTC</td>
+<td class="py-1.5 px-2 text-right text-text-secondary">64,100.00</td>
+<td class="py-1.5 px-2 text-right text-text-primary font-semibold">63,412.00</td>
+<td class="py-1.5 px-2 text-right text-text-tertiary">70,200.00</td>
+<td class="py-1.5 px-2 text-right text-pine-gain font-bold">
+                    +860.00 USDT <span class="text-micro-tag-caps font-normal">(+10.7%)</span>
+</td>
+<td class="py-1.5 pl-2 text-right">
+<button class="px-2 py-0.5 rounded bg-surface-container border border-outline-variant/40 hover:border-crimson-loss hover:text-crimson-loss text-text-secondary transition-colors text-[10px]">
+                      平仓 (Close)
+                    </button>
+</td>
+</tr>
+<!-- Row 3: ETH/USDT Inactive Paper Run -->
+<tr class="hover:bg-surface-container-high/40 transition-colors h-9">
+<td class="py-1.5 pr-2 font-headline-sm text-text-primary flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-text-tertiary"></span>
+<span class="font-bold">ETH/USDT</span>
+<span class="text-text-tertiary text-micro-tag-caps">PAPER SIM</span>
+</td>
+<td class="py-1.5 px-2">
+<span class="px-1.5 py-0.5 rounded text-micro-tag-caps font-micro-tag-caps bg-surface-container border border-outline-variant/40 text-text-secondary">PENDING</span>
+</td>
+<td class="py-1.5 px-2 text-right font-medium text-text-secondary">10.00 ETH</td>
+<td class="py-1.5 px-2 text-right text-text-secondary">3,450.00</td>
+<td class="py-1.5 px-2 text-right text-text-primary font-semibold">3,492.15</td>
+<td class="py-1.5 px-2 text-right text-text-tertiary">--</td>
+<td class="py-1.5 px-2 text-right text-text-secondary font-mono">
+                    0.00 USDT <span class="text-micro-tag-caps font-normal">(0.0%)</span>
+</td>
+<td class="py-1.5 pl-2 text-right">
+<button class="px-2 py-0.5 rounded bg-surface-container border border-outline-variant/40 text-text-tertiary hover:text-text-primary transition-colors text-[10px]">
+                      撤单 (Cancel)
+                    </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Ledger Summary Strip -->
+<div class="mt-4 pt-3 border-t border-glass-border-subtle flex flex-wrap items-center justify-between gap-3 text-body-sm font-numeric-sm">
+<div class="flex items-center space-x-4">
+<div>
+<span class="text-text-tertiary">Total Margin Used: </span>
+<span class="text-text-primary font-medium">8,720.00 USDT</span>
+</div>
+<div>
+<span class="text-text-tertiary">Net Unrealized PnL: </span>
+<span class="text-pine-gain font-semibold">+1,805.00 USDT (+20.7%)</span>
+</div>
+</div>
+<div class="flex items-center space-x-2">
+<span class="text-text-tertiary">Risk Exposure: </span>
+<div class="w-24 bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-electric-cyan h-full w-[28%]"></div>
+</div>
+<span class="text-electric-cyan font-bold">28.4%</span>
+</div>
+</div>
+</div>
+</section>
+<!-- ========================================================================= -->
+<!-- SECTION 2: Research & Data States Matrix                                 -->
+<!-- ========================================================================= -->
+<section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+<!-- Specimen Card 1: Live Research Card -->
+<div class="glass-panel rounded-xl p-4 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-2 border-b border-glass-border-subtle">
+<span class="text-micro-tag-caps font-micro-tag-caps text-electric-cyan uppercase">Model Alpha 09</span>
+<span class="px-1.5 py-0.5 rounded bg-pine-gain-surface text-pine-gain text-[9px] font-micro-tag-caps">CONF: 89.4%</span>
+</div>
+<h3 class="font-headline-sm font-semibold text-text-primary mt-2">SOL Momentum Breakout</h3>
+<p class="text-text-secondary text-body-sm mt-1 leading-snug">
+            30-minute volume profile detected institutional accumulation above 183.20. Skew index turned positive.
+          </p>
+<div class="mt-3 p-2 bg-surface-container-low rounded border border-glass-border-subtle space-y-1 font-numeric-sm text-body-sm">
+<div class="flex justify-between">
+<span class="text-text-tertiary">Sharpe Ratio:</span>
+<span class="text-text-primary">2.84</span>
+</div>
+<div class="flex justify-between">
+<span class="text-text-tertiary">Max Drawdown:</span>
+<span class="text-crimson-loss">-4.12%</span>
+</div>
+</div>
+</div>
+<button class="mt-3 w-full py-1.5 rounded bg-surface-container hover:bg-surface-container-high border border-glass-border-subtle text-electric-cyan text-body-sm font-medium transition-colors">
+          Inspect Model Weights →
+        </button>
+</div>
+<!-- Specimen Card 2: Loading Skeleton State -->
+<div class="glass-panel rounded-xl p-4 flex flex-col justify-between">
+<div class="space-y-3">
+<div class="flex items-center justify-between pb-2 border-b border-glass-border-subtle">
+<div class="w-20 h-3.5 bg-surface-container-high rounded animate-pulse"></div>
+<div class="w-12 h-3.5 bg-surface-container-high rounded animate-pulse"></div>
+</div>
+<div class="w-3/4 h-5 bg-surface-container-high rounded animate-pulse"></div>
+<div class="space-y-1.5">
+<div class="w-full h-3 bg-surface-container-high/60 rounded animate-pulse"></div>
+<div class="w-5/6 h-3 bg-surface-container-high/60 rounded animate-pulse"></div>
+</div>
+<div class="p-2 bg-surface-container-low rounded border border-glass-border-subtle space-y-2">
+<div class="flex justify-between">
+<div class="w-16 h-3 bg-surface-container-high rounded animate-pulse"></div>
+<div class="w-10 h-3 bg-surface-container-high rounded animate-pulse"></div>
+</div>
+<div class="flex justify-between">
+<div class="w-20 h-3 bg-surface-container-high rounded animate-pulse"></div>
+<div class="w-12 h-3 bg-surface-container-high rounded animate-pulse"></div>
+</div>
+</div>
+</div>
+<div class="w-full h-7 bg-surface-container-high rounded animate-pulse mt-3"></div>
+</div>
+<!-- Specimen Card 3: Empty State Specimen -->
+<div class="glass-panel rounded-xl p-4 flex flex-col items-center justify-center text-center">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border border-glass-border-subtle mb-2">
+<span class="material-symbols-outlined text-text-tertiary text-[24px]">filter_alt_off</span>
+</div>
+<h4 class="font-headline-sm font-semibold text-text-primary">暂无符合条件的触价记录</h4>
+<p class="text-text-secondary text-body-sm max-w-xs mt-1">
+          当前过滤规则 (ΔP ≥ 2.5%, Vol &gt; 500k) 在过去 24 小时未触发任何预警信号。
+        </p>
+<button class="mt-3 px-3 py-1 rounded bg-surface-container hover:bg-surface-container-high border border-glass-border-subtle text-text-primary text-body-sm transition-colors">
+          重置筛选参数 (Reset)
+        </button>
+</div>
+<!-- Specimen Card 4: Dedicated Crimson Alert Specimen -->
+<div class="rounded-xl p-4 flex flex-col justify-between bg-crimson-loss/10 border border-crimson-loss/30 shadow-[0_0_24px_rgba(215,53,93,0.12)]">
+<div>
+<div class="flex items-center justify-between pb-2 border-b border-crimson-loss/20">
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-crimson-loss text-[18px]">warning</span>
+<span class="text-micro-tag-caps font-micro-tag-caps text-crimson-loss font-bold uppercase">ALARM PREVIEW</span>
+</div>
+<span class="px-1.5 py-0.5 rounded bg-crimson-loss text-white text-[9px] font-micro-tag-caps">CRITICAL</span>
+</div>
+<h3 class="font-headline-sm font-semibold text-text-primary mt-2">Max Drawdown Breach Risk</h3>
+<p class="text-text-secondary text-body-sm mt-1">
+            Derivatives portfolio delta skew has exceeded predefined barrier (Threshold: 1.50, Current: 1.82). Emergency hedging advised.
+          </p>
+<div class="mt-2.5 p-2 bg-crimson-loss/15 rounded border border-crimson-loss/30 font-numeric-sm text-body-sm text-crimson-loss">
+            Auto-Deleverage trigger armed in: <span class="font-bold">00:04:12</span>
+</div>
+</div>
+<div class="flex space-x-2 mt-3">
+<button class="flex-1 py-1.5 rounded bg-crimson-loss text-white font-headline-sm text-body-sm font-semibold hover:opacity-90 transition-opacity">
+            一键对冲 (Hedge)
+          </button>
+<button class="px-2.5 py-1.5 rounded bg-surface-container border border-outline-variant/40 text-text-secondary hover:text-text-primary text-body-sm">
+            静音 (Mute)
+          </button>
+</div>
+</div>
+</section>
+<!-- ========================================================================= -->
+<!-- SECTION 3: Strategy & Book Reader Specimen + Chart Floating Toolbar       -->
+<!-- ========================================================================= -->
+<section class="grid grid-cols-1 xl:grid-cols-12 gap-5">
+<!-- Deep Research Strategy Reader (8 Cols on XL) -->
+<div class="xl:col-span-8 glass-panel rounded-xl p-5 space-y-4">
+<!-- Document Tabs -->
+<div class="flex items-center justify-between border-b border-glass-border-subtle pb-2">
+<div class="flex space-x-3 text-body-sm">
+<button class="text-electric-cyan font-semibold border-b-2 border-electric-cyan pb-2 flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-[16px]">menu_book</span>
+<span>Quant Research Note #104</span>
+</button>
+<button class="text-text-secondary hover:text-text-primary pb-2 flex items-center space-x-1.5 transition-colors">
+<span class="material-symbols-outlined text-[16px]">data_object</span>
+<span>YOLO Patrol Core</span>
+</button>
+<button class="text-text-secondary hover:text-text-primary pb-2 flex items-center space-x-1.5 transition-colors">
+<span class="material-symbols-outlined text-[16px]">analytics</span>
+<span>Backtest Telemetry</span>
+</button>
+</div>
+<div class="flex items-center space-x-1 text-text-tertiary">
+<span class="text-body-sm">Read time: 4m</span>
+</div>
+</div>
+<!-- Article Headline -->
+<div>
+<h2 class="text-headline-lg font-headline-lg text-text-primary font-bold">
+            SPIKE Volatility Compression &amp; 1.618 Fibonacci Dynamic Extension
+          </h2>
+<div class="flex items-center space-x-3 mt-1 text-body-sm text-text-secondary">
+<span>Author: SPIKE Core Quantitative Lab</span>
+<span>•</span>
+<span class="font-numeric-sm">Revision: 2024.10-rev3</span>
+<span>•</span>
+<span class="text-pine-gain font-micro-tag-caps px-1 rounded bg-pine-gain-surface">STABLE_PRODUCTION</span>
+</div>
+</div>
+<!-- Mathematical Formula Callout Specimen -->
+<div class="p-3.5 rounded-lg bg-surface-container-low border border-glass-border-subtle flex items-start space-x-3">
+<span class="material-symbols-outlined text-electric-cyan text-[22px] mt-0.5">functions</span>
+<div class="space-y-1">
+<div class="text-body-sm text-text-secondary font-medium">Dynamic Volatility Adjusted Barrier Formula:</div>
+<div class="font-numeric-md text-text-primary bg-surface-container-lowest px-3 py-1.5 rounded border border-glass-border-subtle font-mono text-body-md overflow-x-auto">
+              σ_adj(t) = √( 1/N Σ [ ln(P_i / P_{i-1}) - μ ]² ) · λ_{Fib} + γ · OrderBookSkew
+            </div>
+<p class="text-[11px] text-text-tertiary">
+              Where λ_{Fib} adapts to 1.618 during breakout expansions and collapses to 0.618 inside consolidation zones.
+            </p>
+</div>
+</div>
+<!-- Pine / YOLO Code Block Specimen with Syntax Highlighting -->
+<div class="rounded-lg overflow-hidden border border-glass-border-subtle bg-surface-container-lowest font-mono text-body-sm">
+<div class="px-3 py-1.5 bg-surface-container-low border-b border-glass-border-subtle flex items-center justify-between text-text-secondary text-[11px]">
+<span class="flex items-center space-x-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-crimson-loss/60"></span>
+<span class="w-2.5 h-2.5 rounded-full bg-electric-cyan/60"></span>
+<span class="w-2.5 h-2.5 rounded-full bg-pine-gain/60"></span>
+<span class="ml-2 font-numeric-sm text-text-secondary">SpikeEngine_v4.pine (YOLO Alpha Patrol)</span>
+</span>
+<button class="hover:text-text-primary transition-colors flex items-center space-x-1">
+<span class="material-symbols-outlined text-[13px]">content_copy</span>
+<span>Copy snippet</span>
+</button>
+</div>
+<pre class="p-3 overflow-x-auto font-numeric-sm leading-relaxed text-[12px]"><span class="text-text-tertiary">// @version=5</span>
+<span class="text-electric-cyan">strategy</span>(<span class="text-pine-gain">"SPIKE YOLO Volatility Breakout"</span>, overlay=<span class="text-crimson-loss">true</span>, precision=4)
+
+<span class="text-text-tertiary">// Parameters</span>
+fib_ratio = <span class="text-electric-cyan">input.float</span>(1.618, title=<span class="text-pine-gain">"Fib Extension Target"</span>)
+length    = <span class="text-electric-cyan">input.int</span>(20, title=<span class="text-pine-gain">"Lookback Window"</span>)
+
+<span class="text-text-secondary">basis</span> = ta.sma(close, length)
+<span class="text-text-secondary">dev</span>   = 2.0 * ta.stdev(close, length)
+<span class="text-text-secondary">upper</span> = basis + dev
+
+<span class="text-electric-cyan">if</span> (ta.crossover(close, upper) <span class="text-electric-cyan">and</span> volume &gt; ta.sma(volume, 20) * 1.5)
+    <span class="text-pine-gain">strategy.entry</span>(<span class="text-pine-gain">"SPIKE_LONG"</span>, strategy.long, comment=<span class="text-pine-gain">"1.618 Triggered"</span>)
+    <span class="text-electric-cyan">strategy.exit</span>(<span class="text-pine-gain">"TP"</span>, <span class="text-pine-gain">"SPIKE_LONG"</span>, limit=close * fib_ratio, stop=close * 0.985)</pre>
+</div>
+<!-- Strategy Summary Specs -->
+<div class="grid grid-cols-3 gap-3 pt-1">
+<div class="p-2.5 rounded bg-surface-container-low border border-glass-border-subtle">
+<div class="text-text-tertiary text-micro-tag-caps font-micro-tag-caps">WIN RATE (1,420 RUNS)</div>
+<div class="text-pine-gain font-numeric-md font-bold mt-0.5">68.4%</div>
+</div>
+<div class="p-2.5 rounded bg-surface-container-low border border-glass-border-subtle">
+<div class="text-text-tertiary text-micro-tag-caps font-micro-tag-caps">PROFIT FACTOR</div>
+<div class="text-electric-cyan font-numeric-md font-bold mt-0.5">2.41</div>
+</div>
+<div class="p-2.5 rounded bg-surface-container-low border border-glass-border-subtle">
+<div class="text-text-tertiary text-micro-tag-caps font-micro-tag-caps">AVG TRADE TIME</div>
+<div class="text-text-primary font-numeric-md font-bold mt-0.5">42m 18s</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Translucent Chart Dock & Mobile 390px Sheet Preview (4 Cols on XL) -->
+<div class="xl:col-span-4 space-y-4">
+<!-- Translucent Chart Floating Dock Specimen -->
+<div class="glass-panel rounded-xl p-3.5 space-y-2.5">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm font-semibold text-text-primary">Chart Floating Dock</span>
+<span class="text-micro-tag-caps font-micro-tag-caps text-electric-cyan">INTERACTIVE SPEC</span>
+</div>
+<!-- Dock Bar -->
+<div class="glass-dock rounded-lg p-1.5 flex items-center justify-between shadow-lg">
+<!-- Timeframe Pills -->
+<div class="flex items-center space-x-1 font-numeric-sm text-body-sm">
+<button class="px-1.5 py-0.5 rounded text-text-secondary hover:text-text-primary">5m</button>
+<button class="px-1.5 py-0.5 rounded bg-surface-container-high text-electric-cyan font-bold border border-glass-border-subtle">15m</button>
+<button class="px-1.5 py-0.5 rounded text-text-secondary hover:text-text-primary">1h</button>
+<button class="px-1.5 py-0.5 rounded text-text-secondary hover:text-text-primary">4h</button>
+<button class="px-1.5 py-0.5 rounded text-text-secondary hover:text-text-primary">1D</button>
+</div>
+<div class="w-px h-4 bg-glass-border-subtle"></div>
+<!-- Indicator Toggles -->
+<div class="flex items-center space-x-1">
+<button class="px-1.5 py-0.5 rounded bg-electric-cyan/15 text-electric-cyan text-body-sm font-medium border border-electric-cyan/30" title="6 Moving Averages">
+                6均线
+              </button>
+<button class="p-1 rounded text-text-secondary hover:text-text-primary" title="Follow Latest Tick">
+<span class="material-symbols-outlined text-[16px] text-pine-gain">vertical_align_bottom</span>
+</button>
+<button class="p-1 rounded text-text-secondary hover:text-text-primary" title="Full Screen Chart">
+<span class="material-symbols-outlined text-[16px]">aspect_ratio</span>
+</button>
+</div>
+</div>
+<!-- Synthetic Mini Chart Preview Canvas Container -->
+<div class="relative h-32 w-full rounded bg-surface-container-lowest border border-glass-border-subtle flex flex-col justify-end p-2 overflow-hidden">
+<div class="absolute top-2 left-2 flex items-center space-x-2 text-[10px] font-numeric-sm">
+<span class="text-text-secondary">MA7: <span class="text-electric-cyan">183.90</span></span>
+<span class="text-text-secondary">MA25: <span class="text-pine-gain">182.10</span></span>
+<span class="text-text-secondary">MA99: <span class="text-crimson-loss">178.40</span></span>
+</div>
+<!-- Procedural Grid Lines -->
+<div class="w-full h-px bg-outline-variant/15 absolute top-1/4 left-0"></div>
+<div class="w-full h-px bg-outline-variant/15 absolute top-2/4 left-0"></div>
+<div class="w-full h-px bg-outline-variant/15 absolute top-3/4 left-0"></div>
+<!-- Simulated Candlestick / Bar Sparkline -->
+<div class="flex items-end justify-between h-20 w-full z-10 opacity-85">
+<div class="w-1.5 h-8 bg-pine-gain rounded-t"></div>
+<div class="w-1.5 h-10 bg-pine-gain rounded-t"></div>
+<div class="w-1.5 h-6 bg-crimson-loss rounded-t"></div>
+<div class="w-1.5 h-12 bg-pine-gain rounded-t"></div>
+<div class="w-1.5 h-14 bg-pine-gain rounded-t"></div>
+<div class="w-1.5 h-9 bg-crimson-loss rounded-t"></div>
+<div class="w-1.5 h-16 bg-pine-gain rounded-t"></div>
+<div class="w-1.5 h-18 bg-pine-gain rounded-t shadow-[0_0_8px_#169873]"></div>
+</div>
+</div>
+</div>
+<!-- 390px Mobile Viewport Bottom Sheet Specimen -->
+<div class="glass-panel rounded-xl p-3.5 space-y-2">
+<div class="flex items-center justify-between pb-1 border-b border-glass-border-subtle">
+<span class="font-headline-sm font-semibold text-text-primary">Mobile Specimen (390px Viewport)</span>
+<span class="text-micro-tag-caps font-micro-tag-caps text-pine-gain">APPLE GLASS DOCK</span>
+</div>
+<!-- 390px Simulated Frame -->
+<div class="max-w-[390px] mx-auto rounded-2xl bg-canvas-dark border border-glass-specular-edge overflow-hidden shadow-2xl p-2.5 space-y-2">
+<!-- Sheet Drag Handle -->
+<div class="w-10 h-1 bg-surface-bright rounded-full mx-auto my-1"></div>
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center space-x-1.5">
+<span class="font-headline-sm font-bold text-text-primary">SOL-PERP</span>
+<span class="text-pine-gain font-numeric-sm font-semibold">184.50</span>
+</div>
+<span class="text-micro-tag-caps text-text-tertiary">SLIPPAGE: 0.05%</span>
+</div>
+<!-- Touch Action Rows (Apple Glass treatment, no white card artifacts) -->
+<div class="space-y-1.5">
+<div class="p-2 rounded-lg bg-surface-container-low border border-glass-border-subtle flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-electric-cyan text-[18px]">touch_app</span>
+<span class="text-body-sm text-text-primary font-medium">Quick 1-Tap Trigger</span>
+</div>
+<span class="text-electric-cyan font-numeric-sm font-semibold">100.00 SOL</span>
+</div>
+<div class="p-2 rounded-lg bg-surface-container-low border border-glass-border-subtle flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-pine-gain text-[18px]">security</span>
+<span class="text-body-sm text-text-primary font-medium">Auto Trailing Guard</span>
+</div>
+<span class="text-pine-gain font-micro-tag-caps font-semibold">ACTIVATED (1.5R)</span>
+</div>
+</div>
+<!-- Mobile Quick Buttons -->
+<div class="grid grid-cols-2 gap-2 pt-1">
+<button class="py-2 rounded bg-pine-gain text-white font-headline-sm text-body-sm font-bold shadow-md">
+                Buy SOL
+              </button>
+<button class="py-2 rounded bg-crimson-loss text-white font-headline-sm text-body-sm font-bold shadow-md">
+                Sell SOL
+              </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ========================================================================= -->
+<!-- SECTION 4: CSS Semantic Token Matrix & Zero-FOUC Architecture            -->
+<!-- ========================================================================= -->
+<section class="glass-panel rounded-xl p-5 space-y-4">
+<div class="flex flex-col md:flex-row md:items-center justify-between border-b border-glass-border-subtle pb-3 gap-2">
+<div>
+<h2 class="text-headline-lg font-headline-lg font-bold text-text-primary">
+            CSS Semantic Token Matrix &amp; Anti-FOUC Architecture
+          </h2>
+<p class="text-text-secondary text-body-sm">
+            Comparison of Light tokens (#f8f9fc) vs Dark production bedrock (#101318) and executable inline prevention logic.
+          </p>
+</div>
+<div class="flex items-center space-x-2">
+<span class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/40 text-text-primary text-body-sm font-numeric-sm">
+            Zero-FOUC Script Size: 0.42 KB
+          </span>
+</div>
+</div>
+<!-- Token Mapping Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse font-numeric-sm text-body-sm">
+<thead>
+<tr class="border-b border-glass-border-subtle text-text-tertiary text-micro-tag-caps font-micro-tag-caps uppercase h-7">
+<th class="py-1 pr-3">Design Token</th>
+<th class="py-1 px-3">Semantic Purpose</th>
+<th class="py-1 px-3">Light Mode Value</th>
+<th class="py-1 px-3">Dark Obsidian Value (Active)</th>
+<th class="py-1 pl-3 text-right">Specular / Elevation Rim</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-glass-border-subtle">
+<tr class="h-8 hover:bg-surface-container-high/30">
+<td class="py-1.5 pr-3 text-electric-cyan font-semibold font-mono">--canvas-base</td>
+<td class="py-1.5 px-3 text-text-secondary">Bedrock canvas, full window</td>
+<td class="py-1.5 px-3 text-text-tertiary">#f8f9fc</td>
+<td class="py-1.5 px-3 text-text-primary font-bold">#101318 (Solid)</td>
+<td class="py-1.5 pl-3 text-right text-text-tertiary">None (Level 0)</td>
+</tr>
+<tr class="h-8 hover:bg-surface-container-high/30">
+<td class="py-1.5 pr-3 text-electric-cyan font-semibold font-mono">--surface-obsidian</td>
+<td class="py-1.5 px-3 text-text-secondary">Docked containers &amp; tiles</td>
+<td class="py-1.5 px-3 text-text-tertiary">rgba(255,255,255, 0.88)</td>
+<td class="py-1.5 px-3 text-text-primary font-bold">rgba(16, 19, 24, 0.85)</td>
+<td class="py-1.5 pl-3 text-right text-text-secondary">1px rgba(255,255,255,0.08)</td>
+</tr>
+<tr class="h-8 hover:bg-surface-container-high/30">
+<td class="py-1.5 pr-3 text-electric-cyan font-semibold font-mono">--primary-readable</td>
+<td class="py-1.5 px-3 text-text-secondary">High contrast data text</td>
+<td class="py-1.5 px-3 text-text-tertiary">#101318</td>
+<td class="py-1.5 px-3 text-text-primary font-bold">#e8edf4 / #f5f7fa</td>
+<td class="py-1.5 pl-3 text-right text-text-tertiary">WCAG AAA Contrast</td>
+</tr>
+<tr class="h-8 hover:bg-surface-container-high/30">
+<td class="py-1.5 pr-3 text-electric-cyan font-semibold font-mono">--trade-emerald</td>
+<td class="py-1.5 px-3 text-text-secondary">Long, bids, profits (+ROE)</td>
+<td class="py-1.5 px-3 text-text-tertiary">#0e7053</td>
+<td class="py-1.5 px-3 text-pine-gain font-bold">#55c7a5 / #169873</td>
+<td class="py-1.5 pl-3 text-right text-pine-gain">Glow: rgba(22,152,115,0.3)</td>
+</tr>
+<tr class="h-8 hover:bg-surface-container-high/30">
+<td class="py-1.5 pr-3 text-electric-cyan font-semibold font-mono">--trade-rose</td>
+<td class="py-1.5 px-3 text-text-secondary">Short, asks, alarms (-Loss)</td>
+<td class="py-1.5 px-3 text-text-tertiary">#b81d43</td>
+<td class="py-1.5 px-3 text-crimson-loss font-bold">#f57e98 / #d7355d</td>
+<td class="py-1.5 pl-3 text-right text-crimson-loss">Glow: rgba(215,53,93,0.3)</td>
+</tr>
+<tr class="h-8 hover:bg-surface-container-high/30">
+<td class="py-1.5 pr-3 text-electric-cyan font-semibold font-mono">--accent-cyan</td>
+<td class="py-1.5 px-3 text-text-secondary">Focus rings, key controls</td>
+<td class="py-1.5 px-3 text-text-tertiary">#0060a7</td>
+<td class="py-1.5 px-3 text-electric-cyan font-bold">#5aa9ff (Electric)</td>
+<td class="py-1.5 pl-3 text-right text-electric-cyan">Glow: rgba(90,169,255,0.35)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Zero-FOUC Implementation Code Snippet -->
+<div class="mt-4 p-3 rounded-lg bg-surface-container-lowest border border-glass-border-subtle font-mono text-body-sm space-y-1">
+<div class="text-text-tertiary text-micro-tag-caps font-micro-tag-caps">// ANTI-FOUC HEAD ENGINE SCRIPT (Zero Flash of Unstyled Color)</div>
+<div class="text-text-secondary text-[12px] overflow-x-auto">
+<code>&lt;script&gt;
+(function() {
+  const theme = localStorage.getItem('spike_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'dark');
+  if (theme === 'dark') document.documentElement.classList.add('dark');
+  else document.documentElement.classList.remove('dark');
+})();
+&lt;/script&gt;</code>
+</div>
+</div>
+</section>
+<!-- Footer System Status Line -->
+<footer class="pt-4 pb-8 border-t border-glass-border-subtle flex flex-col sm:flex-row items-center justify-between text-body-sm text-text-tertiary gap-2">
+<div class="flex items-center space-x-2">
+<span class="w-1.5 h-1.5 rounded-full bg-pine-gain"></span>
+<span>SPIKE // QUANT Telemetry Engine (Build 2024.10.28-rc4)</span>
+</div>
+<div class="flex items-center space-x-4">
+<span>Deterministic Layout</span>
+<span>•</span>
+<span>Zero Unreadable Dark-on-Dark Artifacts</span>
+<span>•</span>
+<span>Ultra-Clear Obsidian Glass Standard</span>
+</div>
+</footer>
+</main>
+<!-- ========================================================================= -->
+<!-- Global Command Palette / Search Dialog (Cmd+K Popup)                      -->
+<!-- ========================================================================= -->
+<div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-start justify-center pt-20 px-4 hidden" id="cmdk-modal">
+<div class="w-full max-w-xl glass-panel-elevated rounded-xl overflow-hidden border border-glass-specular-edge shadow-[0_20px_60px_rgba(0,0,0,0.85)]">
+<!-- Search Input Line -->
+<div class="p-3 border-b border-glass-border-subtle flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-electric-cyan text-[20px]">search</span>
+<input class="w-full bg-transparent text-text-primary placeholder:text-text-tertiary outline-none text-headline-sm font-headline-sm" id="cmdk-input" placeholder="Type a strategy, instrument, or algorithmic command..." type="text"/>
+<kbd class="font-numeric-sm text-[10px] bg-surface-container px-1.5 py-0.5 rounded border border-glass-border-subtle text-text-secondary">ESC</kbd>
+</div>
+<!-- Command List Items -->
+<div class="p-2 max-h-80 overflow-y-auto space-y-1 text-body-sm font-body-sm">
+<div class="px-2.5 py-1 text-text-tertiary text-micro-tag-caps font-micro-tag-caps uppercase">Quick Jumps &amp; Algorithms</div>
+<!-- Active highlighted item (#5aa9ff highlight) -->
+<div class="flex items-center justify-between p-2 rounded-lg bg-electric-cyan/20 border border-electric-cyan/40 text-text-primary cursor-pointer">
+<div class="flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-electric-cyan text-[18px]">show_chart</span>
+<span class="font-medium">Jump to 1.618 Fibonacci Chart</span>
+</div>
+<span class="text-electric-cyan font-numeric-sm text-[10px]">SOL / USDT</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-container transition-colors text-text-secondary hover:text-text-primary cursor-pointer">
+<div class="flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-[18px]">shield</span>
+<span>YOLO Patrol Core Risk Engine</span>
+</div>
+<span class="font-numeric-sm text-text-tertiary text-[10px]">Guard Matrix</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-container transition-colors text-text-secondary hover:text-text-primary cursor-pointer">
+<div class="flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-[18px]">account_balance</span>
+<span>Sub-Accounts &amp; Ledger Telemetry</span>
+</div>
+<span class="font-numeric-sm text-text-tertiary text-[10px]">Paper 100k</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-container transition-colors text-text-secondary hover:text-text-primary cursor-pointer">
+<div class="flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+<span>Strategy Reader Note #104 (Pine Spec)</span>
+</div>
+<span class="font-numeric-sm text-text-tertiary text-[10px]">Docs</span>
+</div>
+<div class="px-2.5 pt-2 pb-1 text-text-tertiary text-micro-tag-caps font-micro-tag-caps uppercase">Instrument Pairs</div>
+<div class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-container transition-colors text-text-secondary hover:text-text-primary cursor-pointer">
+<div class="flex items-center space-x-2">
+<span class="font-bold text-text-primary">SOL-PERP</span>
+<span class="text-pine-gain font-numeric-sm">184.50</span>
+</div>
+<span class="text-pine-gain text-micro-tag-caps font-micro-tag-caps">+3.42%</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-container transition-colors text-text-secondary hover:text-text-primary cursor-pointer">
+<div class="flex items-center space-x-2">
+<span class="font-bold text-text-primary">BTC-PERP</span>
+<span class="text-crimson-loss font-numeric-sm">63,412.00</span>
+</div>
+<span class="text-crimson-loss text-micro-tag-caps font-micro-tag-caps">-0.88%</span>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="p-2.5 bg-surface-container-low border-t border-glass-border-subtle flex items-center justify-between text-[11px] text-text-tertiary">
+<div class="flex items-center space-x-3">
+<span><kbd class="bg-surface-container px-1 rounded">↑↓</kbd> Navigate</span>
+<span><kbd class="bg-surface-container px-1 rounded">↵</kbd> Select</span>
+</div>
+<button class="hover:text-text-primary" onclick="document.getElementById('cmdk-modal').classList.add('hidden')">
+          Close [Esc]
+        </button>
+</div>
+</div>
+</div>
+<!-- Inline Micro-interactions & Hotkey Script -->
+<script>
+    // Global Cmd+K / Ctrl+K Listener
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        const modal = document.getElementById('cmdk-modal');
+        modal.classList.toggle('hidden');
+        if (!modal.classList.contains('hidden')) {
+          setTimeout(() => document.getElementById('cmdk-input').focus(), 50);
+        }
+      }
+      if (e.key === 'Escape') {
+        document.getElementById('cmdk-modal').classList.add('hidden');
+      }
+    });
+
+    // Close modal on click outside
+    document.getElementById('cmdk-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'cmdk-modal') {
+        e.target.classList.add('hidden');
+      }
+    });
+
+    // Theme Toggle Handler (Maintains Dark Priority while demonstrating interactive token toggle)
+    const toggleBtn = document.getElementById('theme-toggle');
+    toggleBtn.addEventListener('click', () => {
+      const html = document.documentElement;
+      if (html.classList.contains('dark')) {
+        // Toggle light demonstration with notification badge
+        html.classList.remove('dark');
+        toggleBtn.innerHTML = '<span class="material-symbols-outlined text-[17px] text-pine-gain" data-icon="light_mode">light_mode</span>';
+      } else {
+        html.classList.add('dark');
+        toggleBtn.innerHTML = '<span class="material-symbols-outlined text-[17px] text-electric-cyan" data-icon="dark_mode">dark_mode</span>';
+      }
+    });
+  </script>
+</body></html>

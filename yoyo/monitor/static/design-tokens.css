@@ -35,6 +35,8 @@
   --text-soft:var(--text-secondary);--accent:var(--mint);--accent-ink:var(--on-accent);--accent-soft:var(--mint-soft);
   --notice-border:#a66a132b;--notice-bg:#a66a1308;--notice-text:#936015;
   --toast-bg:var(--surface-high);--toast-text:var(--text);--toast-border:var(--line);
+  --danger:var(--trade-short);--danger-soft:var(--red-soft);--success:var(--trade-long);--warning:var(--amber);--warning-soft:var(--warning-bg);
+  --glass-opaque-dock:#f8faf9;--glass-opaque-panel:#fcfdfc;--glass-opaque-sheet:#fff;
   --text-caption:11px;--text-label:12px;--control-height:36px;--touch-height:44px;
   --radius-panel:20px;--radius-control:12px;--radius:20px;
   --space-xs:4px;--space-sm:6px;--space-md:10px;--space-lg:16px;--space-xl:20px;--space-2xl:28px;
@@ -58,7 +60,7 @@ html[data-theme=dark],:host([data-theme=dark]){
  --mint-soft:#5aa9ff18;--red-soft:#f57e9815;--amber:#e6b567;--blue:#5aa9ff;
  --positive-bg:#55c7a514;--warning-bg:#e6b56718;--direction-long-bg:#55c7a514;--direction-short-bg:#f57e9815;
  --nav-active:#5aa9ff18;--control-bg:#232b38b3;--control-border:#ffffff1f;
- --segment-bg:#10131866;--segment-active-bg:#334156;
+ --segment-bg:#10131866;--segment-active-bg:#293342;
  --card-border:#ffffff17;--card-hover-border:#5aa9ff55;--card-selected-bg:#5aa9ff18;
  --chart-bg:#101318;--chart-grid:#ffffff0d;--chart-text:#9aaabc;
  --focus-glow:#5aa9ff26;--dialog-backdrop:#00000080;--dialog-border:#ffffff24;--scrollbar:#9aaabc55;
@@ -66,5 +68,15 @@ html[data-theme=dark],:host([data-theme=dark]){
  --action-border:#5aa9ff40;--action-filled-text:#101318;--card-fresh-border:#5aa9ff55;
  --notice-border:#e6b56740;--notice-bg:#e6b56712;--notice-text:#e6b567;
  --glass-dock:rgba(28,34,44,.72);--glass-panel:rgba(28,34,44,.78);--glass-sheet:rgba(22,27,36,.96);--glass-edge:#ffffff17;
+ --glass-opaque-dock:#1c222c;--glass-opaque-panel:#1c222c;--glass-opaque-sheet:#161b24;
  --panel-shadow:0 12px 32px -6px #00000066,inset 0 1px 0 #ffffff08;--elevated-shadow:0 20px 60px #00000080;
+}
+
+/* Material fallbacks live with the palette so shadow-root workspaces inherit
+ * the same accessibility behavior as ordinary pages. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+ :root,html[data-theme],:host,:host([data-theme]){--glass-dock:var(--glass-opaque-dock);--glass-panel:var(--glass-opaque-panel);--glass-sheet:var(--glass-opaque-sheet)}
+}
+@media(prefers-reduced-transparency:reduce){
+ :root,html[data-theme],:host,:host([data-theme]){--glass-dock:var(--glass-opaque-dock);--glass-panel:var(--glass-opaque-panel);--glass-sheet:var(--glass-opaque-sheet)}
 }

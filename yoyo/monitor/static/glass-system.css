@@ -202,12 +202,7 @@ body[data-design=apple-glass] .copier-kpis article {background:var(--glass-panel
   body[data-design=apple-glass] .topbar .stitch-primary-nav>a {padding-inline:4px;min-width:36px;font-size:11px;}
   body[data-design=apple-glass] #workspace-search {min-width:42px;font-size:11px;}
 }
-@supports not (backdrop-filter:blur(1px)) {
-  body[data-design=apple-glass] {--glass-dock:#f8faf9;--glass-panel:#fcfdfc;--glass-sheet:#fff;}
-}
-@media(prefers-reduced-transparency:reduce) {
-  body[data-design=apple-glass] {--glass-dock:#f8faf9;--glass-panel:#fcfdfc;--glass-sheet:#fff;}
-}
+/* Theme-aware opaque fallbacks are shared with shadow DOM in design-tokens.css. */
 @media(prefers-reduced-motion:reduce) {
   body[data-design=apple-glass] *,body[data-design=apple-glass] *::before,body[data-design=apple-glass] *::after {animation:none!important;transition:none!important;scroll-behavior:auto!important;}
 }

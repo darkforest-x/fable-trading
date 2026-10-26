@@ -1,7 +1,7 @@
 /* 订单流框架 (orderflow.js): reader layout + scoped styles for the generated handbook chapters (.ofb).
  * The handbook's inline SVG figures read --ink/--mut/--up/... so those tokens are mapped here per theme. */
 #orderflow-workspace{
-  --ink:var(--text); --mut:var(--muted); --line:var(--line); --grid:var(--line-soft); --paper:var(--surface); --card:var(--surface-2);
+  --ink:var(--text); --mut:var(--muted); --grid:var(--line-soft); --paper:var(--surface-base); --card:var(--surface-2);
   --up:#4cc38a; --dn:#ef6b6b; --acc:#7aa7f0; --acc2:#e0a344; --vio:#b18cf0;
   --zone:#1b2c40; --zone2:#352a1a; --hl:#4a3f1e; --band:#17324d; --band-ink:#f1f4f8;
 }
@@ -60,7 +60,7 @@ html[data-theme="light"] #orderflow-workspace{
 .ofb .src::before{content:"出处 · ";font-weight:600}
 .ofb .src-inline{font-size:12px;color:var(--mut);border:1px solid var(--line);border-radius:4px;padding:0 5px}
 .ofb .note{border-left:4px solid var(--line);background:var(--card);border-radius:0 8px 8px 0;padding:10px 14px;margin:14px 0;font-size:14px;line-height:1.75}
-.ofb .note .tag{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:10px;margin-right:8px;color:var(--surface);vertical-align:1px}
+.ofb .note .tag{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:10px;margin-right:8px;color:var(--paper);vertical-align:1px}
 .ofb .note ul,.ofb .note ol{margin:4px 0 0}
 .ofb .note.course{border-color:var(--acc)} .ofb .note.course .tag{background:var(--acc)}
 .ofb .note.analysis{border-color:var(--vio)} .ofb .note.analysis .tag{background:var(--vio)}

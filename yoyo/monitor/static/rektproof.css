@@ -1,12 +1,12 @@
 /* RektProof 区间 (rektproof.js): reader, Arthur channel archive, Monday-range planner, sources.
  * The handbook's inline SVG figures read --ink/--mut/--up/... so those tokens are mapped here per theme
  * (same mapping as langlang.css). */
-#rektproof-workspace{
-  --ink:var(--text); --mut:var(--muted); --grid:var(--line-soft); --page:var(--surface); --card:var(--surface-2);
+#rektproof-workspace,.rp-modal{
+  --ink:var(--text); --mut:var(--muted); --grid:var(--line-soft); --page:var(--surface-base); --card:var(--surface-2);
   --up:#4cc38a; --dn:#ef6b6b; --acc:#7aa7f0; --acc2:#e0a344; --vio:#b18cf0;
   --zone:#1b2c40; --zone2:#352a1a; --upf:#16352a; --dnf:#3d1f22;
 }
-html[data-theme="light"] #rektproof-workspace{
+html[data-theme="light"] :is(#rektproof-workspace,.rp-modal){
   --up:#0f8a5f; --dn:#cc3a3a; --acc:#2460c8; --acc2:#b06700; --vio:#7a4cbb;
   --zone:#e2ecfb; --zone2:#fbefd9; --upf:#d9f2e7; --dnf:#fbe1e1;
 }
@@ -156,7 +156,7 @@ html[data-theme="light"] #rektproof-workspace{
 .rp-case-step h3{font-size:17px;margin:5px 0}
 .rp-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:12px 0}
 .rp-original{display:flex;flex-direction:column;align-items:stretch;text-align:left;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--text);padding:0;overflow:hidden;cursor:zoom-in;font:inherit;min-width:0}
-.rp-original img{display:block;width:100%;height:auto;object-fit:contain;background:#f8f9fa}
+.rp-original img{display:block;width:100%;height:auto;object-fit:contain;background:var(--surface-base)}
 .rp-original span{padding:7px 10px;font-size:12px;color:var(--muted)}
 .rp-reference,.rp-case-result{padding:12px 16px;border-radius:8px;background:var(--surface-2);border-left:3px solid var(--mint);margin:14px 0;font-size:13px;line-height:1.85}
 #rektproof-workspace .ms-section>label,.rp-answer label{display:grid;gap:6px;font-size:13px;color:var(--muted);margin:12px 0}
@@ -169,11 +169,11 @@ html[data-theme="light"] #rektproof-workspace{
 .rp-plan-errors{color:var(--red);font-size:13px;line-height:1.8}
 .rp-save-state{font-size:12px;color:var(--muted)}
 .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.rp-modal{--ink:var(--text);--mut:var(--muted);--page:var(--surface);--card:var(--surface-2);--grid:var(--line-soft);--up:#168363;--dn:#c54d4d;--acc:var(--blue);--acc2:var(--amber);--vio:#916bc0;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:14px;width:min(1200px,95vw);max-height:92vh;padding:20px;overflow:auto}
+.rp-modal{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:14px;width:min(1200px,95vw);max-height:92vh;padding:20px;overflow:auto}
 .rp-modal::backdrop{background:rgba(0,0,0,.65)}
 .rp-modal header{display:flex;justify-content:space-between;gap:12px;align-items:center}.rp-modal h2{font-size:19px;margin:0}.rp-modal p{font-size:13px;line-height:1.8;color:var(--text-secondary)}
 .rp-modal .rpb{max-width:none;overflow:auto}.rp-modal svg.fig{min-width:950px}
-.rp-image-scroll{overflow:auto;max-height:65vh;margin-top:12px;border:1px solid var(--line);background:#f7f8f9}
+.rp-image-scroll{overflow:auto;max-height:65vh;margin-top:12px;border:1px solid var(--line);background:var(--surface-base)}
 .rp-image-scroll img{display:block;width:100%;max-width:none;height:auto;transform-origin:top left}
 .rp-backup-label{display:grid;gap:8px;font-size:13px}.rp-backup-label textarea{width:100%;resize:vertical;font:12px/1.6 ui-monospace,monospace}
 .rp-modal select{background:var(--control-bg);color:var(--text);border:1px solid var(--control-border);padding:8px;border-radius:7px}
@@ -188,7 +188,6 @@ html[data-theme="light"] #rektproof-workspace{
 .rp-errors{border-left:3px solid var(--red);background:var(--red-soft);padding:8px 12px;margin-bottom:12px;color:var(--red);font-size:13px}
 .rp-svg-scroll{overflow:auto}
 .rp-original-wrap{margin:0;min-width:0}.rp-original-wrap .rp-original{width:100%}.rp-original-wrap figcaption{font-size:11.5px;margin:5px 2px;color:var(--muted)}
-.rp-modal{--zone:#dfe9fa;--zone2:#fbefd9;--upf:#d9f2e7;--dnf:#fbe1e1}
 /* Charts need readable labels before opening the zoom dialog. */
 .rp-case-step .rp-gallery,.rp-source-group .rp-gallery{grid-template-columns:minmax(0,1fr)}
 

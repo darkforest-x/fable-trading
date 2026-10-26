@@ -227,7 +227,8 @@
     const dlg = document.createElement("dialog"); dlg.className = "rp-modal";
     dlg.innerHTML = `<header><h2>${esc(title)}</h2><button class="rp-btn" data-close autofocus>关闭</button></header>${body}`;
     dlg.setAttribute("aria-labelledby","rp-modal-title");dlg.querySelector("h2").id="rp-modal-title";
-    const tokens=getComputedStyle(root());for(const key of ["ink","mut","grid","page","card","up","dn","acc","acc2","vio","zone","zone2","upf","dnf"])dlg.style.setProperty(`--${key}`,tokens.getPropertyValue(`--${key}`));
+    // The body-level dialog shares live CSS aliases with the reader. Copying
+    // computed colors here freezes an open diagram in its previous theme.
     document.body.appendChild(dlg); dlg.querySelector("[data-close]").addEventListener("click",()=>dlg.close());
     dlg.addEventListener("close",()=>dlg.remove()); dlg.showModal(); return dlg;
   }
