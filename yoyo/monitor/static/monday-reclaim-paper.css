@@ -344,6 +344,8 @@ body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-headi
 #monday-reclaim-paper .rp-coin small small {display:inline;}
 #monday-reclaim-paper .rp-coin>span:last-child>small {white-space:normal;overflow:visible;}
 #monday-reclaim-paper .rp-coin small>span {white-space:nowrap;}
+/* Stitch f56301aa72694cb58f4450afb088c191: original order score and shadow cause. */
+#monday-reclaim-paper .rp-coin small>.rp-order-meta {display:block;white-space:normal;color:var(--rp-muted);line-height:1.5;}
 @media(max-width:700px){
  #monday-reclaim-paper .rp-records {width:auto;}
  #monday-reclaim-paper .rp-ledger-heading>strong {display:none;}

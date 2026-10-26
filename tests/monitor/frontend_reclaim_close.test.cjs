@@ -16,6 +16,15 @@ test('only open funded records expose close actions and tranches remain visible 
  assert.doesNotMatch(rowHTML(position({stage:'closed'}),route({tab:'closed'}),200000),/data-rp-close/);
  assert.doesNotMatch(rowHTML(position({taken:0}),route(),200000),/data-rp-close/);
 });
+test('spike close preview honors the configured margin cap for each closed tranche',()=>{
+ const p=position({track:3060,margin_leverage:5,mark:50});
+ assert.equal(estimate(p,100).pnl,-15);assert.equal(estimate(p,50).pnl,-7.5);
+ assert.equal(estimate({...p,mark:110},50).pnl,3.72375);
+ assert.equal(estimate({...p,margin_leverage:4},100).pnl,-18.75);
+ assert.equal(estimate({...p,mark:null},100).pnl,null);
+ assert.equal(estimate({...p,margin_leverage:null},100),null);
+ assert.equal(estimate({...p,track:60},100).pnl,-37.5525);
+});
 test('double-clicks share one POST and uncertain retries preserve request identity',async()=>{
  let resolve,seq=0;const calls=[];
  const client=createSubmitter({uuid:()=>String(++seq),send:(id,payload)=>{calls.push({id,payload});return new Promise(r=>resolve=r);}});

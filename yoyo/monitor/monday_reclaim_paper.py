@@ -688,17 +688,17 @@ class ReclaimPaper:
             for t in db.execute("SELECT * FROM tracks ORDER BY track DESC").fetchall():
                 m = t["track"]
                 tr = members(m); marks = ",".join("?"*len(tr))
-                # Read the original entry score even after its signal has left the
+                # Read original entry and EMA order scores even after the signal has left the
                 # recent-touch page. LEFT JOIN preserves legacy position records.
                 # Add legs that never filled are bookkeeping only and are left out.
-                closed = [dict(r) for r in db.execute("SELECT p.*, s.score FROM positions p LEFT JOIN signals s ON s.id=p.signal_id "
+                closed = [dict(r) for r in db.execute("SELECT p.*, s.score, s.ema_order FROM positions p LEFT JOIN signals s ON s.id=p.signal_id "
                                                      f"WHERE p.track IN ({marks}) AND p.stage='closed' "
                                                      "AND NOT (p.parent_id IS NOT NULL AND p.taken=0) ORDER BY p.exit_ms DESC", tr)]
                 for r in closed:
                     r["exits"] = exits.get(r["id"], [])
                 taken = [r for r in closed if r["taken"]]
                 open_rows, pending_adds = [], []
-                for r in db.execute("SELECT p.*, s.score FROM positions p JOIN signals s ON s.id=p.signal_id "
+                for r in db.execute("SELECT p.*, s.score, s.ema_order FROM positions p JOIN signals s ON s.id=p.signal_id "
                                     f"WHERE p.track IN ({marks}) AND p.stage<>'closed' ORDER BY p.fill_ms DESC", tr):
                     r = dict(r); q = quotes.get(r["symbol"], {})
                     if r["stage"] == "pending_fill":  # resting add order, not a position yet

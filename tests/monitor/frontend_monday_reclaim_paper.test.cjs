@@ -163,3 +163,39 @@ test('account rule copy reads frozen configuration and does not promise net brea
  for(const pattern of [/独立模拟账户/,/区间 0.618/,/对侧 1.618/,/30% 兜底/,/0.17%/,/确认周期 60 分钟/,/主单与已成交加仓分别计笔/])assert.match(text,pattern);
  assert.doesNotMatch(text,/彻底覆盖|保证|NaN|undefined/);
 });
+
+test('spike routes and scopes preserve account allocation and explicit shadow reasons',()=>{
+ const d=snapshot(),state=ui.route({track:'spike'});
+ const p=position({track:3060,ema_order:4,score:.7});
+ d.tracks.spike=track({open:[p,...['no_slot','order_0','order_missing'].map((note,i)=>({...p,id:i+2,taken:0,notional:0,note,ema_order:i===1?0:null}))]});
+ assert.equal(state.track,'spike');assert.equal(ui.trackLabel(state.track),'spike');assert.equal(ui.validate(d),d);
+ assert.deepEqual(ui.rows(d,state).map(p=>p.id),[1]);
+ const shadow=ui.rows(d,{...state,scope:'shadow'});
+ assert.equal(shadow.length,3);
+ for(const [note,label] of [['no_slot','仓位已满'],['order_0','排列分不足'],['order_missing','排列分缺失']]){
+  const row=shadow.find(p=>p.note===note),html=ui.rowHTML(row,state,10000);
+  assert.match(ui.allocation(row),new RegExp(label));
+  assert.match(html,new RegExp(label));assert.doesNotMatch(html,/data-rp-close=/);
+ }
+ assert.match(ui.rowHTML(p,state,10000),/排列 4\/4/);
+ assert.equal(ui.targetLabel(p,'spike'),'周一低点');
+ delete d.tracks.spike;assert.deepEqual(ui.rows(d,state),[]);
+ assert.throws(()=>ui.validate({...d,tracks:{...d.tracks,spike:track({open:null})}}));
+});
+
+test('recorded order zero differs from missing values without inferring a current score',()=>{
+ assert.equal(ui.orderLabel(0),'排列 0/4');
+ for(const value of [null,undefined,NaN,-1,5,'3'])assert.equal(ui.orderLabel(value),'排列 —');
+ for(const tab of ['open','closed','events']){
+  const html=ui.rowHTML(position({ema_order:0}),ui.route({track:'spike',tab}),10000);
+  assert.match(html,/排列 0\/4/);assert.match(html,/OKX · 15m/);
+ }
+});
+
+test('spike rules use its own sizing, threshold and target without v2 gross cap',()=>{
+ const d=snapshot();d.tracks.spike=track({confirm_minutes:60});
+ d.spike={min_score:.6,min_order:3,slots:10,leverage:5,backstop_pct:18};
+ const text=ui.rulesHTML(d,'spike');
+ for(const pattern of [/最多 10 个资金仓位/,/5 倍杠杆/,/净值 ÷ 10/,/入场分 ≥ 0.60/,/排列分 ≥ 3/,/18% 兜底止损/,/确认周期 60 分钟/,/OKX · 15m/,/币安排列线尚未接入/])assert.match(text,pattern);
+ assert.doesNotMatch(text,/总名义敞口上限|按评分线性分配|NaN|undefined/);
+});

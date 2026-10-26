@@ -7,9 +7,11 @@
   const finite=Number.isFinite;
   function estimate(p,percentage){
     if(!p||p.taken!==1||p.stage==='closed'||!finite(p.remaining_notional)||p.remaining_notional<=0||!finite(p.entry)||p.entry<=0||!finite(percentage)||percentage<=0||percentage>100)return null;
+    if(p.track===3060&&(!finite(p.margin_leverage)||p.margin_leverage<=0))return null;
     const amount=p.remaining_notional*percentage/100,quantity=amount/p.entry;
+    const rawPnl=finite(p.mark)&&p.mark>0?p.side*(p.mark-p.entry)*quantity-amount*.0007:null;
     return {amount,quantity,remaining:(p.remaining_notional-amount)/p.entry,entryFee:amount*.0002,exitFee:amount*.0005,
-      pnl:finite(p.mark)&&p.mark>0?p.side*(p.mark-p.entry)*quantity-amount*.0007:null};
+      pnl:rawPnl===null?null:p.track===3060?Math.max(rawPnl,-amount/p.margin_leverage):rawPnl};
   }
   function createSubmitter({send,uuid=()=>crypto.randomUUID()}){
     let pending=null,key='',id='';
@@ -45,7 +47,8 @@
     const field=(label,value)=>`<div><dt>${label}</dt><dd>${value}</dd></div>`;
     function render(){
       const pct=Number(input.value),e=estimate(position,pct),base=position?.symbol.replace('-USDT-SWAP','')||'';
-      el('identity').innerHTML=`<b>${esc(base)} / USDT</b> <span class="${position?.side===1?'rp-positive':'rp-negative'}">${position?.side===1?'做多':'做空'}</span> <small>${({60:'60m',5:'5m',1060:'v3',2060:'v3add · 主单',2061:'v3add · 加仓'}[position?.track]||'未知账户')} 模拟</small>`;
+      dialog.querySelector('.rp-close-hint').textContent='按最新报价模拟成交；净盈亏含分摊开仓费与本次平仓费。'+(position?.track===3060?' spike 本次亏损按平仓份额的保证金封顶。':'');
+      el('identity').innerHTML=`<b>${esc(base)} / USDT</b> <span class="${position?.side===1?'rp-positive':'rp-negative'}">${position?.side===1?'做多':'做空'}</span> <small>${({60:'60m',5:'5m',1060:'v3',2060:'v3add · 主单',2061:'v3add · 加仓',3060:'spike'}[position?.track]||'未知账户')} 模拟</small>`;
       dialog.querySelectorAll('[data-close-percent]').forEach(b=>{b.setAttribute('aria-pressed',String(Number(b.dataset.closePercent)===pct));b.disabled=busy||success;});
       input.disabled=busy||success;
       el('estimate').innerHTML=field('当前持仓',`${number(position?.remaining_notional/position?.entry)} ${esc(base)}`)+field('拟平仓数量',`${number(e?.quantity)} ${esc(base)}`)+field('平仓后剩余',`${number(e?.remaining)} ${esc(base)}`)+field('参考价格',`${number(position?.mark)} USDT`)+field('预计平仓费 · Taker 0.05%',`${number(e?.exitFee)} USDT`)+field('分摊开仓费 · Maker 0.02%',`${number(e?.entryFee)} USDT`)+field('预计已实现净盈亏',`<b class="${e?.pnl>0?'rp-positive':e?.pnl<0?'rp-negative':''}">${money(e?.pnl)} USDT</b>`);

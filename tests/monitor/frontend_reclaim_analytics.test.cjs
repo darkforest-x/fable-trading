@@ -30,7 +30,7 @@ test('breakdowns label tranche counts separately and escape unexpected symbols',
 });
 
 test('named accounts validate their exact internal analytics identity and reject another account',()=>{
- for(const [key,id] of [['v3','1060'],['v3add','2060']]){
+ for(const [key,id] of [['v3','1060'],['v3add','2060'],['spike','3060']]){
   assert.equal(ui.validate({...data,track:id},key,0).track,id);
   for(const wrong of ['60','5',key,key==='v3'?'2060':'1060'])assert.throws(()=>ui.validate({...data,track:wrong},key,0));
  }

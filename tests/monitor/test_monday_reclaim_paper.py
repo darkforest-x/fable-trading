@@ -532,6 +532,22 @@ class SpikeTrackTests(PaperFixture):
         self.assertEqual((p["taken"], p["notional"], p["note"]), (0, 0., "order_0"))
         self.assertEqual(self.rows(e, "SELECT ema_order FROM signals"), [{"ema_order": 0}])
 
+    def test_snapshot_keeps_original_order_score_after_recent_signal_page_expires(self):
+        e, p = self.spike(.7)
+        self.assertEqual(e.snapshot()["tracks"]["spike"]["open"][0]["ema_order"], 4)
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch+MIN, "high": 101., "low": 94., "price": 100.})
+        self.touch += H5
+        self.client.now = self.touch+2000
+        for k in range(101):
+            self.spike(.7, f"NEW{k}-USDT-SWAP")
+        snap = e.snapshot()
+        self.assertNotIn(p["signal_id"], {s["id"] for s in snap["signals"]})
+        closed = next(r for r in snap["tracks"]["spike"]["closed"] if r["id"] == p["id"])
+        self.assertEqual((closed["ema_order"], closed["score"]), (4, .7))
+        with e.db() as db:
+            db.execute("UPDATE signals SET ema_order=NULL WHERE id=?", (p["signal_id"],))
+        self.assertIsNone(next(r for r in e.snapshot()["tracks"]["spike"]["closed"] if r["id"] == p["id"])["ema_order"])
+
     def test_no_row_below_score_0_6(self):
         e, p = self.spike(.55)
         self.assertIsNone(p)

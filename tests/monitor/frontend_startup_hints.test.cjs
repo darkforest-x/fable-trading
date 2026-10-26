@@ -87,3 +87,12 @@ test('cold named-account bookmarks warm only that account actual fill, not 60m o
  assert.equal(paperSymbol(d,new URLSearchParams('track=v3add&trade=4')),null);
  delete d.tracks.v3;assert.equal(paperSymbol(d,new URLSearchParams('track=v3')),null);
 });
+
+
+test('spike cold links warm only its funded row and never fall back when absent',()=>{
+ const p={id:3001,symbol:'SOL-USDT-SWAP',fill_ms:100,entry:10,side:1,taken:1,notional:500};
+ const d={tracks:{60:{open:[{...p,symbol:'BTC-USDT-SWAP'}]},spike:{open:[p,{...p,id:3002,symbol:'ETH-USDT-SWAP',taken:0,notional:0,fill_ms:200}]}}};
+ assert.equal(paperSymbol(d,new URLSearchParams('track=spike')),'SOL-USDT-SWAP');
+ assert.equal(paperSymbol(d,new URLSearchParams('track=spike&trade=3002')),'ETH-USDT-SWAP');
+ delete d.tracks.spike;assert.equal(paperSymbol(d,new URLSearchParams('track=spike')),null);
+});
