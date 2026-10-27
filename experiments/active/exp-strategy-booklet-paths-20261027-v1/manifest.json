@@ -1,0 +1,169 @@
+{
+  "accounts": {
+    "v3": {
+      "track": "v3",
+      "start": "2020-01-01",
+      "end": "2026-09-23 04:00:00+00:00",
+      "seed": 20261103,
+      "candidates": 2108,
+      "funded": 1712,
+      "note": "历史Binance成交；评分线性分配，总保证金≤净值，1倍；固定原研究首个随机种子，非10次中位数。保护偏移与当前账户相同。",
+      "sources": [
+        "exp-monday-limit-return-opt-20261027-v2"
+      ],
+      "allocator_result": {
+        "final_multiple": 89.96232954074674,
+        "max_drawdown_pct": 32.59547548993632,
+        "liquidations": 0,
+        "taken": 1712,
+        "win_pct": 56.425233644859816
+      },
+      "reconciliation_error": 2.9103830456733704e-11
+    },
+    "v3lock": {
+      "track": "v3lock",
+      "start": "2020-01-01",
+      "end": "2026-09-23 04:00:00+00:00",
+      "seed": 20261103,
+      "candidates": 2108,
+      "funded": 1713,
+      "note": "历史Binance成交；评分线性分配，总保证金≤净值，1倍；固定原研究首个随机种子，非10次中位数。保护偏移与当前账户相同。",
+      "sources": [
+        "exp-monday-limit-be-lock-compare-20261027-v1"
+      ],
+      "allocator_result": {
+        "final_multiple": 91.87387389413104,
+        "max_drawdown_pct": 32.02929587861413,
+        "liquidations": 0,
+        "taken": 1713,
+        "win_pct": 66.84179801517806
+      },
+      "reconciliation_error": 1.4551915228366852e-11
+    },
+    "v3add": {
+      "track": "v3add",
+      "start": "2020-01-01",
+      "end": "2026-09-23 04:00:00+00:00",
+      "seed": 20261103,
+      "candidates": 2481,
+      "funded": 1940,
+      "note": "历史Binance成交；评分线性分配，总保证金≤净值，1倍；固定原研究首个随机种子，非10次中位数。历史BE0，当前+0.17%。",
+      "sources": [
+        "exp-monday-limit-return-opt-20261027-v2"
+      ],
+      "allocator_result": {
+        "final_multiple": 214.55011572321794,
+        "max_drawdown_pct": 50.72498424787311,
+        "liquidations": 0,
+        "taken": 1940,
+        "win_pct": 37.628865979381445
+      },
+      "reconciliation_error": 1.4551915228366852e-11
+    },
+    "60": {
+      "track": "60",
+      "start": "2020-01-01",
+      "end": "2026-09-23 04:00:00+00:00",
+      "seed": null,
+      "candidates": 22708,
+      "funded": 17525,
+      "note": "历史Binance 60m/+0.17%成交；按当前每笔10%净值、总敞口1倍核算。仅补出资金路径，未重放K线成交。",
+      "sources": [
+        "exp-monday-limit-time-news-20261026-v1",
+        "exp-monday-limit-be-scalein-20261026-v1"
+      ],
+      "allocator_result": {
+        "final_multiple": 15.776503743356384,
+        "max_drawdown_pct": 32.71300015826202
+      },
+      "reconciliation_error": 2.9103830456733704e-11
+    },
+    "5": {
+      "track": "5",
+      "start": "2025-01-01",
+      "end": "2026-09-23 03:20:00+00:00",
+      "seed": null,
+      "candidates": 12606,
+      "funded": 11347,
+      "note": "原5m近侧目标基线、BE0、每笔10%净值。当前保护偏移为+0.17%；曲线不是当前版本精确回测。",
+      "sources": [
+        "exp-monday-limit-reclaim-allexits-20261025-v1"
+      ],
+      "allocator_result": {
+        "final_multiple": 1.1092591944597592,
+        "max_drawdown_pct": 38.12866608347949
+      },
+      "reconciliation_error": 6.366462912410498e-12
+    },
+    "spike": {
+      "track": "spike",
+      "start": "2020-01-01",
+      "end": "2026-09-17 17:30:00+00:00",
+      "seed": 20261102,
+      "candidates": 219,
+      "funded": 166,
+      "note": "原高胜率研究：BE0、10份×5倍、19%浮亏强平情景；当前+0.17%且保证金封顶。固定原研究首个种子，不是20次中位数。",
+      "sources": [
+        "exp-monday-limit-spike-hw-20261026-v1"
+      ],
+      "allocator_result": {
+        "final_multiple": 5.032098791499861,
+        "max_drawdown_pct": 21.188741245865938,
+        "liquidations": 2,
+        "skipped": 53,
+        "taken": 166,
+        "win_pct": 83.13253012048193
+      },
+      "reconciliation_error": 1.8189894035458565e-12
+    },
+    "v3add20": {
+      "track": "v3add20",
+      "start": "2020-01-01",
+      "end": "2026-09-23 04:00:00+00:00",
+      "seed": 20261103,
+      "candidates": 2481,
+      "funded": 2138,
+      "note": "修正后的20份动态保证金×3倍；历史BE0/MAE强平，当前+0.17%/保证金封顶。固定原研究首个种子，不是10次中位数。",
+      "sources": [
+        "exp-monday-limit-return-opt-20261027-v2"
+      ],
+      "allocator_result": {
+        "final_multiple": 313.48096202771154,
+        "max_drawdown_pct": 36.82616972172836,
+        "liquidations": 6,
+        "skipped": 343,
+        "taken": 2138,
+        "win_pct": 39.33582787652011
+      },
+      "reconciliation_error": 5.820766091346741e-11
+    },
+    "allin3": {
+      "track": "allin3",
+      "start": "2023-01-01",
+      "end": "2026-09-23 04:00:00+00:00",
+      "seed": 20261105,
+      "candidates": 777,
+      "funded": 336,
+      "note": "原研究首个2023年月度起点和首个种子，非最优起点。历史BE0/MAE强平，当前+0.17%/保证金封顶；补充本金单列，不计收益。",
+      "sources": [
+        "exp-monday-limit-langlang-20261027-v1"
+      ],
+      "allocator_result": {
+        "10": {
+          "days": 290.22569444444446,
+          "blowups": 0,
+          "liquidations": 0
+        },
+        "100": {
+          "days": 1061.9097222222222,
+          "blowups": 2,
+          "liquidations": 0
+        }
+      },
+      "reconciliation_error": 5.820766091346741e-11
+    }
+  },
+  "source_commit": "fb953e4da87bb294f294722aaf0e9ced99e390d6",
+  "training_eligible": false,
+  "production_eligible": false
+}

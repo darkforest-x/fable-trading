@@ -52,15 +52,15 @@ test('score accent uses a strict raw >0.5 boundary, independent of the entry gat
 test('lists filter independently without mutating or mixing track totals and shared events',()=>{
   const d=snapshot();d.tracks[60].open=[position(),position({id:2,symbol:'SUI-USDT-SWAP',taken:0,notional:0}),position({id:3,fill_ms:3000})];
   d.tracks[5].open=[position({id:4,symbol:'DOGE-USDT-SWAP'})];d.signals=[{id:5,symbol:'SOL-USDT-SWAP',status:'excluded',candle_ms:1}];
-  assert.deepEqual(ui.rows(d,ui.route()).map(x=>x.id),[3,1]);
-  assert.deepEqual(ui.rows(d,ui.route({scope:'shadow'})).map(x=>x.id),[2]);
+  assert.deepEqual(ui.rows(d,ui.route({track:'60'})).map(x=>x.id),[3,1]);
+  assert.deepEqual(ui.rows(d,ui.route({track:'60',scope:'shadow'})).map(x=>x.id),[2]);
   assert.deepEqual(ui.rows(d,ui.route({track:'5'})).map(x=>x.id),[4]);
-  assert.deepEqual(ui.rows(d,ui.route({scope:'all',q:' sui '})).map(x=>x.id),[2]);
+  assert.deepEqual(ui.rows(d,ui.route({track:'60',scope:'all',q:' sui '})).map(x=>x.id),[2]);
   assert.equal(ui.rows(d,ui.route({tab:'events',scope:'funded'})).length,1);
   assert.equal(d.tracks[60].open[0].id,1);assert.equal(d.tracks[60].stats.taken_closed,42);
 });
 test('route values are bounded and chart links preserve exact contract and selected track period',()=>{
-  assert.deepEqual(ui.route({track:'bad',tab:'bad',scope:'bad'}),{track:'60',tab:'open',scope:'funded',q:'',period:'5m',trade:'',symbol:''});
+  assert.deepEqual(ui.route({track:'bad',tab:'bad',scope:'bad'}),{track:'spike',tab:'open',scope:'funded',q:'',period:'15m',trade:'',symbol:''});
   assert.equal(ui.route({q:'x'.repeat(1000)}).q.length,80);
   assert.equal(ui.chartLink('SOL-USDT-SWAP','5'),'#monday-fib?symbol=SOL-USDT-SWAP&timeframe=5m');
   assert.equal(ui.chartLink('SOL-USDT-SWAP','60'),'#monday-fib?symbol=SOL-USDT-SWAP&timeframe=1H');
@@ -109,7 +109,7 @@ test('every ledger tab ranks raw scores descending, missing last, then newest on
   const data=snapshot(),input=[.5,null,.9,.4,.50001,0,.9].map((score,i)=>position({id:i+1,score,fill_ms:i,exit_ms:i,candle_ms:i}));
   data.signals=input;data.tracks[60].open=input;data.tracks[60].closed=input;
   for(const tab of ['events','open','closed']){
-    assert.deepEqual(ui.rows(data,ui.route({tab})).map(r=>r.id),[7,3,5,1,4,6,2]);
+    assert.deepEqual(ui.rows(data,ui.route({track:'60',tab})).map(r=>r.id),[7,3,5,1,4,6,2]);
     const html=ui.rowHTML(input[2],ui.route({tab,period:'15m'}),10000);
     assert.match(html,/rp-score is-high/);
     assert.match(html,/https:\/\/www.tradingview.com\/chart\/\?symbol=OKX%3ASOLUSDT.P/);
@@ -202,7 +202,7 @@ test('spike rules use its own sizing, threshold and target without v2 gross cap'
 
 test('paper 12H bookmark survives route parsing and invalid periods keep the default',()=>{
  assert.equal(ui.route({track:'spike',period:'12H'}).period,'12H');
- assert.equal(ui.route({period:'12Hutc'}).period,'5m');
+ assert.equal(ui.route({period:'12Hutc'}).period,'15m');
 });
 
 test('v3lock is an independent optional account with its own funded and shadow ledger',()=>{
@@ -300,3 +300,5 @@ test('v3add20 pending size is dynamic and current rules never inherit score-line
  assert.doesNotMatch(rules,/按评分线性分配|总名义敞口上限|等名义本金加仓/);
  assert.equal(ui.marginLeverage(d,'v3add20'),3);assert.equal(ui.marginLeverage({},'v3add20'),undefined);assert.equal(ui.marginLeverage(d,'v3add'),null);
 });
+
+test('home defaults to the owner-selected historical winner and 15-minute candles',()=>{assert.equal(ui.route().track,'spike');assert.equal(ui.route().period,'15m');assert.equal(ui.route({track:'v3add20',period:'4H'}).track,'v3add20');assert.equal(ui.route({track:'v3add20',period:'4H'}).period,'4H');});

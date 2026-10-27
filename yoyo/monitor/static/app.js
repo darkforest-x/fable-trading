@@ -4,7 +4,7 @@
 
   const $ = (id) => document.getElementById(id);
   const DEFAULT_VIEW = "signals";
-  const HOME_ROUTE = "#signals?pane=reclaim&track=60&tab=events&scope=funded&period=5m";
+  const HOME_ROUTE = "#signals?pane=reclaim&track=spike&tab=events&scope=funded&period=15m";
   const state = {
     view: DEFAULT_VIEW, signals: [], directSignals: [], performanceSignals: [], rawYoloSignals: [], candidates: [], signalScope: "retest", markets: [], status: null, health: null,
     signalsLoaded: false, directSignalsLoaded: false, directSignalTotal: 0, candidatesLoaded: false, candidateTotal: 0, candidateCounts: null, marketsLoaded: false, marketsLoading: false, marketsRetryTimer: null, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",

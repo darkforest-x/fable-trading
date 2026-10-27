@@ -32,6 +32,25 @@ test('v3add20 uses the corrected dynamic-margin study and labels historical BE0'
  assert.equal(r.rows[0][1],original['v3add|frac|N20|L3'].y2020_2024.final_multiple);
  assert.equal(r.rows.at(-1)[1],original['v3add|frac|N20|L3'].from_2020.final_multiple);
  assert.equal(r.capital_rows[1][1],original['v3add|slots|N20|L3'].from_2020.final_multiple);
- assert.match(r.note,/BE0/);assert.match(r.note,/当前保护价.*0.17%/);assert.match(ui.researchHTML(data,'v3add20'),/未保存连续历史资金路径/);
+ assert.match(r.note,/BE0/);assert.match(r.note,/当前保护价.*0.17%/);assert.match(ui.researchHTML(data,'v3add20'),/历史资金曲线暂时无法读取/);
  assert.equal(r.charts.length,3);assert.equal(r.images,undefined);
+});
+
+test('every booklet has an account-matched continuous history with a real drawdown path',()=>{
+ for(const t of paper.TRACKS){
+  const h=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../../yoyo/monitor/static/strategy-booklet',t+'-history.json')));
+  assert.equal(ui.validateHistory(h,t),h);assert.throws(()=>ui.validateHistory(h,'wrong'));
+  const html=ui.researchHTML(data,t,h);assert.match(html,/历史资金与回撤曲线/);assert.match(html,/月度/);assert.doesNotMatch(html,/历史资金曲线暂时无法读取/);
+  const chart=ui.equityOptions(h,'equity');assert.equal(chart.series[0].step,'end');assert.equal(chart.series[0].smooth,false);assert.equal(chart.series[0].data.length,h.points.length);
+  assert.equal(chart.series[1].data.length,h.points.length);assert.deepEqual(chart.dataZoom[0].xAxisIndex,[0,1]);
+  assert.equal(chart.series[0].data.at(-1)[1],h.summary.end);
+  const ret=ui.equityOptions(h,'returns');assert.equal(ret.series[0].data.at(-1)[1],h.refilled?h.summary.pnl:h.summary.return_pct);
+ }
+});
+test('historical refills are distinct from returns and keep pre-refill lows',()=>{
+ const h=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../../yoyo/monitor/static/strategy-booklet/allin3-history.json')));
+ assert.equal(h.refilled,true);assert.equal(h.summary.return_pct,null);assert.ok(h.summary.cash_added>0);
+ assert.match(ui.historyHTML(h),/补充本金不计入交易收益/);assert.match(ui.heatmapHTML(h),/月度交易净盈亏/);
+ assert.equal(ui.equityOptions(h).series[2].name,'累计净投入');assert.equal(ui.equityOptions(h,'returns').series.length,2);
+ assert.ok(h.points.some((p,i)=>i&&p[0]===h.points[i-1][0]&&p[1]>h.points[i-1][1]));
 });

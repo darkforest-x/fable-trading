@@ -16,9 +16,9 @@
   }
   function paperSymbol(data,params){
     const pinned=params.get('symbol');if(pinned)return /^[A-Z0-9]{1,32}-USDT-SWAP$/.test(pinned)?pinned:null;
-    const track=data?.tracks?.[['60','5','v3','v3add','spike','v3lock','allin3'].includes(params.get('track'))?params.get('track'):'60'],id=params.get('trade');
+    const track=data?.tracks?.[['60','5','v3','v3add','spike','v3lock','allin3','v3add20'].includes(params.get('track'))?params.get('track'):'spike'],id=params.get('trade');
     const rows=[...(track?.open||[]),...(track?.closed||[]),...(track?.latest_funded?[track.latest_funded]:[])].filter(p=>/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(p.symbol)&&[1,-1].includes(p.side)&&Number.isFinite(p.fill_ms)&&p.fill_ms>0&&Number.isFinite(p.entry)&&p.entry>0);
-    return (id?rows.find(p=>String(p.id)===id):rows.filter(p=>p.taken===1&&p.notional>0).sort((a,b)=>b.fill_ms-a.fill_ms||b.id-a.id)[0])?.symbol||null;
+    return (id?rows.find(p=>String(p.id)===id):rows.filter(p=>p.taken===1&&p.notional>0).sort((a,b)=>b.fill_ms-a.fill_ms||b.id-a.id)[0])?.symbol||(id?null:'BTC-USDT-SWAP');
   }
   if(typeof module!=='undefined')module.exports={initialSymbol,paperSymbol};
   if(typeof document==='undefined')return;
@@ -50,7 +50,7 @@
   if(paper){
     start('paper-snapshot','/api/monday-reclaim-paper')?.then(packet=>{
       const symbol=paperSymbol(packet?.value,params);if(!symbol)return;
-      const candidate=params.get('period'),period=['5m','15m','1H','4H','12H','1D'].includes(candidate)?candidate:'5m';
+      const candidate=params.get('period'),period=['5m','15m','1H','4H','12H','1D'].includes(candidate)?candidate:'15m';
       start('levels:'+symbol,'/api/monday-fib/levels?symbol='+encodeURIComponent(symbol));
       start(symbol+'|'+period,'/api/monday-fib/candles?symbol='+encodeURIComponent(symbol)+'&period='+period+'&wait_ms=8000');
     });

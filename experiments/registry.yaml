@@ -14587,11 +14587,11 @@ experiments:
 
   - experiment_id: exp-strategy-booklet-paths-20261027-v1
     source_repo: darkforest-x/fable-trading
-    status: active
+    status: completed
     question: Export missing continuous historical equity paths for the eight requested strategy booklets.
     single_variable: None; observe existing capital accounting on saved native fills, no new fills or parameter selection.
     canonical_report: experiments/active/exp-strategy-booklet-paths-20261027-v1/manifest.json
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: Original first seed, source costs and historical protection/liquidation assumptions retained; allin cash additions separate from P&L. No synthetic path from independent period endpoints.
+    notes: Eight historical event ledgers and static tear-sheet datasets exported. Original first seed, source costs and historical protection/liquidation assumptions retained; allin cash additions separate from P&L. Event cash reconciliation error below 6e-11; 5m ending capital and drawdown match the original saved result. No synthetic path from independent period endpoints. Historical versions and v3add child-sizing differences are labeled; no new native fill replay or parameter selection. Manifest and chart-index record sources; raw ledgers and fill caches remain in the registered local output directory.

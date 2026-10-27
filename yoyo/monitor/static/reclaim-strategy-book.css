@@ -87,3 +87,28 @@
 /* WebKit does not reliably sample the page through a transparent modal host.
  * Blur only its read-only background while the independent sheet is open. */
 body.rs-book-open.rs-book-webkit :is(#monday-reclaim-paper,#spike-alarm-dock){filter:blur(10px);}
+/* Stitch 3db5c4dc931244f8a1ea859d4acb8d49: time-series first tear sheet. */
+.rs-history-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 14px;font-size:10px;color:var(--book-muted);margin:0 0 7px;}
+.rs-backtest-metrics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;padding:10px 0 12px;border-bottom:1px solid var(--book-line);margin-bottom:8px;}
+.rs-backtest-metrics small{display:block;font-size:10px;color:var(--book-muted);}
+.rs-backtest-metrics strong{display:block;font-size:19px;letter-spacing:-.5px;font-weight:550;white-space:nowrap;}
+.rs-primary-figure{padding:12px 12px 4px;border:1px solid var(--book-line);border-radius:12px;background:var(--book-soft);}
+.rs-primary-figure>figcaption{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.rs-primary-figure figcaption b{font-size:12px;color:var(--book-ink);font-weight:550;}
+.rs-chart-modes{display:flex;gap:2px;background:var(--book-soft);border-radius:8px;}
+.rs-book .rs-chart-modes button{min-height:34px;padding:4px 10px;font-size:10px;}
+.rs-chart-modes button[aria-pressed=true]{color:var(--book-accent);background:var(--control-selected-bg,#0071e312);}
+.rs-history-chart{width:100%;height:390px;}
+.rs-primary-figure .rs-muted{margin:5px 0;font-size:10px;}
+.rs-period-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:10px;margin-bottom:10px;}
+.rs-period-grid>figure{min-width:0;margin:0;padding:12px;border:1px solid var(--book-line);border-radius:12px;background:var(--book-soft);}
+.rs-heatmap{margin:10px 0 2px;}
+.rs-heatmap table{font-size:9px;}
+.rs-heatmap :is(th,td){padding:7px 3px;text-align:center;border:2px solid transparent;font-variant-numeric:tabular-nums;}
+.rs-heatmap td.is-gain{background:rgb(21 164 117 / var(--cell-alpha));color:var(--book-ink);}
+.rs-heatmap td.is-loss{background:rgb(227 60 94 / var(--cell-alpha));color:var(--book-ink);}
+.rs-heatmap td.is-flat{background:var(--book-soft);color:var(--book-muted);}
+.rs-month-missing{color:var(--book-muted);opacity:.5;}
+.rs-sides{max-width:600px;}
+@media(max-width:1200px){.rs-backtest-metrics{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}.rs-backtest-metrics strong{font-size:18px;}.rs-period-grid{grid-template-columns:1fr;}.rs-heatmap :is(th,td){padding:7px 4px;}}
+@media(max-width:700px){.rs-backtest-metrics{gap:10px 6px;}.rs-backtest-metrics strong{font-size:15px;}.rs-backtest-metrics small{font-size:9px;}.rs-primary-figure{padding:8px 4px 4px;}.rs-history-chart{height:345px;}.rs-primary-figure>figcaption{padding:0 5px;}.rs-period-grid>figure{padding:8px 6px;}.rs-heatmap table{min-width:490px;}.rs-history-meta{font-size:9px;}.rs-book .rs-primary-figure .rs-muted{padding:0 5px;}}
