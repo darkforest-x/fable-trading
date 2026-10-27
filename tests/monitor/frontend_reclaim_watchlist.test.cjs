@@ -7,18 +7,17 @@ const position=(symbol,x={})=>({id:1,symbol:symbol+'-USDT-SWAP',taken:1,notional
 const list=require('../../yoyo/monitor/static/monday-list-model.js');
 const disk=()=>{const store=new Map();return {getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)};};
 const snapshot=items=>({items,now_ms:10000,week:'2026-10-19'});
-test('paper list is identical to Monday policy across every filter, history and favorites',()=>{
+test('touch tabs keep the shared Monday history policy while All needs a full catalog',()=>{
  const data=snapshot([coin('SOL',{touches:{upper:{source:'live',observed_ms:9000}}}),coin('DOGE',{touches:{lower:{source:'history',observed_ms:10000,candle_ms:1000}}}),coin('BTC')]);
  const prefs=list.createListPreferences(disk());prefs.toggle('BTC-USDT-SWAP');
- for(const filter of Object.keys(list.FILTERS))for(const q of ['', 'btc', 'USDT'])assert.deepEqual(ui.model(data,prefs,{q,filter}).items,list.selectRows(data.items,q,filter,data.now_ms,prefs.favorites()));
- assert.equal(ui.model(data,prefs).total,2);assert.deepEqual(ui.model(data,prefs).items.map(r=>r.symbol),['SOL-USDT-SWAP','DOGE-USDT-SWAP']);
- assert.equal(ui.model(data,prefs,{filter:'favorites'}).items[0].symbol,'BTC-USDT-SWAP');
+ for(const filter of ['upper','lower'])for(const q of ['', 'btc', 'USDT'])assert.deepEqual(ui.model(data,prefs,{q,filter}).items,list.selectRows(data.items,q,filter,data.now_ms,prefs.favorites()));
+ assert.equal(ui.model(data,prefs).total,0);assert.deepEqual(ui.model(data,prefs).items,[]);
 });
 test('shared storage removes the same weekly touch on both pages and supports undo',()=>{
  const storage=disk(),p=list.createListPreferences(storage),other=list.createListPreferences(storage),item=coin('SOL',{touches:{upper:{source:'live',observed_ms:9000}}}),data=snapshot([item]);
  p.toggle(item.symbol);other.read();assert.equal(other.has(item.symbol),true);
- const undo=p.remove(item,data.week);other.read();assert.equal(ui.model(data,other).total,0);
- other.undo(undo);p.read();assert.equal(ui.model(data,p).total,1);
+ const undo=p.remove(item,data.week);other.read();assert.equal(ui.model(data,other,{filter:'upper'}).total,0);
+ other.undo(undo);p.read();assert.equal(ui.model(data,p,{filter:'upper'}).total,1);
 });
 test('row exposes separate chart, TradingView, exact inspection, favorite and removal actions',()=>{
  const item=coin('SOL',{price:null,touches:{lower:{source:'live',observed_ms:1000}}});
@@ -94,4 +93,27 @@ test('horizontal dragging suppresses pointer clicks but keeps taps and keyboard 
  lane.fire('pointerdown',{...down,pointerType:'touch'});events.fire('pointermove',{pointerId:1,clientX:40});
  assert.equal(lane.scrollLeft,110);events.fire('pointercancel',{pointerId:1});
  assert.equal(lane.fire('click',{detail:1}).stopped,true);reset();assert.equal(lane.fire('click',{detail:1}).stopped,false);
+});
+
+const catalog=require('../../yoyo/monitor/static/symbol-list-model.js');
+const quote=(symbol,volume,extra={})=>({symbol:symbol+'-USDT-SWAP',last:'100',volume_usdt_24h:String(volume),change_24h_percent:'2',expires_ms:20000,...extra});
+test('All includes untouched live contracts and shares terminal volume ordering',()=>{
+ const prefs=list.createListPreferences(disk()),data=snapshot([coin('SOL',{touches:{lower:{source:'live',observed_ms:9000}}})]);
+ const quotes=[quote('SOL',50),quote('BTC',100),quote('DOGE',30),quote('NEW',900,{expires_ms:9000})];
+ const view=ui.model(data,prefs,{catalog:quotes,now:10000});
+ assert.deepEqual(view.items.map(x=>x.symbol),['BTC','SOL','DOGE','NEW'].map(x=>x+'-USDT-SWAP'));
+ assert.equal(view.total,4);assert.equal(view.items.at(-1).price,null);assert.equal(view.items.at(-1).volume,null);
+ assert.equal(view.items[0].touches,undefined);assert.equal(view.items[1].touches.lower.observed_ms,9000);
+ assert.deepEqual(ui.model(data,prefs,{catalog:quotes,now:10000,q:'doge'}).items.map(x=>x.symbol),['DOGE-USDT-SWAP']);
+ prefs.toggle('BTC-USDT-SWAP');assert.equal(ui.model(data,prefs,{catalog:quotes,now:10000,filter:'favorites'}).items[0].symbol,'BTC-USDT-SWAP');
+ prefs.remove(data.items[0],data.week);assert.equal(ui.model(data,prefs,{catalog:quotes,now:10000}).items.length,4);
+ assert.equal(ui.recentRows(data,prefs).length,0);
+});
+test('catalog validates the endpoint envelope and stale quotes never become zero',()=>{
+ const rows=[quote('BTC',10)];assert.deepEqual(catalog.validateCatalog({symbols:rows}),rows);
+ for(const d of [rows,{}, {symbols:[]},{symbols:[...rows,...rows]},{symbols:[{symbol:'<x>'}]}])assert.throws(()=>catalog.validateCatalog(d));
+ assert.equal(catalog.number({...rows[0],expires_ms:9000},'last',10000),null);
+ assert.equal(catalog.number({...rows[0],last:''},'last',10000),null);
+ const html=ui.rowHTML({symbol:'NEW-USDT-SWAP',catalog:true,price:null,volume:null,change:null,stale:true},'');
+ assert.match(html,/行情待更新/);assert.doesNotMatch(html,/data-watch-action="remove"|收藏币种|0.00%/);
 });

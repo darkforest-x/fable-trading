@@ -42,7 +42,7 @@
   --space-xs:4px;--space-sm:6px;--space-md:10px;--space-lg:16px;--space-xl:20px;--space-2xl:28px;
   --motion-fast:180ms;--motion-panel:220ms;--motion-enter:240ms;
   --motion-ease:cubic-bezier(.22,1,.36,1);--motion-standard:cubic-bezier(.2,.7,.3,1);
-  --glass-dock:rgba(255,255,255,.28);--glass-panel:rgba(255,255,255,.65);--glass-sheet:rgba(255,255,255,.82);
+  --glass-dock:rgba(255,255,255,.28);--glass-panel:rgba(255,255,255,.65);--glass-sheet:rgba(255,255,255,.82);--glass-reading:rgba(248,250,252,.58);--glass-reading-blur:24px;--glass-reading-saturation:160%;
   --glass-edge:rgba(255,255,255,.75);--glass-blur:20px;--glass-saturation:145%;
   --panel-shadow:0 8px 28px #34465a0a,inset 0 1px 0 #ffffffb8;--elevated-shadow:0 20px 60px #3040501a,0 3px 12px #30405008;
 }
@@ -67,7 +67,7 @@ html[data-theme=dark],:host([data-theme=dark]){
  --brand-bg:#5aa9ff18;--brand-border:#5aa9ff40;--on-accent:#101318;--brand-on:#101318;
  --action-border:#5aa9ff40;--action-filled-text:#101318;--card-fresh-border:#5aa9ff55;
  --notice-border:#e6b56740;--notice-bg:#e6b56712;--notice-text:#e6b567;
- --glass-dock:rgba(28,34,44,.72);--glass-panel:rgba(28,34,44,.78);--glass-sheet:rgba(22,27,36,.96);--glass-edge:#ffffff17;
+ --glass-dock:rgba(28,34,44,.72);--glass-panel:rgba(28,34,44,.78);--glass-sheet:rgba(22,27,36,.96);--glass-reading:rgba(18,24,33,.65);--glass-edge:#ffffff17;
  --glass-opaque-dock:#1c222c;--glass-opaque-panel:#1c222c;--glass-opaque-sheet:#161b24;
  --panel-shadow:0 12px 32px -6px #00000066,inset 0 1px 0 #ffffff08;--elevated-shadow:0 20px 60px #00000080;
 }
@@ -75,8 +75,8 @@ html[data-theme=dark],:host([data-theme=dark]){
 /* Material fallbacks live with the palette so shadow-root workspaces inherit
  * the same accessibility behavior as ordinary pages. */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
- :root,html[data-theme],:host,:host([data-theme]){--glass-dock:var(--glass-opaque-dock);--glass-panel:var(--glass-opaque-panel);--glass-sheet:var(--glass-opaque-sheet)}
+ :root,html[data-theme],:host,:host([data-theme]){--glass-dock:var(--glass-opaque-dock);--glass-panel:var(--glass-opaque-panel);--glass-sheet:var(--glass-opaque-sheet);--glass-reading:var(--glass-opaque-sheet)}
 }
 @media(prefers-reduced-transparency:reduce){
- :root,html[data-theme],:host,:host([data-theme]){--glass-dock:var(--glass-opaque-dock);--glass-panel:var(--glass-opaque-panel);--glass-sheet:var(--glass-opaque-sheet)}
+ :root,html[data-theme],:host,:host([data-theme]){--glass-dock:var(--glass-opaque-dock);--glass-panel:var(--glass-opaque-panel);--glass-sheet:var(--glass-opaque-sheet);--glass-reading:var(--glass-opaque-sheet)}
 }

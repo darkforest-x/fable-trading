@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const groups = {
-    signals: ['signal-history.css','signal-components.css','okx-execution.css','signal-workspace.css','monday-reclaim-paper.css','okx-execution.js','public-chart-cache.js','chart-history.js','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','yolo-preview-sheet.js','reclaim-chart.js','chart-focus.js','monday-list-model.js','reclaim-watchlist.js','reclaim-analytics.js','reclaim-close.js','monday-quick.js','home-ticket.css','home-ticket.js','monday-reclaim-paper.js','signal-workspace.js'],
+    signals: ['signal-history.css','signal-components.css','okx-execution.css','signal-workspace.css','monday-reclaim-paper.css','okx-execution.js','public-chart-cache.js','chart-history.js','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','yolo-preview-sheet.js','reclaim-chart.js','chart-focus.js','monday-list-model.js','symbol-list-model.js','reclaim-watchlist.js','reclaim-analytics.js','reclaim-close.js','monday-quick.js','home-ticket.css','home-ticket.js','reclaim-strategy-book.css','reclaim-strategy-book.js','monday-reclaim-paper.js','signal-workspace.js'],
     'signal-charts': ['echarts-6.1.0.min.js'],
     research: ['research.css','research.js'],
     platform: ['research.css','platform.css','platform.js'],
@@ -14,7 +14,7 @@
     knowledge: ['research.css','knowledge.css','knowledge.js'],
     retest: ['v130.css','v130.js'],
     copier: ['research.css','market-sync.css','copier.css','copier.js'],
-    market: ['market-terminal.css','research.css','v130.css','market-sync.css','market-accounts.css','range-chart.css','range-chart.js','market-accounts.js','market-intelligence.js','market-terminal.js','market-sync.js'],
+    market: ['market-terminal.css','research.css','v130.css','market-sync.css','market-accounts.css','range-chart.css','range-chart.js','market-accounts.js','market-intelligence.js','symbol-list-model.js','market-terminal.js','market-sync.js'],
     'trading-books': ['research.css','reading-tools.css','reading-tools.js','trading-books.css','trading-books-study.js','trading-books.js'],
     orderflow: ['research.css','market-sync.css','reading-tools.css','reading-tools.js','orderflow.css','orderflow.js'],
     'monday-fib': ['floating-layout.js','monday-fib.css','public-chart-cache.js','chart-history.js','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','monday-quick.js','monday-list-model.js','monday-fib.js'],

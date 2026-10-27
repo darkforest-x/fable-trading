@@ -31,13 +31,7 @@
   }
   function average(rows,n,step){let sum=0;return rows.map((r,i)=>{sum+=r.close;if(i>=n)sum-=rows[i-n].close;return i>=n-1&&r.time-rows[i-n+1].time===(n-1)*step?{time:r.time,value:sum/n}:null;}).filter(Boolean);}
   function exponential(rows,n,step){let value,count=0,previous;const alpha=2/(n+1);return rows.flatMap(r=>{if(previous!==undefined&&r.time-previous!==step)count=0;value=count?alpha*r.close+(1-alpha)*value:r.close;count++;previous=r.time;return count>=n?[{time:r.time,value}]:[];});}
-  function rankedSymbols(symbols,quotes,order='default',query='',now=Date.now()){
-    const number=(q,key)=>q?.expires_ms>now&&q[key]!=null&&q[key]!==''&&Number.isFinite(Number(q[key]))?Number(q[key]):null;
-    const rows=[...new Set(symbols)].filter(s=>base(s).toLowerCase().includes(query.trim().toLowerCase()));
-    if(order==='default')return rows;
-    const key=order==='volume'?'volume_usdt_24h':'change_24h_percent',direction=order==='losers'?1:-1;
-    return rows.sort((a,b)=>{const x=number(quotes.get(a),key),y=number(quotes.get(b),key);if(x===null||y===null)return x===y?a.localeCompare(b):x===null?1:-1;return direction*(x-y)||a.localeCompare(b);});
-  }
+  const {rankedSymbols}=typeof module!=='undefined'?require('./symbol-list-model.js'):window.SpikeSymbolList;
   if(typeof module!=='undefined')module.exports={candles,daily,average,exponential,rankedSymbols};
   if(typeof document==='undefined')return;
   const chartTools=window.SpikeChartTools,chartViews=new chartTools.Views();

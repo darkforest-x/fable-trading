@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPIKE · 1.618 币种全市场与策略白皮书抽屉工作台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              blue: '#0071e3',
+              cyan: '#00e5ff',
+              emerald: '#10b981',
+              rose: '#f43f5e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .dark .glass-panel {
+      background: rgba(16, 20, 28, 0.78);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 16px 40px -4px rgba(0, 0, 0, 0.45);
+    }
+    .glass-panel-subtle {
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+    }
+    .dark .glass-panel-subtle {
+      background: rgba(22, 27, 38, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .thin-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .thin-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.35);
+      border-radius: 9999px;
+    }
+    .dark .thin-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.2);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .drawer-transition {
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="h-full w-full overflow-hidden select-none bg-slate-100 text-slate-800 antialiased font-sans transition-colors duration-200 dark:bg-[#0c0f16] dark:text-slate-100">
+
+  <!-- ==================== 1. FULL VIEWPORT IMMERSIVE WALLPAPER CANVAS ==================== -->
+  <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+    <!-- SVG Chart Wallpaper -->
+    <svg class="w-full h-full" viewBox="0 0 1440 900" preserveAspectRatio="none">
+      <defs>
+        <pattern id="grid-dots" width="48" height="48" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1" class="fill-slate-300/40 dark:fill-slate-800/60" />
+        </pattern>
+        <linearGradient id="volGradLong" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#10b981" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#10b981" stop-opacity="0.02"/>
+        </linearGradient>
+        <linearGradient id="volGradShort" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#f43f5e" stop-opacity="0.02"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Background dot matrix -->
+      <rect width="100%" height="100%" fill="url(#grid-dots)" />
+
+      <!-- Watermark Big Symbol -->
+      <text x="50%" y="54%" text-anchor="middle" dominant-baseline="middle"
+            class="fill-slate-900/[0.035] dark:fill-white/[0.03] font-mono font-bold text-[120px] md:text-[210px] tracking-tighter">
+        SOL1H
+      </text>
+
+      <!-- Horizontal Reference Price Lines (Full view) -->
+      <!-- Upper 1.618 Solid Line -->
+      <line x1="0" y1="184" x2="1440" y2="184" stroke="#f43f5e" stroke-width="1.25" stroke-opacity="0.75" />
+      <!-- Monday High -->
+      <line x1="0" y1="262" x2="1440" y2="262" stroke="#94a3b8" stroke-width="1" stroke-dasharray="6,6" stroke-opacity="0.5" />
+      <!-- Entry Reference / Breakeven -->
+      <line x1="0" y1="368" x2="1440" y2="368" stroke="#0071e3" stroke-width="1" stroke-dasharray="4,4" stroke-opacity="0.6" />
+      <!-- Monday Low -->
+      <line x1="0" y1="620" x2="1440" y2="620" stroke="#94a3b8" stroke-width="1" stroke-dasharray="6,6" stroke-opacity="0.5" />
+      <!-- Lower 1.618 Solid Line -->
+      <line x1="0" y1="730" x2="1440" y2="730" stroke="#10b981" stroke-width="1.25" stroke-opacity="0.75" />
+
+      <!-- Current Realtime Tick Dashed (4px dash, 4px gap) -->
+      <line x1="0" y1="486" x2="1440" y2="486" stroke="#0071e3" stroke-width="1.2" stroke-dasharray="4,4" stroke-opacity="0.9" />
+
+      <!-- Candlestick Series Simulated (Clean aesthetic) -->
+      <g opacity="0.88">
+        <!-- Week 1 - Trend run to Monday High -->
+        <line x1="140" y1="700" x2="140" y2="580" stroke="#10b981" stroke-width="1.5" />
+        <rect x="134" y="610" width="12" height="74" fill="#10b981" rx="1.5" />
+
+        <line x1="220" y1="630" x2="220" y2="510" stroke="#10b981" stroke-width="1.5" />
+        <rect x="214" y="530" width="12" height="85" fill="#10b981" rx="1.5" />
+
+        <line x1="300" y1="540" x2="300" y2="420" stroke="#10b981" stroke-width="1.5" />
+        <rect x="294" y="440" width="12" height="76" fill="#10b981" rx="1.5" />
+
+        <line x1="380" y1="460" x2="380" y2="340" stroke="#10b981" stroke-width="1.5" />
+        <rect x="374" y="360" width="12" height="80" fill="#10b981" rx="1.5" />
+
+        <line x1="460" y1="380" x2="460" y2="250" stroke="#10b981" stroke-width="1.5" />
+        <rect x="454" y="270" width="12" height="92" fill="#10b981" rx="1.5" />
+
+        <!-- Peak wick touch to Upper 1.618! -->
+        <line x1="540" y1="184" x2="540" y2="340" stroke="#f43f5e" stroke-width="1.5" />
+        <rect x="534" y="220" width="12" height="96" fill="#f43f5e" rx="1.5" />
+
+        <line x1="620" y1="210" x2="620" y2="380" stroke="#f43f5e" stroke-width="1.5" />
+        <rect x="614" y="240" width="12" height="110" fill="#f43f5e" rx="1.5" />
+
+        <line x1="700" y1="310" x2="700" y2="460" stroke="#f43f5e" stroke-width="1.5" />
+        <rect x="704" y="330" width="12" height="90" fill="#f43f5e" rx="1.5" />
+
+        <line x1="780" y1="410" x2="780" y2="520" stroke="#10b981" stroke-width="1.5" />
+        <rect x="774" y="440" width="12" height="54" fill="#10b981" rx="1.5" />
+
+        <line x1="860" y1="460" x2="860" y2="560" stroke="#f43f5e" stroke-width="1.5" />
+        <rect x="854" y="475" width="12" height="65" fill="#f43f5e" rx="1.5" />
+
+        <line x1="940" y1="490" x2="940" y2="580" stroke="#10b981" stroke-width="1.5" />
+        <rect x="934" y="510" width="12" height="42" fill="#10b981" rx="1.5" />
+
+        <line x1="1020" y1="480" x2="1020" y2="595" stroke="#f43f5e" stroke-width="1.5" />
+        <rect x="1014" y="495" width="12" height="78" fill="#f43f5e" rx="1.5" />
+
+        <!-- Current realtime candle -->
+        <line x1="1100" y1="472" x2="1100" y2="530" stroke="#10b981" stroke-width="1.5" />
+        <rect x="1094" y="480" width="12" height="34" fill="#10b981" rx="1.5" />
+      </g>
+
+      <!-- Volume bars lower section -->
+      <g opacity="0.6">
+        <rect x="134" y="800" width="12" height="60" fill="url(#volGradLong)" rx="1"/>
+        <rect x="214" y="785" width="12" height="75" fill="url(#volGradLong)" rx="1"/>
+        <rect x="294" y="810" width="12" height="50" fill="url(#volGradLong)" rx="1"/>
+        <rect x="374" y="770" width="12" height="90" fill="url(#volGradLong)" rx="1"/>
+        <rect x="454" y="730" width="12" height="130" fill="url(#volGradLong)" rx="1"/>
+        <rect x="534" y="690" width="12" height="170" fill="url(#volGradShort)" rx="1"/>
+        <rect x="614" y="740" width="12" height="120" fill="url(#volGradShort)" rx="1"/>
+        <rect x="704" y="790" width="12" height="70" fill="url(#volGradShort)" rx="1"/>
+        <rect x="774" y="820" width="12" height="40" fill="url(#volGradLong)" rx="1"/>
+        <rect x="854" y="815" width="12" height="45" fill="url(#volGradShort)" rx="1"/>
+        <rect x="934" y="830" width="12" height="30" fill="url(#volGradLong)" rx="1"/>
+        <rect x="1014" y="805" width="12" height="55" fill="url(#volGradShort)" rx="1"/>
+        <rect x="1094" y="825" width="12" height="35" fill="url(#volGradLong)" rx="1"/>
+      </g>
+
+      <!-- Right Axis Price Labels -->
+      <g class="font-mono text-[11px] font-medium" text-anchor="end">
+        <text x="1425" y="188" class="fill-rose-500 font-semibold">上1.618 · 198.50</text>
+        <text x="1425" y="266" class="fill-slate-400 dark:fill-slate-500">周一高 · 188.00</text>
+        <text x="1425" y="372" class="fill-brand-blue font-semibold">入场保本 · 184.50</text>
+        <text x="1425" y="490" class="fill-slate-700 dark:fill-slate-300 font-bold bg-white px-1">现价 · 170.96</text>
+        <text x="1425" y="624" class="fill-slate-400 dark:fill-slate-500">周一低 · 168.00</text>
+        <text x="1425" y="734" class="fill-emerald-500 font-semibold">下1.618 · 156.20</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- ==================== 2. DESKTOP/MOBILE TOP SYSTEM APP BAR ==================== -->
+  <header class="relative z-30 flex items-center justify-between px-3 md:px-5 h-13 py-2.5">
+    <!-- Left: Brand + Symbol drawer trigger -->
+    <div class="flex items-center gap-2 md:gap-3">
+      <div class="glass-panel flex items-center gap-2 px-3 py-1.5 rounded-full shadow-sm">
+        <span class="text-amber-500 font-black text-sm tracking-wider flex items-center gap-1">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          SPIKE
+        </span>
+        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300">
+          1.618
+        </span>
+      </div>
+
+      <!-- Quick Symbol Switch & Drawer Trigger Button -->
+      <button id="toggleSymbolDrawerBtn"
+              class="glass-panel flex items-center gap-2 px-3 py-1.5 rounded-full hover:border-brand-blue/50 transition-all text-xs font-medium group active:scale-95">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="font-bold text-slate-900 dark:text-white">SOL/USDT</span>
+        <span class="font-mono text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">+7.34%</span>
+        <span class="text-[11px] text-slate-400 font-mono hidden sm:inline">24h 1.84B U</span>
+        <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+
+      <!-- Pinned Fast Watchlist Pills (Desktop) -->
+      <div class="hidden lg:flex items-center gap-1.5">
+        <button class="glass-panel-subtle px-2.5 py-1 rounded-full text-[11px] font-mono hover:bg-white dark:hover:bg-slate-800 transition-colors flex items-center gap-1">
+          <span class="font-semibold text-slate-700 dark:text-slate-200">BTC</span>
+          <span class="text-rose-500 font-medium">67.4k</span>
+        </button>
+        <button class="glass-panel-subtle px-2.5 py-1 rounded-full text-[11px] font-mono hover:bg-white dark:hover:bg-slate-800 transition-colors flex items-center gap-1">
+          <span class="font-semibold text-slate-700 dark:text-slate-200">ETH</span>
+          <span class="text-emerald-500 font-medium">2,618</span>
+        </button>
+        <button class="glass-panel-subtle px-2.5 py-1 rounded-full text-[11px] font-mono hover:bg-white dark:hover:bg-slate-800 transition-colors flex items-center gap-1">
+          <span class="font-semibold text-slate-700 dark:text-slate-200">SUI</span>
+          <span class="text-emerald-500 font-medium">2.08</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Center/Right: 7-Row Account Selector + Stats Summary + Theme Switch -->
+    <div class="flex items-center gap-2 md:gap-3">
+
+      <!-- Anchored 7-Row Popover Controller -->
+      <div class="relative">
+        <button id="accountPopoverBtn"
+                class="glass-panel flex items-center gap-2.5 px-3 py-1.5 rounded-full hover:border-brand-blue/50 transition-all active:scale-95 shadow-sm text-xs"
+                aria-expanded="false" aria-haspopup="true">
+          <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+          <div class="flex flex-col text-left">
+            <span class="text-[9px] uppercase tracking-wider text-slate-400 font-mono leading-none">模拟账户</span>
+            <span id="currentAccountLabel" class="font-bold text-slate-900 dark:text-white leading-tight">allin3 (3x全仓)</span>
+          </div>
+          <span class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold hidden sm:inline">1,000.00 U</span>
+          <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" id="popoverArrow" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+
+        <!-- Anchored Popover Menu (7 Rows) -->
+        <div id="accountPopoverMenu"
+             class="hidden absolute right-0 mt-2 w-80 sm:w-88 glass-panel rounded-2xl p-2 z-50 shadow-2xl border border-white/80 dark:border-white/10 origin-top-right transition-all">
+          <div class="flex items-center justify-between px-3 py-2 border-b border-slate-200/50 dark:border-slate-800/80 mb-1">
+            <div class="flex items-center gap-1.5">
+              <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">独立模拟账户 (7席)</span>
+            </div>
+            <span class="text-[10px] font-mono text-slate-400">点击书标开研报</span>
+          </div>
+
+          <div class="space-y-1">
+            <!-- Row 1: 60m -->
+            <div class="group flex items-center justify-between p-1.5 rounded-xl hover:bg-white/70 dark:hover:bg-slate-800/70 transition-colors">
+              <button class="flex-1 flex items-center gap-2.5 text-left px-2 py-1 rounded-lg account-select-btn" data-account="60m" data-name="60m 主轨">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600 status-dot"></span>
+                <div class="flex flex-col">
+                  <span class="text-xs font-semibold text-slate-800 dark:text-slate-100">60m 主轨</span>
+                  <span class="text-[10px] text-slate-400 font-mono">1h周期收线确认 · 0.17%保本</span>
+                </div>
+              </button>
+              <button class="open-booklet-btn p-2 rounded-lg text-slate-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
+                      data-strategy="60m" title="查看 60m 策略白皮书与回测">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+              </button>
+            </div>
+
+            <!-- Row 2: 5m -->
+            <div class="group flex items-center justify-between p-1.5 rounded-xl hover:bg-white/70 dark:hover:bg-slate-800/70 transition-colors">
+              <button class="flex-1 flex items-center gap-2.5 text-left px-2 py-1 rounded-lg account-select-btn" data-account="5m" data-name="5m 研究轨">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600 status-dot"></span>
+                <div class="flex flex-col">
+                  <span class="text-xs font-semibold text-slate-800 dark:text-slate-100">5m 研究轨</span>
+                  <span class="text-[10px] text-slate-400 font-mono">微观次级入场 · 动态止损</span>
+                </div>
+              </button>
+              <button class="open-booklet-btn p-2 rounded-lg text-slate-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
+                      data-strategy="5m" title="查看 5m 策略白皮书与回测">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+              </button>
+            </div>
+
+            <!-- Row 3: v3 -->
+            <div class="group flex items-center justify-between p-1.5 rounded-xl hover:bg-white/70 dark:hover:bg-slate-800/70 transition-colors">
+              <button class="flex-1 flex items-center gap-2.5 text-left px-2 py-1 rounded-lg account-select-btn" data-account="v3" data-name="v3 基准">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600 status-dot"></span>
+                <div class="flex flex-col">
+                  <span class="text-xs font-semibold text-slate-800 dark:text-slate-100">v3 基准</span>
+                  <span class="text-[10px] text-slate-400 font-mono">标准反转确认 · 0.17%推保护</span>
+                </div>
+              </button>
+              <button class="open-booklet-btn p-2 rounded-lg text-slate-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
+                      data-strategy="v3" title="查看 v3 策略白皮书与回测">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+              </button>
+            </div>
+
+            <!-- Row 4: v3add -->
+            <div class="group flex items-center justify-between p-1.5 rounded-xl hover:bg-white/70 dark:hover:bg-slate-800/70 transition-colors">
+              <button class="flex-1 flex items-center gap-2.5 text-left px-2 py-1 rounded-lg account-select-btn" data-account="v3add" data-name="v3add 分步仓位">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600 status-dot"></span>
+                <div class="flex flex-col">
+                  <span class="text-xs font-semibold text-slate-800 dark:text-slate-100">v3add 分步仓位</span>
+                  <span class="text-[10px] text-slate-400 font-mono">阶梯突破加仓 · 合并止损</span>
+                </div>
+              </button>
+              <button class="open-booklet-btn p-2 rounded-lg text-slate-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
+                      data-strategy="v3add" title="查看 v3add 策略白皮书与回测">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+              </button>
+            </div>
+
+            <!-- Row 5: spike -->
+            <div class="group flex items-center justify-between p-1.5 rounded-xl hover:bg-white/70 dark:hover:bg-slate-800/70 transition-colors">
+              <button class="flex-1 flex items-center gap-2.5 text-left px-2 py-1 rounded-lg account-select-btn" data-account="spike" data-name="spike 均线分">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600 status-dot"></span>
+                <div class="flex flex-col">
+                  <span class="text-xs font-semibold text-slate-800 dark:text-slate-100">spike 均线分</span>
+                  <span class="text-[10px] text-slate-400 font-mono">6均线排列评分 &gt;0.60 过滤</span>
+                </div>
+              </button>
+              <button class="open-booklet-btn p-2 rounded-lg text-slate-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
+                      data-strategy="spike" title="查看 spike 策略白皮书与回测">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+              </button>
+            </div>
+
+            <!-- Row 6: v3lock -->
+            <div class="group flex items-center justify-between p-1.5 rounded-xl hover:bg-white/70 dark:hover:bg-slate-800/70 transition-colors">
+              <button class="flex-1 flex items-center gap-2.5 text-left px-2 py-1 rounded-lg account-select-btn" data-account="v3lock" data-name="v3lock 利润锁">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600 status-dot"></span>
+                <div class="flex flex-col">
+                  <span class="text-xs font-semibold text-slate-800 dark:text-slate-100">v3lock 利润锁</span>
+                  <span class="text-[10px] text-slate-400 font-mono">+0.50% 保护推锁 · 防回吐</span>
+                </div>
+              </button>
+              <button class="open-booklet-btn p-2 rounded-lg text-slate-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
+                      data-strategy="v3lock" title="查看 v3lock 策略白皮书与回测">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+              </button>
+            </div>
+
+            <!-- Row 7: allin3 (Currently Active) -->
+            <div class="group flex items-center justify-between p-1.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 border border-brand-blue/30 transition-colors">
+              <button class="flex-1 flex items-center gap-2.5 text-left px-2 py-1 rounded-lg account-select-btn" data-account="allin3" data-name="allin3 (3x全仓)">
+                <span class="w-2 h-2 rounded-full bg-brand-blue"></span>
+                <div class="flex flex-col">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-bold text-brand-blue dark:text-blue-400">allin3 (3x全仓)</span>
+                    <svg class="w-3.5 h-3.5 text-brand-blue" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  </div>
+                  <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">第 2 份本金 · 3x全仓单持仓轮动</span>
+                </div>
+              </button>
+              <button class="open-booklet-btn p-2 rounded-lg text-brand-blue hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors"
+                      data-strategy="allin3" title="查看 allin3 策略白皮书与回测">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Equity Summary Badge (Synthetic placeholder) -->
+      <div class="glass-panel hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-full text-xs font-mono">
+        <div class="flex items-center gap-1.5">
+          <span class="text-slate-400 text-[10px]">净值</span>
+          <span class="font-bold text-slate-900 dark:text-white">1,000.00 U</span>
+          <span class="text-[10px] px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-semibold">第2份 · 0.50×</span>
+        </div>
+        <div class="h-3 w-px bg-slate-300 dark:bg-slate-700"></div>
+        <div class="flex items-center gap-1">
+          <span class="text-slate-400 text-[10px]">盈亏</span>
+          <span class="text-rose-500 font-semibold">-900.00 U</span>
+        </div>
+      </div>
+
+      <!-- Theme Switch (Single 44px Sun/Moon Icon button) -->
+      <button id="themeToggleBtn"
+              class="glass-panel w-10 h-10 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-brand-blue transition-colors active:scale-95"
+              aria-label="切换浅色/深色主题">
+        <!-- Sun icon (shown in dark mode) -->
+        <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        <!-- Moon icon (shown in light mode) -->
+        <svg class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      </button>
+
+    </div>
+  </header>
+
+  <!-- ==================== 3. LEFT DOCKED SYMBOL DRAWER (币种全市场) ==================== -->
+  <!--
+    Refined from "最新触价" to "币种", covering full OKX USDT perps, default sorted by 24h turnover.
+    Filters: 全部 / 上沿 / 下沿 / 收藏.
+  -->
+  <aside id="symbolDrawer"
+         class="absolute top-16 left-3 md:left-5 z-20 w-80 md:w-84 max-h-[calc(100vh-5.5rem)] glass-panel rounded-3xl flex flex-col p-3 shadow-xl transition-all duration-200">
+
+    <!-- Drawer Title & Counter -->
+    <div class="flex items-center justify-between px-1 mb-2">
+      <div class="flex items-center gap-2">
+        <h2 class="font-bold text-sm tracking-tight text-slate-900 dark:text-white">币种</h2>
+        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-semibold" id="symbolCount">
+          148 永续
+        </span>
+      </div>
+      <div class="flex items-center gap-1 text-[10px] font-mono text-slate-400">
+        <svg class="w-3 h-3 text-slate-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"/></svg>
+        <span>按24h成交额降序</span>
+      </div>
+    </div>
+
+    <!-- Search Input -->
+    <div class="relative mb-2">
+      <input type="text" id="symbolSearchInput" placeholder="搜索标的代码 (如 BTC, ETH, SOL)..."
+             class="w-full bg-white/70 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 rounded-xl px-3 py-1.5 pl-8 text-xs placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-blue text-slate-800 dark:text-slate-100 font-mono transition-all">
+      <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+    </div>
+
+    <!-- Segmented Filter Chips: 全部 / 上沿 / 下沿 / 收藏 -->
+    <div class="grid grid-cols-4 gap-1 p-0.5 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl mb-2 text-[11px] font-medium text-slate-600 dark:text-slate-300">
+      <button class="symbol-filter-tab py-1 text-center rounded-lg bg-white dark:bg-slate-700 font-semibold text-brand-blue dark:text-white shadow-sm" data-filter="all">全部</button>
+      <button class="symbol-filter-tab py-1 text-center rounded-lg hover:text-slate-900 dark:hover:text-white transition-colors" data-filter="upper">上沿 <span class="text-[9px] font-mono text-rose-500">28</span></button>
+      <button class="symbol-filter-tab py-1 text-center rounded-lg hover:text-slate-900 dark:hover:text-white transition-colors" data-filter="lower">下沿 <span class="text-[9px] font-mono text-emerald-500">14</span></button>
+      <button class="symbol-filter-tab py-1 text-center rounded-lg hover:text-slate-900 dark:hover:text-white transition-colors" data-filter="fav">收藏 <span class="text-[9px] font-mono text-amber-500">5</span></button>
+    </div>
+
+    <!-- Scrollable Symbol List -->
+    <div id="symbolListContainer" class="flex-1 overflow-y-auto space-y-1 pr-1 thin-scrollbar">
+
+      <!-- Symbol 1: SOL (Selected, Touched Upper) -->
+      <div class="symbol-row group flex items-center justify-between p-2 rounded-2xl bg-white/90 dark:bg-slate-800/90 border border-brand-blue/40 shadow-sm cursor-pointer transition-all"
+           data-symbol="SOL/USDT" data-type="upper" data-fav="true">
+        <div class="flex items-center gap-2.5">
+          <!-- Favorite Star -->
+          <button class="star-btn text-amber-500 hover:scale-110 transition-transform">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          </button>
+          <!-- Coin Avatar Pill -->
+          <div class="w-7 h-7 rounded-xl bg-purple-500/10 dark:bg-purple-400/20 text-purple-600 dark:text-purple-300 font-bold text-xs flex items-center justify-center font-mono">
+            S
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-xs text-slate-900 dark:text-white">SOL</span>
+              <span class="text-[9px] px-1 py-0.2 rounded bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 font-mono font-medium">上沿 187.8</span>
+            </div>
+            <span class="text-[10px] text-slate-400 font-mono">24h 1.84B U</span>
+          </div>
+        </div>
+        <div class="flex flex-col items-end">
+          <span class="font-mono text-xs font-bold text-slate-900 dark:text-slate-100">184.50</span>
+          <span class="font-mono text-[10px] text-emerald-500 font-medium">+7.34%</span>
+        </div>
+      </div>
+
+      <!-- Symbol 2: BTC (Touched Upper) -->
+      <div class="symbol-row group flex items-center justify-between p-2 rounded-2xl hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
+           data-symbol="BTC/USDT" data-type="upper" data-fav="true">
+        <div class="flex items-center gap-2.5">
+          <button class="star-btn text-amber-500 hover:scale-110 transition-transform">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          </button>
+          <div class="w-7 h-7 rounded-xl bg-amber-500/10 dark:bg-amber-400/20 text-amber-600 dark:text-amber-300 font-bold text-xs flex items-center justify-center font-mono">
+            B
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-xs text-slate-800 dark:text-slate-200">BTC</span>
+              <span class="text-[9px] px-1 py-0.2 rounded bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 font-mono font-medium">上沿 68,120</span>
+            </div>
+            <span class="text-[10px] text-slate-400 font-mono">24h 5.92B U</span>
+          </div>
+        </div>
+        <div class="flex flex-col items-end">
+          <span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">67,420.0</span>
+          <span class="font-mono text-[10px] text-emerald-500 font-medium">+1.85%</span>
+        </div>
+      </div>
+
+      <!-- Symbol 3: ETH (Touched Lower) -->
+      <div class="symbol-row group flex items-center justify-between p-2 rounded-2xl hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
+           data-symbol="ETH/USDT" data-type="lower" data-fav="true">
+        <div class="flex items-center gap-2.5">
+          <button class="star-btn text-amber-500 hover:scale-110 transition-transform">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          </button>
+          <div class="w-7 h-7 rounded-xl bg-blue-500/10 dark:bg-blue-400/20 text-blue-600 dark:text-blue-300 font-bold text-xs flex items-center justify-center font-mono">
+            E
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-xs text-slate-800 dark:text-slate-200">ETH</span>
+              <span class="text-[9px] px-1 py-0.2 rounded bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 font-mono font-medium">下沿 2,610</span>
+            </div>
+            <span class="text-[10px] text-slate-400 font-mono">24h 3.41B U</span>
+          </div>
+        </div>
+        <div class="flex flex-col items-end">
+          <span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">2,618.50</span>
+          <span class="font-mono text-[10px] text-emerald-500 font-medium">+0.42%</span>
+        </div>
+      </div>
+
+      <!-- Symbol 4: DOGE (Untouched, High Volume) -->
+      <div class="symbol-row group flex items-center justify-between p-2 rounded-2xl hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
+           data-symbol="DOGE/USDT" data-type="untouched" data-fav="false">
+        <div class="flex items-center gap-2.5">
+          <button class="star-btn text-slate-300 dark:text-slate-600 hover:text-amber-500 hover:scale-110 transition-transform">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          </button>
+          <div class="w-7 h-7 rounded-xl bg-yellow-500/10 dark:bg-yellow-400/20 text-yellow-600 dark:text-yellow-300 font-bold text-xs flex items-center justify-center font-mono">
+            D
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-xs text-slate-800 dark:text-slate-200">DOGE</span>
+              <span class="text-[9px] text-slate-400 font-mono">区间内震荡</span>
+            </div>
+            <span class="text-[10px] text-slate-400 font-mono">24h 980M U</span>
+          </div>
+        </div>
+        <div class="flex flex-col items-end">
+          <span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">0.14280</span>
+          <span class="font-mono text-[10px] text-rose-500 font-medium">-1.89%</span>
+        </div>
+      </div>
+
+      <!-- Symbol 5: SUI (Touched Upper) -->
+      <div class="symbol-row group flex items-center justify-between p-2 rounded-2xl hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
+           data-symbol="SUI/USDT" data-type="upper" data-fav="true">
+        <div class="flex items-center gap-2.5">
+          <button class="star-btn text-amber-500 hover:scale-110 transition-transform">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          </button>
+          <div class="w-7 h-7 rounded-xl bg-cyan-500/10 dark:bg-cyan-400/20 text-cyan-600 dark:text-cyan-300 font-bold text-xs flex items-center justify-center font-mono">
+            S
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-xs text-slate-800 dark:text-slate-200">SUI</span>
+              <span class="text-[9px] px-1 py-0.2 rounded bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 font-mono font-medium">上沿 2.115</span>
+            </div>
+            <span class="text-[10px] text-slate-400 font-mono">24h 720M U</span>
+          </div>
+        </div>
+        <div class="flex flex-col items-end">
+          <span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">2.0842</span>
+          <span class="font-mono text-[10px] text-emerald-500 font-medium">+1.45%</span>
+        </div>
+      </div>
+
+      <!-- Symbol 6: BNB (Untouched, High Volume) -->
+      <div class="symbol-row group flex items-center justify-between p-2 rounded-2xl hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
+           data-symbol="BNB/USDT" data-type="untouched" data-fav="false">
+        <div class="flex items-center gap-2.5">
+          <button class="star-btn text-slate-300 dark:text-slate-600 hover:text-amber-500 hover:scale-110 transition-transform">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          </button>
+          <div class="w-7 h-7 rounded-xl bg-amber-500/10 dark:bg-amber-400/20 text-amber-600 dark:text-amber-300 font-bold text-xs flex items-center justify-center font-mono">
+            B
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-xs text-slate-800 dark:text-slate-200">BNB</span>
+              <span class="text-[9px] text-slate-400 font-mono">区间内震荡</span>
+            </div>
+            <span class="text-[10px] text-slate-400 font-mono">24h 590M U</span>
+          </div>
+        </div>
+        <div class="flex flex-col items-end">
+          <span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">598.40</span>
+          <span class="font-mono text-[10px] text-emerald-500 font-medium">+1.05%</span>
+        </div>
+      </div>
+
+      <!-- Symbol 7: AVAX (Touched Upper) -->
+      <div class="symbol-row group flex items-center justify-between p-2 rounded-2xl hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
+           data-symbol="AVAX/USDT" data-type="upper" data-fav="false">
+        <div class="flex items-center gap-2.5">
+          <button class="star-btn text-slate-300 dark:text-slate-600 hover:text-amber-500 hover:scale-110 transition-transform">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          </button>
+          <div class="w-7 h-7 rounded-xl bg-red-500/10 dark:bg-red-400/20 text-red-600 dark:text-red-300 font-bold text-xs flex items-center justify-center font-mono">
+            A
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-xs text-slate-800 dark:text-slate-200">AVAX</span>
+              <span class="text-[9px] px-1 py-0.2 rounded bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 font-mono font-medium">上沿 28.70</span>
+            </div>
+            <span class="text-[10px] text-slate-400 font-mono">24h 410M U</span>
+          </div>
+        </div>
+        <div class="flex flex-col items-end">
+          <span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">28.15</span>
+          <span class="font-mono text-[10px] text-emerald-500 font-medium">+1.95%</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom summary footnote -->
+    <div class="pt-2 mt-1 border-t border-slate-200/50 dark:border-slate-800/80 flex items-center justify-between text-[10px] font-mono text-slate-400 px-1">
+      <span>OKX USDT 永续全标的</span>
+      <span class="text-emerald-600 dark:text-emerald-400 font-medium">WebSocket 实时</span>
+    </div>
+  </aside>
+
+  <!-- ==================== 4. BOTTOM FLOATING CHART INTERACTION DOCK ==================== -->
+  <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 glass-panel rounded-full px-3 py-1.5 flex items-center gap-2 shadow-lg">
+    <!-- Timeframe selection -->
+    <div class="flex items-center gap-0.5 text-xs font-mono font-semibold">
+      <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white">5m</button>
+      <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white">15m</button>
+      <button class="px-2 py-1 rounded-full bg-white dark:bg-slate-700 text-brand-blue dark:text-blue-400 shadow-sm font-bold">1h</button>
+      <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white">4h</button>
+      <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white">1D</button>
+    </div>
+    <div class="h-3 w-px bg-slate-300 dark:bg-slate-700"></div>
+    <!-- Indicators Toggle -->
+    <button class="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800">
+      <svg class="w-3.5 h-3.5 text-brand-blue" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+      <span>指标: 1.618</span>
+    </button>
+    <div class="h-3 w-px bg-slate-300 dark:bg-slate-700"></div>
+    <!-- Follow Latest Trigger -->
+    <button class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-blue text-white hover:bg-blue-600 active:scale-95 transition-all shadow-sm">
+      <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/></svg>
+      <span>跟随最新单</span>
+    </button>
+  </div>
+
+  <!-- ==================== 5. FULL-HEIGHT 75vw STRATEGY BOOKLET DRAWER (VIEWPORT LEVEL) ==================== -->
+  <!--
+    Sliding from RIGHT to LEFT, desktop width exactly 75vw, thin dim backdrop covering left 25%.
+    Contains editorial booklet: title, summary, chapter navigation (逻辑/规则/回测/资金曲线/来源),
+    rule table, backtest results, and honest error/retired states.
+  -->
+  <div id="bookletOverlay" class="fixed inset-0 z-50 pointer-events-none transition-opacity duration-300 opacity-0">
+    <!-- Thin dim backdrop (covers left 25% or full mobile) -->
+    <div id="bookletBackdrop" class="absolute inset-0 bg-slate-900/30 dark:bg-black/50 backdrop-blur-[2px] transition-opacity cursor-pointer"></div>
+
+    <!-- Right-to-Left Sliding Container (width 75vw on desktop, 95vw on mobile) -->
+    <div id="bookletContainer"
+         class="absolute top-0 right-0 bottom-0 w-full sm:w-[92vw] lg:w-[75vw] bg-white/95 dark:bg-[#11151f]/95 backdrop-blur-3xl border-l border-slate-200/80 dark:border-slate-800 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-[280ms] ease-out pointer-events-auto drawer-transition">
+
+      <!-- Sticky Editorial Header -->
+      <div class="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-[#11151f]/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-brand-blue flex items-center justify-center font-bold">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">SPIKE QUANTITATIVE MONOGRAPH</span>
+              <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 font-medium">脱敏研发白皮书</span>
+            </div>
+            <h1 id="bookletTitle" class="text-base font-bold text-slate-900 dark:text-white leading-tight">
+              allin3 (3x 全仓轮次) · 策略设计与回测白皮书
+            </h1>
+          </div>
+        </div>
+
+        <!-- Header Actions: State Switcher + Close Button -->
+        <div class="flex items-center gap-2">
+          <!-- Quick state preview selector (for demonstration of honest backtest states) -->
+          <div class="hidden md:flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-[11px] font-mono">
+            <span class="px-2 text-slate-400">状态演示:</span>
+            <button class="state-demo-btn px-2 py-0.5 rounded font-semibold bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-xs" data-mode="valid">标准回测</button>
+            <button class="state-demo-btn px-2 py-0.5 rounded text-slate-500 hover:text-slate-800 dark:hover:text-white" data-mode="no-match">无匹配回测</button>
+            <button class="state-demo-btn px-2 py-0.5 rounded text-slate-500 hover:text-slate-800 dark:hover:text-white" data-mode="retired">已退役/失效</button>
+          </div>
+
+          <!-- Close Button -->
+          <button id="closeBookletBtn"
+                  class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  aria-label="关闭策略白皮书 (Esc)">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Booklet Content Area with TOC Rail -->
+      <div class="flex-1 flex overflow-hidden">
+
+        <!-- Left TOC Navigation Rail (Desktop) -->
+        <nav class="hidden lg:block w-48 shrink-0 border-r border-slate-200/60 dark:border-slate-800/80 p-5 space-y-1 text-xs">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold px-2 mb-2 block">章节导航 (TOC)</span>
+          <a href="#sec-overview" class="toc-link block px-2.5 py-1.5 rounded-lg font-semibold text-brand-blue bg-blue-50 dark:bg-blue-950/40">1. 架构与机制总览</a>
+          <a href="#sec-flow" class="toc-link block px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">2. 进退场全流程</a>
+          <a href="#sec-rules" class="toc-link block px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">3. 严密参数规则表</a>
+          <a href="#sec-backtest" class="toc-link block px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">4. 回测样本与统计</a>
+          <a href="#sec-curves" class="toc-link block px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">5. 资金与回撤曲线</a>
+          <a href="#sec-source" class="toc-link block px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">6. 研发数据溯源</a>
+        </nav>
+
+        <!-- Right Editorial Prose & Analytics Body -->
+        <main class="flex-1 overflow-y-auto px-6 md:px-12 py-8 space-y-10 thin-scrollbar text-slate-700 dark:text-slate-300">
+
+          <!-- Mobile Horizontal Chapter Links -->
+          <div class="lg:hidden flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-slate-800 text-xs whitespace-nowrap thin-scrollbar">
+            <a href="#sec-overview" class="px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950 text-brand-blue font-semibold">1. 机制总览</a>
+            <a href="#sec-flow" class="px-2.5 py-1 rounded-full text-slate-500">2. 进退流程</a>
+            <a href="#sec-rules" class="px-2.5 py-1 rounded-full text-slate-500">3. 参数表</a>
+            <a href="#sec-backtest" class="px-2.5 py-1 rounded-full text-slate-500">4. 回测数据</a>
+            <a href="#sec-curves" class="px-2.5 py-1 rounded-full text-slate-500">5. 资金曲线</a>
+          </div>
+
+          <!-- Section 1: Overview & Philosophy -->
+          <section id="sec-overview" class="space-y-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono font-bold text-brand-blue px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60">CHAPTER 01</span>
+              <h2 class="text-lg font-bold text-slate-900 dark:text-white">架构与机制总览 (Mechanism Overview)</h2>
+            </div>
+            <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+              <strong class="text-slate-900 dark:text-white font-semibold">allin3</strong> 是 SPIKE 量化实验室在周一 1.618 斐波那契极值体系下探索的
+              <em class="not-italic font-semibold text-brand-blue">「单持仓硬隔离·3x名义全仓轮次」</em> 试验模型。策略旨在捕捉反转初期的高置信度动量，在确认反转后严格推保护保本，并将同一时间风险严格敞口锁定在单一标的内部，拒绝任何多标的并发杠杆堆叠。
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60">
+                <span class="text-[10px] font-mono text-slate-400 block mb-1">确认周期 (CONFIRMATION)</span>
+                <span class="font-mono text-base font-bold text-slate-900 dark:text-white">60 分钟 (1H)</span>
+                <span class="text-[11px] text-slate-500 block mt-1">需实体反转收线确认</span>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60">
+                <span class="text-[10px] font-mono text-slate-400 block mb-1">名义规模 (NOTIONAL LEV)</span>
+                <span class="font-mono text-base font-bold text-brand-blue">3× 净值全仓</span>
+                <span class="text-[11px] text-slate-500 block mt-1">亏损严格兜底于当期保证金</span>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60">
+                <span class="text-[10px] font-mono text-slate-400 block mb-1">并发限制 (CONCURRENCY)</span>
+                <span class="font-mono text-base font-bold text-emerald-600 dark:text-emerald-400">仅限 1 笔有资持仓</span>
+                <span class="text-[11px] text-slate-500 block mt-1">多余触价入「忙碌阴影」</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section 2: Four-Step Execution Flow -->
+          <section id="sec-flow" class="space-y-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono font-bold text-brand-blue px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60">CHAPTER 02</span>
+              <h2 class="text-lg font-bold text-slate-900 dark:text-white">入场 → 确认 → 保护 → 离场全流程</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <!-- Step 1: Entry -->
+              <div class="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/60 relative">
+                <span class="text-[10px] font-mono font-bold text-brand-blue">STEP 01</span>
+                <h3 class="text-xs font-bold text-slate-900 dark:text-white mt-1 mb-2">1.618 扩展位触及</h3>
+                <p class="text-[11px] text-slate-500 leading-relaxed">
+                  当前标的首次击穿纽约周一基准 1.618 扩展位，形态紧凑度评分必须 ≥ 0.60。未触发确认前设置 <strong>-30% 价格硬兜底</strong>。
+                </p>
+              </div>
+
+              <!-- Step 2: Confirm -->
+              <div class="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/60 relative">
+                <span class="text-[10px] font-mono font-bold text-brand-blue">STEP 02</span>
+                <h3 class="text-xs font-bold text-slate-900 dark:text-white mt-1 mb-2">60m 收线反转确认</h3>
+                <p class="text-[11px] text-slate-500 leading-relaxed">
+                  等待 60 分钟 K 线完成收线反转验证。若收线未能满足反转形态要求，执行原路撤单或轻度保护离场。
+                </p>
+              </div>
+
+              <!-- Step 3: Protection -->
+              <div class="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/60 relative">
+                <span class="text-[10px] font-mono font-bold text-brand-blue">STEP 03</span>
+                <h3 class="text-xs font-bold text-slate-900 dark:text-white mt-1 mb-2">推进 +0.17% 保本损</h3>
+                <p class="text-[11px] text-slate-500 leading-relaxed">
+                  反转确认成立瞬间，后端自动将保护性止损推进至入场均价盈利方向 <strong>+0.17%</strong>（覆盖手续费与微滑点）。
+                </p>
+              </div>
+
+              <!-- Step 4: Exit -->
+              <div class="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/60 relative">
+                <span class="text-[10px] font-mono font-bold text-brand-blue">STEP 04</span>
+                <h3 class="text-xs font-bold text-slate-900 dark:text-white mt-1 mb-2">对向 1.618 止盈</h3>
+                <p class="text-[11px] text-slate-500 leading-relaxed">
+                  终极止盈锁定于对向 1.618 目标；若回踩触发 +0.17% 保本损则无损离场，释放并发槽位接纳下一标的。
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section 3: Exact Rules Table -->
+          <section id="sec-rules" class="space-y-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono font-bold text-brand-blue px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60">CHAPTER 03</span>
+              <h2 class="text-lg font-bold text-slate-900 dark:text-white">严密参数与风控规则对照表</h2>
+            </div>
+
+            <div class="overflow-x-auto rounded-2xl border border-slate-200/80 dark:border-slate-800">
+              <table class="w-full text-xs text-left">
+                <thead class="bg-slate-50/80 dark:bg-slate-800/80 font-mono text-[11px] text-slate-400 border-b border-slate-200/80 dark:border-slate-700/80">
+                  <tr>
+                    <th class="py-2.5 px-4">规则维度</th>
+                    <th class="py-2.5 px-4">allin3 (当前策略)</th>
+                    <th class="py-2.5 px-4 text-slate-400">v3 (基准原型)</th>
+                    <th class="py-2.5 px-4 text-slate-400">v3lock (利润锁)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono">
+                  <tr>
+                    <td class="py-2.5 px-4 font-semibold text-slate-800 dark:text-slate-200 font-sans">最低形态评分</td>
+                    <td class="py-2.5 px-4 text-brand-blue font-bold">0.60</td>
+                    <td class="py-2.5 px-4 text-slate-500">0.55</td>
+                    <td class="py-2.5 px-4 text-slate-500">0.60</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2.5 px-4 font-semibold text-slate-800 dark:text-slate-200 font-sans">反转确认周期</td>
+                    <td class="py-2.5 px-4 text-brand-blue font-bold">60 分钟 (1H)</td>
+                    <td class="py-2.5 px-4 text-slate-500">5 分钟 (5m)</td>
+                    <td class="py-2.5 px-4 text-slate-500">5 分钟 (5m)</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2.5 px-4 font-semibold text-slate-800 dark:text-slate-200 font-sans">保护性止损推进</td>
+                    <td class="py-2.5 px-4 text-slate-800 dark:text-slate-200">+0.17% (成本保本)</td>
+                    <td class="py-2.5 px-4 text-slate-500">+0.17%</td>
+                    <td class="py-2.5 px-4 text-emerald-500 font-bold">+0.50% (锁定纯利)</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2.5 px-4 font-semibold text-slate-800 dark:text-slate-200 font-sans">持仓规模控制</td>
+                    <td class="py-2.5 px-4 text-rose-500 font-bold">3× 净值全仓轮动</td>
+                    <td class="py-2.5 px-4 text-slate-500">10% 分批分配</td>
+                    <td class="py-2.5 px-4 text-slate-500">10% 分批分配</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2.5 px-4 font-semibold text-slate-800 dark:text-slate-200 font-sans">注资恢复机制</td>
+                    <td class="py-2.5 px-4 text-amber-500 font-semibold">&lt;100 U 自动恢复 1,000 U</td>
+                    <td class="py-2.5 px-4 text-slate-500">无自动注资</td>
+                    <td class="py-2.5 px-4 text-slate-500">无自动注资</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="text-[11px] text-slate-400 font-mono italic">
+              * 注：所有注资记录独立记入「累计本金」与「补充本金记录」，严禁将外部恢复注资混淆为交易净利润。
+            </p>
+          </section>
+
+          <!-- Section 4: Detailed Backtest Sample & Results (Dynamic View based on State) -->
+          <section id="sec-backtest" class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono font-bold text-brand-blue px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60">CHAPTER 04</span>
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white">回测样本与统计结果 (Backtest Telemetry)</h2>
+              </div>
+              <span id="backtestStateBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-semibold">
+                VALID · 严格回测样本 (N=428)
+              </span>
+            </div>
+
+            <!-- Standard Valid Backtest View -->
+            <div id="validBacktestContent" class="space-y-4">
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
+                <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/60">
+                  <span class="text-[10px] text-slate-400 block">样本周期 (COHORT)</span>
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200 mt-1 block">2021.01 — 2026.10</span>
+                  <span class="text-[10px] text-slate-400">42 个高流动性标的</span>
+                </div>
+                <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/60">
+                  <span class="text-[10px] text-slate-400 block">胜率 (WIN RATE)</span>
+                  <span class="text-base font-bold text-emerald-500 mt-0.5 block">61.2%</span>
+                  <span class="text-[10px] text-slate-400">262 胜 / 166 负</span>
+                </div>
+                <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/60">
+                  <span class="text-[10px] text-slate-400 block">单笔期望 (EXP PER TRADE)</span>
+                  <span class="text-base font-bold text-brand-blue mt-0.5 block">+0.142 R</span>
+                  <span class="text-[10px] text-slate-400">扣除 0.05% 滑点费</span>
+                </div>
+                <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/60">
+                  <span class="text-[10px] text-slate-400 block">最大历史回撤 (MAX DD)</span>
+                  <span class="text-base font-bold text-rose-500 mt-0.5 block">-8.42 R</span>
+                  <span class="text-[10px] text-slate-400">连续 6 笔极限止损</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Honest State 2: No Matched Backtest Container (Hidden by default) -->
+            <div id="noMatchBacktestContent" class="hidden p-8 rounded-3xl bg-slate-50 dark:bg-slate-800/30 border border-dashed border-slate-300 dark:border-slate-700 text-center space-y-2">
+              <div class="w-10 h-10 mx-auto rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">暂无有效匹配的历史回测数据 (No Valid Matched Backtest)</h3>
+              <p class="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+                当前所选策略参数组合尚未完成完整的全样本矢量回测引擎归档，系统诚实保持空状态，绝不伪造虚构胜率与资金收益曲线。
+              </p>
+            </div>
+
+            <!-- Honest State 3: Retired / Erroneous Result Container (Hidden by default) -->
+            <div id="retiredBacktestContent" class="hidden p-6 rounded-3xl bg-rose-50/70 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 space-y-2">
+              <div class="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-bold text-xs font-mono">
+                <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+                <span>策略历史回测已退役 (RETIRED SPECIFICATION)</span>
+              </div>
+              <p class="text-xs text-rose-700 dark:text-rose-300 leading-relaxed">
+                该历史参数版本由于未能正确处理交易所高频极速插针滑点惩罚，已被量化风控委员会标记为已退役。曲线已下线归档，请切换至最新修订版本。
+              </p>
+            </div>
+          </section>
+
+          <!-- Section 5: Profit vs Equity Curve Plots -->
+          <section id="sec-curves" class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono font-bold text-brand-blue px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60">CHAPTER 05</span>
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white">收益与权益回撤曲线 (P&amp;L vs Account Equity)</h2>
+              </div>
+              <div class="flex items-center gap-3 text-[11px] font-mono">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-0.5 bg-brand-blue rounded"></span> 独立单笔 R 累积</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-0.5 bg-emerald-500 rounded"></span> 实盘账户 USDT 净值</span>
+              </div>
+            </div>
+
+            <!-- SVG Visual Curve -->
+            <div id="curvesCanvasCard" class="p-4 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/80">
+              <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 mb-2">
+                <span>R-Metric 累计期望: +35.35 R (已扣双边费)</span>
+                <span>实盘沙盒净值: 1,000.00 USDT (第 2 份本金)</span>
+              </div>
+
+              <!-- Curve SVG Chart -->
+              <svg class="w-full h-48" viewBox="0 0 700 190" preserveAspectRatio="none">
+                <!-- Grid horizontal lines -->
+                <line x1="0" y1="40" x2="700" y2="40" stroke="#94a3b8" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.25"/>
+                <line x1="0" y1="95" x2="700" y2="95" stroke="#94a3b8" stroke-width="0.75" opacity="0.3"/>
+                <line x1="0" y1="150" x2="700" y2="150" stroke="#94a3b8" stroke-width="0.75" stroke-dasharray="3,3" opacity="0.25"/>
+
+                <!-- Blue Curve: Independent Trade R-units -->
+                <path d="M 10 110 Q 70 120 120 100 T 220 85 T 320 60 T 420 75 T 520 45 T 620 35 L 690 30"
+                      fill="none" stroke="#0071e3" stroke-width="2.2" stroke-linecap="round"/>
+
+                <!-- Emerald Curve: Paper Account Actual Equity -->
+                <path d="M 10 130 Q 80 145 140 120 T 260 110 T 360 85 T 460 95 T 560 60 T 640 45 L 690 40"
+                      fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round"/>
+              </svg>
+
+              <!-- Honest Curve Semantics Note -->
+              <div class="mt-2 pt-2 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between text-[10px] font-mono text-slate-400">
+                <span>数据单位: bp / R倍数 (每笔损益) vs USDT (账户名义净值)</span>
+                <span class="text-amber-500 font-medium">严禁将外部补资本金混同为交易 Alpha</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section 6: Source & Transparency -->
+          <section id="sec-source" class="space-y-3 pb-6">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono font-bold text-brand-blue px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60">CHAPTER 06</span>
+              <h2 class="text-lg font-bold text-slate-900 dark:text-white">研发数据溯源与免责约束</h2>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-50/60 dark:bg-slate-800/30 border border-slate-200/60 dark:border-slate-700/50 text-xs text-slate-500 space-y-2 leading-relaxed">
+              <p>
+                1. <strong>数据口径</strong>：所有回测数据均来源于公开交易所 USDT 永续合约的历史 1m/5m/1h 原始 K 线行情，不包含未公开机构暗池或前瞻偏差。
+              </p>
+              <p>
+                2. <strong>示例占位保证</strong>：本白皮书所有收益率、胜率及图表曲线均为量化研讨与界面规范用途，绝不构成任何投资收益承诺与实盘策略保证。
+              </p>
+            </div>
+          </section>
+
+        </main>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 6. JAVASCRIPT CONTROLLERS ==================== -->
+  <script>
+    // 1. Theme Toggle Logic
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    themeToggleBtn.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+    });
+
+    // 2. Account Popover Toggle Logic
+    const accountPopoverBtn = document.getElementById('accountPopoverBtn');
+    const accountPopoverMenu = document.getElementById('accountPopoverMenu');
+    const popoverArrow = document.getElementById('popoverArrow');
+
+    accountPopoverBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = accountPopoverMenu.classList.contains('hidden');
+      if (isHidden) {
+        accountPopoverMenu.classList.remove('hidden');
+        popoverArrow.classList.add('rotate-180');
+      } else {
+        accountPopoverMenu.classList.add('hidden');
+        popoverArrow.classList.remove('rotate-180');
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!accountPopoverMenu.contains(e.target) && !accountPopoverBtn.contains(e.target)) {
+        accountPopoverMenu.classList.add('hidden');
+        popoverArrow.classList.remove('rotate-180');
+      }
+    });
+
+    // 3. Account Row Selection Logic (Without opening booklet)
+    const currentAccountLabel = document.getElementById('currentAccountLabel');
+    const accountSelectBtns = document.querySelectorAll('.account-select-btn');
+
+    accountSelectBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const accountKey = btn.dataset.account;
+        const accountName = btn.dataset.name;
+        currentAccountLabel.textContent = accountName;
+
+        // Reset checkmarks & styles in rows
+        document.querySelectorAll('#accountPopoverMenu .group').forEach(row => {
+          row.classList.remove('bg-blue-50/70', 'dark:bg-blue-950/40', 'border', 'border-brand-blue/30');
+          const rowBtn = row.querySelector('.account-select-btn');
+          const title = rowBtn.querySelector('span.text-xs');
+          title.className = 'text-xs font-semibold text-slate-800 dark:text-slate-100';
+          const checkIcon = rowBtn.querySelector('svg');
+          if (checkIcon) checkIcon.remove();
+        });
+
+        const activeRow = btn.closest('.group');
+        activeRow.classList.add('bg-blue-50/70', 'dark:bg-blue-950/40', 'border', 'border-brand-blue/30');
+        const activeTitle = btn.querySelector('span.text-xs');
+        activeTitle.className = 'text-xs font-bold text-brand-blue dark:text-blue-400';
+
+        // Close popover
+        accountPopoverMenu.classList.add('hidden');
+        popoverArrow.classList.remove('rotate-180');
+      });
+    });
+
+    // 4. Strategy Booklet Drawer Logic (Slides 75vw from Right to Left)
+    const bookletOverlay = document.getElementById('bookletOverlay');
+    const bookletContainer = document.getElementById('bookletContainer');
+    const bookletBackdrop = document.getElementById('bookletBackdrop');
+    const closeBookletBtn = document.getElementById('closeBookletBtn');
+    const bookletTitle = document.getElementById('bookletTitle');
+    const openBookletBtns = document.querySelectorAll('.open-booklet-btn');
+
+    function openBooklet(strategyKey) {
+      bookletTitle.textContent = `${strategyKey} · 策略设计与回测白皮书`;
+      bookletOverlay.classList.remove('pointer-events-none', 'opacity-0');
+      bookletOverlay.classList.add('opacity-100');
+      bookletContainer.classList.remove('translate-x-full');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeBooklet() {
+      bookletContainer.classList.add('translate-x-full');
+      bookletOverlay.classList.add('opacity-0');
+      setTimeout(() => {
+        bookletOverlay.classList.add('pointer-events-none');
+        document.body.classList.remove('overflow-hidden');
+      }, 280);
+    }
+
+    openBookletBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const strategy = btn.dataset.strategy;
+        accountPopoverMenu.classList.add('hidden');
+        popoverArrow.classList.remove('rotate-180');
+        openBooklet(strategy);
+      });
+    });
+
+    bookletBackdrop.addEventListener('click', closeBooklet);
+    closeBookletBtn.addEventListener('click', closeBooklet);
+
+    // Escape Key Handler for Accessibility
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeBooklet();
+        accountPopoverMenu.classList.add('hidden');
+        popoverArrow.classList.remove('rotate-180');
+      }
+    });
+
+    // 5. Symbol List Drawer Filtering & Search
+    const symbolSearchInput = document.getElementById('symbolSearchInput');
+    const filterTabs = document.querySelectorAll('.symbol-filter-tab');
+    const symbolRows = document.querySelectorAll('.symbol-row');
+
+    let currentFilter = 'all';
+
+    filterTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        filterTabs.forEach(t => t.className = 'symbol-filter-tab py-1 text-center rounded-lg hover:text-slate-900 dark:hover:text-white transition-colors');
+        tab.className = 'symbol-filter-tab py-1 text-center rounded-lg bg-white dark:bg-slate-700 font-semibold text-brand-blue dark:text-white shadow-sm';
+        currentFilter = tab.dataset.filter;
+        applyFilters();
+      });
+    });
+
+    symbolSearchInput.addEventListener('input', applyFilters);
+
+    function applyFilters() {
+      const query = symbolSearchInput.value.trim().toUpperCase();
+      let visibleCount = 0;
+
+      symbolRows.forEach(row => {
+        const symbol = row.dataset.symbol.toUpperCase();
+        const type = row.dataset.type;
+        const isFav = row.dataset.fav === 'true';
+
+        let matchesSearch = symbol.includes(query);
+        let matchesTab = true;
+
+        if (currentFilter === 'upper') matchesTab = (type === 'upper');
+        else if (currentFilter === 'lower') matchesTab = (type === 'lower');
+        else if (currentFilter === 'fav') matchesTab = isFav;
+
+        if (matchesSearch && matchesTab) {
+          row.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          row.classList.add('hidden');
+        }
+      });
+
+      document.getElementById('symbolCount').textContent = `${visibleCount} 永续`;
+    }
+
+    // Toggle Favorite button inside row
+    document.querySelectorAll('.star-btn').forEach(star => {
+      star.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const row = star.closest('.symbol-row');
+        const isFav = row.dataset.fav === 'true';
+        row.dataset.fav = (!isFav).toString();
+        if (!isFav) {
+          star.className = 'star-btn text-amber-500 hover:scale-110 transition-transform';
+        } else {
+          star.className = 'star-btn text-slate-300 dark:text-slate-600 hover:text-amber-500 hover:scale-110 transition-transform';
+        }
+        if (currentFilter === 'fav') applyFilters();
+      });
+    });
+
+    // 6. State Demo Switcher inside booklet (Standard / No Match / Retired)
+    const stateDemoBtns = document.querySelectorAll('.state-demo-btn');
+    const validBox = document.getElementById('validBacktestContent');
+    const noMatchBox = document.getElementById('noMatchBacktestContent');
+    const retiredBox = document.getElementById('retiredBacktestContent');
+    const curvesCard = document.getElementById('curvesCanvasCard');
+    const stateBadge = document.getElementById('backtestStateBadge');
+
+    stateDemoBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        stateDemoBtns.forEach(b => b.className = 'state-demo-btn px-2 py-0.5 rounded text-slate-500 hover:text-slate-800 dark:hover:text-white');
+        btn.className = 'state-demo-btn px-2 py-0.5 rounded font-semibold bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-xs';
+
+        const mode = btn.dataset.mode;
+        if (mode === 'valid') {
+          validBox.classList.remove('hidden');
+          noMatchBox.classList.add('hidden');
+          retiredBox.classList.add('hidden');
+          curvesCard.classList.remove('opacity-40', 'pointer-events-none');
+          stateBadge.textContent = 'VALID · 严格回测样本 (N=428)';
+          stateBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-semibold';
+        } else if (mode === 'no-match') {
+          validBox.classList.add('hidden');
+          noMatchBox.classList.remove('hidden');
+          retiredBox.classList.add('hidden');
+          curvesCard.classList.add('opacity-40', 'pointer-events-none');
+          stateBadge.textContent = 'NO MATCH · 暂无匹配';
+          stateBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold';
+        } else if (mode === 'retired') {
+          validBox.classList.add('hidden');
+          noMatchBox.classList.add('hidden');
+          retiredBox.classList.remove('hidden');
+          curvesCard.classList.add('opacity-40', 'pointer-events-none');
+          stateBadge.textContent = 'RETIRED · 已退役失效';
+          stateBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 font-semibold';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -32,6 +32,10 @@
     const trades=!s.exit_count&&!s.refill_count?'所选时间内尚无平仓成交，资金曲线保持不变。':`已实现 ${signed(s.realized_pnl)} USDT · ${s.exit_count} 批平仓${d.curve_points>d.curve.length?' · 曲线按局部极值压缩，指标使用完整账本':''}`;
     return trades+(d.track==='5060'?` 补充本金 ${num(s.refilled)} USDT（${num(s.refill_count,0)} 次），不计入交易盈亏；资金曲线包含补入资金。`:'');
   }
+  function coverageNote(c){
+    const issues=[c.invalid_events&&`${c.invalid_events} 条成交字段不全`,c.missing_trade_pnl&&`${c.missing_trade_pnl} 笔交易缺少盈亏`,c.missing_fees&&`${c.missing_fees} 批手续费缺失`,Math.abs(c.ledger_difference)>.005&&'账本与账户净值尚未对齐'].filter(Boolean);
+    return issues.length?issues.join(' · ')+'；当前统计仅依据可核对记录。':'';
+  }
   function breakdownHTML(d){
     const section=(name,headers,rows,empty)=>`<section class="rp-analysis-section"><h3>${name}</h3>${rows.length?`<table><thead><tr>${headers.map(v=>`<th>${v}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`:`<p class="rp-analysis-empty">${empty}</p>`}</section>`;
     const tradeRow=(name,r)=>`<tr><th scope="row">${name}</th><td>${r.closed_count} / ${rate(r.win_rate)}</td><td class="${tone(r.realized_pnl)}">${signed(r.realized_pnl)}</td></tr>`;
@@ -40,7 +44,7 @@
       section('币种表现 · 按盈亏影响排序',['币种','结清 / 胜率','已实现 USDT'],d.by_symbol.map(r=>tradeRow(esc(r.symbol.replace('-USDT-SWAP','')),r)),'所选时间内尚无已实现盈亏');
   }
   function chartOptions(d,dark=false){const muted=dark?'#9aaabc':'#748493',line=dark?'#ffffff1a':'#cbd9e4',grid=dark?'#ffffff12':'#a1b5c322',accent=dark?'#5aa9ff':'#0071e3';return {animation:false,grid:{left:58,right:12,top:18,bottom:32},tooltip:{trigger:'axis',confine:true,backgroundColor:dark?'#1c222c':'#ffffff',borderColor:line,textStyle:{color:dark?'#e8edf4':'#182b39'},formatter:rows=>{const p=d.curve[rows[0]?.dataIndex];return p?`${time(p.time_ms)} 北京<br>已实现净值 ${num(p.equity)} USDT<br>区间净盈亏 ${signed(p.pnl)} USDT`:'';}},xAxis:{type:'time',axisLabel:{fontSize:10,color:muted,hideOverlap:true,formatter:v=>d.now_ms-d.start_ms<172800000?time(v).slice(6):time(v).slice(0,5)},axisLine:{lineStyle:{color:line}},axisTick:{show:false},splitLine:{show:false}},yAxis:{type:'value',scale:true,axisLabel:{fontSize:10,color:muted,formatter:v=>num(v)},splitNumber:3,splitLine:{lineStyle:{color:grid,type:'dashed'}}},series:[{type:'line',step:'end',showSymbol:false,data:d.curve.map(p=>[p.time_ms,p.equity]),lineStyle:{width:2,color:accent},itemStyle:{color:accent},areaStyle:{color:accent,opacity:.055}}]};}
-  const api={validate,metricsHTML,breakdownHTML,chartOptions,curveNote,pf};
+  const api={validate,metricsHTML,breakdownHTML,chartOptions,curveNote,coverageNote,pf};
   if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}
   function create({root,createFeed,onOpen,onTrack}){
     const trigger=root.querySelector('[data-rp-action="analytics"]'),panel=document.createElement('section');
@@ -79,8 +83,8 @@
       if(!data)return;
       const s=data.summary,c=data.coverage,key=JSON.stringify([s,c,data.by_side,data.by_symbol,data.by_reason]);
       if(signature!==key){el('.rp-analysis-grid').innerHTML=metricsHTML(s,data.track);el('.rp-analysis-breakdowns').innerHTML=breakdownHTML(data);signature=key;}
-      const issues=[c.invalid_events&&`${c.invalid_events} 条成交字段不全`,c.missing_trade_pnl&&`${c.missing_trade_pnl} 笔交易缺少盈亏`,c.missing_fees&&`${c.missing_fees} 批手续费缺失`,Math.abs(c.ledger_difference)>.005&&'账本与账户净值尚未对齐'].filter(Boolean);
-      el('.rp-analysis-warning').hidden=!issues.length;el('.rp-analysis-warning').textContent=issues.length?issues.join(' · ')+'；当前统计仅依据可核对记录。':'';
+      const warning=coverageNote(c);
+      el('.rp-analysis-warning').hidden=!warning;el('.rp-analysis-warning').textContent=warning;
       el('.rp-curve-note').textContent=chartError||curveNote(data);
       el('.rp-equity-chart').setAttribute('aria-label',`已实现资金曲线，从 ${num(s.period_start_equity)} 到 ${num(data.curve.at(-1)?.equity)} USDT`);
       paint(data);

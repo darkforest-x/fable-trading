@@ -84,12 +84,12 @@ body[data-design=apple-glass] :is(.research-table,.okx-live table,.v130-table,.n
 body[data-design=apple-glass] :is(.research-badge,.ms-badge,.okx-badge,.bk-tag) {border-radius:6px;}
 
 /* Sheets have more opacity than floating controls: numbers remain legible. */
-body[data-design=apple-glass] :is(dialog:not([data-global-alert]),.quiet-menu-panel,.symbol-picker-popover,.desk-symbol-popover,.mt-symbol-dialog) {
+body[data-design=apple-glass] :is(dialog:not([data-global-alert]):not(.rs-book),.quiet-menu-panel,.symbol-picker-popover,.desk-symbol-popover,.mt-symbol-dialog) {
   background:var(--glass-sheet)!important;color:var(--text);border:1px solid var(--glass-edge)!important;border-radius:24px!important;box-shadow:var(--elevated-shadow)!important;
   backdrop-filter:blur(24px) saturate(var(--glass-saturation));-webkit-backdrop-filter:blur(24px) saturate(var(--glass-saturation));
 }
-body[data-design=apple-glass] dialog:not([data-global-alert])::backdrop {background:var(--dialog-backdrop);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
-body[data-design=apple-glass] dialog[open]:not([data-global-alert]) {animation:glass-sheet-in var(--motion-panel) var(--motion-ease);}
+body[data-design=apple-glass] dialog:not([data-global-alert]):not(.rs-book)::backdrop {background:var(--dialog-backdrop);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+body[data-design=apple-glass] dialog[open]:not([data-global-alert]):not(.rs-book) {animation:glass-sheet-in var(--motion-panel) var(--motion-ease);}
 body[data-design=apple-glass] :is(.quiet-menu>summary,.quiet-menu-panel>button) {border-radius:10px;min-height:36px;}
 body[data-design=apple-glass] .quiet-menu-panel {padding:10px;border-radius:16px!important;}
 body[data-design=apple-glass] :is(.ml-header,.ml-footer,.ml-steps,.desk-confirm-footer,.yd-enlarge-header) {background:transparent!important;}
