@@ -14,6 +14,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import json
 from pathlib import Path
 import subprocess
+from types import SimpleNamespace
 import zipfile
 
 import numpy as np
@@ -175,7 +176,7 @@ def panel(ax, frame, r, minutes, title):
     pad = max((upper-lower)*.16, abs(upper)*.0005)
     ax.set_ylim(lower-pad, upper+pad)
     ax.set_xlim(-1, len(frame)+max(2,len(frame)*.14))
-    et, xt = pd.Timestamp(r.entry_t), pd.Timestamp(r.exit_t)
+    et, xt = pd.Timestamp(r.entry_bar), pd.Timestamp(r.exit_bar)
     step = pd.Timedelta(minutes=minutes)
     def pos(t):
         return int(frame.index.searchsorted(t, side='right'))-1
@@ -187,7 +188,7 @@ def panel(ax, frame, r, minutes, title):
     price_lines = [('入场',r.entry,COLORS['entry'],'--'), ('目标',r.target_price,COLORS['target'],':')]
     confirmation = et.floor('60min')+pd.Timedelta(hours=2)
     protection = r.entry*(1+int(r.side)*(.005 if r.track == 'v3lock' else 0))
-    protected = r.reclaim_status == 'reclaimed' and xt >= confirmation
+    protected = r.reclaim_status == 'reclaimed' and pd.Timestamp(r.exit_t) >= confirmation
     for label, price, color, style in price_lines:
         if lower-pad <= price <= upper+pad:
             ax.hlines(price,max(-.5,ei),right,color=color,ls=style,lw=1.1)
@@ -224,10 +225,12 @@ def draw(frame, r):
     import matplotlib.pyplot as plt
     plt.rcParams.update({'font.family':'sans-serif','font.sans-serif':['Heiti SC','Arial Unicode MS'],
                          'axes.unicode_minus':False,'figure.facecolor':'white','axes.facecolor':'white'})
-    et,xt=pd.Timestamp(r.entry_t),pd.Timestamp(r.exit_t)
-    assert frame.index[int(r.entry_i)] == et, (r.event, 'entry index/time mismatch')
-    assert frame.index[int(r.exit_i)] == xt, (r.event, 'exit index/time mismatch')
+    recorded_entry,recorded_exit=pd.Timestamp(r.entry_t),pd.Timestamp(r.exit_t)
     step=pd.Timedelta(minutes=5)
+    et,xt=frame.index[int(r.entry_i)],frame.index[int(r.exit_i)]
+    assert et+step == recorded_entry, (r.event, 'native entry close timestamp mismatch')
+    assert recorded_exit in (xt,xt+step), (r.event, 'native exit timestamp mismatch')
+    r=SimpleNamespace(**r._asdict(),entry_bar=str(et),exit_bar=str(xt))
     raw=frame.loc[et-step*30:xt+step*12]
     minutes=next(m for m in [5,15,60,240,1440] if (xt-et).total_seconds()/60/m+45 <= 220)
     main=display_bars(raw,minutes)
@@ -252,7 +255,7 @@ def draw(frame, r):
     when=lambda t:t.tz_convert('Asia/Shanghai').strftime('%m-%d %H:%M')
     holding=(xt-et).total_seconds()/3600
     duration='同一根 5m K线内' if et == xt else f'约 {holding:.2f} 小时'
-    fig.text(.065,.84,f'E 入场 {when(et)} · {fmt(r.entry)}       X 退出 {when(xt)} · {fmt(r.exit_price)}       {duration}',fontsize=12,color=COLORS['muted'])
+    fig.text(.065,.84,f'E 入场 {when(recorded_entry)} · {fmt(r.entry)}       X 退出 {when(recorded_exit)} · {fmt(r.exit_price)}       {duration}',fontsize=12,color=COLORS['muted'])
     protection=r.entry*(1+int(r.side)*(.005 if r.track=='v3lock' else 0))
     extra=f' · EMA排列 {int(r.order)}' if r.track=='spike' else ''
     fig.text(.065,.18,f'评分 {r.score:.4f}{extra}     目标 {fmt(r.target_price)}     初始止损 {fmt(r.stop)}     确认后保护 {fmt(protection)}',fontsize=12,color=COLORS['ink'])
@@ -262,10 +265,11 @@ def draw(frame, r):
     fig.text(.065,.135,f'{funded}。蓝底为持仓；蓝虚线入场、金点线目标、红虚线初始止损、紫点划线确认后保护。',fontsize=10.5,color=COLORS['muted'])
     historical='spike 历史 BE0；当前模拟为 +0.17%。' if r.track=='spike' else 'v3lock 确认后锁利 +0.50%。'
     fig.text(.065,.09,'Binance历史数据 · 北京时间 · '+historical+'远离画面的价位仅列数值；缺K用竖点线标记。',fontsize=10.5,color=COLORS['muted'])
-    fig.text(.065,.05,'手续费 maker 0.02% / taker 0.05%；非目标退出另扣滑点 0.10%。E/X时间为源5m区间标记，同K先后由原回测路径假设。',fontsize=10,color=COLORS['muted'])
+    fig.text(.065,.05,'手续费 maker 0.02% / taker 0.05%；另扣非目标滑点 0.10%。上方为账本时刻，横轴为K线开始；同K先后采用原回测路径。',fontsize=10,color=COLORS['muted'])
     path=EXP/r.file;path.parent.mkdir(parents=True,exist_ok=True)
     fig.savefig(path,dpi=120);plt.close(fig)
-    return dict(file=r.file,event=r.event,track=r.track,cohort=r.cohort,dimensions=[1920,1080],panels=panels)
+    return dict(file=r.file,event=r.event,track=r.track,cohort=r.cohort,dimensions=[1920,1080],panels=panels,
+                entry_bar=str(et),exit_bar=str(xt),native_times_match_source_indices=True)
 
 
 def render_symbol(item):
