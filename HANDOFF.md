@@ -1,3 +1,9 @@
+## 2026-10-27 · Sixth paper account v3lock (+0.5 percent profit lock)
+
+- Owner asked for a v3 +0.5 percent profit-lock paper account next to v3 as a forward check of `exp-monday-limit-be-lock-compare-20261027-v1`. Commit a254f02183: API key `v3lock`, internal track 4060, own 1000 USDT. Same v3 entry, score gate, targets, sizing and -30 percent backstop. A reclaim moves the stop to entry +0.5 percent instead of +0.17 percent; a reclaim close short of that price exits at the close (`reclaimed_inside_be`). Snapshot carries `v3lock: {breakeven_offset_bp: 50}`; analytics accepts `track=v3lock`.
+- Monitor restarted once (11:43, PID 82243). Only this file had changed since the previous start; the uncommitted Bark edits were already loaded. Paper worker alive, queue 0, no error; v3lock 1000 USDT, no trades. Fib stream connected, scan 2008/2008 without errors, model_ready false as before.
+- Web UI does not show v3lock yet: the frontend lists accounts by fixed keys (`monday-reclaim-paper.js`, `startup-hints.js`, `reclaim-analytics.js`). Connecting it is UI work for Codex + Stitch, same pattern as the spike account. Until then the data is in `/api/monday-reclaim-paper` under `tracks.v3lock`.
+
 ## 2026-10-27 · Complete dark-theme coverage for shared and lazy components
 
 - Reproduced unreadable dark text, white tables/steps and stale dialog palettes in secondary study tabs. Playbooks now use live semantic colors; reader figure/badge ink uses opaque page colors, not translucent glass. Body-level RektProof dialogs share the reader palette instead of copying computed colors, so an already-open figure follows theme changes. Removed a self-referencing orderflow border token.
