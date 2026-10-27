@@ -32,6 +32,7 @@ def build():
     spike, spike_src = source('spike-hw-20261026-v1')
     allin, allin_src = source('langlang-20261027-v1')
     controls, controls_src = source('spike-controls-20261027-v1')
+    returns, returns_src = source('return-opt-20261027-v2')
     accounts = {}
     headers = ['区间', '样本数', '胜率 %', '平均净收益 bp']
     for track, variant in [('v3', 'v3_be17'), ('v3lock', 'v3_be50')]:
@@ -70,6 +71,20 @@ def build():
         headers=['区间', '回放样本数', '期末本金倍数', '最大回撤 %'], rows=table(addition, ['n','final_median','dd_median']),
         chart=dict(title='历史BE0加仓 · 分区间本金倍数', unit='倍', labels=LABELS, values=[addition[p]['final_median'] for p in PERIODS]),
         sources=[{**add_src, 'selection': 'replays.v3_be0_plus_add5'}],
+    )
+    add20 = returns['settings']['v3add|frac|N20|L3']
+    add20_fields = ['final_multiple', 'max_drawdown_pct', 'taken', 'skipped', 'liquidations', 'win_pct']
+    accounts['v3add20'] = dict(
+        status='修正资金算法后的历史研究 · BE0',
+        note='每笔成交时按净值1/20配保证金、3倍杠杆、主单和加仓合计最多20笔。来源为修正初始本金错误后的return-opt v2，10次同刻顺序取中位数。历史加仓使用BE0，当前保护价为主单入场价盈利方向+0.17%；历史Binance行情与MAE强平情景，也不同于当前OKX前向模拟及保证金封顶。',
+        headers=['区间', '期末本金倍数', '最大回撤 %', '成交笔数（含加仓）', '容量跳过', '强平情景次数', '胜率 %'],
+        rows=table(add20, add20_fields)+[['2020起连续回放 · 至2026年9月', *[add20['from_2020'][f] for f in add20_fields]]],
+        chart=dict(title='历史BE0 · 分区间期末本金倍数', unit='倍', labels=LABELS, values=[add20[p]['final_multiple'] for p in PERIODS]),
+        charts=[dict(title=title, unit=unit, labels=LABELS, values=[add20[p][field] for p in PERIODS]) for title,unit,field in [('分区间最大已实现回撤','%','max_drawdown_pct'),('分区间资金成交笔数','笔','taken'),('容量不足跳过次数','次','skipped')]],
+        detail='2481笔候选成交（含加仓）。最后一行是从2020起的连续资金回放汇总，不是把前面区间相乘；原结果未保存逐时资金路径。份数及杠杆在同一历史上筛选，不能视为独立样本外业绩。容量对照比较同一组成交：20份动态保证金、修正后的固定20份和原v3add线性分配；入场优势仍需对应随机对照与前向验证。',
+        capital_headers=['同组成交 · 2020起连续回放', '期末本金倍数', '最大回撤 %', '资金成交笔数'],
+        capital_rows=[[title, *[returns['settings'][variant]['from_2020'][f] for f in ['final_multiple','max_drawdown_pct','taken']]] for title,variant in [('20份动态保证金 · 3倍','v3add|frac|N20|L3'),('修正后固定20份 · 3倍','v3add|slots|N20|L3'),('原v3add评分线性分配 · 1倍','v3add|linear|L1')]],
+        sources=[{**returns_src, 'selection': 'settings.v3add|frac|N20|L3; corrected settings.v3add|slots|N20|L3; settings.v3add|linear|L1'}],
     )
     sized = {p: spike['equity']['规则：分10份×5倍|'+p] for p in PERIODS}
     accounts['spike'] = dict(
@@ -130,7 +145,7 @@ def build():
         accounts[track]['references'][0]['caption'] += ' 原图早于异常K线剔除修正，仅作研发历史记录。'
     data = dict(version=1, reviewed_on='2026-10-27', accounts=accounts,
         methodology='成交来自既有NautilusTrader回测，逐笔取O-H-L-C与O-L-H-C中较差路径。Maker单边2bp、Taker单边5bp，非目标退出另计10bp滑点；未纳入资金费率。1bp=0.01%。胜率按各原研究口径，不能跨表直接比较。评分训练截止2025年前；规则与参数也在这些历史数据上研究过，2025以后不等于完全独立的样本外验证。',
-        integrity='2026-10-27发现旧slots回放重复计算初始资金。该类分仓资金倍数与排行不展示；本页只选不受影响的linear、spike小册slot_replay和allin path_run结果。曲线缺失时保留缺失状态，区间汇总只画柱状图。',
+        integrity='2026-10-27发现旧slots回放重复计算初始资金。旧版有误的分仓倍数与排行不展示；采用不受影响的linear、spike小册slot_replay、allin path_run，以及修正后的return-opt v2动态保证金与固定分仓对照。曲线缺失时保留缺失状态，区间汇总只画柱状图。',
         comparison='spike章节提供原始无兜底基线的同币×纽约周×方向×波动桶匹配随机对照；不等同于全部当前账户的对照。排列分≥1仅是规则对照。其他参数版本尚无完整对应的随机对照，不能仅凭绝对收益宣称超额优势。',
         period_note='2026与近5个月均截至原数据末端2026年9月；近5个月与2026重叠。各独立本金回放区间从1000 USDT重启，不可拼接成连续资金曲线。')
     (OUT/'research.json').write_text(json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)+'\n')
