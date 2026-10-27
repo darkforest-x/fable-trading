@@ -160,7 +160,7 @@ test('pending adds use parent original notional as a ceiling and stay out of fil
 test('account rule copy reads frozen configuration and does not promise net breakeven',()=>{
  const d=snapshot();d.tracks.v3add=track({confirm_minutes:60});d.v3={min_score:.5,far_score:.6,backstop_pct:30,sizing:{fraction:.05,cut:.2262,mean_excess:.1088,cap:.5}};d.v3add={from_score:.6,drawdown_pct:5};d.breakeven_offset_bp=17;
  const text=ui.rulesHTML(d,'v3add');
- for(const pattern of [/独立模拟账户/,/区间 0.618/,/对侧 1.618/,/30% 兜底/,/0.17%/,/确认周期 60 分钟/,/主单与已成交加仓分别计笔/])assert.match(text,pattern);
+ for(const pattern of [/独立模拟策略/,/区间 0.618/,/对侧 1.618/,/30% 兜底/,/0.17%/,/确认周期 60 分钟/,/主单与已成交加仓分别计笔/])assert.match(text,pattern);
  assert.doesNotMatch(text,/彻底覆盖|保证|NaN|undefined/);
 });
 
@@ -239,7 +239,7 @@ test('v3lock rules bind its own offset while inheriting v3 entry, target and siz
  d.v3={min_score:.5,far_score:.6,backstop_pct:30,sizing:{fraction:.05,cut:.2262,mean_excess:.1088,cap:.5}};
  d.breakeven_offset_bp=17;d.v3lock={breakeven_offset_bp:50};
  const html=ui.rulesHTML(d,'v3lock');
- for(const p of [/v3lock · 独立模拟账户/,/按评分线性分配/,/0.50%（多加、空减）/,/区间 0.618/,/对侧 1.618/,/30% 兜底/,/确认周期 60 分钟/,/未越过利润锁价，也在该收盘退出/])assert.match(html,p);
+ for(const p of [/v3lock · 独立模拟策略/,/按评分线性分配/,/0.50%（多加、空减）/,/区间 0.618/,/对侧 1.618/,/30% 兜底/,/确认周期 60 分钟/,/未越过利润锁价，也在该收盘退出/])assert.match(html,p);
  assert.doesNotMatch(html,/0.17%|NaN|undefined/);assert.match(ui.rulesHTML(d,'v3'),/0.17%/);
  d.v3lock.breakeven_offset_bp=75;assert.match(ui.rulesHTML(d,'v3lock'),/0.75%/);
  delete d.v3lock;assert.doesNotMatch(ui.rulesHTML(d,'v3lock'),/0.17%|0.50%|NaN|undefined/);

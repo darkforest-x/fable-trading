@@ -160,7 +160,7 @@ def run():
     for track, variant in [('v3', 'v3_be17'), ('v3lock', 'v3_be50'), ('v3add', 'v3_be0')]:
         variants = ['v3_be0', 'v3_add5'] if track == 'v3add' else [variant]
         note = '历史Binance成交；评分线性分配，总保证金≤净值，1倍；固定原研究首个随机种子，非10次中位数。'
-        note += '历史BE0，当前+0.17%。' if track == 'v3add' else '保护偏移与当前账户相同。'
+        note += '历史BE0，当前+0.17%。' if track == 'v3add' else '保护偏移与当前策略相同。'
         meta[track] = export(track, t[t.variant.isin(variants)], linear, note,
                              ['exp-monday-limit-be-lock-compare-20261027-v1' if track == 'v3lock' else 'exp-monday-limit-return-opt-20261027-v2'], '2020-01-01', 20261103)
     meta['60'] = export('60', t[t.variant == 'v2_be17'],

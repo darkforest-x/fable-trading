@@ -1,3 +1,8 @@
+## 2026-10-27 · Simulated strategy terminology
+
+- The homepage selector, popup, analytics filter, strategy booklet and related messages consistently use `策略`. Simulation disclosures, account identifiers, stored preferences and all accounting values are preserved. Booklet text generators and current display projections use the same wording.
+- Stitch copy revision: `f7e5fa6f00394d0d95064106ece0f1ce` (`GEMINI_3_8_FLASH`), source in `docs/design/stitch-20261027-strategy-labels/`. 53 targeted frontend tests pass; public Chrome and mobile WebKit checks pass. Raw QA: `output/playwright/strategy-labels-20261027/`. Both owned browser sessions closed, all 16 recorded processes exited; paper worker, market stream and four patrol schedules remain healthy.
+
 ## 2026-10-27 · Spike historical orders redrawn with real 1m candles
 
 - Delivered all 85 previously exported 2026 spike orders as annotated 1920x1080 1m PNGs in a 10.33MB ZIP to the original Telegram group: https://t.me/c/3823416414/3430. Output: experiments/active/exp-spike-2026-1m-trade-charts-20261027-v1/. Original 5m delivery remains preserved.

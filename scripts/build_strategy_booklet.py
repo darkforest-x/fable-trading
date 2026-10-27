@@ -40,7 +40,7 @@ def build():
         sized = lock['sizing'][variant+'|linear|L1']
         accounts[track] = dict(
             status='规则对应的历史研究',
-            note='保护偏移与本账户一致；历史为 Binance 5m，当前为 OKX 前向模拟。线性分配、总名义敞口1倍。区间分别从1000 USDT开始，同刻顺序10次取中位数；末列区间与2026重叠，不能相加。',
+            note='保护偏移与本策略一致；历史为 Binance 5m，当前为 OKX 前向模拟。线性分配、总名义敞口1倍。区间分别从1000 USDT开始，同刻顺序10次取中位数；末列区间与2026重叠，不能相加。',
             headers=headers, rows=table(rows, ['n', 'win_pct', 'mean_bp']),
             capital_headers=['区间', '期末本金倍数', '最大回撤 %', '资金成交笔数'],
             capital_rows=table(sized, ['final_multiple', 'max_drawdown_pct', 'taken']),
@@ -49,7 +49,7 @@ def build():
         )
     accounts['60'] = dict(
         status='历史研究 · 仓位口径不同',
-        note='本表为60分钟、+0.17%保护偏移的独立交易结果。原研究资金回放使用评分线性仓位，当前60m账户使用每笔10%净值，因此不展示其资金倍数作为当前账户收益。',
+        note='本表为60分钟、+0.17%保护偏移的独立交易结果。原研究资金回放使用评分线性仓位，当前60m策略使用每笔10%净值，因此不展示其资金倍数作为当前策略收益。',
         headers=headers, rows=table(add['offsets']['v2_be17'], ['n', 'win_pct', 'mean_bp']),
         chart=dict(title='独立交易平均净收益', unit='bp', labels=LABELS, values=[add['offsets']['v2_be17'][p]['mean_bp'] for p in PERIODS]),
         sources=[{**add_src, 'selection': 'offsets.v2_be17'}],
@@ -89,7 +89,7 @@ def build():
     sized = {p: spike['equity']['规则：分10份×5倍|'+p] for p in PERIODS}
     accounts['spike'] = dict(
         status='插针高胜率小册 · 历史BE0',
-        note='219笔、181个币种。历史与当前均为评分≥0.6、排列分≥3、10份×5倍；历史用Binance行情与开仓价保本，当前排列分用OKX 15m、保护偏移+0.17%。历史另设19%浮亏强平情景，当前模拟按保证金封顶，两者不能视为完全相同的账户。',
+        note='219笔、181个币种。历史与当前均为评分≥0.6、排列分≥3、10份×5倍；历史用Binance行情与开仓价保本，当前排列分用OKX 15m、保护偏移+0.17%。历史另设19%浮亏强平情景，当前模拟按保证金封顶，两者不能视为完全相同的策略。',
         headers=headers, rows=table(spike['periods'], ['n','win_pct','mean_bp']),
         capital_headers=['区间', '期末本金倍数', '最大回撤 %', '资金成交笔数'], capital_rows=table(sized, ['final_multiple','max_drawdown_pct','taken']),
         chart=dict(title='独立交易平均净收益', unit='bp', labels=LABELS, values=[spike['periods'][p]['mean_bp'] for p in PERIODS]),
@@ -127,7 +127,7 @@ def build():
         accounts[track]['sources'].append({**exits_src,'selection':'2_last5m_equity.png; earlier BE0 account paths'})
     # Keep an earlier curve explicitly secondary, never relabel its parameters.
     for track in ['v3','v3add','v3lock']:
-        accounts[track]['references'] = [dict(file='v3-early-equity.png',caption='早期v3研发曲线（参考）：20%兜底、BE0，门槛0.226/0.5对照。当前v3/v3lock为30%兜底，v3add另有加仓；该图不代表这些当前账户的历史资金表现。')]
+        accounts[track]['references'] = [dict(file='v3-early-equity.png',caption='早期v3研发曲线（参考）：20%兜底、BE0，门槛0.226/0.5对照。当前v3/v3lock为30%兜底，v3add另有加仓；该图不代表这些当前策略的历史资金表现。')]
         accounts[track]['sources'].append(dict(path='experiments/active/exp-monday-limit-v3-compare-20261025-v1/1_v3_equity_2026.png',commit=None,selection='Original earlier-version comparison chart; not current account equity'))
     accounts['spike']['images'] += [dict(file='spike-floating-loss.png',caption='确认前最大浮亏分布 · 赢单与非赢单对比。'),dict(file='spike-frequency.png',caption='月度、单日与累计开单频率 · 满仓跳过前的219笔候选成交。')]
     accounts['spike']['sources'][0]['selection'] += '; 3_floating_loss.png; 4_frequency.png'
@@ -146,7 +146,7 @@ def build():
     data = dict(version=1, reviewed_on='2026-10-27', accounts=accounts,
         methodology='成交来自既有NautilusTrader回测，逐笔取O-H-L-C与O-L-H-C中较差路径。Maker单边2bp、Taker单边5bp，非目标退出另计10bp滑点；未纳入资金费率。1bp=0.01%。胜率按各原研究口径，不能跨表直接比较。评分训练截止2025年前；规则与参数也在这些历史数据上研究过，2025以后不等于完全独立的样本外验证。',
         integrity='2026-10-27发现旧slots回放重复计算初始资金。旧版有误的分仓倍数与排行不展示；采用不受影响的linear、spike小册slot_replay、allin path_run，以及修正后的return-opt v2动态保证金与固定分仓对照。曲线缺失时保留缺失状态，区间汇总只画柱状图。',
-        comparison='spike章节提供原始无兜底基线的同币×纽约周×方向×波动桶匹配随机对照；不等同于全部当前账户的对照。排列分≥1仅是规则对照。其他参数版本尚无完整对应的随机对照，不能仅凭绝对收益宣称超额优势。',
+        comparison='spike章节提供原始无兜底基线的同币×纽约周×方向×波动桶匹配随机对照；不等同于全部当前策略的对照。排列分≥1仅是规则对照。其他参数版本尚无完整对应的随机对照，不能仅凭绝对收益宣称超额优势。',
         period_note='2026与近5个月均截至原数据末端2026年9月；近5个月与2026重叠。各独立本金回放区间从1000 USDT重启，不可拼接成连续资金曲线。')
     (OUT/'research.json').write_text(json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)+'\n')
     src = ROOT/'experiments/active/exp-monday-limit-spike-hw-20261026-v1'
