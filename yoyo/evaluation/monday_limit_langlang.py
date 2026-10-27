@@ -33,8 +33,10 @@ A = ROOT/'experiments/active'
 DAY = 86_400_000_000_000
 
 
-def path_run(t, scheme, lev, seed, goals=(10, 100)):
+def path_run(t, scheme, lev, seed, goals=(10, 100), trace=None):
     """Forward run from the first row; returns days to each goal (None if never), blow-ups and liquidations."""
+    if trace is not None and scheme != "allin":
+        raise ValueError("Booklet trace is supported for allin only")
     rng = np.random.default_rng(seed)
     o = np.lexsort((rng.random(len(t)), t.entry_ns.to_numpy()))
     t = t.iloc[o].reset_index(drop=True)
@@ -43,7 +45,7 @@ def path_run(t, scheme, lev, seed, goals=(10, 100)):
     stakes, blow, nliq, busy = 1, 0, 0, -1
     reserve, b, last_reset, acct = 2000/3, 1000/3, 1000., 1000.
     hit = {g: None for g in goals}
-    for e, x, net, mae in zip(t.entry_ns.to_numpy(), t.exit_ns.to_numpy(), t.net.to_numpy()/1e4, t.mae_pct.to_numpy()):
+    for j, (e, x, net, mae) in enumerate(zip(t.entry_ns.to_numpy(), t.exit_ns.to_numpy(), t.net.to_numpy()/1e4, t.mae_pct.to_numpy())):
         if e < busy:
             continue
         busy = x if x > e else e+1
@@ -52,7 +54,11 @@ def path_run(t, scheme, lev, seed, goals=(10, 100)):
             acct += -m if mae >= liq else max(-m, m*lev*net)
             nliq += mae >= liq
             total = acct
+            if trace is not None:
+                trace(t.iloc[j], int(x), acct, acct-m, m*lev)
             if acct < 100.:
+                if trace is not None:
+                    trace(t.iloc[j], int(x), 1000., 0., 0., cashflow=1000.-acct, stake_budget=1000.)
                 blow += 1; stakes += 1; acct = 1000.
         else:
             pnl = -b if mae >= liq else max(-b, b*lev*net)

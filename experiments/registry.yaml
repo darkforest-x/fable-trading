@@ -14584,3 +14584,14 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: Native633asset source cohort; real1m available for6crypto andspotgold only, others5m. SameNYweek/direction/causal-volatility matched random attempts retained even unfilled. Exactentry stop is not fee breakeven. Entry-notional returns, no initial R. Source page4038856479af8029a91ec6bfe4a6002f andowner answers saved. No newHTML requested in this task.
+
+  - experiment_id: exp-strategy-booklet-paths-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    status: active
+    question: Export missing continuous historical equity paths for the eight requested strategy booklets.
+    single_variable: None; observe existing capital accounting on saved native fills, no new fills or parameter selection.
+    canonical_report: experiments/active/exp-strategy-booklet-paths-20261027-v1/manifest.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Original first seed, source costs and historical protection/liquidation assumptions retained; allin cash additions separate from P&L. No synthetic path from independent period endpoints.

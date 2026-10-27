@@ -36,7 +36,7 @@ EXP = ROOT/'experiments/active/exp-monday-limit-return-opt-20261027-v1'
 A = ROOT/'experiments/active'
 
 
-def linear(t, k, lev, seed):
+def linear(t, k, lev, seed, trace=None):
     """Isolated margin per trade, total margin <= equity; liquidation at MAE >= 100/lev - 1 percent."""
     rng = np.random.default_rng(seed)
     o = np.lexsort((rng.random(len(t)), t.entry_ns.to_numpy()))
@@ -59,12 +59,14 @@ def linear(t, k, lev, seed):
             pnl = -m if mae[j] >= liq else max(-m, m*lev*net[j])
             nliq += mae[j] >= liq; wins += pnl > 0
             eq += pnl; peak = max(peak, eq); dd = max(dd, 1-eq/peak)
+            if trace is not None:
+                trace(t.iloc[j], int(ts), eq, pnl, m*lev)
             if eq <= 1e-6:
                 return dict(final_multiple=0., max_drawdown_pct=100., liquidations=nliq, taken=taken, win_pct=100*wins/max(taken, 1))
     return dict(final_multiple=eq/1000, max_drawdown_pct=100*dd, liquidations=int(nliq), taken=taken, win_pct=100*wins/max(taken, 1))
 
 
-def frac(t, n, lev, seed):
+def frac(t, n, lev, seed, trace=None):
     """Margin = realized equity / n per fill, at most n open, margin in use <= equity; liquidation as in linear."""
     rng = np.random.default_rng(seed)
     t = t.iloc[np.lexsort((rng.random(len(t)), t.entry_ns.to_numpy()))].reset_index(drop=True)
@@ -87,6 +89,8 @@ def frac(t, n, lev, seed):
             pnl = -m if mae[j] >= liq else max(-m, m*lev*net[j])
             nliq += mae[j] >= liq; wins += pnl > 0
             eq += pnl; peak = max(peak, eq); dd = max(dd, 1-eq/peak)
+            if trace is not None:
+                trace(t.iloc[j], int(ts), eq, pnl, m*lev)
             if eq <= 1e-6:
                 return dict(final_multiple=0., max_drawdown_pct=100., liquidations=nliq, skipped=skipped, taken=taken, win_pct=100*wins/max(taken, 1))
     return dict(final_multiple=eq/1000, max_drawdown_pct=100*dd, liquidations=int(nliq), skipped=skipped, taken=taken,

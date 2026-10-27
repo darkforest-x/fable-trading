@@ -1,0 +1,19 @@
+{
+  "experiment_id": "exp-strategy-booklet-paths-20261027-v1",
+  "question": "Owner requested actual equity/return/drawdown paths and conventional backtest charts in every strategy booklet.",
+  "operation": "Read saved Nautilus fills; observe the existing capital accounting functions. No new fills, K-line replay, parameter search, or cost changes.",
+  "seed_policy": "Original study's first seed, chosen before observing outputs; one continuous run, never a splice of medians or period endpoints.",
+  "fee_policy": "Preserve native stored net returns, including original maker/taker fees and 10 bp non-target slippage. No second fee deduction.",
+  "equity": "Realized equity only, not intratrade mark-to-market. Cash additions are separate from trading profit.",
+  "sources": [
+    "exp-monday-limit-time-news-20261026-v1",
+    "exp-monday-limit-be-scalein-20261026-v1",
+    "exp-monday-limit-be-lock-20261027-v1",
+    "exp-monday-limit-return-opt-20261027-v2",
+    "exp-monday-limit-reclaim-allexits-20261025-v1",
+    "exp-monday-limit-spike-hw-20261026-v1",
+    "exp-monday-limit-langlang-20261027-v1"
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}

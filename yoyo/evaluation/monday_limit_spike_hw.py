@@ -34,7 +34,7 @@ A = ROOT/'experiments/active'
 CAUSE = {4: '止盈', 5: '保本出场', 11: '没收回止损', 12: '收回不足保本价', 1: '兜底止损', 0: '其他'}
 
 
-def slot_replay(t, slots, lev, liq, seed):
+def slot_replay(t, slots, lev, liq, seed, trace=None):
     """Equity path of the slot rule; exits before entries at one timestamp except a trade's own same-bar exit."""
     rng = np.random.default_rng(seed)
     o = np.lexsort((rng.random(len(t)), t.entry_ns.to_numpy()))
@@ -56,6 +56,8 @@ def slot_replay(t, slots, lev, liq, seed):
             pnl = -m if mae[j] >= liq else max(-m, m*lev*net[j])
             nliq += mae[j] >= liq; wins += pnl > 0
             eq += pnl; peak = max(peak, eq); dd = max(dd, 1-eq/peak); path.append((int(ts), eq))
+            if trace is not None:
+                trace(t.iloc[j], int(ts), eq, pnl, m*lev)
     return dict(final_multiple=eq/1000, max_drawdown_pct=100*dd, liquidations=int(nliq), skipped=int(skipped), taken=int(taken),
                 win_pct=100*wins/max(taken, 1)), path
 

@@ -56,7 +56,7 @@ def ledger_extra(symbol):
     return t.assign(range_pct=100*(t.monday_high-t.monday_low)/t.level)[['trade_id', 'week', 'bucket', 'range_pct']]
 
 
-def replay_w(t, k, gross=1.):
+def replay_w(t, k, gross=1., trace=None):
     """Realized equity from 1000 USDT; per-trade fraction k; same-bar exits follow their entry."""
     net = t.net.to_numpy()/1e4
     same = t.exit.to_numpy() == t.entry.to_numpy()
@@ -71,6 +71,8 @@ def replay_w(t, k, gross=1.):
         else:
             eq += notional[j]*net[j]; opened -= notional[j]
             peak = max(peak, eq); dd = max(dd, 1-eq/peak); path.append((ts, eq))
+            if trace is not None and notional[j] > 0:
+                trace(t.iloc[j], int(ts), eq, notional[j]*net[j], notional[j])
             if eq <= 0:
                 return dict(final_multiple=0., max_drawdown_pct=100.), path
     return dict(final_multiple=eq/1000, max_drawdown_pct=100*dd), path
