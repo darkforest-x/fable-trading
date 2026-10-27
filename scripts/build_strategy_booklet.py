@@ -90,6 +90,32 @@ def build():
         detail='耗时从该起点之后第一笔可用交易开始计；目标分母计入每次新增1000 USDT的本金份数。各起点使用重叠行情，不是44份独立验证；图中耗时不是资金曲线。',
         sources=[{**allin_src, 'selection': 'grid.v3_ge06_opp1618|allin|L3'}],
     )
+    # More plots are projections of saved aggregates, not new trading replays.
+    reason_names = {'target':'目标止盈', 'breakeven':'保护止损', 'failed_reclaim':'未回收', 'reclaimed_inside_offset':'未越过保护价', 'backstop':'兜底止损', '0':'期末结算'}
+    for track, variant in [('60','v2_be17'), ('v3','v3_be17'), ('v3lock','v3_be50')]:
+        stats = add['offsets'][variant] if track == '60' else lock['per_trade'][variant]
+        reasons = stats['last5m']['reasons']
+        accounts[track]['charts'] = [
+            dict(title='分区间胜率', unit='%', labels=LABELS, values=[stats[p]['win_pct'] for p in PERIODS]),
+            dict(title='近5个月退出原因占比', unit='%', labels=[reason_names.get(k,k) for k in reasons], values=list(reasons.values())),
+        ]
+        if track != '60':
+            capital = lock['sizing'][variant+'|linear|L1']
+            accounts[track]['charts'].append(dict(title='分区间最大已实现回撤', unit='%', labels=LABELS, values=[capital[p]['max_drawdown_pct'] for p in PERIODS]))
+    accounts['5']['charts'] = [dict(title='分区间胜率 · 历史BE0',unit='%',labels=labels,values=[five[p]['win_pct'] for p in keys]),dict(title='近5个月多空平均净收益',unit='bp',labels=['做多','做空'],values=[five['last5m|top40']['long_mean_bp'],five['last5m|top40']['short_mean_bp']])]
+    accounts['v3add']['charts'] = [dict(title='历史BE0加仓 · 最大回撤',unit='%',labels=LABELS,values=[addition[p]['dd_median'] for p in PERIODS]),dict(title='高分主单的加仓成交率',unit='%',labels=LABELS,values=[add['scale_in']['add5'][p]['child_fill_pct'] for p in PERIODS])]
+    accounts['allin3']['charts'] = [dict(title='各月起点达到100倍累计本金的耗时',unit='天',labels=list(grid['by_start']),values=[r['d100'] for r in grid['by_start'].values()]),dict(title='10倍目标 · 历史到达比例',unit='%',labels=['90天内','180天内','365天内','数据结束前'],values=[grid['x10'][k] for k in ['within_90d_pct','within_180d_pct','within_365d_pct','reached_pct']]),dict(title='100倍目标 · 历史到达比例',unit='%',labels=['90天内','180天内','365天内','数据结束前'],values=[grid['x100'][k] for k in ['within_90d_pct','within_180d_pct','within_365d_pct','reached_pct']])]
+    equity_ref = dict(file='v2-equity.png', caption='历史资金曲线 · v2早期BE0版本 · 每笔10%、总敞口≤1倍。蓝线60分钟、橙线5分钟；图内“现行”指原研究2026-10-25当时版本，当前保护偏移已为+0.17%。')
+    for track in ['60','5']:
+        accounts[track]['images'] = [equity_ref]
+        accounts[track]['sources'].append({**exits_src,'selection':'2_last5m_equity.png; earlier BE0 account paths'})
+    # Keep an earlier curve explicitly secondary, never relabel its parameters.
+    for track in ['v3','v3add','v3lock']:
+        accounts[track]['references'] = [dict(file='v3-early-equity.png',caption='早期v3研发曲线（参考）：20%兜底、BE0，门槛0.226/0.5对照。当前v3/v3lock为30%兜底，v3add另有加仓；该图不代表这些当前账户的历史资金表现。')]
+        accounts[track]['sources'].append(dict(path='experiments/active/exp-monday-limit-v3-compare-20261025-v1/1_v3_equity_2026.png',commit=None,selection='Original earlier-version comparison chart; not current account equity'))
+    accounts['spike']['images'] += [dict(file='spike-floating-loss.png',caption='确认前最大浮亏分布 · 赢单与非赢单对比。'),dict(file='spike-frequency.png',caption='月度、单日与累计开单频率 · 满仓跳过前的219笔候选成交。')]
+    accounts['spike']['sources'][0]['selection'] += '; 3_floating_loss.png; 4_frequency.png'
+    accounts['spike']['charts'] = [dict(title='分区间胜率 · 历史BE0',unit='%',labels=LABELS,values=[spike['periods'][p]['win_pct'] for p in PERIODS]),dict(title='分区间最大已实现回撤',unit='%',labels=LABELS,values=[sized[p]['max_drawdown_pct'] for p in PERIODS])]
     data = dict(version=1, reviewed_on='2026-10-27', accounts=accounts,
         methodology='成交来自既有NautilusTrader回测，逐笔取O-H-L-C与O-L-H-C中较差路径。Maker单边2bp、Taker单边5bp，非目标退出另计10bp滑点；未纳入资金费率。1bp=0.01%。胜率按各原研究口径，不能跨表直接比较。评分训练截止2025年前；规则与参数也在这些历史数据上研究过，2025以后不等于完全独立的样本外验证。',
         integrity='2026-10-27发现旧slots回放重复计算初始资金。该类分仓资金倍数与排行不展示；本页只选不受影响的linear、spike小册slot_replay和allin path_run结果。曲线缺失时保留缺失状态，区间汇总只画柱状图。',
@@ -97,8 +123,10 @@ def build():
         period_note='2026与近5个月均截至原数据末端2026年9月；近5个月与2026重叠。各独立本金回放区间从1000 USDT重启，不可拼接成连续资金曲线。')
     (OUT/'research.json').write_text(json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)+'\n')
     src = ROOT/'experiments/active/exp-monday-limit-spike-hw-20261026-v1'
-    for old,new in [('1_equity.png','spike-equity.png'),('2_years_and_returns.png','spike-distribution.png')]:
+    for old,new in [('1_equity.png','spike-equity.png'),('2_years_and_returns.png','spike-distribution.png'),('3_floating_loss.png','spike-floating-loss.png'),('4_frequency.png','spike-frequency.png')]:
         shutil.copyfile(src/old, OUT/new)
+    for folder,name,new in [('reclaim-allexits-20261025-v1','2_last5m_equity.png','v2-equity.png'),('v3-compare-20261025-v1','1_v3_equity_2026.png','v3-early-equity.png')]:
+        shutil.copyfile(ROOT/('experiments/active/exp-monday-limit-'+folder)/name,OUT/new)
 
 
 if __name__ == '__main__':
