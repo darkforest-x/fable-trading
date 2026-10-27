@@ -81,7 +81,7 @@ def build():
         rows=table(add20, add20_fields)+[['2020起连续回放 · 至2026年9月', *[add20['from_2020'][f] for f in add20_fields]]],
         chart=dict(title='历史BE0 · 分区间期末本金倍数', unit='倍', labels=LABELS, values=[add20[p]['final_multiple'] for p in PERIODS]),
         charts=[dict(title=title, unit=unit, labels=LABELS, values=[add20[p][field] for p in PERIODS]) for title,unit,field in [('分区间最大已实现回撤','%','max_drawdown_pct'),('分区间资金成交笔数','笔','taken'),('容量不足跳过次数','次','skipped')]],
-        detail='2481笔候选成交（含加仓）。最后一行是从2020起的连续资金回放汇总，不是把前面区间相乘；原结果未保存逐时资金路径。份数及杠杆在同一历史上筛选，不能视为独立样本外业绩。容量对照比较同一组成交：20份动态保证金、修正后的固定20份和原v3add线性分配；入场优势仍需对应随机对照与前向验证。',
+        detail='2481笔候选成交（含加仓）。最后一行是从2020起的连续资金回放汇总，不是把前面区间相乘；原结果只存汇总；本次另从原始成交补出固定顺序资金路径。份数及杠杆在同一历史上筛选，不能视为独立样本外业绩。容量对照比较同一组成交：20份动态保证金、修正后的固定20份和原v3add线性分配；入场优势仍需对应随机对照与前向验证。',
         capital_headers=['同组成交 · 2020起连续回放', '期末本金倍数', '最大回撤 %', '资金成交笔数'],
         capital_rows=[[title, *[returns['settings'][variant]['from_2020'][f] for f in ['final_multiple','max_drawdown_pct','taken']]] for title,variant in [('20份动态保证金 · 3倍','v3add|frac|N20|L3'),('修正后固定20份 · 3倍','v3add|slots|N20|L3'),('原v3add评分线性分配 · 1倍','v3add|linear|L1')]],
         sources=[{**returns_src, 'selection': 'settings.v3add|frac|N20|L3; corrected settings.v3add|slots|N20|L3; settings.v3add|linear|L1'}],
@@ -99,7 +99,7 @@ def build():
     grid = allin['grid']['v3_ge06_opp1618|allin|L3']
     accounts['allin3'] = dict(
         status='梭哈3倍 · 历史起点研究',
-        note='842个候选交易，44个月度起点×5次同刻顺序。只展示已保存的到达目标耗时统计；这是历史样本描述，不是未来达到目标的概率。历史opp1618_P30为开仓价保本，当前为+0.17%；历史使用MAE强平阈值，当前按单笔保证金封顶。',
+        note='842个候选交易，44个月度起点×5次同刻顺序。原表为已保存的到达目标耗时统计；上方另补首个起点的连续资金路径。这是历史样本描述，不是未来达到目标的概率。历史opp1618_P30为开仓价保本，当前为+0.17%；历史使用MAE强平阈值，当前按单笔保证金封顶。',
         headers=['累计本金目标', '历史到达比例 %', '到达耗时中位数 / 天', '此前重启次数中位数'],
         rows=[[f'{g}倍', *[grid['x'+str(g)][k] for k in ['reached_pct','days_median','blowups_before_median']]] for g in [10,100]],
         chart=dict(title='各月起点达到10倍累计本金的耗时', unit='天', labels=list(grid['by_start']), values=[r['d10'] for r in grid['by_start'].values()]),

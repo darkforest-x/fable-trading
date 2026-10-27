@@ -185,7 +185,8 @@ def run():
                            ['exp-monday-limit-langlang-20261027-v1'], '2023-01-01', 20261105)
     payload = dict(accounts=meta, source_commit=subprocess.check_output(['git','rev-parse','HEAD'], cwd=ROOT,text=True).strip(),
                    training_eligible=False, production_eligible=False)
-    (OUT/'manifest.json').write_text(json.dumps(payload, ensure_ascii=False, indent=2))
+    (OUT/'manifest.json').write_text(json.dumps(payload, ensure_ascii=False, indent=2,
+                                               default=lambda value: value.item()))
 
 
 if __name__ == '__main__':

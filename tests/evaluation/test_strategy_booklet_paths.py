@@ -8,6 +8,7 @@ from yoyo.evaluation.monday_limit_spike_hw import slot_replay
 from yoyo.evaluation.monday_limit_reclaim_optimize import replay_w
 from yoyo.evaluation.monday_limit_langlang import path_run
 from yoyo.evaluation.strategy_booklet_paths import Trace
+from yoyo.evaluation.strategy_booklet_metrics import project
 
 
 def fills():
@@ -43,3 +44,36 @@ def test_allin_refills_are_not_trading_profit():
     assert refill['cashflow'] == 1000
     assert refill['pnl'] == 0
     assert events[-1]['equity'] == pytest.approx(1000+sum(r['pnl']+r['cashflow'] for r in events))
+
+
+def test_chart_metrics_keep_same_timestamp_low_and_exclude_refills():
+    observer = Trace(0)
+    row = pd.Series(dict(event='BTC:one', symbol='BTC', side=1, entry_ns=0, net=-10000))
+    observer(row, 1_000_000, 0, -1000, 3000)
+    observer(row, 1_000_000, 1000, 0, 0, cashflow=1000, stake_budget=1000)
+    observer(row, 2_000_000, 1100, 100, 3000)
+    data = project(pd.DataFrame(observer.rows), {})
+    assert data['summary']['pnl'] == -900
+    assert data['summary']['cash_added'] == 1000
+    assert data['summary']['return_pct'] is None
+    assert data['summary']['max_drawdown_pct'] == 100
+    assert [p[1] for p in data['points']] == [1000, 0, 1000, 1100]
+    assert data['monthly'][0][1] == -900
+    assert data['summary']['win_pct'] == 50
+
+
+def test_chart_monthly_returns_compound_and_future_months_are_absent():
+    start=pd.Timestamp('2025-01-01',tz='UTC').value
+    observer=Trace(start)
+    row=pd.Series(dict(event='A',symbol='A',side=1,entry_ns=start,net=1000))
+    observer(row,pd.Timestamp('2025-01-31',tz='UTC').value,1100,100,1000)
+    observer(row,pd.Timestamp('2025-02-28',tz='UTC').value,990,-110,1100)
+    data=project(pd.DataFrame(observer.rows),{})
+    assert data['monthly'][0][1] == pytest.approx(10)
+    assert data['monthly'][1][1] == pytest.approx(-10)
+    assert len(data['monthly']) == 2
+    assert data['yearly'][0][1] == pytest.approx(-1)
+    assert data['summary']['max_drawdown_pct'] == pytest.approx(10)
+    broken=pd.DataFrame(observer.rows);broken.loc[1,'equity']+=1
+    with pytest.raises(ValueError,match='reconcile'):
+        project(broken,{})
