@@ -1,0 +1,63 @@
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:200: RuntimeWarning: divide by zero encountered in matmul
+  raw_prediction = X @ weights + intercept
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:200: RuntimeWarning: overflow encountered in matmul
+  raw_prediction = X @ weights + intercept
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:200: RuntimeWarning: invalid value encountered in matmul
+  raw_prediction = X @ weights + intercept
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:330: RuntimeWarning: divide by zero encountered in matmul
+  grad[:n_features] = X.T @ grad_pointwise + l2_reg_strength * weights
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:330: RuntimeWarning: overflow encountered in matmul
+  grad[:n_features] = X.T @ grad_pointwise + l2_reg_strength * weights
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:330: RuntimeWarning: invalid value encountered in matmul
+  grad[:n_features] = X.T @ grad_pointwise + l2_reg_strength * weights
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:200: RuntimeWarning: divide by zero encountered in matmul
+  raw_prediction = X @ weights + intercept
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:200: RuntimeWarning: overflow encountered in matmul
+  raw_prediction = X @ weights + intercept
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:200: RuntimeWarning: invalid value encountered in matmul
+  raw_prediction = X @ weights + intercept
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:330: RuntimeWarning: divide by zero encountered in matmul
+  grad[:n_features] = X.T @ grad_pointwise + l2_reg_strength * weights
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:330: RuntimeWarning: overflow encountered in matmul
+  grad[:n_features] = X.T @ grad_pointwise + l2_reg_strength * weights
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:330: RuntimeWarning: invalid value encountered in matmul
+  grad[:n_features] = X.T @ grad_pointwise + l2_reg_strength * weights
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: divide by zero encountered in matmul
+  ret = a @ b
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: overflow encountered in matmul
+  ret = a @ b
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: invalid value encountered in matmul
+  ret = a @ b
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: divide by zero encountered in matmul
+  ret = a @ b
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: overflow encountered in matmul
+  ret = a @ b
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/extmath.py:203: RuntimeWarning: invalid value encountered in matmul
+  ret = a @ b
+Traceback (most recent call last):
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 197, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_limit_score_causal_refit.py", line 151, in <module>
+    run(ap.parse_args().config)
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_limit_score_causal_refit.py", line 133, in run
+    out = pd.DataFrame({'stored': model.predict_proba(with_bar(e, 'ledger')[opt.FEATS])[:, 1],
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/pipeline.py", line 904, in predict_proba
+    return self.steps[-1][1].predict_proba(Xt, **params)
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_logistic.py", line 1428, in predict_proba
+    return super()._predict_proba_lr(X)
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_base.py", line 389, in _predict_proba_lr
+    prob = self.decision_function(X)
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_base.py", line 351, in decision_function
+    X = validate_data(self, X, accept_sparse="csr", reset=False)
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/validation.py", line 2944, in validate_data
+    out = check_array(X, input_name="X", **check_params)
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/validation.py", line 1107, in check_array
+    _assert_all_finite(
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/validation.py", line 120, in _assert_all_finite
+    _assert_all_finite_element_wise(
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/utils/validation.py", line 169, in _assert_all_finite_element_wise
+    raise ValueError(msg_err)
+ValueError: Input X contains NaN.
+LogisticRegression does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values

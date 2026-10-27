@@ -4,13 +4,16 @@ Owner: "用不看触及K线的特征重新拟合评分模型，然后在框架�
 (exp-monday-limit-reclaim-recent-20261025-v1/score_model.json) stays untouched; everything here is written to this
 experiment's directory. The fit repeats monday_limit_reclaim_recent exactly: v2 near-edge 60m fills (Codex O-H-L-C
 ledger and the monotone O-L-H-C replay, worse path, 10bp slippage on non-target exits), win = net > 0, standardized
-logistic regression (sklearn defaults) on fills before 2025-01-01, the same ten features. Only vol_ratio, liquidity and
-toward24 change: computed through the bar before the touch (monday_limit_score_leak_audit.bar_features, 'causal').
-Control: the same procedure with the touch-bar values ('ledger') must reproduce the frozen coefficients.
-Scores for every signal event (as the leak audit): `causal` = refit model on features through the bar before the touch
-(known while an order rests), `stored` = refit model on features through the touch bar (known at its close). The
-column names match what monday_limit_layered reads. Validation on fills from 2025: AUC with a label-permutation p,
-top-decile mean net, against the frozen model on leaky and on causal features.
+logistic regression (sklearn defaults), the same ten features. Only vol_ratio, liquidity and toward24 change: 5m bars
+through the close of the bar before the touch (monday_limit_score_leak_audit.bar_features, 'causal'). Two training
+splits: fills before 2025-01-01 (the frozen split; control: the same procedure with the touch-bar values, 'ledger',
+must reproduce the frozen coefficients) and, as the owner asked, fills before 2026-01-01 with 2026 to date as the test
+(main_split, used for the scores below). Events whose features are missing score NaN (never selected).
+Scores for every signal event (as the leak audit): `causal` = main-split refit on features through the bar before the
+touch (known while an order rests), `stored` = the same model on features through the touch bar (known at its close);
+the column names match what monday_limit_layered reads; the other split adds suffixed columns. Test per split on fills
+from the split date: AUC with a label-permutation p, top-decile mean net, against the frozen model on leaky and causal
+features.
 """
 from __future__ import annotations
 import argparse
@@ -36,6 +39,12 @@ def with_bar(s, tag):
     g['log_vol_ratio'] = np.log(g[f'vol_ratio_{tag}'].clip(lower=.05)); g['log_liquidity'] = np.log10(g[f'liquidity_{tag}'].clip(lower=1e4))
     g['toward24'] = g[f'toward24_{tag}']
     return g
+
+
+def spec_of(model, cut):
+    sc, lr = model[0], model[-1]
+    return dict(features=opt.FEATS, mean=sc.mean_.tolist(), scale=sc.scale_.tolist(), coef=lr.coef_[0].tolist(),
+                intercept=float(lr.intercept_[0]), top40_threshold=cut)
 
 
 def frozen_score(spec, g):
@@ -80,46 +89,46 @@ def run(config):
     from sklearn.linear_model import LogisticRegression
     from sklearn.pipeline import make_pipeline
     from sklearn.preprocessing import StandardScaler
-    fits, frames = {}, {}
-    for tag in ('ledger', 'causal'):
-        g = with_bar(s, tag).dropna(subset=opt.FEATS)
-        tr = g[g.t < SPLIT]
-        fits[tag] = make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000)).fit(tr[opt.FEATS], tr.y)
-        frames[tag] = g
-    lg = fits['ledger']
-    control = dict(train_n=int((frames['ledger'].t < SPLIT).sum()), frozen_train_n=old['train_n'],
+    frames = {tag: with_bar(s, tag).dropna(subset=opt.FEATS) for tag in ('ledger', 'causal')}
+    fit = lambda g, split: make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000)).fit(g[g.t < split][opt.FEATS], g[g.t < split].y)
+    split0 = pd.Timestamp(old['trained_before'])
+    lg = fit(frames['ledger'], split0)
+    control = dict(split=str(split0), train_n=int((frames['ledger'].t < split0).sum()), frozen_train_n=old['train_n'],
                    coef_max_abs_diff=float(np.abs(lg[-1].coef_[0]-np.array(old['coef'])).max()),
                    intercept_diff=float(lg[-1].intercept_[0]-old['intercept']),
                    mean_max_abs_diff=float(np.abs(lg[0].mean_-np.array(old['mean'])).max()), feature_parity=feature_parity)
-    model = fits['causal']
-    g = frames['causal']
-    tr, va = g[g.t < SPLIT], g[g.t >= SPLIT]
-    sc, lr = model[0], model[-1]
-    cut40 = float(np.quantile(model.predict_proba(tr[opt.FEATS])[:, 1], .6))
     notes = dict(old['feature_notes'])
     for k, txt in (('log_vol_ratio', 'log of quote volume of the hour ending at the close of the 5m bar before the touch / median hourly quote volume of the prior 7 days'),
-                   ('log_liquidity', 'log10 mean daily quote volume of the 7 days ending at the close of the bar before the touch (USDT)'),
-                   ('toward24', 'percent move toward the level over the 24h ending at the close of the bar before the touch')):
+                   ('log_liquidity', 'log10 mean daily quote volume of the 7 days ending at the close of the 5m bar before the touch (USDT)'),
+                   ('toward24', 'percent move toward the level over the 24h ending at the close of the 5m bar before the touch')):
         notes[k] = txt
-    dump(exp/'score_model_causal.json', dict(features=opt.FEATS, mean=sc.mean_.tolist(), scale=sc.scale_.tolist(),
-         coef=lr.coef_[0].tolist(), intercept=float(lr.intercept_[0]), top40_threshold=cut40, trained_before=str(SPLIT),
-         train_n=int(len(tr)), feature_notes=notes, frozen_model_untouched=cfg['frozen_model']))
-    # Validation on 2025+ fills: refit causal vs frozen model on causal and on leaky features.
+    g = frames['causal']
     rng = np.random.default_rng(cfg['seed'])
-    p_new = model.predict_proba(va[opt.FEATS])[:, 1]
-    p_old_causal = frozen_score(old, va)
-    p_old_leaky = frozen_score(old, frames['ledger'].loc[va.index])
-    a_new = auc(va.y, p_new)
-    perm = np.array([auc(rng.permutation(va.y.to_numpy()), p_new) for _ in range(cfg['permutations'])])
+    specs, val = {}, {}
+    for split in cfg['splits']:
+        cut_t = pd.Timestamp(split, tz='UTC')
+        model = fit(g, cut_t)
+        tr, va = g[g.t < cut_t], g[g.t >= cut_t]
+        cut40 = float(np.quantile(model.predict_proba(tr[opt.FEATS])[:, 1], .6))
+        specs[split] = spec_of(model, cut40)
+        dump(exp/f'score_model_causal_{split[:4]}.json', dict(specs[split], trained_before=str(cut_t), train_n=int(len(tr)),
+             feature_notes=notes, frozen_model_untouched=cfg['frozen_model']))
+        p_new = model.predict_proba(va[opt.FEATS])[:, 1]
+        p_old_causal = frozen_score(old, va)
+        p_old_leaky = frozen_score(old, frames['ledger'].loc[va.index])
+        a_new = auc(va.y, p_new)
+        perm = np.array([auc(rng.permutation(va.y.to_numpy()), p_new) for _ in range(cfg['permutations'])])
 
-    def top(p, q):
-        k = p >= np.quantile(p, q)
-        return dict(n=int(k.sum()), mean_bp=float(va.net[k].mean()), win_pct=float(100*(va.net[k] > 0).mean()))
-    val = dict(n=int(len(va)), base_mean_bp=float(va.net.mean()), base_win_pct=float(100*va.y.mean()),
-               refit_causal=dict(auc=a_new, perm_p=float((1+(perm >= a_new).sum())/(1+len(perm))), top10=top(p_new, .9),
-                                 ge_05=int((p_new >= .5).sum()), coef=dict(zip(opt.FEATS, lr.coef_[0].round(4).tolist()))),
-               frozen_causal=dict(auc=auc(va.y, p_old_causal), top10=top(p_old_causal, .9), ge_05=int((p_old_causal >= .5).sum())),
-               frozen_leaky=dict(auc=auc(va.y, p_old_leaky), top10=top(p_old_leaky, .9), ge_05=int((p_old_leaky >= .5).sum())))
+        def top(p, q, va=va):
+            k = p >= np.quantile(p, q)
+            return dict(n=int(k.sum()), mean_bp=float(va.net[k].mean()), win_pct=float(100*(va.net[k] > 0).mean()))
+        val[split] = dict(train_n=int(len(tr)), test_n=int(len(va)), test_from=str(cut_t), base_mean_bp=float(va.net.mean()),
+                          base_win_pct=float(100*va.y.mean()),
+                          refit_causal=dict(auc=a_new, perm_p=float((1+(perm >= a_new).sum())/(1+len(perm))), top10=top(p_new, .9),
+                                            ge_05=int((p_new >= .5).sum()), ge_06=int((p_new >= .6).sum()),
+                                            coef=dict(zip(opt.FEATS, model[-1].coef_[0].round(4).tolist()))),
+                          frozen_causal=dict(auc=auc(va.y, p_old_causal), top10=top(p_old_causal, .9), ge_05=int((p_old_causal >= .5).sum())),
+                          frozen_leaky=dict(auc=auc(va.y, p_old_leaky), top10=top(p_old_leaky, .9), ge_05=int((p_old_leaky >= .5).sum())))
     # Scores for every signal event (same frame as the leak audit).
     ae = pd.read_csv(ROOT/cfg['events'])
     ae['event'] = ae.symbol+':'+ae.week+':'+np.where(ae.side_n == 1, '+1', '-1')
@@ -130,16 +139,20 @@ def run(config):
     e = ae.set_index('event').join(ex2.set_index('event')[['bucket', 'range_pct']], how='inner').join(x, how='inner')
     e['side'] = e.side_n.astype(float); e['log_approach'] = np.log1p(e.approach_min.clip(lower=0))
     e['opp_first'] = (e.opp_first == '是').astype(int)
-    out = pd.DataFrame({'stored': model.predict_proba(with_bar(e, 'ledger')[opt.FEATS])[:, 1],
-                        'causal': model.predict_proba(with_bar(e, 'causal')[opt.FEATS])[:, 1]}, index=e.index)
+    out = pd.DataFrame(index=e.index)
+    for split in cfg['splits']:
+        tail = '' if split == cfg['main_split'] else f'_{split[:4]}'
+        out[f'stored{tail}'] = frozen_score(specs[split], with_bar(e, 'ledger'))
+        out[f'causal{tail}'] = frozen_score(specs[split], with_bar(e, 'causal'))
     prev = pd.read_csv(ROOT/cfg['previous_scores']).set_index('event')
     out = out.join(prev[['stored', 'causal']].rename(columns={'stored': 'frozen_stored', 'causal': 'frozen_causal'}), how='left')
     out.reset_index().to_csv(exp/'scores_refit.csv.gz', index=False)
     bands = {str(c): dict(refit_causal=int((out.causal >= c).sum()), refit_touch=int((out.stored >= c).sum()),
                           frozen_causal=int((out.frozen_causal >= c).sum()), frozen_touch=int((out.frozen_stored >= c).sum()),
-                          refit_causal_and_frozen_causal=int(((out.causal >= c) & (out.frozen_causal >= c)).sum()))
+                          refit_causal_and_frozen_causal=int(((out.causal >= c) & (out.frozen_causal >= c)).sum()),
+                          missing_scores=int(out.causal.isna().sum()))
              for c in cfg['cuts']}
-    res = clean(dict(control=control, events=int(len(out)), validation_2025=val, bands=bands, top40_threshold=cut40,
+    res = clean(dict(control=control, events=int(len(out)), test_by_split=val, bands=bands, main_split=cfg['main_split'],
                      corr_refit_vs_frozen_causal=float(out[['causal', 'frozen_causal']].corr().iloc[0, 1])))
     dump(exp/'summary.json', dict(config=cfg, results=res, source_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
                                  training_eligible=False, production_eligible=False))

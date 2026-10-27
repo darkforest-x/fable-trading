@@ -1,16 +1,24 @@
 {
   "experiment_id": "exp-monday-limit-score-causal-refit-20261027-v1",
   "question": "Owner 2026-10-27: refit the Monday1618 entry score with features that do not read the touch bar, then rerun A and ABC in the framework. Do not affect the earlier results.",
-  "single_variable": "Bar of vol_ratio / liquidity / toward24 in the training features (touch bar -> bar before the touch); training rows, label, split, features and estimator as monday_limit_reclaim_recent.",
+  "single_variable": "Bar of vol_ratio / liquidity / toward24 in the training features (touch bar -> 5m bar before the touch); training rows, label, features and estimator as monday_limit_reclaim_recent. Split 2025-01-01 is the like-for-like control against the frozen model; split 2026-01-01 (owner 2026-10-27: train before 2026, test 2026 to date) is the main model for the framework rerun.",
   "frozen_model": "experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/score_model.json",
   "events": "experiments/active/exp-monday-limit-reclaim-patterns3-20261024-v1/events_60m.csv.gz",
   "previous_scores": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
-  "cuts": [0.5, 0.6],
+  "cuts": [
+    0.5,
+    0.6
+  ],
   "permutations": 1000,
   "seed": 20261027,
   "workers": 6,
-  "control": "Refit with the touch-bar values must reproduce the frozen coefficients; validation is time-split (fills from 2025-01-01) with a label-permutation p. Thresholds 0.5 / 0.6 are kept as probability levels.",
-  "outputs": "score_model_causal.json and scores_refit.csv.gz in this directory only; the frozen model and the paper engine are unchanged",
+  "control": "Refit with the touch-bar values on the 2025 split must reproduce the frozen coefficients; each split is tested on fills from its split date with a label-permutation p. Thresholds 0.5 / 0.6 are kept as probability levels.",
+  "outputs": "score_model_causal_2025.json, score_model_causal_2026.json and scores_refit.csv.gz in this directory only; the frozen model and the paper engine are unchanged",
   "training_eligible": false,
-  "production_eligible": false
+  "production_eligible": false,
+  "splits": [
+    "2025-01-01",
+    "2026-01-01"
+  ],
+  "main_split": "2026-01-01"
 }
