@@ -116,6 +116,8 @@ def verify_frame(minute, original, row):
         leading = block.loc[block.index < traded.index[0]]
         if (len(leading) and (leading.volume == 0).all()
                 and np.allclose(leading[FIELDS[:4]], leading.close.iloc[0], rtol=0, atol=1e-12)
+                and stamp-MINUTE in minute.index
+                and np.isclose(leading.close.iloc[0], minute.loc[stamp-MINUTE, 'close'], rtol=0, atol=1e-12)
                 and np.isclose(reference.loc[stamp, 'open'], traded.open.iloc[0], rtol=1e-7, atol=1e-10)):
             empty_minute_differences.append(dict(time=str(stamp), minute_open=rebuilt.loc[stamp, 'open'],
                 original_5m_open=reference.loc[stamp, 'open'], first_traded_minute=str(traded.index[0]),
@@ -193,7 +195,7 @@ def draw(frame, row, quality):
     fig.text(.075,.94,f'spike  #{int(row.sequence):04d}   {row.symbol} · {side}   |   1min',fontsize=22,weight='bold',color=COLORS['ink'])
     result='同一根原 5m 内'+CAUSE[int(row.reason)] if entry == exit_ else CAUSE[int(row.reason)]
     fig.text(.075,.89,f'原账本：{result}   ·   原净收益 {row.net/100:+.2f}%（按名义本金）',fontsize=15,color=COLORS['ink'])
-    exit_label=when(row.exit_t)+' 收盘/开盘时点' if exact_exit else span(exit_)
+    exit_label=(when(row.exit_t)+(' 收盘时点' if int(row.reason) in (11,12) else '开盘时点')) if exact_exit else span(exit_)
     fig.text(.075,.84,f'E 入场 {fmt(row.entry)}  ·  {span(entry)}      X 退出 {fmt(row.exit_price)}  ·  {exit_label}',fontsize=12,color=COLORS['muted'])
     if quality['empty_minute_open_differences']:
         fig.text(.075,.795,'* 交易区间外存在零成交分钟，1m 聚合首价与原 5m 首价有差异；图中保留真实 1m。',fontsize=10,color=COLORS['muted'])

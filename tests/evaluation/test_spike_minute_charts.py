@@ -44,3 +44,9 @@ def test_execution_interval_open_exception_is_not_accepted():
     minute.loc[minute.index[31],'open']=101.
     original.loc[original.index[6],['open','volume']]=[101.,40.]
     with pytest.raises(AssertionError,match='mismatch'):verify_frame(minute,original,row)
+
+
+def test_empty_minute_must_carry_previous_close():
+    minute,original,row=sample()
+    minute.loc[minute.index[15],['open','high','low','close']]=99.5
+    with pytest.raises(AssertionError,match='mismatch'):verify_frame(minute,original,row)
