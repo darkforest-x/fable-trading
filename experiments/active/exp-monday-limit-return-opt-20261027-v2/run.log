@@ -1,0 +1,49 @@
+/Users/zhangzc/fable-trading/yoyo/evaluation/monday_limit_spike_opt.py:58: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  exit_t=pd.to_datetime(pd.Series(np.where(w, l.exit_time, o.exit_time), index=o.index), utc=True)), index=o.index))
+/Users/zhangzc/fable-trading/yoyo/evaluation/monday_limit_spike_opt.py:57: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  entry_t=pd.to_datetime(o.entry_time, utc=True),
+{"rows": {"v3": 2108, "v3add": 2481}, "mae_q": {"v3": {"q50": 3.1687766559048756, "q90": 13.822024992778818, "q95": 18.336831623846788, "q99": 28.2104015677056}, "v3add": {"q50": 3.319598763904455, "q90": 14.0333850931677, "q95": 18.921524047062157, "q99": 27.93802623731865}}}
+== baseline
+v3|linear|L1 x3.86 dd13 liq0 win51 | x9.31 dd19 liq0 win62 | x2.47 dd34 liq0 win56 | x2.95 dd17 liq0 win58
+v3add|linear|L1 x4.69 dd16 liq0 win33 | x13.26 dd28 liq0 win41 | x3.64 dd50 liq0 win38 | x5.48 dd17 liq0 win41
+== selected on 2020-24
+v3|linear|L3                 x37.57 dd36 liq1 win51 | x356.75 dd49 liq1 win62 | x6.87 dd76 liq4 win56 | x17.20 dd44 liq0 win58
+v3add|slots|N10|L5           x32.95 dd31 liq18 win35 | x112.74 dd46 liq36 win40 | x0.22 dd79 liq19 win34 | x14.29 dd55 liq19 win41
+v3add|frac|N10|L3            x28.26 dd28 liq1 win35 | x52.28 dd34 liq1 win41 | x5.75 dd62 liq4 win39 | x11.66 dd25 liq0 win42
+v3|slots|N10|L5              x24.26 dd32 liq16 win32 | x41.01 dd30 liq27 win36 | x0.48 dd62 liq21 win28 | x5.60 dd51 liq15 win35
+v3_tilt|linear|L2            x23.67 dd38 liq0 win51 | x129.50 dd46 liq1 win62 | x3.85 dd84 liq1 win55 | x17.89 dd37 liq0 win57
+v3|frac|N10|L3               x21.04 dd27 liq1 win51 | x24.45 dd22 liq1 win62 | x3.83 dd51 liq4 win56 | x4.89 dd28 liq0 win58
+v3|slots|N5|L3               x20.38 dd34 liq1 win30 | x89.84 dd35 liq1 win37 | x6.07 dd66 liq4 win33 | x5.98 dd59 liq0 win35
+v3add|linear|L2              x18.03 dd31 liq0 win33 | x106.00 dd51 liq1 win41 | x7.86 dd78 liq1 win38 | x23.57 dd33 liq0 win41
+v3|frac|N20|L5               x17.59 dd37 liq20 win52 | x13.15 dd19 liq27 win61 | x3.16 dd42 liq40 win55 | x3.83 dd26 liq16 win58
+v3add|frac|N30|L5            x15.80 dd26 liq24 win39 | x8.65 dd19 liq37 win40 | x3.60 dd38 liq50 win39 | x4.68 dd19 liq20 win42
+v3add|slots|N20|L5           x14.50 dd29 liq22 win37 | x10.79 dd26 liq37 win40 | x0.63 dd38 liq22 win33 | x4.39 dd27 liq19 win42
+v3|linear|L2                 x12.97 dd25 liq0 win51 | x61.67 dd35 liq1 win62 | x4.52 dd59 liq1 win56 | x7.60 dd31 liq0 win58
+v3add|slots|N10|L3           x12.64 dd18 liq1 win35 | x23.64 dd33 liq1 win41 | x4.44 dd66 liq4 win39 | x7.05 dd25 liq0 win42
+v3add|frac|N20|L3            x11.62 dd15 liq1 win38 | x8.26 dd18 liq1 win41 | x3.42 dd35 liq4 win39 | x4.41 dd13 liq0 win43
+v3|frac|N30|L5               x11.51 dd24 liq21 win52 | x5.83 dd13 liq27 win61 | x2.41 dd30 liq42 win54 | x2.88 dd18 liq17 win58
+== dd <= 40 in all periods (in-sample)
+v3add|frac|N30|L5            g6.93 x15.80 dd26 liq24 win39 | x8.65 dd19 liq37 win40 | x3.60 dd38 liq50 win39 | x4.68 dd19 liq20 win42
+v3add|frac|N20|L3            g6.17 x11.62 dd15 liq1 win38 | x8.26 dd18 liq1 win41 | x3.42 dd35 liq4 win39 | x4.41 dd13 liq0 win43
+v3|frac|N10|L2               g4.89 x8.32 dd18 liq0 win51 | x8.74 dd17 liq1 win62 | x2.61 dd39 liq1 win56 | x3.03 dd19 liq0 win58
+v3|frac|N30|L5               g4.64 x11.51 dd24 liq21 win52 | x5.83 dd13 liq27 win61 | x2.41 dd30 liq42 win54 | x2.88 dd18 liq17 win58
+v3add|slots|N20|L5           g4.56 x14.50 dd29 liq22 win37 | x10.79 dd26 liq37 win40 | x0.63 dd38 liq22 win33 | x4.39 dd27 liq19 win42
+v3|frac|N20|L3               g4.19 x8.61 dd13 liq1 win52 | x5.29 dd11 liq1 win62 | x2.54 dd29 liq4 win56 | x2.67 dd14 liq0 win59
+v3add|frac|N30|L3            g4.04 x7.63 dd9 liq1 win40 | x4.24 dd12 liq1 win41 | x2.70 dd24 liq4 win40 | x3.07 dd9 liq0 win44
+v3|linear|L1                 g4.02 x3.86 dd13 liq0 win51 | x9.31 dd19 liq0 win62 | x2.47 dd34 liq0 win56 | x2.95 dd17 liq0 win58
+v3add|slots|N20|L3           g4.02 x6.33 dd9 liq1 win38 | x4.83 dd18 liq1 win41 | x2.70 dd34 liq4 win39 | x3.15 dd13 liq0 win43
+v3|slots|N20|L5              g3.57 x9.91 dd27 liq20 win34 | x7.08 dd17 liq27 win36 | x0.77 dd33 liq22 win28 | x2.99 dd27 liq16 win36
+v3add|frac|N20|L2            g3.50 x5.48 dd10 liq0 win38 | x4.16 dd12 liq1 win41 | x2.37 dd25 liq1 win39 | x2.77 dd9 liq0 win43
+v3|slots|N10|L2              g3.38 x5.20 dd13 liq0 win32 | x4.93 dd14 liq1 win36 | x2.17 dd38 liq1 win33 | x2.36 dd19 liq0 win35
+v3|frac|N30|L3               g2.99 x5.72 dd9 liq1 win52 | x3.10 dd8 liq1 win62 | x2.08 dd20 liq4 win56 | x2.19 dd10 liq0 win60
+v3|slots|N20|L3              g2.99 x5.39 dd10 liq1 win34 | x3.48 dd11 liq1 win36 | x2.01 dd29 liq4 win34 | x2.12 dd15 liq0 win37
+v3|frac|N20|L2               g2.66 x4.40 dd9 liq0 win52 | x3.04 dd9 liq1 win62 | x1.90 dd21 liq1 win56 | x1.97 dd10 liq0 win59
+== owner comparison, plus from_2020
+v3add|frac|N20|L3            x11.62 dd15 liq1 win38 | x8.26 dd18 liq1 win41 | x3.42 dd35 liq4 win39 | x4.41 dd13 liq0 win43 || from_2020 x312.39 dd35 skip342
+v3add|slots|N20|L3           x6.33 dd9 liq1 win38 | x4.83 dd18 liq1 win41 | x2.70 dd34 liq4 win39 | x3.15 dd13 liq0 win43 || from_2020 x75.99 dd23 skip340
+v3|linear|L1                 x3.86 dd13 liq0 win51 | x9.31 dd19 liq0 win62 | x2.47 dd34 liq0 win56 | x2.95 dd17 liq0 win58 || from_2020 x85.63 dd35
+v3|frac|N20|L3               x8.61 dd13 liq1 win52 | x5.29 dd11 liq1 win62 | x2.54 dd29 liq4 win56 | x2.67 dd14 liq0 win59 || from_2020 x111.77 dd29 skip228
+v3add|linear|L1              x4.69 dd16 liq0 win33 | x13.26 dd28 liq0 win41 | x3.64 dd50 liq0 win38 | x5.48 dd17 liq0 win41 || from_2020 x200.14 dd50
+v3|slots|N20|L3              x5.39 dd10 liq1 win34 | x3.48 dd11 liq1 win36 | x2.01 dd29 liq4 win34 | x2.12 dd15 liq0 win37 || from_2020 x33.31 dd26 skip228
+v3add|frac|N30|L3            x7.63 dd9 liq1 win40 | x4.24 dd12 liq1 win41 | x2.70 dd24 liq4 win40 | x3.07 dd9 liq0 win44 || from_2020 x84.77 dd24 skip273
+v3add|frac|N10|L3            x28.26 dd28 liq1 win35 | x52.28 dd34 liq1 win41 | x5.75 dd62 liq4 win39 | x11.66 dd25 liq0 win42 || from_2020 x8381.23 dd63 skip448

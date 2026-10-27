@@ -701,7 +701,21 @@ experiments:
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: 'In sample. Profit locks (exp-monday-limit-be-lock-compare-20261027-v1) raise the win rate but not the multiples. Live resting-order margin for hundreds of 1.618 levels is not modeled.'
+    notes: 'In sample. Profit locks (exp-monday-limit-be-lock-compare-20261027-v1) raise the win rate but not the multiples. Live resting-order margin for hundreds of 1.618 levels is not modeled. Superseded by v2: the slot simulator started at 1000 * (2N-1)/N, so every slots row here is about 2x too high; linear rows are unaffected.'
+  - experiment_id: exp-monday-limit-return-opt-20261027-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9a781c29d1
+    status: complete
+    question: 'Owner 2026-10-27: fix the slot simulator starting capital, rerun the return-first comparison and add margin = realized equity / N per fill (frac); compare frac 20 x 3x with fixed 20 slots 3x and the v3 paper sizing (linear 1x).'
+    single_variable: 'Sizing only on the same v3 / v3add framework fills as v1 (worse path, MAE from 5m bars); slots now start empty with the whole 1000 USDT in the pool; frac adds equity / N margin, at most N open, margin in use <= equity; from_2020 is reported only.'
+    result: 'Acceptance met (in sample). v3add frac 20 x 3x 11.62 / 8.26 / 3.42 / 4.41x, DD 15 / 18 / 35 / 13, from 2020 312x DD 35, 342 skipped. Fixed 20 slots 3x 6.33 / 4.83 / 2.70 / 3.15x, from 2020 76x DD 23. v3 linear 1x 3.86 / 9.31 / 2.47 / 2.95x, from 2020 86x DD 35. frac beats both in every period except 2025 against linear (8.26 vs 9.31). Highest geometric mean under DD 40 is v3add frac 30 x 5x (6.93, 24-50 liquidations per period); v3add linear 1x (the v3add paper sizing) reaches 200x from 2020 but DD 50 in 2026.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-return-opt-20261027-v2/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'In sample; frac was proposed after seeing this history. Paper account v3add20 forward-tests frac 20 x 3x. Live resting orders reserve margin, so at most 20 orders can rest at once; trigger orders are untested.'
   - experiment_id: exp-monday-limit-spike-controls-20261027-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 26da9d3a18
@@ -757,7 +771,7 @@ experiments:
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: 'In sample. At 5x the 20 percent backstop sits beyond liquidation (about 19 percent), so liquidation acts as the stop; an 18 percent stop or 4x would exit first (not run). Not adopted; candidates for a Binance paper shadow line.'
+    notes: 'In sample. At 5x the 20 percent backstop sits beyond liquidation (about 19 percent), so liquidation acts as the stop; an 18 percent stop or 4x would exit first (not run). Not adopted; candidates for a Binance paper shadow line. Slot rows were computed before the 2026-10-27 starting-capital fix (start 1000 * (2N-1)/N) and are about 2x too high; see exp-monday-limit-return-opt-20261027-v2.'
   - experiment_id: exp-monday-limit-spike-stops-20261026-v1
     source_repo: darkforest-x/fable-trading
     source_commit: a88421ea33
@@ -785,7 +799,7 @@ experiments:
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: 'In sample (order filter and the all-period table use the whole history). Binance bars; slots skip fills when all are busy (about 50 of 175 in 2026 with 5 slots); funding not modeled; liquidation from 5m bar extremes. Not adopted; forward paper needed.'
+    notes: 'In sample (order filter and the all-period table use the whole history). Binance bars; slots skip fills when all are busy (about 50 of 175 in 2026 with 5 slots); funding not modeled; liquidation from 5m bar extremes. Not adopted; forward paper needed. Slot rows were computed before the 2026-10-27 starting-capital fix (start 1000 * (2N-1)/N) and are about 2x too high; see exp-monday-limit-return-opt-20261027-v2.'
   - experiment_id: exp-monday-limit-order-targets-20261026-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 7243b38986
@@ -897,7 +911,7 @@ experiments:
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: 'Liquidation at floating loss >= 100/L - 1 percent on last-price wicks; funding and liquidation fees not modelled; a slot that cannot be refilled after resize stays idle. Bit浪浪 transcripts say split positions and at most 5x on alts.'
+    notes: 'Liquidation at floating loss >= 100/L - 1 percent on last-price wicks; funding and liquidation fees not modelled; a slot that cannot be refilled after resize stays idle. Bit浪浪 transcripts say split positions and at most 5x on alts. Slot rows were computed before the 2026-10-27 starting-capital fix (start 1000 * (2N-1)/N) and are about 2x too high; see exp-monday-limit-return-opt-20261027-v2.'
   - experiment_id: exp-monday-limit-be-scalein-20261026-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 3bc582deb3
@@ -953,7 +967,7 @@ experiments:
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: 'In sample. The win rate is the share of reclaim closes beyond entry plus costs, so it is the same for all three locks. v3add add legs were not rerun with a lock.'
+    notes: 'In sample. The win rate is the share of reclaim closes beyond entry plus costs, so it is the same for all three locks. v3add add legs were not rerun with a lock. Slot rows were computed before the 2026-10-27 starting-capital fix (start 1000 * (2N-1)/N) and are about 2x too high; see exp-monday-limit-return-opt-20261027-v2.'
   - experiment_id: exp-monday-limit-pyramid-20261027-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 3b17b453a3
