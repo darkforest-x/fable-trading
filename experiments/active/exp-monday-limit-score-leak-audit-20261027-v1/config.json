@@ -1,0 +1,14 @@
+{
+  "experiment_id": "exp-monday-limit-score-leak-audit-20261027-v1",
+  "question": "Found 2026-10-27 while building the pre-scored arming replay the owner asked for: the frozen entry score's vol_ratio, liquidity and toward24 are computed at the touch bar (ledger entry_i == touch_i_hint), not the bar before. How much does the score and the selection change when they use the bar before the touch?",
+  "single_variable": "Bar of the three bar features: ledger entry_i (touch bar, stored) vs touch - 1 (causal); frozen model, events and outcomes unchanged.",
+  "score_model": "experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/score_model.json",
+  "scores": "experiments/active/exp-monday-limit-be-scalein-20261026-v1/scores.csv.gz",
+  "events": "experiments/active/exp-monday-limit-reclaim-patterns3-20261024-v1/events_60m.csv.gz",
+  "trades": "experiments/active/exp-monday-limit-time-news-20261026-v1/trades.csv.gz",
+  "cuts": [0.2262, 0.5, 0.6],
+  "workers": 8,
+  "null_control": "Not a directional experiment. The control is reproduction: the touch-bar recomputation must equal the stored scores (max abs diff ~0), so any causal difference is the bar shift alone. Outcomes are compared on identical events (v2 near-edge net) and identical fills (v3_be0).",
+  "training_eligible": false,
+  "production_eligible": false
+}
