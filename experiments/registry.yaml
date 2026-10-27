@@ -14634,3 +14634,14 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: All 829 v3lock and 85 spike 2026-entry signals, plus 6 funded v3lock carryover exits. Candidate versus funded counts and annual-restart medians versus continuous paths remain separate. Original maker2bp/taker5bp plus non-target10bp slippage retained. Spike historical BE0 differs from current17bp. Chart markers use native source bar indices, not close-timestamp lookup. All 920 PNGs and five ZIP CRCs verified; five Telegram document acknowledgements cover all images. Initial part2 connection failure reconciled in the native channel before one successful retry; no duplicate file. Delivery acknowledgement is retained locally.
+
+  - experiment_id: exp-spike-2026-1m-trade-charts-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    status: in_progress
+    question: Re-render all 85 previously delivered spike 2026 orders using real 1m candles for same-bar-exit inspection.
+    single_variable: Chart resolution only; preserve original 5m fill intervals, outcomes and funded flags; no trading replay.
+    canonical_report: experiments/active/exp-spike-2026-1m-trade-charts-20261027-v1/delivery.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Reuse registered Binance UM1m daily cache; only missing same-exchange days downloaded. Original score lookahead unresolved, rendering does not repair or validate performance. Intrabar minute execution is unknown and shown as an interval.

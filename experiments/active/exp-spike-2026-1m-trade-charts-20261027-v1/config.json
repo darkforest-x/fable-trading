@@ -1,0 +1,17 @@
+{
+  "experiment_id": "exp-spike-2026-1m-trade-charts-20261027-v1",
+  "operation": "Display all 85 previously delivered 2026 spike historical orders against real Binance UM 1m OHLCV; no replay or revised fills.",
+  "source_orders": "experiments/active/exp-paper-2026-trade-charts-20261027-v1/trades.csv",
+  "source_bar_indices": "experiments/active/exp-paper-2026-trade-charts-20261027-v1/render-validation.json",
+  "minute_cache": "data/crypto/market/kline_binance_um1m_touchdays_20261027",
+  "missing_source": "Reuse registered cache first; download only missing same-exchange daily archives from data.binance.vision.",
+  "chart_timezone": "Asia/Shanghai",
+  "timeframe_minutes": 1,
+  "context_before_minutes": 30,
+  "context_after_exit_bar_minutes": 20,
+  "fill_time_semantics": "Original native indices identify a 5m interval. Intrabar minute unknown; draw intervals. Known confirmation-close or gap-open exits retain boundary time.",
+  "historical_version": "near_P18, BE0; not current paper +17bp. Preserve original net outcomes and continuous funded flags.",
+  "known_limitation": "Original entry score has touch-bar lookahead. Minute visualization does not repair selection or validate historical performance.",
+  "training_eligible": false,
+  "production_eligible": false
+}
