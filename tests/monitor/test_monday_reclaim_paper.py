@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from yoyo.monitor.monday_fib import FibBook, week_window
-from yoyo.monitor.monday_reclaim_paper import (MODEL, V3, V3_TRACK, V3ADD_TRACK, V3ADD_LEG, BE_OFFSET_BP, SPIKE_TRACK, ReclaimPaper,
+from yoyo.monitor.monday_reclaim_paper import (MODEL, V3, V3_TRACK, V3ADD_TRACK, V3ADD_LEG, BE_OFFSET_BP, SPIKE_TRACK, V3LOCK_TRACK, ReclaimPaper,
                                                PaperCloseError, features, settle, bars, install, ema_order)
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -57,11 +57,11 @@ class PaperFixture(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def engine(self, threshold, enable_v3=False, enable_v3add=False, enable_spike=False):
+    def engine(self, threshold, enable_v3=False, enable_v3add=False, enable_spike=False, enable_v3lock=False):
         spec = json.loads(MODEL.read_text()); spec["top40_threshold"] = threshold
         path = Path(self.tmp.name)/"model.json"; path.write_text(json.dumps(spec))
         return ReclaimPaper(self.tmp.name, FakeFib(self.tmp.name, self.client), model_path=path, enable_v3=enable_v3,
-                            enable_v3add=enable_v3add, enable_spike=enable_spike)
+                            enable_v3add=enable_v3add, enable_spike=enable_spike, enable_v3lock=enable_v3lock)
 
     def rows(self, e, sql):
         with e.db() as db:
@@ -577,6 +577,62 @@ class SpikeTrackTests(PaperFixture):
         e, _ = self.spike(.7)
         app = FastAPI(); install(app, e)
         r = TestClient(app).get("/api/monday-reclaim-paper/analytics?track=spike")
+        self.assertEqual((r.status_code, r.json()["summary"]["open_count"]), (200, 1))
+
+
+class V3LockTests(PaperFixture):
+    """v3lock: the v3 rule with the reclaim stop at entry +0.5 percent, in its own account."""
+    LOCK = 93.82*1.005
+
+    def v3lock(self, score=.7):
+        e = self.engine(-1., enable_v3=True, enable_v3lock=True)
+        e.model.score = lambda feats: score
+        e.handle_touch(self.levels, "ABC-USDT-SWAP", "lower", 93.8, self.touch+500, self.touch)
+        return e
+
+    def row(self, e, track):
+        return self.rows(e, f"SELECT * FROM positions WHERE track={track}")[0]
+
+    def test_entry_target_size_and_backstop_match_v3(self):
+        e = self.v3lock()
+        a, b = self.row(e, V3_TRACK), self.row(e, V3LOCK_TRACK)
+        for k in ("taken", "target", "notional", "backstop", "decision_ms"):
+            self.assertEqual(a[k], b[k])
+        self.assertEqual(set(e.snapshot()["tracks"]), {"60", "5", "v3", "v3lock"})
+        self.assertEqual(e.snapshot()["v3lock"], {"breakeven_offset_bp": 50.})
+
+    def test_reclaim_arms_the_lock_and_stops_there(self):
+        e = self.v3lock()
+        self.confirm(e, 94.5)
+        self.assertAlmostEqual(self.row(e, V3LOCK_TRACK)["be_price"], self.LOCK)
+        self.assertAlmostEqual(self.row(e, V3_TRACK)["be_price"], BE)
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch//H1*H1+3*H1, "high": 95., "low": 94., "price": 94.1})
+        c = self.row(e, V3LOCK_TRACK)
+        self.assertEqual(c["reason"], "breakeven"); self.assertAlmostEqual(c["exit_price"], self.LOCK)
+        self.assertGreater(c["net_bp"], 40)
+        self.assertEqual(self.row(e, V3_TRACK)["stage"], "breakeven")  # v3 keeps its +0.17 percent stop
+        snap = e.snapshot()["tracks"]
+        self.assertAlmostEqual(snap["v3lock"]["equity"], 1000+c["pnl"])
+        self.assertEqual(snap["v3"]["equity"], 1000)
+
+    def test_reclaim_close_short_of_the_lock_exits_at_the_close(self):
+        e = self.v3lock()
+        self.confirm(e, 94.1)
+        c = self.row(e, V3LOCK_TRACK)
+        self.assertEqual((c["reason"], c["exit_price"]), ("reclaimed_inside_be", 94.1))
+        self.assertEqual(self.row(e, V3_TRACK)["stage"], "breakeven")
+
+    def test_disabled_without_v3(self):
+        e = self.engine(-1., enable_v3lock=True)
+        self.assertIsNone(e.v3lock)
+        self.assertNotIn("v3lock", e.snapshot()["tracks"])
+
+    def test_analytics_and_api_accept_v3lock(self):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+        e = self.v3lock()
+        app = FastAPI(); install(app, e)
+        r = TestClient(app).get("/api/monday-reclaim-paper/analytics?track=v3lock")
         self.assertEqual((r.status_code, r.json()["summary"]["open_count"]), (200, 1))
 
 
