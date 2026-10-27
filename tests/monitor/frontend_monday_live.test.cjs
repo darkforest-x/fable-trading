@@ -1,6 +1,17 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
-const {Flow}=require('../../yoyo/monitor/static/monday-live.js');
+const {Flow,paperAccount}=require('../../yoyo/monitor/static/monday-live.js');
+test('home account preference resolves its identity even when another account is active or first',()=>{
+ const data={active_account_id:'old',accounts:[{id:'old',name:'其他账户'},{id:'preferred',name:'梭哈账户'}]};
+ assert.equal(paperAccount(data,'梭哈账户'),'preferred');
+ assert.equal(paperAccount({...data,accounts:[...data.accounts].reverse()},'梭哈账户'),'preferred');
+ assert.equal(paperAccount(data),'old');
+});
+test('missing or ambiguous preferred accounts require explicit choice instead of silent fallback',()=>{
+ assert.equal(paperAccount({accounts:[{id:'old',name:'其他账户'}]},'梭哈账户'),'');
+ assert.equal(paperAccount({accounts:[{id:'a',name:'梭哈账户'},{id:'b',name:'梭哈账户'}]},'梭哈账户'),'');
+ assert.equal(paperAccount({accounts:[]},'梭哈账户'),'');
+});
 const draft=()=>({id:'one',state:'preview',expires_ms:Date.now()+60000});
 test('preview and edits never confirm, and retired preview replies cannot become confirmable',async()=>{
  const calls=[];let release;const f=new Flow((p,o)=>{calls.push(p);return new Promise(r=>release=r);});
