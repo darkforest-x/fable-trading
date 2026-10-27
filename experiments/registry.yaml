@@ -379,7 +379,7 @@ experiments:
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: 'Notion v2 full description https://app.notion.com/p/4048856479af81d3bfc5c73c26ed7e35'
+    notes: 'Notion v2 full description https://app.notion.com/p/4048856479af81d3bfc5c73c26ed7e35 LEAK 2026-10-27: vol_ratio, liquidity and toward24 of the frozen score read the touch bar (exp-monday-limit-score-leak-audit-20261027-v1).'
   - experiment_id: exp-monday-limit-reclaim-olhc-allexits-20261025-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 4001d335d1
@@ -716,6 +716,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'In sample; frac was proposed after seeing this history. Paper account v3add20 forward-tests frac 20 x 3x. Live resting orders reserve margin, so at most 20 orders can rest at once; trigger orders are untested.'
+  - experiment_id: exp-monday-limit-score-leak-audit-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8cee0529d6
+    status: complete
+    question: 'Found 2026-10-27 while building the owner-requested pre-scored arming replay: the frozen Monday1618 entry score computes vol_ratio, liquidity and toward24 at ledger entry_i, which equals the touch (fill) bar, not the bar before. How much do score and selection change on the bar before the touch?'
+    single_variable: 'Bar of the three features: entry_i (stored) vs touch - 1 (causal); frozen model, events and outcomes unchanged; read-only.'
+    result: 'entry_i == touch_i_hint in all 58740 events; recomputing at entry_i reproduces the stored scores (max diff 2e-16). Causal vs stored score |diff| median 0.007, p99 0.116, corr 0.971. score >= 0.5: 2108 stored vs 2293 causal, 1865 in both; the 243 dropped are the best (v2 near-edge net +298bp, win 85 percent), the 428 added are weaker (+118bp, 55 percent); selected mean +186 -> +161bp (2020-24 +220 -> +194, from 2025 +167 -> +140). v3_be0 fills kept by the causal score +222bp vs +238bp for all. Top-40 band 22712 -> 22066 (21118 in both); >= 0.6: 842 -> 957 (713 in both).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Every result that filters, targets or sizes by this score (v2 top 40, v3, v3add, be-lock, spike-HW, langlang / allin3, return-opt v1/v2, v3add20) is overstated by this leak; the model was also fitted on the leaky features. The paper engine already uses the bar before the touch (causal), so live scores differ from the backtest ones. Causal scores per event: scores_causal.csv.gz. A corrected v3 needs a framework rerun for the 428 new events. See docs/learnings/ledger-entry-i-is-the-fill-bar-not-the-submission-bar.md.'
   - experiment_id: exp-monday-limit-spike-controls-20261027-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 26da9d3a18
@@ -1155,7 +1169,7 @@ experiments:
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: 'Fast-spike shorts need a framework replay with adverse intrabar order before use; see docs/learnings/same-bar-target-fills-under-ohlc-path-inflate-fast-spike-shorts.md. Post hoc, partial snapshot 536/633.'
+    notes: 'Fast-spike shorts need a framework replay with adverse intrabar order before use; see docs/learnings/same-bar-target-fills-under-ohlc-path-inflate-fast-spike-shorts.md. Post hoc, partial snapshot 536/633. LEAK 2026-10-27: entry_i is the touch bar, not the submission bar as documented, so vol_ratio, liquidity and toward24 include the touch bar (exp-monday-limit-score-leak-audit-20261027-v1).'
   - experiment_id: exp-monday-limit-reclaim-patterns2-20261024-v1
     source_repo: darkforest-x/fable-trading
     source_commit: f2b268aeabac1bb8f1244a476464a02d659789ea

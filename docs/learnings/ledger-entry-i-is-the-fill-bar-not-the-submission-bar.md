@@ -1,0 +1,15 @@
+# In the Codex limit ledgers entry_i is the fill (touch) bar, so features "at entry_i" read the bar the order filled in
+
+- **Problem**: The frozen Monday1618 entry score drives v2's top 40%, v3 (≥ 0.5 entry, ≥ 0.6 far target, sizing linear in score), v3add, spike-HW, allin3 and v3add20. `monday_limit_reclaim_patterns3.price_features` computes vol_ratio (last-hour quote volume / normal), liquidity and toward24 (24h move toward the level) at the ledger's `entry_i`, and its docstring calls that "the submission bar (the bar before the touch)". In every one of 58,740 signal rows, however, `entry_i == touch_i_hint`: the bar whose low or high reached the limit. The fill happens inside that bar, so its close and full-bar volume are future at the entry decision.
+- **Dead ends**:
+  - Trusting the docstring and the column name. `prepare()` gives the order `entry_i = submit = touch - 1`, but the framework ledger writes the fill bar under the same name. The paper engine copied the intended definition (bars before the touch bar), so live scores differ from the backtest's. Nobody compared them.
+  - Reading the earlier same-bar-target note as the whole story. That note covered same-bar exits; this one is an entry feature.
+- **What worked**: The pre-scored arming replay requires that a score recomputed at the previous 5m close equals the stored score at the real touch. It did not, with a gap of up to 0.06. A per-feature diff isolated vol_ratio, liquidity and toward24. Recomputing them at `entry_i` reproduced the stored scores exactly (max |diff| 2e-16); at `touch - 1` the scores move (median 0.007, p99 0.116).
+- **Impact** (`exp-monday-limit-score-leak-audit-20261027-v1`, frozen model unchanged):
+  - The ≥ 0.5 set changes from 2108 to 2293 events, with 1865 in both.
+  - The 243 events dropped by the causal score are the best of the stored selection: v2 near-edge net +298bp, 85% win.
+  - The 428 events that enter are weaker: +118bp, 55% win.
+  - The mean of the selected events falls from +186bp to +161bp on the same outcome.
+  - Every score-filtered result is in-sample overstated by this leak on top of its other caveats. The model was also fitted on the leaky features.
+- **General rule**: Before computing a feature "at bar i" from a ledger, assert which bar i is: compare it with the touch/fill index, and check one row by hand. The decisive test for any entry feature is decision-time parity. Recompute it from only the data available just before the order would rest, and require equality with the stored value on every event.
+- **Related**: `yoyo/evaluation/monday_limit_reclaim_patterns3.py`, `yoyo/evaluation/monday_limit_reclaim_recent.py` (score_model.json), `yoyo/evaluation/monday_limit_score_leak_audit.py`, `yoyo/evaluation/monday_limit_prescore_arm.py`, `yoyo/monitor/monday_reclaim_paper.py` (causal, unchanged), [same-bar-target-fills-under-ohlc-path-inflate-fast-spike-shorts.md](same-bar-target-fills-under-ohlc-path-inflate-fast-spike-shorts.md), [purge-records-are-claims-not-facts.md](purge-records-are-claims-not-facts.md).

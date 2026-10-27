@@ -1,3 +1,11 @@
+## 2026-10-27 · Monday1618 entry score reads the touch bar (lookahead)
+
+- Found while building the owner-requested pre-scored arming replay: the frozen entry score's vol_ratio, liquidity and toward24 are computed at ledger `entry_i`, which equals the touch (fill) bar in all 58,740 events. The fill happens inside that bar, so its close and full-bar volume are future. The stored scores are reproduced exactly at the touch bar.
+- On the bar before the touch, with the frozen model unchanged: score >= 0.5 goes from 2108 to 2293 events, 1865 in both. The 243 dropped events are the best of the old selection (v2 near-edge +298bp, win 85%). The selected mean falls from +186bp to +161bp; from 2025 it falls from +167bp to +140bp.
+- Every score-filtered, -targeted or -sized result is overstated in sample. That covers v2 top 40, v3, v3add, be-lock, spike-HW, langlang/allin3, return-opt v1/v2 and v3add20. The paper engine already scores on the bar before the touch, so it is causal, but its expectations come from leaky backtests. No paper or model change was made.
+- Evidence: `exp-monday-limit-score-leak-audit-20261027-v1` (builder 8cee0529d6; the first run failed on JSON serialization, and its log is kept). Learning: `ledger-entry-i-is-the-fill-bar-not-the-submission-bar.md`.
+- The arming replay is paused, and its builder `yoyo/evaluation/monday_limit_prescore_arm.py` plus config are uncommitted. It cannot match the stored scores by design. Next, pending owner decision: rerun v3/v3add once in NautilusTrader with causal scores, recompute the return table, then run the arming replay. A causal refit of the model would change the paper accounts' frozen model and needs the owner.
+
 ## 2026-10-27 · Remove visible ribbon timestamps
 
 - Owner requested one more reduction: recent coin chips now show only the ticker and exact numeric score. Timestamps remain in the native tooltip, with no visible time column. Width is content-based 76–94px, down from 104px, while tap height stays at least44px. Existing account linkage and fixed shortcuts are unchanged.
