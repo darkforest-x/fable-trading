@@ -1,0 +1,20 @@
+{
+  "experiment_id": "exp-paper-2026-trade-charts-20261027-v1",
+  "operation": "Project saved 2026 v3lock and spike native fills into annotated static charts; no replay or new fills.",
+  "entry_year": 2026,
+  "cohort_timezone": "UTC",
+  "chart_timezone": "Asia/Shanghai",
+  "all_signal_charts": true,
+  "include_funded_carryover_exits": true,
+  "costs": "Preserve stored maker 2bp, taker 5bp, non-target exit slippage 10bp; funding not modeled.",
+  "spike_historical_version": "near_P18, BE0, score>=0.6, EMA order>=3, 10 slots x5; not current +17bp protection.",
+  "v3lock_historical_version": "v3_be50, score-linear allocation at1x; same protection as current paper.",
+  "summary_sources": [
+    "exp-monday-limit-be-lock-compare-20261027-v1",
+    "exp-monday-limit-spike-hw-20261026-v1",
+    "exp-strategy-booklet-paths-20261027-v1"
+  ],
+  "telegram_group": "Yolo均线密集交易系统",
+  "training_eligible": false,
+  "production_eligible": false
+}
