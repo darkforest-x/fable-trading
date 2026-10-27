@@ -167,10 +167,15 @@ def load_symbol(args):
     pick = lambda c: np.where(w, l[c], o[c])
     d = pd.DataFrame(dict(variant=o.variant, side=o.side, entry=o.entry, stop=o.stop, pre=o.pre, full=o.full, net=pick('net'),
                           reason=pick('reason'), entry_i=o.entry_i, exit_i=pick('exit_i'),
-                          entry_t=pd.to_datetime(o.entry_time, utc=True),
                           exit_t=pd.to_datetime(pd.Series(pick('exit_time'), index=o.index), utc=True)), index=o.index)
     job = json.loads((SRC/symbol/'identity.json').read_text())['job']
     f, _ = load_job(job)
+    # Market-mode ledgers carry no entry_time: the fill is the entry bar's close (bar open + execution minutes).
+    close_t = pd.Series(f.index[d.entry_i.astype(int).to_numpy()]+pd.Timedelta(minutes=job['execution_minutes']), index=d.index)
+    known = pd.to_datetime(o.entry_time, utc=True) if 'entry_time' in o else pd.Series(pd.NaT, index=d.index, dtype='datetime64[ns, UTC]')
+    if (known.notna() & (known != close_t)).any():
+        issues.append('limit entry_time differs from the fill bar close')
+    d['entry_t'] = known.where(known.notna(), close_t)
     h, lo = f.high.to_numpy(), f.low.to_numpy()
     mae = []
     for a, b, s, e, v in zip(d.entry_i.astype(int), d.exit_i.astype(int), d.side, d.entry, d.variant):
