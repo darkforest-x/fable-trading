@@ -1,0 +1,163 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-score-causal-refit-20261027-v1",
+    "question": "Owner 2026-10-27: refit the Monday1618 entry score with features that do not read the touch bar, then rerun A and ABC in the framework. Do not affect the earlier results.",
+    "single_variable": "Bar of vol_ratio / liquidity / toward24 in the training features (touch bar -> 5m bar before the touch); training rows, label, features and estimator as monday_limit_reclaim_recent. Split 2025-01-01 is the like-for-like control against the frozen model; split 2026-01-01 (owner 2026-10-27: train before 2026, test 2026 to date) is the main model for the framework rerun.",
+    "frozen_model": "experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/score_model.json",
+    "events": "experiments/active/exp-monday-limit-reclaim-patterns3-20261024-v1/events_60m.csv.gz",
+    "previous_scores": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+    "cuts": [
+      0.5,
+      0.6
+    ],
+    "permutations": 1000,
+    "seed": 20261027,
+    "workers": 6,
+    "control": "Refit with the touch-bar values on the 2025 split must reproduce the frozen coefficients; each split is tested on fills from its split date with a label-permutation p. Thresholds 0.5 / 0.6 are kept as probability levels.",
+    "outputs": "score_model_causal_2025.json, score_model_causal_2026.json and scores_refit.csv.gz in this directory only; the frozen model and the paper engine are unchanged",
+    "training_eligible": false,
+    "production_eligible": false,
+    "splits": [
+      "2025-01-01",
+      "2026-01-01"
+    ],
+    "main_split": "2026-01-01"
+  },
+  "results": {
+    "control": {
+      "split": "2025-01-01 00:00:00+00:00",
+      "train_n": 25260,
+      "frozen_train_n": 25260,
+      "coef_max_abs_diff": 1.1102230246251565e-16,
+      "intercept_diff": 0.0,
+      "mean_max_abs_diff": 0.0,
+      "feature_parity": {
+        "vol_ratio": 5.684341886080802e-14,
+        "liquidity": 4.76837158203125e-07,
+        "toward24": 1.4210854715202004e-14
+      }
+    },
+    "events": 58740,
+    "test_by_split": {
+      "2025-01-01": {
+        "train_n": 25260,
+        "test_n": 33472,
+        "test_from": "2025-01-01 00:00:00+00:00",
+        "base_mean_bp": -2.4234673351593328,
+        "base_win_pct": 24.417423518164437,
+        "refit_causal": {
+          "auc": 0.6477362120626684,
+          "perm_p": 0.000999000999000999,
+          "top10": {
+            "n": 3348,
+            "mean_bp": 3.8426272852318837,
+            "win_pct": 51.971326164874554
+          },
+          "ge_05": 1094,
+          "ge_06": 442,
+          "coef": {
+            "bucket": 0.417,
+            "log_vol_ratio": 0.0293,
+            "log_approach": -0.246,
+            "opp_first": 0.1648,
+            "monday_close_side": -0.0166,
+            "log_liquidity": -0.0671,
+            "toward24": -0.2639,
+            "cluster24": -0.0979,
+            "side": -0.0379,
+            "range_pct": -0.1071
+          }
+        },
+        "frozen_causal": {
+          "auc": 0.6407349889038104,
+          "top10": {
+            "n": 3348,
+            "mean_bp": -9.097412714965143,
+            "win_pct": 50.597371565113505
+          },
+          "ge_05": 1401
+        },
+        "frozen_leaky": {
+          "auc": 0.6543708759207092,
+          "top10": {
+            "n": 3348,
+            "mean_bp": 46.37612174386682,
+            "win_pct": 53.04659498207885
+          },
+          "ge_05": 1366
+        }
+      },
+      "2026-01-01": {
+        "train_n": 42221,
+        "test_n": 16511,
+        "test_from": "2026-01-01 00:00:00+00:00",
+        "base_mean_bp": 2.3388310359619733,
+        "base_win_pct": 26.061413603052507,
+        "refit_causal": {
+          "auc": 0.6607009412190405,
+          "perm_p": 0.000999000999000999,
+          "top10": {
+            "n": 1652,
+            "mean_bp": 21.388288021145527,
+            "win_pct": 56.11380145278451
+          },
+          "ge_05": 661,
+          "ge_06": 255,
+          "coef": {
+            "bucket": 0.3925,
+            "log_vol_ratio": 0.0357,
+            "log_approach": -0.2613,
+            "opp_first": 0.1323,
+            "monday_close_side": 0.0064,
+            "log_liquidity": -0.0906,
+            "toward24": -0.2147,
+            "cluster24": -0.0649,
+            "side": -0.067,
+            "range_pct": -0.1499
+          }
+        },
+        "frozen_causal": {
+          "auc": 0.6527039335840855,
+          "top10": {
+            "n": 1652,
+            "mean_bp": 17.19102465458237,
+            "win_pct": 53.753026634382564
+          },
+          "ge_05": 801
+        },
+        "frozen_leaky": {
+          "auc": 0.6670415562430307,
+          "top10": {
+            "n": 1652,
+            "mean_bp": 47.99254232143754,
+            "win_pct": 56.53753026634383
+          },
+          "ge_05": 829
+        }
+      }
+    },
+    "bands": {
+      "0.5": {
+        "refit_causal": 1613,
+        "refit_touch": 1198,
+        "frozen_causal": 2293,
+        "frozen_touch": 2108,
+        "refit_causal_and_frozen_causal": 1515,
+        "missing_scores": 8
+      },
+      "0.6": {
+        "refit_causal": 542,
+        "refit_touch": 347,
+        "frozen_causal": 957,
+        "frozen_touch": 842,
+        "refit_causal_and_frozen_causal": 526,
+        "missing_scores": 8
+      }
+    },
+    "main_split": "2026-01-01",
+    "corr_refit_vs_frozen_causal": 0.9603701550482941
+  },
+  "source_commit": "14927eb758bf9649edeee2e1df16c61415d2580a",
+  "training_eligible": false,
+  "production_eligible": false
+}

@@ -730,6 +730,34 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
+  - experiment_id: exp-monday-limit-score-causal-refit-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: complete
+    question: 'Owner 2026-10-27: refit the Monday1618 entry score without the touch bar (vol_ratio / liquidity / toward24 from the 5m bar before the touch); owner asked to train before 2026 and test 2026 to date.'
+    single_variable: 'Bar of the three bar features; rows, label, features and estimator as monday_limit_reclaim_recent; splits 2025-01-01 (control) and 2026-01-01 (main).'
+    result: 'Control: touch-bar refit on the 2025 split reproduces the frozen coefficients (max diff 1e-16, 25260 rows). Test 2026 to date (16511 v2 near-edge fills, base +2.3bp, win 26 percent): refit causal AUC 0.661 (perm p 0.001), top decile +21bp win 56 vs frozen on causal features 0.653 / +17bp and frozen leaky 0.667 / +48bp. 2025 split test: top decile +3.8bp vs -9.1bp (frozen causal) and +46bp (leaky). Events with causal score >= 0.5: 1613 (frozen causal 2293); >= 0.6: 542 (957).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-score-causal-refit-20261027-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'New model files score_model_causal_2025.json / _2026.json in the experiment directory only; frozen score_model.json and the paper engine unchanged. First run stopped on NaN features (log kept).'
+  - experiment_id: exp-monday-limit-layered-refit-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: running
+    question: 'Owner 2026-10-27: rerun A and ABC in the framework with the causal refit score (trained before 2026).'
+    single_variable: 'Entry score frozen -> causal refit; everything else as exp-monday-limit-layered-20261027-v1.'
+    result: pending
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-layered-refit-20261027-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Same builder (yoyo/evaluation/monday_limit_layered.py); parity against the frozen-score layered run on shared trade ids. Out of sample only from 2026-01-01.'
   - experiment_id: exp-monday-limit-layered-20261027-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 44514649f1

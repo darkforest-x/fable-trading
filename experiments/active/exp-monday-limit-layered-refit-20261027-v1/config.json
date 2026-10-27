@@ -1,0 +1,29 @@
+{
+  "experiment_id": "exp-monday-limit-layered-refit-20261027-v1",
+  "question": "Owner 2026-10-27: rerun layers A (rest on the previous-close score) and ABC (plus close check and late market entry) in the framework with the causal refit score (trained before 2026, tested 2026 to date). Earlier results stay untouched.",
+  "single_variable": "Entry score: frozen model -> causal refit (exp-monday-limit-score-causal-refit-20261027-v1, main split 2026-01-01); layers, exits, stops, fees, slippage and data as exp-monday-limit-layered-20261027-v1.",
+  "scores": "experiments/active/exp-monday-limit-score-causal-refit-20261027-v1/scores_refit.csv.gz",
+  "cut": 0.5,
+  "since_week": "2019-12-30",
+  "exits": "v3: range 0.618 below 0.6, opposite 1618 from 0.6 (by pre for resting orders, by full for late), -30 percent backstop from the level, 60m reclaim, breakeven at the level",
+  "fees": {
+    "source": "Codex config maker_fee / taker_fee (OKX Lv1 0.02 / 0.05 percent, read 2026-10-23)",
+    "limit_entry_and_target": "maker",
+    "late_entry_fill_close_exit_backstop_reclaim_exits": "taker"
+  },
+  "slippage_bp": {
+    "non_target_exit": 10,
+    "late_market_entry": 10
+  },
+  "reference": "experiments/active/exp-monday-limit-be-scalein-20261026-v1 v3_be0 (frozen leaky selection, unchanged)",
+  "parity": "rows sharing a trade id (same event, target mode and variant) with the frozen-score layered run must have equal net on both paths",
+  "replay": "monday_limit_return_opt.frac N20 3x (the v3add20 sizing, base legs only, no add legs), median of 10 seeds from 20261103; periods 2020-2024 / 2025 / 2026 / last five months",
+  "not_run": "1m spike entry (needs 1m bars through each trade); add legs",
+  "null_control": "Each layer is compared with its own counterfactual on identical events: the same event held (rest) or filled at the limit (reference) or not traded.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "reference_scores": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+  "parity_run": "exp-monday-limit-layered-20261027-v1",
+  "out_of_sample": "2026-01-01 to date (y2026, last5m); 2020-2025 is in the refit's training period",
+  "one_minute_layer": false
+}

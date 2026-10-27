@@ -137,10 +137,10 @@ def run(config, workers, intrabar):
 
 def load_symbol(args):
     """Worse path per trade with slippage, MAE from the entry's first exposed bar, and parity against v3_be0."""
-    exp, symbol, ref_run, slip_exit, slip_late = args
+    exp, symbol, ref_run, slip_exit, slip_late, parity_run = (tuple(args)+(None,))[:6]
     from yoyo.evaluation.monday_limit_reclaim_inputs import load_job
     from yoyo.evaluation.monday_limit_reclaim_patterns import SRC
-    paths, issues, parity = {}, [], 0
+    paths, issues, parity, compared = {}, [], 0, 0
     for p in ('ohlc', 'olhc'):
         d = Path(exp)/p/'symbols'/symbol
         if (d/'error.json').exists() or not (d/'done.json').exists():
@@ -151,6 +151,15 @@ def load_symbol(args):
             issues.append(f'{p}: rows {len(t)} != positions')
         net = t.net_notional_bp-np.where(t.reason == 4, 0., slip_exit)-np.where(t.variant == 'late', slip_late, 0.)
         paths[p] = t.assign(net=net).set_index('trade_id')
+        if parity_run:
+            # Same orders under another score: rows sharing a trade id (event, target mode, variant) must match.
+            r = A/parity_run/p/'symbols'/symbol/'trades.csv.gz'
+            if r.exists():
+                ref = pd.read_csv(r, usecols=['trade_id', 'net_notional_bp']).set_index('trade_id').net_notional_bp
+                both = t.set_index('trade_id').net_notional_bp.reindex(ref.index).dropna()
+                compared += len(both)
+                parity += int(((both-ref.reindex(both.index)).abs() > 1e-6).sum())
+            continue
         r = A/ref_run/p/'symbols'/symbol/'trades.csv.gz'
         rest = t[(t.variant == 'rest') & (t.full >= .5) & (v3_mode(t.pre) == v3_mode(t.full))]
         if len(rest) and not r.exists():
@@ -161,7 +170,7 @@ def load_symbol(args):
             got = rest.assign(base=rest.trade_id.str.rsplit(':v_', n=1).str[0]).set_index('base').net_notional_bp
             parity += int(((got-ref.net_notional_bp.reindex(got.index)).abs() > 1e-6).sum()+ref.net_notional_bp.reindex(got.index).isna().sum())
     if len(paths) < 2 or paths['ohlc'].empty:
-        return symbol, pd.DataFrame(), issues, parity
+        return symbol, pd.DataFrame(), issues, parity, compared
     o = paths['ohlc']; l = paths['olhc'].reindex(o.index)
     w = (l.net < o.net).to_numpy()
     pick = lambda c: np.where(w, l[c], o[c])
@@ -186,7 +195,7 @@ def load_symbol(args):
         mae.append(max(0., -s*(worst-e)/e*100))
     d['mae_pct'] = mae
     d['event'] = [':'.join(i.split(':')[:3]) for i in d.index]
-    return symbol, d.reset_index(drop=True), issues, parity
+    return symbol, d.reset_index(drop=True), issues, parity, compared
 
 
 def counts(s):
@@ -213,17 +222,21 @@ def summarize(config, workers):
     syms = symbols(cfg)
     slip = cfg['slippage_bp']
     with ProcessPoolExecutor(workers) as ex:
-        got = list(ex.map(load_symbol, [(str(exp), s, RUN.name, slip['non_target_exit'], slip['late_market_entry']) for s in syms], chunksize=4))
-    t = pd.concat([d for _, d, _, _ in got if len(d)], ignore_index=True)
+        got = list(ex.map(load_symbol, [(str(exp), s, RUN.name, slip['non_target_exit'], slip['late_market_entry'], cfg.get('parity_run'))
+                                        for s in syms], chunksize=4))
+    t = pd.concat([g[1] for g in got if len(g[1])], ignore_index=True)
     t = t[~t.event.isin(BAD_EVENTS)].copy()
     sc = pd.read_csv(ROOT/cfg['scores']).set_index('event')
-    ref_events = set(sc.index[sc.stored >= cfg['cut']])-BAD_EVENTS
+    # The reference plan is the leaky v3_be0 selection; another run can name the scores that selected it.
+    rs = pd.read_csv(ROOT/cfg['reference_scores']).set_index('event') if cfg.get('reference_scores') else sc
+    ref_events = set(rs.index[rs.stored >= cfg['cut']])-BAD_EVENTS
     with ProcessPoolExecutor(workers) as ex:
         leak = pd.concat([d for d in ex.map(so.legs, [(s, {RUN.name: ['v3_be0']}, ref_events) for s in syms], chunksize=4) if len(d)],
                          ignore_index=True)
     leak['pre'] = leak.event.map(sc.causal); leak['full'] = leak.event.map(sc.stored)
-    res = dict(checks=dict(symbols=len(syms), issues=[f'{s}: {i}' for s, _, iss, _ in got for i in iss],
-                           parity_mismatch=int(sum(p for *_, p in got)), rows=counts(t.variant)))
+    res = dict(checks=dict(symbols=len(syms), issues=[f'{g[0]}: {i}' for g in got for i in g[2]],
+                           parity_mismatch=int(sum(g[3] for g in got)), parity_against=cfg.get('parity_run') or f'{RUN.name} v3_be0',
+                           parity_compared=int(sum(g[4] for g in got)), rows=counts(t.variant)))
     late_skip = {}
     for s in syms:
         f = exp/'ohlc'/'symbols'/s/'done.json'
@@ -271,6 +284,11 @@ def summarize(config, workers):
                           late_reason=counts(lt.reason)),
         same_bar_rest=dict(target=int(((rest.reason == 4) & (rest.exit_i == rest.entry_i)).sum()),
                            backstop=int(((rest.reason == 1) & (rest.exit_i == rest.entry_i)).sum())))
+    if not cfg.get('one_minute_layer', True):
+        res = clean(res)
+        dump(exp/'summary.json', dict(config=cfg, results=res))
+        print(json.dumps(res['checks']))
+        return
     pb = pd.read_csv(A/'exp-monday-limit-partial-bar-score-20261027-v1/events.csv.gz').set_index('event')
     pb = pb.loc[pb.index.intersection(g3)]
     tm = pb.touch_minute.dropna().astype(int)

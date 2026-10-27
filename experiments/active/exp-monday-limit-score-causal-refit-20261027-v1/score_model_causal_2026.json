@@ -1,0 +1,67 @@
+{
+  "features": [
+    "bucket",
+    "log_vol_ratio",
+    "log_approach",
+    "opp_first",
+    "monday_close_side",
+    "log_liquidity",
+    "toward24",
+    "cluster24",
+    "side",
+    "range_pct"
+  ],
+  "mean": [
+    -30.123256199521567,
+    0.8034696657748885,
+    6.483267114671044,
+    0.14547263210250824,
+    0.5576189777417653,
+    7.3396297947490865,
+    7.158514034896212,
+    45.62587338054523,
+    0.020013737239762203,
+    8.563985556709168
+  ],
+  "scale": [
+    3.313379549947404,
+    0.8464973763539663,
+    1.8503163749973393,
+    0.35257672273092067,
+    0.27204033533232497,
+    0.6436039118815738,
+    5.942441000918971,
+    51.619266667716545,
+    0.9997997051018257,
+    6.12259871511692
+  ],
+  "coef": [
+    0.3925148546202515,
+    0.03570140954296652,
+    -0.26128213454075183,
+    0.13233297174639722,
+    0.006389988748952478,
+    -0.09057669626960856,
+    -0.21473764793897365,
+    -0.06492236242234223,
+    -0.06695925586806217,
+    -0.14991572157491315
+  ],
+  "intercept": -1.2821648240876844,
+  "top40_threshold": 0.22676062682406986,
+  "trained_before": "2026-01-01 00:00:00+00:00",
+  "train_n": 42221,
+  "feature_notes": {
+    "bucket": "floor(log2(mean 14-bar TR / close of the 5m bar before the touch)*4)",
+    "log_vol_ratio": "log of quote volume of the hour ending at the close of the 5m bar before the touch / median hourly quote volume of the prior 7 days",
+    "log_approach": "log1p(minutes from the first post-Monday cross of the near Monday edge to the touch bar)",
+    "opp_first": "1 if the opposite 1.618 of the same symbol-week filled earlier",
+    "monday_close_side": "Monday close position, 0 = edge away from this touch, 1 = edge this touch extends",
+    "log_liquidity": "log10 mean daily quote volume of the 7 days ending at the close of the 5m bar before the touch (USDT)",
+    "toward24": "percent move toward the level over the 24h ending at the close of the 5m bar before the touch",
+    "cluster24": "other symbols filling the same side in the prior 24h",
+    "side": "1 long, -1 short",
+    "range_pct": "Monday range / level, percent"
+  },
+  "frozen_model_untouched": "experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/score_model.json"
+}
