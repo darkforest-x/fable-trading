@@ -40,7 +40,7 @@
   }
   function recentHTML(item,selected,score={text:'暂无评分',title:'暂无评分',high:false}){
     const event=latestTouch(item),stamp=touchTime(event),coin=base(item.symbol);
-    return `<button type="button" class="rp-recent-chip" data-symbol="${esc(item.symbol)}" data-watch-select="${esc(item.symbol)}" aria-pressed="${item.symbol===selected}" title="${esc(coin)} · ${touchLabel(event?.side)} 1.618 · ${stamp?date.format(stamp)+' 北京':'时间待核对'} · ${esc(score.title)}">${avatar(coin)}<span><span class="rp-recent-identity"><b>${esc(coin)}</b><em data-scored="${!!score.scored}" class="rp-recent-score${score.high?' is-high':''}" aria-label="${esc(score.title)}">${esc(score.text)}</em></span><small class="${touchTone(event?.side)}">${touchLabel(event?.side)} · ${stamp?date.format(stamp).slice(-5):'—'}</small></span></button>`;
+    return `<button type="button" class="rp-recent-chip" data-symbol="${esc(item.symbol)}" data-watch-select="${esc(item.symbol)}" aria-pressed="${item.symbol===selected}" title="${esc(coin)} · ${touchLabel(event?.side)} 1.618 · ${stamp?date.format(stamp)+' 北京':'时间待核对'} · ${esc(score.title)}">${avatar(coin)}<span><b>${esc(coin)}</b><span class="rp-recent-meta"><em data-scored="${!!score.scored}" class="rp-recent-score${score.high?' is-high':''}" aria-label="${esc(score.title)}">${score.scored?esc(score.text):'—'}</em><small class="${touchTone(event?.side)}">${stamp?date.format(stamp).slice(-5):'—'}</small></span></span></button>`;
   }
   function pinnedHTML(selected){
     return PINNED.map(symbol=>`<button type="button" class="rp-pinned-chip" data-symbol="${symbol}" data-watch-select="${symbol}" aria-pressed="${symbol===selected}" aria-label="查看 ${base(symbol)} K 线">${avatar(base(symbol))}<b>${base(symbol)}</b></button>`).join('');
@@ -72,8 +72,19 @@
     lane.addEventListener('dragstart',event=>event.preventDefault());
     return ()=>{drag=null;blockedUntil=0;lane.classList.remove('is-dragging');};
   }
+  const fundedFill=(p,symbol)=>p.symbol===symbol&&p.taken===1&&positive(p.notional)&&[1,-1].includes(p.side)&&positive(p.fill_ms)&&positive(p.entry);
+  const newestFill=(a,b)=>b.fill_ms-a.fill_ms||b.id-a.id;
+  // Only remaining, filled exposure can link a coin to an account. Shadow
+  // records and unfilled add orders are not holdings, even in the open feed.
+  function openPosition(track,symbol){
+    return (track?.open||[]).filter(p=>fundedFill(p,symbol)&&['pending_confirm','breakeven'].includes(p.stage)&&positive(p.remaining_notional??p.notional)).sort(newestFill)[0]||null;
+  }
+  function holdingTrack(tracks,symbol,current,order){
+    const holders=order.filter(id=>openPosition(tracks?.[id],symbol));
+    return holders.includes(current)?current:holders[0]||'spike';
+  }
   function coinTrade(track,symbol){
-    return [...(track?.open||[]),...(track?.closed||[]),...(track?.latest_funded?[track.latest_funded]:[])].filter(p=>p.symbol===symbol&&p.taken===1&&positive(p.notional)&&[1,-1].includes(p.side)&&positive(p.fill_ms)&&positive(p.entry)).sort((a,b)=>b.fill_ms-a.fill_ms||b.id-a.id)[0]||null;
+    return openPosition(track,symbol)||[...(track?.open||[]),...(track?.closed||[]),...(track?.latest_funded?[track.latest_funded]:[])].filter(p=>fundedFill(p,symbol)).sort(newestFill)[0]||null;
   }
   function rowHTML(item,selected,{favorite=false,expanded=false,now=Date.now(),error=false,platform='',period='5m'}={}){
     const coin=base(item.symbol),event=latestTouch(item),stamp=touchTime(event),side=event?.side;
@@ -83,7 +94,7 @@
     const icon=name=>`<span class="rp-watch-icon" aria-hidden="true" style="--watch-icon:url(/static/icons/${name}.svg)"></span>`;
     return `<article class="rp-watch-row" data-symbol="${esc(item.symbol)}" data-selected="${item.symbol===selected}"><div class="rp-watch-main"><button type="button" class="rp-watch-select" data-watch-select="${esc(item.symbol)}" aria-label="查看 ${esc(coin)} K 线" aria-pressed="${item.symbol===selected}">${avatar(coin)}<span class="rp-watch-identity"><b class="rp-watch-name">${esc(coin)}${side?`<em class="rp-touch-tag ${touchTone(side)}">${touchLabel(side)}</em>`:''}</b><small class="rp-watch-time" title="${esc(meta)}">${esc(meta)}</small></span><span class="rp-watch-quote"><b>${price(item.price)}</b><span class="${item.catalog?(item.change>0?'rp-positive':item.change<0?'rp-negative':''):touchTone(side)}">${item.catalog?change:touchLabel(side)}</span></span></button><button type="button" class="rp-watch-disclosure" data-watch-action="details" aria-expanded="${expanded}" aria-controls="rp-watch-actions-${esc(item.symbol)}" aria-label="${expanded?'收起':'展开'} ${esc(coin)} 操作"><span aria-hidden="true">⌄</span></button></div><div class="rp-watch-bottom" id="rp-watch-actions-${esc(item.symbol)}"${expanded?'':' hidden'}><a class="rp-watch-tv" href="${esc(tradingViewURL(item.symbol,platform))}" target="_blank" rel="noopener" aria-label="在 TradingView 打开 ${esc(coin)}" title="TradingView">TV ↗</a><a href="${esc(inspectionURL(item.symbol,period))}" aria-label="查看 ${esc(coin)} 形态巡检" title="形态巡检">${icon('activity')}</a><button data-watch-action="favorite" aria-pressed="${favorite}" aria-label="${favorite?'取消收藏':'收藏'} ${esc(coin)}">${icon('star')}</button>${!item.catalog&&side?`<button data-watch-action="remove" aria-label="从本周列表移除 ${esc(coin)}" title="从本周列表移除">${icon('trash')}</button>`:''}</div></article>`;
   }
-  const api={validSymbol,validate,model,recentRows,touchScore,recentHTML,PINNED,pinnedHTML,bindRecentDrag,coinTrade,rowHTML};
+  const api={validSymbol,validate,model,recentRows,touchScore,recentHTML,PINNED,pinnedHTML,bindRecentDrag,openPosition,holdingTrack,coinTrade,rowHTML};
   if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}
   function reconcile(container,html){
     if(container._html===html)return;

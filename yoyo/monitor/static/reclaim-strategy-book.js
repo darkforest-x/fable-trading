@@ -161,7 +161,7 @@
     new MutationObserver(()=>{if(open)charts();}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
     window.addEventListener('resize',()=>{if(picker.matches(':popover-open'))positionPicker();});
     document.addEventListener('visibilitychange',()=>analytics?.setActive(active&&open&&!document.hidden));
-    sync();return {sync,close,setActive(value){active=value;if(!value){if(picker.matches(':popover-open'))picker.hidePopover();close(true);}}};
+    sync();return {sync,close,getOrder:()=>[...order],setActive(value){active=value;if(!value){if(picker.matches(':popover-open'))picker.hidePopover();close(true);}}};
   }
   window.SpikeStrategyBook={...api,create};
 })();

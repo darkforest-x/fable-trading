@@ -1,0 +1,7 @@
+# Stitch recovery requires a loaded canvas, not a successful navigation
+
+- **Problem**: A 300-second edit timeout left no returned screen ID. Both list_screens and get_project omitted a known readable screen and the new design.
+- **Dead end**: Repeated API reads, navigation, reloads and blank iframe observations did not recover canvas membership. A successful navigation response was not proof that the project had initialized. Browser diagnostics also reported a paused document response; this did not establish a Stitch backend outage.
+- **Effective path**: The owner opened the project and showed the completed canvas. The official list then grew from 218 to 224 screens and exposed 1452f40e63a04f53b6b5e635ad78079c. Official get_screen/download_file recovered its image and HTML before implementation, without another generation request.
+- **General rule**: Preserve returned IDs and verify list completeness against a known completed screen. When the automated browser cannot load the canvas, distinguish that control-path failure from generation status. Ask for confirmation of a manually loaded canvas promptly instead of repeatedly waiting or declaring generation failed.
+- **Scope**: Stitch project 8978791379095391159; docs/design/stitch-20261027-compact-ribbon/source.json; https://github.com/google-labs-code/stitch-sdk/issues/149. No change to the requirement for design before UI implementation.

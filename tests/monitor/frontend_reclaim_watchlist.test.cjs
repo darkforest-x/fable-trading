@@ -66,6 +66,35 @@ test('coin selection never borrows another symbol or a shadow fill and honors fi
  assert.equal(ui.coinTrade({open:[position('SOL',{entry:null})]},'SOL-USDT-SWAP'),null);
  assert.equal(route({symbol:'BTC-USDT-SWAP'}).symbol,'BTC-USDT-SWAP');assert.equal(route({symbol:'<script>'}).symbol,'');
 });
+test('holding linkage requires filled remaining exposure and excludes shadows or pending adds',()=>{
+ const symbol='SOL-USDT-SWAP',live=position('SOL',{stage:'pending_confirm',remaining_notional:25});
+ assert.equal(ui.openPosition({open:[live]},symbol),live);
+ for(const patch of [{taken:0},{notional:0},{remaining_notional:0},{remaining_notional:-1},{stage:'closed'},{stage:'pending_fill'},{fill_ms:null},{entry:0},{symbol:'BTC-USDT-SWAP'}])assert.equal(ui.openPosition({open:[{...live,...patch}]},symbol),null);
+ const add={...live,id:2,stage:'breakeven',fill_ms:2000,parent_id:1};
+ assert.equal(ui.openPosition({open:[live,add]},symbol),add);
+ assert.equal(ui.openPosition({pending_adds:[live],closed:[live],latest_funded:live},symbol),null);
+ assert.ok(ui.openPosition({open:[position('SOL',{stage:'breakeven'})]},symbol));
+});
+test('coin linkage keeps a current holder, uses saved account order on ties, and otherwise chooses spike',()=>{
+ const symbol='SOL-USDT-SWAP',live=position('SOL',{stage:'pending_confirm'}),tracks={spike:{open:[]},v3:{open:[live]},'60':{open:[live]}};
+ assert.equal(ui.holdingTrack(tracks,symbol,'spike',['spike','60','v3']),'60');
+ assert.equal(ui.holdingTrack(tracks,symbol,'v3',['spike','60','v3']),'v3');
+ assert.equal(ui.holdingTrack(tracks,symbol,'spike',['v3','spike','60']),'v3');
+ assert.equal(ui.holdingTrack(tracks,'BTC-USDT-SWAP','v3',['v3','spike','60']),'spike');
+ assert.equal(ui.holdingTrack(undefined,symbol,'60',['spike','60','v3']),'spike');
+});
+test('current open trade wins over newer closed trades while empty holdings keep historical fallback',()=>{
+ const live=position('SOL',{stage:'pending_confirm'}),closed=position('SOL',{id:2,fill_ms:3000,stage:'closed',remaining_notional:0});
+ assert.equal(ui.coinTrade({open:[live],closed:[closed],latest_funded:closed},live.symbol),live);
+ assert.equal(ui.coinTrade({open:[],closed:[closed]},live.symbol),closed);
+});
+test('compact ribbon removes visible direction and score labels while retaining accessible context',()=>{
+ const item=coin('POPMART',{touches:{lower:{source:'live',observed_ms:1000,candle_ms:1000}}});
+ const html=ui.recentHTML(item,'',{scored:true,text:'0.0000',title:'入场评分 0 · 不是胜率'}),text=html.replace(/<[^>]*>/g,'');
+ assert.match(text,/POPMART0.0000/);assert.doesNotMatch(text,/上沿|下沿|分/);assert.match(html,/下沿 1.618/);assert.match(html,/aria-label="入场评分 0 · 不是胜率"/);
+ const missing=ui.recentHTML(item,'',{text:'评分失败',title:'评分失败'});
+ assert.match(missing,/aria-label="评分失败">—/);assert.doesNotMatch(missing.replace(/<[^>]*>/g,''),/评分失败|0.0000/);
+});
 test('touch list validates symbol identities and rejects duplicate or malformed records',()=>{
  const d=snapshot([coin('SOL')]);assert.equal(ui.validate(d),d);
  for(const bad of [{},{...d,items:[null]},{...d,items:[coin('SOL'),coin('SOL')]},{...d,items:[{symbol:'<img>',state:'ready'}]}])assert.throws(()=>ui.validate(bad));
