@@ -716,6 +716,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'In sample; frac was proposed after seeing this history. Paper account v3add20 forward-tests frac 20 x 3x. Live resting orders reserve margin, so at most 20 orders can rest at once; trigger orders are untested.'
+  - experiment_id: exp-monday-limit-partial-bar-score-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f01de82b6a
+    status: complete
+    question: 'Owner 2026-10-27: score at minute 3 / 4 of the touch 5m bar and only then rest the limit; how many v3 fills are still reached and how many lost?'
+    single_variable: 'Decision minute inside the touch bar (partial-bar vol_ratio / liquidity / toward24 from Binance UM 1m), plus orders already resting from the previous close; frozen model, 0.5 threshold and v3_be0 fills unchanged.'
+    result: '2107/2108 v3 parents with 1m; the 1m full-bar rebuild reproduces every stored score (max diff 2e-16), 1m high/low and volume match all 5m bars. Touch minute in the 5m bar: 0 21 percent, 1 28, 2 21, 3 16, 4 15. Previous close alone keeps 1864 (+222bp) and loses 243 (+361bp). Minute 3 adds back 14 (194 touched before minute 3, 35 score below); minute 4 adds 8 (222 touched before, 13 below). Last five months: previous close keeps 385/450, minute 3 adds 4. The leaked edge comes with the touch itself.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-partial-bar-score-20261027-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
   - experiment_id: exp-monday-limit-score-leak-audit-20261027-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 8cee0529d6
