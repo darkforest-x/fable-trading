@@ -175,7 +175,8 @@ def load_symbol(args):
     known = pd.to_datetime(o.entry_time, utc=True) if 'entry_time' in o else pd.Series(pd.NaT, index=d.index, dtype='datetime64[ns, UTC]')
     if (known.notna() & (known != close_t)).any():
         issues.append('limit entry_time differs from the fill bar close')
-    d['entry_t'] = known.where(known.notna(), close_t)
+    d['entry_t'] = known.where(known.notna(), close_t).dt.as_unit('ns')
+    d['exit_t'] = d.exit_t.dt.as_unit('ns')
     h, lo = f.high.to_numpy(), f.low.to_numpy()
     mae = []
     for a, b, s, e, v in zip(d.entry_i.astype(int), d.exit_i.astype(int), d.side, d.entry, d.variant):
@@ -239,7 +240,8 @@ def summarize(config, workers):
             'last5m': lambda x: x.entry_t >= window}
     res['plans'] = {}
     for name, x in plans.items():
-        x = x.assign(entry_ns=x.entry_t.astype('int64'), exit_ns=x.exit_t.astype('int64'))
+        # One unit for both clocks: a mixed ns/us concat orders exits before their entries.
+        x = x.assign(entry_ns=x.entry_t.dt.as_unit('ns').astype('int64'), exit_ns=x.exit_t.dt.as_unit('ns').astype('int64'))
         res['plans'][name] = {}
         for per, within in pers.items():
             y = x[within(x)].reset_index(drop=True)
