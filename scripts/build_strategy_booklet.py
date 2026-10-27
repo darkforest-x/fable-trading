@@ -31,6 +31,7 @@ def build():
     exits, exits_src = source('reclaim-allexits-20261025-v1')
     spike, spike_src = source('spike-hw-20261026-v1')
     allin, allin_src = source('langlang-20261027-v1')
+    controls, controls_src = source('spike-controls-20261027-v1')
     accounts = {}
     headers = ['区间', '样本数', '胜率 %', '平均净收益 bp']
     for track, variant in [('v3', 'v3_be17'), ('v3lock', 'v3_be50')]:
@@ -116,10 +117,21 @@ def build():
     accounts['spike']['images'] += [dict(file='spike-floating-loss.png',caption='确认前最大浮亏分布 · 赢单与非赢单对比。'),dict(file='spike-frequency.png',caption='月度、单日与累计开单频率 · 满仓跳过前的219笔候选成交。')]
     accounts['spike']['sources'][0]['selection'] += '; 3_floating_loss.png; 4_frequency.png'
     accounts['spike']['charts'] = [dict(title='分区间胜率 · 历史BE0',unit='%',labels=LABELS,values=[spike['periods'][p]['win_pct'] for p in PERIODS]),dict(title='分区间最大已实现回撤',unit='%',labels=LABELS,values=[sized[p]['max_drawdown_pct'] for p in PERIODS])]
+    control = controls['score_ge06_order_ge3']
+    accounts['spike']['controls'] = dict(
+        note='同币、纽约周、方向与波动桶匹配随机对照：原始60m近侧目标、无兜底、仅O-H-L-C路径，并非上方18%兜底策略的完整对照。排列分≥3的全期超额均值95%区间跨0，2025–2026也未显示稳健超额；高胜率本身不能证明入场优势。',
+        headers=['区间','配对数','信号均值 bp','随机均值 bp','超额95%区间 bp','Bootstrap P(差值≤0)'],
+        rows=[[label, control[k]['n'], control[k]['signal_mean_bp'], control[k]['control_mean_bp'], ' ~ '.join(f'{v:.2f}' for v in control[k]['diff_ci95']),control[k]['p_le0']] for k,label in [('y2020_2024','2020–2024'),('y2025_2026','2025–2026'),('all','全期')]])
+    accounts['spike']['sources'].append({**controls_src,'selection':'results.score_ge06_order_ge3; original no-backstop baseline only'})
+    for track in ['60','5']:
+        accounts[track]['images'][0]['caption'] += ' 原图未按后续异常K线剔除重绘，仅作早期历史记录。' if track=='60' else ''
+    accounts['5']['note'] += ' 本组为早期结果，尚包含后续研究剔除的异常事件，不能作为当前收益依据。'
+    for track in ['v3','v3add','v3lock']:
+        accounts[track]['references'][0]['caption'] += ' 原图早于异常K线剔除修正，仅作研发历史记录。'
     data = dict(version=1, reviewed_on='2026-10-27', accounts=accounts,
         methodology='成交来自既有NautilusTrader回测，逐笔取O-H-L-C与O-L-H-C中较差路径。Maker单边2bp、Taker单边5bp，非目标退出另计10bp滑点；未纳入资金费率。1bp=0.01%。胜率按各原研究口径，不能跨表直接比较。评分训练截止2025年前；规则与参数也在这些历史数据上研究过，2025以后不等于完全独立的样本外验证。',
         integrity='2026-10-27发现旧slots回放重复计算初始资金。该类分仓资金倍数与排行不展示；本页只选不受影响的linear、spike小册slot_replay和allin path_run结果。曲线缺失时保留缺失状态，区间汇总只画柱状图。',
-        comparison='本页未提供同币×同时间×同波动桶的匹配随机对照，不能据此断言策略具备超额收益。排列分≥1仅是规则对照。',
+        comparison='spike章节提供原始无兜底基线的同币×纽约周×方向×波动桶匹配随机对照；不等同于全部当前账户的对照。排列分≥1仅是规则对照。其他参数版本尚无完整对应的随机对照，不能仅凭绝对收益宣称超额优势。',
         period_note='2026与近5个月均截至原数据末端2026年9月；近5个月与2026重叠。各独立本金回放区间从1000 USDT重启，不可拼接成连续资金曲线。')
     (OUT/'research.json').write_text(json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)+'\n')
     src = ROOT/'experiments/active/exp-monday-limit-spike-hw-20261026-v1'
