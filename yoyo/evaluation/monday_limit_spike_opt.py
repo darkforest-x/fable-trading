@@ -84,8 +84,9 @@ def simulate(t, lev, slots, extract=True, resize=True, mmr=1., seed=0):
                          np.c_[t.entry_ns, np.ones(len(t)), np.arange(len(t))]])
     ev = ev[np.lexsort((ev[:, 1], ev[:, 0]))]
     liq = 100./lev-mmr
-    reserve, base = 1000.*(slots-1)/slots, 1000./slots
-    bal = [base]*slots; busy = [None]*slots; margin = {}
+    # Starting capital is 1000 USDT in the reserve with empty slots (fixed 2026-10-27, see monday_limit_v3_slots).
+    reserve, base = 1000., 1000./slots
+    bal = [0.]*slots; busy = [None]*slots; margin = {}
     last_reset, peak, dd, nliq, skipped, taken, wins = 1000., 1000., 0., 0, 0, 0, 0
     net, mae = t.net.to_numpy()/1e4, t.mae_pct.to_numpy()
     for ts, kind, j in ev:

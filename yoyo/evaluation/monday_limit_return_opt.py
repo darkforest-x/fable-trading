@@ -10,7 +10,12 @@ bars as in monday_limit_spike_opt.legs. Sizing families on realized equity:
   linear    margin = min(0.05 * (score - cut) / mean_excess, 0.5) * equity (x2 with tilt, cap 0.5), total margin <= equity,
             notional = margin x leverage, a position whose MAE reaches 100/leverage - 1 percent loses its margin;
   slots     monday_limit_spike_opt.simulate (N slots, leverage L, profits above 2x a slot to the reserve, resize on
-            doubling), with tilt ignored.
+            doubling), with tilt ignored;
+  frac      (v2, owner 2026-10-27) margin = realized equity / N per fill at leverage L, at most N open and margin in
+            use <= equity, liquidation as in linear: every fill compounds, no idle reserve.
+v1 ran before the slot simulator's starting-capital fix of 2026-10-27 (it started at 1000 * (2N-1)/N), so its slot
+multiples are about 2x too high; v2 reruns everything on the fixed simulator and adds frac. Periods in
+report_periods are reported but take no part in the selection.
 Selection: best 2020-2024 multiple with drawdown <= 40 percent there, then 2025 / 2026 / last five months as the check;
 also every setting whose drawdown stays <= 40 percent in all four periods, ranked by the geometric mean multiple
 (in-sample). Medians over TIES random orders of same-time fills.
@@ -59,6 +64,35 @@ def linear(t, k, lev, seed):
     return dict(final_multiple=eq/1000, max_drawdown_pct=100*dd, liquidations=int(nliq), taken=taken, win_pct=100*wins/max(taken, 1))
 
 
+def frac(t, n, lev, seed):
+    """Margin = realized equity / n per fill, at most n open, margin in use <= equity; liquidation as in linear."""
+    rng = np.random.default_rng(seed)
+    t = t.iloc[np.lexsort((rng.random(len(t)), t.entry_ns.to_numpy()))].reset_index(drop=True)
+    ev = np.concatenate([np.c_[t.exit_ns, np.where(t.exit_ns == t.entry_ns, 2, 0), np.arange(len(t))],
+                         np.c_[t.entry_ns, np.ones(len(t)), np.arange(len(t))]])
+    ev = ev[np.lexsort((ev[:, 1], ev[:, 0]))]
+    liq = 100./lev-1. if lev > 1 else 1e9
+    eq, peak, dd, used, nliq, wins, taken, skipped = 1000., 1000., 0., 0., 0, 0, 0, 0
+    margin = {}
+    net, mae = t.net.to_numpy()/1e4, t.mae_pct.to_numpy()
+    for ts, kind, j in ev:
+        j = int(j)
+        if kind == 1:
+            m = eq/n
+            if len(margin) >= n or m <= 0 or eq-used < m-1e-9:
+                skipped += 1; continue
+            margin[j] = m; used += m; taken += 1
+        elif j in margin:
+            m = margin.pop(j); used -= m
+            pnl = -m if mae[j] >= liq else max(-m, m*lev*net[j])
+            nliq += mae[j] >= liq; wins += pnl > 0
+            eq += pnl; peak = max(peak, eq); dd = max(dd, 1-eq/peak)
+            if eq <= 1e-6:
+                return dict(final_multiple=0., max_drawdown_pct=100., liquidations=nliq, skipped=skipped, taken=taken, win_pct=100*wins/max(taken, 1))
+    return dict(final_multiple=eq/1000, max_drawdown_pct=100*dd, liquidations=int(nliq), skipped=skipped, taken=taken,
+                win_pct=100*wins/max(taken, 1))
+
+
 def run(config):
     exp = config.resolve().parent
     for p in ('yoyo/evaluation/monday_limit_return_opt.py', str(config.resolve().relative_to(ROOT))):
@@ -80,6 +114,7 @@ def run(config):
     window = pd.Timestamp(json.loads((A/'exp-monday-limit-reclaim-recent-20261025-v1/summary.json').read_text())['results']['window'][0])
     pers = {'y2020_2024': lambda x: x.entry_t < B[0], 'y2025': lambda x: (x.entry_t >= B[0]) & (x.entry_t < B[1]),
             'y2026': lambda x: x.entry_t >= B[1], 'last5m': lambda x: x.entry_t >= window}
+    extra = {k: (lambda x, s=pd.Timestamp(v, tz='UTC'): x.entry_t >= s) for k, v in cfg.get('report_periods', {}).items()}
     plans = {'v3': t[t.variant == 'v3_be17'], 'v3add': t[t.variant.isin(['v3_be0', 'v3_add5'])]}
     res = dict(rows={k: int(len(v)) for k, v in plans.items()}, mae_q={}, settings={})
     for name, x in plans.items():
@@ -92,16 +127,19 @@ def run(config):
         for n in cfg['slots']:
             for L in cfg['slot_leverage']:
                 grid.append((name, False, 'slots', n, L))
+        for n in cfg.get('frac_slots', []):
+            for L in cfg.get('frac_leverage', []):
+                grid.append((name, False, 'frac', n, L))
     for name, tilt, fam, n, L in grid:
         key = f"{name}{'_tilt' if tilt else ''}|{fam}|{'' if n is None else f'N{n}|'}L{L}"
         res['settings'][key] = {}
-        for per, f in pers.items():
+        for per, f in {**pers, **extra}.items():
             x = plans[name][f(plans[name])].reset_index(drop=True)
             k = np.minimum(cfg['fraction']*(x.score.to_numpy()-cut)/mexcess, cfg['cap'])
             if tilt:
                 k = np.where((x.order > 0).to_numpy(), np.minimum(2*k, cfg['cap']), k)
-            reps = [linear(x, k, L, cfg['seed']+r) if fam == 'linear' else so.simulate(x, L, n, True, True, seed=cfg['seed']+r)
-                    for r in range(cfg['ties'])]
+            reps = [linear(x, k, L, cfg['seed']+r) if fam == 'linear' else frac(x, n, L, cfg['seed']+r) if fam == 'frac'
+                    else so.simulate(x, L, n, True, True, seed=cfg['seed']+r) for r in range(cfg['ties'])]
             res['settings'][key][per] = {kk: float(np.median([r[kk] for r in reps])) for kk in reps[0]}
     S = res['settings']
     ok = [k for k in S if S[k]['y2020_2024']['max_drawdown_pct'] <= cfg['max_dd']]
@@ -124,6 +162,12 @@ def run(config):
     print('== dd <= 40 in all periods (in-sample)')
     for r in res['dd_ok_all_periods']:
         print(f"{r['setting']:28s} g{r['gmean']:.2f}", fmt(r))
+    if extra:
+        print('== owner comparison, plus ' + ', '.join(extra))
+        for k in cfg.get('compare', []):
+            if k in S:
+                print(f"{k:28s}", fmt(S[k]), '||', ' | '.join(f"{p} x{S[k][p]['final_multiple']:.2f} dd{S[k][p]['max_drawdown_pct']:.0f}"
+                                                              + (f" skip{S[k][p]['skipped']:.0f}" if 'skipped' in S[k][p] else '') for p in extra))
 
 
 if __name__ == '__main__':

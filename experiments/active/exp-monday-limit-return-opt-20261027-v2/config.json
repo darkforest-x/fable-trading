@@ -1,0 +1,62 @@
+{
+  "experiment_id": "exp-monday-limit-return-opt-20261027-v2",
+  "question": "Owner 2026-10-27: fix the slot simulator's starting capital and formally rerun the return-first comparison; add margin = realized equity / N per fill (frac) and compare frac N20 3x with fixed 20 slots 3x and the v3 paper sizing (v3 linear 1x) in one table.",
+  "trades": "experiments/active/exp-monday-limit-time-news-20261026-v1/trades.csv.gz",
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "plans": {
+    "v3": "v3_be17 fills",
+    "v3add": "v3_be0 plus -5 percent add legs for score >= 0.6",
+    "tilt": "margin x2 when EMA order score > 0"
+  },
+  "fraction": 0.05,
+  "cap": 0.5,
+  "linear_leverage": [
+    1,
+    2,
+    3,
+    5
+  ],
+  "slots": [
+    5,
+    10,
+    20
+  ],
+  "slot_leverage": [
+    2,
+    3,
+    5
+  ],
+  "max_dd": 40,
+  "top": 15,
+  "ties": 10,
+  "seed": 20261103,
+  "in_sample": "Tilt, scale-in and v3 thresholds were chosen on the same history; settings are picked on 2020-2024 and checked on 2025, 2026 and the last five months. frac was proposed after seeing the same history.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "frac_slots": [
+    10,
+    20,
+    30
+  ],
+  "frac_leverage": [
+    2,
+    3,
+    5
+  ],
+  "report_periods": {
+    "from_2020": "2020-01-01"
+  },
+  "compare": [
+    "v3add|frac|N20|L3",
+    "v3add|slots|N20|L3",
+    "v3|linear|L1",
+    "v3|frac|N20|L3",
+    "v3add|linear|L1",
+    "v3|slots|N20|L3",
+    "v3add|frac|N30|L3",
+    "v3add|frac|N10|L3"
+  ],
+  "acceptance": "frac N20 3x holds if its drawdown stays <= 40 percent in each of the four periods and its multiples beat both fixed 20 slots 3x and v3 linear 1x in at least three of the four periods and from 2020.",
+  "control": "Sizing comparison on identical framework fills: entries and exits do not change, so a random-entry control does not apply here; the null is the same fills under the other sizing rules. Entry-level random controls are in the reclaim review and v3 experiments.",
+  "supersedes": "exp-monday-limit-return-opt-20261027-v1 (slot multiples about 2x too high, simulator started at 1000 * (2N-1)/N)"
+}
