@@ -1,3 +1,16 @@
+## 2026-10-27 · Return-first v2 on the fixed simulator; eighth paper account v3add20
+
+- `exp-monday-limit-return-opt-20261027-v2` (builder 9a781c29d1) reruns v1 on the fixed slot simulator and adds `frac`: margin = realized equity / N per fill, at most N open, margin in use ≤ equity. In sample, same fills:
+  - v3add frac 20 × 3x: 11.62 / 8.26 / 3.42 / 4.41x (2020-24 / 2025 / 2026 / last 5 months), DD 15 / 18 / 35 / 13; 312x from 2020 with DD 35.
+  - Fixed 20 slots × 3x: 6.33 / 4.83 / 2.70 / 3.15x; 76x from 2020 with DD 23.
+  - v3 linear 1x (the v3 paper sizing): 3.86 / 9.31 / 2.47 / 2.95x; 86x from 2020 with DD 35.
+  - The acceptance set in the config holds. frac beats both in every period except 2025 against linear.
+  - v3add linear 1x (the v3add paper sizing): 200x from 2020, but DD 50 in 2026.
+  - Highest geometric mean under DD 40 is v3add frac 30 × 5x, but it has 24-50 liquidations per period; not adopted.
+- Paper account `v3add20` (commit 3ee9bf910e; tracks 6060, add legs 6061; 1000 USDT) runs the v3add rule. Each leg posts realized equity / 20 at 3x, with at most 20 funded legs and margin in use ≤ equity. The loss is capped at the margin. A parent with no slot or margin is a shadow row (`no_slot` / `no_capacity`); such an add is cancelled (`add_no_slot` / `add_no_capacity`). Snapshot top-level `v3add20` holds the config; analytics accepts `track=v3add20`. Breakeven +0.17 percent as in the other paper accounts (the backtest v3add used breakeven at entry).
+- Monitor restarted once (PID 93318); only the paper file had changed. Paper worker alive, queue 0, no error; v3add20 1000 USDT with no trades; the other seven accounts are unchanged. Scan 2008/2008 without errors, market_ready true, model_ready false as before; fib stream connected; patrol PID 1266 running.
+- Web UI does not show v3add20, allin3 or v3lock yet (Codex + Stitch). The close sheet should use leverage 3 for the margin-loss cap, as for spike.
+
 ## 2026-10-27 · Minimal home order ticket, default manual paper account
 
 - The homepage 1.618 manual ticket now defaults to the uniquely named 梭哈账户, resolved to its actual account ID. This is the manual paper desk, separate from the automated allin3 track. Other quick-ticket callers retain the API default. Missing/ambiguous names require explicit selection; switching accounts invalidates the old quote. Pending receipts keep their original account and symbol instead of taking the new default.
@@ -15,7 +28,7 @@
 - Affected: `exp-monday-limit-v3-slots-*`, `exp-monday-limit-spike-opt-*`, `exp-monday-limit-spike-more-*`, `exp-monday-limit-return-opt-20261027-v1` and the slot rows of `exp-monday-limit-be-lock-compare-20261027-v1`. Comparisons between variants made on the same simulator keep their direction, but the absolute multiples and any ranking against linear or all-in sizing do not hold.
 - With the correction, v3add 20 × 3x (76x from 2020, max DD 23 percent) no longer beats v3 linear 1x (86x, max DD 35 percent); their geometric means over the four periods are about equal (4.0).
 - Not affected: linear sizing, the spike-HW booklet `slot_replay` (equity / slots), Langlang / all-in `path_run`, and every paper account.
-- Builders not fixed yet; affected results not yet rerun.
+- Fixed in 9a781c29d1 (both simulators; regression tests in `tests/evaluation/test_monday_slot_simulators.py`). The return-first comparison was rerun as `exp-monday-limit-return-opt-20261027-v2`. The other slot studies are flagged in the registry and not rerun.
 
 ## 2026-10-27 · Web integration: v3lock and allin3
 
