@@ -1,3 +1,14 @@
+## 2026-10-27 · Warning: slot-sizing results are overstated about 2x (starting-capital error)
+
+- `simulate` in `yoyo/evaluation/monday_limit_v3_slots.py` and `monday_limit_spike_opt.py` starts with `reserve = 1000*(N-1)/N` and `bal = [1000/N]*N`. The account therefore starts with 1000 × (2N-1)/N (1950 USDT at N = 20, 1900 at N = 10) but reports `total / 1000`. The first doubling resize also fires almost at once.
+- A read-only check on cached fills put every slot USDT in one 1000 USDT pool, with slots starting empty. Committed vs corrected (10 tie orders, median):
+  - v3add 20 × 3x: 12.62 / 9.29 / 5.43 / 6.19x became 6.33 / 4.83 / 2.70 / 3.15x (2020-24 / 2025 / 2026 / last 5 months). Run continuously from 2020 it is 76x, not 152x. Drawdowns are about the same.
+  - v3 20 × 3x: 9.08 / 6.69 / 4.02 / 4.07x became 5.39 / 3.48 / 2.01 / 2.12x.
+- Affected: `exp-monday-limit-v3-slots-*`, `exp-monday-limit-spike-opt-*`, `exp-monday-limit-spike-more-*`, `exp-monday-limit-return-opt-20261027-v1` and the slot rows of `exp-monday-limit-be-lock-compare-20261027-v1`. Comparisons between variants made on the same simulator keep their direction, but the absolute multiples and any ranking against linear or all-in sizing do not hold.
+- With the correction, v3add 20 × 3x (76x from 2020, max DD 23 percent) no longer beats v3 linear 1x (86x, max DD 35 percent); their geometric means over the four periods are about equal (4.0).
+- Not affected: linear sizing, the spike-HW booklet `slot_replay` (equity / slots), Langlang / all-in `path_run`, and every paper account.
+- Builders not fixed yet; affected results not yet rerun.
+
 ## 2026-10-27 · Web integration: v3lock and allin3
 
 - Seven accounts are selectable on the homepage and analytics: 60m, 5m, v3, v3add, spike, v3lock and allin3. Cold links, ledger scopes, internal analytics IDs (4060/5060), targets and close-dialog identities stay account-specific. Missing accounts remain unavailable. v3lock uses its own 50 bp offset and stored long/short protection price; original v3 and allin3 retain 17 bp.
