@@ -91,7 +91,7 @@ test('current open trade wins over newer closed trades while empty holdings keep
 test('compact ribbon removes visible direction and score labels while retaining accessible context',()=>{
  const item=coin('POPMART',{touches:{lower:{source:'live',observed_ms:1000,candle_ms:1000}}});
  const html=ui.recentHTML(item,'',{scored:true,text:'0.0000',title:'入场评分 0 · 不是胜率'}),text=html.replace(/<[^>]*>/g,'');
- assert.match(text,/POPMART0.0000/);assert.doesNotMatch(text,/上沿|下沿|分/);assert.match(html,/下沿 1.618/);assert.match(html,/aria-label="入场评分 0 · 不是胜率"/);
+ assert.match(text,/POPMART0.0000/);assert.doesNotMatch(text,/上沿|下沿|分|\d{2}:\d{2}/);assert.match(html,/下沿 1.618/);assert.match(html,/aria-label="入场评分 0 · 不是胜率"/);
  const missing=ui.recentHTML(item,'',{text:'评分失败',title:'评分失败'});
  assert.match(missing,/aria-label="评分失败">—/);assert.doesNotMatch(missing.replace(/<[^>]*>/g,''),/评分失败|0.0000/);
 });

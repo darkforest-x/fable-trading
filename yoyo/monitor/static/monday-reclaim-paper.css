@@ -302,15 +302,14 @@ body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-headi
 #monday-reclaim-paper .rp-recent-scroll.is-dragging {cursor:grabbing;scroll-behavior:auto;}
 #monday-reclaim-paper .rp-recent-scroll.is-dragging button {transform:none;cursor:grabbing;}
 #monday-reclaim-paper .rp-recent-scroll::-webkit-scrollbar {display:none;}
-#monday-reclaim-paper .rp-recent-chip {display:flex;align-items:center;gap:4px;flex:none;width:104px;min-width:104px;max-width:104px;padding:3px 6px;text-align:left;border-radius:22px;}
+#monday-reclaim-paper .rp-recent-chip {display:flex;align-items:center;gap:4px;flex:none;width:auto;min-width:76px;max-width:94px;padding:3px 6px;text-align:left;border-radius:22px;}
 #monday-reclaim-paper :is(.rp-recent-chip,.rp-pinned-chip) .rp-avatar {flex:none;width:20px;height:20px;font-size:10px;}
 #monday-reclaim-paper .rp-recent-chip .rp-avatar {width:18px;height:18px;}
 #monday-reclaim-paper .rp-recent-chip>span:last-child {min-width:0;flex:1;}
-#monday-reclaim-paper .rp-recent-meta {display:flex;align-items:baseline;justify-content:space-between;gap:3px;}
+#monday-reclaim-paper .rp-recent-meta {display:block;}
 #monday-reclaim-paper .rp-recent-score {font-style:normal;font-size:9px;font-variant-numeric:tabular-nums;color:var(--rp-muted,#718494);white-space:nowrap;}
 #monday-reclaim-paper .rp-recent-score.is-high {color:var(--rp-blue,#0071e3);font-weight:600;}
 #monday-reclaim-paper .rp-recent-chip b {display:block;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-#monday-reclaim-paper .rp-recent-chip small {display:block;font-size:9px;white-space:nowrap;}
 #monday-reclaim-paper .rp-recent-empty {padding:0 8px;line-height:44px;font-size:10px;color:var(--rp-muted,#718494);white-space:nowrap;}
 #monday-reclaim-paper .rp-pinned {display:flex;flex:none;align-items:center;gap:2px;border-left:1px solid var(--rp-edge,#8da2b42b);padding-left:5px;}
 #monday-reclaim-paper .rp-pinned-chip {display:flex;align-items:center;justify-content:center;gap:5px;padding:4px 7px;border-radius:22px;font-size:10px;}

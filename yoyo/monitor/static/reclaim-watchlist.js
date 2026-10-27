@@ -40,7 +40,7 @@
   }
   function recentHTML(item,selected,score={text:'暂无评分',title:'暂无评分',high:false}){
     const event=latestTouch(item),stamp=touchTime(event),coin=base(item.symbol);
-    return `<button type="button" class="rp-recent-chip" data-symbol="${esc(item.symbol)}" data-watch-select="${esc(item.symbol)}" aria-pressed="${item.symbol===selected}" title="${esc(coin)} · ${touchLabel(event?.side)} 1.618 · ${stamp?date.format(stamp)+' 北京':'时间待核对'} · ${esc(score.title)}">${avatar(coin)}<span><b>${esc(coin)}</b><span class="rp-recent-meta"><em data-scored="${!!score.scored}" class="rp-recent-score${score.high?' is-high':''}" aria-label="${esc(score.title)}">${score.scored?esc(score.text):'—'}</em><small class="${touchTone(event?.side)}">${stamp?date.format(stamp).slice(-5):'—'}</small></span></span></button>`;
+    return `<button type="button" class="rp-recent-chip" data-symbol="${esc(item.symbol)}" data-watch-select="${esc(item.symbol)}" aria-pressed="${item.symbol===selected}" title="${esc(coin)} · ${touchLabel(event?.side)} 1.618 · ${stamp?date.format(stamp)+' 北京':'时间待核对'} · ${esc(score.title)}">${avatar(coin)}<span><b>${esc(coin)}</b><span class="rp-recent-meta"><em data-scored="${!!score.scored}" class="rp-recent-score${score.high?' is-high':''}" aria-label="${esc(score.title)}">${score.scored?esc(score.text):'—'}</em></span></span></button>`;
   }
   function pinnedHTML(selected){
     return PINNED.map(symbol=>`<button type="button" class="rp-pinned-chip" data-symbol="${symbol}" data-watch-select="${symbol}" aria-pressed="${symbol===selected}" aria-label="查看 ${base(symbol)} K 线">${avatar(base(symbol))}<b>${base(symbol)}</b></button>`).join('');

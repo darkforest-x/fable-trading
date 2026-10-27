@@ -1,3 +1,9 @@
+## 2026-10-27 · Remove visible ribbon timestamps
+
+- Owner requested one more reduction: recent coin chips now show only the ticker and exact numeric score. Timestamps remain in the native tooltip, with no visible time column. Width is content-based 76–94px, down from 104px, while tap height stays at least44px. Existing account linkage and fixed shortcuts are unchanged.
+- Reused the owner's already-loaded Stitch canvas. GEMINI_3_8_FLASH edit of1452f40e63a04f53b6b5e635ad78079c returned48f7cd3b238047f0bc613828155e30c7 without timeout; retrieved design image/code before implementation. Sources: docs/design/stitch-20261027-ribbon-no-time/.
+- Validation:17 watchlist tests and23 public-browser checks each in Chrome/iPhone-sized WebKit passed. Verified both themes,1440/1024/390/320 widths, no visible time/direction/score labels, intact four-decimal scores, tooltip time,44px tap targets, no overflow, coin navigation, and no page exceptions/API writes. Evidence: output/playwright/ribbon-no-time-20261027/. Task QA sessions closed and owned processes checked; owner's Stitch tab remains intact. No backend restart or trading mutation; service/patrol health retained in final-service-check.json.
+
 ## 2026-10-27 · Compact coin ribbon and current-holding account linkage
 
 - Recent coin chips are 104px wide (previously 146px): ticker above the numeric model score and colored time. Removed visible upper/lower labels and the score prefix. Missing scores use a dash with the original reason in accessible context; exact occurrence joins, four decimals, true zero and pinned BTC/ETH/XAU remain intact.
