@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp-monday-limit-strategies-causal-20261027-v1",
+  "question": "Owner 2026-10-27: rerun the paper strategies v3add20, spike and allin3 the way they can run live (resting on the previous 5m close score), with the frozen model and with the causal refit, against the leaky backtests they were built on.",
+  "single_variable": "Entry score source per strategy: leaky (touch bar) / frozen model on the bar before the touch / causal refit on the bar before the touch; each strategy's exits, stops, sizing, fees and slippage unchanged.",
+  "frozen_scores": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+  "refit_scores": "experiments/active/exp-monday-limit-score-causal-refit-20261027-v1/scores_refit.csv.gz",
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "layered_runs": {"frozen": "exp-monday-limit-layered-20261027-v1", "refit": "exp-monday-limit-layered-refit-20261027-v1"},
+  "leaky_runs": {"v3": "exp-monday-limit-be-scalein-20261026-v1", "spike": "exp-monday-limit-v3-grid-20261025-v1"},
+  "since_week": "2019-12-30",
+  "cut": 0.5,
+  "hi": 0.6,
+  "add_pct": 5,
+  "min_order": 3,
+  "breakeven": "at the level (offset 0) for all strategies; the paper accounts use +0.17 percent, which the spike study found changes nothing beyond tie noise",
+  "fees": "Codex config maker 0.02 / taker 0.05 percent (OKX Lv1, read 2026-10-23); 10bp slippage on non-target exits",
+  "sizing": {
+    "v3add20": "monday_limit_return_opt.frac N20 3x, seeds and ties from exp-monday-limit-return-opt-20261027-v2",
+    "spike": "monday_limit_spike_hw.slot_replay 10 slots 5x liq 19, seeds and ties from exp-monday-limit-spike-hw-20261026-v1",
+    "allin3": "monday_limit_langlang.path_run allin 3x, monthly starts 2023-01 to 2026-08, seeds and ties from the pyramid comparison"
+  },
+  "out_of_sample": "refit only from 2026-01-01; every score threshold and strategy filter was chosen in sample",
+  "training_eligible": false,
+  "production_eligible": false
+}

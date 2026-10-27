@@ -730,6 +730,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
+  - experiment_id: exp-monday-limit-strategies-causal-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: running
+    question: 'Owner 2026-10-27: rerun the paper strategies v3add20, spike and allin3 as they can run live (resting on the previous 5m close score), with the frozen model and with the causal refit, against their leaky backtests.'
+    single_variable: 'Entry score source (leaky / frozen causal / refit causal); exits, stops, sizing, fees and slippage of each strategy unchanged.'
+    result: pending
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-strategies-causal-20261027-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'NautilusTrader native runs of v3 parents, 5 percent add legs and spike orders (near edge, P18) for events with either causal score >= 0.6; v3 0.5-0.6 rows from the layered runs.'
   - experiment_id: exp-monday-limit-score-causal-refit-20261027-v1
     source_repo: darkforest-x/fable-trading
     source_commit: pending
