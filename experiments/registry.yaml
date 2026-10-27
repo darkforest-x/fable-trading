@@ -14609,3 +14609,14 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: Eight historical event ledgers and static tear-sheet datasets exported. Original first seed, source costs and historical protection/liquidation assumptions retained; allin cash additions separate from P&L. Event cash reconciliation error below 6e-11; 5m ending capital and drawdown match the original saved result. No synthetic path from independent period endpoints. Historical versions and v3add child-sizing differences are labeled; no new native fill replay or parameter selection. Manifest and chart-index record sources; raw ledgers and fill caches remain in the registered local output directory.
+
+  - experiment_id: exp-paper-2026-trade-charts-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    status: completed
+    question: Owner requested 2026 v3lock and spike backtest counts, wins, returns and every annotated trade chart, zipped to the configured Telegram group.
+    single_variable: None; reuse saved native fills, annual summaries and continuous capital ledgers, no trading replay or parameter changes.
+    canonical_report: experiments/active/exp-paper-2026-trade-charts-20261027-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: All 829 v3lock and 85 spike 2026-entry signals, plus 6 funded v3lock carryover exits. Candidate versus funded counts and annual-restart medians versus continuous paths remain separate. Original maker2bp/taker5bp plus non-target10bp slippage retained. Spike historical BE0 differs from current17bp. Chart markers use native source bar indices, not close-timestamp lookup. All 920 PNGs and five ZIP CRCs verified; five Telegram document acknowledgements cover all images. Initial part2 connection failure reconciled in the native channel before one successful retry; no duplicate file. Delivery acknowledgement is retained locally.

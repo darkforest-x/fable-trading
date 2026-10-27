@@ -1,0 +1,81 @@
+{
+  "accounts": {
+    "v3lock": {
+      "candidates": 829,
+      "wins_net_gt_1bp": 550,
+      "flat_abs_net_le_1bp": 2,
+      "losses_net_lt_minus_1bp": 277,
+      "win_pct": 66.34499396863691,
+      "mean_net_pct": 1.5235612193993184,
+      "first_entry": "2026-01-01 07:45:00+00:00",
+      "last_exit": "2026-09-23 04:00:00+00:00",
+      "period_restart_medians": {
+        "final_multiple": 2.5970992150510592,
+        "max_drawdown_pct": 33.42802198761362,
+        "liquidations": 0.0,
+        "taken": 657.0,
+        "win_pct": 64.9923896499239
+      },
+      "period_restart_return_pct": 159.7099215051059,
+      "continuous_path": {
+        "funded_entries": 653,
+        "wins": 422,
+        "win_pct": 64.62480857580398,
+        "entry_cohort_pnl": 57533.61080568272,
+        "carryover_exits": 6,
+        "carryover_pnl": 448.0188456251781,
+        "realized_start_equity": 33892.244242823166,
+        "realized_end_equity": 91873.87389413104,
+        "realized_year_pnl": 57981.6296513079,
+        "return_pct": 171.07639504747684,
+        "realized_max_drawdown_pct": 32.02929587861413
+      },
+      "same_bar_exits": 69,
+      "account_note": "历史Binance成交；评分线性分配，总保证金≤净值，1倍；固定原研究首个随机种子，非10次中位数。保护偏移与当前账户相同。"
+    },
+    "spike": {
+      "candidates": 85,
+      "wins_net_gt_1bp": 72,
+      "flat_abs_net_le_1bp": 0,
+      "losses_net_lt_minus_1bp": 13,
+      "win_pct": 84.70588235294117,
+      "mean_net_pct": 2.318012919996983,
+      "first_entry": "2026-01-10 17:25:00+00:00",
+      "last_exit": "2026-09-17 17:30:00+00:00",
+      "period_restart_medians": {
+        "final_multiple": 1.8385606111195536,
+        "max_drawdown_pct": 11.923650252364748,
+        "liquidations": 1.0,
+        "skipped": 27.0,
+        "taken": 58.0,
+        "win_pct": 84.48275862068965
+      },
+      "period_restart_return_pct": 83.85606111195536,
+      "continuous_path": {
+        "funded_entries": 58,
+        "wins": 49,
+        "win_pct": 84.48275862068965,
+        "entry_cohort_pnl": 2581.3975415576356,
+        "carryover_exits": 0,
+        "carryover_pnl": 0.0,
+        "realized_start_equity": 2450.701249942227,
+        "realized_end_equity": 5032.09879149986,
+        "realized_year_pnl": 2581.3975415576356,
+        "return_pct": 105.3330160752351,
+        "realized_max_drawdown_pct": 11.923650252364748
+      },
+      "same_bar_exits": 65,
+      "account_note": "原高胜率研究：BE0、10份×5倍、19%浮亏强平情景；当前+0.17%且保证金封顶。固定原研究首个种子，不是20次中位数。"
+    }
+  },
+  "chart_count": 920,
+  "cost_basis": "Stored net: maker 2bp, taker 5bp; separate 10bp slippage on non-target exits. No funding.",
+  "time_basis": "2026 UTC entry cohort; six funded 2025 v3lock entries closed in 2026 are separate.",
+  "wins": "Original signal statistics: net > 1bp; |net| <= 1bp flat. Account wins: actual P&L > 0.",
+  "capital_basis": "Original annual restart medians over 10 v3lock / 20 spike tie orders; continuous original-first-seed path separately, never combined.",
+  "version_note": "Historical Binance universe. Spike BE0, not current +0.17%. In-sample; not live account results.",
+  "source_commit": "edd420268ef1231e79de7693dc7a01e540257514",
+  "training_eligible": false,
+  "production_eligible": false,
+  "matched_random_control": "Exact v3lock/spike year-and-exit-matched controls are not present in these saved results. This export describes history; it does not establish an edge or recommend promotion."
+}
