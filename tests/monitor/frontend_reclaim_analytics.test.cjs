@@ -30,10 +30,29 @@ test('breakdowns label tranche counts separately and escape unexpected symbols',
 });
 
 test('named accounts validate their exact internal analytics identity and reject another account',()=>{
- for(const [key,id] of [['v3','1060'],['v3add','2060'],['spike','3060']]){
+ for(const [key,id] of [['v3','1060'],['v3add','2060'],['spike','3060'],['v3lock','4060'],['allin3','5060']]){
   assert.equal(ui.validate({...data,track:id},key,0).track,id);
-  for(const wrong of ['60','5',key,key==='v3'?'2060':'1060'])assert.throws(()=>ui.validate({...data,track:wrong},key,0));
+  for(const wrong of ['60','5',key,...['1060','2060','3060','4060','5060'].filter(v=>v!==id)])assert.throws(()=>ui.validate({...data,track:wrong},key,0));
  }
  const html=ui.breakdownHTML({...data,by_reason:[{reason:'backstop',exit_count:1,realized_pnl:-30},{reason:'reclaimed_inside_be',exit_count:1,realized_pnl:-.07}]});
  assert.match(html,/兜底止损/);assert.match(html,/收回但未越过保本价/);
+});
+
+test('v3lock analytics identifies profit-lock exits without relabeling original v3 exits',()=>{
+ const d={...data,by_reason:[{reason:'breakeven',exit_count:1,realized_pnl:4.3},{reason:'reclaimed_inside_be',exit_count:1,realized_pnl:1}]};
+ assert.match(ui.breakdownHTML({...d,track:'4060'}),/利润锁止损/);
+ assert.match(ui.breakdownHTML({...d,track:'4060'}),/收回但未越过利润锁价/);
+ assert.match(ui.breakdownHTML({...d,track:'1060'}),/保本止损/);
+ assert.doesNotMatch(ui.breakdownHTML({...d,track:'1060'}),/利润锁/);
+});
+
+test('allin3 analytics labels refill cash separately and keeps the drawdown before a refill',()=>{
+ const d={...data,track:'5060',summary:{realized_pnl:-902.1,refilled:902.1,refill_count:1,exit_count:1},curve:[{time_ms:0,equity:1000,pnl:0},{time_ms:500,equity:97.9,pnl:-902.1},{time_ms:501,equity:1000,pnl:-902.1}]};
+ const html=ui.metricsHTML(d.summary,d.track);
+ assert.match(html,/补充本金/);assert.match(html,/补充次数/);assert.match(html,/本期净入账 USDT · 不计入交易盈亏/);
+ assert.doesNotMatch(ui.metricsHTML(d.summary,'1060'),/补充本金/);
+ assert.match(ui.curveNote(d),/补充本金 902.10 USDT（1 次）/);assert.match(ui.curveNote(d),/资金曲线包含补入资金/);
+ const o=ui.chartOptions(d);assert.deepEqual(o.series[0].data,[[0,1000],[500,97.9],[501,1000]]);
+ const tip=o.tooltip.formatter([{dataIndex:2}]);assert.match(tip,/1,000.00 USDT/);assert.match(tip,/-902.10 USDT/);
+ assert.doesNotMatch(ui.curveNote({...d,summary:{...d.summary,exit_count:0}}),/曲线保持不变/);
 });

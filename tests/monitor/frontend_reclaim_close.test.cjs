@@ -25,6 +25,16 @@ test('spike close preview honors the configured margin cap for each closed tranc
  assert.equal(estimate({...p,margin_leverage:null},100),null);
  assert.equal(estimate({...p,track:60},100).pnl,-37.5525);
 });
+test('allin3 close preview caps each tranche at its own configured 3x margin',()=>{
+ const p=position({track:5060,margin_leverage:3,notional:3000,remaining_notional:1500,mark:50});
+ assert.equal(estimate(p,100).pnl,-500);assert.equal(estimate(p,25).pnl,-125);
+ assert.equal(estimate({...p,mark:110},50).pnl,74.475);
+ assert.equal(estimate({...p,margin_leverage:5},100).pnl,-300);
+ assert.equal(estimate({...p,side:-1,mark:150},50).pnl,-250);
+ assert.equal(estimate({...p,mark:null},100).pnl,null);
+ for(const margin_leverage of [null,undefined,0,-1])assert.equal(estimate({...p,margin_leverage},100),null);
+ assert.equal(estimate({...p,track:4060},100).pnl,-751.05);
+});
 test('double-clicks share one POST and uncertain retries preserve request identity',async()=>{
  let resolve,seq=0;const calls=[];
  const client=createSubmitter({uuid:()=>String(++seq),send:(id,payload)=>{calls.push({id,payload});return new Promise(r=>resolve=r);}});

@@ -6,6 +6,8 @@
  * Compact ledger/scores: Stitch 77f940d44558444db5ef189e93e9dce0.
  * Four accounts/pending adds: Stitch 571f390de49b49fcbf11ae0c054d3c95.
  * Fifth account/order scores: Stitch f56301aa72694cb58f4450afb088c191.
+ * Sixth account/profit lock: Stitch 071103a8b81847049747df436aeec779.
+ * Seventh account/capital refills: Stitch b218f8c044f442c7bb5650a93a42d7f3.
  */
 (() => {
   'use strict';
@@ -22,11 +24,12 @@
   const validSymbol = value => /^[A-Z0-9]{1,32}-USDT-SWAP$/.test(String(value || ''));
   const base = value => validSymbol(value) ? value.slice(0,-10) : String(value || '未知合约');
   const funded = row => row.taken === 1 && finite(row.notional) && row.notional > 0;
-  const TRACKS = ['60','5','v3','v3add','spike'];
-  const trackLabel = key => ({60:'60m',5:'5m',v3:'v3',v3add:'v3add',spike:'spike'}[key] || '未知账户');
+  const TRACKS = ['60','5','v3','v3add','spike','v3lock','allin3'];
+  const trackLabel = key => ({60:'60m',5:'5m',v3:'v3',v3add:'v3add',spike:'spike',v3lock:'v3lock',allin3:'allin3'}[key] || '未知账户');
   const orderLabel = value => Number.isInteger(value) && value >= 0 && value <= 4 ? `排列 ${value}/4` : '排列 —';
   function targetLabel(row, track='60', config={min_score:.5,far_score:.6}) {
-    if (['v3','v3add'].includes(track) || [1060,2060,2061].includes(row.track)) {
+    if (track==='allin3' || row.track===5060) return '对侧 1.618';
+    if (['v3','v3add','v3lock'].includes(track) || [1060,2060,2061,4060].includes(row.track)) {
       if (!finite(row.score)) return '止盈目标';
       if (row.score >= config.far_score) return '对侧 1.618';
       if (row.score >= config.min_score) return '区间 0.618';
@@ -36,10 +39,10 @@
   const stopPrice = row => row.be_from_ms ? (finite(row.be_price)?row.be_price:row.entry) : row.backstop;
   const legLabel = row => row.parent_id ? `加仓 · 主单 #${row.parent_id}` : `主单 #${row.id}`;
   const sideLabel = row => row.side === 1 ? '做多' : row.side === -1 ? '做空' : '方向未知';
-  const reason = value => ({target:'到达目标',breakeven:'保本止损',backstop:'兜底止损',reclaimed_inside_be:'收回但未越过保本价',failed_reclaim:'确认未收回',manual:'手动平仓'}[value] || '未知退出原因');
+  const reason = (value,track) => ({target:'到达目标',breakeven:track===4060?'利润锁止损':'保本止损',backstop:'兜底止损',reclaimed_inside_be:track===4060?'收回但未越过利润锁价':'收回但未越过保本价',failed_reclaim:'确认未收回',manual:'手动平仓'}[value] || '未知退出原因');
   function stage(row, now) {
-    if (row.stage === 'closed') return reason(row.reason);
-    if (row.stage === 'breakeven') return finite(row.be_price)?'保本保护已启用':'入场价止损已启用';
+    if (row.stage === 'closed') return reason(row.reason,row.track);
+    if (row.stage === 'breakeven') return finite(row.be_price)?(row.track===4060?'利润锁保护已启用':'保本保护已启用'):'入场价止损已启用';
     if (row.stage === 'pending_confirm') return finite(row.decision_ms) && row.decision_ms <= now ? '等待确认结算' : '等待收盘确认';
     return '状态待核对';
   }
@@ -51,7 +54,7 @@
   }
   function allocation(row) {
     if (funded(row)) return '计入资金';
-    const label={no_capacity:'额度不足',no_slot:'仓位已满',order_missing:'排列分缺失'}[row.note]
+    const label={no_capacity:'额度不足',no_slot:'仓位已满',order_missing:'排列分缺失',busy:'已有资金仓位'}[row.note]
       || (/^order_[0-4]$/.test(row.note||'')?'排列分不足':'不计入资金');
     return `影子 · ${label}`;
   }
@@ -67,15 +70,23 @@
     if (data?.paper_only !== true || data?.strategy !== 'monday_1618_limit_reclaim_v2' || !finite(data.now_ms) || !records(data.signals)
       || !['60','5'].every(key => data.tracks?.[key])
       || !TRACKS.every(key => !data.tracks?.[key] || (records(data.tracks[key].open) && records(data.tracks[key].closed)
-        && (data.tracks[key].pending_adds === undefined || records(data.tracks[key].pending_adds))))) {
+        && (data.tracks[key].pending_adds === undefined || records(data.tracks[key].pending_adds))
+        && (key!=='allin3' || data.tracks[key].refills===undefined || finite(refillTotal(data.tracks[key].refills)))))) {
       throw Error('模拟盘返回格式不完整，请稍后重试');
     }
     return data;
   }
-  function summary(track) {
+  // Refill cash is distinct from the stake-budget denominator (start * stakes).
+  // Never infer complete realized P&L from the paginated closed-position list.
+  function refillTotal(refills) {
+    return Array.isArray(refills)&&refills.every(r=>r&&finite(r.equity_before)&&finite(r.equity_after))
+      ? refills.reduce((sum,r)=>sum+r.equity_after-r.equity_before,0) : null;
+  }
+  function summary(track, key=track?.rule) {
     const stats=track?.stats || {}, count=stats.taken_closed;
+    const added=key==='allin3'?refillTotal(track?.refills):0;
     return {equity:track?.equity,start:track?.start_equity,
-      pnl:finite(track?.equity) && finite(track?.start_equity) ? track.equity-track.start_equity : null,
+      pnl:finite(track?.equity) && finite(track?.start_equity) && finite(added) ? track.equity-track.start_equity-added : null,
       count,winRate:finite(count) && count>0 && finite(stats.wins) ? stats.wins/count*100 : null,
       wins:stats.wins,mean:stats.mean_net_bp};
   }
@@ -116,6 +127,20 @@
   }
   const cell=(label,value,cls='')=>`<span class="rp-cell ${cls}"><small>${esc(label)}</small><strong>${value}</strong></span>`;
   const detail=(label,value)=>`<div><dt>${esc(label)}</dt><dd>${value}</dd></div>`;
+  function capitalLabel(track) {
+    return `第 ${num(track?.stakes,0)} 份本金 · ${num(track?.multiple)}×`;
+  }
+  function capitalHTML(track) {
+    return cell('本金份数',`${num(track?.stakes,0)} 份`)+cell('累计本金（份额）',`${num(track?.injected)} USDT`)
+      +cell('本金倍数',`${num(track?.multiple)}×`);
+  }
+  function refillsHTML(track) {
+    if(!track)return '';
+    const refills=track.refills;
+    const body=refillTotal(refills)===null?'<p>补充本金记录暂不可用</p>':!refills.length?'<p>尚无补充本金记录</p>'
+      :refills.slice().sort((a,b)=>b.ms-a.ms||b.id-a.id).map(r=>`<article class="rp-refill"><small>${date(r.ms)} · 北京时间 · 交易 #${esc(r.position_id)}</small><dl>${detail('补前净值',`${num(r.equity_before)} USDT`)+detail('补后净值',`${num(r.equity_after)} USDT`)+detail('补充本金 · 净入账',`${signed(r.equity_after-r.equity_before)} USDT`)}</dl></article>`).join('');
+    return `<details class="rp-rules rp-refills"><summary>补充本金记录 · ${Array.isArray(refills)?refills.length:'—'} 笔</summary>${body}<p>净入账额为补后减补前，不计入交易盈亏。累计本金按每份初始资金 × 本金份数计算，倍数为净值 ÷ 累计本金。</p></details>`;
+  }
   // Highlight the raw model score, independently of the execution score gate.
   function scoreHTML(score) {
     const known=finite(score), high=known&&score>0.5;
@@ -134,20 +159,25 @@
     }).join(''):'<p>当前没有待成交加仓单</p>'}</section>`;
   }
   function rulesHTML(data, key) {
-    const track=data?.tracks?.[key], v3=['v3','v3add'].includes(key), spike=key==='spike', sp=data?.spike, config=data?.v3, sizing=v3?config?.sizing:data?.sizing;
+    const track=data?.tracks?.[key], v3=['v3','v3add','v3lock'].includes(key), spike=key==='spike', allin=key==='allin3', sp=data?.spike, ai=data?.allin3, config=data?.v3, sizing=v3?config?.sizing:data?.sizing;
+    const lock=key==='v3lock', protection=lock?'利润锁价':'保本价';
+    const offset=lock?data?.v3lock?.breakeven_offset_bp:data?.breakeven_offset_bp;
     const baseAllocation=v3
       ? `单笔名义本金按评分线性分配：净值 × min(${num(sizing?.fraction*100)}% × (分数 − ${num(sizing?.cut,4)}) / ${num(sizing?.mean_excess,4)}, ${num(sizing?.cap*100)}%)`
       : `每笔最多按当时净值的 ${num(sizing?.fraction*100,0)}% 分配名义本金`;
-    const allocationRule=spike
+    const allocationRule=allin
+      ? `同一时间仅持有 1 笔资金仓位；开仓保证金为当时全部已实现净值，名义本金为净值 × ${num(ai?.leverage,0)}；单笔亏损按保证金封顶，分批平仓按对应份额封顶`
+      :spike
       ? `最多 ${num(sp?.slots,0)} 个资金仓位，${num(sp?.leverage,0)} 倍杠杆；开仓保证金为当时已实现净值 ÷ ${num(sp?.slots,0)}，名义本金为保证金 × ${num(sp?.leverage,0)}；单笔亏损按该笔保证金封顶`
       : `${baseAllocation}，总名义敞口上限 ${num(data?.sizing?.gross,1)} 倍，按剩余额度分配`;
-    const targets=v3?`分数 ${num(config?.min_score,2)} 至 ${num(config?.far_score,2)}（不含）目标为区间 0.618；从 ${num(config?.far_score,2)} 起目标为对侧 1.618；低于门槛的影子记录仍以近侧周一边界为目标。确认前设 ${num(config?.backstop_pct,0)}% 兜底止损。`:`做多目标为周一低点，做空目标为周一高点。${spike?`确认前设 ${num(sp?.backstop_pct,0)}% 兜底止损。`:''}`;
+    const targets=allin?`目标为对侧 1.618；确认前设 ${num(ai?.backstop_pct,0)}% 价格兜底止损。`:v3?`分数 ${num(config?.min_score,2)} 至 ${num(config?.far_score,2)}（不含）目标为区间 0.618；从 ${num(config?.far_score,2)} 起目标为对侧 1.618；低于门槛的影子记录仍以近侧周一边界为目标。确认前设 ${num(config?.backstop_pct,0)}% 兜底止损。`:`做多目标为周一低点，做空目标为周一高点。${spike?`确认前设 ${num(sp?.backstop_pct,0)}% 兜底止损。`:''}`;
     return `<p>${trackLabel(key)} · 独立模拟账户。各账户分别记账，初始资金各 ${num(track?.start_equity)} USDT；${allocationRule}。影子记录不占用资金、不改变净值。</p>
+      ${allin?`<p>入场分 ≥ ${num(ai?.min_score)} 才记录交易；已有资金仓位时，后续达标触价保留为影子单。完全平仓后净值低于 ${num(ai?.blowup_below,0)} USDT，后台恢复至 ${num(track?.start_equity)} USDT，本金份数加 1，并记录补充本金。累计本金按每份初始资金 × 本金份数计算，本金倍数为净值 ÷ 累计本金，不是交易收益率。已实现交易盈亏剔除补充本金净入账额。</p>`:''}
       ${spike?`<p>入场分 ≥ ${num(sp?.min_score,2)} 且均线排列分 ≥ ${num(sp?.min_order,0)} 才可占用资金仓位。排列分来源 OKX · 15m，按触价时已闭合的 K 线计算，满分 4。高分信号因排列分不足、排列分缺失或仓位已满而未分配资金时，保留为影子单；入场分不足仅保留触价记录。币安排列线尚未接入。</p>`:''}
-      <p>1.618 限价入场；${targets}确认周期 ${num(track?.confirm_minutes,0)} 分钟。确认收盘未收回入场价则退出；已收回但未越过保本价，也在该收盘退出。收回且越过后，止损移至${key==='v3add'?'主单':''}入场价向盈利方向偏移 ${num(data?.breakeven_offset_bp/100)}%（多加、空减）。旧单以实际记录的保护价为准，保本退出仍有成交费用。</p>
+      <p>1.618 限价入场；${targets}确认周期 ${num(track?.confirm_minutes,0)} 分钟。确认收盘未收回入场价则退出；已收回但未越过${protection}，也在该收盘退出。收回且越过后，止损移至${key==='v3add'?'主单':''}入场价向盈利方向偏移 ${num(offset/100)}%（多加、空减）。旧单以实际记录的保护价为准，${lock?'利润锁':'保本'}退出仍有成交费用。</p>
       ${key==='v3add'?`<p>分数从 ${num(data?.v3add?.from_score,2)} 起，在主单入场价逆向 ${num(data?.v3add?.drawdown_pct,0)}% 挂等名义本金加仓，主单确认收盘前有效。加仓共用主单的确认、保本、兜底和目标。主单提前结束会取消未成交加仓；同分钟先触及加仓再触及兜底时，按后台路径结算。待成交单单列，不计入持仓和盈亏；主单与已成交加仓分别计笔。</p>`:''}
       <p>Maker ${num(data?.fees_bp?.maker/100)}% / Taker ${num(data?.fees_bp?.taker/100)}%（单边）；退出滑点情景 ${num(data?.fees_bp?.report_slippage/100)}%。成交费用以每条记录为准。</p>
-      <p>所选账户入场分数门槛 ${num(spike?sp?.min_score:v3?config?.min_score:data?.model?.threshold,4)}，分数不代表胜率。触价列表共用原始信号，其评分结果按 v2 门槛 ${num(data?.model?.threshold,4)} 显示，资金分配以各账户交易记录为准。模型训练截止 ${esc(data?.model?.trained_before||'—')}；训练行情与当前 OKX 行情存在来源差异。BTC、ETH、XAU、XAG、PAXG、XAUT 仅记录触价。</p>
+      <p>所选账户入场分数门槛 ${num(allin?ai?.min_score:spike?sp?.min_score:v3?config?.min_score:data?.model?.threshold,4)}，分数不代表胜率。触价列表共用原始信号，其评分结果按 v2 门槛 ${num(data?.model?.threshold,4)} 显示，资金分配以各账户交易记录为准。模型训练截止 ${esc(data?.model?.trained_before||'—')}；训练行情与当前 OKX 行情存在来源差异。BTC、ETH、XAU、XAG、PAXG、XAUT 仅记录触价。</p>
       <p>统计为所选账户全部已结束资金交易；已结束与触价列表各最多返回最近 100 条，筛选不改变累计统计。部分平仓立即计入已实现盈亏，已平仓统计仅计完全结束的每笔持仓；账户净值不含浮动盈亏。</p>`;
   }
   function rowHTML(row, state, now, {favorite=false,platform=''}={}) {
@@ -170,18 +200,18 @@
         +(row.note?detail('记录说明',esc(funded(row)?row.note:allocation(row))):'');
     const orderInfo=detail('触价时均线排列',`${esc(orderLabel(row.ema_order))} · OKX · 15m`);
     const closeButton=!event&&!closed&&isFunded&&finite(row.remaining_notional)&&row.remaining_notional>0?`<div class="rp-position-actions"><span>持仓 ${num(row.remaining_notional)} USDT${row.remaining_notional<row.notional?` · 已减 ${num((1-row.remaining_notional/row.notional)*100,1)}%`:''}</span><button type="button" data-rp-close="${esc(row.id)}" aria-label="模拟平仓 ${esc(base(row.symbol))}">平仓</button></div>`:'';
-    const exits=Array.isArray(row.exits)&&row.exits.length?`<div class="rp-exits"><strong>逐笔平仓</strong>${row.exits.map(x=>`<p>${date(x.exit_ms)} · ${esc(reason(x.reason))} · ${price(x.notional/row.entry)} ${esc(base(row.symbol))}<br>成交 ${price(x.price)} · 净盈亏 ${signed(x.pnl)} USDT</p>`).join('')}</div>`:'';
+    const exits=Array.isArray(row.exits)&&row.exits.length?`<div class="rp-exits"><strong>逐笔平仓</strong>${row.exits.map(x=>`<p>${date(x.exit_ms)} · ${esc(reason(x.reason,row.track))} · ${price(x.notional/row.entry)} ${esc(base(row.symbol))}<br>成交 ${price(x.price)} · 净盈亏 ${signed(x.pnl)} USDT</p>`).join('')}</div>`:'';
     const selected=event?state.symbol===row.symbol:state.trade===String(row.id);
     const selectAttr=event?`data-rp-symbol="${esc(row.symbol)}"`:`data-rp-trade="${esc(row.id)}"`;
     const meta=event?date(row.candle_ms):value;
-    const orderMeta=event||state.track==='spike'?`<span class="rp-order-meta" title="OKX · 15m · 触价时排列分">${esc(orderLabel(row.ema_order))}${!event&&!isFunded?`<br>${esc(allocation(row))}`:''}</span>`:'';
+    const orderMeta=event||state.track==='spike'?`<span class="rp-order-meta" title="OKX · 15m · 触价时排列分">${esc(orderLabel(row.ema_order))}${!event&&!isFunded?`<br>${esc(allocation(row))}`:''}</span>`:!event&&state.track==='allin3'&&!isFunded?`<span class="rp-order-meta">${esc(allocation(row))}</span>`:'';
     return `<article class="rp-record" data-rp-record="${esc(key)}" data-symbol="${esc(row.symbol)}" data-selected="${selected}"><div class="rp-record-main"><button type="button" class="rp-row-select" ${selectAttr} data-rp-focus="select" aria-pressed="${selected}" aria-label="查看 ${esc(base(row.symbol))} ${event?'触价':'开仓'} K 线"></button>${coinHTML(row,platform,`<span class="${row.side===1?'rp-positive':row.side===-1?'rp-negative':''}">${sideLabel(row)}</span>${!event&&state.track==='v3add'?` · ${esc(legLabel(row))}`:''} · ${event?date(row.candle_ms):`<span class="${closed?(isFunded?tone(row.pnl):''):tone(row.unrealized_bp)}">${value}</span>`}${orderMeta}`)}${scoreHTML(row.score)}</div><div class="rp-record-bottom"><span class="rp-record-meta ${event?'':closed?tone(row.pnl):tone(row.unrealized_bp)}">${meta}</span><a href="${esc(list.inspectionURL(row.symbol,state.period))}" data-rp-focus="patrol" aria-label="查看 ${esc(base(row.symbol))} 巡检 K 线详情" title="巡检 K 线详情"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></a><button type="button" data-rp-detail="${esc(key)}" data-rp-focus="detail" aria-label="展开 ${esc(base(row.symbol))} 明细" aria-expanded="false" aria-controls="rp-detail-${esc(key)}"><span aria-hidden="true">⌄</span></button></div>${closeButton}<section id="rp-detail-${esc(key)}" class="rp-row-detail" hidden><button type="button" data-rp-favorite="${esc(row.symbol)}" data-rp-focus="favorite" class="rp-detail-favorite" aria-pressed="${favorite}" aria-label="${favorite?'取消收藏':'收藏'} ${esc(base(row.symbol))}"><svg width="17" height="17" viewBox="0 0 24 24" fill="${favorite?'currentColor':'none'}" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/></svg><span>${favorite?'取消收藏':'收藏币种'}</span></button><div class="rp-detail-fields">${fields}</div><dl>${orderInfo}${more}</dl>${exits}<a class="rp-chart-link" data-rp-focus="chart" href="${esc(chartLink(row.symbol,state.track))}">查看 ${esc(base(row.symbol))} 的 1.618 图表 ↗</a></section></article>`;
   }
-  const api={finite,esc,num,signed,bp,price,funded,orderLabel,TRACKS,trackLabel,targetLabel,stopPrice,stage,signalStatus,allocation,route,chartLink,validate,summary,rows,createFeed,rowHTML,pendingHTML,rulesHTML};
+  const api={finite,esc,num,signed,bp,price,funded,orderLabel,TRACKS,trackLabel,targetLabel,stopPrice,stage,signalStatus,allocation,route,chartLink,validate,summary,refillTotal,capitalLabel,capitalHTML,refillsHTML,rows,createFeed,rowHTML,pendingHTML,rulesHTML};
   if(typeof module!=='undefined' && module.exports){module.exports=api;return;}
   const root=document.getElementById('monday-reclaim-paper');
   if(!root)return;
-  let state=route(), pageActive=false, mounted=false, shown=50, signature='', chart=null, pinned=null, ma=false, internal=false, indicatorsOpen=false, recordsOpen=false, sheet=null, watch=null, chartSymbol='', closer=null, analytics=null,preferences=null,platform='',focus=null,quick=null;
+  let state=route(), pageActive=false, mounted=false, shown=50, signature='', refillSignature='', chart=null, pinned=null, ma=false, internal=false, indicatorsOpen=false, recordsOpen=false, sheet=null, watch=null, chartSymbol='', closer=null, analytics=null,preferences=null,platform='',focus=null,quick=null;
   const requests=window.SpikeRuntime.createRequests();
   let startupRead=null;
   const feed=createFeed({read:async()=>{
@@ -196,11 +226,12 @@
     root.innerHTML=`<div class="rp-wallpaper" data-rp="chart"></div><div class="rp-watermark" aria-hidden="true" data-rp="watermark"></div><p class="rp-chart-notice rp-glass" data-rp="chart-notice" role="status" hidden></p>
       <header class="rp-heading rp-glass"><details class="rp-navigation"><summary aria-label="打开模拟盘导航"><b>ϟ SPIKE</b></summary><nav class="rp-glass"><a href="#signals?pane=reclaim" aria-current="page">1.618 首页</a><a href="#signals?pane=records">信号记录</a><a href="#signals?pane=overview">表现分析</a><a href="#yolo-detect">形态巡检</a></nav></details></header><button type="button" class="rp-theme-toggle theme-toggle rp-glass" data-theme-toggle aria-label="切换浅色或深色" title="切换浅色或深色"></button>
       <section class="rp-context rp-glass"><div class="rp-context-line"><button type="button" class="rp-symbol-trigger" data-rp-action="watch" aria-controls="rp-watch-panel" aria-expanded="false"><strong data-rp="symbol-label">选择币种</strong><span aria-hidden="true">⌄</span></button><span data-rp="selection-status"></span></div><small class="rp-selection-note" data-rp="selection-note"></small><div class="rp-context-tools"><label class="rp-track-picker"><span>模拟账户</span><select data-rp="track" aria-label="选择模拟账户">${TRACKS.map(track=>`<option value="${track}">${trackLabel(track)}</option>`).join('')}</select></label><button type="button" data-rp-action="records" aria-controls="rp-record-panel" aria-expanded="false">交易簿 <span data-rp="total">—</span></button></div></section>
-      <details class="rp-account rp-glass"><summary><span><small data-rp="account-label">60m 模拟</small> · 已实现净值 <b data-rp="equity">—</b><small> USDT</small></span><span data-rp="pnl"></span><span aria-hidden="true">⌄</span></summary><div class="rp-account-body"><section data-rp="metrics" class="rp-metrics"></section><p data-rp="status" role="status"></p><details class="rp-rules"><summary>规则与统计口径</summary><div data-rp="rules"></div></details></div></details><button class="rp-analysis-trigger rp-glass" data-rp-action="analytics" aria-controls="rp-analysis-panel" aria-expanded="false">统计分析 ↗</button>
+      <details class="rp-account rp-glass"><summary><span><small data-rp="account-label">60m 模拟</small> · 已实现净值 <b data-rp="equity">—</b><small> USDT</small></span><span data-rp="pnl"></span><span aria-hidden="true">⌄</span><span class="rp-capital-status" data-rp="capital" hidden title="净值 ÷ 累计本金，不是交易收益率"></span></summary><div class="rp-account-body"><section data-rp="metrics" class="rp-metrics"></section><p data-rp="status" role="status"></p><div data-rp="refills"></div><details class="rp-rules"><summary>规则与统计口径</summary><div data-rp="rules"></div></details></div></details><button class="rp-analysis-trigger rp-glass" data-rp-action="analytics" aria-controls="rp-analysis-panel" aria-expanded="false">统计分析 ↗</button>
       <div class="rp-alert rp-glass" data-rp="error" role="alert" hidden></div>
       <section id="rp-record-panel" class="rp-records rp-glass" aria-label="模拟交易簿" aria-hidden="true" inert><header class="rp-record-heading rp-ledger-heading" data-yd-sheet-drag><strong data-rp="ledger-label">60m</strong><div class="rp-ledger-tabs" role="group" aria-label="记录类型">${[['open','持仓'],['closed','已结束'],['events','触价']].map(([tab,label])=>`<button type="button" data-rp-tab="${tab}" aria-pressed="false">${label}<span data-rp="count-${tab}"></span></button>`).join('')}</div><label class="rp-scope" data-rp="scope-label" title="记录资金范围"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg><select aria-label="记录资金范围" data-rp="scope"><option value="funded">计入资金</option><option value="shadow">影子记录</option><option value="all">全部记录</option></select></label><label class="rp-search" hidden><input type="search" placeholder="搜索币种" aria-label="搜索模拟盘币种" maxlength="80" autocomplete="off" data-rp="search"></label><button type="button" data-rp-action="search" aria-label="搜索币种" aria-expanded="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></button><button type="button" data-rp-action="close-records" aria-label="收起交易簿">×</button></header><div class="rp-record-scroll"><div data-rp="rows" class="rp-rows"></div><button type="button" data-rp-action="more" class="rp-more" hidden>再显示 50 条</button><div data-rp="pending"></div><p class="rp-record-caption" data-rp="caption"></p><p class="rp-footnote" data-rp="record-note"></p></div></section>
       <nav class="rp-dock" aria-label="模拟盘图表工具"><select data-rp="period" aria-label="K 线周期">${['5m','15m','1H','4H','12H','1D'].map(v=>`<option value="${v}">${v}</option>`).join('')}</select><div class="rp-indicators"><button type="button" data-rp-action="indicators" aria-label="图表指标" aria-controls="rp-indicator-panel" aria-expanded="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="var(--rp-canvas)"/><circle cx="15" cy="17" r="3" fill="var(--rp-canvas)"/></svg>指标<span data-rp="indicator-count" hidden></span></button><section id="rp-indicator-panel" class="rp-indicator-panel rp-glass" aria-label="图表指标" aria-hidden="true" inert><strong>图表指标</strong><button type="button" data-rp-action="ma" role="switch" aria-checked="false" aria-label="六均线"><span>六均线<small>SMA / EMA · 20、60、120</small></span><i aria-hidden="true"></i></button><button type="button" data-rp-action="internal" role="switch" aria-checked="false" aria-label="区间点位"><span>区间点位<small>0.5 · 0.618 · 0.705</small></span><i aria-hidden="true"></i></button></section></div><button type="button" data-rp-action="fit" title="显示全部已加载 K 线">全图</button><button type="button" data-rp-action="latest" title="回到最新 K 线">最新 K</button><button type="button" data-rp-action="follow" aria-pressed="true">跟随最新单</button></nav><span class="rp-chart-foot">逐周 1.618 区间 · 开平仓按实际成交标记</span>`;
     new ResizeObserver(entries=>root.style.setProperty('--rp-context-height',`${entries[0].target.getBoundingClientRect().height}px`)).observe(root.querySelector('.rp-context'));
+    new ResizeObserver(entries=>root.style.setProperty('--rp-account-summary-height',`${entries[0].target.getBoundingClientRect().height}px`)).observe(root.querySelector('.rp-account>summary'));
     chart=window.SpikeReclaimChart.create(el('chart'),text=>{el('chart-notice').textContent=text;el('chart-notice').hidden=!text;});
     sheet=window.SpikeYoloPreviewSheet.bind({panel:root.querySelector('.rp-records'),isOpen:()=>recordsOpen,dismiss:()=>setRecords(false)});
     closer=window.SpikeReclaimClose.create({root,onChanged:()=>{feed.refresh();watch?.refresh();analytics?.refresh();}});
@@ -221,7 +252,7 @@
       if(button.dataset.rpFavorite){preferences.toggle(button.dataset.rpFavorite);watch?.refreshPreferences();render(feed.getState());return;}
       if(button.dataset.rpSymbol){state.symbol=button.dataset.rpSymbol;state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());if(matchMedia('(max-width:700px)').matches)setRecords(false);return;}
 
-      if(button.dataset.rpClose){const data=feed.getState().data,p=data?.tracks[state.track]?.open.find(p=>String(p.id)===button.dataset.rpClose);if(p)closer.open({...p,margin_leverage:state.track==='spike'?data.spike?.leverage:null});}
+      if(button.dataset.rpClose){const data=feed.getState().data,p=data?.tracks[state.track]?.open.find(p=>String(p.id)===button.dataset.rpClose);if(p)closer.open({...p,margin_leverage:state.track==='spike'?data.spike?.leverage:state.track==='allin3'?data.allin3?.leverage:null});}
       if(button.dataset.rpTab){state.tab=button.dataset.rpTab;shown=50;sync();render(feed.getState());}
       if(button.dataset.rpTrade){state.symbol='';state.trade=button.dataset.rpTrade;pinned=window.SpikeReclaimChart.select(feed.getState().data?.tracks[state.track],state.trade);chart.resetFocus();sync();render(feed.getState());if(matchMedia('(max-width:700px)').matches)setRecords(false);}
       const action=button.dataset.rpAction;
@@ -262,7 +293,7 @@
   function replace(id,html){const node=el(id);if(node.innerHTML!==html)node.innerHTML=html;}
   function render(current){
     if(!pageActive)return;mount();
-    const {data,error,busy}=current, track=data?.tracks?.[state.track], stats=summary(track);
+    const {data,error,busy}=current, track=data?.tracks?.[state.track], stats=summary(track,state.track);
     root.setAttribute('aria-busy',String(busy && !data));
     el('account-label').textContent=trackLabel(state.track)+' 模拟';el('ledger-label').textContent=trackLabel(state.track);
     root.querySelector('.rp-records').setAttribute('aria-label',trackLabel(state.track)+' 模拟交易簿');
@@ -290,8 +321,17 @@
     el('selection-note').textContent=selected?`${state.trade?'固定交易':state.symbol?'固定币种':'最新资金交易'} · ${date(selected.fill_ms)} 开仓`:chartSymbol?'固定币种 · 最近记录无资金成交':'等待资金交易 · 点击币种查看触价列表';
     el('watermark').textContent=chartSymbol?base(chartSymbol)+' / USDT':'';
     el('total').textContent=track?String(track.open.filter(funded).length):'—';
+    const allin=state.track==='allin3';
+    root.querySelector('.rp-account').classList.toggle('has-capital',allin);
+    el('capital').hidden=!allin;el('capital').textContent=allin?capitalLabel(track):'';
+    const refillMarkup=allin?refillsHTML(track):'';
+    if(refillMarkup!==refillSignature){
+      const refillOpen=el('refills').querySelector('details')?.open;
+      replace('refills',refillMarkup);refillSignature=refillMarkup;
+      if(refillOpen&&el('refills').querySelector('details'))el('refills').querySelector('details').open=true;
+    }
     replace('equity',num(stats.equity));replace('pnl',`<b class="${tone(stats.pnl)}">${signed(stats.pnl)}</b>`);
-    replace('metrics',cell('已实现盈亏',`${signed(stats.pnl)} USDT`,tone(stats.pnl))+cell('累计已平仓',`${num(stats.count,0)} 笔`)+cell('已平仓胜率',finite(stats.winRate)?`${num(stats.winRate,1)}%`:'—')+cell('平均单笔净收益',bp(stats.mean),tone(stats.mean))+cell('初始资金',`${num(stats.start)} USDT`));
+    replace('metrics',cell('已实现交易盈亏',`${signed(stats.pnl)} USDT`,tone(stats.pnl))+cell('累计已平仓',`${num(stats.count,0)} 笔`)+cell('已平仓胜率',finite(stats.winRate)?`${num(stats.winRate,1)}%`:'—')+cell('平均单笔净收益',bp(stats.mean),tone(stats.mean))+cell('初始资金',`${num(stats.start)} USDT`)+(allin?capitalHTML(track):''));
     for(const tab of ['open','closed','events'])el(`count-${tab}`).textContent=data ? String(rows(data,{...state,tab}).length) : '—';
     const items=data?rows(data,state):[], visible=items.slice(0,shown);
     el('caption').textContent=!data ? (error?'记录暂时不可用':'正在读取记录…') : state.tab==='events' ? `触价记录 · 评分优先 · ${items.length} 条符合筛选 · 最近最多 100 条` : `${trackLabel(state.track)} 模拟账户 · ${{funded:'计入资金',shadow:'影子记录',all:'全部记录'}[state.scope]} · 评分优先 · ${items.length} 条${state.tab==='closed'?'符合筛选 · 最近最多 100 条':'持仓'}`;

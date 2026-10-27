@@ -54,6 +54,15 @@ body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-headi
 #monday-reclaim-paper .rp-account>summary {display:flex;align-items:center;gap:12px;padding:10px 14px;color:var(--rp-muted,#748493);font-size:11px;white-space:nowrap;}
 #monday-reclaim-paper .rp-account>summary b {font-size:17px;margin-left:5px;color:var(--rp-ink,#203745);}
 #monday-reclaim-paper .rp-account-body {padding:2px 16px 14px;max-height:65dvh;overflow:auto;overscroll-behavior:contain;}
+/* Stitch b218f8c044f442c7bb5650a93a42d7f3: compact stake progress and cash refills. */
+#monday-reclaim-paper .rp-account.has-capital>summary {flex-wrap:wrap;}
+#monday-reclaim-paper .rp-capital-status {flex-basis:100%;color:var(--rp-muted);white-space:normal;overflow-wrap:anywhere;}
+#monday-reclaim-paper .rp-refill {padding:10px 0;border-top:1px solid var(--rp-edge);font-size:11px;}
+#monday-reclaim-paper .rp-refill>small {color:var(--rp-muted);}
+#monday-reclaim-paper .rp-refill dl {display:grid;gap:5px;margin:7px 0 0;}
+#monday-reclaim-paper .rp-refill dl>div {display:flex;justify-content:space-between;gap:12px;}
+#monday-reclaim-paper .rp-refill dt {color:var(--rp-muted);}
+#monday-reclaim-paper .rp-refill dd {margin:0;text-align:right;overflow-wrap:anywhere;}
 #monday-reclaim-paper .rp-metrics {display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:12px 0;}
 #monday-reclaim-paper .rp-cell {display:flex;flex-direction:column;gap:3px;min-width:0;}
 #monday-reclaim-paper .rp-cell small {font-size:10px;color:var(--rp-muted,#718494);font-weight:400;}
@@ -378,6 +387,7 @@ body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-headi
 @media(min-width:701px) and (max-width:1420px){#monday-reclaim-paper .rp-records {top:calc(154px + var(--rp-context-height,180px));}}
 @media(max-width:700px){
  #monday-reclaim-paper .rp-account {top:calc(140px + var(--rp-context-height,180px));}
+ #monday-reclaim-paper .rp-account.has-capital .rp-account-body {max-height:calc(100dvh - 250px - var(--rp-context-height,180px) - var(--rp-account-summary-height,90px));}
  #monday-reclaim-paper .rp-alert {top:calc(220px + var(--rp-context-height,180px));}
  #monday-reclaim-paper .rp-ledger-heading>strong {display:block;max-width:44px;padding:0 2px;font-size:9px;color:var(--rp-blue);}
  #monday-reclaim-paper .rp-ledger-heading .rp-ledger-tabs button {font-size:10px;}

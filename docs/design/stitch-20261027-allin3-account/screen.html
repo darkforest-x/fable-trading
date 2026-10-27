@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>⚡ SPIKE 1.618 模拟交易工作台 · v3lock</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Fonts: Inter & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-fixed-dim": "#abc7ff",
+            "on-tertiary-fixed": "#40000d",
+            "surface-bright": "#f8f9ff",
+            "primary": "#0059b5",
+            "on-secondary": "#ffffff",
+            "surface-variant": "#d3e4fe",
+            "inverse-on-surface": "#eaf1ff",
+            "tertiary-fixed-dim": "#ffb2b7",
+            "surface-container-highest": "#d3e4fe",
+            "surface": "#f8f9ff",
+            "primary-container": "#0071e3",
+            "inverse-primary": "#abc7ff",
+            "outline": "#717785",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "on-surface": "#0b1c30",
+            "secondary-container": "#92f2d7",
+            "tertiary-container": "#db2b4e",
+            "on-error-container": "#93000a",
+            "secondary-fixed": "#94f4d9",
+            "on-surface-variant": "#414753",
+            "on-secondary-fixed": "#002019",
+            "error": "#ba1a1a",
+            "on-tertiary-container": "#fffaf9",
+            "on-primary-container": "#fcfbff",
+            "outline-variant": "#c1c6d6",
+            "on-secondary-container": "#00705c",
+            "surface-container-low": "#eff4ff",
+            "on-error": "#ffffff",
+            "on-primary-fixed": "#001b3f",
+            "surface-container-high": "#dce9ff",
+            "on-tertiary-fixed-variant": "#92002a",
+            "secondary-fixed-dim": "#78d8be",
+            "surface-dim": "#cbdbf5",
+            "surface-tint": "#005cbb",
+            "secondary": "#006b58",
+            "inverse-surface": "#213145",
+            "surface-container": "#e5eeff",
+            "background": "#f8f9ff",
+            "on-secondary-fixed-variant": "#005142",
+            "tertiary": "#b70438",
+            "primary-fixed": "#d7e2ff",
+            "on-primary": "#ffffff",
+            "tertiary-fixed": "#ffdadb",
+            "on-background": "#0b1c30",
+            "error-container": "#ffdad6",
+            "on-primary-fixed-variant": "#00458f"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-lg": "1rem",
+            "space-xl": "1.5rem",
+            "gutter-tablet": "1rem",
+            "margin-desktop": "2.5rem",
+            "gutter-desktop": "1.5rem",
+            "space-sm": "0.5rem",
+            "space-xs": "0.25rem",
+            "gutter": "0.75rem",
+            "margin": "1rem",
+            "space-md": "0.75rem",
+            "margin-tablet": "1.5rem"
+          },
+          "fontFamily": {
+            "headline-lg-mobile": ["Inter"],
+            "body-lg": ["Inter"],
+            "label-caps": ["Inter"],
+            "body-md": ["Inter"],
+            "label-numeric-sm": ["JetBrains Mono"],
+            "headline-sm": ["Inter"],
+            "label-numeric-md": ["JetBrains Mono"],
+            "body-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "label-numeric-lg": ["JetBrains Mono"],
+            "headline-md": ["Inter"],
+            "display": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "label-caps": ["10px", { "lineHeight": "12px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-numeric-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "headline-sm": ["17px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-numeric-md": ["14px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "label-numeric-lg": ["20px", { "lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 18px;
+      line-height: 1;
+      display: inline-block;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+    }
+
+    /* Pale Apple Glass Layering & Specular Rims */
+    .apple-glass {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      box-shadow:
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.95),
+        inset 0 -1px 1px 0 rgba(255, 255, 255, 0.2),
+        0 8px 32px -4px rgba(11, 28, 48, 0.04),
+        0 2px 8px -2px rgba(11, 28, 48, 0.02);
+    }
+
+    .apple-glass-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow:
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.98),
+        0 4px 16px -2px rgba(15, 23, 42, 0.03);
+    }
+
+    .apple-glass-dock {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow:
+        inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95),
+        0 12px 36px -6px rgba(0, 89, 181, 0.08),
+        0 4px 12px -2px rgba(11, 28, 48, 0.03);
+    }
+
+    /* Custom scrollbar for clean glass aesthetics */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(113, 119, 133, 0.25);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(113, 119, 133, 0.45);
+    }
+  </style>
+</head>
+<body class="h-full w-full overflow-hidden select-none bg-[#EAEFF7] text-on-surface font-body-md antialiased flex flex-col">
+<!-- ==================== BACKGROUND: 100vw x 100dvh REALISTIC MONDAY 1.618 CANDLESTICK CHART ==================== -->
+<div class="fixed inset-0 w-screen h-screen pointer-events-none z-0 overflow-hidden">
+<!-- Atmospheric base illumination -->
+<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_-15%,_#DCE9FF_0%,_#EAEFF7_65%,_#E2E8F4_100%)]"></div>
+<!-- Realistic Vector SVG Candlestick Canvas -->
+<svg class="absolute inset-0 w-full h-full opacity-90" fill="none" preserveaspectratio="none" viewbox="0 0 1440 900">
+<defs>
+<pattern height="45" id="chart-grid" patternunits="userSpaceOnUse" width="72">
+<path d="M 72 0 L 0 0 0 45" fill="none" stroke="rgba(193, 198, 214, 0.35)" stroke-dasharray="3 3" stroke-width="0.75"></path>
+</pattern>
+<lineargradient id="vol-jade" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#006B58" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#006B58" stop-opacity="0.05"></stop>
+</lineargradient>
+<lineargradient id="vol-rose" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#B70438" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#B70438" stop-opacity="0.05"></stop>
+</lineargradient>
+</defs>
+<!-- Grid lines -->
+<rect fill="url(#chart-grid)" height="900" width="1440"></rect>
+<!-- Monday High Line (186.20) -->
+<line opacity="0.75" stroke="#0071e3" stroke-dasharray="6 4" stroke-width="1.25" x1="80" x2="1400" y1="280" y2="280"></line>
+<text fill="#0059b5" font-family="JetBrains Mono" font-size="11" font-weight="600" opacity="0.85" x="140" y="274">周一高点 (Mon High): 186.200</text>
+<!-- Monday 1.618 Upper Extension Line (187.85) -->
+<line opacity="0.8" stroke="#db2b4e" stroke-dasharray="8 4" stroke-width="1.5" x1="120" x2="1440" y1="195" y2="195"></line>
+<rect fill="rgba(219, 43, 78, 0.12)" height="20" rx="4" stroke="rgba(219, 43, 78, 0.4)" stroke-width="1" width="130" x="1260" y="185"></rect>
+<text fill="#b70438" font-family="JetBrains Mono" font-size="11" font-weight="600" x="1270" y="199">上沿 1.618: 187.854</text>
+<!-- Monday Low Line (181.40) -->
+<line opacity="0.75" stroke="#0071e3" stroke-dasharray="6 4" stroke-width="1.25" x1="80" x2="1400" y1="520" y2="520"></line>
+<text fill="#0059b5" font-family="JetBrains Mono" font-size="11" font-weight="600" opacity="0.85" x="140" y="534">周一低点 (Mon Low): 181.400</text>
+<!-- Monday 1.618 Lower Extension Line (179.80) -->
+<line opacity="0.8" stroke="#006b58" stroke-dasharray="8 4" stroke-width="1.5" x1="120" x2="1440" y1="610" y2="610"></line>
+<rect fill="rgba(0, 107, 88, 0.12)" height="20" rx="4" stroke="rgba(0, 107, 88, 0.4)" stroke-width="1" width="130" x="1260" y="600"></rect>
+<text fill="#006b58" font-family="JetBrains Mono" font-size="11" font-weight="600" x="1270" y="614">下沿 1.618: 179.805</text>
+<!-- Realistic Series of Japanese Candlesticks (Jade #006B58, Rose #B70438) -->
+<!-- Candles Segment 1 -->
+<line stroke="#006b58" stroke-width="1.5" x1="160" x2="160" y1="360" y2="440"></line>
+<rect fill="#006b58" height="45" rx="1.5" width="12" x="154" y="380"></rect>
+<line stroke="#006b58" stroke-width="1.5" x1="190" x2="190" y1="340" y2="420"></line>
+<rect fill="#006b58" height="40" rx="1.5" width="12" x="184" y="355"></rect>
+<line stroke="#b70438" stroke-width="1.5" x1="220" x2="220" y1="330" y2="390"></line>
+<rect fill="#b70438" height="30" rx="1.5" width="12" x="214" y="340"></rect>
+<line stroke="#006b58" stroke-width="1.5" x1="250" x2="250" y1="320" y2="380"></line>
+<rect fill="#006b58" height="35" rx="1.5" width="12" x="244" y="325"></rect>
+<!-- Candle Segment 2 (Ascending towards Mon High) -->
+<line stroke="#006b58" stroke-width="1.5" x1="280" x2="280" y1="290" y2="360"></line>
+<rect fill="#006b58" height="50" rx="1.5" width="12" x="274" y="295"></rect>
+<line stroke="#006b58" stroke-width="1.5" x1="310" x2="310" y1="270" y2="340"></line>
+<rect fill="#006b58" height="40" rx="1.5" width="12" x="304" y="275"></rect>
+<line stroke="#b70438" stroke-width="1.5" x1="340" x2="340" y1="260" y2="320"></line>
+<rect fill="#b70438" height="35" rx="1.5" width="12" x="334" y="270"></rect>
+<line stroke="#b70438" stroke-width="1.5" x1="370" x2="370" y1="280" y2="350"></line>
+<rect fill="#b70438" height="45" rx="1.5" width="12" x="364" y="290"></rect>
+<!-- Candle Segment 3 (Consolidation) -->
+<line stroke="#006b58" stroke-width="1.5" x1="400" x2="400" y1="310" y2="390"></line>
+<rect fill="#006b58" height="50" rx="1.5" width="12" x="394" y="320"></rect>
+<line stroke="#006b58" stroke-width="1.5" x1="430" x2="430" y1="300" y2="370"></line>
+<rect fill="#006b58" height="30" rx="1.5" width="12" x="424" y="305"></rect>
+<line stroke="#b70438" stroke-width="1.5" x1="460" x2="460" y1="280" y2="340"></line>
+<rect fill="#b70438" height="25" rx="1.5" width="12" x="454" y="295"></rect>
+<!-- Candle Segment 4 (Push to Mon 1.618 Upper Zone) -->
+<line stroke="#006b58" stroke-width="1.5" x1="490" x2="490" y1="250" y2="320"></line>
+<rect fill="#006b58" height="45" rx="1.5" width="12" x="484" y="255"></rect>
+<line stroke="#006b58" stroke-width="1.5" x1="520" x2="520" y1="210" y2="280"></line>
+<rect fill="#006b58" height="50" rx="1.5" width="12" x="514" y="215"></rect>
+<line stroke="#006b58" stroke-width="1.5" x1="550" x2="550" y1="190" y2="250"></line>
+<!-- The Spike Touch Candle -->
+<rect fill="#006b58" height="35" rx="1.5" width="12" x="544" y="195"></rect>
+<!-- Upper Wick touching 187.85 -->
+<circle cx="550" cy="195" fill="#0071e3" r="4.5" stroke="#ffffff" stroke-width="1.5"></circle>
+<!-- Reversal Wick & Follow through (v3lock monitor spot) -->
+<line stroke="#b70438" stroke-width="1.5" x1="580" x2="580" y1="198" y2="265"></line>
+<rect fill="#b70438" height="40" rx="1.5" width="12" x="574" y="210"></rect>
+<line stroke="#b70438" stroke-width="1.5" x1="610" x2="610" y1="230" y2="310"></line>
+<rect fill="#b70438" height="45" rx="1.5" width="12" x="604" y="245"></rect>
+<line stroke="#b70438" stroke-width="1.5" x1="640" x2="640" y1="270" y2="350"></line>
+<rect fill="#b70438" height="55" rx="1.5" width="12" x="634" y="280"></rect>
+<!-- Current Active Candle Price Level: 184.50 -->
+<line stroke="#006b58" stroke-width="1.5" x1="670" x2="670" y1="310" y2="375"></line>
+<rect fill="#006b58" height="35" rx="1.5" width="12" x="664" y="325"></rect>
+<line stroke="#0059b5" stroke-dasharray="3 3" stroke-width="1" x1="676" x2="1440" y1="330" y2="330"></line>
+<rect fill="#0059b5" height="20" rx="4" width="70" x="1360" y="320"></rect>
+<text fill="#ffffff" font-family="JetBrains Mono" font-size="11" font-weight="600" x="1368" y="334">184.500</text>
+<!-- EMA 21 / EMA 55 Smooth Flow -->
+<path d="M 140 410 C 260 360, 380 290, 520 230 C 600 240, 700 320, 850 350" fill="none" stroke="rgba(0, 113, 227, 0.45)" stroke-width="2"></path>
+<path d="M 140 435 C 260 390, 380 320, 520 260 C 600 270, 700 340, 850 380" fill="none" stroke="rgba(113, 119, 133, 0.35)" stroke-width="1.5"></path>
+<!-- Translucent Volume Histograms at bottom -->
+<rect fill="url(#vol-jade)" height="35" rx="1" width="12" x="154" y="760"></rect>
+<rect fill="url(#vol-jade)" height="55" rx="1" width="12" x="184" y="740"></rect>
+<rect fill="url(#vol-rose)" height="25" rx="1" width="12" x="214" y="770"></rect>
+<rect fill="url(#vol-jade)" height="45" rx="1" width="12" x="244" y="750"></rect>
+<rect fill="url(#vol-jade)" height="65" rx="1" width="12" x="274" y="730"></rect>
+<rect fill="url(#vol-jade)" height="85" rx="1" width="12" x="304" y="710"></rect>
+<rect fill="url(#vol-rose)" height="50" rx="1" width="12" x="334" y="745"></rect>
+<rect fill="url(#vol-rose)" height="60" rx="1" width="12" x="364" y="735"></rect>
+<rect fill="url(#vol-jade)" height="45" rx="1" width="12" x="394" y="750"></rect>
+<rect fill="url(#vol-jade)" height="30" rx="1" width="12" x="424" y="765"></rect>
+<rect fill="url(#vol-rose)" height="25" rx="1" width="12" x="454" y="770"></rect>
+<rect fill="url(#vol-jade)" height="70" rx="1" width="12" x="484" y="725"></rect>
+<rect fill="url(#vol-jade)" height="100" rx="1" width="12" x="514" y="695"></rect>
+<rect fill="url(#vol-jade)" height="115" rx="1" width="12" x="544" y="680"></rect>
+<rect fill="url(#vol-rose)" height="90" rx="1" width="12" x="574" y="705"></rect>
+<rect fill="url(#vol-rose)" height="75" rx="1" width="12" x="604" y="720"></rect>
+<rect fill="url(#vol-rose)" height="80" rx="1" width="12" x="634" y="715"></rect>
+<rect fill="url(#vol-jade)" height="55" rx="1" width="12" x="664" y="740"></rect>
+</svg>
+</div>
+<!-- ==================== TOP NAVIGATION BAR ==================== -->
+<header class="relative z-30 w-full apple-glass border-b border-white/60 shadow-sm backdrop-blur-xl">
+<div class="max-w-[1720px] mx-auto px-3 sm:px-4 h-13 py-2 flex items-center justify-between gap-3">
+<!-- Brand & Active Symbol Badges -->
+<div class="flex items-center gap-3 shrink-0">
+<div class="flex items-center gap-1.5 pr-2">
+<span class="text-primary font-headline-md text-headline-md tracking-tight font-extrabold flex items-center">
+            ⚡ SPIKE
+          </span>
+<span class="text-[10px] font-label-caps px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold border border-primary/20">
+            1.618 LAB
+          </span>
+</div>
+<div class="h-4 w-px bg-outline-variant/60 hidden md:block"></div>
+<!-- Symbol Ticker Switcher -->
+<nav class="hidden lg:flex items-center gap-1 overflow-x-auto py-0.5">
+<!-- Active SOL -->
+<button class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container-lowest text-primary font-semibold border border-white shadow-xs transition-all active:scale-95">
+<span class="font-headline-sm text-body-sm font-semibold">SOL</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-secondary font-semibold">184.50</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+</button>
+<button class="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/60 text-on-surface-variant font-body-sm transition-all">
+<span class="text-body-sm">BTC</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface font-medium">67,420</span>
+</button>
+<button class="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/60 text-on-surface-variant font-body-sm transition-all">
+<span class="text-body-sm">ETH</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface font-medium">2,618.5</span>
+</button>
+<button class="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/60 text-on-surface-variant font-body-sm transition-all">
+<span class="text-body-sm">XAU</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface font-medium">2,735.2</span>
+</button>
+<button class="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/60 text-on-surface-variant font-body-sm transition-all">
+<span class="text-body-sm">SUI</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface font-medium">2.084</span>
+</button>
+</nav>
+</div>
+<!-- Center: Account Balance Metrics (Clean Monospace Figures) -->
+<div class="hidden xl:flex items-center gap-5 px-3.5 py-1 rounded-xl bg-white/70 border border-white/80 shadow-xs"><div class="flex items-center gap-1.5"><span class="text-on-surface-variant text-[11px] font-medium">模拟本金:</span><span class="font-label-numeric-sm text-label-numeric-sm text-on-surface font-semibold">1,000.00 USDT</span></div><div class="h-3 w-px bg-outline-variant/50"></div><div class="flex items-center gap-1.5"><span class="text-on-surface-variant text-[11px] font-medium">净值:</span><span class="font-label-numeric-sm text-label-numeric-sm text-on-surface font-semibold">1,000.00 U</span><span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20" title="净值 / (1000 × 份数)，非交易收益率">第 2 份本金 · 0.50×</span></div><div class="h-3 w-px bg-outline-variant/50"></div><div class="flex items-center gap-1.5"><span class="text-on-surface-variant text-[11px] font-medium">浮盈:</span><span class="font-label-numeric-sm text-label-numeric-sm text-outline font-semibold">0.00 U</span></div><div class="h-3 w-px bg-outline-variant/50"></div><div class="flex items-center gap-1.5"><span class="text-on-surface-variant text-[11px] font-medium">胜率:</span><span class="font-label-numeric-sm text-label-numeric-sm text-outline font-medium">—</span></div><div class="h-3 w-px bg-outline-variant/50"></div><span class="text-[10px] font-medium px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">未开启实盘 · 沙盒隔离 (7. allin3)</span></div>
+<!-- Right Section: Account Selector (Native) & Statistics Button -->
+<div class="flex items-center gap-2 sm:gap-3">
+<!-- Native Account Selector with Exactly 6 Prescribed Options -->
+<div class="relative flex items-center">
+<label class="sr-only" for="topAccountSelect">选择模拟账户</label>
+<div class="flex items-center pl-2.5 pr-1.5 py-1 rounded-xl bg-surface-container-lowest/90 border border-white shadow-xs">
+<span class="material-symbols-outlined text-primary text-[17px] mr-1">account_balance_wallet</span>
+<span class="text-xs font-semibold text-on-surface whitespace-nowrap mr-1">模拟账户:</span>
+<select class="bg-transparent text-xs font-semibold text-primary focus:outline-none cursor-pointer py-0.5 pr-6 pl-0 border-0 focus:ring-0" id="topAccountSelect"><option value="60m">1. 60m (60m主轨)</option><option value="5m">2. 5m (5m研究轨)</option><option value="v3">3. v3 (v3标准)</option><option value="v3add">4. v3add (v3add加仓)</option><option value="spike">5. spike (均线排列分)</option><option value="v3lock">6. v3lock (v3+0.5%利润锁)</option><option selected="" value="allin3">7. allin3 (3x全仓轮次)</option></select>
+</div>
+</div>
+<!-- 统计分析 (Statistics) Trigger Button -->
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-primary text-on-primary font-headline-sm text-body-sm font-semibold hover:bg-primary-container active:scale-95 shadow-xs transition-all" id="openStatsBtn">
+<span class="material-symbols-outlined text-[17px]">insights</span>
+<span class="hidden sm:inline">统计分析</span>
+</button>
+<!-- Mobile Drawer Toggles -->
+<div class="flex items-center gap-1 lg:hidden">
+<button class="p-1.5 rounded-lg bg-white/70 hover:bg-white text-on-surface border border-white" id="toggleLeftBtn" title="交易规则与账本">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+</button>
+<button class="p-1.5 rounded-lg bg-white/70 hover:bg-white text-on-surface border border-white" id="toggleRightBtn" title="触达标的">
+<span class="material-symbols-outlined text-[18px]">view_list</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Secondary Context Bar for Active Pair & Account isolation status -->
+<div class="border-t border-white/50 px-3 sm:px-4 py-1.5 bg-white/40 flex items-center justify-between text-xs">
+<div class="flex items-center gap-2 flex-wrap">
+<div class="flex items-center gap-1 font-semibold text-on-surface">
+<span class="material-symbols-outlined text-secondary text-[16px]">candlestick_chart</span>
+<span>SOL/USDT 永续</span>
+</div>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20">allin3 (3x全仓)</span>
+<span class="text-outline-variant hidden sm:inline">|</span>
+<div class="flex items-center gap-1 text-on-surface-variant font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+<span>等待入场条件 · 待触发</span>
+</div>
+</div>
+<div class="hidden sm:flex items-center gap-2 text-on-surface-variant text-[11px]">
+<span class="material-symbols-outlined text-[15px] text-secondary">allin3 (3x全仓)</span>
+<span>3× 全仓轮次 · 60m收线确认 · 仅限1笔有资持仓</span>
+</div>
+</div>
+</header>
+<!-- ==================== MAIN WORKBENCH CONTENT CANVAS ==================== -->
+<main class="relative z-10 flex-1 flex overflow-hidden p-2 sm:p-3 gap-3">
+<!-- LEFT FLOATING PANEL: 模拟交易簿 (PAPER LEDGER & RULES) -->
+<aside class="w-full sm:w-[380px] lg:w-[410px] xl:w-[430px] h-full flex flex-col apple-glass rounded-2xl p-3 sm:p-3.5 overflow-hidden transition-all duration-300 z-20 shrink-0" id="leftPanel">
+<!-- Panel Header & Local Selector -->
+<div class="pb-3 border-b border-white/70 space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[20px]">account_tree</span>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">模拟交易簿</h2>
+</div>
+<span class="text-[10px] font-label-caps px-2 py-0.5 rounded bg-secondary/10 text-secondary font-semibold border border-secondary/20">
+            沙盒隔离
+          </span>
+</div>
+<!-- Local Account Selector -->
+<div class="bg-white/80 rounded-xl p-2 border border-white shadow-xs">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-medium text-on-surface-variant">当前独立账户</span>
+<select class="bg-transparent text-xs font-semibold text-primary focus:outline-none border-0 py-0 pr-5 pl-1 cursor-pointer" id="leftAccountSelect"><option value="60m">1. 60m (60m主轨)</option><option value="5m">2. 5m (5m研究轨)</option><option value="v3">3. v3 (v3标准)</option><option value="v3add">4. v3add (v3add加仓)</option><option value="spike">5. spike (均线排列分)</option><option value="v3lock">6. v3lock (v3+0.5%利润锁)</option><option selected="" value="allin3">7. allin3 (3x全仓轮次)</option></select>
+</div>
+<p class="text-[11px] text-on-surface-variant mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-[13px] text-primary">lock</span>规则: allin3 (3× 全仓轮次) | 独立资金沙盒</p>
+</div>
+</div>
+<!-- Scrollable Area for Rules & Ledger -->
+<div class="flex-1 overflow-y-auto space-y-3 pt-3 pr-0.5">
+<!-- RULES DISCLOSURE CARD (v3lock 策略机制规范) -->
+<div class="apple-glass-card rounded-xl p-3 border border-white text-xs space-y-2.5"><div class="flex items-center justify-between pb-1.5 border-b border-outline-variant/30"><div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-[17px]">account_balance</span><span class="font-bold text-on-surface text-body-sm font-headline-sm">账户资本与注资概览</span></div><span class="text-[10px] font-label-numeric-sm px-2 py-0.5 rounded-full bg-secondary/10 text-secondary font-semibold border border-secondary/20">第 2 份本金 · 0.50×</span></div><div class="grid grid-cols-2 gap-2 text-center"><div class="p-2 rounded-lg bg-surface-container/60 border border-outline-variant/30"><span class="text-[10px] text-on-surface-variant block">累计本金</span><span class="font-label-numeric-sm font-bold text-on-surface text-[13px]">2,000 USDT</span></div><div class="p-2 rounded-lg bg-tertiary-fixed/30 border border-tertiary-fixed-dim/40"><span class="text-[10px] text-tertiary block">已实现交易盈亏</span><span class="font-label-numeric-sm font-bold text-tertiary text-[13px]">−900 USDT</span></div></div><details class="group rounded-lg bg-white/70 border border-white p-2 text-xs"><summary class="flex items-center justify-between cursor-pointer font-semibold text-on-surface select-none"><span class="flex items-center gap-1 text-[11px]"><span class="material-symbols-outlined text-[15px] text-primary">history</span>补充本金记录 (1笔)</span><span class="material-symbols-outlined text-[15px] text-outline group-open:rotate-180 transition-transform">expand_more</span></summary><div class="mt-2 pt-2 border-t border-outline-variant/30 space-y-1.5 text-[11px]"><div class="flex justify-between"><span class="text-on-surface-variant">注资时间:</span><span class="font-label-numeric-sm font-medium">2026-03-28 14:20 (UTC+8)</span></div><div class="flex justify-between"><span class="text-on-surface-variant">补前净值:</span><span class="font-label-numeric-sm text-tertiary">82.50 USDT (&lt;100 阈值)</span></div><div class="flex justify-between"><span class="text-on-surface-variant">补充金额:</span><span class="font-label-numeric-sm text-secondary font-semibold">+917.50 USDT (补齐至1000)</span></div><div class="flex justify-between"><span class="text-on-surface-variant">补后净值:</span><span class="font-label-numeric-sm text-on-surface font-semibold">1,000.00 USDT</span></div><div class="p-1.5 mt-1 rounded bg-surface-container-high/60 border border-outline-variant/30 text-[10px] text-on-surface-variant leading-tight flex items-start gap-1"><span class="material-symbols-outlined text-[12px] text-primary shrink-0 mt-0.5">info</span><span>系统自动恢复本金，注资绝不计入交易盈亏 (Never treated as trading profits)</span></div></div></details></div><section class="apple-glass-card rounded-xl p-3 border border-white text-xs space-y-2.5"><div class="flex items-center justify-between pb-1.5 border-b border-outline-variant/30"><h3 class="font-headline-sm text-body-md font-bold text-on-surface flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-[17px]">verified</span>allin3 策略机制与风控规范</h3><span class="text-[10px] font-label-numeric-sm px-1.5 py-0.5 rounded bg-primary/10 text-primary font-semibold">SPEC v2.0 · 3x全仓</span></div><div class="space-y-1.5 text-on-surface"><div class="flex items-start gap-1.5"><span class="material-symbols-outlined text-[14px] text-primary mt-0.5">tune</span><p class="font-medium leading-relaxed"><span class="font-semibold text-primary">评分与目标:</span> 最低形态得分 <span class="font-label-numeric-sm font-semibold text-primary">0.60</span>；目标点位锁定对向 1.618 扩展位；以 <span class="font-semibold text-primary">60 分钟 (60m)</span> 确认收线为基准。</p></div><div class="p-2 rounded-lg bg-surface-container-high/60 border border-primary/20 space-y-1"><div class="flex items-start gap-1.5"><span class="material-symbols-outlined text-[15px] text-secondary mt-0.5">bolt</span><p class="text-on-surface leading-relaxed"><span class="font-semibold text-secondary">3× 名义全仓与硬隔离:</span> 拟开仓位按已实现净值计算 3× 杠杆名义规模。同一时间<strong class="text-on-surface">仅允许持有 1 笔有资持仓</strong>；并发触达标的仅以「忙碌阴影 (Busy Shadows)」记录不入场。</p></div></div><div class="flex items-start gap-1.5"><span class="material-symbols-outlined text-[14px] text-primary mt-0.5">shield</span><p class="text-on-surface leading-relaxed"><span class="font-semibold text-on-surface">收线前防守与保本:</span> 收线前设置 <span class="font-label-numeric-sm font-semibold text-tertiary">-30%</span> 价格硬兜底止损；反转确认后自动推进 <span class="font-label-numeric-sm font-semibold text-secondary">+0.17%</span> 保护性保本止损 (保留原有 v3 规范)；亏损硬锁定于该轮次保证金上限，杜绝穿仓。</p></div><div class="flex items-start gap-1.5"><span class="material-symbols-outlined text-[14px] text-primary mt-0.5">autorenew</span><p class="text-on-surface-variant leading-relaxed"><span class="font-semibold text-on-surface">低于100 U 恢复注资机制:</span> 当全平仓后账户净值低于 100 USDT 时，后端自动将余额恢复为 1,000 USDT，本金份数 +1（第 2 份本金），并记录补充账本。</p></div></div><div class="p-2 rounded-lg bg-tertiary-fixed/30 border border-tertiary-fixed-dim/40 text-[11px] text-on-surface-variant flex items-start gap-1.5"><span class="material-symbols-outlined text-tertiary text-[14px] shrink-0 mt-0.5">gavel</span><p><strong class="text-on-tertiary-fixed font-semibold">明确合规提示:</strong> 模拟沙盒环境，不承诺净利润保证，实际交易所滑点及费用自理。</p></div></section>
+<!-- LEDGER TABS & STATE -->
+<div class="space-y-2">
+<!-- Sub-tabs -->
+<div class="flex items-center p-0.5 rounded-xl bg-white/60 border border-white">
+<button class="flex-1 py-1 text-center rounded-lg text-xs font-semibold bg-white text-primary shadow-xs">
+              当前持仓 (0)
+            </button>
+<button class="flex-1 py-1 text-center rounded-lg text-xs font-medium text-on-surface-variant hover:text-on-surface">
+              历史账本 (0)
+            </button>
+<button class="flex-1 py-1 text-center rounded-lg text-xs font-medium text-on-surface-variant hover:text-on-surface">
+              待触发委托 (0)
+            </button>
+</div>
+<!-- Empty Ledger State Card -->
+<div class="apple-glass-card rounded-xl p-5 border border-white text-center flex flex-col items-center justify-center space-y-2">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-primary mb-1">
+<span class="material-symbols-outlined text-[26px]">inbox</span>
+</div>
+<h4 class="font-headline-sm text-body-md font-semibold text-on-surface">暂无活跃订单与持仓记录</h4>
+<p class="text-xs text-on-surface-variant max-w-[270px] leading-relaxed">allin3 专属 3× 全仓沙盒运行中 · 等待形态得分 ≥ 0.60 且 60m 确认收线</p>
+<div class="pt-2">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-label-numeric-sm bg-surface-variant/50 text-on-surface-variant border border-outline-variant/40">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                监听器就绪 (Listening 42 pairs)
+              </span>
+</div>
+</div>
+</div>
+<!-- Account Isolation Banner -->
+<div class="p-2.5 rounded-xl bg-white/70 border border-white text-[11px] text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">security</span>
+<div>
+<span class="font-semibold text-on-surface">账户隔离:</span>
+<span>各独立账户间持仓互不交叉，无交叉保证金侵占。</span>
+</div>
+</div>
+</div>
+<!-- Drawer Close toggle on Mobile -->
+<button class="mt-2 py-2 text-center text-xs font-semibold text-on-surface-variant bg-white/50 rounded-xl sm:hidden" onclick="document.getElementById('leftPanel').classList.add('hidden')">
+        收起模拟交易簿
+      </button>
+</aside>
+<!-- CENTER CHART INTERACTION AREA (SPACIOUS OVERLAY DOCKS) -->
+<div class="flex-1 flex flex-col justify-between pointer-events-none z-10">
+<!-- Top Center Floating Ticker Status Pill -->
+<div class="flex justify-center pointer-events-auto pt-1">
+<div class="apple-glass-dock rounded-2xl px-4 py-1.5 flex items-center gap-3 text-xs shadow-md">
+<div class="flex items-center gap-1.5 font-bold text-on-surface">
+<span>SOL/USDT</span>
+<span class="font-label-numeric-sm text-secondary font-semibold text-[13px]">184.500</span>
+</div>
+<div class="h-3 w-px bg-outline-variant/50"></div>
+<div class="flex items-center gap-1 text-[11px] text-on-surface-variant">
+<span>距周上沿 1.618:</span>
+<span class="font-label-numeric-sm font-semibold text-primary">-1.78%</span>
+</div>
+<div class="h-3 w-px bg-outline-variant/50 hidden sm:block"></div>
+<div class="hidden sm:flex items-center gap-1 text-[11px] text-on-surface-variant">
+<span>锁止目标:</span>
+<span class="font-label-numeric-sm font-semibold text-secondary">对向 1.618 (+0.17%保本)</span>
+</div>
+</div>
+</div>
+<!-- Bottom Floating Apple Glass Toolbar Dock -->
+<div class="flex justify-center pointer-events-auto pb-2">
+<div class="apple-glass-dock rounded-2xl p-1.5 flex items-center gap-1.5 shadow-lg border border-white flex-wrap justify-center">
+<!-- Timeframe selector -->
+<div class="flex items-center bg-white/80 rounded-xl p-0.5 border border-white">
+<button class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary text-on-primary shadow-xs">
+              5m
+            </button>
+<button class="px-2 py-1 rounded-lg text-xs font-medium text-on-surface-variant hover:text-on-surface">
+              15m
+            </button>
+<button class="px-2 py-1 rounded-lg text-xs font-medium text-on-surface-variant hover:text-on-surface">
+              1h
+            </button>
+<button class="px-2 py-1 rounded-lg text-xs font-medium text-on-surface-variant hover:text-on-surface">
+              4h
+            </button>
+<button class="px-2 py-1 rounded-lg text-xs font-medium text-on-surface-variant hover:text-on-surface">
+              1D
+            </button>
+</div>
+<div class="h-5 w-px bg-outline-variant/40 hidden sm:block"></div>
+<!-- Indicator Toggle -->
+<button class="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white/80 hover:bg-white text-xs font-medium text-on-surface border border-white">
+<span class="material-symbols-outlined text-primary text-[16px]">show_chart</span>
+<span>指标: 1.618</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+</button>
+<!-- Zoom Tools -->
+<div class="flex items-center bg-white/80 rounded-xl p-0.5 border border-white">
+<button class="p-1 hover:bg-surface-variant rounded text-on-surface-variant hover:text-on-surface" title="放大">
+<span class="material-symbols-outlined text-[16px]">zoom_in</span>
+</button>
+<button class="p-1 hover:bg-surface-variant rounded text-on-surface-variant hover:text-on-surface" title="缩小">
+<span class="material-symbols-outlined text-[16px]">zoom_out</span>
+</button>
+<button class="p-1 hover:bg-surface-variant rounded text-on-surface-variant hover:text-on-surface" title="全屏视界">
+<span class="material-symbols-outlined text-[16px]">fit_screen</span>
+</button>
+</div>
+<!-- Action Button: 跟随最新单 -->
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-surface-container-highest hover:bg-primary-container text-primary hover:text-on-primary-container font-headline-sm text-xs font-bold transition-all active:scale-95 border border-primary/20">
+<span class="material-symbols-outlined text-[15px]">navigation</span>
+<span>跟随最新单</span>
+</button>
+</div>
+</div>
+</div>
+<!-- RIGHT FLOATING PANEL: 最新触达标的 (LATEST TOUCH LIST 42) -->
+<aside class="w-full sm:w-[320px] lg:w-[340px] xl:w-[360px] h-full flex flex-col apple-glass rounded-2xl p-3 sm:p-3.5 overflow-hidden transition-all duration-300 z-20 shrink-0" id="rightPanel">
+<!-- Panel Header -->
+<div class="pb-3 border-b border-white/70 space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">radar</span>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">最新触达标的</h2>
+</div>
+<span class="text-[11px] font-label-numeric-sm px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+            实时 42
+          </span>
+</div>
+<!-- Search Input -->
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-outline text-[16px]">search</span>
+<input class="w-full bg-white/80 rounded-xl pl-8 pr-3 py-1.5 text-xs text-on-surface placeholder:text-outline border border-white focus:outline-none focus:ring-1 focus:ring-primary shadow-xs font-body-sm" placeholder="搜索标的 (如 SOL, BTC, ETH)..." type="text"/>
+</div>
+<!-- Filter tabs: 全部 42, 上沿 28, 下沿 14, 收藏 5 -->
+<div class="flex items-center p-0.5 rounded-xl bg-white/60 border border-white text-xs">
+<button class="flex-1 py-1 rounded-lg text-center font-semibold bg-white text-primary shadow-xs">
+            全部 42
+          </button>
+<button class="flex-1 py-1 rounded-lg text-center text-on-surface-variant hover:text-on-surface">
+            上沿 28
+          </button>
+<button class="flex-1 py-1 rounded-lg text-center text-on-surface-variant hover:text-on-surface">
+            下沿 14
+          </button>
+<button class="flex-1 py-1 rounded-lg text-center text-on-surface-variant hover:text-on-surface">
+            收藏 5
+          </button>
+</div>
+</div>
+<!-- Realtime 42 Touch Pairs List -->
+<div class="flex-1 overflow-y-auto space-y-1.5 pt-2.5 pr-0.5">
+<!-- Active Row: SOL/USDT (主图选定) -->
+<div class="apple-glass-card rounded-xl p-2.5 border-primary/40 border-2 bg-white/95 relative cursor-pointer hover:shadow-sm transition-all">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-on-surface text-body-md font-headline-sm">SOL/USDT</span>
+<span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-primary text-on-primary">
+                已选定主图
+              </span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm font-bold text-secondary">
+              184.50
+            </span>
+</div>
+<div class="flex items-center justify-between mt-1 text-[11px]">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="px-1.5 py-0.5 rounded bg-tertiary/10 text-tertiary font-semibold text-[10px]">
+                上沿 1.618
+              </span>
+<span>187.854</span>
+</div>
+<span class="font-label-numeric-sm text-outline font-medium">距 1.78%</span>
+</div>
+</div>
+<!-- Row: BTC/USDT -->
+<div class="apple-glass-card rounded-xl p-2.5 border border-white/80 hover:bg-white cursor-pointer transition-all">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-on-surface text-body-sm font-headline-sm">BTC/USDT</span>
+<span class="text-[10px] px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant">永续</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm font-semibold text-on-surface">
+              67,420.0
+            </span>
+</div>
+<div class="flex items-center justify-between mt-1 text-[11px]">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="px-1.5 py-0.5 rounded bg-tertiary/10 text-tertiary font-semibold text-[10px]">
+                上沿 1.618
+              </span>
+<span>68,120.0</span>
+</div>
+<span class="font-label-numeric-sm text-outline font-medium">距 1.03%</span>
+</div>
+</div>
+<!-- Row: ETH/USDT -->
+<div class="apple-glass-card rounded-xl p-2.5 border border-white/80 hover:bg-white cursor-pointer transition-all">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-on-surface text-body-sm font-headline-sm">ETH/USDT</span>
+<span class="text-[10px] px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant">永续</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm font-semibold text-on-surface">
+              2,618.50
+            </span>
+</div>
+<div class="flex items-center justify-between mt-1 text-[11px]">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="px-1.5 py-0.5 rounded bg-secondary/10 text-secondary font-semibold text-[10px]">
+                下沿 1.618
+              </span>
+<span>2,610.00</span>
+</div>
+<span class="font-label-numeric-sm text-outline font-medium">距 0.32%</span>
+</div>
+</div>
+<!-- Row: SUI/USDT -->
+<div class="apple-glass-card rounded-xl p-2.5 border border-white/80 hover:bg-white cursor-pointer transition-all">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-on-surface text-body-sm font-headline-sm">SUI/USDT</span>
+<span class="text-[10px] px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant">永续</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm font-semibold text-on-surface">
+              2.0842
+            </span>
+</div>
+<div class="flex items-center justify-between mt-1 text-[11px]">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="px-1.5 py-0.5 rounded bg-tertiary/10 text-tertiary font-semibold text-[10px]">
+                上沿 1.618
+              </span>
+<span>2.1150</span>
+</div>
+<span class="font-label-numeric-sm text-outline font-medium">距 1.45%</span>
+</div>
+</div>
+<!-- Row: DOGE/USDT -->
+<div class="apple-glass-card rounded-xl p-2.5 border border-white/80 hover:bg-white cursor-pointer transition-all">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-on-surface text-body-sm font-headline-sm">DOGE/USDT</span>
+<span class="text-[10px] px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant">永续</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm font-semibold text-on-surface">
+              0.14280
+            </span>
+</div>
+<div class="flex items-center justify-between mt-1 text-[11px]">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="px-1.5 py-0.5 rounded bg-tertiary/10 text-tertiary font-semibold text-[10px]">
+                上沿 1.618
+              </span>
+<span>0.14550</span>
+</div>
+<span class="font-label-numeric-sm text-outline font-medium">距 1.89%</span>
+</div>
+</div>
+<!-- Row: BNB/USDT -->
+<div class="apple-glass-card rounded-xl p-2.5 border border-white/80 hover:bg-white cursor-pointer transition-all">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-on-surface text-body-sm font-headline-sm">BNB/USDT</span>
+<span class="text-[10px] px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant">永续</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm font-semibold text-on-surface">
+              598.40
+            </span>
+</div>
+<div class="flex items-center justify-between mt-1 text-[11px]">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="px-1.5 py-0.5 rounded bg-secondary/10 text-secondary font-semibold text-[10px]">
+                下沿 1.618
+              </span>
+<span>592.10</span>
+</div>
+<span class="font-label-numeric-sm text-outline font-medium">距 1.05%</span>
+</div>
+</div>
+<!-- Row: AVAX/USDT -->
+<div class="apple-glass-card rounded-xl p-2.5 border border-white/80 hover:bg-white cursor-pointer transition-all">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-on-surface text-body-sm font-headline-sm">AVAX/USDT</span>
+<span class="text-[10px] px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant">永续</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm font-semibold text-on-surface">
+              28.15
+            </span>
+</div>
+<div class="flex items-center justify-between mt-1 text-[11px]">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="px-1.5 py-0.5 rounded bg-tertiary/10 text-tertiary font-semibold text-[10px]">
+                上沿 1.618
+              </span>
+<span>28.70</span>
+</div>
+<span class="font-label-numeric-sm text-outline font-medium">距 1.95%</span>
+</div>
+</div>
+</div>
+<!-- Quick Scan Status Bar -->
+<div class="pt-2 border-t border-white/70 flex items-center justify-between text-[11px] text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+          自动巡检中 (1.618 频段)
+        </span>
+<span class="font-label-numeric-sm">周期: 5m</span>
+</div>
+<!-- Drawer Close on Mobile -->
+<button class="mt-2 py-2 text-center text-xs font-semibold text-on-surface-variant bg-white/50 rounded-xl sm:hidden" onclick="document.getElementById('rightPanel').classList.add('hidden')">
+        收起标的列表
+      </button>
+</aside>
+</main>
+<!-- ==================== MODAL: 统计分析 (STATISTICS MODAL) ==================== -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-on-surface/20 backdrop-blur-md hidden opacity-0 transition-opacity duration-200" id="statsModal">
+<div class="w-full max-w-2xl apple-glass rounded-2xl p-4 sm:p-6 border border-white shadow-2xl relative space-y-4 max-h-[921px] overflow-y-auto">
+<!-- Modal Header -->
+<div class="flex items-center justify-between pb-3 border-b border-white/70">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[24px]">analytics</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">统计分析与账户对照</h3>
+<p class="text-xs text-on-surface-variant">模拟沙盒 6 个独立账户绩效与规则比对</p>
+</div>
+</div>
+<button class="p-1.5 rounded-full hover:bg-white/80 text-outline hover:text-on-surface transition-all" id="closeStatsBtn">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Modal Native Account Selector (Preserving exact 6 options in identical order) -->
+<div class="bg-white/80 rounded-xl p-3 border border-white space-y-1">
+<label class="text-xs font-semibold text-on-surface" for="modalAccountSelect">选择对比账户:</label>
+<select class="w-full bg-white rounded-lg border border-outline-variant/60 text-xs font-semibold text-primary py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary/30" id="modalAccountSelect"><option value="60m">1. 60m (60m主轨)</option><option value="5m">2. 5m (5m研究轨)</option><option value="v3">3. v3 (v3标准)</option><option value="v3add">4. v3add (v3add加仓)</option><option value="spike">5. spike (均线排列分)</option><option value="v3lock">6. v3lock (v3+0.5%利润锁)</option><option selected="" value="allin3">7. allin3 (3x全仓轮次) [当前选定]</option></select>
+</div>
+<!-- Benchmark Matrix Card -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"><div class="apple-glass-card p-2.5 rounded-xl border border-white text-center"><span class="text-[11px] text-on-surface-variant">当前模拟净值</span><p class="font-label-numeric-sm text-body-md font-bold text-on-surface mt-0.5">1,000.00 U</p><span class="text-[10px] text-secondary font-semibold">第 2 份本金 · 0.50×</span></div><div class="apple-glass-card p-2.5 rounded-xl border border-white text-center"><span class="text-[11px] text-on-surface-variant">累计补充本金</span><p class="font-label-numeric-sm text-body-md font-bold text-primary mt-0.5">1,000.00 USDT</p><span class="text-[10px] text-on-surface-variant">补充次数: 1 次</span></div><div class="apple-glass-card p-2.5 rounded-xl border border-white text-center"><span class="text-[11px] text-on-surface-variant">已实现交易净盈亏</span><p class="font-label-numeric-sm text-body-md font-bold text-tertiary mt-0.5">−900.00 U</p><span class="text-[10px] text-tertiary font-medium">剔除补充本金</span></div><div class="apple-glass-card p-2.5 rounded-xl border border-white text-center"><span class="text-[11px] text-on-surface-variant">杠杆 &amp; 并发上限</span><p class="font-label-numeric-sm text-body-md font-bold text-secondary mt-0.5">3× 全仓 (1笔)</p><span class="text-[10px] text-on-surface-variant">忙碌阴影已启用</span></div></div>
+<!-- Mechanism Contrast Disclosure -->
+<div class="apple-glass-card p-3 rounded-xl border border-white text-xs space-y-2 text-on-surface leading-relaxed"><h4 class="font-bold text-primary flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">compare_arrows</span>allin3 轮次策略规范与口径声明</h4><ul class="list-disc list-inside space-y-1 text-on-surface-variant pl-1"><li><strong>3× 名义杠杆与单一并发:</strong> 按当前已实现净值进行 3× 全仓规模轮次，全局仅允许 1 笔实盘持仓，其它标的列入忙碌阴影 (Busy Shadows)。</li><li><strong>风控与硬兜底止损:</strong> 60m 收线前硬兜底价格止损为 −30%；收线确认后推进 +0.17% 保本；亏损硬锁定于该轮次保证金上限，杜绝穿仓。</li><li><strong>自动恢复注资规则:</strong> 交易结束后账户净值 &lt; 100 USDT 自动恢复至 1,000 USDT，本金份数 +1。</li></ul><div class="p-2 mt-2 rounded-lg bg-surface-container/70 border border-primary/20 text-[11px] text-on-surface leading-relaxed flex items-start gap-1.5"><span class="material-symbols-outlined text-primary text-[15px] shrink-0 mt-0.5">verified_user</span><div><strong class="text-primary">口径声明：</strong>真实账户权益曲线含外部注资，已实现交易净盈亏严格剔除补充本金，杜绝虚饰收益。</div></div></div>
+<!-- Footer Buttons -->
+<div class="flex items-center justify-end gap-2 pt-2 border-t border-white/70">
+<button class="px-4 py-1.5 rounded-xl bg-white hover:bg-white/80 text-xs font-semibold text-on-surface border border-white shadow-xs" id="closeStatsBtn2">
+          关闭
+        </button>
+<button class="px-4 py-1.5 rounded-xl bg-primary hover:bg-primary-container text-xs font-semibold text-on-primary shadow-xs">
+          导出本周报告 (PDF)
+        </button>
+</div>
+</div>
+</div>
+<!-- ==================== RESPONSIVE BEHAVIOR SCRIPT ==================== -->
+<script>
+    // Synchronize All Account Selectors
+    const topSelect = document.getElementById('topAccountSelect');
+    const leftSelect = document.getElementById('leftAccountSelect');
+    const modalSelect = document.getElementById('modalAccountSelect');
+
+    function syncAccountSelects(val) {
+      if (topSelect) topSelect.value = val;
+      if (leftSelect) leftSelect.value = val;
+      if (modalSelect) modalSelect.value = val;
+    }
+
+    if (topSelect) topSelect.addEventListener('change', (e) => syncAccountSelects(e.target.value));
+    if (leftSelect) leftSelect.addEventListener('change', (e) => syncAccountSelects(e.target.value));
+    if (modalSelect) modalSelect.addEventListener('change', (e) => syncAccountSelects(e.target.value));
+
+    // Stats Modal Controls
+    const statsModal = document.getElementById('statsModal');
+    const openStatsBtn = document.getElementById('openStatsBtn');
+    const closeStatsBtn = document.getElementById('closeStatsBtn');
+    const closeStatsBtn2 = document.getElementById('closeStatsBtn2');
+
+    function openModal() {
+      statsModal.classList.remove('hidden');
+      setTimeout(() => statsModal.classList.remove('opacity-0'), 10);
+    }
+
+    function closeModal() {
+      statsModal.classList.add('opacity-0');
+      setTimeout(() => statsModal.classList.add('hidden'), 200);
+    }
+
+    if (openStatsBtn) openStatsBtn.addEventListener('click', openModal);
+    if (closeStatsBtn) closeStatsBtn.addEventListener('click', closeModal);
+    if (closeStatsBtn2) closeStatsBtn2.addEventListener('click', closeModal);
+
+    // Responsive Drawers for 390px and 320px
+    const leftPanel = document.getElementById('leftPanel');
+    const rightPanel = document.getElementById('rightPanel');
+    const toggleLeftBtn = document.getElementById('toggleLeftBtn');
+    const toggleRightBtn = document.getElementById('toggleRightBtn');
+
+    if (toggleLeftBtn) {
+      toggleLeftBtn.addEventListener('click', () => {
+        leftPanel.classList.toggle('hidden');
+        if (!leftPanel.classList.contains('hidden') && window.innerWidth < 1024) {
+          rightPanel.classList.add('hidden');
+        }
+      });
+    }
+
+    if (toggleRightBtn) {
+      toggleRightBtn.addEventListener('click', () => {
+        rightPanel.classList.toggle('hidden');
+        if (!rightPanel.classList.contains('hidden') && window.innerWidth < 1024) {
+          leftPanel.classList.add('hidden');
+        }
+      });
+    }
+
+    // Default adjust on small mobile screens (<640px)
+    function handleResize() {
+      if (window.innerWidth < 640) {
+        if (leftPanel) leftPanel.classList.add('hidden');
+        if (rightPanel) rightPanel.classList.add('hidden');
+      } else {
+        if (leftPanel) leftPanel.classList.remove('hidden');
+        if (rightPanel) rightPanel.classList.remove('hidden');
+      }
+    }
+    window.addEventListener('resize', handleResize);
+    // Initial check
+    if (window.innerWidth < 640) {
+      if (leftPanel) leftPanel.classList.add('hidden');
+      if (rightPanel) rightPanel.classList.add('hidden');
+    }
+  </script>
+</body></html>

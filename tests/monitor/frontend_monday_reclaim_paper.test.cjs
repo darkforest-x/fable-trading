@@ -204,3 +204,80 @@ test('paper 12H bookmark survives route parsing and invalid periods keep the def
  assert.equal(ui.route({track:'spike',period:'12H'}).period,'12H');
  assert.equal(ui.route({period:'12Hutc'}).period,'5m');
 });
+
+test('v3lock is an independent optional account with its own funded and shadow ledger',()=>{
+ const d=snapshot(),state=ui.route({track:'v3lock'});
+ d.tracks.v3=track({open:[position({id:31,track:1060})]});
+ d.tracks.v3lock=track({equity:1000,open:[position({id:41,track:4060}),position({id:42,track:4060,taken:0,notional:0})]});
+ assert.equal(state.track,'v3lock');assert.equal(ui.trackLabel(state.track),'v3lock');assert.equal(ui.validate(d),d);
+ assert.deepEqual(ui.rows(d,state).map(p=>p.id),[41]);
+ assert.deepEqual(ui.rows(d,{...state,scope:'shadow'}).map(p=>p.id),[42]);
+ assert.deepEqual(ui.rows(d,ui.route({track:'v3'})).map(p=>p.id),[31]);
+ assert.equal(ui.summary(d.tracks.v3lock).equity,1000);
+ delete d.tracks.v3lock;
+ assert.equal(ui.validate(d),d);assert.deepEqual(ui.rows(d,state),[]);assert.equal(ui.summary(d.tracks.v3lock).equity,undefined);
+ assert.throws(()=>ui.validate({...d,tracks:{...d.tracks,v3lock:track({open:null})}}));
+});
+
+test('v3lock retains v3 score targets and displays the actual long or short protection price',()=>{
+ for(const [score,label] of [[.49,'周一低点'],[.5,'区间 0.618'],[.59999,'区间 0.618'],[.6,'对侧 1.618']]){
+  assert.equal(ui.targetLabel(position({score}),'v3lock'),label);
+  assert.equal(ui.targetLabel(position({score,track:4060})),label);
+ }
+ for(const [side,be_price] of [[1,100.5],[-1,99.5]]){
+  const p=position({track:4060,side,entry:100,score:.6,be_price,be_from_ms:10000,stage:'breakeven'});
+  assert.equal(ui.stopPrice(p),be_price);assert.equal(ui.stage(p,12000),'利润锁保护已启用');
+  const html=ui.rowHTML(p,ui.route({track:'v3lock'}),12000);
+  assert.match(html,new RegExp(String(be_price).replace('.','\\.')));assert.match(html,/对侧 1.618/);
+  assert.equal(ui.stage({...p,stage:'closed',reason:'breakeven'},12000),'利润锁止损');
+  assert.equal(ui.stage({...p,stage:'closed',reason:'reclaimed_inside_be'},12000),'收回但未越过利润锁价');
+ }
+});
+
+test('v3lock rules bind its own offset while inheriting v3 entry, target and sizing configuration',()=>{
+ const d=snapshot();d.tracks.v3lock=track({confirm_minutes:60});d.tracks.v3=track({confirm_minutes:60});
+ d.v3={min_score:.5,far_score:.6,backstop_pct:30,sizing:{fraction:.05,cut:.2262,mean_excess:.1088,cap:.5}};
+ d.breakeven_offset_bp=17;d.v3lock={breakeven_offset_bp:50};
+ const html=ui.rulesHTML(d,'v3lock');
+ for(const p of [/v3lock · 独立模拟账户/,/按评分线性分配/,/0.50%（多加、空减）/,/区间 0.618/,/对侧 1.618/,/30% 兜底/,/确认周期 60 分钟/,/未越过利润锁价，也在该收盘退出/])assert.match(html,p);
+ assert.doesNotMatch(html,/0.17%|NaN|undefined/);assert.match(ui.rulesHTML(d,'v3'),/0.17%/);
+ d.v3lock.breakeven_offset_bp=75;assert.match(ui.rulesHTML(d,'v3lock'),/0.75%/);
+ delete d.v3lock;assert.doesNotMatch(ui.rulesHTML(d,'v3lock'),/0.17%|0.50%|NaN|undefined/);
+});
+
+test('allin3 owns its ledger, far targets and busy shadows without v3 sizing or spike filters',()=>{
+ const d=snapshot(),state=ui.route({track:'allin3'});
+ const p=position({id:51,track:5060,score:.6,remaining_notional:3000,notional:3000});
+ d.tracks.allin3=track({rule:'allin3',confirm_minutes:60,open:[p,{...p,id:52,taken:0,notional:0,remaining_notional:0,note:'busy'}],refills:[]});
+ assert.equal(state.track,'allin3');assert.equal(ui.trackLabel(state.track),'allin3');assert.equal(ui.validate(d),d);
+ assert.deepEqual(ui.rows(d,state).map(p=>p.id),[51]);assert.deepEqual(ui.rows(d,{...state,scope:'shadow'}).map(p=>p.id),[52]);
+ for(const side of [1,-1])assert.equal(ui.targetLabel({...p,side},state.track),'对侧 1.618');
+ assert.equal(ui.targetLabel(p),'对侧 1.618');
+ const html=ui.rowHTML(d.tracks.allin3.open[1],state,10000);
+ assert.match(html,/已有资金仓位/);assert.doesNotMatch(html,/data-rp-close=/);
+ d.allin3={min_score:.6,backstop_pct:30,leverage:3,blowup_below:100};d.breakeven_offset_bp=17;
+ const rules=ui.rulesHTML(d,'allin3');
+ for(const r of [/仅持有 1 笔资金仓位/,/净值 × 3/,/分批平仓按对应份额封顶/,/入场分 ≥ 0.60/,/对侧 1.618/,/30% 价格兜底/,/确认周期 60 分钟/,/0.17%/,/低于 100 USDT/,/本金份数加 1/,/盈亏剔除补充本金/])assert.match(rules,r);
+ assert.doesNotMatch(rules,/总名义敞口上限|按评分线性分配|均线排列分 ≥|0.50%|NaN|undefined/);
+ assert.throws(()=>ui.validate({...d,tracks:{...d.tracks,allin3:{...d.tracks.allin3,refills:[null]}}}));
+ delete d.tracks.allin3;assert.equal(ui.validate(d),d);assert.deepEqual(ui.rows(d,state),[]);
+});
+
+test('capital refills stay outside realized trading PnL and distinct from stake-budget multiples',()=>{
+ const refill={id:1,ms:1000,position_id:51,equity_before:97.9,equity_after:1000};
+ const t=track({rule:'allin3',equity:1000,stakes:2,injected:2000,multiple:.5,refills:[refill]});
+ assert.ok(Math.abs(ui.summary(t).pnl+902.1)<1e-8);
+ assert.equal(ui.capitalLabel(t),'第 2 份本金 · 0.50×');
+ assert.match(ui.capitalHTML(t),/2,000.00 USDT/);assert.match(ui.capitalHTML(t),/本金份数/);
+ const html=ui.refillsHTML(t);
+ for(const r of [/97.90 USDT/,/1,000.00 USDT/,/\+902.10 USDT/,/交易 #51/,/不计入交易盈亏/])assert.match(html,r);
+ assert.ok(Math.abs(ui.summary({...t,equity:1300}).pnl+602.1)<1e-8);
+ assert.equal(ui.summary({...t,rule:'v3'}).pnl,0);
+ assert.equal(ui.summary({...t,refills:[]}).pnl,0);assert.match(ui.refillsHTML({...t,refills:[]}),/尚无补充本金记录/);
+ for(const refills of [undefined,null,[null],[{...refill,equity_before:null}]]){
+  assert.equal(ui.summary({...t,refills}).pnl,null);assert.match(ui.refillsHTML({...t,refills}),/暂不可用/);
+ }
+ assert.equal(ui.summary(undefined,'allin3').pnl,null);
+ assert.equal(ui.capitalLabel(undefined),'第 — 份本金 · —×');
+ assert.equal(ui.refillTotal([{...refill,equity_before:0},refill]),1902.1);
+});

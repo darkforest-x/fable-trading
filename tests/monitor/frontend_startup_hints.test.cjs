@@ -89,12 +89,15 @@ test('cold named-account bookmarks warm only that account actual fill, not 60m o
 });
 
 
-test('spike cold links warm only its funded row and never fall back when absent',()=>{
+for(const key of ['spike','v3lock','allin3'])test(`${key} cold links warm only its funded row and never fall back when absent`,async()=>{
  const p={id:3001,symbol:'SOL-USDT-SWAP',fill_ms:100,entry:10,side:1,taken:1,notional:500};
- const d={tracks:{60:{open:[{...p,symbol:'BTC-USDT-SWAP'}]},spike:{open:[p,{...p,id:3002,symbol:'ETH-USDT-SWAP',taken:0,notional:0,fill_ms:200}]}}};
- assert.equal(paperSymbol(d,new URLSearchParams('track=spike')),'SOL-USDT-SWAP');
- assert.equal(paperSymbol(d,new URLSearchParams('track=spike&trade=3002')),'ETH-USDT-SWAP');
- delete d.tracks.spike;assert.equal(paperSymbol(d,new URLSearchParams('track=spike')),null);
+ const d={tracks:{60:{open:[{...p,symbol:'BTC-USDT-SWAP'}]},[key]:{open:[p,{...p,id:3002,symbol:'ETH-USDT-SWAP',taken:0,notional:0,fill_ms:200}]}}};
+ assert.equal(paperSymbol(d,new URLSearchParams('track='+key)),'SOL-USDT-SWAP');
+ assert.equal(paperSymbol(d,new URLSearchParams('track='+key+'&trade=3002')),'ETH-USDT-SWAP');
+ const h=harness({hash:'#signals?pane=reclaim&track='+key+'&period=1H'});
+ h.calls[0].resolve({ok:true,json:async()=>d});await flush();
+ assert.deepEqual(h.calls.map(c=>c.url),['/api/monday-reclaim-paper','/api/monday-fib/levels?symbol=SOL-USDT-SWAP','/api/monday-fib/candles?symbol=SOL-USDT-SWAP&period=1H&wait_ms=8000']);
+ delete d.tracks[key];assert.equal(paperSymbol(d,new URLSearchParams('track='+key)),null);
 });
 
 for(const period of ['12H','1D'])test(`paper cold ${period} link warms the selected native period`,async()=>{
