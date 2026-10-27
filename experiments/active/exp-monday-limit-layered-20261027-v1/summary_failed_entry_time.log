@@ -1,0 +1,44 @@
+concurrent.futures.process._RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/Users/zhangzc/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/concurrent/futures/process.py", line 264, in _process_worker
+    r = call_item.fn(*call_item.args, **call_item.kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zhangzc/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/concurrent/futures/process.py", line 213, in _process_chunk
+    return [fn(*args) for args in chunk]
+            ^^^^^^^^^
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_limit_layered.py", line 170, in load_symbol
+    entry_t=pd.to_datetime(o.entry_time, utc=True),
+                           ^^^^^^^^^^^^
+  File "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/lib/python3.12/site-packages/pandas/core/generic.py", line 6194, in __getattr__
+    return object.__getattribute__(self, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'DataFrame' object has no attribute 'entry_time'. Did you mean: 'entry_i'?
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_limit_layered.py", line 284, in <module>
+    summarize(a.config, a.workers) if a.summary else run(a.config, a.workers, a.intrabar)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_limit_layered.py", line 210, in summarize
+    got = list(ex.map(load_symbol, [(str(exp), s, RUN.name, slip['non_target_exit'], slip['late_market_entry']) for s in syms], chunksize=4))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zhangzc/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/concurrent/futures/process.py", line 636, in _chain_from_iterable_of_lists
+    for element in iterable:
+                   ^^^^^^^^
+  File "/Users/zhangzc/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/concurrent/futures/_base.py", line 619, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zhangzc/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/concurrent/futures/_base.py", line 317, in _result_or_cancel
+    return fut.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Users/zhangzc/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Users/zhangzc/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+AttributeError: 'DataFrame' object has no attribute 'entry_time'

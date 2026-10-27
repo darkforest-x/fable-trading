@@ -1,3 +1,9 @@
+## 2026-10-27 · Monday1618 layered live entries (rest / close check / late market)
+
+- Owner asked how to run the spike score live when it is only known at the touch close. Layers run in NautilusTrader (`exp-monday-limit-layered-20261027-v1`, builder 44514649f1, summary fixes cec75c58c5 / 32cf41028f; adapter gains fill_close_exit reason 14 and close-time market entries on the reclaim rule, 157 adapter tests pass).
+- Causal plans are far below the leaky backtest: frac N20 3x base legs from 2020, leaky v3_be0 109x DD30 vs A (rest on previous-close score) 3.9x DD77, ABC 4.5x DD60; 2025 is a losing year for A (0.61x). Per-trade: A +146bp vs +238bp.
+- B (exit at touch close when the touch-bar score < 0.5) cuts tails and drawdown but loses per trade (-372 vs -190bp on those 427). C (market at touch close for missed high-score levels) earns +64bp on 227, a fifth of the leaky limit fill. 1m layer not worth a run (<= 53 events). All in sample; paper accounts unchanged. Learnings: `the-touch-bar-score-leak-turned-4x-into-109x.md`, `mixed-datetime-units-break-event-replays-silently.md`.
+
 ## 2026-10-27 · Simulated strategy terminology
 
 - The homepage selector, popup, analytics filter, strategy booklet and related messages consistently use `策略`. Simulation disclosures, account identifiers, stored preferences and all accounting values are preserved. Booklet text generators and current display projections use the same wording.

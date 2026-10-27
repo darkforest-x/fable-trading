@@ -732,11 +732,11 @@ experiments:
     notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
   - experiment_id: exp-monday-limit-layered-20261027-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: running
+    source_commit: 44514649f1
+    status: complete
     question: 'Owner 2026-10-27: the spike paper score is only known at the 5m touch close, too late to rest a live limit. Layers: rest on the previous-close score (A), exit at the touch close when the touch-bar score fails (B), and for levels touched without a resting order enter at market at the touch close with the stop unchanged (C). Which combination keeps return and cuts drawdown?'
     single_variable: 'One layer per variant against its comparator on identical events: rest vs the leaky v3_be0 ledger, rest_chk vs rest, late vs no trade and vs the leaky limit fill; exits, stops, fees and data frozen.'
-    result: pending
+    result: '500 symbols, both paths, 0 errors; rest equals the old v3_be0 ledger wherever nothing changed (0 mismatches). Worse path, 10bp slippage, frac N20 3x (base legs) from 2020: leaky v3_be0 2108 fills +238bp 109x DD30; A rest 2292 +146bp 3.9x DD77 (2025 -33bp 0.61x DD63; last5m 1.86x DD16); AB 4.2x DD63; AC 4.3x DD74; ABC 2519 +108bp 4.5x DD60 (2025 0.97x DD44; last5m 1.66x DD22). G2 pre-only 427: hold -190bp, close exit -372bp (tail <= -1000bp 63 -> 49). G3 full-only 243: 16 past target at the close, 227 late +64bp win 50 vs their leaky limit fill +321bp; entry median 1.8 percent beyond the level. 1m layer bound: 53 of 243 could enter before the 5m close.'
     artifacts: []
     canonical_report: experiments/active/exp-monday-limit-layered-20261027-v1/summary.json
     holdout_consumed: false

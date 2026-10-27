@@ -1,0 +1,7 @@
+# Mixing ns and us datetimes in one frame makes an event replay close nothing, and it still returns a clean 1.0x
+
+- **Problem**: The layered Monday1618 summary replayed fills in the frac slot simulator. Every causal plan returned exactly 1.0x, 0% drawdown and 0 liquidations, while the reference plan returned 109x.
+- **Dead ends**: Suspecting NaN nets or MAE. Both were complete. A first summary attempt failed earlier on a market-mode ledger with no `entry_time` column. The fix built those times from the bar index, which is ns, while exits still parsed from strings to us (pandas 3). After concat the column became ns, and `astype('int64')` put entries at 1.6e18 and exits at 1.6e15.
+- **What worked**: Debugging four symbols showed `entry_t datetime64[ns]`, `exit_t datetime64[us]`. Cast both to `as_unit('ns')` at the source and again right before `astype('int64')`. The replay then took trades as expected.
+- **General rule**: Never convert datetimes to integers without pinning the unit first. A replay whose result is exactly its starting value (1.0x, 0 DD) is a broken replay, not a flat strategy. Assert that every exit_ns ≥ entry_ns before simulating.
+- **Related**: `yoyo/evaluation/monday_limit_layered.py` (`load_symbol`, `summarize`), `yoyo/evaluation/monday_limit_return_opt.frac`; failed outputs kept as `summary_failed_mixed_units.json/.log` and `summary_failed_entry_time.log` in `exp-monday-limit-layered-20261027-v1`.
