@@ -45,3 +45,13 @@ test('double-clicks share one POST and uncertain retries preserve request identi
  await assert.rejects(uncertain.submit(position(),25));await uncertain.submit(position(),25);assert.equal(keys[0],keys[1]);
  await assert.rejects(uncertain.submit(position(),0));assert.equal(keys.length,2);
 });
+
+test('both v3add20 legs cap their own partial-close loss using configured leverage',()=>{
+ for(const track of [6060,6061]){
+  const p=position({track,margin_leverage:3,notional:180,remaining_notional:150,mark:1});
+  assert.equal(estimate(p,100).pnl,-50);assert.equal(estimate(p,50).pnl,-25);
+  assert.equal(estimate({...p,side:-1,mark:300},25).pnl,-12.5);
+  assert.equal(estimate({...p,margin_leverage:4},100).pnl,-37.5);
+  for(const margin_leverage of [null,undefined,0,-1])assert.equal(estimate({...p,margin_leverage},100),null);
+ }
+});

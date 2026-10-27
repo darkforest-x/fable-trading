@@ -8,6 +8,7 @@
  * Fifth account/order scores: Stitch f56301aa72694cb58f4450afb088c191.
  * Sixth account/profit lock: Stitch 071103a8b81847049747df436aeec779.
  * Seventh account/capital refills: Stitch b218f8c044f442c7bb5650a93a42d7f3.
+ * Eighth account/dynamic margin: Stitch a4e9abe06abd4685af45da545b6003d1.
  */
 (() => {
   'use strict';
@@ -24,12 +25,14 @@
   const validSymbol = value => /^[A-Z0-9]{1,32}-USDT-SWAP$/.test(String(value || ''));
   const base = value => validSymbol(value) ? value.slice(0,-10) : String(value || '未知合约');
   const funded = row => row.taken === 1 && finite(row.notional) && row.notional > 0;
-  const TRACKS = ['60','5','v3','v3add','spike','v3lock','allin3'];
-  const trackLabel = key => ({60:'60m',5:'5m',v3:'v3',v3add:'v3add',spike:'spike',v3lock:'v3lock',allin3:'allin3'}[key] || '未知账户');
+  const TRACKS = ['60','5','v3','v3add','spike','v3lock','allin3','v3add20'];
+  const trackLabel = key => ({60:'60m',5:'5m',v3:'v3',v3add:'v3add',spike:'spike',v3lock:'v3lock',allin3:'allin3',v3add20:'v3add20'}[key] || '未知账户');
+  const isAddTrack = key => ['v3add','v3add20'].includes(key);
+  const marginLeverage = (data,key) => ['spike','allin3','v3add20'].includes(key) ? data?.[key]?.leverage : null;
   const orderLabel = value => Number.isInteger(value) && value >= 0 && value <= 4 ? `排列 ${value}/4` : '排列 —';
   function targetLabel(row, track='60', config={min_score:.5,far_score:.6}) {
     if (track==='allin3' || row.track===5060) return '对侧 1.618';
-    if (['v3','v3add','v3lock'].includes(track) || [1060,2060,2061,4060].includes(row.track)) {
+    if (['v3','v3add','v3lock','v3add20'].includes(track) || [1060,2060,2061,4060,6060,6061].includes(row.track)) {
       if (!finite(row.score)) return '止盈目标';
       if (row.score >= config.far_score) return '对侧 1.618';
       if (row.score >= config.min_score) return '区间 0.618';
@@ -149,23 +152,25 @@
     return `<span class="rp-score${high?' is-high':''}" title="${known?`入场评分 ${esc(score)}`:'暂无评分'} · 大于 0.5 高亮"><small>评分</small><strong>${esc(label)}</strong></span>`;
   }
   // Pending adds have zero allocated notional. The parent's original notional
-  // is their intended ceiling, not a reserved balance or an executed position.
-  function pendingHTML(track, state, now) {
-    if (state.track !== 'v3add' || state.tab !== 'open' || state.scope === 'shadow' || !track) return '';
+  // is the original v3add ceiling; v3add20 recomputes sizing when the add fills.
+  function pendingHTML(track, state, now, config={}) {
+    if (!isAddTrack(state.track) || state.tab !== 'open' || state.scope === 'shadow' || !track) return '';
     const pending=(track.pending_adds||[]).filter(p=>p.symbol.toUpperCase().includes(state.q.trim().toUpperCase()));
     return `<section class="rp-pending" aria-label="待成交加仓"><h3>待成交加仓 <span>${pending.length}</span></h3><p>未入场 · 不计入持仓和盈亏</p>${pending.length?pending.map(p=>{
       const parent=track.open.find(row=>row.id===p.parent_id);
-      return `<article class="rp-pending-order"><header><button type="button" data-rp-symbol="${esc(p.symbol)}">${esc(base(p.symbol))} <small>${sideLabel(p)}</small></button><span>主单 #${esc(p.parent_id)}</span></header><dl>${detail('挂单限价',price(p.entry))+detail('计划本金上限',parent&&finite(parent.notional)?`${num(parent.notional)} USDT`:'—')+detail('有效截止 · 北京',date(p.decision_ms))}</dl><small>${p.decision_ms<=now?'等待后台结算':'主单确认收盘前有效'} · 成交金额受剩余额度限制</small></article>`;
+      return `<article class="rp-pending-order"><header><button type="button" data-rp-symbol="${esc(p.symbol)}">${esc(base(p.symbol))} <small>${sideLabel(p)}</small></button><span>主单 #${esc(p.parent_id)}</span></header><dl>${detail('挂单限价',price(p.entry))+(state.track==='v3add20'?detail('成交名义本金',`成交时净值 ÷ ${num(config?.slots,0)} × ${num(config?.leverage,0)}`):detail('计划本金上限',parent&&finite(parent.notional)?`${num(parent.notional)} USDT`:'—'))+detail('有效截止 · 北京',date(p.decision_ms))}</dl><small>${p.decision_ms<=now?'等待后台结算':'主单确认收盘前有效'} · ${state.track==='v3add20'?'按成交时净值重算，满仓或保证金不足则取消':'成交金额受剩余额度限制'}</small></article>`;
     }).join(''):'<p>当前没有待成交加仓单</p>'}</section>`;
   }
   function rulesHTML(data, key) {
-    const track=data?.tracks?.[key], v3=['v3','v3add','v3lock'].includes(key), spike=key==='spike', allin=key==='allin3', sp=data?.spike, ai=data?.allin3, config=data?.v3, sizing=v3?config?.sizing:data?.sizing;
-    const lock=key==='v3lock', protection=lock?'利润锁价':'保本价';
+    const track=data?.tracks?.[key], v3=['v3','v3add','v3lock','v3add20'].includes(key), spike=key==='spike', allin=key==='allin3', sp=data?.spike, ai=data?.allin3, config=data?.v3, sizing=v3?config?.sizing:data?.sizing;
+    const add20=key==='v3add20', addConfig=data?.[key], lock=key==='v3lock', protection=lock?'利润锁价':'保本价';
     const offset=lock?data?.v3lock?.breakeven_offset_bp:data?.breakeven_offset_bp;
     const baseAllocation=v3
       ? `单笔名义本金按评分线性分配：净值 × min(${num(sizing?.fraction*100)}% × (分数 − ${num(sizing?.cut,4)}) / ${num(sizing?.mean_excess,4)}, ${num(sizing?.cap*100)}%)`
       : `每笔最多按当时净值的 ${num(sizing?.fraction*100,0)}% 分配名义本金`;
-    const allocationRule=allin
+    const allocationRule=add20
+      ? `最多 ${num(addConfig?.slots,0)} 笔资金仓位（主单与已成交加仓合计），${num(addConfig?.leverage,0)} 倍杠杆；每笔成交保证金为成交时已实现净值 ÷ ${num(addConfig?.slots,0)}，名义本金为保证金 × ${num(addConfig?.leverage,0)}；总保证金不超过净值。每笔亏损按该笔保证金封顶，分批平仓按对应份额封顶；主单遇到满仓或保证金不足时保留为影子单`
+      :allin
       ? `同一时间仅持有 1 笔资金仓位；开仓保证金为当时全部已实现净值，名义本金为净值 × ${num(ai?.leverage,0)}；单笔亏损按保证金封顶，分批平仓按对应份额封顶`
       :spike
       ? `最多 ${num(sp?.slots,0)} 个资金仓位，${num(sp?.leverage,0)} 倍杠杆；开仓保证金为当时已实现净值 ÷ ${num(sp?.slots,0)}，名义本金为保证金 × ${num(sp?.leverage,0)}；单笔亏损按该笔保证金封顶`
@@ -174,8 +179,8 @@
     return `<p>${trackLabel(key)} · 独立模拟账户。各账户分别记账，初始资金各 ${num(track?.start_equity)} USDT；${allocationRule}。影子记录不占用资金、不改变净值。</p>
       ${allin?`<p>入场分 ≥ ${num(ai?.min_score)} 才记录交易；已有资金仓位时，后续达标触价保留为影子单。完全平仓后净值低于 ${num(ai?.blowup_below,0)} USDT，后台恢复至 ${num(track?.start_equity)} USDT，本金份数加 1，并记录补充本金。累计本金按每份初始资金 × 本金份数计算，本金倍数为净值 ÷ 累计本金，不是交易收益率。已实现交易盈亏剔除补充本金净入账额。</p>`:''}
       ${spike?`<p>入场分 ≥ ${num(sp?.min_score,2)} 且均线排列分 ≥ ${num(sp?.min_order,0)} 才可占用资金仓位。排列分来源 OKX · 15m，按触价时已闭合的 K 线计算，满分 4。高分信号因排列分不足、排列分缺失或仓位已满而未分配资金时，保留为影子单；入场分不足仅保留触价记录。币安排列线尚未接入。</p>`:''}
-      <p>1.618 限价入场；${targets}确认周期 ${num(track?.confirm_minutes,0)} 分钟。确认收盘未收回入场价则退出；已收回但未越过${protection}，也在该收盘退出。收回且越过后，止损移至${key==='v3add'?'主单':''}入场价向盈利方向偏移 ${num(offset/100)}%（多加、空减）。旧单以实际记录的保护价为准，${lock?'利润锁':'保本'}退出仍有成交费用。</p>
-      ${key==='v3add'?`<p>分数从 ${num(data?.v3add?.from_score,2)} 起，在主单入场价逆向 ${num(data?.v3add?.drawdown_pct,0)}% 挂等名义本金加仓，主单确认收盘前有效。加仓共用主单的确认、保本、兜底和目标。主单提前结束会取消未成交加仓；同分钟先触及加仓再触及兜底时，按后台路径结算。待成交单单列，不计入持仓和盈亏；主单与已成交加仓分别计笔。</p>`:''}
+      <p>1.618 限价入场；${targets}确认周期 ${num(track?.confirm_minutes,0)} 分钟。确认收盘未收回入场价则退出；已收回但未越过${protection}，也在该收盘退出。收回且越过后，止损移至${isAddTrack(key)?'主单':''}入场价向盈利方向偏移 ${num(offset/100)}%（多加、空减）。旧单以实际记录的保护价为准，${lock?'利润锁':'保本'}退出仍有成交费用。</p>
+      ${isAddTrack(key)?`<p>分数从 ${num(addConfig?.from_score,2)} 起，在主单入场价逆向 ${num(addConfig?.drawdown_pct,0)}% 挂一次加仓，${add20?'加仓成交时按当时净值重新计算保证金和名义本金，占用独立仓位；满仓或保证金不足则取消。':'名义本金上限为主单原始名义本金。'}主单确认收盘前有效。加仓共用主单的确认、保本、兜底和目标。主单提前结束会取消未成交加仓；同分钟先触及加仓再触及兜底时，按后台路径结算。待成交单单列，不计入持仓和盈亏；主单与已成交加仓分别计笔。</p>`:''}
       <p>Maker ${num(data?.fees_bp?.maker/100)}% / Taker ${num(data?.fees_bp?.taker/100)}%（单边）；退出滑点情景 ${num(data?.fees_bp?.report_slippage/100)}%。成交费用以每条记录为准。</p>
       <p>所选账户入场分数门槛 ${num(allin?ai?.min_score:spike?sp?.min_score:v3?config?.min_score:data?.model?.threshold,4)}，分数不代表胜率。触价列表共用原始信号，其评分结果按 v2 门槛 ${num(data?.model?.threshold,4)} 显示，资金分配以各账户交易记录为准。模型训练截止 ${esc(data?.model?.trained_before||'—')}；训练行情与当前 OKX 行情存在来源差异。BTC、ETH、XAU、XAG、PAXG、XAUT 仅记录触价。</p>
       <p>统计为所选账户全部已结束资金交易；已结束与触价列表各最多返回最近 100 条，筛选不改变累计统计。部分平仓立即计入已实现盈亏，已平仓统计仅计完全结束的每笔持仓；账户净值不含浮动盈亏。</p>`;
@@ -192,7 +197,7 @@
         +detail('评分说明','通过评分表示满足入场门槛，是否计入资金以对应轨道的交易记录为准。')+(row.error?detail('读取错误',esc(row.error)):'')
       : detail('入场时间',date(row.fill_ms))+detail('确认时间',date(row.decision_ms))+detail('名义本金',isFunded?`${num(row.notional)} USDT`:'影子记录，不占用资金')
         +detail('保护止损',row.be_from_ms?`${price(stopPrice(row))} · ${date(row.be_from_ms)} 起生效`:finite(row.backstop)?`${price(row.backstop)} · 确认前兜底`:'未启用入场价止损')
-        +(state.track==='v3add'?detail('交易关联',esc(legLabel(row))):'')
+        +(isAddTrack(state.track)?detail('交易关联',esc(legLabel(row))):'')
         +(row.parent_id?detail('主单确认参考价',price(row.reclaim_ref)):'')
         +(closed ? detail('退出价格',price(row.exit_price))+detail('毛收益',bp(row.gross_bp))+detail('手续费',finite(row.fee_bp)?`${num(row.fee_bp/100)}%`:'—')
           +detail('净收益',bp(row.net_bp))+detail('滑点情景净收益',bp(row.net_slip_bp))
@@ -204,10 +209,10 @@
     const selected=event?state.symbol===row.symbol:state.trade===String(row.id);
     const selectAttr=event?`data-rp-symbol="${esc(row.symbol)}"`:`data-rp-trade="${esc(row.id)}"`;
     const meta=event?date(row.candle_ms):value;
-    const orderMeta=event||state.track==='spike'?`<span class="rp-order-meta" title="OKX · 15m · 触价时排列分">${esc(orderLabel(row.ema_order))}${!event&&!isFunded?`<br>${esc(allocation(row))}`:''}</span>`:!event&&state.track==='allin3'&&!isFunded?`<span class="rp-order-meta">${esc(allocation(row))}</span>`:'';
-    return `<article class="rp-record" data-rp-record="${esc(key)}" data-symbol="${esc(row.symbol)}" data-selected="${selected}"><div class="rp-record-main"><button type="button" class="rp-row-select" ${selectAttr} data-rp-focus="select" aria-pressed="${selected}" aria-label="查看 ${esc(base(row.symbol))} ${event?'触价':'开仓'} K 线"></button>${coinHTML(row,platform,`<span class="${row.side===1?'rp-positive':row.side===-1?'rp-negative':''}">${sideLabel(row)}</span>${!event&&state.track==='v3add'?` · ${esc(legLabel(row))}`:''} · ${event?date(row.candle_ms):`<span class="${closed?(isFunded?tone(row.pnl):''):tone(row.unrealized_bp)}">${value}</span>`}${orderMeta}`)}${scoreHTML(row.score)}</div><div class="rp-record-bottom"><span class="rp-record-meta ${event?'':closed?tone(row.pnl):tone(row.unrealized_bp)}">${meta}</span><a href="${esc(list.inspectionURL(row.symbol,state.period))}" data-rp-focus="patrol" aria-label="查看 ${esc(base(row.symbol))} 巡检 K 线详情" title="巡检 K 线详情"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></a><button type="button" data-rp-detail="${esc(key)}" data-rp-focus="detail" aria-label="展开 ${esc(base(row.symbol))} 明细" aria-expanded="false" aria-controls="rp-detail-${esc(key)}"><span aria-hidden="true">⌄</span></button></div>${closeButton}<section id="rp-detail-${esc(key)}" class="rp-row-detail" hidden><button type="button" data-rp-favorite="${esc(row.symbol)}" data-rp-focus="favorite" class="rp-detail-favorite" aria-pressed="${favorite}" aria-label="${favorite?'取消收藏':'收藏'} ${esc(base(row.symbol))}"><svg width="17" height="17" viewBox="0 0 24 24" fill="${favorite?'currentColor':'none'}" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/></svg><span>${favorite?'取消收藏':'收藏币种'}</span></button><div class="rp-detail-fields">${fields}</div><dl>${orderInfo}${more}</dl>${exits}<a class="rp-chart-link" data-rp-focus="chart" href="${esc(chartLink(row.symbol,state.track))}">查看 ${esc(base(row.symbol))} 的 1.618 图表 ↗</a></section></article>`;
+    const orderMeta=event||state.track==='spike'?`<span class="rp-order-meta" title="OKX · 15m · 触价时排列分">${esc(orderLabel(row.ema_order))}${!event&&!isFunded?`<br>${esc(allocation(row))}`:''}</span>`:!event&&['allin3','v3add20'].includes(state.track)&&!isFunded?`<span class="rp-order-meta">${esc(allocation(row))}</span>`:'';
+    return `<article class="rp-record" data-rp-record="${esc(key)}" data-symbol="${esc(row.symbol)}" data-selected="${selected}"><div class="rp-record-main"><button type="button" class="rp-row-select" ${selectAttr} data-rp-focus="select" aria-pressed="${selected}" aria-label="查看 ${esc(base(row.symbol))} ${event?'触价':'开仓'} K 线"></button>${coinHTML(row,platform,`<span class="${row.side===1?'rp-positive':row.side===-1?'rp-negative':''}">${sideLabel(row)}</span>${!event&&isAddTrack(state.track)?` · ${esc(legLabel(row))}`:''} · ${event?date(row.candle_ms):`<span class="${closed?(isFunded?tone(row.pnl):''):tone(row.unrealized_bp)}">${value}</span>`}${orderMeta}`)}${scoreHTML(row.score)}</div><div class="rp-record-bottom"><span class="rp-record-meta ${event?'':closed?tone(row.pnl):tone(row.unrealized_bp)}">${meta}</span><a href="${esc(list.inspectionURL(row.symbol,state.period))}" data-rp-focus="patrol" aria-label="查看 ${esc(base(row.symbol))} 巡检 K 线详情" title="巡检 K 线详情"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></a><button type="button" data-rp-detail="${esc(key)}" data-rp-focus="detail" aria-label="展开 ${esc(base(row.symbol))} 明细" aria-expanded="false" aria-controls="rp-detail-${esc(key)}"><span aria-hidden="true">⌄</span></button></div>${closeButton}<section id="rp-detail-${esc(key)}" class="rp-row-detail" hidden><button type="button" data-rp-favorite="${esc(row.symbol)}" data-rp-focus="favorite" class="rp-detail-favorite" aria-pressed="${favorite}" aria-label="${favorite?'取消收藏':'收藏'} ${esc(base(row.symbol))}"><svg width="17" height="17" viewBox="0 0 24 24" fill="${favorite?'currentColor':'none'}" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/></svg><span>${favorite?'取消收藏':'收藏币种'}</span></button><div class="rp-detail-fields">${fields}</div><dl>${orderInfo}${more}</dl>${exits}<a class="rp-chart-link" data-rp-focus="chart" href="${esc(chartLink(row.symbol,state.track))}">查看 ${esc(base(row.symbol))} 的 1.618 图表 ↗</a></section></article>`;
   }
-  const api={finite,esc,num,signed,bp,price,funded,orderLabel,TRACKS,trackLabel,targetLabel,stopPrice,stage,signalStatus,allocation,route,chartLink,validate,summary,refillTotal,capitalLabel,capitalHTML,refillsHTML,rows,createFeed,rowHTML,pendingHTML,rulesHTML};
+  const api={finite,esc,num,signed,bp,price,funded,orderLabel,marginLeverage,TRACKS,trackLabel,targetLabel,stopPrice,stage,signalStatus,allocation,route,chartLink,validate,summary,refillTotal,capitalLabel,capitalHTML,refillsHTML,rows,createFeed,rowHTML,pendingHTML,rulesHTML};
   if(typeof module!=='undefined' && module.exports){module.exports=api;return;}
   const root=document.getElementById('monday-reclaim-paper');
   if(!root)return;
@@ -252,7 +257,7 @@
       if(button.dataset.rpFavorite){preferences.toggle(button.dataset.rpFavorite);watch?.refreshPreferences();render(feed.getState());return;}
       if(button.dataset.rpSymbol){state.symbol=button.dataset.rpSymbol;state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());if(matchMedia('(max-width:700px)').matches)setRecords(false);return;}
 
-      if(button.dataset.rpClose){const data=feed.getState().data,p=data?.tracks[state.track]?.open.find(p=>String(p.id)===button.dataset.rpClose);if(p)closer.open({...p,margin_leverage:state.track==='spike'?data.spike?.leverage:state.track==='allin3'?data.allin3?.leverage:null});}
+      if(button.dataset.rpClose){const data=feed.getState().data,p=data?.tracks[state.track]?.open.find(p=>String(p.id)===button.dataset.rpClose);if(p)closer.open({...p,margin_leverage:marginLeverage(data,state.track)});}
       if(button.dataset.rpTab){state.tab=button.dataset.rpTab;shown=50;sync();render(feed.getState());}
       if(button.dataset.rpTrade){state.symbol='';state.trade=button.dataset.rpTrade;pinned=window.SpikeReclaimChart.select(feed.getState().data?.tracks[state.track],state.trade);chart.resetFocus();sync();render(feed.getState());if(matchMedia('(max-width:700px)').matches)setRecords(false);}
       const action=button.dataset.rpAction;
@@ -350,7 +355,7 @@
     }
 
     root.querySelector('[data-rp-action="more"]').hidden=items.length<=shown;
-    replace('pending',pendingHTML(track,state,data?.now_ms));
+    replace('pending',pendingHTML(track,state,data?.now_ms,data?.v3add20));
     el('record-note').textContent=state.tab==='events' ? '共用触价记录 · 评分结果为 v2 门槛；评分 > 0.5 高亮，非胜率。各账户是否入场请看其持仓与已结束记录。' : state.tab==='open' ? '参考浮动收益未扣费；账户净值包含已减仓盈亏，不包含余仓浮盈。' : '净收益已扣手续费；滑点情景仅供对照，不重复扣入账户净值。';
     replace('rules',rulesHTML(data,state.track));
   }

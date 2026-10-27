@@ -30,9 +30,9 @@ test('breakdowns label tranche counts separately and escape unexpected symbols',
 });
 
 test('named accounts validate their exact internal analytics identity and reject another account',()=>{
- for(const [key,id] of [['v3','1060'],['v3add','2060'],['spike','3060'],['v3lock','4060'],['allin3','5060']]){
+ for(const [key,id] of [['v3','1060'],['v3add','2060'],['spike','3060'],['v3lock','4060'],['allin3','5060'],['v3add20','6060']]){
   assert.equal(ui.validate({...data,track:id},key,0).track,id);
-  for(const wrong of ['60','5',key,...['1060','2060','3060','4060','5060'].filter(v=>v!==id)])assert.throws(()=>ui.validate({...data,track:wrong},key,0));
+  for(const wrong of ['60','5',key,...['1060','2060','3060','4060','5060','6060','6061'].filter(v=>v!==id)])assert.throws(()=>ui.validate({...data,track:wrong},key,0));
  }
  const html=ui.breakdownHTML({...data,by_reason:[{reason:'backstop',exit_count:1,realized_pnl:-30},{reason:'reclaimed_inside_be',exit_count:1,realized_pnl:-.07}]});
  assert.match(html,/兜底止损/);assert.match(html,/收回但未越过保本价/);

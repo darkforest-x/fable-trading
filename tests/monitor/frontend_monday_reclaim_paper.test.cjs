@@ -281,3 +281,22 @@ test('capital refills stay outside realized trading PnL and distinct from stake-
  assert.equal(ui.capitalLabel(undefined),'第 — 份本金 · —×');
  assert.equal(ui.refillTotal([{...refill,equity_before:0},refill]),1902.1);
 });
+
+test('v3add20 preserves its route, both legs, targets and capacity shadows',()=>{
+ const d=snapshot(),state=ui.route({track:'v3add20'}),parent=position({id:6060,track:6060,score:.7}),child=position({id:6061,track:6061,parent_id:6060,score:.55});
+ d.tracks.v3add20=track({open:[parent,child],pending_adds:[]});assert.equal(ui.validate(d),d);assert.equal(state.track,'v3add20');assert.equal(ui.trackLabel(state.track),'v3add20');assert.equal(ui.rows(d,state).length,2);
+ assert.equal(ui.targetLabel(parent,state.track),'对侧 1.618');assert.equal(ui.targetLabel(child,state.track),'区间 0.618');assert.equal(ui.targetLabel({...child,score:.45},state.track),'周一低点');
+ const html=ui.rowHTML(child,state,12000);assert.match(html,/加仓 · 主单 #6060/);assert.match(html,/交易关联/);
+ for(const [note,label] of [['no_slot','仓位已满'],['no_capacity','额度不足']])assert.match(ui.rowHTML({...parent,taken:0,notional:0,note},state,12000),new RegExp(label));
+ assert.equal(ui.rows(snapshot(),state).length,0);assert.throws(()=>ui.validate({...d,tracks:{...d.tracks,v3add20:track({pending_adds:[null]})}}));
+});
+test('v3add20 pending size is dynamic and current rules never inherit score-linear sizing',()=>{
+ const parent=position({id:10,notional:777}),pending=position({id:11,parent_id:10,stage:'pending_fill',notional:0,taken:0});
+ const d=snapshot();d.tracks.v3add20=track({confirm_minutes:60,open:[parent],pending_adds:[pending]});d.v3={min_score:.5,far_score:.6,backstop_pct:30};d.v3add20={from_score:.6,drawdown_pct:5,slots:20,leverage:3};d.breakeven_offset_bp=17;
+ const html=ui.pendingHTML(d.tracks.v3add20,ui.route({track:'v3add20'}),12000,d.v3add20);
+ assert.match(html,/成交时净值 ÷ 20 × 3/);assert.doesNotMatch(html,/777|计划本金上限/);assert.match(html,/满仓或保证金不足则取消/);
+ assert.equal(ui.pendingHTML(d.tracks.v3add20,ui.route({track:'v3add20',scope:'shadow'}),12000,d.v3add20),'');
+ const rules=ui.rulesHTML(d,'v3add20');for(const t of ['最多 20','3 倍','主单与已成交加仓合计','总保证金不超过净值','0.17%','主单入场价','成交时','30%'])assert.ok(rules.includes(t),t);
+ assert.doesNotMatch(rules,/按评分线性分配|总名义敞口上限|等名义本金加仓/);
+ assert.equal(ui.marginLeverage(d,'v3add20'),3);assert.equal(ui.marginLeverage({},'v3add20'),undefined);assert.equal(ui.marginLeverage(d,'v3add'),null);
+});

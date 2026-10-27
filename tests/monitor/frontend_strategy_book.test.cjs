@@ -3,10 +3,10 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const ui=require('../../yoyo/monitor/static/reclaim-strategy-book.js');
 const data=require('../../yoyo/monitor/static/strategy-booklet/research.json');
 const paper=require('../../yoyo/monitor/static/monday-reclaim-paper.js');
-test('all seven accounts have separate selection and accessible booklet buttons',()=>{
+test('all eight accounts have separate selection and accessible booklet buttons',()=>{
  const html=ui.pickerHTML(paper.TRACKS);
  for(const t of paper.TRACKS){assert.ok(html.includes(`data-strategy-select="${t}"`));assert.ok(html.includes(`data-strategy-book="${t}"`));assert.ok(data.accounts[t]);assert.doesNotThrow(()=>ui.researchHTML(data,t));}
- assert.equal((html.match(/<button /g)||[]).length,14);
+ assert.equal((html.match(/<button /g)||[]).length,16);
  for(const match of html.matchAll(/<button[^>]*>([\s\S]*?)<\/button>/g))assert.doesNotMatch(match[1],/<button/);
 });
 test('historical source projection preserves saved numbers and excludes broken slot sizing',()=>{
@@ -24,4 +24,14 @@ test('historical source projection preserves saved numbers and excludes broken s
 test('research tables escape text and show missing values without fabricating zero',()=>{
  const html=ui.tableHTML(['<img>'],[['<script>',null,5]]);assert.match(html,/&lt;img&gt;/);assert.match(html,/&lt;script&gt;/);assert.match(html,/>—</);
  const options=ui.barOptions({labels:['A','B'],values:[null,1.5],unit:'倍'});assert.deepEqual(options.series[0].data,[null,1.5]);assert.equal(options.series[0].type,'bar');
+});
+
+test('v3add20 uses the corrected dynamic-margin study and labels historical BE0',()=>{
+ const r=data.accounts.v3add20,s=r.sources[0];assert.match(s.path,/return-opt-20261027-v2/);
+ const original=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../..',s.path))).results.settings;
+ assert.equal(r.rows[0][1],original['v3add|frac|N20|L3'].y2020_2024.final_multiple);
+ assert.equal(r.rows.at(-1)[1],original['v3add|frac|N20|L3'].from_2020.final_multiple);
+ assert.equal(r.capital_rows[1][1],original['v3add|slots|N20|L3'].from_2020.final_multiple);
+ assert.match(r.note,/BE0/);assert.match(r.note,/当前保护价.*0.17%/);assert.match(ui.researchHTML(data,'v3add20'),/未保存连续历史资金路径/);
+ assert.equal(r.charts.length,3);assert.equal(r.images,undefined);
 });
