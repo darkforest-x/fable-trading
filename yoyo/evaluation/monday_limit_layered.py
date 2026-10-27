@@ -135,7 +135,150 @@ def run(config, workers, intrabar):
             print(json.dumps(dict(progress=k, total=len(todo), **r)), flush=True)
 
 
+def load_symbol(args):
+    """Worse path per trade with slippage, MAE from the entry's first exposed bar, and parity against v3_be0."""
+    exp, symbol, ref_run, slip_exit, slip_late = args
+    from yoyo.evaluation.monday_limit_reclaim_inputs import load_job
+    from yoyo.evaluation.monday_limit_reclaim_patterns import SRC
+    paths, issues, parity = {}, [], 0
+    for p in ('ohlc', 'olhc'):
+        d = Path(exp)/p/'symbols'/symbol
+        if (d/'error.json').exists() or not (d/'done.json').exists():
+            issues.append(f'{p}: missing or failed'); continue
+        done = json.loads((d/'done.json').read_text())
+        t = pd.read_csv(d/'trades.csv.gz')
+        if sum(done.get(m, {}).get('positions', 0) for m in ('limit', 'market')) != len(t):
+            issues.append(f'{p}: rows {len(t)} != positions')
+        net = t.net_notional_bp-np.where(t.reason == 4, 0., slip_exit)-np.where(t.variant == 'late', slip_late, 0.)
+        paths[p] = t.assign(net=net).set_index('trade_id')
+        r = A/ref_run/p/'symbols'/symbol/'trades.csv.gz'
+        rest = t[(t.variant == 'rest') & (t.full >= .5) & (v3_mode(t.pre) == v3_mode(t.full))]
+        if len(rest) and not r.exists():
+            parity += len(rest)
+        elif len(rest):
+            ref = pd.read_csv(r, usecols=['trade_id', 'variant', 'net_notional_bp'])
+            ref = ref[ref.variant == 'v3_be0'].assign(base=lambda x: x.trade_id.str.rsplit(':v_', n=1).str[0]).set_index('base')
+            got = rest.assign(base=rest.trade_id.str.rsplit(':v_', n=1).str[0]).set_index('base').net_notional_bp
+            parity += int(((got-ref.net_notional_bp.reindex(got.index)).abs() > 1e-6).sum()+ref.net_notional_bp.reindex(got.index).isna().sum())
+    if len(paths) < 2 or paths['ohlc'].empty:
+        return symbol, pd.DataFrame(), issues, parity
+    o = paths['ohlc']; l = paths['olhc'].reindex(o.index)
+    w = (l.net < o.net).to_numpy()
+    pick = lambda c: np.where(w, l[c], o[c])
+    d = pd.DataFrame(dict(variant=o.variant, side=o.side, entry=o.entry, stop=o.stop, pre=o.pre, full=o.full, net=pick('net'),
+                          reason=pick('reason'), entry_i=o.entry_i, exit_i=pick('exit_i'),
+                          entry_t=pd.to_datetime(o.entry_time, utc=True),
+                          exit_t=pd.to_datetime(pd.Series(pick('exit_time'), index=o.index), utc=True)), index=o.index)
+    job = json.loads((SRC/symbol/'identity.json').read_text())['job']
+    f, _ = load_job(job)
+    h, lo = f.high.to_numpy(), f.low.to_numpy()
+    mae = []
+    for a, b, s, e, v in zip(d.entry_i.astype(int), d.exit_i.astype(int), d.side, d.entry, d.variant):
+        a += v == 'late'  # a close-time market entry is exposed from the next bar
+        seg = slice(a, max(a+1, b))
+        worst = lo[seg].min() if s == 1 else h[seg].max()
+        mae.append(max(0., -s*(worst-e)/e*100))
+    d['mae_pct'] = mae
+    d['event'] = [':'.join(i.split(':')[:3]) for i in d.index]
+    return symbol, d.reset_index(drop=True), issues, parity
+
+
+def counts(s):
+    return {str(k): int(v) for k, v in s.value_counts().sort_index().items()}
+
+
+def stats(x):
+    n = len(x)
+    if not n:
+        return dict(n=0)
+    q = x.net.quantile(.05)
+    return dict(n=n, mean_bp=float(x.net.mean()), win_pct=float(100*(x.net > 1).mean()), sum_pct=float(x.net.sum()/100),
+                worst5_mean_bp=float(x.net[x.net <= q].mean()), le_minus1000=int((x.net <= -1000).sum()))
+
+
+def summarize(config, workers):
+    from yoyo.evaluation import monday_limit_spike_opt as so
+    from yoyo.evaluation.monday_limit_be_scalein_compare import BAD_EVENTS, B, RUN, clean
+    from yoyo.evaluation.monday_limit_return_opt import frac
+    exp = config.resolve().parent
+    cfg = json.loads(config.read_text())
+    committed('yoyo/evaluation/monday_limit_layered.py')
+    ro = json.loads((A/'exp-monday-limit-return-opt-20261027-v2/config.json').read_text())
+    syms = symbols(cfg)
+    slip = cfg['slippage_bp']
+    with ProcessPoolExecutor(workers) as ex:
+        got = list(ex.map(load_symbol, [(str(exp), s, RUN.name, slip['non_target_exit'], slip['late_market_entry']) for s in syms], chunksize=4))
+    t = pd.concat([d for _, d, _, _ in got if len(d)], ignore_index=True)
+    t = t[~t.event.isin(BAD_EVENTS)].copy()
+    sc = pd.read_csv(ROOT/cfg['scores']).set_index('event')
+    ref_events = set(sc.index[sc.stored >= cfg['cut']])-BAD_EVENTS
+    with ProcessPoolExecutor(workers) as ex:
+        leak = pd.concat([d for d in ex.map(so.legs, [(s, {RUN.name: ['v3_be0']}, ref_events) for s in syms], chunksize=4) if len(d)],
+                         ignore_index=True)
+    leak['pre'] = leak.event.map(sc.causal); leak['full'] = leak.event.map(sc.stored)
+    res = dict(checks=dict(symbols=len(syms), issues=[f'{s}: {i}' for s, _, iss, _ in got for i in iss],
+                           parity_mismatch=int(sum(p for *_, p in got)), rows=counts(t.variant)))
+    late_skip = {}
+    for s in syms:
+        f = exp/'ohlc'/'symbols'/s/'done.json'
+        if f.exists():
+            for k, v in json.loads(f.read_text()).get('late', {}).items():
+                late_skip[k] = late_skip.get(k, 0)+v
+    res['checks']['late_skip'] = late_skip
+    rest, chk, late = (t[t.variant == v] for v in ('rest', 'rest_chk', 'late'))
+    plans = {'leak_v3_be0': leak, 'A_rest': rest, 'AB_rest_chk': pd.concat([rest[rest.full >= cfg['cut']], chk]),
+             'AC_rest_late': pd.concat([rest, late]), 'ABC': pd.concat([rest[rest.full >= cfg['cut']], chk, late])}
+    window = pd.Timestamp(json.loads((A/'exp-monday-limit-reclaim-recent-20261025-v1/summary.json').read_text())['results']['window'][0])
+    pers = {'all': lambda x: x.entry_t >= pd.Timestamp('2020-01-01', tz='UTC'), 'y2020_2024': lambda x: x.entry_t < B[0],
+            'y2025': lambda x: (x.entry_t >= B[0]) & (x.entry_t < B[1]), 'y2026': lambda x: x.entry_t >= B[1],
+            'last5m': lambda x: x.entry_t >= window}
+    res['plans'] = {}
+    for name, x in plans.items():
+        x = x.assign(entry_ns=x.entry_t.astype('int64'), exit_ns=x.exit_t.astype('int64'))
+        res['plans'][name] = {}
+        for per, within in pers.items():
+            y = x[within(x)].reset_index(drop=True)
+            reps = [frac(y, 20, 3, ro['seed']+r) for r in range(ro['ties'])] if len(y) else []
+            res['plans'][name][per] = dict(stats(y), frac20_3x=dict(
+                final_median=float(np.median([r['final_multiple'] for r in reps])) if reps else None,
+                dd_median=float(np.median([r['max_drawdown_pct'] for r in reps])) if reps else None,
+                liquidations_median=float(np.median([r['liquidations'] for r in reps])) if reps else None))
+    # Cases on identical events.
+    lk = leak.set_index('event')
+    g1 = rest[rest.full >= cfg['cut']]
+    g2 = rest[rest.full < cfg['cut']].set_index('event')
+    c2 = chk.set_index('event').reindex(g2.index)
+    g3 = sc[(sc.causal < cfg['cut']) & (sc.stored >= cfg['cut'])].index.difference(list(BAD_EVENTS))
+    lt = late.set_index('event')
+    res['cases'] = dict(
+        G1_pre_and_full=dict(rest=stats(g1), leak_same_events=stats(lk.loc[lk.index.intersection(g1.event)])),
+        G2_pre_only=dict(rest=stats(g2), rest_chk=stats(c2), chk_reason=counts(c2.reason),
+                         chk_better_pct=float(100*(c2.net > g2.net).mean()) if len(g2) else None,
+                         by_full={f'{a}-{b}': dict(rest=stats(g2[(g2.full >= a) & (g2.full < b)]), rest_chk=stats(c2[(c2.full >= a) & (c2.full < b)]))
+                                  for a, b in ((0., .4), (.4, .45), (.45, .5))}),
+        G3_full_only=dict(events=int(len(g3)), late=stats(lt), leak_limit_fill_same_events=stats(lk.loc[lk.index.intersection(lt.index)]),
+                          leak_limit_fill_all_g3=stats(lk.loc[lk.index.intersection(g3)]),
+                          late_close_vs_level_pct={f'q{int(100*q)}': float(v) for q, v in
+                                                   (lt.side*(lt.entry/lk.reindex(lt.index).entry-1)*100).quantile([.1, .25, .5, .75, .9]).items()}
+                          if len(lt) else None,
+                          late_reason=counts(lt.reason)),
+        same_bar_rest=dict(target=int(((rest.reason == 4) & (rest.exit_i == rest.entry_i)).sum()),
+                           backstop=int(((rest.reason == 1) & (rest.exit_i == rest.entry_i)).sum())))
+    pb = pd.read_csv(A/'exp-monday-limit-partial-bar-score-20261027-v1/events.csv.gz').set_index('event')
+    pb = pb.loc[pb.index.intersection(g3)]
+    tm = pb.touch_minute.dropna().astype(int)
+    at_close = pd.Series([pb.at[e, f'score_{m+1}'] for e, m in tm.items()], index=tm.index)
+    res['cases']['G3_full_only']['one_minute_layer'] = dict(
+        with_1m=int(len(tm)), touch_minute=counts(tm),
+        score_ge_cut_at_touch_minute_close=int((at_close >= cfg['cut']).sum()),
+        of_which_before_5m_close=int(((at_close >= cfg['cut']) & (tm < 4)).sum()))
+    res = clean(res)
+    dump(exp/'summary.json', dict(config=cfg, results=res))
+    print(json.dumps(res['checks']))
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(); ap.add_argument('--config', type=Path, required=True); ap.add_argument('--workers', type=int, default=4)
-    ap.add_argument('--intrabar', choices=['OHLC', 'OLHC'], required=True)
-    a = ap.parse_args(); run(a.config, a.workers, a.intrabar)
+    ap.add_argument('--intrabar', choices=['OHLC', 'OLHC']); ap.add_argument('--summary', action='store_true')
+    a = ap.parse_args()
+    summarize(a.config, a.workers) if a.summary else run(a.config, a.workers, a.intrabar)
