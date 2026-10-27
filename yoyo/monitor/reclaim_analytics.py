@@ -73,25 +73,31 @@ def build_analytics(positions, exits, account, quotes, now_ms, days=0, connected
     closed = [p for p in funded if p["stage"] == "closed" and finite(p.get("exit_ms")) and start_ms <= p["exit_ms"] <= now_ms]
     opened = [p for p in funded if p["stage"] != "closed"]
     initial = account["start_equity"]
-    baseline = initial+sum(e["pnl"] for e in events if e["time_ms"] < start_ms)
-    equity, peak, max_dd, max_dd_pct = baseline, baseline, 0., 0.
+    # Blow-up refills (allin3) are cash added after the exit of the same timestamp: not profit, and the low stays visible.
+    refills = [r for r in account.get("refills") or [] if finite(r.get("time_ms")) and finite(r.get("amount")) and r["time_ms"] <= now_ms]
+    baseline = (initial+sum(e["pnl"] for e in events if e["time_ms"] < start_ms)
+                +sum(r["amount"] for r in refills if r["time_ms"] < start_ms))
+    equity, peak, max_dd, max_dd_pct, added = baseline, baseline, 0., 0., 0.
     curve = [dict(time_ms=start_ms, equity=equity, pnl=0.)]
     simultaneous = defaultdict(float)
     for e in window:
         simultaneous[e["time_ms"]] += e["pnl"]
-    for stamp, delta in sorted(simultaneous.items()):
+    steps = sorted([(stamp, 0, delta) for stamp, delta in simultaneous.items()]
+                   + [(r["time_ms"], 1, r["amount"]) for r in refills if r["time_ms"] >= start_ms])
+    for stamp, refill, delta in steps:
         equity += delta
+        added += delta if refill else 0.
         peak = max(peak, equity)
         drawdown = peak-equity
         max_dd = max(max_dd, drawdown)
         max_dd_pct = max(max_dd_pct, drawdown/peak*100 if peak > 0 else 0)
-        point = dict(time_ms=stamp, equity=equity, pnl=equity-baseline)
-        if curve[-1]["time_ms"] == stamp:
+        point = dict(time_ms=stamp+refill, equity=equity, pnl=equity-baseline-added)
+        if curve[-1]["time_ms"] == point["time_ms"]:
             curve[-1] = point
         else:
             curve.append(point)
     if curve[-1]["time_ms"] != now_ms:
-        curve.append(dict(time_ms=now_ms, equity=equity, pnl=equity-baseline))
+        curve.append(dict(time_ms=now_ms, equity=equity, pnl=equity-baseline-added))
     missing_quotes, unrealized, exposure = 0, 0., 0.
     for p in opened:
         remaining = p.get("remaining_notional")
@@ -120,9 +126,10 @@ def build_analytics(positions, exits, account, quotes, now_ms, days=0, connected
                    exit_count=len(window), open_count=len(opened), open_notional=exposure,
                    unrealized_pnl=None if missing_quotes else unrealized, missing_quotes=missing_quotes,
                    max_drawdown=max_dd, max_drawdown_pct=max_dd_pct, period_start_equity=baseline,
-                   current_realized_equity=account["equity"])
+                   current_realized_equity=account["equity"], refill_count=sum(r["time_ms"] >= start_ms for r in refills),
+                   refilled=added)
     return dict(paper_only=True, track=str(track), days=days, now_ms=now_ms, start_ms=start_ms, summary=summary,
                 curve=compress_curve(curve), curve_points=len(curve), by_side=sides, by_symbol=by_symbol, by_reason=by_reason,
                 coverage=dict(invalid_events=invalid, missing_trade_pnl=len(closed)-summary["measured_count"],
                               missing_fees=sum(e["fee"] is None for e in window),
-                              ledger_difference=account["equity"]-(initial+sum(e["pnl"] for e in events))))
+                              ledger_difference=account["equity"]-(initial+sum(e["pnl"] for e in events)+sum(r["amount"] for r in refills))))

@@ -58,6 +58,14 @@ Owner 2026-10-27 (profit lock, exp-monday-limit-be-lock-compare-20261027-v1): a 
 1000 USDT) runs the v3 rule unchanged except that a reclaim moves its stop to entry +0.5 percent instead of
 +0.17 percent; a reclaim close short of that price exits at the close. It runs next to v3 as a forward check:
 in sample the lock raised the v3 win rate from 34-40 to 66-73 percent with the same mean.
+
+Owner 2026-10-27 (high-payoff version, exp-monday-limit-langlang-20261027-v1 / exp-monday-limit-pyramid-20261027-v1):
+a seventh account "allin3" takes score >= 0.6 touches with the opposite 1.618 target, 60m confirmation, a -30 percent
+backstop until the confirmation and breakeven +0.17 percent, all-in at 3x: margin = realized equity, notional = 3 x
+margin, one position at a time (later touches are "busy" shadow rows), a loss never exceeds the margin. As in the
+sizing replay, a close that leaves the account below 100 USDT is a blow-up: the rest counts as lost, a new 1000 USDT
+stake starts and the stake count rises; progress is equity / (1000 x stakes). A backstop at 3x already loses about 90
+percent, so liquidation (about -33 percent) is not simulated separately.
 """
 from __future__ import annotations
 
@@ -92,6 +100,10 @@ SPIKE = dict(min_score=.6, min_order=3, backstop_pct=18., slots=10, leverage=5.)
 V3LOCK_TRACK = 4060  # v3 with a +0.5 percent profit lock at the reclaim; API key "v3lock"
 CONFIRM[V3LOCK_TRACK] = 60
 V3LOCK = dict(breakeven_offset_bp=50.)
+ALLIN3_TRACK = 5060  # all-in 3x high-payoff account; API key "allin3"
+CONFIRM[ALLIN3_TRACK] = 60
+ALLIN3 = dict(min_score=.6, backstop_pct=30., leverage=3., blowup_below=100.)
+KEYS = {V3_TRACK: "v3", V3ADD_TRACK: "v3add", SPIKE_TRACK: "spike", V3LOCK_TRACK: "v3lock", ALLIN3_TRACK: "allin3"}
 EMA_SPANS = (8, 13, 21, 34, 55)
 MAKER_BP, TAKER_BP, SLIP_BP = 2.0, 5.0, 10.0
 START_EQUITY, FRACTION, GROSS = 1000.0, 0.10, 1.0
@@ -110,11 +122,11 @@ def serialized(method):
 
 
 def track_key(track):
-    return {V3_TRACK: "v3", V3ADD_TRACK: "v3add", V3ADD_LEG: "v3add", SPIKE_TRACK: "spike", V3LOCK_TRACK: "v3lock"}.get(track, str(track))
+    return KEYS.get(account(track), str(track))
 
 
 def track_id(key):
-    return {"v3": V3_TRACK, "v3add": V3ADD_TRACK, "spike": SPIKE_TRACK, "v3lock": V3LOCK_TRACK}.get(str(key)) or int(key)
+    return {v: k for k, v in KEYS.items()}.get(str(key)) or int(key)
 
 
 def ema_order(m15, side, candle_ms):
@@ -209,13 +221,14 @@ def settle(side, entry, exit_price, reason):
 
 class ReclaimPaper:
     def __init__(self, runtime, fib, model_path=MODEL, v3_path=V3, enable_v3=True, enable_v3add=True, enable_spike=True,
-                 enable_v3lock=True):
+                 enable_v3lock=True, enable_allin3=True):
         self.write_lock = threading.RLock()
         self.fib, self.client, self.model = fib, fib.client, ScoreModel(model_path)
         self.v3 = json.loads(Path(v3_path).read_text()) if enable_v3 else None
         self.add = dict(ADD) if self.v3 and enable_v3add else None
         self.spike = dict(SPIKE) if enable_spike else None
         self.v3lock = dict(V3LOCK) if self.v3 and enable_v3lock else None
+        self.allin = dict(ALLIN3) if enable_allin3 else None
         self.path = Path(runtime)/"monday-reclaim-paper.sqlite3"
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.events = queue.Queue(maxsize=200_000)
@@ -244,7 +257,12 @@ class ReclaimPaper:
                     request_id TEXT PRIMARY KEY, position_id INTEGER, percentage REAL,
                     expected_revision INTEGER, response TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS tracks (track INTEGER PRIMARY KEY, equity REAL, started_ms INTEGER);
+                CREATE TABLE IF NOT EXISTS refills (
+                    id INTEGER PRIMARY KEY, track INTEGER NOT NULL, ms INTEGER NOT NULL, position_id INTEGER,
+                    equity_before REAL NOT NULL, equity_after REAL NOT NULL);
             """)
+            if "stakes" not in {r["name"] for r in db.execute("PRAGMA table_info(tracks)")}:
+                db.execute("ALTER TABLE tracks ADD COLUMN stakes INTEGER NOT NULL DEFAULT 1")
             columns = {r["name"] for r in db.execute("PRAGMA table_info(positions)")}
             for name, spec in {"remaining_notional": "REAL", "realized_pnl": "REAL NOT NULL DEFAULT 0",
                                "close_revision": "INTEGER NOT NULL DEFAULT 0", "manual_exit_ms": "INTEGER",
@@ -258,8 +276,8 @@ class ReclaimPaper:
             if "realized_pnl" not in columns:
                 db.execute("UPDATE positions SET realized_pnl=COALESCE(pnl,0) WHERE stage='closed'")
             for m in (TRACKS+((V3_TRACK,) if self.v3 else ())+((V3ADD_TRACK,) if self.add else ())+((SPIKE_TRACK,) if self.spike else ())
-                      +((V3LOCK_TRACK,) if self.v3lock else ())):
-                db.execute("INSERT OR IGNORE INTO tracks VALUES (?,?,?)", (m, START_EQUITY, self.client.clock()))
+                      +((V3LOCK_TRACK,) if self.v3lock else ())+((ALLIN3_TRACK,) if self.allin else ())):
+                db.execute("INSERT OR IGNORE INTO tracks (track,equity,started_ms) VALUES (?,?,?)", (m, START_EQUITY, self.client.clock()))
         self._refresh_watch()
 
     @contextmanager
@@ -397,7 +415,42 @@ class ReclaimPaper:
                 self._open_v3(db, sid, levels, symbol, side, level, candle_ms, score, V3LOCK_TRACK)
             if self.spike and score is not None and score >= self.spike["min_score"]:
                 self._open_spike(db, sid, symbol, side, level, target, candle_ms, order)
+            if self.allin and score is not None and score >= self.allin["min_score"]:
+                self._open_allin(db, sid, levels, symbol, side, level, candle_ms)
         self._refresh_watch()
+
+    def _open_allin(self, db, sid, levels, symbol, side, level, candle_ms):
+        """allin3 row: opposite 1.618 target, -30 percent backstop, notional = 3 x realized equity, one at a time."""
+        a = self.allin
+        target = levels["upper"] if side == 1 else levels["lower"]
+        notional, note = 0., None
+        if db.execute("SELECT COUNT(*) n FROM positions WHERE track=? AND stage<>'closed' AND taken=1", (ALLIN3_TRACK,)).fetchone()["n"]:
+            note = "busy"
+        else:
+            equity = db.execute("SELECT equity FROM tracks WHERE track=?", (ALLIN3_TRACK,)).fetchone()["equity"]
+            notional = max(0., equity*a["leverage"])
+        decision = candle_ms//HOUR*HOUR+2*HOUR
+        backstop = level*(1-side*a["backstop_pct"]/100)
+        db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,decision_ms,stage,"
+                   "taken,notional,last_seen_ms,note,remaining_notional,backstop) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                   (sid, ALLIN3_TRACK, symbol, side, level, target, candle_ms, decision, "pending_confirm",
+                    int(notional > 0), notional, candle_ms, note, notional, backstop))
+
+    def _refill(self, db, position_id, ms):
+        """Below the blow-up line the rest counts as lost and a new 1000 USDT stake starts (as in the sizing replay)."""
+        equity = db.execute("SELECT equity FROM tracks WHERE track=?", (ALLIN3_TRACK,)).fetchone()["equity"]
+        if equity < self.allin["blowup_below"]:
+            db.execute("INSERT INTO refills (track,ms,position_id,equity_before,equity_after) VALUES (?,?,?,?,?)",
+                       (ALLIN3_TRACK, ms, position_id, equity, START_EQUITY))
+            db.execute("UPDATE tracks SET equity=?,stakes=stakes+1 WHERE track=?", (START_EQUITY, ALLIN3_TRACK))
+
+    def _leverage(self, track):
+        """Margin leverage of a slot whose loss is capped at its margin, else None."""
+        if track == SPIKE_TRACK and self.spike:
+            return self.spike["leverage"]
+        if track == ALLIN3_TRACK and self.allin:
+            return self.allin["leverage"]
+        return None
 
     def _open_spike(self, db, sid, symbol, side, level, target, candle_ms, order):
         """spike-HW v1 row: near target, -18 percent backstop, margin = equity / slots at the given leverage."""
@@ -487,8 +540,9 @@ class ReclaimPaper:
         """Allocate original entry cost once across each realized tranche."""
         gross, fee, net, net_slip = settle(p["side"], p["entry"], price, reason)
         pnl = amount*net/1e4
-        if p["track"] == SPIKE_TRACK and self.spike:
-            pnl = max(pnl, -amount/self.spike["leverage"])  # a leveraged slot cannot lose more than its margin
+        lev = self._leverage(p["track"])
+        if lev:
+            pnl = max(pnl, -amount/lev)  # a leveraged slot cannot lose more than its margin
         cur = db.execute("INSERT INTO exits (position_id,notional,exit_ms,price,reason,gross_bp,fee_bp,net_bp,net_slip_bp,pnl) "
                          "VALUES (?,?,?,?,?,?,?,?,?,?)", (p["id"], amount, exit_ms, price, reason, gross, fee, net, net_slip, pnl))
         remaining = max(0., p["remaining_notional"]-amount)
@@ -502,6 +556,8 @@ class ReclaimPaper:
             db.execute("UPDATE positions SET stage='closed',exit_ms=?,exit_price=?,reason=?,gross_bp=?,fee_bp=?,net_bp=?,"
                        "net_slip_bp=?,pnl=? WHERE id=?", (exit_ms, price, reason, totals["gross"], totals["fee"],
                        totals["net"], totals["slip"], totals["pnl"], p["id"]))
+            if p["track"] == ALLIN3_TRACK and self.allin:
+                self._refill(db, p["id"], exit_ms)
         return dict(exit_id=cur.lastrowid, position_id=p["id"], symbol=p["symbol"], track=p["track"],
                     closed_notional=amount, closed_quantity=amount/p["entry"], price=price, exit_ms=exit_ms,
                     fee=amount*fee/1e4, pnl=pnl, remaining_notional=remaining, remaining_quantity=remaining/p["entry"],
@@ -687,6 +743,8 @@ class ReclaimPaper:
             acct = dict(db.execute("SELECT * FROM tracks WHERE track=?", (track,)).fetchone())
             positions = [dict(r, track=track) for r in db.execute(f"SELECT * FROM positions WHERE track IN ({marks})", tracks)]
             exits = [dict(r) for r in db.execute(f"SELECT e.* FROM exits e JOIN positions p ON p.id=e.position_id WHERE p.track IN ({marks})", tracks)]
+            acct["refills"] = [dict(r) for r in db.execute("SELECT ms time_ms, equity_after-equity_before amount FROM refills "
+                                                           "WHERE track=? ORDER BY ms,id", (track,))]
         acct["start_equity"] = START_EQUITY
         return build_analytics(positions, exits, acct, quotes, self.client.clock(), days, connected)
 
@@ -723,8 +781,12 @@ class ReclaimPaper:
                     r["exits"] = exits.get(r["id"], [])
                     r["unrealized_bp"] = r["side"]*(q["price"]-r["entry"])/r["entry"]*1e4 if q.get("price") else None
                     open_rows.append(r)
-                tracks[track_key(m)] = dict(confirm_minutes=CONFIRM.get(m, m),
-                    rule={V3_TRACK: "v3", V3ADD_TRACK: "v3add", SPIKE_TRACK: "spike", V3LOCK_TRACK: "v3lock"}.get(m, "v2"),
+                if m == ALLIN3_TRACK:
+                    extra = dict(stakes=t["stakes"], injected=START_EQUITY*t["stakes"], multiple=t["equity"]/(START_EQUITY*t["stakes"]),
+                                 refills=[dict(r) for r in db.execute("SELECT * FROM refills WHERE track=? ORDER BY ms,id", (m,))])
+                else:
+                    extra = {}
+                tracks[track_key(m)] = dict(confirm_minutes=CONFIRM.get(m, m), rule=KEYS.get(m, "v2"), **extra,
                     equity=t["equity"], start_equity=START_EQUITY, started_ms=t["started_ms"],
                     open=open_rows, closed=closed[:100], pending_adds=pending_adds,
                     # Latest fill is independent of the exit-ordered history page.
@@ -739,7 +801,7 @@ class ReclaimPaper:
         return dict(now_ms=self.client.clock(), strategy="monday_1618_limit_reclaim_v2", paper_only=True,
                     model=dict(threshold=self.model.threshold, trained_before=self.model.trained_before, features=self.model.features),
                     sizing=dict(start_equity=START_EQUITY, fraction=FRACTION, gross=GROSS), v3=self.v3, v3add=self.add, spike=self.spike,
-                    v3lock=self.v3lock,
+                    v3lock=self.v3lock, allin3=self.allin,
                     breakeven_offset_bp=BE_OFFSET_BP,
                     fees_bp=dict(maker=MAKER_BP, taker=TAKER_BP, report_slippage=SLIP_BP),
                     worker=dict(alive=bool(self.thread and self.thread.is_alive()), queue=self.events.qsize(), error=self.error),
@@ -750,7 +812,7 @@ def install(app, engine):
     app.state.monday_reclaim_paper = engine
 
     @app.get("/api/monday-reclaim-paper/analytics")
-    def analytics(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock"] = "60", days: Literal["0", "7", "30"] = "0"):
+    def analytics(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3"] = "60", days: Literal["0", "7", "30"] = "0"):
         return engine.analytics(track, int(days))
 
     @app.post("/api/monday-reclaim-paper/positions/{position_id}/close")

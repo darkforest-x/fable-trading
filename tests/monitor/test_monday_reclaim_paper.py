@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from yoyo.monitor.monday_fib import FibBook, week_window
-from yoyo.monitor.monday_reclaim_paper import (MODEL, V3, V3_TRACK, V3ADD_TRACK, V3ADD_LEG, BE_OFFSET_BP, SPIKE_TRACK, V3LOCK_TRACK, ReclaimPaper,
+from yoyo.monitor.monday_reclaim_paper import (MODEL, V3, V3_TRACK, V3ADD_TRACK, V3ADD_LEG, BE_OFFSET_BP, SPIKE_TRACK, V3LOCK_TRACK, ALLIN3_TRACK, ReclaimPaper,
                                                PaperCloseError, features, settle, bars, install, ema_order)
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -57,11 +57,13 @@ class PaperFixture(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def engine(self, threshold, enable_v3=False, enable_v3add=False, enable_spike=False, enable_v3lock=False):
+    def engine(self, threshold, enable_v3=False, enable_v3add=False, enable_spike=False, enable_v3lock=False,
+               enable_allin3=False):
         spec = json.loads(MODEL.read_text()); spec["top40_threshold"] = threshold
         path = Path(self.tmp.name)/"model.json"; path.write_text(json.dumps(spec))
         return ReclaimPaper(self.tmp.name, FakeFib(self.tmp.name, self.client), model_path=path, enable_v3=enable_v3,
-                            enable_v3add=enable_v3add, enable_spike=enable_spike, enable_v3lock=enable_v3lock)
+                            enable_v3add=enable_v3add, enable_spike=enable_spike, enable_v3lock=enable_v3lock,
+                            enable_allin3=enable_allin3)
 
     def rows(self, e, sql):
         with e.db() as db:
@@ -634,6 +636,91 @@ class V3LockTests(PaperFixture):
         app = FastAPI(); install(app, e)
         r = TestClient(app).get("/api/monday-reclaim-paper/analytics?track=v3lock")
         self.assertEqual((r.status_code, r.json()["summary"]["open_count"]), (200, 1))
+
+
+class AllIn3Tests(PaperFixture):
+    """allin3: score >= 0.6, opposite 1.618 target, -30 percent backstop, all-in 3x, one at a time, refill below 100 USDT."""
+
+    def enter(self, score=.7, symbol="ABC-USDT-SWAP"):
+        e = getattr(self, "_e", None) or self.engine(-1., enable_allin3=True)
+        self._e = e
+        e.model.score = lambda feats: score
+        e.handle_touch(self.levels, symbol, "lower", 93.8, self.touch+500, self.touch)
+        rows = self.rows(e, f"SELECT * FROM positions WHERE track={ALLIN3_TRACK} AND symbol='{symbol}'")
+        return e, (rows[0] if rows else None)
+
+    def track(self, e):
+        return self.rows(e, f"SELECT * FROM tracks WHERE track={ALLIN3_TRACK}")[0]
+
+    def test_all_in_three_times_equity_with_far_target_and_backstop(self):
+        e, p = self.enter()
+        self.assertEqual((p["taken"], p["target"], p["note"]), (1, 116.18, None))
+        self.assertAlmostEqual(p["notional"], 3000.)
+        self.assertAlmostEqual(p["backstop"], 93.82*.7)
+        snap = e.snapshot()
+        self.assertEqual((snap["tracks"]["allin3"]["stakes"], snap["tracks"]["allin3"]["injected"], snap["tracks"]["allin3"]["refills"]), (1, 1000., []))
+        self.assertEqual(snap["allin3"]["leverage"], 3.)
+
+    def test_no_row_below_score_0_6(self):
+        _, p = self.enter(.55)
+        self.assertIsNone(p)
+
+    def test_one_position_at_a_time(self):
+        self.enter()
+        e, q = self.enter(.8, "XYZ-USDT-SWAP")
+        self.assertEqual((q["taken"], q["notional"], q["note"]), (0, 0., "busy"))
+
+    def test_backstop_blow_up_refills_one_stake(self):
+        e, p = self.enter()
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch+MIN, "high": 94., "low": 60., "price": 62.})
+        c = self.rows(e, f"SELECT * FROM positions WHERE track={ALLIN3_TRACK}")[0]
+        self.assertEqual((c["reason"], c["exit_price"]), ("backstop", p["backstop"]))
+        loss = 3000*settle(1, 93.82, p["backstop"], "backstop")[2]/1e4
+        self.assertAlmostEqual(c["pnl"], loss)
+        t = self.track(e)
+        self.assertEqual((t["equity"], t["stakes"]), (1000., 2))
+        r = self.rows(e, "SELECT * FROM refills")[0]
+        self.assertAlmostEqual(r["equity_before"], 1000+loss); self.assertEqual(r["equity_after"], 1000.)
+        snap = e.snapshot()["tracks"]["allin3"]
+        self.assertEqual((snap["injected"], snap["multiple"]), (2000., .5))
+        _, q = self.enter(.7, "XYZ-USDT-SWAP")
+        self.assertAlmostEqual(q["notional"], 3000.)  # the slot is free again, sized on the new stake
+        self.client.now = self.touch+5*MIN  # analytics only counts exits up to now
+        a = e.analytics("allin3")["summary"]
+        self.assertEqual(a["refill_count"], 1)
+        self.assertAlmostEqual(a["refilled"], -loss); self.assertAlmostEqual(a["realized_pnl"], loss)
+        self.assertGreater(a["max_drawdown_pct"], 90)
+        self.assertAlmostEqual(e.analytics("allin3")["coverage"]["ledger_difference"], 0.)
+        curve = [round(x["equity"], 6) for x in e.analytics("allin3")["curve"]]
+        self.assertEqual(curve[:3], [1000., round(1000+loss, 6), 1000.])
+
+    def test_target_win_compounds_into_the_next_size(self):
+        e, p = self.enter()
+        self.confirm(e, 94.5)
+        e.handle_quote("ABC-USDT-SWAP", {"candle_ms": self.touch//H1*H1+3*H1, "high": 117., "low": 95., "price": 116.5})
+        c = self.rows(e, f"SELECT * FROM positions WHERE track={ALLIN3_TRACK}")[0]
+        self.assertEqual((c["reason"], c["exit_price"]), ("target", 116.18))
+        equity = 1000+3000*settle(1, 93.82, 116.18, "target")[2]/1e4
+        self.assertAlmostEqual(self.track(e)["equity"], equity)
+        self.client.now = self.touch+2000  # entry features need the pre-touch history window
+        _, q = self.enter(.7, "XYZ-USDT-SWAP")
+        self.assertAlmostEqual(q["notional"], 3*equity)
+
+    def test_loss_beyond_the_margin_is_capped_then_refilled(self):
+        e, p = self.enter()
+        self.confirm(e, 60.)
+        c = self.rows(e, f"SELECT * FROM positions WHERE track={ALLIN3_TRACK}")[0]
+        self.assertEqual((c["reason"], c["pnl"]), ("failed_reclaim", -1000.))
+        self.assertEqual(self.rows(e, "SELECT equity_before FROM refills"), [{"equity_before": 0.}])
+        self.assertEqual(self.track(e)["stakes"], 2)
+
+    def test_analytics_and_api_accept_allin3(self):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+        e, _ = self.enter()
+        app = FastAPI(); install(app, e)
+        r = TestClient(app).get("/api/monday-reclaim-paper/analytics?track=allin3")
+        self.assertEqual((r.status_code, r.json()["summary"]["open_count"], r.json()["summary"]["refill_count"]), (200, 1, 0))
 
 
 if __name__ == "__main__":
