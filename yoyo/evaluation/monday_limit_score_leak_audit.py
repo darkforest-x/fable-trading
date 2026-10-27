@@ -98,7 +98,7 @@ def run(config):
                                             chunksize=4) if len(d)], ignore_index=True).set_index('event')
     legs = legs.join(out[['causal']], how='left')
     stat = lambda g, col, win: dict(n=int(len(g)), mean_bp=float(g[col].mean()) if len(g) else None, win_pct=float(100*(g[col] > win).mean()) if len(g) else None)
-    res = dict(events=int(len(out)), entry_i_minus_touch=dict(out.lag.value_counts().astype(int)),
+    res = dict(events=int(len(out)), entry_i_minus_touch={str(k): int(v) for k, v in out.lag.value_counts().items()},
                ledger_vs_stored_max_abs=float((out.ledger-out.stored).abs().max()),
                causal_vs_stored_abs_q={f'q{int(100*q)}': float((out.causal-out.stored).abs().quantile(q)) for q in (.5, .9, .99)},
                corr=float(out[['stored', 'causal']].corr().iloc[0, 1]), bands={}, v2_near_edge={}, v3_be0={}, by_period={})
