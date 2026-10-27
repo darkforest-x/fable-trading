@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-monday-limit-layered-20261027-v1",
+  "question": "Owner 2026-10-27: the spike paper score is only known at the 5m touch close, too late to rest a live limit. Layered alternative: rest on the previous-close score (A), confirm with the touch-bar score at the touch close and exit if it fails (B), and for levels touched without a resting order enter at market at the touch close with the stop unchanged (C). Which combination keeps return and cuts drawdown?",
+  "single_variable": "Per variant one layer against its comparator: rest vs the leaky v3_be0 ledger (selection score bar), rest_chk vs rest (fill-close exit), late vs no trade and vs the leaky limit fill of the same event (entry at the touch close). Exits, stops, fees and data frozen.",
+  "scores": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+  "cut": 0.5,
+  "since_week": "2019-12-30",
+  "exits": "v3: range 0.618 below 0.6, opposite 1618 from 0.6 (by pre for resting orders, by full for late), -30 percent backstop from the level, 60m reclaim, breakeven at the level",
+  "fees": {
+    "source": "Codex config maker_fee / taker_fee (OKX Lv1 0.02 / 0.05 percent, read 2026-10-23)",
+    "limit_entry_and_target": "maker",
+    "late_entry_fill_close_exit_backstop_reclaim_exits": "taker"
+  },
+  "slippage_bp": {"non_target_exit": 10, "late_market_entry": 10},
+  "reference": "experiments/active/exp-monday-limit-be-scalein-20261026-v1 v3_be0 (stored score >= 0.5, the leaky selection)",
+  "parity": "rest rows whose v3 target mode by pre equals that by full and with full >= 0.5 must equal the reference v3_be0 rows on both paths",
+  "replay": "monday_limit_return_opt.frac N20 3x (the v3add20 sizing, base legs only, no add legs), median of 10 seeds from 20261103; periods 2020-2024 / 2025 / 2026 / last five months",
+  "not_run": "1m spike entry (needs 1m bars through each trade); add legs",
+  "null_control": "Each layer is compared with its own counterfactual on identical events: the same event held (rest) or filled at the limit (reference) or not traded.",
+  "training_eligible": false,
+  "production_eligible": false
+}

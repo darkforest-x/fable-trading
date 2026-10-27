@@ -730,6 +730,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
+  - experiment_id: exp-monday-limit-layered-20261027-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: running
+    question: 'Owner 2026-10-27: the spike paper score is only known at the 5m touch close, too late to rest a live limit. Layers: rest on the previous-close score (A), exit at the touch close when the touch-bar score fails (B), and for levels touched without a resting order enter at market at the touch close with the stop unchanged (C). Which combination keeps return and cuts drawdown?'
+    single_variable: 'One layer per variant against its comparator on identical events: rest vs the leaky v3_be0 ledger, rest_chk vs rest, late vs no trade and vs the leaky limit fill; exits, stops, fees and data frozen.'
+    result: pending
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-layered-20261027-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'NautilusTrader 1.231.0 native runs (both intrabar paths) via yoyo/evaluation/monday_limit_layered.py; adapter gains fill_close_exit (reason 14) and completed-close market entries on the reclaim rule. 1m spike entry and add legs not run.'
   - experiment_id: exp-monday-limit-score-leak-audit-20261027-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 8cee0529d6

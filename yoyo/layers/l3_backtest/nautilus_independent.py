@@ -533,6 +533,7 @@ class IndependentCloseStrategy(Strategy):
                 minutes = int(state.source["reclaim_minutes"])
                 opened = self.frame.index[i]-pd.Timedelta(minutes=self.execution_minutes)
                 due = opened.floor(f"{minutes}min")+pd.Timedelta(minutes=2*minutes)
+                row = state.source
                 parent = row.get("parent")
                 if isinstance(parent, str) and parent in self.reclaim_due_by_trade:
                     due = pd.Timestamp(self.reclaim_due_by_trade[parent], tz="UTC")
@@ -559,7 +560,8 @@ class IndependentCloseStrategy(Strategy):
                         state.source["end_i"] = boundary
                         state.source["censor_reason"] = "missing_preconfirmation_interval"
                 if self.policy.reclaim_backstop:
-                    self.entering_limit_i = i
+                    # A completed-close market entry has no intrabar entry bar to model.
+                    self.entering_limit_i = i if self.entry_order_mode == "limit" else None
                     self._submit_protective_stop(state)
                     self.entering_limit_i = None
             else:
@@ -772,6 +774,15 @@ class IndependentCloseStrategy(Strategy):
             entry, side, risk = row["entry"], row["side"], row["risk"]
             if i > int(row["entry_i"]):
                 state.peak = max(state.peak, side*((high if side > 0 else low)-entry)/risk)
+            if row.get("fill_close_exit") is True or row.get("fill_close_exit") is np.True_:
+                if i == int(row["entry_i"]):
+                    # Decided by the caller from the fill bar's completed close
+                    # (e.g. a score that reads that bar); the position survived
+                    # its own bar's native target and backstop.
+                    self._cancel_target(state)
+                    self._cancel_stop(state)
+                    self._market(state, reason=14)
+                    continue
             if (p.reclaim_next_bar and state.reclaim_status == "pending"
                     and self.frame.index[i].value >= state.reclaim_due_ns):
                 # Source gaps are bounded by the caller. Never silently confirm
@@ -990,8 +1001,12 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     if entry_order_mode not in ("market", "limit"):
         raise ValueError("Unknown entry order mode")
     limit_entry = entry_order_mode == "limit"
-    if policy.reclaim_next_bar and not limit_entry:
-        raise ValueError("Reclaim currently requires a resting limit entry")
+    if policy.reclaim_next_bar and not limit_entry and "parent" in entries:
+        raise ValueError("Scale-in legs on the reclaim rule require resting limit entries")
+    if "fill_close_exit" in entries:
+        flags = entries.fill_close_exit
+        if not (limit_entry and policy.reclaim_next_bar and flags.map(lambda v: isinstance(v, (bool, np.bool_))).all()):
+            raise ValueError("Fill-close exits need boolean flags on resting reclaim entries")
     if policy.reclaim_backstop:
         st, en, sd = (entries[c].to_numpy(float) for c in ('stop', 'entry', 'side'))
         if not (np.isfinite(st).all() and (sd*(en-st) > 0).all()):
