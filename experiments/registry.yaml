@@ -14637,11 +14637,11 @@ experiments:
 
   - experiment_id: exp-spike-2026-1m-trade-charts-20261027-v1
     source_repo: darkforest-x/fable-trading
-    status: in_progress
+    status: completed
     question: Re-render all 85 previously delivered spike 2026 orders using real 1m candles for same-bar-exit inspection.
     single_variable: Chart resolution only; preserve original 5m fill intervals, outcomes and funded flags; no trading replay.
     canonical_report: experiments/active/exp-spike-2026-1m-trade-charts-20261027-v1/delivery.json
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: Reuse registered Binance UM1m daily cache; only missing same-exchange days downloaded. Original score lookahead unresolved, rendering does not repair or validate performance. Intrabar minute execution is unknown and shown as an interval.
+    notes: Reuse registered Binance UM1m daily cache; only missing same-exchange days downloaded. Original score lookahead unresolved, rendering does not repair or validate performance. Intrabar minute execution is unknown and shown as an interval. Completed85PNG and10.33MBZIP;5450real1m candles,1090original5m comparisons,zero gaps,unchanged31original fields. One disclosed DOOD context-only zero-volume leading-minute open difference; no execution-interval mismatch. Eight targeted tests pass; PNG/ZIP checks and five visual samples pass. Telegram upload acknowledged; raw source manifests, comparison rows and receipt retained locally.

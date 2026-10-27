@@ -1,3 +1,11 @@
+## 2026-10-27 · Spike historical orders redrawn with real 1m candles
+
+- Delivered all 85 previously exported 2026 spike orders as annotated 1920x1080 1m PNGs in a 10.33MB ZIP to the original Telegram group: https://t.me/c/3823416414/3430. Output: experiments/active/exp-spike-2026-1m-trade-charts-20261027-v1/. Original 5m delivery remains preserved.
+- Source cache reused 86 of 89 symbol-days; only three missing official Binance UM days downloaded. All 5450 plotted minute candles have continuous coverage; 1090 aggregated 5m bars checked. DOOD has one disclosed open difference before the trade: a zero-volume first minute carries preceding close, while original 5m opens at first positive-volume minute. Other OHLCV and every execution interval agree; plotted source prices were not modified.
+- All 31 original order fields remain unchanged, including net outcomes and 58 funded flags. Original 65 same-5m exits include 60 targets. E/X use original 5m time intervals; only six confirmed close exits have exact boundary marks. This is a display update, not a 1m execution replay; original score lookahead remains unresolved and is stated on every image.
+- Eight targeted tests pass; all 85 PNGs and ZIP CRC verified; five representative images inspected, including same-bar target, multi-bar loss, long confirmation close and DOOD. Luna max read-only source/marker review completed; two label/zero-volume validation refinements incorporated. Builder commits preceded rendering; initial source-parity failure and detailed source/validation/delivery receipts remain local. No browser, service, paper account or live trading changes.
+- Learnings: finer-candles-do-not-create-finer-fill-timestamps.md and empty-leading-minutes-need-explicit-ohlc-parity-evidence.md.
+
 ## 2026-10-27 · Today-only record drawer and historical entry
 
 - The 1.618 drawer defaults to Asia/Shanghai today: touches use candle time, closed positions use final exit time. Older touch events remain only while that exact signal_id has a funded, filled, positive remaining position in any account. Shadow rows, unfilled adds, and zero remaining amounts cannot retain an old touch. The old held touch carries a small holding badge.

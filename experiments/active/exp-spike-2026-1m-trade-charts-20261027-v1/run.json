@@ -1,0 +1,27 @@
+{
+  "generator_commit": "9b7c44d934139be8f4776dcdaf6a151e42fa62ad",
+  "python": "3.9.6",
+  "pandas": "2.3.3",
+  "numpy": "2.0.2",
+  "matplotlib": "3.9.4",
+  "commands": [
+    "python3 -m yoyo.evaluation.spike_2026_minute_charts prepare",
+    "python3 -m yoyo.evaluation.spike_2026_minute_charts render --workers 4",
+    "python3 -m yoyo.evaluation.spike_2026_minute_charts pack"
+  ],
+  "tests": {
+    "command": "python3 -m pytest tests/evaluation/test_spike_minute_charts.py -q",
+    "passed": 8
+  },
+  "initial_failure_log": "render-initial-source-parity-failure.log",
+  "new_backtest_run": false,
+  "final_label_refresh_sequences": [
+    2,
+    3,
+    15,
+    26,
+    32,
+    35,
+    80
+  ]
+}
