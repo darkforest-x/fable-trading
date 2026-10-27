@@ -1,5 +1,6 @@
 /* Stitch 3db5c4dc931244f8a1ea859d4acb8d49. Read-only, source-backed strategy books.
- * The selected book is independent of the selected paper account. */
+ * Picker refinement: 040e7b6c98104d0f9bb77ec995dabb1a.
+ * The selected book and local display order are independent of the paper account. */
 (() => {
   'use strict';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -7,7 +8,15 @@
   const TITLES={60:'等待回收',5:'快速确认',v3:'分数决定目标',v3add:'逆向分步加仓',spike:'排列过滤插针',v3lock:'回收后锁住利润',allin3:'单仓 · 梭哈3倍',v3add20:'20份动态保证金 · 3倍加仓'};
   const BOOK='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5C8 2 4 3 2 4v15c3-1 6-1 10 2 4-3 7-3 10-2V4c-2-1-6-2-10 1Zm0 0v16"/></svg>';
   const num=(v,d=2)=>typeof v==='number'&&Number.isFinite(v)?v.toLocaleString('en-US',{maximumFractionDigits:d}):'—';
-  function pickerHTML(tracks){return tracks.map(t=>`<div class="rs-account-row"><button type="button" data-strategy-select="${esc(t)}" aria-pressed="false"><span>${esc(label(t))}</span><small>${esc(TITLES[t])}${t==='spike'?' · 默认':''}</small><i aria-hidden="true">✓</i></button><button type="button" data-strategy-book="${esc(t)}" aria-label="查看 ${esc(label(t))} 策略小册" title="策略小册">${BOOK}</button></div>`).join('');}
+  const ORDER_KEY='spike:paper-account-order:v1';
+  function accountOrder(saved,tracks){const defaults=[...tracks.filter(t=>t==='spike'),...tracks.filter(t=>t!=='spike')];return [...new Set([...(Array.isArray(saved)?saved:[]).filter(t=>defaults.includes(t)),...defaults])];}
+  function moveAccount(order,id,index){const next=order.filter(t=>t!==id);if(!order.includes(id))return [...order];next.splice(Math.max(0,Math.min(next.length,index)),0,id);return next;}
+  function pnlView(value){
+    if(typeof value!=='number'||!Number.isFinite(value))return {text:'—',tone:'',title:'已实现盈亏暂未读取'};
+    const sign=value>0?'+':value<0?'−':'',amount=Math.abs(value);
+    return {text:sign+(amount>0&&amount<.005?'<0.01':amount.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})),tone:value>0?'rp-positive':value<0?'rp-negative':'',title:'已实现净盈亏 · USDT · 不含浮盈亏和补充本金'};
+  }
+  function pickerHTML(tracks){return tracks.map(t=>`<div class="rs-account-row" data-account-row="${esc(t)}"><button type="button" data-account-drag="${esc(t)}" aria-label="拖动调整 ${esc(label(t))} 顺序" aria-description="拖动排序，或按 Alt 加上下方向键" title="拖动排序 · Alt + ↑/↓"><svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" aria-hidden="true"><circle cx="4" cy="5" r="1.2"/><circle cx="10" cy="5" r="1.2"/><circle cx="4" cy="10" r="1.2"/><circle cx="10" cy="10" r="1.2"/><circle cx="4" cy="15" r="1.2"/><circle cx="10" cy="15" r="1.2"/></svg></button><button type="button" data-strategy-select="${esc(t)}" aria-pressed="false"><span>${esc(label(t))}</span><strong data-account-pnl="${esc(t)}">—</strong><i aria-hidden="true">✓</i></button><button type="button" data-strategy-book="${esc(t)}" aria-label="查看 ${esc(label(t))} 策略小册" title="策略小册">${BOOK}</button></div>`).join('');}
   function tableHTML(headers,rows){return `<div class="rs-table-wrap"><table><thead><tr>${headers.map(h=>`<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map((v,i)=>i?`<td>${typeof v==='number'?num(v):esc(v??'—')}</td>`:`<th scope="row">${esc(v)}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;}
   const historyDate=ms=>new Date(ms).toISOString().slice(0,10);
   function validateHistory(h,track){
@@ -42,22 +51,59 @@
 
   function barOptions(r,dark=false){const c=dark?'#9ba9b8':'#738392';return {animation:!matchReduced(),animationDuration:450,grid:{left:55,right:18,top:25,bottom:r.labels.length>8?45:60},tooltip:{trigger:'axis',confine:true,valueFormatter:v=>num(v)+' '+r.unit},xAxis:{type:'category',data:r.labels,axisTick:{show:false},axisLabel:{color:c,fontSize:9,hideOverlap:true,interval:r.labels.length>8?'auto':0,formatter:v=>v.replace(' · ','\n')}},yAxis:{type:'value',name:r.unit,nameTextStyle:{color:c},axisLabel:{color:c},splitLine:{lineStyle:{color:dark?'#ffffff12':'#71849420'}}},series:[{type:'bar',barMaxWidth:40,data:r.values,itemStyle:{color:'#3285dc',borderRadius:[4,4,0,0]}}]};}
   function matchReduced(){return typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion:reduce)').matches;}
-  const api={pickerHTML,tableHTML,researchHTML,barOptions,historyHTML,heatmapHTML,equityOptions,validateHistory,TITLES};
+  const api={pickerHTML,accountOrder,moveAccount,pnlView,ORDER_KEY,tableHTML,researchHTML,barOptions,historyHTML,heatmapHTML,equityOptions,validateHistory,TITLES};
   if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}
-  function create({root,tracks,getTrack,getSnapshot,renderRules,createFeed,onSelect}){
+  function create({root,tracks,getTrack,getSnapshot,getPnl,renderRules,createFeed,onSelect}){
     const trigger=root.querySelector('[data-rp="track"]');
-    const picker=document.createElement('div');picker.id='rs-account-picker';picker.className='rs-account-picker';picker.setAttribute('popover','auto');picker.setAttribute('role','dialog');picker.setAttribute('aria-label','模拟账户');picker.innerHTML=pickerHTML(tracks);root.append(picker);
+    let storage,saved;try{storage=window.localStorage;saved=JSON.parse(storage.getItem(ORDER_KEY)||'null');}catch{}
+    let order=accountOrder(saved,tracks),drag=null,dragFrame=0,blockedUntil=0;
+    const picker=document.createElement('div');picker.id='rs-account-picker';picker.className='rs-account-picker';picker.setAttribute('popover','auto');picker.setAttribute('role','dialog');picker.setAttribute('aria-label','模拟账户');picker.innerHTML='<header><b>模拟账户</b><small>已实现盈亏 · USDT</small></header><div class="rs-account-list">'+pickerHTML(order)+'</div><p class="rs-order-status" role="status">拖动左侧把手排序</p>';root.append(picker);
+    const accountList=picker.querySelector('.rs-account-list'),orderStatus=picker.querySelector('.rs-order-status');
+    const accountNodes=new Map([...picker.querySelectorAll('[data-account-row]')].map(n=>[n.dataset.accountRow,n]));
+    function applyOrder(animate=false){
+      const before=new Map([...accountNodes].map(([id,n])=>[id,n.getBoundingClientRect().top]));
+      const focused=document.activeElement;
+      order.forEach((id,i)=>{const n=accountNodes.get(id);if(accountList.children[i]!==n)accountList.insertBefore(n,accountList.children[i]||null);});
+      if(picker.contains(focused)&&document.activeElement!==focused)focused.focus({preventScroll:true});
+      if(animate&&!matchReduced())for(const [id,n] of accountNodes){if(id===drag?.id)continue;const delta=before.get(id)-n.getBoundingClientRect().top;n.getAnimations().forEach(a=>a.cancel());if(Math.abs(delta)>.5)n.animate([{transform:`translateY(${delta}px)`},{transform:'translateY(0)'}],{duration:160,easing:'cubic-bezier(.2,.8,.2,1)'});}
+    }
+    function saveOrder(id){try{if(!storage)throw Error();storage.setItem(ORDER_KEY,JSON.stringify(order));orderStatus.textContent=`${label(id)} 已移至第 ${order.indexOf(id)+1} 位`; }catch{orderStatus.textContent='顺序已调整；浏览器未允许保存';}}
+    function moveDrag(){
+      if(!drag?.moved)return;
+      const rows=order.filter(id=>id!==drag.id),index=rows.filter(id=>{const n=accountNodes.get(id);return drag.y>accountList.getBoundingClientRect().top+n.offsetTop-accountList.scrollTop+n.offsetHeight/2;}).length;
+      const next=moveAccount(order,drag.id,index);
+      if(next.join()!==order.join()){order=next;applyOrder(true);}
+      const top=drag.node.getBoundingClientRect().top-drag.dy;drag.dy=drag.y-drag.offset-top;drag.node.style.transform=`translateY(${drag.dy}px)`;
+    }
+    function scrollDrag(){
+      if(!drag?.moved)return;const r=accountList.getBoundingClientRect(),delta=drag.y<r.top+28?-10:drag.y>r.bottom-28?10:0;
+      if(delta){accountList.scrollTop+=delta;moveDrag();}dragFrame=requestAnimationFrame(scrollDrag);
+    }
+    function finishDrag(cancel=false){
+      if(!drag)return;const done=drag;drag=null;cancelAnimationFrame(dragFrame);done.node.classList.remove('is-dragging');done.node.style.transform='';picker.classList.remove('is-sorting');
+      if(picker.hasPointerCapture?.(done.pointer))picker.releasePointerCapture(done.pointer);
+      if(done.moved){blockedUntil=Date.now()+700;if(cancel){order=done.before;applyOrder(true);orderStatus.textContent='已取消排序';}else saveOrder(done.id);}
+      sync();
+    }
+    picker.addEventListener('pointerdown',e=>{const grip=e.target.closest('[data-account-drag]');if(!grip||e.button!==0||e.isPrimary===false)return;e.preventDefault();grip.focus({preventScroll:true});const node=grip.closest('[data-account-row]');drag={id:grip.dataset.accountDrag,node,pointer:e.pointerId,start:e.clientY,y:e.clientY,offset:e.clientY-node.getBoundingClientRect().top,dy:0,moved:false,before:[...order]};picker.setPointerCapture(e.pointerId);});
+    picker.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.pointer)return;drag.y=e.clientY;if(!drag.moved&&Math.abs(e.clientY-drag.start)>5){drag.moved=true;drag.node.classList.add('is-dragging');picker.classList.add('is-sorting');dragFrame=requestAnimationFrame(scrollDrag);}if(drag.moved){e.preventDefault();moveDrag();}},{passive:false});
+    picker.addEventListener('pointerup',e=>{if(e.pointerId===drag?.pointer)finishDrag();});
+    picker.addEventListener('pointercancel',e=>{if(e.pointerId===drag?.pointer)finishDrag(true);});
+    picker.addEventListener('lostpointercapture',()=>finishDrag(true));
+    picker.addEventListener('dragstart',e=>e.preventDefault());
+    window.addEventListener('blur',()=>finishDrag(true));
+    window.addEventListener('storage',e=>{if((e.key===ORDER_KEY||e.key===null)&&!drag){try{order=accountOrder(JSON.parse(e.newValue||'null'),tracks);applyOrder();}catch{}}});
     const dialog=document.createElement('dialog');dialog.className='rs-book';dialog.setAttribute('aria-label','策略小册');
     dialog.innerHTML=`<article class="rs-sheet"><header class="rs-header"><span>${BOOK} 策略小册</span><b data-book-label tabindex="-1"></b><button type="button" data-book-close aria-label="关闭策略小册">×</button></header><div class="rs-layout"><nav class="rs-toc" aria-label="小册章节">${[['overview','概览'],['research','历史回测'],['rules','执行规则'],['forward','前向资金'],['sources','来源']].map(([id,title],i)=>`<button type="button" data-book-chapter="${id}"><small>0${i+1}</small>${title}</button>`).join('')}</nav><div class="rs-reading"><section id="rs-overview"></section><section id="rs-research" aria-live="polite"></section><section id="rs-rules"></section><section id="rs-forward"><div class="rs-section-title"><h2>前向模拟资金曲线</h2></div><p>当前账户完整账本 · USDT · 已实现净值</p><div class="rs-forward-status" role="status"></div><div class="rs-forward-metrics"></div><div class="rs-forward-chart" role="img" aria-label="前向模拟资金曲线"></div><p class="rs-forward-note"></p><button type="button" class="rs-text-button" data-book-refresh>刷新曲线</button></section><section id="rs-sources"></section></div></div></article>`;
     document.body.append(dialog);
     const el=s=>dialog.querySelector(s);let requests=window.SpikeRuntime.createRequests();
     let open=false,track='',epoch=0,closing=null,analytics=null,research=null,bars=[],line=null,chartData=null,active=true,history=null,historyChart=null,historyMode='equity',historyPaintKey='';
-    function positionPicker(){const r=trigger.getBoundingClientRect();picker.style.left=Math.max(8,Math.min(r.left,innerWidth-288))+'px';picker.style.top=Math.max(8,Math.min(r.bottom+6,innerHeight-picker.offsetHeight-8))+'px';}
-    function sync(){trigger.querySelector('b').textContent=label(getTrack());picker.querySelectorAll('[data-strategy-select]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.strategySelect===getTrack())));}
+    function positionPicker(){const r=trigger.getBoundingClientRect();picker.style.left=Math.max(8,Math.min(r.left,innerWidth-picker.offsetWidth-8))+'px';picker.style.top=Math.max(8,Math.min(r.bottom+6,innerHeight-picker.offsetHeight-8))+'px';}
+    function sync(){trigger.querySelector('b').textContent=label(getTrack());picker.querySelectorAll('[data-strategy-select]').forEach(b=>{const selected=b.dataset.strategySelect===getTrack();b.setAttribute('aria-pressed',String(selected));b.closest('[data-account-row]').dataset.selected=String(selected);});picker.querySelectorAll('[data-account-pnl]').forEach(n=>{const v=pnlView(getPnl?.(n.dataset.accountPnl));n.textContent=v.text;n.className=v.tone;n.title=v.title;});}
     trigger.addEventListener('click',()=>{if(picker.matches(':popover-open'))picker.hidePopover();else{sync();picker.showPopover();positionPicker();picker.querySelector(`[data-strategy-select="${getTrack()}"]`).focus({preventScroll:true});}});
-    picker.addEventListener('toggle',()=>trigger.setAttribute('aria-expanded',String(picker.matches(':popover-open'))));
-    picker.addEventListener('keydown',event=>{if(event.key==='Escape')event.stopPropagation();if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();const buttons=[...picker.querySelectorAll('button')],i=buttons.indexOf(document.activeElement);buttons[event.key==='Home'?0:event.key==='End'?buttons.length-1:(i+(event.key==='ArrowDown'?2:-2)+buttons.length)%buttons.length].focus();}});
-    picker.addEventListener('click',event=>{const b=event.target.closest('button');if(!b)return;if(b.dataset.strategySelect){onSelect(b.dataset.strategySelect);sync();picker.hidePopover();trigger.focus({preventScroll:true});}if(b.dataset.strategyBook){picker.hidePopover();show(b.dataset.strategyBook);}});
+    picker.addEventListener('toggle',()=>{const shown=picker.matches(':popover-open');trigger.setAttribute('aria-expanded',String(shown));root.classList.toggle('rs-picker-webkit',shown&&/AppleWebKit\//.test(navigator.userAgent)&&!/(Chrome|Chromium|Edg)\//.test(navigator.userAgent));if(!shown)finishDrag(true);});
+    picker.addEventListener('keydown',event=>{if(event.key==='Escape'){event.stopPropagation();if(drag){event.preventDefault();finishDrag(true);}return;}const row=event.target.closest('[data-account-row]');if(!row)return;const i=order.indexOf(row.dataset.accountRow);if(event.altKey&&['ArrowDown','ArrowUp'].includes(event.key)){event.preventDefault();order=moveAccount(order,row.dataset.accountRow,i+(event.key==='ArrowDown'?1:-1));applyOrder(true);saveOrder(row.dataset.accountRow);return;}if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();const column=[...row.querySelectorAll('button')].indexOf(event.target),next=event.key==='Home'?0:event.key==='End'?order.length-1:(i+(event.key==='ArrowDown'?1:-1)+order.length)%order.length;accountNodes.get(order[next]).querySelectorAll('button')[Math.max(0,column)].focus();}});
+    picker.addEventListener('click',event=>{if(event.detail!==0&&Date.now()<blockedUntil){event.preventDefault();event.stopPropagation();return;}const b=event.target.closest('button');if(!b)return;if(b.dataset.strategySelect){onSelect(b.dataset.strategySelect);sync();picker.hidePopover();trigger.focus({preventScroll:true});}if(b.dataset.strategyBook){picker.hidePopover();show(b.dataset.strategyBook);}});
     function stopCharts(){bars.forEach(c=>c.dispose());bars=[];line?.dispose();line=null;historyChart?.dispose();historyChart=null;historyPaintKey='';}
     function close(immediate=false){
       if(!open&&!dialog.open)return;open=false;epoch++;requests.cancel();analytics?.setActive(false);stopCharts();dialog.classList.remove('is-open');clearTimeout(closing);

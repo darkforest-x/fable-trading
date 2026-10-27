@@ -7,6 +7,19 @@ const position=(symbol,x={})=>({id:1,symbol:symbol+'-USDT-SWAP',taken:1,notional
 const list=require('../../yoyo/monitor/static/monday-list-model.js');
 const disk=()=>{const store=new Map();return {getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)};};
 const snapshot=items=>({items,now_ms:10000,week:'2026-10-19'});
+test('ribbon scores join the exact week, symbol, side and touch candle, never another account or old touch',()=>{
+ const week='2026-10-26',item=coin('SOL',{touches:{upper:{source:'live',candle_ms:1000,observed_ms:2000}}});
+ const signal={week,symbol:item.symbol,side:-1,candle_ms:1000,status:'scored',score:.638144};
+ assert.equal(ui.touchScore(item,week,[signal],3000).text,'0.6381');assert.equal(ui.touchScore(item,week,[signal],3000).high,true);
+ for(const patch of [{week:'2026-10-19'},{symbol:'BTC-USDT-SWAP'},{side:1},{candle_ms:999}])assert.equal(ui.touchScore(item,week,[{...signal,...patch}],3000).text,'待评分');
+ assert.equal(ui.touchScore(item,week,[],100000).text,'暂无评分');
+ assert.equal(ui.touchScore(item,week,[{...signal,score:0}],3000).text,'0.0000');
+ assert.equal(ui.touchScore(item,week,[{...signal,status:'feature_error',score:null}],3000).text,'评分失败');
+ assert.equal(ui.touchScore(item,week,[{...signal,status:'excluded',score:null}],3000).text,'不评分');
+ const html=ui.recentHTML(item,'',ui.touchScore(item,week,[signal],3000));assert.match(html,/0.6381/);assert.match(html,/不是胜率/);assert.match(html,/上沿/);
+ const lower=coin('SOL',{touches:{lower:{source:'live',candle_ms:2000,observed_ms:3000}}});
+ assert.equal(ui.touchScore(lower,week,[signal,{...signal,side:1,candle_ms:2000,score:.2}],4000).text,'0.2000');
+});
 test('touch tabs keep the shared Monday history policy while All needs a full catalog',()=>{
  const data=snapshot([coin('SOL',{touches:{upper:{source:'live',observed_ms:9000}}}),coin('DOGE',{touches:{lower:{source:'history',observed_ms:10000,candle_ms:1000}}}),coin('BTC')]);
  const prefs=list.createListPreferences(disk());prefs.toggle('BTC-USDT-SWAP');

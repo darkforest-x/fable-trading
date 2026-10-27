@@ -29,9 +29,18 @@
   const avatar=coin=>`<span class="rp-avatar" aria-hidden="true"><span>${esc(coin.slice(0,1))}</span><img src="https://static.okx.com/cdn/oksupport/asset/currency/icon/${encodeURIComponent(coin.toLowerCase())}.png" alt="" loading="lazy" referrerpolicy="no-referrer"></span>`;
   const touchLabel=side=>side==='upper'?'上沿':side==='lower'?'下沿':'尚未触价';
   const touchTone=side=>side==='upper'?'rp-negative':side==='lower'?'rp-positive':'';
-  function recentHTML(item,selected){
+  // The ribbon shows the model score of this exact NY-week/side/touch bar.
+  // Never borrow an account fill or another occurrence of the same symbol.
+  function touchScore(item,week,signals,now=Date.now()){
+    const event=latestTouch(item),side=event?.side==='upper'?-1:event?.side==='lower'?1:0;
+    const signal=positive(event?.candle_ms)?signals?.find(s=>s.week===week&&s.symbol===item.symbol&&s.side===side&&s.candle_ms===event.candle_ms):null;
+    if(signal?.status==='scored'&&Number.isFinite(signal.score))return {text:signal.score.toFixed(4),title:`入场评分 ${signal.score} · 不是胜率`,high:signal.score>.5,scored:true};
+    const text=signal?.status==='feature_error'?'评分失败':signal?.status==='excluded'?'不评分':event?.source==='live'&&now>=event.observed_ms&&now-event.observed_ms<90000?'待评分':'暂无评分';
+    return {text,title:text,high:false};
+  }
+  function recentHTML(item,selected,score={text:'暂无评分',title:'暂无评分',high:false}){
     const event=latestTouch(item),stamp=touchTime(event),coin=base(item.symbol);
-    return `<button type="button" class="rp-recent-chip" data-symbol="${esc(item.symbol)}" data-watch-select="${esc(item.symbol)}" aria-pressed="${item.symbol===selected}" title="${esc(coin)} · ${touchLabel(event?.side)} 1.618 · ${stamp?date.format(stamp)+' 北京':'时间待核对'}">${avatar(coin)}<span><b>${esc(coin)}</b><small class="${touchTone(event?.side)}">${touchLabel(event?.side)} · ${stamp?date.format(stamp).slice(-5):'—'}</small></span></button>`;
+    return `<button type="button" class="rp-recent-chip" data-symbol="${esc(item.symbol)}" data-watch-select="${esc(item.symbol)}" aria-pressed="${item.symbol===selected}" title="${esc(coin)} · ${touchLabel(event?.side)} 1.618 · ${stamp?date.format(stamp)+' 北京':'时间待核对'} · ${esc(score.title)}">${avatar(coin)}<span><span class="rp-recent-identity"><b>${esc(coin)}</b><em data-scored="${!!score.scored}" class="rp-recent-score${score.high?' is-high':''}" aria-label="${esc(score.title)}">${esc(score.text)}</em></span><small class="${touchTone(event?.side)}">${touchLabel(event?.side)} · ${stamp?date.format(stamp).slice(-5):'—'}</small></span></button>`;
   }
   function pinnedHTML(selected){
     return PINNED.map(symbol=>`<button type="button" class="rp-pinned-chip" data-symbol="${symbol}" data-watch-select="${symbol}" aria-pressed="${symbol===selected}" aria-label="查看 ${base(symbol)} K 线">${avatar(base(symbol))}<b>${base(symbol)}</b></button>`).join('');
@@ -74,7 +83,7 @@
     const icon=name=>`<span class="rp-watch-icon" aria-hidden="true" style="--watch-icon:url(/static/icons/${name}.svg)"></span>`;
     return `<article class="rp-watch-row" data-symbol="${esc(item.symbol)}" data-selected="${item.symbol===selected}"><div class="rp-watch-main"><button type="button" class="rp-watch-select" data-watch-select="${esc(item.symbol)}" aria-label="查看 ${esc(coin)} K 线" aria-pressed="${item.symbol===selected}">${avatar(coin)}<span class="rp-watch-identity"><b class="rp-watch-name">${esc(coin)}${side?`<em class="rp-touch-tag ${touchTone(side)}">${touchLabel(side)}</em>`:''}</b><small class="rp-watch-time" title="${esc(meta)}">${esc(meta)}</small></span><span class="rp-watch-quote"><b>${price(item.price)}</b><span class="${item.catalog?(item.change>0?'rp-positive':item.change<0?'rp-negative':''):touchTone(side)}">${item.catalog?change:touchLabel(side)}</span></span></button><button type="button" class="rp-watch-disclosure" data-watch-action="details" aria-expanded="${expanded}" aria-controls="rp-watch-actions-${esc(item.symbol)}" aria-label="${expanded?'收起':'展开'} ${esc(coin)} 操作"><span aria-hidden="true">⌄</span></button></div><div class="rp-watch-bottom" id="rp-watch-actions-${esc(item.symbol)}"${expanded?'':' hidden'}><a class="rp-watch-tv" href="${esc(tradingViewURL(item.symbol,platform))}" target="_blank" rel="noopener" aria-label="在 TradingView 打开 ${esc(coin)}" title="TradingView">TV ↗</a><a href="${esc(inspectionURL(item.symbol,period))}" aria-label="查看 ${esc(coin)} 形态巡检" title="形态巡检">${icon('activity')}</a><button data-watch-action="favorite" aria-pressed="${favorite}" aria-label="${favorite?'取消收藏':'收藏'} ${esc(coin)}">${icon('star')}</button>${!item.catalog&&side?`<button data-watch-action="remove" aria-label="从本周列表移除 ${esc(coin)}" title="从本周列表移除">${icon('trash')}</button>`:''}</div></article>`;
   }
-  const api={validSymbol,validate,model,recentRows,PINNED,pinnedHTML,bindRecentDrag,coinTrade,rowHTML};
+  const api={validSymbol,validate,model,recentRows,touchScore,recentHTML,PINNED,pinnedHTML,bindRecentDrag,coinTrade,rowHTML};
   if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}
   function reconcile(container,html){
     if(container._html===html)return;
@@ -135,7 +144,7 @@
       panel.querySelector('.rp-watch-status').textContent=source.error?`同步失败 · ${source.error}${source.data?' · 保留上次记录':''}`:!source.data?'正在读取币种…':catalogTab?`OKX USDT 永续 · 24h 成交额降序 · ${view.items.length} 个`:`${data?.display_previous?'上周触价':'本周触价'} · 最新触价优先 · ${view.items.length} 个`;
       // Keep live controls in place, including while a finger is held down.
       if(pointers.size)return;
-      const chips=recentRows(data,preferences).map(item=>recentHTML(item,context.symbol)).join('')||`<span class="rp-recent-empty">${!data?(error?'触价读取失败':'触价同步中…'):'暂无触价'}</span>`;
+      const chips=recentRows(data,preferences).map(item=>recentHTML(item,context.symbol,touchScore(item,data.display_week||data.week,context.signals))).join('')||`<span class="rp-recent-empty">${!data?(error?'触价读取失败':'触价同步中…'):'暂无触价'}</span>`;
       const offset=lane.scrollLeft;reconcile(lane,chips);lane.scrollLeft=offset;
       reconcile(recent.querySelector('.rp-pinned'),pinnedHTML(context.symbol));
       if(!open)return;

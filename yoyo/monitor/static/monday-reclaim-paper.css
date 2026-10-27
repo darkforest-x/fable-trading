@@ -302,9 +302,13 @@ body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-headi
 #monday-reclaim-paper .rp-recent-scroll.is-dragging {cursor:grabbing;scroll-behavior:auto;}
 #monday-reclaim-paper .rp-recent-scroll.is-dragging button {transform:none;cursor:grabbing;}
 #monday-reclaim-paper .rp-recent-scroll::-webkit-scrollbar {display:none;}
-#monday-reclaim-paper .rp-recent-chip {display:flex;align-items:center;gap:6px;flex:none;width:98px;min-width:98px;max-width:98px;padding:3px 7px;text-align:left;border-radius:22px;}
+#monday-reclaim-paper .rp-recent-chip {display:flex;align-items:center;gap:6px;flex:none;width:146px;min-width:146px;max-width:146px;padding:3px 7px;text-align:left;border-radius:22px;}
 #monday-reclaim-paper :is(.rp-recent-chip,.rp-pinned-chip) .rp-avatar {flex:none;width:20px;height:20px;font-size:10px;}
-#monday-reclaim-paper .rp-recent-chip>span:last-child {min-width:0;}
+#monday-reclaim-paper .rp-recent-chip>span:last-child {min-width:0;flex:1;}
+#monday-reclaim-paper .rp-recent-identity {display:flex;align-items:baseline;justify-content:space-between;gap:5px;}
+#monday-reclaim-paper .rp-recent-score {font-style:normal;font-size:9px;font-variant-numeric:tabular-nums;color:var(--rp-muted,#718494);white-space:nowrap;}
+#monday-reclaim-paper .rp-recent-score[data-scored=true]::before {content:"分 ";}
+#monday-reclaim-paper .rp-recent-score.is-high {color:var(--rp-blue,#0071e3);font-weight:600;}
 #monday-reclaim-paper .rp-recent-chip b {display:block;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 #monday-reclaim-paper .rp-recent-chip small {display:block;font-size:9px;white-space:nowrap;}
 #monday-reclaim-paper .rp-recent-empty {padding:0 8px;line-height:44px;font-size:10px;color:var(--rp-muted,#718494);white-space:nowrap;}

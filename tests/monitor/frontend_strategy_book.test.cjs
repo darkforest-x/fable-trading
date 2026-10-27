@@ -6,8 +6,26 @@ const paper=require('../../yoyo/monitor/static/monday-reclaim-paper.js');
 test('all eight accounts have separate selection and accessible booklet buttons',()=>{
  const html=ui.pickerHTML(paper.TRACKS);
  for(const t of paper.TRACKS){assert.ok(html.includes(`data-strategy-select="${t}"`));assert.ok(html.includes(`data-strategy-book="${t}"`));assert.ok(data.accounts[t]);assert.doesNotThrow(()=>ui.researchHTML(data,t));}
- assert.equal((html.match(/<button /g)||[]).length,16);
+ assert.equal((html.match(/<button /g)||[]).length,24);
  for(const match of html.matchAll(/<button[^>]*>([\s\S]*?)<\/button>/g))assert.doesNotMatch(match[1],/<button/);
+});
+test('local account ordering defaults to spike and preserves valid user order across new accounts',()=>{
+ const defaults=ui.accountOrder(null,paper.TRACKS);assert.equal(defaults[0],'spike');assert.equal(defaults.length,8);
+ const saved=['v3add20','60','60','deleted'];const result=ui.accountOrder(saved,paper.TRACKS);
+ assert.deepEqual(result.slice(0,3),['v3add20','60','spike']);assert.equal(new Set(result).size,8);assert.deepEqual(saved,['v3add20','60','60','deleted']);
+ assert.deepEqual(ui.accountOrder({bad:1},paper.TRACKS),defaults);
+ const moved=ui.moveAccount(defaults,'v3add20',0);assert.equal(moved[0],'v3add20');assert.equal(defaults[0],'spike');
+ assert.deepEqual(ui.moveAccount(defaults,'unknown',0),defaults);assert.equal(ui.moveAccount(defaults,'spike',99).at(-1),'spike');
+});
+test('picker reports complete realized P&L, preserves zero and missing states, and excludes refill cash',()=>{
+ const data={equity:1150,start_equity:1000,closed:[{pnl:99999}],open:[{unrealized_bp:22222}]};
+ assert.equal(ui.pnlView(paper.summary(data,'spike').pnl).text,'+150.00');
+ assert.equal(ui.pnlView(paper.summary({...data,equity:980},'spike').pnl).text,'−20.00');
+ assert.equal(ui.pnlView(paper.summary({...data,equity:1000},'spike').pnl).text,'0.00');
+ const allin={...data,refills:[{equity_before:50,equity_after:1000}]};
+ assert.equal(ui.pnlView(paper.summary(allin,'allin3').pnl).text,'−800.00');
+ assert.equal(ui.pnlView(paper.summary(data,'allin3').pnl).text,'—');assert.equal(ui.pnlView(null).text,'—');
+ assert.equal(ui.pnlView(-.001).text,'−<0.01');assert.match(ui.pnlView(1).title,/不含浮盈亏和补充本金/);
 });
 test('historical source projection preserves saved numbers and excludes broken slot sizing',()=>{
  const base=path.resolve(__dirname,'../..');

@@ -240,9 +240,9 @@
     chart=window.SpikeReclaimChart.create(el('chart'),text=>{el('chart-notice').textContent=text;el('chart-notice').hidden=!text;});
     sheet=window.SpikeYoloPreviewSheet.bind({panel:root.querySelector('.rp-records'),isOpen:()=>recordsOpen,dismiss:()=>setRecords(false)});
     closer=window.SpikeReclaimClose.create({root,onChanged:()=>{feed.refresh();watch?.refresh();analytics?.refresh();}});
-    watch=window.SpikeReclaimWatchlist.create({root,createFeed,getContext:()=>({track:feed.getState().data?.tracks[state.track],symbol:chartSymbol,period:state.period}),onOpen:()=>{analytics?.setOpen(false,false);if(recordsOpen)setRecords(false,false);},onSelect:symbol=>{state.symbol=symbol;state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());}});
+    watch=window.SpikeReclaimWatchlist.create({root,createFeed,getContext:()=>({track:feed.getState().data?.tracks[state.track],signals:feed.getState().data?.signals,symbol:chartSymbol,period:state.period}),onOpen:()=>{analytics?.setOpen(false,false);if(recordsOpen)setRecords(false,false);},onSelect:symbol=>{state.symbol=symbol;state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());}});
     analytics=window.SpikeReclaimAnalytics.create({root,createFeed,onOpen:()=>{watch.setOpen(false,false);if(matchMedia('(max-width:700px)').matches)setRecords(false,false);},onTrack:selectTrack});
-    book=window.SpikeStrategyBook.create({root,tracks:TRACKS,getTrack:()=>state.track,getSnapshot:()=>feed.getState().data,renderRules:rulesHTML,createFeed,onSelect:selectTrack});
+    book=window.SpikeStrategyBook.create({root,tracks:TRACKS,getTrack:()=>state.track,getSnapshot:()=>feed.getState().data,getPnl:t=>summary(feed.getState().data?.tracks?.[t],t).pnl,renderRules:rulesHTML,createFeed,onSelect:selectTrack});
     el('period').addEventListener('change',event=>{state.period=event.target.value;sync();render(feed.getState());});
     quick=window.SpikeHomeTicket.create({root,context:()=>({symbol:chartSymbol,timeframe:state.period})});
     focus=window.SpikeChartFocus.bind(root);
