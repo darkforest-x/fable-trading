@@ -48,10 +48,11 @@
     }
   }
   if(typeof module!=='undefined'&&module.exports){module.exports={latest,select,valid,candleIndex,geometry,TradeDrawing};return;}
-  function create(host,notice){
+  function create(host,notice,drawings){
     let active=true,request=null,epoch=0,desired=null,anchor=null,received=0,pinnedFocus='';
     const shared=window.SpikePublicChartCache;
     const chart=window.SpikeMondayFibChart.create({decorate:(instance,data)=>{
+      drawings?.attach(instance,data);
       const p=data.paperTrade,step=periods[data.bar];
       instance.chart?.applyOptions?.({handleScale:{axisDoubleClickReset:false}});
       instance.canvas?.setAttribute('aria-label','K 线交互图；双击或双点任意图表位置隐藏／恢复悬浮组件；拖动平移，滚轮或双指缩放；Home 全图，End 最新');
@@ -91,7 +92,7 @@
       finally{clearTimeout(timeout);if(request===c)request=null;}
     }
     return {show,fit:chart.fit,latest:chart.latest,zoom:chart.zoom,retry(){received=0;if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
-      setActive(value){active=value;if(!value){epoch++;request?.abort();request=null;chart.pause();}else if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
+      setActive(value){active=value;if(!value){drawings?.cancel();epoch++;request?.abort();request=null;chart.pause();}else if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
       resetFocus(){pinnedFocus='';},destroy(){active=false;epoch++;request?.abort();chart.hide();}};
   }
   window.SpikeReclaimChart={create,latest,select,valid};

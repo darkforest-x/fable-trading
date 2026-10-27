@@ -20,6 +20,16 @@ test('ribbon scores join the exact week, symbol, side and touch candle, never an
  const lower=coin('SOL',{touches:{lower:{source:'live',candle_ms:2000,observed_ms:3000}}});
  assert.equal(ui.touchScore(lower,week,[signal,{...signal,side:1,candle_ms:2000,score:.2}],4000).text,'0.2000');
 });
+test('selected symbol score hides missing values, keeps zero and highlights strictly above 0.5',()=>{
+ const week='2026-10-26',item=coin('SHEIN',{touches:{lower:{source:'history',candle_ms:1000,observed_ms:2000}}}),data={week,items:[item]};
+ const signal={week,symbol:item.symbol,side:1,candle_ms:1000,status:'scored',score:.638144};
+ for(const [value,text,high] of [[0,'0.0000',false],[.5,'0.5000',false],[.50001,'0.5000',true],[.638144,'0.6381',true]]){
+  const score=ui.selectedScore(data,item.symbol,[{...signal,score:value}]);assert.equal(score.text,text);assert.equal(score.high,high);
+ }
+ for(const patch of [{score:null},{score:NaN},{status:'pending'},{status:'feature_error'},{week:'2026-10-19'},{symbol:'BTC-USDT-SWAP'},{side:-1},{candle_ms:999}])assert.equal(ui.selectedScore(data,item.symbol,[{...signal,...patch}]),null);
+ assert.equal(ui.selectedScore(data,'BTC-USDT-SWAP',[signal]),null);assert.equal(ui.selectedScore(null,item.symbol,[signal]),null);
+ assert.equal(ui.selectedScore({...data,week:'2026-11-02',display_week:week},item.symbol,[signal]).text,'0.6381');
+});
 test('touch tabs keep the shared Monday history policy while All needs a full catalog',()=>{
  const data=snapshot([coin('SOL',{touches:{upper:{source:'live',observed_ms:9000}}}),coin('DOGE',{touches:{lower:{source:'history',observed_ms:10000,candle_ms:1000}}}),coin('BTC')]);
  const prefs=list.createListPreferences(disk());prefs.toggle('BTC-USDT-SWAP');

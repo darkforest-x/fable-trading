@@ -43,6 +43,13 @@ body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-headi
 #monday-reclaim-paper .rp-context-line strong {font-size:18px;letter-spacing:-.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 #monday-reclaim-paper .rp-context-line strong small {font-size:11px;color:var(--rp-muted,#788895);font-weight:400;letter-spacing:0;}
 #monday-reclaim-paper .rp-context-line>span {font-size:10px;white-space:nowrap;flex:none;}
+/* Stitch 180e69e1: selected symbol score uses the ribbon's exact occurrence. */
+#monday-reclaim-paper .rp-context-line .rp-context-score{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:88px;padding:6px 9px;border:1px solid var(--rp-edge,#8da2b42b);border-radius:15px;background:var(--rp-recessed);color:var(--rp-muted);}
+#monday-reclaim-paper .rp-context-score small{font-size:10px;line-height:1.4;letter-spacing:.04em;}
+#monday-reclaim-paper .rp-context-score b{font-size:22px;font-weight:650;line-height:1.2;letter-spacing:-.5px;font-variant-numeric:tabular-nums;}
+#monday-reclaim-paper .rp-context-score.is-high{color:var(--rp-blue);background:var(--rp-selected);border-color:color-mix(in srgb,var(--rp-blue) 35%,transparent);box-shadow:inset 0 1px 0 var(--rp-glass-highlight);}
+#monday-reclaim-paper .rp-selection-status{display:block;font-size:11px;margin:2px 0;}
+#monday-reclaim-paper .rp-selection-status:empty{display:none;}
 #monday-reclaim-paper .rp-selection-note {display:block;color:var(--rp-muted,#718494);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 #monday-reclaim-paper .rp-symbol-trigger {display:flex;align-items:center;gap:5px;min-width:0;padding:0 2px;text-align:left;}
 #monday-reclaim-paper .rp-symbol-trigger>span {color:var(--rp-muted,#7b8d9a);transition:transform .2s var(--rp-ease);}
@@ -50,6 +57,9 @@ body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-headi
 #monday-reclaim-paper .rp-context-tools {display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:5px;}
 #monday-reclaim-paper .rp-context-tools>button {color:var(--rp-accent,#0071e3);}
 #monday-reclaim-paper .rp-context-tools>button span {font-size:10px;}
+#monday-reclaim-paper .rp-context-tools{font-size:13px;}
+#monday-reclaim-paper .rp-context-tools .rp-account-trigger{font-size:14px;}
+#monday-reclaim-paper .rp-context-line strong{font-size:20px;}
 #monday-reclaim-paper .rp-account {position:absolute;top:20px;right:270px;z-index:5;max-width:420px;}
 #monday-reclaim-paper .rp-account>summary {display:flex;align-items:center;gap:12px;padding:10px 14px;color:var(--rp-muted,#748493);font-size:11px;white-space:nowrap;}
 #monday-reclaim-paper .rp-account>summary b {font-size:17px;margin-left:5px;color:var(--rp-ink,#203745);}
@@ -156,7 +166,9 @@ body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-headi
  #monday-reclaim-paper .rp-navigation summary {gap:5px;font-size:11px;}
  #monday-reclaim-paper .rp-context {top:130px;left:10px;width:290px;max-width:calc(100% - 86px);padding:5px 8px;border-radius:18px;}
  #monday-reclaim-paper .rp-context-line {gap:2px 8px;}
- #monday-reclaim-paper .rp-context-line strong {font-size:18px;}
+ #monday-reclaim-paper .rp-context-line strong {font-size:20px;}
+ #monday-reclaim-paper .rp-context-line .rp-context-score{min-width:80px;padding:5px 7px;border-radius:13px;}
+ #monday-reclaim-paper .rp-context-score b{font-size:20px;}
  #monday-reclaim-paper .rp-context-line>span {font-size:10px;}
  #monday-reclaim-paper .rp-context-tools {gap:4px;margin-top:5px;}
  #monday-reclaim-paper .rp-context-tools>button {font-size:10px;padding:5px 7px;}

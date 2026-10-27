@@ -1,0 +1,22 @@
+/* Stitch 9fcc51e5d9214869872995f628e3d4aa: drawing tools within the existing dock. */
+#monday-reclaim-paper .rp-indicator-panel{width:300px;max-height:calc(100dvh - 155px);overflow-y:auto;overscroll-behavior:contain;}
+#monday-reclaim-paper .cd-tools{border-top:1px solid var(--rp-edge,#8da2b42b);padding:10px 0 2px;margin-top:8px;}
+#monday-reclaim-paper .cd-tools>strong{display:block;padding:0 8px 8px;font-size:11px;color:var(--rp-muted);}
+#monday-reclaim-paper .cd-tool-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;}
+#monday-reclaim-paper .cd-tool-grid button{min-height:62px;display:flex;flex-direction:column;justify-content:center;gap:5px;padding:7px 2px;text-align:center;font-size:11px;border:1px solid transparent;border-radius:13px;}
+#monday-reclaim-paper .cd-tool-grid button[aria-pressed=true]{color:var(--rp-blue);background:var(--rp-selected);border-color:color-mix(in srgb,var(--rp-blue) 40%,transparent);}
+#monday-reclaim-paper .cd-tool-grid button:disabled{opacity:.4;cursor:wait;}
+#monday-reclaim-paper .cd-actions{display:flex;gap:4px;margin-top:6px;}
+#monday-reclaim-paper .cd-actions button{justify-content:center;min-height:44px;flex:1;padding:6px 2px;text-align:center;font-size:11px;}
+#monday-reclaim-paper .cd-actions [data-cd-action=delete]:not(:disabled){color:var(--rp-red,#d7355d);}
+#monday-reclaim-paper .cd-actions button:disabled{opacity:.38;cursor:default;}
+#monday-reclaim-paper .cd-tools>small{padding:6px 8px;line-height:1.5;}
+#monday-reclaim-paper .cd-status{position:absolute;z-index:5;left:50%;bottom:110px;transform:translateX(-50%);width:max-content;max-width:calc(100% - 24px);display:flex;gap:10px;align-items:center;padding:8px 10px 8px 14px;border-radius:18px;--rp-material:var(--rp-panel);}
+#monday-reclaim-paper .cd-status[hidden]{display:none;}
+#monday-reclaim-paper .cd-status>div{display:grid;gap:2px;min-width:0;}
+#monday-reclaim-paper .cd-status b{font-size:12px;color:var(--rp-blue);}
+#monday-reclaim-paper .cd-status [data-cd-hint]{font-size:11px;color:var(--rp-muted);line-height:1.5;}
+#monday-reclaim-paper .cd-status button{flex:none;min-width:48px;min-height:44px;color:var(--rp-blue);background:var(--rp-selected);border-radius:12px;}
+#monday-reclaim-paper .cd-placing{touch-action:none!important;cursor:crosshair;}
+#monday-reclaim-paper .cd-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+@media(max-width:700px){#monday-reclaim-paper .cd-status{bottom:max(106px,calc(env(safe-area-inset-bottom) + 68px));width:calc(100% - 24px);}#monday-reclaim-paper .rp-indicator-panel{left:50%;max-height:calc(100dvh - 155px);}}

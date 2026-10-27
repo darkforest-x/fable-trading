@@ -219,7 +219,7 @@
       if(a==null||b==null||b<=0||a>=width){this.band.hidden=true;return;}
       this.band.hidden=false;this.band.style.left=Math.max(0,a)+'px';this.band.style.width=Math.max(0,Math.min(width,b)-Math.max(0,a))+'px';this.band.textContent='纽约周一定界';
     }
-    destroy(){this.dead=true;this.freePan?.destroy();this.bandPaint?.cancel();this.bandResize?.disconnect();this.controls?.destroy();this.crosshair?.cancel();this.resize?.disconnect();this.theme?.disconnect();this.chart?.remove();this.chart=null;this.host.replaceChildren();}
+    destroy(){this.dead=true;this.drawingLayer?.destroy();this.freePan?.destroy();this.bandPaint?.cancel();this.bandResize?.disconnect();this.controls?.destroy();this.crosshair?.cancel();this.resize?.disconnect();this.theme?.disconnect();this.chart?.remove();this.chart=null;this.host.replaceChildren();}
   }
   const instances=new WeakMap();
   function mount(host,data,view,error=''){let instance=instances.get(host);if(!instance){instance=new Interactive(host);instances.set(host,instance);}instance.update(data,view,error);return instance;}
