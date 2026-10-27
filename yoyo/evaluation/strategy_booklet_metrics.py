@@ -25,6 +25,9 @@ def histogram(values, edges, labels):
 
 
 def project(frame, meta):
+    meta = dict(meta)
+    if meta.get('track') == 'v3add':
+        meta['note'] += '本曲线来自return-opt的逐腿分配口径：加仓按成交时净值重新分配；当前v3add沿用主单名义金额，二者也有差异。'
     required = ['time_ms', 'equity', 'pnl', 'cashflow', 'stake_budget', 'notional']
     if frame.empty or not np.isfinite(frame[required].to_numpy(float)).all() or not frame.time_ms.is_monotonic_increasing:
         raise ValueError('Incomplete or unordered capital ledger')
