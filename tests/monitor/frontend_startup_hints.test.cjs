@@ -27,7 +27,7 @@ test('other pages and hidden documents make no speculative market request',()=>{
  for(const options of [{hash:'#signals'},{hidden:true}]){const h=harness(options);assert.equal(h.calls.length,0);assert.equal(h.links.length,0);}
 });
 test('home and retired market bookmarks warm only the paper snapshot before choosing its actual coin',()=>{
- for(const hash of ['','#market']){const h=harness({hash});assert.equal(h.calls.length,1);assert.equal(h.calls[0].url,'/api/monday-reclaim-paper');}
+ for(const hash of ['','#market']){const h=harness({hash});assert.equal(h.calls.length,1);assert.equal(h.calls[0].url,'/api/monday-reclaim-paper?list_period=today');}
 });
 test('startup overlaps code and data, preserves receipt time, and consumes each response once',async()=>{
  const h=harness(),signal=new AbortController().signal;
@@ -74,7 +74,7 @@ test('paper warmup chooses exact funded latest fill, preserves pins and overlaps
  assert.equal(paperSymbol(data,new URLSearchParams('trade=999')),null);
  assert.equal(paperSymbol(data,new URLSearchParams('symbol=DOGE-USDT-SWAP')),'DOGE-USDT-SWAP');
  const h=harness({hash:'#signals?pane=reclaim&track=60&period=1H'});h.calls[0].resolve({ok:true,json:async()=>data});await flush();
- assert.deepEqual(h.calls.map(c=>c.url),['/api/monday-reclaim-paper','/api/monday-fib/levels?symbol=SOL-USDT-SWAP','/api/monday-fib/candles?symbol=SOL-USDT-SWAP&period=1H&wait_ms=8000']);
+ assert.deepEqual(h.calls.map(c=>c.url),['/api/monday-reclaim-paper?list_period=today','/api/monday-fib/levels?symbol=SOL-USDT-SWAP','/api/monday-fib/candles?symbol=SOL-USDT-SWAP&period=1H&wait_ms=8000']);
  const warm=await h.window.SpikeStartup.take('paper-snapshot',new AbortController().signal);assert.equal(warm.value,data);
  h.window.location.hash='#signals?pane=records';h.events.hashchange();assert.ok(h.calls.slice(1).every(c=>c.options.signal.aborted));
 });
@@ -96,7 +96,7 @@ for(const key of ['spike','v3lock','allin3','v3add20'])test(`${key} cold links w
  assert.equal(paperSymbol(d,new URLSearchParams('track='+key+'&trade=3002')),'ETH-USDT-SWAP');
  const h=harness({hash:'#signals?pane=reclaim&track='+key+'&period=1H'});
  h.calls[0].resolve({ok:true,json:async()=>d});await flush();
- assert.deepEqual(h.calls.map(c=>c.url),['/api/monday-reclaim-paper','/api/monday-fib/levels?symbol=SOL-USDT-SWAP','/api/monday-fib/candles?symbol=SOL-USDT-SWAP&period=1H&wait_ms=8000']);
+ assert.deepEqual(h.calls.map(c=>c.url),['/api/monday-reclaim-paper?list_period=today','/api/monday-fib/levels?symbol=SOL-USDT-SWAP','/api/monday-fib/candles?symbol=SOL-USDT-SWAP&period=1H&wait_ms=8000']);
  delete d.tracks[key];assert.equal(paperSymbol(d,new URLSearchParams('track='+key)),'BTC-USDT-SWAP');
 });
 
@@ -109,6 +109,6 @@ for(const period of ['12H','1D'])test(`paper cold ${period} link warms the selec
 
 test('empty home warms BTC 15m and ignores other accounts historical trades',async()=>{
  const h=harness({hash:''});h.calls[0].resolve({ok:true,json:async()=>({tracks:{spike:{open:[],closed:[]},60:{open:[{id:1,symbol:'SOL-USDT-SWAP',side:1,entry:1,fill_ms:100,taken:1,notional:100}]}}})});await flush();
- assert.deepEqual(h.calls.map(c=>c.url),['/api/monday-reclaim-paper','/api/monday-fib/levels?symbol=BTC-USDT-SWAP','/api/monday-fib/candles?symbol=BTC-USDT-SWAP&period=15m&wait_ms=8000']);
+ assert.deepEqual(h.calls.map(c=>c.url),['/api/monday-reclaim-paper?list_period=today','/api/monday-fib/levels?symbol=BTC-USDT-SWAP','/api/monday-fib/candles?symbol=BTC-USDT-SWAP&period=15m&wait_ms=8000']);
  assert.equal(paperSymbol({tracks:{}},new URLSearchParams('trade=999')),null);
 });

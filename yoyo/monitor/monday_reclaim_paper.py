@@ -75,6 +75,7 @@ compounds. A leg that finds no slot or margin is a shadow row (parent) or a canc
 from __future__ import annotations
 
 from contextlib import contextmanager
+from datetime import datetime
 import json
 from functools import wraps
 import uuid
@@ -84,8 +85,9 @@ import queue
 import sqlite3
 import threading
 from typing import Literal
+from zoneinfo import ZoneInfo
 
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -122,6 +124,16 @@ START_EQUITY, FRACTION, GROSS = 1000.0, 0.10, 1.0
 EXCLUDE = {"BTC", "ETH", "XAU", "XAG", "PAXG", "XAUT"}
 MANUAL_QUOTE_MAX_MS = 15_000
 MIN5, HOUR, DAY = 300_000, 3_600_000, 86_400_000
+SHANGHAI = ZoneInfo("Asia/Shanghai")
+FUNDED_OPEN_SIGNAL = ("held.stage IN ('pending_confirm','breakeven') AND held.fill_ms>0 AND held.entry>0 "
+                      "AND held.taken=1 AND held.notional>0 "
+                      "AND COALESCE(held.remaining_notional,held.notional)>0")
+
+
+def shanghai_day_start_ms(now_ms):
+    """Return the start of the timestamp's calendar day in Asia/Shanghai."""
+    local = datetime.fromtimestamp(now_ms / 1000, SHANGHAI)
+    return int(local.replace(hour=0, minute=0, second=0, microsecond=0).timestamp()) * 1000
 
 
 def serialized(method):
@@ -791,7 +803,12 @@ class ReclaimPaper:
         acct["start_equity"] = START_EQUITY
         return build_analytics(positions, exits, acct, quotes, self.client.clock(), days, connected)
 
-    def snapshot(self):
+    def snapshot(self, list_period="recent"):
+        if list_period not in ("recent", "today"):
+            raise ValueError("list_period must be 'recent' or 'today'")
+        today = list_period == "today"
+        now_ms = self.client.clock() if today else None
+        day_start_ms = shanghai_day_start_ms(now_ms) if today else None
         with self.fib.lock:
             quotes = dict(self.fib.quotes)
         with self.db() as db:
@@ -805,7 +822,11 @@ class ReclaimPaper:
                 # Add legs that never filled are bookkeeping only and are left out.
                 closed_where = f"p.track IN ({marks}) AND p.stage='closed' AND NOT (p.parent_id IS NOT NULL AND p.taken=0)"
                 joined = "SELECT p.*, s.score, s.ema_order FROM positions p LEFT JOIN signals s ON s.id=p.signal_id WHERE "
-                closed = [dict(r) for r in db.execute(joined + closed_where + " ORDER BY p.exit_ms DESC, p.id DESC LIMIT 100", tr)]
+                closed = [dict(r) for r in db.execute(
+                    joined + closed_where + " ORDER BY p.exit_ms DESC, p.id DESC LIMIT 100", tr)]
+                record_closed = ([dict(r) for r in db.execute(
+                    joined + closed_where + " AND p.exit_ms>=? AND p.exit_ms<? ORDER BY p.exit_ms DESC, p.id DESC",
+                    (*tr, day_start_ms, day_start_ms+DAY))] if today else [])
                 # Full-ledger statistics are independent of the bounded display page.
                 stats = dict(db.execute("SELECT COUNT(*) shadow_closed, AVG(p.net_bp) shadow_mean_net_bp, "
                     "COUNT(CASE WHEN p.taken THEN 1 END) taken_closed, "
@@ -829,7 +850,7 @@ class ReclaimPaper:
                                      if r["taken"] == 1 and r["notional"] > 0),
                                     key=lambda r: (r["fill_ms"], r["id"]), default=None)
                 # Fetch legs only for rows returned to the browser, not all history.
-                visible = open_rows + closed + ([latest_funded] if latest_funded else [])
+                visible = open_rows + closed + record_closed + ([latest_funded] if latest_funded else [])
                 ids = sorted({r["id"] for r in visible})
                 exits = {}
                 for start in range(0, len(ids), 500):
@@ -843,15 +864,27 @@ class ReclaimPaper:
                                  refills=[dict(r) for r in db.execute("SELECT * FROM refills WHERE track=? ORDER BY ms,id", (m,))])
                 else:
                     extra = {}
-                tracks[track_key(m)] = dict(confirm_minutes=CONFIRM.get(m, m), rule=KEYS.get(m, "v2"), **extra,
+                track_snapshot = dict(confirm_minutes=CONFIRM.get(m, m), rule=KEYS.get(m, "v2"), **extra,
                     equity=t["equity"], start_equity=START_EQUITY, started_ms=t["started_ms"],
                     open=open_rows, closed=closed, pending_adds=pending_adds,
                     # Latest fill is independent of the exit-ordered history page.
                     latest_funded=latest_funded, stats=stats)
+                if today:
+                    track_snapshot["record_closed"] = record_closed
+                tracks[track_key(m)] = track_snapshot
+            record_signals = []
+            if today:
+                record_signals = [dict(r) for r in db.execute(
+                    "SELECT s.* FROM signals s WHERE (s.candle_ms>=? AND s.candle_ms<?) OR "
+                    "(s.candle_ms<? AND EXISTS (SELECT 1 FROM positions held WHERE held.signal_id=s.id AND " +
+                    FUNDED_OPEN_SIGNAL + ")) ORDER BY s.candle_ms DESC,s.id DESC",
+                    (day_start_ms, day_start_ms+DAY, day_start_ms))]
             signals = [dict(r) for r in db.execute("SELECT * FROM signals ORDER BY candle_ms DESC LIMIT 100")]
         for s in signals:
             s["features"] = json.loads(s["features"]) if s["features"] else None
-        return dict(now_ms=self.client.clock(), strategy="monday_1618_limit_reclaim_v2", paper_only=True,
+        for s in record_signals:
+            s["features"] = json.loads(s["features"]) if s["features"] else None
+        result = dict(now_ms=now_ms if today else self.client.clock(), strategy="monday_1618_limit_reclaim_v2", paper_only=True,
                     model=dict(threshold=self.model.threshold, trained_before=self.model.trained_before, features=self.model.features),
                     sizing=dict(start_equity=START_EQUITY, fraction=FRACTION, gross=GROSS), v3=self.v3, v3add=self.add, spike=self.spike,
                     v3lock=self.v3lock, allin3=self.allin, v3add20=self.add20,
@@ -859,6 +892,76 @@ class ReclaimPaper:
                     fees_bp=dict(maker=MAKER_BP, taker=TAKER_BP, report_slippage=SLIP_BP),
                     worker=dict(alive=bool(self.thread and self.thread.is_alive()), queue=self.events.qsize(), error=self.error),
                     tracks=tracks, signals=signals)
+        if today:
+            result["record_day_start_ms"] = day_start_ms
+            result["record_signals"] = record_signals
+        return result
+
+    def record_history(self, track="60", tab="events", scope="funded", q="", offset=0, limit=50):
+        """Read a bounded page of older touch events or closed records, without ledger writes."""
+        if tab not in ("events", "closed"):
+            raise ValueError("tab must be 'events' or 'closed'")
+        if scope not in ("funded", "shadow", "all"):
+            raise ValueError("scope must be 'funded', 'shadow', or 'all'")
+        if not isinstance(offset, int) or offset < 0:
+            raise ValueError("offset must be a non-negative integer")
+        if not isinstance(limit, int) or not 1 <= limit <= 100:
+            raise ValueError("limit must be between 1 and 100")
+        if not isinstance(q, str) or len(q) > 100:
+            raise ValueError("q must be a string of at most 100 characters")
+
+        now_ms = self.client.clock()
+        day_start_ms = shanghai_day_start_ms(now_ms)
+        search = "%" + q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
+        if tab == "events":
+            where = "s.candle_ms<? AND NOT EXISTS (SELECT 1 FROM positions held " \
+                    "WHERE held.signal_id=s.id AND " + FUNDED_OPEN_SIGNAL + ") " \
+                    "AND (?='' OR LOWER(s.symbol) LIKE LOWER(?) ESCAPE '\\')"
+            params = (day_start_ms, q, search)
+            count_sql = "SELECT COUNT(*) n FROM signals s WHERE " + where
+            rows_sql = "SELECT s.* FROM signals s WHERE " + where + \
+                       " ORDER BY (s.score IS NULL),s.score DESC,s.candle_ms DESC,s.id DESC LIMIT ? OFFSET ?"
+            with self.db() as db:
+                db.execute("BEGIN")
+                total = db.execute(count_sql, params).fetchone()["n"]
+                rows = [dict(r) for r in db.execute(rows_sql, (*params, limit, offset))]
+            for row in rows:
+                row["features"] = json.loads(row["features"]) if row["features"] else None
+        else:
+            track_id_value = track_id(track)
+            tracks = members(track_id_value)
+            marks = ",".join("?" for _ in tracks)
+            where = (f"p.track IN ({marks}) AND p.stage='closed' AND p.exit_ms<? "
+                     "AND NOT (p.parent_id IS NOT NULL AND p.taken=0)")
+            scope_sql = {
+                "funded": " AND p.taken=1 AND p.notional>0",
+                "shadow": " AND NOT (p.taken=1 AND p.notional>0)",
+                "all": "",
+            }[scope]
+            where += scope_sql + " AND (?='' OR LOWER(p.symbol) LIKE LOWER(?) ESCAPE '\\')"
+            params = (*tracks, day_start_ms, q, search)
+            join = " FROM positions p LEFT JOIN signals s ON s.id=p.signal_id WHERE "
+            count_sql = "SELECT COUNT(*) n" + join + where
+            rows_sql = ("SELECT p.*,s.score,s.ema_order,s.features AS _features" + join + where +
+                        " ORDER BY (s.score IS NULL),s.score DESC,p.exit_ms DESC,p.id DESC LIMIT ? OFFSET ?")
+            with self.db() as db:
+                db.execute("BEGIN")
+                total = db.execute(count_sql, params).fetchone()["n"]
+                rows = [dict(r) for r in db.execute(rows_sql, (*params, limit, offset))]
+                ids = [row["id"] for row in rows]
+                exits = {}
+                for start in range(0, len(ids), 500):
+                    chunk = ids[start:start+500]
+                    for leg in db.execute("SELECT * FROM exits WHERE position_id IN (" + ",".join("?"*len(chunk)) +
+                                          ") ORDER BY exit_ms,id", chunk):
+                        exits.setdefault(leg["position_id"], []).append(dict(leg))
+            for row in rows:
+                features_json = row.pop("_features")
+                row["features"] = json.loads(features_json) if features_json else None
+                row["exits"] = exits.get(row["id"], [])
+
+        return dict(rows=rows, total=total, has_more=offset+len(rows)<total,
+                    now_ms=now_ms, day_start_ms=day_start_ms)
 
 
 def install(app, engine):
@@ -868,6 +971,14 @@ def install(app, engine):
     def analytics(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20"] = "60",
                   days: Literal["0", "7", "30"] = "0"):
         return engine.analytics(track, int(days))
+
+    @app.get("/api/monday-reclaim-paper/history")
+    def record_history(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20"] = "60",
+                       tab: Literal["events", "closed"] = "events",
+                       scope: Literal["funded", "shadow", "all"] = "funded",
+                       q: str = Query("", max_length=100), offset: int = Query(0, ge=0),
+                       limit: int = Query(50, ge=1, le=100)):
+        return JSONResponse(engine.record_history(track, tab, scope, q, offset, limit))
 
     @app.post("/api/monday-reclaim-paper/positions/{position_id}/close")
     def close_position(position_id: int, payload: CloseRequest, request: Request):
@@ -881,7 +992,7 @@ def install(app, engine):
             raise HTTPException(err.status, str(err)) from err
 
     @app.get("/api/monday-reclaim-paper")
-    def snapshot():
+    def snapshot(list_period: Literal["recent", "today"] = "recent"):
         # SQLite primitives and parsed JSON already satisfy the response contract.
         # Avoid FastAPI walking the complete multi-account ledger a second time.
-        return JSONResponse(engine.snapshot())
+        return JSONResponse(engine.snapshot(list_period=list_period))

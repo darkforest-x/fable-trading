@@ -48,7 +48,7 @@
   document.addEventListener('visibilitychange',()=>{if(document.hidden)cancel();});
   setTimeout(cancel,15000);
   if(paper){
-    start('paper-snapshot','/api/monday-reclaim-paper')?.then(packet=>{
+    start('paper-snapshot','/api/monday-reclaim-paper?list_period=today')?.then(packet=>{
       const symbol=paperSymbol(packet?.value,params);if(!symbol)return;
       const candidate=params.get('period'),period=['5m','15m','1H','4H','12H','1D'].includes(candidate)?candidate:'15m';
       start('levels:'+symbol,'/api/monday-fib/levels?symbol='+encodeURIComponent(symbol));
