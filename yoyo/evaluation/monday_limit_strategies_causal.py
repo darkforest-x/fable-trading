@@ -136,8 +136,149 @@ def run(config, workers, intrabar):
             print(json.dumps(dict(progress=k, total=len(todo), **r)), flush=True)
 
 
+def parity(args):
+    """Raw net per path of rows that share an order with the layered runs or the leaky ledgers."""
+    exp, symbol, cfg = args
+    base = lambda s: s.str.rsplit(':v_', n=1).str[0]
+    out = dict(compared=0, mismatch=0)
+    for p in ('ohlc', 'olhc'):
+        f = Path(exp)/p/'symbols'/symbol/'trades.csv.gz'
+        if not f.exists():
+            continue
+        t = pd.read_csv(f, usecols=['trade_id', 'variant', 'net_notional_bp'])
+        refs = [(A/cfg['layered_runs'][m]/p/'symbols'/symbol/'trades.csv.gz', 'rest', 'v3_be0') for m in ('frozen', 'refit')]
+        refs += [(A/cfg['leaky_runs']['v3']/p/'symbols'/symbol/'trades.csv.gz', v, v) for v in ('v3_be0', f"v3_add{cfg['add_pct']}")]
+        refs += [(A/cfg['leaky_runs']['spike']/p/'symbols'/symbol/'trades.csv.gz', 'near_P18', 'spike')]
+        for path, rv, mv in refs:
+            if not path.exists():
+                continue
+            r = pd.read_csv(path, usecols=['trade_id', 'variant', 'net_notional_bp'])
+            r = r[r.variant == rv].assign(b=lambda x: base(x.trade_id)).set_index('b').net_notional_bp
+            mine = t[t.variant == mv].assign(b=lambda x: base(x.trade_id)).set_index('b').net_notional_bp
+            both = mine.index.intersection(r.index)
+            out['compared'] += len(both)
+            out['mismatch'] += int(((mine[both]-r[both]).abs() > 1e-6).sum())
+    return out
+
+
+def in_period(x, per, window):
+    """Picklable period filter on entry time (B = 2025 / 2026 boundaries, window = last five months)."""
+    b25, b26 = pd.Timestamp('2025-01-01', tz='UTC'), pd.Timestamp('2026-01-01', tz='UTC')
+    return {'all': x.entry_t >= pd.Timestamp('2020-01-01', tz='UTC'), 'y2020_2024': x.entry_t < b25,
+            'y2025': (x.entry_t >= b25) & (x.entry_t < b26), 'y2026': x.entry_t >= b26, 'last5m': x.entry_t >= window}[per]
+
+
+def replays(name, x, window, cfg, ro, sh, py):
+    from yoyo.evaluation.monday_limit_return_opt import frac
+    from yoyo.evaluation.monday_limit_spike_hw import slot_replay
+    from yoyo.evaluation.monday_limit_langlang import path_run
+    x = x.assign(entry_ns=x.entry_t.dt.as_unit('ns').astype('int64'), exit_ns=x.exit_t.dt.as_unit('ns').astype('int64'))
+    if (x.exit_ns < x.entry_ns).any():
+        raise RuntimeError(f'{name}: exit before entry')
+    out = {}
+    for per in ('all', 'y2020_2024', 'y2025', 'y2026', 'last5m'):
+        y = x[in_period(x, per, window)].reset_index(drop=True)
+        st = dict(n=int(len(y)))
+        if len(y):
+            st.update(mean_bp=float(y.net.mean()), win_pct=float(100*(y.net > 1).mean()), sum_pct=float(y.net.sum()/100))
+            if name.startswith('v3add20'):
+                reps = [frac(y, 20, 3, ro['seed']+r) for r in range(ro['ties'])]
+            elif name.startswith('spike'):
+                reps = [slot_replay(y, sh['sizing']['slots'], sh['sizing']['leverage'], sh['sizing']['liq_pct'], sh['seed']+r)[0]
+                        for r in range(sh['ties'])]
+            else:
+                reps = []
+            if reps:
+                st['replay'] = dict(final_median=float(np.median([r['final_multiple'] for r in reps])),
+                                    dd_median=float(np.median([r['max_drawdown_pct'] for r in reps])),
+                                    liquidations_median=float(np.median([r['liquidations'] for r in reps])))
+        out[per] = st
+    if name.startswith('allin3'):
+        starts = pd.date_range(py['first_start'], py['last_start'], freq='MS', tz='UTC')
+        rows = []
+        for k, s0 in enumerate(starts):
+            y = x[x.entry_t >= s0].reset_index(drop=True)
+            for r in range(py['ties']):
+                h = path_run(y, 'allin', 3, py['seed']+1000*k+r)
+                rows.append({**{f'd{q}': (h[q]['days'] if h[q] else np.nan) for q in (10, 100)},
+                             **{f'b{q}': (h[q]['blowups'] if h[q] else np.nan) for q in (10, 100)}})
+        d = pd.DataFrame(rows)
+        out['allin3x_monthly_starts'] = {f'x{q}': dict(reached_pct=float(100*d[f'd{q}'].notna().mean()),
+                                                       days_median=float(d[f'd{q}'].median()) if d[f'd{q}'].notna().any() else None,
+                                                       within_365d_pct=float(100*(d[f'd{q}'] <= 365).mean()),
+                                                       blowups_before_median=float(d[f'b{q}'].median()) if d[f'b{q}'].notna().any() else None)
+                                         for q in (10, 100)}
+    return name, out
+
+
+def summarize(config, workers):
+    from yoyo.evaluation import monday_limit_spike_opt as so
+    from yoyo.evaluation.monday_limit_be_scalein_compare import BAD_EVENTS, clean
+    from yoyo.evaluation.monday_limit_layered import load_symbol
+    exp = config.resolve().parent
+    cfg = json.loads(config.read_text())
+    committed('yoyo/evaluation/monday_limit_strategies_causal.py')
+    ro = json.loads((A/'exp-monday-limit-return-opt-20261027-v2/config.json').read_text())
+    sh = json.loads((A/'exp-monday-limit-spike-hw-20261026-v1/config.json').read_text())
+    py = json.loads((A/'exp-monday-limit-pyramid-20261027-v1/compare.json').read_text())
+    sc = scores(cfg)
+    order = pd.read_csv(ROOT/cfg['features'], usecols=['event', 'l2_order_score']).set_index('event').l2_order_score
+    sc['order'] = order.reindex(sc.index)
+    syms = symbols(cfg)
+    missing = [(p, s) for p in ('ohlc', 'olhc') for s in syms if not (exp/p/'symbols'/s/'done.json').exists()]
+    errors = [str(f) for f in exp.glob('*/symbols/*/error.json')]
+    if missing:
+        raise RuntimeError(f'Incomplete run: {len(missing)}')
+    events = set(sc.index)-BAD_EVENTS
+    all_syms = sorted({e.split(':')[0] for e in sc.index[(sc[['leaky', 'frozen', 'refit']] >= cfg['cut']).any(axis=1)]})
+    add = f"v3_add{cfg['add_pct']}"
+    with ProcessPoolExecutor(workers) as ex:
+        par = list(ex.map(parity, [(str(exp), s, cfg) for s in syms], chunksize=4))
+        mine = pd.concat([d for d in ex.map(so.legs, [(s, {exp.name: ['v3_be0', add, 'spike']}, events) for s in syms], chunksize=4) if len(d)])
+        leak = pd.concat([d for d in ex.map(so.legs, [(s, {cfg['leaky_runs']['v3']: ['v3_be0', add], cfg['leaky_runs']['spike']: ['near_P18']}, events)
+                                                      for s in all_syms], chunksize=4) if len(d)])
+        rest = {}
+        for m in ('frozen', 'refit'):
+            run_dir = str(A/cfg['layered_runs'][m])
+            got = list(ex.map(load_symbol, [(run_dir, s, cfg['leaky_runs']['v3'], 10., 10., cfg['layered_runs']['frozen'] if m == 'refit' else None)
+                                            for s in all_syms], chunksize=4))
+            d = pd.concat([g[1] for g in got if len(g[1])])
+            rest[m] = d[d.variant == 'rest']
+    for d in [mine, leak, *rest.values()]:
+        for c in ('entry_t', 'exit_t'):
+            d[c] = pd.to_datetime(d[c], utc=True).dt.as_unit('ns')
+    keep = lambda d: d[~d.event.isin(BAD_EVENTS)]
+    mine, leak = keep(mine), keep(leak)
+    s_ = lambda d, m: d.event.map(sc[m])
+    o_ = lambda d: d.event.map(sc.order)
+    hi, cut, mo = cfg['hi'], cfg['cut'], cfg['min_order']
+    lv3, ladd, lspk = (leak[leak.variant == v] for v in ('v3_be0', add, 'near_P18'))
+    mv3, madd, mspk = (mine[mine.variant == v] for v in ('v3_be0', add, 'spike'))
+    plans = {
+        'v3add20|leaky': pd.concat([lv3[s_(lv3, 'leaky') >= cut], ladd[s_(ladd, 'leaky') >= hi]]),
+        'spike|leaky': lspk[(s_(lspk, 'leaky') >= hi) & (o_(lspk) >= mo)],
+        'allin3|leaky': lv3[s_(lv3, 'leaky') >= hi],
+    }
+    for m in ('frozen', 'refit'):
+        r = keep(rest[m])
+        plans[f'v3add20|{m}'] = pd.concat([r[s_(r, m) >= cut], madd[s_(madd, m) >= hi]])
+        plans[f'spike|{m}'] = mspk[(s_(mspk, m) >= hi) & (o_(mspk) >= mo)]
+        plans[f'allin3|{m}'] = mv3[s_(mv3, m) >= hi]
+    window = pd.Timestamp(json.loads((A/'exp-monday-limit-reclaim-recent-20261025-v1/summary.json').read_text())['results']['window'][0])
+    res = dict(checks=dict(symbols=len(syms), errors=errors, parity_compared=int(sum(p['compared'] for p in par)),
+                           parity_mismatch=int(sum(p['mismatch'] for p in par)),
+                           rows={k: int(len(v)) for k, v in plans.items()}), plans={})
+    with ProcessPoolExecutor(min(workers, len(plans))) as ex:
+        for name, out in ex.map(replays, *zip(*[(k, v, window, cfg, ro, sh, py) for k, v in plans.items()])):
+            res['plans'][name] = out
+    res = clean(res)
+    dump(exp/'summary.json', dict(config=cfg, results=res, source_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+                                 training_eligible=False, production_eligible=False))
+    print(json.dumps(res['checks']))
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(); ap.add_argument('--config', type=Path, required=True); ap.add_argument('--workers', type=int, default=3)
     ap.add_argument('--intrabar', choices=['OHLC', 'OLHC']); ap.add_argument('--summary', action='store_true')
     a = ap.parse_args()
-    run(a.config, a.workers, a.intrabar)
+    summarize(a.config, a.workers) if a.summary else run(a.config, a.workers, a.intrabar)
