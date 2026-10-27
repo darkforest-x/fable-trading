@@ -4,6 +4,7 @@
   'use strict';
   const list=typeof module!=='undefined'&&module.exports?require('./monday-list-model.js'):window.SpikeMondayList;
   const catalogModel=typeof module!=='undefined'&&module.exports?require('./symbol-list-model.js'):window.SpikeSymbolList;
+  const icons=typeof module!=='undefined'&&module.exports?require('./coin-icons.js'):window.SpikeCoinIcons;
   const {esc,price,latestTouch,touchTime,selectRows,createListPreferences,FILTERS,STATES,tradingViewURL,inspectionURL,captureListScroll,restoreListScroll}=list;
   const validSymbol=value=>/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(String(value||''));
   const positive=value=>Number.isFinite(value)&&value>0,base=symbol=>symbol.slice(0,-10);
@@ -26,7 +27,7 @@
   }
   const PINNED=Object.freeze(['BTC-USDT-SWAP','ETH-USDT-SWAP','XAU-USDT-SWAP']);
   const recentRows=(data,preferences)=>selectRows(preferences.visible(data?.items||[],data?.display_week||data?.week)).filter(item=>!PINNED.includes(item.symbol)).slice(0,20);
-  const avatar=coin=>`<span class="rp-avatar" aria-hidden="true"><span>${esc(coin.slice(0,1))}</span><img src="https://static.okx.com/cdn/oksupport/asset/currency/icon/${encodeURIComponent(coin.toLowerCase())}.png" alt="" loading="lazy" referrerpolicy="no-referrer"></span>`;
+  const avatar=coin=>icons.avatar(coin);
   const touchLabel=side=>side==='upper'?'上沿':side==='lower'?'下沿':'尚未触价';
   const touchTone=side=>side==='upper'?'rp-negative':side==='lower'?'rp-positive':'';
   // The ribbon shows the model score of this exact NY-week/side/touch bar.
@@ -146,19 +147,19 @@
     }
     function feedback(text,undo=false){const box=panel.querySelector('.rp-watch-feedback');box.hidden=!text;box.querySelector('span').textContent=text;box.querySelector('button').hidden=!undo;}
     function render(){
-      const {data,error,busy}=feed.getState(),catalog=catalogFeed.getState(),catalogTab=filter==='all'||filter==='favorites',context=getContext(),view=model(data,preferences,{q,filter,catalog:catalog.data||[]});
+      const {data,error}=feed.getState(),context=getContext();
       recent.dataset.previous=String(!!data?.display_previous);recent.querySelector('.rp-recent-label').textContent=data?.display_previous?'上周':'触价';recent.title=data?.display_previous?'本周周一区间形成中，保留上周触价记录':'';
-      trigger.title='选择币种';el('total').textContent=(catalogTab?catalog.data:data)?view.items.length:'—';
-      panel.querySelectorAll('[data-watch-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.watchFilter===filter)));
-      panel.querySelector('[data-watch-action="search"]').classList.toggle('has-query',!!q);
-      const source=catalogTab?catalog:feed.getState();
-      panel.querySelector('.rp-watch-status').textContent=source.error?`同步失败 · ${source.error}${source.data?' · 保留上次记录':''}`:!source.data?'正在读取币种…':catalogTab?`OKX USDT 永续 · 24h 成交额降序 · ${view.items.length} 个`:`${data?.display_previous?'上周触价':'本周触价'} · 最新触价优先 · ${view.items.length} 个`;
       // Keep live controls in place, including while a finger is held down.
       if(pointers.size)return;
       const chips=recentRows(data,preferences).map(item=>recentHTML(item,context.symbol,touchScore(item,data.display_week||data.week,context.signals))).join('')||`<span class="rp-recent-empty">${!data?(error?'触价读取失败':'触价同步中…'):'暂无触价'}</span>`;
       const offset=lane.scrollLeft;reconcile(lane,chips);lane.scrollLeft=offset;
       reconcile(recent.querySelector('.rp-pinned'),pinnedHTML(context.symbol));
       if(!open)return;
+      const catalog=catalogFeed.getState(),catalogTab=filter==='all'||filter==='favorites',view=model(data,preferences,{q,filter,catalog:catalog.data||[]}),source=catalogTab?catalog:feed.getState();
+      trigger.title='选择币种';el('total').textContent=(catalogTab?catalog.data:data)?view.items.length:'—';
+      panel.querySelectorAll('[data-watch-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.watchFilter===filter)));
+      panel.querySelector('[data-watch-action="search"]').classList.toggle('has-query',!!q);
+      panel.querySelector('.rp-watch-status').textContent=source.error?`同步失败 · ${source.error}${source.data?' · 保留上次记录':''}`:!source.data?'正在读取币种…':catalogTab?`OKX USDT 永续 · 24h 成交额降序 · ${view.items.length} 个`:`${data?.display_previous?'上周触价':'本周触价'} · 最新触价优先 · ${view.items.length} 个`;
       const html=view.items.slice(0,shown).map(item=>rowHTML(item,context.symbol,{favorite:preferences.has(item.symbol),expanded:expandedSymbol===item.symbol,now:Date.now(),error:source.error,platform,period:context.period})).join('')||`<div class="rp-empty">${!source.data?(source.error?'读取失败，正在重试':'正在读取…'):q?'没有匹配的币种':filter==='favorites'?'尚未收藏币种':catalogTab?'暂无可用币种':'暂无符合筛选的触价币种'}</div>`;
       const position=captureListScroll(scroll);reconcile(el('rows'),html);restoreListScroll(scroll,position);
       panel.querySelector('[data-watch-action="more"]').hidden=view.items.length<=shown;

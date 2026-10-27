@@ -90,7 +90,7 @@
     finally{marketPending=false;if(state.active&&state.loaded)drawSymbols();}
   }
   function toggleFavorite(symbol){if(!exactSymbol(symbol))return;favorites=favorites.includes(symbol)?favorites.filter(s=>s!==symbol):[...favorites,symbol].slice(-300);save('spike.yolo.favorites.v1',favorites);drawSymbols();}
-  function avatar(symbol){return `<span class="yd-coin-logo" aria-hidden="true"><span>${esc(short(symbol).slice(0,2))}</span><img src="${market.logo(symbol)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-yd-logo></span>`;}
+  function avatar(symbol){return window.SpikeCoinIcons.avatar(symbol,'yd-coin-logo');}
   function wallpaper(){const active=state.active&&state.tab==='results';document.body.toggleAttribute('data-yolo-wallpaper',active);if(active&&!floatingLayout&&root.querySelector('.yd-chart-head'))floatingLayout=window.SpikeFloatingLayout.mountLayout(root,window,'spike:patrol:layout:v1');floatingLayout?.setActive(active);}
   function patterns(open){const panel=$('yd-pattern-panel');panel.classList.toggle('is-open',open);panel.inert=!open;$('yd-pattern-toggle').setAttribute('aria-expanded',String(open));if(!open&&panel.contains(document.activeElement))$('yd-pattern-toggle').focus({preventScroll:true});}
   let chartControls=null,hoverTime=null;

@@ -7,6 +7,22 @@ from fastapi.testclient import TestClient
 from yoyo.monitor.asset_delivery import cache_policy, render_index, version, vision_root, boot_bundle, BOOT_PATH, style_bundles
 
 
+def test_coin_artwork_is_versioned_and_cannot_expose_other_app_sources(tmp_path):
+    from yoyo.monitor.asset_delivery import coin_root
+    root = tmp_path / 'monitor' / 'static'
+    root.mkdir(parents=True)
+    coins = coin_root(root)
+    coins.mkdir(parents=True)
+    artwork = coins / 'layer.png'
+    artwork.write_bytes(b'verified public artwork')
+    digest = version(artwork)
+    assert cache_policy('/coin-assets/layer.png', digest, root, 200).endswith('immutable')
+    assert cache_policy('/coin-assets/layer.png', 'old', root, 200) == 'private, no-cache'
+    assert cache_policy('/coin-assets/layer.png', digest, root, 404) == 'no-store'
+    for path in ('/coin-assets/../private.png', '/coin-assets/private.json', '/api/monday-reclaim-paper'):
+        assert cache_policy(path, digest, root, 200) == 'no-store'
+
+
 def test_versions_invalidate_on_content_change_and_escape_manifest(tmp_path):
     script = tmp_path / 'app.js'
     script.write_text('a' * 3000)

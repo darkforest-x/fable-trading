@@ -539,8 +539,8 @@ test("client preserves display-only Bark state, Unicode search, and the approved
   assert.match(app, /const DISPLAY_ONLY_NOTE = "仅前端 · Bark 已关闭"/);
   assert.match(app, /if \(channel === "bark" && isDisplayOnly\(item\)\) return \[DISPLAY_ONLY_NOTE, "muted"\]/);
   assert.match(app, /normalize\("NFKC"\)\.toUpperCase\(\)\.replace\(\/\[\^\\p\{L\}\\p\{N\}\]\/gu, ""\)/);
-  assert.match(page, /id="theme-select"/);
-  assert.match(page, /value="light"/);
+  assert.match(page, /src="\/static\/theme.js"/);
+  assert.match(page, /href="\/static\/theme-toggle.css"/);
   assert.match(page, /data-design="apple-glass"/);
   assert.doesNotMatch(page, /value="dark"/);
 });

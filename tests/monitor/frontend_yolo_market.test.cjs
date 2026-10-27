@@ -21,6 +21,6 @@ test('Monday deep links retain exact contract and period, reject injection and n
   assert.equal(market.mondayLink('USELESS-USDT-SWAP','1H'),'#monday-fib?symbol=USELESS-USDT-SWAP&timeframe=1H');
   assert.match(market.mondayLink('BTC-USDT-SWAP','1Dutc'),/timeframe=1D$/);
   assert.equal(market.mondayLink('BTC-USDT-SWAP&symbol=ETH-USDT-SWAP','1H'),'#monday-fib');
-  assert.equal(market.logo('BTC-USDT-SWAP'),'https://static.okx.com/cdn/oksupport/asset/currency/icon/btc.png');
+  assert.match(market.logo('BTC-USDT-SWAP'),/^\/coin-assets\/btc\.png\?v=[a-f0-9]{20}$/);
   assert.equal(market.logo('../secret'),'');
 });

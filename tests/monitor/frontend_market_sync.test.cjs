@@ -14,7 +14,7 @@ test("optional metadata failure preserves stale feed status and backfill evidenc
 });
 
 async function mountReadableMarket({history: historyOverride, health, latestRow, context, sourceId, audio=false} = {}) {
- const handlers=new Map(),details=new Map(),window={};
+ const handlers=new Map(),details=new Map(),window={SpikeChartTools:require('../../yoyo/vision_research/static/chart-tools.js')};
  const resonanceNodes=new Map(),periodButtons=['30','60'].map(tf=>({dataset:{resonanceTf:tf},attributes:{},setAttribute(k,v){this.attributes[k]=v;},addEventListener(_,fn){this.click=fn;}}));
  const resonance={innerHTML:'',dataset:{},querySelector(selector){
   if(!this.innerHTML)return null;

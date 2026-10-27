@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.gzip import GZipMiddleware
-from yoyo.monitor.asset_delivery import cache_policy, render_index, boot_bundle, BOOT_PATH, style_bundles
+from yoyo.monitor.asset_delivery import cache_policy, render_index, boot_bundle, BOOT_PATH, style_bundles, coin_root
 
 from yoyo.monitor import FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRAMES, SIGNAL_KIND, SIGNAL_PROTOCOL, SHORT_SIGNAL_PROTOCOL
 from yoyo.monitor import market_sync as market_sync_research
@@ -477,6 +477,7 @@ def create_app(runtime=None, start_monitor=True):
     from yoyo.monitor.pro.delivery import install as install_pro
     install_pro(app)
 
+    app.mount("/coin-assets", StaticFiles(directory=str(coin_root(STATIC)), check_dir=False), name="coin-assets")
     app.mount("/static", StaticFiles(directory=str(STATIC), check_dir=False), name="static")
     return app
 

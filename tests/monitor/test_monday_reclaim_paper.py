@@ -177,6 +177,25 @@ class PaperTests(PaperFixture):
         self.assertEqual(data['tracks']['60']['latest_funded']['symbol'], 'ABC-USDT-SWAP')
         self.assertEqual(data['tracks']['5']['latest_funded']['stage'], 'pending_confirm')
 
+    def test_paged_snapshot_retains_complete_stats_and_only_returned_exit_legs(self):
+        e = self.engine(-1.)
+        e.handle_touch(self.levels, "ABC-USDT-SWAP", "lower", 93.8, self.touch+500, self.touch)
+        with e.db() as db:
+            for i in range(160):
+                row = db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,stage,taken,notional,exit_ms,net_bp) "
+                    "VALUES (?,60,'OLD-USDT-SWAP',1,100,110,?,'closed',1,100,?,?)",
+                    (1000+i, self.touch+10000-i, self.touch+i, 2 if i % 2 else -1))
+                db.execute("INSERT INTO exits (position_id,notional,exit_ms,price,reason,net_bp) VALUES (?,100,?,101,'target',?)",
+                           (row.lastrowid, self.touch+i, 2 if i % 2 else -1))
+        value = e.snapshot()['tracks']['60']
+        self.assertEqual(len(value['closed']), 100)
+        self.assertEqual(value['stats'], dict(taken_closed=160, wins=80, mean_net_bp=.5,
+                                            shadow_closed=160, shadow_mean_net_bp=.5))
+        self.assertEqual(value['latest_funded']['fill_ms'], self.touch+10000)
+        self.assertNotIn(value['latest_funded']['id'], {r['id'] for r in value['closed']})
+        for row in value['closed'] + [value['latest_funded']]:
+            self.assertEqual([leg['position_id'] for leg in row['exits']], [row['id']])
+
     def manual_fixture(self, side='lower'):
         e = self.engine(-1.)
         if side == 'upper':

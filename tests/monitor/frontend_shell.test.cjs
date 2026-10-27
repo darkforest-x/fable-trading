@@ -180,6 +180,6 @@ test('Monday Fib has an independent route, lifecycle and manual refresh',async()
 });
 
 // Root entry must not restore an old workspace or pin a previous coin.
-test('empty and unknown routes land on the latest funded 1.618 paper view',()=>{
- for(const route of ['', 'unknown', 'market']){const c=harness();c.setView(route,false);assert.equal(c.state.view,'signals');const p=new URLSearchParams(c.location.hash.split('?')[1]);assert.equal(p.get('pane'),'reclaim');assert.equal(p.get('track'),'60');assert.equal(p.get('symbol'),null);assert.equal(p.get('trade'),null);}
+test('empty and unknown routes use the owner-selected spike account',()=>{
+ for(const route of ['', 'unknown', 'market']){const c=harness();c.setView(route,false);assert.equal(c.state.view,'signals');const p=new URLSearchParams(c.location.hash.split('?')[1]);assert.equal(p.get('pane'),'reclaim');assert.equal(p.get('track'),'spike');assert.equal(p.get('symbol'),null);assert.equal(p.get('trade'),null);}
 });

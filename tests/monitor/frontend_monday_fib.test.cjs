@@ -30,7 +30,7 @@ test('recent highlight expires at 15 minutes and excludes recovery/future timest
 });
 test('wallpaper opens the newest occurrence automatically and has no notification control or write',async()=>{
  const calls=[];const c=harness(async(u,o)=>{calls.push([u,o]);return response(snap());});await ready(c);
- assert.ok(calls.every(([u,o])=>u==='/api/monday-fib?compact=true'&&!o.method));
+ assert.ok(calls.every(([u,o])=>u==='/api/monday-fib/display'&&!o.method));
  assert.equal(c.el('mf-symbol').textContent,'BTC');assert.equal(c.charts.at(-1).symbol,'BTC-USDT-SWAP');
  assert.match(c.el('mf-week').textContent,/2026-10-19/);assert.doesNotMatch(source,/mf-tg|method:'PUT'|Telegram/);c.api.setActive(false);assert.equal(c.timers.size,0);
 });
@@ -119,7 +119,7 @@ test('only the inline coin link opens externally; the rest of each row pins the 
  c.el('mf-rows').events.click({target:{closest:s=>s==='[data-symbol]'?{dataset:{symbol:a.symbol}}:null}});
  assert.equal(c.charts.at(-1).symbol,a.symbol);assert.equal(c.el('mf-follow').attrs['aria-pressed'],'false');
  assert.equal(c.el('mf-watermark-symbol').textContent,'BTCUSDT');assert.equal(c.el('mf-watermark-period').textContent,'15m · USDT 永续');
- assert.ok(calls.every(([u,o])=>u==='/api/monday-fib?compact=true'&&!o.method));c.api.setActive(false);
+ assert.ok(calls.every(([u,o])=>u==='/api/monday-fib/display'&&!o.method));c.api.setActive(false);
 });
 test('inspection link targets exact coin K-line detail and updates when its period changes',async()=>{
  const c=harness(async()=>response(snap()));await ready(c);
@@ -143,7 +143,7 @@ test('Windows links use only the local app protocol and preserve independent wal
   const before=c.charts.length;
   c.el('mf-rows').events.click({target:{closest:()=>null}});
   assert.equal(c.charts.length,before);
-  assert.ok(calls.every(([u,o])=>u==='/api/monday-fib?compact=true'&&!o.method));
+  assert.ok(calls.every(([u,o])=>u==='/api/monday-fib/display'&&!o.method));
   c.api.setActive(false);
  }
  assert.equal(tradingViewURL('1000PEPE-USDT-SWAP','Windows'),'spike-tradingview://open?symbol=1000PEPE-USDT-SWAP&timeframe=15m');

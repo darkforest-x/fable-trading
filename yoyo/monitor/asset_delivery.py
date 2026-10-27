@@ -32,6 +32,11 @@ def vision_root(root: Path) -> Path:
     return root.parent.parent / "vision_research" / "static"
 
 
+def coin_root(root: Path) -> Path:
+    """Reuse the existing verified public artwork, without copying app assets."""
+    return root.parent.parent / "discipline_app" / "mobile" / "src" / "assets" / "coins"
+
+
 @lru_cache(maxsize=8)
 def _bundle(sources: tuple) -> tuple[str, str]:
     # Preserve the original execution order and script boundaries. No minifier
@@ -158,6 +163,10 @@ def cache_policy(path: str, query_version: str | None, root: Path, status: int) 
                     else "private, no-cache")
     if path.startswith("/static/"):
         relative = path.removeprefix("/static/")
+    elif path.startswith("/coin-assets/"):
+        relative, root = path.removeprefix("/coin-assets/"), coin_root(root)
+        if Path(relative).suffix not in {".png", ".jpg", ".webp", ".gif"}:
+            return "no-store"
     elif path.startswith("/vision-assets/") and path.removeprefix("/vision-assets/") in VISION_CODE:
         relative, root = path.removeprefix("/vision-assets/"), vision_root(root)
     else:
@@ -165,6 +174,6 @@ def cache_policy(path: str, query_version: str | None, root: Path, status: int) 
     candidate = (root / relative).resolve()
     if not candidate.is_relative_to(root.resolve()) or not candidate.is_file():
         return "no-store"
-    if query_version and candidate.suffix in {".js", ".css"} and query_version == version(candidate):
+    if query_version and (candidate.suffix in {".js", ".css"} or path.startswith('/coin-assets/')) and query_version == version(candidate):
         return "public, max-age=31536000, immutable"
     return "private, no-cache"

@@ -508,7 +508,7 @@ test("pipeline plan edits survive registry loading/errors, refresh revisions, an
 test("navigation groups and hooks include platform/model views while preserving VLM research wording", () => {
   const nav = page.match(/<nav class="nav-list"[\s\S]*?<\/nav>/)?.[0] || "";
   const labels = [...nav.matchAll(/class="sidebar-label nav-group-label"[^>]*>([^<]+)/g)].map((match) => match[1]);
-  assert.deepEqual(labels, ["市场", "信号", "账户", "研究", "学习", "运行"]);
+  assert.deepEqual(labels, ["1.618", "信号", "账户", "研究", "学习", "运行"]);
   assert.match(nav, /data-nav-group="research"/);
   assert.ok(nav.indexOf('data-view="platform"') < nav.indexOf('data-view="datasets"'));
   assert.ok(nav.indexOf('data-view="research"') < nav.indexOf('data-view="models"'));

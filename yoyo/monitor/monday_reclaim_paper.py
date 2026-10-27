@@ -86,6 +86,7 @@ import threading
 from typing import Literal
 
 from fastapi import HTTPException, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from yoyo.data.candle_hub import validate
@@ -283,6 +284,12 @@ class ReclaimPaper:
                     db.execute(f"ALTER TABLE positions ADD COLUMN {name} {spec}")
             if "ema_order" not in {r["name"] for r in db.execute("PRAGMA table_info(signals)")}:
                 db.execute("ALTER TABLE signals ADD COLUMN ema_order INTEGER")
+            db.executescript("""
+                CREATE INDEX IF NOT EXISTS positions_track_stage_exit ON positions(track,stage,exit_ms DESC);
+                CREATE INDEX IF NOT EXISTS positions_track_fill ON positions(track,fill_ms DESC,id DESC);
+                CREATE INDEX IF NOT EXISTS exits_position_time ON exits(position_id,exit_ms,id);
+                CREATE INDEX IF NOT EXISTS signals_candle ON signals(candle_ms DESC);
+            """)
             db.execute("UPDATE positions SET remaining_notional=CASE WHEN stage='closed' THEN 0 ELSE notional END "
                        "WHERE remaining_notional IS NULL")
             if "realized_pnl" not in columns:
@@ -789,9 +796,6 @@ class ReclaimPaper:
             quotes = dict(self.fib.quotes)
         with self.db() as db:
             db.execute("BEGIN")
-            exits = {}
-            for row in db.execute("SELECT * FROM exits ORDER BY exit_ms,id"):
-                exits.setdefault(row["position_id"], []).append(dict(row))
             tracks = {}
             for t in db.execute("SELECT * FROM tracks ORDER BY track DESC").fetchall():
                 m = t["track"]
@@ -799,12 +803,17 @@ class ReclaimPaper:
                 # Read original entry and EMA order scores even after the signal has left the
                 # recent-touch page. LEFT JOIN preserves legacy position records.
                 # Add legs that never filled are bookkeeping only and are left out.
-                closed = [dict(r) for r in db.execute("SELECT p.*, s.score, s.ema_order FROM positions p LEFT JOIN signals s ON s.id=p.signal_id "
-                                                     f"WHERE p.track IN ({marks}) AND p.stage='closed' "
-                                                     "AND NOT (p.parent_id IS NOT NULL AND p.taken=0) ORDER BY p.exit_ms DESC", tr)]
-                for r in closed:
-                    r["exits"] = exits.get(r["id"], [])
-                taken = [r for r in closed if r["taken"]]
+                closed_where = f"p.track IN ({marks}) AND p.stage='closed' AND NOT (p.parent_id IS NOT NULL AND p.taken=0)"
+                joined = "SELECT p.*, s.score, s.ema_order FROM positions p LEFT JOIN signals s ON s.id=p.signal_id WHERE "
+                closed = [dict(r) for r in db.execute(joined + closed_where + " ORDER BY p.exit_ms DESC, p.id DESC LIMIT 100", tr)]
+                # Full-ledger statistics are independent of the bounded display page.
+                stats = dict(db.execute("SELECT COUNT(*) shadow_closed, AVG(p.net_bp) shadow_mean_net_bp, "
+                    "COUNT(CASE WHEN p.taken THEN 1 END) taken_closed, "
+                    "COUNT(CASE WHEN p.taken AND p.net_bp>0 THEN 1 END) wins, "
+                    "AVG(CASE WHEN p.taken THEN p.net_bp END) mean_net_bp FROM positions p WHERE " + closed_where, tr).fetchone())
+                latest_closed = db.execute(joined + closed_where + " AND p.taken=1 AND p.notional>0 "
+                                          "ORDER BY p.fill_ms DESC,p.id DESC LIMIT 1", tr).fetchone()
+                latest_closed = dict(latest_closed) if latest_closed else None
                 open_rows, pending_adds = [], []
                 for r in db.execute("SELECT p.*, s.score, s.ema_order FROM positions p JOIN signals s ON s.id=p.signal_id "
                                     f"WHERE p.track IN ({marks}) AND p.stage<>'closed' ORDER BY p.fill_ms DESC", tr):
@@ -814,9 +823,21 @@ class ReclaimPaper:
                         continue
                     r["mark"] = q.get("price")
                     r["quote_ms"] = q.get("received_ms")
-                    r["exits"] = exits.get(r["id"], [])
                     r["unrealized_bp"] = r["side"]*(q["price"]-r["entry"])/r["entry"]*1e4 if q.get("price") else None
                     open_rows.append(r)
+                latest_funded = max((r for r in open_rows + ([latest_closed] if latest_closed else [])
+                                     if r["taken"] == 1 and r["notional"] > 0),
+                                    key=lambda r: (r["fill_ms"], r["id"]), default=None)
+                # Fetch legs only for rows returned to the browser, not all history.
+                visible = open_rows + closed + ([latest_funded] if latest_funded else [])
+                ids = sorted({r["id"] for r in visible})
+                exits = {}
+                for start in range(0, len(ids), 500):
+                    chunk = ids[start:start+500]
+                    for row in db.execute("SELECT * FROM exits WHERE position_id IN (" + ",".join("?"*len(chunk)) + ") ORDER BY exit_ms,id", chunk):
+                        exits.setdefault(row["position_id"], []).append(dict(row))
+                for row in visible:
+                    row["exits"] = exits.get(row["id"], [])
                 if m == ALLIN3_TRACK:
                     extra = dict(stakes=t["stakes"], injected=START_EQUITY*t["stakes"], multiple=t["equity"]/(START_EQUITY*t["stakes"]),
                                  refills=[dict(r) for r in db.execute("SELECT * FROM refills WHERE track=? ORDER BY ms,id", (m,))])
@@ -824,13 +845,9 @@ class ReclaimPaper:
                     extra = {}
                 tracks[track_key(m)] = dict(confirm_minutes=CONFIRM.get(m, m), rule=KEYS.get(m, "v2"), **extra,
                     equity=t["equity"], start_equity=START_EQUITY, started_ms=t["started_ms"],
-                    open=open_rows, closed=closed[:100], pending_adds=pending_adds,
+                    open=open_rows, closed=closed, pending_adds=pending_adds,
                     # Latest fill is independent of the exit-ordered history page.
-                    latest_funded=max((r for r in open_rows + closed if r["taken"] == 1 and r["notional"] > 0),
-                                      key=lambda r: (r["fill_ms"], r["id"]), default=None),
-                    stats=dict(taken_closed=len(taken), wins=sum(r["net_bp"] > 0 for r in taken),
-                               mean_net_bp=(sum(r["net_bp"] for r in taken)/len(taken)) if taken else None,
-                               shadow_closed=len(closed), shadow_mean_net_bp=(sum(r["net_bp"] for r in closed)/len(closed)) if closed else None))
+                    latest_funded=latest_funded, stats=stats)
             signals = [dict(r) for r in db.execute("SELECT * FROM signals ORDER BY candle_ms DESC LIMIT 100")]
         for s in signals:
             s["features"] = json.loads(s["features"]) if s["features"] else None
@@ -865,4 +882,6 @@ def install(app, engine):
 
     @app.get("/api/monday-reclaim-paper")
     def snapshot():
-        return engine.snapshot()
+        # SQLite primitives and parsed JSON already satisfy the response contract.
+        # Avoid FastAPI walking the complete multi-account ledger a second time.
+        return JSONResponse(engine.snapshot())

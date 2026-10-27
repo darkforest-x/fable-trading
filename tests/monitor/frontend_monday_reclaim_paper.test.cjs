@@ -302,3 +302,12 @@ test('v3add20 pending size is dynamic and current rules never inherit score-line
 });
 
 test('home defaults to the owner-selected historical winner and 15-minute candles',()=>{assert.equal(ui.route().track,'spike');assert.equal(ui.route().period,'15m');assert.equal(ui.route({track:'v3add20',period:'4H'}).track,'v3add20');assert.equal(ui.route({track:'v3add20',period:'4H'}).period,'4H');});
+
+test('each completed feed read emits one settled snapshot without a duplicate repaint',async()=>{
+  const states=[],data=snapshot();
+  const feed=ui.createFeed({read:async()=>data,change:s=>states.push(s),schedule:()=>1,unschedule(){}});
+  feed.setActive(true);await feed.refresh();
+  assert.equal(states.length,2);assert.equal(states[0].busy,true);
+  assert.equal(states[1].busy,false);assert.equal(states[1].data,data);
+  feed.setActive(false);
+});

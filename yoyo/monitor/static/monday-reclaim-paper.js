@@ -13,6 +13,7 @@
 (() => {
   'use strict';
   const list=typeof module!=='undefined'&&module.exports?require('./monday-list-model.js'):window.SpikeMondayList;
+  const icons=typeof module!=='undefined'&&module.exports?require('./coin-icons.js'):window.SpikeCoinIcons;
   const finite = value => typeof value === 'number' && Number.isFinite(value);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const num = (value, digits=2) => finite(value) ? value.toLocaleString('en-US', {minimumFractionDigits:digits,maximumFractionDigits:digits}) : '—';
@@ -113,9 +114,9 @@
       const revision=epoch;
       emit({busy:true});
       const task=Promise.resolve().then(()=>active && revision===epoch ? read() : null)
-        .then(data=>{if(active && revision===epoch)emit({data:validateData(data),error:null});})
-        .catch(error=>{if(active && revision===epoch)emit({error:error instanceof TypeError ? '网络暂时不可用' : error?.message || '读取失败，请稍后重试'});})
-        .finally(()=>{if(pending!==task)return;pending=null;emit({busy:false});if(active)timer=schedule(refresh,interval);});
+        .then(data=>{if(active && revision===epoch)emit({data:validateData(data),error:null,busy:false});})
+        .catch(error=>{if(active && revision===epoch)emit({error:error instanceof TypeError ? '网络暂时不可用' : error?.message || '读取失败，请稍后重试',busy:false});})
+        .finally(()=>{if(pending!==task)return;pending=null;if(active)timer=schedule(refresh,interval);});
       pending=task;return task;
     }
     return {refresh,getState:()=>state,setActive(value){
@@ -125,8 +126,7 @@
   }
   function coinHTML(row, platform='',subtitle='') {
     const symbol=base(row.symbol), href=list.tradingViewURL(row.symbol,platform);
-    const logo=validSymbol(row.symbol) ? `https://static.okx.com/cdn/oksupport/asset/currency/icon/${encodeURIComponent(symbol.toLowerCase())}.png` : '';
-    return `<span class="rp-coin"><span class="rp-avatar" aria-hidden="true"><span>${esc(symbol.slice(0,1))}</span>${logo?`<img src="${esc(logo)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:''}</span><span><a href="${esc(href)}" data-rp-focus="tv" target="_blank" rel="noopener noreferrer" title="在 TradingView 打开 ${esc(symbol)}" aria-label="在 TradingView 打开 ${esc(symbol)}">${esc(symbol)} <span aria-hidden="true">↗</span></a><small>${subtitle||sideLabel(row)+' · USDT'}</small></span></span>`;
+    return `<span class="rp-coin">${icons.avatar(symbol)}<span><a href="${esc(href)}" data-rp-focus="tv" target="_blank" rel="noopener noreferrer" title="在 TradingView 打开 ${esc(symbol)}" aria-label="在 TradingView 打开 ${esc(symbol)}">${esc(symbol)} <span aria-hidden="true">↗</span></a><small>${subtitle||sideLabel(row)+' · USDT'}</small></span></span>`;
   }
   const cell=(label,value,cls='')=>`<span class="rp-cell ${cls}"><small>${esc(label)}</small><strong>${value}</strong></span>`;
   const detail=(label,value)=>`<div><dt>${esc(label)}</dt><dd>${value}</dd></div>`;
@@ -293,7 +293,7 @@
     const trigger=root.querySelector('[data-rp-action="indicators"]');trigger.setAttribute('aria-expanded',String(value));
     if(focus)trigger.focus({preventScroll:true});
   }
-  function setRecords(value,focus=true){if(value&&matchMedia('(max-width:700px)').matches)analytics?.setOpen(false,false);if(value)watch?.setOpen(false,false);sheet?.reset();recordsOpen=value;const panel=root.querySelector('.rp-records');panel.classList.toggle('is-open',value);panel.inert=!value;panel.setAttribute('aria-hidden',String(!value));root.querySelector('[data-rp-action="records"]').setAttribute('aria-expanded',String(value));if(!value&&focus)root.querySelector('[data-rp-action="records"]').focus({preventScroll:true});}
+  function setRecords(value,focus=true){if(value&&matchMedia('(max-width:700px)').matches)analytics?.setOpen(false,false);if(value)watch?.setOpen(false,false);sheet?.reset();recordsOpen=value;const panel=root.querySelector('.rp-records');panel.classList.toggle('is-open',value);panel.inert=!value;panel.setAttribute('aria-hidden',String(!value));root.querySelector('[data-rp-action="records"]').setAttribute('aria-expanded',String(value));if(value)render(feed.getState());else if(focus)root.querySelector('[data-rp-action="records"]').focus({preventScroll:true});}
   function sync(){window.SpikeNavigation?.sync('signals',{pane:'reclaim',...state});}
   function replace(id,html){const node=el(id);if(node.innerHTML!==html)node.innerHTML=html;}
   function render(current){
@@ -337,6 +337,9 @@
     }
     replace('equity',num(stats.equity));replace('pnl',`<b class="${tone(stats.pnl)}">${signed(stats.pnl)}</b>`);
     replace('metrics',cell('已实现交易盈亏',`${signed(stats.pnl)} USDT`,tone(stats.pnl))+cell('累计已平仓',`${num(stats.count,0)} 笔`)+cell('已平仓胜率',finite(stats.winRate)?`${num(stats.winRate,1)}%`:'—')+cell('平均单笔净收益',bp(stats.mean),tone(stats.mean))+cell('初始资金',`${num(stats.start)} USDT`)+(allin?capitalHTML(track):''));
+    replace('rules',rulesHTML(data,state.track));
+    // Closed drawers retain their DOM but do no record formatting or image work.
+    if(!recordsOpen)return;
     for(const tab of ['open','closed','events'])el(`count-${tab}`).textContent=data ? String(rows(data,{...state,tab}).length) : '—';
     const items=data?rows(data,state):[], visible=items.slice(0,shown);
     el('caption').textContent=!data ? (error?'记录暂时不可用':'正在读取记录…') : state.tab==='events' ? `触价记录 · 评分优先 · ${items.length} 条符合筛选 · 最近最多 100 条` : `${trackLabel(state.track)} 模拟账户 · ${{funded:'计入资金',shadow:'影子记录',all:'全部记录'}[state.scope]} · 评分优先 · ${items.length} 条${state.tab==='closed'?'符合筛选 · 最近最多 100 条':'持仓'}`;
@@ -357,7 +360,6 @@
     root.querySelector('[data-rp-action="more"]').hidden=items.length<=shown;
     replace('pending',pendingHTML(track,state,data?.now_ms,data?.v3add20));
     el('record-note').textContent=state.tab==='events' ? '共用触价记录 · 评分结果为 v2 门槛；评分 > 0.5 高亮，非胜率。各账户是否入场请看其持仓与已结束记录。' : state.tab==='open' ? '参考浮动收益未扣费；账户净值包含已减仓盈亏，不包含余仓浮盈。' : '净收益已扣手续费；滑点情景仅供对照，不重复扣入账户净值。';
-    replace('rules',rulesHTML(data,state.track));
   }
   document.addEventListener('visibilitychange',()=>{feed.setActive(pageActive && !document.hidden);chart?.setActive(pageActive && !document.hidden);watch?.setActive(pageActive && !document.hidden);analytics?.setActive(pageActive && !document.hidden);});
   window.SpikeReclaimPaper={
