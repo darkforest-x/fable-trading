@@ -103,12 +103,31 @@ def verify_frame(minute, original, row):
     rebuilt = window.resample('5min').agg(dict(open='first', high='max', low='min', close='last', volume='sum'))
     reference = original.reindex(rebuilt.index)
     assert reference[FIELDS].notna().all().all(), (row.event, 'missing original 5m')
-    assert np.allclose(rebuilt[FIELDS], reference[FIELDS], rtol=1e-7, atol=1e-10), (row.event, '1m/5m OHLCV mismatch')
+    # An empty leading minute can carry the preceding close while the 5m
+    # archive opens at its first traded minute. Accept only this observed
+    # context-only distinction; never modify the plotted minutes or fills.
+    compared = rebuilt.copy()
+    empty_minute_differences = []
+    for stamp in rebuilt.index[~np.isclose(rebuilt.open, reference.open, rtol=1e-7, atol=1e-10)]:
+        block = window.loc[stamp:stamp+4*MINUTE]
+        traded = block[block.volume > 0]
+        if traded.empty or entry <= stamp <= exit_:
+            continue
+        leading = block.loc[block.index < traded.index[0]]
+        if (len(leading) and (leading.volume == 0).all()
+                and np.allclose(leading[FIELDS[:4]], leading.close.iloc[0], rtol=0, atol=1e-12)
+                and np.isclose(reference.loc[stamp, 'open'], traded.open.iloc[0], rtol=1e-7, atol=1e-10)):
+            empty_minute_differences.append(dict(time=str(stamp), minute_open=rebuilt.loc[stamp, 'open'],
+                original_5m_open=reference.loc[stamp, 'open'], first_traded_minute=str(traded.index[0]),
+                first_traded_open=float(traded.open.iloc[0]), scope='outside_trade_interval'))
+            compared.loc[stamp, 'open'] = reference.loc[stamp, 'open']
+    assert np.allclose(compared[FIELDS], reference[FIELDS], rtol=1e-7, atol=1e-10), (row.event, '1m/5m OHLCV mismatch')
     return window, dict(minute_bars=len(window), verified_5m_bars=len(rebuilt), gaps=0,
+                        empty_minute_open_differences=empty_minute_differences,
                         max_ohlc_abs_error=float(np.abs(rebuilt[FIELDS[:4]]-reference[FIELDS[:4]]).to_numpy().max()))
 
 
-def draw(frame, row):
+def draw(frame, row, quality):
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -158,7 +177,7 @@ def draw(frame, row):
         ax.text(e+2.5,1.025,'E / X 原 5m 区间',ha='center',transform=ax.get_xaxis_transform(),fontsize=11,color=COLORS['ink'])
     else:
         for value, label, color in [(e+2.5,'E 入场区间',COLORS['entry']),
-                (end if exact_exit else x+2.5,'X 收盘退出' if exact_exit else 'X 退出区间',COLORS['stop'])]:
+                (end if exact_exit else x+2.5,'X 边界退出' if exact_exit else 'X 退出区间',COLORS['stop'])]:
             ax.text(value,1.025,label,ha='center',transform=ax.get_xaxis_transform(),fontsize=11,color=color)
     ticks = sorted(set(np.linspace(0,len(frame)-1,7).round().astype(int)))
     ax.set_xticks([i+.5 for i in ticks],[frame.index[i].tz_convert('Asia/Shanghai').strftime('%m/%d\n%H:%M') for i in ticks])
@@ -176,6 +195,8 @@ def draw(frame, row):
     fig.text(.075,.89,f'原账本：{result}   ·   原净收益 {row.net/100:+.2f}%（按名义本金）',fontsize=15,color=COLORS['ink'])
     exit_label=when(row.exit_t)+' 收盘/开盘时点' if exact_exit else span(exit_)
     fig.text(.075,.84,f'E 入场 {fmt(row.entry)}  ·  {span(entry)}      X 退出 {fmt(row.exit_price)}  ·  {exit_label}',fontsize=12,color=COLORS['muted'])
+    if quality['empty_minute_open_differences']:
+        fig.text(.075,.795,'* 交易区间外存在零成交分钟，1m 聚合首价与原 5m 首价有差异；图中保留真实 1m。',fontsize=10,color=COLORS['muted'])
     fig.text(.075,.18,'每根 K 线 = 真实 1 分钟。E / X 横段和色带表示原 5 分钟成交时窗；盘中具体分钟未知。',fontsize=12,color=COLORS['ink'])
     funded='已纳入' if row.funded_continuous else '未纳入（原资金/名额限制）'
     fig.text(.075,.135,f'原连续资金路径：{funded}。目标 {fmt(row.target_price)} · 初始止损 {fmt(row.stop)} · 历史 BE0。',fontsize=11,color=COLORS['muted'])
@@ -198,7 +219,7 @@ def render_symbol(job):
     results=[]
     for r in data.itertuples():
         window,quality=verify_frame(minute,original,r)
-        results.append({**draw(window,r),**quality})
+        results.append({**draw(window,r,quality),**quality})
     return dict(symbol=symbol,charts=results)
 
 
@@ -237,6 +258,7 @@ def pack():
         funded_continuous=int(data.funded_continuous.sum()),
         total_minute_bars=sum(c['minute_bars'] for c in charts),
         verified_5m_bars=sum(c['verified_5m_bars'] for c in charts),
+        empty_minute_context_differences=[dict(event=c['event'],**d) for c in charts for d in c['empty_minute_open_differences']],
         warnings=['Original score lookahead unresolved','1m display only; original 5m execution intervals preserved'])
     save(EXP/'delivery.json',receipt);print(json.dumps(receipt),flush=True)
 

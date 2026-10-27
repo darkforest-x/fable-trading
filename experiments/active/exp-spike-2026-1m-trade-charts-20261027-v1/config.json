@@ -10,6 +10,7 @@
   "context_before_minutes": 30,
   "context_after_exit_bar_minutes": 20,
   "fill_time_semantics": "Original native indices identify a 5m interval. Intrabar minute unknown; draw intervals. Known confirmation-close or gap-open exits retain boundary time.",
+  "source_parity": "Verify continuous 1m coverage and aggregate OHLCV against original 5m. Only outside execution intervals, disclose an open-only difference explained by flat zero-volume leading minutes and the original open matching the first traded minute; preserve raw plotted data. All other mismatches fail.",
   "historical_version": "near_P18, BE0; not current paper +17bp. Preserve original net outcomes and continuous funded flags.",
   "known_limitation": "Original entry score has touch-bar lookahead. Minute visualization does not repair selection or validate historical performance.",
   "training_eligible": false,
