@@ -66,6 +66,11 @@ margin, one position at a time (later touches are "busy" shadow rows), a loss ne
 sizing replay, a close that leaves the account below 100 USDT is a blow-up: the rest counts as lost, a new 1000 USDT
 stake starts and the stake count rises; progress is equity / (1000 x stakes). A backstop at 3x already loses about 90
 percent, so liquidation (about -33 percent) is not simulated separately.
+
+Owner 2026-10-27 (exp-monday-limit-return-opt-20261027-v2, the fixed slot simulator): an eighth account "v3add20" runs the
+v3add rule (v3 entries, targets, backstop and breakeven, plus the -5 percent add from score 0.6) with margin = realized
+equity / 20 per leg at 3x: notional = 3 x margin, at most 20 funded legs open, margin in use <= equity, every fill
+compounds. A leg that finds no slot or margin is a shadow row (parent) or a cancelled add; a loss never exceeds the margin.
 """
 from __future__ import annotations
 
@@ -103,7 +108,13 @@ V3LOCK = dict(breakeven_offset_bp=50.)
 ALLIN3_TRACK = 5060  # all-in 3x high-payoff account; API key "allin3"
 CONFIRM[ALLIN3_TRACK] = 60
 ALLIN3 = dict(min_score=.6, backstop_pct=30., leverage=3., blowup_below=100.)
-KEYS = {V3_TRACK: "v3", V3ADD_TRACK: "v3add", SPIKE_TRACK: "spike", V3LOCK_TRACK: "v3lock", ALLIN3_TRACK: "allin3"}
+V3ADD20_TRACK, V3ADD20_LEG = 6060, 6061  # v3add with margin = equity / 20 at 3x and its add legs; API key "v3add20"
+CONFIRM[V3ADD20_TRACK] = CONFIRM[V3ADD20_LEG] = 60
+ACCOUNT[V3ADD20_LEG] = V3ADD20_TRACK
+V3ADD20 = dict(ADD, slots=20, leverage=3.)
+LEGS = {V3ADD_TRACK: V3ADD_LEG, V3ADD20_TRACK: V3ADD20_LEG}
+KEYS = {V3_TRACK: "v3", V3ADD_TRACK: "v3add", SPIKE_TRACK: "spike", V3LOCK_TRACK: "v3lock", ALLIN3_TRACK: "allin3",
+        V3ADD20_TRACK: "v3add20"}
 EMA_SPANS = (8, 13, 21, 34, 55)
 MAKER_BP, TAKER_BP, SLIP_BP = 2.0, 5.0, 10.0
 START_EQUITY, FRACTION, GROSS = 1000.0, 0.10, 1.0
@@ -149,7 +160,7 @@ def account(track):
 
 
 def members(acct):
-    return (acct, V3ADD_LEG) if acct == V3ADD_TRACK else (acct,)
+    return (acct, LEGS[acct]) if acct in LEGS else (acct,)
 
 
 class PaperCloseError(ValueError):
@@ -221,7 +232,7 @@ def settle(side, entry, exit_price, reason):
 
 class ReclaimPaper:
     def __init__(self, runtime, fib, model_path=MODEL, v3_path=V3, enable_v3=True, enable_v3add=True, enable_spike=True,
-                 enable_v3lock=True, enable_allin3=True):
+                 enable_v3lock=True, enable_allin3=True, enable_v3add20=True):
         self.write_lock = threading.RLock()
         self.fib, self.client, self.model = fib, fib.client, ScoreModel(model_path)
         self.v3 = json.loads(Path(v3_path).read_text()) if enable_v3 else None
@@ -229,6 +240,7 @@ class ReclaimPaper:
         self.spike = dict(SPIKE) if enable_spike else None
         self.v3lock = dict(V3LOCK) if self.v3 and enable_v3lock else None
         self.allin = dict(ALLIN3) if enable_allin3 else None
+        self.add20 = dict(V3ADD20) if self.v3 and enable_v3add20 else None
         self.path = Path(runtime)/"monday-reclaim-paper.sqlite3"
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.events = queue.Queue(maxsize=200_000)
@@ -276,7 +288,8 @@ class ReclaimPaper:
             if "realized_pnl" not in columns:
                 db.execute("UPDATE positions SET realized_pnl=COALESCE(pnl,0) WHERE stage='closed'")
             for m in (TRACKS+((V3_TRACK,) if self.v3 else ())+((V3ADD_TRACK,) if self.add else ())+((SPIKE_TRACK,) if self.spike else ())
-                      +((V3LOCK_TRACK,) if self.v3lock else ())+((ALLIN3_TRACK,) if self.allin else ())):
+                      +((V3LOCK_TRACK,) if self.v3lock else ())+((ALLIN3_TRACK,) if self.allin else ())
+                      +((V3ADD20_TRACK,) if self.add20 else ())):
                 db.execute("INSERT OR IGNORE INTO tracks (track,equity,started_ms) VALUES (?,?,?)", (m, START_EQUITY, self.client.clock()))
         self._refresh_watch()
 
@@ -403,13 +416,15 @@ class ReclaimPaper:
                             int(taken and notional > 0), notional, candle_ms, note, notional))
             if self.v3:
                 self._open_v3(db, sid, levels, symbol, side, level, candle_ms, score)
-            if self.add:
-                pid, notional, target3, decision3, backstop3 = self._open_v3(db, sid, levels, symbol, side, level, candle_ms, score, V3ADD_TRACK)
-                if notional > 0 and score is not None and score >= self.add["from_score"]:
+            for acct, add in ((V3ADD_TRACK, self.add), (V3ADD20_TRACK, self.add20)):
+                if not add:
+                    continue
+                pid, notional, target3, decision3, backstop3 = self._open_v3(db, sid, levels, symbol, side, level, candle_ms, score, acct)
+                if notional > 0 and score is not None and score >= add["from_score"]:
                     db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,decision_ms,stage,taken,"
                                "notional,last_seen_ms,note,remaining_notional,backstop,parent_id,reclaim_ref) "
                                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                               (sid, V3ADD_LEG, symbol, side, level*(1-side*self.add["drawdown_pct"]/100), target3, candle_ms,
+                               (sid, LEGS[acct], symbol, side, level*(1-side*add["drawdown_pct"]/100), target3, candle_ms,
                                 decision3, "pending_fill", 0, 0., candle_ms, "add_pending", 0., backstop3, pid, level))
             if self.v3lock:
                 self._open_v3(db, sid, levels, symbol, side, level, candle_ms, score, V3LOCK_TRACK)
@@ -450,7 +465,22 @@ class ReclaimPaper:
             return self.spike["leverage"]
         if track == ALLIN3_TRACK and self.allin:
             return self.allin["leverage"]
+        if account(track) == V3ADD20_TRACK and self.add20:
+            return self.add20["leverage"]
         return None
+
+    def _slot_notional(self, db, acct):
+        """v3add20 leg size: margin = realized equity / slots at the leverage, if a slot and the margin are free."""
+        a, tracks = self.add20, members(acct)
+        equity = db.execute("SELECT equity FROM tracks WHERE track=?", (acct,)).fetchone()["equity"]
+        row = db.execute(f"SELECT COUNT(*) n, COALESCE(SUM(COALESCE(remaining_notional,notional)),0) s FROM positions WHERE track IN "
+                         f"({','.join('?'*len(tracks))}) AND stage<>'closed' AND taken=1", tracks).fetchone()
+        margin = equity/a["slots"]
+        if row["n"] >= a["slots"]:
+            return 0., "no_slot"
+        if margin <= 0 or row["s"]/a["leverage"]+margin > equity+1e-9:
+            return 0., "no_capacity"
+        return margin*a["leverage"], None
 
     def _open_spike(self, db, sid, symbol, side, level, target, candle_ms, order):
         """spike-HW v1 row: near target, -18 percent backstop, margin = equity / slots at the given leverage."""
@@ -486,7 +516,9 @@ class ReclaimPaper:
         step = v3["confirm_minutes"]*60_000
         decision = candle_ms//step*step+2*step
         notional, note = 0., None
-        if score is not None and score >= v3["min_score"]:
+        if score is not None and score >= v3["min_score"] and track == V3ADD20_TRACK:
+            notional, note = self._slot_notional(db, track)
+        elif score is not None and score >= v3["min_score"]:
             sz = v3["sizing"]
             k = min(sz["fraction"]*(score-sz["cut"])/sz["mean_excess"], sz["cap"])
             equity = db.execute("SELECT equity FROM tracks WHERE track=?", (track,)).fetchone()["equity"]
@@ -527,10 +559,14 @@ class ReclaimPaper:
         if not reached:
             db.execute("UPDATE positions SET last_seen_ms=MAX(last_seen_ms,?) WHERE id=?", (q["candle_ms"], p["id"]))
             return None
-        equity = db.execute("SELECT equity FROM tracks WHERE track=?", (account(p["track"]),)).fetchone()["equity"]
-        notional = max(0., min(parent["notional"], GROSS*equity-self._opened(db, account(p["track"]))))
+        if account(p["track"]) == V3ADD20_TRACK:
+            notional, note = self._slot_notional(db, V3ADD20_TRACK)
+        else:
+            equity = db.execute("SELECT equity FROM tracks WHERE track=?", (account(p["track"]),)).fetchone()["equity"]
+            notional = max(0., min(parent["notional"], GROSS*equity-self._opened(db, account(p["track"]))))
+            note = "no_capacity"
         if notional <= 0:
-            self._cancel_add(db, p, q["candle_ms"], "add_no_capacity")
+            self._cancel_add(db, p, q["candle_ms"], f"add_{note}")
             return None
         db.execute("UPDATE positions SET stage='pending_confirm',taken=1,notional=?,remaining_notional=?,fill_ms=?,last_seen_ms=?,"
                    "note=NULL WHERE id=?", (notional, notional, q["candle_ms"], q["candle_ms"], p["id"]))
@@ -801,7 +837,7 @@ class ReclaimPaper:
         return dict(now_ms=self.client.clock(), strategy="monday_1618_limit_reclaim_v2", paper_only=True,
                     model=dict(threshold=self.model.threshold, trained_before=self.model.trained_before, features=self.model.features),
                     sizing=dict(start_equity=START_EQUITY, fraction=FRACTION, gross=GROSS), v3=self.v3, v3add=self.add, spike=self.spike,
-                    v3lock=self.v3lock, allin3=self.allin,
+                    v3lock=self.v3lock, allin3=self.allin, v3add20=self.add20,
                     breakeven_offset_bp=BE_OFFSET_BP,
                     fees_bp=dict(maker=MAKER_BP, taker=TAKER_BP, report_slippage=SLIP_BP),
                     worker=dict(alive=bool(self.thread and self.thread.is_alive()), queue=self.events.qsize(), error=self.error),
@@ -812,7 +848,8 @@ def install(app, engine):
     app.state.monday_reclaim_paper = engine
 
     @app.get("/api/monday-reclaim-paper/analytics")
-    def analytics(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3"] = "60", days: Literal["0", "7", "30"] = "0"):
+    def analytics(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20"] = "60",
+                  days: Literal["0", "7", "30"] = "0"):
         return engine.analytics(track, int(days))
 
     @app.post("/api/monday-reclaim-paper/positions/{position_id}/close")
