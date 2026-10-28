@@ -1,0 +1,14 @@
+{
+  "experiment_id": "exp-monday-seconds-entry-audit-20261028-v1",
+  "question": "Do the historical 60m strategy's large losses show a one-way overshoot, and how far does waiting for the first closed opposite 1s candle move the observed entry price?",
+  "type": "descriptive price-path audit; no new trading backtest",
+  "baseline": "exp-monday-limit-paper-accounts-20261028-v1 v2_60|A_rest_causal",
+  "selection": "The three worst short trades since 2026-07-28, ranked by the existing net entry-notional return before inspecting seconds",
+  "first_red": "The first 1s candle at or after the first level touch with close < open; eligibility only after that second ends",
+  "price_proxy": "First same-exchange recorded trade after the red second closes; no assumption of execution at that price",
+  "sources": "Existing native Binance UM ledgers and original 5m candles; missing microstructure from official Binance UM daily aggTrades ZIP; WEN uses previously fetched OKX 1s candles separately",
+  "preserved": "All saved outcomes, fees, risk rules, account sizing, score and production configuration remain unchanged",
+  "limitations": "Outcome-selected cases cannot establish improvement in aggregate P&L; a new strategy requires all signals, missed winners, matched controls, taker entry costs and latency",
+  "training_eligible": false,
+  "production_eligible": false
+}
