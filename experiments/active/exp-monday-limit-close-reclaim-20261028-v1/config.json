@@ -1,0 +1,37 @@
+{
+  "experiment_id": "exp-monday-limit-close-reclaim-20261028-v1",
+  "question": "Owner 2026-10-28: enter at market only when the touch 5m bar closes back inside the 1.618 level, scored at that close; does the target need to change?",
+  "single_variable": "Entry: resting limit at the level (earlier runs) -> market at the touch-bar close when it closed back inside; targets compared across the five Codex modes; stop, reclaim rule, fees and data unchanged.",
+  "scores": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+  "score_column": "stored (frozen model reading the touch bar, known at its close)",
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "since_week": "2019-12-30",
+  "cut": 0.5,
+  "hi": 0.6,
+  "min_order": 3,
+  "targets": [
+    "near_monday_edge",
+    "range_0.5",
+    "range_0.618",
+    "opposite_monday_edge",
+    "opposite_1618"
+  ],
+  "stops": {
+    "P30": "closed inside, -30 percent from the level, all targets",
+    "P18": "closed inside, -18 percent, near edge only (spike)",
+    "B30": "closed at or beyond the level (better price), -30 percent, all targets",
+    "B18": "closed at or beyond, -18 percent, near edge"
+  },
+  "fees": "Codex config: market entry taker 0.05 percent, target maker 0.02 percent, stop / reclaim exits taker (OKX Lv1, read 2026-10-23)",
+  "slippage_bp": {
+    "market_entry": 10,
+    "non_target_exit": 10
+  },
+  "control": "Codex matched random submissions (3 per event, same symbol / week / side / volatility bucket) entered at market at their own close with the same percentage geometry, for events with score >= 0.5, v3 target mode, P30; plus all touches without a score filter",
+  "replays": "frac N20 3x (v3-like), 10 slots 5x liq 19 (spike-like), all-in 3x monthly starts (allin3-like), seeds as the earlier studies",
+  "not_run": "add legs (v3add20) need resting children, which market-entry parents do not support",
+  "in_sample": "The score, thresholds and filters were chosen on the same history; the target comparison is in sample too",
+  "training_eligible": false,
+  "production_eligible": false,
+  "owner_followup": "Owner asked why exclude touches that closed beyond the level; they run as B30 / B18 instead of being dropped."
+}

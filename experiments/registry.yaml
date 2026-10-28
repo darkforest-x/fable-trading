@@ -730,6 +730,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
+  - experiment_id: exp-monday-limit-close-reclaim-20261028-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: running
+    question: 'Owner 2026-10-28: enter at market at the touch 5m close when it closed back inside the 1.618 level (scored at that close); does the target need to change? Owner then asked why exclude closes beyond the level, so they run as their own variants.'
+    single_variable: 'Entry at the touch-bar close (inside vs at/beyond the level) instead of a resting limit; five Codex targets compared; stop, reclaim rule, fees and data unchanged.'
+    result: pending
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-reclaim-20261028-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'NautilusTrader native market entries at the completed touch close for every signal event and target; matched random entries (Codex controls) at their own close with the same geometry for score >= 0.5 events. Scores applied in the summary.'
   - experiment_id: exp-monday-limit-strategies-causal-20261027-v1
     source_repo: darkforest-x/fable-trading
     source_commit: ffbb9e9973
