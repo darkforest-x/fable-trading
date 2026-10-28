@@ -1,0 +1,90 @@
+{
+  "passed": true,
+  "symbols": [
+    {
+      "symbol": "ADAUSDT",
+      "signals": 1281,
+      "positions": 4968,
+      "passed": true
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "signals": 1052,
+      "positions": 4136,
+      "passed": true
+    },
+    {
+      "symbol": "BNBUSDT",
+      "signals": 632,
+      "positions": 2465,
+      "passed": true
+    },
+    {
+      "symbol": "BTCUSDT",
+      "signals": 752,
+      "positions": 2951,
+      "passed": true
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "signals": 651,
+      "positions": 2538,
+      "passed": true
+    },
+    {
+      "symbol": "DOTUSDT",
+      "signals": 1135,
+      "positions": 4420,
+      "passed": true
+    },
+    {
+      "symbol": "ETHUSDT",
+      "signals": 652,
+      "positions": 2557,
+      "passed": true
+    },
+    {
+      "symbol": "LINKUSDT",
+      "signals": 1168,
+      "positions": 4570,
+      "passed": true
+    },
+    {
+      "symbol": "LTCUSDT",
+      "signals": 1174,
+      "positions": 4606,
+      "passed": true
+    },
+    {
+      "symbol": "SOLUSDT",
+      "signals": 679,
+      "positions": 2629,
+      "passed": true
+    },
+    {
+      "symbol": "TRXUSDT",
+      "signals": 1233,
+      "positions": 4827,
+      "passed": true
+    },
+    {
+      "symbol": "XRPUSDT",
+      "signals": 733,
+      "positions": 2863,
+      "passed": true
+    }
+  ],
+  "auc_oracle_checks": 48,
+  "real_future_mutation_prefix_orders": 4,
+  "checks": [
+    "native ledger identities",
+    "entry-bar exclusion",
+    "actual-fee algebra",
+    "signal OHLC and previous-bar exclusion",
+    "mirror target geometry",
+    "random timing and identical observation horizons",
+    "univariate AUC versus sklearn",
+    "real DOGE prefix unchanged after future OHLCV mutation"
+  ],
+  "unit_tests": "16 tests passed in isolated Nautilus runtime; causal future mutation and native fill semantics"
+}

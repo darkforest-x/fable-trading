@@ -16,18 +16,19 @@ schema_version: 1
 experiments:
   - experiment_id: exp-5m-single-wick-1618-majors-20261029-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: active
+    source_commit: a930cad7e2
+    status: rejected
     question: 'Notion72: how many isolated5m wick rejections at NY Monday1.618 reach the far internal0.618 after close entry and a stop at the signal candle extreme?'
     single_variable: 'Owner-defined standalone entry/exit rule; fixed12-major universe, all isolated episodes with first-touch subgroup, same-symbol/week/volatility random controls.'
-    result: 'Builder and causal/native fixtures prepared; historical execution pending.'
-    artifacts: []
+    result: '12 majors:11142 signals/495 targets/3 censored. Requested upper-wick shorts:5415 signals,205 targets(134 no subsequent5m retouch,39 also first-weekly),2 censored,3.79percent hit,-1.074R/entry after fees; first-weekly shorts782/53targets,6.79percent,-0.617R. Matched random full-history shorts-1.627R vs signal-1.094R, but both negative;2026 excess p0.0616. Short natural risk>=0.636percent:2026 n26,+0.459R,but paired p0.136 and pre2025 negative. No standalone rule passes.'
+    artifacts:
+      - single-wick-1618-majors-20261029-v1
     canonical_report: experiments/active/exp-5m-single-wick-1618-majors-20261029-v1/summary.json
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: 'Existing Binance histories; owner confirmed needle-extreme stop. Fees maker2bp/taker5bp. No model fitting or production changes.'
+    notes: 'Existing Binance histories,6 assets on real1m and6 on5m; owner-confirmed candle-extreme stops; no time exit. Fees maker2bp/taker5bp;10bp per market fill stress separate. Original DOGE reference remains source-end censored.48 univariate AUC oracle checks plus real future-mutation audit; no model fitting or production changes.'
   - experiment_id: exp-monday-seconds-entry-audit-20261028-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2af4ca7a94
@@ -799,7 +800,7 @@ experiments:
     status: complete
     question: 'Owner 2026-10-28: paper accounts in the framework with the 1m model choosing the resting orders.'
     single_variable: 'Resting selection score frozen 5m causal -> 1m model; rules, fills and sizing unchanged.'
-    result: '531 symbols, both paths, 0 errors; leaky rows equal the earlier account run. Resting on the 1m score vs the frozen causal score, from 2020 / 2026 (out of sample): v2_60 1.96x / 0.75x vs 1.36x / 0.95x; v3 3.37x DD73 / 0.42x vs 1.04x / 0.65x; v3add 14.8x / 0.38x vs 1.05x / 0.73x; v3add20 20.4x DD84 / 0.68x vs 6.6x / 1.33x; v3lock 3.73x / 0.46x vs 1.13x / 0.68x; spike 0.16x DD94 / 0.68x vs 1.02x / 1.19x; allin3 100x from 3.2 vs 9.5 percent of starts. Gains sit in 2020-2025, the 1m model's training period; in 2026 every account is worse than with the frozen score although the label AUC rose 0.653 -> 0.702.'
+    result: '531 symbols, both paths, 0 errors; leaky rows equal the earlier account run. Resting on the 1m score vs the frozen causal score, from 2020 / 2026 (out of sample): v2_60 1.96x / 0.75x vs 1.36x / 0.95x; v3 3.37x DD73 / 0.42x vs 1.04x / 0.65x; v3add 14.8x / 0.38x vs 1.05x / 0.73x; v3add20 20.4x DD84 / 0.68x vs 6.6x / 1.33x; v3lock 3.73x / 0.46x vs 1.13x / 0.68x; spike 0.16x DD94 / 0.68x vs 1.02x / 1.19x; allin3 100x from 3.2 vs 9.5 percent of starts. Gains sit in 2020-2025, the 1m model''s training period; in 2026 every account is worse than with the frozen score although the label AUC rose 0.653 -> 0.702.'
     artifacts: []
     canonical_report: experiments/active/exp-monday-limit-paper-accounts-1m-20261028-v1/summary.json
     holdout_consumed: false
