@@ -205,7 +205,13 @@ def summarize(config, workers):
     ranked = sorted(ok, key=lambda k: -ok[k]['final_median'])
     res = dict(checks=dict(symbols=len(syms), issues=[f'{g[0]}: {i}' for g in got for i in g[2]], rows=int(len(t)),
                            cuts={k: m['cuts'] for k, m in ms.items()}),
-               selection_2025=dict(combos=len(combos), qualified=len(ok), top10={k: sel[k] for k in ranked[:10]}))
+               selection_2025=dict(combos=len(combos), qualified=len(ok), top10={k: sel[k] for k in ranked[:10]},
+                                   # Recorded so a failed selection can be explained; the rule above is unchanged.
+                                   fails=dict(trades=sum(v['n'] < cfg['min_trades_2025'] for v in sel.values()),
+                                              drawdown=sum(v.get('dd_median', 100) > cfg['max_dd_2025'] for v in sel.values()),
+                                              first_half=sum(v.get('first_half_sum_pct', -1) <= 0 for v in sel.values()),
+                                              second_half=sum(v.get('second_half_sum_pct', -1) <= 0 for v in sel.values())),
+                                   all=sel))
     if not ranked:
         res['verdict'] = 'no combo qualified on 2025; nothing is tested on 2026'
     else:
