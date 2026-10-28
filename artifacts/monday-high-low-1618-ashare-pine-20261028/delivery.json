@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-28",
+  "title": "周一高低点 · 1.618 A股 V1.1",
+  "source": "yoyo/evaluation/pine/monday_high_low_1618_ashare_v1_1.pine",
+  "source_commit": "c0a9c6d303b92e6f3a53605909cbadf38f56914b",
+  "destination": "TradingView private script",
+  "layout": "https://cn.tradingview.com/chart/AlGc61US/",
+  "native_compile": "passed",
+  "cloud_save_observed": "2026-10-28 20:10–20:15 Asia/Shanghai",
+  "final_layout": "Saved on SSE:601212 12h; V1.1 visible, original V1.0 hidden and preserved; editor closed; diagnostics off; test appendix removed.",
+  "semantics": {
+    "timezone": "Asia/Shanghai",
+    "final_prices": "Confirmed Monday exchange daily high/low, including auction prices absent from minute data.",
+    "preview": "Closed intraday bars only; final daily values accepted only on a confirmed chart bar after daily close.",
+    "anchors": "Use observed matching intraday extrema; otherwise label 日线定位 from Monday 09:30 without an extrema dot.",
+    "holiday": "No Tuesday substitution when Monday has no trading bar.",
+    "history": "Historical weekly segments retained and faded; previous week expires at next Monday midnight."
+  },
+  "validation": {
+    "native_fixture_scenarios_passed": 20,
+    "fixture_source": "tests/evaluation/monday_high_low_1618_ashare_v1_1_native_checks.pine",
+    "monday": "2026-10-26",
+    "matrix": [
+      {
+        "symbol": "SSE:601212",
+        "timeframes": ["1m", "3m", "5m", "12h", "1D"],
+        "high": 4.96,
+        "low": 4.77,
+        "upper": 5.07742,
+        "lower": 4.65258,
+        "prices_match_daily_oracle": true,
+        "intraday_bar_counts": {"1m": 238, "3m": 80, "5m": 48, "12h": 48, "1D": 47},
+        "anchor_note": "Daily high not present in available minute bars; low at 10:33 on 1m/3m and 10:30 on 5m aggregation. Final prices agree; timestamps and bar counts are not claimed identical."
+      },
+      {
+        "symbol": "SZSE:002714",
+        "timeframes": ["30m", "12h"],
+        "high": 42.18,
+        "low": 40.92,
+        "upper": 42.95868,
+        "lower": 40.14132,
+        "prices_match_daily_oracle": true,
+        "anchor_note": "Daily high unlocated in minute bars; low at 13:00."
+      }
+    ],
+    "rejected_initial_approach": "Strict minute continuity failed on native SSE feed boundaries (11:31/15:01) and omitted auction prices. Initial synthetic success was insufficient. Failure artifacts retained.",
+    "diagnostic_probe_caveat": "native-probe.pine was a temporary observation probe with assertions disabled; its PASS text is not validation. Final native-qa.pine and listed matrix logs contain active assertions."
+  },
+  "evidence_dir": "output/playwright/monday-1618-ashare-20261028",
+  "final_evidence": ["final-state.txt", "final-chart.png", "saved-ui.txt"],
+  "limitations": [
+    "Native historical validation and deterministic fixtures passed; a live forming Monday and Bar Replay were not separately exercised.",
+    "Minute anchors depend on TradingView history depth and timeframe. Final ranges do not require complete minute coverage.",
+    "Final levels are drawn back to Monday for review; they were not known at their retrospective anchors.",
+    "Price correctness is not a strategy profitability test."
+  ],
+  "cleanup": {
+    "browser": "Reused existing native TradingView; no temporary browser, process or tab created.",
+    "services": "No restarts. Monitor service alive with zero scan errors; paper worker alive, queue zero, error null. Patrol heartbeat current with four enabled schedules and null errors (two running, two partial). Existing market_ready/model_ready false states retained."
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}

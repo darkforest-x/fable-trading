@@ -1,3 +1,10 @@
+## 2026-10-28 · A-share Monday 1.618 private Pine V1.1
+
+- Saved `周一高低点 · 1.618 A股 V1.1` in native TradingView and on the existing SSE:601212 12h layout. New source `yoyo/evaluation/pine/monday_high_low_1618_ashare_v1_1.pine` (c0a9c6d303); original V1.0 source/private script preserved and hidden on this chart.
+- Shanghai calendar; final range comes from confirmed Monday daily OHLC including auctions. Closed minute bars supply the developing preview and matching extrema anchors; unlocated daily extrema explicitly show 日线定位. Monday holidays do not borrow Tuesday. Historical weekly segments remain.
+- Twenty native fixtures passed. SSE:601212 1m/3m/5m/12h/1D agree at H4.96/L4.77, extensions5.07742/4.65258; SZSE:002714 30m/12h agree at H42.18/L40.92, extensions42.95868/40.14132. Initial strict minute continuity failed on native11:31/15:01 closes and missing auction extrema; failed evidence retained. Live forming Monday/Bar Replay not separately tested; no profitability claim.
+- Receipt: `artifacts/monday-high-low-1618-ashare-pine-20261028/delivery.json`; raw native QA: `output/playwright/monday-1618-ashare-20261028/`. Existing app reused, no browser to clean, services and patrol heartbeat retained. Learning: `ashare-daily-extrema-cannot-be-rebuilt-from-minute-bars-alone.md`.
+
 ## 2026-10-28 · Eight paper accounts with their full rules, resting vs close-time entries
 
 - `exp-monday-limit-paper-accounts-20261028-v1` (adapter + builder cd5f85adcf): breakeven +0.17 percent (v3lock +0.5), add legs, each account's sizing; leaky / resting on the causal score / close inside / close both sides.

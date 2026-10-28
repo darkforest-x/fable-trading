@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-high-low-1618-ashare-pine-20261028-v1-1
+    artifact_type: manifest
+    role: standalone_ashare_monday_high_low_1618_private_tradingview_indicator
+    source_repo: darkforest-x/fable-trading
+    source_commit: c0a9c6d303b92e6f3a53605909cbadf38f56914b
+    source_path: artifacts/monday-high-low-1618-ashare-pine-20261028/delivery.json
+    storage_uri: repo://artifacts/monday-high-low-1618-ashare-pine-20261028/delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Private A-share V1.1 saved and active on SSE601212 12h; V1.0 preserved. Shanghai calendar, confirmed daily auction-inclusive extrema, minute anchors or explicit daily-location fallback. Twenty native fixtures and SSE1m/3m/5m/12h/1D plus SZSE30m/12h daily-oracle checks pass. No orders, alerts or profitability claim.
   - artifact_id: monday-12h-partial-recovery-20261026-v1
     artifact_type: manifest
     role: native_no_backstop_12h_weighted_three_target_recovery
