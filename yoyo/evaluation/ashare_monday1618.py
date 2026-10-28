@@ -218,6 +218,8 @@ def summarize(cfg):
     for p in sorted((EXP/'symbols').glob('*/trades.csv')):
         if p.stat().st_size>5:frames.append(pd.read_csv(p))
     t=pd.concat(frames,ignore_index=True) if frames else pd.DataFrame()
+    if t.empty:
+        raise RuntimeError('No completed native trades; inspect status.json, do not infer a strategy result')
     t.to_csv(EXP/'trades.csv.gz',index=False)
     s=t[t.population=='signal'];r=t[t.population=='random']
     # Match only actual filled signals and retain group completeness separately.

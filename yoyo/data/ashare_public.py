@@ -58,8 +58,10 @@ def daily(symbol):
 
 
 def hourly(symbol):
-    url = f'https://ifzq.gtimg.cn/appstock/app/kline/mkline?param={symbol},m60,,1023'
-    data = get(url, CACHE / 'hourly' / f'{symbol}.json')
+    # 1023 is unsupported and silently returns the default 320 rows; 640 is
+    # verified to return the full eight-month window. Preserve the first probe.
+    url = f'https://ifzq.gtimg.cn/appstock/app/kline/mkline?param={symbol},m60,,640'
+    data = get(url, CACHE / 'hourly640' / f'{symbol}.json')
     rows = data.get('data', {}).get(symbol, {}).get('m60', [])
     if not rows:
         raise ValueError(f'No hourly rows: {symbol}')
