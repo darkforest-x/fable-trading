@@ -768,11 +768,11 @@ experiments:
     notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
   - experiment_id: exp-monday-limit-1m-design-20261029-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: running
+    source_commit: 1e6e6a65c6
+    status: rejected
     question: 'Owner 2026-10-29: design a strategy for the 1m entry score (cut, 15m EMA order filter, target, stop) on 2025 with a model that never saw 2025, and test it once on 2026 to date.'
     single_variable: 'Pre-registered design grid (3 cuts x 3 order filters x 6 targets x 3 stops) and selection rule fixed in the config before any strategy result; one frozen test.'
-    result: pending
+    result: '531 symbols, both paths, 0 errors, 198225 rows. Pre-registered selection on 2025 with the model that never saw 2025: 0 of 162 combos qualify. frac 10 slots 3x on 2025: best 0.61x, median 0.26x, every median drawdown > 50 percent (fails: drawdown 162, first half 146, second half 82, trades 0), 12-25 liquidations per combo. Some combos are positive per trade (top 10 percent, opposite 1618, -18 percent: 1631 trades +73bp, win 19 percent) but almost all of it falls in the second half of 2025. Per protocol nothing was tested on 2026.'
     artifacts: []
     canonical_report: experiments/active/exp-monday-limit-1m-design-20261029-v1/summary.json
     holdout_consumed: false

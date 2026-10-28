@@ -1,3 +1,8 @@
+## 2026-10-29 · 1m strategy design fails its pre-registered 2025 selection
+
+- `exp-monday-limit-1m-design-20261029-v1`: 1m model trained before 2025 (2025-to-date AUC 0.688 vs 0.648 base), resting limits, 6 targets x 3 stops x 3 cuts x 3 EMA order filters, frac 10 slots 3x. On 2025 no combo qualifies (best 0.61x, all drawdowns > 50 percent, 12-25 liquidations each), so nothing was tested on 2026. Selection rule unchanged; the full 2025 table is in summary.json (the first summary is kept as summary_first.*).
+- Agreed stop rule applies: no further Monday 1.618 variants; forward paper data is the remaining test. Learning: `a-failed-pre-registered-selection-is-the-result.md`.
+
 ## 2026-10-29 · Notion72 single5m wick: examples found, standalone rule loses after fees
 
 - Owner confirmed close entry, stop at the signal candle extreme, target at the far internal0.618. `exp-5m-single-wick-1618-majors-20261029-v1`: existing12-major Binance histories; six real1m and six5m, NY Monday anchors. One native historical run,43530 independent signal/control positions,87060 fills,zero dual-touch ambiguities. Maker2bp/taker5bp; slippage stress separate.
