@@ -125,9 +125,17 @@ def inspect(row):
     matching = ticks[(ticks.index >= start) & (ticks.index < start+pd.Timedelta(minutes=5))]
     observed = np.array([matching.price.iloc[0], matching.price.max(), matching.price.min(), matching.price.iloc[-1], matching.quantity.sum()], float)
     expected = original[['open', 'high', 'low', 'close', 'volume']].to_numpy(float)
-    assert np.allclose(observed, expected, rtol=1e-7, atol=1e-10), (symbol, observed, expected)
     directory = EXP/'cases'/symbol
     directory.mkdir(parents=True, exist_ok=True)
+    parity = dict(original=expected.tolist(), archive=observed.tolist(),
+                  ohlc_match=bool(np.allclose(observed[:4], expected[:4], rtol=1e-7, atol=1e-10)),
+                  volume_match=bool(np.isclose(observed[4], expected[4], rtol=1e-7, atol=1e-10)),
+                  volume_difference=float(observed[4]-expected[4]),
+                  volume_difference_pct=float((observed[4]/expected[4]-1)*100))
+    save(directory/'source-parity.json', parity)
+    assert parity['ohlc_match'], (symbol, observed, expected)
+    # ONE has a 9.18 ppm volume mismatch. Preserve it as a source qualification;
+    # do not change source rows or present that case as full OHLCV agreement.
     sec.to_csv(directory/'seconds.csv', index_label='utc')
     context = frame.loc[start-pd.Timedelta(minutes=10):pd.Timestamp(row['exit_time'])+pd.Timedelta(minutes=5)]
     context.to_csv(directory/'original-5m-context.csv', index_label='utc')
@@ -140,7 +148,8 @@ def inspect(row):
                   wait_seconds=(proxy_time-touch).total_seconds(), entry_price_improvement_pct=(proxy/row['entry']-1)*100,
                   later_window_high=float(ticks.loc[ticks.index >= proxy_time, 'price'].max()),
                   source_url=url, source_path=str(path.relative_to(ROOT)), source_size=path.stat().st_size,
-                  ticks_read=len(ticks), touch_5m_ohlcv_parity=True, missing_seconds=int((sec.index[-1]-sec.index[0]).total_seconds()+1-len(sec)),
+                  ticks_read=len(ticks), touch_5m_ohlcv_parity=parity['volume_match'], source_parity=parity,
+                  missing_seconds=int((sec.index[-1]-sec.index[0]).total_seconds()+1-len(sec)),
                   semantics='Subsequent trade is a price proxy; not an executable fill or new strategy P&L.')
     save(directory/'evidence.json', result)
     print(json.dumps(result, ensure_ascii=False), flush=True)
