@@ -45,7 +45,10 @@ def get(url, path):
 
 
 def daily(symbol):
-    url = ('https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param='
+    # The web.ifzq host began returning HTTP 501 after 2,372 downloads.
+    # This verified Tencent alias serves the same raw endpoint/schema. Existing
+    # responses retain their original URLs; no cache is replaced.
+    url = ('https://ifzq.gtimg.cn/appstock/app/fqkline/get?param='
            f'{symbol},day,2026-03-01,2026-10-28,320,')
     data = get(url, CACHE / 'daily' / f'{symbol}.json')
     rows = data.get('data', {}).get(symbol, {}).get('day', [])
