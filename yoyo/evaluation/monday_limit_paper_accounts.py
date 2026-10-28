@@ -50,11 +50,13 @@ def scores(cfg):
 def orders(e, close, tick, cfg, family):
     """Order rows of one entry family for every account type; scores decide only which events get rows."""
     th, cut, hi, add = cfg['v2_threshold'], cfg['cut'], cfg['hi'], cfg['add_pct']
+    th_pre = cfg.get('v2_threshold_pre', th)  # a refitted pre-touch score has its own top-40 cut
     out = []
     if family == 'rest':
         x = e.copy()
         x['order_mode'] = 'limit'
         best = np.maximum(x.pre.fillna(-1), x.full.fillna(-1))
+        v2ok = (x.pre >= th_pre) | (x.full >= th)
         v3ok = ((x.pre >= cut) & (x.exit_mode == V3MODE(x.pre, hi))) | ((x.full >= cut) & (x.exit_mode == V3MODE(x.full, hi)))
     else:
         k = e.touch_i_hint.astype(int).to_numpy()
@@ -65,9 +67,10 @@ def orders(e, close, tick, cfg, family):
         x = e[room & (inside if family == 'ci' else ~inside)].copy()
         x['order_mode'] = 'market'
         best = x.full.fillna(-1)
+        v2ok = x.full >= th
         v3ok = (x.full >= cut) & (x.exit_mode == V3MODE(x.full, hi))
     x['reclaim_ref'] = x.entry  # the level
-    types = [('v2', (best >= th) & (x.exit_mode == 'near_monday_edge'), 'far', 0, 17.),
+    types = [('v2', v2ok & (x.exit_mode == 'near_monday_edge'), 'far', 0, 17.),
              ('v3', v3ok, 'P', 30, 17.), ('v3lock', v3ok, 'P', 30, 50.),
              ('spike', (best >= hi) & (x.exit_mode == 'near_monday_edge') & (x.reclaim_minutes == 60), 'P', 18, 17.)]
     for name, keep, kind, value, be in types:
@@ -110,7 +113,7 @@ def process(symbol, intrabar, exp, cfg):
     pre, full = scores(cfg)
     e['pre'] = e.event.map(pre); e['full'] = e.event.map(full)
     close = p.close.to_numpy()
-    x = pd.concat([orders(e, close, tick, cfg, fam) for fam in ('rest', 'ci', 'cb')], ignore_index=True)
+    x = pd.concat([orders(e, close, tick, cfg, fam) for fam in cfg.get('families', ['rest', 'ci', 'cb'])], ignore_index=True)
     out = Path(exp)/intrabar.lower()/'symbols'/symbol
     out.mkdir(parents=True, exist_ok=True)
     if x.empty:
@@ -148,8 +151,8 @@ def committed(*paths):
 
 def symbols(cfg):
     pre, full = scores(cfg)
-    best = np.maximum(pre.reindex(full.index).fillna(-1), full.fillna(-1))
-    ev = full.index[best >= cfg['v2_threshold']]
+    pre = pre.reindex(full.index)
+    ev = full.index[(pre >= cfg.get('v2_threshold_pre', cfg['v2_threshold'])) | (full >= cfg['v2_threshold'])]
     return sorted({e.split(':')[0] for e in ev if e.split(':')[1] >= cfg['since_week']})
 
 
@@ -301,10 +304,12 @@ def summarize(config, workers):
     window = pd.Timestamp(json.loads((A/'exp-monday-limit-reclaim-recent-20261025-v1/summary.json').read_text())['results']['window'][0])
     entries = {'A_rest_causal': (['rest'], 'pre'), 'leaky_rest_touchbar': (['rest'], 'full'),
                'close_inside': (['ci'], 'full'), 'close_all': (['ci', 'cb'], 'full')}
+    entries = {k: v for k, v in entries.items() if set(v[0]) <= set(cfg.get('families', ['rest', 'ci', 'cb']))}
     plans = {}
     for ename, (fams, col) in entries.items():
         g = t[t.family.isin(fams)]
         sc = g[col]
+        th = cfg.get('v2_threshold_pre', cfg['v2_threshold']) if col == 'pre' else cfg['v2_threshold']
         v3sel = lambda kind: g[(g.kind == kind) & (sc >= cut) & (g['mode'] == V3MODE(sc, hi))]
         lin = lambda y: np.minimum(sz['fraction']*(y[col]-sz['cut'])/sz['mean_excess'], sz['cap'])
         v2 = g[(g.kind == 'v2') & (sc >= th)]
