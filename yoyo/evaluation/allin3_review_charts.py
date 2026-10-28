@@ -128,7 +128,7 @@ def timeline(ledger, rows):
         for s in ['bottom', 'left']: a.spines[s].set_color('#cbd4dc')
         a.tick_params(labelsize=11)
     fig.text(.085, .945, 'allin3：1000U → 175万U 的原始历史时间线', fontsize=23, weight='bold')
-    fig.text(.085, .902, '旧评分存在前视，收益能力已被否定；本图仅解释已保存的数字，不代表当前模拟盘或实盘结果。', fontsize=13, color='#a44655')
+    fig.text(.085, .902, '旧评分存在前视，该175万结果不能作为有效收益证据；本图仅解释历史数字，不代表当前模拟盘。', fontsize=13, color='#a44655')
     fig.text(.085, .855, '336笔成交 · 胜率 33.3% · 3倍全仓复利 · 5次补款 · 实际净入金合计 5,527U', fontsize=13)
     fig.text(.085, .090, '最后两笔贡献 1,013,958U（期末余额的57.8%）；其中 ON 的522,745U来自样本末强制结算，并未触及目标。', fontsize=12)
     fig.text(.085, .052, '北京时间；台阶仅在平仓/入金时变化。原账本BE0，当前模拟盘BE +0.17%；原手续费与滑点全部保留。', fontsize=10.5, color='#647382')
@@ -185,11 +185,12 @@ def draw_sample(row):
     direction = '做多' if r.side == 1 else '做空'
     fig.text(.065, .950, f'{r.number:02d}  {r.symbol} · {direction}   |   {r.role}', fontsize=20, weight='bold')
     fig.text(.065, .908, '旧版回测复盘：成交K线评分含前视；历史BE0。此图不是可复现收益能力的证明。', fontsize=12, color='#a44655')
-    fig.text(.065, .862, f'{CAUSE[int(r.reason)]}    标的净收益 {r.net_bp/100:+.2f}%   × 3倍 = 账户 {100*r.pnl/r.before:+.2f}%', fontsize=15)
+    fig.text(.065, .862, f'{CAUSE[int(r.reason)]}    名义本金净收益 {r.net_bp/100:+.2f}%   × 3倍 = 账户 {100*r.pnl/r.before:+.2f}%', fontsize=15)
     fig.text(.065, .820, f'本笔盈亏 {r.pnl:+,.2f}U    余额 {r.before:,.2f} → {r.equity:,.2f}U    旧评分 {r.score:.4f}', fontsize=13)
     fmt = lambda x: f'{x:.7g}'
     fig.text(.065, .248, f'周一范围 {fmt(low)} — {fmt(high)}    1.618入场 {fmt(r.entry)}    对侧1.618目标 {fmt(r.target_price)}', fontsize=12)
-    fig.text(.065, .208, f'初始止损 {fmt(r.stop)}    确认后保护 {fmt(r.entry)}（旧BE0）    实际退出 {fmt(r.exit_price)}', fontsize=12)
+    protection_state = '旧BE0，已激活' if r.reclaim_status == 'reclaimed' else '计划价，未激活'
+    fig.text(.065, .208, f'初始止损 {fmt(r.stop)}    确认后保护 {fmt(r.entry)}（{protection_state}）    实际退出 {fmt(r.exit_price)}', fontsize=12)
     when = lambda t: t.tz_convert('Asia/Shanghai').strftime('%Y-%m-%d %H:%M')
     fig.text(.065, .165, f'入场所在5m：{when(et)} — {(et+STEP).tz_convert("Asia/Shanghai").strftime("%H:%M")}    退出所在5m：{when(xt)}', fontsize=11)
     if r.reason in (0, 11):
