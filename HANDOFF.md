@@ -1,3 +1,9 @@
+## 2026-10-28 · Eight paper accounts with their full rules, resting vs close-time entries
+
+- `exp-monday-limit-paper-accounts-20261028-v1` (adapter + builder cd5f85adcf): breakeven +0.17 percent (v3lock +0.5), add legs, each account's sizing; leaky / resting on the causal score / close inside / close both sides.
+- From 2020, resting on the causal score (what the paper engine does): v2_60 1.36x DD55, v2_5 0.10x, v3 1.04x DD86, v3add 1.05x DD94, v3add20 6.6x DD83, v3lock 1.13x DD85, spike 1.02x DD61; allin3 100x from 9.5 percent of starts. Leaky backtests 15x / 2.4x / 89x / 203x / 328x / 91x / 4.7x / 95 percent.
+- Close-time entries cut drawdown for the v3 family and spike (v3 2.53x DD60, spike 1.25x DD33) but lose for v2 and in 2026. 2026: only spike (1.19x resting, 1.36x close) and v3add20 resting (1.33x) are above 1. In sample.
+
 ## 2026-10-28 · Market entry at the touch close (inside / beyond) and target choice
 
 - `exp-monday-limit-close-reclaim-20261028-v1` (builder eb6dfe553e): market at the touch 5m close scored by the touch-bar score, five targets, -30 / -18 percent from the level, matched random entries. v3-like frac N20 3x from 2020: inside only 1.78x DD44, inside + beyond 3.39x DD49 (resting plan A 3.87x); 2026 0.80x / 0.72x vs A 1.14x. Signal +70bp vs random -60bp; unscored touches -14bp.
