@@ -232,14 +232,29 @@ def paired(g):
 
 def feature_readout(t):
     """Single-feature ranks only; orientation/quartiles chosen before 2025."""
-    from sklearn.metrics import roc_auc_score
+    def auc_value(labels, scores):
+        # Mann-Whitney AUC with midranks for ties; no estimator is fitted.
+        positive = np.asarray(labels, dtype=bool)
+        npos = int(positive.sum()); nneg = len(positive)-npos
+        if not npos or not nneg:
+            return None
+        ranks = pd.Series(np.asarray(scores)).rank(method='average').to_numpy()
+        return float((ranks[positive].sum()-npos*(npos+1)/2)/(npos*nneg))
+
     s = t[t.population.eq('signal') & t.closed].copy()
     et = pd.to_datetime(s.entry_time, utc=True); xt = pd.to_datetime(s.exit_time, utc=True)
+    all_et = pd.to_datetime(t.entry_time, utc=True); all_xt = pd.to_datetime(t.exit_time, utc=True)
+    within_period = {
+        'pre2025': (all_et < '2025-01-01') & (all_xt < '2025-01-01'),
+        'y2025': (all_et >= '2025-01-01') & (all_et < '2026-01-01') & (all_xt < '2026-01-01'),
+        'y2026': all_et >= '2026-01-01',
+    }
     train = s[(et < '2025-01-01') & (xt < '2025-01-01')]
     records = []
     for feat in FEATURES:
         z = train.dropna(subset=[feat])
-        auc = roc_auc_score(z.target_hit.astype(int), z[feat]) if z.target_hit.nunique() == 2 else .5
+        auc = auc_value(z.target_hit, z[feat])
+        auc = .5 if auc is None else auc
         direction = 1 if auc >= .5 else -1
         quartiles = z[feat].quantile([.25, .5, .75]).to_numpy()
         top_cut = (direction*z[feat]).quantile(.9)
@@ -247,16 +262,17 @@ def feature_readout(t):
                              ('y2025', (et >= '2025-01-01') & (et < '2026-01-01') & (xt < '2026-01-01')),
                              ('y2026', et >= '2026-01-01')]:
             q = s[mask].dropna(subset=[feat]); score = q[feat]*direction
-            val_auc = roc_auc_score(q.target_hit.astype(int), score) if q.target_hit.nunique() == 2 else None
+            val_auc = auc_value(q.target_hit, score)
             best = q[score >= top_cut]
+            period_rows = t[within_period[period]]
             groups = []
             for k in range(4):
                 g = q[np.searchsorted(quartiles, q[feat], side='right') == k]
                 ids = set(g.event_id)
-                groups.append(dict(quartile=k+1, **metrics(g), control=paired(t[t.event_id.isin(ids)])))
+                groups.append(dict(quartile=k+1, **metrics(g), control=paired(period_rows[period_rows.event_id.isin(ids)])))
             records.append(finite(dict(feature=feat, period=period, direction=direction, auc=val_auc,
                 training_quartiles=quartiles.tolist(), frozen_top_decile_cut=float(top_cut),
-                frozen_top_decile=metrics(best), top_control=paired(t[t.event_id.isin(set(best.event_id))]),
+                frozen_top_decile=metrics(best), top_control=paired(period_rows[period_rows.event_id.isin(set(best.event_id))]),
                 quartiles=groups)))
     return records
 
