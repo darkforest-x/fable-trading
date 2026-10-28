@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-5m-single-wick-1618-majors-20261029-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: active
+    question: 'Notion72: how many isolated5m wick rejections at NY Monday1.618 reach the far internal0.618 after close entry and a stop at the signal candle extreme?'
+    single_variable: 'Owner-defined standalone entry/exit rule; fixed12-major universe, all isolated episodes with first-touch subgroup, same-symbol/week/volatility random controls.'
+    result: 'Builder and causal/native fixtures prepared; historical execution pending.'
+    artifacts: []
+    canonical_report: experiments/active/exp-5m-single-wick-1618-majors-20261029-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Existing Binance histories; owner confirmed needle-extreme stop. Fees maker2bp/taker5bp. No model fitting or production changes.'
   - experiment_id: exp-monday-seconds-entry-audit-20261028-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2af4ca7a94
