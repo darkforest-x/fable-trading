@@ -7,7 +7,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
-from yoyo.evaluation.single_wick_1618_majors import EXP
+from yoyo.evaluation.single_wick_1618_majors import EXP, FEATURES, prepare
 
 
 def validate(t):
@@ -48,14 +48,38 @@ def validate(t):
              'y2025': (et >= '2025-01-01') & (et < '2026-01-01') & (xt < '2026-01-01'),
              'y2026': et >= '2026-01-01'}
     feature_rows = json.loads((EXP/'features.json').read_text())
+    short_features = json.loads((EXP/'features_short.json').read_text())
+    for item in short_features:
+        item['short_only'] = True
+    feature_rows += short_features
     for item in feature_rows:
         q = signal[masks[item['period']]].dropna(subset=[item['feature']])
+        if item.get('short_only'):
+            q = q[q.side.eq(-1)]
         if item['auc'] is not None:
             np.testing.assert_allclose(item['auc'], roc_auc_score(q.target_hit, q[item['feature']]*item['direction']), atol=1e-12)
+    # High geometry AUC is checked against a real future-mutation fixture.
+    raw = pd.read_parquet(EXP/'symbols/DOGEUSDT/candles5m.parquet').loc['2026-09-28 04:00':]
+    cfg = dict(seed=20261029, controls_per_signal=3)
+    job = dict(symbol='DOGEUSDT', execution_minutes=5)
+    _, _, original, _, _ = prepare(raw, job, cfg)
+    decision = pd.Timestamp('2026-09-30 13:35:00+00:00')
+    changed = raw.copy()
+    changed.loc[changed.index >= decision, ['open','high','low','close']] *= 1.5
+    changed.loc[changed.index >= decision, 'volume'] *= 100
+    _, _, altered, _, _ = prepare(changed, job, cfg)
+    prefix = original[pd.to_datetime(original.signal_time, utc=True) <= decision]
+    counterpart = altered.set_index('trade_id').loc[prefix.trade_id].reset_index()
+    pd.testing.assert_frame_equal(prefix.reset_index(drop=True), counterpart[prefix.columns].reset_index(drop=True))
+    actual = signal[signal.symbol.eq('DOGEUSDT') & signal.entry_time.eq(str(decision))].iloc[0]
+    local = original[original.population.eq('signal') & original.entry_time.eq(str(decision))].iloc[0]
+    np.testing.assert_allclose(actual[FEATURES].astype(float), local[FEATURES].astype(float), rtol=1e-9)
     (EXP/'validation.json').write_text(json.dumps(dict(passed=True, symbols=rows, auc_oracle_checks=len(feature_rows),
+        real_future_mutation_prefix_orders=len(prefix),
         checks=['native ledger identities', 'entry-bar exclusion', 'actual-fee algebra',
                 'signal OHLC and previous-bar exclusion', 'mirror target geometry',
-                'random timing and identical observation horizons', 'univariate AUC versus sklearn'],
+                'random timing and identical observation horizons', 'univariate AUC versus sklearn',
+                'real DOGE prefix unchanged after future OHLCV mutation'],
         unit_tests='16 tests passed in isolated Nautilus runtime; causal future mutation and native fill semantics'), indent=2)+'\n')
 
 
@@ -72,7 +96,7 @@ def main():
         screenshot_candle_open_shanghai='2026-09-30 21:30',
         interpretation='reason0 is source-end censoring, not a profitable completed trade or a target hit.',
         rows=reference[keys].to_dict('records')), indent=2)+'\n')
-    s = t[t.population.eq('signal') & t.closed].copy()
+    s = t[t.population.eq('signal') & t.closed & t.side.eq(-1)].copy()
     s['time'] = pd.to_datetime(s.entry_time, utc=True)
     s['duration'] = (pd.to_datetime(s.exit_time, utc=True)-s.time).dt.total_seconds()/3600
     chosen = []
@@ -110,7 +134,7 @@ def main():
         ax.grid(alpha=.1); ax.legend(loc='best', fontsize=7, facecolor='#101820', labelcolor='white', framealpha=.7)
         for spine in ax.spines.values(): spine.set_color('#344450')
         selected.append({k:row[k] for k in ['trade_id','symbol','entry_time','exit_time','side','entry','stop','target_price','net_r','target_hit']})
-    fig.suptitle('Single 5m wick at Monday 1.618 | close entry, candle-extreme stop, far internal 0.618 target\nBinance history; OKX Lv1 fees; six recent target hits and three stops (illustrative selection)', color='white', fontsize=14)
+    fig.suptitle('Single upper 5m wick at Monday 1.618 | SHORT at close, candle-high stop, far internal 0.618 target\nBinance history; OKX Lv1 fees; six recent target hits and three stops (illustrative selection)', color='white', fontsize=14)
     fig.tight_layout(rect=[0,0,1,.95]); fig.savefig(EXP/'examples.png', dpi=130, facecolor=fig.get_facecolor()); plt.close(fig)
     (EXP/'chart_examples.json').write_text(json.dumps(selected, indent=2)+'\n')
 

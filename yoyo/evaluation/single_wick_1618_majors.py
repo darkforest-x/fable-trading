@@ -288,7 +288,9 @@ def summarize():
                        ('y2025', (et >= '2025-01-01') & (et < '2026-01-01') & (xt < '2026-01-01')),
                        ('y2026', et >= '2026-01-01')]:
         for cohort, cm in [('all', np.ones(len(t), bool)), ('first_touch', t.first_weekly_touch),
-                           ('repeat', ~t.first_weekly_touch), ('short', t.side.eq(-1)), ('long', t.side.eq(1))]:
+                           ('repeat', ~t.first_weekly_touch), ('short', t.side.eq(-1)), ('long', t.side.eq(1)),
+                           ('first_touch_short', t.first_weekly_touch & t.side.eq(-1)),
+                           ('repeat_short', ~t.first_weekly_touch & t.side.eq(-1))]:
             g = t[pm & cm]
             table.append(dict(period=period, cohort=cohort, **metrics(g[g.population.eq('signal')]), control=paired(g)))
     symbols = [dict(symbol=sym, **metrics(g[g.population.eq('signal')]), control=paired(g)) for sym, g in t.groupby('symbol')]
@@ -296,9 +298,11 @@ def summarize():
     signal = t[t.population.eq('signal')]
     good = signal[signal.closed & signal.target_hit].sort_values(['symbol', 'entry_time'])
     good.to_csv(EXP/'target_examples.csv', index=False)
+    good[good.side.eq(-1)].to_csv(EXP/'short_target_examples.csv', index=False)
     signal.to_csv(EXP/'signals.csv', index=False)
     feats = feature_readout(t)
     dump(EXP/'features.json', feats)
+    dump(EXP/'features_short.json', feature_readout(t[t.side.eq(-1)]))
     summary = dict(experiment_id=EXP.name, coverage=done, metrics=table, by_symbol=symbols,
         ohlc_signal_net_r=float(ohlc.loc[ohlc.population.eq('signal') & ohlc.reason.ne(0), 'net_r'].sum()),
         conservative_signal_net_r=float(signal.loc[signal.closed, 'net_r'].sum()),
