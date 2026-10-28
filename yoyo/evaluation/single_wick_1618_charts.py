@@ -41,10 +41,21 @@ def validate(t):
         assert (r.entry_i.to_numpy() < parent.entry_i.to_numpy()).all()
         np.testing.assert_array_equal((r.end_i-r.entry_i).to_numpy(), (parent.end_i-parent.entry_i).to_numpy())
         rows.append(dict(symbol=symbol, signals=len(s), positions=len(g), passed=True))
-    (EXP/'validation.json').write_text(json.dumps(dict(passed=True, symbols=rows,
+    from sklearn.metrics import roc_auc_score
+    signal = t[t.population.eq('signal') & t.closed]
+    et = pd.to_datetime(signal.entry_time, utc=True); xt = pd.to_datetime(signal.exit_time, utc=True)
+    masks = {'pre2025': (et < '2025-01-01') & (xt < '2025-01-01'),
+             'y2025': (et >= '2025-01-01') & (et < '2026-01-01') & (xt < '2026-01-01'),
+             'y2026': et >= '2026-01-01'}
+    feature_rows = json.loads((EXP/'features.json').read_text())
+    for item in feature_rows:
+        q = signal[masks[item['period']]].dropna(subset=[item['feature']])
+        if item['auc'] is not None:
+            np.testing.assert_allclose(item['auc'], roc_auc_score(q.target_hit, q[item['feature']]*item['direction']), atol=1e-12)
+    (EXP/'validation.json').write_text(json.dumps(dict(passed=True, symbols=rows, auc_oracle_checks=len(feature_rows),
         checks=['native ledger identities', 'entry-bar exclusion', 'actual-fee algebra',
                 'signal OHLC and previous-bar exclusion', 'mirror target geometry',
-                'random timing and identical observation horizons'],
+                'random timing and identical observation horizons', 'univariate AUC versus sklearn'],
         unit_tests='16 tests passed in isolated Nautilus runtime; causal future mutation and native fill semantics'), indent=2)+'\n')
 
 
