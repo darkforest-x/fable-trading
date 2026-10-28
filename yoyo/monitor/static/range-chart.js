@@ -155,7 +155,35 @@
       this.chart.applyOptions({layout:{background:{type:'solid',color:value('--surface',dark?'#0b0e14':'#fff')},textColor:value('--muted',dark?'#c7c4d7':'#64748b'),fontSize:11},
         grid:{vertLines:{color:value('--line-soft',dark?'#20232b':'#eef1f5')},horzLines:{color:value('--line-soft',dark?'#20232b':'#eef1f5')}}});
     }
-    readout(){const row=this.rowByTime?.get(this.hover)||this.rows.at(-1),html=row?window.SpikeChartTools.readout(row,row.time,row.time!==this.hover):'';if(html!==this.readoutHTML){this.panel.querySelector('.cv-readout').innerHTML=html;this.readoutHTML=html;}if(this.maSeries?.length)this.panel.querySelector('.cv-ma-legend').innerHTML=window.SpikeChartStyle.legend(row);}
+    readout(){
+      const row=this.rowByTime?.get(this.hover)||this.rows.at(-1),T=window.SpikeChartTools;
+      const fields=row?[row.time,row.open,row.high,row.low,row.close,row.time!==this.hover]:[];
+      if(!this.readoutFields||fields.length!==this.readoutFields.length||fields.some((v,i)=>!Object.is(v,this.readoutFields[i]))){
+        const host=this.panel.querySelector('.cv-readout');
+        // Retain the five readout spans during panning; only text values change.
+        if(row&&this.readoutNodes?.length===5){
+          const values=[`${fields[5]?'最新 K 线':'光标'} · ${T.clock(row.time)} 北京开盘`,...fields.slice(1,5).map(T.axisPrice)];
+          values.forEach((value,i)=>{if(this.readoutNodes[i].textContent!==value)this.readoutNodes[i].textContent=value;});
+        }else{
+          host.innerHTML=row?T.readout(row,row.time,fields[5]):'';
+          this.readoutNodes=host.querySelectorAll?.('.cv-time, b');
+        }
+        this.readoutFields=fields;
+      }
+      if(this.maSeries?.length){
+        const style=window.SpikeChartStyle,values=style.lines.map(line=>row?.[line.key]);
+        if(!this.legendValues||values.some((v,i)=>!Object.is(v,this.legendValues[i]))){
+          const host=this.panel.querySelector('.cv-ma-legend');
+          if(this.legendNodes?.length===style.lines.length){
+            style.lines.forEach((line,i)=>{const node=this.legendNodes[i],value=values[i],text=style.legendPrice(value);
+              node.title=`${line.label} · ${fin(value)?value:'历史不足'}`;
+              const number=node.querySelector('b');if(number.textContent!==text)number.textContent=text;
+            });
+          }else{host.innerHTML=style.legend(row);this.legendNodes=host.querySelectorAll?.('.chart-ma-value');}
+          this.legendValues=values;
+        }
+      }
+    }
     draw(data,view,error){
       const T=window.SpikeChartTools,key=`${data?.symbol||''}|${data?.timezone||''}|${data?.bar||'15m'}|${view.bars}`;
       const oldTimes=T.times(this.rows),oldRange=this.chart.timeScale().getVisibleLogicalRange();
@@ -165,7 +193,8 @@
       // API time is milliseconds. Display-only live tips are explicitly merged
       // by their owning chart; analytical consumers keep their closed series.
       const raw=data?.candles||[],step={'1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000}[data?.bar]||900000;
-      this.rows=(view.ma?window.SpikeChartStyle.averages(raw,step):raw).slice(-view.bars).map(r=>({...r,time:r.time/1000}));
+      if(view.ma)this.averages ||= window.SpikeChartStyle.createAverages();else this.averages=null;
+      this.rows=(this.averages?this.averages(raw,step):raw).slice(-view.bars).map(r=>({...r,time:r.time/1000}));
       this.syncAverages(!!view.ma);
       this.rowByTime=new Map(this.rows.map(r=>[r.time,r]));
       const newTimes=T.times(this.rows),timeChanged=oldTimes.length!==newTimes.length||oldTimes.some((t,i)=>t!==newTimes[i]);

@@ -19,6 +19,15 @@ test('fill and exit markers belong to their actual containing candle; gaps never
  const closed=geometry(pos({stage:'closed',exit_ms:900002,be_from_ms:900000}),rows,step,1000000);
  assert.equal(closed.exit,2);assert.equal(closed.stop,900000);assert.equal(closed.to,900002);
 });
+test('deep-history candle lookup keeps exact gap and endpoint semantics with bounded reads',()=>{
+ let reads=0;
+ const history=Array.from({length:100000},(_,i)=>({get time(){reads++;return i*300;}}));
+ assert.equal(candleIndex(history,99999*300000+1,step),99999);
+ assert.ok(reads<25,`lookup read ${reads} timestamps`);
+ assert.equal(candleIndex(history,-1,step),-1);
+ assert.equal(candleIndex(history,100000*300000,step),-1);
+ assert.equal(candleIndex(history,NaN,step),-1);
+});
 test('confirmation cannot invent an initial stop or extend an ended position into the present',()=>{
  assert.equal(geometry(pos({be_from_ms:1200000}),rows,step,1000000).stop,null);
  assert.equal(geometry(pos({be_from_ms:300000}),rows,step,1000000).stop,null);

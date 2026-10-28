@@ -64,13 +64,19 @@
   }
   function create({root,onTool=()=>{}}){
     let instance=null,index=new DataIndex([],900),symbol='',mode='select',items=[],selected=null,draft=null,preview=null,gesture=null,backup=null,undo=[],warning='',blocked=false,suppressUntil=0,dead=false;
-    const memory=new Map();let primitive=null,lockedOptions=null;
+    const memory=new Map();let primitive=null,lockedOptions=null,published='';
     const strip=document.createElement('div');strip.className='cd-status rp-glass';strip.hidden=true;
     strip.innerHTML='<div><b data-cd-title></b><span data-cd-hint role="status"></span></div><button type="button" data-cd-action="cancel">退出绘图</button>';
     const announcement=document.createElement('span');announcement.className='cd-sr';announcement.setAttribute('aria-live','polite');strip.append(announcement);root.append(strip);
     const state=()=>({mode,selected,items:copy(items),draft:copy(draft),symbol,warning});
     const publish=()=>{
       const active=mode!=='select',choice=items.find(d=>d.id===selected);
+      const text=choice?.type==='measure'?measurementText(index.measure(...choice.points)).join('；'):'';
+      const key=JSON.stringify([mode,!!gesture,selected,draft?.points.length,!!index.rows.length,items.length,undo.length,warning,text]);
+      // Candle ticks still invalidate the canvas primitive, but unchanged tool
+      // chrome must not rebuild text nodes or invalidate the page's layout.
+      primitive?.requestUpdate?.();
+      if(key===published)return;published=key;
       root.classList.toggle('is-drawing',active||!!gesture);strip.hidden=!active&&!choice&&!warning;
       root.querySelectorAll('[data-cd-tool]').forEach(b=>{b.disabled=!index.rows.length;b.setAttribute('aria-pressed',String(b.dataset.cdTool===mode));});
       root.querySelectorAll('[data-cd-action="delete"]').forEach(b=>b.disabled=!choice);
@@ -79,8 +85,7 @@
       strip.querySelector('[data-cd-title]').textContent=active?labels[mode]+' · '+(draft?.points.length||0)+' / '+(mode==='channel'?3:2):choice?labels[choice.type]+'已选中':'绘图';
       strip.querySelector('[data-cd-hint]').textContent=warning||(active?(mode==='channel'&&draft?.points.length===2?'点第三点确定通道宽度':draft?'点终点；Esc 取消':'拖动或点选起点、终点；方向键＋Enter 也可绘制'):choice?'拖动端点调整 · Delete 删除':'');
       strip.querySelector('[data-cd-action="cancel"]').textContent=active?'取消':'完成';
-      const text=choice?.type==='measure'?measurementText(index.measure(...choice.points)).join('；'):'';if(announcement.textContent!==text)announcement.textContent=text;
-      primitive?.requestUpdate?.();
+      if(announcement.textContent!==text)announcement.textContent=text;
     };
     function lock(value){
       if(!instance)return;

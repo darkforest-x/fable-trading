@@ -39,6 +39,21 @@ test('shared range renderer uses the selected contract identity and small coin p
  const html=render(c,view);assert.match(html,/OKX WUSDT.P/);assert.match(html,/周一高 0.0023/);assert.doesNotMatch(html,/BTC/);
  assert.equal(price(.00001234),'0.00001234');assert.equal(price(null),'—');
 });
+test('readout caching preserves DOM and updates corrected OHLC and MA independently',()=>{
+ const style=sandbox.window.SpikeChartStyle=require('../../yoyo/monitor/static/chart-style.js');
+ let writes=0;
+ const textNode=()=>{let value='';return {get textContent(){return value;},set textContent(v){writes++;value=v;}};};
+ const values=Array.from({length:5},textNode),numbers=style.lines.map(textNode);
+ const legend=style.lines.map((_,i)=>({title:'',querySelector:()=>numbers[i]}));
+ const row={time:900,open:.000001,high:.000004,low:.0000008,close:.000002,...Object.fromEntries(style.lines.map((l,i)=>[l.key,(i+1)/10000]))};
+ const host={innerHTML:''},owner={rows:[row],rowByTime:new Map([[row.time,row]]),hover:row.time,maSeries:[{}],readoutNodes:values,legendNodes:legend,panel:{querySelector:()=>host}};
+ const paint=()=>sandbox.module.exports.Interactive.prototype.readout.call(owner);
+ paint();const first=writes;for(let i=0;i<180;i++)paint();assert.equal(writes,first);
+ row.close=.000003;paint();assert.equal(values[4].textContent,'0.000003');assert.equal(writes,first+1);
+ row.ema120=null;paint();assert.equal(numbers[5].textContent,'缺样');assert.equal(writes,first+2);
+ owner.hover=null;paint();assert.match(values[0].textContent,/最新 K 线/);
+ owner.rows=[];owner.rowByTime.clear();paint();assert.equal(host.innerHTML,'');
+});
 test('inline names and prices stay inside their anchored ray, without axis badges',()=>{
  const {WeekLevels}=sandbox.module.exports,lines=[],texts=[],rectangles=[];
  let offset=0,y=40;

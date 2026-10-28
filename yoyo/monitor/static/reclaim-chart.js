@@ -8,7 +8,12 @@
   const valid=p=>p && /^[A-Z0-9]{1,32}-USDT-SWAP$/.test(p.symbol) && [1,-1].includes(p.side) && fin(p.fill_ms) && p.fill_ms>0 && fin(p.entry) && p.entry>0;
   function latest(track){return [...(track?.open||[]),...(track?.closed||[]),...(track?.latest_funded?[track.latest_funded]:[])].filter(p=>valid(p)&&p.taken===1&&p.notional>0).sort((a,b)=>b.fill_ms-a.fill_ms||b.id-a.id)[0]||null;}
   function select(track,id,pinned){return id ? [...(track?.open||[]),...(track?.closed||[]),...(track?.latest_funded?[track.latest_funded]:[])].find(p=>String(p.id)===id&&valid(p)) || (pinned&&String(pinned.id)===id?pinned:null) : latest(track);}
-  function candleIndex(rows,stamp,step){return rows.findIndex(r=>r.time*1000<=stamp&&stamp<r.time*1000+step);}
+  function candleIndex(rows,stamp,step){
+    if(!fin(stamp)||!fin(step)||step<=0)return -1;
+    let lo=0,hi=rows.length;
+    while(lo<hi){const mid=(lo+hi)>>>1;if(rows[mid].time*1000<=stamp)lo=mid+1;else hi=mid;}
+    const i=lo-1;return i>=0&&stamp<rows[i].time*1000+step?i:-1;
+  }
   function geometry(p,rows,step,now){
     if(!valid(p)||!rows.length)return null;
     const end=p.stage==='closed'?p.exit_ms:now;
@@ -54,8 +59,11 @@
     const chart=window.SpikeMondayFibChart.create({decorate:(instance,data)=>{
       drawings?.attach(instance,data);
       const p=data.paperTrade,step=periods[data.bar];
-      instance.chart?.applyOptions?.({handleScale:{axisDoubleClickReset:false}});
-      instance.canvas?.setAttribute('aria-label','K 线交互图；双击或双点任意图表位置隐藏／恢复悬浮组件；拖动平移，滚轮或双指缩放；Home 全图，End 最新');
+      if(!instance.paperInteractionReady){
+        instance.chart?.applyOptions?.({handleScale:{axisDoubleClickReset:false}});
+        instance.canvas?.setAttribute('aria-label','K 线交互图；双击或双点任意图表位置隐藏／恢复悬浮组件；拖动平移，滚轮或双指缩放；Home 全图，End 最新');
+        instance.paperInteractionReady=true;
+      }
       const trades=new Map([...(data.paperTrades||[]),...(p?[p]:[])].filter(t=>valid(t)&&t.symbol===data.symbol).map(t=>[String(t.id),t]));
       instance.paperDrawings ||= new Map();
       for(const [id,old] of instance.paperDrawings)if(!trades.has(id)){old.shape=null;instance.series.detachPrimitive?.(old);instance.paperDrawings.delete(id);}
