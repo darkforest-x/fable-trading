@@ -730,6 +730,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
+  - experiment_id: exp-monday-limit-paper-accounts-20261028-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: queued
+    question: 'Owner 2026-10-28: rerun each of the eight paper accounts with its full rules (breakeven +0.17 percent, v3lock +0.5 percent, add legs, own sizing) in the framework, resting vs close-time entries.'
+    single_variable: 'Entry (resting limit by causal or touch-bar score; market at the touch close inside / beyond the level); account rules frozen as yoyo/monitor/monday_reclaim_paper.py.'
+    result: pending
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-paper-accounts-20261028-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Adapter gains per-row order modes (order_mode limit / market in a limit run) and add legs resting under a market parent. Runs after exp-monday-limit-close-reclaim-20261028-v1.'
   - experiment_id: exp-monday-limit-close-reclaim-20261028-v1
     source_repo: darkforest-x/fable-trading
     source_commit: pending

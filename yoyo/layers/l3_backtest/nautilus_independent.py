@@ -347,6 +347,10 @@ class IndependentCloseStrategy(Strategy):
         self.fees.entries[key] = state.source["entry"]
         self.submit_order(order, position_id=state.position_id)
 
+    def _rests(self, row):
+        """A resting limit entry: the run's mode, unless the row asks for a completed-close market entry."""
+        return self.entry_order_mode == "limit" and row.get("order_mode", "limit") != "market"
+
     def _market(self, state, entering=False, reason=0, quantity=None):
         side = state.source["side"] * (1 if entering else -1)
         order = self.order_factory.market(
@@ -506,7 +510,7 @@ class IndependentCloseStrategy(Strategy):
             self._fill_pyramid(state, i, price)
             return
         if phase == "entry":
-            if self.entry_order_mode == "limit":
+            if self._rests(state.source):
                 row = state.source
                 if not row["entry_i"] < i <= row["expire_i"]:
                     raise RuntimeError("Limit filled before submission or after expiry")
@@ -561,11 +565,11 @@ class IndependentCloseStrategy(Strategy):
                         state.source["censor_reason"] = "missing_preconfirmation_interval"
                 if self.policy.reclaim_backstop:
                     # A completed-close market entry has no intrabar entry bar to model.
-                    self.entering_limit_i = i if self.entry_order_mode == "limit" else None
+                    self.entering_limit_i = i if self._rests(state.source) else None
                     self._submit_protective_stop(state)
                     self.entering_limit_i = None
             else:
-                self.entering_limit_i = i if self.entry_order_mode == "limit" else None
+                self.entering_limit_i = i if self._rests(state.source) else None
                 self._submit_protective_stop(state)
                 self.entering_limit_i = None
             # Synchronous protection can close a just-filled limit immediately.
@@ -951,7 +955,13 @@ class IndependentCloseStrategy(Strategy):
                 # native float exposure can otherwise trim 1e-7 units on exit.
                 self.instrument.make_qty(units), row["stop"], be,
             )
-            if self.entry_order_mode == "limit":
+            parent = row.get("parent")
+            if isinstance(parent, str) and parent in self.reclaim_due_by_trade:
+                # The parent already filled (a market parent fills at this close before its legs are
+                # submitted): the leg may only rest until the parent's decision close.
+                due = pd.Timestamp(self.reclaim_due_by_trade[parent], tz="UTC")
+                row["expire_i"] = min(int(row["expire_i"]), max(int(self.frame.index.searchsorted(due)), i+1))
+            if self._rests(row):
                 order = self.order_factory.limit(self.instrument.id,
                     OrderSide.BUY if side > 0 else OrderSide.SELL, state.quantity,
                     price=self.instrument.make_price(entry))
@@ -1003,6 +1013,14 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     limit_entry = entry_order_mode == "limit"
     if policy.reclaim_next_bar and not limit_entry and "parent" in entries:
         raise ValueError("Scale-in legs on the reclaim rule require resting limit entries")
+    market_rows = (entries.order_mode.astype(str) == "market").to_numpy() if "order_mode" in entries else np.zeros(len(entries), bool)
+    if "order_mode" in entries:
+        if not (limit_entry and entries.order_mode.astype(str).isin(["limit", "market"]).all()):
+            raise ValueError("Per-row order modes need a limit run and values limit / market")
+        if "parent" in entries and (market_rows & entries.parent.map(lambda v: isinstance(v, str) and bool(v)).to_numpy()).any():
+            raise ValueError("Scale-in legs must rest as limits")
+        if "fill_close_exit" in entries and (market_rows & entries.fill_close_exit.astype(bool).to_numpy()).any():
+            raise ValueError("Fill-close exits apply to resting entries only")
     if "fill_close_exit" in entries:
         flags = entries.fill_close_exit
         if not (limit_entry and policy.reclaim_next_bar and flags.map(lambda v: isinstance(v, (bool, np.bool_))).all()):
@@ -1024,7 +1042,8 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
                 raise ValueError("Scale-in leg references an unknown parent")
             par = by_id.loc[r.parent]
             if (par.side != r.side or isinstance(par.get("parent"), str) and par.get("parent")
-                    or not r.side*(par.entry-r.entry) > 0 or abs(float(r.reclaim_ref)-float(par.entry)) > 1e-12
+                    or not r.side*(par.entry-r.entry) > 0
+                    or abs(float(r.reclaim_ref)-(float(par.reclaim_ref) if np.isfinite(float(par.get("reclaim_ref", np.nan))) else float(par.entry))) > 1e-12
                     or int(r.entry_i) != int(par.entry_i) or int(r.expire_i) != int(par.expire_i)):
                 raise ValueError("Scale-in leg must deepen its parent's side, reference its entry and share its window")
     pyramid = (entries.pyramid_parent.map(lambda v: isinstance(v, str) and bool(v)).to_numpy()
@@ -1133,7 +1152,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             raise ValueError("Invalid entry direction or bounded interval")
         if pyramid[k]:
             continue  # validated above; stop entries rest beyond the price, not limits
-        if limit_entry:
+        if limit_entry and not market_rows[k]:
             if (not r.entry_i < r.expire_i <= r.end_i
                     or r.side*(prices[int(r.entry_i), 3]-r.entry) < tick-tick*1e-7
                     or abs(r.entry/market_tick-round(r.entry/market_tick)) > 1e-5):

@@ -77,3 +77,52 @@ class CloseMarketReclaimTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+def mixed(bars, rows, path='OHLC', mode='limit'):
+    frame = pd.DataFrame(bars, columns=['open', 'high', 'low', 'close'],
+                         index=pd.date_range('2026-01-06', periods=len(bars), freq='min', tz='UTC'))
+    base = dict(end_i=len(frame)-1, side=1, stop=70., target_price=150., reclaim_minutes=1)
+    entries = pd.DataFrame([dict(base, **r, risk=r['entry']) for r in rows])
+    policy = ExitPolicy(trail_arm_r=1e12, opposite_hour_exit=False, round_trip_cost=0., target_from_entry=True,
+                        intrabar_path=path, fill_maker_fee=.0002, fill_taker_fee=.0005, reclaim_next_bar=True,
+                        breakeven_includes_cost=False, monotone_segments=True, reclaim_backstop=True)
+    rows_, fills, audit = run_native(frame, np.full(len(frame), np.nan), np.zeros(len(frame)), entries, policy, tick=.1,
+                                     symbol='TEST', execution_minutes=1, entry_order_mode=mode)
+    return rows_.set_index('trade_id'), fills, audit
+
+
+PARENT = dict(trade_id='p', entry_i=1, expire_i=3, entry=101., order_mode='market', parent=None, reclaim_ref=100.)
+CHILD = dict(trade_id='c', entry_i=1, expire_i=3, entry=95., order_mode='limit', parent='p', reclaim_ref=100.)
+
+
+class MarketParentLegTests(unittest.TestCase):
+    def test_leg_fills_and_shares_the_failed_reclaim(self):
+        r, fills, _ = mixed([[102]*4, [102, 103, 99, 101], [101, 101, 94, 96], [96]*4, [96]*4], [PARENT, CHILD])
+        self.assertEqual((r.loc['p', 'reason'], r.loc['p', 'exit_i'], r.loc['p', 'exit_price']), (11, 2, 96.))
+        self.assertEqual((r.loc['c', 'reason'], r.loc['c', 'entry_i'], r.loc['c', 'exit_price']), (11, 2, 96.))
+        self.assertGreater(r.loc['c', 'net_notional_bp'], 0)
+        self.assertLess(r.loc['p', 'net_notional_bp'], 0)
+
+    def test_leg_expires_at_the_parent_decision_close(self):
+        bars = [[102]*4, [102, 103, 99, 101], [101, 103, 99, 102], [102, 102, 94, 95], [95]*4]
+        r, _, audit = mixed(bars, [dict(PARENT, expire_i=4), dict(CHILD, expire_i=4)])  # the leg could rest to bar 4
+        self.assertEqual(list(r.index), ['p'])
+        self.assertEqual((r.loc['p', 'reason'], r.loc['p', 'exit_i'], r.loc['p', 'exit_price']), (5, 3, 100.))
+
+    def test_market_row_in_a_limit_run_matches_a_market_run(self):
+        bars = [[102]*4, [102, 103, 95, 98], [98, 103, 97, 102], [102, 103, 99, 101], [101]*4]
+        one = dict(trade_id='x', entry_i=1, expire_i=2, entry=98., reclaim_ref=100.)
+        a, _, _ = mixed(bars, [dict(one, order_mode='market')])
+        b, _, _ = mixed(bars, [one], mode='market')
+        for c in ('exit_i', 'exit_price', 'reason', 'reclaim_status', 'net_notional_bp'):
+            self.assertEqual(a.loc['x', c], b.loc['x', c])
+
+    def test_invalid_mixed_modes(self):
+        bars = [[102]*4, [102, 103, 99, 101], [101]*4, [101]*4]
+        with self.assertRaises(ValueError):
+            mixed(bars, [PARENT, dict(CHILD, order_mode='market', entry=101.)])
+        with self.assertRaises(ValueError):
+            mixed(bars, [PARENT, CHILD], mode='market')
+        with self.assertRaises(ValueError):
+            mixed(bars, [dict(PARENT, order_mode='stop')])

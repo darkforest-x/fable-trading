@@ -1,0 +1,23 @@
+{
+  "experiment_id": "exp-monday-limit-paper-accounts-20261028-v1",
+  "question": "Owner 2026-10-28: after the close-entry test, rerun each of the eight paper accounts with its full rules (breakeven +0.17 percent, v3lock +0.5 percent, add legs, own sizing) in the framework, for both resting orders and close-time entries.",
+  "single_variable": "Entry (resting limit selected by the causal or the touch-bar score; market at the touch close inside / beyond the level); each account's rules frozen as yoyo/monitor/monday_reclaim_paper.py.",
+  "rules_source": "yoyo/monitor/monday_reclaim_paper.py and yoyo/monitor/monday_reclaim_v3.json as of 2026-10-28",
+  "scores": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "since_week": "2019-12-30",
+  "v2_threshold": 0.22621664169752762,
+  "cut": 0.5,
+  "hi": 0.6,
+  "add_pct": 5,
+  "min_order": 3,
+  "v2_fraction": 0.10,
+  "v3_sizing": {"fraction": 0.05, "cut": 0.22621664169752762, "mean_excess": 0.10882239418547587, "cap": 0.5},
+  "excluded_symbols": "BTC, ETH, XAU, XAG, PAXG, XAUT (none are in the Codex alt inputs)",
+  "fees": "Codex config maker 0.02 / taker 0.05 percent (OKX Lv1, read 2026-10-23)",
+  "slippage_bp": {"market_entry": 10, "non_target_exit": 10},
+  "not_modelled": "OKX vs Binance data and symbol lists; the paper engine's 1m intrabar order; manual reductions",
+  "in_sample": "Rules, thresholds and filters were chosen on the same history; forward paper data is the test",
+  "training_eligible": false,
+  "production_eligible": false
+}
