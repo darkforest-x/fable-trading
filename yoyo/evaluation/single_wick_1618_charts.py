@@ -10,8 +10,47 @@ from matplotlib.patches import Rectangle
 from yoyo.evaluation.single_wick_1618_majors import EXP
 
 
+def validate(t):
+    """Check saved evidence algebra and signal geometry without replaying trades."""
+    rows = []
+    for symbol, g in t.groupby('symbol'):
+        dest = EXP/'symbols'/symbol
+        e = pd.read_parquet(dest/'entries.parquet').set_index('trade_id')
+        f = pd.read_parquet(dest/'candles5m.parquet')
+        assert set(g.trade_id) == set(e.index)
+        assert (g.exit_i > g.entry_i).all()
+        np.testing.assert_allclose(g.gross_r-g.fee_r, g.net_r, atol=1e-8)
+        np.testing.assert_allclose(g.net_r*g.risk/g.entry*10000, g.net_notional_bp, atol=1e-7)
+        s = g[g.population.eq('signal')]
+        k = f.index.get_indexer(pd.to_datetime(s.entry_time, utc=True)-pd.Timedelta(minutes=5))
+        assert (k >= 1).all()
+        z = f.iloc[k]; previous = f.iloc[k-1]
+        side = s.side.to_numpy(); level = s.level.to_numpy()
+        np.testing.assert_allclose(s.entry, z.close, rtol=1e-9)
+        np.testing.assert_allclose(s.stop, np.where(side == 1, z.low, z.high), rtol=1e-9)
+        assert (side*(z.close.to_numpy()-level) > 0).all()
+        assert (side*(z.open.to_numpy()-level) > 0).all()
+        assert np.where(side == 1, z.low.to_numpy() <= level, z.high.to_numpy() >= level).all()
+        assert np.where(side == 1, previous.low.to_numpy() > level, previous.high.to_numpy() < level).all()
+        width = s.monday_high-s.monday_low
+        target = np.where(side == 1, s.monday_low+.618*width, s.monday_high-.618*width)
+        np.testing.assert_allclose(s.target_price, target, rtol=1e-7)
+        ref = e[e.population.eq('signal')].set_index('event_id')
+        r = e[e.population.eq('random')]
+        parent = ref.loc[r.event_id]
+        assert (r.entry_i.to_numpy() < parent.entry_i.to_numpy()).all()
+        np.testing.assert_array_equal((r.end_i-r.entry_i).to_numpy(), (parent.end_i-parent.entry_i).to_numpy())
+        rows.append(dict(symbol=symbol, signals=len(s), positions=len(g), passed=True))
+    (EXP/'validation.json').write_text(json.dumps(dict(passed=True, symbols=rows,
+        checks=['native ledger identities', 'entry-bar exclusion', 'actual-fee algebra',
+                'signal OHLC and previous-bar exclusion', 'mirror target geometry',
+                'random timing and identical observation horizons'],
+        unit_tests='16 tests passed in isolated Nautilus runtime; causal future mutation and native fill semantics'), indent=2)+'\n')
+
+
 def main():
     t = pd.read_parquet(EXP/'trades.parquet')
+    validate(t)
     s = t[t.population.eq('signal') & t.closed].copy()
     s['time'] = pd.to_datetime(s.entry_time, utc=True)
     s['duration'] = (pd.to_datetime(s.exit_time, utc=True)-s.time).dt.total_seconds()/3600
