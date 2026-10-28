@@ -1,0 +1,19 @@
+{
+  "experiment_id": "exp-monday-limit-score-1m-fit-2025split-20261029-v1",
+  "question": "Owner 2026-10-29: design a strategy for the 1m model without touching 2026: refit the same 1m model on fills before 2025 so that 2025 is unseen and can be used to choose strategy parameters.",
+  "single_variable": "Training split 2026-01-01 -> 2025-01-01; features, rows, label and estimator identical to exp-monday-limit-score-1m-fit-20261028-v1.",
+  "frozen_model": "experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/score_model.json",
+  "features_1m": "experiments/active/exp-monday-limit-1m-features-20261028-v1/features_1m.csv.gz",
+  "events": "experiments/active/exp-monday-limit-reclaim-patterns3-20261024-v1/events_60m.csv.gz",
+  "previous_scores": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+  "split": "2025-01-01",
+  "permutations": 1000,
+  "feature_shuffles": 50,
+  "seed": 20261028,
+  "workers": 6,
+  "control": "Base model on the same rows; label permutation p for each AUC; the 1m gain is compared with refits on row-shuffled 1m features (50 shuffles)",
+  "outputs": "score_model_1m.json and scores_1m.csv.gz in this directory only; the frozen model and the paper engine are unchanged",
+  "training_eligible": false,
+  "production_eligible": false,
+  "role": "selection model: strategy parameters are chosen on its 2025 scores; the final 2026 test uses the model trained before 2026"
+}
