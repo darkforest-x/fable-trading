@@ -1,0 +1,109 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-1m-features-20261028-v1",
+    "question": "Owner 2026-10-28: build a 1m model; step 1 downloads Binance UM 1m klines around every touch and computes features through the minute before the touch (recent volume bursts and speed).",
+    "source": "data.binance.vision futures/um/daily/klines/{symbol}/1m (public archive; touch day and the day before)",
+    "cache": "data/crypto/market/kline_binance_um1m_touchdays_20261027",
+    "since_week": "2019-12-30",
+    "download_threads": 16,
+    "workers": 8,
+    "decision_point": "close of the last 1m bar before the touch minute; only completed bars before it are read",
+    "control": "Not directional. Parity: the earlier partial-bar study showed these 1m archives reproduce the Codex 5m bars; touch_not_in_1m counts events whose 1m bars do not reach the level",
+    "training_eligible": false,
+    "production_eligible": false,
+    "max_failed_share": 0.005,
+    "first_run": "Failed 2026-10-28 19:27: 127944 of 135355 downloads hit URLError (network) and 192 failed on non-ASCII symbols; its log, summary and features are kept as *_failed_network"
+  },
+  "results": {
+    "symbols": 626,
+    "symbol_days": 135355,
+    "download": {
+      "cached": 45117,
+      "downloaded": 90219,
+      "http_404": 19
+    },
+    "events": 70020,
+    "status": {
+      "ok": 70010,
+      "no_1m_file": 9,
+      "short_history": 1
+    },
+    "touch_minute": {
+      "0.0": 14009,
+      "1.0": 14772,
+      "2.0": 14639,
+      "3.0": 13675,
+      "4.0": 12915
+    },
+    "feature_q": {
+      "lv1": {
+        "q5": -0.4191241574734739,
+        "q50": 1.8522606564860786,
+        "q95": 4.532170516958263
+      },
+      "lv3": {
+        "q5": -0.0014787940060450374,
+        "q50": 1.79335657047489,
+        "q95": 4.190990755699182
+      },
+      "lv5": {
+        "q5": 0.0997344355558714,
+        "q50": 1.7297664817605065,
+        "q95": 4.007904227491075
+      },
+      "lv15": {
+        "q5": 0.1988297872432425,
+        "q50": 1.544546586672077,
+        "q95": 3.5899954684799766
+      },
+      "lv60": {
+        "q5": 0.20493191331245952,
+        "q50": 1.2589475351486252,
+        "q95": 2.976417190821932
+      },
+      "ln5": {
+        "q5": -0.01746271252290478,
+        "q50": 1.233047555074763,
+        "q95": 3.0895534927564747
+      },
+      "imb5": {
+        "q5": -0.2370692084012936,
+        "q50": 0.1712901245065726,
+        "q95": 0.5964523136025806
+      },
+      "spd1": {
+        "q5": -0.12327417089373237,
+        "q50": 0.17895768822123737,
+        "q95": 1.5043633941496577
+      },
+      "spd5": {
+        "q5": -0.019178237306680657,
+        "q50": 0.5426629284814799,
+        "q95": 3.259138931418598
+      },
+      "spd15": {
+        "q5": 0.09159127091989518,
+        "q50": 1.0038391686914228,
+        "q95": 4.992428471219305
+      },
+      "spd60": {
+        "q5": 0.3539290418824542,
+        "q50": 1.9471789091176084,
+        "q95": 7.869175987041568
+      },
+      "dist": {
+        "q5": 0.06387811450466463,
+        "q50": 0.4182527524948798,
+        "q95": 3.21983378772115
+      },
+      "rng5": {
+        "q5": 0.2304386429798199,
+        "q50": 0.838200480318834,
+        "q95": 4.116091538672034
+      }
+    }
+  },
+  "source_commit": "cf350fbd05cb610321bfb9a5c3a0be50cfb7c2b9",
+  "training_eligible": false,
+  "production_eligible": false
+}

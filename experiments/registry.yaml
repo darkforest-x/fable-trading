@@ -751,13 +751,27 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
-  - experiment_id: exp-monday-limit-1m-features-20261028-v1
+  - experiment_id: exp-monday-limit-paper-accounts-1m-20261028-v1
     source_repo: darkforest-x/fable-trading
     source_commit: pending
     status: running
+    question: 'Owner 2026-10-28: paper accounts in the framework with the 1m model choosing the resting orders.'
+    single_variable: 'Resting selection score frozen 5m causal -> 1m model; rules, fills and sizing unchanged.'
+    result: pending
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-paper-accounts-1m-20261028-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Same builder as exp-monday-limit-paper-accounts-20261028-v1 with families [rest] and the 1m top-40 cut for v2. Out of sample only from 2026-01-01.'
+  - experiment_id: exp-monday-limit-1m-features-20261028-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 66e55eb3f9
+    status: complete
     question: 'Owner 2026-10-28: 1m model, step 1: download Binance UM 1m klines around every touch and compute features through the minute before the touch.'
     single_variable: 'Not directional; feature construction only.'
-    result: pending
+    result: '626 symbols, 135355 symbol-days (90219 downloaded, 45117 cached, 19 missing archives); 70020 events, 70010 ok. Touch minute 0-4: 14009 / 14772 / 14639 / 13675 / 12915. Hand check of three events: the decision bar never reaches the level and the features match a manual recomputation. First run failed on a network drop (kept as *_failed_network).'
     artifacts: []
     canonical_report: experiments/active/exp-monday-limit-1m-features-20261028-v1/summary.json
     holdout_consumed: false
@@ -767,11 +781,11 @@ experiments:
     notes: 'data.binance.vision daily 1m archives (touch day and the day before), cached gzip under data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git).'
   - experiment_id: exp-monday-limit-score-1m-fit-20261028-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: queued
+    source_commit: 6d855d7c7f
+    status: complete
     question: 'Owner 2026-10-28: train the entry score with pre-touch 1m features before 2026 and test it on 2026 to date; then run the paper accounts in the framework.'
     single_variable: 'Feature set (causal 5m base vs base plus 1m); rows, label, estimator and split identical.'
-    result: pending
+    result: 'Train <2026 42220 fills, test 2026 to date 16511 (base +2.3bp, win 26 percent). AUC: 1m model 0.702 (perm p 0.001) vs causal 5m base 0.661 vs frozen causal 0.653 (frozen leaky was 0.667); top decile +45.8bp win 62 vs +21.4bp / +17.2bp (frozen leaky +48bp). Gain +0.041 vs shuffled-1m refits q99 +0.0003. Largest 1m weights: distance to the level one minute before the touch +0.37, 5m range +0.21, 15m speed +0.11, 15m / 1m volume +0.10. Events >= 0.5: 2724 (frozen causal 2293); >= 0.6: 1609 (957). AUC > 0.7 triggered the leak check: decision bars verified by hand.'
     artifacts: []
     canonical_report: experiments/active/exp-monday-limit-score-1m-fit-20261028-v1/summary.json
     holdout_consumed: false

@@ -1,0 +1,129 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-score-1m-fit-20261028-v1",
+    "question": "Owner 2026-10-28: train the entry score with pre-touch 1m features (recent volume bursts and speed) before 2026 and test it on 2026 to date.",
+    "single_variable": "Feature set: the ten causal 5m features (base, control) vs base plus thirteen 1m features through the minute before the touch; rows, label, estimator and split identical.",
+    "frozen_model": "experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/score_model.json",
+    "features_1m": "experiments/active/exp-monday-limit-1m-features-20261028-v1/features_1m.csv.gz",
+    "events": "experiments/active/exp-monday-limit-reclaim-patterns3-20261024-v1/events_60m.csv.gz",
+    "previous_scores": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+    "split": "2026-01-01",
+    "permutations": 1000,
+    "feature_shuffles": 50,
+    "seed": 20261028,
+    "workers": 6,
+    "control": "Base model on the same rows; label permutation p for each AUC; the 1m gain is compared with refits on row-shuffled 1m features (50 shuffles)",
+    "outputs": "score_model_1m.json and scores_1m.csv.gz in this directory only; the frozen model and the paper engine are unchanged",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "results": {
+    "test": {
+      "train_n": 42220,
+      "test_n": 16511,
+      "rows_with_1m": 58731,
+      "base_mean_bp": 2.3388310359619733,
+      "base_win_pct": 26.061413603052507,
+      "base": {
+        "auc": 0.6607024260558865,
+        "perm_p": 0.000999000999000999,
+        "top10": {
+          "n": 1652,
+          "mean_bp": 21.388288021145527,
+          "win_pct": 56.11380145278451
+        },
+        "ge_05": 661,
+        "ge_06": 255,
+        "coef": {
+          "bucket": 0.3926,
+          "log_vol_ratio": 0.0356,
+          "log_approach": -0.2613,
+          "opp_first": 0.1323,
+          "monday_close_side": 0.0064,
+          "log_liquidity": -0.0906,
+          "toward24": -0.2147,
+          "cluster24": -0.0649,
+          "side": -0.067,
+          "range_pct": -0.15
+        }
+      },
+      "m1": {
+        "auc": 0.7019426843839938,
+        "perm_p": 0.000999000999000999,
+        "top10": {
+          "n": 1652,
+          "mean_bp": 45.75565889664601,
+          "win_pct": 62.348668280871664
+        },
+        "ge_05": 984,
+        "ge_06": 577,
+        "coef": {
+          "bucket": 0.294,
+          "log_vol_ratio": -0.0402,
+          "log_approach": -0.0341,
+          "opp_first": 0.0489,
+          "monday_close_side": 0.0255,
+          "log_liquidity": -0.083,
+          "toward24": 0.0013,
+          "cluster24": -0.0081,
+          "side": -0.0761,
+          "range_pct": -0.59,
+          "lv1": 0.0984,
+          "lv3": -0.0235,
+          "lv5": -0.0236,
+          "lv15": 0.1033,
+          "lv60": -0.1103,
+          "ln5": 0.0878,
+          "imb5": -0.0592,
+          "spd1": 0.0008,
+          "spd5": 0.0319,
+          "spd15": 0.1113,
+          "spd60": 0.0161,
+          "dist": 0.3659,
+          "rng5": 0.2093
+        }
+      },
+      "frozen_causal": {
+        "auc": 0.6527039335840855,
+        "top10": {
+          "n": 1652,
+          "mean_bp": 17.19102465458237,
+          "win_pct": 53.753026634382564
+        },
+        "ge_05": 801
+      },
+      "m1_gain_over_base": 0.04124025832810729,
+      "shuffled_1m_gain_q": {
+        "q50": -0.0005322569002271238,
+        "q95": 0.00020082037616486184,
+        "q99": 0.00032289985437949676
+      }
+    },
+    "top40_threshold": 0.22127892409899755,
+    "events": 58740,
+    "scored": 58731,
+    "bands": {
+      "0.22127892409899755": {
+        "m1": 24915,
+        "frozen_causal": 23049,
+        "frozen_touch": 23786,
+        "m1_and_frozen_causal": 17867
+      },
+      "0.5": {
+        "m1": 2724,
+        "frozen_causal": 2293,
+        "frozen_touch": 2108,
+        "m1_and_frozen_causal": 1382
+      },
+      "0.6": {
+        "m1": 1609,
+        "frozen_causal": 957,
+        "frozen_touch": 842,
+        "m1_and_frozen_causal": 597
+      }
+    }
+  },
+  "source_commit": "cf350fbd05cb610321bfb9a5c3a0be50cfb7c2b9",
+  "training_eligible": false,
+  "production_eligible": false
+}

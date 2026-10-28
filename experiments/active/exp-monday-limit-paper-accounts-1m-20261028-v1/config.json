@@ -1,0 +1,38 @@
+{
+  "experiment_id": "exp-monday-limit-paper-accounts-1m-20261028-v1",
+  "question": "Owner 2026-10-28: run the paper accounts in the framework with the 1m model (features through the minute before the touch, trained before 2026) deciding which levels rest an order.",
+  "single_variable": "Resting-order selection score: frozen model on the 5m bar before the touch (earlier run) -> 1m model at the minute before the touch; account rules, fills and sizing unchanged.",
+  "rules_source": "yoyo/monitor/monday_reclaim_paper.py and yoyo/monitor/monday_reclaim_v3.json as of 2026-10-28",
+  "scores": "experiments/active/exp-monday-limit-score-1m-fit-20261028-v1/scores_1m.csv.gz",
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "since_week": "2019-12-30",
+  "v2_threshold": 0.22621664169752762,
+  "cut": 0.5,
+  "hi": 0.6,
+  "add_pct": 5,
+  "min_order": 3,
+  "v2_fraction": 0.1,
+  "v3_sizing": {
+    "fraction": 0.05,
+    "cut": 0.22621664169752762,
+    "mean_excess": 0.10882239418547587,
+    "cap": 0.5
+  },
+  "excluded_symbols": "BTC, ETH, XAU, XAG, PAXG, XAUT (none are in the Codex alt inputs)",
+  "fees": "Codex config maker 0.02 / taker 0.05 percent (OKX Lv1, read 2026-10-23)",
+  "slippage_bp": {
+    "market_entry": 10,
+    "non_target_exit": 10
+  },
+  "not_modelled": "OKX vs Binance data and symbol lists; the paper engine's 1m intrabar order; manual reductions",
+  "in_sample": "Rules, thresholds and filters were chosen on the same history; forward paper data is the test",
+  "training_eligible": false,
+  "production_eligible": false,
+  "score_columns": "causal = 1m model (resting decision), stored = frozen touch-bar score (leaky reference)",
+  "v2_threshold_pre": 0.22127892409899755,
+  "families": [
+    "rest"
+  ],
+  "out_of_sample": "2026-01-01 to date only; 2020-2025 is the 1m model's training period",
+  "resting_semantics": "The order rests at the level before the touch; a 1m decision one minute before the touch gives the same limit fill as the 5m-bar submission in Codex's orders"
+}
