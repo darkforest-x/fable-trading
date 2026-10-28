@@ -51,6 +51,16 @@ def validate(t):
 def main():
     t = pd.read_parquet(EXP/'trades.parquet')
     validate(t)
+    reference = t[t.population.eq('signal') & t.symbol.eq('DOGEUSDT') &
+                  t.entry_time.eq('2026-09-30 13:35:00+00:00')]
+    keys = ['trade_id', 'entry_time', 'entry', 'stop', 'target_price', 'level', 'monday_high',
+            'monday_low', 'wick_fraction', 'volume_ratio20', 'range_atr14', 'risk_bp',
+            'planned_rr', 'exit_time', 'exit_price', 'reason', 'closed', 'target_hit']
+    (EXP/'reference_case.json').write_text(json.dumps(dict(
+        source='Existing Binance UM minute data; Notion screenshot itself is OKX and is not an exact-venue reproduction.',
+        screenshot_candle_open_shanghai='2026-09-30 21:30',
+        interpretation='reason0 is source-end censoring, not a profitable completed trade or a target hit.',
+        rows=reference[keys].to_dict('records')), indent=2)+'\n')
     s = t[t.population.eq('signal') & t.closed].copy()
     s['time'] = pd.to_datetime(s.entry_time, utc=True)
     s['duration'] = (pd.to_datetime(s.exit_time, utc=True)-s.time).dt.total_seconds()/3600
