@@ -1,0 +1,69 @@
+// Native fixture appendix; excluded from the private delivery.
+qaAt(int m) =>
+    timestamp("Asia/Shanghai", 2026, 10, 26, 0, 0) + m * 60000
+qaRequire(bool ok, string name) =>
+    if not ok
+        runtime.error("ASHARE_FIXTURE_FAIL " + name)
+varip bool qaDone = false
+if barstate.islast and not qaDone
+    array<WeekRange> book = array.new<WeekRange>()
+    consumeMinutes(book, qaAt(570), qaAt(575), 11, 9, qaAt(574))
+    qaRequire(book.size() == 0, "forming minute excluded")
+    consumeMinutes(book, qaAt(570), qaAt(575), 11, 9, qaAt(575))
+    qaRequire(book.size() == 1 and not book.last().frozen, "closed minute preview")
+    consumeMinutes(book, qaAt(720), qaAt(725), 99, 1, qaAt(725))
+    qaRequire(book.last().hi == 11 and book.last().lo == 9, "lunch excluded")
+    consumeMinutes(book, qaAt(685), qaAt(691), 12, 9, qaAt(691))
+    qaRequire(book.last().hi == 12, "SSE 11:31 terminal accepted")
+    consumeMinutes(book, qaAt(780), qaAt(785), 11, 8, qaAt(785))
+    qaRequire(book.last().lo == 8, "afternoon resumes")
+    consumeMinutes(book, qaAt(899), qaAt(901), 11, 8, qaAt(901))
+    qaRequire(book.last().loTime == qaAt(780), "auction close and tied extrema")
+    consumeMinutes(book, qaAt(910), qaAt(915), 99, 1, qaAt(915))
+    qaRequire(book.last().hi == 12 and book.last().lo == 8, "after hours excluded")
+    freezeDaily(book, qaAt(570), qaAt(901), 13, 8, qaAt(900))
+    qaRequire(not book.last().frozen, "unclosed daily excluded")
+    freezeDaily(book, qaAt(570), qaAt(901), 13, 8, qaAt(901))
+    WeekRange r = book.last()
+    qaRequire(r.frozen and r.hi == 13 and r.lo == 8, "daily auction extrema authoritative")
+    qaRequire(na(r.hiTime) and r.loTime == qaAt(780), "unseen auction time never fabricated")
+    qaRequire(math.abs(r.hi + .618 * (r.hi-r.lo) - 16.09) < 1e-9 and math.abs(r.lo - .618 * (r.hi-r.lo) - 4.91) < 1e-9, "extensions")
+    consumeMinutes(book, qaAt(570) + 86400000, qaAt(575) + 86400000, 99, 1, qaAt(575) + 86400000)
+    freezeDaily(book, qaAt(570) + 86400000, qaAt(901) + 86400000, 99, 1, qaAt(901) + 86400000)
+    qaRequire(book.size() == 1 and r.hi == 13 and r.lo == 8, "Tuesday cannot alter Monday")
+    array<WeekRange> holiday = array.new<WeekRange>()
+    freezeDaily(holiday, qaAt(570) + 86400000, qaAt(901) + 86400000, 99, 1, qaAt(901) + 86400000)
+    qaRequire(holiday.size() == 0, "holiday Monday has no substitute")
+    array<WeekRange> invalid = array.new<WeekRange>()
+    freezeDaily(invalid, qaAt(570), qaAt(901), na, 8, qaAt(901))
+    freezeDaily(invalid, qaAt(570), qaAt(901), 7, 8, qaAt(901))
+    qaRequire(invalid.size() == 0, "missing or inverted daily rejected")
+    array<WeekRange> dailyOnly = array.new<WeekRange>()
+    freezeDaily(dailyOnly, qaAt(570), qaAt(901), 13, 8, qaAt(901))
+    qaRequire(dailyOnly.last().frozen and na(dailyOnly.last().hiTime) and na(dailyOnly.last().loTime), "daily without intraday coverage")
+    [ws, wf, we] = weekTimes(qaAt(570))
+    qaRequire(ws == qaAt(0) and wf == qaAt(901) and we == qaAt(0) + 7 * 86400000, "Shanghai week expires correctly")
+    for step in array.from(60, 180, 300)
+        array<WeekRange> fine = array.new<WeekRange>()
+        int half = int(7200 / step)
+        for i = 0 to half * 2 - 1
+            int t = qaAt(i < half ? 570 : 780) + (i % half) * step * 1000
+            consumeMinutes(fine, t, t + step * 1000, i == 2 ? 12 : 11, i == half + 2 ? 8 : 9, t + step * 1000)
+        freezeDaily(fine, qaAt(570), qaAt(901), 12, 8, qaAt(901))
+        qaRequire(fine.last().frozen and fine.last().hiTime == qaAt(570) + 2 * step * 1000 and fine.last().loTime == qaAt(780) + 2 * step * 1000, "minute anchors " + str.tostring(step))
+    freezeDaily(book, qaAt(570) + 7 * 86400000, qaAt(901) + 7 * 86400000, 14, 10, qaAt(901) + 7 * 86400000)
+    freezeDaily(book, qaAt(570), qaAt(901), 99, 1, qaAt(901) + 7 * 86400000)
+    qaRequire(book.size() == 2 and book.last().hi == 14 and book.first().hi == 13, "stale daily cannot overwrite next week")
+    qaDone := true
+    log.info("ASHARE_FIXTURES_PASS 20 scenarios")
+
+[qaDay, qaHi, qaLo] = request.security(syminfo.tickerid, "D", [ta.valuewhen(dayofweek(time, "Asia/Shanghai") == dayofweek.monday, time, 0)[1], ta.valuewhen(dayofweek(time, "Asia/Shanghai") == dayofweek.monday, high, 0)[1], ta.valuewhen(dayofweek(time, "Asia/Shanghai") == dayofweek.monday, low, 0)[1]], lookahead=barmerge.lookahead_on)
+varip bool qaMarketDone = false
+if barstate.islast and not qaMarketDone and history.size() > 0
+    [qaStart, qaFinish, qaExpires] = weekTimes(qaDay)
+    for r in history
+        if r.start == qaStart
+            qaRequire(r.frozen and math.abs(r.hi - qaHi) < syminfo.mintick / 2 and math.abs(r.lo - qaLo) < syminfo.mintick / 2, "real Monday daily parity")
+            log.info("ASHARE_MARKET_PASS symbol={0} chart={1} monday={2} high={3} low={4} upper={5} lower={6} bars={7} hiAt={8} loAt={9}", syminfo.tickerid, timeframe.period, str.format_time(r.start, "yyyy-MM-dd", tz), r.hi, r.lo, r.hi + .618 * (r.hi-r.lo), r.lo - .618 * (r.hi-r.lo), r.bars, na(r.hiTime) ? "daily" : str.format_time(r.hiTime, "HH:mm", tz), na(r.loTime) ? "daily" : str.format_time(r.loTime, "HH:mm", tz))
+            qaMarketDone := true
+    qaRequire(qaMarketDone, "real latest Monday found")
