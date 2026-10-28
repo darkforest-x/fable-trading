@@ -4,10 +4,12 @@
   "source": "data.binance.vision futures/um/daily/klines/{symbol}/1m (public archive; touch day and the day before)",
   "cache": "data/crypto/market/kline_binance_um1m_touchdays_20261027",
   "since_week": "2019-12-30",
-  "download_threads": 32,
+  "download_threads": 16,
   "workers": 8,
   "decision_point": "close of the last 1m bar before the touch minute; only completed bars before it are read",
   "control": "Not directional. Parity: the earlier partial-bar study showed these 1m archives reproduce the Codex 5m bars; touch_not_in_1m counts events whose 1m bars do not reach the level",
   "training_eligible": false,
-  "production_eligible": false
+  "production_eligible": false,
+  "max_failed_share": 0.005,
+  "first_run": "Failed 2026-10-28 19:27: 127944 of 135355 downloads hit URLError (network) and 192 failed on non-ASCII symbols; its log, summary and features are kept as *_failed_network"
 }

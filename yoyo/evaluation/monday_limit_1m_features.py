@@ -21,7 +21,9 @@ import gzip
 import io
 import json
 import subprocess
+import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import zipfile
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
@@ -42,12 +44,20 @@ def fetch(args):
     old, new = Path(cache)/symbol/f'{day}.csv', Path(cache)/symbol/f'{day}.csv.gz'
     if old.exists() or new.exists():
         return 'cached'
-    try:
-        raw = urllib.request.urlopen(URL.format(s=symbol, d=day), timeout=60).read()
-    except urllib.error.HTTPError as e:
-        return f'http_{e.code}'
-    except Exception as e:
-        return f'error:{type(e).__name__}'
+    url = URL.format(s=urllib.parse.quote(symbol), d=day)  # some symbols are not ASCII
+    for attempt in range(4):
+        try:
+            raw = urllib.request.urlopen(url, timeout=60).read()
+            break
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                return 'http_404'
+            err = f'http_{e.code}'
+        except Exception as e:
+            err = f'error:{type(e).__name__}'
+        time.sleep(2*(attempt+1)**2)
+    else:
+        return err
     with zipfile.ZipFile(io.BytesIO(raw)) as z:
         body = z.read(z.namelist()[0])
     new.parent.mkdir(parents=True, exist_ok=True)
@@ -142,6 +152,10 @@ def run(config):
             status[st] = status.get(st, 0)+1
             if k % 5000 == 0:
                 print(json.dumps(dict(downloaded=k, total=len(jobs), status=status)), flush=True)
+    failed = sum(v for k, v in status.items() if k not in ('cached', 'downloaded', 'http_404'))
+    if failed > cfg['max_failed_share']*len(jobs):
+        # A dropped network turns into missing days; never build features from a partial download.
+        raise RuntimeError(f'Download failures {failed} of {len(jobs)}: {status}; rerun to retry')
     with ProcessPoolExecutor(cfg['workers']) as ex:
         x = pd.concat([d for d in ex.map(features, [(s, cfg['since_week'], cache) for s in syms], chunksize=4) if len(d)], ignore_index=True)
     x.to_csv(exp/'features_1m.csv.gz', index=False)
