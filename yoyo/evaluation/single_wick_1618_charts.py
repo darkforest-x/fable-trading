@@ -71,7 +71,7 @@ def validate(t):
     prefix = original[pd.to_datetime(original.signal_time, utc=True) <= decision]
     counterpart = altered.set_index('trade_id').loc[prefix.trade_id].reset_index()
     pd.testing.assert_frame_equal(prefix.reset_index(drop=True), counterpart[prefix.columns].reset_index(drop=True))
-    actual = signal[signal.symbol.eq('DOGEUSDT') & signal.entry_time.eq(str(decision))].iloc[0]
+    actual = t[t.population.eq('signal') & t.symbol.eq('DOGEUSDT') & t.entry_time.eq(str(decision))].iloc[0]
     local = original[original.population.eq('signal') & original.entry_time.eq(str(decision))].iloc[0]
     np.testing.assert_allclose(actual[FEATURES].astype(float), local[FEATURES].astype(float), rtol=1e-9)
     (EXP/'validation.json').write_text(json.dumps(dict(passed=True, symbols=rows, auc_oracle_checks=len(feature_rows),
