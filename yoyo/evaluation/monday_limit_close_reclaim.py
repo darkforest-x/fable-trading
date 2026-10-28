@@ -151,8 +151,161 @@ def run(config, workers, intrabar):
             print(json.dumps(dict(progress=k, total=len(todo), **r)), flush=True)
 
 
+def load_symbol(args):
+    """Worse path per row with slippage, entry time from the entry bar's close, MAE from the next bar."""
+    exp, symbol, slip_entry, slip_exit = args
+    from yoyo.evaluation.monday_limit_reclaim_inputs import load_job
+    paths, issues = {}, []
+    for p in ('ohlc', 'olhc'):
+        d = Path(exp)/p/'symbols'/symbol
+        if (d/'error.json').exists() or not (d/'done.json').exists():
+            issues.append(f'{p}: missing or failed'); continue
+        done = json.loads((d/'done.json').read_text())
+        t = pd.read_csv(d/'trades.csv.gz')
+        if done.get('positions', 0) != len(t):
+            issues.append(f'{p}: rows {len(t)} != positions')
+        t['net'] = t.net_notional_bp-slip_entry-np.where(t.reason == 4, 0., slip_exit)
+        paths[p] = t.set_index('trade_id')
+    if len(paths) < 2 or paths['ohlc'].empty:
+        return symbol, pd.DataFrame(), issues
+    o = paths['ohlc']; l = paths['olhc'].reindex(o.index)
+    if l.net.isna().any():
+        issues.append('rows missing on one path')
+    w = (l.net < o.net).to_numpy()
+    pick = lambda c: np.where(w, l[c], o[c])
+    d = pd.DataFrame(dict(variant=o.variant, side=o.side, entry=o.entry, net=pick('net'), reason=pick('reason'),
+                          entry_i=o.entry_i, exit_i=pick('exit_i'),
+                          exit_t=pd.to_datetime(pd.Series(pick('exit_time'), index=o.index), utc=True)), index=o.index)
+    job = json.loads((CODEX/'symbols'/symbol/'identity.json').read_text())['job']
+    f, _ = load_job(job)
+    d['entry_t'] = pd.Series(f.index[d.entry_i.astype(int).to_numpy()]+pd.Timedelta(minutes=job['execution_minutes']), index=d.index)
+    d['entry_t'] = d.entry_t.dt.as_unit('ns'); d['exit_t'] = d.exit_t.dt.as_unit('ns')
+    h, lo = f.high.to_numpy(), f.low.to_numpy()
+    mae = []
+    for a, b, s, e in zip(d.entry_i.astype(int)+1, d.exit_i.astype(int), d.side, d.entry):
+        seg = slice(a, max(a+1, b))
+        worst = lo[seg].min() if s == 1 else h[seg].max()
+        mae.append(max(0., -s*(worst-e)/e*100))
+    d['mae_pct'] = mae
+    parts = d.index.str.split(':')
+    d['event'] = parts.str[:3].str.join(':'); d['mode'] = parts.str[4]
+    return symbol, d.reset_index(drop=True), issues
+
+
+PERIODS = ('all', 'y2020_2024', 'y2025', 'y2026', 'last5m')
+
+
+def in_period(x, per, window):
+    b25, b26 = pd.Timestamp('2025-01-01', tz='UTC'), pd.Timestamp('2026-01-01', tz='UTC')
+    return {'all': x.entry_t >= pd.Timestamp('2020-01-01', tz='UTC'), 'y2020_2024': x.entry_t < b25,
+            'y2025': (x.entry_t >= b25) & (x.entry_t < b26), 'y2026': x.entry_t >= b26, 'last5m': x.entry_t >= window}[per]
+
+
+def stat(y):
+    if not len(y):
+        return dict(n=0)
+    return dict(n=int(len(y)), mean_bp=float(y.net.mean()), win_pct=float(100*(y.net > 1).mean()), sum_pct=float(y.net.sum()/100),
+                target_pct=float(100*(y.reason == 4).mean()))
+
+
+def replay(args):
+    """One plan: per-period stats and its sizing replay (frac / slots / all-in from monthly starts)."""
+    name, kind, x, window, ro, sh, py = args
+    from yoyo.evaluation.monday_limit_return_opt import frac
+    from yoyo.evaluation.monday_limit_spike_hw import slot_replay
+    from yoyo.evaluation.monday_limit_langlang import path_run
+    x = x.assign(entry_ns=x.entry_t.astype('int64'), exit_ns=x.exit_t.astype('int64'))
+    if (x.exit_ns < x.entry_ns).any():
+        raise RuntimeError(f'{name}: exit before entry')
+    out = {}
+    for per in PERIODS:
+        y = x[in_period(x, per, window)].reset_index(drop=True)
+        st = stat(y)
+        if len(y) and kind in ('frac', 'slots'):
+            reps = ([frac(y, 20, 3, ro['seed']+r) for r in range(ro['ties'])] if kind == 'frac' else
+                    [slot_replay(y, sh['sizing']['slots'], sh['sizing']['leverage'], sh['sizing']['liq_pct'], sh['seed']+r)[0] for r in range(sh['ties'])])
+            st['replay'] = dict(final_median=float(np.median([r['final_multiple'] for r in reps])),
+                                dd_median=float(np.median([r['max_drawdown_pct'] for r in reps])),
+                                liquidations_median=float(np.median([r['liquidations'] for r in reps])))
+        out[per] = st
+    if kind == 'allin':
+        rows = []
+        for k, s0 in enumerate(pd.date_range(py['first_start'], py['last_start'], freq='MS', tz='UTC')):
+            y = x[x.entry_t >= s0].reset_index(drop=True)
+            for r in range(py['ties']):
+                h = path_run(y, 'allin', 3, py['seed']+1000*k+r)
+                rows.append({**{f'd{q}': (h[q]['days'] if h[q] else np.nan) for q in (10, 100)},
+                             **{f'b{q}': (h[q]['blowups'] if h[q] else np.nan) for q in (10, 100)}})
+        d = pd.DataFrame(rows)
+        out['allin3x_monthly_starts'] = {f'x{q}': dict(reached_pct=float(100*d[f'd{q}'].notna().mean()),
+                                                       days_median=float(d[f'd{q}'].median()) if d[f'd{q}'].notna().any() else None,
+                                                       blowups_before_median=float(d[f'b{q}'].median()) if d[f'b{q}'].notna().any() else None)
+                                         for q in (10, 100)}
+    return name, out
+
+
+def summarize(config, workers):
+    from yoyo.evaluation.monday_limit_be_scalein_compare import BAD_EVENTS, clean
+    exp = config.resolve().parent
+    cfg = json.loads(config.read_text())
+    committed('yoyo/evaluation/monday_limit_close_reclaim.py')
+    ro = json.loads((A/'exp-monday-limit-return-opt-20261027-v2/config.json').read_text())
+    sh = json.loads((A/'exp-monday-limit-spike-hw-20261026-v1/config.json').read_text())
+    py = json.loads((A/'exp-monday-limit-pyramid-20261027-v1/compare.json').read_text())
+    syms = symbols(cfg)
+    slip = cfg['slippage_bp']
+    with ProcessPoolExecutor(workers) as ex:
+        got = list(ex.map(load_symbol, [(str(exp), s, slip['market_entry'], slip['non_target_exit']) for s in syms], chunksize=4))
+    t = pd.concat([g[1] for g in got if len(g[1])], ignore_index=True)
+    t = t[~t.event.isin(BAD_EVENTS)].copy()
+    sc = pd.read_csv(ROOT/cfg['scores']).set_index('event').stored
+    order = pd.read_csv(ROOT/cfg['features'], usecols=['event', 'l2_order_score']).set_index('event').l2_order_score
+    t['score'] = t.event.map(sc); t['order'] = t.event.map(order)
+    v3mode = np.where(t.score >= cfg['hi'], 'opposite_1618', 'range_0.618')
+    window = pd.Timestamp(json.loads((A/'exp-monday-limit-reclaim-recent-20261025-v1/summary.json').read_text())['results']['window'][0])
+    res = dict(checks=dict(symbols=len(syms), issues=[f'{g[0]}: {i}' for g in got for i in g[2]], rows={str(k): int(v) for k, v in t.variant.value_counts().items()}))
+    # Target table: closed inside (P) vs at/beyond the level (B), by score band, every target mode, -30 percent stop.
+    bands = {'all': t.score.notna(), 'ge_0.5': t.score >= cfg['cut'], 'ge_0.6': t.score >= cfg['hi'],
+             'spike_filter': (t.score >= cfg['hi']) & (t.order >= cfg['min_order'])}
+    res['targets'] = {}
+    for close, var in (('inside', 'P30'), ('beyond', 'B30')):
+        for b, m in bands.items():
+            for mode in cfg['targets']:
+                y = t[m & (t.variant == var) & (t['mode'] == mode)]
+                res['targets'][f'{close}|{b}|{mode}'] = {per: stat(y[in_period(y, per, window)]) for per in PERIODS}
+    for close, var in (('inside', 'P18'), ('beyond', 'B18')):
+        for b in ('ge_0.6', 'spike_filter'):
+            y = t[bands[b] & (t.variant == var)]
+            res['targets'][f'{close}|{b}|near_monday_edge_P18'] = {per: stat(y[in_period(y, per, window)]) for per in PERIODS}
+    # Matched random control on the events of the v3-like plan.
+    sig = t[(t.variant == 'P30') & (t.score >= cfg['cut']) & (t['mode'] == v3mode)]
+    rnd = t[t.variant == 'rnd']
+    res['random_control'] = dict(signal=stat(sig), random=stat(rnd),
+                                 signal_events_with_random=stat(sig[sig.event.isin(rnd.event)]),
+                                 by_period={per: dict(signal=stat(sig[in_period(sig, per, window)]), random=stat(rnd[in_period(rnd, per, window)]))
+                                            for per in PERIODS})
+    # Strategy plans and sizing replays.
+    ins, bey = t.variant == 'P30', t.variant == 'B30'
+    plans = {'v3|inside': ('frac', t[ins & (t.score >= cfg['cut']) & (t['mode'] == v3mode)]),
+             'v3|inside+beyond': ('frac', t[(ins | bey) & (t.score >= cfg['cut']) & (t['mode'] == v3mode)]),
+             'spike|inside': ('slots', t[(t.variant == 'P18') & bands['spike_filter']]),
+             'spike|inside+beyond': ('slots', t[t.variant.isin(['P18', 'B18']) & bands['spike_filter']])}
+    for mode in cfg['targets']:
+        plans[f'v3_target_{mode}|inside'] = ('frac', t[ins & (t.score >= cfg['cut']) & (t['mode'] == mode)])
+        plans[f'allin3_target_{mode}|inside'] = ('allin', t[ins & (t.score >= cfg['hi']) & (t['mode'] == mode)])
+    plans['allin3|inside+beyond'] = ('allin', t[(ins | bey) & (t.score >= cfg['hi']) & (t['mode'] == 'opposite_1618')])
+    res['plans'] = {}
+    with ProcessPoolExecutor(workers) as ex:
+        for name, out in ex.map(replay, [(k, kind, x.reset_index(drop=True), window, ro, sh, py) for k, (kind, x) in plans.items()]):
+            res['plans'][name] = out
+    res = clean(res)
+    dump(exp/'summary.json', dict(config=cfg, results=res, source_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+                                 training_eligible=False, production_eligible=False))
+    print(json.dumps(res['checks']))
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(); ap.add_argument('--config', type=Path, required=True); ap.add_argument('--workers', type=int, default=4)
     ap.add_argument('--intrabar', choices=['OHLC', 'OLHC']); ap.add_argument('--summary', action='store_true')
     a = ap.parse_args()
-    run(a.config, a.workers, a.intrabar)
+    summarize(a.config, a.workers) if a.summary else run(a.config, a.workers, a.intrabar)
