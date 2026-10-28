@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: single-wick-1618-majors-20261029-v1
+    artifact_type: manifest
+    role: native_upper_wick_short_events_outcomes_and_causal_feature_readout
+    source_repo: darkforest-x/fable-trading
+    source_commit: a930cad7e2
+    source_path: experiments/active/exp-5m-single-wick-1618-majors-20261029-v1/summary.json
+    storage_uri: repo://experiments/active/exp-5m-single-wick-1618-majors-20261029-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 'Notion72; owner needle-extreme stop. Raw native fills and all signals local;205 short target examples, mirrored longs separate. Readout46e2369e82; reproducibility includes exact source paths,size,mtime,no hashes. No standalone profitability validation.'
   - artifact_id: monday-high-low-1618-ashare-pine-20261028-v1-1
     artifact_type: manifest
     role: standalone_ashare_monday_high_low_1618_private_tradingview_indicator

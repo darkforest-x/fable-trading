@@ -102,7 +102,10 @@ def main():
     chosen = []
     # Most recent example per symbol, bounded to 12h so individual candles stay legible.
     for hit, count in [(True, 6), (False, 3)]:
-        pool = s[s.target_hit.eq(hit) & s.duration.between(.08, 12)].sort_values('time', ascending=False)
+        pool = s[s.target_hit.eq(hit) & s.first_weekly_touch & s.duration.between(.08, 12)]
+        if hit:
+            pool = pool[pool.single_touch_target]
+        pool = pool.sort_values('time', ascending=False)
         chosen.extend(pool.drop_duplicates('symbol').head(count).to_dict('records'))
     fig, axes = plt.subplots(3, 3, figsize=(20, 13), facecolor='#101820')
     selected = []
@@ -134,7 +137,7 @@ def main():
         ax.grid(alpha=.1); ax.legend(loc='best', fontsize=7, facecolor='#101820', labelcolor='white', framealpha=.7)
         for spine in ax.spines.values(): spine.set_color('#344450')
         selected.append({k:row[k] for k in ['trade_id','symbol','entry_time','exit_time','side','entry','stop','target_price','net_r','target_hit']})
-    fig.suptitle('Single upper 5m wick at Monday 1.618 | SHORT at close, candle-high stop, far internal 0.618 target\nBinance history; OKX Lv1 fees; six recent target hits and three stops (illustrative selection)', color='white', fontsize=14)
+    fig.suptitle('First weekly upper 5m wick at Monday 1.618 | SHORT at close, candle-high stop, far internal 0.618 target\nBinance; OKX Lv1 fees; winners have no subsequent 5m retouch through target; bottom row shows stops', color='white', fontsize=14)
     fig.tight_layout(rect=[0,0,1,.95]); fig.savefig(EXP/'examples.png', dpi=130, facecolor=fig.get_facecolor()); plt.close(fig)
     (EXP/'chart_examples.json').write_text(json.dumps(selected, indent=2)+'\n')
 

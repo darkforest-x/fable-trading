@@ -281,6 +281,22 @@ def summarize():
     cfg = json.loads((EXP/'config.json').read_text())
     done = [json.loads((EXP/'symbols'/j['symbol']/'done.json').read_text()) for j in cfg['jobs']]
     t = pd.concat([pd.read_parquet(EXP/'symbols'/j['symbol']/'trades.parquet') for j in cfg['jobs']], ignore_index=True)
+    # Outcome-only morphology. A full exit 5m candle is included conservatively:
+    # a retouch occurring after the actual fill can exclude an example, never
+    # create a false pristine example. This flag never changes admission/PnL.
+    t['subsequent_5m_touch_bars'] = -1
+    t['single_touch_target'] = False
+    for job in cfg['jobs']:
+        bars = pd.read_parquet(EXP/'symbols'/job['symbol']/'candles5m.parquet')
+        sel = t.symbol.eq(job['symbol']) & t.population.eq('signal') & t.target_hit
+        for k, r in t[sel].iterrows():
+            start = bars.index.searchsorted(pd.Timestamp(r.entry_time))
+            exit_open = (pd.Timestamp(r.framework_exit_time)-pd.Timedelta(minutes=job['execution_minutes'])).floor('5min')
+            end = bars.index.searchsorted(exit_open, side='right')
+            z = bars.iloc[start:end]
+            count = int((z.low <= r.level).sum() if r.side == 1 else (z.high >= r.level).sum())
+            t.loc[k, 'subsequent_5m_touch_bars'] = count
+            t.loc[k, 'single_touch_target'] = count == 0
     t.to_parquet(EXP/'trades.parquet', index=False)
     et = pd.to_datetime(t.entry_time, utc=True); xt = pd.to_datetime(t.exit_time, utc=True)
     table = []
@@ -299,11 +315,19 @@ def summarize():
     good = signal[signal.closed & signal.target_hit].sort_values(['symbol', 'entry_time'])
     good.to_csv(EXP/'target_examples.csv', index=False)
     good[good.side.eq(-1)].to_csv(EXP/'short_target_examples.csv', index=False)
+    strict = good[good.side.eq(-1) & good.first_weekly_touch & good.single_touch_target]
+    strict.to_csv(EXP/'strict_short_examples.csv', index=False)
     signal.to_csv(EXP/'signals.csv', index=False)
     feats = feature_readout(t)
     dump(EXP/'features.json', feats)
     dump(EXP/'features_short.json', feature_readout(t[t.side.eq(-1)]))
     summary = dict(experiment_id=EXP.name, coverage=done, metrics=table, by_symbol=symbols,
+        strict_short=dict(all_pristine_target_n=int((good.side.eq(-1) & good.single_touch_target).sum()),
+            first_weekly_pristine_target_n=len(strict),
+            definition='Outcome-only: no subsequent 5m candle, including the full exit candle, touches the level. '
+                       'Conservative observable subset, not an entry filter or a separate profitable strategy.',
+            success_feature_medians={k:float(strict[k].median()) for k in FEATURES},
+            first_short_failure_feature_medians={k:float(signal[signal.side.eq(-1) & signal.first_weekly_touch & signal.closed & ~signal.target_hit][k].median()) for k in FEATURES}),
         ohlc_signal_net_r=float(ohlc.loc[ohlc.population.eq('signal') & ohlc.reason.ne(0), 'net_r'].sum()),
         conservative_signal_net_r=float(signal.loc[signal.closed, 'net_r'].sum()),
         signal_ambiguous_n=int(signal.ambiguous.sum()),
