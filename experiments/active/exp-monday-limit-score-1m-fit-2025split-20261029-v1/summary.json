@@ -1,0 +1,130 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-score-1m-fit-2025split-20261029-v1",
+    "question": "Owner 2026-10-29: design a strategy for the 1m model without touching 2026: refit the same 1m model on fills before 2025 so that 2025 is unseen and can be used to choose strategy parameters.",
+    "single_variable": "Training split 2026-01-01 -> 2025-01-01; features, rows, label and estimator identical to exp-monday-limit-score-1m-fit-20261028-v1.",
+    "frozen_model": "experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/score_model.json",
+    "features_1m": "experiments/active/exp-monday-limit-1m-features-20261028-v1/features_1m.csv.gz",
+    "events": "experiments/active/exp-monday-limit-reclaim-patterns3-20261024-v1/events_60m.csv.gz",
+    "previous_scores": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+    "split": "2025-01-01",
+    "permutations": 1000,
+    "feature_shuffles": 50,
+    "seed": 20261028,
+    "workers": 6,
+    "control": "Base model on the same rows; label permutation p for each AUC; the 1m gain is compared with refits on row-shuffled 1m features (50 shuffles)",
+    "outputs": "score_model_1m.json and scores_1m.csv.gz in this directory only; the frozen model and the paper engine are unchanged",
+    "training_eligible": false,
+    "production_eligible": false,
+    "role": "selection model: strategy parameters are chosen on its 2025 scores; the final 2026 test uses the model trained before 2026"
+  },
+  "results": {
+    "test": {
+      "train_n": 25259,
+      "test_n": 33472,
+      "rows_with_1m": 58731,
+      "base_mean_bp": -2.4234673351593328,
+      "base_win_pct": 24.417423518164437,
+      "base": {
+        "auc": 0.6477394669069081,
+        "perm_p": 0.000999000999000999,
+        "top10": {
+          "n": 3348,
+          "mean_bp": 3.8426272852318837,
+          "win_pct": 51.971326164874554
+        },
+        "ge_05": 1094,
+        "ge_06": 442,
+        "coef": {
+          "bucket": 0.4171,
+          "log_vol_ratio": 0.0292,
+          "log_approach": -0.246,
+          "opp_first": 0.1648,
+          "monday_close_side": -0.0165,
+          "log_liquidity": -0.0671,
+          "toward24": -0.2639,
+          "cluster24": -0.0979,
+          "side": -0.0379,
+          "range_pct": -0.1072
+        }
+      },
+      "m1": {
+        "auc": 0.6878303555063238,
+        "perm_p": 0.000999000999000999,
+        "top10": {
+          "n": 3348,
+          "mean_bp": 41.60980465432589,
+          "win_pct": 59.70728793309439
+        },
+        "ge_05": 1802,
+        "ge_06": 1137,
+        "coef": {
+          "bucket": 0.3115,
+          "log_vol_ratio": 0.0021,
+          "log_approach": -0.0035,
+          "opp_first": 0.0723,
+          "monday_close_side": 0.0031,
+          "log_liquidity": -0.0914,
+          "toward24": -0.0391,
+          "cluster24": -0.0653,
+          "side": -0.0743,
+          "range_pct": -0.5097,
+          "lv1": 0.1393,
+          "lv3": -0.0793,
+          "lv5": -0.0231,
+          "lv15": 0.1997,
+          "lv60": -0.2573,
+          "ln5": 0.0833,
+          "imb5": -0.061,
+          "spd1": -0.075,
+          "spd5": 0.0085,
+          "spd15": 0.0653,
+          "spd60": 0.0218,
+          "dist": 0.3475,
+          "rng5": 0.2949
+        }
+      },
+      "frozen_causal": {
+        "auc": 0.6407349889038104,
+        "top10": {
+          "n": 3348,
+          "mean_bp": -9.097412714965143,
+          "win_pct": 50.597371565113505
+        },
+        "ge_05": 1401
+      },
+      "m1_gain_over_base": 0.040090888599415675,
+      "shuffled_1m_gain_q": {
+        "q50": -0.0009482188280822701,
+        "q95": -0.00011693281837542081,
+        "q99": 4.59578686674176e-05
+      }
+    },
+    "top40_threshold": 0.22112229135461253,
+    "events": 58740,
+    "scored": 58731,
+    "bands": {
+      "0.22112229135461253": {
+        "m1": 22795,
+        "frozen_causal": 23083,
+        "frozen_touch": 23818,
+        "m1_and_frozen_causal": 16707
+      },
+      "0.5": {
+        "m1": 2927,
+        "frozen_causal": 2293,
+        "frozen_touch": 2108,
+        "m1_and_frozen_causal": 1366
+      },
+      "0.6": {
+        "m1": 1815,
+        "frozen_causal": 957,
+        "frozen_touch": 842,
+        "m1_and_frozen_causal": 603
+      }
+    }
+  },
+  "source_commit": "bda2f858d13f7c5932e88a0d9823758dcb4a52ac",
+  "training_eligible": false,
+  "production_eligible": false
+}

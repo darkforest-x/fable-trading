@@ -751,6 +751,34 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
+  - experiment_id: exp-monday-limit-1m-design-20261029-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: running
+    question: 'Owner 2026-10-29: design a strategy for the 1m entry score (cut, 15m EMA order filter, target, stop) on 2025 with a model that never saw 2025, and test it once on 2026 to date.'
+    single_variable: 'Pre-registered design grid (3 cuts x 3 order filters x 6 targets x 3 stops) and selection rule fixed in the config before any strategy result; one frozen test.'
+    result: pending
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-1m-design-20261029-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Resting limits at the level, breakeven +0.17 percent, 60m confirmation; frac 10 slots 3x. Random control run after the selection.'
+  - experiment_id: exp-monday-limit-score-1m-fit-2025split-20261029-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: bda2f858d1
+    status: complete
+    question: 'Owner 2026-10-29: the same 1m model trained before 2025, so 2025 is unseen for the strategy design.'
+    single_variable: 'Training split 2026-01-01 -> 2025-01-01.'
+    result: 'Train 25259 fills, test 2025 to date 33472. AUC 1m 0.688 vs causal 5m base 0.648 vs frozen causal 0.641; top decile +41.6bp win 60 vs +3.8bp / -9.1bp; gain +0.040 vs shuffled-1m q99 +0.00005. Training-week cuts: top 20 / 10 / 5 percent = 0.295 / 0.377 / 0.481.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-score-1m-fit-2025split-20261029-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Selection model of exp-monday-limit-1m-design-20261029-v1; files only in its experiment directory.'
   - experiment_id: exp-monday-limit-paper-accounts-1m-20261028-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 5d491a93fe

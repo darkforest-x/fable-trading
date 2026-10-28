@@ -1,0 +1,58 @@
+{
+  "experiment_id": "exp-monday-limit-1m-design-20261029-v1",
+  "question": "Owner 2026-10-29: design a strategy for the 1m entry score (targets, cut, 15m EMA order filter, stop) on 2025 only and test it once on 2026 to date.",
+  "single_variable": "Not a single-variable experiment by construction: a pre-registered design grid chosen on 2025 with a model that never saw 2025, then one frozen test on 2026; the grid and the selection rule are fixed here before any strategy result is seen.",
+  "models": {
+    "selection": {
+      "scores": "experiments/active/exp-monday-limit-score-1m-fit-2025split-20261029-v1/scores_1m.csv.gz",
+      "split": "2025-01-01"
+    },
+    "test": {
+      "scores": "experiments/active/exp-monday-limit-score-1m-fit-20261028-v1/scores_1m.csv.gz",
+      "split": "2026-01-01"
+    }
+  },
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "since_week": "2019-12-30",
+  "cut_pct": [
+    20,
+    10,
+    5
+  ],
+  "order_filters": [
+    "none",
+    "ge1",
+    "ge3"
+  ],
+  "targets": [
+    "near_monday_edge",
+    "range_0.5",
+    "range_0.618",
+    "opposite_monday_edge",
+    "opposite_1618",
+    "band"
+  ],
+  "stops": [
+    "far",
+    "P18",
+    "P30"
+  ],
+  "be_offset_bp": 17.0,
+  "sizing": {
+    "rule": "monday_limit_return_opt.frac",
+    "slots": 10,
+    "leverage": 3,
+    "ties": 10
+  },
+  "selection_rule": "2025 with the selection model: highest median final multiple among combos with >= 40 trades, median max drawdown <= 50 percent and a positive net sum in both halves of 2025",
+  "test": "the chosen combo once on 2026 to date with the test model; all combos' 2026 results reported only as a distribution",
+  "benchmarks_2026": "frozen causal score resting: v3add20 1.33x, spike 1.19x (exp-monday-limit-paper-accounts-20261028-v1)",
+  "fees": "Codex config maker 0.02 / taker 0.05 percent (OKX Lv1, read 2026-10-23); 10bp slippage on non-target exits",
+  "random_control": "a second small framework run of Codex matched random submissions for the chosen combo, after the selection",
+  "not_included": "add legs, other breakeven offsets, 5m confirmation (to keep the grid small)",
+  "training_eligible": false,
+  "production_eligible": false,
+  "min_trades_2025": 40,
+  "max_dd_2025": 50,
+  "halves_2025": "split at 2025-07-01"
+}
