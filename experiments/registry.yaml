@@ -730,6 +730,34 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
+  - experiment_id: exp-monday-limit-1m-features-20261028-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: running
+    question: 'Owner 2026-10-28: 1m model, step 1: download Binance UM 1m klines around every touch and compute features through the minute before the touch.'
+    single_variable: 'Not directional; feature construction only.'
+    result: pending
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-1m-features-20261028-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'data.binance.vision daily 1m archives (touch day and the day before), cached gzip under data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git).'
+  - experiment_id: exp-monday-limit-score-1m-fit-20261028-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: queued
+    question: 'Owner 2026-10-28: train the entry score with pre-touch 1m features before 2026 and test it on 2026 to date; then run the paper accounts in the framework.'
+    single_variable: 'Feature set (causal 5m base vs base plus 1m); rows, label, estimator and split identical.'
+    result: pending
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-score-1m-fit-20261028-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Model and scores only in the experiment directory; frozen model and paper engine unchanged.'
   - experiment_id: exp-monday-limit-paper-accounts-20261028-v1
     source_repo: darkforest-x/fable-trading
     source_commit: cd5f85adcf

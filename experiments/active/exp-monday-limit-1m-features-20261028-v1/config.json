@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-monday-limit-1m-features-20261028-v1",
+  "question": "Owner 2026-10-28: build a 1m model; step 1 downloads Binance UM 1m klines around every touch and computes features through the minute before the touch (recent volume bursts and speed).",
+  "source": "data.binance.vision futures/um/daily/klines/{symbol}/1m (public archive; touch day and the day before)",
+  "cache": "data/crypto/market/kline_binance_um1m_touchdays_20261027",
+  "since_week": "2019-12-30",
+  "download_threads": 32,
+  "workers": 8,
+  "decision_point": "close of the last 1m bar before the touch minute; only completed bars before it are read",
+  "control": "Not directional. Parity: the earlier partial-bar study showed these 1m archives reproduce the Codex 5m bars; touch_not_in_1m counts events whose 1m bars do not reach the level",
+  "training_eligible": false,
+  "production_eligible": false
+}
