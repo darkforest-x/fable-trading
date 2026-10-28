@@ -14790,3 +14790,17 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: Known touch-bar score lookahead prominently disclosed. The old336-trade BE0 path ends1754717.31U after5 net refills totalling4527.24U; realized balance DD99.9744percent. Last two trades contribute57.8percent of ending balance; ON profit522744.52U is sample-end settlement. Four purposive samples include terminal winner, largest monetary loss, median long target and median short confirmation failure. Prices, native times, Monday anchors, cash ledger and all5PNGs verified; no source downloads or content hashes.
+
+  - experiment_id: exp-allin3-all-trade-charts-20261028-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 323b0c77c7
+    status: completed
+    question: Count every funded allin3 trade in the saved 1.75m capital path and deliver all candle charts in one folder.
+    single_variable: None; render saved funded trades and original candles without new fills, cost recalculation or downloads.
+    canonical_report: experiments/active/exp-allin3-all-trade-charts-20261028-v1/delivery.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - allin3-all-trade-charts-20261028-v1
+    notes: All336funded trades across212symbols,112wins224losses;336chronological candle PNGs plus copied timeline and Chinese CSV index in one folder. Exact ledger-event and filename coverage verified; all native prices and Monday levels match, zero plotted gaps, all337PNGs decode, seven targeted visual samples inspected. Historical score lookahead and BE0 protection caveats retained. Source slices, inputs metadata, generation receipts and verification remain local.

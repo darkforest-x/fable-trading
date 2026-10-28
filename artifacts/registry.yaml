@@ -35043,3 +35043,14 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: One2240x1540 timeline and four2240x1400 candle figures; all retain lookahead and historical version caveats. Source bars and selected original trade fields retained locally. All charts visually inspected, native prices/times and Monday anchors checked; zero plotted gaps and cash reconciliation error below4e-11. Latest causal results referenced separately, no new strategy simulation.
+
+  - artifact_id: allin3-all-trade-charts-20261028-v1
+    artifact_type: manifest
+    role: complete_funded_allin3_candle_charts_and_equity_timeline
+    source_repo: darkforest-x/fable-trading
+    generator_commit: 323b0c77c7
+    source_path: experiments/active/exp-allin3-all-trade-charts-20261028-v1/delivery.json
+    storage_uri: repo://experiments/active/exp-allin3-all-trade-charts-20261028-v1/delivery.json
+    training_eligible: false
+    production_eligible: false
+    notes: One local folder contains336annotated2240x1400 trade charts, one2240x1540 capital timeline and Chinese CSV index,73.3MB of PNGs. Every funded ledger event has exactly one chart; original costs and outcomes preserved. All images decode, zero plotted gaps, native prices and Monday levels verified; seven visual edge cases inspected. Known lookahead remains explicitly labeled; no new trade simulation or source downloads.
