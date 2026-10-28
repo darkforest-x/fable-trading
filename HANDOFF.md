@@ -1,3 +1,9 @@
+## 2026-10-28 · Market entry at the touch close (inside / beyond) and target choice
+
+- `exp-monday-limit-close-reclaim-20261028-v1` (builder eb6dfe553e): market at the touch 5m close scored by the touch-bar score, five targets, -30 / -18 percent from the level, matched random entries. v3-like frac N20 3x from 2020: inside only 1.78x DD44, inside + beyond 3.39x DD49 (resting plan A 3.87x); 2026 0.80x / 0.72x vs A 1.14x. Signal +70bp vs random -60bp; unscored touches -14bp.
+- Targets: nearer raises win rate (near edge 65 percent) but not the mean (-9bp); opposite 1618 has the best mean (+65bp) and is the worst in 2026; no target is positive in 2026. Closes beyond the level are positive at the market price (near edge +102bp), so the inside-only filter was wrong. Spike filter both sides 1.25x DD33 (2026 1.36x).
+- The eight-account rerun (`exp-monday-limit-paper-accounts-20261028-v1`, adapter cd5f85adcf) started automatically after this summary. Learning: `do-not-drop-a-subgroup-on-outcomes-measured-at-another-entry-price.md`.
+
 ## 2026-10-28 · Causal score refit and the paper strategies on live-executable scores
 
 - Refit (`exp-monday-limit-score-causal-refit-20261027-v1`): same rows/label/estimator, bar features from the 5m bar before the touch; the touch-bar refit reproduces the frozen coefficients exactly. Trained before 2026, tested 2026 to date: AUC 0.661 (p 0.001), top decile +21bp vs frozen causal +17bp. New model files only in that directory; frozen model and paper engine unchanged.

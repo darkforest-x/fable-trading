@@ -746,11 +746,11 @@ experiments:
     notes: 'Adapter gains per-row order modes (order_mode limit / market in a limit run) and add legs resting under a market parent. Runs after exp-monday-limit-close-reclaim-20261028-v1.'
   - experiment_id: exp-monday-limit-close-reclaim-20261028-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: running
+    source_commit: eb6dfe553e
+    status: complete
     question: 'Owner 2026-10-28: enter at market at the touch 5m close when it closed back inside the 1.618 level (scored at that close); does the target need to change? Owner then asked why exclude closes beyond the level, so they run as their own variants.'
     single_variable: 'Entry at the touch-bar close (inside vs at/beyond the level) instead of a resting limit; five Codex targets compared; stop, reclaim rule, fees and data unchanged.'
-    result: pending
+    result: '531 symbols, both paths, 0 errors; market entries at the touch close scored by the touch-bar score. v3-like (score >= 0.5, v3 targets, P30, frac N20 3x, base legs) from 2020: closed inside 1398 fills +70bp 1.78x DD44; inside + beyond 2040 +74bp 3.39x DD49; 2026 0.80x / 0.72x; resting plan A was 3.87x and 1.14x in 2026. Matched random entries -60bp vs +70bp for the signal (2026 -46 vs -32); all inside touches without score -14bp. Targets (score >= 0.5, inside): near edge -9bp win 65, range 0.5 +31, range 0.618 +31, opposite edge +38, opposite 1618 +65 win 30; all negative in 2026. Closed beyond the level (642, better price): near edge +102bp win 62, opposite 1618 +73. Spike filter inside + beyond, near edge P18, 10 slots 5x: 106 fills +90bp 1.25x DD33 (2026 1.36x). allin3-like inside + beyond: 10x from 53 percent of starts (median 395 days, 2 blow-ups), 100x from 0.5 percent.'
     artifacts: []
     canonical_report: experiments/active/exp-monday-limit-close-reclaim-20261028-v1/summary.json
     holdout_consumed: false
