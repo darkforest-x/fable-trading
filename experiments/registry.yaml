@@ -14729,3 +14729,15 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: Reuse registered Binance UM1m daily cache; only missing same-exchange days downloaded. Original score lookahead unresolved, rendering does not repair or validate performance. Intrabar minute execution is unknown and shown as an interval. Completed85PNG and10.33MBZIP;5450real1m candles,1090original5m comparisons,zero gaps,unchanged31original fields. One disclosed DOOD context-only zero-volume leading-minute open difference; no execution-interval mismatch. Eight targeted tests pass; PNG/ZIP checks and five visual samples pass. Telegram upload acknowledged; raw source manifests, comparison rows and receipt retained locally.
+
+  - experiment_id: exp-allin3-review-20261028-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3db5b071ba
+    status: completed
+    question: Explain the saved allin3 1000U to 1.75m endpoint and render a timeline plus sample candles.
+    single_variable: None; read original funded ledger, native fills and source bars, no new trading replay.
+    canonical_report: experiments/active/exp-allin3-review-20261028-v1/manifest.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Known touch-bar score lookahead prominently disclosed. The old336-trade BE0 path ends1754717.31U after5 net refills totalling4527.24U; realized balance DD99.9744percent. Last two trades contribute57.8percent of ending balance; ON profit522744.52U is sample-end settlement. Four purposive samples include terminal winner, largest monetary loss, median long target and median short confirmation failure. Prices, native times, Monday anchors, cash ledger and all5PNGs verified; no source downloads or content hashes.
