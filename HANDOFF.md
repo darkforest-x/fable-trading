@@ -1,3 +1,9 @@
+## 2026-10-28 · Causal score refit and the paper strategies on live-executable scores
+
+- Refit (`exp-monday-limit-score-causal-refit-20261027-v1`): same rows/label/estimator, bar features from the 5m bar before the touch; the touch-bar refit reproduces the frozen coefficients exactly. Trained before 2026, tested 2026 to date: AUC 0.661 (p 0.001), top decile +21bp vs frozen causal +17bp. New model files only in that directory; frozen model and paper engine unchanged.
+- Strategy level the refit does not help: v3 base A 2026 1.00x vs 1.14x for the frozen causal score (`exp-monday-limit-layered-refit-20261027-v1`).
+- Paper strategies resting on the previous-close score (`exp-monday-limit-strategies-causal-20261027-v1`), leaky / frozen causal / refit: v3add20 from 2020 317x DD35 / 6.9x DD84 / 6.5x DD73 (2025 0.60x frozen); spike 4.65x DD21 win 85 / 1.02x DD62 win 78 / 0.70x; allin3 reaches 100x from 95 / 8 / 0 percent of monthly starts. Every multiple quoted for these accounts before 2026-10-27 is invalid. In sample except 2026 for the refit. Learnings: `causal-refit-improves-ranking-but-not-the-strategy.md`, `pgrep-f-waiters-match-their-own-shell.md`.
+
 ## 2026-10-27 · Chart measurement, trend lines, parallel channels and selected-symbol score
 
 - The existing indicator popup now contains selection, measurement, two-point trend lines and three-point parallel channels. Mouse drag, touch placement, endpoint adjustment, deletion, clear/undo and keyboard placement work. Drawings persist per symbol in this browser using UTC/price anchors across reloads, history updates and timeframe changes. Measurement shows price/percent change, candle intervals, elapsed time and inclusive OKX contract volume; incomplete coverage and forming candles are explicit. Storage failures retain temporary drawings without overwriting unreadable originals. No API writes, new polling or chart autoscale contribution.

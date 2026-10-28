@@ -732,11 +732,11 @@ experiments:
     notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
   - experiment_id: exp-monday-limit-strategies-causal-20261027-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: running
+    source_commit: ffbb9e9973
+    status: complete
     question: 'Owner 2026-10-27: rerun the paper strategies v3add20, spike and allin3 as they can run live (resting on the previous 5m close score), with the frozen model and with the causal refit, against their leaky backtests.'
     single_variable: 'Entry score source (leaky / frozen causal / refit causal); exits, stops, sizing, fees and slippage of each strategy unchanged.'
-    result: pending
+    result: '413 symbols, both paths, 0 errors; 7017 shared rows match the layered runs and leaky ledgers (0 mismatches). From 2020, leaky / frozen causal / refit causal: v3add20 (frac N20 3x) 317x DD35 / 6.9x DD84 / 6.5x DD73, 2025 8.3x / 0.60x / 0.96x, 2026 3.4x / 1.41x / 1.13x; spike (10 slots 5x) 4.65x DD21 win 85 / 1.02x DD62 win 78 / 0.70x DD57 win 76; allin3 (all-in 3x, monthly starts 2023-01..2026-08) reaches 100x from 95 / 8 / 0 percent of starts (median 580 days, 2 blow-ups for leaky); 10x from 100 / 95 (median 537 days after 16 blow-ups) / 17 percent. The paper accounts compute the frozen causal score.'
     artifacts: []
     canonical_report: experiments/active/exp-monday-limit-strategies-causal-20261027-v1/summary.json
     holdout_consumed: false
@@ -746,7 +746,7 @@ experiments:
     notes: 'NautilusTrader native runs of v3 parents, 5 percent add legs and spike orders (near edge, P18) for events with either causal score >= 0.6; v3 0.5-0.6 rows from the layered runs.'
   - experiment_id: exp-monday-limit-score-causal-refit-20261027-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
+    source_commit: 14927eb758
     status: complete
     question: 'Owner 2026-10-27: refit the Monday1618 entry score without the touch bar (vol_ratio / liquidity / toward24 from the 5m bar before the touch); owner asked to train before 2026 and test 2026 to date.'
     single_variable: 'Bar of the three bar features; rows, label, features and estimator as monday_limit_reclaim_recent; splits 2025-01-01 (control) and 2026-01-01 (main).'
@@ -760,11 +760,11 @@ experiments:
     notes: 'New model files score_model_causal_2025.json / _2026.json in the experiment directory only; frozen score_model.json and the paper engine unchanged. First run stopped on NaN features (log kept).'
   - experiment_id: exp-monday-limit-layered-refit-20261027-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: running
+    source_commit: 0ad21dc02a
+    status: complete
     question: 'Owner 2026-10-27: rerun A and ABC in the framework with the causal refit score (trained before 2026).'
     single_variable: 'Entry score frozen -> causal refit; everything else as exp-monday-limit-layered-20261027-v1.'
-    result: pending
+    result: '466 symbols, both paths, 0 errors; 2524 rows sharing a trade id with the frozen-score layered run match (0 mismatches). Refit scores select 1612 resting orders (frozen 2292). frac N20 3x base legs: refit A from 2020 3.50x DD71 vs frozen A 3.87x DD77; 2026 (out of sample for both) refit 1.00x DD56, +48bp vs frozen 1.14x DD47, +87bp; last5m 1.91x vs 1.86x. Refit ABC 2.33x DD70 (B closes 454 fills, -297 vs -142bp held; C 38 late entries ~0bp). The refit improves v2-label ranking but not the strategy.'
     artifacts: []
     canonical_report: experiments/active/exp-monday-limit-layered-refit-20261027-v1/summary.json
     holdout_consumed: false
