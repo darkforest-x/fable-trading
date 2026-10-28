@@ -101,8 +101,8 @@ def inspect(row):
                 if ts.iloc[-1] >= upper:
                     break
     ticks = pd.concat(pieces, ignore_index=True)
-    assert ticks.aggregate_trade_id.is_unique
-    assert (ticks.aggregate_trade_id.diff().dropna() == 1).all(), 'Missing aggregate trade IDs'
+    assert ticks.agg_trade_id.is_unique
+    assert (ticks.agg_trade_id.diff().dropna() == 1).all(), 'Missing aggregate trade IDs'
     ticks.index = pd.to_datetime(ticks.transact_time, unit='ms', utc=True)
     price = ticks.price.astype(float)
     sec = price.resample('1s').ohlc()
