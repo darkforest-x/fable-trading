@@ -1,0 +1,10 @@
+{
+  "failed_probes": [
+    {"source": "Binance /fapi/v1/aggTrades BTRUSDT 2026-08-26", "http_status": 400, "code": -4166, "message": "Search window is restricted to recent 2 days only."},
+    {"source": "Binance /fapi/v1/klines BTRUSDT interval=1s", "http_status": 400, "code": -1120, "message": "Invalid interval."}
+  ],
+  "archive_recovery": "Used official Binance UM daily aggTrades ZIPs, preserving the backtest exchange and contract; did not substitute OKX or spot data.",
+  "failed_first_parse": "Assumed aggregate_trade_id, while actual archive header is agg_trade_id; corrected to the observed header before producing results.",
+  "strict_ohlcv_failure": "ONE prices match exactly, but original volume is 1046274323 and archive volume is 1046283925; BTR original volume34535103 and archive34535248 also differ. No source values were modified.",
+  "qualification": "Price-only evidence is reported with explicit per-case volume_match flags and source-parity.json; these are not three complete OHLCV parity passes. Volume discrepancy causes remain unverified."
+}

@@ -14,6 +14,27 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-seconds-entry-audit-20261028-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2af4ca7a94
+    status: inconclusive
+    question: Do large causal-score 60m losses show continued movement beyond 1.618,
+      and does the first completed opposite 1s candle materially improve the entry price?
+    single_variable: Descriptive price-path audit only; original native outcomes unchanged.
+      Select three worst shorts since 2026-07-28 before inspecting same-venue aggTrades.
+    result: Of22063 independent eligible signals,524 lose over10percent of entry notional,
+      including387shorts. First-red subsequent-trade price versus original limit improves
+      BTR0.4396percent andBR0.2768percent,but worsensONE0.1145percent; waits3.391/4.505/1.479seconds.
+      WEN next-second open improves3.0385percent. No new strategy PnL or efficacy claim.
+    artifacts:
+      - monday-seconds-entry-audit-20261028-v1
+    canonical_report: experiments/active/exp-monday-seconds-entry-audit-20261028-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    notes: Selected losing cases only,not a representative test. All three touch-bar OHLC match;
+      BRvolume matches,BTR/ONE differ0.000420/0.000918percent and remain qualified.
+      No fill guarantee,no controls or new backtest,no live/account/config changes.
   - experiment_id: exp-monday-12h-wick3-limit-20261027-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 5e6868710b
