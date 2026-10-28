@@ -753,11 +753,11 @@ experiments:
     notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
   - experiment_id: exp-monday-limit-paper-accounts-1m-20261028-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: running
+    source_commit: 5d491a93fe
+    status: complete
     question: 'Owner 2026-10-28: paper accounts in the framework with the 1m model choosing the resting orders.'
     single_variable: 'Resting selection score frozen 5m causal -> 1m model; rules, fills and sizing unchanged.'
-    result: pending
+    result: '531 symbols, both paths, 0 errors; leaky rows equal the earlier account run. Resting on the 1m score vs the frozen causal score, from 2020 / 2026 (out of sample): v2_60 1.96x / 0.75x vs 1.36x / 0.95x; v3 3.37x DD73 / 0.42x vs 1.04x / 0.65x; v3add 14.8x / 0.38x vs 1.05x / 0.73x; v3add20 20.4x DD84 / 0.68x vs 6.6x / 1.33x; v3lock 3.73x / 0.46x vs 1.13x / 0.68x; spike 0.16x DD94 / 0.68x vs 1.02x / 1.19x; allin3 100x from 3.2 vs 9.5 percent of starts. Gains sit in 2020-2025, the 1m model's training period; in 2026 every account is worse than with the frozen score although the label AUC rose 0.653 -> 0.702.'
     artifacts: []
     canonical_report: experiments/active/exp-monday-limit-paper-accounts-1m-20261028-v1/summary.json
     holdout_consumed: false

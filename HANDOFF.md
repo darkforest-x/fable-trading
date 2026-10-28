@@ -1,3 +1,8 @@
+## 2026-10-29 · 1m entry score: better ranking, worse paper accounts out of sample
+
+- 1m features (`exp-monday-limit-1m-features-20261028-v1`, 70010 / 70020 events) and fit (`exp-monday-limit-score-1m-fit-20261028-v1`, train <2026): 2026 AUC 0.702 vs 0.661 causal 5m base, top decile +45.8bp vs +21.4bp, gain far above shuffled-feature refits; leak check passed (decision bar never reaches the level). Strongest feature: distance to the level one minute before the touch.
+- Paper accounts resting on the 1m score (`exp-monday-limit-paper-accounts-1m-20261028-v1`): much higher multiples in 2020-2025 (training period: v3add20 20.4x, v3add 14.8x) but in 2026 every account is worse than with the frozen causal score (v3add20 0.68x vs 1.33x, spike 0.68x vs 1.19x, v3 0.42x vs 0.65x). Do not switch the paper engine to it. Model files stay in the experiment directories; frozen model and paper engine unchanged.
+
 ## 2026-10-28 · A-share Monday 1.618 private Pine V1.1
 
 - Saved `周一高低点 · 1.618 A股 V1.1` in native TradingView and on the existing SSE:601212 12h layout. New source `yoyo/evaluation/pine/monday_high_low_1618_ashare_v1_1.pine` (c0a9c6d303); original V1.0 source/private script preserved and hidden on this chart.
