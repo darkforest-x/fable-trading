@@ -86,16 +86,16 @@ def render(frames, symbol, start, end, out):
     fig.text(.035, .934, f'{start:%Y-%m-%d %H:%M:%S} — {end:%H:%M:%S}  北京时间  ·  同一时间窗',
              color=muted, fontsize=12)
     fig.text(.965, .934, '历史静态预览 · 真实行情', color=muted, fontsize=12, ha='right')
-    grid = fig.add_gridspec(6, 1, height_ratios=[4, .7, 4, .7, 4, .7],
-                           left=.045, right=.93, bottom=.07, top=.895, hspace=.21)
+    grid = fig.add_gridspec(3, 1, left=.045, right=.93, bottom=.07, top=.895, hspace=.34)
     origin = start.timestamp()
     duration = (end-start).total_seconds()
     all_low = min(frame.low.min() for frame in frames.values())
     all_high = max(frame.high.max() for frame in frames.values())
     padding = max((all_high-all_low)*.12, .001)
     for i, (seconds, frame) in enumerate(frames.items()):
-        ax = fig.add_subplot(grid[2*i])
-        vol = fig.add_subplot(grid[2*i+1], sharex=ax)
+        pair = grid[i].subgridspec(2, 1, height_ratios=[4, .7], hspace=.1)
+        ax = fig.add_subplot(pair[0])
+        vol = fig.add_subplot(pair[1], sharex=ax)
         x = frame.index.astype('int64').to_numpy()/1e9-origin+seconds/2
         colors = np.where(frame.close >= frame.open, up, down)
         width = seconds*.7
