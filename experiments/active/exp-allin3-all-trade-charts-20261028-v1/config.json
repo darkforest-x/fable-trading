@@ -1,0 +1,11 @@
+{
+  "experiment_id": "exp-allin3-all-trade-charts-20261028-v1",
+  "operation": "Render all 336 funded trades from the saved allin3 historical account, plus copy its existing timeline into one folder.",
+  "source_ledger": "experiments/active/exp-strategy-booklet-paths-20261027-v1/allin3-ledger.csv.gz",
+  "native_source": "experiments/active/exp-monday-limit-v3-levels-20261025-v1",
+  "selection": "Every ledger row with notional > 0; exclude refills and unfunded candidates. One original event per PNG.",
+  "costs": "Preserve original net results, maker/taker fees and non-target slippage; no recalculation or new simulation.",
+  "warning": "Known touch-bar score lookahead; historical BE0 differs from current BE17bp.",
+  "training_eligible": false,
+  "production_eligible": false
+}

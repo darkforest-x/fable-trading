@@ -39,7 +39,7 @@ def setup():
     return plt
 
 
-def load():
+def load(all_trades=False):
     ledger = pd.read_csv(PATHS / 'allin3-ledger.csv.gz')
     ledger['date'] = pd.to_datetime(ledger.time_ms, unit='ms', utc=True)
     ledger['before'] = ledger.equity.shift(1)
@@ -54,15 +54,22 @@ def load():
     # Fixed descriptive roles, not a random sample or a performance estimate.
     winners = funded[(funded.reason == 4) & (funded.side == 1)].sort_values(['net_bp', 'event'])
     failures = funded[(funded.reason == 11) & (funded.side == -1)].sort_values(['net_bp', 'event'])
-    selected = [funded.iloc[-1], funded.loc[funded.pnl.idxmin()],
-                winners.iloc[len(winners)//2], failures.iloc[len(failures)//2]]
-    roles = ['期末结算 / 最大金额盈利', '最大金额亏损', '做多止盈 / 收益率中位样本', '做空确认失败 / 收益率中位样本']
+    if all_trades:
+        selected = [r for _, r in funded.sort_values(['entry_ms', 'time_ms', 'event'], kind='stable').iterrows()]
+        roles = ['历史资金路径 · 全部成交']*len(selected)
+    else:
+        selected = [funded.iloc[-1], funded.loc[funded.pnl.idxmin()],
+                    winners.iloc[len(winners)//2], failures.iloc[len(failures)//2]]
+        roles = ['期末结算 / 最大金额盈利', '最大金额亏损', '做多止盈 / 收益率中位样本', '做空确认失败 / 收益率中位样本']
     rows = []
+    cache = {}
     for i, (r, role) in enumerate(zip(selected, roles), 1):
         versions = []
         for path in ('ohlc', 'olhc'):
             p = NATIVE / path / 'symbols' / r.symbol / 'trades.csv.gz'
-            d = pd.read_csv(p)
+            if str(p) not in cache:
+                cache[str(p)] = pd.read_csv(p)
+            d = cache[str(p)]
             d = d[(d.variant == 'opp1618_P30') &
                   (d.trade_id.str.split(':').str[:3].str.join(':') == r.event)]
             assert len(d) == 1
@@ -77,6 +84,10 @@ def load():
         row = r.to_dict()
         row.update({k: q[k] for k in ['entry', 'stop', 'target_price', 'exit_price', 'entry_i', 'exit_i', 'reclaim_status', 'source', 'path']})
         row.update(number=i, role=role, file=f'{i:02d}_{r.symbol}.png', track='allin3')
+        if all_trades:
+            date = pd.Timestamp(r.entry_t).tz_convert('Asia/Shanghai').strftime('%Y%m%d_%H%M')
+            side = '多' if r.side == 1 else '空'
+            row['file'] = f'{i:04d}_{date}_{r.symbol}_{side}.png'
         rows.append(row)
     return ledger, funded, rows
 
@@ -136,19 +147,27 @@ def timeline(ledger, rows):
     return float(abs(dd.min()))
 
 
-def draw_sample(row):
+def load_source(symbol):
+    """Reuse the registered source loader once per symbol in a batch."""
     from yoyo.evaluation.monday_limit_reclaim_inputs import load_job
-    from yoyo.evaluation.paper_2026_trade_charts import panel, display_bars, CAUSE
-    from matplotlib.ticker import FuncFormatter
-    plt = setup()
-    r = SimpleNamespace(**row)
-    job = json.loads((A/'exp-monday-limit-reclaim-20261024-v1/symbols'/r.symbol/'identity.json').read_text())['job']
+    job = json.loads((A/'exp-monday-limit-reclaim-20261024-v1/symbols'/symbol/'identity.json').read_text())['job']
     stamps = []
     for name in job['paths']:
         p = Path(name)
         if not p.exists(): raise FileNotFoundError(f'Registered source unavailable: {p}')
         stamps.append(dict(path=name, size=p.stat().st_size, mtime_ns=p.stat().st_mtime_ns))
     f, _ = load_job(job)
+    return f, stamps
+
+
+def draw_sample(row, cached_source=None, out_dir=None, bars_dir=None):
+    from yoyo.evaluation.paper_2026_trade_charts import panel, display_bars, CAUSE
+    from matplotlib.ticker import FuncFormatter
+    plt = setup()
+    r = SimpleNamespace(**row)
+    out_dir = OUT if out_dir is None else Path(out_dir)
+    bars_dir = out_dir if bars_dir is None else Path(bars_dir)
+    f, stamps = load_source(r.symbol) if cached_source is None else cached_source
     et, xt = f.index[int(r.entry_i)], f.index[int(r.exit_i)]
     assert et+STEP == pd.Timestamp(r.entry_t)
     assert pd.Timestamp(r.exit_t) in (xt, xt+STEP)
@@ -200,8 +219,8 @@ def draw_sample(row):
     fig.text(.065, .123, note, fontsize=11, color='#647382')
     fig.text(.065, .080, '蓝虚线=入场，金点线=目标，红虚线=兜底止损，紫点划线=确认后保护，灰点线=周一高低；远离画面价位只列数值。', fontsize=10, color='#647382')
     fig.text(.065, .045, 'Binance历史行情；北京时间。maker 0.02% / taker 0.05%，非目标退出另扣0.10%滑点；未计资金费。', fontsize=10, color='#647382')
-    fig.savefig(OUT/r.file); plt.close(fig)
-    raw.to_csv(OUT/(Path(r.file).stem+'-ohlcv.csv.gz'))
+    fig.savefig(out_dir/r.file); plt.close(fig)
+    raw.to_csv(bars_dir/(Path(r.file).stem+'-ohlcv.csv.gz'))
     return dict(event=r.event, file=r.file, source_native=r.source, inputs=stamps, panels=validations,
                 monday_low=low, monday_high=high, entry_bar=str(et), exit_bar=str(xt),
                 prices_in_native_bars=True, monday_levels_match=True)
