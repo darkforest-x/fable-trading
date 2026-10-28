@@ -1,3 +1,9 @@
+## 2026-10-29 · Range Fanshen V2.40 wick circles
+
+- Private Pine `周一高低点区间＋翻身 · V2.40` saved on the existing SOLUSDT.P 12h layout. Based on V2.37: closed-bar upper/lower 1.618 wick touches use narrow hollow green ellipses (`#00B43B` sampled from Owner image), default on with size and visibility controls. Body touches excluded; Monday range/timezone and original signal/trade modules preserved.
+- Defaults match the observed Owner chart: Monday price labels off, historical Fib ratios `1.618`, historical lines white. Native off/on verified, oscillator pane collapsed, editor/logs closed and layout saved; old private script restored/preserved. Ten local checks and twelve native fixture groups passed. No browser session, service restart or trade changes.
+- Source: `yoyo/evaluation/pine/monday_range_v2_40.pine`; receipt: `artifacts/range-wicks-v2-40-20261029/delivery.json`; raw native QA: `output/playwright/range-wicks-20261029/`. Learning: `pine-wick-rings-need-screen-sized-glyphs.md`.
+
 ## 2026-10-29 · K-line rendering and layout work reduced without changing the layout
 
 - Owner clarified: performance only, preserve the existing layout. No CSS or visual structure changes. Stitch GEMINI_3_8_FLASH edit timed out; known completed source was missing from list/get_project, and the isolated browser was not signed in. Recovery evidence and the explicit scope decision are retained; no new design was claimed or applied.

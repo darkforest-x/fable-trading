@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-29",
+  "version": "V2.40",
+  "baseline": "V2.37",
+  "private_script": "周一高低点区间＋翻身 · V2.40",
+  "source": "yoyo/evaluation/pine/monday_range_v2_40.pine",
+  "chart_url": "https://cn.tradingview.com/chart/AlGc61US/",
+  "chart_symbol": "OKX:SOLUSDT.P",
+  "chart_timeframe": "12h",
+  "changes": {
+    "wick_rings": {
+      "enabled_by_default": true,
+      "color": "#00B43B",
+      "color_source": "Owner attachment RGB(0,180,59)",
+      "glyph": "⬯",
+      "sizes": {
+        "小": 28,
+        "中": 36,
+        "大": 44
+      },
+      "default_size": "中",
+      "confirmation": "Closed chart OHLC; upper high >= level with body strictly below; lower low <= level with body strictly above. Monday excluded; range expires at next local Monday.",
+      "anchor": "Midpoint of the matched 1.618 level and wick extreme",
+      "history": "Visible loaded history recalculates on pan; at most 60 markers, reduced if other modules reserve the label budget."
+    },
+    "observed_chart_defaults": {
+      "showLabels": false,
+      "histFibLevelsStr": "1.618",
+      "histFibCol": "#FFFFFF"
+    }
+  },
+  "validation": {
+    "local_tests_passed": 10,
+    "native_fixture_groups_passed": 12,
+    "native_evidence": "output/playwright/range-wicks-20261029/labels-native-pass.png",
+    "default_on_evidence": "output/playwright/range-wicks-20261029/toggle-settings.png",
+    "off_checkbox_and_absent_rings": "output/playwright/range-wicks-20261029/off-checkbox.png",
+    "on_restored": "output/playwright/range-wicks-20261029/restore-on.png",
+    "saved_chart": "output/playwright/range-wicks-20261029/final-chart.png",
+    "clean_source_saved": "output/playwright/range-wicks-20261029/clean-saved.png",
+    "baseline_contract": "All original signal, key-level and trade-management code unchanged; range rendering only subtracts the new label reservation.",
+    "command": ".venv/bin/python -m pytest -q tests/evaluation/test_monday_range_v2_37.py tests/evaluation/test_monday_range_v2_40.py"
+  },
+  "prior_local_sources_preserved": true,
+  "native_editor_recovery": "An initial native-editor attempt temporarily applied QA to the V2.37 chart/private source; the original local V2.37 source was restored and saved before creating V2.40. Both private scripts remain. The final chart contains only V2.40.",
+  "qa_appendix_removed": true,
+  "layout_saved": true,
+  "oscillator_pane_collapsed": true,
+  "cleanup": {
+    "temporary_browser_sessions_created": 0,
+    "temporary_tabs_created": 0,
+    "reused_native_app": true,
+    "editor_and_logs_closed": true,
+    "services": "No restart. Monitor alive, scan zero errors; paper worker alive queue 0 error null; patrol heartbeat current with four enabled schedules and no reported error.",
+    "evidence": "output/playwright/range-wicks-20261029/services.json"
+  },
+  "limitations": [
+    "Native visual run used SOL 12h loaded history; no live forming-bar replay or profitability evaluation.",
+    "The fixed-size ellipse marks a wick location; it is not a price-scaled enclosure of arbitrarily long wicks."
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}

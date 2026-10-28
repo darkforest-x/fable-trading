@@ -35054,3 +35054,13 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: One local folder contains336annotated2240x1400 trade charts, one2240x1540 capital timeline and Chinese CSV index,73.3MB of PNGs. Every funded ledger event has exactly one chart; original costs and outcomes preserved. All images decode, zero plotted gaps, native prices and Monday levels verified; seven visual edge cases inspected. Known lookahead remains explicitly labeled; no new trade simulation or source downloads.
+
+  - artifact_id: range-wicks-v2-40-20261029
+    artifact_type: manifest
+    role: private_pine_1618_wick_markers_and_owner_display_defaults
+    source_repo: darkforest-x/fable-trading
+    source_path: artifacts/range-wicks-v2-40-20261029/delivery.json
+    storage_uri: repo://artifacts/range-wicks-v2-40-20261029/delivery.json
+    training_eligible: false
+    production_eligible: false
+    notes: V2.37 baseline preserved; confirmed current-timeframe 1.618 wick rings default on in owner-sampled green with size and visibility controls. Owner chart defaults hide Monday labels and use white historical 1.618 lines. Ten local checks and twelve native Pine fixture groups passed, native off/on and saved SOL12h layout verified. Original script retained after documented native-editor recovery; no trade logic or service changes.

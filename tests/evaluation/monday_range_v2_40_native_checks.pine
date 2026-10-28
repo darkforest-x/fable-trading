@@ -1,0 +1,34 @@
+
+// Append for native QA only; never deliver this appendix in the private script.
+wick1618Assert(bool condition, string name) =>
+    if not condition
+        runtime.error("V240_FIXTURE_FAIL: " + name)
+
+if barstate.islastconfirmedhistory
+    [upExact, dnExact] = wick1618Touches(true, 100, 110, 90, 101, 110, 90)
+    wick1618Assert(upExact and dnExact, "exact touch on both wicks")
+    [upCross, dnCross] = wick1618Touches(true, 100, 112, 88, 99, 110, 90)
+    wick1618Assert(upCross and dnCross, "penetrating both wicks")
+    [upNear, dnNear] = wick1618Touches(true, 100, 109.99, 90.01, 101, 110, 90)
+    wick1618Assert(not upNear and not dnNear, "near miss")
+    [upBody, unused1] = wick1618Touches(true, 100, 112, 95, 110, 110, 90)
+    [unused2, dnBody] = wick1618Touches(true, 100, 105, 88, 90, 110, 90)
+    wick1618Assert(not upBody and not dnBody, "body at boundary excluded")
+    [upOutside, unused3] = wick1618Touches(true, 111, 114, 108, 112, 110, 90)
+    [unused4, dnOutside] = wick1618Touches(true, 89, 92, 86, 88, 110, 90)
+    wick1618Assert(not upOutside and not dnOutside, "body beyond level excluded")
+    [upUnready, dnUnready] = wick1618Touches(false, 100, 112, 88, 101, 110, 90)
+    wick1618Assert(not upUnready and not dnUnready, "unfinalized or stale range excluded")
+    [upMissing, dnMissing] = wick1618Touches(true, 100, 112, 88, 101, na, na)
+    wick1618Assert(not upMissing and not dnMissing, "missing levels excluded")
+    [upOpen, unused5] = wick1618Touches(true, 110, 112, 98, 100, 110, 90)
+    [unused6, dnOpen] = wick1618Touches(true, 90, 105, 88, 100, 110, 90)
+    wick1618Assert(not upOpen and not dnOpen, "opening body at boundary excluded")
+    wick1618Assert(wick1618Center(90, 88) == 89, "lower ring center")
+    wick1618Assert(wick1618Center(110, 114) == 112, "upper ring center")
+    wick1618Assert(wick1618Center(90, 90) == 90, "exact-touch ring center")
+    wick1618Assert(wick1618Rings.size() <= 60 and label.all.size() <= 500, "shared label budget")
+    log.info("V240_FIXTURES_PASS: 12 groups; rings=" + str.tostring(wick1618Rings.size()) + "; totalLabels=" + str.tostring(label.all.size()))
+
+if barstate.isconfirmed and wick1618Visible and (wick1618Up or wick1618Down)
+    log.info("V240_RING " + str.format_time(time, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " up=" + str.tostring(wick1618Up) + " down=" + str.tostring(wick1618Down) + " levels=" + str.tostring(wick1618Upper) + "/" + str.tostring(wick1618Lower) + " low=" + str.tostring(low) + " high=" + str.tostring(high))
