@@ -1,0 +1,30 @@
+{
+  "read_date": "2026-10-29",
+  "sources": [
+    {
+      "url": "https://www.kucoin.com/news/flash/crypto-market-flash-crash-523m-in-liquidations-in-1-hour",
+      "published": "2026-08-22 05:32:06 UTC",
+      "type": "KuCoin relay of BlockBeats/CoinGlass",
+      "finding": "Market-wide trailing-hour liquidations 523 million USD, including 448 million longs and 74.76 million shorts. This is not FHE-specific liquidation attribution. Original BlockBeats link returned HTTP403 during verification."
+    },
+    {
+      "url": "https://cryptoslate.com/xrp-crashes-37-in-one-bitstamp-wick-while-the-wider-market-told-a-different-story/",
+      "published": "2026-08-24",
+      "type": "Retrospective secondary analysis with primary exchange API links",
+      "finding": "The 37.15 percent XRP high-to-low wick was Bitstamp-specific; exchange, quote instrument, and window must remain attached to the statistic."
+    },
+    {
+      "url": "https://www.bitstamp.net/api/v2/ohlc/xrpusd/?end=1787376000&limit=30&start=1787374800&step=60",
+      "type": "Primary exchange historical OHLC",
+      "finding": "UTC05:03 high1.69739; UTC05:10 low1.06689 and close1.44837. FHE low05:12:09 is nearby, not inside this XRP one-minute candle."
+    },
+    {
+      "url": "https://www.binance.com/en/support/announcement/detail/e9a7c2479fb843dcba2e134c8ced17d0",
+      "published": "2026-08-20 03:00 UTC",
+      "type": "Official exchange announcement",
+      "finding": "Aug22 stock-service maintenance10:50–15:00UTC does not match the05:10UTC cryptocurrency event; it is not evidence of a crypto exchange outage."
+    }
+  ],
+  "attribution": "Concurrent market stress and long liquidations supported. Specific FHE initiating seller, forced-liquidation linkage, depth withdrawal, or exchange fault not established.",
+  "rejected_lead": "Automated AInvest FHE article has inconsistent timing and price relative to cached primary trades; not used for cause or precise prices."
+}

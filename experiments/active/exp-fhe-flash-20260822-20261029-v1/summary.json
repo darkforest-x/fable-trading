@@ -1,0 +1,5174 @@
+{
+  "study": "Ex-post price observation; not a strategy backtest",
+  "builder_commit": "ec057684a0d3b666713217901ba591b31646a599",
+  "date_shanghai": "2026-08-22",
+  "event_shanghai": "13:10\u201313:15",
+  "listed_symbols": 638,
+  "observed_symbols": 638,
+  "absent_symbols": [],
+  "event_symbols": 638,
+  "event_median_close_pct": -2.439466017170955,
+  "event_drop_3pct": 504,
+  "event_drop_5pct": 485,
+  "event_drop_10pct": 333,
+  "fhe": {
+    "first_touch": {
+      "price": 0.01693,
+      "qty": 2068.0,
+      "ts": 1787375493608,
+      "buyer_maker": true,
+      "time_shanghai": "2026-08-22 13:11:33.608000+08:00"
+    },
+    "low": {
+      "price": 0.0154,
+      "qty": 481688.0,
+      "ts": 1787375529114,
+      "buyer_maker": true,
+      "time_shanghai": "2026-08-22 13:12:09.114000+08:00"
+    },
+    "first_target_after_low": {
+      "price": 0.02354,
+      "qty": 6596.0,
+      "ts": 1787375628300,
+      "buyer_maker": false,
+      "time_shanghai": "2026-08-22 13:13:48.300000+08:00"
+    },
+    "peak": {
+      "price": 0.029,
+      "qty": 90949.0,
+      "ts": 1787375679181,
+      "buyer_maker": false,
+      "time_shanghai": "2026-08-22 13:14:39.181000+08:00"
+    },
+    "seconds_touch_to_target": 134.692,
+    "seconds_low_to_target": 99.186,
+    "crash_two_minute_quote_volume": 646782.25038,
+    "crash_taker_sell_share": 0.7670460312392966,
+    "previous_hour_median_minute_quote_volume": 1765.0834650000002,
+    "tick_bar_volume_high_low_parity": true
+  },
+  "limitations": "Existing archived universe, not an exhaustive point-in-time exchange listing. Prices are trades, not mark/index prices or order-book depth. Recovery is retrospective, not executable returns. No news/forced-liquidation attribution from price alone.",
+  "sources": {
+    "0GUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/0GUSDT.csv",
+        "bytes": 3153853,
+        "mtime_ns": 1790091178000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "1000000BOBUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/1000000BOBUSDT.csv",
+        "bytes": 3331902,
+        "mtime_ns": 1790091178000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "1000000MOGUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/1000000MOGUSDT.csv",
+        "bytes": 3130826,
+        "mtime_ns": 1790091177000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "1000BONKUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/1000BONKUSDT.csv",
+        "bytes": 3589476,
+        "mtime_ns": 1790091175000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "1000CATUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/1000CATUSDT.csv",
+        "bytes": 3548153,
+        "mtime_ns": 1790091177000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "1000CHEEMSUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/1000CHEEMSUSDT.csv",
+        "bytes": 3730278,
+        "mtime_ns": 1790091175000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "1000FLOKIUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/1000FLOKIUSDT.csv",
+        "bytes": 3361995,
+        "mtime_ns": 1790091178000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "1000LUNCUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/1000LUNCUSDT.csv",
+        "bytes": 3355670,
+        "mtime_ns": 1790091177000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "1000PEPEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/1000PEPEUSDT.csv",
+        "bytes": 3797760,
+        "mtime_ns": 1790091210000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "1000RATSUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/1000RATSUSDT.csv",
+        "bytes": 3336614,
+        "mtime_ns": 1790091211000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "1000SATSUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/1000SATSUSDT.csv",
+        "bytes": 3748069,
+        "mtime_ns": 1790091210000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "1000SHIBUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/1000SHIBUSDT.csv",
+        "bytes": 3591590,
+        "mtime_ns": 1790091216000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "1000WHYUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/1000WHYUSDT.csv",
+        "bytes": 3164680,
+        "mtime_ns": 1790091207000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "1000XECUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/1000XECUSDT.csv",
+        "bytes": 3484661,
+        "mtime_ns": 1790091210000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "1000XUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/1000XUSDT.csv",
+        "bytes": 3164680,
+        "mtime_ns": 1790091208000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "1INCHUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/1INCHUSDT.csv",
+        "bytes": 3239844,
+        "mtime_ns": 1790091210000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "1MBABYDOGEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/1MBABYDOGEUSDT.csv",
+        "bytes": 3749127,
+        "mtime_ns": 1790091243000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "2ZUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/2ZUSDT.csv",
+        "bytes": 3325164,
+        "mtime_ns": 1790091242000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "42USDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/42USDT.csv",
+        "bytes": 2998120,
+        "mtime_ns": 1790091237000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "4USDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/4USDT.csv",
+        "bytes": 3537962,
+        "mtime_ns": 1790091240000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "A2ZUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/A2ZUSDT.csv",
+        "bytes": 3497800,
+        "mtime_ns": 1790091238000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AAVEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AAVEUSDT.csv",
+        "bytes": 2973449,
+        "mtime_ns": 1790091239000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ACEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ACEUSDT.csv",
+        "bytes": 3326824,
+        "mtime_ns": 1790091247000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ACHUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ACHUSDT.csv",
+        "bytes": 3537679,
+        "mtime_ns": 1790091247000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ACTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ACTUSDT.csv",
+        "bytes": 3433365,
+        "mtime_ns": 1790091270000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ACUUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ACUUSDT.csv",
+        "bytes": 3310227,
+        "mtime_ns": 1790091271000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ACXUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ACXUSDT.csv",
+        "bytes": 3267040,
+        "mtime_ns": 1790091273000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ADAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ADAUSDT.csv",
+        "bytes": 3222248,
+        "mtime_ns": 1790091270000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AEROUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AEROUSDT.csv",
+        "bytes": 3155410,
+        "mtime_ns": 1790091277000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AEVOUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AEVOUSDT.csv",
+        "bytes": 3339535,
+        "mtime_ns": 1790091273000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AGIXUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AGIXUSDT.csv",
+        "bytes": 2998120,
+        "mtime_ns": 1790091276000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AGLDUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AGLDUSDT.csv",
+        "bytes": 3141718,
+        "mtime_ns": 1790091278000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AGTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AGTUSDT.csv",
+        "bytes": 3517561,
+        "mtime_ns": 1790091299000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AI16ZUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AI16ZUSDT.csv",
+        "bytes": 3164680,
+        "mtime_ns": 1790091302000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AIAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AIAUSDT.csv",
+        "bytes": 3333473,
+        "mtime_ns": 1790091301000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AIGENSYNUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AIGENSYNUSDT.csv",
+        "bytes": 3365917,
+        "mtime_ns": 1790091303000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AINUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AINUSDT.csv",
+        "bytes": 3313799,
+        "mtime_ns": 1790091307000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AIOTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AIOTUSDT.csv",
+        "bytes": 3332192,
+        "mtime_ns": 1790091307000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AIOUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AIOUSDT.csv",
+        "bytes": 3328012,
+        "mtime_ns": 1790091307000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AIUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AIUSDT.csv",
+        "bytes": 3164680,
+        "mtime_ns": 1790091306000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AIXBTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AIXBTUSDT.csv",
+        "bytes": 3349900,
+        "mtime_ns": 1790091333000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AKEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AKEUSDT.csv",
+        "bytes": 3713667,
+        "mtime_ns": 1790091332000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AKTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AKTUSDT.csv",
+        "bytes": 3123644,
+        "mtime_ns": 1790091333000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ALCHUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ALCHUSDT.csv",
+        "bytes": 3319429,
+        "mtime_ns": 1790091336000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ALGOUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ALGOUSDT.csv",
+        "bytes": 3261270,
+        "mtime_ns": 1790091337000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ALICEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ALICEUSDT.csv",
+        "bytes": 3154763,
+        "mtime_ns": 1790091338000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ALLOUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ALLOUSDT.csv",
+        "bytes": 3343604,
+        "mtime_ns": 1790091344000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ALLUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ALLUSDT.csv",
+        "bytes": 3091033,
+        "mtime_ns": 1790091339000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ALPACAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ALPACAUSDT.csv",
+        "bytes": 2665000,
+        "mtime_ns": 1790091365000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ALPHAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ALPHAUSDT.csv",
+        "bytes": 3164680,
+        "mtime_ns": 1790091360000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ALPINEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ALPINEUSDT.csv",
+        "bytes": 3112377,
+        "mtime_ns": 1790091364000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ALTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ALTUSDT.csv",
+        "bytes": 3540549,
+        "mtime_ns": 1790091371000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AMBUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AMBUSDT.csv",
+        "bytes": 3331240,
+        "mtime_ns": 1790091374000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ANIMEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ANIMEUSDT.csv",
+        "bytes": 3541291,
+        "mtime_ns": 1790091370000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ANKRUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ANKRUSDT.csv",
+        "bytes": 3536186,
+        "mtime_ns": 1790091370000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "APEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/APEUSDT.csv",
+        "bytes": 3169076,
+        "mtime_ns": 1790091381000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "API3USDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/API3USDT.csv",
+        "bytes": 3138609,
+        "mtime_ns": 1790091400000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "APRUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/APRUSDT.csv",
+        "bytes": 3205314,
+        "mtime_ns": 1790091396000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "APTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/APTUSDT.csv",
+        "bytes": 3165506,
+        "mtime_ns": 1790091402000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ARBUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ARBUSDT.csv",
+        "bytes": 3326111,
+        "mtime_ns": 1790091409000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ARCUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ARCUSDT.csv",
+        "bytes": 3327473,
+        "mtime_ns": 1790091408000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ARIAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ARIAUSDT.csv",
+        "bytes": 3296793,
+        "mtime_ns": 1790091416000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ARKMUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ARKMUSDT.csv",
+        "bytes": 3158406,
+        "mtime_ns": 1790091404000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ARKUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ARKUSDT.csv",
+        "bytes": 3135297,
+        "mtime_ns": 1790091419000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ARPAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ARPAUSDT.csv",
+        "bytes": 3427171,
+        "mtime_ns": 1790091432000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ARUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ARUSDT.csv",
+        "bytes": 2950999,
+        "mtime_ns": 1790091436000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ASRUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ASRUSDT.csv",
+        "bytes": 2931652,
+        "mtime_ns": 1790091441000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ASTERUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ASTERUSDT.csv",
+        "bytes": 3170836,
+        "mtime_ns": 1790091441000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ASTRUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ASTRUSDT.csv",
+        "bytes": 3522894,
+        "mtime_ns": 1790091446000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ATAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ATAUSDT.csv",
+        "bytes": 3190517,
+        "mtime_ns": 1790091436000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ATHUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ATHUSDT.csv",
+        "bytes": 3541299,
+        "mtime_ns": 1790091454000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ATOMUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ATOMUSDT.csv",
+        "bytes": 3010658,
+        "mtime_ns": 1790091454000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ATUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ATUSDT.csv",
+        "bytes": 3194062,
+        "mtime_ns": 1790091464000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AUCTIONUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AUCTIONUSDT.csv",
+        "bytes": 2948460,
+        "mtime_ns": 1790091464000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AUSDT.csv",
+        "bytes": 3320982,
+        "mtime_ns": 1790091475000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AVAAIUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AVAAIUSDT.csv",
+        "bytes": 3529636,
+        "mtime_ns": 1790091473000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AVAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AVAUSDT.csv",
+        "bytes": 3124351,
+        "mtime_ns": 1790091484000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AVAXUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AVAXUSDT.csv",
+        "bytes": 2985161,
+        "mtime_ns": 1790091481000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AVNTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AVNTUSDT.csv",
+        "bytes": 3216370,
+        "mtime_ns": 1790091481000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AWEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AWEUSDT.csv",
+        "bytes": 3317806,
+        "mtime_ns": 1790091495000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AXLUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AXLUSDT.csv",
+        "bytes": 3328483,
+        "mtime_ns": 1790091497000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AXSUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AXSUSDT.csv",
+        "bytes": 3023375,
+        "mtime_ns": 1790091495000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "AZTECUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/AZTECUSDT.csv",
+        "bytes": 3344096,
+        "mtime_ns": 1790091504000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "B2USDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/B2USDT.csv",
+        "bytes": 3116471,
+        "mtime_ns": 1790091511000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "B3USDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/B3USDT.csv",
+        "bytes": 3497800,
+        "mtime_ns": 1790091513000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BABYUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BABYUSDT.csv",
+        "bytes": 3370782,
+        "mtime_ns": 1790091516000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BADGERUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BADGERUSDT.csv",
+        "bytes": 2998120,
+        "mtime_ns": 1790091515000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BAKEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BAKEUSDT.csv",
+        "bytes": 2998120,
+        "mtime_ns": 1790091524000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BALUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BALUSDT.csv",
+        "bytes": 2831560,
+        "mtime_ns": 1790091523000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BANANAS31USDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BANANAS31USDT.csv",
+        "bytes": 3536520,
+        "mtime_ns": 1790091540000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BANANAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BANANAUSDT.csv",
+        "bytes": 2911689,
+        "mtime_ns": 1790091535000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BANDUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BANDUSDT.csv",
+        "bytes": 3127737,
+        "mtime_ns": 1790091540000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BANKUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BANKUSDT.csv",
+        "bytes": 3364609,
+        "mtime_ns": 1790091545000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BANUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BANUSDT.csv",
+        "bytes": 3309315,
+        "mtime_ns": 1790091550000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BARDUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BARDUSDT.csv",
+        "bytes": 3146972,
+        "mtime_ns": 1790091550000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BASEDUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BASEDUSDT.csv",
+        "bytes": 3351511,
+        "mtime_ns": 1790091549000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BASUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BASUSDT.csv",
+        "bytes": 3514163,
+        "mtime_ns": 1790091555000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BATUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BATUSDT.csv",
+        "bytes": 3225476,
+        "mtime_ns": 1790091568000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BBUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BBUSDT.csv",
+        "bytes": 3359057,
+        "mtime_ns": 1790091569000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BCHUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BCHUSDT.csv",
+        "bytes": 3154210,
+        "mtime_ns": 1790091568000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BEAMXUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BEAMXUSDT.csv",
+        "bytes": 3549696,
+        "mtime_ns": 1790091578000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BEATUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BEATUSDT.csv",
+        "bytes": 3102067,
+        "mtime_ns": 1790091578000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BELUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BELUSDT.csv",
+        "bytes": 3272212,
+        "mtime_ns": 1790091579000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BERAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BERAUSDT.csv",
+        "bytes": 3157881,
+        "mtime_ns": 1790091579000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BICOUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BICOUSDT.csv",
+        "bytes": 3368616,
+        "mtime_ns": 1790091586000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BIDUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BIDUSDT.csv",
+        "bytes": 3164680,
+        "mtime_ns": 1790091592000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BIGTIMEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BIGTIMEUSDT.csv",
+        "bytes": 3450061,
+        "mtime_ns": 1790091599000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BIOUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BIOUSDT.csv",
+        "bytes": 3368869,
+        "mtime_ns": 1790091608000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BIRBUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BIRBUSDT.csv",
+        "bytes": 3322619,
+        "mtime_ns": 1790091615000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BLESSUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BLESSUSDT.csv",
+        "bytes": 3556203,
+        "mtime_ns": 1790091610000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BLUAIUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BLUAIUSDT.csv",
+        "bytes": 3527359,
+        "mtime_ns": 1790091611000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BLURUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BLURUSDT.csv",
+        "bytes": 3357246,
+        "mtime_ns": 1790091617000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BLZUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BLZUSDT.csv",
+        "bytes": 3164680,
+        "mtime_ns": 1790091614000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BMTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BMTUSDT.csv",
+        "bytes": 3351026,
+        "mtime_ns": 1790091623000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BNBUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BNBUSDT.csv",
+        "bytes": 3121599,
+        "mtime_ns": 1790091636000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BNTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BNTUSDT.csv",
+        "bytes": 3107991,
+        "mtime_ns": 1790091638000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BNXUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BNXUSDT.csv",
+        "bytes": 2498440,
+        "mtime_ns": 1790091638000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BOBUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BOBUSDT.csv",
+        "bytes": 3331240,
+        "mtime_ns": 1790091642000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BOMEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BOMEUSDT.csv",
+        "bytes": 3770277,
+        "mtime_ns": 1790091646000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BONDUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BONDUSDT.csv",
+        "bytes": 2831560,
+        "mtime_ns": 1790091641000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BRETTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BRETTUSDT.csv",
+        "bytes": 3530886,
+        "mtime_ns": 1790091645000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BREVUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BREVUSDT.csv",
+        "bytes": 3268913,
+        "mtime_ns": 1790091657000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BROCCOLI714USDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BROCCOLI714USDT.csv",
+        "bytes": 3351126,
+        "mtime_ns": 1790091668000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BROCCOLIF3BUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BROCCOLIF3BUSDT.csv",
+        "bytes": 3523757,
+        "mtime_ns": 1790091673000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BRUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BRUSDT.csv",
+        "bytes": 3316421,
+        "mtime_ns": 1790091675000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BSBUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BSBUSDT.csv",
+        "bytes": 3344299,
+        "mtime_ns": 1790091671000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BSVUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BSVUSDT.csv",
+        "bytes": 2882544,
+        "mtime_ns": 1790091669000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BSWUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BSWUSDT.csv",
+        "bytes": 2998120,
+        "mtime_ns": 1790091675000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BTCDOMUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BTCDOMUSDT.csv",
+        "bytes": 3078097,
+        "mtime_ns": 1790091678000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BTCUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BTCUSDT.csv",
+        "bytes": 3326725,
+        "mtime_ns": 1790091692000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BTRUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BTRUSDT.csv",
+        "bytes": 3343075,
+        "mtime_ns": 1790091701000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BULLAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BULLAUSDT.csv",
+        "bytes": 3527955,
+        "mtime_ns": 1790091698000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "BUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/BUSDT.csv",
+        "bytes": 3157877,
+        "mtime_ns": 1790091707000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "C98USDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/C98USDT.csv",
+        "bytes": 3345304,
+        "mtime_ns": 1790091706000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CAKEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CAKEUSDT.csv",
+        "bytes": 3123945,
+        "mtime_ns": 1790091711000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CARVUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CARVUSDT.csv",
+        "bytes": 3317403,
+        "mtime_ns": 1790091709000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CATIUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CATIUSDT.csv",
+        "bytes": 3328962,
+        "mtime_ns": 1790091712000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CCUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CCUSDT.csv",
+        "bytes": 3328357,
+        "mtime_ns": 1790091728000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CELOUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CELOUSDT.csv",
+        "bytes": 3317966,
+        "mtime_ns": 1790091732000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CELRUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CELRUSDT.csv",
+        "bytes": 3535494,
+        "mtime_ns": 1790091734000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CETUSUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CETUSUSDT.csv",
+        "bytes": 3330036,
+        "mtime_ns": 1790091738000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CFGUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CFGUSDT.csv",
+        "bytes": 3155709,
+        "mtime_ns": 1790091737000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CFXUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CFXUSDT.csv",
+        "bytes": 3345472,
+        "mtime_ns": 1790091743000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CGPTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CGPTUSDT.csv",
+        "bytes": 3338501,
+        "mtime_ns": 1790091746000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CHESSUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CHESSUSDT.csv",
+        "bytes": 3164680,
+        "mtime_ns": 1790091739000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CHILLGUYUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CHILLGUYUSDT.csv",
+        "bytes": 3518481,
+        "mtime_ns": 1790091761000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CHIPUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CHIPUSDT.csv",
+        "bytes": 3376930,
+        "mtime_ns": 1790091766000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CHRUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CHRUSDT.csv",
+        "bytes": 3340736,
+        "mtime_ns": 1790091764000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CHZUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CHZUSDT.csv",
+        "bytes": 3384245,
+        "mtime_ns": 1790091770000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CKBUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CKBUSDT.csv",
+        "bytes": 3606069,
+        "mtime_ns": 1790091773000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CLANKERUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CLANKERUSDT.csv",
+        "bytes": 2918769,
+        "mtime_ns": 1790091776000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CLOUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CLOUSDT.csv",
+        "bytes": 3332183,
+        "mtime_ns": 1790091775000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "COAIUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/COAIUSDT.csv",
+        "bytes": 3134769,
+        "mtime_ns": 1790091775000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "COLLECTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/COLLECTUSDT.csv",
+        "bytes": 3337430,
+        "mtime_ns": 1790091792000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "COMBOUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/COMBOUSDT.csv",
+        "bytes": 2998120,
+        "mtime_ns": 1790091790000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "COMMONUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/COMMONUSDT.csv",
+        "bytes": 3164680,
+        "mtime_ns": 1790091793000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "COMPUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/COMPUSDT.csv",
+        "bytes": 2979984,
+        "mtime_ns": 1790091801000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "COOKIEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/COOKIEUSDT.csv",
+        "bytes": 3415060,
+        "mtime_ns": 1790091806000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "COSUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/COSUSDT.csv",
+        "bytes": 3401178,
+        "mtime_ns": 1790091801000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "COTIUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/COTIUSDT.csv",
+        "bytes": 3444332,
+        "mtime_ns": 1790091808000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "COWUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/COWUSDT.csv",
+        "bytes": 3137224,
+        "mtime_ns": 1790091811000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CROSSUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CROSSUSDT.csv",
+        "bytes": 3306646,
+        "mtime_ns": 1790091828000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CRVUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CRVUSDT.csv",
+        "bytes": 3178928,
+        "mtime_ns": 1790091828000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CTKUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CTKUSDT.csv",
+        "bytes": 3120230,
+        "mtime_ns": 1790091823000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CTSIUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CTSIUSDT.csv",
+        "bytes": 3332541,
+        "mtime_ns": 1790091828000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CUDISUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CUDISUSDT.csv",
+        "bytes": 3164680,
+        "mtime_ns": 1790091831000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CUSDT.csv",
+        "bytes": 3322535,
+        "mtime_ns": 1790091833000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CVCUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CVCUSDT.csv",
+        "bytes": 3326767,
+        "mtime_ns": 1790091841000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CVXUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CVXUSDT.csv",
+        "bytes": 2926972,
+        "mtime_ns": 1790091839000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CYBERUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CYBERUSDT.csv",
+        "bytes": 3119914,
+        "mtime_ns": 1790091853000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "CYSUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/CYSUSDT.csv",
+        "bytes": 3141193,
+        "mtime_ns": 1790091856000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DAMUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DAMUSDT.csv",
+        "bytes": 3164680,
+        "mtime_ns": 1790091855000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DARUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DARUSDT.csv",
+        "bytes": 2998120,
+        "mtime_ns": 1790091852000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DASHUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DASHUSDT.csv",
+        "bytes": 3009227,
+        "mtime_ns": 1790091861000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DEEPUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DEEPUSDT.csv",
+        "bytes": 3343063,
+        "mtime_ns": 1790091861000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DEFIUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DEFIUSDT.csv",
+        "bytes": 2831560,
+        "mtime_ns": 1790091863000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DEGENUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DEGENUSDT.csv",
+        "bytes": 3497800,
+        "mtime_ns": 1790091867000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DEGOUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DEGOUSDT.csv",
+        "bytes": 2998120,
+        "mtime_ns": 1790091879000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DENTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DENTUSDT.csv",
+        "bytes": 3497800,
+        "mtime_ns": 1790091882000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DEXEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DEXEUSDT.csv",
+        "bytes": 3038309,
+        "mtime_ns": 1790091885000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DFUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DFUSDT.csv",
+        "bytes": 3164680,
+        "mtime_ns": 1790091879000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DGBUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DGBUSDT.csv",
+        "bytes": 3164680,
+        "mtime_ns": 1790091888000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DIAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DIAUSDT.csv",
+        "bytes": 3137287,
+        "mtime_ns": 1790091890000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DMCUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DMCUSDT.csv",
+        "bytes": 3331240,
+        "mtime_ns": 1790091891000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DODOXUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DODOXUSDT.csv",
+        "bytes": 3517555,
+        "mtime_ns": 1790091895000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DOGEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DOGEUSDT.csv",
+        "bytes": 3416010,
+        "mtime_ns": 1790091904000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DOGSUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DOGSUSDT.csv",
+        "bytes": 3802444,
+        "mtime_ns": 1790091911000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DOLOUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DOLOUSDT.csv",
+        "bytes": 3329729,
+        "mtime_ns": 1790091918000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DOODUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DOODUSDT.csv",
+        "bytes": 3553083,
+        "mtime_ns": 1790091918000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DOTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DOTUSDT.csv",
+        "bytes": 3078954,
+        "mtime_ns": 1790091923000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DRIFTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DRIFTUSDT.csv",
+        "bytes": 3351346,
+        "mtime_ns": 1790091922000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DUSDT.csv",
+        "bytes": 3390850,
+        "mtime_ns": 1790091922000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DUSKUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DUSKUSDT.csv",
+        "bytes": 3327636,
+        "mtime_ns": 1790091924000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DYDXUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DYDXUSDT.csv",
+        "bytes": 3168152,
+        "mtime_ns": 1790091941000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "DYMUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/DYMUSDT.csv",
+        "bytes": 3355350,
+        "mtime_ns": 1790091942000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "EDENUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/EDENUSDT.csv",
+        "bytes": 3356874,
+        "mtime_ns": 1790091952000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "EDGEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/EDGEUSDT.csv",
+        "bytes": 3151164,
+        "mtime_ns": 1790091949000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "EDUUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/EDUUSDT.csv",
+        "bytes": 3340715,
+        "mtime_ns": 1790091953000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "EGLDUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/EGLDUSDT.csv",
+        "bytes": 2933472,
+        "mtime_ns": 1790091952000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "EIGENUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/EIGENUSDT.csv",
+        "bytes": 3174629,
+        "mtime_ns": 1790091949000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ELSAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ELSAUSDT.csv",
+        "bytes": 3322139,
+        "mtime_ns": 1790091955000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ENAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ENAUSDT.csv",
+        "bytes": 3394915,
+        "mtime_ns": 1790091974000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ENJUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ENJUSDT.csv",
+        "bytes": 3351608,
+        "mtime_ns": 1790091974000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ENSOUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ENSOUSDT.csv",
+        "bytes": 3130276,
+        "mtime_ns": 1790091977000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ENSUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ENSUSDT.csv",
+        "bytes": 2933989,
+        "mtime_ns": 1790091977000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "EPICUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/EPICUSDT.csv",
+        "bytes": 3152988,
+        "mtime_ns": 1790091990000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "EPTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/EPTUSDT.csv",
+        "bytes": 3164680,
+        "mtime_ns": 1790091977000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ERAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ERAUSDT.csv",
+        "bytes": 3245381,
+        "mtime_ns": 1790091986000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ESPORTSUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ESPORTSUSDT.csv",
+        "bytes": 3332829,
+        "mtime_ns": 1790091992000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ESPUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ESPUSDT.csv",
+        "bytes": 3338994,
+        "mtime_ns": 1790092005000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ETCUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ETCUSDT.csv",
+        "bytes": 2987657,
+        "mtime_ns": 1790092005000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ETHFIUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHFIUSDT.csv",
+        "bytes": 3163703,
+        "mtime_ns": 1790092014000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ETHUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHUSDT.csv",
+        "bytes": 3358521,
+        "mtime_ns": 1790092006000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ETHWUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHWUSDT.csv",
+        "bytes": 3109028,
+        "mtime_ns": 1790092007000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "EULUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/EULUSDT.csv",
+        "bytes": 3115036,
+        "mtime_ns": 1790092021000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "EVAAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/EVAAUSDT.csv",
+        "bytes": 3137331,
+        "mtime_ns": 1790092024000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FARTCOINUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/FARTCOINUSDT.csv",
+        "bytes": 3193924,
+        "mtime_ns": 1790092022000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FETUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/FETUSDT.csv",
+        "bytes": 3194000,
+        "mtime_ns": 1790092034000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FFUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/FFUSDT.csv",
+        "bytes": 3346237,
+        "mtime_ns": 1790092041000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FHEUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/FHEUSDT.csv",
+        "bytes": 3349931,
+        "mtime_ns": 1790092046000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FIDAUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/FIDAUSDT.csv",
+        "bytes": 3358558,
+        "mtime_ns": 1790092040000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FIGHTUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/FIGHTUSDT.csv",
+        "bytes": 3538380,
+        "mtime_ns": 1790092046000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FILUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/FILUSDT.csv",
+        "bytes": 3101160,
+        "mtime_ns": 1790092049000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FIOUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/FIOUSDT.csv",
+        "bytes": 3331240,
+        "mtime_ns": 1790092051000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FISUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/FISUSDT.csv",
+        "bytes": 3164680,
+        "mtime_ns": 1790092052000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FLMUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/FLMUSDT.csv",
+        "bytes": 2998120,
+        "mtime_ns": 1790092063000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FLOCKUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/FLOCKUSDT.csv",
+        "bytes": 3335843,
+        "mtime_ns": 1790092066000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FLOWUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/FLOWUSDT.csv",
+        "bytes": 3330531,
+        "mtime_ns": 1790092073000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FLUIDUSDT": [
+      {
+        "path": "data/crypto/market/kline_binance_um5m_forward_20260922/series/FLUIDUSDT.csv",
+        "bytes": 2922363,
+        "mtime_ns": 1790092071000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FLUXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/FLUXUSDT.csv.gz",
+        "bytes": 1093027,
+        "mtime_ns": 1790138645000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FOGOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/FOGOUSDT.csv.gz",
+        "bytes": 954672,
+        "mtime_ns": 1790138647000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FOLKSUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/FOLKSUSDT.csv.gz",
+        "bytes": 1108875,
+        "mtime_ns": 1790138646000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FORMUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/FORMUSDT.csv.gz",
+        "bytes": 1162634,
+        "mtime_ns": 1790138650000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FORTHUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/FORTHUSDT.csv.gz",
+        "bytes": 512776,
+        "mtime_ns": 1790138646000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FRAXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/FRAXUSDT.csv.gz",
+        "bytes": 868617,
+        "mtime_ns": 1790138653000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FTMUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/FTMUSDT.csv.gz",
+        "bytes": 218965,
+        "mtime_ns": 1790138649000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FTTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/FTTUSDT.csv.gz",
+        "bytes": 210676,
+        "mtime_ns": 1790138648000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FUNUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/FUNUSDT.csv.gz",
+        "bytes": 676492,
+        "mtime_ns": 1790138666000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/FUSDT.csv.gz",
+        "bytes": 1239495,
+        "mtime_ns": 1790138672000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "FXSUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/FXSUSDT.csv.gz",
+        "bytes": 386167,
+        "mtime_ns": 1790138669000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GALAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GALAUSDT.csv.gz",
+        "bytes": 1086359,
+        "mtime_ns": 1790138671000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GASUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GASUSDT.csv.gz",
+        "bytes": 932233,
+        "mtime_ns": 1790138673000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GENIUSUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GENIUSUSDT.csv.gz",
+        "bytes": 598817,
+        "mtime_ns": 1790138671000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GHSTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GHSTUSDT.csv.gz",
+        "bytes": 431640,
+        "mtime_ns": 1790138671000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GIGGLEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GIGGLEUSDT.csv.gz",
+        "bytes": 1191615,
+        "mtime_ns": 1790138676000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GLMRUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GLMRUSDT.csv.gz",
+        "bytes": 218937,
+        "mtime_ns": 1790138685000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GLMUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GLMUSDT.csv.gz",
+        "bytes": 1262233,
+        "mtime_ns": 1790138694000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GMTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GMTUSDT.csv.gz",
+        "bytes": 1087703,
+        "mtime_ns": 1790138701000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GMXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GMXUSDT.csv.gz",
+        "bytes": 1179325,
+        "mtime_ns": 1790138699000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GOATUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GOATUSDT.csv.gz",
+        "bytes": 1093187,
+        "mtime_ns": 1790138698000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GPSUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GPSUSDT.csv.gz",
+        "bytes": 1345545,
+        "mtime_ns": 1790138699000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GRASSUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GRASSUSDT.csv.gz",
+        "bytes": 1224339,
+        "mtime_ns": 1790138700000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GRIFFAINUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GRIFFAINUSDT.csv.gz",
+        "bytes": 1268390,
+        "mtime_ns": 1790138701000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GRTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GRTUSDT.csv.gz",
+        "bytes": 1117486,
+        "mtime_ns": 1790138710000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GTCUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GTCUSDT.csv.gz",
+        "bytes": 1029191,
+        "mtime_ns": 1790138721000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GUAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GUAUSDT.csv.gz",
+        "bytes": 1152855,
+        "mtime_ns": 1790138727000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GUNUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GUNUSDT.csv.gz",
+        "bytes": 1189899,
+        "mtime_ns": 1790138726000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GUSDT.csv.gz",
+        "bytes": 1210435,
+        "mtime_ns": 1790138727000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "GWEIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/GWEIUSDT.csv.gz",
+        "bytes": 1017319,
+        "mtime_ns": 1790138727000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HAEDALUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HAEDALUSDT.csv.gz",
+        "bytes": 1117992,
+        "mtime_ns": 1790138729000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HANAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HANAUSDT.csv.gz",
+        "bytes": 1158233,
+        "mtime_ns": 1790138729000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HBARUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HBARUSDT.csv.gz",
+        "bytes": 1283177,
+        "mtime_ns": 1790138739000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HEIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HEIUSDT.csv.gz",
+        "bytes": 1259672,
+        "mtime_ns": 1790138745000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HEMIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HEMIUSDT.csv.gz",
+        "bytes": 1262427,
+        "mtime_ns": 1790138751000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HFTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HFTUSDT.csv.gz",
+        "bytes": 959852,
+        "mtime_ns": 1790138751000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HIFIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HIFIUSDT.csv.gz",
+        "bytes": 218936,
+        "mtime_ns": 1790138749000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HIGHUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HIGHUSDT.csv.gz",
+        "bytes": 807548,
+        "mtime_ns": 1790138753000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HIPPOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HIPPOUSDT.csv.gz",
+        "bytes": 687511,
+        "mtime_ns": 1790138751000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HIVEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HIVEUSDT.csv.gz",
+        "bytes": 1164243,
+        "mtime_ns": 1790138754000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HMSTRUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HMSTRUSDT.csv.gz",
+        "bytes": 1240938,
+        "mtime_ns": 1790138763000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HOLOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HOLOUSDT.csv.gz",
+        "bytes": 1224212,
+        "mtime_ns": 1790138770000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HOMEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HOMEUSDT.csv.gz",
+        "bytes": 1374681,
+        "mtime_ns": 1790138778000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HOOKUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HOOKUSDT.csv.gz",
+        "bytes": 637038,
+        "mtime_ns": 1790138774000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HOTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HOTUSDT.csv.gz",
+        "bytes": 1037128,
+        "mtime_ns": 1790138778000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HUMAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HUMAUSDT.csv.gz",
+        "bytes": 1431909,
+        "mtime_ns": 1790138777000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HUSDT.csv.gz",
+        "bytes": 1408123,
+        "mtime_ns": 1790138776000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HYPERUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HYPERUSDT.csv.gz",
+        "bytes": 1117046,
+        "mtime_ns": 1790138780000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "HYPEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/HYPEUSDT.csv.gz",
+        "bytes": 1525659,
+        "mtime_ns": 1790138786000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ICNTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ICNTUSDT.csv.gz",
+        "bytes": 1115990,
+        "mtime_ns": 1790138798000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ICPUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ICPUSDT.csv.gz",
+        "bytes": 1048945,
+        "mtime_ns": 1790138798000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ICXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ICXUSDT.csv.gz",
+        "bytes": 860150,
+        "mtime_ns": 1790138802000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "IDEXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/IDEXUSDT.csv.gz",
+        "bytes": 218936,
+        "mtime_ns": 1790138797000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "IDOLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/IDOLUSDT.csv.gz",
+        "bytes": 1110693,
+        "mtime_ns": 1790138802000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "IDUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/IDUSDT.csv.gz",
+        "bytes": 1184350,
+        "mtime_ns": 1790138805000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ILVUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ILVUSDT.csv.gz",
+        "bytes": 1073823,
+        "mtime_ns": 1790138805000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "IMXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/IMXUSDT.csv.gz",
+        "bytes": 1017362,
+        "mtime_ns": 1790138813000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "INITUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/INITUSDT.csv.gz",
+        "bytes": 1158313,
+        "mtime_ns": 1790138822000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "INJUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/INJUSDT.csv.gz",
+        "bytes": 1188839,
+        "mtime_ns": 1790138822000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "INUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/INUSDT.csv.gz",
+        "bytes": 1226467,
+        "mtime_ns": 1790138825000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "INXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/INXUSDT.csv.gz",
+        "bytes": 1022798,
+        "mtime_ns": 1790138827000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "IOSTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/IOSTUSDT.csv.gz",
+        "bytes": 1125040,
+        "mtime_ns": 1790138830000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "IOTAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/IOTAUSDT.csv.gz",
+        "bytes": 1053798,
+        "mtime_ns": 1790138832000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "IOTXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/IOTXUSDT.csv.gz",
+        "bytes": 1002472,
+        "mtime_ns": 1790138829000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "IOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/IOUSDT.csv.gz",
+        "bytes": 1097050,
+        "mtime_ns": 1790138837000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "IPUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/IPUSDT.csv.gz",
+        "bytes": 907452,
+        "mtime_ns": 1790138845000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "IRUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/IRUSDT.csv.gz",
+        "bytes": 634949,
+        "mtime_ns": 1790138842000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "IRYSUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/IRYSUSDT.csv.gz",
+        "bytes": 1188759,
+        "mtime_ns": 1790138850000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "JASMYUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/JASMYUSDT.csv.gz",
+        "bytes": 1275450,
+        "mtime_ns": 1790138850000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "JCTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/JCTUSDT.csv.gz",
+        "bytes": 1286405,
+        "mtime_ns": 1790138856000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "JELLYJELLYUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/JELLYJELLYUSDT.csv.gz",
+        "bytes": 1246808,
+        "mtime_ns": 1790138854000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "JOEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/JOEUSDT.csv.gz",
+        "bytes": 1142309,
+        "mtime_ns": 1790138860000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "JSTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/JSTUSDT.csv.gz",
+        "bytes": 1281362,
+        "mtime_ns": 1790138870000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "JTOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/JTOUSDT.csv.gz",
+        "bytes": 1192787,
+        "mtime_ns": 1790138869000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "JUPUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/JUPUSDT.csv.gz",
+        "bytes": 1081424,
+        "mtime_ns": 1790138871000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "KAIAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/KAIAUSDT.csv.gz",
+        "bytes": 1134853,
+        "mtime_ns": 1790138876000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "KAITOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/KAITOUSDT.csv.gz",
+        "bytes": 1249318,
+        "mtime_ns": 1790138877000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "KASUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/KASUSDT.csv.gz",
+        "bytes": 1146440,
+        "mtime_ns": 1790138887000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "KATUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/KATUSDT.csv.gz",
+        "bytes": 784712,
+        "mtime_ns": 1790138883000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "KAVAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/KAVAUSDT.csv.gz",
+        "bytes": 1021551,
+        "mtime_ns": 1790138887000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "KDAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/KDAUSDT.csv.gz",
+        "bytes": 218537,
+        "mtime_ns": 1790138887000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "KERNELUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/KERNELUSDT.csv.gz",
+        "bytes": 1193421,
+        "mtime_ns": 1790138896000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "KEYUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/KEYUSDT.csv.gz",
+        "bytes": 220933,
+        "mtime_ns": 1790138889000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "KGENUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/KGENUSDT.csv.gz",
+        "bytes": 1247113,
+        "mtime_ns": 1790138902000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "KITEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/KITEUSDT.csv.gz",
+        "bytes": 1374635,
+        "mtime_ns": 1790138903000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "KLAYUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/KLAYUSDT.csv.gz",
+        "bytes": 218937,
+        "mtime_ns": 1790138905000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "KMNOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/KMNOUSDT.csv.gz",
+        "bytes": 1121586,
+        "mtime_ns": 1790138910000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "KNCUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/KNCUSDT.csv.gz",
+        "bytes": 926062,
+        "mtime_ns": 1790138912000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "KOMAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/KOMAUSDT.csv.gz",
+        "bytes": 1211149,
+        "mtime_ns": 1790138910000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "KSMUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/KSMUSDT.csv.gz",
+        "bytes": 1093447,
+        "mtime_ns": 1790138913000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LABUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LABUSDT.csv.gz",
+        "bytes": 1381291,
+        "mtime_ns": 1790138921000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LAUSDT.csv.gz",
+        "bytes": 1214981,
+        "mtime_ns": 1790138930000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LAYERUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LAYERUSDT.csv.gz",
+        "bytes": 1214910,
+        "mtime_ns": 1790138932000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LDOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LDOUSDT.csv.gz",
+        "bytes": 1154631,
+        "mtime_ns": 1790138926000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LEVERUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LEVERUSDT.csv.gz",
+        "bytes": 220964,
+        "mtime_ns": 1790138929000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LIGHTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LIGHTUSDT.csv.gz",
+        "bytes": 1136143,
+        "mtime_ns": 1790138937000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LINAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LINAUSDT.csv.gz",
+        "bytes": 221251,
+        "mtime_ns": 1790138934000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LINEAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LINEAUSDT.csv.gz",
+        "bytes": 1208168,
+        "mtime_ns": 1790138939000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LINKUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LINKUSDT.csv.gz",
+        "bytes": 1327910,
+        "mtime_ns": 1790138945000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LISTAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LISTAUSDT.csv.gz",
+        "bytes": 1132997,
+        "mtime_ns": 1790138952000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LITUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LITUSDT.csv.gz",
+        "bytes": 1178504,
+        "mtime_ns": 1790138959000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LOKAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LOKAUSDT.csv.gz",
+        "bytes": 218539,
+        "mtime_ns": 1790138950000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LOOMUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LOOMUSDT.csv.gz",
+        "bytes": 218582,
+        "mtime_ns": 1790138952000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LPTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LPTUSDT.csv.gz",
+        "bytes": 1012928,
+        "mtime_ns": 1790138960000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LQTYUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LQTYUSDT.csv.gz",
+        "bytes": 1104246,
+        "mtime_ns": 1790138965000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LRCUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LRCUSDT.csv.gz",
+        "bytes": 621613,
+        "mtime_ns": 1790138963000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LSKUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LSKUSDT.csv.gz",
+        "bytes": 1006271,
+        "mtime_ns": 1790138974000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LTCUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LTCUSDT.csv.gz",
+        "bytes": 1230765,
+        "mtime_ns": 1790138979000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LUMIAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LUMIAUSDT.csv.gz",
+        "bytes": 1243332,
+        "mtime_ns": 1790138984000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LUNA2USDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LUNA2USDT.csv.gz",
+        "bytes": 1209414,
+        "mtime_ns": 1790138983000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "LYNUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/LYNUSDT.csv.gz",
+        "bytes": 1292332,
+        "mtime_ns": 1790138989000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MAGICUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MAGICUSDT.csv.gz",
+        "bytes": 1178323,
+        "mtime_ns": 1790138987000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MAGMAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MAGMAUSDT.csv.gz",
+        "bytes": 1202175,
+        "mtime_ns": 1790138990000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MANAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MANAUSDT.csv.gz",
+        "bytes": 1012768,
+        "mtime_ns": 1790138994000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MANTAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MANTAUSDT.csv.gz",
+        "bytes": 1263624,
+        "mtime_ns": 1790138999000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MANTRAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MANTRAUSDT.csv.gz",
+        "bytes": 756931,
+        "mtime_ns": 1790139004000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MASKUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MASKUSDT.csv.gz",
+        "bytes": 1104538,
+        "mtime_ns": 1790139006000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MAVIAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MAVIAUSDT.csv.gz",
+        "bytes": 1153532,
+        "mtime_ns": 1790139011000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MAVUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MAVUSDT.csv.gz",
+        "bytes": 1084615,
+        "mtime_ns": 1790139009000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MBOXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MBOXUSDT.csv.gz",
+        "bytes": 804203,
+        "mtime_ns": 1790139012000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MDTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MDTUSDT.csv.gz",
+        "bytes": 218537,
+        "mtime_ns": 1790139008000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MEGAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MEGAUSDT.csv.gz",
+        "bytes": 940919,
+        "mtime_ns": 1790139015000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MELANIAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MELANIAUSDT.csv.gz",
+        "bytes": 1184074,
+        "mtime_ns": 1790139022000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MEMEFIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MEMEFIUSDT.csv.gz",
+        "bytes": 221269,
+        "mtime_ns": 1790139031000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MEMEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MEMEUSDT.csv.gz",
+        "bytes": 1284232,
+        "mtime_ns": 1790139035000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MERLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MERLUSDT.csv.gz",
+        "bytes": 1244808,
+        "mtime_ns": 1790139044000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "METISUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/METISUSDT.csv.gz",
+        "bytes": 1146642,
+        "mtime_ns": 1790139037000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "METUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/METUSDT.csv.gz",
+        "bytes": 1075732,
+        "mtime_ns": 1790139041000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MEUSDT.csv.gz",
+        "bytes": 1142044,
+        "mtime_ns": 1790139041000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MEWUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MEWUSDT.csv.gz",
+        "bytes": 1231699,
+        "mtime_ns": 1790139044000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MILKUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MILKUSDT.csv.gz",
+        "bytes": 279592,
+        "mtime_ns": 1790139047000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MINAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MINAUSDT.csv.gz",
+        "bytes": 1127462,
+        "mtime_ns": 1790139060000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MIRAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MIRAUSDT.csv.gz",
+        "bytes": 1139417,
+        "mtime_ns": 1790139069000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MITOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MITOUSDT.csv.gz",
+        "bytes": 1186469,
+        "mtime_ns": 1790139066000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MKRUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MKRUSDT.csv.gz",
+        "bytes": 218939,
+        "mtime_ns": 1790139069000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MLNUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MLNUSDT.csv.gz",
+        "bytes": 764096,
+        "mtime_ns": 1790139067000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MMTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MMTUSDT.csv.gz",
+        "bytes": 1064289,
+        "mtime_ns": 1790139075000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MOCAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MOCAUSDT.csv.gz",
+        "bytes": 1056894,
+        "mtime_ns": 1790139071000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MONUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MONUSDT.csv.gz",
+        "bytes": 1206115,
+        "mtime_ns": 1790139075000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MOODENGUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MOODENGUSDT.csv.gz",
+        "bytes": 1238970,
+        "mtime_ns": 1790139087000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MORPHOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MORPHOUSDT.csv.gz",
+        "bytes": 1330336,
+        "mtime_ns": 1790139092000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MOVEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MOVEUSDT.csv.gz",
+        "bytes": 1145907,
+        "mtime_ns": 1790139096000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MOVRUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MOVRUSDT.csv.gz",
+        "bytes": 1116675,
+        "mtime_ns": 1790139092000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MTLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MTLUSDT.csv.gz",
+        "bytes": 993090,
+        "mtime_ns": 1790139097000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MUBARAKUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MUBARAKUSDT.csv.gz",
+        "bytes": 1119905,
+        "mtime_ns": 1790139098000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MUSDT.csv.gz",
+        "bytes": 1280833,
+        "mtime_ns": 1790139101000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MYROUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MYROUSDT.csv.gz",
+        "bytes": 218548,
+        "mtime_ns": 1790139094000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "MYXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/MYXUSDT.csv.gz",
+        "bytes": 1179630,
+        "mtime_ns": 1790139110000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "NAORISUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/NAORISUSDT.csv.gz",
+        "bytes": 1251578,
+        "mtime_ns": 1790139115000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "NEARUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/NEARUSDT.csv.gz",
+        "bytes": 1042905,
+        "mtime_ns": 1790139118000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "NEIROETHUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/NEIROETHUSDT.csv.gz",
+        "bytes": 218543,
+        "mtime_ns": 1790139113000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "NEIROUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/NEIROUSDT.csv.gz",
+        "bytes": 1388623,
+        "mtime_ns": 1790139119000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "NEOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/NEOUSDT.csv.gz",
+        "bytes": 1093766,
+        "mtime_ns": 1790139122000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "NEWTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/NEWTUSDT.csv.gz",
+        "bytes": 1117981,
+        "mtime_ns": 1790139121000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "NFPUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/NFPUSDT.csv.gz",
+        "bytes": 929101,
+        "mtime_ns": 1790139125000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "NIGHTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/NIGHTUSDT.csv.gz",
+        "bytes": 1117182,
+        "mtime_ns": 1790139135000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "NILUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/NILUSDT.csv.gz",
+        "bytes": 1310512,
+        "mtime_ns": 1790139139000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "NKNUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/NKNUSDT.csv.gz",
+        "bytes": 433541,
+        "mtime_ns": 1790139136000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "NMRUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/NMRUSDT.csv.gz",
+        "bytes": 1145172,
+        "mtime_ns": 1790139144000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "NOMUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/NOMUSDT.csv.gz",
+        "bytes": 1231431,
+        "mtime_ns": 1790139145000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "NOTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/NOTUSDT.csv.gz",
+        "bytes": 1337533,
+        "mtime_ns": 1790139147000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "NTRNUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/NTRNUSDT.csv.gz",
+        "bytes": 592390,
+        "mtime_ns": 1790139142000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "NULSUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/NULSUSDT.csv.gz",
+        "bytes": 218936,
+        "mtime_ns": 1790139147000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "NXPCUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/NXPCUSDT.csv.gz",
+        "bytes": 1043328,
+        "mtime_ns": 1790139161000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "OBOLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/OBOLUSDT.csv.gz",
+        "bytes": 288203,
+        "mtime_ns": 1790139155000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "OCEANUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/OCEANUSDT.csv.gz",
+        "bytes": 218682,
+        "mtime_ns": 1790139162000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "OGNUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/OGNUSDT.csv.gz",
+        "bytes": 897214,
+        "mtime_ns": 1790139166000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "OGUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/OGUSDT.csv.gz",
+        "bytes": 1049971,
+        "mtime_ns": 1790139170000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "OLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/OLUSDT.csv.gz",
+        "bytes": 610918,
+        "mtime_ns": 1790139169000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "OMGUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/OMGUSDT.csv.gz",
+        "bytes": 218680,
+        "mtime_ns": 1790139169000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "OMNIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/OMNIUSDT.csv.gz",
+        "bytes": 218682,
+        "mtime_ns": 1790139168000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "OMUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/OMUSDT.csv.gz",
+        "bytes": 581907,
+        "mtime_ns": 1790139176000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ONDOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ONDOUSDT.csv.gz",
+        "bytes": 1238946,
+        "mtime_ns": 1790139189000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ONEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ONEUSDT.csv.gz",
+        "bytes": 1029440,
+        "mtime_ns": 1790139188000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ONGUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ONGUSDT.csv.gz",
+        "bytes": 1203418,
+        "mtime_ns": 1790139193000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ONTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ONTUSDT.csv.gz",
+        "bytes": 1057140,
+        "mtime_ns": 1790139193000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ONUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ONUSDT.csv.gz",
+        "bytes": 1285361,
+        "mtime_ns": 1790139197000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "OPENUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/OPENUSDT.csv.gz",
+        "bytes": 1048512,
+        "mtime_ns": 1790139197000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "OPGUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/OPGUSDT.csv.gz",
+        "bytes": 528048,
+        "mtime_ns": 1790139197000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "OPNUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/OPNUSDT.csv.gz",
+        "bytes": 827103,
+        "mtime_ns": 1790139202000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "OPUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/OPUSDT.csv.gz",
+        "bytes": 1166766,
+        "mtime_ns": 1790139222000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ORBSUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ORBSUSDT.csv.gz",
+        "bytes": 221250,
+        "mtime_ns": 1790139212000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ORCAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ORCAUSDT.csv.gz",
+        "bytes": 958968,
+        "mtime_ns": 1790139227000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ORDERUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ORDERUSDT.csv.gz",
+        "bytes": 1186009,
+        "mtime_ns": 1790139230000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ORDIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ORDIUSDT.csv.gz",
+        "bytes": 1158050,
+        "mtime_ns": 1790139232000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "OXTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/OXTUSDT.csv.gz",
+        "bytes": 624645,
+        "mtime_ns": 1790139228000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PARTIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PARTIUSDT.csv.gz",
+        "bytes": 1259538,
+        "mtime_ns": 1790139231000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PAXGUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PAXGUSDT.csv.gz",
+        "bytes": 1428605,
+        "mtime_ns": 1790139232000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PENDLEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PENDLEUSDT.csv.gz",
+        "bytes": 1292723,
+        "mtime_ns": 1790139238000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PENGUUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PENGUUSDT.csv.gz",
+        "bytes": 1398846,
+        "mtime_ns": 1790139255000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PEOPLEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PEOPLEUSDT.csv.gz",
+        "bytes": 1108504,
+        "mtime_ns": 1790139261000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PERPUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PERPUSDT.csv.gz",
+        "bytes": 237652,
+        "mtime_ns": 1790139251000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PHAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PHAUSDT.csv.gz",
+        "bytes": 1183929,
+        "mtime_ns": 1790139269000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PHBUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PHBUSDT.csv.gz",
+        "bytes": 703926,
+        "mtime_ns": 1790139266000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PIEVERSEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PIEVERSEUSDT.csv.gz",
+        "bytes": 1252036,
+        "mtime_ns": 1790139268000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PIPPINUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PIPPINUSDT.csv.gz",
+        "bytes": 1341868,
+        "mtime_ns": 1790139271000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PIXELUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PIXELUSDT.csv.gz",
+        "bytes": 1221015,
+        "mtime_ns": 1790139272000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PLAYUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PLAYUSDT.csv.gz",
+        "bytes": 1273278,
+        "mtime_ns": 1790139282000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PLUMEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PLUMEUSDT.csv.gz",
+        "bytes": 1107947,
+        "mtime_ns": 1790139288000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PNUTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PNUTUSDT.csv.gz",
+        "bytes": 1238917,
+        "mtime_ns": 1790139295000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "POLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/POLUSDT.csv.gz",
+        "bytes": 1279209,
+        "mtime_ns": 1790139302000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "POLYXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/POLYXUSDT.csv.gz",
+        "bytes": 1154445,
+        "mtime_ns": 1790139300000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PONKEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PONKEUSDT.csv.gz",
+        "bytes": 261278,
+        "mtime_ns": 1790139294000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "POPCATUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/POPCATUSDT.csv.gz",
+        "bytes": 1146577,
+        "mtime_ns": 1790139302000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PORT3USDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PORT3USDT.csv.gz",
+        "bytes": 246735,
+        "mtime_ns": 1790139298000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PORTALUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PORTALUSDT.csv.gz",
+        "bytes": 1164763,
+        "mtime_ns": 1790139313000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "POWERUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/POWERUSDT.csv.gz",
+        "bytes": 1278061,
+        "mtime_ns": 1790139319000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "POWRUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/POWRUSDT.csv.gz",
+        "bytes": 1121236,
+        "mtime_ns": 1790139326000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PRLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PRLUSDT.csv.gz",
+        "bytes": 616126,
+        "mtime_ns": 1790139321000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PROMPTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PROMPTUSDT.csv.gz",
+        "bytes": 1155434,
+        "mtime_ns": 1790139326000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PROMUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PROMUSDT.csv.gz",
+        "bytes": 1082343,
+        "mtime_ns": 1790139328000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PROVEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PROVEUSDT.csv.gz",
+        "bytes": 1101813,
+        "mtime_ns": 1790139329000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PTBUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PTBUSDT.csv.gz",
+        "bytes": 1347592,
+        "mtime_ns": 1790139332000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PUFFERUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PUFFERUSDT.csv.gz",
+        "bytes": 673017,
+        "mtime_ns": 1790139338000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PUMPBTCUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PUMPBTCUSDT.csv.gz",
+        "bytes": 1065642,
+        "mtime_ns": 1790139347000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PUMPUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PUMPUSDT.csv.gz",
+        "bytes": 1303080,
+        "mtime_ns": 1790139348000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PUNDIXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PUNDIXUSDT.csv.gz",
+        "bytes": 993227,
+        "mtime_ns": 1790139365000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "PYTHUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/PYTHUSDT.csv.gz",
+        "bytes": 1235458,
+        "mtime_ns": 1790139356000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "QNTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/QNTUSDT.csv.gz",
+        "bytes": 1065211,
+        "mtime_ns": 1790139357000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "QTUMUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/QTUMUSDT.csv.gz",
+        "bytes": 967864,
+        "mtime_ns": 1790139357000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "QUICKUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/QUICKUSDT.csv.gz",
+        "bytes": 255449,
+        "mtime_ns": 1790139357000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "QUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/QUSDT.csv.gz",
+        "bytes": 1407705,
+        "mtime_ns": 1790139368000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RADUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RADUSDT.csv.gz",
+        "bytes": 218938,
+        "mtime_ns": 1790139371000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RAREUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RAREUSDT.csv.gz",
+        "bytes": 1034091,
+        "mtime_ns": 1790139376000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RAVEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RAVEUSDT.csv.gz",
+        "bytes": 1207957,
+        "mtime_ns": 1790139384000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RAYSOLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RAYSOLUSDT.csv.gz",
+        "bytes": 1235688,
+        "mtime_ns": 1790139386000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RAYUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RAYUSDT.csv.gz",
+        "bytes": 218679,
+        "mtime_ns": 1790139379000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RDNTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RDNTUSDT.csv.gz",
+        "bytes": 576321,
+        "mtime_ns": 1790139384000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RECALLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RECALLUSDT.csv.gz",
+        "bytes": 1143221,
+        "mtime_ns": 1790139394000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "REDUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/REDUSDT.csv.gz",
+        "bytes": 995844,
+        "mtime_ns": 1790139395000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "REEFUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/REEFUSDT.csv.gz",
+        "bytes": 218538,
+        "mtime_ns": 1790139393000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "REIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/REIUSDT.csv.gz",
+        "bytes": 285943,
+        "mtime_ns": 1790139397000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RENDERUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RENDERUSDT.csv.gz",
+        "bytes": 1060135,
+        "mtime_ns": 1790139408000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RENUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RENUSDT.csv.gz",
+        "bytes": 218678,
+        "mtime_ns": 1790139408000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RESOLVUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RESOLVUSDT.csv.gz",
+        "bytes": 1233249,
+        "mtime_ns": 1790139412000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "REZUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/REZUSDT.csv.gz",
+        "bytes": 1245770,
+        "mtime_ns": 1790139417000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RIFUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RIFUSDT.csv.gz",
+        "bytes": 1231944,
+        "mtime_ns": 1790139426000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RIVERUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RIVERUSDT.csv.gz",
+        "bytes": 1307084,
+        "mtime_ns": 1790139420000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RLCUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RLCUSDT.csv.gz",
+        "bytes": 1137357,
+        "mtime_ns": 1790139426000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RLSUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RLSUSDT.csv.gz",
+        "bytes": 665705,
+        "mtime_ns": 1790139424000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ROBOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ROBOUSDT.csv.gz",
+        "bytes": 773786,
+        "mtime_ns": 1790139435000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RONINUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RONINUSDT.csv.gz",
+        "bytes": 1103803,
+        "mtime_ns": 1790139439000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ROSEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ROSEUSDT.csv.gz",
+        "bytes": 1140784,
+        "mtime_ns": 1790139440000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RPLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RPLUSDT.csv.gz",
+        "bytes": 980803,
+        "mtime_ns": 1790139449000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RSRUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RSRUSDT.csv.gz",
+        "bytes": 1147313,
+        "mtime_ns": 1790139452000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RUNEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RUNEUSDT.csv.gz",
+        "bytes": 1103231,
+        "mtime_ns": 1790139450000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RVNUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RVNUSDT.csv.gz",
+        "bytes": 991827,
+        "mtime_ns": 1790139454000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "RVVUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/RVVUSDT.csv.gz",
+        "bytes": 539244,
+        "mtime_ns": 1790139450000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SAFEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SAFEUSDT.csv.gz",
+        "bytes": 1020796,
+        "mtime_ns": 1790139464000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SAGAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SAGAUSDT.csv.gz",
+        "bytes": 1222145,
+        "mtime_ns": 1790139470000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SAHARAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SAHARAUSDT.csv.gz",
+        "bytes": 1192827,
+        "mtime_ns": 1790139467000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SANDUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SANDUSDT.csv.gz",
+        "bytes": 1258383,
+        "mtime_ns": 1790139476000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SANTOSUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SANTOSUSDT.csv.gz",
+        "bytes": 1033374,
+        "mtime_ns": 1790139477000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SAPIENUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SAPIENUSDT.csv.gz",
+        "bytes": 1278418,
+        "mtime_ns": 1790139477000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SCRTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SCRTUSDT.csv.gz",
+        "bytes": 1048515,
+        "mtime_ns": 1790139481000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SCRUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SCRUSDT.csv.gz",
+        "bytes": 1132938,
+        "mtime_ns": 1790139482000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SCUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SCUSDT.csv.gz",
+        "bytes": 221249,
+        "mtime_ns": 1790139484000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SEIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SEIUSDT.csv.gz",
+        "bytes": 1153454,
+        "mtime_ns": 1790139496000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SENTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SENTUSDT.csv.gz",
+        "bytes": 1134648,
+        "mtime_ns": 1790139499000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SFPUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SFPUSDT.csv.gz",
+        "bytes": 1001887,
+        "mtime_ns": 1790139507000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SHELLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SHELLUSDT.csv.gz",
+        "bytes": 1140156,
+        "mtime_ns": 1790139503000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SIGNUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SIGNUSDT.csv.gz",
+        "bytes": 1191058,
+        "mtime_ns": 1790139508000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SIRENUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SIRENUSDT.csv.gz",
+        "bytes": 1312547,
+        "mtime_ns": 1790139509000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SKATEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SKATEUSDT.csv.gz",
+        "bytes": 298794,
+        "mtime_ns": 1790139506000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SKLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SKLUSDT.csv.gz",
+        "bytes": 1050985,
+        "mtime_ns": 1790139514000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SKRUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SKRUSDT.csv.gz",
+        "bytes": 1084754,
+        "mtime_ns": 1790139522000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SKYAIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SKYAIUSDT.csv.gz",
+        "bytes": 1329028,
+        "mtime_ns": 1790139528000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SKYUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SKYUSDT.csv.gz",
+        "bytes": 1211524,
+        "mtime_ns": 1790139530000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SLERFUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SLERFUSDT.csv.gz",
+        "bytes": 218540,
+        "mtime_ns": 1790139531000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SLPUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SLPUSDT.csv.gz",
+        "bytes": 1274668,
+        "mtime_ns": 1790139535000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SNTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SNTUSDT.csv.gz",
+        "bytes": 218537,
+        "mtime_ns": 1790139529000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SNXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SNXUSDT.csv.gz",
+        "bytes": 992082,
+        "mtime_ns": 1790139535000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SOLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SOLUSDT.csv.gz",
+        "bytes": 1321141,
+        "mtime_ns": 1790139541000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SOLVUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SOLVUSDT.csv.gz",
+        "bytes": 1158582,
+        "mtime_ns": 1790139554000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SOMIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SOMIUSDT.csv.gz",
+        "bytes": 1024861,
+        "mtime_ns": 1790139554000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SONICUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SONICUSDT.csv.gz",
+        "bytes": 1173071,
+        "mtime_ns": 1790139558000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SOONUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SOONUSDT.csv.gz",
+        "bytes": 1077934,
+        "mtime_ns": 1790139553000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SOPHUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SOPHUSDT.csv.gz",
+        "bytes": 1290480,
+        "mtime_ns": 1790139561000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SPACEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SPACEUSDT.csv.gz",
+        "bytes": 1049880,
+        "mtime_ns": 1790139564000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SPELLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SPELLUSDT.csv.gz",
+        "bytes": 1126065,
+        "mtime_ns": 1790139563000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SPKUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SPKUSDT.csv.gz",
+        "bytes": 1107255,
+        "mtime_ns": 1790139566000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SPORTFUNUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SPORTFUNUSDT.csv.gz",
+        "bytes": 963191,
+        "mtime_ns": 1790139578000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SPXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SPXUSDT.csv.gz",
+        "bytes": 1176695,
+        "mtime_ns": 1790139581000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SQDUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SQDUSDT.csv.gz",
+        "bytes": 1198641,
+        "mtime_ns": 1790139582000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SSVUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SSVUSDT.csv.gz",
+        "bytes": 1129379,
+        "mtime_ns": 1790139587000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "STABLEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/STABLEUSDT.csv.gz",
+        "bytes": 1289619,
+        "mtime_ns": 1790139587000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "STBLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/STBLUSDT.csv.gz",
+        "bytes": 1179960,
+        "mtime_ns": 1790139589000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "STEEMUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/STEEMUSDT.csv.gz",
+        "bytes": 1142672,
+        "mtime_ns": 1790139593000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "STGUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/STGUSDT.csv.gz",
+        "bytes": 1051994,
+        "mtime_ns": 1790139595000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "STMXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/STMXUSDT.csv.gz",
+        "bytes": 218539,
+        "mtime_ns": 1790139597000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "STORJUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/STORJUSDT.csv.gz",
+        "bytes": 914462,
+        "mtime_ns": 1790139610000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "STOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/STOUSDT.csv.gz",
+        "bytes": 1245220,
+        "mtime_ns": 1790139612000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "STPTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/STPTUSDT.csv.gz",
+        "bytes": 218539,
+        "mtime_ns": 1790139609000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "STRAXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/STRAXUSDT.csv.gz",
+        "bytes": 218940,
+        "mtime_ns": 1790139611000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "STRKUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/STRKUSDT.csv.gz",
+        "bytes": 1214357,
+        "mtime_ns": 1790139616000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "STXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/STXUSDT.csv.gz",
+        "bytes": 1058677,
+        "mtime_ns": 1790139624000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SUIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SUIUSDT.csv.gz",
+        "bytes": 1355250,
+        "mtime_ns": 1790139623000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SUNUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SUNUSDT.csv.gz",
+        "bytes": 1234601,
+        "mtime_ns": 1790139625000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SUPERUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SUPERUSDT.csv.gz",
+        "bytes": 1021608,
+        "mtime_ns": 1790139641000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SUSDT.csv.gz",
+        "bytes": 1167748,
+        "mtime_ns": 1790139641000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SUSHIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SUSHIUSDT.csv.gz",
+        "bytes": 1040305,
+        "mtime_ns": 1790139641000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SWARMSUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SWARMSUSDT.csv.gz",
+        "bytes": 1273399,
+        "mtime_ns": 1790139639000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SWELLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SWELLUSDT.csv.gz",
+        "bytes": 263861,
+        "mtime_ns": 1790139643000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SXTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SXTUSDT.csv.gz",
+        "bytes": 1175270,
+        "mtime_ns": 1790139659000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SYNUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SYNUSDT.csv.gz",
+        "bytes": 1211353,
+        "mtime_ns": 1790139656000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SYRUPUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SYRUPUSDT.csv.gz",
+        "bytes": 1354583,
+        "mtime_ns": 1790139654000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "SYSUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/SYSUSDT.csv.gz",
+        "bytes": 700419,
+        "mtime_ns": 1790139667000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TACUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TACUSDT.csv.gz",
+        "bytes": 1295259,
+        "mtime_ns": 1790139675000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TAGUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TAGUSDT.csv.gz",
+        "bytes": 1307917,
+        "mtime_ns": 1790139671000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TAIKOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TAIKOUSDT.csv.gz",
+        "bytes": 982304,
+        "mtime_ns": 1790139674000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TAKEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TAKEUSDT.csv.gz",
+        "bytes": 1241413,
+        "mtime_ns": 1790139676000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TANSSIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TANSSIUSDT.csv.gz",
+        "bytes": 409865,
+        "mtime_ns": 1790139679000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TAOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TAOUSDT.csv.gz",
+        "bytes": 1442936,
+        "mtime_ns": 1790139687000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TAUSDT.csv.gz",
+        "bytes": 1201079,
+        "mtime_ns": 1790139690000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "THETAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/THETAUSDT.csv.gz",
+        "bytes": 1106941,
+        "mtime_ns": 1790139701000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "THEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/THEUSDT.csv.gz",
+        "bytes": 1156924,
+        "mtime_ns": 1790139701000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TIAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TIAUSDT.csv.gz",
+        "bytes": 1180873,
+        "mtime_ns": 1790139705000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TLMUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TLMUSDT.csv.gz",
+        "bytes": 1156669,
+        "mtime_ns": 1790139705000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TNSRUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TNSRUSDT.csv.gz",
+        "bytes": 1274269,
+        "mtime_ns": 1790139708000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TOKENUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TOKENUSDT.csv.gz",
+        "bytes": 291470,
+        "mtime_ns": 1790139704000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TONUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TONUSDT.csv.gz",
+        "bytes": 1016540,
+        "mtime_ns": 1790139712000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TOSHIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TOSHIUSDT.csv.gz",
+        "bytes": 1205354,
+        "mtime_ns": 1790139720000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TOWNSUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TOWNSUSDT.csv.gz",
+        "bytes": 1227530,
+        "mtime_ns": 1790139733000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TRADOORUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TRADOORUSDT.csv.gz",
+        "bytes": 1118794,
+        "mtime_ns": 1790139738000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TRBUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TRBUSDT.csv.gz",
+        "bytes": 1248464,
+        "mtime_ns": 1790139735000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TREEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TREEUSDT.csv.gz",
+        "bytes": 1130353,
+        "mtime_ns": 1790139739000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TRIAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TRIAUSDT.csv.gz",
+        "bytes": 946117,
+        "mtime_ns": 1790139735000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TROYUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TROYUSDT.csv.gz",
+        "bytes": 221251,
+        "mtime_ns": 1790139735000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TRUMPUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TRUMPUSDT.csv.gz",
+        "bytes": 1194863,
+        "mtime_ns": 1790139745000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TRUSTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TRUSTUSDT.csv.gz",
+        "bytes": 1122853,
+        "mtime_ns": 1790139752000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TRUTHUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TRUTHUSDT.csv.gz",
+        "bytes": 1374384,
+        "mtime_ns": 1790139768000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TRUUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TRUUSDT.csv.gz",
+        "bytes": 686879,
+        "mtime_ns": 1790139767000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TRXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TRXUSDT.csv.gz",
+        "bytes": 1262596,
+        "mtime_ns": 1790139772000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TSTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TSTUSDT.csv.gz",
+        "bytes": 1202474,
+        "mtime_ns": 1790139772000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TURBOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TURBOUSDT.csv.gz",
+        "bytes": 1441938,
+        "mtime_ns": 1790139773000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TURTLEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TURTLEUSDT.csv.gz",
+        "bytes": 1154459,
+        "mtime_ns": 1790139774000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TUSDT.csv.gz",
+        "bytes": 1135964,
+        "mtime_ns": 1790139780000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TUTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TUTUSDT.csv.gz",
+        "bytes": 1106003,
+        "mtime_ns": 1790139786000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "TWTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/TWTUSDT.csv.gz",
+        "bytes": 1090769,
+        "mtime_ns": 1790139800000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "UAIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/UAIUSDT.csv.gz",
+        "bytes": 1181436,
+        "mtime_ns": 1790139796000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "UBUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/UBUSDT.csv.gz",
+        "bytes": 1313375,
+        "mtime_ns": 1790139803000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "UMAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/UMAUSDT.csv.gz",
+        "bytes": 1062624,
+        "mtime_ns": 1790139800000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "UNFIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/UNFIUSDT.csv.gz",
+        "bytes": 210677,
+        "mtime_ns": 1790139798000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "UNIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/UNIUSDT.csv.gz",
+        "bytes": 1119183,
+        "mtime_ns": 1790139805000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "USDCUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/USDCUSDT.csv.gz",
+        "bytes": 698290,
+        "mtime_ns": 1790139806000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "USELESSUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/USELESSUSDT.csv.gz",
+        "bytes": 1317064,
+        "mtime_ns": 1790139820000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "USTCUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/USTCUSDT.csv.gz",
+        "bytes": 1249945,
+        "mtime_ns": 1790139826000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "USUALUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/USUALUSDT.csv.gz",
+        "bytes": 1119852,
+        "mtime_ns": 1790139828000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "USUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/USUSDT.csv.gz",
+        "bytes": 1215277,
+        "mtime_ns": 1790139830000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "UXLINKUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/UXLINKUSDT.csv.gz",
+        "bytes": 218938,
+        "mtime_ns": 1790139827000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "VANAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/VANAUSDT.csv.gz",
+        "bytes": 1085572,
+        "mtime_ns": 1790139833000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "VANRYUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/VANRYUSDT.csv.gz",
+        "bytes": 1092668,
+        "mtime_ns": 1790139836000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "VELODROMEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/VELODROMEUSDT.csv.gz",
+        "bytes": 1069922,
+        "mtime_ns": 1790139833000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "VELVETUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/VELVETUSDT.csv.gz",
+        "bytes": 1283451,
+        "mtime_ns": 1790139847000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "VETUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/VETUSDT.csv.gz",
+        "bytes": 1295310,
+        "mtime_ns": 1790139856000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "VFYUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/VFYUSDT.csv.gz",
+        "bytes": 568041,
+        "mtime_ns": 1790139851000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "VICUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/VICUSDT.csv.gz",
+        "bytes": 968064,
+        "mtime_ns": 1790139855000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "VIDTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/VIDTUSDT.csv.gz",
+        "bytes": 218539,
+        "mtime_ns": 1790139855000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "VINEUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/VINEUSDT.csv.gz",
+        "bytes": 689701,
+        "mtime_ns": 1790139858000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "VIRTUALUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/VIRTUALUSDT.csv.gz",
+        "bytes": 1312360,
+        "mtime_ns": 1790139868000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "VOXELUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/VOXELUSDT.csv.gz",
+        "bytes": 298603,
+        "mtime_ns": 1790139861000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "VTHOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/VTHOUSDT.csv.gz",
+        "bytes": 1238927,
+        "mtime_ns": 1790139873000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "VVVUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/VVVUSDT.csv.gz",
+        "bytes": 1324152,
+        "mtime_ns": 1790139883000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "WALUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/WALUSDT.csv.gz",
+        "bytes": 1118404,
+        "mtime_ns": 1790139887000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "WAVESUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/WAVESUSDT.csv.gz",
+        "bytes": 218940,
+        "mtime_ns": 1790139879000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "WAXPUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/WAXPUSDT.csv.gz",
+        "bytes": 1173691,
+        "mtime_ns": 1790139886000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "WCTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/WCTUSDT.csv.gz",
+        "bytes": 1179519,
+        "mtime_ns": 1790139884000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "WETUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/WETUSDT.csv.gz",
+        "bytes": 1169109,
+        "mtime_ns": 1790139890000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "WIFUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/WIFUSDT.csv.gz",
+        "bytes": 1185443,
+        "mtime_ns": 1790139898000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "WLDUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/WLDUSDT.csv.gz",
+        "bytes": 1226188,
+        "mtime_ns": 1790139903000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "WLFIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/WLFIUSDT.csv.gz",
+        "bytes": 1089808,
+        "mtime_ns": 1790139906000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "WOOUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/WOOUSDT.csv.gz",
+        "bytes": 1058288,
+        "mtime_ns": 1790139921000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "WUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/WUSDT.csv.gz",
+        "bytes": 1200091,
+        "mtime_ns": 1790139914000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "XAIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/XAIUSDT.csv.gz",
+        "bytes": 1119152,
+        "mtime_ns": 1790139921000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "XANUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/XANUSDT.csv.gz",
+        "bytes": 1292906,
+        "mtime_ns": 1790139922000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "XAUTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/XAUTUSDT.csv.gz",
+        "bytes": 795522,
+        "mtime_ns": 1790139921000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "XCNUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/XCNUSDT.csv.gz",
+        "bytes": 241209,
+        "mtime_ns": 1790139923000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "XEMUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/XEMUSDT.csv.gz",
+        "bytes": 218935,
+        "mtime_ns": 1790139929000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "XLMUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/XLMUSDT.csv.gz",
+        "bytes": 1373741,
+        "mtime_ns": 1790139937000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "XMRUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/XMRUSDT.csv.gz",
+        "bytes": 1432637,
+        "mtime_ns": 1790139946000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "XNYUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/XNYUSDT.csv.gz",
+        "bytes": 1323444,
+        "mtime_ns": 1790139948000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "XPINUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/XPINUSDT.csv.gz",
+        "bytes": 1167486,
+        "mtime_ns": 1790139949000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "XPLUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/XPLUSDT.csv.gz",
+        "bytes": 1194453,
+        "mtime_ns": 1790139954000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "XRPUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/XRPUSDT.csv.gz",
+        "bytes": 1380600,
+        "mtime_ns": 1790139951000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "XTZUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/XTZUSDT.csv.gz",
+        "bytes": 966037,
+        "mtime_ns": 1790139950000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "XVGUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/XVGUSDT.csv.gz",
+        "bytes": 1251819,
+        "mtime_ns": 1790139956000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "XVSUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/XVSUSDT.csv.gz",
+        "bytes": 1002351,
+        "mtime_ns": 1790139967000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "YALAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/YALAUSDT.csv.gz",
+        "bytes": 499060,
+        "mtime_ns": 1790139975000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "YBUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/YBUSDT.csv.gz",
+        "bytes": 1095234,
+        "mtime_ns": 1790139974000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "YFIUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/YFIUSDT.csv.gz",
+        "bytes": 985038,
+        "mtime_ns": 1790139975000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "YGGUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/YGGUSDT.csv.gz",
+        "bytes": 1144524,
+        "mtime_ns": 1790139977000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ZAMAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ZAMAUSDT.csv.gz",
+        "bytes": 991663,
+        "mtime_ns": 1790139983000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ZBTUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ZBTUSDT.csv.gz",
+        "bytes": 1241898,
+        "mtime_ns": 1790139984000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ZECUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ZECUSDT.csv.gz",
+        "bytes": 1558708,
+        "mtime_ns": 1790139984000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ZENUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ZENUSDT.csv.gz",
+        "bytes": 1198719,
+        "mtime_ns": 1790139991000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ZEREBROUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ZEREBROUSDT.csv.gz",
+        "bytes": 1344052,
+        "mtime_ns": 1790140005000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ZETAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ZETAUSDT.csv.gz",
+        "bytes": 1135576,
+        "mtime_ns": 1790140005000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ZILUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ZILUSDT.csv.gz",
+        "bytes": 991778,
+        "mtime_ns": 1790140003000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ZKCUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ZKCUSDT.csv.gz",
+        "bytes": 1116369,
+        "mtime_ns": 1790140005000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ZKJUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ZKJUSDT.csv.gz",
+        "bytes": 740349,
+        "mtime_ns": 1790140006000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ZKPUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ZKPUSDT.csv.gz",
+        "bytes": 1112962,
+        "mtime_ns": 1790140010000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ZKUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ZKUSDT.csv.gz",
+        "bytes": 1163073,
+        "mtime_ns": 1790140010000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ZORAUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ZORAUSDT.csv.gz",
+        "bytes": 1181009,
+        "mtime_ns": 1790140019000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ZRCUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ZRCUSDT.csv.gz",
+        "bytes": 432593,
+        "mtime_ns": 1790140028000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ZROUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ZROUSDT.csv.gz",
+        "bytes": 1350998,
+        "mtime_ns": 1790140032000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "ZRXUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/ZRXUSDT.csv.gz",
+        "bytes": 983839,
+        "mtime_ns": 1790140030000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "\u5e01\u5b89\u4eba\u751fUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/\u5e01\u5b89\u4eba\u751fUSDT.csv.gz",
+        "bytes": 1346215,
+        "mtime_ns": 1790140146000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "\u6211\u8e0f\u9a6c\u6765\u4e86USDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/\u6211\u8e0f\u9a6c\u6765\u4e86USDT.csv.gz",
+        "bytes": 1089444,
+        "mtime_ns": 1790140147000000000,
+        "observed_day_rows": 288
+      }
+    ],
+    "\u9f99\u867eUSDT": [
+      {
+        "path": "data/crypto/market/research-spike_v128_recent_20260923/series/\u9f99\u867eUSDT.csv.gz",
+        "bytes": 915884,
+        "mtime_ns": 1790140143000000000,
+        "observed_day_rows": 288
+      }
+    ]
+  },
+  "extra_sources": [
+    "data/crypto/market/kline_binance_um1m_touchdays_20261027/FHEUSDT/2026-08-22.csv",
+    "data/crypto/market/aggtrades_binance_um_touchbars_20261029/FHEUSDT/2026-08-22.csv.gz"
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "active_cross_section": {
+    "archived_crypto_count": 632,
+    "active_crypto_count": 507,
+    "zero_volume_crypto_count": 125,
+    "active_drop_5pct": 484,
+    "active_drop_10pct": 332,
+    "active_median_close_pct": -2.853185595567864,
+    "classification_source": "experiments/active/exp-monday-5m-wick-engulf-20261023-v1/symbols",
+    "note": "Observed traded contracts in the archived cohort, not a complete point-in-time exchange universe. Zero-volume bars must not count as active-market evidence."
+  },
+  "classification_commit": "21fdbcc24784da59cd97bbc98d63cbded119c638"
+}
