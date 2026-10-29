@@ -179,8 +179,103 @@ def run(config, workers, intrabar):
             print(json.dumps(dict(progress=k, total=len(todo), **r)), flush=True)
 
 
+def load_symbol(args):
+    """Worse path per row (10bp slippage on non-target exits), fill time at the fill bar close, MAE from the fill bar."""
+    exp, symbol, slip = args
+    from yoyo.evaluation.monday_limit_reclaim_inputs import load_job
+    paths, issues = {}, []
+    for p in ('ohlc', 'olhc'):
+        d = Path(exp)/p/'symbols'/symbol
+        if (d/'error.json').exists() or not (d/'done.json').exists():
+            issues.append(f'{p}: missing or failed'); continue
+        t = pd.read_csv(d/'trades.csv.gz')
+        if json.loads((d/'done.json').read_text()).get('positions', 0) != len(t):
+            issues.append(f'{p}: rows != positions')
+        paths[p] = t.assign(net=t.net_notional_bp-np.where(t.reason == 4, 0., slip)).set_index('trade_id')
+    if len(paths) < 2 or paths['ohlc'].empty:
+        return symbol, pd.DataFrame(), issues
+    o = paths['ohlc']; l = paths['olhc'].reindex(o.index)
+    w = (l.net < o.net).fillna(False).to_numpy()
+    pick = lambda c: np.where(w, l[c], o[c])
+    d = pd.DataFrame(dict(variant=o.variant, side=o.side, entry=o.entry, net=pick('net'), reason=pick('reason'),
+                          entry_i=o.entry_i, exit_i=pick('exit_i'),
+                          exit_t=pd.to_datetime(pd.Series(pick('exit_time'), index=o.index), utc=True).dt.as_unit('ns')), index=o.index)
+    job = json.loads((CODEX/'symbols'/symbol/'identity.json').read_text())['job']
+    f, _ = load_job(job)
+    d['entry_t'] = pd.Series(f.index[d.entry_i.astype(int).to_numpy()]+pd.Timedelta(minutes=job['execution_minutes']), index=d.index).dt.as_unit('ns')
+    h, lo = f.high.to_numpy(), f.low.to_numpy()
+    d['mae_pct'] = [max(0., -s*((lo[a:max(a+1, b)].min() if s == 1 else h[a:max(a+1, b)].max())-e)/e*100)
+                    for a, b, s, e in zip(d.entry_i.astype(int), d.exit_i.astype(int), d.side, d.entry)]
+    d['event'] = d.index.str.split(':').str[:3].str.join(':')
+    d['kind'] = d.variant.str.split('_').str[0]; d['act'] = d.variant.str.split('_').str[1]
+    return symbol, d.reset_index(drop=True), issues
+
+
+def summarize(config, workers):
+    from yoyo.evaluation.monday_limit_be_scalein_compare import BAD_EVENTS, clean
+    from yoyo.evaluation.monday_limit_paper_accounts import replay
+    exp = config.resolve().parent
+    cfg = json.loads(config.read_text())
+    committed('yoyo/evaluation/monday_limit_alarm_entry.py')
+    ro = json.loads((A/'exp-monday-limit-return-opt-20261027-v2/config.json').read_text())
+    sh = json.loads((A/'exp-monday-limit-spike-hw-20261026-v1/config.json').read_text())
+    py = json.loads((A/'exp-monday-limit-pyramid-20261027-v1/compare.json').read_text())
+    win = pd.read_csv(exp/'alarm_windows.csv.gz')
+    control = set(pd.read_csv(exp/'control_events.csv.gz').event)
+    syms = sorted({e.split(':')[0] for e in set(win.event) | control})
+    missing = [(p, s) for p in ('ohlc', 'olhc') for s in syms if not (exp/p/'symbols'/s/'done.json').exists()]
+    if missing:
+        raise RuntimeError(f'Incomplete run: {len(missing)}')
+    with ProcessPoolExecutor(workers) as ex:
+        got = list(ex.map(load_symbol, [(str(exp), s, cfg['slippage_bp']) for s in syms], chunksize=4))
+    t = pd.concat([g[1] for g in got if len(g[1])], ignore_index=True)
+    t = t[~t.event.isin(BAD_EVENTS)].copy()
+    sc = pd.read_csv(ROOT/cfg['scores']).set_index('event')
+    t['full'] = t.event.map(sc.stored); t['pre'] = t.event.map(sc.causal)
+    window = pd.Timestamp(json.loads((A/'exp-monday-limit-reclaim-recent-20261025-v1/summary.json').read_text())['results']['window'][0])
+    res = dict(checks=dict(symbols=len(syms), issues=[f'{g[0]}: {i}' for g in got for i in g[2]][:20], rows=int(len(t)),
+                           alarms=int(pd.read_csv(exp/'alarms.csv.gz').shape[0])), plans={}, exits={})
+    jobs = []
+
+    def plans(g, tag, episodes):
+        for v in VARIANTS:
+            hold = g[(g.kind == v) & (g.act == 'hold')]
+            chk = g[(g.kind == v) & (g.act == 'chk')]
+            out = {'hold_all': hold}
+            for cut in cfg['cuts']:
+                out[f'exit_below_{cut}'] = pd.concat([hold[hold.full >= cut], chk[chk.full < cut]])
+            out['resting_causal_0.5'] = hold[hold.pre >= .5]
+            for name, x in out.items():
+                jobs.append((f'{tag}|{v}|{name}', 'frac', x.assign(episode=x.event.map(episodes)).reset_index(drop=True), window, cfg, ro, sh, py))
+            # Paired: what the close exit did to the touches it closed.
+            ex_ = chk[chk.full < min(cfg['cuts'])].set_index('event').net
+            hd = hold.set_index('event').net.reindex(ex_.index)
+            res['exits'][f'{tag}|{v}'] = dict(n=int(len(ex_)), exit_mean_bp=float(ex_.mean()) if len(ex_) else None,
+                                               hold_mean_bp=float(hd.mean()) if len(hd) else None,
+                                               exit_reason={str(k): int(n) for k, n in chk[chk.full < min(cfg['cuts'])].reason.value_counts().items()})
+    for w in cfg['windows_min']:
+        ww = win[win.window == w]
+        ep = ww.drop_duplicates('event').set_index('event').alarm_ms
+        plans(t[t.event.isin(ep.index)], f'alarm_{w}m', ep)
+    plans(t[t.event.isin(control)], 'no_alarm_control', pd.Series(dtype='int64'))
+    with ProcessPoolExecutor(workers) as ex:
+        for name, out in ex.map(replay, jobs):
+            res['plans'][name] = out
+    eps = {}
+    for job in jobs:
+        x = job[2]
+        if 'episode' in x and x.episode.notna().any():
+            per = x.groupby('episode').net.mean()
+            eps[job[0]] = dict(episodes=int(per.size), episode_mean_bp=float(per.mean()), episodes_positive_pct=float(100*(per > 0).mean()))
+    res['episodes'] = eps
+    res = clean(res)
+    dump(exp/'summary.json', dict(config=cfg, results=res, source_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+                                 training_eligible=False, production_eligible=False))
+    print(json.dumps(res['checks'], ensure_ascii=False))
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(); ap.add_argument('--config', type=Path, required=True); ap.add_argument('--workers', type=int, default=5)
     ap.add_argument('--intrabar', choices=['OHLC', 'OLHC']); ap.add_argument('--summary', action='store_true')
     a = ap.parse_args()
-    run(a.config, a.workers, a.intrabar)
+    summarize(a.config, a.workers) if a.summary else run(a.config, a.workers, a.intrabar)
