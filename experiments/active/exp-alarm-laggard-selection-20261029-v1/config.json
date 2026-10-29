@@ -1,0 +1,58 @@
+{
+  "experiment_id": "exp-alarm-laggard-selection-20261029-v1",
+  "question": "With frozen market alarms, can ex-ante lag and historical recovery rank not-yet-deep coins by subsequent deep decline and recovery?",
+  "alarm_source": "experiments/active/exp-market-crash-alarm-20261029-v1",
+  "source_config": "experiments/active/exp-monday-ma6-retest-20261024-v1/config.json",
+  "start": "2025-01-01T00:00:00Z",
+  "end_exclusive": "2026-09-22T00:00:00Z",
+  "design_day": "2026-08-22",
+  "primary_alarm": "six",
+  "baseline_alarm": "btc",
+  "alarm_policy": "Reuse saved exact alarm timestamps, thresholds,15m cooldown and1s latency; no new alarm fitting or event-based selection. Every alarm in the available coverage is retained; August22 is separate.",
+  "availability": "5m coin OHLCV becomes known at its close+1second. Reference price and features use the latest such completed5m bar. Market beta features are synchronized to the same5m close, never comparing a fresh major price to stale altcoin quotes.",
+  "eligibility": {
+    "prior_minutes": 30,
+    "close_decline_limit": -0.02,
+    "low_decline_limit": -0.05,
+    "recent_positive_volume_bars": 3,
+    "definition": "Known30m close return >-2percent AND minimum completed30m low / close30mago >0.95. All feature rows require complete8day history,positive last3bar volume,finite historical scores. Already-deep and unavailable cases remain counted separately. No future information filters candidates."
+  },
+  "features": {
+    "volatility_bars": 288,
+    "history_bars": 2016,
+    "volatility_floor": 0.0001,
+    "historical_tail_sigma": 2.0,
+    "minimum_historical_tails": 5,
+    "lag": "(coin log return30m - trailing7day beta * synchronous median-major log return30m) / (prior24h coin sigma5m *sqrt6). Beta and sigma exclude the latest completed return.",
+    "recovery": "Mean clipped (close-low)/(previous_close-low) of prior7days5m bars whose low drops by at least2 prior24h sigmas from previous close; at least5 such bars. This is historical within-bar recovery, not future target recovery.",
+    "liquidity_proxy": "Prior24h sum(close*base_volume); approximate traded dollar volume, not order-book depth."
+  },
+  "selection": {
+    "fraction": 0.1,
+    "rules": ["lag", "lag_then_recovery"],
+    "lag": "Within each alarm, highest lag score ceil(10percent*N), deterministic symbol ties.",
+    "lag_then_recovery": "Same count: take highest2K lag candidates, then highest historical recovery K. Relative to lag-only, only second-stage ordering changes; no parameter search.",
+    "matching": "Same alarm x causal volume tertile x causal volatility tertile. Match each selected-cell count to nonselected candidates without replacement. Insufficient cells are unmatched, never broadened. Exact expected random-candidate label rate within each matched cell is the control; all selected results also retained."
+  },
+  "outcomes": {
+    "deep_fraction": 0.05,
+    "deep_horizon_minutes": 15,
+    "recovery_fraction": 0.025,
+    "recovery_horizon_minutes": 60,
+    "definition": "Deep means first new crossing of reference*0.95 within15m after alarm. Joint recovery means a later completed close >=reference*0.975 by60m after alarm. These are observational labels, not limit fills, exits or PnL.",
+    "bounds": "Lower: no possible deep touch in the bar straddling alarm, a definite crossing in a full bar contained in the15m window, and for joint label a later completed close after that crossing bar. Upper: any crossing in a bar intersecting15m window and possible later recovery by60m. Crossing/recovery inside a boundary bar is ambiguous. Missing outcome data gives lower0/upper1,never silently removes an eligible candidate.",
+    "minute_cache": "Touch-day-selected1m caches cannot define the universe, features, eligibility, ranking or primary point estimates. Existing FHE tick data may annotate the original single example only."
+  },
+  "statistics": {
+    "seed": 20261029,
+    "bootstrap_repeats": 5000,
+    "permutation_repeats": 4999,
+    "primary": "Prospective deep-and-recovery joint frequency per selected candidate and per alarm, with interval bounds. Report decline frequency and conditional recovery separately. Week-block paired confidence intervals; same alarm controls. No coin-iid tests.",
+    "uncertainty": "Robust excess bounds selected_lower-control_upper and selected_upper-control_lower. Test lower-bound weekly excess via sign randomization,then Holm over2rules x2outcomes for pooled six alarms. All scores and quantile choices fixed before outcomes;2025and2026reported separately.",
+    "na_metrics": "No training,trade return or execution: valAUC,winrate,fees,topdecile netR are inapplicable. Use target-frequency bounds and matched randomized candidate controls instead."
+  },
+  "workers": 2,
+  "training_eligible": false,
+  "production_eligible": false,
+  "reproduction": ".venv/bin/python -m yoyo.evaluation.alarm_laggard_selection"
+}
