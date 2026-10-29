@@ -20,5 +20,14 @@
   "fill_rule": "first taker trade in the order's direction at or after t_star + L (buyer-taker for longs, seller-taker for shorts); no extra entry slippage, taker fee",
   "parity": "touch-bar aggTrades quantity vs Codex 5m volume, high / low vs the 5m bar",
   "training_eligible": false,
-  "production_eligible": false
+  "production_eligible": false,
+  "accounts_config": "experiments/active/exp-monday-limit-paper-accounts-20261028-v1/config.json",
+  "accounts_run": "experiments/active/exp-monday-limit-paper-accounts-20261028-v1",
+  "tick_accounts_config": "experiments/active/exp-monday-limit-tick-accounts-20261029-v1/config.json",
+  "tick_accounts_run": "experiments/active/exp-monday-limit-tick-accounts-20261029-v1",
+  "maker_fee_bp": 2.0,
+  "taker_fee_bp": 5.0,
+  "slippage_bp": 10.0,
+  "replacement": "market entry at p_L replaces the framework's limit entry on the same framework exit (price and reason); taker entry fee, exit fee on exit notional, 10bp slippage on non-target exits; a touch whose target traded before the fill is no trade; add legs keep their framework limit fills and need their parent's market entry",
+  "plans": "last five months: resting on the causal score (paper engine), instant score at the level (ideal, no latency), instant market after each latency, resting plus instant for touches not resting, leaky reference; account rules and sizing as exp-monday-limit-paper-accounts-20261028-v1 (allin3 not replayed over five months)"
 }

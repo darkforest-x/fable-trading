@@ -228,7 +228,121 @@ def run(config):
     print(json.dumps(res, ensure_ascii=False), flush=True)
 
 
+def load_paths(args):
+    """Both intrabar paths of one symbol's framework rows with exit prices (for the entry replacement)."""
+    run_dir, symbol = args
+    out = []
+    for p in ('ohlc', 'olhc'):
+        f = Path(run_dir)/p/'symbols'/symbol/'trades.csv.gz'
+        if f.exists():
+            t = pd.read_csv(f, usecols=['trade_id', 'variant', 'side', 'entry', 'exit_price', 'reason', 'net_notional_bp'])
+            out.append(t.assign(path=p))
+    return pd.concat(out, ignore_index=True) if out else pd.DataFrame()
+
+
+def plans_for(g, col, cfg):
+    """The paper accounts' selections (as monday_limit_paper_accounts.summarize) on rows scored by `col`."""
+    from yoyo.evaluation.monday_limit_paper_accounts import V3MODE
+    sz, cut, hi = cfg['v3_sizing'], cfg['cut'], cfg['hi']
+    sc = g[col]
+    lin = lambda y: np.minimum(sz['fraction']*(y[col]-sz['cut'])/sz['mean_excess'], sz['cap'])
+    v3sel = lambda kind: g[(g.kind == kind) & (sc >= cut) & (g['mode'] == V3MODE(sc, hi))]
+    v2 = g[(g.kind == 'v2') & (sc >= cfg['v2_threshold']) & (g.minutes == 'm60')].assign(k=cfg['v2_fraction'])
+    v3 = v3sel('v3').assign(k=lambda y: lin(y))
+    legs = g[(g.kind == 'v3_add') & g.base.isin(v3.trade_id) & (sc >= hi)]
+    legs = legs.assign(k=legs.base.map(v3.set_index('trade_id').k))
+    return {'v2_60': ('fixed', v2), 'v3': ('linear', v3), 'v3add': ('linear', pd.concat([v3, legs])),
+            'v3add20': ('frac', pd.concat([v3, legs])), 'v3lock': ('linear', v3sel('v3lock').assign(k=lambda y: lin(y))),
+            'spike': ('slots', g[(g.kind == 'spike') & (sc >= hi) & (g.order >= cfg['min_order'])])}
+
+
+def summarize(config, workers):
+    """Step 3: resting (causal score) vs instant market entries after each latency vs both vs the leaky reference."""
+    from yoyo.evaluation.monday_limit_paper_accounts import load_symbol, replay, scores as acct_scores
+    exp = config.resolve().parent
+    cfg = json.loads(config.read_text())
+    committed('yoyo/evaluation/monday_limit_tick_entry.py')
+    acfg = json.loads((ROOT/cfg['accounts_config']).read_text())
+    tcfg = json.loads((ROOT/cfg['tick_accounts_config']).read_text())
+    ro = json.loads((ROOT/'experiments/active/exp-monday-limit-return-opt-20261027-v2/config.json').read_text())
+    sh = json.loads((ROOT/'experiments/active/exp-monday-limit-spike-hw-20261026-v1/config.json').read_text())
+    py = json.loads((ROOT/'experiments/active/exp-monday-limit-pyramid-20261027-v1/compare.json').read_text())
+    ticks = pd.read_csv(exp/'tick_events.csv.gz').set_index('event')
+    _, w0 = candidates(cfg)
+    order = pd.read_csv(ROOT/acfg['features'], usecols=['event', 'l2_order_score']).set_index('event').l2_order_score
+    trun, arun = ROOT/cfg['tick_accounts_run'], ROOT/cfg['accounts_run']
+    syms = sorted({e.split(':')[0] for e in ticks.index})
+    with ProcessPoolExecutor(workers) as ex:
+        tk = [g for g in ex.map(load_symbol, [(str(trun), s, 10., 10.) for s in syms], chunksize=4)]
+        ac = [g for g in ex.map(load_symbol, [(str(arun), s, 10., 10.) for s in syms], chunksize=4)]
+        raw = pd.concat([d for d in ex.map(load_paths, [(str(trun), s) for s in syms], chunksize=4) if len(d)], ignore_index=True)
+    issues = [f'{g[0]}: {i}' for g in tk+ac for i in g[2]]
+    tk = pd.concat([g[1] for g in tk if len(g[1])], ignore_index=True)
+    ac = pd.concat([g[1] for g in ac if len(g[1])], ignore_index=True)
+    for d in (tk, ac):
+        d['family'] = d.variant.str.split('_').str[0]; d['kind'] = d.variant.str.split('_', n=1).str[1]
+        d['order'] = d.event.map(order)
+    tk = tk[~tk.event.isin(BAD_EVENTS) & (tk.entry_t >= w0)].copy()
+    ac = ac[~ac.event.isin(BAD_EVENTS) & (ac.entry_t >= w0)].copy()
+    pre, full = acct_scores(acfg)
+    ac['pre'] = ac.event.map(pre); ac['full'] = ac.event.map(full)
+    tk['instant'] = tk.event.map(ticks.instant)
+    # Fee parity of the replacement formula on the framework's own limit fills.
+    raw['event'] = raw.trade_id.str.split(':').str[:3].str.join(':')
+    raw['mode'] = raw.trade_id.str.split(':').str[4]
+    raw['add_leg'] = raw.variant.str.endswith('_add')
+    # Commission per fill on its own notional, expressed per entry notional (the framework's normalization).
+    fee_exit = np.where(raw.reason == 4, cfg['maker_fee_bp'], cfg['taker_fee_bp'])*raw.exit_price/raw.entry
+    rep0 = raw.side*(raw.exit_price/raw.entry-1)*1e4-cfg['maker_fee_bp']-fee_exit
+    parity = dict(max_abs_bp=float((rep0-raw.net_notional_bp).abs().max()), p99_abs_bp=float((rep0-raw.net_notional_bp).abs().quantile(.99)))
+    res = dict(checks=dict(issues=issues[:20], tick_rows=int(len(tk)), account_rows=int(len(ac)), fee_formula_parity=parity,
+                           tick_status={str(k): int(v) for k, v in ticks.status.value_counts().items()}), latency={}, plans={})
+    for lat in cfg['latencies_ms']:
+        r = raw[~raw.add_leg].copy()
+        p = r.event.map(ticks[f'p_{lat}'])
+        tp_before = np.zeros(len(r), bool)
+        for mode in ('range_0.618', 'opposite_1618', 'near_monday_edge'):
+            col = f'tp_{mode}_before_{lat}'
+            if col in ticks:
+                tp_before |= (r['mode'] == mode).to_numpy() & r.event.map(ticks[col]).fillna(False).astype(bool).to_numpy()
+        fee_exit = np.where(r.reason == 4, cfg['maker_fee_bp'], cfg['taker_fee_bp'])*r.exit_price/p
+        r['net_l'] = r.side*(r.exit_price/p-1)*1e4-cfg['taker_fee_bp']-fee_exit-np.where(r.reason == 4, 0., cfg['slippage_bp'])
+        r['shift_bp'] = r.side*(p/r.entry-1)*1e4
+        r['valid'] = p.notna() & ~tp_before
+        worse = r[r.valid].sort_values('net_l').drop_duplicates('trade_id')[['trade_id', 'net_l', 'shift_bp']]
+        res['latency'][str(lat)] = dict(entries=int(r.valid.sum()//2), no_fill_or_target_first=int((~r.valid).sum()//2),
+                                        entry_shift_bp_q={f'q{int(100*q)}': float(worse.shift_bp.quantile(q)) for q in (.1, .25, .5, .75, .9)})
+        tl = tk.merge(worse, on='trade_id', how='left')
+        tl = tl[tl.variant.str.endswith('_add') | tl.net_l.notna()].copy()
+        legs = tl.variant.str.endswith('_add')
+        tl.loc[~legs, 'mae_pct'] = np.maximum(0., tl.loc[~legs, 'mae_pct']+tl.loc[~legs, 'shift_bp']/100)
+        tl.loc[~legs, 'net'] = tl.loc[~legs, 'net_l']
+        tl = tl[~legs | tl.base.isin(tl.trade_id)]  # an add leg needs its parent's market entry
+        for acct, (sizing, x) in plans_for(tl, 'instant', tcfg).items():
+            res['plans'].setdefault(acct, {})[f'instant_market_{lat}ms'] = (sizing, x)
+            a = plans_for(ac[ac.family == 'rest'], 'pre', acfg)[acct][1]
+            both = pd.concat([a, x[~x.event.isin(a.event)]])
+            res['plans'][acct][f'resting_plus_instant_{lat}ms'] = (sizing, both)
+    for acct, (sizing, x) in plans_for(tk, 'instant', tcfg).items():
+        res['plans'][acct]['instant_at_level_ideal'] = (sizing, x)
+    for acct, (sizing, x) in plans_for(ac[ac.family == 'rest'], 'pre', acfg).items():
+        res['plans'][acct]['resting_causal'] = (sizing, x)
+    for acct, (sizing, x) in plans_for(ac[ac.family == 'rest'], 'full', acfg).items():
+        res['plans'][acct]['leaky_reference'] = (sizing, x)
+    jobs = [(f'{acct}|{k}', s, x.reset_index(drop=True), w0, acfg, ro, sh, py) for acct, d in res['plans'].items() for k, (s, x) in d.items()]
+    res['plans'] = {}
+    with ProcessPoolExecutor(workers) as ex:
+        for name, out in ex.map(replay, jobs):
+            acct, k = name.split('|')
+            res['plans'].setdefault(acct, {})[k] = out['last5m']
+    res = clean(res)
+    dump(exp/'summary.json', dict(config=cfg, results=res, source_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+                                 training_eligible=False, production_eligible=False))
+    print(json.dumps(res['checks'], ensure_ascii=False))
+
+
 if __name__ == '__main__':
-    ap = argparse.ArgumentParser(); ap.add_argument('--config', type=Path, required=True)
+    ap = argparse.ArgumentParser(); ap.add_argument('--config', type=Path, required=True); ap.add_argument('--workers', type=int, default=6)
+    ap.add_argument('--summary', action='store_true')
     a = ap.parse_args()
-    run(a.config)
+    summarize(a.config, a.workers) if a.summary else run(a.config)
