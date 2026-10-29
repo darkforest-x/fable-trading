@@ -789,11 +789,11 @@ experiments:
     notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
   - experiment_id: exp-monday-limit-tick-entry-20261029-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: running
+    source_commit: 3575cccfde
+    status: rejected
     question: 'Owner 2026-10-29: score each touch at the instant of the touch from Binance trades and enter at market after 100 / 300 / 1000 ms; last five months; in the framework.'
     single_variable: 'Entry: resting limit vs market after latency L when the instant score clears the account threshold; account rules, exits and sizing unchanged.'
-    result: pending
+    result: 'Last five months, 2140 candidates, 2075 aggTrades days, 2110 touches located (high match 100 percent, low 99.95, quantity vs 5m median 1.00). Instant score >= 0.5: 326 vs 435 resting causal and 450 leaky (the touch price maximizes toward24). Market fill vs level, median / p90: +4.2 / +43.8bp worse at 100 ms, +3.6 / +56.8bp at 1000 ms; 3-4 percent no fill or target first. v3 (linear): resting causal 434 trades +205bp 1.70x; instant at the level (no latency) 326 +128bp 1.55x; instant market 100 ms +83bp 1.40x; resting plus instant 439 +198bp 1.64x; leaky 2.91x. v3add20: 2.76x resting vs 2.03x instant market vs 2.68x both. spike: resting 1.52x, instant market 0.80x. The seconds layer adds about five trades and lowers returns.'
     artifacts: []
     canonical_report: experiments/active/exp-monday-limit-tick-entry-20261029-v1/summary.json
     holdout_consumed: false
@@ -803,11 +803,11 @@ experiments:
     notes: 'Step 1 tick features and fill prices (this experiment), step 2 framework fills (exp-monday-limit-tick-accounts-20261029-v1), step 3 summary here. aggTrades touch-bar windows cached under data/crypto/market/aggtrades_binance_um_touchbars_20261029 (not in git).'
   - experiment_id: exp-monday-limit-tick-accounts-20261029-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: queued
+    source_commit: 3575cccfde
+    status: complete
     question: 'Seconds-level test, step 2: framework fills with full account rules for touches selected by the instant score.'
     single_variable: 'Selection by instant score; rules as exp-monday-limit-paper-accounts-20261028-v1.'
-    result: pending
+    result: '430 symbols, both paths, 0 errors; framework fills for instant-selected touches used by exp-monday-limit-tick-entry-20261029-v1 (fee-formula parity on these fills max 1e-7 bp).'
     artifacts: []
     canonical_report: experiments/active/exp-monday-limit-tick-accounts-20261029-v1/summary.json
     holdout_consumed: false

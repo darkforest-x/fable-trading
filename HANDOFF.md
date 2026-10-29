@@ -1,3 +1,8 @@
+## 2026-10-29 · Seconds-level entries (Binance aggTrades) do not help
+
+- `exp-monday-limit-tick-entry-20261029-v1` (+ framework fills `exp-monday-limit-tick-accounts-20261029-v1`): last five months, frozen score at the instant of the first trade through the level, market fill after 100 / 300 / 1000 ms. Latency costs a median 4bp (p90 44-57bp) plus the taker fee; the bigger problem is selection: the instant score passes fewer and weaker touches than the resting causal score (v3 +128bp vs +205bp per trade even with no latency).
+- Resting plus instant adds ~5 trades and lowers every account (v3 1.64x vs 1.70x, v3add20 2.68x vs 2.76x); spike instant market loses. The paper engine's resting causal plan stays the best executable variant. Learning: `the-touch-instant-knows-less-than-the-bar-before.md`.
+
 ## 2026-10-29 · Qualification on the 1m strategy account verdict
 
 - Explaining the prior result exposed an important accounting boundary: native Nautilus trade fills feed `monday_limit_return_opt.frac`, a separate simplified margin overlay. It uses realized equity/10 at3x, an MAE threshold of32.333percent for liquidation, applies the loss and releases the slot at the original exit timestamp, and measures drawdown only on realized exits. This is not native timestamped liquidation or mark-to-market account validation. The direction/magnitude of its bias has not been measured; do not state the0.612x result as a reliable real-account forecast.
