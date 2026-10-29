@@ -141,6 +141,15 @@ def summarize():
         q=orders.merge(trades[['trade_id','net','net_notional_bp','reason','entry_time','exit_time']],
                        on='trade_id',how='left',validate='one_to_one')
         q['filled']=q.exit_time.notna()
+        # The native adapter supplies limit fill time. Its market rows preserve
+        # the caller's optional time field; execution itself is at decision_i.
+        market=trades[trades.order_mode=='market'].merge(orders[['trade_id','decision_i']],on='trade_id')
+        if (market.entry_i != market.decision_i).any():
+            raise ValueError('Market native fill is not its completed decision close')
+        at_close=q.filled & (q.order_mode=='market')
+        q.loc[at_close,'entry_time']=q.loc[at_close,'decision_time']
+        if q.loc[q.filled,'entry_time'].isna().any():
+            raise ValueError('Unknown native entry timestamp')
         q['release_time']=q.exit_time
         q['status']=np.where(q.filled,'filled','missing')
         canc=cancelled.set_index('trade_id')
