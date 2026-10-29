@@ -14,6 +14,34 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-flash-precursor-20261029-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2c8a580622
+    status: inconclusive
+    question: Can earlier cross-asset deterioration leave time to prepare limits in coins that have not yet made a deep move?
+    single_variable: None; single-event clock observation and separate alarm-selection-execution research design.
+    result: At13:08Shanghai Aug22,88of92cachedtouch-day symbols had just declined; at13:09,91of92. Same13:07minute XRP-2.117percent,DOGE-1.533,BTC-0.317;FHEfirsttouch13:11:33.608. Nominal213.608seconds from13:08;not an alarm accuracy or profit result.
+    artifacts: [flash-precursor-20261029-v1]
+    canonical_report: experiments/active/exp-flash-precursor-20261029-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 92coin cache was selected by later touches and cannot estimate exante breadth/precision. Six complete major1m histories provide separate benchmark context. One crash event,not92independent events;availability+1minute andfuturemutation checks pass. Priorstaticdepth/OI/funding/24hbreadth failures preserved. Notionidea4088856479af810cb501f7807617b521 remainsInbox/inactive. No training,newfills,downloadorservicechange.
+  - experiment_id: exp-fhe-flash-20260822-20261029-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 21fdbcc247
+    status: inconclusive
+    question: What happened during the FHE flash crash at Shanghai13:10 on2026-08-22, and which other coins shared it?
+    single_variable: None; descriptive synchronized market observation using existing5m,1m and aggTrades, without trade simulation.
+    result: Of507 actively traded crypto contracts in the archived cohort,332dropped over10percent intrabar during13:10-13:15. FHE-42.45percent, H-41.76, BASED-41.50, ACT-40.07, BSB-39.71; BTC-1.64/ETH-2.76. FHE low-to-target99.186seconds; exact initiating cause unproven.
+    artifacts: [fhe-flash-20260822-20261029-v1]
+    canonical_report: experiments/active/exp-fhe-flash-20260822-20261029-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 638archive series;6noncrypto exclusions and125zero-volume crypto bars excluded from active breadth.92minute-to5m checks and FHE aggTrades volume/high/low parity pass. No download, trade replay or profit claim. Concurrent public market-wide liquidation report supports background, not FHE-specific causation. Notion4088856479af81998523f69202d963fa. Initial full-history read interrupted; bounded day reader equals full FHE parse.
   - experiment_id: exp-spike-booklet-close-compare-20261029-v1
     source_repo: darkforest-x/fable-trading
     source_commit: ac094bd4db
@@ -819,11 +847,11 @@ experiments:
     notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
   - experiment_id: exp-monday-limit-alarm-entry-20261029-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: running
+    source_commit: db5f169c42
+    status: complete
     question: 'Owner 2026-10-29: when the market-wide spike alarm (>= 25 coins in 5 minutes) fires, enter every later same-side 1.618 touch at once and decide at the touch bar close with the real score whether to stay.'
     single_variable: 'Entry selection after alarms (no score) with a close-time exit by the touch-bar score; compared with holding all, the paper engine resting rule in the same windows and touches outside alarms.'
-    result: pending
+    result: '531 symbols, both paths, 0 errors, 99268 rows; 129 alarms (>= 25 coins), 96 / 109 / 117 with later touches in 30 / 120 / 360 minutes. Enter every later same-side touch and hold (near edge, -30 percent, frac N20 3x): 30 min 2146 trades +80bp, 3.70x DD17 from 2021 (2020-24 2.32x, 2025 1.31x, 2026 1.23x, last5m 1.19x), 96 episodes, episode mean +162bp, 65 percent positive; 120 min 3.13x; 360 min 2.84x (2026 0.92x). Control outside alarms with the same rule: -6bp, 0.33x DD81. The owner's close-time exit (touch-bar score < 0.5) hits 97 percent of alarm touches and turns +70bp into -25bp on them: 1.41x instead of 3.70x. Resting on the causal score inside the windows: 114 trades +270bp 1.33x. Alarm threshold chosen on the same history; about 100 independent episodes; longs 122 of 129.'
     artifacts: []
     canonical_report: experiments/active/exp-monday-limit-alarm-entry-20261029-v1/summary.json
     holdout_consumed: false

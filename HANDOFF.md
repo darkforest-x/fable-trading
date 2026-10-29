@@ -1,3 +1,9 @@
+## 2026-10-29 · After a 25-coin spike alarm, buying every later touch and holding works in sample; the close-time score exit does not
+
+- `exp-monday-limit-alarm-entry-20261029-v1` (builder db5f169c42; the first launch built wrong windows from a pandas-3 unit change and was stopped at once, outputs in `failed_units/`): 129 alarms 2021-2026, entries at the level for every same-side touch after the alarm bar.
+- Hold all, near edge -30 percent, 30-minute window, frac N20 3x: 2146 trades +80bp, 3.70x DD17 since 2021, every period positive (2025 1.31x, 2026 1.23x); control outside alarms -6bp 0.33x. The owner's exit at the touch close when the score < 0.5 closes 97 percent of alarm touches at -25bp vs +70bp held (1.41x).
+- In sample (threshold 25 picked 10-27 on the same data), ~100 episodes, mostly longs; live needs orders on all untouched same-side levels within seconds of the alarm. Candidate for a forward paper account (owner decision). Learning: `a-market-wide-alarm-selects-touches-the-score-rejects.md`.
+
 ## 2026-10-29 · Owner's exact spike403.21percent baseline comparison
 
 - Owner corrected the comparator: compare with screenshot+403.21percent, not the current paper-rule proxy+2.30percent. `exp-spike-booklet-close-compare-20261029-v1` reproduces every original booked settlement and metrics:1000→5032.0987915U,166funded,83.1325percentwin,21.1887percentDD,PF2.44995.
