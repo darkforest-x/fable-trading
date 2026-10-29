@@ -1,3 +1,9 @@
+## 2026-10-29 · Qualification on the 1m strategy account verdict
+
+- Explaining the prior result exposed an important accounting boundary: native Nautilus trade fills feed `monday_limit_return_opt.frac`, a separate simplified margin overlay. It uses realized equity/10 at3x, an MAE threshold of32.333percent for liquidation, applies the loss and releases the slot at the original exit timestamp, and measures drawdown only on realized exits. This is not native timestamped liquidation or mark-to-market account validation. The direction/magnitude of its bias has not been measured; do not state the0.612x result as a reliable real-account forecast.
+- The saved162-combo selection still fails under its documented assumptions;59 combos have positive independent mean returns. The model label is near-edge net-positive classification, not far-target return or account risk. A documented example(top10percent/noEMA/opposite1618/P18) has1631 trades,+72.64bp mean but95.6percent of summed net in2025H2, and0.551x in the simplified account. These facts identify target/accounting mismatches, not proof that lower leverage or a new label will fix it. Before further optimization, validate the account semantics; no new replay/training or production change made here.
+- Raw table correction: simulated liquidation medians range12–89 across all162 combos, not12–25 as the earlier prose states. Learning: `native-fills-do-not-validate-a-margin-overlay.md`.
+
 ## 2026-10-29 · Single5m wick risk filter remains unproven
 
 - Owner approved the proposed natural risk-distance filter. `exp-5m-wick-risk-filter-20261029-v1` keeps short close entry, exact needle-high stop, far internal0.618 target, and maker2bp/taker5bp. Frozen risk distance >=63.621485488253036bp; first-touch/reclaim/volume assessed separately without combinations. Existing native outcomes only, zero replay or new trades.
