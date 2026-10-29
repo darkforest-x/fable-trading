@@ -1,0 +1,14 @@
+{
+  "experiment_id": "exp-alarm-laggard-recovery-20261029-v2",
+  "parent": "experiments/active/exp-alarm-laggard-selection-20261029-v1",
+  "single_variable": "Recovery outcome definition only. All alarm times, archived universe, candidate eligibility, causal features, selections, matching strata and control pools are unchanged.",
+  "reason": "V1 requires recovery near the original reference price. A deep needle can rebound strongly without returning there; these are different research questions. V1 results are preserved.",
+  "new_outcome": "First new5percent decline within15minutes, then a completed close at or above halfway between reference and the actual15minute trough, after that trough and by60minutes after alarm.",
+  "lower_bound": "Retain V1 definite-first-touch requirement. Minimum of fully contained15minute bars is an upper bound on actual trough. A close after the entire15minute interval and before60minutes above the midpoint using that higher trough proves recovery. This may miss fast rebounds before15minutes and is intentionally conservative.",
+  "upper_bound": "Minimum of all bars overlapping15minutes is a lower bound on actual trough. A later close after the earliest possible first-touch bar above that easier midpoint is a permissive upper bound; boundary bars may overinclude outcomes. Missing future data keeps upper1.",
+  "interpretation": "Added after viewing V1 and the FHE construct check; descriptive endpoint expansion,not confirmatory untouched evidence and not parameter optimization. No training,trade fills or PnL.",
+  "workers": 2,
+  "training_eligible": false,
+  "production_eligible": false,
+  "reproduction": ".venv/bin/python -m yoyo.evaluation.alarm_laggard_recovery"
+}
