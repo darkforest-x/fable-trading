@@ -1,0 +1,46 @@
+{
+  "experiment_id": "exp-5m-wick-risk-filter-20261029-v1",
+  "source_experiment": "experiments/active/exp-5m-single-wick-1618-majors-20261029-v1",
+  "notion_page": "40788564-79af-806c-bbb8-f61ef864b118",
+  "authorization": "Owner approved 2026-10-29: validate risk-distance-only candidate; inspect first touch, reclaim, and volume separately, then assess stability before combined filters or funded-account research.",
+  "rules": [
+    {
+      "name": "baseline",
+      "feature": null
+    },
+    {
+      "name": "risk_only",
+      "feature": "risk_bp",
+      "cut": 63.621485488253036
+    },
+    {
+      "name": "first_touch_only",
+      "feature": "first_weekly_touch"
+    },
+    {
+      "name": "reclaim_only",
+      "feature": "reclaim_range",
+      "cut": 0.07464477713507899
+    },
+    {
+      "name": "volume_only",
+      "feature": "volume_ratio20",
+      "cut": 5.478058243873612
+    }
+  ],
+  "primary_rule": "risk_only",
+  "unchanged_execution": "Original native ledger: closed5m short entry, exact candle-high stop, Monday H-.618*(H-L) target, no time exit, taker5bp entry/stop and maker2bp target.",
+  "stability_readout": "Both 2025 and 2026 must have positive fee-net and stress-net meanR, and paired-week signflip p<.01. This is a retrospective diagnostic, not a new pre-registered test.",
+  "combination_policy": "No combined filters, parameter scan, or funded-account replay in this audit.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "limitations": [
+    "Feature choice follows inspection of2026 outcomes; frozen pre2025 cut alone does not make2026 fresh validation.",
+    "Original universe/data and costs retained; Binance candles with OKX Lv1 fee benchmark read2026-10-23.",
+    "Instantaneous5m-close fills, no funding or capacity model; separate10bp-per-market-fill slippage stress.",
+    "Independent original-riskR, not account returns; source/gap-censored trades retained separately.",
+    "Period tables require each signal/control own entry and exit inside the period; boundary-crossing exclusions separately counted. Monthly sums are not additive.",
+    "Bootstrap/signflip intervals are conditional descriptive statistics; feature search, survivorship, and shared market exposure limit inference.",
+    "Removing winning trades or weeks is an outcome-conditioned fragility test; not a causal strategy filter."
+  ]
+}
