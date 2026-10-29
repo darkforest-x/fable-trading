@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-booklet-close-compare-20261029-v1
+    artifact_type: manifest
+    role: exact_displayed_spike_baseline_vs_completed_close_account_projection
+    source_repo: darkforest-x/fable-trading
+    source_commit: ac094bd4db
+    source_path: experiments/active/exp-spike-booklet-close-compare-20261029-v1/summary.json
+    storage_uri: repo://experiments/active/exp-spike-booklet-close-compare-20261029-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Original403.21percent booklet curve exactly reproduced;matchedBE0/seed close curve25.0917percent. Config/summary/reproduction tracked;source receipts and projected ledgers local. No native replay,source download,parameter scan or live change.
   - artifact_id: spike-close-execution-20261029-v1
     artifact_type: manifest
     role: frozen_spike_postclose_native_execution_and_conditional_controls

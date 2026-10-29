@@ -1,0 +1,143 @@
+{
+  "config": {
+    "experiment_id": "exp-spike-booklet-close-compare-20261029-v1",
+    "question": "Owner explicitly requests comparison with the displayed +403.21percent spike curve, not the current paper-rule proxy.",
+    "baseline_study": "exp-monday-limit-spike-hw-20261026-v1",
+    "booklet": "exp-strategy-booklet-paths-20261027-v1",
+    "close_be0_study": "exp-monday-limit-close-reclaim-20261028-v1",
+    "cached_clocks": "exp-spike-close-execution-20261029-v1",
+    "start": "2020-01-01T00:00:00Z",
+    "slots": 10,
+    "leverage": 5,
+    "liquidation_proxy_pct": 19,
+    "seed": 20261102,
+    "breakeven_offset_bp": 0,
+    "backstop_pct": 18,
+    "score_cut": 0.6,
+    "min_order": 3,
+    "target": "near_monday_edge",
+    "entry_variable": "Same original touch-close scores and EMA filter; move entry from original1.618 touch to its5m close, skip if already beyond target/stop. Fixed original price anchors and H1 confirmation policy.",
+    "market_entry_slippage_bp": 10,
+    "non_target_slippage_bp": 10,
+    "fees": "Preserve saved native fees: resting entry maker2bp versus close market entry taker5bp; target maker2bp and other exits taker5bp. No double deduction. Fee snapshot2026-10-23.",
+    "operation": "Read-only projection of already executed BE0 native fills, no new trading backtest or parameter scan; reuse exact original capital allocator and stable symbol/time ordering.",
+    "control_scope": "Exact baseline accounting comparison, not a new alpha/causal efficacy claim. No invented BE0 random control or reuse of BE17 control p-values; conditional-control evidence for the adjacent BE17 study remains separate.",
+    "limitations": "The baseline uses touch-close information for an earlier limit fill. Both curves retain original simplified realized-equity/MAE liquidation overlay, not native margin/mark-to-market. Close entry still assumes exact close plus10bp cost, not measured order latency. Binance histories, no funding/depth/partial fills.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "baseline": {
+    "final_multiple": 5.032098791499861,
+    "max_drawdown_pct": 21.188741245865938,
+    "liquidations": 2,
+    "skipped": 53,
+    "taken": 166,
+    "win_pct": 83.13253012048193,
+    "initial_equity": 1000.0,
+    "ending_equity": 5032.09879149986,
+    "return_pct": 403.2098791499861,
+    "profit_factor": 2.449946455078297,
+    "independent_fills": 219,
+    "independent_mean_bp": 240.59803611640748
+  },
+  "close_now": {
+    "final_multiple": 1.2509170341284408,
+    "max_drawdown_pct": 32.94791889370994,
+    "liquidations": 5,
+    "skipped": 0,
+    "taken": 106,
+    "win_pct": 77.35849056603773,
+    "initial_equity": 1000.0,
+    "ending_equity": 1250.9170341284407,
+    "return_pct": 25.09170341284408,
+    "profit_factor": 1.1945916895503104,
+    "independent_fills": 106,
+    "independent_mean_bp": 89.79727794061057
+  },
+  "period_restarts": {
+    "2025": {
+      "booklet": {
+        "final_multiple": 1.6645282802363135,
+        "max_drawdown_pct": 21.18874124586595,
+        "liquidations": 0,
+        "skipped": 0,
+        "taken": 66,
+        "win_pct": 78.78787878787878,
+        "initial_equity": 1000.0,
+        "ending_equity": 1664.5282802363135,
+        "return_pct": 66.45282802363135,
+        "profit_factor": 1.956319470152208,
+        "independent_fills": 66,
+        "independent_mean_bp": 166.80700553622128
+      },
+      "close_now": {
+        "final_multiple": 0.7682840439841239,
+        "max_drawdown_pct": 32.94791889370995,
+        "liquidations": 3,
+        "skipped": 0,
+        "taken": 42,
+        "win_pct": 69.04761904761905,
+        "initial_equity": 1000.0,
+        "ending_equity": 768.2840439841239,
+        "return_pct": -23.17159560158761,
+        "profit_factor": 0.6435099456035057,
+        "independent_fills": 42,
+        "independent_mean_bp": -66.0820625160277
+      }
+    },
+    "2026": {
+      "booklet": {
+        "final_multiple": 1.6562708666313302,
+        "max_drawdown_pct": 15.47385048230705,
+        "liquidations": 1,
+        "skipped": 27,
+        "taken": 58,
+        "win_pct": 82.75862068965517,
+        "initial_equity": 1000.0,
+        "ending_equity": 1656.2708666313301,
+        "return_pct": 65.62708666313301,
+        "profit_factor": 2.007601719550418,
+        "independent_fills": 85,
+        "independent_mean_bp": 231.8012919996984
+      },
+      "close_now": {
+        "final_multiple": 1.3648191345951366,
+        "max_drawdown_pct": 12.781388527231552,
+        "liquidations": 1,
+        "skipped": 0,
+        "taken": 36,
+        "win_pct": 80.55555555555556,
+        "initial_equity": 1000.0,
+        "ending_equity": 1364.8191345951366,
+        "return_pct": 36.48191345951366,
+        "profit_factor": 2.199431665361295,
+        "independent_fills": 36,
+        "independent_mean_bp": 216.82396793750263
+      }
+    }
+  },
+  "admission": {
+    "original_signals": 219,
+    "close_fills": 106,
+    "skipped_at_close": {
+      "target_already_reached_at_decision_close": 113
+    },
+    "old_funded_no_longer_enterable": 68,
+    "old_funded_pnl_no_longer_enterable": 2787.5913391826534
+  },
+  "difference": {
+    "ending_equity": -3781.1817573714197,
+    "return_percentage_points": -378.118175737142
+  },
+  "validation": {
+    "original_ledger_exact": true,
+    "original_booklet_summary_exact": true,
+    "cached_mae_window_price_checks": 212,
+    "old_be0_mean_exact": true,
+    "new_native_replays": 0,
+    "native_versions": "Original saved NautilusTrader1.231.0 fills",
+    "source_commit": "ac094bd4db2732a3dd4b7e1cf6dd486c4747a6ec"
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}

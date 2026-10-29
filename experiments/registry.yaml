@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-booklet-close-compare-20261029-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ac094bd4db
+    status: inconclusive
+    question: Compare close entry directly with the owner's displayed403.21percent spike curve, preserving its exact historical baseline.
+    single_variable: Original touch-close score candidates;1.618fill replaced by completed5m market. BE0/P18/near-edge/H1 and original10slot5x/19percentMAE/seed20261102 unchanged.
+    result: Exact baseline5032.0988U,+403.2099percent,166funded,DD21.1887percent,PF2.44995. Close1250.9170U,+25.0917percent,106funded,DD32.9479percent,PF1.19459.219original signals;113already past target at close. Profit remains positive but much smaller.
+    artifacts:
+      - spike-booklet-close-compare-20261029-v1
+    canonical_report: experiments/active/exp-spike-booklet-close-compare-20261029-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Read-only accounting of existingBE0Nautilus fills;zero native replay/download/parameter scan. Original ledger reproduced,212per-pathMAEwindow/price parity checks. Fixed seed,not medians. This aligns accounting,not a new alpha validation;no fabricatedBE0random control or transferredBE17p-value. Original baseline foresight and simplifiedmargin/latency limitations remain.
   - experiment_id: exp-spike-close-execution-20261029-v1
     source_repo: darkforest-x/fable-trading
     source_commit: a4af39971a

@@ -1,3 +1,9 @@
+## 2026-10-29 · Owner's exact spike403.21percent baseline comparison
+
+- Owner corrected the comparator: compare with screenshot+403.21percent, not the current paper-rule proxy+2.30percent. `exp-spike-booklet-close-compare-20261029-v1` reproduces every original booked settlement and metrics:1000→5032.0987915U,166funded,83.1325percentwin,21.1887percentDD,PF2.44995.
+- Reuse BE0P18/B18 close-entry native fills with the exact same10slot5x/19percentMAE allocator,seed20261102 and stable symbol/time ordering:1000→1250.9170341U,+25.091703percent,106funded,77.3585percentwin,32.9479percentDD,PF1.19459. This differs slightly from the earlierBE17+25.41percent; do not mix them.219original signals,113already close past target.68ofthose were funded in the old curve;their old recorded2787.59U PnL is descriptive,not a linear attribution because allocation/compounding changes.
+- Original nativeBE0 means and212per-path entry/exit-window/price checks pass. No new native execution/download/fitting; merely project saved fills through the original allocator. Original margin/mark-to-market/funding/close-latency limits and baseline information leakage remain. Learning:`a-displayed-baseline-is-a-specific-ledger.md`.
+
 ## 2026-10-29 · Spike after the completed touch5m close remains a research candidate
 
 - Owner explicitly reopened scoped spike live-execution research. Rejecting a score-informed pre-touch limit does not reject a score available after the touch close. `exp-spike-close-execution-20261029-v1` freezes score>=0.6/order>=3/near-edge/P18/BE17/fill-derivedH1; no parameter search, account or execution-service changes.

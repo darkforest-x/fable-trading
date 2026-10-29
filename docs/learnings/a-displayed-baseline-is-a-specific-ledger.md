@@ -1,0 +1,7 @@
+# A displayed baseline identifies a specific ledger
+
+- **Problem**: The owner asked to compare post-close spike entries with the screenshot's+403.21percent curve, but the answer substituted the current paper-rule projection(+2.30percent).
+- **Dead end**: Treating the same strategy name as the same baseline hid BE0 versusBE17, frozen scores, candidate sets, original MAE accounting and fixed-seed versus median differences. Explaining why the old curve is optimistic did not answer the requested comparison.
+- **Effective path**: Resolve the screenshot to the booklet manifest and require the original166 funded settlements,5032.0987915USDT ending balance,21.188741percent drawdown and2.449946PF to reproduce. Reuse BE0 close-entry native fills, identical allocator, seed20261102 and symbol/time ordering. The aligned close account ends1250.9170341USDT(+25.091703percent),106funded,32.947919percent drawdown.212per-path price/window checks permit reuse of MAE, with no native replay.
+- **General rule**: A named or pictured comparison baseline is fixed by its saved ledger and assumptions. Reproduce it first, change only the requested dimension, and explain validity limits separately. Never replace it with a preferred or more recent baseline.
+- **Dependencies**: `spike_booklet_close_compare.py`, `exp-spike-booklet-close-compare-20261029-v1`, original `slot_replay` and booklet exporter. Both curves retain the historical simplified margin proxy and close-fill assumptions; this comparison grants no live eligibility.
