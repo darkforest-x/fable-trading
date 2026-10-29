@@ -1,0 +1,66 @@
+{
+  "experiment_id": "exp-market-crash-alarm-20261029-v1",
+  "question": "Does six-major downside breadth and acceleration warn of collective severe declines earlier or with less noise than BTC alone?",
+  "scope": "Alarm evaluation only; no orders, trade outcomes, strategy parameters, training, services or live changes.",
+  "source_config": "experiments/active/exp-monday-1618-oos-1m-20261023-v1/config.json",
+  "symbols": [
+    "BTC",
+    "ETH",
+    "SOL",
+    "BNB",
+    "XRP",
+    "DOGE"
+  ],
+  "development_end": "2025-01-01T00:00:00Z",
+  "evaluation_periods": [
+    "2025",
+    "2026",
+    "2025_2026"
+  ],
+  "design_day_excluded_from_primary": "2026-08-22",
+  "event": {
+    "reference_bars": 5,
+    "definition": "At current minute i, low_i / close_(i-5) - 1 for each coin; NOT a rolling minimum. Median <= -3% and at least4of6 <= -2%.",
+    "median_drop": -0.03,
+    "coin_drop": -0.02,
+    "minimum_coins": 4,
+    "merge_gap_minutes": 30,
+    "clock": "First flagged minute open is the conservative earliest severe-threshold crossing; labels become known after minute close. It is not the initial selloff onset.",
+    "recovery": "Descriptive only: median normalized close basket; trough in first30m after crossing, recovery of at least half that drawdown at60m. Does not filter event admission."
+  },
+  "score": {
+    "volatility_window": 1440,
+    "minimum_volatility": 0.0001,
+    "component_cap": 20,
+    "definition": "r=log(close/previous_close); sigma=std of1440previous returns, excluding current. Percoin=(clip(-r/sigma,0,20)+clip((previous_r-r)/sigma,0,20))/2. Score=median(percoin)*share(r<0). BTC uses the same equation with one coin.",
+    "availability": "Minute open+60seconds+assumed feed/compute delay; no tick-reaction claims."
+  },
+  "alarm": {
+    "development_target_per_exposure_day": 1.0,
+    "cooldown_minutes": 15,
+    "threshold_calibration": "32 bisection steps on development score only to match total alert count, no event labels; closest achieved count, higher threshold breaks tie. Greedy earliest eligible exceedance, same cooldown for both methods.",
+    "latency_seconds": 1,
+    "sensitivity_latency_seconds": [
+      0,
+      10,
+      30
+    ],
+    "minimum_lead_seconds": 60,
+    "maximum_lead_seconds": 300,
+    "matching": "One alarm to one event; earliest timely alarm per event. All other alarms remain in precision denominator, with late/inside versus ordinary false alarms separately. No future event suppression."
+  },
+  "statistics": {
+    "seed": 20261029,
+    "bootstrap_repeats": 5000,
+    "null_repeats": 499,
+    "null_max_restarts": 10,
+    "null": "Same number of alarms per UTCweek x UTChour x laggedBTCvolatility quintile. Quintile boundaries from development only. Sample without replacement with the same15m separation. Keep event-period candidates. Failed exact-constraint replicates reported, never relax strata/cooldown. Use independent within-week rejection first, followed by global cross-week cooldown rejection; repeat whole blocked draw if cross-week constraints fail. Each rejection stage allows one initial attempt plus max_restarts.",
+    "pairing": "Same event list and UTCweek blocks for paired recall and non-timely-alert/day differences; all coins from a shock are one event.",
+    "ranking_metrics": "Minute ROC-AUC/AP against the next60..300second severe-crossing label are diagnostics, not iid significance tests or profit metrics.",
+    "interpretation": "Historical chronological comparison;2026andothermarketepisodes have previously been observed. Do not call it untouched prospective validation. Require cross-year consistency and uncertainty bounds; no automatic promotion."
+  },
+  "not_applicable": "No strategy PnL, cost, win-rate or random-entry-return claim: this is a warning-system test. Conditional random alert times are its null control.",
+  "reproduction": ".venv/bin/python -m yoyo.evaluation.market_crash_alarm",
+  "training_eligible": false,
+  "production_eligible": false
+}
