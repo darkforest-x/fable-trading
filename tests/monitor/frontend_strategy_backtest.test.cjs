@@ -43,3 +43,12 @@ test('desktop overlay reserves visible chart space for both trade endpoints',()=
  assert.equal(partial.from,full.from);assert.ok(partial.to>full.to);
  assert.ok((partial.exit-partial.from)/(partial.to-partial.from)<.6);
 });
+
+test('left ledger keeps both endpoints in the uncovered right area',()=>{
+ const bars=Array.from({length:100},(_,i)=>({time:1700000040+i*60}));
+ const r={entry_ms:bars[20].time*1000,exit_ms:bars[70].time*1000};
+ const focus=chart.replayRange(r,bars,60000,.6,'left');
+ assert.ok((focus.entry-focus.from)/(focus.to-focus.from)>.4);
+ assert.ok((focus.exit-focus.from)/(focus.to-focus.from)<1);
+ for(const period of ['1m','2m','3m'])assert.equal(ui.periodFor(r,period),period);
+});

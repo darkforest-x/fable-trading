@@ -110,3 +110,13 @@ def test_week_cursor_covers_each_week_once_across_dst_and_keeps_missing_state():
     assert any(w['expires_ms']-w['start_ms'] == 167*3600000 for w in rows)
     assert all(w['state'] == 'missing_monday' for w in rows)
     assert second['next_before_ms'] is None
+
+
+def test_two_minute_pages_are_complete_utc_pairs_with_progressing_cursors():
+    history, client = service()
+    before=NOW//120000*120000
+    first=history.read('BTC-USDT-SWAP','2m',before)
+    second=history.read('BTC-USDT-SWAP','2m',first['next_before_ms'])
+    assert first['native_bar']=='1m' and len(first['candles'])==150
+    assert all(b['time']%120000==0 and b['volume']==8 for b in first['candles'])
+    assert max(b['time'] for b in second['candles'])<min(b['time'] for b in first['candles'])

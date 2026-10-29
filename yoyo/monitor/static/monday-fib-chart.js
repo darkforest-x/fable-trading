@@ -5,7 +5,7 @@
  */
 (() => {
   'use strict';
-  const finite=Number.isFinite,PERIODS={'1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000};
+  const finite=Number.isFinite,PERIODS={'1m':60000,'2m':120000,'3m':180000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000};
   const weekOf=ms=>new Intl.DateTimeFormat('sv-SE',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(ms));
   function levels(row,anchors){
     const h=row.high,l=row.low,r=h-l;

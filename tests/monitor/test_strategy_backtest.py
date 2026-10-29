@@ -90,3 +90,20 @@ def test_endpoint_allowlists_and_bounded_concurrency(monkeypatch):
         assert client.get('/api/strategy-backtest/candles?track=allin3&trade=1').status_code == 503
     finally:
         api.SLOTS.release(); api.SLOTS.release()
+
+
+def test_smaller_periods_use_real_minutes_not_split_five_minute_candles(saved,monkeypatch):
+    from yoyo.data import binance_minute_window
+    directory,identities,path=saved
+    calls=[]
+    def read(symbol,start,end):
+        calls.append((symbol,start,end))
+        return [dict(time=t,open=10,high=12,low=9,close=11,volume=.4) for t in range(start,end,60000)]
+    monkeypatch.setattr(binance_minute_window,'read',read)
+    for period,step,volume in [('1m',60000,.4),('2m',120000,.8),('3m',180000,1.2)]:
+        v=api.candles('allin3',3,period,directory=directory,identities=identities)
+        assert all(b['time']%step==0 and b['volume']==pytest.approx(volume) for b in v['candles'])
+        assert v['weekly_ranges'][0]['high']==12
+    assert len(calls)==3
+    with pytest.raises(ValueError,match='cannot_split'):
+        api.aggregate(pd.DataFrame(),60000,300000)

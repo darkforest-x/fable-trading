@@ -4,7 +4,7 @@
  */
 (() => {
  'use strict';
- const STEPS={'1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000};
+ const STEPS={'1m':60000,'2m':120000,'3m':180000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000};
  const finite=Number.isFinite,DAY=86400000,symbolOK=s=>typeof s==='string'&&/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(s);
  function weekAt(now){const day=new Date(new Intl.DateTimeFormat('sv-SE',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(now)+'T00:00:00Z');day.setUTCDate(day.getUTCDate()-(day.getUTCDay()+6)%7);return day.toISOString().slice(0,10);}
  function sanitize(kind,value){

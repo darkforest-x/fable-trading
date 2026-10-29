@@ -1,8 +1,9 @@
-"""Demand-only native candles for the Monday wallpaper, separate from scanning.
+"""Demand-only display candles for the Monday wallpaper, separate from scanning.
 
 OKX bar/confirm contract: https://app.okx.com/docs-v5/en/#order-book-trading-market-data
 Half-day/daily candles use 12Hutc/1Dutc (UTC 00/12 and 00 boundaries); NY Monday anchors still come from MondayFibService.
 Only the selected symbol/period is read through the shared public candle hub.
+The 2m display aggregates complete UTC-aligned native 1m pairs.
 Two history jobs, two live-tail readers and twelve cached history views cannot
 expand the monitor universe. Closed snapshots remain separate from live tails.
 """
@@ -13,11 +14,11 @@ import re
 import threading
 
 from fastapi import HTTPException, Query
-from yoyo.data.candle_hub import STEPS, bar_open, validate
+from yoyo.data.candle_hub import STEPS, validate
 from yoyo.monitor.monday_fib import week_window
 from yoyo.monitor.okx import OKX
+from .chart_periods import PERIODS, native_bar, step_ms, open_time, candles as display_candles
 
-PERIODS = ('1m', '5m', '15m', '30m', '1H', '4H', '12H', '1D')
 SYMBOL = r'^[A-Z0-9]{1,32}-USDT-SWAP$'
 
 
@@ -38,9 +39,9 @@ class MondayCandles:
         self.closed = False
 
     def _fetch(self, symbol, period, entry):
-        bar = {'12H': '12Hutc', '1D': '1Dutc'}.get(period, period)
+        bar = native_bar(period)
         now = self.client.clock()
-        boundary = bar_open(now, bar)
+        boundary = open_time(now, period)
         try:
             rows = {}
             cursor = boundary
@@ -49,7 +50,7 @@ class MondayCandles:
             previous = {r['time']: r for r in entry['candles']}
             complete = entry.get('history_complete', False)
             overlap = False
-            for page_index in range(3):
+            for page_index in range(6 if period == '2m' else 3):
                 raw = self.client.get('/api/v5/market/history-candles',
                                       dict(instId=symbol, bar=bar, limit='240', after=str(cursor)))
                 page = validate(raw, bar, now)
@@ -61,24 +62,25 @@ class MondayCandles:
                     overlap = True
                     break
                 if page_index == 0:
-                    # A first screen needs 160 bars, not all three history pages.
+                    # Publish the first validated page for a quick first screen.
                     # Publish only validated closed bars; history keeps the same
                     # bounded job and shared upstream rate budget.
-                    first = self._candles(rows)
-                    with self.ready:
-                        entry.update(candles=first, last_close_ms=first[-1]['time']+STEPS[bar],
-                                     generated_ms=now, history_complete=False, error=None)
-                        self.ready.notify_all()
+                    first = display_candles(rows, period)
+                    if first:
+                        with self.ready:
+                            entry.update(candles=first, last_close_ms=first[-1]['time']+step_ms(period),
+                                         generated_ms=now, history_complete=False, error=None)
+                            self.ready.notify_all()
                 cursor = min(page)
                 if len(page) < 240:
                     break
-            candles = self._candles(rows)
+            candles = display_candles(rows, period)
             if overlap:
                 previous.update({r['time']: r for r in candles})
                 candles = [previous[t] for t in sorted(previous)][-720:]
             # An upstream page can lag a just-closed bar. Retry that boundary;
             # never call an older tail fresh merely because a fetch succeeded.
-            last_close = candles[-1]['time'] + STEPS[bar] if candles else 0
+            last_close = candles[-1]['time'] + step_ms(period) if candles else 0
             with self.lock:
                 entry.update(candles=candles, last_close_ms=last_close, generated_ms=now,
                              history_complete=True, error=None)
@@ -93,33 +95,33 @@ class MondayCandles:
 
     @staticmethod
     def _candles(rows):
-        return [dict(time=t, open=float(r[1]), high=float(r[2]), low=float(r[3]),
-                     close=float(r[4]), volume=float(r[5])) for t, r in sorted(rows.items())]
+        return display_candles(rows)
 
     def recent(self, symbol, period):
-        """Native display OHLC, with the forming candle explicitly separated.
+        """Display OHLC, with the forming candle explicitly separated.
 
         Uses the shared two-second transient cache and background rate budget.
         No subscriptions, scanner work, or writes to the closed snapshot.
         """
         if not re.fullmatch(SYMBOL, symbol) or period not in PERIODS:
             raise ValueError('unsupported_chart_query')
-        bar = {'12H': '12Hutc', '1D': '1Dutc'}.get(period, period)
+        bar = native_bar(period)
         value = dict(symbol=symbol, bar=period, native_bar=bar,
                      closed_candles=[], forming_candle=None, error=None)
         if self.closed or not self.live_slots.acquire(False):
             return dict(value, now_ms=self.client.clock(), error='实时 K 线正在重连')
         try:
             raw = self.live_client.get('/api/v5/market/candles',
-                                       dict(instId=symbol, bar=bar, limit='3'))
+                                       dict(instId=symbol, bar=bar, limit='6' if period == '2m' else '3'))
             now = self.live_client.clock()
-            boundary = bar_open(now, bar)
+            boundary = open_time(now, period)
             rows = validate(raw, bar, now)
             closed = {t:r for t,r in rows.items() if r[8]=='1' and t+STEPS[bar]<=boundary}
-            forming = {t:r for t,r in rows.items() if r[8]=='0' and t==boundary}
-            value.update(closed_candles=self._candles(closed),
-                         forming_candle=next(iter(self._candles(forming)), None))
-            if not closed and not forming:
+            forming = {t:r for t,r in rows.items() if boundary <= t <= now and
+                       (period == '2m' or r[8]=='0')}
+            value.update(closed_candles=display_candles(closed, period),
+                         forming_candle=next(iter(display_candles(forming, period, now=now, forming=True)), None))
+            if not value['closed_candles'] and not value['forming_candle']:
                 value['error'] = '实时 K 线暂不可用'
         except Exception:
             value['error'] = '实时 K 线暂不可用'
@@ -131,12 +133,12 @@ class MondayCandles:
         if not re.fullmatch(SYMBOL, symbol) or period not in PERIODS:
             raise ValueError('unsupported_chart_query')
         now = self.client.clock()
-        bar = {'12H': '12Hutc', '1D': '1Dutc'}.get(period, period)
+        bar = native_bar(period)
         with self.ready:
             key = (symbol, period)
             entry = self.cache.setdefault(key, dict(candles=[], loading=False, last_close_ms=0))
             self.cache.move_to_end(key)
-            due = (entry['last_close_ms'] < bar_open(now, bar) or not entry['candles']
+            due = (entry['last_close_ms'] < open_time(now, period) or not entry['candles']
                    or not entry.get('history_complete') or bool(entry.get('error')))
             if not self.closed and due and not entry['loading'] and entry.get('retry_ms', 0) <= now:
                 if self.slots.acquire(False):
@@ -159,7 +161,7 @@ class MondayCandles:
         value.pop('retry_ms', None)
         now = self.client.clock()
         window = week_window(now)
-        return dict(value, now_ms=now, next_close_ms=bar_open(now, bar)+STEPS[bar],
+        return dict(value, now_ms=now, next_close_ms=open_time(now, period)+step_ms(period),
                     symbol=symbol, bar=period, native_bar=bar, source='OKX',
                     timezone='America/New_York', week=window['week'],
                     monday=dict(start_ms=window['start'], end_ms=window['end'], expires_ms=window['expires']))
@@ -197,11 +199,11 @@ def install(app, runtime):
 
     @app.get('/api/monday-fib/candles')
     def candles(symbol: str = Query(..., pattern=SYMBOL),
-                period: str = Query('15m', pattern=r'^(1m|5m|15m|30m|1H|4H|12H|1D)$'),
+                period: str = Query('15m', pattern='^('+'|'.join(PERIODS)+')$'),
                 wait_ms: int = Query(0, ge=0, le=8000)):
         return service.snapshot(symbol, period, wait_ms)
 
     @app.get('/api/monday-fib/live-candles')
     def live_candles(symbol: str = Query(..., pattern=SYMBOL),
-                     period: str = Query('15m', pattern=r'^(1m|5m|15m|30m|1H|4H|12H|1D)$')):
+                     period: str = Query('15m', pattern='^('+'|'.join(PERIODS)+')$')):
         return service.recent(symbol, period)

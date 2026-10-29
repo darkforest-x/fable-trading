@@ -192,7 +192,7 @@
       const saved=key===this.key?T.anchor(oldRange,oldTimes):null;
       // API time is milliseconds. Display-only live tips are explicitly merged
       // by their owning chart; analytical consumers keep their closed series.
-      const raw=data?.candles||[],step={'1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000}[data?.bar]||900000;
+      const raw=data?.candles||[],step={'1m':60000,'2m':120000,'3m':180000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000}[data?.bar]||900000;
       if(view.ma)this.averages ||= window.SpikeChartStyle.createAverages();else this.averages=null;
       this.rows=(this.averages?this.averages(raw,step):raw).slice(-view.bars).map(r=>({...r,time:r.time/1000}));
       this.syncAverages(!!view.ma);

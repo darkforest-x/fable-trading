@@ -6,7 +6,7 @@ const raw=(t,confirm='0',close='11')=>[String(t),'10','14','8',close,'4','40','4
 const obj=(t,confirmed=false,close=11)=>({time:t,open:10,high:14,low:8,close,volume:4,confirmed});
 for(const [period,step] of Object.entries(PERIODS))test(`${period}: exact native live OHLC, confirmed-only history, boundary rollover`,()=>{
  const boundary=Math.floor(NOW/step)*step;
- assert.equal(nativeBar(period),({'12H':'12Hutc','1D':'1Dutc'}[period]||period));
+ assert.equal(nativeBar(period),({'2m':'1m','12H':'12Hutc','1D':'1Dutc'}[period]||period));
  const rows=parse([raw(boundary),raw(boundary-step,'1')],period,NOW);
  assert.equal(rows.length,2);assert.equal(rows[1].confirmed,false);
  assert.deepEqual(parse([raw(boundary,'1'),raw(boundary-step),raw(boundary+step),raw(boundary+1)],period,NOW),[]);
@@ -73,4 +73,12 @@ test('identical snapshots and heartbeats skip redraws while price, volume and st
  f.message([raw(f.boundary)]);f.run(100);for(const t of f.intervals.values())t.fn();assert.equal(f.states.length,count);
  const changed=raw(f.boundary);changed[5]='5';f.message([changed]);f.run(100);assert.equal(f.states.length,count+1);
  f.advance(16000);for(const t of f.intervals.values())t.fn();assert.match(f.states.at(-1).error,/延迟/);f.feed.stop();
+});
+
+test('2m polls validated aggregated REST bars without requesting an unsupported exchange channel',async()=>{
+ const f=fixture('2m');f.feed.start();assert.equal(f.sockets.length,0);
+ f.requests[0].resolve({ok:true,json:async()=>f.value()});await f.flush();f.run(100);
+ assert.equal(f.states.at(-1).bars.at(-1).time,f.boundary);
+ for(const t of f.intervals.values())t.fn();assert.equal(f.requests.length,2);
+ f.feed.stop();assert.equal(f.requests[1].options.signal.aborted,true);
 });

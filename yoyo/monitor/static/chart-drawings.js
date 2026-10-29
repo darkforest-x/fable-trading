@@ -208,7 +208,7 @@
       if(symbol!==data.symbol){cancel();symbol=data.symbol;undo=[];warning='';blocked=false;
         if(memory.has(symbol)){const cached=memory.get(symbol);items=copy(cached.items);blocked=cached.blocked;warning=cached.warning;}else try{items=decode(window.localStorage.getItem(PREFIX+symbol));}catch{items=[];warning='本地绘图暂不可读取；新增绘图仅本页保留，原内容未改';blocked=true;}
       }
-      const step=({'1m':60,'5m':300,'15m':900,'30m':1800,'1H':3600,'4H':14400,'12H':43200,'1D':86400})[data.bar]||900;
+      const step=({'1m':60,'2m':120,'3m':180,'5m':300,'15m':900,'30m':1800,'1H':3600,'4H':14400,'12H':43200,'1D':86400})[data.bar]||900;
       if(index.step!==step){cancel();}
       index=new DataIndex(next.rows,step);publish();
     }

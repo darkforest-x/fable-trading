@@ -4,7 +4,7 @@
  */
 (() => {
   'use strict';
-  const fin=Number.isFinite,periods={'5m':300000,'15m':900000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000};
+  const fin=Number.isFinite,periods={'1m':60000,'2m':120000,'3m':180000,'5m':300000,'15m':900000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000};
   const valid=p=>p && /^[A-Z0-9]{1,32}-USDT-SWAP$/.test(p.symbol) && [1,-1].includes(p.side) && fin(p.fill_ms) && p.fill_ms>0 && fin(p.entry) && p.entry>0;
   function latest(track){return [...(track?.open||[]),...(track?.closed||[]),...(track?.latest_funded?[track.latest_funded]:[])].filter(p=>valid(p)&&p.taken===1&&p.notional>0).sort((a,b)=>b.fill_ms-a.fill_ms||b.id-a.id)[0]||null;}
   function select(track,id,pinned){return id ? [...(track?.open||[]),...(track?.closed||[]),...(track?.latest_funded?[track.latest_funded]:[])].find(p=>String(p.id)===id&&valid(p)) || (pinned&&String(pinned.id)===id?pinned:null) : latest(track);}
@@ -21,13 +21,14 @@
     return {entry:candleIndex(rows,p.fill_ms,step),exit:p.stage==='closed'?candleIndex(rows,p.exit_ms,step):-1,
       from:p.fill_ms,to:end,stop:fin(p.be_from_ms)&&p.be_from_ms>=p.fill_ms&&p.be_from_ms<=end?p.be_from_ms:null};
   }
-  function replayRange(trade,rows,step,visibleFraction=1){
+  function replayRange(trade,rows,step,visibleFraction=1,overlaySide='right'){
     if(!rows.length)return null;
     const a=candleIndex(rows,trade.entry_ms,step),b=candleIndex(rows,trade.exit_ms,step);
     if(a<0)return null;
     const end=b>=0?b:rows.length-1,span=Math.max(45,end-a+1),pad=Math.max(12,span*.18);
     const from=a-pad,to=Math.max(a+45,end+pad);
-    return {from,to:from+(to-from)/Math.min(1,Math.max(.25,visibleFraction)),entry:a,exit:b};
+    const visibleSpan=(to-from)/Math.min(1,Math.max(.25,visibleFraction));
+    return {from:overlaySide==='left'?to-visibleSpan:from,to:overlaySide==='left'?to:from+visibleSpan,entry:a,exit:b};
   }
   class TradeDrawing {
     constructor(owner){this.owner=owner;this.view={zOrder:()=> 'top',renderer:()=>({draw:target=>this.paint(target)})};}
@@ -82,8 +83,8 @@
       const draw=instance.paperDrawings.get(String(p?.id));instance.paperDrawing=draw||{shape:null};
       if(data.backtestTrade){
         const panel=host.parentElement?.querySelector('.bt-panel.is-open');
-        const fraction=panel&&host.clientWidth>700?Math.min(1,(panel.getBoundingClientRect().left-host.getBoundingClientRect().left-24)/instance.chart.timeScale().width()):1;
-        const t=data.backtestTrade,g=replayRange(t,instance.rows,step,fraction),key='backtest|'+data.track+'|'+t.id+'|'+data.bar;
+        const fraction=panel&&host.clientWidth>700?1-(panel.getBoundingClientRect().right-host.getBoundingClientRect().left+24)/instance.chart.timeScale().width():1;
+        const t=data.backtestTrade,g=replayRange(t,instance.rows,step,fraction,'left'),key='backtest|'+data.track+'|'+t.id+'|'+data.bar;
         instance.series.setMarkers(g?[{time:instance.rows[g.entry].time,position:'belowBar',color:'#2586e7',shape:'arrowUp',text:'开仓时间'},...(g.exit>=0?[{time:instance.rows[g.exit].time,position:'aboveBar',color:'#738392',shape:'arrowDown',text:'结算时间'}]:[])]:[]);
         instance.hasBacktestMarkers=true;
         if(g&&pinnedFocus!==key){pinnedFocus=key;instance.chart.priceScale('right').applyOptions({autoScale:true});instance.chart.timeScale().setVisibleLogicalRange({from:g.from,to:g.to});}

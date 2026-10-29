@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[2]
 LEDGERS = ROOT / 'experiments/active/exp-strategy-booklet-paths-20261027-v1'
 IDENTITIES = ROOT / 'experiments/active/exp-monday-limit-reclaim-20261024-v1/symbols'
 TRACKS = ('60', '5', 'v3', 'v3add', 'spike', 'v3lock', 'allin3', 'v3add20')
-PERIODS = {'5m': 300000, '15m': 900000, '1H': 3600000, '4H': 14400000,
+PERIODS = {'1m': 60000, '2m': 120000, '3m': 180000, '5m': 300000, '15m': 900000, '1H': 3600000, '4H': 14400000,
            '12H': 43200000, '1D': 86400000}
 SLOTS = BoundedSemaphore(2)
 
@@ -83,6 +83,8 @@ def page(track, *, sort='time', direction='desc', symbol='', offset=0, limit=50,
 def aggregate(frame, step, native):
     """UTC-open buckets require every original bar; never fill missing candles."""
     import pandas as pd
+    if step < native or step % native:
+        raise ValueError('cannot_split_source_candles')
     if frame.empty:
         return frame
     grouped = frame.groupby(frame.index // step * step)
@@ -159,15 +161,34 @@ def candles(track, trade, period, *, directory=LEDGERS, identities=IDENTITIES):
     end = row['exit_ms'] // step * step + 81 * step
     from .monday_fib import week_window
     source_start = min(start, week_window(row['entry_ms'])['start'])
-    value = _candles(str(identity), identity.stat().st_mtime_ns, stamps, source_start, end, period)
-    display = [b for b in value['candles'] if start <= b['time'] < end]
+    minute_view = step < int(job['execution_minutes']) * 60000
+    value = _candles(str(identity), identity.stat().st_mtime_ns, stamps, source_start, end,
+                     '5m' if minute_view else period)
+    if minute_view:
+        from yoyo.data.binance_minute_window import read
+        import pandas as pd
+        import numpy as np
+        # Keep original Monday rays. The finer display comes from real 1m
+        # archives of the same contract, not interpolation of saved 5m bars.
+        start = max(start, value['candles'][0]['time'])
+        minute = pd.DataFrame(read(row['symbol'], start, end)).set_index('time')
+        reference = pd.DataFrame(value['candles']).set_index('time')
+        rebuilt = aggregate(minute, 300000, 60000)
+        overlap = reference.index.intersection(rebuilt.index)
+        columns = ['high', 'low', 'close', 'volume']
+        if not len(overlap) or not np.allclose(reference.loc[overlap,columns], rebuilt.loc[overlap,columns],rtol=1e-7,atol=1e-10):
+            raise ValueError('minute_source_mismatch')
+        bars = aggregate(minute, step, 60000)
+        display = [dict(time=int(t), **r) for t,r in bars.to_dict('index').items()]
+    else:
+        display = [b for b in value['candles'] if start <= b['time'] < end]
     if not display:
         raise ValueError('empty_saved_window')
     return dict(schema=1, track=track, trade_id=trade, symbol=row['symbol'], source='Binance',
                 bar=period, timezone='America/New_York', candles=display,
                 weekly_ranges=value['weekly_ranges'], now_ms=display[-1]['time'] + step,
                 last_close_ms=display[-1]['time'] + step, backtestTrade=row,
-                note='原始回测行情；仅聚合完整 K 线。开平仓标记表示账本记录时间。')
+                note='币安历史行情；仅聚合完整 K 线。标记为原账本记录时间，切换分钟周期不改变原回测成交精度。')
 
 
 def install(app):
@@ -192,6 +213,6 @@ def install(app):
         except KeyError:
             raise HTTPException(404, '没有找到这笔回测交易') from None
         except (OSError, ValueError):
-            raise HTTPException(503, '这段原始回测行情暂不可读；请检查数据盘或切换更大周期后重试') from None
+            raise HTTPException(503, '这段历史行情暂不可读或不完整；分钟行情首次读取可能较慢，请重试或切换更大周期') from None
         finally:
             SLOTS.release()

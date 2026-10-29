@@ -5,7 +5,7 @@
   'use strict';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const tracks=['60','5','v3','v3add','spike','v3lock','allin3','v3add20'];
-  const steps={'5m':300000,'15m':900000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000};
+  const steps={'1m':60000,'2m':120000,'3m':180000,'5m':300000,'15m':900000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000};
   const symbolOK=v=>typeof v==='string'&&/^[A-Z0-9]{1,32}USDT$/.test(v);
   const valid=r=>r&&Number.isInteger(r.id)&&r.id>0&&symbolOK(r.symbol)&&[1,-1].includes(r.side)&&['entry_ms','exit_ms','pnl','return_pct'].every(k=>Number.isFinite(r[k]))&&r.entry_ms>0&&r.exit_ms>=r.entry_ms;
   const base=s=>s.replace(/USDT$/,''),label=t=>({60:'60m',5:'5m'}[t]||t);

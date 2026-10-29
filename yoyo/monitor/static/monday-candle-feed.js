@@ -4,8 +4,8 @@
  */
 (() => {
   'use strict';
-  const PERIODS={'1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000};
-  const nativeBar=period=>({'12H':'12Hutc','1D':'1Dutc'}[period]||period);
+  const PERIODS={'1m':60000,'2m':120000,'3m':180000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000};
+  const nativeBar=period=>({'2m':'1m','12H':'12Hutc','1D':'1Dutc'}[period]||period);
   function valid(b,period,now){
     const step=PERIODS[period],boundary=Math.floor(now/step)*step;
     return !!step&&[b.time,b.open,b.high,b.low,b.close,b.volume].every(Number.isFinite)
@@ -99,7 +99,7 @@
     }
     return {
       start(){
-        if(active)return;active=true;startedAt=connectedAt=now();void refresh();connect();
+        if(active)return;active=true;startedAt=connectedAt=now();void refresh();if(period!=='2m')connect();
         beat=repeat(()=>{
           if(!active)return;
           if(ws?.readyState===0&&now()-connectedAt>10000)ws.close();

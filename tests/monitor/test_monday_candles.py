@@ -37,7 +37,7 @@ def run_fetch(service, period):
     return entry
 
 
-@pytest.mark.parametrize('period', PERIODS)
+@pytest.mark.parametrize('period', [p for p in PERIODS if p != '2m'])
 def test_native_bar_boundaries_and_complete_history(period):
     client = Client()
     service = MondayCandles(client=client)
@@ -62,7 +62,7 @@ def test_native_bar_boundaries_and_complete_history(period):
         service.close()
 
 
-@pytest.mark.parametrize('period', PERIODS)
+@pytest.mark.parametrize('period', [p for p in PERIODS if p != '2m'])
 def test_live_display_tail_never_enters_the_closed_snapshot(period):
     client = Client()
     native = {'12H': '12Hutc', '1D': '1Dutc'}.get(period, period)
@@ -294,3 +294,42 @@ def test_extrema_api_is_read_only_validates_symbol_and_hides_upstream_errors(tmp
         failure = client.get('/api/monday-fib/levels?symbol=ETH-USDT-SWAP')
         assert failure.status_code == 503 and 'private' not in failure.text
         assert client.post('/api/monday-fib/levels?symbol=BTC-USDT-SWAP').status_code == 405
+
+
+def test_two_minute_history_uses_complete_one_minute_pairs_and_preserves_native_cache():
+    from yoyo.monitor.chart_periods import candles
+    client = Client(); service = MondayCandles(client=client)
+    try:
+        entry = run_fetch(service, '2m')
+        assert len(entry['candles']) == 720 and len(client.calls) == 6
+        assert {q['bar'] for _, q in client.calls} == {'1m'}
+        assert all(b['time'] % 120000 == 0 and b['volume'] == 8 for b in entry['candles'])
+        raw = {0:['0','10','12','9','11','4','40','400','1'],
+               60000:['60000','11','14','8','13','6','40','400','1']}
+        assert candles(raw,'2m') == [dict(time=0,open=10,high=14,low=8,close=13,volume=10)]
+        assert candles({60000:raw[60000]},'2m') == []
+        assert candles({0:raw[0]},'2m',now=70000,forming=True) == []
+        assert candles({0:raw[0]},'2m',now=10000,forming=True)[0]['volume'] == 4
+        raw[60000][-1]='0'
+        assert candles(raw,'2m') == []
+        assert candles(raw,'2m',now=70000,forming=True)[0]['close'] == 13
+    finally:
+        service.close()
+
+
+def test_two_minute_live_tail_is_aggregated_and_never_promoted_without_all_minutes():
+    class Live(Client):
+        def get(self,path,params):
+            assert params['bar']=='1m' and params['limit']=='6'
+            boundary=NOW//120000*120000
+            return [[str(boundary-120000),'10','12','9','11','4','40','400','1'],
+                    [str(boundary-60000),'11','14','8','13','6','40','400','1'],
+                    [str(boundary),'13','15','12','14','2','40','400','0']]
+    live=Live();service=MondayCandles(client=Client(),live_client=live)
+    try:
+        value=service.recent('BTC-USDT-SWAP','2m')
+        assert value['native_bar']=='1m' and not value['error']
+        assert value['closed_candles'][0]['volume']==10
+        assert value['forming_candle']['volume']==2
+        assert not service.cache
+    finally:service.close()

@@ -1,7 +1,7 @@
-/* Stitch 8e070b181b7a4b43a48692d1b8f7a2ee, adapted to the existing glass tokens. */
+/* Stitch 25cb1fd3a8de409a89928c7efaf0edf9, adapted to the existing glass tokens. */
 #monday-reclaim-paper .rs-account-picker{width:360px;}
 #monday-reclaim-paper .rs-account-row [data-strategy-backtest]{display:grid;place-items:center;flex:none;width:40px;min-width:40px;min-height:44px;padding:0;color:var(--rp-blue);}
-#monday-reclaim-paper .bt-panel{position:absolute;z-index:8;right:100px;top:90px;bottom:110px;width:400px;max-width:calc(100% - 40px);display:flex;flex-direction:column;overflow:hidden;background:var(--glass-reading,var(--rp-canvas));opacity:0;visibility:hidden;transform:translateX(18px);transition:opacity .2s,transform .24s var(--rp-ease),visibility .24s;}
+#monday-reclaim-paper .bt-panel{position:absolute;z-index:8;left:20px;right:auto;top:calc(96px + var(--rp-context-height,180px));bottom:100px;width:360px;max-width:calc(100% - 40px);display:flex;flex-direction:column;overflow:hidden;background:var(--glass-reading,var(--rp-canvas));opacity:0;visibility:hidden;transform:translateX(-18px);transition:opacity .2s,transform .24s var(--rp-ease),visibility .24s;}
 #monday-reclaim-paper .bt-panel.is-open{opacity:1;visibility:visible;transform:translateX(0);}
 #monday-reclaim-paper .bt-heading{display:flex;align-items:center;justify-content:space-between;padding:5px 8px 0 16px;flex:none;}
 #monday-reclaim-paper .bt-heading strong{font-size:13px;font-weight:600;outline:none;}
@@ -35,9 +35,10 @@
 #monday-reclaim-paper .bt-mode{position:absolute;z-index:6;top:86px;left:50%;transform:translateX(-50%);display:flex;align-items:center;padding:2px 5px;font-size:11px;max-width:calc(100% - 40px);white-space:nowrap;}
 #monday-reclaim-paper .bt-mode button{font-size:11px;min-height:36px;padding:4px 8px;}
 #monday-reclaim-paper .bt-mode [data-rp-action="backtest-list"]{color:var(--rp-blue);}
-@media(max-width:1050px){#monday-reclaim-paper .bt-mode{top:auto;bottom:178px;}#monday-reclaim-paper .bt-panel{right:20px;width:370px;}}
+@media(max-width:1050px){#monday-reclaim-paper .bt-mode{top:auto;bottom:178px;}}
+@media(min-width:701px) and (max-width:1420px){#monday-reclaim-paper .bt-panel{top:calc(154px + var(--rp-context-height,180px));}}
 @media(max-width:700px){
- #monday-reclaim-paper .bt-panel{top:auto;bottom:110px;left:10px;right:10px;width:auto;max-width:none;height:50dvh;max-height:520px;transform:translateY(30px);}
+ #monday-reclaim-paper .bt-panel{top:auto;bottom:112px;left:10px;right:10px;width:auto;max-width:none;height:520px;max-height:70dvh;border-radius:22px;transform:translateY(30px);}
  #monday-reclaim-paper .bt-panel.is-open{transform:translateY(var(--yd-sheet-offset,0px));}
  #monday-reclaim-paper .bt-panel.yd-sheet-dragging{transition:none;}
  #monday-reclaim-paper .bt-heading{touch-action:none;}
