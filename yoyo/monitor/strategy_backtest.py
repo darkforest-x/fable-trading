@@ -16,6 +16,7 @@ from threading import BoundedSemaphore
 from functools import lru_cache
 
 from fastapi import HTTPException, Query
+from . import strategy_backtest_evidence as evidence
 
 ROOT = Path(__file__).resolve().parents[2]
 LEDGERS = ROOT / 'experiments/active/exp-strategy-booklet-paths-20261027-v1'
@@ -31,11 +32,12 @@ def ledger(track, directory=LEDGERS):
         raise ValueError('unknown_strategy')
     directory = Path(directory)
     paths = [directory / 'manifest.json', directory / f'{track}-ledger.csv.gz']
-    return _ledger(track, str(directory), tuple((p.stat().st_mtime_ns, p.stat().st_size) for p in paths))
+    return _ledger(track, str(directory), tuple((p.stat().st_mtime_ns, p.stat().st_size) for p in paths),
+                   evidence.stamp(evidence.source_path(track, directory)))
 
 
 @lru_cache(maxsize=8)
-def _ledger(track, directory, stamp):
+def _ledger(track, directory, stamp, evidence_stamp):
     directory = Path(directory)
     manifest = json.loads((directory / 'manifest.json').read_text())
     meta = dict(manifest['accounts'][track])
@@ -52,6 +54,8 @@ def _ledger(track, directory, stamp):
         if (not all(math.isfinite(row[k]) for k in ('pnl', 'return_pct'))
                 or row['entry_ms'] <= 0 or row['exit_ms'] < row['entry_ms'] or row['side'] not in (-1, 1)):
             raise ValueError('invalid_saved_ledger')
+        row['entry_rules'] = evidence.rules(track, row, r.get('net_bp'), evidence_stamp)
+        row['entry_start_ms'] = evidence.entry_start(row, directory)
         rows.append(row)
         rank = ranking.setdefault(row['symbol'], dict(symbol=row['symbol'], pnl=0., trades=0))
         rank['pnl'] += row['pnl']
@@ -156,6 +160,7 @@ def candles(track, trade, period, *, directory=LEDGERS, identities=IDENTITIES):
     job = json.loads(identity.read_text())['job']
     if job['symbol'] != row['symbol']:
         raise ValueError('source_symbol_mismatch')
+    row = dict(row, fills=evidence.fill_geometry(track, row, directory, job['execution_minutes']))
     stamps = tuple((Path(p).stat().st_size, Path(p).stat().st_mtime_ns) for p in job['paths'])
     start = row['entry_ms'] // step * step - 240 * step
     end = row['exit_ms'] // step * step + 81 * step
@@ -188,7 +193,7 @@ def candles(track, trade, period, *, directory=LEDGERS, identities=IDENTITIES):
                 bar=period, timezone='America/New_York', candles=display,
                 weekly_ranges=value['weekly_ranges'], now_ms=display[-1]['time'] + step,
                 last_close_ms=display[-1]['time'] + step, backtestTrade=row,
-                note='币安历史行情；仅聚合完整 K 线。标记为原账本记录时间，切换分钟周期不改变原回测成交精度。')
+                note='币安历史行情；仅聚合完整 K 线。标线使用原成交价和原周期成交区间；收盘退出标记已知时点。切换分钟周期不改变原回测成交精度。')
 
 
 def install(app):

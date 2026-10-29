@@ -23,12 +23,57 @@
   }
   function replayRange(trade,rows,step,visibleFraction=1,overlaySide='right'){
     if(!rows.length)return null;
-    const a=candleIndex(rows,trade.entry_ms,step),b=candleIndex(rows,trade.exit_ms,step);
+    const a=candleIndex(rows,trade.fills?.entry_start_ms??trade.entry_start_ms??trade.entry_ms,step),b=candleIndex(rows,trade.fills?.exit_kind==='interval'?trade.exit_ms-1:trade.exit_ms,step);
     if(a<0)return null;
     const end=b>=0?b:rows.length-1,span=Math.max(45,end-a+1),pad=Math.max(12,span*.18);
     const from=a-pad,to=Math.max(a+45,end+pad);
     const visibleSpan=(to-from)/Math.min(1,Math.max(.25,visibleFraction));
     return {from:overlaySide==='left'?to-visibleSpan:from,to:overlaySide==='left'?to:from+visibleSpan,entry:a,exit:b};
+  }
+  function replayFills(trade){
+    const f=trade?.fills;
+    if(!f)return [];
+    return [['entry','开仓','#169873'],['exit','平仓','#738392']].flatMap(([key,label,color])=>{
+      const start=f[key+'_start_ms'],end=f[key+'_end_ms'],price=f[key+'_price'];
+      return [start,end,price].every(fin)&&price>0&&start<=end?[{key,label,color,start,end,price}]:[];
+    });
+  }
+  function logicalAt(rows,stamp,step){
+    const i=candleIndex(rows,stamp,step);
+    if(i>=0)return i+(stamp-rows[i].time*1000)/step;
+    const before=candleIndex(rows,stamp-1,step);
+    return before>=0&&rows[before].time*1000+step===stamp?before+1:null;
+  }
+  const fillClock=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+  class ReplayFillDrawing {
+    constructor(owner){this.owner=owner;this.items=[];this.view={zOrder:()=> 'top',renderer:()=>({draw:target=>this.paint(target)})};}
+    attached({requestUpdate}){this.requestUpdate=requestUpdate;}
+    detached(){this.requestUpdate=null;}
+    paneViews(){return [this.view];}updateAllViews(){}
+    autoscaleInfo(from,to){
+      const prices=this.items.filter(f=>{const a=logicalAt(this.owner.rows,f.start,this.step),b=logicalAt(this.owner.rows,f.end,this.step);return a!=null&&b!=null&&a<=to&&b>=from;}).map(f=>f.price);
+      return prices.length?{priceRange:{minValue:Math.min(...prices),maxValue:Math.max(...prices)}}:null;
+    }
+    paint(target){
+      const o=this.owner,scale=o.chart.timeScale(),format=window.SpikeChartTools.axisPrice;
+      target.useMediaCoordinateSpace(({context:ctx,mediaSize:s})=>{
+        ctx.save();ctx.beginPath();ctx.rect(0,0,s.width,s.height);ctx.clip();ctx.font='11px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';ctx.textBaseline='middle';
+        for(const f of this.items){
+          const a=logicalAt(o.rows,f.start,this.step),b=logicalAt(o.rows,f.end,this.step);
+          if(a==null||b==null)continue;
+          const x=scale.logicalToCoordinate(a),z=scale.logicalToCoordinate(b),y=o.series.priceToCoordinate(f.price);
+          if(x==null||z==null||y==null||z<0||x>s.width)continue;
+          ctx.strokeStyle=f.color;ctx.lineWidth=2;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(z,y);
+          ctx.moveTo(x,y-5);ctx.lineTo(x,y+5);ctx.moveTo(z,y-5);ctx.lineTo(z,y+5);ctx.stroke();
+          const time=fillClock.format(f.start)+(f.end>f.start?'–'+fillClock.format(f.end):''),text=f.label+' '+format(f.price)+' · '+time;
+          const w=ctx.measureText(text).width+12,left=Math.max(2,Math.min(f.key==='entry'?x:z-w,s.width-w-2));
+          const top=y+(f.key==='entry'&&y<s.height*.7?8:-45);
+          const dark=typeof document!=='undefined'&&document.documentElement.dataset.theme==='dark';
+          ctx.fillStyle=dark?'#1c222cf2':'#f7faf8f2';ctx.fillRect(left,top,w,20);ctx.fillStyle=f.color;ctx.textAlign='left';ctx.fillText(text,left+6,top+10);
+        }
+        ctx.restore();
+      });
+    }
   }
   class TradeDrawing {
     constructor(owner){this.owner=owner;this.view={zOrder:()=> 'top',renderer:()=>({draw:target=>this.paint(target)})};}
@@ -61,7 +106,7 @@
       });
     }
   }
-  if(typeof module!=='undefined'&&module.exports){module.exports={latest,select,valid,candleIndex,geometry,TradeDrawing,replayRange};return;}
+  if(typeof module!=='undefined'&&module.exports){module.exports={latest,select,valid,candleIndex,geometry,TradeDrawing,replayRange,replayFills,logicalAt,ReplayFillDrawing};return;}
   function create(host,notice,drawings){
     let active=true,request=null,epoch=0,desired=null,anchor=null,received=0,pinnedFocus='';
     const shared=window.SpikePublicChartCache;
@@ -85,12 +130,15 @@
         const panel=host.parentElement?.querySelector('.bt-panel.is-open');
         const fraction=panel&&host.clientWidth>700?1-(panel.getBoundingClientRect().right-host.getBoundingClientRect().left+24)/instance.chart.timeScale().width():1;
         const t=data.backtestTrade,g=replayRange(t,instance.rows,step,fraction,'left'),key='backtest|'+data.track+'|'+t.id+'|'+data.bar;
-        instance.series.setMarkers(g?[{time:instance.rows[g.entry].time,position:'belowBar',color:'#2586e7',shape:'arrowUp',text:'开仓时间'},...(g.exit>=0?[{time:instance.rows[g.exit].time,position:'aboveBar',color:'#738392',shape:'arrowDown',text:'结算时间'}]:[])]:[]);
+        instance.series.setMarkers([]);
+        if(!instance.backtestDrawing){instance.backtestDrawing=new ReplayFillDrawing(instance);instance.series.attachPrimitive(instance.backtestDrawing);}
+        instance.backtestDrawing.items=replayFills(t);instance.backtestDrawing.step=step;instance.backtestDrawing.requestUpdate?.();
         instance.hasBacktestMarkers=true;
         if(g&&pinnedFocus!==key){pinnedFocus=key;instance.chart.priceScale('right').applyOptions({autoScale:true});instance.chart.timeScale().setVisibleLogicalRange({from:g.from,to:g.to});}
-        notice(g?'':'开仓时间的原始 K 线缺失；请切换周期或重新加载。');return;
+        notice(!g?'开仓区间的原始 K 线缺失；请切换周期或重新加载。':!instance.backtestDrawing.items.length?'原始成交价暂不可读，未绘制成交标记。':'');return;
       }
       if(instance.hasBacktestMarkers){instance.series.setMarkers([]);instance.hasBacktestMarkers=false;}
+      if(instance.backtestDrawing){instance.backtestDrawing.items=[];instance.series.detachPrimitive?.(instance.backtestDrawing);instance.backtestDrawing=null;}
       if(!p){notice('');return;}
       const focusKey=p.id+'|'+data.bar;
       if(draw.shape&&pinnedFocus!==focusKey){pinnedFocus=focusKey;

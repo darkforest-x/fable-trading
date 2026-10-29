@@ -1,4 +1,4 @@
-/* Stitch 8e070b181b7a4b43a48692d1b8f7a2ee. Saved funded-trade browser.
+/* Stitch 3addf9a46166403e99a844214cde4b94. Saved funded-trade browser.
  * List filters never select a trade; only opening a strategy or choosing a row
  * changes the wallpaper. A generation owns each paginated read, including retry. */
 (() => {
@@ -13,6 +13,14 @@
   const tone=v=>v>0?'rp-positive':v<0?'rp-negative':'';
   const format=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
   const date=t=>format.format(t);
+  const shortTime=t=>date(t).slice(-5);
+  const entryLabel=r=>Number.isFinite(r.entry_start_ms)?`${date(r.entry_start_ms)}–${shortTime(r.entry_ms)}`:date(r.entry_ms)+'（记账）';
+  function rulesHTML(r){
+    const e=r.entry_rules;
+    if(e?.status!=='saved'||!Number.isFinite(e.score)||!Number.isFinite(e.minimum))return '<span class="bt-entry">入场条件／评分未留存</span>';
+    const add=e.kind==='add5',gate=e.minimum<.3?' · 前40%':`≥${e.minimum}`;
+    return `<span class="bt-entry"><span>${add?'逆向5%加仓':'1.618首触'}</span><span class="bt-score" title="原回测评分 ${e.score}，门槛 ${e.minimum}；不是胜率">${add?'主单评分':'评分'} ${e.score.toFixed(4)}${gate}</span>${Number.isFinite(e.minimum_order)&&Number.isFinite(e.order)?`<span>排列 ${e.order}≥${e.minimum_order}</span>`:''}</span>`;
+  }
   function periodFor(row,period){return Object.keys(steps).find(p=>steps[p]>=steps[period]&&(row.exit_ms-row.entry_ms)/steps[p]<=5000)||'1D';}
   function validate(p,q,offset){
     if(p?.schema!==1||p.track!==q.track||p.sort!==q.sort||p.direction!==q.direction||p.symbol!==q.symbol||p.offset!==offset||!Array.isArray(p.rows)||!p.rows.every(valid)||new Set(p.rows.map(r=>r.id)).size!==p.rows.length||!Number.isInteger(p.total)||p.total<offset+p.rows.length||typeof p.has_more!=='boolean'||!p.meta||p.meta.track!==q.track||!Array.isArray(p.ranking)||!p.ranking.every(r=>symbolOK(r.symbol)&&Number.isFinite(r.pnl)&&Number.isInteger(r.trades))||(p.focus!=null&&!valid(p.focus)))throw Error('回测账本返回的数据不完整');
@@ -43,14 +51,14 @@
       sort(key){if(!['time','pnl'].includes(key))return;const direction=state.sort===key&&state.direction==='desc'?'asc':'desc';reset();state.sort=key;state.direction=direction;auto=false;return load();}};
   }
   function rowHTML(r,selected){
-    return `<button type="button" class="bt-row" data-bt-trade="${r.id}" aria-pressed="${r.id===selected}" aria-label="查看 ${esc(base(r.symbol))} ${date(r.entry_ms)} 回测交易"><span class="bt-coin"><b>${esc(base(r.symbol))}</b><em class="${r.side===1?'rp-positive':'rp-negative'}">${r.side===1?'多':'空'}</em>${r.id===selected?'<small>图表焦点</small>':''}</span><span class="bt-pnl ${tone(r.pnl)}"><b>${money(r.pnl)} <small>USDT</small></b><small>${money(r.return_pct)}%</small></span><span class="bt-times"><span>开 ${date(r.entry_ms)}</span><span>平 ${date(r.exit_ms)}</span></span></button>`;
+    return `<button type="button" class="bt-row" data-bt-trade="${r.id}" aria-pressed="${r.id===selected}" aria-label="查看 ${esc(base(r.symbol))} ${date(r.entry_ms)} 回测交易"><span class="bt-coin"><b>${esc(base(r.symbol))}</b><em class="${r.side===1?'rp-positive':'rp-negative'}">${r.side===1?'多':'空'}</em>${r.id===selected?'<small>图表焦点</small>':''}</span><span class="bt-pnl ${tone(r.pnl)}"><b>${money(r.pnl)} <small>USDT</small></b><small>${money(r.return_pct)}%</small></span>${rulesHTML(r)}<span class="bt-times"><span title="原回测成交所在区间">开 ${entryLabel(r)}</span><span>平 ${date(r.exit_ms)}</span></span></button>`;
   }
-  const api={createModel,validate,valid,rowHTML,periodFor,base,date};
+  const api={createModel,validate,valid,rowHTML,rulesHTML,entryLabel,periodFor,base,date};
   if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}
   function create({root,onOpen=()=>{},onSelect}){
     let opened=false,selected=null,returnFocus=null,request=null;
     const panel=document.createElement('section');panel.id='strategy-backtest-panel';panel.className='bt-panel rp-glass';panel.inert=true;panel.setAttribute('aria-hidden','true');panel.setAttribute('aria-label','历史回测交易');
-    panel.innerHTML='<header class="bt-heading" data-yd-sheet-drag><strong tabindex="-1" data-bt-title>回测交易</strong><button type="button" data-bt-close aria-label="收起回测交易">×</button></header><div class="bt-controls"><div class="bt-badges"><span>历史回测 · Binance</span><button type="button" data-bt-top title="查看累计净盈亏第一名">Top 1 · 读取中</button></div><div class="bt-sort"><select aria-label="回测币种" data-bt-symbol><option value="">全部币种</option></select><button type="button" data-bt-sort="time" aria-pressed="true">开仓时间 ↓</button><button type="button" data-bt-sort="pnl" aria-pressed="false">净收益</button></div><small>时间为北京时间 · 收益已扣原研究成本</small></div><div class="bt-scroll"><p data-bt-status role="status"></p><button type="button" data-bt-retry hidden>重试读取</button><div class="bt-rows"></div><button type="button" class="bt-more" data-bt-more hidden>再显示 50 笔</button><p class="bt-count"></p><details class="bt-notes"><summary>历史版本与统计口径</summary><p></p></details></div>';
+    panel.innerHTML='<header class="bt-heading" data-yd-sheet-drag><strong tabindex="-1" data-bt-title>回测交易</strong><button type="button" data-bt-close aria-label="收起回测交易">×</button></header><div class="bt-controls"><div class="bt-badges"><span>历史回测 · Binance</span><button type="button" data-bt-top title="查看累计净盈亏第一名">Top 1 · 读取中</button></div><div class="bt-sort"><select aria-label="回测币种" data-bt-symbol><option value="">全部币种</option></select><button type="button" data-bt-sort="time" aria-pressed="true">开仓时间 ↓</button><button type="button" data-bt-sort="pnl" aria-pressed="false">净收益</button></div><small>原回测入场条件 · 评分非胜率<br>北京时间 · 收益已扣原研究成本</small></div><div class="bt-scroll"><p data-bt-status role="status"></p><button type="button" data-bt-retry hidden>重试读取</button><div class="bt-rows"></div><button type="button" class="bt-more" data-bt-more hidden>再显示 50 笔</button><p class="bt-count"></p><details class="bt-notes"><summary>历史版本与统计口径</summary><p></p></details></div>';
     root.append(panel);
     const node=s=>panel.querySelector(s),sheet=window.SpikeYoloPreviewSheet.bind({panel,isOpen:()=>opened,dismiss:()=>setOpen(false)});
     async function read(params){const c=new AbortController();request=c;const timeout=setTimeout(()=>c.abort(),20000);

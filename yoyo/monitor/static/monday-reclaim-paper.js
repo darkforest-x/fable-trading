@@ -384,8 +384,8 @@
     root.querySelector('[data-rp-action="follow"]').setAttribute('aria-pressed',String(!replay&&!state.trade&&!state.symbol));
     replace('symbol-label',chartSymbol?`${esc(base(chartSymbol))}<small> / USDT</small>`:'选择币种');
     replace('selection-status',replay?`<span class="${tone(replay.row.pnl)}">历史回测 · ${sideLabel(replay.row)} · ${signed(replay.row.pnl)} USDT</span>`:selected?`<span class="${selected.side===1?'rp-positive':'rp-negative'}">${sideLabel(selected)} · ${esc(stage(selected,data.now_ms))}</span>`:'');
-    el('selection-note').textContent=replay?`Binance · ${window.SpikeStrategyBacktest.date(replay.row.entry_ms)} 开仓`:selected?`${state.trade?'固定交易':state.symbol?'固定币种':'最新资金交易'} · ${date(selected.fill_ms)} 开仓`:chartSymbol?(state.symbol?'固定币种 · 最近记录无资金成交':'默认行情 · 暂无资金成交'):'等待资金交易 · 点击币种查看触价列表';
-    root.querySelector('.rp-chart-foot').textContent=replay?'历史回测行情 · 标记为账本开仓／结算时间':'逐周 1.618 区间 · 开平仓按实际成交标记';
+    el('selection-note').textContent=replay?`Binance · ${window.SpikeStrategyBacktest.entryLabel(replay.row)} 开仓区间`:selected?`${state.trade?'固定交易':state.symbol?'固定币种':'最新资金交易'} · ${date(selected.fill_ms)} 开仓`:chartSymbol?(state.symbol?'固定币种 · 最近记录无资金成交':'默认行情 · 暂无资金成交'):'等待资金交易 · 点击币种查看触价列表';
+    root.querySelector('.rp-chart-foot').textContent=replay?'历史回测 · 标线为原成交价及原周期成交区间':'逐周 1.618 区间 · 开平仓按实际成交标记';
     el('watermark').textContent=chartSymbol?base(chartSymbol)+' / USDT':'';
     el('total').textContent=track?String(track.open.filter(funded).length):'—';
     const allin=state.track==='allin3';

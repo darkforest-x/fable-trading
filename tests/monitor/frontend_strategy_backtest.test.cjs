@@ -5,6 +5,14 @@ const chart=require('../../yoyo/monitor/static/reclaim-chart.js');
 const flush=()=>new Promise(r=>setImmediate(r));
 const row=(id,symbol='AAAUSDT')=>({id,symbol,side:1,entry_ms:1700000000000+id*300000,exit_ms:1700000000000+id*300000+900000,pnl:id-3,return_pct:(id-3)/100});
 const page=(q,ids,total=ids.length)=>({schema:1,...q,meta:{track:q.track,trades:total},rows:ids.map(i=>row(i)),ranking:[{symbol:'AAAUSDT',pnl:3,trades:total}],focus:row(2),total,has_more:q.offset+ids.length<total});
+test('each saved row shows its own score and qualified gates without inventing missing values',()=>{
+ const r={...row(1),entry_start_ms:row(1).entry_ms-300000,entry_rules:{status:'saved',score:.6592223040584619,minimum:.6,order:3,minimum_order:3,kind:'first_touch'}};
+ const html=ui.rowHTML(r,1);assert.match(html,/1.618首触/);assert.match(html,/0.6592≥0.6/);assert.match(html,/排列 3≥3/);
+ assert.ok(html.indexOf('bt-entry')<html.indexOf('bt-times'));assert.match(ui.entryLabel(r),/–/);
+ assert.match(ui.rulesHTML({...r,entry_rules:{...r.entry_rules,kind:'add5',minimum_order:null}}),/逆向5%加仓.*主单评分/);
+ assert.doesNotMatch(ui.rulesHTML({...r,entry_rules:{status:'unavailable'}}),/首触|≥|0.6592/);
+ assert.match(ui.rulesHTML({...r,entry_rules:{...r.entry_rules,score:.2262167,minimum:.22621664169752762}}),/0.2262 · 前40%/);
+});
 test('rapid strategy changes discard stale data and focus only the correct Top 1',async()=>{
  const requests=[],chosen=[];const m=ui.createModel({read:q=>new Promise((resolve,reject)=>requests.push({q,resolve,reject})),focus:(r,t)=>chosen.push([r.id,t])});
  m.select('allin3');await flush();m.select('spike');await flush();

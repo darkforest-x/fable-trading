@@ -3,6 +3,20 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const {latest,select,candleIndex,geometry}=require('../../yoyo/monitor/static/reclaim-chart.js');
 const pos=(x={})=>({id:1,symbol:'SOL-USDT-SWAP',side:1,fill_ms:600001,entry:120,target:125,taken:1,notional:100,stage:'pending_confirm',...x});
 const rows=[{time:300},{time:600},{time:900}],step=300000;
+test('historical fills anchor to saved price and native interval on a finer chart',()=>{
+ const api=require('../../yoyo/monitor/static/reclaim-chart.js'),start=Date.parse('2026-09-02T03:45:00Z');
+ const bars=Array.from({length:50},(_,i)=>({time:(start-60000+i*60000)/1000}));
+ const trade={entry_ms:start+300000,exit_ms:start+2100000,fills:{entry_start_ms:start,entry_end_ms:start+300000,entry_price:.01115564,exit_start_ms:start+1800000,exit_end_ms:start+2100000,exit_price:.01364,exit_kind:'interval'}};
+ assert.equal(api.replayRange(trade,bars,60000).entry,1);assert.equal(api.logicalAt(bars,start+300000,60000),6);
+ assert.equal(api.replayFills(trade)[0].price,.01115564);assert.deepEqual(api.replayFills({}),[]);
+ const sandbox={window:{SpikeChartTools:{axisPrice:String}},module:{exports:{}}};vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/reclaim-chart.js','utf8'),sandbox);
+ const strokes=[],texts=[];let path=[];const ctx={save(){},restore(){},beginPath(){path=[];},rect(){},clip(){},setLineDash(){},moveTo:(...x)=>path.push(x),lineTo:(...x)=>path.push(x),stroke:()=>strokes.push(path.slice()),fillRect(){},measureText:t=>({width:t.length*3}),fillText:t=>texts.push(t)};
+ const owner={rows:bars,chart:{timeScale:()=>({logicalToCoordinate:i=>i*10})},series:{priceToCoordinate:p=>p*1000000}};
+ const draw=new sandbox.module.exports.ReplayFillDrawing(owner);draw.step=60000;draw.items=api.replayFills(trade);draw.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:500,height:20000}})});
+ assert.deepEqual(strokes[0].slice(0,2),[[10,11155.64],[60,11155.64]]);
+ assert.ok(texts.some(t=>t.includes('开仓 0.01115564 · 11:45–11:50')));
+ assert.equal(draw.autoscaleInfo(0,49).priceRange.minValue,.01115564);
+});
 test('latest wallpaper follows fill time across open/closed funded trades, never exit order or shadows',()=>{
  const track={open:[pos(),pos({id:4,fill_ms:1200000,taken:0,notional:0})],closed:[pos({id:2,fill_ms:900001,exit_ms:1000000}),pos({id:3,fill_ms:300001,exit_ms:2000000})]};
  assert.equal(latest(track).id,2);assert.equal(latest({open:[pos({notional:0})]}),null);
