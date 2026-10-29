@@ -1,0 +1,7 @@
+# Multiple all-in waiting levels require explicit first-fill cancellation
+
+- **Problem**: A delayed-limit variant can have several waiting levels while allowing only one full-equity position. A ledger of independent native fills is not yet the funded account.
+- **Dead end**: Sorting fills and skipping overlapping positions alone admits old waiting orders after the winning position exits, even though those orders should have been cancelled. Reserving the entire account on the first submission instead changes the Owner's rule.
+- **Effective path**: Owner confirmed multiple levels may wait, and the first fill cancels the others. Consume native submission, fill, cancellation and exit events; remove every other pending ID when one fills, and skip new signals during a position. Cash contributions remain separate from trade profit. Native candles and completed executions are not replayed for this accounting change.
+- **General rule**: Define the lifecycle of waiting orders before calculating a single-position account. Neither an independent trade return nor an OHLC fill timestamp establishes that capital was available or that competing orders could be cancelled without latency.
+- **Connections**: `yoyo/evaluation/allin3_close_hybrid_summary.py`, `tests/evaluation/test_allin3_close_hybrid.py`, `experiments/active/exp-allin3-close-hybrid-20261029-v1/config.json`. Historical 5m paths, instant cancellation and margin-loss caps remain explicit approximations.

@@ -72,24 +72,24 @@ if __name__=='__main__': unittest.main()
 
 
 class CapitalReservationTests(unittest.TestCase):
-    def test_pending_order_reserves_money_and_refills_are_not_profit(self):
+    def test_first_fill_cancels_pending_busy_signals_skip_and_cash_reconciles(self):
         from yoyo.evaluation.allin3_close_hybrid_summary import account
         day=pd.Timestamp('2023-01-01',tz='UTC').value
-        rows=[dict(trade_id='pending',decision_ns=day,release_ns=day+10,
-                   filled=False,status='expired',order_mode='limit'),
-              dict(trade_id='busy_winner',decision_ns=day+1,release_ns=day+2,
-                   filled=True,status='filled',net=10000,reason=4,order_mode='market'),
-              dict(trade_id='gap_loss',decision_ns=day+10,release_ns=day+11,
-                   filled=True,status='filled',net=-5000,reason=1,order_mode='limit'),
-              dict(trade_id='next',decision_ns=day+12,release_ns=day+13,
-                   filled=True,status='filled',net=100,reason=4,order_mode='market')]
+        rows=[]
+        for name,decision,entry,exit,net in [('pending',0,10,11,10000),
+                ('winner',1,1,5,100),('busy',2,2,3,10000),
+                ('gap_loss',6,6,7,-5000),('next',8,8,9,100)]:
+            rows.append(dict(trade_id=name,decision_ns=day+decision,entry_ns=day+entry,
+                release_ns=day+exit,filled=True,status='filled',net=net,
+                reason=1 if net<0 else 4,order_mode='limit' if name=='pending' else 'market'))
         cfg=dict(initial=1000,leverage=3,refill_below=100,refill_to=1000)
-        result,ledger,_=account(pd.DataFrame(rows),cfg,20261105)
-        self.assertEqual(result['funded'],2)
+        result,ledger,funded=account(pd.DataFrame(rows),cfg,20261105)
+        self.assertEqual(result['funded'],3)
         self.assertEqual(result['skipped_busy'],1)
-        self.assertEqual(result['reserved_but_unfilled'],1)
+        self.assertEqual(result['cancelled_on_other_fill'],1)
         self.assertEqual(result['ending_equity'],1030)
         self.assertEqual(result['cash_added'],1000)
         self.assertEqual(result['trading_pnl'],-970)
         self.assertEqual(result['realized_balance_max_dd_pct'],100)
         self.assertEqual(ledger.pnl.sum(),-970)
+        self.assertEqual(funded.set_index('trade_id').loc['pending','status'],'cancelled_on_other_fill')

@@ -1,13 +1,14 @@
 """Cash accounting over saved native hybrid outcomes; no candle execution.
 
-One full-equity pending order reserves the slot from decision until cancellation
-or actual position exit. Subsequent signals while busy are skipped permanently.
+Multiple pending levels wait while flat. The first native fill takes the full
+equity slot and cancels every other pending order. Signals while held are skipped.
 Current paper semantics cap a trade at its margin and refill below 100 to 1000;
 no MAE-derived fictitious liquidation is imposed. Native independent fills do
 not establish exchange margin, funding, order-book capacity or live returns.
 """
 from __future__ import annotations
 import json
+import heapq
 from pathlib import Path
 import subprocess
 import numpy as np
@@ -21,51 +22,68 @@ def ns(s):
 
 
 def account(orders, cfg, seed, start='2023-01-01', net_column='net'):
-    """Reserve capital using decision/cancellation/fill/exit events, never prices."""
+    """Select first native fill, cancel other pending levels, and account cash."""
     cut = pd.Timestamp(start, tz='UTC').value
-    t = orders[orders.decision_ns >= cut].copy()
+    rows = orders[orders.decision_ns >= cut].to_dict('records')
     rng = np.random.default_rng(seed)
-    t = t.iloc[np.lexsort((rng.random(len(t)), t.decision_ns.to_numpy()))]
+    queue = []
+    for i, r in enumerate(rows):
+        heapq.heappush(queue, (int(r['decision_ns']), 0, rng.random(), 'submit', i))
+        if r['filled']:
+            heapq.heappush(queue, (int(r['entry_ns']), 1, rng.random(), 'fill', i))
+        else:
+            heapq.heappush(queue, (int(r['release_ns']), -2, rng.random(), 'cancel', i))
     equity = float(cfg['initial']); initial = equity
-    busy = -1; refills = 0; cash = 0.; skipped = 0; waits = 0
+    refills = 0; cash = 0.; skipped = 0; waits = 0; cancel_others = 0
+    active = None; pending = set(); max_pending = 0
     ledger = [dict(time_ns=cut,kind='initial',equity=equity,pnl=0.,cashflow=0.)]
     funding = []
-    for r in t.to_dict('records'):
-        if r['decision_ns'] < busy:
-            skipped += 1; continue
-        busy = int(r['release_ns'])
-        if not r['filled']:
-            waits += 1
+    while queue:
+        now, _, _, kind, i = heapq.heappop(queue)
+        r = rows[i]
+        if kind == 'submit':
+            if active is not None:
+                skipped += 1
+            else:
+                pending.add(i); max_pending = max(max_pending,len(pending))
+        elif kind == 'cancel' and i in pending:
+            pending.remove(i); waits += 1
             funding.append(dict(trade_id=r['trade_id'],decision_ns=r['decision_ns'],
-                                release_ns=busy,status=r['status'],pnl=0.,notional=0.))
-            continue
-        margin = equity; notional = margin*cfg['leverage']
-        pnl = max(-margin, notional*float(r[net_column])/1e4)
-        equity += pnl
-        ledger.append(dict(time_ns=busy,kind='exit',trade_id=r['trade_id'],
-            equity=equity,pnl=pnl,cashflow=0.,reason=int(r['reason']),
-            order_mode=r['order_mode'],net_bp=r[net_column],notional=notional))
-        funding.append(dict(trade_id=r['trade_id'],decision_ns=r['decision_ns'],release_ns=busy,
-            status='funded',pnl=pnl,notional=notional,reason=int(r['reason']),order_mode=r['order_mode']))
-        if equity < cfg['refill_below']:
-            add = cfg['refill_to']-equity
-            cash += add; refills += 1; equity = float(cfg['refill_to'])
-            ledger.append(dict(time_ns=busy,kind='refill',equity=equity,pnl=0.,cashflow=add))
-    ledger = pd.DataFrame(ledger); funded = pd.DataFrame(funding)
-    exits = ledger[ledger.kind == 'exit']
-    profits = exits.pnl.to_numpy() if len(exits) else np.array([])
-    dd = (1-ledger.equity/ledger.equity.cummax()).max()*100
-    gain, loss = profits[profits > 0].sum(), -profits[profits < 0].sum()
-    pnl = float(profits.sum())
-    np.testing.assert_allclose(equity, initial+cash+pnl, rtol=1e-12, atol=1e-8)
-    result = dict(initial=initial,ending_equity=equity,trading_pnl=pnl,cash_added=cash,
+                                release_ns=now,status=r['status'],pnl=0.,notional=0.))
+        elif kind == 'fill' and i in pending and active is None:
+            pending.remove(i)
+            for other in pending:
+                funding.append(dict(trade_id=rows[other]['trade_id'],decision_ns=rows[other]['decision_ns'],
+                    release_ns=now,status='cancelled_on_other_fill',pnl=0.,notional=0.))
+            cancel_others += len(pending); pending.clear(); active = i
+            heapq.heappush(queue,(max(now,int(r['release_ns'])),-1,0.,'exit',i))
+        elif kind == 'exit' and active == i:
+            margin = equity; notional = margin*cfg['leverage']
+            pnl = max(-margin,notional*float(r[net_column])/1e4); equity += pnl
+            ledger.append(dict(time_ns=now,kind='exit',trade_id=r['trade_id'],equity=equity,
+                pnl=pnl,cashflow=0.,reason=int(r['reason']),order_mode=r['order_mode'],
+                net_bp=r[net_column],notional=notional))
+            funding.append(dict(trade_id=r['trade_id'],decision_ns=r['decision_ns'],release_ns=now,
+                status='funded',pnl=pnl,notional=notional,reason=int(r['reason']),order_mode=r['order_mode']))
+            if equity < cfg['refill_below']:
+                add=cfg['refill_to']-equity;cash+=add;refills+=1;equity=float(cfg['refill_to'])
+                ledger.append(dict(time_ns=now,kind='refill',equity=equity,pnl=0.,cashflow=add))
+            active=None
+    if pending or active is not None: raise ValueError('Unresolved account orders')
+    ledger=pd.DataFrame(ledger);funded=pd.DataFrame(funding);exits=ledger[ledger.kind=='exit']
+    profits=exits.pnl.to_numpy() if len(exits) else np.array([])
+    dd=(1-ledger.equity/ledger.equity.cummax()).max()*100
+    gain,loss=profits[profits>0].sum(),-profits[profits<0].sum();pnl=float(profits.sum())
+    np.testing.assert_allclose(equity,initial+cash+pnl,rtol=1e-12,atol=1e-8)
+    result=dict(initial=initial,ending_equity=equity,trading_pnl=pnl,cash_added=cash,
         total_cash_in=initial+cash,ending_over_total_cash_in=equity/(initial+cash),
-        refills=refills,funded=len(exits),skipped_busy=skipped,reserved_but_unfilled=waits,
+        refills=refills,funded=len(exits),skipped_busy=skipped,unfilled=waits,
+        cancelled_on_other_fill=cancel_others,max_simultaneous_waiting=max_pending,
         win_pct=float(100*(profits>0).mean()) if len(profits) else None,
         profit_factor=float(gain/loss) if loss else None,realized_balance_max_dd_pct=float(dd),
         terminal_settlement_pnl=float(exits[exits.reason==0].pnl.sum()) if len(exits) else 0.,
         terminal_settlements=int((exits.reason==0).sum()) if len(exits) else 0)
-    return result, ledger, funded
+    return result,ledger,funded
 
 
 def stats(t, col='net'):
@@ -100,7 +118,8 @@ def summarize():
     orders=[]; decisions=[]; paths={k:[] for k in ('ohlc','olhc')}; resolutions={k:[] for k in paths}
     for p in dirs:
         if (p/'decisions.csv.gz').exists():
-            d=pd.read_csv(p/'decisions.csv.gz')
+            try: d=pd.read_csv(p/'decisions.csv.gz')
+            except pd.errors.EmptyDataError: d=pd.DataFrame()
             if len(d): decisions.append(d)
         if not (p/'orders.csv.gz').exists(): continue
         o=pd.read_csv(p/'orders.csv.gz');orders.append(o)
@@ -130,6 +149,10 @@ def summarize():
         q.loc[mask,'status']=q.loc[mask,'trade_id'].map(canc.status)
         if q.release_time.isna().any():raise ValueError('Missing native fill/cancel resolution')
         q['release_ns']=ns(q.release_time)
+        q['entry_ns']=ns(q.entry_time)
+        # Limits match before the completed-close callback; market entries at it.
+        q.loc[q.filled & (q.order_mode=='limit'),'entry_ns'] -= 1
+        q.loc[q.filled,'release_ns']=np.maximum(q.loc[q.filled,'release_ns'],q.loc[q.filled,'entry_ns'])
         if (q.release_ns<q.decision_ns).any():raise ValueError('Resolution before decision')
         q.to_csv(EXP/f'{path}-resolved-orders.csv.gz',index=False)
         main=q[q.control_id==0];sig=trades[trades.control_id==0]
@@ -152,7 +175,7 @@ def summarize():
                 pnl_min=min(r['trading_pnl'] for r in tie),pnl_max=max(r['trading_pnl'] for r in tie)),
             restart_years=yearly)
     result['source_commit']=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
-    result['limits']='Single reserved-order capital projection, not native margin/funding or real-live return. Both full intrabar paths retained; no per-trade path stitching. Controls are conditional on signal geometry. 2023-2025 model training period; selected strategy remains retrospective.'
+    result['limits']='Multiple waiting levels / first-fill-cancels-others capital projection, not native margin/funding or real-live return. Both full intrabar paths retained; no per-trade path stitching. Controls are conditional on signal geometry. 2023-2025 model training period; selected strategy remains retrospective.'
     dump(EXP/'summary.json',result)
     print(json.dumps(result,ensure_ascii=False,indent=2))
 

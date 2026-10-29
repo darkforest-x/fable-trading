@@ -17,8 +17,9 @@
   "slippage_bp": {"market_entry": 10, "non_target_exit": 10},
   "control_seed": 20261029,
   "controls": 3,
+  "pending_policy_owner": "2026-10-29: multiple levels wait; first fill cancels other pending orders; new signals during a position are skipped",
   "capital": {"initial": 1000, "leverage": 3, "refill_below": 100, "refill_to": 1000, "tie_seed": 20261105},
-  "account_basis": "Native independent fills projected through one reserved full-equity order/position, capped margin losses and original refill rule; not native exchange liquidation or mark-to-market margin",
+  "account_basis": "Native independent fills projected through multiple pending levels while flat, first fill cancels all others, one full-equity position, capped margin losses and original refill rule; not native exchange liquidation or mark-to-market margin",
   "limits": "Binance historical bars with OKX fee schedule; no funding, depth, queue or measured latency; score model fitted in sample before 2026",
   "training_eligible": false,
   "production_eligible": false
