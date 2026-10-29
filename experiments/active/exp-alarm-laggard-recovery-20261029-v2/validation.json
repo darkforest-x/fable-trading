@@ -1,0 +1,49 @@
+{
+  "tests_passed": 13,
+  "checks": {
+    "feature_and_eligibility_parity": true,
+    "selection_and_control_parity": true,
+    "keys_unique": true,
+    "ordered_bounds": true,
+    "joint_subset_of_deep": true
+  },
+  "primary_counts": {
+    "lag": {
+      "selected": 37916,
+      "deep_lower": 487,
+      "deep_upper": 990,
+      "joint_lower": 284,
+      "joint_upper": 711,
+      "alarms_with_definite_joint": 131,
+      "alarms_with_possible_joint": 238
+    },
+    "lag_then_recovery": {
+      "selected": 37916,
+      "deep_lower": 509,
+      "deep_upper": 1040,
+      "joint_lower": 306,
+      "joint_upper": 774,
+      "alarms_with_definite_joint": 136,
+      "alarms_with_possible_joint": 251
+    }
+  },
+  "FHE_label": [
+    {
+      "reference": 0.02812,
+      "deep_lower": 0,
+      "deep_upper": 1,
+      "joint_lower": 0,
+      "joint_upper": 1,
+      "trough_possible": 0.0154,
+      "trough_full": 0.0154
+    }
+  ],
+  "interpretation": "V2 recovery endpoint was specified after V1 results and the FHE construct check. It is exploratory and did not change any selected coin or control identity. Exact source references and prior close prices matched. No simulation of limit fills, fees, stop loss or PnL.",
+  "definition_difference": "V1 near-reference recovery differs from V2 half of actual15m drawdown. Lower V2 requires a later close after15m, so quick transient recoveries may be uncertain rather than definite.",
+  "current_conclusion": "Inconclusive screening edge with5m time uncertainty; do not promote or change live orders.",
+  "registry": {
+    "new_record_schema_and_reference": "pass",
+    "full_registry_result": "tradingview-candle-probe-20261023-v1: holdout_status 'not_applicable' not in ('pre_holdout', 'historical', 'holdout_consumed', 'unknown')",
+    "scope": "The incompatible existing tradingview-candle-probe row was not changed."
+  }
+}

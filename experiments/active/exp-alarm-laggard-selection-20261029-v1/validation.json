@@ -1,0 +1,44 @@
+{
+  "tests_passed": 13,
+  "test_command": ".venv/bin/python -m pytest tests/evaluation/test_alarm_laggard_selection.py tests/evaluation/test_alarm_laggard_recovery.py -q",
+  "checks": {
+    "candidate_keys_unique": true,
+    "label_bounds_ordered": true,
+    "joint_subset_of_deep": true,
+    "selections_exante_eligible": true,
+    "equal_rule_counts": true,
+    "matched_counts_do_not_exceed_selected": true,
+    "control_labels_bounded": true,
+    "feature_age_1_to241seconds": true,
+    "no_future_censoring_in_selected": true
+  },
+  "source_symbols": 632,
+  "snapshots": 502065,
+  "primary_alarm_count": 851,
+  "primary_alarms_with_selection": 846,
+  "primary_not_deep_observations": 375496,
+  "failures_preserved": [
+    "run_initial_summary_dtype_failure.log",
+    "summary_blas_warning.json",
+    "summary_blas_warning.log"
+  ],
+  "numerical_diagnostic": {
+    "finite_weekly_inputs": true,
+    "finite_matmul_output": true,
+    "matmul_vs_elementwise_max_abs_diff": 1.3322676295501878e-15,
+    "example_p_before_and_after": 0.9912,
+    "resolution": "Use elementwise signed sum; avoids platform BLAS warnings. No input/threshold/ranking change."
+  },
+  "original_example": {
+    "FHE_lag_rank": 256,
+    "eligible_coins": 499,
+    "selected_per_rule": 50,
+    "FHE_selected_by_either_rule": false
+  },
+  "interpretation": "Outer bounds, not confidence intervals. Their overlap does not prove equality or absence of alpha. Weekly resampling confidence bounds are reported separately.5m features cannot claim fresh minute-level lag. No trades or fees/PnL.",
+  "registry": {
+    "new_record_schema_and_reference": "pass",
+    "full_registry_result": "tradingview-candle-probe-20261023-v1: holdout_status 'not_applicable' not in ('pre_holdout', 'historical', 'holdout_consumed', 'unknown')",
+    "scope": "The incompatible existing tradingview-candle-probe row was not changed."
+  }
+}

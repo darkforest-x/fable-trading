@@ -14,6 +14,42 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-alarm-laggard-selection-20261029-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: c09b54a9de
+    status: inconclusive
+    question: Can causal lag and historical wick recovery rank still-not-deep coins after the frozen six-major/BTC alarms?
+    single_variable: Lag-only top10percent versus same-size two-stage historical-recovery ordering; alarm times and outcomes fixed before extraction.
+    result: 632archived coins;1050union alarms;primary851six alarms,846with20plus candidates,375496eligible observations.37916selected per rule. Near-reference joint recovery lag0.604to1.342percent
+      vs matchedrandom0.400to0.907;two-stage0.620to1.390vs0.422to0.929. Timing bounds overlap;screening edge inconclusive.
+    artifacts:
+    - alarm-laggard-selection-20261029-v1
+    canonical_report: experiments/active/exp-alarm-laggard-selection-20261029-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Read headline.csv first. Five-minute features are1to241seconds old;all ordinary alarms retained and5insufficient-candidate alarms explicit. Same-alarm volume/volatility-tertile
+      controls and week-block uncertainty. FHErank256of499,neither rule selected. Input receipts,candidates andfixedselections retained. Initial bool summary failure and BLAS warnings
+      preserved;summary fix b7d0811c4d uses cached candidates. No training,trades,fees/PnL or live changes. Notion4088856479af810cb501f7807617b521.
+  - experiment_id: exp-alarm-laggard-recovery-20261029-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 60ca6eb3b1
+    status: inconclusive
+    question: Do the unchanged V1 selected coins recover half the actual15minute drawdown rather than return near pre-alarm price?
+    single_variable: Recovery outcome only;all alarms,candidate eligibility,features,selections andmatched control pools unchanged.
+    result: Primary851six alarms;37916selected per rule. Lag joint284to711cases,0.749to1.875percent vs random0.545to1.471;two-stage306to774cases,0.807to2.041vs0.567to1.489. Two-stage alarm-level
+      excess interval-0.834to1.818pp,week95percentCI-1.389to2.436pp. Neither rule confirms an advantage.
+    artifacts:
+    - alarm-laggard-recovery-20261029-v2
+    canonical_report: experiments/active/exp-alarm-laggard-recovery-20261029-v2/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Endpoint added after V1 and FHE construct review;descriptive,not untouched validation.13tests pass including known-second-path truth inside5m bounds. Every candidate feature,eligibility,deep
+      label,selection andcontrol match unchanged. Additional future windows cached;old near-reference endpoint preserved. Conditional recovery bounds remain wide. No limit-fill simulation
+      or profits;do not promote. Notion4088856479af810cb501f7807617b521.
   - experiment_id: exp-market-crash-alarm-20261029-v1
     source_repo: darkforest-x/fable-trading
     source_commit: b2840d4aca

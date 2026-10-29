@@ -18,6 +18,30 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: alarm-laggard-selection-20261029-v1
+    artifact_type: manifest
+    role: frozen_alarm_prospective_coin_selection_with_interval_censoring
+    source_repo: darkforest-x/fable-trading
+    source_commit: c09b54a9de
+    source_path: experiments/active/exp-alarm-laggard-selection-20261029-v1/summary.json
+    storage_uri: repo://experiments/active/exp-alarm-laggard-selection-20261029-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen config,summary,headline,validation and necessary raw tables/receipts retained. Large candidate/window caches local only;no content hashes. Observational outcomes,not
+      executed trades.
+  - artifact_id: alarm-laggard-recovery-20261029-v2
+    artifact_type: manifest
+    role: fixed_selection_actual_drawdown_recovery_endpoint_expansion
+    source_repo: darkforest-x/fable-trading
+    source_commit: 60ca6eb3b1
+    source_path: experiments/active/exp-alarm-laggard-recovery-20261029-v2/summary.json
+    storage_uri: repo://experiments/active/exp-alarm-laggard-recovery-20261029-v2/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen config,summary,headline,validation and necessary raw tables/receipts retained. Large candidate/window caches local only;no content hashes. Observational outcomes,not
+      executed trades.
   - artifact_id: market-crash-alarm-20261029-v1
     artifact_type: manifest
     role: causal_market_crash_warning_comparison_and_conditional_controls
