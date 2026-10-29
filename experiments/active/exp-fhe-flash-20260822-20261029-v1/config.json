@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-fhe-flash-20260822-20261029-v1",
+  "kind": "descriptive_market_observation",
+  "question": "What happened to FHE at Shanghai noon on 2026-08-22, and which other coins moved similarly?",
+  "event": "2026-08-22T13:10:00+08:00",
+  "scope": "All existing recent/tail Binance UM 5m series, same five-minute interval, noon 12:00–14:00 and same calendar day; FHE cached 1m and aggTrades",
+  "reproduction": ".venv/bin/python -m yoyo.evaluation.fhe_flash_event",
+  "price_change_definition": "Five-minute low/open - 1; later rebound uses the maximum of the next three five-minute closes, not a same-bar high of unknown order.",
+  "controls": "Simultaneous cross-section and BTC/ETH distinguish broad market moves from a single-contract outlier; not a profitability hypothesis.",
+  "performance_metrics": "AUC, trade PnL, fees and permutation significance do not apply: no fitted model, trading rule or profitable-edge claim.",
+  "training_eligible": false,
+  "production_eligible": false
+}
