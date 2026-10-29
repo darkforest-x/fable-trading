@@ -35087,3 +35087,14 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: V2.37 baseline preserved; confirmed current-timeframe 1.618 wick rings default on in owner-sampled green with size and visibility controls. Owner chart defaults hide Monday labels and use white historical 1.618 lines. Ten local checks and twelve native Pine fixture groups passed, native off/on and saved SOL12h layout verified. Original script retained after documented native-editor recovery; no trade logic or service changes.
+
+  - artifact_id: allin3-close-hybrid-20261029-v1
+    artifact_type: manifest
+    role: causal_close_market_or_delayed_limit_allin3_native_outcomes_and_cash_projection
+    source_repo: darkforest-x/fable-trading
+    generator_commit: 0c51d20173
+    source_path: experiments/active/exp-allin3-close-hybrid-20261029-v1/verification.json
+    storage_uri: repo://experiments/active/exp-allin3-close-hybrid-20261029-v1/verification.json
+    training_eligible: false
+    production_eligible: false
+    notes: 'Both full intrabar paths, native new fills, reused185market fills per path, all rejected/unfilled opportunities, first-fill cancellation cash ledgers, cash additions, matched controls and fixed tie sensitivity retained. Summary includes fee-only sensitivity and boundary settlement. No content hashes or production changes.'

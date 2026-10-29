@@ -14910,3 +14910,18 @@ experiments:
     artifacts:
     - allin3-all-trade-charts-20261028-v1
     notes: All336funded trades across212symbols,112wins224losses;336chronological candle PNGs plus copied timeline and Chinese CSV index in one folder. Exact ledger-event and filename coverage verified; all native prices and Monday levels match, zero plotted gaps, all337PNGs decode, seven targeted visual samples inspected. Historical score lookahead and BE0 protection caveats retained. Source slices, inputs metadata, generation receipts and verification remain local.
+
+  - experiment_id: exp-allin3-close-hybrid-20261029-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: cd3cc5aa82
+    status: complete
+    question: 'Owner: allin3 score at touch5m close, favorable market else rest at1.618 until target-first cancellation; multiple levels wait, first fill cancels others.'
+    single_variable: 'Entry after the score is known; current BE17/P30/H1/opposite1618 and all-in3x/refill rules retained.'
+    canonical_report: experiments/active/exp-allin3-close-hybrid-20261029-v1/summary.json
+    artifacts:
+    - allin3-close-hybrid-20261029-v1
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    result: '386symbols, both paths, zero final errors.777score-qualified events;737admitted,548independent fills (185cached market,363new limits). First seed:315/316funded, ending5939.78/7424.77U after5586.82U net refills; trading-647.04/+837.95U; realized DD99.7466percent. Full 10-seed/path net range-649.62..43902.16U; no stable execution forecast.584matched groups: signal-29.53/-28.11bp per opportunity vs random+21.93/+22.02bp, weekly signflip p0.178/0.185.'
+    notes: 'Fees maker2bp/taker5bp; original slip10bp market entry/non-target exit separate. Fee-only endpoints67299/84124U are discontinuous refill-timing sensitivity, not a robust profit claim. Current margin-cap cash overlay, not native exchange liquidation; funding/depth/latency absent. Native3656position fee checks max3.64e-12bp error. Owner multiple-wait policy2e15df4a3d; timestamp contract0c51d20173. Old screenshot BE0/lookahead1.75m invalidity retained. Notion4088856479af815d88ddf57c8b4837d2.'

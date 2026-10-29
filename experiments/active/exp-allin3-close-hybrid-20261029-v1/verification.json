@@ -1,0 +1,180 @@
+{
+  "ohlc": {
+    "seed_first_difference": [
+      {
+        "trade_id": "GASUSDT:2026-01-12:+1:hybrid:c0",
+        "decision_ns": 1768781100000000000,
+        "release_ns": 1768788000000000000,
+        "status": "funded",
+        "pnl": -52.48233947997281,
+        "notional": 9418.850562008598,
+        "reason": 11.0,
+        "order_mode": "market"
+      },
+      {
+        "trade_id": "EVAAUSDT:2026-01-12:+1:hybrid:c0",
+        "decision_ns": 1768781100000000000,
+        "release_ns": 1768788000000000000,
+        "status": "funded",
+        "pnl": -185.1982377207172,
+        "notional": 9418.850562008598,
+        "reason": 11.0,
+        "order_mode": "market"
+      }
+    ],
+    "slippage_refills": [
+      {
+        "time_ns": 1740672000000000000,
+        "cashflow": 960.110853333455
+      },
+      {
+        "time_ns": 1741237200000000000,
+        "cashflow": 925.0468203817263
+      },
+      {
+        "time_ns": 1761266700000000000,
+        "cashflow": 923.4022887991289
+      },
+      {
+        "time_ns": 1772064000000000000,
+        "cashflow": 927.5639698695027
+      },
+      {
+        "time_ns": 1773846000000000000,
+        "cashflow": 923.229933993306
+      },
+      {
+        "time_ns": 1774965600000000000,
+        "cashflow": 927.4632495031894
+      }
+    ],
+    "fees_only_refills": [
+      {
+        "time_ns": 1740672000000000000,
+        "cashflow": 947.8935425260834
+      },
+      {
+        "time_ns": 1741237200000000000,
+        "cashflow": 919.9061003542836
+      },
+      {
+        "time_ns": 1761670800000000000,
+        "cashflow": 910.4975748450197
+      },
+      {
+        "time_ns": 1772240400000000000,
+        "cashflow": 934.7844507543115
+      },
+      {
+        "time_ns": 1774695600000000000,
+        "cashflow": 982.3258041022655
+      },
+      {
+        "time_ns": 1781193600000000000,
+        "cashflow": 922.3094222358449
+      }
+    ],
+    "same_funded_ids_across_costs": true
+  },
+  "olhc": {
+    "seed_first_difference": [
+      {
+        "trade_id": "GASUSDT:2026-01-12:+1:hybrid:c0",
+        "decision_ns": 1768781100000000000,
+        "release_ns": 1768788000000000000,
+        "status": "funded",
+        "pnl": -52.48233947997281,
+        "notional": 9418.850562008598,
+        "reason": 11.0,
+        "order_mode": "market"
+      },
+      {
+        "trade_id": "EVAAUSDT:2026-01-12:+1:hybrid:c0",
+        "decision_ns": 1768781100000000000,
+        "release_ns": 1768788000000000000,
+        "status": "funded",
+        "pnl": -185.1982377207172,
+        "notional": 9418.850562008598,
+        "reason": 11.0,
+        "order_mode": "market"
+      }
+    ],
+    "slippage_refills": [
+      {
+        "time_ns": 1740672000000000000,
+        "cashflow": 960.110853333455
+      },
+      {
+        "time_ns": 1741237200000000000,
+        "cashflow": 925.0468203817263
+      },
+      {
+        "time_ns": 1761266700000000000,
+        "cashflow": 923.4022887991289
+      },
+      {
+        "time_ns": 1772064000000000000,
+        "cashflow": 927.5639698695027
+      },
+      {
+        "time_ns": 1773846000000000000,
+        "cashflow": 923.229933993306
+      },
+      {
+        "time_ns": 1774965600000000000,
+        "cashflow": 927.4632495031894
+      }
+    ],
+    "fees_only_refills": [
+      {
+        "time_ns": 1740672000000000000,
+        "cashflow": 947.8935425260834
+      },
+      {
+        "time_ns": 1741237200000000000,
+        "cashflow": 919.9061003542836
+      },
+      {
+        "time_ns": 1761670800000000000,
+        "cashflow": 910.4975748450197
+      },
+      {
+        "time_ns": 1772240400000000000,
+        "cashflow": 934.7844507543115
+      },
+      {
+        "time_ns": 1774695600000000000,
+        "cashflow": 982.3258041022655
+      },
+      {
+        "time_ns": 1781193600000000000,
+        "cashflow": 922.3094222358449
+      }
+    ],
+    "same_funded_ids_across_costs": true
+  },
+  "native_fee_reconciliation": {
+    "new_positions_checked": 3656,
+    "maximum_bp_error": 3.637978807091713e-12
+  },
+  "native_run_symbols": 386,
+  "native_run_errors": 0,
+  "focused_tests": 82,
+  "boundary_tests": 77,
+  "builder_commits": [
+    "cd3cc5aa82",
+    "aa430fe329"
+  ],
+  "account_owner_policy_commit": "2e15df4a3d",
+  "timestamp_contract_commit": "0c51d20173",
+  "notion_url": "https://app.notion.com/p/4088856479af815d88ddf57c8b4837d2",
+  "reproduce": [
+    "/Users/zhangzc/.local/bin/nautilus-python -m yoyo.evaluation.allin3_close_hybrid --workers 4",
+    "/Users/zhangzc/.local/bin/nautilus-python -m yoyo.evaluation.allin3_close_hybrid_summary"
+  ],
+  "source_checks": "Existing registered source paths, size, mtime and real reads; no content hashes",
+  "failed_logs_preserved": [
+    "run-first-empty-cache-failure.log",
+    "summary-first-missing-time-failure.log"
+  ]
+}

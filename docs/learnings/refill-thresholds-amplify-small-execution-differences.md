@@ -1,0 +1,7 @@
+# Refill thresholds can amplify small execution differences
+
+- **Problem**: The same funded allin3 trades finish near 5,940–7,425 USDT with the historical slippage haircut, but 67,299–84,124 with fees alone. Same-time entry ordering also changes the terminal balance severalfold.
+- **Dead end**: Explaining this as a linear fee deduction or ordinary compounding misses the discontinuous rule that replenishes an account below 100 to 1,000. Quoting only the best terminal value obscures external cash and timing uncertainty.
+- **Effective path**: Reconcile every native fill and fee, match funded trade IDs across cost cases, and compare cash-injection dates. Here the last refill changes from March 31 to June 11, 2026. Different injection timing changes the principal exposed to the later rally. Ten fixed tie seeds and both full OHLC paths remain visible.
+- **General rule**: For accounts with resets or refills, execution sensitivity must include cash-flow timing, not only final PnL. Report actual cash added, trading profit, realized drawdown and terminal marking separately; ranges across assumptions are not statistical confidence intervals.
+- **Connections**: `experiments/active/exp-allin3-close-hybrid-20261029-v1/verification.json`, `summary.json`, `yoyo/evaluation/allin3_close_hybrid_summary.py`. The 5m data and independent native fills do not validate simultaneous live order cancellation or exchange margin behavior.
