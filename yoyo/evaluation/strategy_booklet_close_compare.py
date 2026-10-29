@@ -126,7 +126,7 @@ def process(symbol, config):
     cols=['open','high','low','close']
     decimals=max(2,min(9,int(np.ceil(-np.log10(f[cols].to_numpy().min())))+7))
     tick=10.**(-decimals); p=f[cols].round(decimals); p.index=p.index.as_unit('ns')
-    original=pd.read_csv(origin/'orders.csv.gz')
+    original=pd.read_csv(origin/'orders.csv.gz',float_precision='round_trip')
     x,decisions=construct(p,original,tick,cohorts(),symbol)
     decisions.to_csv(out/'decisions.csv.gz',index=False)
     x.to_csv(out/'orders.csv.gz',index=False)
@@ -149,16 +149,22 @@ def process(symbol, config):
         for group,runtime,backstop in [('five',new5,False),('add',newadd,True)]:
             if runtime.empty:
                 continue
-            policy=ExitPolicy(trail_arm_r=1e12,opposite_hour_exit=False,round_trip_cost=0,
-                target_from_entry=True,intrabar_path=path.upper(),reclaim_next_bar=True,
-                breakeven_includes_cost=False,fill_maker_fee=cfg['maker_fee'],
-                fill_taker_fee=cfg['taker_fee'],monotone_segments=True,reclaim_backstop=backstop)
-            rows,fills,audit=run_native(frame,np.full(len(frame),np.nan),np.zeros(len(frame)),
-                runtime.copy(),policy,tick=tick,symbol=symbol.removesuffix('USDT'),
-                entry_order_mode='limit',batch_bars=288,skip_idle_bars=True)
-            rows.to_csv(dest/f'{group}-native-trades.csv.gz',index=False)
-            fills.to_csv(dest/f'{group}-native-fills.csv.gz',index=False)
-            dump(dest/f'{group}-native-audit.json',audit)
+            audit_path=dest/f'{group}-native-audit.json'
+            if audit_path.exists():
+                audit=json.loads(audit_path.read_text())
+                rows=pd.read_csv(dest/f'{group}-native-trades.csv.gz')
+                assert len(rows)==audit['positions']
+            else:
+                policy=ExitPolicy(trail_arm_r=1e12,opposite_hour_exit=False,round_trip_cost=0,
+                    target_from_entry=True,intrabar_path=path.upper(),reclaim_next_bar=True,
+                    breakeven_includes_cost=False,fill_maker_fee=cfg['maker_fee'],
+                    fill_taker_fee=cfg['taker_fee'],monotone_segments=True,reclaim_backstop=backstop)
+                rows,fills,audit=run_native(frame,np.full(len(frame),np.nan),np.zeros(len(frame)),
+                    runtime.copy(),policy,tick=tick,symbol=symbol.removesuffix('USDT'),
+                    entry_order_mode='limit',batch_bars=288,skip_idle_bars=True)
+                rows.to_csv(dest/f'{group}-native-trades.csv.gz',index=False)
+                fills.to_csv(dest/f'{group}-native-fills.csv.gz',index=False)
+                dump(audit_path,audit)
             if group == 'add':
                 expected=cached_rows(runtime[runtime.kind.eq('v3be0')],symbol,path,tick).set_index('trade_id')
                 actual=rows.set_index('trade_id').reindex(expected.index)
@@ -186,13 +192,25 @@ def process(symbol, config):
     dump(out/'done.json',done);return done
 
 
-def run(config, workers, symbol=None):
+def run(config, workers, symbol=None, retry_failed=False):
     committed('yoyo/evaluation/strategy_booklet_close_compare.py','yoyo/evaluation/strategy_booklet_accounting.py',
               'yoyo/layers/l3_backtest/nautilus_independent.py',str(config.relative_to(ROOT)))
     tables=cohorts()
     symbols=sorted(set(pd.concat([tables[k] for k in ('60','5','v3')]).symbol))
     if symbol:
         symbols=[symbol]
+    elif retry_failed:
+        # Only completed failures from the original run; never race a symbol
+        # still queued/running in that pool (e.g. the earlier HEMI pilot).
+        completed=[]
+        for line in (config.parent/'run.log').read_text().splitlines():
+            try:
+                item=json.loads(line)
+            except ValueError:
+                continue
+            if 'error' in item:
+                completed.append(item['symbol'])
+        symbols=sorted(set(completed))
     with ProcessPoolExecutor(workers) as pool:
         jobs={pool.submit(process,s,str(config)):s for s in symbols}
         for i,task in enumerate(as_completed(jobs),1):
@@ -231,7 +249,7 @@ def summarize(config):
         if track in ('v3add','v3add20'):
             new['source_rank']=[int(base.index[(base.event==r.event)&(base.variant==('v3_add5' if r.kind=='add0' else 'v3_be0'))][0])
                                if ((base.event==r.event)&(base.variant==('v3_add5' if r.kind=='add0' else 'v3_be0'))).any()
-                               else ranks[r.event]+.5 for r in new.itertuples()]
+                               else int(base.index[(base.event==r.event)&base.variant.eq('v3_be0')][0])+.5 for r in new.itertuples()]
         new=new.sort_values('source_rank',kind='stable').reset_index(drop=True)
         old_metrics,old_ledger=account(track,base);new_metrics,new_ledger=account(track,new)
         old_ledger.to_csv(config.parent/f'{track}-baseline-ledger.csv.gz',index=False)
@@ -255,5 +273,6 @@ def summarize(config):
 if __name__=='__main__':
     ap=argparse.ArgumentParser();ap.add_argument('--config',type=Path,default=EXP/'config.json')
     ap.add_argument('--workers',type=int,default=4);ap.add_argument('--symbol');ap.add_argument('--summary',action='store_true')
+    ap.add_argument('--retry-failed',action='store_true')
     args=ap.parse_args();config=args.config.resolve()
-    summarize(config) if args.summary else run(config,args.workers,args.symbol)
+    summarize(config) if args.summary else run(config,args.workers,args.symbol,args.retry_failed)

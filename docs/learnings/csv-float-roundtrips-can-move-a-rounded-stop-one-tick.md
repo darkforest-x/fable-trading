@@ -1,0 +1,7 @@
+# Preserve serialized floating-point values before rebuilding tick-rounded prices
+
+- **Problem**: The exact booklet comparison failed a cached stop-price check by one tick although the intended rule was unchanged. For `1000BONKUSDT:2024-03-11:-1:60`, the original entry text was `0.034821648000000004`; the cached short far stop was `1.741082401`.
+- **Dead end**: Relaxing the cache check by one tick would hide a real input change. Default CSV float parsing returned `0.034821648`, and multiplying by50 before tick-ceiling produced `1.7410824`. Replaying trades would merely build a different baseline.
+- **Effective path**: Read the saved order geometry with `float_precision='round_trip'`. The recovered entry yields `1.7410824010000001`, matching the original cache at sub-tick tolerance. Keep the original check strict and retain the initial failed receipt. Reuse any already completed native group when resuming a later failed cache check.
+- **General rule**: A decimal serialization followed by default parsing is not necessarily a binary floating-point roundtrip. Floor/ceil to a price tick amplifies one-ULP input changes into a whole tick; restore the exact serialized input before deriving rounded geometry.
+- **Dependencies**: `yoyo/evaluation/strategy_booklet_close_compare.py`, the immutable Codex `orders.csv.gz` inputs, and the original stop rounding in `monday_limit_backstop.stops`. No historical cache or tolerance was changed.
