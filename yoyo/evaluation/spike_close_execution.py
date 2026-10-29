@@ -239,9 +239,11 @@ def paired(g, rng):
     if not len(d):
         return dict(pairs=0)
     # One sign per NY week, preserving same-week cross-coin correlation.
-    week = d.groupby(d.index.str.split(':').str[1]).sum().to_numpy()
+    clustered = d.groupby(d.index.str.split(':').str[1]).agg(['sum','size'])
+    week = clustered['sum'].to_numpy()
     null = (rng.choice([-1., 1.], size=(20000, len(week)))@week)/len(d)
-    boot = np.array([rng.choice(week, len(week), replace=True).sum()/len(d) for _ in range(3000)])
+    sampled = rng.integers(0, len(week), size=(3000,len(week)))
+    boot = week[sampled].sum(axis=1)/clustered['size'].to_numpy()[sampled].sum(axis=1)
     return dict(pairs=len(d), weeks=len(week), signal_bp=float(joint.signal.mean()), random_bp=float(joint.random.mean()),
         excess_bp=float(d.mean()), week_sign_flip_p=float((1+(null >= d.mean()).sum())/(len(null)+1)),
         week_bootstrap_excess_ci95_bp=[float(x) for x in np.quantile(boot,[.025,.975])])
@@ -289,7 +291,7 @@ def summarize(config):
               '2020_2024': lambda x: x.week < '2025-01-01',
               '2025': lambda x: (x.week >= '2025-01-01') & (x.week < '2026-01-01'),
               '2026': lambda x: x.week >= '2026-01-01'}
-    result = dict(symbols=len(syms), eligible_signals=len(selected), variants={}, decomposition={}, controls={},
+    result = dict(symbols=len(syms), eligible_signals=len(selected), variants={}, decomposition={}, controls={}, branch_controls={},
                   fixed_buckets={}, concentration={}, cases={}, checks={})
     rng = np.random.default_rng(cfg['control_seed'])
     for variant in VARIANTS:
@@ -299,6 +301,11 @@ def summarize(config):
                                        for per,mask in groups.items()}
         result['decomposition'][variant] = {key: {per:stats(g[mask(g)]) for per,mask in groups.items()}
                                             for key,g in s.groupby('close_position')}
+        result['branch_controls'][variant] = {}
+        for key,g in s.groupby('close_position'):
+            matched = worst[(worst.variant == variant)&worst.event.isin(g.event)]
+            result['branch_controls'][variant][key] = {per:paired(matched[mask(matched)],rng)
+                                                      for per,mask in groups.items()}
         f = s[s.filled].copy()
         f['room_bucket'] = pd.cut(f.remaining_target_bp, [0,50,100,200,500,np.inf], right=False).astype(str)
         f['chase_bucket'] = pd.cut(f.chase_fraction, [-np.inf,0,.25,.5,.75,1], right=False).astype(str)
