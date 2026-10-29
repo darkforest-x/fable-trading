@@ -231,6 +231,20 @@ def stats(g):
     return clean(result)
 
 
+def week_sign_flip(week, count, rng):
+    """Exact small-cluster null; include equality despite floating-point summation."""
+    observed = float(week.sum()/count)
+    if len(week) <= 16:
+        bits = (np.arange(2**len(week))[:,None] >> np.arange(len(week))) & 1
+        null = ((2*bits-1)@week)/count
+        correction = 0
+    else:
+        null = (rng.choice([-1.,1.],size=(20000,len(week)))@week)/count
+        correction = 1
+    tolerance = 1e-12*max(1., abs(observed), float(np.abs(week).sum()/count))
+    return float((correction+(null >= observed-tolerance).sum())/(len(null)+correction))
+
+
 def paired(g, rng):
     sig = g[g.control_id == 0].set_index('event').net
     control = g[g.control_id > 0].groupby('event').net.mean()
@@ -241,11 +255,11 @@ def paired(g, rng):
     # One sign per NY week, preserving same-week cross-coin correlation.
     clustered = d.groupby(d.index.str.split(':').str[1]).agg(['sum','size'])
     week = clustered['sum'].to_numpy()
-    null = (rng.choice([-1., 1.], size=(20000, len(week)))@week)/len(d)
+    p_value = week_sign_flip(week, len(d), rng)
     sampled = rng.integers(0, len(week), size=(3000,len(week)))
     boot = week[sampled].sum(axis=1)/clustered['size'].to_numpy()[sampled].sum(axis=1)
     return dict(pairs=len(d), weeks=len(week), signal_bp=float(joint.signal.mean()), random_bp=float(joint.random.mean()),
-        excess_bp=float(d.mean()), week_sign_flip_p=float((1+(null >= d.mean()).sum())/(len(null)+1)),
+        excess_bp=float(d.mean()), week_sign_flip_p=p_value,
         week_bootstrap_excess_ci95_bp=[float(x) for x in np.quantile(boot,[.025,.975])])
 
 

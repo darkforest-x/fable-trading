@@ -1,7 +1,8 @@
 """Admission timing and cancellation boundaries for the frozen spike comparison."""
 import unittest
+import numpy as np
 import pandas as pd
-from yoyo.evaluation.spike_close_execution import decision
+from yoyo.evaluation.spike_close_execution import decision, week_sign_flip
 
 CFG = dict(backstop_pct=18, be_offset_bp=17)
 
@@ -38,6 +39,11 @@ class CloseDecisionTests(unittest.TestCase):
         p=200-self.p; p[['high','low']]=p[['low','high']].to_numpy()
         a,_=decision(dict(self.source,side=-1,target_price=90.),p,.1,CFG,'close_now')
         self.assertEqual(a['entry'],98); self.assertEqual(a['reclaim_ref'],100); self.assertEqual(a['stop'],118)
+
+    def test_small_cluster_null_includes_observed_arrangement(self):
+        weeks=np.array([.1,.2,.3,.4,.5,.6])
+        self.assertEqual(week_sign_flip(weeks,14,np.random.default_rng(1)),1/64)
+        self.assertEqual(week_sign_flip(np.zeros(6),14,np.random.default_rng(1)),1.)
 
 
 if __name__=='__main__': unittest.main()
