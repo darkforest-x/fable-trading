@@ -342,6 +342,12 @@ def summarize(config):
     prior = json.loads((CACHED/'summary.json').read_text())['results']['plans']
     result['legacy_account_reference'] = {k:v for k,v in prior.items() if k.startswith('spike|')}
     baseline = signal[(signal.variant == 'close_now')&signal.filled]
+    risk_pct = baseline.side*(baseline.entry-baseline.stop)/baseline.entry*100
+    result['unchanged_level_anchored_risk'] = dict(fills=len(baseline),
+        beyond_legacy_19pct_liquidation_proxy=int((risk_pct >= 19).sum()),
+        beyond_20pct_initial_margin_at_5x=int((risk_pct >= 20).sum()),
+        stop_distance_pct_quantiles={str(q):float(risk_pct.quantile(q)) for q in (0,.5,.9,1)},
+        basis='Price geometry only; no actual OKX liquidation inference without margin mode, tiers, mark-price path and funding')
     ref = prior['spike|close_all']['all']
     np.testing.assert_allclose([len(baseline), baseline.net.mean()], [ref['n'], ref['mean_bp']], rtol=1e-10)
     result['checks'] = dict(baseline_exact_saved_summary=True,

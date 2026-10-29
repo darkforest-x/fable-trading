@@ -1,0 +1,7 @@
+# An unavailable pre-limit score does not refute a post-close entry
+
+- **Problem**: The frozen spike score reads the touch candle's complete close and volume. Rejecting its historical informed 1.618 fill was repeatedly generalized to rejecting entries after that candle closes.
+- **Dead end**: Applying an allin3, instant-score or prior-bar score failure to spike changes the information set, target, position sizing or all three. None answers whether the completed score still identifies useful later entries.
+- **Effective path**: Reuse spike's exact BE17 close-entry native ledger, then change only execution: immediate close, favorable market/rebound retest, or next5m close. Keep unfilled/rejected opportunities, same conditional controls and chronological segments. Of219 signals,113 already close past target;106 remain. Immediate entries average+90.27bp after costs,2025-64.88bp and2026+216.82bp. This is positive historical evidence, not proof of a stable live edge; matched all-history excess p0.172.
+- **General rule**: Write the observation time and permissible execution time separately. Invalidate the impossible fill, then test the later execution with its own price and costs. Keep timing, scoring and portfolio findings distinct.
+- **Dependencies**: `yoyo/evaluation/spike_close_execution.py`; `exp-spike-close-execution-20261029-v1`; no model, stop, target or production changes. Historical rules were already selected on this history.
