@@ -1,0 +1,35 @@
+{
+  "experiment_id": "exp-monday-limit-alarm-entry-20261029-v1",
+  "question": "Owner 2026-10-29: when the market-wide spike alarm fires, enter every later same-side 1.618 touch at once and decide at the touch bar close with the real score whether to stay.",
+  "single_variable": "Entry selection: every touch after an alarm (no score) with a close-time exit by the touch-bar score, against holding all, the paper engine's resting rule in the same windows, and touches outside alarms.",
+  "alarm_rule": "yoyo/monitor/spike_alert.py: >= 25 distinct same-side touches within 5 minutes, 30-minute cooldown; replayed on Binance 5m first-touch bars, known at the alarm bar's close",
+  "thresholds": [
+    25
+  ],
+  "windows_min": [
+    30,
+    120,
+    360
+  ],
+  "cuts": [
+    0.5,
+    0.6
+  ],
+  "variants": {
+    "near30": "near Monday edge, -30 percent",
+    "r0618": "range 0.618, -30 percent",
+    "opp30": "opposite 1.618, -30 percent",
+    "near18": "near Monday edge, -18 percent (spike)"
+  },
+  "be_offset_bp": 17.0,
+  "scores": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+  "score_use": "stored = frozen touch-bar score, used only at the touch close for the exit decision; causal = the paper engine's resting score, used only for the comparison plan",
+  "since_week": "2019-12-30",
+  "control_share": 0.15,
+  "seed": 20261029,
+  "sizing": "monday_limit_return_opt.frac N20 3x; per-trade and per-alarm-episode statistics",
+  "fees": "Codex config maker 0.02 / taker 0.05 percent (OKX Lv1, read 2026-10-23); 10bp slippage on non-target exits; the immediate entry is modelled as a limit at the level (zero latency; the seconds study measured a median 4bp latency cost)",
+  "in_sample": "The 25-coin threshold was chosen on 2026-10-27 from the same history (exp-monday-spike-alert-quality-20261027-v1)",
+  "training_eligible": false,
+  "production_eligible": false
+}

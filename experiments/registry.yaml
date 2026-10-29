@@ -817,6 +817,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
+  - experiment_id: exp-monday-limit-alarm-entry-20261029-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: running
+    question: 'Owner 2026-10-29: when the market-wide spike alarm (>= 25 coins in 5 minutes) fires, enter every later same-side 1.618 touch at once and decide at the touch bar close with the real score whether to stay.'
+    single_variable: 'Entry selection after alarms (no score) with a close-time exit by the touch-bar score; compared with holding all, the paper engine resting rule in the same windows and touches outside alarms.'
+    result: pending
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-alarm-entry-20261029-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: '129 alarms 2021-2026 on Binance 5m first touches (122 lower); windows 30 / 120 / 360 minutes; 15 percent seeded control outside alarms. NautilusTrader native run with fill_close_exit.'
   - experiment_id: exp-monday-limit-tick-entry-20261029-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 3575cccfde
