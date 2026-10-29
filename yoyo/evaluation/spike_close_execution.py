@@ -269,6 +269,11 @@ def summarize(config):
             all_paths[path].append(joined)
     decisions = pd.concat(all_decisions, ignore_index=True)
     paths = {k: pd.concat(v, ignore_index=True).set_index('trade_id') for k,v in all_paths.items()}
+    # A symbol with no admitted orders contributes empty object-typed columns.
+    for t in paths.values():
+        for col in ('net','net_notional_bp','entry','entry_i','exit_i','reason','mae_pct',
+                    'stop','target_price','exit_price'):
+            t[col] = pd.to_numeric(t[col], errors='raise')
     a, b = paths['ohlc'], paths['olhc']
     b = b.reindex(a.index)
     if b.variant.isna().any():
