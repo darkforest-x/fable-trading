@@ -1,3 +1,9 @@
+## 2026-10-29 · Single5m wick risk filter remains unproven
+
+- Owner approved the proposed natural risk-distance filter. `exp-5m-wick-risk-filter-20261029-v1` keeps short close entry, exact needle-high stop, far internal0.618 target, and maker2bp/taker5bp. Frozen risk distance >=63.621485488253036bp; first-touch/reclaim/volume assessed separately without combinations. Existing native outcomes only, zero replay or new trades.
+- Candidate:444 completed+1censored, all-history mean-0.203R.2025 n50,+0.051R after fees but-0.133R under10bp/market-fill stress.2026 n26,+0.459R/stress+0.238R; matched24 signal+0.588R vs random-0.610R,p0.136. Removing XRP gives-0.069R/entry; removing week2026-01-12 gives-0.016R.2026 absolute mean week-bootstrap95[-0.721,1.888]R. No stable edge established; no account-sizing or combined-filter stage.
+- Threshold is pre2025 but feature was selected after seeing2026, so this remains retrospective.81 saved numeric comparisons,2 focused admission/period tests and1687-row exact ledger projection check pass. No production, training, paper-engine or service changes. Learning: `multiple-winning-symbols-can-share-one-profitable-week.md`. Notion72 receives the follow-up findings; original failures remain preserved.
+
 ## 2026-10-29 · 1m strategy design fails its pre-registered 2025 selection
 
 - `exp-monday-limit-1m-design-20261029-v1`: 1m model trained before 2025 (2025-to-date AUC 0.688 vs 0.648 base), resting limits, 6 targets x 3 stops x 3 cuts x 3 EMA order filters, frac 10 slots 3x. On 2025 no combo qualifies (best 0.61x, all drawdowns > 50 percent, 12-25 liquidations each), so nothing was tested on 2026. Selection rule unchanged; the full 2025 table is in summary.json (the first summary is kept as summary_first.*).

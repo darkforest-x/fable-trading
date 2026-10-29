@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: 5m-wick-risk-filter-20261029-v1
+    artifact_type: manifest
+    role: frozen_single_wick_filter_and_concentration_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: c18cde2537
+    source_path: experiments/active/exp-5m-wick-risk-filter-20261029-v1/summary.json
+    storage_uri: repo://experiments/active/exp-5m-wick-risk-filter-20261029-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 'Source native ledger reused without replay. config,summary,concentration,validation,reproduction retained; candidate CSV and projected
+      controls local. Inconclusive: sparse correlated winners,2025 stress negative,2026 week p0.136.'
   - artifact_id: single-wick-1618-majors-20261029-v1
     artifact_type: manifest
     role: native_upper_wick_short_events_outcomes_and_causal_feature_readout

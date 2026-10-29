@@ -14,6 +14,27 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-5m-wick-risk-filter-20261029-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: c18cde2537
+    status: inconclusive
+    question: Does the approved natural wick-risk filter support a stable short strategy after controlling for annual performance and concentrated
+      winners?
+    single_variable: Frozen risk_bp>=63.621485488253036 versus unchanged original short rule; first-touch, reclaim and volume checked separately,
+      never combined.
+    result: 444 closed+1censored; fee-net mean-0.203R.2025 n50,+0.051R,10bp/market-fill stress-0.133R;2026 n26,+0.459R,stress+0.238R.2026 matched24
+      signal+0.588R/random-0.610R,p0.136; excluding XRP gives-0.069R and excluding week2026-01-12 gives-0.016R. Other individual filters fail cross-year
+      fee/stress stability. No account or combined-filter stage.
+    artifacts:
+    - 5m-wick-risk-filter-20261029-v1
+    canonical_report: experiments/active/exp-5m-wick-risk-filter-20261029-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Read-only projection of original Nautilus native ledger,zero new trades/replays;81 saved-value checks,2 period/admission tests,1687-row
+      exact projection check. Feature selected after seeing2026; not fresh validation. Original close-fill idealization/no funding retained; source-censored
+      separate.
   - experiment_id: exp-5m-single-wick-1618-majors-20261029-v1
     source_repo: darkforest-x/fable-trading
     source_commit: a930cad7e2
