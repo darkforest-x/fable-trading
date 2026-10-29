@@ -1,0 +1,16 @@
+{
+  "experiment_id": "exp-strategy-booklet-close-compare-20261029-v1",
+  "question": "Owner asks every other strategy against its exact displayed history, as spike403.21percent versus25.09percent.",
+  "single_variable": "Entry at original1.618 replaced by market at completed touch5m close; skip if target/backstop already passed. Preserve each booklet cohort, protection, targets, sizing, start, tie seed and historical account semantics.",
+  "baseline": "exp-strategy-booklet-paths-20261027-v1",
+  "reuse": ["exp-monday-limit-paper-accounts-20261028-v1", "exp-monday-limit-close-reclaim-20261028-v1", "exp-spike-booklet-close-compare-20261029-v1"],
+  "new_native": "Only missing5mBE0/no-initial-stop andBE0parent/add groups; parents required by native child cancellation/confirmation. All other fills reused.",
+  "maker_fee": 0.0002,
+  "taker_fee": 0.0005,
+  "fee_snapshot": "2026-10-23 OKX Lv1",
+  "slippage_bp": {"market_entry": 10, "non_target_exit": 10},
+  "not_modelled": "Actual score/quote/order latency, funding, exchange margin and mark-to-market liquidation; historical allocation and row-wise intrabar conventions retained for comparison only.",
+  "control_scope": "Paired deterministic historical execution change, not new strategy validation. No newly matched random capital curve; existing conditional per-signal control evidence is not transferred to account returns.",
+  "training_eligible": false,
+  "production_eligible": false
+}
