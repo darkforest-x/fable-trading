@@ -1,0 +1,12 @@
+{
+  "experiment_id": "exp-flash-precursor-20261029-v1",
+  "kind": "single_event_exploration_and_research_design",
+  "question": "Can a cross-asset market-stress alarm precede deep wicks, leaving time to select lagging vulnerable coins and prepare limits?",
+  "scope": "Read existing pre-13:10 information for the Aug22 example only; no parameter selection, new market download, trading simulation or service changes.",
+  "reproduction": ".venv/bin/python -m yoyo.evaluation.flash_precursor_observation",
+  "universe_limitation": "92 cached daily minute histories were selected by prior touch research, not frozen before this event. Six major histories are explicit benchmarks. One crash event, not92independent events.",
+  "next_test": "Freeze an ex-ante liquid universe and include ordinary/non-crash times. Test market alarm separately from candidate ranking and eventual execution. Time-split and leave whole crash events together. False alarms/day, event recall, latency-adjusted lead time, subsequent deep-move and recovery incidence precede any profit claim.",
+  "trading_evaluation_if_later_authorized": "Nautilus native execution once for fixed rules, or isolated VectorBT for parameter research; unchanged approved fee/exit policy, recorded queue/latency assumptions and event-wide exposure. No handcrafted fill engine.",
+  "training_eligible": false,
+  "production_eligible": false
+}
