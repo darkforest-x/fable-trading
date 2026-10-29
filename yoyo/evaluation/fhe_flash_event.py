@@ -4,10 +4,12 @@ This is an ex-post market observation, not a trading simulation or signal rule.
 Read OHLCV for the Shanghai calendar day, compare simultaneous 5m candles,
 and measure recovery using subsequent candle closes. No execution, profits,
 fees, queue position, or liquidation mechanism is inferred from these bars.
-Existing recent/tail archives are merged only on exact OHLCV agreement.
+Reuse the existing tail where it covers this date; recent archives supply
+missing dates. Avoid re-reading full histories or repeating prior overlap audits.
 """
 from concurrent.futures import ThreadPoolExecutor
 import json
+import io
 from pathlib import Path
 import subprocess
 
@@ -21,17 +23,49 @@ END = START + pd.Timedelta(days=1)
 EVENT = pd.Timestamp('2026-08-22 13:10', tz='Asia/Shanghai').tz_convert('UTC')
 
 
+def read_day(path):
+    """Seek a sorted uncompressed CSV to this day; gzip falls back to parsing."""
+    lower, upper = START.value // 10**6, END.value // 10**6
+    if path.suffix == '.gz':
+        frame = pd.read_csv(path, usecols=['ts', *COLS], float_precision='round_trip')
+        return frame[frame.ts.between(lower, upper - 1)]
+    with path.open('rb') as handle:
+        header = handle.readline()
+        left, right = handle.tell(), path.stat().st_size
+        while right - left > 16384:
+            middle = (left + right) // 2
+            handle.seek(middle)
+            handle.readline()
+            line = handle.readline()
+            if line and int(line.split(b',', 1)[0]) < lower:
+                left = middle
+            else:
+                right = middle
+        handle.seek(left)
+        if left != len(header):
+            handle.readline()
+        lines = []
+        for line in handle:
+            stamp = int(line.split(b',', 1)[0])
+            if stamp >= upper:
+                break
+            if stamp >= lower:
+                lines.append(line)
+    return pd.read_csv(io.BytesIO(header + b''.join(lines)), usecols=['ts', *COLS], float_precision='round_trip')
+
+
 def read_symbol(job):
     """Read the observed day only; future recovery fields are outcome labels."""
     symbol, paths = job
     parts, receipts = [], []
     for path in paths:
         stat = path.stat()
-        frame = pd.read_csv(path, usecols=['ts', *COLS], float_precision='round_trip')
-        frame = frame[frame.ts.between(START.value // 10**6, END.value // 10**6 - 1)]
+        frame = read_day(path)
         parts.append(frame)
         receipts.append(dict(path=str(path.relative_to(ROOT)), bytes=stat.st_size,
                              mtime_ns=stat.st_mtime_ns, observed_day_rows=len(frame)))
+        if len(frame) == 288:
+            break
     frame = pd.concat(parts).sort_values('ts')
     dup = frame[frame.ts.duplicated(keep=False)]
     if len(dup) and dup.groupby('ts')[COLS].nunique().gt(1).any().any():
@@ -68,13 +102,15 @@ def main():
             jobs.setdefault(path.name.split('.')[0], []).append(path)
     OUT.mkdir(exist_ok=True)
     frames, sources, absent = [], {}, []
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        for symbol, frame, receipts in pool.map(read_symbol, sorted(jobs.items())):
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        for number, (symbol, frame, receipts) in enumerate(pool.map(read_symbol, sorted(jobs.items())), 1):
             sources[symbol] = receipts
             if frame.empty:
                 absent.append(symbol)
             else:
                 frames.append(frame)
+            if number % 100 == 0:
+                print(f'Read {number}/{len(jobs)} symbols', flush=True)
     all_bars = pd.concat(frames).sort_index()
     all_bars.to_csv(OUT / 'day_bars.csv.gz', compression='gzip')
     simultaneous = all_bars.loc[[EVENT]].sort_values('drop_pct')
