@@ -63,6 +63,8 @@ def construct(p, original, tick, tables, symbol):
                        score=float(r.score), source_id=source_id)
             src['stop'] = float(stops(pd.DataFrame([dict(src,entry=level)]),
                                      'far' if kind in ('60','5') else 'P',30,tick)[0])
+            if kind == '5':
+                src['stop'] = np.nan
             status = 'admitted'
             if np.isfinite(target) and side*(target-close) < tick*(1-1e-7):
                 status = 'past_target_at_close'
@@ -73,8 +75,8 @@ def construct(p, original, tick, tables, symbol):
             decisions.append(dict(event=r.event,kind=kind,score=r.score,status=status))
             if status != 'admitted':
                 continue
-            # The original 5m booklet has no initial stop; its placeholder is
-            # ignored by the separate reclaim_backstop=False native policy.
+            # The original 5m booklet has no initial stop. NaN is the native
+            # reclaim_backstop=False contract, not a finite far-away substitute.
             src['cache_family'] = 'ci' if side*(close-level) >= tick*(1-1e-7) else 'cb'
             orders.append(src)
             if kind == 'v3be0' and r.score >= .6:
