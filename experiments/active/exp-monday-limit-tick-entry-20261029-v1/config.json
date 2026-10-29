@@ -1,0 +1,24 @@
+{
+  "experiment_id": "exp-monday-limit-tick-entry-20261029-v1",
+  "question": "Owner 2026-10-29: with Binance trade data, score each touch at the instant of the touch and enter at market after 100 / 300 / 1000 ms; last five months; in the framework.",
+  "single_variable": "Entry: resting limit at the level (paper engine) vs market order after a latency L once the instant score clears the account threshold; account rules, exits and sizing unchanged.",
+  "source": "data.binance.vision futures/um/daily/aggTrades (public archive), touch days only; only the touch bar plus a 10 s tail is cached",
+  "cache": "data/crypto/market/aggtrades_binance_um_touchbars_20261029",
+  "scores": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+  "score_model": "experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/score_model.json",
+  "events": "experiments/active/exp-monday-limit-reclaim-patterns3-20261024-v1/events_60m.csv.gz",
+  "window_from": "experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/summary.json",
+  "candidate_floor": 0.3,
+  "latencies_ms": [
+    100,
+    300,
+    1000
+  ],
+  "download_threads": 8,
+  "workers": 6,
+  "max_failed_share": 0.005,
+  "fill_rule": "first taker trade in the order's direction at or after t_star + L (buyer-taker for longs, seller-taker for shorts); no extra entry slippage, taker fee",
+  "parity": "touch-bar aggTrades quantity vs Codex 5m volume, high / low vs the 5m bar",
+  "training_eligible": false,
+  "production_eligible": false
+}

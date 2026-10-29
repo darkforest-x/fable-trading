@@ -787,6 +787,34 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Downloaded 2085 data.binance.vision daily 1m files (touch days only) to data/crypto/market/kline_binance_um1m_touchdays_20261027 (not in git). Not measured: orders placed at minute D that never fill, and non-v3 events whose partial score clears 0.5. See docs/learnings/touch-bar-information-arrives-with-the-touch.md.'
+  - experiment_id: exp-monday-limit-tick-entry-20261029-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: running
+    question: 'Owner 2026-10-29: score each touch at the instant of the touch from Binance trades and enter at market after 100 / 300 / 1000 ms; last five months; in the framework.'
+    single_variable: 'Entry: resting limit vs market after latency L when the instant score clears the account threshold; account rules, exits and sizing unchanged.'
+    result: pending
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-tick-entry-20261029-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Step 1 tick features and fill prices (this experiment), step 2 framework fills (exp-monday-limit-tick-accounts-20261029-v1), step 3 summary here. aggTrades touch-bar windows cached under data/crypto/market/aggtrades_binance_um_touchbars_20261029 (not in git).'
+  - experiment_id: exp-monday-limit-tick-accounts-20261029-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: queued
+    question: 'Seconds-level test, step 2: framework fills with full account rules for touches selected by the instant score.'
+    single_variable: 'Selection by instant score; rules as exp-monday-limit-paper-accounts-20261028-v1.'
+    result: pending
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-tick-accounts-20261029-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Resting family only; monday_limit_paper_accounts builder.'
   - experiment_id: exp-monday-limit-1m-design-20261029-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 1e6e6a65c6
