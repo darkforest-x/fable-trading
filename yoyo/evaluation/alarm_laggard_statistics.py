@@ -28,12 +28,16 @@ def weekly_interval(lower, upper, weeks, cfg):
     if grouped.empty:
         return dict(alarms=0,weeks=0,lower_mean=None,upper_mean=None,ci95=None,lower_sign_p=None)
     a = grouped.to_numpy(float)
+    if not np.isfinite(a).all():
+        raise ValueError('Nonfinite weekly inputs; do not compute significance')
     rng = np.random.default_rng(cfg['statistics']['seed'])
     indices = rng.integers(0,len(a),(cfg['statistics']['bootstrap_repeats'],len(a)))
     totals = a[indices].sum(axis=1)
     low_boot = totals[:,0]/totals[:,2]; up_boot = totals[:,1]/totals[:,2]
     signs = rng.choice([-1,1],(cfg['statistics']['permutation_repeats'],len(a)))
-    null = signs @ a[:,0]
+    # Elementwise reduction avoids spurious platform-BLAS matmul floating
+    # exceptions observed with finite, sub-unit inputs on this local runtime.
+    null = np.sum(signs * a[:,0],axis=1)
     observed = a[:,0].sum()
     p = (1+int((null >= observed-1e-14).sum()))/(len(null)+1)
     return dict(alarms=int(a[:,2].sum()), weeks=len(a),

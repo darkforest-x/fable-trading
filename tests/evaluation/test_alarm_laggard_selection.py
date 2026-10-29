@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from yoyo.evaluation.alarm_laggard_selection import OUT, STEP, causal_features, outcome_bounds, select_and_match
-from yoyo.evaluation.alarm_laggard_statistics import interval_rates, summarize
+from yoyo.evaluation.alarm_laggard_statistics import interval_rates, summarize, weekly_interval
 
 
 def cfg():
@@ -118,6 +118,16 @@ def test_conditional_recovery_interval_uses_deep_uncertainty():
     r=interval_rates(f)['rates']
     assert r['conditional_recovery_lower']==1/3
     assert r['conditional_recovery_upper']==1.
+
+
+def test_week_randomization_is_finite_and_respects_two_block_symmetry():
+    c=cfg()
+    with np.errstate(all='raise'):
+        result=weekly_interval([.3,.4,-.2],[.3,.4,-.2],[1,1,2],c)
+    # Two independent sign blocks: .7 +/- .2 are the two outcomes at or
+    # above the observed .5, out of four equally likely sign configurations.
+    assert .45<result['lower_sign_p']<.55
+    assert result['weeks']==2 and result['alarms']==3
 
 
 def test_year_masks_do_not_mutate_alarm_membership(tmp_path):
