@@ -53,6 +53,9 @@ def run():
     baseline = pd.read_csv(source/'trades.csv')
     old_result,old_ledger = account(baseline,cfg)
     saved = pd.read_csv(booklet/'spike-ledger.csv.gz')
+    # Trace stores reason strings; CSV inference reads the same codes as floats.
+    old_ledger['reason'] = pd.to_numeric(old_ledger.reason,errors='raise')
+    saved['reason'] = pd.to_numeric(saved.reason,errors='raise')
     pd.testing.assert_frame_equal(old_ledger,saved,check_dtype=False,atol=1e-8,rtol=1e-11)
     manifest = json.loads((booklet/'manifest.json').read_text())['accounts']['spike']
     for key in ('final_multiple','max_drawdown_pct','liquidations','skipped','taken','win_pct'):
@@ -104,7 +107,6 @@ def run():
         for name,t in [('booklet',baseline),('close_now',worse)]:
             x=clocked(t); x=x[x.entry_t.dt.year==year]
             periods[str(year)][name]=account(x,cfg)[0]
-    funded_ids=set(saved.loc[saved.notional > 0,'trade_id'])
     gone=admission[~admission.filled]
     funded_gone=saved[saved.trade_id.isin(gone.event)&(saved.notional > 0)]
     result=dict(config=cfg,baseline=old_result,close_now=new_result,period_restarts=periods,
