@@ -10,6 +10,7 @@ new trained classifier. See the frozen experiment config for all windows.
 from __future__ import annotations
 
 from concurrent.futures import ProcessPoolExecutor, as_completed
+import argparse
 import json
 from pathlib import Path
 import subprocess
@@ -242,9 +243,26 @@ def main():
     from yoyo.evaluation.monday_ma6_retest import source_jobs
     from yoyo.evaluation.alarm_laggard_statistics import summarize
     start_clock = time.monotonic()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--summarize-only',action='store_true',help='Reuse persisted candidates and matched records; no market/source replay.')
+    args = parser.parse_args()
     cfg = json.loads((OUT / 'config.json').read_text())
     code = ['yoyo/evaluation/alarm_laggard_selection.py','yoyo/evaluation/alarm_laggard_statistics.py',str((OUT/'config.json').relative_to(ROOT))]
     subprocess.run(['git','diff','--exit-code','HEAD','--',*code], cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
+    if args.summarize_only:
+        alarm_table = pd.read_csv(OUT/'alarms.csv')
+        candidates = pd.read_csv(OUT/'candidates.csv.gz',dtype={'not_deep':bool})
+        records = pd.read_csv(OUT/'matched_alarm_records.csv')
+        result = summarize(records,candidates,alarm_table,cfg,OUT)
+        result.update(experiment_id=cfg['experiment_id'],
+                      builder_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+                      candidate_builder_commit=json.loads((OUT/'candidate_build.json').read_text())['builder_commit'],
+                      symbols=len(json.loads((OUT/'input_receipts.json').read_text())),
+                      raw_candidate_snapshots=len(candidates),summary_elapsed_seconds=time.monotonic()-start_clock,
+                      source_read_errors=[],resumed_from_cached_candidates=True,training_eligible=False,production_eligible=False)
+        save(OUT/'summary.json',result)
+        print('Completed summary from cached candidates; no source replay.',flush=True)
+        return
     alarm_table = frozen_alarms(cfg)
     alarm_table.to_csv(OUT / 'alarms.csv', index=False)
     if not (OUT / 'market_5m.npz').exists():
@@ -269,8 +287,11 @@ def main():
     if errors:
         raise RuntimeError(f'{len(errors)} source errors; do not silently discard symbols')
     frames = [pd.read_csv(OUT/'symbols'/f'{s}.csv.gz') for s,_ in jobs]
-    candidates = pd.concat(frames,ignore_index=True)
+    candidates = pd.concat([f for f in frames if not f.empty],ignore_index=True)
+    candidates['not_deep'] = candidates.not_deep.astype('boolean').astype(bool)
     candidates.to_csv(OUT/'candidates.csv.gz',index=False,compression='gzip')
+    save(OUT/'candidate_build.json',dict(builder_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+                                        source_read_errors=errors,source_symbols=len(jobs),rows=len(candidates)))
     records, selected = select_and_match(candidates,cfg)
     records.to_csv(OUT/'matched_alarm_records.csv',index=False)
     selected.to_csv(OUT/'selections.csv.gz',index=False,compression='gzip')

@@ -70,9 +70,12 @@ def summarize(records, candidates, alarms, cfg, out):
             ids = alarm_data.loc[mask,'alarm_id']
             c = candidates[candidates.alarm_id.isin(ids)]
             r = records[records.alarm_id.isin(ids)].merge(alarm_data[['alarm_id','week']],on='alarm_id')
+            # Object bools can arise from concatenating empty CSV frames; never
+            # invert an object Series, where ~True is the integer -2.
+            not_deep = c.not_deep.astype('boolean').astype(bool)
             entry = dict(all_alarms=len(ids), alarms_with_rankable_coins=int(c.alarm_id.nunique()),
-                         candidate_universe_not_deep=interval_rates(c[c.not_deep]),
-                         already_deep_comparator=interval_rates(c[~c.not_deep]), rules={})
+                         candidate_universe_not_deep=interval_rates(c[not_deep]),
+                         already_deep_comparator=interval_rates(c[~not_deep]), rules={})
             for rule in cfg['selection']['rules']:
                 f = r[r.rule==rule].copy()
                 matched = f[f.matched_n>0]

@@ -49,6 +49,26 @@ def test_missing_outcomes_are_censored_not_silently_negative():
     assert result['future_censored']==1
 
 
+def test_bounds_contain_known_second_path_truth_after_aggregation():
+    # Independent fine-time paths check the bounds against known ordering.
+    # This is a label contract, not a fill or trading backtest.
+    rng=np.random.default_rng(9021)
+    times=np.arange(14)*STEP
+    for _ in range(100):
+        prices=100*np.exp(np.cumsum(rng.normal(0,.002,14*300)))
+        bar_low=prices.reshape(14,300).min(axis=1)
+        bar_close=prices.reshape(14,300)[:,-1]
+        arrival=int(rng.integers(1,300000))
+        result=outcome_bounds(times,bar_low,bar_close,arrival,100.,cfg())
+        touches=np.flatnonzero(prices<=95.)
+        first=(int(touches[0])+1)*1000 if len(touches) else None
+        truth_deep=int(first is not None and arrival<first<=arrival+900000)
+        closes_at=(np.arange(14)+1)*STEP
+        truth_joint=int(bool(truth_deep) and bool(((closes_at>first)&(closes_at<=arrival+3600000)&(bar_close>=97.5)).any()))
+        assert result['deep_lower']<=truth_deep<=result['deep_upper']
+        assert result['joint_lower']<=truth_joint<=result['joint_upper']
+
+
 def test_close_recovery_after_deadline_does_not_enter_lower_bound():
     times=np.arange(14)*STEP
     low=np.full(14,94.);low[0]=99.
@@ -106,6 +126,8 @@ def test_year_masks_do_not_mutate_alarm_membership(tmp_path):
     for i in range(3):
         f=candidates();f['alarm_id']=i;frames.append(f)
     f=pd.concat(frames,ignore_index=True);records,_=select_and_match(f,c)
+    # Reproduce the post-CSV-concat object-bool dtype from empty symbol tables.
+    f['not_deep']=f.not_deep.astype(object)
     times=pd.to_datetime(['2025-06-01T00:00Z','2026-06-01T00:00Z','2026-08-22T00:00Z'])
     alarms=pd.DataFrame(dict(alarm_id=range(3),alarm_ms=times.astype('int64')//10**6,
                              six=True,btc=True,design_day=[False,False,True]))
