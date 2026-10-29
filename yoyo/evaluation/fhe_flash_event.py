@@ -91,6 +91,23 @@ def read_symbol(job):
     return symbol, frame, receipts
 
 
+def active_cross_section(simultaneous):
+    """Exclude frozen non-crypto identities and zero-volume stale bars."""
+    identity_root = ROOT / 'experiments/active/exp-monday-5m-wick-engulf-20261023-v1/symbols'
+    crypto = {p.parent.name for p in identity_root.glob('*/identity.json')} - {'XAUUSD'}
+    if len(crypto) != 632:
+        raise ValueError('Frozen crypto classification unavailable')
+    selected = simultaneous[simultaneous.symbol.isin(crypto)]
+    active = selected[selected.volume > 0]
+    return dict(archived_crypto_count=len(selected), active_crypto_count=len(active),
+                zero_volume_crypto_count=int((selected.volume <= 0).sum()),
+                active_drop_5pct=int((active.drop_pct <= -5).sum()),
+                active_drop_10pct=int((active.drop_pct <= -10).sum()),
+                active_median_close_pct=float(active.close_pct.median()),
+                classification_source=str(identity_root.relative_to(ROOT)),
+                note='Observed traded contracts in the archived cohort, not a complete point-in-time exchange universe. Zero-volume bars must not count as active-market evidence.')
+
+
 def main():
     directories = [ROOT / 'data/crypto/market' / name / 'series' for name in
                    ('kline_binance_um5m_forward_20260922', 'research-spike_v128_recent_20260923')]
@@ -146,6 +163,7 @@ def main():
         event_drop_3pct=int((simultaneous.drop_pct <= -3).sum()),
         event_drop_5pct=int((simultaneous.drop_pct <= -5).sum()),
         event_drop_10pct=int((simultaneous.drop_pct <= -10).sum()),
+        active_cross_section=active_cross_section(simultaneous),
         fhe=dict(first_touch=first_touch.to_dict(), low=low.to_dict(), first_target_after_low=target.to_dict(),
                  peak=peak.to_dict(), seconds_touch_to_target=(target.ts-first_touch.ts)/1000,
                  seconds_low_to_target=(target.ts-low.ts)/1000,
