@@ -69,3 +69,27 @@ class HybridTests(unittest.TestCase):
 
 
 if __name__=='__main__': unittest.main()
+
+
+class CapitalReservationTests(unittest.TestCase):
+    def test_pending_order_reserves_money_and_refills_are_not_profit(self):
+        from yoyo.evaluation.allin3_close_hybrid_summary import account
+        day=pd.Timestamp('2023-01-01',tz='UTC').value
+        rows=[dict(trade_id='pending',decision_ns=day,release_ns=day+10,
+                   filled=False,status='expired',order_mode='limit'),
+              dict(trade_id='busy_winner',decision_ns=day+1,release_ns=day+2,
+                   filled=True,status='filled',net=10000,reason=4,order_mode='market'),
+              dict(trade_id='gap_loss',decision_ns=day+10,release_ns=day+11,
+                   filled=True,status='filled',net=-5000,reason=1,order_mode='limit'),
+              dict(trade_id='next',decision_ns=day+12,release_ns=day+13,
+                   filled=True,status='filled',net=100,reason=4,order_mode='market')]
+        cfg=dict(initial=1000,leverage=3,refill_below=100,refill_to=1000)
+        result,ledger,_=account(pd.DataFrame(rows),cfg,20261105)
+        self.assertEqual(result['funded'],2)
+        self.assertEqual(result['skipped_busy'],1)
+        self.assertEqual(result['reserved_but_unfilled'],1)
+        self.assertEqual(result['ending_equity'],1030)
+        self.assertEqual(result['cash_added'],1000)
+        self.assertEqual(result['trading_pnl'],-970)
+        self.assertEqual(result['realized_balance_max_dd_pct'],100)
+        self.assertEqual(ledger.pnl.sum(),-970)

@@ -160,7 +160,7 @@ def process(symbol, config):
         old = cached[cached.trade_id.isin(ids)].copy()
         if len(old) != reuse.sum():
             raise ValueError('Missing exact cached market rows')
-        old['trade_id'] = old.trade_id.map(ids)
+        old['trade_id'] = old.trade_id.map(ids).astype('str')
         merged = old.merge(x[reuse][['trade_id','entry','entry_i','stop','target_price']], on='trade_id', suffixes=('', '_intended'))
         for field in ('entry','entry_i','stop','target_price'):
             np.testing.assert_allclose(merged[field], merged[field+'_intended'], atol=tick*1e-6, rtol=1e-12)
