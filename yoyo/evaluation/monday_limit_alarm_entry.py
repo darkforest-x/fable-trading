@@ -45,7 +45,8 @@ def touches():
     syms = sorted(d.name for d in SRC.iterdir() if (d/'trades.csv.gz').exists())
     with ProcessPoolExecutor(6) as ex:
         t = pd.concat([d for d in ex.map(touch_rows, syms, chunksize=8) if len(d)], ignore_index=True)
-    t['ms'] = pd.to_datetime(t.entry_time, utc=True).astype('int64')//10**6-5*60_000
+    # Pin the unit: pandas 3 parses to microseconds, and ms arithmetic below assumes nanoseconds // 1e6.
+    t['ms'] = pd.to_datetime(t.entry_time, utc=True).dt.as_unit('ns').astype('int64')//10**6-5*60_000
     t['event'] = t.symbol+':'+t.week+':'+np.where(t.side == 1, '+1', '-1')
     return t
 
