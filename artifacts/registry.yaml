@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-close-execution-20261029-v1
+    artifact_type: manifest
+    role: frozen_spike_postclose_native_execution_and_conditional_controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: a4af39971a
+    source_path: experiments/active/exp-spike-close-execution-20261029-v1/summary.json
+    storage_uri: repo://experiments/active/exp-spike-close-execution-20261029-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Config,summary,validation,reproduce script tracked;native fills/orders/source path-size-mtime receipts local. Immediate/retest/delay5m compared once in Nautilus per path,oldclosefills reused.219signals/93matchedgroups;2025negative,fullpairedp0.172. Independent notional returns only;exactclose and old margin-overlay limits retained. No report or content hashes.
   - artifact_id: 5m-wick-risk-filter-20261029-v1
     artifact_type: manifest
     role: frozen_single_wick_filter_and_concentration_validation

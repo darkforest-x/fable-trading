@@ -16,18 +16,19 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-close-execution-20261029-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: in_progress
+    source_commit: a4af39971a
+    status: inconclusive
     question: Does frozen spike remain useful after its touch5m close, and what changes when waiting for a retest or another5m close?
     single_variable: Entry execution only; score0.6,order3,near-edge target,P18,BE17 and fill-derived60m confirmation unchanged.
-    result: Pending; reuse exact native close entries, run only new orders and conditional matched controls once per declared intrabar path.
-    artifacts: []
+    result: 219signals,113already past target at score close. Immediate106fills+90.27bp per fill,2025-64.88bp/2026+216.82bp;hybrid70fills+87.67bp;delay5m63fills+49.30bp. All219 opportunity means+43.69/+28.02/+14.18bp. Close matched93signal+100.34bp/random+46.36bp,week-p0.172. Positive historical evidence,unstable across years and unproven live advantage.
+    artifacts:
+      - spike-close-execution-20261029-v1
     canonical_report: experiments/active/exp-spike-close-execution-20261029-v1/summary.json
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: No parameter search or live changes. Independent entry-notional returns, historical account projection clearly separated; no report requested.
+    notes: Only825new native orders per path;145cached rows per path reused.1431new positions/2862fills fee-reconciled,11focused tests. Original level-based P18/BE17 means24of106close entries have stop distance>=20percent. Old simplified10slot5x account+25.41percent full/+36.48percent2026 is reference only,no exchange-margin forecast. No parameter search,training,live changes or source download. Notion4088856479af8102a9c1ee1d9bbfe18a.
   - experiment_id: exp-5m-wick-risk-filter-20261029-v1
     source_repo: darkforest-x/fable-trading
     source_commit: c18cde2537
