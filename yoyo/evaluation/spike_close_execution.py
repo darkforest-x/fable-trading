@@ -285,8 +285,10 @@ def summarize(config):
             all_paths[path].append(joined)
     decisions = pd.concat(all_decisions, ignore_index=True)
     paths = {k: pd.concat(v, ignore_index=True).set_index('trade_id') for k,v in all_paths.items()}
+    cohort_time = decisions[(decisions.control_id == 0)&(decisions.variant == 'close_now')].set_index('event').decision_time
     # A symbol with no admitted orders contributes empty object-typed columns.
     for t in paths.values():
+        t['cohort_time'] = t.event.map(cohort_time)
         for col in ('net','net_notional_bp','entry','entry_i','exit_i','reason','mae_pct',
                     'stop','target_price','exit_price'):
             t[col] = pd.to_numeric(t[col], errors='raise')
@@ -302,9 +304,9 @@ def summarize(config):
     decisions.to_csv(root/'decisions.csv.gz', index=False)
     signal = worst[worst.control_id == 0]
     groups = {'all': lambda x: np.ones(len(x), bool),
-              '2020_2024': lambda x: x.week < '2025-01-01',
-              '2025': lambda x: (x.week >= '2025-01-01') & (x.week < '2026-01-01'),
-              '2026': lambda x: x.week >= '2026-01-01'}
+              '2020_2024': lambda x: x.cohort_time < '2025-01-01',
+              '2025': lambda x: (x.cohort_time >= '2025-01-01') & (x.cohort_time < '2026-01-01'),
+              '2026': lambda x: x.cohort_time >= '2026-01-01'}
     result = dict(symbols=len(syms), eligible_signals=len(selected), variants={}, decomposition={}, controls={}, branch_controls={},
                   fixed_buckets={}, concentration={}, cases={}, checks={})
     rng = np.random.default_rng(cfg['control_seed'])
@@ -356,8 +358,73 @@ def summarize(config):
     print(json.dumps(clean({k:result[k] for k in ('eligible_signals','variants','controls','new_orders_per_path','cached_rows_per_path')})), flush=True)
 
 
+def validate(config):
+    """Reconcile recorded native fills and all opportunities; no execution replay."""
+    cfg = json.loads(config.read_text()); root = config.parent
+    counts = dict(symbols=0, native_positions=0, native_fills=0, reused_rows=0,
+                  future_limit_fills=0, scored_market_fills=0, fee_checks=0)
+    max_net_error = 0.
+    for symbol in sorted(set(eligible(cfg).index.str.split(':').str[0])):
+        d = root/'symbols'/symbol
+        done = json.loads((d/'done.json').read_text()); counts['symbols'] += 1
+        if not done['orders']:
+            continue
+        orders = pd.read_csv(d/'orders.csv.gz').set_index('trade_id')
+        assert orders.index.is_unique
+        assert (orders.score >= cfg['score_cut']).all() and (orders.order_score >= cfg['min_order']).all()
+        for path in ('ohlc','olhc'):
+            receipt = json.loads((d/path/'audit.json').read_text())
+            ledger = pd.read_csv(d/path/'trades.csv.gz').set_index('trade_id')
+            assert len(ledger) == receipt['positions']
+            counts['reused_rows'] += receipt['reused_positions']
+            if not receipt['new_fills']:
+                continue
+            fills = pd.read_csv(d/path/'new_native_fills.csv.gz')
+            assert len(fills) == receipt['new_fills']
+            counts['native_fills'] += len(fills)
+            for tid, g in fills.groupby('trade_id'):
+                r = ledger.loc[tid]; order = orders.loc[tid]
+                entry = g[g.phase == 'entry']; exit_ = g[g.phase != 'entry']
+                assert len(entry) == 1 and len(exit_) == 1
+                en, ex = entry.iloc[0], exit_.iloc[0]
+                assert en.quantity == ex.quantity
+                assert en.bar_i == r.entry_i and ex.bar_i == r.exit_i
+                assert r.entry_i >= order.decision_i
+                if order.order_mode == 'limit':
+                    assert order.entry_i < en.bar_i <= order.expire_i
+                    counts['future_limit_fills'] += 1
+                else:
+                    assert order.entry_i == en.bar_i
+                    counts['scored_market_fills'] += 1
+                for fill in (en,ex):
+                    fee = cfg['maker_fee'] if fill.phase == 'target' or (fill.phase == 'entry' and order.order_mode == 'limit') else cfg['taker_fee']
+                    np.testing.assert_allclose(fill.commission, fill.price*fill.quantity*fee, atol=1e-8, rtol=1e-7)
+                    counts['fee_checks'] += 1
+                gross = r.side*(ex.price/en.price-1)*1e4
+                expected = gross-g.commission.sum()/(en.price*en.quantity)*1e4
+                err = abs(expected-r.net_notional_bp); max_net_error = max(max_net_error,err)
+                np.testing.assert_allclose(expected,r.net_notional_bp,atol=1e-6,rtol=1e-10)
+                counts['native_positions'] += 1
+    a,b,w = [pd.read_csv(root/f'{name}.csv.gz').set_index('trade_id') for name in ('ohlc','olhc','worse_opportunity')]
+    np.testing.assert_allclose(w.net,np.minimum(a.net,b.net),atol=1e-10,rtol=1e-10)
+    assert (w.loc[~w.filled,'net'] == 0).all()
+    assert (w.loc[w.status != 'admitted','filled'] == False).all()
+    result = dict(checks=counts, max_native_net_reconciliation_error_bp=max_net_error,
+        opportunity_rows=len(w), original_signals=int(((w.control_id == 0)&(w.variant == 'close_now')).sum()),
+        tests='11 passed: admission/future mutation/mirrored bounds, native cancellation/path/idle parity, small-cluster exact null',
+        native_builder_commit='efadc6a7d6', summary_source_commit=subprocess.check_output(
+            ['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+        no_new_native_replay=True, no_source_download=True, content_hashing=False)
+    dump(root/'validation.json',result); print(json.dumps(result),flush=True)
+
+
 if __name__ == '__main__':
-    ap = argparse.ArgumentParser(); ap.add_argument('action', choices=['run','summary'])
+    ap = argparse.ArgumentParser(); ap.add_argument('action', choices=['run','summary','validate'])
     ap.add_argument('--config', type=Path, default=EXP/'config.json'); ap.add_argument('--workers', type=int, default=4)
     args = ap.parse_args(); config = args.config.resolve()
-    run(config, args.workers) if args.action == 'run' else summarize(config)
+    if args.action == 'run':
+        run(config,args.workers)
+    elif args.action == 'summary':
+        summarize(config)
+    else:
+        validate(config)
