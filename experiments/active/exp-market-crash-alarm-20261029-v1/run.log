@@ -1,0 +1,112 @@
+Read BTC: 2059200 minutes
+Read ETH: 2059200 minutes
+Read SOL: 2059200 minutes
+Read BNB: 2059200 minutes
+Read XRP: 2059200 minutes
+Read DOGE: 2059200 minutes
+Conditional null 2025/btc: 272 alarms, 18 events
+Conditional null 2025/six: 423 alarms, 18 events
+Conditional null 2026/btc: 262 alarms, 7 events
+Conditional null 2026/six: 441 alarms, 7 events
+Conditional null 2025_2026/btc: 534 alarms, 25 events
+Conditional null 2025_2026/six: 864 alarms, 25 events
+{
+  "experiment_id": "exp-market-crash-alarm-20261029-v1",
+  "builder_commit": "b2840d4aca8e88158c50f9515d929395c1faab80",
+  "source_rows": 2059200,
+  "valid_minutes": 2057753,
+  "total_threshold_events": 88,
+  "source_start": "2022-11-01 00:00:00+00:00",
+  "source_end": "2026-10-01 00:00:00+00:00",
+  "volatility_quintile_bounds": "[0.00039389 0.00052555 0.00063609 0.00079023]",
+  "limitations": "Historical chronological comparison;2026andothermarketepisodes have previously been observed. Do not call it untouched prospective validation. Require cross-year consistency and uncertainty bounds; no automatic promotion.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "design_day": {
+    "exposure_days": 1.0,
+    "valid_minutes": 1440,
+    "events": 1,
+    "excluded_events_incomplete_warning_window": 0,
+    "utc_days_with_exposure": 1,
+    "full_utc_days": 1,
+    "partial_utc_days": 0,
+    "methods": {
+      "btc": {
+        "alarms": 1,
+        "timely_events": 0,
+        "recall": 0.0,
+        "precision": 0.0,
+        "non_timely_per_day": 1.0,
+        "late_or_inside": 1,
+        "ordinary_false": 0,
+        "median_lead_seconds": null,
+        "minute_label_prevalence": 0.002777777777777778,
+        "minute_roc_auc": 0.47928272980501396,
+        "minute_average_precision": 0.0030879622251061885
+      },
+      "six": {
+        "alarms": 1,
+        "timely_events": 0,
+        "recall": 0.0,
+        "precision": 0.0,
+        "non_timely_per_day": 1.0,
+        "late_or_inside": 1,
+        "ordinary_false": 0,
+        "median_lead_seconds": null,
+        "minute_label_prevalence": 0.002777777777777778,
+        "minute_roc_auc": 0.7228412256267409,
+        "minute_average_precision": 0.011062949078412996
+      }
+    },
+    "sensitivity": {
+      "0": {
+        "btc": {
+          "timely_events": 0,
+          "median_lead_seconds": null
+        },
+        "six": {
+          "timely_events": 1,
+          "median_lead_seconds": 60.0
+        }
+      },
+      "10": {
+        "btc": {
+          "timely_events": 0,
+          "median_lead_seconds": null
+        },
+        "six": {
+          "timely_events": 0,
+          "median_lead_seconds": null
+        }
+      },
+      "30": {
+        "btc": {
+          "timely_events": 0,
+          "median_lead_seconds": null
+        },
+        "six": {
+          "timely_events": 0,
+          "median_lead_seconds": null
+        }
+      }
+    },
+    "paired_weeks": {
+      "weeks": 1,
+      "bootstrap_repeats": 5000,
+      "recall_diff": 0.0,
+      "recall_diff_ci95": [
+        0.0,
+        0.0
+      ],
+      "valid_recall_replicates": 5000,
+      "false_rate_diff": 0.0,
+      "false_rate_diff_ci95": [
+        0.0,
+        0.0
+      ],
+      "valid_false_rate_replicates": 5000
+    }
+  },
+  "elapsed_seconds": 45.932512417000005
+}
+Saved summary.json

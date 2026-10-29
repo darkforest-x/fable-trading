@@ -1,3 +1,10 @@
+## 2026-10-29 · Six-major early crash warning did not improve on BTC
+
+- `exp-market-crash-alarm-20261029-v1`, frozen builder `b2840d4aca`; read `headline.json` first. Reused six complete1m histories,2022-11to2026-09. Thresholds calibrated before2025toonealert/day without event labels;2025–2026excludingAug22designcase gives25events. Both detectors warn8/25,median149seconds;BTC534alarms versus six864. Six adds0.518non-timelyalerts/day(week95%CI0.422–0.615),recall difference0pp(CI-11.76–11.54). Reject this frozen six-score incremental-value claim;do not retune from the result.
+- Aug22case:six13:08:01Shanghai,BTC13:11:01,FHEtouch13:11:33.608. Six gives212.608seconds toFHE but only59seconds before the first severe major-market minute,so fails the frozen>=60second market criterion. This is different from the25-coin touch-alarm entry experiment below; no trades or PnL here. Target-coin decline and recovery remain separate unverified questions.
+- Fifteen focused tests and saved-result clock/count checks pass. Exact-constraint random null successful459/499BTCand92/499six;failures retained,not relaxed. Main comparison historical,not untouched prospective validation. Notion strategy4088856479af810cb501f7807617b521 updated,research/inactive. No service or execution change.
+- New registry rows validate individually. Full-registry validation is already blocked in unchanged HEAD by `tradingview-candle-probe-20261023-v1`'s unsupported `holdout_status` and an unescaped apostrophe in `exp-monday-limit-alarm-entry-20261029-v1`'s result. Recorded in validation.json;unrelated rows preserved.
+
 ## 2026-10-29 · After a 25-coin spike alarm, buying every later touch and holding works in sample; the close-time score exit does not
 
 - `exp-monday-limit-alarm-entry-20261029-v1` (builder db5f169c42; the first launch built wrong windows from a pandas-3 unit change and was stopped at once, outputs in `failed_units/`): 129 alarms 2021-2026, entries at the level for every same-side touch after the alarm bar.

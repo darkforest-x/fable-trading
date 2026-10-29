@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: market-crash-alarm-20261029-v1
+    artifact_type: manifest
+    role: causal_market_crash_warning_comparison_and_conditional_controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: b2840d4aca
+    source_path: experiments/active/exp-market-crash-alarm-20261029-v1/summary.json
+    storage_uri: repo://experiments/active/exp-market-crash-alarm-20261029-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Headline,config,fullsummary,calibration,receipts,alarm/event/week tables andvalidation retained. Large source andscore npz caches local only,no content hashes. Historical chronological evaluation excludesAug22designcase from primary;not untouched prospective evidence. No execution or profit claims.
   - artifact_id: spike-booklet-close-compare-20261029-v1
     artifact_type: manifest
     role: exact_displayed_spike_baseline_vs_completed_close_account_projection

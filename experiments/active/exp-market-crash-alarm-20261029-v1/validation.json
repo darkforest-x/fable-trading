@@ -1,0 +1,97 @@
+{
+  "tests": {
+    "command": ".venv/bin/python -m pytest tests/evaluation/test_market_crash_alarm.py tests/evaluation/test_market_crash_alarm_stats.py -q",
+    "passed": 15
+  },
+  "checks": {
+    "btc": {
+      "annual_alarms_sum_to_pooled": true,
+      "annual_hits_sum_to_pooled": true,
+      "cooldown_preserved": true,
+      "one_to_one": true,
+      "lead_in_frozen_bounds": true,
+      "design_day_excluded": true,
+      "zero_false_success_after_event_open": true
+    },
+    "six": {
+      "annual_alarms_sum_to_pooled": true,
+      "annual_hits_sum_to_pooled": true,
+      "cooldown_preserved": true,
+      "one_to_one": true,
+      "lead_in_frozen_bounds": true,
+      "design_day_excluded": true,
+      "zero_false_success_after_event_open": true
+    }
+  },
+  "conditional_null": {
+    "2025": {
+      "btc": {
+        "success_replicates": 499,
+        "failed_replicates": 0,
+        "constraints_verified": true,
+        "p_ge_observed": 0.002
+      },
+      "six": {
+        "success_replicates": 166,
+        "failed_replicates": 333,
+        "constraints_verified": true,
+        "p_ge_observed": 0.005988023952095809
+      }
+    },
+    "2026": {
+      "btc": {
+        "success_replicates": 477,
+        "failed_replicates": 22,
+        "constraints_verified": true,
+        "p_ge_observed": 0.02301255230125523
+      },
+      "six": {
+        "success_replicates": 289,
+        "failed_replicates": 210,
+        "constraints_verified": true,
+        "p_ge_observed": 0.017241379310344827
+      }
+    },
+    "2025_2026": {
+      "btc": {
+        "success_replicates": 459,
+        "failed_replicates": 40,
+        "constraints_verified": true,
+        "p_ge_observed": 0.002173913043478261
+      },
+      "six": {
+        "success_replicates": 92,
+        "failed_replicates": 407,
+        "constraints_verified": true,
+        "p_ge_observed": 0.010752688172043012
+      }
+    }
+  },
+  "notes": [
+    "Current5bar common warning-availability gate includes the extra e-2 row needed by the0second latency sensitivity; no evaluation event was excluded for an incomplete window.",
+    "Successful conditional-null repetitions meet all fixed strata and cooldown constraints. Failed repetitions were not relaxed or silently replaced; pooled six-coin null has only92successful of499and its p-value is coarse.",
+    "Zero-volume OHLCV rows are retained as source observations, with per-coin counts in input_receipt.json. No claim of continuous executable quotes.",
+    "Historical evaluation is not untouched prospective validation. No trades, fills, fees, PnL or live-service change."
+  ],
+  "design_example": {
+    "six_available_shanghai": "2026-08-22T13:08:01+08:00",
+    "btc_available_shanghai": "2026-08-22T13:11:01+08:00",
+    "severe_minute_open_shanghai": "2026-08-22T13:09:00+08:00",
+    "six_lead_to_market_severe_open_seconds": 59,
+    "fhe_first_touch_shanghai": "2026-08-22T13:11:33.608+08:00",
+    "six_lead_to_fhe_touch_seconds": 212.608,
+    "btc_lead_to_fhe_touch_seconds": 32.608,
+    "fhe_source": "experiments/active/exp-fhe-flash-20260822-20261029-v1/summary.json"
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "registry_validation": {
+    "new_experiment_and_artifact_schema": "pass",
+    "unique_ids_and_cross_reference": "pass",
+    "full_registry": "blocked_by_preexisting_entries",
+    "unchanged_HEAD_failures": [
+      "tradingview-candle-probe-20261023-v1: holdout_status 'not_applicable' not in ('pre_holdout', 'historical', 'holdout_consumed', 'unknown')",
+      "HEAD experiment registry already has a YAML parse error in exp-monday-limit-alarm-entry-20261029-v1 result (unescaped owner apostrophe)."
+    ]
+  }
+}

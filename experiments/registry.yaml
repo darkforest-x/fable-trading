@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-market-crash-alarm-20261029-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: b2840d4aca
+    status: rejected
+    question: Does frozen six-major downside breadth and acceleration improve timely collective-crash alarms over BTC alone?
+    single_variable: Six-major aggregate versus identical BTC-only score; same prior1440minute normalization, development alert budget,15minute cooldown and event-matching clocks.
+    result: 2025toSep2026excludingAug22 design day;25events. Both8timelyhits,32percent recall,149second median lead. BTC534alarms vs six864;non-timely/day0.826vs1.344. Six recall gain0pp,weekCI-11.76to11.54pp;false/day gain0.518,CI0.422to0.615. Frozen six-major incremental-value claim rejected.
+    artifacts: [market-crash-alarm-20261029-v1]
+    canonical_report: experiments/active/exp-market-crash-alarm-20261029-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: First read headline.json;fullsummary retains random-replicate evidence. Six complete2,059,200minute histories reused;no download,training,trades or live change.2025both6of18,2026both2of7. ConditionalnullBTC459of499successful,p0.00217;six92of499,p0.01075,failures retained. Aug22 six13:08:01Shanghai vsBTC13:11:01 leaves212.608vs32.608seconds toFHEtouch;single-case lead is not full-period superiority or rebound evidence.15tests pass. Notion4088856479af810cb501f7807617b521 updated,research/inactive.
   - experiment_id: exp-flash-precursor-20261029-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2c8a580622
