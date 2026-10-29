@@ -53,7 +53,7 @@
   function distance(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,t=clamp(((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy||1),0,1);return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy);}
   const amount=v=>finite(v)?v.toLocaleString('en-US',{maximumFractionDigits:Math.abs(v)>=100?2:Math.abs(v)>=1?4:10}):'—';
   function duration(seconds){const parts=[];for(const [unit,size] of [['天',86400],['小时',3600],['分钟',60],['秒',1]]){const n=Math.floor(seconds/size);if(n){parts.push(n+' '+unit);seconds-=n*size;}if(parts.length===2)break;}return parts.join(' ')||'0 分钟';}
-  function measurementText(m){const sign=m.delta>0?'+':'';return [sign+amount(m.delta)+' ('+(m.percent>0?'+':'')+amount(m.percent)+'%)',m.bars+' 根间隔 · '+duration(m.seconds),'成交量 '+amount(m.volume)+' 张',m.complete?'含首尾 K 线'+(m.live?' · 最新 K 未收盘':''):'仅 '+m.count+' 根已载入 · 覆盖不完整'];}
+  function measurementText(m,unit='张'){const sign=m.delta>0?'+':'';return [sign+amount(m.delta)+' ('+(m.percent>0?'+':'')+amount(m.percent)+'%)',m.bars+' 根间隔 · '+duration(m.seconds),'成交量 '+amount(m.volume)+' '+unit,m.complete?'含首尾 K 线'+(m.live?' · 最新 K 未收盘':''):'仅 '+m.count+' 根已载入 · 覆盖不完整'];}
   const icons={select:'M5 3 20 12l-7 1-4 7Z',measure:'m3 16 13-13 5 5-13 13Z M8 11l3 3 M11 8l3 3 M14 5l3 3',trend:'M4 19 20 5 M4 16v3h3 M17 5h3v3',channel:'M3 15 18 4 M6 20 21 9 M5 17.5l14-11'};
   function toolsHTML(){return `<div class="cd-tools"><strong>绘图工具</strong><div class="cd-tool-grid">${Object.entries(labels).map(([id,label])=>`<button type="button" data-cd-tool="${id}" aria-label="${label==='选择'?'选择绘图':label}" aria-pressed="${id==='select'}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="${icons[id]}"/></svg><span>${label}</span></button>`).join('')}</div><div class="cd-actions"><button type="button" data-cd-action="delete" disabled>删除所选</button><button type="button" data-cd-action="undo" disabled>撤销</button><button type="button" data-cd-action="clear" disabled>清空绘图</button></div><small>绘图保存在本浏览器 · 按币种独立保存</small></div>`;}
   class Primitive {
@@ -63,7 +63,7 @@
     paneViews(){return [this.view];}updateAllViews(){}
   }
   function create({root,onTool=()=>{}}){
-    let instance=null,index=new DataIndex([],900),symbol='',mode='select',items=[],selected=null,draft=null,preview=null,gesture=null,backup=null,undo=[],warning='',blocked=false,suppressUntil=0,dead=false;
+    let instance=null,index=new DataIndex([],900),symbol='',volumeUnit='张',mode='select',items=[],selected=null,draft=null,preview=null,gesture=null,backup=null,undo=[],warning='',blocked=false,suppressUntil=0,dead=false;
     const memory=new Map();let primitive=null,lockedOptions=null,published='';
     const strip=document.createElement('div');strip.className='cd-status rp-glass';strip.hidden=true;
     strip.innerHTML='<div><b data-cd-title></b><span data-cd-hint role="status"></span></div><button type="button" data-cd-action="cancel">退出绘图</button>';
@@ -71,7 +71,7 @@
     const state=()=>({mode,selected,items:copy(items),draft:copy(draft),symbol,warning});
     const publish=()=>{
       const active=mode!=='select',choice=items.find(d=>d.id===selected);
-      const text=choice?.type==='measure'?measurementText(index.measure(...choice.points)).join('；'):'';
+      const text=choice?.type==='measure'?measurementText(index.measure(...choice.points),volumeUnit).join('；'):'';
       const key=JSON.stringify([mode,!!gesture,selected,draft?.points.length,!!index.rows.length,items.length,undo.length,warning,text]);
       // Candle ticks still invalidate the canvas primitive, but unchanged tool
       // chrome must not rebuild text nodes or invalidate the page's layout.
@@ -202,6 +202,7 @@
     }
     function click(e){const b=e.target.closest?.('[data-cd-tool],[data-cd-action]');if(!b||!root.contains(b))return;e.preventDefault();b.dataset.cdTool?choose(b.dataset.cdTool):action(b.dataset.cdAction);}
     function attach(next,data){
+      volumeUnit=data.source==='Binance'?'基础币':'张';
       if(dead)return;
       if(instance!==next){detach();instance=next;primitive=new Primitive(api);next.series.attachPrimitive(primitive);next.drawingLayer={destroy:detach};}
       if(symbol!==data.symbol){cancel();symbol=data.symbol;undo=[];warning='';blocked=false;
@@ -228,7 +229,7 @@
           ctx.globalAlpha=.12;ctx.fillRect(left,top,width,height);ctx.globalAlpha=1;ctx.setLineDash([4,4]);ctx.strokeRect(left,top,width,height);ctx.setLineDash([]);
           arrow({x:a.x,y:(a.y+b.y)/2},{x:b.x,y:(a.y+b.y)/2});arrow({x:(a.x+b.x)/2,y:a.y},{x:(a.x+b.x)/2,y:b.y});
           if(active&&Math.max(a.x,b.x)>=0&&left<s.width&&Math.max(a.y,b.y)>=0&&top<s.height){
-            const text=measurementText(index.measure(...d.points)),w=Math.min(258,s.width-16),h=90,x=clamp((a.x+b.x-w)/2,8,s.width-w-8),y=clamp(top-h-12,8,s.height-h-8);
+            const text=measurementText(index.measure(...d.points),volumeUnit),w=Math.min(258,s.width-16),h=90,x=clamp((a.x+b.x-w)/2,8,s.width-w-8),y=clamp(top-h-12,8,s.height-h-8);
             ctx.fillStyle=tone;ctx.beginPath();ctx.roundRect(x,y,w,h,10);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
             text.forEach((t,i)=>{ctx.font=(i===0?'600 13':'11')+'px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';ctx.fillText(t,x+w/2,y+17+i*19,w-16);});ctx.fillStyle=tone;
           }

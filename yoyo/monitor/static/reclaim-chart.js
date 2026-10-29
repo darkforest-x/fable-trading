@@ -21,6 +21,14 @@
     return {entry:candleIndex(rows,p.fill_ms,step),exit:p.stage==='closed'?candleIndex(rows,p.exit_ms,step):-1,
       from:p.fill_ms,to:end,stop:fin(p.be_from_ms)&&p.be_from_ms>=p.fill_ms&&p.be_from_ms<=end?p.be_from_ms:null};
   }
+  function replayRange(trade,rows,step,visibleFraction=1){
+    if(!rows.length)return null;
+    const a=candleIndex(rows,trade.entry_ms,step),b=candleIndex(rows,trade.exit_ms,step);
+    if(a<0)return null;
+    const end=b>=0?b:rows.length-1,span=Math.max(45,end-a+1),pad=Math.max(12,span*.18);
+    const from=a-pad,to=Math.max(a+45,end+pad);
+    return {from,to:from+(to-from)/Math.min(1,Math.max(.25,visibleFraction)),entry:a,exit:b};
+  }
   class TradeDrawing {
     constructor(owner){this.owner=owner;this.view={zOrder:()=> 'top',renderer:()=>({draw:target=>this.paint(target)})};}
     attached({requestUpdate}){this.requestUpdate=requestUpdate;}
@@ -52,7 +60,7 @@
       });
     }
   }
-  if(typeof module!=='undefined'&&module.exports){module.exports={latest,select,valid,candleIndex,geometry,TradeDrawing};return;}
+  if(typeof module!=='undefined'&&module.exports){module.exports={latest,select,valid,candleIndex,geometry,TradeDrawing,replayRange};return;}
   function create(host,notice,drawings){
     let active=true,request=null,epoch=0,desired=null,anchor=null,received=0,pinnedFocus='';
     const shared=window.SpikePublicChartCache;
@@ -72,6 +80,16 @@
         drawing.trade=t;drawing.step=step;drawing.shape=geometry(t,instance.rows,step,Math.max(data.now_ms,p?.asof_ms||0));drawing.requestUpdate?.();
       }
       const draw=instance.paperDrawings.get(String(p?.id));instance.paperDrawing=draw||{shape:null};
+      if(data.backtestTrade){
+        const panel=host.parentElement?.querySelector('.bt-panel.is-open');
+        const fraction=panel&&host.clientWidth>700?Math.min(1,(panel.getBoundingClientRect().left-host.getBoundingClientRect().left-24)/instance.chart.timeScale().width()):1;
+        const t=data.backtestTrade,g=replayRange(t,instance.rows,step,fraction),key='backtest|'+data.track+'|'+t.id+'|'+data.bar;
+        instance.series.setMarkers(g?[{time:instance.rows[g.entry].time,position:'belowBar',color:'#2586e7',shape:'arrowUp',text:'开仓时间'},...(g.exit>=0?[{time:instance.rows[g.exit].time,position:'aboveBar',color:'#738392',shape:'arrowDown',text:'结算时间'}]:[])]:[]);
+        instance.hasBacktestMarkers=true;
+        if(g&&pinnedFocus!==key){pinnedFocus=key;instance.chart.priceScale('right').applyOptions({autoScale:true});instance.chart.timeScale().setVisibleLogicalRange({from:g.from,to:g.to});}
+        notice(g?'':'开仓时间的原始 K 线缺失；请切换周期或重新加载。');return;
+      }
+      if(instance.hasBacktestMarkers){instance.series.setMarkers([]);instance.hasBacktestMarkers=false;}
       if(!p){notice('');return;}
       const focusKey=p.id+'|'+data.bar;
       if(draw.shape&&pinnedFocus!==focusKey){pinnedFocus=focusKey;
@@ -80,6 +98,11 @@
       notice(!draw.shape||draw.shape.entry===-1?'开仓时间不在当前已加载 K 线内；可切换更大周期查看。':'');
     }});
     function paint(){if(active&&anchor&&desired)chart.show(host,anchor,anchor.current_week||anchor.week,{period:desired.period,ma:desired.ma,internal:desired.internal,trade:desired.trade,trades:desired.trades,anchors:anchor});}
+    function showReplay(track,trade,period='15m',ma=false,internal=false){
+      if(desired?.mode!=='backtest'){epoch++;request?.abort();request=null;anchor=null;chart.pause();pinnedFocus='';}
+      desired={mode:'backtest',track,trade,period,ma,internal};
+      if(active)chart.showReplay(host,track,trade,{period,ma,internal,refocus:!pinnedFocus});
+    }
     async function show(trade,period='5m',ma=false,symbol=trade?.symbol||'',internal=false,trades=[]){
       const changed=desired?.symbol!==symbol;desired={trade:valid(trade)&&trade.symbol===symbol?trade:null,period,ma,symbol,internal,trades};
       if(changed){epoch++;request?.abort();request=null;anchor=null;chart.hide();pinnedFocus='';}
@@ -99,8 +122,8 @@
       }catch(e){if(revision===epoch&&active)notice((e.name==='AbortError'?'图表读取超时':e.message)+' · 点击刷新重试');}
       finally{clearTimeout(timeout);if(request===c)request=null;}
     }
-    return {show,fit:chart.fit,latest:chart.latest,zoom:chart.zoom,retry(){received=0;if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
-      setActive(value){active=value;if(!value){drawings?.cancel();epoch++;request?.abort();request=null;chart.pause();}else if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
+    return {show,showReplay,fit:chart.fit,latest:chart.latest,zoom:chart.zoom,retry(){if(desired?.mode==='backtest'){chart.retry();return;}received=0;if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
+      setActive(value){active=value;if(!value){drawings?.cancel();epoch++;request?.abort();request=null;chart.pause();}else if(desired?.mode==='backtest')showReplay(desired.track,desired.trade,desired.period,desired.ma,desired.internal);else if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
       resetFocus(){pinnedFocus='';},destroy(){active=false;epoch++;request?.abort();chart.hide();}};
   }
   window.SpikeReclaimChart={create,latest,select,valid};

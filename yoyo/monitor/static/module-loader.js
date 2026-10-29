@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const groups = {
-    signals: ['signal-history.css','signal-components.css','okx-execution.css','signal-workspace.css','monday-reclaim-paper.css','okx-execution.js','public-chart-cache.js','chart-history.js','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','yolo-preview-sheet.js','chart-drawings.css','chart-drawings.js','reclaim-chart.js','chart-focus.js','monday-list-model.js','symbol-list-model.js','reclaim-watchlist.js','reclaim-analytics.js','reclaim-close.js','monday-quick.js','home-ticket.css','home-ticket.js','reclaim-strategy-book.css','reclaim-strategy-book.js','monday-reclaim-paper.js','signal-workspace.js'],
+    signals: ['signal-history.css','signal-components.css','okx-execution.css','signal-workspace.css','monday-reclaim-paper.css','okx-execution.js','public-chart-cache.js','chart-history.js','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','yolo-preview-sheet.js','chart-drawings.css','chart-drawings.js','reclaim-chart.js','chart-focus.js','monday-list-model.js','symbol-list-model.js','reclaim-watchlist.js','reclaim-analytics.js','reclaim-close.js','monday-quick.js','home-ticket.css','home-ticket.js','reclaim-strategy-book.css','reclaim-strategy-book.js','strategy-backtest.css','strategy-backtest.js','monday-reclaim-paper.js','signal-workspace.js'],
     'signal-charts': ['echarts-6.1.0.min.js'],
     research: ['research.css','research.js'],
     platform: ['research.css','platform.css','platform.js'],

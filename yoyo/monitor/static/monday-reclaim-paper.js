@@ -251,7 +251,7 @@
   if(typeof module!=='undefined' && module.exports){module.exports=api;return;}
   const root=document.getElementById('monday-reclaim-paper');
   if(!root)return;
-  let state=route(), pageActive=false, mounted=false, shown=50, signature='', refillSignature='', chart=null, pinned=null, ma=false, internal=false, indicatorsOpen=false, recordsOpen=false, sheet=null, watch=null, chartSymbol='', closer=null, analytics=null,preferences=null,platform='',focus=null,quick=null,book=null,drawings=null;
+  let state=route(), pageActive=false, mounted=false, shown=50, signature='', refillSignature='', chart=null, pinned=null, ma=false, internal=false, indicatorsOpen=false, recordsOpen=false, sheet=null, watch=null, chartSymbol='', closer=null, analytics=null,preferences=null,platform='',focus=null,quick=null,book=null,drawings=null,backtest=null,replay=null,liveState=null;
   const requests=window.SpikeRuntime.createRequests();
   const historyRequests=window.SpikeRuntime.createRequests();
   const history=createHistory({read:({day,held,...params})=>historyRequests.json('/api/monday-reclaim-paper/history?'+new URLSearchParams(params)),cancel:()=>historyRequests.cancel(),change:()=>render(feed.getState())});
@@ -265,7 +265,7 @@
     if(mounted)return;mounted=true;
     let storage;try{storage=window.localStorage;}catch{}
     preferences=list.createListPreferences(storage);platform=navigator.userAgentData?.platform||navigator.platform||'';
-    root.innerHTML=`<div class="rp-wallpaper" data-rp="chart"></div><div class="rp-watermark" aria-hidden="true" data-rp="watermark"></div><p class="rp-chart-notice rp-glass" data-rp="chart-notice" role="status" hidden></p>
+    root.innerHTML=`<div class="rp-wallpaper" data-rp="chart"></div><div class="bt-mode rp-glass" data-rp="backtest-mode" hidden><button type="button" data-rp-action="backtest-list">回测交易</button><button type="button" data-rp-action="backtest-exit">返回行情</button></div><div class="rp-watermark" aria-hidden="true" data-rp="watermark"></div><p class="rp-chart-notice rp-glass" data-rp="chart-notice" role="status" hidden></p>
       <header class="rp-heading rp-glass"><details class="rp-navigation"><summary aria-label="打开模拟盘导航"><b>ϟ SPIKE</b></summary><nav class="rp-glass"><a href="#signals?pane=reclaim" aria-current="page">1.618 首页</a><a href="#signals?pane=records">信号记录</a><a href="#signals?pane=overview">表现分析</a><a href="#yolo-detect">形态巡检</a></nav></details></header><button type="button" class="rp-theme-toggle theme-toggle rp-glass" data-theme-toggle aria-label="切换浅色或深色" title="切换浅色或深色"></button>
       <section class="rp-context rp-glass"><div class="rp-context-line"><button type="button" class="rp-symbol-trigger" data-rp-action="watch" aria-controls="rp-watch-panel" aria-expanded="false"><strong data-rp="symbol-label">选择币种</strong><span aria-hidden="true">⌄</span></button><span class="rp-context-score" data-rp="symbol-score" hidden aria-live="polite"><small>入场评分</small><b></b></span></div><span class="rp-selection-status" data-rp="selection-status"></span><small class="rp-selection-note" data-rp="selection-note"></small><div class="rp-context-tools"><div class="rp-track-picker"><span>策略</span><button type="button" class="rp-account-trigger" data-rp="track" aria-label="选择策略" aria-haspopup="dialog" aria-controls="rs-account-picker" aria-expanded="false"><b>spike</b><span aria-hidden="true">⌄</span></button></div><button type="button" data-rp-action="records" aria-controls="rp-record-panel" aria-expanded="false">交易簿 <span data-rp="total">—</span></button></div></section>
       <details class="rp-account rp-glass"><summary><span><small data-rp="account-label">spike 模拟</small> · 已实现净值 <b data-rp="equity">—</b><small> USDT</small></span><span data-rp="pnl"></span><span aria-hidden="true">⌄</span><span class="rp-capital-status" data-rp="capital" hidden title="净值 ÷ 累计本金，不是交易收益率"></span></summary><div class="rp-account-body"><section data-rp="metrics" class="rp-metrics"></section><p data-rp="status" role="status"></p><div data-rp="refills"></div><details class="rp-rules"><summary>规则与统计口径</summary><div data-rp="rules"></div></details></div></details><button class="rp-analysis-trigger rp-glass" data-rp-action="analytics" aria-controls="rp-analysis-panel" aria-expanded="false">统计分析 ↗</button>
@@ -285,11 +285,14 @@
     chart=window.SpikeReclaimChart.create(el('chart'),text=>{el('chart-notice').textContent=text;el('chart-notice').hidden=!text;},drawings);
     sheet=window.SpikeYoloPreviewSheet.bind({panel:root.querySelector('.rp-records'),isOpen:()=>recordsOpen,dismiss:()=>setRecords(false)});
     closer=window.SpikeReclaimClose.create({root,onChanged:()=>{feed.refresh();watch?.refresh();analytics?.refresh();}});
-    watch=window.SpikeReclaimWatchlist.create({root,createFeed,onScore:score=>{const node=el('symbol-score');node.hidden=!score;node.classList.toggle('is-high',!!score?.high);node.querySelector('b').textContent=score?.text||'';node.title=score?.title||'';node.setAttribute('aria-label',score?.title||'');},getContext:()=>({track:feed.getState().data?.tracks[state.track],signals:feed.getState().data?.signals,symbol:chartSymbol,period:state.period}),onOpen:()=>{analytics?.setOpen(false,false);if(recordsOpen)setRecords(false,false);},onSelect:symbol=>{state.track=window.SpikeReclaimWatchlist.holdingTrack(feed.getState().data?.tracks,symbol,state.track,book.getOrder());state.symbol=symbol;state.trade='';shown=50;pinned=null;chart.resetFocus();sync();render(feed.getState());}});
-    analytics=window.SpikeReclaimAnalytics.create({root,createFeed,onOpen:()=>{watch.setOpen(false,false);if(matchMedia('(max-width:700px)').matches)setRecords(false,false);},onTrack:selectTrack});
-    book=window.SpikeStrategyBook.create({root,tracks:TRACKS,getTrack:()=>state.track,getSnapshot:()=>feed.getState().data,getPnl:t=>summary(feed.getState().data?.tracks?.[t],t).pnl,renderRules:rulesHTML,createFeed,onSelect:selectTrack});
+    watch=window.SpikeReclaimWatchlist.create({root,createFeed,onScore:score=>{const node=el('symbol-score');node.hidden=!!replay||!score;node.classList.toggle('is-high',!!score?.high);node.querySelector('b').textContent=score?.text||'';node.title=score?.title||'';node.setAttribute('aria-label',score?.title||'');},getContext:()=>({track:feed.getState().data?.tracks[state.track],signals:feed.getState().data?.signals,symbol:chartSymbol,period:state.period}),onOpen:()=>{backtest?.setOpen(false,false);analytics?.setOpen(false,false);if(recordsOpen)setRecords(false,false);},onSelect:symbol=>{leaveBacktest(false);state.track=window.SpikeReclaimWatchlist.holdingTrack(feed.getState().data?.tracks,symbol,state.track,book.getOrder());state.symbol=symbol;state.trade='';shown=50;pinned=null;chart.resetFocus();sync();render(feed.getState());}});
+    analytics=window.SpikeReclaimAnalytics.create({root,createFeed,onOpen:()=>{backtest?.setOpen(false,false);watch.setOpen(false,false);if(matchMedia('(max-width:700px)').matches)setRecords(false,false);},onTrack:selectTrack});
+    backtest=window.SpikeStrategyBacktest.create({root,onOpen:()=>{watch?.setOpen(false,false);analytics?.setOpen(false,false);setRecords(false,false);quick?.close();},onSelect:value=>{
+      if(!replay)liveState={...state};replay=value;state.track=value.track;state.trade='';state.symbol=value.row.symbol.replace(/USDT$/,'-USDT-SWAP');state.period=window.SpikeStrategyBacktest.periodFor(value.row,state.period);pinned=null;chart.resetFocus();render(feed.getState());
+    }});
+    book=window.SpikeStrategyBook.create({root,tracks:TRACKS,getTrack:()=>state.track,getSnapshot:()=>feed.getState().data,getPnl:t=>summary(feed.getState().data?.tracks?.[t],t).pnl,renderRules:rulesHTML,createFeed,onSelect:selectTrack,onBacktest:track=>{focus?.reset();backtest.open(track);}});
     el('period').addEventListener('change',event=>{state.period=event.target.value;sync();render(feed.getState());});
-    quick=window.SpikeHomeTicket.create({root,context:()=>({symbol:chartSymbol,timeframe:state.period})});
+    quick=window.SpikeHomeTicket.create({root,context:()=>replay?null:({symbol:chartSymbol,timeframe:state.period})});
     focus=window.SpikeChartFocus.bind(root);
     root.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(root.querySelector('.rp-ledger-heading').classList.contains('is-searching')){event.stopPropagation();setSearch(false);}else if(indicatorsOpen){event.stopPropagation();setIndicators(false,true);}else if(recordsOpen)setRecords(false);});
     document.addEventListener('pointerdown',event=>{if(!focus?.hidden&&indicatorsOpen&&!event.target.closest('.rp-indicators'))setIndicators(false);},true);
@@ -300,11 +303,11 @@
       const button=event.target.closest('button');if(!button)return;
       if(button.dataset.rpDetail){const detail=document.getElementById(button.getAttribute('aria-controls'));detail.hidden=!detail.hidden;button.setAttribute('aria-expanded',String(!detail.hidden));return;}
       if(button.dataset.rpFavorite){preferences.toggle(button.dataset.rpFavorite);watch?.refreshPreferences();render(feed.getState());return;}
-      if(button.dataset.rpSymbol){state.symbol=button.dataset.rpSymbol;state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());if(matchMedia('(max-width:700px)').matches)setRecords(false);return;}
+      if(button.dataset.rpSymbol){leaveBacktest(false);state.symbol=button.dataset.rpSymbol;state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());if(matchMedia('(max-width:700px)').matches)setRecords(false);return;}
 
       if(button.dataset.rpClose){const data=feed.getState().data,p=data?.tracks[state.track]?.open.find(p=>String(p.id)===button.dataset.rpClose);if(p)closer.open({...p,margin_leverage:marginLeverage(data,state.track)});}
       if(button.dataset.rpTab){state.tab=button.dataset.rpTab;if(state.tab==='open')state.history='';shown=50;sync();render(feed.getState());}
-      if(button.dataset.rpTrade){state.symbol='';state.trade=button.dataset.rpTrade;pinned=window.SpikeReclaimChart.select(feed.getState().data?.tracks[state.track],state.trade,history.getState().rows.find(p=>String(p.id)===state.trade));chart.resetFocus();sync();render(feed.getState());if(matchMedia('(max-width:700px)').matches)setRecords(false);}
+      if(button.dataset.rpTrade){leaveBacktest(false);state.symbol='';state.trade=button.dataset.rpTrade;pinned=window.SpikeReclaimChart.select(feed.getState().data?.tracks[state.track],state.trade,history.getState().rows.find(p=>String(p.id)===state.trade));chart.resetFocus();sync();render(feed.getState());if(matchMedia('(max-width:700px)').matches)setRecords(false);}
       const action=button.dataset.rpAction;
       if(action==='history'||action==='today'){state.history=action==='today'||state.history?'':'1';if(state.history&&state.tab==='open')state.tab='closed';shown=50;sync();render(feed.getState());}
       if(action==='retry-history')history.load(history.getState().loaded);
@@ -317,15 +320,21 @@
       if(action==='indicators')setIndicators(!indicatorsOpen);
       if(action==='ma'){ma=!ma;render(feed.getState());}
       if(action==='internal'){internal=!internal;render(feed.getState());}
-      if(action==='follow'){state.symbol='';state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());}
+      if(action==='backtest-list')backtest.setOpen(true);
+      if(action==='backtest-exit'){leaveBacktest();sync();render(feed.getState());}
+      if(action==='follow'){leaveBacktest(false);state.symbol='';state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());}
       if(button.dataset.rpAction==='more'){if(state.history)history.load(true);else{shown+=50;render(feed.getState());}}
     });
     el('scope').addEventListener('change',event=>{state.scope=event.target.value;shown=50;sync();render(feed.getState());});
     el('search').addEventListener('input',event=>{state.q=event.target.value;shown=50;sync();render(feed.getState());});
     root.addEventListener('error',event=>{if(event.target.tagName==='IMG')event.target.hidden=true;},true);
   }
+  function leaveBacktest(restore=true){
+    if(replay&&restore&&liveState)state={...liveState};replay=null;liveState=null;backtest?.setOpen(false,false);chart?.resetFocus();
+  }
   function selectTrack(track){
-    if(!TRACKS.includes(track)||track===state.track)return;
+    if(!TRACKS.includes(track))return;
+    const wasReplay=!!replay;leaveBacktest(false);if(track===state.track&&!wasReplay)return;
     state.track=track;state.trade='';pinned=null;shown=50;sync();render(feed.getState());
   }
   function setSearch(value){
@@ -340,7 +349,7 @@
     const trigger=root.querySelector('[data-rp-action="indicators"]');trigger.setAttribute('aria-expanded',String(value));
     if(focus)trigger.focus({preventScroll:true});
   }
-  function setRecords(value,focus=true){if(value&&matchMedia('(max-width:700px)').matches)analytics?.setOpen(false,false);if(value)watch?.setOpen(false,false);sheet?.reset();recordsOpen=value;if(!value)history.select(null);const panel=root.querySelector('.rp-records');panel.classList.toggle('is-open',value);panel.inert=!value;panel.setAttribute('aria-hidden',String(!value));root.querySelector('[data-rp-action="records"]').setAttribute('aria-expanded',String(value));if(value)render(feed.getState());else if(focus)root.querySelector('[data-rp-action="records"]').focus({preventScroll:true});}
+  function setRecords(value,focus=true){if(value)backtest?.setOpen(false,false);if(value&&matchMedia('(max-width:700px)').matches)analytics?.setOpen(false,false);if(value)watch?.setOpen(false,false);sheet?.reset();recordsOpen=value;if(!value)history.select(null);const panel=root.querySelector('.rp-records');panel.classList.toggle('is-open',value);panel.inert=!value;panel.setAttribute('aria-hidden',String(!value));root.querySelector('[data-rp-action="records"]').setAttribute('aria-expanded',String(value));if(value)render(feed.getState());else if(focus)root.querySelector('[data-rp-action="records"]').focus({preventScroll:true});}
   function sync(){window.SpikeNavigation?.sync('signals',{pane:'reclaim',...state});}
   function replace(id,html){const node=el(id);if(node.innerHTML!==html)node.innerHTML=html;}
   function render(current){
@@ -363,18 +372,20 @@
     root.querySelector('[data-rp-action="today"]').hidden=!state.history;
     el('list-period').textContent=state.history?'历史 · 今日之前':state.tab==='open'?'当前持仓':'今日 · 北京时间';
     el('scope').value=state.scope;el('scope-label').hidden=state.tab==='events';
-    const selected=state.symbol&&!state.trade?window.SpikeReclaimWatchlist.coinTrade(track,state.symbol):window.SpikeReclaimChart.select(track,state.trade,pinned||history.getState().rows.find(p=>String(p.id)===state.trade));if(state.trade&&selected)pinned=selected;
+    const selected=replay?null:state.symbol&&!state.trade?window.SpikeReclaimWatchlist.coinTrade(track,state.symbol):window.SpikeReclaimChart.select(track,state.trade,pinned||history.getState().rows.find(p=>String(p.id)===state.trade));if(state.trade&&selected)pinned=selected;
     chartSymbol=state.symbol||selected?.symbol||(state.trade?'':'BTC-USDT-SWAP');quick?.refresh();
+    el('backtest-mode').hidden=!replay;root.classList.toggle('is-backtest',!!replay);if(replay)root.querySelector('[data-rp-action="backtest-list"]').textContent=trackLabel(replay.track)+' · 回测交易';
     analytics?.setTrack(state.track);
-    chart.show(selected?{...selected,asof_ms:data.now_ms}:null,state.period,ma,chartSymbol,internal,[...(track?.open||[]),...(track?.closed||[]),...(pinned&&!track?.closed?.some(p=>p.id===pinned.id)?[pinned]:[])].filter(p=>funded(p)&&p.symbol===chartSymbol));watch?.render();el('period').value=state.period;
+    if(replay)chart.showReplay(replay.track,replay.row,state.period,ma,internal);else chart.show(selected?{...selected,asof_ms:data.now_ms}:null,state.period,ma,chartSymbol,internal,[...(track?.open||[]),...(track?.closed||[]),...(pinned&&!track?.closed?.some(p=>p.id===pinned.id)?[pinned]:[])].filter(p=>funded(p)&&p.symbol===chartSymbol));watch?.render();if(replay)el('symbol-score').hidden=true;el('period').value=state.period;
     if(!selected&&state.trade){el('chart-notice').textContent='该交易不在当前返回记录中，请点击跟随最新单。';el('chart-notice').hidden=false;}
     root.querySelector('[data-rp-action="ma"]').setAttribute('aria-checked',String(ma));
     root.querySelector('[data-rp-action="internal"]').setAttribute('aria-checked',String(internal));
     el('indicator-count').textContent=String(Number(ma)+Number(internal));el('indicator-count').hidden=!ma&&!internal;
-    root.querySelector('[data-rp-action="follow"]').setAttribute('aria-pressed',String(!state.trade&&!state.symbol));
+    root.querySelector('[data-rp-action="follow"]').setAttribute('aria-pressed',String(!replay&&!state.trade&&!state.symbol));
     replace('symbol-label',chartSymbol?`${esc(base(chartSymbol))}<small> / USDT</small>`:'选择币种');
-    replace('selection-status',selected?`<span class="${selected.side===1?'rp-positive':'rp-negative'}">${sideLabel(selected)} · ${esc(stage(selected,data.now_ms))}</span>`:'');
-    el('selection-note').textContent=selected?`${state.trade?'固定交易':state.symbol?'固定币种':'最新资金交易'} · ${date(selected.fill_ms)} 开仓`:chartSymbol?(state.symbol?'固定币种 · 最近记录无资金成交':'默认行情 · 暂无资金成交'):'等待资金交易 · 点击币种查看触价列表';
+    replace('selection-status',replay?`<span class="${tone(replay.row.pnl)}">历史回测 · ${sideLabel(replay.row)} · ${signed(replay.row.pnl)} USDT</span>`:selected?`<span class="${selected.side===1?'rp-positive':'rp-negative'}">${sideLabel(selected)} · ${esc(stage(selected,data.now_ms))}</span>`:'');
+    el('selection-note').textContent=replay?`Binance · ${window.SpikeStrategyBacktest.date(replay.row.entry_ms)} 开仓`:selected?`${state.trade?'固定交易':state.symbol?'固定币种':'最新资金交易'} · ${date(selected.fill_ms)} 开仓`:chartSymbol?(state.symbol?'固定币种 · 最近记录无资金成交':'默认行情 · 暂无资金成交'):'等待资金交易 · 点击币种查看触价列表';
+    root.querySelector('.rp-chart-foot').textContent=replay?'历史回测行情 · 标记为账本开仓／结算时间':'逐周 1.618 区间 · 开平仓按实际成交标记';
     el('watermark').textContent=chartSymbol?base(chartSymbol)+' / USDT':'';
     el('total').textContent=track?String(track.open.filter(funded).length):'—';
     const allin=state.track==='allin3';
@@ -419,10 +430,10 @@
     replace('pending',archive?'':pendingHTML(track,state,data?.now_ms,data?.v3add20));
     el('record-note').textContent=state.tab==='events' ? '共用触价记录 · 评分结果为 v2 门槛；评分 > 0.5 高亮，非胜率。各策略是否入场请看其持仓与已结束记录。' : state.tab==='open' ? '参考浮动收益未扣费；策略净值包含已减仓盈亏，不包含余仓浮盈。' : '净收益已扣手续费；滑点情景仅供对照，不重复扣入策略净值。';
   }
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)history.select(null);feed.setActive(pageActive && !document.hidden);chart?.setActive(pageActive && !document.hidden);watch?.setActive(pageActive && !document.hidden);analytics?.setActive(pageActive && !document.hidden);});
+  document.addEventListener('visibilitychange',()=>{backtest?.setActive(pageActive&&!document.hidden);if(document.hidden)history.select(null);feed.setActive(pageActive && !document.hidden);chart?.setActive(pageActive && !document.hidden);watch?.setActive(pageActive && !document.hidden);analytics?.setActive(pageActive && !document.hidden);});
   window.SpikeReclaimPaper={
-    setActive(value){pageActive=value;root.hidden=!value;if(value)mount();book?.setActive(value);if(!value){history.select(null);focus?.reset();quick?.close();setIndicators(false);sheet?.reset();closer?.hide();}chart?.setActive(value && !document.hidden);if(value)render(feed.getState());feed.setActive(value && !document.hidden);watch?.setActive(value && !document.hidden);analytics?.setActive(value && !document.hidden);},
+    setActive(value){pageActive=value;root.hidden=!value;if(value)mount();book?.setActive(value);backtest?.setActive(value);if(!value){history.select(null);focus?.reset();quick?.close();setIndicators(false);sheet?.reset();closer?.hide();}chart?.setActive(value && !document.hidden);if(value)render(feed.getState());feed.setActive(value && !document.hidden);watch?.setActive(value && !document.hidden);analytics?.setActive(value && !document.hidden);},
     refresh:()=>{watch?.refresh();analytics?.refresh();return feed.refresh();},route:()=>({...state}),
-    restore(params){const next=route(params);if(next.track!==state.track||next.trade!==state.trade||next.symbol!==state.symbol)pinned=null;state=next;shown=50;render(feed.getState());}
+    restore(params){leaveBacktest(false);const next=route(params);if(next.track!==state.track||next.trade!==state.trade||next.symbol!==state.symbol)pinned=null;state=next;shown=50;render(feed.getState());}
   };
 })();

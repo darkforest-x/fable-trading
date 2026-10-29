@@ -166,3 +166,24 @@ test('a developing anchor response keeps live candles visible without a false er
  for(let i=0;i<25;i++)await Promise.resolve();
  assert.ok(draws.length>0);assert.equal(draws.at(-1).levels.length,0);assert.equal(messages.textContent,'');sandbox.window.SpikeMondayFibChart.hide();
 });
+
+test('historical replay isolates source, trade, timeframe, cancellation and cache from live feeds',async()=>{
+ const pending=[],drawn=[],timers=new Map();let sequence=0,feeds=0;
+ const status={textContent:''},caption={},mount={};const host={innerHTML:'',replaceChildren(){},querySelector:s=>s==='[role=status]'?status:s==='.mf-chart-caption'?caption:s==='.mf-chart-mount'?mount:{addEventListener(){}}};
+ const sandbox={document:{hidden:false},window:{SpikeMondayCandleFeed:{create(){feeds++;}},SpikeRangeChart:{mount:(h,d)=>drawn.push(d),unmount(){}}},Intl,Date,AbortController,URLSearchParams,
+  setTimeout(fn,ms){timers.set(++sequence,{fn,ms});return sequence;},clearTimeout:i=>timers.delete(i),fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve}))};
+ vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
+ const api=sandbox.window.SpikeMondayFibChart,settle=async()=>{for(let n=0;n<20;n++)await Promise.resolve();};
+ const trade={id:1,symbol:'AAAUSDT',entry_ms:start,exit_ms:start+900000};
+ const reply=(id,period='15m')=>({schema:1,track:'allin3',trade_id:id,symbol:'AAAUSDT',source:'Binance',bar:period,backtestTrade:{...trade,id},candles:[bar(start)],weekly_ranges:[]});
+ api.showReplay(host,'allin3',trade);api.showReplay(host,'allin3',{...trade,id:2});assert.equal(pending[0].options.signal.aborted,true);
+ pending[1].resolve({ok:true,json:async()=>reply(2)});pending[0].resolve({ok:true,json:async()=>reply(1)});await settle();
+ assert.equal(drawn.at(-1).trade_id,2);assert.equal(feeds,0);assert.equal(timers.size,0);
+ api.showReplay(host,'allin3',{...trade,id:2},{period:'5m'});api.pause();assert.equal(pending[2].options.signal.aborted,true);
+ pending[2].resolve({ok:true,json:async()=>reply(2,'5m')});await settle();assert.equal(drawn.at(-1).candles.length,0);
+ api.showReplay(host,'allin3',{...trade,id:2},{period:'5m'});assert.equal(pending.length,4);
+ pending[3].resolve({ok:true,json:async()=>({...reply(2,'5m'),source:'OKX'})});await settle();assert.match(status.textContent,/不匹配/);
+ api.retry();pending[4].resolve({ok:true,json:async()=>reply(2,'5m')});await settle();assert.equal(drawn.at(-1).bar,'5m');
+ api.showReplay(host,'allin3',{...trade,id:2},{period:'15m'});assert.equal(pending.length,5);assert.equal(drawn.at(-1).bar,'15m');
+ api.hide();assert.equal(timers.size,0);
+});

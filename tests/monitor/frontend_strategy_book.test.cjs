@@ -5,8 +5,8 @@ const data=require('../../yoyo/monitor/static/strategy-booklet/research.json');
 const paper=require('../../yoyo/monitor/static/monday-reclaim-paper.js');
 test('all eight accounts have separate selection and accessible booklet buttons',()=>{
  const html=ui.pickerHTML(paper.TRACKS);
- for(const t of paper.TRACKS){assert.ok(html.includes(`data-strategy-select="${t}"`));assert.ok(html.includes(`data-strategy-book="${t}"`));assert.ok(data.accounts[t]);assert.doesNotThrow(()=>ui.researchHTML(data,t));}
- assert.equal((html.match(/<button /g)||[]).length,24);
+ for(const t of paper.TRACKS){assert.ok(html.includes(`data-strategy-select="${t}"`));assert.ok(html.includes(`data-strategy-book="${t}"`));assert.ok(html.includes(`data-strategy-backtest="${t}"`));assert.ok(data.accounts[t]);assert.doesNotThrow(()=>ui.researchHTML(data,t));}
+ assert.equal((html.match(/<button /g)||[]).length,32);
  for(const match of html.matchAll(/<button[^>]*>([\s\S]*?)<\/button>/g))assert.doesNotMatch(match[1],/<button/);
 });
 test('local account ordering defaults to spike and preserves valid user order across new accounts',()=>{

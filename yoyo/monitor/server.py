@@ -151,6 +151,8 @@ def create_app(runtime=None, start_monitor=True):
     install_spike_alert(app, spike_alert)
     from yoyo.monitor.monday_candles import install as install_monday_candles
     install_monday_candles(app, runtime)
+    from yoyo.monitor.strategy_backtest import install as install_strategy_backtest
+    install_strategy_backtest(app)
 
     @app.middleware("http")
     async def headers(request, call_next):

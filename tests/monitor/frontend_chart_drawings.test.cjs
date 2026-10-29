@@ -45,3 +45,9 @@ test('duration and sub-cent price differences remain meaningful without currency
  assert.equal(D.duration(1555200),'18 天');assert.equal(D.duration(3660),'1 小时 1 分钟');assert.equal(D.duration(0),'0 分钟');
  const text=D.measurementText({delta:.00000002,percent:2,seconds:900,bars:1,count:2,volume:0,complete:true});assert.match(text[0],/0\.00000002/);assert.match(text[2],/0 张/);
 });
+
+test('historical Binance volume is labelled in base units rather than OKX contracts',()=>{
+ const m={delta:1,percent:1,seconds:300,bars:1,count:2,volume:100,complete:true};
+ assert.match(D.measurementText(m,'基础币')[2],/100 基础币/);
+ assert.match(D.measurementText(m)[2],/100 张/);
+});
