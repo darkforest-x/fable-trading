@@ -997,7 +997,7 @@ def ohlc_path_frame(frame, path):
 
 def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", market_tick=None,
                *, execution_minutes=5, rsi_side=None, entry_order_mode="market", entry_updates=None,
-               batch_bars=None):
+               batch_bars=None, skip_idle_bars=False):
     """Execute supplied entries using native orders, fills and HEDGING positions.
 
     Frame index is UTC close time. ATR is NaN except at completed management
@@ -1006,8 +1006,13 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     No future excursion or expected-exit fields are read by the strategy.
     Optional batch_bars streams the same native engine across bounded chunks;
     open orders and positions survive batch boundaries (1.231.0 run docstring).
+    Reclaim-only skip_idle_bars skips a chunk prefix only when no position or
+    order exists, stopping at the next supplied submission close. No price or
+    future outcome decides a skip; all feature inputs remain precomputed.
     """
     started = time.perf_counter()
+    if skip_idle_bars and (batch_bars is None or not policy.reclaim_next_bar):
+        raise ValueError("Idle skipping requires streamed reclaim entries")
     if entry_order_mode not in ("market", "limit"):
         raise ValueError("Unknown entry order mode")
     limit_entry = entry_order_mode == "limit"
@@ -1223,7 +1228,16 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
                 prepared = time.perf_counter()
                 engine.run()
             else:
-                for start in range(0, len(frame), batch_bars):
+                start = 0
+                submitted_at = sorted(strategy.by_entry)
+                while start < len(frame):
+                    if skip_idle_bars and not strategy.active and not strategy.pending:
+                        if engine.cache.orders_open():
+                            raise RuntimeError("Cannot skip an idle interval with open native orders")
+                        next_pos = np.searchsorted(submitted_at, start)
+                        if next_pos == len(submitted_at):
+                            break
+                        start = int(submitted_at[next_pos])
                     chunk = frame.iloc[start:start+batch_bars]
                     if policy.intrabar_path:
                         execution_frame, local_phases = ohlc_path_frame(chunk, policy.intrabar_path)
@@ -1237,6 +1251,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
                     engine.add_data(BarDataWrangler(bar_type, instrument).process(execution_frame))
                     engine.run(streaming=True)
                     engine.clear_data()
+                    start += len(chunk)
                 engine.end()
         if strategy.errors:
             raise RuntimeError(f"Native order errors: {strategy.errors[:3]}")
@@ -1277,6 +1292,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             positions=len(positions), fills=len(fills),
             execution_minutes=execution_minutes,
             streaming_batch_bars=batch_bars,
+            skipped_idle_bars_enabled=skip_idle_bars,
             rsi_scaleout="five original20percent reductions at fee-positive opposite confirmed strong closes" if policy.rsi_scaleout else "disabled",
             rsi_skip_events=policy.rsi_skip_events,
             timed_be_minutes=policy.time_breakeven_minutes,
