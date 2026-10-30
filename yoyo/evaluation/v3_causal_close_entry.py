@@ -16,6 +16,7 @@ import json
 from pathlib import Path
 import subprocess
 import time
+import shutil
 
 import numpy as np
 import pandas as pd
@@ -28,6 +29,22 @@ from yoyo.evaluation.spike_close_execution import stats, paired, week_sign_flip
 
 EXP = ROOT/'experiments/active/exp-v3-causal-close-entry-20261030-v1'
 VARIANTS = ('rest', 'close')
+
+
+def read_csv(*args, **kwargs):
+    return pd.read_csv(*args, float_precision='round_trip', **kwargs)
+
+
+def changed_order_ids(old, new, tick):
+    """Find execution changes; ignore sub-tick binary round-trip noise only."""
+    old=old.set_index('trade_id');new=new.set_index('trade_id')
+    common=old.index.intersection(new.index)
+    changed=set(new.index.difference(old.index))
+    for field in ('side','entry_i','expire_i','end_i','entry','stop','risk','target_price','reclaim_ref','be_offset_bp'):
+        same=np.isclose(old.loc[common,field].to_numpy(float),new.loc[common,field].to_numpy(float),rtol=1e-12,atol=tick*1e-6,equal_nan=True)
+        changed.update(common[~same])
+    changed.update(common[old.loc[common,'order_mode']!=new.loc[common,'order_mode']])
+    return changed
 
 
 def eligible(cfg):
@@ -105,8 +122,8 @@ def process(symbol, config):
     decimals = max(2, min(9, int(np.ceil(-np.log10(f[['open','high','low','close']].to_numpy().min())))+7))
     tick = 10.**(-decimals); p = f[['open','high','low','close']].round(decimals)
     p.index = p.index.as_unit('ns'); frame = p.copy(); frame.index += pd.Timedelta(minutes=5)
-    e = select_orders(pd.read_csv(origin/'orders.csv.gz'), eligible(cfg), cfg)
-    old_fills = pd.read_csv(origin/'trades.csv.gz', usecols=['trade_id','entry_i']).set_index('trade_id')
+    e = select_orders(read_csv(origin/'orders.csv.gz'), eligible(cfg), cfg)
+    old_fills = read_csv(origin/'trades.csv.gz', usecols=['trade_id','entry_i']).set_index('trade_id')
     e['original_id'] = e.trade_id
     e['native_touch_i'] = e.original_id.map(old_fills.entry_i)
     e['reclaim_ref'] = e.entry
@@ -125,7 +142,7 @@ def process(symbol, config):
         dest = out/path.lower(); dest.mkdir(exist_ok=True)
         if (dest/'audit.json').exists():
             receipts[path] = json.loads((dest/'audit.json').read_text()); continue
-        cached = pd.read_csv(CACHED/path.lower()/'symbols'/symbol/'trades.csv.gz').set_index('trade_id')
+        cached = read_csv(CACHED/path.lower()/'symbols'/symbol/'trades.csv.gz').set_index('trade_id')
         rest = e.copy(); rest['trade_id'] = rest.original_id+':entry_rest'
         rest['variant'] = 'rest'
         reused = []
@@ -137,16 +154,34 @@ def process(symbol, config):
         new_rest = rest[(rest.control_id > 0) & rest.native_touch_i.notna()]
         # Cache each native stage independently; a summary failure never replays it.
         def stage(name, orders):
+            reused_rows=pd.DataFrame(columns=KEEP+['reclaim_due_ns']);reused_fills=pd.DataFrame();old_ops=[]
+            runtime=orders
             if (dest/(name+'_audit.json')).exists():
-                rows = pd.read_csv(dest/(name+'_trades.csv.gz'))
+                rows = read_csv(dest/(name+'_trades.csv.gz'))
                 audit = json.loads((dest/(name+'_audit.json')).read_text())
-                return rows, audit
+                old_orders=read_csv(dest/(name+'_orders.csv.gz'))
+                changed=changed_order_ids(old_orders,orders,tick)
+                removed=set(old_orders.trade_id)-set(orders.trade_id)
+                if not changed and not removed:
+                    return rows, audit
+                archive=dest/'precision_before_fix';archive.mkdir(exist_ok=True)
+                for suffix in ('orders.csv.gz','trades.csv.gz','audit.json','fills.csv.gz','opportunities.csv.gz'):
+                    src=dest/(name+'_'+suffix)
+                    if src.exists() and not (archive/src.name).exists():shutil.copy2(src,archive/src.name)
+                keep=set(orders.trade_id)-changed
+                reused_rows=rows[rows.trade_id.isin(keep)]
+                if audit['fills']:
+                    ff=read_csv(dest/(name+'_fills.csv.gz'));reused_fills=ff[ff.trade_id.isin(keep)]
+                runtime=orders[orders.trade_id.isin(changed)]
             orders.to_csv(dest/(name+'_orders.csv.gz'), index=False)
-            rows, fills, audit = execute(frame, orders, path, tick, symbol, cfg)
+            rows, fills, audit = execute(frame, runtime, path, tick, symbol, cfg)
+            repaired_count=len(runtime) if len(reused_rows) else 0
+            rows=pd.concat([reused_rows,rows.reindex(columns=KEEP+['reclaim_due_ns'])],ignore_index=True)
+            fills=pd.concat([reused_fills,fills],ignore_index=True)
             rows.reindex(columns=KEEP+['reclaim_due_ns']).to_csv(dest/(name+'_trades.csv.gz'), index=False)
             fills.to_csv(dest/(name+'_fills.csv.gz'), index=False)
             pd.DataFrame(audit.get('opportunities',[])).to_csv(dest/(name+'_opportunities.csv.gz'), index=False)
-            receipt = dict(orders=len(orders),positions=audit['positions'],fills=audit['fills'])
+            receipt = dict(orders=len(orders),positions=len(rows),fills=len(fills),precision_repaired_orders=repaired_count)
             dump(dest/(name+'_audit.json'),receipt)
             return rows, receipt
         rows_r, ar = stage('new_rest',new_rest)
@@ -304,10 +339,37 @@ def validate(config):
     dump(root/'validation.json',result);print(json.dumps(result),flush=True)
 
 
+def precision_audit(config):
+    """Invalidate only rounded execution changes, retaining every native receipt."""
+    root=config.parent;changes=[];source_count=0
+    for d in sorted((root/'symbols').iterdir()):
+        if not (d/'sources.csv.gz').exists():continue
+        saved=read_csv(d/'sources.csv.gz').set_index('original_id')
+        original=read_csv(CODEX/'symbols'/d.name/'orders.csv.gz').set_index('trade_id').loc[saved.index]
+        tick=json.loads((CODEX/'symbols'/d.name/'audit.json').read_text())['protection_tick']
+        expected=stops(original,'P',30,tick)
+        bad=~np.isclose(saved.stop.to_numpy(),expected,rtol=1e-12,atol=tick*1e-6)
+        source_count+=len(saved)
+        for i in np.flatnonzero(bad):
+            changes.append(dict(symbol=d.name,original_id=saved.index[i],control_id=int(saved.control_id.iloc[i]),old_stop=float(saved.stop.iloc[i]),correct_stop=float(expected[i])))
+        if bad.any():
+            archive=d/'precision_before_fix';archive.mkdir(exist_ok=True)
+            for name in ('done.json','sources.csv.gz'):
+                if (d/name).exists() and not (archive/name).exists():shutil.copy2(d/name,archive/name)
+            if (d/'done.json').exists():(d/'done.json').unlink()
+            for path in ('ohlc','olhc'):
+                f=d/path/'audit.json'
+                if f.exists():
+                    shutil.copy2(f,archive/(path+'_audit.json'));f.unlink()
+    result=dict(source_rows=source_count,stop_changes=changes,policy='Replay only changed order versions; preserve unchanged native fills and all pre-fix receipts')
+    dump(root/'precision_audit.json',result);print(json.dumps(result),flush=True)
+
+
 if __name__=='__main__':
-    ap=argparse.ArgumentParser();ap.add_argument('action',choices=['run','summary','validate'])
+    ap=argparse.ArgumentParser();ap.add_argument('action',choices=['run','summary','validate','precision-audit'])
     ap.add_argument('--config',type=Path,default=EXP/'config.json');ap.add_argument('--workers',type=int,default=4)
     args=ap.parse_args();config=args.config.resolve()
     if args.action=='run':run(config,args.workers)
     elif args.action=='summary':summarize(config)
-    else:validate(config)
+    elif args.action=='validate':validate(config)
+    else:precision_audit(config)

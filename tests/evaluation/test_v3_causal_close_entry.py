@@ -1,7 +1,7 @@
 """Keep the owner comparison on one score clock and one episode."""
 import unittest
 import pandas as pd
-from yoyo.evaluation.v3_causal_close_entry import close_order, select_orders
+from yoyo.evaluation.v3_causal_close_entry import close_order, select_orders, changed_order_ids
 
 
 class V3CloseTests(unittest.TestCase):
@@ -41,6 +41,12 @@ class V3CloseTests(unittest.TestCase):
         self.assertEqual(select_orders(rows,pd.Series({'a':.5678}),cfg).exit_mode.tolist(),['range_0.618'])
         self.assertEqual(select_orders(rows,pd.Series({'a':.6}),cfg).exit_mode.tolist(),['opposite_1618'])
         self.assertTrue(select_orders(rows,pd.Series({'a':.499}),cfg).empty)
+
+    def test_one_tick_stop_change_invalidates_only_that_order(self):
+        a=pd.DataFrame([dict(self.order,trade_id=x,entry_i=0,order_mode='market') for x in ['a','b']])
+        b=a.copy();b.loc[0,'stop']+=1e-6
+        self.assertEqual(changed_order_ids(a,b,1e-6),{'a'})
+        self.assertEqual(changed_order_ids(a,a.copy(),1e-6),set())
 
 
 if __name__=='__main__':unittest.main()
