@@ -1,0 +1,23 @@
+{
+  "experiment_id": "exp-btc-1618-return-count-20261030-v1",
+  "observation_start": "2024-10-30T00:00:00+08:00",
+  "observation_end_exclusive": "2026-10-30T12:00:00+08:00",
+  "timezone": "America/New_York",
+  "touch_definition": "Contiguous 15m bars spanning the extension form one episode; at least one whole non-touch bar rearms. Count episode starts after the completed Monday and before next NY Monday.",
+  "range_return": "Upper: price reaches or passes original Monday high downward. Lower: reaches or passes original Monday low upward. No close confirmation required. Deadline next NY Monday, never reset the original edge.",
+  "censoring": "Current NY week unresolved events remain pending; observed count divided by all original events is not a completed-horizon estimate.",
+  "limitations": "Descriptive price reachability, no orders/PnL/stops. Several touches can share the same later return. No strategy edge, win rate or independent sample claim; no matching null or p-value is needed for a requested event count.",
+  "reproduce": ".venv/bin/python -m yoyo.evaluation.btc_1618_return_count",
+  "source_files": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib1618-okx-20261022-v1/candles.csv.gz",
+      "size_bytes": 13519631,
+      "mtime_ns": 1792664441774616517
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-1618-return-count-20261030-v1/inputs/recent_15m.csv.gz",
+      "size_bytes": 89221,
+      "mtime_ns": 1793334045676753052
+    }
+  ]
+}

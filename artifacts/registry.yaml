@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-1618-return-count-20261030-v1
+    artifact_type: manifest
+    role: repeated_btc_touch_same_week_range_return_count
+    source_repo: darkforest-x/fable-trading
+    source_commit: e65c3da9a0
+    source_path: experiments/active/exp-btc-1618-return-count-20261030-v1/summary.json
+    storage_uri: repo://experiments/active/exp-btc-1618-return-count-20261030-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    license: internal-research
+    notes: Original859episodes,151upper259lowerreturns,onepending. Frozen recent public15m snapshot and original1m archive;no content hashing or trading inference.
   - artifact_id: alarm-laggard-selection-20261029-v1
     artifact_type: manifest
     role: frozen_alarm_prospective_coin_selection_with_interval_censoring
