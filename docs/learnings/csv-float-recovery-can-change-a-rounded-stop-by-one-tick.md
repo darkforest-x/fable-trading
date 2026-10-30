@@ -1,0 +1,7 @@
+# CSV float recovery can change a rounded stop by one tick
+
+- **问题**：Exact reuse of old native v3 trades failed because a reconstructed P30 stop differed by one tick even though the printed level looked identical.
+- **死胡同**：A looser numeric tolerance would accept a different executable price. Replaying all completed histories would waste unchanged results and conceal which orders actually changed.
+- **有效路径**：Read price CSVs with pandas `float_precision="round_trip"`. Decimal-to-binary conversion near a tick boundary changed the subsequent floor/ceil operation. Across the frozen sources, twelve order rows changed rounded stops: nine signal rows had already been blocked by strict baseline matching; three control rows had executed. Preserve pre-fix receipts and rerun only those changed control order versions (rest and close, both paths), then resume the blocked symbols. Compare execution fields before reusing stage rows; verify all resulting native commissions, indices and H1 clocks.
+- **通用规则**：Treat parse precision as part of cached execution semantics. On a cache mismatch, identify the first executable field that differs and preserve exact price identity; repair only affected orders and keep failure evidence.
+- **牵连**：`yoyo/evaluation/v3_causal_close_entry.py`, `tests/evaluation/test_v3_causal_close_entry.py`, experiment `precision_audit.json`, `run.log`, `run_precision_retry.log` and per-symbol `precision_before_fix/`. No data downloads or content hashes; 19,691 final new native positions and 39,382 fills reconcile within 3.19e-12bp.

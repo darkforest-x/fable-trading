@@ -272,6 +272,10 @@ def summarize(config):
             trades=pd.read_csv(d/path/'trades.csv.gz').drop(columns=['variant'])
             z=decisions.merge(trades,on='trade_id',how='left',validate='one_to_one',suffixes=('','_fill'))
             z['filled']=z.net.notna();z['net']=z.net.fillna(0.)
+            missing_time=z.filled & z.entry_time.isna()
+            assert ((z.loc[missing_time,'control_id']==0)&(z.loc[missing_time,'variant']=='close')).all()
+            assert (z.loc[missing_time,'entry_i']==z.loc[missing_time,'native_touch_i']).all()
+            z.loc[missing_time,'entry_time']=z.loc[missing_time,'cohort_time']
             paths[path].append(z)
     paths={p:pd.concat(v,ignore_index=True).set_index('trade_id') for p,v in paths.items()}
     a,b=paths['ohlc'],paths['olhc'];b=b.reindex(a.index)
@@ -316,6 +320,9 @@ def summarize(config):
         for status,g in close_signal.groupby('status')}
     result['risk_geometry']={v:dict(stop_distance_pct_quantiles={str(q):float((s.side*(s.entry-s.stop)/s.entry*100).quantile(q)) for q in (0,.5,.9,1)})
         for v,s in signal[signal.filled].groupby('variant')}
+    result['boundary_sensitivity']={v:{per:stats(g[mask(g)&~g.reason.eq(0)]) for per,mask in periods.items()}
+        for v,g in signal.groupby('variant')}
+    result['boundary_cases']=signal[signal.reason.eq(0)].reset_index()[['event','variant','net','entry_time','exit_time']].to_dict('records')
     result['native_counts']={key:sum(r['paths'][p][key] for r in receipts for p in ('OHLC','OLHC')) for key in ('reused_rest','reused_close')}
     for key in ('orders','positions','fills'):
         result['native_counts']['new_'+key]=sum(r['paths'][p][stage][key] for r in receipts for p in ('OHLC','OLHC') for stage in ('new_rest','new_close'))
