@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-score-ablation-20261030-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: e09542ead8
+    status: rejected
+    question: Can the saved pre-touch1m score improve spike, and what happens when the0.6 gate is removed?
+    single_variable: Score admission only; completed pre-touch15m EMA>=3, original near-edge P18/BE0/H1, real fees and fixed displayed10slot5x allocator unchanged.
+    result: Original166funded/83.1325percent/5032.0987915U ledger reproduced.2026fixed-seed BE0 restarts causal5m87candidates62funded1091.64U;1m178/121/601.85U;no-score447/378/611.52U,DD26.55/55.16/63.43percent. Full no-score1500candidates1143funded194.97U. Reject these replacements under frozen rules;0.6optimality untested.
+    artifacts: [spike-score-ablation-20261030-v1]
+    canonical_report: experiments/active/exp-spike-score-ablation-20261030-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 519symbols;2002native rows reused,6264newpositions12528fills checked,max3.41e-12bp.1500no-score events versus1283common score-known;common2026account846.42U still loses.2026no-score matched428signal54.17bp/random-0.69bp,p0.1665,CI[-32.93,127.08]bp. Positive candidate means coexist with losing funded cohorts due capacity/tails;69skipped2026orders average385.54bp.1m model frozen,trained before2026;BE17median results remain separate.80focused/boundary tests;no downloads,hashes,fit,sweep or service changes.
   - experiment_id: exp-v3-causal-close-entry-20261030-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 3e9e15fbba

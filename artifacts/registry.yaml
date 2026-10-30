@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-score-ablation-20261030-v1
+    artifact_type: manifest
+    role: fixed_spike_score_admission_ablation_native_outcomes
+    source_repo: darkforest-x/fable-trading
+    source_commit: e09542ead8
+    generator_commit: bbc3a81ef5
+    source_path: experiments/active/exp-spike-score-ablation-20261030-v1/summary.json
+    storage_uri: repo://experiments/active/exp-spike-score-ablation-20261030-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    license: internal-research
+    notes: 519symbols1500events;exact original83.1325percent baseline preserved.2026causal5m/1m/no-score fixed-seed accounts1091.64/601.85/611.52U. Common no-score846.42U. Matchedrandom and account projections separate.2002cachedrows6264newpositions12528fills;validation and headline retained. Reject tested replacements,not all1m models or allpossiblecuts.
   - artifact_id: v3-causal-close-entry-20261030-v1
     artifact_type: manifest
     role: fixed_causal_score_v3_resting_vs_touch_close_native_outcomes
