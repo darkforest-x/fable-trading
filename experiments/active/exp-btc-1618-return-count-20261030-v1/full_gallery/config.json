@@ -1,0 +1,38 @@
+{
+  "original_ledger": "../events.csv",
+  "label_builder": "yoyo/evaluation/btc_1618_all_targets.py",
+  "renderer": "yoyo/evaluation/btc_1618_full_gallery.py",
+  "label_builder_commit": "e8d50c07f444f10aae0fd58ee885c7a628e991a8",
+  "renderer_commit": "6ece8fc8e156a840a3367da24ef20e77729c662a",
+  "target_definition": {
+    "near": "upper: Monday high; lower: Monday low",
+    "far": "upper: Monday low; lower: Monday high",
+    "opposite1618": "upper: Monday low - 0.618 range; lower: Monday high + 0.618 range"
+  },
+  "fixed_population": 859,
+  "upper": 408,
+  "lower": 451,
+  "deadline": "Before next NY Monday; never cross weeks",
+  "cutoff_exclusive": "2026-10-30T12:00:00+08:00",
+  "chart_timeframes_minutes": [
+    5,
+    15
+  ],
+  "chart_timezone": "Asia/Shanghai",
+  "detail_window": "From touch minus 3h (after Monday closes) through touch plus at most 18h. Full continuous15m high-low-close path below extends through expiry or frozen cutoff.",
+  "timestamp_semantics": "Candle start. Label ordering uses OHLC proof and existing1m where required.5m refines the saved15m episode, not a new event count.",
+  "reproduce": [
+    ".venv/bin/python -m yoyo.evaluation.btc_1618_all_targets",
+    ".venv/bin/python -m yoyo.evaluation.btc_1618_full_gallery render --workers 4",
+    ".venv/bin/python -m yoyo.evaluation.btc_1618_full_gallery pack"
+  ],
+  "delivery": "send action separately: authorized Telegram destination title verified; uncertain uploads not retried automatically",
+  "environment": {
+    "python": "3.9.6",
+    "pandas": "2.3.3",
+    "numpy": "2.0.2",
+    "matplotlib": "3.9.4"
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}
