@@ -5,8 +5,9 @@ from zoneinfo import ZoneInfo
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 import pytest
+import math
 
-from yoyo.monitor.monday_fib import FibBook, baseline, deliver_once, week_window, HOUR, MINUTE
+from yoyo.monitor.monday_fib import FibBook, baseline, deliver_once, week_window, HOUR, MINUTE, FRESH_MS
 from yoyo.monitor.monday_fib_service import MondayFibService, install
 
 
@@ -112,7 +113,7 @@ def test_reenable_disables_old_pending_and_unknown_not_retried(tmp_path):
     def timeout(*args, **kwargs):
         calls.append(1)
         raise TimeoutError()
-    assert deliver_once(book, ("fake", "fake"), timeout, NOW + MINUTE + 1)
+    assert deliver_once(book, ("fake", "fake"), timeout, NOW + MINUTE + 1, score_lookup=lambda e: {"status":"scored","score":.6})
     assert not deliver_once(book, ("fake", "fake"), timeout, NOW + MINUTE + 2)
     assert calls == [1]
     assert book.records()[0]["status"] == "unknown"
@@ -135,9 +136,10 @@ def test_sender_receipts(tmp_path, code, payload, expected):
             return payload
     def sender(url, **kwargs):
         assert kwargs["allow_redirects"] is False
-        assert "位置提醒" in kwargs["json"]["text"]
+        assert len(kwargs["json"]["text"].splitlines()) == 3
+        assert "评分 0.6000" in kwargs["json"]["text"]
         return Response()
-    deliver_once(book, ("fake", "fake"), sender, NOW + 1)
+    deliver_once(book, ("fake", "fake"), sender, NOW + 1, score_lookup=lambda e: {"status":"scored","score":.6})
     assert book.records()[0]["status"] == expected
 
 
@@ -217,3 +219,112 @@ def test_compact_snapshot_preserves_quotes_anchors_and_touch_semantics(tmp_path,
     for key in ('symbol', 'state', 'stale', 'price', 'high', 'low', 'upper', 'lower', 'received_ms'):
         assert row[key] == original[key]
     assert row['touches']['upper'] == {k: original['touches']['upper'][k] for k in ('source', 'observed_ms', 'candle_ms')}
+
+
+def queued_book(tmp_path):
+    book = FibBook(tmp_path)
+    book.set_enabled(True, NOW-MINUTE)
+    book.touch(baseline(history(), NOW), SYMBOL, 'upper', 120, NOW, NOW, 'live')
+    return book
+
+
+def fake_sender(calls):
+    class Response:
+        status_code = 200
+        def json(self):
+            return {'ok': True, 'result': {'message_id': 123}}
+    def send(url, **kwargs):
+        calls.append(kwargs['json'])
+        return Response()
+    return send
+
+
+@pytest.mark.parametrize('score,allowed', [
+    (.4, False), (.399999, False), (math.nextafter(.4, 1), True), (.400001, True), (.9, True),
+    (None, False), (float('nan'), False), (float('inf'), False), ('0.9', False),
+    (True, False), (-.2, False), (1.2, False),
+])
+def test_telegram_requires_strict_raw_score_and_compact_text(tmp_path, score, allowed):
+    book, calls = queued_book(tmp_path), []
+    assert deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+1,
+                        score_lookup=lambda event: {'status': 'scored', 'score': score})
+    assert bool(calls) is allowed
+    assert book.records()[0]['status'] == ('sent' if allowed else 'skipped')
+    if allowed:
+        text = calls[0]['text']
+        assert text.splitlines()[0] == 'BTC · 上沿 1.618'
+        assert len(text.splitlines()) == 3 and '点位 116.18' in text and '北京' in text
+        assert '评分 0.4000 ·' not in text
+        assert all(label not in text for label in ['-USDT-SWAP', '纽约时间', '本周首次', '最新价'])
+        assert calls[0]['reply_markup']['inline_keyboard'][0][0]['url'].endswith('OKX%3ABTCUSDT.P&interval=15')
+
+
+@pytest.mark.parametrize('status', ['feature_error', 'excluded', 'identity_mismatch'])
+def test_terminal_score_states_never_send_even_if_a_score_is_present(tmp_path, status):
+    book, calls = queued_book(tmp_path), []
+    deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+1,
+                 score_lookup=lambda event: {'status': status, 'score': .9})
+    assert not calls and book.records()[0]['status'] == 'skipped'
+
+
+def test_wait_for_score_without_claiming_delivery_or_blocking_other_ready_events(tmp_path):
+    book, calls = queued_book(tmp_path), []
+    book.touch(baseline(history(), NOW), SYMBOL, 'lower', 90, NOW+1, NOW, 'live')
+    def lookup(event):
+        assert all(r['status'] != 'sending' for r in book.records())
+        return None if event['side'] == 'upper' else {'status': 'scored', 'score': .6}
+    deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+2, score_lookup=lookup)
+    assert not calls and all(r['status'] == 'pending' for r in book.records())
+    book.recover()  # Waiting is not an uncertain HTTP send, even across restart.
+    deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+1002, score_lookup=lookup)
+    assert len(calls) == 1 and '下沿' in calls[0]['text']
+    deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+2002,
+                 score_lookup=lambda event: {'status': 'scored', 'score': .7})
+    assert len(calls) == 2 and '上沿' in calls[1]['text']
+    assert not deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+3002)
+
+
+@pytest.mark.parametrize('lookup', [None, lambda event: None, lambda event: 1/0])
+def test_absent_or_failed_score_reader_waits_only_inside_original_freshness(tmp_path, lookup):
+    book, calls = queued_book(tmp_path), []
+    deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+1, score_lookup=lookup)
+    assert not calls and book.records()[0]['status'] == 'pending'
+    assert not deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+FRESH_MS+1,
+                            score_lookup=lambda event: {'status': 'scored', 'score': .9})
+    assert not calls and book.records()[0]['status'] == 'skipped'
+
+
+def test_score_lookup_racing_disable_or_expiry_cannot_send(tmp_path):
+    book, calls = queued_book(tmp_path), []
+    def disable(event):
+        book.set_enabled(False, NOW+2)
+        book.set_enabled(True, NOW+3)
+        return {'status': 'scored', 'score': .9}
+    deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+1, score_lookup=disable)
+    assert not calls and book.records()[0]['status'] == 'skipped'
+    book.touch(baseline(history(), NOW), SYMBOL, 'lower', 90, NOW+MINUTE, NOW+MINUTE, 'live')
+    deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+MINUTE+1,
+                 score_lookup=lambda event: {'status': 'scored', 'score': .9},
+                 clock=lambda: NOW+MINUTE+FRESH_MS+1)
+    assert not calls and all(r['status'] == 'skipped' for r in book.records())
+
+
+def test_two_readers_only_claim_one_exact_event(tmp_path):
+    book = queued_book(tmp_path)
+    first, second = book.pending(NOW+1), book.pending(NOW+1)
+    assert book.claim(NOW+1, first)
+    assert book.claim(NOW+1, second) is None
+
+
+def test_service_passes_score_reader_to_telegram_worker(tmp_path, monkeypatch):
+    service, levels = ready_service(tmp_path)
+    service.book.set_enabled(True, NOW-MINUTE)
+    service.book.touch(levels, SYMBOL, 'upper', 120, NOW, NOW, 'live')
+    calls, lookups = [], []
+    service.telegram_score_lookup = lambda event: (lookups.append(event) or {'status': 'scored', 'score': .6})
+    monkeypatch.setattr('yoyo.monitor.monday_fib_service.credentials', lambda: ('fake', 'fake'))
+    monkeypatch.setattr('yoyo.monitor.monday_fib_service.requests.post', fake_sender(calls))
+    monkeypatch.setattr(service.stop, 'wait', lambda timeout: service.stop.set())
+    service._send()
+    assert len(calls) == len(lookups) == 1
+    assert service.snapshot()['telegram']['min_score_exclusive'] == .4

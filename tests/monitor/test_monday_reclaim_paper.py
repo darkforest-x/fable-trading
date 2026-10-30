@@ -351,6 +351,80 @@ class PaperTests(PaperFixture):
         self.assertAlmostEqual(e.snapshot()['tracks']['60']['equity'], 1000+sum(x['pnl'] for x in exits))
 
 
+class NotificationScoreTests(PaperFixture):
+    def event(self, side="lower", symbol="ABC-USDT-SWAP", week=None, candle_ms=None, observed_ms=None):
+        return dict(week=week or self.win["week"], symbol=symbol, side=side,
+                    candle_ms=self.touch if candle_ms is None else candle_ms,
+                    observed_ms=self.touch+500 if observed_ms is None else observed_ms)
+
+    def insert_signal(self, e, event, side_value, score, status="scored"):
+        with e.db() as db:
+            db.execute("INSERT INTO signals (week,symbol,side,candle_ms,observed_ms,status,score) "
+                       "VALUES (?,?,?,?,?,?,?)",
+                       (event["week"], event["symbol"], side_value, event["candle_ms"],
+                        event["observed_ms"], status, score))
+
+    def ledger_snapshot(self, e):
+        tables = ("signals", "positions", "exits", "manual_requests", "tracks", "refills")
+        with e.db() as db:
+            return {table: tuple(tuple(row) for row in db.execute(f"SELECT * FROM {table} ORDER BY rowid"))
+                    for table in tables}
+
+    def test_reads_exact_raw_score_without_mutating_paper_ledger(self):
+        e = self.engine(2.)
+        e.model.score = lambda _features: .400001
+        event = self.event()
+        e.handle_touch(self.levels, event["symbol"], event["side"], 93.8,
+                       event["observed_ms"], event["candle_ms"])
+        before = self.ledger_snapshot(e)
+
+        self.assertEqual(e.notification_score(event), {"status": "scored", "score": .400001})
+        self.assertEqual(self.ledger_snapshot(e), before)
+        self.assertEqual(self.rows(e, "SELECT DISTINCT taken FROM signals"), [{"taken": 0}])
+
+    def test_week_and_direction_do_not_reuse_another_score(self):
+        e = self.engine(2.)
+        lower = self.event("lower")
+        upper = self.event("upper", candle_ms=self.touch+H5, observed_ms=self.touch+H5+500)
+        previous_week = self.event("lower", week=week_window(self.win["start"]-1)["week"])
+        self.insert_signal(e, lower, 1, .71)
+        self.insert_signal(e, upper, -1, .32)
+        self.insert_signal(e, previous_week, 1, .99)
+
+        self.assertEqual(e.notification_score(lower), {"status": "scored", "score": .71})
+        self.assertEqual(e.notification_score(upper), {"status": "scored", "score": .32})
+        self.assertEqual(e.notification_score(previous_week), {"status": "scored", "score": .99})
+
+    def test_timestamp_mismatch_is_terminal(self):
+        e = self.engine(2.)
+        exact = self.event()
+        self.insert_signal(e, exact, 1, .8)
+        for changed in ({"candle_ms": exact["candle_ms"]+H5},
+                        {"observed_ms": exact["observed_ms"]+1}):
+            candidate = {**exact, **changed}
+            self.assertEqual(e.notification_score(candidate),
+                             {"status": "identity_mismatch", "score": None})
+
+    def test_missing_row_is_pending_and_invalid_side_is_rejected(self):
+        e = self.engine(2.)
+        self.assertIsNone(e.notification_score(self.event()))
+        with self.assertRaisesRegex(ValueError, "side must"):
+            e.notification_score(self.event("unexpected"))
+
+    def test_feature_error_and_excluded_rows_are_returned_as_terminal(self):
+        e = self.engine(2.)
+        e.client.get = lambda *_args, **_kwargs: []
+        feature_error = self.event()
+        e.handle_touch(self.levels, feature_error["symbol"], feature_error["side"], 93.8,
+                       feature_error["observed_ms"], feature_error["candle_ms"])
+        excluded = self.event(symbol="BTC-USDT-SWAP")
+        e.handle_touch(self.levels, excluded["symbol"], excluded["side"], 93.8,
+                       excluded["observed_ms"], excluded["candle_ms"])
+
+        self.assertEqual(e.notification_score(feature_error), {"status": "feature_error", "score": None})
+        self.assertEqual(e.notification_score(excluded), {"status": "excluded", "score": None})
+
+
 class V3TrackTests(PaperFixture):
     """v3: score-dependent target, -30 percent backstop, linear notional, isolated equity."""
 

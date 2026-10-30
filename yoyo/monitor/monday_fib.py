@@ -11,6 +11,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from datetime import datetime, time, timedelta
 import json
+import math
 from pathlib import Path
 import sqlite3
 from zoneinfo import ZoneInfo
@@ -21,6 +22,7 @@ ZONE = ZoneInfo("America/New_York")
 HOUR = 3_600_000
 MINUTE = 60_000
 FRESH_MS = 90_000
+TELEGRAM_MIN_SCORE = 0.4  # Owner 2026-10-30: strict raw-score notification gate.
 
 
 def week_window(now):
@@ -142,43 +144,92 @@ class FibBook:
                 rows = db.execute("SELECT * FROM touches ORDER BY observed_ms DESC LIMIT ?", (limit or 1000,))
             return [dict(row) for row in rows]
 
-    def claim(self, now):
+    def pending(self, now):
+        """Peek without claiming delivery; score readiness is checked outside the DB lock."""
         with self.db() as db:
             db.execute("BEGIN IMMEDIATE")
             route = db.execute("SELECT * FROM subscription WHERE id=1").fetchone()
             db.execute("UPDATE touches SET status='skipped',error='expired_or_disabled' WHERE status='pending' "
-                       "AND (observed_ms<? OR generation<>? OR ?=0)",
-                       (now - FRESH_MS, route["generation"], route["enabled"]))
-            row = db.execute("SELECT * FROM touches WHERE status='pending' AND due_ms<=? ORDER BY observed_ms LIMIT 1", (now,)).fetchone()
+                       "AND (observed_ms<? OR observed_ms>? OR generation<>? OR ?=0)",
+                       (now - FRESH_MS, now, route["generation"], route["enabled"]))
+            row = db.execute("SELECT * FROM touches WHERE status='pending' AND due_ms<=? "
+                             "ORDER BY due_ms,observed_ms LIMIT 1", (now,)).fetchone()
+            return dict(row) if row else None
+
+    def claim(self, now, event=None):
+        event = event or self.pending(now)
+        if not event:
+            return None
+        with self.db() as db:
+            db.execute("BEGIN IMMEDIATE")
+            route = db.execute("SELECT * FROM subscription WHERE id=1").fetchone()
+            row = db.execute("SELECT * FROM touches WHERE week=? AND symbol=? AND side=? "
+                             "AND status='pending' AND due_ms<=? AND observed_ms BETWEEN ? AND ? "
+                             "AND generation=? AND ?=1",
+                             (event["week"], event["symbol"], event["side"], now, now-FRESH_MS, now,
+                              route["generation"], route["enabled"])).fetchone()
             if row:
                 db.execute("UPDATE touches SET status='sending' WHERE week=? AND symbol=? AND side=?",
                            (row["week"], row["symbol"], row["side"]))
                 return dict(row)
         return None
 
-    def finish(self, event, status, error=None, message_id=None, due_ms=0):
+    def finish(self, event, status, error=None, message_id=None, due_ms=0, *, expected="sending"):
         with self.db() as db:
             db.execute("UPDATE touches SET status=?,error=?,message_id=?,due_ms=? "
-                       "WHERE week=? AND symbol=? AND side=? AND status='sending'",
-                       (status, error, message_id, due_ms, event["week"], event["symbol"], event["side"]))
+                       "WHERE week=? AND symbol=? AND side=? AND status=? AND generation=?",
+                       (status, error, message_id, due_ms, event["week"], event["symbol"], event["side"], expected, event["generation"]))
 
 
-def deliver_once(book, creds, sender, now):
-    """Reuse local Telegram credentials; uncertain HTTP outcomes never auto-retry."""
+def telegram_text(event, score):
+    """Owner 2026-10-30: three short lines; score is raw entry score, not a trade instruction."""
+    symbol = event["symbol"].removesuffix("-USDT-SWAP")
+    side = "上沿" if event["side"] == "upper" else "下沿"
+    observed = datetime.fromtimestamp(event["observed_ms"] / 1000, ZoneInfo("Asia/Shanghai")).strftime("%m-%d %H:%M")
+    label = f"{score:.4f}"
+    if label == f"{TELEGRAM_MIN_SCORE:.4f}" and score > TELEGRAM_MIN_SCORE:
+        label = str(score)  # Do not display an admitted raw score as the excluded boundary.
+    return (f"{symbol} · {side} 1.618\n评分 {label} · 点位 {event['level']:.10g}\n"
+            f"{observed} 北京")
+
+
+def deliver_once(book, creds, sender, now, *, score_lookup=None, clock=None):
+    """Wait for the exact stored score; strictly >0.4. Uncertain sends never auto-retry."""
     if not creds:
         return False
-    event = book.claim(now)
+    event = book.pending(now)
     if not event:
         return False
+    read_error = None
+    try:
+        result = score_lookup(event) if score_lookup else None
+    except Exception:
+        result, read_error = None, "score_read_error"
+    ready_at = clock() if clock else now
+    if not 0 <= ready_at-event["observed_ms"] <= FRESH_MS:
+        book.finish(event, "skipped", "expired_before_score", expected="pending")
+        return True
+    if result is None:
+        book.finish(event, "pending", read_error or "score_pending", due_ms=ready_at+1000, expected="pending")
+        return True
+    score = result.get("score") if isinstance(result, dict) else None
+    if (not isinstance(result, dict) or result.get("status") != "scored"
+            or type(score) not in (int, float) or not math.isfinite(score) or not 0 <= score <= 1):
+        book.finish(event, "skipped", "score_unavailable", expected="pending")
+        return True
+    if score <= TELEGRAM_MIN_SCORE:
+        book.finish(event, "skipped", "score_not_above_0_4", expected="pending")
+        return True
+    # A score read can race a subscription change or another sender. Revalidate
+    # and claim this exact event only after eligibility is known.
+    event = book.claim(ready_at, event)
+    if not event:
+        return True
     route = book.subscription()
     if not route["enabled"] or route["generation"] != event["generation"]:
         book.finish(event, "skipped", "subscription_changed")
         return True
-    side = "上方" if event["side"] == "upper" else "下方"
-    observed = datetime.fromtimestamp(event["observed_ms"] / 1000, ZoneInfo("Asia/Shanghai")).strftime("%m-%d %H:%M:%S")
-    text = (f"周一 1.618 · {event['symbol']}\n{side} 1.618 本周首次触及\n"
-            f"点位 {event['level']:.10g} · 最新价 {event['price']:.10g}\n"
-            f"周一 {event['week']}（纽约时间）\n观测 {observed}（北京时间）\n位置提醒，不代表入场确认")
+    text = telegram_text(event, score)
     tv = event["symbol"].removesuffix("-SWAP").replace("-", "") + ".P"
     try:
         response = sender("https://api.telegram.org/bot" + creds[0] + "/sendMessage",
@@ -196,7 +247,7 @@ def deliver_once(book, creds, sender, now):
             book.finish(event, "sent", message_id=mid)
         elif payload.get("error_code") == 429:
             delay = max(5, min(3600, int(payload.get("parameters", {}).get("retry_after", 30))))
-            book.finish(event, "pending", "rate_limited", due_ms=now + delay * 1000)
+            book.finish(event, "pending", "rate_limited", due_ms=ready_at + delay * 1000)
         else:
             book.finish(event, "failed", "telegram_rejected")
     except Exception:

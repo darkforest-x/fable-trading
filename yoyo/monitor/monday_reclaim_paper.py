@@ -453,6 +453,43 @@ class ReclaimPaper:
                 self._open_allin(db, sid, levels, symbol, side, level, candle_ms)
         self._refresh_watch()
 
+    def notification_score(self, event):
+        """Read the persisted score for this exact FibBook touch identity.
+
+        Identity is the NY week, symbol, side, candle timestamp, and observation
+        timestamp. A missing signal row returns ``None`` while asynchronous
+        scoring has not persisted it yet. A row with mismatched timestamps is
+        terminal as ``identity_mismatch``; stored ``feature_error`` and
+        ``excluded`` statuses are returned as terminal rows with their raw
+        score (normally ``None``). This method never recomputes a score or
+        mutates the paper ledger.
+        """
+        if not isinstance(event, dict):
+            raise ValueError("event must be a FibBook touch dictionary")
+        side_text = event.get("side")
+        if side_text not in ("lower", "upper"):
+            raise ValueError("side must be 'lower' or 'upper'")
+        try:
+            week = event["week"]
+            symbol = event["symbol"]
+            candle_ms = event["candle_ms"]
+            observed_ms = event["observed_ms"]
+        except KeyError as err:
+            raise ValueError(f"missing touch identity field: {err.args[0]}") from err
+
+        side = 1 if side_text == "lower" else -1
+        with self.db() as db:
+            row = db.execute(
+                "SELECT status,score,candle_ms,observed_ms FROM signals "
+                "WHERE week=? AND symbol=? AND side=?",
+                (week, symbol, side),
+            ).fetchone()
+        if row is None:
+            return None
+        if row["candle_ms"] != candle_ms or row["observed_ms"] != observed_ms:
+            return {"status": "identity_mismatch", "score": None}
+        return {"status": row["status"], "score": row["score"]}
+
     def _open_allin(self, db, sid, levels, symbol, side, level, candle_ms):
         """allin3 row: opposite 1.618 target, -30 percent backstop, notional = 3 x realized equity, one at a time."""
         a = self.allin

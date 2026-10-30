@@ -18,7 +18,7 @@ from pydantic import BaseModel, ConfigDict, StrictBool
 import requests
 
 from yoyo.data.candle_hub import validate
-from .monday_fib import FibBook, baseline, deliver_once, week_window, HOUR, MINUTE, FRESH_MS
+from .monday_fib import FibBook, baseline, deliver_once, week_window, HOUR, MINUTE, FRESH_MS, TELEGRAM_MIN_SCORE
 from .okx import OKX
 from .telegram import credentials
 
@@ -44,6 +44,7 @@ class MondayFibService:
         self.attempts = {}
         # Read-only observers (paper engines); they must only enqueue and never raise.
         self.listeners = []
+        self.telegram_score_lookup = None  # Wired to the existing paper ledger before workers start.
 
     def start(self):
         if self.threads:
@@ -235,7 +236,8 @@ class MondayFibService:
         while not self.stop.is_set():
             try:
                 if self.book.subscription()["enabled"]:
-                    deliver_once(self.book, credentials(), requests.post, self.client.clock())
+                    deliver_once(self.book, credentials(), requests.post, self.client.clock(),
+                                 score_lookup=self.telegram_score_lookup, clock=self.client.clock)
             except Exception:
                 # No exception string can expose the token-bearing request URL.
                 pass
@@ -278,7 +280,8 @@ class MondayFibService:
         if compact:
             return result
         return {**result,
-                "telegram": {**self.book.subscription(), "configured": bool(credentials())},
+                "telegram": {**self.book.subscription(), "configured": bool(credentials()),
+                             "min_score_exclusive": TELEGRAM_MIN_SCORE},
                 "counts": {"total": len(rows), "ready": sum(r["state"] == "ready" and not r["stale"] for r in rows),
                            "touched": len(events), "unavailable": sum(r["state"] != "ready" or r["stale"] for r in rows)},
                 "events": events[:40]}

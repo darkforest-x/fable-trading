@@ -86,6 +86,7 @@ def create_app(runtime=None, start_monitor=True):
     from yoyo.monitor.monday_reclaim_paper import ReclaimPaper, install as install_reclaim_paper
     reclaim_paper = ReclaimPaper(runtime, monday_fib)
     monday_fib.listeners.append(reclaim_paper)
+    monday_fib.telegram_score_lookup = reclaim_paper.notification_score
     from yoyo.monitor.spike_alert import SpikeAlert, install as install_spike_alert
     spike_alert = SpikeAlert(runtime)  # owner 2026-10-27: notify only, never touches positions
     monday_fib.listeners.append(spike_alert)

@@ -1,3 +1,10 @@
+## 2026-10-30 · Compact Telegram touches only above score 0.4
+
+- Owner's Monday 1.618 Telegram notification is now three lines: short symbol/upper or lower level, raw score/level price, Beijing observation minute; existing chart button retained. Only finite raw scores strictly >0.4 qualify; 0.4, invalid/missing terminal scores and expired touches cannot send. No model, trading gate or Bark change.
+- Telegram peeks while scoring is pending, reads the stored score for exact NY week/symbol/side/candle/observation identity outside the touch DB lock, then atomically claims/rechecks subscription and original 90s freshness. Pending retries cannot starve later ready rows; uncertain HTTP sends remain non-retryable.
+- 128 focused Fib/paper/Bark tests pass, including strict boundary, delayed score, identity mismatch, disable/expiry races and receipts. Raw evidence: output/telegram/touch-score-20261030/. Monitor restarted; live API confirms min_score_exclusive=0.4, same enabled TG/Bark subscriptions, connected stream, paper alive/queue 0 and four healthy patrol plans. No synthetic Telegram message was sent.
+- Pre-existing uncommitted Bark code preserved and excluded from this commit. Learning: score-gated-alerts-need-event-identity-and-pending-state.md.
+
 ## 2026-10-30 · Owner correction: one sorting icon, no extra row
 
 - Removed the standalone sorting row. One 44px icon target now sits beside search/history/close in the existing header; native choice menu retains score/newest/oldest, URL state and history paging. Time sorting accents the icon; current mode remains in its tooltip and existing footer.
