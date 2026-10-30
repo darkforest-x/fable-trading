@@ -1,0 +1,7 @@
+# Clipped chart windows must normalize timezone representation
+
+- **问题**：A bulk BTC gallery failed on 158 of 859 cases because dynamic window clipping selected a UTC target time or a New York expiry, while the left endpoint retained Shanghai's offset. Comparisons of the instants worked; pandas date_range rejected endpoints with different timezone representations.
+- **死胡同**：A few successful visual samples did not exercise every branch of min/max window selection. Treating successful timezone-aware comparisons as proof that date_range could accept the pair hid the error. A process-pool context also waited for already-submitted work before exposing the first failure, and failed charts retained figures.
+- **有效路径**：Convert both tick-range endpoints to UTC before constructing the range and convert tick labels to Shanghai only for presentation. Close figures in a finally block and cancel pending futures on failure. Keep the original NY expiry and observed target timestamps intact.
+- **通用规则**：Normalize the representation at the boundary of a time-axis builder after dynamic clipping; test windows selected by each branch, including target-derived ends, NY week expiry, and an incomplete current week. Timezone correctness of event comparisons and API input compatibility are separate checks.
+- **牵连**：`yoyo/evaluation/btc_1618_full_gallery.py`; the frozen 859-event ledger and three-target counts are unaffected. Failed batch receipts are invalidated by the renderer commit before delivery.

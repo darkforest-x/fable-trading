@@ -79,7 +79,7 @@ def axes_style(ax):
     for spine in ax.spines.values():spine.set_color('#334052')
 
 
-def render_one(index):
+def _render_one(index):
     five,fifteen,records=DATA;r=records[index];number=r['number'];t=pd.Timestamp(r['start'])
     side=r['side'];upper=side=='upper';end=pd.Timestamp(r['observation_end']);expiry=pd.Timestamp(r['expiry'])
     dirname='上沿_408次' if upper else '下沿_451次'
@@ -143,7 +143,7 @@ def render_one(index):
         label(ax,q,r['level'],f'触达 {hit.tz_convert("Asia/Shanghai"):%H:%M}',GOLD,12,38 if upper else -35)
         ax.set_ylim(ymin,ymax);ax.set_xlim(-1,len(data)+1)
         hours=3 if right-left>pd.Timedelta(hours=12) else 2 if right-left>pd.Timedelta(hours=7) else 1
-        stamps=pd.date_range(left.ceil('h'),right,freq=f'{hours}h',inclusive='left')
+        stamps=pd.date_range(left.tz_convert('UTC').ceil('h'),right.tz_convert('UTC'),freq=f'{hours}h',inclusive='left')
         ax.set_xticks([location(data,s) for s in stamps],stamps.tz_convert('Asia/Shanghai').strftime('%H:%M'))
     fig.text(.055,.371,f'细节窗口：{left.tz_convert("Asia/Shanghai"):%m/%d %H:%M} — {right.tz_convert("Asia/Shanghai"):%m/%d %H:%M}。超出窗口的目标到达点见下方全程图。',fontsize=12.5,color=MUTED)
     ax=fig.add_axes([.055,.135,.925,.155]);axes_style(ax)
@@ -176,13 +176,25 @@ def render_one(index):
     save(receipt,result);return result
 
 
+def render_one(index):
+    """Release figures even if one unusual sample fails before savefig."""
+    try:
+        return _render_one(index)
+    finally:
+        plt.close('all')
+
+
 def render(workers=4,numbers=None):
     records=pd.read_csv(DEST/'events_targets.csv');indices=[n-1 for n in numbers] if numbers else list(range(len(records)))
     with ProcessPoolExecutor(max_workers=workers,mp_context=multiprocessing.get_context('spawn'),initializer=init) as pool:
         futures={pool.submit(render_one,i):i for i in indices};completed=0;rows=[]
-        for f in as_completed(futures):
-            rows.append(f.result());completed+=1
-            if completed%25==0 or completed==len(indices):print(f'rendered {completed}/{len(indices)}',flush=True)
+        try:
+            for f in as_completed(futures):
+                rows.append(f.result());completed+=1
+                if completed%25==0 or completed==len(indices):print(f'rendered {completed}/{len(indices)}',flush=True)
+        except BaseException:
+            for f in futures:f.cancel()
+            raise
     if numbers:return
     rows.sort(key=lambda r:r['number']);assert len(rows)==859
     save(DEST/'gallery_manifest.json',rows)
