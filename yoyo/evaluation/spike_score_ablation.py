@@ -206,7 +206,18 @@ def summarize(config):
             account_rows['symbol'] = account_rows.event.str.split(':').str[0]
             acct,ledger = account(account_rows,cfg)
             ledger.to_csv(root/(arm+'-'+period+'-ledger.csv.gz'),index=False)
+            funded = ledger[ledger.notional > 0]
+            taken = signal[signal.event.isin(funded.trade_id)]
+            skipped = signal[~signal.event.isin(funded.trade_id)]
+            effective = funded.pnl/funded.notional*1e4
+            attribution = dict(funded_native_mean_bp=float(taken.net.mean()),
+                funded_effective_mean_bp=float(effective.mean()),skipped=len(skipped),
+                skipped_native_mean_bp=float(skipped.net.mean()) if len(skipped) else None,
+                effective_winner_mean_bp=float(effective[funded.pnl > 0].mean()),
+                effective_loser_mean_bp=float(effective[funded.pnl < 0].mean()),
+                funded_liquidation_proxy=int((taken.mae_pct >= cfg['liquidation_proxy_pct']).sum()))
             s.update(account=acct,matched_random=controls,
+                funded_attribution=attribution,
                 without_boundary=stats(signal[~signal.reason.eq(0)]))
             result['arms'][arm][period] = s
             headline.append(dict(arm=arm,period=period,opportunities=s['opportunities'],fills=s['fills'],
