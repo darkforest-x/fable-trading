@@ -1,0 +1,1256 @@
+{
+  "config": {
+    "experiment_id": "exp-v3-causal-close-entry-20261030-v1",
+    "question": "Owner: do the agreed conditions one at a time. First, retain current v3 causal scores and exits while entering at the completed touch 5m close.",
+    "single_variable": "Entry at 1.618 versus its first touch candle close. Completed episodes in that touch bar are not reopened. Same eligible events, pre-touch scores, target bands, stop prices and H1 clock.",
+    "scores": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+    "score_column": "causal",
+    "score_cut": 0.5,
+    "far_score": 0.6,
+    "targets": {
+      "0.5-0.6": "range_0.618",
+      ">=0.6": "opposite_1618"
+    },
+    "backstop_pct": 30,
+    "be_offset_bp": 17,
+    "confirmation_minutes": 60,
+    "confirmation_clock": "Touch 5m open floored to H1 plus 120min, identical for resting and touch-close fills; native fill derives it. Prices remain anchored to original 1.618.",
+    "maker_fee": 0.0002,
+    "taker_fee": 0.0005,
+    "fee_read_date": "2026-10-23",
+    "slippage_bp": {
+      "market_entry": 10,
+      "non_target_exit": 10
+    },
+    "seed": 20261030,
+    "controls": "Reuse original three random submissions matched by symbol, NY week, side and pre-submission 14bar relative TR bucket. Same parent-selected v3 target ratios, stop and execution policies; no-touch and rejected opportunities stay zero. Conditional geometry comparison, not random score qualification.",
+    "admission": "No extra EMA/reclaim/volume filter. At the touch close skip if the native original episode already ended in that candle, no source/weekly interval remains, target has no remaining space, or price is beyond original backstop. Accept both inside and outside closes otherwise.",
+    "data": "Existing Binance 5m altcoin histories, 2020 through September 2026; PROVE October30 is a design observation outside this history.",
+    "comparison": "Chronological 2020-2024/2025/2026 segments, same-event opportunity returns, matched random controls, NY-week clustered uncertainty, score bands and concentration; no new threshold search.",
+    "limitations": "Retrospective previously observed history. Causal scoring uses frozen historical approximation of the live score. Limit prices assume pre-positioned orders; close fill has idealized zero latency. No depth, funding or exchange margin model. Independent entry-notional returns, not account returns. Wide original P30 is retained for attribution, not endorsed for sizing.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "results": {
+    "symbols": 491,
+    "events": 2292,
+    "variants": {
+      "rest": {
+        "all": {
+          "opportunities": 2292,
+          "fills": 2292,
+          "mean_opportunity_bp": 145.16488702361693,
+          "mean_fill_bp": 145.16488702361693,
+          "win_pct": 33.02792321116929,
+          "sum_independent_pct": 3327.1792105812997,
+          "censored_fills": 2,
+          "median_fill_bp": 0.008501160689223498,
+          "mean_winner_bp": 1178.0540795801635,
+          "mean_loser_bp": -697.9650579421383,
+          "worst_bp": -3018.560205865945,
+          "best_bp": 8051.945025117338,
+          "without_best_mean_bp": 141.71365169489857,
+          "mean_gross_bp": 157.93975744421655,
+          "mean_fee_bp": 6.068936738226187,
+          "mean_slippage_bp": 6.705933682373473,
+          "positive_net_pct": 50.56719022687609
+        },
+        "2020_2024": {
+          "opportunities": 892,
+          "fills": 892,
+          "mean_opportunity_bp": 321.04052106767443,
+          "mean_fill_bp": 321.04052106767443,
+          "win_pct": 37.33183856502242,
+          "sum_independent_pct": 2863.681447923656,
+          "censored_fills": 0,
+          "median_fill_bp": 0.0030435028115478498,
+          "mean_winner_bp": 1218.6324435424742,
+          "mean_loser_bp": -452.40778405112377,
+          "worst_bp": -3018.500007656765,
+          "best_bp": 4647.703639060911,
+          "without_best_mean_bp": 316.18455797228364,
+          "mean_gross_bp": 333.2691388460154,
+          "mean_fee_bp": 5.961801634843122,
+          "mean_slippage_bp": 6.266816143497758,
+          "positive_net_pct": 50.0
+        },
+        "2025": {
+          "opportunities": 600,
+          "fills": 600,
+          "mean_opportunity_bp": -30.529894006990585,
+          "mean_fill_bp": -30.529894006990585,
+          "win_pct": 29.833333333333336,
+          "sum_independent_pct": -183.17936404194353,
+          "censored_fills": 0,
+          "median_fill_bp": 0.0085092472785861,
+          "mean_winner_bp": 1170.8800959253,
+          "mean_loser_bp": -978.1403264993621,
+          "worst_bp": -3018.5120837404006,
+          "best_bp": 4813.709497704685,
+          "without_best_mean_bp": -38.61710501151767,
+          "mean_gross_bp": -17.376383743440908,
+          "mean_fee_bp": 6.136843596883,
+          "mean_slippage_bp": 7.016666666666667,
+          "positive_net_pct": 54.666666666666664
+        },
+        "2026": {
+          "opportunities": 800,
+          "fills": 800,
+          "mean_opportunity_bp": 80.83464083744833,
+          "mean_fill_bp": 80.83464083744833,
+          "win_pct": 30.625000000000004,
+          "sum_independent_pct": 646.6771266995867,
+          "censored_fills": 2,
+          "median_fill_bp": -0.00815841182945925,
+          "mean_winner_bp": 1128.142030089433,
+          "mean_loser_bp": -696.4725669335685,
+          "worst_bp": -3018.560205865945,
+          "best_bp": 8051.945025117338,
+          "without_best_mean_bp": 70.85828240906297,
+          "mean_gross_bp": 93.93460307195406,
+          "mean_fee_bp": 6.137462234505694,
+          "mean_slippage_bp": 6.9625,
+          "positive_net_pct": 48.125
+        }
+      },
+      "close": {
+        "all": {
+          "opportunities": 2292,
+          "fills": 2047,
+          "mean_opportunity_bp": 57.52684364086823,
+          "mean_fill_bp": 64.41207895694674,
+          "win_pct": 43.18514899853444,
+          "sum_independent_pct": 1318.5152562486996,
+          "censored_fills": 2,
+          "median_fill_bp": -41.041053564218146,
+          "mean_winner_bp": 761.022515361326,
+          "mean_loser_bp": -467.4980814290805,
+          "worst_bp": -3350.3068110256145,
+          "best_bp": 7336.883456507729,
+          "without_best_mean_bp": 60.857596367723495,
+          "mean_gross_bp": 90.9258291064066,
+          "mean_fee_bp": 9.22992015434504,
+          "mean_slippage_bp": 17.283829995114804,
+          "positive_net_pct": 43.42940889106009
+        },
+        "2020_2024": {
+          "opportunities": 892,
+          "fills": 801,
+          "mean_opportunity_bp": 241.89901164229104,
+          "mean_fill_bp": 269.38067214097833,
+          "win_pct": 53.18352059925093,
+          "sum_independent_pct": 2157.739183849236,
+          "censored_fills": 0,
+          "median_fill_bp": 28.803062463693045,
+          "mean_winner_bp": 798.7203685791246,
+          "mean_loser_bp": -335.5316579145886,
+          "worst_bp": -3045.4780294252087,
+          "best_bp": 4375.703922968902,
+          "without_best_mean_bp": 264.24776807744337,
+          "mean_gross_bp": 295.1913498590027,
+          "mean_fee_bp": 9.094073473330237,
+          "mean_slippage_bp": 16.716604244694132,
+          "positive_net_pct": 53.558052434456926
+        },
+        "2025": {
+          "opportunities": 600,
+          "fills": 549,
+          "mean_opportunity_bp": -37.697348652417425,
+          "mean_fill_bp": -41.19928814471847,
+          "win_pct": 39.89071038251366,
+          "sum_independent_pct": -226.18409191450453,
+          "censored_fills": 0,
+          "median_fill_bp": -64.59372684613516,
+          "mean_winner_bp": 764.5347426512072,
+          "mean_loser_bp": -575.9136904001964,
+          "worst_bp": -3350.3068110256145,
+          "best_bp": 4173.36528179639,
+          "without_best_mean_bp": -48.890099403735036,
+          "mean_gross_bp": -14.526329877585965,
+          "mean_fee_bp": 9.241264278061484,
+          "mean_slippage_bp": 17.43169398907104,
+          "positive_net_pct": 39.89071038251366
+        },
+        "2026": {
+          "opportunities": 800,
+          "fills": 697,
+          "mean_opportunity_bp": -76.62997946075399,
+          "mean_fill_bp": -87.95406537819683,
+          "win_pct": 34.28981348637016,
+          "sum_independent_pct": -613.0398356860319,
+          "censored_fills": 2,
+          "median_fill_bp": -102.84985422740588,
+          "mean_winner_bp": 690.6105352472416,
+          "mean_loser_bp": -496.4068361733969,
+          "worst_bp": -3270.423860250851,
+          "best_bp": 7336.883456507729,
+          "without_best_mean_bp": -98.62193538090646,
+          "mean_gross_bp": -60.75773881413512,
+          "mean_fee_bp": 9.377101312985685,
+          "mean_slippage_bp": 17.81922525107604,
+          "positive_net_pct": 34.576757532281206
+        }
+      }
+    },
+    "controls": {
+      "rest": {
+        "all": {
+          "pairs": 2138,
+          "weeks": 227,
+          "signal_bp": 124.90444796422396,
+          "random_bp": 11.170436010352482,
+          "excess_bp": 113.7340119538715,
+          "week_sign_flip_p": 0.00679966001699915,
+          "week_bootstrap_excess_ci95_bp": [
+            24.386331948604816,
+            211.2756067830593
+          ]
+        },
+        "2020_2024": {
+          "pairs": 823,
+          "weeks": 136,
+          "signal_bp": 318.79670244414416,
+          "random_bp": 38.085415015401054,
+          "excess_bp": 280.71128742874316,
+          "week_sign_flip_p": 0.000199990000499975,
+          "week_bootstrap_excess_ci95_bp": [
+            109.68446740800175,
+            447.1778020660649
+          ]
+        },
+        "2025": {
+          "pairs": 567,
+          "weeks": 53,
+          "signal_bp": -67.02845096061431,
+          "random_bp": -39.07473473570581,
+          "excess_bp": -27.9537162249085,
+          "week_sign_flip_p": 0.743962801859907,
+          "week_bootstrap_excess_ci95_bp": [
+            -115.31013957584346,
+            50.09844165771048
+          ]
+        },
+        "2026": {
+          "pairs": 748,
+          "weeks": 39,
+          "signal_bp": 57.06036808910226,
+          "random_bp": 19.643676774871302,
+          "excess_bp": 37.41669131423096,
+          "week_sign_flip_p": 0.33903304834758263,
+          "week_bootstrap_excess_ci95_bp": [
+            -76.79225340289965,
+            150.07627833575745
+          ]
+        }
+      },
+      "close": {
+        "all": {
+          "pairs": 2138,
+          "weeks": 227,
+          "signal_bp": 37.71629959129218,
+          "random_bp": -10.509648987895162,
+          "excess_bp": 48.22594857918733,
+          "week_sign_flip_p": 0.08669566521673916,
+          "week_bootstrap_excess_ci95_bp": [
+            -14.031449502023872,
+            112.13617031176655
+          ]
+        },
+        "2020_2024": {
+          "pairs": 823,
+          "weeks": 136,
+          "signal_bp": 218.07343500394558,
+          "random_bp": 19.355499927542485,
+          "excess_bp": 198.71793507640305,
+          "week_sign_flip_p": 0.0013499325033748313,
+          "week_bootstrap_excess_ci95_bp": [
+            83.20889611629333,
+            297.5948871643714
+          ]
+        },
+        "2025": {
+          "pairs": 567,
+          "weeks": 53,
+          "signal_bp": -55.68217577867269,
+          "random_bp": -35.15843482778811,
+          "excess_bp": -20.52374095088457,
+          "week_sign_flip_p": 0.680265986700665,
+          "week_bootstrap_excess_ci95_bp": [
+            -104.31136721799881,
+            59.95912151087608
+          ]
+        },
+        "2026": {
+          "pairs": 748,
+          "weeks": 39,
+          "signal_bp": -89.92673103684105,
+          "random_bp": -24.68499121541638,
+          "excess_bp": -65.24173982142467,
+          "week_sign_flip_p": 0.9936003199840008,
+          "week_bootstrap_excess_ci95_bp": [
+            -121.8146479918175,
+            -14.522885842803355
+          ]
+        }
+      }
+    },
+    "score_bands": {
+      "rest": {
+        "0.5-0.6": {
+          "all": {
+            "signal": {
+              "opportunities": 1336,
+              "fills": 1336,
+              "mean_opportunity_bp": 77.15363208035171,
+              "mean_fill_bp": 77.15363208035171,
+              "win_pct": 33.458083832335326,
+              "sum_independent_pct": 1030.772524593499,
+              "censored_fills": 1,
+              "median_fill_bp": 0.0085006648627894,
+              "mean_winner_bp": 853.052129858294,
+              "mean_loser_bp": -563.2347080965382,
+              "worst_bp": -3018.560205865945,
+              "best_bp": 3477.1100759044716,
+              "without_best_mean_bp": 74.60684822729993,
+              "mean_gross_bp": 89.85317292608892,
+              "mean_fee_bp": 6.037864199030621,
+              "mean_slippage_bp": 6.661676646706587,
+              "positive_net_pct": 50.22455089820359
+            },
+            "matched_random": {
+              "pairs": 1260,
+              "weeks": 211,
+              "signal_bp": 61.44933356405246,
+              "random_bp": -1.9443986209736819,
+              "excess_bp": 63.39373218502613,
+              "week_sign_flip_p": 0.012349382530873457,
+              "week_bootstrap_excess_ci95_bp": [
+                8.424036790078613,
+                119.45262179428187
+              ]
+            }
+          },
+          "2020_2024": {
+            "signal": {
+              "opportunities": 579,
+              "fills": 579,
+              "mean_opportunity_bp": 176.72306823755505,
+              "mean_fill_bp": 176.72306823755505,
+              "win_pct": 34.369602763385146,
+              "sum_independent_pct": 1023.2265650954438,
+              "censored_fills": 0,
+              "median_fill_bp": -0.0079867249396681,
+              "mean_winner_bp": 859.8097476932204,
+              "mean_loser_bp": -367.8036650639049,
+              "worst_bp": -3018.500007656765,
+              "best_bp": 2107.1145532370574,
+              "without_best_mean_bp": 173.3832905818466,
+              "mean_gross_bp": 189.29260086920866,
+              "mean_fee_bp": 6.006492907992102,
+              "mean_slippage_bp": 6.563039723661485,
+              "positive_net_pct": 48.18652849740933
+            },
+            "matched_random": {
+              "pairs": 536,
+              "weeks": 122,
+              "signal_bp": 170.40227755220346,
+              "random_bp": 12.126064592905303,
+              "excess_bp": 158.27621295929816,
+              "week_sign_flip_p": 9.99950002499875e-05,
+              "week_bootstrap_excess_ci95_bp": [
+                81.42221361651374,
+                236.68108992386456
+              ]
+            }
+          },
+          "2025": {
+            "signal": {
+              "opportunities": 340,
+              "fills": 340,
+              "mean_opportunity_bp": -47.30410721477928,
+              "mean_fill_bp": -47.30410721477928,
+              "win_pct": 33.23529411764706,
+              "sum_independent_pct": -160.83396453024955,
+              "censored_fills": 0,
+              "median_fill_bp": 0.008516612228532,
+              "mean_winner_bp": 882.9953848088704,
+              "mean_loser_bp": -858.2414625979405,
+              "worst_bp": -3018.5120837404006,
+              "best_bp": 2641.266665417373,
+              "without_best_mean_bp": -55.2349944496824,
+              "mean_gross_bp": -34.58178887099138,
+              "mean_fee_bp": 6.045847755552584,
+              "mean_slippage_bp": 6.676470588235294,
+              "positive_net_pct": 55.00000000000001
+            },
+            "matched_random": {
+              "pairs": 324,
+              "weeks": 51,
+              "signal_bp": -65.45000958427214,
+              "random_bp": -28.123180919973212,
+              "excess_bp": -37.32682866429892,
+              "week_sign_flip_p": 0.7238638068096596,
+              "week_bootstrap_excess_ci95_bp": [
+                -151.89881045186397,
+                56.087946387159484
+              ]
+            }
+          },
+          "2026": {
+            "signal": {
+              "opportunities": 417,
+              "fills": 417,
+              "mean_opportunity_bp": 40.378878663862,
+              "mean_fill_bp": 40.378878663862,
+              "win_pct": 32.37410071942446,
+              "sum_independent_pct": 168.37992402830452,
+              "censored_fills": 1,
+              "median_fill_bp": -0.0080516151981431,
+              "mean_winner_bp": 818.0272872022533,
+              "mean_loser_bp": -544.1631568721959,
+              "worst_bp": -3018.560205865945,
+              "best_bp": 3477.1100759044716,
+              "without_best_mean_bp": 32.11750559357212,
+              "mean_gross_bp": 53.24036293074354,
+              "mean_fee_bp": 6.074913523476267,
+              "mean_slippage_bp": 6.786570743405276,
+              "positive_net_pct": 49.16067146282973
+            },
+            "matched_random": {
+              "pairs": 400,
+              "weeks": 39,
+              "signal_bp": 18.240856570073067,
+              "random_bp": 0.40599433461810575,
+              "excess_bp": 17.83486223545495,
+              "week_sign_flip_p": 0.35798210089495525,
+              "week_bootstrap_excess_ci95_bp": [
+                -69.81156201655017,
+                98.37622744719486
+              ]
+            }
+          }
+        },
+        ">=0.6": {
+          "all": {
+            "signal": {
+              "opportunities": 956,
+              "fills": 956,
+              "mean_opportunity_bp": 240.2099043920294,
+              "mean_fill_bp": 240.2099043920294,
+              "win_pct": 32.42677824267782,
+              "sum_independent_pct": 2296.4066859878008,
+              "censored_fills": 1,
+              "median_fill_bp": 0.00850309519357935,
+              "mean_winner_bp": 1646.6859232113752,
+              "mean_loser_bp": -914.7624287034625,
+              "worst_bp": -3018.504152001794,
+              "best_bp": 8051.945025117338,
+              "without_best_mean_bp": 232.03007704048454,
+              "mean_gross_bp": 253.09004710553305,
+              "mean_fee_bp": 6.11236028672543,
+              "mean_slippage_bp": 6.7677824267782425,
+              "positive_net_pct": 51.04602510460251
+            },
+            "matched_random": {
+              "pairs": 878,
+              "weeks": 164,
+              "signal_bp": 215.96759619226054,
+              "random_bp": 29.991269308155406,
+              "excess_bp": 185.97632688410516,
+              "week_sign_flip_p": 0.021698915054247286,
+              "week_bootstrap_excess_ci95_bp": [
+                24.15349809547758,
+                353.11179789842214
+              ]
+            }
+          },
+          "2020_2024": {
+            "signal": {
+              "opportunities": 313,
+              "fills": 313,
+              "mean_opportunity_bp": 588.0047548971925,
+              "mean_fill_bp": 588.0047548971925,
+              "win_pct": 42.81150159744409,
+              "sum_independent_pct": 1840.4548828282122,
+              "censored_fills": 0,
+              "median_fill_bp": 0.0085192930019495,
+              "mean_winner_bp": 1751.5109246917393,
+              "mean_loser_bp": -657.8749301629412,
+              "worst_bp": -3018.5000040265613,
+              "best_bp": 4647.703639060911,
+              "without_best_mean_bp": 574.9928994992318,
+              "mean_gross_bp": 599.6027346561466,
+              "mean_fee_bp": 5.8791299186985215,
+              "mean_slippage_bp": 5.718849840255591,
+              "positive_net_pct": 53.35463258785943
+            },
+            "matched_random": {
+              "pairs": 287,
+              "weeks": 79,
+              "signal_bp": 595.9375099078385,
+              "random_bp": 86.56698932361611,
+              "excess_bp": 509.3705205842224,
+              "week_sign_flip_p": 0.004849757512124394,
+              "week_bootstrap_excess_ci95_bp": [
+                145.83474468178218,
+                787.0790165310892
+              ]
+            }
+          },
+          "2025": {
+            "signal": {
+              "opportunities": 260,
+              "fills": 260,
+              "mean_opportunity_bp": -8.5943844275746,
+              "mean_fill_bp": -8.5943844275746,
+              "win_pct": 25.384615384615383,
+              "sum_independent_pct": -22.34539951169396,
+              "censored_fills": 0,
+              "median_fill_bp": 0.00850670196490895,
+              "mean_winner_bp": 1663.7736164731266,
+              "mean_loser_bp": -1143.307128812545,
+              "worst_bp": -3018.502357690758,
+              "best_bp": 4813.709497704685,
+              "without_best_mean_bp": -27.21331833542115,
+              "mean_gross_bp": 5.122992192586671,
+              "mean_fee_bp": 6.255838158622773,
+              "mean_slippage_bp": 7.461538461538462,
+              "positive_net_pct": 54.230769230769226
+            },
+            "matched_random": {
+              "pairs": 243,
+              "weeks": 49,
+              "signal_bp": -69.13303946240389,
+              "random_bp": -53.67680649001592,
+              "excess_bp": -15.456232972387976,
+              "week_sign_flip_p": 0.5624218789060547,
+              "week_bootstrap_excess_ci95_bp": [
+                -208.97265415298293,
+                148.48873437554346
+              ]
+            }
+          },
+          "2026": {
+            "signal": {
+              "opportunities": 383,
+              "fills": 383,
+              "mean_opportunity_bp": 124.88177615438184,
+              "mean_fill_bp": 124.88177615438184,
+              "win_pct": 28.720626631853786,
+              "sum_independent_pct": 478.29720267128243,
+              "censored_fills": 1,
+              "median_fill_bp": -0.0082027330132952,
+              "mean_winner_bp": 1508.7373963600628,
+              "mean_loser_bp": -894.9363436802054,
+              "worst_bp": -3018.504152001794,
+              "best_bp": 8051.945025117338,
+              "without_best_mean_bp": 104.13030168065681,
+              "mean_gross_bp": 138.24138672439477,
+              "mean_fee_bp": 6.205563572623897,
+              "mean_slippage_bp": 7.154046997389034,
+              "positive_net_pct": 46.99738903394256
+            },
+            "matched_random": {
+              "pairs": 348,
+              "weeks": 37,
+              "signal_bp": 101.68049627189444,
+              "random_bp": 41.755955441829,
+              "excess_bp": 59.92454083006543,
+              "week_sign_flip_p": 0.3107344632768362,
+              "week_bootstrap_excess_ci95_bp": [
+                -140.2182139185733,
+                244.35081145640356
+              ]
+            }
+          }
+        }
+      },
+      "close": {
+        "0.5-0.6": {
+          "all": {
+            "signal": {
+              "opportunities": 1336,
+              "fills": 1178,
+              "mean_opportunity_bp": 20.563624233565925,
+              "mean_fill_bp": 23.321733426183428,
+              "win_pct": 41.511035653650254,
+              "sum_independent_pct": 274.73001976044077,
+              "censored_fills": 1,
+              "median_fill_bp": -43.4232939210915,
+              "mean_winner_bp": 609.9904931793113,
+              "mean_loser_bp": -395.93014524750816,
+              "worst_bp": -3350.3068110256145,
+              "best_bp": 2868.654253422228,
+              "without_best_mean_bp": 20.904288634343082,
+              "mean_gross_bp": 49.85628828128763,
+              "mean_fee_bp": 9.225556552897077,
+              "mean_slippage_bp": 17.30899830220713,
+              "positive_net_pct": 41.935483870967744
+            },
+            "matched_random": {
+              "pairs": 1260,
+              "weeks": 211,
+              "signal_bp": -2.552274627573059,
+              "random_bp": -17.974094838164934,
+              "excess_bp": 15.42182021059187,
+              "week_sign_flip_p": 0.31228438578071094,
+              "week_bootstrap_excess_ci95_bp": [
+                -34.0363421377654,
+                71.19585956061466
+              ]
+            }
+          },
+          "2020_2024": {
+            "signal": {
+              "opportunities": 579,
+              "fills": 509,
+              "mean_opportunity_bp": 124.58186093785062,
+              "mean_fill_bp": 141.7149262927613,
+              "win_pct": 46.95481335952849,
+              "sum_independent_pct": 721.3289748301551,
+              "censored_fills": 0,
+              "median_fill_bp": -13.698095191222246,
+              "mean_winner_bp": 637.4428241898502,
+              "mean_loser_bp": -300.4426661297379,
+              "worst_bp": -2643.502774263107,
+              "best_bp": 2792.1897221627005,
+              "without_best_mean_bp": 136.49745622215113,
+              "mean_gross_bp": 168.05845978975006,
+              "mean_fee_bp": 9.192256483236303,
+              "mean_slippage_bp": 17.151277013752456,
+              "positive_net_pct": 47.54420432220039
+            },
+            "matched_random": {
+              "pairs": 536,
+              "weeks": 122,
+              "signal_bp": 97.11567142512735,
+              "random_bp": -2.5540367693894592,
+              "excess_bp": 99.6697081945168,
+              "week_sign_flip_p": 0.012749362531873407,
+              "week_bootstrap_excess_ci95_bp": [
+                18.629207900755677,
+                184.59632032691644
+              ]
+            }
+          },
+          "2025": {
+            "signal": {
+              "opportunities": 340,
+              "fills": 310,
+              "mean_opportunity_bp": -44.07674193142557,
+              "mean_fill_bp": -48.34223308607965,
+              "win_pct": 42.58064516129032,
+              "sum_independent_pct": -149.86092256684694,
+              "censored_fills": 0,
+              "median_fill_bp": -49.574178336432155,
+              "mean_winner_bp": 592.9751216981198,
+              "mean_loser_bp": -523.9258894429017,
+              "worst_bp": -3350.3068110256145,
+              "best_bp": 2765.8944179286837,
+              "without_best_mean_bp": -57.449795063473715,
+              "mean_gross_bp": -22.139723552216328,
+              "mean_fee_bp": 9.137993404831075,
+              "mean_slippage_bp": 17.06451612903226,
+              "positive_net_pct": 42.58064516129032
+            },
+            "matched_random": {
+              "pairs": 324,
+              "weeks": 51,
+              "signal_bp": -61.32009402583011,
+              "random_bp": -25.869762909696025,
+              "excess_bp": -35.450331116134066,
+              "week_sign_flip_p": 0.7176141192940353,
+              "week_bootstrap_excess_ci95_bp": [
+                -144.34719400114503,
+                53.928464411253586
+              ]
+            }
+          },
+          "2026": {
+            "signal": {
+              "opportunities": 417,
+              "fills": 359,
+              "mean_opportunity_bp": -71.16019964097538,
+              "mean_fill_bp": -82.65683356625831,
+              "win_pct": 32.86908077994429,
+              "sum_independent_pct": -296.7380325028673,
+              "censored_fills": 1,
+              "median_fill_bp": -86.02269594780846,
+              "mean_winner_bp": 573.4220349081124,
+              "mean_loser_bp": -407.277067664515,
+              "worst_bp": -3270.423860250851,
+              "best_bp": 2868.654253422228,
+              "without_best_mean_bp": -90.90071928410325,
+              "mean_gross_bp": -55.56471904300525,
+              "mean_fee_bp": 9.348381932723807,
+              "mean_slippage_bp": 17.74373259052925,
+              "positive_net_pct": 33.42618384401114
+            },
+            "matched_random": {
+              "pairs": 400,
+              "weeks": 39,
+              "signal_bp": -88.50538862560337,
+              "random_bp": -32.24148151238388,
+              "excess_bp": -56.2639071132195,
+              "week_sign_flip_p": 0.9653517324133793,
+              "week_bootstrap_excess_ci95_bp": [
+                -114.67197574564767,
+                0.13087110880630937
+              ]
+            }
+          }
+        },
+        ">=0.6": {
+          "all": {
+            "signal": {
+              "opportunities": 956,
+              "fills": 869,
+              "mean_opportunity_bp": 109.18255611801874,
+              "mean_fill_bp": 120.11337589047861,
+              "win_pct": 45.45454545454545,
+              "sum_independent_pct": 1043.7852364882592,
+              "censored_fills": 1,
+              "median_fill_bp": -38.66233766233671,
+              "mean_winner_bp": 947.9963352271618,
+              "mean_loser_bp": -570.9916720172316,
+              "worst_bp": -3249.49257051461,
+              "best_bp": 7336.883456507729,
+              "without_best_mean_bp": 111.79912464552793,
+              "mean_gross_bp": 146.5989235735989,
+              "mean_fee_bp": 9.235835370116849,
+              "mean_slippage_bp": 17.249712313003453,
+              "positive_net_pct": 45.45454545454545
+            },
+            "matched_random": {
+              "pairs": 878,
+              "weeks": 164,
+              "signal_bp": 95.50491407394615,
+              "random_bp": 0.2024259225147727,
+              "excess_bp": 95.3024881514314,
+              "week_sign_flip_p": 0.0662966851657417,
+              "week_bootstrap_excess_ci95_bp": [
+                -13.300334200180822,
+                207.50819459274857
+              ]
+            }
+          },
+          "2020_2024": {
+            "signal": {
+              "opportunities": 313,
+              "fills": 292,
+              "mean_opportunity_bp": 458.9169996866075,
+              "mean_fill_bp": 491.9213044585894,
+              "win_pct": 64.04109589041096,
+              "sum_independent_pct": 1436.4102090190813,
+              "censored_fills": 0,
+              "median_fill_bp": 395.2445356282277,
+              "mean_winner_bp": 1004.8451445632774,
+              "mean_loser_bp": -425.6158964391571,
+              "worst_bp": -3045.4780294252087,
+              "best_bp": 4375.703922968902,
+              "without_best_mean_bp": 478.57497243621725,
+              "mean_gross_bp": 516.8031342605424,
+              "mean_fee_bp": 8.922925692363842,
+              "mean_slippage_bp": 15.95890410958904,
+              "positive_net_pct": 64.04109589041096
+            },
+            "matched_random": {
+              "pairs": 287,
+              "weeks": 79,
+              "signal_bp": 443.9736485169998,
+              "random_bp": 60.27365905491364,
+              "excess_bp": 383.69998946208614,
+              "week_sign_flip_p": 0.001399930003499825,
+              "week_bootstrap_excess_ci95_bp": [
+                146.8339331578257,
+                544.5518348207752
+              ]
+            }
+          },
+          "2025": {
+            "signal": {
+              "opportunities": 260,
+              "fills": 239,
+              "mean_opportunity_bp": -29.355065133714437,
+              "mean_fill_bp": -31.934380480191457,
+              "win_pct": 36.40167364016737,
+              "sum_independent_pct": -76.32316934765753,
+              "censored_fills": 0,
+              "median_fill_bp": -93.6001605445088,
+              "mean_winner_bp": 1024.8320985800292,
+              "mean_loser_bp": -636.7941415212388,
+              "worst_bp": -3249.49257051461,
+              "best_bp": 4173.36528179639,
+              "without_best_mean_bp": -49.603706792277904,
+              "mean_gross_bp": -4.651216743128186,
+              "mean_fee_bp": 9.375213946268293,
+              "mean_slippage_bp": 17.90794979079498,
+              "positive_net_pct": 36.40167364016737
+            },
+            "matched_random": {
+              "pairs": 243,
+              "weeks": 49,
+              "signal_bp": -48.16495144912946,
+              "random_bp": -47.54333071857757,
+              "excess_bp": -0.6216207305518869,
+              "week_sign_flip_p": 0.5009749512524374,
+              "week_bootstrap_excess_ci95_bp": [
+                -150.58205888333256,
+                129.85898454686344
+              ]
+            }
+          },
+          "2026": {
+            "signal": {
+              "opportunities": 383,
+              "fills": 338,
+              "mean_opportunity_bp": -82.58532720187063,
+              "mean_fill_bp": -93.5804151429481,
+              "win_pct": 35.798816568047336,
+              "sum_independent_pct": -316.3018031831645,
+              "censored_fills": 1,
+              "median_fill_bp": -128.9346997064824,
+              "mean_winner_bp": 804.8935355779627,
+              "mean_loser_bp": -594.57280241129,
+              "worst_bp": -3200.4861849490385,
+              "best_bp": 7336.883456507729,
+              "without_best_mean_bp": -115.62926936149614,
+              "mean_gross_bp": -66.27340182548309,
+              "mean_fee_bp": 9.40760503344135,
+              "mean_slippage_bp": 17.899408284023668,
+              "positive_net_pct": 35.798816568047336
+            },
+            "matched_random": {
+              "pairs": 348,
+              "weeks": 37,
+              "signal_bp": -91.56045794630964,
+              "random_bp": -15.999370184419254,
+              "excess_bp": -75.5610877618904,
+              "week_sign_flip_p": 0.9103044847757612,
+              "week_bootstrap_excess_ci95_bp": [
+                -208.50322411516427,
+                29.134401094905225
+              ]
+            }
+          }
+        }
+      }
+    },
+    "paired_entry_difference": {
+      "all": {
+        "events": 2292,
+        "mean_close_minus_rest_bp": -87.63804338274868,
+        "week_p": 0.9579021048947552,
+        "ci95_bp": [
+          -184.45467786203577,
+          3.458971227569487
+        ]
+      },
+      "2020_2024": {
+        "events": 892,
+        "mean_close_minus_rest_bp": -79.14150942538339,
+        "week_p": 0.8226088695565221,
+        "ci95_bp": [
+          -249.06020387649434,
+          89.05064796874359
+        ]
+      },
+      "2025": {
+        "events": 600,
+        "mean_close_minus_rest_bp": -7.167454645426836,
+        "week_p": 0.5826208689565522,
+        "ci95_bp": [
+          -65.61767098158246,
+          53.09220294001913
+        ]
+      },
+      "2026": {
+        "events": 800,
+        "mean_close_minus_rest_bp": -157.46462029820236,
+        "week_p": 0.9996500174991251,
+        "ci95_bp": [
+          -330.36409676148907,
+          -32.90486570923482
+        ]
+      }
+    },
+    "checks": {
+      "statuses": {
+        "rest": {
+          "admitted": 2292
+        },
+        "close": {
+          "admitted": 2047,
+          "episode_completed_in_touch_bar": 245
+        }
+      },
+      "paths": {
+        "ohlc": {
+          "rest": {
+            "opportunities": 2292,
+            "fills": 2292,
+            "mean_opportunity_bp": 168.47193483709938,
+            "mean_fill_bp": 168.47193483709938,
+            "win_pct": 33.987783595113434,
+            "sum_independent_pct": 3861.3767464663174,
+            "censored_fills": 2,
+            "median_fill_bp": 0.00850386011081915,
+            "mean_winner_bp": 1178.5135061203894,
+            "mean_loser_bp": -681.082360533551,
+            "worst_bp": -3018.560205865945,
+            "best_bp": 8051.945025117338,
+            "without_best_mean_bp": 165.0308728160254,
+            "mean_gross_bp": 181.11388631863366,
+            "mean_fee_bp": 6.032003837555293,
+            "mean_slippage_bp": 6.609947643979058,
+            "positive_net_pct": 51.439790575916234
+          },
+          "close": {
+            "opportunities": 2292,
+            "fills": 2147,
+            "mean_opportunity_bp": 89.65773201387357,
+            "mean_fill_bp": 95.71286528914682,
+            "win_pct": 46.66977177456917,
+            "sum_independent_pct": 2054.955217757982,
+            "censored_fills": 2,
+            "median_fill_bp": -22.905701170843123,
+            "mean_winner_bp": 726.9083931469368,
+            "mean_loser_bp": -459.0602198563094,
+            "worst_bp": -3350.3068110256145,
+            "best_bp": 7336.883456507729,
+            "without_best_mean_bp": 92.3386012671438,
+            "mean_gross_bp": 121.79186758789778,
+            "mean_fee_bp": 9.129770812956822,
+            "mean_slippage_bp": 16.949231485794133,
+            "positive_net_pct": 46.902654867256636
+          }
+        },
+        "olhc": {
+          "rest": {
+            "opportunities": 2292,
+            "fills": 2292,
+            "mean_opportunity_bp": 177.09975982807754,
+            "mean_fill_bp": 177.09975982807754,
+            "win_pct": 35.645724258289704,
+            "sum_independent_pct": 4059.1264952595375,
+            "censored_fills": 2,
+            "median_fill_bp": 0.0085110874450711,
+            "mean_winner_bp": 1154.8517535846854,
+            "mean_loser_bp": -688.3519505279031,
+            "worst_bp": -3018.560205865945,
+            "best_bp": 8051.945025117338,
+            "without_best_mean_bp": 173.662463771644,
+            "mean_gross_bp": 189.54331457429436,
+            "mean_fee_bp": 5.999401168555394,
+            "mean_slippage_bp": 6.444153577661431,
+            "positive_net_pct": 53.18499127399651
+          },
+          "close": {
+            "opportunities": 2292,
+            "fills": 2047,
+            "mean_opportunity_bp": 78.86829875068278,
+            "mean_fill_bp": 88.30783621717876,
+            "win_pct": 45.23693209574988,
+            "sum_independent_pct": 1807.6614073656494,
+            "censored_fills": 2,
+            "median_fill_bp": -29.281054187362617,
+            "mean_winner_bp": 750.6126793745551,
+            "mean_loser_bp": -461.25928486383606,
+            "worst_bp": -3350.3068110256145,
+            "best_bp": 7336.883456507729,
+            "without_best_mean_bp": 84.76503288370344,
+            "mean_gross_bp": 114.59031846667371,
+            "mean_fee_bp": 9.17940457484911,
+            "mean_slippage_bp": 17.103077674645824,
+            "positive_net_pct": 45.481191988275526
+          }
+        }
+      },
+      "first_cohort": "2020-02-15 16:40:00+00:00",
+      "last_cohort": "2026-09-22 18:55:00+00:00",
+      "expected_controls": 6876,
+      "actual_controls": 6414
+    },
+    "concentration": {
+      "rest": {
+        "all": {
+          "best_week": "2024-02-26",
+          "mean_without_best_week_bp": 105.08264964001842,
+          "mean_without_top3_bp": 137.35506779442048
+        },
+        "2020_2024": {
+          "best_week": "2024-02-26",
+          "mean_without_best_week_bp": 228.1179771494951,
+          "mean_without_top3_bp": 308.17586548482524
+        },
+        "2025": {
+          "best_week": "2025-10-27",
+          "mean_without_best_week_bp": -55.021045591913655,
+          "mean_without_top3_bp": -51.6258515405828
+        },
+        "2026": {
+          "best_week": "2026-08-17",
+          "mean_without_best_week_bp": -3.1431226248348207,
+          "mean_without_top3_bp": 59.530816972314206
+        }
+      },
+      "close": {
+        "all": {
+          "best_week": "2024-01-01",
+          "mean_without_best_week_bp": 34.027077857889374,
+          "mean_without_top3_bp": 56.734624737571984
+        },
+        "2020_2024": {
+          "best_week": "2024-01-01",
+          "mean_without_best_week_bp": 212.44534307114333,
+          "mean_without_top3_bp": 255.2615151509855
+        },
+        "2025": {
+          "best_week": "2025-11-10",
+          "mean_without_best_week_bp": -61.33247768479617,
+          "mean_without_top3_bp": -61.93783667259171
+        },
+        "2026": {
+          "best_week": "2026-08-31",
+          "mean_without_best_week_bp": -102.7116669563597,
+          "mean_without_top3_bp": -109.12657162366341
+        }
+      }
+    },
+    "difference_by_close_status": {
+      "admitted": {
+        "events": 2047,
+        "rest_mean_bp": 98.42594653209912,
+        "close_mean_bp": 64.41207895694674,
+        "contribution_bp_per_all_opportunity": -30.37800476716269
+      },
+      "episode_completed_in_touch_bar": {
+        "events": 245,
+        "rest_mean_bp": 535.6735041098901,
+        "close_mean_bp": 0.0,
+        "contribution_bp_per_all_opportunity": -57.260038615585984
+      }
+    },
+    "risk_geometry": {
+      "close": {
+        "stop_distance_pct_quantiles": {
+          "0": 5.371678622668578,
+          "0.5": 30.272434339474717,
+          "0.9": 33.51644563423631,
+          "1": 65.25835698772428
+        }
+      },
+      "rest": {
+        "stop_distance_pct_quantiles": {
+          "0": 29.999999999999975,
+          "0.5": 30.000000000000004,
+          "0.9": 30.000004043213604,
+          "1": 30.00912131346914
+        }
+      }
+    },
+    "boundary_sensitivity": {
+      "close": {
+        "all": {
+          "opportunities": 2290,
+          "fills": 2045,
+          "mean_opportunity_bp": 57.61497261985472,
+          "mean_fill_bp": 64.51749990194001,
+          "win_pct": 43.178484107579465,
+          "sum_independent_pct": 1319.382872994673,
+          "censored_fills": 0,
+          "median_fill_bp": -41.041053564218146,
+          "mean_winner_bp": 760.2851632606668,
+          "mean_loser_bp": -466.6058945662677,
+          "worst_bp": -3350.3068110256145,
+          "best_bp": 7336.883456507729,
+          "without_best_mean_bp": 60.95959092121315,
+          "mean_gross_bp": 91.0285522482266,
+          "mean_fee_bp": 9.22987875215456,
+          "mean_slippage_bp": 17.281173594132028,
+          "positive_net_pct": 43.422982885085574
+        },
+        "2020_2024": {
+          "opportunities": 892,
+          "fills": 801,
+          "mean_opportunity_bp": 241.89901164229104,
+          "mean_fill_bp": 269.38067214097833,
+          "win_pct": 53.18352059925093,
+          "sum_independent_pct": 2157.739183849236,
+          "censored_fills": 0,
+          "median_fill_bp": 28.803062463693045,
+          "mean_winner_bp": 798.7203685791246,
+          "mean_loser_bp": -335.5316579145886,
+          "worst_bp": -3045.4780294252087,
+          "best_bp": 4375.703922968902,
+          "without_best_mean_bp": 264.24776807744337,
+          "mean_gross_bp": 295.1913498590027,
+          "mean_fee_bp": 9.094073473330237,
+          "mean_slippage_bp": 16.716604244694132,
+          "positive_net_pct": 53.558052434456926
+        },
+        "2025": {
+          "opportunities": 600,
+          "fills": 549,
+          "mean_opportunity_bp": -37.697348652417425,
+          "mean_fill_bp": -41.19928814471847,
+          "win_pct": 39.89071038251366,
+          "sum_independent_pct": -226.18409191450453,
+          "censored_fills": 0,
+          "median_fill_bp": -64.59372684613516,
+          "mean_winner_bp": 764.5347426512072,
+          "mean_loser_bp": -575.9136904001964,
+          "worst_bp": -3350.3068110256145,
+          "best_bp": 4173.36528179639,
+          "without_best_mean_bp": -48.890099403735036,
+          "mean_gross_bp": -14.526329877585965,
+          "mean_fee_bp": 9.241264278061484,
+          "mean_slippage_bp": 17.43169398907104,
+          "positive_net_pct": 39.89071038251366
+        },
+        "2026": {
+          "opportunities": 798,
+          "fills": 695,
+          "mean_opportunity_bp": -76.71331064411761,
+          "mean_fill_bp": -88.08233366044007,
+          "win_pct": 34.24460431654676,
+          "sum_independent_pct": -612.1722189400585,
+          "censored_fills": 0,
+          "median_fill_bp": -102.84985422740588,
+          "mean_winner_bp": 687.579048335493,
+          "mean_loser_bp": -494.20362901149065,
+          "worst_bp": -3270.423860250851,
+          "best_bp": 7336.883456507729,
+          "without_best_mean_bp": -98.78113162898212,
+          "mean_gross_bp": -60.891980987975614,
+          "mean_fee_bp": 9.377403032176698,
+          "mean_slippage_bp": 17.81294964028777,
+          "positive_net_pct": 34.53237410071942
+        }
+      },
+      "rest": {
+        "all": {
+          "opportunities": 2290,
+          "fills": 2290,
+          "mean_opportunity_bp": 143.1556452848027,
+          "mean_fill_bp": 143.1556452848027,
+          "win_pct": 32.96943231441048,
+          "sum_independent_pct": 3278.2642770219813,
+          "censored_fills": 0,
+          "median_fill_bp": 0.008501133249652,
+          "mean_winner_bp": 1174.6959534917244,
+          "mean_loser_bp": -697.9650579421383,
+          "worst_bp": -3018.560205865945,
+          "best_bp": 8051.945025117338,
+          "without_best_mean_bp": 139.70051667849756,
+          "mean_gross_bp": 155.92637472102106,
+          "mean_fee_bp": 6.067672667659421,
+          "mean_slippage_bp": 6.703056768558952,
+          "positive_net_pct": 50.5240174672489
+        },
+        "2020_2024": {
+          "opportunities": 892,
+          "fills": 892,
+          "mean_opportunity_bp": 321.04052106767443,
+          "mean_fill_bp": 321.04052106767443,
+          "win_pct": 37.33183856502242,
+          "sum_independent_pct": 2863.681447923656,
+          "censored_fills": 0,
+          "median_fill_bp": 0.0030435028115478498,
+          "mean_winner_bp": 1218.6324435424742,
+          "mean_loser_bp": -452.40778405112377,
+          "worst_bp": -3018.500007656765,
+          "best_bp": 4647.703639060911,
+          "without_best_mean_bp": 316.18455797228364,
+          "mean_gross_bp": 333.2691388460154,
+          "mean_fee_bp": 5.961801634843122,
+          "mean_slippage_bp": 6.266816143497758,
+          "positive_net_pct": 50.0
+        },
+        "2025": {
+          "opportunities": 600,
+          "fills": 600,
+          "mean_opportunity_bp": -30.529894006990585,
+          "mean_fill_bp": -30.529894006990585,
+          "win_pct": 29.833333333333336,
+          "sum_independent_pct": -183.17936404194353,
+          "censored_fills": 0,
+          "median_fill_bp": 0.0085092472785861,
+          "mean_winner_bp": 1170.8800959253,
+          "mean_loser_bp": -978.1403264993621,
+          "worst_bp": -3018.5120837404006,
+          "best_bp": 4813.709497704685,
+          "without_best_mean_bp": -38.61710501151767,
+          "mean_gross_bp": -17.376383743440908,
+          "mean_fee_bp": 6.136843596883,
+          "mean_slippage_bp": 7.016666666666667,
+          "positive_net_pct": 54.666666666666664
+        },
+        "2026": {
+          "opportunities": 798,
+          "fills": 798,
+          "mean_opportunity_bp": 74.90754300003364,
+          "mean_fill_bp": 74.90754300003364,
+          "win_pct": 30.451127819548873,
+          "sum_independent_pct": 597.7621931402686,
+          "censored_fills": 0,
+          "median_fill_bp": -0.0081690659502262,
+          "mean_winner_bp": 1117.2975473908612,
+          "mean_loser_bp": -696.4725669335685,
+          "worst_bp": -3018.560205865945,
+          "best_bp": 8051.945025117338,
+          "without_best_mean_bp": 64.89871303501818,
+          "mean_gross_bp": 87.99643672500886,
+          "mean_fee_bp": 6.134006506930088,
+          "mean_slippage_bp": 6.954887218045113,
+          "positive_net_pct": 47.99498746867168
+        }
+      }
+    },
+    "boundary_cases": [
+      {
+        "event": "FHEUSDT:2026-08-17:+1",
+        "variant": "rest",
+        "net": 3477.1100759044716,
+        "entry_time": "2026-08-22 05:15:00+00:00",
+        "exit_time": "2026-09-23 04:00:00+00:00"
+      },
+      {
+        "event": "FHEUSDT:2026-08-17:+1",
+        "variant": "close",
+        "net": -1498.8660948407692,
+        "entry_time": "2026-08-22 05:15:00+00:00",
+        "exit_time": "2026-09-23 04:00:00+00:00"
+      },
+      {
+        "event": "ONUSDT:2026-09-21:-1",
+        "variant": "rest",
+        "net": 1414.3832800273556,
+        "entry_time": "2026-09-22 18:55:00+00:00",
+        "exit_time": "2026-09-23 04:00:00+00:00"
+      },
+      {
+        "event": "ONUSDT:2026-09-21:-1",
+        "variant": "close",
+        "net": 1412.1044202434332,
+        "entry_time": "2026-09-22 18:55:00+00:00",
+        "exit_time": "2026-09-23 04:00:00+00:00"
+      }
+    ],
+    "native_counts": {
+      "reused_rest": 4584,
+      "reused_close": 2919,
+      "new_orders": 19691,
+      "new_positions": 19691,
+      "new_fills": 39382
+    }
+  },
+  "runtime": {
+    "nautilus_trader": "1.231.0",
+    "pandas": "3.0.5",
+    "numpy": "2.5.3"
+  },
+  "source_commit": "874208b11b74b8d3de38f8146b1dc1fa3a540e99",
+  "training_eligible": false,
+  "production_eligible": false
+}

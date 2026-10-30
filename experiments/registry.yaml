@@ -17,17 +17,17 @@ experiments:
   - experiment_id: exp-v3-causal-close-entry-20261030-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 3e9e15fbba
-    status: active
+    status: rejected
     question: Does v3 retain its opportunity returns when entry waits for the touch5m close under the unchanged pre-touch score?
     single_variable: Entry timing only; causal score0.5/0.6 target bands, original P30/BE17 and touch-derivedH1 clock frozen. Completed touch-bar episodes are not reopened.
-    result: Running491symbols and2292fixedscoreevents; old native resting and exact close fills reused, only missing trades and same-candidate random controls executed.
-    artifacts: []
+    result: 491symbols2292events;rest2292fills+145.16bp/opportunity versus close2047fills+57.53bp.2025-30.53/-37.70bp;2026+80.83/-76.63bp.2026matched748close-89.93bp/random-24.68bp;close-minus-rest95CI[-330.36,-32.90]bp. Reject immediate-close replacement under these frozen rules.
+    artifacts: [v3-causal-close-entry-20261030-v1]
     canonical_report: experiments/active/exp-v3-causal-close-entry-20261030-v1/summary.json
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: Owner authorized conditions one at a time. No EMA/reclaim/volume gate or account overlay. Native1.231.0, real2/5bp fees plus10bp market/non-target slip. Notion4098856479af81d18509f77db7d19e67.
+    notes: Read headline.csv first.245touch-bar-completed episodes not reopened;their missed baseline gains explain57.26bp of87.64bp mean decline,remaining admitted entries explain30.38bp. Both score bands negative in2026.2138matched events;154lack original controls and are not resampled.2boundary marks explicit;exclusion leaves2026close-76.71bp.19691newpositions39382fills reconciled,max3.19e-12bp;7503cachedrows reused.12source-order one-tick parse differences repaired selectively;initial failures retained. No EMA/reclaim/volume gate, training, account overlay or service change. Notion4098856479af81d18509f77db7d19e67.
   - experiment_id: exp-btc-1618-return-count-20261030-v1
     source_repo: darkforest-x/fable-trading
     source_commit: e65c3da9a0

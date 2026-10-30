@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: v3-causal-close-entry-20261030-v1
+    artifact_type: manifest
+    role: fixed_causal_score_v3_resting_vs_touch_close_native_outcomes
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3e9e15fbba
+    generator_commit: 874208b11b
+    source_path: experiments/active/exp-v3-causal-close-entry-20261030-v1/summary.json
+    storage_uri: repo://experiments/active/exp-v3-causal-close-entry-20261030-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    license: internal-research
+    notes: 491coins2292events;fixed0.5/0.6causalscore/P30/BE17/H1. Nativefills and matchedrandom retained, no account projection. Immediateclose2025and2026negative;2026bothscorebandsnegative.19691newpositions39382fills checked;7503cachedrows reused. Precisionaudit preserves12source-order changes and selectively repairs3executedcontrol versions acrossbothentries/paths. Read headline.csv;PROVEdesigncase outside historical sample.
   - artifact_id: btc-1618-three-target-gallery-20261030-v1
     artifact_type: manifest
     role: frozen859_touch_three_target_paired5m15m_charts
