@@ -1,3 +1,9 @@
+## 2026-10-30 · Owner correction: one sorting icon, no extra row
+
+- Removed the standalone sorting row. One 44px icon target now sits beside search/history/close in the existing header; native choice menu retains score/newest/oldest, URL state and history paging. Time sorting accents the icon; current mode remains in its tooltip and existing footer.
+- Stitch GEMINI_3_8_FLASH screen 0ee14c4f3aba409ebba1ea8c88e85516, source docs/design/stitch-20261030-touch-sort-icon/. 38 existing frontend tests and 22 public WebKit interaction/layout checks pass at 320/390/1440 widths, both themes. QA in output/playwright/touch-sort-icon-20261030/. Physical iPhone remains untested; existing WebKit backdrop limitation is unchanged. No backend/service restart needed.
+- Owner's compact icon preference retained in AGENTS/CLAUDE. Learning: compact-controls-must-not-spend-a-new-row.md.
+
 ## 2026-10-30 · Touch records support chronological sorting
 
 - Added a compact sorting select below the ledger tabs: score (existing default), newest time, oldest time. Touches use candle_ms, closed trades exit_ms, holdings fill_ms. Today and history share the selected mode; URL preserves it across reloads.
