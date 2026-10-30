@@ -120,8 +120,8 @@ def render(case, number, five, fifteen, events):
     fig.text(.045, .89, f'OKX BTC-USDT 永续  |  纽约周一 {weekday}  |  周一区间 {low:,.1f} — {high:,.1f} USDT',
              fontsize=14.5, color=MUTED)
     fig.text(.975, .89, badge, ha='right', fontsize=16, color=GREEN if good else RED, fontweight='bold')
-    detail = f'5m 首次触价 {t5.tz_convert(TZ):%m/%d %H:%M} → 返回 {ret5.tz_convert(TZ):%H:%M}' if good else \
-             f'5m 首次触价 {t5.tz_convert(TZ):%m/%d %H:%M} → 截止 {expiry.tz_convert(TZ):%m/%d %H:%M} 未返回'
+    detail = f'本次触达（5m）{t5.tz_convert(TZ):%m/%d %H:%M} → 返回 {ret5.tz_convert(TZ):%H:%M}' if good else \
+             f'本次触达（5m）{t5.tz_convert(TZ):%m/%d %H:%M} → 截止 {expiry.tz_convert(TZ):%m/%d %H:%M} 未返回'
     fig.text(.045, .845, detail, fontsize=16, color=INK)
 
     for ax, data, minutes, hit, ret in zip(axes, frames, [5, 15], [t5, t15], [ret5, ret15]):
@@ -144,7 +144,8 @@ def render(case, number, five, fifteen, events):
         ax.axvspan(j-.5, last+.5, color=GOLD, alpha=.09, zorder=1)
         ax.scatter(j, row.level, s=150, facecolors='none', edgecolors=GOLD, lw=2.2, zorder=11)
         label(ax, j, row.level, f'① 触达 {hit.tz_convert(TZ):%H:%M}', GOLD,
-              -18 if good and row.side == 'lower' else 12, -55 if row.side == 'lower' else 65)
+              -18 if good and row.side == 'lower' else 12,
+              (-28 if good else -55) if row.side == 'lower' else 65)
         if good:
             rj = location(data, ret)
             ax.scatter(rj, row.edge, marker='D', s=90, color=GREEN, edgecolor=BG, lw=1, zorder=11)
@@ -159,13 +160,18 @@ def render(case, number, five, fifteen, events):
             for other in others.itertuples():
                 stamp = pd.Timestamp(other.start)
                 if left <= stamp < t15:
+                    if minutes == 5:
+                        window = five[(five.index >= stamp) & (five.index < stamp+pd.Timedelta(minutes=15))]
+                        stamp = window[(window.low <= other.level) & (window.high >= other.level)].index[0]
                     oj = location(data, stamp)
                     ax.scatter(oj, other.level, s=95, facecolors='none', edgecolors=MUTED, lw=1.6, zorder=10)
                     label(ax, oj, other.level, '前一次触达', MUTED, -15, 62)
         ax.set_ylim(ymin, ymax)
         ax.set_xlim(-1, len(data)+1)
-        ticks = np.arange(0, len(data), max(1, len(data)//6))
-        ax.set_xticks(ticks, data.index[ticks].tz_convert(TZ).strftime('%H:%M'), fontsize=12.5)
+        tick_hours = 2 if right-left > pd.Timedelta(hours=9) else 1
+        tick_times = pd.date_range(left, right, freq=f'{tick_hours}h', inclusive='left')
+        ticks = [location(data, stamp) for stamp in tick_times]
+        ax.set_xticks(ticks, tick_times.strftime('%H:%M'), fontsize=12.5)
         ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:,.0f}'))
         ax.yaxis.set_major_locator(MaxNLocator(nbins=6))
         ax.tick_params(colors=MUTED, axis='both', labelsize=12.5, length=0, pad=9)
@@ -173,7 +179,7 @@ def render(case, number, five, fifteen, events):
         for spine in ax.spines.values():
             spine.set_color('#334052')
         ax.set_xlabel(f'{left:%Y/%m/%d} · 北京时间', fontsize=13, color=MUTED, labelpad=12)
-    fig.text(.045, .125, '金色虚线：1.618    蓝色实线：返回边界    蓝色阴影：周一区间    圆圈：触达    菱形：返回',
+    fig.text(.045, .125, '金色虚线：1.618    蓝色实线：返回边界    蓝色阴影：周一区间    圆圈：触达    菱形：返回    浅金色带：同一15m触达段',
              color=INK, fontsize=13.5)
     fig.text(.045, .083, '同一案例、相同时间窗与价格轴；15m 用于原859次计数，5m 仅细化触价/返回时刻。时间均为K线起始时间。',
              color=MUTED, fontsize=12.5)
