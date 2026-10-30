@@ -10,8 +10,8 @@ Range return means upper -> Monday H, lower -> Monday L. A later bar proves
 ordering. Within the first touch bar, a close inside the edge or an open
 beyond the extension proves ordering; otherwise refine with existing 1m
 bars and retain any residual ordering ambiguity. No OHLC path is invented.
-Future labels are evaluated separately to NY next Monday, 7 days, and the
-fixed data cutoff. Failure to return before a truncated horizon is censored.
+Owner confirmed the return deadline is NY next Monday, without crossing
+weeks. Failure to return before the truncated current week is censored.
 Repeated episodes may share a single return; no independent-trade inference.
 """
 from __future__ import annotations
@@ -127,12 +127,12 @@ def run():
                            episode_last_bar=str(bars.index[last].tz_convert('Asia/Shanghai')),
                            episode_bars=last-i+1, return_bar=str(definite_time) if definite_time is not None else None,
                            same_bar_definite=certain, same_bar_possible=possible)
-                for name, horizon in [('same_week', next_week), ('seven_days', stamp+pd.Timedelta(days=7)), ('through_cutoff', END)]:
+                for name, horizon in [('same_week', next_week)]:
                     end = min(horizon, END)
                     yes = definite_time is not None and definite_time < end
                     maybe = possible_time is not None and possible_time < end
                     row[name] = ('returned' if yes else 'ambiguous' if maybe else
-                                 'pending' if horizon > END or name == 'through_cutoff' else 'not_returned')
+                                 'pending' if horizon > END else 'not_returned')
                 events.append(row)
     frame = pd.DataFrame(events).sort_values(['start', 'side']).reset_index(drop=True)
     assert frame.groupby('side').size().to_dict() == {'lower': 451, 'upper': 408}
@@ -142,7 +142,7 @@ def run():
     summary = dict(start=str(START), end=str(END), events=len(frame), overlap_bars_equal=overlap,
                    source_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
                    training_eligible=False, production_eligible=False, tables={})
-    for name in ['same_week', 'seven_days', 'through_cutoff']:
+    for name in ['same_week']:
         summary['tables'][name] = {side: dict(n=len(g), **g[name].value_counts().to_dict())
                                    for side, g in frame.groupby('side')}
     (EXP/'summary.json').write_text(json.dumps(summary, indent=2)+'\n')
