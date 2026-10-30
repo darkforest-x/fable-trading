@@ -1,3 +1,10 @@
+## 2026-10-30 · Touch records support chronological sorting
+
+- Added a compact sorting select below the ledger tabs: score (existing default), newest time, oldest time. Touches use candle_ms, closed trades exit_ms, holdings fill_ms. Today and history share the selected mode; URL preserves it across reloads.
+- History sorts before LIMIT/OFFSET with matching ID tie direction. Changing sort resets the page and scroll, cancels stale requests, and keeps existing date/funding/held-touch filters.
+- Stitch GEMINI_3_8_FLASH screen 25d6ce16d8a94b95a45b4436f0581907; source in docs/design/stitch-20261030-touch-sort/. 38 frontend and 72 Python checks pass. Chrome/iPhone WebKit each passed 26 fixture checks and 7 public spikeok.com checks; real API ordering and invalid-sort 422 checked. Raw QA: output/playwright/touch-sort-20261030/. Initial system-Python missing-httpx, WebKit native-select sizing, same-document harness and restart-window failures retained; repository venv and final runs pass.
+- Both task browser sessions closed and all recorded PIDs exited; existing WebKit backdrop rendering limitation remains, physical iPhone untested. Monitor restarted to load the read-only API option; paper worker alive/queue 0, market stream connected, all four patrol plans enabled/error-free. Learning: global-history-sort-must-precede-pagination.md.
+
 ## 2026-10-29 · Fixed-alarm laggard selection remains inconclusive
 
 - `exp-alarm-laggard-selection-20261029-v1` (candidates c09b54a9de, summary repair b7d0811c4d) and explicit recovery endpoint expansion `exp-alarm-laggard-recovery-20261029-v2` (60ca6eb3b1). Read `headline.csv` first.632coin archive;1050union fixed alarm times,2025to2026-09-21;primary851six alarms excludingAug22,846with enough candidates,375496known-not-deep coin/alarm observations.5alarms lacked20candidates and remain recorded.

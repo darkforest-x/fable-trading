@@ -897,10 +897,29 @@ class ReclaimPaper:
             result["record_signals"] = record_signals
         return result
 
-    def record_history(self, track="60", tab="events", scope="funded", q="", offset=0, limit=50):
+    @staticmethod
+    def _history_order_by(tab, sort):
+        """Return a fixed SQL order for a history tab and its requested sort."""
+        clauses = {
+            ("events", "score"): "(s.score IS NULL),s.score DESC,(s.candle_ms IS NULL),s.candle_ms DESC,s.id DESC",
+            ("events", "time_desc"): "(s.candle_ms IS NULL),s.candle_ms DESC,s.id DESC",
+            ("events", "time_asc"): "(s.candle_ms IS NULL),s.candle_ms ASC,s.id ASC",
+            ("closed", "score"): "(s.score IS NULL),s.score DESC,(p.exit_ms IS NULL),p.exit_ms DESC,p.id DESC",
+            ("closed", "time_desc"): "(p.exit_ms IS NULL),p.exit_ms DESC,p.id DESC",
+            ("closed", "time_asc"): "(p.exit_ms IS NULL),p.exit_ms ASC,p.id ASC",
+        }
+        try:
+            return clauses[(tab, sort)]
+        except KeyError as exc:
+            raise ValueError("unsupported history tab or sort") from exc
+
+    def record_history(self, track="60", tab="events", scope="funded", q="", offset=0, limit=50,
+                       sort="score"):
         """Read a bounded page of older touch events or closed records, without ledger writes."""
         if tab not in ("events", "closed"):
             raise ValueError("tab must be 'events' or 'closed'")
+        if sort not in ("score", "time_desc", "time_asc"):
+            raise ValueError("sort must be 'score', 'time_desc', or 'time_asc'")
         if scope not in ("funded", "shadow", "all"):
             raise ValueError("scope must be 'funded', 'shadow', or 'all'")
         if not isinstance(offset, int) or offset < 0:
@@ -914,13 +933,14 @@ class ReclaimPaper:
         day_start_ms = shanghai_day_start_ms(now_ms)
         search = "%" + q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
         if tab == "events":
+            order_by = self._history_order_by(tab, sort)
             where = "s.candle_ms<? AND NOT EXISTS (SELECT 1 FROM positions held " \
                     "WHERE held.signal_id=s.id AND " + FUNDED_OPEN_SIGNAL + ") " \
                     "AND (?='' OR LOWER(s.symbol) LIKE LOWER(?) ESCAPE '\\')"
             params = (day_start_ms, q, search)
             count_sql = "SELECT COUNT(*) n FROM signals s WHERE " + where
             rows_sql = "SELECT s.* FROM signals s WHERE " + where + \
-                       " ORDER BY (s.score IS NULL),s.score DESC,s.candle_ms DESC,s.id DESC LIMIT ? OFFSET ?"
+                       " ORDER BY " + order_by + " LIMIT ? OFFSET ?"
             with self.db() as db:
                 db.execute("BEGIN")
                 total = db.execute(count_sql, params).fetchone()["n"]
@@ -928,6 +948,7 @@ class ReclaimPaper:
             for row in rows:
                 row["features"] = json.loads(row["features"]) if row["features"] else None
         else:
+            order_by = self._history_order_by(tab, sort)
             track_id_value = track_id(track)
             tracks = members(track_id_value)
             marks = ",".join("?" for _ in tracks)
@@ -943,7 +964,7 @@ class ReclaimPaper:
             join = " FROM positions p LEFT JOIN signals s ON s.id=p.signal_id WHERE "
             count_sql = "SELECT COUNT(*) n" + join + where
             rows_sql = ("SELECT p.*,s.score,s.ema_order,s.features AS _features" + join + where +
-                        " ORDER BY (s.score IS NULL),s.score DESC,p.exit_ms DESC,p.id DESC LIMIT ? OFFSET ?")
+                        " ORDER BY " + order_by + " LIMIT ? OFFSET ?")
             with self.db() as db:
                 db.execute("BEGIN")
                 total = db.execute(count_sql, params).fetchone()["n"]
@@ -977,8 +998,9 @@ def install(app, engine):
                        tab: Literal["events", "closed"] = "events",
                        scope: Literal["funded", "shadow", "all"] = "funded",
                        q: str = Query("", max_length=100), offset: int = Query(0, ge=0),
-                       limit: int = Query(50, ge=1, le=100)):
-        return JSONResponse(engine.record_history(track, tab, scope, q, offset, limit))
+                       limit: int = Query(50, ge=1, le=100),
+                       sort: Literal["score", "time_desc", "time_asc"] = "score"):
+        return JSONResponse(engine.record_history(track, tab, scope, q, offset, limit, sort))
 
     @app.post("/api/monday-reclaim-paper/positions/{position_id}/close")
     def close_position(position_id: int, payload: CloseRequest, request: Request):

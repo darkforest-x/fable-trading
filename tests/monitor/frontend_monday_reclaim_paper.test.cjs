@@ -60,7 +60,7 @@ test('lists filter independently without mutating or mixing track totals and sha
   assert.equal(d.tracks[60].open[0].id,1);assert.equal(d.tracks[60].stats.taken_closed,42);
 });
 test('route values are bounded and chart links preserve exact contract and selected track period',()=>{
-  assert.deepEqual(ui.route({track:'bad',tab:'bad',scope:'bad'}),{track:'spike',tab:'open',history:'',scope:'funded',q:'',period:'15m',trade:'',symbol:''});
+  assert.deepEqual(ui.route({track:'bad',tab:'bad',scope:'bad'}),{track:'spike',tab:'open',sort:'score',history:'',scope:'funded',q:'',period:'15m',trade:'',symbol:''});
   assert.equal(ui.route({q:'x'.repeat(1000)}).q.length,80);
   assert.equal(ui.chartLink('SOL-USDT-SWAP','5'),'#monday-fib?symbol=SOL-USDT-SWAP&timeframe=5m');
   assert.equal(ui.chartLink('SOL-USDT-SWAP','60'),'#monday-fib?symbol=SOL-USDT-SWAP&timeframe=1H');

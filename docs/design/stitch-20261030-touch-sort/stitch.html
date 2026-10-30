@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>SPIKE · 1.618 移动端极简标的带与纯评分芯片主页 (390px)</title>
+<!-- Tailwind CSS Play CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Google Fonts: Inter & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'PingFang SC', 'sans-serif'],
+            mono: ['JetBrains Mono', 'SF Mono', 'ui-monospace', 'monospace']
+          },
+          colors: {
+            apple: {
+              blue: '#0071E3',
+              'blue-hover': '#0077ED',
+              green: '#10B981',
+              red: '#F43F5E',
+              scrim: 'rgba(0, 0, 0, 0.42)'
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* iOS Momentum Scrolling & Touch Targets */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Apple Clear Glass Shader Simulator */
+    .apple-glass-panel {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    }
+    .dark .apple-glass-panel {
+      background: rgba(18, 22, 30, 0.85);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow: 0 20px 48px -10px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .apple-glass-pill {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.06);
+    }
+    .dark .apple-glass-pill {
+      background: rgba(26, 32, 44, 0.75);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.45);
+    }
+
+    /* Selected Row Blue Glass */
+    .row-selected {
+      background: rgba(0, 113, 227, 0.12) !important;
+      border: 1px solid rgba(0, 113, 227, 0.35) !important;
+    }
+    .dark .row-selected {
+      background: rgba(0, 113, 227, 0.22) !important;
+      border: 1px solid rgba(0, 113, 227, 0.5) !important;
+    }
+
+    /* Drag states */
+    .dragging-row {
+      opacity: 0.95;
+      transform: scale(1.02);
+      box-shadow: 0 12px 28px -4px rgba(0, 113, 227, 0.25), 0 0 0 1px rgba(0, 113, 227, 0.4);
+      z-index: 50;
+      transition: none !important;
+    }
+
+    /* Candlestick Wallpaper styling */
+    .chart-grid-line {
+      stroke: rgba(0, 0, 0, 0.04);
+      stroke-width: 1;
+    }
+    .dark .chart-grid-line {
+      stroke: rgba(255, 255, 255, 0.04);
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-[#eef2f6] dark:bg-[#080b11] text-[#0f172a] dark:text-[#f8fafc] font-sans h-full flex items-center justify-center p-0 sm:p-4 select-none antialiased">
+<!-- Mobile Viewport Shell (Strict 390px * 844px Frame for iPhone Layout) -->
+<div class="relative w-full max-w-[390px] h-full sm:h-[844px] bg-[#f8f9fc] dark:bg-[#0c1017] sm:rounded-[44px] sm:shadow-[0_25px_70px_rgba(0,0,0,0.35)] overflow-hidden flex flex-col sm:border-[8px] sm:border-[#1e2533]" id="mobile-viewport">
+<!-- ========================================================
+         LAYER 0: 100% Fullscreen Candlestick Chart Wallpaper
+         ======================================================== -->
+<div class="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+<!-- Watermark Background -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<span class="text-[88px] font-mono font-bold tracking-tighter text-[#000000]/[0.025] dark:text-[#ffffff]/[0.025] select-none -rotate-12 translate-y-6">SOL 1H</span>
+</div>
+<!-- Simulated Candlestick SVG Layer -->
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 390 844">
+<!-- Grid Reference Lines -->
+<line class="chart-grid-line" stroke-dasharray="4 4" x1="0" x2="390" y1="180" y2="180"></line>
+<line class="chart-grid-line" stroke-dasharray="4 4" x1="0" x2="390" y1="310" y2="310"></line>
+<line class="chart-grid-line" stroke-dasharray="4 4" x1="0" x2="390" y1="460" y2="460"></line>
+<line class="chart-grid-line" stroke-dasharray="4 4" x1="0" x2="390" y1="620" y2="620"></line>
+<!-- Monday Solid Fixed Range Lines -->
+<!-- Upper 1.618 Extension (Solid Rose) -->
+<line opacity="0.85" stroke="#f43f5e" stroke-width="1.25" x1="0" x2="390" y1="210" y2="210"></line>
+<text class="font-mono text-[9px] font-semibold" fill="#f43f5e" text-anchor="end" x="382" y="206">上1.618 198.50</text>
+<!-- Monday High (Subtle Neutral Line) -->
+<line opacity="0.6" stroke="#94a3b8" stroke-dasharray="2 2" stroke-width="0.8" x1="0" x2="390" y1="275" y2="275"></line>
+<text class="font-mono text-[8px]" fill="#94a3b8" text-anchor="end" x="382" y="271">周一高 188.00</text>
+<!-- Current Live Price (Dashed Follow Line) -->
+<line opacity="0.9" stroke="#0071e3" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="390" y1="365" y2="365"></line>
+<text class="font-mono text-[9px] font-bold" fill="#0071e3" text-anchor="end" x="382" y="361">现价 170.96</text>
+<!-- Monday Low -->
+<line opacity="0.6" stroke="#94a3b8" stroke-dasharray="2 2" stroke-width="0.8" x1="0" x2="390" y1="480" y2="480"></line>
+<text class="font-mono text-[8px]" fill="#94a3b8" text-anchor="end" x="382" y="476">周一低 168.00</text>
+<!-- Lower 1.618 Extension (Solid Emerald) -->
+<line opacity="0.85" stroke="#10b981" stroke-width="1.25" x1="0" x2="390" y1="590" y2="590"></line>
+<text class="font-mono text-[9px] font-semibold" fill="#10b981" text-anchor="end" x="382" y="586">下1.618 156.20</text>
+<!-- Candles Path & Bodies (SOL 1H Wave) -->
+<!-- Candle 1: Green -->
+<line stroke="#10b981" stroke-width="1.2" x1="28" x2="28" y1="490" y2="580"></line>
+<rect fill="#10b981" height="50" rx="1.5" width="10" x="23" y="510"></rect>
+<!-- Candle 2: Green -->
+<line stroke="#10b981" stroke-width="1.2" x1="56" x2="56" y1="420" y2="530"></line>
+<rect fill="#10b981" height="70" rx="1.5" width="10" x="51" y="440"></rect>
+<!-- Candle 3: Green -->
+<line stroke="#10b981" stroke-width="1.2" x1="84" x2="84" y1="350" y2="470"></line>
+<rect fill="#10b981" height="75" rx="1.5" width="10" x="79" y="370"></rect>
+<!-- Candle 4: Red Pullback -->
+<line stroke="#f43f5e" stroke-width="1.2" x1="112" x2="112" y1="340" y2="440"></line>
+<rect fill="#f43f5e" height="45" rx="1.5" width="10" x="107" y="370"></rect>
+<!-- Candle 5: Spike Piercing Upper Line -->
+<line stroke="#f43f5e" stroke-width="1.2" x1="140" x2="140" y1="195" y2="390"></line>
+<rect fill="#f43f5e" height="90" rx="1.5" width="10" x="135" y="250"></rect>
+<!-- Candle 6: Red Reversal Confirmation -->
+<line stroke="#f43f5e" stroke-width="1.2" x1="168" x2="168" y1="240" y2="420"></line>
+<rect fill="#f43f5e" height="110" rx="1.5" width="10" x="163" y="270"></rect>
+<!-- Candle 7: Red Down -->
+<line stroke="#f43f5e" stroke-width="1.2" x1="196" x2="196" y1="320" y2="450"></line>
+<rect fill="#f43f5e" height="70" rx="1.5" width="10" x="191" y="360"></rect>
+<!-- Candle 8: Green Pause -->
+<line stroke="#10b981" stroke-width="1.2" x1="224" x2="224" y1="340" y2="460"></line>
+<rect fill="#10b981" height="40" rx="1.5" width="10" x="219" y="380"></rect>
+<!-- Candle 9: Red Drop to BE line -->
+<line stroke="#f43f5e" stroke-width="1.2" x1="252" x2="252" y1="350" y2="490"></line>
+<rect fill="#f43f5e" height="90" rx="1.5" width="10" x="247" y="370"></rect>
+<!-- Candle 10: Red consolidation -->
+<line stroke="#f43f5e" stroke-width="1.2" x1="280" x2="280" y1="360" y2="460"></line>
+<rect fill="#f43f5e" height="50" rx="1.5" width="10" x="275" y="390"></rect>
+<!-- Candle 11: Green test -->
+<line stroke="#10b981" stroke-width="1.2" x1="308" x2="308" y1="345" y2="430"></line>
+<rect fill="#10b981" height="35" rx="1.5" width="10" x="303" y="365"></rect>
+<!-- Candle 12: Live Candle -->
+<line stroke="#f43f5e" stroke-width="1.2" x1="336" x2="336" y1="350" y2="395"></line>
+<rect fill="#f43f5e" height="25" rx="1.5" width="10" x="331" y="360"></rect>
+<!-- Volume Histogram in background -->
+<rect fill="#10b981" height="24" opacity="0.18" width="10" x="23" y="700"></rect>
+<rect fill="#10b981" height="44" opacity="0.25" width="10" x="51" y="680"></rect>
+<rect fill="#10b981" height="54" opacity="0.25" width="10" x="79" y="670"></rect>
+<rect fill="#f43f5e" height="34" opacity="0.22" width="10" x="107" y="690"></rect>
+<rect fill="#f43f5e" height="84" opacity="0.45" width="10" x="135" y="640"></rect>
+<rect fill="#f43f5e" height="64" opacity="0.35" width="10" x="163" y="660"></rect>
+<rect fill="#f43f5e" height="39" opacity="0.25" width="10" x="191" y="685"></rect>
+<rect fill="#10b981" height="19" opacity="0.15" width="10" x="219" y="705"></rect>
+<rect fill="#f43f5e" height="49" opacity="0.3" width="10" x="247" y="675"></rect>
+<rect fill="#f43f5e" height="29" opacity="0.2" width="10" x="275" y="695"></rect>
+<rect fill="#10b981" height="24" opacity="0.18" width="10" x="303" y="700"></rect>
+<rect fill="#f43f5e" height="34" opacity="0.25" width="10" x="331" y="690"></rect>
+</svg>
+</div>
+<!-- ========================================================
+         LAYER 1: Header Bar & Top Touch Ribbon (Active Mobile Chrome)
+         ======================================================== -->
+<header class="relative z-10 pt-safe px-3 pt-3 flex flex-col gap-2 pointer-events-auto">
+<!-- Top Primary Row: App Brand, Live Account Trigger Pill, Light/Dark Switch -->
+<div class="flex items-center justify-between">
+<!-- Left Brand & Open Sheet Trigger (Current Selected: spike) -->
+<button class="apple-glass-pill flex items-center gap-2 pl-2.5 pr-3 py-1.5 rounded-full transition-all active:scale-95 border border-apple-blue/40 ring-2 ring-apple-blue/20" id="account-trigger-btn" title="点击展开模拟账户切换列表">
+<span class="w-2 h-2 rounded-full bg-apple-blue animate-pulse"></span>
+<span class="font-bold text-[13px] tracking-tight">SPIKE</span>
+<span class="text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded bg-apple-blue/10 text-apple-blue dark:bg-apple-blue/20">spike</span>
+<!-- Chevron Up (since popover is open) -->
+<svg class="w-3.5 h-3.5 text-[#64748b] dark:text-[#94a3b8] transition-transform duration-200" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</button>
+<!-- Right Quick Actions: Realized Balance & Dark Mode Toggle -->
+<div class="flex items-center gap-2">
+<!-- Realized P&L Quick Snapshot -->
+<div class="apple-glass-pill px-2.5 py-1.5 rounded-full flex items-center gap-1.5 font-mono text-[11px]">
+<span class="text-[10px] text-[#64748b] dark:text-[#94a3b8]">已结</span>
+<span class="font-semibold text-apple-green">+12.30</span>
+<span class="text-[9px] text-[#94a3b8]">U</span>
+</div>
+<!-- Theme Toggle Button -->
+<button class="apple-glass-pill w-8 h-8 rounded-full flex items-center justify-center text-[#64748b] dark:text-[#94a3b8] active:scale-90 transition-transform" id="theme-toggle" title="切换深浅主题">
+<!-- Sun / Moon Icon -->
+<svg class="w-4 h-4 hidden dark:block text-amber-400" fill="currentColor" viewbox="0 0 20 20">
+<path clip-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd"></path>
+</svg>
+<svg class="w-4 h-4 block dark:hidden text-[#475569]" fill="currentColor" viewbox="0 0 20 20">
+<path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+</svg>
+</button>
+</div>
+</div>
+<!-- ========================================================
+           Top Horizontal Recent-Touch Coin Ribbon (Model Score + Touch Status)
+           ======================================================== -->
+<div class="flex items-center gap-1.5 w-full"><!-- Scrollable Compact Ribbon Container -->
+<div class="flex-1 overflow-x-auto no-scrollbar py-0.5">
+<div class="flex items-center gap-1.5 w-max pr-1" id="coin-chips-list"><!-- Chip 1: SOL (Verified Logo, Active Selected) -->
+<button class="coin-chip active-chip apple-glass-pill px-2.5 py-1 rounded-xl border border-apple-blue/50 ring-1 ring-apple-blue/20 bg-apple-blue/[0.08] flex flex-col justify-center min-w-[76px] h-10 text-left transition-all active:scale-95 shrink-0" data-coin="SOL" data-direction="做空·浮盈中" data-entry="184.50" data-pnl="+7.34%" data-price="170.96" title="更新时间: 16:18">
+<div class="flex items-center gap-1.5 leading-tight">
+<div class="w-4 h-4 rounded-full bg-gradient-to-tr from-purple-500 to-teal-400 flex items-center justify-center text-[7px] text-white font-bold shrink-0 select-none overflow-hidden" data-avatar-coin="SOL">
+<span class="leading-none">S</span>
+</div>
+<span class="font-bold text-[12px] tracking-tight text-[#0f172a] dark:text-[#f8fafc]">SOL</span>
+</div>
+<div class="flex items-center gap-1 font-mono text-[11px] font-semibold text-apple-blue leading-tight mt-0.5">
+<span class="score-val" data-score="SOL">0.6381</span>
+<span class="text-[8px] font-normal text-[#94a3b8] dark:text-[#64748b]">16:18</span>
+</div>
+</button>
+<!-- Chip 2: BTC (Verified Logo) -->
+<button class="coin-chip apple-glass-pill px-2.5 py-1 rounded-xl flex flex-col justify-center min-w-[76px] h-10 text-left transition-all active:scale-95 hover:bg-white/70 dark:hover:bg-white/[0.08] shrink-0" data-coin="BTC" data-direction="做多·持有中" data-entry="63,800" data-pnl="+3.12%" data-price="64,280" title="更新时间: 16:15">
+<div class="flex items-center gap-1.5 leading-tight">
+<div class="w-4 h-4 rounded-full bg-[#f59e0b] flex items-center justify-center text-[7px] text-white font-bold shrink-0 select-none overflow-hidden" data-avatar-coin="BTC">
+<span class="leading-none">₿</span>
+</div>
+<span class="font-bold text-[12px] tracking-tight text-[#334155] dark:text-[#cbd5e1]">BTC</span>
+</div>
+<div class="flex items-center gap-1 font-mono text-[11px] font-medium text-[#475569] dark:text-[#94a3b8] leading-tight mt-0.5">
+<span class="score-val" data-score="BTC">0.5840</span>
+<span class="text-[8px] font-normal text-[#94a3b8] dark:text-[#64748b]">16:15</span>
+</div>
+</button>
+<!-- Chip 3: ETH (Verified Logo) -->
+<button class="coin-chip apple-glass-pill px-2.5 py-1 rounded-xl flex flex-col justify-center min-w-[76px] h-10 text-left transition-all active:scale-95 hover:bg-white/70 dark:hover:bg-white/[0.08] shrink-0" data-coin="ETH" data-direction="做空·浮盈中" data-entry="2,680.0" data-pnl="+1.45%" data-price="2,642.5" title="更新时间: 16:12">
+<div class="flex items-center gap-1.5 leading-tight">
+<div class="w-4 h-4 rounded-full bg-[#6366f1] flex items-center justify-center text-[7px] text-white font-bold shrink-0 select-none overflow-hidden" data-avatar-coin="ETH">
+<span class="leading-none">Ξ</span>
+</div>
+<span class="font-bold text-[12px] tracking-tight text-[#334155] dark:text-[#cbd5e1]">ETH</span>
+</div>
+<div class="flex items-center gap-1 font-mono text-[11px] font-medium text-[#475569] dark:text-[#94a3b8] leading-tight mt-0.5">
+<span class="score-val" data-score="ETH">0.6120</span>
+<span class="text-[8px] font-normal text-[#94a3b8] dark:text-[#64748b]">16:12</span>
+</div>
+</button>
+<!-- Chip 4: AAA (Fallback State, Synthetic Ticker, 2-Char Deterministic Badge 'AA') -->
+<button class="coin-chip apple-glass-pill px-2.5 py-1 rounded-xl flex flex-col justify-center min-w-[76px] h-10 text-left transition-all active:scale-95 hover:bg-white/70 dark:hover:bg-white/[0.08] shrink-0" data-coin="AAA" data-direction="震荡·观察中" data-entry="1.205" data-pnl="+0.45%" data-price="1.238" title="更新时间: 16:05">
+<div class="flex items-center gap-1.5 leading-tight">
+<div class="w-4 h-4 rounded-full bg-apple-red flex items-center justify-center text-[7px] text-white font-bold shrink-0 select-none tracking-tighter" data-avatar-coin="AAA">
+<span class="leading-none">AA</span>
+</div>
+<span class="font-bold text-[12px] tracking-tight text-[#334155] dark:text-[#cbd5e1]">AAA</span>
+</div>
+<div class="flex items-center gap-1 font-mono text-[11px] font-medium text-[#475569] dark:text-[#94a3b8] leading-tight mt-0.5">
+<span class="score-val" data-score="AAA">0.1234</span>
+<span class="text-[8px] font-normal text-[#94a3b8] dark:text-[#64748b]">16:05</span>
+</div>
+</button>
+<!-- Chip 5: BBB (Fallback State, Synthetic Ticker, 2-Char Deterministic Badge 'BB') -->
+<button class="coin-chip apple-glass-pill px-2.5 py-1 rounded-xl flex flex-col justify-center min-w-[76px] h-10 text-left transition-all active:scale-95 hover:bg-white/70 dark:hover:bg-white/[0.08] shrink-0" data-coin="BBB" data-direction="做多·观察中" data-entry="0.840" data-pnl="+2.15%" data-price="0.865" title="更新时间: 15:40">
+<div class="flex items-center gap-1.5 leading-tight">
+<div class="w-4 h-4 rounded-full bg-cyan-500 flex items-center justify-center text-[7px] text-white font-bold shrink-0 select-none tracking-tighter" data-avatar-coin="BBB">
+<span class="leading-none">BB</span>
+</div>
+<span class="font-bold text-[12px] tracking-tight text-[#334155] dark:text-[#cbd5e1]">BBB</span>
+</div>
+<div class="flex items-center gap-1 font-mono text-[11px] font-medium text-[#475569] dark:text-[#94a3b8] leading-tight mt-0.5">
+<span class="score-val" data-score="BBB">0.5678</span>
+<span class="text-[8px] font-normal text-[#94a3b8] dark:text-[#64748b]">15:40</span>
+</div>
+</button>
+<!-- Chip 6: POPMART (Extended Ticker, Deterministic 'PO') -->
+<button class="coin-chip apple-glass-pill px-2.5 py-1 rounded-xl flex flex-col justify-center min-w-[92px] h-10 text-left transition-all active:scale-95 hover:bg-white/70 dark:hover:bg-white/[0.08] shrink-0" data-coin="POPMART" data-direction="做多·持有中" data-entry="42.60" data-pnl="+4.28%" data-price="44.42" title="更新时间: 15:20">
+<div class="flex items-center gap-1.5 leading-tight">
+<div class="w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center text-[7px] text-white font-bold shrink-0 select-none tracking-tighter" data-avatar-coin="POPMART">
+<span class="leading-none">PO</span>
+</div>
+<span class="font-bold text-[11px] tracking-tight text-[#334155] dark:text-[#cbd5e1]">POPMART</span>
+</div>
+<div class="flex items-center gap-1 font-mono text-[11px] font-medium text-[#475569] dark:text-[#94a3b8] leading-tight mt-0.5">
+<span class="score-val" data-score="POPMART">0.7245</span>
+<span class="text-[8px] font-normal text-[#94a3b8] dark:text-[#64748b]">15:20</span>
+</div>
+</button></div>
+</div>
+<!-- Pinned Compact Right Shortcuts: BTC, ETH, XAU -->
+<div class="flex items-center gap-1 pl-1.5 border-l border-[#000000]/10 dark:border-[#ffffff]/10 shrink-0">
+<button class="shortcut-btn w-6 h-6 rounded-md apple-glass-pill flex items-center justify-center font-bold text-[10px] text-[#f59e0b] hover:scale-105 active:scale-90 transition-transform" data-coin="BTC" title="BTC 快捷切换">₿</button>
+<button class="shortcut-btn w-6 h-6 rounded-md apple-glass-pill flex items-center justify-center font-bold text-[10px] text-[#6366f1] hover:scale-105 active:scale-90 transition-transform" data-coin="ETH" title="ETH 快捷切换">Ξ</button>
+<button class="shortcut-btn w-6 h-6 rounded-md apple-glass-pill flex items-center justify-center font-bold text-[9px] text-[#eab308] hover:scale-105 active:scale-90 transition-transform" data-coin="XAU" title="XAU 黄金快捷切换">Au</button>
+</div></div>
+</header>
+<!-- ========================================================
+         LAYER 2: Current Symbol Quick Float Bar (under header)
+         ======================================================== -->
+<div class="relative z-10 px-3 mt-2 flex items-center justify-between pointer-events-auto">
+<div class="apple-glass-pill pl-2.5 pr-3 py-1.5 rounded-2xl flex items-center gap-2"><span class="font-black text-[15px] font-mono tracking-tight" id="current-symbol-title">SOL/USDT</span>
+<span class="text-[10px] px-1.5 py-0.5 rounded bg-apple-red/10 text-apple-red font-semibold font-mono" id="current-symbol-badge">做空·浮盈中</span>
+<div class="flex items-center gap-1 font-mono text-[11px] text-[#64748b] dark:text-[#94a3b8]">
+<span id="current-symbol-entry">入场: 184.50</span>
+<span class="text-apple-green font-semibold" id="current-symbol-pnl">+7.34%</span>
+</div></div>
+<!-- Quick 1R order pill -->
+<button class="apple-glass-pill px-3 py-1.5 rounded-2xl flex items-center gap-1.5 font-bold text-[11px] text-apple-blue active:scale-95 transition-transform">
+<span>⚡ 1.618 挂单</span>
+</button>
+</div>
+<!-- ========================================================
+         LAYER 3: THE SPECIFIED FOCUSED TASK:
+         Anchored 8-Account Drag-Reorder Popover (OPEN STATE)
+         ======================================================== -->
+<!-- Modal Scrim (Subtle, leaves the background chart softly visible) -->
+<div class="absolute inset-x-0 bottom-0 z-30 flex flex-col justify-end pointer-events-none transition-all duration-300" id="records-drawer-scrim" style="top: 0; background: rgba(0, 0, 0, 0.22); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);">
+<!-- Compact Floating Records Drawer: Open State -->
+<div class="pointer-events-auto apple-glass-panel rounded-t-[28px] mx-1 sm:mx-2 mb-1 p-3 flex flex-col shadow-2xl border-t border-x border-white/80 dark:border-white/10 max-h-[580px] overflow-hidden" id="records-drawer-sheet" style="box-shadow: 0 -12px 36px -4px rgba(0,0,0,0.18);">
+<!-- Drawer Drag Pull-Pill -->
+<div class="flex justify-center items-center pb-1.5 pt-0.5 cursor-grab">
+<div class="w-9 h-1 rounded-full bg-[#000000]/20 dark:bg-[#ffffff]/25"></div>
+</div>
+<!-- 1. Drawer Primary Header -->
+<div class="flex items-center justify-between gap-1.5 pb-2 border-b border-[#000000]/[0.06] dark:border-[#ffffff]/[0.08]">
+<!-- Left: Account Identifier Pill -->
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="w-2 h-2 rounded-full bg-apple-blue shrink-0"></span>
+<div class="flex items-baseline gap-1 truncate">
+<span class="font-mono font-bold text-[13px] tracking-tight text-[#0f172a] dark:text-[#f8fafc] truncate" id="drawer-account-id">spike 独立账户</span>
+<span class="text-[9px] font-mono text-[#64748b] dark:text-[#94a3b8] px-1 py-0.5 rounded bg-apple-blue/10 text-apple-blue shrink-0">实时模拟</span>
+</div>
+</div>
+<!-- Right Controls with Guaranteed 44px Tap Target -->
+<div class="flex items-center gap-0.5 shrink-0">
+<!-- Search Action -->
+<button aria-label="搜索" class="w-11 h-11 flex items-center justify-center rounded-xl text-[#64748b] hover:text-apple-blue dark:text-[#94a3b8] hover:bg-apple-blue/10 active:scale-90 transition-all" id="btn-drawer-search" title="搜索标的/记录">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<!-- History Clock Toggle (Outlined Clock Counter-Clockwise) -->
+<button aria-label="历史记录" class="w-11 h-11 flex items-center justify-center rounded-xl text-[#64748b] hover:text-apple-blue dark:text-[#94a3b8] hover:bg-apple-blue/10 active:scale-90 transition-all relative" id="btn-history-toggle" title="历史记录 (切换今日/历史周)">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M3 12a9 9 0 013-6.7L3 3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-apple-blue" id="history-indicator-dot" style="display: none;"></span>
+</button>
+<!-- Close (×) Action -->
+<button aria-label="关闭" class="w-11 h-11 flex items-center justify-center rounded-xl text-[#64748b] hover:text-apple-red dark:text-[#94a3b8] hover:bg-apple-red/10 active:scale-90 transition-all" id="btn-drawer-close" title="收起抽屉">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+<!-- 2. Sub-Header: Mode Banner & Timezone / Quick Return Indicator -->
+<div class="flex items-center justify-between py-1.5 px-0.5 text-[11px] font-mono leading-none">
+<!-- Today Mode Header -->
+<div class="flex items-center gap-1.5 text-[#64748b] dark:text-[#94a3b8]" id="today-mode-bar">
+<span class="font-semibold text-apple-blue text-[12px]">今日</span>
+<span class="text-[10px] text-[#94a3b8] dark:text-[#64748b]">UTC+8 Asia/Shanghai</span>
+</div>
+<!-- History Mode Header (Hidden by default) -->
+<div class="items-center justify-between w-full hidden" id="history-mode-bar">
+<div class="flex items-center gap-1.5">
+<span class="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 font-semibold text-[11px]">历史记录 (历史周)</span>
+<span class="text-[10px] text-[#94a3b8] dark:text-[#64748b]">上周全周期</span>
+</div>
+<button class="flex items-center gap-1 text-[11px] font-bold text-apple-blue px-2.5 py-1 rounded-full bg-apple-blue/10 dark:bg-apple-blue/20 hover:bg-apple-blue/20 active:scale-95 transition-all" id="btn-back-to-today">
+<span>← 返回今日</span>
+</button>
+</div>
+<!-- Funding Scope Selector (shown on 持仓 tab) -->
+<div class="flex items-center gap-1" id="funding-scope-wrapper">
+<span class="text-[10px] text-[#94a3b8] dark:text-[#64748b]">范围:</span>
+<button class="apple-glass-pill px-2 py-0.5 rounded text-[10px] font-medium text-apple-blue border border-apple-blue/30 active:scale-95 transition-all" id="funding-scope-btn">全资产 / 逐仓</button>
+</div>
+</div>
+<!-- 3. Three Tab Controls with Numerical Badges -->
+<div class="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-white/40 dark:bg-white/[0.04] border border-[#000000]/[0.05] dark:border-[#ffffff]/[0.06] mb-2" id="drawer-tabs"><button class="drawer-tab-btn flex items-center justify-center gap-1.5 py-1.5 rounded-xl text-[#64748b] dark:text-[#94a3b8] hover:text-[#0f172a] dark:hover:text-[#f8fafc] text-[12px] font-medium transition-all" data-tab="positions"><span>持仓</span><span class="tab-count font-mono text-[10px] px-1.5 py-0.2 rounded-full bg-[#000000]/5 dark:bg-white/10 leading-tight">1</span></button><button class="drawer-tab-btn flex items-center justify-center gap-1.5 py-1.5 rounded-xl text-[#64748b] dark:text-[#94a3b8] hover:text-[#0f172a] dark:hover:text-[#f8fafc] text-[12px] font-medium transition-all" data-tab="closed"><span>已结束</span><span class="tab-count font-mono text-[10px] px-1.5 py-0.2 rounded-full bg-[#000000]/5 dark:bg-white/10 leading-tight">3</span></button><button class="drawer-tab-btn active-tab flex items-center justify-center gap-1.5 py-1.5 rounded-xl bg-apple-blue text-white shadow-sm text-[12px] font-semibold transition-all" data-tab="touches"><span>触价</span><span class="tab-count font-mono text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 leading-tight">5</span></button></div><div class="flex items-center justify-between gap-2 px-1 py-1 mb-1.5 text-[11px] font-mono" id="records-sort-bar"><div class="flex items-center gap-1.5 shrink-0 text-[#64748b] dark:text-[#94a3b8]"><svg class="w-3.5 h-3.5 text-apple-blue" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg><span class="font-medium text-[11px] text-[#334155] dark:text-[#cbd5e1]">排序</span></div><div class="relative flex-1 max-w-[210px]"><select class="w-full h-[36px] pl-2.5 pr-7 rounded-xl apple-glass-pill text-[11px] font-mono font-medium text-[#0f172a] dark:text-[#f8fafc] border border-apple-blue/30 focus:border-apple-blue focus:outline-none bg-white/80 dark:bg-[#12161e]/90 cursor-pointer appearance-none transition-all" id="records-sort-select"><option value="score_desc">评分优先</option><option selected="" value="time_desc">时间：最新优先</option><option value="time_asc">时间：最早优先</option></select><div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-[#64748b] dark:text-[#94a3b8]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg></div></div></div>
+<!-- 4. Records Dynamic List Container -->
+<div class="flex flex-col gap-1.5 overflow-y-auto no-scrollbar max-h-[300px] py-0.5" id="drawer-records-list"><div class="flex flex-col gap-1.5 tab-panel" id="panel-touches"><div class="apple-glass-pill p-2 rounded-[16px] border border-apple-blue/30 bg-apple-blue/[0.04] flex items-center justify-between transition-all hover:bg-apple-blue/[0.08]"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-500 to-teal-400 flex items-center justify-center text-[10px] text-white font-bold shrink-0 font-mono shadow-sm">S</div><div class="flex flex-col"><div class="flex items-center gap-1.5 leading-tight"><span class="font-mono font-bold text-[13px] text-[#0f172a] dark:text-[#f8fafc]">SOL/USDT</span><span class="text-[9px] font-mono px-1 py-0.5 rounded bg-apple-red/10 text-apple-red font-semibold">空 20x</span><span class="text-[9px] font-mono font-semibold px-1.5 py-0.2 rounded-full bg-emerald-500 text-white tracking-wider flex items-center gap-0.5"><span class="w-1 h-1 rounded-full bg-white animate-pulse"></span>持仓</span></div><div class="flex items-center gap-1.5 text-[10px] font-mono text-[#64748b] dark:text-[#94a3b8] mt-0.5"><span>触价 16:42:15</span><span class="text-apple-blue font-semibold">排列 3/3</span><span class="px-1 rounded bg-[#000000]/5 dark:bg-white/10 text-apple-blue">评分 0.7420</span></div></div></div><div class="flex flex-col items-end font-mono"><span class="text-[11px] font-bold text-apple-green">+7.34% 浮盈</span><span class="text-[9px] text-[#64748b] dark:text-[#94a3b8]">现价 170.96</span></div></div><div class="apple-glass-pill p-2 rounded-[16px] border border-transparent hover:border-black/5 dark:hover:border-white/5 flex items-center justify-between transition-all"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-xl bg-[#f59e0b] flex items-center justify-center text-[10px] text-white font-bold shrink-0 font-mono shadow-sm">₿</div><div class="flex flex-col"><div class="flex items-center gap-1.5 leading-tight"><span class="font-mono font-bold text-[13px] text-[#0f172a] dark:text-[#f8fafc]">BTC/USDT</span><span class="text-[9px] font-mono px-1 py-0.5 rounded bg-apple-green/10 text-apple-green font-semibold">多 10x</span><span class="text-[9px] font-mono px-1 py-0.5 rounded bg-[#000000]/5 dark:bg-white/10 text-[#64748b] dark:text-[#cbd5e1]">已平</span></div><div class="flex items-center gap-1.5 text-[10px] font-mono text-[#64748b] dark:text-[#94a3b8] mt-0.5"><span>触价 16:35:00</span><span class="text-apple-blue font-semibold">排列 3/3</span><span class="px-1 rounded bg-[#000000]/5 dark:bg-white/10">评分 0.6381</span></div></div></div><div class="flex flex-col items-end font-mono"><span class="text-[11px] font-semibold text-apple-green">+3.12% 离场</span><span class="text-[9px] text-[#94a3b8]">现价 64,280</span></div></div><div class="apple-glass-pill p-2 rounded-[16px] border border-transparent hover:border-black/5 dark:hover:border-white/5 flex items-center justify-between transition-all"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-xl bg-[#6366f1] flex items-center justify-center text-[10px] text-white font-bold shrink-0 font-mono shadow-sm">Ξ</div><div class="flex flex-col"><div class="flex items-center gap-1.5 leading-tight"><span class="font-mono font-bold text-[13px] text-[#0f172a] dark:text-[#f8fafc]">ETH/USDT</span><span class="text-[9px] font-mono px-1 py-0.5 rounded bg-apple-red/10 text-apple-red font-semibold">空 20x</span><span class="text-[9px] font-mono px-1 py-0.5 rounded bg-[#000000]/5 dark:bg-white/10 text-[#64748b] dark:text-[#cbd5e1]">已平</span></div><div class="flex items-center gap-1.5 text-[10px] font-mono text-[#64748b] dark:text-[#94a3b8] mt-0.5"><span>触价 16:21:40</span><span class="text-apple-blue font-semibold">排列 2/3</span><span class="px-1 rounded bg-[#000000]/5 dark:bg-white/10">评分 0.6120</span></div></div></div><div class="flex flex-col items-end font-mono"><span class="text-[11px] font-semibold text-apple-green">+1.45% 离场</span><span class="text-[9px] text-[#94a3b8]">现价 2,642.5</span></div></div><div class="apple-glass-pill p-2 rounded-[16px] border border-transparent hover:border-black/5 dark:hover:border-white/5 flex items-center justify-between transition-all"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-xl bg-cyan-500 flex items-center justify-center text-[10px] text-white font-bold shrink-0 font-mono shadow-sm">S</div><div class="flex flex-col"><div class="flex items-center gap-1.5 leading-tight"><span class="font-mono font-bold text-[13px] text-[#0f172a] dark:text-[#f8fafc]">SUI/USDT</span><span class="text-[9px] font-mono px-1 py-0.5 rounded bg-apple-green/10 text-apple-green font-semibold">多 10x</span><span class="text-[9px] font-mono px-1 py-0.5 rounded bg-[#000000]/5 dark:bg-white/10 text-[#64748b] dark:text-[#cbd5e1]">已平</span></div><div class="flex items-center gap-1.5 text-[10px] font-mono text-[#64748b] dark:text-[#94a3b8] mt-0.5"><span>触价 15:48:12</span><span class="text-apple-blue font-semibold">排列 2/3</span><span class="px-1 rounded bg-[#000000]/5 dark:bg-white/10">评分 0.5890</span></div></div></div><div class="flex flex-col items-end font-mono"><span class="text-[11px] font-semibold text-apple-green">+4.20% 离场</span><span class="text-[9px] text-[#94a3b8]">现价 2.145</span></div></div><div class="apple-glass-pill p-2 rounded-[16px] border border-transparent hover:border-black/5 dark:hover:border-white/5 flex items-center justify-between transition-all"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center text-[10px] text-white font-bold shrink-0 font-mono shadow-sm">Ð</div><div class="flex flex-col"><div class="flex items-center gap-1.5 leading-tight"><span class="font-mono font-bold text-[13px] text-[#0f172a] dark:text-[#f8fafc]">DOGE/USDT</span><span class="text-[9px] font-mono px-1 py-0.5 rounded bg-apple-red/10 text-apple-red font-semibold">空 20x</span><span class="text-[9px] font-mono px-1 py-0.5 rounded bg-[#000000]/5 dark:bg-white/10 text-[#64748b] dark:text-[#cbd5e1]">已平</span></div><div class="flex items-center gap-1.5 text-[10px] font-mono text-[#64748b] dark:text-[#94a3b8] mt-0.5"><span>触价 15:10:05</span><span class="text-apple-blue font-semibold">排列 1/3</span><span class="px-1 rounded bg-[#000000]/5 dark:bg-white/10">评分 0.4950</span></div></div></div><div class="flex flex-col items-end font-mono"><span class="text-[11px] font-semibold text-apple-red">-0.65% 离场</span><span class="text-[9px] text-[#94a3b8]">现价 0.1420</span></div></div></div></div>
+<!-- 5. Drawer Micro Footer -->
+<div class="mt-2 pt-1.5 border-t border-[#000000]/[0.05] dark:border-[#ffffff]/[0.06] flex items-center justify-between text-[10px] text-[#94a3b8] dark:text-[#64748b] font-mono"><div class="flex flex-col gap-0.5 min-w-0 pr-1 truncate"><span class="text-[10px] text-[#64748b] dark:text-[#94a3b8] font-medium truncate">当前排序：时间 · 最新优先</span><span class="text-[9px] text-[#94a3b8] dark:text-[#64748b] truncate">数据基于 1.618 周一固定区间算法 · 占位数据</span></div><span class="text-apple-blue flex items-center gap-1 cursor-pointer active:scale-95 transition-all shrink-0" id="btn-drawer-collapse"><span>收起抽屉</span><svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></span></div>
+</div>
+</div>
+<!-- ========================================================
+         LAYER 4: Bottom Controls & Navigation Bar
+         ======================================================== -->
+<div class="mt-auto relative z-10 p-3 pb-safe flex flex-col gap-2 pointer-events-auto">
+<!-- Timeframe Selector Bar -->
+<div class="flex items-center justify-between">
+<div class="apple-glass-pill p-1 rounded-2xl flex items-center gap-1 font-mono text-[11px]"><button class="px-2 py-1 rounded-xl text-[#64748b] dark:text-[#94a3b8] hover:text-[#0f172a] dark:hover:text-[#f8fafc] transition-colors">5m</button>
+<button class="px-2 py-1 rounded-xl text-[#64748b] dark:text-[#94a3b8] hover:text-[#0f172a] dark:hover:text-[#f8fafc] transition-colors">15m</button>
+<button class="px-2 py-1 rounded-xl bg-apple-blue text-white font-bold shadow-sm">1h</button>
+<button class="px-2 py-1 rounded-xl text-[#64748b] dark:text-[#94a3b8] hover:text-[#0f172a] dark:hover:text-[#f8fafc] transition-colors">4h</button>
+<button class="px-2 py-1 rounded-xl text-[#64748b] dark:text-[#94a3b8] hover:text-[#0f172a] dark:hover:text-[#f8fafc] transition-colors">12H</button>
+<button class="px-2 py-1 rounded-xl text-[#64748b] dark:text-[#94a3b8] hover:text-[#0f172a] dark:hover:text-[#f8fafc] transition-colors">1D</button></div>
+<!-- Follow Latest Candle Pill -->
+<button class="apple-glass-pill px-3 py-1.5 rounded-2xl flex items-center gap-1.5 font-bold text-[11px] text-[#334155] dark:text-[#cbd5e1] active:scale-95 transition-transform">
+<span class="w-1.5 h-1.5 rounded-full bg-apple-blue animate-ping"></span>
+<span>跟随最新单</span>
+</button>
+</div>
+<!-- Five Core Tab Navigation Bar (1.618 Selected at center) -->
+<nav class="apple-glass-panel px-3 py-2 rounded-[28px] flex items-center justify-around shadow-lg border border-white/70 dark:border-white/10">
+<!-- Tab 1: 合约 -->
+<button class="flex flex-col items-center gap-0.5 text-[#64748b] dark:text-[#94a3b8] hover:text-apple-blue active:scale-90 transition-transform">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="text-[10px] font-medium leading-none">合约</span>
+</button>
+<!-- Tab 2: 巡检 -->
+<button class="flex flex-col items-center gap-0.5 text-[#64748b] dark:text-[#94a3b8] hover:text-apple-blue active:scale-90 transition-transform">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="text-[10px] font-medium leading-none">巡检</span>
+</button>
+<!-- Tab 3: 1.618 (Active Tab - Centered) -->
+<button class="flex flex-col items-center gap-0.5 text-apple-blue active:scale-90 transition-transform relative">
+<div class="w-8 h-7 rounded-xl bg-apple-blue/15 dark:bg-apple-blue/25 flex items-center justify-center">
+<svg class="w-4 h-4 text-apple-blue" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</div>
+<span class="text-[10px] font-bold leading-none text-apple-blue">1.618</span>
+</button>
+<!-- Tab 4: 持仓 -->
+<button class="flex flex-col items-center gap-0.5 text-[#64748b] dark:text-[#94a3b8] hover:text-apple-blue active:scale-90 transition-transform relative">
+<span class="absolute -top-1 right-1.5 w-3.5 h-3.5 rounded-full bg-apple-red text-white text-[9px] font-bold flex items-center justify-center">1</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="text-[10px] font-medium leading-none">持仓</span>
+</button>
+<!-- Tab 5: 统计 -->
+<button class="flex flex-col items-center gap-0.5 text-[#64748b] dark:text-[#94a3b8] hover:text-apple-blue active:scale-90 transition-transform">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="text-[10px] font-medium leading-none">统计</span>
+</button>
+</nav>
+</div>
+</div>
+<!-- Vanilla JS: Dark Mode Toggle, Non-intrusive Account Selection & Drag-and-Drop Reorder -->
+<script>
+    // 1. Dark Mode toggle
+    const themeBtn = document.getElementById('theme-toggle');
+    themeBtn.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+    });
+
+    // 2. Popover toggle / dismiss
+    const popoverScrim = document.getElementById('popover-scrim');
+    const closeBtn = document.getElementById('close-popover-btn');
+    const triggerBtn = document.getElementById('account-trigger-btn');
+
+    function togglePopover() {
+      popoverScrim.classList.toggle('hidden');
+    }
+    closeBtn.addEventListener('click', () => popoverScrim.classList.add('hidden'));
+    triggerBtn.addEventListener('click', () => popoverScrim.classList.toggle('hidden'));
+    
+    // Close on clicking outside container
+    popoverScrim.addEventListener('click', (e) => {
+      if (e.target === popoverScrim) {
+        popoverScrim.classList.add('hidden');
+      }
+    });
+
+    // 3. Selection vs Strategy Book Independent Behavior
+    const accountRows = document.querySelectorAll('.account-row');
+    accountRows.forEach(row => {
+      // Row click: Select Account
+      row.addEventListener('click', (e) => {
+        // If clicking book button or drag handle, do NOT switch selection
+        if (e.target.closest('.book-action') || e.target.closest('.drag-handle')) {
+          return;
+        }
+        accountRows.forEach(r => r.classList.remove('row-selected'));
+        row.classList.add('row-selected');
+        
+        // Update header trigger label
+        const accountId = row.getAttribute('data-account-id');
+        const triggerLabel = document.querySelector('#account-trigger-btn span.font-mono');
+        if (triggerLabel) triggerLabel.textContent = accountId;
+      });
+    });
+
+    // 4. Book buttons: Independent action (Does not alter selected account)
+    const bookButtons = document.querySelectorAll('.book-action');
+    bookButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const row = btn.closest('.account-row');
+        const accountId = row.getAttribute('data-account-id');
+        // Gentle haptic feedback / visual pulse
+        btn.classList.add('ring-2', 'ring-apple-blue');
+        setTimeout(() => btn.classList.remove('ring-2', 'ring-apple-blue'), 400);
+        console.log(`[Strategy Booklet] 呼出 ${accountId} 白皮书抽屉 (不切换当前选中账户)`);
+      });
+    });
+
+    // 5. Native Touch & Pointer Drag-and-Drop Reorder with Smooth Neighbor Movement
+    const list = document.getElementById('accounts-drag-list');
+    let draggedItem = null;
+    let placeholder = null;
+
+    list.addEventListener('pointerdown', (e) => {
+      const handle = e.target.closest('.drag-handle');
+      if (!handle) return;
+      
+      const item = handle.closest('.account-row');
+      draggedItem = item;
+      item.classList.add('dragging-row');
+
+      // Add temporary document listeners for smooth move & drop
+      function onPointerMove(moveEvent) {
+        if (!draggedItem) return;
+        const targetElement = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+        if (!targetElement) return;
+        
+        const overRow = targetElement.closest('.account-row');
+        if (overRow && overRow !== draggedItem) {
+          const bounding = overRow.getBoundingClientRect();
+          const offset = moveEvent.clientY - bounding.top;
+          if (offset > bounding.height / 2) {
+            overRow.after(draggedItem);
+          } else {
+            overRow.before(draggedItem);
+          }
+        }
+      }
+
+      function onPointerUp() {
+        if (draggedItem) {
+          draggedItem.classList.remove('dragging-row');
+          draggedItem = null;
+          // Persist reorder state log
+          const newOrder = Array.from(list.querySelectorAll('.account-row')).map(r => r.getAttribute('data-account-id'));
+          console.log('[Order Persisted] 当前账户自定义排序:', newOrder);
+        }
+        document.removeEventListener('pointermove', onPointerMove);
+        document.removeEventListener('pointerup', onPointerUp);
+      }
+
+      document.addEventListener('pointermove', onPointerMove);
+      document.addEventListener('pointerup', onPointerUp);
+    });
+  </script>
+</body>
+</html>
+

@@ -10,6 +10,7 @@
  * Seventh account/capital refills: Stitch b218f8c044f442c7bb5650a93a42d7f3.
  * Eighth account/dynamic margin: Stitch a4e9abe06abd4685af45da545b6003d1.
  * Today/history drawer: Stitch 678fa6592e6b4343a02a3a4b745a55b5.
+ * Record sorting: Stitch 25d6ce16d8a94b95a45b4436f0581907.
  */
 (() => {
   'use strict';
@@ -32,6 +33,8 @@
     .filter(p=>funded(p)&&['pending_confirm','breakeven'].includes(p.stage)&&p.fill_ms>0&&p.entry>0&&(p.remaining_notional??p.notional)>0)
     .map(p=>p.signal_id));
   const TRACKS = ['60','5','v3','v3add','spike','v3lock','allin3','v3add20'];
+  const SORTS = {score:'评分优先',time_desc:'时间：最新优先',time_asc:'时间：最早优先'};
+  const recordSort = value => Object.hasOwn(SORTS,value) ? value : 'score';
   const trackLabel = key => ({60:'60m',5:'5m',v3:'v3',v3add:'v3add',spike:'spike',v3lock:'v3lock',allin3:'allin3',v3add20:'v3add20'}[key] || '未知策略');
   const isAddTrack = key => ['v3add','v3add20'].includes(key);
   const marginLeverage = (data,key) => ['spike','allin3','v3add20'].includes(key) ? data?.[key]?.leverage : null;
@@ -69,6 +72,7 @@
   }
   function route(params={}) {
     return {track:TRACKS.includes(params.track) ? params.track : 'spike',tab:['open','closed','events'].includes(params.tab) ? params.tab : 'open',
+      sort:recordSort(params.sort),
       history:params.history==='1'&&['closed','events'].includes(params.tab)?'1':'',
       scope:['funded','shadow','all'].includes(params.scope) ? params.scope : 'funded',q:String(params.q || '').slice(0,80),period:['1m','2m','3m','5m','15m','1H','4H','12H','1D'].includes(params.period)?params.period:'15m',trade:/^\d+$/.test(String(params.trade||''))?String(params.trade):'',symbol:validSymbol(params.symbol)?params.symbol:''};
   }
@@ -109,7 +113,18 @@
     return source.filter(row => (!query || String(row.symbol).toUpperCase().includes(query))
       && (state.tab==='open'||(state.tab==='events'&&held.has(row.id))||row[state.tab==='events'?'candle_ms':'exit_ms']>=start&&row[state.tab==='events'?'candle_ms':'exit_ms']<start+86400000)
       && (state.tab === 'events' || state.scope === 'all' || (state.scope === 'funded' ? funded(row) : !funded(row))))
-      .slice().sort((a,b) => (Number(finite(b.score))-Number(finite(a.score))) || (finite(a.score)&&finite(b.score)?b.score-a.score:0) || (b[state.tab==='events'?'candle_ms':state.tab==='closed'?'exit_ms':'fill_ms']||0)-(a[state.tab==='events'?'candle_ms':state.tab==='closed'?'exit_ms':'fill_ms']||0) || Number(b.id)-Number(a.id));
+      .slice().sort((a,b) => compareRecords(a,b,state));
+  }
+  // Use the displayed event clock, never ingestion time; IDs break ties just
+  // like the history SQL so separately fetched pages retain the same order.
+  function compareRecords(a,b,state) {
+    const sort=recordSort(state.sort),direction=sort==='time_asc'?1:-1;
+    const field=state.tab==='events'?'candle_ms':state.tab==='closed'?'exit_ms':'fill_ms';
+    const time=(Number(finite(b[field]))-Number(finite(a[field])))
+      || (finite(a[field])&&finite(b[field])?direction*(a[field]-b[field]):0)
+      || direction*(Number(a.id)-Number(b.id));
+    return sort==='score' ? (Number(finite(b.score))-Number(finite(a.score)))
+      || (finite(a.score)&&finite(b.score)?b.score-a.score:0) || time : time;
   }
   // History is fetched only while visible; changing filters cancels stale pages.
   function createHistory({read,cancel=()=>{},change=()=>{}}) {
@@ -270,7 +285,7 @@
       <section class="rp-context rp-glass"><div class="rp-context-line"><button type="button" class="rp-symbol-trigger" data-rp-action="watch" aria-controls="rp-watch-panel" aria-expanded="false"><strong data-rp="symbol-label">选择币种</strong><span aria-hidden="true">⌄</span></button><span class="rp-context-score" data-rp="symbol-score" hidden aria-live="polite"><small>入场评分</small><b></b></span></div><span class="rp-selection-status" data-rp="selection-status"></span><small class="rp-selection-note" data-rp="selection-note"></small><div class="rp-context-tools"><div class="rp-track-picker"><span>策略</span><button type="button" class="rp-account-trigger" data-rp="track" aria-label="选择策略" aria-haspopup="dialog" aria-controls="rs-account-picker" aria-expanded="false"><b>spike</b><span aria-hidden="true">⌄</span></button></div><button type="button" data-rp-action="records" aria-controls="rp-record-panel" aria-expanded="false">交易簿 <span data-rp="total">—</span></button></div></section>
       <details class="rp-account rp-glass"><summary><span><small data-rp="account-label">spike 模拟</small> · 已实现净值 <b data-rp="equity">—</b><small> USDT</small></span><span data-rp="pnl"></span><span aria-hidden="true">⌄</span><span class="rp-capital-status" data-rp="capital" hidden title="净值 ÷ 累计本金，不是交易收益率"></span></summary><div class="rp-account-body"><section data-rp="metrics" class="rp-metrics"></section><p data-rp="status" role="status"></p><div data-rp="refills"></div><details class="rp-rules"><summary>规则与统计口径</summary><div data-rp="rules"></div></details></div></details><button class="rp-analysis-trigger rp-glass" data-rp-action="analytics" aria-controls="rp-analysis-panel" aria-expanded="false">统计分析 ↗</button>
       <div class="rp-alert rp-glass" data-rp="error" role="alert" hidden></div>
-      <section id="rp-record-panel" class="rp-records rp-glass" aria-label="模拟交易簿" aria-hidden="true" inert><header class="rp-record-heading rp-ledger-heading" data-yd-sheet-drag><strong data-rp="ledger-label">60m</strong><label class="rp-search" hidden><input type="search" placeholder="搜索币种" aria-label="搜索模拟盘币种" maxlength="80" autocomplete="off" data-rp="search"></label><button type="button" data-rp-action="search" aria-label="搜索币种" aria-expanded="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></button><button type="button" data-rp-action="history" aria-label="历史记录" title="历史记录" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 10a9 9 0 1 1 1.5 7M3 4v6h6M12 7v5l3 2"/></svg></button><button type="button" data-rp-action="close-records" aria-label="收起交易簿">×</button><div class="rp-ledger-period"><span data-rp="list-period">今日 · 北京时间</span><button type="button" data-rp-action="today" hidden>← 返回今日</button></div><div class="rp-ledger-filter"><div class="rp-ledger-tabs" role="group" aria-label="记录类型">${[['open','持仓'],['closed','已结束'],['events','触价']].map(([tab,label])=>`<button type="button" data-rp-tab="${tab}" aria-pressed="false">${label}<span data-rp="count-${tab}"></span></button>`).join('')}</div><label class="rp-scope" data-rp="scope-label" title="记录资金范围"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg><select aria-label="记录资金范围" data-rp="scope"><option value="funded">计入资金</option><option value="shadow">影子记录</option><option value="all">全部记录</option></select></label></div></header><div class="rp-record-scroll"><p data-rp="history-error" class="rp-history-error" role="status" hidden></p><button type="button" data-rp-action="retry-history" class="rp-more" hidden>重试读取历史</button><div data-rp="rows" class="rp-rows"></div><button type="button" data-rp-action="more" class="rp-more" hidden>再显示 50 条</button><div data-rp="pending"></div><p class="rp-record-caption" data-rp="caption"></p><p class="rp-footnote" data-rp="record-note"></p></div></section>
+      <section id="rp-record-panel" class="rp-records rp-glass" aria-label="模拟交易簿" aria-hidden="true" inert><header class="rp-record-heading rp-ledger-heading" data-yd-sheet-drag><strong data-rp="ledger-label">60m</strong><label class="rp-search" hidden><input type="search" placeholder="搜索币种" aria-label="搜索模拟盘币种" maxlength="80" autocomplete="off" data-rp="search"></label><button type="button" data-rp-action="search" aria-label="搜索币种" aria-expanded="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></button><button type="button" data-rp-action="history" aria-label="历史记录" title="历史记录" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 10a9 9 0 1 1 1.5 7M3 4v6h6M12 7v5l3 2"/></svg></button><button type="button" data-rp-action="close-records" aria-label="收起交易簿">×</button><div class="rp-ledger-period"><span data-rp="list-period">今日 · 北京时间</span><button type="button" data-rp-action="today" hidden>← 返回今日</button></div><div class="rp-ledger-filter"><div class="rp-ledger-tabs" role="group" aria-label="记录类型">${[['open','持仓'],['closed','已结束'],['events','触价']].map(([tab,label])=>`<button type="button" data-rp-tab="${tab}" aria-pressed="false">${label}<span data-rp="count-${tab}"></span></button>`).join('')}</div><label class="rp-scope" data-rp="scope-label" title="记录资金范围"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg><select aria-label="记录资金范围" data-rp="scope"><option value="funded">计入资金</option><option value="shadow">影子记录</option><option value="all">全部记录</option></select></label></div><label class="rp-record-sort"><span>排序</span><select aria-label="记录排序" data-rp="sort">${Object.entries(SORTS).map(([value,label])=>`<option value="${value}">${label}</option>`).join('')}</select><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></label></header><div class="rp-record-scroll"><p data-rp="history-error" class="rp-history-error" role="status" hidden></p><button type="button" data-rp-action="retry-history" class="rp-more" hidden>重试读取历史</button><div data-rp="rows" class="rp-rows"></div><button type="button" data-rp-action="more" class="rp-more" hidden>再显示 50 条</button><div data-rp="pending"></div><p class="rp-record-caption" data-rp="caption"></p><p class="rp-footnote" data-rp="record-note"></p></div></section>
       <nav class="rp-dock" aria-label="模拟盘图表工具"><select data-rp="period" aria-label="K 线周期">${['1m','2m','3m','5m','15m','1H','4H','12H','1D'].map(v=>`<option value="${v}">${v}</option>`).join('')}</select><div class="rp-indicators"><button type="button" data-rp-action="indicators" aria-label="图表指标" aria-controls="rp-indicator-panel" aria-expanded="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="var(--rp-canvas)"/><circle cx="15" cy="17" r="3" fill="var(--rp-canvas)"/></svg>指标<span data-rp="indicator-count" hidden></span></button><section id="rp-indicator-panel" class="rp-indicator-panel rp-glass" aria-label="图表指标" aria-hidden="true" inert><strong>图表指标</strong><button type="button" data-rp-action="ma" role="switch" aria-checked="false" aria-label="六均线"><span>六均线<small>SMA / EMA · 20、60、120</small></span><i aria-hidden="true"></i></button><button type="button" data-rp-action="internal" role="switch" aria-checked="false" aria-label="区间点位"><span>区间点位<small>0.5 · 0.618 · 0.705</small></span><i aria-hidden="true"></i></button>${window.SpikeChartDrawings.toolsHTML()}</section></div><button type="button" data-rp-action="fit" title="显示全部已加载 K 线">全图</button><button type="button" data-rp-action="latest" title="回到最新 K 线">最新 K</button><button type="button" data-rp-action="follow" aria-pressed="true">跟随最新单</button></nav><span class="rp-chart-foot">逐周 1.618 区间 · 开平仓按实际成交标记</span>`;
     const heightProperties=new Map([[root.querySelector('.rp-context'),'--rp-context-height'],[root.querySelector('.rp-account>summary'),'--rp-account-summary-height']]);
     const heights=new ResizeObserver(entries=>{
@@ -326,6 +341,7 @@
       if(button.dataset.rpAction==='more'){if(state.history)history.load(true);else{shown+=50;render(feed.getState());}}
     });
     el('scope').addEventListener('change',event=>{state.scope=event.target.value;shown=50;sync();render(feed.getState());});
+    el('sort').addEventListener('change',event=>{state.sort=recordSort(event.target.value);shown=50;root.querySelector('.rp-record-scroll').scrollTop=0;sync();render(feed.getState());});
     el('search').addEventListener('input',event=>{state.q=event.target.value;shown=50;sync();render(feed.getState());});
     root.addEventListener('error',event=>{if(event.target.tagName==='IMG')event.target.hidden=true;},true);
   }
@@ -372,6 +388,7 @@
     root.querySelector('[data-rp-action="today"]').hidden=!state.history;
     el('list-period').textContent=state.history?'历史 · 今日之前':state.tab==='open'?'当前持仓':'今日 · 北京时间';
     el('scope').value=state.scope;el('scope-label').hidden=state.tab==='events';
+    el('sort').value=state.sort;
     const selected=replay?null:state.symbol&&!state.trade?window.SpikeReclaimWatchlist.coinTrade(track,state.symbol):window.SpikeReclaimChart.select(track,state.trade,pinned||history.getState().rows.find(p=>String(p.id)===state.trade));if(state.trade&&selected)pinned=selected;
     chartSymbol=state.symbol||selected?.symbol||(state.trade?'':'BTC-USDT-SWAP');quick?.refresh();
     el('backtest-mode').hidden=!replay;root.classList.toggle('is-backtest',!!replay);if(replay)root.querySelector('[data-rp-action="backtest-list"]').textContent=trackLabel(replay.track)+' · 回测交易';
@@ -403,14 +420,14 @@
     // Closed drawers retain their DOM but do no record formatting or image work.
     if(!recordsOpen)return;
     const held=data?heldSignals(data):new Set(),archive=!!state.history;
-    history.select(archive&&data&&!document.hidden?{track:state.track,tab:state.tab,scope:state.scope,q:state.q.trim(),day:dayStart(data.now_ms),held:Array.from(held).sort().join(',')}:null);
+    history.select(archive&&data&&!document.hidden?{track:state.track,tab:state.tab,scope:state.scope,sort:state.sort,q:state.q.trim(),day:dayStart(data.now_ms),held:Array.from(held).sort().join(',')}:null);
     const past=history.getState();
     for(const tab of ['open','closed','events'])el(`count-${tab}`).textContent=archive&&tab!=='open'?(tab===state.tab&&past.loaded?String(past.total):''):data?String(rows(data,{...state,tab}).length):'—';
     const items=archive?past.rows:data?rows(data,state):[],visible=archive?items:items.slice(0,shown);
     el('history-error').hidden=!archive||!past.error;
     el('history-error').textContent=past.error?`历史读取失败：${past.error}。${past.loaded?'已保留加载的记录。':''}`:'';
     root.querySelector('[data-rp-action="retry-history"]').hidden=!archive||!past.error;
-    el('caption').textContent=archive?(past.busy?'正在读取历史…':past.loaded?`历史${state.tab==='events'?'触价':'已结束'} · 评分优先 · 已显示 ${items.length} / ${past.total} 条`:'历史记录待读取'):!data?(error?'记录暂时不可用':'正在读取记录…'):`${state.tab==='open'?'当前持仓':state.tab==='events'?'今日触价 · 含跨日持仓':'今日已结束'} · 评分优先 · ${items.length} 条`;
+    el('caption').textContent=archive?(past.busy?'正在读取历史…':past.loaded?`历史${state.tab==='events'?'触价':'已结束'} · ${SORTS[state.sort]} · 已显示 ${items.length} / ${past.total} 条`:'历史记录待读取'):!data?(error?'记录暂时不可用':'正在读取记录…'):`${state.tab==='open'?'当前持仓':state.tab==='events'?'今日触价 · 含跨日持仓':'今日已结束'} · ${SORTS[state.sort]} · ${items.length} 条`;
     preferences?.read();
     const rowSignature=visible.length ? visible.map(row=>rowHTML(row,{...state,v3:data.v3,trade:String(selected?.id||state.trade),symbol:chartSymbol},data.now_ms,{favorite:preferences?.has(row.symbol),platform,carried:state.tab==='events'&&row.candle_ms<dayStart(data.now_ms)&&held.has(row.id)})).join('')
       : `<div class="rp-empty"><span aria-hidden="true">${data?'◌':'⋯'}</span><strong>${archive?(past.busy?'正在读取历史':past.error?'历史暂时无法读取':state.q?'没有匹配的历史记录':'暂无历史记录'):!data?(error?'暂时无法读取':'正在读取模拟盘'):missingTrack?'该策略暂不可用':state.q?'没有匹配的币种':state.tab==='open'?'当前没有持仓':state.tab==='closed'?'当前没有已结束记录':'还没有触价记录'}</strong><p>${data?(state.q?'换一个币种或清空搜索。':state.scope==='shadow'&&state.tab!=='events'?'未计入资金的模拟交易会出现在这里。':'后台产生新记录后会自动更新。'):'请稍候，数据会自动重试同步。'}</p></div>`;

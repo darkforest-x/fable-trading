@@ -182,18 +182,62 @@ class TestReclaimRecordHistory(HistoryFixture):
         self.assertTrue(all(row["score"] is None for row in all_rows["rows"][10:]))
         self.assertNotIn(boundary, {row["signal_id"] for row in all_rows["rows"]})
 
+    def test_history_time_sort_is_stable_across_pages_for_touch_and_exit_time(self):
+        for i in range(105):
+            symbol = f"Timed-{i:03d}-USDT-SWAP"
+            candle_ms = DAY_START-1_000 if i in (0, 1) else DAY_START-1_000-i
+            exit_ms = DAY_START-2_000 if i in (0, 1) else DAY_START-2_000-i
+            sid = self.add_signal(symbol, candle_ms, score=(104-i)/100)
+            self.add_position(sid, symbol, exit_ms=exit_ms)
+
+        # Descending timestamps put the higher ID first on a tie; ascending
+        # timestamps reverse both the timestamp and ID directions.
+        for tab, time_field in (("events", "candle_ms"), ("closed", "exit_ms")):
+            for sort, reverse in (("time_desc", True), ("time_asc", False)):
+                first = self.engine.record_history(tab=tab, scope="funded", sort=sort, limit=100)
+                second = self.engine.record_history(tab=tab, scope="funded", sort=sort, offset=100, limit=100)
+                joined = first["rows"] + second["rows"]
+                self.assertEqual((first["total"], len(first["rows"]), first["has_more"]), (105, 100, True))
+                self.assertEqual((second["total"], len(second["rows"]), second["has_more"]), (105, 5, False))
+                self.assertEqual(len({row["id"] for row in joined}), 105)
+                keys = [(row[time_field], row["id"]) for row in joined]
+                expected = sorted(keys, key=lambda pair: pair, reverse=reverse)
+                self.assertEqual(keys, expected)
+
+            scored = self.engine.record_history(tab=tab, scope="funded", limit=100)
+            self.assertEqual(scored["rows"][0]["score"], 1.04)
+
+    def test_history_time_order_clauses_put_null_timestamps_last(self):
+        with self.engine.db() as db:
+            db.execute("CREATE TEMP TABLE sort_probe (id INTEGER, candle_ms INTEGER, exit_ms INTEGER, score REAL)")
+            db.executemany("INSERT INTO sort_probe VALUES (?,?,?,?)",
+                            [(1, None, None, .5), (2, 10, 10, .5), (3, 10, 10, .5)])
+            for tab, alias in (("events", "s"), ("closed", "p")):
+                for sort, expected in (("time_desc", [3, 2, 1]), ("time_asc", [2, 3, 1])):
+                    order = self.engine._history_order_by(tab, sort)
+                    rows = db.execute(f"SELECT {alias}.id FROM sort_probe {alias} ORDER BY {order}").fetchall()
+                    self.assertEqual([row[0] for row in rows], expected)
+
+        for sort in ("descending", "score DESC; DROP TABLE positions"):
+            with self.assertRaisesRegex(ValueError, "sort must be"):
+                self.engine.record_history(sort=sort)
+
     def test_history_api_validates_filters_and_reads_without_mutation(self):
-        sid = self.add_signal("API-USDT-SWAP", DAY_START-1, features={"x": 1})
+        sid = self.add_signal("API-USDT-SWAP", DAY_START-1, score=.1, features={"x": 1})
         self.add_position(sid, "API-USDT-SWAP", exit_ms=DAY_START-1, with_exit=True)
+        older = self.add_signal("API-OLDER-USDT-SWAP", DAY_START-2, score=.9)
+        self.add_position(older, "API-OLDER-USDT-SWAP", exit_ms=DAY_START-2)
         before_positions = self.rows("SELECT * FROM positions ORDER BY id")
         before_tracks = self.rows("SELECT * FROM tracks ORDER BY track")
         app = FastAPI()
         install(app, self.engine)
         routes = {route.path: route for route in app.routes if getattr(route, "path", None)}
         history_route = routes["/api/monday-reclaim-paper/history"]
-        valid = history_route.endpoint(track="60", tab="closed", scope="funded", q="", offset=0, limit=1)
+        valid = history_route.endpoint(track="60", tab="events", scope="funded", q="", offset=0,
+                                       limit=1, sort="time_desc")
         payload = json.loads(valid.body)
-        self.assertEqual(payload["total"], 1)
+        self.assertEqual(payload["total"], 2)
+        self.assertEqual(payload["rows"][0]["id"], sid)
         self.assertEqual(payload["rows"][0]["features"], {"x": 1})
         snapshot_route = routes["/api/monday-reclaim-paper"]
         today = json.loads(snapshot_route.endpoint(list_period="today").body)
@@ -204,6 +248,8 @@ class TestReclaimRecordHistory(HistoryFixture):
                               schema["paths"]["/api/monday-reclaim-paper/history"]["get"]["parameters"]}
         self.assertEqual(history_parameters["tab"]["enum"], ["events", "closed"])
         self.assertEqual(history_parameters["scope"]["enum"], ["funded", "shadow", "all"])
+        self.assertEqual(history_parameters["sort"]["enum"], ["score", "time_desc", "time_asc"])
+        self.assertEqual(history_parameters["sort"]["default"], "score")
         self.assertEqual((history_parameters["offset"]["minimum"], history_parameters["limit"]["minimum"],
                           history_parameters["limit"]["maximum"], history_parameters["q"]["maxLength"]),
                          (0, 1, 100, 100))
@@ -212,6 +258,9 @@ class TestReclaimRecordHistory(HistoryFixture):
                          ["recent", "today"])
         self.assertEqual(self.rows("SELECT * FROM positions ORDER BY id"), before_positions)
         self.assertEqual(self.rows("SELECT * FROM tracks ORDER BY track"), before_tracks)
+        with self.assertRaisesRegex(ValueError, "sort must be"):
+            history_route.endpoint(track="60", tab="events", scope="funded", q="", offset=0,
+                                  limit=1, sort="bad")
 
     def rows(self, sql):
         with self.engine.db() as db:
