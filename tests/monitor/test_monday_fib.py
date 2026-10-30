@@ -321,7 +321,7 @@ def test_service_passes_score_reader_to_telegram_worker(tmp_path, monkeypatch):
     service.book.set_enabled(True, NOW-MINUTE)
     service.book.touch(levels, SYMBOL, 'upper', 120, NOW, NOW, 'live')
     calls, lookups = [], []
-    service.telegram_score_lookup = lambda event: (lookups.append(event) or {'status': 'scored', 'score': .6})
+    service.notification_score_lookup = lambda event: (lookups.append(event) or {'status': 'scored', 'score': .6})
     monkeypatch.setattr('yoyo.monitor.monday_fib_service.credentials', lambda: ('fake', 'fake'))
     monkeypatch.setattr('yoyo.monitor.monday_fib_service.requests.post', fake_sender(calls))
     monkeypatch.setattr(service.stop, 'wait', lambda timeout: service.stop.set())

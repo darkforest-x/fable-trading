@@ -1,4 +1,4 @@
-"""Public OKX Monday-range monitor with isolated IO threads and opt-in Telegram.
+"""Public OKX Monday-range monitor with isolated IO and opt-in Telegram/Bark.
 
 Sources: OKX REST candlesticks/instruments and WS candle1m (business channel).
 https://www.okx.com/docs-v5/en/#order-book-trading-market-data
@@ -18,9 +18,10 @@ from pydantic import BaseModel, ConfigDict, StrictBool
 import requests
 
 from yoyo.data.candle_hub import validate
-from .monday_fib import FibBook, baseline, deliver_once, week_window, HOUR, MINUTE, FRESH_MS, TELEGRAM_MIN_SCORE
+from .monday_fib import FibBook, baseline, deliver_once, week_window, HOUR, MINUTE, FRESH_MS, NOTIFICATION_MIN_SCORE
 from .okx import OKX
 from .telegram import credentials
+from .monday_fib_bark import configured_credentials, deliver_once as deliver_bark_once
 
 
 class MondayFibService:
@@ -44,13 +45,14 @@ class MondayFibService:
         self.attempts = {}
         # Read-only observers (paper engines); they must only enqueue and never raise.
         self.listeners = []
-        self.telegram_score_lookup = None  # Wired to the existing paper ledger before workers start.
+        self.notification_score_lookup = None  # Shared read-only ledger lookup for both channels.
 
     def start(self):
         if self.threads:
             return
         self.book.recover()
-        for target, name in ((self._maintain, "fib-anchors"), (self._stream, "fib-quotes"), (self._send, "fib-telegram")):
+        for target, name in ((self._maintain, "fib-anchors"), (self._stream, "fib-quotes"),
+                             (self._send, "fib-telegram"), (self._send_bark, "fib-bark")):
             thread = threading.Thread(target=target, name=name, daemon=True)
             self.threads.append(thread)
             thread.start()
@@ -237,9 +239,20 @@ class MondayFibService:
             try:
                 if self.book.subscription()["enabled"]:
                     deliver_once(self.book, credentials(), requests.post, self.client.clock(),
-                                 score_lookup=self.telegram_score_lookup, clock=self.client.clock)
+                                 score_lookup=self.notification_score_lookup, clock=self.client.clock)
             except Exception:
                 # No exception string can expose the token-bearing request URL.
+                pass
+            self.stop.wait(1)
+
+    def _send_bark(self):
+        while not self.stop.is_set():
+            try:
+                if self.book.subscription("bark")["enabled"]:
+                    deliver_bark_once(self.book, configured_credentials(self.book), requests.post, self.client.clock(),
+                                      score_lookup=self.notification_score_lookup, clock=self.client.clock)
+            except Exception:
+                # Credentials and server responses never enter logs or snapshots.
                 pass
             self.stop.wait(1)
 
@@ -281,7 +294,9 @@ class MondayFibService:
             return result
         return {**result,
                 "telegram": {**self.book.subscription(), "configured": bool(credentials()),
-                             "min_score_exclusive": TELEGRAM_MIN_SCORE},
+                             "min_score_exclusive": NOTIFICATION_MIN_SCORE},
+                "bark": {**self.book.bark_status(), "configured": bool(configured_credentials(self.book)),
+                         "min_score_exclusive": NOTIFICATION_MIN_SCORE},
                 "counts": {"total": len(rows), "ready": sum(r["state"] == "ready" and not r["stale"] for r in rows),
                            "touched": len(events), "unavailable": sum(r["state"] != "ready" or r["stale"] for r in rows)},
                 "events": events[:40]}
@@ -308,4 +323,15 @@ def install(app, service):
         if payload.enabled and not credentials():
             raise HTTPException(409, "本机尚未配置 Telegram 通道")
         service.book.set_enabled(payload.enabled, service.client.clock())
+        return service.snapshot()
+
+    @app.put("/api/monday-fib/bark")
+    def subscribe_bark(payload: FibSubscription, request: Request):
+        if (request.headers.get("origin") != f"{request.url.scheme}://{request.url.netloc}"
+                or request.headers.get("sec-fetch-site", "same-origin") != "same-origin"
+                or request.headers.get("x-spike-action") != "update-monday-fib-bark"):
+            raise HTTPException(403, "请从周一 1.618 同源入口修改报警开关")
+        if payload.enabled and not configured_credentials(service.book):
+            raise HTTPException(409, "本机尚未配置 1.618 Bark 通道")
+        service.book.set_enabled(payload.enabled, service.client.clock(), "bark")
         return service.snapshot()

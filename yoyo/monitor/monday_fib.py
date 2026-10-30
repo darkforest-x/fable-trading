@@ -4,7 +4,7 @@ Owner: NY calendar Monday, all live OKX USDT perpetuals, first touch on each
 side per week. H/L use only the 24 completed hourly bars of Monday (NY midnight
 is an integral UTC hour). Intraminute extrema come from OKX candle1m updates.
 History establishes consumed sides, never notification authority. SQLite owns
-weekly deduplication, subscription cutovers and conservative Telegram receipts.
+weekly deduplication, independent channel cutovers and conservative receipts.
 """
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ ZONE = ZoneInfo("America/New_York")
 HOUR = 3_600_000
 MINUTE = 60_000
 FRESH_MS = 90_000
-TELEGRAM_MIN_SCORE = 0.4  # Owner 2026-10-30: strict raw-score notification gate.
+NOTIFICATION_MIN_SCORE = 0.4  # Owner 2026-10-30: shared TG/Bark raw-score gate.
 
 
 def week_window(now):
@@ -82,6 +82,16 @@ class FibBook:
                     observed_ms INTEGER, candle_ms INTEGER, source TEXT,
                     generation INTEGER, status TEXT, due_ms INTEGER, error TEXT,
                     message_id INTEGER, PRIMARY KEY(week,symbol,side));
+                CREATE TABLE IF NOT EXISTS bark_subscription (
+                    id INTEGER PRIMARY KEY CHECK(id=1), enabled INTEGER NOT NULL,
+                    activated_ms INTEGER NOT NULL, generation INTEGER NOT NULL);
+                INSERT OR IGNORE INTO bark_subscription VALUES (1,0,0,0);
+                CREATE TABLE IF NOT EXISTS bark_changes (
+                    id INTEGER PRIMARY KEY, enabled INTEGER, changed_ms INTEGER, generation INTEGER);
+                CREATE TABLE IF NOT EXISTS bark_outbox (
+                    week TEXT, symbol TEXT, side TEXT, generation INTEGER,
+                    status TEXT, due_ms INTEGER, error TEXT, server_timestamp INTEGER,
+                    attempts INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(week,symbol,side));
             """)
         self.path.chmod(0o600)
 
@@ -98,40 +108,60 @@ class FibBook:
     def recover(self):
         with self.db() as db:
             db.execute("UPDATE touches SET status='unknown',error='interrupted_delivery' WHERE status='sending'")
+            db.execute("UPDATE bark_outbox SET status='unknown',error='interrupted_delivery' WHERE status='sending'")
 
-    def subscription(self):
+    @staticmethod
+    def _channel_tables(channel):
+        if channel == "telegram":
+            return "subscription", "changes", "touches"
+        if channel == "bark":
+            return "bark_subscription", "bark_changes", "bark_outbox"
+        raise ValueError("unsupported_channel")
+
+    def subscription(self, channel="telegram"):
+        subscription, _, _ = self._channel_tables(channel)
         with self.db() as db:
-            row = dict(db.execute("SELECT * FROM subscription WHERE id=1").fetchone())
+            row = dict(db.execute(f"SELECT * FROM {subscription} WHERE id=1").fetchone())
         return {"enabled": bool(row["enabled"]), "activated_ms": row["activated_ms"], "generation": row["generation"]}
 
-    def set_enabled(self, enabled, now):
+    def set_enabled(self, enabled, now, channel="telegram"):
         if type(enabled) is not bool:
             raise ValueError("enabled must be boolean")
+        subscription, changes, outbox = self._channel_tables(channel)
         with self.db() as db:
             db.execute("BEGIN IMMEDIATE")
-            row = db.execute("SELECT * FROM subscription WHERE id=1").fetchone()
+            row = db.execute(f"SELECT * FROM {subscription} WHERE id=1").fetchone()
             if bool(row["enabled"]) != enabled:
                 generation = row["generation"] + 1
-                db.execute("UPDATE subscription SET enabled=?,activated_ms=?,generation=? WHERE id=1",
+                db.execute(f"UPDATE {subscription} SET enabled=?,activated_ms=?,generation=? WHERE id=1",
                            (int(enabled), now, generation))
-                db.execute("INSERT INTO changes(enabled,changed_ms,generation) VALUES (?,?,?)",
+                db.execute(f"INSERT INTO {changes}(enabled,changed_ms,generation) VALUES (?,?,?)",
                            (int(enabled), now, generation))
-                db.execute("UPDATE touches SET status='skipped',error='subscription_changed' WHERE status='pending'")
-        return self.subscription()
+                db.execute(f"UPDATE {outbox} SET status='skipped',error='subscription_changed' WHERE status='pending'")
+        return self.subscription(channel)
+
+    @staticmethod
+    def _eligible(route, levels, observed_ms, candle_ms, source, known_after_ms):
+        return (source == "live" and route["enabled"] and observed_ms > route["activated_ms"]
+                and (candle_ms if known_after_ms is None else known_after_ms) >= route["activated_ms"]
+                and levels["end"] <= candle_ms < levels["expires"])
 
     def touch(self, levels, symbol, side, price, observed_ms, candle_ms, source, *, known_after_ms=None):
         """Atomic weekly first touch plus forward-only enqueue; duplicate is inert."""
         with self.db() as db:
             db.execute("BEGIN IMMEDIATE")
             route = db.execute("SELECT * FROM subscription WHERE id=1").fetchone()
-            active = (source == "live" and route["enabled"] and observed_ms > route["activated_ms"]
-                      and (candle_ms if known_after_ms is None else known_after_ms) >= route["activated_ms"]
-                      and levels["end"] <= candle_ms < levels["expires"])
+            active = self._eligible(route, levels, observed_ms, candle_ms, source, known_after_ms)
             status = "pending" if active else ("history" if source == "history" else "muted")
             cursor = db.execute("INSERT OR IGNORE INTO touches VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
                                 (levels["week"], symbol, side, levels[side], price, observed_ms, candle_ms,
                                  source, route["generation"], status, observed_ms, None, None))
-            return cursor.rowcount == 1
+            inserted = cursor.rowcount == 1
+            bark = db.execute("SELECT * FROM bark_subscription WHERE id=1").fetchone()
+            if inserted and self._eligible(bark, levels, observed_ms, candle_ms, source, known_after_ms):
+                db.execute("INSERT INTO bark_outbox (week,symbol,side,generation,status,due_ms) VALUES (?,?,?,?,?,?)",
+                           (levels["week"], symbol, side, bark["generation"], "pending", observed_ms))
+            return inserted
 
     def records(self, week=None, limit=None):
         with self.db() as db:
@@ -180,17 +210,105 @@ class FibBook:
                        "WHERE week=? AND symbol=? AND side=? AND status=? AND generation=?",
                        (status, error, message_id, due_ms, event["week"], event["symbol"], event["side"], expected, event["generation"]))
 
+    def pending_bark(self, now):
+        """Peek independently of Telegram; wait for scoring without a send attempt."""
+        with self.db() as db:
+            db.execute("BEGIN IMMEDIATE")
+            route = db.execute("SELECT * FROM bark_subscription WHERE id=1").fetchone()
+            db.execute("UPDATE bark_outbox SET status='skipped',error='expired_or_disabled' WHERE status='pending' "
+                       "AND (generation<>? OR ?=0 OR EXISTS (SELECT 1 FROM touches t WHERE "
+                       "t.week=bark_outbox.week AND t.symbol=bark_outbox.symbol AND t.side=bark_outbox.side "
+                       "AND (t.observed_ms<? OR t.observed_ms>?)))",
+                       (route["generation"], route["enabled"], now - FRESH_MS, now))
+            row = db.execute("SELECT t.week,t.symbol,t.side,t.level,t.price,t.observed_ms,t.candle_ms,t.source, "
+                             "b.generation,b.attempts FROM bark_outbox b JOIN touches t USING(week,symbol,side) "
+                             "WHERE b.status='pending' AND b.due_ms<=? ORDER BY b.due_ms,t.observed_ms LIMIT 1", (now,)).fetchone()
+            return dict(row) if row else None
 
-def telegram_text(event, score):
-    """Owner 2026-10-30: three short lines; score is raw entry score, not a trade instruction."""
+    def claim_bark(self, now, event=None):
+        event = event or self.pending_bark(now)
+        if not event:
+            return None
+        with self.db() as db:
+            db.execute("BEGIN IMMEDIATE")
+            route = db.execute("SELECT * FROM bark_subscription WHERE id=1").fetchone()
+            row = db.execute("SELECT t.week,t.symbol,t.side,t.level,t.price,t.observed_ms,t.candle_ms,t.source, "
+                             "b.generation,b.attempts FROM bark_outbox b JOIN touches t USING(week,symbol,side) "
+                             "WHERE b.week=? AND b.symbol=? AND b.side=? AND b.status='pending' AND b.due_ms<=? "
+                             "AND t.observed_ms BETWEEN ? AND ? AND b.generation=? AND b.generation=? AND ?=1",
+                             (event["week"], event["symbol"], event["side"], now, now-FRESH_MS, now,
+                              event["generation"], route["generation"], route["enabled"])).fetchone()
+            if row:
+                db.execute("UPDATE bark_outbox SET status='sending',attempts=attempts+1 WHERE week=? AND symbol=? AND side=?",
+                           (row["week"], row["symbol"], row["side"]))
+                return {**dict(row), "attempts": row["attempts"] + 1}
+        return None
+
+    def finish_bark(self, event, status, error=None, server_timestamp=None, due_ms=0, *, expected="sending"):
+        with self.db() as db:
+            db.execute("UPDATE bark_outbox SET status=?,error=?,server_timestamp=?,due_ms=? "
+                       "WHERE week=? AND symbol=? AND side=? AND status=? AND generation=?",
+                       (status, error, server_timestamp, due_ms, event["week"], event["symbol"], event["side"], expected, event["generation"]))
+
+    def bark_status(self):
+        with self.db() as db:
+            counts = {r["status"]: r["n"] for r in db.execute("SELECT status,COUNT(*) n FROM bark_outbox GROUP BY status")}
+            recent = [dict(r) for r in db.execute("SELECT * FROM bark_outbox ORDER BY rowid DESC LIMIT 10")]
+        return {**self.subscription("bark"), "counts": counts, "recent": recent,
+                "acceptance": "bark_server_accepted_not_device_receipt"}
+
+
+def notification_text(event, score):
+    """Shared TG/Bark facts: three short lines, raw score, no trading instruction."""
     symbol = event["symbol"].removesuffix("-USDT-SWAP")
     side = "上沿" if event["side"] == "upper" else "下沿"
     observed = datetime.fromtimestamp(event["observed_ms"] / 1000, ZoneInfo("Asia/Shanghai")).strftime("%m-%d %H:%M")
     label = f"{score:.4f}"
-    if label == f"{TELEGRAM_MIN_SCORE:.4f}" and score > TELEGRAM_MIN_SCORE:
+    if label == f"{NOTIFICATION_MIN_SCORE:.4f}" and score > NOTIFICATION_MIN_SCORE:
         label = str(score)  # Do not display an admitted raw score as the excluded boundary.
     return (f"{symbol} · {side} 1.618\n评分 {label} · 点位 {event['level']:.10g}\n"
             f"{observed} 北京")
+
+
+def claim_scored_notification(book, event, now, *, score_lookup=None, clock=None, channel="telegram"):
+    """Apply one score/freshness policy, then claim only this channel's event.
+
+    The reader joins the persisted score to the full touch identity outside the
+    FibBook lock. Pending scoring does not consume transport retry attempts.
+    """
+    book._channel_tables(channel)  # Reject unsupported routes before any state change.
+    finish = book.finish_bark if channel == "bark" else book.finish
+    claim = book.claim_bark if channel == "bark" else book.claim
+    read_error = None
+    try:
+        result = score_lookup(event) if score_lookup else None
+    except Exception:
+        result, read_error = None, "score_read_error"
+    ready_at = clock() if clock else now
+    if not 0 <= ready_at-event["observed_ms"] <= FRESH_MS:
+        finish(event, "skipped", "expired_before_score", expected="pending")
+        return None
+    if result is None:
+        finish(event, "pending", read_error or "score_pending", due_ms=ready_at+1000, expected="pending")
+        return None
+    score = result.get("score") if isinstance(result, dict) else None
+    if (not isinstance(result, dict) or result.get("status") != "scored"
+            or type(score) not in (int, float) or not math.isfinite(score) or not 0 <= score <= 1):
+        finish(event, "skipped", "score_unavailable", expected="pending")
+        return None
+    if score <= NOTIFICATION_MIN_SCORE:
+        finish(event, "skipped", "score_not_above_0_4", expected="pending")
+        return None
+    # A score read can race a subscription change or another sender. Revalidate
+    # and claim this exact event only after eligibility is known.
+    event = claim(ready_at, event)
+    if not event:
+        return None
+    route = book.subscription(channel)
+    if not route["enabled"] or route["generation"] != event["generation"]:
+        finish(event, "skipped", "subscription_changed")
+        return None
+    return event, score, ready_at
 
 
 def deliver_once(book, creds, sender, now, *, score_lookup=None, clock=None):
@@ -200,36 +318,11 @@ def deliver_once(book, creds, sender, now, *, score_lookup=None, clock=None):
     event = book.pending(now)
     if not event:
         return False
-    read_error = None
-    try:
-        result = score_lookup(event) if score_lookup else None
-    except Exception:
-        result, read_error = None, "score_read_error"
-    ready_at = clock() if clock else now
-    if not 0 <= ready_at-event["observed_ms"] <= FRESH_MS:
-        book.finish(event, "skipped", "expired_before_score", expected="pending")
+    prepared = claim_scored_notification(book, event, now, score_lookup=score_lookup, clock=clock)
+    if prepared is None:
         return True
-    if result is None:
-        book.finish(event, "pending", read_error or "score_pending", due_ms=ready_at+1000, expected="pending")
-        return True
-    score = result.get("score") if isinstance(result, dict) else None
-    if (not isinstance(result, dict) or result.get("status") != "scored"
-            or type(score) not in (int, float) or not math.isfinite(score) or not 0 <= score <= 1):
-        book.finish(event, "skipped", "score_unavailable", expected="pending")
-        return True
-    if score <= TELEGRAM_MIN_SCORE:
-        book.finish(event, "skipped", "score_not_above_0_4", expected="pending")
-        return True
-    # A score read can race a subscription change or another sender. Revalidate
-    # and claim this exact event only after eligibility is known.
-    event = book.claim(ready_at, event)
-    if not event:
-        return True
-    route = book.subscription()
-    if not route["enabled"] or route["generation"] != event["generation"]:
-        book.finish(event, "skipped", "subscription_changed")
-        return True
-    text = telegram_text(event, score)
+    event, score, ready_at = prepared
+    text = notification_text(event, score)
     tv = event["symbol"].removesuffix("-SWAP").replace("-", "") + ".P"
     try:
         response = sender("https://api.telegram.org/bot" + creds[0] + "/sendMessage",
