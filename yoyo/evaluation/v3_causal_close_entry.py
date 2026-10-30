@@ -25,10 +25,19 @@ from yoyo.evaluation.range_framework import ROOT, dump, file_stamp, runtime_vers
 from yoyo.evaluation.monday_limit_backstop import CODEX, stops
 from yoyo.evaluation.allin3_close_hybrid import CACHED, KEEP
 from yoyo.evaluation.monday_limit_be_scalein_compare import BAD_EVENTS, clean
-from yoyo.evaluation.spike_close_execution import stats, paired, week_sign_flip
+from yoyo.evaluation.spike_close_execution import stats as base_stats, paired, week_sign_flip
 
 EXP = ROOT/'experiments/active/exp-v3-causal-close-entry-20261030-v1'
 VARIANTS = ('rest', 'close')
+
+
+def stats(g):
+    result=base_stats(g);f=g[g.filled]
+    if len(f):
+        gross=f.side*(f.exit_price/f.entry-1)*1e4
+        result.update(mean_gross_bp=float(gross.mean()),mean_fee_bp=float((gross-f.net_notional_bp).mean()),
+            mean_slippage_bp=float((f.net_notional_bp-f.net).mean()),positive_net_pct=float(100*(f.net>0).mean()))
+    return clean(result)
 
 
 def read_csv(*args, **kwargs):
@@ -287,6 +296,7 @@ def summarize(config):
                 mean_without_best_week_bp=float(f.loc[f.week!=weeks.index[0],'net'].mean()) if len(weeks)>1 else None,
                 mean_without_top3_bp=float(f.net.nsmallest(max(0,len(f)-3)).mean()))
     signal=w[w.control_id==0]
+    assert set(signal[signal.variant=='rest'].event)==set(selected.index)
     for per,mask in periods.items():
         q=signal[mask(signal)].pivot(index='event',columns='variant',values='net')
         diff=q['close']-q['rest'];weeks=diff.groupby(diff.index.str.split(':').str[1]).agg(['sum','size'])
@@ -298,10 +308,25 @@ def summarize(config):
         paths={p:{v:stats(z[(z.variant==v)&(z.control_id==0)]) for v in VARIANTS} for p,z in paths.items()},
         first_cohort=signal.cohort_time.min(),last_cohort=signal.cohort_time.max(),
         expected_controls=len(selected)*3,actual_controls=int(((w.variant=='rest')&(w.control_id>0)).sum()))
+    rest_signal=signal[signal.variant=='rest'].set_index('event')
+    close_signal=signal[signal.variant=='close'].set_index('event').copy()
+    close_signal['rest_net']=rest_signal.net
+    result['difference_by_close_status']={str(status):dict(events=len(g),rest_mean_bp=float(g.rest_net.mean()),
+        close_mean_bp=float(g.net.mean()),contribution_bp_per_all_opportunity=float((g.net-g.rest_net).sum()/len(close_signal)))
+        for status,g in close_signal.groupby('status')}
+    result['risk_geometry']={v:dict(stop_distance_pct_quantiles={str(q):float((s.side*(s.entry-s.stop)/s.entry*100).quantile(q)) for q in (0,.5,.9,1)})
+        for v,s in signal[signal.filled].groupby('variant')}
     result['native_counts']={key:sum(r['paths'][p][key] for r in receipts for p in ('OHLC','OLHC')) for key in ('reused_rest','reused_close')}
     for key in ('orders','positions','fills'):
         result['native_counts']['new_'+key]=sum(r['paths'][p][stage][key] for r in receipts for p in ('OHLC','OLHC') for stage in ('new_rest','new_close'))
     dump(root/'summary.json',clean(dict(config=cfg,results=result,runtime=runtime_versions(),source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),training_eligible=False,production_eligible=False)))
+    headline=[]
+    for variant in VARIANTS:
+        for period,s in result['variants'][variant].items():
+            control=result['controls'][variant][period]
+            headline.append(dict(variant=variant,period=period,**s,matched_n=control.get('pairs'),
+                matched_signal_bp=control.get('signal_bp'),matched_random_bp=control.get('random_bp'),matched_week_p=control.get('week_sign_flip_p')))
+    pd.DataFrame(headline).to_csv(root/'headline.csv',index=False)
     print(json.dumps(clean(result)),flush=True)
 
 
