@@ -131,7 +131,10 @@ def render_one(index):
                 if left<=rt<right:
                     q=location(data,rt);ax.scatter(q,px,s=75,marker='D',color=COLORS[j],edgecolor=BG,zorder=12)
                     # The fixed header carries exact times; short in-panel tags avoid overlap.
-                    ax.annotate(f'T{j+1}',(q,px),xytext=(8,10+15*j),textcoords='offset points',fontsize=12,color=COLORS[j],fontweight='bold',
+                    dy=(-14-8*j) if (px-ymin)/(ymax-ymin)>.70 else (10+8*j)
+                    at_right=q>len(data)*.85
+                    ax.annotate(f'T{j+1}',(q,px),xytext=(-8 if at_right else 8,dy),ha='right' if at_right else 'left',
+                                textcoords='offset points',fontsize=12,color=COLORS[j],fontweight='bold',
                                 bbox=dict(facecolor=BG,edgecolor='none',alpha=.9,pad=2),zorder=13)
         hit=pd.Timestamp(r['touch_5m']) if minutes==5 else t
         q=location(data,hit);qend=location(data,min(last-pd.Timedelta(minutes=minutes),right-pd.Timedelta(minutes=minutes)))
