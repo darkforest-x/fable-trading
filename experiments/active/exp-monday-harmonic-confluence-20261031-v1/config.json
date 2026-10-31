@@ -37,7 +37,7 @@
   "reuse": "All baseline signal fills are reused. Only missing selected-event matched controls can run natively. No fitting or production changes.",
   "baseline_ledger": "experiments/active/exp-monday-order-only-originalscore-20261031-v1/baseline.csv.gz",
   "baseline_comparison": "experiments/active/exp-monday-order-only-originalscore-20261031-v1",
-  "admission_events": "experiments/active/exp-monday-harmonic-confluence-20261031-v1/gates.csv.gz",
+  "admission_events": "experiments/active/exp-monday-harmonic-confluence-20261031-v1/admission.csv.gz",
   "harmonic": {
     "package": "pyharmonics",
     "version": "1.5.3",
@@ -53,12 +53,14 @@
     "invalidation": "No earlier excursion past far PRZ edge after C; no return beyond C after D",
     "prz": "Use search.PATTERNS ratio definitions; bullish anchor max(A,C), bearish min(A,C), matching library fib matrix. Do not use asymmetric bearish Pattern.completion_* helper.",
     "clock": "Prefix ends immediately before the touch 5m bar opens. Only already closed bars; no touch-bar OHLC or later data. Tail D may be provisional; XABC must be confirmed.",
-    "missing": "Insufficient or noncontiguous last 1000 bars are explicit unavailable; compare all and common observable baselines."
+    "missing": "Insufficient or noncontiguous last 1000 bars are explicit unavailable; compare all and common observable baselines.",
+    "candidate_validation": "Reject forming() candidates whose actual XABC prices violate its own tolerance-adjusted XAB or ABC table; raw library joins retained. Source audit correction before return comparison."
   },
   "parameter_search": false,
   "source_urls": [
     "https://pyharmonics.readthedocs.io/en/latest/pyharmonics.search.html",
     "https://github.com/niall-oc/pyharmonics"
   ],
-  "preserve_original_admission": true
+  "preserve_original_admission": true,
+  "scan_builder_commit": "d8cb53d580"
 }

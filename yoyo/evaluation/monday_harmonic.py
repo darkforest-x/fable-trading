@@ -79,7 +79,7 @@ def projection_band(y, bullish, definitions, name):
     return (lower,upper) if 0 < lower <= upper else None
 
 
-def scan_at(frame, cutoff, symbol, side, level, hc):
+def scan_at(frame, cutoff, symbol, side, level, hc, *, all_endpoints=False):
     """Causal feature boundary: only rows whose close time is <= cutoff.
 
     Uses open/high/low/close/volume from the last <=1000 completed 5m rows.
@@ -103,11 +103,14 @@ def scan_at(frame, cutoff, symbol, side, level, hc):
         meta['reason']='nonfinite_history';return meta,[]
     td = OHLCTechnicals(w,symbol,hc['interval'],peak_spacing=hc['peak_spacing'])
     hs = HarmonicSearch(td,fib_tolerance=hc['fib_tolerance'],check_anchor=True)
-    hs.search();hs.forming(percent_c_to_d=hc['percent_c_to_d'])
-    found = hs.get_patterns(family=hs.XABCD)[hs.XABCD] + hs.get_patterns(family=hs.XABCD,formed=False)[hs.XABCD]
     desired_type = 0 if side==1 else 1
-    same_side = [p[0] for p in td.peak_data if p[2]==desired_type]
-    latest = max(same_side) if same_side else -1
+    positions = [i for i,p in enumerate(td.peak_data) if p[2]==desired_type]
+    latest = td.peak_data[positions[-1]][0] if positions else -1
+    # Older D endpoints were unconditionally discarded below. Limit only the
+    # search, retaining the full pivot matrix and all XABC anchor choices.
+    limit = -1 if all_endpoints else len(td.peak_data)-positions[-1] if positions else 1
+    hs.search(limit_to=limit);hs.forming(limit_to=limit,percent_c_to_d=hc['percent_c_to_d'])
+    found = hs.get_patterns(family=hs.XABCD)[hs.XABCD] + hs.get_patterns(family=hs.XABCD,formed=False)[hs.XABCD]
     records=[];seen=set();rejected=Counter()
     for p in found:
         if p.bullish != (side==1):

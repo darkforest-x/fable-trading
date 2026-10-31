@@ -59,6 +59,15 @@ def test_bearish_projection_and_search_are_price_mirrors():
         assert np.isclose(x[k]['prz_high'],220-y[k]['prz_low'])
 
 
+def test_endpoint_search_optimization_preserves_all_eligible_patterns():
+    f=candles()
+    for data,side,level in [(f,1,104.28),(mirror(f),-1,115.72)]:
+        a,pa=scan_at(data,f.index[230],'TEST',side,level,CFG['harmonic'])
+        b,pb=scan_at(data,f.index[230],'TEST',side,level,CFG['harmonic'],all_endpoints=True)
+        assert pa==pb
+        assert {k:v for k,v in a.items() if k!='rejected'}=={k:v for k,v in b.items() if k!='rejected'}
+
+
 def test_ratio_tolerance_is_not_three_percent_of_market_price():
     defs=utils.get_pattern_definition(.03,constants.MATRIX_PATTERNS)
     lo,hi=projection_band([100,120,107.64,116],True,defs,constants.GARTLEY)
@@ -113,3 +122,13 @@ def test_native_overlay_generates_only_originally_eligible_rules():
     assert set(x[(x.rule=='p30')&(x.event=='mid')].exit_mode)=={'range_0.618'}
     assert set(x[x.rule=='add'].event)=={'high','spike'}
     assert set(x[x.rule=='v2'].event)==set(pop.index)
+
+
+def test_library_candidate_name_does_not_override_actual_xabc_ratios():
+    from yoyo.evaluation.monday_harmonic_summary import valid_geometry
+    defs=utils.get_pattern_definition(.03,constants.MATRIX_PATTERNS)
+    good=dict(name=constants.GARTLEY,prices=[100,120,107.64,116.37852,106])
+    assert valid_geometry(good,defs)
+    # A joined different A can keep a name while invalidating the ABC ratio.
+    assert not valid_geometry(dict(good,prices=[100,120,107.64,125,106]),defs)
+    assert not valid_geometry(dict(good,prices=[100,120,110,116.37852,106]),defs)

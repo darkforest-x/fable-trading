@@ -157,6 +157,10 @@ def reuse_unchanged_symbol(symbol, cfg, out, selected):
     every admitted event. Frame bytes are not read; registered sizes and times
     must still match. New score metadata feeds the unchanged account allocators.
     """
+    # The external overlay can keep fewer rules for the same event IDs.
+    # Reuse individual exact orders below, never a broader complete ledger.
+    if cfg.get('preserve_original_admission', False):
+        return None
     prior = prior_study(cfg)
     if prior is None:
         return None
