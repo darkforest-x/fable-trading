@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score,brier_score_loss,mean_squared_error
 from yoyo.evaluation.btc_eth_repeat_data import dump
-from yoyo.evaluation.btc_eth_repeat_fit import no_overlap,metrics,permutation_rank
+from yoyo.evaluation.btc_eth_repeat_fit import no_overlap,metrics
 from yoyo.evaluation.major_1618_v2_data import EXP,OLD,config,read
 from yoyo.evaluation.major_1618_v2_models import FINAL
 
@@ -40,17 +40,55 @@ def policy_difference(chosen,base,weeks):
                 improvement_week_p=float((1+int((null>=delta.sum()).sum()))/10001))
 
 
+def fold_rank_metrics(data):
+    """Different quarterly models have different scales: rank only within fold."""
+    rows=[];tops=[]
+    for fold,g in data.groupby('fold'):
+        rows.append(dict(fold=fold,n=len(g),positives=int(g.label.sum()),
+                         target_auc=float(roc_auc_score(g.label,g.score)) if g.label.nunique()==2 else None,
+                         profit_auc=float(roc_auc_score(g.net_r>0,g.score)) if (g.net_r>0).nunique()==2 else None))
+        tops.append(g.nlargest(max(1,int(np.ceil(len(g)*.1))),'score'))
+    def weighted(key):
+        valid=[r for r in rows if r[key] is not None]
+        return float(sum(r[key]*r['n'] for r in valid)/sum(r['n'] for r in valid)) if valid else None
+    return rows,weighted('target_auc'),weighted('profit_auc'),pd.concat(tops)
+
+
+def fold_week_permutation(data,outcome='label'):
+    """Permute weekly rank outcomes within the same frozen quarterly model.
+
+    Spearman-style centered ranks remove between-fold score-scale changes.
+    Entire weekly means move together; no sibling touch is permuted alone.
+    """
+    w=data.groupby(['symbol','fold','week']).agg(score=('score','mean'),outcome=(outcome,'mean')).reset_index()
+    groups=list(w.groupby(['symbol','fold']).indices.values())
+    x=np.zeros(len(w));y=np.zeros(len(w))
+    valid=[]
+    for idx in groups:
+        xx=w.loc[idx,'score'].rank().to_numpy();yy=w.loc[idx,'outcome'].rank().to_numpy()
+        xx-=xx.mean();yy-=yy.mean()
+        if not np.any(xx) or not np.any(yy):continue
+        x[idx]=xx/np.sqrt(np.mean(xx**2));y[idx]=yy/np.sqrt(np.mean(yy**2));valid.append(idx)
+    observed=float(np.dot(x,y));count=0
+    rng=np.random.default_rng(config()['seed'])
+    for _ in range(10000):
+        perm=y.copy()
+        for idx in valid:perm[idx]=rng.permutation(perm[idx])
+        count+=float(np.dot(x,perm))>=observed
+    return float((1+count)/10001)
+
+
 def diagnose(data):
     if data.empty:return {}
+    folds,auc,profit_auc,top=fold_rank_metrics(data)
     out=dict(candidates=len(data),candidate_weeks=int(data.week.nunique()),
              first_week=str(data.week.min()),last_week=str(data.week.max()),
-             target_auc=float(roc_auc_score(data.label,data.score)) if data.label.nunique()==2 else None,
-             profit_auc=float(roc_auc_score(data.net_r>0,data.score)) if (data.net_r>0).nunique()==2 else None)
+             target_auc=auc,profit_auc=profit_auc,folds=folds,
+             ranking_basis='Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.')
     if data.score_kind.eq('probability').all():
         out['brier']=float(brier_score_loss(data.label,data.score))
     else:
         out['net_r_rmse']=float(mean_squared_error(data.net_r,data.score)**.5)
-    top=data.nlargest(max(1,int(np.ceil(len(data)*.1))),'score')
     out['retrospective_top_decile']=metrics(top)
     return out
 
@@ -82,12 +120,12 @@ def main():
         diagnostics.append(dict(symbol=symbol,target=target,arm=arm,**diag,selected=score,baseline=baseline))
         selected.append(chosen)
         if arm==FINAL:
-            ranked=g.copy();ranked['p']=ranked.score
-            p=permutation_rank(ranked)
+            p=fold_week_permutation(g)
             row['week_rank_permutation_p']=p
             final.append(dict(symbol=symbol,target=target,arm=arm,matched_week_p=score.get('week_p'),
                               candidate_n=len(g),test_weeks=int(g.week.nunique()),selected=score,baseline=baseline,
                               diagnostics=diag,week_rank_permutation_p=p,
+                              week_net_rank_permutation_p=fold_week_permutation(g,'net_r'),
                               policy_difference=policy_difference(chosen,base,g.week)))
     holm(final)
     for r in final:

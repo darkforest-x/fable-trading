@@ -37,3 +37,15 @@ def test_model_inputs_do_not_consume_test_labels():
     test=d.iloc[:10].copy();before=score_model(model,test,['f_x'],True)
     test['label']=1-test.label;test['net_r']=1e6
     np.testing.assert_array_equal(score_model(model,test,['f_x'],True),before)
+
+
+def test_ranking_diagnostics_never_pool_different_model_scales():
+    from yoyo.evaluation.major_1618_v2_evaluate import fold_rank_metrics
+    data=pd.DataFrame(dict(fold=['q1','q1','q2','q2'],label=[0,1,0,1],
+                           net_r=[-1,1,-1,1],score=[.8,.9,.1,.2],trade_id=['a','b','c','d']))
+    folds,auc,profit,top=fold_rank_metrics(data)
+    assert auc==profit==1.
+    assert set(top.trade_id)=={'b','d'} and len(folds)==2
+    shifted=data.copy();shifted.loc[shifted.fold.eq('q2'),'score']+=100
+    _,other,_,other_top=fold_rank_metrics(shifted)
+    assert other==auc and set(other_top.trade_id)==set(top.trade_id)
