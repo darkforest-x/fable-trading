@@ -1,4 +1,11 @@
 """Patrol feed clocks, duplicate suppression and exact chart provenance."""
+from contextlib import closing
+import gzip
+import json
+import os
+import sqlite3
+
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -144,3 +151,96 @@ def test_page_cutoff_freezes_scores_and_cluster_merges_before_sorting(tmp_path):
     assert second['total']==3
     assert feed.read(days=0,sort='score')['items'][0]['detection_id']=='promoted'
     assert Feed(book).read(days=0,offset=1,limit=2,sort='score',before_ms=102)['items']==second['items']
+
+
+def test_restart_restores_metadata_without_scanning_result_payloads(tmp_path, monkeypatch):
+    book=Book(tmp_path)
+    add(book,'first',observed=100)
+    add(book,'repeat',observed=200,start=15,end=25)
+    feed=Feed(book);expected=feed.read(days=0)
+    with gzip.open(feed.checkpoint,'rt') as stream:
+        checkpoint=json.load(stream)
+    assert len(checkpoint['rows'])==2
+    assert all('candles' not in row for row in checkpoint['rows'])
+    statements=[];connect=book.connect
+    def traced_connect():
+        db=connect();db.set_trace_callback(statements.append);return db
+    monkeypatch.setattr(book,'connect',traced_connect)
+    restarted=Feed(book)
+    assert restarted.read(days=0)['items']==expected['items']
+    assert not any('json_each' in sql for sql in statements)
+    assert restarted.read(days=0,before_ms=100)['items'][0]['detection_id']=='first'
+
+
+def test_checkpoint_replays_new_rows_and_keeps_first_discovery(tmp_path):
+    book=Book(tmp_path);feed=Feed(book)
+    add(book,'first',observed=100)
+    original=feed.read(days=0)['items'][0]
+    add(book,'repeat',observed=200,start=15,end=25)
+    restarted=Feed(book);out=restarted.read(days=0)
+    assert out['total']==1 and out['items'][0]['id']==original['id']
+    assert out['items'][0]['scan_count']==2
+    assert out['items'][0]['detection_id']=='repeat'
+    assert Feed(book).read(days=0)['items']==out['items']
+
+
+@pytest.mark.parametrize('damage',['gzip','version','identity','cursor','rows'])
+def test_invalid_checkpoint_rebuilds_from_observations(tmp_path,damage):
+    book=Book(tmp_path);add(book,'saved');feed=Feed(book)
+    expected=feed.read(days=0)['items']
+    with gzip.open(feed.checkpoint,'rt') as stream:
+        data=json.load(stream)
+    if damage=='gzip':
+        feed.checkpoint.write_bytes(b'incomplete gzip')
+    else:
+        data[damage]={'version':999,'identity':[0,0],'cursor':99999,'rows':[{}]}[damage]
+        with gzip.open(feed.checkpoint,'wt') as stream:
+            json.dump(data,stream)
+    assert Feed(book).read(days=0)['items']==expected
+
+
+def test_replaced_source_does_not_reuse_previous_book_metadata(tmp_path):
+    book=Book(tmp_path/'old');add(book,'old',observed=100);feed=Feed(book)
+    feed.read(days=0)
+    replacement=Book(tmp_path/'new');add(replacement,'new',observed=200)
+    os.replace(replacement.path,book.path)
+    assert [r['detection_id'] for r in feed.read(days=0)['items']]==['new']
+
+
+def test_reduced_source_high_water_discards_checkpoint_and_memory(tmp_path):
+    book=Book(tmp_path);add(book,'a');add(book,'b',start=50,end=60);feed=Feed(book)
+    assert feed.read(days=0)['total']==2
+    with closing(book.connect()) as db,db:
+        db.execute('DELETE FROM results WHERE rowid=(SELECT MAX(rowid) FROM results)')
+    assert [r['detection_id'] for r in feed.read(days=0)['items']]==['a']
+    assert [r['detection_id'] for r in Feed(book).read(days=0)['items']]==['a']
+
+
+def test_checkpoint_failure_does_not_hide_results_or_leave_partial_file(tmp_path,monkeypatch):
+    book=Book(tmp_path);add(book,'a');feed=Feed(book)
+    def unavailable(*args):
+        raise OSError('checkpoint storage unavailable')
+    monkeypatch.setattr('yoyo.yolo_workbench.discoveries.os.replace',unavailable)
+    assert feed.read(days=0)['total']==1
+    assert not feed.checkpoint.exists()
+    assert not list(feed.checkpoint.parent.glob('.discoveries-*.tmp'))
+
+
+def test_empty_results_do_not_repeatedly_parse_the_frozen_job_manifest(tmp_path,monkeypatch):
+    book=Book(tmp_path);job,_=add(book,'shape')
+    with closing(book.connect()) as db,db:
+        db.executemany('INSERT INTO results VALUES (?,?,?)',[
+            (job['id'],f'EMPTY{i}-USDT-SWAP',json.dumps({'episodes':[]})) for i in range(200)])
+    connect=book.connect;mode_reads=[]
+    with closing(sqlite3.connect(':memory:')) as native:
+        def traced_connect():
+            db=connect()
+            def extract(value,path):
+                if path=='$.mode':mode_reads.append(1)
+                return native.execute('SELECT json_extract(?,?)',(value,path)).fetchone()[0]
+            db.create_function('json_extract',2,extract,deterministic=True)
+            return db
+        monkeypatch.setattr(book,'connect',traced_connect)
+        assert Feed(book).read(days=0)['total']==1
+    # One lookup for the shape and one for latest-job status, not 200 empty scans.
+    assert len(mode_reads)<=2

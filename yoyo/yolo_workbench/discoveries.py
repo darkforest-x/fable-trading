@@ -1,15 +1,22 @@
 """Read-only patrol feed over immutable result rows, independent of inference.
 
 Project only episode metadata, incrementally by SQLite rowid. A service restart
-rebuilds this cache from the observation book; it never creates observations.
+reuses an atomic metadata checkpoint beside the observation book; a missing or
+invalid checkpoint rebuilds from the book. It never creates observations.
 Merge overlapping cores only within the same symbol, period, side and frozen
 input contract. First observation orders discoveries; repeat scans do not bump
 an old shape to the top. The latest observation supplies the exact chart link.
 """
 from contextlib import closing
+import gzip
 import json
+import logging
+import os
 import re
+import tempfile
 from threading import Lock
+import time
+import zlib
 
 from .store import encode, now
 
@@ -51,6 +58,59 @@ class Feed:
         self.rows = []
         self.items = []
         self.lock = Lock()
+        self.identity = None
+        self.loaded = False
+        self.saved_at = 0
+        self.saved_cursor = 0
+        self.checkpoint = book.path.with_name('discoveries-v1.json.gz')
+
+    def restore(self, high):
+        """Reuse raw metadata, not merged pages, so cutoff pagination is exact."""
+        stat = self.book.path.stat()
+        identity = [stat.st_dev, stat.st_ino]
+        if self.loaded and identity == self.identity and high >= self.cursor:
+            return
+        self.rows, self.items, self.cursor = [], [], 0
+        self.identity, self.loaded, self.saved_at, self.saved_cursor = identity, True, 0, 0
+        try:
+            with gzip.open(self.checkpoint, 'rt', encoding='utf-8') as stream:
+                data = json.load(stream)
+            if (data['version'] != 1 or data['identity'] != identity
+                    or not isinstance(data['cursor'], int) or not 0 <= data['cursor'] <= high):
+                return
+            rows = data['rows']
+            if not isinstance(rows, list):
+                return
+            items = merge_findings(rows)
+            self.rows, self.items, self.cursor = rows, items, data['cursor']
+            self.saved_cursor, self.saved_at = self.cursor, time.monotonic()
+        except (OSError, EOFError, ValueError, TypeError, KeyError, zlib.error):
+            # Derived data is disposable; the observation book stays authoritative.
+            return
+
+    def checkpoint_rows(self):
+        """Atomically publish rows and their high-water mark, at most once/minute."""
+        stamp = time.monotonic()
+        if self.cursor == self.saved_cursor or (self.saved_at and stamp-self.saved_at < 60):
+            return
+        temporary = None
+        try:
+            with tempfile.NamedTemporaryFile(dir=self.checkpoint.parent,
+                    prefix='.discoveries-', suffix='.tmp', delete=False) as stream:
+                temporary = stream.name
+            with gzip.open(temporary, 'wt', encoding='utf-8', compresslevel=1) as stream:
+                json.dump(dict(version=1, identity=self.identity, cursor=self.cursor,
+                               rows=self.rows), stream, ensure_ascii=False, separators=(',', ':'))
+            os.replace(temporary, self.checkpoint)
+            self.saved_cursor, self.saved_at = self.cursor, stamp
+        except OSError:
+            logging.getLogger(__name__).warning('Patrol metadata checkpoint unavailable', exc_info=True)
+        finally:
+            if temporary is not None:
+                try:
+                    os.unlink(temporary)
+                except OSError:
+                    pass
 
     def read(self, *, days=7, query='', timeframe='', side='', limit=30, sort='newest', offset=0, before_ms=None):
         """Page discoveries; full OKX contracts match exactly, abbreviations by substring."""
@@ -58,12 +118,18 @@ class Feed:
             # A snapshot prevents the high-water mark from skipping a concurrent insert.
             db.execute('BEGIN')
             high = db.execute('SELECT COALESCE(MAX(rowid),0) FROM results').fetchone()[0]
+            self.restore(high)
             if high > self.cursor:
                 added = []
+                # Expand episodes before looking up the frozen job manifest.
+                # Most result rows have no episodes; an unrestricted join makes
+                # SQLite read and parse a large manifest for every empty scan.
+                # CROSS JOIN fixes the loop order without changing membership.
                 for row in db.execute("""SELECT j.id,j.schedule_id,j.spec,r.symbol,
                     COALESCE(json_extract(r.payload,'$.observed_ms'),j.updated_ms) observed_ms,
-                    e.value episode FROM results r JOIN jobs j ON j.id=r.job_id
-                    JOIN json_each(r.payload,'$.episodes') e
+                    e.value episode FROM results r
+                    CROSS JOIN json_each(r.payload,'$.episodes') e
+                    CROSS JOIN jobs j ON j.id=r.job_id
                     WHERE r.rowid>? AND r.rowid<=? AND j.schedule_id IS NOT NULL
                     AND json_extract(j.spec,'$.mode')='latest'
                     AND json_extract(r.payload,'$.error') IS NULL""", (self.cursor, high)):
@@ -78,6 +144,8 @@ class Feed:
                 self.cursor = high
                 if added:
                     self.items = merge_findings(self.rows)
+            if self.cursor:
+                self.checkpoint_rows()
             stamp = now()
             cutoff = min(stamp, before_ms) if before_ms is not None else stamp
             symbol_query = query.strip().upper()
