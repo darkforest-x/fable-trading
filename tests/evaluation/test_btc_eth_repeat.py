@@ -54,3 +54,43 @@ def test_adjacent_touch_bars_merge_then_rearm():
     assert list(pd.to_datetime(upper.touch_open,utc=True))==[formed,formed+pd.Timedelta(minutes=45)]
     assert (upper.submission_i==upper.touch_i-1).all()
     assert (orders.loc[orders.kind.eq('signal'),'stop']>102.236).all()
+
+
+def test_nonoverlap_uses_submission_clock():
+    from yoyo.evaluation.btc_eth_repeat_fit import no_overlap
+    rows=pd.DataFrame([
+        dict(symbol='BTC',submission_i=1,entry_i=2,exit_i=10,trade_id='a',exit_time='a'),
+        dict(symbol='BTC',submission_i=9,entry_i=11,exit_i=15,trade_id='b',exit_time='b'),
+        dict(symbol='BTC',submission_i=10,entry_i=11,exit_i=20,trade_id='c',exit_time='c'),
+        dict(symbol='ETH',submission_i=2,entry_i=3,exit_i=11,trade_id='d',exit_time='d')])
+    assert set(no_overlap(rows).trade_id)=={'a','c','d'}
+
+
+def test_rolling_fit_cannot_read_later_labels(tmp_path,monkeypatch):
+    import yoyo.evaluation.btc_eth_repeat_fit as fit
+    monkeypatch.setattr(fit,'EXP',tmp_path)
+    monkeypatch.setattr(fit,'config',lambda: {'seed':7})
+    rng=np.random.default_rng(2)
+    rows=[]
+    for w in pd.date_range('2024-01-01','2026-10-01',freq='W-MON'):
+        week=w.strftime('%Y-%m-%d')
+        for s in ['BTC','ETH']:
+            for k in range(3):
+                x=float(rng.normal())
+                rows.append(dict(event_id=f'{s}-{week}-{k}',symbol=s,week=week,
+                                 expiry=str(bounds(week)[2]),complete=True,
+                                 label=int(rng.uniform()<1/(1+np.exp(-x))),f_x=x,break_even_p=.5))
+    d=pd.DataFrame(rows)
+    before=fit.rolling_predict(d,['x'],'test_before')
+    d.loc[d.week>='2025-07-01','label']=1-d.loc[d.week>='2025-07-01','label']
+    after=fit.rolling_predict(d,['x'],'test_after')
+    a=before[before.week<'2025-07-01'].set_index('event_id').p
+    b=after[after.week<'2025-07-01'].set_index('event_id').p
+    pd.testing.assert_series_equal(a,b)
+    import json
+    folds=json.loads((tmp_path/'test_before_folds.json').read_text())
+    for r in folds:
+        if r['status']=='fitted':
+            start=pd.Period(r['fold'],freq='Q').start_time.tz_localize('America/New_York')
+            assert pd.Timestamp(r['train_label_expiry_max'])<=start-pd.DateOffset(months=3)
+            assert pd.Timestamp(r['cal_label_expiry_max'])<=start
