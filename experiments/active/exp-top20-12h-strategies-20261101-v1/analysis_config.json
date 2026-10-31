@@ -2,5 +2,5 @@
   "maturity": "All primary metrics require signalclose+29days <= frozen source end, independent of eventual exit; every strategy uses the same longest-window maturity gate.",
   "split": "Selection signalclose+29days < 2025-01-01; evaluation2025 signalclose >=2025-01-01 and +29days <2026-01-01; evaluation2026 signalclose>=2026-01-01. Existing actual-exit purge also retained.",
   "reason": "Do not exclude only still-open recent losers while admitting fast recent winners.",
-  "timing": "Added during initial result aggregation before headline/summary existed or any strategy performance was viewed; native fills unchanged and not replayed."
+  "timing": "Added before any strategy performance was inspected. Initial aggregation was interrupted; its log and path-level output are retained. Final aggregate tables use common29day maturity; all_observed is also retained. Native fills were not replayed."
 }
