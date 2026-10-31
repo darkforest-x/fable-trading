@@ -183,15 +183,35 @@ def process(symbol, config):
                 par=cache.loc[r['cached_id'].removesuffix('_add')]
                 expected=x.set_index('trade_id').loc[r['parent']]
                 if cache_match(par,expected,tick):known_empty.add(r['trade_id'])
+        control_path=A/'exp-v3-causal-close-entry-20261030-v1'/'symbols'/symbol/path/'trades.csv.gz'
+        if control_path.exists():
+            controls=read_csv(control_path).set_index('trade_id')
+            for r in x[x.control_id.gt(0)&x.rule.eq('p30')].to_dict('records'):
+                key=r['original_id']+':entry_rest'
+                if key not in controls.index:continue
+                row=controls.loc[key].to_dict()
+                if not cache_match(row,r,tick):continue
+                assert int(row['entry_i'])==int(r['native_touch_i'])
+                row.update(trade_id=r['trade_id'],cache_source=str(control_path))
+                reused.append(row);reused_ids.add(r['trade_id'])
         runtime=x[~x.trade_id.isin(reused_ids|known_empty)&x.native_touch_i.notna()].copy()
         dependencies=set(runtime.parent.dropna())
         deps=x[x.trade_id.isin(dependencies-set(runtime.trade_id))]
         runtime=pd.concat([runtime,deps],ignore_index=True)
         reused=[r for r in reused if r['trade_id'] not in dependencies]
-        runtime.to_csv(d/'native-orders.csv.gz',index=False)
         if (d/'native-audit.json').exists():
+            # A completed stage remains authoritative after discovering extra
+            # external caches. Never overwrite its submitted-order receipt.
+            old_runtime=read_csv(d/'native-orders.csv.gz')
+            assert set(runtime.trade_id)<=set(old_runtime.trade_id)
+            current=x.set_index('trade_id')
+            for r in old_runtime.to_dict('records'):
+                assert cache_match(r,current.loc[r['trade_id']],tick)
+            runtime=old_runtime
+            reused=[r for r in reused if r['trade_id'] not in set(runtime.trade_id)]
             rows=read_csv(d/'native-trades.csv.gz');audit=json.loads((d/'native-audit.json').read_text())
         else:
+            runtime.to_csv(d/'native-orders.csv.gz',index=False)
             rows,native_fills,audit=execute(frame,runtime,path.upper(),tick,symbol,cfg)
             rows.to_csv(d/'native-trades.csv.gz',index=False)
             native_fills.to_csv(d/'native-fills.csv.gz',index=False)
