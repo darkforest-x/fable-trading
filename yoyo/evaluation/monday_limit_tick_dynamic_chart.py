@@ -21,7 +21,8 @@ from yoyo.evaluation.monday_limit_tick_dynamic import contrib, _fixed_symbol
 
 EXP = ROOT/'experiments/active/exp-monday-limit-tick-dynamic-20261031-v1'
 KLINE_1M = ROOT/'data/crypto/market/kline_binance_um1m_touchdays_20261027'
-ACCOUNT = {'05': ('rest_v3', 'v3'), '06': ('rest_spike', 'spike')}
+# account -> (threshold key, framework variant, target mode; None = v3's score band)
+ACCOUNT = {'v3': ('05', 'rest_v3', None), 'spike': ('06', 'rest_spike', 'near_monday_edge'), 'allin3': ('06', 'rest_v3', 'opposite_1618')}
 
 
 def score_path(event, tick, spec, ticks):
@@ -63,16 +64,16 @@ def score_path(event, tick, spec, ticks):
                 path=pd.DataFrame(dict(ts=ts[seg], price=px[seg], score=1/(1+np.exp(-z)))))
 
 
-def outcomes(event, cut, tick, row, s, lat):
+def outcomes(event, account, tick, row, s, lat):
     """Resting framework row (worse path) and the chased entry on the dynamic run's exit, as the experiment's summary."""
     from yoyo.evaluation.monday_limit_paper_accounts import load_symbol, V3MODE
     from yoyo.evaluation.monday_limit_tick_entry import load_paths
     symbol = event.split(':')[0]
-    variant, kind = ACCOUNT[cut]
+    cut, variant, mode = ACCOUNT[account]
     acfg = json.loads((ROOT/tick['accounts_config']).read_text())
     _, rest, _ = load_symbol((str(ROOT/tick['accounts_run']), symbol, 10., 10.))
-    rest = rest[(rest.variant == variant) & (rest.event == event)]
-    mode = 'near_monday_edge' if kind == 'spike' else str(V3MODE(np.array([row[f's_{cut}']]), acfg['hi'])[0])
+    mode = mode or str(V3MODE(np.array([row[f's_{cut}']]), acfg['hi'])[0])
+    rest = rest[(rest.variant == variant) & (rest.event == event) & (rest['mode'] == mode)]
     raw = load_paths((str(ROOT/json.loads((EXP/'config.json').read_text())['accounts_run']), symbol))
     raw = raw[(raw.variant == variant) & raw.trade_id.str.startswith(event+':') & (raw.trade_id.str.split(':').str[4] == mode)]
     p = row.get(f'p_{cut}_{lat}', np.nan)
@@ -97,7 +98,7 @@ def minute_bars(symbol, start, end):
     return m[(m.t >= start) & (m.t < end)].reset_index(drop=True)
 
 
-def draw(event, cut, lat, out):
+def draw(event, account, lat, out):
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -107,6 +108,7 @@ def draw(event, cut, lat, out):
     spec = json.loads((ROOT/tick['score_model']).read_text())
     ticks = pd.read_csv(ROOT/'experiments/active/exp-monday-limit-tick-entry-20261029-v1/tick_events.csv.gz').set_index('event')
     row = pd.read_csv(EXP/'dyn_events.csv.gz').set_index('event').loc[event]
+    cut = ACCOUNT[account][0]
     thr = {'05': 0.5, '06': 0.6}[cut]
     g = score_path(event, tick, spec, ticks)
     path, s, L = g['path'], g['side'], g['level']
@@ -119,7 +121,7 @@ def draw(event, cut, lat, out):
     taker = trades.buyer_maker.astype(str).str.lower().isin(['false', '0'] if s > 0 else ['true', '1'])
     fills = trades[taker & (trades.ts >= t_cross+lat) & (trades.ts > t_cross)] if lat else trades[trades.ts == t_cross]
     t_fill, p_fill = int(fills.ts.iat[0]), float(row[f'p_{cut}_{lat}'])
-    rest, chased, mode = outcomes(event, cut, tick, row, s, lat)
+    rest, chased, mode = outcomes(event, account, tick, row, s, lat)
     target = g['targets'][mode]
     o = g['open_ms']
     hit = trades[(trades.ts >= int(path.ts.iat[0])) & ((trades.price >= target) if s > 0 else (trades.price <= target))]
@@ -173,7 +175,7 @@ def draw(event, cut, lat, out):
     zs.plot(sec(path.ts), path.score, color='#d64545', lw=1.2, alpha=.8); zs.axhline(thr, color='#d64545', ls='--', lw=.8)
     zs.set_ylabel('评分', color='#d64545'); zs.set_xlim(lo, hi_)
     i_c = int(np.flatnonzero(path.ts.to_numpy() == t_cross)[0])
-    zx.set_title(f'放大：触及后 {sec(t_cross)-sec(path.ts.iat[0]):.1f} 秒评分才过线，这时成交价已比挂单价差 '
+    zx.set_title(f'放大：触及后 {sec(t_cross)-sec(path.ts.iat[0]):.1f} 秒评分过线，这时市价成交比挂单价差 '
                  f'{s*(p_fill/L-1)*1e4:+.0f}bp；{"" if t_hit is None else f"{sec(t_hit)-sec(path.ts.iat[0]):.0f} 秒后价格到止盈"}',
                  loc='left')
     c = ax[3]
@@ -194,7 +196,7 @@ def draw(event, cut, lat, out):
     fig.tight_layout()
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, dpi=130)
-    facts = dict(event=event, cut=thr, latency_ms=lat, side=s, level=L, target=float(target), target_mode=mode,
+    facts = dict(event=event, account=account, cut=thr, latency_ms=lat, side=s, level=L, target=float(target), target_mode=mode,
                  bar_open_utc=str(ts0), touch_s=float(sec(path.ts.iat[0])), cross_s=float(sec(t_cross)), fill_s=float(sec(t_fill)),
                  target_hit_s=None if t_hit is None else float(sec(t_hit)), causal=causal, instant=float(path.score.iat[0]),
                  stored=stored, final=float(path.score.iat[-1]), market_fill=p_fill,
@@ -212,8 +214,8 @@ def draw(event, cut, lat, out):
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument('--event', required=True)
-    ap.add_argument('--cut', choices=['05', '06'], default='05')
+    ap.add_argument('--account', choices=list(ACCOUNT), default='v3')
     ap.add_argument('--lat', type=int, default=100)
     ap.add_argument('--out', type=Path)
     a = ap.parse_args()
-    draw(a.event, a.cut, a.lat, a.out or EXP/'charts'/f"{a.event.replace(':', '_')}_{a.cut}.png")
+    draw(a.event, a.account, a.lat, a.out or EXP/'charts'/f"{a.event.replace(':', '_')}_{a.account}.png")
