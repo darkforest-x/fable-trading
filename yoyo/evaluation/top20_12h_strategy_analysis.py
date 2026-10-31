@@ -103,6 +103,26 @@ def bootstrap_pairs(p,seed=20261101):
         p_two_sided=float((1+np.sum(np.abs(perm)>=abs(observed)))/2001))
 
 
+def ablations(signal):
+    """Preserve equal event cohorts for partial exits and entry comparisons."""
+    pairs=[('A_limit_5R_14d','B_618_5R_14d'),('A_limit_5R_14d','B_705_5R_14d'),
+           ('B_618_5R_14d','B_705_5R_14d'),('A_limit_5R_14d','C_sweep_5R_14d')]
+    for mode in ['A_limit','B_618','B_705','C_sweep']:
+        for other in [f'{mode}_5R_7d',f'{mode}_5R_28d',f'{mode}_partial_14d']:
+            pairs.append((f'{mode}_5R_14d',other))
+        pairs.append((f'{mode}_opposite_14d',f'{mode}_partial_14d'))
+    out=[]
+    for period,mask in periods(signal).items():
+        x=signal[mask]
+        for baseline,candidate in pairs:
+            a=x[x.config.eq(baseline)];b=x[x.config.eq(candidate)]
+            common=set(a.event_id)&set(b.event_id)
+            aa=a[a.event_id.isin(common)];bb=b[b.event_id.isin(common)]
+            out.append(dict(period=period,baseline=baseline,candidate=candidate,
+                            common_events=len(common),baseline_stats=stats(aa),candidate_stats=stats(bb)))
+    return out
+
+
 def main():
     cfg=json.loads((EXP/'config.json').read_text())
     dests=sorted((EXP/'symbols').glob('*/done.json'))
@@ -140,6 +160,7 @@ def main():
     for (name,year),g in valid.groupby(['config','year']):yearly.append(dict(config=name,year=int(year),**stats(g)))
     for (name,symbol),g in valid.groupby(['config','symbol']):coin.append(dict(config=name,symbol=symbol,**stats(g)))
     pd.DataFrame(yearly).to_csv(EXP/'by_year.csv',index=False);pd.DataFrame(coin).to_csv(EXP/'by_symbol.csv',index=False)
+    dump(EXP/'same_cohort_comparisons.json',ablations(signal))
     selection=headline[(headline.period=='selection_pre2025') & headline.n.ge(cfg['minimum_selection_trades'])].copy()
     winners={}
     definitions=[('win_rate_at_5R','win_pct',True),('total_net_R','net_r',False),('return_over_realized_drawdown','efficiency',False)]
@@ -167,7 +188,7 @@ def main():
     first=signal.sort_values('signal_close').drop_duplicates(['config','symbol','week','side'])
     for name,g in first[first.closed].groupby('config'):
         sensitivity.append(dict(config=name,**stats(g)))
-    pd.DataFrame(sensitivity).to_csv(EXP/'first_episode_sensitivity.csv',index=False)
+    pd.DataFrame(sensitivity).to_csv(EXP/'first_filled_episode_sensitivity.csv',index=False)
     summary=dict(candidates=len(candidates()),signals=int(coverage.event_id.nunique()),
         native_legs=len(legs),native_fills=sum(json.loads(p.read_text())['fills'] for p in dests),
         candidate_signal_results=len(signal),closed_results=int(signal.closed.sum()),
