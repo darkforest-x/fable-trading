@@ -97,7 +97,6 @@ def analyze(ledger, paper):
                          cost_r=.002 * entry / risk, exit_ms=p["exit_time_ms"],
                          exit_day=stamp(p["exit_time_ms"])[:10], entry_day=stamp(p["entry_time_ms"])[:10],
                          exit_reason=p["exit_reason"], peak_r=p["peak_r"],
-                         observation_delay_min=(event["detected_at_ms"] - event["bar_close_ms"]) / 60000,
                          asset_class=instruments.get(event["symbol"], {}).get("asset_class", "unknown")))
     assert max(errors) < 1e-8
     assert len(rows) == ledger["stats"]["measured_closed"]
