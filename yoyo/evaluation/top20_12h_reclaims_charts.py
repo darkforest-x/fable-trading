@@ -47,7 +47,12 @@ def draw(r):
     if path.exists():
         from PIL import Image
         try:
-            with Image.open(path) as im:assert im.size==(2160,1215);im.verify()
+            with Image.open(path) as im:
+                assert im.size==(2160,1215)
+                # Existing large-price panels fit their outside label; low-price
+                # labels need the new inside placement to preserve all digits.
+                assert abs(r['level'])>=1 or im.info.get('PriceLabelLayout')=='inside-v2'
+                im.verify()
             return dict(event_id=r['event_id'],symbol=r['symbol'],path=str(path),bytes=path.stat().st_size,reused=True)
         except (OSError,AssertionError):pass
     fig=plt.figure(figsize=(16,9),dpi=135);ax=fig.add_axes([.065,.17,.86,.64])
@@ -76,7 +81,7 @@ def draw(r):
         ax.hlines(r['monday_high'],left,right,color='#df5363',lw=.9,alpha=.75)
         ax.hlines(r['monday_low'],left,right,color='#5687f0',lw=.9,alpha=.75)
     if right<40.5:ax.hlines(level,max(right,-.5),40.5,color=GOLD,lw=1,ls='--',alpha=.55)
-    ax.annotate(f'1.618  {price(level)}',xy=(40.5,level),xytext=(5,0),textcoords='offset points',fontsize=10,color=GOLD,va='center')
+    ax.annotate(f'1.618  {price(level)}',xy=(40.5,level),xytext=(-6,6),textcoords='offset points',fontsize=10,color=GOLD,va='bottom',ha='right',bbox=dict(facecolor=BG,edgecolor='none',alpha=.7,pad=2))
     for n in r['nearby']:
         x=xpos(n['signal_open'])
         if -.5<=x<=40.5 and abs(x-20)>.01:ax.scatter(x,n['low'] if side==1 else n['high'],s=45,facecolors='none',edgecolors=color,lw=1,alpha=.7)
@@ -96,7 +101,7 @@ def draw(r):
     flags='旧挂牌历史 | ' if r['before_current_listTime'] else ''
     fig.text(.065,.052,flags+'圆圈=越线端点；菱形=当根收盘；小圆=同周同侧其他收回。虚线=该周到期后的原价参考。',fontsize=11,color=MUTED)
     fig.text(.065,.022,'OKX历史OHLC · 周一按12h K线开盘所属纽约日计算 · 未来仅供复盘 · 价格变化不是交易胜率/收益',fontsize=10,color=MUTED)
-    fig.savefig(path,dpi=135,pil_kwargs={'compress_level':1});plt.close(fig)
+    fig.savefig(path,dpi=135,pil_kwargs={'compress_level':1},metadata={'PriceLabelLayout':'inside-v2'});plt.close(fig)
     return dict(event_id=r['event_id'],symbol=r['symbol'],path=str(path),bytes=path.stat().st_size,reused=False)
 
 
