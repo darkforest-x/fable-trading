@@ -58,10 +58,21 @@ def verify():
         X=pd.read_csv(path/'features.csv',float_precision='round_trip');native=np.load(path/'native.npz')
         meta=pd.read_csv(path/'rows.csv',float_precision='round_trip')
         bg=pd.read_csv(path/'background.csv',float_precision='round_trip')
-        for method in ['tree_path_dependent','interventional']:
-            explainer=shap.TreeExplainer(model,data=bg if method=='interventional' else None,
-                                      model_output='raw',feature_perturbation=method)
-            explanation=explainer(X,check_additivity=True)
+        for method in ['tree_path_dependent','interventional_permutation_3','interventional_permutation_10']:
+            destination=path/f'{method}_explanation.pkl'
+            if destination.exists():
+                with destination.open('rb') as handle:explanation=pickle.load(handle)
+            elif method=='tree_path_dependent':
+                explainer=shap.TreeExplainer(model,model_output='raw',feature_perturbation=method)
+                explanation=explainer(X,check_additivity=True)
+            else:
+                # The interventional tree implementation failed additivity
+                # despite exact schema/native/internal prediction parity.
+                # Use the actual native callable, retaining the same background.
+                cycles=int(method.rsplit('_',1)[1])
+                callback=lambda values:model.predict(values,num_threads=1)
+                explainer=shap.PermutationExplainer(callback,shap.maskers.Independent(bg,max_samples=len(bg)),seed=20261031)
+                explanation=explainer(X,max_evals=cycles*(2*len(X.columns)+1))
             assert isinstance(explanation,shap.Explanation)
             reconstructed=explanation.base_values+explanation.values.sum(axis=1)
             error=float(abs(reconstructed-native['score']).max());assert error<1e-6
@@ -70,19 +81,22 @@ def verify():
                 parity=float(abs(explanation.values-native['contributions'][:,:-1]).max())
                 assert parity<1e-12
                 np.testing.assert_allclose(explanation.base_values,native['contributions'][:,-1],rtol=0,atol=1e-12)
-            with (path/f'{method}_explanation.pkl').open('wb') as handle:pickle.dump(explanation,handle)
+            with destination.open('wb') as handle:pickle.dump(explanation,handle)
             values=pd.DataFrame(explanation.values,columns=X.columns)
             values['base_value']=explanation.base_values
             for col in meta:values[col]=meta[col].to_numpy()
             values['arm']=spec['arm'];values['method']=method;outputs.append(values)
             records.append(dict(fold=spec['fold'],arm=spec['arm'],method=method,rows=len(X),
                 features=len(X.columns),additivity_max_error=error,native_parity_max_error=parity))
+        print(spec['fold'],spec['arm'],'verified three explanation variants',flush=True)
     pd.concat(outputs,ignore_index=True).to_csv(EXP/'shap_values.csv.gz',index=False)
     dump(EXP/'shap_verification.json',dict(shap_version=shap.__version__,lightgbm_version=lgb.__version__,
         output='Expected native netR',reference='Frozen training cover or paired training-only one-event-per-week background',
         records=records,explanation_objects_retained=True,refits=0,
+        recovery='Interventional TreeSHAP failed on2025Q4 original model by0.04574R. Native and SHAP internal predictions match exactly; removing incomplete background rows does not fix it. Failed values rejected. Same background now uses actual-Booster PermutationExplainer with3and10permutation budgets, both checked for additivity.',
         limitations=['Correlated features share allocation under the chosen reference; no market-causal claim.',
-            'Differences between two fitted models are not the effect of deleting an input from one model.']))
+            'Differences between two fitted models are not the effect of deleting an input from one model.',
+            'Interventional permutation attributions are Monte Carlo approximations;3versus10budget cohort stability is reported.']))
     print('Verified',len(records),'paired explanation batches',flush=True)
 
 
