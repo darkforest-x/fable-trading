@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-clean-reversal-classifier-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5433e158f6
+    status: inconclusive
+    question: Does binary classification of unchanged clean-candidate labels improve ranking over continuous-quality regression?
+    single_variable: Objective only;L2quality regression becomes binarylogloss with same24features,parameters,weights and16quarter train/test sets.No label changes or owner-example overweighting.
+    result: 1901OOS events,within-foldAUC0.4979;topdecile52of196clean26.53percent versus matchedrandom30.06percent,lift-3.53pp CI[-8.87,+2.02],p0.929.Originalregression57of19629.08percent;paired improvement CIcrosseszero.No improved score established.
+    artifacts: [clean-reversal-classifier-20261101-v1, clean-reversal-owner-six-20261101-v1]
+    canonical_report: experiments/active/exp-clean-reversal-classifier-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Owner accepted all6reviewed boundary examples,already positive;other214gallery candidates not confirmed.49models saved,5703predictions reloadexact;2256labels/24features and48fold memberships unchanged.2behavioraltests;baseline reused without retraining.2026hit28.57vs23.21percent but fullperiod not improved. Notion40a8856479af811288e8c9addca7615b.No tradePnL or service changes.
+
   - experiment_id: exp-clean-reversal-audit-20261101-v1
     source_repo: darkforest-x/fable-trading
     source_commit: b088b1ade7

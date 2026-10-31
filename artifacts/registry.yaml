@@ -19,6 +19,30 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: clean-reversal-classifier-20261101-v1
+    artifact_type: manifest
+    role: binary_objective_ablation_of_frozen_clean_reversal_labels
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5433e158f6
+    generator_commit: 5433e158f6
+    source_path: experiments/active/exp-clean-reversal-classifier-20261101-v1/summary.json
+    storage_uri: repo://experiments/active/exp-clean-reversal-classifier-20261101-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 49binarymodels,5703OOSprediction rows,644gallerynew/oldscores and6owner-example scores. AUC0.4979,top26.53percent vsrandom30.06percent,p0.929;no improved model established.Originallabels and causal feature values exact. No profits or production use.
+  - artifact_id: clean-reversal-owner-six-20261101-v1
+    artifact_type: annotation_set
+    role: owner_confirmation_of_six_specific_reversal_boundary_examples
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5433e158f6
+    source_path: experiments/active/exp-clean-reversal-audit-20261101-v1/owner_confirmation_20261101.json
+    storage_uri: repo://experiments/active/exp-clean-reversal-audit-20261101-v1/owner_confirmation_20261101.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Ownerreply都算 applies exactly to6shown charts,left-to-right/top-to-bottom;not all46flags or220candidates.None of2256automatic labels changed.220reviewCSV has exactly6confirmed rows;other214stayunconfirmed.
+
   - artifact_id: clean-reversal-audit-20261101-v1
     artifact_type: manifest
     role: frozen_clean_label_review_and_matched_feature_diagnostics

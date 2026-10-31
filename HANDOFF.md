@@ -1,3 +1,10 @@
+## 2026-11-01 — Six boundary examples accepted; binary scoring does not improve
+
+- Owner replied “都算” to all6boundaryexamples. Recorded exact event IDs in audit experiment owner_confirmation_20261101.json and220reviewCSV;other214candidates remain automatic/unconfirmed. These6were already positive,so no original label or audit flag was converted to a rejection. Previous boundary-review question resolved for these6only.
+- New exp-clean-reversal-classifier-20261101-v1 changes only L2continuous-quality objective to binarylogloss. Same24features,2256labels,sampleweights,parameters and16chronologicalfolds;oldregression predictions reused.49models saved,5703readback probabilities exact,48train/test lists andvolbins equal;2behavioraltests passed.
+- 1901OOS:within-foldAUC0.4979;top52/196=26.53percent vsmatchedrandom30.06percent,lift-3.53pp CI[-8.87,+2.02],p0.929. Oldregression57/196=29.08percent;paired rawdifference-2.55pp CI[-10.96,+5.87],matchedliftdifference-3.03pp CI[-9.86,+3.64].2026new28.57percent vsold23.21but fullperiod not improved. Singlewick/shuffledbinary both26.53percent. No validated replacement.
+- Read new comparison.csv/summary.json/validation.json/gallery_644_labels_and_scores.csv. Notion40a8856479af811288e8c9addca7615b linksEXP235. Learning accepted-boundary-examples-are-not-hard-negatives.md. No further threshold/featuresearch,tradePnL,eligibility or service changes;only six human confirmations are gold facts.
+
 ## 2026-11-01 — Clean reversal label audit, owner boundary review pending
 
 - Continued from exp-clean-reversal-score-20261101-v1 without changing labels or refitting. New exp-clean-reversal-audit-20261101-v1 flags46of220gallery candidates:33only2of4advancing blocks,12close drawdown larger than terminal progress,3mostly not favorable relative to signal close. Flags overlap;174unflagged are also not owner-confirmed.
