@@ -101,6 +101,11 @@ def verify():
 
 
 def summarize():
+    manifest=json.loads((EXP/'shap_manifest.json').read_text())
+    for fold in config()['folds']:
+        pair=[s for s in manifest if s['fold']==fold]
+        assert len(pair)==2
+        assert pair[0]['background_event_ids']==pair[1]['background_event_ids']
     contributions=read('shap_values.csv.gz');membership=read('tail_membership.csv')
     labels=membership[membership.arm.eq('full_context')].set_index('trade_id')
     state=config()['feature_groups']['state_only'];returns=config()['feature_groups']['return_residual_only']
@@ -130,8 +135,31 @@ def summarize():
                 term=full.loc[g.index,feature]
                 features.append(dict(method=method,category=category,feature=feature,
                     mean_shap_r=float(term.mean()),mean_abs_shap_r=float(term.abs().mean())))
-    pd.concat(events,ignore_index=True).to_csv(EXP/'tail_score_decomposition.csv',index=False)
+    event_table=pd.concat(events,ignore_index=True)
+    event_table.to_csv(EXP/'tail_score_decomposition.csv',index=False)
     pd.DataFrame(features).to_csv(EXP/'tail_feature_attribution.csv',index=False)
+    terms=['base_delta','shared_feature_delta','state_contribution','return_contribution']
+    cohorts=pd.DataFrame(records)
+    low=cohorts[cohorts.method.eq('interventional_permutation_3')].set_index('category')
+    high=cohorts[cohorts.method.eq('interventional_permutation_10')].set_index('category')
+    cohort_diff=(high[terms]-low[terms]).abs()
+    low_events=event_table[event_table.method.eq('interventional_permutation_3')].set_index('trade_id')
+    high_events=event_table[event_table.method.eq('interventional_permutation_10')].set_index('trade_id')
+    event_diff=(high_events[terms]-low_events[terms]).abs()
+    error=abs(event_table[terms].sum(axis=1)-(event_table.score-event_table.original_score)).max()
+    assert error<2e-6
+    promoted=cohorts[cohorts.category.eq('promoted')]
+    displaced=cohorts[cohorts.category.eq('displaced')]
+    dump(EXP/'shap_sensitivity.json',dict(paired_background_ids_exact=True,
+        batches=16,events_per_model=333,full_minus_original_max_error=float(error),
+        budget3_vs10_max_cohort_term_delta_r=float(cohort_diff.to_numpy().max()),
+        budget3_vs10_event_term_p95_delta_r={c:float(event_diff[c].quantile(.95)) for c in terms},
+        budget3_vs10_max_event_term_delta_r=float(event_diff.to_numpy().max()),
+        promoted_state_contribution_range_r=[float(promoted.state_contribution.min()),float(promoted.state_contribution.max())],
+        promoted_return_contribution_range_r=[float(promoted.return_contribution.min()),float(promoted.return_contribution.max())],
+        displaced_mean_score_change_r=float((displaced.mean_score-displaced.mean_original_score).iloc[0]),
+        caveat='Limited same-seed budget sensitivity, not a convergence guarantee. Correlated input allocations depend on reference. Displaced means relative rank exclusion, not necessarily lower absolute score.',
+        generator_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()))
     dump(EXP/'tail_explanation.json',dict(cohorts=records,
         interpretation='Full-minus-original predictions decompose exactly into reference, shared-feature changes and new input groups. These are descriptive allocations, not retraining causal effects.',
         generator_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()))
