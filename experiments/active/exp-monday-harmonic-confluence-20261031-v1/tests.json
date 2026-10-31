@@ -1,0 +1,26 @@
+{
+  "isolated_runtime_suite": {
+    "passed": 108,
+    "failed": 2,
+    "log": "tests-final.log"
+  },
+  "resolved_in_main_runtime": {
+    "test": "test_the_review_toolchain_imports",
+    "passed": 1,
+    "reason": "Optional cv2 renderer dependency intentionally absent from harmonic-only runtime",
+    "log": "tests-main-runtime.log"
+  },
+  "existing_repository_failure": {
+    "test": "test_no_file_names_a_sibling_repository_in_a_path_expression",
+    "file": "yoyo/evaluation/ma_morphology_reuse_recover.py",
+    "literal": "archive/consolidated/yoyo-trading",
+    "source_commit": "e06b10d6c0",
+    "not_changed_by_this_study": true
+  },
+  "harmonic_and_original_runner_regressions": {
+    "passed": 23,
+    "failed": 0,
+    "builder_log": "tests-builder.log"
+  },
+  "log_format": "Trailing whitespace stripped from versioned tests-final.log; original tests-final.raw.log remains local."
+}

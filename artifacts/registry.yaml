@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-harmonic-confluence-20261031-v1
+    artifact_type: manifest
+    role: fixed_pre_touch_harmonic_gate_on_original_monday_accounts
+    source_repo: darkforest-x/fable-trading
+    source_commit: d8cb53d580
+    generator_commit: 09a7d08928
+    source_path: experiments/active/exp-monday-harmonic-confluence-20261031-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-harmonic-confluence-20261031-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 'Pyharmonics1.5.3,5m/1000bar/10spacing/3percent/80percent forming; no tuning.531causal checks,1284source stamps,2517signal rows exact,zero new signal orders;13236new matched-control positions over2paths audited.60m paired6.71/-12.07bp p0.0765;v3 91.54/11.33 p0.1490.13history gaps;10events lack original eligible controls.23focused tests pass; one existing archive-path boundary failure retained,cv2 check passes main runtime.Original touch-bar score lookahead preserved. Notion EXP-230.'
   - artifact_id: spike-v131-forward-review-20261031-v1
     artifact_type: manifest
     role: saved_v131_reference_outcomes_and_scoped_pause_receipt

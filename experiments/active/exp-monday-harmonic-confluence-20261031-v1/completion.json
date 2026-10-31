@@ -1,0 +1,135 @@
+{
+  "experiment_id": "exp-monday-harmonic-confluence-20261031-v1",
+  "status": "rejected_fixed_configuration",
+  "result": "Fixed harmonic gate rejected: 1220/22708 events retained. All-history final multiples original/harmonic:60m15.2215/1.0985,5m2.3791/0.9295,v3 89.0068/1.0573,add202.8406/1.1042,add20 327.7442/1.0926,lock90.9776/1.0492,spike4.6599/1.0000. Mean trade returns also decline. Allin3 only3events; monthly x10 reach100/0percent. 2026 5m loses less but remains negative.",
+  "notes": "Pyharmonics1.5.3,5m/1000bar/10spacing/3percent/80percent forming; no tuning.531causal checks,1284source stamps,2517signal rows exact,zero new signal orders;13236new matched-control positions over2paths audited.60m paired6.71/-12.07bp p0.0765;v3 91.54/11.33 p0.1490.13history gaps;10events lack original eligible controls.23focused tests pass; one existing archive-path boundary failure retained,cv2 check passes main runtime.Original touch-bar score lookahead preserved. Notion EXP-230.",
+  "builder_commits": [
+    "d8cb53d580",
+    "0d8c9c5dc2",
+    "502166f79c",
+    "09a7d08928"
+  ],
+  "source_range": [
+    "2020-01-14",
+    "2026-09-23"
+  ],
+  "configuration_frozen_before_returns": true,
+  "no_parameter_search": true,
+  "validation": {
+    "events": 22708,
+    "observable": 22695,
+    "source_files_unchanged": 1284,
+    "prefix_and_future_mutation_checks": 531,
+    "validated_patterns": 4387,
+    "score_metadata_rows_checked": 10002,
+    "new_native_positions_checked": 13236,
+    "confirmation_clocks_checked": 13234,
+    "max_fee_net_error_bp": 3.410605131648481e-12,
+    "exact_cached_orders_rerun_only_as_dependencies": 0,
+    "cache_mismatches": 0,
+    "native_signal_orders": 0,
+    "touch_bar_excluded": true,
+    "no_execution_replay": true
+  },
+  "tests": {
+    "isolated_runtime_suite": {
+      "passed": 108,
+      "failed": 2,
+      "log": "tests-final.log"
+    },
+    "resolved_in_main_runtime": {
+      "test": "test_the_review_toolchain_imports",
+      "passed": 1,
+      "reason": "Optional cv2 renderer dependency intentionally absent from harmonic-only runtime",
+      "log": "tests-main-runtime.log"
+    },
+    "existing_repository_failure": {
+      "test": "test_no_file_names_a_sibling_repository_in_a_path_expression",
+      "file": "yoyo/evaluation/ma_morphology_reuse_recover.py",
+      "literal": "archive/consolidated/yoyo-trading",
+      "source_commit": "e06b10d6c0",
+      "not_changed_by_this_study": true
+    },
+    "harmonic_and_original_runner_regressions": {
+      "passed": 23,
+      "failed": 0,
+      "builder_log": "tests-builder.log"
+    },
+    "log_format": "Trailing whitespace stripped from versioned tests-final.log; original tests-final.raw.log remains local."
+  },
+  "coverage": {
+    "selected_events": 1220,
+    "matched_events": 1210,
+    "coverage_pct": 99.18032786885246,
+    "missing": [
+      {
+        "event": "1000XECUSDT:2023-06-12:+1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "4USDT:2026-07-06:+1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "ALPACAUSDT:2025-04-28:+1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "BCHUSDT:2025-06-09:+1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "CAKEUSDT:2024-06-03:+1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "CELOUSDT:2022-09-12:+1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "CHRUSDT:2021-04-12:+1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "ENAUSDT:2026-03-30:+1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "HIFIUSDT:2025-06-02:+1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "LRCUSDT:2022-07-11:+1",
+        "original_control_orders": 0
+      }
+    ],
+    "reason": "Original matched-bucket generator provided no eligible random orders for these events; no imputation or resampling.",
+    "control_attempts": 3630,
+    "unfilled_control_attempts": 354,
+    "all_unfilled_attempts_remain_zero": true
+  },
+  "reproduction": "sh experiments/active/exp-monday-harmonic-confluence-20261031-v1/reproduce.sh",
+  "evidence": [
+    "summary.json",
+    "headline.csv",
+    "annual.csv",
+    "scan.json",
+    "harmonic-validation.json",
+    "controls-validation.json",
+    "validation.json",
+    "control-coverage.json",
+    "allin_monthly.json"
+  ],
+  "local_bulk": [
+    "scan/",
+    "symbols/",
+    "patterns-validated.jsonl.gz",
+    "patterns-invalid-library-join.jsonl.gz",
+    "admission.csv.gz",
+    "matched-controls.csv.gz",
+    "*-ledger.csv.gz"
+  ],
+  "notion": "https://app.notion.com/p/40a8856479af81719cbcc2349cd01f0f",
+  "training_eligible": false,
+  "production_eligible": false
+}

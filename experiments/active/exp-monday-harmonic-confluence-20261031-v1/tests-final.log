@@ -1,0 +1,75 @@
+........................................................................ [ 65%]
+............................F........F                                   [100%]
+=================================== FAILURES ===================================
+_________ test_no_file_names_a_sibling_repository_in_a_path_expression _________
+
+    def test_no_file_names_a_sibling_repository_in_a_path_expression():
+        offenders: dict[str, list[str]] = {}
+        for path in _python_files():
+            text = path.read_text(encoding="utf-8", errors="ignore")
+            try:
+                tree = ast.parse(text)
+            except SyntaxError:
+                continue
+            hits = []
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Constant) or not isinstance(node.value, str):
+                    continue
+                if any(repo == node.value or node.value.endswith(f"/{repo}") for repo in SIBLING_REPOS):
+                    hits.append(node.value)
+            relative = str(path.relative_to(REPO))
+            if hits and relative not in ALLOWED_TO_NAME_SOURCES:
+                offenders[relative] = sorted(set(hits))
+>       assert not offenders, (
+            f"these files build a path to a repository that is being archived: {offenders}. "
+            "Everything they need is in this repository now."
+        )
+E       AssertionError: these files build a path to a repository that is being archived: {'yoyo/evaluation/ma_morphology_reuse_recover.py': ['archive/consolidated/yoyo-trading']}. Everything they need is in this repository now.
+E       assert not {'yoyo/evaluation/ma_morphology_reuse_recover.py': ['archive/consolidated/yoyo-trading']}
+
+tests/boundaries/test_no_cross_repository_bridges.py:113: AssertionError
+______________________ test_the_review_toolchain_imports _______________________
+
+    def test_the_review_toolchain_imports() -> None:
+>       from tools.review import convert_labelstudio_export
+
+tests/boundaries/test_yoyo_package_is_local.py:150:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools/review/convert_labelstudio_export.py:11: in <module>
+    from yoyo.datasets.gold_box import snap_x_to_bar
+yoyo/datasets/gold_box.py:11: in <module>
+    from yoyo.layers.l1_detection.render import MARGIN, make_chart_transform
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    """Render 15m candlestick charts with SMA/EMA 20/60/120 for YOLO detection.
+
+    Style follows the old project's TradingView-like renderer (cv2 drawing,
+    1280x742) but deliberately drops grids, axes and text so the only pixels on
+    the canvas are candles and the six moving averages.
+    """
+
+    from __future__ import annotations
+
+    from dataclasses import dataclass
+    from pathlib import Path
+
+>   import cv2
+E   ModuleNotFoundError: No module named 'cv2'
+
+yoyo/layers/l1_detection/render.py:13: ModuleNotFoundError
+=============================== warnings summary ===============================
+tests/evaluation/test_monday_harmonic.py::test_external_filter_preserves_original_score_and_ema
+tests/evaluation/test_monday_order_only.py::test_stored_clock_controls_targets_adds_and_missingness
+tests/evaluation/test_monday_order_only.py::test_stored_clock_controls_targets_adds_and_missingness
+tests/evaluation/test_monday_order_only.py::test_stored_clock_controls_targets_adds_and_missingness
+tests/evaluation/test_monday_order_only.py::test_stored_clock_controls_targets_adds_and_missingness
+tests/evaluation/test_monday_order_only.py::test_complete_symbol_reuse_relabels_score_but_refuses_new_target_band
+tests/evaluation/test_monday_order_only.py::test_complete_symbol_reuse_relabels_score_but_refuses_new_target_band
+  /Users/zhangzc/fable-trading/yoyo/evaluation/v3_causal_close_entry.py:44: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+    return pd.read_csv(*args, float_precision='round_trip', **kwargs)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/boundaries/test_no_cross_repository_bridges.py::test_no_file_names_a_sibling_repository_in_a_path_expression
+FAILED tests/boundaries/test_yoyo_package_is_local.py::test_the_review_toolchain_imports
+2 failed, 108 passed, 7 warnings in 135.54s (0:02:15)

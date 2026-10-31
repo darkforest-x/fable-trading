@@ -30,17 +30,17 @@ experiments:
   - experiment_id: exp-monday-harmonic-confluence-20261031-v1
     source_repo: darkforest-x/fable-trading
     source_commit: d8cb53d580
-    status: active
+    status: rejected
     question: Does pre-touch Pyharmonics confluence improve the eight unchanged original-score Monday1618 strategies?
     single_variable: Add one harmonic admission gate; preserve original touch-bar scores, fills, targets, stops, child orders, fees and capital conventions.
-    result: Pending frozen 5m Pyharmonics 1.5.3 scan; no return-based tuning.
-    artifacts: []
+    result: 'Fixed harmonic gate rejected: 1220/22708 events retained. All-history final multiples original/harmonic:60m15.2215/1.0985,5m2.3791/0.9295,v3 89.0068/1.0573,add202.8406/1.1042,add20 327.7442/1.0926,lock90.9776/1.0492,spike4.6599/1.0000. Mean trade returns also decline. Allin3 only3events; monthly x10 reach100/0percent. 2026 5m loses less but remains negative.'
+    artifacts: [monday-harmonic-confluence-20261031-v1]
     canonical_report: experiments/active/exp-monday-harmonic-confluence-20261031-v1/summary.json
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: '1000bar lookback, 10bar pivot spacing, 3percent ratio tolerance, default80percent forming. XABC confirmed before touch; touch bar excluded. Verify actual ratios and symmetric PRZ projection. Reuse native baseline fills and missing-control-only execution. No training, downloads or service changes.'
+    notes: 'Pyharmonics1.5.3,5m/1000bar/10spacing/3percent/80percent forming; no tuning.531causal checks,1284source stamps,2517signal rows exact,zero new signal orders;13236new matched-control positions over2paths audited.60m paired6.71/-12.07bp p0.0765;v3 91.54/11.33 p0.1490.13history gaps;10events lack original eligible controls.23focused tests pass; one existing archive-path boundary failure retained,cv2 check passes main runtime.Original touch-bar score lookahead preserved. Notion EXP-230.'
   - experiment_id: exp-eth-btc-context-ablation-20261031-v1
     source_repo: darkforest-x/fable-trading
     source_commit: a5d8c26312
