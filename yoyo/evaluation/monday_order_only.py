@@ -395,7 +395,9 @@ def summarize(config):
                 headline.append(row);details[track][arm+'_'+period]=dict(metrics=row,account_seeds=seeds,matched_random=control)
     selected=pop[pop.l2_order_score.ge(cfg['min_order'])]
     result=dict(config=cfg,coverage=dict(events=len(selected),missing_score=int(selected.score.isna().sum()),symbols=len(receipts),
-                olhc_only_children=int(only_l.sum())),baseline_counts_and_accounts_match=True,strategies=details,
+                olhc_only_children=int(only_l.sum())),baseline_counts_match_all_eight=True,
+                saved_account_metrics_match_seven_non_allin=True,
+                allin_account_scope='Additional fixed full/annual starts with original allocator and replenishments; not the old monthly goal-rate summary.',strategies=details,
                 native_counts={key:sum(r['paths'][p][key] for r in receipts for p in r['paths']) for key in ('reused','known_empty_children','new_orders','new_positions','new_fills')},
                 source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),training_eligible=False,production_eligible=False)
     dump(root/'summary.json',clean(result));pd.DataFrame(headline).to_csv(root/'headline.csv',index=False)
@@ -469,10 +471,36 @@ def validate(config):
     dump(root/'validation.json',result);print(json.dumps(result))
 
 
+def diagnostics(config):
+    """Read-only boundary and best-week attribution; never replay an account."""
+    cfg=json.loads(config.read_text());root=config.parent
+    w=read_csv(root/'worse.csv.gz');out={}
+    for track in TRACKS:
+        t=select_track(w,track,cfg);t=t[t.control_id.eq(0)&t.filled]
+        for period,begin in [('all','2020-01-01'),('2026','2026-01-01')]:
+            s=t[t.cohort_time.ge(begin)];nb=s[~s.reason.eq(0)]
+            weeks=s.event.str.split(':').str[1]
+            weekly=s.groupby(weeks).net.sum().sort_values(ascending=False)
+            ledger=read_csv(root/f'{track}-order_only-{period}-seed0-ledger.csv.gz')
+            boundary=ledger.notional.gt(0)&pd.to_numeric(ledger.reason,errors='coerce').eq(0)
+            out[track+'|'+period]=dict(n=len(s),mean_bp=float(s.net.mean()),boundary=len(s)-len(nb),
+                without_boundary_mean_bp=float(nb.net.mean()),best_week=str(weekly.index[0]),
+                mean_without_best_week_bp=float(s[weeks!=weekly.index[0]].net.mean()),
+                funded_boundary_pnl=float(ledger.loc[boundary,'pnl'].sum()),seed0_net_pnl=float(ledger.pnl.sum()))
+    dump(root/'concentration.json',out)
+    summary=json.loads((root/'summary.json').read_text())
+    summary.pop('baseline_counts_and_accounts_match',None)
+    summary.update(baseline_counts_match_all_eight=True,saved_account_metrics_match_seven_non_allin=True,
+                   allin_account_scope='Additional fixed full/annual starts with original allocator and replenishments; not the old monthly goal-rate summary.')
+    dump(root/'summary.json',summary)
+    print(json.dumps(out))
+
+
 if __name__=='__main__':
-    ap=argparse.ArgumentParser();ap.add_argument('action',choices=['run','summary','validate'])
+    ap=argparse.ArgumentParser();ap.add_argument('action',choices=['run','summary','validate','diagnostics'])
     ap.add_argument('--config',type=Path,default=EXP/'config.json');ap.add_argument('--workers',type=int,default=4)
     args=ap.parse_args();config=args.config.resolve()
     if args.action=='run':run(config,args.workers)
     elif args.action=='summary':summarize(config)
-    else:validate(config)
+    elif args.action=='validate':validate(config)
+    else:diagnostics(config)
