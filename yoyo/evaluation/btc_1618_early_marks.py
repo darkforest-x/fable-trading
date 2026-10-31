@@ -158,6 +158,8 @@ def run():
     marks, episodes, skipped = census(bars)
     primary = marks[marks.basis.eq('wick') & marks.visible_v242 & marks.ordinal.le(5)].copy()
     primary.sort_values(['signal_open', 'side']).to_csv(EXP/'matches.csv', index=False)
+    primary[primary.episode_bars.le(5) & primary.duration_known].sort_values(
+        ['signal_open', 'side']).to_csv(EXP/'short_excursion_matches.csv', index=False)
     marks.to_csv(EXP/'all_outside_marks.csv', index=False)
     episodes.to_csv(EXP/'episodes.csv', index=False)
     # Existing independent normalized implementation should agree away from warmup.

@@ -1,3 +1,9 @@
+## 2026-10-31 · BTC15m first-five outside-1.618 glyph census
+
+- Owner confirmed first1-5candles and all existing history. `exp-btc-1618-early-marks-20261031-v1` reuses181149gapfree OKX15m bars,2021-09-01..2026-10-31 23:15Shanghai;first incompleteNYweek excluded. V2.42 default Stoch5/3/3,strict directional wick outside completedNY Monday1.618,NY weekends hidden;one inside candle rearms.
+- 158signals(80red crosses/78green checks),154excursions. Byordinal1..5:28/27/32/42/29. If the whole excursion ultimately returns inside after only1-5bars:43signals(23crosses/20checks),42excursions;this duration is retrospective,not an entry-time condition.121primary signals also close outside;close-based first-five count143;including weekends200.
+- Screenshot redcrosses match Oct28 16:30 andOct30 00:00Shanghai,ordinal1/3,totalduration1/4.1919overlapOHLCmatches,zero literal/rounded signal differences,two prefix checks,10existing tests pass. Read `matches.csv`,`short_excursion_matches.csv`,`summary.json`;raw snapshot local. Builder3d9450e857 preceded scan. Notion40a8856479af81918b60ffa2c26e2d0e. Pattern census only;no profitability claim,orders,training,download or services change.
+
 ## 2026-10-31 · Separate pre-touch15m/1h harmonics also fail to improve Monday accounts
 
 - `exp-monday-harmonic-15m-confluence-20261031-v1` and `exp-monday-harmonic-1h-confluence-20261031-v1` independently change only harmonic interval. Reuse Pyharmonics1.5.3/1000bars/spacing10/tolerance3percent/forming80percent; all original scores,entries,exits,fees,allocators remain. Higher candles must be complete and closed by the touch5m opening; completed pre-touch5m tail only expires existing zones. Original score lookahead deliberately preserved.

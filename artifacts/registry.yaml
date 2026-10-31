@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-1618-early-marks-20261031-v1
+    artifact_type: manifest
+    role: btc_15m_first_five_outside_monday1618_v242_glyph_census
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3d9450e857
+    generator_commit: 3d9450e857
+    source_path: experiments/active/exp-btc-1618-early-marks-20261031-v1/summary.json
+    storage_uri: repo://experiments/active/exp-btc-1618-early-marks-20261031-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 158signals154excursions;43signals42excursions if entire observed outside run lasts1-5bars. Raw snapshot local,match CSVs preserved. NY weekday V2.42 defaults;no performance inference.1919overlap comparisons,zero gaps,two prefix checks,10existing tests and two signal implementations agree.
   - artifact_id: monday-harmonic-15m-confluence-20261031-v1
     artifact_type: manifest
     role: fixed_pre_touch_15m_harmonic_gate_on_original_monday_accounts

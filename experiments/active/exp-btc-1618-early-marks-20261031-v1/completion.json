@@ -1,0 +1,33 @@
+{
+  "status": "complete",
+  "pattern_census_only": true,
+  "notion": "https://app.notion.com/p/40a8856479af81918b60ffa2c26e2d0e",
+  "tests": {
+    "command": ".venv/bin/python -m pytest tests/test_spike_fanshen_exit.py -q",
+    "passed": 10
+  },
+  "primary": {
+    "signals": 158,
+    "episodes": 154,
+    "short": 80,
+    "long": 78
+  },
+  "short_excursions": {
+    "signals": 43,
+    "episodes": 42,
+    "short": 23,
+    "long": 20
+  },
+  "original_screenshot_matches": [
+    {
+      "signal_open_shanghai": "2026-10-28 16:30",
+      "ordinal": 1,
+      "total_excursion_bars": 1
+    },
+    {
+      "signal_open_shanghai": "2026-10-30 00:00",
+      "ordinal": 3,
+      "total_excursion_bars": 4
+    }
+  ]
+}

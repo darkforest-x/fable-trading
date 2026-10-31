@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btc-1618-early-marks-20261031-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3d9450e857
+    status: accepted
+    question: How many BTC15m V2.42 glyphs appear during the first1-5 candles outside completed Monday1.618?
+    single_variable: Descriptive signal census; strict directional wick crossing,NY Tue-Fri,consecutive outside candles,rearm after one inside candle;all existing OKX history.
+    result: 158signals(80short/78long)in154excursions. Byordinal1to5 28/27/32/42/29. Whole excursion ultimately1-5candles with observed reentry43signals(23short/20long)in42excursions;this is retrospective.121primarysignals also close outside. Including weekends200signals.
+    artifacts: [btc-1618-early-marks-20261031-v1]
+    canonical_report: experiments/active/exp-btc-1618-early-marks-20261031-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 181149gapfree15m candles2021-09-01through2026-10-31 23:15Shanghai;first incompleteNYweek excluded.1919overlapOHLCmatches,two prefix checks,zero literal/rounded signal mismatches,10existing tests pass. Screenshot redcrosses Oct28 16:30 andOct30 00:00 match ordinal1/3 and totalduration1/4. No orders,return labels,training,downloads or service changes. Notion40a8856479af81918b60ffa2c26e2d0e. Reproduce .venv/bin/python -m yoyo.evaluation.btc_1618_early_marks.
   - experiment_id: exp-monday-harmonic-15m-confluence-20261031-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 713d178899
