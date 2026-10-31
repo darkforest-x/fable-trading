@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-monday-limit-close-slices-20261101-v1",
+  "question": "Owner 2026-11-01 '围绕5min插针收盘这个特点，展开分析，收盘之后，有哪些还有不错的盈利空间的': which touch-bar facts known at the touch 5m close still leave profit for a market entry at that close?",
+  "single_variable": "Event selection by one touch-bar fact at a time (score band, close inside / beyond, wick depth, recovery, volume ratio, same-bar cluster, side), alone and within score >= 0.5; fills, targets, stop, fees and slippage of the close-reclaim run unchanged.",
+  "approval": "Owner 2026-11-01 '展开分析'",
+  "source": "experiments/active/exp-monday-limit-close-reclaim-20261028-v1",
+  "targets": ["near_monday_edge", "range_0.5", "range_0.618", "opposite_monday_edge", "opposite_1618"],
+  "tercile_dims": ["depth_pct", "recovery", "vol_ratio"],
+  "score_bands": [0, 0.3, 0.5, 0.6, 1.01],
+  "score_labels": ["<0.3", "0.3-0.5", "0.5-0.6", ">=0.6"],
+  "cluster_bands": [1, 2, 5, 25, 100000],
+  "cluster_labels": ["1", "2-4", "5-24", "25+"],
+  "min_n": 100,
+  "bootstrap_seed": 20261101,
+  "draws": 2000,
+  "selection": "candidate: 2020-2024 n >= min_n, mean net > 0 and cluster-bootstrap 95 percent lower bound > 0; survives: 2025-2026 pooled lower bound > 0 and 2025 and 2026 means each > 0. Clusters are side x touch bar.",
+  "null": "The same target's all-touch close-entry mean per period (baseline); survivors still need a matched random-time control before any paper account.",
+  "fees": "As the source: taker entry 0.05 percent, maker target 0.02, taker stop / reclaim exits (OKX Lv1, read 2026-10-23); 10bp slippage on the market entry and on non-target exits; worse of the two intrabar paths",
+  "in_sample": "The score and the close-reclaim targets were built on 2020-2024 data and looked at on the full history; 2025-2026 is the test only for the slice selection here",
+  "training_eligible": false,
+  "production_eligible": false
+}
