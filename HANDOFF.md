@@ -1,3 +1,9 @@
+## 2026-11-01 · Resting pre-touch score plus alarm entries does not beat alarm-only
+
+- Owner: "回测这个组合". `exp-monday-limit-alarm-combo-20261031-v1` (builder 763f98c078): rest leg = first weekly touches with frozen pre-touch score >= 0.6 (limit already resting at the 1.618), alarm leg = every later same-side touch for 30 minutes after a 25-coin alarm, combo = union. NautilusTrader for the 785 rest events the alarm study never filled, 382 symbols, both paths, 0 errors; alarm leg equals the 10-29 hold plan exactly.
+- frac N20 3x since 2020 (rest / alarm / combo / unscored control): near30 1.21x DD55 / 3.70x DD17 / 3.56x DD40 / 0.33x; opp30 4.55x DD59 / 2.30x DD19 / 6.49x DD58 / 1.75x; near18 0.93x / 2.92x / 2.43x DD40 / 0.19x. 2025 combo about 1.0x on all three; 2026 combo 1.34x / 1.37x / 1.22x vs unscored control 1.35x / 1.70x / 1.33x.
+- The rest leg earns only inside 19 alarm bars (239 touches, near30 +324bp) and after alarms (43, +374bp); its 674 other touches lose (-47bp). Adding it keeps 674 losing ordinary-time trades for 19 unforeseeable crash bars. In sample (rest cut and timing split looked at on this history). Alarm-only remains the forward-paper candidate (owner decision). Learning: `a-score-that-only-earns-in-crash-bars-dilutes-the-alarm-leg.md`.
+
 ## 2026-11-01 — Six boundary examples accepted; binary scoring does not improve
 
 - Owner replied “都算” to all6boundaryexamples. Recorded exact event IDs in audit experiment owner_confirmation_20261101.json and220reviewCSV;other214candidates remain automatic/unconfirmed. These6were already positive,so no original label or audit flag was converted to a rejection. Previous boundary-review question resolved for these6only.

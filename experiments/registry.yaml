@@ -15414,3 +15414,17 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Single paths, not medians; the frozen score was trained before 2025. The booklet HTML stays outside the public repo (~/Documents/Codex/2026-10-31/pretouch-booklet/, work/build.py) and reuses the monitor booklet module unchanged. Paper accounts still run the lookahead score by owner rule; no forward record exists for the pre-touch version.'
+  - experiment_id: exp-monday-limit-alarm-combo-20261031-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 763f98c078
+    status: complete
+    question: 'Owner 2026-10-31 "回测这个组合": one account that rests 1.618 limits on touches whose frozen pre-touch score is >= 0.6 (to catch single-bar crashes inside the alarm bar) plus every later same-side touch for 30 minutes after a 25-coin alarm, no score.'
+    single_variable: 'Entry set: rest leg, alarm leg or their union (each event once); exits, fees, slippage and frac N20 3x sizing identical per variant (near30, opp30, near18).'
+    result: 'NautilusTrader, 785 new rest events on 382 symbols, both paths, 0 errors; the alarm leg equals the 10-29 hold plan exactly (2146 trades, near30 3.70x / opp30 2.30x / near18 2.92x). Since 2020, frac N20 3x median: near30 rest 1.21x DD55, alarm 3.70x DD17, combo 3.56x DD40, unscored control 0.33x DD81; opp30 4.55x DD59 / 2.30x DD19 / 6.49x DD58 / 1.75x DD57; near18 0.93x / 2.92x / 2.43x DD40 / 0.19x. 2025 (after score training): combo 0.99x / 1.06x / 1.01x vs alarm 1.31x / 1.15x / 1.32x. 2026: combo 1.34x / 1.37x / 1.22x vs unscored control 1.35x / 1.70x / 1.33x. Rest leg by timing (near30): 239 touches inside 19 alarm bars +324bp, 43 after an alarm +374bp, 674 other touches in 657 bars -47bp (opp30 +838 / +913 / -15bp).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-alarm-combo-20261031-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'The combination does not beat alarm-only on the near rules and doubles drawdown; on opp30 it gains only through the 19 crash bars and trails the unscored control in 2026. The rest cut 0.6 and the timing split were looked at on the same history; per-symbol fills in ohlc/ and olhc/ stay local (not committed), like the source study.'
