@@ -123,10 +123,20 @@ def main():
     validation['frozen_score_path_sensitivity']=sensitivity
     sig,_=labels()
     targets=[]
+    target_years=[]
+    concentration=[]
     for target,g in sig[sig.complete & (sig.week>='2025-01-01')].groupby('target'):
         chosen=no_overlap(g)
         for symbol in cfg['symbols']:
-            targets.append(dict(target=target,symbol=symbol,**metrics(chosen[chosen.symbol.eq(symbol)])))
+            coin=chosen[chosen.symbol.eq(symbol)]
+            targets.append(dict(target=target,symbol=symbol,**metrics(coin)))
+            for year,part in coin.groupby(coin.week.str[:4]):
+                target_years.append(dict(target=target,symbol=symbol,year=year,n=len(part),
+                                         net_r=float(part.net_r.sum()),net_bp=float(part.net_notional_bp.mean())))
+            weekly=coin.groupby('week').net_r.sum().sort_values(ascending=False)
+            concentration.append(dict(target=target,symbol=symbol,best_week=weekly.index[0],
+                                      best_week_r=float(weekly.iloc[0]),net_excluding_best_week_r=float(coin.net_r.sum()-weekly.iloc[0]),
+                                      net_excluding_best_three_weeks_r=float(coin.net_r.sum()-weekly.iloc[:3].sum())))
     dump(EXP/'target_baselines.json',targets)
     entry=json.loads((EXP/'entry_summary.json').read_text())
     cont=json.loads((EXP/'continuation_summary.json').read_text())
@@ -136,10 +146,17 @@ def main():
     for i,(name,p) in enumerate(ordered):
         last=max(last,min(1.,(len(ordered)-i)*p));holm.append(dict(test=name,p=p,holm_p=last))
     validation['primary_comparisons_holm']=holm
+    target_holm=[];last=0.
+    for i,r in enumerate(sorted(targets,key=lambda r:r['week_p'])):
+        last=max(last,min(1.,(len(targets)-i)*r['week_p']))
+        target_holm.append(dict(symbol=r['symbol'],target=r['target'],p=r['week_p'],holm_p=last))
+    validation['target_comparisons_holm']=target_holm
+    validation['target_years']=target_years
+    validation['concentration']=concentration
     validation['numeric_warnings']='Local sklearn matmul RuntimeWarnings retained in logs; all frozen model/calibrator outputs checked against einsum/elementwise calculations, finite coefficients and first-order gradients.'
     validation['continuation_scope']='Conditional independent opportunity study after near-touch completed close; not an integrated single-position entry-plus-continuation account strategy. Calibrated model folds lacking history are explicitly skipped.'
     dump(EXP/'validation.json',validation)
-    dump(EXP/'summary.json',dict(experiment=cfg['experiment_id'],verdict='No robust profitable entry or continuation model established; retain negative results.',
+    dump(EXP/'summary.json',dict(experiment=cfg['experiment_id'],verdict='No robust trained entry or continuation model. Unscored ETH far/opposite targets are positive exploratory baselines, but absolute-net confidence intervals include zero and matched tests fail multiplicity and p<0.01 gates.',
          config=cfg,input_receipt=json.loads((EXP/'inputs/receipt.json').read_text()),
          entry=entry,continuation=cont,target_baselines=targets,validation=validation,
          builder_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
