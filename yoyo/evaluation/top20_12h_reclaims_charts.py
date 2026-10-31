@@ -41,8 +41,16 @@ def prepare():
 def draw(r):
     import matplotlib.pyplot as plt
     from matplotlib.patches import Rectangle
+    from matplotlib.collections import PatchCollection
     from matplotlib.ticker import MaxNLocator, FuncFormatter
-    setup();fig=plt.figure(figsize=(16,9),dpi=135);ax=fig.add_axes([.065,.17,.86,.64])
+    folder=OUT/r['symbol'];folder.mkdir(parents=True,exist_ok=True);path=folder/r['filename']
+    if path.exists():
+        from PIL import Image
+        try:
+            with Image.open(path) as im:assert im.size==(2160,1215);im.verify()
+            return dict(event_id=r['event_id'],symbol=r['symbol'],path=str(path),bytes=path.stat().st_size,reused=True)
+        except (OSError,AssertionError):pass
+    fig=plt.figure(figsize=(16,9),dpi=135);ax=fig.add_axes([.065,.17,.86,.64])
     times=pd.DatetimeIndex([c['time'] for c in r['candles']]);side=r['side'];color='#4ae5a0' if side==1 else '#ff7183'
     ready=pd.Timestamp(r['ready']);expiry=pd.Timestamp(r['expiry']);first=pd.Timestamp(r['first_monday']);level=r['level']
     price=lambda v:f'{v:,.10f}'.rstrip('0').rstrip('.') if abs(v)<1 else f'{v:,.2f}'
@@ -51,13 +59,16 @@ def draw(r):
     fig.text(.065,.858,f'1.618 = {price(level)}    周一区间：{price(r["monday_low"])} — {price(r["monday_high"])}    影线占比 {r["wick_fraction"]:.0%}',fontsize=13,color=MUTED)
     ax.axvspan(20.5,40.5,color='#93a4c5',alpha=.075);ax.axvline(20.5,color=FG,lw=.8,ls=':')
     ax.text(.53,.98,'收盘后走势 →',color=MUTED,fontsize=11,transform=ax.transAxes,va='top')
+    xs=[];lows=[];highs=[];colors=[];bodies=[]
     for x,c in enumerate(r['candles']):
         if not c['complete']:continue
         o,h,l,cl=(c[k] for k in OHLC);t=times[x]
         col='#48b45d' if first<=t<ready else ('#a7b0c0' if cl>=o else '#626b7d')
         if x==20:col=color
-        ax.vlines(x,l,h,color=col,lw=1.2)
-        ax.add_patch(Rectangle((x-.32,min(o,cl)),.64,max(abs(cl-o),(h-l)*.008),facecolor=col,edgecolor=col,lw=.8))
+        xs.append(x);lows.append(l);highs.append(h);colors.append(col)
+        bodies.append(Rectangle((x-.32,min(o,cl)),.64,max(abs(cl-o),(h-l)*.008)))
+    ax.vlines(xs,lows,highs,color=colors,lw=1.2)
+    ax.add_collection(PatchCollection(bodies,facecolors=colors,edgecolors=colors,lw=.8))
     xpos=lambda t:float((pd.Timestamp(t)-times[0])/STEP)
     left=max(-.5,xpos(ready)-.5);right=min(40.5,xpos(expiry)-.5)
     if left<right:
@@ -85,9 +96,8 @@ def draw(r):
     flags='旧挂牌历史 | ' if r['before_current_listTime'] else ''
     fig.text(.065,.052,flags+'圆圈=越线端点；菱形=当根收盘；小圆=同周同侧其他收回。虚线=该周到期后的原价参考。',fontsize=11,color=MUTED)
     fig.text(.065,.022,'OKX历史OHLC · 周一按12h K线开盘所属纽约日计算 · 未来仅供复盘 · 价格变化不是交易胜率/收益',fontsize=10,color=MUTED)
-    folder=OUT/r['symbol'];folder.mkdir(parents=True,exist_ok=True);path=folder/r['filename']
-    fig.savefig(path,dpi=135);plt.close(fig)
-    return dict(event_id=r['event_id'],symbol=r['symbol'],path=str(path),bytes=path.stat().st_size)
+    fig.savefig(path,dpi=135,pil_kwargs={'compress_level':1});plt.close(fig)
+    return dict(event_id=r['event_id'],symbol=r['symbol'],path=str(path),bytes=path.stat().st_size,reused=False)
 
 
 def contacts(symbol,rows):
@@ -105,8 +115,12 @@ def contacts(symbol,rows):
 
 def run():
     assert not (OUT/'delivery.json').exists(),'Existing gallery complete; reuse delivery.'
-    OUT.mkdir(parents=True,exist_ok=True);rows=prepare();results=[]
-    with ProcessPoolExecutor(max_workers=2) as pool:
+    OUT.mkdir(parents=True,exist_ok=True)
+    receipt={name:dict(bytes=(EXP/name).stat().st_size,mtime_ns=(EXP/name).stat().st_mtime_ns) for name in ['events.csv','config.json']}
+    if (OUT/'render_inputs.json').exists():assert json.loads((OUT/'render_inputs.json').read_text())==receipt
+    else:dump(OUT/'render_inputs.json',receipt)
+    rows=prepare();results=[]
+    with ProcessPoolExecutor(max_workers=4,initializer=setup) as pool:
         for i,r in enumerate(pool.map(draw,rows,chunksize=8),1):
             results.append(r)
             if i%100==0:print('rendered',i,'/',len(rows),flush=True)
@@ -128,7 +142,7 @@ def run():
     for r in results:
         with Image.open(r['path']) as im:assert im.size==(2160,1215);im.verify()
     with ZipFile(complete) as z:assert z.testzip() is None;assert sum(p.endswith('.png') for p in z.namelist())==len(rows)
-    dump(OUT/'delivery.json',dict(charts=len(rows),unique_events=len(set(r['event_id'] for r in rows)),source=str(EXP),generator_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),all_archive=str(complete),all_archive_bytes=complete.stat().st_size,coins=bycoin,overviews=overviews,dimensions=[2160,1215],source_ohlc_and_level_verified=True,all_png_decoded=True,archive_integrity=True,training_eligible=False,production_eligible=False))
+    dump(OUT/'delivery.json',dict(charts=len(rows),unique_events=len(set(r['event_id'] for r in rows)),reused_completed_charts=sum(r['reused'] for r in results),source=str(EXP),generator_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),all_archive=str(complete),all_archive_bytes=complete.stat().st_size,coins=bycoin,overviews=overviews,dimensions=[2160,1215],source_ohlc_and_level_verified=True,all_png_decoded=True,archive_integrity=True,training_eligible=False,production_eligible=False))
     print('DELIVERED',len(rows),str(complete),flush=True)
 
 
