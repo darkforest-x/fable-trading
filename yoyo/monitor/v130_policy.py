@@ -21,6 +21,16 @@ VERSION = "spike-v13.1-retest-monitor-20261007-v1"
 TOPIC = "spike_v130"
 TIMEFRAMES = ("15m", "30m", "1H", "4H")
 MAX_WAIT_BARS = 24
+CONTROL_KEY = "v130:observation_control"
+
+
+def observation_control(store):
+    """Owner pause is durable and independent of immutable activation receipts."""
+    return store.get_meta(CONTROL_KEY, {"status": "running", "accept_new": True})
+
+
+def paused(store):
+    return observation_control(store).get("status") == "paused"
 
 
 def trail_atr(timeframe: str) -> float:

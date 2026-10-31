@@ -15,7 +15,7 @@ from yoyo.monitor import (DIRECT_POLICY, DIRECT_TIMEFRAMES, FRESH_MS, MODEL_KIND
 from yoyo.monitor.joint_notifications import JOINT_POLICY, is_joint_event
 from yoyo.monitor.policy import finite, is_model_signal, is_tv_start, is_v1_short_display_signal
 from yoyo.monitor.v130_policy import (POLICY as V130_POLICY, SIGNAL_KIND as V130_KIND,
-                                      SIGNAL_PROTOCOL as V130_PROTOCOL, is_v130_signal)
+                                      SIGNAL_PROTOCOL as V130_PROTOCOL, is_v130_signal, paused as v130_paused)
 
 
 def arm_v9_bark(store, activated_ms):
@@ -166,6 +166,8 @@ def delivery_error(store, event, now, channel):
     if event.get("protocol") == V130_PROTOCOL or event.get("kind") == V130_KIND:
         if channel not in ("telegram", "bark"):
             raise ValueError("unsupported notification channel")
+        if v130_paused(store):
+            return "v130_paused_by_owner"
         if not is_v130_signal(event):
             return "not_v130_retest_signal"
         reason = exclusion_reason(event['symbol'], timeframe=event['timeframe'], side=event['side'])

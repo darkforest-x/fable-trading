@@ -228,7 +228,7 @@ def create_app(runtime=None, start_monitor=True):
     @app.get("/api/v13/signals")
     def v13_signals(limit: int = Query(100, ge=1, le=1000), symbol: str = None, timeframe: str = None):
         from yoyo.contracts.signal_universe import exclusion_reason, public_policy
-        from yoyo.monitor.v130_policy import TIMEFRAMES as periods
+        from yoyo.monitor.v130_policy import TIMEFRAMES as periods, observation_control
         from yoyo.monitor.v130_signals import SIGNAL_PROTOCOL as protocol, SIGNAL_KIND as kind
         if timeframe is not None and timeframe not in periods:
             raise HTTPException(400, "不支持的周期。")
@@ -236,13 +236,15 @@ def create_app(runtime=None, start_monitor=True):
         rows = store.list_events(limit=limit, symbol=symbol, timeframe=timeframe, kind=kind,
                                  protocol=protocol, source="live", confirmation="retest", summary=False)
         clock = monitor.client.clock()
+        control = observation_control(store)
         for row in rows:
-            reason = exclusion_reason(row['symbol'], timeframe=row['timeframe'], side=row['side'])
+            reason = ("v130_paused_by_owner" if control.get("status") == "paused" else
+                      exclusion_reason(row['symbol'], timeframe=row['timeframe'], side=row['side']))
             row.update(entry_eligible=reason is None, entry_exclusion=reason,
                        is_fresh=reason is None and 0 <= clock - row["bar_close_ms"] <= FRESH_MS)
         return {"items": rows, "protocol": protocol, "timeframes": list(periods),
                 "entry_universe": public_policy(),
-                "candidate_source": "ordinary_both", "activation": arm,
+                "candidate_source": "ordinary_both", "activation": arm, "observation_control": control,
                 "signals_24h": store.count_since(clock - 86400000, kind=kind, protocol=protocol),
                 "last_observation": store.get_meta("v130:last_observation", {}),
                 "now_ms": clock, "orders_enabled": False, "chart_parity_verified": False}

@@ -20,7 +20,8 @@ from pathlib import Path
 from yoyo.monitor import (SIGNAL_KIND, SIGNAL_PROTOCOL, SHORT_SIGNAL_PROTOCOL, MONITORED_TIMEFRAMES, MODEL_PROTOCOL, MODEL_KIND, FRESH_MS,
                           DIRECT_POLICY, DIRECT_TIMEFRAMES, BARK_TIMEFRAMES)
 from yoyo.monitor.v130_policy import (POLICY as V130_POLICY, SIGNAL_KIND as V130_KIND,
-                                      SIGNAL_PROTOCOL as V130_PROTOCOL, is_v130_signal)
+                                      SIGNAL_PROTOCOL as V130_PROTOCOL, is_v130_signal,
+                                      CONTROL_KEY as V130_CONTROL_KEY)
 
 
 def now_ms():
@@ -209,6 +210,13 @@ class Store:
         v130_candidate = (e.get("protocol") == V130_PROTOCOL or e.get("kind") == V130_KIND)
         if v130_candidate:
             if not is_v130_signal(e):
+                return False
+            # Serialize admission with the owner's pause write, including a
+            # scanner that evaluated the signal before the pause was committed.
+            if not db.in_transaction:
+                db.execute("BEGIN IMMEDIATE")
+            control = db.execute("SELECT payload FROM meta WHERE key=?", (V130_CONTROL_KEY,)).fetchone()
+            if control and json.loads(control[0]).get("status") == "paused":
                 return False
             # This stream has its own cold-start boundary.  It prevents a
             # newly introduced identity from storing or queueing bars the
@@ -593,6 +601,30 @@ class Store:
             db.execute("INSERT OR IGNORE INTO meta VALUES (?,?)",
                        (key, encode({"activated_ms": baseline})))
         return self.timeframe_activation(timeframe, protocol=protocol)
+
+    def pause_v130(self, at_ms, reason):
+        """Stop only new V13.1 observations/delivery; retain outcome settlement.
+
+        The write and pending queue retirement share the admission lock.
+        Already-sent or uncertain deliveries are preserved as historical facts.
+        No shared scanner, paper account or live execution setting is changed.
+        """
+        if type(at_ms) is not int or at_ms < 0 or not isinstance(reason, str) or not reason.strip():
+            raise ValueError("invalid V13.1 pause receipt")
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT payload FROM meta WHERE key=?", (V130_CONTROL_KEY,)).fetchone()
+            existing = json.loads(row[0]) if row else {}
+            receipt = existing if existing.get("status") == "paused" else dict(
+                status="paused", accept_new=False, paused_at_ms=at_ms, reason=reason,
+                existing_outcomes="continue_original_rules", protocol=V130_PROTOCOL)
+            db.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", (V130_CONTROL_KEY, encode(receipt)))
+            for table in ("outbox", "bark_outbox"):
+                db.execute(f"""UPDATE {table} SET status='skipped',error='v130_paused_by_owner',updated_ms=?
+                    WHERE status IN ('pending','retry') AND event_id IN
+                    (SELECT id FROM events WHERE kind=? AND json_extract(payload,'$.protocol')=?)""",
+                           (at_ms, V130_KIND, V130_PROTOCOL))
+        return receipt
 
     def set_meta(self, key, value):
         with self.connect() as db:

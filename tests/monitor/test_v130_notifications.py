@@ -210,6 +210,41 @@ def test_both_existing_senders_deliver_v130_text_with_mock_transports(tmp_path):
     assert store.notification_status("bark")["sent"] == 1
 
 
+def test_pause_rejects_direct_insert_and_preclaimed_delivery(tmp_path, monkeypatch):
+    store, _ = setup(tmp_path)
+    signal = event()
+    now = CLOSE + 1000
+    assert enqueue(store, signal, now)
+    tg_claim, bark_claim = store.claim(now), store.claim_bark(now)
+    store.pause_v130(now, 'Owner review found no established edge')
+    assert not store.upsert_event(event(symbol='ETH-USDT-SWAP'), notify=True, bark_notify=True)
+    monkeypatch.setattr(store, 'claim', lambda _: tg_claim)
+    monkeypatch.setattr(store, 'claim_bark', lambda _: bark_claim)
+
+    def forbidden_send(*args, **kwargs):
+        raise AssertionError('A paused stream must not send')
+
+    assert TelegramWorker(store, creds=('token', 'chat'), sender=forbidden_send, enabled=True).deliver_once(now)
+    assert BarkWorker(store, creds='device', sender=forbidden_send).deliver_once(now)
+    assert store.notification_status('telegram')['skipped'] == 1
+    assert store.notification_status('bark')['skipped'] == 1
+
+
+def test_pause_retires_only_v13_pending_queues(tmp_path):
+    store = Store(tmp_path / 'monitor.sqlite3')
+    arm_v130(store, CLOSE - 1)
+    assert store.upsert_event(event(), notify=True, bark_notify=True)
+    other = event(kind='unrelated', protocol='unrelated-protocol')
+    assert store.upsert_event(other, notify=True, bark_notify=True)
+    store.pause_v130(CLOSE + 1000, 'Owner pause')
+    assert store.event_count() == 2
+    with store.connect() as db:
+        for table in ('outbox', 'bark_outbox'):
+            rows = dict(db.execute(f'SELECT event_id,status FROM {table}'))
+            assert rows[store.event_id(other)] == 'pending'
+            assert rows[store.event_id(event())] == 'skipped'
+
+
 def test_v130_message_helpers_are_explicitly_research_references():
     signal = event()
     assert "V13.1 15m 回踩再突破" in telegram_message(signal)

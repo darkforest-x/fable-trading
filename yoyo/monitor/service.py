@@ -33,7 +33,7 @@ from yoyo.monitor.telegram import TelegramWorker
 from yoyo.monitor.bark import BarkWorker
 from yoyo.monitor.v130_policy import (SIGNAL_KIND as V130_KIND, SIGNAL_PROTOCOL as V130_PROTOCOL,
                                       TIMEFRAMES as V130_TIMEFRAMES, VERSION as V130_VERSION,
-                                      trail_atr as v130_trail)
+                                      trail_atr as v130_trail, observation_control as v130_control)
 
 LOG = logging.getLogger("fable.monitor")
 PROTOCOL = MODEL_PROTOCOL
@@ -453,6 +453,7 @@ class Monitor:
                     "candle_storage": "shared_public_read_cache", "candle_status_url": "/api/candles/status", "history_days": 7,
                     "signal_mode": "V13.1 普通多空回踩 15m/30m/1H/4H（1H 2ATR 追踪）；独立YOLO订阅保留", "signal_kind": MODEL_KIND,
                     "v130": {"protocol": "spike-burst-v130-retest-monitor-v1", "strategy_version": V130_VERSION,
+                             "observation_control": v130_control(self.store),
                              "timeframes": list(V130_TIMEFRAMES), "trail_atr": {tf: v130_trail(tf) for tf in V130_TIMEFRAMES},
                              "candidate_source": "ordinary_both", "orders_enabled": False,
                              "signals_24h": self.store.count_since(self.client.clock() - 86400000, kind=V130_KIND, protocol=V130_PROTOCOL),

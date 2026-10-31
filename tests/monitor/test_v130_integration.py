@@ -135,3 +135,67 @@ def test_signal_center_ledger_reads_the_v131_cohort_with_its_own_projection(tmp_
     assert item['performance']['exit_reason'] == 'initial_stop' and item['trail_atr'] == 4.
     assert [row['total'] for row in data['by_timeframe']] == [1, 0, 0, 0]
     assert ledger(store, now=final + 900_001, confirmation='retest', timeframe='1H')['total'] == 0
+
+
+def test_paused_stream_keeps_old_outcomes_and_rejects_new_symbols_after_restart(tmp_path):
+    from yoyo.monitor.v130_policy import observation_control
+    parent, context = inputs()
+    final = int(context['built'].index[-1].value // 1_000_000) + 900_000
+    store = Store(tmp_path / 'monitor.sqlite3')
+    NotificationCenter(tmp_path)
+    arm_v130(store, final - 1)
+    observe(store, parent, context, symbol='ETH-USDT-SWAP', tick=.1, clock=lambda: final + 1)
+    first = store.list_events(summary=False)[0]
+    receipt = store.pause_v130(final + 2, 'Owner paused new observations after review')
+    restarted = Store(store.path)
+    assert restarted.pause_v130(final + 3, 'Repeated request') == receipt
+    parent, context = inputs([(11.2, 11.4, 7.9, 9.)])
+    result = observe(restarted, parent, context, symbol='ETH-USDT-SWAP', tick=.1, clock=lambda: final + 900_001)
+    assert result['events'][0]['performance']['status'] == 'loss'
+    assert result['state']['observation_control']['status'] == 'paused'
+    assert observe(restarted, parent, context, symbol='BTC-USDT-SWAP', tick=.1,
+                   clock=lambda: final + 900_001)['events'] == []
+    saved = restarted.list_events(summary=False)
+    assert len(saved) == 1 and saved[0]['detected_at_ms'] == first['detected_at_ms']
+    assert saved[0]['performance']['status'] == 'loss'
+    assert observation_control(restarted) == receipt  # arm_v130 did not undo pause.
+    assert restarted.notification_status('telegram')['pending'] == 0
+    assert restarted.notification_status('bark')['pending'] == 0
+
+
+def test_pause_wins_between_worker_admission_and_insert(tmp_path, monkeypatch):
+    parent, context = inputs()
+    final = int(context['built'].index[-1].value // 1_000_000) + 900_000
+    store = Store(tmp_path / 'monitor.sqlite3')
+    NotificationCenter(tmp_path)
+    arm_v130(store, final - 1)
+    insert = store.upsert_event
+
+    def pause_then_insert(*args, **kwargs):
+        store.pause_v130(final + 1, 'Concurrent pause')
+        return insert(*args, **kwargs)
+
+    monkeypatch.setattr(store, 'upsert_event', pause_then_insert)
+    result = observe(store, parent, context, symbol='ETH-USDT-SWAP', tick=.1, clock=lambda: final + 1)
+    assert result['events'] == []
+    assert store.event_count() == 0
+
+
+def test_api_keeps_history_but_reports_paused_admission(tmp_path, monkeypatch):
+    monkeypatch.setattr('yoyo.monitor.telegram.credentials', lambda: None)
+    monkeypatch.setattr('yoyo.monitor.bark.credentials', lambda *a: None)
+    app = create_app(tmp_path, start_monitor=False)
+    parent, context = inputs()
+    final = int(context['built'].index[-1].value // 1_000_000) + 900_000
+    store = app.state.monitor.store
+    app.state.monitor.client.clock = lambda: final + 1
+    arm_v130(store, final - 1)
+    observe(store, parent, context, symbol='ETH-USDT-SWAP', tick=.1, clock=lambda: final + 1)
+    store.pause_v130(final + 1, 'Owner pause')
+    with TestClient(app) as client:
+        payload = client.get('/api/v13/signals').json()
+        assert payload['observation_control']['accept_new'] is False
+        assert len(payload['items']) == 1
+        assert payload['items'][0]['entry_eligible'] is False
+        assert payload['items'][0]['entry_exclusion'] == 'v130_paused_by_owner'
+        assert not payload['items'][0]['is_fresh']

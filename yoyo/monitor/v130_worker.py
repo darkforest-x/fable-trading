@@ -1,6 +1,6 @@
 """Observe V13.1 from the existing scanner prefix of each period, without another fetch loop."""
 from yoyo.monitor.v130_signals import from_parent, SIGNAL_PROTOCOL
-from yoyo.monitor.v130_policy import arm_v130
+from yoyo.monitor.v130_policy import arm_v130, paused, observation_control
 from yoyo.monitor.notification_policy import delivery_error
 from yoyo.contracts.signal_universe import exclusion_reason, VERSION as UNIVERSE_VERSION
 
@@ -12,6 +12,7 @@ def observe(store, parent_result, context, *, symbol, tick, clock, timeframe='15
     # Each protocol owns its forward boundary. No historical recomputation is
     # journaled or pushed at startup, even when it is within 30 minutes.
     since = store.get_meta('notification_policy:spike-burst-v130-retest-notifications-v1', {}).get('activated_ms')
+    allow_new = allow_new and not paused(store)
     events = []
     for original in result['events']:
         if type(since) is not int or original['bar_close_ms'] <= since:
@@ -25,9 +26,12 @@ def observe(store, parent_result, context, *, symbol, tick, clock, timeframe='15
             notify=admitted and delivery_error(store, event, event_now, 'telegram') is None,
             bark_notify=admitted and delivery_error(store, event, event_now, 'bark') is None)
         if not inserted:
+            if not store.has_event(event):
+                continue  # A pause committed after the admission check won.
             store.update_event_payload(store.event_id(event), {'performance': event['performance']})
         events.append(event)
     result['events'] = events
-    result['state'].update(symbol=symbol, last_observed_ms=int(clock()), entry_universe_version=UNIVERSE_VERSION)
+    result['state'].update(symbol=symbol, last_observed_ms=int(clock()), entry_universe_version=UNIVERSE_VERSION,
+                           observation_control=observation_control(store))
     store.set_meta('v130:last_observation', result['state'])
     return result
