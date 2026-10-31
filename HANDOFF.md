@@ -1,3 +1,8 @@
+## 2026-10-31 · Why the rebuilt BTC model rejects the first and third current-week shorts
+
+- Frozen Q4 BTC near netR/noordinal TreeSHAP: baseline-0.21982R,first/second/third scores-0.00785/+0.15663/-0.01525R;strict>0 gate. First and third are only-0.55/-1.07bp belowzero. No calibration or ordinal feature. First negative contributions:15mreturn-0.04115R,Mondaycloseposition-0.01706R,24hreturn-0.01538R. Third:4hreturn-0.13205R,15mreturn-0.06091R,upperwick-0.03527R.
+- First/second negative sums are nearlyidentical;first mainly lacks second's24h-return and width/ATR positives. Third has stronger4h-return penalty. Native and SHAP0.52 contributions match exactly;sum error1.39e-16R,665historical training events/107weeks,no current-week reference. No fit/replay/gate changes. Read `exp-btc-eth-xau-1618-models-20261031-v2/diagnostics_three_btc_shorts/explanation.json` and CSV;new isolatedSHAP runtime,training dependencies unchanged. Notion EXP-223 appended;learning:`a-rejected-score-can-lack-positive-contributions.md`.
+
 ## 2026-10-31 · BTC / ETH / XAU models rebuilt with fixed 0.7% stops; no validated replacement
 
 - Owner authorized independent rebuilding and explicitly aligned XAU to0.7percent. `exp-btc-eth-xau-1618-models-20261031-v2` freezes sequential asset separation, calibration removal, fresh training history, small fixed trees, actual netR objective, and ordinal removal. Final model was predefined. BTC/ETH native results reused; only registered OKX XAU-USDT-SWAP needs new fills. NY-week purge,quarterly evaluation,pre-touch5m features,15m repeated episodes;maker2bp/taker5bp,oneposition perasset,independentR.

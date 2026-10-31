@@ -1,0 +1,876 @@
+{
+  "model_path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-eth-xau-1618-models-20261031-v2/models/BTC/near/2026Q4/fresh_tree_net_noordinal.pkl",
+  "model_size": 96861,
+  "model_mtime": 1793434562.385673,
+  "feature_names": [
+    "f_side",
+    "f_range_pct",
+    "f_reward_r",
+    "f_width_atr",
+    "f_atr_pct",
+    "f_distance_atr",
+    "f_ret15",
+    "f_ret60",
+    "f_ret240",
+    "f_ret1440",
+    "f_ema4h_gap",
+    "f_volume_ratio",
+    "f_wick",
+    "f_close_location",
+    "f_since_previous_log",
+    "f_prior_favorable_atr",
+    "f_prior_adverse_atr",
+    "f_prior_near",
+    "f_hours_left",
+    "f_monday_close_position"
+  ],
+  "units": "Expected netR; not probability or percentage points. Gate is strictly >0.",
+  "method": "Exact native LightGBM TreeSHAP, tree-path-dependent; background is frozen historical training path cover.",
+  "reference": {
+    "train_n": 665,
+    "train_weeks": 107,
+    "first_week": "2024-01-15",
+    "last_week": "2026-09-14",
+    "label_expiry_max": "2026-09-21 04:00:00+00:00",
+    "baseline_r": -0.21981884040015834
+  },
+  "cases": [
+    {
+      "event_id": "BTC-2026-10-26--1-1",
+      "ordinal": 1,
+      "touch_shanghai": "2026-10-28 16:35:00+08:00",
+      "feature_bar_close_shanghai": "2026-10-28 16:35:00+08:00",
+      "baseline_r": -0.21981884040015834,
+      "positive_sum_r": 0.35347811987726274,
+      "negative_sum_r": -0.14150713812264173,
+      "predicted_net_r": -0.007847858645537442,
+      "predicted_net_bp": -0.5493562539809527,
+      "gate_net_r": 0.0,
+      "admitted": false,
+      "negative": [
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_ret15",
+          "observed": -0.3493001060837386,
+          "shap_r": -0.04115195680654789,
+          "shap_bp": -2.88066921899597,
+          "training_q05": -0.6886997800424676,
+          "training_median": -0.1389822387875883,
+          "training_q95": 0.05123088473734314
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_monday_close_position",
+          "observed": 0.7387284065658387,
+          "shap_r": -0.017061139365354805,
+          "shap_bp": -1.1942931229690135,
+          "training_q05": 0.08317849538198671,
+          "training_median": 0.3632556767915035,
+          "training_q95": 0.8581842576028597
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_ret1440",
+          "observed": -2.1694406671651123,
+          "shap_r": -0.015381979726904946,
+          "shap_bp": -1.0767506326567848,
+          "training_q05": -5.4323345980815425,
+          "training_median": -1.6539157124845438,
+          "training_q95": 1.1395776265558861
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_wick",
+          "observed": 0.1230769230768911,
+          "shap_r": -0.013780391265082301,
+          "shap_bp": -0.964638185485439,
+          "training_q05": 0.0,
+          "training_median": 0.14658237850651426,
+          "training_q95": 0.5883544469552312
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_width_atr",
+          "observed": 14.241942540469713,
+          "shap_r": -0.012830851251284007,
+          "shap_bp": -0.8981696405554316,
+          "training_q05": 4.730484255311937,
+          "training_median": 10.154399680184731,
+          "training_q95": 31.06283313862291
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_since_previous_log",
+          "observed": 0.0,
+          "shap_r": -0.012331458346226436,
+          "shap_bp": -0.8632117459273098,
+          "training_q05": 0.0,
+          "training_median": 4.330733340286331,
+          "training_q95": 7.1179511036211105
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_atr_pct",
+          "observed": 0.0012027279842194742,
+          "shap_r": -0.011525015061520672,
+          "shap_bp": -0.8067600841499953,
+          "training_q05": 0.0011081713351601434,
+          "training_median": 0.0030324705312215856,
+          "training_q95": 0.007526421545981905
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_reward_r",
+          "observed": 1.5078867619364698,
+          "shap_r": -0.009604159403978636,
+          "shap_bp": -0.672298683132604,
+          "training_q05": 1.4629070628501555,
+          "training_median": 2.6326481963782418,
+          "training_q95": 5.9315517791442085
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_hours_left",
+          "observed": 116.41666666666667,
+          "shap_r": -0.005331562668598489,
+          "shap_bp": -0.37321356407858397,
+          "training_q05": 5.733333333333334,
+          "training_median": 80.75,
+          "training_q95": 131.55
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_prior_adverse_atr",
+          "observed": 0.0,
+          "shap_r": -0.0025086242271435406,
+          "shap_bp": -0.1756056614058777,
+          "training_q05": 0.0,
+          "training_median": 0.4192624471321278,
+          "training_q95": 1.4908751373346307
+        }
+      ],
+      "positive": [
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_ret240",
+          "observed": -0.5339870539615932,
+          "shap_r": 0.08300737293021722,
+          "shap_bp": 5.810581141350465,
+          "training_q05": -2.550549779149547,
+          "training_median": -0.3110232287227177,
+          "training_q95": 0.7318012122907679
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_ema4h_gap",
+          "observed": 4.844112705199656,
+          "shap_r": 0.07697422092963124,
+          "shap_bp": 5.388255774337866,
+          "training_q05": -13.672576315153817,
+          "training_median": -2.1585948281786003,
+          "training_q95": 3.391057179270254
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_range_pct",
+          "observed": 0.017129182843068712,
+          "shap_r": 0.07452655974134084,
+          "shap_bp": 5.216917573416217,
+          "training_q05": 0.0165844415018991,
+          "training_median": 0.029732484159389474,
+          "training_q95": 0.06677981625522339
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_distance_atr",
+          "observed": 2.439842496718692,
+          "shap_r": 0.07032400315700527,
+          "shap_bp": 4.922735319811742,
+          "training_q05": 0.08790935304682297,
+          "training_median": 0.4377027767243718,
+          "training_q95": 1.6156141982877628
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_ret60",
+          "observed": -0.6573654217631342,
+          "shap_r": 0.030614498819858088,
+          "shap_bp": 2.143038903834611,
+          "training_q05": -1.419122081518882,
+          "training_median": -0.17359933157957697,
+          "training_q95": 0.3391176074091492
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_volume_ratio",
+          "observed": 3.7760806009840233,
+          "shap_r": 0.008874387617322973,
+          "shap_bp": 0.6212140862908769,
+          "training_q05": 0.34493785239028213,
+          "training_median": 1.2571113596072139,
+          "training_q95": 9.551836416658281
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_close_location",
+          "observed": 0.12307692307689111,
+          "shap_r": 0.0071002090114680415,
+          "shap_bp": 0.4970201938129795,
+          "training_q05": 0.0,
+          "training_median": 0.16469517743396023,
+          "training_q95": 0.7528786003337601
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_prior_favorable_atr",
+          "observed": 0.0,
+          "shap_r": 0.002056867670419081,
+          "shap_bp": 0.1439823484841288,
+          "training_q05": 0.0,
+          "training_median": 1.5083169342309855,
+          "training_q95": 7.546314104017268
+        }
+      ],
+      "difference_vs_second_r": -0.16448240850489707,
+      "negative_differences_vs_second": [
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_ret1440",
+          "observed": -2.1694406671651123,
+          "accepted_observed": -0.9566629694184758,
+          "shap_difference_vs_second_r": -0.15323032975419548
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_width_atr",
+          "observed": 14.241942540469713,
+          "accepted_observed": 5.054840963793088,
+          "shap_difference_vs_second_r": -0.08873053521397657
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_ret15",
+          "observed": -0.3493001060837386,
+          "accepted_observed": -0.3193347602529206,
+          "shap_difference_vs_second_r": -0.05799479734602894
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_since_previous_log",
+          "observed": 0.0,
+          "accepted_observed": 6.530877627725885,
+          "shap_difference_vs_second_r": -0.035807294735661466
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_monday_close_position",
+          "observed": 0.7387284065658387,
+          "accepted_observed": 0.7387284065658387,
+          "shap_difference_vs_second_r": -0.024819581515509573
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_ema4h_gap",
+          "observed": 4.844112705199656,
+          "accepted_observed": 1.2314943656262258,
+          "shap_difference_vs_second_r": -0.02104773075925967
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_hours_left",
+          "observed": 116.41666666666667,
+          "accepted_observed": 105.0,
+          "shap_difference_vs_second_r": -0.015721349346315174
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_range_pct",
+          "observed": 0.017129182843068712,
+          "accepted_observed": 0.017106540974279563,
+          "shap_difference_vs_second_r": -0.010012064187213246
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_reward_r",
+          "observed": 1.5078867619364698,
+          "accepted_observed": 1.5078867619364698,
+          "shap_difference_vs_second_r": -0.0032466321437020947
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-1",
+          "ordinal": 1,
+          "feature": "f_prior_adverse_atr",
+          "observed": 0.0,
+          "accepted_observed": 0.3699371101736276,
+          "shap_difference_vs_second_r": -0.0002594666345017726
+        }
+      ]
+    },
+    {
+      "event_id": "BTC-2026-10-26--1-2",
+      "ordinal": 2,
+      "touch_shanghai": "2026-10-29 04:00:00+08:00",
+      "feature_bar_close_shanghai": "2026-10-29 04:00:00+08:00",
+      "baseline_r": -0.21981884040015834,
+      "positive_sum_r": 0.5185686276914098,
+      "negative_sum_r": -0.1421152374318918,
+      "predicted_net_r": 0.15663454985935962,
+      "predicted_net_bp": 10.964541213246807,
+      "gate_net_r": 0.0,
+      "admitted": true,
+      "negative": [
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_distance_atr",
+          "observed": 0.4753746214964057,
+          "shap_r": -0.047659116515968,
+          "shap_bp": -3.3361754970117627,
+          "training_q05": 0.08790935304682297,
+          "training_median": 0.4377027767243718,
+          "training_q95": 1.6156141982877628
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_wick",
+          "observed": 0.28214503351609277,
+          "shap_r": -0.044457465327830986,
+          "shap_bp": -3.112057405350064,
+          "training_q05": 0.0,
+          "training_median": 0.14658237850651426,
+          "training_q95": 0.5883544469552312
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_atr_pct",
+          "observed": 0.0033841897493532684,
+          "shap_r": -0.023323028768770064,
+          "shap_bp": -1.6326302873953036,
+          "training_q05": 0.0011081713351601434,
+          "training_median": 0.0030324705312215856,
+          "training_q95": 0.007526421545981905
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_volume_ratio",
+          "observed": 4.401246348436517,
+          "shap_r": -0.016544115077002583,
+          "shap_bp": -1.158101017696086,
+          "training_q05": 0.34493785239028213,
+          "training_median": 1.2571113596072139,
+          "training_q95": 9.551836416658281
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_reward_r",
+          "observed": 1.5078867619364698,
+          "shap_r": -0.006357527260276542,
+          "shap_bp": -0.4450318893387932,
+          "training_q05": 1.4629070628501555,
+          "training_median": 2.6326481963782418,
+          "training_q95": 5.9315517791442085
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_prior_adverse_atr",
+          "observed": 0.3699371101736276,
+          "shap_r": -0.002249157592641768,
+          "shap_bp": -0.15744279369877498,
+          "training_q05": 0.0,
+          "training_median": 0.4192624471321278,
+          "training_q95": 1.4908751373346307
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_prior_favorable_atr",
+          "observed": 4.836357048577879,
+          "shap_r": -0.001524826889401857,
+          "shap_bp": -0.10673907695923676,
+          "training_q05": 0.0,
+          "training_median": 1.5083169342309855,
+          "training_q95": 7.546314104017268
+        }
+      ],
+      "positive": [
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_ret1440",
+          "observed": -0.9566629694184758,
+          "shap_r": 0.13784835002729054,
+          "shap_bp": 9.64949250602378,
+          "training_q05": -5.4323345980815425,
+          "training_median": -1.6539157124845438,
+          "training_q95": 1.1395776265558861
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_ema4h_gap",
+          "observed": 1.2314943656262258,
+          "shap_r": 0.09802195168889091,
+          "shap_bp": 6.861613418372586,
+          "training_q05": -13.672576315153817,
+          "training_median": -2.1585948281786003,
+          "training_q95": 3.391057179270254
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_range_pct",
+          "observed": 0.017106540974279563,
+          "shap_r": 0.08453862392855409,
+          "shap_bp": 5.917769910968439,
+          "training_q05": 0.0165844415018991,
+          "training_median": 0.029732484159389474,
+          "training_q95": 0.06677981625522339
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_width_atr",
+          "observed": 5.054840963793088,
+          "shap_r": 0.07589968396269256,
+          "shap_bp": 5.31303734475298,
+          "training_q05": 4.730484255311937,
+          "training_median": 10.154399680184731,
+          "training_q95": 31.06283313862291
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_ret240",
+          "observed": -1.2835304476770393,
+          "shap_r": 0.033068875579364394,
+          "shap_bp": 2.3148472000030185,
+          "training_q05": -2.550549779149547,
+          "training_median": -0.3110232287227177,
+          "training_q95": 0.7318012122907679
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_ret60",
+          "observed": -0.7021053281471845,
+          "shap_r": 0.02587294601967699,
+          "shap_bp": 1.8111264928176818,
+          "training_q05": -1.419122081518882,
+          "training_median": -0.17359933157957697,
+          "training_q95": 0.3391176074091492
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_since_previous_log",
+          "observed": 6.530877627725885,
+          "shap_r": 0.023475836389435033,
+          "shap_bp": 1.643326940566546,
+          "training_q05": 0.0,
+          "training_median": 4.330733340286331,
+          "training_q95": 7.1179511036211105
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_ret15",
+          "observed": -0.3193347602529206,
+          "shap_r": 0.01684284053948106,
+          "shap_bp": 1.17901203412083,
+          "training_q05": -0.6886997800424676,
+          "training_median": -0.1389822387875883,
+          "training_q95": 0.05123088473734314
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_hours_left",
+          "observed": 105.0,
+          "shap_r": 0.010389786677716686,
+          "shap_bp": 0.7272932078328441,
+          "training_q05": 5.733333333333334,
+          "training_median": 80.75,
+          "training_q95": 131.55
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_monday_close_position",
+          "observed": 0.7387284065658387,
+          "shap_r": 0.00775844215015477,
+          "shap_bp": 0.543097029246386,
+          "training_q05": 0.08317849538198671,
+          "training_median": 0.3632556767915035,
+          "training_q95": 0.8581842576028597
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-2",
+          "ordinal": 2,
+          "feature": "f_close_location",
+          "observed": 0.28214503351609277,
+          "shap_r": 0.0048512907281527224,
+          "shap_bp": 0.33959415195455467,
+          "training_q05": 0.0,
+          "training_median": 0.16469517743396023,
+          "training_q95": 0.7528786003337601
+        }
+      ],
+      "difference_vs_second_r": 0.0,
+      "negative_differences_vs_second": []
+    },
+    {
+      "event_id": "BTC-2026-10-26--1-3",
+      "ordinal": 3,
+      "touch_shanghai": "2026-10-29 23:30:00+08:00",
+      "feature_bar_close_shanghai": "2026-10-29 23:30:00+08:00",
+      "baseline_r": -0.21981884040015834,
+      "positive_sum_r": 0.47245552999644297,
+      "negative_sum_r": -0.26788756609151554,
+      "predicted_net_r": -0.015250876495231006,
+      "predicted_net_bp": -1.0675733037202924,
+      "gate_net_r": 0.0,
+      "admitted": false,
+      "negative": [
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_ret240",
+          "observed": -1.6009086710685683,
+          "shap_r": -0.13204798899259118,
+          "shap_bp": -9.24346268901485,
+          "training_q05": -2.550549779149547,
+          "training_median": -0.3110232287227177,
+          "training_q95": 0.7318012122907679
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_ret15",
+          "observed": 0.18601788076952896,
+          "shap_r": -0.060906529210406735,
+          "shap_bp": -4.263504764963708,
+          "training_q05": -0.6886997800424676,
+          "training_median": -0.1389822387875883,
+          "training_q95": 0.05123088473734314
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_wick",
+          "observed": 0.09084745762717784,
+          "shap_r": -0.03527167281277976,
+          "shap_bp": -2.469044732232627,
+          "training_q05": 0.0,
+          "training_median": 0.14658237850651426,
+          "training_q95": 0.5883544469552312
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_prior_favorable_atr",
+          "observed": 6.138435810003717,
+          "shap_r": -0.013144528986799115,
+          "shap_bp": -0.9201273278078385,
+          "training_q05": 0.0,
+          "training_median": 1.5083169342309855,
+          "training_q95": 7.546314104017268
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_hours_left",
+          "observed": 85.5,
+          "shap_r": -0.010244200948431351,
+          "shap_bp": -0.7171020927165245,
+          "training_q05": 5.733333333333334,
+          "training_median": 80.75,
+          "training_q95": 131.55
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_monday_close_position",
+          "observed": 0.7387284065658387,
+          "shap_r": -0.00910397141585807,
+          "shap_bp": -0.6372851320671251,
+          "training_q05": 0.08317849538198671,
+          "training_median": 0.3632556767915035,
+          "training_q95": 0.8581842576028597
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_reward_r",
+          "observed": 1.5078867619364698,
+          "shap_r": -0.00466004949750576,
+          "shap_bp": -0.32620711597185853,
+          "training_q05": 1.4629070628501555,
+          "training_median": 2.6326481963782418,
+          "training_q95": 5.9315517791442085
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_prior_adverse_atr",
+          "observed": 0.25298090915013405,
+          "shap_r": -0.0025086242271435406,
+          "shap_bp": -0.1756056614058777,
+          "training_q05": 0.0,
+          "training_median": 0.4192624471321278,
+          "training_q95": 1.4908751373346307
+        }
+      ],
+      "positive": [
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_ret1440",
+          "observed": -0.8956703893302942,
+          "shap_r": 0.1566512492089664,
+          "shap_bp": 10.965710180803212,
+          "training_q05": -5.4323345980815425,
+          "training_median": -1.6539157124845438,
+          "training_q95": 1.1395776265558861
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_width_atr",
+          "observed": 4.241991182155839,
+          "shap_r": 0.06273129241035282,
+          "shap_bp": 4.39123961866099,
+          "training_q05": 4.730484255311937,
+          "training_median": 10.154399680184731,
+          "training_q95": 31.06283313862291
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_ret60",
+          "observed": -1.2461799280327757,
+          "shap_r": 0.06153575589306573,
+          "shap_bp": 4.307551125748629,
+          "training_q05": -1.419122081518882,
+          "training_median": -0.17359933157957697,
+          "training_q95": 0.3391176074091492
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_atr_pct",
+          "observed": 0.004040297144317301,
+          "shap_r": 0.057898588192937465,
+          "shap_bp": 4.052946537020573,
+          "training_q05": 0.0011081713351601434,
+          "training_median": 0.0030324705312215856,
+          "training_q95": 0.007526421545981905
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_distance_atr",
+          "observed": 0.8671893664617791,
+          "shap_r": 0.0516152280322765,
+          "shap_bp": 3.613106402764756,
+          "training_q05": 0.08790935304682297,
+          "training_median": 0.4377027767243718,
+          "training_q95": 1.6156141982877628
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_volume_ratio",
+          "observed": 2.0127448644374435,
+          "shap_r": 0.034024568106262816,
+          "shap_bp": 2.381746425670526,
+          "training_q05": 0.34493785239028213,
+          "training_median": 1.2571113596072139,
+          "training_q95": 9.551836416658281
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_range_pct",
+          "observed": 0.017138904859483408,
+          "shap_r": 0.02217610918046218,
+          "shap_bp": 1.5523450176028268,
+          "training_q05": 0.0165844415018991,
+          "training_median": 0.029732484159389474,
+          "training_q95": 0.06677981625522339
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_ema4h_gap",
+          "observed": 1.167427304532205,
+          "shap_r": 0.014628849163932537,
+          "shap_bp": 1.024030903171296,
+          "training_q05": -13.672576315153817,
+          "training_median": -2.1585948281786003,
+          "training_q95": 3.391057179270254
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_since_previous_log",
+          "observed": 7.065613363597717,
+          "shap_r": 0.006342599080033804,
+          "shap_bp": 0.44398690502557975,
+          "training_q05": 0.0,
+          "training_median": 4.330733340286331,
+          "training_q95": 7.1179511036211105
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_close_location",
+          "observed": 0.7945762711864209,
+          "shap_r": 0.0048512907281527224,
+          "shap_bp": 0.33959415195455467,
+          "training_q05": 0.0,
+          "training_median": 0.16469517743396023,
+          "training_q95": 0.7528786003337601
+        }
+      ],
+      "difference_vs_second_r": -0.17188542635459064,
+      "negative_differences_vs_second": [
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_ret240",
+          "observed": -1.6009086710685683,
+          "accepted_observed": -1.2835304476770393,
+          "shap_difference_vs_second_r": -0.16511686457195557
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_ema4h_gap",
+          "observed": 1.167427304532205,
+          "accepted_observed": 1.2314943656262258,
+          "shap_difference_vs_second_r": -0.08339310252495838
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_ret15",
+          "observed": 0.18601788076952896,
+          "accepted_observed": -0.3193347602529206,
+          "shap_difference_vs_second_r": -0.07774936974988779
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_range_pct",
+          "observed": 0.017138904859483408,
+          "accepted_observed": 0.017106540974279563,
+          "shap_difference_vs_second_r": -0.06236251474809191
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_hours_left",
+          "observed": 85.5,
+          "accepted_observed": 105.0,
+          "shap_difference_vs_second_r": -0.020633987626148036
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_since_previous_log",
+          "observed": 7.065613363597717,
+          "accepted_observed": 6.530877627725885,
+          "shap_difference_vs_second_r": -0.01713323730940123
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_monday_close_position",
+          "observed": 0.7387284065658387,
+          "accepted_observed": 0.7387284065658387,
+          "shap_difference_vs_second_r": -0.01686241356601284
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_width_atr",
+          "observed": 4.241991182155839,
+          "accepted_observed": 5.054840963793088,
+          "shap_difference_vs_second_r": -0.013168391552339745
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_prior_favorable_atr",
+          "observed": 6.138435810003717,
+          "accepted_observed": 4.836357048577879,
+          "shap_difference_vs_second_r": -0.011619702097397258
+        },
+        {
+          "event_id": "BTC-2026-10-26--1-3",
+          "ordinal": 3,
+          "feature": "f_prior_adverse_atr",
+          "observed": 0.25298090915013405,
+          "accepted_observed": 0.3699371101736276,
+          "shap_difference_vs_second_r": -0.0002594666345017726
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "prediction_reproduction_max_error": 0.0,
+    "additivity_max_error": 1.3877787807814457e-16,
+    "no_ordinal": true,
+    "no_calibrator": true,
+    "refit": false,
+    "replay": false,
+    "settings_changed": false
+  },
+  "limitations": [
+    "Local description of this frozen model, not a market-causal explanation.",
+    "Correlated features share attribution under path-dependent assumptions.",
+    "Positive/negative SHAP contributions are not the effect of deleting a feature or retraining.",
+    "Three owner-selected known winners,not an unbiased performance evaluation."
+  ],
+  "sources": [
+    "https://lightgbm.readthedocs.io/en/v4.6.0/pythonapi/lightgbm.Booster.html",
+    "https://shap.readthedocs.io/en/stable/generated/shap.TreeExplainer.html"
+  ],
+  "reproduction": [
+    ".venv/bin/python -m yoyo.evaluation.major_1618_v2_explain",
+    "/Users/zhangzc/.local/share/fable-trading/venvs/shap-052/bin/python -m yoyo.evaluation.major_1618_v2_explain --verify"
+  ],
+  "generator_commit": "0537d7ddf71e6741e4411ca57107bd8619ac962c"
+}

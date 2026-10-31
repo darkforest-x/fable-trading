@@ -21,7 +21,7 @@ experiments:
     question: Rebuild separate BTC ETH XAU repeated1618 models with fixed0.7percent stops and causal rolling evaluation.
     single_variable: Frozen sequential asset split, calibration removal, fresh training window, nonlinear learner, actual netR objective and ordinal removal; each comparison changes one element.
     result: '222 quarterly models; final near BTC -11.27R/70trades, ETH +7.61R/76, XAU -26.34R/69, versus unscored -25.53/-8.97/-35.82R. Far -21.02/+36.71/-20.57R; opposite +16.82/+46.87/-18.43R. Near mean signal/random bp -11.27/-27.17, +7.01/-11.39, -26.74/-29.95. All9 historical gates fail: positive-net CIs crosszero and Holm p>=0.0396. No promotion.'
-    artifacts: [btc-eth-xau-1618-models-20261031-v2]
+    artifacts: [btc-eth-xau-1618-models-20261031-v2, btc-three-short-tree-attribution-20261031-v2]
     canonical_report: experiments/active/exp-btc-eth-xau-1618-models-20261031-v2/summary.json
     holdout_consumed: false
     training_eligible: false
