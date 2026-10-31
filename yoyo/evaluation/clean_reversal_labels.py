@@ -66,8 +66,12 @@ def path_label(bars,i,direction,scale,horizon=29):
     efficiency=progress/travel if travel else 0.
     drawdown=float((np.maximum.accumulate(q)-q).max())
     adverse=max(0.,float((ref-future.low.min())/scale if direction==1 else (future.high.max()-ref)/scale))
-    quality=100.*(progress/(1.+progress))*efficiency/(1.+drawdown+adverse)
-    return dict(quality=quality,net_progress_tr=net,efficiency=efficiency,max_close_drawdown_tr=drawdown,adverse_wick_tr=adverse,positive_time_fraction=float((q[1:]>0).mean()),label_end=str(future.index[-1]+STEP))
+    # Efficiency alone scores a single jump followed by flat prices as perfect.
+    # Four chronological blocks measure whether progress persists across time.
+    edges=np.linspace(0,horizon,5,dtype=int)
+    sustained=float((np.diff(q[edges])>0).mean())
+    quality=100.*(progress/(1.+progress))*efficiency*sustained/(1.+drawdown+adverse)
+    return dict(quality=quality,net_progress_tr=net,efficiency=efficiency,sustained_blocks_fraction=sustained,max_close_drawdown_tr=drawdown,adverse_wick_tr=adverse,positive_time_fraction=float((q[1:]>0).mean()),label_end=str(future.index[-1]+STEP))
 
 
 def source_data():
