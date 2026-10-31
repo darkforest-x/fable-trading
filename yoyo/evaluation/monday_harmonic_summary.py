@@ -179,9 +179,13 @@ def validate_outputs(config):
     assert (pd.to_datetime(seen.last_input_close,utc=True)==boundary).all()
     if step>STEP:
         assert (pd.to_datetime(seen.invalidation_last_close,utc=True)==pd.to_datetime(seen.cutoff,utc=True)).all()
-    stamps={};prefix_checks=0;patterns=0
+    stamps={};prefix_checks=0;patterns=0;reference_symbols=0
     for path in (root/'scan').glob('*/done.json'):
         r=json.loads(path.read_text())
+        if cfg.get('parent_study'):
+            old=json.loads((ROOT/cfg['parent_study']/'scan'/r['symbol']/'done.json').read_text())
+            assert r['sources']==old['sources'],('source_changed_since_5m',r['symbol'])
+            reference_symbols+=1
         for s in r['sources']:stamps[s['path']]=s
         for c in r['causality_checks']:
             assert c['prefix_equal'] and c['future_mutation_equal'];prefix_checks+=1
@@ -236,6 +240,7 @@ def validate_outputs(config):
     assert native_signal_orders==0,native_signal_orders
     result=dict(events=len(gates),observable=len(seen),source_files_unchanged=len(stamps),
         prefix_and_future_mutation_checks=prefix_checks,validated_patterns=patterns,
+        source_symbols_equal_prior_5m=reference_symbols,
         score_metadata_rows_checked=score_rows,new_native_positions_checked=positions,
         confirmation_clocks_checked=clocks,max_fee_net_error_bp=worst,
         exact_cached_orders_rerun_only_as_dependencies=parent_reruns,cache_mismatches=0,
