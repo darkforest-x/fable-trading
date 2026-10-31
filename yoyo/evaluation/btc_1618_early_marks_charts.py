@@ -89,11 +89,15 @@ def setup():
                          'text.color': FG, 'font.size': 14})
 
 
-def draw(r):
+def draw(r, output_dir=None):
     import matplotlib.pyplot as plt
     from matplotlib.patches import Rectangle
     from matplotlib.ticker import MaxNLocator, StrMethodFormatter
     candles, side = r['candles'], r['side']
+    total, symbol = r.get('total', 43), r.get('symbol', 'BTC')
+    precision = r.get('precision', 1)
+    signal_x = r.get('signal_x', 30)
+    size = len(candles)
     color = COLORS[side]
     start = pd.Timestamp(candles[0]['time'])
     x = lambda t: (pd.Timestamp(t)-start)/STEP
@@ -101,21 +105,21 @@ def draw(r):
     high = max(max(c['high'] for c in candles), r['level'])
     span = high-low
     fig = plt.figure(figsize=(16, 9), dpi=150)
-    fig.text(.045, .952, f'{r["number"]:02d} / 43   BTCUSDT.P · 15分钟', fontsize=23, weight='bold', va='top')
+    fig.text(.045, .952, f'{r["number"]:02d} / {total}   {symbol}USDT.P · 15分钟', fontsize=23, weight='bold', va='top')
     fig.text(.955, .95, stamp(r['signal_open'], '%Y-%m-%d %H:%M')+'  北京时间', fontsize=17, ha='right', va='top')
     direction = '上穿 · 红叉 ×' if side == 'upper' else '下穿 · 绿勾 ✓'
     fig.text(.045, .884, direction, color=color, fontsize=18)
-    fig.text(.30, .884, ('上' if side == 'upper' else '下')+f' 1.618  {r["level"]:,.1f}',
+    fig.text(.30, .884, ('上' if side == 'upper' else '下')+f' 1.618  {r["level"]:,.{precision}f}',
              color=GOLD, fontsize=16)
     fig.text(.955, .884, f'信号在越线第 {r["ordinal"]} 根  /  整段越线 {r["episode_bars"]} 根',
              fontsize=16, color=FG, ha='right')
     ax = fig.add_axes([.07, .19, .80, .64])
-    ax.set(xlim=(-1, 60), ylim=(low-span*.13, high+span*.13))
+    ax.set(xlim=(-1, size), ylim=(low-span*.13, high+span*.13))
     ax.yaxis.tick_right()
     ax.yaxis.set_major_locator(MaxNLocator(nbins=6))
-    ax.yaxis.set_major_formatter(StrMethodFormatter('{x:,.0f}'))
+    ax.yaxis.set_major_formatter(StrMethodFormatter('{x:,.'+str(r.get('axis_precision', 0))+'f}'))
     ax.tick_params(axis='both', colors=MUTED, length=0, labelsize=12, pad=10)
-    ticks = [0, 10, 20, 30, 40, 50, 59]
+    ticks = sorted(set(range(0, size, 10)) | {size-1})
     ax.set_xticks(ticks, [stamp(candles[j]['time'], '%m-%d\n%H:%M') for j in ticks])
     for name, spine in ax.spines.items():
         spine.set_visible(name in ('bottom', 'right'))
@@ -123,12 +127,12 @@ def draw(r):
     ax.grid(axis='y', color='#29313d', alpha=.55, lw=.65, linestyle=(0, (2, 5)))
     ax.axvspan(x(r['start'])-.48, x(r['last'])+.48, color=GOLD, alpha=.13, lw=0, zorder=0)
     # The level never appears over Monday candles before it was available.
-    a, b = max(-.5, x(r['ready'])-.5), min(59.5, x(r['expiry'])-.5)
+    a, b = max(-.5, x(r['ready'])-.5), min(size-.5, x(r['expiry'])-.5)
     ax.hlines(r['level'], a, b, color=GOLD, lw=1.65, zorder=2)
     for j, c in enumerate(candles):
-        candle_color = '#eef1f5' if j == 30 else '#8792a2'
+        candle_color = '#eef1f5' if j == signal_x else '#8792a2'
         bottom, top = sorted([c['open'], c['close']])
-        ax.vlines(j, c['low'], c['high'], color=candle_color, lw=1.3 if j == 30 else 1.0, zorder=3)
+        ax.vlines(j, c['low'], c['high'], color=candle_color, lw=1.3 if j == signal_x else 1.0, zorder=3)
         ax.add_patch(Rectangle((j-.32, bottom), .64, max(top-bottom, span*.0003),
                                facecolor=candle_color, edgecolor=candle_color, lw=.7, zorder=3))
     for mark in r['nearby_marks']:
@@ -140,12 +144,14 @@ def draw(r):
                     xytext=(0, offset), textcoords='offset points', color=color,
                     fontsize=32 if primary else 20, alpha=1 if primary else .4,
                     ha='center', va='center', weight='bold', zorder=6)
-    ax.axvline(30, color=color, alpha=.38, lw=.9, linestyle=(0, (3, 5)), zorder=1)
+    ax.axvline(signal_x, color=color, alpha=.38, lw=.9, linestyle=(0, (3, 5)), zorder=1)
     fig.text(.07, .068, '金线：1.618   ·   淡金色带：本段越线 K 线   ·   亮色勾叉：本张信号',
              fontsize=13, color=MUTED)
-    fig.text(.955, .068, 'OKX · V2.42 · 60根原始K线', fontsize=12, ha='right', color=MUTED)
+    fig.text(.955, .068, f'OKX · V2.42 · {size}根原始K线', fontsize=12, ha='right', color=MUTED)
     fig.text(.07, .029, '历史复盘；横轴为K线开盘时间，信号在该K收盘确认。各图价格轴独立。', fontsize=10, color='#697587')
-    path = OUT/'png'/r['filename']
+    if r.get('listing_segment') == 'before_current_listTime':
+        fig.text(.955, .029, '旧挂牌数据段（早于当前 listTime）', fontsize=10, ha='right', color=GOLD)
+    path = (Path(output_dir) if output_dir is not None else OUT/'png')/r['filename']
     fig.savefig(path)
     plt.close(fig)
     return path
