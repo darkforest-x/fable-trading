@@ -84,8 +84,10 @@ def main():
                 d['fresh_score']=d.trade_id.map(reference.score)
                 d['role']=role;d['fold']=fold;d['score_model_fold']=prior_fold
                 single=old[old.target.eq(target)&old.arm.eq('single_reward')].set_index('trade_id')
-                d['single_reward_admit']=d.trade_id.map(single.admit)
-                assert d.fresh_score.notna().all() and d.single_reward_admit.notna().all()
+                single_admit=d.trade_id.map(single.admit)
+                d['single_reward_available']=single_admit.notna()
+                d['single_reward_admit']=single_admit.fillna(False).astype(bool)
+                assert d.fresh_score.notna().all()
                 output.append(d)
             np.testing.assert_allclose(cal.score,cal.fresh_score,rtol=0,atol=1e-12)
             adequate=len(cal)>=cfg['calibration_min_rows'] and cal.week.nunique()>=cfg['calibration_min_weeks']
@@ -95,6 +97,7 @@ def main():
                  model_mtime=path.stat().st_mtime,train_n=rec['train_n'],train_weeks=rec['train_weeks'],train_label_expiry=rec['label_expiry_max'],
                  cal_n=len(cal),cal_weeks=int(cal.week.nunique()),cal_expiry_max=str(cal.expiry_dt.max()),
                  test_n=len(test),complete_test_n=int(test.complete.sum()),calibration_adequate=bool(adequate),
+                 single_reward_test_unavailable=int((~test.single_reward_available).sum()),
                  bias_delta_r=delta,cal_prediction_parity_max_error=float(abs(cal.score-cal.fresh_score).max())))
             policies.append(dict(target=target,fold=fold,adequate=bool(adequate),rules=rule_list,bias_delta_r=delta))
     pd.concat(output,ignore_index=True).to_csv(EXP/'scores.csv.gz',index=False)
