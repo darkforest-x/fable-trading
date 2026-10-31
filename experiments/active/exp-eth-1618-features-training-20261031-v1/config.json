@@ -1,0 +1,41 @@
+{
+  "experiment_id": "exp-eth-1618-features-training-20261031-v1",
+  "authorization": "Owner requests ETH feature and training improvements beyond thresholds; offline single-variable comparisons only.",
+  "source_experiment": "exp-btc-eth-xau-1618-models-20261031-v2",
+  "source_arm": "fresh_tree_net_noordinal",
+  "symbol": "ETH",
+  "targets": ["near", "far", "opposite1618"],
+  "primary_target": "near",
+  "stop_fraction": 0.007,
+  "maker_fee": 0.0002,
+  "taker_fee": 0.0005,
+  "funding_included": false,
+  "extra_slippage": 0,
+  "seed": 20261031,
+  "folds": ["2025Q1", "2025Q2", "2025Q3", "2025Q4", "2026Q1", "2026Q2", "2026Q3", "2026Q4"],
+  "arms": ["add_regime", "add_approach", "add_btc_context", "decay_26w", "window_52w", "leaves_3"],
+  "single_variable": "Each new arm differs directly from the original expanding ETH netR model in one feature group or one training setting. No combinations or post-test winner refitting.",
+  "feature_groups": {
+    "add_regime": ["g_efficiency_4h", "g_efficiency_24h", "g_range_expansion", "g_vol_expansion"],
+    "add_approach": ["g_approach_efficiency_1h", "g_approach_acceleration_15m", "g_candle_volume_imbalance_1h", "g_level_occupancy_4h"],
+    "add_btc_context": ["g_btc_return_4h", "g_eth_residual_4h", "g_beta_7d", "g_correlation_7d"]
+  },
+  "training_variants": {
+    "decay_26w": "Original equal-NY-week weights times 2**(-age_weeks/26), age measured from label expiry to train cutoff; renormalize mean weight to1.",
+    "window_52w": "Use only complete NY weeks starting no earlier than52calendar weeks before the test quarter; original equal-week weights.",
+    "leaves_3": "Change num_leaves from7to3 only; original training history, weights and other settings."
+  },
+  "baseline_weights": "Already equal total weight per symbol/NY week; do not misrepresent existing protection as a new change.",
+  "lightgbm": {"n_estimators": 100, "learning_rate": 0.03, "num_leaves": 7, "max_depth": 3, "min_child_samples": 30, "reg_lambda": 10.0, "reg_alpha": 0.0, "n_jobs": 1, "deterministic": true, "force_col_wise": true, "verbosity": -1, "random_state": 20261031},
+  "minimum_history": {"rows": 50, "weeks": 12},
+  "decision_clock": "All features end at submission_i, the closed5m bar before the native touch; BTC bars have exactly matching close timestamps. No touch or later candle enters features.",
+  "execution": "Reuse unchanged Nautilus fills. Existing baseline/unscored/single-feature selections reused; VectorBT handles only new policy admission and accounting on original fills. One position, same submission/exit ordering, one dollar original risk per trade.",
+  "gate": "score>0 expected native netR, fixed for every arm; no threshold/calibration or barrier changes.",
+  "split": "Quarterly expanding tests2025Q1..2026Q4, training label expiry<=test-quarter start; test week starts inside quarter. Whole NY weeks purged; incomplete current week never trains/evaluates.",
+  "controls": ["original_model", "unscored", "single_reward", "original matched random entries with same target/stop/expiry"],
+  "statistics": "Weekly bootstrap2000/signflip10000; Holm across all18 arm-target matched comparisons and separately18 versus-original improvements. Require positive absolute-net CI, both adjusted p<0.01 and positive improvement CI for historical evidence. Within-fold AUC/topdecile/permutation; report years,sides,quarters,profit concentration and fixed-gate alternate native path.",
+  "historical_use": "Exploratory known history; no untouched validation or automatic selection/promotion. Near primary, far/opposite secondary.",
+  "official_api": "https://lightgbm.readthedocs.io/en/v4.6.0/pythonapi/lightgbm.LGBMRegressor.html",
+  "training_eligible": false,
+  "production_eligible": false
+}

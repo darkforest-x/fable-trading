@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-eth-1618-features-training-20261031-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: active
+    question: Can causal regime, approach or BTC-context features, or independent training changes improve ETH beyond threshold tuning?
+    single_variable: Six direct baseline comparisons; each changes one feature group or one training setting, never combined.
+    result: Pending; near primary, far/opposite secondary; original netR gate and all execution assumptions frozen.
+    artifacts: []
+    canonical_report: experiments/active/exp-eth-1618-features-training-20261031-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Owner authorizes ETH-only feature/training research. Three causal4feature groups,26week decay,52week window,3leaf trees; baseline already equal-week weighted. Reuse native outcomes and prior models,VectorBT only new admissions,no paper/live changes.
   - experiment_id: exp-eth-1618-score-calibration-20261031-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2f5591e606
