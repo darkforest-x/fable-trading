@@ -1,0 +1,44 @@
+{
+  "saved_model_prediction_rows_verified": 5703,
+  "max_prediction_error": 4.440892098500626e-16,
+  "real_feature_boundary_checks": [
+    {
+      "symbol": "BTC",
+      "event_id": "BTC|2025-01-08 15:15:00+08:00|lower",
+      "prefix_and_future_mutation_equal": true
+    },
+    {
+      "symbol": "ETH",
+      "event_id": "ETH|2024-01-25 20:45:00+08:00|lower",
+      "prefix_and_future_mutation_equal": true
+    },
+    {
+      "symbol": "ZEC",
+      "event_id": "ZEC|2026-05-06 04:15:00+08:00|upper",
+      "prefix_and_future_mutation_equal": true
+    },
+    {
+      "symbol": "PEPE",
+      "event_id": "PEPE|2025-02-01 09:30:00+08:00|upper",
+      "prefix_and_future_mutation_equal": true
+    },
+    {
+      "symbol": "PUMP",
+      "event_id": "PUMP|2026-03-19 21:15:00+08:00|lower",
+      "prefix_and_future_mutation_equal": true
+    },
+    {
+      "symbol": "TRX",
+      "event_id": "TRX|2024-05-02 18:00:00+08:00|upper",
+      "prefix_and_future_mutation_equal": true
+    }
+  ],
+  "synthetic_behavioral_tests": 5,
+  "model_count": 49,
+  "feature_count": 24,
+  "all2256_feature_and_label_windows_complete": true,
+  "whole_week_and_episode_fold_purge": true,
+  "pre2023_and_initial_boundary_samples_have_no_historical_score": true,
+  "training_eligible": false,
+  "production_eligible": false
+}

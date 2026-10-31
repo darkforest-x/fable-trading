@@ -1,3 +1,11 @@
+## 2026-11-01 — Clean reversal candidates and first feature-score study
+
+- Owner asked to find clean reversals and score signal-time features;explicitly chose sustainedreverseprogress/smallpullback. Research-only tabular fit authorized. `exp-clean-reversal-score-20261101-v1` uses all2256causal firstfiveglyphs(2098alt+158BTC),not just hindsight601+43gallery.
+- Outcome window29bars/7h15m;directional progression,efficiency,close drawdown,adversewick and4block persistence scaled by signal14bar arithmeticmeanTR. Initial337trainingrows'80th percentile2.0081 freezes candidate cutoff.644gallery rows become220automaticclean candidates,240terminalnonreversals,184ambiguous. Candidates remain unconfirmed;source images unchanged.
+- Fixed24closed-OHLC features,100trees/7leaves/depth3;16quarterexpanding tests2023–2026,wholeNYweek/episode purge,49models including controls/latest saved.1901testevents:within-quarterAUC0.5026;topdecile196events clean29.08percent versus matchedcandidate29.58percent,lift-0.50pp CI[-6.52,+5.62],p0.6167.2026top23.21percent vsbase26.15. Current scoring does not establish predictive ability;do not promote or claim winrate.
+- Delivery: `artifacts/clean-reversal-review-20261101/`,220PNG/28sheets/44MBZIP plus220candidate and644fullscoresCSV.193candidate/552gallery chronological scores;remaining initial/boundary records explicitly have no OOSscore. BTC2026-10-30 00:00 ranks6th by outcomequality but modelscore8.6,illustrating miss.
+- 5behavioraltests,6realprefix/futuremutationchecks,5703savedpredictionrows parity<=4.44e-16. Added persistence before any fit/metric inspection after equal-endpoint one-jump-versus-steady counterexample;olduntrainedlabels retained. No PnL/tradefees/YOLOtraining/service changes;production/trainingeligiblefalse. Notion40a8856479af8164a1c2c390e10b5a7a;learning `path-efficiency-does-not-measure-sustained-movement.md`.
+
 ## 2026-11-01 · live-allin3 pre-touch account connected
 
 - Owner requested Claude's 417kU pre-touch allin3 variant, named `live-allin3`; track7060 starts at1000U when enabled, with separate `live_scores` and funding. Original eight accounts keep touch-close scores. Delayed original replay excludes live positions. No exchange orders or eligibility change.

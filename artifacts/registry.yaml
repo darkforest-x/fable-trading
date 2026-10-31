@@ -19,6 +19,31 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: clean-reversal-score-20261101-v1
+    artifact_type: manifest
+    role: causal_tabular_reversal_quality_scoring_exploratory_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 157b0d0605
+    generator_commit: cd35858d1e
+    source_path: experiments/active/exp-clean-reversal-score-20261101-v1/summary.json
+    storage_uri: repo://experiments/active/exp-clean-reversal-score-20261101-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Separate2256event/features/futurelabels;644gallerylabels,220automaticclean candidates.49savedresearchmodels;1901OOSrows/arm. MainAUC0.5026,matchedlift-0.50pp,95CI[-6.52,+5.62]pp,p0.6167. Scoring not validated;0-100score is pastprediction percentile,not winprobability. No orders or PnL.
+  - artifact_id: clean-reversal-review-20261101-v1
+    artifact_type: manifest
+    role: owner_review_of_all_automatic_clean_reversal_candidates
+    source_repo: darkforest-x/fable-trading
+    source_commit: 157b0d0605
+    generator_commit: 1cf6fa2722
+    source_path: artifacts/clean-reversal-review-20261101/delivery.json
+    storage_uri: repo://artifacts/clean-reversal-review-20261101/delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 220unchangedoriginalPNG,28overviewJPG,44MBZIP,220candidateCSV and644full-label-scoreCSV. Outcomequality/modelscore separated;193candidate OOSscores,27initialhistory/boundary samples explicitly unscored. Human confirmation blank;not gold.
+
   - artifact_id: top20-1618-short-charts-20261031-v1
     artifact_type: manifest
     role: owner_requested_all_current_top20_other19_short_excursion_charts

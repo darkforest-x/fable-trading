@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-clean-reversal-score-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 157b0d0605
+    status: inconclusive
+    question: Can closed-bar features rank owner-defined sustained clean reversals outside Monday1.618?
+    single_variable: New29bar path-quality target with sustained movement and small pullback;fixed24causal OHLC features and existing smallLightGBM parameters,with single-wick and shuffled-label controls.
+    result: 2256causal candidates,644originalcharts;220gallery clean candidates,240terminal nonreversals,184ambiguous.1901rolling-test samples;within-quarterAUC0.5026,topdecile29.08percent versus matchedrandom29.58percent,p0.6167;no predictive edge established.
+    artifacts: [clean-reversal-score-20261101-v1, clean-reversal-review-20261101-v1]
+    canonical_report: experiments/active/exp-clean-reversal-score-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Owner explicitly chose sustainedreverseprogress/smalldrawdown and authorized offlinefeaturefitting.601alt+43BTC images are retrospective subset;all2098alt+158BTC candidates train.337initialtraining rows;16quarterfolds/3arms pluslatestresearchmodel49saved.5behavioraltests,6real prefix/futuremutations,5703savedpredictionrows equal4.44e-16.27of220candidates have no OOSscore;labels remainautomatic/unconfirmed. No trades,PnL,fees,trainingeligibility,paper or production changes. Notion40a8856479af8164a1c2c390e10b5a7a.
+
   - experiment_id: exp-top20-1618-short-marks-20261031-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 0286cd200f
