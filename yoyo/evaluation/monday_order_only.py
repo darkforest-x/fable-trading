@@ -621,11 +621,55 @@ def diagnostics(config):
     print(json.dumps(out))
 
 
+def monthly(config):
+    """Reuse the original all-in monthly starts and seeds on saved native fills."""
+    from yoyo.evaluation.monday_limit_langlang import path_run
+    cfg=json.loads(config.read_text()); root=config.parent
+    py=json.loads((A/'exp-monday-limit-pyramid-20261027-v1/compare.json').read_text())
+    arms={}; details=[]
+    for arm,filename in [('baseline','baseline.csv.gz'),('order_only','worse.csv.gz')]:
+        table=select_track(read_csv(root/filename),'allin3',cfg,arm=='baseline')
+        table=table[table.control_id.eq(0)&table.filled].copy()
+        table['entry_t']=pd.to_datetime(table.entry_time,utc=True).astype('datetime64[ns, UTC]')
+        table['exit_t']=pd.to_datetime(table.exit_time,utc=True).astype('datetime64[ns, UTC]')
+        table['entry_ns']=table.entry_t.astype('int64'); table['exit_ns']=table.exit_t.astype('int64')
+        table['entry']=table.entry_ns;table['exit']=table.exit_ns
+        rows=[]
+        for k,start in enumerate(pd.date_range(py['first_start'],py['last_start'],freq='MS',tz='UTC')):
+            t=table[table.entry_t>=start].reset_index(drop=True)
+            for r in range(py['ties']):
+                seed=py['seed']+1000*k+r
+                h=path_run(t,'allin',3,seed)
+                rows.append(dict(arm=arm,start=str(start),seed=seed,
+                    **{f'd{q}':h[q]['days'] if h[q] else np.nan for q in (10,100)},
+                    **{f'b{q}':h[q]['blowups'] if h[q] else np.nan for q in (10,100)}))
+        d=pd.DataFrame(rows);details.extend(rows)
+        arms[arm]={f'x{q}':dict(reached_pct=float(100*d[f'd{q}'].notna().mean()),
+                    days_median=float(d[f'd{q}'].median()) if d[f'd{q}'].notna().any() else None,
+                    blowups_before_median=float(d[f'b{q}'].median()) if d[f'b{q}'].notna().any() else None)
+                   for q in (10,100)}
+    prior=json.loads((ROOT/cfg['baseline']/'summary.json').read_text())['results']['plans']
+    ref=prior['allin3|'+cfg.get('baseline_arm','A_rest_causal')]['allin3x_monthly_starts']
+    for goal,values in ref.items():
+        for key,value in values.items():
+            if value is None: assert arms['baseline'][goal][key] is None
+            else: assert np.isclose(value,arms['baseline'][goal][key]),(goal,key,value,arms)
+    result=dict(config=py,arms=arms,trials_per_arm=len(rows),baseline_matches_original=True,
+                accounting='Original all-in allocator including replenishment after blowups; goal reach rates are not investment returns.',
+                native_fills_rerun=False,trials=details)
+    dump(root/'allin_monthly.json',clean(result))
+    summary=json.loads((root/'summary.json').read_text())
+    summary['allin_original_monthly_starts']=dict(arms=arms,trials_per_arm=len(rows),baseline_matches_original=True)
+    dump(root/'summary.json',summary)
+    print(json.dumps(dict(arms=arms,trials_per_arm=len(rows))))
+
+
 if __name__=='__main__':
-    ap=argparse.ArgumentParser();ap.add_argument('action',choices=['run','summary','validate','diagnostics'])
+    ap=argparse.ArgumentParser();ap.add_argument('action',choices=['run','summary','validate','diagnostics','monthly'])
     ap.add_argument('--config',type=Path,default=EXP/'config.json');ap.add_argument('--workers',type=int,default=4)
     args=ap.parse_args();config=args.config.resolve()
     if args.action=='run':run(config,args.workers)
     elif args.action=='summary':summarize(config)
     elif args.action=='validate':validate(config)
-    else:diagnostics(config)
+    elif args.action=='diagnostics':diagnostics(config)
+    else:monthly(config)
