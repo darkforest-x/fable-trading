@@ -392,7 +392,7 @@ def summarize(config):
 
 
 def validate(config):
-    cfg=json.loads(config.read_text());root=config.parent;count=0;worst=0.
+    cfg=json.loads(config.read_text());root=config.parent;count=0;worst=0.;clocks=0
     for symbol in symbols(cfg):
         d=root/'symbols'/symbol
         for path in ('ohlc','olhc'):
@@ -401,18 +401,46 @@ def validate(config):
             audit=json.loads((p/'native-audit.json').read_text())
             if not audit['fills']:continue
             rows=read_csv(p/'native-trades.csv.gz').set_index('trade_id')
+            orders=read_csv(p/'native-orders.csv.gz').set_index('trade_id')
             fills=read_csv(p/'native-fills.csv.gz')
             assert len(fills)==audit['fills']==2*len(rows)
             for tid,g in fills.groupby('trade_id'):
-                r=rows.loc[tid];en=g[g.phase=='entry'].iloc[0];ex=g[g.phase!='entry'].iloc[0]
+                r=rows.loc[tid];order=orders.loc[tid]
+                en=g[g.phase=='entry'].iloc[0];ex=g[g.phase!='entry'].iloc[0]
                 assert en.quantity==ex.quantity and en.bar_i==r.entry_i and ex.bar_i==r.exit_i
+                if order.rule!='add':
+                    assert order.entry_i<r.entry_i<=order.expire_i and r.entry_i==order.native_touch_i
+                    opened=pd.Timestamp(r.entry_time)-pd.Timedelta(minutes=5)
+                    due=opened.floor(f'{int(order.reclaim_minutes)}min')+pd.Timedelta(minutes=2*int(order.reclaim_minutes))
+                    assert int(r.reclaim_due_ns)==due.value
+                    clocks+=1
                 for fill in (en,ex):
                     fee=cfg['maker_fee'] if fill.phase in ('entry','target') else cfg['taker_fee']
                     np.testing.assert_allclose(fill.commission,fill.price*fill.quantity*fee,rtol=1e-7,atol=1e-8)
                 expected=r.side*(ex.price/en.price-1)*1e4-g.commission.sum()/(en.price*en.quantity)*1e4
                 worst=max(worst,abs(expected-r.net_notional_bp));assert abs(expected-r.net_notional_bp)<1e-6
                 count+=1
-    result=dict(new_positions_checked=count,max_fee_net_error_bp=worst,no_download=True,no_content_hash=True,no_model_fit=True)
+    o,l,w=[read_csv(root/(path+'.csv.gz')).set_index('trade_id') for path in ('ohlc','olhc','worse')]
+    l=l.reindex(o.index);w=w.reindex(o.index)
+    only_l=o.rule.eq('add')&~o.filled&l.filled
+    np.testing.assert_allclose(w.net,np.where(only_l,o.net,np.minimum(o.net,l.net)))
+    for path in (o,l):
+        assert path.loc[path.control_id.eq(0)&path.rule.ne('add'),'filled'].all()
+        assert path.loc[~path.filled,'net'].eq(0).all()
+    base=read_csv(root/'baseline.csv.gz');common_counts={}
+    for track in TRACKS:
+        a=select_track(base,track,cfg,True)
+        b=select_track(w.reset_index(),track,cfg)
+        b=b[b.control_id.eq(0)&b.filled]
+        a=a.assign(is_add=a.variant.str.endswith('_add'))
+        b=b.assign(is_add=b.rule.eq('add'))
+        common=a.merge(b,on=['event','is_add'],suffixes=('_old','_new'),validate='one_to_one')
+        for field in ('entry_i','exit_i','entry','exit_price','net','reason'):
+            np.testing.assert_allclose(common[field+'_old'],common[field+'_new'],atol=1e-8,rtol=1e-10)
+        common_counts[track]=len(common)
+    result=dict(new_positions_checked=count,max_fee_net_error_bp=worst,confirmation_clocks_checked=clocks,
+                unchanged_common_fills=common_counts,original_no_fill_controls_zero=True,
+                no_download=True,no_content_hash=True,no_model_fit=True)
     dump(root/'validation.json',result);print(json.dumps(result))
 
 
