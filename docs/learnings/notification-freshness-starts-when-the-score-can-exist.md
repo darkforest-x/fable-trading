@@ -1,0 +1,7 @@
+# Notification freshness starts when the score can exist
+
+- **Problem**: TG/Bark Monday 1.618 alerts wait for the stored score (> 0.4) and expire 90 s after the touch is observed. Once the score became the backtest's touch-bar score, it exists only after the touch 5m bar closes, up to five minutes after the touch.
+- **Dead end**: Keeping the observation-anchored 90 s window would expire almost every alert before its score was written. Widening the window for every alert would also let late or replayed touches through.
+- **Effective path**: Start the window at the later of the observation and the touch 5m close, `max(observed_ms, candle_ms//300000*300000+300000)`. Use that one anchor in the SQL expiry, the claim and the Python check in `claim_scored_notification`. Keep `observed_ms <= now`, so the window is the same 90 s, shifted only by the time the score needs. The ribbon's "待评分" label uses the same anchor, plus the `pending_score` row status.
+- **General rule**: A freshness gate on a derived value is measured from when that value can first exist, not from when its trigger was seen. Whenever the derivation time changes, update every reader of the gate in the same change.
+- **Dependencies**: `yoyo/monitor/monday_fib.py` (`READY_SQL`, `score_ready_ms`), `yoyo/monitor/static/reclaim-watchlist.js`, [the paper replica](a-forward-replica-of-a-fill-bar-score-books-late-and-replays-the-gap.md). Telegram/Bark alerts now arrive after the touch 5m close.

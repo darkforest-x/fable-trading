@@ -12,7 +12,10 @@ test('ribbon scores join the exact week, symbol, side and touch candle, never an
  const signal={week,symbol:item.symbol,side:-1,candle_ms:1000,status:'scored',score:.638144};
  assert.equal(ui.touchScore(item,week,[signal],3000).text,'0.6381');assert.equal(ui.touchScore(item,week,[signal],3000).high,true);
  for(const patch of [{week:'2026-10-19'},{symbol:'BTC-USDT-SWAP'},{side:1},{candle_ms:999}])assert.equal(ui.touchScore(item,week,[{...signal,...patch}],3000).text,'待评分');
- assert.equal(ui.touchScore(item,week,[],100000).text,'暂无评分');
+ // Scored at the touch 5m close (owner 2026-10-31): pending until 90s after that close, or while the row says so.
+ assert.equal(ui.touchScore(item,week,[],100000).text,'待评分');assert.equal(ui.touchScore(item,week,[],389999).text,'待评分');
+ assert.equal(ui.touchScore(item,week,[],390000).text,'暂无评分');
+ assert.equal(ui.touchScore(item,week,[{...signal,status:'pending_score',score:null}],9e9).text,'待评分');
  assert.equal(ui.touchScore(item,week,[{...signal,score:0}],3000).text,'0.0000');
  assert.equal(ui.touchScore(item,week,[{...signal,status:'feature_error',score:null}],3000).text,'评分失败');
  assert.equal(ui.touchScore(item,week,[{...signal,status:'excluded',score:null}],3000).text,'不评分');

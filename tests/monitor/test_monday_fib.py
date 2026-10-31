@@ -16,6 +16,7 @@ def ms(text):
 
 
 NOW = ms("2026-10-21T12:30:00")
+READY = NOW + 5 * MINUTE  # touch 5m close: the backtest score exists from here (owner 2026-10-31)
 SYMBOL = "BTC-USDT-SWAP"
 
 
@@ -147,7 +148,7 @@ def test_expiry_restart_and_week_rollover(tmp_path):
     service, levels = ready_service(tmp_path)
     service.book.set_enabled(True, NOW - MINUTE)
     service.book.touch(levels, SYMBOL, "upper", 120, NOW, NOW, "live")
-    assert service.book.claim(NOW + 91_000) is None
+    assert service.book.claim(READY + 91_000) is None
     service.book.touch(levels, SYMBOL, "lower", 90, NOW + MINUTE, NOW + MINUTE, "live")
     assert service.book.claim(NOW + MINUTE + 1)
     service.book.recover()
@@ -289,7 +290,9 @@ def test_absent_or_failed_score_reader_waits_only_inside_original_freshness(tmp_
     book, calls = queued_book(tmp_path), []
     deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+1, score_lookup=lookup)
     assert not calls and book.records()[0]['status'] == 'pending'
-    assert not deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+FRESH_MS+1,
+    deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+FRESH_MS+1, score_lookup=lookup)
+    assert not calls and book.records()[0]['status'] == 'pending'  # the touch 5m bar has not closed yet
+    assert not deliver_once(book, ('fake', 'fake'), fake_sender(calls), READY+FRESH_MS+1,
                             score_lookup=lambda event: {'status': 'scored', 'score': .9})
     assert not calls and book.records()[0]['status'] == 'skipped'
 
@@ -305,8 +308,16 @@ def test_score_lookup_racing_disable_or_expiry_cannot_send(tmp_path):
     book.touch(baseline(history(), NOW), SYMBOL, 'lower', 90, NOW+MINUTE, NOW+MINUTE, 'live')
     deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+MINUTE+1,
                  score_lookup=lambda event: {'status': 'scored', 'score': .9},
-                 clock=lambda: NOW+MINUTE+FRESH_MS+1)
+                 clock=lambda: READY+FRESH_MS+1)
     assert not calls and all(r['status'] == 'skipped' for r in book.records())
+
+
+def test_score_ready_at_the_touch_close_is_sent_inside_its_window(tmp_path):
+    book, calls = queued_book(tmp_path), []
+    assert deliver_once(book, ('fake', 'fake'), fake_sender(calls), READY-1, score_lookup=lambda event: None)
+    deliver_once(book, ('fake', 'fake'), fake_sender(calls), READY+FRESH_MS,
+                 score_lookup=lambda event: {'status': 'scored', 'score': .6})
+    assert len(calls) == 1 and book.records()[0]['status'] == 'sent'
 
 
 def test_two_readers_only_claim_one_exact_event(tmp_path):

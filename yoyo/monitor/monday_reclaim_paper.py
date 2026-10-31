@@ -17,9 +17,9 @@ in experiments/active/exp-monday-limit-reclaim-*:
            track account, every signal is still tracked as a shadow position;
   sizing = 1000 USDT per track, 10 percent of realized equity per trade, open
            notional <= 1x equity.
-Features use only candles closed before the touch bar. Within one 1m update a
-stop beats a target; the fill minute can only reach the target if it closes
-beyond it. Live features come from OKX, the model from Binance history, and
+Features are scored at the touch 5m close as in the backtest (owner 2026-10-31,
+below). Within one 1m update a stop beats a target; the fill minute can only
+reach the target if it closes beyond it. Live features come from OKX, the model from Binance history, and
 cluster24 counts OKX symbols, so the score is approximate. No account, key or
 order endpoint is used.
 
@@ -71,6 +71,13 @@ Owner 2026-10-27 (exp-monday-limit-return-opt-20261027-v2, the fixed slot simula
 v3add rule (v3 entries, targets, backstop and breakeven, plus the -5 percent add from score 0.6) with margin = realized
 equity / 20 per leg at 3x: notional = 3 x margin, at most 20 funded legs open, margin in use <= equity, every fill
 compounds. A leg that finds no slot or margin is a shadow row (parent) or a cancelled add; a loss never exceeds the margin.
+
+Owner 2026-10-31: the paper accounts and every displayed score follow the original backtest, lookahead included. The
+backtest ledger reads vol_ratio, liquidity and toward24 at the touch 5m bar itself (exp-monday-limit-score-leak-audit-
+20261027-v1), so a live touch is stored as "pending_score" and scored once that bar has closed. The accounts then
+open exactly as the backtest books them, filled at the 1.618 in the touch minute, and the completed 1m candles from
+the touch to the scoring time are replayed before live quotes resume. These accounts are therefore not executable
+orders: they forward-track the backtest. Rows scored before this change keep their pre-touch score (score_basis NULL).
 """
 from __future__ import annotations
 
@@ -124,6 +131,7 @@ START_EQUITY, FRACTION, GROSS = 1000.0, 0.10, 1.0
 EXCLUDE = {"BTC", "ETH", "XAU", "XAG", "PAXG", "XAUT"}
 MANUAL_QUOTE_MAX_MS = 15_000
 MIN5, HOUR, DAY = 300_000, 3_600_000, 86_400_000
+SCORE_GRACE_MS, SCORE_GIVEUP_MS = 2_000, 30*60_000  # first try / give up, measured from the touch 5m close
 SHANGHAI = ZoneInfo("Asia/Shanghai")
 FUNDED_OPEN_SIGNAL = ("held.stage IN ('pending_confirm','breakeven') AND held.fill_ms>0 AND held.entry>0 "
                       "AND held.taken=1 AND held.notional>0 "
@@ -176,6 +184,10 @@ def members(acct):
     return (acct, LEGS[acct]) if acct in LEGS else (acct,)
 
 
+class ScoreNotReady(Exception):
+    """The touch 5m bar is not closed on OKX yet, or its candles could not be read; retried until SCORE_GIVEUP_MS."""
+
+
 class PaperCloseError(ValueError):
     def __init__(self, message, status=409):
         super().__init__(message)
@@ -207,20 +219,40 @@ def bars(raw, bar, now):
     return [(int(ts), *(float(v) for v in r[1:5]), float(r[7])) for ts, r in sorted(rows.items(), key=lambda kv: int(kv[0]))]
 
 
-def features(five, hourly, side, levels, touch_ms, opp_first, cluster24):
-    """Entry-time features with the backtest definitions (monday_limit_reclaim_patterns{,3})."""
+def features(five, hourly, side, levels, touch_ms, opp_first, cluster24, at_touch_close=False):
+    """Entry-time features with the backtest definitions (monday_limit_reclaim_patterns{,3}).
+
+    at_touch_close=True matches the backtest ledger: vol_ratio (last 12 5m bars, hourly median base shifted one
+    hour), liquidity (7 days of quote volume) and toward24 (close vs 288 bars earlier) end at the touch 5m bar
+    itself, which must be in ``five`` and closed. bucket, approach and the rest never read the touch bar.
+    False reads only bars closed before the touch bar (the earlier pre-touch paper score).
+    """
     touch_bar = touch_ms//MIN5*MIN5
     pre = [b for b in five if b[0] < touch_bar]
-    hours = [b for b in hourly if b[0]+HOUR <= touch_bar]
+    end = touch_bar+MIN5 if at_touch_close else touch_bar
+    upto = pre+[b for b in five if b[0] == touch_bar] if at_touch_close else pre
+    hours = [b for b in hourly if b[0]+HOUR <= end]
     high, low = levels["high"], levels["low"]
     level = levels["lower"] if side == 1 else levels["upper"]
+    if at_touch_close and len(upto) != len(pre)+1:
+        raise ValueError("touch_bar_missing")
     if len(pre) < 289 or len(hours) < 169:
         raise ValueError("short_history")
     tr = [max(h-l, abs(h-pre[i-1][4]), abs(l-pre[i-1][4])) for i, (_, _, h, l, _, _) in enumerate(pre[-14:], len(pre)-14)]
     vol = sum(tr)/14/pre[-1][4]
-    last_hour = sum(b[5] for b in pre[-12:])
+    last_hour = sum(b[5] for b in upto[-12:])
     base = sorted(b[5] for b in hours[-169:-1])
     median = (base[83]+base[84])/2
+    if at_touch_close:
+        # Seven days ending at the touch close: whole hours before the touch hour, the touch hour's 5m bars so far,
+        # minus the matching share of the oldest hour.
+        start = touch_bar//HOUR*HOUR
+        whole = [b for b in hourly if b[0]+HOUR <= start][-168:]
+        if len(whole) < 168:
+            raise ValueError("short_history")
+        week_volume = sum(b[5] for b in whole)-(end-start)/HOUR*whole[0][5]+sum(b[5] for b in upto if b[0] >= start)
+    else:
+        week_volume = sum(b[5] for b in hours[-168:])
     edge = low if side == 1 else high
     crossed = [b[0] for b in hours if b[0] >= levels["end"] and b[0] < (five[0][0] if five else touch_bar)
                and (b[3] <= edge if side == 1 else b[2] >= edge)]
@@ -232,8 +264,8 @@ def features(five, hourly, side, levels, touch_ms, opp_first, cluster24):
     return dict(bucket=math.floor(math.log2(vol)*4), log_vol_ratio=math.log(max(last_hour/median, .05)) if median > 0 else math.log(.05),
                 log_approach=math.log1p(max(0., (touch_bar-min(crossed))/60_000)), opp_first=int(opp_first),
                 monday_close_side=(1-pos) if side == 1 else pos,
-                log_liquidity=math.log10(max(sum(b[5] for b in hours[-168:])/7, 1e4)),
-                toward24=-side*100*(pre[-1][4]/pre[-289][4]-1), cluster24=float(cluster24), side=float(side),
+                log_liquidity=math.log10(max(week_volume/7, 1e4)),
+                toward24=-side*100*(upto[-1][4]/upto[-289][4]-1), cluster24=float(cluster24), side=float(side),
                 range_pct=100*(high-low)/level)
 
 
@@ -245,7 +277,10 @@ def settle(side, entry, exit_price, reason):
 
 class ReclaimPaper:
     def __init__(self, runtime, fib, model_path=MODEL, v3_path=V3, enable_v3=True, enable_v3add=True, enable_spike=True,
-                 enable_v3lock=True, enable_allin3=True, enable_v3add20=True):
+                 enable_v3lock=True, enable_allin3=True, enable_v3add20=True, score_basis="touch_close"):
+        if score_basis not in ("touch_close", "pre_touch"):
+            raise ValueError("score_basis must be 'touch_close' or 'pre_touch'")
+        self.score_basis = score_basis
         self.write_lock = threading.RLock()
         self.fib, self.client, self.model = fib, fib.client, ScoreModel(model_path)
         self.v3 = json.loads(Path(v3_path).read_text()) if enable_v3 else None
@@ -294,8 +329,10 @@ class ReclaimPaper:
                                "backstop": "REAL", "be_price": "REAL", "parent_id": "INTEGER", "reclaim_ref": "REAL"}.items():
                 if name not in columns:
                     db.execute(f"ALTER TABLE positions ADD COLUMN {name} {spec}")
-            if "ema_order" not in {r["name"] for r in db.execute("PRAGMA table_info(signals)")}:
-                db.execute("ALTER TABLE signals ADD COLUMN ema_order INTEGER")
+            signal_columns = {r["name"] for r in db.execute("PRAGMA table_info(signals)")}
+            for name, spec in {"ema_order": "INTEGER", "score_basis": "TEXT", "levels": "TEXT", "scored_ms": "INTEGER"}.items():
+                if name not in signal_columns:
+                    db.execute(f"ALTER TABLE signals ADD COLUMN {name} {spec}")
             db.executescript("""
                 CREATE INDEX IF NOT EXISTS positions_track_stage_exit ON positions(track,stage,exit_ms DESC);
                 CREATE INDEX IF NOT EXISTS positions_track_fill ON positions(track,fill_ms DESC,id DESC);
@@ -365,6 +402,7 @@ class ReclaimPaper:
             if now-last_tick >= 5000:
                 last_tick = now
                 try:
+                    self.score_due(now)
                     self.decide(now)
                     if now-last_catch >= 120_000:
                         last_catch = now
@@ -385,80 +423,165 @@ class ReclaimPaper:
                                  "AND candle_ms>=? AND candle_ms<?", (side_text, symbol, candle_ms-DAY, candle_ms)).fetchone()["n"]
         return bool(opp and opp["candle_ms"] < candle_ms), cluster
 
+    def _score(self, levels, symbol, side_text, candle_ms, at_touch_close):
+        """Frozen-model score and 15m EMA order of one touch: (status, score, taken, features, error, order).
+
+        at_touch_close reads the touch 5m bar as the backtest does. It raises ScoreNotReady while OKX has not marked
+        that bar closed or a candle read fails, so the caller retries; feature errors stay terminal.
+        """
+        side = 1 if side_text == "lower" else -1
+        status, score, taken, feats, error, order = "scored", None, 0, None, None, None
+        now = self.client.clock()
+
+        def read(bar, **extra):
+            try:
+                raw = self.client.get("/api/v5/market/candles", {"instId": symbol, "bar": bar, "limit": "300", **extra})
+                return raw, bars(raw, bar, now)
+            except Exception as err:
+                if at_touch_close:
+                    raise ScoreNotReady(f"candles_unavailable: {type(err).__name__}") from err
+                raise
+        try:
+            if at_touch_close:
+                touch_bar = candle_ms//MIN5*MIN5
+                raw, five = read("5m", after=str(touch_bar+MIN5))  # bars up to and including the touch bar
+                if (validate(raw, "5m", now).get(touch_bar) or ["0"])[-1] != "1":
+                    raise ScoreNotReady("touch_bar_unconfirmed")
+            else:
+                _, five = read("5m")
+            _, hourly = read("1H")
+            opp, cluster = self._context(levels, symbol, side_text, candle_ms)
+            feats = features(five, hourly, side, levels, candle_ms, opp, cluster, at_touch_close)
+            score = self.model.score(feats)
+            taken = int(score >= self.model.threshold)
+        except ScoreNotReady:
+            raise
+        except Exception as err:
+            status, error = "feature_error", f"{type(err).__name__}: {err}"[:200]
+        try:
+            order = ema_order(read("15m")[1], side, candle_ms)
+        except ScoreNotReady:
+            raise
+        except Exception:
+            order = None
+        return status, score, taken, feats, error, order
+
     @serialized
     def handle_touch(self, levels, symbol, side_text, price, observed_ms, candle_ms):
         side = 1 if side_text == "lower" else -1
         level = levels[side_text]
         target = levels["low"] if side == 1 else levels["high"]
-        status, score, taken, feats, error, order = "scored", None, 0, None, None, None
-        if symbol.split("-")[0] in EXCLUDE:
-            status = "excluded"
-        else:
-            try:
-                now = self.client.clock()
-                five = bars(self.client.get("/api/v5/market/candles", {"instId": symbol, "bar": "5m", "limit": "300"}), "5m", now)
-                hourly = bars(self.client.get("/api/v5/market/candles", {"instId": symbol, "bar": "1H", "limit": "300"}), "1H", now)
-                opp, cluster = self._context(levels, symbol, side_text, candle_ms)
-                feats = features(five, hourly, side, levels, candle_ms, opp, cluster)
-                score = self.model.score(feats)
-                taken = int(score >= self.model.threshold)
-            except Exception as err:
-                status, error = "feature_error", f"{type(err).__name__}: {err}"[:200]
-            try:
-                m15 = bars(self.client.get("/api/v5/market/candles", {"instId": symbol, "bar": "15m", "limit": "300"}), "15m", self.client.clock())
-                order = ema_order(m15, side, candle_ms)
-            except Exception:
-                order = None
+        excluded = symbol.split("-")[0] in EXCLUDE
+        if self.score_basis == "touch_close" and not excluded:
+            # Scored by score_due once the touch 5m bar has closed, as the backtest scores it.
+            with self.db() as db:
+                db.execute("INSERT OR IGNORE INTO signals (week,symbol,side,level,target,high,low,candle_ms,observed_ms,"
+                           "status,taken,score_basis,levels) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                           (levels["week"], symbol, side, level, target, levels["high"], levels["low"], candle_ms,
+                            observed_ms, "pending_score", 0, self.score_basis, json.dumps(levels)))
+            return
+        status, score, taken, feats, error, order = (("excluded", None, 0, None, None, None) if excluded else
+                                                     self._score(levels, symbol, side_text, candle_ms, False))
         with self.db() as db:
             db.execute("BEGIN IMMEDIATE")
             cur = db.execute("INSERT OR IGNORE INTO signals (week,symbol,side,level,target,high,low,candle_ms,observed_ms,"
-                             "status,score,taken,features,error,ema_order) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                             "status,score,taken,features,error,ema_order,score_basis,scored_ms) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                              (levels["week"], symbol, side, level, target, levels["high"], levels["low"], candle_ms,
-                              observed_ms, status, score, taken, json.dumps(feats) if feats else None, error, order))
+                              observed_ms, status, score, taken, json.dumps(feats) if feats else None, error, order,
+                              self.score_basis, self.client.clock()))
             if cur.rowcount != 1 or status == "excluded":
                 return
-            sid = cur.lastrowid
-            for m in TRACKS:
-                step = m*60_000
-                decision = candle_ms//step*step+2*step
-                notional, note = 0., None
-                if taken:
-                    equity = db.execute("SELECT equity FROM tracks WHERE track=?", (m,)).fetchone()["equity"]
-                    opened = db.execute("SELECT COALESCE(SUM(COALESCE(remaining_notional,notional)),0) s FROM positions WHERE track=? AND stage<>'closed' "
-                                        "AND taken=1", (m,)).fetchone()["s"]
-                    notional = max(0., min(FRACTION*equity, GROSS*equity-opened))
-                    if notional <= 0:
-                        note = "no_capacity"
-                db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,decision_ms,stage,"
-                           "taken,notional,last_seen_ms,note,remaining_notional) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                           (sid, m, symbol, side, level, target, candle_ms, decision, "pending_confirm",
-                            int(taken and notional > 0), notional, candle_ms, note, notional))
-            if self.v3:
-                self._open_v3(db, sid, levels, symbol, side, level, candle_ms, score)
-            for acct, add in ((V3ADD_TRACK, self.add), (V3ADD20_TRACK, self.add20)):
-                if not add:
-                    continue
-                pid, notional, target3, decision3, backstop3 = self._open_v3(db, sid, levels, symbol, side, level, candle_ms, score, acct)
-                if notional > 0 and score is not None and score >= add["from_score"]:
-                    db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,decision_ms,stage,taken,"
-                               "notional,last_seen_ms,note,remaining_notional,backstop,parent_id,reclaim_ref) "
-                               "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                               (sid, LEGS[acct], symbol, side, level*(1-side*add["drawdown_pct"]/100), target3, candle_ms,
-                                decision3, "pending_fill", 0, 0., candle_ms, "add_pending", 0., backstop3, pid, level))
-            if self.v3lock:
-                self._open_v3(db, sid, levels, symbol, side, level, candle_ms, score, V3LOCK_TRACK)
-            if self.spike and score is not None and score >= self.spike["min_score"]:
-                self._open_spike(db, sid, symbol, side, level, target, candle_ms, order)
-            if self.allin and score is not None and score >= self.allin["min_score"]:
-                self._open_allin(db, sid, levels, symbol, side, level, candle_ms)
+            self._open_accounts(db, cur.lastrowid, levels, symbol, side, level, target, candle_ms, score, taken, order)
         self._refresh_watch()
+
+    @serialized
+    def score_due(self, now=None):
+        """Score pending touches after their 5m bar closes, open the accounts at the touch, replay the gap.
+
+        The 1m candles are read before the accounts open, so a failed read retries the whole step instead of letting
+        a live quote advance past unreplayed minutes. After SCORE_GIVEUP_MS the touch is settled as a feature error or
+        opened without the replay (_catch_up then replays from the touch minute).
+        """
+        now = self.client.clock() if now is None else now
+        with self.db() as db:
+            due = [dict(r) for r in db.execute("SELECT * FROM signals WHERE status='pending_score' AND candle_ms/?*?+?<=? "
+                                               "ORDER BY candle_ms,id", (MIN5, MIN5, MIN5+SCORE_GRACE_MS, now))]
+        for s in due:
+            levels, symbol, candle_ms = json.loads(s["levels"]), s["symbol"], s["candle_ms"]
+            late = self.client.clock() >= candle_ms//MIN5*MIN5+MIN5+SCORE_GIVEUP_MS
+            try:
+                result = self._score(levels, symbol, "lower" if s["side"] == 1 else "upper", candle_ms, True)
+            except ScoreNotReady as err:
+                if not late:
+                    continue
+                result = ("feature_error", None, 0, None, str(err), None)
+            start = candle_ms//60_000*60_000
+            try:
+                at = self.client.clock()
+                minutes = [b for b in bars(self.client.get("/api/v5/market/candles", {
+                    "instId": symbol, "bar": "1m", "limit": str(min(300, (at-start)//60_000+2))}), "1m", at)
+                    if b[0] >= start and b[0]+60_000 <= at]
+            except Exception:
+                if not late:
+                    continue
+                minutes = []
+            status, score, taken, feats, error, order = result
+            with self.db() as db:
+                db.execute("BEGIN IMMEDIATE")
+                cur = db.execute("UPDATE signals SET status=?,score=?,taken=?,features=?,error=?,ema_order=?,scored_ms=? "
+                                 "WHERE id=? AND status='pending_score'",
+                                 (status, score, taken, json.dumps(feats) if feats else None, error, order,
+                                  self.client.clock(), s["id"]))
+                if cur.rowcount != 1:
+                    continue
+                self._open_accounts(db, s["id"], levels, symbol, s["side"], s["level"], s["target"], candle_ms, score, taken, order)
+            for ts, _, h, l, c, _ in minutes:
+                self.decide(ts, symbol)  # confirmations due before this minute, as in _catch_up
+                self.handle_quote(symbol, {"candle_ms": ts, "high": h, "low": l, "price": c})
+        self._refresh_watch()
+
+    def _open_accounts(self, db, sid, levels, symbol, side, level, target, candle_ms, score, taken, order):
+        """Book one scored touch in every account, filled at the 1.618 in the touch minute."""
+        for m in TRACKS:
+            step = m*60_000
+            decision = candle_ms//step*step+2*step
+            notional, note = 0., None
+            if taken:
+                equity = db.execute("SELECT equity FROM tracks WHERE track=?", (m,)).fetchone()["equity"]
+                opened = db.execute("SELECT COALESCE(SUM(COALESCE(remaining_notional,notional)),0) s FROM positions WHERE track=? AND stage<>'closed' "
+                                    "AND taken=1", (m,)).fetchone()["s"]
+                notional = max(0., min(FRACTION*equity, GROSS*equity-opened))
+                if notional <= 0:
+                    note = "no_capacity"
+            db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,decision_ms,stage,"
+                       "taken,notional,last_seen_ms,note,remaining_notional) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                       (sid, m, symbol, side, level, target, candle_ms, decision, "pending_confirm",
+                        int(taken and notional > 0), notional, candle_ms, note, notional))
+        if self.v3:
+            self._open_v3(db, sid, levels, symbol, side, level, candle_ms, score)
+        for acct, add in ((V3ADD_TRACK, self.add), (V3ADD20_TRACK, self.add20)):
+            if not add:
+                continue
+            pid, notional, target3, decision3, backstop3 = self._open_v3(db, sid, levels, symbol, side, level, candle_ms, score, acct)
+            if notional > 0 and score is not None and score >= add["from_score"]:
+                db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,decision_ms,stage,taken,"
+                           "notional,last_seen_ms,note,remaining_notional,backstop,parent_id,reclaim_ref) "
+                           "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                           (sid, LEGS[acct], symbol, side, level*(1-side*add["drawdown_pct"]/100), target3, candle_ms,
+                            decision3, "pending_fill", 0, 0., candle_ms, "add_pending", 0., backstop3, pid, level))
+        if self.v3lock:
+            self._open_v3(db, sid, levels, symbol, side, level, candle_ms, score, V3LOCK_TRACK)
+        if self.spike and score is not None and score >= self.spike["min_score"]:
+            self._open_spike(db, sid, symbol, side, level, target, candle_ms, order)
+        if self.allin and score is not None and score >= self.allin["min_score"]:
+            self._open_allin(db, sid, levels, symbol, side, level, candle_ms)
 
     def notification_score(self, event):
         """Read the persisted score for this exact FibBook touch identity.
 
         Identity is the NY week, symbol, side, candle timestamp, and observation
-        timestamp. A missing signal row returns ``None`` while asynchronous
-        scoring has not persisted it yet. A row with mismatched timestamps is
+        timestamp. A missing signal row, or a ``pending_score`` row whose touch
+        5m bar has not been scored yet, returns ``None``. A row with mismatched timestamps is
         terminal as ``identity_mismatch``; stored ``feature_error`` and
         ``excluded`` statuses are returned as terminal rows with their raw
         score (normally ``None``). This method never recomputes a score or
@@ -484,7 +607,7 @@ class ReclaimPaper:
                 "WHERE week=? AND symbol=? AND side=?",
                 (week, symbol, side),
             ).fetchone()
-        if row is None:
+        if row is None or row["status"] == "pending_score" and row["candle_ms"] == candle_ms:
             return None
         if row["candle_ms"] != candle_ms or row["observed_ms"] != observed_ms:
             return {"status": "identity_mismatch", "score": None}

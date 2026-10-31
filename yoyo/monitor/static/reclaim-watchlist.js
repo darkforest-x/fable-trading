@@ -30,13 +30,13 @@
   const avatar=coin=>icons.avatar(coin);
   const touchLabel=side=>side==='upper'?'上沿':side==='lower'?'下沿':'尚未触价';
   const touchTone=side=>side==='upper'?'rp-negative':side==='lower'?'rp-positive':'';
-  // The ribbon shows the model score of this exact NY-week/side/touch bar.
+  // The ribbon shows the model score of this exact NY-week/side/touch bar, scored at that 5m close as in the backtest.
   // Never borrow an account fill or another occurrence of the same symbol.
   function touchScore(item,week,signals,now=Date.now()){
     const event=latestTouch(item),side=event?.side==='upper'?-1:event?.side==='lower'?1:0;
     const signal=positive(event?.candle_ms)?signals?.find(s=>s.week===week&&s.symbol===item.symbol&&s.side===side&&s.candle_ms===event.candle_ms):null;
     if(signal?.status==='scored'&&Number.isFinite(signal.score))return {text:signal.score.toFixed(4),title:`入场评分 ${signal.score} · 不是胜率`,high:signal.score>.5,scored:true};
-    const text=signal?.status==='feature_error'?'评分失败':signal?.status==='excluded'?'不评分':event?.source==='live'&&now>=event.observed_ms&&now-event.observed_ms<90000?'待评分':'暂无评分';
+    const text=signal?.status==='feature_error'?'评分失败':signal?.status==='excluded'?'不评分':signal?.status==='pending_score'||event?.source==='live'&&now>=event.observed_ms&&now-Math.max(event.observed_ms,Math.floor(event.candle_ms/300000)*300000+300000)<90000?'待评分':'暂无评分';
     return {text,title:text,high:false};
   }
   function selectedScore(data,symbol,signals){

@@ -13,6 +13,7 @@ from yoyo.monitor.monday_fib import deliver_once as deliver_telegram_once
 from yoyo.monitor.monday_fib_service import MondayFibService, install
 
 NOW = 1792600200000  # 2026-10-21 12:30 America/New_York
+READY = NOW + 5 * MINUTE  # touch 5m close: the backtest score exists from here (owner 2026-10-31)
 SYMBOL = "BTC-USDT-SWAP"
 
 
@@ -174,7 +175,7 @@ def test_rate_limit_retries_are_bounded_and_expired_alerts_do_not_send(tmp_path)
     assert book.bark_status()["counts"] == {"failed": 1}
     assert not deliver_once(book, "key", limited, NOW + 25001)
     book.touch(levels, SYMBOL, "lower", 90, NOW + MINUTE, NOW + MINUTE, "live")
-    assert not deliver_once(book, "key", limited, NOW + MINUTE + FRESH_MS + 1)
+    assert not deliver_once(book, "key", limited, READY + FRESH_MS + 1)
     assert book.bark_status()["counts"] == {"failed": 1, "skipped": 1}
 
 
@@ -305,7 +306,9 @@ def test_bark_missing_score_waits_only_inside_original_freshness(tmp_path, looku
     assert deliver_once(book, "key", sender, NOW+1, score_lookup=lookup)
     assert book.bark_status()["counts"] == {"pending": 1}
     assert book.bark_status()["recent"][0]["attempts"] == 0
-    assert not deliver_once(book, "key", sender, NOW+FRESH_MS+1, score_lookup=scored)
+    assert deliver_once(book, "key", sender, NOW+FRESH_MS+1, score_lookup=lookup)  # touch 5m bar still open
+    assert book.bark_status()["counts"] == {"pending": 1}
+    assert not deliver_once(book, "key", sender, READY+FRESH_MS+1, score_lookup=scored)
     assert book.bark_status()["counts"] == {"skipped": 1}
 
 
@@ -326,7 +329,7 @@ def test_bark_score_read_racing_disable_cannot_send_or_revive_pending(tmp_path, 
 def test_bark_score_read_cannot_extend_expiry(tmp_path):
     book, _ = armed(tmp_path)
     assert deliver_once(book, "key", lambda *a, **kw: pytest.fail("expired touch sent"), NOW+1,
-                        score_lookup=scored, clock=lambda: NOW+FRESH_MS+1)
+                        score_lookup=scored, clock=lambda: READY+FRESH_MS+1)
     assert book.bark_status()["counts"] == {"skipped": 1}
     assert book.bark_status()["recent"][0]["attempts"] == 0
 

@@ -15,6 +15,7 @@ test('capacity shadows cannot masquerade as funded positions or executed signals
   const p=position({taken:0,notional:0,note:'no_capacity',pnl:0});
   assert.equal(ui.funded(p),false);assert.equal(ui.funded(position({notional:0})),false);
   assert.equal(ui.signalStatus({status:'scored',taken:1}),'通过评分');
+  assert.equal(ui.signalStatus({status:'pending_score',taken:0}),'等待触及K线收盘评分');
   assert.match(ui.allocation(p),/额度不足/);
   const html=ui.rowHTML({...p,stage:'closed',net_bp:100},ui.route({tab:'closed'}),10000);
   assert.match(html,/不计入资金/);assert.doesNotMatch(html,/0\.00 <small>USDT/);

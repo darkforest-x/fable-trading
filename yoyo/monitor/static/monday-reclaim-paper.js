@@ -61,6 +61,7 @@
   function signalStatus(row) {
     if (row.status === 'excluded') return '排除币种';
     if (row.status === 'feature_error') return '特征读取失败';
+    if (row.status === 'pending_score') return '等待触及K线收盘评分';
     if (row.status === 'scored') return row.taken === 1 ? '通过评分' : '未通过评分';
     return '状态待核对';
   }

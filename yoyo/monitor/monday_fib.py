@@ -23,6 +23,15 @@ HOUR = 3_600_000
 MINUTE = 60_000
 FRESH_MS = 90_000
 NOTIFICATION_MIN_SCORE = 0.4  # Owner 2026-10-30: shared TG/Bark raw-score gate.
+# Owner 2026-10-31: the score is the backtest's, read at the touch 5m close, so a notification stays fresh for
+# FRESH_MS after its score can exist: the later of the observation and that close.
+SCORE_BAR_MS = 300_000
+READY_SQL = "MAX({t}observed_ms, COALESCE({t}candle_ms/300000*300000+300000, {t}observed_ms))"
+
+
+def score_ready_ms(event):
+    candle = event.get("candle_ms")
+    return max(event["observed_ms"], candle//SCORE_BAR_MS*SCORE_BAR_MS+SCORE_BAR_MS if candle is not None else 0)
 
 
 def week_window(now):
@@ -180,7 +189,7 @@ class FibBook:
             db.execute("BEGIN IMMEDIATE")
             route = db.execute("SELECT * FROM subscription WHERE id=1").fetchone()
             db.execute("UPDATE touches SET status='skipped',error='expired_or_disabled' WHERE status='pending' "
-                       "AND (observed_ms<? OR observed_ms>? OR generation<>? OR ?=0)",
+                       f"AND ({READY_SQL.format(t='')}<? OR observed_ms>? OR generation<>? OR ?=0)",
                        (now - FRESH_MS, now, route["generation"], route["enabled"]))
             row = db.execute("SELECT * FROM touches WHERE status='pending' AND due_ms<=? "
                              "ORDER BY due_ms,observed_ms LIMIT 1", (now,)).fetchone()
@@ -194,7 +203,7 @@ class FibBook:
             db.execute("BEGIN IMMEDIATE")
             route = db.execute("SELECT * FROM subscription WHERE id=1").fetchone()
             row = db.execute("SELECT * FROM touches WHERE week=? AND symbol=? AND side=? "
-                             "AND status='pending' AND due_ms<=? AND observed_ms BETWEEN ? AND ? "
+                             f"AND status='pending' AND due_ms<=? AND {READY_SQL.format(t='')}>=? AND observed_ms<=? "
                              "AND generation=? AND ?=1",
                              (event["week"], event["symbol"], event["side"], now, now-FRESH_MS, now,
                               route["generation"], route["enabled"])).fetchone()
@@ -218,7 +227,7 @@ class FibBook:
             db.execute("UPDATE bark_outbox SET status='skipped',error='expired_or_disabled' WHERE status='pending' "
                        "AND (generation<>? OR ?=0 OR EXISTS (SELECT 1 FROM touches t WHERE "
                        "t.week=bark_outbox.week AND t.symbol=bark_outbox.symbol AND t.side=bark_outbox.side "
-                       "AND (t.observed_ms<? OR t.observed_ms>?)))",
+                       f"AND ({READY_SQL.format(t='t.')}<? OR t.observed_ms>?)))",
                        (route["generation"], route["enabled"], now - FRESH_MS, now))
             row = db.execute("SELECT t.week,t.symbol,t.side,t.level,t.price,t.observed_ms,t.candle_ms,t.source, "
                              "b.generation,b.attempts FROM bark_outbox b JOIN touches t USING(week,symbol,side) "
@@ -235,7 +244,7 @@ class FibBook:
             row = db.execute("SELECT t.week,t.symbol,t.side,t.level,t.price,t.observed_ms,t.candle_ms,t.source, "
                              "b.generation,b.attempts FROM bark_outbox b JOIN touches t USING(week,symbol,side) "
                              "WHERE b.week=? AND b.symbol=? AND b.side=? AND b.status='pending' AND b.due_ms<=? "
-                             "AND t.observed_ms BETWEEN ? AND ? AND b.generation=? AND b.generation=? AND ?=1",
+                             f"AND {READY_SQL.format(t='t.')}>=? AND t.observed_ms<=? AND b.generation=? AND b.generation=? AND ?=1",
                              (event["week"], event["symbol"], event["side"], now, now-FRESH_MS, now,
                               event["generation"], route["generation"], route["enabled"])).fetchone()
             if row:
@@ -285,7 +294,7 @@ def claim_scored_notification(book, event, now, *, score_lookup=None, clock=None
     except Exception:
         result, read_error = None, "score_read_error"
     ready_at = clock() if clock else now
-    if not 0 <= ready_at-event["observed_ms"] <= FRESH_MS:
+    if not (event["observed_ms"] <= ready_at and ready_at-score_ready_ms(event) <= FRESH_MS):
         finish(event, "skipped", "expired_before_score", expected="pending")
         return None
     if result is None:

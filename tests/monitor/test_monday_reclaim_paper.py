@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from yoyo.monitor.monday_fib import FibBook, week_window
-from yoyo.monitor.monday_reclaim_paper import (MODEL, V3, V3_TRACK, V3ADD_TRACK, V3ADD_LEG, BE_OFFSET_BP, SPIKE_TRACK, V3LOCK_TRACK, ALLIN3_TRACK, V3ADD20_TRACK, V3ADD20_LEG, ReclaimPaper,
+from yoyo.monitor.monday_reclaim_paper import (MODEL, V3, V3_TRACK, SCORE_GRACE_MS, SCORE_GIVEUP_MS, V3ADD_TRACK, V3ADD_LEG, BE_OFFSET_BP, SPIKE_TRACK, V3LOCK_TRACK, ALLIN3_TRACK, V3ADD20_TRACK, V3ADD20_LEG, ReclaimPaper,
                                                PaperCloseError, features, settle, bars, install, ema_order)
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -18,7 +18,7 @@ BE = 93.82*(1+BE_OFFSET_BP/1e4)  # breakeven stop after a reclaim, entry +0.17 p
 
 
 class FakeClient:
-    """OKX-shaped candles: flat 105 unless overridden per (bar, open time)."""
+    """OKX-shaped candles: flat 105, quote volume 1000, unless overridden per (bar, open time) as (o, h, l, c[, volume])."""
 
     def __init__(self, now):
         self.now = now
@@ -33,8 +33,8 @@ class FakeClient:
         rows = []
         for k in range(int(params["limit"])):
             ts = last-k*step
-            o, h, l, c = self.override.get((params["bar"], ts), (105., 105., 105., 105.))
-            rows.append([str(ts), str(o), str(h), str(l), str(c), "1", "1", "1000", "1" if ts+step <= self.now else "0"])
+            o, h, l, c, *v = self.override.get((params["bar"], ts), (105., 105., 105., 105.))
+            rows.append([str(ts), str(o), str(h), str(l), str(c), "1", "1", str(v[0] if v else 1000), "1" if ts+step <= self.now else "0"])
         return rows
 
 
@@ -58,12 +58,14 @@ class PaperFixture(unittest.TestCase):
         self.tmp.cleanup()
 
     def engine(self, threshold, enable_v3=False, enable_v3add=False, enable_spike=False, enable_v3lock=False,
-               enable_allin3=False, enable_v3add20=False):
+               enable_allin3=False, enable_v3add20=False, score_basis="pre_touch"):
+        # Account mechanics are shared by both score bases (_open_accounts); the production touch_close
+        # path (pending score, retroactive fill, 1m replay) is covered by TouchCloseScoreTests.
         spec = json.loads(MODEL.read_text()); spec["top40_threshold"] = threshold
         path = Path(self.tmp.name)/"model.json"; path.write_text(json.dumps(spec))
         return ReclaimPaper(self.tmp.name, FakeFib(self.tmp.name, self.client), model_path=path, enable_v3=enable_v3,
                             enable_v3add=enable_v3add, enable_spike=enable_spike, enable_v3lock=enable_v3lock,
-                            enable_allin3=enable_allin3, enable_v3add20=enable_v3add20)
+                            enable_allin3=enable_allin3, enable_v3add20=enable_v3add20, score_basis=score_basis)
 
     def rows(self, e, sql):
         with e.db() as db:
@@ -902,6 +904,144 @@ class V3Add20Tests(PaperFixture):
         app = FastAPI(); install(app, e)
         r = TestClient(app).get("/api/monday-reclaim-paper/analytics?track=v3add20")
         self.assertEqual((r.status_code, r.json()["summary"]["open_count"]), (200, 2))
+
+
+class TouchCloseScoreTests(PaperFixture):
+    """Production basis (owner 2026-10-31): score at the touch 5m close as the backtest, book at the touch, replay."""
+
+    def setUp(self):
+        super().setUp()
+        self.bar = self.touch//H5*H5
+        self.close = self.bar+H5
+        for ts in range(self.touch, self.close+H5, MIN):  # quiet minutes near the entry unless a test overrides one
+            self.client.override[("1m", ts)] = (93.9, 94.2, 93.85, 94.)
+
+    def fire(self, e, symbol="ABC-USDT-SWAP"):
+        e.handle_touch(self.levels, symbol, "lower", 93.8, self.touch+500, self.touch)
+        return {"week": self.levels["week"], "symbol": symbol, "side": "lower",
+                "candle_ms": self.touch, "observed_ms": self.touch+500}
+
+    def scored(self, e, at=None):
+        self.client.now = self.close+SCORE_GRACE_MS if at is None else at
+        e.score_due(self.client.now)
+
+    def test_touch_waits_for_its_5m_close_then_books_at_the_touch_minute(self):
+        e = self.engine(-1., enable_v3=True, score_basis="touch_close")
+        event = self.fire(e)
+        self.assertEqual(self.rows(e, "SELECT status,score,score_basis FROM signals"),
+                         [{"status": "pending_score", "score": None, "score_basis": "touch_close"}])
+        self.assertEqual(self.rows(e, "SELECT COUNT(*) n FROM positions"), [{"n": 0}])
+        self.assertIsNone(e.notification_score(event))
+        self.client.now = self.close-1
+        e.score_due(self.client.now)
+        self.assertEqual(self.rows(e, "SELECT COUNT(*) n FROM positions"), [{"n": 0}])
+        self.scored(e)
+        sig = self.rows(e, "SELECT * FROM signals")[0]
+        self.assertEqual((sig["status"], sig["scored_ms"]), ("scored", self.client.now))
+        self.assertEqual(e.notification_score(event), {"status": "scored", "score": sig["score"]})
+        pos = self.rows(e, "SELECT * FROM positions ORDER BY track")
+        self.assertEqual([p["track"] for p in pos], [5, 60, V3_TRACK])
+        self.assertTrue(all((p["fill_ms"], p["entry"], p["stage"]) == (self.touch, 93.82, "pending_confirm") for p in pos))
+        self.assertTrue(all(p["last_seen_ms"] == self.close-MIN for p in pos))  # last completed minute replayed
+
+    def test_score_reads_the_touch_bar_like_the_backtest(self):
+        e = self.engine(-1., score_basis="touch_close")
+        self.client.override[("5m", self.bar)] = (105., 105., 93.7, 93.9, 13000.)
+        self.fire(e)
+        self.scored(e)
+        sig = self.rows(e, "SELECT * FROM signals")[0]
+        five = bars(self.client.get("/", {"bar": "5m", "limit": "300"}), "5m", self.client.now)
+        hourly = bars(self.client.get("/", {"bar": "1H", "limit": "300"}), "1H", self.client.now)
+        f = features(five, hourly, 1, self.levels, self.touch, False, 0, at_touch_close=True)
+        self.assertEqual(json.loads(sig["features"]), f)
+        self.assertAlmostEqual(sig["score"], e.model.score(f))
+        self.assertAlmostEqual(f["log_vol_ratio"], math.log(24))  # 11 x 1000 + the touch bar's 13000, base 1000
+        self.assertAlmostEqual(f["toward24"], -100*(93.9/105-1))
+        start = self.touch//H1*H1
+        self.assertAlmostEqual(f["log_liquidity"], math.log10((168*1000-(self.close-start)/H1*1000+1000+13000)/7))
+        pre = features(five, hourly, 1, self.levels, self.touch, False, 0)
+        self.assertEqual((pre["log_vol_ratio"], pre["toward24"]), (math.log(12), 0.))  # the pre-touch score never sees it
+        self.assertEqual(pre["bucket"], f["bucket"])
+
+    def test_minutes_between_touch_and_score_are_replayed_in_order(self):
+        e = self.engine(-1., enable_v3=True, score_basis="touch_close")
+        e.model.score = lambda feats: .7
+        self.client.override[("1m", self.touch+2*MIN)] = (94., 100.5, 93.9, 100.2)  # near edge 100 reached
+        self.client.override[("1m", self.touch+MIN)] = (94., 95., 60., 94.)  # v3 -30 percent backstop, before the target
+        self.fire(e)
+        self.scored(e)
+        pos = {p["track"]: p for p in self.rows(e, "SELECT * FROM positions")}
+        self.assertEqual({m: (pos[m]["reason"], pos[m]["exit_ms"]) for m in (5, 60)},
+                         {m: ("target", self.touch+2*MIN) for m in (5, 60)})
+        self.assertEqual((pos[V3_TRACK]["reason"], pos[V3_TRACK]["exit_ms"], pos[V3_TRACK]["exit_price"]),
+                         ("backstop", self.touch+MIN, 93.82*.7))
+        self.assertEqual(self.client.now, self.touch+3*MIN+SCORE_GRACE_MS)  # touch+3min is still open, left to live quotes
+
+    def test_unconfirmed_touch_bar_waits_then_settles_as_a_feature_error(self):
+        e = self.engine(-1., score_basis="touch_close")
+        get = self.client.get
+
+        def lagging(path, params):
+            rows = get(path, params)
+            return [r[:8]+["0"] if params["bar"] == "5m" and int(r[0]) == self.bar else r for r in rows]
+        self.client.get = lagging
+        event = self.fire(e)
+        self.scored(e)
+        self.assertEqual(self.rows(e, "SELECT status FROM signals"), [{"status": "pending_score"}])
+        self.assertIsNone(e.notification_score(event))
+        self.scored(e, self.close+SCORE_GIVEUP_MS)
+        self.assertEqual(self.rows(e, "SELECT status,error,score FROM signals"),
+                         [{"status": "feature_error", "error": "touch_bar_unconfirmed", "score": None}])
+        self.assertEqual(e.notification_score(event), {"status": "feature_error", "score": None})
+        self.assertEqual({p["taken"] for p in self.rows(e, "SELECT * FROM positions")}, {0})
+
+    def test_failed_minute_read_retries_before_any_account_opens(self):
+        e = self.engine(-1., score_basis="touch_close")
+        get, calls = self.client.get, []
+
+        def flaky(path, params):
+            if params["bar"] == "1m" and not calls:
+                calls.append(1)
+                raise OSError("timeout")
+            return get(path, params)
+        self.client.get = flaky
+        self.fire(e)
+        self.scored(e)
+        self.assertEqual(self.rows(e, "SELECT status FROM signals"), [{"status": "pending_score"}])
+        self.assertEqual(self.rows(e, "SELECT COUNT(*) n FROM positions"), [{"n": 0}])
+        self.scored(e, self.close+SCORE_GRACE_MS+5000)
+        self.assertEqual(self.rows(e, "SELECT status FROM signals"), [{"status": "scored"}])
+        self.assertEqual({p["fill_ms"] for p in self.rows(e, "SELECT * FROM positions")}, {self.touch})
+
+    def test_candle_read_failure_at_the_close_is_retried_not_a_feature_error(self):
+        e = self.engine(-1., score_basis="touch_close")
+        get, calls = self.client.get, []
+
+        def flaky(path, params):
+            if params["bar"] in ("5m", "15m") and params["bar"] not in calls:
+                calls.append(params["bar"])
+                raise OSError("timeout")
+            return get(path, params)
+        self.client.get = flaky
+        event = self.fire(e)
+        for k in range(3):
+            self.scored(e, self.close+SCORE_GRACE_MS+k*5000)
+        self.assertEqual(calls, ["5m", "15m"])
+        sig = self.rows(e, "SELECT * FROM signals")[0]
+        self.assertEqual((sig["status"], sig["ema_order"]), ("scored", 4))  # 15m retried, not left missing; flat EMAs tie
+        self.assertEqual(e.notification_score(event), {"status": "scored", "score": sig["score"]})
+
+    def test_excluded_major_is_settled_at_once(self):
+        e = self.engine(-1., score_basis="touch_close")
+        self.fire(e, "BTC-USDT-SWAP")
+        self.assertEqual(self.rows(e, "SELECT status FROM signals"), [{"status": "excluded"}])
+        self.assertEqual(self.rows(e, "SELECT COUNT(*) n FROM positions"), [{"n": 0}])
+
+    def test_production_default_is_touch_close(self):
+        e = ReclaimPaper(self.tmp.name, FakeFib(self.tmp.name, self.client))
+        self.assertEqual(e.score_basis, "touch_close")
+        with self.assertRaises(ValueError):
+            ReclaimPaper(self.tmp.name, FakeFib(self.tmp.name, self.client), score_basis="later")
 
 
 if __name__ == "__main__":
