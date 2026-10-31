@@ -1,0 +1,138 @@
+{
+  "comparisons": {
+    "baseline": {
+      "pairs": 3351,
+      "weeks": 256,
+      "signal_mean_pct": 0.055173336096125375,
+      "random_mean_pct": -1.9038980411360777,
+      "excess_mean_pct": 1.9590713772322033,
+      "excess_mean_pct_95ci": [
+        1.6709450934329664,
+        2.2523363722209853
+      ],
+      "signal_positive_rate": 0.5320799761265294,
+      "random_positive_rate": 0.3795066343186307,
+      "excess_positive_rate": 0.15257334180789867,
+      "excess_positive_95ci": [
+        0.13449233569464916,
+        0.170143336955286
+      ],
+      "paired_week_signflip_p": 0.0004997501249375312
+    },
+    "controls_already_touched": {
+      "pairs": 2747,
+      "weeks": 251,
+      "signal_mean_pct": 0.6856893391852135,
+      "random_mean_pct": -0.7032514021295126,
+      "excess_mean_pct": 1.3889407413147261,
+      "excess_mean_pct_95ci": [
+        1.146782622096885,
+        1.6343590839580557
+      ],
+      "signal_positive_rate": 0.5635238441936659,
+      "random_positive_rate": 0.4559969133321882,
+      "excess_positive_rate": 0.10752693086147765,
+      "excess_positive_95ci": [
+        0.08927837649553805,
+        0.1262557865394762
+      ],
+      "paired_week_signflip_p": 0.0004997501249375312
+    },
+    "controls_within_24h": {
+      "pairs": 3194,
+      "weeks": 256,
+      "signal_mean_pct": 0.04576089371325309,
+      "random_mean_pct": -1.2031886622300407,
+      "excess_mean_pct": 1.248949555943294,
+      "excess_mean_pct_95ci": [
+        1.0547498146099288,
+        1.4433074951754097
+      ],
+      "signal_positive_rate": 0.5313087038196619,
+      "random_positive_rate": 0.4381131287831351,
+      "excess_positive_rate": 0.09319557503652683,
+      "excess_positive_95ci": [
+        0.0793437270055723,
+        0.10685217741829549
+      ],
+      "paired_week_signflip_p": 0.0004997501249375312
+    },
+    "non_reclaim_controls": {
+      "pairs": 2989,
+      "weeks": 254,
+      "signal_mean_pct": 0.332248557678961,
+      "random_mean_pct": -2.4506721013489843,
+      "excess_mean_pct": 2.7829206590279454,
+      "excess_mean_pct_95ci": [
+        2.402327699594046,
+        3.178681109946126
+      ],
+      "signal_positive_rate": 0.5513549682167949,
+      "random_positive_rate": 0.3271628607443261,
+      "excess_positive_rate": 0.22419210747246882,
+      "excess_positive_95ci": [
+        0.1986673112855249,
+        0.247656615319155
+      ],
+      "paired_week_signflip_p": 0.0004997501249375312
+    },
+    "same_close_distance_bucket": {
+      "pairs": 1868,
+      "weeks": 242,
+      "signal_mean_pct": 0.214726082165491,
+      "random_mean_pct": 0.14834466341282648,
+      "excess_mean_pct": 0.06638141875266447,
+      "excess_mean_pct_95ci": [
+        -0.14521958347127917,
+        0.27936288932887915
+      ],
+      "signal_positive_rate": 0.521948608137045,
+      "random_positive_rate": 0.5021251826926345,
+      "excess_positive_rate": 0.019823425444410455,
+      "excess_positive_95ci": [
+        0.002193835325212019,
+        0.03661547856812507
+      ],
+      "paired_week_signflip_p": 0.5687156421789106
+    }
+  },
+  "absolute_72h": {
+    "pairs": 3651,
+    "weeks": 259,
+    "signal_mean_pct": -0.2794623805229191,
+    "random_mean_pct": 0.0,
+    "excess_mean_pct": -0.2794623805229191,
+    "excess_mean_pct_95ci": [
+      -0.7865607595050828,
+      0.2594159180375872
+    ],
+    "signal_positive_rate": 0.517118597644481,
+    "random_positive_rate": 0.0,
+    "excess_positive_rate": 0.517118597644481,
+    "excess_positive_95ci": [
+      0.4881617255880178,
+      0.548114659455418
+    ],
+    "paired_week_signflip_p": 0.3168415792103948
+  },
+  "path_summary": {
+    "6": {
+      "events": 3651,
+      "median_efficiency": 0.026086956521738466,
+      "median_positive_close_fraction": 0.5,
+      "median_close_pullback_pct": 3.6210854593494157,
+      "median_giveback_pct": 2.0516289031676127
+    },
+    "14": {
+      "events": 3609,
+      "median_efficiency": 0.005181347150258968,
+      "median_positive_close_fraction": 0.5,
+      "median_close_pullback_pct": 7.727333135042436,
+      "median_giveback_pct": 4.487333036763297
+    }
+  },
+  "source_return_checks": 3651,
+  "baseline_exactly_reproduced": true,
+  "source_commit": "d9b6b53aca1b73b6731413c254684dded8e950c0",
+  "caution": "Each arm is one post-hoc control-pool restriction,not a validated trading rule. Sameweek event-conditioned matching can select countertrend weeks;absolute full-cohort metrics and unmatched events remain primary descriptive evidence. No multiple-testing claim."
+}
