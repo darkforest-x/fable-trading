@@ -1,0 +1,398 @@
+{
+  "experiment_id": "exp-monday-harmonic-15m-confluence-20261031-v1",
+  "completed_date": "2026-10-31",
+  "status": "rejected_fixed_configuration",
+  "conclusion": "1262/22708 events retained;22unobservable. Full-history original/15m multiples60m15.2215/1.00245,v3 89.0068/1.09220;all eight do not improve.2026v3 mean147.38/294.80bp but14trades,capital2.5761/1.0715,excluding best3weeks -40.82bp. Notion EXP-231.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "notion_experiment": "https://app.notion.com/p/40a8856479af81818cfcea06e59f3a61",
+  "builder_commits": [
+    "713d178899",
+    "4dae29ba58",
+    "b2024cb09b",
+    "a1d372f024",
+    "8a580924ff",
+    "6e05931d93"
+  ],
+  "actual_native_arm_order": [
+    "1h",
+    "15m"
+  ],
+  "clock": "Only complete UTC higher bars closed by the touch5m opening; later completed pre-touch5m bars can expire a zone, never form/confirm a higher pivot. No unfinished higher candle or touch5m candle.",
+  "unchanged": "Original stored touch-bar scores including known lookahead,1.618 entry,targets,stops,BE17,lock50,adds,allocator,tie seeds,maker0.02percent/taker0.05percent and non-target10bp slippage.",
+  "source": "Reuse registered5m inputs; no downloads or content hashes; no signal fill replay.",
+  "scan": {
+    "events": 22708,
+    "symbols": 531,
+    "observable": 22686,
+    "admitted": 1296,
+    "causality_checks": 531,
+    "unavailable": {
+      "nonfinite_history": 22
+    },
+    "package_versions": {
+      "pyharmonics": "1.5.3",
+      "numpy": "2.5.4",
+      "pandas": "3.1.0",
+      "ta": "0.11.0"
+    },
+    "source_commit": "4e38b8484ec7a387b347e3fbf7b0d18aefe2db6c",
+    "interval": "15m",
+    "complete_higher_bars_only": true,
+    "no_touch_bar": true,
+    "no_model_fit": true,
+    "parameter_search": false
+  },
+  "harmonic_validation": {
+    "raw_patterns": 4769,
+    "valid_patterns": 4497,
+    "rejected_inconsistent_xabc": 272,
+    "raw_admitted": 1296,
+    "admitted": 1262,
+    "removed_events": 34,
+    "correction": "Before looking at returns, reject forming() joins whose actual XABC prices violate the same library ratio table. Raw candidates preserved; no rescan or parameter change.",
+    "no_outcome_columns": true,
+    "no_touch_candle": true
+  },
+  "native_counts": {
+    "reused": 14394,
+    "new_orders": 4836,
+    "new_positions": 4830,
+    "new_fills": 9660,
+    "dependent_parents": 10,
+    "known_empty_children": 4,
+    "known_empty_prior_orders": 792,
+    "symbols": 432,
+    "signal_rows_checked": 2604,
+    "signal_net_max_error_bp": 0.0
+  },
+  "validation": {
+    "events": 22708,
+    "observable": 22686,
+    "source_files_unchanged": 1284,
+    "prefix_and_future_mutation_checks": 531,
+    "validated_patterns": 4497,
+    "source_symbols_equal_prior_5m": 531,
+    "score_metadata_rows_checked": 10325,
+    "new_native_positions_checked": 4830,
+    "confirmation_clocks_checked": 4826,
+    "max_fee_net_error_bp": 3.183231456205249e-12,
+    "exact_cached_orders_rerun_only_as_dependencies": 0,
+    "cache_mismatches": 0,
+    "native_signal_orders": 0,
+    "interval": "15m",
+    "complete_higher_bars_only": true,
+    "touch_bar_excluded": true,
+    "no_execution_replay": true
+  },
+  "control_coverage": {
+    "selected_events": 1262,
+    "matched_events": 1250,
+    "coverage_pct": 99.04912836767036,
+    "missing": [
+      {
+        "event": "ALPACAUSDT:2025-04-28:+1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "BCHUSDT:2025-06-09:+1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "BIGTIMEUSDT:2025-12-29:-1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "BMTUSDT:2025-07-07:-1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "CHRUSDT:2021-04-12:+1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "ENAUSDT:2026-03-30:+1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "GLMUSDT:2025-10-20:-1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "HIFIUSDT:2025-06-02:+1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "KAVAUSDT:2025-12-22:-1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "ONGUSDT:2024-03-18:-1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "RDNTUSDT:2026-03-23:+1",
+        "original_control_orders": 0
+      },
+      {
+        "event": "RVNUSDT:2026-01-05:-1",
+        "original_control_orders": 0
+      }
+    ],
+    "reason": "The original matched-bucket generator supplied no random orders for listed events; no imputation or resampling.",
+    "control_attempts": 3750,
+    "unfilled_control_attempts": 334,
+    "all_unfilled_attempts_remain_zero": true
+  },
+  "tests": {
+    "passed": 32,
+    "failed": 0,
+    "log": "tests.log",
+    "legacy_5m_real_window_parity": 18,
+    "scope": "Higher-frame causal aggregation, prefix/future mutation, incomplete constituents, raw5m invalidation, frozen trading config, cache fee validation and original runner regressions.",
+    "followup_cache_receipt_regressions": {
+      "passed": 2,
+      "failed": 0,
+      "log": "tests-cache-receipts.log",
+      "note": "Focused rerun after recording caches actually available at execution; not two additional unique tests."
+    }
+  },
+  "full_history_accounts": [
+    {
+      "strategy": "v2_60",
+      "timeframe": "none",
+      "n": "22708",
+      "events": "22708",
+      "mean_net_bp": "26.54920027632781",
+      "account_final_multiple": "15.22150338400322",
+      "account_max_drawdown_pct": "33.90407982065899",
+      "matched_n": "",
+      "matched_signal_bp": "",
+      "matched_random_bp": "",
+      "matched_week_p": ""
+    },
+    {
+      "strategy": "v2_5",
+      "timeframe": "none",
+      "n": "22708",
+      "events": "22708",
+      "mean_net_bp": "8.71511651083457",
+      "account_final_multiple": "2.379101161174164",
+      "account_max_drawdown_pct": "42.136715652287265",
+      "matched_n": "",
+      "matched_signal_bp": "",
+      "matched_random_bp": "",
+      "matched_week_p": ""
+    },
+    {
+      "strategy": "v3",
+      "timeframe": "none",
+      "n": "2108",
+      "events": "2108",
+      "mean_net_bp": "237.87861323622852",
+      "account_final_multiple": "89.00683220917267",
+      "account_max_drawdown_pct": "35.50622242341208",
+      "matched_n": "",
+      "matched_signal_bp": "",
+      "matched_random_bp": "",
+      "matched_week_p": ""
+    },
+    {
+      "strategy": "v3add",
+      "timeframe": "none",
+      "n": "2481",
+      "events": "2108",
+      "mean_net_bp": "289.72581403643",
+      "account_final_multiple": "202.84055922371095",
+      "account_max_drawdown_pct": "50.45779218593811",
+      "matched_n": "",
+      "matched_signal_bp": "",
+      "matched_random_bp": "",
+      "matched_week_p": ""
+    },
+    {
+      "strategy": "v3add20",
+      "timeframe": "none",
+      "n": "2481",
+      "events": "2108",
+      "mean_net_bp": "289.72581403643",
+      "account_final_multiple": "327.74423973562045",
+      "account_max_drawdown_pct": "35.37735796803131",
+      "matched_n": "",
+      "matched_signal_bp": "",
+      "matched_random_bp": "",
+      "matched_week_p": ""
+    },
+    {
+      "strategy": "v3lock",
+      "timeframe": "none",
+      "n": "2108",
+      "events": "2108",
+      "mean_net_bp": "235.93797990623787",
+      "account_final_multiple": "90.97756620046974",
+      "account_max_drawdown_pct": "34.42433203658799",
+      "matched_n": "",
+      "matched_signal_bp": "",
+      "matched_random_bp": "",
+      "matched_week_p": ""
+    },
+    {
+      "strategy": "spike",
+      "timeframe": "none",
+      "n": "219",
+      "events": "219",
+      "mean_net_bp": "240.83095202725696",
+      "account_final_multiple": "4.659927298851921",
+      "account_max_drawdown_pct": "21.188741245865938",
+      "matched_n": "",
+      "matched_signal_bp": "",
+      "matched_random_bp": "",
+      "matched_week_p": ""
+    },
+    {
+      "strategy": "allin3",
+      "timeframe": "none",
+      "n": "842",
+      "events": "842",
+      "mean_net_bp": "372.3068412611043",
+      "account_final_multiple": "",
+      "account_max_drawdown_pct": "99.99011690103917",
+      "matched_n": "",
+      "matched_signal_bp": "",
+      "matched_random_bp": "",
+      "matched_week_p": ""
+    },
+    {
+      "strategy": "v2_60",
+      "timeframe": "15m",
+      "n": "1262",
+      "events": "1262",
+      "mean_net_bp": "2.1808346334816666",
+      "account_final_multiple": "1.0024507601802197",
+      "account_max_drawdown_pct": "11.048294567170874",
+      "matched_n": "1250.0",
+      "matched_signal_bp": "-0.17473811154605356",
+      "matched_random_bp": "-12.65808495675228",
+      "matched_week_p": "0.1208439578021099"
+    },
+    {
+      "strategy": "v2_5",
+      "timeframe": "15m",
+      "n": "1262",
+      "events": "1262",
+      "mean_net_bp": "-13.776719951427586",
+      "account_final_multiple": "0.8378091795224032",
+      "account_max_drawdown_pct": "18.116978879836655",
+      "matched_n": "1250.0",
+      "matched_signal_bp": "-14.670969803085784",
+      "matched_random_bp": "-18.534051794515896",
+      "matched_week_p": "0.27583620818959054"
+    },
+    {
+      "strategy": "v3",
+      "timeframe": "15m",
+      "n": "39",
+      "events": "39",
+      "mean_net_bp": "146.74414137599783",
+      "account_final_multiple": "1.0921969746556763",
+      "account_max_drawdown_pct": "2.372106196180701",
+      "matched_n": "35.0",
+      "matched_signal_bp": "113.35438627651213",
+      "matched_random_bp": "25.434996018141323",
+      "matched_week_p": "0.15949202539873006"
+    },
+    {
+      "strategy": "v3add",
+      "timeframe": "15m",
+      "n": "41",
+      "events": "39",
+      "mean_net_bp": "182.65177267356694",
+      "account_final_multiple": "1.1323837187962038",
+      "account_max_drawdown_pct": "2.2921643174857564",
+      "matched_n": "35.0",
+      "matched_signal_bp": "127.86705690508128",
+      "matched_random_bp": "29.844613375297577",
+      "matched_week_p": "0.13939303034848258"
+    },
+    {
+      "strategy": "v3add20",
+      "timeframe": "15m",
+      "n": "41",
+      "events": "39",
+      "mean_net_bp": "182.65177267356694",
+      "account_final_multiple": "1.1164280812815293",
+      "account_max_drawdown_pct": "2.064899174749746",
+      "matched_n": "35.0",
+      "matched_signal_bp": "127.86705690508128",
+      "matched_random_bp": "29.844613375297577",
+      "matched_week_p": "0.13939303034848258"
+    },
+    {
+      "strategy": "v3lock",
+      "timeframe": "15m",
+      "n": "39",
+      "events": "39",
+      "mean_net_bp": "129.91156662839344",
+      "account_final_multiple": "1.0832633014530084",
+      "account_max_drawdown_pct": "2.305495401149571",
+      "matched_n": "35.0",
+      "matched_signal_bp": "91.7681077529036",
+      "matched_random_bp": "22.543068713770396",
+      "matched_week_p": "0.21488925553722313"
+    },
+    {
+      "strategy": "spike",
+      "timeframe": "15m",
+      "n": "0",
+      "events": "0",
+      "mean_net_bp": "",
+      "account_final_multiple": "1.0",
+      "account_max_drawdown_pct": "0.0",
+      "matched_n": "",
+      "matched_signal_bp": "",
+      "matched_random_bp": "",
+      "matched_week_p": ""
+    },
+    {
+      "strategy": "allin3",
+      "timeframe": "15m",
+      "n": "4",
+      "events": "4",
+      "mean_net_bp": "187.45569860806225",
+      "account_final_multiple": "1.348396382194179",
+      "account_max_drawdown_pct": "3.1461600646735977",
+      "matched_n": "3.0",
+      "matched_signal_bp": "249.93807398416337",
+      "matched_random_bp": "-162.82066023088433",
+      "matched_week_p": "0.5"
+    }
+  ],
+  "full_history_holm_min_p": 0.7871606419679016,
+  "inference_limit": "Holm covers16 new full-history signal-versus-matched-random tests, not incremental efficacy. Annual subgroup results are descriptive. Hard gate rejects most trades; less drawdown alone is not improved efficiency. No score/model fitting,parameter search,service/paper/ACTIVE change.",
+  "metrics_not_applicable": "No fitted classifier or changed ranker: valAUC/top-decile ranking are not new experiment endpoints; retained/rejected week-clustered comparisons and unchanged-rule matched random controls test the gate.",
+  "reproduce_command": "sh /Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/reproduce.sh",
+  "combined_comparison": "experiments/active/exp-monday-harmonic-1h-confluence-20261031-v1/timeframe-comparison.json",
+  "raw_local_outputs": [
+    "scan/",
+    "symbols/",
+    "gates.csv.gz",
+    "admission.csv.gz",
+    "events.csv.gz",
+    "patterns-validated.jsonl.gz",
+    "patterns-invalid-library-join.jsonl.gz",
+    "matched-controls.csv.gz",
+    "*-ledger.csv.gz"
+  ],
+  "committed_results": [
+    "summary.json",
+    "headline.csv",
+    "annual.csv",
+    "allin_monthly.json",
+    "scan.json",
+    "harmonic-validation.json",
+    "controls-validation.json",
+    "control-coverage.json",
+    "validation.json",
+    "completion.json"
+  ]
+}

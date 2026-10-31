@@ -18,6 +18,30 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-harmonic-15m-confluence-20261031-v1
+    artifact_type: manifest
+    role: fixed_pre_touch_15m_harmonic_gate_on_original_monday_accounts
+    source_repo: darkforest-x/fable-trading
+    source_commit: 713d178899
+    generator_commit: 6e05931d93
+    source_path: experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: "1262/22708 events retained;22unobservable. Full-history original/15m multiples60m15.2215/1.00245,v3 89.0068/1.09220;all eight do not improve.2026v3 mean147.38/294.80bp but14trades,capital2.5761/1.0715,excluding best3weeks -40.82bp. Notion EXP-231. Both arms531causal checks,1284source stamps,531source symbols equal prior5m,zero new signal orders or cache mismatches.32focused tests and2cache-regression reruns;18old5m windows exact. Original score lookahead retained. Two-timeframe16tests Holm minimum0.78716;no post-result tuning."
+  - artifact_id: monday-harmonic-1h-confluence-20261031-v1
+    artifact_type: manifest
+    role: fixed_pre_touch_1h_harmonic_gate_on_original_monday_accounts
+    source_repo: darkforest-x/fable-trading
+    source_commit: 713d178899
+    generator_commit: 6e05931d93
+    source_path: experiments/active/exp-monday-harmonic-1h-confluence-20261031-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-harmonic-1h-confluence-20261031-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: "485/22708 events retained;677unobservable. Full-history original/1h multiples60m15.2215/1.07720,v3 89.0068/1.00686;all eight do not improve. V3 only10events,spike0,allin3only1;2026v3 only4trades. Notion EXP-232. Both arms531causal checks,1284source stamps,531source symbols equal prior5m,zero new signal orders or cache mismatches.32focused tests and2cache-regression reruns;18old5m windows exact. Original score lookahead retained. Two-timeframe16tests Holm minimum0.78716;no post-result tuning."
   - artifact_id: monday-harmonic-confluence-20261031-v1
     artifact_type: manifest
     role: fixed_pre_touch_harmonic_gate_on_original_monday_accounts

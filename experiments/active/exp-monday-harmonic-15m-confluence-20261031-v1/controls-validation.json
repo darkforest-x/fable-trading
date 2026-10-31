@@ -1,0 +1,4334 @@
+{
+  "reused": 14394,
+  "new_orders": 4836,
+  "new_positions": 4830,
+  "new_fills": 9660,
+  "dependent_parents": 10,
+  "known_empty_children": 4,
+  "known_empty_prior_orders": 792,
+  "symbols": 432,
+  "signal_rows_checked": 2604,
+  "signal_net_max_error_bp": 0.0,
+  "sources": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/0GUSDT/ohlc/trades.csv.gz",
+      "bytes": 738,
+      "mtime_ns": 1793458611117902521
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/0GUSDT/olhc/trades.csv.gz",
+      "bytes": 738,
+      "mtime_ns": 1793458611216746895
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000000BOBUSDT/ohlc/trades.csv.gz",
+      "bytes": 3391,
+      "mtime_ns": 1793458611871057252
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000000BOBUSDT/olhc/trades.csv.gz",
+      "bytes": 3391,
+      "mtime_ns": 1793458612578813341
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000000MOGUSDT/ohlc/trades.csv.gz",
+      "bytes": 1902,
+      "mtime_ns": 1793458611126081319
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000000MOGUSDT/olhc/trades.csv.gz",
+      "bytes": 1902,
+      "mtime_ns": 1793458611286511140
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000BONKUSDT/ohlc/trades.csv.gz",
+      "bytes": 3275,
+      "mtime_ns": 1793458611120824746
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000BONKUSDT/olhc/trades.csv.gz",
+      "bytes": 3275,
+      "mtime_ns": 1793458611286926684
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000CHEEMSUSDT/ohlc/trades.csv.gz",
+      "bytes": 1566,
+      "mtime_ns": 1793458615383257208
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000CHEEMSUSDT/olhc/trades.csv.gz",
+      "bytes": 1566,
+      "mtime_ns": 1793458615848784494
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000FLOKIUSDT/ohlc/trades.csv.gz",
+      "bytes": 3434,
+      "mtime_ns": 1793458616734653674
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000FLOKIUSDT/olhc/trades.csv.gz",
+      "bytes": 3434,
+      "mtime_ns": 1793458617209561599
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000LUNCUSDT/ohlc/trades.csv.gz",
+      "bytes": 2220,
+      "mtime_ns": 1793458616887491367
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000LUNCUSDT/olhc/trades.csv.gz",
+      "bytes": 2220,
+      "mtime_ns": 1793458617436631771
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000PEPEUSDT/ohlc/trades.csv.gz",
+      "bytes": 958,
+      "mtime_ns": 1793458616595836689
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000PEPEUSDT/olhc/trades.csv.gz",
+      "bytes": 958,
+      "mtime_ns": 1793458616664474386
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000RATSUSDT/ohlc/trades.csv.gz",
+      "bytes": 925,
+      "mtime_ns": 1793458619146273558
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000RATSUSDT/olhc/trades.csv.gz",
+      "bytes": 925,
+      "mtime_ns": 1793458619192049328
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000SATSUSDT/ohlc/trades.csv.gz",
+      "bytes": 1618,
+      "mtime_ns": 1793458620756452509
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000SATSUSDT/olhc/trades.csv.gz",
+      "bytes": 1618,
+      "mtime_ns": 1793458620872848278
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000SHIBUSDT/ohlc/trades.csv.gz",
+      "bytes": 3666,
+      "mtime_ns": 1793458623757924037
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000SHIBUSDT/olhc/trades.csv.gz",
+      "bytes": 3666,
+      "mtime_ns": 1793458624593810506
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000WHYUSDT/ohlc/trades.csv.gz",
+      "bytes": 2692,
+      "mtime_ns": 1793458621290416532
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000WHYUSDT/olhc/trades.csv.gz",
+      "bytes": 2732,
+      "mtime_ns": 1793458621790244812
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000XECUSDT/ohlc/trades.csv.gz",
+      "bytes": 2655,
+      "mtime_ns": 1793458624823610486
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000XECUSDT/olhc/trades.csv.gz",
+      "bytes": 2810,
+      "mtime_ns": 1793458625864611539
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000XUSDT/ohlc/trades.csv.gz",
+      "bytes": 1568,
+      "mtime_ns": 1793458624144753817
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1000XUSDT/olhc/trades.csv.gz",
+      "bytes": 1568,
+      "mtime_ns": 1793458624594307301
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1INCHUSDT/ohlc/trades.csv.gz",
+      "bytes": 1834,
+      "mtime_ns": 1793458626681405146
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1INCHUSDT/olhc/trades.csv.gz",
+      "bytes": 1834,
+      "mtime_ns": 1793458626841063046
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1MBABYDOGEUSDT/ohlc/trades.csv.gz",
+      "bytes": 2315,
+      "mtime_ns": 1793458628480494836
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/1MBABYDOGEUSDT/olhc/trades.csv.gz",
+      "bytes": 2315,
+      "mtime_ns": 1793458628939120664
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/2ZUSDT/ohlc/trades.csv.gz",
+      "bytes": 960,
+      "mtime_ns": 1793458627654580508
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/2ZUSDT/olhc/trades.csv.gz",
+      "bytes": 960,
+      "mtime_ns": 1793458627764887325
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/42USDT/ohlc/trades.csv.gz",
+      "bytes": 854,
+      "mtime_ns": 1793458628534834698
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/42USDT/olhc/trades.csv.gz",
+      "bytes": 854,
+      "mtime_ns": 1793458628793718307
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/4USDT/ohlc/trades.csv.gz",
+      "bytes": 1480,
+      "mtime_ns": 1793458629564490685
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/4USDT/olhc/trades.csv.gz",
+      "bytes": 1480,
+      "mtime_ns": 1793458629702945876
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AAVEUSDT/ohlc/trades.csv.gz",
+      "bytes": 1598,
+      "mtime_ns": 1793458634772627554
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AAVEUSDT/olhc/trades.csv.gz",
+      "bytes": 1598,
+      "mtime_ns": 1793458635231245091
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ACEUSDT/ohlc/trades.csv.gz",
+      "bytes": 3688,
+      "mtime_ns": 1793458634754198696
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ACEUSDT/olhc/trades.csv.gz",
+      "bytes": 3754,
+      "mtime_ns": 1793458635415526469
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ACHUSDT/ohlc/trades.csv.gz",
+      "bytes": 1487,
+      "mtime_ns": 1793458634709950310
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ACHUSDT/olhc/trades.csv.gz",
+      "bytes": 1487,
+      "mtime_ns": 1793458635045939707
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ACTUSDT/ohlc/trades.csv.gz",
+      "bytes": 1985,
+      "mtime_ns": 1793458634227177005
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ACTUSDT/olhc/trades.csv.gz",
+      "bytes": 1985,
+      "mtime_ns": 1793458634543071868
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ACXUSDT/ohlc/trades.csv.gz",
+      "bytes": 936,
+      "mtime_ns": 1793458638343814857
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ACXUSDT/olhc/trades.csv.gz",
+      "bytes": 936,
+      "mtime_ns": 1793458638393187482
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ADAUSDT/ohlc/trades.csv.gz",
+      "bytes": 4733,
+      "mtime_ns": 1793458641681213782
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ADAUSDT/olhc/trades.csv.gz",
+      "bytes": 4733,
+      "mtime_ns": 1793458642177951377
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AEVOUSDT/ohlc/trades.csv.gz",
+      "bytes": 1940,
+      "mtime_ns": 1793458639855846646
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AEVOUSDT/olhc/trades.csv.gz",
+      "bytes": 1940,
+      "mtime_ns": 1793458640153860361
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AGIXUSDT/ohlc/trades.csv.gz",
+      "bytes": 2367,
+      "mtime_ns": 1793458639995661512
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AGIXUSDT/olhc/trades.csv.gz",
+      "bytes": 2352,
+      "mtime_ns": 1793458640526109639
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AGLDUSDT/ohlc/trades.csv.gz",
+      "bytes": 3141,
+      "mtime_ns": 1793458641733053963
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AGLDUSDT/olhc/trades.csv.gz",
+      "bytes": 3141,
+      "mtime_ns": 1793458642031561014
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AGTUSDT/ohlc/trades.csv.gz",
+      "bytes": 949,
+      "mtime_ns": 1793458642984285047
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AGTUSDT/olhc/trades.csv.gz",
+      "bytes": 949,
+      "mtime_ns": 1793458643111671632
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AIAUSDT/ohlc/trades.csv.gz",
+      "bytes": 1550,
+      "mtime_ns": 1793458643007719602
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AIAUSDT/olhc/trades.csv.gz",
+      "bytes": 1550,
+      "mtime_ns": 1793458643236849161
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AINUSDT/ohlc/trades.csv.gz",
+      "bytes": 1443,
+      "mtime_ns": 1793458644540788682
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AINUSDT/olhc/trades.csv.gz",
+      "bytes": 1443,
+      "mtime_ns": 1793458644715111418
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AIOTUSDT/ohlc/trades.csv.gz",
+      "bytes": 1690,
+      "mtime_ns": 1793458644705771988
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AIOTUSDT/olhc/trades.csv.gz",
+      "bytes": 1690,
+      "mtime_ns": 1793458644908491308
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AIOUSDT/ohlc/trades.csv.gz",
+      "bytes": 948,
+      "mtime_ns": 1793458645120211889
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AIOUSDT/olhc/trades.csv.gz",
+      "bytes": 948,
+      "mtime_ns": 1793458645164601317
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AIUSDT/ohlc/trades.csv.gz",
+      "bytes": 2354,
+      "mtime_ns": 1793458645762410467
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AIUSDT/olhc/trades.csv.gz",
+      "bytes": 2354,
+      "mtime_ns": 1793458646023457756
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AIXBTUSDT/ohlc/trades.csv.gz",
+      "bytes": 1642,
+      "mtime_ns": 1793458647329476913
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AIXBTUSDT/olhc/trades.csv.gz",
+      "bytes": 1642,
+      "mtime_ns": 1793458647577895878
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AKEUSDT/ohlc/trades.csv.gz",
+      "bytes": 923,
+      "mtime_ns": 1793458647070767888
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AKEUSDT/olhc/trades.csv.gz",
+      "bytes": 923,
+      "mtime_ns": 1793458647126027922
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ALGOUSDT/ohlc/trades.csv.gz",
+      "bytes": 3912,
+      "mtime_ns": 1793458649811591796
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ALGOUSDT/olhc/trades.csv.gz",
+      "bytes": 3912,
+      "mtime_ns": 1793458650594961997
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ALICEUSDT/ohlc/trades.csv.gz",
+      "bytes": 2226,
+      "mtime_ns": 1793458649769587340
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ALICEUSDT/olhc/trades.csv.gz",
+      "bytes": 2226,
+      "mtime_ns": 1793458649849046017
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ALLOUSDT/ohlc/trades.csv.gz",
+      "bytes": 1509,
+      "mtime_ns": 1793458649431693723
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ALLOUSDT/olhc/trades.csv.gz",
+      "bytes": 1509,
+      "mtime_ns": 1793458649725472913
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ALPACAUSDT/ohlc/trades.csv.gz",
+      "bytes": 1397,
+      "mtime_ns": 1793458650000307325
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ALPACAUSDT/olhc/trades.csv.gz",
+      "bytes": 1397,
+      "mtime_ns": 1793458650392211552
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ALPHAUSDT/ohlc/trades.csv.gz",
+      "bytes": 2304,
+      "mtime_ns": 1793458656103042802
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ALPHAUSDT/olhc/trades.csv.gz",
+      "bytes": 2304,
+      "mtime_ns": 1793458656937496180
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ALPINEUSDT/ohlc/trades.csv.gz",
+      "bytes": 2102,
+      "mtime_ns": 1793458654156093783
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ALPINEUSDT/olhc/trades.csv.gz",
+      "bytes": 2102,
+      "mtime_ns": 1793458654305499705
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ALTUSDT/ohlc/trades.csv.gz",
+      "bytes": 1390,
+      "mtime_ns": 1793458654994223765
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ALTUSDT/olhc/trades.csv.gz",
+      "bytes": 1390,
+      "mtime_ns": 1793458655623693560
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AMBUSDT/ohlc/trades.csv.gz",
+      "bytes": 1635,
+      "mtime_ns": 1793458655213113472
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AMBUSDT/olhc/trades.csv.gz",
+      "bytes": 1636,
+      "mtime_ns": 1793458655480376006
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ANIMEUSDT/ohlc/trades.csv.gz",
+      "bytes": 750,
+      "mtime_ns": 1793458657432248263
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ANIMEUSDT/olhc/trades.csv.gz",
+      "bytes": 750,
+      "mtime_ns": 1793458657493005038
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ANKRUSDT/ohlc/trades.csv.gz",
+      "bytes": 4314,
+      "mtime_ns": 1793458662100931703
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ANKRUSDT/olhc/trades.csv.gz",
+      "bytes": 4314,
+      "mtime_ns": 1793458662901906508
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/APEUSDT/ohlc/trades.csv.gz",
+      "bytes": 5468,
+      "mtime_ns": 1793458661926940010
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/APEUSDT/olhc/trades.csv.gz",
+      "bytes": 5468,
+      "mtime_ns": 1793458663255653843
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/API3USDT/ohlc/trades.csv.gz",
+      "bytes": 3053,
+      "mtime_ns": 1793458662310524105
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/API3USDT/olhc/trades.csv.gz",
+      "bytes": 3053,
+      "mtime_ns": 1793458663249697350
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/APRUSDT/ohlc/trades.csv.gz",
+      "bytes": 902,
+      "mtime_ns": 1793458660869681528
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/APRUSDT/olhc/trades.csv.gz",
+      "bytes": 902,
+      "mtime_ns": 1793458660922628006
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/APTUSDT/ohlc/trades.csv.gz",
+      "bytes": 1330,
+      "mtime_ns": 1793458664744713872
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/APTUSDT/olhc/trades.csv.gz",
+      "bytes": 1330,
+      "mtime_ns": 1793458664809363961
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ARBUSDT/ohlc/trades.csv.gz",
+      "bytes": 2016,
+      "mtime_ns": 1793458667067315564
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ARBUSDT/olhc/trades.csv.gz",
+      "bytes": 2016,
+      "mtime_ns": 1793458667497146765
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ARCUSDT/ohlc/trades.csv.gz",
+      "bytes": 958,
+      "mtime_ns": 1793458666294221506
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ARCUSDT/olhc/trades.csv.gz",
+      "bytes": 958,
+      "mtime_ns": 1793458666353943733
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ARIAUSDT/ohlc/trades.csv.gz",
+      "bytes": 1929,
+      "mtime_ns": 1793458666144387415
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ARIAUSDT/olhc/trades.csv.gz",
+      "bytes": 1929,
+      "mtime_ns": 1793458666230794091
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ARKMUSDT/ohlc/trades.csv.gz",
+      "bytes": 2697,
+      "mtime_ns": 1793458668080060576
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ARKMUSDT/olhc/trades.csv.gz",
+      "bytes": 2697,
+      "mtime_ns": 1793458668367627188
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ARKUSDT/ohlc/trades.csv.gz",
+      "bytes": 1639,
+      "mtime_ns": 1793458669210074488
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ARKUSDT/olhc/trades.csv.gz",
+      "bytes": 1639,
+      "mtime_ns": 1793458669277846637
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ARPAUSDT/ohlc/trades.csv.gz",
+      "bytes": 3121,
+      "mtime_ns": 1793458671110243106
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ARPAUSDT/olhc/trades.csv.gz",
+      "bytes": 3121,
+      "mtime_ns": 1793458671533415893
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ARUSDT/ohlc/trades.csv.gz",
+      "bytes": 3052,
+      "mtime_ns": 1793458672076723304
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ARUSDT/olhc/trades.csv.gz",
+      "bytes": 3052,
+      "mtime_ns": 1793458672738083661
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ASRUSDT/ohlc/trades.csv.gz",
+      "bytes": 782,
+      "mtime_ns": 1793458670612766340
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ASRUSDT/olhc/trades.csv.gz",
+      "bytes": 782,
+      "mtime_ns": 1793458670693414399
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ASTERUSDT/ohlc/trades.csv.gz",
+      "bytes": 1449,
+      "mtime_ns": 1793458671464255318
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ASTERUSDT/olhc/trades.csv.gz",
+      "bytes": 1449,
+      "mtime_ns": 1793458671820707378
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ASTRUSDT/ohlc/trades.csv.gz",
+      "bytes": 2869,
+      "mtime_ns": 1793458674263742447
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ASTRUSDT/olhc/trades.csv.gz",
+      "bytes": 2869,
+      "mtime_ns": 1793458674550121885
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ATAUSDT/ohlc/trades.csv.gz",
+      "bytes": 3419,
+      "mtime_ns": 1793458677590278058
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ATAUSDT/olhc/trades.csv.gz",
+      "bytes": 3419,
+      "mtime_ns": 1793458678130138448
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ATHUSDT/ohlc/trades.csv.gz",
+      "bytes": 2268,
+      "mtime_ns": 1793458675735146455
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ATHUSDT/olhc/trades.csv.gz",
+      "bytes": 2268,
+      "mtime_ns": 1793458675800702591
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ATOMUSDT/ohlc/trades.csv.gz",
+      "bytes": 2980,
+      "mtime_ns": 1793458678510531358
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ATOMUSDT/olhc/trades.csv.gz",
+      "bytes": 2978,
+      "mtime_ns": 1793458679175746654
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AUCTIONUSDT/ohlc/trades.csv.gz",
+      "bytes": 3486,
+      "mtime_ns": 1793458677878470590
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AUCTIONUSDT/olhc/trades.csv.gz",
+      "bytes": 3486,
+      "mtime_ns": 1793458678344756130
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AUSDT/ohlc/trades.csv.gz",
+      "bytes": 2164,
+      "mtime_ns": 1793458678222313742
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AUSDT/olhc/trades.csv.gz",
+      "bytes": 2164,
+      "mtime_ns": 1793458678669506878
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AVAAIUSDT/ohlc/trades.csv.gz",
+      "bytes": 1584,
+      "mtime_ns": 1793458681119580114
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AVAAIUSDT/olhc/trades.csv.gz",
+      "bytes": 1584,
+      "mtime_ns": 1793458681187423764
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AVAXUSDT/ohlc/trades.csv.gz",
+      "bytes": 1373,
+      "mtime_ns": 1793458683067754724
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AVAXUSDT/olhc/trades.csv.gz",
+      "bytes": 1373,
+      "mtime_ns": 1793458683406859264
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AVNTUSDT/ohlc/trades.csv.gz",
+      "bytes": 980,
+      "mtime_ns": 1793458681369170460
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AVNTUSDT/olhc/trades.csv.gz",
+      "bytes": 980,
+      "mtime_ns": 1793458681416364238
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AWEUSDT/ohlc/trades.csv.gz",
+      "bytes": 775,
+      "mtime_ns": 1793458682243131904
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AWEUSDT/olhc/trades.csv.gz",
+      "bytes": 775,
+      "mtime_ns": 1793458682423040548
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AXLUSDT/ohlc/trades.csv.gz",
+      "bytes": 2216,
+      "mtime_ns": 1793458684444938926
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AXLUSDT/olhc/trades.csv.gz",
+      "bytes": 2216,
+      "mtime_ns": 1793458684828674521
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AXSUSDT/ohlc/trades.csv.gz",
+      "bytes": 3601,
+      "mtime_ns": 1793458685870190286
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/AXSUSDT/olhc/trades.csv.gz",
+      "bytes": 3601,
+      "mtime_ns": 1793458686353221134
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/B2USDT/ohlc/trades.csv.gz",
+      "bytes": 1574,
+      "mtime_ns": 1793458684718939791
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/B2USDT/olhc/trades.csv.gz",
+      "bytes": 1621,
+      "mtime_ns": 1793458684779209521
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BABYUSDT/ohlc/trades.csv.gz",
+      "bytes": 922,
+      "mtime_ns": 1793458685591217017
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BABYUSDT/olhc/trades.csv.gz",
+      "bytes": 922,
+      "mtime_ns": 1793458685645628671
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BADGERUSDT/ohlc/trades.csv.gz",
+      "bytes": 1998,
+      "mtime_ns": 1793458687880307595
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BADGERUSDT/olhc/trades.csv.gz",
+      "bytes": 1998,
+      "mtime_ns": 1793458688110461993
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BAKEUSDT/ohlc/trades.csv.gz",
+      "bytes": 4561,
+      "mtime_ns": 1793458690025547408
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BAKEUSDT/olhc/trades.csv.gz",
+      "bytes": 4561,
+      "mtime_ns": 1793458690928715524
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BALUSDT/ohlc/trades.csv.gz",
+      "bytes": 1544,
+      "mtime_ns": 1793458690282442089
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BALUSDT/olhc/trades.csv.gz",
+      "bytes": 1544,
+      "mtime_ns": 1793458690354179345
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BANANAS31USDT/ohlc/trades.csv.gz",
+      "bytes": 775,
+      "mtime_ns": 1793458689141922407
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BANANAS31USDT/olhc/trades.csv.gz",
+      "bytes": 775,
+      "mtime_ns": 1793458689509614991
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BANANAUSDT/ohlc/trades.csv.gz",
+      "bytes": 1168,
+      "mtime_ns": 1793458690741489629
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BANANAUSDT/olhc/trades.csv.gz",
+      "bytes": 1202,
+      "mtime_ns": 1793458690802986991
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BANDUSDT/ohlc/trades.csv.gz",
+      "bytes": 4555,
+      "mtime_ns": 1793458694431469090
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BANDUSDT/olhc/trades.csv.gz",
+      "bytes": 4555,
+      "mtime_ns": 1793458694845325238
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BANKUSDT/ohlc/trades.csv.gz",
+      "bytes": 754,
+      "mtime_ns": 1793458693403725906
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BANKUSDT/olhc/trades.csv.gz",
+      "bytes": 754,
+      "mtime_ns": 1793458693442612302
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BANUSDT/ohlc/trades.csv.gz",
+      "bytes": 956,
+      "mtime_ns": 1793458693863717243
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BANUSDT/olhc/trades.csv.gz",
+      "bytes": 956,
+      "mtime_ns": 1793458694093003470
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BASUSDT/ohlc/trades.csv.gz",
+      "bytes": 1151,
+      "mtime_ns": 1793458693680736290
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BASUSDT/olhc/trades.csv.gz",
+      "bytes": 1151,
+      "mtime_ns": 1793458693849736536
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BATUSDT/ohlc/trades.csv.gz",
+      "bytes": 5249,
+      "mtime_ns": 1793458699716122869
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BATUSDT/olhc/trades.csv.gz",
+      "bytes": 5249,
+      "mtime_ns": 1793458700435570277
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BBUSDT/ohlc/trades.csv.gz",
+      "bytes": 942,
+      "mtime_ns": 1793458697557723020
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BBUSDT/olhc/trades.csv.gz",
+      "bytes": 942,
+      "mtime_ns": 1793458697909262884
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BCHUSDT/ohlc/trades.csv.gz",
+      "bytes": 4427,
+      "mtime_ns": 1793458699885599952
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BCHUSDT/olhc/trades.csv.gz",
+      "bytes": 4427,
+      "mtime_ns": 1793458700407146276
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BEAMXUSDT/ohlc/trades.csv.gz",
+      "bytes": 3720,
+      "mtime_ns": 1793458699304270691
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BEAMXUSDT/olhc/trades.csv.gz",
+      "bytes": 3720,
+      "mtime_ns": 1793458699977558452
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BELUSDT/ohlc/trades.csv.gz",
+      "bytes": 1592,
+      "mtime_ns": 1793458701701252322
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BELUSDT/olhc/trades.csv.gz",
+      "bytes": 1592,
+      "mtime_ns": 1793458701790989809
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BERAUSDT/ohlc/trades.csv.gz",
+      "bytes": 1452,
+      "mtime_ns": 1793458703386022671
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BERAUSDT/olhc/trades.csv.gz",
+      "bytes": 1452,
+      "mtime_ns": 1793458703557603682
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BICOUSDT/ohlc/trades.csv.gz",
+      "bytes": 946,
+      "mtime_ns": 1793458704466009621
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BICOUSDT/olhc/trades.csv.gz",
+      "bytes": 946,
+      "mtime_ns": 1793458704518883974
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BIGTIMEUSDT/ohlc/trades.csv.gz",
+      "bytes": 2030,
+      "mtime_ns": 1793458704815249388
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BIGTIMEUSDT/olhc/trades.csv.gz",
+      "bytes": 2030,
+      "mtime_ns": 1793458705003253663
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BIOUSDT/ohlc/trades.csv.gz",
+      "bytes": 1546,
+      "mtime_ns": 1793458704539069802
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BIOUSDT/olhc/trades.csv.gz",
+      "bytes": 1546,
+      "mtime_ns": 1793458704608278126
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BIRBUSDT/ohlc/trades.csv.gz",
+      "bytes": 875,
+      "mtime_ns": 1793458705252383423
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BIRBUSDT/olhc/trades.csv.gz",
+      "bytes": 938,
+      "mtime_ns": 1793458705446843945
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BLUAIUSDT/ohlc/trades.csv.gz",
+      "bytes": 1494,
+      "mtime_ns": 1793458706879390057
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BLUAIUSDT/olhc/trades.csv.gz",
+      "bytes": 1494,
+      "mtime_ns": 1793458707058220986
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BLURUSDT/ohlc/trades.csv.gz",
+      "bytes": 4681,
+      "mtime_ns": 1793458708370731140
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BLURUSDT/olhc/trades.csv.gz",
+      "bytes": 4681,
+      "mtime_ns": 1793458709016787366
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BLZUSDT/ohlc/trades.csv.gz",
+      "bytes": 2621,
+      "mtime_ns": 1793458709263787113
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BLZUSDT/olhc/trades.csv.gz",
+      "bytes": 2621,
+      "mtime_ns": 1793458709322096665
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BMTUSDT/ohlc/trades.csv.gz",
+      "bytes": 1838,
+      "mtime_ns": 1793458707973929301
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BMTUSDT/olhc/trades.csv.gz",
+      "bytes": 1838,
+      "mtime_ns": 1793458708009430594
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BNTUSDT/ohlc/trades.csv.gz",
+      "bytes": 2237,
+      "mtime_ns": 1793458709527956254
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BNTUSDT/olhc/trades.csv.gz",
+      "bytes": 2237,
+      "mtime_ns": 1793458709803985173
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BNXUSDT/ohlc/trades.csv.gz",
+      "bytes": 802,
+      "mtime_ns": 1793458710301453355
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BNXUSDT/olhc/trades.csv.gz",
+      "bytes": 802,
+      "mtime_ns": 1793458710509735000
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BOMEUSDT/ohlc/trades.csv.gz",
+      "bytes": 953,
+      "mtime_ns": 1793458711938308255
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BOMEUSDT/olhc/trades.csv.gz",
+      "bytes": 953,
+      "mtime_ns": 1793458712114168709
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BONDUSDT/ohlc/trades.csv.gz",
+      "bytes": 1369,
+      "mtime_ns": 1793458711868855346
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BONDUSDT/olhc/trades.csv.gz",
+      "bytes": 1369,
+      "mtime_ns": 1793458712027873158
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BREVUSDT/ohlc/trades.csv.gz",
+      "bytes": 1595,
+      "mtime_ns": 1793458711862739268
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BREVUSDT/olhc/trades.csv.gz",
+      "bytes": 1595,
+      "mtime_ns": 1793458711901157370
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BROCCOLI714USDT/ohlc/trades.csv.gz",
+      "bytes": 946,
+      "mtime_ns": 1793458712373655697
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BROCCOLI714USDT/olhc/trades.csv.gz",
+      "bytes": 946,
+      "mtime_ns": 1793458712516425538
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BRUSDT/ohlc/trades.csv.gz",
+      "bytes": 769,
+      "mtime_ns": 1793458714310643199
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BRUSDT/olhc/trades.csv.gz",
+      "bytes": 769,
+      "mtime_ns": 1793458714347038830
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BSBUSDT/ohlc/trades.csv.gz",
+      "bytes": 926,
+      "mtime_ns": 1793458713947984686
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BSBUSDT/olhc/trades.csv.gz",
+      "bytes": 926,
+      "mtime_ns": 1793458714111984694
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BSVUSDT/ohlc/trades.csv.gz",
+      "bytes": 2736,
+      "mtime_ns": 1793458714664698370
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BSVUSDT/olhc/trades.csv.gz",
+      "bytes": 2736,
+      "mtime_ns": 1793458714716795093
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BSWUSDT/ohlc/trades.csv.gz",
+      "bytes": 725,
+      "mtime_ns": 1793458714526884515
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BSWUSDT/olhc/trades.csv.gz",
+      "bytes": 725,
+      "mtime_ns": 1793458714563844108
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BTRUSDT/ohlc/trades.csv.gz",
+      "bytes": 983,
+      "mtime_ns": 1793458715724176199
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BTRUSDT/olhc/trades.csv.gz",
+      "bytes": 983,
+      "mtime_ns": 1793458715746265246
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BULLAUSDT/ohlc/trades.csv.gz",
+      "bytes": 1587,
+      "mtime_ns": 1793458716069640944
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BULLAUSDT/olhc/trades.csv.gz",
+      "bytes": 1587,
+      "mtime_ns": 1793458716202300767
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BUSDT/ohlc/trades.csv.gz",
+      "bytes": 1994,
+      "mtime_ns": 1793458716496078833
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/BUSDT/olhc/trades.csv.gz",
+      "bytes": 1994,
+      "mtime_ns": 1793458716544283242
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/C98USDT/ohlc/trades.csv.gz",
+      "bytes": 3360,
+      "mtime_ns": 1793458718178216791
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/C98USDT/olhc/trades.csv.gz",
+      "bytes": 3360,
+      "mtime_ns": 1793458718449613474
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CAKEUSDT/ohlc/trades.csv.gz",
+      "bytes": 1587,
+      "mtime_ns": 1793458718378413763
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CAKEUSDT/olhc/trades.csv.gz",
+      "bytes": 1587,
+      "mtime_ns": 1793458718626682060
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CATIUSDT/ohlc/trades.csv.gz",
+      "bytes": 1642,
+      "mtime_ns": 1793458718491838056
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CATIUSDT/olhc/trades.csv.gz",
+      "bytes": 1642,
+      "mtime_ns": 1793458718719674358
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CELOUSDT/ohlc/trades.csv.gz",
+      "bytes": 2352,
+      "mtime_ns": 1793458719368296682
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CELOUSDT/olhc/trades.csv.gz",
+      "bytes": 2352,
+      "mtime_ns": 1793458719422602585
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CELRUSDT/ohlc/trades.csv.gz",
+      "bytes": 4542,
+      "mtime_ns": 1793458722638237917
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CELRUSDT/olhc/trades.csv.gz",
+      "bytes": 4542,
+      "mtime_ns": 1793458722883981991
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CETUSUSDT/ohlc/trades.csv.gz",
+      "bytes": 2067,
+      "mtime_ns": 1793458721609368477
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CETUSUSDT/olhc/trades.csv.gz",
+      "bytes": 2067,
+      "mtime_ns": 1793458721657240509
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CFXUSDT/ohlc/trades.csv.gz",
+      "bytes": 3597,
+      "mtime_ns": 1793458722428926391
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CFXUSDT/olhc/trades.csv.gz",
+      "bytes": 3597,
+      "mtime_ns": 1793458722657232904
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CGPTUSDT/ohlc/trades.csv.gz",
+      "bytes": 1643,
+      "mtime_ns": 1793458722138792223
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CGPTUSDT/olhc/trades.csv.gz",
+      "bytes": 1643,
+      "mtime_ns": 1793458722324455525
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CHESSUSDT/ohlc/trades.csv.gz",
+      "bytes": 946,
+      "mtime_ns": 1793458723339244758
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CHESSUSDT/olhc/trades.csv.gz",
+      "bytes": 946,
+      "mtime_ns": 1793458723363716944
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CHILLGUYUSDT/ohlc/trades.csv.gz",
+      "bytes": 1999,
+      "mtime_ns": 1793458724681504671
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CHILLGUYUSDT/olhc/trades.csv.gz",
+      "bytes": 1999,
+      "mtime_ns": 1793458724712250144
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CHRUSDT/ohlc/trades.csv.gz",
+      "bytes": 5445,
+      "mtime_ns": 1793458727130772068
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CHRUSDT/olhc/trades.csv.gz",
+      "bytes": 5445,
+      "mtime_ns": 1793458727674775609
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CHZUSDT/ohlc/trades.csv.gz",
+      "bytes": 2464,
+      "mtime_ns": 1793458727586511755
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CHZUSDT/olhc/trades.csv.gz",
+      "bytes": 2464,
+      "mtime_ns": 1793458727904358462
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CKBUSDT/ohlc/trades.csv.gz",
+      "bytes": 1780,
+      "mtime_ns": 1793458727328035148
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CKBUSDT/olhc/trades.csv.gz",
+      "bytes": 1828,
+      "mtime_ns": 1793458727603266854
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/COMBOUSDT/ohlc/trades.csv.gz",
+      "bytes": 958,
+      "mtime_ns": 1793458727084888506
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/COMBOUSDT/olhc/trades.csv.gz",
+      "bytes": 958,
+      "mtime_ns": 1793458727128969224
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/COMPUSDT/ohlc/trades.csv.gz",
+      "bytes": 3280,
+      "mtime_ns": 1793458731456420402
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/COMPUSDT/olhc/trades.csv.gz",
+      "bytes": 3280,
+      "mtime_ns": 1793458731770066960
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/COOKIEUSDT/ohlc/trades.csv.gz",
+      "bytes": 1906,
+      "mtime_ns": 1793458730761313138
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/COOKIEUSDT/olhc/trades.csv.gz",
+      "bytes": 1906,
+      "mtime_ns": 1793458730943794255
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/COSUSDT/ohlc/trades.csv.gz",
+      "bytes": 1914,
+      "mtime_ns": 1793458730786174076
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/COSUSDT/olhc/trades.csv.gz",
+      "bytes": 1914,
+      "mtime_ns": 1793458730830236086
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/COTIUSDT/ohlc/trades.csv.gz",
+      "bytes": 2240,
+      "mtime_ns": 1793458731921509727
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/COTIUSDT/olhc/trades.csv.gz",
+      "bytes": 2240,
+      "mtime_ns": 1793458732158395499
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/COWUSDT/ohlc/trades.csv.gz",
+      "bytes": 2098,
+      "mtime_ns": 1793458733190021289
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/COWUSDT/olhc/trades.csv.gz",
+      "bytes": 2098,
+      "mtime_ns": 1793458733380608746
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CROSSUSDT/ohlc/trades.csv.gz",
+      "bytes": 1557,
+      "mtime_ns": 1793458732946447811
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CROSSUSDT/olhc/trades.csv.gz",
+      "bytes": 1515,
+      "mtime_ns": 1793458732983856823
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CRVUSDT/ohlc/trades.csv.gz",
+      "bytes": 3713,
+      "mtime_ns": 1793458736086051028
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CRVUSDT/olhc/trades.csv.gz",
+      "bytes": 3713,
+      "mtime_ns": 1793458736493628514
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CTKUSDT/ohlc/trades.csv.gz",
+      "bytes": 1671,
+      "mtime_ns": 1793458734144694000
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CTKUSDT/olhc/trades.csv.gz",
+      "bytes": 1671,
+      "mtime_ns": 1793458734300459002
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CTSIUSDT/ohlc/trades.csv.gz",
+      "bytes": 2933,
+      "mtime_ns": 1793458736727308642
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CTSIUSDT/olhc/trades.csv.gz",
+      "bytes": 2933,
+      "mtime_ns": 1793458737030246094
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CUDISUSDT/ohlc/trades.csv.gz",
+      "bytes": 946,
+      "mtime_ns": 1793458735672112463
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CUDISUSDT/olhc/trades.csv.gz",
+      "bytes": 946,
+      "mtime_ns": 1793458735806329462
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CUSDT/ohlc/trades.csv.gz",
+      "bytes": 1608,
+      "mtime_ns": 1793458736184260399
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CUSDT/olhc/trades.csv.gz",
+      "bytes": 1608,
+      "mtime_ns": 1793458736525282201
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CVXUSDT/ohlc/trades.csv.gz",
+      "bytes": 980,
+      "mtime_ns": 1793458737411907303
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CVXUSDT/olhc/trades.csv.gz",
+      "bytes": 980,
+      "mtime_ns": 1793458737445872670
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CYBERUSDT/ohlc/trades.csv.gz",
+      "bytes": 2161,
+      "mtime_ns": 1793458739892336217
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CYBERUSDT/olhc/trades.csv.gz",
+      "bytes": 2161,
+      "mtime_ns": 1793458740126045303
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CYSUSDT/ohlc/trades.csv.gz",
+      "bytes": 992,
+      "mtime_ns": 1793458739087532473
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/CYSUSDT/olhc/trades.csv.gz",
+      "bytes": 992,
+      "mtime_ns": 1793458739179858058
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DARUSDT/ohlc/trades.csv.gz",
+      "bytes": 1468,
+      "mtime_ns": 1793458740166920169
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DARUSDT/olhc/trades.csv.gz",
+      "bytes": 1468,
+      "mtime_ns": 1793458740213792404
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DASHUSDT/ohlc/trades.csv.gz",
+      "bytes": 4732,
+      "mtime_ns": 1793458741659412634
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DASHUSDT/olhc/trades.csv.gz",
+      "bytes": 4732,
+      "mtime_ns": 1793458742144361660
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DEEPUSDT/ohlc/trades.csv.gz",
+      "bytes": 1522,
+      "mtime_ns": 1793458741014304123
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DEEPUSDT/olhc/trades.csv.gz",
+      "bytes": 1522,
+      "mtime_ns": 1793458741144208222
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DEGENUSDT/ohlc/trades.csv.gz",
+      "bytes": 3040,
+      "mtime_ns": 1793458742157805989
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DEGENUSDT/olhc/trades.csv.gz",
+      "bytes": 3040,
+      "mtime_ns": 1793458742342532870
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DEGOUSDT/ohlc/trades.csv.gz",
+      "bytes": 864,
+      "mtime_ns": 1793458742092308020
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DEGOUSDT/olhc/trades.csv.gz",
+      "bytes": 864,
+      "mtime_ns": 1793458742134142391
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DENTUSDT/ohlc/trades.csv.gz",
+      "bytes": 2645,
+      "mtime_ns": 1793458744618495313
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DENTUSDT/olhc/trades.csv.gz",
+      "bytes": 2645,
+      "mtime_ns": 1793458744775720838
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DFUSDT/ohlc/trades.csv.gz",
+      "bytes": 441,
+      "mtime_ns": 1793458744842394213
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DFUSDT/olhc/trades.csv.gz",
+      "bytes": 441,
+      "mtime_ns": 1793458744867995206
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DGBUSDT/ohlc/trades.csv.gz",
+      "bytes": 1663,
+      "mtime_ns": 1793458746002190565
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DGBUSDT/olhc/trades.csv.gz",
+      "bytes": 1663,
+      "mtime_ns": 1793458746278502572
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DIAUSDT/ohlc/trades.csv.gz",
+      "bytes": 2159,
+      "mtime_ns": 1793458745267804908
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DIAUSDT/olhc/trades.csv.gz",
+      "bytes": 2159,
+      "mtime_ns": 1793458745505054011
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DMCUSDT/ohlc/trades.csv.gz",
+      "bytes": 830,
+      "mtime_ns": 1793458746599033104
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DMCUSDT/olhc/trades.csv.gz",
+      "bytes": 830,
+      "mtime_ns": 1793458746623591506
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DODOXUSDT/ohlc/trades.csv.gz",
+      "bytes": 4592,
+      "mtime_ns": 1793458747355531626
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DODOXUSDT/olhc/trades.csv.gz",
+      "bytes": 4592,
+      "mtime_ns": 1793458747426903485
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DOGSUSDT/ohlc/trades.csv.gz",
+      "bytes": 2602,
+      "mtime_ns": 1793458747565081673
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DOGSUSDT/olhc/trades.csv.gz",
+      "bytes": 2602,
+      "mtime_ns": 1793458747767029756
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DOLOUSDT/ohlc/trades.csv.gz",
+      "bytes": 1370,
+      "mtime_ns": 1793458748002325628
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DOLOUSDT/olhc/trades.csv.gz",
+      "bytes": 1375,
+      "mtime_ns": 1793458748183735789
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DOODUSDT/ohlc/trades.csv.gz",
+      "bytes": 904,
+      "mtime_ns": 1793458748375468555
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DOODUSDT/olhc/trades.csv.gz",
+      "bytes": 904,
+      "mtime_ns": 1793458748548324455
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DOTUSDT/ohlc/trades.csv.gz",
+      "bytes": 3894,
+      "mtime_ns": 1793458751791221625
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DOTUSDT/olhc/trades.csv.gz",
+      "bytes": 3894,
+      "mtime_ns": 1793458752109600697
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DRIFTUSDT/ohlc/trades.csv.gz",
+      "bytes": 880,
+      "mtime_ns": 1793458750508157555
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DRIFTUSDT/olhc/trades.csv.gz",
+      "bytes": 880,
+      "mtime_ns": 1793458750528617639
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DUSDT/ohlc/trades.csv.gz",
+      "bytes": 892,
+      "mtime_ns": 1793458751078877639
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DUSDT/olhc/trades.csv.gz",
+      "bytes": 892,
+      "mtime_ns": 1793458751103094121
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DUSKUSDT/ohlc/trades.csv.gz",
+      "bytes": 4509,
+      "mtime_ns": 1793458752164626825
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DUSKUSDT/olhc/trades.csv.gz",
+      "bytes": 4509,
+      "mtime_ns": 1793458752469589563
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DYDXUSDT/ohlc/trades.csv.gz",
+      "bytes": 5213,
+      "mtime_ns": 1793458753702206081
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DYDXUSDT/olhc/trades.csv.gz",
+      "bytes": 5213,
+      "mtime_ns": 1793458754061257351
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DYMUSDT/ohlc/trades.csv.gz",
+      "bytes": 2826,
+      "mtime_ns": 1793458753220829522
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/DYMUSDT/olhc/trades.csv.gz",
+      "bytes": 2826,
+      "mtime_ns": 1793458753281430683
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/EDGEUSDT/ohlc/trades.csv.gz",
+      "bytes": 853,
+      "mtime_ns": 1793458753375857217
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/EDGEUSDT/olhc/trades.csv.gz",
+      "bytes": 853,
+      "mtime_ns": 1793458753408853918
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/EDUUSDT/ohlc/trades.csv.gz",
+      "bytes": 5145,
+      "mtime_ns": 1793458754743004956
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/EDUUSDT/olhc/trades.csv.gz",
+      "bytes": 5145,
+      "mtime_ns": 1793458755103470355
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/EGLDUSDT/ohlc/trades.csv.gz",
+      "bytes": 2226,
+      "mtime_ns": 1793458756362317326
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/EGLDUSDT/olhc/trades.csv.gz",
+      "bytes": 2226,
+      "mtime_ns": 1793458756405007793
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ELSAUSDT/ohlc/trades.csv.gz",
+      "bytes": 924,
+      "mtime_ns": 1793458755044075744
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ELSAUSDT/olhc/trades.csv.gz",
+      "bytes": 924,
+      "mtime_ns": 1793458755070093027
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ENAUSDT/ohlc/trades.csv.gz",
+      "bytes": 3160,
+      "mtime_ns": 1793458756233786255
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ENAUSDT/olhc/trades.csv.gz",
+      "bytes": 3160,
+      "mtime_ns": 1793458756462659934
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ENJUSDT/ohlc/trades.csv.gz",
+      "bytes": 3281,
+      "mtime_ns": 1793458759459155463
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ENJUSDT/olhc/trades.csv.gz",
+      "bytes": 3281,
+      "mtime_ns": 1793458759905615447
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ENSOUSDT/ohlc/trades.csv.gz",
+      "bytes": 2063,
+      "mtime_ns": 1793458757020318437
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ENSOUSDT/olhc/trades.csv.gz",
+      "bytes": 2063,
+      "mtime_ns": 1793458757185142809
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ENSUSDT/ohlc/trades.csv.gz",
+      "bytes": 3863,
+      "mtime_ns": 1793458759660724720
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ENSUSDT/olhc/trades.csv.gz",
+      "bytes": 3863,
+      "mtime_ns": 1793458759892190575
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/EPICUSDT/ohlc/trades.csv.gz",
+      "bytes": 1556,
+      "mtime_ns": 1793458758983565970
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/EPICUSDT/olhc/trades.csv.gz",
+      "bytes": 1556,
+      "mtime_ns": 1793458759032762017
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ESPORTSUSDT/ohlc/trades.csv.gz",
+      "bytes": 1543,
+      "mtime_ns": 1793458759270243991
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ESPORTSUSDT/olhc/trades.csv.gz",
+      "bytes": 1504,
+      "mtime_ns": 1793458759469225774
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ESPUSDT/ohlc/trades.csv.gz",
+      "bytes": 1536,
+      "mtime_ns": 1793458760402238813
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ESPUSDT/olhc/trades.csv.gz",
+      "bytes": 1536,
+      "mtime_ns": 1793458760517526883
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ETCUSDT/ohlc/trades.csv.gz",
+      "bytes": 2689,
+      "mtime_ns": 1793458764941534742
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ETCUSDT/olhc/trades.csv.gz",
+      "bytes": 2689,
+      "mtime_ns": 1793458765344591947
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ETHFIUSDT/ohlc/trades.csv.gz",
+      "bytes": 3284,
+      "mtime_ns": 1793458763138855891
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ETHFIUSDT/olhc/trades.csv.gz",
+      "bytes": 3284,
+      "mtime_ns": 1793458763242080093
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ETHWUSDT/ohlc/trades.csv.gz",
+      "bytes": 918,
+      "mtime_ns": 1793458764488441526
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ETHWUSDT/olhc/trades.csv.gz",
+      "bytes": 918,
+      "mtime_ns": 1793458764694909180
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/EVAAUSDT/ohlc/trades.csv.gz",
+      "bytes": 839,
+      "mtime_ns": 1793458764081903215
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/EVAAUSDT/olhc/trades.csv.gz",
+      "bytes": 839,
+      "mtime_ns": 1793458764111897769
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FARTCOINUSDT/ohlc/trades.csv.gz",
+      "bytes": 1561,
+      "mtime_ns": 1793458764853932050
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FARTCOINUSDT/olhc/trades.csv.gz",
+      "bytes": 1561,
+      "mtime_ns": 1793458764972455510
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FETUSDT/ohlc/trades.csv.gz",
+      "bytes": 1393,
+      "mtime_ns": 1793458766654433035
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FETUSDT/olhc/trades.csv.gz",
+      "bytes": 1393,
+      "mtime_ns": 1793458766691313880
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FFUSDT/ohlc/trades.csv.gz",
+      "bytes": 976,
+      "mtime_ns": 1793458766953127821
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FFUSDT/olhc/trades.csv.gz",
+      "bytes": 976,
+      "mtime_ns": 1793458767111762145
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FHEUSDT/ohlc/trades.csv.gz",
+      "bytes": 3059,
+      "mtime_ns": 1793458767201112387
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FHEUSDT/olhc/trades.csv.gz",
+      "bytes": 3059,
+      "mtime_ns": 1793458767477790499
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FIDAUSDT/ohlc/trades.csv.gz",
+      "bytes": 1650,
+      "mtime_ns": 1793458767408197791
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FIDAUSDT/olhc/trades.csv.gz",
+      "bytes": 1650,
+      "mtime_ns": 1793458767602210075
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FIGHTUSDT/ohlc/trades.csv.gz",
+      "bytes": 989,
+      "mtime_ns": 1793458767951290495
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FIGHTUSDT/olhc/trades.csv.gz",
+      "bytes": 989,
+      "mtime_ns": 1793458767978675867
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FILUSDT/ohlc/trades.csv.gz",
+      "bytes": 2106,
+      "mtime_ns": 1793458771441679648
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FILUSDT/olhc/trades.csv.gz",
+      "bytes": 2106,
+      "mtime_ns": 1793458771785075735
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FIOUSDT/ohlc/trades.csv.gz",
+      "bytes": 1471,
+      "mtime_ns": 1793458770441588522
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FIOUSDT/olhc/trades.csv.gz",
+      "bytes": 1471,
+      "mtime_ns": 1793458770471583742
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FLMUSDT/ohlc/trades.csv.gz",
+      "bytes": 3312,
+      "mtime_ns": 1793458772086527823
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FLMUSDT/olhc/trades.csv.gz",
+      "bytes": 3312,
+      "mtime_ns": 1793458772714002308
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FLOCKUSDT/ohlc/trades.csv.gz",
+      "bytes": 2022,
+      "mtime_ns": 1793458770995187155
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FLOCKUSDT/olhc/trades.csv.gz",
+      "bytes": 2022,
+      "mtime_ns": 1793458771249272043
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FLOWUSDT/ohlc/trades.csv.gz",
+      "bytes": 6745,
+      "mtime_ns": 1793458774269247686
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FLOWUSDT/olhc/trades.csv.gz",
+      "bytes": 6745,
+      "mtime_ns": 1793458775040602231
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FLUIDUSDT/ohlc/trades.csv.gz",
+      "bytes": 881,
+      "mtime_ns": 1793458773004373369
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FLUIDUSDT/olhc/trades.csv.gz",
+      "bytes": 881,
+      "mtime_ns": 1793458773171645240
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FLUXUSDT/ohlc/trades.csv.gz",
+      "bytes": 3616,
+      "mtime_ns": 1793458774040896787
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FLUXUSDT/olhc/trades.csv.gz",
+      "bytes": 3616,
+      "mtime_ns": 1793458774261940934
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FOGOUSDT/ohlc/trades.csv.gz",
+      "bytes": 1494,
+      "mtime_ns": 1793458774308368669
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FOGOUSDT/olhc/trades.csv.gz",
+      "bytes": 1494,
+      "mtime_ns": 1793458774497611253
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FOLKSUSDT/ohlc/trades.csv.gz",
+      "bytes": 1920,
+      "mtime_ns": 1793458774876212212
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FOLKSUSDT/olhc/trades.csv.gz",
+      "bytes": 1920,
+      "mtime_ns": 1793458775102092472
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FORMUSDT/ohlc/trades.csv.gz",
+      "bytes": 2067,
+      "mtime_ns": 1793458775935417674
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FORMUSDT/olhc/trades.csv.gz",
+      "bytes": 2145,
+      "mtime_ns": 1793458776160141885
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FORTHUSDT/ohlc/trades.csv.gz",
+      "bytes": 2255,
+      "mtime_ns": 1793458776047635008
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FORTHUSDT/olhc/trades.csv.gz",
+      "bytes": 2255,
+      "mtime_ns": 1793458776278858798
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FRAXUSDT/ohlc/trades.csv.gz",
+      "bytes": 1628,
+      "mtime_ns": 1793458776627513328
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FRAXUSDT/olhc/trades.csv.gz",
+      "bytes": 1628,
+      "mtime_ns": 1793458776730532273
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FTMUSDT/ohlc/trades.csv.gz",
+      "bytes": 1787,
+      "mtime_ns": 1793458778325882036
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FTMUSDT/olhc/trades.csv.gz",
+      "bytes": 1787,
+      "mtime_ns": 1793458778801679776
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FUSDT/ohlc/trades.csv.gz",
+      "bytes": 1520,
+      "mtime_ns": 1793458777813262661
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FUSDT/olhc/trades.csv.gz",
+      "bytes": 1520,
+      "mtime_ns": 1793458777853890194
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FXSUSDT/ohlc/trades.csv.gz",
+      "bytes": 1674,
+      "mtime_ns": 1793458778901958830
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/FXSUSDT/olhc/trades.csv.gz",
+      "bytes": 1674,
+      "mtime_ns": 1793458779177811800
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GALAUSDT/ohlc/trades.csv.gz",
+      "bytes": 981,
+      "mtime_ns": 1793458779649383514
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GALAUSDT/olhc/trades.csv.gz",
+      "bytes": 981,
+      "mtime_ns": 1793458779696830379
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GASUSDT/ohlc/trades.csv.gz",
+      "bytes": 3264,
+      "mtime_ns": 1793458780097080085
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GASUSDT/olhc/trades.csv.gz",
+      "bytes": 3264,
+      "mtime_ns": 1793458780602524916
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GHSTUSDT/ohlc/trades.csv.gz",
+      "bytes": 2757,
+      "mtime_ns": 1793458781003131792
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GHSTUSDT/olhc/trades.csv.gz",
+      "bytes": 2757,
+      "mtime_ns": 1793458781303012444
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GIGGLEUSDT/ohlc/trades.csv.gz",
+      "bytes": 746,
+      "mtime_ns": 1793458780526818217
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GIGGLEUSDT/olhc/trades.csv.gz",
+      "bytes": 746,
+      "mtime_ns": 1793458780648455605
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GLMRUSDT/ohlc/trades.csv.gz",
+      "bytes": 633,
+      "mtime_ns": 1793458782000687288
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GLMRUSDT/olhc/trades.csv.gz",
+      "bytes": 633,
+      "mtime_ns": 1793458782182461824
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GLMUSDT/ohlc/trades.csv.gz",
+      "bytes": 795,
+      "mtime_ns": 1793458783481633397
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GLMUSDT/olhc/trades.csv.gz",
+      "bytes": 795,
+      "mtime_ns": 1793458783530500478
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GMTUSDT/ohlc/trades.csv.gz",
+      "bytes": 993,
+      "mtime_ns": 1793458784384955289
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GMTUSDT/olhc/trades.csv.gz",
+      "bytes": 993,
+      "mtime_ns": 1793458784441791750
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GMXUSDT/ohlc/trades.csv.gz",
+      "bytes": 1784,
+      "mtime_ns": 1793458785006271510
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GMXUSDT/olhc/trades.csv.gz",
+      "bytes": 1784,
+      "mtime_ns": 1793458785527098844
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GOATUSDT/ohlc/trades.csv.gz",
+      "bytes": 1802,
+      "mtime_ns": 1793458784195455542
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GOATUSDT/olhc/trades.csv.gz",
+      "bytes": 1802,
+      "mtime_ns": 1793458784257548618
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GPSUSDT/ohlc/trades.csv.gz",
+      "bytes": 1766,
+      "mtime_ns": 1793458785251300127
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GPSUSDT/olhc/trades.csv.gz",
+      "bytes": 1768,
+      "mtime_ns": 1793458785307623211
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GRASSUSDT/ohlc/trades.csv.gz",
+      "bytes": 1553,
+      "mtime_ns": 1793458786199827243
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GRASSUSDT/olhc/trades.csv.gz",
+      "bytes": 1553,
+      "mtime_ns": 1793458786533574218
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GRIFFAINUSDT/ohlc/trades.csv.gz",
+      "bytes": 1624,
+      "mtime_ns": 1793458786275402357
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GRIFFAINUSDT/olhc/trades.csv.gz",
+      "bytes": 1624,
+      "mtime_ns": 1793458786506732101
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GRTUSDT/ohlc/trades.csv.gz",
+      "bytes": 2859,
+      "mtime_ns": 1793458788824523607
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GRTUSDT/olhc/trades.csv.gz",
+      "bytes": 2859,
+      "mtime_ns": 1793458788886845893
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GTCUSDT/ohlc/trades.csv.gz",
+      "bytes": 2238,
+      "mtime_ns": 1793458789117021421
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GTCUSDT/olhc/trades.csv.gz",
+      "bytes": 2238,
+      "mtime_ns": 1793458789483378463
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GUAUSDT/ohlc/trades.csv.gz",
+      "bytes": 1576,
+      "mtime_ns": 1793458788433108875
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GUAUSDT/olhc/trades.csv.gz",
+      "bytes": 1576,
+      "mtime_ns": 1793458788746436645
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GUNUSDT/ohlc/trades.csv.gz",
+      "bytes": 1426,
+      "mtime_ns": 1793458788387617356
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GUNUSDT/olhc/trades.csv.gz",
+      "bytes": 1426,
+      "mtime_ns": 1793458788430454859
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GUSDT/ohlc/trades.csv.gz",
+      "bytes": 1940,
+      "mtime_ns": 1793458790080942289
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GUSDT/olhc/trades.csv.gz",
+      "bytes": 1940,
+      "mtime_ns": 1793458790131586463
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GWEIUSDT/ohlc/trades.csv.gz",
+      "bytes": 830,
+      "mtime_ns": 1793458789934614590
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/GWEIUSDT/olhc/trades.csv.gz",
+      "bytes": 830,
+      "mtime_ns": 1793458790032471711
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HANAUSDT/ohlc/trades.csv.gz",
+      "bytes": 812,
+      "mtime_ns": 1793458790316508224
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HANAUSDT/olhc/trades.csv.gz",
+      "bytes": 812,
+      "mtime_ns": 1793458790429254932
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HBARUSDT/ohlc/trades.csv.gz",
+      "bytes": 2952,
+      "mtime_ns": 1793458793586752099
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HBARUSDT/olhc/trades.csv.gz",
+      "bytes": 2952,
+      "mtime_ns": 1793458793924213886
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HEMIUSDT/ohlc/trades.csv.gz",
+      "bytes": 1504,
+      "mtime_ns": 1793458792123119197
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HEMIUSDT/olhc/trades.csv.gz",
+      "bytes": 1504,
+      "mtime_ns": 1793458792224083169
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HFTUSDT/ohlc/trades.csv.gz",
+      "bytes": 951,
+      "mtime_ns": 1793458793657691019
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HFTUSDT/olhc/trades.csv.gz",
+      "bytes": 951,
+      "mtime_ns": 1793458793695309283
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HIFIUSDT/ohlc/trades.csv.gz",
+      "bytes": 2166,
+      "mtime_ns": 1793458793921822705
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HIFIUSDT/olhc/trades.csv.gz",
+      "bytes": 2224,
+      "mtime_ns": 1793458794129803184
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HIGHUSDT/ohlc/trades.csv.gz",
+      "bytes": 3477,
+      "mtime_ns": 1793458794338134833
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HIGHUSDT/olhc/trades.csv.gz",
+      "bytes": 3477,
+      "mtime_ns": 1793458794399517237
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HIVEUSDT/ohlc/trades.csv.gz",
+      "bytes": 960,
+      "mtime_ns": 1793458795392080185
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HIVEUSDT/olhc/trades.csv.gz",
+      "bytes": 960,
+      "mtime_ns": 1793458795415612835
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HMSTRUSDT/ohlc/trades.csv.gz",
+      "bytes": 2365,
+      "mtime_ns": 1793458795954981757
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HMSTRUSDT/olhc/trades.csv.gz",
+      "bytes": 2365,
+      "mtime_ns": 1793458796097719212
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HOMEUSDT/ohlc/trades.csv.gz",
+      "bytes": 1642,
+      "mtime_ns": 1793458796015607414
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HOMEUSDT/olhc/trades.csv.gz",
+      "bytes": 1642,
+      "mtime_ns": 1793458796118224974
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HOOKUSDT/ohlc/trades.csv.gz",
+      "bytes": 2423,
+      "mtime_ns": 1793458796699932865
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HOOKUSDT/olhc/trades.csv.gz",
+      "bytes": 2423,
+      "mtime_ns": 1793458796948353040
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HOTUSDT/ohlc/trades.csv.gz",
+      "bytes": 4323,
+      "mtime_ns": 1793458798585251371
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HOTUSDT/olhc/trades.csv.gz",
+      "bytes": 4341,
+      "mtime_ns": 1793458798908581030
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HUMAUSDT/ohlc/trades.csv.gz",
+      "bytes": 1493,
+      "mtime_ns": 1793458797846216897
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HUMAUSDT/olhc/trades.csv.gz",
+      "bytes": 1493,
+      "mtime_ns": 1793458797886999635
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HUSDT/ohlc/trades.csv.gz",
+      "bytes": 954,
+      "mtime_ns": 1793458797778915157
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HUSDT/olhc/trades.csv.gz",
+      "bytes": 954,
+      "mtime_ns": 1793458797817388092
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HYPERUSDT/ohlc/trades.csv.gz",
+      "bytes": 887,
+      "mtime_ns": 1793458798323483481
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/HYPERUSDT/olhc/trades.csv.gz",
+      "bytes": 887,
+      "mtime_ns": 1793458798468721429
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ICNTUSDT/ohlc/trades.csv.gz",
+      "bytes": 899,
+      "mtime_ns": 1793458799423737539
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ICNTUSDT/olhc/trades.csv.gz",
+      "bytes": 899,
+      "mtime_ns": 1793458799532701116
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ICPUSDT/ohlc/trades.csv.gz",
+      "bytes": 3251,
+      "mtime_ns": 1793458801697820928
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ICPUSDT/olhc/trades.csv.gz",
+      "bytes": 3251,
+      "mtime_ns": 1793458801934846542
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ICXUSDT/ohlc/trades.csv.gz",
+      "bytes": 1993,
+      "mtime_ns": 1793458802227454270
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ICXUSDT/olhc/trades.csv.gz",
+      "bytes": 1993,
+      "mtime_ns": 1793458802471800755
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IDEXUSDT/ohlc/trades.csv.gz",
+      "bytes": 978,
+      "mtime_ns": 1793458801735624744
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IDEXUSDT/olhc/trades.csv.gz",
+      "bytes": 978,
+      "mtime_ns": 1793458801923132524
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IDOLUSDT/ohlc/trades.csv.gz",
+      "bytes": 3856,
+      "mtime_ns": 1793458801670468998
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IDOLUSDT/olhc/trades.csv.gz",
+      "bytes": 3856,
+      "mtime_ns": 1793458801928379759
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IDUSDT/ohlc/trades.csv.gz",
+      "bytes": 1420,
+      "mtime_ns": 1793458805328321925
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IDUSDT/olhc/trades.csv.gz",
+      "bytes": 1420,
+      "mtime_ns": 1793458805512509927
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ILVUSDT/ohlc/trades.csv.gz",
+      "bytes": 3124,
+      "mtime_ns": 1793458805360292841
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ILVUSDT/olhc/trades.csv.gz",
+      "bytes": 3124,
+      "mtime_ns": 1793458805705457563
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IMXUSDT/ohlc/trades.csv.gz",
+      "bytes": 3516,
+      "mtime_ns": 1793458805587919405
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IMXUSDT/olhc/trades.csv.gz",
+      "bytes": 3516,
+      "mtime_ns": 1793458805902788723
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/INITUSDT/ohlc/trades.csv.gz",
+      "bytes": 1897,
+      "mtime_ns": 1793458805111370464
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/INITUSDT/olhc/trades.csv.gz",
+      "bytes": 1897,
+      "mtime_ns": 1793458805274558729
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/INJUSDT/ohlc/trades.csv.gz",
+      "bytes": 2666,
+      "mtime_ns": 1793458808080160687
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/INJUSDT/olhc/trades.csv.gz",
+      "bytes": 2666,
+      "mtime_ns": 1793458808231338075
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/INXUSDT/ohlc/trades.csv.gz",
+      "bytes": 1465,
+      "mtime_ns": 1793458806903283987
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/INXUSDT/olhc/trades.csv.gz",
+      "bytes": 1465,
+      "mtime_ns": 1793458807042239346
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IOSTUSDT/ohlc/trades.csv.gz",
+      "bytes": 2818,
+      "mtime_ns": 1793458810581877618
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IOSTUSDT/olhc/trades.csv.gz",
+      "bytes": 2866,
+      "mtime_ns": 1793458810901669019
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IOTAUSDT/ohlc/trades.csv.gz",
+      "bytes": 2660,
+      "mtime_ns": 1793458810447599557
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IOTAUSDT/olhc/trades.csv.gz",
+      "bytes": 2660,
+      "mtime_ns": 1793458810696560407
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IOTXUSDT/ohlc/trades.csv.gz",
+      "bytes": 4477,
+      "mtime_ns": 1793458810912066742
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IOTXUSDT/olhc/trades.csv.gz",
+      "bytes": 4477,
+      "mtime_ns": 1793458811196217950
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IOUSDT/ohlc/trades.csv.gz",
+      "bytes": 973,
+      "mtime_ns": 1793458810269584431
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IOUSDT/olhc/trades.csv.gz",
+      "bytes": 973,
+      "mtime_ns": 1793458810301285435
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IPUSDT/ohlc/trades.csv.gz",
+      "bytes": 1370,
+      "mtime_ns": 1793458811577370187
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IPUSDT/olhc/trades.csv.gz",
+      "bytes": 1370,
+      "mtime_ns": 1793458811613642051
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IRYSUSDT/ohlc/trades.csv.gz",
+      "bytes": 798,
+      "mtime_ns": 1793458811774544679
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/IRYSUSDT/olhc/trades.csv.gz",
+      "bytes": 746,
+      "mtime_ns": 1793458811804811969
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/JASMYUSDT/ohlc/trades.csv.gz",
+      "bytes": 3268,
+      "mtime_ns": 1793458814194554023
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/JASMYUSDT/olhc/trades.csv.gz",
+      "bytes": 3268,
+      "mtime_ns": 1793458814406283522
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/JOEUSDT/ohlc/trades.csv.gz",
+      "bytes": 1623,
+      "mtime_ns": 1793458814112876449
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/JOEUSDT/olhc/trades.csv.gz",
+      "bytes": 1623,
+      "mtime_ns": 1793458814142145360
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/JSTUSDT/ohlc/trades.csv.gz",
+      "bytes": 954,
+      "mtime_ns": 1793458813921213477
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/JSTUSDT/olhc/trades.csv.gz",
+      "bytes": 954,
+      "mtime_ns": 1793458813951039641
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/JTOUSDT/ohlc/trades.csv.gz",
+      "bytes": 2228,
+      "mtime_ns": 1793458814213196668
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/JTOUSDT/olhc/trades.csv.gz",
+      "bytes": 2228,
+      "mtime_ns": 1793458814368529940
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/JUPUSDT/ohlc/trades.csv.gz",
+      "bytes": 1462,
+      "mtime_ns": 1793458815979273441
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/JUPUSDT/olhc/trades.csv.gz",
+      "bytes": 1462,
+      "mtime_ns": 1793458816118825091
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KAITOUSDT/ohlc/trades.csv.gz",
+      "bytes": 985,
+      "mtime_ns": 1793458816159700109
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KAITOUSDT/olhc/trades.csv.gz",
+      "bytes": 985,
+      "mtime_ns": 1793458816262072386
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KASUSDT/ohlc/trades.csv.gz",
+      "bytes": 2886,
+      "mtime_ns": 1793458816902362034
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KASUSDT/olhc/trades.csv.gz",
+      "bytes": 2886,
+      "mtime_ns": 1793458817323164297
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KATUSDT/ohlc/trades.csv.gz",
+      "bytes": 961,
+      "mtime_ns": 1793458815781020465
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KATUSDT/olhc/trades.csv.gz",
+      "bytes": 961,
+      "mtime_ns": 1793458815799671568
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KAVAUSDT/ohlc/trades.csv.gz",
+      "bytes": 2817,
+      "mtime_ns": 1793458819018197704
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KAVAUSDT/olhc/trades.csv.gz",
+      "bytes": 2817,
+      "mtime_ns": 1793458819289098766
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KDAUSDT/ohlc/trades.csv.gz",
+      "bytes": 926,
+      "mtime_ns": 1793458817996480061
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KDAUSDT/olhc/trades.csv.gz",
+      "bytes": 926,
+      "mtime_ns": 1793458818110059780
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KERNELUSDT/ohlc/trades.csv.gz",
+      "bytes": 1600,
+      "mtime_ns": 1793458818115922688
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KERNELUSDT/olhc/trades.csv.gz",
+      "bytes": 1630,
+      "mtime_ns": 1793458818172675130
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KEYUSDT/ohlc/trades.csv.gz",
+      "bytes": 1557,
+      "mtime_ns": 1793458819051549932
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KEYUSDT/olhc/trades.csv.gz",
+      "bytes": 1557,
+      "mtime_ns": 1793458819211800624
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KGENUSDT/ohlc/trades.csv.gz",
+      "bytes": 1960,
+      "mtime_ns": 1793458819514701533
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KGENUSDT/olhc/trades.csv.gz",
+      "bytes": 1960,
+      "mtime_ns": 1793458819711368057
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KITEUSDT/ohlc/trades.csv.gz",
+      "bytes": 947,
+      "mtime_ns": 1793458819379683608
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KITEUSDT/olhc/trades.csv.gz",
+      "bytes": 947,
+      "mtime_ns": 1793458819408644270
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KLAYUSDT/ohlc/trades.csv.gz",
+      "bytes": 1810,
+      "mtime_ns": 1793458822029869522
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KLAYUSDT/olhc/trades.csv.gz",
+      "bytes": 1810,
+      "mtime_ns": 1793458822149114113
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KMNOUSDT/ohlc/trades.csv.gz",
+      "bytes": 911,
+      "mtime_ns": 1793458822045352318
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KMNOUSDT/olhc/trades.csv.gz",
+      "bytes": 911,
+      "mtime_ns": 1793458822081540106
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KNCUSDT/ohlc/trades.csv.gz",
+      "bytes": 3187,
+      "mtime_ns": 1793458823900786559
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KNCUSDT/olhc/trades.csv.gz",
+      "bytes": 3187,
+      "mtime_ns": 1793458824159613741
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KOMAUSDT/ohlc/trades.csv.gz",
+      "bytes": 1500,
+      "mtime_ns": 1793458822488883163
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KOMAUSDT/olhc/trades.csv.gz",
+      "bytes": 1500,
+      "mtime_ns": 1793458822567769028
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KSMUSDT/ohlc/trades.csv.gz",
+      "bytes": 2973,
+      "mtime_ns": 1793458824626939736
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/KSMUSDT/olhc/trades.csv.gz",
+      "bytes": 2973,
+      "mtime_ns": 1793458824874350314
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LAUSDT/ohlc/trades.csv.gz",
+      "bytes": 995,
+      "mtime_ns": 1793458823587614360
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LAUSDT/olhc/trades.csv.gz",
+      "bytes": 995,
+      "mtime_ns": 1793458823605551921
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LAYERUSDT/ohlc/trades.csv.gz",
+      "bytes": 942,
+      "mtime_ns": 1793458823888137737
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LAYERUSDT/olhc/trades.csv.gz",
+      "bytes": 942,
+      "mtime_ns": 1793458823904284121
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LDOUSDT/ohlc/trades.csv.gz",
+      "bytes": 2217,
+      "mtime_ns": 1793458825716176577
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LDOUSDT/olhc/trades.csv.gz",
+      "bytes": 2217,
+      "mtime_ns": 1793458825748260468
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LIGHTUSDT/ohlc/trades.csv.gz",
+      "bytes": 1834,
+      "mtime_ns": 1793458825669865520
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LIGHTUSDT/olhc/trades.csv.gz",
+      "bytes": 1834,
+      "mtime_ns": 1793458825786295186
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LINAUSDT/ohlc/trades.csv.gz",
+      "bytes": 2472,
+      "mtime_ns": 1793458827048383239
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LINAUSDT/olhc/trades.csv.gz",
+      "bytes": 2472,
+      "mtime_ns": 1793458827260765705
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LINKUSDT/ohlc/trades.csv.gz",
+      "bytes": 4872,
+      "mtime_ns": 1793458828244085761
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LINKUSDT/olhc/trades.csv.gz",
+      "bytes": 4872,
+      "mtime_ns": 1793458828575763416
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LITUSDT/ohlc/trades.csv.gz",
+      "bytes": 1575,
+      "mtime_ns": 1793458827476926485
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LITUSDT/olhc/trades.csv.gz",
+      "bytes": 1575,
+      "mtime_ns": 1793458827499969075
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LOKAUSDT/ohlc/trades.csv.gz",
+      "bytes": 1652,
+      "mtime_ns": 1793458827585981319
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LOKAUSDT/olhc/trades.csv.gz",
+      "bytes": 1652,
+      "mtime_ns": 1793458827693658978
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LPTUSDT/ohlc/trades.csv.gz",
+      "bytes": 4142,
+      "mtime_ns": 1793458830019150383
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LPTUSDT/olhc/trades.csv.gz",
+      "bytes": 4142,
+      "mtime_ns": 1793458830198689167
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LQTYUSDT/ohlc/trades.csv.gz",
+      "bytes": 4100,
+      "mtime_ns": 1793458829946606299
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LQTYUSDT/olhc/trades.csv.gz",
+      "bytes": 4100,
+      "mtime_ns": 1793458830095117070
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LRCUSDT/ohlc/trades.csv.gz",
+      "bytes": 952,
+      "mtime_ns": 1793458830904351941
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LRCUSDT/olhc/trades.csv.gz",
+      "bytes": 952,
+      "mtime_ns": 1793458830931795474
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LSKUSDT/ohlc/trades.csv.gz",
+      "bytes": 2871,
+      "mtime_ns": 1793458830885943002
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LSKUSDT/olhc/trades.csv.gz",
+      "bytes": 2871,
+      "mtime_ns": 1793458831086227323
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LTCUSDT/ohlc/trades.csv.gz",
+      "bytes": 2327,
+      "mtime_ns": 1793458832977730078
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LTCUSDT/olhc/trades.csv.gz",
+      "bytes": 2327,
+      "mtime_ns": 1793458833181396463
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LUMIAUSDT/ohlc/trades.csv.gz",
+      "bytes": 1689,
+      "mtime_ns": 1793458831474539020
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LUMIAUSDT/olhc/trades.csv.gz",
+      "bytes": 1689,
+      "mtime_ns": 1793458831503530354
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LUNA2USDT/ohlc/trades.csv.gz",
+      "bytes": 5059,
+      "mtime_ns": 1793458833677008372
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LUNA2USDT/olhc/trades.csv.gz",
+      "bytes": 5059,
+      "mtime_ns": 1793458833981426134
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LYNUSDT/ohlc/trades.csv.gz",
+      "bytes": 993,
+      "mtime_ns": 1793458833059613301
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/LYNUSDT/olhc/trades.csv.gz",
+      "bytes": 993,
+      "mtime_ns": 1793458833077934324
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MAGICUSDT/ohlc/trades.csv.gz",
+      "bytes": 3662,
+      "mtime_ns": 1793458833727171037
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MAGICUSDT/olhc/trades.csv.gz",
+      "bytes": 3662,
+      "mtime_ns": 1793458833946778933
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MAGMAUSDT/ohlc/trades.csv.gz",
+      "bytes": 874,
+      "mtime_ns": 1793458833894189087
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MAGMAUSDT/olhc/trades.csv.gz",
+      "bytes": 874,
+      "mtime_ns": 1793458833989195679
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MANAUSDT/ohlc/trades.csv.gz",
+      "bytes": 5722,
+      "mtime_ns": 1793458835296753086
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MANAUSDT/olhc/trades.csv.gz",
+      "bytes": 5722,
+      "mtime_ns": 1793458835711108197
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MANTAUSDT/ohlc/trades.csv.gz",
+      "bytes": 2457,
+      "mtime_ns": 1793458835661967454
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MANTAUSDT/olhc/trades.csv.gz",
+      "bytes": 2457,
+      "mtime_ns": 1793458835810998027
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MANTRAUSDT/ohlc/trades.csv.gz",
+      "bytes": 1445,
+      "mtime_ns": 1793458835330732241
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MANTRAUSDT/olhc/trades.csv.gz",
+      "bytes": 1445,
+      "mtime_ns": 1793458835354340170
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MASKUSDT/ohlc/trades.csv.gz",
+      "bytes": 2697,
+      "mtime_ns": 1793458836268255929
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MASKUSDT/olhc/trades.csv.gz",
+      "bytes": 2697,
+      "mtime_ns": 1793458836313348857
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MAVIAUSDT/ohlc/trades.csv.gz",
+      "bytes": 1018,
+      "mtime_ns": 1793458836523559744
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MAVIAUSDT/olhc/trades.csv.gz",
+      "bytes": 1018,
+      "mtime_ns": 1793458836547653051
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MAVUSDT/ohlc/trades.csv.gz",
+      "bytes": 652,
+      "mtime_ns": 1793458837356949792
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MAVUSDT/olhc/trades.csv.gz",
+      "bytes": 652,
+      "mtime_ns": 1793458837377166368
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MBOXUSDT/ohlc/trades.csv.gz",
+      "bytes": 922,
+      "mtime_ns": 1793458837655678194
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MBOXUSDT/olhc/trades.csv.gz",
+      "bytes": 922,
+      "mtime_ns": 1793458837789874516
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MELANIAUSDT/ohlc/trades.csv.gz",
+      "bytes": 1854,
+      "mtime_ns": 1793458838022790787
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MELANIAUSDT/olhc/trades.csv.gz",
+      "bytes": 1935,
+      "mtime_ns": 1793458838202973042
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MEMEUSDT/ohlc/trades.csv.gz",
+      "bytes": 1651,
+      "mtime_ns": 1793458838343326733
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MEMEUSDT/olhc/trades.csv.gz",
+      "bytes": 1651,
+      "mtime_ns": 1793458838462196632
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/METISUSDT/ohlc/trades.csv.gz",
+      "bytes": 2102,
+      "mtime_ns": 1793458838775174703
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/METISUSDT/olhc/trades.csv.gz",
+      "bytes": 2102,
+      "mtime_ns": 1793458838930368564
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MEUSDT/ohlc/trades.csv.gz",
+      "bytes": 986,
+      "mtime_ns": 1793458839257990137
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MEUSDT/olhc/trades.csv.gz",
+      "bytes": 986,
+      "mtime_ns": 1793458839459547226
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MEWUSDT/ohlc/trades.csv.gz",
+      "bytes": 943,
+      "mtime_ns": 1793458839772631049
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MEWUSDT/olhc/trades.csv.gz",
+      "bytes": 943,
+      "mtime_ns": 1793458839798409741
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MILKUSDT/ohlc/trades.csv.gz",
+      "bytes": 988,
+      "mtime_ns": 1793458839829029877
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MILKUSDT/olhc/trades.csv.gz",
+      "bytes": 988,
+      "mtime_ns": 1793458839856708372
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MINAUSDT/ohlc/trades.csv.gz",
+      "bytes": 2243,
+      "mtime_ns": 1793458840659941549
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MINAUSDT/olhc/trades.csv.gz",
+      "bytes": 2243,
+      "mtime_ns": 1793458840695965050
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MITOUSDT/ohlc/trades.csv.gz",
+      "bytes": 933,
+      "mtime_ns": 1793458840629425246
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MITOUSDT/olhc/trades.csv.gz",
+      "bytes": 933,
+      "mtime_ns": 1793458840652916300
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MKRUSDT/ohlc/trades.csv.gz",
+      "bytes": 4169,
+      "mtime_ns": 1793458842248484975
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MKRUSDT/olhc/trades.csv.gz",
+      "bytes": 4169,
+      "mtime_ns": 1793458842294516994
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MLNUSDT/ohlc/trades.csv.gz",
+      "bytes": 1520,
+      "mtime_ns": 1793458841749366398
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MLNUSDT/olhc/trades.csv.gz",
+      "bytes": 1523,
+      "mtime_ns": 1793458841814421861
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MONUSDT/ohlc/trades.csv.gz",
+      "bytes": 746,
+      "mtime_ns": 1793458842166024328
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MONUSDT/olhc/trades.csv.gz",
+      "bytes": 746,
+      "mtime_ns": 1793458842227424561
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MORPHOUSDT/ohlc/trades.csv.gz",
+      "bytes": 1505,
+      "mtime_ns": 1793458842342234189
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MORPHOUSDT/olhc/trades.csv.gz",
+      "bytes": 1505,
+      "mtime_ns": 1793458842447697304
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MOVEUSDT/ohlc/trades.csv.gz",
+      "bytes": 1251,
+      "mtime_ns": 1793458842985623484
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MOVEUSDT/olhc/trades.csv.gz",
+      "bytes": 1251,
+      "mtime_ns": 1793458843013128936
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MOVRUSDT/ohlc/trades.csv.gz",
+      "bytes": 1546,
+      "mtime_ns": 1793458844494646252
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MOVRUSDT/olhc/trades.csv.gz",
+      "bytes": 1546,
+      "mtime_ns": 1793458844514290950
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MTLUSDT/ohlc/trades.csv.gz",
+      "bytes": 2917,
+      "mtime_ns": 1793458845186975839
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MTLUSDT/olhc/trades.csv.gz",
+      "bytes": 2917,
+      "mtime_ns": 1793458845453903774
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MUBARAKUSDT/ohlc/trades.csv.gz",
+      "bytes": 1546,
+      "mtime_ns": 1793458844627615363
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MUBARAKUSDT/olhc/trades.csv.gz",
+      "bytes": 1546,
+      "mtime_ns": 1793458844649335781
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MUSDT/ohlc/trades.csv.gz",
+      "bytes": 835,
+      "mtime_ns": 1793458844635597909
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MUSDT/olhc/trades.csv.gz",
+      "bytes": 835,
+      "mtime_ns": 1793458844654333019
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MYXUSDT/ohlc/trades.csv.gz",
+      "bytes": 931,
+      "mtime_ns": 1793458845603117521
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/MYXUSDT/olhc/trades.csv.gz",
+      "bytes": 931,
+      "mtime_ns": 1793458845625240567
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NAORISUSDT/ohlc/trades.csv.gz",
+      "bytes": 1320,
+      "mtime_ns": 1793458846162022163
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NAORISUSDT/olhc/trades.csv.gz",
+      "bytes": 1320,
+      "mtime_ns": 1793458846274860739
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NEARUSDT/ohlc/trades.csv.gz",
+      "bytes": 3822,
+      "mtime_ns": 1793458847706606863
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NEARUSDT/olhc/trades.csv.gz",
+      "bytes": 3822,
+      "mtime_ns": 1793458847999363909
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NEIROETHUSDT/ohlc/trades.csv.gz",
+      "bytes": 1646,
+      "mtime_ns": 1793458847045676288
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NEIROETHUSDT/olhc/trades.csv.gz",
+      "bytes": 1646,
+      "mtime_ns": 1793458847133939346
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NEIROUSDT/ohlc/trades.csv.gz",
+      "bytes": 2661,
+      "mtime_ns": 1793458847670885779
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NEIROUSDT/olhc/trades.csv.gz",
+      "bytes": 2661,
+      "mtime_ns": 1793458847712756899
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NEOUSDT/ohlc/trades.csv.gz",
+      "bytes": 5697,
+      "mtime_ns": 1793458849237381531
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NEOUSDT/olhc/trades.csv.gz",
+      "bytes": 5697,
+      "mtime_ns": 1793458849706627029
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NEWTUSDT/ohlc/trades.csv.gz",
+      "bytes": 924,
+      "mtime_ns": 1793458848470733668
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NEWTUSDT/olhc/trades.csv.gz",
+      "bytes": 924,
+      "mtime_ns": 1793458848648734876
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NFPUSDT/ohlc/trades.csv.gz",
+      "bytes": 2430,
+      "mtime_ns": 1793458849410022125
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NFPUSDT/olhc/trades.csv.gz",
+      "bytes": 2430,
+      "mtime_ns": 1793458849455966977
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NILUSDT/ohlc/trades.csv.gz",
+      "bytes": 2146,
+      "mtime_ns": 1793458849510023544
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NILUSDT/olhc/trades.csv.gz",
+      "bytes": 2146,
+      "mtime_ns": 1793458849651190412
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NKNUSDT/ohlc/trades.csv.gz",
+      "bytes": 3306,
+      "mtime_ns": 1793458851217220003
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NKNUSDT/olhc/trades.csv.gz",
+      "bytes": 3306,
+      "mtime_ns": 1793458851516770925
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NMRUSDT/ohlc/trades.csv.gz",
+      "bytes": 804,
+      "mtime_ns": 1793458851627050238
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NMRUSDT/olhc/trades.csv.gz",
+      "bytes": 804,
+      "mtime_ns": 1793458851729660840
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NOMUSDT/ohlc/trades.csv.gz",
+      "bytes": 925,
+      "mtime_ns": 1793458851396400386
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NOMUSDT/olhc/trades.csv.gz",
+      "bytes": 925,
+      "mtime_ns": 1793458851428487574
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NOTUSDT/ohlc/trades.csv.gz",
+      "bytes": 1515,
+      "mtime_ns": 1793458851947297407
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NOTUSDT/olhc/trades.csv.gz",
+      "bytes": 1515,
+      "mtime_ns": 1793458852134393295
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NTRNUSDT/ohlc/trades.csv.gz",
+      "bytes": 2082,
+      "mtime_ns": 1793458853833364589
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NTRNUSDT/olhc/trades.csv.gz",
+      "bytes": 2082,
+      "mtime_ns": 1793458853853763084
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NXPCUSDT/ohlc/trades.csv.gz",
+      "bytes": 2259,
+      "mtime_ns": 1793458853837748657
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/NXPCUSDT/olhc/trades.csv.gz",
+      "bytes": 2259,
+      "mtime_ns": 1793458853917757751
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OCEANUSDT/ohlc/trades.csv.gz",
+      "bytes": 1544,
+      "mtime_ns": 1793458855196987131
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OCEANUSDT/olhc/trades.csv.gz",
+      "bytes": 1544,
+      "mtime_ns": 1793458855388733798
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OGNUSDT/ohlc/trades.csv.gz",
+      "bytes": 2526,
+      "mtime_ns": 1793458855771791545
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OGNUSDT/olhc/trades.csv.gz",
+      "bytes": 2526,
+      "mtime_ns": 1793458856059327441
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OGUSDT/ohlc/trades.csv.gz",
+      "bytes": 1599,
+      "mtime_ns": 1793458855265604200
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OGUSDT/olhc/trades.csv.gz",
+      "bytes": 1599,
+      "mtime_ns": 1793458855292378732
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OLUSDT/ohlc/trades.csv.gz",
+      "bytes": 932,
+      "mtime_ns": 1793458855310287754
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OLUSDT/olhc/trades.csv.gz",
+      "bytes": 932,
+      "mtime_ns": 1793458855379899913
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OMGUSDT/ohlc/trades.csv.gz",
+      "bytes": 3873,
+      "mtime_ns": 1793458858508107443
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OMGUSDT/olhc/trades.csv.gz",
+      "bytes": 3873,
+      "mtime_ns": 1793458858724797216
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OMNIUSDT/ohlc/trades.csv.gz",
+      "bytes": 926,
+      "mtime_ns": 1793458857702512713
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OMNIUSDT/olhc/trades.csv.gz",
+      "bytes": 926,
+      "mtime_ns": 1793458857713924905
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OMUSDT/ohlc/trades.csv.gz",
+      "bytes": 3663,
+      "mtime_ns": 1793458858334315340
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OMUSDT/olhc/trades.csv.gz",
+      "bytes": 3663,
+      "mtime_ns": 1793458858502675452
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ONDOUSDT/ohlc/trades.csv.gz",
+      "bytes": 1868,
+      "mtime_ns": 1793458858450869733
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ONDOUSDT/olhc/trades.csv.gz",
+      "bytes": 1868,
+      "mtime_ns": 1793458858569713513
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ONEUSDT/ohlc/trades.csv.gz",
+      "bytes": 4857,
+      "mtime_ns": 1793458859613164600
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ONEUSDT/olhc/trades.csv.gz",
+      "bytes": 4857,
+      "mtime_ns": 1793458859785907115
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ONGUSDT/ohlc/trades.csv.gz",
+      "bytes": 2798,
+      "mtime_ns": 1793458860610947170
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ONGUSDT/olhc/trades.csv.gz",
+      "bytes": 2798,
+      "mtime_ns": 1793458860725132133
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ONTUSDT/ohlc/trades.csv.gz",
+      "bytes": 5914,
+      "mtime_ns": 1793458862620394271
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ONTUSDT/olhc/trades.csv.gz",
+      "bytes": 5914,
+      "mtime_ns": 1793458863064614091
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OPENUSDT/ohlc/trades.csv.gz",
+      "bytes": 886,
+      "mtime_ns": 1793458860481560743
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OPENUSDT/olhc/trades.csv.gz",
+      "bytes": 886,
+      "mtime_ns": 1793458860496030745
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OPUSDT/ohlc/trades.csv.gz",
+      "bytes": 1487,
+      "mtime_ns": 1793458862317409573
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OPUSDT/olhc/trades.csv.gz",
+      "bytes": 1487,
+      "mtime_ns": 1793458862493847236
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ORCAUSDT/ohlc/trades.csv.gz",
+      "bytes": 2244,
+      "mtime_ns": 1793458862142456503
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ORCAUSDT/olhc/trades.csv.gz",
+      "bytes": 2244,
+      "mtime_ns": 1793458862360737120
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ORDERUSDT/ohlc/trades.csv.gz",
+      "bytes": 686,
+      "mtime_ns": 1793458862104698115
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ORDERUSDT/olhc/trades.csv.gz",
+      "bytes": 686,
+      "mtime_ns": 1793458862191242457
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ORDIUSDT/ohlc/trades.csv.gz",
+      "bytes": 1545,
+      "mtime_ns": 1793458864177190924
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ORDIUSDT/olhc/trades.csv.gz",
+      "bytes": 1545,
+      "mtime_ns": 1793458864194096481
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OXTUSDT/ohlc/trades.csv.gz",
+      "bytes": 2172,
+      "mtime_ns": 1793458864670977535
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/OXTUSDT/olhc/trades.csv.gz",
+      "bytes": 2172,
+      "mtime_ns": 1793458864807312586
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PARTIUSDT/ohlc/trades.csv.gz",
+      "bytes": 590,
+      "mtime_ns": 1793458864464369486
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PARTIUSDT/olhc/trades.csv.gz",
+      "bytes": 590,
+      "mtime_ns": 1793458864499648069
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PENDLEUSDT/ohlc/trades.csv.gz",
+      "bytes": 986,
+      "mtime_ns": 1793458864867220730
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PENDLEUSDT/olhc/trades.csv.gz",
+      "bytes": 986,
+      "mtime_ns": 1793458864887184973
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PENGUUSDT/ohlc/trades.csv.gz",
+      "bytes": 977,
+      "mtime_ns": 1793458865507068784
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PENGUUSDT/olhc/trades.csv.gz",
+      "bytes": 977,
+      "mtime_ns": 1793458865528338451
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PEOPLEUSDT/ohlc/trades.csv.gz",
+      "bytes": 1976,
+      "mtime_ns": 1793458867410238561
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PEOPLEUSDT/olhc/trades.csv.gz",
+      "bytes": 1976,
+      "mtime_ns": 1793458867634709506
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PHAUSDT/ohlc/trades.csv.gz",
+      "bytes": 764,
+      "mtime_ns": 1793458867052016620
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PHAUSDT/olhc/trades.csv.gz",
+      "bytes": 764,
+      "mtime_ns": 1793458867068689843
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PHBUSDT/ohlc/trades.csv.gz",
+      "bytes": 960,
+      "mtime_ns": 1793458867340881861
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PHBUSDT/olhc/trades.csv.gz",
+      "bytes": 960,
+      "mtime_ns": 1793458867493869511
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PIPPINUSDT/ohlc/trades.csv.gz",
+      "bytes": 827,
+      "mtime_ns": 1793458867153390591
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PIPPINUSDT/olhc/trades.csv.gz",
+      "bytes": 827,
+      "mtime_ns": 1793458867171132071
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PIXELUSDT/ohlc/trades.csv.gz",
+      "bytes": 3909,
+      "mtime_ns": 1793458868875805267
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PIXELUSDT/olhc/trades.csv.gz",
+      "bytes": 3909,
+      "mtime_ns": 1793458869052139221
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PLAYUSDT/ohlc/trades.csv.gz",
+      "bytes": 926,
+      "mtime_ns": 1793458868917281386
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PLAYUSDT/olhc/trades.csv.gz",
+      "bytes": 926,
+      "mtime_ns": 1793458868983330899
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PLUMEUSDT/ohlc/trades.csv.gz",
+      "bytes": 965,
+      "mtime_ns": 1793458869042271413
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PLUMEUSDT/olhc/trades.csv.gz",
+      "bytes": 965,
+      "mtime_ns": 1793458869067186476
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/POLUSDT/ohlc/trades.csv.gz",
+      "bytes": 3342,
+      "mtime_ns": 1793458869267628031
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/POLUSDT/olhc/trades.csv.gz",
+      "bytes": 3342,
+      "mtime_ns": 1793458869415136273
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/POLYXUSDT/ohlc/trades.csv.gz",
+      "bytes": 2443,
+      "mtime_ns": 1793458871188705460
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/POLYXUSDT/olhc/trades.csv.gz",
+      "bytes": 2443,
+      "mtime_ns": 1793458871311268015
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PONKEUSDT/ohlc/trades.csv.gz",
+      "bytes": 1494,
+      "mtime_ns": 1793458871048665427
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PONKEUSDT/olhc/trades.csv.gz",
+      "bytes": 1494,
+      "mtime_ns": 1793458871120661434
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/POPCATUSDT/ohlc/trades.csv.gz",
+      "bytes": 2071,
+      "mtime_ns": 1793458871152304996
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/POPCATUSDT/olhc/trades.csv.gz",
+      "bytes": 2071,
+      "mtime_ns": 1793458871265620163
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PORT3USDT/ohlc/trades.csv.gz",
+      "bytes": 975,
+      "mtime_ns": 1793458871050556689
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PORT3USDT/olhc/trades.csv.gz",
+      "bytes": 975,
+      "mtime_ns": 1793458871069332716
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PORTALUSDT/ohlc/trades.csv.gz",
+      "bytes": 2260,
+      "mtime_ns": 1793458873031458557
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PORTALUSDT/olhc/trades.csv.gz",
+      "bytes": 2202,
+      "mtime_ns": 1793458873059448971
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/POWRUSDT/ohlc/trades.csv.gz",
+      "bytes": 2696,
+      "mtime_ns": 1793458873077787413
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/POWRUSDT/olhc/trades.csv.gz",
+      "bytes": 2696,
+      "mtime_ns": 1793458873107551671
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PRLUSDT/ohlc/trades.csv.gz",
+      "bytes": 1237,
+      "mtime_ns": 1793458872857931202
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PRLUSDT/olhc/trades.csv.gz",
+      "bytes": 1237,
+      "mtime_ns": 1793458872903177760
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PROMUSDT/ohlc/trades.csv.gz",
+      "bytes": 644,
+      "mtime_ns": 1793458873082439732
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PROMUSDT/olhc/trades.csv.gz",
+      "bytes": 644,
+      "mtime_ns": 1793458873148835664
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PTBUSDT/ohlc/trades.csv.gz",
+      "bytes": 1803,
+      "mtime_ns": 1793458873871457168
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PTBUSDT/olhc/trades.csv.gz",
+      "bytes": 1803,
+      "mtime_ns": 1793458873963388668
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PUMPBTCUSDT/ohlc/trades.csv.gz",
+      "bytes": 925,
+      "mtime_ns": 1793458874712001825
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PUMPBTCUSDT/olhc/trades.csv.gz",
+      "bytes": 925,
+      "mtime_ns": 1793458874727969627
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PYTHUSDT/ohlc/trades.csv.gz",
+      "bytes": 1844,
+      "mtime_ns": 1793458875238069214
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/PYTHUSDT/olhc/trades.csv.gz",
+      "bytes": 1844,
+      "mtime_ns": 1793458875274300510
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/QNTUSDT/ohlc/trades.csv.gz",
+      "bytes": 2248,
+      "mtime_ns": 1793458875579193139
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/QNTUSDT/olhc/trades.csv.gz",
+      "bytes": 2248,
+      "mtime_ns": 1793458875706237595
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/QTUMUSDT/ohlc/trades.csv.gz",
+      "bytes": 1542,
+      "mtime_ns": 1793458877033486744
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/QTUMUSDT/olhc/trades.csv.gz",
+      "bytes": 1542,
+      "mtime_ns": 1793458877213446845
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/QUICKUSDT/ohlc/trades.csv.gz",
+      "bytes": 968,
+      "mtime_ns": 1793458876026337397
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/QUICKUSDT/olhc/trades.csv.gz",
+      "bytes": 968,
+      "mtime_ns": 1793458876049252282
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RADUSDT/ohlc/trades.csv.gz",
+      "bytes": 950,
+      "mtime_ns": 1793458877101254976
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RADUSDT/olhc/trades.csv.gz",
+      "bytes": 950,
+      "mtime_ns": 1793458877126451375
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RAREUSDT/ohlc/trades.csv.gz",
+      "bytes": 1643,
+      "mtime_ns": 1793458877878963180
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RAREUSDT/olhc/trades.csv.gz",
+      "bytes": 1643,
+      "mtime_ns": 1793458878243424826
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RAYSOLUSDT/ohlc/trades.csv.gz",
+      "bytes": 2670,
+      "mtime_ns": 1793458878112443305
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RAYSOLUSDT/olhc/trades.csv.gz",
+      "bytes": 2670,
+      "mtime_ns": 1793458878279342704
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RDNTUSDT/ohlc/trades.csv.gz",
+      "bytes": 461,
+      "mtime_ns": 1793458879319883874
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RDNTUSDT/olhc/trades.csv.gz",
+      "bytes": 456,
+      "mtime_ns": 1793458879345839277
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RECALLUSDT/ohlc/trades.csv.gz",
+      "bytes": 2784,
+      "mtime_ns": 1793458879130252091
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RECALLUSDT/olhc/trades.csv.gz",
+      "bytes": 2784,
+      "mtime_ns": 1793458879262384286
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/REDUSDT/ohlc/trades.csv.gz",
+      "bytes": 3567,
+      "mtime_ns": 1793458880015558763
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/REDUSDT/olhc/trades.csv.gz",
+      "bytes": 3567,
+      "mtime_ns": 1793458880152907197
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/REEFUSDT/ohlc/trades.csv.gz",
+      "bytes": 1435,
+      "mtime_ns": 1793458881431246393
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/REEFUSDT/olhc/trades.csv.gz",
+      "bytes": 1435,
+      "mtime_ns": 1793458881629838855
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RENDERUSDT/ohlc/trades.csv.gz",
+      "bytes": 1454,
+      "mtime_ns": 1793458882068163895
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RENDERUSDT/olhc/trades.csv.gz",
+      "bytes": 1454,
+      "mtime_ns": 1793458882178575504
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RENUSDT/ohlc/trades.csv.gz",
+      "bytes": 1559,
+      "mtime_ns": 1793458883409441671
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RENUSDT/olhc/trades.csv.gz",
+      "bytes": 1559,
+      "mtime_ns": 1793458883460873639
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RESOLVUSDT/ohlc/trades.csv.gz",
+      "bytes": 2554,
+      "mtime_ns": 1793458882711907645
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RESOLVUSDT/olhc/trades.csv.gz",
+      "bytes": 2554,
+      "mtime_ns": 1793458882821151247
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/REZUSDT/ohlc/trades.csv.gz",
+      "bytes": 1325,
+      "mtime_ns": 1793458884577405425
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/REZUSDT/olhc/trades.csv.gz",
+      "bytes": 1325,
+      "mtime_ns": 1793458884813867151
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RIFUSDT/ohlc/trades.csv.gz",
+      "bytes": 1970,
+      "mtime_ns": 1793458884823550167
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RIFUSDT/olhc/trades.csv.gz",
+      "bytes": 1970,
+      "mtime_ns": 1793458884871754826
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RLCUSDT/ohlc/trades.csv.gz",
+      "bytes": 3946,
+      "mtime_ns": 1793458886233508765
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RLCUSDT/olhc/trades.csv.gz",
+      "bytes": 3946,
+      "mtime_ns": 1793458886505111323
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RLSUSDT/ohlc/trades.csv.gz",
+      "bytes": 777,
+      "mtime_ns": 1793458884886003327
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RLSUSDT/olhc/trades.csv.gz",
+      "bytes": 777,
+      "mtime_ns": 1793458884917872473
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ROBOUSDT/ohlc/trades.csv.gz",
+      "bytes": 801,
+      "mtime_ns": 1793458886294006288
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ROBOUSDT/olhc/trades.csv.gz",
+      "bytes": 801,
+      "mtime_ns": 1793458886379175706
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ROSEUSDT/ohlc/trades.csv.gz",
+      "bytes": 2132,
+      "mtime_ns": 1793458887809398632
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/ROSEUSDT/olhc/trades.csv.gz",
+      "bytes": 2132,
+      "mtime_ns": 1793458888057695262
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RPLUSDT/ohlc/trades.csv.gz",
+      "bytes": 1491,
+      "mtime_ns": 1793458887086520915
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RPLUSDT/olhc/trades.csv.gz",
+      "bytes": 1491,
+      "mtime_ns": 1793458887125920772
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RSRUSDT/ohlc/trades.csv.gz",
+      "bytes": 4957,
+      "mtime_ns": 1793458890581578548
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RSRUSDT/olhc/trades.csv.gz",
+      "bytes": 4957,
+      "mtime_ns": 1793458890646074845
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RUNEUSDT/ohlc/trades.csv.gz",
+      "bytes": 3510,
+      "mtime_ns": 1793458890947226370
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RUNEUSDT/olhc/trades.csv.gz",
+      "bytes": 3510,
+      "mtime_ns": 1793458891352139422
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RVNUSDT/ohlc/trades.csv.gz",
+      "bytes": 4242,
+      "mtime_ns": 1793458891394764299
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RVNUSDT/olhc/trades.csv.gz",
+      "bytes": 4242,
+      "mtime_ns": 1793458891723822528
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RVVUSDT/ohlc/trades.csv.gz",
+      "bytes": 982,
+      "mtime_ns": 1793458890396479000
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/RVVUSDT/olhc/trades.csv.gz",
+      "bytes": 982,
+      "mtime_ns": 1793458890415659571
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SAGAUSDT/ohlc/trades.csv.gz",
+      "bytes": 949,
+      "mtime_ns": 1793458891976925853
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SAGAUSDT/olhc/trades.csv.gz",
+      "bytes": 949,
+      "mtime_ns": 1793458892014819910
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SAHARAUSDT/ohlc/trades.csv.gz",
+      "bytes": 1093,
+      "mtime_ns": 1793458891961356345
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SAHARAUSDT/olhc/trades.csv.gz",
+      "bytes": 1093,
+      "mtime_ns": 1793458891997377682
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SANDUSDT/ohlc/trades.csv.gz",
+      "bytes": 3731,
+      "mtime_ns": 1793458894485601928
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SANDUSDT/olhc/trades.csv.gz",
+      "bytes": 3731,
+      "mtime_ns": 1793458894816035459
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SANTOSUSDT/ohlc/trades.csv.gz",
+      "bytes": 2027,
+      "mtime_ns": 1793458893792321176
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SANTOSUSDT/olhc/trades.csv.gz",
+      "bytes": 2027,
+      "mtime_ns": 1793458893818342871
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SAPIENUSDT/ohlc/trades.csv.gz",
+      "bytes": 3151,
+      "mtime_ns": 1793458893970278266
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SAPIENUSDT/olhc/trades.csv.gz",
+      "bytes": 3218,
+      "mtime_ns": 1793458894112672689
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SCRTUSDT/ohlc/trades.csv.gz",
+      "bytes": 830,
+      "mtime_ns": 1793458893923573658
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SCRTUSDT/olhc/trades.csv.gz",
+      "bytes": 830,
+      "mtime_ns": 1793458893941866265
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SCRUSDT/ohlc/trades.csv.gz",
+      "bytes": 1423,
+      "mtime_ns": 1793458895623571343
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SCRUSDT/olhc/trades.csv.gz",
+      "bytes": 1423,
+      "mtime_ns": 1793458895810752237
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SCUSDT/ohlc/trades.csv.gz",
+      "bytes": 924,
+      "mtime_ns": 1793458896735869106
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SCUSDT/olhc/trades.csv.gz",
+      "bytes": 924,
+      "mtime_ns": 1793458896757492983
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SEIUSDT/ohlc/trades.csv.gz",
+      "bytes": 2281,
+      "mtime_ns": 1793458896741769474
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SEIUSDT/olhc/trades.csv.gz",
+      "bytes": 2281,
+      "mtime_ns": 1793458896973899592
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SENTUSDT/ohlc/trades.csv.gz",
+      "bytes": 1438,
+      "mtime_ns": 1793458896463780544
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SENTUSDT/olhc/trades.csv.gz",
+      "bytes": 1438,
+      "mtime_ns": 1793458896577332422
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SFPUSDT/ohlc/trades.csv.gz",
+      "bytes": 2936,
+      "mtime_ns": 1793458899071611413
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SFPUSDT/olhc/trades.csv.gz",
+      "bytes": 2936,
+      "mtime_ns": 1793458899556591854
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SHELLUSDT/ohlc/trades.csv.gz",
+      "bytes": 2153,
+      "mtime_ns": 1793458898712218670
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SHELLUSDT/olhc/trades.csv.gz",
+      "bytes": 2153,
+      "mtime_ns": 1793458898964227530
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SIGNUSDT/ohlc/trades.csv.gz",
+      "bytes": 829,
+      "mtime_ns": 1793458898500443755
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SIGNUSDT/olhc/trades.csv.gz",
+      "bytes": 829,
+      "mtime_ns": 1793458898540001697
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SIRENUSDT/ohlc/trades.csv.gz",
+      "bytes": 788,
+      "mtime_ns": 1793458898624923530
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SIRENUSDT/olhc/trades.csv.gz",
+      "bytes": 788,
+      "mtime_ns": 1793458898668522163
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SKLUSDT/ohlc/trades.csv.gz",
+      "bytes": 2586,
+      "mtime_ns": 1793458901717964009
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SKLUSDT/olhc/trades.csv.gz",
+      "bytes": 2586,
+      "mtime_ns": 1793458901772124662
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SKRUSDT/ohlc/trades.csv.gz",
+      "bytes": 964,
+      "mtime_ns": 1793458900240518593
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SKRUSDT/olhc/trades.csv.gz",
+      "bytes": 964,
+      "mtime_ns": 1793458900292783526
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SKYAIUSDT/ohlc/trades.csv.gz",
+      "bytes": 1560,
+      "mtime_ns": 1793458901004338095
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SKYAIUSDT/olhc/trades.csv.gz",
+      "bytes": 1560,
+      "mtime_ns": 1793458901203188683
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SKYUSDT/ohlc/trades.csv.gz",
+      "bytes": 1593,
+      "mtime_ns": 1793458901384036249
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SKYUSDT/olhc/trades.csv.gz",
+      "bytes": 1593,
+      "mtime_ns": 1793458901528167349
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SLERFUSDT/ohlc/trades.csv.gz",
+      "bytes": 1708,
+      "mtime_ns": 1793458902372495408
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SLERFUSDT/olhc/trades.csv.gz",
+      "bytes": 1708,
+      "mtime_ns": 1793458902596073600
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SLPUSDT/ohlc/trades.csv.gz",
+      "bytes": 1090,
+      "mtime_ns": 1793458902797055868
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SLPUSDT/olhc/trades.csv.gz",
+      "bytes": 1090,
+      "mtime_ns": 1793458902835379552
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SNTUSDT/ohlc/trades.csv.gz",
+      "bytes": 896,
+      "mtime_ns": 1793458903365618719
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SNTUSDT/olhc/trades.csv.gz",
+      "bytes": 896,
+      "mtime_ns": 1793458903413168874
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SNXUSDT/ohlc/trades.csv.gz",
+      "bytes": 2626,
+      "mtime_ns": 1793458905247027350
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SNXUSDT/olhc/trades.csv.gz",
+      "bytes": 2626,
+      "mtime_ns": 1793458905306712952
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SOLVUSDT/ohlc/trades.csv.gz",
+      "bytes": 1100,
+      "mtime_ns": 1793458904929431728
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SOLVUSDT/olhc/trades.csv.gz",
+      "bytes": 1100,
+      "mtime_ns": 1793458905119290972
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SONICUSDT/ohlc/trades.csv.gz",
+      "bytes": 1438,
+      "mtime_ns": 1793458905036270983
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SONICUSDT/olhc/trades.csv.gz",
+      "bytes": 1438,
+      "mtime_ns": 1793458905091738768
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SOONUSDT/ohlc/trades.csv.gz",
+      "bytes": 2125,
+      "mtime_ns": 1793458905257117284
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SOONUSDT/olhc/trades.csv.gz",
+      "bytes": 2125,
+      "mtime_ns": 1793458905519307246
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SOPHUSDT/ohlc/trades.csv.gz",
+      "bytes": 1633,
+      "mtime_ns": 1793458907191957897
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SOPHUSDT/olhc/trades.csv.gz",
+      "bytes": 1633,
+      "mtime_ns": 1793458907346422474
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SPACEUSDT/ohlc/trades.csv.gz",
+      "bytes": 1008,
+      "mtime_ns": 1793458906923961359
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SPACEUSDT/olhc/trades.csv.gz",
+      "bytes": 1008,
+      "mtime_ns": 1793458906952757529
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SPELLUSDT/ohlc/trades.csv.gz",
+      "bytes": 3776,
+      "mtime_ns": 1793458908570710565
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SPELLUSDT/olhc/trades.csv.gz",
+      "bytes": 3776,
+      "mtime_ns": 1793458908882794447
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SPKUSDT/ohlc/trades.csv.gz",
+      "bytes": 999,
+      "mtime_ns": 1793458907442034288
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SPKUSDT/olhc/trades.csv.gz",
+      "bytes": 999,
+      "mtime_ns": 1793458907518321779
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SPXUSDT/ohlc/trades.csv.gz",
+      "bytes": 1484,
+      "mtime_ns": 1793458908592210317
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SPXUSDT/olhc/trades.csv.gz",
+      "bytes": 1484,
+      "mtime_ns": 1793458908625939683
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SQDUSDT/ohlc/trades.csv.gz",
+      "bytes": 1272,
+      "mtime_ns": 1793458909094081442
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SQDUSDT/olhc/trades.csv.gz",
+      "bytes": 1272,
+      "mtime_ns": 1793458909151204112
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SSVUSDT/ohlc/trades.csv.gz",
+      "bytes": 2588,
+      "mtime_ns": 1793458910224477813
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SSVUSDT/olhc/trades.csv.gz",
+      "bytes": 2588,
+      "mtime_ns": 1793458910581343583
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STABLEUSDT/ohlc/trades.csv.gz",
+      "bytes": 946,
+      "mtime_ns": 1793458910153275519
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STABLEUSDT/olhc/trades.csv.gz",
+      "bytes": 946,
+      "mtime_ns": 1793458910271600133
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STBLUSDT/ohlc/trades.csv.gz",
+      "bytes": 1602,
+      "mtime_ns": 1793458910354594955
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STBLUSDT/olhc/trades.csv.gz",
+      "bytes": 1602,
+      "mtime_ns": 1793458910458765861
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STEEMUSDT/ohlc/trades.csv.gz",
+      "bytes": 1365,
+      "mtime_ns": 1793458911212569554
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STEEMUSDT/olhc/trades.csv.gz",
+      "bytes": 1365,
+      "mtime_ns": 1793458911366152459
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STGUSDT/ohlc/trades.csv.gz",
+      "bytes": 1909,
+      "mtime_ns": 1793458915571478370
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STGUSDT/olhc/trades.csv.gz",
+      "bytes": 1909,
+      "mtime_ns": 1793458915673654556
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STMXUSDT/ohlc/trades.csv.gz",
+      "bytes": 2151,
+      "mtime_ns": 1793458916204746228
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STMXUSDT/olhc/trades.csv.gz",
+      "bytes": 2151,
+      "mtime_ns": 1793458916510136069
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STOUSDT/ohlc/trades.csv.gz",
+      "bytes": 1825,
+      "mtime_ns": 1793458914439008821
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STOUSDT/olhc/trades.csv.gz",
+      "bytes": 1825,
+      "mtime_ns": 1793458914485838888
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STPTUSDT/ohlc/trades.csv.gz",
+      "bytes": 724,
+      "mtime_ns": 1793458915467941177
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STPTUSDT/olhc/trades.csv.gz",
+      "bytes": 724,
+      "mtime_ns": 1793458915777572543
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STRKUSDT/ohlc/trades.csv.gz",
+      "bytes": 2388,
+      "mtime_ns": 1793458916441656166
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STRKUSDT/olhc/trades.csv.gz",
+      "bytes": 2388,
+      "mtime_ns": 1793458916487451477
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STXUSDT/ohlc/trades.csv.gz",
+      "bytes": 3649,
+      "mtime_ns": 1793458918386940756
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/STXUSDT/olhc/trades.csv.gz",
+      "bytes": 3649,
+      "mtime_ns": 1793458918535483548
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SUIUSDT/ohlc/trades.csv.gz",
+      "bytes": 1395,
+      "mtime_ns": 1793458918714437687
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SUIUSDT/olhc/trades.csv.gz",
+      "bytes": 1395,
+      "mtime_ns": 1793458918753282166
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SUNUSDT/ohlc/trades.csv.gz",
+      "bytes": 814,
+      "mtime_ns": 1793458918719634634
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SUNUSDT/olhc/trades.csv.gz",
+      "bytes": 814,
+      "mtime_ns": 1793458918840063094
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SUPERUSDT/ohlc/trades.csv.gz",
+      "bytes": 2487,
+      "mtime_ns": 1793458918815695909
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SUPERUSDT/olhc/trades.csv.gz",
+      "bytes": 2440,
+      "mtime_ns": 1793458918967505053
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SUSDT/ohlc/trades.csv.gz",
+      "bytes": 2045,
+      "mtime_ns": 1793458920151159738
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SUSDT/olhc/trades.csv.gz",
+      "bytes": 2045,
+      "mtime_ns": 1793458920304126973
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SWARMSUSDT/ohlc/trades.csv.gz",
+      "bytes": 932,
+      "mtime_ns": 1793458920859691622
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SWARMSUSDT/olhc/trades.csv.gz",
+      "bytes": 932,
+      "mtime_ns": 1793458920908257700
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SXTUSDT/ohlc/trades.csv.gz",
+      "bytes": 988,
+      "mtime_ns": 1793458920844062780
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SXTUSDT/olhc/trades.csv.gz",
+      "bytes": 988,
+      "mtime_ns": 1793458920887871955
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SYSUSDT/ohlc/trades.csv.gz",
+      "bytes": 1417,
+      "mtime_ns": 1793458920953042089
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/SYSUSDT/olhc/trades.csv.gz",
+      "bytes": 1417,
+      "mtime_ns": 1793458921006845823
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/TAGUSDT/ohlc/trades.csv.gz",
+      "bytes": 1235,
+      "mtime_ns": 1793458921829667506
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/TAGUSDT/olhc/trades.csv.gz",
+      "bytes": 1235,
+      "mtime_ns": 1793458921908888264
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/TAIKOUSDT/ohlc/trades.csv.gz",
+      "bytes": 942,
+      "mtime_ns": 1793458922287170161
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/TAIKOUSDT/olhc/trades.csv.gz",
+      "bytes": 942,
+      "mtime_ns": 1793458922341113479
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/TAKEUSDT/ohlc/trades.csv.gz",
+      "bytes": 1974,
+      "mtime_ns": 1793458922460160264
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/symbols/TAKEUSDT/olhc/trades.csv.gz",
+      "bytes": 1975,
+      "mtime_ns": 1793458922611158321
+    }
+  ]
+}

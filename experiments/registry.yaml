@@ -16,32 +16,32 @@ schema_version: 1
 experiments:
   - experiment_id: exp-monday-harmonic-15m-confluence-20261031-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: ff7f6f5a54
-    status: active
+    source_commit: 713d178899
+    status: rejected
     question: Does pre-touch 15m Pyharmonics confluence improve the original eight Monday1618 accounts?
     single_variable: Change only harmonic timeframe; keep1000bar lookback,10spacing,3percent ratios,original score,entries,exits,fees and account rules.
-    result: Pending independently frozen timeframe arm; no outcome-driven tuning.
-    artifacts: []
+    result: "1262/22708 events retained;22unobservable. Full-history original/15m multiples60m15.2215/1.00245,v3 89.0068/1.09220;all eight do not improve.2026v3 mean147.38/294.80bp but14trades,capital2.5761/1.0715,excluding best3weeks -40.82bp. Notion EXP-231."
+    artifacts: [monday-harmonic-15m-confluence-20261031-v1]
     canonical_report: experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/summary.json
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: 'Aggregate original5m into complete UTC 15m bars; unfinished higher candle excluded. Pre-touch5m tail can invalidate existing zones only. Original score lookahead retained. Reuse5m harmonic and earlier exact native caches;1h also reuses completed15m controls.'
+    notes: "Both arms531causal checks,1284source stamps,531source symbols equal prior5m,zero new signal orders or cache mismatches.32focused tests and2cache-regression reruns;18old5m windows exact. Original score lookahead retained. Two-timeframe16tests Holm minimum0.78716;no post-result tuning. Actual native order1h then15m,exact earlier controls reused;completed5m tail invalidates only."
   - experiment_id: exp-monday-harmonic-1h-confluence-20261031-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: ff7f6f5a54
-    status: active
+    source_commit: 713d178899
+    status: rejected
     question: Does pre-touch 1h Pyharmonics confluence improve the original eight Monday1618 accounts?
     single_variable: Change only harmonic timeframe; keep1000bar lookback,10spacing,3percent ratios,original score,entries,exits,fees and account rules.
-    result: Pending independently frozen timeframe arm; no outcome-driven tuning.
-    artifacts: []
+    result: "485/22708 events retained;677unobservable. Full-history original/1h multiples60m15.2215/1.07720,v3 89.0068/1.00686;all eight do not improve. V3 only10events,spike0,allin3only1;2026v3 only4trades. Notion EXP-232."
+    artifacts: [monday-harmonic-1h-confluence-20261031-v1]
     canonical_report: experiments/active/exp-monday-harmonic-1h-confluence-20261031-v1/summary.json
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: 'Aggregate original5m into complete UTC 1h bars; unfinished higher candle excluded. Pre-touch5m tail can invalidate existing zones only. Original score lookahead retained. Reuse5m harmonic and earlier exact native caches;1h also reuses completed15m controls.'
+    notes: "Both arms531causal checks,1284source stamps,531source symbols equal prior5m,zero new signal orders or cache mismatches.32focused tests and2cache-regression reruns;18old5m windows exact. Original score lookahead retained. Two-timeframe16tests Holm minimum0.78716;no post-result tuning. Actual native order1h then15m,exact earlier controls reused;completed5m tail invalidates only."
   - experiment_id: exp-spike-v131-forward-review-20261031-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 0319aa9ca7

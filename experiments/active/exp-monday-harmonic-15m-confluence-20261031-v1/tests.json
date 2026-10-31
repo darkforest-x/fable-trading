@@ -3,5 +3,11 @@
   "failed": 0,
   "log": "tests.log",
   "legacy_5m_real_window_parity": 18,
-  "scope": "Higher-frame causal aggregation, prefix/future mutation, incomplete constituents, raw5m invalidation, frozen trading config, cache fee validation and original runner regressions."
+  "scope": "Higher-frame causal aggregation, prefix/future mutation, incomplete constituents, raw5m invalidation, frozen trading config, cache fee validation and original runner regressions.",
+  "followup_cache_receipt_regressions": {
+    "passed": 2,
+    "failed": 0,
+    "log": "tests-cache-receipts.log",
+    "note": "Focused rerun after recording caches actually available at execution; not two additional unique tests."
+  }
 }
