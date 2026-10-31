@@ -16,18 +16,18 @@ schema_version: 1
 experiments:
   - experiment_id: exp-monday-order-only-originalscore-20261031-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: running
+    source_commit: 78577fb442
+    status: complete
     question: Original touch-bar backtest score versus replacing primary entry admission with EMA order >=3.
     single_variable: Both arms use stored touch-bar scores; only primary admission changes. Preserve 20261028 BE17/lock50, targets, sizing, score-based adds and real fees.
-    result: Pending; reuse prior native orders and original leaky_rest_touchbar baseline.
+    result: 'All seven non-All-in accounts decline in full-history and 2026 net capital. Full 1000U final original/order-only: V2 60m 15222/505, V2 5m 2379/432, V3 89007/7025, add 202841/12674, add20 327744/4363, lock 90978/7106, Spike 4660/203. All-in original 220 monthly-start trials: 10x 100/24.09 percent, 100x 94.55/3.64 percent. V3/linear-add/lock drawdowns improve, but returns decline; no unified replacement supported.'
     artifacts: []
     canonical_report: experiments/active/exp-monday-order-only-originalscore-20261031-v1/summary.json
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: Owner explicitly requests original backtest score, including its known fill-bar lookahead. No paper service changes; prior causal experiment retained separately.
+    notes: 'Owner explicitly retains original fill-bar score lookahead; BE17/lock50, targets, sizing/add rules and seed ensembles unchanged. 1500 EMA events;217 missing scores;1283 V3 parents,285 zero linear allocations. 602 symbols,508 completely reused;45865 cached fills,656 native positions/1312 fills;96 necessary parent dependencies,0 avoidable duplicate orders. Original counts/wins,7 account metrics and All-in monthly results reproduced. 32674 score rows,636 clocks,fees checked;99 tests. All 2026 matched p>0.05. Notion40a8856479af817ea46fe10e7bfdd2f0. Prior causal study retained;no service changes.'
   - experiment_id: exp-monday-order-only-20261031-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 0f0bf00c29

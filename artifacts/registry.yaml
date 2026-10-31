@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-order-only-originalscore-20261031-v1
+    artifact_type: manifest
+    role: original_touchbar_score_order_filter_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 78577fb442
+    generator_commit: 392114d49a
+    source_path: experiments/active/exp-monday-order-only-originalscore-20261031-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-order-only-originalscore-20261031-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    license: internal-research
+    notes: 'Original stored score in both arms. Seven account returns fall; All-in 100x monthly reach 94.55 to3.64percent. 45865 fills reused,656 new native positions;99 tests and baseline/fee/clock/cache parity. Read headline.csv,allin_monthly.json,validation.json;original score lookahead retained by request.'
   - artifact_id: monday-order-only-20261031-v1
     artifact_type: manifest
     role: frozen_eight_strategy_primary_order_filter_comparison
