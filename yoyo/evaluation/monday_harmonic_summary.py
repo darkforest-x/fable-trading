@@ -155,6 +155,22 @@ def collect_controls(config):
     assert maxerr<1e-7,maxerr
     for col in ('side','entry','stop','target_price','exit_price'):
         assert np.allclose(expected[col],signals[col],equal_nan=True,rtol=1e-10,atol=1e-10),col
+    # A missing matched set is different from an unfilled random attempt.
+    from yoyo.evaluation.monday_limit_backstop import CODEX
+    c=w[w.rule.eq('v2')&w.minutes.eq('m60')&w.control_id.gt(0)]
+    missing=sorted(set(gates.loc[gates.admitted,'event'])-set(c.event));unmatched=[]
+    for symbol in sorted({e.split(':')[0] for e in missing}):
+        original=read_csv(CODEX/'symbols'/symbol/'orders.csv.gz')
+        for event in [e for e in missing if e.split(':')[0]==symbol]:
+            n=int((original.event_id.eq(event)&original.control_id.gt(0)).sum())
+            assert n==0,('missing_existing_controls',event,n)
+            unmatched.append(dict(event=event,original_control_orders=n))
+    assert w.loc[~w.filled,'net'].eq(0).all()
+    selected=int(gates.admitted.sum());matched=c.event.nunique()
+    dump(root/'control-coverage.json',dict(selected_events=selected,matched_events=int(matched),
+        coverage_pct=100*matched/selected if selected else None,missing=unmatched,
+        reason='The original matched-bucket generator supplied no random orders for listed events; no imputation or resampling.',
+        control_attempts=len(c),unfilled_control_attempts=int((~c.filled).sum()),all_unfilled_attempts_remain_zero=True))
     w.to_csv(root/'matched-controls.csv.gz',index=False)
     totals={k:sum(r['paths'][p].get(k,0) for r in receipts for p in r['paths'])
             for k in ('reused','new_orders','new_positions','new_fills','dependent_parents','known_empty_children','known_empty_prior_orders')}
