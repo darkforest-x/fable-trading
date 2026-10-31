@@ -46,20 +46,32 @@ def classify(o,h,l,c,level,side):
     return 'body_on_level'
 
 
-def outcome(b,i,side,level,edge,horizon,scale):
+def future_windows(b):
+    """Precompute fixed-horizon future descriptors once;no execution simulation."""
+    cache={};n=len(b);complete=b.complete.to_numpy(bool)
+    for h in HORIZONS:
+        idx=np.arange(n)[:,None]+np.arange(1,h+1);valid=idx<n;idx=np.minimum(idx,n-1)
+        cache[h]=dict(valid=(valid&complete[idx]).all(axis=1),
+            last=b.close.to_numpy()[idx[:,-1]],high=b.high.to_numpy()[idx].max(axis=1),
+            low=b.low.to_numpy()[idx].min(axis=1),close_min=b.close.to_numpy()[idx].min(axis=1),
+            close_max=b.close.to_numpy()[idx].max(axis=1))
+    return cache
+
+
+def outcome(b,i,side,level,edge,horizon,scale,cache=None):
     """Future price descriptors only;missing timestamps or bars leave NA outcomes."""
-    f=b.iloc[i+1:i+1+horizon]
-    if len(f)!=horizon or not f.complete.all():return {}
-    c=float(b.close.iloc[i]);pct=side*(float(f.close.iloc[-1])/c-1)*100
-    favorable=(f.high.max()-c) if side==1 else (c-f.low.min())
-    adverse=(c-f.low.min()) if side==1 else (f.high.max()-c)
+    f=(cache if cache is not None else future_windows(b))[horizon]
+    if not f['valid'][i]:return {}
+    c=float(b.close.iloc[i]);pct=side*(float(f['last'][i])/c-1)*100
+    favorable=(f['high'][i]-c) if side==1 else (c-f['low'][i])
+    adverse=(c-f['low'][i]) if side==1 else (f['high'][i]-c)
     extreme=b.low.iloc[i] if side==1 else b.high.iloc[i]
     return {f'return_pct_{horizon}':pct,f'positive_{horizon}':float(pct>0),
         f'favorable_pct_{horizon}':max(0.,float(favorable/c*100)),f'adverse_pct_{horizon}':max(0.,float(adverse/c*100)),
-        f'level_lost_{horizon}':float(((f.close-level)*side<0).any()),
-        f'wick_broken_{horizon}':float((f.low<extreme).any() if side==1 else (f.high>extreme).any()),
-        f'near_edge_reached_{horizon}':float((f.high>=edge).any() if side==1 else (f.low<=edge).any()),
-        f'return_tr_{horizon}':side*(float(f.close.iloc[-1])-c)/scale if np.isfinite(scale) and scale>0 else np.nan}
+        f'level_lost_{horizon}':float(f['close_min'][i]<level if side==1 else f['close_max'][i]>level),
+        f'wick_broken_{horizon}':float(f['low'][i]<extreme if side==1 else f['high'][i]>extreme),
+        f'near_edge_reached_{horizon}':float(f['high'][i]>=edge if side==1 else f['low'][i]<=edge),
+        f'return_tr_{horizon}':side*(float(f['last'][i])-c)/scale if np.isfinite(scale) and scale>0 else np.nan}
 
 
 def census(b,symbol):
@@ -68,7 +80,7 @@ def census(b,symbol):
     tr=pd.concat([b.high-b.low,(b.high-b.close.shift()).abs(),(b.low-b.close.shift()).abs()],axis=1).max(axis=1)
     tr=tr.where(b.complete&b.close.shift().notna());scale=tr.rolling(14,min_periods=14).mean().shift()
     vol=scale/b.close.shift();buckets=np.floor(4*np.log2(vol.where(vol>0)))
-    groups=pd.Series(np.arange(len(b)),index=keys).groupby(level=0);rows=[];weeks=[]
+    groups=pd.Series(np.arange(len(b)),index=keys).groupby(level=0);rows=[];weeks=[];future=future_windows(b)
     for week,g in groups:
         pos=g.to_numpy();mon=pos[local[pos].dayofweek==0];label=str(week.date())
         if len(mon)!=2 or not b.complete.iloc[mon].all():
@@ -96,7 +108,7 @@ def census(b,symbol):
                     penetration_width=side*(level-extreme)/width,reclaim_width=side*(c-level)/width,signal_range_tr=span/scale.iloc[i] if scale.iloc[i]>0 else np.nan,
                     approach4_pct=-side*(c/b.close.iloc[i-4]-1)*100 if i>=4 and b.complete.iloc[i-4:i+1].all() else np.nan,
                     **{x:float(bar[x]) for x in OHLC})
-                for horizon in HORIZONS:row.update(outcome(b,i,side,level,lo if side==1 else hi,horizon,scale.iloc[i]))
+                for horizon in HORIZONS:row.update(outcome(b,i,side,level,lo if side==1 else hi,horizon,scale.iloc[i],future))
                 rows.append(row)
                 if penetrates:touches+=1
                 if kind:reclaims+=1

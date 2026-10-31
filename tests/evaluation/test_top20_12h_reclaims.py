@@ -59,5 +59,14 @@ class ReclaimTests(unittest.TestCase):
         o,w=census(b,'TST');self.assertFalse(o.is_event.any())
         self.assertEqual(w[w.week.eq('2026-09-21')].status.iloc[0],'incomplete_monday')
 
+    def test_future_descriptors_exclude_signal_range(self):
+        b=self.fixture();b.loc[b.index[6],OHLC]=[92.,96.,86.,90.]
+        o,_=census(b,'TST');e=o[o.bar_i.eq(5)&o.side.eq(1)].iloc[0]
+        self.assertAlmostEqual(e.return_pct_2,(100/92-1)*100)
+        self.assertAlmostEqual(e.favorable_pct_2,13/92*100)
+        self.assertAlmostEqual(e.adverse_pct_2,6/92*100)
+        self.assertEqual(e.level_lost_2,0);self.assertEqual(e.wick_broken_2,1)
+        self.assertEqual(e.near_edge_reached_2,1)
+
 
 if __name__=='__main__':unittest.main()
