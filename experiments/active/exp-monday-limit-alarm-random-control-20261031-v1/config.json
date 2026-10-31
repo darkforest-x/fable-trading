@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-monday-limit-alarm-random-control-20261031-v1",
+  "question": "Owner 2026-10-31 '先补报警对照': inside the same 30-minute alarm windows, does entering the same coin at a random time with the same order geometry do as well as entering at its Monday 1.618 touch? Separates the 1.618 from 'buy any dip after a market-wide spike'.",
+  "single_variable": "Entry time inside the alarm window: the signal's 1.618 touch vs every other 5m submission bar of the same symbol from the alarm bar to alarm+25 min; same percentage limit distance, scaled target, backstop, breakeven, confirmation, fees, slippage and sizing.",
+  "source_experiment": "experiments/active/exp-monday-limit-alarm-entry-20261029-v1",
+  "threshold": 25,
+  "window_min": 30,
+  "variant": ["near_monday_edge", 30],
+  "be_offset_bp": 17.0,
+  "slippage_bp": 10.0,
+  "control_orders": "all other submission bars with open in [alarm_ms, alarm_ms + 25 min], limit at c[j] * level / c[submit], target scaled by the same ratio, expires at the bar opening alarm_ms + 30 min; unfilled = no trade",
+  "matching": "same symbol, side and 30-minute alarm window; 14-bar TR/close log2 quarter bucket recorded, bucket-matched subset reported (not a filter)",
+  "control_portfolios": 5,
+  "bootstrap": 10000,
+  "seed": 20261031,
+  "fees": "Codex config maker 0.02 / taker 0.05 percent (OKX Lv1, read 2026-10-23); limit entries are maker, target exits maker, other exits taker plus 10bp slippage",
+  "parity": "signal rows rerun in this native run must reproduce the 10-29 near30 hold fills (net, reason) per path",
+  "null_control": "This is the matched random control itself: same symbol, same alarm window, same geometry and barriers. Episodes (alarms) are the independent unit; bootstrap over episodes.",
+  "known_limits": "25-coin threshold chosen in sample (2026-10-27); 122 of 129 alarms are long; controls can fill only inside the window; geometry copies the signal's submission distance, so wide touch-bar wicks give deep control limits.",
+  "training_eligible": false,
+  "production_eligible": false
+}
