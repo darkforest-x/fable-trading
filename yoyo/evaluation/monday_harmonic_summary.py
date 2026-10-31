@@ -191,7 +191,7 @@ def validate_outputs(config):
                 assert p['prz_low']<=gates.loc[p['event'],'entry']<=p['prz_high']
             patterns+=1
     pop=population(cfg);prior=prior_study(cfg)
-    score_rows=positions=clocks=parent_reruns=0;worst=0.;mismatches=[]
+    score_rows=positions=clocks=parent_reruns=native_signal_orders=0;worst=0.;mismatches=[]
     syms=sorted(gates.loc[gates.admitted,'symbol'].unique())
     for symbol in syms:
         d=root/'symbols'/symbol;saved=read_csv(d/'orders.csv.gz')
@@ -202,6 +202,7 @@ def validate_outputs(config):
             p=d/path;r=json.loads((p/'done.json').read_text());mismatches.extend(r['cache_mismatches'])
             audit=json.loads((p/'native-audit.json').read_text())
             orders=read_csv(p/'native-orders.csv.gz').set_index('trade_id')
+            native_signal_orders+=int(orders.control_id.eq(0).sum())
             source=prior/'symbols'/symbol if prior else None
             if source and (source/'orders.csv.gz').exists():
                 old=read_csv(source/'orders.csv.gz').set_index('trade_id');parents=set(orders.parent.dropna())
@@ -227,11 +228,13 @@ def validate_outputs(config):
                 worst=max(worst,abs(net-row.net_notional_bp));assert abs(net-row.net_notional_bp)<1e-6
                 positions+=1
     assert not mismatches,mismatches[:3]
+    assert native_signal_orders==0,native_signal_orders
     result=dict(events=len(gates),observable=len(seen),source_files_unchanged=len(stamps),
         prefix_and_future_mutation_checks=prefix_checks,validated_patterns=patterns,
         score_metadata_rows_checked=score_rows,new_native_positions_checked=positions,
         confirmation_clocks_checked=clocks,max_fee_net_error_bp=worst,
         exact_cached_orders_rerun_only_as_dependencies=parent_reruns,cache_mismatches=0,
+        native_signal_orders=native_signal_orders,
         touch_bar_excluded=True,no_execution_replay=True)
     dump(root/'validation.json',result);print(json.dumps(result))
 
