@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-eth-1618-score-calibration-20261031-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: active
+    question: Can past-only score calibration improve ETH repeated1618 selection under unchanged0.7percent stops and real costs?
+    single_variable: Same frozen model scores preceding-quarter calibration and following-quarter test; mapping-to-admission changes only,with lagged raw0 control and fresh-model anchor.
+    result: Pending; fixed7-rule grid and shrunk intercept calibration,near primary,far/opposite secondary,no test-winner promotion.
+    artifacts: []
+    canonical_report: experiments/active/exp-eth-1618-score-calibration-20261031-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Owner chose ETH-only optimization. Reuse21priorquarter models and all native fills;VectorBT admission/cost accounting on cached fill events,no price replay. NY-week purge,same-model scale,quarterly tests2025Q2..2026Q4. No paper/live changes.
   - experiment_id: exp-btc-eth-xau-1618-models-20261031-v2
     source_repo: darkforest-x/fable-trading
     source_commit: 9c0ad41802
