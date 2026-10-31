@@ -156,8 +156,10 @@ def make_features(frame, base, i, symbol, side, high, low, mon_close, level, ord
     return feature
 
 
-def candidates(symbol, frame):
-    cfg, tick = config(), .1 if symbol=='BTC' else .01
+def candidates(symbol, frame, *, cfg=None, tick=None):
+    """Optional explicit research configuration; historical defaults unchanged."""
+    cfg = config() if cfg is None else cfg
+    tick = (.1 if symbol=='BTC' else .01) if tick is None else tick
     base = base_features(frame)
     opens = frame.index-STEP
     fif = frame.copy()
