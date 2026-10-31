@@ -1,0 +1,16 @@
+{
+  "experiment_id": "exp-m1-ranked-booklet-20261031-v1",
+  "question": "Owner 2026-10-31 '写个策略小册我看看 要和之前一样': continuous single-seed capital paths for the 1m rank-mapped entry score, in the strategy-booklet format, next to the frozen pre-touch score.",
+  "source_experiment": "experiments/active/exp-monday-limit-1m-account-label-20261031-v1/config.json",
+  "arms": {"m1_ranked": ["v3_m1_ranked", "spike_m1_ranked"], "frozen": ["frozen_full", "frozen_full"]},
+  "paths": {
+    "v3": {"allocator": "linear", "leverage": 1, "seed": 20261103, "start": "2020-01-01"},
+    "v3add20": {"allocator": "frac", "slots": 20, "leverage": 3, "seed": 20261103, "start": "2020-01-01"},
+    "spike": {"allocator": "slots", "slots": 10, "leverage": 5, "liq_pct": 19.0, "seed": 20261102, "start": "2020-01-01"},
+    "allin3": {"allocator": "allin", "leverage": 3, "seed": 20261105, "start": "2023-01-01"}
+  },
+  "seed_policy": "The seeds and start dates of exp-strategy-booklet-paths-20261027-v1, fixed before any output; one continuous run per account and arm, never a splice of medians.",
+  "fills": "Label-run fills of exp-monday-limit-1m-account-label-accounts-20261031-v1 (worse path, 10bp non-target slippage, maker 2bp / taker 5bp); no new fills.",
+  "training_eligible": false,
+  "production_eligible": false
+}
