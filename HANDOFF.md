@@ -1,3 +1,9 @@
+## 2026-11-01 — Clean reversal label audit, owner boundary review pending
+
+- Continued from exp-clean-reversal-score-20261101-v1 without changing labels or refitting. New exp-clean-reversal-audit-20261101-v1 flags46of220gallery candidates:33only2of4advancing blocks,12close drawdown larger than terminal progress,3mostly not favorable relative to signal close. Flags overlap;174unflagged are also not owner-confirmed.
+- Original1901OOS signals become1842first-per-episode observations;904match across238samecoin/side/quarter/past-volatility strata,938unmatched excluded. Original24causal features scaled with savedfold trainingpercentiles. Rejectionwick/+4.61pp and4bar directional efficiency/+4.70pp weak associations;24feature simultaneous CIs crosszero,Holm p0.720/0.747. Zero new models,labels,trades or production changes.
+- Artifacts clean-reversal-audit-20261101:3signal-prefix/future-review paired sheets and6boundaryexamples,220CSV.8tests,all original220columns preserved,12figure events/4PNGs inspected. Owner asked to keep boundary examples by1–6(left-to-right,top-to-bottom);no response assumed. Notion EXP-235 appended. Learning: composite-label-cutoffs-do-not-enforce-each-shape-requirement.md.
+
 ## 2026-11-01 — Clean reversal candidates and first feature-score study
 
 - Owner asked to find clean reversals and score signal-time features;explicitly chose sustainedreverseprogress/smallpullback. Research-only tabular fit authorized. `exp-clean-reversal-score-20261101-v1` uses all2256causal firstfiveglyphs(2098alt+158BTC),not just hindsight601+43gallery.

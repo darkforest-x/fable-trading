@@ -19,6 +19,19 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: clean-reversal-audit-20261101-v1
+    artifact_type: manifest
+    role: frozen_clean_label_review_and_matched_feature_diagnostics
+    source_repo: darkforest-x/fable-trading
+    source_commit: b088b1ade7
+    generator_commit: b088b1ade7
+    source_path: artifacts/clean-reversal-audit-20261101/delivery.json
+    storage_uri: repo://artifacts/clean-reversal-audit-20261101/delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 3samecoin/sameside/sameyear nearest-feature comparison sheets plus6boundaryexamples;220reviewCSV.46flagged,174unflagged allunconfirmed.904matched episodes,24original features,2000NYweek bootstraps and conditional permutations. No significant family-adjusted association,zero new models,original labels preserved.
+
   - artifact_id: clean-reversal-score-20261101-v1
     artifact_type: manifest
     role: causal_tabular_reversal_quality_scoring_exploratory_research

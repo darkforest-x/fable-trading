@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-clean-reversal-audit-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: b088b1ade7
+    status: inconclusive
+    question: Do frozen clean-reversal candidates meet their intended path semantics, and do original causal features differ under matched comparison?
+    single_variable: Diagnostic audit only; retain all original labels and models, add review flags and matched original-feature associations without fitting.
+    result: 220gallery candidates include46unique priority-review flags;174unflagged remain unconfirmed.904of1842first-per-episode OOSsamples matched in238strata. Wick and4bar efficiency differences4.61/4.70percentilepoints have simultaneous95CIs crossingzero and Holm p0.720/0.747;no validated predictor.
+    artifacts: [clean-reversal-audit-20261101-v1]
+    canonical_report: experiments/active/exp-clean-reversal-audit-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Zero fits or relabels;8focused tests,original220columns preserved,12charted events/4review figures verified. Signalprefix61bars and original60bar future review have separate axes. Owner boundary labels pending;no automatic rejection from flags. Currenttop20 history remains exploratory. Notion EXP-235 appended.
+
   - experiment_id: exp-clean-reversal-score-20261101-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 157b0d0605
