@@ -229,6 +229,11 @@ def summarize(config, workers):
 
     # Per event: the signal against the mean of its filled controls; the signal's fill time sets the period.
     sm = sig.set_index('event')
+    # Primary: per attempt. Every submitted control order counts, unfilled = 0bp (a limit control's fill is itself an
+    # outcome; see docs/learnings/limit-fill-complete-pairs-select-on-outcome.md). Filled-only is descriptive.
+    att = sub[['trade_id', 'event', 'bucket', 'sig_bucket']].merge(ctl[['trade_id', 'net']], on='trade_id', how='left')
+    att['net'] = att.net.fillna(0.)
+
     def per_event(c):
         ev = pd.DataFrame(dict(sig=sm.net, ctl=c.groupby('event').net.mean(), n_ctl=c.groupby('event').size(),
                                alarm_ms=sm.alarm_ms, entry_t=sm.entry_t)).dropna(subset=['sig', 'ctl'])
@@ -243,16 +248,21 @@ def summarize(config, workers):
         boot = rng.choice(ep, (cfg['bootstrap'], len(ep)), replace=True).mean(axis=1)
         return dict(episodes=int(len(ep)), mean_bp=float(ep.mean()), positive_pct=float(100*(ep > 0).mean()),
                     ci95=[float(np.quantile(boot, .025)), float(np.quantile(boot, .975))])
-    res['trades'], res['events'], res['episodes'], res['bucket_matched'] = {}, {}, {}, {}
-    ev_all = per_event(ctl)
-    ev_b = per_event(ctl[ctl.bucket == ctl.sig_bucket])
+    res['trades'] = {}
+    views = {'events_attempt': per_event(att), 'events_attempt_bucket': per_event(att[att.bucket == att.sig_bucket]),
+             'events_filled_only': per_event(ctl), 'events_filled_only_bucket': per_event(ctl[ctl.bucket == ctl.sig_bucket])}
+    for k in views:
+        res[k] = {}
     for per in PERIODS:
         res['trades'][per] = dict(signal=stats(sig[in_period(sig, per, window)]), control=stats(ctl[in_period(ctl, per, window)]))
-        for name, ev, out in (('all', ev_all, res['events']), ('bucket', ev_b, res['bucket_matched'])):
+        for name, ev in views.items():
             e = ev[in_period(ev, per, window)]
-            out[per] = dict(events=int(len(e)), signal_bp=float(e.sig.mean()) if len(e) else None,
-                            control_bp=float(e.ctl.mean()) if len(e) else None, diff_bp=float(e['diff'].mean()) if len(e) else None,
-                            **({'episode': episode_ci(e)} if name == 'all' else {}))
+            res[name][per] = dict(events=int(len(e)), signal_bp=float(e.sig.mean()) if len(e) else None,
+                                  control_bp=float(e.ctl.mean()) if len(e) else None, diff_bp=float(e['diff'].mean()) if len(e) else None,
+                                  episode=episode_ci(e))
+        f = views['events_filled_only']
+        out = sig[in_period(sig, per, window) & ~sig.event.isin(f.index)]
+        res['events_filled_only'][per]['excluded_signal'] = dict(n=int(len(out)), mean_bp=float(out.net.mean()) if len(out) else None)
     # Control value per submitted order, unfilled = 0.
     res['control_per_submitted_bp'] = float(ctl.net.sum()/max(len(sub), 1))
     res['control_by_offset'] = {str(k): dict(n=int(len(g)), mean_bp=float(g.net.mean())) for k, g in ctl.groupby('offset')}
