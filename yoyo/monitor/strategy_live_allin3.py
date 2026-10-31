@@ -48,7 +48,7 @@ def ledger():
 def _ledger(signature):
     manifest = json.loads((SOURCE / 'manifest.json').read_text())
     meta = manifest['accounts'][ARM]
-    scores = {r['event']: float(r['causal']) for r in csv_rows(SCORES)}
+    scores = {r['event']: float(r['causal']) for r in csv_rows(SCORES) if r['causal']}
     rows, ranking = [], {}
     raw = list(enumerate(csv_rows(SOURCE / f'{ARM}-ledger.csv.gz')))
     # Group native reads by symbol; the final display order is selected by the API.
