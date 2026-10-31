@@ -105,6 +105,8 @@ def draw(r):
     fig.text(.955, .95, stamp(r['signal_open'], '%Y-%m-%d %H:%M')+'  北京时间', fontsize=17, ha='right', va='top')
     direction = '上穿 · 红叉 ×' if side == 'upper' else '下穿 · 绿勾 ✓'
     fig.text(.045, .884, direction, color=color, fontsize=18)
+    fig.text(.30, .884, ('上' if side == 'upper' else '下')+f' 1.618  {r["level"]:,.1f}',
+             color=GOLD, fontsize=16)
     fig.text(.955, .884, f'信号在越线第 {r["ordinal"]} 根  /  整段越线 {r["episode_bars"]} 根',
              fontsize=16, color=FG, ha='right')
     ax = fig.add_axes([.07, .19, .80, .64])
@@ -123,10 +125,6 @@ def draw(r):
     # The level never appears over Monday candles before it was available.
     a, b = max(-.5, x(r['ready'])-.5), min(59.5, x(r['expiry'])-.5)
     ax.hlines(r['level'], a, b, color=GOLD, lw=1.65, zorder=2)
-    ax.annotate(('上' if side == 'upper' else '下')+f' 1.618   {r["level"]:,.1f}',
-                xy=(1, r['level']), xycoords=('axes fraction', 'data'),
-                xytext=(0, 9), textcoords='offset points', ha='right', va='bottom',
-                color=GOLD, fontsize=15, bbox=dict(facecolor=BG, edgecolor='none', pad=3))
     for j, c in enumerate(candles):
         candle_color = '#eef1f5' if j == 30 else '#8792a2'
         bottom, top = sorted([c['open'], c['close']])
