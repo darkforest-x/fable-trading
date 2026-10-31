@@ -50,6 +50,22 @@ def population(cfg):
     return x[~x.index.isin(BAD_EVENTS)]
 
 
+def admitted_population(cfg):
+    """Reuse native execution for a frozen external event filter, if supplied.
+
+    This hook never changes scores or execution. Its CSV must contain unique
+    event IDs and an explicit boolean admitted flag, prepared before this run.
+    Without the opt-in key, the original EMA-only experiment is unchanged.
+    """
+    pop = population(cfg)
+    if cfg.get('admission_events'):
+        gates = read_csv(ROOT/cfg['admission_events'], usecols=['event', 'admitted'])
+        if not gates.event.is_unique or not gates.admitted.isin([True, False]).all():
+            raise ValueError('Invalid external event admission ledger')
+        return pop.loc[pop.index.intersection(gates.loc[gates.admitted, 'event'], sort=False)]
+    return pop[pop.l2_order_score.ge(cfg['min_order'])]
+
+
 def construct(original, pop, close, tick, cfg):
     """Change primary admission only; retain target, add and stop semantics."""
     e = original[original.event_id.isin(pop.index) & original.reclaim_minutes.isin([5,60])].copy()
@@ -70,6 +86,14 @@ def construct(original, pop, close, tick, cfg):
         ('spike',m60&near,'P',18,cfg['breakeven_bp'],'spike'),
     ]:
         x = e[mask].copy()
+        if cfg.get('preserve_original_admission', False):
+            if rule == 'v2':
+                x = x[x.score.ge(cfg['v2_threshold'])]
+            elif rule == 'spike':
+                x = x[x.score.ge(cfg['far_score']) & x.order_score.ge(cfg['min_order'])]
+            else:
+                modes = np.where(x.score.ge(cfg['far_score']), 'opposite_1618', 'range_0.618')
+                x = x[x.score.ge(cfg['v3_cut']) & x.exit_mode.eq(modes)]
         x['rule'] = rule
         x['stop'] = stops(x,kind,value,tick)
         x['reclaim_ref'] = x.entry
@@ -218,8 +242,8 @@ def process(symbol, config):
     out = root/'symbols'/symbol; out.mkdir(parents=True,exist_ok=True)
     if (out/'done.json').exists():
         return json.loads((out/'done.json').read_text())
-    pop = population(cfg)
-    selected = pop[pop.index.str.startswith(symbol+':') & pop.l2_order_score.ge(cfg['min_order'])]
+    pop = admitted_population(cfg)
+    selected = pop[pop.index.str.startswith(symbol+':')]
     reused_symbol = reuse_unchanged_symbol(symbol, cfg, out, selected)
     if reused_symbol is not None:
         return reused_symbol
@@ -240,7 +264,8 @@ def process(symbol, config):
     x = construct(original,selected,p.close.to_numpy(),tick,cfg)
     fills = read_csv(origin/'trades.csv.gz',usecols=['trade_id','entry_i']).set_index('trade_id')
     x['native_touch_i'] = x.original_id.map(fills.entry_i)
-    core = x[x.control_id.eq(0)&x.rule.eq('spike')].set_index('event')
+    core_rule = 'v2' if cfg.get('preserve_original_admission', False) else 'spike'
+    core = x[x.control_id.eq(0)&x.rule.eq(core_rule)&x.reclaim_minutes.eq(60)].set_index('event')
     assert set(core.index)==set(selected.index)
     x['cohort_time'] = x.event.map(pd.Series((p.index[core.native_touch_i.astype(int)]+pd.Timedelta(minutes=5)).astype(str),index=core.index))
     x.to_csv(out/'orders.csv.gz',index=False)
@@ -253,7 +278,7 @@ def process(symbol, config):
         reused, reused_ids, known_empty, mismatches = [],set(),set(),[]
         prior = prior_study(cfg)
         prior_empty = set()
-        if prior is not None:
+        if prior is not None and (prior/'symbols'/symbol/'orders.csv.gz').exists():
             source = prior/'symbols'/symbol
             old_orders = read_csv(source/'orders.csv.gz').set_index('trade_id')
             old_rows = read_csv(source/path/'trades.csv.gz').set_index('trade_id')
@@ -338,7 +363,7 @@ def process(symbol, config):
 
 
 def symbols(cfg):
-    pop=population(cfg);pop=pop[pop.l2_order_score.ge(cfg['min_order'])]
+    pop=admitted_population(cfg)
     prior=ROOT/cfg['baseline']/'ohlc/symbols'
     return sorted(set(pop.index.str.split(':').str[0])|{d.name for d in prior.iterdir() if (d/'done.json').exists()})
 
