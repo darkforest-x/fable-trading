@@ -163,6 +163,79 @@ def collect_controls(config):
     return w,totals
 
 
+def validate_outputs(config):
+    """Audit saved clocks, source stamps and native fills without replaying them."""
+    from yoyo.evaluation.monday_harmonic import events, STEP
+    from yoyo.evaluation.monday_order_only import population, prior_study, same_order
+    from yoyo.evaluation.monday_limit_backstop import CODEX
+    cfg=json.loads(config.read_text());root=config.parent
+    gates=read_csv(ROOT/cfg['admission_events']).set_index('event')
+    expected=events(cfg).set_index('event')
+    assert gates.index.is_unique and set(gates.index)==set(expected.index)
+    assert (pd.to_datetime(gates.cutoff,utc=True)==pd.to_datetime(expected.loc[gates.index].cutoff,utc=True)).all()
+    seen=gates[gates.observable]
+    assert (pd.to_datetime(seen.last_input_close,utc=True)==pd.to_datetime(seen.cutoff,utc=True)).all()
+    stamps={};prefix_checks=0;patterns=0
+    for path in (root/'scan').glob('*/done.json'):
+        r=json.loads(path.read_text())
+        for s in r['sources']:stamps[s['path']]=s
+        for c in r['causality_checks']:
+            assert c['prefix_equal'] and c['future_mutation_equal'];prefix_checks+=1
+    for path,saved in stamps.items():assert file_stamp(path)==saved,path
+    with gzip.open(root/'patterns-validated.jsonl.gz','rt') as handle:
+        for line in handle:
+            p=json.loads(line);cut=pd.Timestamp(p['cutoff'])
+            assert all(pd.Timestamp(v)+STEP<=cut for v in p['points'])
+            assert pd.Timestamp(p['xabc_confirmed_at'])<=cut
+            if p['confluence']:
+                assert p['prz_low']<=gates.loc[p['event'],'entry']<=p['prz_high']
+            patterns+=1
+    pop=population(cfg);prior=prior_study(cfg)
+    score_rows=positions=clocks=parent_reruns=0;worst=0.;mismatches=[]
+    syms=sorted(gates.loc[gates.admitted,'symbol'].unique())
+    for symbol in syms:
+        d=root/'symbols'/symbol;saved=read_csv(d/'orders.csv.gz')
+        np.testing.assert_allclose(saved.score,saved.event.map(pop.score),equal_nan=True)
+        assert set(saved.event)<=set(gates.index[gates.admitted]);score_rows+=len(saved)
+        tick=json.loads((CODEX/'symbols'/symbol/'audit.json').read_text())['protection_tick']
+        for path in ('ohlc','olhc'):
+            p=d/path;r=json.loads((p/'done.json').read_text());mismatches.extend(r['cache_mismatches'])
+            audit=json.loads((p/'native-audit.json').read_text())
+            orders=read_csv(p/'native-orders.csv.gz').set_index('trade_id')
+            source=prior/'symbols'/symbol if prior else None
+            if source and (source/'orders.csv.gz').exists():
+                old=read_csv(source/'orders.csv.gz').set_index('trade_id');parents=set(orders.parent.dropna())
+                for tid,order in orders.iterrows():
+                    if tid in old.index and same_order(old.loc[tid],order,tick):
+                        assert tid in parents,('avoidable_rerun',tid);parent_reruns+=1
+            if not audit['fills']:continue
+            rows=read_csv(p/'native-trades.csv.gz').set_index('trade_id');fills=read_csv(p/'native-fills.csv.gz')
+            assert len(fills)==audit['fills']==2*len(rows)
+            for tid,g in fills.groupby('trade_id'):
+                row=rows.loc[tid];order=orders.loc[tid]
+                en=g[g.phase.eq('entry')].iloc[0];ex=g[~g.phase.eq('entry')].iloc[0]
+                assert en.quantity==ex.quantity and en.bar_i==row.entry_i and ex.bar_i==row.exit_i
+                if order.rule!='add':
+                    assert order.entry_i<row.entry_i<=order.expire_i and row.entry_i==order.native_touch_i
+                    opened=pd.Timestamp(row.entry_time)-STEP
+                    due=opened.floor(f'{int(order.reclaim_minutes)}min')+pd.Timedelta(minutes=2*int(order.reclaim_minutes))
+                    assert int(row.reclaim_due_ns)==due.value;clocks+=1
+                for fill in (en,ex):
+                    fee=cfg['maker_fee'] if fill.phase in ('entry','target') else cfg['taker_fee']
+                    np.testing.assert_allclose(fill.commission,fill.price*fill.quantity*fee,rtol=1e-7,atol=1e-8)
+                net=row.side*(ex.price/en.price-1)*1e4-g.commission.sum()/(en.price*en.quantity)*1e4
+                worst=max(worst,abs(net-row.net_notional_bp));assert abs(net-row.net_notional_bp)<1e-6
+                positions+=1
+    assert not mismatches,mismatches[:3]
+    result=dict(events=len(gates),observable=len(seen),source_files_unchanged=len(stamps),
+        prefix_and_future_mutation_checks=prefix_checks,validated_patterns=patterns,
+        score_metadata_rows_checked=score_rows,new_native_positions_checked=positions,
+        confirmation_clocks_checked=clocks,max_fee_net_error_bp=worst,
+        exact_cached_orders_rerun_only_as_dependencies=parent_reruns,cache_mismatches=0,
+        touch_bar_excluded=True,no_execution_replay=True)
+    dump(root/'validation.json',result);print(json.dumps(result))
+
+
 def summarize(config):
     cfg=json.loads(config.read_text());root=config.parent
     gates=read_csv(ROOT/cfg['admission_events']).set_index('event')
@@ -253,8 +326,9 @@ def monthly(config):
 
 
 if __name__=='__main__':
-    ap=argparse.ArgumentParser();ap.add_argument('action',choices=['validate','summary','monthly'])
+    ap=argparse.ArgumentParser();ap.add_argument('action',choices=['validate','audit','summary','monthly'])
     ap.add_argument('--config',type=Path,default=EXP/'config.json');args=ap.parse_args()
     if args.action=='summary':summarize(args.config.resolve())
     elif args.action=='monthly':monthly(args.config.resolve())
+    elif args.action=='audit':validate_outputs(args.config.resolve())
     else:validate_candidates(args.config.resolve())

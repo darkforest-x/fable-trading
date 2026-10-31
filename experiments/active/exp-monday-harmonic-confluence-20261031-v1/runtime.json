@@ -1,0 +1,15 @@
+{
+  "python": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/pyharmonics/bin/python",
+  "native_python": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python",
+  "environment": "New isolated detection-only venv; training, VectorBT and Nautilus environments unchanged.",
+  "install": [
+    "python -m venv /Users/zhangzc/.local/share/crypto-toolkit/venvs/pyharmonics",
+    "python -m pip install --dry-run --report core-plan.json numpy==2.5.4 pandas==3.1.0 plotly==7.1.0 ta==0.11.0 pytest==9.2.0 pyarrow==26.0.0 pyyaml==6.0.3",
+    "python -m pip install numpy==2.5.4 pandas==3.1.0 plotly==7.1.0 ta==0.11.0 pytest==9.2.0 pyarrow==26.0.0 pyyaml==6.0.3",
+    "python -m pip install --no-deps pyharmonics==1.5.3"
+  ],
+  "optional_packages": "The full dependency dry-run was retained; network/download adapters alpaca/yfinance/binance and kaleido are not installed or used. OHLCTechnicals/HarmonicSearch and their actual import dependencies are installed and behaviorally tested.",
+  "frozen_configuration": "5m, <=1000 prior completed bars, minimum200, peak_spacing10, fib_tolerance0.03, forming0.8; no parameter search.",
+  "notion_experiment": "https://app.notion.com/p/40a8856479af81719cbcc2349cd01f0f",
+  "signal_fill_source": "Existing Nautilus1.231.0 original-score baseline, no signal replay"
+}
