@@ -1,0 +1,18 @@
+{
+  "experiment_id": "exp-clean-reversal-audit-20261101-v1",
+  "parent": "exp-clean-reversal-score-20261101-v1",
+  "scope": "Audit frozen labels and existing signal-time features only. No label replacement, new features, fits, parameter search, fills or production changes.",
+  "label_flags": {
+    "half_or_fewer_advancing_blocks": "sustained_blocks_fraction <= 0.5",
+    "drawdown_exceeds_terminal_progress": "max_close_drawdown_tr > net_progress_tr",
+    "minority_time_in_favorable_direction": "positive_time_fraction < 0.5"
+  },
+  "flag_semantics": "Priority review flags, not automatic rejection or owner gold. No flags also does not confirm a sample.",
+  "feature_audit": "Reuse original chronological OOS events, first event per episode. Scale each original feature by its saved fold's training empirical percentile. Match symbol x side x quarter x training-defined volatility tercile; compare clean versus all nonclean within mixed strata. Equal mixed-stratum weights. No model trained.",
+  "uncertainty": "2000 global NY-week cluster bootstrap replicates, recomputing mixed-stratum differences; simultaneous max-standardized-deviation 95% intervals across all 24 features. Descriptive historical association, not prospective validation. Previously inspected 2026 separately checks consistency.",
+  "null": "2000 label permutations within matched strata; two-sided absolute statistic, plus-one correction and Holm across 24. Conditional exchangeability is an approximation because market weeks may correlate; cluster intervals are also required. No profit claims from p values.",
+  "plots": "Three high-quality references from distinct symbols, BTC first then descending frozen quality, each paired with nearest nonclean gallery example of the same symbol and side using initial-training percentiles of the same 24 features. Prefer same calendar year; declare any all-year fallback. Six flagged examples (two per flag where available), deduplicated. Prefix plots use only 60 preceding bars plus signal, with their own causal y range; review plots use original 30+1+29 bars. Figures are not model inputs.",
+  "random_seed": 20261102,
+  "training_eligible": false,
+  "production_eligible": false
+}
