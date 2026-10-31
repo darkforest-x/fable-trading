@@ -15471,4 +15471,32 @@ experiments:
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: 'One survivor out of 190 slices; the recovery edge 0.64 is a 2020-2024 tercile. Post-hoc description of the survivor (scratch, not selection): 2025-26 has 254 trades on 175 days, +143bp, +119 without the top 3 days and +72 without the top 10; 6 of 7 quarters positive (2025Q1 -54, 14 trades); 293 of 398 are single-coin touches; exits 188 target, 166 failed reclaim, 36 breakeven, 8 backstop; 5 percent tail -1081bp, worst -2971bp, median MAE 3.5 percent. No matched random-time control yet; needed before any paper account.'
+    notes: 'One survivor out of 190 slices; the recovery edge 0.64 is a 2020-2024 tercile. Post-hoc description of the survivor (scratch, not selection): 2025-26 has 254 trades on 175 days, +143bp, +119 without the top 3 days and +72 without the top 10; 6 of 7 quarters positive (2025Q1 -54, 14 trades); 293 of 398 are single-coin touches; exits 188 target, 166 failed reclaim, 36 breakeven, 8 backstop; 5 percent tail -1081bp, worst -2971bp, median MAE 3.5 percent. No matched random-time control yet; needed before any paper account. Control added 2026-11-01 in exp-monday-limit-close-slice-control-20261101-v1.'
+  - experiment_id: exp-monday-limit-alarm-threshold-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: db49f35672
+    status: complete
+    question: 'Owner 2026-11-01 "这个25是最好的参数？" / "先测门槛稳健性": do neighbouring alarm thresholds give results similar to 25?'
+    single_variable: 'Alarm threshold only (10, 15, 20, 25, 35, 50, 75 distinct same-side touches within 5 minutes); the alarm-entry rule otherwise unchanged (30-minute window, resting limit at the 1.618, no score, hold near30 / opp30 / near18, frac N20 3x, maker 2bp / taker 5bp, 10bp non-target-exit slippage, worse path).'
+    result: '3152 new events filled in NautilusTrader (485 symbols, both paths, 0 errors), the rest reused from the alarm-entry and combo runs; threshold 25 equals the 10-29 plan exactly (2146 trades, 3.70x / 2.30x / 2.92x). near30 by threshold (alarms / trades / episode mean bp [95 CI] / frac all, 2025, 2026): 10 415/6406/+48 [16,80]/0.24x DD95, 0.09x, 1.02x; 15 257/4047/+82 [36,127]/0.41x DD93, 0.10x, 1.24x; 20 171/2927/+146 [96,203]/4.72x DD21, 1.10x, 1.29x; 25 129/2146/+162 [104,219]/3.70x DD17, 1.31x, 1.23x; 35 78/1369/+184 [107,264]/1.74x DD18, 0.91x, 1.13x; 50 39/657/+244 [112,379]/2.00x DD3, 1.03x, 1.08x; 75 19/202/+309 [99,551]/1.62x DD4, 0.98x, 1.05x. Unscored control -6bp, 0.33x. Per-episode quality rises monotonically with the threshold on all three rules; account multiple peaks at 20-25; 10 and 15 lose -58 / -66bp per trade in 2025.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-alarm-threshold-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Every threshold was looked at on the same history, so the best one is not a new parameter. 2025 per trade (near30) is +3bp at 25 and +40 at 50 but -19 at 20 and -66 at 35, so the 2025 result of 25 is not robust; 2026 is positive at every threshold. Per-trade fills under ohlc/ and olhc/ are not committed (same as the combo run).'
+  - experiment_id: exp-monday-limit-close-slice-control-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: dbd54eadb4
+    status: complete
+    question: 'Owner 2026-11-01 "补跑随机对照": does the touch-close survivor slice (score >= 0.5, closed still beyond the 1.618 with recovery < 0.64) beat matched random-time entries?'
+    single_variable: 'Entry time only: the touch 5m close vs 3 random 5m closes of the same symbol / week / side / volatility bucket (pair_id of exp-monday-limit-close-reclaim-20261028-v1), entry scaled to the same distance beyond a virtual level; market entry, five-target exits of near edge and range 0.5, -30 percent, 60m reclaim, taker + 10bp entry and non-target-exit slippage, worse path, all unchanged.'
+    result: '398 events, 263 symbols, both paths, 0 errors, 0 dropped; re-run signal rows equal the 10-28 B30 fills exactly (796 rows, max 0bp). 2262 random rows. Near edge per trade (signal / random / paired [95 CI], clusters = side x touch bar): 2025 +136 / -8 / +134 [0, 263]; 2026 +149 / -118 / +255 [128, 376]; 2025-26 +143 / -66 / +197 [110, 287]; 2020-24 +212 / -91 / +279. frac N20 3x signal vs random c0/c1/c2: 2025 1.26x vs 0.90/1.02/1.04x; 2026 1.34x vs 0.70/0.75/0.97x; all 2.63x DD6 vs 0.45/0.63/0.96x. Range 0.5: 2025-26 paired +188 [78, 296].'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-slice-control-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Post-hoc after reading results: random controls are numbered by time, and the 269 of 1131 random rows that enter before the real touch lose -280bp because they ride the real spike; after-touch random rows -11bp. Against after-touch random only (near edge): 2025-26 paired +139 [44, 229], 2025 +102 [-34, 236], 2026 +173 [47, 292]; range 0.5 2025-26 +115 [2, 223]. The slice is still one of 190 and the recovery edge a 2020-24 tercile; forward paper is the next gate (owner decision). Per-trade fills under ohlc/ and olhc/ are not committed.'

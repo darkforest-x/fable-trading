@@ -1,3 +1,15 @@
+## 2026-11-01 · Touch-close survivor slice beats matched random-time entries
+
+- Owner: "补跑随机对照". `exp-monday-limit-close-slice-control-20261101-v1` (builder dbd54eadb4): the 398 survivor events (score >= 0.5, closed still beyond the 1.618, recovery < 0.64), each with 3 random 5m closes of the same symbol / week / side / vol bucket (close-reclaim pair_id), entry scaled to the same distance beyond a virtual level, same exits. NautilusTrader, 263 symbols, both paths, 0 errors, 0 dropped; re-run signal rows equal the 10-28 B30 fills exactly (796 rows, max 0bp).
+- Near edge per trade (signal / random / paired [95 CI]): 2025 +136 / -8 / +134 [0, 263]; 2026 +149 / -118 / +255 [128, 376]; 2025-26 +143 / -66 / +197 [110, 287]. frac N20 3x 2025 1.26x vs random 0.90 / 1.02 / 1.04x; 2026 1.34x vs 0.70 / 0.75 / 0.97x. Range 0.5 2025-26 paired +188 [78, 296].
+- Post-hoc: random rows entering before the real touch (269 of 1131) lose -280bp because they ride the real spike. Against after-touch random only: 2025-26 +139 [44, 229], 2025 +102 [-34, 236], 2026 +173 [47, 292]. Still one of 190 slices; forward paper is the next gate (owner decision). Learning: `random-time-controls-drawn-before-the-event-ride-its-shock.md`.
+
+## 2026-11-01 · 25-coin alarm threshold: quality rises with cluster size, account peaks at 20-25
+
+- Owner: "先测门槛稳健性". `exp-monday-limit-alarm-threshold-20261101-v1` (builder db49f35672): the alarm-entry rule at 10 / 15 / 20 / 25 / 35 / 50 / 75 coins, everything else fixed. Reused fills of the alarm and combo runs; NautilusTrader for 3152 new events, 485 symbols, both paths, 0 errors. 25 equals the 10-29 plan exactly (2146 trades, 3.70x / 2.30x / 2.92x).
+- near30 (trades / episode mean bp / frac all, 2025, 2026): 10 6406 / +48 / 0.24x DD95, 0.09x, 1.02x; 15 4047 / +82 / 0.41x, 0.10x, 1.24x; 20 2927 / +146 / 4.72x DD21, 1.10x, 1.29x; 25 2146 / +162 / 3.70x DD17, 1.31x, 1.23x; 35 1369 / +184 / 1.74x, 0.91x, 1.13x; 50 657 / +244 / 2.00x DD3, 1.03x, 1.08x; 75 202 / +309 / 1.62x, 0.98x, 1.05x. Unscored control 0.33x.
+- Episode quality rises monotonically on all three rules, so 25 is not a knife edge; the account peak at 20-25 is count x quality. 2025 per trade is near zero or negative at every threshold (25 +3bp, 20 -19, 35 -66), so 25's 2025 result is not robust. All thresholds in sample; keep 25, do not adopt 20. Learning: `alarm-threshold-quality-and-trade-count-peak-in-different-places.md`.
+
 ## 2026-11-01 · 32 twelve-hour reclaim strategies: later profit, no stable selection-period edge
 
 - Owner “都去做” authorized all proposed families. `exp-top20-12h-strategies-20261101-v1`: same frozen20coins,1051pure-wick events withBeijing12hOPEN Tue/Thu;A limit715,B618451,B705361,Csweep495entries (overlapping). 32fixed candidates;maker2bp/taker5bp;oldneedle stop forA/B,new15mneedle forC;24hpending and7/14/28d holding caps. No4hMA/add-position model.
