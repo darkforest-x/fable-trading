@@ -15326,3 +15326,17 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Single paths, not medians; 2020-2025 is in sample for the 1m model. The booklet HTML stays outside the public repo (~/Documents/Codex/2026-10-31/m1-ranked-booklet/, rebuilt with work/build.py) and reuses the monitor booklet module unchanged.'
+  - experiment_id: exp-pretouch-booklet-20261031-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4e38b8484e
+    status: complete
+    question: 'Owner 2026-10-31 "能把触价前评分的几个策略的小册都写好吗": one continuous booklet path per paper account (60, 5, v3, v3add, v3add20, v3lock, spike, allin3) on the frozen pre-touch score, next to the touch-bar score on the same fills.'
+    single_variable: 'None; admission is monday_limit_paper_accounts.account_plans on the saved fills of exp-monday-limit-paper-accounts-20261028-v1 (plan sizes equal its summary for both scores), allocators, seeds and start dates of exp-strategy-booklet-paths-20261027-v1.'
+    result: 'Pre-touch vs touch-bar single paths: 60 1.31x DD55 vs 15.8x DD33; 5 (from 2025) 0.10x DD91 vs 1.08x DD42; v3 1.06x DD86 vs 90.0x DD33; v3add 1.04x DD94 vs 210x DD50; v3add20 6.56x DD84 vs 374x DD34; v3lock 1.14x DD85 vs 91.9x DD32; spike 1.10x DD62 vs 5.04x DD21; allin3 (from 2023, refilled) trading P&L +406801 USDT with 20204 added (21 refills) vs +1688060 with 3758 added. The pre-touch allin3 gain comes from 2026-08-22..09-23 after the last refill on 2026-07-07; its final ONUSDT trade (+127506) is settled at the data end (reason 0), not a real exit.'
+    artifacts: []
+    canonical_report: experiments/active/exp-pretouch-booklet-20261031-v1/manifest.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Single paths, not medians; the frozen score was trained before 2025. The booklet HTML stays outside the public repo (~/Documents/Codex/2026-10-31/pretouch-booklet/, work/build.py) and reuses the monitor booklet module unchanged. Paper accounts still run the lookahead score by owner rule; no forward record exists for the pre-touch version.'
