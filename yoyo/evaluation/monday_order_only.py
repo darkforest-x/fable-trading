@@ -139,15 +139,21 @@ def same_order(row, order, tick):
 
 def prior_study(cfg):
     """A score-clock change may reuse fills only under unchanged execution rules."""
-    if not cfg.get('reuse_study'):
-        return None
-    root = ROOT/cfg['reuse_study']
-    old = json.loads((root/'config.json').read_text())
-    for key in ('baseline', 'features', 'scores', 'min_order', 'maker_fee', 'taker_fee',
-                'non_target_slippage_bp', 'breakeven_bp', 'lock_bp', 'far_score', 'add_pct'):
-        if cfg[key] != old[key]:
-            raise ValueError(f'Prior study execution mismatch: {key}')
-    return root
+    roots=prior_studies(cfg)
+    return roots[0] if roots else None
+
+
+def prior_studies(cfg):
+    """Ordered exact-fill caches; additional studies never alter admission."""
+    names=([cfg['reuse_study']] if cfg.get('reuse_study') else [])+cfg.get('reuse_studies',[])
+    roots=[]
+    for name in dict.fromkeys(names):
+        root=ROOT/name;old=json.loads((root/'config.json').read_text())
+        for key in ('baseline','features','scores','min_order','maker_fee','taker_fee',
+                    'non_target_slippage_bp','breakeven_bp','lock_bp','far_score','add_pct'):
+            if cfg[key]!=old[key]:raise ValueError(f'Prior study execution mismatch: {key}')
+        roots.append(root)
+    return roots
 
 
 def reuse_unchanged_symbol(symbol, cfg, out, selected):
@@ -280,15 +286,16 @@ def process(symbol, config):
             receipts[path]=json.loads((d/'done.json').read_text());continue
         cache = tabs.get(path,pd.DataFrame())
         reused, reused_ids, known_empty, mismatches = [],set(),set(),[]
-        prior = prior_study(cfg)
         prior_empty = set()
-        if prior is not None and (prior/'symbols'/symbol/'orders.csv.gz').exists():
+        for prior in prior_studies(cfg):
+            if not (prior/'symbols'/symbol/'orders.csv.gz').exists():continue
             source = prior/'symbols'/symbol
             old_orders = read_csv(source/'orders.csv.gz').set_index('trade_id')
             old_rows = read_csv(source/path/'trades.csv.gz').set_index('trade_id')
             assert (source/path/'done.json').exists() and not (source/'error.json').exists()
             for r in x.to_dict('records'):
                 key = r['trade_id']
+                if key in reused_ids|prior_empty:continue
                 if key not in old_orders.index or not same_order(old_orders.loc[key], r, tick):
                     continue
                 if key not in old_rows.index:

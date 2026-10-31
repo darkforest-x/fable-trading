@@ -14,6 +14,34 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-harmonic-15m-confluence-20261031-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ff7f6f5a54
+    status: active
+    question: Does pre-touch 15m Pyharmonics confluence improve the original eight Monday1618 accounts?
+    single_variable: Change only harmonic timeframe; keep1000bar lookback,10spacing,3percent ratios,original score,entries,exits,fees and account rules.
+    result: Pending independently frozen timeframe arm; no outcome-driven tuning.
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Aggregate original5m into complete UTC 15m bars; unfinished higher candle excluded. Pre-touch5m tail can invalidate existing zones only. Original score lookahead retained. Reuse5m harmonic and earlier exact native caches;1h also reuses completed15m controls.'
+  - experiment_id: exp-monday-harmonic-1h-confluence-20261031-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ff7f6f5a54
+    status: active
+    question: Does pre-touch 1h Pyharmonics confluence improve the original eight Monday1618 accounts?
+    single_variable: Change only harmonic timeframe; keep1000bar lookback,10spacing,3percent ratios,original score,entries,exits,fees and account rules.
+    result: Pending independently frozen timeframe arm; no outcome-driven tuning.
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-harmonic-1h-confluence-20261031-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Aggregate original5m into complete UTC 1h bars; unfinished higher candle excluded. Pre-touch5m tail can invalidate existing zones only. Original score lookahead retained. Reuse5m harmonic and earlier exact native caches;1h also reuses completed15m controls.'
   - experiment_id: exp-spike-v131-forward-review-20261031-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 0319aa9ca7

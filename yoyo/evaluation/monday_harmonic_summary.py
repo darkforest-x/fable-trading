@@ -165,8 +165,8 @@ def collect_controls(config):
 
 def validate_outputs(config):
     """Audit saved clocks, source stamps and native fills without replaying them."""
-    from yoyo.evaluation.monday_harmonic import events, STEP
-    from yoyo.evaluation.monday_order_only import population, prior_study, same_order
+    from yoyo.evaluation.monday_harmonic import events, STEP, interval_step
+    from yoyo.evaluation.monday_order_only import population, prior_studies, same_order
     from yoyo.evaluation.monday_limit_backstop import CODEX
     cfg=json.loads(config.read_text());root=config.parent
     gates=read_csv(ROOT/cfg['admission_events']).set_index('event')
@@ -174,7 +174,11 @@ def validate_outputs(config):
     assert gates.index.is_unique and set(gates.index)==set(expected.index)
     assert (pd.to_datetime(gates.cutoff,utc=True)==pd.to_datetime(expected.loc[gates.index].cutoff,utc=True)).all()
     seen=gates[gates.observable]
-    assert (pd.to_datetime(seen.last_input_close,utc=True)==pd.to_datetime(seen.cutoff,utc=True)).all()
+    step=interval_step(cfg['harmonic'])
+    boundary=pd.to_datetime(seen.cutoff,utc=True).dt.floor(step)
+    assert (pd.to_datetime(seen.last_input_close,utc=True)==boundary).all()
+    if step>STEP:
+        assert (pd.to_datetime(seen.invalidation_last_close,utc=True)==pd.to_datetime(seen.cutoff,utc=True)).all()
     stamps={};prefix_checks=0;patterns=0
     for path in (root/'scan').glob('*/done.json'):
         r=json.loads(path.read_text())
@@ -185,12 +189,12 @@ def validate_outputs(config):
     with gzip.open(root/'patterns-validated.jsonl.gz','rt') as handle:
         for line in handle:
             p=json.loads(line);cut=pd.Timestamp(p['cutoff'])
-            assert all(pd.Timestamp(v)+STEP<=cut for v in p['points'])
+            assert all(pd.Timestamp(v)+step<=cut for v in p['points'])
             assert pd.Timestamp(p['xabc_confirmed_at'])<=cut
             if p['confluence']:
                 assert p['prz_low']<=gates.loc[p['event'],'entry']<=p['prz_high']
             patterns+=1
-    pop=population(cfg);prior=prior_study(cfg)
+    pop=population(cfg);priors=prior_studies(cfg)
     score_rows=positions=clocks=parent_reruns=native_signal_orders=0;worst=0.;mismatches=[]
     syms=sorted(gates.loc[gates.admitted,'symbol'].unique())
     for symbol in syms:
@@ -203,8 +207,9 @@ def validate_outputs(config):
             audit=json.loads((p/'native-audit.json').read_text())
             orders=read_csv(p/'native-orders.csv.gz').set_index('trade_id')
             native_signal_orders+=int(orders.control_id.eq(0).sum())
-            source=prior/'symbols'/symbol if prior else None
-            if source and (source/'orders.csv.gz').exists():
+            for prior in priors:
+                source=prior/'symbols'/symbol
+                if not (source/'orders.csv.gz').exists():continue
                 old=read_csv(source/'orders.csv.gz').set_index('trade_id');parents=set(orders.parent.dropna())
                 for tid,order in orders.iterrows():
                     if tid in old.index and same_order(old.loc[tid],order,tick):
@@ -235,6 +240,7 @@ def validate_outputs(config):
         confirmation_clocks_checked=clocks,max_fee_net_error_bp=worst,
         exact_cached_orders_rerun_only_as_dependencies=parent_reruns,cache_mismatches=0,
         native_signal_orders=native_signal_orders,
+        interval=cfg['harmonic']['interval'],complete_higher_bars_only=True,
         touch_bar_excluded=True,no_execution_replay=True)
     dump(root/'validation.json',result);print(json.dumps(result))
 
@@ -290,7 +296,7 @@ def summarize(config):
     out=dict(config=cfg,scan=json.loads((root/'scan.json').read_text()),harmonic_validation=json.loads((root/'harmonic-validation.json').read_text()),native_counts={k:v for k,v in validation.items() if k!='sources'},
         baseline_exact=True,strategies=details,limitations=[
             'Original fill-bar score lookahead is deliberately preserved; only harmonic information is pre-touch.',
-            'Single frozen 5m/1000bar/10spacing/3percent Pyharmonics configuration; no outcome-tuned search.',
+            f"Single frozen {cfg['harmonic']['interval']}/1000bar/10spacing/3percent Pyharmonics configuration; no outcome-tuned search.",
             'Historical selection study; no unseen forward proof. Same-size harmonic gating is not randomized.',
             'Native fills plus unchanged realized-equity/MAE capital overlays; no exchange margin, funding or mark-to-market model.',
             'Matched random-time controls are conditional on selected signal geometry and original score; unfilled attempts remain zero.',

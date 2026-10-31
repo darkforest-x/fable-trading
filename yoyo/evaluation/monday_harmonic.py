@@ -1,7 +1,7 @@
 """Pre-touch Pyharmonics confluence, original Monday1618 execution unchanged.
 
 Owner 2026-10-31 authorizes only a harmonic admission overlay. Read OHLCV from
-at most 1000 completed 5m bars strictly before the original touch bar; never
+at most 1000 completed configured-timeframe bars before the original touch; never
 read the touch candle or its outcome for this new feature. XABC pivots require
 10 observations on both sides. D may be a provisional prefix endpoint, so
 this is a known candidate zone, not a claim of a confirmed future reversal.
@@ -38,6 +38,33 @@ from yoyo.evaluation.v3_causal_close_entry import read_csv
 EXP = ROOT/'experiments/active/exp-monday-harmonic-confluence-20261031-v1'
 STEP = pd.Timedelta(minutes=5)
 CODE = ['yoyo/evaluation/monday_harmonic.py', 'yoyo/evaluation/monday_order_only.py']
+
+
+def interval_step(hc):
+    return {'5m':STEP,'15m':pd.Timedelta(minutes=15),'1h':pd.Timedelta(hours=1)}[hc['interval']]
+
+
+def aggregate_bars(frame, hc):
+    """UTC left-labelled bars; a missing 5m constituent invalidates the whole bar.
+
+    Precomputing the complete series is safe only with scan_at's close boundary.
+    No forward fill, interpolation, partial candle or external data is used.
+    """
+    step=interval_step(hc)
+    if step==STEP:return frame
+    assert frame.index.is_unique and frame.index.is_monotonic_increasing
+    assert (frame.index==frame.index.floor(STEP)).all()
+    res=frame[['open','high','low','close','volume']].resample(step,origin='epoch',label='left',closed='left')
+    out=res.agg(dict(open='first',high='max',low='min',close='last',volume='sum'))
+    counts=res.count();complete=counts.eq(int(step/STEP)).all(axis=1)
+    out.loc[~complete,:]=np.nan
+    return out
+
+
+def scan_raw(frame, cutoff, symbol, side, level, hc):
+    """Convenience entry point for raw 5m prefix/future-mutation validation."""
+    return scan_at(aggregate_bars(frame,hc),cutoff,symbol,side,level,hc,
+                   source_frame=frame if interval_step(hc)>STEP else None)
 
 
 def baseline(cfg):
@@ -79,28 +106,39 @@ def projection_band(y, bullish, definitions, name):
     return (lower,upper) if 0 < lower <= upper else None
 
 
-def scan_at(frame, cutoff, symbol, side, level, hc, *, all_endpoints=False):
+def scan_at(frame, cutoff, symbol, side, level, hc, *, all_endpoints=False, source_frame=None):
     """Causal feature boundary: only rows whose close time is <= cutoff.
 
-    Uses open/high/low/close/volume from the last <=1000 completed 5m rows.
+    Uses OHLCV from the last <=1000 completed configured-timeframe rows.
+    Raw completed 5m bars after the last higher close only invalidate old zones;
+    they never form or confirm a higher-timeframe point.
     Future mutation and prefix truncation must leave every returned field equal.
     """
     from pyharmonics import OHLCTechnicals
     from pyharmonics.search import HarmonicSearch
     from pyharmonics import constants as c
-    cutoff = pd.Timestamp(cutoff)
-    n = int(frame.index.searchsorted(cutoff, side='left'))
+    cutoff = pd.Timestamp(cutoff);step=interval_step(hc);boundary=cutoff.floor(step)
+    if step>STEP and source_frame is None:raise ValueError('Higher timeframe needs raw pre-touch invalidation data')
+    n = int(frame.index.searchsorted(boundary, side='left'))
     w = frame.iloc[max(0,n-hc['lookback_bars']):n][['open','high','low','close','volume']].copy()
     w.index = w.index.as_unit('ns')
     meta = dict(observable=False,admitted=False,bars=len(w),cutoff=str(cutoff),
-                last_input_close=str(w.index[-1]+STEP) if len(w) else None,
+                last_input_close=str(w.index[-1]+step) if len(w) else None,
                 candidate_count=0,confluent_count=0,reason='insufficient_history')
     if len(w) < hc['min_bars']:
         return meta,[]
-    if w.index[-1]+STEP != cutoff or not np.all(np.diff(w.index.asi8)==STEP.value):
+    if w.index[-1]+step != boundary or not np.all(np.diff(w.index.asi8)==step.value):
         meta['reason']='noncontiguous_history';return meta,[]
     if not np.isfinite(w.to_numpy(float)).all():
         meta['reason']='nonfinite_history';return meta,[]
+    tail=w.iloc[:0]
+    if step>STEP:
+        lo=source_frame.index.searchsorted(boundary);hi=source_frame.index.searchsorted(cutoff)
+        tail=source_frame.iloc[lo:hi][['open','high','low','close','volume']]
+        expected=pd.date_range(boundary,cutoff,freq=STEP,inclusive='left')
+        if not tail.index.as_unit('ns').equals(expected.as_unit('ns')) or not np.isfinite(tail.to_numpy(float)).all():
+            meta['reason']='noncontiguous_partial_tail';return meta,[]
+        meta.update(harmonic_interval=hc['interval'],invalidation_last_close=str(cutoff))
     td = OHLCTechnicals(w,symbol,hc['interval'],peak_spacing=hc['peak_spacing'])
     hs = HarmonicSearch(td,fib_tolerance=hc['fib_tolerance'],check_anchor=True)
     desired_type = 0 if side==1 else 1
@@ -130,8 +168,10 @@ def scan_at(frame, cutoff, symbol, side, level, hc, *, all_endpoints=False):
         after_c=w.iloc[ix[3]+1:];after_d=w.iloc[ix[4]+1:]
         if side==1:
             invalid=(after_c.low.min()<lo) or (len(after_d)>0 and after_d.high.max()>C)
+            invalid=invalid or (len(tail)>0 and (tail.low.min()<lo or tail.high.max()>C))
         else:
             invalid=(after_c.high.max()>hi) or (len(after_d)>0 and after_d.low.min()<C)
+            invalid=invalid or (len(tail)>0 and (tail.high.max()>hi or tail.low.min()<C))
         if invalid:
             rejected['invalidated_before_touch']+=1;continue
         key=(p.name,tuple(map(str,p.x)))
@@ -139,7 +179,7 @@ def scan_at(frame, cutoff, symbol, side, level, hc, *, all_endpoints=False):
         seen.add(key)
         records.append(dict(name=p.name,bullish=bool(p.bullish),formed=bool(p.formed),
             points=[str(v) for v in p.x],prices=[float(v) for v in p.y],
-            xabc_confirmed_at=str(w.index[ix[3]+spacing]+STEP),
+            xabc_confirmed_at=str(w.index[ix[3]+spacing]+step),
             d_confirmed=bool(ix[4]+spacing<len(w)),prz_low=float(lo),prz_high=float(hi),
             confluence=bool(lo<=level<=hi),retraces={str(k):float(v) for k,v in p.retraces.items()},
             library_raw_completion=[float(p.completion_min_price),float(p.completion_max_price)]))
@@ -159,20 +199,24 @@ def scan_symbol(symbol, config, rows):
     stamps=[file_stamp(p) for p in job['paths']]
     f,_=load_job(job);old=json.loads((CODEX/'symbols'/symbol/'done.json').read_text())
     assert (len(f),str(f.index[0]),str(f.index[-1]))==(old['rows'],old['first'],old['last'])
-    gates=[];patterns=[];checks=[]
+    gates=[];patterns=[];checks=[];higher=interval_step(cfg['harmonic'])>STEP
+    prepared=aggregate_bars(f,cfg['harmonic'])
     for r in rows:
         cutoff=pd.Timestamp(r['cutoff']);k=int(r['entry_i'])
         assert f.index[k]==cutoff,(symbol,k,cutoff,f.index[k])
-        gate,candidates=scan_at(f,cutoff,symbol,int(r['side']),float(r['entry']),cfg['harmonic'])
+        gate,candidates=scan_at(prepared,cutoff,symbol,int(r['side']),float(r['entry']),cfg['harmonic'],
+                                source_frame=f if higher else None)
         gates.append(dict(r,**gate))
         patterns.extend(dict(event=r['event'],cutoff=str(cutoff),**p) for p in candidates)
         # One actual prefix per coin; mutate every future candle, not only one.
         if not checks and gate['observable']:
-            n=f.index.searchsorted(cutoff);start=max(0,n-cfg['harmonic']['lookback_bars'])
+            n=f.index.searchsorted(cutoff)
+            factor=int(interval_step(cfg['harmonic'])/STEP)
+            start=max(0,n-(cfg['harmonic']['lookback_bars']+2)*factor) if higher else max(0,n-cfg['harmonic']['lookback_bars'])
             tail=f.iloc[start:min(len(f),n+40)].copy()
             tail.loc[tail.index>=cutoff,['open','high','low','close','volume']]*=100
-            other=scan_at(tail,cutoff,symbol,int(r['side']),float(r['entry']),cfg['harmonic'])
-            prefix=scan_at(f.iloc[:n],cutoff,symbol,int(r['side']),float(r['entry']),cfg['harmonic'])
+            other=scan_raw(tail,cutoff,symbol,int(r['side']),float(r['entry']),cfg['harmonic'])
+            prefix=scan_raw(f.iloc[:n],cutoff,symbol,int(r['side']),float(r['entry']),cfg['harmonic'])
             assert (gate,candidates)==other==prefix
             checks.append(dict(event=r['event'],prefix_equal=True,future_mutation_equal=True))
     g=pd.DataFrame(gates);g.drop(columns=['rejected'],errors='ignore').to_csv(out/'gates.csv.gz',index=False)
@@ -210,6 +254,7 @@ def run_scan(config,workers):
         unavailable=gates.loc[~gates.observable,'reason'].value_counts().to_dict(),
         package_versions={p:version(p) for p in ('pyharmonics','numpy','pandas','ta')},
         source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+        interval=cfg['harmonic']['interval'],complete_higher_bars_only=True,
         no_touch_bar=True,no_model_fit=True,parameter_search=False))
 
 

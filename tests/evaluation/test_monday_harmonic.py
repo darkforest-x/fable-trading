@@ -132,3 +132,57 @@ def test_library_candidate_name_does_not_override_actual_xabc_ratios():
     # A joined different A can keep a name while invalidating the ABC ratio.
     assert not valid_geometry(dict(good,prices=[100,120,107.64,125,106]),defs)
     assert not valid_geometry(dict(good,prices=[100,120,110,116.37852,106]),defs)
+
+
+def higher_candles(interval):
+    from yoyo.evaluation.monday_harmonic import interval_step
+    hc=dict(CFG['harmonic'],interval=interval);step=interval_step(hc);factor=int(step/pd.Timedelta(minutes=5))
+    f=candles();f.index=pd.date_range('2025-01-01',periods=len(f),freq=step,tz='UTC')
+    raw=f.loc[f.index.repeat(factor)].copy();raw.index=pd.date_range(f.index[0],periods=len(raw),freq='5min')
+    raw['volume']/=factor
+    return raw,hc,f.index[230]+pd.Timedelta(minutes=5)
+
+
+@pytest.mark.parametrize('interval',['15m','1h'])
+def test_higher_timeframe_uses_only_completed_bars_and_preserves_causality(interval):
+    from yoyo.evaluation.monday_harmonic import scan_raw,interval_step
+    raw,hc,cut=higher_candles(interval);expected=scan_raw(raw,cut,'TEST',1,104.28,hc)
+    m,patterns=expected
+    assert m['admitted'] and m['last_input_close']==str(cut.floor(interval_step(hc)))
+    assert m['invalidation_last_close']==str(cut)
+    assert all(pd.Timestamp(t)+interval_step(hc)<=cut for p in patterns for t in p['points'])
+    assert all(pd.Timestamp(p['xabc_confirmed_at'])<=cut for p in patterns)
+    changed=raw.copy();changed.loc[cut:,:]*=100
+    assert scan_raw(changed,cut,'TEST',1,104.28,hc)==expected
+    assert scan_raw(raw.loc[raw.index<cut],cut,'TEST',1,104.28,hc)==expected
+
+
+@pytest.mark.parametrize('interval',['15m','1h'])
+def test_known_five_minute_tail_can_expire_but_not_form_a_higher_pattern(interval):
+    from yoyo.evaluation.monday_harmonic import scan_raw,interval_step
+    raw,hc,cut=higher_candles(interval);boundary=cut.floor(interval_step(hc))
+    assert scan_raw(raw,cut,'TEST',1,104.28,hc)[0]['admitted']
+    raw.loc[boundary,'low']=80.
+    assert not scan_raw(raw,cut,'TEST',1,104.28,hc)[0]['admitted']
+
+
+@pytest.mark.parametrize('interval',['15m','1h'])
+def test_missing_constituent_cannot_be_aggregated_as_a_complete_bar(interval):
+    from yoyo.evaluation.monday_harmonic import scan_raw,aggregate_bars,interval_step
+    raw,hc,cut=higher_candles(interval);step=interval_step(hc)
+    removed=raw.index[50];broken=raw.drop(removed)
+    assert aggregate_bars(broken,hc).loc[removed.floor(step)].isna().all()
+    m,_=scan_raw(broken,cut,'TEST',1,104.28,hc)
+    assert not m['observable'] and m['reason']=='nonfinite_history'
+    m,_=scan_raw(raw.drop(cut-pd.Timedelta(minutes=5)),cut,'TEST',1,104.28,hc)
+    assert not m['observable'] and m['reason']=='noncontiguous_partial_tail'
+
+
+def test_multiple_native_caches_keep_order_and_reject_fee_changes(tmp_path):
+    from yoyo.evaluation.monday_order_only import prior_studies
+    a=tmp_path/'a';b=tmp_path/'b';a.mkdir();b.mkdir()
+    for p in (a,b):(p/'config.json').write_text(json.dumps(CFG))
+    cfg=dict(CFG,reuse_study=str(a),reuse_studies=[str(b),str(a)])
+    assert prior_studies(cfg)==[a,b]
+    changed=dict(CFG,maker_fee=.001);(b/'config.json').write_text(json.dumps(changed))
+    with pytest.raises(ValueError,match='maker_fee'):prior_studies(cfg)
