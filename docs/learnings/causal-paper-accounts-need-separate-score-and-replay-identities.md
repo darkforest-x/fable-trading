@@ -1,0 +1,7 @@
+# Causal paper accounts need separate score and replay identities
+
+- **Problem**: A pre-touch allin3 strategy had to coexist with eight accounts that intentionally reproduce touch-close backtests. Sharing the signal score would silently change one family's entry decisions and displayed evidence.
+- **Dead end**: Changing the global score basis, or adding only a strategy label, cannot preserve both semantics. Replaying the retrospective account's entry minutes through every position can also rewind a position that already ran forward. These approaches were rejected before deployment.
+- **Effective path**: Store the frozen pre-touch score separately, join it by account for every snapshot/history/notification, and keep the original score untouched. Open the new account only on newly observed touches. Exclude its positions from the older account's delayed touch-bar replay; normal forward catch-up still applies. Project saved historical fills instead of recalculating trades.
+- **General rule**: Before adding a causal sibling to a retrospective simulator, enumerate score ownership, opening clock, replay clock, display joins and funding identity. A shared symbol/event does not imply interchangeable scores or clocks.
+- **Scope**: `yoyo/monitor/monday_reclaim_paper.py` track7060 and `live_scores`; `strategy_live_allin3.py`; `tests/monitor/test_live_allin3.py`; original eight accounts retain Owner's touch-close basis. The `live-` prefix does not grant real-order authorization. Saved historical terminal settlement and cash additions remain explicit.

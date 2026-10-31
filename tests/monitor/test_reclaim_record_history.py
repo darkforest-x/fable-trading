@@ -253,7 +253,7 @@ class TestReclaimRecordHistory(HistoryFixture):
         self.assertEqual((history_parameters["offset"]["minimum"], history_parameters["limit"]["minimum"],
                           history_parameters["limit"]["maximum"], history_parameters["q"]["maxLength"]),
                          (0, 1, 100, 100))
-        self.assertEqual(history_parameters["track"]["enum"], ["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20"])
+        self.assertEqual(history_parameters["track"]["enum"], ["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20", "live-allin3"])
         self.assertEqual(schema["paths"]["/api/monday-reclaim-paper"]["get"]["parameters"][0]["schema"]["enum"],
                          ["recent", "today"])
         self.assertEqual(self.rows("SELECT * FROM positions ORDER BY id"), before_positions)

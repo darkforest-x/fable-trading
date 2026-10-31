@@ -16,7 +16,7 @@
   }
   function paperSymbol(data,params){
     const pinned=params.get('symbol');if(pinned)return /^[A-Z0-9]{1,32}-USDT-SWAP$/.test(pinned)?pinned:null;
-    const track=data?.tracks?.[['60','5','v3','v3add','spike','v3lock','allin3','v3add20'].includes(params.get('track'))?params.get('track'):'spike'],id=params.get('trade');
+    const track=data?.tracks?.[['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3'].includes(params.get('track'))?params.get('track'):'spike'],id=params.get('trade');
     const rows=[...(track?.open||[]),...(track?.closed||[]),...(track?.latest_funded?[track.latest_funded]:[])].filter(p=>/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(p.symbol)&&[1,-1].includes(p.side)&&Number.isFinite(p.fill_ms)&&p.fill_ms>0&&Number.isFinite(p.entry)&&p.entry>0);
     return (id?rows.find(p=>String(p.id)===id):rows.filter(p=>p.taken===1&&p.notional>0).sort((a,b)=>b.fill_ms-a.fill_ms||b.id-a.id)[0])?.symbol||(id?null:'BTC-USDT-SWAP');
   }

@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const tracks=['60','5','v3','v3add','spike','v3lock','allin3','v3add20'];
+  const tracks=['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3'];
   const steps={'1m':60000,'2m':120000,'3m':180000,'5m':300000,'15m':900000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000};
   const symbolOK=v=>typeof v==='string'&&/^[A-Z0-9]{1,32}USDT$/.test(v);
   const valid=r=>r&&Number.isInteger(r.id)&&r.id>0&&symbolOK(r.symbol)&&[1,-1].includes(r.side)&&['entry_ms','exit_ms','pnl','return_pct'].every(k=>Number.isFinite(r[k]))&&r.entry_ms>0&&r.exit_ms>=r.entry_ms;
@@ -19,7 +19,7 @@
     const e=r.entry_rules;
     if(e?.status!=='saved'||!Number.isFinite(e.score)||!Number.isFinite(e.minimum))return '<span class="bt-entry">入场条件／评分未留存</span>';
     const add=e.kind==='add5',gate=e.minimum<.3?' · 前40%':`≥${e.minimum}`;
-    return `<span class="bt-entry"><span>${add?'逆向5%加仓':'1.618首触'}</span><span class="bt-score" title="原回测评分 ${e.score}，门槛 ${e.minimum}；不是胜率">${add?'主单评分':'评分'} ${e.score.toFixed(4)}${gate}</span>${Number.isFinite(e.minimum_order)&&Number.isFinite(e.order)?`<span>排列 ${e.order}≥${e.minimum_order}</span>`:''}</span>`;
+    return `<span class="bt-entry"><span>${add?'逆向5%加仓':'1.618首触'}</span><span class="bt-score" title="原回测评分 ${e.score}，门槛 ${e.minimum}；不是胜率">${e.score_basis==='pre_touch'?'触价前评分':add?'主单评分':'评分'} ${e.score.toFixed(4)}${gate}</span>${Number.isFinite(e.minimum_order)&&Number.isFinite(e.order)?`<span>排列 ${e.order}≥${e.minimum_order}</span>`:''}</span>`;
   }
   function periodFor(row,period){return Object.keys(steps).find(p=>steps[p]>=steps[period]&&(row.exit_ms-row.entry_ms)/steps[p]<=5000)||'1D';}
   function validate(p,q,offset){
@@ -51,7 +51,7 @@
       sort(key){if(!['time','pnl'].includes(key))return;const direction=state.sort===key&&state.direction==='desc'?'asc':'desc';reset();state.sort=key;state.direction=direction;auto=false;return load();}};
   }
   function rowHTML(r,selected){
-    return `<button type="button" class="bt-row" data-bt-trade="${r.id}" aria-pressed="${r.id===selected}" aria-label="查看 ${esc(base(r.symbol))} ${date(r.entry_ms)} 回测交易"><span class="bt-coin"><b>${esc(base(r.symbol))}</b><em class="${r.side===1?'rp-positive':'rp-negative'}">${r.side===1?'多':'空'}</em>${r.id===selected?'<small>图表焦点</small>':''}</span><span class="bt-pnl ${tone(r.pnl)}"><b>${money(r.pnl)} <small>USDT</small></b><small>${money(r.return_pct)}%</small></span>${rulesHTML(r)}<span class="bt-times"><span title="原回测成交所在区间">开 ${entryLabel(r)}</span><span>平 ${date(r.exit_ms)}</span></span></button>`;
+    return `<button type="button" class="bt-row" data-bt-trade="${r.id}" aria-pressed="${r.id===selected}" aria-label="查看 ${esc(base(r.symbol))} ${date(r.entry_ms)} 回测交易"><span class="bt-coin"><b>${esc(base(r.symbol))}</b><em class="${r.side===1?'rp-positive':'rp-negative'}">${r.side===1?'多':'空'}</em>${r.id===selected?'<small>图表焦点</small>':''}</span><span class="bt-pnl ${tone(r.pnl)}"><b>${money(r.pnl)} <small>USDT</small></b><small>${money(r.return_pct)}%</small></span>${rulesHTML(r)}<span class="bt-times"><span title="原回测成交所在区间">开 ${entryLabel(r)}</span><span>${r.exit_reason===0?'期末结算':'平'} ${date(r.exit_ms)}</span></span></button>`;
   }
   const api={createModel,validate,valid,rowHTML,rulesHTML,entryLabel,periodFor,base,date};
   if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}

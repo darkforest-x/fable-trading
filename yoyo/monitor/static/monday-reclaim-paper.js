@@ -32,15 +32,17 @@
   const heldSignals = data => new Set(Object.values(data.tracks||{}).flatMap(t=>t.open||[])
     .filter(p=>funded(p)&&['pending_confirm','breakeven'].includes(p.stage)&&p.fill_ms>0&&p.entry>0&&(p.remaining_notional??p.notional)>0)
     .map(p=>p.signal_id));
-  const TRACKS = ['60','5','v3','v3add','spike','v3lock','allin3','v3add20'];
+  const TRACKS = ['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3'];
   const SORTS = {score:'评分优先',time_desc:'时间：最新优先',time_asc:'时间：最早优先'};
   const recordSort = value => Object.hasOwn(SORTS,value) ? value : 'score';
-  const trackLabel = key => ({60:'60m',5:'5m',v3:'v3',v3add:'v3add',spike:'spike',v3lock:'v3lock',allin3:'allin3',v3add20:'v3add20'}[key] || '未知策略');
+  const trackLabel = key => ({60:'60m',5:'5m',v3:'v3',v3add:'v3add',spike:'spike',v3lock:'v3lock',allin3:'allin3',v3add20:'v3add20','live-allin3':'live-allin3'}[key] || '未知策略');
+  const isAllinTrack = key => ['allin3','live-allin3'].includes(key);
+  const signalRows = (data,key,today=false) => key==='live-allin3' ? (today?data?.live_record_signals??data?.live_signals:data?.live_signals)||[] : (today?data?.record_signals??data?.signals:data?.signals)||[];
   const isAddTrack = key => ['v3add','v3add20'].includes(key);
-  const marginLeverage = (data,key) => ['spike','allin3','v3add20'].includes(key) ? data?.[key]?.leverage : null;
+  const marginLeverage = (data,key) => ['spike','allin3','v3add20','live-allin3'].includes(key) ? data?.[key]?.leverage : null;
   const orderLabel = value => Number.isInteger(value) && value >= 0 && value <= 4 ? `排列 ${value}/4` : '排列 —';
   function targetLabel(row, track='60', config={min_score:.5,far_score:.6}) {
-    if (track==='allin3' || row.track===5060) return '对侧 1.618';
+    if (isAllinTrack(track) || [5060,7060].includes(row.track)) return '对侧 1.618';
     if (['v3','v3add','v3lock','v3add20'].includes(track) || [1060,2060,2061,4060,6060,6061].includes(row.track)) {
       if (!finite(row.score)) return '止盈目标';
       if (row.score >= config.far_score) return '对侧 1.618';
@@ -88,7 +90,7 @@
       || !TRACKS.every(key => !data.tracks?.[key] || (records(data.tracks[key].open) && records(data.tracks[key].closed)
         && (data.tracks[key].record_closed===undefined||records(data.tracks[key].record_closed))
         && (data.tracks[key].pending_adds === undefined || records(data.tracks[key].pending_adds))
-        && (key!=='allin3' || data.tracks[key].refills===undefined || finite(refillTotal(data.tracks[key].refills)))))) {
+        && (!isAllinTrack(key) || data.tracks[key].refills===undefined || finite(refillTotal(data.tracks[key].refills)))))) {
       throw Error('模拟盘返回格式不完整，请稍后重试');
     }
     return data;
@@ -101,14 +103,14 @@
   }
   function summary(track, key=track?.rule) {
     const stats=track?.stats || {}, count=stats.taken_closed;
-    const added=key==='allin3'?refillTotal(track?.refills):0;
+    const added=isAllinTrack(key)?refillTotal(track?.refills):0;
     return {equity:track?.equity,start:track?.start_equity,
       pnl:finite(track?.equity) && finite(track?.start_equity) && finite(added) ? track.equity-track.start_equity-added : null,
       count,winRate:finite(count) && count>0 && finite(stats.wins) ? stats.wins/count*100 : null,
       wins:stats.wins,mean:stats.mean_net_bp};
   }
   function rows(data, state) {
-    const source = state.tab === 'events' ? data.record_signals??data.signals : state.tab==='closed' ? data.tracks[state.track]?.record_closed??data.tracks[state.track]?.closed??[] : data.tracks[state.track]?.open||[];
+    const source = state.tab === 'events' ? signalRows(data,state.track,true) : state.tab==='closed' ? data.tracks[state.track]?.record_closed??data.tracks[state.track]?.closed??[] : data.tracks[state.track]?.open||[];
     const query=state.q.trim().toUpperCase();
     const start=dayStart(data.now_ms), held=heldSignals(data);
     return source.filter(row => (!query || String(row.symbol).toUpperCase().includes(query))
@@ -213,7 +215,7 @@
     }).join(''):'<p>当前没有待成交加仓单</p>'}</section>`;
   }
   function rulesHTML(data, key) {
-    const track=data?.tracks?.[key], v3=['v3','v3add','v3lock','v3add20'].includes(key), spike=key==='spike', allin=key==='allin3', sp=data?.spike, ai=data?.allin3, config=data?.v3, sizing=v3?config?.sizing:data?.sizing;
+    const track=data?.tracks?.[key], v3=['v3','v3add','v3lock','v3add20'].includes(key), spike=key==='spike', allin=isAllinTrack(key), sp=data?.spike, ai=data?.[key], config=data?.v3, sizing=v3?config?.sizing:data?.sizing;
     const add20=key==='v3add20', addConfig=data?.[key], lock=key==='v3lock', protection=lock?'利润锁价':'保本价';
     const offset=lock?data?.v3lock?.breakeven_offset_bp:data?.breakeven_offset_bp;
     const baseAllocation=v3
@@ -233,7 +235,7 @@
       <p>1.618 限价入场；${targets}确认周期 ${num(track?.confirm_minutes,0)} 分钟。确认收盘未收回入场价则退出；已收回但未越过${protection}，也在该收盘退出。收回且越过后，止损移至${isAddTrack(key)?'主单':''}入场价向盈利方向偏移 ${num(offset/100)}%（多加、空减）。旧单以实际记录的保护价为准，${lock?'利润锁':'保本'}退出仍有成交费用。</p>
       ${isAddTrack(key)?`<p>分数从 ${num(addConfig?.from_score,2)} 起，在主单入场价逆向 ${num(addConfig?.drawdown_pct,0)}% 挂一次加仓，${add20?'加仓成交时按当时净值重新计算保证金和名义本金，占用独立仓位；满仓或保证金不足则取消。':'名义本金上限为主单原始名义本金。'}主单确认收盘前有效。加仓共用主单的确认、保本、兜底和目标。主单提前结束会取消未成交加仓；同分钟先触及加仓再触及兜底时，按后台路径结算。待成交单单列，不计入持仓和盈亏；主单与已成交加仓分别计笔。</p>`:''}
       <p>Maker ${num(data?.fees_bp?.maker/100)}% / Taker ${num(data?.fees_bp?.taker/100)}%（单边）；退出滑点情景 ${num(data?.fees_bp?.report_slippage/100)}%。成交费用以每条记录为准。</p>
-      <p>所选策略入场分数门槛 ${num(allin?ai?.min_score:spike?sp?.min_score:v3?config?.min_score:data?.model?.threshold,4)}，分数不代表胜率。触价列表共用原始信号，其评分结果按 v2 门槛 ${num(data?.model?.threshold,4)} 显示，资金分配以各策略交易记录为准。模型训练截止 ${esc(data?.model?.trained_before||'—')}；训练行情与当前 OKX 行情存在来源差异。BTC、ETH、XAU、XAG、PAXG、XAUT 仅记录触价。</p>
+      <p>${key==='live-allin3'?'live- 标识触价前规则；当前为模拟账户。评分只读取触价5m开始前已收盘数据；非目标退出的10bp滑点计入净盈亏。':'原模拟策略按触价5m收盘评分，按回测回记入场。'}所选策略入场分数门槛 ${num(allin?ai?.min_score:spike?sp?.min_score:v3?config?.min_score:data?.model?.threshold,4)}，分数不代表胜率。${key==='live-allin3'?'触价列表显示本策略独立触价前评分，门槛0.6':'触价列表共用原始信号，其评分结果按 v2 门槛 '+num(data?.model?.threshold,4)+' 显示'}，资金分配以各策略交易记录为准。模型训练截止 ${esc(data?.model?.trained_before||'—')}；训练行情与当前 OKX 行情存在来源差异。BTC、ETH、XAU、XAG、PAXG、XAUT 仅记录触价。</p>
       <p>统计为所选策略全部已结束资金交易；已结束与触价列表默认显示北京时间今日，往日记录从历史入口按页读取；跨日未平仓触价保留在今日，筛选不改变累计统计。部分平仓立即计入已实现盈亏，已平仓统计仅计完全结束的每笔持仓；策略净值不含浮动盈亏。</p>`;
   }
   function rowHTML(row, state, now, {favorite=false,platform='',carried=false}={}) {
@@ -260,7 +262,7 @@
     const selected=event?state.symbol===row.symbol:state.trade===String(row.id);
     const selectAttr=event?`data-rp-symbol="${esc(row.symbol)}"`:`data-rp-trade="${esc(row.id)}"`;
     const meta=event?date(row.candle_ms):value;
-    const orderMeta=event||state.track==='spike'?`<span class="rp-order-meta" title="OKX · 15m · 触价时排列分">${esc(orderLabel(row.ema_order))}${!event&&!isFunded?`<br>${esc(allocation(row))}`:''}</span>`:!event&&['allin3','v3add20'].includes(state.track)&&!isFunded?`<span class="rp-order-meta">${esc(allocation(row))}</span>`:'';
+    const orderMeta=event||state.track==='spike'?`<span class="rp-order-meta" title="OKX · 15m · 触价时排列分">${esc(orderLabel(row.ema_order))}${!event&&!isFunded?`<br>${esc(allocation(row))}`:''}</span>`:!event&&['allin3','v3add20','live-allin3'].includes(state.track)&&!isFunded?`<span class="rp-order-meta">${esc(allocation(row))}</span>`:'';
     return `<article class="rp-record" data-rp-record="${esc(key)}" data-symbol="${esc(row.symbol)}" data-selected="${selected}"><div class="rp-record-main"><button type="button" class="rp-row-select" ${selectAttr} data-rp-focus="select" aria-pressed="${selected}" aria-label="查看 ${esc(base(row.symbol))} ${event?'触价':'开仓'} K 线"></button>${coinHTML(row,platform,`<span class="${row.side===1?'rp-positive':row.side===-1?'rp-negative':''}">${sideLabel(row)}</span>${!event&&isAddTrack(state.track)?` · ${esc(legLabel(row))}`:''} · ${event?date(row.candle_ms):`<span class="${closed?(isFunded?tone(row.pnl):''):tone(row.unrealized_bp)}">${value}</span>`}${carried?'<span class="rp-held-tag">持仓</span>':''}${orderMeta}`)}${scoreHTML(row.score)}</div><div class="rp-record-bottom"><span class="rp-record-meta ${event?'':closed?tone(row.pnl):tone(row.unrealized_bp)}">${meta}</span><a href="${esc(list.inspectionURL(row.symbol,state.period))}" data-rp-focus="patrol" aria-label="查看 ${esc(base(row.symbol))} 巡检 K 线详情" title="巡检 K 线详情"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></a><button type="button" data-rp-detail="${esc(key)}" data-rp-focus="detail" aria-label="展开 ${esc(base(row.symbol))} 明细" aria-expanded="false" aria-controls="rp-detail-${esc(key)}"><span aria-hidden="true">⌄</span></button></div>${closeButton}<section id="rp-detail-${esc(key)}" class="rp-row-detail" hidden><button type="button" data-rp-favorite="${esc(row.symbol)}" data-rp-focus="favorite" class="rp-detail-favorite" aria-pressed="${favorite}" aria-label="${favorite?'取消收藏':'收藏'} ${esc(base(row.symbol))}"><svg width="17" height="17" viewBox="0 0 24 24" fill="${favorite?'currentColor':'none'}" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/></svg><span>${favorite?'取消收藏':'收藏币种'}</span></button><div class="rp-detail-fields">${fields}</div><dl>${orderInfo}${more}</dl>${exits}<a class="rp-chart-link" data-rp-focus="chart" href="${esc(chartLink(row.symbol,state.track))}">查看 ${esc(base(row.symbol))} 的 1.618 图表 ↗</a></section></article>`;
   }
   const api={finite,esc,num,signed,bp,price,funded,orderLabel,marginLeverage,TRACKS,trackLabel,targetLabel,stopPrice,stage,signalStatus,allocation,route,chartLink,validate,summary,refillTotal,capitalLabel,capitalHTML,refillsHTML,rows,dayStart,heldSignals,createHistory,createFeed,rowHTML,pendingHTML,rulesHTML};
@@ -301,7 +303,7 @@
     chart=window.SpikeReclaimChart.create(el('chart'),text=>{el('chart-notice').textContent=text;el('chart-notice').hidden=!text;},drawings);
     sheet=window.SpikeYoloPreviewSheet.bind({panel:root.querySelector('.rp-records'),isOpen:()=>recordsOpen,dismiss:()=>setRecords(false)});
     closer=window.SpikeReclaimClose.create({root,onChanged:()=>{feed.refresh();watch?.refresh();analytics?.refresh();}});
-    watch=window.SpikeReclaimWatchlist.create({root,createFeed,onScore:score=>{const node=el('symbol-score');node.hidden=!!replay||!score;node.classList.toggle('is-high',!!score?.high);node.querySelector('b').textContent=score?.text||'';node.title=score?.title||'';node.setAttribute('aria-label',score?.title||'');},getContext:()=>({track:feed.getState().data?.tracks[state.track],signals:feed.getState().data?.signals,symbol:chartSymbol,period:state.period}),onOpen:()=>{backtest?.setOpen(false,false);analytics?.setOpen(false,false);if(recordsOpen)setRecords(false,false);},onSelect:symbol=>{leaveBacktest(false);state.track=window.SpikeReclaimWatchlist.holdingTrack(feed.getState().data?.tracks,symbol,state.track,book.getOrder());state.symbol=symbol;state.trade='';shown=50;pinned=null;chart.resetFocus();sync();render(feed.getState());}});
+    watch=window.SpikeReclaimWatchlist.create({root,createFeed,onScore:score=>{const node=el('symbol-score');node.hidden=!!replay||!score;node.classList.toggle('is-high',!!score?.high);node.querySelector('b').textContent=score?.text||'';node.title=score?.title||'';node.setAttribute('aria-label',score?.title||'');},getContext:()=>({track:feed.getState().data?.tracks[state.track],signals:signalRows(feed.getState().data,state.track),symbol:chartSymbol,period:state.period}),onOpen:()=>{backtest?.setOpen(false,false);analytics?.setOpen(false,false);if(recordsOpen)setRecords(false,false);},onSelect:symbol=>{leaveBacktest(false);state.track=window.SpikeReclaimWatchlist.holdingTrack(feed.getState().data?.tracks,symbol,state.track,book.getOrder());state.symbol=symbol;state.trade='';shown=50;pinned=null;chart.resetFocus();sync();render(feed.getState());}});
     analytics=window.SpikeReclaimAnalytics.create({root,createFeed,onOpen:()=>{backtest?.setOpen(false,false);watch.setOpen(false,false);if(matchMedia('(max-width:700px)').matches)setRecords(false,false);},onTrack:selectTrack});
     backtest=window.SpikeStrategyBacktest.create({root,onOpen:()=>{watch?.setOpen(false,false);analytics?.setOpen(false,false);setRecords(false,false);quick?.close();},onSelect:value=>{
       if(!replay)liveState={...state};replay=value;state.track=value.track;state.trade='';state.symbol=value.row.symbol.replace(/USDT$/,'-USDT-SWAP');state.period=window.SpikeStrategyBacktest.periodFor(value.row,state.period);pinned=null;chart.resetFocus();render(feed.getState());
@@ -403,11 +405,11 @@
     root.querySelector('[data-rp-action="follow"]').setAttribute('aria-pressed',String(!replay&&!state.trade&&!state.symbol));
     replace('symbol-label',chartSymbol?`${esc(base(chartSymbol))}<small> / USDT</small>`:'选择币种');
     replace('selection-status',replay?`<span class="${tone(replay.row.pnl)}">历史回测 · ${sideLabel(replay.row)} · ${signed(replay.row.pnl)} USDT</span>`:selected?`<span class="${selected.side===1?'rp-positive':'rp-negative'}">${sideLabel(selected)} · ${esc(stage(selected,data.now_ms))}</span>`:'');
-    el('selection-note').textContent=replay?`Binance · ${window.SpikeStrategyBacktest.entryLabel(replay.row)} 开仓区间`:selected?`${state.trade?'固定交易':state.symbol?'固定币种':'最新资金交易'} · ${date(selected.fill_ms)} 开仓`:chartSymbol?(state.symbol?'固定币种 · 最近记录无资金成交':'默认行情 · 暂无资金成交'):'等待资金交易 · 点击币种查看触价列表';
+    el('selection-note').textContent=(state.track==='live-allin3'?'触价前评分 · 模拟运行 · ':'')+(replay?`Binance · ${window.SpikeStrategyBacktest.entryLabel(replay.row)} 开仓区间`:selected?`${state.trade?'固定交易':state.symbol?'固定币种':'最新资金交易'} · ${date(selected.fill_ms)} 开仓`:chartSymbol?(state.symbol?'固定币种 · 最近记录无资金成交':'默认行情 · 暂无资金成交'):'等待资金交易 · 点击币种查看触价列表');
     root.querySelector('.rp-chart-foot').textContent=replay?'历史回测 · 标线为原成交价及原周期成交区间':'逐周 1.618 区间 · 开平仓按实际成交标记';
     el('watermark').textContent=chartSymbol?base(chartSymbol)+' / USDT':'';
     el('total').textContent=track?String(track.open.filter(funded).length):'—';
-    const allin=state.track==='allin3';
+    const allin=isAllinTrack(state.track);
     root.querySelector('.rp-account').classList.toggle('has-capital',allin);
     el('capital').hidden=!allin;el('capital').textContent=allin?capitalLabel(track):'';
     const refillMarkup=allin?refillsHTML(track):'';

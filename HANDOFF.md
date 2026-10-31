@@ -1,3 +1,11 @@
+## 2026-11-01 · live-allin3 pre-touch account connected
+
+- Owner requested Claude's 417kU pre-touch allin3 variant, named `live-allin3`; track7060 starts at1000U when enabled, with separate `live_scores` and funding. Original eight accounts keep touch-close scores. Delayed original replay excludes live positions. No exchange orders or eligibility change.
+- Reused `exp-pretouch-booklet-20261031-v1/allin3-A_rest_causal`:422funded settlements, exact event/native-time/net/score joins. Full2023–2026 PnL406801.41U;2026 417032.22U; cash added20203.83U/21refills; maximum realized drawdown100%; terminal ONUSDT127506.23U remains labeled. No new backtest. Maker2bp/taker5bp and non-target10bp slippage retained; Binance dual-OHLC/MAE vs OKX minute/margin-cap differences disclosed.
+- Frontend picker, independent score lists, ledger/history/analytics, strategy booklet/curves and422backtest trades connected. TG/Bark existing eligible notices additionally show frozen live score; notification gates unchanged. Stitch Flash screen `1e1df06e25b64257b3f0de741e8f8c81`, assets `docs/design/stitch-20261101-live-allin3/`.
+- 196backend and78frontend tests passed; public Chrome desktop1470 and mobile390/320 verified, both themes, no horizontal overflow/page errors. All3572previously closed rows and eight equities/start times unchanged across reload. Raw checks/screenshots `output/playwright/live-allin3-20261101/`. Notion strategy `40a8856479af81fa82e4f60fde2cea02`, status shadow observation, no forward performance claim.
+- Learning: `causal-paper-accounts-need-separate-score-and-replay-identities.md`. Requested Luna/max delegate stopped because actual runtime could not be verified; main completed integration. No report generated.
+
 ## 2026-10-31 · BTC15m first-five outside-1.618 glyph census
 
 ## 2026-11-01 — Current top20 all short-excursion chart census delivered

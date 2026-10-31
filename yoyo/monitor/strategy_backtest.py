@@ -21,13 +21,16 @@ from . import strategy_backtest_evidence as evidence
 ROOT = Path(__file__).resolve().parents[2]
 LEDGERS = ROOT / 'experiments/active/exp-strategy-booklet-paths-20261027-v1'
 IDENTITIES = ROOT / 'experiments/active/exp-monday-limit-reclaim-20261024-v1/symbols'
-TRACKS = ('60', '5', 'v3', 'v3add', 'spike', 'v3lock', 'allin3', 'v3add20')
+TRACKS = ('60', '5', 'v3', 'v3add', 'spike', 'v3lock', 'allin3', 'v3add20', 'live-allin3')
 PERIODS = {'1m': 60000, '2m': 120000, '3m': 180000, '5m': 300000, '15m': 900000, '1H': 3600000, '4H': 14400000,
            '12H': 43200000, '1D': 86400000}
 SLOTS = BoundedSemaphore(2)
 
 
 def ledger(track, directory=LEDGERS):
+    if track == 'live-allin3':
+        from .strategy_live_allin3 import ledger as live_ledger
+        return live_ledger()
     if track not in TRACKS:
         raise ValueError('unknown_strategy')
     directory = Path(directory)
@@ -160,7 +163,7 @@ def candles(track, trade, period, *, directory=LEDGERS, identities=IDENTITIES):
     job = json.loads(identity.read_text())['job']
     if job['symbol'] != row['symbol']:
         raise ValueError('source_symbol_mismatch')
-    row = dict(row, fills=evidence.fill_geometry(track, row, directory, job['execution_minutes']))
+    row = dict(row, fills=row['fills'] if track == 'live-allin3' else evidence.fill_geometry(track, row, directory, job['execution_minutes']))
     stamps = tuple((Path(p).stat().st_size, Path(p).stat().st_mtime_ns) for p in job['paths'])
     start = row['entry_ms'] // step * step - 240 * step
     end = row['exit_ms'] // step * step + 81 * step

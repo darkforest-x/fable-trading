@@ -118,13 +118,18 @@ V3LOCK = dict(breakeven_offset_bp=50.)
 ALLIN3_TRACK = 5060  # all-in 3x high-payoff account; API key "allin3"
 CONFIRM[ALLIN3_TRACK] = 60
 ALLIN3 = dict(min_score=.6, backstop_pct=30., leverage=3., blowup_below=100.)
+LIVE_ALLIN3_TRACK = 7060  # Separate pre-touch paper account; never exchange orders.
+CONFIRM[LIVE_ALLIN3_TRACK] = 60
 V3ADD20_TRACK, V3ADD20_LEG = 6060, 6061  # v3add with margin = equity / 20 at 3x and its add legs; API key "v3add20"
 CONFIRM[V3ADD20_TRACK] = CONFIRM[V3ADD20_LEG] = 60
 ACCOUNT[V3ADD20_LEG] = V3ADD20_TRACK
 V3ADD20 = dict(ADD, slots=20, leverage=3.)
 LEGS = {V3ADD_TRACK: V3ADD_LEG, V3ADD20_TRACK: V3ADD20_LEG}
 KEYS = {V3_TRACK: "v3", V3ADD_TRACK: "v3add", SPIKE_TRACK: "spike", V3LOCK_TRACK: "v3lock", ALLIN3_TRACK: "allin3",
-        V3ADD20_TRACK: "v3add20"}
+        V3ADD20_TRACK: "v3add20", LIVE_ALLIN3_TRACK: "live-allin3"}
+POSITION_SCORES = ("CASE WHEN p.track=7060 THEN ls.score ELSE s.score END AS score, s.ema_order, "
+                   "CASE WHEN p.track=7060 THEN 'pre_touch' ELSE s.score_basis END AS score_basis")
+SCORE_JOIN = " LEFT JOIN signals s ON s.id=p.signal_id LEFT JOIN live_scores ls ON ls.signal_id=p.signal_id "
 EMA_SPANS = (8, 13, 21, 34, 55)
 MAKER_BP, TAKER_BP, SLIP_BP = 2.0, 5.0, 10.0
 START_EQUITY, FRACTION, GROSS = 1000.0, 0.10, 1.0
@@ -277,7 +282,8 @@ def settle(side, entry, exit_price, reason):
 
 class ReclaimPaper:
     def __init__(self, runtime, fib, model_path=MODEL, v3_path=V3, enable_v3=True, enable_v3add=True, enable_spike=True,
-                 enable_v3lock=True, enable_allin3=True, enable_v3add20=True, score_basis="touch_close"):
+                 enable_v3lock=True, enable_allin3=True, enable_v3add20=True, score_basis="touch_close",
+                 enable_live_allin3=False):
         if score_basis not in ("touch_close", "pre_touch"):
             raise ValueError("score_basis must be 'touch_close' or 'pre_touch'")
         self.score_basis = score_basis
@@ -288,6 +294,7 @@ class ReclaimPaper:
         self.spike = dict(SPIKE) if enable_spike else None
         self.v3lock = dict(V3LOCK) if self.v3 and enable_v3lock else None
         self.allin = dict(ALLIN3) if enable_allin3 else None
+        self.live_allin = dict(ALLIN3, score_basis="pre_touch", slippage_bp=SLIP_BP) if enable_live_allin3 else None
         self.add20 = dict(V3ADD20) if self.v3 and enable_v3add20 else None
         self.path = Path(runtime)/"monday-reclaim-paper.sqlite3"
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -320,6 +327,8 @@ class ReclaimPaper:
                 CREATE TABLE IF NOT EXISTS refills (
                     id INTEGER PRIMARY KEY, track INTEGER NOT NULL, ms INTEGER NOT NULL, position_id INTEGER,
                     equity_before REAL NOT NULL, equity_after REAL NOT NULL);
+                CREATE TABLE IF NOT EXISTS live_scores (
+                    signal_id INTEGER PRIMARY KEY, status TEXT, score REAL, features TEXT, error TEXT, scored_ms INTEGER);
             """)
             if "stakes" not in {r["name"] for r in db.execute("PRAGMA table_info(tracks)")}:
                 db.execute("ALTER TABLE tracks ADD COLUMN stakes INTEGER NOT NULL DEFAULT 1")
@@ -345,7 +354,7 @@ class ReclaimPaper:
                 db.execute("UPDATE positions SET realized_pnl=COALESCE(pnl,0) WHERE stage='closed'")
             for m in (TRACKS+((V3_TRACK,) if self.v3 else ())+((V3ADD_TRACK,) if self.add else ())+((SPIKE_TRACK,) if self.spike else ())
                       +((V3LOCK_TRACK,) if self.v3lock else ())+((ALLIN3_TRACK,) if self.allin else ())
-                      +((V3ADD20_TRACK,) if self.add20 else ())):
+                      +((V3ADD20_TRACK,) if self.add20 else ())+((LIVE_ALLIN3_TRACK,) if self.live_allin else ())):
                 db.execute("INSERT OR IGNORE INTO tracks (track,equity,started_ms) VALUES (?,?,?)", (m, START_EQUITY, self.client.clock()))
         self._refresh_watch()
 
@@ -475,10 +484,13 @@ class ReclaimPaper:
         if self.score_basis == "touch_close" and not excluded:
             # Scored by score_due once the touch 5m bar has closed, as the backtest scores it.
             with self.db() as db:
-                db.execute("INSERT OR IGNORE INTO signals (week,symbol,side,level,target,high,low,candle_ms,observed_ms,"
+                cur = db.execute("INSERT OR IGNORE INTO signals (week,symbol,side,level,target,high,low,candle_ms,observed_ms,"
                            "status,taken,score_basis,levels) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
                            (levels["week"], symbol, side, level, target, levels["high"], levels["low"], candle_ms,
                             observed_ms, "pending_score", 0, self.score_basis, json.dumps(levels)))
+                sid = cur.lastrowid if cur.rowcount == 1 else None
+            if sid is not None:
+                self._open_live_touch(sid, levels, symbol, side_text, candle_ms)
             return
         status, score, taken, feats, error, order = (("excluded", None, 0, None, None, None) if excluded else
                                                      self._score(levels, symbol, side_text, candle_ms, False))
@@ -492,6 +504,26 @@ class ReclaimPaper:
             if cur.rowcount != 1 or status == "excluded":
                 return
             self._open_accounts(db, cur.lastrowid, levels, symbol, side, level, target, candle_ms, score, taken, order)
+            sid = cur.lastrowid
+        self._open_live_touch(sid, levels, symbol, side_text, candle_ms)
+        self._refresh_watch()
+
+    def _open_live_touch(self, sid, levels, symbol, side_text, candle_ms):
+        """Freeze only pre-touch closed 5m/1h features; persist independently of the later touch-close score.
+
+        Uses the frozen model and existing features(..., at_touch_close=False).
+        No historical signals are backfilled when enabling this forward account.
+        """
+        if not self.live_allin:
+            return
+        status, score, _, feats, error, _ = self._score(levels, symbol, side_text, candle_ms, False)
+        with self.db() as db:
+            db.execute("BEGIN IMMEDIATE")
+            cur = db.execute("INSERT OR IGNORE INTO live_scores VALUES (?,?,?,?,?,?)",
+                             (sid, status, score, json.dumps(feats) if feats else None, error, self.client.clock()))
+            if cur.rowcount == 1 and status == "scored" and score is not None and score >= self.live_allin["min_score"]:
+                self._open_allin(db, sid, levels, symbol, 1 if side_text == "lower" else -1,
+                                 levels[side_text], candle_ms, LIVE_ALLIN3_TRACK)
         self._refresh_watch()
 
     @serialized
@@ -537,7 +569,8 @@ class ReclaimPaper:
                 self._open_accounts(db, s["id"], levels, symbol, s["side"], s["level"], s["target"], candle_ms, score, taken, order)
             for ts, _, h, l, c, _ in minutes:
                 self.decide(ts, symbol)  # confirmations due before this minute, as in _catch_up
-                self.handle_quote(symbol, {"candle_ms": ts, "high": h, "low": l, "price": c})
+                self.handle_quote(symbol, {"candle_ms": ts, "high": h, "low": l, "price": c},
+                                  skip_live=True)
         self._refresh_watch()
 
     def _open_accounts(self, db, sid, levels, symbol, side, level, target, candle_ms, score, taken, order):
@@ -603,40 +636,45 @@ class ReclaimPaper:
         side = 1 if side_text == "lower" else -1
         with self.db() as db:
             row = db.execute(
-                "SELECT status,score,candle_ms,observed_ms FROM signals "
+                "SELECT id,status,score,candle_ms,observed_ms FROM signals "
                 "WHERE week=? AND symbol=? AND side=?",
                 (week, symbol, side),
             ).fetchone()
+            live = db.execute("SELECT status,score FROM live_scores WHERE signal_id=?", (row["id"],)).fetchone() if row else None
         if row is None or row["status"] == "pending_score" and row["candle_ms"] == candle_ms:
             return None
         if row["candle_ms"] != candle_ms or row["observed_ms"] != observed_ms:
             return {"status": "identity_mismatch", "score": None}
-        return {"status": row["status"], "score": row["score"]}
+        result = {"status": row["status"], "score": row["score"]}
+        if live and live["status"] == "scored":
+            result["live_allin3_score"] = live["score"]
+        return result
 
-    def _open_allin(self, db, sid, levels, symbol, side, level, candle_ms):
+    def _open_allin(self, db, sid, levels, symbol, side, level, candle_ms, track=ALLIN3_TRACK):
         """allin3 row: opposite 1.618 target, -30 percent backstop, notional = 3 x realized equity, one at a time."""
-        a = self.allin
+        a = self.live_allin if track == LIVE_ALLIN3_TRACK else self.allin
         target = levels["upper"] if side == 1 else levels["lower"]
         notional, note = 0., None
-        if db.execute("SELECT COUNT(*) n FROM positions WHERE track=? AND stage<>'closed' AND taken=1", (ALLIN3_TRACK,)).fetchone()["n"]:
+        if db.execute("SELECT COUNT(*) n FROM positions WHERE track=? AND stage<>'closed' AND taken=1", (track,)).fetchone()["n"]:
             note = "busy"
         else:
-            equity = db.execute("SELECT equity FROM tracks WHERE track=?", (ALLIN3_TRACK,)).fetchone()["equity"]
+            equity = db.execute("SELECT equity FROM tracks WHERE track=?", (track,)).fetchone()["equity"]
             notional = max(0., equity*a["leverage"])
         decision = candle_ms//HOUR*HOUR+2*HOUR
         backstop = level*(1-side*a["backstop_pct"]/100)
         db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,decision_ms,stage,"
                    "taken,notional,last_seen_ms,note,remaining_notional,backstop) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                   (sid, ALLIN3_TRACK, symbol, side, level, target, candle_ms, decision, "pending_confirm",
+                   (sid, track, symbol, side, level, target, candle_ms, decision, "pending_confirm",
                     int(notional > 0), notional, candle_ms, note, notional, backstop))
 
-    def _refill(self, db, position_id, ms):
+    def _refill(self, db, position_id, ms, track=ALLIN3_TRACK):
         """Below the blow-up line the rest counts as lost and a new 1000 USDT stake starts (as in the sizing replay)."""
-        equity = db.execute("SELECT equity FROM tracks WHERE track=?", (ALLIN3_TRACK,)).fetchone()["equity"]
-        if equity < self.allin["blowup_below"]:
+        equity = db.execute("SELECT equity FROM tracks WHERE track=?", (track,)).fetchone()["equity"]
+        config = self.live_allin if track == LIVE_ALLIN3_TRACK else self.allin
+        if equity < config["blowup_below"]:
             db.execute("INSERT INTO refills (track,ms,position_id,equity_before,equity_after) VALUES (?,?,?,?,?)",
-                       (ALLIN3_TRACK, ms, position_id, equity, START_EQUITY))
-            db.execute("UPDATE tracks SET equity=?,stakes=stakes+1 WHERE track=?", (START_EQUITY, ALLIN3_TRACK))
+                       (track, ms, position_id, equity, START_EQUITY))
+            db.execute("UPDATE tracks SET equity=?,stakes=stakes+1 WHERE track=?", (START_EQUITY, track))
 
     def _leverage(self, track):
         """Margin leverage of a slot whose loss is capped at its margin, else None."""
@@ -644,6 +682,8 @@ class ReclaimPaper:
             return self.spike["leverage"]
         if track == ALLIN3_TRACK and self.allin:
             return self.allin["leverage"]
+        if track == LIVE_ALLIN3_TRACK and self.live_allin:
+            return self.live_allin["leverage"]
         if account(track) == V3ADD20_TRACK and self.add20:
             return self.add20["leverage"]
         return None
@@ -754,6 +794,8 @@ class ReclaimPaper:
     def _record_exit(self, db, p, amount, exit_ms, price, reason):
         """Allocate original entry cost once across each realized tranche."""
         gross, fee, net, net_slip = settle(p["side"], p["entry"], price, reason)
+        if p["track"] == LIVE_ALLIN3_TRACK:
+            net = net_slip  # The saved pre-touch account deducts the 10bp non-target scenario.
         pnl = amount*net/1e4
         lev = self._leverage(p["track"])
         if lev:
@@ -773,6 +815,8 @@ class ReclaimPaper:
                        totals["net"], totals["slip"], totals["pnl"], p["id"]))
             if p["track"] == ALLIN3_TRACK and self.allin:
                 self._refill(db, p["id"], exit_ms)
+            if p["track"] == LIVE_ALLIN3_TRACK and self.live_allin:
+                self._refill(db, p["id"], exit_ms, LIVE_ALLIN3_TRACK)
         return dict(exit_id=cur.lastrowid, position_id=p["id"], symbol=p["symbol"], track=p["track"],
                     closed_notional=amount, closed_quantity=amount/p["entry"], price=price, exit_ms=exit_ms,
                     fee=amount*fee/1e4, pnl=pnl, remaining_notional=remaining, remaining_quantity=remaining/p["entry"],
@@ -787,6 +831,8 @@ class ReclaimPaper:
             self._record_exit(db, p, p["remaining_notional"], exit_ms, price, reason)
         else:
             gross, fee, net, net_slip = settle(p["side"], p["entry"], price, reason)
+            if p["track"] == LIVE_ALLIN3_TRACK:
+                net = net_slip
             db.execute("UPDATE positions SET stage='closed',exit_ms=?,exit_price=?,reason=?,gross_bp=?,fee_bp=?,net_bp=?,"
                        "net_slip_bp=?,pnl=0,remaining_notional=0 WHERE id=?", (exit_ms, price, reason, gross, fee, net, net_slip, p["id"]))
 
@@ -851,11 +897,13 @@ class ReclaimPaper:
         return result
 
     @serialized
-    def handle_quote(self, symbol, q):
+    def handle_quote(self, symbol, q, skip_live=False):
         """One 1m candle update (cumulative minute high/low, latest close)."""
         with self.db() as db:
             for p in db.execute("SELECT * FROM positions WHERE symbol=? AND stage<>'closed' ORDER BY (parent_id IS NOT NULL), id",
                                 (symbol,)).fetchall():
+                if skip_live and p["track"] == LIVE_ALLIN3_TRACK:
+                    continue
                 if p["stage"] == "pending_fill":
                     p = self._try_fill_add(db, p, q)
                     if p is None:
@@ -981,7 +1029,7 @@ class ReclaimPaper:
                 # recent-touch page. LEFT JOIN preserves legacy position records.
                 # Add legs that never filled are bookkeeping only and are left out.
                 closed_where = f"p.track IN ({marks}) AND p.stage='closed' AND NOT (p.parent_id IS NOT NULL AND p.taken=0)"
-                joined = "SELECT p.*, s.score, s.ema_order FROM positions p LEFT JOIN signals s ON s.id=p.signal_id WHERE "
+                joined = "SELECT p.*, " + POSITION_SCORES + " FROM positions p" + SCORE_JOIN + "WHERE "
                 closed = [dict(r) for r in db.execute(
                     joined + closed_where + " ORDER BY p.exit_ms DESC, p.id DESC LIMIT 100", tr)]
                 record_closed = ([dict(r) for r in db.execute(
@@ -996,8 +1044,7 @@ class ReclaimPaper:
                                           "ORDER BY p.fill_ms DESC,p.id DESC LIMIT 1", tr).fetchone()
                 latest_closed = dict(latest_closed) if latest_closed else None
                 open_rows, pending_adds = [], []
-                for r in db.execute("SELECT p.*, s.score, s.ema_order FROM positions p JOIN signals s ON s.id=p.signal_id "
-                                    f"WHERE p.track IN ({marks}) AND p.stage<>'closed' ORDER BY p.fill_ms DESC", tr):
+                for r in db.execute(joined + f"p.track IN ({marks}) AND p.stage<>'closed' ORDER BY p.fill_ms DESC", tr):
                     r = dict(r); q = quotes.get(r["symbol"], {})
                     if r["stage"] == "pending_fill":  # resting add order, not a position yet
                         pending_adds.append(r)
@@ -1019,7 +1066,7 @@ class ReclaimPaper:
                         exits.setdefault(row["position_id"], []).append(dict(row))
                 for row in visible:
                     row["exits"] = exits.get(row["id"], [])
-                if m == ALLIN3_TRACK:
+                if m in (ALLIN3_TRACK, LIVE_ALLIN3_TRACK):
                     extra = dict(stakes=t["stakes"], injected=START_EQUITY*t["stakes"], multiple=t["equity"]/(START_EQUITY*t["stakes"]),
                                  refills=[dict(r) for r in db.execute("SELECT * FROM refills WHERE track=? ORDER BY ms,id", (m,))])
                 else:
@@ -1040,6 +1087,7 @@ class ReclaimPaper:
                     FUNDED_OPEN_SIGNAL + ")) ORDER BY s.candle_ms DESC,s.id DESC",
                     (day_start_ms, day_start_ms+DAY, day_start_ms))]
             signals = [dict(r) for r in db.execute("SELECT * FROM signals ORDER BY candle_ms DESC LIMIT 100")]
+            live_scores = {r["signal_id"]: dict(r) for r in db.execute("SELECT * FROM live_scores")}
         for s in signals:
             s["features"] = json.loads(s["features"]) if s["features"] else None
         for s in record_signals:
@@ -1052,10 +1100,20 @@ class ReclaimPaper:
                     fees_bp=dict(maker=MAKER_BP, taker=TAKER_BP, report_slippage=SLIP_BP),
                     worker=dict(alive=bool(self.thread and self.thread.is_alive()), queue=self.events.qsize(), error=self.error),
                     tracks=tracks, signals=signals)
+        result["live-allin3"] = self.live_allin
+        result["live_signals"] = [self._live_signal(s, live_scores[s["id"]]) for s in signals if s["id"] in live_scores]
         if today:
             result["record_day_start_ms"] = day_start_ms
             result["record_signals"] = record_signals
+            result["live_record_signals"] = [self._live_signal(s, live_scores[s["id"]]) for s in record_signals if s["id"] in live_scores]
         return result
+
+    @staticmethod
+    def _live_signal(signal, score):
+        return dict(signal, status=score["status"], score=score["score"], error=score["error"],
+                    features=json.loads(score["features"]) if score["features"] else None,
+                    scored_ms=score["scored_ms"], score_basis="pre_touch",
+                    taken=int(score["score"] is not None and score["score"] >= ALLIN3["min_score"]))
 
     @staticmethod
     def _history_order_by(tab, sort):
@@ -1094,12 +1152,18 @@ class ReclaimPaper:
         search = "%" + q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
         if tab == "events":
             order_by = self._history_order_by(tab, sort)
+            signal_source = "signals s"
+            if track == "live-allin3":
+                # Project the selected score before filtering/sorting/pagination, never after LIMIT.
+                signal_source = ("(SELECT s.id,s.week,s.symbol,s.side,s.level,s.target,s.high,s.low,s.candle_ms,s.observed_ms,"
+                                 "ls.status,ls.score,(ls.score>=0.6) taken,ls.features,ls.error,s.ema_order,"
+                                 "'pre_touch' score_basis,ls.scored_ms FROM signals s JOIN live_scores ls ON ls.signal_id=s.id) s")
             where = "s.candle_ms<? AND NOT EXISTS (SELECT 1 FROM positions held " \
                     "WHERE held.signal_id=s.id AND " + FUNDED_OPEN_SIGNAL + ") " \
                     "AND (?='' OR LOWER(s.symbol) LIKE LOWER(?) ESCAPE '\\')"
             params = (day_start_ms, q, search)
-            count_sql = "SELECT COUNT(*) n FROM signals s WHERE " + where
-            rows_sql = "SELECT s.* FROM signals s WHERE " + where + \
+            count_sql = "SELECT COUNT(*) n FROM " + signal_source + " WHERE " + where
+            rows_sql = "SELECT s.* FROM " + signal_source + " WHERE " + where + \
                        " ORDER BY " + order_by + " LIMIT ? OFFSET ?"
             with self.db() as db:
                 db.execute("BEGIN")
@@ -1109,6 +1173,8 @@ class ReclaimPaper:
                 row["features"] = json.loads(row["features"]) if row["features"] else None
         else:
             order_by = self._history_order_by(tab, sort)
+            if track == "live-allin3":
+                order_by = order_by.replace("s.score", "ls.score")
             track_id_value = track_id(track)
             tracks = members(track_id_value)
             marks = ",".join("?" for _ in tracks)
@@ -1121,9 +1187,10 @@ class ReclaimPaper:
             }[scope]
             where += scope_sql + " AND (?='' OR LOWER(p.symbol) LIKE LOWER(?) ESCAPE '\\')"
             params = (*tracks, day_start_ms, q, search)
-            join = " FROM positions p LEFT JOIN signals s ON s.id=p.signal_id WHERE "
+            join = " FROM positions p" + SCORE_JOIN + "WHERE "
             count_sql = "SELECT COUNT(*) n" + join + where
-            rows_sql = ("SELECT p.*,s.score,s.ema_order,s.features AS _features" + join + where +
+            features_column = "ls.features" if track == "live-allin3" else "s.features"
+            rows_sql = ("SELECT p.*, " + POSITION_SCORES + "," + features_column + " AS _features" + join + where +
                         " ORDER BY " + order_by + " LIMIT ? OFFSET ?")
             with self.db() as db:
                 db.execute("BEGIN")
@@ -1149,12 +1216,12 @@ def install(app, engine):
     app.state.monday_reclaim_paper = engine
 
     @app.get("/api/monday-reclaim-paper/analytics")
-    def analytics(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20"] = "60",
+    def analytics(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20", "live-allin3"] = "60",
                   days: Literal["0", "7", "30"] = "0"):
         return engine.analytics(track, int(days))
 
     @app.get("/api/monday-reclaim-paper/history")
-    def record_history(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20"] = "60",
+    def record_history(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20", "live-allin3"] = "60",
                        tab: Literal["events", "closed"] = "events",
                        scope: Literal["funded", "shadow", "all"] = "funded",
                        q: str = Query("", max_length=100), offset: int = Query(0, ge=0),

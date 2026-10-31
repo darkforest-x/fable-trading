@@ -275,8 +275,11 @@ def notification_text(event, score):
     label = f"{score:.4f}"
     if label == f"{NOTIFICATION_MIN_SCORE:.4f}" and score > NOTIFICATION_MIN_SCORE:
         label = str(score)  # Do not display an admitted raw score as the excluded boundary.
+    live_score = event.get("live_allin3_score")
+    live_note = (f"\nlive-allin3 · 触价前评分 {live_score:.4f} · 模拟" if
+                 type(live_score) in (int, float) and math.isfinite(live_score) and 0 <= live_score <= 1 else "")
     return (f"{symbol} · {side} 1.618\n评分 {label} · 点位 {event['level']:.10g}\n"
-            f"{observed} 北京")
+            f"{observed} 北京{live_note}")
 
 
 def claim_scored_notification(book, event, now, *, score_lookup=None, clock=None, channel="telegram"):
@@ -317,6 +320,8 @@ def claim_scored_notification(book, event, now, *, score_lookup=None, clock=None
     if not route["enabled"] or route["generation"] != event["generation"]:
         finish(event, "skipped", "subscription_changed")
         return None
+    if "live_allin3_score" in result:
+        event = dict(event, live_allin3_score=result["live_allin3_score"])
     return event, score, ready_at
 
 

@@ -5,7 +5,8 @@
   'use strict';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const label=t=>({60:'60m',5:'5m'}[t]||t);
-  const TITLES={60:'等待回收',5:'快速确认',v3:'分数决定目标',v3add:'逆向分步加仓',spike:'排列过滤插针',v3lock:'回收后锁住利润',allin3:'单仓 · 梭哈3倍',v3add20:'20份动态保证金 · 3倍加仓'};
+  // Stitch 1e1df06e25b64257b3f0de741e8f8c81: independent pre-touch account.
+  const TITLES={'live-allin3':'触价前评分 · 模拟运行',60:'等待回收',5:'快速确认',v3:'分数决定目标',v3add:'逆向分步加仓',spike:'排列过滤插针',v3lock:'回收后锁住利润',allin3:'单仓 · 梭哈3倍',v3add20:'20份动态保证金 · 3倍加仓'};
   const BOOK='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5C8 2 4 3 2 4v15c3-1 6-1 10 2 4-3 7-3 10-2V4c-2-1-6-2-10 1Zm0 0v16"/></svg>';
   const BACKTEST='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 17 9 11l4 4 8-10M15 5h6v6"/></svg>';
   const num=(v,d=2)=>typeof v==='number'&&Number.isFinite(v)?v.toLocaleString('en-US',{maximumFractionDigits:d}):'—';
@@ -132,11 +133,11 @@
       el('.rs-forward-note').textContent=window.SpikeReclaimAnalytics.curveNote(data)+' 不含浮动盈亏。'+window.SpikeReclaimAnalytics.coverageNote(data.coverage);charts();
     }
     function rules(){
-      const d=getSnapshot(),current=d?.tracks?.[track],lock=track==='v3lock',sp=track==='spike',all=track==='allin3',v3=['v3','v3add','v3lock','v3add20'].includes(track);
-      const threshold=all?d?.allin3?.min_score:sp?d?.spike?.min_score:v3?d?.v3?.min_score:d?.model?.threshold;
+      const d=getSnapshot(),current=d?.tracks?.[track],lock=track==='v3lock',sp=track==='spike',all=['allin3','live-allin3'].includes(track),v3=['v3','v3add','v3lock','v3add20'].includes(track);
+      const threshold=all?d?.[track]?.min_score:sp?d?.spike?.min_score:v3?d?.v3?.min_score:d?.model?.threshold;
       const offset=lock?d?.v3lock?.breakeven_offset_bp:d?.breakeven_offset_bp;
       el('#rs-overview').innerHTML=`<div class="rs-section-title"><h1>${esc(label(track))}<em>${esc(TITLES[track])}</em></h1></div><div class="rs-facts"><div><small>确认周期</small><b>${num(current?.confirm_minutes,0)} <small>分钟</small></b></div><div><small>入场分门槛</small><b>≥ ${num(threshold,4)}</b></div><div><small>${lock?'利润锁':'保护偏移'}</small><b>+${num(offset/100)}%</b></div></div>${!current?'<p class="rs-warning">策略规则尚未读取，参数保持空缺。稍后重新打开可重试。</p>':''}`;
-      el('#rs-rules').innerHTML=`<div class="rs-section-title"><h2>从触价到退出</h2></div><ol class="rs-flow"><li><b>划区间</b><span>纽约周一高低点 H / L，宽度 W=H−L。上沿 H+0.618W，下沿 L−0.618W。</span></li><li><b>等触价</b><span>每周每侧首次触及；下沿做多、上沿做空。冻结入场评分按触价前信息计算，不是胜率。</span></li><li><b>等回收</b><span>触价所在K线之后，下一根确认周期K线收盘。未收回则退出；目标可在确认前成交。</span></li><li><b>保护余仓</b><span>收回且越过保护价才移动止损；收回但未越过时按确认收盘退出。多单加偏移，空单减偏移。</span></li></ol><h3>本策略当前规则</h3><div class="rs-current-rules">${current?renderRules(d,track):'<p>正在读取策略数据。</p>'}</div><p class="rs-muted">规则取自当前只读模拟盘接口；历史回测版本差异见回测章节。</p>`;
+      el('#rs-rules').innerHTML=`<div class="rs-section-title"><h2>从触价到退出</h2></div><ol class="rs-flow"><li><b>划区间</b><span>纽约周一高低点 H / L，宽度 W=H−L。上沿 H+0.618W，下沿 L−0.618W。</span></li><li><b>等触价</b><span>每周每侧首次触及；下沿做多、上沿做空。${track==='live-allin3'?'冻结入场评分仅使用触价前已收盘信息；当前模拟运行。':'原回测评分包含触价5m收盘信息，收盘后回记触价入场。'}分数不是胜率。</span></li><li><b>等回收</b><span>触价所在K线之后，下一根确认周期K线收盘。未收回则退出；目标可在确认前成交。</span></li><li><b>保护余仓</b><span>收回且越过保护价才移动止损；收回但未越过时按确认收盘退出。多单加偏移，空单减偏移。</span></li></ol><h3>本策略当前规则</h3><div class="rs-current-rules">${current?renderRules(d,track):'<p>正在读取策略数据。</p>'}</div><p class="rs-muted">规则取自当前只读模拟盘接口；历史回测版本差异见回测章节。</p>`;
     }
     async function show(next){
       if(!tracks.includes(next))return;clearTimeout(closing);epoch++;const token=epoch;track=next;open=true;chartData=null;research=null;history=null;historyMode='equity';analytics?.setActive(false);requests.cancel();requests=window.SpikeRuntime.createRequests();stopCharts();

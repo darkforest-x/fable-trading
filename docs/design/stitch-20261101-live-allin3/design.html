@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background text-on-surface antialiased" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Spike Terminal - Quantitative Strategy Hub</title>
+<!-- Google Fonts: Inter & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-fixed-dim": "#abc7ff",
+            "secondary-fixed-dim": "#78d8be",
+            "inverse-primary": "#abc7ff",
+            "on-background": "#0b1c30",
+            "on-tertiary-container": "#fffaf9",
+            "error-container": "#ffdad6",
+            "primary": "#0059b5",
+            "on-surface-variant": "#414753",
+            "on-secondary-fixed": "#002019",
+            "primary-container": "#0071e3",
+            "on-tertiary-fixed": "#40000d",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed-variant": "#92002a",
+            "on-secondary-fixed-variant": "#005142",
+            "surface-container-highest": "#d3e4fe",
+            "on-secondary-container": "#00705c",
+            "on-secondary": "#ffffff",
+            "surface-tint": "#005cbb",
+            "surface-dim": "#cbdbf5",
+            "on-primary-fixed": "#001b3f",
+            "error": "#ba1a1a",
+            "tertiary-fixed-dim": "#ffb2b7",
+            "primary-fixed": "#d7e2ff",
+            "tertiary-container": "#db2b4e",
+            "surface-container-high": "#dce9ff",
+            "on-error-container": "#93000a",
+            "tertiary-fixed": "#ffdadb",
+            "on-primary": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "on-surface": "#0b1c30",
+            "secondary-fixed": "#94f4d9",
+            "outline": "#717785",
+            "surface-container": "#e5eeff",
+            "background": "#f8f9ff",
+            "on-primary-container": "#fcfbff",
+            "secondary-container": "#92f2d7",
+            "inverse-surface": "#213145",
+            "inverse-on-surface": "#eaf1ff",
+            "tertiary": "#b70438",
+            "surface-variant": "#d3e4fe",
+            "surface-bright": "#f8f9ff",
+            "surface": "#f8f9ff",
+            "surface-container-low": "#eff4ff",
+            "on-primary-fixed-variant": "#00458f",
+            "secondary": "#006b58",
+            "surface-container-lowest": "#ffffff",
+            "outline-variant": "#c1c6d6"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin-desktop": "2.5rem",
+            "gutter-desktop": "1.5rem",
+            "gutter-tablet": "1rem",
+            "gutter": "0.75rem",
+            "margin-tablet": "1.5rem",
+            "margin": "1rem",
+            "space-md": "0.75rem",
+            "space-xs": "0.25rem",
+            "space-lg": "1rem",
+            "space-xl": "1.5rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "label-numeric-sm": ["JetBrains Mono"],
+            "display": ["Inter"],
+            "body-sm": ["Inter"],
+            "label-numeric-lg": ["JetBrains Mono"],
+            "label-caps": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-md": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "label-numeric-md": ["JetBrains Mono"],
+            "headline-sm": ["Inter"],
+            "body-lg": ["Inter"]
+          },
+          "fontSize": {
+            "label-numeric-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+            "label-numeric-lg": ["20px", { "lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "label-caps": ["10px", { "lineHeight": "12px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "label-numeric-md": ["14px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "headline-sm": ["17px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      font-feature-settings: 'liga';
+    }
+    /* Apple Glass custom depth accents */
+    .glass-canvas {
+      background: radial-gradient(ellipse at 50% -10%, #dce8f5 0%, #e2e8f0 100%);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(28px) saturate(180%);
+      box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 1px 0 rgba(255, 255, 255, 0.2), 0 8px 32px -4px rgba(15, 23, 42, 0.05);
+    }
+    .glass-drawer {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(36px) saturate(200%);
+      box-shadow: -12px 0 48px -12px rgba(15, 23, 42, 0.12), inset 1px 0 0 0 rgba(255, 255, 255, 0.9);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(113, 119, 133, 0.25);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="h-full overflow-hidden flex flex-col glass-canvas text-on-surface selection:bg-primary-container/20">
+<!-- TOP APP BAR (Shared Component: TopNavBar) -->
+<header class="bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.03)] docked full-width top-0 sticky z-30 shrink-0">
+<div class="flex justify-between items-center w-full px-space-lg max-w-[1536px] mx-auto h-16">
+<!-- Brand & Search / Symbol Bar -->
+<div class="flex items-center gap-space-lg">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-primary-container text-on-primary flex items-center justify-center font-bold text-headline-sm shadow-sm">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+</div>
+<span class="text-headline-md font-headline-md font-bold tracking-tight text-on-surface">Spike Terminal</span>
+</div>
+<!-- Strategy Quick Selector Trigger Button -->
+<button class="flex items-center gap-2 bg-surface-container-lowest/90 border border-outline-variant/60 rounded-lg px-3 py-1.5 shadow-sm hover:border-primary-container transition-all text-left" id="strategyTriggerBtn">
+<div class="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-body-sm font-semibold text-on-surface">live-allin3</span>
+<span class="text-label-caps font-label-caps bg-primary/10 text-primary px-1 rounded font-semibold">SELECTED</span>
+</div>
+<p class="text-body-sm text-outline font-body-sm text-[10px] leading-tight">触价前评分 · 模拟运行</p>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px] ml-1">unfold_more</span>
+</button>
+<!-- Search Bar -->
+<div class="hidden lg:flex items-center gap-2 bg-surface-container-low border border-outline-variant/30 rounded-lg px-3 py-1.5 w-64 text-on-surface-variant">
+<span class="material-symbols-outlined text-outline text-[18px]">search</span>
+<span class="text-body-sm font-body-sm">搜索标的、因子或策略...</span>
+<kbd class="ml-auto text-[10px] font-label-numeric-sm bg-surface-container px-1.5 py-0.5 rounded text-outline">⌘K</kbd>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-on-surface-variant hover:text-on-surface font-medium pb-1 transition-colors duration-150 text-body-md font-body-md" href="#">Overview</a>
+<a class="text-on-surface-variant hover:text-on-surface font-medium pb-1 transition-colors duration-150 text-body-md font-body-md" href="#">Screeners</a>
+<a class="text-primary border-b-2 border-primary font-semibold pb-1 text-body-md font-body-md" href="#">Quantitative</a>
+<a class="text-on-surface-variant hover:text-on-surface font-medium pb-1 transition-colors duration-150 text-body-md font-body-md" href="#">Order Flow</a>
+<a class="text-on-surface-variant hover:text-on-surface font-medium pb-1 transition-colors duration-150 text-body-md font-body-md" href="#">Portfolio</a>
+<a class="text-on-surface-variant hover:text-on-surface font-medium pb-1 transition-colors duration-150 text-body-md font-body-md" href="#">Reports</a>
+</nav>
+<!-- Trailing Action Icons -->
+<div class="flex items-center gap-3">
+<button class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-tertiary-container"></span>
+</button>
+<button class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined">tune</span>
+</button>
+<div class="h-6 w-px bg-outline-variant/40 mx-1 hidden sm:block"></div>
+<!-- Whitepaper Booklet Quick Toggle -->
+<button class="flex items-center gap-1.5 bg-primary-container/10 border border-primary-container/30 text-primary-container px-3 py-1.5 rounded-lg text-body-sm font-semibold hover:bg-primary-container/20 transition-all" id="bookletOpenToggleBtn">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+<span class="hidden sm:inline">策略白皮书</span>
+</button>
+<!-- Profile -->
+<button class="flex items-center gap-2 p-1 rounded-lg hover:bg-surface-container-low">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant/60 flex items-center justify-center text-primary font-semibold text-body-sm">
+            ST
+          </div>
+</button>
+</div>
+</div>
+</header>
+<!-- MAIN QUANTITATIVE WORKSPACE WRAPPER -->
+<div class="flex-1 flex overflow-hidden relative">
+<!-- DESKTOP PERSISTENT DRAWER (Shared Component: SideNavBar) -->
+<aside class="hidden xl:flex flex-col justify-between w-64 shrink-0 bg-surface-container-lowest/70 backdrop-blur-2xl border-r border-outline-variant/30 p-space-md z-20">
+<div>
+<!-- SideNav Header -->
+<div class="flex items-center gap-3 px-2 py-3 border-b border-outline-variant/20 mb-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+</div>
+<div>
+<h2 class="text-headline-sm font-headline-sm font-bold text-on-surface leading-tight">Spike Research Engine</h2>
+<p class="text-body-sm font-body-sm text-outline text-[11px]">Terminal v4.12.0</p>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<nav class="space-y-1">
+<a class="flex items-center gap-space-sm text-on-surface-variant hover:text-on-surface font-normal rounded-lg px-space-md py-space-sm transition-all duration-150 hover:bg-surface-container-high/50" href="#">
+<span class="material-symbols-outlined text-outline">insights</span>
+<span class="text-body-sm font-body-sm">Macro Synthesis</span>
+</a>
+<a class="flex items-center gap-space-sm bg-primary-container/10 text-primary font-semibold rounded-lg px-space-md py-space-sm shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8)]" href="#">
+<span class="material-symbols-outlined text-primary-container">equalizer</span>
+<span class="text-body-sm font-body-sm">Factor Models</span>
+</a>
+<a class="flex items-center gap-space-sm text-on-surface-variant hover:text-on-surface font-normal rounded-lg px-space-md py-space-sm transition-all duration-150 hover:bg-surface-container-high/50" href="#">
+<span class="material-symbols-outlined text-outline">show_chart</span>
+<span class="text-body-sm font-body-sm">Volatility Skew</span>
+</a>
+<a class="flex items-center gap-space-sm text-on-surface-variant hover:text-on-surface font-normal rounded-lg px-space-md py-space-sm transition-all duration-150 hover:bg-surface-container-high/50" href="#">
+<span class="material-symbols-outlined text-outline">waterfall_chart</span>
+<span class="text-body-sm font-body-sm">Liquidity Maps</span>
+</a>
+<a class="flex items-center gap-space-sm text-on-surface-variant hover:text-on-surface font-normal rounded-lg px-space-md py-space-sm transition-all duration-150 hover:bg-surface-container-high/50" href="#">
+<span class="material-symbols-outlined text-outline">science</span>
+<span class="text-body-sm font-body-sm">Backtesting</span>
+</a>
+<a class="flex items-center gap-space-sm text-on-surface-variant hover:text-on-surface font-normal rounded-lg px-space-md py-space-sm transition-all duration-150 hover:bg-surface-container-high/50" href="#">
+<span class="material-symbols-outlined text-outline">history</span>
+<span class="text-body-sm font-body-sm">Execution Log</span>
+</a>
+</nav>
+</div>
+<!-- SideNav Footer -->
+<div class="border-t border-outline-variant/30 pt-3 space-y-1">
+<a class="flex items-center gap-space-sm text-on-surface-variant hover:text-on-surface font-normal rounded-lg px-space-md py-space-sm text-body-sm" href="#">
+<span class="material-symbols-outlined text-outline text-[18px]">settings</span>
+<span class="text-body-sm font-body-sm">Workspace Settings</span>
+</a>
+<a class="flex items-center gap-space-sm text-on-surface-variant hover:text-on-surface font-normal rounded-lg px-space-md py-space-sm text-body-sm" href="#">
+<span class="material-symbols-outlined text-outline text-[18px]">terminal</span>
+<span class="text-body-sm font-body-sm">API Documentation</span>
+</a>
+</div>
+</aside>
+<!-- CENTER / UNDERLYING TRADING WORKSPACE CANVAS -->
+<main class="flex-1 p-space-md lg:p-space-lg overflow-y-auto custom-scrollbar flex flex-col gap-4">
+<!-- Top Status Banner -->
+<div class="glass-card rounded-xl p-4 flex flex-wrap items-center justify-between gap-3 border border-white/80">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container/10 border border-primary-container/20 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined">candlestick_chart</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h1 class="text-headline-sm font-headline-sm font-bold text-on-surface">OKX 永续合约高频策略监控</h1>
+<span class="bg-secondary/10 text-secondary border border-secondary/20 px-2 py-0.5 rounded-full text-label-caps font-label-caps">实时模拟运行</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant">聚合全通道触价前特征评分引擎 · 当前聚焦策略：<span class="font-semibold text-on-surface">live-allin3</span></p>
+</div>
+</div>
+<!-- Strategy Quick Switcher Bar Button -->
+<button class="flex items-center gap-2 bg-surface-container-lowest/90 hover:bg-white text-on-surface px-4 py-2 rounded-lg border border-outline-variant/50 shadow-sm transition-all" onclick="toggleModal('strategyPickerModal')">
+<span class="material-symbols-outlined text-primary text-[20px]">stacks</span>
+<span class="text-body-sm font-body-sm font-semibold">切换 9 个运行策略</span>
+<span class="bg-primary/10 text-primary px-1.5 py-0.2 rounded text-[11px] font-label-numeric-sm font-bold">+4,467.50 USDT</span>
+</button>
+</div>
+<!-- Quick Metrics Strip -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="glass-card p-3.5 rounded-xl border border-white/70">
+<span class="text-body-sm font-body-sm text-outline block mb-1">活跃策略总计</span>
+<div class="flex items-baseline justify-between">
+<span class="text-headline-md font-headline-md font-bold text-on-surface">9 个</span>
+<span class="text-label-caps font-label-caps text-secondary font-semibold">100% 在线</span>
+</div>
+</div>
+<div class="glass-card p-3.5 rounded-xl border border-white/70">
+<span class="text-body-sm font-body-sm text-outline block mb-1">累计已实现净盈亏</span>
+<div class="flex items-baseline justify-between">
+<span class="text-headline-md font-headline-md font-bold text-secondary font-label-numeric-lg">+4,467.50</span>
+<span class="text-[11px] font-label-numeric-sm text-outline">USDT</span>
+</div>
+</div>
+<div class="glass-card p-3.5 rounded-xl border border-white/70">
+<span class="text-body-sm font-body-sm text-outline block mb-1">当前聚焦策略 PnL</span>
+<div class="flex items-baseline justify-between">
+<span class="text-headline-md font-headline-md font-bold text-secondary font-label-numeric-lg">+1,420.00</span>
+<span class="text-[11px] font-label-numeric-sm text-primary font-bold">live-allin3</span>
+</div>
+</div>
+<div class="glass-card p-3.5 rounded-xl border border-white/70">
+<span class="text-body-sm font-body-sm text-outline block mb-1">触价前加权评分均值</span>
+<div class="flex items-baseline justify-between">
+<span class="text-headline-md font-headline-md font-bold text-on-surface font-label-numeric-lg">0.742</span>
+<span class="text-[11px] font-label-caps text-secondary bg-secondary/10 px-1.5 py-0.5 rounded">High Confidence</span>
+</div>
+</div>
+</div>
+<!-- Mock Workspace Chart Background Layout -->
+<div class="glass-card p-4 rounded-xl border border-white/80 flex-1 min-h-[360px] flex flex-col justify-between">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/20">
+<div class="flex items-center gap-3">
+<span class="text-body-lg font-headline-sm font-bold text-on-surface">全仓轮次与触价前评分实时分布雷达</span>
+<span class="text-body-sm text-outline font-label-numeric-sm">OKX PERPETUAL FUTURES · 5M RESOLUTION</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-2.5 py-1 text-[12px] rounded bg-white font-medium text-on-surface shadow-sm border border-outline-variant/30">5M</button>
+<button class="px-2.5 py-1 text-[12px] rounded text-outline hover:text-on-surface">15M</button>
+<button class="px-2.5 py-1 text-[12px] rounded text-outline hover:text-on-surface">1H</button>
+<button class="px-2.5 py-1 text-[12px] rounded text-outline hover:text-on-surface">4H</button>
+</div>
+</div>
+<!-- Ambient Chart Visualization Mock -->
+<div class="relative w-full h-56 my-auto flex items-center justify-center">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 800 200">
+<defs>
+<lineargradient id="chartGradientMain" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#0071e3" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#0071e3" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,160 Q120,150 200,110 T400,95 T600,45 T800,20 L800,200 L0,200 Z" fill="url(#chartGradientMain)"></path>
+<path d="M0,160 Q120,150 200,110 T400,95 T600,45 T800,20" fill="none" stroke="#0071e3" stroke-width="2.5"></path>
+<!-- Markers -->
+<circle cx="200" cy="110" fill="#ffffff" r="4" stroke="#0071e3" stroke-width="2"></circle>
+<circle cx="400" cy="95" fill="#ffffff" r="4" stroke="#0071e3" stroke-width="2"></circle>
+<circle cx="600" cy="45" fill="#ffffff" r="4" stroke="#0071e3" stroke-width="2"></circle>
+<circle cx="800" cy="20" fill="#10b981" r="5" stroke="#ffffff" stroke-width="2"></circle>
+</svg>
+</div>
+<div class="flex items-center justify-between pt-3 border-t border-outline-variant/20 text-body-sm text-outline">
+<span>策略沙盒状态：已连接 OKX 模拟撮合管道 (Latency: 14ms)</span>
+<span class="font-label-numeric-sm text-on-surface">Total Trades Executed: 452 | Open Orders: 0</span>
+</div>
+</div>
+</main>
+<!-- ============================================================== -->
+<!-- 1. STRATEGY PICKER POPOVER MODAL (#strategyPickerModal)       -->
+<!-- EXACTLY 9 ACTIVE STRATEGIES INCLUDING NEW 'live-allin3'        -->
+<!-- ============================================================== -->
+<div class="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-20 px-3 bg-inverse-surface/20 backdrop-blur-sm transition-opacity duration-200" id="strategyPickerModal">
+<!-- Backdrop Click to Close (optional behavior) -->
+<div class="absolute inset-0" onclick="toggleModal('strategyPickerModal')"></div>
+<!-- Popover Content Card -->
+<div class="relative w-full max-w-md glass-card rounded-2xl border border-white/90 shadow-2xl overflow-hidden flex flex-col z-10 animate-in fade-in zoom-in-95 duration-150">
+<!-- Header: Exactly specified Realized PnL summary and 9 ACTIVE count -->
+<div class="p-3.5 px-4 bg-white/70 border-b border-outline-variant/30 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="text-body-md font-headline-sm font-bold text-on-surface tracking-tight">策略 9 ACTIVE</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+</div>
+<div class="flex items-center gap-2.5">
+<div class="text-right">
+<span class="text-[10px] font-label-caps text-outline block leading-none">累计已实现</span>
+<span class="text-body-sm font-label-numeric-sm font-bold text-secondary">+4,467.50 USDT</span>
+</div>
+<button class="w-7 h-7 rounded-lg hover:bg-surface-container-high/60 flex items-center justify-center text-outline transition-all" onclick="toggleModal('strategyPickerModal')">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+<!-- Popover Body: Exactly 9 Active Strategy Rows -->
+<div class="p-2 space-y-1.5 max-h-[737px] overflow-y-auto custom-scrollbar">
+<!-- Row 1: 60m (+142.80) -->
+<div class="group flex items-center justify-between p-2.5 rounded-xl bg-white/50 hover:bg-white/80 border border-transparent hover:border-outline-variant/40 transition-all cursor-pointer">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-outline/50 group-hover:text-outline text-[16px] select-none">drag_indicator</span>
+<div>
+<span class="text-body-md font-headline-sm font-semibold text-on-surface">60m</span>
+<span class="text-[11px] text-outline font-body-sm block">趋势动量顺势跟踪</span>
+</div>
+</div>
+<div class="flex items-center gap-2.5">
+<span class="text-body-sm font-label-numeric-sm font-semibold text-secondary">+142.80 USDT</span>
+<button class="p-1 rounded text-outline hover:text-primary transition-colors" title="查看回测">
+<span class="material-symbols-outlined text-[18px]">arrow_upward_alt</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-primary transition-colors" onclick="openBooklet(); event.stopPropagation();" title="独立白皮书">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+</button>
+</div>
+</div>
+<!-- Row 2: 5m (-18.40) -->
+<div class="group flex items-center justify-between p-2.5 rounded-xl bg-white/50 hover:bg-white/80 border border-transparent hover:border-outline-variant/40 transition-all cursor-pointer">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-outline/50 group-hover:text-outline text-[16px] select-none">drag_indicator</span>
+<div>
+<span class="text-body-md font-headline-sm font-semibold text-on-surface">5m</span>
+<span class="text-[11px] text-outline font-body-sm block">微观订单簿均值回归</span>
+</div>
+</div>
+<div class="flex items-center gap-2.5">
+<span class="text-body-sm font-label-numeric-sm font-semibold text-tertiary-container">-18.40 USDT</span>
+<button class="p-1 rounded text-outline hover:text-primary transition-colors" title="查看回测">
+<span class="material-symbols-outlined text-[18px]">arrow_upward_alt</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-primary transition-colors" onclick="openBooklet(); event.stopPropagation();" title="独立白皮书">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+</button>
+</div>
+</div>
+<!-- Row 3: v3 (+360.50) -->
+<div class="group flex items-center justify-between p-2.5 rounded-xl bg-white/50 hover:bg-white/80 border border-transparent hover:border-outline-variant/40 transition-all cursor-pointer">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-outline/50 group-hover:text-outline text-[16px] select-none">drag_indicator</span>
+<div>
+<span class="text-body-md font-headline-sm font-semibold text-on-surface">v3</span>
+<span class="text-[11px] text-outline font-body-sm block">波动率挤压突破</span>
+</div>
+</div>
+<div class="flex items-center gap-2.5">
+<span class="text-body-sm font-label-numeric-sm font-semibold text-secondary">+360.50 USDT</span>
+<button class="p-1 rounded text-outline hover:text-primary transition-colors" title="查看回测">
+<span class="material-symbols-outlined text-[18px]">arrow_upward_alt</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-primary transition-colors" onclick="openBooklet(); event.stopPropagation();" title="独立白皮书">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+</button>
+</div>
+</div>
+<!-- Row 4: v3add (+490.20) -->
+<div class="group flex items-center justify-between p-2.5 rounded-xl bg-white/50 hover:bg-white/80 border border-transparent hover:border-outline-variant/40 transition-all cursor-pointer">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-outline/50 group-hover:text-outline text-[16px] select-none">drag_indicator</span>
+<div>
+<span class="text-body-md font-headline-sm font-semibold text-on-surface">v3add</span>
+<span class="text-[11px] text-outline font-body-sm block">阶梯式浮盈加仓模型</span>
+</div>
+</div>
+<div class="flex items-center gap-2.5">
+<span class="text-body-sm font-label-numeric-sm font-semibold text-secondary">+490.20 USDT</span>
+<button class="p-1 rounded text-outline hover:text-primary transition-colors" title="查看回测">
+<span class="material-symbols-outlined text-[18px]">arrow_upward_alt</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-primary transition-colors" onclick="openBooklet(); event.stopPropagation();" title="独立白皮书">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+</button>
+</div>
+</div>
+<!-- Row 5: spike (+12.30) -->
+<div class="group flex items-center justify-between p-2.5 rounded-xl bg-white/50 hover:bg-white/80 border border-transparent hover:border-outline-variant/40 transition-all cursor-pointer">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-outline/50 group-hover:text-outline text-[16px] select-none">drag_indicator</span>
+<div>
+<span class="text-body-md font-headline-sm font-semibold text-on-surface">spike</span>
+<span class="text-[11px] text-outline font-body-sm block">极值插针瞬间反冲</span>
+</div>
+</div>
+<div class="flex items-center gap-2.5">
+<span class="text-body-sm font-label-numeric-sm font-semibold text-secondary">+12.30 USDT</span>
+<button class="p-1 rounded text-outline hover:text-primary transition-colors" title="查看回测">
+<span class="material-symbols-outlined text-[18px]">arrow_upward_alt</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-primary transition-colors" onclick="openBooklet(); event.stopPropagation();" title="独立白皮书">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+</button>
+</div>
+</div>
+<!-- Row 6: v3lock (+215.00) -->
+<div class="group flex items-center justify-between p-2.5 rounded-xl bg-white/50 hover:bg-white/80 border border-transparent hover:border-outline-variant/40 transition-all cursor-pointer">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-outline/50 group-hover:text-outline text-[16px] select-none">drag_indicator</span>
+<div>
+<span class="text-body-md font-headline-sm font-semibold text-on-surface">v3lock</span>
+<span class="text-[11px] text-outline font-body-sm block">跨周期反向锁仓套利</span>
+</div>
+</div>
+<div class="flex items-center gap-2.5">
+<span class="text-body-sm font-label-numeric-sm font-semibold text-secondary">+215.00 USDT</span>
+<button class="p-1 rounded text-outline hover:text-primary transition-colors" title="查看回测">
+<span class="material-symbols-outlined text-[18px]">arrow_upward_alt</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-primary transition-colors" onclick="openBooklet(); event.stopPropagation();" title="独立白皮书">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+</button>
+</div>
+</div>
+<!-- Row 7: allin3 (+1,250.00) -->
+<div class="group flex items-center justify-between p-2.5 rounded-xl bg-white/50 hover:bg-white/80 border border-transparent hover:border-outline-variant/40 transition-all cursor-pointer">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-outline/50 group-hover:text-outline text-[16px] select-none">drag_indicator</span>
+<div>
+<span class="text-body-md font-headline-sm font-semibold text-on-surface">allin3</span>
+<span class="text-[11px] text-outline font-body-sm block">3x 全仓复利迭代轮次</span>
+</div>
+</div>
+<div class="flex items-center gap-2.5">
+<span class="text-body-sm font-label-numeric-sm font-semibold text-secondary">+1,250.00 USDT</span>
+<button class="p-1 rounded text-outline hover:text-primary transition-colors" title="查看回测">
+<span class="material-symbols-outlined text-[18px]">arrow_upward_alt</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-primary transition-colors" onclick="openBooklet(); event.stopPropagation();" title="独立白皮书">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+</button>
+</div>
+</div>
+<!-- Row 8: v3add20 (+680.10) -->
+<div class="group flex items-center justify-between p-2.5 rounded-xl bg-white/50 hover:bg-white/80 border border-transparent hover:border-outline-variant/40 transition-all cursor-pointer">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-outline/50 group-hover:text-outline text-[16px] select-none">drag_indicator</span>
+<div>
+<span class="text-body-md font-headline-sm font-semibold text-on-surface">v3add20</span>
+<span class="text-[11px] text-outline font-body-sm block">20% 动态追踪追加仓位</span>
+</div>
+</div>
+<div class="flex items-center gap-2.5">
+<span class="text-body-sm font-label-numeric-sm font-semibold text-secondary">+680.10 USDT</span>
+<button class="p-1 rounded text-outline hover:text-primary transition-colors" title="查看回测">
+<span class="material-symbols-outlined text-[18px]">arrow_upward_alt</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-primary transition-colors" onclick="openBooklet(); event.stopPropagation();" title="独立白皮书">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+</button>
+</div>
+</div>
+<!-- Row 9 (NEW & CURRENTLY SELECTED): live-allin3 (+1,420.00 USDT) -->
+<div class="group flex items-center justify-between p-2.5 rounded-xl bg-primary-container/10 border-2 border-primary-container shadow-[0_0_16px_rgba(0,113,227,0.18)] transition-all cursor-pointer">
+<div class="flex items-center gap-2.5">
+<!-- Drag Handle (6-dot icon) -->
+<span class="material-symbols-outlined text-primary-container text-[16px] select-none">drag_indicator</span>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-body-md font-headline-sm font-bold text-primary">live-allin3</span>
+<span class="text-[10px] font-label-caps bg-primary text-white px-1.5 py-0.2 rounded font-bold">CURRENT</span>
+</div>
+<!-- Compact subtitle specified in requirements -->
+<span class="text-[11px] text-primary-container font-body-sm block font-medium">触价前评分 · 模拟运行</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-body-sm font-label-numeric-sm font-bold text-secondary">+1,420.00 USDT</span>
+<!-- Backtest upward-arrow icon -->
+<button class="p-1 rounded text-primary hover:bg-primary/10 transition-colors" title="回测分析">
+<span class="material-symbols-outlined text-[18px]">arrow_upward_alt</span>
+</button>
+<!-- Independent Booklet icon -->
+<button class="p-1.5 rounded-lg bg-primary-container text-white shadow-sm hover:bg-primary transition-transform active:scale-95" onclick="openBooklet(); event.stopPropagation();" title="打开独立白皮书">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Popover Footer Compact Info -->
+<div class="p-2.5 bg-surface-container-low/80 border-t border-outline-variant/30 flex items-center justify-between text-body-sm text-outline">
+<span class="text-[11px]">按住拖拽点可重排实时执行调度顺序</span>
+<span class="font-label-numeric-sm text-[11px] font-semibold text-on-surface">Engine: Spike v4.12</span>
+</div>
+</div>
+</div>
+<!-- ============================================================== -->
+<!-- 2. STRATEGY BOOKLET DRAWER (#bookletDrawer)                    -->
+<!-- 75vw Desktop / 100% Mobile right slide-over for live-allin3     -->
+<!-- ============================================================== -->
+<div class="fixed inset-y-0 right-0 z-50 w-full sm:w-[75vw] max-w-[1280px] glass-drawer transform translate-x-0 transition-transform duration-300 ease-in-out flex flex-col border-l border-white/80" id="bookletDrawer">
+<!-- Drawer Top Bar: Title, Tags, Close Button -->
+<div class="p-4 lg:p-6 border-b border-outline-variant/30 bg-white/70 backdrop-blur-md flex items-start justify-between gap-4 shrink-0">
+<div>
+<div class="flex flex-wrap items-center gap-2 mb-1.5">
+<h2 class="text-headline-md font-headline-md font-bold text-on-surface tracking-tight">
+              live-allin3 (3x全仓轮次) · 策略设计与回测白皮书
+            </h2>
+<span class="px-2 py-0.5 rounded-full text-label-caps font-label-caps bg-primary-container/10 text-primary-container border border-primary-container/20 font-semibold">
+              N=452 严选样本
+            </span>
+<span class="px-2 py-0.5 rounded-full text-label-caps font-label-caps bg-surface-container text-on-surface-variant border border-outline-variant/40 font-semibold">
+              OKX 永续
+            </span>
+<span class="px-2 py-0.5 rounded-full text-label-caps font-label-caps bg-secondary/10 text-secondary border border-secondary/20 font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+              触价前评分 · 模拟运行
+            </span>
+</div>
+<p class="text-body-sm font-body-sm text-outline">
+            基于多因子高频订单簿、挂单失衡度与挂单撤单动量加权的触价前特征评分迭代算法 (Tear Sheet v2.8)
+          </p>
+</div>
+<!-- Action / Close -->
+<div class="flex items-center gap-2 shrink-0">
+<button class="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-lg border border-outline-variant/40 text-on-surface hover:bg-white text-body-sm font-medium transition-all shadow-sm" onclick="toggleModal('strategyPickerModal')">
+<span class="material-symbols-outlined text-[18px]">stacks</span>
+<span>策略选择器</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-container-high/60 hover:bg-surface-container-highest flex items-center justify-center text-on-surface transition-all" onclick="closeBooklet()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+<!-- Drawer Sub-Navigation Tabs: Tear Sheet Tabs -->
+<div class="px-4 lg:px-6 bg-surface-container-low/50 border-b border-outline-variant/20 flex items-center gap-6 overflow-x-auto custom-scrollbar shrink-0">
+<button class="text-primary border-b-2 border-primary font-semibold py-3 text-body-md font-body-md whitespace-nowrap">
+          资金曲线
+        </button>
+<button class="text-on-surface-variant hover:text-on-surface font-medium py-3 text-body-md font-body-md whitespace-nowrap transition-colors">
+          回测统计
+        </button>
+<button class="text-on-surface-variant hover:text-on-surface font-medium py-3 text-body-md font-body-md whitespace-nowrap transition-colors">
+          决策与参数
+        </button>
+<button class="text-on-surface-variant hover:text-on-surface font-medium py-3 text-body-md font-body-md whitespace-nowrap transition-colors">
+          收益分布
+        </button>
+<button class="text-on-surface-variant hover:text-on-surface font-medium py-3 text-body-md font-body-md whitespace-nowrap transition-colors">
+          历年表现
+        </button>
+<button class="text-on-surface-variant hover:text-on-surface font-medium py-3 text-body-md font-body-md whitespace-nowrap transition-colors">
+          回撤与浮亏
+        </button>
+<button class="text-on-surface-variant hover:text-on-surface font-medium py-3 text-body-md font-body-md whitespace-nowrap transition-colors">
+          模拟账本
+        </button>
+</div>
+<!-- Drawer Scrollable Content Canvas -->
+<div class="flex-1 overflow-y-auto custom-scrollbar p-4 lg:p-6 space-y-6">
+<!-- PROMINENT DISCLAIMER / ARCHITECTURE CALLOUT -->
+<div class="glass-card rounded-2xl p-4 lg:p-5 border-l-4 border-l-primary-container border-t border-r border-b border-white/80 bg-white/75 shadow-sm space-y-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-[22px]">policy</span>
+<h3 class="text-headline-sm font-headline-sm font-bold text-on-surface">策略运行准则与核算口径规范</h3>
+</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant leading-relaxed space-y-2">
+<div class="flex items-start gap-2 bg-primary/5 p-2.5 rounded-lg border border-primary/10">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified_user</span>
+<p>
+<strong class="text-on-surface font-semibold">前缀架构标识：</strong>
+                「live-」前缀标识核心逻辑基于触价前特征评分（Pre-touch Score）；当前环境为纯沙盒模拟账户，不产生任何真实市场撮合资金支出。
+              </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+<!-- Accounting Norms -->
+<div class="bg-surface-container-lowest/90 p-3 rounded-xl border border-outline-variant/30">
+<div class="flex items-center gap-1.5 text-on-surface font-semibold mb-1">
+<span class="material-symbols-outlined text-secondary text-[18px]">account_balance_wallet</span>
+<span>资金核算口径规范</span>
+</div>
+<p class="text-outline text-[12px] leading-normal">
+                  明确区分「外部现金注资/充值补齐」（External Cash Replenishments）与「纯策略交易净盈亏」（Trading PnL），两者物理隔离核算；杜绝将再注资现金混同于策略原生收益率计算。
+                </p>
+</div>
+<!-- Settlement Norms -->
+<div class="bg-surface-container-lowest/90 p-3 rounded-xl border border-outline-variant/30">
+<div class="flex items-center gap-1.5 text-on-surface font-semibold mb-1">
+<span class="material-symbols-outlined text-primary text-[18px]">rule_folder</span>
+<span>离场口径规范</span>
+</div>
+<p class="text-outline text-[12px] leading-normal">
+                  明确区分「数据截止强制结算」（Data-End Forced Settlement）与「常规止盈止损/保本平仓」（Ordinary Target Exits）。截止结算交易单均单独标注残差滑点与标记价折价。
+                </p>
+</div>
+</div>
+</div>
+</div>
+<!-- 6 KPI METRICS CARDS -->
+<div>
+<div class="flex items-center justify-between mb-3">
+<span class="text-body-lg font-headline-sm font-bold text-on-surface">核心绩效度量 (Key Performance Indicators)</span>
+<span class="text-body-sm text-outline font-label-numeric-sm">Benchmark: Risk-Unit Normalized (R)</span>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+<!-- Metric 1: 累计期望收益 -->
+<div class="glass-card p-3 rounded-xl border border-white/80 bg-white/70">
+<span class="text-[11px] font-label-caps text-outline block mb-1">累计期望收益</span>
+<span class="text-headline-md font-headline-md font-bold text-secondary font-label-numeric-lg block">+38.60 R</span>
+<span class="text-[10px] text-outline font-label-numeric-sm">Cumulative Return</span>
+</div>
+<!-- Metric 2: 样本胜率 -->
+<div class="glass-card p-3 rounded-xl border border-white/80 bg-white/70">
+<span class="text-[11px] font-label-caps text-outline block mb-1">样本胜率</span>
+<span class="text-headline-md font-headline-md font-bold text-on-surface font-label-numeric-lg block">62.4%</span>
+<span class="text-[10px] text-outline font-label-numeric-sm">282胜 / 170负</span>
+</div>
+<!-- Metric 3: 极限最大回撤 -->
+<div class="glass-card p-3 rounded-xl border border-white/80 bg-white/70">
+<span class="text-[11px] font-label-caps text-outline block mb-1">极限最大回撤</span>
+<span class="text-headline-md font-headline-md font-bold text-tertiary-container font-label-numeric-lg block">-7.80 R</span>
+<span class="text-[10px] text-outline font-label-numeric-sm">Max Drawdown</span>
+</div>
+<!-- Metric 4: 综合盈亏比 -->
+<div class="glass-card p-3 rounded-xl border border-white/80 bg-white/70">
+<span class="text-[11px] font-label-caps text-outline block mb-1">综合盈亏比</span>
+<span class="text-headline-md font-headline-md font-bold text-on-surface font-label-numeric-lg block">1 : 1.42</span>
+<span class="text-[10px] text-outline font-label-numeric-sm">Payoff Ratio</span>
+</div>
+<!-- Metric 5: 全样本总量 -->
+<div class="glass-card p-3 rounded-xl border border-white/80 bg-white/70">
+<span class="text-[11px] font-label-caps text-outline block mb-1">全样本总量</span>
+<span class="text-headline-md font-headline-md font-bold text-on-surface font-label-numeric-lg block">N = 452</span>
+<span class="text-[10px] text-secondary font-label-numeric-sm font-semibold">Strict Validated</span>
+</div>
+<!-- Metric 6: 触价前平均评分 -->
+<div class="glass-card p-3 rounded-xl border border-white/80 bg-white/70">
+<span class="text-[11px] font-label-caps text-outline block mb-1">触价前平均评分</span>
+<span class="text-headline-md font-headline-md font-bold text-primary-container font-label-numeric-lg block">0.74</span>
+<span class="text-[10px] text-outline font-label-numeric-sm">Mean Pre-touch</span>
+</div>
+</div>
+</div>
+<!-- CUMULATIVE EQUITY CURVE CHART (SVG Vector Chart) -->
+<div class="glass-card p-4 lg:p-5 rounded-2xl border border-white/80 bg-white/80 shadow-sm">
+<div class="flex flex-wrap items-center justify-between pb-3 mb-2 border-b border-outline-variant/20 gap-2">
+<div>
+<div class="flex items-center gap-2">
+<span class="text-body-lg font-headline-sm font-bold text-on-surface">策略累积资金与净值增长曲线 (Cumulative Equity Curve)</span>
+<span class="text-label-caps font-label-caps bg-secondary/10 text-secondary px-2 py-0.5 rounded font-bold">R-Multiple Growth</span>
+</div>
+<p class="text-body-sm font-body-sm text-outline">排除外部注资干扰，单笔交易以标准风险单元 R 归一化累计</p>
+</div>
+<div class="flex items-center gap-3 text-body-sm">
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-0.5 bg-primary-container"></span>
+<span class="text-on-surface font-medium text-[12px]">live-allin3 (3x全仓)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-0.5 bg-outline-variant"></span>
+<span class="text-outline text-[12px]">基准持币线 (Benchmark)</span>
+</div>
+</div>
+</div>
+<!-- SVG Chart Visual -->
+<div class="relative w-full h-64 sm:h-72 my-2">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 900 280">
+<defs>
+<lineargradient id="equityFill" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#0071e3" stop-opacity="0.30"></stop>
+<stop offset="70%" stop-color="#0071e3" stop-opacity="0.04"></stop>
+<stop offset="100%" stop-color="#0071e3" stop-opacity="0.0"></stop>
+</lineargradient>
+<pattern height="40" id="gridPattern" patternunits="userSpaceOnUse" width="60">
+<path d="M 60 0 L 0 0 0 40" fill="none" stroke="rgba(193, 198, 214, 0.2)" stroke-width="1"></path>
+</pattern>
+</defs>
+<!-- Background Grid -->
+<rect fill="url(#gridPattern)" height="280" width="900"></rect>
+<!-- Zero Line (Baseline) -->
+<line stroke="rgba(113, 119, 133, 0.3)" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="900" y1="230" y2="230"></line>
+<text fill="#717785" font-family="JetBrains Mono" font-size="10" x="10" y="225">0.0 R (基准底线)</text>
+<!-- Benchmark Line (Dotted Gray) -->
+<path d="M 0,230 Q 200,210 400,215 T 700,195 T 900,180" fill="none" opacity="0.6" stroke="#717785" stroke-dasharray="3 3" stroke-width="1.5"></path>
+<!-- Strategy Equity Area Fill -->
+<path d="M 0,230
+                       C 80,220 120,200 180,185
+                       C 240,170 290,190 350,150
+                       C 420,110 470,135 540,95
+                       C 620,60 690,75 760,45
+                       C 820,25 860,35 900,15
+                       L 900,280 L 0,280 Z" fill="url(#equityFill)"></path>
+<!-- Strategy Equity Line -->
+<path d="M 0,230
+                       C 80,220 120,200 180,185
+                       C 240,170 290,190 350,150
+                       C 420,110 470,135 540,95
+                       C 620,60 690,75 760,45
+                       C 820,25 860,35 900,15" fill="none" stroke="#0071e3" stroke-linecap="round" stroke-width="3"></path>
+<!-- Highlight Key Milestone Nodes -->
+<g transform="translate(180, 185)">
+<circle fill="#ffffff" r="4" stroke="#0071e3" stroke-width="2"></circle>
+</g>
+<g transform="translate(350, 150)">
+<circle fill="#ffffff" r="4" stroke="#0071e3" stroke-width="2"></circle>
+</g>
+<g transform="translate(540, 95)">
+<circle fill="#ffffff" r="4" stroke="#0071e3" stroke-width="2"></circle>
+<rect fill="#ffffff" height="18" rx="4" stroke="#abc7ff" stroke-width="1" width="70" x="-35" y="-24"></rect>
+<text fill="#0059b5" font-family="JetBrains Mono" font-size="10" font-weight="600" text-anchor="middle" x="0" y="-11">+22.4 R</text>
+</g>
+<g transform="translate(760, 45)">
+<circle fill="#ffffff" r="4" stroke="#0071e3" stroke-width="2"></circle>
+</g>
+<g transform="translate(900, 15)">
+<circle fill="#10b981" r="5" stroke="#ffffff" stroke-width="2"></circle>
+</g>
+</svg>
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-numeric-sm text-outline pt-2 border-t border-outline-variant/20">
+<span>2024-Q1 样本起点</span>
+<span>Q2 样本回撤修复</span>
+<span>Q3 轮次复利加速</span>
+<span class="text-secondary font-bold">最终净收益: +38.60 R (峰值)</span>
+</div>
+</div>
+<!-- HISTORICAL TRADE LEDGER / REPRESENTATIVE TRADES (With Pre-touch Score Column) -->
+<div class="glass-card rounded-2xl border border-white/80 bg-white/80 shadow-sm overflow-hidden">
+<div class="p-4 border-b border-outline-variant/20 flex flex-wrap items-center justify-between gap-2">
+<div>
+<div class="flex items-center gap-2">
+<span class="text-body-lg font-headline-sm font-bold text-on-surface">代表性执行交易记录 (Historical Trade Ledger)</span>
+<span class="text-[11px] font-label-numeric-sm bg-surface-container px-2 py-0.5 rounded text-outline">严选 452 笔子样本</span>
+</div>
+<p class="text-body-sm font-body-sm text-outline">包含触价前评分特征检测、入场状态判别与核算离场归因</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[12px] text-outline">口径过滤:</span>
+<button class="px-2 py-1 rounded bg-white text-[11px] font-medium text-on-surface border border-outline-variant/40 shadow-sm">全部交易</button>
+<button class="px-2 py-1 rounded text-[11px] text-outline hover:text-on-surface">常规平仓</button>
+<button class="px-2 py-1 rounded text-[11px] text-outline hover:text-on-surface">数据截止结算</button>
+</div>
+</div>
+<!-- Trade Ledger Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/60 text-outline text-[11px] font-label-caps border-b border-outline-variant/20">
+<th class="py-2.5 px-4">执行时间 / 轮次</th>
+<th class="py-2.5 px-3">合约标的</th>
+<th class="py-2.5 px-3">方向/杠杆</th>
+<th class="py-2.5 px-3 font-semibold text-primary">触价前评分 (Pre-touch Score)</th>
+<th class="py-2.5 px-3">入场条件判定</th>
+<th class="py-2.5 px-3">离场原因 / 口径类型</th>
+<th class="py-2.5 px-4 text-right">单笔净 R (Net R)</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20 text-body-sm font-body-sm">
+<!-- Trade 1 -->
+<tr class="hover:bg-white/90 transition-colors">
+<td class="py-3 px-4 font-label-numeric-sm text-outline text-[11px]">
+                    2024-10-18 14:22:05<br/>
+<span class="text-[10px] text-on-surface-variant font-sans">Round #449</span>
+</td>
+<td class="py-3 px-3 font-semibold text-on-surface">SOL/USDT</td>
+<td class="py-3 px-3">
+<span class="bg-secondary/10 text-secondary border border-secondary/20 px-1.5 py-0.5 rounded text-[11px] font-label-caps font-bold">LONG 3x</span>
+</td>
+<!-- Pre-touch score column -->
+<td class="py-3 px-3">
+<div class="flex items-center gap-1.5">
+<span class="font-label-numeric-sm font-bold text-primary text-[13px]">0.78</span>
+<span class="w-12 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<span class="block h-full bg-primary-container" style="width: 78%;"></span>
+</span>
+</div>
+</td>
+<td class="py-3 px-3 text-on-surface-variant">订单簿买单失衡比 &gt; 2.45σ 触价突破</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded-full text-[11px] bg-secondary/10 text-secondary border border-secondary/20">
+                      常规止盈 (Ordinary Target Exit)
+                    </span>
+</td>
+<td class="py-3 px-4 text-right font-label-numeric-md font-bold text-secondary">
+                    +1.85 R
+                  </td>
+</tr>
+<!-- Trade 2 -->
+<tr class="hover:bg-white/90 transition-colors">
+<td class="py-3 px-4 font-label-numeric-sm text-outline text-[11px]">
+                    2024-10-18 11:05:42<br/>
+<span class="text-[10px] text-on-surface-variant font-sans">Round #448</span>
+</td>
+<td class="py-3 px-3 font-semibold text-on-surface">ETH/USDT</td>
+<td class="py-3 px-3">
+<span class="bg-secondary/10 text-secondary border border-secondary/20 px-1.5 py-0.5 rounded text-[11px] font-label-caps font-bold">LONG 3x</span>
+</td>
+<!-- Pre-touch score column -->
+<td class="py-3 px-3">
+<div class="flex items-center gap-1.5">
+<span class="font-label-numeric-sm font-bold text-primary text-[13px]">0.65</span>
+<span class="w-12 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<span class="block h-full bg-primary-container" style="width: 65%;"></span>
+</span>
+</div>
+</td>
+<td class="py-3 px-3 text-on-surface-variant">高频主动撤单急跌耗尽 + 前置评分确认</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded-full text-[11px] bg-secondary/10 text-secondary border border-secondary/20">
+                      常规止盈 (Ordinary Target Exit)
+                    </span>
+</td>
+<td class="py-3 px-4 text-right font-label-numeric-md font-bold text-secondary">
+                    +1.20 R
+                  </td>
+</tr>
+<!-- Trade 3 -->
+<tr class="hover:bg-white/90 transition-colors">
+<td class="py-3 px-4 font-label-numeric-sm text-outline text-[11px]">
+                    2024-10-17 23:45:10<br/>
+<span class="text-[10px] text-on-surface-variant font-sans">Round #447</span>
+</td>
+<td class="py-3 px-3 font-semibold text-on-surface">BTC/USDT</td>
+<td class="py-3 px-3">
+<span class="bg-secondary/10 text-secondary border border-secondary/20 px-1.5 py-0.5 rounded text-[11px] font-label-caps font-bold">LONG 3x</span>
+</td>
+<!-- Pre-touch score column -->
+<td class="py-3 px-3">
+<div class="flex items-center gap-1.5">
+<span class="font-label-numeric-sm font-bold text-primary text-[13px]">0.71</span>
+<span class="w-12 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<span class="block h-full bg-primary-container" style="width: 71%;"></span>
+</span>
+</div>
+</td>
+<td class="py-3 px-3 text-on-surface-variant">流动性缺口回补回踩，前置挂单动量 0.71</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded-full text-[11px] bg-tertiary-container/10 text-tertiary-container border border-tertiary-container/20">
+                      触发硬止损 (Stop Loss Trigger)
+                    </span>
+</td>
+<td class="py-3 px-4 text-right font-label-numeric-md font-bold text-tertiary-container">
+                    -1.00 R
+                  </td>
+</tr>
+<!-- Trade 4: Data-End Forced Settlement Example -->
+<tr class="hover:bg-white/90 transition-colors bg-surface-container-low/30">
+<td class="py-3 px-4 font-label-numeric-sm text-outline text-[11px]">
+                    2024-10-17 18:00:00<br/>
+<span class="text-[10px] text-on-surface-variant font-sans">Round #446</span>
+</td>
+<td class="py-3 px-3 font-semibold text-on-surface">AVAX/USDT</td>
+<td class="py-3 px-3">
+<span class="bg-secondary/10 text-secondary border border-secondary/20 px-1.5 py-0.5 rounded text-[11px] font-label-caps font-bold">LONG 3x</span>
+</td>
+<!-- Pre-touch score column -->
+<td class="py-3 px-3">
+<div class="flex items-center gap-1.5">
+<span class="font-label-numeric-sm font-bold text-primary text-[13px]">0.82</span>
+<span class="w-12 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<span class="block h-full bg-primary-container" style="width: 82%;"></span>
+</span>
+</div>
+</td>
+<td class="py-3 px-3 text-on-surface-variant">高置信度极值脉冲，预评分顶格</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded-full text-[11px] bg-outline-variant/40 text-on-surface font-semibold border border-outline-variant/60">
+                      数据截止强制结算 (Data-End Settlement)
+                    </span>
+</td>
+<td class="py-3 px-4 text-right font-label-numeric-md font-bold text-secondary">
+                    +0.42 R
+                  </td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer -->
+<div class="p-3 bg-surface-container-low/60 border-t border-outline-variant/20 flex flex-wrap items-center justify-between text-body-sm text-outline text-[11px]">
+<span>* 单笔净 R 扣除了 OKX VIP 手续费标准万分之二与万分之五滑点磨损</span>
+<span class="font-label-numeric-sm">Showing 4 of 452 rigorous trades</span>
+</div>
+</div>
+</div>
+<!-- Drawer Bottom Status Dock -->
+<div class="p-3.5 px-6 bg-white/80 border-t border-outline-variant/30 flex flex-wrap items-center justify-between gap-3 text-body-sm shrink-0">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-on-surface-variant font-medium">当前研究环境：沙盒回测已固化</span>
+<span class="text-outline">|</span>
+<span class="text-outline font-label-numeric-sm">Last Synced: 2024-10-19 09:12:00 UTC</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="px-4 py-1.5 rounded-lg border border-outline-variant/60 text-on-surface hover:bg-surface-container-high transition-colors text-body-sm font-medium" onclick="closeBooklet()">
+            收起白皮书
+          </button>
+<button class="px-4 py-1.5 rounded-lg bg-primary-container text-white shadow-sm hover:bg-primary transition-all text-body-sm font-semibold" onclick="toggleModal('strategyPickerModal')">
+            切换其它策略 (9 Active)
+          </button>
+</div>
+</div>
+</div>
+</div>
+<!-- SCRIPT FOR LIGHTWEIGHT MODAL & DRAWER TOGGLES -->
+<script>
+    function toggleModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      if (modal.classList.contains('hidden')) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function openBooklet() {
+      const drawer = document.getElementById('bookletDrawer');
+      if (drawer) {
+        drawer.classList.remove('translate-x-full');
+        drawer.classList.add('translate-x-0');
+      }
+      // Close the popover picker when opening drawer for crisp focus
+      const modal = document.getElementById('strategyPickerModal');
+      if (modal && !modal.classList.contains('hidden')) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function closeBooklet() {
+      const drawer = document.getElementById('bookletDrawer');
+      if (drawer) {
+        drawer.classList.remove('translate-x-0');
+        drawer.classList.add('translate-x-full');
+      }
+    }
+
+    // Attach click listeners to trigger buttons
+    document.getElementById('strategyTriggerBtn').addEventListener('click', function() {
+      toggleModal('strategyPickerModal');
+    });
+
+    document.getElementById('bookletOpenToggleBtn').addEventListener('click', function() {
+      const drawer = document.getElementById('bookletDrawer');
+      if (drawer.classList.contains('translate-x-0')) {
+        closeBooklet();
+      } else {
+        openBooklet();
+      }
+    });
+
+    // Strategy Picker begins visible/toggled as modal on load or accessible via click;
+    // Drawer is OPEN by default at 75vw as mandated:
+    document.addEventListener('DOMContentLoaded', () => {
+      // Ensure drawer is open on initial load
+      const drawer = document.getElementById('bookletDrawer');
+      if (drawer) {
+        drawer.classList.remove('translate-x-full');
+        drawer.classList.add('translate-x-0');
+      }
+    });
+  </script>
+</body></html>

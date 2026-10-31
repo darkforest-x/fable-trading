@@ -84,7 +84,7 @@ def create_app(runtime=None, start_monitor=True):
     from yoyo.monitor.monday_fib_service import MondayFibService, install as install_monday_fib
     monday_fib = MondayFibService(runtime)
     from yoyo.monitor.monday_reclaim_paper import ReclaimPaper, install as install_reclaim_paper
-    reclaim_paper = ReclaimPaper(runtime, monday_fib)
+    reclaim_paper = ReclaimPaper(runtime, monday_fib, enable_live_allin3=True)
     monday_fib.listeners.append(reclaim_paper)
     monday_fib.notification_score_lookup = reclaim_paper.notification_score
     from yoyo.monitor.spike_alert import SpikeAlert, install as install_spike_alert
