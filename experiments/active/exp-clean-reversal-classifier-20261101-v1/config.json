@@ -1,0 +1,30 @@
+{
+  "experiment_id": "exp-clean-reversal-classifier-20261101-v1",
+  "parent": "exp-clean-reversal-score-20261101-v1",
+  "owner_review": "exp-clean-reversal-audit-20261101-v1/owner_confirmation_20261101.json",
+  "single_variable": "Training objective only: continuous quality L2 regression becomes binary log-loss classification of the existing clean_candidate label. Same 24 causal features, model size, regularization, sample weights, population and chronological folds.",
+  "rationale": "Owner accepts all six boundary examples, already positive under the frozen cutoff. Test whether treating every accepted automatic candidate equally better matches the desired ranking than emphasizing extremely high quality scores. Six confirmed positives do not confirm the other 214 gallery candidates.",
+  "target": "Original clean_candidate from initial training 80th percentile quality cutoff; no new threshold, target changes, sample exclusions, class balance, oversampling, feature selection or hyperparameter search.",
+  "decision_clock": "Same signal15m close and original OHLC features through that close only. Reuse saved causal feature CSV, entire NY-week and episode purge. Owner metadata is never a feature or weight.",
+  "lightgbm": {
+    "n_estimators": 100,
+    "learning_rate": 0.03,
+    "num_leaves": 7,
+    "max_depth": 3,
+    "min_child_samples": 30,
+    "reg_lambda": 10.0,
+    "reg_alpha": 0.0,
+    "n_jobs": 1,
+    "deterministic": true,
+    "force_col_wise": true,
+    "verbosity": -1,
+    "random_state": 20261101
+  },
+  "arms": ["full", "single_rejection_wick", "shuffled_training_labels"],
+  "evaluation": "Reuse exactly the 16 saved quarterly test/train event sets. Baseline predictions reused without refit. Primary within-fold top-decile clean-candidate rate vs same-symbol/quarter/past-volatility random candidates; original statistics and 2000 NY-week cluster bootstrap. Also paired week bootstrap classifier-minus-regressor uplift and previously inspected annual/side subsets.",
+  "score": "0-100 percentile relative to training predictions, not winrate. Raw classifier probability saved as uncalibrated; not an established event probability. Initial/boundary history has no OOS score.",
+  "economics": "Path classification only; no entry, exits, fees, PnL or trade win rate. No execution framework required.",
+  "official_api": "https://lightgbm.readthedocs.io/en/v4.6.0/pythonapi/lightgbm.LGBMClassifier.html",
+  "training_eligible": false,
+  "production_eligible": false
+}
