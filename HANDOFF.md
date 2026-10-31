@@ -1,5 +1,13 @@
 ## 2026-10-31 · BTC15m first-five outside-1.618 glyph census
 
+## 2026-11-01 — Current top20 all short-excursion chart census delivered
+
+- Owner requested all matches, not a small curated sample. Frozen OKX crypto USDT-perpetual rank uses actual volCcyQuote over 2026-10-30 23:00–2026-10-31 23:00 Shanghai;289live instruments;BTC excluded because its43charts already delivered.
+- Same BTC43 rule:15m V2.42 NY Tue-Fri,strict directional wick outside completed Monday1.618,entire observed excursion1–5bars and subsequent inside candle. Final duration and current universe are retrospective;no winrate/entry/SL/TP or profitability inference.
+- 601signals in598excursions,318crosses/283checks. Counts: ETH30, ZEC12, SOL44, HYPE15, PEPE35, XRP50, NEAR43, DOGE47, AKE0, WLD33, UNI41, PUMP18, BNB45, WET7, ENA11, TRX59, OP49, SOPH22, BCH40.2126854bars reused;unequal histories and gaps.7OHLC conflicts excluded with affectedweeks. ZEC4samples before currentlistTime retained with visible old-listing note.
+- Artifacts: `artifacts/top20-1618-short-excursions-20261031/` contains all601PNG,per-symbol overview sheets andZIPs,fullZIP,index and delivery.json. `experiments/active/exp-top20-1618-short-marks-20261031-v1/` contains rank,source receipts,frozenbars andmatches. All601signal/level/boundary checks,independent per-chart Stoch verification and30existingtests passed. training_eligible=false;production_eligible=false.
+
+
 - Owner-requested gallery delivered: all43 short-excursion signals in `artifacts/btc-1618-short-excursions-43-20261031/`,43PNG2400x1350,six chronological overview sheets and ZIP. Each60real15m candles;matching completedMonday1.618,primary glyph and excursion band. All43signalOHLC,levels and excursion boundaries checked;no new scan or PnL. Original screenshot examples are42/43;the one shared excursion retains two separate signal panels40/41.
 - Owner confirmed first1-5candles and all existing history. `exp-btc-1618-early-marks-20261031-v1` reuses181149gapfree OKX15m bars,2021-09-01..2026-10-31 23:15Shanghai;first incompleteNYweek excluded. V2.42 default Stoch5/3/3,strict directional wick outside completedNY Monday1.618,NY weekends hidden;one inside candle rearms.
 - 158signals(80red crosses/78green checks),154excursions. Byordinal1..5:28/27/32/42/29. If the whole excursion ultimately returns inside after only1-5bars:43signals(23crosses/20checks),42excursions;this duration is retrospective,not an entry-time condition.121primary signals also close outside;close-based first-five count143;including weekends200.

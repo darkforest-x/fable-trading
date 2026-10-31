@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+
+  - artifact_id: top20-1618-short-charts-20261031-v1
+    artifact_type: manifest
+    role: owner_requested_all_current_top20_other19_short_excursion_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0286cd200f
+    generator_commit: 0286cd200f
+    source_path: artifacts/top20-1618-short-excursions-20261031/delivery.json
+    storage_uri: repo://artifacts/top20-1618-short-excursions-20261031/delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: All601PNG2400x1350;each60consecutive15m bars with1.618,glyph andexcursionband. Per-symbol overviews/ZIPs plus completeZIP,index and3latest-per-coin preview sheets.601glyphs independently recomputed on their own chart OHLC;alllevel/episodeboundary validations pass.30existingtests pass. Images/local frozeninputs remainlocal;no training or production.
   - artifact_id: btc-1618-short-excursions-43-charts-20261031
     artifact_type: manifest
     role: owner_requested_43_btc15m_short_excursion_candlestick_charts
