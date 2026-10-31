@@ -1,0 +1,20 @@
+{
+  "runtime": {
+    "python": "3.9.6",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "lightgbm": "4.6.0",
+    "sklearn": "1.6.1",
+    "vectorbt": "1.2.0 isolated"
+  },
+  "commands": [
+    ".venv/bin/python -m yoyo.evaluation.eth_1618_features",
+    ".venv/bin/python -m yoyo.evaluation.eth_1618_feature_models",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.eth_1618_feature_portfolios",
+    ".venv/bin/python -m yoyo.evaluation.eth_1618_feature_evaluate",
+    ".venv/bin/python -m yoyo.evaluation.eth_1618_feature_validate"
+  ],
+  "source_native": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-eth-repeat-1618-20261031-v1",
+  "baseline": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-eth-xau-1618-models-20261031-v2",
+  "model_artifacts": "Local models/target/fold/arm.pkl; no weights committed to git"
+}

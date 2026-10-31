@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: eth-1618-features-training-20261031-v1
+    artifact_type: manifest
+    role: eth_causal_feature_and_training_single_variable_comparisons
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5a8c2449ea
+    generator_commit: 74a4487c7b
+    source_path: experiments/active/exp-eth-1618-features-training-20261031-v1/summary.json
+    storage_uri: repo://experiments/active/exp-eth-1618-features-training-20261031-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: '144quarterly models,24original reused; six separate feature/training changes,strict netR>0 unchanged. Near baseline+7.61R,BTC-context+15.40R,mean signal/random bp+8.84/-13.05; high-score topdecile deteriorates+43.33to-2.61bp. All18historical gates fail.85tests,144exact prediction replays,8real future mutations and truncations,unchanged native costs/oneposition. No new native fills/OHLC replay. Original/unscored controls match prior totals; initial missing-control results preserved. Models/gzip remain local; small results and reproduction versioned. Notion EXP-225.'
   - artifact_id: eth-1618-score-calibration-20261031-v1
     artifact_type: manifest
     role: eth_frozen_model_past_only_calibration_and_admission

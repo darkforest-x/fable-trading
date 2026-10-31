@@ -16,18 +16,18 @@ schema_version: 1
 experiments:
   - experiment_id: exp-eth-1618-features-training-20261031-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: active
+    source_commit: 5a8c2449ea
+    status: inconclusive
     question: Can causal regime, approach or BTC-context features, or independent training changes improve ETH beyond threshold tuning?
     single_variable: Six direct baseline comparisons; each changes one feature group or one training setting, never combined.
-    result: Pending; near primary, far/opposite secondary; original netR gate and all execution assumptions frozen.
-    artifacts: []
+    result: 'Near baseline +7.61R/76 trades; regime +6.25/81, approach +6.02/75, BTC context +15.40/122, decay26w -3.85/84, window52w -5.79/95, leaves3 +3.36/61. BTC-context signal/random meanbp +8.84/-13.05 versus baseline +7.01/-11.39; improvement p0.267. High-score topdecile mean netbp deteriorates +43.33 to -2.61. All18 historical gates fail. BTC-context far/opposite +35.14/+57.71R versus original +36.71/+46.87R; exploratory only.'
+    artifacts: [eth-1618-features-training-20261031-v1]
     canonical_report: experiments/active/exp-eth-1618-features-training-20261031-v1/summary.json
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: Owner authorizes ETH-only feature/training research. Three causal4feature groups,26week decay,52week window,3leaf trees; baseline already equal-week weighted. Reuse native outcomes and prior models,VectorBT only new admissions,no paper/live changes.
+    notes: 'Owner authorizes ETH-only feature/training research. Three causal4feature groups,26week decay,52week window,3leaf trees; original equal-week weights already present. 333 test candidates/64NY weeks,2025-01-06..2026-10-19. 144models fitted/24original reused;85tests,144exact score reconstructions,8real future mutations/truncations. No new native fills or OHLC replay. Missing unscored records recovered from calibration cache plus3Q1VectorBT columns; all controls match prior totals. BTC context adds58trades +12.15R/removes12 +4.36R; training gain points to correlation/beta,not proof of individual value. Read summary/validation/completion; Notion40a8856479af81bbb677d4c4211e82aa. No paper/live changes.'
   - experiment_id: exp-eth-1618-score-calibration-20261031-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2f5591e606
