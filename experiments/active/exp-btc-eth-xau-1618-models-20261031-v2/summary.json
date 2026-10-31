@@ -1,0 +1,2664 @@
+{
+  "config": {
+    "experiment_id": "exp-btc-eth-xau-1618-models-20261031-v2",
+    "authorization": "Owner requests rebuilding BTC/ETH/XAU models; explicitly confirms XAU also fixed0.7percent stop on2026-10-31. Research fitting only.",
+    "baseline_experiment": "exp-btc-eth-repeat-1618-20261031-v1",
+    "symbols": [
+      "BTC",
+      "ETH",
+      "XAU"
+    ],
+    "start": "2024-01-01T00:00:00Z",
+    "snapshot_last_close": "2026-10-31T06:45:00Z",
+    "xau_snapshot_last_close": "2026-10-28T09:45:00Z",
+    "targets": [
+      "near",
+      "far",
+      "opposite1618"
+    ],
+    "stop_fraction": 0.007,
+    "maker_fee": 0.0002,
+    "taker_fee": 0.0005,
+    "fee_sources": {
+      "BTC_ETH": "OKX Lv1 read2026-10-23",
+      "XAU": "OKX XAU-USDT-SWAP Lv1 group4 read2026-10-26 timestamp1793026758398; priorregisteredreceipt"
+    },
+    "extra_slippage": 0,
+    "funding_included": false,
+    "seed": 20261031,
+    "controls_per_event": 3,
+    "execution": "Reuse all unchanged BTC/ETH native orders/fills. XAU new independent native resting limits, same15m episode definition,5m monotone OHLC,NY nextMonday expiry,one position perasset for policy evaluation.",
+    "stages": [
+      {
+        "arm": "asset_lr_cal",
+        "change": "Separate asset model only; same old train/cal time split, features, C=1 and sigmoid calibration."
+      },
+      {
+        "arm": "asset_lr_raw",
+        "change": "Remove calibration only; reuse asset_lr_cal base model."
+      },
+      {
+        "arm": "fresh_lr_raw",
+        "change": "Training extends through last complete NY week before test quarter; same uncalibrated logistic and features."
+      },
+      {
+        "arm": "fresh_tree_class",
+        "change": "Replace logistic with fixed small regularized LightGBM classifier; same features,history,target label and economic gate."
+      },
+      {
+        "arm": "fresh_tree_net",
+        "change": "Same tree settings, change objective to native actual netR including fees and timeouts; admit expected netR>0."
+      },
+      {
+        "arm": "fresh_tree_net_noordinal",
+        "change": "Remove ordinal_log alone from netR model; preserve other observed prior-touch state."
+      }
+    ],
+    "primary_candidate": "fresh_tree_net_noordinal; predefined, never picked from test winners",
+    "primary_target": "near",
+    "secondary_targets": "Only predefined final netR/noordinal model on far and opposite1618, each compared with its unchanged unscored native baseline. No adaptive target-selection policy.",
+    "features": "Reuse causal22features; is_eth constant removed for per-asset models. Far targets replace reward_r by their actual fixed target distance/risk; all other features unchanged.",
+    "lightgbm": {
+      "n_estimators": 100,
+      "learning_rate": 0.03,
+      "num_leaves": 7,
+      "max_depth": 3,
+      "min_child_samples": 30,
+      "reg_lambda": 10.0,
+      "reg_alpha": 0.0,
+      "n_jobs": 1,
+      "deterministic": true,
+      "force_col_wise": true,
+      "verbosity": -1,
+      "random_state": 20261031
+    },
+    "split": "Expanding quarterly tests2025Q1..2026Q4; NY weeks never split, expiry<=train boundary. Old split reserves priorquarter for calibration; fresh variants use all prior completedweeks. Incomplete current week scored only, excluded from evaluation/fitting.",
+    "minimum_history": {
+      "train_rows": 50,
+      "train_weeks": 12,
+      "each_classifier_class": 5,
+      "cal_rows": 20,
+      "cal_weeks": 4
+    },
+    "selection": "No parameter/threshold search; probability variants use fee-adjusted target-versus-stop break-even; regression uses expected netR>0. Timeouts retain actual native outcomes. No-ML baseline matched to each evaluable fold coverage.",
+    "statistics": "NY-week grouped bootstrap2000,matched-week signflip10000,weekly ranking permutation10000;Holm across9predefined final asset/target tests. Report all sequential ablations and pairwise common-fold comparisons. Topdecile diagnostic is retrospective,not a trade gate.",
+    "known_history_use": "Historical data and the three this-week BTC examples have already been inspected. Freeze before runs; no claim of untouched confirmatory test, no tuning to make the three examples pass.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "final_candidates": [
+    {
+      "symbol": "BTC",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "matched_week_p": 0.0537946205379462,
+      "candidate_n": 449,
+      "test_weeks": 71,
+      "selected": {
+        "n": 83,
+        "weeks": 46,
+        "target_rate": 0.07228915662650602,
+        "net_win_rate": 0.1927710843373494,
+        "gross_bp": -10.951089537335056,
+        "net_bp": -17.732126167104465,
+        "net_bp_ci95": [
+          -42.80053019892013,
+          9.986708313480031
+        ],
+        "net_r": -21.023963160916146,
+        "closed_trade_drawdown_r": 23.886383455202115,
+        "profit_factor": 0.714712589982253,
+        "time_exit_n": 10,
+        "adverse_path_n": 0,
+        "matched_n": 83,
+        "random_bp": -36.26449990356359,
+        "matched_signal_bp": -17.732126167104465,
+        "excess_bp": 18.53237373645911,
+        "week_p": 0.0537946205379462,
+        "excess_ci95": [
+          -1.7917593721786593,
+          41.08978103892087
+        ]
+      },
+      "baseline": {
+        "n": 155,
+        "weeks": 71,
+        "target_rate": 0.07741935483870968,
+        "net_win_rate": 0.17419354838709677,
+        "gross_bp": -5.7462786273451325,
+        "net_bp": -12.504647174514671,
+        "net_bp_ci95": [
+          -34.86680893070665,
+          11.587832638539673
+        ],
+        "net_r": -27.68770925419139,
+        "closed_trade_drawdown_r": 36.30895732104593,
+        "profit_factor": 0.7992034868669844,
+        "time_exit_n": 19,
+        "adverse_path_n": 0,
+        "matched_n": 155,
+        "random_bp": -22.18612609570116,
+        "matched_signal_bp": -12.504647174514671,
+        "excess_bp": 9.681478921186494,
+        "week_p": 0.22597740225977403,
+        "excess_ci95": [
+          -14.238391306215934,
+          34.36943209770018
+        ]
+      },
+      "diagnostics": {
+        "candidates": 449,
+        "candidate_weeks": 71,
+        "first_week": "2025-01-06",
+        "last_week": "2026-10-19",
+        "target_auc": 0.5483434594507755,
+        "profit_auc": 0.5556001802787071,
+        "folds": [
+          {
+            "fold": "2025Q1",
+            "n": 43,
+            "positives": 9,
+            "target_auc": 0.588235294117647,
+            "profit_auc": 0.588235294117647
+          },
+          {
+            "fold": "2025Q2",
+            "n": 53,
+            "positives": 4,
+            "target_auc": 0.5102040816326531,
+            "profit_auc": 0.7179054054054054
+          },
+          {
+            "fold": "2025Q3",
+            "n": 78,
+            "positives": 1,
+            "target_auc": 0.6883116883116883,
+            "profit_auc": 0.34285714285714286
+          },
+          {
+            "fold": "2025Q4",
+            "n": 81,
+            "positives": 4,
+            "target_auc": 0.25,
+            "profit_auc": 0.5216049382716048
+          },
+          {
+            "fold": "2026Q1",
+            "n": 56,
+            "positives": 2,
+            "target_auc": 0.6203703703703705,
+            "profit_auc": 0.7585034013605442
+          },
+          {
+            "fold": "2026Q2",
+            "n": 72,
+            "positives": 4,
+            "target_auc": 0.6507352941176471,
+            "profit_auc": 0.453125
+          },
+          {
+            "fold": "2026Q3",
+            "n": 58,
+            "positives": 2,
+            "target_auc": 0.5625,
+            "profit_auc": 0.6260869565217391
+          },
+          {
+            "fold": "2026Q4",
+            "n": 8,
+            "positives": 1,
+            "target_auc": 0.7142857142857143,
+            "profit_auc": 0.7142857142857143
+          }
+        ],
+        "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+        "net_r_rmse": 2.2439110689217756,
+        "retrospective_top_decile": {
+          "n": 49,
+          "weeks": 22,
+          "target_rate": 0.061224489795918366,
+          "net_win_rate": 0.3877551020408163,
+          "gross_bp": 41.853901123959105,
+          "net_bp": 35.02233301477442,
+          "net_bp_ci95": [
+            -29.765428855489382,
+            98.90450039380856
+          ],
+          "net_r": 24.51294601091726,
+          "closed_trade_drawdown_r": 10.303050120310317,
+          "profit_factor": 1.7427082801313252,
+          "time_exit_n": 16,
+          "adverse_path_n": 0,
+          "matched_n": 49,
+          "random_bp": -29.8796744870884,
+          "matched_signal_bp": 35.02233301477442,
+          "excess_bp": 64.90200750186283,
+          "week_p": 0.022097790220977902,
+          "excess_ci95": [
+            14.23075050231689,
+            118.23449246537557
+          ]
+        }
+      },
+      "week_rank_permutation_p": 0.050594940505949405,
+      "week_net_rank_permutation_p": 0.39166083391660833,
+      "policy_difference": {
+        "delta_total_r": 6.6637460932752415,
+        "delta_mean_week_r": 0.09385557877852453,
+        "delta_mean_week_ci95": [
+          -0.5266839118704638,
+          0.6629081461381242
+        ],
+        "improvement_week_p": 0.37666233376662334
+      },
+      "holm_p": 0.268973102689731,
+      "historical_evidence_gate": false,
+      "production_eligible": false
+    },
+    {
+      "symbol": "BTC",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "matched_week_p": 0.14088591140885912,
+      "candidate_n": 449,
+      "test_weeks": 71,
+      "selected": {
+        "n": 70,
+        "weeks": 42,
+        "target_rate": 0.2571428571428571,
+        "net_win_rate": 0.3142857142857143,
+        "gross_bp": -5.04056095558668,
+        "net_bp": -11.266181892108534,
+        "net_bp_ci95": [
+          -33.22562807897945,
+          10.414264679571259
+        ],
+        "net_r": -11.265715067102787,
+        "closed_trade_drawdown_r": 17.038032937831787,
+        "profit_factor": 0.7866125494230394,
+        "time_exit_n": 4,
+        "adverse_path_n": 0,
+        "matched_n": 70,
+        "random_bp": -27.172700448529888,
+        "matched_signal_bp": -11.266181892108534,
+        "excess_bp": 15.906518556421341,
+        "week_p": 0.14088591140885912,
+        "excess_ci95": [
+          -13.213654355577521,
+          43.008352333022806
+        ]
+      },
+      "baseline": {
+        "n": 178,
+        "weeks": 71,
+        "target_rate": 0.24719101123595505,
+        "net_win_rate": 0.2808988764044944,
+        "gross_bp": -3.787943447421381,
+        "net_bp": -10.0399606663383,
+        "net_bp_ci95": [
+          -25.508680983346714,
+          5.484944417564396
+        ],
+        "net_r": -25.528741334251045,
+        "closed_trade_drawdown_r": 25.528741334251052,
+        "profit_factor": 0.8148607312532976,
+        "time_exit_n": 10,
+        "adverse_path_n": 0,
+        "matched_n": 178,
+        "random_bp": -19.784025873500365,
+        "matched_signal_bp": -10.0399606663383,
+        "excess_bp": 9.744065207162063,
+        "week_p": 0.09989001099890012,
+        "excess_ci95": [
+          -5.210632904823007,
+          24.57694248842459
+        ]
+      },
+      "diagnostics": {
+        "candidates": 449,
+        "candidate_weeks": 71,
+        "first_week": "2025-01-06",
+        "last_week": "2026-10-19",
+        "target_auc": 0.42365858026571784,
+        "profit_auc": 0.4682828192777429,
+        "folds": [
+          {
+            "fold": "2025Q1",
+            "n": 43,
+            "positives": 12,
+            "target_auc": 0.5376344086021505,
+            "profit_auc": 0.5376344086021505
+          },
+          {
+            "fold": "2025Q2",
+            "n": 53,
+            "positives": 20,
+            "target_auc": 0.4878787878787879,
+            "profit_auc": 0.5646551724137931
+          },
+          {
+            "fold": "2025Q3",
+            "n": 78,
+            "positives": 34,
+            "target_auc": 0.32286096256684493,
+            "profit_auc": 0.32286096256684493
+          },
+          {
+            "fold": "2025Q4",
+            "n": 81,
+            "positives": 24,
+            "target_auc": 0.35964912280701755,
+            "profit_auc": 0.35964912280701755
+          },
+          {
+            "fold": "2026Q1",
+            "n": 56,
+            "positives": 16,
+            "target_auc": 0.6375,
+            "profit_auc": 0.6375
+          },
+          {
+            "fold": "2026Q2",
+            "n": 72,
+            "positives": 13,
+            "target_auc": 0.4067796610169491,
+            "profit_auc": 0.3894736842105263
+          },
+          {
+            "fold": "2026Q3",
+            "n": 58,
+            "positives": 7,
+            "target_auc": 0.3389355742296919,
+            "profit_auc": 0.6357142857142857
+          },
+          {
+            "fold": "2026Q4",
+            "n": 8,
+            "positives": 1,
+            "target_auc": 0.2857142857142857,
+            "profit_auc": 0.2857142857142857
+          }
+        ],
+        "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+        "net_r_rmse": 1.7203379546400401,
+        "retrospective_top_decile": {
+          "n": 49,
+          "weeks": 25,
+          "target_rate": 0.20408163265306123,
+          "net_win_rate": 0.3673469387755102,
+          "gross_bp": 1.5890657100654786,
+          "net_bp": -4.808221183869047,
+          "net_bp_ci95": [
+            -37.83791306673748,
+            27.59894489162112
+          ],
+          "net_r": -3.365813624309388,
+          "closed_trade_drawdown_r": 8.802931637641567,
+          "profit_factor": 0.9013110747695474,
+          "time_exit_n": 8,
+          "adverse_path_n": 0,
+          "matched_n": 49,
+          "random_bp": -16.800317038242007,
+          "matched_signal_bp": -4.808221183869047,
+          "excess_bp": 11.992095854372952,
+          "week_p": 0.3003699630036996,
+          "excess_ci95": [
+            -30.442871346700155,
+            49.72962614909531
+          ]
+        }
+      },
+      "week_rank_permutation_p": 0.5938406159384062,
+      "week_net_rank_permutation_p": 0.5561443855614439,
+      "policy_difference": {
+        "delta_total_r": 14.263026267148259,
+        "delta_mean_week_r": 0.20088769390349662,
+        "delta_mean_week_ci95": [
+          -0.22210646338960377,
+          0.6295348799905816
+        ],
+        "improvement_week_p": 0.1785821417858214
+      },
+      "holm_p": 0.4226577342265774,
+      "historical_evidence_gate": false,
+      "production_eligible": false
+    },
+    {
+      "symbol": "BTC",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "matched_week_p": 0.004399560043995601,
+      "candidate_n": 449,
+      "test_weeks": 71,
+      "selected": {
+        "n": 62,
+        "weeks": 40,
+        "target_rate": 0.0967741935483871,
+        "net_win_rate": 0.25806451612903225,
+        "gross_bp": 25.69279041794024,
+        "net_bp": 18.988220069102645,
+        "net_bp_ci95": [
+          -28.55933021024549,
+          75.12537845611747
+        ],
+        "net_r": 16.81607010415949,
+        "closed_trade_drawdown_r": 12.504622187167051,
+        "profit_factor": 1.3323490330800403,
+        "time_exit_n": 10,
+        "adverse_path_n": 0,
+        "matched_n": 62,
+        "random_bp": -28.61979856896726,
+        "matched_signal_bp": 18.988220069102645,
+        "excess_bp": 47.6080186380699,
+        "week_p": 0.004399560043995601,
+        "excess_ci95": [
+          14.312667620560543,
+          87.24110582270492
+        ]
+      },
+      "baseline": {
+        "n": 151,
+        "weeks": 71,
+        "target_rate": 0.0728476821192053,
+        "net_win_rate": 0.17218543046357615,
+        "gross_bp": 3.371571454354473,
+        "net_bp": -3.4001218682603698,
+        "net_bp_ci95": [
+          -30.05093871768929,
+          26.983787839868164
+        ],
+        "net_r": -7.335444097846295,
+        "closed_trade_drawdown_r": 28.335657336113634,
+        "profit_factor": 0.9454978215158542,
+        "time_exit_n": 19,
+        "adverse_path_n": 0,
+        "matched_n": 151,
+        "random_bp": -22.539501843417018,
+        "matched_signal_bp": -3.4001218682603698,
+        "excess_bp": 19.139379975156643,
+        "week_p": 0.0714928507149285,
+        "excess_ci95": [
+          -5.913850592082583,
+          44.688804353650035
+        ]
+      },
+      "diagnostics": {
+        "candidates": 449,
+        "candidate_weeks": 71,
+        "first_week": "2025-01-06",
+        "last_week": "2026-10-19",
+        "target_auc": 0.5650645455694914,
+        "profit_auc": 0.5890487970079269,
+        "folds": [
+          {
+            "fold": "2025Q1",
+            "n": 43,
+            "positives": 2,
+            "target_auc": 0.5609756097560976,
+            "profit_auc": 0.6241830065359477
+          },
+          {
+            "fold": "2025Q2",
+            "n": 53,
+            "positives": 4,
+            "target_auc": 0.4795918367346939,
+            "profit_auc": 0.6554054054054054
+          },
+          {
+            "fold": "2025Q3",
+            "n": 78,
+            "positives": 1,
+            "target_auc": 0.5584415584415585,
+            "profit_auc": 0.55
+          },
+          {
+            "fold": "2025Q4",
+            "n": 81,
+            "positives": 4,
+            "target_auc": 0.36363636363636365,
+            "profit_auc": 0.5123456790123457
+          },
+          {
+            "fold": "2026Q1",
+            "n": 56,
+            "positives": 2,
+            "target_auc": 0.6759259259259259,
+            "profit_auc": 0.70578231292517
+          },
+          {
+            "fold": "2026Q2",
+            "n": 72,
+            "positives": 4,
+            "target_auc": 0.6397058823529411,
+            "profit_auc": 0.443359375
+          },
+          {
+            "fold": "2026Q3",
+            "n": 58,
+            "positives": 2,
+            "target_auc": 0.6964285714285714,
+            "profit_auc": 0.6931677018633541
+          },
+          {
+            "fold": "2026Q4",
+            "n": 8,
+            "positives": 1,
+            "target_auc": 0.8571428571428572,
+            "profit_auc": 0.8571428571428572
+          }
+        ],
+        "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+        "net_r_rmse": 2.433690922620807,
+        "retrospective_top_decile": {
+          "n": 49,
+          "weeks": 28,
+          "target_rate": 0.04081632653061224,
+          "net_win_rate": 0.30612244897959184,
+          "gross_bp": 29.458254353217278,
+          "net_bp": 22.574170572847937,
+          "net_bp_ci95": [
+            -40.66921063970179,
+            86.85125912034646
+          ],
+          "net_r": 15.800127648887502,
+          "closed_trade_drawdown_r": 12.101382249713362,
+          "profit_factor": 1.422421033710895,
+          "time_exit_n": 13,
+          "adverse_path_n": 0,
+          "matched_n": 49,
+          "random_bp": -27.836425429491975,
+          "matched_signal_bp": 22.574170572847937,
+          "excess_bp": 50.410596002339915,
+          "week_p": 0.06209379062093791,
+          "excess_ci95": [
+            -2.9682304687362064,
+            108.27349864804198
+          ]
+        }
+      },
+      "week_rank_permutation_p": 0.11768823117688232,
+      "week_net_rank_permutation_p": 0.21237876212378762,
+      "policy_difference": {
+        "delta_total_r": 24.151514202005785,
+        "delta_mean_week_r": 0.3401621718592364,
+        "delta_mean_week_ci95": [
+          -0.37166573644781287,
+          0.9371774062558857
+        ],
+        "improvement_week_p": 0.15498450154984503
+      },
+      "holm_p": 0.03959604039596041,
+      "historical_evidence_gate": false,
+      "production_eligible": false
+    },
+    {
+      "symbol": "ETH",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "matched_week_p": 0.022497750224977502,
+      "candidate_n": 333,
+      "test_weeks": 64,
+      "selected": {
+        "n": 78,
+        "weeks": 40,
+        "target_rate": 0.08974358974358974,
+        "net_win_rate": 0.19230769230769232,
+        "gross_bp": 39.68976558703105,
+        "net_bp": 32.95537653508343,
+        "net_bp_ci95": [
+          -17.66667885235358,
+          98.06838461177995
+        ],
+        "net_r": 36.713316796557955,
+        "closed_trade_drawdown_r": 26.636179051714876,
+        "profit_factor": 1.529798234715721,
+        "time_exit_n": 8,
+        "adverse_path_n": 0,
+        "matched_n": 78,
+        "random_bp": -23.408111866265962,
+        "matched_signal_bp": 32.95537653508343,
+        "excess_bp": 56.363488401349386,
+        "week_p": 0.022497750224977502,
+        "excess_ci95": [
+          6.328627909119,
+          120.92786982416027
+        ]
+      },
+      "baseline": {
+        "n": 168,
+        "weeks": 64,
+        "target_rate": 0.08928571428571429,
+        "net_win_rate": 0.17857142857142858,
+        "gross_bp": 21.968650058159408,
+        "net_bp": 15.236414358179818,
+        "net_bp_ci95": [
+          -15.850458014549108,
+          53.72327781176048
+        ],
+        "net_r": 36.551657755247035,
+        "closed_trade_drawdown_r": 28.54462075339177,
+        "profit_factor": 1.2424998129127558,
+        "time_exit_n": 16,
+        "adverse_path_n": 0,
+        "matched_n": 168,
+        "random_bp": -27.93101505019319,
+        "matched_signal_bp": 15.236414358179818,
+        "excess_bp": 43.16742940837301,
+        "week_p": 0.0143985601439856,
+        "excess_ci95": [
+          7.193253935539637,
+          86.0996359724514
+        ]
+      },
+      "diagnostics": {
+        "candidates": 333,
+        "candidate_weeks": 64,
+        "first_week": "2025-01-06",
+        "last_week": "2026-10-19",
+        "target_auc": 0.6101193792546905,
+        "profit_auc": 0.5286220975405072,
+        "folds": [
+          {
+            "fold": "2025Q1",
+            "n": 40,
+            "positives": 2,
+            "target_auc": 0.21052631578947367,
+            "profit_auc": 0.3402777777777778
+          },
+          {
+            "fold": "2025Q2",
+            "n": 38,
+            "positives": 9,
+            "target_auc": 0.7931034482758621,
+            "profit_auc": 0.7931034482758621
+          },
+          {
+            "fold": "2025Q3",
+            "n": 31,
+            "positives": 2,
+            "target_auc": 0.7241379310344827,
+            "profit_auc": 0.8214285714285714
+          },
+          {
+            "fold": "2025Q4",
+            "n": 77,
+            "positives": 11,
+            "target_auc": 0.5977961432506886,
+            "profit_auc": 0.5860655737704918
+          },
+          {
+            "fold": "2026Q1",
+            "n": 68,
+            "positives": 6,
+            "target_auc": 0.8844086021505376,
+            "profit_auc": 0.6441798941798942
+          },
+          {
+            "fold": "2026Q2",
+            "n": 35,
+            "positives": 0,
+            "target_auc": null,
+            "profit_auc": 0.11574074074074074
+          },
+          {
+            "fold": "2026Q3",
+            "n": 34,
+            "positives": 7,
+            "target_auc": 0.33862433862433866,
+            "profit_auc": 0.31501831501831506
+          },
+          {
+            "fold": "2026Q4",
+            "n": 10,
+            "positives": 2,
+            "target_auc": 0.3125,
+            "profit_auc": 0.3125
+          }
+        ],
+        "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+        "net_r_rmse": 3.2276270102538693,
+        "retrospective_top_decile": {
+          "n": 36,
+          "weeks": 25,
+          "target_rate": 0.19444444444444445,
+          "net_win_rate": 0.3055555555555556,
+          "gross_bp": 97.48609044680764,
+          "net_bp": 91.07552524901386,
+          "net_bp_ci95": [
+            -16.51010609294297,
+            195.4868597429833
+          ],
+          "net_r": 46.820763773708094,
+          "closed_trade_drawdown_r": 12.097304799773713,
+          "profit_factor": 2.7028288329312615,
+          "time_exit_n": 4,
+          "adverse_path_n": 0,
+          "matched_n": 36,
+          "random_bp": 1.0277532197198933,
+          "matched_signal_bp": 91.07552524901386,
+          "excess_bp": 90.04777202929398,
+          "week_p": 0.012198780121987801,
+          "excess_ci95": [
+            21.25827855111583,
+            164.3689758073624
+          ]
+        }
+      },
+      "week_rank_permutation_p": 0.0071992800719928,
+      "week_net_rank_permutation_p": 0.009299070092990702,
+      "policy_difference": {
+        "delta_total_r": 0.16165904131091935,
+        "delta_mean_week_r": 0.002525922520483115,
+        "delta_mean_week_ci95": [
+          -1.123655815943008,
+          0.8476962116717967
+        ],
+        "improvement_week_p": 0.49395060493950604
+      },
+      "holm_p": 0.15748425157484253,
+      "historical_evidence_gate": false,
+      "production_eligible": false
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "matched_week_p": 0.16328367163283672,
+      "candidate_n": 333,
+      "test_weeks": 64,
+      "selected": {
+        "n": 76,
+        "weeks": 45,
+        "target_rate": 0.2236842105263158,
+        "net_win_rate": 0.23684210526315788,
+        "gross_bp": 13.34167681096278,
+        "net_bp": 7.0131647306141245,
+        "net_bp_ci95": [
+          -25.711139759414017,
+          44.55860799073305
+        ],
+        "net_r": 7.610368402397231,
+        "closed_trade_drawdown_r": 14.837244736725879,
+        "profit_factor": 1.1192910225947323,
+        "time_exit_n": 1,
+        "adverse_path_n": 1,
+        "matched_n": 76,
+        "random_bp": -11.386044364202172,
+        "matched_signal_bp": 7.0131647306141245,
+        "excess_bp": 18.399209094816296,
+        "week_p": 0.16328367163283672,
+        "excess_ci95": [
+          -17.218937324953096,
+          60.04789867663141
+        ]
+      },
+      "baseline": {
+        "n": 181,
+        "weeks": 64,
+        "target_rate": 0.20994475138121546,
+        "net_win_rate": 0.23756906077348067,
+        "gross_bp": 2.899384552231584,
+        "net_bp": -3.4702023398424444,
+        "net_bp_ci95": [
+          -22.504786180574506,
+          16.893832251498118
+        ],
+        "net_r": -8.974271735679725,
+        "closed_trade_drawdown_r": 35.02116990427204,
+        "profit_factor": 0.9404607246132861,
+        "time_exit_n": 6,
+        "adverse_path_n": 1,
+        "matched_n": 181,
+        "random_bp": -24.2688922157706,
+        "matched_signal_bp": -3.4702023398424444,
+        "excess_bp": 20.798689875928154,
+        "week_p": 0.026997300269973004,
+        "excess_ci95": [
+          1.0197680107321143,
+          43.796950594175826
+        ]
+      },
+      "diagnostics": {
+        "candidates": 333,
+        "candidate_weeks": 64,
+        "first_week": "2025-01-06",
+        "last_week": "2026-10-19",
+        "target_auc": 0.6163361327716157,
+        "profit_auc": 0.5768130862151462,
+        "folds": [
+          {
+            "fold": "2025Q1",
+            "n": 40,
+            "positives": 7,
+            "target_auc": 0.47186147186147187,
+            "profit_auc": 0.47186147186147187
+          },
+          {
+            "fold": "2025Q2",
+            "n": 38,
+            "positives": 11,
+            "target_auc": 0.7138047138047138,
+            "profit_auc": 0.7138047138047138
+          },
+          {
+            "fold": "2025Q3",
+            "n": 31,
+            "positives": 4,
+            "target_auc": 0.7777777777777778,
+            "profit_auc": 0.7777777777777778
+          },
+          {
+            "fold": "2025Q4",
+            "n": 77,
+            "positives": 18,
+            "target_auc": 0.571563088512241,
+            "profit_auc": 0.49659863945578236
+          },
+          {
+            "fold": "2026Q1",
+            "n": 68,
+            "positives": 10,
+            "target_auc": 0.6982758620689655,
+            "profit_auc": 0.6691823899371069
+          },
+          {
+            "fold": "2026Q2",
+            "n": 35,
+            "positives": 10,
+            "target_auc": 0.372,
+            "profit_auc": 0.34782608695652173
+          },
+          {
+            "fold": "2026Q3",
+            "n": 34,
+            "positives": 10,
+            "target_auc": 0.7166666666666667,
+            "profit_auc": 0.5824175824175823
+          },
+          {
+            "fold": "2026Q4",
+            "n": 10,
+            "positives": 2,
+            "target_auc": 0.625,
+            "profit_auc": 0.625
+          }
+        ],
+        "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+        "net_r_rmse": 2.0333468160903823,
+        "retrospective_top_decile": {
+          "n": 36,
+          "weeks": 24,
+          "target_rate": 0.3888888888888889,
+          "net_win_rate": 0.3888888888888889,
+          "gross_bp": 49.150304972002736,
+          "net_bp": 43.32635421895014,
+          "net_bp_ci95": [
+            -19.7824289408596,
+            102.71504621592474
+          ],
+          "net_r": 22.27303496438346,
+          "closed_trade_drawdown_r": 8.208700379989113,
+          "profit_factor": 1.9204695568934522,
+          "time_exit_n": 0,
+          "adverse_path_n": 0,
+          "matched_n": 36,
+          "random_bp": 3.4004942243169167,
+          "matched_signal_bp": 43.32635421895014,
+          "excess_bp": 39.925859994633214,
+          "week_p": 0.07429257074292571,
+          "excess_ci95": [
+            -10.335166945423223,
+            94.51622523449328
+          ]
+        }
+      },
+      "week_rank_permutation_p": 0.0197980201979802,
+      "week_net_rank_permutation_p": 0.025297470252974703,
+      "policy_difference": {
+        "delta_total_r": 16.584640138076963,
+        "delta_mean_week_r": 0.25913500215745255,
+        "delta_mean_week_ci95": [
+          -0.30859125972816887,
+          0.7855413159511891
+        ],
+        "improvement_week_p": 0.18448155184481552
+      },
+      "holm_p": 0.4226577342265774,
+      "historical_evidence_gate": false,
+      "production_eligible": false
+    },
+    {
+      "symbol": "ETH",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "matched_week_p": 0.0168983101689831,
+      "candidate_n": 333,
+      "test_weeks": 64,
+      "selected": {
+        "n": 79,
+        "weeks": 42,
+        "target_rate": 0.05063291139240506,
+        "net_win_rate": 0.20253164556962025,
+        "gross_bp": 48.38585455117453,
+        "net_bp": 41.541015461650645,
+        "net_bp_ci95": [
+          -12.14277065225971,
+          102.51280726039981
+        ],
+        "net_r": 46.871726344364546,
+        "closed_trade_drawdown_r": 25.5357531341119,
+        "profit_factor": 1.6764006258180764,
+        "time_exit_n": 12,
+        "adverse_path_n": 0,
+        "matched_n": 79,
+        "random_bp": -16.30245496232905,
+        "matched_signal_bp": 41.541015461650645,
+        "excess_bp": 57.84347042397969,
+        "week_p": 0.0168983101689831,
+        "excess_ci95": [
+          7.872660348915237,
+          117.42063820985763
+        ]
+      },
+      "baseline": {
+        "n": 163,
+        "weeks": 64,
+        "target_rate": 0.05521472392638037,
+        "net_win_rate": 0.17791411042944785,
+        "gross_bp": 29.137687086470862,
+        "net_bp": 22.30319658914907,
+        "net_bp_ci95": [
+          -10.249126262384612,
+          62.63291730298236
+        ],
+        "net_r": 51.91397937876218,
+        "closed_trade_drawdown_r": 28.544620753391765,
+        "profit_factor": 1.354778730869659,
+        "time_exit_n": 21,
+        "adverse_path_n": 0,
+        "matched_n": 163,
+        "random_bp": -20.66899158154369,
+        "matched_signal_bp": 22.30319658914907,
+        "excess_bp": 42.97218817069277,
+        "week_p": 0.0160983901609839,
+        "excess_ci95": [
+          6.014180690152872,
+          84.58098766933404
+        ]
+      },
+      "diagnostics": {
+        "candidates": 333,
+        "candidate_weeks": 64,
+        "first_week": "2025-01-06",
+        "last_week": "2026-10-19",
+        "target_auc": 0.6542193461391624,
+        "profit_auc": 0.5120854880488384,
+        "folds": [
+          {
+            "fold": "2025Q1",
+            "n": 40,
+            "positives": 1,
+            "target_auc": 0.1282051282051282,
+            "profit_auc": 0.3125
+          },
+          {
+            "fold": "2025Q2",
+            "n": 38,
+            "positives": 5,
+            "target_auc": 0.8545454545454545,
+            "profit_auc": 0.7873563218390804
+          },
+          {
+            "fold": "2025Q3",
+            "n": 31,
+            "positives": 1,
+            "target_auc": 0.9333333333333333,
+            "profit_auc": 0.7738095238095238
+          },
+          {
+            "fold": "2025Q4",
+            "n": 77,
+            "positives": 1,
+            "target_auc": 0.6842105263157895,
+            "profit_auc": 0.5399590163934427
+          },
+          {
+            "fold": "2026Q1",
+            "n": 68,
+            "positives": 5,
+            "target_auc": 0.8444444444444444,
+            "profit_auc": 0.6124338624338624
+          },
+          {
+            "fold": "2026Q2",
+            "n": 35,
+            "positives": 0,
+            "target_auc": null,
+            "profit_auc": 0.10185185185185187
+          },
+          {
+            "fold": "2026Q3",
+            "n": 34,
+            "positives": 4,
+            "target_auc": 0.3916666666666666,
+            "profit_auc": 0.3626373626373627
+          },
+          {
+            "fold": "2026Q4",
+            "n": 10,
+            "positives": 2,
+            "target_auc": 0.5,
+            "profit_auc": 0.5
+          }
+        ],
+        "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+        "net_r_rmse": 3.4619987621056336,
+        "retrospective_top_decile": {
+          "n": 36,
+          "weeks": 26,
+          "target_rate": 0.05555555555555555,
+          "net_win_rate": 0.2222222222222222,
+          "gross_bp": 64.35743421637413,
+          "net_bp": 57.52047530681219,
+          "net_bp_ci95": [
+            -33.77572421380091,
+            160.968873304692
+          ],
+          "net_r": 29.57295710880537,
+          "closed_trade_drawdown_r": 18.21976842785277,
+          "profit_factor": 1.9601521784027374,
+          "time_exit_n": 6,
+          "adverse_path_n": 0,
+          "matched_n": 36,
+          "random_bp": -12.631923253994895,
+          "matched_signal_bp": 57.52047530681219,
+          "excess_bp": 70.15239856080707,
+          "week_p": 0.08599140085991401,
+          "excess_ci95": [
+            -19.685125317704056,
+            168.50694945037876
+          ]
+        }
+      },
+      "week_rank_permutation_p": 0.004899510048995101,
+      "week_net_rank_permutation_p": 0.019098090190980903,
+      "policy_difference": {
+        "delta_total_r": -5.042253034397639,
+        "delta_mean_week_r": -0.07878520366246311,
+        "delta_mean_week_ci95": [
+          -1.0832495899814911,
+          0.7637978308458251
+        ],
+        "improvement_week_p": 0.5551444855514449
+      },
+      "holm_p": 0.1351864813518648,
+      "historical_evidence_gate": false,
+      "production_eligible": false
+    },
+    {
+      "symbol": "XAU",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "matched_week_p": 0.058394160583941604,
+      "candidate_n": 259,
+      "test_weeks": 46,
+      "selected": {
+        "n": 44,
+        "weeks": 27,
+        "target_rate": 0.09090909090909091,
+        "net_win_rate": 0.1590909090909091,
+        "gross_bp": -26.04067454851832,
+        "net_bp": -32.76349435157211,
+        "net_bp_ci95": [
+          -58.21822442750952,
+          0.8466040840617617
+        ],
+        "net_r": -20.5693884447612,
+        "closed_trade_drawdown_r": 20.569388444761188,
+        "profit_factor": 0.46463329405795506,
+        "time_exit_n": 6,
+        "adverse_path_n": 0,
+        "matched_n": 44,
+        "random_bp": -53.47485643607413,
+        "matched_signal_bp": -32.76349435157211,
+        "excess_bp": 20.71136208450201,
+        "week_p": 0.058394160583941604,
+        "excess_ci95": [
+          -3.4453120583929984,
+          51.20625715622125
+        ]
+      },
+      "baseline": {
+        "n": 89,
+        "weeks": 46,
+        "target_rate": 0.06741573033707865,
+        "net_win_rate": 0.16853932584269662,
+        "gross_bp": -28.50422485391908,
+        "net_bp": -35.30052265865507,
+        "net_bp_ci95": [
+          -53.48839635515244,
+          -12.774670206013532
+        ],
+        "net_r": -44.824162097513145,
+        "closed_trade_drawdown_r": 44.82416209751317,
+        "profit_factor": 0.4276455433462806,
+        "time_exit_n": 13,
+        "adverse_path_n": 0,
+        "matched_n": 89,
+        "random_bp": -52.983289406571046,
+        "matched_signal_bp": -35.30052265865507,
+        "excess_bp": 17.682766747915984,
+        "week_p": 0.041995800419958006,
+        "excess_ci95": [
+          0.4128326345429035,
+          40.18300618752101
+        ]
+      },
+      "diagnostics": {
+        "candidates": 259,
+        "candidate_weeks": 46,
+        "first_week": "2025-10-06",
+        "last_week": "2026-10-19",
+        "target_auc": 0.7130923245938855,
+        "profit_auc": 0.5834978809837231,
+        "folds": [
+          {
+            "fold": "2025Q4",
+            "n": 49,
+            "positives": 0,
+            "target_auc": null,
+            "profit_auc": 0.59375
+          },
+          {
+            "fold": "2026Q1",
+            "n": 59,
+            "positives": 6,
+            "target_auc": 0.8490566037735849,
+            "profit_auc": 0.5546218487394958
+          },
+          {
+            "fold": "2026Q2",
+            "n": 87,
+            "positives": 4,
+            "target_auc": 0.5813253012048193,
+            "profit_auc": 0.5147058823529411
+          },
+          {
+            "fold": "2026Q3",
+            "n": 59,
+            "positives": 10,
+            "target_auc": 0.7714285714285715,
+            "profit_auc": 0.7123745819397993
+          },
+          {
+            "fold": "2026Q4",
+            "n": 5,
+            "positives": 0,
+            "target_auc": null,
+            "profit_auc": 0.5
+          }
+        ],
+        "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+        "net_r_rmse": 1.552793245421167,
+        "retrospective_top_decile": {
+          "n": 27,
+          "weeks": 12,
+          "target_rate": 0.2962962962962963,
+          "net_win_rate": 0.37037037037037035,
+          "gross_bp": 39.76484492176311,
+          "net_bp": 33.635107093541514,
+          "net_bp_ci95": [
+            -77.06681647987082,
+            130.76977663824408
+          ],
+          "net_r": 12.94012200640099,
+          "closed_trade_drawdown_r": 6.602398204513445,
+          "profit_factor": 1.6920779400851165,
+          "time_exit_n": 2,
+          "adverse_path_n": 0,
+          "matched_n": 27,
+          "random_bp": -13.137236157776396,
+          "matched_signal_bp": 33.635107093541514,
+          "excess_bp": 46.772343251317906,
+          "week_p": 0.23177682231776822,
+          "excess_ci95": [
+            -30.330087660400622,
+            121.60207810646922
+          ]
+        }
+      },
+      "week_rank_permutation_p": 0.17498250174982502,
+      "week_net_rank_permutation_p": 0.250974902509749,
+      "policy_difference": {
+        "delta_total_r": 24.254773652751943,
+        "delta_mean_week_r": 0.5272776881033031,
+        "delta_mean_week_ci95": [
+          0.09213183798044736,
+          0.9611876871780043
+        ],
+        "improvement_week_p": 0.008099190080991902
+      },
+      "holm_p": 0.268973102689731,
+      "historical_evidence_gate": false,
+      "production_eligible": false
+    },
+    {
+      "symbol": "XAU",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "matched_week_p": 0.39906009399060094,
+      "candidate_n": 259,
+      "test_weeks": 46,
+      "selected": {
+        "n": 69,
+        "weeks": 29,
+        "target_rate": 0.2898550724637681,
+        "net_win_rate": 0.2898550724637681,
+        "gross_bp": -20.620665342021542,
+        "net_bp": -26.740162388585066,
+        "net_bp_ci95": [
+          -48.34997660483416,
+          -2.4941780624930687
+        ],
+        "net_r": -26.335855585651263,
+        "closed_trade_drawdown_r": 26.335855585651256,
+        "profit_factor": 0.499544919614654,
+        "time_exit_n": 2,
+        "adverse_path_n": 0,
+        "matched_n": 69,
+        "random_bp": -29.946802187606618,
+        "matched_signal_bp": -26.740162388585066,
+        "excess_bp": 3.2066397990215445,
+        "week_p": 0.39906009399060094,
+        "excess_ci95": [
+          -18.86733571007696,
+          26.706020008619983
+        ]
+      },
+      "baseline": {
+        "n": 105,
+        "weeks": 46,
+        "target_rate": 0.2761904761904762,
+        "net_win_rate": 0.3047619047619048,
+        "gross_bp": -17.740338313839462,
+        "net_bp": -23.907551032448318,
+        "net_bp_ci95": [
+          -40.33282618167401,
+          -6.536332444816899
+        ],
+        "net_r": -35.82159616436732,
+        "closed_trade_drawdown_r": 36.15148481587557,
+        "profit_factor": 0.5360806703605451,
+        "time_exit_n": 7,
+        "adverse_path_n": 0,
+        "matched_n": 105,
+        "random_bp": -28.157106929811576,
+        "matched_signal_bp": -23.907551032448318,
+        "excess_bp": 4.249555897363258,
+        "week_p": 0.32486751324867513,
+        "excess_ci95": [
+          -11.204165146339117,
+          22.003146933322554
+        ]
+      },
+      "diagnostics": {
+        "candidates": 259,
+        "candidate_weeks": 46,
+        "first_week": "2025-10-06",
+        "last_week": "2026-10-19",
+        "target_auc": 0.565457998125935,
+        "profit_auc": 0.49264076420345554,
+        "folds": [
+          {
+            "fold": "2025Q4",
+            "n": 49,
+            "positives": 5,
+            "target_auc": 0.37727272727272726,
+            "profit_auc": 0.37727272727272726
+          },
+          {
+            "fold": "2026Q1",
+            "n": 59,
+            "positives": 12,
+            "target_auc": 0.8023049645390071,
+            "profit_auc": 0.6090785907859079
+          },
+          {
+            "fold": "2026Q2",
+            "n": 87,
+            "positives": 28,
+            "target_auc": 0.44219128329297824,
+            "profit_auc": 0.44219128329297824
+          },
+          {
+            "fold": "2026Q3",
+            "n": 59,
+            "positives": 17,
+            "target_auc": 0.6666666666666667,
+            "profit_auc": 0.5881578947368421
+          },
+          {
+            "fold": "2026Q4",
+            "n": 5,
+            "positives": 0,
+            "target_auc": null,
+            "profit_auc": 0.0
+          }
+        ],
+        "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+        "net_r_rmse": 1.252868641663023,
+        "retrospective_top_decile": {
+          "n": 27,
+          "weeks": 15,
+          "target_rate": 0.25925925925925924,
+          "net_win_rate": 0.25925925925925924,
+          "gross_bp": -22.989398019759246,
+          "net_bp": -29.194573947268854,
+          "net_bp_ci95": [
+            -58.99195572967238,
+            11.504784330163572
+          ],
+          "net_r": -11.25870590944352,
+          "closed_trade_drawdown_r": 11.258705909443517,
+          "profit_factor": 0.4372547937150109,
+          "time_exit_n": 3,
+          "adverse_path_n": 0,
+          "matched_n": 27,
+          "random_bp": -25.11882069901157,
+          "matched_signal_bp": -29.194573947268854,
+          "excess_bp": -4.075753248257284,
+          "week_p": 0.6123387661233877,
+          "excess_ci95": [
+            -26.10319029146319,
+            27.83024259397858
+          ]
+        }
+      },
+      "week_rank_permutation_p": 0.055394460553944605,
+      "week_net_rank_permutation_p": 0.13158684131586842,
+      "policy_difference": {
+        "delta_total_r": 9.485740578716044,
+        "delta_mean_week_r": 0.20621175171121833,
+        "delta_mean_week_ci95": [
+          -0.03664243931740033,
+          0.43863760333278895
+        ],
+        "improvement_week_p": 0.05629437056294371
+      },
+      "holm_p": 0.4226577342265774,
+      "historical_evidence_gate": false,
+      "production_eligible": false
+    },
+    {
+      "symbol": "XAU",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "matched_week_p": 0.022897710228977103,
+      "candidate_n": 259,
+      "test_weeks": 46,
+      "selected": {
+        "n": 43,
+        "weeks": 29,
+        "target_rate": 0.06976744186046512,
+        "net_win_rate": 0.16279069767441862,
+        "gross_bp": -23.24614558882446,
+        "net_bp": -30.036284745652548,
+        "net_bp_ci95": [
+          -58.09993526535711,
+          11.160849226901703
+        ],
+        "net_r": -18.42933993019566,
+        "closed_trade_drawdown_r": 23.187359067114627,
+        "profit_factor": 0.5062136209332112,
+        "time_exit_n": 7,
+        "adverse_path_n": 0,
+        "matched_n": 43,
+        "random_bp": -57.55796161442121,
+        "matched_signal_bp": -30.036284745652548,
+        "excess_bp": 27.52167686876865,
+        "week_p": 0.022897710228977103,
+        "excess_ci95": [
+          4.0029955686393395,
+          61.889916899077036
+        ]
+      },
+      "baseline": {
+        "n": 88,
+        "weeks": 46,
+        "target_rate": 0.03409090909090909,
+        "net_win_rate": 0.17045454545454544,
+        "gross_bp": -29.251601456101273,
+        "net_bp": -36.14888913492673,
+        "net_bp_ci95": [
+          -55.1680161664372,
+          -12.984589613521042
+        ],
+        "net_r": -45.385605513898476,
+        "closed_trade_drawdown_r": 45.385605513898476,
+        "profit_factor": 0.41221885633585764,
+        "time_exit_n": 16,
+        "adverse_path_n": 0,
+        "matched_n": 88,
+        "random_bp": -53.02658822717546,
+        "matched_signal_bp": -36.14888913492673,
+        "excess_bp": 16.877699092248726,
+        "week_p": 0.04689531046895311,
+        "excess_ci95": [
+          -0.5463387584977499,
+          39.46015566179812
+        ]
+      },
+      "diagnostics": {
+        "candidates": 259,
+        "candidate_weeks": 46,
+        "first_week": "2025-10-06",
+        "last_week": "2026-10-19",
+        "target_auc": 0.8378406708595388,
+        "profit_auc": 0.5825852848001811,
+        "folds": [
+          {
+            "fold": "2025Q4",
+            "n": 49,
+            "positives": 0,
+            "target_auc": null,
+            "profit_auc": 0.59375
+          },
+          {
+            "fold": "2026Q1",
+            "n": 59,
+            "positives": 6,
+            "target_auc": 0.8867924528301887,
+            "profit_auc": 0.5560224089635855
+          },
+          {
+            "fold": "2026Q2",
+            "n": 87,
+            "positives": 0,
+            "target_auc": null,
+            "profit_auc": 0.519736842105263
+          },
+          {
+            "fold": "2026Q3",
+            "n": 59,
+            "positives": 9,
+            "target_auc": 0.7888888888888889,
+            "profit_auc": 0.7207357859531773
+          },
+          {
+            "fold": "2026Q4",
+            "n": 5,
+            "positives": 0,
+            "target_auc": null,
+            "profit_auc": 0.25
+          }
+        ],
+        "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+        "net_r_rmse": 1.7247302833540235,
+        "retrospective_top_decile": {
+          "n": 27,
+          "weeks": 13,
+          "target_rate": 0.2962962962962963,
+          "net_win_rate": 0.37037037037037035,
+          "gross_bp": 70.43452140467224,
+          "net_bp": 64.30049133301034,
+          "net_bp_ci95": [
+            -69.5999306477831,
+            181.95161641508685
+          ],
+          "net_r": 24.751925597141156,
+          "closed_trade_drawdown_r": 6.5980574752759775,
+          "profit_factor": 2.399724051282633,
+          "time_exit_n": 3,
+          "adverse_path_n": 0,
+          "matched_n": 27,
+          "random_bp": -12.698172347080542,
+          "matched_signal_bp": 64.30049133301034,
+          "excess_bp": 76.99866368009087,
+          "week_p": 0.21737826217378262,
+          "excess_ci95": [
+            -15.44289499842637,
+            167.27096293349217
+          ]
+        }
+      },
+      "week_rank_permutation_p": 0.12818718128187181,
+      "week_net_rank_permutation_p": 0.42805719428057193,
+      "policy_difference": {
+        "delta_total_r": 26.956265583702812,
+        "delta_mean_week_r": 0.5860057735587568,
+        "delta_mean_week_ci95": [
+          0.17424162430424509,
+          1.0231100177978139
+        ],
+        "improvement_week_p": 0.0035996400359964
+      },
+      "holm_p": 0.15748425157484253,
+      "historical_evidence_gate": false,
+      "production_eligible": false
+    }
+  ],
+  "sequential_comparisons": [
+    {
+      "symbol": "BTC",
+      "before": "old_pooled",
+      "after": "asset_lr_cal",
+      "common_candidates": 449,
+      "before_n": 59,
+      "after_n": 55,
+      "before_net_r": 0.8565792734927813,
+      "after_net_r": -10.192479569199955,
+      "delta_total_r": -11.049058842692736,
+      "delta_mean_week_r": -0.1556205470801794,
+      "delta_mean_week_ci95": [
+        -0.3474605368861593,
+        0.02607367606457415
+      ],
+      "improvement_week_p": 0.9403059694030597
+    },
+    {
+      "symbol": "BTC",
+      "before": "asset_lr_cal",
+      "after": "asset_lr_raw",
+      "common_candidates": 449,
+      "before_n": 55,
+      "after_n": 49,
+      "before_net_r": -10.192479569199955,
+      "after_net_r": -10.576468278502912,
+      "delta_total_r": -0.38398870930295725,
+      "delta_mean_week_r": -0.005408291680323342,
+      "delta_mean_week_ci95": [
+        -0.36376204113466126,
+        0.3674260152375869
+      ],
+      "improvement_week_p": 0.5144485551444855
+    },
+    {
+      "symbol": "BTC",
+      "before": "asset_lr_raw",
+      "after": "fresh_lr_raw",
+      "common_candidates": 449,
+      "before_n": 49,
+      "after_n": 46,
+      "before_net_r": -10.576468278502912,
+      "after_net_r": -4.197066700172966,
+      "delta_total_r": 6.379401578329947,
+      "delta_mean_week_r": 0.08985072645535137,
+      "delta_mean_week_ci95": [
+        -0.08182991806824486,
+        0.27774995543823977
+      ],
+      "improvement_week_p": 0.17938206179382063
+    },
+    {
+      "symbol": "BTC",
+      "before": "fresh_lr_raw",
+      "after": "fresh_tree_class",
+      "common_candidates": 449,
+      "before_n": 46,
+      "after_n": 34,
+      "before_net_r": -4.197066700172966,
+      "after_net_r": -4.553336969514268,
+      "delta_total_r": -0.35627026934130335,
+      "delta_mean_week_r": -0.005017891117483146,
+      "delta_mean_week_ci95": [
+        -0.367529569640506,
+        0.34556188802350185
+      ],
+      "improvement_week_p": 0.503949605039496
+    },
+    {
+      "symbol": "BTC",
+      "before": "fresh_tree_class",
+      "after": "fresh_tree_net",
+      "common_candidates": 449,
+      "before_n": 34,
+      "after_n": 68,
+      "before_net_r": -4.553336969514268,
+      "after_net_r": -15.280733992177032,
+      "delta_total_r": -10.727397022662764,
+      "delta_mean_week_r": -0.15109009891074315,
+      "delta_mean_week_ci95": [
+        -0.4513963630751627,
+        0.12145672794276294
+      ],
+      "improvement_week_p": 0.841915808419158
+    },
+    {
+      "symbol": "BTC",
+      "before": "fresh_tree_net",
+      "after": "fresh_tree_net_noordinal",
+      "common_candidates": 449,
+      "before_n": 68,
+      "after_n": 70,
+      "before_net_r": -15.280733992177032,
+      "after_net_r": -11.265715067102787,
+      "delta_total_r": 4.015018925074248,
+      "delta_mean_week_r": 0.05654956232498941,
+      "delta_mean_week_ci95": [
+        -0.046457817262773975,
+        0.17510071751984282
+      ],
+      "improvement_week_p": 0.17048295170482952
+    },
+    {
+      "symbol": "ETH",
+      "before": "old_pooled",
+      "after": "asset_lr_cal",
+      "common_candidates": 333,
+      "before_n": 83,
+      "after_n": 62,
+      "before_net_r": -12.829584685736211,
+      "after_net_r": -9.71775098306826,
+      "delta_total_r": 3.111833702667955,
+      "delta_mean_week_r": 0.04862240160418679,
+      "delta_mean_week_ci95": [
+        -0.42313279126385245,
+        0.5154416442252512
+      ],
+      "improvement_week_p": 0.4233576642335766
+    },
+    {
+      "symbol": "ETH",
+      "before": "asset_lr_cal",
+      "after": "asset_lr_raw",
+      "common_candidates": 333,
+      "before_n": 62,
+      "after_n": 63,
+      "before_net_r": -9.71775098306826,
+      "after_net_r": -15.58734159071118,
+      "delta_total_r": -5.869590607642914,
+      "delta_mean_week_r": -0.09171235324442054,
+      "delta_mean_week_ci95": [
+        -0.600627273879749,
+        0.41894943488988673
+      ],
+      "improvement_week_p": 0.6355364463553644
+    },
+    {
+      "symbol": "ETH",
+      "before": "asset_lr_raw",
+      "after": "fresh_lr_raw",
+      "common_candidates": 333,
+      "before_n": 63,
+      "after_n": 64,
+      "before_net_r": -15.58734159071118,
+      "after_net_r": -17.828542078296554,
+      "delta_total_r": -2.2412004875853797,
+      "delta_mean_week_r": -0.03501875761852156,
+      "delta_mean_week_ci95": [
+        -0.40616661943829996,
+        0.3563855881523183
+      ],
+      "improvement_week_p": 0.5646435356464353
+    },
+    {
+      "symbol": "ETH",
+      "before": "fresh_lr_raw",
+      "after": "fresh_tree_class",
+      "common_candidates": 333,
+      "before_n": 64,
+      "after_n": 56,
+      "before_net_r": -17.828542078296554,
+      "after_net_r": -2.3446087604638546,
+      "delta_total_r": 15.483933317832703,
+      "delta_mean_week_r": 0.24193645809113598,
+      "delta_mean_week_ci95": [
+        -0.23646604837573826,
+        0.7030880798573147
+      ],
+      "improvement_week_p": 0.1593840615938406
+    },
+    {
+      "symbol": "ETH",
+      "before": "fresh_tree_class",
+      "after": "fresh_tree_net",
+      "common_candidates": 333,
+      "before_n": 56,
+      "after_n": 76,
+      "before_net_r": -2.3446087604638546,
+      "after_net_r": 7.610368402397231,
+      "delta_total_r": 9.954977162861088,
+      "delta_mean_week_r": 0.1555465181697045,
+      "delta_mean_week_ci95": [
+        -0.1781455360033131,
+        0.5449303008121464
+      ],
+      "improvement_week_p": 0.2044795520447955
+    },
+    {
+      "symbol": "ETH",
+      "before": "fresh_tree_net",
+      "after": "fresh_tree_net_noordinal",
+      "common_candidates": 333,
+      "before_n": 76,
+      "after_n": 76,
+      "before_net_r": 7.610368402397231,
+      "after_net_r": 7.610368402397231,
+      "delta_total_r": 0.0,
+      "delta_mean_week_r": 0.0,
+      "delta_mean_week_ci95": [
+        0.0,
+        0.0
+      ],
+      "improvement_week_p": 1.0
+    },
+    {
+      "symbol": "XAU",
+      "before": "asset_lr_cal",
+      "after": "asset_lr_raw",
+      "common_candidates": 210,
+      "before_n": 12,
+      "after_n": 54,
+      "before_net_r": 1.4257617601387398,
+      "after_net_r": -20.693638462280568,
+      "delta_total_r": -22.11940022241931,
+      "delta_mean_week_r": -0.5978216276329543,
+      "delta_mean_week_ci95": [
+        -0.9259384415601274,
+        -0.27020633207644906
+      ],
+      "improvement_week_p": 0.9993000699930007
+    },
+    {
+      "symbol": "XAU",
+      "before": "asset_lr_raw",
+      "after": "fresh_lr_raw",
+      "common_candidates": 210,
+      "before_n": 54,
+      "after_n": 49,
+      "before_net_r": -20.693638462280568,
+      "after_net_r": -18.31838853954226,
+      "delta_total_r": 2.37524992273831,
+      "delta_mean_week_r": 0.06419594385779216,
+      "delta_mean_week_ci95": [
+        -0.17034200014637135,
+        0.29108271931306745
+      ],
+      "improvement_week_p": 0.30086991300869914
+    },
+    {
+      "symbol": "XAU",
+      "before": "fresh_lr_raw",
+      "after": "fresh_tree_class",
+      "common_candidates": 259,
+      "before_n": 59,
+      "after_n": 55,
+      "before_net_r": -23.952592143344415,
+      "after_net_r": -19.11593132836854,
+      "delta_total_r": 4.83666081497587,
+      "delta_mean_week_r": 0.1051448003255624,
+      "delta_mean_week_ci95": [
+        -0.16815845585186517,
+        0.3652805529212499
+      ],
+      "improvement_week_p": 0.22807719228077192
+    },
+    {
+      "symbol": "XAU",
+      "before": "fresh_tree_class",
+      "after": "fresh_tree_net",
+      "common_candidates": 259,
+      "before_n": 55,
+      "after_n": 67,
+      "before_net_r": -19.11593132836854,
+      "after_net_r": -24.135290861995248,
+      "delta_total_r": -5.019359533626711,
+      "delta_mean_week_r": -0.10911651160058068,
+      "delta_mean_week_ci95": [
+        -0.3755366178482319,
+        0.1633948604410922
+      ],
+      "improvement_week_p": 0.7838216178382161
+    },
+    {
+      "symbol": "XAU",
+      "before": "fresh_tree_net",
+      "after": "fresh_tree_net_noordinal",
+      "common_candidates": 259,
+      "before_n": 67,
+      "after_n": 69,
+      "before_net_r": -24.135290861995248,
+      "after_net_r": -26.335855585651263,
+      "delta_total_r": -2.2005647236560195,
+      "delta_mean_week_r": -0.04783836355773956,
+      "delta_mean_week_ci95": [
+        -0.11959761425153968,
+        0.0
+      ],
+      "improvement_week_p": 1.0
+    }
+  ],
+  "concentration": [
+    {
+      "symbol": "BTC",
+      "target": "far",
+      "best_week_r": 7.94173473109899,
+      "net_excluding_best_week": -28.965697892015136,
+      "net_excluding_best_three": -38.682623910202096
+    },
+    {
+      "symbol": "BTC",
+      "target": "near",
+      "best_week_r": 3.407547735635203,
+      "net_excluding_best_week": -14.673262802737991,
+      "net_excluding_best_three": -19.91715497813949
+    },
+    {
+      "symbol": "BTC",
+      "target": "opposite1618",
+      "best_week_r": 9.109561946768073,
+      "net_excluding_best_week": 7.706508157391417,
+      "net_excluding_best_three": -8.902435070981365
+    },
+    {
+      "symbol": "ETH",
+      "target": "far",
+      "best_week_r": 18.211629629629236,
+      "net_excluding_best_week": 18.50168716692872,
+      "net_excluding_best_three": 1.2344197482894899
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "best_week_r": 6.920872904483277,
+      "net_excluding_best_week": 0.6894954979139545,
+      "net_excluding_best_three": -12.042922739026185
+    },
+    {
+      "symbol": "ETH",
+      "target": "opposite1618",
+      "best_week_r": 14.295129629629313,
+      "net_excluding_best_week": 32.57659671473523,
+      "net_excluding_best_three": 9.216189505853869
+    },
+    {
+      "symbol": "XAU",
+      "target": "far",
+      "best_week_r": 4.33025647058823,
+      "net_excluding_best_week": -24.899644915349427,
+      "net_excluding_best_three": -30.430807821459695
+    },
+    {
+      "symbol": "XAU",
+      "target": "near",
+      "best_week_r": 3.8096104651163194,
+      "net_excluding_best_week": -30.14546605076758,
+      "net_excluding_best_three": -35.8350617585892
+    },
+    {
+      "symbol": "XAU",
+      "target": "opposite1618",
+      "best_week_r": 6.006391764705877,
+      "net_excluding_best_week": -24.435731694901538,
+      "net_excluding_best_three": -32.123808245891524
+    }
+  ],
+  "latest_models": [
+    [
+      {
+        "symbol": "BTC",
+        "target": "near",
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-eth-xau-1618-models-20261031-v2/models/BTC/near/2026Q4/fresh_tree_net_noordinal.pkl",
+        "available": true,
+        "production_eligible": false
+      },
+      {
+        "symbol": "BTC",
+        "target": "far",
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-eth-xau-1618-models-20261031-v2/models/BTC/far/2026Q4/fresh_tree_net_noordinal.pkl",
+        "available": true,
+        "production_eligible": false
+      },
+      {
+        "symbol": "BTC",
+        "target": "opposite1618",
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-eth-xau-1618-models-20261031-v2/models/BTC/opposite1618/2026Q4/fresh_tree_net_noordinal.pkl",
+        "available": true,
+        "production_eligible": false
+      }
+    ],
+    [
+      {
+        "symbol": "ETH",
+        "target": "near",
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-eth-xau-1618-models-20261031-v2/models/ETH/near/2026Q4/fresh_tree_net_noordinal.pkl",
+        "available": true,
+        "production_eligible": false
+      },
+      {
+        "symbol": "ETH",
+        "target": "far",
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-eth-xau-1618-models-20261031-v2/models/ETH/far/2026Q4/fresh_tree_net_noordinal.pkl",
+        "available": true,
+        "production_eligible": false
+      },
+      {
+        "symbol": "ETH",
+        "target": "opposite1618",
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-eth-xau-1618-models-20261031-v2/models/ETH/opposite1618/2026Q4/fresh_tree_net_noordinal.pkl",
+        "available": true,
+        "production_eligible": false
+      }
+    ],
+    [
+      {
+        "symbol": "XAU",
+        "target": "near",
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-eth-xau-1618-models-20261031-v2/models/XAU/near/2026Q4/fresh_tree_net_noordinal.pkl",
+        "available": true,
+        "production_eligible": false
+      },
+      {
+        "symbol": "XAU",
+        "target": "far",
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-eth-xau-1618-models-20261031-v2/models/XAU/far/2026Q4/fresh_tree_net_noordinal.pkl",
+        "available": true,
+        "production_eligible": false
+      },
+      {
+        "symbol": "XAU",
+        "target": "opposite1618",
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-eth-xau-1618-models-20261031-v2/models/XAU/opposite1618/2026Q4/fresh_tree_net_noordinal.pkl",
+        "available": true,
+        "production_eligible": false
+      }
+    ]
+  ],
+  "model_artifacts": 222,
+  "current_week": [
+    {
+      "symbol": "BTC",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "BTC-2026-10-26--1-1",
+      "ordinal": 1,
+      "side": -1,
+      "score": -0.007847858645537442,
+      "admit": false,
+      "reason": 4,
+      "net_r": 1.4510292409933672
+    },
+    {
+      "symbol": "BTC",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "BTC-2026-10-26--1-2",
+      "ordinal": 2,
+      "side": -1,
+      "score": 0.15663454985935962,
+      "admit": true,
+      "reason": 4,
+      "net_r": 1.4510292409933672
+    },
+    {
+      "symbol": "BTC",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "BTC-2026-10-26--1-3",
+      "ordinal": 3,
+      "side": -1,
+      "score": -0.015250876495231006,
+      "admit": false,
+      "reason": 4,
+      "net_r": 1.4510292409933672
+    },
+    {
+      "symbol": "BTC",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "BTC-2026-10-26-1-1",
+      "ordinal": 1,
+      "side": 1,
+      "score": -0.2801651419655697,
+      "admit": false,
+      "reason": 4,
+      "net_r": 1.5101844363636312
+    },
+    {
+      "symbol": "BTC",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "BTC-2026-10-26-1-2",
+      "ordinal": 2,
+      "side": 1,
+      "score": -0.05098461884926588,
+      "admit": false,
+      "reason": 1,
+      "net_r": -1.0994922
+    },
+    {
+      "symbol": "BTC",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "BTC-2026-10-26--1-1",
+      "ordinal": 1,
+      "side": -1,
+      "score": -0.3425085816057558,
+      "admit": false,
+      "reason": 4,
+      "net_r": 3.8913563133962774
+    },
+    {
+      "symbol": "BTC",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "BTC-2026-10-26--1-2",
+      "ordinal": 2,
+      "side": -1,
+      "score": -0.6042568471661155,
+      "admit": false,
+      "reason": 4,
+      "net_r": 3.8913563133962774
+    },
+    {
+      "symbol": "BTC",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "BTC-2026-10-26--1-3",
+      "ordinal": 3,
+      "side": -1,
+      "score": 1.0090568586975155,
+      "admit": true,
+      "reason": 4,
+      "net_r": 3.8913563133962774
+    },
+    {
+      "symbol": "BTC",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "BTC-2026-10-26-1-1",
+      "ordinal": 1,
+      "side": 1,
+      "score": 0.6150412748192227,
+      "admit": true,
+      "reason": 1,
+      "net_r": -1.0994922
+    },
+    {
+      "symbol": "BTC",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "BTC-2026-10-26-1-2",
+      "ordinal": 2,
+      "side": 1,
+      "score": 0.4386943038985371,
+      "admit": true,
+      "reason": 1,
+      "net_r": -1.0994922
+    },
+    {
+      "symbol": "BTC",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "BTC-2026-10-26--1-1",
+      "ordinal": 1,
+      "side": -1,
+      "score": -0.2709351984425423,
+      "admit": false,
+      "reason": 4,
+      "net_r": 5.399527771948207
+    },
+    {
+      "symbol": "BTC",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "BTC-2026-10-26--1-2",
+      "ordinal": 2,
+      "side": -1,
+      "score": -0.78099891096782,
+      "admit": false,
+      "reason": 4,
+      "net_r": 5.399527771948207
+    },
+    {
+      "symbol": "BTC",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "BTC-2026-10-26--1-3",
+      "ordinal": 3,
+      "side": -1,
+      "score": 0.9585964054113937,
+      "admit": true,
+      "reason": 4,
+      "net_r": 5.399527771948207
+    },
+    {
+      "symbol": "BTC",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "BTC-2026-10-26-1-1",
+      "ordinal": 1,
+      "side": 1,
+      "score": 0.8661637668949232,
+      "admit": true,
+      "reason": 1,
+      "net_r": -1.0994922
+    },
+    {
+      "symbol": "BTC",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "BTC-2026-10-26-1-2",
+      "ordinal": 2,
+      "side": 1,
+      "score": 1.251290231232538,
+      "admit": true,
+      "reason": 1,
+      "net_r": -1.0994922
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26--1-1",
+      "ordinal": 1,
+      "side": -1,
+      "score": -0.364664581072879,
+      "admit": false,
+      "reason": 4,
+      "net_r": 1.7706757666866915
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26--1-2",
+      "ordinal": 2,
+      "side": -1,
+      "score": -0.2802588440774653,
+      "admit": false,
+      "reason": 4,
+      "net_r": 1.7706757666866915
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26--1-3",
+      "ordinal": 3,
+      "side": -1,
+      "score": 0.33535651410065886,
+      "admit": true,
+      "reason": 1,
+      "net_r": -1.1004425736620558
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26--1-4",
+      "ordinal": 4,
+      "side": -1,
+      "score": 0.33369563395400015,
+      "admit": true,
+      "reason": 4,
+      "net_r": 1.7706757666866915
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26-1-1",
+      "ordinal": 1,
+      "side": 1,
+      "score": -0.4491675989126938,
+      "admit": false,
+      "reason": 1,
+      "net_r": -1.0994424337957145
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26-1-2",
+      "ordinal": 2,
+      "side": 1,
+      "score": 0.21194637375965958,
+      "admit": true,
+      "reason": 1,
+      "net_r": -1.0994424337957145
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26-1-3",
+      "ordinal": 3,
+      "side": 1,
+      "score": -0.2513554416361783,
+      "admit": false,
+      "reason": 1,
+      "net_r": -1.0994424337957145
+    },
+    {
+      "symbol": "ETH",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26--1-1",
+      "ordinal": 1,
+      "side": -1,
+      "score": -0.33022411268060553,
+      "admit": false,
+      "reason": 1,
+      "net_r": -1.1004425736620558
+    },
+    {
+      "symbol": "ETH",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26--1-2",
+      "ordinal": 2,
+      "side": -1,
+      "score": -0.35165697823640624,
+      "admit": false,
+      "reason": 1,
+      "net_r": -1.1004425736620558
+    },
+    {
+      "symbol": "ETH",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26--1-3",
+      "ordinal": 3,
+      "side": -1,
+      "score": 0.126621962631842,
+      "admit": true,
+      "reason": 1,
+      "net_r": -1.1004425736620558
+    },
+    {
+      "symbol": "ETH",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26--1-4",
+      "ordinal": 4,
+      "side": -1,
+      "score": 1.665335214505462,
+      "admit": true,
+      "reason": 4,
+      "net_r": 4.727370414912761
+    },
+    {
+      "symbol": "ETH",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26-1-1",
+      "ordinal": 1,
+      "side": 1,
+      "score": 0.8103581633786255,
+      "admit": true,
+      "reason": 1,
+      "net_r": -1.0994424337957145
+    },
+    {
+      "symbol": "ETH",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26-1-2",
+      "ordinal": 2,
+      "side": 1,
+      "score": 0.08234437275630024,
+      "admit": true,
+      "reason": 1,
+      "net_r": -1.0994424337957145
+    },
+    {
+      "symbol": "ETH",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26-1-3",
+      "ordinal": 3,
+      "side": 1,
+      "score": -0.2680679913808888,
+      "admit": false,
+      "reason": 1,
+      "net_r": -1.0994424337957145
+    },
+    {
+      "symbol": "ETH",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26--1-1",
+      "ordinal": 1,
+      "side": -1,
+      "score": -0.23526197615758992,
+      "admit": false,
+      "reason": 1,
+      "net_r": -1.1004425736620558
+    },
+    {
+      "symbol": "ETH",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26--1-2",
+      "ordinal": 2,
+      "side": -1,
+      "score": -0.2717978450314454,
+      "admit": false,
+      "reason": 1,
+      "net_r": -1.1004425736620558
+    },
+    {
+      "symbol": "ETH",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26--1-3",
+      "ordinal": 3,
+      "side": -1,
+      "score": 0.12868288352091115,
+      "admit": true,
+      "reason": 1,
+      "net_r": -1.1004425736620558
+    },
+    {
+      "symbol": "ETH",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26--1-4",
+      "ordinal": 4,
+      "side": -1,
+      "score": 2.023967872430009,
+      "admit": true,
+      "reason": 4,
+      "net_r": 6.555156223692083
+    },
+    {
+      "symbol": "ETH",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26-1-1",
+      "ordinal": 1,
+      "side": 1,
+      "score": 1.2110630003348568,
+      "admit": true,
+      "reason": 1,
+      "net_r": -1.0994424337957145
+    },
+    {
+      "symbol": "ETH",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26-1-2",
+      "ordinal": 2,
+      "side": 1,
+      "score": -0.1768116404932318,
+      "admit": false,
+      "reason": 1,
+      "net_r": -1.0994424337957145
+    },
+    {
+      "symbol": "ETH",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "ETH-2026-10-26-1-3",
+      "ordinal": 3,
+      "side": 1,
+      "score": -0.14203531400223673,
+      "admit": false,
+      "reason": 1,
+      "net_r": -1.0994424337957145
+    },
+    {
+      "symbol": "XAU",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "XAU-2026-10-26--1-1",
+      "ordinal": 1,
+      "side": -1,
+      "score": 0.011218187661432297,
+      "admit": true,
+      "reason": 4,
+      "net_r": 0.8378771929824561
+    },
+    {
+      "symbol": "XAU",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "XAU-2026-10-26--1-4",
+      "ordinal": 4,
+      "side": -1,
+      "score": 0.00038068555871277523,
+      "admit": true,
+      "reason": 0,
+      "net_r": -0.07524385964912919
+    },
+    {
+      "symbol": "XAU",
+      "target": "near",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "XAU-2026-10-26--1-5",
+      "ordinal": 5,
+      "side": -1,
+      "score": -0.0013689888776621112,
+      "admit": false,
+      "reason": 0,
+      "net_r": -0.07524385964912919
+    },
+    {
+      "symbol": "XAU",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "XAU-2026-10-26--1-1",
+      "ordinal": 1,
+      "side": -1,
+      "score": 0.3206735173461184,
+      "admit": true,
+      "reason": 0,
+      "net_r": -0.07524385964912919
+    },
+    {
+      "symbol": "XAU",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "XAU-2026-10-26--1-4",
+      "ordinal": 4,
+      "side": -1,
+      "score": -0.019741375219366447,
+      "admit": false,
+      "reason": 0,
+      "net_r": -0.07524385964912919
+    },
+    {
+      "symbol": "XAU",
+      "target": "far",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "XAU-2026-10-26--1-5",
+      "ordinal": 5,
+      "side": -1,
+      "score": -0.10779029823821261,
+      "admit": false,
+      "reason": 0,
+      "net_r": -0.07524385964912919
+    },
+    {
+      "symbol": "XAU",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "XAU-2026-10-26--1-1",
+      "ordinal": 1,
+      "side": -1,
+      "score": 0.7667014231707866,
+      "admit": true,
+      "reason": 0,
+      "net_r": -0.07524385964912919
+    },
+    {
+      "symbol": "XAU",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "XAU-2026-10-26--1-4",
+      "ordinal": 4,
+      "side": -1,
+      "score": 0.5006418186446584,
+      "admit": true,
+      "reason": 0,
+      "net_r": -0.07524385964912919
+    },
+    {
+      "symbol": "XAU",
+      "target": "opposite1618",
+      "arm": "fresh_tree_net_noordinal",
+      "event_id": "XAU-2026-10-26--1-5",
+      "ordinal": 5,
+      "side": -1,
+      "score": 0.1521724487343767,
+      "admit": true,
+      "reason": 0,
+      "net_r": -0.07524385964912919
+    },
+    {
+      "symbol": "BTC",
+      "target": "near",
+      "arm": "old_pooled",
+      "event_id": "BTC-2026-10-26--1-1",
+      "ordinal": 1,
+      "side": -1,
+      "score": 0.10545666555847984,
+      "admit": false,
+      "reason": 4,
+      "net_r": 1.4510292409933672
+    },
+    {
+      "symbol": "BTC",
+      "target": "near",
+      "arm": "old_pooled",
+      "event_id": "BTC-2026-10-26--1-2",
+      "ordinal": 2,
+      "side": -1,
+      "score": 0.10749974140455786,
+      "admit": false,
+      "reason": 4,
+      "net_r": 1.4510292409933672
+    },
+    {
+      "symbol": "BTC",
+      "target": "near",
+      "arm": "old_pooled",
+      "event_id": "BTC-2026-10-26--1-3",
+      "ordinal": 3,
+      "side": -1,
+      "score": 0.10227690208719295,
+      "admit": false,
+      "reason": 4,
+      "net_r": 1.4510292409933672
+    },
+    {
+      "symbol": "BTC",
+      "target": "near",
+      "arm": "old_pooled",
+      "event_id": "BTC-2026-10-26-1-1",
+      "ordinal": 1,
+      "side": 1,
+      "score": 0.07056209542260447,
+      "admit": false,
+      "reason": 4,
+      "net_r": 1.5101844363636312
+    },
+    {
+      "symbol": "BTC",
+      "target": "near",
+      "arm": "old_pooled",
+      "event_id": "BTC-2026-10-26-1-2",
+      "ordinal": 2,
+      "side": 1,
+      "score": 0.11256122544275506,
+      "admit": false,
+      "reason": 1,
+      "net_r": -1.0994922
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "arm": "old_pooled",
+      "event_id": "ETH-2026-10-26--1-1",
+      "ordinal": 1,
+      "side": -1,
+      "score": 0.421860417415448,
+      "admit": true,
+      "reason": 4,
+      "net_r": 1.7706757666866915
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "arm": "old_pooled",
+      "event_id": "ETH-2026-10-26--1-2",
+      "ordinal": 2,
+      "side": -1,
+      "score": 0.39020052839834224,
+      "admit": true,
+      "reason": 4,
+      "net_r": 1.7706757666866915
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "arm": "old_pooled",
+      "event_id": "ETH-2026-10-26--1-3",
+      "ordinal": 3,
+      "side": -1,
+      "score": 0.4879370851249615,
+      "admit": true,
+      "reason": 1,
+      "net_r": -1.1004425736620558
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "arm": "old_pooled",
+      "event_id": "ETH-2026-10-26--1-4",
+      "ordinal": 4,
+      "side": -1,
+      "score": 0.5193953693373018,
+      "admit": true,
+      "reason": 4,
+      "net_r": 1.7706757666866915
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "arm": "old_pooled",
+      "event_id": "ETH-2026-10-26-1-1",
+      "ordinal": 1,
+      "side": 1,
+      "score": 0.18766422764141885,
+      "admit": false,
+      "reason": 1,
+      "net_r": -1.0994424337957145
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "arm": "old_pooled",
+      "event_id": "ETH-2026-10-26-1-2",
+      "ordinal": 2,
+      "side": 1,
+      "score": 0.5851161596940615,
+      "admit": true,
+      "reason": 1,
+      "net_r": -1.0994424337957145
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "arm": "old_pooled",
+      "event_id": "ETH-2026-10-26-1-3",
+      "ordinal": 3,
+      "side": 1,
+      "score": 0.47111982814265796,
+      "admit": true,
+      "reason": 1,
+      "net_r": -1.0994424337957145
+    }
+  ],
+  "limitations": [
+    "Previously researched history; exploratory,not untouched confirmation.",
+    "Only pre-touch causal5m features; cannot use the later rejection wick.",
+    "Independent initial risk units,not compounded funded-account ROI.",
+    "Maker2bp/taker5bp perfill; funding and extra slippage excluded.",
+    "Matched control entries are taker markets,signal entries maker limits.",
+    "XAU history begins2025-04,so its evaluable model period is shorter.",
+    "Targets evaluated separately; no test-chosen adaptive target routing."
+  ],
+  "builder_commit": "422a27f3e217be318150340ed64181d2cd0e86f2"
+}

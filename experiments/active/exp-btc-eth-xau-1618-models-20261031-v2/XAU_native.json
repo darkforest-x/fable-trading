@@ -1,0 +1,6958 @@
+{
+  "engine": "nautilus_trader",
+  "version": "1.231.0",
+  "market_tick": 0.1,
+  "protection_tick": 0.1,
+  "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+  "partial_execution": "disabled",
+  "native_partial_accounting_checked": 0,
+  "fixed_target_execution": "resting limit; OHLC; independent limit-price book; native reduce-only sibling cleanup",
+  "native_fixed_target_accounting_checked": 3948,
+  "target_from_entry": true,
+  "target_breakeven": false,
+  "breakeven_includes_cost": true,
+  "fill_maker_fee": 0.0002,
+  "fill_taker_fee": 0.0005,
+  "breakeven_on_touch": false,
+  "reclaim_next_bar": false,
+  "intrabar_path": "OHLC",
+  "synthetic_segments_per_bar": 4,
+  "positions": 3948,
+  "fills": 7896,
+  "execution_minutes": 5,
+  "streaming_batch_bars": 24000,
+  "skipped_idle_bars_enabled": false,
+  "rsi_scaleout": "disabled",
+  "rsi_skip_events": 0,
+  "timed_be_minutes": null,
+  "confirmed_pivot_exit": false,
+  "structural_pivot_stop": false,
+  "structural_execution": "disabled",
+  "pivot_execution": "disabled",
+  "strict_pivot_ties": false,
+  "max_simultaneous_positions": 107,
+  "bars_with_both_directions": 2216,
+  "prepare_seconds": 0.19278845898224972,
+  "replay_seconds": 28.340270750020863,
+  "runtime_warnings": [
+    "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+  ],
+  "accounting": "independent original-risk R; frozen account; not portfolio returns",
+  "entry_order_mode": "limit",
+  "opportunities": [
+    {
+      "trade_id": "XAU-2025-04-14--1-1:near",
+      "status": "filled",
+      "submitted_i": 1953,
+      "fill_i": 1954,
+      "expire_i": 1954
+    },
+    {
+      "trade_id": "XAU-2025-04-14--1-1:far",
+      "status": "filled",
+      "submitted_i": 1953,
+      "fill_i": 1954,
+      "expire_i": 1954
+    },
+    {
+      "trade_id": "XAU-2025-04-14--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 1953,
+      "fill_i": 1954,
+      "expire_i": 1954
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-1:near",
+      "status": "filled",
+      "submitted_i": 4075,
+      "fill_i": 4076,
+      "expire_i": 4076
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-1:far",
+      "status": "filled",
+      "submitted_i": 4075,
+      "fill_i": 4076,
+      "expire_i": 4076
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 4075,
+      "fill_i": 4076,
+      "expire_i": 4076
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-2:near",
+      "status": "filled",
+      "submitted_i": 4091,
+      "fill_i": 4092,
+      "expire_i": 4092
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-2:far",
+      "status": "filled",
+      "submitted_i": 4091,
+      "fill_i": 4092,
+      "expire_i": 4092
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 4091,
+      "fill_i": 4092,
+      "expire_i": 4092
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-3:near",
+      "status": "filled",
+      "submitted_i": 4121,
+      "fill_i": 4122,
+      "expire_i": 4122
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-3:far",
+      "status": "filled",
+      "submitted_i": 4121,
+      "fill_i": 4122,
+      "expire_i": 4122
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 4121,
+      "fill_i": 4122,
+      "expire_i": 4122
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-5:near",
+      "status": "filled",
+      "submitted_i": 4160,
+      "fill_i": 4161,
+      "expire_i": 4161
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-5:far",
+      "status": "filled",
+      "submitted_i": 4160,
+      "fill_i": 4161,
+      "expire_i": 4161
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 4160,
+      "fill_i": 4161,
+      "expire_i": 4161
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-6:near",
+      "status": "filled",
+      "submitted_i": 4171,
+      "fill_i": 4172,
+      "expire_i": 4172
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-6:far",
+      "status": "filled",
+      "submitted_i": 4171,
+      "fill_i": 4172,
+      "expire_i": 4172
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 4171,
+      "fill_i": 4172,
+      "expire_i": 4172
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-7:near",
+      "status": "filled",
+      "submitted_i": 4561,
+      "fill_i": 4562,
+      "expire_i": 4562
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-7:far",
+      "status": "filled",
+      "submitted_i": 4561,
+      "fill_i": 4562,
+      "expire_i": 4562
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 4561,
+      "fill_i": 4562,
+      "expire_i": 4562
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-8:near",
+      "status": "filled",
+      "submitted_i": 4642,
+      "fill_i": 4643,
+      "expire_i": 4643
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-8:far",
+      "status": "filled",
+      "submitted_i": 4642,
+      "fill_i": 4643,
+      "expire_i": 4643
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 4642,
+      "fill_i": 4643,
+      "expire_i": 4643
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-11:near",
+      "status": "filled",
+      "submitted_i": 5333,
+      "fill_i": 5334,
+      "expire_i": 5334
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-11:far",
+      "status": "filled",
+      "submitted_i": 5333,
+      "fill_i": 5334,
+      "expire_i": 5334
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-11:opposite1618",
+      "status": "filled",
+      "submitted_i": 5333,
+      "fill_i": 5334,
+      "expire_i": 5334
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-12:near",
+      "status": "filled",
+      "submitted_i": 5368,
+      "fill_i": 5369,
+      "expire_i": 5369
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-12:far",
+      "status": "filled",
+      "submitted_i": 5368,
+      "fill_i": 5369,
+      "expire_i": 5369
+    },
+    {
+      "trade_id": "XAU-2025-04-21-1-12:opposite1618",
+      "status": "filled",
+      "submitted_i": 5368,
+      "fill_i": 5369,
+      "expire_i": 5369
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-1:near",
+      "status": "filled",
+      "submitted_i": 6271,
+      "fill_i": 6272,
+      "expire_i": 6272
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-1:far",
+      "status": "filled",
+      "submitted_i": 6271,
+      "fill_i": 6272,
+      "expire_i": 6272
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 6271,
+      "fill_i": 6272,
+      "expire_i": 6272
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-2:near",
+      "status": "filled",
+      "submitted_i": 6330,
+      "fill_i": 6331,
+      "expire_i": 6331
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-2:far",
+      "status": "filled",
+      "submitted_i": 6330,
+      "fill_i": 6331,
+      "expire_i": 6331
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 6330,
+      "fill_i": 6331,
+      "expire_i": 6331
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-4:near",
+      "status": "filled",
+      "submitted_i": 6355,
+      "fill_i": 6356,
+      "expire_i": 6356
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-4:far",
+      "status": "filled",
+      "submitted_i": 6355,
+      "fill_i": 6356,
+      "expire_i": 6356
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 6355,
+      "fill_i": 6356,
+      "expire_i": 6356
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-6:near",
+      "status": "filled",
+      "submitted_i": 6373,
+      "fill_i": 6374,
+      "expire_i": 6374
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-6:far",
+      "status": "filled",
+      "submitted_i": 6373,
+      "fill_i": 6374,
+      "expire_i": 6374
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 6373,
+      "fill_i": 6374,
+      "expire_i": 6374
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-7:near",
+      "status": "filled",
+      "submitted_i": 6383,
+      "fill_i": 6384,
+      "expire_i": 6384
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-7:far",
+      "status": "filled",
+      "submitted_i": 6383,
+      "fill_i": 6384,
+      "expire_i": 6384
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 6383,
+      "fill_i": 6384,
+      "expire_i": 6384
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-8:near",
+      "status": "filled",
+      "submitted_i": 6397,
+      "fill_i": 6398,
+      "expire_i": 6398
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-8:far",
+      "status": "filled",
+      "submitted_i": 6397,
+      "fill_i": 6398,
+      "expire_i": 6398
+    },
+    {
+      "trade_id": "XAU-2025-04-28-1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 6397,
+      "fill_i": 6398,
+      "expire_i": 6398
+    },
+    {
+      "trade_id": "XAU-2025-05-12-1-1:near",
+      "status": "filled",
+      "submitted_i": 10183,
+      "fill_i": 10184,
+      "expire_i": 10184
+    },
+    {
+      "trade_id": "XAU-2025-05-12-1-1:far",
+      "status": "filled",
+      "submitted_i": 10183,
+      "fill_i": 10184,
+      "expire_i": 10184
+    },
+    {
+      "trade_id": "XAU-2025-05-12-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 10183,
+      "fill_i": 10184,
+      "expire_i": 10184
+    },
+    {
+      "trade_id": "XAU-2025-05-12-1-2:near",
+      "status": "filled",
+      "submitted_i": 10276,
+      "fill_i": 10277,
+      "expire_i": 10277
+    },
+    {
+      "trade_id": "XAU-2025-05-12-1-2:far",
+      "status": "filled",
+      "submitted_i": 10276,
+      "fill_i": 10277,
+      "expire_i": 10277
+    },
+    {
+      "trade_id": "XAU-2025-05-12-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 10276,
+      "fill_i": 10277,
+      "expire_i": 10277
+    },
+    {
+      "trade_id": "XAU-2025-05-12-1-4:near",
+      "status": "filled",
+      "submitted_i": 10677,
+      "fill_i": 10678,
+      "expire_i": 10678
+    },
+    {
+      "trade_id": "XAU-2025-05-12-1-4:far",
+      "status": "filled",
+      "submitted_i": 10677,
+      "fill_i": 10678,
+      "expire_i": 10678
+    },
+    {
+      "trade_id": "XAU-2025-05-12-1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 10677,
+      "fill_i": 10678,
+      "expire_i": 10678
+    },
+    {
+      "trade_id": "XAU-2025-05-19--1-1:near",
+      "status": "filled",
+      "submitted_i": 11904,
+      "fill_i": 11905,
+      "expire_i": 11905
+    },
+    {
+      "trade_id": "XAU-2025-05-19--1-1:far",
+      "status": "filled",
+      "submitted_i": 11904,
+      "fill_i": 11905,
+      "expire_i": 11905
+    },
+    {
+      "trade_id": "XAU-2025-05-19--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 11904,
+      "fill_i": 11905,
+      "expire_i": 11905
+    },
+    {
+      "trade_id": "XAU-2025-05-19--1-2:near",
+      "status": "filled",
+      "submitted_i": 11910,
+      "fill_i": 11911,
+      "expire_i": 11911
+    },
+    {
+      "trade_id": "XAU-2025-05-19--1-2:far",
+      "status": "filled",
+      "submitted_i": 11910,
+      "fill_i": 11911,
+      "expire_i": 11911
+    },
+    {
+      "trade_id": "XAU-2025-05-19--1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 11910,
+      "fill_i": 11911,
+      "expire_i": 11911
+    },
+    {
+      "trade_id": "XAU-2025-05-19--1-5:near",
+      "status": "filled",
+      "submitted_i": 11936,
+      "fill_i": 11937,
+      "expire_i": 11937
+    },
+    {
+      "trade_id": "XAU-2025-05-19--1-5:far",
+      "status": "filled",
+      "submitted_i": 11936,
+      "fill_i": 11937,
+      "expire_i": 11937
+    },
+    {
+      "trade_id": "XAU-2025-05-19--1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 11936,
+      "fill_i": 11937,
+      "expire_i": 11937
+    },
+    {
+      "trade_id": "XAU-2025-05-19--1-6:near",
+      "status": "filled",
+      "submitted_i": 11942,
+      "fill_i": 11943,
+      "expire_i": 11943
+    },
+    {
+      "trade_id": "XAU-2025-05-19--1-6:far",
+      "status": "filled",
+      "submitted_i": 11942,
+      "fill_i": 11943,
+      "expire_i": 11943
+    },
+    {
+      "trade_id": "XAU-2025-05-19--1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 11942,
+      "fill_i": 11943,
+      "expire_i": 11943
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-1:near",
+      "status": "filled",
+      "submitted_i": 13788,
+      "fill_i": 13789,
+      "expire_i": 13789
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-1:far",
+      "status": "filled",
+      "submitted_i": 13788,
+      "fill_i": 13789,
+      "expire_i": 13789
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 13788,
+      "fill_i": 13789,
+      "expire_i": 13789
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-2:near",
+      "status": "filled",
+      "submitted_i": 13797,
+      "fill_i": 13798,
+      "expire_i": 13798
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-2:far",
+      "status": "filled",
+      "submitted_i": 13797,
+      "fill_i": 13798,
+      "expire_i": 13798
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 13797,
+      "fill_i": 13798,
+      "expire_i": 13798
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-7:near",
+      "status": "filled",
+      "submitted_i": 14004,
+      "fill_i": 14005,
+      "expire_i": 14005
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-7:far",
+      "status": "filled",
+      "submitted_i": 14004,
+      "fill_i": 14005,
+      "expire_i": 14005
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 14004,
+      "fill_i": 14005,
+      "expire_i": 14005
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-9:near",
+      "status": "filled",
+      "submitted_i": 14024,
+      "fill_i": 14025,
+      "expire_i": 14025
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-9:far",
+      "status": "filled",
+      "submitted_i": 14024,
+      "fill_i": 14025,
+      "expire_i": 14025
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-9:opposite1618",
+      "status": "filled",
+      "submitted_i": 14024,
+      "fill_i": 14025,
+      "expire_i": 14025
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-12:near",
+      "status": "filled",
+      "submitted_i": 14153,
+      "fill_i": 14154,
+      "expire_i": 14154
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-12:far",
+      "status": "filled",
+      "submitted_i": 14153,
+      "fill_i": 14154,
+      "expire_i": 14154
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-12:opposite1618",
+      "status": "filled",
+      "submitted_i": 14153,
+      "fill_i": 14154,
+      "expire_i": 14154
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-15:near",
+      "status": "filled",
+      "submitted_i": 14593,
+      "fill_i": 14594,
+      "expire_i": 14594
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-15:far",
+      "status": "filled",
+      "submitted_i": 14593,
+      "fill_i": 14594,
+      "expire_i": 14594
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-15:opposite1618",
+      "status": "filled",
+      "submitted_i": 14593,
+      "fill_i": 14594,
+      "expire_i": 14594
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-18:near",
+      "status": "filled",
+      "submitted_i": 14726,
+      "fill_i": 14727,
+      "expire_i": 14727
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-18:far",
+      "status": "filled",
+      "submitted_i": 14726,
+      "fill_i": 14727,
+      "expire_i": 14727
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-18:opposite1618",
+      "status": "filled",
+      "submitted_i": 14726,
+      "fill_i": 14727,
+      "expire_i": 14727
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-20:near",
+      "status": "filled",
+      "submitted_i": 15439,
+      "fill_i": 15440,
+      "expire_i": 15440
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-20:far",
+      "status": "filled",
+      "submitted_i": 15439,
+      "fill_i": 15440,
+      "expire_i": 15440
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-20:opposite1618",
+      "status": "filled",
+      "submitted_i": 15439,
+      "fill_i": 15440,
+      "expire_i": 15440
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-21:near",
+      "status": "filled",
+      "submitted_i": 15450,
+      "fill_i": 15451,
+      "expire_i": 15451
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-21:far",
+      "status": "filled",
+      "submitted_i": 15450,
+      "fill_i": 15451,
+      "expire_i": 15451
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-21:opposite1618",
+      "status": "filled",
+      "submitted_i": 15450,
+      "fill_i": 15451,
+      "expire_i": 15451
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-22:near",
+      "status": "filled",
+      "submitted_i": 15474,
+      "fill_i": 15475,
+      "expire_i": 15475
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-22:far",
+      "status": "filled",
+      "submitted_i": 15474,
+      "fill_i": 15475,
+      "expire_i": 15475
+    },
+    {
+      "trade_id": "XAU-2025-05-26-1-22:opposite1618",
+      "status": "filled",
+      "submitted_i": 15474,
+      "fill_i": 15475,
+      "expire_i": 15475
+    },
+    {
+      "trade_id": "XAU-2025-06-09--1-1:near",
+      "status": "filled",
+      "submitted_i": 18290,
+      "fill_i": 18291,
+      "expire_i": 18291
+    },
+    {
+      "trade_id": "XAU-2025-06-09--1-1:far",
+      "status": "filled",
+      "submitted_i": 18290,
+      "fill_i": 18291,
+      "expire_i": 18291
+    },
+    {
+      "trade_id": "XAU-2025-06-09--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 18290,
+      "fill_i": 18291,
+      "expire_i": 18291
+    },
+    {
+      "trade_id": "XAU-2025-06-09--1-4:near",
+      "status": "filled",
+      "submitted_i": 18412,
+      "fill_i": 18413,
+      "expire_i": 18413
+    },
+    {
+      "trade_id": "XAU-2025-06-09--1-4:far",
+      "status": "filled",
+      "submitted_i": 18412,
+      "fill_i": 18413,
+      "expire_i": 18413
+    },
+    {
+      "trade_id": "XAU-2025-06-09--1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 18412,
+      "fill_i": 18413,
+      "expire_i": 18413
+    },
+    {
+      "trade_id": "XAU-2025-06-23-1-1:near",
+      "status": "filled",
+      "submitted_i": 21931,
+      "fill_i": 21932,
+      "expire_i": 21932
+    },
+    {
+      "trade_id": "XAU-2025-06-23-1-1:far",
+      "status": "filled",
+      "submitted_i": 21931,
+      "fill_i": 21932,
+      "expire_i": 21932
+    },
+    {
+      "trade_id": "XAU-2025-06-23-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 21931,
+      "fill_i": 21932,
+      "expire_i": 21932
+    },
+    {
+      "trade_id": "XAU-2025-06-23-1-2:near",
+      "status": "filled",
+      "submitted_i": 22676,
+      "fill_i": 22677,
+      "expire_i": 22677
+    },
+    {
+      "trade_id": "XAU-2025-06-23-1-2:far",
+      "status": "filled",
+      "submitted_i": 22676,
+      "fill_i": 22677,
+      "expire_i": 22677
+    },
+    {
+      "trade_id": "XAU-2025-06-23-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 22676,
+      "fill_i": 22677,
+      "expire_i": 22677
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-1:near",
+      "status": "filled",
+      "submitted_i": 23919,
+      "fill_i": 23920,
+      "expire_i": 23920
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-1:far",
+      "status": "filled",
+      "submitted_i": 23919,
+      "fill_i": 23920,
+      "expire_i": 23920
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 23919,
+      "fill_i": 23920,
+      "expire_i": 23920
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-2:near",
+      "status": "filled",
+      "submitted_i": 23930,
+      "fill_i": 23931,
+      "expire_i": 23931
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-2:far",
+      "status": "filled",
+      "submitted_i": 23930,
+      "fill_i": 23931,
+      "expire_i": 23931
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 23930,
+      "fill_i": 23931,
+      "expire_i": 23931
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-3:near",
+      "status": "filled",
+      "submitted_i": 23950,
+      "fill_i": 23951,
+      "expire_i": 23951
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-3:far",
+      "status": "filled",
+      "submitted_i": 23950,
+      "fill_i": 23951,
+      "expire_i": 23951
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 23950,
+      "fill_i": 23951,
+      "expire_i": 23951
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-4:near",
+      "status": "filled",
+      "submitted_i": 24298,
+      "fill_i": 24299,
+      "expire_i": 24299
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-4:far",
+      "status": "filled",
+      "submitted_i": 24298,
+      "fill_i": 24299,
+      "expire_i": 24299
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 24298,
+      "fill_i": 24299,
+      "expire_i": 24299
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-6:near",
+      "status": "filled",
+      "submitted_i": 24422,
+      "fill_i": 24423,
+      "expire_i": 24423
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-6:far",
+      "status": "filled",
+      "submitted_i": 24422,
+      "fill_i": 24423,
+      "expire_i": 24423
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 24422,
+      "fill_i": 24423,
+      "expire_i": 24423
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-8:near",
+      "status": "filled",
+      "submitted_i": 24460,
+      "fill_i": 24461,
+      "expire_i": 24461
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-8:far",
+      "status": "filled",
+      "submitted_i": 24460,
+      "fill_i": 24461,
+      "expire_i": 24461
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 24460,
+      "fill_i": 24461,
+      "expire_i": 24461
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-10:near",
+      "status": "filled",
+      "submitted_i": 24488,
+      "fill_i": 24489,
+      "expire_i": 24489
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-10:far",
+      "status": "filled",
+      "submitted_i": 24488,
+      "fill_i": 24489,
+      "expire_i": 24489
+    },
+    {
+      "trade_id": "XAU-2025-06-30--1-10:opposite1618",
+      "status": "filled",
+      "submitted_i": 24488,
+      "fill_i": 24489,
+      "expire_i": 24489
+    },
+    {
+      "trade_id": "XAU-2025-07-14-1-1:near",
+      "status": "filled",
+      "submitted_i": 28277,
+      "fill_i": 28278,
+      "expire_i": 28278
+    },
+    {
+      "trade_id": "XAU-2025-07-14-1-1:far",
+      "status": "filled",
+      "submitted_i": 28277,
+      "fill_i": 28278,
+      "expire_i": 28278
+    },
+    {
+      "trade_id": "XAU-2025-07-14-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 28277,
+      "fill_i": 28278,
+      "expire_i": 28278
+    },
+    {
+      "trade_id": "XAU-2025-07-14-1-2:near",
+      "status": "filled",
+      "submitted_i": 28541,
+      "fill_i": 28542,
+      "expire_i": 28542
+    },
+    {
+      "trade_id": "XAU-2025-07-14-1-2:far",
+      "status": "filled",
+      "submitted_i": 28541,
+      "fill_i": 28542,
+      "expire_i": 28542
+    },
+    {
+      "trade_id": "XAU-2025-07-14-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 28541,
+      "fill_i": 28542,
+      "expire_i": 28542
+    },
+    {
+      "trade_id": "XAU-2025-07-21--1-1:near",
+      "status": "filled",
+      "submitted_i": 30035,
+      "fill_i": 30036,
+      "expire_i": 30036
+    },
+    {
+      "trade_id": "XAU-2025-07-21--1-1:far",
+      "status": "filled",
+      "submitted_i": 30035,
+      "fill_i": 30036,
+      "expire_i": 30036
+    },
+    {
+      "trade_id": "XAU-2025-07-21--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 30035,
+      "fill_i": 30036,
+      "expire_i": 30036
+    },
+    {
+      "trade_id": "XAU-2025-07-21--1-2:near",
+      "status": "filled",
+      "submitted_i": 30109,
+      "fill_i": 30110,
+      "expire_i": 30110
+    },
+    {
+      "trade_id": "XAU-2025-07-21--1-2:far",
+      "status": "filled",
+      "submitted_i": 30109,
+      "fill_i": 30110,
+      "expire_i": 30110
+    },
+    {
+      "trade_id": "XAU-2025-07-21--1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 30109,
+      "fill_i": 30110,
+      "expire_i": 30110
+    },
+    {
+      "trade_id": "XAU-2025-07-21--1-3:near",
+      "status": "filled",
+      "submitted_i": 30122,
+      "fill_i": 30123,
+      "expire_i": 30123
+    },
+    {
+      "trade_id": "XAU-2025-07-21--1-3:far",
+      "status": "filled",
+      "submitted_i": 30122,
+      "fill_i": 30123,
+      "expire_i": 30123
+    },
+    {
+      "trade_id": "XAU-2025-07-21--1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 30122,
+      "fill_i": 30123,
+      "expire_i": 30123
+    },
+    {
+      "trade_id": "XAU-2025-07-21--1-4:near",
+      "status": "filled",
+      "submitted_i": 30230,
+      "fill_i": 30231,
+      "expire_i": 30231
+    },
+    {
+      "trade_id": "XAU-2025-07-21--1-4:far",
+      "status": "filled",
+      "submitted_i": 30230,
+      "fill_i": 30231,
+      "expire_i": 30231
+    },
+    {
+      "trade_id": "XAU-2025-07-21--1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 30230,
+      "fill_i": 30231,
+      "expire_i": 30231
+    },
+    {
+      "trade_id": "XAU-2025-07-28-1-1:near",
+      "status": "filled",
+      "submitted_i": 32369,
+      "fill_i": 32370,
+      "expire_i": 32370
+    },
+    {
+      "trade_id": "XAU-2025-07-28-1-1:far",
+      "status": "filled",
+      "submitted_i": 32369,
+      "fill_i": 32370,
+      "expire_i": 32370
+    },
+    {
+      "trade_id": "XAU-2025-07-28-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 32369,
+      "fill_i": 32370,
+      "expire_i": 32370
+    },
+    {
+      "trade_id": "XAU-2025-08-18--1-1:near",
+      "status": "filled",
+      "submitted_i": 38940,
+      "fill_i": 38941,
+      "expire_i": 38941
+    },
+    {
+      "trade_id": "XAU-2025-08-18--1-1:far",
+      "status": "filled",
+      "submitted_i": 38940,
+      "fill_i": 38941,
+      "expire_i": 38941
+    },
+    {
+      "trade_id": "XAU-2025-08-18--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 38940,
+      "fill_i": 38941,
+      "expire_i": 38941
+    },
+    {
+      "trade_id": "XAU-2025-08-25--1-1:near",
+      "status": "filled",
+      "submitted_i": 40625,
+      "fill_i": 40626,
+      "expire_i": 40626
+    },
+    {
+      "trade_id": "XAU-2025-08-25--1-1:far",
+      "status": "filled",
+      "submitted_i": 40625,
+      "fill_i": 40626,
+      "expire_i": 40626
+    },
+    {
+      "trade_id": "XAU-2025-08-25--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 40625,
+      "fill_i": 40626,
+      "expire_i": 40626
+    },
+    {
+      "trade_id": "XAU-2025-08-25--1-2:near",
+      "status": "filled",
+      "submitted_i": 40632,
+      "fill_i": 40633,
+      "expire_i": 40633
+    },
+    {
+      "trade_id": "XAU-2025-08-25--1-2:far",
+      "status": "filled",
+      "submitted_i": 40632,
+      "fill_i": 40633,
+      "expire_i": 40633
+    },
+    {
+      "trade_id": "XAU-2025-08-25--1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 40632,
+      "fill_i": 40633,
+      "expire_i": 40633
+    },
+    {
+      "trade_id": "XAU-2025-08-25--1-3:near",
+      "status": "filled",
+      "submitted_i": 40651,
+      "fill_i": 40652,
+      "expire_i": 40652
+    },
+    {
+      "trade_id": "XAU-2025-08-25--1-3:far",
+      "status": "filled",
+      "submitted_i": 40651,
+      "fill_i": 40652,
+      "expire_i": 40652
+    },
+    {
+      "trade_id": "XAU-2025-08-25--1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 40651,
+      "fill_i": 40652,
+      "expire_i": 40652
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-1:near",
+      "status": "filled",
+      "submitted_i": 42370,
+      "fill_i": 42371,
+      "expire_i": 42371
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-1:far",
+      "status": "filled",
+      "submitted_i": 42370,
+      "fill_i": 42371,
+      "expire_i": 42371
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 42370,
+      "fill_i": 42371,
+      "expire_i": 42371
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-5:near",
+      "status": "filled",
+      "submitted_i": 42665,
+      "fill_i": 42666,
+      "expire_i": 42666
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-5:far",
+      "status": "filled",
+      "submitted_i": 42665,
+      "fill_i": 42666,
+      "expire_i": 42666
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 42665,
+      "fill_i": 42666,
+      "expire_i": 42666
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-6:near",
+      "status": "filled",
+      "submitted_i": 42695,
+      "fill_i": 42696,
+      "expire_i": 42696
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-6:far",
+      "status": "filled",
+      "submitted_i": 42695,
+      "fill_i": 42696,
+      "expire_i": 42696
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 42695,
+      "fill_i": 42696,
+      "expire_i": 42696
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-7:near",
+      "status": "filled",
+      "submitted_i": 42708,
+      "fill_i": 42709,
+      "expire_i": 42709
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-7:far",
+      "status": "filled",
+      "submitted_i": 42708,
+      "fill_i": 42709,
+      "expire_i": 42709
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 42708,
+      "fill_i": 42709,
+      "expire_i": 42709
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-8:near",
+      "status": "filled",
+      "submitted_i": 42804,
+      "fill_i": 42805,
+      "expire_i": 42805
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-8:far",
+      "status": "filled",
+      "submitted_i": 42804,
+      "fill_i": 42805,
+      "expire_i": 42805
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 42804,
+      "fill_i": 42805,
+      "expire_i": 42805
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-9:near",
+      "status": "filled",
+      "submitted_i": 42809,
+      "fill_i": 42810,
+      "expire_i": 42810
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-9:far",
+      "status": "filled",
+      "submitted_i": 42809,
+      "fill_i": 42810,
+      "expire_i": 42810
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-9:opposite1618",
+      "status": "filled",
+      "submitted_i": 42809,
+      "fill_i": 42810,
+      "expire_i": 42810
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-10:near",
+      "status": "filled",
+      "submitted_i": 42816,
+      "fill_i": 42817,
+      "expire_i": 42817
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-10:far",
+      "status": "filled",
+      "submitted_i": 42816,
+      "fill_i": 42817,
+      "expire_i": 42817
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-10:opposite1618",
+      "status": "filled",
+      "submitted_i": 42816,
+      "fill_i": 42817,
+      "expire_i": 42817
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-11:near",
+      "status": "filled",
+      "submitted_i": 42833,
+      "fill_i": 42834,
+      "expire_i": 42834
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-11:far",
+      "status": "filled",
+      "submitted_i": 42833,
+      "fill_i": 42834,
+      "expire_i": 42834
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-11:opposite1618",
+      "status": "filled",
+      "submitted_i": 42833,
+      "fill_i": 42834,
+      "expire_i": 42834
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-13:near",
+      "status": "filled",
+      "submitted_i": 42871,
+      "fill_i": 42872,
+      "expire_i": 42872
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-13:far",
+      "status": "filled",
+      "submitted_i": 42871,
+      "fill_i": 42872,
+      "expire_i": 42872
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-13:opposite1618",
+      "status": "filled",
+      "submitted_i": 42871,
+      "fill_i": 42872,
+      "expire_i": 42872
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-14:near",
+      "status": "filled",
+      "submitted_i": 42940,
+      "fill_i": 42941,
+      "expire_i": 42941
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-14:far",
+      "status": "filled",
+      "submitted_i": 42940,
+      "fill_i": 42941,
+      "expire_i": 42941
+    },
+    {
+      "trade_id": "XAU-2025-09-01--1-14:opposite1618",
+      "status": "filled",
+      "submitted_i": 42940,
+      "fill_i": 42941,
+      "expire_i": 42941
+    },
+    {
+      "trade_id": "XAU-2025-09-29--1-1:near",
+      "status": "filled",
+      "submitted_i": 51707,
+      "fill_i": 51708,
+      "expire_i": 51708
+    },
+    {
+      "trade_id": "XAU-2025-09-29--1-1:far",
+      "status": "filled",
+      "submitted_i": 51707,
+      "fill_i": 51708,
+      "expire_i": 51708
+    },
+    {
+      "trade_id": "XAU-2025-09-29--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 51707,
+      "fill_i": 51708,
+      "expire_i": 51708
+    },
+    {
+      "trade_id": "XAU-2025-09-29--1-2:near",
+      "status": "filled",
+      "submitted_i": 51741,
+      "fill_i": 51742,
+      "expire_i": 51742
+    },
+    {
+      "trade_id": "XAU-2025-09-29--1-2:far",
+      "status": "filled",
+      "submitted_i": 51741,
+      "fill_i": 51742,
+      "expire_i": 51742
+    },
+    {
+      "trade_id": "XAU-2025-09-29--1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 51741,
+      "fill_i": 51742,
+      "expire_i": 51742
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-1:near",
+      "status": "filled",
+      "submitted_i": 52330,
+      "fill_i": 52331,
+      "expire_i": 52331
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-1:far",
+      "status": "filled",
+      "submitted_i": 52330,
+      "fill_i": 52331,
+      "expire_i": 52331
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 52330,
+      "fill_i": 52331,
+      "expire_i": 52331
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-5:near",
+      "status": "filled",
+      "submitted_i": 53052,
+      "fill_i": 53053,
+      "expire_i": 53053
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-5:far",
+      "status": "filled",
+      "submitted_i": 53052,
+      "fill_i": 53053,
+      "expire_i": 53053
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 53052,
+      "fill_i": 53053,
+      "expire_i": 53053
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-6:near",
+      "status": "filled",
+      "submitted_i": 53103,
+      "fill_i": 53104,
+      "expire_i": 53104
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-6:far",
+      "status": "filled",
+      "submitted_i": 53103,
+      "fill_i": 53104,
+      "expire_i": 53104
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 53103,
+      "fill_i": 53104,
+      "expire_i": 53104
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-8:near",
+      "status": "filled",
+      "submitted_i": 53313,
+      "fill_i": 53314,
+      "expire_i": 53314
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-8:far",
+      "status": "filled",
+      "submitted_i": 53313,
+      "fill_i": 53314,
+      "expire_i": 53314
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 53313,
+      "fill_i": 53314,
+      "expire_i": 53314
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-9:near",
+      "status": "filled",
+      "submitted_i": 53319,
+      "fill_i": 53320,
+      "expire_i": 53320
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-9:far",
+      "status": "filled",
+      "submitted_i": 53319,
+      "fill_i": 53320,
+      "expire_i": 53320
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-9:opposite1618",
+      "status": "filled",
+      "submitted_i": 53319,
+      "fill_i": 53320,
+      "expire_i": 53320
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-10:near",
+      "status": "filled",
+      "submitted_i": 53339,
+      "fill_i": 53340,
+      "expire_i": 53340
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-10:far",
+      "status": "filled",
+      "submitted_i": 53339,
+      "fill_i": 53340,
+      "expire_i": 53340
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-10:opposite1618",
+      "status": "filled",
+      "submitted_i": 53339,
+      "fill_i": 53340,
+      "expire_i": 53340
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-11:near",
+      "status": "filled",
+      "submitted_i": 53453,
+      "fill_i": 53454,
+      "expire_i": 53454
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-11:far",
+      "status": "filled",
+      "submitted_i": 53453,
+      "fill_i": 53454,
+      "expire_i": 53454
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-11:opposite1618",
+      "status": "filled",
+      "submitted_i": 53453,
+      "fill_i": 53454,
+      "expire_i": 53454
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-12:near",
+      "status": "filled",
+      "submitted_i": 53464,
+      "fill_i": 53465,
+      "expire_i": 53465
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-12:far",
+      "status": "filled",
+      "submitted_i": 53464,
+      "fill_i": 53465,
+      "expire_i": 53465
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-12:opposite1618",
+      "status": "filled",
+      "submitted_i": 53464,
+      "fill_i": 53465,
+      "expire_i": 53465
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-15:near",
+      "status": "filled",
+      "submitted_i": 53653,
+      "fill_i": 53654,
+      "expire_i": 53654
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-15:far",
+      "status": "filled",
+      "submitted_i": 53653,
+      "fill_i": 53654,
+      "expire_i": 53654
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-15:opposite1618",
+      "status": "filled",
+      "submitted_i": 53653,
+      "fill_i": 53654,
+      "expire_i": 53654
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-16:near",
+      "status": "filled",
+      "submitted_i": 53670,
+      "fill_i": 53671,
+      "expire_i": 53671
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-16:far",
+      "status": "filled",
+      "submitted_i": 53670,
+      "fill_i": 53671,
+      "expire_i": 53671
+    },
+    {
+      "trade_id": "XAU-2025-10-06--1-16:opposite1618",
+      "status": "filled",
+      "submitted_i": 53670,
+      "fill_i": 53671,
+      "expire_i": 53671
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-1:near",
+      "status": "filled",
+      "submitted_i": 54633,
+      "fill_i": 54634,
+      "expire_i": 54634
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-1:far",
+      "status": "filled",
+      "submitted_i": 54633,
+      "fill_i": 54634,
+      "expire_i": 54634
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 54633,
+      "fill_i": 54634,
+      "expire_i": 54634
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-2:near",
+      "status": "filled",
+      "submitted_i": 54750,
+      "fill_i": 54751,
+      "expire_i": 54751
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-2:far",
+      "status": "filled",
+      "submitted_i": 54750,
+      "fill_i": 54751,
+      "expire_i": 54751
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 54750,
+      "fill_i": 54751,
+      "expire_i": 54751
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-3:near",
+      "status": "filled",
+      "submitted_i": 54759,
+      "fill_i": 54760,
+      "expire_i": 54760
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-3:far",
+      "status": "filled",
+      "submitted_i": 54759,
+      "fill_i": 54760,
+      "expire_i": 54760
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 54759,
+      "fill_i": 54760,
+      "expire_i": 54760
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-5:near",
+      "status": "filled",
+      "submitted_i": 55063,
+      "fill_i": 55064,
+      "expire_i": 55064
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-5:far",
+      "status": "filled",
+      "submitted_i": 55063,
+      "fill_i": 55064,
+      "expire_i": 55064
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 55063,
+      "fill_i": 55064,
+      "expire_i": 55064
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-6:near",
+      "status": "filled",
+      "submitted_i": 55074,
+      "fill_i": 55075,
+      "expire_i": 55075
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-6:far",
+      "status": "filled",
+      "submitted_i": 55074,
+      "fill_i": 55075,
+      "expire_i": 55075
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 55074,
+      "fill_i": 55075,
+      "expire_i": 55075
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-7:near",
+      "status": "filled",
+      "submitted_i": 55140,
+      "fill_i": 55141,
+      "expire_i": 55141
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-7:far",
+      "status": "filled",
+      "submitted_i": 55140,
+      "fill_i": 55141,
+      "expire_i": 55141
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 55140,
+      "fill_i": 55141,
+      "expire_i": 55141
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-8:near",
+      "status": "filled",
+      "submitted_i": 55160,
+      "fill_i": 55161,
+      "expire_i": 55161
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-8:far",
+      "status": "filled",
+      "submitted_i": 55160,
+      "fill_i": 55161,
+      "expire_i": 55161
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 55160,
+      "fill_i": 55161,
+      "expire_i": 55161
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-9:near",
+      "status": "filled",
+      "submitted_i": 55731,
+      "fill_i": 55732,
+      "expire_i": 55732
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-9:far",
+      "status": "filled",
+      "submitted_i": 55731,
+      "fill_i": 55732,
+      "expire_i": 55732
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-9:opposite1618",
+      "status": "filled",
+      "submitted_i": 55731,
+      "fill_i": 55732,
+      "expire_i": 55732
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-10:near",
+      "status": "filled",
+      "submitted_i": 55773,
+      "fill_i": 55774,
+      "expire_i": 55774
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-10:far",
+      "status": "filled",
+      "submitted_i": 55773,
+      "fill_i": 55774,
+      "expire_i": 55774
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-10:opposite1618",
+      "status": "filled",
+      "submitted_i": 55773,
+      "fill_i": 55774,
+      "expire_i": 55774
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-11:near",
+      "status": "filled",
+      "submitted_i": 55797,
+      "fill_i": 55798,
+      "expire_i": 55798
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-11:far",
+      "status": "filled",
+      "submitted_i": 55797,
+      "fill_i": 55798,
+      "expire_i": 55798
+    },
+    {
+      "trade_id": "XAU-2025-10-13--1-11:opposite1618",
+      "status": "filled",
+      "submitted_i": 55797,
+      "fill_i": 55798,
+      "expire_i": 55798
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-1:near",
+      "status": "filled",
+      "submitted_i": 56215,
+      "fill_i": 56216,
+      "expire_i": 56216
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-1:far",
+      "status": "filled",
+      "submitted_i": 56215,
+      "fill_i": 56216,
+      "expire_i": 56216
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 56215,
+      "fill_i": 56216,
+      "expire_i": 56216
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-2:near",
+      "status": "filled",
+      "submitted_i": 56235,
+      "fill_i": 56236,
+      "expire_i": 56236
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-2:far",
+      "status": "filled",
+      "submitted_i": 56235,
+      "fill_i": 56236,
+      "expire_i": 56236
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 56235,
+      "fill_i": 56236,
+      "expire_i": 56236
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-3:near",
+      "status": "filled",
+      "submitted_i": 56264,
+      "fill_i": 56265,
+      "expire_i": 56265
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-3:far",
+      "status": "filled",
+      "submitted_i": 56264,
+      "fill_i": 56265,
+      "expire_i": 56265
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 56264,
+      "fill_i": 56265,
+      "expire_i": 56265
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-5:near",
+      "status": "filled",
+      "submitted_i": 56324,
+      "fill_i": 56325,
+      "expire_i": 56325
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-5:far",
+      "status": "filled",
+      "submitted_i": 56324,
+      "fill_i": 56325,
+      "expire_i": 56325
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 56324,
+      "fill_i": 56325,
+      "expire_i": 56325
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-8:near",
+      "status": "filled",
+      "submitted_i": 56377,
+      "fill_i": 56378,
+      "expire_i": 56378
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-8:far",
+      "status": "filled",
+      "submitted_i": 56377,
+      "fill_i": 56378,
+      "expire_i": 56378
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 56377,
+      "fill_i": 56378,
+      "expire_i": 56378
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-9:near",
+      "status": "filled",
+      "submitted_i": 56424,
+      "fill_i": 56425,
+      "expire_i": 56425
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-9:far",
+      "status": "filled",
+      "submitted_i": 56424,
+      "fill_i": 56425,
+      "expire_i": 56425
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-9:opposite1618",
+      "status": "filled",
+      "submitted_i": 56424,
+      "fill_i": 56425,
+      "expire_i": 56425
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-11:near",
+      "status": "filled",
+      "submitted_i": 56694,
+      "fill_i": 56695,
+      "expire_i": 56695
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-11:far",
+      "status": "filled",
+      "submitted_i": 56694,
+      "fill_i": 56695,
+      "expire_i": 56695
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-11:opposite1618",
+      "status": "filled",
+      "submitted_i": 56694,
+      "fill_i": 56695,
+      "expire_i": 56695
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-13:near",
+      "status": "filled",
+      "submitted_i": 56738,
+      "fill_i": 56739,
+      "expire_i": 56739
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-13:far",
+      "status": "filled",
+      "submitted_i": 56738,
+      "fill_i": 56739,
+      "expire_i": 56739
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-13:opposite1618",
+      "status": "filled",
+      "submitted_i": 56738,
+      "fill_i": 56739,
+      "expire_i": 56739
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-16:near",
+      "status": "filled",
+      "submitted_i": 56850,
+      "fill_i": 56851,
+      "expire_i": 56851
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-16:far",
+      "status": "filled",
+      "submitted_i": 56850,
+      "fill_i": 56851,
+      "expire_i": 56851
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-16:opposite1618",
+      "status": "filled",
+      "submitted_i": 56850,
+      "fill_i": 56851,
+      "expire_i": 56851
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-18:near",
+      "status": "filled",
+      "submitted_i": 56880,
+      "fill_i": 56881,
+      "expire_i": 56881
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-18:far",
+      "status": "filled",
+      "submitted_i": 56880,
+      "fill_i": 56881,
+      "expire_i": 56881
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-18:opposite1618",
+      "status": "filled",
+      "submitted_i": 56880,
+      "fill_i": 56881,
+      "expire_i": 56881
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-20:near",
+      "status": "filled",
+      "submitted_i": 56925,
+      "fill_i": 56926,
+      "expire_i": 56926
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-20:far",
+      "status": "filled",
+      "submitted_i": 56925,
+      "fill_i": 56926,
+      "expire_i": 56926
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-20:opposite1618",
+      "status": "filled",
+      "submitted_i": 56925,
+      "fill_i": 56926,
+      "expire_i": 56926
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-24:near",
+      "status": "filled",
+      "submitted_i": 57081,
+      "fill_i": 57082,
+      "expire_i": 57082
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-24:far",
+      "status": "filled",
+      "submitted_i": 57081,
+      "fill_i": 57082,
+      "expire_i": 57082
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-24:opposite1618",
+      "status": "filled",
+      "submitted_i": 57081,
+      "fill_i": 57082,
+      "expire_i": 57082
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-25:near",
+      "status": "filled",
+      "submitted_i": 57092,
+      "fill_i": 57093,
+      "expire_i": 57093
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-25:far",
+      "status": "filled",
+      "submitted_i": 57092,
+      "fill_i": 57093,
+      "expire_i": 57093
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-25:opposite1618",
+      "status": "filled",
+      "submitted_i": 57092,
+      "fill_i": 57093,
+      "expire_i": 57093
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-26:near",
+      "status": "filled",
+      "submitted_i": 57103,
+      "fill_i": 57104,
+      "expire_i": 57104
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-26:far",
+      "status": "filled",
+      "submitted_i": 57103,
+      "fill_i": 57104,
+      "expire_i": 57104
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-26:opposite1618",
+      "status": "filled",
+      "submitted_i": 57103,
+      "fill_i": 57104,
+      "expire_i": 57104
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-27:near",
+      "status": "filled",
+      "submitted_i": 57111,
+      "fill_i": 57112,
+      "expire_i": 57112
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-27:far",
+      "status": "filled",
+      "submitted_i": 57111,
+      "fill_i": 57112,
+      "expire_i": 57112
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-27:opposite1618",
+      "status": "filled",
+      "submitted_i": 57111,
+      "fill_i": 57112,
+      "expire_i": 57112
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-32:near",
+      "status": "filled",
+      "submitted_i": 57209,
+      "fill_i": 57210,
+      "expire_i": 57210
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-32:far",
+      "status": "filled",
+      "submitted_i": 57209,
+      "fill_i": 57210,
+      "expire_i": 57210
+    },
+    {
+      "trade_id": "XAU-2025-10-20-1-32:opposite1618",
+      "status": "filled",
+      "submitted_i": 57209,
+      "fill_i": 57210,
+      "expire_i": 57210
+    },
+    {
+      "trade_id": "XAU-2025-10-27-1-1:near",
+      "status": "filled",
+      "submitted_i": 58163,
+      "fill_i": 58164,
+      "expire_i": 58164
+    },
+    {
+      "trade_id": "XAU-2025-10-27-1-1:far",
+      "status": "filled",
+      "submitted_i": 58163,
+      "fill_i": 58164,
+      "expire_i": 58164
+    },
+    {
+      "trade_id": "XAU-2025-10-27-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 58163,
+      "fill_i": 58164,
+      "expire_i": 58164
+    },
+    {
+      "trade_id": "XAU-2025-11-03-1-1:near",
+      "status": "filled",
+      "submitted_i": 60245,
+      "fill_i": 60246,
+      "expire_i": 60246
+    },
+    {
+      "trade_id": "XAU-2025-11-03-1-1:far",
+      "status": "filled",
+      "submitted_i": 60245,
+      "fill_i": 60246,
+      "expire_i": 60246
+    },
+    {
+      "trade_id": "XAU-2025-11-03-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 60245,
+      "fill_i": 60246,
+      "expire_i": 60246
+    },
+    {
+      "trade_id": "XAU-2025-11-03-1-2:near",
+      "status": "filled",
+      "submitted_i": 60292,
+      "fill_i": 60293,
+      "expire_i": 60293
+    },
+    {
+      "trade_id": "XAU-2025-11-03-1-2:far",
+      "status": "filled",
+      "submitted_i": 60292,
+      "fill_i": 60293,
+      "expire_i": 60293
+    },
+    {
+      "trade_id": "XAU-2025-11-03-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 60292,
+      "fill_i": 60293,
+      "expire_i": 60293
+    },
+    {
+      "trade_id": "XAU-2025-11-10--1-1:near",
+      "status": "filled",
+      "submitted_i": 62712,
+      "fill_i": 62713,
+      "expire_i": 62713
+    },
+    {
+      "trade_id": "XAU-2025-11-10--1-1:far",
+      "status": "filled",
+      "submitted_i": 62712,
+      "fill_i": 62713,
+      "expire_i": 62713
+    },
+    {
+      "trade_id": "XAU-2025-11-10--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 62712,
+      "fill_i": 62713,
+      "expire_i": 62713
+    },
+    {
+      "trade_id": "XAU-2025-11-10--1-2:near",
+      "status": "filled",
+      "submitted_i": 62724,
+      "fill_i": 62725,
+      "expire_i": 62725
+    },
+    {
+      "trade_id": "XAU-2025-11-10--1-2:far",
+      "status": "filled",
+      "submitted_i": 62724,
+      "fill_i": 62725,
+      "expire_i": 62725
+    },
+    {
+      "trade_id": "XAU-2025-11-10--1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 62724,
+      "fill_i": 62725,
+      "expire_i": 62725
+    },
+    {
+      "trade_id": "XAU-2025-11-10--1-3:near",
+      "status": "filled",
+      "submitted_i": 62752,
+      "fill_i": 62753,
+      "expire_i": 62753
+    },
+    {
+      "trade_id": "XAU-2025-11-10--1-3:far",
+      "status": "filled",
+      "submitted_i": 62752,
+      "fill_i": 62753,
+      "expire_i": 62753
+    },
+    {
+      "trade_id": "XAU-2025-11-10--1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 62752,
+      "fill_i": 62753,
+      "expire_i": 62753
+    },
+    {
+      "trade_id": "XAU-2025-11-24--1-1:near",
+      "status": "filled",
+      "submitted_i": 67205,
+      "fill_i": 67206,
+      "expire_i": 67206
+    },
+    {
+      "trade_id": "XAU-2025-11-24--1-1:far",
+      "status": "filled",
+      "submitted_i": 67205,
+      "fill_i": 67206,
+      "expire_i": 67206
+    },
+    {
+      "trade_id": "XAU-2025-11-24--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 67205,
+      "fill_i": 67206,
+      "expire_i": 67206
+    },
+    {
+      "trade_id": "XAU-2025-11-24--1-2:near",
+      "status": "filled",
+      "submitted_i": 67232,
+      "fill_i": 67233,
+      "expire_i": 67233
+    },
+    {
+      "trade_id": "XAU-2025-11-24--1-2:far",
+      "status": "filled",
+      "submitted_i": 67232,
+      "fill_i": 67233,
+      "expire_i": 67233
+    },
+    {
+      "trade_id": "XAU-2025-11-24--1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 67232,
+      "fill_i": 67233,
+      "expire_i": 67233
+    },
+    {
+      "trade_id": "XAU-2025-11-24--1-3:near",
+      "status": "filled",
+      "submitted_i": 67271,
+      "fill_i": 67272,
+      "expire_i": 67272
+    },
+    {
+      "trade_id": "XAU-2025-11-24--1-3:far",
+      "status": "filled",
+      "submitted_i": 67271,
+      "fill_i": 67272,
+      "expire_i": 67272
+    },
+    {
+      "trade_id": "XAU-2025-11-24--1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 67271,
+      "fill_i": 67272,
+      "expire_i": 67272
+    },
+    {
+      "trade_id": "XAU-2025-11-24--1-5:near",
+      "status": "filled",
+      "submitted_i": 67324,
+      "fill_i": 67325,
+      "expire_i": 67325
+    },
+    {
+      "trade_id": "XAU-2025-11-24--1-5:far",
+      "status": "filled",
+      "submitted_i": 67324,
+      "fill_i": 67325,
+      "expire_i": 67325
+    },
+    {
+      "trade_id": "XAU-2025-11-24--1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 67324,
+      "fill_i": 67325,
+      "expire_i": 67325
+    },
+    {
+      "trade_id": "XAU-2025-11-24--1-7:near",
+      "status": "filled",
+      "submitted_i": 67356,
+      "fill_i": 67357,
+      "expire_i": 67357
+    },
+    {
+      "trade_id": "XAU-2025-11-24--1-7:far",
+      "status": "filled",
+      "submitted_i": 67356,
+      "fill_i": 67357,
+      "expire_i": 67357
+    },
+    {
+      "trade_id": "XAU-2025-11-24--1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 67356,
+      "fill_i": 67357,
+      "expire_i": 67357
+    },
+    {
+      "trade_id": "XAU-2025-12-08--1-1:near",
+      "status": "filled",
+      "submitted_i": 70915,
+      "fill_i": 70916,
+      "expire_i": 70916
+    },
+    {
+      "trade_id": "XAU-2025-12-08--1-1:far",
+      "status": "filled",
+      "submitted_i": 70915,
+      "fill_i": 70916,
+      "expire_i": 70916
+    },
+    {
+      "trade_id": "XAU-2025-12-08--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 70915,
+      "fill_i": 70916,
+      "expire_i": 70916
+    },
+    {
+      "trade_id": "XAU-2025-12-15--1-1:near",
+      "status": "filled",
+      "submitted_i": 73941,
+      "fill_i": 73942,
+      "expire_i": 73942
+    },
+    {
+      "trade_id": "XAU-2025-12-15--1-1:far",
+      "status": "filled",
+      "submitted_i": 73941,
+      "fill_i": 73942,
+      "expire_i": 73942
+    },
+    {
+      "trade_id": "XAU-2025-12-15--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 73941,
+      "fill_i": 73942,
+      "expire_i": 73942
+    },
+    {
+      "trade_id": "XAU-2026-01-05--1-1:near",
+      "status": "filled",
+      "submitted_i": 79263,
+      "fill_i": 79264,
+      "expire_i": 79264
+    },
+    {
+      "trade_id": "XAU-2026-01-05--1-1:far",
+      "status": "filled",
+      "submitted_i": 79263,
+      "fill_i": 79264,
+      "expire_i": 79264
+    },
+    {
+      "trade_id": "XAU-2026-01-05--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 79263,
+      "fill_i": 79264,
+      "expire_i": 79264
+    },
+    {
+      "trade_id": "XAU-2026-01-05--1-2:near",
+      "status": "filled",
+      "submitted_i": 79490,
+      "fill_i": 79491,
+      "expire_i": 79491
+    },
+    {
+      "trade_id": "XAU-2026-01-05--1-2:far",
+      "status": "filled",
+      "submitted_i": 79490,
+      "fill_i": 79491,
+      "expire_i": 79491
+    },
+    {
+      "trade_id": "XAU-2026-01-05--1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 79490,
+      "fill_i": 79491,
+      "expire_i": 79491
+    },
+    {
+      "trade_id": "XAU-2026-01-05--1-5:near",
+      "status": "filled",
+      "submitted_i": 79602,
+      "fill_i": 79603,
+      "expire_i": 79603
+    },
+    {
+      "trade_id": "XAU-2026-01-05--1-5:far",
+      "status": "filled",
+      "submitted_i": 79602,
+      "fill_i": 79603,
+      "expire_i": 79603
+    },
+    {
+      "trade_id": "XAU-2026-01-05--1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 79602,
+      "fill_i": 79603,
+      "expire_i": 79603
+    },
+    {
+      "trade_id": "XAU-2026-01-05--1-6:near",
+      "status": "filled",
+      "submitted_i": 79629,
+      "fill_i": 79630,
+      "expire_i": 79630
+    },
+    {
+      "trade_id": "XAU-2026-01-05--1-6:far",
+      "status": "filled",
+      "submitted_i": 79629,
+      "fill_i": 79630,
+      "expire_i": 79630
+    },
+    {
+      "trade_id": "XAU-2026-01-05--1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 79629,
+      "fill_i": 79630,
+      "expire_i": 79630
+    },
+    {
+      "trade_id": "XAU-2026-01-05--1-8:near",
+      "status": "filled",
+      "submitted_i": 79673,
+      "fill_i": 79674,
+      "expire_i": 79674
+    },
+    {
+      "trade_id": "XAU-2026-01-05--1-8:far",
+      "status": "filled",
+      "submitted_i": 79673,
+      "fill_i": 79674,
+      "expire_i": 79674
+    },
+    {
+      "trade_id": "XAU-2026-01-05--1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 79673,
+      "fill_i": 79674,
+      "expire_i": 79674
+    },
+    {
+      "trade_id": "XAU-2026-01-12--1-1:near",
+      "status": "filled",
+      "submitted_i": 81947,
+      "fill_i": 81948,
+      "expire_i": 81948
+    },
+    {
+      "trade_id": "XAU-2026-01-12--1-1:far",
+      "status": "filled",
+      "submitted_i": 81947,
+      "fill_i": 81948,
+      "expire_i": 81948
+    },
+    {
+      "trade_id": "XAU-2026-01-12--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 81947,
+      "fill_i": 81948,
+      "expire_i": 81948
+    },
+    {
+      "trade_id": "XAU-2026-01-19--1-1:near",
+      "status": "filled",
+      "submitted_i": 82318,
+      "fill_i": 82319,
+      "expire_i": 82319
+    },
+    {
+      "trade_id": "XAU-2026-01-19--1-1:far",
+      "status": "filled",
+      "submitted_i": 82318,
+      "fill_i": 82319,
+      "expire_i": 82319
+    },
+    {
+      "trade_id": "XAU-2026-01-19--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 82318,
+      "fill_i": 82319,
+      "expire_i": 82319
+    },
+    {
+      "trade_id": "XAU-2026-01-19--1-2:near",
+      "status": "filled",
+      "submitted_i": 82335,
+      "fill_i": 82336,
+      "expire_i": 82336
+    },
+    {
+      "trade_id": "XAU-2026-01-19--1-2:far",
+      "status": "filled",
+      "submitted_i": 82335,
+      "fill_i": 82336,
+      "expire_i": 82336
+    },
+    {
+      "trade_id": "XAU-2026-01-19--1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 82335,
+      "fill_i": 82336,
+      "expire_i": 82336
+    },
+    {
+      "trade_id": "XAU-2026-01-26--1-1:near",
+      "status": "filled",
+      "submitted_i": 84564,
+      "fill_i": 84565,
+      "expire_i": 84565
+    },
+    {
+      "trade_id": "XAU-2026-01-26--1-1:far",
+      "status": "filled",
+      "submitted_i": 84564,
+      "fill_i": 84565,
+      "expire_i": 84565
+    },
+    {
+      "trade_id": "XAU-2026-01-26--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 84564,
+      "fill_i": 84565,
+      "expire_i": 84565
+    },
+    {
+      "trade_id": "XAU-2026-01-26--1-2:near",
+      "status": "filled",
+      "submitted_i": 84570,
+      "fill_i": 84571,
+      "expire_i": 84571
+    },
+    {
+      "trade_id": "XAU-2026-01-26--1-2:far",
+      "status": "filled",
+      "submitted_i": 84570,
+      "fill_i": 84571,
+      "expire_i": 84571
+    },
+    {
+      "trade_id": "XAU-2026-01-26--1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 84570,
+      "fill_i": 84571,
+      "expire_i": 84571
+    },
+    {
+      "trade_id": "XAU-2026-01-26-1-1:near",
+      "status": "filled",
+      "submitted_i": 85339,
+      "fill_i": 85340,
+      "expire_i": 85340
+    },
+    {
+      "trade_id": "XAU-2026-01-26-1-1:far",
+      "status": "filled",
+      "submitted_i": 85339,
+      "fill_i": 85340,
+      "expire_i": 85340
+    },
+    {
+      "trade_id": "XAU-2026-01-26-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 85339,
+      "fill_i": 85340,
+      "expire_i": 85340
+    },
+    {
+      "trade_id": "XAU-2026-01-26-1-3:near",
+      "status": "filled",
+      "submitted_i": 85359,
+      "fill_i": 85360,
+      "expire_i": 85360
+    },
+    {
+      "trade_id": "XAU-2026-01-26-1-3:far",
+      "status": "filled",
+      "submitted_i": 85359,
+      "fill_i": 85360,
+      "expire_i": 85360
+    },
+    {
+      "trade_id": "XAU-2026-01-26-1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 85359,
+      "fill_i": 85360,
+      "expire_i": 85360
+    },
+    {
+      "trade_id": "XAU-2026-01-26-1-4:near",
+      "status": "filled",
+      "submitted_i": 85373,
+      "fill_i": 85374,
+      "expire_i": 85374
+    },
+    {
+      "trade_id": "XAU-2026-01-26-1-4:far",
+      "status": "filled",
+      "submitted_i": 85373,
+      "fill_i": 85374,
+      "expire_i": 85374
+    },
+    {
+      "trade_id": "XAU-2026-01-26-1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 85373,
+      "fill_i": 85374,
+      "expire_i": 85374
+    },
+    {
+      "trade_id": "XAU-2026-01-26-1-6:near",
+      "status": "filled",
+      "submitted_i": 85402,
+      "fill_i": 85403,
+      "expire_i": 85403
+    },
+    {
+      "trade_id": "XAU-2026-01-26-1-6:far",
+      "status": "filled",
+      "submitted_i": 85402,
+      "fill_i": 85403,
+      "expire_i": 85403
+    },
+    {
+      "trade_id": "XAU-2026-01-26-1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 85402,
+      "fill_i": 85403,
+      "expire_i": 85403
+    },
+    {
+      "trade_id": "XAU-2026-01-26-1-7:near",
+      "status": "filled",
+      "submitted_i": 85609,
+      "fill_i": 85610,
+      "expire_i": 85610
+    },
+    {
+      "trade_id": "XAU-2026-01-26-1-7:far",
+      "status": "filled",
+      "submitted_i": 85609,
+      "fill_i": 85610,
+      "expire_i": 85610
+    },
+    {
+      "trade_id": "XAU-2026-01-26-1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 85609,
+      "fill_i": 85610,
+      "expire_i": 85610
+    },
+    {
+      "trade_id": "XAU-2026-02-09-1-1:near",
+      "status": "filled",
+      "submitted_i": 89068,
+      "fill_i": 89069,
+      "expire_i": 89069
+    },
+    {
+      "trade_id": "XAU-2026-02-09-1-1:far",
+      "status": "filled",
+      "submitted_i": 89068,
+      "fill_i": 89069,
+      "expire_i": 89069
+    },
+    {
+      "trade_id": "XAU-2026-02-09-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 89068,
+      "fill_i": 89069,
+      "expire_i": 89069
+    },
+    {
+      "trade_id": "XAU-2026-02-09-1-2:near",
+      "status": "filled",
+      "submitted_i": 89090,
+      "fill_i": 89091,
+      "expire_i": 89091
+    },
+    {
+      "trade_id": "XAU-2026-02-09-1-2:far",
+      "status": "filled",
+      "submitted_i": 89090,
+      "fill_i": 89091,
+      "expire_i": 89091
+    },
+    {
+      "trade_id": "XAU-2026-02-09-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 89090,
+      "fill_i": 89091,
+      "expire_i": 89091
+    },
+    {
+      "trade_id": "XAU-2026-02-09-1-3:near",
+      "status": "filled",
+      "submitted_i": 89147,
+      "fill_i": 89148,
+      "expire_i": 89148
+    },
+    {
+      "trade_id": "XAU-2026-02-09-1-3:far",
+      "status": "filled",
+      "submitted_i": 89147,
+      "fill_i": 89148,
+      "expire_i": 89148
+    },
+    {
+      "trade_id": "XAU-2026-02-09-1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 89147,
+      "fill_i": 89148,
+      "expire_i": 89148
+    },
+    {
+      "trade_id": "XAU-2026-02-09-1-4:near",
+      "status": "filled",
+      "submitted_i": 89154,
+      "fill_i": 89155,
+      "expire_i": 89155
+    },
+    {
+      "trade_id": "XAU-2026-02-09-1-4:far",
+      "status": "filled",
+      "submitted_i": 89154,
+      "fill_i": 89155,
+      "expire_i": 89155
+    },
+    {
+      "trade_id": "XAU-2026-02-09-1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 89154,
+      "fill_i": 89155,
+      "expire_i": 89155
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-1:near",
+      "status": "filled",
+      "submitted_i": 90377,
+      "fill_i": 90378,
+      "expire_i": 90378
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-1:far",
+      "status": "filled",
+      "submitted_i": 90377,
+      "fill_i": 90378,
+      "expire_i": 90378
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 90377,
+      "fill_i": 90378,
+      "expire_i": 90378
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-2:near",
+      "status": "filled",
+      "submitted_i": 90479,
+      "fill_i": 90480,
+      "expire_i": 90480
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-2:far",
+      "status": "filled",
+      "submitted_i": 90479,
+      "fill_i": 90480,
+      "expire_i": 90480
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 90479,
+      "fill_i": 90480,
+      "expire_i": 90480
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-3:near",
+      "status": "filled",
+      "submitted_i": 90488,
+      "fill_i": 90489,
+      "expire_i": 90489
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-3:far",
+      "status": "filled",
+      "submitted_i": 90488,
+      "fill_i": 90489,
+      "expire_i": 90489
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 90488,
+      "fill_i": 90489,
+      "expire_i": 90489
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-4:near",
+      "status": "filled",
+      "submitted_i": 90515,
+      "fill_i": 90516,
+      "expire_i": 90516
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-4:far",
+      "status": "filled",
+      "submitted_i": 90515,
+      "fill_i": 90516,
+      "expire_i": 90516
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 90515,
+      "fill_i": 90516,
+      "expire_i": 90516
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-5:near",
+      "status": "filled",
+      "submitted_i": 90587,
+      "fill_i": 90588,
+      "expire_i": 90588
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-5:far",
+      "status": "filled",
+      "submitted_i": 90587,
+      "fill_i": 90588,
+      "expire_i": 90588
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 90587,
+      "fill_i": 90588,
+      "expire_i": 90588
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-6:near",
+      "status": "filled",
+      "submitted_i": 90597,
+      "fill_i": 90598,
+      "expire_i": 90598
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-6:far",
+      "status": "filled",
+      "submitted_i": 90597,
+      "fill_i": 90598,
+      "expire_i": 90598
+    },
+    {
+      "trade_id": "XAU-2026-02-16-1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 90597,
+      "fill_i": 90598,
+      "expire_i": 90598
+    },
+    {
+      "trade_id": "XAU-2026-02-16--1-1:near",
+      "status": "filled",
+      "submitted_i": 91380,
+      "fill_i": 91381,
+      "expire_i": 91381
+    },
+    {
+      "trade_id": "XAU-2026-02-16--1-1:far",
+      "status": "filled",
+      "submitted_i": 91380,
+      "fill_i": 91381,
+      "expire_i": 91381
+    },
+    {
+      "trade_id": "XAU-2026-02-16--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 91380,
+      "fill_i": 91381,
+      "expire_i": 91381
+    },
+    {
+      "trade_id": "XAU-2026-02-16--1-2:near",
+      "status": "filled",
+      "submitted_i": 91387,
+      "fill_i": 91388,
+      "expire_i": 91388
+    },
+    {
+      "trade_id": "XAU-2026-02-16--1-2:far",
+      "status": "filled",
+      "submitted_i": 91387,
+      "fill_i": 91388,
+      "expire_i": 91388
+    },
+    {
+      "trade_id": "XAU-2026-02-16--1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 91387,
+      "fill_i": 91388,
+      "expire_i": 91388
+    },
+    {
+      "trade_id": "XAU-2026-02-23--1-1:near",
+      "status": "filled",
+      "submitted_i": 93556,
+      "fill_i": 93557,
+      "expire_i": 93557
+    },
+    {
+      "trade_id": "XAU-2026-02-23--1-1:far",
+      "status": "filled",
+      "submitted_i": 93556,
+      "fill_i": 93557,
+      "expire_i": 93557
+    },
+    {
+      "trade_id": "XAU-2026-02-23--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 93556,
+      "fill_i": 93557,
+      "expire_i": 93557
+    },
+    {
+      "trade_id": "XAU-2026-02-23--1-7:near",
+      "status": "filled",
+      "submitted_i": 93839,
+      "fill_i": 93840,
+      "expire_i": 93840
+    },
+    {
+      "trade_id": "XAU-2026-02-23--1-7:far",
+      "status": "filled",
+      "submitted_i": 93839,
+      "fill_i": 93840,
+      "expire_i": 93840
+    },
+    {
+      "trade_id": "XAU-2026-02-23--1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 93839,
+      "fill_i": 93840,
+      "expire_i": 93840
+    },
+    {
+      "trade_id": "XAU-2026-02-23--1-8:near",
+      "status": "filled",
+      "submitted_i": 93846,
+      "fill_i": 93847,
+      "expire_i": 93847
+    },
+    {
+      "trade_id": "XAU-2026-02-23--1-8:far",
+      "status": "filled",
+      "submitted_i": 93846,
+      "fill_i": 93847,
+      "expire_i": 93847
+    },
+    {
+      "trade_id": "XAU-2026-02-23--1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 93846,
+      "fill_i": 93847,
+      "expire_i": 93847
+    },
+    {
+      "trade_id": "XAU-2026-02-23--1-9:near",
+      "status": "filled",
+      "submitted_i": 93869,
+      "fill_i": 93870,
+      "expire_i": 93870
+    },
+    {
+      "trade_id": "XAU-2026-02-23--1-9:far",
+      "status": "filled",
+      "submitted_i": 93869,
+      "fill_i": 93870,
+      "expire_i": 93870
+    },
+    {
+      "trade_id": "XAU-2026-02-23--1-9:opposite1618",
+      "status": "filled",
+      "submitted_i": 93869,
+      "fill_i": 93870,
+      "expire_i": 93870
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-1:near",
+      "status": "filled",
+      "submitted_i": 94480,
+      "fill_i": 94481,
+      "expire_i": 94481
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-1:far",
+      "status": "filled",
+      "submitted_i": 94480,
+      "fill_i": 94481,
+      "expire_i": 94481
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 94480,
+      "fill_i": 94481,
+      "expire_i": 94481
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-3:near",
+      "status": "filled",
+      "submitted_i": 94500,
+      "fill_i": 94501,
+      "expire_i": 94501
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-3:far",
+      "status": "filled",
+      "submitted_i": 94500,
+      "fill_i": 94501,
+      "expire_i": 94501
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 94500,
+      "fill_i": 94501,
+      "expire_i": 94501
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-4:near",
+      "status": "filled",
+      "submitted_i": 94506,
+      "fill_i": 94507,
+      "expire_i": 94507
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-4:far",
+      "status": "filled",
+      "submitted_i": 94506,
+      "fill_i": 94507,
+      "expire_i": 94507
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 94506,
+      "fill_i": 94507,
+      "expire_i": 94507
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-6:near",
+      "status": "filled",
+      "submitted_i": 94665,
+      "fill_i": 94666,
+      "expire_i": 94666
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-6:far",
+      "status": "filled",
+      "submitted_i": 94665,
+      "fill_i": 94666,
+      "expire_i": 94666
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 94665,
+      "fill_i": 94666,
+      "expire_i": 94666
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-8:near",
+      "status": "filled",
+      "submitted_i": 94683,
+      "fill_i": 94684,
+      "expire_i": 94684
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-8:far",
+      "status": "filled",
+      "submitted_i": 94683,
+      "fill_i": 94684,
+      "expire_i": 94684
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 94683,
+      "fill_i": 94684,
+      "expire_i": 94684
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-11:near",
+      "status": "filled",
+      "submitted_i": 94727,
+      "fill_i": 94728,
+      "expire_i": 94728
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-11:far",
+      "status": "filled",
+      "submitted_i": 94727,
+      "fill_i": 94728,
+      "expire_i": 94728
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-11:opposite1618",
+      "status": "filled",
+      "submitted_i": 94727,
+      "fill_i": 94728,
+      "expire_i": 94728
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-12:near",
+      "status": "filled",
+      "submitted_i": 94739,
+      "fill_i": 94740,
+      "expire_i": 94740
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-12:far",
+      "status": "filled",
+      "submitted_i": 94739,
+      "fill_i": 94740,
+      "expire_i": 94740
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-12:opposite1618",
+      "status": "filled",
+      "submitted_i": 94739,
+      "fill_i": 94740,
+      "expire_i": 94740
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-13:near",
+      "status": "filled",
+      "submitted_i": 94783,
+      "fill_i": 94784,
+      "expire_i": 94784
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-13:far",
+      "status": "filled",
+      "submitted_i": 94783,
+      "fill_i": 94784,
+      "expire_i": 94784
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-13:opposite1618",
+      "status": "filled",
+      "submitted_i": 94783,
+      "fill_i": 94784,
+      "expire_i": 94784
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-14:near",
+      "status": "filled",
+      "submitted_i": 94801,
+      "fill_i": 94802,
+      "expire_i": 94802
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-14:far",
+      "status": "filled",
+      "submitted_i": 94801,
+      "fill_i": 94802,
+      "expire_i": 94802
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-14:opposite1618",
+      "status": "filled",
+      "submitted_i": 94801,
+      "fill_i": 94802,
+      "expire_i": 94802
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-17:near",
+      "status": "filled",
+      "submitted_i": 94977,
+      "fill_i": 94978,
+      "expire_i": 94978
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-17:far",
+      "status": "filled",
+      "submitted_i": 94977,
+      "fill_i": 94978,
+      "expire_i": 94978
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-17:opposite1618",
+      "status": "filled",
+      "submitted_i": 94977,
+      "fill_i": 94978,
+      "expire_i": 94978
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-18:near",
+      "status": "filled",
+      "submitted_i": 94985,
+      "fill_i": 94986,
+      "expire_i": 94986
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-18:far",
+      "status": "filled",
+      "submitted_i": 94985,
+      "fill_i": 94986,
+      "expire_i": 94986
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-18:opposite1618",
+      "status": "filled",
+      "submitted_i": 94985,
+      "fill_i": 94986,
+      "expire_i": 94986
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-21:near",
+      "status": "filled",
+      "submitted_i": 95034,
+      "fill_i": 95035,
+      "expire_i": 95035
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-21:far",
+      "status": "filled",
+      "submitted_i": 95034,
+      "fill_i": 95035,
+      "expire_i": 95035
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-21:opposite1618",
+      "status": "filled",
+      "submitted_i": 95034,
+      "fill_i": 95035,
+      "expire_i": 95035
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-23:near",
+      "status": "filled",
+      "submitted_i": 95071,
+      "fill_i": 95072,
+      "expire_i": 95072
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-23:far",
+      "status": "filled",
+      "submitted_i": 95071,
+      "fill_i": 95072,
+      "expire_i": 95072
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-23:opposite1618",
+      "status": "filled",
+      "submitted_i": 95071,
+      "fill_i": 95072,
+      "expire_i": 95072
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-27:near",
+      "status": "filled",
+      "submitted_i": 95528,
+      "fill_i": 95529,
+      "expire_i": 95529
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-27:far",
+      "status": "filled",
+      "submitted_i": 95528,
+      "fill_i": 95529,
+      "expire_i": 95529
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-27:opposite1618",
+      "status": "filled",
+      "submitted_i": 95528,
+      "fill_i": 95529,
+      "expire_i": 95529
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-28:near",
+      "status": "filled",
+      "submitted_i": 95541,
+      "fill_i": 95542,
+      "expire_i": 95542
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-28:far",
+      "status": "filled",
+      "submitted_i": 95541,
+      "fill_i": 95542,
+      "expire_i": 95542
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-28:opposite1618",
+      "status": "filled",
+      "submitted_i": 95541,
+      "fill_i": 95542,
+      "expire_i": 95542
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-29:near",
+      "status": "filled",
+      "submitted_i": 95988,
+      "fill_i": 95989,
+      "expire_i": 95989
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-29:far",
+      "status": "filled",
+      "submitted_i": 95988,
+      "fill_i": 95989,
+      "expire_i": 95989
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-29:opposite1618",
+      "status": "filled",
+      "submitted_i": 95988,
+      "fill_i": 95989,
+      "expire_i": 95989
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-31:near",
+      "status": "filled",
+      "submitted_i": 96041,
+      "fill_i": 96042,
+      "expire_i": 96042
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-31:far",
+      "status": "filled",
+      "submitted_i": 96041,
+      "fill_i": 96042,
+      "expire_i": 96042
+    },
+    {
+      "trade_id": "XAU-2026-03-02-1-31:opposite1618",
+      "status": "filled",
+      "submitted_i": 96041,
+      "fill_i": 96042,
+      "expire_i": 96042
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-1:near",
+      "status": "filled",
+      "submitted_i": 97996,
+      "fill_i": 97997,
+      "expire_i": 97997
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-1:far",
+      "status": "filled",
+      "submitted_i": 97996,
+      "fill_i": 97997,
+      "expire_i": 97997
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 97996,
+      "fill_i": 97997,
+      "expire_i": 97997
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-2:near",
+      "status": "filled",
+      "submitted_i": 98017,
+      "fill_i": 98018,
+      "expire_i": 98018
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-2:far",
+      "status": "filled",
+      "submitted_i": 98017,
+      "fill_i": 98018,
+      "expire_i": 98018
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 98017,
+      "fill_i": 98018,
+      "expire_i": 98018
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-3:near",
+      "status": "filled",
+      "submitted_i": 98024,
+      "fill_i": 98025,
+      "expire_i": 98025
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-3:far",
+      "status": "filled",
+      "submitted_i": 98024,
+      "fill_i": 98025,
+      "expire_i": 98025
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 98024,
+      "fill_i": 98025,
+      "expire_i": 98025
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-5:near",
+      "status": "filled",
+      "submitted_i": 98039,
+      "fill_i": 98040,
+      "expire_i": 98040
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-5:far",
+      "status": "filled",
+      "submitted_i": 98039,
+      "fill_i": 98040,
+      "expire_i": 98040
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 98039,
+      "fill_i": 98040,
+      "expire_i": 98040
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-6:near",
+      "status": "filled",
+      "submitted_i": 98079,
+      "fill_i": 98080,
+      "expire_i": 98080
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-6:far",
+      "status": "filled",
+      "submitted_i": 98079,
+      "fill_i": 98080,
+      "expire_i": 98080
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 98079,
+      "fill_i": 98080,
+      "expire_i": 98080
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-7:near",
+      "status": "filled",
+      "submitted_i": 98101,
+      "fill_i": 98102,
+      "expire_i": 98102
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-7:far",
+      "status": "filled",
+      "submitted_i": 98101,
+      "fill_i": 98102,
+      "expire_i": 98102
+    },
+    {
+      "trade_id": "XAU-2026-03-09-1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 98101,
+      "fill_i": 98102,
+      "expire_i": 98102
+    },
+    {
+      "trade_id": "XAU-2026-03-16-1-1:near",
+      "status": "filled",
+      "submitted_i": 98809,
+      "fill_i": 98810,
+      "expire_i": 98810
+    },
+    {
+      "trade_id": "XAU-2026-03-16-1-1:far",
+      "status": "filled",
+      "submitted_i": 98809,
+      "fill_i": 98810,
+      "expire_i": 98810
+    },
+    {
+      "trade_id": "XAU-2026-03-16-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 98809,
+      "fill_i": 98810,
+      "expire_i": 98810
+    },
+    {
+      "trade_id": "XAU-2026-03-30--1-1:near",
+      "status": "filled",
+      "submitted_i": 102696,
+      "fill_i": 102697,
+      "expire_i": 102697
+    },
+    {
+      "trade_id": "XAU-2026-03-30--1-1:far",
+      "status": "filled",
+      "submitted_i": 102696,
+      "fill_i": 102697,
+      "expire_i": 102697
+    },
+    {
+      "trade_id": "XAU-2026-03-30--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 102696,
+      "fill_i": 102697,
+      "expire_i": 102697
+    },
+    {
+      "trade_id": "XAU-2026-03-30--1-4:near",
+      "status": "filled",
+      "submitted_i": 102762,
+      "fill_i": 102763,
+      "expire_i": 102763
+    },
+    {
+      "trade_id": "XAU-2026-03-30--1-4:far",
+      "status": "filled",
+      "submitted_i": 102762,
+      "fill_i": 102763,
+      "expire_i": 102763
+    },
+    {
+      "trade_id": "XAU-2026-03-30--1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 102762,
+      "fill_i": 102763,
+      "expire_i": 102763
+    },
+    {
+      "trade_id": "XAU-2026-03-30--1-5:near",
+      "status": "filled",
+      "submitted_i": 102771,
+      "fill_i": 102772,
+      "expire_i": 102772
+    },
+    {
+      "trade_id": "XAU-2026-03-30--1-5:far",
+      "status": "filled",
+      "submitted_i": 102771,
+      "fill_i": 102772,
+      "expire_i": 102772
+    },
+    {
+      "trade_id": "XAU-2026-03-30--1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 102771,
+      "fill_i": 102772,
+      "expire_i": 102772
+    },
+    {
+      "trade_id": "XAU-2026-03-30--1-7:near",
+      "status": "filled",
+      "submitted_i": 103024,
+      "fill_i": 103025,
+      "expire_i": 103025
+    },
+    {
+      "trade_id": "XAU-2026-03-30--1-7:far",
+      "status": "filled",
+      "submitted_i": 103024,
+      "fill_i": 103025,
+      "expire_i": 103025
+    },
+    {
+      "trade_id": "XAU-2026-03-30--1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 103024,
+      "fill_i": 103025,
+      "expire_i": 103025
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-1:near",
+      "status": "filled",
+      "submitted_i": 104693,
+      "fill_i": 104694,
+      "expire_i": 104694
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-1:far",
+      "status": "filled",
+      "submitted_i": 104693,
+      "fill_i": 104694,
+      "expire_i": 104694
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 104693,
+      "fill_i": 104694,
+      "expire_i": 104694
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-3:near",
+      "status": "filled",
+      "submitted_i": 104894,
+      "fill_i": 104895,
+      "expire_i": 104895
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-3:far",
+      "status": "filled",
+      "submitted_i": 104894,
+      "fill_i": 104895,
+      "expire_i": 104895
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 104894,
+      "fill_i": 104895,
+      "expire_i": 104895
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-6:near",
+      "status": "filled",
+      "submitted_i": 105140,
+      "fill_i": 105141,
+      "expire_i": 105141
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-6:far",
+      "status": "filled",
+      "submitted_i": 105140,
+      "fill_i": 105141,
+      "expire_i": 105141
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 105140,
+      "fill_i": 105141,
+      "expire_i": 105141
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-7:near",
+      "status": "filled",
+      "submitted_i": 105157,
+      "fill_i": 105158,
+      "expire_i": 105158
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-7:far",
+      "status": "filled",
+      "submitted_i": 105157,
+      "fill_i": 105158,
+      "expire_i": 105158
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 105157,
+      "fill_i": 105158,
+      "expire_i": 105158
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-10:near",
+      "status": "filled",
+      "submitted_i": 105323,
+      "fill_i": 105324,
+      "expire_i": 105324
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-10:far",
+      "status": "filled",
+      "submitted_i": 105323,
+      "fill_i": 105324,
+      "expire_i": 105324
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-10:opposite1618",
+      "status": "filled",
+      "submitted_i": 105323,
+      "fill_i": 105324,
+      "expire_i": 105324
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-13:near",
+      "status": "filled",
+      "submitted_i": 105389,
+      "fill_i": 105390,
+      "expire_i": 105390
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-13:far",
+      "status": "filled",
+      "submitted_i": 105389,
+      "fill_i": 105390,
+      "expire_i": 105390
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-13:opposite1618",
+      "status": "filled",
+      "submitted_i": 105389,
+      "fill_i": 105390,
+      "expire_i": 105390
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-14:near",
+      "status": "filled",
+      "submitted_i": 105398,
+      "fill_i": 105399,
+      "expire_i": 105399
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-14:far",
+      "status": "filled",
+      "submitted_i": 105398,
+      "fill_i": 105399,
+      "expire_i": 105399
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-14:opposite1618",
+      "status": "filled",
+      "submitted_i": 105398,
+      "fill_i": 105399,
+      "expire_i": 105399
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-15:near",
+      "status": "filled",
+      "submitted_i": 105405,
+      "fill_i": 105406,
+      "expire_i": 105406
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-15:far",
+      "status": "filled",
+      "submitted_i": 105405,
+      "fill_i": 105406,
+      "expire_i": 105406
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-15:opposite1618",
+      "status": "filled",
+      "submitted_i": 105405,
+      "fill_i": 105406,
+      "expire_i": 105406
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-20:near",
+      "status": "filled",
+      "submitted_i": 105542,
+      "fill_i": 105543,
+      "expire_i": 105543
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-20:far",
+      "status": "filled",
+      "submitted_i": 105542,
+      "fill_i": 105543,
+      "expire_i": 105543
+    },
+    {
+      "trade_id": "XAU-2026-04-06--1-20:opposite1618",
+      "status": "filled",
+      "submitted_i": 105542,
+      "fill_i": 105543,
+      "expire_i": 105543
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-1:near",
+      "status": "filled",
+      "submitted_i": 106644,
+      "fill_i": 106645,
+      "expire_i": 106645
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-1:far",
+      "status": "filled",
+      "submitted_i": 106644,
+      "fill_i": 106645,
+      "expire_i": 106645
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 106644,
+      "fill_i": 106645,
+      "expire_i": 106645
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-5:near",
+      "status": "filled",
+      "submitted_i": 106890,
+      "fill_i": 106891,
+      "expire_i": 106891
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-5:far",
+      "status": "filled",
+      "submitted_i": 106890,
+      "fill_i": 106891,
+      "expire_i": 106891
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 106890,
+      "fill_i": 106891,
+      "expire_i": 106891
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-6:near",
+      "status": "filled",
+      "submitted_i": 107015,
+      "fill_i": 107016,
+      "expire_i": 107016
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-6:far",
+      "status": "filled",
+      "submitted_i": 107015,
+      "fill_i": 107016,
+      "expire_i": 107016
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 107015,
+      "fill_i": 107016,
+      "expire_i": 107016
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-8:near",
+      "status": "filled",
+      "submitted_i": 107052,
+      "fill_i": 107053,
+      "expire_i": 107053
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-8:far",
+      "status": "filled",
+      "submitted_i": 107052,
+      "fill_i": 107053,
+      "expire_i": 107053
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 107052,
+      "fill_i": 107053,
+      "expire_i": 107053
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-9:near",
+      "status": "filled",
+      "submitted_i": 107066,
+      "fill_i": 107067,
+      "expire_i": 107067
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-9:far",
+      "status": "filled",
+      "submitted_i": 107066,
+      "fill_i": 107067,
+      "expire_i": 107067
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-9:opposite1618",
+      "status": "filled",
+      "submitted_i": 107066,
+      "fill_i": 107067,
+      "expire_i": 107067
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-11:near",
+      "status": "filled",
+      "submitted_i": 107096,
+      "fill_i": 107097,
+      "expire_i": 107097
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-11:far",
+      "status": "filled",
+      "submitted_i": 107096,
+      "fill_i": 107097,
+      "expire_i": 107097
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-11:opposite1618",
+      "status": "filled",
+      "submitted_i": 107096,
+      "fill_i": 107097,
+      "expire_i": 107097
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-12:near",
+      "status": "filled",
+      "submitted_i": 107178,
+      "fill_i": 107179,
+      "expire_i": 107179
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-12:far",
+      "status": "filled",
+      "submitted_i": 107178,
+      "fill_i": 107179,
+      "expire_i": 107179
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-12:opposite1618",
+      "status": "filled",
+      "submitted_i": 107178,
+      "fill_i": 107179,
+      "expire_i": 107179
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-13:near",
+      "status": "filled",
+      "submitted_i": 107456,
+      "fill_i": 107457,
+      "expire_i": 107457
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-13:far",
+      "status": "filled",
+      "submitted_i": 107456,
+      "fill_i": 107457,
+      "expire_i": 107457
+    },
+    {
+      "trade_id": "XAU-2026-04-13--1-13:opposite1618",
+      "status": "filled",
+      "submitted_i": 107456,
+      "fill_i": 107457,
+      "expire_i": 107457
+    },
+    {
+      "trade_id": "XAU-2026-04-20-1-1:near",
+      "status": "filled",
+      "submitted_i": 108632,
+      "fill_i": 108633,
+      "expire_i": 108633
+    },
+    {
+      "trade_id": "XAU-2026-04-20-1-1:far",
+      "status": "filled",
+      "submitted_i": 108632,
+      "fill_i": 108633,
+      "expire_i": 108633
+    },
+    {
+      "trade_id": "XAU-2026-04-20-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 108632,
+      "fill_i": 108633,
+      "expire_i": 108633
+    },
+    {
+      "trade_id": "XAU-2026-04-20-1-4:near",
+      "status": "filled",
+      "submitted_i": 108896,
+      "fill_i": 108897,
+      "expire_i": 108897
+    },
+    {
+      "trade_id": "XAU-2026-04-20-1-4:far",
+      "status": "filled",
+      "submitted_i": 108896,
+      "fill_i": 108897,
+      "expire_i": 108897
+    },
+    {
+      "trade_id": "XAU-2026-04-20-1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 108896,
+      "fill_i": 108897,
+      "expire_i": 108897
+    },
+    {
+      "trade_id": "XAU-2026-04-20-1-5:near",
+      "status": "filled",
+      "submitted_i": 108911,
+      "fill_i": 108912,
+      "expire_i": 108912
+    },
+    {
+      "trade_id": "XAU-2026-04-20-1-5:far",
+      "status": "filled",
+      "submitted_i": 108911,
+      "fill_i": 108912,
+      "expire_i": 108912
+    },
+    {
+      "trade_id": "XAU-2026-04-20-1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 108911,
+      "fill_i": 108912,
+      "expire_i": 108912
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-1:near",
+      "status": "filled",
+      "submitted_i": 110539,
+      "fill_i": 110540,
+      "expire_i": 110540
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-1:far",
+      "status": "filled",
+      "submitted_i": 110539,
+      "fill_i": 110540,
+      "expire_i": 110540
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 110539,
+      "fill_i": 110540,
+      "expire_i": 110540
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-6:near",
+      "status": "filled",
+      "submitted_i": 111184,
+      "fill_i": 111185,
+      "expire_i": 111185
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-6:far",
+      "status": "filled",
+      "submitted_i": 111184,
+      "fill_i": 111185,
+      "expire_i": 111185
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 111184,
+      "fill_i": 111185,
+      "expire_i": 111185
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-7:near",
+      "status": "filled",
+      "submitted_i": 111209,
+      "fill_i": 111210,
+      "expire_i": 111210
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-7:far",
+      "status": "filled",
+      "submitted_i": 111209,
+      "fill_i": 111210,
+      "expire_i": 111210
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 111209,
+      "fill_i": 111210,
+      "expire_i": 111210
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-9:near",
+      "status": "filled",
+      "submitted_i": 111334,
+      "fill_i": 111335,
+      "expire_i": 111335
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-9:far",
+      "status": "filled",
+      "submitted_i": 111334,
+      "fill_i": 111335,
+      "expire_i": 111335
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-9:opposite1618",
+      "status": "filled",
+      "submitted_i": 111334,
+      "fill_i": 111335,
+      "expire_i": 111335
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-13:near",
+      "status": "filled",
+      "submitted_i": 111515,
+      "fill_i": 111516,
+      "expire_i": 111516
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-13:far",
+      "status": "filled",
+      "submitted_i": 111515,
+      "fill_i": 111516,
+      "expire_i": 111516
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-13:opposite1618",
+      "status": "filled",
+      "submitted_i": 111515,
+      "fill_i": 111516,
+      "expire_i": 111516
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-14:near",
+      "status": "filled",
+      "submitted_i": 111545,
+      "fill_i": 111546,
+      "expire_i": 111546
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-14:far",
+      "status": "filled",
+      "submitted_i": 111545,
+      "fill_i": 111546,
+      "expire_i": 111546
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-14:opposite1618",
+      "status": "filled",
+      "submitted_i": 111545,
+      "fill_i": 111546,
+      "expire_i": 111546
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-17:near",
+      "status": "filled",
+      "submitted_i": 112105,
+      "fill_i": 112106,
+      "expire_i": 112106
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-17:far",
+      "status": "filled",
+      "submitted_i": 112105,
+      "fill_i": 112106,
+      "expire_i": 112106
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-17:opposite1618",
+      "status": "filled",
+      "submitted_i": 112105,
+      "fill_i": 112106,
+      "expire_i": 112106
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-20:near",
+      "status": "filled",
+      "submitted_i": 112175,
+      "fill_i": 112176,
+      "expire_i": 112176
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-20:far",
+      "status": "filled",
+      "submitted_i": 112175,
+      "fill_i": 112176,
+      "expire_i": 112176
+    },
+    {
+      "trade_id": "XAU-2026-04-27-1-20:opposite1618",
+      "status": "filled",
+      "submitted_i": 112175,
+      "fill_i": 112176,
+      "expire_i": 112176
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-1:near",
+      "status": "filled",
+      "submitted_i": 112881,
+      "fill_i": 112882,
+      "expire_i": 112882
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-1:far",
+      "status": "filled",
+      "submitted_i": 112881,
+      "fill_i": 112882,
+      "expire_i": 112882
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 112881,
+      "fill_i": 112882,
+      "expire_i": 112882
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-3:near",
+      "status": "filled",
+      "submitted_i": 112931,
+      "fill_i": 112932,
+      "expire_i": 112932
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-3:far",
+      "status": "filled",
+      "submitted_i": 112931,
+      "fill_i": 112932,
+      "expire_i": 112932
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 112931,
+      "fill_i": 112932,
+      "expire_i": 112932
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-4:near",
+      "status": "filled",
+      "submitted_i": 112937,
+      "fill_i": 112938,
+      "expire_i": 112938
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-4:far",
+      "status": "filled",
+      "submitted_i": 112937,
+      "fill_i": 112938,
+      "expire_i": 112938
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 112937,
+      "fill_i": 112938,
+      "expire_i": 112938
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-6:near",
+      "status": "filled",
+      "submitted_i": 112975,
+      "fill_i": 112976,
+      "expire_i": 112976
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-6:far",
+      "status": "filled",
+      "submitted_i": 112975,
+      "fill_i": 112976,
+      "expire_i": 112976
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 112975,
+      "fill_i": 112976,
+      "expire_i": 112976
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-7:near",
+      "status": "filled",
+      "submitted_i": 112995,
+      "fill_i": 112996,
+      "expire_i": 112996
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-7:far",
+      "status": "filled",
+      "submitted_i": 112995,
+      "fill_i": 112996,
+      "expire_i": 112996
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 112995,
+      "fill_i": 112996,
+      "expire_i": 112996
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-8:near",
+      "status": "filled",
+      "submitted_i": 113003,
+      "fill_i": 113004,
+      "expire_i": 113004
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-8:far",
+      "status": "filled",
+      "submitted_i": 113003,
+      "fill_i": 113004,
+      "expire_i": 113004
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 113003,
+      "fill_i": 113004,
+      "expire_i": 113004
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-13:near",
+      "status": "filled",
+      "submitted_i": 113075,
+      "fill_i": 113076,
+      "expire_i": 113076
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-13:far",
+      "status": "filled",
+      "submitted_i": 113075,
+      "fill_i": 113076,
+      "expire_i": 113076
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-13:opposite1618",
+      "status": "filled",
+      "submitted_i": 113075,
+      "fill_i": 113076,
+      "expire_i": 113076
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-17:near",
+      "status": "filled",
+      "submitted_i": 113327,
+      "fill_i": 113328,
+      "expire_i": 113328
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-17:far",
+      "status": "filled",
+      "submitted_i": 113327,
+      "fill_i": 113328,
+      "expire_i": 113328
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-17:opposite1618",
+      "status": "filled",
+      "submitted_i": 113327,
+      "fill_i": 113328,
+      "expire_i": 113328
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-19:near",
+      "status": "filled",
+      "submitted_i": 113340,
+      "fill_i": 113341,
+      "expire_i": 113341
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-19:far",
+      "status": "filled",
+      "submitted_i": 113340,
+      "fill_i": 113341,
+      "expire_i": 113341
+    },
+    {
+      "trade_id": "XAU-2026-05-04--1-19:opposite1618",
+      "status": "filled",
+      "submitted_i": 113340,
+      "fill_i": 113341,
+      "expire_i": 113341
+    },
+    {
+      "trade_id": "XAU-2026-05-11-1-1:near",
+      "status": "filled",
+      "submitted_i": 115433,
+      "fill_i": 115434,
+      "expire_i": 115434
+    },
+    {
+      "trade_id": "XAU-2026-05-11-1-1:far",
+      "status": "filled",
+      "submitted_i": 115433,
+      "fill_i": 115434,
+      "expire_i": 115434
+    },
+    {
+      "trade_id": "XAU-2026-05-11-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 115433,
+      "fill_i": 115434,
+      "expire_i": 115434
+    },
+    {
+      "trade_id": "XAU-2026-05-11-1-2:near",
+      "status": "filled",
+      "submitted_i": 115448,
+      "fill_i": 115449,
+      "expire_i": 115449
+    },
+    {
+      "trade_id": "XAU-2026-05-11-1-2:far",
+      "status": "filled",
+      "submitted_i": 115448,
+      "fill_i": 115449,
+      "expire_i": 115449
+    },
+    {
+      "trade_id": "XAU-2026-05-11-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 115448,
+      "fill_i": 115449,
+      "expire_i": 115449
+    },
+    {
+      "trade_id": "XAU-2026-05-11-1-3:near",
+      "status": "filled",
+      "submitted_i": 115463,
+      "fill_i": 115464,
+      "expire_i": 115464
+    },
+    {
+      "trade_id": "XAU-2026-05-11-1-3:far",
+      "status": "filled",
+      "submitted_i": 115463,
+      "fill_i": 115464,
+      "expire_i": 115464
+    },
+    {
+      "trade_id": "XAU-2026-05-11-1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 115463,
+      "fill_i": 115464,
+      "expire_i": 115464
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-1:near",
+      "status": "filled",
+      "submitted_i": 116680,
+      "fill_i": 116681,
+      "expire_i": 116681
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-1:far",
+      "status": "filled",
+      "submitted_i": 116680,
+      "fill_i": 116681,
+      "expire_i": 116681
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 116680,
+      "fill_i": 116681,
+      "expire_i": 116681
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-2:near",
+      "status": "filled",
+      "submitted_i": 116745,
+      "fill_i": 116746,
+      "expire_i": 116746
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-2:far",
+      "status": "filled",
+      "submitted_i": 116745,
+      "fill_i": 116746,
+      "expire_i": 116746
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 116745,
+      "fill_i": 116746,
+      "expire_i": 116746
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-5:near",
+      "status": "filled",
+      "submitted_i": 116819,
+      "fill_i": 116820,
+      "expire_i": 116820
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-5:far",
+      "status": "filled",
+      "submitted_i": 116819,
+      "fill_i": 116820,
+      "expire_i": 116820
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 116819,
+      "fill_i": 116820,
+      "expire_i": 116820
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-7:near",
+      "status": "filled",
+      "submitted_i": 116954,
+      "fill_i": 116955,
+      "expire_i": 116955
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-7:far",
+      "status": "filled",
+      "submitted_i": 116954,
+      "fill_i": 116955,
+      "expire_i": 116955
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 116954,
+      "fill_i": 116955,
+      "expire_i": 116955
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-8:near",
+      "status": "filled",
+      "submitted_i": 116963,
+      "fill_i": 116964,
+      "expire_i": 116964
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-8:far",
+      "status": "filled",
+      "submitted_i": 116963,
+      "fill_i": 116964,
+      "expire_i": 116964
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 116963,
+      "fill_i": 116964,
+      "expire_i": 116964
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-10:near",
+      "status": "filled",
+      "submitted_i": 117257,
+      "fill_i": 117258,
+      "expire_i": 117258
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-10:far",
+      "status": "filled",
+      "submitted_i": 117257,
+      "fill_i": 117258,
+      "expire_i": 117258
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-10:opposite1618",
+      "status": "filled",
+      "submitted_i": 117257,
+      "fill_i": 117258,
+      "expire_i": 117258
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-11:near",
+      "status": "filled",
+      "submitted_i": 117553,
+      "fill_i": 117554,
+      "expire_i": 117554
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-11:far",
+      "status": "filled",
+      "submitted_i": 117553,
+      "fill_i": 117554,
+      "expire_i": 117554
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-11:opposite1618",
+      "status": "filled",
+      "submitted_i": 117553,
+      "fill_i": 117554,
+      "expire_i": 117554
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-12:near",
+      "status": "filled",
+      "submitted_i": 117671,
+      "fill_i": 117672,
+      "expire_i": 117672
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-12:far",
+      "status": "filled",
+      "submitted_i": 117671,
+      "fill_i": 117672,
+      "expire_i": 117672
+    },
+    {
+      "trade_id": "XAU-2026-05-18-1-12:opposite1618",
+      "status": "filled",
+      "submitted_i": 117671,
+      "fill_i": 117672,
+      "expire_i": 117672
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-1:near",
+      "status": "filled",
+      "submitted_i": 118750,
+      "fill_i": 118751,
+      "expire_i": 118751
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-1:far",
+      "status": "filled",
+      "submitted_i": 118750,
+      "fill_i": 118751,
+      "expire_i": 118751
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 118750,
+      "fill_i": 118751,
+      "expire_i": 118751
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-2:near",
+      "status": "filled",
+      "submitted_i": 118899,
+      "fill_i": 118900,
+      "expire_i": 118900
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-2:far",
+      "status": "filled",
+      "submitted_i": 118899,
+      "fill_i": 118900,
+      "expire_i": 118900
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 118899,
+      "fill_i": 118900,
+      "expire_i": 118900
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-5:near",
+      "status": "filled",
+      "submitted_i": 118932,
+      "fill_i": 118933,
+      "expire_i": 118933
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-5:far",
+      "status": "filled",
+      "submitted_i": 118932,
+      "fill_i": 118933,
+      "expire_i": 118933
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 118932,
+      "fill_i": 118933,
+      "expire_i": 118933
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-6:near",
+      "status": "filled",
+      "submitted_i": 118943,
+      "fill_i": 118944,
+      "expire_i": 118944
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-6:far",
+      "status": "filled",
+      "submitted_i": 118943,
+      "fill_i": 118944,
+      "expire_i": 118944
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 118943,
+      "fill_i": 118944,
+      "expire_i": 118944
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-8:near",
+      "status": "filled",
+      "submitted_i": 119351,
+      "fill_i": 119352,
+      "expire_i": 119352
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-8:far",
+      "status": "filled",
+      "submitted_i": 119351,
+      "fill_i": 119352,
+      "expire_i": 119352
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 119351,
+      "fill_i": 119352,
+      "expire_i": 119352
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-9:near",
+      "status": "filled",
+      "submitted_i": 119360,
+      "fill_i": 119361,
+      "expire_i": 119361
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-9:far",
+      "status": "filled",
+      "submitted_i": 119360,
+      "fill_i": 119361,
+      "expire_i": 119361
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-9:opposite1618",
+      "status": "filled",
+      "submitted_i": 119360,
+      "fill_i": 119361,
+      "expire_i": 119361
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-10:near",
+      "status": "filled",
+      "submitted_i": 119371,
+      "fill_i": 119372,
+      "expire_i": 119372
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-10:far",
+      "status": "filled",
+      "submitted_i": 119371,
+      "fill_i": 119372,
+      "expire_i": 119372
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-10:opposite1618",
+      "status": "filled",
+      "submitted_i": 119371,
+      "fill_i": 119372,
+      "expire_i": 119372
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-12:near",
+      "status": "filled",
+      "submitted_i": 119409,
+      "fill_i": 119410,
+      "expire_i": 119410
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-12:far",
+      "status": "filled",
+      "submitted_i": 119409,
+      "fill_i": 119410,
+      "expire_i": 119410
+    },
+    {
+      "trade_id": "XAU-2026-05-25-1-12:opposite1618",
+      "status": "filled",
+      "submitted_i": 119409,
+      "fill_i": 119410,
+      "expire_i": 119410
+    },
+    {
+      "trade_id": "XAU-2026-06-01-1-1:near",
+      "status": "filled",
+      "submitted_i": 121570,
+      "fill_i": 121571,
+      "expire_i": 121571
+    },
+    {
+      "trade_id": "XAU-2026-06-01-1-1:far",
+      "status": "filled",
+      "submitted_i": 121570,
+      "fill_i": 121571,
+      "expire_i": 121571
+    },
+    {
+      "trade_id": "XAU-2026-06-01-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 121570,
+      "fill_i": 121571,
+      "expire_i": 121571
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-1:near",
+      "status": "filled",
+      "submitted_i": 122851,
+      "fill_i": 122852,
+      "expire_i": 122852
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-1:far",
+      "status": "filled",
+      "submitted_i": 122851,
+      "fill_i": 122852,
+      "expire_i": 122852
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 122851,
+      "fill_i": 122852,
+      "expire_i": 122852
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-5:near",
+      "status": "filled",
+      "submitted_i": 123423,
+      "fill_i": 123424,
+      "expire_i": 123424
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-5:far",
+      "status": "filled",
+      "submitted_i": 123423,
+      "fill_i": 123424,
+      "expire_i": 123424
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 123423,
+      "fill_i": 123424,
+      "expire_i": 123424
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-10:near",
+      "status": "filled",
+      "submitted_i": 123657,
+      "fill_i": 123658,
+      "expire_i": 123658
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-10:far",
+      "status": "filled",
+      "submitted_i": 123657,
+      "fill_i": 123658,
+      "expire_i": 123658
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-10:opposite1618",
+      "status": "filled",
+      "submitted_i": 123657,
+      "fill_i": 123658,
+      "expire_i": 123658
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-13:near",
+      "status": "filled",
+      "submitted_i": 123812,
+      "fill_i": 123813,
+      "expire_i": 123813
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-13:far",
+      "status": "filled",
+      "submitted_i": 123812,
+      "fill_i": 123813,
+      "expire_i": 123813
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-13:opposite1618",
+      "status": "filled",
+      "submitted_i": 123812,
+      "fill_i": 123813,
+      "expire_i": 123813
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-14:near",
+      "status": "filled",
+      "submitted_i": 123822,
+      "fill_i": 123823,
+      "expire_i": 123823
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-14:far",
+      "status": "filled",
+      "submitted_i": 123822,
+      "fill_i": 123823,
+      "expire_i": 123823
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-14:opposite1618",
+      "status": "filled",
+      "submitted_i": 123822,
+      "fill_i": 123823,
+      "expire_i": 123823
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-17:near",
+      "status": "filled",
+      "submitted_i": 123873,
+      "fill_i": 123874,
+      "expire_i": 123874
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-17:far",
+      "status": "filled",
+      "submitted_i": 123873,
+      "fill_i": 123874,
+      "expire_i": 123874
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-17:opposite1618",
+      "status": "filled",
+      "submitted_i": 123873,
+      "fill_i": 123874,
+      "expire_i": 123874
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-19:near",
+      "status": "filled",
+      "submitted_i": 123917,
+      "fill_i": 123918,
+      "expire_i": 123918
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-19:far",
+      "status": "filled",
+      "submitted_i": 123917,
+      "fill_i": 123918,
+      "expire_i": 123918
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-19:opposite1618",
+      "status": "filled",
+      "submitted_i": 123917,
+      "fill_i": 123918,
+      "expire_i": 123918
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-20:near",
+      "status": "filled",
+      "submitted_i": 123936,
+      "fill_i": 123937,
+      "expire_i": 123937
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-20:far",
+      "status": "filled",
+      "submitted_i": 123936,
+      "fill_i": 123937,
+      "expire_i": 123937
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-20:opposite1618",
+      "status": "filled",
+      "submitted_i": 123936,
+      "fill_i": 123937,
+      "expire_i": 123937
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-21:near",
+      "status": "filled",
+      "submitted_i": 123945,
+      "fill_i": 123946,
+      "expire_i": 123946
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-21:far",
+      "status": "filled",
+      "submitted_i": 123945,
+      "fill_i": 123946,
+      "expire_i": 123946
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-21:opposite1618",
+      "status": "filled",
+      "submitted_i": 123945,
+      "fill_i": 123946,
+      "expire_i": 123946
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-23:near",
+      "status": "filled",
+      "submitted_i": 124162,
+      "fill_i": 124163,
+      "expire_i": 124163
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-23:far",
+      "status": "filled",
+      "submitted_i": 124162,
+      "fill_i": 124163,
+      "expire_i": 124163
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-23:opposite1618",
+      "status": "filled",
+      "submitted_i": 124162,
+      "fill_i": 124163,
+      "expire_i": 124163
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-24:near",
+      "status": "filled",
+      "submitted_i": 124168,
+      "fill_i": 124169,
+      "expire_i": 124169
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-24:far",
+      "status": "filled",
+      "submitted_i": 124168,
+      "fill_i": 124169,
+      "expire_i": 124169
+    },
+    {
+      "trade_id": "XAU-2026-06-08-1-24:opposite1618",
+      "status": "filled",
+      "submitted_i": 124168,
+      "fill_i": 124169,
+      "expire_i": 124169
+    },
+    {
+      "trade_id": "XAU-2026-06-15-1-1:near",
+      "status": "filled",
+      "submitted_i": 125102,
+      "fill_i": 125103,
+      "expire_i": 125103
+    },
+    {
+      "trade_id": "XAU-2026-06-15-1-1:far",
+      "status": "filled",
+      "submitted_i": 125102,
+      "fill_i": 125103,
+      "expire_i": 125103
+    },
+    {
+      "trade_id": "XAU-2026-06-15-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 125102,
+      "fill_i": 125103,
+      "expire_i": 125103
+    },
+    {
+      "trade_id": "XAU-2026-06-15-1-3:near",
+      "status": "filled",
+      "submitted_i": 125122,
+      "fill_i": 125123,
+      "expire_i": 125123
+    },
+    {
+      "trade_id": "XAU-2026-06-15-1-3:far",
+      "status": "filled",
+      "submitted_i": 125122,
+      "fill_i": 125123,
+      "expire_i": 125123
+    },
+    {
+      "trade_id": "XAU-2026-06-15-1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 125122,
+      "fill_i": 125123,
+      "expire_i": 125123
+    },
+    {
+      "trade_id": "XAU-2026-06-15-1-5:near",
+      "status": "filled",
+      "submitted_i": 125290,
+      "fill_i": 125291,
+      "expire_i": 125291
+    },
+    {
+      "trade_id": "XAU-2026-06-15-1-5:far",
+      "status": "filled",
+      "submitted_i": 125290,
+      "fill_i": 125291,
+      "expire_i": 125291
+    },
+    {
+      "trade_id": "XAU-2026-06-15-1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 125290,
+      "fill_i": 125291,
+      "expire_i": 125291
+    },
+    {
+      "trade_id": "XAU-2026-06-15-1-8:near",
+      "status": "filled",
+      "submitted_i": 125324,
+      "fill_i": 125325,
+      "expire_i": 125325
+    },
+    {
+      "trade_id": "XAU-2026-06-15-1-8:far",
+      "status": "filled",
+      "submitted_i": 125324,
+      "fill_i": 125325,
+      "expire_i": 125325
+    },
+    {
+      "trade_id": "XAU-2026-06-15-1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 125324,
+      "fill_i": 125325,
+      "expire_i": 125325
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-1:near",
+      "status": "filled",
+      "submitted_i": 126899,
+      "fill_i": 126900,
+      "expire_i": 126900
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-1:far",
+      "status": "filled",
+      "submitted_i": 126899,
+      "fill_i": 126900,
+      "expire_i": 126900
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 126899,
+      "fill_i": 126900,
+      "expire_i": 126900
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-2:near",
+      "status": "filled",
+      "submitted_i": 126914,
+      "fill_i": 126915,
+      "expire_i": 126915
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-2:far",
+      "status": "filled",
+      "submitted_i": 126914,
+      "fill_i": 126915,
+      "expire_i": 126915
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 126914,
+      "fill_i": 126915,
+      "expire_i": 126915
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-4:near",
+      "status": "filled",
+      "submitted_i": 126978,
+      "fill_i": 126979,
+      "expire_i": 126979
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-4:far",
+      "status": "filled",
+      "submitted_i": 126978,
+      "fill_i": 126979,
+      "expire_i": 126979
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 126978,
+      "fill_i": 126979,
+      "expire_i": 126979
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-6:near",
+      "status": "filled",
+      "submitted_i": 126992,
+      "fill_i": 126993,
+      "expire_i": 126993
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-6:far",
+      "status": "filled",
+      "submitted_i": 126992,
+      "fill_i": 126993,
+      "expire_i": 126993
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 126992,
+      "fill_i": 126993,
+      "expire_i": 126993
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-9:near",
+      "status": "filled",
+      "submitted_i": 127638,
+      "fill_i": 127639,
+      "expire_i": 127639
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-9:far",
+      "status": "filled",
+      "submitted_i": 127638,
+      "fill_i": 127639,
+      "expire_i": 127639
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-9:opposite1618",
+      "status": "filled",
+      "submitted_i": 127638,
+      "fill_i": 127639,
+      "expire_i": 127639
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-10:near",
+      "status": "filled",
+      "submitted_i": 127643,
+      "fill_i": 127644,
+      "expire_i": 127644
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-10:far",
+      "status": "filled",
+      "submitted_i": 127643,
+      "fill_i": 127644,
+      "expire_i": 127644
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-10:opposite1618",
+      "status": "filled",
+      "submitted_i": 127643,
+      "fill_i": 127644,
+      "expire_i": 127644
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-11:near",
+      "status": "filled",
+      "submitted_i": 127673,
+      "fill_i": 127674,
+      "expire_i": 127674
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-11:far",
+      "status": "filled",
+      "submitted_i": 127673,
+      "fill_i": 127674,
+      "expire_i": 127674
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-11:opposite1618",
+      "status": "filled",
+      "submitted_i": 127673,
+      "fill_i": 127674,
+      "expire_i": 127674
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-13:near",
+      "status": "filled",
+      "submitted_i": 127984,
+      "fill_i": 127985,
+      "expire_i": 127985
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-13:far",
+      "status": "filled",
+      "submitted_i": 127984,
+      "fill_i": 127985,
+      "expire_i": 127985
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-13:opposite1618",
+      "status": "filled",
+      "submitted_i": 127984,
+      "fill_i": 127985,
+      "expire_i": 127985
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-15:near",
+      "status": "filled",
+      "submitted_i": 128018,
+      "fill_i": 128019,
+      "expire_i": 128019
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-15:far",
+      "status": "filled",
+      "submitted_i": 128018,
+      "fill_i": 128019,
+      "expire_i": 128019
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-15:opposite1618",
+      "status": "filled",
+      "submitted_i": 128018,
+      "fill_i": 128019,
+      "expire_i": 128019
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-16:near",
+      "status": "filled",
+      "submitted_i": 128030,
+      "fill_i": 128031,
+      "expire_i": 128031
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-16:far",
+      "status": "filled",
+      "submitted_i": 128030,
+      "fill_i": 128031,
+      "expire_i": 128031
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-16:opposite1618",
+      "status": "filled",
+      "submitted_i": 128030,
+      "fill_i": 128031,
+      "expire_i": 128031
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-17:near",
+      "status": "filled",
+      "submitted_i": 128182,
+      "fill_i": 128183,
+      "expire_i": 128183
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-17:far",
+      "status": "filled",
+      "submitted_i": 128182,
+      "fill_i": 128183,
+      "expire_i": 128183
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-17:opposite1618",
+      "status": "filled",
+      "submitted_i": 128182,
+      "fill_i": 128183,
+      "expire_i": 128183
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-18:near",
+      "status": "filled",
+      "submitted_i": 128215,
+      "fill_i": 128216,
+      "expire_i": 128216
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-18:far",
+      "status": "filled",
+      "submitted_i": 128215,
+      "fill_i": 128216,
+      "expire_i": 128216
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-18:opposite1618",
+      "status": "filled",
+      "submitted_i": 128215,
+      "fill_i": 128216,
+      "expire_i": 128216
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-19:near",
+      "status": "filled",
+      "submitted_i": 128240,
+      "fill_i": 128241,
+      "expire_i": 128241
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-19:far",
+      "status": "filled",
+      "submitted_i": 128240,
+      "fill_i": 128241,
+      "expire_i": 128241
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-19:opposite1618",
+      "status": "filled",
+      "submitted_i": 128240,
+      "fill_i": 128241,
+      "expire_i": 128241
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-20:near",
+      "status": "filled",
+      "submitted_i": 128303,
+      "fill_i": 128304,
+      "expire_i": 128304
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-20:far",
+      "status": "filled",
+      "submitted_i": 128303,
+      "fill_i": 128304,
+      "expire_i": 128304
+    },
+    {
+      "trade_id": "XAU-2026-06-22-1-20:opposite1618",
+      "status": "filled",
+      "submitted_i": 128303,
+      "fill_i": 128304,
+      "expire_i": 128304
+    },
+    {
+      "trade_id": "XAU-2026-06-29--1-1:near",
+      "status": "filled",
+      "submitted_i": 129489,
+      "fill_i": 129490,
+      "expire_i": 129490
+    },
+    {
+      "trade_id": "XAU-2026-06-29--1-1:far",
+      "status": "filled",
+      "submitted_i": 129489,
+      "fill_i": 129490,
+      "expire_i": 129490
+    },
+    {
+      "trade_id": "XAU-2026-06-29--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 129489,
+      "fill_i": 129490,
+      "expire_i": 129490
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-1:near",
+      "status": "filled",
+      "submitted_i": 130862,
+      "fill_i": 130863,
+      "expire_i": 130863
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-1:far",
+      "status": "filled",
+      "submitted_i": 130862,
+      "fill_i": 130863,
+      "expire_i": 130863
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 130862,
+      "fill_i": 130863,
+      "expire_i": 130863
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-2:near",
+      "status": "filled",
+      "submitted_i": 130895,
+      "fill_i": 130896,
+      "expire_i": 130896
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-2:far",
+      "status": "filled",
+      "submitted_i": 130895,
+      "fill_i": 130896,
+      "expire_i": 130896
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 130895,
+      "fill_i": 130896,
+      "expire_i": 130896
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-3:near",
+      "status": "filled",
+      "submitted_i": 131018,
+      "fill_i": 131019,
+      "expire_i": 131019
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-3:far",
+      "status": "filled",
+      "submitted_i": 131018,
+      "fill_i": 131019,
+      "expire_i": 131019
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 131018,
+      "fill_i": 131019,
+      "expire_i": 131019
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-5:near",
+      "status": "filled",
+      "submitted_i": 131337,
+      "fill_i": 131338,
+      "expire_i": 131338
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-5:far",
+      "status": "filled",
+      "submitted_i": 131337,
+      "fill_i": 131338,
+      "expire_i": 131338
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 131337,
+      "fill_i": 131338,
+      "expire_i": 131338
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-6:near",
+      "status": "filled",
+      "submitted_i": 131600,
+      "fill_i": 131601,
+      "expire_i": 131601
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-6:far",
+      "status": "filled",
+      "submitted_i": 131600,
+      "fill_i": 131601,
+      "expire_i": 131601
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 131600,
+      "fill_i": 131601,
+      "expire_i": 131601
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-7:near",
+      "status": "filled",
+      "submitted_i": 131656,
+      "fill_i": 131657,
+      "expire_i": 131657
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-7:far",
+      "status": "filled",
+      "submitted_i": 131656,
+      "fill_i": 131657,
+      "expire_i": 131657
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 131656,
+      "fill_i": 131657,
+      "expire_i": 131657
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-8:near",
+      "status": "filled",
+      "submitted_i": 131669,
+      "fill_i": 131670,
+      "expire_i": 131670
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-8:far",
+      "status": "filled",
+      "submitted_i": 131669,
+      "fill_i": 131670,
+      "expire_i": 131670
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 131669,
+      "fill_i": 131670,
+      "expire_i": 131670
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-9:near",
+      "status": "filled",
+      "submitted_i": 132335,
+      "fill_i": 132336,
+      "expire_i": 132336
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-9:far",
+      "status": "filled",
+      "submitted_i": 132335,
+      "fill_i": 132336,
+      "expire_i": 132336
+    },
+    {
+      "trade_id": "XAU-2026-07-06-1-9:opposite1618",
+      "status": "filled",
+      "submitted_i": 132335,
+      "fill_i": 132336,
+      "expire_i": 132336
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-1:near",
+      "status": "filled",
+      "submitted_i": 134884,
+      "fill_i": 134885,
+      "expire_i": 134885
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-1:far",
+      "status": "filled",
+      "submitted_i": 134884,
+      "fill_i": 134885,
+      "expire_i": 134885
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 134884,
+      "fill_i": 134885,
+      "expire_i": 134885
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-2:near",
+      "status": "filled",
+      "submitted_i": 134891,
+      "fill_i": 134892,
+      "expire_i": 134892
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-2:far",
+      "status": "filled",
+      "submitted_i": 134891,
+      "fill_i": 134892,
+      "expire_i": 134892
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 134891,
+      "fill_i": 134892,
+      "expire_i": 134892
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-3:near",
+      "status": "filled",
+      "submitted_i": 134909,
+      "fill_i": 134910,
+      "expire_i": 134910
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-3:far",
+      "status": "filled",
+      "submitted_i": 134909,
+      "fill_i": 134910,
+      "expire_i": 134910
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 134909,
+      "fill_i": 134910,
+      "expire_i": 134910
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-4:near",
+      "status": "filled",
+      "submitted_i": 134933,
+      "fill_i": 134934,
+      "expire_i": 134934
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-4:far",
+      "status": "filled",
+      "submitted_i": 134933,
+      "fill_i": 134934,
+      "expire_i": 134934
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 134933,
+      "fill_i": 134934,
+      "expire_i": 134934
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-5:near",
+      "status": "filled",
+      "submitted_i": 134952,
+      "fill_i": 134953,
+      "expire_i": 134953
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-5:far",
+      "status": "filled",
+      "submitted_i": 134952,
+      "fill_i": 134953,
+      "expire_i": 134953
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 134952,
+      "fill_i": 134953,
+      "expire_i": 134953
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-7:near",
+      "status": "filled",
+      "submitted_i": 136367,
+      "fill_i": 136368,
+      "expire_i": 136368
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-7:far",
+      "status": "filled",
+      "submitted_i": 136367,
+      "fill_i": 136368,
+      "expire_i": 136368
+    },
+    {
+      "trade_id": "XAU-2026-07-20--1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 136367,
+      "fill_i": 136368,
+      "expire_i": 136368
+    },
+    {
+      "trade_id": "XAU-2026-07-27-1-1:near",
+      "status": "filled",
+      "submitted_i": 137137,
+      "fill_i": 137138,
+      "expire_i": 137138
+    },
+    {
+      "trade_id": "XAU-2026-07-27-1-1:far",
+      "status": "filled",
+      "submitted_i": 137137,
+      "fill_i": 137138,
+      "expire_i": 137138
+    },
+    {
+      "trade_id": "XAU-2026-07-27-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 137137,
+      "fill_i": 137138,
+      "expire_i": 137138
+    },
+    {
+      "trade_id": "XAU-2026-08-03--1-1:near",
+      "status": "filled",
+      "submitted_i": 138900,
+      "fill_i": 138901,
+      "expire_i": 138901
+    },
+    {
+      "trade_id": "XAU-2026-08-03--1-1:far",
+      "status": "filled",
+      "submitted_i": 138900,
+      "fill_i": 138901,
+      "expire_i": 138901
+    },
+    {
+      "trade_id": "XAU-2026-08-03--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 138900,
+      "fill_i": 138901,
+      "expire_i": 138901
+    },
+    {
+      "trade_id": "XAU-2026-08-03--1-2:near",
+      "status": "filled",
+      "submitted_i": 139012,
+      "fill_i": 139013,
+      "expire_i": 139013
+    },
+    {
+      "trade_id": "XAU-2026-08-03--1-2:far",
+      "status": "filled",
+      "submitted_i": 139012,
+      "fill_i": 139013,
+      "expire_i": 139013
+    },
+    {
+      "trade_id": "XAU-2026-08-03--1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 139012,
+      "fill_i": 139013,
+      "expire_i": 139013
+    },
+    {
+      "trade_id": "XAU-2026-08-17-1-1:near",
+      "status": "filled",
+      "submitted_i": 142966,
+      "fill_i": 142967,
+      "expire_i": 142967
+    },
+    {
+      "trade_id": "XAU-2026-08-17-1-1:far",
+      "status": "filled",
+      "submitted_i": 142966,
+      "fill_i": 142967,
+      "expire_i": 142967
+    },
+    {
+      "trade_id": "XAU-2026-08-17-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 142966,
+      "fill_i": 142967,
+      "expire_i": 142967
+    },
+    {
+      "trade_id": "XAU-2026-08-17-1-2:near",
+      "status": "filled",
+      "submitted_i": 142970,
+      "fill_i": 142971,
+      "expire_i": 142971
+    },
+    {
+      "trade_id": "XAU-2026-08-17-1-2:far",
+      "status": "filled",
+      "submitted_i": 142970,
+      "fill_i": 142971,
+      "expire_i": 142971
+    },
+    {
+      "trade_id": "XAU-2026-08-17-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 142970,
+      "fill_i": 142971,
+      "expire_i": 142971
+    },
+    {
+      "trade_id": "XAU-2026-08-17-1-4:near",
+      "status": "filled",
+      "submitted_i": 142989,
+      "fill_i": 142990,
+      "expire_i": 142990
+    },
+    {
+      "trade_id": "XAU-2026-08-17-1-4:far",
+      "status": "filled",
+      "submitted_i": 142989,
+      "fill_i": 142990,
+      "expire_i": 142990
+    },
+    {
+      "trade_id": "XAU-2026-08-17-1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 142989,
+      "fill_i": 142990,
+      "expire_i": 142990
+    },
+    {
+      "trade_id": "XAU-2026-08-17-1-6:near",
+      "status": "filled",
+      "submitted_i": 143026,
+      "fill_i": 143027,
+      "expire_i": 143027
+    },
+    {
+      "trade_id": "XAU-2026-08-17-1-6:far",
+      "status": "filled",
+      "submitted_i": 143026,
+      "fill_i": 143027,
+      "expire_i": 143027
+    },
+    {
+      "trade_id": "XAU-2026-08-17-1-6:opposite1618",
+      "status": "filled",
+      "submitted_i": 143026,
+      "fill_i": 143027,
+      "expire_i": 143027
+    },
+    {
+      "trade_id": "XAU-2026-08-17-1-7:near",
+      "status": "filled",
+      "submitted_i": 143077,
+      "fill_i": 143078,
+      "expire_i": 143078
+    },
+    {
+      "trade_id": "XAU-2026-08-17-1-7:far",
+      "status": "filled",
+      "submitted_i": 143077,
+      "fill_i": 143078,
+      "expire_i": 143078
+    },
+    {
+      "trade_id": "XAU-2026-08-17-1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 143077,
+      "fill_i": 143078,
+      "expire_i": 143078
+    },
+    {
+      "trade_id": "XAU-2026-08-17--1-1:near",
+      "status": "filled",
+      "submitted_i": 143185,
+      "fill_i": 143186,
+      "expire_i": 143186
+    },
+    {
+      "trade_id": "XAU-2026-08-17--1-1:far",
+      "status": "filled",
+      "submitted_i": 143185,
+      "fill_i": 143186,
+      "expire_i": 143186
+    },
+    {
+      "trade_id": "XAU-2026-08-17--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 143185,
+      "fill_i": 143186,
+      "expire_i": 143186
+    },
+    {
+      "trade_id": "XAU-2026-08-17--1-4:near",
+      "status": "filled",
+      "submitted_i": 143456,
+      "fill_i": 143457,
+      "expire_i": 143457
+    },
+    {
+      "trade_id": "XAU-2026-08-17--1-4:far",
+      "status": "filled",
+      "submitted_i": 143456,
+      "fill_i": 143457,
+      "expire_i": 143457
+    },
+    {
+      "trade_id": "XAU-2026-08-17--1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 143456,
+      "fill_i": 143457,
+      "expire_i": 143457
+    },
+    {
+      "trade_id": "XAU-2026-08-24-1-1:near",
+      "status": "filled",
+      "submitted_i": 145484,
+      "fill_i": 145485,
+      "expire_i": 145485
+    },
+    {
+      "trade_id": "XAU-2026-08-24-1-1:far",
+      "status": "filled",
+      "submitted_i": 145484,
+      "fill_i": 145485,
+      "expire_i": 145485
+    },
+    {
+      "trade_id": "XAU-2026-08-24-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 145484,
+      "fill_i": 145485,
+      "expire_i": 145485
+    },
+    {
+      "trade_id": "XAU-2026-08-24-1-2:near",
+      "status": "filled",
+      "submitted_i": 145776,
+      "fill_i": 145777,
+      "expire_i": 145777
+    },
+    {
+      "trade_id": "XAU-2026-08-24-1-2:far",
+      "status": "filled",
+      "submitted_i": 145776,
+      "fill_i": 145777,
+      "expire_i": 145777
+    },
+    {
+      "trade_id": "XAU-2026-08-24-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 145776,
+      "fill_i": 145777,
+      "expire_i": 145777
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-1:near",
+      "status": "filled",
+      "submitted_i": 146857,
+      "fill_i": 146858,
+      "expire_i": 146858
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-1:far",
+      "status": "filled",
+      "submitted_i": 146857,
+      "fill_i": 146858,
+      "expire_i": 146858
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 146857,
+      "fill_i": 146858,
+      "expire_i": 146858
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-3:near",
+      "status": "filled",
+      "submitted_i": 146888,
+      "fill_i": 146889,
+      "expire_i": 146889
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-3:far",
+      "status": "filled",
+      "submitted_i": 146888,
+      "fill_i": 146889,
+      "expire_i": 146889
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 146888,
+      "fill_i": 146889,
+      "expire_i": 146889
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-5:near",
+      "status": "filled",
+      "submitted_i": 147221,
+      "fill_i": 147222,
+      "expire_i": 147222
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-5:far",
+      "status": "filled",
+      "submitted_i": 147221,
+      "fill_i": 147222,
+      "expire_i": 147222
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 147221,
+      "fill_i": 147222,
+      "expire_i": 147222
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-7:near",
+      "status": "filled",
+      "submitted_i": 147320,
+      "fill_i": 147321,
+      "expire_i": 147321
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-7:far",
+      "status": "filled",
+      "submitted_i": 147320,
+      "fill_i": 147321,
+      "expire_i": 147321
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 147320,
+      "fill_i": 147321,
+      "expire_i": 147321
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-8:near",
+      "status": "filled",
+      "submitted_i": 147341,
+      "fill_i": 147342,
+      "expire_i": 147342
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-8:far",
+      "status": "filled",
+      "submitted_i": 147341,
+      "fill_i": 147342,
+      "expire_i": 147342
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-8:opposite1618",
+      "status": "filled",
+      "submitted_i": 147341,
+      "fill_i": 147342,
+      "expire_i": 147342
+    },
+    {
+      "trade_id": "XAU-2026-08-31--1-1:near",
+      "status": "filled",
+      "submitted_i": 147515,
+      "fill_i": 147516,
+      "expire_i": 147516
+    },
+    {
+      "trade_id": "XAU-2026-08-31--1-1:far",
+      "status": "filled",
+      "submitted_i": 147515,
+      "fill_i": 147516,
+      "expire_i": 147516
+    },
+    {
+      "trade_id": "XAU-2026-08-31--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 147515,
+      "fill_i": 147516,
+      "expire_i": 147516
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-9:near",
+      "status": "filled",
+      "submitted_i": 147773,
+      "fill_i": 147774,
+      "expire_i": 147774
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-9:far",
+      "status": "filled",
+      "submitted_i": 147773,
+      "fill_i": 147774,
+      "expire_i": 147774
+    },
+    {
+      "trade_id": "XAU-2026-08-31-1-9:opposite1618",
+      "status": "filled",
+      "submitted_i": 147773,
+      "fill_i": 147774,
+      "expire_i": 147774
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-1:near",
+      "status": "filled",
+      "submitted_i": 149064,
+      "fill_i": 149065,
+      "expire_i": 149065
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-1:far",
+      "status": "filled",
+      "submitted_i": 149064,
+      "fill_i": 149065,
+      "expire_i": 149065
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 149064,
+      "fill_i": 149065,
+      "expire_i": 149065
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-2:near",
+      "status": "filled",
+      "submitted_i": 149501,
+      "fill_i": 149502,
+      "expire_i": 149502
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-2:far",
+      "status": "filled",
+      "submitted_i": 149501,
+      "fill_i": 149502,
+      "expire_i": 149502
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 149501,
+      "fill_i": 149502,
+      "expire_i": 149502
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-3:near",
+      "status": "filled",
+      "submitted_i": 149568,
+      "fill_i": 149569,
+      "expire_i": 149569
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-3:far",
+      "status": "filled",
+      "submitted_i": 149568,
+      "fill_i": 149569,
+      "expire_i": 149569
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 149568,
+      "fill_i": 149569,
+      "expire_i": 149569
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-5:near",
+      "status": "filled",
+      "submitted_i": 149728,
+      "fill_i": 149729,
+      "expire_i": 149729
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-5:far",
+      "status": "filled",
+      "submitted_i": 149728,
+      "fill_i": 149729,
+      "expire_i": 149729
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 149728,
+      "fill_i": 149729,
+      "expire_i": 149729
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-7:near",
+      "status": "filled",
+      "submitted_i": 149748,
+      "fill_i": 149749,
+      "expire_i": 149749
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-7:far",
+      "status": "filled",
+      "submitted_i": 149748,
+      "fill_i": 149749,
+      "expire_i": 149749
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-7:opposite1618",
+      "status": "filled",
+      "submitted_i": 149748,
+      "fill_i": 149749,
+      "expire_i": 149749
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-9:near",
+      "status": "filled",
+      "submitted_i": 149766,
+      "fill_i": 149767,
+      "expire_i": 149767
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-9:far",
+      "status": "filled",
+      "submitted_i": 149766,
+      "fill_i": 149767,
+      "expire_i": 149767
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-9:opposite1618",
+      "status": "filled",
+      "submitted_i": 149766,
+      "fill_i": 149767,
+      "expire_i": 149767
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-11:near",
+      "status": "filled",
+      "submitted_i": 149859,
+      "fill_i": 149860,
+      "expire_i": 149860
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-11:far",
+      "status": "filled",
+      "submitted_i": 149859,
+      "fill_i": 149860,
+      "expire_i": 149860
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-11:opposite1618",
+      "status": "filled",
+      "submitted_i": 149859,
+      "fill_i": 149860,
+      "expire_i": 149860
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-12:near",
+      "status": "filled",
+      "submitted_i": 149865,
+      "fill_i": 149866,
+      "expire_i": 149866
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-12:far",
+      "status": "filled",
+      "submitted_i": 149865,
+      "fill_i": 149866,
+      "expire_i": 149866
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-12:opposite1618",
+      "status": "filled",
+      "submitted_i": 149865,
+      "fill_i": 149866,
+      "expire_i": 149866
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-13:near",
+      "status": "filled",
+      "submitted_i": 149876,
+      "fill_i": 149877,
+      "expire_i": 149877
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-13:far",
+      "status": "filled",
+      "submitted_i": 149876,
+      "fill_i": 149877,
+      "expire_i": 149877
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-13:opposite1618",
+      "status": "filled",
+      "submitted_i": 149876,
+      "fill_i": 149877,
+      "expire_i": 149877
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-14:near",
+      "status": "filled",
+      "submitted_i": 150403,
+      "fill_i": 150404,
+      "expire_i": 150404
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-14:far",
+      "status": "filled",
+      "submitted_i": 150403,
+      "fill_i": 150404,
+      "expire_i": 150404
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-14:opposite1618",
+      "status": "filled",
+      "submitted_i": 150403,
+      "fill_i": 150404,
+      "expire_i": 150404
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-16:near",
+      "status": "filled",
+      "submitted_i": 150446,
+      "fill_i": 150447,
+      "expire_i": 150447
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-16:far",
+      "status": "filled",
+      "submitted_i": 150446,
+      "fill_i": 150447,
+      "expire_i": 150447
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-16:opposite1618",
+      "status": "filled",
+      "submitted_i": 150446,
+      "fill_i": 150447,
+      "expire_i": 150447
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-17:near",
+      "status": "filled",
+      "submitted_i": 150458,
+      "fill_i": 150459,
+      "expire_i": 150459
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-17:far",
+      "status": "filled",
+      "submitted_i": 150458,
+      "fill_i": 150459,
+      "expire_i": 150459
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-17:opposite1618",
+      "status": "filled",
+      "submitted_i": 150458,
+      "fill_i": 150459,
+      "expire_i": 150459
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-22:near",
+      "status": "filled",
+      "submitted_i": 150535,
+      "fill_i": 150536,
+      "expire_i": 150536
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-22:far",
+      "status": "filled",
+      "submitted_i": 150535,
+      "fill_i": 150536,
+      "expire_i": 150536
+    },
+    {
+      "trade_id": "XAU-2026-09-07-1-22:opposite1618",
+      "status": "filled",
+      "submitted_i": 150535,
+      "fill_i": 150536,
+      "expire_i": 150536
+    },
+    {
+      "trade_id": "XAU-2026-09-14--1-1:near",
+      "status": "filled",
+      "submitted_i": 151729,
+      "fill_i": 151730,
+      "expire_i": 151730
+    },
+    {
+      "trade_id": "XAU-2026-09-14--1-1:far",
+      "status": "filled",
+      "submitted_i": 151729,
+      "fill_i": 151730,
+      "expire_i": 151730
+    },
+    {
+      "trade_id": "XAU-2026-09-14--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 151729,
+      "fill_i": 151730,
+      "expire_i": 151730
+    },
+    {
+      "trade_id": "XAU-2026-09-14--1-5:near",
+      "status": "filled",
+      "submitted_i": 151865,
+      "fill_i": 151866,
+      "expire_i": 151866
+    },
+    {
+      "trade_id": "XAU-2026-09-14--1-5:far",
+      "status": "filled",
+      "submitted_i": 151865,
+      "fill_i": 151866,
+      "expire_i": 151866
+    },
+    {
+      "trade_id": "XAU-2026-09-14--1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 151865,
+      "fill_i": 151866,
+      "expire_i": 151866
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-1:near",
+      "status": "filled",
+      "submitted_i": 153259,
+      "fill_i": 153260,
+      "expire_i": 153260
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-1:far",
+      "status": "filled",
+      "submitted_i": 153259,
+      "fill_i": 153260,
+      "expire_i": 153260
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 153259,
+      "fill_i": 153260,
+      "expire_i": 153260
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-3:near",
+      "status": "filled",
+      "submitted_i": 153280,
+      "fill_i": 153281,
+      "expire_i": 153281
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-3:far",
+      "status": "filled",
+      "submitted_i": 153280,
+      "fill_i": 153281,
+      "expire_i": 153281
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-3:opposite1618",
+      "status": "filled",
+      "submitted_i": 153280,
+      "fill_i": 153281,
+      "expire_i": 153281
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-9:near",
+      "status": "filled",
+      "submitted_i": 153376,
+      "fill_i": 153377,
+      "expire_i": 153377
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-9:far",
+      "status": "filled",
+      "submitted_i": 153376,
+      "fill_i": 153377,
+      "expire_i": 153377
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-9:opposite1618",
+      "status": "filled",
+      "submitted_i": 153376,
+      "fill_i": 153377,
+      "expire_i": 153377
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-11:near",
+      "status": "filled",
+      "submitted_i": 153404,
+      "fill_i": 153405,
+      "expire_i": 153405
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-11:far",
+      "status": "filled",
+      "submitted_i": 153404,
+      "fill_i": 153405,
+      "expire_i": 153405
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-11:opposite1618",
+      "status": "filled",
+      "submitted_i": 153404,
+      "fill_i": 153405,
+      "expire_i": 153405
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-14:near",
+      "status": "filled",
+      "submitted_i": 153446,
+      "fill_i": 153447,
+      "expire_i": 153447
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-14:far",
+      "status": "filled",
+      "submitted_i": 153446,
+      "fill_i": 153447,
+      "expire_i": 153447
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-14:opposite1618",
+      "status": "filled",
+      "submitted_i": 153446,
+      "fill_i": 153447,
+      "expire_i": 153447
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-16:near",
+      "status": "filled",
+      "submitted_i": 153692,
+      "fill_i": 153693,
+      "expire_i": 153693
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-16:far",
+      "status": "filled",
+      "submitted_i": 153692,
+      "fill_i": 153693,
+      "expire_i": 153693
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-16:opposite1618",
+      "status": "filled",
+      "submitted_i": 153692,
+      "fill_i": 153693,
+      "expire_i": 153693
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-18:near",
+      "status": "filled",
+      "submitted_i": 153831,
+      "fill_i": 153832,
+      "expire_i": 153832
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-18:far",
+      "status": "filled",
+      "submitted_i": 153831,
+      "fill_i": 153832,
+      "expire_i": 153832
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-18:opposite1618",
+      "status": "filled",
+      "submitted_i": 153831,
+      "fill_i": 153832,
+      "expire_i": 153832
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-22:near",
+      "status": "filled",
+      "submitted_i": 153904,
+      "fill_i": 153905,
+      "expire_i": 153905
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-22:far",
+      "status": "filled",
+      "submitted_i": 153904,
+      "fill_i": 153905,
+      "expire_i": 153905
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-22:opposite1618",
+      "status": "filled",
+      "submitted_i": 153904,
+      "fill_i": 153905,
+      "expire_i": 153905
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-23:near",
+      "status": "filled",
+      "submitted_i": 153915,
+      "fill_i": 153916,
+      "expire_i": 153916
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-23:far",
+      "status": "filled",
+      "submitted_i": 153915,
+      "fill_i": 153916,
+      "expire_i": 153916
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-23:opposite1618",
+      "status": "filled",
+      "submitted_i": 153915,
+      "fill_i": 153916,
+      "expire_i": 153916
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-25:near",
+      "status": "filled",
+      "submitted_i": 153936,
+      "fill_i": 153937,
+      "expire_i": 153937
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-25:far",
+      "status": "filled",
+      "submitted_i": 153936,
+      "fill_i": 153937,
+      "expire_i": 153937
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-25:opposite1618",
+      "status": "filled",
+      "submitted_i": 153936,
+      "fill_i": 153937,
+      "expire_i": 153937
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-27:near",
+      "status": "filled",
+      "submitted_i": 153956,
+      "fill_i": 153957,
+      "expire_i": 153957
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-27:far",
+      "status": "filled",
+      "submitted_i": 153956,
+      "fill_i": 153957,
+      "expire_i": 153957
+    },
+    {
+      "trade_id": "XAU-2026-09-21-1-27:opposite1618",
+      "status": "filled",
+      "submitted_i": 153956,
+      "fill_i": 153957,
+      "expire_i": 153957
+    },
+    {
+      "trade_id": "XAU-2026-10-05--1-1:near",
+      "status": "filled",
+      "submitted_i": 158571,
+      "fill_i": 158572,
+      "expire_i": 158572
+    },
+    {
+      "trade_id": "XAU-2026-10-05--1-1:far",
+      "status": "filled",
+      "submitted_i": 158571,
+      "fill_i": 158572,
+      "expire_i": 158572
+    },
+    {
+      "trade_id": "XAU-2026-10-05--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 158571,
+      "fill_i": 158572,
+      "expire_i": 158572
+    },
+    {
+      "trade_id": "XAU-2026-10-12-1-1:near",
+      "status": "filled",
+      "submitted_i": 159293,
+      "fill_i": 159294,
+      "expire_i": 159294
+    },
+    {
+      "trade_id": "XAU-2026-10-12-1-1:far",
+      "status": "filled",
+      "submitted_i": 159293,
+      "fill_i": 159294,
+      "expire_i": 159294
+    },
+    {
+      "trade_id": "XAU-2026-10-12-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 159293,
+      "fill_i": 159294,
+      "expire_i": 159294
+    },
+    {
+      "trade_id": "XAU-2026-10-19-1-1:near",
+      "status": "filled",
+      "submitted_i": 161516,
+      "fill_i": 161517,
+      "expire_i": 161517
+    },
+    {
+      "trade_id": "XAU-2026-10-19-1-1:far",
+      "status": "filled",
+      "submitted_i": 161516,
+      "fill_i": 161517,
+      "expire_i": 161517
+    },
+    {
+      "trade_id": "XAU-2026-10-19-1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 161516,
+      "fill_i": 161517,
+      "expire_i": 161517
+    },
+    {
+      "trade_id": "XAU-2026-10-19-1-2:near",
+      "status": "filled",
+      "submitted_i": 161582,
+      "fill_i": 161583,
+      "expire_i": 161583
+    },
+    {
+      "trade_id": "XAU-2026-10-19-1-2:far",
+      "status": "filled",
+      "submitted_i": 161582,
+      "fill_i": 161583,
+      "expire_i": 161583
+    },
+    {
+      "trade_id": "XAU-2026-10-19-1-2:opposite1618",
+      "status": "filled",
+      "submitted_i": 161582,
+      "fill_i": 161583,
+      "expire_i": 161583
+    },
+    {
+      "trade_id": "XAU-2026-10-19-1-4:near",
+      "status": "filled",
+      "submitted_i": 161609,
+      "fill_i": 161610,
+      "expire_i": 161610
+    },
+    {
+      "trade_id": "XAU-2026-10-19-1-4:far",
+      "status": "filled",
+      "submitted_i": 161609,
+      "fill_i": 161610,
+      "expire_i": 161610
+    },
+    {
+      "trade_id": "XAU-2026-10-19-1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 161609,
+      "fill_i": 161610,
+      "expire_i": 161610
+    },
+    {
+      "trade_id": "XAU-2026-10-26--1-1:near",
+      "status": "filled",
+      "submitted_i": 163067,
+      "fill_i": 163068,
+      "expire_i": 163068
+    },
+    {
+      "trade_id": "XAU-2026-10-26--1-1:far",
+      "status": "filled",
+      "submitted_i": 163067,
+      "fill_i": 163068,
+      "expire_i": 163068
+    },
+    {
+      "trade_id": "XAU-2026-10-26--1-1:opposite1618",
+      "status": "filled",
+      "submitted_i": 163067,
+      "fill_i": 163068,
+      "expire_i": 163068
+    },
+    {
+      "trade_id": "XAU-2026-10-26--1-4:near",
+      "status": "filled",
+      "submitted_i": 163280,
+      "fill_i": 163281,
+      "expire_i": 163281
+    },
+    {
+      "trade_id": "XAU-2026-10-26--1-4:far",
+      "status": "filled",
+      "submitted_i": 163280,
+      "fill_i": 163281,
+      "expire_i": 163281
+    },
+    {
+      "trade_id": "XAU-2026-10-26--1-4:opposite1618",
+      "status": "filled",
+      "submitted_i": 163280,
+      "fill_i": 163281,
+      "expire_i": 163281
+    },
+    {
+      "trade_id": "XAU-2026-10-26--1-5:near",
+      "status": "filled",
+      "submitted_i": 163291,
+      "fill_i": 163292,
+      "expire_i": 163292
+    },
+    {
+      "trade_id": "XAU-2026-10-26--1-5:far",
+      "status": "filled",
+      "submitted_i": 163291,
+      "fill_i": 163292,
+      "expire_i": 163292
+    },
+    {
+      "trade_id": "XAU-2026-10-26--1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 163291,
+      "fill_i": 163292,
+      "expire_i": 163292
+    }
+  ],
+  "cancelled": 0,
+  "pending_amendments": [],
+  "expired": 0,
+  "entry_fill": "Native resting limit after signal close; fixed limit price even on favorable gaps; OHLC order O-H-L-C; protection follows configured policy (reclaim mode has no initial stop); any entry-bar stop book uses stop/adverse open, later stops use native model; expiry after last eligible bar matching",
+  "entry_bar_mfe": "excluded"
+}

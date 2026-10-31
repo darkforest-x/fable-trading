@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-eth-xau-1618-models-20261031-v2
+    artifact_type: manifest
+    role: separate_asset_causal_repeated_touch_model_rebuild
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9c0ad41802
+    generator_commit: 422a27f3e2
+    source_path: experiments/active/exp-btc-eth-xau-1618-models-20261031-v2/summary.json
+    storage_uri: repo://experiments/active/exp-btc-eth-xau-1618-models-20261031-v2/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    license: internal-research
+    notes: '222frozen quarterly models,9latest research heads; uniform0.7percent initial stop,actual maker2bp/taker5bp,NY expiry. Near netR BTC-11.27/ETH+7.61/XAU-26.34;opposite+16.82/+46.87/-18.43. Matched controls and all9uncertainty gates fail. 97tests,exact model replay,7904newXAU fills,causal future mutations;BTCETHnative unchanged. Models/rawgzip remain local in experiment directory; small metrics,receipts and reproduction versioned. Read completion.json,diagnostic_validation.json; initial pooled rank diagnostics superseded without changing policy returns.'
   - artifact_id: btc-three-short-score-attribution-20261031-v1
     artifact_type: manifest
     role: frozen_logistic_feature_and_calibration_attribution

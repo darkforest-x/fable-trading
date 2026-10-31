@@ -1,0 +1,26 @@
+{
+  "runtime": {
+    "python": "3.9.6",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "lightgbm": "4.6.0",
+    "sklearn": "1.6.1",
+    "scipy": "1.13.1",
+    "nautilus": "1.231.0 in separate native venv"
+  },
+  "commands": [
+    ".venv/bin/python -m yoyo.evaluation.major_1618_v2_data prepare",
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.major_1618_v2_data native",
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.major_1618_v2_data sensitivity",
+    ".venv/bin/python -m yoyo.evaluation.major_1618_v2_models --symbol BTC",
+    ".venv/bin/python -m yoyo.evaluation.major_1618_v2_models --symbol ETH",
+    ".venv/bin/python -m yoyo.evaluation.major_1618_v2_models --symbol XAU",
+    ".venv/bin/python -m yoyo.evaluation.major_1618_v2_evaluate",
+    ".venv/bin/python -m yoyo.evaluation.major_1618_v2_validate",
+    ".venv/bin/python -m yoyo.evaluation.major_1618_v2_validate --diagnostics-only"
+  ],
+  "prerequisites": "Registered v1 inputs/native results; registered XAU candles and readonly local OKX cache through frozen cutoff. No downloads. Existing completed native and model artifacts reused.",
+  "research_only": true,
+  "production_eligible": false,
+  "diagnostic_validation_prerequisite": "Initial pooled diagnostic files are retained audit evidence only. Re-evaluation uses corrected within-fold ranks; every actual policy return is identical."
+}

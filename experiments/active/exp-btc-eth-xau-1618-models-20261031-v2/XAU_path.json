@@ -1,0 +1,77 @@
+{
+  "engine": "nautilus_trader",
+  "version": "1.231.0",
+  "market_tick": 0.1,
+  "protection_tick": 0.1,
+  "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+  "partial_execution": "disabled",
+  "native_partial_accounting_checked": 0,
+  "fixed_target_execution": "resting limit; OLHC; independent limit-price book; native reduce-only sibling cleanup",
+  "native_fixed_target_accounting_checked": 4,
+  "target_from_entry": true,
+  "target_breakeven": false,
+  "breakeven_includes_cost": true,
+  "fill_maker_fee": 0.0002,
+  "fill_taker_fee": 0.0005,
+  "breakeven_on_touch": false,
+  "reclaim_next_bar": false,
+  "intrabar_path": "OLHC",
+  "synthetic_segments_per_bar": 4,
+  "positions": 4,
+  "fills": 8,
+  "execution_minutes": 5,
+  "streaming_batch_bars": 24000,
+  "skipped_idle_bars_enabled": false,
+  "rsi_scaleout": "disabled",
+  "rsi_skip_events": 0,
+  "timed_be_minutes": null,
+  "confirmed_pivot_exit": false,
+  "structural_pivot_stop": false,
+  "structural_execution": "disabled",
+  "pivot_execution": "disabled",
+  "strict_pivot_ties": false,
+  "max_simultaneous_positions": 1,
+  "bars_with_both_directions": 0,
+  "prepare_seconds": 0.13774487501359545,
+  "replay_seconds": 21.100462665985106,
+  "runtime_warnings": [
+    "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+  ],
+  "accounting": "independent original-risk R; frozen account; not portfolio returns",
+  "entry_order_mode": "limit",
+  "opportunities": [
+    {
+      "trade_id": "XAU-2026-01-12--1-1:near",
+      "status": "filled",
+      "submitted_i": 81947,
+      "fill_i": 81948,
+      "expire_i": 81948
+    },
+    {
+      "trade_id": "XAU-2026-10-26--1-5:near",
+      "status": "filled",
+      "submitted_i": 163291,
+      "fill_i": 163292,
+      "expire_i": 163292
+    },
+    {
+      "trade_id": "XAU-2026-10-26--1-5:far",
+      "status": "filled",
+      "submitted_i": 163291,
+      "fill_i": 163292,
+      "expire_i": 163292
+    },
+    {
+      "trade_id": "XAU-2026-10-26--1-5:opposite1618",
+      "status": "filled",
+      "submitted_i": 163291,
+      "fill_i": 163292,
+      "expire_i": 163292
+    }
+  ],
+  "cancelled": 0,
+  "pending_amendments": [],
+  "expired": 0,
+  "entry_fill": "Native resting limit after signal close; fixed limit price even on favorable gaps; OHLC order O-H-L-C; protection follows configured policy (reclaim mode has no initial stop); any entry-bar stop book uses stop/adverse open, later stops use native model; expiry after last eligible bar matching",
+  "entry_bar_mfe": "excluded"
+}

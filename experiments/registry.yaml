@@ -16,18 +16,18 @@ schema_version: 1
 experiments:
   - experiment_id: exp-btc-eth-xau-1618-models-20261031-v2
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: active
+    source_commit: 9c0ad41802
+    status: inconclusive
     question: Rebuild separate BTC ETH XAU repeated1618 models with fixed0.7percent stops and causal rolling evaluation.
     single_variable: Frozen sequential asset split, calibration removal, fresh training window, nonlinear learner, actual netR objective and ordinal removal; each comparison changes one element.
-    result: Pending; predefined final netR model without ordinal, no parameter search or test-winner selection.
-    artifacts: []
+    result: '222 quarterly models; final near BTC -11.27R/70trades, ETH +7.61R/76, XAU -26.34R/69, versus unscored -25.53/-8.97/-35.82R. Far -21.02/+36.71/-20.57R; opposite +16.82/+46.87/-18.43R. Near mean signal/random bp -11.27/-27.17, +7.01/-11.39, -26.74/-29.95. All9 historical gates fail: positive-net CIs crosszero and Holm p>=0.0396. No promotion.'
+    artifacts: [btc-eth-xau-1618-models-20261031-v2]
     canonical_report: experiments/active/exp-btc-eth-xau-1618-models-20261031-v2/summary.json
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: Owner explicitly requests three separate rebuilt models and confirms XAU0.7percent. Reuse all BTC/ETH native fills; only XAU new native labels. Registered OKX perpetual data and maker2bp/taker5bp. NY expiry,oneposition perasset; no service or paper changes.
+    notes: 'Owner authorized research fitting and XAU0.7percent. BTC/ETH449/333 test candidates from2025; XAU259 from2025Q4. Registered OKX perp5m,15m episodes,NY expiry,oneposition perasset,real maker2bp/taker5bp. 222models reconstructed exactly,1249BTCETH near rows reused,7904newXAU fills,9future mutations,97tests. Within-fold ranking correction preserves all policy returns; initial pooled diagnostics retained. This-week3BTC near gates false/true/false,far/opposite false/false/true. Notion40a8856479af8165804ccb40615a3768. No service or paper changes.'
   - experiment_id: exp-btc-eth-repeat-1618-20261031-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 923bc30d67
