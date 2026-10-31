@@ -1,0 +1,2261 @@
+[
+  {
+    "target": "far",
+    "arm": "original_model",
+    "selected": {
+      "n": 78,
+      "weeks": 40,
+      "target_rate": 0.08974358974358974,
+      "net_win_rate": 0.19230769230769232,
+      "gross_bp": 39.68976558703105,
+      "net_bp": 32.95537653508343,
+      "net_bp_ci95": [
+        -17.66667885235358,
+        98.06838461177995
+      ],
+      "net_r": 36.713316796557955,
+      "closed_trade_drawdown_r": 26.636179051714876,
+      "profit_factor": 1.529798234715721,
+      "time_exit_n": 8,
+      "adverse_path_n": 0,
+      "matched_n": 78,
+      "random_bp": -23.408111866265962,
+      "matched_signal_bp": 32.95537653508343,
+      "excess_bp": 56.363488401349386,
+      "week_p": 0.022497750224977502,
+      "excess_ci95": [
+        6.328627909119,
+        120.92786982416027
+      ]
+    },
+    "diagnostics": {
+      "candidates": 333,
+      "candidate_weeks": 64,
+      "first_week": "2025-01-06",
+      "last_week": "2026-10-19",
+      "target_auc": 0.6101193792546905,
+      "profit_auc": 0.5286220975405072,
+      "folds": [
+        {
+          "fold": "2025Q1",
+          "n": 40,
+          "positives": 2,
+          "target_auc": 0.21052631578947367,
+          "profit_auc": 0.3402777777777778
+        },
+        {
+          "fold": "2025Q2",
+          "n": 38,
+          "positives": 9,
+          "target_auc": 0.7931034482758621,
+          "profit_auc": 0.7931034482758621
+        },
+        {
+          "fold": "2025Q3",
+          "n": 31,
+          "positives": 2,
+          "target_auc": 0.7241379310344827,
+          "profit_auc": 0.8214285714285714
+        },
+        {
+          "fold": "2025Q4",
+          "n": 77,
+          "positives": 11,
+          "target_auc": 0.5977961432506886,
+          "profit_auc": 0.5860655737704918
+        },
+        {
+          "fold": "2026Q1",
+          "n": 68,
+          "positives": 6,
+          "target_auc": 0.8844086021505376,
+          "profit_auc": 0.6441798941798942
+        },
+        {
+          "fold": "2026Q2",
+          "n": 35,
+          "positives": 0,
+          "target_auc": null,
+          "profit_auc": 0.11574074074074074
+        },
+        {
+          "fold": "2026Q3",
+          "n": 34,
+          "positives": 7,
+          "target_auc": 0.33862433862433866,
+          "profit_auc": 0.31501831501831506
+        },
+        {
+          "fold": "2026Q4",
+          "n": 10,
+          "positives": 2,
+          "target_auc": 0.3125,
+          "profit_auc": 0.3125
+        }
+      ],
+      "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+      "net_r_rmse": 3.2276270102538693,
+      "retrospective_top_decile": {
+        "n": 36,
+        "weeks": 25,
+        "target_rate": 0.19444444444444445,
+        "net_win_rate": 0.3055555555555556,
+        "gross_bp": 97.48609044680764,
+        "net_bp": 91.07552524901386,
+        "net_bp_ci95": [
+          -16.51010609294297,
+          195.4868597429833
+        ],
+        "net_r": 46.820763773708094,
+        "closed_trade_drawdown_r": 12.097304799773713,
+        "profit_factor": 2.7028288329312615,
+        "time_exit_n": 4,
+        "adverse_path_n": 0,
+        "matched_n": 36,
+        "random_bp": 1.0277532197198933,
+        "matched_signal_bp": 91.07552524901386,
+        "excess_bp": 90.04777202929398,
+        "week_p": 0.012198780121987801,
+        "excess_ci95": [
+          21.25827855111583,
+          164.3689758073624
+        ]
+      }
+    },
+    "versus_original": {
+      "delta_total_r": 0.0,
+      "delta_mean_week_r": 0.0,
+      "delta_mean_week_ci95": [
+        0.0,
+        0.0
+      ],
+      "improvement_week_p": 1.0
+    },
+    "versus_full": {
+      "delta_total_r": 1.5733272498632758,
+      "delta_mean_week_r": 0.024583238279113684,
+      "delta_mean_week_ci95": [
+        -0.4397362945969077,
+        0.44291322240352793
+      ],
+      "improvement_week_p": 0.45815418458154183
+    }
+  },
+  {
+    "target": "far",
+    "arm": "full_context",
+    "selected": {
+      "n": 124,
+      "weeks": 53,
+      "target_rate": 0.08870967741935484,
+      "net_win_rate": 0.1935483870967742,
+      "gross_bp": 26.577605204892468,
+      "net_bp": 19.843294088408086,
+      "net_bp_ci95": [
+        -12.91254077089075,
+        57.70445300159213
+      ],
+      "net_r": 35.139989546694686,
+      "closed_trade_drawdown_r": 15.46078766607588,
+      "profit_factor": 1.3225902849713997,
+      "time_exit_n": 14,
+      "adverse_path_n": 0,
+      "matched_n": 124,
+      "random_bp": -16.64563171305866,
+      "matched_signal_bp": 19.843294088408086,
+      "excess_bp": 36.48892580146675,
+      "week_p": 0.027797220277972202,
+      "excess_ci95": [
+        0.9552332011678147,
+        77.99972508377391
+      ]
+    },
+    "diagnostics": {
+      "candidates": 333,
+      "candidate_weeks": 64,
+      "first_week": "2025-01-06",
+      "last_week": "2026-10-19",
+      "target_auc": 0.5284853248315634,
+      "profit_auc": 0.5477288567350435,
+      "folds": [
+        {
+          "fold": "2025Q1",
+          "n": 40,
+          "positives": 2,
+          "target_auc": 0.25,
+          "profit_auc": 0.3819444444444444
+        },
+        {
+          "fold": "2025Q2",
+          "n": 38,
+          "positives": 9,
+          "target_auc": 0.603448275862069,
+          "profit_auc": 0.603448275862069
+        },
+        {
+          "fold": "2025Q3",
+          "n": 31,
+          "positives": 2,
+          "target_auc": 0.5689655172413792,
+          "profit_auc": 0.7142857142857142
+        },
+        {
+          "fold": "2025Q4",
+          "n": 77,
+          "positives": 11,
+          "target_auc": 0.4765840220385675,
+          "profit_auc": 0.5706967213114754
+        },
+        {
+          "fold": "2026Q1",
+          "n": 68,
+          "positives": 6,
+          "target_auc": 0.6021505376344086,
+          "profit_auc": 0.4828042328042328
+        },
+        {
+          "fold": "2026Q2",
+          "n": 35,
+          "positives": 0,
+          "target_auc": null,
+          "profit_auc": 0.38888888888888895
+        },
+        {
+          "fold": "2026Q3",
+          "n": 34,
+          "positives": 7,
+          "target_auc": 0.6772486772486772,
+          "profit_auc": 0.7472527472527473
+        },
+        {
+          "fold": "2026Q4",
+          "n": 10,
+          "positives": 2,
+          "target_auc": 0.625,
+          "profit_auc": 0.625
+        }
+      ],
+      "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+      "net_r_rmse": 3.3127712061291756,
+      "retrospective_top_decile": {
+        "n": 36,
+        "weeks": 23,
+        "target_rate": 0.16666666666666666,
+        "net_win_rate": 0.2222222222222222,
+        "gross_bp": 51.09825073251683,
+        "net_bp": 44.5926962319608,
+        "net_bp_ci95": [
+          -39.13620435378873,
+          143.52045329418675
+        ],
+        "net_r": 22.928273107059947,
+        "closed_trade_drawdown_r": 9.1391564967753,
+        "profit_factor": 1.744441290453346,
+        "time_exit_n": 2,
+        "adverse_path_n": 0,
+        "matched_n": 36,
+        "random_bp": 10.735951614653315,
+        "matched_signal_bp": 44.5926962319608,
+        "excess_bp": 33.856744617307484,
+        "week_p": 0.20107989201079893,
+        "excess_ci95": [
+          -37.717069245706355,
+          110.46396967272804
+        ]
+      }
+    },
+    "versus_original": {
+      "delta_total_r": -1.5733272498632758,
+      "delta_mean_week_r": -0.024583238279113684,
+      "delta_mean_week_ci95": [
+        -0.44291322240352826,
+        0.43973629459690744
+      ],
+      "improvement_week_p": 0.541945805419458
+    },
+    "versus_full": {
+      "delta_total_r": 0.0,
+      "delta_mean_week_r": 0.0,
+      "delta_mean_week_ci95": [
+        0.0,
+        0.0
+      ],
+      "improvement_week_p": 1.0
+    }
+  },
+  {
+    "target": "far",
+    "arm": "unscored",
+    "selected": {
+      "n": 168,
+      "weeks": 64,
+      "target_rate": 0.08928571428571429,
+      "net_win_rate": 0.17857142857142858,
+      "gross_bp": 21.96865005815941,
+      "net_bp": 15.236414358179813,
+      "net_bp_ci95": [
+        -15.850458014549108,
+        53.72327781176048
+      ],
+      "net_r": 36.55165775524671,
+      "closed_trade_drawdown_r": 28.544620753391847,
+      "profit_factor": 1.2424998129127531,
+      "time_exit_n": 16,
+      "adverse_path_n": 0,
+      "matched_n": 168,
+      "random_bp": -27.93101505019319,
+      "matched_signal_bp": 15.236414358179813,
+      "excess_bp": 43.167429408373,
+      "week_p": 0.0143985601439856,
+      "excess_ci95": [
+        7.193253935539637,
+        86.0996359724514
+      ]
+    },
+    "diagnostics": {},
+    "versus_original": {
+      "delta_total_r": -0.1616590413112533,
+      "delta_mean_week_r": -0.002525922520488333,
+      "delta_mean_week_ci95": [
+        -0.8476962116718014,
+        1.1236558159430035
+      ],
+      "improvement_week_p": 0.5061493850614939
+    },
+    "versus_full": {
+      "delta_total_r": 1.411668208552026,
+      "delta_mean_week_r": 0.022057315758625406,
+      "delta_mean_week_ci95": [
+        -0.7010870995031284,
+        1.07024636843891
+      ],
+      "improvement_week_p": 0.49725027497250274
+    }
+  },
+  {
+    "target": "far",
+    "arm": "single_reward",
+    "selected": {
+      "n": 0
+    },
+    "diagnostics": {
+      "candidates": 333,
+      "candidate_weeks": 64,
+      "first_week": "2025-01-06",
+      "last_week": "2026-10-19",
+      "target_auc": 0.756109260794006,
+      "profit_auc": 0.5305639293925205,
+      "folds": [
+        {
+          "fold": "2025Q1",
+          "n": 40,
+          "positives": 2,
+          "target_auc": 0.46710526315789475,
+          "profit_auc": 0.40972222222222215
+        },
+        {
+          "fold": "2025Q2",
+          "n": 38,
+          "positives": 9,
+          "target_auc": 0.7701149425287357,
+          "profit_auc": 0.7701149425287357
+        },
+        {
+          "fold": "2025Q3",
+          "n": 31,
+          "positives": 2,
+          "target_auc": 0.5603448275862069,
+          "profit_auc": 0.36904761904761907
+        },
+        {
+          "fold": "2025Q4",
+          "n": 77,
+          "positives": 11,
+          "target_auc": 0.949724517906336,
+          "profit_auc": 0.7776639344262294
+        },
+        {
+          "fold": "2026Q1",
+          "n": 68,
+          "positives": 6,
+          "target_auc": 0.7862903225806452,
+          "profit_auc": 0.4173280423280423
+        },
+        {
+          "fold": "2026Q2",
+          "n": 35,
+          "positives": 0,
+          "target_auc": null,
+          "profit_auc": 0.24305555555555555
+        },
+        {
+          "fold": "2026Q3",
+          "n": 34,
+          "positives": 7,
+          "target_auc": 0.7619047619047619,
+          "profit_auc": 0.45054945054945056
+        },
+        {
+          "fold": "2026Q4",
+          "n": 10,
+          "positives": 2,
+          "target_auc": 0.75,
+          "profit_auc": 0.75
+        }
+      ],
+      "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+      "brier": 0.10272091909761277,
+      "retrospective_top_decile": {
+        "n": 36,
+        "weeks": 12,
+        "target_rate": 0.19444444444444445,
+        "net_win_rate": 0.19444444444444445,
+        "gross_bp": 41.157054481636294,
+        "net_bp": 34.74497295697916,
+        "net_bp_ci95": [
+          -77.04032948625128,
+          176.71669086934094
+        ],
+        "net_r": 17.867404223856155,
+        "closed_trade_drawdown_r": 17.601620373292068,
+        "profit_factor": 1.5600247960392062,
+        "time_exit_n": 0,
+        "adverse_path_n": 0,
+        "matched_n": 36,
+        "random_bp": 19.089688804627265,
+        "matched_signal_bp": 34.74497295697916,
+        "excess_bp": 15.655284152351904,
+        "week_p": 0.49765023497650235,
+        "excess_ci95": [
+          -149.37058911822328,
+          178.11909725927646
+        ]
+      }
+    },
+    "versus_original": {
+      "delta_total_r": -36.71331679655795,
+      "delta_mean_week_r": -0.5736455749462179,
+      "delta_mean_week_ci95": [
+        -1.57108756036793,
+        0.2579195659308017
+      ],
+      "improvement_week_p": 0.8758124187581242
+    },
+    "versus_full": {
+      "delta_total_r": -35.13998954669467,
+      "delta_mean_week_r": -0.5490623366671042,
+      "delta_mean_week_ci95": [
+        -1.54565422700469,
+        0.30657889833452406
+      ],
+      "improvement_week_p": 0.8683131686831317
+    }
+  },
+  {
+    "target": "far",
+    "arm": "state_only",
+    "selected": {
+      "n": 125,
+      "weeks": 54,
+      "target_rate": 0.096,
+      "net_win_rate": 0.2,
+      "gross_bp": 32.37058897037382,
+      "net_bp": 25.65751131232621,
+      "net_bp_ci95": [
+        -7.499293000165656,
+        61.307006273135755
+      ],
+      "net_r": 45.80285848784348,
+      "closed_trade_drawdown_r": 15.460813494879957,
+      "profit_factor": 1.4204807728308382,
+      "time_exit_n": 14,
+      "adverse_path_n": 0,
+      "matched_n": 125,
+      "random_bp": -20.266656893138766,
+      "matched_signal_bp": 25.65751131232621,
+      "excess_bp": 45.92416820546497,
+      "week_p": 0.0071992800719928,
+      "excess_ci95": [
+        10.502945868262973,
+        85.89337559933658
+      ]
+    },
+    "diagnostics": {
+      "candidates": 333,
+      "candidate_weeks": 64,
+      "first_week": "2025-01-06",
+      "last_week": "2026-10-19",
+      "target_auc": 0.5290522553370585,
+      "profit_auc": 0.5447691252524491,
+      "folds": [
+        {
+          "fold": "2025Q1",
+          "n": 40,
+          "positives": 2,
+          "target_auc": 0.17105263157894735,
+          "profit_auc": 0.3055555555555556
+        },
+        {
+          "fold": "2025Q2",
+          "n": 38,
+          "positives": 9,
+          "target_auc": 0.6551724137931034,
+          "profit_auc": 0.6551724137931034
+        },
+        {
+          "fold": "2025Q3",
+          "n": 31,
+          "positives": 2,
+          "target_auc": 0.6379310344827587,
+          "profit_auc": 0.7619047619047619
+        },
+        {
+          "fold": "2025Q4",
+          "n": 77,
+          "positives": 11,
+          "target_auc": 0.49586776859504134,
+          "profit_auc": 0.5819672131147542
+        },
+        {
+          "fold": "2026Q1",
+          "n": 68,
+          "positives": 6,
+          "target_auc": 0.5860215053763441,
+          "profit_auc": 0.48544973544973546
+        },
+        {
+          "fold": "2026Q2",
+          "n": 35,
+          "positives": 0,
+          "target_auc": null,
+          "profit_auc": 0.35185185185185186
+        },
+        {
+          "fold": "2026Q3",
+          "n": 34,
+          "positives": 7,
+          "target_auc": 0.6613756613756614,
+          "profit_auc": 0.7326007326007327
+        },
+        {
+          "fold": "2026Q4",
+          "n": 10,
+          "positives": 2,
+          "target_auc": 0.5625,
+          "profit_auc": 0.5625
+        }
+      ],
+      "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+      "net_r_rmse": 3.3009414128466026,
+      "retrospective_top_decile": {
+        "n": 36,
+        "weeks": 24,
+        "target_rate": 0.16666666666666666,
+        "net_win_rate": 0.2222222222222222,
+        "gross_bp": 51.09891198341435,
+        "net_bp": 44.593357171381,
+        "net_bp_ci95": [
+          -38.91319517556815,
+          137.4066609385251
+        ],
+        "net_r": 22.928239113679748,
+        "closed_trade_drawdown_r": 11.339129755880656,
+        "profit_factor": 1.7444393651049068,
+        "time_exit_n": 2,
+        "adverse_path_n": 0,
+        "matched_n": 36,
+        "random_bp": 21.1279994446428,
+        "matched_signal_bp": 44.593357171381,
+        "excess_bp": 23.46535772673821,
+        "week_p": 0.2766723327667233,
+        "excess_ci95": [
+          -51.484795780313235,
+          105.98086457838923
+        ]
+      }
+    },
+    "versus_original": {
+      "delta_total_r": 9.089541691285522,
+      "delta_mean_week_r": 0.14202408892633628,
+      "delta_mean_week_ci95": [
+        -0.32627595274994764,
+        0.683083551510806
+      ],
+      "improvement_week_p": 0.3007699230076992
+    },
+    "versus_full": {
+      "delta_total_r": 10.662868941148798,
+      "delta_mean_week_r": 0.16660732720544996,
+      "delta_mean_week_ci95": [
+        -0.03439030404734904,
+        0.5002672462957178
+      ],
+      "improvement_week_p": 0.19208079192080793
+    },
+    "matched_week_p": 0.0071992800719928,
+    "rank_permutation_p": 0.0011998800119988001,
+    "holm_p": 0.035996400359964,
+    "improvement_original_holm_p": 1.0,
+    "improvement_full_holm_p": 1.0,
+    "historical_evidence_gate": false,
+    "production_eligible": false
+  },
+  {
+    "target": "far",
+    "arm": "return_residual_only",
+    "selected": {
+      "n": 84,
+      "weeks": 47,
+      "target_rate": 0.10714285714285714,
+      "net_win_rate": 0.20238095238095238,
+      "gross_bp": 41.233123966269616,
+      "net_bp": 34.548655781791346,
+      "net_bp_ci95": [
+        -14.919301215405625,
+        90.1721638706912
+      ],
+      "net_r": 41.45105496707443,
+      "closed_trade_drawdown_r": 25.537721721084353,
+      "profit_factor": 1.562432140829991,
+      "time_exit_n": 8,
+      "adverse_path_n": 0,
+      "matched_n": 84,
+      "random_bp": -28.21390064096526,
+      "matched_signal_bp": 34.548655781791346,
+      "excess_bp": 62.76255642275661,
+      "week_p": 0.0040995900409959,
+      "excess_ci95": [
+        17.432277010523265,
+        116.52153175098422
+      ]
+    },
+    "diagnostics": {
+      "candidates": 333,
+      "candidate_weeks": 64,
+      "first_week": "2025-01-06",
+      "last_week": "2026-10-19",
+      "target_auc": 0.5980532554660554,
+      "profit_auc": 0.5136698713185743,
+      "folds": [
+        {
+          "fold": "2025Q1",
+          "n": 40,
+          "positives": 2,
+          "target_auc": 0.2631578947368421,
+          "profit_auc": 0.3263888888888889
+        },
+        {
+          "fold": "2025Q2",
+          "n": 38,
+          "positives": 9,
+          "target_auc": 0.7509578544061302,
+          "profit_auc": 0.7509578544061302
+        },
+        {
+          "fold": "2025Q3",
+          "n": 31,
+          "positives": 2,
+          "target_auc": 0.6551724137931034,
+          "profit_auc": 0.75
+        },
+        {
+          "fold": "2025Q4",
+          "n": 77,
+          "positives": 11,
+          "target_auc": 0.5743801652892562,
+          "profit_auc": 0.5758196721311475
+        },
+        {
+          "fold": "2026Q1",
+          "n": 68,
+          "positives": 6,
+          "target_auc": 0.8870967741935485,
+          "profit_auc": 0.6455026455026456
+        },
+        {
+          "fold": "2026Q2",
+          "n": 35,
+          "positives": 0,
+          "target_auc": null,
+          "profit_auc": 0.14351851851851855
+        },
+        {
+          "fold": "2026Q3",
+          "n": 34,
+          "positives": 7,
+          "target_auc": 0.4021164021164021,
+          "profit_auc": 0.3626373626373627
+        },
+        {
+          "fold": "2026Q4",
+          "n": 10,
+          "positives": 2,
+          "target_auc": 0.0625,
+          "profit_auc": 0.0625
+        }
+      ],
+      "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+      "net_r_rmse": 3.2059204657018676,
+      "retrospective_top_decile": {
+        "n": 36,
+        "weeks": 25,
+        "target_rate": 0.19444444444444445,
+        "net_win_rate": 0.2777777777777778,
+        "gross_bp": 83.44444642196714,
+        "net_bp": 77.03561268750795,
+        "net_bp_ci95": [
+          -22.619711997591477,
+          175.66389786728323
+        ],
+        "net_r": 39.60050571974395,
+        "closed_trade_drawdown_r": 7.700311479050029,
+        "profit_factor": 2.38461738743345,
+        "time_exit_n": 3,
+        "adverse_path_n": 0,
+        "matched_n": 36,
+        "random_bp": -12.286820171053485,
+        "matched_signal_bp": 77.03561268750795,
+        "excess_bp": 89.32243285856144,
+        "week_p": 0.0165983401659834,
+        "excess_ci95": [
+          21.93631273940317,
+          154.58452619538565
+        ]
+      }
+    },
+    "versus_original": {
+      "delta_total_r": 4.737738170516476,
+      "delta_mean_week_r": 0.07402715891431993,
+      "delta_mean_week_ci95": [
+        -0.17191910636360616,
+        0.4628246995670266
+      ],
+      "improvement_week_p": 0.43185681431856815
+    },
+    "versus_full": {
+      "delta_total_r": 6.311065420379748,
+      "delta_mean_week_r": 0.09861039719343356,
+      "delta_mean_week_ci95": [
+        -0.322510492846539,
+        0.48584344850789085
+      ],
+      "improvement_week_p": 0.3284671532846715
+    },
+    "matched_week_p": 0.0040995900409959,
+    "rank_permutation_p": 0.18688131186881313,
+    "holm_p": 0.0245975402459754,
+    "improvement_original_holm_p": 1.0,
+    "improvement_full_holm_p": 1.0,
+    "historical_evidence_gate": false,
+    "production_eligible": false
+  },
+  {
+    "target": "near",
+    "arm": "original_model",
+    "selected": {
+      "n": 76,
+      "weeks": 45,
+      "target_rate": 0.2236842105263158,
+      "net_win_rate": 0.23684210526315788,
+      "gross_bp": 13.34167681096278,
+      "net_bp": 7.0131647306141245,
+      "net_bp_ci95": [
+        -25.711139759414017,
+        44.55860799073305
+      ],
+      "net_r": 7.610368402397231,
+      "closed_trade_drawdown_r": 14.837244736725879,
+      "profit_factor": 1.1192910225947323,
+      "time_exit_n": 1,
+      "adverse_path_n": 1,
+      "matched_n": 76,
+      "random_bp": -11.386044364202172,
+      "matched_signal_bp": 7.0131647306141245,
+      "excess_bp": 18.399209094816296,
+      "week_p": 0.16328367163283672,
+      "excess_ci95": [
+        -17.218937324953096,
+        60.04789867663141
+      ]
+    },
+    "diagnostics": {
+      "candidates": 333,
+      "candidate_weeks": 64,
+      "first_week": "2025-01-06",
+      "last_week": "2026-10-19",
+      "target_auc": 0.6163361327716157,
+      "profit_auc": 0.5768130862151462,
+      "folds": [
+        {
+          "fold": "2025Q1",
+          "n": 40,
+          "positives": 7,
+          "target_auc": 0.47186147186147187,
+          "profit_auc": 0.47186147186147187
+        },
+        {
+          "fold": "2025Q2",
+          "n": 38,
+          "positives": 11,
+          "target_auc": 0.7138047138047138,
+          "profit_auc": 0.7138047138047138
+        },
+        {
+          "fold": "2025Q3",
+          "n": 31,
+          "positives": 4,
+          "target_auc": 0.7777777777777778,
+          "profit_auc": 0.7777777777777778
+        },
+        {
+          "fold": "2025Q4",
+          "n": 77,
+          "positives": 18,
+          "target_auc": 0.571563088512241,
+          "profit_auc": 0.49659863945578236
+        },
+        {
+          "fold": "2026Q1",
+          "n": 68,
+          "positives": 10,
+          "target_auc": 0.6982758620689655,
+          "profit_auc": 0.6691823899371069
+        },
+        {
+          "fold": "2026Q2",
+          "n": 35,
+          "positives": 10,
+          "target_auc": 0.372,
+          "profit_auc": 0.34782608695652173
+        },
+        {
+          "fold": "2026Q3",
+          "n": 34,
+          "positives": 10,
+          "target_auc": 0.7166666666666667,
+          "profit_auc": 0.5824175824175823
+        },
+        {
+          "fold": "2026Q4",
+          "n": 10,
+          "positives": 2,
+          "target_auc": 0.625,
+          "profit_auc": 0.625
+        }
+      ],
+      "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+      "net_r_rmse": 2.0333468160903823,
+      "retrospective_top_decile": {
+        "n": 36,
+        "weeks": 24,
+        "target_rate": 0.3888888888888889,
+        "net_win_rate": 0.3888888888888889,
+        "gross_bp": 49.150304972002736,
+        "net_bp": 43.32635421895014,
+        "net_bp_ci95": [
+          -19.7824289408596,
+          102.71504621592474
+        ],
+        "net_r": 22.27303496438346,
+        "closed_trade_drawdown_r": 8.208700379989113,
+        "profit_factor": 1.9204695568934522,
+        "time_exit_n": 0,
+        "adverse_path_n": 0,
+        "matched_n": 36,
+        "random_bp": 3.4004942243169167,
+        "matched_signal_bp": 43.32635421895014,
+        "excess_bp": 39.925859994633214,
+        "week_p": 0.07429257074292571,
+        "excess_ci95": [
+          -10.335166945423223,
+          94.51622523449328
+        ]
+      }
+    },
+    "versus_original": {
+      "delta_total_r": 0.0,
+      "delta_mean_week_r": 0.0,
+      "delta_mean_week_ci95": [
+        0.0,
+        0.0
+      ],
+      "improvement_week_p": 1.0
+    },
+    "versus_full": {
+      "delta_total_r": -7.790789986739835,
+      "delta_mean_week_r": -0.12173109354280992,
+      "delta_mean_week_ci95": [
+        -0.5048587777239947,
+        0.23427924958032534
+      ],
+      "improvement_week_p": 0.7330266973302669
+    }
+  },
+  {
+    "target": "near",
+    "arm": "full_context",
+    "selected": {
+      "n": 122,
+      "weeks": 49,
+      "target_rate": 0.23770491803278687,
+      "net_win_rate": 0.27049180327868855,
+      "gross_bp": 15.127875550974261,
+      "net_bp": 8.838955575255083,
+      "net_bp_ci95": [
+        -13.788999973798056,
+        33.4161689340205
+      ],
+      "net_r": 15.401158389137066,
+      "closed_trade_drawdown_r": 14.725748055189909,
+      "profit_factor": 1.1573182500711257,
+      "time_exit_n": 4,
+      "adverse_path_n": 1,
+      "matched_n": 122,
+      "random_bp": -13.052329976167778,
+      "matched_signal_bp": 8.838955575255083,
+      "excess_bp": 21.891285551422857,
+      "week_p": 0.047495250474952504,
+      "excess_ci95": [
+        -1.375173295784041,
+        50.932203852235574
+      ]
+    },
+    "diagnostics": {
+      "candidates": 333,
+      "candidate_weeks": 64,
+      "first_week": "2025-01-06",
+      "last_week": "2026-10-19",
+      "target_auc": 0.6204199938403457,
+      "profit_auc": 0.5982973816216001,
+      "folds": [
+        {
+          "fold": "2025Q1",
+          "n": 40,
+          "positives": 7,
+          "target_auc": 0.41991341991341985,
+          "profit_auc": 0.41991341991341985
+        },
+        {
+          "fold": "2025Q2",
+          "n": 38,
+          "positives": 11,
+          "target_auc": 0.67003367003367,
+          "profit_auc": 0.67003367003367
+        },
+        {
+          "fold": "2025Q3",
+          "n": 31,
+          "positives": 4,
+          "target_auc": 0.7222222222222223,
+          "profit_auc": 0.7222222222222223
+        },
+        {
+          "fold": "2025Q4",
+          "n": 77,
+          "positives": 18,
+          "target_auc": 0.5386064030131826,
+          "profit_auc": 0.5578231292517006
+        },
+        {
+          "fold": "2026Q1",
+          "n": 68,
+          "positives": 10,
+          "target_auc": 0.6913793103448276,
+          "profit_auc": 0.6012578616352201
+        },
+        {
+          "fold": "2026Q2",
+          "n": 35,
+          "positives": 10,
+          "target_auc": 0.58,
+          "profit_auc": 0.45652173913043476
+        },
+        {
+          "fold": "2026Q3",
+          "n": 34,
+          "positives": 10,
+          "target_auc": 0.7916666666666667,
+          "profit_auc": 0.8388278388278388
+        },
+        {
+          "fold": "2026Q4",
+          "n": 10,
+          "positives": 2,
+          "target_auc": 0.625,
+          "profit_auc": 0.625
+        }
+      ],
+      "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+      "net_r_rmse": 2.080721958790889,
+      "retrospective_top_decile": {
+        "n": 36,
+        "weeks": 18,
+        "target_rate": 0.25,
+        "net_win_rate": 0.2777777777777778,
+        "gross_bp": 3.6380795457884463,
+        "net_bp": -2.610513573263361,
+        "net_bp_ci95": [
+          -33.74546322589008,
+          30.48261268842084
+        ],
+        "net_r": -1.3392811161669913,
+        "closed_trade_drawdown_r": 9.690658043756763,
+        "profit_factor": 0.9531725163553179,
+        "time_exit_n": 1,
+        "adverse_path_n": 0,
+        "matched_n": 36,
+        "random_bp": -6.002952532309932,
+        "matched_signal_bp": -2.610513573263361,
+        "excess_bp": 3.392438959046573,
+        "week_p": 0.43785621437856215,
+        "excess_ci95": [
+          -31.193450826885364,
+          44.884724972569074
+        ]
+      }
+    },
+    "versus_original": {
+      "delta_total_r": 7.790789986739835,
+      "delta_mean_week_r": 0.12173109354280992,
+      "delta_mean_week_ci95": [
+        -0.23427924958032548,
+        0.5048587777239947
+      ],
+      "improvement_week_p": 0.26707329267073293
+    },
+    "versus_full": {
+      "delta_total_r": 0.0,
+      "delta_mean_week_r": 0.0,
+      "delta_mean_week_ci95": [
+        0.0,
+        0.0
+      ],
+      "improvement_week_p": 1.0
+    }
+  },
+  {
+    "target": "near",
+    "arm": "unscored",
+    "selected": {
+      "n": 181,
+      "weeks": 64,
+      "target_rate": 0.20994475138121546,
+      "net_win_rate": 0.23756906077348067,
+      "gross_bp": 2.899384552231577,
+      "net_bp": -3.4702023398424457,
+      "net_bp_ci95": [
+        -22.504786180574506,
+        16.893832251498118
+      ],
+      "net_r": -8.974271735680155,
+      "closed_trade_drawdown_r": 35.02116990427216,
+      "profit_factor": 0.9404607246132832,
+      "time_exit_n": 6,
+      "adverse_path_n": 1,
+      "matched_n": 181,
+      "random_bp": -24.268892215770602,
+      "matched_signal_bp": -3.4702023398424457,
+      "excess_bp": 20.798689875928158,
+      "week_p": 0.026997300269973004,
+      "excess_ci95": [
+        1.0197680107321143,
+        43.796950594175826
+      ]
+    },
+    "diagnostics": {},
+    "versus_original": {
+      "delta_total_r": -16.584640138077383,
+      "delta_mean_week_r": -0.2591350021574591,
+      "delta_mean_week_ci95": [
+        -0.7855413159511919,
+        0.308591259728158
+      ],
+      "improvement_week_p": 0.8156184381561844
+    },
+    "versus_full": {
+      "delta_total_r": -24.375430124817225,
+      "delta_mean_week_r": -0.38086609570026914,
+      "delta_mean_week_ci95": [
+        -0.7932982089304245,
+        0.06882144464179804
+      ],
+      "improvement_week_p": 0.9493050694930507
+    }
+  },
+  {
+    "target": "near",
+    "arm": "single_reward",
+    "selected": {
+      "n": 8,
+      "weeks": 3,
+      "target_rate": 0.125,
+      "net_win_rate": 0.125,
+      "gross_bp": 13.285234116666231,
+      "net_bp": 6.688271311285725,
+      "net_bp_ci95": [
+        -76.97952075055771,
+        146.13320716599458
+      ],
+      "net_r": 0.764442095256884,
+      "closed_trade_drawdown_r": 5.4974021833499656,
+      "profit_factor": 1.0992992145319866,
+      "time_exit_n": 0,
+      "adverse_path_n": 0,
+      "matched_n": 8,
+      "random_bp": -24.214899715481174,
+      "matched_signal_bp": 6.688271311285725,
+      "excess_bp": 30.903171026766913,
+      "week_p": 0.1212878712128787,
+      "excess_ci95": [
+        3.006772997505802,
+        77.39711079353576
+      ]
+    },
+    "diagnostics": {
+      "candidates": 333,
+      "candidate_weeks": 64,
+      "first_week": "2025-01-06",
+      "last_week": "2026-10-19",
+      "target_auc": 0.6647286060757714,
+      "profit_auc": 0.5822984274276316,
+      "folds": [
+        {
+          "fold": "2025Q1",
+          "n": 40,
+          "positives": 7,
+          "target_auc": 0.5800865800865801,
+          "profit_auc": 0.5800865800865801
+        },
+        {
+          "fold": "2025Q2",
+          "n": 38,
+          "positives": 11,
+          "target_auc": 0.6734006734006734,
+          "profit_auc": 0.6734006734006734
+        },
+        {
+          "fold": "2025Q3",
+          "n": 31,
+          "positives": 4,
+          "target_auc": 0.5231481481481481,
+          "profit_auc": 0.5231481481481481
+        },
+        {
+          "fold": "2025Q4",
+          "n": 77,
+          "positives": 18,
+          "target_auc": 0.9378531073446328,
+          "profit_auc": 0.8048469387755102
+        },
+        {
+          "fold": "2026Q1",
+          "n": 68,
+          "positives": 10,
+          "target_auc": 0.6189655172413793,
+          "profit_auc": 0.44716981132075473
+        },
+        {
+          "fold": "2026Q2",
+          "n": 35,
+          "positives": 10,
+          "target_auc": 0.404,
+          "profit_auc": 0.391304347826087
+        },
+        {
+          "fold": "2026Q3",
+          "n": 34,
+          "positives": 10,
+          "target_auc": 0.6,
+          "profit_auc": 0.45054945054945056
+        },
+        {
+          "fold": "2026Q4",
+          "n": 10,
+          "positives": 2,
+          "target_auc": 0.75,
+          "profit_auc": 0.75
+        }
+      ],
+      "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+      "brier": 0.1665635022137715,
+      "retrospective_top_decile": {
+        "n": 36,
+        "weeks": 12,
+        "target_rate": 0.3611111111111111,
+        "net_win_rate": 0.3611111111111111,
+        "gross_bp": 20.85651384509356,
+        "net_bp": 14.935988023075623,
+        "net_bp_ci95": [
+          -49.519954408258755,
+          70.89917831319525
+        ],
+        "net_r": 7.679472661414278,
+        "closed_trade_drawdown_r": 8.479570562686103,
+        "profit_factor": 1.303478198559262,
+        "time_exit_n": 0,
+        "adverse_path_n": 2,
+        "matched_n": 36,
+        "random_bp": -1.8775891363794908,
+        "matched_signal_bp": 14.935988023075623,
+        "excess_bp": 16.813577159455114,
+        "week_p": 0.3598640135986401,
+        "excess_ci95": [
+          -67.04175517961484,
+          83.72390487271632
+        ]
+      }
+    },
+    "versus_original": {
+      "delta_total_r": -6.845926307140347,
+      "delta_mean_week_r": -0.10696759854906793,
+      "delta_mean_week_ci95": [
+        -0.6579956245922338,
+        0.4041825698730185
+      ],
+      "improvement_week_p": 0.646935306469353
+    },
+    "versus_full": {
+      "delta_total_r": -14.636716293880184,
+      "delta_mean_week_r": -0.22869869209187788,
+      "delta_mean_week_ci95": [
+        -0.8398233989272154,
+        0.3333965831265255
+      ],
+      "improvement_week_p": 0.7813218678132187
+    }
+  },
+  {
+    "target": "near",
+    "arm": "state_only",
+    "selected": {
+      "n": 119,
+      "weeks": 46,
+      "target_rate": 0.24369747899159663,
+      "net_win_rate": 0.2773109243697479,
+      "gross_bp": 17.274489834881038,
+      "net_bp": 11.002613664146116,
+      "net_bp_ci95": [
+        -11.083440620912231,
+        35.83354298349212
+      ],
+      "net_r": 18.699567736810728,
+      "closed_trade_drawdown_r": 12.527796058503526,
+      "profit_factor": 1.1976704874939483,
+      "time_exit_n": 4,
+      "adverse_path_n": 1,
+      "matched_n": 119,
+      "random_bp": -14.06706806138613,
+      "matched_signal_bp": 11.002613664146116,
+      "excess_bp": 25.069681725532238,
+      "week_p": 0.030996900309969003,
+      "excess_ci95": [
+        1.631602900957678,
+        52.04171659798339
+      ]
+    },
+    "diagnostics": {
+      "candidates": 333,
+      "candidate_weeks": 64,
+      "first_week": "2025-01-06",
+      "last_week": "2026-10-19",
+      "target_auc": 0.6258944897772094,
+      "profit_auc": 0.6036780377086639,
+      "folds": [
+        {
+          "fold": "2025Q1",
+          "n": 40,
+          "positives": 7,
+          "target_auc": 0.4675324675324675,
+          "profit_auc": 0.4675324675324675
+        },
+        {
+          "fold": "2025Q2",
+          "n": 38,
+          "positives": 11,
+          "target_auc": 0.6262626262626263,
+          "profit_auc": 0.6262626262626263
+        },
+        {
+          "fold": "2025Q3",
+          "n": 31,
+          "positives": 4,
+          "target_auc": 0.6666666666666667,
+          "profit_auc": 0.6666666666666667
+        },
+        {
+          "fold": "2025Q4",
+          "n": 77,
+          "positives": 18,
+          "target_auc": 0.5621468926553672,
+          "profit_auc": 0.5816326530612245
+        },
+        {
+          "fold": "2026Q1",
+          "n": 68,
+          "positives": 10,
+          "target_auc": 0.6948275862068966,
+          "profit_auc": 0.6037735849056604
+        },
+        {
+          "fold": "2026Q2",
+          "n": 35,
+          "positives": 10,
+          "target_auc": 0.624,
+          "profit_auc": 0.49275362318840576
+        },
+        {
+          "fold": "2026Q3",
+          "n": 34,
+          "positives": 10,
+          "target_auc": 0.7833333333333333,
+          "profit_auc": 0.8388278388278388
+        },
+        {
+          "fold": "2026Q4",
+          "n": 10,
+          "positives": 2,
+          "target_auc": 0.625,
+          "profit_auc": 0.625
+        }
+      ],
+      "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+      "net_r_rmse": 2.0788714071592325,
+      "retrospective_top_decile": {
+        "n": 36,
+        "weeks": 19,
+        "target_rate": 0.25,
+        "net_win_rate": 0.2777777777777778,
+        "gross_bp": 2.963088513080182,
+        "net_bp": -3.283027931923958,
+        "net_bp_ci95": [
+          -37.29538934679556,
+          34.074683955226966
+        ],
+        "net_r": -1.6865793858390838,
+        "closed_trade_drawdown_r": 10.037956313428857,
+        "profit_factor": 0.9410295011484502,
+        "time_exit_n": 1,
+        "adverse_path_n": 0,
+        "matched_n": 36,
+        "random_bp": 20.41755514448898,
+        "matched_signal_bp": -3.283027931923958,
+        "excess_bp": -23.700583076412943,
+        "week_p": 0.8343165683431657,
+        "excess_ci95": [
+          -64.01121183896674,
+          20.062678804022006
+        ]
+      }
+    },
+    "versus_original": {
+      "delta_total_r": 11.0891993344135,
+      "delta_mean_week_r": 0.17326873960021094,
+      "delta_mean_week_ci95": [
+        -0.17098909695923045,
+        0.5388248736043797
+      ],
+      "improvement_week_p": 0.17848215178482152
+    },
+    "versus_full": {
+      "delta_total_r": 3.298409347673667,
+      "delta_mean_week_r": 0.05153764605740105,
+      "delta_mean_week_ci95": [
+        -0.06874972349486622,
+        0.18897200965767272
+      ],
+      "improvement_week_p": 0.26117388261173885
+    },
+    "matched_week_p": 0.030996900309969003,
+    "rank_permutation_p": 0.014898510148985102,
+    "holm_p": 0.061993800619938005,
+    "improvement_original_holm_p": 1.0,
+    "improvement_full_holm_p": 1.0,
+    "historical_evidence_gate": false,
+    "production_eligible": false
+  },
+  {
+    "target": "near",
+    "arm": "return_residual_only",
+    "selected": {
+      "n": 81,
+      "weeks": 48,
+      "target_rate": 0.24691358024691357,
+      "net_win_rate": 0.25925925925925924,
+      "gross_bp": 18.27668965944201,
+      "net_bp": 12.014864929321728,
+      "net_bp_ci95": [
+        -19.242968761293643,
+        46.36496705421374
+      ],
+      "net_r": 13.895505183925838,
+      "closed_trade_drawdown_r": 10.091625891005915,
+      "profit_factor": 1.2105391800325416,
+      "time_exit_n": 1,
+      "adverse_path_n": 1,
+      "matched_n": 81,
+      "random_bp": -9.069262244916919,
+      "matched_signal_bp": 12.014864929321728,
+      "excess_bp": 21.084127174238645,
+      "week_p": 0.11948805119488051,
+      "excess_ci95": [
+        -13.319393328164557,
+        58.89598769338242
+      ]
+    },
+    "diagnostics": {
+      "candidates": 333,
+      "candidate_weeks": 64,
+      "first_week": "2025-01-06",
+      "last_week": "2026-10-19",
+      "target_auc": 0.6041147776263692,
+      "profit_auc": 0.56916140883874,
+      "folds": [
+        {
+          "fold": "2025Q1",
+          "n": 40,
+          "positives": 7,
+          "target_auc": 0.4502164502164502,
+          "profit_auc": 0.4502164502164502
+        },
+        {
+          "fold": "2025Q2",
+          "n": 38,
+          "positives": 11,
+          "target_auc": 0.6936026936026936,
+          "profit_auc": 0.6936026936026936
+        },
+        {
+          "fold": "2025Q3",
+          "n": 31,
+          "positives": 4,
+          "target_auc": 0.7037037037037037,
+          "profit_auc": 0.7037037037037037
+        },
+        {
+          "fold": "2025Q4",
+          "n": 77,
+          "positives": 18,
+          "target_auc": 0.5668549905838041,
+          "profit_auc": 0.5051020408163265
+        },
+        {
+          "fold": "2026Q1",
+          "n": 68,
+          "positives": 10,
+          "target_auc": 0.6810344827586207,
+          "profit_auc": 0.6578616352201258
+        },
+        {
+          "fold": "2026Q2",
+          "n": 35,
+          "positives": 10,
+          "target_auc": 0.364,
+          "profit_auc": 0.3442028985507246
+        },
+        {
+          "fold": "2026Q3",
+          "n": 34,
+          "positives": 10,
+          "target_auc": 0.7291666666666666,
+          "profit_auc": 0.5934065934065934
+        },
+        {
+          "fold": "2026Q4",
+          "n": 10,
+          "positives": 2,
+          "target_auc": 0.75,
+          "profit_auc": 0.75
+        }
+      ],
+      "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+      "net_r_rmse": 2.040007378177286,
+      "retrospective_top_decile": {
+        "n": 36,
+        "weeks": 23,
+        "target_rate": 0.3055555555555556,
+        "net_win_rate": 0.3055555555555556,
+        "gross_bp": 12.498278399784542,
+        "net_bp": 6.4252322483825015,
+        "net_bp_ci95": [
+          -43.86416012298462,
+          50.29787269436725
+        ],
+        "net_r": 3.3009685842633165,
+        "closed_trade_drawdown_r": 12.574673097801918,
+        "profit_factor": 1.1200402889490209,
+        "time_exit_n": 0,
+        "adverse_path_n": 0,
+        "matched_n": 36,
+        "random_bp": 3.8705605396921245,
+        "matched_signal_bp": 6.4252322483825015,
+        "excess_bp": 2.554671708690377,
+        "week_p": 0.44195580441955806,
+        "excess_ci95": [
+          -28.173768632194726,
+          41.17436419836886
+        ]
+      }
+    },
+    "versus_original": {
+      "delta_total_r": 6.285136781528603,
+      "delta_mean_week_r": 0.09820526221138443,
+      "delta_mean_week_ci95": [
+        -0.08885531110415006,
+        0.286440201530038
+      ],
+      "improvement_week_p": 0.21547845215478453
+    },
+    "versus_full": {
+      "delta_total_r": -1.505653205211229,
+      "delta_mean_week_r": -0.023525831331425454,
+      "delta_mean_week_ci95": [
+        -0.4095033888162912,
+        0.3364549745407039
+      ],
+      "improvement_week_p": 0.5533446655334466
+    },
+    "matched_week_p": 0.11948805119488051,
+    "rank_permutation_p": 0.09149085091490851,
+    "holm_p": 0.11948805119488051,
+    "improvement_original_holm_p": 1.0,
+    "improvement_full_holm_p": 1.0,
+    "historical_evidence_gate": false,
+    "production_eligible": false
+  },
+  {
+    "target": "opposite1618",
+    "arm": "original_model",
+    "selected": {
+      "n": 79,
+      "weeks": 42,
+      "target_rate": 0.05063291139240506,
+      "net_win_rate": 0.20253164556962025,
+      "gross_bp": 48.38585455117453,
+      "net_bp": 41.541015461650645,
+      "net_bp_ci95": [
+        -12.14277065225971,
+        102.51280726039981
+      ],
+      "net_r": 46.871726344364546,
+      "closed_trade_drawdown_r": 25.5357531341119,
+      "profit_factor": 1.6764006258180764,
+      "time_exit_n": 12,
+      "adverse_path_n": 0,
+      "matched_n": 79,
+      "random_bp": -16.30245496232905,
+      "matched_signal_bp": 41.541015461650645,
+      "excess_bp": 57.84347042397969,
+      "week_p": 0.0168983101689831,
+      "excess_ci95": [
+        7.872660348915237,
+        117.42063820985763
+      ]
+    },
+    "diagnostics": {
+      "candidates": 333,
+      "candidate_weeks": 64,
+      "first_week": "2025-01-06",
+      "last_week": "2026-10-19",
+      "target_auc": 0.6542193461391624,
+      "profit_auc": 0.5120854880488384,
+      "folds": [
+        {
+          "fold": "2025Q1",
+          "n": 40,
+          "positives": 1,
+          "target_auc": 0.1282051282051282,
+          "profit_auc": 0.3125
+        },
+        {
+          "fold": "2025Q2",
+          "n": 38,
+          "positives": 5,
+          "target_auc": 0.8545454545454545,
+          "profit_auc": 0.7873563218390804
+        },
+        {
+          "fold": "2025Q3",
+          "n": 31,
+          "positives": 1,
+          "target_auc": 0.9333333333333333,
+          "profit_auc": 0.7738095238095238
+        },
+        {
+          "fold": "2025Q4",
+          "n": 77,
+          "positives": 1,
+          "target_auc": 0.6842105263157895,
+          "profit_auc": 0.5399590163934427
+        },
+        {
+          "fold": "2026Q1",
+          "n": 68,
+          "positives": 5,
+          "target_auc": 0.8444444444444444,
+          "profit_auc": 0.6124338624338624
+        },
+        {
+          "fold": "2026Q2",
+          "n": 35,
+          "positives": 0,
+          "target_auc": null,
+          "profit_auc": 0.10185185185185187
+        },
+        {
+          "fold": "2026Q3",
+          "n": 34,
+          "positives": 4,
+          "target_auc": 0.3916666666666666,
+          "profit_auc": 0.3626373626373627
+        },
+        {
+          "fold": "2026Q4",
+          "n": 10,
+          "positives": 2,
+          "target_auc": 0.5,
+          "profit_auc": 0.5
+        }
+      ],
+      "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+      "net_r_rmse": 3.4619987621056336,
+      "retrospective_top_decile": {
+        "n": 36,
+        "weeks": 26,
+        "target_rate": 0.05555555555555555,
+        "net_win_rate": 0.2222222222222222,
+        "gross_bp": 64.35743421637413,
+        "net_bp": 57.52047530681219,
+        "net_bp_ci95": [
+          -33.77572421380091,
+          160.968873304692
+        ],
+        "net_r": 29.57295710880537,
+        "closed_trade_drawdown_r": 18.21976842785277,
+        "profit_factor": 1.9601521784027374,
+        "time_exit_n": 6,
+        "adverse_path_n": 0,
+        "matched_n": 36,
+        "random_bp": -12.631923253994895,
+        "matched_signal_bp": 57.52047530681219,
+        "excess_bp": 70.15239856080707,
+        "week_p": 0.08599140085991401,
+        "excess_ci95": [
+          -19.685125317704056,
+          168.50694945037876
+        ]
+      }
+    },
+    "versus_original": {
+      "delta_total_r": 0.0,
+      "delta_mean_week_r": 0.0,
+      "delta_mean_week_ci95": [
+        0.0,
+        0.0
+      ],
+      "improvement_week_p": 1.0
+    },
+    "versus_full": {
+      "delta_total_r": -10.841246619007324,
+      "delta_mean_week_r": -0.16939447842198943,
+      "delta_mean_week_ci95": [
+        -0.7844217520134463,
+        0.36638119494347016
+      ],
+      "improvement_week_p": 0.7097290270972902
+    }
+  },
+  {
+    "target": "opposite1618",
+    "arm": "full_context",
+    "selected": {
+      "n": 126,
+      "weeks": 55,
+      "target_rate": 0.05555555555555555,
+      "net_win_rate": 0.1984126984126984,
+      "gross_bp": 38.9067355756553,
+      "net_bp": 32.072599651926375,
+      "net_bp_ci95": [
+        -3.2019072041373584,
+        70.84400379405976
+      ],
+      "net_r": 57.71297296337186,
+      "closed_trade_drawdown_r": 15.461740414486961,
+      "profit_factor": 1.5245146884023486,
+      "time_exit_n": 19,
+      "adverse_path_n": 0,
+      "matched_n": 126,
+      "random_bp": -10.590710449853532,
+      "matched_signal_bp": 32.072599651926375,
+      "excess_bp": 42.663310101779906,
+      "week_p": 0.019698030196980302,
+      "excess_ci95": [
+        4.266584705161634,
+        84.72606806480974
+      ]
+    },
+    "diagnostics": {
+      "candidates": 333,
+      "candidate_weeks": 64,
+      "first_week": "2025-01-06",
+      "last_week": "2026-10-19",
+      "target_auc": 0.5409316104830058,
+      "profit_auc": 0.5683292063583817,
+      "folds": [
+        {
+          "fold": "2025Q1",
+          "n": 40,
+          "positives": 1,
+          "target_auc": 0.10256410256410253,
+          "profit_auc": 0.375
+        },
+        {
+          "fold": "2025Q2",
+          "n": 38,
+          "positives": 5,
+          "target_auc": 0.6151515151515151,
+          "profit_auc": 0.7049808429118773
+        },
+        {
+          "fold": "2025Q3",
+          "n": 31,
+          "positives": 1,
+          "target_auc": 0.9333333333333333,
+          "profit_auc": 0.8809523809523809
+        },
+        {
+          "fold": "2025Q4",
+          "n": 77,
+          "positives": 1,
+          "target_auc": 0.5526315789473684,
+          "profit_auc": 0.5706967213114754
+        },
+        {
+          "fold": "2026Q1",
+          "n": 68,
+          "positives": 5,
+          "target_auc": 0.5333333333333334,
+          "profit_auc": 0.5
+        },
+        {
+          "fold": "2026Q2",
+          "n": 35,
+          "positives": 0,
+          "target_auc": null,
+          "profit_auc": 0.3657407407407408
+        },
+        {
+          "fold": "2026Q3",
+          "n": 34,
+          "positives": 4,
+          "target_auc": 0.6166666666666666,
+          "profit_auc": 0.717948717948718
+        },
+        {
+          "fold": "2026Q4",
+          "n": 10,
+          "positives": 2,
+          "target_auc": 0.5,
+          "profit_auc": 0.5
+        }
+      ],
+      "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+      "net_r_rmse": 3.465267115164238,
+      "retrospective_top_decile": {
+        "n": 36,
+        "weeks": 25,
+        "target_rate": 0.08333333333333333,
+        "net_win_rate": 0.19444444444444445,
+        "gross_bp": 57.662042206312826,
+        "net_bp": 50.913298265233735,
+        "net_bp_ci95": [
+          -49.10985096211761,
+          165.44036663466525
+        ],
+        "net_r": 26.178985860066515,
+        "closed_trade_drawdown_r": 16.75688105509225,
+        "profit_factor": 1.8206644785436743,
+        "time_exit_n": 4,
+        "adverse_path_n": 0,
+        "matched_n": 36,
+        "random_bp": 28.408668893705418,
+        "matched_signal_bp": 50.913298265233735,
+        "excess_bp": 22.504629371528317,
+        "week_p": 0.35426457354264573,
+        "excess_ci95": [
+          -79.61632030216354,
+          124.58361754560354
+        ]
+      }
+    },
+    "versus_original": {
+      "delta_total_r": 10.841246619007324,
+      "delta_mean_week_r": 0.16939447842198943,
+      "delta_mean_week_ci95": [
+        -0.3663811949434709,
+        0.784421752013446
+      ],
+      "improvement_week_p": 0.2903709629037096
+    },
+    "versus_full": {
+      "delta_total_r": 0.0,
+      "delta_mean_week_r": 0.0,
+      "delta_mean_week_ci95": [
+        0.0,
+        0.0
+      ],
+      "improvement_week_p": 1.0
+    }
+  },
+  {
+    "target": "opposite1618",
+    "arm": "unscored",
+    "selected": {
+      "n": 163,
+      "weeks": 64,
+      "target_rate": 0.05521472392638037,
+      "net_win_rate": 0.17791411042944785,
+      "gross_bp": 29.13768708647085,
+      "net_bp": 22.30319658914907,
+      "net_bp_ci95": [
+        -10.249126262384612,
+        62.63291730298236
+      ],
+      "net_r": 51.91397937876182,
+      "closed_trade_drawdown_r": 28.54462075339186,
+      "profit_factor": 1.3547787308696557,
+      "time_exit_n": 21,
+      "adverse_path_n": 0,
+      "matched_n": 163,
+      "random_bp": -20.668991581543686,
+      "matched_signal_bp": 22.30319658914907,
+      "excess_bp": 42.97218817069275,
+      "week_p": 0.0160983901609839,
+      "excess_ci95": [
+        6.014180690152872,
+        84.58098766933404
+      ]
+    },
+    "diagnostics": {},
+    "versus_original": {
+      "delta_total_r": 5.042253034397277,
+      "delta_mean_week_r": 0.07878520366245745,
+      "delta_mean_week_ci95": [
+        -0.7637978308458285,
+        1.0832495899814822
+      ],
+      "improvement_week_p": 0.44495550444955506
+    },
+    "versus_full": {
+      "delta_total_r": -5.7989935846100416,
+      "delta_mean_week_r": -0.0906092747595319,
+      "delta_mean_week_ci95": [
+        -0.6856249976837095,
+        0.811556767505341
+      ],
+      "improvement_week_p": 0.5952404759524048
+    }
+  },
+  {
+    "target": "opposite1618",
+    "arm": "single_reward",
+    "selected": {
+      "n": 0
+    },
+    "diagnostics": {
+      "candidates": 255,
+      "candidate_weeks": 50,
+      "first_week": "2025-07-07",
+      "last_week": "2026-10-19",
+      "target_auc": 0.693958760537708,
+      "profit_auc": 0.513821693265602,
+      "folds": [
+        {
+          "fold": "2025Q3",
+          "n": 31,
+          "positives": 1,
+          "target_auc": 0.6833333333333333,
+          "profit_auc": 0.36904761904761907
+        },
+        {
+          "fold": "2025Q4",
+          "n": 77,
+          "positives": 1,
+          "target_auc": 0.5197368421052632,
+          "profit_auc": 0.7776639344262294
+        },
+        {
+          "fold": "2026Q1",
+          "n": 68,
+          "positives": 5,
+          "target_auc": 0.9285714285714286,
+          "profit_auc": 0.4173280423280423
+        },
+        {
+          "fold": "2026Q2",
+          "n": 35,
+          "positives": 0,
+          "target_auc": null,
+          "profit_auc": 0.24305555555555555
+        },
+        {
+          "fold": "2026Q3",
+          "n": 34,
+          "positives": 4,
+          "target_auc": 0.6125,
+          "profit_auc": 0.45054945054945056
+        },
+        {
+          "fold": "2026Q4",
+          "n": 10,
+          "positives": 2,
+          "target_auc": 0.75,
+          "profit_auc": 0.75
+        }
+      ],
+      "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+      "brier": 0.04769923275692823,
+      "retrospective_top_decile": {
+        "n": 28,
+        "weeks": 9,
+        "target_rate": 0.0,
+        "net_win_rate": 0.21428571428571427,
+        "gross_bp": 25.099280983257835,
+        "net_bp": 18.12683403351706,
+        "net_bp_ci95": [
+          -77.04585598157911,
+          144.9949458581602
+        ],
+        "net_r": 7.251187688310723,
+        "closed_trade_drawdown_r": 17.601620373292082,
+        "profit_factor": 1.2995795490971038,
+        "time_exit_n": 6,
+        "adverse_path_n": 0,
+        "matched_n": 28,
+        "random_bp": 39.551942082547086,
+        "matched_signal_bp": 18.12683403351706,
+        "excess_bp": -21.42510804903001,
+        "week_p": 0.726027397260274,
+        "excess_ci95": [
+          -240.41605933601693,
+          144.11028458406452
+        ]
+      }
+    },
+    "versus_original": {
+      "delta_total_r": -46.87172634436453,
+      "delta_mean_week_r": -0.7323707241306958,
+      "delta_mean_week_ci95": [
+        -1.7976786539946679,
+        0.14920032346057788
+      ],
+      "improvement_week_p": 0.92000799920008
+    },
+    "versus_full": {
+      "delta_total_r": -57.71297296337187,
+      "delta_mean_week_r": -0.9017652025526854,
+      "delta_mean_week_ci95": [
+        -2.0155156333355007,
+        0.04417976251717093
+      ],
+      "improvement_week_p": 0.9512048795120488
+    }
+  },
+  {
+    "target": "opposite1618",
+    "arm": "state_only",
+    "selected": {
+      "n": 128,
+      "weeks": 55,
+      "target_rate": 0.0546875,
+      "net_win_rate": 0.203125,
+      "gross_bp": 37.87001920952705,
+      "net_bp": 31.033624140774776,
+      "net_bp_ci95": [
+        -5.469626670342438,
+        70.3673755106537
+      ],
+      "net_r": 56.72922517097335,
+      "closed_trade_drawdown_r": 16.44546907299518,
+      "profit_factor": 1.5104730135806608,
+      "time_exit_n": 20,
+      "adverse_path_n": 0,
+      "matched_n": 128,
+      "random_bp": -11.52852239281924,
+      "matched_signal_bp": 31.033624140774776,
+      "excess_bp": 42.56214653359402,
+      "week_p": 0.016998300169983,
+      "excess_ci95": [
+        5.7132858216725175,
+        85.29066351851539
+      ]
+    },
+    "diagnostics": {
+      "candidates": 333,
+      "candidate_weeks": 64,
+      "first_week": "2025-01-06",
+      "last_week": "2026-10-19",
+      "target_auc": 0.5167487561694556,
+      "profit_auc": 0.5366733417028625,
+      "folds": [
+        {
+          "fold": "2025Q1",
+          "n": 40,
+          "positives": 1,
+          "target_auc": 0.0,
+          "profit_auc": 0.2916666666666667
+        },
+        {
+          "fold": "2025Q2",
+          "n": 38,
+          "positives": 5,
+          "target_auc": 0.4484848484848485,
+          "profit_auc": 0.6819923371647509
+        },
+        {
+          "fold": "2025Q3",
+          "n": 31,
+          "positives": 1,
+          "target_auc": 0.9333333333333333,
+          "profit_auc": 0.7261904761904762
+        },
+        {
+          "fold": "2025Q4",
+          "n": 77,
+          "positives": 1,
+          "target_auc": 0.644736842105263,
+          "profit_auc": 0.5860655737704918
+        },
+        {
+          "fold": "2026Q1",
+          "n": 68,
+          "positives": 5,
+          "target_auc": 0.5174603174603175,
+          "profit_auc": 0.49603174603174605
+        },
+        {
+          "fold": "2026Q2",
+          "n": 35,
+          "positives": 0,
+          "target_auc": null,
+          "profit_auc": 0.3564814814814815
+        },
+        {
+          "fold": "2026Q3",
+          "n": 34,
+          "positives": 4,
+          "target_auc": 0.6083333333333334,
+          "profit_auc": 0.728937728937729
+        },
+        {
+          "fold": "2026Q4",
+          "n": 10,
+          "positives": 2,
+          "target_auc": 0.25,
+          "profit_auc": 0.25
+        }
+      ],
+      "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+      "net_r_rmse": 3.4577816347010653,
+      "retrospective_top_decile": {
+        "n": 36,
+        "weeks": 24,
+        "target_rate": 0.08333333333333333,
+        "net_win_rate": 0.19444444444444445,
+        "gross_bp": 57.66213207852458,
+        "net_bp": 50.91338805339291,
+        "net_bp_ci95": [
+          -45.80476767413861,
+          160.24882998319492
+        ],
+        "net_r": 26.178981244950155,
+        "closed_trade_drawdown_r": 16.756887681224704,
+        "profit_factor": 1.8206642151378771,
+        "time_exit_n": 4,
+        "adverse_path_n": 0,
+        "matched_n": 36,
+        "random_bp": 44.75664753761372,
+        "matched_signal_bp": 50.91338805339291,
+        "excess_bp": 6.156740515779193,
+        "week_p": 0.4530546945305469,
+        "excess_ci95": [
+          -98.73298965538176,
+          107.30658420783786
+        ]
+      }
+    },
+    "versus_original": {
+      "delta_total_r": 9.857498826608813,
+      "delta_mean_week_r": 0.1540234191657627,
+      "delta_mean_week_ci95": [
+        -0.3899837796182595,
+        0.774895463473775
+      ],
+      "improvement_week_p": 0.30586941305869414
+    },
+    "versus_full": {
+      "delta_total_r": -0.9837477923985108,
+      "delta_mean_week_r": -0.015371059256226732,
+      "delta_mean_week_ci95": [
+        -0.08237115735951141,
+        0.03802214632904947
+      ],
+      "improvement_week_p": 0.6199380061993801
+    },
+    "matched_week_p": 0.016998300169983,
+    "rank_permutation_p": 0.000999900009999,
+    "holm_p": 0.050994900509949,
+    "improvement_original_holm_p": 1.0,
+    "improvement_full_holm_p": 1.0,
+    "historical_evidence_gate": false,
+    "production_eligible": false
+  },
+  {
+    "target": "opposite1618",
+    "arm": "return_residual_only",
+    "selected": {
+      "n": 82,
+      "weeks": 46,
+      "target_rate": 0.06097560975609756,
+      "net_win_rate": 0.1951219512195122,
+      "gross_bp": 37.35089531402973,
+      "net_bp": 30.528425099355555,
+      "net_bp_ci95": [
+        -17.164534593968163,
+        88.47969792573488
+      ],
+      "net_r": 35.75517506963655,
+      "closed_trade_drawdown_r": 28.83717285627567,
+      "profit_factor": 1.4925142470433284,
+      "time_exit_n": 11,
+      "adverse_path_n": 0,
+      "matched_n": 82,
+      "random_bp": -19.6977005411682,
+      "matched_signal_bp": 30.528425099355555,
+      "excess_bp": 50.22612564052376,
+      "week_p": 0.0115988401159884,
+      "excess_ci95": [
+        11.632289312138445,
+        100.31536373658486
+      ]
+    },
+    "diagnostics": {
+      "candidates": 333,
+      "candidate_weeks": 64,
+      "first_week": "2025-01-06",
+      "last_week": "2026-10-19",
+      "target_auc": 0.6437922335131802,
+      "profit_auc": 0.5053737156698653,
+      "folds": [
+        {
+          "fold": "2025Q1",
+          "n": 40,
+          "positives": 1,
+          "target_auc": 0.1282051282051282,
+          "profit_auc": 0.3263888888888889
+        },
+        {
+          "fold": "2025Q2",
+          "n": 38,
+          "positives": 5,
+          "target_auc": 0.7575757575757576,
+          "profit_auc": 0.7471264367816092
+        },
+        {
+          "fold": "2025Q3",
+          "n": 31,
+          "positives": 1,
+          "target_auc": 0.8666666666666667,
+          "profit_auc": 0.8214285714285713
+        },
+        {
+          "fold": "2025Q4",
+          "n": 77,
+          "positives": 1,
+          "target_auc": 0.7236842105263157,
+          "profit_auc": 0.5389344262295082
+        },
+        {
+          "fold": "2026Q1",
+          "n": 68,
+          "positives": 5,
+          "target_auc": 0.8253968253968255,
+          "profit_auc": 0.58994708994709
+        },
+        {
+          "fold": "2026Q2",
+          "n": 35,
+          "positives": 0,
+          "target_auc": null,
+          "profit_auc": 0.10185185185185187
+        },
+        {
+          "fold": "2026Q3",
+          "n": 34,
+          "positives": 4,
+          "target_auc": 0.4916666666666667,
+          "profit_auc": 0.402930402930403
+        },
+        {
+          "fold": "2026Q4",
+          "n": 10,
+          "positives": 2,
+          "target_auc": 0.25,
+          "profit_auc": 0.25
+        }
+      ],
+      "ranking_basis": "Within-fold AUC weighted by eligible test rows; top decile selected separately in every fold. Not a trading gate.",
+      "net_r_rmse": 3.435206571094186,
+      "retrospective_top_decile": {
+        "n": 36,
+        "weeks": 25,
+        "target_rate": 0.027777777777777776,
+        "net_win_rate": 0.19444444444444445,
+        "gross_bp": 36.09211117964556,
+        "net_bp": 29.176111015143526,
+        "net_bp_ci95": [
+          -50.43531892441969,
+          133.4726080081175
+        ],
+        "net_r": 14.996842400036364,
+        "closed_trade_drawdown_r": 18.220809844525256,
+        "profit_factor": 1.4701093627936241,
+        "time_exit_n": 6,
+        "adverse_path_n": 0,
+        "matched_n": 36,
+        "random_bp": -34.08691613910142,
+        "matched_signal_bp": 29.176111015143526,
+        "excess_bp": 63.26302715424495,
+        "week_p": 0.06819318068193181,
+        "excess_ci95": [
+          -10.35388836883273,
+          145.39197955130925
+        ]
+      }
+    },
+    "versus_original": {
+      "delta_total_r": -11.116551274727982,
+      "delta_mean_week_r": -0.17369611366762472,
+      "delta_mean_week_ci95": [
+        -0.7388048635037305,
+        0.2712166145610824
+      ],
+      "improvement_week_p": 0.7014298570142986
+    },
+    "versus_full": {
+      "delta_total_r": -21.95779789373531,
+      "delta_mean_week_r": -0.34309059208961423,
+      "delta_mean_week_ci95": [
+        -1.091991325465462,
+        0.30973521497741446
+      ],
+      "improvement_week_p": 0.8201179882011799
+    },
+    "matched_week_p": 0.0115988401159884,
+    "rank_permutation_p": 0.31126887311268875,
+    "holm_p": 0.0463953604639536,
+    "improvement_original_holm_p": 1.0,
+    "improvement_full_holm_p": 1.0,
+    "historical_evidence_gate": false,
+    "production_eligible": false
+  }
+]

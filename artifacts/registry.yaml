@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: eth-btc-context-ablation-20261031-v1
+    artifact_type: manifest
+    role: eth_btc_state_vs_return_ablation_and_high_score_cohort_diagnosis
+    source_repo: darkforest-x/fable-trading
+    source_commit: a5d8c26312
+    generator_commit: 05b9d52d5d
+    source_path: experiments/active/exp-eth-btc-context-ablation-20261031-v1/summary.json
+    storage_uri: repo://experiments/active/exp-eth-btc-context-ablation-20261031-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: '48new models and48reused; state-only near+18.70R vsoriginal+7.61,mean signal/random+11.00/-14.07bp,improvementp0.1785; all6gates fail. High-score tail remains negative. Full-context promoted18+3.10R/displaced18+26.72R; correlation/beta dominates promoted score uplift.96exact replays,85tests,48additive SHAP batches,paired training backgrounds. Failed interventional TreeSHAP values rejected; native-callable permutation sensitivity retained. Read completion/reproduction/validation/tail_explanation/shap_sensitivity. Models and large gzip remain local. Notion EXP-226.'
   - artifact_id: eth-1618-features-training-20261031-v1
     artifact_type: manifest
     role: eth_causal_feature_and_training_single_variable_comparisons

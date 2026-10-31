@@ -16,18 +16,18 @@ schema_version: 1
 experiments:
   - experiment_id: exp-eth-btc-context-ablation-20261031-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: active
+    source_commit: a5d8c26312
+    status: inconclusive
     question: Which BTC-context input pair drives ETH improvement or high-score deterioration?
     single_variable: Add state beta/correlation or return/residual pair separately to unchanged original20features; compare both to original and existing full-context model.
-    result: Pending; two frozen arms and near-primary tail/SHAP diagnosis, unchanged training/barriers/costs/gate.
-    artifacts: []
+    result: 'Near state-only +18.70R/119, return-residual +13.90R/81 versus original +7.61R/76 and full-context +15.40R/122. Mean signal/random bp state +11.00/-14.07, returns +12.01/-9.07; state improvement p0.1785. All6 evidence gates fail. State high-score tail remains -3.28bp; full-context displaced18 +26.72R and promoted18 +3.10R. No validated replacement.'
+    artifacts: [eth-btc-context-ablation-20261031-v1]
     canonical_report: experiments/active/exp-eth-btc-context-ablation-20261031-v1/summary.json
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: Owner says continue. 48new quarterly models planned,48original/full models reused; use existing causal features and native outcomes. Residual still uses beta internally; groups not orthogonal. No paper/live changes.
+    notes: '48new models/48reused,333test events pertarget/64NYweeks/8quarters;0.7percent stop,fees,training,gates unchanged.96score replays exact,85tests,all controls/native fields exact;24VectorBT new admission runs,zero native/OHLC replay. Tail SHAP explains all333events with paired historical backgrounds; native parity and48batches additive. Failed interventional TreeSHAP preserved and rejected; native-callable permutation3/10budget cohort sensitivity documented. Notion EXP-226 40a8856479af81e19769e1a2ed6c0b03. Production false; source models and large raw outputs remain local.'
   - experiment_id: exp-eth-1618-features-training-20261031-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 5a8c2449ea

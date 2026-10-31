@@ -1,0 +1,31 @@
+{
+  "runtime": {
+    "python": "3.9.6",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "lightgbm": "4.6.0",
+    "sklearn": "1.6.1",
+    "vectorbt": "1.2.0 isolated",
+    "shap": "0.52.0 isolated Python3.12"
+  },
+  "commands": [
+    ".venv/bin/python -m yoyo.evaluation.eth_btc_ablation fit",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.eth_btc_ablation portfolios",
+    ".venv/bin/python -m yoyo.evaluation.eth_btc_ablation_evaluate",
+    ".venv/bin/python -m yoyo.evaluation.eth_btc_tail_explain export",
+    "/Users/zhangzc/.local/share/fable-trading/venvs/shap-052/bin/python -m yoyo.evaluation.eth_btc_tail_explain verify",
+    ".venv/bin/python -m yoyo.evaluation.eth_btc_tail_explain summarize",
+    ".venv/bin/python -m yoyo.evaluation.eth_btc_ablation_validate"
+  ],
+  "source_data": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-1618-features-training-20261031-v1/data.csv.gz",
+  "native_source": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-eth-repeat-1618-20261031-v1",
+  "original_models": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-eth-xau-1618-models-20261031-v2/models/ETH",
+  "full_context_models": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-1618-features-training-20261031-v1/models",
+  "local_models": "models/target/fold/arm.pkl",
+  "local_explanations": "shap/fold/arm/*_explanation.pkl",
+  "working_directory": "/Users/zhangzc/fable-trading",
+  "tests_command": ".venv/bin/python -m pytest tests/evaluation/test_eth_btc_ablation.py tests/boundaries/test_layer_imports.py tests/boundaries/test_yoyo_package_is_local.py -q",
+  "explanation_recovery": "Initial interventional TreeSHAP rejected. Current verify uses native-callable permutation budgets3and10 with the same frozen backgrounds; initial failure receipts retained. See config addendum and shap_failure_minimal_checks.json.",
+  "do_not_repeat_completed_runs": "Reuse existing weights/fills/explanations when unchanged. Commands document reproduction, not a request to rerun completed experiments.",
+  "source_models_must_exist": true
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "case": "complete_background",
+    "rows": 62,
+    "passed": false,
+    "error": "Additivity check failed in TreeExplainer! Please ensure the data matrix you passed to the explainer is the same shape that the model was trained on. If your data shape is correct then please report this on GitHub. This check failed because for one of the samples the sum of the SHAP values was 0.333245, while the model output was 0.287505. If this difference is acceptable you can set check_additivity=False to disable this check."
+  },
+  {
+    "case": "native_callable_permutation_three",
+    "max_error": 0.0,
+    "seconds": 2.9819156249868684,
+    "passed": true
+  }
+]
