@@ -96,19 +96,22 @@ def native(sensitivity=False):
     print(suffix,dict(orders=len(entries),trades=len(rows),fills=len(fills),ambiguous=int(rows.ambiguous.sum())),flush=True)
 
 
-def label_data():
+def label_data(include_xau=True):
     from yoyo.evaluation.btc_eth_repeat_fit import labels
     old,_=labels()
-    new=read('XAU_native_trades.csv.gz')
-    events=read('XAU_events.csv.gz')
-    x=new[new.kind.eq('signal')].copy()
-    extra=[c for c in events if c not in x or c=='event_id']
-    x=x.merge(events[extra],on='event_id',validate='many_to_one')
-    x['label']=x.reason.eq(4).astype(int)
-    c=new[new.kind.eq('control')].groupby(['event_id','target']).agg(
-        random_bp=('net_notional_bp','mean'),random_r=('net_r','mean'),random_n=('trade_id','size')).reset_index()
-    x=x.merge(c,on=['event_id','target'],how='left',validate='one_to_one')
-    d=pd.concat([old,x],ignore_index=True)
+    parts=[old]
+    if include_xau:
+        new=read('XAU_native_trades.csv.gz')
+        events=read('XAU_events.csv.gz')
+        x=new[new.kind.eq('signal')].copy()
+        extra=[c for c in events if c not in x or c=='event_id']
+        x=x.merge(events[extra],on='event_id',validate='many_to_one')
+        x['label']=x.reason.eq(4).astype(int)
+        c=new[new.kind.eq('control')].groupby(['event_id','target']).agg(
+            random_bp=('net_notional_bp','mean'),random_r=('net_r','mean'),random_n=('trade_id','size')).reset_index()
+        x=x.merge(c,on=['event_id','target'],how='left',validate='one_to_one')
+        parts.append(x)
+    d=pd.concat(parts,ignore_index=True)
     # Net-gain geometry is target-specific; original near features are retained
     # byte-for-value and far heads receive their actual known target distance.
     farther=d.target.ne('near')
