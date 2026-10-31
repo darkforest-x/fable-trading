@@ -45,7 +45,7 @@ def draw(r):
     setup();fig=plt.figure(figsize=(16,9),dpi=135);ax=fig.add_axes([.065,.17,.86,.64])
     times=pd.DatetimeIndex([c['time'] for c in r['candles']]);side=r['side'];color='#4ae5a0' if side==1 else '#ff7183'
     ready=pd.Timestamp(r['ready']);expiry=pd.Timestamp(r['expiry']);first=pd.Timestamp(r['first_monday']);level=r['level']
-    price=lambda v:f'{v:,.8f}'.rstrip('0').rstrip('.') if abs(v)<1 else f'{v:,.2f}'
+    price=lambda v:f'{v:,.10f}'.rstrip('0').rstrip('.') if abs(v)<1 else f'{v:,.2f}'
     fig.text(.065,.945,f'{r["symbol"]}USDT.P · 12小时    {r["number"]:04d} / {r["total"]}',fontsize=24,weight='bold')
     fig.text(.065,.902,f'{pd.Timestamp(r["signal_open"]):%Y-%m-%d %H:%M} 开盘（北京时间）  |  {"下刺收回" if side==1 else "上刺收回"} · {KINDS[r["kind"]]}',fontsize=17,color=color)
     fig.text(.065,.858,f'1.618 = {price(level)}    周一区间：{price(r["monday_low"])} — {price(r["monday_high"])}    影线占比 {r["wick_fraction"]:.0%}',fontsize=13,color=MUTED)
