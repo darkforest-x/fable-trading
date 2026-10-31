@@ -186,3 +186,18 @@ def test_multiple_native_caches_keep_order_and_reject_fee_changes(tmp_path):
     assert prior_studies(cfg)==[a,b]
     changed=dict(CFG,maker_fee=.001);(b/'config.json').write_text(json.dumps(changed))
     with pytest.raises(ValueError,match='maker_fee'):prior_studies(cfg)
+
+
+def test_higher_configs_change_timeframe_without_changing_original_trading_rules():
+    for tf in ('15m','1h'):
+        cfg=json.loads((ROOT/f'experiments/active/exp-monday-harmonic-{tf}-confluence-20261031-v1/config.json').read_text())
+        for k in ('maker_fee','taker_fee','non_target_slippage_bp','breakeven_bp','lock_bp','v2_threshold','v3_cut','far_score','add_pct','v3_sizing','score_column','baseline_arm','baseline_ledger','seed'):
+            assert cfg[k]==CFG[k]
+        for k in ('lookback_bars','min_bars','peak_spacing','fib_tolerance','percent_c_to_d'):
+            assert cfg['harmonic'][k]==CFG['harmonic'][k]
+        assert cfg['harmonic']['interval']==tf
+
+
+def test_holm_keeps_untestable_empty_arms_in_the_declared_family():
+    from yoyo.evaluation.monday_harmonic_compare import holm
+    np.testing.assert_allclose(holm([.03,None,.001,.01]),[.06,1.,.004,.03])

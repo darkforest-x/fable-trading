@@ -9,6 +9,11 @@ STUDY=experiments/active/exp-monday-harmonic-1h-confluence-20261031-v1
 CONFIG="$STUDY/config.json"
 "$HARMONIC_PY" -m yoyo.evaluation.monday_harmonic scan --workers 3 --config "$CONFIG"
 "$HARMONIC_PY" -m yoyo.evaluation.monday_harmonic_summary validate --config "$CONFIG"
+# Complete15m first so overlapping missing controls are never executed twice.
+PRIOR=experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1
+if [ ! -f "$PRIOR/summary.json" ] || [ ! -f "$PRIOR/allin_monthly.json" ]; then
+  sh "$PRIOR/reproduce.sh"
+fi
 "$NATIVE_PY" -m yoyo.evaluation.monday_harmonic controls --workers 4 --config "$CONFIG"
 "$HARMONIC_PY" -m yoyo.evaluation.monday_harmonic_summary audit --config "$CONFIG"
 if [ ! -f "$STUDY/summary.json" ]; then
@@ -17,3 +22,4 @@ fi
 if [ ! -f "$STUDY/allin_monthly.json" ]; then
   "$HARMONIC_PY" -m yoyo.evaluation.monday_harmonic_summary monthly --config "$CONFIG"
 fi
+"$HARMONIC_PY" -m yoyo.evaluation.monday_harmonic_compare

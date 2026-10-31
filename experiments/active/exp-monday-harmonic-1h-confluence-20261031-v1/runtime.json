@@ -1,0 +1,18 @@
+{
+  "python": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/pyharmonics/bin/python",
+  "native_python": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python",
+  "environment": "New isolated detection-only venv; training, VectorBT and Nautilus environments unchanged.",
+  "install": [
+    "/Users/zhangzc/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/bin/python3.12 -m venv /Users/zhangzc/.local/share/crypto-toolkit/venvs/pyharmonics",
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/pyharmonics/bin/python -m pip install --dry-run --report core-plan.json numpy==2.5.4 pandas==3.1.0 plotly==7.1.0 ta==0.11.0 pytest==9.2.0 pyarrow==26.0.0 pyyaml==6.0.3",
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/pyharmonics/bin/python -m pip install numpy==2.5.4 pandas==3.1.0 plotly==7.1.0 ta==0.11.0 pytest==9.2.0 pyarrow==26.0.0 pyyaml==6.0.3",
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/pyharmonics/bin/python -m pip install --no-deps pyharmonics==1.5.3"
+  ],
+  "optional_packages": "The full dependency dry-run was retained; network/download adapters alpaca/yfinance/binance and kaleido are not installed or used. OHLCTechnicals/HarmonicSearch and their actual import dependencies are installed and behaviorally tested.",
+  "frozen_configuration": "1h,<=1000complete bars,minimum200,spacing10,tolerance0.03,forming0.8;completed5m tail only expires zones.",
+  "notion_experiment": "https://app.notion.com/p/40a8856479af815187e3e0dd7a95ab11",
+  "signal_fill_source": "Existing Nautilus1.231.0 original-score baseline, no signal replay",
+  "base_python": "/Users/zhangzc/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/bin/python3.12",
+  "python_version": "3.12.12 (main, Jan 27 2026, 23:41:44) [Clang 21.1.4 ]",
+  "no_new_install": true
+}
