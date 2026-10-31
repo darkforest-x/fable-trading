@@ -16,18 +16,18 @@ schema_version: 1
 experiments:
   - experiment_id: exp-btc-eth-repeat-1618-20261031-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: active
+    source_commit: 923bc30d67
+    status: inconclusive
     question: Can causal BTC/ETH repeated Monday 1.618 entry and continuation scores improve fixed 0.7 percent stop mean reversion?
     single_variable: Sequential first-versus-repeat admission, fixed logistic entry score, then separate continuation decisions; frozen per-arm barriers, fees and NY expiry.
-    result: Pending native execution and chronological weekly grouped evaluation.
-    artifacts: []
+    result: 'Rolling2025-2026 near-edge first/repeat/score netR: BTC -10.13/-25.53/+0.86, ETH -22.31/-8.97/-12.83; score AUC0.476/0.521 and matchedp0.188/0.235. No trained edge. Unscored far/opposite: BTC -27.69/-7.34R, ETH +36.55/+51.91R; ETH opposite163trades17.79percentwins,PF1.355,closedDD28.54R,2025+31.23R/2026+20.68R. Absolute-net CI crosseszero,Holmp0.086;exploratory only. Conditional continuation scores not superior.'
+    artifacts: [btc-eth-repeat-1618-20261031-v1]
     canonical_report: experiments/active/exp-btc-eth-repeat-1618-20261031-v1/summary.json
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: Owner authorized dedicated research and fixed 0.7 percent stop on 2026-10-31; no production or existing paper account changes. Reuse registered OKX 5m data; maker 2bp and taker 5bp per fill.
+    notes: 'Owner authorized dedicated fitting and fixed0.7percent stop; maker2bp/taker5bp, no extra slip/funding.2164episodes,1249resting-eligible;old859allmatched. Reused297969OKX5m bars percoin through20261031T0645Z,completeNYweeks onlytrain.14979initialnativepositions+268close-now+168path-sensitive=30830fills reconciled.24rollingmodels,6focusedtests; numeric BLAS warnings retained and independent finite/gradient checks pass. Only2ETHnear outcomes path-sensitive,score conclusions unchanged. This-week3BTC shorts allwon butmodelrejectedall. No production/paper changes. Notion40a8856479af819fad8adbc2cc727155;read summary.json and entry_metrics.csv.'
   - experiment_id: exp-monday-order-only-originalscore-20261031-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 78577fb442

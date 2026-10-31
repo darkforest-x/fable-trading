@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-eth-repeat-1618-20261031-v1
+    artifact_type: manifest
+    role: btc_eth_causal_repeated_touch_fixed_stop_models
+    source_repo: darkforest-x/fable-trading
+    source_commit: 923bc30d67
+    generator_commit: 66198d0d38
+    source_path: experiments/active/exp-btc-eth-repeat-1618-20261031-v1/summary.json
+    storage_uri: repo://experiments/active/exp-btc-eth-repeat-1618-20261031-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    license: internal-research
+    notes: 'Fixed0.7percent stop,real maker2bp/taker5bp,NY expiry;2164episodes/1249resting-eligible,24weekly-grouped rollingmodels. Near score BTC+0.86R/ETH-12.83R,no significant edge. ETH unscored opposite+51.91R but netCIcrosses0/Holmp0.086.30830nativefills/6tests/old859parity/finite-gradient audits. Conditional continuation no robust gain. Raw input,orders,fills,predictions,models,config and reproduction in experiment folder; no live or paper changes.'
   - artifact_id: monday-order-only-originalscore-20261031-v1
     artifact_type: manifest
     role: original_touchbar_score_order_filter_comparison

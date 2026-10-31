@@ -1,0 +1,410 @@
+[
+  {
+    "fold": "2025Q1",
+    "tag": "entry",
+    "train_n": 354,
+    "cal_n": 85,
+    "test_n": 83,
+    "train_weeks": 34,
+    "cal_weeks": 10,
+    "test_weeks": 9,
+    "train_positive": 0.1553672316384181,
+    "cal_positive": 0.09411764705882353,
+    "train_label_expiry_max": "2024-09-30 04:00:00+00:00",
+    "cal_label_expiry_max": "2024-12-30 05:00:00+00:00",
+    "status": "fitted",
+    "calibration": {
+      "BTC": {
+        "pooled_fallback": false,
+        "cal_n": 47,
+        "top_threshold": 0.19245016061684167
+      },
+      "ETH": {
+        "pooled_fallback": false,
+        "cal_n": 38,
+        "top_threshold": 0.08415179507173592
+      }
+    },
+    "coefficients": {
+      "is_eth": 0.06331678697750805,
+      "side": -0.3500789965687761,
+      "range_pct": -0.22910356048782046,
+      "reward_r": -0.23930156304463057,
+      "width_atr": 0.07599670489346624,
+      "atr_pct": 0.0885750170293916,
+      "distance_atr": 0.1970288819887693,
+      "ret15": -0.4068406785150909,
+      "ret60": -0.36367629205328283,
+      "ret240": -0.05707258857093616,
+      "ret1440": 0.47332059117156605,
+      "ema4h_gap": 0.29495613965666845,
+      "volume_ratio": -0.9512015921156852,
+      "wick": 0.7138250498561598,
+      "close_location": -0.6156591332400672,
+      "ordinal_log": -0.549470593566511,
+      "since_previous_log": -0.2595266965310266,
+      "prior_favorable_atr": 0.3337573443989639,
+      "prior_adverse_atr": 0.1924678163361518,
+      "prior_near": -0.15835557948955048,
+      "hours_left": -0.12282585198299562,
+      "monday_close_position": -0.28299740197518974
+    }
+  },
+  {
+    "fold": "2025Q2",
+    "tag": "entry",
+    "train_n": 449,
+    "cal_n": 76,
+    "test_n": 91,
+    "train_weeks": 45,
+    "cal_weeks": 8,
+    "test_weeks": 10,
+    "train_positive": 0.1403118040089087,
+    "cal_positive": 0.23684210526315788,
+    "train_label_expiry_max": "2024-12-30 05:00:00+00:00",
+    "cal_label_expiry_max": "2025-03-31 04:00:00+00:00",
+    "status": "fitted",
+    "calibration": {
+      "BTC": {
+        "pooled_fallback": false,
+        "cal_n": 40,
+        "top_threshold": 0.17572673564488384
+      },
+      "ETH": {
+        "pooled_fallback": false,
+        "cal_n": 36,
+        "top_threshold": 0.2174859325220923
+      }
+    },
+    "coefficients": {
+      "is_eth": 0.023833459833948717,
+      "side": -0.20381930164756917,
+      "range_pct": -0.15145427284109755,
+      "reward_r": -0.13305618046433645,
+      "width_atr": 0.10777106670108094,
+      "atr_pct": -0.1123514929956813,
+      "distance_atr": 0.16721759597639957,
+      "ret15": -0.35657221476891227,
+      "ret60": -0.17156507268817328,
+      "ret240": -0.1115459788084949,
+      "ret1440": 0.2100459963690899,
+      "ema4h_gap": 0.34506102195606664,
+      "volume_ratio": -0.8965492696443829,
+      "wick": 0.49008197136096115,
+      "close_location": -0.4369092209883811,
+      "ordinal_log": -0.2754162337216265,
+      "since_previous_log": -0.22830938818874763,
+      "prior_favorable_atr": 0.14131593283758845,
+      "prior_adverse_atr": 0.11734150055576799,
+      "prior_near": 0.0428063593934933,
+      "hours_left": -0.05030135685182661,
+      "monday_close_position": -0.28435055798456577
+    }
+  },
+  {
+    "fold": "2025Q3",
+    "tag": "entry",
+    "train_n": 531,
+    "cal_n": 62,
+    "test_n": 109,
+    "train_weeks": 54,
+    "cal_weeks": 9,
+    "test_weeks": 12,
+    "train_positive": 0.15254237288135594,
+    "cal_positive": 0.25806451612903225,
+    "train_label_expiry_max": "2025-03-31 04:00:00+00:00",
+    "cal_label_expiry_max": "2025-06-23 04:00:00+00:00",
+    "status": "fitted",
+    "calibration": {
+      "BTC": {
+        "pooled_fallback": false,
+        "cal_n": 35,
+        "top_threshold": 0.13908182864378762
+      },
+      "ETH": {
+        "pooled_fallback": true,
+        "cal_n": 62,
+        "top_threshold": 0.21801237573545346
+      }
+    },
+    "coefficients": {
+      "is_eth": 0.02631128325607513,
+      "side": -0.1629067026704663,
+      "range_pct": -0.299721668180289,
+      "reward_r": -0.3270253945311763,
+      "width_atr": 0.15071053462019376,
+      "atr_pct": 0.04213805346767704,
+      "distance_atr": 0.01877785475576025,
+      "ret15": -0.3300395218050626,
+      "ret60": -0.3471626066734087,
+      "ret240": -0.12123839029554932,
+      "ret1440": 0.18784209515288722,
+      "ema4h_gap": 0.12707494745324502,
+      "volume_ratio": -0.8569974810332186,
+      "wick": 0.4684966864854362,
+      "close_location": -0.3513101478134158,
+      "ordinal_log": -0.13640839168915495,
+      "since_previous_log": -0.1032834971816192,
+      "prior_favorable_atr": 0.03950022812276137,
+      "prior_adverse_atr": 0.023212759534821985,
+      "prior_near": 0.20717203105327114,
+      "hours_left": -0.01291928543555922,
+      "monday_close_position": -0.2541301869817597
+    }
+  },
+  {
+    "fold": "2025Q4",
+    "tag": "entry",
+    "train_n": 600,
+    "cal_n": 105,
+    "test_n": 158,
+    "train_weeks": 64,
+    "cal_weeks": 11,
+    "test_weeks": 12,
+    "train_positive": 0.16333333333333333,
+    "cal_positive": 0.3619047619047619,
+    "train_label_expiry_max": "2025-06-23 04:00:00+00:00",
+    "cal_label_expiry_max": "2025-09-29 04:00:00+00:00",
+    "status": "fitted",
+    "calibration": {
+      "BTC": {
+        "pooled_fallback": false,
+        "cal_n": 76,
+        "top_threshold": 0.4514164216763814
+      },
+      "ETH": {
+        "pooled_fallback": true,
+        "cal_n": 105,
+        "top_threshold": 0.27172441888486965
+      }
+    },
+    "coefficients": {
+      "is_eth": 0.06712783403218549,
+      "side": -0.08273539768484113,
+      "range_pct": -0.3095177344507032,
+      "reward_r": -0.3009882368587038,
+      "width_atr": 0.12318764008395106,
+      "atr_pct": 0.2093770433668743,
+      "distance_atr": 0.13236471642661748,
+      "ret15": -0.2572826249202832,
+      "ret60": -0.21086242859539356,
+      "ret240": -0.014148442019317751,
+      "ret1440": 0.14923278535397302,
+      "ema4h_gap": 0.0930663583356681,
+      "volume_ratio": -0.8800021570339202,
+      "wick": 0.2654618489770084,
+      "close_location": -0.2031022072858231,
+      "ordinal_log": -0.07947407792925763,
+      "since_previous_log": -0.2046771498109462,
+      "prior_favorable_atr": 0.20318964406928977,
+      "prior_adverse_atr": 0.025152342127272673,
+      "prior_near": 0.09409788682861955,
+      "hours_left": 0.04205785802203058,
+      "monday_close_position": -0.25570238842289295
+    }
+  },
+  {
+    "fold": "2026Q1",
+    "tag": "entry",
+    "train_n": 734,
+    "cal_n": 149,
+    "test_n": 124,
+    "train_weeks": 76,
+    "cal_weeks": 11,
+    "test_weeks": 12,
+    "train_positive": 0.20572207084468666,
+    "cal_positive": 0.28187919463087246,
+    "train_label_expiry_max": "2025-09-29 04:00:00+00:00",
+    "cal_label_expiry_max": "2025-12-29 05:00:00+00:00",
+    "status": "fitted",
+    "calibration": {
+      "BTC": {
+        "pooled_fallback": false,
+        "cal_n": 80,
+        "top_threshold": 0.2913996951746717
+      },
+      "ETH": {
+        "pooled_fallback": false,
+        "cal_n": 69,
+        "top_threshold": 0.28785123467105794
+      }
+    },
+    "coefficients": {
+      "is_eth": -0.0489927074376832,
+      "side": 0.0019806327719531515,
+      "range_pct": -0.44008390302725103,
+      "reward_r": -0.42709085118592705,
+      "width_atr": 0.4269855476609702,
+      "atr_pct": 0.34169395724047796,
+      "distance_atr": 0.11539386556394966,
+      "ret15": -0.14476776823811974,
+      "ret60": -0.2229461058956488,
+      "ret240": -0.03208781121114134,
+      "ret1440": 0.1433195625363798,
+      "ema4h_gap": 0.04498896363878136,
+      "volume_ratio": -0.6893456758251546,
+      "wick": 0.3052533015181561,
+      "close_location": -0.10739232154488679,
+      "ordinal_log": 0.04635243538572036,
+      "since_previous_log": -0.11069443168905381,
+      "prior_favorable_atr": 0.06433463489749446,
+      "prior_adverse_atr": -0.08823548958444083,
+      "prior_near": 0.1277642505626515,
+      "hours_left": 0.1298488869066949,
+      "monday_close_position": -0.3107397750891167
+    }
+  },
+  {
+    "fold": "2026Q2",
+    "tag": "entry",
+    "train_n": 887,
+    "cal_n": 116,
+    "test_n": 107,
+    "train_weeks": 88,
+    "cal_weeks": 11,
+    "test_weeks": 11,
+    "train_positive": 0.21758737316798196,
+    "cal_positive": 0.22413793103448276,
+    "train_label_expiry_max": "2025-12-29 05:00:00+00:00",
+    "cal_label_expiry_max": "2026-03-23 04:00:00+00:00",
+    "status": "fitted",
+    "calibration": {
+      "BTC": {
+        "pooled_fallback": false,
+        "cal_n": 56,
+        "top_threshold": 0.33100394932970145
+      },
+      "ETH": {
+        "pooled_fallback": false,
+        "cal_n": 60,
+        "top_threshold": 0.21743936942937278
+      }
+    },
+    "coefficients": {
+      "is_eth": 0.00919110342596575,
+      "side": 0.022292264945780824,
+      "range_pct": -0.45800368357664156,
+      "reward_r": -0.4399327219046449,
+      "width_atr": 0.3974136039448285,
+      "atr_pct": 0.2536605037535607,
+      "distance_atr": 0.109694861312134,
+      "ret15": -0.179372362786343,
+      "ret60": -0.12856862084576265,
+      "ret240": -0.13372050201431765,
+      "ret1440": 0.10929374475928505,
+      "ema4h_gap": 0.03366455898867966,
+      "volume_ratio": -0.5207015611234646,
+      "wick": 0.2771640423617096,
+      "close_location": -0.12187530670539944,
+      "ordinal_log": 0.08953688705290397,
+      "since_previous_log": -0.03648381440871381,
+      "prior_favorable_atr": 0.021960079874934344,
+      "prior_adverse_atr": -0.08097961116273794,
+      "prior_near": 0.1390151359039703,
+      "hours_left": 0.13045071575860712,
+      "monday_close_position": -0.13529062537089606
+    }
+  },
+  {
+    "fold": "2026Q3",
+    "tag": "entry",
+    "train_n": 1012,
+    "cal_n": 102,
+    "test_n": 92,
+    "train_weeks": 100,
+    "cal_weeks": 10,
+    "test_weeks": 8,
+    "train_positive": 0.21640316205533597,
+    "cal_positive": 0.21568627450980393,
+    "train_label_expiry_max": "2026-03-23 04:00:00+00:00",
+    "cal_label_expiry_max": "2026-06-29 04:00:00+00:00",
+    "status": "fitted",
+    "calibration": {
+      "BTC": {
+        "pooled_fallback": false,
+        "cal_n": 68,
+        "top_threshold": 0.18450672292893572
+      },
+      "ETH": {
+        "pooled_fallback": false,
+        "cal_n": 34,
+        "top_threshold": 0.35768373525391045
+      }
+    },
+    "coefficients": {
+      "is_eth": -0.02422322493089113,
+      "side": -0.038268281004469884,
+      "range_pct": -0.35376600735095104,
+      "reward_r": -0.366227845369487,
+      "width_atr": 0.33402799118301074,
+      "atr_pct": 0.18765426968310728,
+      "distance_atr": 0.11072944657535494,
+      "ret15": -0.17666693104181386,
+      "ret60": -0.1483620706113755,
+      "ret240": -0.12030816872786988,
+      "ret1440": -0.1141753826075393,
+      "ema4h_gap": 0.05453566180602881,
+      "volume_ratio": -0.5674130876057074,
+      "wick": 0.26037597070558643,
+      "close_location": -0.18432002480864634,
+      "ordinal_log": 0.343114269505903,
+      "since_previous_log": -0.1355179717092549,
+      "prior_favorable_atr": -0.02173253970983366,
+      "prior_adverse_atr": -0.04694712385403376,
+      "prior_near": 0.21313604564606264,
+      "hours_left": 0.13818642293231245,
+      "monday_close_position": -0.12839377287194212
+    }
+  },
+  {
+    "fold": "2026Q4",
+    "tag": "entry",
+    "train_n": 1122,
+    "cal_n": 86,
+    "test_n": 30,
+    "train_weeks": 111,
+    "cal_weeks": 7,
+    "test_weeks": 3,
+    "train_positive": 0.21479500891265596,
+    "cal_positive": 0.16279069767441862,
+    "train_label_expiry_max": "2026-06-29 04:00:00+00:00",
+    "cal_label_expiry_max": "2026-09-21 04:00:00+00:00",
+    "status": "fitted",
+    "calibration": {
+      "BTC": {
+        "pooled_fallback": false,
+        "cal_n": 53,
+        "top_threshold": 0.11008299554087689
+      },
+      "ETH": {
+        "pooled_fallback": false,
+        "cal_n": 33,
+        "top_threshold": 0.43295319630067086
+      }
+    },
+    "coefficients": {
+      "is_eth": 0.006670409925911948,
+      "side": -0.060725209859658937,
+      "range_pct": -0.2815839821376452,
+      "reward_r": -0.28225812973978986,
+      "width_atr": 0.21373442024992784,
+      "atr_pct": 0.13811244289518923,
+      "distance_atr": 0.053808421255600085,
+      "ret15": -0.10245725854076962,
+      "ret60": -0.14356163951861983,
+      "ret240": -0.030302456584512985,
+      "ret1440": -0.184732866623053,
+      "ema4h_gap": 0.10600144444113975,
+      "volume_ratio": -0.4464712729567471,
+      "wick": 0.2094677873278867,
+      "close_location": -0.20100586970504258,
+      "ordinal_log": 0.31897018431437824,
+      "since_previous_log": -0.1169209021221495,
+      "prior_favorable_atr": -0.06294245122372366,
+      "prior_adverse_atr": 0.04183215836917586,
+      "prior_near": 0.21516037115026412,
+      "hours_left": 0.09687407824200145,
+      "monday_close_position": -0.11110775794532095
+    }
+  }
+]

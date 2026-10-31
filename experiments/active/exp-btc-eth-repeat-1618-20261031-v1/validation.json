@@ -1,0 +1,891 @@
+{
+  "fees": [
+    {
+      "symbol": "BTC",
+      "arm": "native",
+      "orders": 8196,
+      "trades": 8196,
+      "fills": 16392,
+      "max_commission_error": 1.4210854715202004e-14,
+      "max_net_bp_error": 3.410605131648481e-13
+    },
+    {
+      "symbol": "BTC",
+      "arm": "close_now",
+      "orders": 158,
+      "trades": 158,
+      "fills": 316,
+      "max_commission_error": 1.4210854715202004e-14,
+      "max_net_bp_error": 1.1368683772161603e-13
+    },
+    {
+      "symbol": "BTC",
+      "arm": "path_sensitivity",
+      "orders": 48,
+      "trades": 48,
+      "fills": 96,
+      "max_commission_error": 7.105427357601002e-15,
+      "max_net_bp_error": 1.4210854715202004e-14
+    },
+    {
+      "symbol": "ETH",
+      "arm": "native",
+      "orders": 6783,
+      "trades": 6783,
+      "fills": 13566,
+      "max_commission_error": 4.440892098500626e-16,
+      "max_net_bp_error": 2.2737367544323206e-13
+    },
+    {
+      "symbol": "ETH",
+      "arm": "close_now",
+      "orders": 110,
+      "trades": 110,
+      "fills": 220,
+      "max_commission_error": 4.440892098500626e-16,
+      "max_net_bp_error": 5.684341886080802e-14
+    },
+    {
+      "symbol": "ETH",
+      "arm": "path_sensitivity",
+      "orders": 120,
+      "trades": 120,
+      "fills": 240,
+      "max_commission_error": 2.220446049250313e-16,
+      "max_net_bp_error": 2.842170943040401e-14
+    }
+  ],
+  "paths": [
+    {
+      "symbol": "BTC",
+      "tested": 48,
+      "changed": 0,
+      "changes": []
+    },
+    {
+      "symbol": "ETH",
+      "tested": 120,
+      "changed": 2,
+      "changes": [
+        {
+          "trade_id": "ETH-2025-09-08--1-2:near",
+          "reason_oh": 1,
+          "reason_ol": 4,
+          "net_notional_bp_oh": -77.04258007369324,
+          "net_notional_bp_ol": 143.8008448570071
+        },
+        {
+          "trade_id": "ETH-2025-09-08--1-3:near",
+          "reason_oh": 1,
+          "reason_ol": 4,
+          "net_notional_bp_oh": -77.04258007369324,
+          "net_notional_bp_ol": 143.8008448570071
+        }
+      ]
+    }
+  ],
+  "source_parity": {
+    "old_859": 859,
+    "matched_859": 859
+  },
+  "model_numeric": [
+    {
+      "model": "continue_far_2025Q4.pkl",
+      "train_n": 97,
+      "max_scaled_feature": 8.355283100145027,
+      "gradient": 9.574827523265999e-05,
+      "iterations": 19,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 3.0493015376027966e-05,
+          "iterations": 9
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 5.278900036861057e-05,
+          "iterations": 4
+        }
+      ]
+    },
+    {
+      "model": "continue_far_2026Q1.pkl",
+      "train_n": 150,
+      "max_scaled_feature": 7.855482279241736,
+      "gradient": 8.309508336159398e-05,
+      "iterations": 27,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 9.37594852068966e-05,
+          "iterations": 4
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 9.37594852068966e-05,
+          "iterations": 4
+        }
+      ]
+    },
+    {
+      "model": "continue_far_2026Q2.pkl",
+      "train_n": 192,
+      "max_scaled_feature": 8.74622981231235,
+      "gradient": 7.086457284351082e-05,
+      "iterations": 27,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 1.7985885338962674e-06,
+          "iterations": 6
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 1.7985885338962674e-06,
+          "iterations": 6
+        }
+      ]
+    },
+    {
+      "model": "continue_far_2026Q3.pkl",
+      "train_n": 218,
+      "max_scaled_feature": 9.213980689139657,
+      "gradient": 9.874949234605633e-05,
+      "iterations": 33,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 2.368829240534134e-05,
+          "iterations": 9
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 2.368829240534134e-05,
+          "iterations": 9
+        }
+      ]
+    },
+    {
+      "model": "continue_opposite1618_2025Q4.pkl",
+      "train_n": 97,
+      "max_scaled_feature": 8.355283100145027,
+      "gradient": 8.135507085779273e-05,
+      "iterations": 18,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 2.3897455746066552e-05,
+          "iterations": 9
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 8.297493365514324e-05,
+          "iterations": 8
+        }
+      ]
+    },
+    {
+      "model": "continue_opposite1618_2026Q1.pkl",
+      "train_n": 150,
+      "max_scaled_feature": 7.855482279241736,
+      "gradient": 9.824061089440709e-05,
+      "iterations": 20,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 4.085327409460556e-06,
+          "iterations": 9
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 4.085327409460556e-06,
+          "iterations": 9
+        }
+      ]
+    },
+    {
+      "model": "continue_opposite1618_2026Q2.pkl",
+      "train_n": 192,
+      "max_scaled_feature": 8.74622981231235,
+      "gradient": 8.528830022908399e-05,
+      "iterations": 23,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 8.141183506996962e-05,
+          "iterations": 10
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 8.141183506996962e-05,
+          "iterations": 10
+        }
+      ]
+    },
+    {
+      "model": "continue_opposite1618_2026Q3.pkl",
+      "train_n": 218,
+      "max_scaled_feature": 9.213980689139657,
+      "gradient": 5.1927628477673616e-05,
+      "iterations": 26,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 2.6769455025077934e-05,
+          "iterations": 7
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 2.6769455025077934e-05,
+          "iterations": 7
+        }
+      ]
+    },
+    {
+      "model": "entry_2025Q1.pkl",
+      "train_n": 354,
+      "max_scaled_feature": 10.539248258186849,
+      "gradient": 7.567330269280386e-05,
+      "iterations": 21,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 1.892902104743416e-05,
+          "iterations": 10
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 2.1377090391579508e-05,
+          "iterations": 9
+        }
+      ]
+    },
+    {
+      "model": "entry_2025Q2.pkl",
+      "train_n": 449,
+      "max_scaled_feature": 10.361640937051227,
+      "gradient": 6.720666314807784e-05,
+      "iterations": 21,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 1.0101712669696034e-05,
+          "iterations": 8
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 1.0528391385590993e-05,
+          "iterations": 7
+        }
+      ]
+    },
+    {
+      "model": "entry_2025Q3.pkl",
+      "train_n": 531,
+      "max_scaled_feature": 10.295589023804066,
+      "gradient": 7.465033501443884e-05,
+      "iterations": 21,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 2.338630642919417e-05,
+          "iterations": 7
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 5.879550331779103e-07,
+          "iterations": 10
+        }
+      ]
+    },
+    {
+      "model": "entry_2025Q4.pkl",
+      "train_n": 600,
+      "max_scaled_feature": 10.286886423919729,
+      "gradient": 4.1700737860398754e-05,
+      "iterations": 22,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 1.7333737800821033e-05,
+          "iterations": 7
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 1.9374542298711804e-05,
+          "iterations": 8
+        }
+      ]
+    },
+    {
+      "model": "entry_2026Q1.pkl",
+      "train_n": 734,
+      "max_scaled_feature": 10.623338685188388,
+      "gradient": 5.092213746201568e-05,
+      "iterations": 21,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 2.4395322579850997e-05,
+          "iterations": 8
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 6.549547369622068e-06,
+          "iterations": 7
+        }
+      ]
+    },
+    {
+      "model": "entry_2026Q2.pkl",
+      "train_n": 887,
+      "max_scaled_feature": 11.135402818717228,
+      "gradient": 9.976352352426933e-05,
+      "iterations": 21,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 9.618746527606523e-07,
+          "iterations": 8
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 3.784076410363461e-05,
+          "iterations": 10
+        }
+      ]
+    },
+    {
+      "model": "entry_2026Q3.pkl",
+      "train_n": 1012,
+      "max_scaled_feature": 14.201568461548488,
+      "gradient": 9.419584931219115e-05,
+      "iterations": 18,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 1.4058753038686755e-06,
+          "iterations": 8
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 9.592102788966324e-05,
+          "iterations": 8
+        }
+      ]
+    },
+    {
+      "model": "entry_2026Q4.pkl",
+      "train_n": 1122,
+      "max_scaled_feature": 14.427246098354749,
+      "gradient": 7.235585621181325e-05,
+      "iterations": 20,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 4.392385113186697e-06,
+          "iterations": 9
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 1.2857314398783062e-05,
+          "iterations": 10
+        }
+      ]
+    },
+    {
+      "model": "single_reward_2025Q1.pkl",
+      "train_n": 354,
+      "max_scaled_feature": 2.7672842482936533,
+      "gradient": 2.9319963424675126e-05,
+      "iterations": 5,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 4.493004793903843e-05,
+          "iterations": 10
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 3.599790087319837e-05,
+          "iterations": 10
+        }
+      ]
+    },
+    {
+      "model": "single_reward_2025Q2.pkl",
+      "train_n": 449,
+      "max_scaled_feature": 3.107983783932542,
+      "gradient": 6.217009166064341e-05,
+      "iterations": 5,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 8.119892633046133e-06,
+          "iterations": 11
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 9.592620633528762e-06,
+          "iterations": 11
+        }
+      ]
+    },
+    {
+      "model": "single_reward_2025Q3.pkl",
+      "train_n": 531,
+      "max_scaled_feature": 3.0001484034720156,
+      "gradient": 1.3364173957464267e-06,
+      "iterations": 7,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 5.2856298410365805e-05,
+          "iterations": 9
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 7.247644578025462e-05,
+          "iterations": 6
+        }
+      ]
+    },
+    {
+      "model": "single_reward_2025Q4.pkl",
+      "train_n": 600,
+      "max_scaled_feature": 3.10679284198028,
+      "gradient": 9.861566161880238e-06,
+      "iterations": 7,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 4.036120179866304e-05,
+          "iterations": 8
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 8.989396670754645e-05,
+          "iterations": 10
+        }
+      ]
+    },
+    {
+      "model": "single_reward_2026Q1.pkl",
+      "train_n": 734,
+      "max_scaled_feature": 3.2842380160814297,
+      "gradient": 1.1300898820159575e-05,
+      "iterations": 7,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 1.228414139491929e-05,
+          "iterations": 11
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 5.946336591449066e-05,
+          "iterations": 10
+        }
+      ]
+    },
+    {
+      "model": "single_reward_2026Q2.pkl",
+      "train_n": 887,
+      "max_scaled_feature": 3.424568316132899,
+      "gradient": 8.439022774206993e-06,
+      "iterations": 7,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 3.24017604151211e-05,
+          "iterations": 8
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 2.3109759695229723e-05,
+          "iterations": 9
+        }
+      ]
+    },
+    {
+      "model": "single_reward_2026Q3.pkl",
+      "train_n": 1012,
+      "max_scaled_feature": 3.409356539114764,
+      "gradient": 8.741019327703841e-05,
+      "iterations": 6,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 5.167190356614822e-06,
+          "iterations": 10
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 3.5291810572970877e-06,
+          "iterations": 7
+        }
+      ]
+    },
+    {
+      "model": "single_reward_2026Q4.pkl",
+      "train_n": 1122,
+      "max_scaled_feature": 3.5662741118644785,
+      "gradient": 5.779616507083854e-05,
+      "iterations": 6,
+      "calibration": [
+        {
+          "symbol": "BTC",
+          "gradient": 1.1721254556039679e-05,
+          "iterations": 10
+        },
+        {
+          "symbol": "ETH",
+          "gradient": 1.9613020547125426e-05,
+          "iterations": 9
+        }
+      ]
+    }
+  ],
+  "frozen_score_path_sensitivity": [
+    {
+      "symbol": "BTC",
+      "arm": "all_repeats",
+      "n": 178,
+      "weeks": 71,
+      "target_rate": 0.24719101123595505,
+      "net_win_rate": 0.2808988764044944,
+      "gross_bp": -3.787943447421381,
+      "net_bp": -10.0399606663383,
+      "net_bp_ci95": [
+        -25.508680983346714,
+        5.484944417564396
+      ],
+      "net_r": -25.528741334251045,
+      "closed_trade_drawdown_r": 25.528741334251052,
+      "profit_factor": 0.8148607312532976,
+      "time_exit_n": 10,
+      "adverse_path_n": 0,
+      "matched_n": 178,
+      "random_bp": -19.784025873500365,
+      "matched_signal_bp": -10.0399606663383,
+      "excess_bp": 9.744065207162063,
+      "week_p": 0.09989001099890012,
+      "excess_ci95": [
+        -5.210632904823007,
+        24.57694248842459
+      ],
+      "auc": 0.5295115332428766,
+      "brier": 0.19738558810103113
+    },
+    {
+      "symbol": "BTC",
+      "arm": "score_gate",
+      "n": 59,
+      "weeks": 27,
+      "target_rate": 0.2711864406779661,
+      "net_win_rate": 0.288135593220339,
+      "gross_bp": 7.195898491946093,
+      "net_bp": 1.0166773143854042,
+      "net_bp_ci95": [
+        -32.04378548627532,
+        33.191178271965384
+      ],
+      "net_r": 0.8565792734927813,
+      "closed_trade_drawdown_r": 9.522803957972142,
+      "profit_factor": 1.018544061057335,
+      "time_exit_n": 1,
+      "adverse_path_n": 0,
+      "matched_n": 59,
+      "random_bp": -10.860981154745788,
+      "matched_signal_bp": 1.0166773143854042,
+      "excess_bp": 11.87765846913119,
+      "week_p": 0.18838116188381163,
+      "excess_ci95": [
+        -13.443407694808245,
+        35.60701233329662
+      ],
+      "auc": 0.6293604651162791,
+      "brier": 0.20061790442687336
+    },
+    {
+      "symbol": "ETH",
+      "arm": "all_repeats",
+      "n": 181,
+      "weeks": 64,
+      "target_rate": 0.2154696132596685,
+      "net_win_rate": 0.2430939226519337,
+      "gross_bp": 4.1025827118141125,
+      "net_bp": -2.250072920335813,
+      "net_bp_ci95": [
+        -21.516231294486314,
+        18.53081787723619
+      ],
+      "net_r": -5.8197070921344825,
+      "closed_trade_drawdown_r": 31.8666052607268,
+      "profit_factor": 0.9611055236396479,
+      "time_exit_n": 6,
+      "adverse_path_n": 1,
+      "matched_n": 181,
+      "random_bp": -24.2688922157706,
+      "matched_signal_bp": -2.250072920335813,
+      "excess_bp": 22.018819295434785,
+      "week_p": 0.0216978302169783,
+      "excess_ci95": [
+        1.7427417570521313,
+        45.17968375353908
+      ],
+      "auc": 0.4680390032502708,
+      "brier": 0.18280257059269303
+    },
+    {
+      "symbol": "ETH",
+      "arm": "score_gate",
+      "n": 83,
+      "weeks": 35,
+      "target_rate": 0.14457831325301204,
+      "net_win_rate": 0.1927710843373494,
+      "gross_bp": -4.252420436307439,
+      "net_bp": -10.81765543710159,
+      "net_bp_ci95": [
+        -39.309077117548604,
+        22.751912324250302
+      ],
+      "net_r": -12.829584685736211,
+      "closed_trade_drawdown_r": 18.17991376947456,
+      "profit_factor": 0.8258959228345012,
+      "time_exit_n": 4,
+      "adverse_path_n": 0,
+      "matched_n": 83,
+      "random_bp": -23.997086707103737,
+      "matched_signal_bp": -10.81765543710159,
+      "excess_bp": 13.179431270002148,
+      "week_p": 0.23457654234576542,
+      "excess_ci95": [
+        -19.28950629001465,
+        55.08777367065937
+      ],
+      "auc": 0.539906103286385,
+      "brier": 0.1468295881565641
+    }
+  ],
+  "primary_comparisons_holm": [
+    {
+      "test": "BTC_entry",
+      "p": 0.18838116188381163,
+      "holm_p": 1.0
+    },
+    {
+      "test": "ETH_entry",
+      "p": 0.23457654234576542,
+      "holm_p": 1.0
+    },
+    {
+      "test": "BTC_far",
+      "p": 0.49835016498350165,
+      "holm_p": 1.0
+    },
+    {
+      "test": "BTC_opposite1618",
+      "p": 0.49845015498450157,
+      "holm_p": 1.0
+    },
+    {
+      "test": "ETH_far",
+      "p": 0.8740125987401259,
+      "holm_p": 1.0
+    },
+    {
+      "test": "ETH_opposite1618",
+      "p": 1.0,
+      "holm_p": 1.0
+    }
+  ],
+  "target_comparisons_holm": [
+    {
+      "symbol": "ETH",
+      "target": "far",
+      "p": 0.0143985601439856,
+      "holm_p": 0.08639136086391361
+    },
+    {
+      "symbol": "ETH",
+      "target": "opposite1618",
+      "p": 0.0160983901609839,
+      "holm_p": 0.08639136086391361
+    },
+    {
+      "symbol": "ETH",
+      "target": "near",
+      "p": 0.026997300269973004,
+      "holm_p": 0.10798920107989202
+    },
+    {
+      "symbol": "BTC",
+      "target": "opposite1618",
+      "p": 0.0714928507149285,
+      "holm_p": 0.2144785521447855
+    },
+    {
+      "symbol": "BTC",
+      "target": "near",
+      "p": 0.09989001099890012,
+      "holm_p": 0.2144785521447855
+    },
+    {
+      "symbol": "BTC",
+      "target": "far",
+      "p": 0.22597740225977403,
+      "holm_p": 0.22597740225977403
+    }
+  ],
+  "target_years": [
+    {
+      "target": "far",
+      "symbol": "BTC",
+      "year": "2025",
+      "n": 79,
+      "net_r": -18.59214472983996,
+      "net_bp": -16.474653501651638
+    },
+    {
+      "target": "far",
+      "symbol": "BTC",
+      "year": "2026",
+      "n": 76,
+      "net_r": -9.095564524351433,
+      "net_bp": -8.377930071306505
+    },
+    {
+      "target": "far",
+      "symbol": "ETH",
+      "year": "2025",
+      "n": 96,
+      "net_r": 21.78368706072098,
+      "net_bp": 15.894199416534923
+    },
+    {
+      "target": "far",
+      "symbol": "ETH",
+      "year": "2026",
+      "n": 72,
+      "net_r": 14.767970694526063,
+      "net_bp": 14.359367613706342
+    },
+    {
+      "target": "near",
+      "symbol": "BTC",
+      "year": "2025",
+      "n": 94,
+      "net_r": -6.352812407655473,
+      "net_bp": -4.730816758305743
+    },
+    {
+      "target": "near",
+      "symbol": "BTC",
+      "year": "2026",
+      "n": 84,
+      "net_r": -19.175928926595567,
+      "net_bp": -15.981145515803302
+    },
+    {
+      "target": "near",
+      "symbol": "ETH",
+      "year": "2025",
+      "n": 103,
+      "net_r": -13.286499751127256,
+      "net_bp": -9.027529087918454
+    },
+    {
+      "target": "near",
+      "symbol": "ETH",
+      "year": "2026",
+      "n": 78,
+      "net_r": 4.312228015447522,
+      "net_bp": 3.868318878770746
+    },
+    {
+      "target": "opposite1618",
+      "symbol": "BTC",
+      "year": "2025",
+      "n": 77,
+      "net_r": -14.585840456022156,
+      "net_bp": -13.260157731736331
+    },
+    {
+      "target": "opposite1618",
+      "symbol": "BTC",
+      "year": "2026",
+      "n": 74,
+      "net_r": 7.250396358175857,
+      "net_bp": 6.859645178870024
+    },
+    {
+      "target": "opposite1618",
+      "symbol": "ETH",
+      "year": "2025",
+      "n": 93,
+      "net_r": 31.23368714105398,
+      "net_bp": 23.521439272211875
+    },
+    {
+      "target": "opposite1618",
+      "symbol": "ETH",
+      "year": "2026",
+      "n": 70,
+      "net_r": 20.680292237708187,
+      "net_bp": 20.684674167365632
+    }
+  ],
+  "concentration": [
+    {
+      "target": "far",
+      "symbol": "BTC",
+      "best_week": "2026-03-02",
+      "best_week_r": 10.370105296072005,
+      "net_excluding_best_week_r": -38.057814550263394,
+      "net_excluding_best_three_weeks_r": -55.295345713382616
+    },
+    {
+      "target": "far",
+      "symbol": "ETH",
+      "best_week": "2025-02-10",
+      "best_week_r": 24.682961641114833,
+      "net_excluding_best_week_r": 11.868696114132202,
+      "net_excluding_best_three_weeks_r": -16.40818692896542
+    },
+    {
+      "target": "near",
+      "symbol": "BTC",
+      "best_week": "2025-12-08",
+      "best_week_r": 7.602026011954935,
+      "net_excluding_best_week_r": -33.13076734620598,
+      "net_excluding_best_three_weeks_r": -43.30105815254075
+    },
+    {
+      "target": "near",
+      "symbol": "ETH",
+      "best_week": "2025-02-10",
+      "best_week_r": 10.137046431582037,
+      "net_excluding_best_week_r": -19.111318167261764,
+      "net_excluding_best_three_weeks_r": -32.976822494670046
+    },
+    {
+      "target": "opposite1618",
+      "symbol": "BTC",
+      "best_week": "2026-03-02",
+      "best_week_r": 10.370105296072005,
+      "net_excluding_best_week_r": -17.7055493939183,
+      "net_excluding_best_three_weeks_r": -35.708829227498526
+    },
+    {
+      "target": "opposite1618",
+      "symbol": "ETH",
+      "best_week": "2025-02-10",
+      "best_week_r": 19.651021950306347,
+      "net_excluding_best_week_r": 32.262957428455834,
+      "net_excluding_best_three_weeks_r": 4.920714736235375
+    }
+  ],
+  "numeric_warnings": "Local sklearn matmul RuntimeWarnings retained in logs; all frozen model/calibrator outputs checked against einsum/elementwise calculations, finite coefficients and first-order gradients.",
+  "continuation_scope": "Conditional independent opportunity study after near-touch completed close; not an integrated single-position entry-plus-continuation account strategy. Calibrated model folds lacking history are explicitly skipped."
+}

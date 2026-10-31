@@ -1,0 +1,3168 @@
+{
+  "experiment": "exp-btc-eth-repeat-1618-20261031-v1",
+  "verdict": "No robust trained entry or continuation model. Unscored ETH far/opposite targets are positive exploratory baselines, but absolute-net confidence intervals include zero and matched tests fail multiplicity and p<0.01 gates.",
+  "config": {
+    "experiment_id": "exp-btc-eth-repeat-1618-20261031-v1",
+    "authorized": "Owner 2026-10-31: BTC/ETH research and fitting; fixed 0.7% initial stop, near Monday edge, expire before next NY Monday",
+    "start": "2024-01-01T00:00:00Z",
+    "snapshot_before": "2026-11-01T00:00:00Z",
+    "symbols": [
+      "BTC",
+      "ETH"
+    ],
+    "stop_fraction": 0.007,
+    "maker_fee": 0.0002,
+    "taker_fee": 0.0005,
+    "fee_source": "OKX account Lv1 read 2026-10-23; fees per fill",
+    "extra_slippage": 0,
+    "funding_included": false,
+    "execution_minutes": 5,
+    "intrabar_path": "OHLC",
+    "episode": "Adjacent 15m bars spanning exact 1.618 merge; one non-hit 15m bar rearms. First 5m touch in each episode; only favorable resting-limit approaches executable.",
+    "targets": [
+      "near",
+      "far",
+      "opposite1618"
+    ],
+    "controls_per_event": 3,
+    "control": "Random completed 5m closes, same coin/NY week/direction/pre-entry relative-ATR log2 quarter bucket; same percentage barriers and expiry. Market control pays taker entry; signal resting limit pays maker. No outcome resampling.",
+    "seed": 20261031,
+    "model": "Median imputation, standard scaling, L2 logistic regression C=1; no search. Weight inverse coin-week counts, equal aggregate coin weight. Previous quarter sigmoid calibration, per coin when n>=30 and both classes else pooled.",
+    "evaluation": "Expanding training; quarters from 2025Q1, previous quarter calibration, complete NY weeks stay together. Purge label weeks crossing each split. One position per coin at submission time. No compounded-account claims.",
+    "entry_gate": "p(target-before-stop-or-expiry) greater than fee-adjusted target/stop break-even probability; timeout treated as failure for labels, actual native timeout PnL for evaluation.",
+    "continuation": "At completed 5m close containing first near-target hit, only if far-position remains open. Fixed original stop. Compare native close-now versus cached farther target, separately for far/opposite1618; same rolling model recipe.",
+    "inference": "NY week cluster bootstrap 2000 draws; paired weekly sign-flip 10000 draws; descriptive and exploratory, not untouched confirmatory history.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "input_receipt": {
+    "sources": {
+      "BTC": {
+        "source": "/Users/zhangzc/fable-trading/data/crypto/market/exp-monday-12h-partial-recovery-20261026-v1/BTC/candles.csv.gz",
+        "real_source": "/Users/zhangzc/fable-trading/data/crypto/market/exp-monday-12h-partial-recovery-20261026-v1/BTC/candles.csv.gz",
+        "size": 7917205,
+        "mtime": 1793029330.8768065,
+        "overlap_rows": 289,
+        "cache_tail_rows": 1341,
+        "rows": 297969,
+        "first_close": "2023-12-31 16:05:00+00:00",
+        "last_close": "2026-10-31 06:45:00+00:00"
+      },
+      "ETH": {
+        "source": "/Users/zhangzc/fable-trading/data/crypto/market/exp-monday-12h-partial-recovery-20261026-v1/ETH/candles.csv.gz",
+        "real_source": "/Users/zhangzc/fable-trading/data/crypto/market/exp-monday-12h-partial-recovery-20261026-v1/ETH/candles.csv.gz",
+        "size": 5869443,
+        "mtime": 1793029120.1511714,
+        "overlap_rows": 289,
+        "cache_tail_rows": 1341,
+        "rows": 297969,
+        "first_close": "2023-12-31 16:05:00+00:00",
+        "last_close": "2026-10-31 06:45:00+00:00"
+      }
+    },
+    "common_last_close": "2026-10-31 06:45:00+00:00",
+    "builder_commit": "66198d0d387b4c6845b2a8fe917e6295a57d7cf0"
+  },
+  "entry": {
+    "rows": [
+      {
+        "period": "all_complete",
+        "arm": "first_only",
+        "symbol": "ALL",
+        "side": "both",
+        "n": 242,
+        "weeks": 122,
+        "target_rate": 0.21074380165289255,
+        "net_win_rate": 0.23140495867768596,
+        "gross_bp": -7.986290540187691,
+        "net_bp": -14.353946406004942,
+        "net_bp_ci95": [
+          -30.96104102421972,
+          2.3756191801787314
+        ],
+        "net_r": -49.612223239831025,
+        "closed_trade_drawdown_r": 56.38124370906645,
+        "profit_factor": 0.7553650093842279,
+        "time_exit_n": 7,
+        "adverse_path_n": 0,
+        "matched_n": 242,
+        "random_bp": -30.7126987226815,
+        "matched_signal_bp": -14.353946406004942,
+        "excess_bp": 16.358752316676554,
+        "week_p": 0.031796820317968204,
+        "excess_ci95": [
+          -0.005149965018694508,
+          33.093003001355726
+        ]
+      },
+      {
+        "period": "all_complete",
+        "arm": "first_only",
+        "symbol": "BTC",
+        "side": "both",
+        "n": 124,
+        "weeks": 110,
+        "target_rate": 0.25,
+        "net_win_rate": 0.28225806451612906,
+        "gross_bp": -2.337578302152793,
+        "net_bp": -8.588950499479552,
+        "net_bp_ci95": [
+          -29.17461514513164,
+          12.4875851347407
+        ],
+        "net_r": -15.212630254716327,
+        "closed_trade_drawdown_r": 27.230511303401933,
+        "profit_factor": 0.8417100347140128,
+        "time_exit_n": 6,
+        "adverse_path_n": 0,
+        "matched_n": 124,
+        "random_bp": -26.680478616404294,
+        "matched_signal_bp": -8.588950499479552,
+        "excess_bp": 18.091528116924746,
+        "week_p": 0.0655934406559344,
+        "excess_ci95": [
+          -3.7008855252061883,
+          41.10470526630114
+        ]
+      },
+      {
+        "period": "all_complete",
+        "arm": "first_only",
+        "symbol": "BTC",
+        "side": "upper_short",
+        "n": 59,
+        "weeks": 59,
+        "target_rate": 0.22033898305084745,
+        "net_win_rate": 0.2542372881355932,
+        "gross_bp": -10.673166448515039,
+        "net_bp": -17.02902778101965,
+        "net_bp_ci95": [
+          -42.81857881333119,
+          11.863495527142128
+        ],
+        "net_r": -14.351997613885908,
+        "closed_trade_drawdown_r": 20.320129586745576,
+        "profit_factor": 0.6982317523933441,
+        "time_exit_n": 3,
+        "adverse_path_n": 0,
+        "matched_n": 59,
+        "random_bp": -30.204638392723215,
+        "matched_signal_bp": -17.02902778101965,
+        "excess_bp": 13.17561061170356,
+        "week_p": 0.20727927207279273,
+        "excess_ci95": [
+          -17.154892001242562,
+          45.95314785336444
+        ]
+      },
+      {
+        "period": "all_complete",
+        "arm": "first_only",
+        "symbol": "BTC",
+        "side": "lower_long",
+        "n": 65,
+        "weeks": 65,
+        "target_rate": 0.27692307692307694,
+        "net_win_rate": 0.3076923076923077,
+        "gross_bp": 5.228570938391398,
+        "net_bp": -0.9279572746970093,
+        "net_bp_ci95": [
+          -29.359081707748818,
+          30.53231546779211
+        ],
+        "net_r": -0.8606326408304237,
+        "closed_trade_drawdown_r": 12.072348592312576,
+        "profit_factor": 0.9822719670288983,
+        "time_exit_n": 3,
+        "adverse_path_n": 0,
+        "matched_n": 65,
+        "random_bp": -23.481625896360978,
+        "matched_signal_bp": -0.9279572746970093,
+        "excess_bp": 22.553668621663967,
+        "week_p": 0.08949105089491051,
+        "excess_ci95": [
+          -10.276153939745036,
+          55.9109219452224
+        ]
+      },
+      {
+        "period": "all_complete",
+        "arm": "first_only",
+        "symbol": "ETH",
+        "side": "both",
+        "n": 118,
+        "weeks": 103,
+        "target_rate": 0.1694915254237288,
+        "net_win_rate": 0.17796610169491525,
+        "gross_bp": -13.922225434393848,
+        "net_bp": -20.412077697607895,
+        "net_bp_ci95": [
+          -44.502035424477846,
+          6.449903886908295
+        ],
+        "net_r": -34.3995929851147,
+        "closed_trade_drawdown_r": 37.58196064646879,
+        "profit_factor": 0.6775892035358015,
+        "time_exit_n": 1,
+        "adverse_path_n": 0,
+        "matched_n": 118,
+        "random_bp": -34.94994696995584,
+        "matched_signal_bp": -20.412077697607895,
+        "excess_bp": 14.53786927234795,
+        "week_p": 0.1513848615138486,
+        "excess_ci95": [
+          -13.199709697914306,
+          42.644355241193324
+        ]
+      },
+      {
+        "period": "all_complete",
+        "arm": "first_only",
+        "symbol": "ETH",
+        "side": "upper_short",
+        "n": 57,
+        "weeks": 57,
+        "target_rate": 0.17543859649122806,
+        "net_win_rate": 0.19298245614035087,
+        "gross_bp": -11.787556170278647,
+        "net_bp": -18.279977843428075,
+        "net_bp_ci95": [
+          -48.827718472080306,
+          15.140632440169137
+        ],
+        "net_r": -14.879694296190156,
+        "closed_trade_drawdown_r": 21.862551423313686,
+        "profit_factor": 0.7060612913690971,
+        "time_exit_n": 1,
+        "adverse_path_n": 0,
+        "matched_n": 57,
+        "random_bp": -37.10919739241151,
+        "matched_signal_bp": -18.279977843428075,
+        "excess_bp": 18.82921954898343,
+        "week_p": 0.17468253174682533,
+        "excess_ci95": [
+          -18.153381346800504,
+          57.69148368826971
+        ]
+      },
+      {
+        "period": "all_complete",
+        "arm": "first_only",
+        "symbol": "ETH",
+        "side": "lower_long",
+        "n": 61,
+        "weeks": 61,
+        "target_rate": 0.16393442622950818,
+        "net_win_rate": 0.16393442622950818,
+        "gross_bp": -15.916916386108058,
+        "net_bp": -22.404367725284118,
+        "net_bp_ci95": [
+          -52.87666121004347,
+          11.975084921086204
+        ],
+        "net_r": -19.519898688924545,
+        "closed_trade_drawdown_r": 21.59313451629973,
+        "profit_factor": 0.6518851554190548,
+        "time_exit_n": 0,
+        "adverse_path_n": 0,
+        "matched_n": 61,
+        "random_bp": -32.93228673913661,
+        "matched_signal_bp": -22.404367725284118,
+        "excess_bp": 10.527919013852502,
+        "week_p": 0.277972202779722,
+        "excess_ci95": [
+          -24.039442351320286,
+          46.64806708898171
+        ]
+      },
+      {
+        "period": "all_complete",
+        "arm": "all_repeats",
+        "symbol": "ALL",
+        "side": "both",
+        "n": 568,
+        "weeks": 122,
+        "target_rate": 0.20598591549295775,
+        "net_win_rate": 0.2306338028169014,
+        "gross_bp": -5.720343667376469,
+        "net_bp": -12.100175284104681,
+        "net_bp_ci95": [
+          -23.11930009591928,
+          -0.7434600214644427
+        ],
+        "net_r": -98.1705046596181,
+        "closed_trade_drawdown_r": 108.40509717549082,
+        "profit_factor": 0.7930948383145168,
+        "time_exit_n": 22,
+        "adverse_path_n": 1,
+        "matched_n": 568,
+        "random_bp": -26.9264251215182,
+        "matched_signal_bp": -12.100175284104681,
+        "excess_bp": 14.826249837413519,
+        "week_p": 0.004999500049995001,
+        "excess_ci95": [
+          3.2715216685692954,
+          26.28545173901962
+        ]
+      },
+      {
+        "period": "all_complete",
+        "arm": "all_repeats",
+        "symbol": "BTC",
+        "side": "both",
+        "n": 275,
+        "weeks": 110,
+        "target_rate": 0.21454545454545454,
+        "net_win_rate": 0.24727272727272728,
+        "gross_bp": -7.400350023020148,
+        "net_bp": -13.75338440651265,
+        "net_bp_ci95": [
+          -27.583333634419184,
+          0.8782414332892777
+        ],
+        "net_r": -54.024871765599514,
+        "closed_trade_drawdown_r": 54.02487176559953,
+        "profit_factor": 0.7572457315411906,
+        "time_exit_n": 16,
+        "adverse_path_n": 0,
+        "matched_n": 275,
+        "random_bp": -28.026672187483005,
+        "matched_signal_bp": -13.75338440651265,
+        "excess_bp": 14.27328778097035,
+        "week_p": 0.025197480251974803,
+        "excess_ci95": [
+          0.38959323827066045,
+          29.06830565549629
+        ]
+      },
+      {
+        "period": "all_complete",
+        "arm": "all_repeats",
+        "symbol": "BTC",
+        "side": "upper_short",
+        "n": 121,
+        "weeks": 59,
+        "target_rate": 0.21487603305785125,
+        "net_win_rate": 0.2644628099173554,
+        "gross_bp": -4.269021366863168,
+        "net_bp": -10.639097025339968,
+        "net_bp_ci95": [
+          -32.34166951245615,
+          11.85458046598601
+        ],
+        "net_r": -18.388653496484082,
+        "closed_trade_drawdown_r": 28.386728796479293,
+        "profit_factor": 0.8062470632865413,
+        "time_exit_n": 10,
+        "adverse_path_n": 0,
+        "matched_n": 121,
+        "random_bp": -27.99190919461962,
+        "matched_signal_bp": -10.639097025339968,
+        "excess_bp": 17.35281216927965,
+        "week_p": 0.036696330366963306,
+        "excess_ci95": [
+          -0.8924343036897621,
+          36.97624135674238
+        ]
+      },
+      {
+        "period": "all_complete",
+        "arm": "all_repeats",
+        "symbol": "BTC",
+        "side": "lower_long",
+        "n": 154,
+        "weeks": 64,
+        "target_rate": 0.21428571428571427,
+        "net_win_rate": 0.23376623376623376,
+        "gross_bp": -9.860679681429204,
+        "net_bp": -16.20032449171976,
+        "net_bp_ci95": [
+          -32.38405695357318,
+          2.3307482282051537
+        ],
+        "net_r": -35.63621826911543,
+        "closed_trade_drawdown_r": 46.512378590724225,
+        "profit_factor": 0.7208109384624081,
+        "time_exit_n": 6,
+        "adverse_path_n": 0,
+        "matched_n": 154,
+        "random_bp": -28.053985967589945,
+        "matched_signal_bp": -16.20032449171976,
+        "excess_bp": 11.853661475870187,
+        "week_p": 0.12498750124987501,
+        "excess_ci95": [
+          -8.160625897626579,
+          31.6269425980057
+        ]
+      },
+      {
+        "period": "all_complete",
+        "arm": "all_repeats",
+        "symbol": "ETH",
+        "side": "both",
+        "n": 293,
+        "weeks": 103,
+        "target_rate": 0.19795221843003413,
+        "net_win_rate": 0.2150170648464164,
+        "gross_bp": -4.143545893308169,
+        "net_bp": -10.548528496861708,
+        "net_bp_ci95": [
+          -26.561791209570906,
+          6.931650146306916
+        ],
+        "net_r": -44.14563289401857,
+        "closed_trade_drawdown_r": 61.076058368809626,
+        "profit_factor": 0.8247642609520293,
+        "time_exit_n": 6,
+        "adverse_path_n": 1,
+        "matched_n": 293,
+        "random_bp": -25.893770025476158,
+        "matched_signal_bp": -10.548528496861708,
+        "excess_bp": 15.345241528614446,
+        "week_p": 0.0313968603139686,
+        "excess_ci95": [
+          -0.1179889611876662,
+          32.78558056661839
+        ]
+      },
+      {
+        "period": "all_complete",
+        "arm": "all_repeats",
+        "symbol": "ETH",
+        "side": "upper_short",
+        "n": 137,
+        "weeks": 57,
+        "target_rate": 0.20437956204379562,
+        "net_win_rate": 0.22627737226277372,
+        "gross_bp": -3.2189184553387964,
+        "net_bp": -9.622112045607974,
+        "net_bp_ci95": [
+          -30.000139350914075,
+          14.015344834671218
+        ],
+        "net_r": -18.82207494265915,
+        "closed_trade_drawdown_r": 34.818015434845606,
+        "profit_factor": 0.8371600190938908,
+        "time_exit_n": 4,
+        "adverse_path_n": 1,
+        "matched_n": 137,
+        "random_bp": -20.820891223264567,
+        "matched_signal_bp": -9.622112045607974,
+        "excess_bp": 11.198779177656593,
+        "week_p": 0.14038596140385962,
+        "excess_ci95": [
+          -7.896608014103661,
+          32.286418294241635
+        ]
+      },
+      {
+        "period": "all_complete",
+        "arm": "all_repeats",
+        "symbol": "ETH",
+        "side": "lower_long",
+        "n": 156,
+        "weeks": 61,
+        "target_rate": 0.19230769230769232,
+        "net_win_rate": 0.20512820512820512,
+        "gross_bp": -4.955558451012046,
+        "net_bp": -11.362112175206335,
+        "net_bp_ci95": [
+          -31.678701061054056,
+          12.005399850075554
+        ],
+        "net_r": -25.323557951359426,
+        "closed_trade_drawdown_r": 35.234799053041606,
+        "profit_factor": 0.8142550056019082,
+        "time_exit_n": 2,
+        "adverse_path_n": 0,
+        "matched_n": 156,
+        "random_bp": -30.348798204341463,
+        "matched_signal_bp": -11.362112175206335,
+        "excess_bp": 18.98668602913513,
+        "week_p": 0.060493950604939506,
+        "excess_ci95": [
+          -2.942369545770761,
+          44.796373246702366
+        ]
+      },
+      {
+        "period": "rolling_test",
+        "arm": "first_only",
+        "symbol": "ALL",
+        "side": "both",
+        "n": 159,
+        "weeks": 76,
+        "target_rate": 0.22641509433962265,
+        "net_win_rate": 0.24528301886792453,
+        "gross_bp": -7.961795408034523,
+        "net_bp": -14.282939915727539,
+        "net_bp_ci95": [
+          -33.29148116267305,
+          4.818414557798038
+        ],
+        "net_r": -32.4357537570044,
+        "closed_trade_drawdown_r": 37.405217247487045,
+        "profit_factor": 0.7508834801976407,
+        "time_exit_n": 5,
+        "adverse_path_n": 0,
+        "matched_n": 159,
+        "random_bp": -26.515318357466956,
+        "matched_signal_bp": -14.282939915727539,
+        "excess_bp": 12.232378441739415,
+        "week_p": 0.10698930106989302,
+        "excess_ci95": [
+          -6.7822571984722115,
+          31.57416573069514
+        ],
+        "auc": 0.4896115627822945,
+        "brier": 0.1931184417562437
+      },
+      {
+        "period": "rolling_test",
+        "arm": "first_only",
+        "symbol": "BTC",
+        "side": "both",
+        "n": 83,
+        "weeks": 71,
+        "target_rate": 0.27710843373493976,
+        "net_win_rate": 0.30120481927710846,
+        "gross_bp": -2.3759258653763315,
+        "net_bp": -8.544430679412084,
+        "net_bp_ci95": [
+          -31.594864935406196,
+          14.40487616573802
+        ],
+        "net_r": -10.129681647178597,
+        "closed_trade_drawdown_r": 18.56771065439175,
+        "profit_factor": 0.8366310271023502,
+        "time_exit_n": 4,
+        "adverse_path_n": 0,
+        "matched_n": 83,
+        "random_bp": -12.945657564695253,
+        "matched_signal_bp": -8.544430679412084,
+        "excess_bp": 4.40122688528317,
+        "week_p": 0.37076292370762925,
+        "excess_ci95": [
+          -21.773398586872634,
+          29.78261179803804
+        ],
+        "auc": 0.5166666666666667,
+        "brier": 0.21464144123865475
+      },
+      {
+        "period": "rolling_test",
+        "arm": "first_only",
+        "symbol": "BTC",
+        "side": "upper_short",
+        "n": 38,
+        "weeks": 38,
+        "target_rate": 0.2631578947368421,
+        "net_win_rate": 0.2894736842105263,
+        "gross_bp": -5.837528068844688,
+        "net_bp": -12.063424898174029,
+        "net_bp_ci95": [
+          -43.65591473465831,
+          23.745931413914565
+        ],
+        "net_r": -6.547597307891136,
+        "closed_trade_drawdown_r": 13.160174009453137,
+        "profit_factor": 0.7730574155048439,
+        "time_exit_n": 2,
+        "adverse_path_n": 0,
+        "matched_n": 38,
+        "random_bp": -17.31248554934108,
+        "matched_signal_bp": -12.063424898174029,
+        "excess_bp": 5.249060651167054,
+        "week_p": 0.39786021397860216,
+        "excess_ci95": [
+          -34.18113145003552,
+          46.22855775033853
+        ],
+        "auc": 0.49642857142857144,
+        "brier": 0.20917560770985896
+      },
+      {
+        "period": "rolling_test",
+        "arm": "first_only",
+        "symbol": "BTC",
+        "side": "lower_long",
+        "n": 45,
+        "weeks": 45,
+        "target_rate": 0.28888888888888886,
+        "net_win_rate": 0.3111111111111111,
+        "gross_bp": 0.5472048842191697,
+        "net_bp": -5.572835561346441,
+        "net_bp_ci95": [
+          -36.54455775947986,
+          24.952242217494252
+        ],
+        "net_r": -3.5820843392874613,
+        "closed_trade_drawdown_r": 11.012142060564809,
+        "profit_factor": 0.8919548615150386,
+        "time_exit_n": 2,
+        "adverse_path_n": 0,
+        "matched_n": 45,
+        "random_bp": -9.258113933216553,
+        "matched_signal_bp": -5.572835561346441,
+        "excess_bp": 3.685278371870112,
+        "week_p": 0.4116588341165883,
+        "excess_ci95": [
+          -29.425622365691883,
+          38.71715241510404
+        ],
+        "auc": 0.5408653846153846,
+        "brier": 0.21925703399630467
+      },
+      {
+        "period": "rolling_test",
+        "arm": "first_only",
+        "symbol": "ETH",
+        "side": "both",
+        "n": 76,
+        "weeks": 64,
+        "target_rate": 0.17105263157894737,
+        "net_win_rate": 0.18421052631578946,
+        "gross_bp": -14.062152934884915,
+        "net_bp": -20.549996055387837,
+        "net_bp_ci95": [
+          -48.51930205966703,
+          11.543298101694932
+        ],
+        "net_r": -22.306072109825806,
+        "closed_trade_drawdown_r": 27.948484305656415,
+        "profit_factor": 0.672922924378008,
+        "time_exit_n": 1,
+        "adverse_path_n": 0,
+        "matched_n": 76,
+        "random_bp": -41.33481632852026,
+        "matched_signal_bp": -20.549996055387837,
+        "excess_bp": 20.78482027313242,
+        "week_p": 0.11828817118288171,
+        "excess_ci95": [
+          -9.131513812674923,
+          55.25114264067539
+        ],
+        "auc": 0.4761904761904763,
+        "brier": 0.1696130607425579
+      },
+      {
+        "period": "rolling_test",
+        "arm": "first_only",
+        "symbol": "ETH",
+        "side": "upper_short",
+        "n": 37,
+        "weeks": 37,
+        "target_rate": 0.13513513513513514,
+        "net_win_rate": 0.16216216216216217,
+        "gross_bp": -21.78405571742552,
+        "net_bp": -28.399725902360398,
+        "net_bp_ci95": [
+          -62.56275922547353,
+          14.266154499326257
+        ],
+        "net_r": -15.006080729246648,
+        "closed_trade_drawdown_r": 20.737676091613118,
+        "profit_factor": 0.5601267398863947,
+        "time_exit_n": 1,
+        "adverse_path_n": 0,
+        "matched_n": 37,
+        "random_bp": -46.96524074425777,
+        "matched_signal_bp": -28.399725902360398,
+        "excess_bp": 18.565514841897368,
+        "week_p": 0.21737826217378262,
+        "excess_ci95": [
+          -24.34155263369494,
+          66.98516098828303
+        ],
+        "auc": 0.2625,
+        "brier": 0.16404212167504315
+      },
+      {
+        "period": "rolling_test",
+        "arm": "first_only",
+        "symbol": "ETH",
+        "side": "lower_long",
+        "n": 39,
+        "weeks": 39,
+        "target_rate": 0.20512820512820512,
+        "net_win_rate": 0.20512820512820512,
+        "gross_bp": -6.736245166833582,
+        "net_bp": -13.102816456977957,
+        "net_bp_ci95": [
+          -48.19747087068618,
+          29.876929938331642
+        ],
+        "net_r": -7.29999138057916,
+        "closed_trade_drawdown_r": 11.376758689454341,
+        "profit_factor": 0.7858213618293622,
+        "time_exit_n": 0,
+        "adverse_path_n": 0,
+        "matched_n": 39,
+        "random_bp": -35.9931316264103,
+        "matched_signal_bp": -13.102816456977957,
+        "excess_bp": 22.890315169432345,
+        "week_p": 0.1675832416758324,
+        "excess_ci95": [
+          -17.877519765940285,
+          71.75803144347368
+        ],
+        "auc": 0.6491935483870968,
+        "brier": 0.17489831062712313
+      },
+      {
+        "period": "rolling_test",
+        "arm": "all_repeats",
+        "symbol": "ALL",
+        "side": "both",
+        "n": 359,
+        "weeks": 76,
+        "target_rate": 0.22841225626740946,
+        "net_win_rate": 0.2590529247910863,
+        "gross_bp": -0.41633796570220166,
+        "net_bp": -6.727631259386351,
+        "net_bp_ci95": [
+          -19.896534956107175,
+          7.498297543870182
+        ],
+        "net_r": -34.50301306993078,
+        "closed_trade_drawdown_r": 49.30297584505333,
+        "profit_factor": 0.880454393983417,
+        "time_exit_n": 16,
+        "adverse_path_n": 1,
+        "matched_n": 359,
+        "random_bp": -22.04519804049455,
+        "matched_signal_bp": -6.727631259386351,
+        "excess_bp": 15.3175667811082,
+        "week_p": 0.016298370162983702,
+        "excess_ci95": [
+          1.506643465714554,
+          29.494683036372557
+        ],
+        "auc": 0.5023773883948226,
+        "brier": 0.18831914557762933
+      },
+      {
+        "period": "rolling_test",
+        "arm": "all_repeats",
+        "symbol": "BTC",
+        "side": "both",
+        "n": 178,
+        "weeks": 71,
+        "target_rate": 0.24719101123595505,
+        "net_win_rate": 0.2808988764044944,
+        "gross_bp": -3.787943447421381,
+        "net_bp": -10.0399606663383,
+        "net_bp_ci95": [
+          -25.508680983346714,
+          5.484944417564396
+        ],
+        "net_r": -25.528741334251045,
+        "closed_trade_drawdown_r": 25.528741334251052,
+        "profit_factor": 0.8148607312532976,
+        "time_exit_n": 10,
+        "adverse_path_n": 0,
+        "matched_n": 178,
+        "random_bp": -19.784025873500365,
+        "matched_signal_bp": -10.0399606663383,
+        "excess_bp": 9.744065207162063,
+        "week_p": 0.09989001099890012,
+        "excess_ci95": [
+          -5.210632904823007,
+          24.57694248842459
+        ],
+        "auc": 0.5295115332428766,
+        "brier": 0.19738558810103113
+      },
+      {
+        "period": "rolling_test",
+        "arm": "all_repeats",
+        "symbol": "BTC",
+        "side": "upper_short",
+        "n": 74,
+        "weeks": 38,
+        "target_rate": 0.2702702702702703,
+        "net_win_rate": 0.33783783783783783,
+        "gross_bp": 10.376659574712727,
+        "net_bp": 4.177401470939657,
+        "net_bp_ci95": [
+          -21.11866966718865,
+          31.71821951552435
+        ],
+        "net_r": 4.415789982651502,
+        "closed_trade_drawdown_r": 9.351139589709552,
+        "profit_factor": 1.0839409495278556,
+        "time_exit_n": 7,
+        "adverse_path_n": 0,
+        "matched_n": 74,
+        "random_bp": -18.591741139582094,
+        "matched_signal_bp": 4.177401470939657,
+        "excess_bp": 22.769142610521744,
+        "week_p": 0.0405959404059594,
+        "excess_ci95": [
+          -1.4908328985860027,
+          46.51406338129301
+        ],
+        "auc": 0.5194444444444445,
+        "brier": 0.21037578237732643
+      },
+      {
+        "period": "rolling_test",
+        "arm": "all_repeats",
+        "symbol": "BTC",
+        "side": "lower_long",
+        "n": 104,
+        "weeks": 45,
+        "target_rate": 0.23076923076923078,
+        "net_win_rate": 0.2403846153846154,
+        "gross_bp": -13.866603290093725,
+        "net_bp": -20.156160648632238,
+        "net_bp_ci95": [
+          -37.410937807131,
+          -1.9587032716337682
+        ],
+        "net_r": -29.944531316902548,
+        "closed_trade_drawdown_r": 31.080715642742582,
+        "profit_factor": 0.6488824079236469,
+        "time_exit_n": 3,
+        "adverse_path_n": 0,
+        "matched_n": 104,
+        "random_bp": -20.632382318788373,
+        "matched_signal_bp": -20.156160648632238,
+        "excess_bp": 0.4762216701561316,
+        "week_p": 0.47585241475852413,
+        "excess_ci95": [
+          -16.48131525919117,
+          17.718206789440025
+        ],
+        "auc": 0.5401041666666666,
+        "brier": 0.1881425652505903
+      },
+      {
+        "period": "rolling_test",
+        "arm": "all_repeats",
+        "symbol": "ETH",
+        "side": "both",
+        "n": 181,
+        "weeks": 64,
+        "target_rate": 0.20994475138121546,
+        "net_win_rate": 0.23756906077348067,
+        "gross_bp": 2.899384552231584,
+        "net_bp": -3.4702023398424444,
+        "net_bp_ci95": [
+          -22.504786180574506,
+          16.893832251498118
+        ],
+        "net_r": -8.974271735679725,
+        "closed_trade_drawdown_r": 35.02116990427204,
+        "profit_factor": 0.9404607246132861,
+        "time_exit_n": 6,
+        "adverse_path_n": 1,
+        "matched_n": 181,
+        "random_bp": -24.2688922157706,
+        "matched_signal_bp": -3.4702023398424444,
+        "excess_bp": 20.798689875928154,
+        "week_p": 0.026997300269973004,
+        "excess_ci95": [
+          1.0197680107321143,
+          43.796950594175826
+        ],
+        "auc": 0.472396025027604,
+        "brier": 0.1794029755822397
+      },
+      {
+        "period": "rolling_test",
+        "arm": "all_repeats",
+        "symbol": "ETH",
+        "side": "upper_short",
+        "n": 87,
+        "weeks": 37,
+        "target_rate": 0.21839080459770116,
+        "net_win_rate": 0.25287356321839083,
+        "gross_bp": 4.199193312397691,
+        "net_bp": -2.1596005756582497,
+        "net_bp_ci95": [
+          -26.288432721903973,
+          26.35228356020614
+        ],
+        "net_r": -2.6795406199964518,
+        "closed_trade_drawdown_r": 29.309656886320052,
+        "profit_factor": 0.9619743845981756,
+        "time_exit_n": 4,
+        "adverse_path_n": 1,
+        "matched_n": 87,
+        "random_bp": -16.998220316953656,
+        "matched_signal_bp": -2.1596005756582497,
+        "excess_bp": 14.838619741295405,
+        "week_p": 0.1304869513048695,
+        "excess_ci95": [
+          -9.818362691970332,
+          44.85287912911473
+        ],
+        "auc": 0.40170278637770895,
+        "brier": 0.1958047270216002
+      },
+      {
+        "period": "rolling_test",
+        "arm": "all_repeats",
+        "symbol": "ETH",
+        "side": "lower_long",
+        "n": 94,
+        "weeks": 39,
+        "target_rate": 0.20212765957446807,
+        "net_win_rate": 0.22340425531914893,
+        "gross_bp": 1.6963700614395423,
+        "net_bp": -4.683206100310795,
+        "net_bp_ci95": [
+          -29.783021081085938,
+          25.115881578244423
+        ],
+        "net_r": -6.294731115683277,
+        "closed_trade_drawdown_r": 18.912991368598416,
+        "profit_factor": 0.9215725891780111,
+        "time_exit_n": 2,
+        "adverse_path_n": 0,
+        "matched_n": 94,
+        "random_bp": -30.99813110084586,
+        "matched_signal_bp": -4.683206100310795,
+        "excess_bp": 26.314925000535062,
+        "week_p": 0.0476952304769523,
+        "excess_ci95": [
+          -2.801034960552852,
+          60.142520225055726
+        ],
+        "auc": 0.5501754385964912,
+        "brier": 0.16422263116495917
+      },
+      {
+        "period": "rolling_test",
+        "arm": "score_gate",
+        "symbol": "ALL",
+        "side": "both",
+        "n": 142,
+        "weeks": 45,
+        "target_rate": 0.19718309859154928,
+        "net_win_rate": 0.2323943661971831,
+        "gross_bp": 0.5042754564176232,
+        "net_bp": -5.9005735192302335,
+        "net_bp_ci95": [
+          -30.521581070529454,
+          21.95642879693934
+        ],
+        "net_r": -11.973005412243428,
+        "closed_trade_drawdown_r": 24.09977751891626,
+        "profit_factor": 0.9001256943296677,
+        "time_exit_n": 5,
+        "adverse_path_n": 0,
+        "matched_n": 142,
+        "random_bp": -18.539127357884592,
+        "matched_signal_bp": -5.9005735192302335,
+        "excess_bp": 12.638553838654353,
+        "week_p": 0.14828517148285172,
+        "excess_ci95": [
+          -10.632200318510929,
+          38.7268109203946
+        ],
+        "auc": 0.6365914786967418,
+        "brier": 0.1691782547759179
+      },
+      {
+        "period": "rolling_test",
+        "arm": "score_gate",
+        "symbol": "BTC",
+        "side": "both",
+        "n": 59,
+        "weeks": 27,
+        "target_rate": 0.2711864406779661,
+        "net_win_rate": 0.288135593220339,
+        "gross_bp": 7.195898491946093,
+        "net_bp": 1.0166773143854042,
+        "net_bp_ci95": [
+          -32.04378548627532,
+          33.191178271965384
+        ],
+        "net_r": 0.8565792734927813,
+        "closed_trade_drawdown_r": 9.522803957972142,
+        "profit_factor": 1.018544061057335,
+        "time_exit_n": 1,
+        "adverse_path_n": 0,
+        "matched_n": 59,
+        "random_bp": -10.860981154745788,
+        "matched_signal_bp": 1.0166773143854042,
+        "excess_bp": 11.87765846913119,
+        "week_p": 0.18838116188381163,
+        "excess_ci95": [
+          -13.443407694808245,
+          35.60701233329662
+        ],
+        "auc": 0.6293604651162791,
+        "brier": 0.20061790442687336
+      },
+      {
+        "period": "rolling_test",
+        "arm": "score_gate",
+        "symbol": "BTC",
+        "side": "upper_short",
+        "n": 19,
+        "weeks": 11,
+        "target_rate": 0.2631578947368421,
+        "net_win_rate": 0.3157894736842105,
+        "gross_bp": 19.22837681879231,
+        "net_bp": 13.00883667760769,
+        "net_bp_ci95": [
+          -47.796333129667104,
+          82.8049746945519
+        ],
+        "net_r": 3.5305386628776185,
+        "closed_trade_drawdown_r": 4.401933976030982,
+        "profit_factor": 1.2467814007087614,
+        "time_exit_n": 1,
+        "adverse_path_n": 0,
+        "matched_n": 19,
+        "random_bp": 3.9429350215427803,
+        "matched_signal_bp": 13.00883667760769,
+        "excess_bp": 9.065901656064906,
+        "week_p": 0.3932606739326067,
+        "excess_ci95": [
+          -35.249505839780866,
+          66.87708211255412
+        ],
+        "auc": 0.6714285714285715,
+        "brier": 0.19190028985860497
+      },
+      {
+        "period": "rolling_test",
+        "arm": "score_gate",
+        "symbol": "BTC",
+        "side": "lower_long",
+        "n": 40,
+        "weeks": 18,
+        "target_rate": 0.275,
+        "net_win_rate": 0.275,
+        "gross_bp": 1.4804712866941423,
+        "net_bp": -4.679598383145182,
+        "net_bp_ci95": [
+          -36.69835593303225,
+          28.48638201705542
+        ],
+        "net_r": -2.673959389384838,
+        "closed_trade_drawdown_r": 8.849879804204079,
+        "profit_factor": 0.9161379893720069,
+        "time_exit_n": 0,
+        "adverse_path_n": 0,
+        "matched_n": 40,
+        "random_bp": -17.89284133848286,
+        "matched_signal_bp": -4.679598383145182,
+        "excess_bp": 13.213242955337671,
+        "week_p": 0.1827817218278172,
+        "excess_ci95": [
+          -15.202426028553342,
+          36.709074540739195
+        ],
+        "auc": 0.6144200626959249,
+        "brier": 0.20475877134680082
+      },
+      {
+        "period": "rolling_test",
+        "arm": "score_gate",
+        "symbol": "ETH",
+        "side": "both",
+        "n": 83,
+        "weeks": 35,
+        "target_rate": 0.14457831325301204,
+        "net_win_rate": 0.1927710843373494,
+        "gross_bp": -4.252420436307439,
+        "net_bp": -10.81765543710159,
+        "net_bp_ci95": [
+          -39.309077117548604,
+          22.751912324250302
+        ],
+        "net_r": -12.829584685736211,
+        "closed_trade_drawdown_r": 18.17991376947456,
+        "profit_factor": 0.8258959228345012,
+        "time_exit_n": 4,
+        "adverse_path_n": 0,
+        "matched_n": 83,
+        "random_bp": -23.997086707103737,
+        "matched_signal_bp": -10.81765543710159,
+        "excess_bp": 13.179431270002148,
+        "week_p": 0.23457654234576542,
+        "excess_ci95": [
+          -19.28950629001465,
+          55.08777367065937
+        ],
+        "auc": 0.539906103286385,
+        "brier": 0.1468295881565641
+      },
+      {
+        "period": "rolling_test",
+        "arm": "score_gate",
+        "symbol": "ETH",
+        "side": "upper_short",
+        "n": 29,
+        "weeks": 17,
+        "target_rate": 0.10344827586206896,
+        "net_win_rate": 0.1724137931034483,
+        "gross_bp": -21.803384204764914,
+        "net_bp": -28.513045020744045,
+        "net_bp_ci95": [
+          -65.48721866591596,
+          29.141732316928653
+        ],
+        "net_r": -11.808634452993278,
+        "closed_trade_drawdown_r": 14.829366978602469,
+        "profit_factor": 0.5528949405775726,
+        "time_exit_n": 2,
+        "adverse_path_n": 0,
+        "matched_n": 29,
+        "random_bp": -19.332145665923107,
+        "matched_signal_bp": -28.513045020744045,
+        "excess_bp": -9.180899354820937,
+        "week_p": 0.6024397560243976,
+        "excess_ci95": [
+          -50.18272927079672,
+          61.89303875192894
+        ],
+        "auc": 0.5384615384615384,
+        "brier": 0.14526169666748026
+      },
+      {
+        "period": "rolling_test",
+        "arm": "score_gate",
+        "symbol": "ETH",
+        "side": "lower_long",
+        "n": 54,
+        "weeks": 21,
+        "target_rate": 0.16666666666666666,
+        "net_win_rate": 0.2037037037037037,
+        "gross_bp": 5.173097143049355,
+        "net_bp": -1.3145758458862018,
+        "net_bp_ci95": [
+          -38.17802824352878,
+          43.29329163656273
+        ],
+        "net_r": -1.020950232742933,
+        "closed_trade_drawdown_r": 17.813504257051147,
+        "profit_factor": 0.9784053156476407,
+        "time_exit_n": 2,
+        "adverse_path_n": 0,
+        "matched_n": 54,
+        "random_bp": -26.50233282181185,
+        "matched_signal_bp": -1.3145758458862018,
+        "excess_bp": 25.187756975925648,
+        "week_p": 0.15858414158584141,
+        "excess_ci95": [
+          -16.492946429785924,
+          76.41645790763539
+        ],
+        "auc": 0.5802469135802469,
+        "brier": 0.1476716039562573
+      },
+      {
+        "period": "rolling_test",
+        "arm": "calibration_top_decile",
+        "symbol": "ALL",
+        "side": "both",
+        "n": 82,
+        "weeks": 45,
+        "target_rate": 0.25609756097560976,
+        "net_win_rate": 0.3048780487804878,
+        "gross_bp": -0.6829060768764388,
+        "net_bp": -6.910582801300426,
+        "net_bp_ci95": [
+          -29.41975360120256,
+          15.92329939647428
+        ],
+        "net_r": -8.095824426278844,
+        "closed_trade_drawdown_r": 15.630058836780483,
+        "profit_factor": 0.8708645221864743,
+        "time_exit_n": 4,
+        "adverse_path_n": 0,
+        "matched_n": 82,
+        "random_bp": -19.211239179182904,
+        "matched_signal_bp": -6.910582801300426,
+        "excess_bp": 12.300656377882474,
+        "week_p": 0.128987101289871,
+        "excess_ci95": [
+          -8.162238488051186,
+          34.041046134743475
+        ],
+        "auc": 0.5300546448087431,
+        "brier": 0.2135932745509587
+      },
+      {
+        "period": "rolling_test",
+        "arm": "calibration_top_decile",
+        "symbol": "BTC",
+        "side": "both",
+        "n": 37,
+        "weeks": 26,
+        "target_rate": 0.2972972972972973,
+        "net_win_rate": 0.3783783783783784,
+        "gross_bp": 4.726602202666047,
+        "net_bp": -1.3766549933489232,
+        "net_bp_ci95": [
+          -36.150003540205496,
+          34.39731595822891
+        ],
+        "net_r": -0.7279566873482635,
+        "closed_trade_drawdown_r": 9.023257343021996,
+        "profit_factor": 0.9712228568888834,
+        "time_exit_n": 3,
+        "adverse_path_n": 0,
+        "matched_n": 37,
+        "random_bp": -18.592613761825856,
+        "matched_signal_bp": -1.3766549933489232,
+        "excess_bp": 17.215958768476934,
+        "week_p": 0.148985101489851,
+        "excess_ci95": [
+          -13.59487862262194,
+          49.71621931695846
+        ],
+        "auc": 0.5104895104895105,
+        "brier": 0.23579722136827017
+      },
+      {
+        "period": "rolling_test",
+        "arm": "calibration_top_decile",
+        "symbol": "BTC",
+        "side": "upper_short",
+        "n": 15,
+        "weeks": 12,
+        "target_rate": 0.3333333333333333,
+        "net_win_rate": 0.4666666666666667,
+        "gross_bp": 13.262661017030801,
+        "net_bp": 7.255197449178443,
+        "net_bp_ci95": [
+          -43.54822407604952,
+          71.2281154436818
+        ],
+        "net_r": 1.5543480481222252,
+        "closed_trade_drawdown_r": 4.401965751188258,
+        "profit_factor": 1.1765512036156427,
+        "time_exit_n": 2,
+        "adverse_path_n": 0,
+        "matched_n": 15,
+        "random_bp": -22.665569570351867,
+        "matched_signal_bp": 7.255197449178443,
+        "excess_bp": 29.92076701953031,
+        "week_p": 0.16098390160983903,
+        "excess_ci95": [
+          -24.417554467782246,
+          97.32462859081717
+        ],
+        "auc": 0.42,
+        "brier": 0.26765595671683245
+      },
+      {
+        "period": "rolling_test",
+        "arm": "calibration_top_decile",
+        "symbol": "BTC",
+        "side": "lower_long",
+        "n": 22,
+        "weeks": 15,
+        "target_rate": 0.2727272727272727,
+        "net_win_rate": 0.3181818181818182,
+        "gross_bp": -1.0934378980371875,
+        "net_bp": -7.2620089314357665,
+        "net_bp_ci95": [
+          -48.58299295440006,
+          35.61079187267345
+        ],
+        "net_r": -2.2823047354704906,
+        "closed_trade_drawdown_r": 6.851437278811327,
+        "profit_factor": 0.8616147569790537,
+        "time_exit_n": 1,
+        "adverse_path_n": 0,
+        "matched_n": 22,
+        "random_bp": -15.81559843783086,
+        "matched_signal_bp": -7.2620089314357665,
+        "excess_bp": 8.553589506395086,
+        "week_p": 0.3481651834816518,
+        "excess_ci95": [
+          -24.498743866391873,
+          41.921307399435314
+        ],
+        "auc": 0.6145833333333333,
+        "brier": 0.21407535635788674
+      },
+      {
+        "period": "rolling_test",
+        "arm": "calibration_top_decile",
+        "symbol": "ETH",
+        "side": "both",
+        "n": 45,
+        "weeks": 28,
+        "target_rate": 0.2222222222222222,
+        "net_win_rate": 0.24444444444444444,
+        "gross_bp": -5.130723995611374,
+        "net_bp": -11.46070122117166,
+        "net_bp_ci95": [
+          -40.3392824371068,
+          18.80929492713031
+        ],
+        "net_r": -7.367867738930576,
+        "closed_trade_drawdown_r": 14.3896359120086,
+        "profit_factor": 0.8029778446524845,
+        "time_exit_n": 1,
+        "adverse_path_n": 0,
+        "matched_n": 45,
+        "random_bp": -19.719886744565358,
+        "matched_signal_bp": -11.46070122117166,
+        "excess_bp": 8.259185523393699,
+        "week_p": 0.30756924307569244,
+        "excess_ci95": [
+          -21.681755439006942,
+          39.37408204511016
+        ],
+        "auc": 0.54,
+        "brier": 0.1953366960567248
+      },
+      {
+        "period": "rolling_test",
+        "arm": "calibration_top_decile",
+        "symbol": "ETH",
+        "side": "upper_short",
+        "n": 19,
+        "weeks": 15,
+        "target_rate": 0.21052631578947367,
+        "net_win_rate": 0.2631578947368421,
+        "gross_bp": -7.077980790967642,
+        "net_bp": -13.461578925623865,
+        "net_bp_ci95": [
+          -53.23136513397699,
+          20.15243388231898
+        ],
+        "net_r": -3.6536214036359778,
+        "closed_trade_drawdown_r": 8.803784763233844,
+        "profit_factor": 0.7628543844725084,
+        "time_exit_n": 1,
+        "adverse_path_n": 0,
+        "matched_n": 19,
+        "random_bp": -22.737038063682576,
+        "matched_signal_bp": -13.461578925623865,
+        "excess_bp": 9.275459138058714,
+        "week_p": 0.3157684231576842,
+        "excess_ci95": [
+          -23.982494122384143,
+          44.612547972385634
+        ],
+        "auc": 0.5,
+        "brier": 0.2080350366007441
+      },
+      {
+        "period": "rolling_test",
+        "arm": "calibration_top_decile",
+        "symbol": "ETH",
+        "side": "lower_long",
+        "n": 26,
+        "weeks": 16,
+        "target_rate": 0.23076923076923078,
+        "net_win_rate": 0.23076923076923078,
+        "gross_bp": -3.707728645158721,
+        "net_bp": -9.99852136022582,
+        "net_bp_ci95": [
+          -51.763713234103655,
+          41.76851956430391
+        ],
+        "net_r": -3.7142463352946002,
+        "closed_trade_drawdown_r": 12.013149086457613,
+        "profit_factor": 0.8310898521803692,
+        "time_exit_n": 0,
+        "adverse_path_n": 0,
+        "matched_n": 26,
+        "random_bp": -17.51504539597971,
+        "matched_signal_bp": -9.99852136022582,
+        "excess_bp": 7.516524035753891,
+        "week_p": 0.38816118388161186,
+        "excess_ci95": [
+          -44.897220777404875,
+          60.06203203727129
+        ],
+        "auc": 0.5916666666666667,
+        "brier": 0.18605713950532615
+      },
+      {
+        "period": "rolling_test",
+        "arm": "single_reward_gate",
+        "symbol": "ALL",
+        "side": "both",
+        "n": 112,
+        "weeks": 32,
+        "target_rate": 0.16071428571428573,
+        "net_win_rate": 0.1875,
+        "gross_bp": -15.305307753603405,
+        "net_bp": -21.812484553649956,
+        "net_bp_ci95": [
+          -43.524975905666935,
+          1.7142029648982244
+        ],
+        "net_r": -34.893174982353436,
+        "closed_trade_drawdown_r": 34.89317498235344,
+        "profit_factor": 0.6513403351535125,
+        "time_exit_n": 3,
+        "adverse_path_n": 0,
+        "matched_n": 112,
+        "random_bp": -24.552089587207227,
+        "matched_signal_bp": -21.812484553649956,
+        "excess_bp": 2.7396050335572784,
+        "week_p": 0.400959904009599,
+        "excess_ci95": [
+          -16.576473819289347,
+          23.894843955563257
+        ],
+        "auc": 0.5839243498817968,
+        "brier": 0.15391810137594764
+      },
+      {
+        "period": "rolling_test",
+        "arm": "single_reward_gate",
+        "symbol": "BTC",
+        "side": "both",
+        "n": 51,
+        "weeks": 20,
+        "target_rate": 0.2549019607843137,
+        "net_win_rate": 0.2549019607843137,
+        "gross_bp": 4.848670549072998,
+        "net_bp": -1.3762278582804668,
+        "net_bp_ci95": [
+          -37.62325973459362,
+          34.77102602240691
+        ],
+        "net_r": -1.0024826859619735,
+        "closed_trade_drawdown_r": 10.515860996529666,
+        "profit_factor": 0.9760123417319085,
+        "time_exit_n": 0,
+        "adverse_path_n": 0,
+        "matched_n": 51,
+        "random_bp": -23.803232092776252,
+        "matched_signal_bp": -1.3762278582804668,
+        "excess_bp": 22.42700423449578,
+        "week_p": 0.08589141085891411,
+        "excess_ci95": [
+          -6.1976529565938305,
+          50.63049297894438
+        ],
+        "auc": 0.5607287449392712,
+        "brier": 0.19962168962958168
+      },
+      {
+        "period": "rolling_test",
+        "arm": "single_reward_gate",
+        "symbol": "BTC",
+        "side": "upper_short",
+        "n": 16,
+        "weeks": 8,
+        "target_rate": 0.3125,
+        "net_win_rate": 0.3125,
+        "gross_bp": 38.06392280634737,
+        "net_bp": 31.994596376254226,
+        "net_bp_ci95": [
+          -46.10094681139542,
+          115.61085484847057
+        ],
+        "net_r": 7.312437007425675,
+        "closed_trade_drawdown_r": 4.401933976030982,
+        "profit_factor": 1.6040655826744985,
+        "time_exit_n": 0,
+        "adverse_path_n": 0,
+        "matched_n": 16,
+        "random_bp": 1.2679129844588868,
+        "matched_signal_bp": 31.994596376254226,
+        "excess_bp": 30.726683391795333,
+        "week_p": 0.20007999200079993,
+        "excess_ci95": [
+          -30.963538935378132,
+          101.63306127423203
+        ],
+        "auc": 0.44545454545454544,
+        "brier": 0.22307099792373292
+      },
+      {
+        "period": "rolling_test",
+        "arm": "single_reward_gate",
+        "symbol": "BTC",
+        "side": "lower_long",
+        "n": 35,
+        "weeks": 13,
+        "target_rate": 0.22857142857142856,
+        "net_win_rate": 0.22857142857142856,
+        "gross_bp": -10.335444768538151,
+        "net_bp": -16.631461794067757,
+        "net_bp_ci95": [
+          -48.2142825799859,
+          13.31721834311619
+        ],
+        "net_r": -8.31491969338765,
+        "closed_trade_drawdown_r": 12.512360860858458,
+        "profit_factor": 0.7199065445224921,
+        "time_exit_n": 0,
+        "adverse_path_n": 0,
+        "matched_n": 35,
+        "random_bp": -35.2643269852266,
+        "matched_signal_bp": -16.631461794067757,
+        "excess_bp": 18.632865191158842,
+        "week_p": 0.12868713128687131,
+        "excess_ci95": [
+          -10.342869207879453,
+          42.813869111419386
+        ],
+        "auc": 0.6458333333333333,
+        "brier": 0.18890200583796968
+      },
+      {
+        "period": "rolling_test",
+        "arm": "single_reward_gate",
+        "symbol": "ETH",
+        "side": "both",
+        "n": 61,
+        "weeks": 23,
+        "target_rate": 0.08196721311475409,
+        "net_win_rate": 0.13114754098360656,
+        "gross_bp": -32.1553551869886,
+        "net_bp": -38.8985352333851,
+        "net_bp_ci95": [
+          -62.37009816017252,
+          -14.823588441978764
+        ],
+        "net_r": -33.890692296391464,
+        "closed_trade_drawdown_r": 33.89069229639146,
+        "profit_factor": 0.4185492300103482,
+        "time_exit_n": 3,
+        "adverse_path_n": 0,
+        "matched_n": 61,
+        "random_bp": -25.17818355796099,
+        "matched_signal_bp": -38.8985352333851,
+        "excess_bp": -13.7203516754241,
+        "week_p": 0.8086191380861913,
+        "excess_ci95": [
+          -40.86874575312204,
+          16.85364025227584
+        ],
+        "auc": 0.47500000000000003,
+        "brier": 0.11570690463930274
+      },
+      {
+        "period": "rolling_test",
+        "arm": "single_reward_gate",
+        "symbol": "ETH",
+        "side": "upper_short",
+        "n": 17,
+        "weeks": 10,
+        "target_rate": 0.058823529411764705,
+        "net_win_rate": 0.17647058823529413,
+        "gross_bp": -35.96135181579269,
+        "net_bp": -42.80640562111112,
+        "net_bp_ci95": [
+          -70.58672372232485,
+          -0.09530720911005233
+        ],
+        "net_r": -10.392714779572918,
+        "closed_trade_drawdown_r": 12.595652773088533,
+        "profit_factor": 0.3254372717801873,
+        "time_exit_n": 2,
+        "adverse_path_n": 0,
+        "matched_n": 17,
+        "random_bp": -26.263715943451388,
+        "matched_signal_bp": -42.80640562111112,
+        "excess_bp": -16.54268967765973,
+        "week_p": 0.7365263473652635,
+        "excess_ci95": [
+          -39.906771142608996,
+          28.416713649764894
+        ],
+        "auc": 0.90625,
+        "brier": 0.09336729938740573
+      },
+      {
+        "period": "rolling_test",
+        "arm": "single_reward_gate",
+        "symbol": "ETH",
+        "side": "lower_long",
+        "n": 44,
+        "weeks": 15,
+        "target_rate": 0.09090909090909091,
+        "net_win_rate": 0.11363636363636363,
+        "gross_bp": -30.684856489496102,
+        "net_bp": -37.388676219945495,
+        "net_bp_ci95": [
+          -63.79720979142326,
+          -3.5046229441190855
+        ],
+        "net_r": -23.497977516818544,
+        "closed_trade_drawdown_r": 23.497977516818544,
+        "profit_factor": 0.4520040714207729,
+        "time_exit_n": 1,
+        "adverse_path_n": 0,
+        "matched_n": 44,
+        "random_bp": -24.758773318112432,
+        "matched_signal_bp": -37.388676219945495,
+        "excess_bp": -12.629902901833061,
+        "week_p": 0.7117288271172882,
+        "excess_ci95": [
+          -53.239441373692905,
+          31.687684260133015
+        ],
+        "auc": 0.371875,
+        "brier": 0.12433811575935386
+      }
+    ],
+    "diagnostics": [
+      {
+        "symbol": "BTC",
+        "all_predictions": {
+          "n": 449,
+          "weeks": 71,
+          "target_rate": 0.2828507795100223,
+          "net_win_rate": 0.3429844097995546,
+          "gross_bp": 6.4735041201847805,
+          "net_bp": 0.31864308309698375,
+          "net_bp_ci95": [
+            -24.994679276178765,
+            27.317848920458268
+          ],
+          "net_r": 2.0436913580992027,
+          "closed_trade_drawdown_r": 50.36668404912763,
+          "profit_factor": 1.0063822147656847,
+          "time_exit_n": 33,
+          "adverse_path_n": 0,
+          "matched_n": 449,
+          "random_bp": -19.861963275119788,
+          "matched_signal_bp": 0.31864308309698375,
+          "excess_bp": 20.180606358216775,
+          "week_p": 0.014198580141985802,
+          "excess_ci95": [
+            3.431361698958385,
+            36.575348858911894
+          ],
+          "auc": 0.4759377903848975,
+          "brier": 0.22140024931960817
+        },
+        "retrospective_top_decile": {
+          "n": 45,
+          "weeks": 8,
+          "target_rate": 0.28888888888888886,
+          "net_win_rate": 0.28888888888888886,
+          "gross_bp": -1.8099364181711202,
+          "net_bp": -7.950744699580778,
+          "net_bp_ci95": [
+            -57.366976567322716,
+            45.73586939692124
+          ],
+          "net_r": -5.110813501836847,
+          "closed_trade_drawdown_r": 22.450986565719084,
+          "profit_factor": 0.8548096553674273,
+          "time_exit_n": 0,
+          "adverse_path_n": 0,
+          "matched_n": 45,
+          "random_bp": -24.365085485517774,
+          "matched_signal_bp": -7.950744699580778,
+          "excess_bp": 16.414340785936993,
+          "week_p": 0.32526747325267474,
+          "excess_ci95": [
+            -34.810105053924154,
+            70.00170186815278
+          ],
+          "auc": 0.4254807692307693,
+          "brier": 0.24708579373887543
+        },
+        "week_rank_permutation_p": 0.3314668533146685
+      },
+      {
+        "symbol": "ETH",
+        "all_predictions": {
+          "n": 333,
+          "weeks": 64,
+          "target_rate": 0.21621621621621623,
+          "net_win_rate": 0.2552552552552553,
+          "gross_bp": 5.208782343705781,
+          "net_bp": -1.1455584423265053,
+          "net_bp_ci95": [
+            -23.376004581661316,
+            23.30944733688992
+          ],
+          "net_r": -5.449441816953623,
+          "closed_trade_drawdown_r": 67.86446062761539,
+          "profit_factor": 0.9799458946875723,
+          "time_exit_n": 14,
+          "adverse_path_n": 2,
+          "matched_n": 333,
+          "random_bp": -26.183179304285545,
+          "matched_signal_bp": -1.1455584423265053,
+          "excess_bp": 25.037620861959038,
+          "week_p": 0.0100989901009899,
+          "excess_ci95": [
+            5.545996518233263,
+            47.48336869857671
+          ],
+          "auc": 0.5207002979991486,
+          "brier": 0.17757042487684305
+        },
+        "retrospective_top_decile": {
+          "n": 34,
+          "weeks": 15,
+          "target_rate": 0.20588235294117646,
+          "net_win_rate": 0.29411764705882354,
+          "gross_bp": -5.799269934678056,
+          "net_bp": -12.175056891744461,
+          "net_bp_ci95": [
+            -51.890835598395334,
+            10.177611102556604
+          ],
+          "net_r": -5.911620086593242,
+          "closed_trade_drawdown_r": 13.0803287989362,
+          "profit_factor": 0.7760786074996734,
+          "time_exit_n": 3,
+          "adverse_path_n": 0,
+          "matched_n": 34,
+          "random_bp": 1.2687281281631877,
+          "matched_signal_bp": -12.175056891744461,
+          "excess_bp": -13.443785019907644,
+          "week_p": 0.7723227677232277,
+          "excess_ci95": [
+            -54.61717087454013,
+            17.465545408259384
+          ],
+          "auc": 0.4973544973544974,
+          "brier": 0.20911906832387828
+        },
+        "week_rank_permutation_p": 0.47665233476652336
+      }
+    ],
+    "current_week": [
+      {
+        "event_id": "BTC-2026-10-26--1-1",
+        "symbol": "BTC",
+        "week": "2026-10-26",
+        "ordinal": 1,
+        "side": -1,
+        "p": 0.10545666555847984,
+        "break_even_p": 0.4313097203825052,
+        "gate": false,
+        "reason": 4,
+        "net_notional_bp": 101.57318375022177
+      },
+      {
+        "event_id": "BTC-2026-10-26--1-2",
+        "symbol": "BTC",
+        "week": "2026-10-26",
+        "ordinal": 2,
+        "side": -1,
+        "p": 0.10749974140455786,
+        "break_even_p": 0.4313097203825052,
+        "gate": false,
+        "reason": 4,
+        "net_notional_bp": 101.57318375022177
+      },
+      {
+        "event_id": "BTC-2026-10-26--1-3",
+        "symbol": "BTC",
+        "week": "2026-10-26",
+        "ordinal": 3,
+        "side": -1,
+        "p": 0.10227690208719295,
+        "break_even_p": 0.4313097203825052,
+        "gate": false,
+        "reason": 4,
+        "net_notional_bp": 101.57318375022177
+      },
+      {
+        "event_id": "BTC-2026-10-26-1-1",
+        "symbol": "BTC",
+        "week": "2026-10-26",
+        "ordinal": 1,
+        "side": 1,
+        "p": 0.07056209542260447,
+        "break_even_p": 0.42131357758256655,
+        "gate": false,
+        "reason": 4,
+        "net_notional_bp": 105.72115679568424
+      },
+      {
+        "event_id": "BTC-2026-10-26-1-2",
+        "symbol": "BTC",
+        "week": "2026-10-26",
+        "ordinal": 2,
+        "side": 1,
+        "p": 0.11256122544275506,
+        "break_even_p": 0.42131357758256655,
+        "gate": false,
+        "reason": 1,
+        "net_notional_bp": -76.97045769570028
+      },
+      {
+        "event_id": "ETH-2026-10-26--1-1",
+        "symbol": "ETH",
+        "week": "2026-10-26",
+        "ordinal": 1,
+        "side": -1,
+        "p": 0.421860417415448,
+        "break_even_p": 0.38328011708788984,
+        "gate": true,
+        "reason": 4,
+        "net_notional_bp": 124.01852296417914
+      },
+      {
+        "event_id": "ETH-2026-10-26--1-2",
+        "symbol": "ETH",
+        "week": "2026-10-26",
+        "ordinal": 2,
+        "side": -1,
+        "p": 0.39020052839834224,
+        "break_even_p": 0.38328011708788984,
+        "gate": true,
+        "reason": 4,
+        "net_notional_bp": 124.01852296417914
+      },
+      {
+        "event_id": "ETH-2026-10-26--1-3",
+        "symbol": "ETH",
+        "week": "2026-10-26",
+        "ordinal": 3,
+        "side": -1,
+        "p": 0.4879370851249615,
+        "break_even_p": 0.38328011708788984,
+        "gate": true,
+        "reason": 1,
+        "net_notional_bp": -77.07524164508227
+      },
+      {
+        "event_id": "ETH-2026-10-26--1-4",
+        "symbol": "ETH",
+        "week": "2026-10-26",
+        "ordinal": 4,
+        "side": -1,
+        "p": 0.5193953693373018,
+        "break_even_p": 0.38328011708788984,
+        "gate": true,
+        "reason": 4,
+        "net_notional_bp": 124.01852296417914
+      },
+      {
+        "event_id": "ETH-2026-10-26-1-1",
+        "symbol": "ETH",
+        "week": "2026-10-26",
+        "ordinal": 1,
+        "side": 1,
+        "p": 0.18766422764141885,
+        "break_even_p": 0.37167302404342106,
+        "gate": false,
+        "reason": 1,
+        "net_notional_bp": -77.0052993936596
+      },
+      {
+        "event_id": "ETH-2026-10-26-1-2",
+        "symbol": "ETH",
+        "week": "2026-10-26",
+        "ordinal": 2,
+        "side": 1,
+        "p": 0.5851161596940615,
+        "break_even_p": 0.37167302404342106,
+        "gate": true,
+        "reason": 1,
+        "net_notional_bp": -77.0052993936596
+      },
+      {
+        "event_id": "ETH-2026-10-26-1-3",
+        "symbol": "ETH",
+        "week": "2026-10-26",
+        "ordinal": 3,
+        "side": 1,
+        "p": 0.47111982814265796,
+        "break_even_p": 0.37167302404342106,
+        "gate": true,
+        "reason": 1,
+        "net_notional_bp": -77.0052993936596
+      }
+    ]
+  },
+  "continuation": [
+    {
+      "target": "far",
+      "symbol": "ALL",
+      "n": 108,
+      "weeks": 24,
+      "selected": 7,
+      "auc": 0.5223765432098766,
+      "close_now_bp": 206.10408141571367,
+      "always_continue_bp": 225.22079864859504,
+      "score_policy_bp": 204.12984280095466,
+      "always_incremental_bp": 19.11671723288141,
+      "score_incremental_bp": -1.9742386147589817,
+      "paired_close_control": {
+        "matched_n": 108,
+        "random_bp": 206.10408141571367,
+        "matched_signal_bp": 204.12984280095466,
+        "excess_bp": -1.9742386147589817,
+        "week_p": 0.6148385161483851,
+        "excess_ci95": [
+          -12.505788463024603,
+          7.933404010747011
+        ]
+      },
+      "random_entry_control": {
+        "matched_n": 108,
+        "random_bp": 11.68591516811758,
+        "matched_signal_bp": 225.22079864859504,
+        "excess_bp": 213.53488348047753,
+        "week_p": 9.999000099990002e-05,
+        "excess_ci95": [
+          120.66009908581717,
+          325.9949563129976
+        ]
+      },
+      "week_rank_permutation_p": 0.44375562443755623
+    },
+    {
+      "target": "far",
+      "symbol": "BTC",
+      "n": 60,
+      "weeks": 19,
+      "selected": 1,
+      "auc": 0.6145833333333333,
+      "close_now_bp": 180.86513107903724,
+      "always_continue_bp": 162.72190621263465,
+      "score_policy_bp": 185.79204667055623,
+      "always_incremental_bp": -18.143224866402605,
+      "score_incremental_bp": 4.92691559151898,
+      "paired_close_control": {
+        "matched_n": 60,
+        "random_bp": 180.86513107903724,
+        "matched_signal_bp": 185.79204667055623,
+        "excess_bp": 4.92691559151898,
+        "week_p": 0.49835016498350165,
+        "excess_ci95": [
+          0.0,
+          17.38911385241993
+        ]
+      },
+      "random_entry_control": {
+        "matched_n": 60,
+        "random_bp": 7.481649685530885,
+        "matched_signal_bp": 162.72190621263465,
+        "excess_bp": 155.24025652710375,
+        "week_p": 0.0018998100189981002,
+        "excess_ci95": [
+          70.365049627753,
+          283.86809450187167
+        ]
+      },
+      "week_rank_permutation_p": 0.30686931306869314
+    },
+    {
+      "target": "far",
+      "symbol": "ETH",
+      "n": 48,
+      "weeks": 15,
+      "selected": 6,
+      "auc": 0.27777777777777773,
+      "close_now_bp": 237.6527693365592,
+      "always_continue_bp": 303.3444141935456,
+      "score_policy_bp": 227.05208796395277,
+      "always_incremental_bp": 65.69164485698643,
+      "score_incremental_bp": -10.600681372606436,
+      "paired_close_control": {
+        "matched_n": 48,
+        "random_bp": 237.6527693365592,
+        "matched_signal_bp": 227.05208796395277,
+        "excess_bp": -10.600681372606436,
+        "week_p": 0.8740125987401259,
+        "excess_ci95": [
+          -30.44075332140528,
+          6.25074695917616
+        ]
+      },
+      "random_entry_control": {
+        "matched_n": 48,
+        "random_bp": 16.941247021350943,
+        "matched_signal_bp": 303.3444141935456,
+        "excess_bp": 286.4031671721947,
+        "week_p": 0.00029997000299970003,
+        "excess_ci95": [
+          173.4432081414863,
+          394.0888790121251
+        ]
+      },
+      "week_rank_permutation_p": 0.6851314868513149
+    },
+    {
+      "target": "opposite1618",
+      "symbol": "ALL",
+      "n": 108,
+      "weeks": 24,
+      "selected": 20,
+      "auc": 0.6871035940803383,
+      "close_now_bp": 206.10408141571367,
+      "always_continue_bp": 239.40646679775287,
+      "score_policy_bp": 195.3765801507041,
+      "always_incremental_bp": 33.30238538203922,
+      "score_incremental_bp": -10.727501265009558,
+      "paired_close_control": {
+        "matched_n": 108,
+        "random_bp": 206.10408141571367,
+        "matched_signal_bp": 195.3765801507041,
+        "excess_bp": -10.727501265009558,
+        "week_p": 0.6806319368063194,
+        "excess_ci95": [
+          -63.47685551913495,
+          43.374799580397884
+        ]
+      },
+      "random_entry_control": {
+        "matched_n": 108,
+        "random_bp": 15.696523799180648,
+        "matched_signal_bp": 239.40646679775287,
+        "excess_bp": 223.70994299857227,
+        "week_p": 9.999000099990002e-05,
+        "excess_ci95": [
+          138.1245783752792,
+          330.07356530195506
+        ]
+      },
+      "week_rank_permutation_p": 0.17078292170782922
+    },
+    {
+      "target": "opposite1618",
+      "symbol": "BTC",
+      "n": 60,
+      "weeks": 19,
+      "selected": 13,
+      "auc": 0.6701388888888888,
+      "close_now_bp": 180.86513107903724,
+      "always_continue_bp": 196.54043886386793,
+      "score_policy_bp": 181.54788913889172,
+      "always_incremental_bp": 15.675307784830663,
+      "score_incremental_bp": 0.6827580598544879,
+      "paired_close_control": {
+        "matched_n": 60,
+        "random_bp": 180.86513107903724,
+        "matched_signal_bp": 181.54788913889172,
+        "excess_bp": 0.6827580598544879,
+        "week_p": 0.49845015498450157,
+        "excess_ci95": [
+          -68.87552191098416,
+          81.06064141714715
+        ]
+      },
+      "random_entry_control": {
+        "matched_n": 60,
+        "random_bp": 6.494886649141912,
+        "matched_signal_bp": 196.54043886386793,
+        "excess_bp": 190.045552214726,
+        "week_p": 0.0005999400059994001,
+        "excess_ci95": [
+          95.75692584913197,
+          334.0772363201669
+        ]
+      },
+      "week_rank_permutation_p": 0.12218778122187782
+    },
+    {
+      "target": "opposite1618",
+      "symbol": "ETH",
+      "n": 48,
+      "weeks": 15,
+      "selected": 7,
+      "auc": 0.7526315789473684,
+      "close_now_bp": 237.6527693365592,
+      "always_continue_bp": 292.98900171510905,
+      "score_policy_bp": 212.66244391546957,
+      "always_incremental_bp": 55.336232378549916,
+      "score_incremental_bp": -24.990325421089608,
+      "paired_close_control": {
+        "matched_n": 48,
+        "random_bp": 237.6527693365592,
+        "matched_signal_bp": 212.66244391546957,
+        "excess_bp": -24.990325421089608,
+        "week_p": 1.0,
+        "excess_ci95": [
+          -61.52538172402648,
+          0.0
+        ]
+      },
+      "random_entry_control": {
+        "matched_n": 48,
+        "random_bp": 27.198570236729054,
+        "matched_signal_bp": 292.98900171510905,
+        "excess_bp": 265.79043147838007,
+        "week_p": 0.00029997000299970003,
+        "excess_ci95": [
+          169.49652603221827,
+          367.6765113466615
+        ]
+      },
+      "week_rank_permutation_p": 0.49465053494650535
+    }
+  ],
+  "target_baselines": [
+    {
+      "target": "far",
+      "symbol": "BTC",
+      "n": 155,
+      "weeks": 71,
+      "target_rate": 0.07741935483870968,
+      "net_win_rate": 0.17419354838709677,
+      "gross_bp": -5.7462786273451325,
+      "net_bp": -12.504647174514671,
+      "net_bp_ci95": [
+        -34.86680893070665,
+        11.587832638539673
+      ],
+      "net_r": -27.68770925419139,
+      "closed_trade_drawdown_r": 36.30895732104593,
+      "profit_factor": 0.7992034868669844,
+      "time_exit_n": 19,
+      "adverse_path_n": 0,
+      "matched_n": 155,
+      "random_bp": -22.18612609570116,
+      "matched_signal_bp": -12.504647174514671,
+      "excess_bp": 9.681478921186494,
+      "week_p": 0.22597740225977403,
+      "excess_ci95": [
+        -14.238391306215934,
+        34.36943209770018
+      ]
+    },
+    {
+      "target": "far",
+      "symbol": "ETH",
+      "n": 168,
+      "weeks": 64,
+      "target_rate": 0.08928571428571429,
+      "net_win_rate": 0.17857142857142858,
+      "gross_bp": 21.968650058159408,
+      "net_bp": 15.236414358179818,
+      "net_bp_ci95": [
+        -15.850458014549108,
+        53.72327781176048
+      ],
+      "net_r": 36.551657755247035,
+      "closed_trade_drawdown_r": 28.54462075339177,
+      "profit_factor": 1.2424998129127558,
+      "time_exit_n": 16,
+      "adverse_path_n": 0,
+      "matched_n": 168,
+      "random_bp": -27.93101505019319,
+      "matched_signal_bp": 15.236414358179818,
+      "excess_bp": 43.16742940837301,
+      "week_p": 0.0143985601439856,
+      "excess_ci95": [
+        7.193253935539637,
+        86.0996359724514
+      ]
+    },
+    {
+      "target": "near",
+      "symbol": "BTC",
+      "n": 178,
+      "weeks": 71,
+      "target_rate": 0.24719101123595505,
+      "net_win_rate": 0.2808988764044944,
+      "gross_bp": -3.787943447421381,
+      "net_bp": -10.0399606663383,
+      "net_bp_ci95": [
+        -25.508680983346714,
+        5.484944417564396
+      ],
+      "net_r": -25.528741334251045,
+      "closed_trade_drawdown_r": 25.528741334251052,
+      "profit_factor": 0.8148607312532976,
+      "time_exit_n": 10,
+      "adverse_path_n": 0,
+      "matched_n": 178,
+      "random_bp": -19.784025873500365,
+      "matched_signal_bp": -10.0399606663383,
+      "excess_bp": 9.744065207162063,
+      "week_p": 0.09989001099890012,
+      "excess_ci95": [
+        -5.210632904823007,
+        24.57694248842459
+      ]
+    },
+    {
+      "target": "near",
+      "symbol": "ETH",
+      "n": 181,
+      "weeks": 64,
+      "target_rate": 0.20994475138121546,
+      "net_win_rate": 0.23756906077348067,
+      "gross_bp": 2.899384552231584,
+      "net_bp": -3.4702023398424444,
+      "net_bp_ci95": [
+        -22.504786180574506,
+        16.893832251498118
+      ],
+      "net_r": -8.974271735679725,
+      "closed_trade_drawdown_r": 35.02116990427204,
+      "profit_factor": 0.9404607246132861,
+      "time_exit_n": 6,
+      "adverse_path_n": 1,
+      "matched_n": 181,
+      "random_bp": -24.2688922157706,
+      "matched_signal_bp": -3.4702023398424444,
+      "excess_bp": 20.798689875928154,
+      "week_p": 0.026997300269973004,
+      "excess_ci95": [
+        1.0197680107321143,
+        43.796950594175826
+      ]
+    },
+    {
+      "target": "opposite1618",
+      "symbol": "BTC",
+      "n": 151,
+      "weeks": 71,
+      "target_rate": 0.0728476821192053,
+      "net_win_rate": 0.17218543046357615,
+      "gross_bp": 3.371571454354473,
+      "net_bp": -3.4001218682603698,
+      "net_bp_ci95": [
+        -30.05093871768929,
+        26.983787839868164
+      ],
+      "net_r": -7.335444097846295,
+      "closed_trade_drawdown_r": 28.335657336113634,
+      "profit_factor": 0.9454978215158542,
+      "time_exit_n": 19,
+      "adverse_path_n": 0,
+      "matched_n": 151,
+      "random_bp": -22.539501843417018,
+      "matched_signal_bp": -3.4001218682603698,
+      "excess_bp": 19.139379975156643,
+      "week_p": 0.0714928507149285,
+      "excess_ci95": [
+        -5.913850592082583,
+        44.688804353650035
+      ]
+    },
+    {
+      "target": "opposite1618",
+      "symbol": "ETH",
+      "n": 163,
+      "weeks": 64,
+      "target_rate": 0.05521472392638037,
+      "net_win_rate": 0.17791411042944785,
+      "gross_bp": 29.137687086470862,
+      "net_bp": 22.30319658914907,
+      "net_bp_ci95": [
+        -10.249126262384612,
+        62.63291730298236
+      ],
+      "net_r": 51.91397937876218,
+      "closed_trade_drawdown_r": 28.544620753391765,
+      "profit_factor": 1.354778730869659,
+      "time_exit_n": 21,
+      "adverse_path_n": 0,
+      "matched_n": 163,
+      "random_bp": -20.66899158154369,
+      "matched_signal_bp": 22.30319658914907,
+      "excess_bp": 42.97218817069277,
+      "week_p": 0.0160983901609839,
+      "excess_ci95": [
+        6.014180690152872,
+        84.58098766933404
+      ]
+    }
+  ],
+  "validation": {
+    "fees": [
+      {
+        "symbol": "BTC",
+        "arm": "native",
+        "orders": 8196,
+        "trades": 8196,
+        "fills": 16392,
+        "max_commission_error": 1.4210854715202004e-14,
+        "max_net_bp_error": 3.410605131648481e-13
+      },
+      {
+        "symbol": "BTC",
+        "arm": "close_now",
+        "orders": 158,
+        "trades": 158,
+        "fills": 316,
+        "max_commission_error": 1.4210854715202004e-14,
+        "max_net_bp_error": 1.1368683772161603e-13
+      },
+      {
+        "symbol": "BTC",
+        "arm": "path_sensitivity",
+        "orders": 48,
+        "trades": 48,
+        "fills": 96,
+        "max_commission_error": 7.105427357601002e-15,
+        "max_net_bp_error": 1.4210854715202004e-14
+      },
+      {
+        "symbol": "ETH",
+        "arm": "native",
+        "orders": 6783,
+        "trades": 6783,
+        "fills": 13566,
+        "max_commission_error": 4.440892098500626e-16,
+        "max_net_bp_error": 2.2737367544323206e-13
+      },
+      {
+        "symbol": "ETH",
+        "arm": "close_now",
+        "orders": 110,
+        "trades": 110,
+        "fills": 220,
+        "max_commission_error": 4.440892098500626e-16,
+        "max_net_bp_error": 5.684341886080802e-14
+      },
+      {
+        "symbol": "ETH",
+        "arm": "path_sensitivity",
+        "orders": 120,
+        "trades": 120,
+        "fills": 240,
+        "max_commission_error": 2.220446049250313e-16,
+        "max_net_bp_error": 2.842170943040401e-14
+      }
+    ],
+    "paths": [
+      {
+        "symbol": "BTC",
+        "tested": 48,
+        "changed": 0,
+        "changes": []
+      },
+      {
+        "symbol": "ETH",
+        "tested": 120,
+        "changed": 2,
+        "changes": [
+          {
+            "trade_id": "ETH-2025-09-08--1-2:near",
+            "reason_oh": 1,
+            "reason_ol": 4,
+            "net_notional_bp_oh": -77.04258007369324,
+            "net_notional_bp_ol": 143.8008448570071
+          },
+          {
+            "trade_id": "ETH-2025-09-08--1-3:near",
+            "reason_oh": 1,
+            "reason_ol": 4,
+            "net_notional_bp_oh": -77.04258007369324,
+            "net_notional_bp_ol": 143.8008448570071
+          }
+        ]
+      }
+    ],
+    "source_parity": {
+      "old_859": 859,
+      "matched_859": 859
+    },
+    "model_numeric": [
+      {
+        "model": "continue_far_2025Q4.pkl",
+        "train_n": 97,
+        "max_scaled_feature": 8.355283100145027,
+        "gradient": 9.574827523265999e-05,
+        "iterations": 19,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 3.0493015376027966e-05,
+            "iterations": 9
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 5.278900036861057e-05,
+            "iterations": 4
+          }
+        ]
+      },
+      {
+        "model": "continue_far_2026Q1.pkl",
+        "train_n": 150,
+        "max_scaled_feature": 7.855482279241736,
+        "gradient": 8.309508336159398e-05,
+        "iterations": 27,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 9.37594852068966e-05,
+            "iterations": 4
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 9.37594852068966e-05,
+            "iterations": 4
+          }
+        ]
+      },
+      {
+        "model": "continue_far_2026Q2.pkl",
+        "train_n": 192,
+        "max_scaled_feature": 8.74622981231235,
+        "gradient": 7.086457284351082e-05,
+        "iterations": 27,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 1.7985885338962674e-06,
+            "iterations": 6
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 1.7985885338962674e-06,
+            "iterations": 6
+          }
+        ]
+      },
+      {
+        "model": "continue_far_2026Q3.pkl",
+        "train_n": 218,
+        "max_scaled_feature": 9.213980689139657,
+        "gradient": 9.874949234605633e-05,
+        "iterations": 33,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 2.368829240534134e-05,
+            "iterations": 9
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 2.368829240534134e-05,
+            "iterations": 9
+          }
+        ]
+      },
+      {
+        "model": "continue_opposite1618_2025Q4.pkl",
+        "train_n": 97,
+        "max_scaled_feature": 8.355283100145027,
+        "gradient": 8.135507085779273e-05,
+        "iterations": 18,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 2.3897455746066552e-05,
+            "iterations": 9
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 8.297493365514324e-05,
+            "iterations": 8
+          }
+        ]
+      },
+      {
+        "model": "continue_opposite1618_2026Q1.pkl",
+        "train_n": 150,
+        "max_scaled_feature": 7.855482279241736,
+        "gradient": 9.824061089440709e-05,
+        "iterations": 20,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 4.085327409460556e-06,
+            "iterations": 9
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 4.085327409460556e-06,
+            "iterations": 9
+          }
+        ]
+      },
+      {
+        "model": "continue_opposite1618_2026Q2.pkl",
+        "train_n": 192,
+        "max_scaled_feature": 8.74622981231235,
+        "gradient": 8.528830022908399e-05,
+        "iterations": 23,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 8.141183506996962e-05,
+            "iterations": 10
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 8.141183506996962e-05,
+            "iterations": 10
+          }
+        ]
+      },
+      {
+        "model": "continue_opposite1618_2026Q3.pkl",
+        "train_n": 218,
+        "max_scaled_feature": 9.213980689139657,
+        "gradient": 5.1927628477673616e-05,
+        "iterations": 26,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 2.6769455025077934e-05,
+            "iterations": 7
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 2.6769455025077934e-05,
+            "iterations": 7
+          }
+        ]
+      },
+      {
+        "model": "entry_2025Q1.pkl",
+        "train_n": 354,
+        "max_scaled_feature": 10.539248258186849,
+        "gradient": 7.567330269280386e-05,
+        "iterations": 21,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 1.892902104743416e-05,
+            "iterations": 10
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 2.1377090391579508e-05,
+            "iterations": 9
+          }
+        ]
+      },
+      {
+        "model": "entry_2025Q2.pkl",
+        "train_n": 449,
+        "max_scaled_feature": 10.361640937051227,
+        "gradient": 6.720666314807784e-05,
+        "iterations": 21,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 1.0101712669696034e-05,
+            "iterations": 8
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 1.0528391385590993e-05,
+            "iterations": 7
+          }
+        ]
+      },
+      {
+        "model": "entry_2025Q3.pkl",
+        "train_n": 531,
+        "max_scaled_feature": 10.295589023804066,
+        "gradient": 7.465033501443884e-05,
+        "iterations": 21,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 2.338630642919417e-05,
+            "iterations": 7
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 5.879550331779103e-07,
+            "iterations": 10
+          }
+        ]
+      },
+      {
+        "model": "entry_2025Q4.pkl",
+        "train_n": 600,
+        "max_scaled_feature": 10.286886423919729,
+        "gradient": 4.1700737860398754e-05,
+        "iterations": 22,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 1.7333737800821033e-05,
+            "iterations": 7
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 1.9374542298711804e-05,
+            "iterations": 8
+          }
+        ]
+      },
+      {
+        "model": "entry_2026Q1.pkl",
+        "train_n": 734,
+        "max_scaled_feature": 10.623338685188388,
+        "gradient": 5.092213746201568e-05,
+        "iterations": 21,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 2.4395322579850997e-05,
+            "iterations": 8
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 6.549547369622068e-06,
+            "iterations": 7
+          }
+        ]
+      },
+      {
+        "model": "entry_2026Q2.pkl",
+        "train_n": 887,
+        "max_scaled_feature": 11.135402818717228,
+        "gradient": 9.976352352426933e-05,
+        "iterations": 21,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 9.618746527606523e-07,
+            "iterations": 8
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 3.784076410363461e-05,
+            "iterations": 10
+          }
+        ]
+      },
+      {
+        "model": "entry_2026Q3.pkl",
+        "train_n": 1012,
+        "max_scaled_feature": 14.201568461548488,
+        "gradient": 9.419584931219115e-05,
+        "iterations": 18,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 1.4058753038686755e-06,
+            "iterations": 8
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 9.592102788966324e-05,
+            "iterations": 8
+          }
+        ]
+      },
+      {
+        "model": "entry_2026Q4.pkl",
+        "train_n": 1122,
+        "max_scaled_feature": 14.427246098354749,
+        "gradient": 7.235585621181325e-05,
+        "iterations": 20,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 4.392385113186697e-06,
+            "iterations": 9
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 1.2857314398783062e-05,
+            "iterations": 10
+          }
+        ]
+      },
+      {
+        "model": "single_reward_2025Q1.pkl",
+        "train_n": 354,
+        "max_scaled_feature": 2.7672842482936533,
+        "gradient": 2.9319963424675126e-05,
+        "iterations": 5,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 4.493004793903843e-05,
+            "iterations": 10
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 3.599790087319837e-05,
+            "iterations": 10
+          }
+        ]
+      },
+      {
+        "model": "single_reward_2025Q2.pkl",
+        "train_n": 449,
+        "max_scaled_feature": 3.107983783932542,
+        "gradient": 6.217009166064341e-05,
+        "iterations": 5,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 8.119892633046133e-06,
+            "iterations": 11
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 9.592620633528762e-06,
+            "iterations": 11
+          }
+        ]
+      },
+      {
+        "model": "single_reward_2025Q3.pkl",
+        "train_n": 531,
+        "max_scaled_feature": 3.0001484034720156,
+        "gradient": 1.3364173957464267e-06,
+        "iterations": 7,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 5.2856298410365805e-05,
+            "iterations": 9
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 7.247644578025462e-05,
+            "iterations": 6
+          }
+        ]
+      },
+      {
+        "model": "single_reward_2025Q4.pkl",
+        "train_n": 600,
+        "max_scaled_feature": 3.10679284198028,
+        "gradient": 9.861566161880238e-06,
+        "iterations": 7,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 4.036120179866304e-05,
+            "iterations": 8
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 8.989396670754645e-05,
+            "iterations": 10
+          }
+        ]
+      },
+      {
+        "model": "single_reward_2026Q1.pkl",
+        "train_n": 734,
+        "max_scaled_feature": 3.2842380160814297,
+        "gradient": 1.1300898820159575e-05,
+        "iterations": 7,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 1.228414139491929e-05,
+            "iterations": 11
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 5.946336591449066e-05,
+            "iterations": 10
+          }
+        ]
+      },
+      {
+        "model": "single_reward_2026Q2.pkl",
+        "train_n": 887,
+        "max_scaled_feature": 3.424568316132899,
+        "gradient": 8.439022774206993e-06,
+        "iterations": 7,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 3.24017604151211e-05,
+            "iterations": 8
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 2.3109759695229723e-05,
+            "iterations": 9
+          }
+        ]
+      },
+      {
+        "model": "single_reward_2026Q3.pkl",
+        "train_n": 1012,
+        "max_scaled_feature": 3.409356539114764,
+        "gradient": 8.741019327703841e-05,
+        "iterations": 6,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 5.167190356614822e-06,
+            "iterations": 10
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 3.5291810572970877e-06,
+            "iterations": 7
+          }
+        ]
+      },
+      {
+        "model": "single_reward_2026Q4.pkl",
+        "train_n": 1122,
+        "max_scaled_feature": 3.5662741118644785,
+        "gradient": 5.779616507083854e-05,
+        "iterations": 6,
+        "calibration": [
+          {
+            "symbol": "BTC",
+            "gradient": 1.1721254556039679e-05,
+            "iterations": 10
+          },
+          {
+            "symbol": "ETH",
+            "gradient": 1.9613020547125426e-05,
+            "iterations": 9
+          }
+        ]
+      }
+    ],
+    "frozen_score_path_sensitivity": [
+      {
+        "symbol": "BTC",
+        "arm": "all_repeats",
+        "n": 178,
+        "weeks": 71,
+        "target_rate": 0.24719101123595505,
+        "net_win_rate": 0.2808988764044944,
+        "gross_bp": -3.787943447421381,
+        "net_bp": -10.0399606663383,
+        "net_bp_ci95": [
+          -25.508680983346714,
+          5.484944417564396
+        ],
+        "net_r": -25.528741334251045,
+        "closed_trade_drawdown_r": 25.528741334251052,
+        "profit_factor": 0.8148607312532976,
+        "time_exit_n": 10,
+        "adverse_path_n": 0,
+        "matched_n": 178,
+        "random_bp": -19.784025873500365,
+        "matched_signal_bp": -10.0399606663383,
+        "excess_bp": 9.744065207162063,
+        "week_p": 0.09989001099890012,
+        "excess_ci95": [
+          -5.210632904823007,
+          24.57694248842459
+        ],
+        "auc": 0.5295115332428766,
+        "brier": 0.19738558810103113
+      },
+      {
+        "symbol": "BTC",
+        "arm": "score_gate",
+        "n": 59,
+        "weeks": 27,
+        "target_rate": 0.2711864406779661,
+        "net_win_rate": 0.288135593220339,
+        "gross_bp": 7.195898491946093,
+        "net_bp": 1.0166773143854042,
+        "net_bp_ci95": [
+          -32.04378548627532,
+          33.191178271965384
+        ],
+        "net_r": 0.8565792734927813,
+        "closed_trade_drawdown_r": 9.522803957972142,
+        "profit_factor": 1.018544061057335,
+        "time_exit_n": 1,
+        "adverse_path_n": 0,
+        "matched_n": 59,
+        "random_bp": -10.860981154745788,
+        "matched_signal_bp": 1.0166773143854042,
+        "excess_bp": 11.87765846913119,
+        "week_p": 0.18838116188381163,
+        "excess_ci95": [
+          -13.443407694808245,
+          35.60701233329662
+        ],
+        "auc": 0.6293604651162791,
+        "brier": 0.20061790442687336
+      },
+      {
+        "symbol": "ETH",
+        "arm": "all_repeats",
+        "n": 181,
+        "weeks": 64,
+        "target_rate": 0.2154696132596685,
+        "net_win_rate": 0.2430939226519337,
+        "gross_bp": 4.1025827118141125,
+        "net_bp": -2.250072920335813,
+        "net_bp_ci95": [
+          -21.516231294486314,
+          18.53081787723619
+        ],
+        "net_r": -5.8197070921344825,
+        "closed_trade_drawdown_r": 31.8666052607268,
+        "profit_factor": 0.9611055236396479,
+        "time_exit_n": 6,
+        "adverse_path_n": 1,
+        "matched_n": 181,
+        "random_bp": -24.2688922157706,
+        "matched_signal_bp": -2.250072920335813,
+        "excess_bp": 22.018819295434785,
+        "week_p": 0.0216978302169783,
+        "excess_ci95": [
+          1.7427417570521313,
+          45.17968375353908
+        ],
+        "auc": 0.4680390032502708,
+        "brier": 0.18280257059269303
+      },
+      {
+        "symbol": "ETH",
+        "arm": "score_gate",
+        "n": 83,
+        "weeks": 35,
+        "target_rate": 0.14457831325301204,
+        "net_win_rate": 0.1927710843373494,
+        "gross_bp": -4.252420436307439,
+        "net_bp": -10.81765543710159,
+        "net_bp_ci95": [
+          -39.309077117548604,
+          22.751912324250302
+        ],
+        "net_r": -12.829584685736211,
+        "closed_trade_drawdown_r": 18.17991376947456,
+        "profit_factor": 0.8258959228345012,
+        "time_exit_n": 4,
+        "adverse_path_n": 0,
+        "matched_n": 83,
+        "random_bp": -23.997086707103737,
+        "matched_signal_bp": -10.81765543710159,
+        "excess_bp": 13.179431270002148,
+        "week_p": 0.23457654234576542,
+        "excess_ci95": [
+          -19.28950629001465,
+          55.08777367065937
+        ],
+        "auc": 0.539906103286385,
+        "brier": 0.1468295881565641
+      }
+    ],
+    "primary_comparisons_holm": [
+      {
+        "test": "BTC_entry",
+        "p": 0.18838116188381163,
+        "holm_p": 1.0
+      },
+      {
+        "test": "ETH_entry",
+        "p": 0.23457654234576542,
+        "holm_p": 1.0
+      },
+      {
+        "test": "BTC_far",
+        "p": 0.49835016498350165,
+        "holm_p": 1.0
+      },
+      {
+        "test": "BTC_opposite1618",
+        "p": 0.49845015498450157,
+        "holm_p": 1.0
+      },
+      {
+        "test": "ETH_far",
+        "p": 0.8740125987401259,
+        "holm_p": 1.0
+      },
+      {
+        "test": "ETH_opposite1618",
+        "p": 1.0,
+        "holm_p": 1.0
+      }
+    ],
+    "target_comparisons_holm": [
+      {
+        "symbol": "ETH",
+        "target": "far",
+        "p": 0.0143985601439856,
+        "holm_p": 0.08639136086391361
+      },
+      {
+        "symbol": "ETH",
+        "target": "opposite1618",
+        "p": 0.0160983901609839,
+        "holm_p": 0.08639136086391361
+      },
+      {
+        "symbol": "ETH",
+        "target": "near",
+        "p": 0.026997300269973004,
+        "holm_p": 0.10798920107989202
+      },
+      {
+        "symbol": "BTC",
+        "target": "opposite1618",
+        "p": 0.0714928507149285,
+        "holm_p": 0.2144785521447855
+      },
+      {
+        "symbol": "BTC",
+        "target": "near",
+        "p": 0.09989001099890012,
+        "holm_p": 0.2144785521447855
+      },
+      {
+        "symbol": "BTC",
+        "target": "far",
+        "p": 0.22597740225977403,
+        "holm_p": 0.22597740225977403
+      }
+    ],
+    "target_years": [
+      {
+        "target": "far",
+        "symbol": "BTC",
+        "year": "2025",
+        "n": 79,
+        "net_r": -18.59214472983996,
+        "net_bp": -16.474653501651638
+      },
+      {
+        "target": "far",
+        "symbol": "BTC",
+        "year": "2026",
+        "n": 76,
+        "net_r": -9.095564524351433,
+        "net_bp": -8.377930071306505
+      },
+      {
+        "target": "far",
+        "symbol": "ETH",
+        "year": "2025",
+        "n": 96,
+        "net_r": 21.78368706072098,
+        "net_bp": 15.894199416534923
+      },
+      {
+        "target": "far",
+        "symbol": "ETH",
+        "year": "2026",
+        "n": 72,
+        "net_r": 14.767970694526063,
+        "net_bp": 14.359367613706342
+      },
+      {
+        "target": "near",
+        "symbol": "BTC",
+        "year": "2025",
+        "n": 94,
+        "net_r": -6.352812407655473,
+        "net_bp": -4.730816758305743
+      },
+      {
+        "target": "near",
+        "symbol": "BTC",
+        "year": "2026",
+        "n": 84,
+        "net_r": -19.175928926595567,
+        "net_bp": -15.981145515803302
+      },
+      {
+        "target": "near",
+        "symbol": "ETH",
+        "year": "2025",
+        "n": 103,
+        "net_r": -13.286499751127256,
+        "net_bp": -9.027529087918454
+      },
+      {
+        "target": "near",
+        "symbol": "ETH",
+        "year": "2026",
+        "n": 78,
+        "net_r": 4.312228015447522,
+        "net_bp": 3.868318878770746
+      },
+      {
+        "target": "opposite1618",
+        "symbol": "BTC",
+        "year": "2025",
+        "n": 77,
+        "net_r": -14.585840456022156,
+        "net_bp": -13.260157731736331
+      },
+      {
+        "target": "opposite1618",
+        "symbol": "BTC",
+        "year": "2026",
+        "n": 74,
+        "net_r": 7.250396358175857,
+        "net_bp": 6.859645178870024
+      },
+      {
+        "target": "opposite1618",
+        "symbol": "ETH",
+        "year": "2025",
+        "n": 93,
+        "net_r": 31.23368714105398,
+        "net_bp": 23.521439272211875
+      },
+      {
+        "target": "opposite1618",
+        "symbol": "ETH",
+        "year": "2026",
+        "n": 70,
+        "net_r": 20.680292237708187,
+        "net_bp": 20.684674167365632
+      }
+    ],
+    "concentration": [
+      {
+        "target": "far",
+        "symbol": "BTC",
+        "best_week": "2026-03-02",
+        "best_week_r": 10.370105296072005,
+        "net_excluding_best_week_r": -38.057814550263394,
+        "net_excluding_best_three_weeks_r": -55.295345713382616
+      },
+      {
+        "target": "far",
+        "symbol": "ETH",
+        "best_week": "2025-02-10",
+        "best_week_r": 24.682961641114833,
+        "net_excluding_best_week_r": 11.868696114132202,
+        "net_excluding_best_three_weeks_r": -16.40818692896542
+      },
+      {
+        "target": "near",
+        "symbol": "BTC",
+        "best_week": "2025-12-08",
+        "best_week_r": 7.602026011954935,
+        "net_excluding_best_week_r": -33.13076734620598,
+        "net_excluding_best_three_weeks_r": -43.30105815254075
+      },
+      {
+        "target": "near",
+        "symbol": "ETH",
+        "best_week": "2025-02-10",
+        "best_week_r": 10.137046431582037,
+        "net_excluding_best_week_r": -19.111318167261764,
+        "net_excluding_best_three_weeks_r": -32.976822494670046
+      },
+      {
+        "target": "opposite1618",
+        "symbol": "BTC",
+        "best_week": "2026-03-02",
+        "best_week_r": 10.370105296072005,
+        "net_excluding_best_week_r": -17.7055493939183,
+        "net_excluding_best_three_weeks_r": -35.708829227498526
+      },
+      {
+        "target": "opposite1618",
+        "symbol": "ETH",
+        "best_week": "2025-02-10",
+        "best_week_r": 19.651021950306347,
+        "net_excluding_best_week_r": 32.262957428455834,
+        "net_excluding_best_three_weeks_r": 4.920714736235375
+      }
+    ],
+    "numeric_warnings": "Local sklearn matmul RuntimeWarnings retained in logs; all frozen model/calibrator outputs checked against einsum/elementwise calculations, finite coefficients and first-order gradients.",
+    "continuation_scope": "Conditional independent opportunity study after near-touch completed close; not an integrated single-position entry-plus-continuation account strategy. Calibrated model folds lacking history are explicitly skipped."
+  },
+  "builder_commit": "923bc30d67e16279e36feea380a61dafb782a798",
+  "reproduction": [
+    ".venv/bin/python -m yoyo.evaluation.btc_eth_repeat_data",
+    "for symbol in BTC ETH; do /Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.btc_eth_repeat_native --symbol \"$symbol\"; done",
+    ".venv/bin/python -m yoyo.evaluation.btc_eth_repeat_fit entry",
+    ".venv/bin/python -m yoyo.evaluation.btc_eth_repeat_fit prepare_continuation",
+    "for symbol in BTC ETH; do /Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.btc_eth_repeat_native --symbol \"$symbol\" --continuation; done",
+    "for symbol in BTC ETH; do /Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.btc_eth_repeat_native --symbol \"$symbol\" --sensitivity; done",
+    ".venv/bin/python -m yoyo.evaluation.btc_eth_repeat_fit continuation",
+    ".venv/bin/python -m yoyo.evaluation.btc_eth_repeat_validate"
+  ]
+}
