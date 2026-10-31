@@ -1,3 +1,10 @@
+## 2026-11-01 · 32 twelve-hour reclaim strategies: later profit, no stable selection-period edge
+
+- Owner “都去做” authorized all proposed families. `exp-top20-12h-strategies-20261101-v1`: same frozen20coins,1051pure-wick events withBeijing12hOPEN Tue/Thu;A limit715,B618451,B705361,Csweep495entries (overlapping). 32fixed candidates;maker2bp/taker5bp;oldneedle stop forA/B,new15mneedle forC;24hpending and7/14/28d holding caps. No4hMA/add-position model.
+- Maturefull B61810R436trades13.99percent,+65.26R,realizedDD42.48R,longest35losses;B70510R+62.21R;B618partial259+36.80R/DD30.78. Highest substantive win B618near45.13percent still-38.55R;A5R-221.56R,C10R-50.29R. B61810R BTC36-4.78R,ETH45+23.23R. Tinyspacefilter4/5trades excluded fromselection.
+- Everypre2025 candidate withn>=50loses;bestnetC10R-0.66R,later-55.09R. FullsamplewinnerB61810R pre-6.42R,2025+40.57R,2026+19.73R;later55matchedpairs excess0.300R,CI[-0.441,1.160],p0.406. No validated champion/promotion. Same259cohort5R+11.66,partial+36.80,opposite+61.93R:partial reducesreturn andonlyslightlydrawdown versusopposite.
+- OneVectorBTexecution,39966nativelegs79888fills,14tests,190summaryrows andallfeesreconciled2.53e-12R. OHLC/OLHCworsepath;common29daymaturity preventsrecentfast-exit bias. Initialaggregationinterruptedbeforeperformanceinspection,rawfillsneverreplayed. Currentuniverse,ticks,15mordering,unmodeledfunding/slippage andindependentR—notcashROI—remainlimits. NotionEXP24040a8856479af8135a602fbc81abb3acc. Sourcee9b847bc6a,analysis01907444ac,audit1667872982.
+
 ## 2026-11-01 · All 12h 1.618 reclaims: the wick alone does not establish a clean reversal edge
 
 - Owner confirmed the prior turnover top20, all existing frozen OKX history, same-bar reclaim only, both sides and no Stoch requirement. `exp-top20-12h-1618-reclaims-20261101-v1`: 5128 events / 5084 candles, including3682 pure wicks and1446 bodies starting outside. BTC256+104;ETH305+93. Every event is charted; delivery and Chinese index live in `artifacts/top20-12h-1618-reclaims-20261101/`.

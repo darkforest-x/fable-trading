@@ -1,0 +1,260 @@
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "BTC", "signals": 87, "plans": 198, "legs": 3308, "fills": 6616, "seconds": 4.479828624986112}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "ETH", "signals": 90, "plans": 214, "legs": 3698, "fills": 7396, "seconds": 4.4238270000205375}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "ZEC", "signals": 13, "plans": 30, "legs": 512, "fills": 1024, "seconds": 1.0007293749949895}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "SOL", "signals": 63, "plans": 148, "legs": 2312, "fills": 4624, "seconds": 3.174481541966088}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "HYPE", "signals": 26, "plans": 60, "legs": 1268, "fills": 2536, "seconds": 1.7031100839958526}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "PEPE", "signals": 60, "plans": 134, "legs": 2242, "fills": 4484, "seconds": 3.0531166669679806}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "XRP", "signals": 78, "plans": 174, "legs": 2776, "fills": 5540, "seconds": 3.5744843750144355}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "NEAR", "signals": 75, "plans": 180, "legs": 3120, "fills": 6240, "seconds": 3.5838322920026258}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "DOGE", "signals": 73, "plans": 142, "legs": 2168, "fills": 4336, "seconds": 2.8214548749965616}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "AKE", "signals": 1, "plans": 1, "legs": 0, "fills": 0, "seconds": 0.574230624944903}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "WLD", "signals": 61, "plans": 135, "legs": 2118, "fills": 4236, "seconds": 2.3048012499930337}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "UNI", "signals": 63, "plans": 139, "legs": 2358, "fills": 4706, "seconds": 2.838196415978018}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "PUMP", "signals": 22, "plans": 53, "legs": 860, "fills": 1720, "seconds": 1.4854933749884367}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "BNB", "signals": 56, "plans": 124, "legs": 2222, "fills": 4444, "seconds": 2.735269790980965}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "WET", "signals": 17, "plans": 46, "legs": 650, "fills": 1278, "seconds": 1.467733416997362}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "ENA", "signals": 20, "plans": 45, "legs": 798, "fills": 1596, "seconds": 1.292861666996032}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "TRX", "signals": 72, "plans": 147, "legs": 2636, "fills": 5272, "seconds": 3.451397333992645}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "OP", "signals": 65, "plans": 149, "legs": 2478, "fills": 4956, "seconds": 3.156744209001772}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "SOPH", "signals": 29, "plans": 63, "legs": 1164, "fills": 2328, "seconds": 1.6712803750415333}
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:240: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  f=pd.read_csv(receipt['source'],float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:245: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  events=pd.read_csv(SOURCE/'events.csv',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:247: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  weekday=pd.to_datetime(events.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: Pandas4Warning: The 'float_precision' argument is deprecated. Use the default float precision instead.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:249: DtypeWarning: Columns (20: first_weekly_reclaim) have mixed types. Specify dtype option on import or set low_memory=False.
+  obs=pd.read_csv(SOURCE/'observations.csv.gz',float_precision='round_trip')
+/Users/zhangzc/fable-trading/yoyo/evaluation/top20_12h_strategies.py:251: Pandas4Warning: Series.dt.dayofweek is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  days=pd.to_datetime(obs.signal_open,utc=True).dt.tz_convert('Asia/Shanghai').dt.dayofweek
+{"symbol": "BCH", "signals": 80, "plans": 176, "legs": 3278, "fills": 6556, "seconds": 4.2980678750318475}

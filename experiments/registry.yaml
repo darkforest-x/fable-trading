@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-top20-12h-strategies-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: e9b847bc6a
+    status: inconclusive
+    question: Compare all proposed12h reclaim entry/exit families for win rate, fee-netR and realizedR drawdown.
+    single_variable: Owner authorized all32 predefined candidates;A/B entry,5R/10R/near/opposite targets,7/14/28day caps,space gate andstatic partials have named baselines;Cnew-needle stop is a separate family.
+    result: 1051TueThu pure-wick events across20coins. Mature fullhistory B618/10R436trades13.99percent,+65.26R,DD42.48R;B618partials259trades+36.80R. Allpre2025 candidates withatleast50trades lose;selectedC10R later-55.09R. B618/10R later55matchedpairs excess0.300R,CI[-0.441,1.160],p0.406;no validated edge.
+    artifacts: [top20-12h-strategies-20261101-v1]
+    canonical_report: experiments/active/exp-top20-12h-strategies-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: VectorBT1.2.0 only,39966nativelegs79888fills;14behavioraltests,190summaryrows reconciled,maxfee/PnLerror2.53e-12R,0preconfirmationentries. Frozen20inputs unchanged,no hashes/downloads. Bothintrabarpaths retained,worseused;common29daymaturity. Currenttop20,ticks,partialfunding andindependentR limitations. NotionEXP24040a8856479af8135a602fbc81abb3acc. No training,promotion,services or orders.
+
   - experiment_id: exp-top20-12h-1618-reclaims-20261101-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 94d3a340de

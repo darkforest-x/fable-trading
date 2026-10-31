@@ -19,6 +19,19 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: top20-12h-strategies-20261101-v1
+    artifact_type: manifest
+    role: native_vectorbt_finite_reclaim_strategy_results_and_conditional_controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: e9b847bc6a
+    generator_commit: 01907444ac
+    source_path: experiments/active/exp-top20-12h-strategies-20261101-v1/summary.json
+    storage_uri: repo://experiments/active/exp-top20-12h-strategies-20261101-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen32configs,all20symbol nativefills/legs,190nonemptyperiodsummaries,matchedrandom/weekCIs,pairedcohortpartials andverification. Fullobservedandcommon29daymaturetablesseparate. B61810Rfull+65.26R13.99percent,butallselectionn>=50netnegative;randomexcessunconfirmed. Independentfee-netR,notaccountROI;no funding/slippage/queue model. Rawgzlocal,summary/config/receipts tracked. Audit1667872982;14tests,feeerror2.53e-12R.
+
   - artifact_id: top20-12h-reclaims-20261101-v1
     artifact_type: manifest
     role: complete_12h_1618_reclaim_candles_and_price_path_evidence

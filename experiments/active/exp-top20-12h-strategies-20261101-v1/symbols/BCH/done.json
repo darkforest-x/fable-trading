@@ -1,0 +1,318 @@
+{
+  "symbol": "BCH",
+  "signals": 80,
+  "plans": 176,
+  "legs": 3278,
+  "fills": 6556,
+  "seconds": 4.2980678750318475,
+  "source": {
+    "symbol": "BCH",
+    "rank": 20,
+    "source": "/Users/zhangzc/fable-trading/experiments/active/exp-top20-1618-short-marks-20261031-v1/BCH/bars.csv.gz",
+    "bytes": 1674915,
+    "mtime_ns": 1793462354636963628,
+    "source15m_rows": 166946,
+    "first_source": "2022-01-03 14:15:00+00:00",
+    "last_source": "2026-10-31 14:45:00+00:00",
+    "complete12h": 3476,
+    "incomplete12h": 49,
+    "first_complete": "2022-01-04 00:00:00+00:00",
+    "last_complete": "2026-10-31 00:00:00+00:00",
+    "valid_weeks": 248,
+    "invalid_weeks": 4,
+    "reclaims": 386
+  },
+  "config": {
+    "experiment_id": "exp-top20-12h-strategies-20261101-v1",
+    "owner_authorization": "2026-11-01 都去做: execute all proposed candidate families, using stated recommended definitions.",
+    "ranking_source": "experiments/active/exp-top20-1618-short-marks-20261031-v1/ranking.json",
+    "signal_source": "experiments/active/exp-top20-12h-1618-reclaims-20261101-v1",
+    "calendar": "Signal12h OPEN in Asia/Shanghai Tuesday/Thursday; pure_wick only, both directions; original screenshot Pine levels unchanged.",
+    "entry_clock": "Only after12h confirm; B/C market at next15m open after their closed confirmation. A pending limit is never backfilled into signal candle.",
+    "pending_hours": 24,
+    "maker_fee": 0.0002,
+    "taker_fee": 0.0005,
+    "fee_basis": "Owner-verified OKX Lv1 as of2026-10-23; entry marketable limits taker, resting limits maker, TP maker, stop/time taker.",
+    "slippage": 0.0,
+    "funding": "Not included: registered OKX funding file coverage is partial and settlement completeness unknown; fee-net is not fully net.",
+    "stop": "A/B original12h needle rounded outward then one frozen current tick beyond; C new closed15m sweep needle outward+one tick. A risk fixed from planned rounded limit, B/C from next-open quote; gap-through-stop limit remains a real filled loss/fee, not removed.",
+    "pullback": "Frozen impulse from LAST12h needle occurrence to following completed15m highs/lows before12hclose; omit if no later15m impulse. Touch .618/.705 then15mclose beyond previous15m extreme, retrace line and original1.618; no prior structural stop breach.",
+    "sweep": "First15m strict sweep of old12h needle and same15mclose reclaim after12h confirmation; nextopen; new15mneedle stop.",
+    "holding": "Keep original stop/targets across weeks; timed exit at entry15m interval start+7/14/28days. Unknown intrabar entry duration bracket is up to15m shorter than nominal.",
+    "paths": [
+      "OHLC",
+      "OLHC"
+    ],
+    "ranking_path": "Per-trade worse of the two native paths; both paths must be complete. Not the known true tick path.",
+    "partial": "Two native half-size positions with same original stop;5R and original opposite1.618. Only when opposite target is farther than5R. No breakeven or stop move.",
+    "minimum_selection_trades": 50,
+    "selection_cut": "2025-01-01T00:00:00Z",
+    "later_evaluation": [
+      "2025",
+      "2026"
+    ],
+    "seed": 20261101,
+    "controls_per_signal": 3,
+    "controls": "Conditional timing null after removing pin admission: samecoin/NYweek/side/prior12h volatility bucket/half-TR close-distance bucket and sameTueThu policy. Preserve risk/priorTR and targetR and order type; actual per-fill maker/taker. Match only observed filled+closed pairs, disclose coverage. Not an executable control strategy.",
+    "baseline": "A_limit_5R_14d",
+    "candidates": [
+      {
+        "config": "A_limit_5R_14d",
+        "mode": "A_limit",
+        "target": "5R",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "A_limit_10R_14d",
+        "mode": "A_limit",
+        "target": "10R",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "A_limit_near_14d",
+        "mode": "A_limit",
+        "target": "near",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "A_limit_opposite_14d",
+        "mode": "A_limit",
+        "target": "opposite",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "A_limit_5R_7d",
+        "mode": "A_limit",
+        "target": "5R",
+        "days": 7,
+        "space_filter": false
+      },
+      {
+        "config": "A_limit_5R_28d",
+        "mode": "A_limit",
+        "target": "5R",
+        "days": 28,
+        "space_filter": false
+      },
+      {
+        "config": "A_limit_partial_14d",
+        "mode": "A_limit",
+        "target": "partial",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "A_limit_5R_space5_14d",
+        "mode": "A_limit",
+        "target": "5R",
+        "days": 14,
+        "space_filter": true
+      },
+      {
+        "config": "B_618_5R_14d",
+        "mode": "B_618",
+        "target": "5R",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "B_618_10R_14d",
+        "mode": "B_618",
+        "target": "10R",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "B_618_near_14d",
+        "mode": "B_618",
+        "target": "near",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "B_618_opposite_14d",
+        "mode": "B_618",
+        "target": "opposite",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "B_618_5R_7d",
+        "mode": "B_618",
+        "target": "5R",
+        "days": 7,
+        "space_filter": false
+      },
+      {
+        "config": "B_618_5R_28d",
+        "mode": "B_618",
+        "target": "5R",
+        "days": 28,
+        "space_filter": false
+      },
+      {
+        "config": "B_618_partial_14d",
+        "mode": "B_618",
+        "target": "partial",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "B_618_5R_space5_14d",
+        "mode": "B_618",
+        "target": "5R",
+        "days": 14,
+        "space_filter": true
+      },
+      {
+        "config": "B_705_5R_14d",
+        "mode": "B_705",
+        "target": "5R",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "B_705_10R_14d",
+        "mode": "B_705",
+        "target": "10R",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "B_705_near_14d",
+        "mode": "B_705",
+        "target": "near",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "B_705_opposite_14d",
+        "mode": "B_705",
+        "target": "opposite",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "B_705_5R_7d",
+        "mode": "B_705",
+        "target": "5R",
+        "days": 7,
+        "space_filter": false
+      },
+      {
+        "config": "B_705_5R_28d",
+        "mode": "B_705",
+        "target": "5R",
+        "days": 28,
+        "space_filter": false
+      },
+      {
+        "config": "B_705_partial_14d",
+        "mode": "B_705",
+        "target": "partial",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "B_705_5R_space5_14d",
+        "mode": "B_705",
+        "target": "5R",
+        "days": 14,
+        "space_filter": true
+      },
+      {
+        "config": "C_sweep_5R_14d",
+        "mode": "C_sweep",
+        "target": "5R",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "C_sweep_10R_14d",
+        "mode": "C_sweep",
+        "target": "10R",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "C_sweep_near_14d",
+        "mode": "C_sweep",
+        "target": "near",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "C_sweep_opposite_14d",
+        "mode": "C_sweep",
+        "target": "opposite",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "C_sweep_5R_7d",
+        "mode": "C_sweep",
+        "target": "5R",
+        "days": 7,
+        "space_filter": false
+      },
+      {
+        "config": "C_sweep_5R_28d",
+        "mode": "C_sweep",
+        "target": "5R",
+        "days": 28,
+        "space_filter": false
+      },
+      {
+        "config": "C_sweep_partial_14d",
+        "mode": "C_sweep",
+        "target": "partial",
+        "days": 14,
+        "space_filter": false
+      },
+      {
+        "config": "C_sweep_5R_space5_14d",
+        "mode": "C_sweep",
+        "target": "5R",
+        "days": 14,
+        "space_filter": true
+      }
+    ],
+    "limitations": [
+      "Historical current-top20 selection and unequal coin histories;ZEC older-listing samples retained and flagged.",
+      "All history previously inspected; chronological evaluation is not pristine blind OOS.",
+      "15mOHLC paths are assumptions; queue, spread, latency, slippage and complete funding absent.",
+      "Independent trades may overlap; cumulativeR/realized-tradeR drawdown is not funded portfolio return or mark-to-market drawdown.",
+      "Current frozen tick sizes used retrospectively; historical tick changes unavailable.",
+      "C changes both setup and structural stop; not a pure entry-only ablation.",
+      "Partial/space filters change eligible population; compare same-cohort baselines separately.",
+      "Matched controls may be sparse; transfer of risk/target nuisance parameters is conditional research only."
+    ],
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "code_stamps": {
+    "yoyo/evaluation/top20_12h_strategies.py": {
+      "bytes": 17658,
+      "mtime_ns": 1793475569477468844
+    },
+    "yoyo/evaluation/reclaim_strategy_engine.py": {
+      "bytes": 4572,
+      "mtime_ns": 1793475419087527475
+    },
+    "yoyo/evaluation/monday_timed_engine.py": {
+      "bytes": 3859,
+      "mtime_ns": 1792781885757792560
+    }
+  },
+  "builder_commit": "1828512f6f97d15aa171c77d1caf22e1241abaf5",
+  "versions": {
+    "vectorbt": "1.2.0",
+    "numpy": "2.5.4",
+    "pandas": "3.1.0",
+    "numba": "0.68.0"
+  }
+}
