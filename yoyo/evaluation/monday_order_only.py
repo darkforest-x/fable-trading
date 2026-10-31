@@ -156,6 +156,15 @@ def prior_studies(cfg):
     return roots
 
 
+def audit_prior_studies(cfg, receipt):
+    """Audit caches that existed at execution, not ones produced afterwards."""
+    roots=prior_studies(cfg)
+    used=receipt.get('prior_studies_used')
+    if used is None:return roots  # Legacy one-prior receipts.
+    assert set(used)<=set(map(str,roots)),used
+    return [p for p in roots if str(p) in used]
+
+
 def reuse_unchanged_symbol(symbol, cfg, out, selected):
     """Score values can change sizing without changing any native order.
 
@@ -286,13 +295,14 @@ def process(symbol, config):
             receipts[path]=json.loads((d/'done.json').read_text());continue
         cache = tabs.get(path,pd.DataFrame())
         reused, reused_ids, known_empty, mismatches = [],set(),set(),[]
-        prior_empty = set()
+        prior_empty = set();prior_used=[]
         for prior in prior_studies(cfg):
             if not (prior/'symbols'/symbol/'orders.csv.gz').exists():continue
             source = prior/'symbols'/symbol
             old_orders = read_csv(source/'orders.csv.gz').set_index('trade_id')
             old_rows = read_csv(source/path/'trades.csv.gz').set_index('trade_id')
             assert (source/path/'done.json').exists() and not (source/'error.json').exists()
+            prior_used.append(str(prior))
             for r in x.to_dict('records'):
                 key = r['trade_id']
                 if key in reused_ids|prior_empty:continue
@@ -365,6 +375,7 @@ def process(symbol, config):
         rows.reindex(columns=KEEP+['net','mae_pct','cache_source']).to_csv(d/'trades.csv.gz',index=False)
         receipt=dict(reused=len(reused),known_empty_children=len(known_empty-prior_empty),
                      known_empty_prior_orders=len(prior_empty),cache_mismatches=mismatches,
+                     prior_studies_used=prior_used,
                      new_orders=len(runtime),new_positions=audit['positions'],new_fills=audit['fills'],
                      dependent_parents=len(deps),positions=len(rows),engine=audit.get('engine'),version=audit.get('version'))
         dump(d/'done.json',receipt);receipts[path]=receipt

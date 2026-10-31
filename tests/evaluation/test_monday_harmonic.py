@@ -179,11 +179,13 @@ def test_missing_constituent_cannot_be_aggregated_as_a_complete_bar(interval):
 
 
 def test_multiple_native_caches_keep_order_and_reject_fee_changes(tmp_path):
-    from yoyo.evaluation.monday_order_only import prior_studies
+    from yoyo.evaluation.monday_order_only import prior_studies,audit_prior_studies
     a=tmp_path/'a';b=tmp_path/'b';a.mkdir();b.mkdir()
     for p in (a,b):(p/'config.json').write_text(json.dumps(CFG))
     cfg=dict(CFG,reuse_study=str(a),reuse_studies=[str(b),str(a)])
     assert prior_studies(cfg)==[a,b]
+    assert audit_prior_studies(cfg,{'prior_studies_used':[str(a)]})==[a]
+    assert audit_prior_studies(cfg,{'prior_studies_used':[]})==[]
     changed=dict(CFG,maker_fee=.001);(b/'config.json').write_text(json.dumps(changed))
     with pytest.raises(ValueError,match='maker_fee'):prior_studies(cfg)
 

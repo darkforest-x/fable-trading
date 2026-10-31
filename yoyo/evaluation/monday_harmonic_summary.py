@@ -166,7 +166,7 @@ def collect_controls(config):
 def validate_outputs(config):
     """Audit saved clocks, source stamps and native fills without replaying them."""
     from yoyo.evaluation.monday_harmonic import events, STEP, interval_step
-    from yoyo.evaluation.monday_order_only import population, prior_studies, same_order
+    from yoyo.evaluation.monday_order_only import population, audit_prior_studies, same_order
     from yoyo.evaluation.monday_limit_backstop import CODEX
     cfg=json.loads(config.read_text());root=config.parent
     gates=read_csv(ROOT/cfg['admission_events']).set_index('event')
@@ -198,7 +198,7 @@ def validate_outputs(config):
             if p['confluence']:
                 assert p['prz_low']<=gates.loc[p['event'],'entry']<=p['prz_high']
             patterns+=1
-    pop=population(cfg);priors=prior_studies(cfg)
+    pop=population(cfg)
     score_rows=positions=clocks=parent_reruns=native_signal_orders=0;worst=0.;mismatches=[]
     syms=sorted(gates.loc[gates.admitted,'symbol'].unique())
     for symbol in syms:
@@ -211,7 +211,7 @@ def validate_outputs(config):
             audit=json.loads((p/'native-audit.json').read_text())
             orders=read_csv(p/'native-orders.csv.gz').set_index('trade_id')
             native_signal_orders+=int(orders.control_id.eq(0).sum())
-            for prior in priors:
+            for prior in audit_prior_studies(cfg,r):
                 source=prior/'symbols'/symbol
                 if not (source/'orders.csv.gz').exists():continue
                 old=read_csv(source/'orders.csv.gz').set_index('trade_id');parents=set(orders.parent.dropna())
