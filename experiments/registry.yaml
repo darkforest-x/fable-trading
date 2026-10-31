@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-top20-12h-1618-reclaims-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 94d3a340de
+    status: inconclusive
+    question: Find every 12h same-bar Monday1.618 reclaim in the frozen prior20 OKX coins and assess subsequent clean reversal paths.
+    single_variable: New screenshot-aligned descriptive census; no Stoch or future-outcome admission filters. Each diagnostic arm changes one random-control restriction only.
+    result: 5128events on5084candles;3682pure-wick and1446body-reclaims. Pure3651complete72h paths show51.71percent positive-direction closes,mean-0.279percent,55.14percent level-lost and64.94percent wick-broken. Same1868event distance matching reduces excess1.421to0.066pp,CI[-0.145,0.279],p0.569;no independent reversal edge established.
+    artifacts: [top20-12h-reclaims-20261101-v1]
+    canonical_report: experiments/active/exp-top20-12h-1618-reclaims-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Reuse2308003frozen15m bars into48042complete12h candles;PineNYMonday based on chart-bar OPEN,not intraday calendar Monday. SixETH levels,threearrows,cursorOHLC and7behavioral tests verified;3651future endpoints checked. Currenttop20 retrospective,unequal history,ZEC26old-listing events flagged;missing future censors statistics only. All requested charts and separate pure/body packages in delivery manifest. No trades,fees,model fitting or service changes. Notion40a8856479af81e0bffac9632888916e.
+
   - experiment_id: exp-clean-reversal-classifier-20261101-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 5433e158f6

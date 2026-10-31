@@ -19,6 +19,19 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: top20-12h-reclaims-20261101-v1
+    artifact_type: manifest
+    role: complete_12h_1618_reclaim_candles_and_price_path_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: 94d3a340de
+    generator_commit: 3a950c97e2
+    source_path: artifacts/top20-12h-1618-reclaims-20261101/delivery.json
+    storage_uri: repo://artifacts/top20-12h-1618-reclaims-20261101/delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 5128source-backed2160x1215 candle plots;3682pure-wick and1446body-reclaims separately accessible. Selected1.618,wick endpoint,close,Monday range and41fixed12h slots;future shaded,missing slots blank,expired level dashed. Chinese index,per-coin chronological overviews,20coin archives andcombined/class archives. Source OHLC andlevels verified;completion/integrity receipts in delivery. This is retrospective path research,not trade PnL or a trained model.
+
   - artifact_id: clean-reversal-classifier-20261101-v1
     artifact_type: manifest
     role: binary_objective_ablation_of_frozen_clean_reversal_labels
