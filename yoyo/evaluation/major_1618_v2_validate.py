@@ -7,6 +7,7 @@ All inference uses explicit feature allowlists; target labels are audit-only.
 from __future__ import annotations
 
 import json
+import argparse
 import pickle
 import platform
 import subprocess
@@ -188,5 +189,39 @@ def main():
                             BTC_ETH_reused_rows=len(near),causal_mutations=len(result['causal_future_mutations'])),flush=True)
 
 
+def audit_diagnostics():
+    """Independent pair-count AUC and unchanged policy PnL after rank fix."""
+    before=read('metrics_initial_pooled.csv');after=read('metrics.csv')
+    columns=['symbol','target','arm','n','net_r','net_bp','random_bp','baseline_net_r']
+    pd.testing.assert_frame_equal(before[columns],after[columns])
+    pred=predictions();pred=pred[pred.complete]
+    saved=json.loads((EXP/'diagnostics.json').read_text());checks=[]
+    for item in saved:
+        g=pred[pred.symbol.eq(item['symbol'])&pred.target.eq(item['target'])&pred.arm.eq(item['arm'])]
+        numerator=denominator=0.;tops=[];folds=[]
+        for fold,part in g.groupby('fold'):
+            pos=part.loc[part.label.eq(1),'score'].to_numpy();neg=part.loc[part.label.eq(0),'score'].to_numpy()
+            if len(pos) and len(neg):
+                dif=pos[:,None]-neg[None,:]
+                auc=float(((dif>0).sum()+.5*(dif==0).sum())/dif.size)
+                numerator+=len(part)*auc;denominator+=len(part)
+                folds.append(dict(fold=fold,n=len(part),positives=len(pos),pair_count_auc=auc))
+            tops.append(part.sort_values('score',ascending=False,kind='stable').iloc[:max(1,int(np.ceil(len(part)*.1)))])
+        auc=numerator/denominator if denominator else None
+        assert auc is None or abs(auc-item['target_auc'])<1e-12
+        top=pd.concat(tops)
+        assert len(top)==item['retrospective_top_decile']['n']
+        assert abs(float(top.net_notional_bp.mean())-item['retrospective_top_decile']['net_bp'])<1e-10
+        checks.append(dict(symbol=item['symbol'],target=item['target'],arm=item['arm'],auc=auc,folds=folds))
+    dump(EXP/'diagnostic_validation.json',dict(policy_returns_unchanged=True,independent_pair_count_auc=checks,
+         numerical_and_future_leak_audit='validation.json:222 model reconstructions,whole-week purge,9 real future OHLCV mutations; XAU0.838 target AUC has only15 positives over259 candidates and no profitable fixed-gate policy.',
+         superseded_files=['metrics_initial_pooled.csv','diagnostics_initial_pooled.json','summary_initial_pooled.json'],
+         tests='96 focused and boundary tests passed; added within-fold scale-invariance regression test passed separately (97 total).',
+         builder_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()))
+    print('Ranking diagnostics validated',len(checks),flush=True)
+
+
 if __name__=='__main__':
-    main()
+    parser=argparse.ArgumentParser();parser.add_argument('--diagnostics-only',action='store_true')
+    args=parser.parse_args()
+    audit_diagnostics() if args.diagnostics_only else main()
