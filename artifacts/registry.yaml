@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: eth-1618-score-calibration-20261031-v1
+    artifact_type: manifest
+    role: eth_frozen_model_past_only_calibration_and_admission
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2f5591e606
+    generator_commit: 178abe043a
+    source_path: experiments/active/exp-eth-1618-score-calibration-20261031-v1/summary.json
+    storage_uri: repo://experiments/active/exp-eth-1618-score-calibration-20261031-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 'ETH only; fixed0.7percent stop, maker2bp/taker5bp, NY expiry. Common-period near lagged/bias/selected +8.91/+6.69/+2.41R versus fresh +10.17R; signal/random meanbp +10.76/-7.11,+6.33/-7.81,+2.25/-15.25. All6 evidence gates fail. 21 existing models,0 fits or new native positions; VectorBT cached-fill accounting max error2.49e-14R. 86 pytest and2 isolated behavior checks pass. Large gzip files remain local; small results, clock/fee/sensitivity receipts and reproduction versioned. Read completion.json. Notion EXP-224.'
   - artifact_id: btc-three-short-tree-attribution-20261031-v2
     artifact_type: manifest
     role: frozen_btc_netR_tree_local_attribution

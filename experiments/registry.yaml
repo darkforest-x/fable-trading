@@ -16,18 +16,18 @@ schema_version: 1
 experiments:
   - experiment_id: exp-eth-1618-score-calibration-20261031-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: active
+    source_commit: 2f5591e606
+    status: inconclusive
     question: Can past-only score calibration improve ETH repeated1618 selection under unchanged0.7percent stops and real costs?
     single_variable: Same frozen model scores preceding-quarter calibration and following-quarter test; mapping-to-admission changes only,with lagged raw0 control and fresh-model anchor.
-    result: Pending; fixed7-rule grid and shrunk intercept calibration,near primary,far/opposite secondary,no test-winner promotion.
-    artifacts: []
+    result: 'Common-period near lagged raw0 +8.91R/58 trades, bias +6.69R/74, past-selected threshold +2.41R/75; fresh raw0 +10.17R/61, unscored -10.94R/158. Near mean signal/random bp +10.76/-7.11, +6.33/-7.81, +2.25/-15.25. Far lagged/bias/selected +43.60/+42.36/+40.81R; opposite +25.75/+45.49/+29.68R, fresh +49.68R. All six evidence gates fail; no replacement supported.'
+    artifacts: [eth-1618-score-calibration-20261031-v1]
     canonical_report: experiments/active/exp-eth-1618-score-calibration-20261031-v1/summary.json
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: Owner chose ETH-only optimization. Reuse21priorquarter models and all native fills;VectorBT admission/cost accounting on cached fill events,no price replay. NY-week purge,same-model scale,quarterly tests2025Q2..2026Q4. No paper/live changes.
+    notes: 'Owner chose ETH only; 0.7percent stop, maker2bp/taker5bp, NY expiry unchanged. 293 candidates per target/56 weeks, 2025-04-14..2026-10-19, current incomplete week excluded. 21 priorquarter models reused, no refits/new native fills/OHLC replays; VectorBT single-position accounting parity2.49e-14R, score reconstruction exact. 86 pytest plus2 isolated framework behavior tests pass. Single-feature control abstains, 38 opposite candidates lack model coverage. Read completion/validation/reproduction.json; Notion40a8856479af81daab54ccba23f43f02. No paper/live changes.'
   - experiment_id: exp-btc-eth-xau-1618-models-20261031-v2
     source_repo: darkforest-x/fable-trading
     source_commit: 9c0ad41802

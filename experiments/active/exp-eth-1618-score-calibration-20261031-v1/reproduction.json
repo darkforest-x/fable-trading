@@ -1,0 +1,21 @@
+{
+  "runtime": {
+    "python": "3.9.6",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "lightgbm": "4.6.0",
+    "sklearn": "1.6.1",
+    "vectorbt": "1.2.0 in isolated vectorbt-python"
+  },
+  "commands": [
+    ".venv/bin/python -m yoyo.evaluation.eth_score_calibration_data",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.eth_score_calibration_vbt",
+    ".venv/bin/python -m yoyo.evaluation.eth_score_calibration_evaluate",
+    ".venv/bin/python -m yoyo.evaluation.eth_score_calibration_validate"
+  ],
+  "source_inputs": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-eth-xau-1618-models-20261031-v2",
+  "native_source": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-eth-repeat-1618-20261031-v1",
+  "models_reused": 21,
+  "refits": 0,
+  "price_replays": 0
+}
