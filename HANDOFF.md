@@ -1,3 +1,9 @@
+## 2026-11-01 · At the touch close, a high score pays only while the bar is still beyond the level
+
+- Owner: "围绕5min插针收盘这个特点，展开分析". `exp-monday-limit-close-slices-20261101-v1` (builder 7926cf3471) reads the saved NautilusTrader close-entry fills of `exp-monday-limit-close-reclaim-20261028-v1` (market at the touch 5m close, five targets, -30 percent, 60m reclaim, taker + 10bp slippage, worse path); no new fills. 58683 events; all-touch close entry 2020-24 +6 to +16bp, 2025-26 -15 to -26bp per target.
+- 190 slices (score, inside/beyond, depth, recovery, volume, same-bar cluster, side; alone and within score >= 0.5), chosen on 2020-24, tested on 2025 and 2026: 62 candidates, one survivor set of 398 events = score >= 0.5 and recovery < 0.64 (closed still beyond the level). Near edge: 2025 +136bp (119), 2026 +149bp (135), frac N20 3x 1.26x / 1.34x DD6; range 0.5 also passes. Same score with mid recovery -43 to -103bp; volume, depth and 25+ clusters fail in 2025-26.
+- Post-hoc: 175 days in 2025-26, +72bp without the top 10 days, mostly single-coin touches, 5 percent tail -11 percent. One of 190 slices and no matched random-time control yet (next step, owner decision). Learning: `touch-bar-information-pays-only-before-the-price-recovers.md`.
+
 ## 2026-11-01 · Resting pre-touch score plus alarm entries does not beat alarm-only
 
 - Owner: "回测这个组合". `exp-monday-limit-alarm-combo-20261031-v1` (builder 763f98c078): rest leg = first weekly touches with frozen pre-touch score >= 0.6 (limit already resting at the 1.618), alarm leg = every later same-side touch for 30 minutes after a 25-coin alarm, combo = union. NautilusTrader for the 785 rest events the alarm study never filled, 382 symbols, both paths, 0 errors; alarm leg equals the 10-29 hold plan exactly.

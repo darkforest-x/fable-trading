@@ -15428,3 +15428,17 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'The combination does not beat alarm-only on the near rules and doubles drawdown; on opp30 it gains only through the 19 crash bars and trails the unscored control in 2026. The rest cut 0.6 and the timing split were looked at on the same history; per-symbol fills in ohlc/ and olhc/ stay local (not committed), like the source study.'
+  - experiment_id: exp-monday-limit-close-slices-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7926cf3471
+    status: complete
+    question: 'Owner 2026-11-01 "围绕5min插针收盘这个特点，展开分析，收盘之后，有哪些还有不错的盈利空间的": which touch-bar facts known at the touch 5m close still leave profit for a market entry at that close?'
+    single_variable: 'Event selection by one touch-bar fact at a time (score band, close inside / beyond, wick depth, recovery, volume ratio, same-bar cluster, side), alone and within score >= 0.5; the saved close-entry fills of exp-monday-limit-close-reclaim-20261028-v1 (P30 / B30, five targets) unchanged.'
+    result: '292647 rows, 58683 events, 0 issues. All-touch close entry per target: 2020-2024 +6 to +16bp, 2025 -16 to -26, 2026 -15 to -24. 190 slices, 62 candidates on 2020-2024, 2 survivors, both the same 398 events: score >= 0.5 and recovery < 0.64 (the bar closed still beyond the level, median 1.56 percent past it). Near Monday edge target: 2020-24 144 trades +212bp, 2025 119 +136bp, 2026 135 +149bp, win 64-70 percent, 2025-26 pooled cluster-bootstrap lower bound +50bp; frac N20 3x 1.55x DD3 / 1.26x DD6 / 1.34x DD5. Range 0.5 target 2025 +162 / 2026 +116. Score >= 0.5 with mid recovery loses -43 to -103bp in 2025-26; high volume, deep wick and 25+ same-bar clusters are positive only in 2020-24.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-slices-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'One survivor out of 190 slices; the recovery edge 0.64 is a 2020-2024 tercile. Post-hoc description of the survivor (scratch, not selection): 2025-26 has 254 trades on 175 days, +143bp, +119 without the top 3 days and +72 without the top 10; 6 of 7 quarters positive (2025Q1 -54, 14 trades); 293 of 398 are single-coin touches; exits 188 target, 166 failed reclaim, 36 breakeven, 8 backstop; 5 percent tail -1081bp, worst -2971bp, median MAE 3.5 percent. No matched random-time control yet; needed before any paper account.'
