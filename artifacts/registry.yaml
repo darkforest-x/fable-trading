@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-three-short-score-attribution-20261031-v1
+    artifact_type: manifest
+    role: frozen_logistic_feature_and_calibration_attribution
+    source_repo: darkforest-x/fable-trading
+    source_commit: 830c464dc2
+    generator_commit: 7b014b3acf
+    source_path: experiments/active/exp-btc-eth-repeat-1618-20261031-v1/diagnostics/three_btc_shorts_explanation.json
+    storage_uri: repo://experiments/active/exp-btc-eth-repeat-1618-20261031-v1/diagnostics/three_btc_shorts_explanation.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 'Exact frozen Q4 BTC score reconstruction error0. Raw27.20/30.21/22.82percent; calibrated10.55/10.75/10.23;gate43.13. Cal53rows/7weeks/5positives,slope0.146/intercept-1.994;all13Q4BTCfiltered. Features netpositive versus training-mean reference. Ordinal,relativevolatility,volume and priorclose location supply negative terms; analytical attribution is not market causality. No refit,replay or settings changes.'
   - artifact_id: btc-eth-repeat-1618-20261031-v1
     artifact_type: manifest
     role: btc_eth_causal_repeated_touch_fixed_stop_models
