@@ -302,12 +302,27 @@ def summarize(config, workers):
     t['pre'] = t.event.map(pre); t['full'] = t.event.map(full); t['order'] = t.event.map(order)
     t['family'] = t.variant.str.split('_').str[0]
     t['kind'] = t.variant.str.split('_', n=1).str[1]
-    sz = cfg['v3_sizing']
-    th, cut, hi = cfg['v2_threshold'], cfg['cut'], cfg['hi']
     window = pd.Timestamp(json.loads((A/'exp-monday-limit-reclaim-recent-20261025-v1/summary.json').read_text())['results']['window'][0])
     entries = {'A_rest_causal': (['rest'], 'pre'), 'leaky_rest_touchbar': (['rest'], 'full'),
                'close_inside': (['ci'], 'full'), 'close_all': (['ci', 'cb'], 'full')}
     entries = {k: v for k, v in entries.items() if set(v[0]) <= set(cfg.get('families', ['rest', 'ci', 'cb']))}
+    plans = account_plans(t, cfg, entries)
+    res = dict(checks=dict(symbols=len(syms), issues=[f'{g[0]}: {i}' for g in got for i in g[2]],
+                           rows={str(k): int(v) for k, v in t.variant.value_counts().items()},
+                           plan_rows={k: int(len(v)) for k, (_, v) in plans.items()}), plans={})
+    with ProcessPoolExecutor(workers) as ex:
+        for name, out in ex.map(replay, [(k, s, v.reset_index(drop=True), window, cfg, ro, sh, py) for k, (s, v) in plans.items()]):
+            res['plans'][name] = out
+    res = clean(res)
+    dump(exp/'summary.json', dict(config=cfg, results=res, source_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+                                 training_eligible=False, production_eligible=False))
+    print(json.dumps(res['checks']['issues'][:20]))
+
+
+def account_plans(t, cfg, entries):
+    """Rows each account admits, per entry rule: {'account|entry': (sizing, rows)}."""
+    sz = cfg['v3_sizing']
+    cut, hi = cfg['cut'], cfg['hi']
     plans = {}
     for ename, (fams, col) in entries.items():
         g = t[t.family.isin(fams)]
@@ -327,16 +342,7 @@ def summarize(config, workers):
         plans[f'v3lock|{ename}'] = ('linear', v3sel('v3lock').assign(k=lambda y: lin(y)))
         plans[f'spike|{ename}'] = ('slots', g[(g.kind == 'spike') & (sc >= hi) & (g.order >= cfg['min_order'])])
         plans[f'allin3|{ename}'] = ('allin', g[(g.kind == 'v3') & (sc >= hi) & (g['mode'] == 'opposite_1618')])
-    res = dict(checks=dict(symbols=len(syms), issues=[f'{g[0]}: {i}' for g in got for i in g[2]],
-                           rows={str(k): int(v) for k, v in t.variant.value_counts().items()},
-                           plan_rows={k: int(len(v)) for k, (_, v) in plans.items()}), plans={})
-    with ProcessPoolExecutor(workers) as ex:
-        for name, out in ex.map(replay, [(k, s, v.reset_index(drop=True), window, cfg, ro, sh, py) for k, (s, v) in plans.items()]):
-            res['plans'][name] = out
-    res = clean(res)
-    dump(exp/'summary.json', dict(config=cfg, results=res, source_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
-                                 training_eligible=False, production_eligible=False))
-    print(json.dumps(res['checks']['issues'][:20]))
+    return plans
 
 
 if __name__ == '__main__':

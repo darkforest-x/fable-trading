@@ -1,0 +1,21 @@
+{
+  "experiment_id": "exp-pretouch-booklet-20261031-v1",
+  "question": "Owner 2026-10-31 '能把触价前评分的几个策略的小册都写好吗': one continuous booklet path per paper account on the frozen pre-touch score, next to the touch-bar (lookahead) score on the same fills.",
+  "source_run": "experiments/active/exp-monday-limit-paper-accounts-20261028-v1",
+  "arms": {"A_rest_causal": "pre", "leaky_rest_touchbar": "full"},
+  "tracks": {"v2_60": "60", "v2_5": "5", "v3": "v3", "v3add": "v3add", "v3add20": "v3add20", "v3lock": "v3lock", "spike": "spike", "allin3": "allin3"},
+  "paths": {
+    "60": {"allocator": "fixed", "fraction": 0.1, "leverage": 1.0, "start": "2020-01-01"},
+    "5": {"allocator": "fixed", "fraction": 0.1, "leverage": 1.0, "start": "2025-01-01"},
+    "v3": {"allocator": "linear", "leverage": 1, "seed": 20261103, "start": "2020-01-01"},
+    "v3add": {"allocator": "linear", "leverage": 1, "seed": 20261103, "start": "2020-01-01"},
+    "v3lock": {"allocator": "linear", "leverage": 1, "seed": 20261103, "start": "2020-01-01"},
+    "v3add20": {"allocator": "frac", "slots": 20, "leverage": 3, "seed": 20261103, "start": "2020-01-01"},
+    "spike": {"allocator": "slots", "slots": 10, "leverage": 5, "liq_pct": 19.0, "seed": 20261102, "start": "2020-01-01"},
+    "allin3": {"allocator": "allin", "leverage": 3, "seed": 20261105, "start": "2023-01-01"}
+  },
+  "seed_policy": "Seeds, start dates and allocators of exp-strategy-booklet-paths-20261027-v1, fixed before any output; one continuous run per account and score, never a splice of medians.",
+  "fills": "Saved NautilusTrader fills of exp-monday-limit-paper-accounts-20261028-v1 (worse path, 10bp non-target slippage, maker 2bp / taker 5bp); no new fills.",
+  "training_eligible": false,
+  "production_eligible": false
+}
