@@ -1,0 +1,31 @@
+{
+  "experiment_id": "exp-eth-btc-context-ablation-20261031-v1",
+  "authorization": "Owner said continue after proposal to separate BTC state features from direction/residual and diagnose degraded high-score tail.",
+  "source_experiment": "exp-eth-1618-features-training-20261031-v1",
+  "symbol": "ETH",
+  "targets": ["near", "far", "opposite1618"],
+  "primary_target": "near",
+  "arms": ["state_only", "return_residual_only"],
+  "feature_groups": {
+    "state_only": ["g_beta_7d", "g_correlation_7d"],
+    "return_residual_only": ["g_btc_return_4h", "g_eth_residual_4h"]
+  },
+  "group_caveat": "ETH residual internally uses trailing7day beta. This ablates model input columns, not independent or orthogonal economic information.",
+  "controls": ["original_model", "full_context", "unscored", "single_reward", "unchanged native matched random"],
+  "folds": ["2025Q1", "2025Q2", "2025Q3", "2025Q4", "2026Q1", "2026Q2", "2026Q3", "2026Q4"],
+  "seed": 20261031,
+  "stop_fraction": 0.007,
+  "maker_fee": 0.0002,
+  "taker_fee": 0.0005,
+  "funding_included": false,
+  "extra_slippage": 0,
+  "gate": "Unchanged expected native netR>0; no calibration/threshold change.",
+  "training": "Identical expanding complete NY weeks, label expiry<=test-quarter start, equal total weight per NY week, same LightGBM settings and raw native netR objective.",
+  "execution": "Reuse original entry/target/stop/NY expiry/cached native fees. VectorBT evaluates new admission columns only; all original/full-context/unscored/single-feature selections reused. One position per asset; independent1dollar original risk, not funded-account return.",
+  "statistics": "Six new arm-target tests; Holm across6 matched-control tests and separately across12 improvements versus original/full-context. Report both, with weekly bootstrap2000/signflip10000. Historical evidence requires net CI>0, matched Holm<.01, original-improvement Holm<.01 and improvement CI>0. No promotion or choosing a target on test profit.",
+  "tail_diagnostic": "Near target only. Within each quarter choose ceil(10percent*n) by score, as in previous study; diagnostic not an executable trade gate. Compare promoted/displaced/shared events for original/full/state/return models; include all quarters, failed outcomes, matched controls and repeated-week counts.",
+  "attribution": "Explain original and full-context near models on all333 complete test events. Native TreeSHAP exact netR and SHAP0.52 tree-path-dependent parity; also interventional training-only background of first event per NY week, at most100 evenly spaced weeks, identical event IDs across paired models. Save Explanation objects and check additivity. Decompose full-minus-original score into base change, shared-feature attribution change, beta/correlation and return/residual sums. Descriptive model behavior, not market causality or feature-deletion effect.",
+  "historical_use": "Known exploratory history including prior feature-screening results. No untouched confirmation. All barriers/costs/time boundaries frozen. Current incomplete week inference only.",
+  "training_eligible": false,
+  "production_eligible": false
+}
