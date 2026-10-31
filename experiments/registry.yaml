@@ -15201,3 +15201,17 @@ experiments:
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
+  - experiment_id: exp-monday-limit-alarm-random-control-20261031-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: d32aecd5f4
+    status: complete
+    question: 'Owner 2026-10-31 "先补报警对照": inside the same 30-minute 25-coin alarm windows, does entering the same coin at a random time with the same order geometry do as well as entering at its Monday 1.618 touch?'
+    single_variable: 'Entry time inside the alarm window: the 1.618 touch vs every other 5m submission bar of the same symbol from the alarm bar to alarm+25 min (limit at the same percentage distance, target scaled, -30 percent backstop, breakeven +0.17 percent, 60m, fees, slippage, frac N20 3x).'
+    result: 'NautilusTrader, 467 symbols, both paths, 0 errors; 2146 signal rows equal the 10-29 fills exactly. 10730 control orders, 4168 filled. Per attempt (unfilled = 0): signal +79.6bp vs control -0.8bp, per event +80bp; episodes 96, mean +158bp, 79 percent positive, bootstrap 95 percent CI +110 to +211bp; every period positive (2020-24 +155, 2025 +35, 2026 +59, last five months +77bp per event; episode CIs above 0 in each). Volatility-bucket-matched controls: +37bp per event, episode CI -30 to +91 overall (2020-24 about 0; 2025 +54, CI +24 to +130; 2026 +42, CI +18 to +106). Filled-only pairing (descriptive) shrinks the gap to +17bp because the 435 events whose controls never filled average +213bp. Controls placed before the signal bar lose (-50 to -161bp by offset); after the touch they gain (+5 to +133bp). frac N20 3x: signal 3.70x DD17 vs five random-time control portfolios 1.03-1.12x DD22-30 (2025 0.85-0.93x vs 1.31x; 2026 0.99-1.05x vs 1.23x).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-alarm-random-control-20261031-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Attempt-level is primary (docs/learnings/limit-fill-complete-pairs-select-on-outcome.md); the first summary reported filled-only pairs and was replaced in the same session (commit 2nd summary). Still in sample: the 25-coin threshold was chosen 2026-10-27 on the same history; 122 of 129 alarms are long; single-bar crashes before the alarm close are not captured.'
