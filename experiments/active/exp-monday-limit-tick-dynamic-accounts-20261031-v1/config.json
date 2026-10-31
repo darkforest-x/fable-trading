@@ -1,0 +1,36 @@
+{
+  "experiment_id": "exp-monday-limit-tick-dynamic-accounts-20261031-v1",
+  "question": "Dynamic seconds-level test, step 2: framework fills (resting family, full account rules) for touches whose trade-by-trade touch-bar score clears an account threshold; step 3 in exp-monday-limit-tick-dynamic-20261031-v1 replaces the entry with the market fill at that decision.",
+  "single_variable": "Selection by the trade-by-trade score's first crossing; rules and fills as exp-monday-limit-paper-accounts-20261028-v1.",
+  "rules_source": "yoyo/monitor/monday_reclaim_paper.py and yoyo/monitor/monday_reclaim_v3.json as of 2026-10-28",
+  "scores": "experiments/active/exp-monday-limit-tick-dynamic-20261031-v1/scores_dynamic.csv.gz",
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "since_week": "2019-12-30",
+  "v2_threshold": 0.22621664169752762,
+  "cut": 0.5,
+  "hi": 0.6,
+  "add_pct": 5,
+  "min_order": 3,
+  "v2_fraction": 0.1,
+  "v3_sizing": {
+    "fraction": 0.05,
+    "cut": 0.22621664169752762,
+    "mean_excess": 0.10882239418547587,
+    "cap": 0.5
+  },
+  "excluded_symbols": "BTC, ETH, XAU, XAG, PAXG, XAUT (none are in the Codex alt inputs)",
+  "fees": "Codex config maker 0.02 / taker 0.05 percent (OKX Lv1, read 2026-10-23)",
+  "slippage_bp": {
+    "market_entry": 10,
+    "non_target_exit": 10
+  },
+  "not_modelled": "OKX vs Binance data and symbol lists; the paper engine's 1m intrabar order; manual reductions",
+  "in_sample": "Rules, thresholds and filters were chosen on the same history; forward paper data is the test",
+  "training_eligible": false,
+  "production_eligible": false,
+  "score_columns": "causal = score at the 0.5 decision (else at the v2 decision); stored = score at the 0.6 decision",
+  "families": [
+    "rest"
+  ],
+  "v2_threshold_pre": 0.22621664169752762
+}

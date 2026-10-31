@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp-monday-limit-tick-dynamic-20261031-v1",
+  "question": "Owner 2026-10-31 '测一下': update the frozen score after every Binance aggTrade of the touch bar from the first trade through the 1.618 to the bar close; enter at market when it first clears the account threshold, after 0 (ideal) / 100 / 300 / 1000 ms. Last five months, framework fills.",
+  "single_variable": "Decision time inside the touch bar: first trade whose partial-bar score clears the account threshold (vs only the first touching trade in exp-monday-limit-tick-entry-20261029-v1). Score model, partial-bar feature definitions, events, exits, fees and sizing unchanged.",
+  "tick_config": "experiments/active/exp-monday-limit-tick-entry-20261029-v1/config.json",
+  "tick_events": "experiments/active/exp-monday-limit-tick-entry-20261029-v1/tick_events.csv.gz",
+  "tick_summary": "experiments/active/exp-monday-limit-tick-entry-20261029-v1/summary.json",
+  "accounts_config": "experiments/active/exp-monday-limit-tick-dynamic-accounts-20261031-v1/config.json",
+  "accounts_run": "experiments/active/exp-monday-limit-tick-dynamic-accounts-20261031-v1",
+  "v2_threshold": 0.22621664169752762,
+  "cut": 0.5,
+  "hi": 0.6,
+  "latencies_ms": [
+    0,
+    100,
+    300,
+    1000
+  ],
+  "workers": 6,
+  "parity": "score at the first touching trade must equal the instant score; score at the last trade of the bar vs the stored touch-bar score",
+  "null_control": "Entry-timing comparison on the same events and framework exits as the instant experiment (resting on the pre-touch score, instant market, leaky reference); no new matched random entries, as in exp-monday-limit-tick-entry-20261029-v1.",
+  "known_limits": "aggTrades cached only for events with stored or causal score >= 0.3 (candidate floor), so v2 events whose score crosses 0.2262 only mid-bar may be missing; breakeven and reclaim stay referenced to the level; Binance data, OKX live venue.",
+  "training_eligible": false,
+  "production_eligible": false
+}
