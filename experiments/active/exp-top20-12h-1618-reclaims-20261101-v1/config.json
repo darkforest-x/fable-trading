@@ -1,0 +1,20 @@
+{
+  "experiment_id": "exp-top20-12h-1618-reclaims-20261101-v1",
+  "owner_scope": "BTC,ETH and the previously frozen turnover top20;all existing history;12h same-bar penetration and close reclaim only;both sides;no Stoch requirement.",
+  "universe_source": "experiments/active/exp-top20-1618-short-marks-20261031-v1/ranking.json",
+  "bar_clock": "UTC00/12,Beijing08/20;48consecutive confirmed15m candles per12h bar;incomplete bars remain missing.",
+  "level_clock": "Reproduce screenshot PineV2.42: select12h candles whose OPEN is NYMonday,require both complete,freeze their high/low after the last closes. These are Mon12UTC and Tue00UTC,not a true00-24NY intraday Monday. Post-Monday OPEN times through next NYMonday00 are eligible,including weekends. A Sunday-open12h candle may close after NYMonday00,as in Pine.",
+  "levels": "upper=L+1.618*(H-L);lower=H-1.618*(H-L);full precision,unrounded tests.",
+  "same_bar_reclaim": "lower:low<lower and close>lower;upper:high>upper and close<upper. Class pure_wick additionally requires open strictly inside;body_reclaim starts outside;body_on_level starts exactly on line. All3subtypes charted separately;pure_wick primary. Equality-only touches or close-on-line are audited but not included.",
+  "observations": "Do not require eventual1-5bar excursion or a future outcome. Complete Monday anchors and signal bar suffice;missing post-signal data censors only the affected horizon. No cross-period prior15m labels reused.",
+  "analysis": "Horizon1/2/6/14future12h bars=12h/1d/3d/7d from signal CLOSE. Signed close-price change,positive-direction fraction,favorable/adverse price excursions,any close outside original1.618,break of signalwick extreme,reach of original near Mondayedge. These are price-path descriptors,not fills or tradePnL.",
+  "scale_and_matching": "14prior completed12h true ranges,excluding signal bar;volatility bucket=floor(4*log2(priorTR14/priorclose)). Matched random candidate pool:samecoin/NYweek/side/bucket,post-Monday eligible and close on same inside side of the fixed boundary,excluding own candle. Use exact mean of all matching times,not outcome-selected controls. Other signal times may be controls. Save missing pools and horizon-complete control counts.",
+  "primary_comparison": "Pure-wick72h signed close-price change versus matchedrandom expectation;globalNYweek clusterbootstrap2000 and pairedweek sign-flip2000. Allother horizons/groups descriptive;historical currenttop20 selection remains biased and alreadyinspected.",
+  "dependence": "Report event count,unique candle count,coin/week/side episodes and first reclaim per episode sensitivity. Sameweek and shared market shocks cluster together.",
+  "charts": "All samebarreclaims,chronological percoin,41slots=20past+signal+20future;missing candles remain blank. Mark selected1.618,signal wick andclose,Monday range and other sameweekreclaims. Future shaded;originallevel becomes dashed reference after expiry. No modelinputs or goldlabels generated.",
+  "screenshot_lower_levels": {"2026-09-14":2369.26,"2026-09-21":2650.09,"2026-09-28":2595.46,"2026-10-05":2646.21,"2026-10-12":2322.35,"2026-10-19":2331.97},
+  "screenshot_arrow_signals_utc": ["2026-09-15T12:00:00Z","2026-09-23T12:00:00Z","2026-10-15T00:00:00Z"],
+  "random_seed": 20261101,
+  "training_eligible": false,
+  "production_eligible": false
+}
