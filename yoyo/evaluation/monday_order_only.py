@@ -514,8 +514,14 @@ def summarize(config):
 def validate(config):
     cfg=json.loads(config.read_text());root=config.parent;count=0;worst=0.;clocks=0
     prior_control_duplicates=0;required_control_parents=0
+    prior = prior_study(cfg); prior_parent_dependencies = 0; score_rows = 0
+    pop = population(cfg)
     for symbol in symbols(cfg):
         d=root/'symbols'/symbol
+        if (d/'orders.csv.gz').exists():
+            saved = read_csv(d/'orders.csv.gz')
+            np.testing.assert_allclose(saved.score, saved.event.map(pop.score), equal_nan=True)
+            score_rows += len(saved)
         for path in ('ohlc','olhc'):
             p=d/path
             if not (p/'native-audit.json').exists():continue
@@ -523,6 +529,16 @@ def validate(config):
             if not audit['fills']:continue
             rows=read_csv(p/'native-trades.csv.gz').set_index('trade_id')
             orders=read_csv(p/'native-orders.csv.gz').set_index('trade_id')
+            if prior is not None:
+                source = prior/'symbols'/symbol
+                old_orders = read_csv(source/'orders.csv.gz').set_index('trade_id')
+                cached = read_csv(source/path/'trades.csv.gz').set_index('trade_id')
+                tick = json.loads((CODEX/'symbols'/symbol/'audit.json').read_text())['protection_tick']
+                parents = set(orders.parent.dropna())
+                for tid, order in orders.iterrows():
+                    if tid in old_orders.index and same_order(old_orders.loc[tid], order, tick):
+                        assert tid in parents, ('avoidable_prior_order_rerun', tid)
+                        prior_parent_dependencies += int(tid in cached.index)
             older=A/'exp-v3-causal-close-entry-20261030-v1'/'symbols'/symbol/path/'trades.csv.gz'
             if older.exists():
                 cached=read_csv(older).set_index('trade_id')
@@ -572,6 +588,8 @@ def validate(config):
         common_counts[track]=len(common)
     result=dict(new_positions_checked=count,max_fee_net_error_bp=worst,confirmation_clocks_checked=clocks,
                 unchanged_common_fills=common_counts,original_no_fill_controls_zero=True,
+                score_column=cfg.get('score_column','causal'),score_metadata_rows_checked=score_rows,
+                unchanged_prior_orders_rerun_only_as_parent_dependencies=prior_parent_dependencies,
                 earlier_control_cache_coverage_gap_positions=prior_control_duplicates,
                 native_parent_dependencies_with_old_standalone_controls=required_control_parents,
                 no_download=True,no_content_hash=True,no_model_fit=True)
