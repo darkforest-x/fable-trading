@@ -7,6 +7,7 @@ The baseline's large excess must not be mistaken for absolute profitability.
 """
 import json
 import subprocess
+import sys
 import numpy as np
 import pandas as pd
 from yoyo.evaluation.top20_12h_reclaims import EXP, compare, dump
@@ -62,4 +63,16 @@ def run():
     print(json.dumps(comparison,indent=2),flush=True)
 
 
-if __name__=='__main__':run()
+def cohort_check():
+    """Change matching distance on exactly the same1868 signal events."""
+    pairs=pd.read_csv(EXP/'control_diagnostic_pairs.csv')
+    strict=pairs[pairs.variant.eq('same_close_distance_bucket')]
+    base=pairs[pairs.variant.eq('baseline')&pairs.event_id.isin(strict.event_id)]
+    assert set(base.event_id)==set(strict.event_id)
+    dump(EXP/'same_cohort_control_check.json',dict(baseline_same_events=compare(base),distance_matched_same_events=compare(strict),
+        interpretation='Same signal cohort;only candidate control distance restriction changes. Post-hoc diagnostic,not an out-of-sample validation.'))
+
+
+if __name__=='__main__':
+    if '--cohort-check' in sys.argv:cohort_check()
+    else:run()
