@@ -15145,3 +15145,31 @@ experiments:
     reuse_allowed: true
     result: '386symbols, both paths, zero final errors.777score-qualified events;737admitted,548independent fills (185cached market,363new limits). First seed:315/316funded, ending5939.78/7424.77U after5586.82U net refills; trading-647.04/+837.95U; realized DD99.7466percent. Full 10-seed/path net range-649.62..43902.16U; no stable execution forecast.584matched groups: signal-29.53/-28.11bp per opportunity vs random+21.93/+22.02bp, weekly signflip p0.178/0.185.'
     notes: 'Fees maker2bp/taker5bp; original slip10bp market entry/non-target exit separate. Fee-only endpoints67299/84124U are discontinuous refill-timing sensitivity, not a robust profit claim. Current margin-cap cash overlay, not native exchange liquidation; funding/depth/latency absent. Native3656position fee checks max3.64e-12bp error. Owner multiple-wait policy2e15df4a3d; timestamp contract0c51d20173. Old screenshot BE0/lookahead1.75m invalidity retained. Notion4088856479af815d88ddf57c8b4837d2.'
+
+  - experiment_id: exp-monday-limit-tick-dynamic-20261031-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 72ea2f5853
+    status: rejected
+    question: 'Owner 2026-10-31 "测一下": recompute the frozen score after every Binance aggTrade of the touch bar, from the first trade through the 1.618 to the bar close; enter at market when it first clears the account threshold, after 0 / 100 / 300 / 1000 ms. Last five months, framework fills.'
+    single_variable: 'Decision time inside the touch bar (first trade whose partial-bar score clears the threshold) vs only the first touching trade in exp-monday-limit-tick-entry-20261029-v1; score model, events, exits, fees and sizing unchanged.'
+    result: '2110 events; score at the first trade equals the instant score (max diff 1e-14), score at the last trade vs stored max diff 0.00195. Crossing 0.5 anywhere in the bar 498 (331 at the first trade, 167 later), 0.6 235 (141/94); instant 326/140, stored 450/204. Later crossings fill far from the level (median +139bp at 0.5, +290bp at 0.6, 100 ms), and 53 of 94 later 0.6 crossings come after price already reached the Monday edge, so they cannot be entered. Median final multiple from 1000U, dynamic 100 ms / resting pre-touch / instant 100 ms / leaky: v3 1.25x (466 trades +54bp) / 1.70x (434 +205bp) / 1.40x / 2.91x; v3add 1.88/2.91/2.13/5.51; v3add20 1.57/2.76/2.03/4.38; v3lock 1.31/1.78/1.47/3.07; spike 0.91x (35 trades -21.5bp) / 1.52x (68 +218bp) / 0.80x / 1.55x. Even 0 ms latency: v3 1.33x, spike 1.03x. v2 60m 1.02x vs 1.00x is not comparable (aggTrades only cached for score >= 0.3).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-tick-dynamic-20261031-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Step 1 dyn_events.csv.gz and scores_dynamic.csv.gz (this experiment), step 2 framework fills (exp-monday-limit-tick-dynamic-accounts-20261031-v1), step 3 summary here. First strict run (846/2110 matched) kept under failed_units/run1_strict_tstar_match/. BABYUSDT:2026-06-01:-1 stays excluded (bad print 0.93 vs 0.0134). Reuses the 20261029 aggTrades cache; no download.'
+  - experiment_id: exp-monday-limit-tick-dynamic-accounts-20261031-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 72ea2f5853
+    status: complete
+    question: 'Dynamic tick-score test, step 2: NautilusTrader fills with full account rules for touches selected by the trade-by-trade score.'
+    single_variable: 'Selection by first in-bar crossing of the trade-by-trade score; rules as exp-monday-limit-paper-accounts-20261028-v1.'
+    result: '430 symbols, OHLC and OLHC, 0 error files; 5753 dynamic rows and 17077 account rows, fee-formula parity max 1e-7 bp.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-tick-dynamic-20261031-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true

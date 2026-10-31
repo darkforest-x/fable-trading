@@ -1,0 +1,139 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-tick-dynamic-20261031-v1",
+    "question": "Owner 2026-10-31 '测一下': update the frozen score after every Binance aggTrade of the touch bar from the first trade through the 1.618 to the bar close; enter at market when it first clears the account threshold, after 0 (ideal) / 100 / 300 / 1000 ms. Last five months, framework fills.",
+    "single_variable": "Decision time inside the touch bar: first trade whose partial-bar score clears the account threshold (vs only the first touching trade in exp-monday-limit-tick-entry-20261029-v1). Score model, partial-bar feature definitions, events, exits, fees and sizing unchanged.",
+    "tick_config": "experiments/active/exp-monday-limit-tick-entry-20261029-v1/config.json",
+    "tick_events": "experiments/active/exp-monday-limit-tick-entry-20261029-v1/tick_events.csv.gz",
+    "tick_summary": "experiments/active/exp-monday-limit-tick-entry-20261029-v1/summary.json",
+    "accounts_config": "experiments/active/exp-monday-limit-tick-dynamic-accounts-20261031-v1/config.json",
+    "accounts_run": "experiments/active/exp-monday-limit-tick-dynamic-accounts-20261031-v1",
+    "v2_threshold": 0.22621664169752762,
+    "cut": 0.5,
+    "hi": 0.6,
+    "latencies_ms": [
+      0,
+      100,
+      300,
+      1000
+    ],
+    "workers": 6,
+    "parity": "score at the first touching trade must equal the instant score; score at the last trade of the bar vs the stored touch-bar score",
+    "null_control": "Entry-timing comparison on the same events and framework exits as the instant experiment (resting on the pre-touch score, instant market, leaky reference); no new matched random entries, as in exp-monday-limit-tick-entry-20261029-v1.",
+    "known_limits": "aggTrades cached only for events with stored or causal score >= 0.3 (candidate floor), so v2 events whose score crosses 0.2262 only mid-bar may be missing; breakeven and reclaim stay referenced to the level; Binance data, OKX live venue.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "results": {
+    "events": 846,
+    "status": {
+      "ok": 846
+    },
+    "parity_final_vs_stored": {
+      "q50": 5.551115123125783e-17,
+      "q99": 0.0008357618213252857,
+      "max": 0.0019526256899509153
+    },
+    "crossed": {
+      "v2": 844,
+      "05": 165,
+      "06": 74
+    },
+    "instant_ge": {
+      "v2": 843,
+      "05": 118,
+      "06": 58
+    },
+    "stored_ge": {
+      "v2": 843,
+      "05": 151,
+      "06": 69
+    },
+    "causal_ge": {
+      "v2": 842,
+      "05": 148,
+      "06": 67
+    },
+    "parity_first_vs_instant_max": 5.2595572045954775e-06,
+    "decision_offset_s_q": {
+      "v2": {
+        "q10": 0.0,
+        "q50": 0.0,
+        "q90": 0.0
+      },
+      "05": {
+        "q10": 0.0,
+        "q50": 0.0,
+        "q90": 64.22659999999999
+      },
+      "06": {
+        "q10": 0.0,
+        "q50": 0.0,
+        "q90": 48.36620000000004
+      }
+    },
+    "entry_vs_level_bp_q": {
+      "v2_0": {
+        "q10": -6.220433303837812,
+        "q50": -1.657377344905786,
+        "q90": -0.3022970962260895
+      },
+      "v2_100": {
+        "q10": -11.26190905415014,
+        "q50": 3.2161332249841523,
+        "q90": 22.810028437627583
+      },
+      "v2_300": {
+        "q10": -14.929089158721709,
+        "q50": 2.8649688360354864,
+        "q90": 25.095801008892195
+      },
+      "v2_1000": {
+        "q10": -23.320573371479192,
+        "q50": 2.7411256717579935,
+        "q90": 27.541378595950658
+      },
+      "05_0": {
+        "q10": -5.840022914702647,
+        "q50": -0.9387162693963447,
+        "q90": 154.6789223599445
+      },
+      "05_100": {
+        "q10": -12.31388217940843,
+        "q50": 6.270575325285632,
+        "q90": 167.96471829301518
+      },
+      "05_300": {
+        "q10": -18.649995528145613,
+        "q50": 5.575232847960798,
+        "q90": 174.83347033078675
+      },
+      "05_1000": {
+        "q10": -35.42790547983898,
+        "q50": 4.126849977882374,
+        "q90": 198.48069531398903
+      },
+      "06_0": {
+        "q10": -6.470284007197845,
+        "q50": -1.0678916643264147,
+        "q90": 270.5173009808859
+      },
+      "06_100": {
+        "q10": -14.602768357213636,
+        "q50": 8.307103922881032,
+        "q90": 346.8035196396571
+      },
+      "06_300": {
+        "q10": -17.561823338150482,
+        "q50": 7.237246113988016,
+        "q90": 401.6602611873682
+      },
+      "06_1000": {
+        "q10": -36.91900409897109,
+        "q50": 1.9907312468253613,
+        "q90": 404.94584404976837
+      }
+    }
+  },
+  "source_commit": "844999d3ff3d39d30db84bbac7444280f38129f4"
+}
