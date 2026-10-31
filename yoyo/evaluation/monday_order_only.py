@@ -310,14 +310,18 @@ def accounts(track,t,cfg,start):
         assert np.allclose(ledger.equity,1000+ledger.pnl.cumsum()+ledger.cashflow.cumsum(),rtol=1e-9,atol=1e-7)
         funded=ledger[ledger.notional>0]
         cash=float(ledger.cashflow.sum())
-        equity=float(ledger.equity.iloc[-1])
-        dd=float(100*(1-ledger.equity/ledger.equity.cummax()).max())
+        raw_equity=float(ledger.equity.iloc[-1])
+        multiple=result.get('final_multiple',raw_equity/1000 if cash==0 else None)
+        equity=1000*multiple if 'final_multiple' in result else raw_equity
+        dd=float(result.get('max_drawdown_pct',100*(1-ledger.equity/ledger.equity.cummax()).max()))
         rows.append(dict(seed_index=seed_i,funded=len(funded),win_pct=float(100*(funded.pnl>0).mean()) if len(funded) else 0.,
-                         equity=equity,external_cash=cash,net_pnl=float(ledger.pnl.sum()),max_drawdown_pct=dd,
-                         final_multiple=equity/1000 if cash==0 else None))
+                         equity=equity,raw_ending_equity=raw_equity,external_cash=cash,net_pnl=float(ledger.pnl.sum()),max_drawdown_pct=dd,
+                         final_multiple=multiple if cash==0 else None))
         if seed_i==0:ledger0=ledger
     d=pd.DataFrame(rows)
-    return {c:float(d[c].median()) if d[c].notna().any() else None for c in d if c!='seed_index'},ledger0,rows
+    summary={c:float(d[c].median()) if d[c].notna().any() else None for c in d if c!='seed_index'}
+    if d.external_cash.gt(0).any():summary['final_multiple']=None
+    return summary,ledger0,rows
 
 
 def worse_paths(o,l):

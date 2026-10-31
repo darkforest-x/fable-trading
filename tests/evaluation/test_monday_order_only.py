@@ -96,3 +96,11 @@ def test_one_path_child_keeps_original_ohlc_universe_and_outcome():
     w=worse_paths(o,l)
     assert w.net.tolist()==[100.,-100.,0.,50.]
     assert w.filled.tolist()==[True,True,False,True]
+
+
+def test_original_bankruptcy_cap_and_raw_accounting_are_both_retained():
+    x=pd.DataFrame([dict(event='X:2026-01-05:-1',score=.1,entry_time='2026-01-06T00:00:00Z',
+                         exit_time='2026-01-06T01:00:00Z',net=-200000.,mae_pct=2000.,side=-1,reason=1)])
+    result,ledger,_=accounts('v2_60',x,CFG,'2026-01-01')
+    assert result['final_multiple']==0 and result['equity']==0 and result['max_drawdown_pct']==100
+    assert result['raw_ending_equity']==-1000. and ledger.equity.iloc[-1]==-1000.
