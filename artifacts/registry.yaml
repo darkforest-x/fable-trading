@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v131-forward-review-20261031-v1
+    artifact_type: manifest
+    role: saved_v131_reference_outcomes_and_scoped_pause_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0319aa9ca7
+    generator_commit: 0319aa9ca7
+    source_path: experiments/active/exp-spike-v131-forward-review-20261031-v1/results_v2/summary.json
+    storage_uri: repo://experiments/active/exp-spike-v131-forward-review-20261031-v1/results_v2/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 'Saved live ledger and prior observed-paper export retained locally in results_v1/results_v2. No candles or fills regenerated. 331closed+0.408730R, recent160-66.395745R; taker5bp per-leg sensitivity recent-60.478788R. Existing paper was stopped with zero decisions. pause_receipt.json preserves363IDs and zero pending V13 notifications; original open outcomes continue. config.json has reproduction command; 130 targeted regressions pass.'
   - artifact_id: eth-btc-context-ablation-20261031-v1
     artifact_type: manifest
     role: eth_btc_state_vs_return_ablation_and_high_score_cohort_diagnosis

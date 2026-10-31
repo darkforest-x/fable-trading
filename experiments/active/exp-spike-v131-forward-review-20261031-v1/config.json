@@ -1,0 +1,16 @@
+{
+  "experiment_id": "exp-spike-v131-forward-review-20261031-v1",
+  "question": "Does the saved V13.1 forward evidence justify continuing unchanged observation?",
+  "method": "Saved-outcome descriptive review; no OHLC replay or new fills",
+  "input_directory": "results_v1",
+  "result_directory": "results_v2",
+  "primary_outcome": "Saved closed reference net R, original 20bp costs",
+  "recent_window": "Last seven days by saved exit timestamp",
+  "bootstrap": {"unit": "Beijing entry-day cluster", "resamples": 10000, "seed": 20261031},
+  "fee_sensitivity": {"rate_read_date": "2026-10-23", "taker_entry": 0.0005, "taker_exit": 0.0005, "exit_fee_on": "saved exit notional", "no_fill_replay": true},
+  "matched_control": "No contemporaneous control; reuse separately identified 2026-10-19 historical evidence without pooling",
+  "decision": "Pause new V13.1 references and notifications; retain existing outcome tracking and all history",
+  "reproduce": "python3 -m yoyo.evaluation.spike_v131_forward_review --inputs experiments/active/exp-spike-v131-forward-review-20261031-v1/results_v1 --output /tmp/spike-v131-forward-review-reproduce",
+  "training_eligible": false,
+  "production_eligible": false
+}

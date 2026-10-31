@@ -14,6 +14,19 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v131-forward-review-20261031-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0319aa9ca7
+    status: inconclusive
+    question: Does saved V13.1 forward evidence justify continuing unchanged observation?
+    single_variable: No strategy change or fill replay; saved-outcome review with separately labelled fee sensitivity.
+    result: '331 closed references: +0.408730R, PF1.002001, win32.93percent, maxdrawdown95.198808R. Last7 exit days160 records -66.395745R. Saved-price taker5bp per-leg sensitivity: all+12.859298R, recent-60.478788R. No contemporaneous matched control. New V13.1 observation paused under Owner authorization; existing32 active references retained.'
+    artifacts: [spike-v131-forward-review-20261031-v1]
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Snapshot2026-10-31 21:58 Beijing; 24 entry-day clusters,10000 bootstrap draws,seed20261031; meanR95CI[-0.384126,0.441788]. Historical non-Sunday matched-control later-period mean excess15m+0.004123R CI[-0.006690,0.015806],1H-0.021491R CI[-0.038610,-0.005070], kept separate. Observed-entry paper dc0c7e42add44beb902cafb33ea48424 already stopped on10-18 with zero decisions. Durable new-admission/notification pause preserves all363 reference IDs; no real-money control changes. See config.json for replay of saved arithmetic.'
   - experiment_id: exp-monday-harmonic-confluence-20261031-v1
     source_repo: darkforest-x/fable-trading
     source_commit: d8cb53d580
@@ -3404,11 +3417,11 @@ experiments:
   - experiment_id: exp-spike-v131-observed-paper-20261016-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 07bc93ab67043604633aad58ff63588a97478cc6
-    status: active
+    status: inconclusive
     question: 15m 回踩信号实际到达后才入场，多空表现和相对原参考价的价差如何？
     single_variable: Entry timing after actual observation only; original stop, 2R/4ATR, raw opposite exits and 20bp
       unchanged.
-    result: 前向观察待积累；退出适配核对通过，不构成盈利验证。
+    result: '2026-10-31只读复核：10-16 12:04因源码变化报错，10-18 18:14已停止；0条决策、0笔成交。此前active登记过期，不构成前向盈利证据。原注册与错误/停止记录保留。'
     holdout_consumed: false
     training_eligible: false
     production_eligible: false

@@ -1,0 +1,30 @@
+{
+  "control": {
+    "status": "paused",
+    "accept_new": false,
+    "paused_at_ms": 1793455455713,
+    "reason": "Owner 2026-10-31: pause V13.1 new observations and notifications after forward review; continue existing outcomes.",
+    "existing_outcomes": "continue_original_rules",
+    "protocol": "spike-burst-v130-retest-monitor-v1"
+  },
+  "previous_count": 363,
+  "count_after": 363,
+  "history_ids_preserved": true,
+  "pending_queues": {
+    "outbox": 0,
+    "bark_outbox": 0
+  },
+  "code_commit": "56f6bd56aa",
+  "tests_passed": 130,
+  "runtime_verification": {
+    "public_api_paused": true,
+    "public_verification": "Authenticated Chrome tab read spikeok.com/api/v13/signals?limit=1; status paused and accept_new false. Temporary tab closed.",
+    "new_records_after_pause": 0,
+    "existing_outcomes_updated_since_snapshot": 8,
+    "worker_observed_paused_control": true,
+    "checked_ms": 1793455677749,
+    "patrol_enabled_plans": 4,
+    "patrol_pid_unchanged": 1144,
+    "monday_paper_worker_alive": true
+  }
+}
