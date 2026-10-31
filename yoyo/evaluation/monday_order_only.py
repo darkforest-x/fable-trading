@@ -2,7 +2,8 @@
 
 Owner 2026-10-31 keeps all eight 20261028 paper strategies' score-based targets,
 sizing and add eligibility. Features are frozen l2_order_score from completed
-15m bars before the touch and causal score from the preceding completed5m bar.
+15m bars before the touch. The declared score column is causal (the original
+study) or stored (the owner's original touch-bar backtest comparison).
 No feature is recomputed, no model fitted, no candle downloaded. Exact native
 signal caches are reused; missing orders and original matched controls execute
 once per declared path in Nautilus. Existing capital allocators consume fills.
@@ -13,6 +14,7 @@ import argparse
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import time
 
@@ -35,9 +37,15 @@ KEEP = ['trade_id','side','entry','stop','target_price','exit_price','reason',
 
 
 def population(cfg):
-    """Frozen completed-bar EMA feature and pre-touch score, keyed by event."""
+    """Read frozen EMA and the explicitly declared score clock; never substitute."""
     f = read_csv(ROOT/cfg['features'], usecols=['event','l2_order_score']).set_index('event')
-    s = read_csv(ROOT/cfg['scores']).set_index('event').causal.rename('score')
+    column = cfg.get('score_column', 'causal')
+    if column not in ('causal', 'stored'):
+        raise ValueError(f'Unsupported frozen score column: {column}')
+    expected_arm = 'leaky_rest_touchbar' if column == 'stored' else 'A_rest_causal'
+    if cfg.get('baseline_arm', expected_arm) != expected_arm:
+        raise ValueError('Baseline and treatment must use the same score clock')
+    s = read_csv(ROOT/cfg['scores']).set_index('event')[column].rename('score')
     x = f.join(s)
     return x[~x.index.isin(BAD_EVENTS)]
 
@@ -93,6 +101,77 @@ def cache_match(row, order, tick):
                for k in ('entry','stop','target_price','side'))
 
 
+def same_order(row, order, tick):
+    """Cache identity includes timing, protection and the native parent link."""
+    if not cache_match(row, order, tick):
+        return False
+    for key in ('entry_i', 'expire_i', 'end_i', 'reclaim_minutes', 'be_offset_bp',
+                'reclaim_ref', 'native_touch_i'):
+        if not np.isclose(row[key], order[key], rtol=1e-12, atol=1e-12, equal_nan=True):
+            return False
+    return all((pd.isna(row[key]) and pd.isna(order[key])) or row[key] == order[key]
+               for key in ('parent', 'order_mode'))
+
+
+def prior_study(cfg):
+    """A score-clock change may reuse fills only under unchanged execution rules."""
+    if not cfg.get('reuse_study'):
+        return None
+    root = ROOT/cfg['reuse_study']
+    old = json.loads((root/'config.json').read_text())
+    for key in ('baseline', 'features', 'scores', 'min_order', 'maker_fee', 'taker_fee',
+                'non_target_slippage_bp', 'breakeven_bp', 'lock_bp', 'far_score', 'add_pct'):
+        if cfg[key] != old[key]:
+            raise ValueError(f'Prior study execution mismatch: {key}')
+    return root
+
+
+def reuse_unchanged_symbol(symbol, cfg, out, selected):
+    """Score values can change sizing without changing any native order.
+
+    Reuse only if score availability and the target/add band are unchanged for
+    every admitted event. Frame bytes are not read; registered sizes and times
+    must still match. New score metadata feeds the unchanged account allocators.
+    """
+    prior = prior_study(cfg)
+    if prior is None:
+        return None
+    d = prior/'symbols'/symbol
+    if not (d/'done.json').exists() or (d/'error.json').exists():
+        return None
+    receipt = json.loads((d/'done.json').read_text())
+    for stamp in receipt.get('sources', []):
+        if file_stamp(Path(stamp['path'])) != stamp:
+            raise ValueError(f'Cached source changed: {stamp["path"]}')
+    if len(selected) != receipt['events']:
+        return None
+    if len(selected):
+        orders = read_csv(d/'orders.csv.gz')
+        old = orders[orders.control_id.eq(0)&orders.rule.eq('spike')].set_index('event').score
+        new = selected.score.reindex(old.index)
+        if set(old.index) != set(selected.index) or not old.isna().equals(new.isna()) \
+                or not old.ge(cfg['far_score']).equals(new.ge(cfg['far_score'])):
+            return None
+        orders['score'] = orders.event.map(selected.score)
+        orders.to_csv(out/'orders.csv.gz', index=False)
+    shutil.copyfile(d/'baseline.csv.gz', out/'baseline.csv.gz')
+    paths = {}
+    for path in receipt['paths']:
+        dest = out/path; dest.mkdir(exist_ok=True)
+        shutil.copyfile(d/path/'trades.csv.gz', dest/'trades.csv.gz')
+        count = receipt['paths'][path]['positions']
+        p = dict(reused=count, known_empty_children=0,
+                 known_empty_prior_orders=len(orders)-count, cache_mismatches=[],
+                 new_orders=0, new_positions=0, new_fills=0, dependent_parents=0,
+                 positions=count, engine='nautilus_trader', version='1.231.0',
+                 source=str(d/path/'trades.csv.gz'))
+        dump(dest/'done.json', p); paths[path] = p
+    result = dict(receipt, paths=paths, reused_complete_symbol=True,
+                  reuse_source=str(d), seconds=0.)
+    dump(out/'done.json', result)
+    return result
+
+
 def baseline_projection(paper, symbol, f):
     """Original loader's order, worse path and MAE, without a second data read."""
     tabs = {}
@@ -139,6 +218,11 @@ def process(symbol, config):
     out = root/'symbols'/symbol; out.mkdir(parents=True,exist_ok=True)
     if (out/'done.json').exists():
         return json.loads((out/'done.json').read_text())
+    pop = population(cfg)
+    selected = pop[pop.index.str.startswith(symbol+':') & pop.l2_order_score.ge(cfg['min_order'])]
+    reused_symbol = reuse_unchanged_symbol(symbol, cfg, out, selected)
+    if reused_symbol is not None:
+        return reused_symbol
     started = time.perf_counter(); origin = CODEX/'symbols'/symbol
     job = json.loads((origin/'identity.json').read_text())['job']
     assert job['group']=='crypto_5m'
@@ -149,7 +233,6 @@ def process(symbol, config):
     p.index = p.index.as_unit('ns'); frame = p.copy(); frame.index += pd.Timedelta(minutes=5)
     base,tabs = baseline_projection(ROOT/cfg['baseline'],symbol,f)
     base.to_csv(out/'baseline.csv.gz',index=False)
-    pop = population(cfg); selected = pop[pop.index.str.startswith(symbol+':') & pop.l2_order_score.ge(cfg['min_order'])]
     if selected.empty:
         result = dict(symbol=symbol,events=0,baseline=len(base),paths={},seconds=time.perf_counter()-started)
         dump(out/'done.json',result);return result
@@ -168,7 +251,27 @@ def process(symbol, config):
             receipts[path]=json.loads((d/'done.json').read_text());continue
         cache = tabs.get(path,pd.DataFrame())
         reused, reused_ids, known_empty, mismatches = [],set(),set(),[]
+        prior = prior_study(cfg)
+        prior_empty = set()
+        if prior is not None:
+            source = prior/'symbols'/symbol
+            old_orders = read_csv(source/'orders.csv.gz').set_index('trade_id')
+            old_rows = read_csv(source/path/'trades.csv.gz').set_index('trade_id')
+            assert (source/path/'done.json').exists() and not (source/'error.json').exists()
+            for r in x.to_dict('records'):
+                key = r['trade_id']
+                if key not in old_orders.index or not same_order(old_orders.loc[key], r, tick):
+                    continue
+                if key not in old_rows.index:
+                    prior_empty.add(key)
+                    continue
+                row = old_rows.loc[key].to_dict()
+                row.update(trade_id=key, cache_source=str(source/path/'trades.csv.gz'))
+                reused.append(row); reused_ids.add(key)
+            known_empty.update(prior_empty)
         for r in x[x.control_id.eq(0)].to_dict('records'):
+            if r['trade_id'] in reused_ids|known_empty:
+                continue
             key=r['cached_id']
             if key in cache.index:
                 row=cache.loc[key].to_dict()
@@ -187,6 +290,8 @@ def process(symbol, config):
         if control_path.exists():
             controls=read_csv(control_path).set_index('trade_id')
             for r in x[x.control_id.gt(0)&x.rule.eq('p30')].to_dict('records'):
+                if r['trade_id'] in reused_ids|known_empty:
+                    continue
                 key=r['original_id']+':entry_rest'
                 if key not in controls.index:continue
                 row=controls.loc[key].to_dict()
@@ -222,7 +327,8 @@ def process(symbol, config):
         rows['net']=rows.net_notional_bp-np.where(rows.reason.eq(4),0.,cfg['non_target_slippage_bp'])
         rows['mae_pct']=adverse(p,rows)
         rows.reindex(columns=KEEP+['net','mae_pct','cache_source']).to_csv(d/'trades.csv.gz',index=False)
-        receipt=dict(reused=len(reused),known_empty_children=len(known_empty),cache_mismatches=mismatches,
+        receipt=dict(reused=len(reused),known_empty_children=len(known_empty-prior_empty),
+                     known_empty_prior_orders=len(prior_empty),cache_mismatches=mismatches,
                      new_orders=len(runtime),new_positions=audit['positions'],new_fills=audit['fills'],
                      dependent_parents=len(deps),positions=len(rows),engine=audit.get('engine'),version=audit.get('version'))
         dump(d/'done.json',receipt);receipts[path]=receipt
@@ -367,7 +473,7 @@ def summarize(config):
         for arm,source in [('baseline',baseline),('order_only',w.reset_index())]:
             table=select_track(source,track,cfg,arm=='baseline')
             if arm=='baseline':
-                ref=prior[track+'|A_rest_causal']['all']
+                ref=prior[track+'|'+cfg.get('baseline_arm','A_rest_causal')]['all']
                 assert len(table)==ref['n'],(track,len(table),ref['n'])
                 assert np.isclose(100*table.net.gt(1).mean(),ref['win_pct'])
             for period,(begin,end) in periods.items():
@@ -383,7 +489,7 @@ def summarize(config):
                     q=t.groupby(['event','control_id'],as_index=False).net.mean()
                     control=paired(q,rng)
                 if arm=='baseline' and track!='allin3':
-                    ref=prior[track+'|A_rest_causal']['all' if period=='all' else 'y'+period]['replay']
+                    ref=prior[track+'|'+cfg.get('baseline_arm','A_rest_causal')]['all' if period=='all' else 'y'+period]['replay']
                     assert np.isclose(acc['final_multiple'],ref['final_median'],rtol=1e-9,atol=1e-9),(track,period,acc,ref)
                     assert np.isclose(acc['max_drawdown_pct'],ref['dd_median'],rtol=1e-9,atol=1e-9),(track,period,acc,ref)
                 row=dict(strategy=track,arm=arm,period=period,n=len(sig),events=sig.event.nunique(),wins=int(sig.net.gt(1).sum()),
@@ -398,7 +504,8 @@ def summarize(config):
                 olhc_only_children=int(only_l.sum())),baseline_counts_match_all_eight=True,
                 saved_account_metrics_match_seven_non_allin=True,
                 allin_account_scope='Additional fixed full/annual starts with original allocator and replenishments; not the old monthly goal-rate summary.',strategies=details,
-                native_counts={key:sum(r['paths'][p][key] for r in receipts for p in r['paths']) for key in ('reused','known_empty_children','new_orders','new_positions','new_fills')},
+                reused_complete_symbols=sum(bool(r.get('reused_complete_symbol')) for r in receipts),
+                native_counts={key:sum(r['paths'][p].get(key,0) for r in receipts for p in r['paths']) for key in ('reused','known_empty_children','known_empty_prior_orders','new_orders','new_positions','new_fills')},
                 source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),training_eligible=False,production_eligible=False)
     dump(root/'summary.json',clean(result));pd.DataFrame(headline).to_csv(root/'headline.csv',index=False)
     print(json.dumps(clean(dict(coverage=result['coverage'],native_counts=result['native_counts'],headline=headline))),flush=True)

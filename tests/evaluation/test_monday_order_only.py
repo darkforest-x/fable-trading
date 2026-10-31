@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from yoyo.evaluation.monday_order_only import construct, select_track, cache_match, accounts, worse_paths
+from yoyo.evaluation.monday_order_only import construct, select_track, cache_match, accounts, worse_paths, same_order
 
 CFG=json.loads((Path(__file__).resolve().parents[2]/'experiments/active/exp-monday-order-only-20261031-v1/config.json').read_text())
 
@@ -104,3 +104,51 @@ def test_original_bankruptcy_cap_and_raw_accounting_are_both_retained():
     result,ledger,_=accounts('v2_60',x,CFG,'2026-01-01')
     assert result['final_multiple']==0 and result['equity']==0 and result['max_drawdown_pct']==100
     assert result['raw_ending_equity']==-1000. and ledger.equity.iloc[-1]==-1000.
+
+
+def test_stored_clock_controls_targets_adds_and_missingness(tmp_path, monkeypatch):
+    from yoyo.evaluation import monday_order_only as runner
+    monkeypatch.setattr(runner, 'ROOT', tmp_path)
+    pd.DataFrame({'event':['low','high','missing'], 'l2_order_score':[3,4,3]}).to_csv(tmp_path/'features.csv', index=False)
+    pd.DataFrame({'event':['low','high','missing'], 'causal':[.7,.1,.9],
+                  'stored':[.1,.7,np.nan]}).to_csv(tmp_path/'scores.csv', index=False)
+    cfg=dict(CFG, features='features.csv', scores='scores.csv', score_column='stored')
+    pop=runner.population(cfg)
+    x=construct(orders(),pop,np.array([110.,0.,999.]),.01,cfg)
+    x['mode']=x.exit_mode; x['minutes']='m'+x.reclaim_minutes.astype(str)
+    t=select_track(x,'v3add',cfg)
+    assert set(t.event)=={'low','high'}
+    assert set(t[t.event=='low']['mode'])=={'range_0.618'}
+    assert set(t[t.rule=='add'].event)=={'high'}
+    assert pd.isna(pop.loc['missing','score'])  # Never fill from causal scores.
+    assert runner.population(dict(cfg,score_column='causal')).loc['low','score']==.7
+
+
+def test_fill_cache_rejects_changed_clock_or_parent_even_with_equal_prices():
+    r=table().iloc[0].to_dict(); r['native_touch_i']=1
+    assert same_order(r,dict(r,score=.99),.01)
+    for key,value in [('be_offset_bp',0),('entry_i',1),('expire_i',11),
+                      ('parent','another-parent'),('native_touch_i',2)]:
+        assert not same_order(r,dict(r,**{key:value}),.01)
+
+
+def test_complete_symbol_reuse_relabels_score_but_refuses_new_target_band(tmp_path, monkeypatch):
+    from yoyo.evaluation import monday_order_only as runner
+    monkeypatch.setattr(runner,'ROOT',tmp_path)
+    prior=tmp_path/'previous'; source=prior/'symbols'/'X'; (source/'ohlc').mkdir(parents=True)
+    (prior/'config.json').write_text(json.dumps(CFG))
+    cfg=dict(CFG,reuse_study='previous',score_column='stored')
+    original=pd.DataFrame({'event':['event'], 'control_id':[0], 'rule':['spike'], 'score':[.7]})
+    original.to_csv(source/'orders.csv.gz',index=False)
+    pd.DataFrame({'trade_id':['trade'], 'net':[100.]}).to_csv(source/'ohlc/trades.csv.gz',index=False)
+    pd.DataFrame({'trade_id':['baseline']}).to_csv(source/'baseline.csv.gz',index=False)
+    (source/'done.json').write_text(json.dumps({'events':1,'paths':{'ohlc':{'positions':1}},'sources':[]}))
+    out=tmp_path/'out';out.mkdir()
+    selection=pd.DataFrame({'score':[.2]},index=['event'])
+    assert runner.reuse_unchanged_symbol('X',cfg,out,selection) is None
+    assert not (out/'orders.csv.gz').exists()
+    selection['score']=.9
+    result=runner.reuse_unchanged_symbol('X',cfg,out,selection)
+    assert result['paths']['ohlc']['new_orders']==0
+    assert pd.read_csv(out/'orders.csv.gz').score.iloc[0]==.9
+    pd.testing.assert_frame_equal(pd.read_csv(source/'ohlc/trades.csv.gz'),pd.read_csv(out/'ohlc/trades.csv.gz'))
