@@ -320,6 +320,16 @@ def accounts(track,t,cfg,start):
     return {c:float(d[c].median()) if d[c].notna().any() else None for c in d if c!='seed_index'},ledger0,rows
 
 
+def worse_paths(o,l):
+    """Keep the original OHLC child universe; compare only dual-filled children."""
+    l=l.reindex(o.index)
+    comparable=o.rule.ne('add')|(o.filled&l.filled)
+    choose=l.net.lt(o.net)&comparable
+    w=o.copy();w.loc[choose]=l.loc[choose]
+    w['chosen_path']=np.where(choose,'olhc','ohlc')
+    return w
+
+
 def summarize(config):
     cfg=json.loads(config.read_text());root=config.parent;pop=population(cfg)
     bases=[];paths={'ohlc':[],'olhc':[]};receipts=[]
@@ -338,11 +348,8 @@ def summarize(config):
             paths[path].append(z)
     paths={p:pd.concat(v,ignore_index=True).set_index('trade_id') for p,v in paths.items()}
     o,l=paths['ohlc'],paths['olhc'];l=l.reindex(o.index)
-    w=o.copy();choose=l.net.lt(o.net);w.loc[choose]=l.loc[choose]
-    # Preserve original OHLC child-fill universe, including zero for OLHC-only.
+    w=worse_paths(o,l)
     only_l=o.rule.eq('add')&~o.filled&l.filled
-    w.loc[only_l]=o.loc[only_l]
-    w['chosen_path']=np.where(choose&~only_l,'olhc','ohlc')
     for name,t in [*paths.items(),('worse',w)]:t.to_csv(root/(name+'.csv.gz'))
     baseline=pd.concat(bases,ignore_index=True)
     baseline['score']=baseline.event.map(pop.score);baseline['order_score']=baseline.event.map(pop.l2_order_score)
@@ -434,8 +441,8 @@ def validate(config):
                 count+=1
     o,l,w=[read_csv(root/(path+'.csv.gz')).set_index('trade_id') for path in ('ohlc','olhc','worse')]
     l=l.reindex(o.index);w=w.reindex(o.index)
-    only_l=o.rule.eq('add')&~o.filled&l.filled
-    np.testing.assert_allclose(w.net,np.where(only_l,o.net,np.minimum(o.net,l.net)))
+    one_path_child=o.rule.eq('add')&~(o.filled&l.filled)
+    np.testing.assert_allclose(w.net,np.where(one_path_child,o.net,np.minimum(o.net,l.net)))
     for path in (o,l):
         assert path.loc[path.control_id.eq(0)&path.rule.ne('add'),'filled'].all()
         assert path.loc[~path.filled,'net'].eq(0).all()

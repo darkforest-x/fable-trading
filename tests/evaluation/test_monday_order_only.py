@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from yoyo.evaluation.monday_order_only import construct, select_track, cache_match, accounts
+from yoyo.evaluation.monday_order_only import construct, select_track, cache_match, accounts, worse_paths
 
 CFG=json.loads((Path(__file__).resolve().parents[2]/'experiments/active/exp-monday-order-only-20261031-v1/config.json').read_text())
 
@@ -88,3 +88,11 @@ def test_allin_replenishment_remains_external_cash():
     result,ledger,_=accounts('allin3',x,CFG,'2026-01-01')
     assert result['external_cash']==1000. and result['net_pnl']==-1000.
     assert result['final_multiple'] is None and result['equity']==1000.
+
+
+def test_one_path_child_keeps_original_ohlc_universe_and_outcome():
+    o=pd.DataFrame({'rule':['add']*4,'filled':[True,True,False,True],'net':[100.,-100.,0.,100.]})
+    l=pd.DataFrame({'rule':['add']*4,'filled':[False,False,True,True],'net':[0.,0.,80.,50.]})
+    w=worse_paths(o,l)
+    assert w.net.tolist()==[100.,-100.,0.,50.]
+    assert w.filled.tolist()==[True,True,False,True]
