@@ -141,6 +141,15 @@ def test_batch_and_scalar_accounting_agree():
     np.testing.assert_allclose(batch.net_r,scalar)
 
 
+def test_recent_fast_winner_and_unresolved_trade_share_maturity_gate():
+    x=pd.DataFrame(dict(entry_time=['2026-10-20T00:00Z']*2,
+        signal_close=['2026-10-20T00:00Z']*2,exit_time=['2026-10-20T01:00Z','2026-10-31T00:00Z'],
+        source_end=['2026-10-31T00:00Z']*2,closed=[True,False]))
+    p=periods(x)
+    assert p['all_observed'].tolist()==[True,False]
+    assert not p['all'].any() and not p['evaluation_2026'].any()
+
+
 def load_tests(loader,tests,pattern):
     return unittest.TestSuite(unittest.FunctionTestCase(f) for name,f in globals().items()
                               if name.startswith('test_') and callable(f))

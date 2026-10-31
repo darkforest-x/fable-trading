@@ -82,10 +82,14 @@ def stats(g):
 def periods(x):
     t=pd.to_datetime(x.entry_time,utc=True);e=pd.to_datetime(x.exit_time,utc=True)+pd.Timedelta(minutes=15)
     a=pd.Timestamp('2025-01-01',tz='UTC');b=pd.Timestamp('2026-01-01',tz='UTC')
-    return {'all':x.closed,'selection_pre2025':x.closed&(t<a)&(e<a),
-            'evaluation_2025':x.closed&(t>=a)&(e<b),
-            'evaluation_2026':x.closed&(t>=b),
-            'evaluation_2025_2026':x.closed&(t>=a)}
+    signal=pd.to_datetime(x.signal_close,utc=True) if 'signal_close' in x else t
+    full_window=signal+pd.Timedelta(days=29)
+    mature=full_window.le(pd.to_datetime(x.source_end,utc=True)) if 'source_end' in x else pd.Series(True,index=x.index)
+    valid=x.closed&mature
+    return {'all_observed':x.closed,'all':valid,'selection_pre2025':valid&(signal<a)&(full_window<a)&(e<a),
+            'evaluation_2025':valid&(signal>=a)&(full_window<b)&(e<b),
+            'evaluation_2026':valid&(signal>=b),
+            'evaluation_2025_2026':valid&(signal>=a)}
 
 
 def bootstrap_pairs(p,seed=20261101):
@@ -131,6 +135,8 @@ def main():
     entries=pd.concat([pd.read_csv(p.parent/'entries.csv.gz',float_precision='round_trip') for p in dests],ignore_index=True)
     coverage=pd.concat([pd.read_csv(p.parent/'coverage.csv') for p in dests],ignore_index=True)
     paths,trades=combine(legs)
+    source_ends={json.loads(p.read_text())['symbol']:str(pd.Timestamp(json.loads(p.read_text())['source']['last_source'])+pd.Timedelta(minutes=15)) for p in dests}
+    trades['source_end']=trades.symbol.map(source_ends)
     paths.to_csv(EXP/'path_results.csv.gz',index=False)
     trades.to_csv(EXP/'trades.csv.gz',index=False)
     rows=[];comparisons=[];allpairs=[]
@@ -156,7 +162,7 @@ def main():
     headline.to_csv(EXP/'headline.csv',index=False);paired.to_csv(EXP/'matched_summary.csv',index=False)
     pd.DataFrame(allpairs).to_csv(EXP/'matched_pairs.csv.gz',index=False)
     yearly=[];coin=[]
-    valid=signal[signal.closed].copy();valid['year']=pd.to_datetime(valid.entry_time,utc=True).dt.year
+    valid=signal[periods(signal)['all']].copy();valid['year']=pd.to_datetime(valid.entry_time,utc=True).dt.year
     for (name,year),g in valid.groupby(['config','year']):yearly.append(dict(config=name,year=int(year),**stats(g)))
     for (name,symbol),g in valid.groupby(['config','symbol']):coin.append(dict(config=name,symbol=symbol,**stats(g)))
     pd.DataFrame(yearly).to_csv(EXP/'by_year.csv',index=False);pd.DataFrame(coin).to_csv(EXP/'by_symbol.csv',index=False)
@@ -186,13 +192,15 @@ def main():
     # First per symbol/week/side sensitivity, using signal time, before outcomes.
     sensitivity=[]
     first=signal.sort_values('signal_close').drop_duplicates(['config','symbol','week','side'])
-    for name,g in first[first.closed].groupby('config'):
+    for name,g in first[periods(first)['all']].groupby('config'):
         sensitivity.append(dict(config=name,**stats(g)))
     pd.DataFrame(sensitivity).to_csv(EXP/'first_filled_episode_sensitivity.csv',index=False)
     summary=dict(candidates=len(candidates()),signals=int(coverage.event_id.nunique()),
         native_legs=len(legs),native_fills=sum(json.loads(p.read_text())['fills'] for p in dests),
         candidate_signal_results=len(signal),closed_results=int(signal.closed.sum()),
         censored_results=int((~signal.closed).sum()),counts=counts,winners=winners,
+        mature_closed_results=int(periods(signal)['all'].sum()),
+        maturity_policy='Primary ranking requires signalclose+24h pending+28d maxhold <= sourceend, uniformly across all32 candidates; pre-year selection/evaluation also purges the full29d window. all_observed retained separately.',
         baseline=headline[headline.config.eq('A_limit_5R_14d')].to_dict('records'),
         limitations=cfg['limitations'],training_eligible=False,production_eligible=False)
     # Missing/undefined metrics remain null in the portable evidence JSON.
