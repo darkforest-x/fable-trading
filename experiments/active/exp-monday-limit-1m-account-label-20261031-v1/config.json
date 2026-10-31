@@ -1,0 +1,30 @@
+{
+  "experiment_id": "exp-monday-limit-1m-account-label-20261031-v1",
+  "question": "Owner 2026-10-31 '同时去做试试看吧': retest the 1m entry score on the paper accounts with cuts rank-mapped onto the frozen scale and labels from the accounts' own exits; train before 2026, test 2026.",
+  "single_variable": "Arms separate the two approved changes: m1_fixed -> m1_ranked (cuts only) -> m1_acct (cuts and label); base_acct is the 5m control for m1_acct and m1_shuf the 1m-feature null. Fills, rules, costs and sizing identical across arms.",
+  "approval": "Two changes at once approved by the owner on 2026-10-31; arms report each step separately",
+  "frozen_scores": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+  "scores_1m": "experiments/active/exp-monday-limit-score-1m-fit-20261028-v1/scores_1m.csv.gz",
+  "features_1m": "experiments/active/exp-monday-limit-1m-features-20261028-v1/features_1m.csv.gz",
+  "events": "experiments/active/exp-monday-limit-reclaim-patterns3-20261024-v1/events_60m.csv.gz",
+  "admit_all_scores": "experiments/active/exp-monday-limit-1m-account-label-accounts-20261031-v1/admit_all.csv.gz",
+  "accounts_config": "experiments/active/exp-monday-limit-1m-account-label-accounts-20261031-v1/config.json",
+  "accounts_run": "experiments/active/exp-monday-limit-1m-account-label-accounts-20261031-v1",
+  "labels": {
+    "v3": "v3 opposite 1.618 parent row (-30 percent, breakeven +0.17 percent, 60m); win = net > 0, worse path, 10bp slippage on non-target exits",
+    "spike": "spike row (near Monday edge, -18 percent, breakeven +0.17 percent, 60m), same win definition"
+  },
+  "estimator": "StandardScaler + LogisticRegression(max_iter=2000), as exp-monday-limit-score-1m-fit-20261028-v1",
+  "split": "2026-01-01",
+  "seed": 20261031,
+  "shuffles": 5,
+  "workers": 6,
+  "rank_map": "score -> frozen causal score at the same training-period rank (np.interp over both sorted columns of training events)",
+  "accounts": "v3, v3add, v3add20, allin3 on the v3-label score; spike on the spike-label score with EMA order >= 3; rules and sizing as exp-monday-limit-paper-accounts-20261028-v1; v2 and v3lock not rerun",
+  "parity_frozen": "experiments/active/exp-monday-limit-paper-accounts-20261028-v1/summary.json",
+  "parity_m1": "experiments/active/exp-monday-limit-paper-accounts-1m-20261028-v1/summary.json",
+  "null_control": "m1_shuf: 1m features permuted jointly across all events, refit and replayed (5 seeds); base_acct isolates the label change from the 1m features. Same fills for all arms, so no separate random entries; the matched-random question for these accounts is unchanged from 20261028.",
+  "in_sample": "2020-2025 is the training period for every refit arm; only 2026 is a test",
+  "training_eligible": false,
+  "production_eligible": false
+}

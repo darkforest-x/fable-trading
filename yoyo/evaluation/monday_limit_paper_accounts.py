@@ -73,7 +73,10 @@ def orders(e, close, tick, cfg, family):
     types = [('v2', v2ok & (x.exit_mode == 'near_monday_edge'), 'far', 0, 17.),
              ('v3', v3ok, 'P', 30, 17.), ('v3lock', v3ok, 'P', 30, 50.),
              ('spike', (best >= hi) & (x.exit_mode == 'near_monday_edge') & (x.reclaim_minutes == 60), 'P', 18, 17.)]
+    only = cfg.get('types')  # optional subset of account types (a label run needs only some of them)
     for name, keep, kind, value, be in types:
+        if only and name not in only:
+            continue
         y = x[keep & ((x.reclaim_minutes == 60) | (name == 'v2'))].copy()
         y['stop'] = stops(y, kind, value, tick)  # from the level
         y['be_offset_bp'] = be

@@ -1,0 +1,39 @@
+{
+  "experiment_id": "exp-monday-limit-1m-account-label-accounts-20261031-v1",
+  "question": "Step 1 of exp-monday-limit-1m-account-label-20261031-v1: NautilusTrader fills of every Monday 1.618 signal event under the paper accounts' exact v3 and spike rules, used as training labels and as the fills every arm's accounts select from.",
+  "single_variable": "None (label run); orders admitted for every event by admit-all scores, rules frozen as exp-monday-limit-paper-accounts-20261028-v1.",
+  "rules_source": "yoyo/monitor/monday_reclaim_paper.py and yoyo/monitor/monday_reclaim_v3.json as of 2026-10-28",
+  "scores": "experiments/active/exp-monday-limit-1m-account-label-accounts-20261031-v1/admit_all.csv.gz",
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "since_week": "2019-12-30",
+  "v2_threshold": 0.22621664169752762,
+  "cut": 0.5,
+  "hi": 0.6,
+  "add_pct": 5,
+  "min_order": 3,
+  "v2_fraction": 0.1,
+  "v3_sizing": {
+    "fraction": 0.05,
+    "cut": 0.22621664169752762,
+    "mean_excess": 0.10882239418547587,
+    "cap": 0.5
+  },
+  "excluded_symbols": "BTC, ETH, XAU, XAG, PAXG, XAUT (none are in the Codex alt inputs)",
+  "fees": "Codex config maker 0.02 / taker 0.05 percent (OKX Lv1, read 2026-10-23)",
+  "slippage_bp": {
+    "market_entry": 10,
+    "non_target_exit": 10
+  },
+  "not_modelled": "OKX vs Binance data and symbol lists; the paper engine's 1m intrabar order; manual reductions",
+  "in_sample": "Rules, thresholds and filters were chosen on the same history; forward paper data is the test",
+  "training_eligible": false,
+  "production_eligible": false,
+  "families": [
+    "rest"
+  ],
+  "types": [
+    "v3",
+    "spike"
+  ],
+  "admit_all": "causal 0.55 and stored 0.65 for every event: v3 rows in both target bands (range 0.618, opposite 1.618 with its add leg) and the spike row; selection happens later in the summary of the main experiment"
+}
