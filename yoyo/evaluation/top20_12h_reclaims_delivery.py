@@ -35,7 +35,13 @@ def run():
     from pathlib import Path
     for source in receipt['sources']:
         stat=Path(source['source']).stat();assert(stat.st_size,stat.st_mtime_ns)==(source['bytes'],source['mtime_ns'])
-    delivery.update(kind_archives=archives,chinese_index=str(OUT/'中文索引.csv'),all_source_stats_unchanged=True)
+    pure=index[index.kind.eq('pure_wick')&index.return_pct_6.notna()]
+    extreme=pure.low.where(pure.side.eq(1),pure.high)
+    within=pure.side*(pure.close-extreme)/pure.close*100
+    delivery.update(kind_archives=archives,chinese_index=str(OUT/'中文索引.csv'),all_source_stats_unchanged=True,
+        price_time_boundary=dict(events=len(pure),median_signal_extreme_to_close_pct_of_close=float(within.median()),
+            median_subsequent_72h_directional_pct=float(pure.return_pct_6.median()),
+            meaning='Distances normalized by signal close;the inside-signal-bar move is already over at confirmation and is never added to subsequent price changes.'))
     dump(OUT/'delivery.json',delivery)
     print(json.dumps(archives,ensure_ascii=False),flush=True)
 
