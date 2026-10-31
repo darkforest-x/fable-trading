@@ -1,0 +1,20 @@
+{
+  "experiment_id": "exp-monday-limit-close-slice-control-20261101-v1",
+  "question": "Owner 2026-11-01 '补跑随机对照': does the touch-close survivor slice (score >= 0.5, touch bar closed still beyond the level with recovery below the 2020-2024 lower tercile) beat market entries at random 5m closes of the same symbol, week, side and volatility bucket with the same geometry?",
+  "single_variable": "Entry time: the touch-bar close vs Codex's three matched random submissions entered at market at their own close; target, -30 percent stop and reclaim level scaled by close / touch close, the control entering beyond its virtual level like the signal.",
+  "approval": "Owner 2026-11-01 '补跑随机对照'",
+  "source": "experiments/active/exp-monday-limit-close-reclaim-20261028-v1",
+  "slices": "experiments/active/exp-monday-limit-close-slices-20261101-v1",
+  "scores": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+  "targets": ["near_monday_edge", "range_0.5"],
+  "cut": 0.5,
+  "since_week": "2019-12-30",
+  "slippage_bp": {"market_entry": 10, "non_target_exit": 10},
+  "bootstrap_seed": 20261101,
+  "draws": 2000,
+  "fees": "Codex config: market entry taker 0.05 percent, target maker 0.02 percent, stop / reclaim exits taker (OKX Lv1, read 2026-10-23); 10bp slippage on the market entry and on non-target exits; worse of the two intrabar paths",
+  "sizing": "frac N20 3x (monday_limit_close_reclaim.replay) for the signal and for each control index alone",
+  "in_sample": "The slice was chosen on 2020-2024 and passed 2025 and 2026 in exp-monday-limit-close-slices-20261101-v1; the control is the first test of the timing",
+  "training_eligible": false,
+  "production_eligible": false
+}
