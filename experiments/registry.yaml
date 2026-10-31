@@ -15229,3 +15229,31 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Attempt-level is primary (docs/learnings/limit-fill-complete-pairs-select-on-outcome.md); the first summary reported filled-only pairs and was replaced in the same session (commit 2nd summary). Still in sample: the 25-coin threshold was chosen 2026-10-27 on the same history; 122 of 129 alarms are long; single-bar crashes before the alarm close are not captured.'
+  - experiment_id: exp-monday-limit-1m-account-label-accounts-20261031-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: e9126d2a05
+    status: complete
+    question: 'Label run for exp-monday-limit-1m-account-label-20261031-v1: the v3 (range / opposite 1.618) and spike account-rule fills for every Monday 1.618 touch, admitted regardless of score.'
+    single_variable: 'Admission only: admit_all scores (causal 0.55, stored 0.65 for all 58740 events) with the 20261028 paper-account config, rest family, types v3 and spike; rules, fees and slippage unchanged.'
+    result: 'NautilusTrader 1.231.0, 531 symbols, OHLC and OLHC both complete (531 done.json each), 0 error.json.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-1m-account-label-accounts-20261031-v1/config.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Fills only; labels and results live in the companion experiment. Admitting every event is a label device, not an account.'
+  - experiment_id: exp-monday-limit-1m-account-label-20261031-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5d3bc67805
+    status: complete
+    question: 'Owner 2026-10-31 "同时去做试试看吧": retest the 1m entry score on the paper accounts (a) with cuts rank-mapped onto the frozen pre-touch scale so it takes about as many trades, and (b) with labels from the accounts own exits; train before 2026, test 2026.'
+    single_variable: 'Two owner-approved changes reported as separate arms: m1_fixed -> m1_ranked (cuts only) -> m1_acct (cuts and account label, win = net > 0); base_acct is the 5m-only control for m1_acct and m1_shuf0-4 permute the 1m features. All arms are pre-touch scores; fills, rules, fees and slippage unchanged.'
+    result: 'Parity: frozen and m1_fixed rows and medians equal the 20261028 runs exactly. 2026 test (v3 / v3add20 / spike per-trade bp and median multiple): frozen 81bp x0.65 / 150bp x1.33 / 125bp x1.19 (87 trades); m1_fixed 64 x0.42 / 127 x0.68 / 84 x0.68 (178); m1_ranked 101 x0.65 / 174 x0.95 / 116 x0.86 (135); m1_acct 25 x0.62 / 71 x0.94 / 73 x0.64 (125); base_acct -50 x0.40 / -32 x0.54 / -138 x0.73; shuffles -44 to -60 x0.34-0.45 / -25 to -46 x0.46-0.61. allin3 2026 per trade: frozen 125bp, m1_ranked 235, m1_acct 90, base_acct -30; monthly-start reach of x10: frozen 96 percent, m1_ranked 65, m1_acct 5, base_acct 0. Test AUC on the v3 win label: m1_acct 0.810, base_acct 0.798, shuffles 0.797-0.798, m1_old 0.681, frozen 0.631, but top-decile mean net -39.9bp base_acct, +11.0 m1_acct, +29.6 m1_old, +2.5 frozen.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-1m-account-label-20261031-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'No arm beats the frozen pre-touch score on 2026 accounts. Rank matching restores the 1m per-trade mean (v3 101 vs 81bp, allin3 235 vs 125bp) but not the multiples; the account win label raises AUC and lowers money. The 1m features carry information (m1_acct beats its shuffles by about 70-100bp per trade in 2026) but not enough to replace the frozen score. 2020-2025 is in sample for every fitted arm. Learning: docs/learnings/an-account-win-label-raises-auc-and-loses-money.md.'
