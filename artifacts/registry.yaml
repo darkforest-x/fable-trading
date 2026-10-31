@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-order-only-20261031-v1
+    artifact_type: manifest
+    role: frozen_eight_strategy_primary_order_filter_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0f0bf00c29
+    generator_commit: 49f06555a1
+    source_path: experiments/active/exp-monday-order-only-20261031-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-order-only-20261031-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    license: internal-research
+    notes: '1500order events;1283scored V3 events. Pre-touch20261028 research baseline,not current original-backtest paper replica. Win and funded-account effects differ;all2026matchedp>0.05.39165newnativepositions/78330fills,7310cachedfills,96tests;common-fill and original-account parity pass. Initial102control-cache duplicates retained transparently;658native parent dependencies separate. Read headline.csv,validation.json,concentration.json.'
   - artifact_id: spike-score-ablation-20261030-v1
     artifact_type: manifest
     role: fixed_spike_score_admission_ablation_native_outcomes

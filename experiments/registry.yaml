@@ -16,18 +16,18 @@ schema_version: 1
 experiments:
   - experiment_id: exp-monday-order-only-20261031-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: running
+    source_commit: 0f0bf00c29
+    status: complete
     question: Replace primary score admission with pre-touch15m EMA order>=3 in all eight paper strategies.
     single_variable: Primary admission only; retain20261028 causal score targets, original sizing, score>=0.6 add gate, stop/BE/confirmation and real fees.
-    result: Pending native cache reuse and missing-order execution; no production changes.
+    result: '1500 EMA>=3 events,217 missing scores;V3-family1283 primary fills,313 nonpositive linear sizes. Full independent win baseline/order-only:V2_60 32.48/59.40,V2_5 16.72/45.40,V3 33.03/40.61,V3add and20 39.99/44.96,V3lock65.23/70.54,spike77.86/58.07,allin32.43/31.20percent. Full1000U median accounts:V2_60 1361/505,V2_5 102/432,V3 1045/1653,V3add1052/2396,V3add20 6597/5702,V3lock1131/1636,spike1023/203.2026V3add20 1331/1887,DD58.35/26.17;spike1193/749. All2026matched weekp>0.05;no unified replacement supported.'
     artifacts: []
     canonical_report: experiments/active/exp-monday-order-only-20261031-v1/summary.json
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
-    notes: Owner explicitly chose entry-filter replacement only. Missing score cannot choose V3-family target; original nonpositive linear size stays unfunded. Original matched controls retained; no-fill controls0. Distinguish independent fills from funded accounts and all-in external replenishment.
+    notes: 'Read headline.csv. Frozen20261028 pre-touch-score research baseline;separate from20261031 owner-mandated original-backtest paper replica.602symbols processed,519order-filter symbols;7310fills reused,39165newpositions/78330fills;96tests,fee-net maxerror5.46e-12bp,38900primary clocks and common-fill parity pass. Initial control-cache lookup gap repeated102already-existing positions;receipts kept,remaining caches repaired;658old standalone parents required new native child dependencies. No downloads,hashes,fit,services or production changes. All-in explicit replenishments,not simple ROI. Notion40a8856479af81f994f3c10d21455769.'
   - experiment_id: exp-spike-score-ablation-20261030-v1
     source_repo: darkforest-x/fable-trading
     source_commit: e09542ead8
@@ -957,7 +957,7 @@ experiments:
     status: complete
     question: 'Owner 2026-10-29: when the market-wide spike alarm (>= 25 coins in 5 minutes) fires, enter every later same-side 1.618 touch at once and decide at the touch bar close with the real score whether to stay.'
     single_variable: 'Entry selection after alarms (no score) with a close-time exit by the touch-bar score; compared with holding all, the paper engine resting rule in the same windows and touches outside alarms.'
-    result: '531 symbols, both paths, 0 errors, 99268 rows; 129 alarms (>= 25 coins), 96 / 109 / 117 with later touches in 30 / 120 / 360 minutes. Enter every later same-side touch and hold (near edge, -30 percent, frac N20 3x): 30 min 2146 trades +80bp, 3.70x DD17 from 2021 (2020-24 2.32x, 2025 1.31x, 2026 1.23x, last5m 1.19x), 96 episodes, episode mean +162bp, 65 percent positive; 120 min 3.13x; 360 min 2.84x (2026 0.92x). Control outside alarms with the same rule: -6bp, 0.33x DD81. The owner's close-time exit (touch-bar score < 0.5) hits 97 percent of alarm touches and turns +70bp into -25bp on them: 1.41x instead of 3.70x. Resting on the causal score inside the windows: 114 trades +270bp 1.33x. Alarm threshold chosen on the same history; about 100 independent episodes; longs 122 of 129.'
+    result: '531 symbols, both paths, 0 errors, 99268 rows; 129 alarms (>= 25 coins), 96 / 109 / 117 with later touches in 30 / 120 / 360 minutes. Enter every later same-side touch and hold (near edge, -30 percent, frac N20 3x): 30 min 2146 trades +80bp, 3.70x DD17 from 2021 (2020-24 2.32x, 2025 1.31x, 2026 1.23x, last5m 1.19x), 96 episodes, episode mean +162bp, 65 percent positive; 120 min 3.13x; 360 min 2.84x (2026 0.92x). Control outside alarms with the same rule: -6bp, 0.33x DD81. The owner''s close-time exit (touch-bar score < 0.5) hits 97 percent of alarm touches and turns +70bp into -25bp on them: 1.41x instead of 3.70x. Resting on the causal score inside the windows: 114 trades +270bp 1.33x. Alarm threshold chosen on the same history; about 100 independent episodes; longs 122 of 129.'
     artifacts: []
     canonical_report: experiments/active/exp-monday-limit-alarm-entry-20261029-v1/summary.json
     holdout_consumed: false
