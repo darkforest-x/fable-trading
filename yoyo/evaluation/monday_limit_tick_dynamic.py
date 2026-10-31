@@ -195,11 +195,11 @@ def _fixed_symbol(args):
         tr = pd.read_csv(p).sort_values('ts', kind='mergesort').reset_index(drop=True)
         bar = tr[(tr.ts >= o) & (tr.ts < o+300_000)]
         x = ok.loc[r.event]
-        upto = bar[bar.ts <= x.t_star_ms]
-        if upto.empty or not np.isclose(upto.price.iat[-1], x.t_star_price, rtol=1e-9):
+        # The instant experiment's touch: the bar's first trade at or through the level; quantity counts through it.
+        hit = bar[(bar.price <= r.entry) if s > 0 else (bar.price >= r.entry)]
+        if hit.empty or int(hit.ts.iat[0]) != int(x.t_star_ms) or not np.isclose(hit.price.iat[0], x.t_star_price, rtol=1e-12):
             continue
-        # The instant experiment counts quantity through the first touching trade; ties at t_star end at that trade.
-        i0 = bar.index[(bar.ts == x.t_star_ms) & np.isclose(bar.price, x.t_star_price, rtol=1e-9)][0]
+        i0 = hit.index[0]
         qd = float(bar.loc[bar.index <= i0].qty.sum())*x.t_star_price
         zi = np.log(x.instant/(1-x.instant))
         out[r.event] = float(zi-contrib(spec, (hour[k]-qv[k]+qd)/base[k], day[k]-(qv[k]-qd)/7, -s*100*(x.t_star_price/c[k-288]-1)))
