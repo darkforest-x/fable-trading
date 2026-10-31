@@ -15284,3 +15284,17 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'No arm beats the frozen pre-touch score on 2026 accounts. Rank matching restores the 1m per-trade mean (v3 101 vs 81bp, allin3 235 vs 125bp) but not the multiples; the account win label raises AUC and lowers money. The 1m features carry information (m1_acct beats its shuffles by about 70-100bp per trade in 2026) but not enough to replace the frozen score. 2020-2025 is in sample for every fitted arm. Learning: docs/learnings/an-account-win-label-raises-auc-and-loses-money.md.'
+  - experiment_id: exp-m1-ranked-booklet-20261031-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: d4601d79ee
+    status: complete
+    question: 'Owner 2026-10-31 "写个策略小册我看看 要和之前一样": continuous single-seed capital paths for the 1m rank-mapped entry score in the strategy-booklet format, next to the frozen pre-touch score.'
+    single_variable: 'None; the account plans of exp-monday-limit-1m-account-label-20261031-v1 (m1_ranked and frozen arms) on its saved label-run fills, run through the booklet allocators with the seeds and start dates of exp-strategy-booklet-paths-20261027-v1 (v3 linear 1x and v3add20 frac 20x3 from 2020, seed 20261103; spike 10 slots 5x liq 19 from 2020, seed 20261102; allin3 from 2023, seed 20261105).'
+    result: 'Ending multiples m1_ranked vs frozen pre-touch: v3 2.48x DD78 vs 1.06x DD86; v3add20 21.57x DD83 vs 6.56x DD84; spike 0.28x DD88 vs 1.10x DD62; allin3 (refilled) trading P&L -25575 USDT with 25785 added vs +406801 with 20204 added. 2026 calendar year: v3 -20.9 vs -35.7 percent; v3add20 -7.4 vs +27.4; spike -3.3 vs +19.8; allin3 -8863 vs +417032 USDT. Cash reconciliation passes for all eight paths.'
+    artifacts: []
+    canonical_report: experiments/active/exp-m1-ranked-booklet-20261031-v1/manifest.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Single paths, not medians; 2020-2025 is in sample for the 1m model. The booklet HTML stays outside the public repo (~/Documents/Codex/2026-10-31/m1-ranked-booklet/, rebuilt with work/build.py) and reuses the monitor booklet module unchanged.'
