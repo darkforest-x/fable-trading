@@ -71,13 +71,20 @@ def main():
             np.testing.assert_allclose(g.score,pp.score,rtol=0,atol=1e-12)
     previous=pd.read_csv(PRIOR/'selected_trades.csv.gz',float_precision='round_trip')
     parity=[]
-    for oldname,newname in [('fresh_tree_net_noordinal','original_model'),('unscored','unscored'),('single_reward','single_reward')]:
+    for oldname,newname in [('fresh_tree_net_noordinal','original_model'),('single_reward','single_reward')]:
         for target in cfg['targets']:
             a=previous[previous.symbol.eq('ETH')&previous.target.eq(target)&previous.arm.eq(oldname)]
             b=selected[selected.target.eq(target)&selected.arm.eq(newname)]
             assert set(a.trade_id)==set(b.trade_id)
             assert abs(a.net_r.sum()-b.net_r.sum())<1e-9
             parity.append(dict(arm=newname,target=target,n=len(b),net_r=float(b.net_r.sum())))
+    oldmetrics=pd.read_csv(PRIOR/'metrics.csv')
+    for target in cfg['targets']:
+        old=oldmetrics[oldmetrics.symbol.eq('ETH')&oldmetrics.target.eq(target)&oldmetrics.arm.eq('fresh_tree_net_noordinal')].iloc[0]
+        unscored=selected[selected.target.eq(target)&selected.arm.eq('unscored')]
+        assert len(unscored)==int(old.baseline_n)
+        assert abs(unscored.net_r.sum()-old.baseline_net_r)<1e-8
+        parity.append(dict(arm='unscored',target=target,n=len(unscored),net_r=float(unscored.net_r.sum())))
     alt=pd.read_csv(native_dir/'ETH_path_sensitivity_trades.csv.gz',float_precision='round_trip').set_index('trade_id')
     assert (native.loc[alt.index].exit_i==alt.exit_i).all()
     paths=[]
