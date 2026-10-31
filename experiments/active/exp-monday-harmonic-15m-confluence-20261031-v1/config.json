@@ -34,7 +34,7 @@
   "score_column": "stored",
   "baseline_arm": "leaky_rest_touchbar",
   "reuse_study": "experiments/active/exp-monday-order-only-originalscore-20261031-v1",
-  "reuse": "All baseline signal fills are reused. Only missing selected-event matched controls can run natively. No fitting or production changes.",
+  "reuse": "All original signal fills and exact completed5m/15m/1h controls are reused. The two native-control arms run sequentially, whichever scan finishes first; only absent controls run. Cache order is operational, not an admission parameter.",
   "baseline_ledger": "experiments/active/exp-monday-order-only-originalscore-20261031-v1/baseline.csv.gz",
   "baseline_comparison": "experiments/active/exp-monday-order-only-originalscore-20261031-v1",
   "admission_events": "experiments/active/exp-monday-harmonic-15m-confluence-20261031-v1/admission.csv.gz",
@@ -67,6 +67,7 @@
   "parent_study": "experiments/active/exp-monday-harmonic-confluence-20261031-v1",
   "parent_scan_builder_commit": "d8cb53d580",
   "reuse_studies": [
-    "experiments/active/exp-monday-harmonic-confluence-20261031-v1"
+    "experiments/active/exp-monday-harmonic-confluence-20261031-v1",
+    "experiments/active/exp-monday-harmonic-1h-confluence-20261031-v1"
   ]
 }
