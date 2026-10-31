@@ -100,7 +100,12 @@ def train_all(d):
 def metric(d):
     selected=d[d.top_decile];p90=d[d.score_at_least90]
     rate=float(d.clean_candidate.mean());sr=float(selected.clean_candidate.mean()) if len(selected) else None
-    return dict(n=len(d),clean_candidates=int(d.clean_candidate.sum()),clean_rate=rate,auc=float(roc_auc_score(d.clean_candidate,d.predicted_quality)) if d.clean_candidate.nunique()==2 else None,spearman=float(spearmanr(d.quality,d.predicted_quality).statistic) if d.predicted_quality.nunique()>1 else None,mean_quality=float(d.quality.mean()),median_progress_tr=float(d.net_progress_tr.median()),top_n=len(selected),top_clean_rate=sr,top_mean_quality=float(selected.quality.mean()) if len(selected) else None,top_median_progress_tr=float(selected.net_progress_tr.median()) if len(selected) else None,top_median_drawdown_tr=float(selected.max_close_drawdown_tr.median()) if len(selected) else None,score90_n=len(p90),score90_clean_rate=float(p90.clean_candidate.mean()) if len(p90) else None)
+    aucs=[];pair_counts=[]
+    for _,g in d.groupby('fold'):
+        if g.clean_candidate.nunique()==2:
+            aucs.append(roc_auc_score(g.clean_candidate,g.predicted_quality))
+            pair_counts.append(int(g.clean_candidate.sum())*int((~g.clean_candidate).sum()))
+    return dict(n=len(d),clean_candidates=int(d.clean_candidate.sum()),clean_rate=rate,within_fold_auc_pair_weighted=float(np.average(aucs,weights=pair_counts)) if aucs else None,pooled_auc_descriptive=float(roc_auc_score(d.clean_candidate,d.predicted_quality)) if d.clean_candidate.nunique()==2 else None,spearman=float(spearmanr(d.quality,d.predicted_quality).statistic) if d.predicted_quality.nunique()>1 else None,mean_quality=float(d.quality.mean()),median_progress_tr=float(d.net_progress_tr.median()),top_n=len(selected),top_clean_rate=sr,top_mean_quality=float(selected.quality.mean()) if len(selected) else None,top_median_progress_tr=float(selected.net_progress_tr.median()) if len(selected) else None,top_median_drawdown_tr=float(selected.max_close_drawdown_tr.median()) if len(selected) else None,score90_n=len(p90),score90_clean_rate=float(p90.clean_candidate.mean()) if len(p90) else None)
 
 
 def statistics(full):
@@ -136,7 +141,7 @@ def run():
     summary['sides']={side:metric(g) for side,g in full.groupby('side')}
     summary['gallery']=metric(full[full.in_original_gallery])
     review=d.merge(full[['event_id','fold','predicted_quality','model_score','explanation_feature1','explanation_delta1','explanation_feature2','explanation_delta2','explanation_feature3','explanation_delta3']],on='event_id',how='left',validate='one_to_one')
-    review['score_basis']=np.where(review.model_score.notna(),'walkforward_unseen_at_fit','initial_training_period_no_oos_score')
+    review['score_basis']=np.where(review.model_score.notna(),'walkforward_unseen_at_fit','initial_history_or_boundary_no_oos_score')
     review.sort_values(['quality','event_id'],ascending=[False,True]).to_csv(EXP/'all_labels_and_scores.csv',index=False)
     review[review.in_original_gallery].sort_values(['quality','event_id'],ascending=[False,True]).to_csv(EXP/'gallery_644_labels_and_scores.csv',index=False)
     review[review.in_original_gallery&review.clean_candidate].sort_values(['quality','event_id'],ascending=[False,True]).to_csv(EXP/'clean_gallery_candidates.csv',index=False)

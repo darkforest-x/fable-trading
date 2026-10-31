@@ -32,7 +32,7 @@ def original_images():
 def public_table(frame):
     out=frame[['event_id','symbol','side','signal_open','quality','net_progress_tr','efficiency','sustained_blocks_fraction','max_close_drawdown_tr','adverse_wick_tr','model_score','score_basis','outcome_group']].copy()
     out['side']=out.side.map({'upper':'红叉/看回落','lower':'绿勾/看反弹'})
-    out['score_basis']=out.score_basis.map({'walkforward_unseen_at_fit':'按时间滚动/训练未见','initial_training_period_no_oos_score':'初始训练期/无历史外推分'})
+    out['score_basis']=out.score_basis.map({'walkforward_unseen_at_fit':'按时间滚动/训练未见','initial_history_or_boundary_no_oos_score':'初始历史或跨界周/无历史外推分'})
     out['outcome_group']=out.outcome_group.map({'clean_candidate':'干净反转候选','reverse_failed':'期末未反向推进','ambiguous':'模糊/不够干净'})
     out=out.rename(columns=dict(event_id='样本ID',symbol='币种',side='方向',signal_open='信号时间_北京时间',quality='事后干净度',net_progress_tr='净反向推进_平均波幅',efficiency='收盘路径效率',sustained_blocks_fraction='持续推进区间比例',max_close_drawdown_tr='最大途中回撤_平均波幅',adverse_wick_tr='最大逆向影线_平均波幅',model_score='模型评分_0到100_不是胜率',score_basis='模型评分来源',outcome_group='自动分组'))
     out['人工确认']='';return out
