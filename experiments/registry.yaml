@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-order-only-20261031-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: running
+    question: Replace primary score admission with pre-touch15m EMA order>=3 in all eight paper strategies.
+    single_variable: Primary admission only; retain20261028 causal score targets, original sizing, score>=0.6 add gate, stop/BE/confirmation and real fees.
+    result: Pending native cache reuse and missing-order execution; no production changes.
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-order-only-20261031-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Owner explicitly chose entry-filter replacement only. Missing score cannot choose V3-family target; original nonpositive linear size stays unfunded. Original matched controls retained; no-fill controls0. Distinguish independent fills from funded accounts and all-in external replenishment.
   - experiment_id: exp-spike-score-ablation-20261030-v1
     source_repo: darkforest-x/fable-trading
     source_commit: e09542ead8
