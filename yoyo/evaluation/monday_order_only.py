@@ -393,6 +393,7 @@ def summarize(config):
 
 def validate(config):
     cfg=json.loads(config.read_text());root=config.parent;count=0;worst=0.;clocks=0
+    prior_control_duplicates=0;required_control_parents=0
     for symbol in symbols(cfg):
         d=root/'symbols'/symbol
         for path in ('ohlc','olhc'):
@@ -402,6 +403,17 @@ def validate(config):
             if not audit['fills']:continue
             rows=read_csv(p/'native-trades.csv.gz').set_index('trade_id')
             orders=read_csv(p/'native-orders.csv.gz').set_index('trade_id')
+            older=A/'exp-v3-causal-close-entry-20261030-v1'/'symbols'/symbol/path/'trades.csv.gz'
+            if older.exists():
+                cached=read_csv(older).set_index('trade_id')
+                parents=set(orders.parent.dropna())
+                for tid,r in orders[orders.rule.eq('p30')&orders.control_id.gt(0)].iterrows():
+                    key=r.original_id+':entry_rest'
+                    if key not in cached.index or tid not in rows.index:continue
+                    old=cached.loc[key]
+                    if not all(np.isclose(old[k],r[k],rtol=1e-12,atol=1e-12) for k in ('entry','stop','target_price')):continue
+                    if tid in parents:required_control_parents+=1
+                    else:prior_control_duplicates+=1
             fills=read_csv(p/'native-fills.csv.gz')
             assert len(fills)==audit['fills']==2*len(rows)
             for tid,g in fills.groupby('trade_id'):
@@ -440,6 +452,8 @@ def validate(config):
         common_counts[track]=len(common)
     result=dict(new_positions_checked=count,max_fee_net_error_bp=worst,confirmation_clocks_checked=clocks,
                 unchanged_common_fills=common_counts,original_no_fill_controls_zero=True,
+                earlier_control_cache_coverage_gap_positions=prior_control_duplicates,
+                native_parent_dependencies_with_old_standalone_controls=required_control_parents,
                 no_download=True,no_content_hash=True,no_model_fit=True)
     dump(root/'validation.json',result);print(json.dumps(result))
 
