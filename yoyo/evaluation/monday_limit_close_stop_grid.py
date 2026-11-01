@@ -19,6 +19,12 @@ Follow-up, owner "60分钟未收回·市价平 为什么加这个逻辑 还有�
 (default 60, the saved rule). The adapter decides at the close of the candle after the one holding the touch on that
 clock (5m .. 1440m): closed back inside the level -> stop to the level, else exit at that close. `parity` lists which
 variants must equal which saved fills.
+Follow-up, owner "我们还需要盈亏比高一点的策略 比如止损只放在5min插针引线的低点的这种单子": base `wick` puts the stop
+`pct` percent beyond the touch 5m bar's own extreme (its low for a long, its high for a short), at least one tick beyond
+it, known at the entry close. `survivors` may list several files and `jobs` may name a jobs.json of extended series
+(monday_limit_live_october) so the weeks after the frozen ledger are filled on the same code; `max_beyond_pct` drops
+closes that far past the level as the live-wick paths do. The summary adds the payoff ratio (mean win / mean loss),
+the stop distance and the net in units of it (R).
 The engine streams day chunks and skips idle stretches (run_native skip_idle_bars, 288-bar batches): fills are
 identical to streaming the whole history (checked on 1000CATUSDT and DEGOUSDT, engine 20 s -> 0.1 s per symbol);
 symbols finished before this switch were streamed in full.
@@ -41,12 +47,32 @@ PER = {'y2020_2024': ('2020-01-01', '2025-01-01'), 'y2025': ('2025-01-01', '2026
        'from2025': ('2025-01-01', '2100-01-01'), 'all': ('2020-01-01', '2100-01-01')}
 
 
+def survivors(cfg):
+    files = cfg['survivors'] if isinstance(cfg['survivors'], list) else [cfg['survivors']]
+    return pd.concat([pd.read_csv(ROOT/f) for f in files]).drop_duplicates('event').reset_index(drop=True)
+
+
+def jobs(cfg):
+    """Extended jobs where given (bars appended after the frozen series, same indexes), else the frozen Codex job."""
+    return json.loads((ROOT/cfg['jobs']).read_text()) if cfg.get('jobs') else {}
+
+
+def wick_stops(x, p, pct, tick):
+    """Stop pct percent beyond the touch 5m bar's own extreme (low for longs, high for shorts), at least one tick past it."""
+    k, side = x.entry_i.to_numpy(int), x.side.to_numpy(float)
+    ext = np.where(side > 0, p.low.to_numpy()[k], p.high.to_numpy()[k])
+    raw = ext*(1-side*pct/100)
+    out = np.where(side > 0, np.floor(raw/tick+1e-7)*tick, np.ceil(raw/tick-1e-7)*tick)
+    out = np.where(side*(ext-out) < tick*(1-1e-7), out-side*tick, out)
+    return np.maximum(out, tick)
+
+
 def process(symbol, intrabar, exp, cfg, events):
     from yoyo.evaluation.monday_limit_reclaim import prepare
     from yoyo.evaluation.monday_limit_reclaim_inputs import load_job
     from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy, run_native
     ccfg = json.loads((CODEX/'config.json').read_text())
-    job = json.loads((CODEX/'symbols'/symbol/'identity.json').read_text())['job']
+    job = jobs(cfg).get(symbol) or json.loads((CODEX/'symbols'/symbol/'identity.json').read_text())['job']
     if job['group'] != 'crypto_5m':
         return dict(symbol=symbol, skipped=job['group'])
     t0 = time.perf_counter()
@@ -75,6 +101,8 @@ def process(symbol, intrabar, exp, cfg, events):
         x['entry'] = close[x.entry_i.to_numpy()]
         if st['base'] == 'entry':
             x['stop'] = stops(x, 'P', st['pct'], tick)
+        elif st['base'] == 'wick':
+            x['stop'] = wick_stops(x, p, st['pct'], tick)
         x['reclaim_minutes'] = int(st.get('reclaim_minutes', 60))
         x['trade_id'] = x.trade_id+':v_'+st['name']
         good = x.side*(x.entry-x.stop) > 0
@@ -112,7 +140,7 @@ def run(config, workers, intrabar):
     cfg = json.loads(config.read_text())
     cr.committed('yoyo/evaluation/monday_limit_close_stop_grid.py', 'yoyo/layers/l3_backtest/nautilus_independent.py',
                  str(config.resolve().relative_to(ROOT)))
-    sv = pd.read_csv(ROOT/cfg['survivors'])
+    sv = survivors(cfg)
     root = exp/intrabar.lower()
     todo = [s for s in sorted(set(sv.symbol)) if not (root/'symbols'/s/'done.json').exists()]
     with ProcessPoolExecutor(workers) as ex:
@@ -124,6 +152,44 @@ def run(config, workers, intrabar):
                 r = dict(symbol=futs[fu], error=repr(err))
                 (root/'symbols'/futs[fu]).mkdir(parents=True, exist_ok=True); dump(root/'symbols'/futs[fu]/'error.json', r)
             print(json.dumps(dict(progress=n, total=len(todo), **{k: v for k, v in r.items() if k != 'wrong_side'})), flush=True)
+
+
+def levels(cfg, syms):
+    """Monday 1.618 level per event: the frozen ledger, else the extension survivors."""
+    from yoyo.evaluation.monday_limit_reclaim_patterns import SRC
+    out = {}
+    for s in syms:
+        path = SRC/s/'trades.csv.gz'
+        if path.exists():
+            lv = pd.read_csv(path, usecols=['population', 'week', 'side', 'level'])
+            lv = lv[lv.population == 'signal']
+            out.update(zip(s+':'+lv.week+':'+np.where(lv.side == 1, '+1', '-1'), lv.level))
+    sv = survivors(cfg)
+    if 'level' in sv:
+        out.update({e: v for e, v in zip(sv.event, sv.level) if np.isfinite(v)})
+    return pd.Series(out)
+
+
+def stop_bp(exp, syms):
+    """Initial stop distance per row, in bp of the entry (same on both intrabar paths)."""
+    rows = []
+    for s in syms:
+        t = pd.read_csv(Path(exp)/'ohlc'/'symbols'/s/'trades.csv.gz', usecols=['trade_id', 'entry', 'stop'])
+        parts = t.trade_id.str.split(':')
+        rows.append(pd.DataFrame(dict(event=parts.str[:3].str.join(':'), mode=parts.str[4],
+                                      variant=t.trade_id.str.rsplit(':v_', n=1).str[-1], stop_bp=1e4*(t.entry-t.stop).abs()/t.entry)))
+    return pd.concat(rows).set_index(['event', 'mode', 'variant']).stop_bp
+
+
+def payoff(y):
+    """Mean win / mean loss (bp, after costs), payoff ratio, median stop distance and net in stop units (R)."""
+    if not len(y):
+        return {}
+    w, l = y.net[y.net > 0], y.net[y.net <= 0]
+    r = y.net/y.stop_bp
+    return dict(win_mean_bp=float(w.mean()) if len(w) else None, loss_mean_bp=float(l.mean()) if len(l) else None,
+                payoff=float(w.mean()/-l.mean()) if len(w) and len(l) and l.mean() < 0 else None,
+                stop_bp_median=float(y.stop_bp.median()), r_mean=float(r.mean()), r_median=float(r.median()))
 
 
 def window(x, p):
@@ -152,19 +218,25 @@ def summarize(config, workers):
     exp = config.resolve().parent
     cfg = json.loads(config.read_text())
     cr.committed('yoyo/evaluation/monday_limit_close_stop_grid.py')
-    syms = sorted(set(pd.read_csv(ROOT/cfg['survivors']).symbol))
+    syms = sorted(set(survivors(cfg).symbol))
+    jb = jobs(cfg)
     missing = [(p, s) for p in ('ohlc', 'olhc') for s in syms if not (exp/p/'symbols'/s/'done.json').exists()]
     if missing:
         raise RuntimeError(f'Incomplete run: {len(missing)}')
     slip = cfg['slippage_bp']
     with ProcessPoolExecutor(workers) as ex:
-        got = list(ex.map(cr.load_symbol, [(str(exp), s, slip['market_entry'], slip['non_target_exit']) for s in syms], chunksize=4))
+        got = list(ex.map(cr.load_symbol, [(str(exp), s, slip['market_entry'], slip['non_target_exit'], jb.get(s)) for s in syms], chunksize=4))
     t = pd.concat([g[1] for g in got if len(g[1])], ignore_index=True)
     t = t[~t.event.isin(BAD_EVENTS) & (t.entry_t >= pd.Timestamp('2020-01-01', tz='UTC'))].copy()
     if cfg.get('common_with'):
         # Same events for every variant: entry-based stops also keep the few closes more than 30 percent past the level,
         # which the level-based baseline cannot place.
         t = t[t.event.isin(set(t.event[t.variant == cfg['common_with']]))].copy()
+    if cfg.get('max_beyond_pct') is not None:
+        lv = levels(cfg, syms)
+        beyond = 100*t.side*(t.event.map(lv)-t.entry)/t.event.map(lv)
+        t = t[beyond < cfg['max_beyond_pct']].copy()
+    t = t.join(stop_bp(exp, syms), on=['event', 'mode', 'variant'])
     wrong = {}
     for p in ('ohlc', 'olhc'):
         for s in syms:
@@ -176,7 +248,7 @@ def summarize(config, workers):
                                    dict(name='L18', source=cfg['parity_b18'], variant='B18', modes=['near_monday_edge'])]
     for name, src, variant, modes in ((c['name'], c['source'], c['variant'], c['modes']) for c in checks):
         with ProcessPoolExecutor(workers) as ex:
-            old = list(ex.map(cr.load_symbol, [(str(ROOT/src), s, slip['market_entry'], slip['non_target_exit']) for s in syms], chunksize=4))
+            old = list(ex.map(cr.load_symbol, [(str(ROOT/src), s, slip['market_entry'], slip['non_target_exit'], jb.get(s)) for s in syms], chunksize=4))
         o = pd.concat([g[1] for g in old if len(g[1])], ignore_index=True)
         o = o[(o.variant == variant) & o['mode'].isin(modes)].assign(key=lambda y: y.event+':'+y['mode']).set_index('key')
         mine = t[(t.variant == name) & t['mode'].isin(modes)].assign(key=lambda y: y.event+':'+y['mode']).set_index('key')
@@ -189,6 +261,7 @@ def summarize(config, workers):
             stats[f'{mode}|{v}|{p}'] = dict(n=int(len(y)), mean_bp=float(y.net.mean()) if len(y) else None,
                                             win_pct=float(100*(y.net > 1).mean()) if len(y) else None,
                                             stops=int((y.reason == 1).sum()), stop_mean_bp=float(y.net[y.reason == 1].mean()) if (y.reason == 1).any() else None,
+                                            **payoff(y),
                                             reasons={str(k): int(c) for k, c in y.reason.value_counts().items()})
         jobs.append((f'{mode}|{v}', x.reset_index(drop=True), cfg))
     plans = {}

@@ -152,8 +152,9 @@ def run(config, workers, intrabar):
 
 
 def load_symbol(args):
-    """Worse path per row with slippage, entry time from the entry bar's close, MAE from the next bar."""
-    exp, symbol, slip_entry, slip_exit = args
+    """Worse path per row with slippage, entry time from the entry bar's close, MAE from the next bar. An optional fifth
+    item is the job to read bars from (a series extended past the frozen ledger); default the frozen Codex job."""
+    exp, symbol, slip_entry, slip_exit, *override = args
     from yoyo.evaluation.monday_limit_reclaim_inputs import load_job
     paths, issues = {}, []
     for p in ('ohlc', 'olhc'):
@@ -176,7 +177,7 @@ def load_symbol(args):
     d = pd.DataFrame(dict(variant=o.variant, side=o.side, entry=o.entry, net=pick('net'), reason=pick('reason'),
                           entry_i=o.entry_i, exit_i=pick('exit_i'),
                           exit_t=pd.to_datetime(pd.Series(pick('exit_time'), index=o.index), utc=True)), index=o.index)
-    job = json.loads((CODEX/'symbols'/symbol/'identity.json').read_text())['job']
+    job = override[0] if override and override[0] else json.loads((CODEX/'symbols'/symbol/'identity.json').read_text())['job']
     f, _ = load_job(job)
     d['entry_t'] = pd.Series(f.index[d.entry_i.astype(int).to_numpy()]+pd.Timedelta(minutes=job['execution_minutes']), index=d.index)
     d['entry_t'] = d.entry_t.dt.as_unit('ns'); d['exit_t'] = d.exit_t.dt.as_unit('ns')
