@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp-monday-limit-close-stop-grid-20261101-v1",
+  "question": "Owner 2026-11-01 '−30%兜底止损 是不是有点太多了？' / '测更紧止损': does a tighter stop help the touch-close survivor slice?",
+  "approval": "Owner 2026-11-01 '测更紧止损'",
+  "single_variable": "Stop only: L30 / L18 beyond the level (parity with the saved B30 / B18) and E5 / E10 / E15 / E20 / E30 from the entry price; entry, targets, reclaim, fees and slippage unchanged",
+  "survivors": "experiments/active/exp-monday-limit-close-slice-control-20261101-v1/survivors.csv.gz",
+  "parity_b30": "experiments/active/exp-monday-limit-close-slice-control-20261101-v1",
+  "parity_b18": "experiments/active/exp-monday-limit-close-reclaim-20261028-v1",
+  "targets": ["near_monday_edge", "range_0.5"],
+  "since_week": "2019-12-30",
+  "stops": [
+    {"name": "L30", "base": "level", "pct": 30},
+    {"name": "L18", "base": "level", "pct": 18},
+    {"name": "E5", "base": "entry", "pct": 5},
+    {"name": "E10", "base": "entry", "pct": 10},
+    {"name": "E15", "base": "entry", "pct": 15},
+    {"name": "E20", "base": "entry", "pct": 20},
+    {"name": "E30", "base": "entry", "pct": 30}
+  ],
+  "slippage_bp": {"market_entry": 10, "non_target_exit": 10},
+  "sizings": [[20, 3], [10, 5], [6, 3], [6, 5], [4, 3], [3, 3]],
+  "seed": 20261103,
+  "ties": 10,
+  "fees": "Codex config: market entry taker 0.05 percent, target maker 0.02 percent, stop / reclaim exits taker (OKX Lv1, read 2026-10-23); 10bp slippage on the market entry and on non-target exits; worse of the two intrabar paths; funding not modelled",
+  "in_sample": "The survivor filters were chosen on 2020-2024 and confirmed on 2025-2026; the stop is compared on the same history, so the best stop is not a validated parameter",
+  "training_eligible": false,
+  "production_eligible": false
+}
