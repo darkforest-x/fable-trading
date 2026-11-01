@@ -1,0 +1,27 @@
+{
+  "experiment_id": "exp-monday-limit-close-reclaim-window-20261101-v1",
+  "question": "Owner 2026-11-01 '60分钟未收回·市价平 为什么加这个逻辑 还有更好的逻辑吗': does another reclaim (confirmation) window, or effectively none, beat the 60m rule on the touch-close survivor slice?",
+  "approval": "Owner 2026-11-01 '还有更好的逻辑吗'",
+  "single_variable": "Reclaim clock only: decision at the close of the candle after the touch candle on a 5 / 15 / 30 / 60 / 120 / 240 / 1440 minute clock (closed back inside the level -> stop to the level, else market exit); stop 30 percent beyond the level, targets, fees and slippage unchanged",
+  "survivors": "experiments/active/exp-monday-limit-close-slice-control-20261101-v1/survivors.csv.gz",
+  "parity": [{"name": "W60", "source": "experiments/active/exp-monday-limit-close-slice-control-20261101-v1", "variant": "B30", "modes": ["near_monday_edge", "range_0.5"]}],
+  "targets": ["near_monday_edge", "range_0.5"],
+  "since_week": "2019-12-30",
+  "stops": [
+    {"name": "W5", "base": "level", "pct": 30, "reclaim_minutes": 5},
+    {"name": "W15", "base": "level", "pct": 30, "reclaim_minutes": 15},
+    {"name": "W30", "base": "level", "pct": 30, "reclaim_minutes": 30},
+    {"name": "W60", "base": "level", "pct": 30, "reclaim_minutes": 60},
+    {"name": "W120", "base": "level", "pct": 30, "reclaim_minutes": 120},
+    {"name": "W240", "base": "level", "pct": 30, "reclaim_minutes": 240},
+    {"name": "W1440", "base": "level", "pct": 30, "reclaim_minutes": 1440}
+  ],
+  "slippage_bp": {"market_entry": 10, "non_target_exit": 10},
+  "sizings": [[20, 3], [10, 5], [6, 3], [6, 5], [4, 3], [3, 3]],
+  "seed": 20261103,
+  "ties": 10,
+  "fees": "Codex config: market entry taker 0.05 percent, target maker 0.02 percent, stop / reclaim exits taker (OKX Lv1, read 2026-10-23); 10bp slippage on the market entry and on non-target exits; worse of the two intrabar paths; funding not modelled",
+  "in_sample": "The survivor filters were chosen on 2020-2024 with the 60m rule and confirmed on 2025-2026; the window is compared on the same history, so the best window is not a validated parameter",
+  "training_eligible": false,
+  "production_eligible": false
+}

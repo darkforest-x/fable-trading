@@ -15,6 +15,10 @@ Summary: per stop, target and period the per-trade mean, win rate and exit mix; 
 (2020-2024 one seed; 2025 onward 10 tie seeds, median final and worst drawdown); parity of L30 and L18.
 NautilusTrader rather than VectorBT: the reclaim, breakeven and target semantics live in the Nautilus adapter that
 produced every fill being compared, so the stop is the only change.
+Follow-up, owner "60分钟未收回·市价平 为什么加这个逻辑 还有更好的逻辑吗": a variant may also set `reclaim_minutes`
+(default 60, the saved rule). The adapter decides at the close of the candle after the one holding the touch on that
+clock (5m .. 1440m): closed back inside the level -> stop to the level, else exit at that close. `parity` lists which
+variants must equal which saved fills.
 """
 from __future__ import annotations
 import argparse
@@ -68,6 +72,7 @@ def process(symbol, intrabar, exp, cfg, events):
         x['entry'] = close[x.entry_i.to_numpy()]
         if st['base'] == 'entry':
             x['stop'] = stops(x, 'P', st['pct'], tick)
+        x['reclaim_minutes'] = int(st.get('reclaim_minutes', 60))
         x['trade_id'] = x.trade_id+':v_'+st['name']
         good = x.side*(x.entry-x.stop) > 0
         stats['wrong_side'][st['name']] = sorted(set(x.event[~good]))
@@ -160,7 +165,9 @@ def summarize(config, workers):
                 wrong.setdefault(k, set()).update(v)
     # Parity: L30 against the control run's B30 (both targets), L18 against the close-reclaim B18 (near edge only).
     par = {}
-    for name, src, variant, modes in (('L30', cfg['parity_b30'], 'B30', cfg['targets']), ('L18', cfg['parity_b18'], 'B18', ['near_monday_edge'])):
+    checks = cfg.get('parity') or [dict(name='L30', source=cfg['parity_b30'], variant='B30', modes=cfg['targets']),
+                                   dict(name='L18', source=cfg['parity_b18'], variant='B18', modes=['near_monday_edge'])]
+    for name, src, variant, modes in ((c['name'], c['source'], c['variant'], c['modes']) for c in checks):
         with ProcessPoolExecutor(workers) as ex:
             old = list(ex.map(cr.load_symbol, [(str(ROOT/src), s, slip['market_entry'], slip['non_target_exit']) for s in syms], chunksize=4))
         o = pd.concat([g[1] for g in old if len(g[1])], ignore_index=True)
