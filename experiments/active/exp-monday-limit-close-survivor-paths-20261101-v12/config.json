@@ -1,0 +1,35 @@
+{
+  "experiment_id": "exp-monday-limit-close-survivor-paths-20261101-v12",
+  "question": "Owner 2026-11-01 '应该融合进整体的回测数据中吧': the live-wick6x3hi path of v8 continued through the October 2026 extension (one account from 2020 / 2025, not a separate 1000U month).",
+  "approval": "Owner 2026-11-01 '我怎么没看到呢，应该融合进整体的回测数据中吧！'",
+  "source": "experiments/active/exp-monday-limit-close-slice-control-20261101-v1",
+  "targets": [
+    "near_monday_edge"
+  ],
+  "starts": [
+    "2020-01-01",
+    "2025-01-01"
+  ],
+  "slots": 6,
+  "leverage": 3,
+  "tie_seed_from": "experiments/active/exp-monday-limit-return-opt-20261027-v2/config.json",
+  "slippage_bp": {
+    "market_entry": 10,
+    "non_target_exit": 10
+  },
+  "fees": "Framework fills of the control run: market entry taker 0.05 percent, target maker 0.02 percent, stop / reclaim exits taker (OKX Lv1, read 2026-10-23); 10bp slippage on the market entry and on non-target exits; worse of the two intrabar paths; funding not modelled",
+  "in_sample": "The slice was chosen on 2020-2024; 2025-2026 passed the slice test and the matched random-time control",
+  "training_eligible": false,
+  "production_eligible": false,
+  "variant": "E20",
+  "fills": "experiments/active/exp-monday-limit-close-stop-grid-20261101-v1",
+  "stop": "20 percent from the entry price (E20 of the stop grid); at 3x the liquidation line (about 32 percent) is beyond it, so the stop fires first",
+  "max_beyond_pct": 30,
+  "note": "0.76 was read off 2025-2026 trades by the owner (post hoc; no trade >= 0.76 before 2025); forward observation only",
+  "boost": {
+    "from_score": 0.76,
+    "x": 1.5
+  },
+  "extension": "experiments/active/exp-monday-limit-live-october-20261101-v1",
+  "extension_note": "Saved rows unchanged (frozen series to 2026-09-23); appended: survivors after the frozen ledger from Binance daily archives, touches to 2026-10-27 23:55 (no 2026-10-28 archive upstream; week 2026-10-26 monitoring stops at that break). Parent: exp-monday-limit-close-survivor-paths-20261101-v8"
+}

@@ -20,6 +20,11 @@ signal rows from another run with the same B30 fills (the 10-28 close-reclaim ru
 Owner "开一个观察账户": `boost` {from_score, x} gives fills whose score is >= from_score that x the margin
 (monday_limit_close_order_boost.weighted_frac, otherwise frac). Owner "改成这个" (the stop 20 percent from the entry): `variant` picks the signal rows of another stop from
 exp-monday-limit-close-stop-grid-20261101-v1 (e.g. E20); default B30.
+Owner "应该融合进整体的回测数据中吧" (the October 2026 replay had started a separate 1000U account): `extension` names a
+run of monday_limit_live_october whose fills cover the weeks after the frozen ledger (same rule, same E20 fills in
+NautilusTrader, Binance daily archives). Its survivors that the saved fills do not hold are appended after the saved
+rows, so the tie draws of the saved rows and their whole path stay as before and the account simply continues.
+Near Monday edge only (the extension has no other targets).
 """
 from __future__ import annotations
 import argparse
@@ -66,6 +71,32 @@ def symbol_rows(args):
     return d, issues
 
 
+def extension_rows(ext, saved, workers):
+    """Fills of the extension run for its survivors not in the saved rows, in the saved rows' schema (worse path, 10bp
+    entry and non-target slippage, entry time from the extended series, as monday_limit_live_october.load_fills)."""
+    from yoyo.evaluation.monday_limit_live_october import load_fills
+    surv = pd.concat([pd.read_csv(ext/'parity_survivors.csv.gz'), pd.read_csv(ext/'survivors.csv.gz')]).set_index('event')
+    new = surv[~surv.index.isin(saved)]
+    jobs = json.loads((ext/'jobs.json').read_text())
+    with ProcessPoolExecutor(workers) as ex:
+        got = list(ex.map(load_fills, [(str(ext), s, jobs[s]) for s in sorted(set(new.symbol))]))
+    d = pd.concat([g for g in got if len(g)], ignore_index=True)
+    d = d[d.event.isin(new.index)].copy()
+    if set(d.event) != set(new.index):
+        raise ValueError(f'extension fills missing: {sorted(set(new.index)-set(d.event))[:5]}')
+    d['mode'] = d.trade_id.str.split(':').str[4]
+    if set(d['mode']) != {'near_monday_edge'}:
+        raise ValueError('extension rows must be near Monday edge')
+    d['variant'] = 'E20'
+    d['entry_t'] = pd.to_datetime(d.entry_t, utc=True).dt.as_unit('ns'); d['exit_t'] = pd.to_datetime(d.exit_t, utc=True).dt.as_unit('ns')
+    for c in ('level', 'recovery'):
+        d[c] = d.event.map(new[c])
+    d['score'] = d.event.map(new.score_stored)
+    return d.sort_values(['entry_t', 'event']).drop(columns=['data_end'])[
+        ['trade_id', 'variant', 'side', 'entry', 'net', 'reason', 'entry_i', 'exit_i', 'exit_t', 'entry_t', 'mae_pct', 'event',
+         'mode', 'exit_price', 'level', 'score', 'recovery', 'symbol']]
+
+
 def allin(x, cfg, seed, trace):
     """allin3 rule on one path, plus monthly starts as the allin3 studies (days to 10x / 100x of the stakes)."""
     from yoyo.evaluation.monday_limit_langlang import path_run
@@ -106,6 +137,8 @@ def run(config, workers):
     t = t[~t.event.isin(BAD_EVENTS) & (t.entry_t >= pd.Timestamp('2020-01-01', tz='UTC')) & t.event.isin(surv.index)].copy()
     t['score'] = t.event.map(surv.score); t['recovery'] = t.event.map(surv.recovery)
     t['symbol'] = t.event.str.split(':').str[0]
+    if cfg.get('extension'):
+        t = pd.concat([t, extension_rows(ROOT/cfg['extension'], set(t.event), workers)], ignore_index=True)
     t['beyond_pct'] = 100*t.side*(t.level-t.entry)/t.level
     t['reason_name'] = t.reason.map(REASONS).fillna(t.reason.astype(str))
     if cfg.get('max_beyond_pct') is not None:
