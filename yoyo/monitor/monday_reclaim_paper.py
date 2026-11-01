@@ -92,6 +92,9 @@ Owner 2026-11-01 ("开一个观察账户", exp-monday-limit-close-score-boost-20
 live-wick6x3 except that a touch-close score >= 0.76 opens with 1.5 x the margin (still at most 6 open, margin in use
 <= equity). The 0.76 line was read off 2025-2026 backtest trades (12 / 12 wins, none before 2025), so this account is a
 forward observation of that sizing, not a validated rule.
+Owner 2026-11-01 ("开观察账户", exp-monday-limit-close-beyond-filter-20261101-v1): a fourth account "live-wick3x3far" is
+live-wick3x3 but only takes touches whose close is at least 1.5 percent past the level. The distance effect was noticed on
+the backtest trades (post hoc), held in both periods and beat random same-size subsets; this account observes it forward.
 """
 from __future__ import annotations
 
@@ -136,11 +139,12 @@ LIVE_ALLIN3_TRACK = 7060  # Separate pre-touch paper account; never exchange ord
 CONFIRM[LIVE_ALLIN3_TRACK] = 60
 WICK6_TRACK, WICK3_TRACK = 8060, 9060  # touch-close market entries; API keys "live-wick6x3" / "live-wick3x3"
 WICK6HI_TRACK = 8160  # live-wick6x3 with 1.5 x margin from score 0.76; API key "live-wick6x3hi"
-WICK_TRACKS = (WICK6_TRACK, WICK3_TRACK, WICK6HI_TRACK)
-CONFIRM[WICK6_TRACK] = CONFIRM[WICK3_TRACK] = CONFIRM[WICK6HI_TRACK] = 60
+WICK3FAR_TRACK = 9160  # live-wick3x3 only when the close is >= 1.5 percent past the level; API key "live-wick3x3far"
+WICK_TRACKS = (WICK6_TRACK, WICK3_TRACK, WICK6HI_TRACK, WICK3FAR_TRACK)
+CONFIRM[WICK6_TRACK] = CONFIRM[WICK3_TRACK] = CONFIRM[WICK6HI_TRACK] = CONFIRM[WICK3FAR_TRACK] = 60
 WICK = dict(min_score=.5, max_recovery=0.6395668107499273, max_beyond_pct=30., stop_pct=20., leverage=3.)
-WICK_SLOTS = {WICK6_TRACK: 6, WICK3_TRACK: 3, WICK6HI_TRACK: 6}
-WICK_BOOST = {WICK6HI_TRACK: dict(boost_from_score=.76, boost=1.5)}
+WICK_SLOTS = {WICK6_TRACK: 6, WICK3_TRACK: 3, WICK6HI_TRACK: 6, WICK3FAR_TRACK: 3}
+WICK_BOOST = {WICK6HI_TRACK: dict(boost_from_score=.76, boost=1.5), WICK3FAR_TRACK: dict(min_beyond_pct=1.5)}
 V3ADD20_TRACK, V3ADD20_LEG = 6060, 6061  # v3add with margin = equity / 20 at 3x and its add legs; API key "v3add20"
 CONFIRM[V3ADD20_TRACK] = CONFIRM[V3ADD20_LEG] = 60
 ACCOUNT[V3ADD20_LEG] = V3ADD20_TRACK
@@ -148,7 +152,7 @@ V3ADD20 = dict(ADD, slots=20, leverage=3.)
 LEGS = {V3ADD_TRACK: V3ADD_LEG, V3ADD20_TRACK: V3ADD20_LEG}
 KEYS = {V3_TRACK: "v3", V3ADD_TRACK: "v3add", SPIKE_TRACK: "spike", V3LOCK_TRACK: "v3lock", ALLIN3_TRACK: "allin3",
         V3ADD20_TRACK: "v3add20", LIVE_ALLIN3_TRACK: "live-allin3", WICK6_TRACK: "live-wick6x3",
-        WICK3_TRACK: "live-wick3x3", WICK6HI_TRACK: "live-wick6x3hi"}
+        WICK3_TRACK: "live-wick3x3", WICK6HI_TRACK: "live-wick6x3hi", WICK3FAR_TRACK: "live-wick3x3far"}
 POSITION_SCORES = ("CASE WHEN p.track=7060 THEN ls.score ELSE s.score END AS score, s.ema_order, "
                    "CASE WHEN p.track=7060 THEN 'pre_touch' ELSE s.score_basis END AS score_basis")
 SCORE_JOIN = " LEFT JOIN signals s ON s.id=p.signal_id LEFT JOIN live_scores ls ON ls.signal_id=p.signal_id "
@@ -782,6 +786,8 @@ class ReclaimPaper:
         entry = facts["close"]
         backstop = entry*(1-side*WICK["stop_pct"]/100)
         for track, w in self.wick.items():
+            if facts["beyond_pct"] < w.get("min_beyond_pct", 0.):
+                continue
             notional, note = 0., None
             equity = db.execute("SELECT equity FROM tracks WHERE track=?", (track,)).fetchone()["equity"]
             row = db.execute("SELECT COUNT(*) n, COALESCE(SUM(COALESCE(remaining_notional,notional)),0) s FROM positions "
@@ -1318,14 +1324,14 @@ def install(app, engine):
     @app.get("/api/monday-reclaim-paper/analytics")
     def analytics(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20", "live-allin3",
                                   "live-wick6x3", "live-wick3x3",
-                                  "live-wick6x3hi"] = "60",
+                                  "live-wick6x3hi", "live-wick3x3far"] = "60",
                   days: Literal["0", "7", "30"] = "0"):
         return engine.analytics(track, int(days))
 
     @app.get("/api/monday-reclaim-paper/history")
     def record_history(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20", "live-allin3",
                                   "live-wick6x3", "live-wick3x3",
-                                  "live-wick6x3hi"] = "60",
+                                  "live-wick6x3hi", "live-wick3x3far"] = "60",
                        tab: Literal["events", "closed"] = "events",
                        scope: Literal["funded", "shadow", "all"] = "funded",
                        q: str = Query("", max_length=100), offset: int = Query(0, ge=0),

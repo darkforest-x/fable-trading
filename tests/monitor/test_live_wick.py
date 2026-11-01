@@ -121,3 +121,15 @@ class LiveWickTests(PaperFixture):
                 self.assertAlmostEqual(hi[0]['notional'], margin*3)
                 self.assertAlmostEqual(base[0]['notional'], 500.)
         self.assertEqual(e.snapshot()['live-wick6x3hi']['boost_from_score'], .76)
+
+    def test_far_account_needs_the_close_15_percent_past_the_level(self):
+        for low, close, opened in ((92., 92.5, 0), (90., 91.5, 1)):  # 1.41 vs 2.47 percent past 93.82
+            with self.subTest(close=close):
+                self.tearDown(); self.setUp()
+                e = self.wick(); self.set_bar(low, close)
+                self.fire(e); self.scored(e)
+                far = self.rows(e, "SELECT notional FROM positions WHERE track=9160")
+                self.assertEqual(len(far), opened)
+                self.assertEqual(len(self.rows(e, f"SELECT 1 FROM positions WHERE track={WICK3_TRACK}")), 1)
+                if opened:
+                    self.assertAlmostEqual(far[0]['notional'], 1000.)

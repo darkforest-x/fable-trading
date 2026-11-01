@@ -16,8 +16,10 @@ A = ROOT / 'experiments/active'
 CONTROL = A / 'exp-monday-limit-close-slice-control-20261101-v1'
 SOURCES = {'live-wick6x3': (A / 'exp-monday-limit-close-survivor-paths-20261101-v5', 'near_monday_edge-2020', 6),
            'live-wick3x3': (A / 'exp-monday-limit-close-survivor-paths-20261101-v7', 'near_monday_edge-2020', 3),
-           'live-wick6x3hi': (A / 'exp-monday-limit-close-survivor-paths-20261101-v8', 'near_monday_edge-2020', 6)}
-BOOST = {'live-wick6x3hi': '评分≥0.76时保证金×1.5（观察账户：0.76由2025–26回测事后选出，2025年前没有这类单，未经检验）。'}
+           'live-wick6x3hi': (A / 'exp-monday-limit-close-survivor-paths-20261101-v8', 'near_monday_edge-2020', 6),
+           'live-wick3x3far': (A / 'exp-monday-limit-close-survivor-paths-20261101-v9', 'near_monday_edge-2020', 3)}
+BOOST = {'live-wick6x3hi': '评分≥0.76时保证金×1.5（观察账户：0.76由2025–26回测事后选出，2025年前没有这类单，未经检验）。',
+         'live-wick3x3far': '只做收盘离1.618至少1.5%的单（观察账户：门槛由回测事后发现，2020–24与2025–26两段都成立，待前向检验）。'}
 CLOSE_EXITS = (0, 11, 12, 14)
 RULE = ('触价那根5分钟K线收盘时：评分≥0.5、收盘仍在1.618外且插出去的部分收回不到64%、离1.618不到30%，'
         '收盘市价进场。止盈周一近侧边界；止损开仓价−20%；触价后下一根1小时K线收盘仍未回到1.618以内则市价平，'

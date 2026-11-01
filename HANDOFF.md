@@ -1,3 +1,8 @@
+## 2026-11-01 · live-wick3x3far observation account (close >= 1.5 percent past the level)
+
+- Owner: "开观察账户". Track 9160 `live-wick3x3far` = live-wick3x3 but only touches whose 5m close is >= 1.5 percent past the 1.618 (`min_beyond_pct`; the cut is post hoc from `exp-monday-limit-close-beyond-filter-20261101-v1`). Path `exp-monday-limit-close-survivor-paths-20261101-v9`: 206 candidates since 2020, 2025 onward 1000 -> 18431U DD28.6 win 73.5 percent; from 2020 81145U.
+- Engine, booklet, backtest replay, frontend lists (only own lines staged in the two files carrying another tool's uncommitted edits); 118 backend + 113 frontend tests pass. CLAUDE.md / AGENTS.md list both observation accounts (8160 hi-score boost, 9160 far close) as forward observation only.
+
 ## 2026-11-01 · live-wick: distance past the 1.618 at the close raises win rate; live-wick6x3hi observation account added
 
 - Owner: "开一个观察账户" → `live-wick6x3hi` (track 8160, 4a52652554): live-wick6x3 with 1.5x margin when the touch-close score >= 0.76 (post-hoc line). Path `exp-monday-limit-close-survivor-paths-20261101-v8` (2025 onward 6455U DD19). Service restarted; earlier accounts unchanged. Browser check of the new account not yet done.
