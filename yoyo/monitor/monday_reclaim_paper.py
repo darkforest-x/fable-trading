@@ -78,6 +78,16 @@ backtest ledger reads vol_ratio, liquidity and toward24 at the touch 5m bar itse
 open exactly as the backtest books them, filled at the 1.618 in the touch minute, and the completed 1m candles from
 the touch to the scoring time are replayed before live quotes resume. These accounts are therefore not executable
 orders: they forward-track the backtest. Rows scored before this change keep their pre-touch score (score_basis NULL).
+
+Owner 2026-11-01 (exp-monday-limit-close-survivor-paths-20261101-v5 / -v6, "接入这两个 ... 能实盘的要用live-开头"):
+two accounts "live-wick6x3" and "live-wick3x3" (own 1000 USDT each) enter at market at the touch 5m close, using only
+facts known at that close: touch-close score >= 0.5, the bar closed still beyond the 1.618 (and short of the target),
+having recovered < 0.6396 of the excursion past the level (side x (close - extreme) / side x (level - extreme) of the
+5m bar), and less than 30 percent past the level. Near Monday edge target, stop 20 percent from the entry until the
+60m confirmation, which compares the 1h close with the level (not the entry): back inside -> stop to the level
+(no offset), else exit at that close. Margin = realized equity / 6 (or / 3) at 3x, at most 6 (3) open, margin in use
+<= equity, a loss never exceeds the margin. Costs as the backtest: taker entry + 10bp, maker target, taker + 10bp on
+other exits. "live-" names an executable rule; these are paper accounts and place no exchange orders.
 """
 from __future__ import annotations
 
@@ -120,13 +130,19 @@ CONFIRM[ALLIN3_TRACK] = 60
 ALLIN3 = dict(min_score=.6, backstop_pct=30., leverage=3., blowup_below=100.)
 LIVE_ALLIN3_TRACK = 7060  # Separate pre-touch paper account; never exchange orders.
 CONFIRM[LIVE_ALLIN3_TRACK] = 60
+WICK6_TRACK, WICK3_TRACK = 8060, 9060  # touch-close market entries; API keys "live-wick6x3" / "live-wick3x3"
+WICK_TRACKS = (WICK6_TRACK, WICK3_TRACK)
+CONFIRM[WICK6_TRACK] = CONFIRM[WICK3_TRACK] = 60
+WICK = dict(min_score=.5, max_recovery=0.6395668107499273, max_beyond_pct=30., stop_pct=20., leverage=3.)
+WICK_SLOTS = {WICK6_TRACK: 6, WICK3_TRACK: 3}
 V3ADD20_TRACK, V3ADD20_LEG = 6060, 6061  # v3add with margin = equity / 20 at 3x and its add legs; API key "v3add20"
 CONFIRM[V3ADD20_TRACK] = CONFIRM[V3ADD20_LEG] = 60
 ACCOUNT[V3ADD20_LEG] = V3ADD20_TRACK
 V3ADD20 = dict(ADD, slots=20, leverage=3.)
 LEGS = {V3ADD_TRACK: V3ADD_LEG, V3ADD20_TRACK: V3ADD20_LEG}
 KEYS = {V3_TRACK: "v3", V3ADD_TRACK: "v3add", SPIKE_TRACK: "spike", V3LOCK_TRACK: "v3lock", ALLIN3_TRACK: "allin3",
-        V3ADD20_TRACK: "v3add20", LIVE_ALLIN3_TRACK: "live-allin3"}
+        V3ADD20_TRACK: "v3add20", LIVE_ALLIN3_TRACK: "live-allin3", WICK6_TRACK: "live-wick6x3",
+        WICK3_TRACK: "live-wick3x3"}
 POSITION_SCORES = ("CASE WHEN p.track=7060 THEN ls.score ELSE s.score END AS score, s.ema_order, "
                    "CASE WHEN p.track=7060 THEN 'pre_touch' ELSE s.score_basis END AS score_basis")
 SCORE_JOIN = " LEFT JOIN signals s ON s.id=p.signal_id LEFT JOIN live_scores ls ON ls.signal_id=p.signal_id "
@@ -280,10 +296,38 @@ def settle(side, entry, exit_price, reason):
     return gross, fee, gross-fee, gross-fee-(0. if reason == "target" else SLIP_BP)
 
 
+def settle_market(side, entry, exit_price, reason):
+    """Market entry at the touch close: taker entry + 10bp, maker target, taker + 10bp otherwise (net = net_slip)."""
+    gross = side*(exit_price-entry)/entry*1e4
+    fee = TAKER_BP+(MAKER_BP if reason == "target" else TAKER_BP)
+    net = gross-fee-SLIP_BP-(0. if reason == "target" else SLIP_BP)
+    return gross, fee, net, net
+
+
+def wick_entry(side, level, target, bar):
+    """Touch 5m bar (open_ms, o, h, l, c) -> (close, recovery, beyond_pct) or the reason it is not an entry."""
+    close = bar[4]
+    extreme = bar[3] if side == 1 else bar[2]
+    past = side*(level-extreme)
+    if not past > 0:
+        return None, "no_excursion"
+    recovery = side*(close-extreme)/past
+    beyond = 100*side*(level-close)/level
+    if not side*(close-level) < 0:
+        return None, "closed_inside"
+    if not side*(target-close) > 0:
+        return None, "target_passed"
+    if not recovery < WICK["max_recovery"]:
+        return None, "recovered"
+    if not beyond < WICK["max_beyond_pct"]:
+        return None, "collapse"
+    return dict(close=close, recovery=recovery, beyond_pct=beyond), None
+
+
 class ReclaimPaper:
     def __init__(self, runtime, fib, model_path=MODEL, v3_path=V3, enable_v3=True, enable_v3add=True, enable_spike=True,
                  enable_v3lock=True, enable_allin3=True, enable_v3add20=True, score_basis="touch_close",
-                 enable_live_allin3=False):
+                 enable_live_allin3=False, enable_live_wick=False):
         if score_basis not in ("touch_close", "pre_touch"):
             raise ValueError("score_basis must be 'touch_close' or 'pre_touch'")
         self.score_basis = score_basis
@@ -296,6 +340,7 @@ class ReclaimPaper:
         self.allin = dict(ALLIN3) if enable_allin3 else None
         self.live_allin = dict(ALLIN3, score_basis="pre_touch", slippage_bp=SLIP_BP) if enable_live_allin3 else None
         self.add20 = dict(V3ADD20) if self.v3 and enable_v3add20 else None
+        self.wick = {t: dict(WICK, slots=WICK_SLOTS[t]) for t in WICK_TRACKS} if enable_live_wick else {}
         self.path = Path(runtime)/"monday-reclaim-paper.sqlite3"
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.events = queue.Queue(maxsize=200_000)
@@ -354,7 +399,8 @@ class ReclaimPaper:
                 db.execute("UPDATE positions SET realized_pnl=COALESCE(pnl,0) WHERE stage='closed'")
             for m in (TRACKS+((V3_TRACK,) if self.v3 else ())+((V3ADD_TRACK,) if self.add else ())+((SPIKE_TRACK,) if self.spike else ())
                       +((V3LOCK_TRACK,) if self.v3lock else ())+((ALLIN3_TRACK,) if self.allin else ())
-                      +((V3ADD20_TRACK,) if self.add20 else ())+((LIVE_ALLIN3_TRACK,) if self.live_allin else ())):
+                      +((V3ADD20_TRACK,) if self.add20 else ())+((LIVE_ALLIN3_TRACK,) if self.live_allin else ())
+                      +tuple(self.wick)):
                 db.execute("INSERT OR IGNORE INTO tracks (track,equity,started_ms) VALUES (?,?,?)", (m, START_EQUITY, self.client.clock()))
         self._refresh_watch()
 
@@ -557,6 +603,7 @@ class ReclaimPaper:
                 if not late:
                     continue
                 minutes = []
+            touch_bar = self._touch_bar(symbol, candle_ms) if self.wick else None
             status, score, taken, feats, error, order = result
             with self.db() as db:
                 db.execute("BEGIN IMMEDIATE")
@@ -567,6 +614,8 @@ class ReclaimPaper:
                 if cur.rowcount != 1:
                     continue
                 self._open_accounts(db, s["id"], levels, symbol, s["side"], s["level"], s["target"], candle_ms, score, taken, order)
+                if status == "scored":
+                    self._open_wick(db, s["id"], levels, symbol, s["side"], s["level"], candle_ms, score, touch_bar)
             for ts, _, h, l, c, _ in minutes:
                 self.decide(ts, symbol)  # confirmations due before this minute, as in _catch_up
                 self.handle_quote(symbol, {"candle_ms": ts, "high": h, "low": l, "price": c},
@@ -684,6 +733,8 @@ class ReclaimPaper:
             return self.allin["leverage"]
         if track == LIVE_ALLIN3_TRACK and self.live_allin:
             return self.live_allin["leverage"]
+        if track in self.wick:
+            return self.wick[track]["leverage"]
         if account(track) == V3ADD20_TRACK and self.add20:
             return self.add20["leverage"]
         return None
@@ -700,6 +751,46 @@ class ReclaimPaper:
         if margin <= 0 or row["s"]/a["leverage"]+margin > equity+1e-9:
             return 0., "no_capacity"
         return margin*a["leverage"], None
+
+    def _touch_bar(self, symbol, candle_ms):
+        """The completed OKX 5m candle holding the touch, as the backtest's touch bar; None if it cannot be read."""
+        start, now = candle_ms//MIN5*MIN5, self.client.clock()
+        try:
+            rows = bars(self.client.get("/api/v5/market/candles", {"instId": symbol, "bar": "5m",
+                                                                  "limit": str(min(300, (now-start)//MIN5+2))}), "5m", now)
+        except Exception:
+            return None
+        hit = [b for b in rows if b[0] == start and b[0]+MIN5 <= now]
+        return hit[0] if hit else None
+
+    def _open_wick(self, db, sid, levels, symbol, side, level, candle_ms, score, bar):
+        """live-wick rows: market entry at the touch 5m close when it is a survivor (see the module docstring)."""
+        if not self.wick or score is None or score < WICK["min_score"]:
+            return
+        target = levels["low"] if side == 1 else levels["high"]
+        facts, why = (None, "bar_missing") if bar is None else wick_entry(side, level, target, bar)
+        if facts is None:
+            return
+        fill = candle_ms//MIN5*MIN5+MIN5
+        decision = candle_ms//HOUR*HOUR+2*HOUR
+        entry = facts["close"]
+        backstop = entry*(1-side*WICK["stop_pct"]/100)
+        for track, w in self.wick.items():
+            notional, note = 0., None
+            equity = db.execute("SELECT equity FROM tracks WHERE track=?", (track,)).fetchone()["equity"]
+            row = db.execute("SELECT COUNT(*) n, COALESCE(SUM(COALESCE(remaining_notional,notional)),0) s FROM positions "
+                             "WHERE track=? AND stage<>'closed' AND taken=1", (track,)).fetchone()
+            margin = equity/w["slots"]
+            if row["n"] >= w["slots"]:
+                note = "no_slot"
+            elif margin <= 0 or row["s"]/w["leverage"]+margin > equity+1e-9:
+                note = "no_capacity"
+            else:
+                notional = margin*w["leverage"]
+            db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,decision_ms,stage,taken,notional,"
+                       "last_seen_ms,note,remaining_notional,backstop,reclaim_ref) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                       (sid, track, symbol, side, entry, target, fill, decision, "pending_confirm", int(notional > 0), notional,
+                        fill, note, notional, backstop, level))
 
     def _open_spike(self, db, sid, symbol, side, level, target, candle_ms, order):
         """spike-HW v1 row: near target, -18 percent backstop, margin = equity / slots at the given leverage."""
@@ -793,7 +884,7 @@ class ReclaimPaper:
 
     def _record_exit(self, db, p, amount, exit_ms, price, reason):
         """Allocate original entry cost once across each realized tranche."""
-        gross, fee, net, net_slip = settle(p["side"], p["entry"], price, reason)
+        gross, fee, net, net_slip = (settle_market if p["track"] in WICK_TRACKS else settle)(p["side"], p["entry"], price, reason)
         if p["track"] == LIVE_ALLIN3_TRACK:
             net = net_slip  # The saved pre-touch account deducts the 10bp non-target scenario.
         pnl = amount*net/1e4
@@ -830,7 +921,7 @@ class ReclaimPaper:
         if p["taken"] and p["notional"] > 0:
             self._record_exit(db, p, p["remaining_notional"], exit_ms, price, reason)
         else:
-            gross, fee, net, net_slip = settle(p["side"], p["entry"], price, reason)
+            gross, fee, net, net_slip = (settle_market if p["track"] in WICK_TRACKS else settle)(p["side"], p["entry"], price, reason)
             if p["track"] == LIVE_ALLIN3_TRACK:
                 net = net_slip
             db.execute("UPDATE positions SET stage='closed',exit_ms=?,exit_price=?,reason=?,gross_bp=?,fee_bp=?,net_bp=?,"
@@ -958,7 +1049,8 @@ class ReclaimPaper:
                 continue
             close = window[0][4]
             ref = p["reclaim_ref"] if p["reclaim_ref"] is not None else p["entry"]
-            offset = self.v3lock["breakeven_offset_bp"] if p["track"] == V3LOCK_TRACK and self.v3lock else BE_OFFSET_BP
+            offset = (self.v3lock["breakeven_offset_bp"] if p["track"] == V3LOCK_TRACK and self.v3lock else
+                      0. if p["track"] in WICK_TRACKS else BE_OFFSET_BP)
             be = ref*(1+p["side"]*offset/1e4)
             inside = close > ref if p["side"] == 1 else close < ref
             beyond_be = close > be if p["side"] == 1 else close < be
@@ -1101,6 +1193,8 @@ class ReclaimPaper:
                     worker=dict(alive=bool(self.thread and self.thread.is_alive()), queue=self.events.qsize(), error=self.error),
                     tracks=tracks, signals=signals)
         result["live-allin3"] = self.live_allin
+        for t, config in self.wick.items():
+            result[KEYS[t]] = config
         result["live_signals"] = [self._live_signal(s, live_scores[s["id"]]) for s in signals if s["id"] in live_scores]
         if today:
             result["record_day_start_ms"] = day_start_ms
@@ -1216,12 +1310,14 @@ def install(app, engine):
     app.state.monday_reclaim_paper = engine
 
     @app.get("/api/monday-reclaim-paper/analytics")
-    def analytics(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20", "live-allin3"] = "60",
+    def analytics(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20", "live-allin3",
+                                  "live-wick6x3", "live-wick3x3"] = "60",
                   days: Literal["0", "7", "30"] = "0"):
         return engine.analytics(track, int(days))
 
     @app.get("/api/monday-reclaim-paper/history")
-    def record_history(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20", "live-allin3"] = "60",
+    def record_history(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20", "live-allin3",
+                                  "live-wick6x3", "live-wick3x3"] = "60",
                        tab: Literal["events", "closed"] = "events",
                        scope: Literal["funded", "shadow", "all"] = "funded",
                        q: str = Query("", max_length=100), offset: int = Query(0, ge=0),

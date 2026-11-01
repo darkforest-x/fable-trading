@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const tracks=['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3'];
+  const tracks=['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3','live-wick6x3','live-wick3x3'];
   const steps={'1m':60000,'2m':120000,'3m':180000,'5m':300000,'15m':900000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000};
   const symbolOK=v=>typeof v==='string'&&/^[A-Z0-9]{1,32}USDT$/.test(v);
   const valid=r=>r&&Number.isInteger(r.id)&&r.id>0&&symbolOK(r.symbol)&&[1,-1].includes(r.side)&&['entry_ms','exit_ms','pnl','return_pct'].every(k=>Number.isFinite(r[k]))&&r.entry_ms>0&&r.exit_ms>=r.entry_ms;
@@ -19,7 +19,7 @@
     const e=r.entry_rules;
     if(e?.status!=='saved'||!Number.isFinite(e.score)||!Number.isFinite(e.minimum))return '<span class="bt-entry">入场条件／评分未留存</span>';
     const add=e.kind==='add5',gate=e.minimum<.3?' · 前40%':`≥${e.minimum}`;
-    return `<span class="bt-entry"><span>${add?'逆向5%加仓':'1.618首触'}</span><span class="bt-score" title="原回测评分 ${e.score}，门槛 ${e.minimum}；不是胜率">${e.score_basis==='pre_touch'?'触价前评分':add?'主单评分':'评分'} ${e.score.toFixed(4)}${gate}</span>${Number.isFinite(e.minimum_order)&&Number.isFinite(e.order)?`<span>排列 ${e.order}≥${e.minimum_order}</span>`:''}</span>`;
+    return `<span class="bt-entry"><span>${add?'逆向5%加仓':e.kind==='touch_close'?'触价收盘进场':'1.618首触'}</span><span class="bt-score" title="原回测评分 ${e.score}，门槛 ${e.minimum}；不是胜率">${e.score_basis==='pre_touch'?'触价前评分':add?'主单评分':'评分'} ${e.score.toFixed(4)}${gate}</span>${Number.isFinite(e.minimum_order)&&Number.isFinite(e.order)?`<span>排列 ${e.order}≥${e.minimum_order}</span>`:''}</span>`;
   }
   function periodFor(row,period){return Object.keys(steps).find(p=>steps[p]>=steps[period]&&(row.exit_ms-row.entry_ms)/steps[p]<=5000)||'1D';}
   function validate(p,q,offset){
