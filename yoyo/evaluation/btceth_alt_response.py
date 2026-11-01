@@ -8,6 +8,7 @@ not a fill simulation, fee-net return, predictive model or causal impact test.
 """
 from pathlib import Path
 import json
+import argparse
 import subprocess
 import numpy as np
 import pandas as pd
@@ -209,6 +210,34 @@ def run():
     write(EXP/'summary.json',summary)
     print(json.dumps({k:v for k,v in summary.items() if k not in ['groups','strength_ranks']},default=str),flush=True)
 
+def describe_existing():
+    """Read-only robust summaries of saved observations; no feature or path replay."""
+    e=pd.read_csv(EXP/'events.csv');r=pd.read_csv(EXP/'strength_rank_pairs.csv');o=pd.read_csv(EXP/'coin_observations.csv.gz')
+    pure=e[e.kind.eq('pure_wick_reclaim')];rows=[]
+    for (leader,side),g in pure.groupby(['leader','side']):
+        rows.append(dict(leader=leader,side=int(side),events=len(g),days=g.day.nunique(),same_direction_share=g.alt_same_direction_share.mean(),
+            median_volume_ratio=g.alt_volume_ratio_median.median(),median_range_ratio=g.alt_range_ratio_median.median(),
+            **{f'actual_alt_return_{h*5}m':float((g[f'alt_after_{h}_mean']*side).mean()) for h in HORIZONS}))
+    robust={}
+    for name,g in [('all',e),('pure',pure),('failed',e[~e.reclaimed])]:
+        obs=o[o.event_id.isin(g.event_id)]
+        robust[name]=dict(events=len(g),days=g.day.nunique(),volume_ratio_median=g.alt_volume_ratio_median.median(),range_ratio_median=g.alt_range_ratio_median.median(),
+            same_direction_share=g.alt_same_direction_share.mean(),own_touch_share=g.alt_own_touch_share.mean(),own_fresh_share=g.alt_own_fresh_now_share.mean(),
+            recovery_above_half_share=g.alt_recovery_gt_half.mean(),
+            earlier_extreme_share=g.alt_extreme_earlier_share.mean(),
+            same_bar_extreme_share=obs.assign(v=obs.extreme_offset_bars.eq(0).astype(float).where(obs.extreme_offset_bars.notna())).groupby('event_id').v.mean().mean())
+    rp=r[r.event_id.isin(pure.event_id)];strength={}
+    for feature,g in rp.groupby('feature'):
+        strength[feature]={k:bootstrap_mean(g[k],g.day) for k in ['difference','residual_difference']}
+    # Explicitly retain the support behind the apparent ETH-upper asymmetry.
+    g=pure[pure.leader.eq('ETH')&pure.side.eq(-1)]
+    means=[g[g.day.ne(day)].alt_after_6_mean.mean() for day in g.day.unique()]
+    write(EXP/'description.json',dict(pure_direction_rows=rows,robust=robust,pure_strength_ranks=strength,
+        eth_upper_leave_one_day_out_30m_reversal_mean_range=[min(means),max(means)],
+        cohort_counts=e.groupby('alt_n').size().to_dict(),all_after_returns_are_descriptors_not_PnL=True))
+    print('Saved descriptive aggregates without replay',flush=True)
+
 if __name__=='__main__':
+    parser=argparse.ArgumentParser();parser.add_argument('--describe',action='store_true');args=parser.parse_args()
     assert subprocess.run(['git','diff','--quiet','HEAD','--',__file__,str(EXP/'config.json')],cwd=ROOT).returncode==0,'Commit builder first'
-    run()
+    describe_existing() if args.describe else run()
