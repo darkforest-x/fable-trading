@@ -1,0 +1,23 @@
+{
+  "experiment_id": "exp-monday-limit-close-beyond-filter-20261101-v1",
+  "question": "Owner 2026-11-01 '测离1.618≥2%过滤': does requiring the touch close to be at least 2 percent past the 1.618 raise the live-wick win rate and keep the account result?",
+  "approval": "Owner 2026-11-01 '测离1.618≥2%过滤'",
+  "single_variable": "Entry filter only: beyond_pct (side x (level - close) / level at the touch close) >= cut; fills, stop, target, sizing and costs unchanged",
+  "primary": "cut 2 (read off the same trades: post hoc); 1, 1.5, 3, 4 for robustness; 0 = current rule",
+  "fills": "experiments/active/exp-monday-limit-close-stop-grid-20261101-v1",
+  "survivors": "experiments/active/exp-monday-limit-close-slice-control-20261101-v1/survivors.csv.gz",
+  "variant": "E20",
+  "target": "near_monday_edge",
+  "max_beyond_pct": 30,
+  "cuts": [0, 1, 1.5, 2, 3, 4],
+  "sizings": [[6, 3], [4, 3], [3, 3]],
+  "control_sizing": [6, 3],
+  "seed": 20261103,
+  "ties": 10,
+  "control_seed": 20261104,
+  "control_draws": 300,
+  "slippage_bp": {"market_entry": 10, "non_target_exit": 10},
+  "in_sample": "The 2 percent cut was chosen after seeing win rates by distance on these trades in both periods",
+  "training_eligible": false,
+  "production_eligible": false
+}
