@@ -99,10 +99,11 @@ def events(args):
 
 
 def cluster24(s):
-    """Other symbols with a same-side first weekly touch in the prior 24 hours (monday_limit_reclaim_patterns3)."""
+    """Other symbols with a same-side first weekly touch in the prior 24 hours (monday_limit_reclaim_patterns3).
+    Epochs in nanoseconds whatever the parsed resolution (pandas 3 in the framework env parses microseconds)."""
     out = pd.Series(0, index=s.index)
     for _, g in s.groupby('side'):
-        ts = g.t.astype('int64').to_numpy(); order = np.argsort(ts); tsorted = ts[order]; syms = g.symbol.to_numpy()[order]
+        ts = g.t.dt.as_unit('ns').astype('int64').to_numpy(); order = np.argsort(ts); tsorted = ts[order]; syms = g.symbol.to_numpy()[order]
         lo = np.searchsorted(tsorted, tsorted-86_400_000_000_000, 'left'); hi = np.searchsorted(tsorted, tsorted, 'left')
         out.loc[g.index[order]] = [len(set(syms[a:b])-{syms[i]}) for i, (a, b) in enumerate(zip(lo, hi))]
     return out
@@ -131,7 +132,9 @@ def fills(args):
     from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy, run_native
     out = Path(exp)/intrabar.lower()/'symbols'/symbol
     if (out/'done.json').exists():
-        return json.loads((out/'done.json').read_text())
+        done = json.loads((out/'done.json').read_text())
+        if done.get('events') == sorted(events_):
+            return done
     t0 = time.perf_counter()
     ccfg = json.loads((CODEX/'config.json').read_text())
     f, q = load_job(job)
@@ -144,7 +147,7 @@ def fills(args):
     s_, L, T, c = x.side.to_numpy(float), x.entry.to_numpy(float), x.target_price.to_numpy(float), close[k]
     ok = (s_*(c-L) < tick*(1-1e-7)) & (~np.isfinite(T) | (s_*(T-c) >= tick*(1-1e-7))) & (k < x.end_i.to_numpy())
     x = x[ok].copy()
-    stats = dict(symbol=symbol, intrabar=intrabar, listed=len(events_), signal_rows=int(len(x)))
+    stats = dict(symbol=symbol, intrabar=intrabar, listed=len(events_), events=sorted(events_), signal_rows=int(len(x)))
     out.mkdir(parents=True, exist_ok=True)
     if x.empty:
         pd.DataFrame(columns=cr.KEEP+['variant']).to_csv(out/'trades.csv.gz', index=False)
@@ -227,7 +230,7 @@ def accounts(config, workers):
     t = t[t.event.isin(facts.index)].copy()
     for c in ('score_stored', 'recovery', 'beyond_pct', 'level'):
         t[c] = t.event.map(facts[c])
-    t = t.assign(entry_ns=t.entry_t.astype('int64'), exit_ns=t.exit_t.astype('int64')).sort_values('entry_t').reset_index(drop=True)
+    t = t.assign(entry_ns=t.entry_t.dt.as_unit('ns').astype('int64'), exit_ns=t.exit_t.dt.as_unit('ns').astype('int64')).sort_values('entry_t').reset_index(drop=True)
     start = pd.Timestamp(cfg['window'][0], tz='UTC').value
     names = {4: '止盈', 11: '60分钟未收回', 5: '保本止损', 1: '−20%止损', 14: '收盘平仓', 0: '数据断点平仓'}
     res = {}
