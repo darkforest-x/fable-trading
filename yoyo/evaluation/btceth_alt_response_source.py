@@ -55,7 +55,10 @@ def prepare():
             tail=tail.reset_index();tail['open_time']=pd.to_datetime(tail.ts,unit='ms',utc=True).astype(str)
             tail.to_csv(part,index=False)
             receipt.append(dict(symbol=sym,seed_rows=len(tail),start=str(tail.open_time.iloc[0]),end=str(tail.open_time.iloc[-1]),sources=sources))
-    write(EXP/'seed_receipt.json',receipt)
+    if receipt:
+        existing=json.loads((EXP/'seed_receipt.json').read_text()) if (EXP/'seed_receipt.json').exists() else []
+        merged={r['symbol']:r for r in existing};merged.update({r['symbol']:r for r in receipt})
+        write(EXP/'seed_receipt.json',list(merged.values()))
     print('Seeded',len(receipt),'symbols',flush=True)
 
 def finalize():

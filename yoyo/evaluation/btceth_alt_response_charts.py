@@ -5,6 +5,7 @@ not an observed tick timestamp. Upward means movement against the initial
 spike for both sides. Context prices after zero are explicitly retrospective.
 """
 import json
+import argparse
 import subprocess
 import numpy as np
 import pandas as pd
@@ -15,14 +16,17 @@ from yoyo.evaluation.eth_reclaim_trade_charts import candles,decorate,bounds
 OUT=ROOT/'artifacts/btceth-5m-alt-response-20261101'
 BLUE='#65b8ff';GREEN='#5dd5b1';RED='#fa7585'
 
-def run():
+def run(pure_only=False):
     import matplotlib.pyplot as plt
     setup();OUT.mkdir(exist_ok=True)
+    plt.rcParams.update({'axes.labelcolor':MUTED,'xtick.color':MUTED,'ytick.color':MUTED,'axes.edgecolor':'#344355'})
     events=pd.read_csv(EXP/'events.csv');paths=pd.read_csv(EXP/'paths.csv')
+    if pure_only:
+        events=events[events.kind.eq('pure_wick_reclaim')];paths=paths[paths.event_id.isin(events.event_id)]
     fig,axes=plt.subplots(2,2,figsize=(18,11),dpi=150)
     fig.subplots_adjust(left=.075,right=.97,bottom=.14,top=.85,hspace=.40,wspace=.18)
-    fig.suptitle('BTC / ETH触及5分钟1.618时，山寨怎样反应？',fontsize=24,y=.965)
-    fig.text(.075,.91,'9—10月固定20币池 · 山寨为其余18币等权 · 只观察价格路径，不是交易收益',fontsize=14,color=MUTED)
+    fig.suptitle('BTC / ETH'+('插针1.618当根收回' if pure_only else '触及5分钟1.618')+'时，山寨怎样反应？',fontsize=24,y=.965)
+    fig.text(.075,.91,f'5分钟自身周一区间 · 9—10月{len(events)}次事件 · 山寨池18币，可观察17—18币等权 · 价格路径，不是交易收益',fontsize=13,color=MUTED)
     for ax,(leader,side) in zip(axes.ravel(),[('BTC',1),('BTC',-1),('ETH',1),('ETH',-1)]):
         p=paths[paths.leader.eq(leader)&paths.side.eq(side)]
         complete=p.groupby('event_id')[['alt_mean','control','leader_return']].apply(lambda g:len(g)==25 and g.notna().all().all())
@@ -39,7 +43,9 @@ def run():
         ax.set_xlabel('距触价K收盘的分钟数',fontsize=12);ax.legend(fontsize=10,loc='best')
     fig.text(.075,.065,'基准=触价K前一根收盘；下刺时向上代表上涨，上刺时向上代表下跌。灰带是触价所在5分钟，无法判断该K内先后。',fontsize=12,color=MUTED)
     fig.text(.075,.032,'对照匹配同一周、触价前30分钟涨跌幅和波动；排除BTC/ETH冲击前后65分钟。样本相关、观察期短，均值不等于可交易优势。',fontsize=11,color=MUTED)
-    fig.savefig(OUT/'反应总览.png',dpi=150);plt.close(fig)
+    fig.savefig(OUT/('反应总览_当根收回.png' if pure_only else '反应总览.png'),dpi=150);plt.close(fig)
+    if pure_only:
+        print('Rendered pure-wick overview',flush=True);return
     values={r['event_id']:r for r in json.loads((EXP/'path_values.json').read_text())};chosen=[]
     # Examples selected by chronology and event subtype, never subsequent PnL.
     for leader in ['BTC','ETH']:
@@ -52,7 +58,8 @@ def run():
         start=t-pd.Timedelta(hours=1);end=t+pd.Timedelta(minutes=65);frame=f[(f.index>=start)&(f.index<end)]
         val=values[r.event_id];arr=np.array(val['values']);alts=[i for i,s in enumerate(val['symbols']) if s!=leader]
         fig=plt.figure(figsize=(18,12),dpi=150);fig.text(.065,.95,f'{leader} {"下插针" if side==1 else "上插针"} · {t.tz_convert("Asia/Shanghai"):%Y-%m-%d %H:%M} 北京时间',fontsize=24)
-        fig.text(.065,.915,'该方向首个当根收回样本，按时间选取 · 上：主币5m K线；下：18个山寨的同步反应',fontsize=14,color=MUTED)
+        available=int(np.isfinite(arr[alts,12]).sum())
+        fig.text(.065,.915,f'该方向首个当根收回样本，按时间选取 · 上：主币5m K线；下：山寨池18币，当时可观察{available}币',fontsize=14,color=MUTED)
         ax=fig.add_axes([.065,.61,.87,.25]);candles(ax,frame,STEP,t);bounds(ax,frame,[r.level]);decorate(ax,start,end,True)
         ax.axhline(r.level,color=GOLD,lw=1.2);ax.text(.99,.95,f'5m 1.618 = {r.level:,.2f}',transform=ax.transAxes,ha='right',va='top',fontsize=14,color=GOLD)
         from yoyo.evaluation.eth_reclaim_trade_charts import dn
@@ -71,12 +78,14 @@ def run():
         for y in range(6):
             for x in range(len(alts)):
                 if np.isfinite(matrix[y,x]):heat.text(x,y,f'{matrix[y,x]:+.1f}',ha='center',va='center',fontsize=8,color='black' if abs(matrix[y,x])<vmax*.55 else 'white')
-        fig.text(.065,.035,'价格均以触价前一根收盘为基准；正值=反向恢复。0为触价K收盘，非精确触价秒数；之后均为事后观察。',fontsize=11,color=MUTED)
+                else:heat.text(x,y,'—',ha='center',va='center',fontsize=8,color=MUTED)
+        fig.text(.065,.035,'价格均以前一根收盘为基准；正值=反向恢复。0为触价K收盘，非精确触价秒数；之后为事后观察。—为历史缺失。',fontsize=11,color=MUTED)
         path=OUT/f'{leader}_{"lower" if side==1 else "upper"}_first_reclaim.png';fig.savefig(path,dpi=150);plt.close(fig)
         records.append(dict(event_id=r.event_id,image=str(path)))
     (OUT/'examples.json').write_text(json.dumps(records,ensure_ascii=False,indent=2)+'\n')
     print('Rendered',1+len(records),'figures',flush=True)
 
 if __name__=='__main__':
+    parser=argparse.ArgumentParser();parser.add_argument('--pure-only',action='store_true');args=parser.parse_args()
     assert subprocess.run(['git','diff','--quiet','HEAD','--',__file__],cwd=ROOT).returncode==0
-    run()
+    run(args.pure_only)
