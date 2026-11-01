@@ -189,23 +189,26 @@ def context(ax,b,event,trade=None):
 
 def position(ax,trade,start,end,labels=True):
     """Active protection is solid; post-exit references are explicitly dashed."""
-    entry=pd.Timestamp(trade['entry_time']);last=max(pd.Timestamp(lr['exit_time']) for lr in trade['legs'])
+    def exit_marker(lr):
+        t=pd.Timestamp(lr['exit_time'])
+        return t if lr['reason']=='time' or int(lr['exit_segment'])==0 else t+pd.Timedelta(minutes=7.5)
+    entry=pd.Timestamp(trade['entry_time']);last=max(exit_marker(lr) for lr in trade['legs'])
     entry_exact=int(trade['entry_segment'])%4==0
     mx=entry if entry_exact else entry+pd.Timedelta(minutes=7.5)
     low,high=ax.get_ylim()
     levels=[('入场',trade['entry'],ENTRY),('初始止损',trade['stop'],STOP)]
     for i,lr in enumerate(trade['legs'],1):levels.append((f'目标{i}' if len(trade['legs'])>1 else '目标',lr['target'],TARGET))
-    for label,p,color in levels:
+    ends=[last,last]+[exit_marker(lr) for lr in trade['legs']]
+    for (label,p,color),active_end in zip(levels,ends):
         if low<=p<=high:
-            left=max(entry,start);right=min(last+pd.Timedelta(minutes=15),end)
+            left=max(mx,start);right=min(active_end,end)
             if right>left:ax.hlines(p,dn(left),dn(right),color=color,lw=1.2)
-            if last<end:ax.hlines(p,dn(max(last+pd.Timedelta(minutes=15),start)),dn(end),color=color,ls=':',lw=.8,alpha=.45)
+            if active_end<end:ax.hlines(p,dn(max(active_end,start)),dn(end),color=color,ls=':',lw=.8,alpha=.45)
     if start<=mx<=end and low<=trade['entry']<=high:
         ax.scatter(dn(mx),trade['entry'],marker='^' if trade['side']==1 else 'v',s=105,color=ENTRY,edgecolors=BG,lw=.6,zorder=10)
         ax.annotate('入场',xy=(dn(mx),trade['entry']),xytext=(5,14),textcoords='offset points',color=ENTRY,fontsize=11)
     for i,lr in enumerate(trade['legs'],1):
-        t=pd.Timestamp(lr['exit_time']);exact=lr['reason']=='time' or int(lr['exit_segment'])==0
-        x=t if exact else t+pd.Timedelta(minutes=7.5)
+        x=exit_marker(lr)
         if start<=x<=end and low<=lr['exit_price']<=high:
             color=STOP if lr['reason']=='stop' else TARGET if lr['reason']=='target' else FG
             ax.scatter(dn(x),lr['exit_price'],marker='X',s=90,color=color,edgecolors=BG,lw=.6,zorder=10)
