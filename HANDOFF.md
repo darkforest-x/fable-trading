@@ -1,3 +1,9 @@
+## 2026-11-01 · Survivor slice: 4 slots 3x, allin3 rule and the -30 percent stop
+
+- Owner asked for detail on 10 x 5 vs 4 x 3, compounding, the allin3 rule and whether -30 percent is too wide. Builder 38bce0067d adds the allin3 path_run option and an alternate fills source to `monday_limit_close_survivor_paths.py`; configs `-v3` (n4 x3) and `-v4` (allin3) run once on saved fills.
+- All frac paths compound on realized equity. n4 x3 from 2025: 1000 -> 9989U, DD 29.5, no liquidation (range 0.5 DD 43). n10 x5: 5351U, DD 19.4, 9 liquidation-line hits. allin3 rule: near edge from 2025 peaks at 34033U (2025-10-17) and falls to 396U (2026-03-25), ends 2964U, DD 98.8; opposite 1.618 ends 804U with refills. Not a candidate.
+- Stop: saved B18 (-18 percent) is worse at every size (backstops 10-14 a year instead of 1-5; 2025 +98 vs +136bp; n10 x5 2.95x DD27 vs 5.35x DD19). The 60m time exit is the real risk control; tighter stops (-5 / -10 / -15) need new framework fills (not run). Learning: `a-tighter-disaster-stop-sells-the-wick-bottom.md`.
+
 ## 2026-11-01 · Touch-close optimization: re-picking filters fails out of sample; size is the lever (10 slots 5x)
 
 - Owner: "以最大利润为目标，重构出新的策略出来，回撤控制小于35%" (explicit multi-variable request, PROJECT_PLAN). `exp-monday-limit-close-optimize-20261101-v1` (builder dbfcf061eb): 288 selections (score, recovery, five targets, -30 / -18 stop) x 40 sizings on the saved close-reclaim fills, max training profit with DD < 35, expanding walk-forward.

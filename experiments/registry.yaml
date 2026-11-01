@@ -15573,3 +15573,31 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Size chosen after the first sizing rule failed out of sample; 2025-2026 also chose the survivor filters, so not untouched. At 5x the -30 percent backstop is never reached: positions are liquidated around -19 percent. Booklet ~/Documents/Codex/2026-11-01/close-survivor-booklet now holds both sizes plus the optimization tables.'
+  - experiment_id: exp-monday-limit-close-survivor-paths-20261101-v3
+    source_repo: darkforest-x/fable-trading
+    source_commit: 38bce0067d
+    status: complete
+    question: 'Owner 2026-11-01 "能详细说明一下吗 / 是复利的吗": the survivor rule at 4 slots x 3 (75 percent notional) from 1000U.'
+    single_variable: 'Sizing only versus v1 / v2 (frac n4 x3); same fills, seed and starts.'
+    result: 'Near edge from 2025: 1000 -> 9989U (2025 end 2777U), DD 29.5, 254 trades, 0 liquidations; from 2020: 29581U, 374 of 398 taken (24 skipped, 4 open), DD 29.5. Range 0.5: 7667U / 32643U but DD 43.1 (over the cap).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-survivor-paths-20261101-v3/manifest.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Compounding on realized equity. One -30 percent backstop (average -22 percent price) costs about 16-22 percent of equity at this size. Post hoc stop comparison (B18 near edge, saved fills): worse at every size, 2025 onward 5.19x DD 34 vs 9.99x DD 29.'
+  - experiment_id: exp-monday-limit-close-survivor-paths-20261101-v4
+    source_repo: darkforest-x/fable-trading
+    source_commit: 38bce0067d
+    status: complete
+    question: 'Owner 2026-11-01 "有尝试过跟之前的all3策略一样去弄吗": the survivor events under the allin3 paper rule (all-in 3x, one trade at a time, below 100U refill 1000U).'
+    single_variable: 'Sizing rule only (allin3 path_run) on the survivor events; targets near edge, range 0.5 and allin3''s opposite 1.618 from the 10-28 close-reclaim B30 fills.'
+    result: 'Near edge from 2025: 2964U, DD 98.8 (peak 34033U on 2025-10-17, trough 396U on 2026-03-25), 241 of 254 taken; from 2020: 12224U (peak 140359U, trough 1633U). Range 0.5 from 2020: 31686U at 2025 end, 1336U at data end. Opposite 1.618: 804U with 1-2 refills. Monthly starts 2023-01..2026-08 (5 seeds): near edge 82 percent reach 10x (median 471 days), none 100x; opposite 1.618 43 percent reach 10x.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-survivor-paths-20261101-v4/manifest.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Each backstop or a deep 60m exit takes 35-90 percent of an all-in 3x account; the October-November 2025 cluster (MLN -18 percent, DEGO -22 percent, MMT -17 percent) erased the peak. Not a candidate.'
