@@ -1,0 +1,19 @@
+{
+  "experiment_id": "exp-live-strategy-audit-20261101-v1",
+  "question": "Owner 2026-11-01 '目前我们的live策略是否有过拟合的可能。或者有没有什么bug?实盘真的有这个效果？我看live-all3 从1000u打到42wu 其实也就是最近几个月的事情？能不能详细拆解一下live-all3': where the live- backtest profits come from and what may not survive live trading.",
+  "approval": "Owner 2026-11-01 '能不能详细拆解一下live-all3'",
+  "single_variable": "None (read-only audit of saved ledgers and fills; no fills, scores or parameters change).",
+  "allin3_booklet": "experiments/active/exp-pretouch-booklet-20261031-v1",
+  "allin3_key": "allin3|A_rest_causal",
+  "allin3_ledger": "allin3-A_rest_causal-ledger.csv.gz",
+  "wick_ledger": "experiments/active/exp-monday-limit-close-survivor-paths-20261101-v10/near_monday_edge-2020-ledger.csv.gz",
+  "wick_october": "experiments/active/exp-monday-limit-live-october-20261101-v1",
+  "events": "experiments/active/exp-monday-limit-reclaim-patterns3-20261024-v1/events_60m.csv.gz",
+  "okx": "experiments/active/exp-live-strategy-audit-20261101-v1/okx_swaps.json",
+  "alarm_breadth": 25,
+  "month_starts": ["2023-01-01", "2026-09-01"],
+  "start_ties": 5,
+  "null_control": "Not a new directional test. Path dependence is shown by replaying the same candidate rows from every month start with several tie seeds; the per-trade edge is read at a fixed notional next to the compounded path; crash-bar concentration is split by same-bar breadth, the alarm study's 25-coin line.",
+  "training_eligible": false,
+  "production_eligible": false
+}
