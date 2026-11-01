@@ -78,6 +78,10 @@ def all_features(frames,bounds,leader,side):
         touch=(f.low<lev) if side==1 else (f.high>lev)
         one['own_touch']=touch.astype(float).where(lev.notna()&f.close.notna())
         one['own_reclaim']=(touch&(side*(f.close-lev)>0)&(side*(f.open-lev)>0)).astype(float).where(lev.notna()&f.close.notna())
+        fresh=touch & (side*((f.low if side==1 else f.high).shift()-lev)>=0)
+        one['own_fresh_now']=fresh.astype(float).where(lev.notna()&f.close.notna())
+        one['own_fresh_before30']=one.own_fresh_now.shift().rolling(6,min_periods=6).max()
+        one['own_fresh_after30']=pd.concat([one.own_fresh_now.shift(-h) for h in range(1,7)],axis=1).max(axis=1).where(f.close.shift(-6).notna())
         one['vol_bucket']=np.floor(2*np.log2((tr.rolling(14).mean().shift()/prev).where(prev>0)))
         beta=r.rolling(288,min_periods=288).cov(lr).shift()/lr.rolling(288,min_periods=288).var().shift().replace(0,np.nan)
         one['beta']=beta
@@ -96,13 +100,14 @@ def all_features(frames,bounds,leader,side):
         a=pd.concat([data[s][field] for s in alt_names],axis=1)
         metrics['alt_'+field+'_mean']=a.mean(axis=1)
         metrics['alt_'+field+'_median']=a.median(axis=1)
-    for field in ['new_extreme','own_touch','own_reclaim']:
+    for field in ['new_extreme','own_touch','own_reclaim','own_fresh_before30','own_fresh_now','own_fresh_after30']:
         a=pd.concat([data[s][field] for s in alt_names],axis=1)
         metrics['alt_'+field+'_share']=a.mean(axis=1);metrics['alt_'+field+'_n']=a.notna().sum(axis=1)
     metrics['alt_n']=pd.concat([data[s].touch_return for s in alt_names],axis=1).notna().sum(axis=1)
     metrics['availability_mask']=sum(data[s].touch_return.notna().astype('int64')*(2**j) for j,s in enumerate(alt_names))
     metrics['alt_recovery_gt_half']=pd.concat([data[s].recovery.gt(.5).astype(float).where(data[s].recovery.notna()) for s in alt_names],axis=1).mean(axis=1)
     metrics['alt_touch_positive_share']=pd.concat([data[s].touch_return.gt(0).astype(float).where(data[s].touch_return.notna()) for s in alt_names],axis=1).mean(axis=1)
+    metrics['alt_same_direction_share']=pd.concat([(data[s].touch_return*data[leader].touch_return).gt(0).astype(float).where(data[s].touch_return.notna()&data[leader].touch_return.ne(0)) for s in alt_names],axis=1).mean(axis=1)
     metrics['alt_extreme_earlier_share']=pd.concat([data[s].extreme_offset_bars.lt(0).astype(float).where(data[s].extreme_offset_bars.notna()) for s in alt_names],axis=1).mean(axis=1)
     for h in HORIZONS:
         a=pd.concat([data[s][f'after_{h}'] for s in alt_names],axis=1)
