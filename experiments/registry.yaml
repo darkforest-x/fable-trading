@@ -15839,3 +15839,17 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'The payoff ratio rises 3-5x but the wick extreme is revisited before the target in about 83 percent of trades, and round-trip costs (~30bp) are half the median stop. Mean R is dominated by one-tick stops; read median R. In sample (same events as the live-wick rule); no new random control for a stop change; Binance bars; touches 2026-10-28..31 missing. No paper account changed.'
+  - experiment_id: exp-live-strategy-audit-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 71d02b0a73
+    status: complete
+    question: 'Owner 2026-11-01 "目前我们的live策略是否有过拟合的可能。或者有没有什么bug?实盘真的有这个效果？… 详细拆解一下live-all3": where the live- backtest profits come from and what may not survive live trading.'
+    single_variable: 'None (read-only audit of saved ledgers; no fills, scores or parameters change).'
+    result: 'live-allin3 (pre-touch, all-in 3x, 2023-01..2026-09-23): 422 trades, 21 refills (20204U); trading P&L before the last refill (2026-07-07) = -20204U, after it +427005U in 48 trades (September +415555U). Per trade at fixed notional: 2023 +207bp, 2024 -156, 2025 -58, 2026 +93, median 0. Top 10 trades 117 percent of P&L; ONUSDT +127506U is a data-end mark (end without it 300499U). Month-start replays (2023-01..2026-09, 5 ties): every start before 2026-08 ends near 300kU net (96 percent positive) - all ride the same window. After the last refill notional / touch-bar 5m quote volume median 3 percent, q90 80 percent, max 375 percent (ONUSDT 901kU vs 240kU); 69 percent of that profit on coins OKX does not list. Crash bars (>= 25 same-side touches) 17 trades +968bp, others -16bp. live-wick 6x3 (v10): per trade 2024 +156bp, 2025 +139, 2026 +159 (2023 -25, 21 trades), median +226..+336; top 10 = 45 percent of P&L; not crash-bar driven (others +123bp); OKX-listed coins same edge (+154bp) but 126 of 400 trades; notional / touch-bar volume median 0.17 percent, max 39 percent.'
+    artifacts: []
+    canonical_report: experiments/active/exp-live-strategy-audit-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'OKX listing fetched 2026-11-01 (prefix stripping is approximate). Breadth uses patterns3 events to 2026-09, so October live-wick trades have none. No paper account or service changed.'

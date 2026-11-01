@@ -1,3 +1,9 @@
+## 2026-11-01 · Audit of the live- backtests: live-allin3's 42.8万U is one 7-week window
+
+- Owner asked about overfitting, bugs and whether live-allin3's 1000 → 428kU is real. `exp-live-strategy-audit-20261101-v1` (`yoyo/evaluation/live_strategy_audit.py`, read-only):
+- live-allin3: before the last refill (2026-07-07) trading P&L = −20,204U = all 21 refills lost; after it +427kU in 48 trades (September +416kU). Fixed-notional edge 2024 −156bp, 2025 −58bp. Every month start before 2026-08 ends near 300kU (same window). Top 10 trades 117 percent; ONUSDT +127.5kU is a data-end mark. Notional up to 3.75x the touch bar's whole quote volume; 69 percent of the late profit on coins OKX does not list. Not reproducible as live P&L.
+- live-wick 6x3: edge per trade steady 2024–26 (+139..+159bp, median positive), not crash-bar driven, same edge on OKX-listed coins (fewer trades), notional small vs volume at current size. Remaining risks: slice picked from 190, stop / sizing / observation thresholds set after seeing 2025–26, market entry slippage on small alts. Learning: `an-all-in-compounding-path-is-decided-by-its-last-winning-streak.md`.
+
 ## 2026-11-01 · Wick-extreme stop on live-wick: payoff ratio 4x, edge gone (rejected)
 
 - Owner: "我们还需要盈亏比高一点的策略 比如止损只放在5min插针引线的低点的这种单子". `exp-monday-limit-close-wick-stop-20261101-v1` (stop grid base `wick`, NautilusTrader, both paths, 416 survivor events 2020 to 2026-10-27): stop one tick / 0.3 / 1 percent past the touch 5m bar's low (long) or high (short), plus one tick with a daily reclaim check. E20 parity 0 bp (398 saved rows + 51 October-run rows).
