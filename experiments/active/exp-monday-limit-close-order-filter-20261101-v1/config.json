@@ -1,0 +1,20 @@
+{
+  "experiment_id": "exp-monday-limit-close-order-filter-20261101-v1",
+  "question": "Owner 2026-11-01 '这套策略没用上排列过滤吗？能用吗？能提高胜率吗？能提高收益吗？': does the spike EMA order filter (>= 3) improve the live-wick rule?",
+  "approval": "Owner 2026-11-01 '能用吗？能提高胜率吗？能提高收益吗？'",
+  "single_variable": "Add the 15m EMA order filter (l2_order_score >= min_order, known before the touch) to the live-wick E20 near-edge rule; fills, stop, sizing and costs unchanged",
+  "primary": "min_order 3 (the spike value) against 0 (no filter); 1, 2, 4 are context",
+  "fills": "experiments/active/exp-monday-limit-close-stop-grid-20261101-v1",
+  "paths": "experiments/active/exp-monday-limit-close-survivor-paths-20261101-v5",
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "variant": "E20",
+  "target": "near_monday_edge",
+  "min_order": [0, 1, 2, 3, 4],
+  "sizings": [[6, 3], [3, 3]],
+  "seed": 20261103,
+  "ties": 10,
+  "slippage_bp": {"market_entry": 10, "non_target_exit": 10},
+  "in_sample": "The order filter value comes from spike-HW (chosen on 2020-2026 limit entries); here it is looked at on the same history",
+  "training_eligible": false,
+  "production_eligible": false
+}
