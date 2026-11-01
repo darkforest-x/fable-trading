@@ -1,3 +1,9 @@
+## 2026-11-01 · Size boosts on live-wick (EMA order, entry score) do not beat random boosting
+
+- Owner asked to test a larger size when the EMA order score is high, then whether high entry scores (">0.76 all won") justify dynamic sizing. `exp-monday-limit-close-order-boost-20261101-v1` and `exp-monday-limit-close-score-boost-20261101-v1`: weighted frac on the saved E20 survivor fills, every trade kept, control = the same count of random trades boosted (300 draws).
+- Order >= 3 x1.5 at 6x3: 2025 onward 6.26x DD28 vs 5.34x DD19, random median 5.82x (beats 78 percent), 2020-24 slightly worse. Score: Spearman with net / win about 0.06 (p 0.10-0.12), bands not monotonic (0.55-0.60 worst, 0.70-0.76 three stop-outs). Score >= 0.76: 12 / 12 wins, +663bp, all in 2025-26 (none before), so the cut is post hoc; pre-set cut 0.6 x1.5 beats only 80 percent of random boosts and is worse in 2020-24.
+- No sizing change to live-wick accounts. Learning: `a-perfect-top-score-band-picked-by-eye-is-not-a-sizing-rule.md`. A forward variant boosting score >= 0.76 is an owner decision.
+
 ## 2026-11-01 · Backtest replay: sort by entry score, score on every row and in the summary
 
 - Owner (screenshot of live-wick3x3 replay): add score sorting next to 开仓时间/净收益, show the trade's score on the right summary and on every list row. Committed: `/api/strategy-backtest?sort=score` (saved entry_rules score, missing last) and a 评分 sort button in `strategy-backtest.js`; test added.

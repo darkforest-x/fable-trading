@@ -1,0 +1,344 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-close-order-boost-20261101-v1",
+    "question": "Owner 2026-11-01 '在排列分高时开大一点的仓位 … 测试一下吧': does a larger margin when the 15m EMA order score is high improve the live-wick account beyond a random boost of the same number of trades?",
+    "approval": "Owner 2026-11-01 '测试一下吧'",
+    "single_variable": "Sizing only: margin x boost when l2_order_score >= k (known before the touch); every trade kept; fills, stop, costs unchanged",
+    "primary": "k 3, boost 1.5 and 2.0, 6 slots x 3; k 2 and 3 slots x 3 are context",
+    "fills": "experiments/active/exp-monday-limit-close-stop-grid-20261101-v1",
+    "paths": "experiments/active/exp-monday-limit-close-survivor-paths-20261101-v5",
+    "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+    "variant": "E20",
+    "target": "near_monday_edge",
+    "boosts": [
+      [
+        3,
+        1.5
+      ],
+      [
+        3,
+        2.0
+      ],
+      [
+        2,
+        1.5
+      ],
+      [
+        2,
+        2.0
+      ]
+    ],
+    "sizings": [
+      [
+        6,
+        3
+      ],
+      [
+        3,
+        3
+      ]
+    ],
+    "seed": 20261103,
+    "ties": 10,
+    "control_seed": 20261102,
+    "control_draws": 300,
+    "slippage_bp": {
+      "market_entry": 10,
+      "non_target_exit": 10
+    },
+    "in_sample": "The order score and k come from spike-HW on the same history; 45 events have order >= 3",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "results": {
+    "checks": {
+      "events": 398,
+      "missing_order": 0
+    },
+    "variants": {
+      "k3|x1.5|6x3": {
+        "y2020_2024": {
+          "trades": 144,
+          "boosted": 17,
+          "base": 2.5765303880981705,
+          "base_dd": 11.822776118359524,
+          "boosted_final": 2.5024884295926846,
+          "boosted_dd": 13.629295233178873,
+          "control_median": 2.5125752066321057,
+          "control_p95": 2.752557080138664,
+          "share_of_controls_below": 46.33333333333333
+        },
+        "from2025": {
+          "trades": 254,
+          "boosted": 28,
+          "base": 5.341572434854869,
+          "base_dd": 19.268293231659182,
+          "boosted_final": 6.256739357095398,
+          "boosted_dd": 28.130674983799054,
+          "control_median": 5.816695409076831,
+          "control_p95": 6.722772826859825,
+          "share_of_controls_below": 78.33333333333333
+        },
+        "all": {
+          "trades": 398,
+          "boosted": 45,
+          "base": 13.660244838631396,
+          "base_dd": 19.268293231659182,
+          "boosted_final": 15.640946615131414,
+          "boosted_dd": 28.130674983799064,
+          "control_median": 14.802893651602318,
+          "control_p95": 17.427834616561796,
+          "share_of_controls_below": 70.66666666666667
+        }
+      },
+      "k3|x1.5|3x3": {
+        "y2020_2024": {
+          "trades": 144,
+          "boosted": 17,
+          "base": 2.975744898773501,
+          "base_dd": 23.18041350789538,
+          "boosted_final": 3.777079239549988,
+          "boosted_dd": 23.18041350789537,
+          "control_median": 3.245768113198751,
+          "control_p95": 4.054219318778629,
+          "share_of_controls_below": 88.0
+        },
+        "from2025": {
+          "trades": 254,
+          "boosted": 28,
+          "base": 19.960979915222943,
+          "base_dd": 36.5664101073733,
+          "boosted_final": 27.759452540840346,
+          "boosted_dd": 51.69446431480278,
+          "control_median": 23.85578795813541,
+          "control_p95": 32.11350927839337,
+          "share_of_controls_below": 76.66666666666667
+        },
+        "all": {
+          "trades": 398,
+          "boosted": 45,
+          "base": 60.78562951469568,
+          "base_dd": 36.566410107373315,
+          "boosted_final": 112.70191554178399,
+          "boosted_dd": 51.69446431480278,
+          "control_median": 74.14407163002899,
+          "control_p95": 111.35387951973861,
+          "share_of_controls_below": 95.66666666666667
+        }
+      },
+      "k3|x2.0|6x3": {
+        "y2020_2024": {
+          "trades": 144,
+          "boosted": 17,
+          "base": 2.5765303880981705,
+          "base_dd": 11.822776118359524,
+          "boosted_final": 2.5648226283073035,
+          "boosted_dd": 19.546000929655214,
+          "control_median": 2.5802401664414827,
+          "control_p95": 3.057293893215951,
+          "share_of_controls_below": 48.0
+        },
+        "from2025": {
+          "trades": 254,
+          "boosted": 28,
+          "base": 5.341572434854869,
+          "base_dd": 19.268293231659182,
+          "boosted_final": 7.186857169554218,
+          "boosted_dd": 36.477934904679024,
+          "control_median": 6.282167585368594,
+          "control_p95": 8.375358629213016,
+          "share_of_controls_below": 78.0
+        },
+        "all": {
+          "trades": 398,
+          "boosted": 45,
+          "base": 13.660244838631396,
+          "base_dd": 19.268293231659182,
+          "boosted_final": 18.176019750217442,
+          "boosted_dd": 36.47793490467901,
+          "control_median": 16.296005119139274,
+          "control_p95": 22.80079261900606,
+          "share_of_controls_below": 71.0
+        }
+      },
+      "k3|x2.0|3x3": {
+        "y2020_2024": {
+          "trades": 144,
+          "boosted": 17,
+          "base": 2.975744898773501,
+          "base_dd": 23.18041350789538,
+          "boosted_final": 4.797531767699687,
+          "boosted_dd": 25.82776275290145,
+          "control_median": 3.3625975746998336,
+          "control_p95": 4.668116289571782,
+          "share_of_controls_below": 96.0
+        },
+        "from2025": {
+          "trades": 254,
+          "boosted": 28,
+          "base": 19.960979915222943,
+          "base_dd": 36.5664101073733,
+          "boosted_final": 31.325679812083497,
+          "boosted_dd": 64.76490109812325,
+          "control_median": 25.432847540456585,
+          "control_p95": 45.85366402277795,
+          "share_of_controls_below": 72.33333333333334
+        },
+        "all": {
+          "trades": 398,
+          "boosted": 45,
+          "base": 60.78562951469568,
+          "base_dd": 36.566410107373315,
+          "boosted_final": 145.8244388546586,
+          "boosted_dd": 64.76490109812325,
+          "control_median": 80.14852608372027,
+          "control_p95": 176.98109605537033,
+          "share_of_controls_below": 91.0
+        }
+      },
+      "k2|x1.5|6x3": {
+        "y2020_2024": {
+          "trades": 144,
+          "boosted": 32,
+          "base": 2.5765303880981705,
+          "base_dd": 11.822776118359524,
+          "boosted_final": 2.57170249275139,
+          "boosted_dd": 13.629295233178873,
+          "control_median": 2.5479276006339506,
+          "control_p95": 2.8073819389657055,
+          "share_of_controls_below": 53.333333333333336
+        },
+        "from2025": {
+          "trades": 254,
+          "boosted": 57,
+          "base": 5.341572434854869,
+          "base_dd": 19.268293231659182,
+          "boosted_final": 7.00379430340252,
+          "boosted_dd": 28.130674983799054,
+          "control_median": 6.26426315001336,
+          "control_p95": 7.617674012111138,
+          "share_of_controls_below": 81.66666666666667
+        },
+        "all": {
+          "trades": 398,
+          "boosted": 89,
+          "base": 13.660244838631396,
+          "base_dd": 19.268293231659182,
+          "boosted_final": 17.68264635015935,
+          "boosted_dd": 28.130674983799043,
+          "control_median": 16.20302673559501,
+          "control_p95": 20.6318364132674,
+          "share_of_controls_below": 71.33333333333334
+        }
+      },
+      "k2|x1.5|3x3": {
+        "y2020_2024": {
+          "trades": 144,
+          "boosted": 32,
+          "base": 2.975744898773501,
+          "base_dd": 23.18041350789538,
+          "boosted_final": 4.072700204549629,
+          "boosted_dd": 23.097383930997207,
+          "control_median": 3.4582400152748294,
+          "control_p95": 4.480694950168545,
+          "share_of_controls_below": 85.33333333333334
+        },
+        "from2025": {
+          "trades": 254,
+          "boosted": 57,
+          "base": 19.960979915222943,
+          "base_dd": 36.5664101073733,
+          "boosted_final": 32.543760472641814,
+          "boosted_dd": 51.69446431480278,
+          "control_median": 26.73916540726905,
+          "control_p95": 41.56619562415432,
+          "share_of_controls_below": 75.33333333333333
+        },
+        "all": {
+          "trades": 398,
+          "boosted": 89,
+          "base": 60.78562951469568,
+          "base_dd": 36.566410107373315,
+          "boosted_final": 136.27668938198036,
+          "boosted_dd": 51.69446431480278,
+          "control_median": 89.53110672607488,
+          "control_p95": 159.96251657535745,
+          "share_of_controls_below": 87.66666666666667
+        }
+      },
+      "k2|x2.0|6x3": {
+        "y2020_2024": {
+          "trades": 144,
+          "boosted": 32,
+          "base": 2.5765303880981705,
+          "base_dd": 11.822776118359524,
+          "boosted_final": 2.746856189951206,
+          "boosted_dd": 19.54106985811672,
+          "control_median": 2.701162079063055,
+          "control_p95": 3.2696245196764333,
+          "share_of_controls_below": 54.0
+        },
+        "from2025": {
+          "trades": 254,
+          "boosted": 57,
+          "base": 5.341572434854869,
+          "base_dd": 19.268293231659182,
+          "boosted_final": 8.892765285005142,
+          "boosted_dd": 36.47793490467901,
+          "control_median": 7.186745981850315,
+          "control_p95": 10.729687165207446,
+          "share_of_controls_below": 79.66666666666666
+        },
+        "all": {
+          "trades": 398,
+          "boosted": 89,
+          "base": 13.660244838631396,
+          "base_dd": 19.268293231659182,
+          "boosted_final": 24.70475432628593,
+          "boosted_dd": 36.47793490467901,
+          "control_median": 19.678213112796534,
+          "control_p95": 31.823200707072786,
+          "share_of_controls_below": 78.0
+        }
+      },
+      "k2|x2.0|3x3": {
+        "y2020_2024": {
+          "trades": 144,
+          "boosted": 32,
+          "base": 2.975744898773501,
+          "base_dd": 23.18041350789538,
+          "boosted_final": 5.556140927434423,
+          "boosted_dd": 30.217810172986393,
+          "control_median": 3.7429660334507813,
+          "control_p95": 5.682932285166129,
+          "share_of_controls_below": 93.33333333333333
+        },
+        "from2025": {
+          "trades": 254,
+          "boosted": 57,
+          "base": 19.960979915222943,
+          "base_dd": 36.5664101073733,
+          "boosted_final": 40.40186349387458,
+          "boosted_dd": 64.76490109812325,
+          "control_median": 27.822722414936933,
+          "control_p95": 73.16731197640009,
+          "share_of_controls_below": 71.66666666666667
+        },
+        "all": {
+          "trades": 398,
+          "boosted": 89,
+          "base": 60.78562951469568,
+          "base_dd": 36.566410107373315,
+          "boosted_final": 214.16742422084994,
+          "boosted_dd": 64.76490109812325,
+          "control_median": 103.32734840337895,
+          "control_p95": 319.41337194167943,
+          "share_of_controls_below": 86.0
+        }
+      }
+    }
+  },
+  "source_commit": "d8a7e72f8641bf9df8c05316b8a1a82aa1f3ae72",
+  "training_eligible": false,
+  "production_eligible": false
+}

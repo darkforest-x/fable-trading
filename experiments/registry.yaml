@@ -15685,3 +15685,31 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'The filter raises win rate and per-trade mean but keeps about 11 percent of trades, so every account multiple falls and drawdown rises. Order as a size booster is untested (45 order >= 3 events in 6.7 years).'
+  - experiment_id: exp-monday-limit-close-order-boost-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: d8a7e72f86
+    status: complete
+    question: 'Owner 2026-11-01 "在排列分高时开大一点的仓位 … 测试一下吧": does a larger margin when the 15m EMA order score is >= k beat a random boost of the same number of trades?'
+    single_variable: 'Sizing only (margin x boost for order >= k), every trade kept; weighted frac; control = same count of random trades boosted (300 draws).'
+    result: 'Primary k3 at 6x3: x1.5 2025 onward 6.26x DD28 vs base 5.34x DD19, random median 5.82x, beats 78 percent; 2020-24 2.50x vs 2.58x (beats 46). x2.0: 7.19x DD36, beats 78. 3x3 and k2 variants beat 72-96 percent with DD 52-65.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-order-boost-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'The extra return is mostly extra exposure; the order score does not select better trades significantly. Not adopted.'
+  - experiment_id: exp-monday-limit-close-score-boost-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: c4e5586b2e
+    status: complete
+    question: 'Owner 2026-11-01 "我看评分大于0.76的单子全赢了？能否动态针对高评分加大仓位？详细分析一下评分和胜率的关系？"'
+    single_variable: 'Score bands and rank correlation (2000 within-period shuffles); sizing margin x boost for score >= cut (primary 0.6; 0.7 context; 0.76 post hoc), random-boost control.'
+    result: 'Bands 2025 onward (n / win / mean): 0.50-0.55 98 / 67 / +189bp; 0.55-0.60 64 / 52 / -9; 0.60-0.65 32 / 69 / +226; 0.65-0.70 27 / 67 / +102; 0.70-0.76 21 / 76 / +49; >= 0.76 12 / 100 / +663 (all 12 in 2025-26, none in 2020-24). Spearman score-net 0.06 (p 0.12), score-win 0.07 (p 0.11) from 2025; all years 0.06 (p 0.10-0.11). Cut 0.6 x1.5 at 6x3: 2025 onward 7.79x DD30 vs base 5.34x DD19, random median 6.88x, beats 80; 2020-24 worse than base. Cut 0.76 x1.5: 6.46x DD19, beats 100 percent, but post hoc and untestable before 2025.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-score-boost-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Weak, non-monotonic relation; no pre-specified score boost beats random boosting. The 0.76 band is a forward-observation candidate only (owner decision).'
