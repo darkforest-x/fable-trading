@@ -15500,3 +15500,17 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Post-hoc after reading results: random controls are numbered by time, and the 269 of 1131 random rows that enter before the real touch lose -280bp because they ride the real spike; after-touch random rows -11bp. Against after-touch random only (near edge): 2025-26 paired +139 [44, 229], 2025 +102 [-34, 236], 2026 +173 [47, 292]; range 0.5 2025-26 +115 [2, 223]. The slice is still one of 190 and the recovery edge a 2020-24 tercile; forward paper is the next gate (owner decision). Per-trade fills under ohlc/ and olhc/ are not committed.'
+  - experiment_id: exp-monday-limit-close-survivor-paths-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0609011a0f
+    status: complete
+    question: 'Owner 2026-11-01 "先做一次详细的回测啊 用1000u": one continuous 1000U account of the touch-close survivor slice, trade by trade.'
+    single_variable: 'None new: the saved NautilusTrader signal rows of exp-monday-limit-close-slice-control-20261101-v1 (398 events, near edge and range 0.5) replayed by monday_limit_return_opt.frac (N20 3x) with one tie seed (20261103) from 2020-01-01 and from 2025-01-01; ledgers add prices, exit reasons and touch-bar facts.'
+    result: 'Near edge from 2020: 1000 -> 2628U, 398 trades all funded, win 67.3 percent, max DD 6.2 percent, PF 1.83, equal to the control run median of 10 tie seeds (2.63x); by year 2020 +14, 2021 +184, 2022 +43, 2023 -11, 2024 +319, 2025 +411, 2026 +667U. Exits: 188 target +623bp, 166 not reclaimed in 60m -230bp, 36 breakeven +150bp, 8 backstop -2213bp (-568U). From 2025: 1695U, 254 trades, DD 6.2. Range 0.5: 2798U DD 9.5 from 2020, 1650U from 2025. Max 12 open at once (3 from 2025), none skipped.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-survivor-paths-20261101-v1/manifest.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Booklet built outside the public repo: ~/Documents/Codex/2026-11-01/close-survivor-booklet (work/build.py, outputs/index.html, self-contained). Realized equity only; funding not modelled. The slice was chosen on 2020-2024; the 2025 start excludes those years.'

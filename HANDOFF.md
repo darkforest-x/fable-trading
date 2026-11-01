@@ -1,3 +1,9 @@
+## 2026-11-01 · Touch-close survivor slice, 1000U: 2628U from 2020, 1695U from 2025
+
+- Owner: "先做一次详细的回测啊 用1000u". `exp-monday-limit-close-survivor-paths-20261101-v1` (builder 0609011a0f) replays the saved signal fills of the random-control run (no new fills) with frac N20 3x, one tie seed, from 2020-01-01 and 2025-01-01; ledgers per trade (prices, exit reason, score, recovery, margin, equity).
+- Near edge from 2020: 2628U, 398 trades, win 67 percent, DD 6.2, PF 1.83 (equals the 10-seed median 2.63x); 2020-23 only 7-33 trades a year (+23 percent in four years), 2024 +319U, 2025 +411U, 2026 +667U. Target exits +3135U, 60m not reclaimed -1069U, 8 backstops -568U (each 1-4.5 percent of equity). From 2025: 1695U. Range 0.5: 2798U DD 9.5 / 1650U.
+- Booklet outside the public repo: `~/Documents/Codex/2026-11-01/close-survivor-booklet/outputs/index.html` (rebuild `python3 work/build.py outputs`; four paths, full trade list with year filter, random-control tables). Forward paper account still the owner's decision.
+
 ## 2026-11-01 · Touch-close survivor slice beats matched random-time entries
 
 - Owner: "补跑随机对照". `exp-monday-limit-close-slice-control-20261101-v1` (builder dbd54eadb4): the 398 survivor events (score >= 0.5, closed still beyond the 1.618, recovery < 0.64), each with 3 random 5m closes of the same symbol / week / side / vol bucket (close-reclaim pair_id), entry scaled to the same distance beyond a virtual level, same exits. NautilusTrader, 263 symbols, both paths, 0 errors, 0 dropped; re-run signal rows equal the 10-28 B30 fills exactly (796 rows, max 0bp).
