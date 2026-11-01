@@ -226,7 +226,36 @@ def run(config, workers):
     print(json.dumps(res['oos'], ensure_ascii=False, default=str)[:600])
 
 
+def sizing(config):
+    """Post hoc, after the walk-forward choices overshot the cap out of sample: the survivor rule's filters held fixed,
+    every sizing on 2020-2024 (one seed) and on 2025 onward (10 seeds, median final, worst drawdown), and the size
+    picked on 2020-2024 alone with drawdown < cap and < cap / 2."""
+    from yoyo.evaluation.monday_limit_return_opt import frac
+    exp = config.resolve().parent
+    cfg = json.loads(config.read_text())
+    cr.committed('yoyo/evaluation/monday_limit_close_optimize.py')
+    x = select(pd.read_parquet(exp/'rows.parquet'), cfg['survivor'])
+    tr, te = window(x, '2020-01-01', '2025-01-01'), window(x, '2025-01-01', '2100-01-01')
+    rows = []
+    for n, lev in itertools.product(cfg['slots'], cfg['leverage']):
+        a = frac(tr, n, lev, cfg['seed'])
+        b = [frac(te, n, lev, cfg['seed']+k) for k in range(cfg['ties'])]
+        rows.append(dict(n=n, lev=lev, notional_pct=100*lev/n, train_multiple=a['final_multiple'], train_dd=a['max_drawdown_pct'],
+                         test_multiple_median=float(np.median([r['final_multiple'] for r in b])),
+                         test_dd_max=float(np.max([r['max_drawdown_pct'] for r in b])),
+                         test_liquidations_median=float(np.median([r['liquidations'] for r in b]))))
+    d = pd.DataFrame(rows).sort_values(['notional_pct', 'n'])
+    d.to_csv(exp/'sizing_survivor.csv', index=False)
+    picks = {}
+    for name, cap in (('cap', cfg['dd_cap']), ('half_cap', cfg['dd_cap']/2)):
+        picks[name] = d[d.train_dd < cap].sort_values('train_multiple', ascending=False).iloc[0].to_dict()
+    (exp/'sizing_survivor.json').write_text(json.dumps(dict(picks=picks, source_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()),
+                                                       indent=1, default=lambda v: v.item() if hasattr(v, 'item') else str(v)))
+    print(json.dumps(picks, default=str))
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(); ap.add_argument('--config', type=Path, required=True); ap.add_argument('--workers', type=int, default=6)
+    ap.add_argument('--sizing', action='store_true')
     a = ap.parse_args()
-    run(a.config, a.workers)
+    sizing(a.config) if a.sizing else run(a.config, a.workers)
