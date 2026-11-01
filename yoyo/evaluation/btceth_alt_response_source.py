@@ -30,7 +30,7 @@ def prepare():
         db.execute('BEGIN')
         for spec in specs:
             sym=spec['symbol'];part=folder/f'{sym}_USDT_SWAP_5m.part.csv'
-            if part.exists() or list(folder.glob(f'okx_{sym}_USDT_SWAP_5m_*.csv')):continue
+            if list(folder.glob(f'okx_{sym}_USDT_SWAP_5m_*.csv')):continue
             raw=[json.loads(r[0]) for r in db.execute('SELECT raw FROM candles WHERE key=? AND t>=? AND t<? ORDER BY t',('https://www.okx.com|'+spec['instId']+'|5m',int(start.timestamp()*1000),int(end.timestamp()*1000)))]
             raw=[r for r in raw if r[8]=='1']
             tail=pd.DataFrame([[int(r[0])]+[float(x) for x in r[1:6]] for r in raw],columns=['ts']+OHLCV).set_index('ts')
@@ -38,13 +38,19 @@ def prepare():
             sources=[dict(path=str(CACHE),role='read_only_snapshot',rows=len(tail))]
             if sym in ['BTC','ETH']:
                 old=ROOT/f'experiments/active/exp-range-v231-fiveyear-20261021-v1/{sym}/candles.csv.gz'
-                f=pd.read_csv(old,usecols=['ts']+OHLCV,float_precision='round_trip').set_index('ts')
+                f=pd.read_csv(old,usecols=['ts']+OHLCV[:4],float_precision='round_trip').set_index('ts')
                 f=f[(f.index>=start.timestamp()*1000)&(f.index<end.timestamp()*1000)]
                 common=f.index.intersection(tail.index)
                 assert len(common)
-                np.testing.assert_allclose(f.loc[common,OHLCV],tail.loc[common,OHLCV],rtol=1e-11,atol=1e-10)
-                tail=pd.concat([f[f.index<tail.index.min()],tail]).sort_index()
-                sources.append(dict(path=str(old),bytes=old.stat().st_size,mtime_ns=old.stat().st_mtime_ns,overlap_rows=len(common)))
+                np.testing.assert_allclose(f.loc[common,OHLCV[:4]],tail.loc[common,OHLCV[:4]],rtol=1e-11,atol=1e-10)
+                sources.append(dict(path=str(old),bytes=old.stat().st_size,mtime_ns=old.stat().st_mtime_ns,overlap_rows=len(common),role='OHLC crosscheck only; volume absent, cannot supply OHLCV prefix'))
+            if part.exists():
+                prior=pd.read_csv(part,float_precision='round_trip').set_index('ts')[OHLCV]
+                prior=prior[(prior.index>=start.timestamp()*1000)&(prior.index<end.timestamp()*1000)]
+                common=prior.index.intersection(tail.index)
+                np.testing.assert_allclose(prior.loc[common],tail.loc[common],rtol=1e-11,atol=1e-10)
+                tail=pd.concat([prior[~prior.index.isin(tail.index)],tail]).sort_index()
+                sources.append(dict(path=str(part),role='reuse already fetched resumable pages',rows=len(prior)))
             assert (np.diff(tail.index)==300000).all()
             tail=tail.reset_index();tail['open_time']=pd.to_datetime(tail.ts,unit='ms',utc=True).astype(str)
             tail.to_csv(part,index=False)

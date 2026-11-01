@@ -10,7 +10,7 @@
   "outcomes": "5/15/30/60min signed close changes after touchbar CLOSE;future30min extreme timing is descriptive only. Prices are not trade returns.",
   "controls": "Sameleader/week/side,prior30min signed return0.5percentagepoint buckets andpriorTR/close log2 half-octave buckets;non-event bars outside65min of all BTC/ETH events;mean of all eligiblecontrols. Match only pre-touch quantities;exclude shock-contaminated controls retrospectively,not a tradable control strategy.",
   "aggregation": "Equal weight availablealts within event,then equalweight events;report missingcoins/events. BTC/ETH simultaneous triggers are correlated;uncertainty resamples UTCeventdays. Firstperleader/week/side is a sensitivity. No inference from thousands of coin-bars as independent events.",
-  "source": "Existing repaired BTC/ETH5m + sharedconfirmedOKX5m cache. Missingolderaltprefix fetched with unchanged src.data.fetch_okx,preseeded resumableparts,read-onlypublicmarketAPI. No productioncachewrites or hashes.",
+  "source": "SharedconfirmedOKX5m OHLCV cache. RepairedBTC/ETH5m hasOHLC only,used forpricecrosscheck;missingvolume requires fetching olderOHLCV forleaders too. Missingprefix fetched with unchanged src.data.fetch_okx,preseeded resumableparts,read-onlypublicmarketAPI. No productioncachewrites or hashes.",
   "random_seed": 20261101,
   "training_eligible": false,
   "production_eligible": false
