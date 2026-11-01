@@ -15,6 +15,8 @@ weeks with the unchanged code:
   accounts 1000U on 2026-10-01 for live-wick6x3 / 3x3 / 6x3hi / 3x3far with their paper rules (frac; 1.5 x margin from
            score 0.76; close >= 1.5 percent past the level).
 Entries are touch closes from 2026-10-01 to the data end; exits may run to the data end (open trades are reported).
+Universe: the 536-symbol snapshot of the backtest (crypto_5m part); the 95 later listings are left out, as in the
+backtest, and BNB / DOGE / SOL (1m jobs, not extended) are missing from the October cluster24 counts.
 Validation before October is read: the recomputed stored / causal scores against the saved score file from
 parity_from, and the same E20 fills for the earlier survivors against the saved stop grid (fill_parity).
 """
@@ -279,6 +281,10 @@ def run(config, workers):
         dump(exp/'jobs.json', {n['symbol']: n['job'] for n in notes if n.get('job')})
         dump(exp/'events_notes.json', [{k: v for k, v in n.items() if k != 'job'} for n in notes])
     s = pd.read_csv(path, parse_dates=['t'])
+    # The backtest universe (monday_limit_reclaim_patterns3 SNAP): later listings are neither traded nor counted in cluster24.
+    snap = set(json.loads((ROOT/cfg['universe']).read_text()))
+    later = s[~s.symbol.isin(snap)]
+    s = s[s.symbol.isin(snap)].reset_index(drop=True)
     spec = json.loads((ROOT/cfg['score_model']).read_text())
     s = score(s, spec)
     # Parity: events that already have a stored / causal score.
@@ -330,7 +336,7 @@ def run(config, workers):
                               max_abs_bp=float((both_.net_notional_bp-both_.net_notional_bp_ref).abs().max()) if len(both_) else None,
                               only_new=sorted(j.index[j.net_notional_bp_ref.isna()])[:20],
                               only_saved=sorted(j.index[j.net_notional_bp.isna()])[:20])
-    res = dict(parity=parity, fill_parity=fill_parity, parity_survivors=int(len(pre)), window_events=int(len(win)), survivors=int(len(surv)),
+    res = dict(parity=parity, fill_parity=fill_parity, later_listings=dict(symbols=int(later.symbol.nunique()), events=int(len(later))), parity_survivors=int(len(pre)), window_events=int(len(win)), survivors=int(len(surv)),
                new_data_last=str(s.t.max()), events_total=int(len(s)))
     dump(exp/'summary_events.json', clean(res))
     print(json.dumps(res, default=str))
