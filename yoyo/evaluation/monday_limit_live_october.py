@@ -319,7 +319,7 @@ def run(config, workers):
             if n_.exists():
                 new_.append(pd.read_csv(n_))
             if r_.exists():
-                r = pd.read_csv(r_); ref.append(r[r.variant == 'E20'])
+                r = pd.read_csv(r_); ref.append(r[(r.variant == 'E20') & r.trade_id.str.contains(':near_monday_edge:')])
         n_, r_ = pd.concat(new_), pd.concat(ref)
         n_ = n_[n_.trade_id.str.split(':').str[:3].str.join(':').isin(set(pre.event))].set_index('trade_id')
         r_ = r_[r_.trade_id.str.split(':').str[:3].str.join(':').isin(set(pre.event))].set_index('trade_id')
