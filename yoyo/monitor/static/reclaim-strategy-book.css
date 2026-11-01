@@ -154,6 +154,32 @@ body.rs-book-open.rs-book-webkit :is(#monday-reclaim-paper,#spike-alarm-dock){fi
 .rs-book .rs-calendar-day.is-uncovered{opacity:.42;cursor:default;border-color:transparent;}
 .rs-calendar-detail{min-height:35px;margin:10px 0 6px;font-size:10px;line-height:1.6;overflow-wrap:anywhere;color:var(--book-muted);}
 .rs-calendar footer{padding-top:8px;border-top:1px solid var(--book-line);font-size:9px;color:var(--book-muted);line-height:1.7;}
+/* Stitch 35ddb15e36454b709d1ade43eedae412: date drill-down in the same card. */
+.rs-calendar.is-day-view:popover-open{display:flex;flex-direction:column;max-height:min(620px,calc(100dvh - 24px));overflow:hidden;}
+.rs-book .rs-calendar-day[aria-pressed=true]{box-shadow:inset 0 0 0 1.5px var(--book-accent);}
+.rs-book .rs-calendar [data-calendar-back]{font-size:26px;padding:0;min-width:36px;}
+.rs-day-title{flex:1;min-width:0;}
+.rs-calendar.is-day-view .rs-calendar-header,.rs-calendar.is-day-view .rs-calendar-summary,.rs-calendar.is-day-view footer{flex:none;}
+.rs-calendar-summary strong small{display:inline;font-size:10px;font-weight:400;}
+.rs-book .rs-day-hint{margin:0 0 9px;color:var(--book-muted);font-size:10px;}
+.rs-day-scroll{flex:0 1 auto;min-height:0;max-height:350px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:2px;}
+.rs-book .rs-day-status{font-size:12px;color:var(--book-muted);margin:8px 0;}
+.rs-day-status:empty{display:none;}
+.rs-day-rows{display:flex;flex-direction:column;gap:8px;}
+.rs-book .rs-day-trade{display:flex;flex-direction:column;gap:7px;flex:none;width:100%;min-width:0;padding:11px;text-align:left;border:1px solid var(--book-line);border-radius:12px;background:var(--book-soft);}
+.rs-book .rs-day-trade:hover{border-color:var(--book-accent);background:var(--control-selected-bg,#0071e312);color:var(--book-ink);}
+.rs-day-trade-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.rs-day-trade-head>span{display:flex;gap:7px;align-items:center;flex-wrap:wrap;min-width:0;}
+.rs-day-trade-head b{font-size:13px;overflow-wrap:anywhere;}
+.rs-day-trade-head em{font-style:normal;font-size:10px;white-space:nowrap;}
+.rs-day-trade-head strong{font-size:13px;text-align:right;overflow-wrap:anywhere;}
+.rs-day-trade-head small{font-size:9px;font-weight:400;}
+.rs-day-trade-times{display:flex;flex-direction:column;gap:2px;color:var(--book-muted);font-size:10px;}
+.rs-day-trade-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:10px;color:var(--book-muted);}
+.rs-day-trade-foot>span:last-child{color:var(--book-accent);white-space:nowrap;}
+.rs-day-count{display:block;margin:10px 0;font-size:10px;color:var(--book-muted);}
+.rs-book .rs-day-more{width:100%;margin-top:8px;font-size:11px;color:var(--book-accent);}
+.rs-calendar.is-day-view footer{margin-top:8px;}
 html[data-theme=dark] .rs-calendar{background:#15212bf5;}
 html[data-theme=dark] .rs-calendar :is(.rp-positive,.rs-calendar-day.is-gain){color:#55d5b1;}
 html[data-theme=dark] .rs-calendar :is(.rp-negative,.rs-calendar-day.is-loss){color:#ff8ca1;}

@@ -11,6 +11,7 @@ import csv
 import gzip
 import json
 import math
+from datetime import datetime, timezone
 from pathlib import Path
 from threading import BoundedSemaphore
 from functools import lru_cache
@@ -95,6 +96,26 @@ def page(track, *, sort='time', direction='desc', symbol='', offset=0, limit=50,
     return dict(schema=1, track=track, meta=value['meta'], ranking=value['ranking'], focus=focus,
                 rows=rows[offset:offset + limit], total=len(rows), offset=offset,
                 has_more=offset + limit < len(rows), sort=sort, direction=direction, symbol=symbol)
+
+
+def day_bounds(day):
+    """Use the booklet's UTC settlement date, not entry date or local timezone."""
+    date = datetime.strptime(day, '%Y-%m-%d').replace(tzinfo=timezone.utc)
+    if date.strftime('%Y-%m-%d') != day:
+        raise ValueError('invalid_settlement_date')
+    start = int(date.timestamp() * 1000)
+    return start, start + 86400000
+
+
+def day_page(track, day, *, offset=0, limit=50, directory=LEDGERS):
+    start, end = day_bounds(day)
+    # ledger() already excludes deposits and unfunded/shadow records, and its
+    # IDs are the same ones accepted by /candles. Never renumber a filtered day.
+    rows = sorted((r for r in ledger(track, directory)['rows'] if start <= r['exit_ms'] < end),
+                  key=lambda r: (r['exit_ms'], r['id']))
+    return dict(schema=1, track=track, date=day, timezone='UTC', source='Binance',
+                rows=rows[offset:offset + limit], total=len(rows), offset=offset,
+                has_more=offset + limit < len(rows), pnl=sum(r['pnl'] for r in rows))
 
 
 def aggregate(frame, step, native):
@@ -210,6 +231,19 @@ def candles(track, trade, period, *, directory=LEDGERS, identities=IDENTITIES):
 
 
 def install(app):
+    @app.get('/api/strategy-backtest/day')
+    def settlements(track: str = Query(..., pattern='^(' + '|'.join(TRACKS) + ')$'),
+                    date: str = Query(..., pattern=r'^\d{4}-\d{2}-\d{2}$'),
+                    offset: int = Query(0, ge=0, le=100000), limit: int = Query(50, ge=1, le=100)):
+        try:
+            day_bounds(date)
+        except ValueError:
+            raise HTTPException(422, '结算日期无效，请使用 YYYY-MM-DD') from None
+        try:
+            return day_page(track, date, offset=offset, limit=limit)
+        except (OSError, ValueError, KeyError):
+            raise HTTPException(503, '当日回测交易暂不可读，请重试') from None
+
     @app.get('/api/strategy-backtest')
     def history(track: str = Query(..., pattern='^(' + '|'.join(TRACKS) + ')$'),
                 sort: str = Query('time', pattern='^(time|pnl|score)$'),

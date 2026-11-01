@@ -19,6 +19,12 @@ test('rapid strategy changes discard stale data and focus only the correct Top 1
  requests[0].resolve(page(requests[0].q,[1]));await flush();assert.equal(m.getState().data,null);
  requests[1].resolve(page(requests[1].q,[2]));await flush();assert.deepEqual(chosen,[[2,'spike']]);assert.equal(m.getState().rows[0].id,2);
 });
+test('a calendar-selected trade keeps its focus through list reads and resume',async()=>{
+ const requests=[],chosen=[];const m=ui.createModel({read:q=>new Promise(resolve=>requests.push({q,resolve})),focus:(r,t)=>chosen.push([r.id,t])});
+ m.select('allin3');await flush();m.select('spike',row(351));await flush();assert.deepEqual(chosen,[[351,'spike']]);
+ requests[0].resolve(page(requests[0].q,[1]));requests[1].resolve(page(requests[1].q,[2]));await flush();assert.deepEqual(chosen,[[351,'spike']]);
+ m.pause();m.load();await flush();requests[2].resolve(page(requests[2].q,[2]));await flush();assert.deepEqual(chosen,[[351,'spike']]);
+});
 test('whole-ledger sorting/filtering restarts paging and errors preserve loaded rows',async()=>{
  const req=[],chosen=[];const m=ui.createModel({read:q=>new Promise((resolve,reject)=>req.push({q,resolve,reject})),focus:r=>chosen.push(r.id)});
  m.select('allin3');await flush();req[0].resolve(page(req[0].q,[4,3],4));await flush();

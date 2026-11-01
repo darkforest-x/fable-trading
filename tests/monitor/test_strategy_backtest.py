@@ -51,6 +51,37 @@ def test_rank_uses_whole_funded_ledger_and_excludes_cash(saved):
     assert api.page('allin3', directory=directory, symbol='NONEUSDT')['rows'] == []
 
 
+def test_daily_settlements_exclude_cash_keep_ids_and_total_across_pages(saved):
+    directory, _, _ = saved
+    first = api.day_page('allin3', '2024-01-02', directory=directory, limit=2)
+    second = api.day_page('allin3', '2024-01-02', directory=directory, offset=2, limit=2)
+    assert first['pnl'] == second['pnl'] == 29
+    assert first['total'] == 4 and first['has_more'] and not second['has_more']
+    assert [r['id'] for r in first['rows'] + second['rows']] == [1, 2, 3, 4]
+    assert first['timezone'] == 'UTC' and first['source'] == 'Binance'
+    assert api.day_page('allin3', '2024-01-03', directory=directory)['total'] == 0
+
+
+def test_daily_settlements_use_exit_utc_boundary_not_entry_or_beijing_date(monkeypatch):
+    start, end = api.day_bounds('2024-02-29')
+    rows = [dict(id=i+1, entry_ms=start-86400000, exit_ms=t, pnl=i) for i,t in
+            enumerate([start-1, start, end-1, end])]
+    monkeypatch.setattr(api, 'ledger', lambda *a, **k: dict(rows=rows))
+    p = api.day_page('allin3', '2024-02-29')
+    assert [r['id'] for r in p['rows']] == [2, 3] and p['pnl'] == 3
+    with pytest.raises(ValueError): api.day_bounds('2023-02-29')
+
+
+def test_day_endpoint_validates_dates_and_does_not_disclose_paths(monkeypatch):
+    app = FastAPI(); api.install(app); client = TestClient(app)
+    for query in ['track=unknown&date=2024-01-02', 'track=spike&date=2023-02-29',
+                  'track=spike&date=2024-1-2', 'track=spike&date=2024-01-02&limit=101']:
+        assert client.get('/api/strategy-backtest/day?' + query).status_code == 422
+    monkeypatch.setattr(api, 'day_page', lambda *a, **k: (_ for _ in ()).throw(FileNotFoundError('/private')))
+    r = client.get('/api/strategy-backtest/day?track=spike&date=2024-01-02')
+    assert r.status_code == 503 and '/private' not in r.text
+
+
 def test_chart_uses_trade_identity_and_rejects_missing_or_conflicting_data(saved):
     directory, identities, path = saved
     value = api.candles('allin3', 3, '15m', directory=directory, identities=identities)

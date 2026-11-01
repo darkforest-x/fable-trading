@@ -115,3 +115,31 @@ test('same-time loss and refill remain a loss; pure cash additions never become 
  const html=ui.calendarHTML(m);assert.match(html,/补充本金不计收益/);assert.doesNotMatch(html,/月收益率/);
  assert.match(html,/−900\.00/);assert.match(html,/2024-02-02 · −900\.00 USDT/);
 });
+
+const backtest=require('../../yoyo/monitor/static/strategy-backtest.js');
+const flush=()=>new Promise(r=>setImmediate(r));
+const dayRow=(id,pnl=1)=>({id,symbol:'AAAUSDT',side:1,entry_ms:Date.parse('2024-02-28T23:50:00Z'),exit_ms:Date.parse('2024-02-29T00:10:00Z'),pnl,return_pct:pnl});
+const dayPage=(q,rows,total=rows.length,pnl=rows.reduce((v,r)=>v+r.pnl,0))=>({schema:1,...q,timezone:'UTC',source:'Binance',rows,total,pnl,has_more:q.offset+rows.length<total});
+test('daily pages validate exact strategy/date, UTC boundaries and calendar amounts',()=>{
+ const q={track:'spike',date:'2024-02-29',expectedPnl:1},p=dayPage({...q,offset:0},[dayRow(1)]);
+ assert.equal(ui.validateDayPage(p,q,0,backtest.valid),p);
+ for(const update of [{track:'60'},{date:'2024-02-28'},{timezone:'Asia/Shanghai'},{pnl:2},{rows:[dayRow(1),dayRow(1)],total:2},{rows:[{...dayRow(1),exit_ms:Date.parse('2024-03-01T00:00:00Z')}]},{rows:[],total:1,has_more:true}])assert.throws(()=>ui.validateDayPage({...p,...update},q,0,backtest.valid));
+ const html=ui.dayTradeHTML({...dayRow(351),entry_rules:{score:.659222}});
+ assert.match(html,/data-day-trade="351"/);assert.match(html,/2024-02-28 23:50/);assert.match(html,/2024-02-29 00:10/);assert.match(html,/0.6592/);assert.match(html,/历史K线/);
+ assert.match(ui.dayTradesHTML({date:q.date,expectedPnl:0,data:{total:0},rows:[],busy:false,error:''}),/当天无结算交易/);
+ assert.match(ui.dayTradesHTML({date:q.date,expectedPnl:0,data:null,rows:[],busy:false,error:'offline'}),/重试读取/);
+});
+test('late day reads cannot overwrite a different date or reopen a dismissed calendar',async()=>{
+ const requests=[];const m=ui.createDayModel({validRow:backtest.valid,read:q=>new Promise(resolve=>requests.push({q,resolve}))});
+ m.select('spike','2024-02-29',1);await flush();m.select('60','2024-03-01',0);await flush();
+ requests[0].resolve(dayPage(requests[0].q,[dayRow(1)]));await flush();assert.equal(m.getState().data,null);
+ requests[1].resolve(dayPage(requests[1].q,[]));await flush();assert.equal(m.getState().date,'2024-03-01');assert.equal(m.getState().data.total,0);
+ m.select('spike','2024-02-29',1);await flush();m.pause();requests[2].resolve(dayPage(requests[2].q,[dayRow(1)]));await flush();assert.equal(m.getState().data,null);
+});
+test('day pagination retains rows on failure, retries the same offset and reconciles full total',async()=>{
+ const req=[];const m=ui.createDayModel({validRow:backtest.valid,read:q=>new Promise((resolve,reject)=>req.push({q,resolve,reject}))});
+ m.select('spike','2024-02-29',1);await flush();req[0].resolve(dayPage(req[0].q,[dayRow(1,2)],2,1));await flush();
+ m.load();await flush();assert.equal(req[1].q.offset,1);req[1].reject(Error('offline'));await flush();assert.equal(m.getState().rows.length,1);
+ m.load();await flush();assert.equal(req[2].q.offset,1);req[2].resolve(dayPage(req[2].q,[dayRow(2,-1)],2,1));await flush();assert.equal(m.getState().rows.length,2);assert.equal(m.getState().error,'');
+ m.select('spike','2024-02-29',1);await flush();req[3].resolve(dayPage(req[3].q,[dayRow(1,2)],1,1));await flush();assert.match(m.getState().error,/合计不一致/);assert.equal(m.getState().rows.length,0);
+});

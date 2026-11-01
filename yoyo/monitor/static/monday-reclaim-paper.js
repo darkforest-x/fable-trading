@@ -312,7 +312,7 @@
     backtest=window.SpikeStrategyBacktest.create({root,onOpen:()=>{watch?.setOpen(false,false);analytics?.setOpen(false,false);setRecords(false,false);quick?.close();},onSelect:value=>{
       if(!replay)liveState={...state};replay=value;state.track=value.track;state.trade='';state.symbol=value.row.symbol.replace(/USDT$/,'-USDT-SWAP');state.period=window.SpikeStrategyBacktest.periodFor(value.row,state.period);pinned=null;chart.resetFocus();render(feed.getState());
     }});
-    book=window.SpikeStrategyBook.create({root,tracks:TRACKS,getTrack:()=>state.track,getSnapshot:()=>feed.getState().data,getPnl:t=>summary(feed.getState().data?.tracks?.[t],t).pnl,renderRules:rulesHTML,createFeed,onSelect:selectTrack,onBacktest:track=>{focus?.reset();backtest.open(track);}});
+    book=window.SpikeStrategyBook.create({root,tracks:TRACKS,getTrack:()=>state.track,getSnapshot:()=>feed.getState().data,getPnl:t=>summary(feed.getState().data?.tracks?.[t],t).pnl,renderRules:rulesHTML,createFeed,onSelect:selectTrack,onBacktest:(track,row)=>{focus?.reset();backtest.open(track,row);}});
     el('period').addEventListener('change',event=>{state.period=event.target.value;sync();render(feed.getState());});
     quick=window.SpikeHomeTicket.create({root,context:()=>replay?null:({symbol:chartSymbol,timeframe:state.period})});
     focus=window.SpikeChartFocus.bind(root);

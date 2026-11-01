@@ -1,6 +1,7 @@
 /* Stitch 3db5c4dc931244f8a1ea859d4acb8d49. Read-only, source-backed strategy books.
  * Picker refinement: 040e7b6c98104d0f9bb77ec995dabb1a.
  * Month calendar: Stitch 744049734c8745ec9111be91a2fca95c.
+ * Daily settlements: Stitch 35ddb15e36454b709d1ade43eedae412.
  * The selected book and local display order are independent of the paper account. */
 (() => {
   'use strict';
@@ -69,10 +70,46 @@
     return (v<0?'−':'+')+num(Math.abs(v)/scale,1)+(scale===1e6?'m':'k');
   }
   function calendarDayLabel(d){return `${d.date} · ${d.covered?`${signed(d.pnl)} USDT${d.returnPct==null?'':` · 日收益 ${signed(d.returnPct)}%`}${d.changed?'':' · 无已实现盈亏'}`:'未覆盖'}`;}
+  const closeAmount=(a,b)=>Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=Math.max(1e-6,Math.abs(b)*1e-9);
+  function validateDayPage(p,q,offset,validRow){
+    if(p?.schema!==1||p.track!==q.track||p.date!==q.date||p.timezone!=='UTC'||p.source!=='Binance'||p.offset!==offset||!Array.isArray(p.rows)||!p.rows.every(r=>validRow(r)&&historyDate(r.exit_ms)===q.date)||new Set(p.rows.map(r=>r.id)).size!==p.rows.length||!Number.isInteger(p.total)||p.total<offset+p.rows.length||p.has_more!==(offset+p.rows.length<p.total)||(p.has_more&&!p.rows.length))throw Error('当日交易数据不完整，请重试');
+    if(!closeAmount(p.pnl,q.expectedPnl))throw Error('交易合计与日历金额不一致，请刷新小册后重试');
+    return p;
+  }
+  function createDayModel({read,validRow,cancel=()=>{},change=()=>{}}){
+    let version=0,pending=null,state={track:'',date:'',expectedPnl:0,rows:[],data:null,busy:false,error:''};
+    function pause(){version++;cancel();pending=null;state.busy=false;}
+    async function load(){
+      if(pending||!state.date)return pending;
+      const revision=version,q={track:state.track,date:state.date,expectedPnl:state.expectedPnl},offset=state.rows.length;
+      state.busy=true;state.error='';change(state);
+      pending=Promise.resolve().then(async()=>{
+        if(revision!==version)return;
+        try{
+          const p=validateDayPage(await read({track:q.track,date:q.date,offset,limit:50}),q,offset,validRow);
+          if(revision!==version)return;
+          const rows=[...state.rows,...p.rows];
+          if(new Set(rows.map(r=>r.id)).size!==rows.length||(state.data&&p.total!==state.data.total)||(!p.has_more&&!closeAmount(rows.reduce((sum,r)=>sum+r.pnl,0),p.pnl)))throw Error('当日分页合计不一致，请重新选择日期');
+          state={...state,rows,data:p};
+        }catch(e){if(revision===version)state.error=e.message||'当日交易读取失败，请重试';}
+        finally{if(revision===version){state.busy=false;pending=null;change(state);}}
+      });return pending;
+    }
+    return {load,pause,getState:()=>state,select(track,date,expectedPnl){pause();state={track,date,expectedPnl,rows:[],data:null,busy:false,error:''};return load();}};
+  }
+  const utcTime=ms=>new Date(ms).toISOString().slice(0,16).replace('T',' ');
+  function dayTradeHTML(r){
+    const score=r.entry_rules?.score,view=pnlView(r.pnl),side=r.side===1?'做多':'做空';
+    return `<button type="button" class="rs-day-trade" data-day-trade="${r.id}" aria-label="查看 ${esc(r.symbol.replace(/USDT$/,''))} ${side} ${utcTime(r.entry_ms)} 历史K线"><span class="rs-day-trade-head"><span><b>${esc(r.symbol.replace(/USDT$/,''))}</b><em class="${r.side===1?'rp-positive':'rp-negative'}">${side}</em></span><strong class="${view.tone}">${view.text}<small> USDT</small></strong></span><span class="rs-day-trade-times"><span>开 ${utcTime(r.entry_ms)}</span><span>平 ${utcTime(r.exit_ms)}</span></span><span class="rs-day-trade-foot"><span>${Number.isFinite(score)?'评分 '+score.toFixed(4):'评分未留存'} · 单笔 ${signed(r.return_pct)}%</span><span>查看K线 ↗</span></span></button>`;
+  }
+  function dayTradesHTML(s){
+    const [y,m,d]=s.date.split('-').map(Number);
+    return `<header class="rs-calendar-header"><button type="button" data-calendar-back aria-label="返回月历">‹</button><div class="rs-day-title"><strong id="rs-calendar-title" tabindex="-1">${y}年${m}月${d}日</strong><small>当日结算 · UTC</small></div><div class="rs-calendar-nav"><button type="button" data-calendar-close aria-label="关闭每日盈亏日历">×</button></div></header><div class="rs-calendar-summary"><div><small>当日净盈亏 / USDT</small><strong class="${pnlView(s.expectedPnl).tone}">${signed(s.expectedPnl)}</strong></div><div><small>结算交易</small><strong>${s.data?s.data.total:'—'}<small> 笔</small></strong></div></div><p class="rs-day-hint">点交易查看历史K线 · 单笔 % 按名义本金</p><div class="rs-day-scroll" tabindex="-1"><p class="rs-day-status" role="status">${esc(s.error||(s.busy?'正在读取当日交易…':s.data?.total===0?'当天无结算交易':''))}</p>${s.error?'<button type="button" data-day-retry>重试读取</button>':''}<div class="rs-day-rows">${s.rows.map(dayTradeHTML).join('')}</div>${s.data?.has_more?`<button type="button" class="rs-day-more" data-day-more ${s.busy?'disabled':''}>${s.busy?'读取中…':'再显示 50 笔'}</button>`:''}${s.data?`<small class="rs-day-count">显示 ${s.rows.length} / ${s.data.total} 笔 · 按平仓时间排列</small>`:''}</div><footer>按 UTC 结算日归集 · 已扣原回测成本<br>补充本金不计收益 · K线回放时间显示为北京时间</footer>`;
+  }
   function calendarHTML(m){
     const cells=m.days.map(d=>`<button type="button" class="rs-calendar-day ${!d.covered?'is-uncovered':d.pnl>0?'is-gain':d.pnl<0?'is-loss':'is-flat'}" data-calendar-day="${d.day}" ${!d.covered?'disabled':''} aria-label="${esc(calendarDayLabel(d))}" title="${esc(calendarDayLabel(d))}"><time datetime="${d.date}">${d.day}</time><b>${d.changed&&d.covered?compactPnl(d.pnl):'—'}</b><small>${!d.covered?'未覆盖':d.changed&&d.returnPct!=null?signed(d.returnPct)+'%':''}</small></button>`);
     const blanks=n=>'<span class="rs-calendar-blank" aria-hidden="true"></span>'.repeat(n);
-    return `<header class="rs-calendar-header"><div><strong id="rs-calendar-title" tabindex="-1">${m.title}</strong><small>每日已实现盈亏 · USDT · UTC</small></div><div class="rs-calendar-nav"><button type="button" data-calendar-nav="previous" aria-label="上一月" ${m.previous?'':'disabled'}>‹</button><button type="button" data-calendar-nav="next" aria-label="下一月" ${m.next?'':'disabled'}>›</button><button type="button" data-calendar-close aria-label="关闭每日盈亏日历">×</button></div></header><div class="rs-calendar-summary"><div><small>月度净盈亏 / USDT</small><strong class="${pnlView(m.pnl).tone}">${signed(m.pnl)}</strong></div>${m.refilled?'':`<div><small>月收益率</small><strong class="${pnlView(m.returnPct).tone}">${signed(m.returnPct)}${m.returnPct==null?'':'%'}</strong></div>`}</div><div class="rs-calendar-week" aria-hidden="true">${['一','二','三','四','五','六','日'].map(d=>`<span>${d}</span>`).join('')}</div><div class="rs-calendar-grid" role="group" aria-label="${m.title}每日盈亏">${blanks(m.offset)}${cells.join('')}${blanks((7-(m.offset+cells.length)%7)%7)}</div><div class="rs-calendar-detail" role="status">点日期查看完整金额 · — 无已实现盈亏</div><footer>按结算日统计 · 不含浮盈亏${m.refilled?' · 补充本金不计收益':''}<br>数据截至 ${new Date(m.lastMs).toISOString().slice(0,16).replace('T',' ')} UTC</footer>`;
+    return `<header class="rs-calendar-header"><div><strong id="rs-calendar-title" tabindex="-1">${m.title}</strong><small>每日已实现盈亏 · USDT · UTC</small></div><div class="rs-calendar-nav"><button type="button" data-calendar-nav="previous" aria-label="上一月" ${m.previous?'':'disabled'}>‹</button><button type="button" data-calendar-nav="next" aria-label="下一月" ${m.next?'':'disabled'}>›</button><button type="button" data-calendar-close aria-label="关闭每日盈亏日历">×</button></div></header><div class="rs-calendar-summary"><div><small>月度净盈亏 / USDT</small><strong class="${pnlView(m.pnl).tone}">${signed(m.pnl)}</strong></div>${m.refilled?'':`<div><small>月收益率</small><strong class="${pnlView(m.returnPct).tone}">${signed(m.returnPct)}${m.returnPct==null?'':'%'}</strong></div>`}</div><div class="rs-calendar-week" aria-hidden="true">${['一','二','三','四','五','六','日'].map(d=>`<span>${d}</span>`).join('')}</div><div class="rs-calendar-grid" role="group" aria-label="${m.title}每日盈亏">${blanks(m.offset)}${cells.join('')}${blanks((7-(m.offset+cells.length)%7)%7)}</div><div class="rs-calendar-detail" role="status">点日期查看当天交易 · — 无已实现盈亏</div><footer>按结算日统计 · 不含浮盈亏${m.refilled?' · 补充本金不计收益':''}<br>数据截至 ${new Date(m.lastMs).toISOString().slice(0,16).replace('T',' ')} UTC</footer>`;
   }
   function historyHTML(h){
     const s=h.summary,pf=s.profit_factor_state==='no_losses'?'∞':num(s.profit_factor),unit=h.refilled?'USDT':'%';
@@ -96,7 +133,7 @@
 
   function barOptions(r,dark=false){const c=dark?'#9ba9b8':'#738392';return {animation:!matchReduced(),animationDuration:450,grid:{left:55,right:18,top:25,bottom:r.labels.length>8?45:60},tooltip:{trigger:'axis',confine:true,valueFormatter:v=>num(v)+' '+r.unit},xAxis:{type:'category',data:r.labels,axisTick:{show:false},axisLabel:{color:c,fontSize:9,hideOverlap:true,interval:r.labels.length>8?'auto':0,formatter:v=>v.replace(' · ','\n')}},yAxis:{type:'value',name:r.unit,nameTextStyle:{color:c},axisLabel:{color:c},splitLine:{lineStyle:{color:dark?'#ffffff12':'#71849420'}}},series:[{type:'bar',barMaxWidth:40,data:r.values,itemStyle:{color:'#3285dc',borderRadius:[4,4,0,0]}}]};}
   function matchReduced(){return typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion:reduce)').matches;}
-  const api={pickerHTML,accountOrder,moveAccount,pnlView,ORDER_KEY,tableHTML,researchHTML,barOptions,historyHTML,heatmapHTML,monthCalendar,calendarHTML,equityOptions,validateHistory,TITLES};
+  const api={pickerHTML,accountOrder,moveAccount,pnlView,ORDER_KEY,tableHTML,researchHTML,barOptions,historyHTML,heatmapHTML,monthCalendar,calendarHTML,validateDayPage,createDayModel,dayTradeHTML,dayTradesHTML,equityOptions,validateHistory,TITLES};
   if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}
   function create({root,tracks,getTrack,getSnapshot,getPnl,renderRules,createFeed,onSelect,onBacktest}){
     const trigger=root.querySelector('[data-rp="track"]');
@@ -144,9 +181,27 @@
     const el=s=>dialog.querySelector(s);let requests=window.SpikeRuntime.createRequests();
     let open=false,track='',epoch=0,closing=null,analytics=null,research=null,bars=[],line=null,chartData=null,active=true,history=null,historyChart=null,historyMode='equity',historyPaintKey='';
     const calendar=document.createElement('div');calendar.id='rs-month-calendar';calendar.className='rs-calendar';calendar.setAttribute('popover','auto');calendar.setAttribute('role','dialog');calendar.setAttribute('aria-labelledby','rs-calendar-title');dialog.append(calendar);
-    let calendarOrigin=null,calendarMonth=null;
+    let calendarOrigin=null,calendarMonth=null,calendarDay=0,dayView=false;
+    const dayRequests=window.SpikeRuntime.createRequests();
+    const dayModel=createDayModel({read:q=>dayRequests.json('/api/strategy-backtest/day?'+new URLSearchParams(q)),validRow:window.SpikeStrategyBacktest.valid,cancel:()=>dayRequests.cancel(),change:renderDay});
+    function renderDay(s){
+      if(!open||!dayView||!calendar.matches(':popover-open'))return;
+      const scroll=calendar.querySelector('.rs-day-scroll')?.scrollTop||0,focused=document.activeElement;
+      const hadFocus=calendar.contains(focused),focusId=hadFocus?focused.id:'',action=['data-day-more','data-day-retry'].find(a=>focused?.hasAttribute(a));
+      calendar.innerHTML=dayTradesHTML(s);calendar.classList.add('is-day-view');positionCalendar();
+      calendar.querySelector('.rs-day-scroll').scrollTop=scroll;
+      const target=focusId?calendar.querySelector('#'+focusId):action?calendar.querySelector(`[${action}]:not(:disabled)`):focused?.dataset.dayTrade?calendar.querySelector(`[data-day-trade="${focused.dataset.dayTrade}"]`):null;
+      // Replacing a loading/pagination button must not leave focus on body:
+      // Escape then bypasses this dialog's day -> month navigation handler.
+      if(hadFocus)(target||calendar.querySelector('#rs-calendar-title')).focus({preventScroll:true});
+    }
+    function showDay(number){
+      const d=calendarMonth?.days[number-1];if(!d?.covered)return;
+      calendarDay=number;dayView=true;dayModel.select(track,d.date,d.pnl);calendar.querySelector('#rs-calendar-title').focus({preventScroll:true});
+    }
+    function backToCalendar(){showCalendar(calendarMonth.key,null,'day');}
     function resetMonthButtons(){dialog.querySelectorAll('[data-history-month][aria-expanded="true"]').forEach(b=>b.setAttribute('aria-expanded','false'));}
-    function closeCalendar(restore=false){if(calendar.matches(':popover-open'))calendar.hidePopover();resetMonthButtons();if(restore&&calendarOrigin?.isConnected)calendarOrigin.focus({preventScroll:true});}
+    function closeCalendar(restore=false){dayModel.pause();dayView=false;if(calendar.matches(':popover-open'))calendar.hidePopover();resetMonthButtons();if(restore&&calendarOrigin?.isConnected)calendarOrigin.focus({preventScroll:true});}
     function positionCalendar(){
       if(!calendar.matches(':popover-open')||!calendarOrigin)return;
       const r=calendarOrigin.getBoundingClientRect(),w=calendar.offsetWidth,h=calendar.offsetHeight;
@@ -156,21 +211,26 @@
     }
     function showCalendar(key,origin=null,focus=''){
       const month=history&&monthCalendar(history,key);if(!month)return;
+      dayModel.pause();dayView=false;calendar.classList.remove('is-day-view');if(key!==calendarMonth?.key)calendarDay=0;
       if(origin)calendarOrigin=origin;calendarMonth=month;resetMonthButtons();
       el(`[data-history-month="${key}"]`)?.setAttribute('aria-expanded','true');
       calendar.innerHTML=calendarHTML(month);if(!calendar.matches(':popover-open'))calendar.showPopover();positionCalendar();
-      const target=focus?calendar.querySelector(`[data-calendar-nav="${focus}"]:not(:disabled)`):null;
+      if(calendarDay)calendar.querySelector(`[data-calendar-day="${calendarDay}"]`)?.setAttribute('aria-pressed','true');
+      const target=focus==='day'?calendar.querySelector(`[data-calendar-day="${calendarDay}"]`):focus?calendar.querySelector(`[data-calendar-nav="${focus}"]:not(:disabled)`):null;
       (target||calendar.querySelector('#rs-calendar-title')).focus({preventScroll:true});
     }
-    calendar.addEventListener('toggle',e=>{if(e.newState==='closed')resetMonthButtons();});
+    calendar.addEventListener('toggle',e=>{if(e.newState==='closed'){resetMonthButtons();dayModel.pause();dayView=false;}});
     calendar.addEventListener('click',e=>{
       const nav=e.target.closest('[data-calendar-nav]'),day=e.target.closest('[data-calendar-day]');
       if(nav)showCalendar(calendarMonth[nav.dataset.calendarNav],null,nav.dataset.calendarNav);
       if(e.target.closest('[data-calendar-close]'))closeCalendar(true);
-      if(day)calendar.querySelector('.rs-calendar-detail').textContent=calendarDayLabel(calendarMonth.days[Number(day.dataset.calendarDay)-1]);
+      if(day)showDay(Number(day.dataset.calendarDay));
+      if(e.target.closest('[data-calendar-back]'))backToCalendar();
+      if(e.target.closest('[data-day-more],[data-day-retry]'))dayModel.load();
+      const trade=e.target.closest('[data-day-trade]');if(trade){const s=dayModel.getState(),row=s.rows.find(r=>r.id===Number(trade.dataset.dayTrade));if(row){const selectedTrack=s.track;close(true);onBacktest?.(selectedTrack,row);}}
     });
     calendar.addEventListener('focusin',e=>{const day=e.target.closest('[data-calendar-day]');if(day)calendar.querySelector('.rs-calendar-detail').textContent=calendarDayLabel(calendarMonth.days[Number(day.dataset.calendarDay)-1]);});
-    dialog.addEventListener('keydown',e=>{if(e.key==='Escape'&&calendar.matches(':popover-open')){e.preventDefault();e.stopPropagation();closeCalendar(true);}});
+    dialog.addEventListener('keydown',e=>{if(e.key==='Escape'&&calendar.matches(':popover-open')){e.preventDefault();e.stopPropagation();if(dayView)backToCalendar();else closeCalendar(true);}});
     // A click may finish the reader's smooth scroll after opening the popover.
     // Follow its anchor instead of dismissing the just-opened calendar.
     el('.rs-reading').addEventListener('scroll',()=>positionCalendar(),{passive:true});
@@ -233,7 +293,7 @@
         el('#rs-research').querySelectorAll('img').forEach(img=>img.addEventListener('error',()=>{img.hidden=true;img.parentElement.insertAdjacentHTML('beforeend','<p>原图暂时无法读取，请稍后重试。</p>');},{once:true}));charts();
       }catch(error){if(open&&token===epoch)el('#rs-research').innerHTML=`<p class="rs-warning">回测资料暂时不可用：${esc(error.message)}</p><button type="button" data-book-retry>重试读取</button>`;}
     }
-    dialog.addEventListener('cancel',e=>{e.preventDefault();if(calendar.matches(':popover-open'))closeCalendar(true);else close();});
+    dialog.addEventListener('cancel',e=>{e.preventDefault();if(calendar.matches(':popover-open')){if(dayView)backToCalendar();else closeCalendar(true);}else close();});
     dialog.addEventListener('click',e=>{const month=e.target.closest('[data-history-month]');if(month)showCalendar(month.dataset.historyMonth,month);});
     dialog.addEventListener('click',e=>{if(e.target===dialog||e.target.closest('[data-book-close]'))close();if(e.target.closest('[data-book-refresh]')){analytics?.refresh();charts();}if(e.target.closest('[data-book-retry]'))show(track);const mode=e.target.closest('[data-history-mode]');if(mode&&history){historyMode=mode.dataset.historyMode;dialog.querySelectorAll('[data-history-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===mode)));charts();}const chapter=e.target.closest('[data-book-chapter]');if(chapter)el('#rs-'+chapter.dataset.bookChapter).scrollIntoView({behavior:matchReduced()?'instant':'smooth',block:'start'});});
     new ResizeObserver(()=>{bars.forEach(c=>c.resize());line?.resize();historyChart?.resize();}).observe(el('.rs-reading'));

@@ -46,7 +46,7 @@
         finally{if(revision===version){state.busy=false;pending=null;change(state);}}
       });return pending;
     }
-    return {load,pause,getState:()=>state,select(track){if(!tracks.includes(track))return;reset();state={...state,track,sort:'time',direction:'desc',symbol:''};auto=true;return load();},
+    return {load,pause,getState:()=>state,select(track,selectedRow=null){if(!tracks.includes(track)||(selectedRow&&!valid(selectedRow)))return;reset();state={...state,track,sort:'time',direction:'desc',symbol:''};auto=!selectedRow;if(selectedRow)focus(selectedRow,track);return load();},
       filter(symbol){if(symbol&&!symbolOK(symbol))return;reset();state.symbol=symbol;auto=false;return load();},
       sort(key){if(!['time','pnl','score'].includes(key))return;const direction=state.sort===key&&state.direction==='desc'?'asc':'desc';reset();state.sort=key;state.direction=direction;auto=false;return load();}};
   }
@@ -90,7 +90,7 @@
     });
     node('[data-bt-symbol]').onchange=e=>{node('.bt-scroll').scrollTop=0;model.filter(e.target.value);};
     panel.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();setOpen(false);}});
-    return {open(track){returnFocus=root.querySelector('[data-rp="track"]');selected=null;model.select(track);setOpen(true);},setOpen,getState:model.getState,isOpen:()=>opened,
+    return {open(track,row=null){if(!tracks.includes(track)||(row&&!valid(row)))return;returnFocus=root.querySelector('[data-rp="track"]');selected=null;model.select(track,row);if(row){onOpen();setOpen(false,false);root.querySelector('[data-rp-action="backtest-list"]')?.focus({preventScroll:true});}else setOpen(true);},setOpen,getState:model.getState,isOpen:()=>opened,
       setActive(value){if(!value){model.pause();sheet.reset();}else if(opened&&!model.getState().data)model.load();}};
   }
   window.SpikeStrategyBacktest={...api,create};
