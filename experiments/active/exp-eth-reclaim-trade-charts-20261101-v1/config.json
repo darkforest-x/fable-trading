@@ -1,0 +1,19 @@
+{
+  "experiment_id": "exp-eth-reclaim-trade-charts-20261101-v1",
+  "owner_request": "Draw all recent ETH samples with saved backtest entries,initial stops,targets,actual exits and subsequent price action for manual review.",
+  "start": "2026-09-13T00:00:00+08:00",
+  "end": "frozen source end;15m through2026-10-31 23:00Asia/Shanghai;12h completed only",
+  "scope": "All14samebar-reclaim events in screenshot period:11pure+3body. Keep weekday-excluded,body-excluded andunfilled cases explicitly labelled. All60actuallyfilled originalstrategy candidate/event pairs receive separate plots;zero hypothetical fills.",
+  "sources": [
+    "exp-top20-12h-1618-reclaims-20261101-v1",
+    "exp-top20-12h-strategies-20261101-v1"
+  ],
+  "overview": "12h from6days before eachsignal throughlastcompletedbar;overlay B61810R when it exists,otherwise no execution markers.",
+  "trade_panels": "12hcontext plus15m entry andfinalexit zooms;initialSL andeachlegTP,actualexitprice/time/weight/PnL. Partiallegs readoriginalnativehalfpositions.",
+  "timing": "AlllabelsBeijing. Intrabarentry/exit times shown as15minintervals andmarkercenteredinsidebar;observedopens/timedexits useexact quote time. OHLCpaths remainassumptions.",
+  "plots": "3000pxwidePNG,14overviews+60trades;4overviewcontact sheets;zip andCSVindex. Each zoom usesexplicitindependentyaxis;offaxisprices labelledasoutsidezoom andvisiblein12hcontext.",
+  "no_new_backtest": true,
+  "no_content_hash": true,
+  "training_eligible": false,
+  "production_eligible": false
+}
