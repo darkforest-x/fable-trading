@@ -24,5 +24,7 @@
   "production_eligible": false,
   "variant": "E20",
   "fills": "experiments/active/exp-monday-limit-close-stop-grid-20261101-v1",
-  "stop": "20 percent from the entry price (E20 of the stop grid); at 3x the liquidation line (about 32 percent) is beyond it, so the stop fires first"
+  "stop": "20 percent from the entry price (E20 of the stop grid); at 3x the liquidation line (about 32 percent) is beyond it, so the stop fires first",
+  "max_beyond_pct": 30,
+  "note": "First run (b0e3798d07) also traded 3 touches whose close was 33-37 percent past the level (QUSDT x2, PARTIUSDT, all losses; 6x3 from 2025 3752U DD36, 4x3 6236U DD51); the original level-based stop excluded them, so the filter is made explicit"
 }

@@ -107,8 +107,16 @@ def run(config, workers):
     t['symbol'] = t.event.str.split(':').str[0]
     t['beyond_pct'] = 100*t.side*(t.level-t.entry)/t.level
     t['reason_name'] = t.reason.map(REASONS).fillna(t.reason.astype(str))
+    if cfg.get('max_beyond_pct') is not None:
+        # The level-based -30 percent stop could not be placed when the close was already 30 percent past the level, so
+        # the original rule never traded those collapses; an entry-based stop needs the same filter made explicit.
+        manifest_excluded = sorted(t.event[t.beyond_pct >= cfg['max_beyond_pct']].unique())
+        t = t[t.beyond_pct < cfg['max_beyond_pct']].copy()
+    else:
+        manifest_excluded = []
     seed = json.loads((ROOT/cfg['tie_seed_from']).read_text())['seed']
-    manifest = dict(rows=int(len(t)), events=int(t.event.nunique()), issues=issues[:20], seed=seed, accounts={})
+    manifest = dict(rows=int(len(t)), events=int(t.event.nunique()), issues=issues[:20], seed=seed, accounts={},
+                    excluded_beyond=manifest_excluded)
     saved = json.loads((src/'summary.json').read_text())['results']['plans']
     for mode in cfg['targets']:
         for start in cfg['starts']:
