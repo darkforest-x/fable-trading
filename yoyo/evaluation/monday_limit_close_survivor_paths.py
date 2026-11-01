@@ -113,6 +113,9 @@ def run(config, workers):
         # the original rule never traded those collapses; an entry-based stop needs the same filter made explicit.
         manifest_excluded = sorted(t.event[t.beyond_pct >= cfg['max_beyond_pct']].unique())
         t = t[t.beyond_pct < cfg['max_beyond_pct']].copy()
+    if cfg.get('min_beyond_pct') is not None:
+        # live-wick3x3far: only closes at least this far past the level (exp-monday-limit-close-beyond-filter-20261101-v1).
+        t = t[t.beyond_pct >= cfg['min_beyond_pct']].copy()
     else:
         manifest_excluded = []
     seed = json.loads((ROOT/cfg['tie_seed_from']).read_text())['seed']
