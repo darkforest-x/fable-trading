@@ -1,0 +1,17 @@
+{
+  "experiment_id": "exp-monday-limit-live-martingale-20261101-v1",
+  "question": "Owner 2026-11-01 '不动原来的仓位和杠杆逻辑 … 只不过是基于原有的实际持仓量翻倍': loss doubling on top of the live-wick account sizing",
+  "approval": "Owner 2026-11-01",
+  "single_variable": "Sizing only: margin = equity / n x 2^level (level = consecutive losing closes, reset after a win, capped); fills, stop, target, costs unchanged",
+  "fills": "experiments/active/exp-monday-limit-close-stop-grid-20261101-v1",
+  "survivors": "experiments/active/exp-monday-limit-close-slice-control-20261101-v1/survivors.csv.gz",
+  "variant": "E20",
+  "target": "near_monday_edge",
+  "sizings": [[6, 3], [3, 3]],
+  "max_levels": [2, 3],
+  "seed": 20261103,
+  "ties": 10,
+  "in_sample": "Same history as every live-wick result",
+  "training_eligible": false,
+  "production_eligible": false
+}
