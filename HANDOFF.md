@@ -1,3 +1,8 @@
+## 2026-11-01 · TG / Bark also notify live- account entries, once per touch
+
+- Owner: "现在的tg bark监控通知是只发分数大于4的吗，每一个策略出信号也要发，但是不要重复发了 我说的live策略". Before: one message per weekly first touch when the touch-close score > 0.4, with a live-allin3 pre-touch score line. Now `ReclaimPaper.notification_score` also returns the live- rows booked on that touch (live-allin3 at the touch, live-wick at its 5m close in the score transaction), and `claim_scored_notification` sends when the score > 0.4 or any live- row exists. Still one message per touch per channel (same outbox key); lines "live开仓 · …" and "live未开 · name（满仓 / 保证金不足 / 已有持仓）". A live entry with no usable touch score shows "评分 —".
+- Tests: 6 new (TG, Bark, paper lookup); monitor suite has 144 failures that fail the same way without this change (other in-progress work). Monitor restarted; TG and Bark enabled. No live touch observed yet (Sunday).
+
 ## 2026-11-01 · live-wick backtests now run through 2026-10-27 as one account
 
 - Owner: "我怎么没看到呢，应该融合进整体的回测数据中吧！… 收益热力图我都没看到10月份的". The October replay had been a separate 1000U account in an extra table. Now `exp-monday-limit-close-survivor-paths-20261101-v10`..`v13` continue v5 / v7 / v8 / v9: saved rows identical, then 18 new fills (ARKUSDT 2026-09-30 + 17 in October; far: 8) from `exp-monday-limit-live-october-20261101-v1`. Booklets (curve, monthly heatmap, yearly) and the backtest replay read the new paths; replay charts append the extension bars (`strategy_backtest.EXTENSION`).

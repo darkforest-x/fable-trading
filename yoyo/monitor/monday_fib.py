@@ -23,6 +23,9 @@ HOUR = 3_600_000
 MINUTE = 60_000
 FRESH_MS = 90_000
 NOTIFICATION_MIN_SCORE = 0.4  # Owner 2026-10-30: shared TG/Bark raw-score gate.
+# Owner 2026-11-01 "每一个策略出信号也要发，但是不要重复发了 … 我说的live策略": a touch where a live- paper account
+# entered is sent even at or below the gate, still once per touch and channel, listing those accounts in the message.
+LIVE_NOTES = {"no_slot": "满仓", "no_capacity": "保证金不足", "busy": "已有持仓"}
 # Owner 2026-10-31: the score is the backtest's, read at the touch 5m close, so a notification stays fresh for
 # FRESH_MS after its score can exist: the later of the observation and that close.
 SCORE_BAR_MS = 300_000
@@ -268,16 +271,21 @@ class FibBook:
 
 
 def notification_text(event, score):
-    """Shared TG/Bark facts: three short lines, raw score, no trading instruction."""
+    """Shared TG/Bark facts: three short lines, raw score, no trading instruction; then the live- accounts that entered."""
     symbol = event["symbol"].removesuffix("-USDT-SWAP")
     side = "上沿" if event["side"] == "upper" else "下沿"
     observed = datetime.fromtimestamp(event["observed_ms"] / 1000, ZoneInfo("Asia/Shanghai")).strftime("%m-%d %H:%M")
-    label = f"{score:.4f}"
-    if label == f"{NOTIFICATION_MIN_SCORE:.4f}" and score > NOTIFICATION_MIN_SCORE:
+    label = "—" if score is None else f"{score:.4f}"
+    if score is not None and label == f"{NOTIFICATION_MIN_SCORE:.4f}" and score > NOTIFICATION_MIN_SCORE:
         label = str(score)  # Do not display an admitted raw score as the excluded boundary.
     live_score = event.get("live_allin3_score")
     live_note = (f"\nlive-allin3 · 触价前评分 {live_score:.4f} · 模拟" if
                  type(live_score) in (int, float) and math.isfinite(live_score) and 0 <= live_score <= 1 else "")
+    entries = event.get("live_entries") or []
+    opened = [e["name"] for e in entries if e["taken"]]
+    missed = [f"{e['name']}（{LIVE_NOTES.get(e['note'], '未开')}）" for e in entries if not e["taken"]]
+    live_note += f"\nlive开仓 · {'、'.join(opened)} · 模拟" if opened else ""
+    live_note += f"\nlive未开 · {'、'.join(missed)}" if missed else ""
     return (f"{symbol} · {side} 1.618\n评分 {label} · 点位 {event['level']:.10g}\n"
             f"{observed} 北京{live_note}")
 
@@ -304,11 +312,16 @@ def claim_scored_notification(book, event, now, *, score_lookup=None, clock=None
         finish(event, "pending", read_error or "score_pending", due_ms=ready_at+1000, expected="pending")
         return None
     score = result.get("score") if isinstance(result, dict) else None
+    entries = result.get("live_entries") if isinstance(result, dict) else None
+    live = isinstance(entries, list) and bool(entries) and all(
+        isinstance(e, dict) and isinstance(e.get("name"), str) and type(e.get("taken")) is bool for e in entries)
     if (not isinstance(result, dict) or result.get("status") != "scored"
             or type(score) not in (int, float) or not math.isfinite(score) or not 0 <= score <= 1):
-        finish(event, "skipped", "score_unavailable", expected="pending")
-        return None
-    if score <= NOTIFICATION_MIN_SCORE:
+        if not live:
+            finish(event, "skipped", "score_unavailable", expected="pending")
+            return None
+        score = None  # A live account entered on its own rule; show the touch without a score.
+    elif score <= NOTIFICATION_MIN_SCORE and not live:
         finish(event, "skipped", "score_not_above_0_4", expected="pending")
         return None
     # A score read can race a subscription change or another sender. Revalidate
@@ -322,11 +335,13 @@ def claim_scored_notification(book, event, now, *, score_lookup=None, clock=None
         return None
     if "live_allin3_score" in result:
         event = dict(event, live_allin3_score=result["live_allin3_score"])
+    if live:
+        event = dict(event, live_entries=entries)
     return event, score, ready_at
 
 
 def deliver_once(book, creds, sender, now, *, score_lookup=None, clock=None):
-    """Wait for the exact stored score; strictly >0.4. Uncertain sends never auto-retry."""
+    """Wait for the exact stored score; strictly >0.4 or a live- entry. Uncertain sends never auto-retry."""
     if not creds:
         return False
     event = book.pending(now)

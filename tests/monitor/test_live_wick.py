@@ -52,6 +52,17 @@ class LiveWickTests(PaperFixture):
         # The original near-edge accounts still book their own rows at the level.
         self.assertTrue(all(p['entry'] == 93.82 for t in ('60', '5') for p in snap['tracks'][t]['open']))
 
+    def test_notification_lookup_names_the_live_accounts_of_the_touch(self):
+        e = self.wick(); self.set_bar(92., 92.5)
+        identity = dict(week=self.levels['week'], symbol='ABC-USDT-SWAP', side='lower', candle_ms=self.touch,
+                        observed_ms=self.touch+500)
+        self.fire(e)
+        self.assertIsNone(e.notification_score(identity))  # waits for the touch 5m close, as the score does
+        self.scored(e)
+        names = [(x['name'], x['taken']) for x in e.notification_score(identity)['live_entries']]
+        # 92.5 closes 1.4 percent past 93.82, short of the far account's 1.5 percent, so that account has no row.
+        self.assertEqual(names, [('live-wick6x3', True), ('live-wick3x3', True), ('live-wick6x3hi', True)])
+
     def test_not_entered_when_recovered_inside_collapsed_or_low_score(self):
         for low, close, score in ((92., 94., .7), (92., 93.5, .7), (60., 62., .7), (92., 92.5, .45)):
             with self.subTest(close=close, score=score):

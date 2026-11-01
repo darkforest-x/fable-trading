@@ -141,6 +141,7 @@ WICK6_TRACK, WICK3_TRACK = 8060, 9060  # touch-close market entries; API keys "l
 WICK6HI_TRACK = 8160  # live-wick6x3 with 1.5 x margin from score 0.76; API key "live-wick6x3hi"
 WICK3FAR_TRACK = 9160  # live-wick3x3 only when the close is >= 1.5 percent past the level; API key "live-wick3x3far"
 WICK_TRACKS = (WICK6_TRACK, WICK3_TRACK, WICK6HI_TRACK, WICK3FAR_TRACK)
+LIVE_TRACKS = (LIVE_ALLIN3_TRACK,)+WICK_TRACKS  # live- accounts named in TG / Bark notifications
 CONFIRM[WICK6_TRACK] = CONFIRM[WICK3_TRACK] = CONFIRM[WICK6HI_TRACK] = CONFIRM[WICK3FAR_TRACK] = 60
 WICK = dict(min_score=.5, max_recovery=0.6395668107499273, max_beyond_pct=30., stop_pct=20., leverage=3.)
 WICK_SLOTS = {WICK6_TRACK: 6, WICK3_TRACK: 3, WICK6HI_TRACK: 6, WICK3FAR_TRACK: 3}
@@ -700,6 +701,10 @@ class ReclaimPaper:
                 (week, symbol, side),
             ).fetchone()
             live = db.execute("SELECT status,score FROM live_scores WHERE signal_id=?", (row["id"],)).fetchone() if row else None
+            # live- accounts booked on this touch (live-allin3 at the touch, live-wick at its 5m close, same transaction
+            # as the score), so one notification can name them all.
+            entries = db.execute(f"SELECT track,taken,note FROM positions WHERE signal_id=? AND track IN ({','.join('?'*len(LIVE_TRACKS))})",
+                                 (row["id"], *LIVE_TRACKS)).fetchall() if row else []
         if row is None or row["status"] == "pending_score" and row["candle_ms"] == candle_ms:
             return None
         if row["candle_ms"] != candle_ms or row["observed_ms"] != observed_ms:
@@ -707,6 +712,9 @@ class ReclaimPaper:
         result = {"status": row["status"], "score": row["score"]}
         if live and live["status"] == "scored":
             result["live_allin3_score"] = live["score"]
+        if entries:
+            result["live_entries"] = [dict(name=KEYS[r["track"]], taken=bool(r["taken"]), note=r["note"])
+                                      for r in sorted(entries, key=lambda r: LIVE_TRACKS.index(r["track"]))]
         return result
 
     def _open_allin(self, db, sid, levels, symbol, side, level, candle_ms, track=ALLIN3_TRACK):

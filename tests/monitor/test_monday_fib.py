@@ -268,6 +268,32 @@ def test_terminal_score_states_never_send_even_if_a_score_is_present(tmp_path, s
     assert not calls and book.records()[0]['status'] == 'skipped'
 
 
+LIVE = [{'name': 'live-allin3', 'taken': True, 'note': None}, {'name': 'live-wick6x3', 'taken': True, 'note': None},
+        {'name': 'live-wick3x3', 'taken': False, 'note': 'no_slot'}]
+
+
+@pytest.mark.parametrize('result', [{'status': 'scored', 'score': .3}, {'status': 'scored', 'score': .8},
+                                    {'status': 'feature_error', 'score': None}])
+def test_live_entries_are_sent_once_with_the_accounts_named(tmp_path, result):
+    book, calls = queued_book(tmp_path), []
+    lookup = lambda event: {**result, 'live_entries': LIVE}
+    assert deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+1, score_lookup=lookup)
+    assert len(calls) == 1 and book.records()[0]['status'] == 'sent'
+    lines = calls[0]['text'].splitlines()
+    assert lines[1].startswith('评分 —' if result['score'] is None else f"评分 {result['score']:.4f}")
+    assert lines[3:] == ['live开仓 · live-allin3、live-wick6x3 · 模拟', 'live未开 · live-wick3x3（满仓）']
+    assert not deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+2, score_lookup=lookup)
+    assert len(calls) == 1  # one message per touch, whatever number of accounts entered
+
+
+@pytest.mark.parametrize('entries', [[], None, [{'name': 'live-wick6x3'}], 'live-wick6x3'])
+def test_without_valid_live_entries_the_score_gate_still_applies(tmp_path, entries):
+    book, calls = queued_book(tmp_path), []
+    deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+1,
+                 score_lookup=lambda event: {'status': 'scored', 'score': .3, 'live_entries': entries})
+    assert not calls and book.records()[0]['status'] == 'skipped'
+
+
 def test_wait_for_score_without_claiming_delivery_or_blocking_other_ready_events(tmp_path):
     book, calls = queued_book(tmp_path), []
     book.touch(baseline(history(), NOW), SYMBOL, 'lower', 90, NOW+1, NOW, 'live')

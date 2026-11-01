@@ -358,3 +358,20 @@ def test_bark_scored_delivery_is_independent_of_disabled_telegram(tmp_path):
     assert deliver_once(book, "key", lambda *a, **kw: Response(), NOW+2, score_lookup=scored)
     assert book.bark_status()["counts"] == {"sent": 1}
     assert book.records()[0]["status"] == "skipped"
+
+
+def test_bark_names_live_entries_like_telegram(tmp_path):
+    book, _ = armed(tmp_path)
+    calls = {}
+    def sender(url, **kwargs):
+        channel = "bark" if url.endswith("/push") else "telegram"
+        calls[channel] = kwargs["json"]
+        return Response(payload={"ok": True, "result": {"message_id": 17}}) if channel == "telegram" else Response()
+    lookup = lambda event: {"status": "scored", "score": .2,
+                            "live_entries": [{"name": "live-allin3", "taken": True, "note": None}]}
+    assert deliver_once(book, "key", sender, NOW+1, score_lookup=lookup)
+    assert deliver_telegram_once(book, ("fake", "fake"), sender, NOW+1, score_lookup=lookup)
+    text = calls["bark"]["title"] + "\n" + calls["bark"]["body"]
+    assert text == calls["telegram"]["text"] and text.splitlines()[-1] == "live开仓 · live-allin3 · 模拟"
+    assert book.bark_status()["counts"] == {"sent": 1}
+
