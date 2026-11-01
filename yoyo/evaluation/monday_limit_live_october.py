@@ -13,7 +13,8 @@ weeks with the unchanged code:
            percent from the entry, near Monday edge target, 60m reclaim against the level, taker + 10bp entry, maker
            target, taker + 10bp other exits, skip idle bars, both intrabar paths, the worse one per trade);
   accounts 1000U on 2026-10-01 for live-wick6x3 / 3x3 / 6x3hi / 3x3far with their paper rules (frac; 1.5 x margin from
-           score 0.76; close >= 1.5 percent past the level).
+           score 0.76; close >= 1.5 percent past the level), plus loss doubling on the account's own margin
+           (monday_limit_live_martingale.martingale_frac) for the unweighted accounts.
 Entries are touch closes from 2026-10-01 to the data end; exits may run to the data end (open trades are reported).
 Universe: the 536-symbol snapshot of the backtest (crypto_5m part); the 95 later listings are left out, as in the
 backtest, and BNB / DOGE / SOL (1m jobs, not extended) are missing from the October cluster24 counts.
@@ -220,6 +221,7 @@ def accounts(config, workers):
     from yoyo.evaluation.monday_limit_return_opt import frac
     from yoyo.evaluation.monday_limit_close_order_boost import weighted_frac
     from yoyo.evaluation.strategy_booklet_paths import Trace
+    from yoyo.evaluation.monday_limit_live_martingale import martingale_frac
     exp = config.resolve().parent
     cfg = json.loads(config.read_text())
     cr.committed('yoyo/evaluation/monday_limit_live_october.py')
@@ -252,6 +254,10 @@ def accounts(config, workers):
         res[name] = dict(candidates=int(len(x)), funded=len(trades), skipped=int(r['skipped']) if 'skipped' in r else None,
                          final=float(r['final_multiple']*1000), max_dd_pct=float(r['max_drawdown_pct']),
                          wins=int(sum(tt['pnl'] > 0 for tt in trades)), trades=trades)
+        if w is None:
+            # Loss doubling on the account's own margin (monday_limit_live_martingale); caps that fit the margin limit only.
+            res[name]['doubling'] = {f'x2_L{c}': {k: float(v) for k, v in martingale_frac(x, n, 3, cfg['seed'], 2., c).items()}
+                                     for c in ((1, 2) if n == 6 else (1,))}
     res['data_end'] = str(t.data_end.max()) if len(t) else None
     res['closed_at_data_break'] = sorted(t.event[t.reason == 0])
     dump(exp/'summary.json', dict(config=cfg, results=clean(res), source_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
