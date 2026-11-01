@@ -1,3 +1,8 @@
+## 2026-11-01 · Backtest replay: sort by entry score, score on every row and in the summary
+
+- Owner (screenshot of live-wick3x3 replay): add score sorting next to 开仓时间/净收益, show the trade's score on the right summary and on every list row. Committed: `/api/strategy-backtest?sort=score` (saved entry_rules score, missing last) and a 评分 sort button in `strategy-backtest.js`; test added.
+- Not committable separately: the summary block and the replay-layout CSS belong to another tool's uncommitted work (Stitch 069bd922 / 051be7f4 notes in monday-reclaim-paper.js). The working copy now adds an 入场评分 column to `summaryHTML` and keeps `.bt-score` visible on unselected rows (`strategy-backtest.css`); live after the monitor restart, to be committed with that work. Desktop 1600 / 800 / 375 checked, no overflow; nine plus two accounts unchanged across restart. No Stitch screen (not available here).
+
 ## 2026-11-01 · EMA order filter on live-wick: higher win rate, much lower returns
 
 - Owner: "这套策略没用上排列过滤吗？能用吗？能提高胜率吗？能提高收益吗？". `exp-monday-limit-close-order-filter-20261101-v1` adds spike's 15m EMA order score (>= 3, known before the touch) to the E20 near-edge survivor rows; saved fills only. 398 events, only 45 have order >= 3.

@@ -107,3 +107,11 @@ def test_smaller_periods_use_real_minutes_not_split_five_minute_candles(saved,mo
     assert len(calls)==3
     with pytest.raises(ValueError,match='cannot_split'):
         api.aggregate(pd.DataFrame(),60000,300000)
+
+
+def test_live_wick_sorts_by_saved_entry_score():
+    desc = api.page('live-wick6x3', sort='score', direction='desc', limit=100)
+    scores = [r['entry_rules']['score'] for r in desc['rows']]
+    assert desc['sort'] == 'score' and scores == sorted(scores, reverse=True) and scores[0] >= .5
+    asc = api.page('live-wick6x3', sort='score', direction='asc', limit=5)
+    assert asc['rows'][0]['entry_rules']['score'] == min(r['entry_rules']['score'] for r in api.ledger('live-wick6x3')['rows'])

@@ -81,8 +81,14 @@ def _ledger(track, directory, stamp, evidence_stamp):
 def page(track, *, sort='time', direction='desc', symbol='', offset=0, limit=50, directory=LEDGERS):
     value = ledger(track, directory)
     rows = [r for r in value['rows'] if not symbol or r['symbol'] == symbol]
-    key = 'entry_ms' if sort == 'time' else 'pnl'
-    rows = sorted(rows, key=lambda r: (r[key], r['entry_ms'], r['id']), reverse=direction == 'desc')
+    if sort == 'score':
+        # Saved entry score; rows without one sort last in descending order.
+        score = lambda r: (r.get('entry_rules') or {}).get('score')
+        rows = sorted(rows, key=lambda r: (score(r) if isinstance(score(r), (int, float)) and math.isfinite(score(r)) else -math.inf,
+                                           r['entry_ms'], r['id']), reverse=direction == 'desc')
+    else:
+        key = 'entry_ms' if sort == 'time' else 'pnl'
+        rows = sorted(rows, key=lambda r: (r[key], r['entry_ms'], r['id']), reverse=direction == 'desc')
     top = value['ranking'][0]['symbol'] if value['ranking'] else None
     focus = max((r for r in value['rows'] if r['symbol'] == top),
                 key=lambda r: (r['entry_ms'], r['id']), default=None)
@@ -206,7 +212,7 @@ def candles(track, trade, period, *, directory=LEDGERS, identities=IDENTITIES):
 def install(app):
     @app.get('/api/strategy-backtest')
     def history(track: str = Query(..., pattern='^(' + '|'.join(TRACKS) + ')$'),
-                sort: str = Query('time', pattern='^(time|pnl)$'),
+                sort: str = Query('time', pattern='^(time|pnl|score)$'),
                 direction: str = Query('desc', pattern='^(asc|desc)$'),
                 symbol: str = Query('', pattern=r'^([A-Z0-9]{1,32}USDT)?$'),
                 offset: int = Query(0, ge=0, le=100000), limit: int = Query(50, ge=1, le=100)):
