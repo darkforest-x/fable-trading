@@ -15,7 +15,9 @@ ROOT = Path(__file__).resolve().parents[2]
 A = ROOT / 'experiments/active'
 CONTROL = A / 'exp-monday-limit-close-slice-control-20261101-v1'
 SOURCES = {'live-wick6x3': (A / 'exp-monday-limit-close-survivor-paths-20261101-v5', 'near_monday_edge-2020', 6),
-           'live-wick3x3': (A / 'exp-monday-limit-close-survivor-paths-20261101-v7', 'near_monday_edge-2020', 3)}
+           'live-wick3x3': (A / 'exp-monday-limit-close-survivor-paths-20261101-v7', 'near_monday_edge-2020', 3),
+           'live-wick6x3hi': (A / 'exp-monday-limit-close-survivor-paths-20261101-v8', 'near_monday_edge-2020', 6)}
+BOOST = {'live-wick6x3hi': '评分≥0.76时保证金×1.5（观察账户：0.76由2025–26回测事后选出，2025年前没有这类单，未经检验）。'}
 CLOSE_EXITS = (0, 11, 12, 14)
 RULE = ('触价那根5分钟K线收盘时：评分≥0.5、收盘仍在1.618外且插出去的部分收回不到64%、离1.618不到30%，'
         '收盘市价进场。止盈周一近侧边界；止损开仓价−20%；触价后下一根1小时K线收盘仍未回到1.618以内则市价平，'
@@ -30,9 +32,9 @@ def csv_rows(path):
         return list(csv.DictReader(handle))
 
 
-def note(slots):
-    return (RULE + f'每笔保证金=已实现净值/{slots}，3倍，最多同时{slots}笔；Taker 5bp+10bp滑点进场，'
-            'Maker 2bp止盈，其他退出Taker 5bp+10bp；不含资金费。')
+def note(slots, track=None):
+    return (RULE + f'每笔保证金=已实现净值/{slots}，3倍，最多同时{slots}笔；' + BOOST.get(track, '') +
+            'Taker 5bp+10bp滑点进场，Maker 2bp止盈，其他退出Taker 5bp+10bp；不含资金费。')
 
 
 def ledger(track):
@@ -72,7 +74,7 @@ def _ledger(track, signature):
         rank['pnl'] += row['pnl']; rank['trades'] += 1
     if len(rows) != meta['funded'] or not math.isclose(sum(r['pnl'] for r in rows), meta['summary']['pnl'], abs_tol=1e-6):
         raise ValueError('live_wick_ledger_incomplete')
-    return dict(meta=dict(track=track, start=meta['start'], end=meta['end'], note=note(slots), limitation=LIMITATION,
+    return dict(meta=dict(track=track, start=meta['start'], end=meta['end'], note=note(slots, track), limitation=LIMITATION,
                          source='Binance', trades=len(rows), pnl=meta['summary']['pnl'],
                          source_commit=manifest['source_commit'], sources=[str(directory.relative_to(ROOT))],
                          basis='触价收盘市价进场 · 原始资金账本；百分比为净盈亏除以开仓名义金额，费用和滑点已扣。'),
@@ -100,13 +102,13 @@ def publish_booklet():
     for track, (directory, name, slots) in SOURCES.items():
         value = ledger(track)
         history = json.loads((directory / f'{name}-history.json').read_text())
-        history['meta'].update(track=track, note=note(slots) + LIMITATION)
+        history['meta'].update(track=track, note=note(slots, track) + LIMITATION)
         history['source_commit'] = value['meta']['source_commit']
         (out / f'{track}-history.json').write_text(json.dumps(history, ensure_ascii=False, separators=(',', ':')))
         m = json.loads((directory / 'manifest.json').read_text())['accounts']
         recent = m[name.replace('2020', '2025')]['summary']
         research['accounts'][track] = dict(
-            status='触价收盘进场 · 模拟运行', note=note(slots),
+            status='触价收盘进场 · 模拟运行', note=note(slots, track),
             detail=LIMITATION + f"2025年起1000U → {recent['end']:,.0f}U，最大回撤{recent['max_drawdown_pct']:.1f}%。",
             headers=['年份', '年度收益 %'], rows=history['yearly'],
             chart=dict(title='年度收益', unit='%', labels=[r[0] for r in history['yearly']], values=[r[1] for r in history['yearly']]),

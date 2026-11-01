@@ -109,3 +109,15 @@ class LiveWickTests(PaperFixture):
         self.assertGreaterEqual(r['pnl'], -1000/3)
         self.assertAlmostEqual(r['pnl'], 1000*settle_market(1, 92.5, 74., 'backstop')[2]/1e4)
         self.assertAlmostEqual(e.snapshot()['tracks']['live-wick3x3']['equity'], 1000+r['pnl'])
+
+    def test_high_score_account_boosts_only_from_076(self):
+        for score, margin in ((.7, 1000/6), (.8, 1000/6*1.5)):
+            with self.subTest(score=score):
+                self.tearDown(); self.setUp()
+                e = self.wick(score); self.set_bar(92., 92.5)
+                self.fire(e); self.scored(e)
+                hi = self.rows(e, "SELECT notional FROM positions WHERE track=8160")
+                base = self.rows(e, f"SELECT notional FROM positions WHERE track={WICK6_TRACK}")
+                self.assertAlmostEqual(hi[0]['notional'], margin*3)
+                self.assertAlmostEqual(base[0]['notional'], 500.)
+        self.assertEqual(e.snapshot()['live-wick6x3hi']['boost_from_score'], .76)

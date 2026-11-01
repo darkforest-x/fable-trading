@@ -3,16 +3,16 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const ui=require('../../yoyo/monitor/static/reclaim-strategy-book.js');
 const data=require('../../yoyo/monitor/static/strategy-booklet/research.json');
 const paper=require('../../yoyo/monitor/static/monday-reclaim-paper.js');
-test('all eleven accounts have separate selection and accessible booklet buttons',()=>{
+test('all twelve accounts have separate selection and accessible booklet buttons',()=>{
  const html=ui.pickerHTML(paper.TRACKS);
  for(const t of paper.TRACKS){assert.ok(html.includes(`data-strategy-select="${t}"`));assert.ok(html.includes(`data-strategy-book="${t}"`));assert.ok(html.includes(`data-strategy-backtest="${t}"`));assert.ok(data.accounts[t]);assert.doesNotThrow(()=>ui.researchHTML(data,t));}
- assert.equal((html.match(/<button /g)||[]).length,44);
+ assert.equal((html.match(/<button /g)||[]).length,48);
  for(const match of html.matchAll(/<button[^>]*>([\s\S]*?)<\/button>/g))assert.doesNotMatch(match[1],/<button/);
 });
 test('local account ordering defaults to spike and preserves valid user order across new accounts',()=>{
- const defaults=ui.accountOrder(null,paper.TRACKS);assert.equal(defaults[0],'spike');assert.equal(defaults.length,11);
+ const defaults=ui.accountOrder(null,paper.TRACKS);assert.equal(defaults[0],'spike');assert.equal(defaults.length,12);
  const saved=['v3add20','60','60','deleted'];const result=ui.accountOrder(saved,paper.TRACKS);
- assert.deepEqual(result.slice(0,3),['v3add20','60','spike']);assert.equal(new Set(result).size,11);assert.deepEqual(saved,['v3add20','60','60','deleted']);
+ assert.deepEqual(result.slice(0,3),['v3add20','60','spike']);assert.equal(new Set(result).size,12);assert.deepEqual(saved,['v3add20','60','60','deleted']);
  assert.deepEqual(ui.accountOrder({bad:1},paper.TRACKS),defaults);
  const moved=ui.moveAccount(defaults,'v3add20',0);assert.equal(moved[0],'v3add20');assert.equal(defaults[0],'spike');
  assert.deepEqual(ui.moveAccount(defaults,'unknown',0),defaults);assert.equal(ui.moveAccount(defaults,'spike',99).at(-1),'spike');
