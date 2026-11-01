@@ -15629,3 +15629,31 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Shorter windows than 60m are worse in every period. Longer windows win more and earn more per trade in 2025-2026 but not in 2020-2024 (the selection years), and add backstops and drawdown; choosing 240m now would be a choice made on the test years. 60m stays; 240m is a forward-test candidate (owner decision).'
+  - experiment_id: exp-monday-limit-close-survivor-paths-20261101-v5
+    source_repo: darkforest-x/fable-trading
+    source_commit: d7b0d938e0
+    status: complete
+    question: 'Owner 2026-11-01 "改成这个": the survivor rule with the stop 20 percent from the entry (E20 fills of the stop grid) at 6 slots x 3, from 1000U.'
+    single_variable: 'Stop (level 30 percent -> entry 20 percent) at a size where the stop fires before liquidation; the original rule''s implicit exclusion of closes 30 percent or more past the level made explicit (max_beyond_pct 30).'
+    result: 'Near edge from 2025: 1000 -> 5342U, DD 19.3, 254 trades, win 65.7 percent, 10 stop-outs at -20.3 percent, no liquidation; from 2020: 13660U, 382 of 398 taken. Range 0.5: 4794U DD 24.5 from 2025.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-survivor-paths-20261101-v5/manifest.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'First run (b0e3798d07) also traded 3 closes 33-37 percent past the level (QUSDT x2, PARTIUSDT, all losses): 3752U DD 36 from 2025. Those collapses were never tradable under the level-based stop; the rerun keeps the original event set (398). Current recommended version.'
+  - experiment_id: exp-monday-limit-close-survivor-paths-20261101-v6
+    source_repo: darkforest-x/fable-trading
+    source_commit: d7b0d938e0
+    status: complete
+    question: 'Owner 2026-11-01 "改成这个": the E20 survivor rule at 4 slots x 3 (75 percent notional), from 1000U.'
+    single_variable: 'Sizing only versus v5 (n6 -> n4 at 3x).'
+    result: 'Near edge from 2025: 10814U, DD 28.2, no liquidation; from 2020: 30820U, 374 of 398 taken. Range 0.5: 8748U DD 35.7 from 2025 (over the cap).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-survivor-paths-20261101-v6/manifest.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'First run with the 3 collapse closes: 6236U DD 51 from 2025. Size picked after seeing 2025-26; out-of-sample drawdown has run about 1.6 times the selection period.'

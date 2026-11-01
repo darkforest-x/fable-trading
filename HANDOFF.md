@@ -1,3 +1,9 @@
+## 2026-11-01 · Survivor slice switched to a -20% entry stop (research definition)
+
+- Owner: "那改成这个". Recommended research version is now: touch-close survivor entry unchanged, stop 20 percent from the entry (E20 fills of the stop grid), 6 slots x 3 so the stop fires before liquidation. `exp-monday-limit-close-survivor-paths-20261101-v5` (6 x 3) and `-v6` (4 x 3), builder d7b0d938e0.
+- Near edge from 2025: 6 x 3 1000 -> 5342U DD 19.3 (10 stop-outs at -20.3 percent); 4 x 3 10814U DD 28.2. From 2020: 13660U / 30820U. A first run also traded 3 closes 33-37 percent past the level (QUSDT x2, PARTIUSDT; all lost; DD 36 / 51): the old level-based stop could never place those, so `max_beyond_pct` 30 now excludes them explicitly.
+- Booklet updated to the E20 versions (outside the repo). No paper account or service change; forward paper remains the owner's decision.
+
 ## 2026-11-01 · Survivor slice: tighter stops lose, 60m stays; engine runs 10x faster with idle skipping
 
 - Owner: "测更紧止损", "60分钟未收回·市价平 为什么加这个逻辑 还有更好的逻辑吗", "为什么每次跑都要这么久". `exp-monday-limit-close-stop-grid-20261101-v1` and `exp-monday-limit-close-reclaim-window-20261101-v1` (`monday_limit_close_stop_grid.py`, NautilusTrader, 263 symbols, both paths, 0 errors; L30 / L18 / W60 parity exact).
