@@ -161,6 +161,10 @@ def summarize(config, workers):
         got = list(ex.map(cr.load_symbol, [(str(exp), s, slip['market_entry'], slip['non_target_exit']) for s in syms], chunksize=4))
     t = pd.concat([g[1] for g in got if len(g[1])], ignore_index=True)
     t = t[~t.event.isin(BAD_EVENTS) & (t.entry_t >= pd.Timestamp('2020-01-01', tz='UTC'))].copy()
+    if cfg.get('common_with'):
+        # Same events for every variant: entry-based stops also keep the few closes more than 30 percent past the level,
+        # which the level-based baseline cannot place.
+        t = t[t.event.isin(set(t.event[t.variant == cfg['common_with']]))].copy()
     wrong = {}
     for p in ('ohlc', 'olhc'):
         for s in syms:
