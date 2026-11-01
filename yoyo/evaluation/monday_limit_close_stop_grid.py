@@ -52,7 +52,7 @@ def survivors(cfg):
     return pd.concat([pd.read_csv(ROOT/f) for f in files]).drop_duplicates('event').reset_index(drop=True)
 
 
-def jobs(cfg):
+def extended_jobs(cfg):
     """Extended jobs where given (bars appended after the frozen series, same indexes), else the frozen Codex job."""
     return json.loads((ROOT/cfg['jobs']).read_text()) if cfg.get('jobs') else {}
 
@@ -72,7 +72,7 @@ def process(symbol, intrabar, exp, cfg, events):
     from yoyo.evaluation.monday_limit_reclaim_inputs import load_job
     from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy, run_native
     ccfg = json.loads((CODEX/'config.json').read_text())
-    job = jobs(cfg).get(symbol) or json.loads((CODEX/'symbols'/symbol/'identity.json').read_text())['job']
+    job = extended_jobs(cfg).get(symbol) or json.loads((CODEX/'symbols'/symbol/'identity.json').read_text())['job']
     if job['group'] != 'crypto_5m':
         return dict(symbol=symbol, skipped=job['group'])
     t0 = time.perf_counter()
@@ -219,7 +219,7 @@ def summarize(config, workers):
     cfg = json.loads(config.read_text())
     cr.committed('yoyo/evaluation/monday_limit_close_stop_grid.py')
     syms = sorted(set(survivors(cfg).symbol))
-    jb = jobs(cfg)
+    jb = extended_jobs(cfg)
     missing = [(p, s) for p in ('ohlc', 'olhc') for s in syms if not (exp/p/'symbols'/s/'done.json').exists()]
     if missing:
         raise RuntimeError(f'Incomplete run: {len(missing)}')
