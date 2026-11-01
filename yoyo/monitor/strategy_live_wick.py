@@ -1,7 +1,8 @@
 """Project the saved live-wick backtest paths without replaying trades (owner 2026-11-01).
 
-Sources: exp-monday-limit-close-survivor-paths-20261101-v5 (6 slots x 3) and -v7 (3 slots x 3), near Monday edge,
-1000 USDT from 2020-01-01, one tie seed. Entries are the touch-close survivors of the stop grid's E20 fills
+Sources: exp-monday-limit-close-survivor-paths-20261101-v10 (6 slots x 3), -v11 (3 slots x 3), -v12 (6x3, 1.5x from
+score 0.76) and -v13 (3x3, close >= 1.5 percent past the level): v5 / v7 / v8 / v9 continued through the October 2026
+extension (owner "应该融合进整体的回测数据中吧"), near Monday edge, 1000 USDT from 2020-01-01, one tie seed. Entries are the touch-close survivors of the stop grid's E20 fills
 (NautilusTrader, worse of two intrabar paths); amounts and P&L are the saved ledger facts.
 """
 import csv
@@ -14,26 +15,25 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 A = ROOT / 'experiments/active'
 CONTROL = A / 'exp-monday-limit-close-slice-control-20261101-v1'
-SOURCES = {'live-wick6x3': (A / 'exp-monday-limit-close-survivor-paths-20261101-v5', 'near_monday_edge-2020', 6),
-           'live-wick3x3': (A / 'exp-monday-limit-close-survivor-paths-20261101-v7', 'near_monday_edge-2020', 3),
-           'live-wick6x3hi': (A / 'exp-monday-limit-close-survivor-paths-20261101-v8', 'near_monday_edge-2020', 6),
-           'live-wick3x3far': (A / 'exp-monday-limit-close-survivor-paths-20261101-v9', 'near_monday_edge-2020', 3)}
+SOURCES = {'live-wick6x3': (A / 'exp-monday-limit-close-survivor-paths-20261101-v10', 'near_monday_edge-2020', 6),
+           'live-wick3x3': (A / 'exp-monday-limit-close-survivor-paths-20261101-v11', 'near_monday_edge-2020', 3),
+           'live-wick6x3hi': (A / 'exp-monday-limit-close-survivor-paths-20261101-v12', 'near_monday_edge-2020', 6),
+           'live-wick3x3far': (A / 'exp-monday-limit-close-survivor-paths-20261101-v13', 'near_monday_edge-2020', 3)}
 BOOST = {'live-wick6x3hi': '评分≥0.76时保证金×1.5（观察账户：0.76由2025–26回测事后选出，2025年前没有这类单，未经检验）。',
          'live-wick3x3far': '只做收盘离1.618至少1.5%的单（观察账户：门槛由回测事后发现，2020–24与2025–26两段都成立，待前向检验）。'}
 CLOSE_EXITS = (0, 11, 12, 14)
 RULE = ('触价那根5分钟K线收盘时：评分≥0.5、收盘仍在1.618外且插出去的部分收回不到64%、离1.618不到30%，'
         '收盘市价进场。止盈周一近侧边界；止损开仓价−20%；触价后下一根1小时K线收盘仍未回到1.618以内则市价平，'
         '回到以内则止损移到1.618。')
-# Booklet supplements (owner 2026-11-01 "这些数据整合一下补充到对应的策略小册 … 先不做倍投了").
-OCTOBER = A / 'exp-monday-limit-live-october-20261101-v1'
-STREAKS = A / 'exp-monday-limit-live-streaks-20261101-v1'
+# Booklet supplement (owner 2026-11-01 "这些数据整合一下补充到对应的策略小册 … 先不做倍投了"); October is in the paths.
 DOUBLING = A / 'exp-monday-limit-live-martingale-20261101-v1'
-# track -> (streak stream, doubling account or None, doubling caps that fit the margin limit)
-SUPPLEMENT = {'live-wick6x3': ('live-wick', 'live-wick|6x3', (1, 2)), 'live-wick3x3': ('live-wick', 'live-wick|3x3', (1,)),
-              'live-wick6x3hi': ('live-wick', None, ()), 'live-wick3x3far': ('live-wick-far', 'live-wick-far|3x3', (1,))}
+# track -> (doubling account or None, doubling caps that fit the margin limit)
+SUPPLEMENT = {'live-wick6x3': ('live-wick|6x3', (1, 2)), 'live-wick3x3': ('live-wick|3x3', (1,)),
+              'live-wick6x3hi': (None, ()), 'live-wick3x3far': ('live-wick-far|3x3', (1,))}
 LIMITATION = ('live-标识可在收盘后执行的规则，当前仅模拟运行，不下真单。历史成交来自Binance 5分钟数据的较差路径，'
               '与OKX逐分钟模拟存在差异；固定同刻排序不等于实时到达顺序。入场条件在2020–2024选出、2025–2026检验，'
-              '止损和仓位是看过2025–2026后定的；不代表未来收益。')
+              '止损和仓位是看过2025–2026后定的；不代表未来收益。2026-09-21之后的成交来自币安每日归档补数，同一规则同一框架；'
+              '币安没有发布10月28日数据，10-26当周只看到10-27收盘，10-28至10-31的触价没有计入。')
 
 
 def csv_rows(path):
@@ -108,22 +108,22 @@ def _multiple(v):
     return f"{v['final_median']:.2f}倍 · 回撤{v['dd_max']:.0f}%"
 
 
+def _streak(flags):
+    best = cur = 0
+    for f in flags:
+        cur = cur+1 if f else 0
+        best = max(best, cur)
+    return best
+
+
 def sections(track):
-    """October 2026 out-of-period replay, losing streaks and the loss-doubling study, from their committed summaries."""
-    month = json.loads((OCTOBER / 'summary.json').read_text())['results'][track]
-    trades = sorted(month['trades'], key=lambda t: t['entry'])
-    october = dict(
-        title='2026年10月补跑 · 规则冻结后的新月份',
-        note=(f"币安5分钟日归档补到10月底，用原代码在原536币池重建事件、评分和成交；8–9月复算的评分与原回测一致，33笔成交逐笔一致。"
-              f"1000U起：{month['funded']}笔，赚{month['wins']}笔，月末{month['final']:,.0f}U，最大回撤{month['max_dd_pct']:.1f}%。"
-              '币安没有发布10月28日数据，10-26当周只看到10-27收盘，10-28至10-31的触价没有计入。单月样本小，只作新月份参考。'),
-        headers=['开仓 UTC', '币种', '方向', '评分', '离1.618', '单笔净收益', '出场', '盈亏 U'],
-        rows=[[t['entry'][5:], t['symbol'], t['side'], f"{t['score']:.2f}", f"{t['beyond_pct']:.2f}%", f"{t['net_pct']:+.2f}%",
-               t['exit_reason'], f"{t['pnl']:+.2f}"] for t in trades])
-    stream, account, caps = SUPPLEMENT[track]
-    st = json.loads((STREAKS / 'summary.json').read_text())['results']['streams'][stream]
-    rows = [['最长连续亏损（2020起 / 2025起）', f"{st['from2020']['streaks']['losses']}笔 / {st['from2025']['streaks']['losses']}笔"],
-            ['最长连续−20%止损', f"{st['from2020']['streaks']['backstops']}笔"]]
+    """Losing streaks of the account's own settlements (entry order) and the loss-doubling study, which is not adopted."""
+    value = ledger(track)
+    rows_ = sorted(value['rows'], key=lambda r: (r['entry_ms'], r['event']))
+    since = [r for r in rows_ if r['entry_ms'] >= 1735689600000]  # 2025-01-01 UTC
+    rows = [['最长连续亏损（2020起 / 2025起）', f"{_streak(r['pnl'] < 0 for r in rows_)}笔 / {_streak(r['pnl'] < 0 for r in since)}笔"],
+            ['最长连续−20%止损', f"{_streak(r['exit_reason'] == 1 for r in rows_)}笔"]]
+    account, caps = SUPPLEMENT[track]
     if account:
         d = json.loads((DOUBLING / 'summary.json').read_text())['results']['accounts'][account]
         for c in (0,)+caps:
@@ -131,13 +131,10 @@ def sections(track):
             label = '不倍投' if c == 0 else f'亏后翻倍，最多{c}次'
             rows.append([f'{label} · 2025起', _multiple(d['from2025']['variants'][key])])
             rows.append([f'{label} · 2020–24', _multiple(d['y2020_2024']['variants'][key])])
-        dbl = month.get('doubling', {})
-        rows.append(['2026年10月 不倍投 / 翻倍1次', f"{month['final']:,.0f}U / {dbl['x2_L1']['final_multiple']*1000:,.0f}U"
-                     if 'x2_L1' in dbl else f"{month['final']:,.0f}U / —"])
-    note = ('按开仓顺序数连续亏损，不考虑同时持仓。倍投指亏一笔后下一笔保证金按实际仓位翻倍、赢一笔复原。'
-            '回测里倍投收益更高，但回撤和单笔亏损一起放大，且没有随机翻倍对照；2026年10月止损紧跟在一笔亏损后，翻倍反而更差。'
+    note = ('连续亏损按本账户实际成交、按开仓顺序数，含补进的10月。倍投指亏一笔后下一笔保证金按实际仓位翻倍、赢一笔复原，'
+            '测算期到2026-09（不含10月）：收益更高，但回撤和单笔亏损一起放大，且没有随机翻倍对照；把10月单独从1000U算，翻倍反而更差。'
             + ('' if account else '本账户按评分加仓，未单独测倍投。') + 'Owner 2026-11-01决定先不做倍投，模拟盘维持原仓位。')
-    return [october, dict(title='连续亏损与倍投 · 已研究，暂不采用', note=note, headers=['项目', '结果'], rows=rows)]
+    return [dict(title='连续亏损与倍投 · 已研究，暂不采用', note=note, headers=['项目', '结果'], rows=rows)]
 
 
 def publish_booklet():
@@ -160,8 +157,7 @@ def publish_booklet():
             controls=controls(), sections=sections(track),
             sources=[dict(path=str(directory.relative_to(ROOT)) + '/manifest.json', commit=value['meta']['source_commit'],
                           selection=f'{name}; {value["meta"]["trades"]} funded settlements')]
-            + [dict(path=str(d.relative_to(ROOT)) + '/summary.json', selection=label)
-               for d, label in ((OCTOBER, '2026-10 replay'), (STREAKS, 'losing streaks'), (DOUBLING, 'loss doubling, not adopted'))])
+            + [dict(path=str(DOUBLING.relative_to(ROOT)) + '/summary.json', selection='loss doubling, not adopted')])
     (out / 'research.json').write_text(json.dumps(research, ensure_ascii=False, indent=2))
 
 

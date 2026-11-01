@@ -15769,3 +15769,59 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Binance has no 2026-10-28 daily archive (404 for every symbol); the unchanged inputs end week 2026-10-26 monitoring at that break, so touches 10-28..10-31 are not seen (10-31 also missing for 108 symbols). 95 later listings left out as in the backtest. Binance bars, not the OKX paper feed. live-allin3 not included. First two scoring runs failed parity (pandas 3 microsecond epochs in cluster24; 626-symbol population) and were rerun.'
+  - experiment_id: exp-monday-limit-close-survivor-paths-20261101-v10
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9074d151c1
+    status: complete
+    question: 'Owner 2026-11-01 "应该融合进整体的回测数据中吧": live-wick6x3 path (v5) continued through the October 2026 extension as one account.'
+    single_variable: 'None (period only). Saved v5 rows unchanged; survivors after the frozen ledger appended from exp-monday-limit-live-october-20261101-v1 (same rule, E20 NautilusTrader fills).'
+    result: 'Saved rows identical to v5; 400 funded from 2020, last exit 2026-10-27 15:00. From 2020 16,438U DD19.3; from 2025 6,428U DD19.3. Booklet and backtest replay of live-wick6x3 now read this path.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-survivor-paths-20261101-v10/manifest.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'No 2026-10-28 Binance daily archive; touches 2026-10-28..10-31 not covered. Near Monday edge only.'
+  - experiment_id: exp-monday-limit-close-survivor-paths-20261101-v11
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9074d151c1
+    status: complete
+    question: 'Owner 2026-11-01 "应该融合进整体的回测数据中吧": live-wick3x3 path (v7) continued through the October 2026 extension as one account.'
+    single_variable: 'None (period only). Saved v7 rows unchanged; survivors after the frozen ledger appended from exp-monday-limit-live-october-20261101-v1 (same rule, E20 NautilusTrader fills).'
+    result: 'Saved rows identical to v7; 387 funded from 2020, last exit 2026-10-27 15:00. From 2020 85,787U DD36.6; from 2025 28,171U DD36.6. Booklet and backtest replay of live-wick3x3 now read this path.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-survivor-paths-20261101-v11/manifest.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'No 2026-10-28 Binance daily archive; touches 2026-10-28..10-31 not covered. Near Monday edge only.'
+  - experiment_id: exp-monday-limit-close-survivor-paths-20261101-v12
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9074d151c1
+    status: complete
+    question: 'Owner 2026-11-01 "应该融合进整体的回测数据中吧": live-wick6x3hi path (v8) continued through the October 2026 extension as one account.'
+    single_variable: 'None (period only). Saved v8 rows unchanged; survivors after the frozen ledger appended from exp-monday-limit-live-october-20261101-v1 (same rule, E20 NautilusTrader fills).'
+    result: 'Saved rows identical to v8; 400 funded from 2020, last exit 2026-10-27 15:00. From 2020 19,993U DD19.3; from 2025 7,818U DD19.3. Booklet and backtest replay of live-wick6x3hi now read this path.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-survivor-paths-20261101-v12/manifest.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'No 2026-10-28 Binance daily archive; touches 2026-10-28..10-31 not covered. Near Monday edge only.'
+  - experiment_id: exp-monday-limit-close-survivor-paths-20261101-v13
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9074d151c1
+    status: complete
+    question: 'Owner 2026-11-01 "应该融合进整体的回测数据中吧": live-wick3x3far path (v9) continued through the October 2026 extension as one account.'
+    single_variable: 'None (period only). Saved v9 rows unchanged; survivors after the frozen ledger appended from exp-monday-limit-live-october-20261101-v1 (same rule, E20 NautilusTrader fills).'
+    result: 'Saved rows identical to v9; 189 funded from 2020, last exit 2026-10-21 10:50. From 2020 90,852U DD28.6; from 2025 20,636U DD28.6. Booklet and backtest replay of live-wick3x3far now read this path.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-survivor-paths-20261101-v13/manifest.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'No 2026-10-28 Binance daily archive; touches 2026-10-28..10-31 not covered. Near Monday edge only.'

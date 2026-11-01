@@ -22,6 +22,10 @@ from . import strategy_backtest_evidence as evidence
 ROOT = Path(__file__).resolve().parents[2]
 LEDGERS = ROOT / 'experiments/active/exp-strategy-booklet-paths-20261027-v1'
 IDENTITIES = ROOT / 'experiments/active/exp-monday-limit-reclaim-20261024-v1/symbols'
+# Bars after the frozen series (Binance daily archives, exp-monday-limit-live-october-20261101-v1) for the live-wick
+# paths that continue past it; read only, appended after the identity's own files.
+EXTENSION = ROOT / 'experiments/active/exp-monday-limit-live-october-20261101-v1/symbols'
+EXTENDED = ('live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far')
 TRACKS = ('60', '5', 'v3', 'v3add', 'spike', 'v3lock', 'allin3', 'v3add20', 'live-allin3', 'live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far')
 SAVED_FILLS = ('live-allin3', 'live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far')
 PERIODS = {'1m': 60000, '2m': 120000, '3m': 180000, '5m': 300000, '15m': 900000, '1H': 3600000, '4H': 14400000,
@@ -132,7 +136,7 @@ def aggregate(frame, step, native):
 
 
 @lru_cache(maxsize=12)
-def _candles(identity_path, identity_stamp, source_stamps, start, end, period):
+def _candles(identity_path, identity_stamp, source_stamps, start, end, period, extra=()):
     import pandas as pd
     import numpy as np
     job = json.loads(Path(identity_path).read_text())['job']
@@ -140,7 +144,7 @@ def _candles(identity_path, identity_stamp, source_stamps, start, end, period):
         raise ValueError('unsupported_saved_source')
     native = int(job['execution_minutes']) * 60000
     chunks = []
-    for path in job['paths']:
+    for path in [*job['paths'], *extra]:
         # Explicit identity paths retain migrated symlinks. No directory scan,
         # network fallback, data write or content hashing on an offline disk.
         for part in pd.read_csv(path, usecols=['ts', 'open', 'high', 'low', 'close', 'volume'],
@@ -195,14 +199,16 @@ def candles(track, trade, period, *, directory=LEDGERS, identities=IDENTITIES):
     if job['symbol'] != row['symbol']:
         raise ValueError('source_symbol_mismatch')
     row = dict(row, fills=row['fills'] if track in SAVED_FILLS else evidence.fill_geometry(track, row, directory, job['execution_minutes']))
-    stamps = tuple((Path(p).stat().st_size, Path(p).stat().st_mtime_ns) for p in job['paths'])
+    extension = Path(EXTENSION) / row['symbol'] / 'new_bars.csv.gz'
+    extra = (str(extension),) if track in EXTENDED and extension.is_file() else ()
+    stamps = tuple((Path(p).stat().st_size, Path(p).stat().st_mtime_ns) for p in [*job['paths'], *extra])
     start = row['entry_ms'] // step * step - 240 * step
     end = row['exit_ms'] // step * step + 81 * step
     from .monday_fib import week_window
     source_start = min(start, week_window(row['entry_ms'])['start'])
     minute_view = step < int(job['execution_minutes']) * 60000
     value = _candles(str(identity), identity.stat().st_mtime_ns, stamps, source_start, end,
-                     '5m' if minute_view else period)
+                     '5m' if minute_view else period, extra)
     if minute_view:
         from yoyo.data.binance_minute_window import read
         import pandas as pd

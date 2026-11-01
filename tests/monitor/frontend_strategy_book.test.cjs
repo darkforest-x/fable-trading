@@ -52,7 +52,6 @@ test('booklet supplements render as escaped collapsible tables after the control
  assert.ok(html.indexOf('同条件随机入场对照')<html.indexOf('&lt;b&gt;t'));
  for(const t of ['live-wick6x3','live-wick3x3','live-wick6x3hi','live-wick3x3far','live-allin3'])
   assert.match(ui.researchHTML(data,t),/倍投暂不采用|已研究，暂不采用/);
- assert.match(ui.researchHTML(data,'live-wick6x3'),/2026年10月补跑/);
 });
 
 test('v3add20 uses the corrected dynamic-margin study and labels historical BE0',()=>{

@@ -146,3 +146,13 @@ def test_live_wick_sorts_by_saved_entry_score():
     assert desc['sort'] == 'score' and scores == sorted(scores, reverse=True) and scores[0] >= .5
     asc = api.page('live-wick6x3', sort='score', direction='asc', limit=5)
     assert asc['rows'][0]['entry_rules']['score'] == min(r['entry_rules']['score'] for r in api.ledger('live-wick6x3')['rows'])
+
+
+def test_live_wick_october_trade_charts_read_the_extension_bars():
+    rows = api.ledger('live-wick6x3')['rows']
+    october = [r for r in rows if r['entry_ms'] >= 1790812800000]  # 2026-10-01 UTC
+    assert len(october) == 17
+    value = api.candles('live-wick6x3', october[0]['id'], '15m')
+    times = [c['time'] for c in value['candles']]
+    assert times[0] <= october[0]['entry_ms'] and times[-1] >= october[0]['exit_ms'] - 900000
+

@@ -1,3 +1,9 @@
+## 2026-11-01 · live-wick backtests now run through 2026-10-27 as one account
+
+- Owner: "我怎么没看到呢，应该融合进整体的回测数据中吧！… 收益热力图我都没看到10月份的". The October replay had been a separate 1000U account in an extra table. Now `exp-monday-limit-close-survivor-paths-20261101-v10`..`v13` continue v5 / v7 / v8 / v9: saved rows identical, then 18 new fills (ARKUSDT 2026-09-30 + 17 in October; far: 8) from `exp-monday-limit-live-october-20261101-v1`. Booklets (curve, monthly heatmap, yearly) and the backtest replay read the new paths; replay charts append the extension bars (`strategy_backtest.EXTENSION`).
+- From 2020: 6x3 13,660 → 16,438U, 3x3 60,786 → 85,787U, 6x3hi 16,509 → 19,993U, far 81,145 → 90,852U; drawdowns unchanged (19.3 / 36.6 / 19.3 / 28.6). October 6x3 +13.1 percent.
+- Data: frozen series to 2026-09-23; extension to 2026-10-31 but Binance has no 2026-10-28 archive (all symbols) and 108 symbols lack 10-31, so touches 10-28..10-31 are missing. The separate October table was removed; the streak / doubling table stays (doubling not adopted). Learning: `a-new-backtest-period-continues-the-saved-account.md`.
+
 ## 2026-11-01 · live booklets: October replay, losing streaks, doubling not adopted
 
 - Owner: "这些数据整合一下补充到对应的策略小册 … 然后先不做倍投了". Each live-wick booklet gets two collapsible tables built from the committed summaries (`strategy_live_wick.sections`): the October 2026 replay (trade list, month total, data limits) and losing streaks + loss-doubling results marked "已研究，暂不采用". live-allin3 gets its streak table (422 trades, 52.1 percent, longest 9 losses, 2 backstops).

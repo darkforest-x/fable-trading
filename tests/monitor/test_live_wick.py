@@ -138,12 +138,22 @@ class LiveWickTests(PaperFixture):
 
 
 class LiveWickBookletTests(unittest.TestCase):
-    def test_sections_match_the_committed_summaries(self):
+    def test_paths_continue_the_saved_account_through_october(self):
+        import pandas as pd
         from yoyo.monitor import strategy_live_wick as w
-        month = json.loads((w.OCTOBER / 'summary.json').read_text())['results']
+        for track, old in (('live-wick6x3', 'v5'), ('live-wick3x3', 'v7'), ('live-wick6x3hi', 'v8'), ('live-wick3x3far', 'v9')):
+            directory, name, _ = w.SOURCES[track]
+            saved = pd.read_csv(w.A / f'exp-monday-limit-close-survivor-paths-20261101-{old}' / f'{name}-ledger.csv.gz')
+            now = pd.read_csv(directory / f'{name}-ledger.csv.gz')
+            self.assertTrue(now.trade_id.iloc[:len(saved)].reset_index(drop=True).equals(saved.trade_id))
+            self.assertLess(float(abs(now.equity.iloc[:len(saved)].to_numpy()-saved.equity.to_numpy()).max()), 1e-6)
+            history = json.loads((w.ROOT / 'yoyo/monitor/static/strategy-booklet' / f'{track}-history.json').read_text())
+            self.assertIn('2026-10', [m[0] for m in history['monthly']])
+
+    def test_section_streaks_come_from_the_account_and_doubling_is_not_adopted(self):
+        from yoyo.monitor import strategy_live_wick as w
         for track in w.SOURCES:
-            october, streak = w.sections(track)
-            self.assertEqual(len(october['rows']), month[track]['funded'])
-            self.assertAlmostEqual(sum(float(r[-1]) for r in october['rows']), month[track]['final']-1000, delta=.05)
-            self.assertIn('先不做倍投', streak['note'])
-        self.assertEqual(len(w.sections('live-wick6x3hi')[1]['rows']), 2)  # weighted account: streaks only, no doubling row
+            (section,) = w.sections(track)
+            self.assertIn('先不做倍投', section['note'])
+            self.assertRegex(section['rows'][0][1], r'^\d+笔 / \d+笔$')
+        self.assertEqual(len(w.sections('live-wick6x3hi')[0]['rows']), 2)  # weighted account: streaks only, no doubling row
