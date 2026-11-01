@@ -1,0 +1,106 @@
+{
+  "experiment_id": "exp-btceth-5m-alt-response-20261101-v1",
+  "generated_at": "2026-11-01T03:28:14.313044+00:00",
+  "figures": [
+    {
+      "path": "artifacts/btceth-5m-alt-response-20261101/BTC_lower_first_reclaim.png",
+      "size_bytes": 304987,
+      "width": 2700,
+      "height": 1800,
+      "decoded": true,
+      "visually_inspected": true
+    },
+    {
+      "path": "artifacts/btceth-5m-alt-response-20261101/BTC_upper_first_reclaim.png",
+      "size_bytes": 298267,
+      "width": 2700,
+      "height": 1800,
+      "decoded": true,
+      "visually_inspected": true
+    },
+    {
+      "path": "artifacts/btceth-5m-alt-response-20261101/ETH_lower_first_reclaim.png",
+      "size_bytes": 277980,
+      "width": 2700,
+      "height": 1800,
+      "decoded": true,
+      "visually_inspected": true
+    },
+    {
+      "path": "artifacts/btceth-5m-alt-response-20261101/ETH_upper_first_reclaim.png",
+      "size_bytes": 285286,
+      "width": 2700,
+      "height": 1800,
+      "decoded": true,
+      "visually_inspected": true
+    },
+    {
+      "path": "artifacts/btceth-5m-alt-response-20261101/反应总览.png",
+      "size_bytes": 452889,
+      "width": 2700,
+      "height": 1650,
+      "decoded": true,
+      "visually_inspected": true
+    },
+    {
+      "path": "artifacts/btceth-5m-alt-response-20261101/反应总览_当根收回.png",
+      "size_bytes": 473420,
+      "width": 2700,
+      "height": 1650,
+      "decoded": true,
+      "visually_inspected": true
+    }
+  ],
+  "figure_note": "All-touch and pure-reclaim overviews use matched subsets; paths normalize to the previous bar close and reverse the upper-side sign. Tables of after-period changes use touch-bar close. Examples are the first chronological pure event per leader and side; missing AKE is a dash. No intrabar touch time is inferred.",
+  "evidence_files": [
+    "config.json",
+    "summary.json",
+    "description.json",
+    "source_receipt.json",
+    "seed_receipt.json",
+    "verification.json",
+    "events.csv",
+    "coin_observations.csv.gz",
+    "controls.csv.gz",
+    "strength_rank_pairs.csv",
+    "by_coin.csv",
+    "paths.csv",
+    "path_values.json"
+  ],
+  "verification": {
+    "events": 78,
+    "coin_event_rows": 1404,
+    "scalar_checks": 12474,
+    "max_absolute_error": 0.0,
+    "matched_control_event_rows": 5854,
+    "source_csv_equals_frozen": true,
+    "sources_unchanged": true,
+    "tests": "3 passed: NYMonday completeness, first-ready/cooldown/rearm, future-mutation invariance",
+    "control_note": "Retrospective shock-free background comparison; no causal or tradable-alpha claim.",
+    "no_execution_or_fee_calculation": true,
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "code_commits": {
+    "event_builder": "583db266df",
+    "final_event_features": "45b29f6fd3",
+    "independent_verifier": "1d5ab14698",
+    "charts": "48a9c135b1",
+    "robust_description": "b3a1e38100"
+  },
+  "notion_url": "https://app.notion.com/p/40b8856479af810ebcddfd882b898b09",
+  "training_eligible": false,
+  "production_eligible": false,
+  "own_registry_records_valid": true,
+  "reuse_commands": [
+    "python3 -m yoyo.evaluation.btceth_alt_response --describe",
+    "python3 -m yoyo.evaluation.btceth_alt_response_charts",
+    "python3 -m yoyo.evaluation.btceth_alt_response_charts --pure-only"
+  ],
+  "computation_commands": [
+    "python3 -m yoyo.evaluation.btceth_alt_response",
+    "python3 -m yoyo.evaluation.btceth_alt_response_verify",
+    "python3 -m pytest -q tests/evaluation/test_btceth_alt_response.py"
+  ],
+  "reproduction_note": "Reuse completed results by default. Main computation intentionally refuses to overwrite an existing summary. Source preparation/finalization use the committed source module and configuration; historical input CSV and frozen snapshots retained locally. No need to fetch or replay unchanged data."
+}

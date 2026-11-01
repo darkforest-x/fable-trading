@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-btceth-5m-alt-response-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 583db266df
+    status: inconclusive
+    question: Observe altcoin responses around BTC/ETH native 5m Monday 1.618 penetrations, separating same-bar pure wick reclaims and failed closes.
+    single_variable: Descriptive event study using the owner-selected 5m native levels and frozen prior top20 universe; no trade execution or strategy parameter search.
+    result: 78 events on 28 UTC days, including 42 pure reclaims on 23 days. Pure events show 81.57 percent same-direction alt breadth, typical volume 1.65x and range 1.35x; own fresh 1.618 crosses only 3.22 percent. Paired 39-event 30m reversal excess is 0.049pp with day-bootstrap CI [-0.176,0.295]; no reliable subsequent edge. BTC upper and ETH upper means differ and must remain separate.
+    artifacts: [btceth-5m-alt-response-20261101-v1]
+    canonical_report: experiments/active/exp-btceth-5m-alt-response-20261101-v1/delivery.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 349356 native OKX 5m bars across 20 coins, September-October 2026. Shared cache reused and missing prefixes fetched with the existing fetcher; AKE leading history missing, no internal gaps. Scalar verification 12474 checks, zero difference; three behavioral tests pass. Current retrospective universe, only 28 event days, correlated BTC/ETH events, same-bar intrabar order unknown. No fills, PnL or fees. All beta-adjusted strength-ranking intervals cross zero. Six figures visually checked. Notion 40b8856479af810ebcddfd882b898b09.
+
   - experiment_id: exp-eth-reclaim-trade-charts-20261101-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 4bd00d1118

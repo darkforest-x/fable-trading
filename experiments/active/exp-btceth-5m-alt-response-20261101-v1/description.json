@@ -1,0 +1,171 @@
+{
+  "pure_direction_rows": [
+    {
+      "leader": "BTC",
+      "side": -1,
+      "events": 13,
+      "days": 9,
+      "same_direction_share": 0.7863247863247863,
+      "median_volume_ratio": 1.6195747044033584,
+      "median_range_ratio": 1.3491271140207222,
+      "actual_alt_return_5m": 0.07051455296715047,
+      "actual_alt_return_15m": 0.11207073097508514,
+      "actual_alt_return_30m": 0.21917627455337219,
+      "actual_alt_return_60m": 0.24960660267603785
+    },
+    {
+      "leader": "BTC",
+      "side": 1,
+      "events": 11,
+      "days": 10,
+      "same_direction_share": 0.8116458704694,
+      "median_volume_ratio": 2.7886676695045405,
+      "median_range_ratio": 1.6124270511500292,
+      "actual_alt_return_5m": 0.046473161444297036,
+      "actual_alt_return_15m": -0.07578890370824035,
+      "actual_alt_return_30m": 0.037332852797580716,
+      "actual_alt_return_60m": -0.18176037421026806
+    },
+    {
+      "leader": "ETH",
+      "side": -1,
+      "events": 10,
+      "days": 8,
+      "same_direction_share": 0.7862745098039217,
+      "median_volume_ratio": 2.1329154906628767,
+      "median_range_ratio": 1.4683779900000358,
+      "actual_alt_return_5m": -0.07183604830208354,
+      "actual_alt_return_15m": -0.221215407297002,
+      "actual_alt_return_30m": -0.39771855786537946,
+      "actual_alt_return_60m": -0.3883080873390205
+    },
+    {
+      "leader": "ETH",
+      "side": 1,
+      "events": 8,
+      "days": 6,
+      "same_direction_share": 0.9060457516339869,
+      "median_volume_ratio": 1.1769135993222684,
+      "median_range_ratio": 1.3113005552621249,
+      "actual_alt_return_5m": 0.23971577312326126,
+      "actual_alt_return_15m": 0.006357123819616846,
+      "actual_alt_return_30m": 0.12028720099252467,
+      "actual_alt_return_60m": -0.042720632160214864
+    }
+  ],
+  "robust": {
+    "all": {
+      "events": 78,
+      "days": 28,
+      "volume_ratio_median": 1.6190306251791986,
+      "range_ratio_median": 1.3057475586911353,
+      "same_direction_share": 0.8534439416792358,
+      "own_touch_share": 0.40778448131389305,
+      "own_fresh_share": 0.04839115133232779,
+      "recovery_above_half_share": 0.3086664152840623,
+      "earlier_extreme_share": 0.21007206301323952,
+      "same_bar_extreme_share": 0.18342550695491872
+    },
+    "pure": {
+      "events": 42,
+      "days": 23,
+      "volume_ratio_median": 1.6541587330192915,
+      "range_ratio_median": 1.3491271140207222,
+      "same_direction_share": 0.8157485216308747,
+      "own_touch_share": 0.4088079676314971,
+      "own_fresh_share": 0.03221288515406161,
+      "recovery_above_half_share": 0.41814503579209455,
+      "earlier_extreme_share": 0.21957671957671956,
+      "same_bar_extreme_share": 0.20409274821039528
+    },
+    "failed": {
+      "events": 36,
+      "days": 18,
+      "volume_ratio_median": 1.4323682134149425,
+      "range_ratio_median": 1.1733223272510056,
+      "same_direction_share": 0.8974219317356571,
+      "own_touch_share": 0.4065904139433551,
+      "own_fresh_share": 0.06726579520697168,
+      "recovery_above_half_share": 0.18094135802469136,
+      "earlier_extreme_share": 0.1989832970225127,
+      "same_bar_extreme_share": 0.15931372549019607
+    }
+  },
+  "pure_strength_ranks": {
+    "recovery": {
+      "difference": {
+        "n": 42,
+        "days": 23,
+        "mean": 0.040632153549829464,
+        "median": -0.02104017544656885,
+        "day_bootstrap95": [
+          -0.16318762269515585,
+          0.2690274255171786
+        ]
+      },
+      "residual_difference": {
+        "n": 42,
+        "days": 23,
+        "mean": 0.055782780475439026,
+        "median": -0.0735422762582049,
+        "day_bootstrap95": [
+          -0.12136786882713023,
+          0.24874470262962106
+        ]
+      }
+    },
+    "relative_pre30": {
+      "difference": {
+        "n": 42,
+        "days": 23,
+        "mean": -0.1796958054290554,
+        "median": -0.026722542265879348,
+        "day_bootstrap95": [
+          -0.3609158493213364,
+          -0.012449490645011994
+        ]
+      },
+      "residual_difference": {
+        "n": 42,
+        "days": 23,
+        "mean": -0.12334836596744195,
+        "median": 0.0628961311754781,
+        "day_bootstrap95": [
+          -0.29525794278094736,
+          0.042799652346286174
+        ]
+      }
+    },
+    "relative_touch": {
+      "difference": {
+        "n": 42,
+        "days": 23,
+        "mean": 0.07377426188580853,
+        "median": 0.046024286043108646,
+        "day_bootstrap95": [
+          -0.11026039486327072,
+          0.325854070947607
+        ]
+      },
+      "residual_difference": {
+        "n": 42,
+        "days": 23,
+        "mean": 0.04576600761536035,
+        "median": -0.03823553304122195,
+        "day_bootstrap95": [
+          -0.13267008633545369,
+          0.2798257573975741
+        ]
+      }
+    }
+  },
+  "eth_upper_leave_one_day_out_30m_reversal_mean_range": [
+    0.2003021602016719,
+    0.5481889939747455
+  ],
+  "cohort_counts": {
+    "17": 28,
+    "18": 50
+  },
+  "all_after_returns_are_descriptors_not_PnL": true
+}
