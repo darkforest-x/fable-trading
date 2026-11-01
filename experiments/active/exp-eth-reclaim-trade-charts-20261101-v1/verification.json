@@ -1,0 +1,36 @@
+{
+  "index_rows": 74,
+  "unique_events": 14,
+  "unique_execution_pairs": 60,
+  "index_paths_present": true,
+  "partial_net_r_reconciles": true,
+  "all_overviews_inspected_via_four_contact_sheets": true,
+  "individual_execution_inspections": [
+    "01/A_limit_5R_14d",
+    "01/B_618_partial_14d",
+    "06/B_618_10R_14d",
+    "06/B_618_near_14d",
+    "06/B_705_5R_7d",
+    "07/C_sweep_10R_14d"
+  ],
+  "excluded_and_unfilled_individual_inspections": [
+    "03_20260923_2000_long",
+    "14_20261029_2000_short"
+  ],
+  "visual_checks": [
+    "Chinese labels and prices readable",
+    "planned targets distinct from actual exits",
+    "post-exit prices visible",
+    "partial target solid lines end at own exit",
+    "independent zoom axes explicit",
+    "15m fill intervals not tick times"
+  ],
+  "reproduction": ".venv/bin/python -m yoyo.evaluation.eth_reclaim_trade_charts",
+  "builder_commit": "4bd00d11180553b8772a22c784bc550e204b88e5",
+  "note": "Completed delivery is reused; full generation rejects an existing delivery.json. No trade replay or new statistical evaluation.",
+  "registry_validation": {
+    "new_experiment_record": "passed",
+    "new_artifact_record": "passed",
+    "full_registry": "blocked by unrelated existing range-weekend-filter-v2-42-20261031 missing holdout_status; left unchanged"
+  }
+}

@@ -19,6 +19,20 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: eth-reclaim-trade-review-20261101-v1
+    artifact_type: manifest
+    role: recent_eth_12h_samples_and_saved_strategy_execution_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4bd00d1118
+    generator_commit: 4bd00d1118
+    source_path: experiments/active/exp-eth-reclaim-trade-charts-20261101-v1/delivery.json
+    storage_uri: repo://experiments/active/exp-eth-reclaim-trade-charts-20261101-v1/delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Local artifacts/eth-reclaim-trade-review-20261101 contains 14 overviews, 60 original candidate/event execution plots, four contact sheets, CSV index, native value joins, source receipt and ZIP. Planned TP is distinct from actual exit; prices after exit remain visible, partial target lines end at their own fills, intrabar times are 15m intervals. The 60 versions are not independent market events. No backtest replay, new alpha claim or price download.
+
+
   - artifact_id: top20-12h-strategies-20261101-v1
     artifact_type: manifest
     role: native_vectorbt_finite_reclaim_strategy_results_and_conditional_controls

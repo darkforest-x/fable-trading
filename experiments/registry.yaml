@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-eth-reclaim-trade-charts-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4bd00d1118
+    status: accepted
+    question: Draw every recent ETH 12h reclaim with the saved strategy entries, stops, targets, actual exits and subsequent prices for owner review.
+    single_variable: None; read-only visualization of frozen census and original VectorBT trade legs, without parameter changes or replay.
+    result: 14 events after September 13 through October 31, 2026; 11 pure wicks and 3 body reclaims. All 14 overviews and 60 filled candidate/event plots exported at 3000px, plus four contact sheets, CSV index and 27.7MB ZIP. Excluded and unfilled events have explicit reasons and no invented orders.
+    artifacts: [eth-reclaim-trade-review-20261101-v1]
+    canonical_report: experiments/active/exp-eth-reclaim-trade-charts-20261101-v1/delivery.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Full 12h context and 15m entry/exit zooms, Beijing clocks, original selected intrabar path and both partial legs. Every plotted execution value reconciled to saved legs; all 74 images decoded and ZIP checked. Eight source files unchanged by size/mtime; no hashes or new backtest. Visual QA covers all overviews and six representative execution versions. Original research is Notion EXP-240; no change to its strategy conclusions.
+
+
   - experiment_id: exp-top20-12h-strategies-20261101-v1
     source_repo: darkforest-x/fable-trading
     source_commit: e9b847bc6a
