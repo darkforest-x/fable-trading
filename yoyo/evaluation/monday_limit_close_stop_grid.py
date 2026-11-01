@@ -253,7 +253,7 @@ def summarize(config, workers):
         o = o[(o.variant == variant) & o['mode'].isin(modes)].assign(key=lambda y: y.event+':'+y['mode']).set_index('key')
         mine = t[(t.variant == name) & t['mode'].isin(modes)].assign(key=lambda y: y.event+':'+y['mode']).set_index('key')
         d = (mine.net-o.net.reindex(mine.index)).abs()
-        par[name] = dict(rows=int(len(mine)), missing=int(d.isna().sum()), max_abs_bp=float(d.max()))
+        par[name if len(checks) == len({c['name'] for c in checks}) else f"{name}|{Path(src).name}"] = dict(rows=int(len(mine)), missing=int(d.isna().sum()), max_abs_bp=float(d.max()))
     stats, jobs = {}, []
     for (mode, v), x in t.groupby(['mode', 'variant']):
         for p in PER:
