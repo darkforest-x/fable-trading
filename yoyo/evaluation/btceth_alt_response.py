@@ -100,6 +100,7 @@ def all_features(frames,bounds,leader,side):
         a=pd.concat([data[s][field] for s in alt_names],axis=1)
         metrics['alt_'+field+'_share']=a.mean(axis=1);metrics['alt_'+field+'_n']=a.notna().sum(axis=1)
     metrics['alt_n']=pd.concat([data[s].touch_return for s in alt_names],axis=1).notna().sum(axis=1)
+    metrics['availability_mask']=sum(data[s].touch_return.notna().astype('int64')*(2**j) for j,s in enumerate(alt_names))
     metrics['alt_recovery_gt_half']=pd.concat([data[s].recovery.gt(.5).astype(float).where(data[s].recovery.notna()) for s in alt_names],axis=1).mean(axis=1)
     metrics['alt_touch_positive_share']=pd.concat([data[s].touch_return.gt(0).astype(float).where(data[s].touch_return.notna()) for s in alt_names],axis=1).mean(axis=1)
     metrics['alt_extreme_earlier_share']=pd.concat([data[s].extreme_offset_bars.lt(0).astype(float).where(data[s].extreme_offset_bars.notna()) for s in alt_names],axis=1).mean(axis=1)
@@ -149,10 +150,10 @@ def run():
             feat,data,paths=all_features(frames,bounds,leader,side)
             chosen=events[events.leader.eq(leader)&events.side.eq(side)]
             pool=feat[~blocked & feat.week.notna() & feat.leader_after_12.notna() & feat.pre_bucket.notna() & feat.vol_bucket.notna()]
-            groups={k:g for k,g in pool.groupby(['week','pre_bucket','vol_bucket'])}
+            groups={k:g for k,g in pool.groupby(['week','pre_bucket','vol_bucket','availability_mask'])}
             for e in chosen.to_dict('records'):
                 i=e['i'];r=feat.iloc[i];one={**e,**{k:v for k,v in r.items() if k not in ['week']}}
-                control=groups.get((e['week'],r.pre_bucket,r.vol_bucket),pd.DataFrame())
+                control=groups.get((e['week'],r.pre_bucket,r.vol_bucket,r.availability_mask),pd.DataFrame())
                 one['controls']=len(control)
                 if len(control):
                     for col in feat.select_dtypes(include=[np.number]).columns:one['control_'+col]=control[col].mean()
@@ -180,7 +181,7 @@ def run():
     result=pd.DataFrame(allrows).sort_values(['time','leader']);coins=pd.DataFrame(coinrows);rank=pd.DataFrame(ranks);ep=pd.DataFrame(event_paths)
     result.to_csv(EXP/'events.csv',index=False);coins.to_csv(EXP/'coin_observations.csv.gz',index=False);pd.DataFrame(controls).to_csv(EXP/'controls.csv.gz',index=False)
     rank.to_csv(EXP/'strength_rank_pairs.csv',index=False);ep.to_csv(EXP/'paths.csv',index=False);write(EXP/'path_values.json',path_values)
-    groups={'all':result,'first_weekly':result[result.first_weekly],'pure_wick':result[result.kind.eq('pure_wick_reclaim')],'not_reclaimed':result[~result.reclaimed]}
+    groups={'all':result,'all18_present':result[result.alt_n.eq(18)],'first_weekly':result[result.first_weekly],'pure_wick':result[result.kind.eq('pure_wick_reclaim')],'not_reclaimed':result[~result.reclaimed]}
     for leader in ['BTC','ETH']:
         for side,name in [(1,'lower'),(-1,'upper')]:
             g=result[result.leader.eq(leader)&result.side.eq(side)];groups[leader+'_'+name]=g
@@ -189,6 +190,8 @@ def run():
     rank_summary={}
     for feature,g in rank.groupby('feature'):
         rank_summary[feature]={k:bootstrap_mean(g[k],g.day) for k in ['difference','residual_difference']}
+        for side,name in [(1,'lower'),(-1,'upper')]:
+            z=g[g.side.eq(side)];rank_summary[feature][name]={k:bootstrap_mean(z[k],z.day) for k in ['difference','residual_difference']}
     bycoin=[]
     for sym,g in coins.groupby('symbol'):
         bycoin.append(dict(symbol=sym,n=int(g.touch_return.notna().sum()),volume_ratio_median=g.volume_ratio.median(),range_ratio_median=g.range_ratio.median(),shock_median=g.shock.median(),touch_mean=g.touch_return.mean(),after30_mean=g.after_6.mean(),recovery_mean=g.recovery.mean(),relative_touch_mean=g.relative_touch.mean()))
