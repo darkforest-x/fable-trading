@@ -17,7 +17,8 @@ MAE reaches the liquidation line loses the account, below 100U a blow-up refille
 added, not profit) plus the monthly-start statistics of the allin3 studies (start on the first of each month from
 first_start to last_start, several tie seeds, share reaching 10x / 100x of the stakes, days, blow-ups); `fills` reads the
 signal rows from another run with the same B30 fills (the 10-28 close-reclaim run holds all five targets).
-Owner "改成这个" (the stop 20 percent from the entry): `variant` picks the signal rows of another stop from
+Owner "开一个观察账户": `boost` {from_score, x} gives fills whose score is >= from_score that x the margin
+(monday_limit_close_order_boost.weighted_frac, otherwise frac). Owner "改成这个" (the stop 20 percent from the entry): `variant` picks the signal rows of another stop from
 exp-monday-limit-close-stop-grid-20261101-v1 (e.g. E20); default B30.
 """
 from __future__ import annotations
@@ -124,6 +125,10 @@ def run(config, workers):
             trace = Trace(pd.Timestamp(start, tz='UTC').value)
             if cfg.get('allocator', 'frac') == 'allin':
                 result = allin(x, cfg, seed, trace)
+            elif cfg.get('boost'):
+                from yoyo.evaluation.monday_limit_close_order_boost import weighted_frac
+                b = cfg['boost']
+                result = weighted_frac(x, cfg['slots'], cfg['leverage'], seed, np.where(x.score >= b['from_score'], b['x'], 1.), trace=trace)
             else:
                 result = frac(x, cfg['slots'], cfg['leverage'], seed, trace=trace)
             frame = pd.DataFrame(trace.rows)

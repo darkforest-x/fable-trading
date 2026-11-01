@@ -22,8 +22,8 @@ from yoyo.evaluation import monday_limit_close_reclaim as cr
 from yoyo.evaluation.monday_limit_close_order_filter import PER, window
 
 
-def weighted_frac(t, n, lev, seed, weights):
-    """frac with a margin multiplier per fill (weights aligned to t's rows)."""
+def weighted_frac(t, n, lev, seed, weights, trace=None):
+    """frac with a margin multiplier per fill (weights aligned to t's rows); optional booklet trace as frac."""
     rng = np.random.default_rng(seed)
     o = np.lexsort((rng.random(len(t)), t.entry_ns.to_numpy()))
     t, w = t.iloc[o].reset_index(drop=True), np.asarray(weights, float)[o]
@@ -43,8 +43,11 @@ def weighted_frac(t, n, lev, seed, weights):
             margin[j] = m; used += m
         elif j in margin:
             m = margin.pop(j); used -= m
-            eq += -m if mae[j] >= liq else max(-m, m*lev*net[j])
+            pnl = -m if mae[j] >= liq else max(-m, m*lev*net[j])
+            eq += pnl
             peak = max(peak, eq); dd = max(dd, 1-eq/peak)
+            if trace is not None:
+                trace(t.iloc[j], int(ts), eq, pnl, m*lev)
             if eq <= 1e-6:
                 return dict(final_multiple=0., max_drawdown_pct=100., skipped=skipped)
     return dict(final_multiple=eq/1000, max_drawdown_pct=100*dd, skipped=skipped)
