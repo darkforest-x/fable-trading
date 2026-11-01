@@ -1,0 +1,35 @@
+{
+  "experiment_id": "exp-monday-limit-close-survivor-paths-20261101-v4",
+  "question": "Owner 2026-11-01 '有尝试过跟之前的all3策略一样去弄吗': the survivor events under the allin3 paper rule (all-in 3x, one trade at a time, below 100U refill 1000U), three targets including allin3's opposite 1.618.",
+  "approval": "Owner 2026-11-01 '有尝试过跟之前的all3策略一样去弄吗'",
+  "source": "experiments/active/exp-monday-limit-close-slice-control-20261101-v1",
+  "targets": [
+    "near_monday_edge",
+    "range_0.5",
+    "opposite_1618"
+  ],
+  "starts": [
+    "2020-01-01",
+    "2025-01-01"
+  ],
+  "leverage": 3,
+  "tie_seed_from": "experiments/active/exp-monday-limit-return-opt-20261027-v2/config.json",
+  "slippage_bp": {
+    "market_entry": 10,
+    "non_target_exit": 10
+  },
+  "fees": "Framework fills of the control run: market entry taker 0.05 percent, target maker 0.02 percent, stop / reclaim exits taker (OKX Lv1, read 2026-10-23); 10bp slippage on the market entry and on non-target exits; worse of the two intrabar paths; funding not modelled",
+  "in_sample": "The slice was chosen on 2020-2024; 2025-2026 passed the slice test and the matched random-time control",
+  "training_eligible": false,
+  "production_eligible": false,
+  "allocator": "allin",
+  "fills": "experiments/active/exp-monday-limit-close-reclaim-20261028-v1",
+  "monthly": {
+    "first_start": "2023-01-01",
+    "last_start": "2026-08-01",
+    "ties": 5,
+    "seed": 20261106,
+    "from": "experiments/active/exp-monday-limit-pyramid-20261027-v1/compare.json"
+  },
+  "sizing_rule": "allin3 paper rule (monday_reclaim_paper ALLIN3: leverage 3, blow-up below 100U); its score >= 0.6 gate is replaced by the survivor filters"
+}

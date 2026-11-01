@@ -11,6 +11,12 @@ open, margin in use <= equity, liquidation when the MAE reaches the 3x line), on
 Starts 2020-01-01 (the slice was chosen on 2020-2024, so that stretch is in sample) and 2025-01-01 (after it).
 The ledger adds each trade's prices, exit reason and touch-bar facts; the booklet projection is
 strategy_booklet_metrics.project. Equity is realized only (no open P&L), funding is not modelled.
+Config options added for the owner's follow-up "有尝试过跟之前的all3策略一样去弄吗": `allocator` "allin" replays the
+allin3 paper rule (monday_limit_langlang.path_run: one trade at a time with the whole account at `leverage`, a fill whose
+MAE reaches the liquidation line loses the account, below 100U a blow-up refilled with a new 1000U stake that is cash
+added, not profit) plus the monthly-start statistics of the allin3 studies (start on the first of each month from
+first_start to last_start, several tie seeds, share reaching 10x / 100x of the stakes, days, blow-ups); `fills` reads the
+signal rows from another run with the same B30 fills (the 10-28 close-reclaim run holds all five targets).
 """
 from __future__ import annotations
 import argparse
@@ -57,6 +63,28 @@ def symbol_rows(args):
     return d, issues
 
 
+def allin(x, cfg, seed, trace):
+    """allin3 rule on one path, plus monthly starts as the allin3 studies (days to 10x / 100x of the stakes)."""
+    from yoyo.evaluation.monday_limit_langlang import path_run
+    path_run(x, 'allin', cfg['leverage'], seed, trace=trace)
+    rows = trace.rows[1:]
+    out = dict(blowups=int(sum(r['cashflow'] > 0 for r in rows)), cash_added=float(sum(r['cashflow'] for r in rows)),
+               taken=int(sum(r['notional'] > 0 for r in rows)), months={})
+    m = cfg['monthly']
+    for start in pd.date_range(m['first_start'], m['last_start'], freq='MS', tz='UTC'):
+        y = x[x.entry_t >= start].reset_index(drop=True)
+        for k in range(m['ties']):
+            out['months'][f'{start.date()}|{k}'] = path_run(y, 'allin', cfg['leverage'], m['seed']+k)
+    d = pd.DataFrame([{**{f'd{q}': (h[q]['days'] if h[q] else np.nan) for q in (10, 100)},
+                       **{f'b{q}': (h[q]['blowups'] if h[q] else np.nan) for q in (10, 100)}} for h in out['months'].values()])
+    out['monthly_starts'] = {f'x{q}': dict(reached_pct=float(100*d[f'd{q}'].notna().mean()),
+                                           days_median=float(d[f'd{q}'].median()) if d[f'd{q}'].notna().any() else None,
+                                           blowups_before_median=float(d[f'b{q}'].median()) if d[f'b{q}'].notna().any() else None)
+                             for q in (10, 100)}
+    out['starts'] = int(len(d)); out.pop('months')
+    return out
+
+
 def run(config, workers):
     from yoyo.evaluation.monday_limit_be_scalein_compare import BAD_EVENTS
     from yoyo.evaluation.monday_limit_return_opt import frac
@@ -65,12 +93,13 @@ def run(config, workers):
     cr.committed('yoyo/evaluation/monday_limit_close_survivor_paths.py', str(config.resolve().relative_to(ROOT)))
     src = ROOT/cfg['source']
     surv = pd.read_csv(src/'survivors.csv.gz').set_index('event')
+    fills = ROOT/cfg.get('fills', cfg['source'])
     slip = cfg['slippage_bp']
     with ProcessPoolExecutor(workers) as ex:
-        got = list(ex.map(symbol_rows, [(str(src), s, slip['market_entry'], slip['non_target_exit']) for s in sorted(set(surv.symbol))], chunksize=4))
+        got = list(ex.map(symbol_rows, [(str(fills), s, slip['market_entry'], slip['non_target_exit']) for s in sorted(set(surv.symbol))], chunksize=4))
     t = pd.concat([g[0] for g in got if len(g[0])], ignore_index=True)
     issues = [i for g in got for i in g[1]]
-    t = t[~t.event.isin(BAD_EVENTS) & (t.entry_t >= pd.Timestamp('2020-01-01', tz='UTC'))].copy()
+    t = t[~t.event.isin(BAD_EVENTS) & (t.entry_t >= pd.Timestamp('2020-01-01', tz='UTC')) & t.event.isin(surv.index)].copy()
     t['score'] = t.event.map(surv.score); t['recovery'] = t.event.map(surv.recovery)
     t['symbol'] = t.event.str.split(':').str[0]
     t['beyond_pct'] = 100*t.side*(t.level-t.entry)/t.level
@@ -82,7 +111,10 @@ def run(config, workers):
         for start in cfg['starts']:
             x = dated(t[(t['mode'] == mode) & (t.entry_t >= pd.Timestamp(start, tz='UTC'))]).reset_index(drop=True)
             trace = Trace(pd.Timestamp(start, tz='UTC').value)
-            result = frac(x, cfg['slots'], cfg['leverage'], seed, trace=trace)
+            if cfg.get('allocator', 'frac') == 'allin':
+                result = allin(x, cfg, seed, trace)
+            else:
+                result = frac(x, cfg['slots'], cfg['leverage'], seed, trace=trace)
             frame = pd.DataFrame(trace.rows)
             error = float(np.abs(frame.equity-(1000+frame.pnl.cumsum()+frame.cashflow.cumsum())).max())
             if error > 1e-6*max(1., frame.equity.max()):
@@ -94,7 +126,8 @@ def run(config, workers):
             name = f"{mode}-{start[:4]}"
             ledger.to_csv(exp/f'{name}-ledger.csv.gz', index=False, compression='gzip')
             meta = dict(target=mode, start=start, end=str(x.exit_t.max()), seed=seed, candidates=int(len(x)),
-                        funded=int((frame.notional > 0).sum()), allocator=dict(kind='frac', slots=cfg['slots'], leverage=cfg['leverage']),
+                        funded=int((frame.notional > 0).sum()),
+                        allocator=dict(kind=cfg.get('allocator', 'frac'), slots=cfg.get('slots', 1), leverage=cfg['leverage']),
                         allocator_result=result, reconciliation_error=error)
             data = project(frame, {**meta, 'note': ''})
             (exp/f'{name}-history.json').write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':'), allow_nan=False,
@@ -105,7 +138,7 @@ def run(config, workers):
             reasons = {k: dict(n=int(len(g)), mean_bp=float(g.net_bp.mean()), pnl=float(g.pnl.sum()))
                        for k, g in ledger[ledger.notional > 0].groupby('reason_name')}
             # The control run replayed 2020 onward with 10 tie seeds; a 2025 start has no saved counterpart.
-            ref = saved[f'{mode}|signal']['all'].get('replay') if start == '2020-01-01' else None
+            ref = saved.get(f'{mode}|signal', {}).get('all', {}).get('replay') if start == '2020-01-01' and cfg.get('allocator', 'frac') == 'frac' else None
             manifest['accounts'][name] = {**meta, 'summary': data['summary'], 'years': years, 'reasons': reasons,
                                           'saved_median_of_ties': ref}
             print(f"{name}: {meta['funded']}/{meta['candidates']} funded, end {data['summary']['end']:.2f}, "
