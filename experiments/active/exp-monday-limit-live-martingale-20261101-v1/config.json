@@ -7,11 +7,25 @@
   "survivors": "experiments/active/exp-monday-limit-close-slice-control-20261101-v1/survivors.csv.gz",
   "variant": "E20",
   "target": "near_monday_edge",
-  "sizings": [[6, 3], [3, 3]],
-  "max_levels": [2, 3],
+  "sizings": [
+    [
+      6,
+      3
+    ],
+    [
+      3,
+      3
+    ]
+  ],
+  "max_levels": [
+    1,
+    2,
+    3
+  ],
   "seed": 20261103,
   "ties": 10,
   "in_sample": "Same history as every live-wick result",
   "training_eligible": false,
-  "production_eligible": false
+  "production_eligible": false,
+  "note": "A level whose margin exceeds equity (3x3 level 2 = 4/3 of equity, 6x3 level 3 = 8/6) can never fill and the account stops trading; feasible caps are 1 for 3x3 and 2 for 6x3. First run had max_levels [2, 3]."
 }
