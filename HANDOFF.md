@@ -1,3 +1,8 @@
+## 2026-11-01 · EMA order filter on live-wick: higher win rate, much lower returns
+
+- Owner: "这套策略没用上排列过滤吗？能用吗？能提高胜率吗？能提高收益吗？". `exp-monday-limit-close-order-filter-20261101-v1` adds spike's 15m EMA order score (>= 3, known before the touch) to the E20 near-edge survivor rows; saved fills only. 398 events, only 45 have order >= 3.
+- Order >= 3 vs none: win rate 2025-26 75 vs 66 percent, mean +293 vs +146bp, but 28 vs 254 trades since 2025; 6x3 from 2025 1.45x DD23 vs 5.34x DD19, 3x3 1.96x DD42 vs 19.96x DD37. Not adopted; live-wick accounts unchanged. Order as a size booster is untested (tiny sample).
+
 ## 2026-11-01 · live-wick6x3 / live-wick3x3 touch-close paper accounts connected
 
 - Owner: "那叫做两个模拟盘接入前端吧 … 6 份 3 倍 / 3 份 3 倍 … 能实盘的要用live-开头 … 小册 … 历史交易k线图". New tracks 8060 `live-wick6x3` and 9060 `live-wick3x3` in `monday_reclaim_paper.py` (enable_live_wick): at the touch 5m close (score_due) a survivor (touch-close score >= 0.5, closed beyond the 1.618, recovery < 0.6396, < 30 percent past) opens at the OKX 5m close price; near Monday edge target, stop entry -20 percent, 60m reclaim vs the level with no offset, margin equity / 6 or / 3 at 3x, taker + 10bp entry, maker target, taker + 10bp other exits. Each starts at 1000U on 2026-11-01; no history injected; paper only.

@@ -15671,3 +15671,17 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Feeds yoyo/monitor/strategy_live_wick.py (live-wick3x3 booklet and backtest K-line replay); v5 feeds live-wick6x3. Paper accounts live-wick6x3 (8060) and live-wick3x3 (9060) connected in 803d70b723; forward record starts at 1000U on 2026-11-01.'
+  - experiment_id: exp-monday-limit-close-order-filter-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: e912dec4bc
+    status: complete
+    question: 'Owner 2026-11-01 "这套策略没用上排列过滤吗？能用吗？能提高胜率吗？能提高收益吗？": does the spike 15m EMA order filter (>= 3) improve the live-wick rule?'
+    single_variable: 'Add l2_order_score >= min_order (known before the touch) to the E20 near-edge survivor rows; fills, stop, sizing and costs unchanged; primary min_order 3 vs none.'
+    result: '398 events: order 0 250, 1 59, 2 44, 3 19, 4 26. No filter: 2020-24 144 trades win 70 percent +208bp, 2025 119 / 64 / +139, 2026 135 / 67 / +151; 6x3 from 2025 5.34x DD19, 3x3 19.96x DD37. Order >= 3: 2020-24 17 / 82 / +384, 2025 16 / 69 / +219, 2026 12 / 83 / +392; 6x3 from 2025 1.45x DD23, 3x3 1.96x DD42. Order >= 1: 2026 +0bp; >= 2: 2025-26 57 trades +243bp, 6x3 1.89x.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-order-filter-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'The filter raises win rate and per-trade mean but keeps about 11 percent of trades, so every account multiple falls and drawdown rises. Order as a size booster is untested (45 order >= 3 events in 6.7 years).'
