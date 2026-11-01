@@ -1,8 +1,5 @@
 /* Stitch 7908551d2e9a4ccc8a684a8da56dd952: clear glass and fixed quick symbols. */
 /* Ledger density and raw-score accent: Stitch 77f940d44558444db5ef189e93e9dce0. */
-/* Stitch 6c5a4b7e3e404f4dba8b60d67262b49d: replay sheets need a solid canvas in both themes. */
-#monday-reclaim-paper {--rp-canvas:#f7f8f6;}
-#monday-reclaim-paper.is-replay :is(.bt-panel,.rp-records){backdrop-filter:none;-webkit-backdrop-filter:none;}
 body.reclaim-paper-active {overflow:hidden;color-scheme:light;background:var(--rp-canvas,#f7f8f6);}
 #signals-view.signal-workspace[data-signal-pane="reclaim"] > :not(#monday-reclaim-paper){display:none!important;}
 body.reclaim-paper-active .primary-metrics{display:none!important;}
@@ -42,7 +39,7 @@ body.reclaim-paper-active :is(#main-sidebar,.workspace>.topbar,#main>.page-headi
 #monday-reclaim-paper .rp-navigation nav a:hover {background:#0071e310;}
 /* Stitch 228409830de7429e865415e2350ad8f7: readable menu above the chart controls. */
 #monday-reclaim-paper .rp-heading:has(.rp-navigation[open]){z-index:12;}
-#monday-reclaim-paper .rp-navigation nav{min-width:204px;max-width:calc(100vw - 32px);background:var(--rp-canvas);color:var(--rp-ink,#182b39);border:1px solid var(--rp-edge,#71849425);box-shadow:0 12px 36px #071b3026;backdrop-filter:none;-webkit-backdrop-filter:none;transform-origin:top left;}
+#monday-reclaim-paper .rp-navigation nav{min-width:204px;max-width:calc(100vw - 32px);background:var(--rp-canvas,#f7f8f6);color:var(--rp-ink,#182b39);border:1px solid var(--rp-edge,#71849425);box-shadow:0 12px 36px #071b3026;backdrop-filter:none;-webkit-backdrop-filter:none;transform-origin:top left;}
 #monday-reclaim-paper .rp-navigation[open] nav{animation:rp-menu-reveal .16s var(--rp-ease);}
 #monday-reclaim-paper .rp-navigation nav a{display:flex;align-items:center;font-size:13px;transition:background .14s,color .14s;}
 #monday-reclaim-paper .rp-navigation nav a[aria-current=page]{background:var(--rp-selected);color:var(--rp-blue);font-weight:600;}
@@ -492,3 +489,9 @@ html[data-theme=dark] body.reclaim-paper-active #spike-alarm-dock :is(.sa-trigge
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
  body.reclaim-paper-active #spike-alarm-dock :is(.sa-trigger,.sa-settings) {background:var(--surface);}
 }
+
+/* Stitch 51d49795956647bea9adebc114a9dc85: only the SPIKE menu is opaque.
+ * Replay surfaces keep the existing glass materials, independent of canvas color. */
+#monday-reclaim-paper.is-replay:not([hidden]) :is(.bt-mode,.bt-summary,.rp-dock){background:var(--rp-glass-tint);backdrop-filter:blur(14px) saturate(175%);-webkit-backdrop-filter:blur(14px) saturate(175%);}
+#monday-reclaim-paper.is-replay:not([hidden]) .bt-panel{background:var(--glass-reading,var(--rp-panel));backdrop-filter:blur(var(--glass-reading-blur,24px)) saturate(var(--glass-reading-saturation,160%));-webkit-backdrop-filter:blur(var(--glass-reading-blur,24px)) saturate(var(--glass-reading-saturation,160%));}
+#monday-reclaim-paper.is-paper-history:not([hidden]) .rp-records{background:var(--rp-panel);backdrop-filter:blur(14px) saturate(175%);-webkit-backdrop-filter:blur(14px) saturate(175%);}
