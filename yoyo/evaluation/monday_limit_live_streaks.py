@@ -47,7 +47,8 @@ def stream(x, trigger):
     rows = []
     for k, r in enumerate(x.itertuples()):
         reason = 'stop' if trigger == 'any_loss' else STOPS.get(int(r.reason), 'exit')
-        rows.append(dict(trade_id=str(r.event), entry_time=start+timedelta(hours=k), exit_time=start+timedelta(hours=k, minutes=30),
+        rows.append(dict(trade_id=str(r.event), entry_time=(start+timedelta(hours=k)).isoformat(),
+                         exit_time=(start+timedelta(hours=k, minutes=30)).isoformat(),
                          net_return=float(r.net)/1e4, initial_risk_frac=float(r.risk_frac), exit_reason=reason))
     return rows
 
