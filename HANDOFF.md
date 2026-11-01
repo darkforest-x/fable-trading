@@ -1,3 +1,9 @@
+## 2026-11-01 · live-wick: distance past the 1.618 at the close raises win rate; live-wick6x3hi observation account added
+
+- Owner: "开一个观察账户" → `live-wick6x3hi` (track 8160, 4a52652554): live-wick6x3 with 1.5x margin when the touch-close score >= 0.76 (post-hoc line). Path `exp-monday-limit-close-survivor-paths-20261101-v8` (2025 onward 6455U DD19). Service restarted; earlier accounts unchanged. Browser check of the new account not yet done.
+- Owner: "测离1.618≥2%过滤". `exp-monday-limit-close-beyond-filter-20261101-v1`: win rate rises with the distance past the level at the close in both periods (>= 1.5 percent: 84 / 73 / 74 vs 70 / 64 / 67), beating 97-100 percent of random same-size subsets. Fewer trades lower the 6x3 multiple at fixed size; at 3x3, >= 1.5 gives 2025 onward 18.43x DD29 vs 19.96x DD37 (full history 81x vs 61x). Post hoc cut; paper accounts unchanged pending owner decision.
+- Pending from the owner: profit-protect stop (move stop to entry after a favorable move / tighter stop once in profit) needs an adapter extension for reclaim mode; not started.
+
 ## 2026-11-01 · Size boosts on live-wick (EMA order, entry score) do not beat random boosting
 
 - Owner asked to test a larger size when the EMA order score is high, then whether high entry scores (">0.76 all won") justify dynamic sizing. `exp-monday-limit-close-order-boost-20261101-v1` and `exp-monday-limit-close-score-boost-20261101-v1`: weighted frac on the saved E20 survivor fills, every trade kept, control = the same count of random trades boosted (300 draws).

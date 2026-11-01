@@ -15713,3 +15713,17 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Weak, non-monotonic relation; no pre-specified score boost beats random boosting. The 0.76 band is a forward-observation candidate only (owner decision).'
+  - experiment_id: exp-monday-limit-close-beyond-filter-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 764aabe56b
+    status: complete
+    question: 'Owner 2026-11-01 "测离1.618≥2%过滤": does requiring the touch close to be >= cut percent past the 1.618 raise the live-wick win rate and keep the account result?'
+    single_variable: 'Entry filter only (beyond_pct >= cut, known at the close) on the E20 near-edge survivor fills; cuts 0 / 1 / 1.5 / 2 / 3 / 4; control = 300 random subsets of the same size per period.'
+    result: 'Win rate rises with the cut in both periods: none 70 / 64 / 67 percent (2020-24 / 2025 / 2026), >= 1.5 84 / 73 / 74, >= 2 87 / 78 / 74, >= 3 87 / 76 / 78; every cut >= 1 beats 97-100 percent of random same-size subsets on win rate. Fewer trades lower the 6x3 multiple at fixed size (2025 onward: none 5.34x DD19, >= 1.5 4.87x DD15, >= 2 3.46x DD16). At 3x3: none 19.96x DD37, >= 1.5 18.43x DD29 (full history 81.1x DD29 vs 60.8x DD37), >= 2 9.66x DD32.'
+    artifacts: []
+    canonical_report: experiments/active/experiments/active/exp-monday-limit-close-beyond-filter-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'The distance effect was noticed on these trades (post hoc) but is monotonic across cuts and holds in both periods. Best balance: >= 1.5 at 3x3 (about the same 2025 onward multiple as the current 3x3 with drawdown 29 instead of 37). Not applied to the paper accounts (owner decision).'
