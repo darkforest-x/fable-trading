@@ -1,3 +1,12 @@
+## 2026-11-01 · live-wick October 2026 backtest; losing streaks and loss doubling
+
+- Owner: "目前我们的几个live策略 都跑一下上个月的回测 10月份的 … 最长的连续止损是多少次 … 补充上我们之前的倍投策略" / "补跑10月" / "倍投 … 基于原有的实际持仓量翻倍". Three experiments, all in sample, no paper-account change.
+- Streaks (`exp-monday-limit-live-streaks-20261101-v1`, entry order, overlaps ignored): longest losing run live-wick 4 (backstops 1), far 4 (1), live-allin3 9 (2).
+- Doubling on the account's own margin (`exp-monday-limit-live-martingale-20261101-v1`): live-wick 6x3 from 2025 5.34x DD19 → one doubling 12.69x DD26, two 30.94x DD31; 3x3 one doubling 59.23x DD49. No random-doubling control yet.
+- October (`exp-monday-limit-live-october-20261101-v1`): Binance daily archives fetched with `yoyo/data/binance_um_daily.py` (monthly October not published). Before October the rebuild reproduces the stored scores (median diff 0, 0.5 agreement 100 percent, 3457 events) and the E20 fills (33/33, 0 bp). 17 survivors on touches 10-01..10-27: 11 targets, 5 not reclaimed, 1 -20 percent stop. From 1000U: 6x3 1131U DD11, 3x3 1251U DD22, 6x3hi 1138U DD11, 3x3far 992U DD22 (7 trades). Doubling hurt in October (stop right after a loss): 6x3 L1 1063U, 3x3 L1 943U DD42.
+- Limits: Binance has no 2026-10-28 daily archive, so week 2026-10-26 monitoring stops at 10-27 23:55 and touches 10-28..10-31 are missing. Binance bars, not the OKX paper feed. live-allin3 (causal pre-touch limit rule) not run for October. Learning: `extending-a-backtest-past-its-end-must-keep-the-scored-universe.md`.
+- Still pending from the owner: profit-protect stop study (needs an adapter extension for reclaim mode).
+
 ## 2026-11-01 · live-wick3x3far observation account (close >= 1.5 percent past the level)
 
 - Owner: "开观察账户". Track 9160 `live-wick3x3far` = live-wick3x3 but only touches whose 5m close is >= 1.5 percent past the 1.618 (`min_beyond_pct`; the cut is post hoc from `exp-monday-limit-close-beyond-filter-20261101-v1`). Path `exp-monday-limit-close-survivor-paths-20261101-v9`: 206 candidates since 2020, 2025 onward 1000 -> 18431U DD28.6 win 73.5 percent; from 2020 81145U.

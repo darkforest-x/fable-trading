@@ -15755,3 +15755,17 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'In sample; no random-doubling control yet (doubling adds exposure to a positive-mean stream, so part of the gain is plain size). Not applied to any paper account.'
+  - experiment_id: exp-monday-limit-live-october-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: b680e9eb31
+    status: complete
+    question: 'Owner 2026-11-01 "都跑一下上个月的回测 10月份的" / "补跑10月": the live-wick accounts on October 2026 from 1000U, on Binance data extended with checksum-verified daily archives.'
+    single_variable: 'None (new period, rules unchanged). Events, entry score and E20 fills rebuilt with the frozen code on the backtest universe (536-symbol snapshot).'
+    result: 'Parity before October: stored score median |diff| 0, max 0.0017, 0.5 / 0.6 agreement 100 percent (3457 events); E20 fills 33/33 identical. October (touches 10-01..10-27): 17 survivors, 11 targets, 5 not reclaimed in 60m, 1 -20 percent stop (PTBUSDT -20.3 percent). live-wick6x3 1131U DD11; live-wick3x3 1251U DD22; live-wick6x3hi 1138U DD11; live-wick3x3far 7 trades 992U DD22. Loss doubling on own margin hurt in October: 6x3 L1 1063U DD21, 3x3 L1 943U DD42, far L1 777U DD42 (the stop came right after a loss).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-live-october-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Binance has no 2026-10-28 daily archive (404 for every symbol); the unchanged inputs end week 2026-10-26 monitoring at that break, so touches 10-28..10-31 are not seen (10-31 also missing for 108 symbols). 95 later listings left out as in the backtest. Binance bars, not the OKX paper feed. live-allin3 not included. First two scoring runs failed parity (pandas 3 microsecond epochs in cluster24; 626-symbol population) and were rerun.'
