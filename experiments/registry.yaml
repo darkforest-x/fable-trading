@@ -15530,3 +15530,31 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Booklet built outside the public repo: ~/Documents/Codex/2026-11-01/close-survivor-booklet (work/build.py, outputs/index.html, self-contained). Realized equity only; funding not modelled. The slice was chosen on 2020-2024; the 2025 start excludes those years.'
+  - experiment_id: exp-monday-limit-close-optimize-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: dbfcf061eb
+    status: complete
+    question: 'Owner 2026-11-01 "为什么笔数这么少？…以最大利润为目标，重构出新的策略出来，回撤控制小于35%": which touch-close rule and sizing gives the most profit with drawdown < 35 percent, judged out of sample?'
+    single_variable: 'Explicit multi-variable search (owner request, PROJECT_PLAN): score_min x recovery_max x target x stop (288 selections) x frac slots x leverage (40 sizings) on the saved close-reclaim fills; objective max training final with training DD < 35 percent and >= 50 trades; expanding walk-forward, test years 2024 / 2025 / 2026.'
+    result: '350777 rows, 58683 events, 0 issues. Funnel: symbols 45 (2020) to 479 (2025), touches 1034 to 16829 a year, score >= 0.5 about 3 percent, survivor 7 to 135 a year. Walk-forward picks: 2024 and 2025 score >= 0.45, recovery <= 0.3, opposite 1.618, n3 x5; 2026 score >= 0.45, recovery <= 0.5, range 0.618, n5 x5. Test: 2024 5.35x DD25, 2025 6.42x DD69 (3 liquidations), 2026 0.95x DD69 (7); chained 1000 -> 32814U, DD 72 percent. Survivor at n20 x3 same years 1.26x / 1.26x / 1.34x. Full-history in-sample optimum score >= 0.5, recovery <= 0.5, near edge, n6 x5: 68x DD30 (upper bound only). Rows added by relaxing score or recovery lose in 2025-26 (-21 to -56bp, near edge).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-optimize-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Post hoc (--sizing, after the walk-forward overshot the cap): survivor filters fixed, sizing picked on 2020-2024 only. DD < 35 picks n2 x3 (150 percent notional), 2025 onward 44.8x median but worst DD 55 percent; DD < 17.5 picks n10 x5 (50 percent notional), 2025 onward 5.35x, worst DD 19 percent of 10 seeds. Out-of-sample DD about 1.6-1.7 times the training DD. rows.parquet is a local cache, not committed.'
+  - experiment_id: exp-monday-limit-close-survivor-paths-20261101-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0609011a0f
+    status: complete
+    question: 'Owner 2026-11-01 "以最大利润为目标…回撤控制小于35%": the survivor rule at the half-cap size (n10 x5) from 1000U.'
+    single_variable: 'Sizing only versus v1 (frac n20 x3 -> n10 x5); same builder, fills, seed and starts.'
+    result: 'Near edge from 2025: 1000 -> 5351U, 254 trades, win 65.7 percent, DD 19.4, 9 liquidation-line hits (margin lost); from 2020: 16914U, 395 of 398 funded, DD 19.4, 12 liquidations. Range 0.5: 4819U / 20137U, DD 24.2.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-survivor-paths-20261101-v2/manifest.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Size chosen after the first sizing rule failed out of sample; 2025-2026 also chose the survivor filters, so not untouched. At 5x the -30 percent backstop is never reached: positions are liquidated around -19 percent. Booklet ~/Documents/Codex/2026-11-01/close-survivor-booklet now holds both sizes plus the optimization tables.'

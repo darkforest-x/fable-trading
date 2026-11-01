@@ -1,0 +1,1669 @@
+{
+ "config": {
+  "experiment_id": "exp-monday-limit-close-optimize-20261101-v1",
+  "question": "Owner 2026-11-01 '为什么笔数这么少？收益不是很高！针对这套逻辑做策略优化？以最大利润为目标，重构出新的策略出来，回撤控制小于35%就好了': which touch-close rule and sizing gives the most profit with drawdown < 35 percent, judged out of sample?",
+  "approval": "Owner 2026-11-01, explicit multi-variable optimization request (recorded in PROJECT_PLAN)",
+  "source": "experiments/active/exp-monday-limit-close-reclaim-20261028-v1",
+  "score_min": [
+   0,
+   0.3,
+   0.4,
+   0.45,
+   0.5,
+   0.55,
+   0.6,
+   0.7
+  ],
+  "recovery_max": [
+   0.3,
+   0.5,
+   0.6395668107499273,
+   0.8,
+   1.0,
+   "inf"
+  ],
+  "targets": [
+   "near_monday_edge",
+   "range_0.5",
+   "range_0.618",
+   "opposite_monday_edge",
+   "opposite_1618"
+  ],
+  "stops": [
+   30,
+   18
+  ],
+  "slots": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   8,
+   10,
+   15,
+   20
+  ],
+  "leverage": [
+   1,
+   2,
+   3,
+   5
+  ],
+  "dd_cap": 35,
+  "min_trades": 50,
+  "objective": "Largest final equity from 1000U over the training window with realized max drawdown < dd_cap and >= min_trades trades; one tie seed",
+  "test_years": [
+   2024,
+   2025,
+   2026
+  ],
+  "seed": 20261103,
+  "ties": 10,
+  "top": 15,
+  "survivor": {
+   "score_min": 0.5,
+   "recovery_max": 0.6395668107499273,
+   "target": "near_monday_edge",
+   "stop": 30
+  },
+  "survivor_sizing": [
+   20,
+   3
+  ],
+  "fees": "Saved fills of the source: taker entry 0.05 percent, maker target 0.02 percent, taker stop / reclaim exits (OKX Lv1, read 2026-10-23); 10bp slippage on the market entry and on non-target exits; worse of the two intrabar paths; funding not modelled",
+  "not_searched": "Reclaim window, stop distances other than 30 / 18, other levels or later touches need new framework fills; pyramiding and profit locks were rejected earlier",
+  "in_sample": "The score was trained on pre-2025 data; the survivor slice was found with 2025-2026 as its test, so 2025-2026 are not untouched; the walk-forward choice per year uses only earlier years",
+  "training_eligible": false,
+  "production_eligible": false,
+  "sizings": [
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    2
+   ],
+   [
+    1,
+    3
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    2,
+    1
+   ],
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    3,
+    1
+   ],
+   [
+    3,
+    2
+   ],
+   [
+    3,
+    3
+   ],
+   [
+    3,
+    5
+   ],
+   [
+    4,
+    1
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    4,
+    3
+   ],
+   [
+    4,
+    5
+   ],
+   [
+    5,
+    1
+   ],
+   [
+    5,
+    2
+   ],
+   [
+    5,
+    3
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    6,
+    1
+   ],
+   [
+    6,
+    2
+   ],
+   [
+    6,
+    3
+   ],
+   [
+    6,
+    5
+   ],
+   [
+    8,
+    1
+   ],
+   [
+    8,
+    2
+   ],
+   [
+    8,
+    3
+   ],
+   [
+    8,
+    5
+   ],
+   [
+    10,
+    1
+   ],
+   [
+    10,
+    2
+   ],
+   [
+    10,
+    3
+   ],
+   [
+    10,
+    5
+   ],
+   [
+    15,
+    1
+   ],
+   [
+    15,
+    2
+   ],
+   [
+    15,
+    3
+   ],
+   [
+    15,
+    5
+   ],
+   [
+    20,
+    1
+   ],
+   [
+    20,
+    2
+   ],
+   [
+    20,
+    3
+   ],
+   [
+    20,
+    5
+   ]
+  ]
+ },
+ "results": {
+  "checks": {
+   "rows": 350777,
+   "events": 58683,
+   "issues": [],
+   "specs": 288,
+   "sizings": 40
+  },
+  "funnel": {
+   "2020": {
+    "symbols": 45,
+    "touches": 1034,
+    "score_ge_0_5": 34,
+    "beyond": 10,
+    "recovery_lt_0_64": 7
+   },
+   "2021": {
+    "symbols": 89,
+    "touches": 3071,
+    "score_ge_0_5": 85,
+    "beyond": 45,
+    "recovery_lt_0_64": 33
+   },
+   "2022": {
+    "symbols": 108,
+    "touches": 4499,
+    "score_ge_0_5": 68,
+    "beyond": 21,
+    "recovery_lt_0_64": 13
+   },
+   "2023": {
+    "symbols": 183,
+    "touches": 6647,
+    "score_ge_0_5": 191,
+    "beyond": 43,
+    "recovery_lt_0_64": 21
+   },
+   "2024": {
+    "symbols": 291,
+    "touches": 9831,
+    "score_ge_0_5": 260,
+    "beyond": 98,
+    "recovery_lt_0_64": 70
+   },
+   "2025": {
+    "symbols": 479,
+    "touches": 16829,
+    "score_ge_0_5": 473,
+    "beyond": 173,
+    "recovery_lt_0_64": 119
+   },
+   "2026": {
+    "symbols": 471,
+    "touches": 16268,
+    "score_ge_0_5": 647,
+    "beyond": 252,
+    "recovery_lt_0_64": 135
+   }
+  },
+  "windows": {
+   "2024": {
+    "train": [
+     "2020-01-01",
+     "2024-01-01"
+    ],
+    "candidates": 8160,
+    "feasible": 4510,
+    "choice": {
+     "score_min": 0.45,
+     "recovery_max": 0.3,
+     "target": "opposite_1618",
+     "stop": 30,
+     "n": 3,
+     "lev": 5,
+     "trades": 60,
+     "mean_bp": 429.0519556692433,
+     "multiple": 9.451153739298567,
+     "dd": 33.33333333333333,
+     "liquidations": 1,
+     "taken": 55
+    },
+    "top": [
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 3,
+      "lev": 5,
+      "trades": 60,
+      "mean_bp": 429.0519556692433,
+      "multiple": 9.451153739298567,
+      "dd": 33.33333333333333,
+      "liquidations": 1,
+      "taken": 55
+     },
+     {
+      "score_min": 0.4,
+      "recovery_max": 0.3,
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 2,
+      "lev": 3,
+      "trades": 98,
+      "mean_bp": 312.00437469948616,
+      "multiple": 8.582151162687378,
+      "dd": 30.772967400298967,
+      "liquidations": 0,
+      "taken": 82
+     },
+     {
+      "score_min": 0.6,
+      "recovery_max": "inf",
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 3,
+      "lev": 3,
+      "trades": 126,
+      "mean_bp": 398.1928105443669,
+      "multiple": 7.021402554049771,
+      "dd": 24.411565563162164,
+      "liquidations": 0,
+      "taken": 91
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 4,
+      "lev": 5,
+      "trades": 60,
+      "mean_bp": 429.0519556692433,
+      "multiple": 6.932914312002413,
+      "dd": 25.0,
+      "liquidations": 1,
+      "taken": 56
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 1,
+      "lev": 2,
+      "trades": 60,
+      "mean_bp": 429.0519556692433,
+      "multiple": 6.926735458122864,
+      "dd": 34.382249541080256,
+      "liquidations": 0,
+      "taken": 47
+     },
+     {
+      "score_min": 0.5,
+      "recovery_max": 1.0,
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 3,
+      "lev": 3,
+      "trades": 119,
+      "mean_bp": 260.9387423103174,
+      "multiple": 6.299825079325708,
+      "dd": 28.390313679868328,
+      "liquidations": 0,
+      "taken": 99
+     },
+     {
+      "score_min": 0.6,
+      "recovery_max": "inf",
+      "target": "opposite_monday_edge",
+      "stop": 30,
+      "n": 3,
+      "lev": 3,
+      "trades": 125,
+      "mean_bp": 300.94998509918935,
+      "multiple": 6.263056213695074,
+      "dd": 24.411565563162174,
+      "liquidations": 0,
+      "taken": 92
+     },
+     {
+      "score_min": 0.5,
+      "recovery_max": 1.0,
+      "target": "opposite_monday_edge",
+      "stop": 30,
+      "n": 3,
+      "lev": 3,
+      "trades": 119,
+      "mean_bp": 248.48303300744988,
+      "multiple": 6.108461035956701,
+      "dd": 29.978905323231064,
+      "liquidations": 0,
+      "taken": 100
+     },
+     {
+      "score_min": 0.5,
+      "recovery_max": 1.0,
+      "target": "range_0.5",
+      "stop": 30,
+      "n": 2,
+      "lev": 3,
+      "trades": 119,
+      "mean_bp": 221.3110334907804,
+      "multiple": 6.065409407481932,
+      "dd": 34.12193585278547,
+      "liquidations": 0,
+      "taken": 95
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 2,
+      "lev": 3,
+      "trades": 60,
+      "mean_bp": 429.0519556692433,
+      "multiple": 5.926130641203548,
+      "dd": 25.786687155810196,
+      "liquidations": 0,
+      "taken": 53
+     },
+     {
+      "score_min": 0.5,
+      "recovery_max": 1.0,
+      "target": "opposite_monday_edge",
+      "stop": 30,
+      "n": 5,
+      "lev": 5,
+      "trades": 119,
+      "mean_bp": 248.48303300744988,
+      "multiple": 5.6662663461475296,
+      "dd": 32.95239086344439,
+      "liquidations": 3,
+      "taken": 107
+     },
+     {
+      "score_min": 0.6,
+      "recovery_max": "inf",
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 4,
+      "lev": 3,
+      "trades": 126,
+      "mean_bp": 398.1928105443669,
+      "multiple": 5.627380776078573,
+      "dd": 18.34672229603148,
+      "liquidations": 0,
+      "taken": 97
+     },
+     {
+      "score_min": 0.55,
+      "recovery_max": "inf",
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 4,
+      "lev": 3,
+      "trades": 250,
+      "mean_bp": 259.52247957241735,
+      "multiple": 5.582144280577056,
+      "dd": 32.205204241347516,
+      "liquidations": 0,
+      "taken": 190
+     },
+     {
+      "score_min": 0.6,
+      "recovery_max": "inf",
+      "target": "opposite_monday_edge",
+      "stop": 30,
+      "n": 4,
+      "lev": 5,
+      "trades": 125,
+      "mean_bp": 300.94998509918935,
+      "multiple": 5.5408084875071895,
+      "dd": 34.571016791404574,
+      "liquidations": 5,
+      "taken": 97
+     },
+     {
+      "score_min": 0.4,
+      "recovery_max": 0.3,
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 3,
+      "lev": 3,
+      "trades": 98,
+      "mean_bp": 312.00437469948616,
+      "multiple": 5.539606257888656,
+      "dd": 21.096979198868514,
+      "liquidations": 0,
+      "taken": 86
+     }
+    ],
+    "train_seeds": {
+     "final_median": 8.562872597888683,
+     "dd_median": 33.333333333333336,
+     "dd_max": 33.33333333333335
+    },
+    "test": {
+     "trades": 77,
+     "mean_bp": 418.110166064274,
+     "multiple": 5.353278518752446,
+     "dd": 24.738975103271176,
+     "liquidations": 0,
+     "seeds": {
+      "final_median": 3.7823677637685442,
+      "dd_median": 24.738975103271176,
+      "dd_max": 33.33333333333333
+     }
+    },
+    "survivor_test": {
+     "score_min": 0.5,
+     "recovery_max": 0.6395668107499273,
+     "target": "near_monday_edge",
+     "stop": 30,
+     "n": 20,
+     "lev": 3,
+     "trades": 70,
+     "mean_bp": 231.4292965209522,
+     "multiple": 1.2591592118699524,
+     "dd": 2.6780013039159334,
+     "liquidations": 0,
+     "taken": 70
+    }
+   },
+   "2025": {
+    "train": [
+     "2020-01-01",
+     "2025-01-01"
+    ],
+    "candidates": 9240,
+    "feasible": 4960,
+    "choice": {
+     "score_min": 0.45,
+     "recovery_max": 0.3,
+     "target": "opposite_1618",
+     "stop": 30,
+     "n": 3,
+     "lev": 5,
+     "trades": 137,
+     "mean_bp": 422.902190708786,
+     "multiple": 38.42271309729333,
+     "dd": 33.333333333333336,
+     "liquidations": 1,
+     "taken": 95
+    },
+    "top": [
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 3,
+      "lev": 5,
+      "trades": 137,
+      "mean_bp": 422.902190708786,
+      "multiple": 38.42271309729333,
+      "dd": 33.333333333333336,
+      "liquidations": 1,
+      "taken": 95
+     },
+     {
+      "score_min": 0.4,
+      "recovery_max": 0.3,
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 2,
+      "lev": 3,
+      "trades": 228,
+      "mean_bp": 342.6782716108466,
+      "multiple": 32.69202565808216,
+      "dd": 30.772967400298956,
+      "liquidations": 0,
+      "taken": 148
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 1,
+      "lev": 2,
+      "trades": 137,
+      "mean_bp": 422.902190708786,
+      "multiple": 27.379102502399387,
+      "dd": 34.382249541080256,
+      "liquidations": 0,
+      "taken": 80
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 4,
+      "lev": 5,
+      "trades": 137,
+      "mean_bp": 422.902190708786,
+      "multiple": 25.537536626471635,
+      "dd": 25.0,
+      "liquidations": 1,
+      "taken": 99
+     },
+     {
+      "score_min": 0.4,
+      "recovery_max": 0.3,
+      "target": "opposite_monday_edge",
+      "stop": 30,
+      "n": 2,
+      "lev": 3,
+      "trades": 228,
+      "mean_bp": 317.29346828242257,
+      "multiple": 20.60476987717585,
+      "dd": 30.772967400298956,
+      "liquidations": 0,
+      "taken": 149
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 2,
+      "lev": 3,
+      "trades": 137,
+      "mean_bp": 422.902190708786,
+      "multiple": 19.128786627600604,
+      "dd": 25.786687155810196,
+      "liquidations": 0,
+      "taken": 90
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 5,
+      "lev": 5,
+      "trades": 137,
+      "mean_bp": 422.902190708786,
+      "multiple": 17.69233385098195,
+      "dd": 20.000000000000007,
+      "liquidations": 1,
+      "taken": 103
+     },
+     {
+      "score_min": 0.5,
+      "recovery_max": 0.3,
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 3,
+      "lev": 5,
+      "trades": 75,
+      "mean_bp": 397.4610771960521,
+      "multiple": 17.569596744385816,
+      "dd": 24.738975103271176,
+      "liquidations": 0,
+      "taken": 59
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "opposite_monday_edge",
+      "stop": 30,
+      "n": 3,
+      "lev": 5,
+      "trades": 137,
+      "mean_bp": 369.1036877860389,
+      "multiple": 16.12902051681995,
+      "dd": 33.333333333333336,
+      "liquidations": 1,
+      "taken": 95
+     },
+     {
+      "score_min": 0.4,
+      "recovery_max": 0.3,
+      "target": "range_0.618",
+      "stop": 30,
+      "n": 2,
+      "lev": 3,
+      "trades": 228,
+      "mean_bp": 311.51539913136116,
+      "multiple": 16.05482516339,
+      "dd": 30.772967400298956,
+      "liquidations": 0,
+      "taken": 150
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "opposite_1618",
+      "stop": 30,
+      "n": 6,
+      "lev": 5,
+      "trades": 137,
+      "mean_bp": 422.902190708786,
+      "multiple": 14.890060563945658,
+      "dd": 16.666666666666675,
+      "liquidations": 1,
+      "taken": 106
+     },
+     {
+      "score_min": 0.5,
+      "recovery_max": 0.5,
+      "target": "range_0.5",
+      "stop": 30,
+      "n": 3,
+      "lev": 5,
+      "trades": 126,
+      "mean_bp": 267.1734068007645,
+      "multiple": 14.508024003060138,
+      "dd": 34.81914030819141,
+      "liquidations": 1,
+      "taken": 102
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "range_0.618",
+      "stop": 30,
+      "n": 3,
+      "lev": 5,
+      "trades": 137,
+      "mean_bp": 357.3917046860044,
+      "multiple": 14.178225567744482,
+      "dd": 33.333333333333336,
+      "liquidations": 1,
+      "taken": 95
+     },
+     {
+      "score_min": 0.4,
+      "recovery_max": 0.3,
+      "target": "range_0.5",
+      "stop": 30,
+      "n": 2,
+      "lev": 3,
+      "trades": 228,
+      "mean_bp": 298.57894938254617,
+      "multiple": 13.79113704924937,
+      "dd": 30.772967400298956,
+      "liquidations": 0,
+      "taken": 150
+     },
+     {
+      "score_min": 0.5,
+      "recovery_max": 0.3,
+      "target": "opposite_monday_edge",
+      "stop": 30,
+      "n": 3,
+      "lev": 5,
+      "trades": 75,
+      "mean_bp": 357.7121988186181,
+      "multiple": 13.240504881314722,
+      "dd": 24.738975103271176,
+      "liquidations": 0,
+      "taken": 59
+     }
+    ],
+    "train_seeds": {
+     "final_median": 37.968386309070524,
+     "dd_median": 33.333333333333336,
+     "dd_max": 33.333333333333336
+    },
+    "test": {
+     "trades": 104,
+     "mean_bp": 163.17758930391844,
+     "multiple": 6.423643881924025,
+     "dd": 69.40317755908572,
+     "liquidations": 3,
+     "seeds": {
+      "final_median": 6.423643881924025,
+      "dd_median": 69.40317755908572,
+      "dd_max": 69.40317755908572
+     }
+    },
+    "survivor_test": {
+     "score_min": 0.5,
+     "recovery_max": 0.6395668107499273,
+     "target": "near_monday_edge",
+     "stop": 30,
+     "n": 20,
+     "lev": 3,
+     "trades": 119,
+     "mean_bp": 135.7865073622695,
+     "multiple": 1.2647508363539666,
+     "dd": 6.225294414663374,
+     "liquidations": 0,
+     "taken": 119
+    }
+   },
+   "2026": {
+    "train": [
+     "2020-01-01",
+     "2026-01-01"
+    ],
+    "candidates": 10080,
+    "feasible": 3964,
+    "choice": {
+     "score_min": 0.45,
+     "recovery_max": 0.5,
+     "target": "range_0.618",
+     "stop": 30,
+     "n": 5,
+     "lev": 5,
+     "trades": 376,
+     "mean_bp": 215.09228789046827,
+     "multiple": 68.01995846602004,
+     "dd": 34.03295707253091,
+     "liquidations": 8,
+     "taken": 331
+    },
+    "top": [
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.5,
+      "target": "range_0.618",
+      "stop": 30,
+      "n": 5,
+      "lev": 5,
+      "trades": 376,
+      "mean_bp": 215.09228789046827,
+      "multiple": 68.01995846602004,
+      "dd": 34.03295707253091,
+      "liquidations": 8,
+      "taken": 331
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "near_monday_edge",
+      "stop": 30,
+      "n": 4,
+      "lev": 5,
+      "trades": 241,
+      "mean_bp": 260.5770722299168,
+      "multiple": 63.37160859674524,
+      "dd": 33.68784197743355,
+      "liquidations": 3,
+      "taken": 204
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.5,
+      "target": "range_0.618",
+      "stop": 30,
+      "n": 6,
+      "lev": 5,
+      "trades": 376,
+      "mean_bp": 215.09228789046827,
+      "multiple": 46.01337718868351,
+      "dd": 28.801736217271866,
+      "liquidations": 8,
+      "taken": 336
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "near_monday_edge",
+      "stop": 18,
+      "n": 4,
+      "lev": 5,
+      "trades": 241,
+      "mean_bp": 220.48951680701032,
+      "multiple": 45.30065060265743,
+      "dd": 29.98800996630098,
+      "liquidations": 0,
+      "taken": 204
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.5,
+      "target": "range_0.5",
+      "stop": 30,
+      "n": 6,
+      "lev": 5,
+      "trades": 376,
+      "mean_bp": 215.38441259948448,
+      "multiple": 44.759774995848694,
+      "dd": 30.544116402594245,
+      "liquidations": 8,
+      "taken": 336
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "opposite_monday_edge",
+      "stop": 30,
+      "n": 6,
+      "lev": 5,
+      "trades": 241,
+      "mean_bp": 298.92756055135663,
+      "multiple": 42.34591071277855,
+      "dd": 34.32800450409377,
+      "liquidations": 4,
+      "taken": 210
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.5,
+      "target": "near_monday_edge",
+      "stop": 30,
+      "n": 5,
+      "lev": 5,
+      "trades": 376,
+      "mean_bp": 189.54121161431755,
+      "multiple": 41.74972392583364,
+      "dd": 32.78383056394042,
+      "liquidations": 7,
+      "taken": 333
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "range_0.618",
+      "stop": 30,
+      "n": 6,
+      "lev": 5,
+      "trades": 241,
+      "mean_bp": 292.40420227962284,
+      "multiple": 40.98376417479854,
+      "dd": 32.88521040461436,
+      "liquidations": 4,
+      "taken": 210
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "near_monday_edge",
+      "stop": 30,
+      "n": 5,
+      "lev": 5,
+      "trades": 241,
+      "mean_bp": 260.5770722299168,
+      "multiple": 36.39294874361859,
+      "dd": 27.422629379553786,
+      "liquidations": 3,
+      "taken": 208
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "range_0.5",
+      "stop": 30,
+      "n": 6,
+      "lev": 5,
+      "trades": 241,
+      "mean_bp": 277.42644436805483,
+      "multiple": 33.17999775927939,
+      "dd": 33.186429552796604,
+      "liquidations": 4,
+      "taken": 210
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.5,
+      "target": "opposite_monday_edge",
+      "stop": 30,
+      "n": 8,
+      "lev": 5,
+      "trades": 376,
+      "mean_bp": 218.6848479772111,
+      "multiple": 30.71349081432503,
+      "dd": 34.986834538791925,
+      "liquidations": 8,
+      "taken": 343
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.5,
+      "target": "near_monday_edge",
+      "stop": 30,
+      "n": 6,
+      "lev": 5,
+      "trades": 376,
+      "mean_bp": 189.54121161431755,
+      "multiple": 29.139334410570992,
+      "dd": 27.68585363114695,
+      "liquidations": 7,
+      "taken": 337
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.5,
+      "target": "range_0.618",
+      "stop": 30,
+      "n": 8,
+      "lev": 5,
+      "trades": 376,
+      "mean_bp": 215.09228789046827,
+      "multiple": 28.538205055362788,
+      "dd": 22.007812623115186,
+      "liquidations": 8,
+      "taken": 343
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.3,
+      "target": "near_monday_edge",
+      "stop": 18,
+      "n": 5,
+      "lev": 5,
+      "trades": 241,
+      "mean_bp": 220.48951680701032,
+      "multiple": 27.155460647550868,
+      "dd": 24.577999561793007,
+      "liquidations": 0,
+      "taken": 208
+     },
+     {
+      "score_min": 0.45,
+      "recovery_max": 0.5,
+      "target": "range_0.5",
+      "stop": 30,
+      "n": 8,
+      "lev": 5,
+      "trades": 376,
+      "mean_bp": 215.38441259948448,
+      "multiple": 26.866548208386753,
+      "dd": 22.861812078149068,
+      "liquidations": 8,
+      "taken": 344
+     }
+    ],
+    "train_seeds": {
+     "final_median": 59.919103759139,
+     "dd_median": 34.03295707253092,
+     "dd_max": 35.49558208607452
+    },
+    "test": {
+     "trades": 177,
+     "mean_bp": 34.556299128991384,
+     "multiple": 0.9542440837390458,
+     "dd": 69.19980106480783,
+     "liquidations": 7,
+     "seeds": {
+      "final_median": 0.9542440837390458,
+      "dd_median": 69.19980106480783,
+      "dd_max": 69.19980106480783
+     }
+    },
+    "survivor_test": {
+     "score_min": 0.5,
+     "recovery_max": 0.6395668107499273,
+     "target": "near_monday_edge",
+     "stop": 30,
+     "n": 20,
+     "lev": 3,
+     "trades": 135,
+     "mean_bp": 148.898049544193,
+     "multiple": 1.340141276470055,
+     "dd": 5.316886744795313,
+     "liquidations": 0,
+     "taken": 135
+    }
+   }
+  },
+  "oos": {
+   "start": "2024-01-01",
+   "picks": [
+    {
+     "year": 2024,
+     "score_min": 0.45,
+     "recovery_max": 0.3,
+     "target": "opposite_1618",
+     "stop": 30,
+     "n": 3,
+     "lev": 5.0
+    },
+    {
+     "year": 2025,
+     "score_min": 0.45,
+     "recovery_max": 0.3,
+     "target": "opposite_1618",
+     "stop": 30,
+     "n": 3,
+     "lev": 5.0
+    },
+    {
+     "year": 2026,
+     "score_min": 0.45,
+     "recovery_max": 0.5,
+     "target": "range_0.618",
+     "stop": 30,
+     "n": 5,
+     "lev": 5.0
+    }
+   ],
+   "summary": {
+    "start": 1000.0,
+    "end": 32814.12072713286,
+    "pnl": 31814.120727132857,
+    "return_pct": 3181.412072713286,
+    "max_drawdown_pct": 71.88135501847587,
+    "win_pct": 60.062893081761004,
+    "trades": 318,
+    "profit_factor": 1.1712721721034494,
+    "profit_factor_state": "finite",
+    "cash_added": 0.0,
+    "stake_budget": 1000.0,
+    "avg_win": 1139.088787944857,
+    "avg_loss": -1462.6128958294084
+   },
+   "yearly": [
+    [
+     "2024",
+     435.3278518752448
+    ],
+    [
+     "2025",
+     432.2479092781996
+    ],
+    [
+     "2026",
+     15.166712043740183
+    ]
+   ]
+  },
+  "full_in_sample": {
+   "choice": {
+    "score_min": 0.5,
+    "recovery_max": 0.5,
+    "target": "near_monday_edge",
+    "stop": 30,
+    "n": 6,
+    "lev": 5,
+    "trades": 327,
+    "mean_bp": 201.98219908761484,
+    "multiple": 68.29911220442158,
+    "dd": 29.8168237432057,
+    "liquidations": 7,
+    "taken": 317
+   },
+   "top": [
+    {
+     "score_min": 0.5,
+     "recovery_max": 0.5,
+     "target": "near_monday_edge",
+     "stop": 30,
+     "n": 6,
+     "lev": 5,
+     "trades": 327,
+     "mean_bp": 201.98219908761484,
+     "multiple": 68.29911220442158,
+     "dd": 29.8168237432057,
+     "liquidations": 7,
+     "taken": 317
+    },
+    {
+     "score_min": 0.5,
+     "recovery_max": 0.6395668107499273,
+     "target": "near_monday_edge",
+     "stop": 30,
+     "n": 6,
+     "lev": 5,
+     "trades": 398,
+     "mean_bp": 167.68281003851436,
+     "multiple": 48.15827802020035,
+     "dd": 31.74478888566319,
+     "liquidations": 12,
+     "taken": 382
+    },
+    {
+     "score_min": 0.5,
+     "recovery_max": 0.3,
+     "target": "near_monday_edge",
+     "stop": 30,
+     "n": 5,
+     "lev": 5,
+     "trades": 203,
+     "mean_bp": 252.14964246724566,
+     "multiple": 48.027306743912966,
+     "dd": 31.360535624090247,
+     "liquidations": 5,
+     "taken": 195
+    },
+    {
+     "score_min": 0.5,
+     "recovery_max": 0.5,
+     "target": "near_monday_edge",
+     "stop": 30,
+     "n": 4,
+     "lev": 3,
+     "trades": 327,
+     "mean_bp": 201.98219908761484,
+     "multiple": 39.22428460607331,
+     "dd": 32.16631678775922,
+     "liquidations": 0,
+     "taken": 309
+    },
+    {
+     "score_min": 0.5,
+     "recovery_max": 0.5,
+     "target": "near_monday_edge",
+     "stop": 30,
+     "n": 8,
+     "lev": 5,
+     "trades": 327,
+     "mean_bp": 201.98219908761484,
+     "multiple": 31.11105440964462,
+     "dd": 22.92622548221669,
+     "liquidations": 7,
+     "taken": 322
+    },
+    {
+     "score_min": 0.5,
+     "recovery_max": 0.3,
+     "target": "near_monday_edge",
+     "stop": 30,
+     "n": 6,
+     "lev": 5,
+     "trades": 203,
+     "mean_bp": 252.14964246724566,
+     "multiple": 29.91986476271169,
+     "dd": 26.17772327849357,
+     "liquidations": 5,
+     "taken": 197
+    },
+    {
+     "score_min": 0.5,
+     "recovery_max": 0.6395668107499273,
+     "target": "range_0.5",
+     "stop": 30,
+     "n": 8,
+     "lev": 5,
+     "trades": 398,
+     "mean_bp": 179.93895128619494,
+     "multiple": 29.627614258746704,
+     "dd": 29.86693918729254,
+     "liquidations": 14,
+     "taken": 389
+    },
+    {
+     "score_min": 0.5,
+     "recovery_max": 0.6395668107499273,
+     "target": "near_monday_edge",
+     "stop": 30,
+     "n": 4,
+     "lev": 3,
+     "trades": 398,
+     "mean_bp": 167.68281003851436,
+     "multiple": 29.580808192215066,
+     "dd": 29.48175085728758,
+     "liquidations": 0,
+     "taken": 374
+    },
+    {
+     "score_min": 0.45,
+     "recovery_max": 0.5,
+     "target": "range_0.5",
+     "stop": 30,
+     "n": 10,
+     "lev": 5,
+     "trades": 553,
+     "mean_bp": 170.68835482638195,
+     "multiple": 28.669664283906965,
+     "dd": 31.758352880513264,
+     "liquidations": 16,
+     "taken": 526
+    },
+    {
+     "score_min": 0.5,
+     "recovery_max": 0.6395668107499273,
+     "target": "near_monday_edge",
+     "stop": 30,
+     "n": 8,
+     "lev": 5,
+     "trades": 398,
+     "mean_bp": 167.68281003851436,
+     "multiple": 25.93976307660039,
+     "dd": 24.07917323971872,
+     "liquidations": 12,
+     "taken": 389
+    },
+    {
+     "score_min": 0.5,
+     "recovery_max": 0.5,
+     "target": "near_monday_edge",
+     "stop": 30,
+     "n": 5,
+     "lev": 3,
+     "trades": 327,
+     "mean_bp": 201.98219908761484,
+     "multiple": 22.90961387216923,
+     "dd": 26.25548486726519,
+     "liquidations": 0,
+     "taken": 313
+    },
+    {
+     "score_min": 0.5,
+     "recovery_max": 0.5,
+     "target": "near_monday_edge",
+     "stop": 30,
+     "n": 3,
+     "lev": 2,
+     "trades": 327,
+     "mean_bp": 201.98219908761484,
+     "multiple": 22.877787019335774,
+     "dd": 28.91420718316573,
+     "liquidations": 0,
+     "taken": 304
+    },
+    {
+     "score_min": 0.5,
+     "recovery_max": 0.5,
+     "target": "range_0.618",
+     "stop": 30,
+     "n": 8,
+     "lev": 5,
+     "trades": 327,
+     "mean_bp": 179.4643620260158,
+     "multiple": 21.44453132918321,
+     "dd": 34.43102772735514,
+     "liquidations": 9,
+     "taken": 321
+    },
+    {
+     "score_min": 0.5,
+     "recovery_max": 0.6395668107499273,
+     "target": "range_0.5",
+     "stop": 30,
+     "n": 10,
+     "lev": 5,
+     "trades": 398,
+     "mean_bp": 179.93895128619494,
+     "multiple": 20.136739739147306,
+     "dd": 24.225036210886596,
+     "liquidations": 14,
+     "taken": 395
+    },
+    {
+     "score_min": 0.5,
+     "recovery_max": 0.3,
+     "target": "near_monday_edge",
+     "stop": 30,
+     "n": 4,
+     "lev": 3,
+     "trades": 203,
+     "mean_bp": 252.14964246724566,
+     "multiple": 20.119991220963932,
+     "dd": 32.81719947485949,
+     "liquidations": 0,
+     "taken": 192
+    }
+   ],
+   "seeds": {
+    "final_median": 68.08265569078547,
+    "dd_median": 29.8168237432057,
+    "dd_max": 29.81682374320571
+   }
+  },
+  "paths": {
+   "latest_choice-2020": {
+    "spec": {
+     "score_min": 0.45,
+     "recovery_max": 0.5,
+     "target": "range_0.618",
+     "stop": 30
+    },
+    "n": 5,
+    "lev": 5.0,
+    "summary": {
+     "start": 1000.0,
+     "end": 72200.10655226755,
+     "pnl": 71200.10655226752,
+     "return_pct": 7120.010655226755,
+     "max_drawdown_pct": 69.80720831028022,
+     "win_pct": 60.23622047244095,
+     "trades": 508,
+     "profit_factor": 1.1652748283297496,
+     "profit_factor_state": "finite",
+     "cash_added": 0.0,
+     "stake_budget": 1000.0,
+     "avg_win": 1640.5174999072979,
+     "avg_loss": -2132.664596135474
+    },
+    "yearly": [
+     [
+      "2020",
+      20.995139606542644
+     ],
+     [
+      "2021",
+      157.09047667899395
+     ],
+     [
+      "2022",
+      -10.04821995260119
+     ],
+     [
+      "2023",
+      -9.72110405547978
+     ],
+     [
+      "2024",
+      271.29333705917804
+     ],
+     [
+      "2025",
+      706.6985771232355
+     ],
+     [
+      "2026",
+      -4.575591626095365
+     ]
+    ]
+   },
+   "latest_choice-2025": {
+    "spec": {
+     "score_min": 0.45,
+     "recovery_max": 0.5,
+     "target": "range_0.618",
+     "stop": 30
+    },
+    "n": 5,
+    "lev": 5.0,
+    "summary": {
+     "start": 1000.0,
+     "end": 7697.8734458055405,
+     "pnl": 6697.8734458055405,
+     "return_pct": 669.7873445805541,
+     "max_drawdown_pct": 69.80720831028022,
+     "win_pct": 60.35502958579882,
+     "trades": 338,
+     "profit_factor": 1.1502332026068898,
+     "profit_factor_state": "finite",
+     "cash_added": 0.0,
+     "stake_budget": 1000.0,
+     "avg_win": 251.37769769945706,
+     "avg_loss": -332.7102752603261
+    },
+    "yearly": [
+     [
+      "2025",
+      706.6985771232349
+     ],
+     [
+      "2026",
+      -4.575591626095354
+     ]
+    ]
+   },
+   "full_in_sample-2020": {
+    "spec": {
+     "score_min": 0.5,
+     "recovery_max": 0.5,
+     "target": "near_monday_edge",
+     "stop": 30
+    },
+    "n": 6,
+    "lev": 5.0,
+    "summary": {
+     "start": 1000.0,
+     "end": 68299.11220442157,
+     "pnl": 67299.11220442156,
+     "return_pct": 6729.911220442157,
+     "max_drawdown_pct": 29.8168237432057,
+     "win_pct": 68.13880126182966,
+     "trades": 317,
+     "profit_factor": 1.821033638261428,
+     "profit_factor_state": "finite",
+     "cash_added": 0.0,
+     "stake_budget": 1000.0,
+     "avg_win": 691.0549805879949,
+     "avg_loss": -811.5719168572806
+    },
+    "yearly": [
+     [
+      "2020",
+      8.070913647964616
+     ],
+     [
+      "2021",
+      135.69033547179993
+     ],
+     [
+      "2022",
+      4.48653014446263
+     ],
+     [
+      "2023",
+      -6.591533555800488
+     ],
+     [
+      "2024",
+      66.96308329416243
+     ],
+     [
+      "2025",
+      185.25188689276368
+     ],
+     [
+      "2026",
+      476.85801295216095
+     ]
+    ]
+   },
+   "full_in_sample-2025": {
+    "spec": {
+     "score_min": 0.5,
+     "recovery_max": 0.5,
+     "target": "near_monday_edge",
+     "stop": 30
+    },
+    "n": 6,
+    "lev": 5.0,
+    "summary": {
+     "start": 1000.0,
+     "end": 16454.98366638141,
+     "pnl": 15454.98366638141,
+     "return_pct": 1545.4983666381409,
+     "max_drawdown_pct": 29.81682374320571,
+     "win_pct": 68.65671641791045,
+     "trades": 201,
+     "profit_factor": 1.8228942520678657,
+     "profit_factor_state": "finite",
+     "cash_added": 0.0,
+     "stake_budget": 1000.0,
+     "avg_win": 248.08865851595903,
+     "avg_loss": -298.11509855271333
+    },
+    "yearly": [
+     [
+      "2025",
+      185.25188689276368
+     ],
+     [
+      "2026",
+      476.8580129521606
+     ]
+    ]
+   },
+   "survivor-2020": {
+    "spec": {
+     "score_min": 0.5,
+     "recovery_max": 0.6395668107499273,
+     "target": "near_monday_edge",
+     "stop": 30
+    },
+    "n": 20,
+    "lev": 3.0,
+    "summary": {
+     "start": 1000.0,
+     "end": 2628.09286021907,
+     "pnl": 1628.092860219072,
+     "return_pct": 162.80928602190704,
+     "max_drawdown_pct": 6.225294414663396,
+     "win_pct": 67.33668341708542,
+     "trades": 398,
+     "profit_factor": 1.8273118613488182,
+     "profit_factor_state": "finite",
+     "cash_added": 0.0,
+     "stake_budget": 1000.0,
+     "avg_win": 13.418000387699681,
+     "avg_loss": -15.137932643726487
+    },
+    "yearly": [
+     [
+      "2020",
+      1.4332332457601682
+     ],
+     [
+      "2021",
+      18.164184120768123
+     ],
+     [
+      "2022",
+      3.623074735530496
+     ],
+     [
+      "2023",
+      -0.8524707949435939
+     ],
+     [
+      "2024",
+      25.91592118699517
+     ],
+     [
+      "2025",
+      26.475083635396658
+     ],
+     [
+      "2026",
+      34.01412764700558
+     ]
+    ]
+   },
+   "survivor-2025": {
+    "spec": {
+     "score_min": 0.5,
+     "recovery_max": 0.6395668107499273,
+     "target": "near_monday_edge",
+     "stop": 30
+    },
+    "n": 20,
+    "lev": 3.0,
+    "summary": {
+     "start": 1000.0,
+     "end": 1694.9448002479758,
+     "pnl": 694.9448002479763,
+     "return_pct": 69.49448002479757,
+     "max_drawdown_pct": 6.225294414663374,
+     "win_pct": 65.74803149606299,
+     "trades": 254,
+     "profit_factor": 1.6679907725563046,
+     "profit_factor_state": "finite",
+     "cash_added": 0.0,
+     "stake_budget": 1000.0,
+     "avg_win": 10.390992206541657,
+     "avg_loss": -11.958056301660697
+    },
+    "yearly": [
+     [
+      "2025",
+      26.475083635396658
+     ],
+     [
+      "2026",
+      34.0141276470056
+     ]
+    ]
+   }
+  }
+ },
+ "source_commit": "95a4560a4ca7ec72a3eed2398be56958b31d370b",
+ "training_eligible": false,
+ "production_eligible": false
+}

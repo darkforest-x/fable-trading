@@ -1,3 +1,9 @@
+## 2026-11-01 · Touch-close optimization: re-picking filters fails out of sample; size is the lever (10 slots 5x)
+
+- Owner: "以最大利润为目标，重构出新的策略出来，回撤控制小于35%" (explicit multi-variable request, PROJECT_PLAN). `exp-monday-limit-close-optimize-20261101-v1` (builder dbfcf061eb): 288 selections (score, recovery, five targets, -30 / -18 stop) x 40 sizings on the saved close-reclaim fills, max training profit with DD < 35, expanding walk-forward.
+- Few trades because few coins early (45 in 2020, 479 in 2025) and score >= 0.5 is about 3 percent of touches; rows added by relaxing score or recovery lose in 2025-26 (-21 to -56bp). Walk-forward picks change every year (opposite 1.618, score 0.45, n3-n5 x5): 2024 5.35x DD25, 2025 6.42x DD69, 2026 0.95x DD69; chained 32814U, DD 72. Full-history optimum 68x DD30 is in sample only.
+- Post hoc: keep the survivor filters, pick size on 2020-24 with DD < half the cap -> n10 x5 (50 percent notional). `-v2` paths: 2025 onward 1000 -> 5351U DD 19.4 (vs 1695U at n20 x3), 2020 onward 16914U. DD < 35 picks n2 x3, 2025 onward DD 55. Booklet updated (both sizes, funnel, walk-forward, sizing). Learning: `max-profit-under-a-drawdown-cap-overshoots-out-of-sample.md`. Paper account: owner decision.
+
 ## 2026-11-01 · Touch-close survivor slice, 1000U: 2628U from 2020, 1695U from 2025
 
 - Owner: "先做一次详细的回测啊 用1000u". `exp-monday-limit-close-survivor-paths-20261101-v1` (builder 0609011a0f) replays the saved signal fills of the random-control run (no new fills) with frac N20 3x, one tie seed, from 2020-01-01 and 2025-01-01; ledgers per trade (prices, exit reason, score, recovery, margin, equity).
