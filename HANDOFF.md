@@ -1,3 +1,9 @@
+## 2026-11-01 · Wick-extreme stop on live-wick: payoff ratio 4x, edge gone (rejected)
+
+- Owner: "我们还需要盈亏比高一点的策略 比如止损只放在5min插针引线的低点的这种单子". `exp-monday-limit-close-wick-stop-20261101-v1` (stop grid base `wick`, NautilusTrader, both paths, 416 survivor events 2020 to 2026-10-27): stop one tick / 0.3 / 1 percent past the touch 5m bar's low (long) or high (short), plus one tick with a daily reclaim check. E20 parity 0 bp (398 saved rows + 51 October-run rows).
+- All periods: E20 win 67 percent, +170bp, payoff 0.97 vs W0 16 percent, -14bp, payoff 4.40 (median stop 60bp, 344 of 416 stopped); W1 30 percent, -10bp, payoff 2.18. 6x3 from 2025: 6.43x vs about 1.0x. The better intrabar path on every row is still only +1 to +11bp.
+- Not adopted; no paper account changed. Learning: `a-wick-extreme-stop-buys-payoff-ratio-with-the-whole-edge.md`. A high payoff design would need a different entry (e.g. a limit nearer the wick extreme), not a tighter stop on the close entry.
+
 ## 2026-11-01 · TG / Bark also notify live- account entries, once per touch
 
 - Owner: "现在的tg bark监控通知是只发分数大于4的吗，每一个策略出信号也要发，但是不要重复发了 我说的live策略". Before: one message per weekly first touch when the touch-close score > 0.4, with a live-allin3 pre-touch score line. Now `ReclaimPaper.notification_score` also returns the live- rows booked on that touch (live-allin3 at the touch, live-wick at its 5m close in the score transaction), and `claim_scored_notification` sends when the score > 0.4 or any live- row exists. Still one message per touch per channel (same outbox key); lines "live开仓 · …" and "live未开 · name（满仓 / 保证金不足 / 已有持仓）". A live entry with no usable touch score shows "评分 —".

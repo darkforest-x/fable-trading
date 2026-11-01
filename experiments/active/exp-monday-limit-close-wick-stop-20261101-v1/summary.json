@@ -1,0 +1,856 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-close-wick-stop-20261101-v1",
+    "question": "Owner 2026-11-01 '我们还需要盈亏比高一点的策略 比如止损只放在5min插针引线的低点的这种单子': the live-wick entries with the stop just beyond the touch 5m bar's own extreme instead of 20 percent from the entry.",
+    "approval": "Owner 2026-11-01 '我们还需要盈亏比高一点的策略 比如止损只放在5min插针引线的低点的这种单子'",
+    "single_variable": "Stop only: E20 (current live-wick, parity) vs W0 / W03 / W1 = one tick / 0.3 / 1 percent beyond the touch bar's low (long) or high (short). Sensitivity W0_1440: W0 with the reclaim decision at the next daily close instead of 60m (closest the adapter gets to 'only the wick stop'). Entry, target, reclaim rule, fees and slippage unchanged.",
+    "survivors": [
+      "experiments/active/exp-monday-limit-close-slice-control-20261101-v1/survivors.csv.gz",
+      "experiments/active/exp-monday-limit-live-october-20261101-v1/parity_survivors.csv.gz",
+      "experiments/active/exp-monday-limit-live-october-20261101-v1/survivors.csv.gz"
+    ],
+    "jobs": "experiments/active/exp-monday-limit-live-october-20261101-v1/jobs.json",
+    "targets": [
+      "near_monday_edge"
+    ],
+    "since_week": "2019-12-30",
+    "max_beyond_pct": 30,
+    "stops": [
+      {
+        "name": "E20",
+        "base": "entry",
+        "pct": 20
+      },
+      {
+        "name": "W0",
+        "base": "wick",
+        "pct": 0
+      },
+      {
+        "name": "W03",
+        "base": "wick",
+        "pct": 0.3
+      },
+      {
+        "name": "W1",
+        "base": "wick",
+        "pct": 1.0
+      },
+      {
+        "name": "W0_1440",
+        "base": "wick",
+        "pct": 0,
+        "reclaim_minutes": 1440
+      }
+    ],
+    "parity": [
+      {
+        "name": "E20",
+        "source": "experiments/active/exp-monday-limit-close-stop-grid-20261101-v1",
+        "variant": "E20",
+        "modes": [
+          "near_monday_edge"
+        ]
+      },
+      {
+        "name": "E20",
+        "source": "experiments/active/exp-monday-limit-live-october-20261101-v1",
+        "variant": "E20",
+        "modes": [
+          "near_monday_edge"
+        ]
+      }
+    ],
+    "slippage_bp": {
+      "market_entry": 10,
+      "non_target_exit": 10
+    },
+    "sizings": [
+      [
+        6,
+        3
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        20,
+        3
+      ]
+    ],
+    "seed": 20261103,
+    "ties": 10,
+    "fees": "Codex config: market entry taker 0.05 percent, target maker 0.02 percent, stop / reclaim exits taker (OKX Lv1, read 2026-10-23); 10bp slippage on the market entry and on non-target exits; worse of the two intrabar paths; funding not modelled",
+    "data": "Frozen Binance 5m series to 2026-09-23 plus the checksum-verified daily archives of exp-monday-limit-live-october-20261101-v1 to 2026-10-31 (no 2026-10-28 archive upstream; touches to 2026-10-27)",
+    "null_control": "Paired against E20 on the same events and fills engine; the entry itself was tested against matched random-time entries in exp-monday-limit-close-slice-control-20261101-v1. A stop change alone has no new random control.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "results": {
+    "checks": {
+      "rows": 2080,
+      "events": 416,
+      "issues": [],
+      "wrong_side": {
+        "E20": 0,
+        "W0": 0,
+        "W03": 0,
+        "W1": 0,
+        "W0_1440": 0
+      },
+      "parity": {
+        "E20|exp-monday-limit-close-stop-grid-20261101-v1": {
+          "rows": 416,
+          "missing": 18,
+          "max_abs_bp": 0.0
+        },
+        "E20|exp-monday-limit-live-october-20261101-v1": {
+          "rows": 416,
+          "missing": 365,
+          "max_abs_bp": 0.0
+        }
+      }
+    },
+    "stats": {
+      "near_monday_edge|E20|y2020_2024": {
+        "n": 144,
+        "mean_bp": 208.13677105707822,
+        "win_pct": 70.13888888888889,
+        "stops": 2,
+        "stop_mean_bp": -2030.9999999899971,
+        "win_mean_bp": 478.56708190689346,
+        "loss_mean_bp": -427.0600055901622,
+        "payoff": 1.1206085225554023,
+        "stop_bp_median": 2000.0,
+        "r_mean": 0.10406838552853914,
+        "r_median": 0.1507209825095549,
+        "reasons": {
+          "4": 64,
+          "11": 63,
+          "5": 15,
+          "1": 2
+        }
+      },
+      "near_monday_edge|E20|y2025": {
+        "n": 119,
+        "mean_bp": 139.0421636483228,
+        "win_pct": 63.86554621848739,
+        "stops": 4,
+        "stop_mean_bp": -2030.5000000074995,
+        "win_mean_bp": 534.4052761579451,
+        "loss_mean_bp": -559.7391514849634,
+        "payoff": 0.9547398546987313,
+        "stop_bp_median": 1999.9999999999998,
+        "r_mean": 0.06952108182416138,
+        "r_median": 0.11307127071823204,
+        "reasons": {
+          "4": 58,
+          "11": 46,
+          "5": 11,
+          "1": 4
+        }
+      },
+      "near_monday_edge|E20|y2026": {
+        "n": 153,
+        "mean_bp": 159.23116784828142,
+        "win_pct": 67.3202614379085,
+        "stops": 7,
+        "stop_mean_bp": -2030.1428571448007,
+        "win_mean_bp": 520.1977627766763,
+        "loss_mean_bp": -584.3600177042124,
+        "payoff": 0.8902008128831064,
+        "stop_bp_median": 1999.9999999999998,
+        "r_mean": 0.07961558392414071,
+        "r_median": 0.1677466960352428,
+        "reasons": {
+          "4": 78,
+          "11": 58,
+          "5": 10,
+          "1": 7
+        }
+      },
+      "near_monday_edge|E20|from2025": {
+        "n": 272,
+        "mean_bp": 150.3984785107995,
+        "win_pct": 65.80882352941177,
+        "stops": 11,
+        "stop_mean_bp": -2030.2727272766906,
+        "win_mean_bp": 526.2300030949805,
+        "loss_mean_bp": -572.976176334022,
+        "payoff": 0.9184151537710873,
+        "stop_bp_median": 1999.9999999999998,
+        "r_mean": 0.07519923925539974,
+        "r_median": 0.13780949267299808,
+        "reasons": {
+          "4": 136,
+          "11": 104,
+          "5": 21,
+          "1": 11
+        }
+      },
+      "near_monday_edge|E20|all": {
+        "n": 416,
+        "mean_bp": 170.38481054604983,
+        "win_pct": 67.3076923076923,
+        "stops": 13,
+        "stop_mean_bp": -2030.3846153864301,
+        "win_mean_bp": 509.03730652356336,
+        "loss_mean_bp": -526.8409164664781,
+        "payoff": 0.9662068579215077,
+        "stop_bp_median": 2000.0,
+        "r_mean": 0.08519240527302492,
+        "r_median": 0.14411807846379454,
+        "reasons": {
+          "4": 200,
+          "11": 167,
+          "5": 36,
+          "1": 13
+        }
+      },
+      "near_monday_edge|W0|y2020_2024": {
+        "n": 144,
+        "mean_bp": -39.85948089809878,
+        "win_pct": 11.805555555555555,
+        "stops": 125,
+        "stop_mean_bp": -124.23696107664568,
+        "win_mean_bp": 581.0093131736074,
+        "loss_mean_bp": -122.96790215179172,
+        "payoff": 4.724885949964478,
+        "stop_bp_median": 53.588549776383005,
+        "r_mean": 2886208.1572803785,
+        "r_median": -1.4771114096687787,
+        "reasons": {
+          "1": 125,
+          "4": 15,
+          "11": 3,
+          "5": 1
+        }
+      },
+      "near_monday_edge|W0|y2025": {
+        "n": 119,
+        "mean_bp": 20.084394034215943,
+        "win_pct": 18.487394957983195,
+        "stops": 96,
+        "stop_mean_bp": -102.45555521699026,
+        "win_mean_bp": 565.0952756081296,
+        "loss_mean_bp": -103.52632137430057,
+        "payoff": 5.458469576688824,
+        "stop_bp_median": 44.15547292586617,
+        "r_mean": -3001.713765483077,
+        "r_median": -1.4942927394111247,
+        "reasons": {
+          "1": 96,
+          "4": 19,
+          "11": 3,
+          "5": 1
+        }
+      },
+      "near_monday_edge|W0|y2026": {
+        "n": 153,
+        "mean_bp": -16.724119986460856,
+        "win_pct": 18.954248366013072,
+        "stops": 123,
+        "stop_mean_bp": -135.91755736979198,
+        "win_mean_bp": 489.8410161772893,
+        "loss_mean_bp": -135.19499860540242,
+        "payoff": 3.6232184713208406,
+        "stop_bp_median": 77.94271239282999,
+        "r_mean": -3866.566823542143,
+        "r_median": -1.2959997049853225,
+        "reasons": {
+          "1": 123,
+          "4": 23,
+          "11": 4,
+          "5": 3
+        }
+      },
+      "near_monday_edge|W0|from2025": {
+        "n": 272,
+        "mean_bp": -0.6203951024147538,
+        "win_pct": 18.75,
+        "stops": 219,
+        "stop_mean_bp": -121.24928245349535,
+        "win_mean_bp": 522.3036378925539,
+        "loss_mean_bp": -121.29517194740748,
+        "payoff": 4.306054639330741,
+        "stop_bp_median": 64.86378911341146,
+        "r_mean": -3488.1936106413027,
+        "r_median": -1.3787271774302186,
+        "reasons": {
+          "1": 219,
+          "4": 42,
+          "11": 7,
+          "5": 4
+        }
+      },
+      "near_monday_edge|W0|all": {
+        "n": 416,
+        "mean_bp": -14.203155570151532,
+        "win_pct": 16.346153846153847,
+        "stops": 344,
+        "stop_mean_bp": -122.33492148807031,
+        "win_mean_bp": 536.9800567128173,
+        "loss_mean_bp": -121.90562233808797,
+        "payoff": 4.404883436988486,
+        "stop_bp_median": 60.166140913566565,
+        "r_mean": 996791.3124670195,
+        "r_median": -1.4068227018174468,
+        "reasons": {
+          "1": 344,
+          "4": 57,
+          "11": 10,
+          "5": 5
+        }
+      },
+      "near_monday_edge|W03|y2020_2024": {
+        "n": 144,
+        "mean_bp": -40.01729553283094,
+        "win_pct": 16.666666666666664,
+        "stops": 117,
+        "stop_mean_bp": -157.89407189187273,
+        "win_mean_bp": 535.1235892969154,
+        "loss_mean_bp": -155.0454724987802,
+        "payoff": 3.4513977136683263,
+        "stop_bp_median": 83.58246057199585,
+        "r_mean": -0.23750774653045317,
+        "r_median": -1.2933228048490026,
+        "reasons": {
+          "1": 117,
+          "4": 20,
+          "11": 5,
+          "5": 2
+        }
+      },
+      "near_monday_edge|W03|y2025": {
+        "n": 119,
+        "mean_bp": 37.129898287476536,
+        "win_pct": 25.210084033613445,
+        "stops": 87,
+        "stop_mean_bp": -131.7922806460896,
+        "win_mean_bp": 536.9465690531699,
+        "loss_mean_bp": -131.34763118410552,
+        "payoff": 4.0879806069783635,
+        "stop_bp_median": 74.28770625145233,
+        "r_mean": 0.1469525463564584,
+        "r_median": -1.29494650178684,
+        "reasons": {
+          "1": 87,
+          "4": 25,
+          "11": 4,
+          "5": 3
+        }
+      },
+      "near_monday_edge|W03|y2026": {
+        "n": 153,
+        "mean_bp": -35.19522654514316,
+        "win_pct": 20.915032679738562,
+        "stops": 120,
+        "stop_mean_bp": -165.82359061243096,
+        "win_mean_bp": 455.008796333447,
+        "loss_mean_bp": -164.83595986840666,
+        "payoff": 2.760373383918738,
+        "stop_bp_median": 108.17614964925936,
+        "r_mean": -0.2600603302848515,
+        "r_median": -1.2253532796322113,
+        "reasons": {
+          "1": 120,
+          "4": 24,
+          "11": 5,
+          "5": 4
+        }
+      },
+      "near_monday_edge|W03|from2025": {
+        "n": 272,
+        "mean_bp": -3.5529844308720357,
+        "win_pct": 22.794117647058822,
+        "stops": 207,
+        "stop_mean_bp": -151.52057627875126,
+        "win_mean_bp": 494.65610571395825,
+        "loss_mean_bp": -150.64328723553618,
+        "payoff": 3.2836252765816623,
+        "stop_bp_median": 95.0583146515561,
+        "r_mean": -0.08199219675427838,
+        "r_median": -1.2473393846946723,
+        "reasons": {
+          "1": 207,
+          "4": 49,
+          "11": 9,
+          "5": 7
+        }
+      },
+      "near_monday_edge|W03|all": {
+        "n": 416,
+        "mean_bp": -16.175245966165505,
+        "win_pct": 20.673076923076923,
+        "stops": 324,
+        "stop_mean_bp": -153.82211636126732,
+        "win_mean_bp": 505.9493569464113,
+        "loss_mean_bp": -152.24408187671582,
+        "payoff": 3.323277665112256,
+        "stop_bp_median": 90.12971387549602,
+        "r_mean": -0.13582450244603123,
+        "r_median": -1.2683177136393753,
+        "reasons": {
+          "1": 324,
+          "4": 69,
+          "11": 14,
+          "5": 9
+        }
+      },
+      "near_monday_edge|W0_1440|y2020_2024": {
+        "n": 144,
+        "mean_bp": -39.0253586738763,
+        "win_pct": 11.11111111111111,
+        "stops": 128,
+        "stop_mean_bp": -123.66944669309393,
+        "win_mean_bp": 638.127345479865,
+        "loss_mean_bp": -123.66944669309393,
+        "payoff": 5.159943401893622,
+        "stop_bp_median": 53.588549776383005,
+        "r_mean": 2886208.1403850415,
+        "r_median": -1.4979903204573417,
+        "reasons": {
+          "1": 128,
+          "4": 16
+        }
+      },
+      "near_monday_edge|W0_1440|y2025": {
+        "n": 119,
+        "mean_bp": 3.4065797542354517,
+        "win_pct": 15.966386554621847,
+        "stops": 100,
+        "stop_mean_bp": -112.37980622532805,
+        "win_mean_bp": 612.808611225622,
+        "loss_mean_bp": -112.37980622532805,
+        "payoff": 5.453013595671317,
+        "stop_bp_median": 44.15547292586617,
+        "r_mean": -3001.7843762504326,
+        "r_median": -1.503539798584086,
+        "reasons": {
+          "1": 100,
+          "4": 19
+        }
+      },
+      "near_monday_edge|W0_1440|y2026": {
+        "n": 153,
+        "mean_bp": 2.179565351853184,
+        "win_pct": 18.30065359477124,
+        "stops": 125,
+        "stop_mean_bp": -136.0550159966119,
+        "win_mean_bp": 619.2982320860725,
+        "loss_mean_bp": -136.0550159966119,
+        "payoff": 4.55182212540767,
+        "stop_bp_median": 77.94271239282999,
+        "r_mean": -3866.5617486737606,
+        "r_median": -1.2962121738559413,
+        "reasons": {
+          "1": 125,
+          "4": 27,
+          "11": 1
+        }
+      },
+      "near_monday_edge|W0_1440|from2025": {
+        "n": 272,
+        "mean_bp": 2.7163841528954276,
+        "win_pct": 17.27941176470588,
+        "stops": 225,
+        "stop_mean_bp": -125.53270054270799,
+        "win_mean_bp": 616.6747683339755,
+        "loss_mean_bp": -125.53270054270799,
+        "payoff": 4.912463172288516,
+        "stop_bp_median": 64.86378911341146,
+        "r_mean": -3488.2216482385556,
+        "r_median": -1.3895881154469016,
+        "reasons": {
+          "1": 225,
+          "4": 46,
+          "11": 1
+        }
+      },
+      "near_monday_edge|W0_1440|all": {
+        "n": 416,
+        "mean_bp": -11.732680671756324,
+        "win_pct": 15.144230769230768,
+        "stops": 353,
+        "stop_mean_bp": -124.85707308449098,
+        "win_mean_bp": 622.1230418948363,
+        "loss_mean_bp": -124.85707308449098,
+        "payoff": 4.982681609666155,
+        "stop_bp_median": 60.166140913566565,
+        "r_mean": 996791.2882863582,
+        "r_median": -1.4188768573334123,
+        "reasons": {
+          "1": 353,
+          "4": 62,
+          "11": 1
+        }
+      },
+      "near_monday_edge|W1|y2020_2024": {
+        "n": 144,
+        "mean_bp": -36.92242572645677,
+        "win_pct": 26.38888888888889,
+        "stops": 100,
+        "stop_mean_bp": -233.69611972085463,
+        "win_mean_bp": 479.44754686675077,
+        "loss_mean_bp": -222.0361894862859,
+        "payoff": 2.1593216311990613,
+        "stop_bp_median": 153.56838225493777,
+        "r_mean": -0.06905751416599831,
+        "r_median": -1.1334784600869823,
+        "reasons": {
+          "1": 100,
+          "4": 30,
+          "11": 11,
+          "5": 3
+        }
+      },
+      "near_monday_edge|W1|y2025": {
+        "n": 119,
+        "mean_bp": 36.069296636089575,
+        "win_pct": 32.773109243697476,
+        "stops": 78,
+        "stop_mean_bp": -206.53403470569035,
+        "win_mean_bp": 528.8695324593361,
+        "loss_mean_bp": -204.17081832774306,
+        "payoff": 2.590328710003865,
+        "stop_bp_median": 144.59679293516228,
+        "r_mean": 0.17952568863583152,
+        "r_median": -1.145512787723786,
+        "reasons": {
+          "1": 78,
+          "4": 31,
+          "11": 5,
+          "5": 5
+        }
+      },
+      "near_monday_edge|W1|y2026": {
+        "n": 153,
+        "mean_bp": -19.74286653619657,
+        "win_pct": 31.372549019607842,
+        "stops": 102,
+        "stop_mean_bp": -235.89710102837475,
+        "win_mean_bp": 441.27166164718466,
+        "loss_mean_bp": -230.4923651343137,
+        "payoff": 1.9144740928405353,
+        "stop_bp_median": 178.72174590802805,
+        "r_mean": -0.08901081233636353,
+        "r_median": -1.1304006211180124,
+        "reasons": {
+          "1": 102,
+          "4": 35,
+          "11": 10,
+          "5": 6
+        }
+      },
+      "near_monday_edge|W1|from2025": {
+        "n": 272,
+        "mean_bp": 4.674954851678618,
+        "win_pct": 31.985294117647058,
+        "stops": 180,
+        "stop_mean_bp": -223.17310562187816,
+        "win_mean_bp": 480.5396727009076,
+        "loss_mean_bp": -219.11007462336423,
+        "payoff": 2.193142754968815,
+        "stop_bp_median": 165.06276125527344,
+        "r_mean": 0.028473906838971805,
+        "r_median": -1.1346824516516432,
+        "reasons": {
+          "1": 180,
+          "4": 66,
+          "11": 15,
+          "5": 11
+        }
+      },
+      "near_monday_edge|W1|all": {
+        "n": 416,
+        "mean_bp": -9.724138425368247,
+        "win_pct": 30.048076923076923,
+        "stops": 280,
+        "stop_mean_bp": -226.93132494294122,
+        "win_mean_bp": 480.20766644732396,
+        "loss_mean_bp": -220.17594464216046,
+        "payoff": 2.181017854733306,
+        "stop_bp_median": 160.09896155420552,
+        "r_mean": -0.005286969662748638,
+        "r_median": -1.1346824516516432,
+        "reasons": {
+          "1": 280,
+          "4": 96,
+          "11": 26,
+          "5": 14
+        }
+      }
+    },
+    "plans": {
+      "near_monday_edge|E20": {
+        "6x3": {
+          "y2020_2024": {
+            "final": 2.5765303880981705,
+            "dd": 11.822776118359524,
+            "liquidations": 0
+          },
+          "from2025": {
+            "final_median": 6.427932831111129,
+            "dd_max": 19.268293231659182,
+            "liquidations_median": 0.0
+          },
+          "all": {
+            "final_median": 16.461392215916504,
+            "dd_max": 19.268293231659193,
+            "liquidations_median": 0.0
+          }
+        },
+        "3x3": {
+          "y2020_2024": {
+            "final": 2.975744898773501,
+            "dd": 23.18041350789538,
+            "liquidations": 0
+          },
+          "from2025": {
+            "final_median": 28.17110019599893,
+            "dd_max": 36.5664101073733,
+            "liquidations_median": 0.0
+          },
+          "all": {
+            "final_median": 84.81183334866358,
+            "dd_max": 36.566410107373315,
+            "liquidations_median": 0.0
+          }
+        },
+        "20x3": {
+          "y2020_2024": {
+            "final": 1.5390246085631016,
+            "dd": 3.5982775077945783,
+            "liquidations": 0
+          },
+          "from2025": {
+            "final_median": 1.8169232625330698,
+            "dd_max": 5.982683703764613,
+            "liquidations_median": 0.0
+          },
+          "all": {
+            "final_median": 2.7962896129091486,
+            "dd_max": 5.982683703764624,
+            "liquidations_median": 0.0
+          }
+        }
+      },
+      "near_monday_edge|W0": {
+        "6x3": {
+          "y2020_2024": {
+            "final": 0.8207972435152712,
+            "dd": 23.549143131040918,
+            "liquidations": 0
+          },
+          "from2025": {
+            "final_median": 0.9634528155464815,
+            "dd_max": 25.948705408887875,
+            "liquidations_median": 0.0
+          },
+          "all": {
+            "final_median": 0.7788866433626238,
+            "dd_max": 33.39783558351724,
+            "liquidations_median": 0.0
+          }
+        },
+        "3x3": {
+          "y2020_2024": {
+            "final": 0.7219694488076464,
+            "dd": 36.79318961848105,
+            "liquidations": 0
+          },
+          "from2025": {
+            "final_median": 0.8781251170638366,
+            "dd_max": 46.34930166714653,
+            "liquidations_median": 0.0
+          },
+          "all": {
+            "final_median": 0.6657773670947441,
+            "dd_max": 46.902940374814264,
+            "liquidations_median": 0.0
+          }
+        },
+        "20x3": {
+          "y2020_2024": {
+            "final": 0.9153280582795297,
+            "dd": 10.49046196246528,
+            "liquidations": 0
+          },
+          "from2025": {
+            "final_median": 0.994855269340761,
+            "dd_max": 8.40310522510065,
+            "liquidations_median": 0.0
+          },
+          "all": {
+            "final_median": 0.9106189419548378,
+            "dd_max": 12.042230341725823,
+            "liquidations_median": 0.0
+          }
+        }
+      },
+      "near_monday_edge|W03": {
+        "6x3": {
+          "y2020_2024": {
+            "final": 0.7996289821731456,
+            "dd": 24.159403064692743,
+            "liquidations": 0
+          },
+          "from2025": {
+            "final_median": 0.92098827216101,
+            "dd_max": 35.40366740610208,
+            "liquidations_median": 0.0
+          },
+          "all": {
+            "final_median": 0.7489839837052853,
+            "dd_max": 35.40366740610226,
+            "liquidations_median": 0.0
+          }
+        },
+        "3x3": {
+          "y2020_2024": {
+            "final": 0.666292950451644,
+            "dd": 39.486434029306515,
+            "liquidations": 0
+          },
+          "from2025": {
+            "final_median": 0.7944339221050625,
+            "dd_max": 59.26319212557637,
+            "liquidations_median": 0.0
+          },
+          "all": {
+            "final_median": 0.5911091069354477,
+            "dd_max": 59.263192125576424,
+            "liquidations_median": 0.0
+          }
+        },
+        "20x3": {
+          "y2020_2024": {
+            "final": 0.9140866589976592,
+            "dd": 10.127434181342155,
+            "liquidations": 0
+          },
+          "from2025": {
+            "final_median": 0.9825569971831144,
+            "dd_max": 12.061311781948802,
+            "liquidations_median": 0.0
+          },
+          "all": {
+            "final_median": 0.8981422428298865,
+            "dd_max": 12.061311781948724,
+            "liquidations_median": 0.0
+          }
+        }
+      },
+      "near_monday_edge|W0_1440": {
+        "6x3": {
+          "y2020_2024": {
+            "final": 0.8254659999673354,
+            "dd": 25.388024762649863,
+            "liquidations": 0
+          },
+          "from2025": {
+            "final_median": 0.9975012156146591,
+            "dd_max": 26.99561848645098,
+            "liquidations_median": 0.0
+          },
+          "all": {
+            "final_median": 0.8109994140341024,
+            "dd_max": 40.959644913718904,
+            "liquidations_median": 0.0
+          }
+        },
+        "3x3": {
+          "y2020_2024": {
+            "final": 0.729734190815656,
+            "dd": 39.78661290135016,
+            "liquidations": 0
+          },
+          "from2025": {
+            "final_median": 0.9238757994315477,
+            "dd_max": 47.64661761532588,
+            "liquidations_median": 0.0
+          },
+          "all": {
+            "final_median": 0.7079981027260298,
+            "dd_max": 58.130436688646505,
+            "liquidations_median": 0.0
+          }
+        },
+        "20x3": {
+          "y2020_2024": {
+            "final": 0.9169508395600288,
+            "dd": 11.141721115513192,
+            "liquidations": 0
+          },
+          "from2025": {
+            "final_median": 1.007476386156481,
+            "dd_max": 8.832492587151286,
+            "liquidations_median": 0.0
+          },
+          "all": {
+            "final_median": 0.92380631812309,
+            "dd_max": 15.147362827500189,
+            "liquidations_median": 0.0
+          }
+        }
+      },
+      "near_monday_edge|W1": {
+        "6x3": {
+          "y2020_2024": {
+            "final": 0.8426100931515393,
+            "dd": 21.308886239253056,
+            "liquidations": 0
+          },
+          "from2025": {
+            "final_median": 1.0139735764169568,
+            "dd_max": 34.61093524342188,
+            "liquidations_median": 0.0
+          },
+          "all": {
+            "final_median": 0.8466511823353158,
+            "dd_max": 34.610935243421935,
+            "liquidations_median": 0.0
+          }
+        },
+        "3x3": {
+          "y2020_2024": {
+            "final": 0.7234096655335475,
+            "dd": 39.802997013246156,
+            "liquidations": 0
+          },
+          "from2025": {
+            "final_median": 0.9342702603971407,
+            "dd_max": 58.32696134398834,
+            "liquidations_median": 0.0
+          },
+          "all": {
+            "final_median": 0.7753266677027038,
+            "dd_max": 58.326961343988415,
+            "liquidations_median": 0.0
+          }
+        },
+        "20x3": {
+          "y2020_2024": {
+            "final": 0.9186896997898506,
+            "dd": 10.115266997463667,
+            "liquidations": 0
+          },
+          "from2025": {
+            "final_median": 1.0146441826349442,
+            "dd_max": 11.724157880353282,
+            "liquidations_median": 0.0
+          },
+          "all": {
+            "final_median": 0.9321431595384154,
+            "dd_max": 11.925589374246105,
+            "liquidations_median": 0.0
+          }
+        }
+      }
+    }
+  },
+  "source_commit": "5378522c2280d4d5102ec86a8ad0c32239e67811",
+  "training_eligible": false,
+  "production_eligible": false
+}

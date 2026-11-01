@@ -15825,3 +15825,17 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'No 2026-10-28 Binance daily archive; touches 2026-10-28..10-31 not covered. Near Monday edge only.'
+  - experiment_id: exp-monday-limit-close-wick-stop-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ac68007287
+    status: rejected
+    question: 'Owner 2026-11-01 "我们还需要盈亏比高一点的策略 比如止损只放在5min插针引线的低点的这种单子": live-wick entries with the stop just beyond the touch 5m bar extreme instead of 20 percent from the entry.'
+    single_variable: 'Stop only: E20 (parity) vs W0 / W03 / W1 = one tick / 0.3 / 1 percent beyond the touch bar low (long) or high (short); W0_1440 = W0 with the reclaim decision at the next daily close. Same 416 survivor events 2020 to 2026-10-27 (October extension), near Monday edge, fees, slippage, worse path.'
+    result: 'Parity: E20 equals the stop grid on 398 rows and the October run on 51 rows, 0 bp. All periods, per trade after costs: E20 win 67 percent, +170bp, payoff 0.97; W0 win 16 percent, -14bp, payoff 4.40, median stop 60bp, 344 of 416 stopped; W03 21 percent, -16bp, payoff 3.32; W1 30 percent, -10bp, payoff 2.18; W0_1440 15 percent, -12bp, payoff 4.98. From 2025: E20 +150bp vs W0 -1, W03 -4, W1 +5, W0_1440 +3. Accounts 6x3 from 2025: E20 6.43x DD19, W0 0.96x DD26, W03 0.92x DD35, W1 1.01x DD35, W0_1440 1.00x DD27; all-period 6x3 16.46x vs 0.75-0.85x. Better path on every row still only +1 to +11bp (14-17 of 419 rows differ by path).'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-wick-stop-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'The payoff ratio rises 3-5x but the wick extreme is revisited before the target in about 83 percent of trades, and round-trip costs (~30bp) are half the median stop. Mean R is dominated by one-tick stops; read median R. In sample (same events as the live-wick rule); no new random control for a stop change; Binance bars; touches 2026-10-28..31 missing. No paper account changed.'
