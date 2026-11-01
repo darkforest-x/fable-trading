@@ -1,5 +1,6 @@
 /* Stitch 3db5c4dc931244f8a1ea859d4acb8d49. Read-only, source-backed strategy books.
  * Picker refinement: 040e7b6c98104d0f9bb77ec995dabb1a.
+ * Month calendar: Stitch 744049734c8745ec9111be91a2fca95c.
  * The selected book and local display order are independent of the paper account. */
 (() => {
   'use strict';
@@ -28,8 +29,50 @@
   function heatmapHTML(h){
     const years=[...new Set(h.monthly.map(p=>p[0].slice(0,4)))],values=new Map(h.monthly),unit=h.refilled?'USDT':'%';
     const max=Math.max(1,...h.monthly.map(p=>Math.abs(p[1]||0)));
-    const cell=v=>v==null?'<td class="rs-month-missing">—</td>':`<td style="--cell-alpha:${(.06+.3*Math.sqrt(Math.abs(v)/max)).toFixed(3)}" class="${v>0?'is-gain':v<0?'is-loss':'is-flat'}" title="${esc(num(v)+' '+unit)}">${num(v,h.refilled?0:1)}</td>`;
-    return `<div class="rs-table-wrap rs-heatmap"><table aria-label="${h.refilled?'月度交易净盈亏':'月度收益率'}"><thead><tr><th>年 / 月</th>${Array.from({length:12},(_,i)=>`<th>${i+1}</th>`).join('')}<th>全年</th></tr></thead><tbody>${years.map(y=>`<tr><th>${y}</th>${Array.from({length:12},(_,i)=>cell(values.get(y+'-'+String(i+1).padStart(2,'0')))).join('')}${cell(h.yearly.find(p=>p[0]===y)?.[1])}</tr>`).join('')}</tbody></table></div>`;
+    const cell=(v,key='')=>{
+      if(v==null&&!values.has(key))return '<td class="rs-month-missing">—</td>';
+      const value=num(v,h.refilled?0:1),title=key?`${key} · ${num(v)} ${unit} · 点击查看每日盈亏`:num(v)+' '+unit;
+      return `<td style="--cell-alpha:${(.06+.3*Math.sqrt(Math.abs(v||0)/max)).toFixed(3)}" class="${v>0?'is-gain':v<0?'is-loss':'is-flat'}${key?' rs-month-cell':''}" title="${esc(title)}">${key?`<button type="button" data-history-month="${esc(key)}" aria-haspopup="dialog" aria-expanded="false" aria-controls="rs-month-calendar" aria-label="${esc(title)}">${value}</button>`:value}</td>`;
+    };
+    return `<div class="rs-table-wrap rs-heatmap"><table aria-label="${h.refilled?'月度交易净盈亏':'月度收益率'}"><thead><tr><th>年 / 月</th>${Array.from({length:12},(_,i)=>`<th>${i+1}</th>`).join('')}<th>全年</th></tr></thead><tbody>${years.map(y=>`<tr><th>${y}</th>${Array.from({length:12},(_,i)=>{const key=y+'-'+String(i+1).padStart(2,'0');return cell(values.get(key),values.has(key)?key:'');}).join('')}${cell(h.yearly.find(p=>p[0]===y)?.[1])}</tr>`).join('')}</tbody></table></div>`;
+  }
+  // Read the complete saved settlement path, never the truncated recent-trade list.
+  // Point columns: UTC timestamp, equity, cumulative P&L OR return %, DD %, cash.
+  // Equity changes less cash changes are trading P&L, including same-time refills.
+  function monthCalendar(h,key){
+    if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(key)||!h.monthly.some(p=>p[0]===key))return null;
+    const [year,month]=key.split('-').map(Number),first=h.points[0],last=h.points.at(-1);
+    const begin=Date.UTC(year,month-1,1),end=Date.UTC(year,month,1),dayMs=86400000;
+    let index=1,previous=first;
+    while(index<h.points.length&&h.points[index][0]<begin)previous=h.points[index++];
+    const days=[];
+    for(let time=begin;time<end;time+=dayMs){
+      const date=historyDate(time),covered=date>=historyDate(first[0])&&date<=historyDate(last[0]);
+      const start=previous[1];let pnl=0,changed=false;
+      while(index<h.points.length&&h.points[index][0]<time+dayMs){
+        const p=h.points[index++],delta=p[1]-previous[1]-(p[4]-previous[4]);
+        pnl+=delta;changed||=Math.abs(delta)>1e-8;previous=p;
+      }
+      if(Math.abs(pnl)<1e-8)pnl=0;
+      days.push({date,day:days.length+1,covered,pnl:covered?pnl:null,changed,
+        returnPct:covered&&!h.refilled&&start>0?100*(previous[1]/start-1):null});
+    }
+    const months=h.monthly.map(p=>p[0]),at=months.indexOf(key);
+    return {key,title:`${year}年${month}月`,days,offset:(new Date(begin).getUTCDay()+6)%7,
+      pnl:days.reduce((sum,d)=>sum+(d.pnl||0),0),returnPct:h.refilled?null:h.monthly[at][1],refilled:h.refilled,
+      previous:months[at-1]||null,next:months[at+1]||null,firstMs:first[0],lastMs:last[0]};
+  }
+  const signed=v=>v==null?'—':pnlView(v).text;
+  function compactPnl(v){
+    if(Math.abs(v)<1000)return signed(v);
+    const scale=Math.abs(v)>=1e6?1e6:1e3;
+    return (v<0?'−':'+')+num(Math.abs(v)/scale,1)+(scale===1e6?'m':'k');
+  }
+  function calendarDayLabel(d){return `${d.date} · ${d.covered?`${signed(d.pnl)} USDT${d.returnPct==null?'':` · 日收益 ${signed(d.returnPct)}%`}${d.changed?'':' · 无已实现盈亏'}`:'未覆盖'}`;}
+  function calendarHTML(m){
+    const cells=m.days.map(d=>`<button type="button" class="rs-calendar-day ${!d.covered?'is-uncovered':d.pnl>0?'is-gain':d.pnl<0?'is-loss':'is-flat'}" data-calendar-day="${d.day}" ${!d.covered?'disabled':''} aria-label="${esc(calendarDayLabel(d))}" title="${esc(calendarDayLabel(d))}"><time datetime="${d.date}">${d.day}</time><b>${d.changed&&d.covered?compactPnl(d.pnl):'—'}</b><small>${!d.covered?'未覆盖':d.changed&&d.returnPct!=null?signed(d.returnPct)+'%':''}</small></button>`);
+    const blanks=n=>'<span class="rs-calendar-blank" aria-hidden="true"></span>'.repeat(n);
+    return `<header class="rs-calendar-header"><div><strong id="rs-calendar-title" tabindex="-1">${m.title}</strong><small>每日已实现盈亏 · USDT · UTC</small></div><div class="rs-calendar-nav"><button type="button" data-calendar-nav="previous" aria-label="上一月" ${m.previous?'':'disabled'}>‹</button><button type="button" data-calendar-nav="next" aria-label="下一月" ${m.next?'':'disabled'}>›</button><button type="button" data-calendar-close aria-label="关闭每日盈亏日历">×</button></div></header><div class="rs-calendar-summary"><div><small>月度净盈亏 / USDT</small><strong class="${pnlView(m.pnl).tone}">${signed(m.pnl)}</strong></div>${m.refilled?'':`<div><small>月收益率</small><strong class="${pnlView(m.returnPct).tone}">${signed(m.returnPct)}${m.returnPct==null?'':'%'}</strong></div>`}</div><div class="rs-calendar-week" aria-hidden="true">${['一','二','三','四','五','六','日'].map(d=>`<span>${d}</span>`).join('')}</div><div class="rs-calendar-grid" role="group" aria-label="${m.title}每日盈亏">${blanks(m.offset)}${cells.join('')}${blanks((7-(m.offset+cells.length)%7)%7)}</div><div class="rs-calendar-detail" role="status">点日期查看完整金额 · — 无已实现盈亏</div><footer>按结算日统计 · 不含浮盈亏${m.refilled?' · 补充本金不计收益':''}<br>数据截至 ${new Date(m.lastMs).toISOString().slice(0,16).replace('T',' ')} UTC</footer>`;
   }
   function historyHTML(h){
     const s=h.summary,pf=s.profit_factor_state==='no_losses'?'∞':num(s.profit_factor),unit=h.refilled?'USDT':'%';
@@ -53,7 +96,7 @@
 
   function barOptions(r,dark=false){const c=dark?'#9ba9b8':'#738392';return {animation:!matchReduced(),animationDuration:450,grid:{left:55,right:18,top:25,bottom:r.labels.length>8?45:60},tooltip:{trigger:'axis',confine:true,valueFormatter:v=>num(v)+' '+r.unit},xAxis:{type:'category',data:r.labels,axisTick:{show:false},axisLabel:{color:c,fontSize:9,hideOverlap:true,interval:r.labels.length>8?'auto':0,formatter:v=>v.replace(' · ','\n')}},yAxis:{type:'value',name:r.unit,nameTextStyle:{color:c},axisLabel:{color:c},splitLine:{lineStyle:{color:dark?'#ffffff12':'#71849420'}}},series:[{type:'bar',barMaxWidth:40,data:r.values,itemStyle:{color:'#3285dc',borderRadius:[4,4,0,0]}}]};}
   function matchReduced(){return typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion:reduce)').matches;}
-  const api={pickerHTML,accountOrder,moveAccount,pnlView,ORDER_KEY,tableHTML,researchHTML,barOptions,historyHTML,heatmapHTML,equityOptions,validateHistory,TITLES};
+  const api={pickerHTML,accountOrder,moveAccount,pnlView,ORDER_KEY,tableHTML,researchHTML,barOptions,historyHTML,heatmapHTML,monthCalendar,calendarHTML,equityOptions,validateHistory,TITLES};
   if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}
   function create({root,tracks,getTrack,getSnapshot,getPnl,renderRules,createFeed,onSelect,onBacktest}){
     const trigger=root.querySelector('[data-rp="track"]');
@@ -100,6 +143,37 @@
     document.body.append(dialog);
     const el=s=>dialog.querySelector(s);let requests=window.SpikeRuntime.createRequests();
     let open=false,track='',epoch=0,closing=null,analytics=null,research=null,bars=[],line=null,chartData=null,active=true,history=null,historyChart=null,historyMode='equity',historyPaintKey='';
+    const calendar=document.createElement('div');calendar.id='rs-month-calendar';calendar.className='rs-calendar';calendar.setAttribute('popover','auto');calendar.setAttribute('role','dialog');calendar.setAttribute('aria-labelledby','rs-calendar-title');dialog.append(calendar);
+    let calendarOrigin=null,calendarMonth=null;
+    function resetMonthButtons(){dialog.querySelectorAll('[data-history-month][aria-expanded="true"]').forEach(b=>b.setAttribute('aria-expanded','false'));}
+    function closeCalendar(restore=false){if(calendar.matches(':popover-open'))calendar.hidePopover();resetMonthButtons();if(restore&&calendarOrigin?.isConnected)calendarOrigin.focus({preventScroll:true});}
+    function positionCalendar(){
+      if(!calendar.matches(':popover-open')||!calendarOrigin)return;
+      const r=calendarOrigin.getBoundingClientRect(),w=calendar.offsetWidth,h=calendar.offsetHeight;
+      const mobile=innerWidth<=700,left=mobile?(innerWidth-w)/2:Math.max(12,Math.min(r.left,innerWidth-w-12));
+      const top=mobile?innerHeight-h-12:r.bottom+8+h<=innerHeight-12?r.bottom+8:r.top-h-8;
+      calendar.style.left=left+'px';calendar.style.top=Math.max(12,Math.min(top,innerHeight-h-12))+'px';
+    }
+    function showCalendar(key,origin=null,focus=''){
+      const month=history&&monthCalendar(history,key);if(!month)return;
+      if(origin)calendarOrigin=origin;calendarMonth=month;resetMonthButtons();
+      el(`[data-history-month="${key}"]`)?.setAttribute('aria-expanded','true');
+      calendar.innerHTML=calendarHTML(month);if(!calendar.matches(':popover-open'))calendar.showPopover();positionCalendar();
+      const target=focus?calendar.querySelector(`[data-calendar-nav="${focus}"]:not(:disabled)`):null;
+      (target||calendar.querySelector('#rs-calendar-title')).focus({preventScroll:true});
+    }
+    calendar.addEventListener('toggle',e=>{if(e.newState==='closed')resetMonthButtons();});
+    calendar.addEventListener('click',e=>{
+      const nav=e.target.closest('[data-calendar-nav]'),day=e.target.closest('[data-calendar-day]');
+      if(nav)showCalendar(calendarMonth[nav.dataset.calendarNav],null,nav.dataset.calendarNav);
+      if(e.target.closest('[data-calendar-close]'))closeCalendar(true);
+      if(day)calendar.querySelector('.rs-calendar-detail').textContent=calendarDayLabel(calendarMonth.days[Number(day.dataset.calendarDay)-1]);
+    });
+    calendar.addEventListener('focusin',e=>{const day=e.target.closest('[data-calendar-day]');if(day)calendar.querySelector('.rs-calendar-detail').textContent=calendarDayLabel(calendarMonth.days[Number(day.dataset.calendarDay)-1]);});
+    dialog.addEventListener('keydown',e=>{if(e.key==='Escape'&&calendar.matches(':popover-open')){e.preventDefault();e.stopPropagation();closeCalendar(true);}});
+    // A click may finish the reader's smooth scroll after opening the popover.
+    // Follow its anchor instead of dismissing the just-opened calendar.
+    el('.rs-reading').addEventListener('scroll',()=>positionCalendar(),{passive:true});
     function positionPicker(){const r=trigger.getBoundingClientRect();picker.style.left=Math.max(8,Math.min(r.left,innerWidth-picker.offsetWidth-8))+'px';picker.style.top=Math.max(8,Math.min(r.bottom+6,innerHeight-picker.offsetHeight-8))+'px';}
     function sync(){trigger.querySelector('b').textContent=label(getTrack());picker.querySelectorAll('[data-strategy-select]').forEach(b=>{const selected=b.dataset.strategySelect===getTrack();b.setAttribute('aria-pressed',String(selected));b.closest('[data-account-row]').dataset.selected=String(selected);});picker.querySelectorAll('[data-account-pnl]').forEach(n=>{const v=pnlView(getPnl?.(n.dataset.accountPnl));n.textContent=v.text;n.className=v.tone;n.title=v.title;});}
     trigger.addEventListener('click',()=>{if(picker.matches(':popover-open'))picker.hidePopover();else{sync();picker.showPopover();positionPicker();picker.querySelector(`[data-strategy-select="${getTrack()}"]`).focus({preventScroll:true});}});
@@ -108,6 +182,7 @@
     picker.addEventListener('click',event=>{if(event.detail!==0&&Date.now()<blockedUntil){event.preventDefault();event.stopPropagation();return;}const b=event.target.closest('button');if(!b)return;if(b.dataset.strategySelect){onSelect(b.dataset.strategySelect);sync();picker.hidePopover();trigger.focus({preventScroll:true});}if(b.dataset.strategyBook){picker.hidePopover();show(b.dataset.strategyBook);}if(b.dataset.strategyBacktest){picker.hidePopover();onBacktest?.(b.dataset.strategyBacktest);}});
     function stopCharts(){bars.forEach(c=>c.dispose());bars=[];line?.dispose();line=null;historyChart?.dispose();historyChart=null;historyPaintKey='';}
     function close(immediate=false){
+      closeCalendar();
       if(!open&&!dialog.open)return;open=false;epoch++;requests.cancel();analytics?.setActive(false);stopCharts();dialog.classList.remove('is-open');clearTimeout(closing);
       const finish=()=>{dialog.close();document.body.classList.remove('rs-book-open','rs-book-webkit');trigger.focus({preventScroll:true});};
       if(immediate||matchReduced())finish();else closing=setTimeout(finish,280);
@@ -140,6 +215,7 @@
       el('#rs-rules').innerHTML=`<div class="rs-section-title"><h2>从触价到退出</h2></div><ol class="rs-flow"><li><b>划区间</b><span>纽约周一高低点 H / L，宽度 W=H−L。上沿 H+0.618W，下沿 L−0.618W。</span></li><li><b>等触价</b><span>每周每侧首次触及；下沿做多、上沿做空。${track==='live-allin3'?'冻结入场评分仅使用触价前已收盘信息；当前模拟运行。':['live-wick6x3','live-wick3x3','live-wick6x3hi'].includes(track)?'触价5m收盘时评分并检查收回比例，收盘后市价入场，不回记；当前模拟运行。':'原回测评分包含触价5m收盘信息，收盘后回记触价入场。'}分数不是胜率。</span></li><li><b>等回收</b><span>触价所在K线之后，下一根确认周期K线收盘。未收回则退出；目标可在确认前成交。</span></li><li><b>保护余仓</b><span>收回且越过保护价才移动止损；收回但未越过时按确认收盘退出。多单加偏移，空单减偏移。</span></li></ol><h3>本策略当前规则</h3><div class="rs-current-rules">${current?renderRules(d,track):'<p>正在读取策略数据。</p>'}</div><p class="rs-muted">规则取自当前只读模拟盘接口；历史回测版本差异见回测章节。</p>`;
     }
     async function show(next){
+      closeCalendar();
       if(!tracks.includes(next))return;clearTimeout(closing);epoch++;const token=epoch;track=next;open=true;chartData=null;research=null;history=null;historyMode='equity';analytics?.setActive(false);requests.cancel();requests=window.SpikeRuntime.createRequests();stopCharts();
       el('[data-book-label]').textContent=label(track);rules();el('.rs-reading').scrollTop=0;
       el('#rs-research').innerHTML='<p class="rs-muted">正在读取回测资料…</p>';el('#rs-sources').innerHTML='';el('.rs-forward-metrics').innerHTML='';el('.rs-forward-note').textContent='';
@@ -157,11 +233,12 @@
         el('#rs-research').querySelectorAll('img').forEach(img=>img.addEventListener('error',()=>{img.hidden=true;img.parentElement.insertAdjacentHTML('beforeend','<p>原图暂时无法读取，请稍后重试。</p>');},{once:true}));charts();
       }catch(error){if(open&&token===epoch)el('#rs-research').innerHTML=`<p class="rs-warning">回测资料暂时不可用：${esc(error.message)}</p><button type="button" data-book-retry>重试读取</button>`;}
     }
-    dialog.addEventListener('cancel',e=>{e.preventDefault();close();});
+    dialog.addEventListener('cancel',e=>{e.preventDefault();if(calendar.matches(':popover-open'))closeCalendar(true);else close();});
+    dialog.addEventListener('click',e=>{const month=e.target.closest('[data-history-month]');if(month)showCalendar(month.dataset.historyMonth,month);});
     dialog.addEventListener('click',e=>{if(e.target===dialog||e.target.closest('[data-book-close]'))close();if(e.target.closest('[data-book-refresh]')){analytics?.refresh();charts();}if(e.target.closest('[data-book-retry]'))show(track);const mode=e.target.closest('[data-history-mode]');if(mode&&history){historyMode=mode.dataset.historyMode;dialog.querySelectorAll('[data-history-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===mode)));charts();}const chapter=e.target.closest('[data-book-chapter]');if(chapter)el('#rs-'+chapter.dataset.bookChapter).scrollIntoView({behavior:matchReduced()?'instant':'smooth',block:'start'});});
     new ResizeObserver(()=>{bars.forEach(c=>c.resize());line?.resize();historyChart?.resize();}).observe(el('.rs-reading'));
     new MutationObserver(()=>{if(open)charts();}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
-    window.addEventListener('resize',()=>{if(picker.matches(':popover-open'))positionPicker();});
+    window.addEventListener('resize',()=>{if(picker.matches(':popover-open'))positionPicker();positionCalendar();});
     document.addEventListener('visibilitychange',()=>analytics?.setActive(active&&open&&!document.hidden));
     sync();return {sync,close,getOrder:()=>[...order],setActive(value){active=value;if(!value){if(picker.matches(':popover-open'))picker.hidePopover();close(true);}}};
   }

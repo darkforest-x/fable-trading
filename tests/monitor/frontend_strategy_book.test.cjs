@@ -72,3 +72,46 @@ test('historical refills are distinct from returns and keep pre-refill lows',()=
  assert.equal(ui.equityOptions(h).series[2].name,'累计净投入');assert.equal(ui.equityOptions(h,'returns').series.length,2);
  assert.ok(h.points.some((p,i)=>i&&p[0]===h.points[i-1][0]&&p[1]>h.points[i-1][1]));
 });
+
+test('month calendar reconciles every saved account/month without treating refills as profit',()=>{
+ for(const track of paper.TRACKS){
+  const h=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../../yoyo/monitor/static/strategy-booklet',track+'-history.json')));
+  let pnl=0;
+  for(const [key,value] of h.monthly){
+   const m=ui.monthCalendar(h,key);assert.ok(m);pnl+=m.pnl;
+   assert.equal(m.returnPct,h.refilled?null:value);
+   const calculated=h.refilled?m.pnl:(m.days.filter(d=>d.covered).reduce((v,d)=>v*(1+d.returnPct/100),1)-1)*100;
+   assert.ok(Math.abs(calculated-value)<1e-6,`${track}/${key}: ${calculated} != ${value}`);
+  }
+  assert.ok(Math.abs(pnl-h.summary.pnl)<1e-6,track);
+  assert.equal(ui.monthCalendar(h,'9999-12'),null);
+  const markup=ui.heatmapHTML(h);
+  assert.equal((markup.match(/data-history-month=/g)||[]).length,h.monthly.length);
+ }
+});
+
+test('calendar uses UTC settlement dates, leap days, carried equity and explicit coverage',()=>{
+ const t=s=>Date.parse(s),h={refilled:false,monthly:[['2024-02',10],['2024-03',0]],points:[
+  [t('2024-02-10T10:00Z'),1000,0,0,1000],
+  [t('2024-02-28T23:59Z'),1100,10,0,1000],
+  [t('2024-02-29T00:00Z'),990,-1,-10,1000],
+  [t('2024-02-29T00:00Z'),1100,10,0,1000],
+  [t('2024-03-02T03:00Z'),1100,10,0,1000]]};
+ const feb=ui.monthCalendar(h,'2024-02');assert.equal(feb.days.length,29);assert.equal(feb.offset,3);
+ assert.equal(feb.previous,null);assert.equal(feb.next,'2024-03');assert.equal(feb.days[8].covered,false);
+ assert.equal(feb.days[9].covered,true);assert.equal(feb.days[9].changed,false);
+ assert.equal(feb.days[27].pnl,100);assert.ok(Math.abs(feb.days[27].returnPct-10)<1e-10);
+ assert.equal(feb.days[28].pnl,0);assert.equal(feb.days[28].changed,true);assert.equal(feb.days[28].returnPct,0);
+ const march=ui.monthCalendar(h,'2024-03');assert.equal(march.days[1].covered,true);assert.equal(march.days[2].covered,false);assert.equal(march.days[2].pnl,null);assert.equal(march.next,null);
+ assert.match(ui.calendarHTML(march),/未覆盖/);assert.equal(ui.monthCalendar(h,'2024-13'),null);
+});
+
+test('same-time loss and refill remain a loss; pure cash additions never become daily profit',()=>{
+ const start=Date.UTC(2024,1,1),h={refilled:true,monthly:[['2024-02',-900]],points:[
+  [start,1000,0,0,1000],[start+86400000,100,-900,-90,1000],
+  [start+86400000,1000,-900,0,1900],[start+172800000,1200,-900,0,2100]]};
+ const m=ui.monthCalendar(h,'2024-02');assert.equal(m.pnl,-900);assert.equal(m.days[1].pnl,-900);
+ assert.equal(m.days[2].pnl,0);assert.equal(m.days[2].changed,false);assert.equal(m.days[1].returnPct,null);
+ const html=ui.calendarHTML(m);assert.match(html,/补充本金不计收益/);assert.doesNotMatch(html,/月收益率/);
+ assert.match(html,/−900\.00/);assert.match(html,/2024-02-02 · −900\.00 USDT/);
+});
