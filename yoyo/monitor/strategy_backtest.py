@@ -17,6 +17,7 @@ from threading import BoundedSemaphore
 from functools import lru_cache
 
 from fastapi import HTTPException, Query
+from starlette.responses import JSONResponse
 from . import strategy_backtest_evidence as evidence
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -246,7 +247,7 @@ def install(app):
         except ValueError:
             raise HTTPException(422, '结算日期无效，请使用 YYYY-MM-DD') from None
         try:
-            return day_page(track, date, offset=offset, limit=limit)
+            return JSONResponse(day_page(track, date, offset=offset, limit=limit))
         except (OSError, ValueError, KeyError):
             raise HTTPException(503, '当日回测交易暂不可读，请重试') from None
 
@@ -257,7 +258,7 @@ def install(app):
                 symbol: str = Query('', pattern=r'^([A-Z0-9]{1,32}USDT)?$'),
                 offset: int = Query(0, ge=0, le=100000), limit: int = Query(50, ge=1, le=100)):
         try:
-            return page(track, sort=sort, direction=direction, symbol=symbol, offset=offset, limit=limit)
+            return JSONResponse(page(track, sort=sort, direction=direction, symbol=symbol, offset=offset, limit=limit))
         except (OSError, ValueError, KeyError):
             raise HTTPException(503, '历史回测账本暂不可读，请重试') from None
 
@@ -267,7 +268,9 @@ def install(app):
         if not SLOTS.acquire(False):
             raise HTTPException(503, '历史行情正在读取，请稍后重试')
         try:
-            return candles(track, trade, period)
+            # These projections already contain JSON primitives. Avoid a second
+            # recursive traversal of every candle on the FastAPI event loop.
+            return JSONResponse(candles(track, trade, period))
         except KeyError:
             raise HTTPException(404, '没有找到这笔回测交易') from None
         except (OSError, ValueError):

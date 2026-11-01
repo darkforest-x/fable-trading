@@ -3,6 +3,33 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const ui=require('../../yoyo/monitor/static/reclaim-strategy-book.js');
 const data=require('../../yoyo/monitor/static/strategy-booklet/research.json');
 const paper=require('../../yoyo/monitor/static/monday-reclaim-paper.js');
+test('calendar windows cross leap days and year boundaries without changing settlements',()=>{
+ const point=(t,e=1000,dd=0,cash=1000)=>[Date.parse(t),e,e-1000,dd,cash];
+ const h={points:[point('2023-12-15T12:00Z'),point('2024-02-29T08:00Z'),point('2024-03-15T16:00Z')]};
+ const feb=ui.historyWindow(h,'month',Date.parse('2024-02-20'));
+ assert.equal(feb.start,Date.parse('2024-02-01'));assert.equal(feb.end,Date.parse('2024-03-01')-1);
+ const leap=ui.historyWindow(h,'day',Date.parse('2024-02-29T08:00Z'));
+ assert.equal(ui.shiftHistoryWindow(h,leap,1).start,Date.parse('2024-03-01'));
+ assert.equal(ui.shiftHistoryWindow(h,feb,-1).start,Date.parse('2024-01-01'));
+ const first=ui.historyWindow(h,'month',h.points[0][0]),last=ui.historyWindow(h,'month');
+ assert.equal(first.start,h.points[0][0]);assert.equal(last.end,h.points.at(-1)[0]);
+ assert.deepEqual(ui.shiftHistoryWindow(h,first,-1),first);assert.deepEqual(ui.shiftHistoryWindow(h,last,1),last);
+});
+test('zoomed axes retain carried values and same-time loss before refill without rebasing drawdown',()=>{
+ const t=Date.parse('2024-02-29'),h={refilled:true,points:[[t-86400000,1000,0,0,1000],[t+100,100,-900,-90,1000],[t+100,1000,-900,0,1900],[t+86400000,1100,-800,0,1900]]};
+ const before=JSON.stringify(h),view=ui.historyWindow(h,'day',t),a=ui.historyAxes(h,'equity',view);
+ assert.ok(a[0].min<100);assert.ok(a[0].max>1900);assert.ok(a[1].min<=-90);
+ const empty={period:'custom',start:t+1000,end:t+2000},e=ui.historyAxes(h,'equity',empty);
+ assert.ok(e[0].min<1000);assert.ok(e[0].max>1900);assert.equal(e[1].max,0);
+ const option=ui.equityOptions(h,'returns',true,view);
+ assert.equal(option.dataZoom[0].filterMode,'none');assert.equal(option.dataZoom[0].startValue,view.start);
+ assert.deepEqual(option.series[1].data,h.points.map(p=>[p[0],p[3]]));assert.equal(JSON.stringify(h),before);
+});
+test('custom windows shift by their span and clamp at the saved history boundaries',()=>{
+ const h={points:[[0,1,0,0,1],[1000,2,100,0,1]]},w={period:'custom',start:100,end:400};
+ assert.deepEqual(ui.shiftHistoryWindow(h,w,-1),{period:'custom',start:0,end:300});
+ assert.deepEqual(ui.shiftHistoryWindow(h,{...w,start:650,end:950},1),{period:'custom',start:700,end:1000});
+});
 test('all thirteen accounts have separate selection and accessible booklet buttons',()=>{
  const html=ui.pickerHTML(paper.TRACKS);
  for(const t of paper.TRACKS){assert.ok(html.includes(`data-strategy-select="${t}"`));assert.ok(html.includes(`data-strategy-book="${t}"`));assert.ok(html.includes(`data-strategy-backtest="${t}"`));assert.ok(data.accounts[t]);assert.doesNotThrow(()=>ui.researchHTML(data,t));}

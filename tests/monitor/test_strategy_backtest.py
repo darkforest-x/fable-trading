@@ -123,6 +123,24 @@ def test_endpoint_allowlists_and_bounded_concurrency(monkeypatch):
         api.SLOTS.release(); api.SLOTS.release()
 
 
+def test_fast_responses_preserve_saved_trade_and_chart_contract(saved, monkeypatch):
+    directory, identities, _ = saved
+    payloads = [
+        ('page', '/api/strategy-backtest?track=allin3', api.page('allin3', directory=directory)),
+        ('day_page', '/api/strategy-backtest/day?track=allin3&date=2024-01-02',
+         api.day_page('allin3', '2024-01-02', directory=directory)),
+        ('candles', '/api/strategy-backtest/candles?track=allin3&trade=3',
+         api.candles('allin3', 3, '15m', directory=directory, identities=identities)),
+    ]
+    app = FastAPI(); api.install(app); client = TestClient(app)
+    for name, url, value in payloads:
+        monkeypatch.setattr(api, name, lambda *a, result=value, **k: result)
+        response = client.get(url)
+        assert response.status_code == 200
+        assert response.headers['content-type'] == 'application/json'
+        assert response.json() == value
+
+
 def test_smaller_periods_use_real_minutes_not_split_five_minute_candles(saved,monkeypatch):
     from yoyo.data import binance_minute_window
     directory,identities,path=saved
