@@ -126,6 +126,14 @@ def summarize(g):
     for h in HORIZONS:
         c=f'alt_after_{h}_mean';out[c+'_uncertainty']=bootstrap_mean(g[c],g.day)
         if 'control_'+c in g:out[c+'_matched_difference']=bootstrap_mean(g[c]-g['control_'+c],g.day)
+    paired={}
+    fields=['alt_volume_ratio_median','alt_range_ratio_median','alt_shock_mean','alt_touch_return_mean','alt_new_extreme_share','alt_own_touch_share','alt_recovery_gt_half']+[f'alt_after_{h}_mean' for h in HORIZONS]
+    for col in fields:
+        other='control_'+col
+        if other not in g:continue
+        a=g.dropna(subset=[col,other]);paired[col]=dict(signal_mean=float(a[col].mean()) if len(a) else None,
+            control_mean=float(a[other].mean()) if len(a) else None,**bootstrap_mean(a[col]-a[other],a.day))
+    out['paired_metrics']=paired
     return out
 
 def run():
