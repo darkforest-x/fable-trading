@@ -12,6 +12,8 @@ from __future__ import annotations
 import argparse
 import io
 import json
+import threading
+import time
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -19,10 +21,30 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from yoyo.data.binance_um_archives import (KLINE_COLUMNS, BinanceArchiveError, _normalise_epoch, _request_bytes,
+from yoyo.data.binance_um_archives import (KLINE_COLUMNS, BinanceArchiveError, _normalise_epoch,
                                            interval_delta, parse_checksum, sha256_bytes)
 
 DAILY_BASE = "https://data.binance.vision/data/futures/um/daily/klines"
+_local = threading.local()
+
+
+def _get(url, retries=5):
+    """Keep-alive GET per thread (each new TLS connection costs about 3 s here); 404 -> None."""
+    import requests
+    session = getattr(_local, "session", None)
+    if session is None:
+        session = _local.session = requests.Session()
+    for attempt in range(retries):
+        try:
+            r = session.get(url, timeout=60)
+            if r.status_code == 404:
+                return None
+            r.raise_for_status()
+            return r.content
+        except requests.RequestException as err:
+            if attempt+1 == retries:
+                raise BinanceArchiveError(f"request failed: {url}: {err}") from err
+            time.sleep(2**attempt)
 
 
 def daily_urls(symbol, day, interval):
@@ -66,10 +88,10 @@ def fetch_symbol(symbol, days, interval, out_dir):
     frames, missing, errors = [], [], []
     for day in days:
         url, checksum_url = daily_urls(symbol, day, interval)
-        checksum = _request_bytes(checksum_url)
+        checksum = _get(checksum_url)
         if checksum is None:
             missing.append(day); continue
-        payload = _request_bytes(url)
+        payload = _get(url)
         if payload is None:
             missing.append(day); continue
         try:
