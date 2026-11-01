@@ -1,0 +1,36 @@
+{
+  "experiment_id": "exp-monday-limit-live-october-20261101-v1",
+  "question": "Owner 2026-11-01 '目前我们的几个live策略 都跑一下上个月的回测 10月份的' / '补跑10月': the live-wick accounts on October 2026, from 1000U on 2026-10-01.",
+  "approval": "Owner 2026-11-01 '补跑10月'",
+  "new_data": "data/crypto/market/binance_um5m_20260923_20261031",
+  "new_data_source": "data.binance.vision USD-M daily 5m archives, checksum-verified (yoyo.data.binance_um_daily); monthly October archive not published on 2026-11-01",
+  "since_week": "2026-07-27",
+  "parity_from": "2026-08-03",
+  "window": [
+    "2026-10-01",
+    "2026-11-01"
+  ],
+  "score_model": "experiments/active/exp-monday-limit-reclaim-recent-20261025-v1/score_model.json",
+  "scores": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+  "fill_parity": "experiments/active/exp-monday-limit-close-stop-grid-20261101-v1",
+  "seed": 20261103,
+  "rule": "Touch-close (stored) score >= 0.5, close still beyond the 1.618, recovery < 0.6395668107499273, beyond < 30 percent; market at the touch 5m close; near Monday edge target; stop 20 percent from the entry; 60m reclaim against the level",
+  "accounts": {
+    "live-wick6x3": "6 slots x 3, margin = realized equity / 6",
+    "live-wick3x3": "3 slots x 3",
+    "live-wick6x3hi": "6 slots x 3, 1.5 x margin from score 0.76",
+    "live-wick3x3far": "3 slots x 3, only closes >= 1.5 percent past the level"
+  },
+  "fees": "Market entry taker 0.05 percent + 10bp slippage, target maker 0.02 percent, stop / reclaim / data-end exits taker + 10bp (OKX Lv1, read 2026-10-23); worse of the two intrabar paths; funding not modelled",
+  "limits": "Binance data, not the OKX paper feed; live-allin3 not included (its causal pre-touch limit rule is a different pipeline)",
+  "training_eligible": false,
+  "production_eligible": false,
+  "data_gap": "data.binance.vision has no 2026-10-28 daily archive (404 for every symbol, BTCUSDT checked 2026-11-01; 10-27 and 10-29 exist). Not filled from another venue. The unchanged Codex inputs treat it as a data break: week 2026-10-26 monitoring stops at its first break (monitor_cutoff_cause missing_execution_bar, i.e. after 2026-10-27 23:55), and a trade still open at the break exits at the last bar before it (reason 0, end_i)",
+  "reason_codes": {
+    "4": "target",
+    "11": "not reclaimed in 60m",
+    "1": "-20 percent stop",
+    "5": "breakeven stop",
+    "0": "data break / data end (end_i)"
+  }
+}
