@@ -297,9 +297,11 @@
     const navigation=root.querySelector('.rp-navigation'),navTrigger=navigation.querySelector('summary');
     navTrigger.setAttribute('aria-expanded','false');
     navigation.addEventListener('toggle',()=>navTrigger.setAttribute('aria-expanded',String(navigation.open)));
-    document.addEventListener('pointerdown',e=>{if(navigation.open&&!navigation.contains(e.target))navigation.open=false;});
-    navigation.addEventListener('keydown',e=>{if(e.key==='Escape'&&navigation.open){e.preventDefault();e.stopPropagation();navigation.open=false;navTrigger.focus({preventScroll:true});}});
+    window.SpikeYoloPreviewSheet.bindOutside({panel:navigation,dismiss:restore=>{navigation.open=false;if(restore)navTrigger.focus({preventScroll:true});}});
+    navigation.addEventListener('keydown',e=>{if(e.key==='Escape'&&navigation.open&&!e.defaultPrevented&&!document.querySelector('dialog[open], [popover]:popover-open')){e.preventDefault();e.stopPropagation();navigation.open=false;navTrigger.focus({preventScroll:true});}});
     navigation.addEventListener('click',e=>{if(e.target.closest('a'))navigation.open=false;});
+    const account=root.querySelector('.rp-account');
+    window.SpikeYoloPreviewSheet.bindOutside({panel:account,dismiss:restore=>{account.open=false;if(restore)account.querySelector('summary').focus({preventScroll:true});}});
     const heightProperties=new Map([[root.querySelector('.rp-context'),'--rp-context-height'],[root.querySelector('.rp-account>summary'),'--rp-account-summary-height']]);
     const heights=new ResizeObserver(entries=>{
       // Read the browser's measured border boxes before writing layout vars.
@@ -312,6 +314,7 @@
     drawings=window.SpikeChartDrawings.create({root,onTool:()=>setIndicators(false)});
     chart=window.SpikeReclaimChart.create(el('chart'),text=>{el('chart-notice').textContent=text;el('chart-notice').hidden=!text;},drawings);
     sheet=window.SpikeYoloPreviewSheet.bind({panel:root.querySelector('.rp-records'),isOpen:()=>recordsOpen,dismiss:()=>setRecords(false)});
+    window.SpikeYoloPreviewSheet.bindOutside({panel:root.querySelector('.rp-records'),triggers:[root.querySelector('[data-rp-action="records"]'),root.querySelector('[data-rp-action="backtest-list"]')],isOpen:()=>recordsOpen,dismiss:restore=>setRecords(false,restore)});
     closer=window.SpikeReclaimClose.create({root,onChanged:()=>{feed.refresh();watch?.refresh();analytics?.refresh();}});
     watch=window.SpikeReclaimWatchlist.create({root,createFeed,onScore:score=>{const node=el('symbol-score');node.hidden=!!replay||!score;node.classList.toggle('is-high',!!score?.high);node.querySelector('b').textContent=score?.text||'';node.title=score?.title||'';node.setAttribute('aria-label',score?.title||'');},getContext:()=>({track:feed.getState().data?.tracks[state.track],signals:signalRows(feed.getState().data,state.track),symbol:chartSymbol,period:state.period}),onOpen:()=>{backtest?.setOpen(false,false);analytics?.setOpen(false,false);if(recordsOpen)setRecords(false,false);},onSelect:symbol=>{leaveBacktest(false);state.track=window.SpikeReclaimWatchlist.holdingTrack(feed.getState().data?.tracks,symbol,state.track,book.getOrder());state.symbol=symbol;state.trade='';shown=50;pinned=null;chart.resetFocus();sync();render(feed.getState());}});
     analytics=window.SpikeReclaimAnalytics.create({root,createFeed,onOpen:()=>{backtest?.setOpen(false,false);watch.setOpen(false,false);if(matchMedia('(max-width:700px)').matches)setRecords(false,false);},onTrack:selectTrack});
@@ -322,7 +325,7 @@
     el('period').addEventListener('change',event=>{state.period=event.target.value;sync();render(feed.getState());});
     quick=window.SpikeHomeTicket.create({root,context:()=>replay?null:({symbol:chartSymbol,timeframe:state.period})});
     focus=window.SpikeChartFocus.bind(root);
-    root.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(root.querySelector('.rp-ledger-heading').classList.contains('is-searching')){event.stopPropagation();setSearch(false);}else if(indicatorsOpen){event.stopPropagation();setIndicators(false,true);}else if(recordsOpen)setRecords(false);});
+    root.addEventListener('keydown',event=>{if(event.key!=='Escape'||event.defaultPrevented||document.querySelector('dialog[open], [popover]:popover-open'))return;if(recordsOpen&&root.querySelector('.rp-ledger-heading').classList.contains('is-searching')){event.preventDefault();event.stopPropagation();setSearch(false);}else if(indicatorsOpen){event.preventDefault();event.stopPropagation();setIndicators(false,true);}else if(recordsOpen){event.preventDefault();event.stopPropagation();setRecords(false);}});
     document.addEventListener('pointerdown',event=>{if(!focus?.hidden&&indicatorsOpen&&!event.target.closest('.rp-indicators'))setIndicators(false);},true);
     root.addEventListener('focusin',event=>{if(!focus?.hidden&&indicatorsOpen&&!event.target.closest('.rp-indicators'))setIndicators(false);});
     root.addEventListener('click',event=>{

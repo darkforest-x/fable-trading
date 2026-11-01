@@ -61,6 +61,7 @@
     panel.innerHTML='<header class="bt-heading" data-yd-sheet-drag><strong tabindex="-1" data-bt-title>回测交易</strong><button type="button" data-bt-close aria-label="收起回测交易">×</button></header><div class="bt-controls"><div class="bt-badges"><span>历史回测 · Binance</span><button type="button" data-bt-top title="查看累计净盈亏第一名">Top 1 · 读取中</button></div><div class="bt-sort"><select aria-label="回测币种" data-bt-symbol><option value="">全部币种</option></select><button type="button" data-bt-sort="time" aria-pressed="true">开仓时间 ↓</button><button type="button" data-bt-sort="pnl" aria-pressed="false">净收益</button><button type="button" data-bt-sort="score" aria-pressed="false">评分</button></div><small>原回测入场条件 · 评分非胜率<br>北京时间 · 收益已扣原研究成本</small></div><div class="bt-scroll"><p data-bt-status role="status"></p><button type="button" data-bt-retry hidden>重试读取</button><div class="bt-rows"></div><button type="button" class="bt-more" data-bt-more hidden>再显示 50 笔</button><p class="bt-count"></p><details class="bt-notes"><summary>历史版本与统计口径</summary><p></p></details></div>';
     root.append(panel);
     const node=s=>panel.querySelector(s),sheet=window.SpikeYoloPreviewSheet.bind({panel,isOpen:()=>opened,dismiss:()=>setOpen(false)});
+    window.SpikeYoloPreviewSheet.bindOutside({panel,triggers:[root.querySelector('[data-rp-action="backtest-list"]')],isOpen:()=>opened,dismiss:restore=>setOpen(false,restore)});
     async function read(params){const c=new AbortController();request=c;const timeout=setTimeout(()=>c.abort(),20000);
       try{const r=await fetch('/api/strategy-backtest?'+new URLSearchParams(params),{signal:c.signal,cache:'no-store'});const value=await r.json();if(!r.ok)throw Error(value.detail||'回测读取失败');return value;}
       catch(e){if(e.name==='AbortError')throw Error('回测读取超时，请重试');throw e;}
@@ -89,7 +90,7 @@
       if(b.hasAttribute('data-bt-top')){const s=model.getState();if(s.data?.focus){choose(s.data.focus,s.track);model.filter(s.data.focus.symbol);}}
     });
     node('[data-bt-symbol]').onchange=e=>{node('.bt-scroll').scrollTop=0;model.filter(e.target.value);};
-    panel.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();setOpen(false);}});
+    panel.addEventListener('keydown',e=>{if(e.key==='Escape'&&opened&&!e.defaultPrevented&&!document.querySelector('dialog[open], [popover]:popover-open')){e.preventDefault();e.stopPropagation();setOpen(false);}});
     return {open(track,row=null){if(!tracks.includes(track)||(row&&!valid(row)))return;returnFocus=root.querySelector('[data-rp="track"]');selected=null;model.select(track,row);if(row){onOpen();setOpen(false,false);root.querySelector('[data-rp-action="backtest-list"]')?.focus({preventScroll:true});}else setOpen(true);},setOpen,getState:model.getState,isOpen:()=>opened,
       setActive(value){if(!value){model.pause();sheet.reset();}else if(opened&&!model.getState().data)model.load();}};
   }

@@ -25,7 +25,7 @@
   },true);
   document.addEventListener('keydown',event=>{
     pointerMenu=null;
-    if(event.key!=='Escape')return;
+    if(event.key!=='Escape'||event.defaultPrevented||document.querySelector('dialog[open], [popover]:popover-open'))return;
     const menu=document.querySelector('details.quiet-menu[open], details.rp-navigation[open], details.mf-home-menu[open]');
     if(menu){event.preventDefault();event.stopPropagation();close(menu,true);}
   },true);

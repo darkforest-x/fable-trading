@@ -54,6 +54,7 @@
     let track='60',days=0,active=false,open=false,feed=null,chart=null,chartLoading=false,chartError='',signature='',lastChartData=null;
     const requests=window.SpikeRuntime.createRequests(),el=s=>panel.querySelector(s);
     const sheet=window.SpikeYoloPreviewSheet.bind({panel,isOpen:()=>open,dismiss:()=>setOpen(false)});
+    window.SpikeYoloPreviewSheet.bindOutside({panel,triggers:[trigger],isOpen:()=>open,dismiss:restore=>setOpen(false,restore)});
     function stopChart(){chart?.dispose();chart=null;lastChartData=null;}
     function newFeed(){
       feed?.setActive(false);requests.cancel();signature='';stopChart();
@@ -91,7 +92,7 @@
     }
     panel.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.analysisDays!==undefined){const n=Number(b.dataset.analysisDays);if(n!==days){days=n;newFeed();}}if(b.dataset.analysisAction==='close')setOpen(false);if(b.dataset.analysisAction==='refresh'){chartError='';feed.refresh();}});
     el('[data-analysis-track]').addEventListener('change',e=>onTrack(e.target.value));
-    panel.addEventListener('keydown',e=>{if(e.key==='Escape'&&open){e.stopPropagation();setOpen(false);}});
+    panel.addEventListener('keydown',e=>{if(e.key==='Escape'&&open&&!e.defaultPrevented&&!document.querySelector('dialog[open], [popover]:popover-open')){e.preventDefault();e.stopPropagation();setOpen(false);}});
     new ResizeObserver(()=>chart?.resize()).observe(el('.rp-equity-chart'));
     new MutationObserver(()=>{lastChartData=null;if(active&&open)render();}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
     newFeed();setOpen(false,false);

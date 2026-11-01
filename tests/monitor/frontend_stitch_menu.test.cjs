@@ -3,15 +3,15 @@
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const source=fs.readFileSync('yoyo/monitor/static/stitch-workspace.js','utf8').split('/* Account navigation')[0];
 function harness(){
- const handlers={},windowHandlers={},tasks=[];
+ const handlers={},windowHandlers={},tasks=[];let topLayer=null;
  const summary={focus(){this.focused=true;}};
  const menu={open:true,contains:n=>n===link||n===summary,querySelector:()=>summary};
  const link={closest:selector=>selector==='a'?link:menu};
  const outside={closest:()=>null};
- const document={querySelector:()=>menu.open?menu:null,querySelectorAll:()=>menu.open?[menu]:[],addEventListener:(type,fn)=>(handlers[type]??=[]).push(fn)};
+ const document={querySelector:selector=>selector.startsWith('dialog')?topLayer:(menu.open?menu:null),querySelectorAll:()=>menu.open?[menu]:[],addEventListener:(type,fn)=>(handlers[type]??=[]).push(fn)};
  vm.runInNewContext(source,{document,window:{addEventListener:(type,fn)=>windowHandlers[type]=fn},setTimeout:fn=>tasks.push(fn)});
  const dispatch=(type,target=outside,props={})=>{for(const fn of handlers[type]||[])fn({target,key:'',preventDefault(){},stopPropagation(){},...props});};
- return {menu,link,outside,summary,dispatch,windowHandlers,flush(){while(tasks.length)tasks.shift()();}};
+ return {menu,link,outside,summary,dispatch,windowHandlers,layer(value){topLayer=value;},flush(){while(tasks.length)tasks.shift()();}};
 }
 test('Safari focus fallback during a link tap preserves the target until native activation',()=>{
  const h=harness();h.dispatch('pointerdown',h.link);
@@ -36,4 +36,10 @@ test('cancelled or completed taps release the focus guard; same-route links clos
  assert.equal(h.menu.open,false);
  h.menu.open=true;h.dispatch('focusin');assert.equal(h.menu.open,false);
  h.menu.open=true;h.windowHandlers.hashchange();assert.equal(h.menu.open,false);
+});
+test('native child layers and already handled Escape do not close the parent menu',()=>{
+ const h=harness();
+ h.layer({open:true});h.dispatch('keydown',h.link,{key:'Escape'});assert.equal(h.menu.open,true);
+ h.layer(null);h.dispatch('keydown',h.link,{key:'Escape',defaultPrevented:true});assert.equal(h.menu.open,true);
+ h.dispatch('keydown',h.link,{key:'Escape'});assert.equal(h.menu.open,false);assert.equal(h.summary.focused,true);
 });

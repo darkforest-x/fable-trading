@@ -64,6 +64,27 @@
     listen(panel,'close',reset);listen(env,'blur',cancel);listen(env,'resize',reset);listen(mobile,'change',reset);
     return {reset,destroy(){reset();listeners.splice(0).forEach(remove=>remove());}};
   }
-  if(typeof module!=='undefined')module.exports={bind};
-  if(typeof window!=='undefined')window.SpikeYoloPreviewSheet={bind};
+  // Stitch e392e183ed3c45bab90093b1bad0e9db: opt-in dismissal for read panels.
+  // Observe the press before chart handlers, but let the original interaction
+  // continue. Owners retain responsibility for requests, charts and focus.
+  function bindOutside({panel,triggers=[],dismiss,env=window,isOpen=()=>panel.open}){
+    const doc=env.document;
+    const active=()=>isOpen()&&panel.isConnected&&!panel.closest('[hidden],[inert],.is-chart-focused');
+    const nested=()=>doc.querySelector('dialog[open], [popover]:popover-open');
+    function down(e){
+      if(e.isPrimary===false||(e.button!=null&&e.button!==0)||!active()||nested())return;
+      const path=e.composedPath?.()||[];
+      if([panel,...triggers].some(node=>node&&(path.includes(node)||node.contains(e.target))))return;
+      dismiss(false);
+    }
+    function escape(e){
+      if(e.key!=='Escape'||e.defaultPrevented||!active()||nested())return;
+      e.preventDefault();dismiss(true);
+    }
+    doc.addEventListener('pointerdown',down,true);
+    doc.addEventListener('keydown',escape);
+    return {destroy(){doc.removeEventListener('pointerdown',down,true);doc.removeEventListener('keydown',escape);}};
+  }
+  if(typeof module!=='undefined')module.exports={bind,bindOutside};
+  if(typeof window!=='undefined')window.SpikeYoloPreviewSheet={bind,bindOutside};
 })();

@@ -143,6 +143,7 @@
     const catalogRequests=window.SpikeRuntime.createRequests();
     const catalogFeed=createFeed({read:()=>catalogRequests.json('/api/research/paper-desk/symbols'),validateData:catalogModel.validateCatalog,cancel:()=>catalogRequests.cancel(),change:render});
     const sheet=window.SpikeYoloPreviewSheet.bind({panel,isOpen:()=>open,dismiss:()=>setOpen(false)});
+    window.SpikeYoloPreviewSheet.bindOutside({panel,triggers:[trigger,recent],isOpen:()=>open,dismiss:restore=>setOpen(false,restore)});
     const el=id=>panel.querySelector(`[data-watch="${id}"]`),scroll=panel.querySelector('.rp-watch-scroll');
     function setOpen(value,focus=true){sheet.reset();open=value;panel.classList.toggle('is-open',value);panel.inert=!value;panel.setAttribute('aria-hidden',String(!value));trigger.setAttribute('aria-expanded',String(value));catalogFeed.setActive(active&&open);if(value){preferences.read();onOpen?.();render();}else if(focus)trigger.focus({preventScroll:true});}
     function setSearch(value){
@@ -185,8 +186,8 @@
       if(row&&!event.target.closest('a,.rp-watch-bottom')&&!action){onSelect(row.dataset.symbol);setOpen(false);}
     });
     recent.addEventListener('click',event=>{const b=event.target.closest('[data-watch-select]');if(b){onSelect(b.dataset.watchSelect);setOpen(false,false);}});
-    root.addEventListener('keydown',event=>{if(event.key==='Escape'&&open){event.preventDefault();event.stopImmediatePropagation();if(searching)setSearch(false);else setOpen(false);}});
-    root.addEventListener('pointerdown',event=>{if(panel.contains(event.target)||recent.contains(event.target))pointers.add(event.pointerId);else if(open&&!trigger.contains(event.target))setOpen(false,false);});
+    root.addEventListener('keydown',event=>{if(event.key==='Escape'&&open&&!event.defaultPrevented&&!document.querySelector('dialog[open], [popover]:popover-open')){event.preventDefault();event.stopImmediatePropagation();if(searching)setSearch(false);else setOpen(false);}});
+    root.addEventListener('pointerdown',event=>{if(panel.contains(event.target)||recent.contains(event.target))pointers.add(event.pointerId);});
     const release=event=>{if(pointers.delete(event.pointerId))setTimeout(render,0);};
     document.addEventListener('pointerup',release);document.addEventListener('pointercancel',release);
     window.addEventListener('blur',()=>{pointers.clear();resetDrag();render();});
