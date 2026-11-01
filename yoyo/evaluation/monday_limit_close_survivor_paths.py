@@ -17,6 +17,8 @@ MAE reaches the liquidation line loses the account, below 100U a blow-up refille
 added, not profit) plus the monthly-start statistics of the allin3 studies (start on the first of each month from
 first_start to last_start, several tie seeds, share reaching 10x / 100x of the stakes, days, blow-ups); `fills` reads the
 signal rows from another run with the same B30 fills (the 10-28 close-reclaim run holds all five targets).
+Owner "改成这个" (the stop 20 percent from the entry): `variant` picks the signal rows of another stop from
+exp-monday-limit-close-stop-grid-20261101-v1 (e.g. E20); default B30.
 """
 from __future__ import annotations
 import argparse
@@ -40,16 +42,16 @@ REASONS = {4: 'target', 11: 'not_reclaimed_60m', 12: 'reclaimed_inside_breakeven
 
 def symbol_rows(args):
     """Signal rows of one symbol with the exit price of the chosen (worse) path and the 1.618 level."""
-    exp, symbol, slip_entry, slip_exit = args
+    exp, symbol, slip_entry, slip_exit, variant = args
     _, d, issues = cr.load_symbol((exp, symbol, slip_entry, slip_exit))
     if d.empty:
         return d, issues
-    d = d[d.variant == 'B30'].copy()
+    d = d[d.variant == variant].copy()
     key = pd.MultiIndex.from_arrays([d.event, d['mode']])
     px = {}
     for p in ('ohlc', 'olhc'):
         t = pd.read_csv(Path(exp)/p/'symbols'/symbol/'trades.csv.gz')
-        t = t[t.variant == 'B30']
+        t = t[t.variant == variant]
         parts = t.trade_id.str.split(':')
         px[p] = t.set_index([parts.str[:3].str.join(':'), parts.str[4]])
     o, l = px['ohlc'].reindex(key), px['olhc'].reindex(key)
@@ -96,7 +98,8 @@ def run(config, workers):
     fills = ROOT/cfg.get('fills', cfg['source'])
     slip = cfg['slippage_bp']
     with ProcessPoolExecutor(workers) as ex:
-        got = list(ex.map(symbol_rows, [(str(fills), s, slip['market_entry'], slip['non_target_exit']) for s in sorted(set(surv.symbol))], chunksize=4))
+        got = list(ex.map(symbol_rows, [(str(fills), s, slip['market_entry'], slip['non_target_exit'], cfg.get('variant', 'B30'))
+                                        for s in sorted(set(surv.symbol))], chunksize=4))
     t = pd.concat([g[0] for g in got if len(g[0])], ignore_index=True)
     issues = [i for g in got for i in g[1]]
     t = t[~t.event.isin(BAD_EVENTS) & (t.entry_t >= pd.Timestamp('2020-01-01', tz='UTC')) & t.event.isin(surv.index)].copy()
@@ -138,7 +141,8 @@ def run(config, workers):
             reasons = {k: dict(n=int(len(g)), mean_bp=float(g.net_bp.mean()), pnl=float(g.pnl.sum()))
                        for k, g in ledger[ledger.notional > 0].groupby('reason_name')}
             # The control run replayed 2020 onward with 10 tie seeds; a 2025 start has no saved counterpart.
-            ref = saved.get(f'{mode}|signal', {}).get('all', {}).get('replay') if start == '2020-01-01' and cfg.get('allocator', 'frac') == 'frac' else None
+            ref = (saved.get(f'{mode}|signal', {}).get('all', {}).get('replay')
+                   if start == '2020-01-01' and cfg.get('allocator', 'frac') == 'frac' and cfg.get('variant', 'B30') == 'B30' else None)
             manifest['accounts'][name] = {**meta, 'summary': data['summary'], 'years': years, 'reasons': reasons,
                                           'saved_median_of_ties': ref}
             print(f"{name}: {meta['funded']}/{meta['candidates']} funded, end {data['summary']['end']:.2f}, "

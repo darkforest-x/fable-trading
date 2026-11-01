@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp-monday-limit-close-survivor-paths-20261101-v5",
+  "question": "Owner 2026-11-01 '改成这个': the survivor rule with the stop 20 percent from the entry (E20) at 6 slots x 3, from 1000U.",
+  "approval": "Owner 2026-11-01 '−20%（从开仓价算）… 那改成这个'",
+  "source": "experiments/active/exp-monday-limit-close-slice-control-20261101-v1",
+  "targets": [
+    "near_monday_edge",
+    "range_0.5"
+  ],
+  "starts": [
+    "2020-01-01",
+    "2025-01-01"
+  ],
+  "slots": 6,
+  "leverage": 3,
+  "tie_seed_from": "experiments/active/exp-monday-limit-return-opt-20261027-v2/config.json",
+  "slippage_bp": {
+    "market_entry": 10,
+    "non_target_exit": 10
+  },
+  "fees": "Framework fills of the control run: market entry taker 0.05 percent, target maker 0.02 percent, stop / reclaim exits taker (OKX Lv1, read 2026-10-23); 10bp slippage on the market entry and on non-target exits; worse of the two intrabar paths; funding not modelled",
+  "in_sample": "The slice was chosen on 2020-2024; 2025-2026 passed the slice test and the matched random-time control",
+  "training_eligible": false,
+  "production_eligible": false,
+  "variant": "E20",
+  "fills": "experiments/active/exp-monday-limit-close-stop-grid-20261101-v1",
+  "stop": "20 percent from the entry price (E20 of the stop grid); at 3x the liquidation line (about 32 percent) is beyond it, so the stop fires first"
+}
