@@ -15741,3 +15741,17 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Ignoring overlaps lets one sequence double stakes that real accounts would hold at the same time; the simulator keeps the level when a stake is rejected, so a too-large base locks the stream. October 2026 is not in the backtest data (Binance files end 2026-09-30; trades end 2026-09-20).'
+  - experiment_id: exp-monday-limit-live-martingale-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 614fd29c13
+    status: complete
+    question: 'Owner 2026-11-01 "不动原来的仓位和杠杆逻辑 … 基于原有的实际持仓量翻倍": loss doubling on top of the live-wick account sizing.'
+    single_variable: 'Sizing only: margin = equity / n x 2^level, level = consecutive losing closes (reset after a win), cap 1-3; skipped fills keep the level.'
+    result: 'live-wick 6x3 2025 onward: none 5.34x DD19; one doubling 12.69x DD26; two doublings 30.94x DD31 (2020-24 2.59x vs 2.58x, DD 25 vs 12). live-wick 3x3 one doubling 59.23x DD49 (worst trade -41 percent of equity). live-wick-far 6x3 two doublings 10.63x DD16 vs 4.87x DD15; far 3x3 one doubling 60.60x DD31 vs 18.43x DD29 (2020-24 6.11x vs 3.59x). Caps above the margin limit (6x3 level 3, 3x3 level 2) lock the account (doubled margin never fits).'
+    artifacts: []
+    canonical_report: experiments/active/experiments/active/exp-monday-limit-live-martingale-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'In sample; no random-doubling control yet (doubling adds exposure to a positive-mean stream, so part of the gain is plain size). Not applied to any paper account.'
