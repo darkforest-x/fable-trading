@@ -15727,3 +15727,17 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'The distance effect was noticed on these trades (post hoc) but is monotonic across cuts and holds in both periods. Best balance: >= 1.5 at 3x3 (about the same 2025 onward multiple as the current 3x3 with drawdown 29 instead of 37). Not applied to the paper accounts (owner decision).'
+  - experiment_id: exp-monday-limit-live-streaks-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 01efde271a
+    status: complete
+    question: 'Owner 2026-11-01 "最长的连续止损是多少次？不考虑同时持仓的情况下，假如再补充上我们之前的倍投策略，最后的收益会如何呢"'
+    single_variable: 'Sizing only: spike_martingale_account.simulate (double after a losing stop, reset after a win, max level 3 or 5, fixed base risk 10-100U, 3x cap) on the saved live- streams in entry order, overlaps ignored.'
+    result: 'Longest losing streak / longest backstop streak: live-wick (398 trades) 4 / 1 (2025 onward 3 / 1); live-wick-far (206) 4 / 1; live-allin3 (422) 9 / 2. live-wick 2025 onward, any-loss doubling L3: base risk 50U 3126U DD10 vs fixed 1924U DD7; base 100U 5252U DD17 vs fixed 2848U DD12 (6x3 compounding was 5342U DD19). From 2020 base 100U the doubled stake stopped fitting the cash and the stream locked (392 rejections, 1045U). live-wick-far 2025 onward base 100U L3 locked as well; base 25U 1661U. live-allin3 doubling: drawdown 30-90 percent, most variants end below 1000U.'
+    artifacts: []
+    canonical_report: experiments/active/experiments/active/exp-monday-limit-live-streaks-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Ignoring overlaps lets one sequence double stakes that real accounts would hold at the same time; the simulator keeps the level when a stake is rejected, so a too-large base locks the stream. October 2026 is not in the backtest data (Binance files end 2026-09-30; trades end 2026-09-20).'
