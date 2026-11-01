@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-monday-limit-live-streaks-20261101-v1",
+  "question": "Owner 2026-11-01 '最长的连续止损是多少次？不考虑同时持仓的情况下，假如再补充上我们之前的倍投策略，最后的收益会如何呢'",
+  "approval": "Owner 2026-11-01",
+  "single_variable": "Sizing only: fixed-base loss doubling (spike_martingale_account.simulate) on the saved live- trade streams, overlaps ignored",
+  "fills": "experiments/active/exp-monday-limit-close-stop-grid-20261101-v1",
+  "survivors": "experiments/active/exp-monday-limit-close-slice-control-20261101-v1/survivors.csv.gz",
+  "allin3_ledger": "experiments/active/exp-pretouch-booklet-20261031-v1/allin3-A_rest_causal-ledger.csv.gz",
+  "variant": "E20",
+  "target": "near_monday_edge",
+  "wick_stop_frac": 0.20,
+  "allin3_stop_frac": 0.30,
+  "periods": {"from2020": "2020-01-01", "from2025": "2025-01-01"},
+  "triggers": ["any_loss", "stop_only"],
+  "base_risk_usdt": [10, 25, 50, 100],
+  "multiplier": 2,
+  "max_levels": [3, 5],
+  "leverage_cap": 3,
+  "in_sample": "Same history as every earlier live-wick result; ignoring overlaps lets the doubling act on a single sequence that no real account could hold when trades overlap",
+  "training_eligible": false,
+  "production_eligible": false
+}
