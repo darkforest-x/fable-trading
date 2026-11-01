@@ -44,6 +44,17 @@ test('research tables escape text and show missing values without fabricating ze
  const options=ui.barOptions({labels:['A','B'],values:[null,1.5],unit:'倍'});assert.deepEqual(options.series[0].data,[null,1.5]);assert.equal(options.series[0].type,'bar');
 });
 
+test('booklet supplements render as escaped collapsible tables after the controls',()=>{
+ const r={status:'s',note:'n',headers:['h'],rows:[['a']],controls:{note:'c',headers:['h'],rows:[['b']]},
+  sections:[{title:'<b>t</b>',note:'<i>x</i>',headers:['k'],rows:[['v']]}]};
+ const html=ui.researchHTML({accounts:{x:r},period_note:''},'x');
+ assert.match(html,/<summary>&lt;b&gt;t&lt;\/b&gt;<\/summary><p class="rs-muted">&lt;i&gt;x&lt;\/i&gt;<\/p>/);
+ assert.ok(html.indexOf('同条件随机入场对照')<html.indexOf('&lt;b&gt;t'));
+ for(const t of ['live-wick6x3','live-wick3x3','live-wick6x3hi','live-wick3x3far','live-allin3'])
+  assert.match(ui.researchHTML(data,t),/倍投暂不采用|已研究，暂不采用/);
+ assert.match(ui.researchHTML(data,'live-wick6x3'),/2026年10月补跑/);
+});
+
 test('v3add20 uses the corrected dynamic-margin study and labels historical BE0',()=>{
  const r=data.accounts.v3add20,s=r.sources[0];assert.match(s.path,/return-opt-20261027-v2/);
  const original=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../..',s.path))).results.settings;

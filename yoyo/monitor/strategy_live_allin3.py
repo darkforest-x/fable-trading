@@ -15,6 +15,7 @@ from .strategy_backtest_evidence import millis
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / 'experiments/active/exp-pretouch-booklet-20261031-v1'
+STREAKS = ROOT / 'experiments/active/exp-monday-limit-live-streaks-20261101-v1'
 NATIVE = ROOT / 'experiments/active/exp-monday-limit-paper-accounts-20261028-v1'
 SCORES = ROOT / 'experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz'
 ARM = 'allin3-A_rest_causal'
@@ -94,6 +95,16 @@ def _ledger(signature):
                 rows=rows, ranking=sorted(ranking.values(), key=lambda r: (-r['pnl'], r['symbol'])))
 
 
+def streak_section():
+    """Losing streaks of the funded settlements (exp-monday-limit-live-streaks-20261101-v1); doubling not adopted."""
+    st = json.loads((STREAKS / 'summary.json').read_text())['results']['streams']['live-allin3']['from2020']
+    return dict(title='连续亏损 · 倍投暂不采用',
+                note=('按开仓顺序数，一次只持一单。Owner 2026-11-01决定先不做倍投，模拟盘维持原仓位。'),
+                headers=['项目', '结果'],
+                rows=[['成交笔数 · 胜率', f"{st['trades']}笔 · {st['win_pct']:.1f}%"],
+                      ['最长连续亏损', f"{st['streaks']['losses']}笔"], ['最长连续−30%兜底止损', f"{st['streaks']['backstops']}笔"]])
+
+
 def publish_booklet():
     """Copy the existing charts and add source-backed booklet text; no fills or allocations."""
     value = ledger()  # Require all 422 source joins before publishing.
@@ -107,8 +118,10 @@ def publish_booklet():
         headers=['年份', '交易净盈亏 USDT'], rows=history['yearly'],
         chart=dict(title='年度交易净盈亏 · 补款不计收益', unit='USDT',
                    labels=[r[0] for r in history['yearly']], values=[r[1] for r in history['yearly']]),
+        sections=[streak_section()],
         sources=[dict(path=str(SOURCE.relative_to(ROOT)) + '/manifest.json',
-                      commit=value['meta']['source_commit'], selection=ARM + '; 422 funded settlements')])
+                      commit=value['meta']['source_commit'], selection=ARM + '; 422 funded settlements'),
+                 dict(path=str(STREAKS.relative_to(ROOT)) + '/summary.json', selection='losing streaks')])
     (out / 'research.json').write_text(json.dumps(research, ensure_ascii=False, indent=2))
 
 

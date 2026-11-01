@@ -1,3 +1,9 @@
+## 2026-11-01 · live booklets: October replay, losing streaks, doubling not adopted
+
+- Owner: "这些数据整合一下补充到对应的策略小册 … 然后先不做倍投了". Each live-wick booklet gets two collapsible tables built from the committed summaries (`strategy_live_wick.sections`): the October 2026 replay (trade list, month total, data limits) and losing streaks + loss-doubling results marked "已研究，暂不采用". live-allin3 gets its streak table (422 trades, 52.1 percent, longest 9 losses, 2 backstops).
+- Frontend: `reclaim-strategy-book.js` renders `sections` with the existing `rs-detail-table` style after the random-entry control; no new styles. Not run through Stitch (no Stitch connection in this session). Checked at desktop and phone width.
+- Decision recorded in CLAUDE.md / AGENTS.md: no loss doubling; paper accounts keep their sizing.
+
 ## 2026-11-01 · live-wick October 2026 backtest; losing streaks and loss doubling
 
 - Owner: "目前我们的几个live策略 都跑一下上个月的回测 10月份的 … 最长的连续止损是多少次 … 补充上我们之前的倍投策略" / "补跑10月" / "倍投 … 基于原有的实际持仓量翻倍". Three experiments, all in sample, no paper-account change.

@@ -1,4 +1,6 @@
 """live-wick6x3 / live-wick3x3: market entry at the touch 5m close for survivor touches (owner 2026-11-01)."""
+import json
+import unittest
 from unittest.mock import Mock
 
 from test_monday_reclaim_paper import PaperFixture, FakeFib, H5, H1, MIN
@@ -133,3 +135,15 @@ class LiveWickTests(PaperFixture):
                 self.assertEqual(len(self.rows(e, f"SELECT 1 FROM positions WHERE track={WICK3_TRACK}")), 1)
                 if opened:
                     self.assertAlmostEqual(far[0]['notional'], 1000.)
+
+
+class LiveWickBookletTests(unittest.TestCase):
+    def test_sections_match_the_committed_summaries(self):
+        from yoyo.monitor import strategy_live_wick as w
+        month = json.loads((w.OCTOBER / 'summary.json').read_text())['results']
+        for track in w.SOURCES:
+            october, streak = w.sections(track)
+            self.assertEqual(len(october['rows']), month[track]['funded'])
+            self.assertAlmostEqual(sum(float(r[-1]) for r in october['rows']), month[track]['final']-1000, delta=.05)
+            self.assertIn('先不做倍投', streak['note'])
+        self.assertEqual(len(w.sections('live-wick6x3hi')[1]['rows']), 2)  # weighted account: streaks only, no doubling row
