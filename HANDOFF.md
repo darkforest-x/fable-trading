@@ -1,3 +1,9 @@
+## 2026-11-01 · Survivor slice: tighter stops lose, 60m stays; engine runs 10x faster with idle skipping
+
+- Owner: "测更紧止损", "60分钟未收回·市价平 为什么加这个逻辑 还有更好的逻辑吗", "为什么每次跑都要这么久". `exp-monday-limit-close-stop-grid-20261101-v1` and `exp-monday-limit-close-reclaim-window-20261101-v1` (`monday_limit_close_stop_grid.py`, NautilusTrader, 263 symbols, both paths, 0 errors; L30 / L18 / W60 parity exact).
+- Stops from the entry (near edge, 2025 / 2026 per trade): -5% +53 / 0bp, -10% +70 / +42, -15% +85 / +144, -20% +139 / +151 (= the -30%-from-level baseline +136 / +149), -30% +141 / +172. Reclaim window: 5 / 15 / 30m worse everywhere; 120m similar; 240m better in 2025-26 (+164 / +215bp, n10 x5 7.97x DD22) but worse in 2020-24 (+143 vs +212, DD31), 1440m DD 44-65. Keep 60m; 240m only as a forward candidate.
+- Runtime: the engine streamed every 5m bar of each symbol's history; `skip_idle_bars=True` (adapter feature) gives identical fills and cut 4 runs to 622 s. Also answered: closes back inside the level (P30) lose in 2025-26 (-29bp, 695 trades). Learnings: `engine-time-goes-to-idle-bars-not-to-trades.md`; stop note updated.
+
 ## 2026-11-01 · Survivor slice: 4 slots 3x, allin3 rule and the -30 percent stop
 
 - Owner asked for detail on 10 x 5 vs 4 x 3, compounding, the allin3 rule and whether -30 percent is too wide. Builder 38bce0067d adds the allin3 path_run option and an alternate fills source to `monday_limit_close_survivor_paths.py`; configs `-v3` (n4 x3) and `-v4` (allin3) run once on saved fills.

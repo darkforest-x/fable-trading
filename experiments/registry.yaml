@@ -15601,3 +15601,31 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Each backstop or a deep 60m exit takes 35-90 percent of an all-in 3x account; the October-November 2025 cluster (MLN -18 percent, DEGO -22 percent, MMT -17 percent) erased the peak. Not a candidate.'
+  - experiment_id: exp-monday-limit-close-stop-grid-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f1f3a5e012
+    status: complete
+    question: 'Owner 2026-11-01 "−30%兜底止损 是不是有点太多了？" / "测更紧止损": does a tighter stop help the touch-close survivor slice?'
+    single_variable: 'Stop only: L30 / L18 beyond the level (parity) and E5 / E10 / E15 / E20 / E30 from the entry; NautilusTrader, 263 symbols, both paths, worse path; compared on the 398 baseline events (common_with L30).'
+    result: 'Parity L30 796 rows and L18 396 rows exact (0bp). Near edge per trade 2020-24 / 2025 / 2026 and stop hits: E5 +11 / +53 / 0bp, 41-56 stops a year; E10 +116 / +70 / +42; E15 +183 / +85 / +144; E20 +208 / +139 / +151; E30 +202 / +141 / +172; L18 +144 / +98 / +111; L30 +212 / +136 / +149. Accounts 2025 onward (10 seeds, worst DD) n4 x3: E5 1.30x/37, E10 2.08x/33, E15 6.28x/38, E20 10.81x/28, E30 13.20x/31, L30 9.99x/29; n10 x5 E20 5.35x/19 = L30.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-stop-grid-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'First 74 OHLC symbols streamed the full history; the rest used skip_idle_bars (8a77b8c68a), fills identical by parity. Three events whose close was more than 30 percent past the level are dropped from all variants for the comparison. Stops tighter than about -15 percent from the entry cut wicks that come back.'
+  - experiment_id: exp-monday-limit-close-reclaim-window-20261101-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: abb3c03432
+    status: complete
+    question: 'Owner 2026-11-01 "60分钟未收回·市价平 为什么加这个逻辑 还有更好的逻辑吗": does another reclaim window beat the 60m rule on the survivor slice?'
+    single_variable: 'Reclaim clock only (5 / 15 / 30 / 60 / 120 / 240 / 1440 minutes), stop 30 percent beyond the level; NautilusTrader with skip_idle_bars, 263 symbols, both paths.'
+    result: 'W60 parity 796 rows exact. Near edge per trade 2020-24 / 2025 / 2026: W5 +71 / +57 / +33; W15 +163 / +98 / +47; W30 +176 / +113 / +108; W60 +212 / +136 / +149; W120 +188 / +120 / +157; W240 +143 / +164 / +215 (win 69-77 percent); W1440 +176 / +200 / +185 (win 77-81, 6-13 backstops a year). n10 x5 2020-24 then 2025 onward: W60 3.18x DD12 -> 5.35x DD19; W240 2.02x DD31 -> 7.97x DD22; W1440 2.21x DD35 -> 5.82x DD50. n4 x3: W60 3.00x/17 -> 9.99x/29; W240 1.01x/52 -> 20.89x/33.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-reclaim-window-20261101-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Shorter windows than 60m are worse in every period. Longer windows win more and earn more per trade in 2025-2026 but not in 2020-2024 (the selection years), and add backstops and drawdown; choosing 240m now would be a choice made on the test years. 60m stays; 240m is a forward-test candidate (owner decision).'
