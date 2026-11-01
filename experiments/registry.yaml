@@ -15657,3 +15657,17 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'First run with the 3 collapse closes: 6236U DD 51 from 2025. Size picked after seeing 2025-26; out-of-sample drawdown has run about 1.6 times the selection period.'
+  - experiment_id: exp-monday-limit-close-survivor-paths-20261101-v7
+    source_repo: darkforest-x/fable-trading
+    source_commit: d7b0d938e0
+    status: complete
+    question: 'Owner 2026-11-01 "6 份 3 倍（推荐） 3 份 3 倍 接入这两个": the E20 survivor rule at 3 slots x 3 (100 percent notional) from 1000U, for the live-wick3x3 paper account and booklet.'
+    single_variable: 'Sizing only versus v5 (n6 -> n3 at 3x).'
+    result: 'Near edge from 2025: 1000 -> 19961U, DD 36.6 (over the owner''s 35 percent cap); from 2020: 60786U, 369 of 398 taken. Range 0.5 from 2025: 14118U DD 46.'
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-close-survivor-paths-20261101-v7/manifest.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Feeds yoyo/monitor/strategy_live_wick.py (live-wick3x3 booklet and backtest K-line replay); v5 feeds live-wick6x3. Paper accounts live-wick6x3 (8060) and live-wick3x3 (9060) connected in 803d70b723; forward record starts at 1000U on 2026-11-01.'

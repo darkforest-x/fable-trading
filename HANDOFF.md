@@ -1,3 +1,9 @@
+## 2026-11-01 · live-wick6x3 / live-wick3x3 touch-close paper accounts connected
+
+- Owner: "那叫做两个模拟盘接入前端吧 … 6 份 3 倍 / 3 份 3 倍 … 能实盘的要用live-开头 … 小册 … 历史交易k线图". New tracks 8060 `live-wick6x3` and 9060 `live-wick3x3` in `monday_reclaim_paper.py` (enable_live_wick): at the touch 5m close (score_due) a survivor (touch-close score >= 0.5, closed beyond the 1.618, recovery < 0.6396, < 30 percent past) opens at the OKX 5m close price; near Monday edge target, stop entry -20 percent, 60m reclaim vs the level with no offset, margin equity / 6 or / 3 at 3x, taker + 10bp entry, maker target, taker + 10bp other exits. Each starts at 1000U on 2026-11-01; no history injected; paper only.
+- Booklet and backtest replay from `exp-monday-limit-close-survivor-paths-20261101-v5` / `-v7` via `yoyo/monitor/strategy_live_wick.py` (382 / 369 trades, Binance K-lines). Frontend: picker, rules, analytics, close dialog, backtest list (existing components, no layout change; Stitch MCP not available in this session, so no Stitch screen). Two front-end files carry another tool's uncommitted edits; only my lines were committed.
+- Tests: 7 new + 98 reclaim backend, 106 frontend pass (unrelated suites have pre-existing failures, e.g. snapshot_invalid_event). `com.fable.impulse-monitor` restarted 13:5x; all nine earlier accounts' equity / open / closed unchanged; desktop and 375px checked, no overflow. 3x3 backtest DD 37 percent exceeds the owner's 35 percent cap (connected as requested).
+
 ## 2026-11-01 · Survivor slice switched to a -20% entry stop (research definition)
 
 - Owner: "那改成这个". Recommended research version is now: touch-close survivor entry unchanged, stop 20 percent from the entry (E20 fills of the stop grid), 6 slots x 3 so the stop fires before liquidation. `exp-monday-limit-close-survivor-paths-20261101-v5` (6 x 3) and `-v6` (4 x 3), builder d7b0d938e0.
