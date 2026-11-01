@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-monday-limit-close-order-boost-20261101-v1",
+  "question": "Owner 2026-11-01 '在排列分高时开大一点的仓位 … 测试一下吧': does a larger margin when the 15m EMA order score is high improve the live-wick account beyond a random boost of the same number of trades?",
+  "approval": "Owner 2026-11-01 '测试一下吧'",
+  "single_variable": "Sizing only: margin x boost when l2_order_score >= k (known before the touch); every trade kept; fills, stop, costs unchanged",
+  "primary": "k 3, boost 1.5 and 2.0, 6 slots x 3; k 2 and 3 slots x 3 are context",
+  "fills": "experiments/active/exp-monday-limit-close-stop-grid-20261101-v1",
+  "paths": "experiments/active/exp-monday-limit-close-survivor-paths-20261101-v5",
+  "features": "experiments/active/exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz",
+  "variant": "E20",
+  "target": "near_monday_edge",
+  "boosts": [[3, 1.5], [3, 2.0], [2, 1.5], [2, 2.0]],
+  "sizings": [[6, 3], [3, 3]],
+  "seed": 20261103,
+  "ties": 10,
+  "control_seed": 20261102,
+  "control_draws": 300,
+  "slippage_bp": {"market_entry": 10, "non_target_exit": 10},
+  "in_sample": "The order score and k come from spike-HW on the same history; 45 events have order >= 3",
+  "training_eligible": false,
+  "production_eligible": false
+}
