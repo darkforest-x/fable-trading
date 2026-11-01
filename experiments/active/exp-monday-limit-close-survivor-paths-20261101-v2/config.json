@@ -1,0 +1,26 @@
+{
+  "experiment_id": "exp-monday-limit-close-survivor-paths-20261101-v2",
+  "question": "Owner 2026-11-01 '以最大利润为目标…回撤控制小于35%': the survivor rule's 1000U account at the size picked in exp-monday-limit-close-optimize-20261101-v1 (largest 2020-2024 final with 2020-2024 drawdown under half the 35 percent cap).",
+  "approval": "Owner 2026-11-01 '针对这套逻辑做策略优化…回撤控制小于35%'",
+  "source": "experiments/active/exp-monday-limit-close-slice-control-20261101-v1",
+  "targets": [
+    "near_monday_edge",
+    "range_0.5"
+  ],
+  "starts": [
+    "2020-01-01",
+    "2025-01-01"
+  ],
+  "slots": 10,
+  "leverage": 5,
+  "tie_seed_from": "experiments/active/exp-monday-limit-return-opt-20261027-v2/config.json",
+  "slippage_bp": {
+    "market_entry": 10,
+    "non_target_exit": 10
+  },
+  "fees": "Framework fills of the control run: market entry taker 0.05 percent, target maker 0.02 percent, stop / reclaim exits taker (OKX Lv1, read 2026-10-23); 10bp slippage on the market entry and on non-target exits; worse of the two intrabar paths; funding not modelled",
+  "in_sample": "Filters chosen on 2020-2024, confirmed on 2025-2026 and by the random-time control; this size was picked after seeing that the first sizing rule failed, so 2025-2026 is not untouched",
+  "training_eligible": false,
+  "production_eligible": false,
+  "sizing_rule": "Post hoc, after the walk-forward (first rule) overshot the cap out of sample: on 2020-2024 only, the largest final multiple with drawdown < 17.5 percent (half the cap) gives n10 x 5x; with < 35 percent it gave n2 x 3x, whose 2025-2026 drawdown was 55 percent"
+}
