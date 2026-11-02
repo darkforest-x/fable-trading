@@ -218,7 +218,39 @@ def run(config, workers):
         ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(), training_eligible=False, production_eligible=False))
 
 
+def permutation(config, draws=5000, seed=20261107):
+    """Per-trade with-minus-against difference (mean net bp, win rate) against shuffles of the colour match within each
+    calendar year, from the saved candidates.csv.gz (unsized; one candidate set per account family)."""
+    exp = config.resolve().parent
+    cr.committed('yoyo/evaluation/live_ema_cloud_filter.py', str(config.resolve().relative_to(ROOT)))
+    c = pd.read_csv(exp/'candidates.csv.gz', parse_dates=['entry_t'])
+    rng = np.random.default_rng(seed)
+    out = {}
+    for key in ('live-wick6x3|2020-01-01', 'live-wick3x3far|2020-01-01', 'live-allin3|2023-01-01'):
+        x = c[c.account+'|'+c.start == key]
+        for tf in TF:
+            y = x[x[f'cloud_{tf}'] != 0]
+            net, win, yr = y.net.to_numpy(), (y.net > 0).to_numpy(), y.entry_t.dt.year.to_numpy()
+            m = (y.side == y[f'cloud_{tf}']).to_numpy()
+            diff = lambda k: (net[k].mean()-net[~k].mean(), 100*(win[k].mean()-win[~k].mean()))
+            obs = diff(m)
+            groups = [np.flatnonzero(yr == v) for v in np.unique(yr)]
+            null = []
+            for _ in range(draws):
+                k = m.copy()
+                for g in groups:
+                    k[g] = rng.permutation(m[g])
+                null.append(diff(k))
+            null = np.array(null)
+            out.setdefault(key, {})[tf] = dict(n_with=int(m.sum()), n_against=int((~m).sum()), mean_diff_bp=float(obs[0]),
+                                               win_diff_pp=float(obs[1]), p_mean=float((null[:, 0] >= obs[0]).mean()),
+                                               p_win=float((null[:, 1] >= obs[1]).mean()), draws=draws)
+    dump(exp/'permutation.json', dict(method=permutation.__doc__.split('\n')[0], seed=seed, results=out))
+    print(json.dumps(out, indent=1))
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(); ap.add_argument('--config', type=Path, required=True); ap.add_argument('--workers', type=int, default=6)
+    ap.add_argument('--permutation', action='store_true')
     a = ap.parse_args()
-    run(a.config, a.workers)
+    permutation(a.config) if a.permutation else run(a.config, a.workers)
