@@ -19,6 +19,19 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: h1-outside-glyph-stops-20261102-v1
+    artifact_type: manifest
+    role: h1_outside_stochastic_glyph_stop_and_confluence_study
+    source_repo: darkforest-x/fable-trading
+    source_commit: 50f3ba28c5
+    source_path: experiments/active/exp-h1-outside-glyph-stops-20261102-v1/summary.json
+    storage_uri: repo://experiments/active/exp-h1-outside-glyph-stops-20261102-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 638symbols53068signals;four stops and3paired controls,846576native positions. Config,metrics,coverage,year/side/symbol breakdown,verification and OKX screenshot geometry retained. Gzipped trade/fill ledgers and source size/mtime identities local; no historical input hashes. All later-period configurations netnegative.12behavioraltests and actual-prefix/control/cost checks pass.
+
+
   - artifact_id: month-first-week-touch-charts-dense-20261102-v2
     artifact_type: manifest
     role: monthly_first_week_thinner_denser_chart_revision

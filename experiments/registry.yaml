@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-h1-outside-glyph-stops-20261102-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 50f3ba28c5
+    status: rejected
+    question: Do closed H1 V2.43 glyphs outside complete NY Monday1.618 support small stops and high payoff, and do individual confluence filters help?
+    single_variable: Four stop widths separately with common entries/near-Monday-edge target/7day expiry; then each predeclared indicator filter individually on the unchanged ledgers.
+    result: 638symbols53068signals846576native VectorBT independent positions. Full-history wick01/fixed0.5/1/2percent win15.86/7.25/13.04/22.17percent,payoff3.68/7.74/4.67/2.72,mean netR-0.327/-0.511/-0.312/-0.193. Gross price returns also negative. Earlier-selected2percent later29472trades-0.163R versus random-0.195R,month-blockp0.2424. All four stops and all seven individual filters negative after2025;4Htrend earlier positive fails later. No profitable rule established.
+    artifacts: [h1-outside-glyph-stops-20261102-v1]
+    canonical_report: experiments/active/exp-h1-outside-glyph-stops-20261102-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Maker2bp/taker5bp,market slippage5bp perfill;funding absent. Independent overlaps are not account return. Current registered Binance files2020toOct2026;BTC/ETH endSep22,Oct28gap preserved.133censored signal positions acrossfourstops.12tests,three real-prefix checks,cost and paired-control invariants pass. OKX screenshot two LPT arrows separately verified without trade replay. Native kernel+Portfolio,one framework run. No paper/live change.
+
   - experiment_id: exp-month-first-week-touches-20261102-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 96d2c2b748
