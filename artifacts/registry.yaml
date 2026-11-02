@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: h1-ema-cloud-20261102-v1
+    artifact_type: manifest
+    role: h1_outside_glyph_ema_cloud_delayed_entry_study
+    source_repo: darkforest-x/fable-trading
+    source_commit: e27c05c089
+    source_path: experiments/active/exp-h1-ema-cloud-20261102-v1/summary.json
+    storage_uri: repo://experiments/active/exp-h1-ema-cloud-20261102-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 638symbols53068setups41560new entries;664960native VectorBT positions. Frozen baseline reused without replay. All four stops negative and weaker than random in full/later periods. Config,metrics,paired changes,coverage,year/side/symbol splits,verification and local compressed schedules/trades/fills retained.31tests,realprefix checks and full-ledger invariants pass. No historical hashes,cloud-stop change,report or deployment.
+
   - artifact_id: h1-outside-glyph-stops-20261102-v1
     artifact_type: manifest
     role: h1_outside_stochastic_glyph_stop_and_confluence_study

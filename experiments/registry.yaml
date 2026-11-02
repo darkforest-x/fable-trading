@@ -17,16 +17,18 @@ experiments:
 
   - experiment_id: exp-h1-ema-cloud-20261102-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: working-tree-uncommitted
-    status: running
+    source_commit: e27c05c089
+    status: rejected
     question: Does waiting for a newly closed 5m EMA20/50 flip improve H1 outside1.618 glyph entries after costs?
     single_variable: Entry confirmation only; fixed24h wait and unchanged four stop formulas, near-Monday target, seven-day holding horizon and costs. Primary fixed2percent inherited from previous earlier-period choice.
-    artifacts: []
+    result: 638symbols53068frozen setups41560accepted;664960native independent positions. All four stops negative fullhistory and after2025,all weaker than matchedrandom. Later fixed2percent22845trades win27.16percent,payoff2.23,mean-0.135R versus random-0.108R,p0.7162;old full baseline-0.163R. Same completed22836pairs delayed entry reduces mean by0.183R;eventual-fill old-entry subset+0.048R is ex-post and not executable.
+    artifacts: [h1-ema-cloud-20261102-v1]
+    canonical_report: experiments/active/exp-h1-ema-cloud-20261102-v1/summary.json
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    reuse_allowed: false
-    notes: All638 existing registered perpetual files; frozen baseline fills reused without replay. New fills use native VectorBT only. Same-event paired entry comparison and same-symbol/month/causal-H1-ATR random controls. No cloud-stop change or simulation deployment.
+    reuse_allowed: true
+    notes: Fixed24h wait,78.31percent fillability;10177invalid entry geometry,1045target beforeflip,246no flip,40wait censored. After-entry91signal parameter positions censored.31tests and all-ledger entry/stop/target/control/cost checks pass;three real EMAprefix checks and independent BTC/ETH/LPT ledger audit.1936shared flips retain3910signals. Maker2bp/taker5bp,market slippage5bp perfill,funding absent;independent R not account returns. No cloud-stop change or simulation deployment. Notion40c8856479af813fb6f7eba6c3b88001.
 
   - experiment_id: exp-h1-outside-glyph-stops-20261102-v1
     source_repo: darkforest-x/fable-trading

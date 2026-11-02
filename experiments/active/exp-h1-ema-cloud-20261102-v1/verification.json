@@ -1,0 +1,49 @@
+{
+  "unit_tests_passed": 31,
+  "unique_keys": true,
+  "all_signal_rows": 166240,
+  "all_random_rows": 498720,
+  "exact_entry_after_confirmation": true,
+  "wait_minutes_range": [
+    0.0,
+    1425.0
+  ],
+  "original_targets_and_stop_formulas": true,
+  "paired_month_bucket_side_distances": true,
+  "cost_identities": true,
+  "stop_first_never_better": true,
+  "cached_baseline_metrics_identical": true,
+  "source_prefix_checks": {
+    "BTCUSDT": [
+      {
+        "source_rows": 353748,
+        "matched_rows": 353748
+      }
+    ],
+    "ETHUSDT": [
+      {
+        "source_rows": 353748,
+        "matched_rows": 353748
+      }
+    ],
+    "LPTUSDT": [
+      {
+        "source_rows": 240459,
+        "matched_rows": 240459
+      }
+    ]
+  },
+  "shared_flip_groups": 1936,
+  "signal_events_in_shared_flip_groups": 3910,
+  "unique_symbol_side_entries": 39586,
+  "three_symbol_independent_audit": "BTC ETH LPT new/old schedules, fills, stops, targets, controls and fee arithmetic all pass; no extra engine run.",
+  "model": "gpt-6-luna",
+  "reasoning_effort": "max",
+  "model_verified_from": "existing child runtime turn_context",
+  "source_commit": "e27c05c08905b9f0499f335e3b5cf9c0c1873c44",
+  "no_second_replay": true,
+  "nonapplicable_metrics": "No trained ranker: AUC/top-decile ranking metrics are inapplicable. No funded portfolio: account return and account drawdown not claimed.",
+  "own_registry_entries_validated": true,
+  "global_registry_validation": "monday-calendar-impact-audit-20261101: missing required field 'source_commit'",
+  "notion": "https://app.notion.com/p/40c8856479af813fb6f7eba6c3b88001"
+}
