@@ -236,7 +236,8 @@ def render(data,months,events,summary,config):
             val=getattr(e,key);start=max(left,ready);end=min(right,expiry)
             if start<end:ax.hlines(val,md.date2num(start),md.date2num(end),color=color,lw=.85,zorder=2)
             if right>expiry and max(left,expiry)<right:ax.hlines(val,md.date2num(max(left,expiry)),md.date2num(right),color=color,lw=.85,linestyles='dashed',alpha=.55)
-            ax.text(.008,val,f'{title}  {val:,.1f}',transform=ax.get_yaxis_transform(),color=color,fontsize=8.3,va='bottom',bbox=dict(facecolor=panel,alpha=.82,edgecolor='none',pad=1))
+            if ax.get_ylim()[0] <= val <= ax.get_ylim()[1]:
+                ax.text(.008,val,f'{title}  {val:,.1f}',transform=ax.get_yaxis_transform(),color=color,fontsize=8.3,va='bottom',zorder=8,clip_on=True,bbox=dict(facecolor=panel,alpha=.90,edgecolor='none',pad=1))
     def metric(e,n):
         if not getattr(e,f'complete_{n}h'):return f'{n}h  数据未满'
         return f'{n}h  向内 {getattr(e,f"inward_pct_{n}h"):.2f}%  /  向外 {getattr(e,f"outward_pct_{n}h"):.2f}%  /  期末 {getattr(e,f"close_inward_pct_{n}h"):+.2f}%'
@@ -257,11 +258,12 @@ def render(data,months,events,summary,config):
             '向内＝朝区间内的最大幅度；向外＝继续突破的最大幅度；期末＝到点收盘向内涨跌幅。',
             '反应和突破可同时发生，不能直接当成胜率。此处没有成交、盈亏或因果有效性判断。',
             '蓝色阴影是首周；实线是已确认且有效的价位；月底后的虚线只供走势复盘。',
-            '图中日K / 4小时K 以 UTC 聚合，横轴显示纽约日期；分图纵轴独立缩放。',
+            '日K / 4小时K 以 UTC 聚合，首末K可能未满；横轴为纽约日期，分图纵轴独立。',
+            '圆点对应包含触及小时的展示K；细节图只显示视野内价位，其他价位见上方全景。',
             f'完整月份：2022-02 至 2026-10。行情截止 {pd.Timestamp(config["asof_exclusive"]).tz_convert(NY):%Y-%m-%d %H:%M} 纽约时间。',
             '2022-01 首周不完整，2026-11 首周尚未完成，不进入完整月分母。',
             '下页起按触及时间排序，每个事件一页；所有事件都保留，包括没有反转的情况。']
-        for i,line in enumerate(lines):fig.text(.06,.43-i*.03,line,fontsize=10.2,color=muted)
+        for i,line in enumerate(lines):fig.text(.06,.43-i*.028,line,fontsize=10.2,color=muted)
         book.savefig(fig,facecolor=bg);plt.close(fig)
         for e in events.itertuples(index=False):
             f=data[e.symbol];t=pd.Timestamp(e.touch);st=pd.Timestamp(e.start);ready=pd.Timestamp(e.ready)
@@ -274,16 +276,24 @@ def render(data,months,events,summary,config):
             fig.text(.055,.902,f'纽约时间 {t.tz_convert(NY):%Y-%m-%d %H:%M}–{(t+HOUR).tz_convert(NY):%H:%M}  |  1.618 = {e.level:,.2f} USDT',fontsize=11.5,color=muted)
             for ax,hours,l,title in [(axs[0],24,left,'月度背景 · 日K'),(axs[1],4,max(t-pd.Timedelta(hours=48),f.index.min()),'触及前后 · 4小时K')]:
                 fr=aggregate(f[(f.index>=l)&(f.index<right)],hours)
-                style(ax);candle(ax,fr,hours);levels(ax,e,l,right)
+                style(ax);candle(ax,fr,hours)
+                vals=[fr.low.min(),fr.high.max(),e.upper,e.lower] if hours==24 else [fr.low.min(),fr.high.max(),e.level]
+                span=max(vals)-min(vals)
+                ax.set_ylim(min(vals)-span*.09,max(vals)+span*.13)
+                levels(ax,e,l,right)
                 ax.axvspan(md.date2num(st),md.date2num(ready),color=blue,alpha=.07)
-                ax.axvline(md.date2num(t),color=ink,lw=.7,ls=':',alpha=.7)
-                ax.scatter([md.date2num(t)],[e.level],s=38,color=pink if e.side=='upper' else mint,edgecolors=bg,zorder=6)
+                marker_at=t.floor(f'{hours}h')+pd.Timedelta(hours=hours/2)
+                ax.axvline(md.date2num(marker_at),color=ink,lw=.7,ls=':',alpha=.7)
+                ax.scatter([md.date2num(marker_at)],[e.level],s=38,color=pink if e.side=='upper' else mint,edgecolors=bg,zorder=6)
                 if l<ready<right:ax.axvline(md.date2num(ready),color=blue,lw=.6,ls=':',alpha=.6)
                 ax.set_xlim(md.date2num(l),md.date2num(right)+.3)
-                vals=[fr.low.min(),fr.high.max(),e.upper,e.lower];span=max(vals)-min(vals)
-                ax.set_ylim(min(vals)-span*.09,max(vals)+span*.13)
                 ax.set_title(title,loc='left',color=muted,fontsize=10,pad=8)
             for i,n in enumerate([24,72,168]):fig.text(.055,.122-i*.027,metric(e,n),color=ink,fontsize=10.5)
+            if not e.complete_168h:
+                recent=f[(f.index>t)&(f.index<right)]
+                available=len(recent)
+                result=reaction(f,t,e.level,e.side,available)
+                fig.text(.055,.041,f'已观测 {available}h：最大向内 {result["inward_pct"]:.2f}% / 最大向外 {result["outward_pct"]:.2f}% / 最新收盘 {result["close_inward_pct"]:+.2f}%',fontsize=10.5,color=mint)
             fig.text(.055,.018,'数据：OKX公开行情（复用本地历史与已收盘1H缓存）  |  触及根不参与后续极值  |  幅度相对1.618价位  |  USDT / 线性坐标',fontsize=8,color=muted)
             path=out/f'{e.event_id}_{e.symbol}_{e.month}_{e.side}.png'
             fig.savefig(path,dpi=145,facecolor=bg);book.savefig(fig,facecolor=bg);plt.close(fig);paths.append(path)
@@ -305,7 +315,7 @@ def render(data,months,events,summary,config):
         for p in paths:z.write(p,'charts/'+p.name)
         for filename in ['events.csv','months.csv','summary.json','config.json']:
             z.write(DEST/filename,filename)
-    save(DEST/'chart_manifest.json',dict(pdf=str(pdf.relative_to(ROOT)),pdf_pages=len(events)+1,pdf_bytes=pdf.stat().st_size,
+    save(DEST/'chart_manifest.json',dict(renderer_commit=subprocess.check_output(['git','log','-1','--format=%H','--',__file__],cwd=ROOT,text=True).strip(),pdf=str(pdf.relative_to(ROOT)),pdf_pages=len(events)+1,pdf_bytes=pdf.stat().st_size,
                                         zip=str(zp.relative_to(ROOT)),charts=manifest,contacts=contacts))
 
 
