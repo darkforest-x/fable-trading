@@ -1,0 +1,2915 @@
+{
+  "config": {
+    "experiment_id": "exp-live-ema-cloud-filter-20261103-v1",
+    "question": "Owner 2026-11-03 '我们的那几个live策略，测试一下，使用ema cloud这个指标 默认参数 20 50 50 … 基于12h级别，只做一边，比如红色云带只做空，绿色云只做多，12h。4h。1h的都试试，live原有的所有规则都不变'",
+    "approval": "Owner 2026-11-03 request above",
+    "single_variable": "Admission only: a candidate is taken when its side matches the EMA cloud colour of the last bar closed at the decision (green EMA20 > EMA50 long only, red short only); fills, stops, targets, sizing, seeds and costs of each live- account unchanged",
+    "indicator": {
+      "name": "EMA Trend (owner Pine v4) with fast 20, medium 50, slow 50",
+      "lengths": {
+        "fast": 20,
+        "medium": 50,
+        "slow": 50
+      },
+      "source": "close",
+      "colour": "green when EMA(fast) > EMA(slow), red when EMA(fast) < EMA(slow); medium does not set the colour",
+      "ema": "alpha 2/(n+1), seeded with the SMA of the first n closes (Pine ema); undefined before n bars",
+      "bars": "Resampled from the 5m (1m for crypto_1m jobs) execution series, UTC epoch alignment (12h bars open 00:00 / 12:00 UTC)"
+    },
+    "timeframes": [
+      "12h",
+      "4h",
+      "1h"
+    ],
+    "primary": "12h with-cloud (owner names 12h first)",
+    "causality": "Cloud of the last bar whose close is at or before the decision time: live-wick* = the touch 5m close (market entry, entry_t); live-allin3 = the open of the 5m fill bar (the limit rests before the touch; entry_t is that bar's close)",
+    "no_colour": "Candidates whose EMA50 is still undefined (too few bars since listing) or equal are not taken under the filter (no colour = neither side); counted separately",
+    "arms": {
+      "base": "no filter (must reproduce the saved account exactly)",
+      "with": "side == cloud colour (owner rule)",
+      "against": "side == opposite colour (reference only)"
+    },
+    "accounts": {
+      "live-wick6x3": {
+        "paths": "experiments/active/exp-monday-limit-close-survivor-paths-20261101-v10",
+        "starts": [
+          "2020-01-01",
+          "2025-01-01"
+        ]
+      },
+      "live-wick3x3": {
+        "paths": "experiments/active/exp-monday-limit-close-survivor-paths-20261101-v11",
+        "starts": [
+          "2020-01-01",
+          "2025-01-01"
+        ]
+      },
+      "live-wick6x3hi": {
+        "paths": "experiments/active/exp-monday-limit-close-survivor-paths-20261101-v12",
+        "starts": [
+          "2020-01-01",
+          "2025-01-01"
+        ]
+      },
+      "live-wick3x3far": {
+        "paths": "experiments/active/exp-monday-limit-close-survivor-paths-20261101-v13",
+        "starts": [
+          "2020-01-01",
+          "2025-01-01"
+        ]
+      },
+      "live-allin3": {
+        "booklet": "experiments/active/exp-pretouch-booklet-20261031-v1",
+        "plan": "allin3|A_rest_causal",
+        "track": "allin3"
+      }
+    },
+    "october_bars": "experiments/active/exp-monday-limit-live-october-20261101-v1/symbols",
+    "control": {
+      "draws": 300,
+      "seed": 20261106,
+      "rule": "Random subsets of the account's own candidates (same start) with the with-cloud arm's size, replayed with the account's allocator and seed; share of draws below the filtered account. Metric: final multiple (live-wick*), trading P&L after refills = end - 1000 - cash added (live-allin3)"
+    },
+    "periods": {
+      "live-wick": [
+        "y2020_2024",
+        "y2025",
+        "y2026"
+      ],
+      "live-allin3": [
+        "y2023",
+        "y2024",
+        "y2025",
+        "y2026"
+      ]
+    },
+    "fees": "Unchanged from the saved fills: market entry taker 0.05 percent + 10bp, target maker 0.02 percent, other exits taker + 10bp (live-wick); maker limit entry 2bp and 10bp non-target slippage (live-allin3); worse intrabar path; funding not modelled",
+    "limits": "Binance bars, not the OKX paper feed; live-wick touches 2026-10-28..31 not covered (no Binance 2026-10-28 archive); live-allin3 ends 2026-09-23. Timeframes and the 20/50 lengths are owner-given, not selected here.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "results": {
+    "checks": {
+      "parity": {
+        "live-wick6x3|2020-01-01": {
+          "replay_end": 16438.44342656393,
+          "saved_end": 16438.44342656393,
+          "abs_error": 0.0
+        },
+        "live-wick6x3|2025-01-01": {
+          "replay_end": 6427.9328311111285,
+          "saved_end": 6427.9328311111285,
+          "abs_error": 0.0
+        },
+        "live-wick3x3|2020-01-01": {
+          "replay_end": 85787.2743125916,
+          "saved_end": 85787.2743125916,
+          "abs_error": 0.0
+        },
+        "live-wick3x3|2025-01-01": {
+          "replay_end": 28171.10019599893,
+          "saved_end": 28171.10019599893,
+          "abs_error": 0.0
+        },
+        "live-wick6x3hi|2020-01-01": {
+          "replay_end": 19992.71664333053,
+          "saved_end": 19992.71664333053,
+          "abs_error": 0.0
+        },
+        "live-wick6x3hi|2025-01-01": {
+          "replay_end": 7817.7620812379155,
+          "saved_end": 7817.7620812379155,
+          "abs_error": 0.0
+        },
+        "live-wick3x3far|2020-01-01": {
+          "replay_end": 90852.0053534979,
+          "saved_end": 90852.0053534979,
+          "abs_error": 0.0
+        },
+        "live-wick3x3far|2025-01-01": {
+          "replay_end": 20635.8738296775,
+          "saved_end": 20635.8738296775,
+          "abs_error": 0.0
+        },
+        "live-allin3|2023-01-01": {
+          "replay_end": 428005.2431207798,
+          "saved_end": 428005.2431207798,
+          "abs_error": 0.0
+        }
+      },
+      "no_colour": {
+        "live-wick6x3|2020-01-01": {
+          "12h": 9,
+          "4h": 1,
+          "1h": 0,
+          "candidates": 416
+        },
+        "live-wick6x3|2025-01-01": {
+          "12h": 4,
+          "4h": 1,
+          "1h": 0,
+          "candidates": 272
+        },
+        "live-wick3x3|2020-01-01": {
+          "12h": 9,
+          "4h": 1,
+          "1h": 0,
+          "candidates": 416
+        },
+        "live-wick3x3|2025-01-01": {
+          "12h": 4,
+          "4h": 1,
+          "1h": 0,
+          "candidates": 272
+        },
+        "live-wick6x3hi|2020-01-01": {
+          "12h": 9,
+          "4h": 1,
+          "1h": 0,
+          "candidates": 416
+        },
+        "live-wick6x3hi|2025-01-01": {
+          "12h": 4,
+          "4h": 1,
+          "1h": 0,
+          "candidates": 272
+        },
+        "live-wick3x3far|2020-01-01": {
+          "12h": 4,
+          "4h": 0,
+          "1h": 0,
+          "candidates": 214
+        },
+        "live-wick3x3far|2025-01-01": {
+          "12h": 2,
+          "4h": 0,
+          "1h": 0,
+          "candidates": 140
+        },
+        "live-allin3|2023-01-01": {
+          "12h": 18,
+          "4h": 1,
+          "1h": 0,
+          "candidates": 874
+        }
+      },
+      "stale_bar": {
+        "live-wick6x3|2020-01-01": {
+          "12h": 0,
+          "4h": 0,
+          "1h": 0
+        },
+        "live-wick6x3|2025-01-01": {
+          "12h": 0,
+          "4h": 0,
+          "1h": 0
+        },
+        "live-wick3x3|2020-01-01": {
+          "12h": 0,
+          "4h": 0,
+          "1h": 0
+        },
+        "live-wick3x3|2025-01-01": {
+          "12h": 0,
+          "4h": 0,
+          "1h": 0
+        },
+        "live-wick6x3hi|2020-01-01": {
+          "12h": 0,
+          "4h": 0,
+          "1h": 0
+        },
+        "live-wick6x3hi|2025-01-01": {
+          "12h": 0,
+          "4h": 0,
+          "1h": 0
+        },
+        "live-wick3x3far|2020-01-01": {
+          "12h": 0,
+          "4h": 0,
+          "1h": 0
+        },
+        "live-wick3x3far|2025-01-01": {
+          "12h": 0,
+          "4h": 0,
+          "1h": 0
+        },
+        "live-allin3|2023-01-01": {
+          "12h": 0,
+          "4h": 0,
+          "1h": 0
+        }
+      }
+    },
+    "per_trade": {
+      "live-wick6x3|2020-01-01": {
+        "base": {
+          "y2020_2024": {
+            "n": 144,
+            "win_pct": 70.13888888888889,
+            "mean_bp": 208.13677105707822,
+            "median_bp": 301.4419650191098
+          },
+          "y2025": {
+            "n": 119,
+            "win_pct": 63.86554621848739,
+            "mean_bp": 139.0421636483228,
+            "median_bp": 226.1425414364639
+          },
+          "y2026": {
+            "n": 153,
+            "win_pct": 67.3202614379085,
+            "mean_bp": 159.23116784828142,
+            "median_bp": 335.4933920704855
+          },
+          "all": {
+            "n": 416,
+            "win_pct": 67.3076923076923,
+            "mean_bp": 170.38481054604983,
+            "median_bp": 288.2361569275891
+          }
+        },
+        "with_12h": {
+          "y2020_2024": {
+            "n": 77,
+            "win_pct": 75.32467532467533,
+            "mean_bp": 280.9565071416983,
+            "median_bp": 389.53922735727514
+          },
+          "y2025": {
+            "n": 84,
+            "win_pct": 69.04761904761905,
+            "mean_bp": 231.70841826969502,
+            "median_bp": 383.33365626594224
+          },
+          "y2026": {
+            "n": 116,
+            "win_pct": 66.37931034482759,
+            "mean_bp": 119.69185967865218,
+            "median_bp": 279.151031040358
+          },
+          "all": {
+            "n": 277,
+            "win_pct": 69.67509025270758,
+            "mean_bp": 198.48885887107872,
+            "median_bp": 361.1567318079149
+          }
+        },
+        "against_12h": {
+          "y2020_2024": {
+            "n": 62,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 133.43898512891099,
+            "median_bp": 99.09744621537038
+          },
+          "y2025": {
+            "n": 32,
+            "win_pct": 50.0,
+            "mean_bp": -47.152365294490764,
+            "median_bp": -4.660400204978949
+          },
+          "y2026": {
+            "n": 36,
+            "win_pct": 69.44444444444444,
+            "mean_bp": 266.39566430713376,
+            "median_bp": 384.07488846088245
+          },
+          "all": {
+            "n": 130,
+            "win_pct": 62.30769230769231,
+            "mean_bp": 125.80450233558147,
+            "median_bp": 101.53257489430489
+          }
+        },
+        "with_4h": {
+          "y2020_2024": {
+            "n": 94,
+            "win_pct": 74.46808510638297,
+            "mean_bp": 238.75856814703923,
+            "median_bp": 357.0791124145812
+          },
+          "y2025": {
+            "n": 88,
+            "win_pct": 62.5,
+            "mean_bp": 144.39201247817175,
+            "median_bp": 268.2162431128378
+          },
+          "y2026": {
+            "n": 113,
+            "win_pct": 71.68141592920354,
+            "mean_bp": 183.9142323435988,
+            "median_bp": 369.08841962347714
+          },
+          "all": {
+            "n": 295,
+            "win_pct": 69.83050847457626,
+            "mean_bp": 189.60037545331346,
+            "median_bp": 350.3459417361477
+          }
+        },
+        "against_4h": {
+          "y2020_2024": {
+            "n": 50,
+            "win_pct": 62.0,
+            "mean_bp": 150.56779252795155,
+            "median_bp": 149.2568321749441
+          },
+          "y2025": {
+            "n": 31,
+            "win_pct": 67.74193548387096,
+            "mean_bp": 123.85549600229972,
+            "median_bp": 201.92850576340433
+          },
+          "y2026": {
+            "n": 39,
+            "win_pct": 53.84615384615385,
+            "mean_bp": 69.03054828086673,
+            "median_bp": 45.565063604170334
+          },
+          "all": {
+            "n": 120,
+            "win_pct": 60.83333333333333,
+            "mean_bp": 117.16751154518894,
+            "median_bp": 112.93372745436436
+          }
+        },
+        "with_1h": {
+          "y2020_2024": {
+            "n": 87,
+            "win_pct": 73.5632183908046,
+            "mean_bp": 312.18187216509193,
+            "median_bp": 389.53922735727514
+          },
+          "y2025": {
+            "n": 88,
+            "win_pct": 63.63636363636363,
+            "mean_bp": 144.60161158149478,
+            "median_bp": 232.3151148691956
+          },
+          "y2026": {
+            "n": 91,
+            "win_pct": 69.23076923076923,
+            "mean_bp": 166.69545594667917,
+            "median_bp": 367.6923076923081
+          },
+          "all": {
+            "n": 266,
+            "win_pct": 68.796992481203,
+            "mean_bp": 206.9701172506855,
+            "median_bp": 337.2694884937599
+          }
+        },
+        "against_1h": {
+          "y2020_2024": {
+            "n": 57,
+            "win_pct": 64.91228070175438,
+            "mean_bp": 49.33109041853108,
+            "median_bp": 87.308580564931
+          },
+          "y2025": {
+            "n": 31,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 123.26050499931826,
+            "median_bp": 226.1425414364639
+          },
+          "y2026": {
+            "n": 62,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 148.27551918772988,
+            "median_bp": 279.151031040358
+          },
+          "all": {
+            "n": 150,
+            "win_pct": 64.66666666666666,
+            "mean_bp": 105.50686665649594,
+            "median_bp": 237.99801285746497
+          }
+        }
+      },
+      "live-wick6x3|2025-01-01": {
+        "base": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 119,
+            "win_pct": 63.86554621848739,
+            "mean_bp": 139.0421636483228,
+            "median_bp": 226.1425414364639
+          },
+          "y2026": {
+            "n": 153,
+            "win_pct": 67.3202614379085,
+            "mean_bp": 159.23116784828142,
+            "median_bp": 335.4933920704855
+          },
+          "all": {
+            "n": 272,
+            "win_pct": 65.80882352941177,
+            "mean_bp": 150.39847851079946,
+            "median_bp": 275.6189853459962
+          }
+        },
+        "with_12h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 84,
+            "win_pct": 69.04761904761905,
+            "mean_bp": 231.70841826969502,
+            "median_bp": 383.33365626594224
+          },
+          "y2026": {
+            "n": 116,
+            "win_pct": 66.37931034482759,
+            "mean_bp": 119.69185967865218,
+            "median_bp": 279.151031040358
+          },
+          "all": {
+            "n": 200,
+            "win_pct": 67.5,
+            "mean_bp": 166.73881428689015,
+            "median_bp": 340.0476230440843
+          }
+        },
+        "against_12h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 32,
+            "win_pct": 50.0,
+            "mean_bp": -47.152365294490764,
+            "median_bp": -4.660400204978949
+          },
+          "y2026": {
+            "n": 36,
+            "win_pct": 69.44444444444444,
+            "mean_bp": 266.39566430713376,
+            "median_bp": 384.07488846088245
+          },
+          "all": {
+            "n": 68,
+            "win_pct": 60.29411764705882,
+            "mean_bp": 118.8436503769575,
+            "median_bp": 101.53257489430489
+          }
+        },
+        "with_4h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 88,
+            "win_pct": 62.5,
+            "mean_bp": 144.39201247817175,
+            "median_bp": 268.2162431128378
+          },
+          "y2026": {
+            "n": 113,
+            "win_pct": 71.68141592920354,
+            "mean_bp": 183.9142323435988,
+            "median_bp": 369.08841962347714
+          },
+          "all": {
+            "n": 201,
+            "win_pct": 67.66169154228857,
+            "mean_bp": 166.6109719050039,
+            "median_bp": 344.601854017683
+          }
+        },
+        "against_4h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 31,
+            "win_pct": 67.74193548387096,
+            "mean_bp": 123.85549600229972,
+            "median_bp": 201.92850576340433
+          },
+          "y2026": {
+            "n": 39,
+            "win_pct": 53.84615384615385,
+            "mean_bp": 69.03054828086673,
+            "median_bp": 45.565063604170334
+          },
+          "all": {
+            "n": 70,
+            "win_pct": 60.0,
+            "mean_bp": 93.31016798607277,
+            "median_bp": 102.12424765372496
+          }
+        },
+        "with_1h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 88,
+            "win_pct": 63.63636363636363,
+            "mean_bp": 144.60161158149478,
+            "median_bp": 232.3151148691956
+          },
+          "y2026": {
+            "n": 91,
+            "win_pct": 69.23076923076923,
+            "mean_bp": 166.69545594667917,
+            "median_bp": 367.6923076923081
+          },
+          "all": {
+            "n": 179,
+            "win_pct": 66.4804469273743,
+            "mean_bp": 155.83367771128127,
+            "median_bp": 280.0140845070414
+          }
+        },
+        "against_1h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 31,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 123.26050499931826,
+            "median_bp": 226.1425414364639
+          },
+          "y2026": {
+            "n": 62,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 148.27551918772988,
+            "median_bp": 279.151031040358
+          },
+          "all": {
+            "n": 93,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 139.93718112492598,
+            "median_bp": 271.22388618495097
+          }
+        }
+      },
+      "live-wick3x3|2020-01-01": {
+        "base": {
+          "y2020_2024": {
+            "n": 144,
+            "win_pct": 70.13888888888889,
+            "mean_bp": 208.13677105707822,
+            "median_bp": 301.4419650191098
+          },
+          "y2025": {
+            "n": 119,
+            "win_pct": 63.86554621848739,
+            "mean_bp": 139.0421636483228,
+            "median_bp": 226.1425414364639
+          },
+          "y2026": {
+            "n": 153,
+            "win_pct": 67.3202614379085,
+            "mean_bp": 159.23116784828142,
+            "median_bp": 335.4933920704855
+          },
+          "all": {
+            "n": 416,
+            "win_pct": 67.3076923076923,
+            "mean_bp": 170.38481054604983,
+            "median_bp": 288.2361569275891
+          }
+        },
+        "with_12h": {
+          "y2020_2024": {
+            "n": 77,
+            "win_pct": 75.32467532467533,
+            "mean_bp": 280.9565071416983,
+            "median_bp": 389.53922735727514
+          },
+          "y2025": {
+            "n": 84,
+            "win_pct": 69.04761904761905,
+            "mean_bp": 231.70841826969502,
+            "median_bp": 383.33365626594224
+          },
+          "y2026": {
+            "n": 116,
+            "win_pct": 66.37931034482759,
+            "mean_bp": 119.69185967865218,
+            "median_bp": 279.151031040358
+          },
+          "all": {
+            "n": 277,
+            "win_pct": 69.67509025270758,
+            "mean_bp": 198.48885887107872,
+            "median_bp": 361.1567318079149
+          }
+        },
+        "against_12h": {
+          "y2020_2024": {
+            "n": 62,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 133.43898512891099,
+            "median_bp": 99.09744621537038
+          },
+          "y2025": {
+            "n": 32,
+            "win_pct": 50.0,
+            "mean_bp": -47.152365294490764,
+            "median_bp": -4.660400204978949
+          },
+          "y2026": {
+            "n": 36,
+            "win_pct": 69.44444444444444,
+            "mean_bp": 266.39566430713376,
+            "median_bp": 384.07488846088245
+          },
+          "all": {
+            "n": 130,
+            "win_pct": 62.30769230769231,
+            "mean_bp": 125.80450233558147,
+            "median_bp": 101.53257489430489
+          }
+        },
+        "with_4h": {
+          "y2020_2024": {
+            "n": 94,
+            "win_pct": 74.46808510638297,
+            "mean_bp": 238.75856814703923,
+            "median_bp": 357.0791124145812
+          },
+          "y2025": {
+            "n": 88,
+            "win_pct": 62.5,
+            "mean_bp": 144.39201247817175,
+            "median_bp": 268.2162431128378
+          },
+          "y2026": {
+            "n": 113,
+            "win_pct": 71.68141592920354,
+            "mean_bp": 183.9142323435988,
+            "median_bp": 369.08841962347714
+          },
+          "all": {
+            "n": 295,
+            "win_pct": 69.83050847457626,
+            "mean_bp": 189.60037545331346,
+            "median_bp": 350.3459417361477
+          }
+        },
+        "against_4h": {
+          "y2020_2024": {
+            "n": 50,
+            "win_pct": 62.0,
+            "mean_bp": 150.56779252795155,
+            "median_bp": 149.2568321749441
+          },
+          "y2025": {
+            "n": 31,
+            "win_pct": 67.74193548387096,
+            "mean_bp": 123.85549600229972,
+            "median_bp": 201.92850576340433
+          },
+          "y2026": {
+            "n": 39,
+            "win_pct": 53.84615384615385,
+            "mean_bp": 69.03054828086673,
+            "median_bp": 45.565063604170334
+          },
+          "all": {
+            "n": 120,
+            "win_pct": 60.83333333333333,
+            "mean_bp": 117.16751154518894,
+            "median_bp": 112.93372745436436
+          }
+        },
+        "with_1h": {
+          "y2020_2024": {
+            "n": 87,
+            "win_pct": 73.5632183908046,
+            "mean_bp": 312.18187216509193,
+            "median_bp": 389.53922735727514
+          },
+          "y2025": {
+            "n": 88,
+            "win_pct": 63.63636363636363,
+            "mean_bp": 144.60161158149478,
+            "median_bp": 232.3151148691956
+          },
+          "y2026": {
+            "n": 91,
+            "win_pct": 69.23076923076923,
+            "mean_bp": 166.69545594667917,
+            "median_bp": 367.6923076923081
+          },
+          "all": {
+            "n": 266,
+            "win_pct": 68.796992481203,
+            "mean_bp": 206.9701172506855,
+            "median_bp": 337.2694884937599
+          }
+        },
+        "against_1h": {
+          "y2020_2024": {
+            "n": 57,
+            "win_pct": 64.91228070175438,
+            "mean_bp": 49.33109041853108,
+            "median_bp": 87.308580564931
+          },
+          "y2025": {
+            "n": 31,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 123.26050499931826,
+            "median_bp": 226.1425414364639
+          },
+          "y2026": {
+            "n": 62,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 148.27551918772988,
+            "median_bp": 279.151031040358
+          },
+          "all": {
+            "n": 150,
+            "win_pct": 64.66666666666666,
+            "mean_bp": 105.50686665649594,
+            "median_bp": 237.99801285746497
+          }
+        }
+      },
+      "live-wick3x3|2025-01-01": {
+        "base": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 119,
+            "win_pct": 63.86554621848739,
+            "mean_bp": 139.0421636483228,
+            "median_bp": 226.1425414364639
+          },
+          "y2026": {
+            "n": 153,
+            "win_pct": 67.3202614379085,
+            "mean_bp": 159.23116784828142,
+            "median_bp": 335.4933920704855
+          },
+          "all": {
+            "n": 272,
+            "win_pct": 65.80882352941177,
+            "mean_bp": 150.39847851079946,
+            "median_bp": 275.6189853459962
+          }
+        },
+        "with_12h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 84,
+            "win_pct": 69.04761904761905,
+            "mean_bp": 231.70841826969502,
+            "median_bp": 383.33365626594224
+          },
+          "y2026": {
+            "n": 116,
+            "win_pct": 66.37931034482759,
+            "mean_bp": 119.69185967865218,
+            "median_bp": 279.151031040358
+          },
+          "all": {
+            "n": 200,
+            "win_pct": 67.5,
+            "mean_bp": 166.73881428689015,
+            "median_bp": 340.0476230440843
+          }
+        },
+        "against_12h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 32,
+            "win_pct": 50.0,
+            "mean_bp": -47.152365294490764,
+            "median_bp": -4.660400204978949
+          },
+          "y2026": {
+            "n": 36,
+            "win_pct": 69.44444444444444,
+            "mean_bp": 266.39566430713376,
+            "median_bp": 384.07488846088245
+          },
+          "all": {
+            "n": 68,
+            "win_pct": 60.29411764705882,
+            "mean_bp": 118.8436503769575,
+            "median_bp": 101.53257489430489
+          }
+        },
+        "with_4h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 88,
+            "win_pct": 62.5,
+            "mean_bp": 144.39201247817175,
+            "median_bp": 268.2162431128378
+          },
+          "y2026": {
+            "n": 113,
+            "win_pct": 71.68141592920354,
+            "mean_bp": 183.9142323435988,
+            "median_bp": 369.08841962347714
+          },
+          "all": {
+            "n": 201,
+            "win_pct": 67.66169154228857,
+            "mean_bp": 166.6109719050039,
+            "median_bp": 344.601854017683
+          }
+        },
+        "against_4h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 31,
+            "win_pct": 67.74193548387096,
+            "mean_bp": 123.85549600229972,
+            "median_bp": 201.92850576340433
+          },
+          "y2026": {
+            "n": 39,
+            "win_pct": 53.84615384615385,
+            "mean_bp": 69.03054828086673,
+            "median_bp": 45.565063604170334
+          },
+          "all": {
+            "n": 70,
+            "win_pct": 60.0,
+            "mean_bp": 93.31016798607277,
+            "median_bp": 102.12424765372496
+          }
+        },
+        "with_1h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 88,
+            "win_pct": 63.63636363636363,
+            "mean_bp": 144.60161158149478,
+            "median_bp": 232.3151148691956
+          },
+          "y2026": {
+            "n": 91,
+            "win_pct": 69.23076923076923,
+            "mean_bp": 166.69545594667917,
+            "median_bp": 367.6923076923081
+          },
+          "all": {
+            "n": 179,
+            "win_pct": 66.4804469273743,
+            "mean_bp": 155.83367771128127,
+            "median_bp": 280.0140845070414
+          }
+        },
+        "against_1h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 31,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 123.26050499931826,
+            "median_bp": 226.1425414364639
+          },
+          "y2026": {
+            "n": 62,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 148.27551918772988,
+            "median_bp": 279.151031040358
+          },
+          "all": {
+            "n": 93,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 139.93718112492598,
+            "median_bp": 271.22388618495097
+          }
+        }
+      },
+      "live-wick6x3hi|2020-01-01": {
+        "base": {
+          "y2020_2024": {
+            "n": 144,
+            "win_pct": 70.13888888888889,
+            "mean_bp": 208.13677105707822,
+            "median_bp": 301.4419650191098
+          },
+          "y2025": {
+            "n": 119,
+            "win_pct": 63.86554621848739,
+            "mean_bp": 139.0421636483228,
+            "median_bp": 226.1425414364639
+          },
+          "y2026": {
+            "n": 153,
+            "win_pct": 67.3202614379085,
+            "mean_bp": 159.23116784828142,
+            "median_bp": 335.4933920704855
+          },
+          "all": {
+            "n": 416,
+            "win_pct": 67.3076923076923,
+            "mean_bp": 170.38481054604983,
+            "median_bp": 288.2361569275891
+          }
+        },
+        "with_12h": {
+          "y2020_2024": {
+            "n": 77,
+            "win_pct": 75.32467532467533,
+            "mean_bp": 280.9565071416983,
+            "median_bp": 389.53922735727514
+          },
+          "y2025": {
+            "n": 84,
+            "win_pct": 69.04761904761905,
+            "mean_bp": 231.70841826969502,
+            "median_bp": 383.33365626594224
+          },
+          "y2026": {
+            "n": 116,
+            "win_pct": 66.37931034482759,
+            "mean_bp": 119.69185967865218,
+            "median_bp": 279.151031040358
+          },
+          "all": {
+            "n": 277,
+            "win_pct": 69.67509025270758,
+            "mean_bp": 198.48885887107872,
+            "median_bp": 361.1567318079149
+          }
+        },
+        "against_12h": {
+          "y2020_2024": {
+            "n": 62,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 133.43898512891099,
+            "median_bp": 99.09744621537038
+          },
+          "y2025": {
+            "n": 32,
+            "win_pct": 50.0,
+            "mean_bp": -47.152365294490764,
+            "median_bp": -4.660400204978949
+          },
+          "y2026": {
+            "n": 36,
+            "win_pct": 69.44444444444444,
+            "mean_bp": 266.39566430713376,
+            "median_bp": 384.07488846088245
+          },
+          "all": {
+            "n": 130,
+            "win_pct": 62.30769230769231,
+            "mean_bp": 125.80450233558147,
+            "median_bp": 101.53257489430489
+          }
+        },
+        "with_4h": {
+          "y2020_2024": {
+            "n": 94,
+            "win_pct": 74.46808510638297,
+            "mean_bp": 238.75856814703923,
+            "median_bp": 357.0791124145812
+          },
+          "y2025": {
+            "n": 88,
+            "win_pct": 62.5,
+            "mean_bp": 144.39201247817175,
+            "median_bp": 268.2162431128378
+          },
+          "y2026": {
+            "n": 113,
+            "win_pct": 71.68141592920354,
+            "mean_bp": 183.9142323435988,
+            "median_bp": 369.08841962347714
+          },
+          "all": {
+            "n": 295,
+            "win_pct": 69.83050847457626,
+            "mean_bp": 189.60037545331346,
+            "median_bp": 350.3459417361477
+          }
+        },
+        "against_4h": {
+          "y2020_2024": {
+            "n": 50,
+            "win_pct": 62.0,
+            "mean_bp": 150.56779252795155,
+            "median_bp": 149.2568321749441
+          },
+          "y2025": {
+            "n": 31,
+            "win_pct": 67.74193548387096,
+            "mean_bp": 123.85549600229972,
+            "median_bp": 201.92850576340433
+          },
+          "y2026": {
+            "n": 39,
+            "win_pct": 53.84615384615385,
+            "mean_bp": 69.03054828086673,
+            "median_bp": 45.565063604170334
+          },
+          "all": {
+            "n": 120,
+            "win_pct": 60.83333333333333,
+            "mean_bp": 117.16751154518894,
+            "median_bp": 112.93372745436436
+          }
+        },
+        "with_1h": {
+          "y2020_2024": {
+            "n": 87,
+            "win_pct": 73.5632183908046,
+            "mean_bp": 312.18187216509193,
+            "median_bp": 389.53922735727514
+          },
+          "y2025": {
+            "n": 88,
+            "win_pct": 63.63636363636363,
+            "mean_bp": 144.60161158149478,
+            "median_bp": 232.3151148691956
+          },
+          "y2026": {
+            "n": 91,
+            "win_pct": 69.23076923076923,
+            "mean_bp": 166.69545594667917,
+            "median_bp": 367.6923076923081
+          },
+          "all": {
+            "n": 266,
+            "win_pct": 68.796992481203,
+            "mean_bp": 206.9701172506855,
+            "median_bp": 337.2694884937599
+          }
+        },
+        "against_1h": {
+          "y2020_2024": {
+            "n": 57,
+            "win_pct": 64.91228070175438,
+            "mean_bp": 49.33109041853108,
+            "median_bp": 87.308580564931
+          },
+          "y2025": {
+            "n": 31,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 123.26050499931826,
+            "median_bp": 226.1425414364639
+          },
+          "y2026": {
+            "n": 62,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 148.27551918772988,
+            "median_bp": 279.151031040358
+          },
+          "all": {
+            "n": 150,
+            "win_pct": 64.66666666666666,
+            "mean_bp": 105.50686665649594,
+            "median_bp": 237.99801285746497
+          }
+        }
+      },
+      "live-wick6x3hi|2025-01-01": {
+        "base": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 119,
+            "win_pct": 63.86554621848739,
+            "mean_bp": 139.0421636483228,
+            "median_bp": 226.1425414364639
+          },
+          "y2026": {
+            "n": 153,
+            "win_pct": 67.3202614379085,
+            "mean_bp": 159.23116784828142,
+            "median_bp": 335.4933920704855
+          },
+          "all": {
+            "n": 272,
+            "win_pct": 65.80882352941177,
+            "mean_bp": 150.39847851079946,
+            "median_bp": 275.6189853459962
+          }
+        },
+        "with_12h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 84,
+            "win_pct": 69.04761904761905,
+            "mean_bp": 231.70841826969502,
+            "median_bp": 383.33365626594224
+          },
+          "y2026": {
+            "n": 116,
+            "win_pct": 66.37931034482759,
+            "mean_bp": 119.69185967865218,
+            "median_bp": 279.151031040358
+          },
+          "all": {
+            "n": 200,
+            "win_pct": 67.5,
+            "mean_bp": 166.73881428689015,
+            "median_bp": 340.0476230440843
+          }
+        },
+        "against_12h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 32,
+            "win_pct": 50.0,
+            "mean_bp": -47.152365294490764,
+            "median_bp": -4.660400204978949
+          },
+          "y2026": {
+            "n": 36,
+            "win_pct": 69.44444444444444,
+            "mean_bp": 266.39566430713376,
+            "median_bp": 384.07488846088245
+          },
+          "all": {
+            "n": 68,
+            "win_pct": 60.29411764705882,
+            "mean_bp": 118.8436503769575,
+            "median_bp": 101.53257489430489
+          }
+        },
+        "with_4h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 88,
+            "win_pct": 62.5,
+            "mean_bp": 144.39201247817175,
+            "median_bp": 268.2162431128378
+          },
+          "y2026": {
+            "n": 113,
+            "win_pct": 71.68141592920354,
+            "mean_bp": 183.9142323435988,
+            "median_bp": 369.08841962347714
+          },
+          "all": {
+            "n": 201,
+            "win_pct": 67.66169154228857,
+            "mean_bp": 166.6109719050039,
+            "median_bp": 344.601854017683
+          }
+        },
+        "against_4h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 31,
+            "win_pct": 67.74193548387096,
+            "mean_bp": 123.85549600229972,
+            "median_bp": 201.92850576340433
+          },
+          "y2026": {
+            "n": 39,
+            "win_pct": 53.84615384615385,
+            "mean_bp": 69.03054828086673,
+            "median_bp": 45.565063604170334
+          },
+          "all": {
+            "n": 70,
+            "win_pct": 60.0,
+            "mean_bp": 93.31016798607277,
+            "median_bp": 102.12424765372496
+          }
+        },
+        "with_1h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 88,
+            "win_pct": 63.63636363636363,
+            "mean_bp": 144.60161158149478,
+            "median_bp": 232.3151148691956
+          },
+          "y2026": {
+            "n": 91,
+            "win_pct": 69.23076923076923,
+            "mean_bp": 166.69545594667917,
+            "median_bp": 367.6923076923081
+          },
+          "all": {
+            "n": 179,
+            "win_pct": 66.4804469273743,
+            "mean_bp": 155.83367771128127,
+            "median_bp": 280.0140845070414
+          }
+        },
+        "against_1h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 31,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 123.26050499931826,
+            "median_bp": 226.1425414364639
+          },
+          "y2026": {
+            "n": 62,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 148.27551918772988,
+            "median_bp": 279.151031040358
+          },
+          "all": {
+            "n": 93,
+            "win_pct": 64.51612903225806,
+            "mean_bp": 139.93718112492598,
+            "median_bp": 271.22388618495097
+          }
+        }
+      },
+      "live-wick3x3far|2020-01-01": {
+        "base": {
+          "y2020_2024": {
+            "n": 74,
+            "win_pct": 83.78378378378379,
+            "mean_bp": 405.4610267424532,
+            "median_bp": 516.3765599052169
+          },
+          "y2025": {
+            "n": 55,
+            "win_pct": 72.72727272727273,
+            "mean_bp": 306.974734838933,
+            "median_bp": 480.23135755258096
+          },
+          "y2026": {
+            "n": 85,
+            "win_pct": 72.94117647058823,
+            "mean_bp": 220.7214314799758,
+            "median_bp": 429.3158375622113
+          },
+          "all": {
+            "n": 214,
+            "win_pct": 76.63551401869158,
+            "mean_bp": 306.7712526676673,
+            "median_bp": 480.480512350821
+          }
+        },
+        "with_12h": {
+          "y2020_2024": {
+            "n": 42,
+            "win_pct": 88.09523809523809,
+            "mean_bp": 491.6573447929536,
+            "median_bp": 565.6718452635646
+          },
+          "y2025": {
+            "n": 42,
+            "win_pct": 76.19047619047619,
+            "mean_bp": 396.54733362497757,
+            "median_bp": 557.2206483472986
+          },
+          "y2026": {
+            "n": 63,
+            "win_pct": 69.84126984126983,
+            "mean_bp": 166.94639874751076,
+            "median_bp": 426.1265822784805
+          },
+          "all": {
+            "n": 147,
+            "win_pct": 76.87074829931973,
+            "mean_bp": 325.32122186834204,
+            "median_bp": 526.3490629165003
+          }
+        },
+        "against_12h": {
+          "y2020_2024": {
+            "n": 30,
+            "win_pct": 80.0,
+            "mean_bp": 296.6453784021774,
+            "median_bp": 441.1943925865928
+          },
+          "y2025": {
+            "n": 11,
+            "win_pct": 63.63636363636363,
+            "mean_bp": 166.2519688748726,
+            "median_bp": 190.78842698029223
+          },
+          "y2026": {
+            "n": 22,
+            "win_pct": 81.81818181818183,
+            "mean_bp": 374.7135706683983,
+            "median_bp": 514.130925951674
+          },
+          "all": {
+            "n": 63,
+            "win_pct": 77.77777777777779,
+            "mean_bp": 301.1401835618046,
+            "median_bp": 423.7766002543447
+          }
+        },
+        "with_4h": {
+          "y2020_2024": {
+            "n": 56,
+            "win_pct": 83.92857142857143,
+            "mean_bp": 410.4669766571156,
+            "median_bp": 517.4550973569211
+          },
+          "y2025": {
+            "n": 45,
+            "win_pct": 68.88888888888889,
+            "mean_bp": 281.2836041472389,
+            "median_bp": 536.7107199999997
+          },
+          "y2026": {
+            "n": 66,
+            "win_pct": 72.72727272727273,
+            "mean_bp": 243.8558674673702,
+            "median_bp": 465.5213656272812
+          },
+          "all": {
+            "n": 167,
+            "win_pct": 75.44910179640718,
+            "mean_bp": 309.81077923515363,
+            "median_bp": 492.4573804573798
+          }
+        },
+        "against_4h": {
+          "y2020_2024": {
+            "n": 18,
+            "win_pct": 83.33333333333334,
+            "mean_bp": 389.8869603412811,
+            "median_bp": 493.2994712114138
+          },
+          "y2025": {
+            "n": 10,
+            "win_pct": 90.0,
+            "mean_bp": 422.5848229515558,
+            "median_bp": 384.69524232394804
+          },
+          "y2026": {
+            "n": 19,
+            "win_pct": 73.68421052631578,
+            "mean_bp": 140.35970647113209,
+            "median_bp": 423.7766002543447
+          },
+          "all": {
+            "n": 47,
+            "win_pct": 80.85106382978722,
+            "mean_bp": 295.9712327363857,
+            "median_bp": 429.3158375622113
+          }
+        },
+        "with_1h": {
+          "y2020_2024": {
+            "n": 50,
+            "win_pct": 90.0,
+            "mean_bp": 556.8270606897528,
+            "median_bp": 593.9532177000574
+          },
+          "y2025": {
+            "n": 41,
+            "win_pct": 73.17073170731707,
+            "mean_bp": 350.26814859681144,
+            "median_bp": 546.0896946564887
+          },
+          "y2026": {
+            "n": 59,
+            "win_pct": 71.1864406779661,
+            "mean_bp": 225.08411991380052,
+            "median_bp": 423.7766002543447
+          },
+          "all": {
+            "n": 150,
+            "win_pct": 78.0,
+            "mean_bp": 369.8820680124743,
+            "median_bp": 536.6941031602976
+          }
+        },
+        "against_1h": {
+          "y2020_2024": {
+            "n": 24,
+            "win_pct": 70.83333333333334,
+            "mean_bp": 90.1151226855789,
+            "median_bp": 149.2568321749441
+          },
+          "y2025": {
+            "n": 14,
+            "win_pct": 71.42857142857143,
+            "mean_bp": 180.1868802622887,
+            "median_bp": 375.68845428496087
+          },
+          "y2026": {
+            "n": 26,
+            "win_pct": 76.92307692307693,
+            "mean_bp": 210.82148464937347,
+            "median_bp": 460.88660900979556
+          },
+          "all": {
+            "n": 64,
+            "win_pct": 73.4375,
+            "mean_bp": 158.85527920327567,
+            "median_bp": 418.0585110245171
+          }
+        }
+      },
+      "live-wick3x3far|2025-01-01": {
+        "base": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 55,
+            "win_pct": 72.72727272727273,
+            "mean_bp": 306.974734838933,
+            "median_bp": 480.23135755258096
+          },
+          "y2026": {
+            "n": 85,
+            "win_pct": 72.94117647058823,
+            "mean_bp": 220.7214314799758,
+            "median_bp": 429.3158375622113
+          },
+          "all": {
+            "n": 140,
+            "win_pct": 72.85714285714285,
+            "mean_bp": 254.6066577995661,
+            "median_bp": 464.219327807221
+          }
+        },
+        "with_12h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 42,
+            "win_pct": 76.19047619047619,
+            "mean_bp": 396.54733362497757,
+            "median_bp": 557.2206483472986
+          },
+          "y2026": {
+            "n": 63,
+            "win_pct": 69.84126984126983,
+            "mean_bp": 166.94639874751076,
+            "median_bp": 426.1265822784805
+          },
+          "all": {
+            "n": 105,
+            "win_pct": 72.38095238095238,
+            "mean_bp": 258.7867726984975,
+            "median_bp": 492.4573804573798
+          }
+        },
+        "against_12h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 11,
+            "win_pct": 63.63636363636363,
+            "mean_bp": 166.2519688748726,
+            "median_bp": 190.78842698029223
+          },
+          "y2026": {
+            "n": 22,
+            "win_pct": 81.81818181818183,
+            "mean_bp": 374.7135706683983,
+            "median_bp": 514.130925951674
+          },
+          "all": {
+            "n": 33,
+            "win_pct": 75.75757575757575,
+            "mean_bp": 305.2263700705564,
+            "median_bp": 408.13698630136946
+          }
+        },
+        "with_4h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 45,
+            "win_pct": 68.88888888888889,
+            "mean_bp": 281.2836041472389,
+            "median_bp": 536.7107199999997
+          },
+          "y2026": {
+            "n": 66,
+            "win_pct": 72.72727272727273,
+            "mean_bp": 243.8558674673702,
+            "median_bp": 465.5213656272812
+          },
+          "all": {
+            "n": 111,
+            "win_pct": 71.17117117117117,
+            "mean_bp": 259.0292742294791,
+            "median_bp": 477.28488372092966
+          }
+        },
+        "against_4h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 10,
+            "win_pct": 90.0,
+            "mean_bp": 422.5848229515558,
+            "median_bp": 384.69524232394804
+          },
+          "y2026": {
+            "n": 19,
+            "win_pct": 73.68421052631578,
+            "mean_bp": 140.35970647113209,
+            "median_bp": 423.7766002543447
+          },
+          "all": {
+            "n": 29,
+            "win_pct": 79.3103448275862,
+            "mean_bp": 237.6787121540368,
+            "median_bp": 423.7766002543447
+          }
+        },
+        "with_1h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 41,
+            "win_pct": 73.17073170731707,
+            "mean_bp": 350.26814859681144,
+            "median_bp": 546.0896946564887
+          },
+          "y2026": {
+            "n": 59,
+            "win_pct": 71.1864406779661,
+            "mean_bp": 225.08411991380052,
+            "median_bp": 423.7766002543447
+          },
+          "all": {
+            "n": 100,
+            "win_pct": 72.0,
+            "mean_bp": 276.409571673835,
+            "median_bp": 475.9828459008695
+          }
+        },
+        "against_1h": {
+          "y2020_2024": {
+            "n": 0,
+            "win_pct": null,
+            "mean_bp": null,
+            "median_bp": null
+          },
+          "y2025": {
+            "n": 14,
+            "win_pct": 71.42857142857143,
+            "mean_bp": 180.1868802622887,
+            "median_bp": 375.68845428496087
+          },
+          "y2026": {
+            "n": 26,
+            "win_pct": 76.92307692307693,
+            "mean_bp": 210.82148464937347,
+            "median_bp": 460.88660900979556
+          },
+          "all": {
+            "n": 40,
+            "win_pct": 75.0,
+            "mean_bp": 200.09937311389382,
+            "median_bp": 430.0832919154338
+          }
+        }
+      },
+      "live-allin3|2023-01-01": {
+        "base": {
+          "y2023": {
+            "n": 87,
+            "win_pct": 62.06896551724138,
+            "mean_bp": 776.7522461551946,
+            "median_bp": 868.7392926573267
+          },
+          "y2024": {
+            "n": 144,
+            "win_pct": 55.55555555555556,
+            "mean_bp": 647.101302460106,
+            "median_bp": 0.008525966813707875
+          },
+          "y2025": {
+            "n": 260,
+            "win_pct": 54.230769230769226,
+            "mean_bp": -8.5943844275746,
+            "median_bp": 0.008506701964908991
+          },
+          "y2026": {
+            "n": 383,
+            "win_pct": 46.99738903394256,
+            "mean_bp": 124.88177615438184,
+            "median_bp": -0.008202733013295216
+          },
+          "all": {
+            "n": 874,
+            "win_pct": 52.059496567505725,
+            "mean_bp": 236.10436302713507,
+            "median_bp": 0.008507892178825749
+          }
+        },
+        "with_12h": {
+          "y2023": {
+            "n": 59,
+            "win_pct": 67.79661016949152,
+            "mean_bp": 951.7360308091448,
+            "median_bp": 1106.6059704185718
+          },
+          "y2024": {
+            "n": 103,
+            "win_pct": 56.310679611650485,
+            "mean_bp": 940.8541542826609,
+            "median_bp": 1144.4102863932708
+          },
+          "y2025": {
+            "n": 173,
+            "win_pct": 60.115606936416185,
+            "mean_bp": 28.29463343263877,
+            "median_bp": 0.008519398551014135
+          },
+          "y2026": {
+            "n": 266,
+            "win_pct": 49.62406015037594,
+            "mean_bp": 166.78881275139008,
+            "median_bp": -0.005085503027377314
+          },
+          "all": {
+            "n": 601,
+            "win_pct": 55.574043261231274,
+            "mean_bp": 336.64093092274527,
+            "median_bp": 0.008532743504950702
+          }
+        },
+        "against_12h": {
+          "y2023": {
+            "n": 23,
+            "win_pct": 47.82608695652174,
+            "mean_bp": 343.1790916780291,
+            "median_bp": -0.00813281489856088
+          },
+          "y2024": {
+            "n": 39,
+            "win_pct": 51.28205128205128,
+            "mean_bp": -140.95088261147205,
+            "median_bp": 0.008501141363023379
+          },
+          "y2025": {
+            "n": 79,
+            "win_pct": 45.56962025316456,
+            "mean_bp": 69.46571735057348,
+            "median_bp": -0.008432251424098425
+          },
+          "y2026": {
+            "n": 114,
+            "win_pct": 41.228070175438596,
+            "mean_bp": 42.022229114122446,
+            "median_bp": -0.008426840705087812
+          },
+          "all": {
+            "n": 255,
+            "win_pct": 44.70588235294118,
+            "mean_bp": 49.7033744174609,
+            "median_bp": -0.008411716807717795
+          }
+        },
+        "with_4h": {
+          "y2023": {
+            "n": 66,
+            "win_pct": 66.66666666666666,
+            "mean_bp": 914.1478905696735,
+            "median_bp": 1052.5879582879882
+          },
+          "y2024": {
+            "n": 106,
+            "win_pct": 59.43396226415094,
+            "mean_bp": 856.4150159681103,
+            "median_bp": 825.7387088154135
+          },
+          "y2025": {
+            "n": 195,
+            "win_pct": 56.41025641025641,
+            "mean_bp": 11.163773424198062,
+            "median_bp": 0.008509824617904727
+          },
+          "y2026": {
+            "n": 304,
+            "win_pct": 51.31578947368421,
+            "mean_bp": 212.6320867649731,
+            "median_bp": 0.008514435876168847
+          },
+          "all": {
+            "n": 671,
+            "win_pct": 55.58867362146051,
+            "mean_bp": 324.78516045378325,
+            "median_bp": 0.008527739569549553
+          }
+        },
+        "against_4h": {
+          "y2023": {
+            "n": 21,
+            "win_pct": 47.61904761904761,
+            "mean_bp": 344.9373637096899,
+            "median_bp": -0.00813281489856088
+          },
+          "y2024": {
+            "n": 38,
+            "win_pct": 44.73684210526316,
+            "mean_bp": 63.226206885147256,
+            "median_bp": -0.008470082645346544
+          },
+          "y2025": {
+            "n": 65,
+            "win_pct": 47.69230769230769,
+            "mean_bp": -67.86885798289255,
+            "median_bp": -0.008006620675692133
+          },
+          "y2026": {
+            "n": 78,
+            "win_pct": 29.48717948717949,
+            "mean_bp": -215.51849523332535,
+            "median_bp": -0.008494308213538915
+          },
+          "all": {
+            "n": 202,
+            "win_pct": 40.099009900990104,
+            "mean_bp": -57.30513810667478,
+            "median_bp": -0.008452446079129317
+          }
+        },
+        "with_1h": {
+          "y2023": {
+            "n": 75,
+            "win_pct": 62.66666666666667,
+            "mean_bp": 882.7625769799963,
+            "median_bp": 966.930150024196
+          },
+          "y2024": {
+            "n": 121,
+            "win_pct": 57.02479338842975,
+            "mean_bp": 829.8270838345567,
+            "median_bp": 698.7175334877016
+          },
+          "y2025": {
+            "n": 201,
+            "win_pct": 57.711442786069654,
+            "mean_bp": 66.9684387977908,
+            "median_bp": 0.008514406871347191
+          },
+          "y2026": {
+            "n": 271,
+            "win_pct": 48.33948339483395,
+            "mean_bp": 136.6283745108717,
+            "median_bp": -0.007973675578877959
+          },
+          "all": {
+            "n": 668,
+            "win_pct": 54.34131736526946,
+            "mean_bp": 325.00481453335817,
+            "median_bp": 0.008519345776481835
+          }
+        },
+        "against_1h": {
+          "y2023": {
+            "n": 12,
+            "win_pct": 58.333333333333336,
+            "mean_bp": 114.18767850018408,
+            "median_bp": 0.008548442211137264
+          },
+          "y2024": {
+            "n": 23,
+            "win_pct": 47.82608695652174,
+            "mean_bp": -314.1951995533078,
+            "median_bp": -0.008488787134846021
+          },
+          "y2025": {
+            "n": 59,
+            "win_pct": 42.3728813559322,
+            "mean_bp": -266.0202737207686,
+            "median_bp": -0.008409739196752142
+          },
+          "y2026": {
+            "n": 112,
+            "win_pct": 43.75,
+            "mean_bp": 96.45920334537497,
+            "median_bp": -0.008362740619327624
+          },
+          "all": {
+            "n": 206,
+            "win_pct": 44.66019417475729,
+            "mean_bp": -52.17477098333601,
+            "median_bp": -0.008362740619327624
+          }
+        }
+      }
+    },
+    "accounts": {
+      "live-wick6x3|2020-01-01": {
+        "base": {
+          "end": 16438.44342656393,
+          "cash_added": 0.0,
+          "trading_pnl": 15438.443426563928,
+          "multiple": 16.43844342656393,
+          "max_drawdown_pct": 19.268293231659182,
+          "taken": 400,
+          "refills": 0,
+          "win_pct": 66.0
+        },
+        "with_12h": {
+          "candidates": 277,
+          "end": 10621.153050994726,
+          "cash_added": 0.0,
+          "trading_pnl": 9621.153050994726,
+          "multiple": 10.621153050994726,
+          "max_drawdown_pct": 20.441647532058983,
+          "taken": 273,
+          "refills": 0,
+          "win_pct": 69.23076923076923
+        },
+        "against_12h": {
+          "candidates": 130,
+          "end": 2102.120155760573,
+          "cash_added": 0.0,
+          "trading_pnl": 1102.1201557605732,
+          "multiple": 2.102120155760573,
+          "max_drawdown_pct": 17.513432121500962,
+          "taken": 130,
+          "refills": 0,
+          "win_pct": 62.30769230769231
+        },
+        "with_4h": {
+          "candidates": 295,
+          "end": 10020.29808203368,
+          "cash_added": 0.0,
+          "trading_pnl": 9020.29808203368,
+          "multiple": 10.02029808203368,
+          "max_drawdown_pct": 19.690128993717913,
+          "taken": 284,
+          "refills": 0,
+          "win_pct": 69.01408450704226
+        },
+        "against_4h": {
+          "candidates": 120,
+          "end": 1893.3114984811116,
+          "cash_added": 0.0,
+          "trading_pnl": 893.3114984811116,
+          "multiple": 1.8933114984811117,
+          "max_drawdown_pct": 11.798559420241784,
+          "taken": 120,
+          "refills": 0,
+          "win_pct": 60.83333333333333
+        },
+        "with_1h": {
+          "candidates": 266,
+          "end": 7918.8348572605055,
+          "cash_added": 0.0,
+          "trading_pnl": 6918.8348572605055,
+          "multiple": 7.918834857260506,
+          "max_drawdown_pct": 22.167756475687383,
+          "taken": 253,
+          "refills": 0,
+          "win_pct": 67.19367588932806
+        },
+        "against_1h": {
+          "candidates": 150,
+          "end": 2064.817509804171,
+          "cash_added": 0.0,
+          "trading_pnl": 1064.817509804171,
+          "multiple": 2.064817509804171,
+          "max_drawdown_pct": 15.291777966862252,
+          "taken": 150,
+          "refills": 0,
+          "win_pct": 64.66666666666666
+        }
+      },
+      "live-wick6x3|2025-01-01": {
+        "base": {
+          "end": 6427.9328311111285,
+          "cash_added": 0.0,
+          "trading_pnl": 5427.9328311111285,
+          "multiple": 6.427932831111129,
+          "max_drawdown_pct": 19.268293231659182,
+          "taken": 272,
+          "refills": 0,
+          "win_pct": 65.80882352941177
+        },
+        "with_12h": {
+          "candidates": 200,
+          "end": 4589.857556972425,
+          "cash_added": 0.0,
+          "trading_pnl": 3589.8575569724253,
+          "multiple": 4.589857556972425,
+          "max_drawdown_pct": 20.441647532059005,
+          "taken": 200,
+          "refills": 0,
+          "win_pct": 67.5
+        },
+        "against_12h": {
+          "candidates": 68,
+          "end": 1441.2076372276895,
+          "cash_added": 0.0,
+          "trading_pnl": 441.2076372276895,
+          "multiple": 1.4412076372276894,
+          "max_drawdown_pct": 17.513432121500927,
+          "taken": 68,
+          "refills": 0,
+          "win_pct": 60.29411764705882
+        },
+        "with_4h": {
+          "candidates": 201,
+          "end": 4613.994307862957,
+          "cash_added": 0.0,
+          "trading_pnl": 3613.9943078629567,
+          "multiple": 4.613994307862956,
+          "max_drawdown_pct": 19.690128993717927,
+          "taken": 201,
+          "refills": 0,
+          "win_pct": 67.66169154228857
+        },
+        "against_4h": {
+          "candidates": 70,
+          "end": 1334.3783187981314,
+          "cash_added": 0.0,
+          "trading_pnl": 334.37831879813143,
+          "multiple": 1.3343783187981315,
+          "max_drawdown_pct": 11.798559420241794,
+          "taken": 70,
+          "refills": 0,
+          "win_pct": 60.0
+        },
+        "with_1h": {
+          "candidates": 179,
+          "end": 3481.39747933089,
+          "cash_added": 0.0,
+          "trading_pnl": 2481.39747933089,
+          "multiple": 3.48139747933089,
+          "max_drawdown_pct": 22.167756475687383,
+          "taken": 179,
+          "refills": 0,
+          "win_pct": 66.4804469273743
+        },
+        "against_1h": {
+          "candidates": 93,
+          "end": 1846.8278810251888,
+          "cash_added": 0.0,
+          "trading_pnl": 846.8278810251888,
+          "multiple": 1.8468278810251888,
+          "max_drawdown_pct": 14.912163011964452,
+          "taken": 93,
+          "refills": 0,
+          "win_pct": 64.51612903225806
+        }
+      },
+      "live-wick3x3|2020-01-01": {
+        "base": {
+          "end": 85787.2743125916,
+          "cash_added": 0.0,
+          "trading_pnl": 84787.2743125916,
+          "multiple": 85.7872743125916,
+          "max_drawdown_pct": 36.566410107373315,
+          "taken": 387,
+          "refills": 0,
+          "win_pct": 64.85788113695091
+        },
+        "with_12h": {
+          "candidates": 277,
+          "end": 41663.69067614892,
+          "cash_added": 0.0,
+          "trading_pnl": 40663.69067614892,
+          "multiple": 41.663690676148924,
+          "max_drawdown_pct": 38.53044400577366,
+          "taken": 260,
+          "refills": 0,
+          "win_pct": 67.6923076923077
+        },
+        "against_12h": {
+          "candidates": 130,
+          "end": 3157.510637866405,
+          "cash_added": 0.0,
+          "trading_pnl": 2157.510637866405,
+          "multiple": 3.157510637866405,
+          "max_drawdown_pct": 34.19074488409893,
+          "taken": 126,
+          "refills": 0,
+          "win_pct": 61.111111111111114
+        },
+        "with_4h": {
+          "candidates": 295,
+          "end": 32682.343897436756,
+          "cash_added": 0.0,
+          "trading_pnl": 31682.343897436756,
+          "multiple": 32.68234389743676,
+          "max_drawdown_pct": 38.22092612140908,
+          "taken": 271,
+          "refills": 0,
+          "win_pct": 67.52767527675276
+        },
+        "against_4h": {
+          "candidates": 120,
+          "end": 3143.2239527724414,
+          "cash_added": 0.0,
+          "trading_pnl": 2143.2239527724414,
+          "multiple": 3.1432239527724413,
+          "max_drawdown_pct": 23.322628788968146,
+          "taken": 120,
+          "refills": 0,
+          "win_pct": 60.83333333333333
+        },
+        "with_1h": {
+          "candidates": 266,
+          "end": 25383.942958088766,
+          "cash_added": 0.0,
+          "trading_pnl": 24383.942958088766,
+          "multiple": 25.383942958088767,
+          "max_drawdown_pct": 41.74725290867004,
+          "taken": 240,
+          "refills": 0,
+          "win_pct": 65.41666666666667
+        },
+        "against_1h": {
+          "candidates": 150,
+          "end": 3706.239030232816,
+          "cash_added": 0.0,
+          "trading_pnl": 2706.239030232816,
+          "multiple": 3.706239030232816,
+          "max_drawdown_pct": 29.95924599781803,
+          "taken": 150,
+          "refills": 0,
+          "win_pct": 64.66666666666666
+        }
+      },
+      "live-wick3x3|2025-01-01": {
+        "base": {
+          "end": 28171.10019599893,
+          "cash_added": 0.0,
+          "trading_pnl": 27171.10019599893,
+          "multiple": 28.17110019599893,
+          "max_drawdown_pct": 36.5664101073733,
+          "taken": 272,
+          "refills": 0,
+          "win_pct": 65.80882352941177
+        },
+        "with_12h": {
+          "candidates": 200,
+          "end": 15643.721270069947,
+          "cash_added": 0.0,
+          "trading_pnl": 14643.721270069947,
+          "multiple": 15.643721270069948,
+          "max_drawdown_pct": 38.53044400577367,
+          "taken": 200,
+          "refills": 0,
+          "win_pct": 67.5
+        },
+        "against_12h": {
+          "candidates": 68,
+          "end": 1918.8056085632313,
+          "cash_added": 0.0,
+          "trading_pnl": 918.8056085632313,
+          "multiple": 1.9188056085632312,
+          "max_drawdown_pct": 34.190744884098876,
+          "taken": 68,
+          "refills": 0,
+          "win_pct": 60.29411764705882
+        },
+        "with_4h": {
+          "candidates": 201,
+          "end": 15757.524534388967,
+          "cash_added": 0.0,
+          "trading_pnl": 14757.524534388967,
+          "multiple": 15.757524534388967,
+          "max_drawdown_pct": 38.036778355690025,
+          "taken": 201,
+          "refills": 0,
+          "win_pct": 67.66169154228857
+        },
+        "against_4h": {
+          "candidates": 70,
+          "end": 1644.0506331603076,
+          "cash_added": 0.0,
+          "trading_pnl": 644.0506331603076,
+          "multiple": 1.6440506331603075,
+          "max_drawdown_pct": 23.32262878896816,
+          "taken": 70,
+          "refills": 0,
+          "win_pct": 60.0
+        },
+        "with_1h": {
+          "candidates": 179,
+          "end": 8937.889919265366,
+          "cash_added": 0.0,
+          "trading_pnl": 7937.889919265366,
+          "multiple": 8.937889919265366,
+          "max_drawdown_pct": 41.74725290867005,
+          "taken": 179,
+          "refills": 0,
+          "win_pct": 66.4804469273743
+        },
+        "against_1h": {
+          "candidates": 93,
+          "end": 3154.6766858999576,
+          "cash_added": 0.0,
+          "trading_pnl": 2154.6766858999576,
+          "multiple": 3.1546766858999575,
+          "max_drawdown_pct": 29.91295718394461,
+          "taken": 93,
+          "refills": 0,
+          "win_pct": 64.51612903225806
+        }
+      },
+      "live-wick6x3hi|2020-01-01": {
+        "base": {
+          "end": 19992.71664333053,
+          "cash_added": 0.0,
+          "trading_pnl": 18992.71664333053,
+          "multiple": 19.992716643330528,
+          "max_drawdown_pct": 19.268293231659182,
+          "taken": 400,
+          "refills": 0,
+          "win_pct": 66.0
+        },
+        "with_12h": {
+          "candidates": 277,
+          "end": 12036.632175073324,
+          "cash_added": 0.0,
+          "trading_pnl": 11036.632175073324,
+          "multiple": 12.036632175073324,
+          "max_drawdown_pct": 19.268293231659182,
+          "taken": 273,
+          "refills": 0,
+          "win_pct": 69.23076923076923
+        },
+        "against_12h": {
+          "candidates": 130,
+          "end": 2255.9804597236516,
+          "cash_added": 0.0,
+          "trading_pnl": 1255.9804597236516,
+          "multiple": 2.2559804597236517,
+          "max_drawdown_pct": 15.299406139339734,
+          "taken": 130,
+          "refills": 0,
+          "win_pct": 62.30769230769231
+        },
+        "with_4h": {
+          "candidates": 295,
+          "end": 11761.788856034611,
+          "cash_added": 0.0,
+          "trading_pnl": 10761.788856034611,
+          "multiple": 11.761788856034611,
+          "max_drawdown_pct": 19.33264133568905,
+          "taken": 284,
+          "refills": 0,
+          "win_pct": 69.01408450704226
+        },
+        "against_4h": {
+          "candidates": 120,
+          "end": 1961.73551296614,
+          "cash_added": 0.0,
+          "trading_pnl": 961.73551296614,
+          "multiple": 1.96173551296614,
+          "max_drawdown_pct": 11.798559420241784,
+          "taken": 120,
+          "refills": 0,
+          "win_pct": 60.83333333333333
+        },
+        "with_1h": {
+          "candidates": 266,
+          "end": 9334.812306648239,
+          "cash_added": 0.0,
+          "trading_pnl": 8334.812306648239,
+          "multiple": 9.334812306648239,
+          "max_drawdown_pct": 22.167756475687373,
+          "taken": 253,
+          "refills": 0,
+          "win_pct": 67.19367588932806
+        },
+        "against_1h": {
+          "candidates": 150,
+          "end": 2130.3378805470193,
+          "cash_added": 0.0,
+          "trading_pnl": 1130.3378805470193,
+          "multiple": 2.1303378805470192,
+          "max_drawdown_pct": 15.291777966862252,
+          "taken": 150,
+          "refills": 0,
+          "win_pct": 64.66666666666666
+        }
+      },
+      "live-wick6x3hi|2025-01-01": {
+        "base": {
+          "end": 7817.7620812379155,
+          "cash_added": 0.0,
+          "trading_pnl": 6817.7620812379155,
+          "multiple": 7.817762081237915,
+          "max_drawdown_pct": 19.268293231659182,
+          "taken": 272,
+          "refills": 0,
+          "win_pct": 65.80882352941177
+        },
+        "with_12h": {
+          "candidates": 200,
+          "end": 5201.547033924314,
+          "cash_added": 0.0,
+          "trading_pnl": 4201.547033924314,
+          "multiple": 5.201547033924314,
+          "max_drawdown_pct": 19.268293231659193,
+          "taken": 200,
+          "refills": 0,
+          "win_pct": 67.5
+        },
+        "against_12h": {
+          "candidates": 68,
+          "end": 1546.6938267445455,
+          "cash_added": 0.0,
+          "trading_pnl": 546.6938267445455,
+          "multiple": 1.5466938267445456,
+          "max_drawdown_pct": 15.299406139339721,
+          "taken": 68,
+          "refills": 0,
+          "win_pct": 60.29411764705882
+        },
+        "with_4h": {
+          "candidates": 201,
+          "end": 5415.889466335667,
+          "cash_added": 0.0,
+          "trading_pnl": 4415.889466335667,
+          "multiple": 5.415889466335667,
+          "max_drawdown_pct": 18.75380170008527,
+          "taken": 201,
+          "refills": 0,
+          "win_pct": 67.66169154228857
+        },
+        "against_4h": {
+          "candidates": 70,
+          "end": 1382.6025658315434,
+          "cash_added": 0.0,
+          "trading_pnl": 382.6025658315434,
+          "multiple": 1.3826025658315435,
+          "max_drawdown_pct": 11.798559420241805,
+          "taken": 70,
+          "refills": 0,
+          "win_pct": 60.0
+        },
+        "with_1h": {
+          "candidates": 179,
+          "end": 4103.910817712745,
+          "cash_added": 0.0,
+          "trading_pnl": 3103.9108177127446,
+          "multiple": 4.103910817712745,
+          "max_drawdown_pct": 22.167756475687373,
+          "taken": 179,
+          "refills": 0,
+          "win_pct": 66.4804469273743
+        },
+        "against_1h": {
+          "candidates": 93,
+          "end": 1905.4310490477594,
+          "cash_added": 0.0,
+          "trading_pnl": 905.4310490477594,
+          "multiple": 1.9054310490477595,
+          "max_drawdown_pct": 14.91216301196443,
+          "taken": 93,
+          "refills": 0,
+          "win_pct": 64.51612903225806
+        }
+      },
+      "live-wick3x3far|2020-01-01": {
+        "base": {
+          "end": 90852.0053534979,
+          "cash_added": 0.0,
+          "trading_pnl": 89852.0053534979,
+          "multiple": 90.8520053534979,
+          "max_drawdown_pct": 28.56502118594615,
+          "taken": 189,
+          "refills": 0,
+          "win_pct": 74.07407407407408
+        },
+        "with_12h": {
+          "candidates": 147,
+          "end": 25696.822751387717,
+          "cash_added": 0.0,
+          "trading_pnl": 24696.822751387717,
+          "multiple": 25.696822751387717,
+          "max_drawdown_pct": 40.297197100970926,
+          "taken": 133,
+          "refills": 0,
+          "win_pct": 74.43609022556392
+        },
+        "against_12h": {
+          "candidates": 63,
+          "end": 4876.338774244328,
+          "cash_added": 0.0,
+          "trading_pnl": 3876.3387742443283,
+          "multiple": 4.876338774244329,
+          "max_drawdown_pct": 24.53899001633707,
+          "taken": 61,
+          "refills": 0,
+          "win_pct": 77.04918032786885
+        },
+        "with_4h": {
+          "candidates": 167,
+          "end": 39476.62185333647,
+          "cash_added": 0.0,
+          "trading_pnl": 38476.62185333647,
+          "multiple": 39.476621853336475,
+          "max_drawdown_pct": 32.10457303783612,
+          "taken": 147,
+          "refills": 0,
+          "win_pct": 72.78911564625851
+        },
+        "against_4h": {
+          "candidates": 47,
+          "end": 3351.4496898858433,
+          "cash_added": 0.0,
+          "trading_pnl": 2351.4496898858433,
+          "multiple": 3.3514496898858432,
+          "max_drawdown_pct": 20.310000000000016,
+          "taken": 47,
+          "refills": 0,
+          "win_pct": 80.85106382978722
+        },
+        "with_1h": {
+          "candidates": 150,
+          "end": 32932.25413768913,
+          "cash_added": 0.0,
+          "trading_pnl": 31932.25413768913,
+          "multiple": 32.93225413768913,
+          "max_drawdown_pct": 27.284475531001775,
+          "taken": 129,
+          "refills": 0,
+          "win_pct": 74.4186046511628
+        },
+        "against_1h": {
+          "candidates": 64,
+          "end": 2295.2894458145115,
+          "cash_added": 0.0,
+          "trading_pnl": 1295.2894458145115,
+          "multiple": 2.2952894458145114,
+          "max_drawdown_pct": 33.61717056813263,
+          "taken": 64,
+          "refills": 0,
+          "win_pct": 73.4375
+        }
+      },
+      "live-wick3x3far|2025-01-01": {
+        "base": {
+          "end": 20635.8738296775,
+          "cash_added": 0.0,
+          "trading_pnl": 19635.8738296775,
+          "multiple": 20.6358738296775,
+          "max_drawdown_pct": 28.565021185946136,
+          "taken": 140,
+          "refills": 0,
+          "win_pct": 72.85714285714285
+        },
+        "with_12h": {
+          "candidates": 105,
+          "end": 9979.811022921782,
+          "cash_added": 0.0,
+          "trading_pnl": 8979.811022921782,
+          "multiple": 9.979811022921782,
+          "max_drawdown_pct": 40.297197100970905,
+          "taken": 105,
+          "refills": 0,
+          "win_pct": 72.38095238095238
+        },
+        "against_12h": {
+          "candidates": 33,
+          "end": 2439.8635558733613,
+          "cash_added": 0.0,
+          "trading_pnl": 1439.8635558733613,
+          "multiple": 2.4398635558733615,
+          "max_drawdown_pct": 20.310000000000016,
+          "taken": 33,
+          "refills": 0,
+          "win_pct": 75.75757575757575
+        },
+        "with_4h": {
+          "candidates": 111,
+          "end": 11740.215345968023,
+          "cash_added": 0.0,
+          "trading_pnl": 10740.215345968023,
+          "multiple": 11.740215345968023,
+          "max_drawdown_pct": 32.10457303783612,
+          "taken": 111,
+          "refills": 0,
+          "win_pct": 71.17117117117117
+        },
+        "against_4h": {
+          "candidates": 29,
+          "end": 1757.7082891213347,
+          "cash_added": 0.0,
+          "trading_pnl": 757.7082891213347,
+          "multiple": 1.7577082891213347,
+          "max_drawdown_pct": 20.310000000000016,
+          "taken": 29,
+          "refills": 0,
+          "win_pct": 79.3103448275862
+        },
+        "with_1h": {
+          "candidates": 100,
+          "end": 10407.791686650464,
+          "cash_added": 0.0,
+          "trading_pnl": 9407.791686650464,
+          "multiple": 10.407791686650464,
+          "max_drawdown_pct": 27.284475531001785,
+          "taken": 100,
+          "refills": 0,
+          "win_pct": 72.0
+        },
+        "against_1h": {
+          "candidates": 40,
+          "end": 1982.7331725082518,
+          "cash_added": 0.0,
+          "trading_pnl": 982.7331725082518,
+          "multiple": 1.9827331725082518,
+          "max_drawdown_pct": 28.260251507158095,
+          "taken": 40,
+          "refills": 0,
+          "win_pct": 75.0
+        }
+      },
+      "live-allin3|2023-01-01": {
+        "base": {
+          "end": 428005.2431207798,
+          "cash_added": 20203.831466330983,
+          "trading_pnl": 406801.41165444884,
+          "multiple": 428.0052431207798,
+          "max_drawdown_pct": 100.0,
+          "taken": 422,
+          "refills": 21,
+          "win_pct": 52.13270142180095
+        },
+        "with_12h": {
+          "candidates": 601,
+          "end": 107434.74327024858,
+          "cash_added": 10543.36517388168,
+          "trading_pnl": 95891.3780963669,
+          "multiple": 107.43474327024859,
+          "max_drawdown_pct": 100.0,
+          "taken": 295,
+          "refills": 11,
+          "win_pct": 53.559322033898304
+        },
+        "against_12h": {
+          "candidates": 255,
+          "end": 8575.951191515356,
+          "cash_added": 8685.047450660295,
+          "trading_pnl": -1109.0962591449388,
+          "multiple": 8.575951191515356,
+          "max_drawdown_pct": 100.0,
+          "taken": 177,
+          "refills": 9,
+          "win_pct": 46.32768361581921
+        },
+        "with_4h": {
+          "candidates": 671,
+          "end": 77095.43078055677,
+          "cash_added": 13471.059390005958,
+          "trading_pnl": 62624.371390550805,
+          "multiple": 77.09543078055677,
+          "max_drawdown_pct": 100.0,
+          "taken": 333,
+          "refills": 14,
+          "win_pct": 53.153153153153156
+        },
+        "against_4h": {
+          "candidates": 202,
+          "end": 622.8037585801321,
+          "cash_added": 10658.076064547493,
+          "trading_pnl": -11035.27230596736,
+          "multiple": 0.6228037585801321,
+          "max_drawdown_pct": 100.0,
+          "taken": 146,
+          "refills": 11,
+          "win_pct": 42.465753424657535
+        },
+        "with_1h": {
+          "candidates": 668,
+          "end": 92672.19769590655,
+          "cash_added": 18337.32868524632,
+          "trading_pnl": 73334.86901066023,
+          "multiple": 92.67219769590655,
+          "max_drawdown_pct": 100.0,
+          "taken": 355,
+          "refills": 19,
+          "win_pct": 51.267605633802816
+        },
+        "against_1h": {
+          "candidates": 206,
+          "end": 1187.4213792425755,
+          "cash_added": 5703.362543635561,
+          "trading_pnl": -5515.941164392986,
+          "multiple": 1.1874213792425756,
+          "max_drawdown_pct": 100.0,
+          "taken": 144,
+          "refills": 6,
+          "win_pct": 52.77777777777778
+        }
+      }
+    },
+    "control": {
+      "live-wick6x3|2020-01-01": {
+        "12h": {
+          "metric": "multiple",
+          "filtered": 10.621153050994726,
+          "random_median": 7.521809305643353,
+          "random_p5": 4.722827329188404,
+          "random_p95": 13.538658369349154,
+          "share_below": 84.66666666666667,
+          "draws": 300
+        },
+        "4h": {
+          "metric": "multiple",
+          "filtered": 10.02029808203368,
+          "random_median": 8.162471496718124,
+          "random_p5": 5.0466933746781155,
+          "random_p95": 14.688510940887074,
+          "share_below": 71.33333333333334,
+          "draws": 300
+        },
+        "1h": {
+          "metric": "multiple",
+          "filtered": 7.918834857260506,
+          "random_median": 7.074352763111188,
+          "random_p5": 4.035086464734985,
+          "random_p95": 11.707342842171675,
+          "share_below": 63.66666666666667,
+          "draws": 300
+        }
+      },
+      "live-wick6x3|2025-01-01": {
+        "12h": {
+          "metric": "multiple",
+          "filtered": 4.589857556972425,
+          "random_median": 3.9036237937712426,
+          "random_p5": 2.562199098743966,
+          "random_p95": 5.932055434880591,
+          "share_below": 74.66666666666667,
+          "draws": 300
+        },
+        "4h": {
+          "metric": "multiple",
+          "filtered": 4.613994307862956,
+          "random_median": 3.928316351164653,
+          "random_p5": 2.6924041566746415,
+          "random_p95": 6.164372921591423,
+          "share_below": 71.33333333333334,
+          "draws": 300
+        },
+        "1h": {
+          "metric": "multiple",
+          "filtered": 3.48139747933089,
+          "random_median": 3.4558570646447837,
+          "random_p5": 2.0776662578075675,
+          "random_p95": 5.568764291080758,
+          "share_below": 50.66666666666667,
+          "draws": 300
+        }
+      },
+      "live-wick3x3|2020-01-01": {
+        "12h": {
+          "metric": "multiple",
+          "filtered": 41.663690676148924,
+          "random_median": 26.171379138398827,
+          "random_p5": 10.120305245636082,
+          "random_p95": 70.11059501600464,
+          "share_below": 79.66666666666666,
+          "draws": 300
+        },
+        "4h": {
+          "metric": "multiple",
+          "filtered": 32.68234389743676,
+          "random_median": 30.33568140136248,
+          "random_p5": 9.827392127182183,
+          "random_p95": 75.38153248926501,
+          "share_below": 56.00000000000001,
+          "draws": 300
+        },
+        "1h": {
+          "metric": "multiple",
+          "filtered": 25.383942958088767,
+          "random_median": 22.25813279300634,
+          "random_p5": 7.928673856170337,
+          "random_p95": 66.69365632566942,
+          "share_below": 58.333333333333336,
+          "draws": 300
+        }
+      },
+      "live-wick3x3|2025-01-01": {
+        "12h": {
+          "metric": "multiple",
+          "filtered": 15.643721270069948,
+          "random_median": 11.999029046679947,
+          "random_p5": 4.544464341409886,
+          "random_p95": 29.505702828626283,
+          "share_below": 67.66666666666666,
+          "draws": 300
+        },
+        "4h": {
+          "metric": "multiple",
+          "filtered": 15.757524534388967,
+          "random_median": 13.309113202580459,
+          "random_p5": 5.301034603331921,
+          "random_p95": 31.77968812738885,
+          "share_below": 64.33333333333333,
+          "draws": 300
+        },
+        "1h": {
+          "metric": "multiple",
+          "filtered": 8.937889919265366,
+          "random_median": 8.85029391251742,
+          "random_p5": 3.6260634928782456,
+          "random_p95": 23.617705664277693,
+          "share_below": 51.66666666666667,
+          "draws": 300
+        }
+      },
+      "live-wick6x3hi|2020-01-01": {
+        "12h": {
+          "metric": "multiple",
+          "filtered": 12.036632175073324,
+          "random_median": 8.5108176215926,
+          "random_p5": 5.243429417480519,
+          "random_p95": 15.296191494888715,
+          "share_below": 85.66666666666667,
+          "draws": 300
+        },
+        "4h": {
+          "metric": "multiple",
+          "filtered": 11.761788856034611,
+          "random_median": 9.497335125322376,
+          "random_p5": 6.078156524656308,
+          "random_p95": 16.722390815824955,
+          "share_below": 71.33333333333334,
+          "draws": 300
+        },
+        "1h": {
+          "metric": "multiple",
+          "filtered": 9.334812306648239,
+          "random_median": 7.8718998340200805,
+          "random_p5": 4.940901946658123,
+          "random_p95": 14.783012107745446,
+          "share_below": 67.66666666666666,
+          "draws": 300
+        }
+      },
+      "live-wick6x3hi|2025-01-01": {
+        "12h": {
+          "metric": "multiple",
+          "filtered": 5.201547033924314,
+          "random_median": 4.537090452393493,
+          "random_p5": 2.81367978554573,
+          "random_p95": 6.934655437619972,
+          "share_below": 68.33333333333333,
+          "draws": 300
+        },
+        "4h": {
+          "metric": "multiple",
+          "filtered": 5.415889466335667,
+          "random_median": 4.441987832156315,
+          "random_p5": 2.9856881619573854,
+          "random_p95": 7.024507187729795,
+          "share_below": 76.0,
+          "draws": 300
+        },
+        "1h": {
+          "metric": "multiple",
+          "filtered": 4.103910817712745,
+          "random_median": 3.8237569336829402,
+          "random_p5": 2.434274676987771,
+          "random_p95": 6.5929956943457695,
+          "share_below": 61.33333333333333,
+          "draws": 300
+        }
+      },
+      "live-wick3x3far|2020-01-01": {
+        "12h": {
+          "metric": "multiple",
+          "filtered": 25.696822751387717,
+          "random_median": 22.867844551456166,
+          "random_p5": 10.20527671366432,
+          "random_p95": 53.830476204404434,
+          "share_below": 56.99999999999999,
+          "draws": 300
+        },
+        "4h": {
+          "metric": "multiple",
+          "filtered": 39.476621853336475,
+          "random_median": 30.885567255686254,
+          "random_p5": 15.476582728261727,
+          "random_p95": 73.24043302478609,
+          "share_below": 67.0,
+          "draws": 300
+        },
+        "1h": {
+          "metric": "multiple",
+          "filtered": 32.93225413768913,
+          "random_median": 25.044812126759403,
+          "random_p5": 12.778703121025153,
+          "random_p95": 65.16459320831761,
+          "share_below": 66.33333333333333,
+          "draws": 300
+        }
+      },
+      "live-wick3x3far|2025-01-01": {
+        "12h": {
+          "metric": "multiple",
+          "filtered": 9.979811022921782,
+          "random_median": 9.67141218381579,
+          "random_p5": 4.733615797981745,
+          "random_p95": 19.669562313601933,
+          "share_below": 53.333333333333336,
+          "draws": 300
+        },
+        "4h": {
+          "metric": "multiple",
+          "filtered": 11.740215345968023,
+          "random_median": 11.476027337494745,
+          "random_p5": 5.481561060500196,
+          "random_p95": 23.287323590250086,
+          "share_below": 51.66666666666667,
+          "draws": 300
+        },
+        "1h": {
+          "metric": "multiple",
+          "filtered": 10.407791686650464,
+          "random_median": 8.172093545731338,
+          "random_p5": 4.27494127260453,
+          "random_p95": 18.311070316543105,
+          "share_below": 70.66666666666667,
+          "draws": 300
+        }
+      },
+      "live-allin3|2023-01-01": {
+        "12h": {
+          "metric": "trading_pnl",
+          "filtered": 95891.3780963669,
+          "random_median": 26542.556654739357,
+          "random_p5": -13839.539538080302,
+          "random_p95": 272521.3162050788,
+          "share_below": 75.66666666666667,
+          "draws": 300
+        },
+        "4h": {
+          "metric": "trading_pnl",
+          "filtered": 62624.371390550805,
+          "random_median": 60472.68052004147,
+          "random_p5": -10350.494921240967,
+          "random_p95": 359641.9498530241,
+          "share_below": 50.33333333333333,
+          "draws": 300
+        },
+        "1h": {
+          "metric": "trading_pnl",
+          "filtered": 73334.86901066023,
+          "random_median": 49749.96061478899,
+          "random_p5": -11661.089345943334,
+          "random_p95": 295403.15494945337,
+          "share_below": 59.66666666666667,
+          "draws": 300
+        }
+      }
+    }
+  },
+  "source_commit": "14fd4a5017e8b802417db363351a0a2eab89461d",
+  "training_eligible": false,
+  "production_eligible": false
+}

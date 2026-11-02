@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-live-ema-cloud-filter-20261103-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 14fd4a5017
+    status: rejected
+    question: 'Owner 2026-11-03 "使用ema cloud这个指标 默认参数 20 50 50 … 红色云带只做空，绿色云只做多，12h。4h。1h的都试试，live原有的所有规则都不变": does an EMA20/50 cloud side filter improve the five live- accounts?'
+    single_variable: 'Admission only: take a candidate when its side matches the colour (EMA20 vs EMA50, Pine SMA seed) of the last 12h / 4h / 1h bar closed at the decision (touch close for live-wick, fill-bar open for live-allin3); saved NautilusTrader fills, allocators, seeds and costs unchanged.'
+    result: 'Unfiltered replays equal all nine saved accounts (error 0). Every filtered account ends below the unfiltered one and drawdown is not lower. From 2020 (12h / 4h / 1h): live-wick6x3 16438U DD19 -> 10621 / 10020 / 7919; live-wick3x3 85787 DD37 -> 41664 / 32682 / 25384 (DD 38-42); live-wick6x3hi 19993 -> 12037 / 11762 / 9335; live-wick3x3far 90852 DD29 -> 25697 (DD40) / 39477 / 32932. From 2025: 6x3 6428 -> 4590 / 4614 / 3481; 3x3 28171 -> 15644 / 15758 / 8938. live-allin3 trading P&L 406801U (21 refills) -> 95891 / 62624 / 73335. Against random same-size subsets with the same allocator: 51-86 percent beaten, none >= 95. Per trade (live-wick, 12h): with +198bp win 70 vs against +126bp win 62, within-year permutation p 0.14 (4h 0.20, 1h 0.07); 2026 with +120 vs against +266. live-wick3x3far no difference at 12h / 4h (p 0.50 / 0.58). live-allin3 candidates with +337bp vs against +50 (p 0.002), but 28 percent of candidates sit on days with >= 10 touches; without them the gap is +78bp (12h) / +23bp (1h), and within a day with beats against on 52-57 percent of days.'
+    artifacts: []
+    canonical_report: experiments/active/exp-live-ema-cloud-filter-20261103-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Against-cloud live-wick trades are still profitable (+106 to +126bp), so removing them lowers the compounded result. Indicator lengths and timeframes are owner-given. Binance bars; live-wick to 2026-10-27, live-allin3 to 2026-09-23. permutation.json: within-calendar-year shuffles treat clustered crash-day touches as independent, so the allin3 p is optimistic. No paper account changed.'
+
   - experiment_id: exp-h1-ema-cloud-20261102-v1
     source_repo: darkforest-x/fable-trading
     source_commit: e27c05c089
