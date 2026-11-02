@@ -209,19 +209,22 @@ def render(data,months,events,summary,config):
     fontManager.addfont(fontpath)
     plt.rcParams.update({'font.family':FontProperties(fname=fontpath).get_name(),'axes.unicode_minus':False})
     bg='#0b1019'; panel='#101925';ink='#edf3ff'; muted='#a8b5c7';blue='#69c7ff';pink='#ff7ca8';mint='#49e3c2'
-    out=DEST/'charts';out.mkdir(exist_ok=True)
+    render_root=DEST/config.get('render_subdir','.')
+    render_root.mkdir(parents=True,exist_ok=True)
+    settings=config['render']
+    out=render_root/'charts';out.mkdir(exist_ok=True)
     pdf=ROOT/config['pdf'];pdf.parent.mkdir(parents=True,exist_ok=True)
-    paths=[]
+    paths=[];candle_counts=[]
     def aggregate(f,hours):
         # Display OHLC only; event/anchor prices always come from the hourly input.
         return f.resample(f'{hours}h').agg(dict(open='first',high='max',low='min',close='last')).dropna()
     def candle(ax,f,hours):
         x=md.date2num(f.index.to_pydatetime())+hours/48
         a=f[['open','high','low','close']].to_numpy();colors=np.where(a[:,3]>=a[:,0],'#78c6af','#e28b95')
-        ax.add_collection(LineCollection([[(i,l),(i,h)] for i,(_,h,l,_) in zip(x,a)],colors=colors,linewidths=.65,zorder=3))
-        w=hours/24*.32;eps=(f.high.max()-f.low.min())*.0008
+        ax.add_collection(LineCollection([[(i,l),(i,h)] for i,(_,h,l,_) in zip(x,a)],colors=colors,linewidths=settings['wick_width_points'],zorder=3))
+        w=hours/24*settings['body_width_fraction']/2;eps=(f.high.max()-f.low.min())*.00035
         bodies=[[(i-w,min(o,c)),(i+w,min(o,c)),(i+w,min(o,c)+max(abs(c-o),eps)),(i-w,min(o,c)+max(abs(c-o),eps))] for i,(o,_,_,c) in zip(x,a)]
-        ax.add_collection(PolyCollection(bodies,facecolors=colors,edgecolors=colors,linewidths=.2,zorder=4))
+        ax.add_collection(PolyCollection(bodies,facecolors=colors,edgecolors='none',linewidths=0,zorder=4))
     def style(ax):
         ax.set_facecolor(panel);ax.grid(axis='y',color='#65778f',alpha=.16,lw=.5)
         ax.tick_params(colors=muted,labelsize=9,length=0,pad=5)
@@ -244,7 +247,7 @@ def render(data,months,events,summary,config):
     with PdfPages(pdf,metadata={'Title':'BTC ETH 月首周1.618 全部首次触及','Author':'Fable Trading Research'}) as book:
         # The first page is an index to the chart collection, not a separate report.
         fig=plt.figure(figsize=(13,9),facecolor=bg)
-        fig.text(.06,.91,'月首周 1.618 · 全部触及图',fontsize=26,color=ink)
+        fig.text(.06,.91,'月首周 1.618 · 全部触及图 · 细K版',fontsize=26,color=ink)
         fig.text(.06,.855,'BTC + ETH  /  OKX USDT 永续  /  2022–2026',fontsize=15,color=muted)
         y=.76
         for s,r in summary['symbols'].items():
@@ -258,45 +261,53 @@ def render(data,months,events,summary,config):
             '向内＝朝区间内的最大幅度；向外＝继续突破的最大幅度；期末＝到点收盘向内涨跌幅。',
             '反应和突破可同时发生，不能直接当成胜率。此处没有成交、盈亏或因果有效性判断。',
             '蓝色阴影是首周；实线是已确认且有效的价位；月底后的虚线只供走势复盘。',
-            '日K / 4小时K 以 UTC 聚合，首末K可能未满；横轴为纽约日期，分图纵轴独立。',
+            '全景为4小时K（首周前14天至触后14天），细节为1小时K（触前后各7天）。',
+            'K线按UTC聚合，首末展示K可能未满；横轴为纽约日期，分图纵轴独立。',
             '圆点对应包含触及小时的展示K；细节图只显示视野内价位，其他价位见上方全景。',
             f'完整月份：2022-02 至 2026-10。行情截止 {pd.Timestamp(config["asof_exclusive"]).tz_convert(NY):%Y-%m-%d %H:%M} 纽约时间。',
             '2022-01 首周不完整，2026-11 首周尚未完成，不进入完整月分母。',
             '下页起按触及时间排序，每个事件一页；所有事件都保留，包括没有反转的情况。']
-        for i,line in enumerate(lines):fig.text(.06,.43-i*.028,line,fontsize=10.2,color=muted)
+        for i,line in enumerate(lines):fig.text(.06,.43-i*.026,line,fontsize=10.2,color=muted)
         book.savefig(fig,facecolor=bg);plt.close(fig)
         for e in events.itertuples(index=False):
             f=data[e.symbol];t=pd.Timestamp(e.touch);st=pd.Timestamp(e.start);ready=pd.Timestamp(e.ready)
-            right=min(t+pd.Timedelta(days=7)+HOUR,f.index.max()+HOUR)
-            left=st-pd.Timedelta(days=3)
+            observed_end=f.index.max()+HOUR
+            detail_end=min(t+pd.Timedelta(days=settings['detail_follow_days'])+HOUR,observed_end)
+            overview_end=min(t+pd.Timedelta(days=settings['overview_follow_days'])+HOUR,observed_end)
+            left=max(st-pd.Timedelta(days=settings['overview_lead_days']),f.index.min())
             fig,axs=plt.subplots(2,1,figsize=(13,9),facecolor=bg,gridspec_kw={'height_ratios':[1,1.25]})
             fig.subplots_adjust(left=.055,right=.90,top=.84,bottom=.17,hspace=.28)
             side='上沿' if e.side=='upper' else '下沿'
             fig.text(.055,.945,f'{e.event_id}   {e.symbol} · {e.month} {side}首次触及',fontsize=22,color=ink)
             fig.text(.055,.902,f'纽约时间 {t.tz_convert(NY):%Y-%m-%d %H:%M}–{(t+HOUR).tz_convert(NY):%H:%M}  |  1.618 = {e.level:,.2f} USDT',fontsize=11.5,color=muted)
-            for ax,hours,l,title in [(axs[0],24,left,'月度背景 · 日K'),(axs[1],4,max(t-pd.Timedelta(hours=48),f.index.min()),'触及前后 · 4小时K')]:
+            panels=[(axs[0],settings['overview_bar_hours'],left,overview_end,'月度背景 · 4小时K',True),
+                    (axs[1],settings['detail_bar_hours'],max(t-pd.Timedelta(days=settings['detail_lead_days']),f.index.min()),detail_end,'触及前后 · 1小时K',False)]
+            panel_counts={}
+            for ax,hours,l,right,title,overview in panels:
                 fr=aggregate(f[(f.index>=l)&(f.index<right)],hours)
+                panel_counts['overview' if overview else 'detail']=len(fr)
                 style(ax);candle(ax,fr,hours)
-                vals=[fr.low.min(),fr.high.max(),e.upper,e.lower] if hours==24 else [fr.low.min(),fr.high.max(),e.level]
+                vals=[fr.low.min(),fr.high.max(),e.upper,e.lower] if overview else [fr.low.min(),fr.high.max(),e.level]
                 span=max(vals)-min(vals)
                 ax.set_ylim(min(vals)-span*.09,max(vals)+span*.13)
                 levels(ax,e,l,right)
                 ax.axvspan(md.date2num(st),md.date2num(ready),color=blue,alpha=.07)
                 marker_at=t.floor(f'{hours}h')+pd.Timedelta(hours=hours/2)
                 ax.axvline(md.date2num(marker_at),color=ink,lw=.7,ls=':',alpha=.7)
-                ax.scatter([md.date2num(marker_at)],[e.level],s=38,color=pink if e.side=='upper' else mint,edgecolors=bg,zorder=6)
+                ax.scatter([md.date2num(marker_at)],[e.level],s=25,color=pink if e.side=='upper' else mint,edgecolors=bg,zorder=6)
                 if l<ready<right:ax.axvline(md.date2num(ready),color=blue,lw=.6,ls=':',alpha=.6)
                 ax.set_xlim(md.date2num(l),md.date2num(right)+.3)
-                ax.set_title(title,loc='left',color=muted,fontsize=10,pad=8)
+                ax.set_title(f'{title} · {len(fr)} 根',loc='left',color=muted,fontsize=10,pad=8)
             for i,n in enumerate([24,72,168]):fig.text(.055,.122-i*.027,metric(e,n),color=ink,fontsize=10.5)
             if not e.complete_168h:
-                recent=f[(f.index>t)&(f.index<right)]
+                recent=f[(f.index>t)&(f.index<detail_end)]
                 available=len(recent)
                 result=reaction(f,t,e.level,e.side,available)
                 fig.text(.055,.041,f'已观测 {available}h：最大向内 {result["inward_pct"]:.2f}% / 最大向外 {result["outward_pct"]:.2f}% / 最新收盘 {result["close_inward_pct"]:+.2f}%',fontsize=10.5,color=mint)
             fig.text(.055,.018,'数据：OKX公开行情（复用本地历史与已收盘1H缓存）  |  触及根不参与后续极值  |  幅度相对1.618价位  |  USDT / 线性坐标',fontsize=8,color=muted)
             path=out/f'{e.event_id}_{e.symbol}_{e.month}_{e.side}.png'
-            fig.savefig(path,dpi=145,facecolor=bg);book.savefig(fig,facecolor=bg);plt.close(fig);paths.append(path)
+            fig.savefig(path,dpi=165,facecolor=bg);book.savefig(fig,facecolor=bg);plt.close(fig);paths.append(path)
+            candle_counts.append(dict(event_id=e.event_id,**panel_counts))
     manifest=[]
     for p in paths:
         with Image.open(p) as im:
@@ -309,13 +320,13 @@ def render(data,months,events,summary,config):
         for j,p in enumerate(subset):
             with Image.open(p) as im:
                 thumb=im.convert('RGB');thumb.thumbnail((630,436));sheet.paste(thumb,((j%3)*630,(j//3)*436))
-        cp=DEST/f'contact_{start//12+1:02d}.jpg';sheet.save(cp,quality=88);contacts.append(str(cp.relative_to(ROOT)))
-    zp=DEST/'BTC_ETH_month_first_week_1618_all_charts.zip'
+        cp=render_root/f'contact_{start//12+1:02d}.jpg';sheet.save(cp,quality=88);contacts.append(str(cp.relative_to(ROOT)))
+    zp=render_root/'BTC_ETH_month_first_week_1618_all_charts_dense.zip'
     with zipfile.ZipFile(zp,'w',zipfile.ZIP_DEFLATED) as z:
         for p in paths:z.write(p,'charts/'+p.name)
         for filename in ['events.csv','months.csv','summary.json','config.json']:
             z.write(DEST/filename,filename)
-    save(DEST/'chart_manifest.json',dict(renderer_commit=subprocess.check_output(['git','log','-1','--format=%H','--',__file__],cwd=ROOT,text=True).strip(),pdf=str(pdf.relative_to(ROOT)),pdf_pages=len(events)+1,pdf_bytes=pdf.stat().st_size,
+    save(render_root/'chart_manifest.json',dict(render_settings=settings,candle_counts=candle_counts,renderer_commit=subprocess.check_output(['git','log','-1','--format=%H','--',__file__],cwd=ROOT,text=True).strip(),pdf=str(pdf.relative_to(ROOT)),pdf_pages=len(events)+1,pdf_bytes=pdf.stat().st_size,
                                         zip=str(zp.relative_to(ROOT)),charts=manifest,contacts=contacts))
 
 

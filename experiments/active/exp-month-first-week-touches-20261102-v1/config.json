@@ -1,15 +1,37 @@
 {
   "experiment_id": "exp-month-first-week-touches-20261102-v1",
-  "symbols": ["BTC", "ETH"],
+  "symbols": [
+    "BTC",
+    "ETH"
+  ],
   "timezone": "America/New_York",
   "asof_exclusive": "2026-11-02T06:00:00Z",
   "anchor": "first calendar Monday 00:00 to next Monday 00:00; complete confirmed 1h bars",
   "levels": "upper=high+0.618*(high-low); lower=low-0.618*(high-low)",
   "eligibility": "after anchor ready, before next calendar month; first touch per month and side",
   "reaction": "exclude entire touch hour; next 24/72/168 complete hourly bars; inward/outward extrema relative to level, signed inward endpoint close",
-  "descriptive_thresholds_percent": [1, 3],
+  "descriptive_thresholds_percent": [
+    1,
+    3
+  ],
   "no_trade_simulation": true,
-  "source_priority_low_to_high": ["deep15m", "native60m", "recent5m", "shared_cache_native1h"],
+  "source_priority_low_to_high": [
+    "deep15m",
+    "native60m",
+    "recent5m",
+    "shared_cache_native1h"
+  ],
   "snapshot_only_cache": true,
-  "pdf": "output/pdf/BTC_ETH_month_first_week_1618_all_touches.pdf"
+  "pdf": "output/pdf/BTC_ETH_month_first_week_1618_all_touches_dense.pdf",
+  "render_subdir": "dense_v2",
+  "render": {
+    "overview_bar_hours": 4,
+    "overview_lead_days": 14,
+    "overview_follow_days": 14,
+    "detail_bar_hours": 1,
+    "detail_lead_days": 7,
+    "detail_follow_days": 7,
+    "body_width_fraction": 0.48,
+    "wick_width_points": 0.4
+  }
 }
