@@ -240,7 +240,9 @@ def render(data,months,events,summary,config):
             if start<end:ax.hlines(val,md.date2num(start),md.date2num(end),color=color,lw=.85,zorder=2)
             if right>expiry and max(left,expiry)<right:ax.hlines(val,md.date2num(max(left,expiry)),md.date2num(right),color=color,lw=.85,linestyles='dashed',alpha=.55)
             if ax.get_ylim()[0] <= val <= ax.get_ylim()[1]:
-                ax.text(.008,val,f'{title}  {val:,.1f}',transform=ax.get_yaxis_transform(),color=color,fontsize=8.3,va='bottom',zorder=8,clip_on=True,bbox=dict(facecolor=panel,alpha=.90,edgecolor='none',pad=1))
+                ymin,ymax=ax.get_ylim()
+                align='top' if ymax-val < (ymax-ymin)*.06 else 'bottom'
+                ax.text(.008,val,f'{title}  {val:,.1f}',transform=ax.get_yaxis_transform(),color=color,fontsize=8.3,va=align,zorder=8,clip_on=True,bbox=dict(facecolor=panel,alpha=.90,edgecolor='none',pad=1))
     def metric(e,n):
         if not getattr(e,f'complete_{n}h'):return f'{n}h  数据未满'
         return f'{n}h  向内 {getattr(e,f"inward_pct_{n}h"):.2f}%  /  向外 {getattr(e,f"outward_pct_{n}h"):.2f}%  /  期末 {getattr(e,f"close_inward_pct_{n}h"):+.2f}%'
