@@ -15,6 +15,19 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-h1-ema-cloud-20261102-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: working-tree-uncommitted
+    status: running
+    question: Does waiting for a newly closed 5m EMA20/50 flip improve H1 outside1.618 glyph entries after costs?
+    single_variable: Entry confirmation only; fixed24h wait and unchanged four stop formulas, near-Monday target, seven-day holding horizon and costs. Primary fixed2percent inherited from previous earlier-period choice.
+    artifacts: []
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: All638 existing registered perpetual files; frozen baseline fills reused without replay. New fills use native VectorBT only. Same-event paired entry comparison and same-symbol/month/causal-H1-ATR random controls. No cloud-stop change or simulation deployment.
+
   - experiment_id: exp-h1-outside-glyph-stops-20261102-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 50f3ba28c5
