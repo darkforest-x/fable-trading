@@ -15,6 +15,24 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-month-first-week-touches-20261102-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 96d2c2b748
+    status: inconclusive
+    question: Count all BTC/ETH first touches of first complete NY-week monthly 1.618 and inspect subsequent paths.
+    single_variable: Descriptive census only; complete confirmed1H anchors, post-ready through month-end, first per coin-month-side; no fills or parameter search.
+    result: '2022-02 through2026-10: BTC37/57 hit months,23upper+16lower;ETH34/57 hit months,19upper+20lower.78events:24h inward>=1percent63/78,outward>=1percent50/78(nonexclusive).7day endpoint inward39/76;
+      no causal or PnL claim.'
+    artifacts:
+    - month-first-week-touch-charts-20261102-v1
+    canonical_report: experiments/active/exp-month-first-week-touches-20261102-v1/delivery.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: All78charts plus79page PDF and PNG ZIP.84653 mergedH1 bars,no gaps,53284 overlapOHLC matches.4 behavioral tests and independent scalar checks pass.24/72/168h n78/77/76; touch hour omitted. LatestBTC/ETH
+      lower reactions3.13/5.28percent through2026-11-02 06Z. Notion40c8856479af81ebb186ef61e1d955c4. Rendererad32b0a128.
+
   - experiment_id: exp-btceth-5m-alt-response-20261101-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 583db266df

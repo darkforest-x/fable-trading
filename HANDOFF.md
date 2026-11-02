@@ -1,3 +1,11 @@
+## 2026-11-02 · Monthly first-complete NY week: BTC/ETH all78 first touches
+
+- Owner requested both BTC/ETH, all charts and subsequent reaction. Reused OKX15m/native1H/recent5m and read-only shared cache; froze84653 H1 bars through2026-11-02 06:00Z. No gaps;53284 overlapping hours matchOHLC exactly. Complete2022-02..2026-10:57months each; Jan2022 prefix incomplete and Nov2026 forming excluded.
+- BTC37/57 hit months,23upper+16lower=39;ETH34/57,19upper+20lower=39. First per coin/month/side after firstweek ready untilmonthend.24h inward>=1%63/78,outward>=1%50/78(nonexclusive);7day endpoint inward39/76. No fills,PnL,random-price control or causal edge claim. LatestOctober lower touches76435.4756/2201.75126 show maximum observed rebound3.13%/5.28% asof cutoff, excludingtouchhour.
+- All78 charts (daily context +4H detail),79page PDF and10.5MB PNG ZIP at `experiments/active/exp-month-first-week-touches-20261102-v1/`; PDF `output/pdf/BTC_ETH_month_first_week_1618_all_touches.pdf`.4 behavioral tests, independent scalar calendar/event/outcome verification,allPNG decode,ZIP integrity,seven contact sheets and renderedPDF cover/finalpage pass.72h event078 and168h events077/078 censored.
+- Builder committed before run `96d2c2b748`; renderer `ad32b0a128`; frozen inputs,source receipt,ledgers,summary,verification,delivery retained. Notion `40c8856479af81ebb186ef61e1d955c4` observation only. Child gpt-6-luna/max runtime verified. No browser/session,service,order or account changes. Learning `touch-review-needs-context-and-local-price-scales.md`.
+
+
 ## 2026-11-01 · Audit of the live- backtests: live-allin3's 42.8万U is one 7-week window
 
 - Owner asked about overfitting, bugs and whether live-allin3's 1000 → 428kU is real. `exp-live-strategy-audit-20261101-v1` (`yoyo/evaluation/live_strategy_audit.py`, read-only):

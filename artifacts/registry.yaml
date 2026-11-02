@@ -19,6 +19,20 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: month-first-week-touch-charts-20261102-v1
+    artifact_type: manifest
+    role: monthly_first_week_touch_census_and_all_event_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: 96d2c2b748
+    generator_commit: ad32b0a128
+    source_path: experiments/active/exp-month-first-week-touches-20261102-v1/delivery.json
+    storage_uri: repo://experiments/active/exp-month-first-week-touches-20261102-v1/delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 78 event PNGs,79page PDF,10.5MB ZIP retained locally,not in git. Frozen BTC/ETH1H input snapshots and size/mtime source receipts. Complete57months each,114coin-months. Descriptive reaction maxima
+      and endpoint changes; no strategy validation.
+
   - artifact_id: btceth-5m-alt-response-20261101-v1
     artifact_type: manifest
     role: native_5m_leader_events_altcoin_response_paths_and_conditional_background
