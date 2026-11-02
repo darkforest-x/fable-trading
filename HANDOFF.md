@@ -1,3 +1,8 @@
+## 2026-11-02 · Monthly touch chart density revision
+
+- Owner wanted thinner candles and more bars. All78 plots re-exported with4H context (213–335bars;firstweek−14d through touch+14d) and1H detail (228–337bars;touch±7d), capped at original frozen cutoff. Body width48%,wick0.4pt,no body outline. Price labels stay inside panels. Results and five source/ledger files unchanged by size/mtime; no new census or backtest.
+- New outputs `experiments/active/exp-month-first-week-touches-20261102-v1/dense_v2/`,PDF `output/pdf/BTC_ETH_month_first_week_1618_all_touches_dense.pdf`;old chartbook retained.78PNGs/79PDFpages/ZIP integrity verified,all contact sheets plus earliest/latest/continuation samples and renderedPDF cover/finalpage checked. Read-only gpt-6-luna/max checked file inventory and frozen inputs. Renderer `2438c3b4e6`.
+
 ## 2026-11-02 · Monthly first-complete NY week: BTC/ETH all78 first touches
 
 - Owner requested both BTC/ETH, all charts and subsequent reaction. Reused OKX15m/native1H/recent5m and read-only shared cache; froze84653 H1 bars through2026-11-02 06:00Z. No gaps;53284 overlapping hours matchOHLC exactly. Complete2022-02..2026-10:57months each; Jan2022 prefix incomplete and Nov2026 forming excluded.

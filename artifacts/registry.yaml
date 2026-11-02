@@ -19,6 +19,19 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: month-first-week-touch-charts-dense-20261102-v2
+    artifact_type: manifest
+    role: monthly_first_week_thinner_denser_chart_revision
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2438c3b4e6
+    source_path: experiments/active/exp-month-first-week-touches-20261102-v1/dense_v2/delivery.json
+    storage_uri: repo://experiments/active/exp-month-first-week-touches-20261102-v1/dense_v2/delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner requested thinner candles and more bars.78 charts,79page PDF,13.3MB ZIP.4H context213-335bars;1H detail228-337bars,7days before/after capped at frozen data. Body48percent,width0.4pt wicks.
+      Frozen inputs/events/months/summary size+mtime unchanged. Read-only inventory check and primary visual/image/ZIP/PDF checks pass; old charts preserved.
+
   - artifact_id: month-first-week-touch-charts-20261102-v1
     artifact_type: manifest
     role: monthly_first_week_touch_census_and_all_event_charts
