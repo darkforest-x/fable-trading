@@ -1,0 +1,19 @@
+{
+  "cases": 6,
+  "source_validation_issues": 0,
+  "ledger_returns_unchanged": true,
+  "png_size": [
+    2400,
+    1830
+  ],
+  "background": "white",
+  "zip_members": 6,
+  "zip_integrity": "pass",
+  "manual_image_review": "all six checked for labels and marker visibility",
+  "independent_review": "six frozen cases: EMA close time/next-bar open, exit-containing bar, cancelled null fills pass",
+  "reproduce": [
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.h1_ema_cloud_chart_inputs",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.h1_ema_cloud_charts"
+  ],
+  "temporary_stitch_tab": "977883851 closed and absent from browser inventory; no app services restarted"
+}

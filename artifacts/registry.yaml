@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: h1-ema-cloud-white-charts-20261102-v1
+    artifact_type: manifest
+    role: explanatory_h1_5m_entry_comparison_figures
+    source_repo: darkforest-x/fable-trading
+    source_commit: bfc2dc87bf
+    source_path: experiments/active/exp-h1-ema-cloud-20261102-v1/charts_white_v1/delivery.json
+    storage_uri: repo://experiments/active/exp-h1-ema-cloud-20261102-v1/charts_white_v1/delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner requested six simple white figures. Stitch screen67f5325d32b945d9b3465d1efe97fc08, GEMINI_3_8_FLASH; actual frozen fixed2percent fills, full-history EMA then display slicing, no PnL replay. Six illustrative BTC/ETH/LPT cases include win/loss and two cancellations; not representative. Source stat/OHLC/entry/exit/flip checks pass. PNG/ZIP and12candle windows local; manifest and builders retained, no historical input hashes.
+
   - artifact_id: h1-ema-cloud-20261102-v1
     artifact_type: manifest
     role: h1_outside_glyph_ema_cloud_delayed_entry_study

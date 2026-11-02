@@ -1,0 +1,1649 @@
+{
+  "source_experiment": "exp-h1-ema-cloud-20261102-v1",
+  "baseline_experiment": "exp-h1-outside-glyph-stops-20261102-v1",
+  "stop_id": "fixed20",
+  "timezone": "Asia/Shanghai",
+  "background": "#FFFFFF",
+  "sample_selection": "Explanatory, outcome-stratified examples among BTC/ETH/LPT; not a representative/random sample. Normal examples >=2025, both sides noncensored stop/target and holding<=72h. Prefer class-median delay, avoid extreme R. Fixed LPT screenshot event and latest cancellation cases. BTC long double-loss adds directional coverage.",
+  "panels": [
+    "1H context with signal/entries/exits and relevant weekly levels",
+    "5m close-computed EMA20/50 flip and entry detail"
+  ],
+  "data_policy": "Reuse frozen fills; full source history only to compute continuous EMA and OHLC; never rerun PnL. Freeze displayed candles/EMA and provenance by source size/mtime, no input hashes.",
+  "cases": [
+    {
+      "number": 1,
+      "role": "fixed_lpt_screenshot",
+      "title": "同样到目标，等待后少赚",
+      "caption": "两种入场都到目标；看清80分钟等待消耗了多少空间。",
+      "symbol": "LPTUSDT",
+      "side": -1,
+      "pair_id": "LPTUSDT:2026-10-21T19:00:00+00:00:-1",
+      "stop_id": "fixed20",
+      "status": "entered",
+      "signal_time": "2026-10-21T19:00:00+00:00",
+      "signal_candle_time": "2026-10-21T18:00:00+00:00",
+      "level1618": {
+        "monday_date_new_york": "2026-10-19",
+        "monday_start_utc": "2026-10-19T04:00:00+00:00",
+        "levels_available_from_utc": "2026-10-20T04:00:00+00:00",
+        "next_monday_start_utc": "2026-10-26T04:00:00+00:00",
+        "monday_high": 1.651,
+        "monday_low": 1.601,
+        "range": 0.050000000000000044,
+        "level1618": {
+          "upper": 1.6819000000000002,
+          "lower": 1.5701,
+          "active_outside_level": 1.6819000000000002,
+          "target_edge": 1.651,
+          "formula": "upper = monday_low + 1.618 * (monday_high - monday_low); lower = monday_high - 1.618 * (monday_high - monday_low)"
+        }
+      },
+      "old": {
+        "pair_id": "LPTUSDT:2026-10-21T19:00:00+00:00:-1",
+        "trade_key": "LPTUSDT:2026-10-21T19:00:00+00:00:-1:fixed20:0",
+        "symbol": "LPTUSDT",
+        "population": "signal",
+        "stop_id": "fixed20",
+        "entry_i": 478266,
+        "entry_time": "2026-10-21 19:00:00+00:00",
+        "signal_time": "2026-10-21 19:00:00+00:00",
+        "side": -1,
+        "entry": 1.717,
+        "stop": 1.7513400000000001,
+        "target_price": 1.651,
+        "risk": 0.03434,
+        "planned_rr": 1.9219569015725118,
+        "planned_rr3": false,
+        "stop_pct": 2.0,
+        "month": "2026-10",
+        "bucket": -27,
+        "monday_high": 1.651,
+        "monday_low": 1.601,
+        "signal_high": 1.73,
+        "signal_low": 1.714,
+        "signal_close": 1.717,
+        "volume2": false,
+        "rsi_extreme": false,
+        "rsi_div": false,
+        "bb_reentry": true,
+        "trend4h": false,
+        "reclaim1618": false,
+        "exit_i": 478346,
+        "exit_time": "2026-10-22 01:45:00+00:00",
+        "reason": "target",
+        "raw_exit_price": 1.651,
+        "censored": false,
+        "entry_fill": 1.7161415000000002,
+        "exit_fill": 1.651,
+        "fee_entry_rate": 0.0005,
+        "fee_exit_rate": 0.0002,
+        "net_bp": 372.470758590566,
+        "net_r": 1.86235379295283,
+        "gross_bp": 384.3913803145024,
+        "fee_bp": 6.920621723937099,
+        "slippage_bp": 4.999999999999261,
+        "ambiguous_bar": false,
+        "stop_first_net_bp": 372.470758590566,
+        "stop_first_net_r": 1.86235379295283
+      },
+      "new": {
+        "pair_id": "LPTUSDT:2026-10-21T19:00:00+00:00:-1",
+        "trade_key": "LPTUSDT:2026-10-21T19:00:00+00:00:-1:fixed20:cloud:0",
+        "symbol": "LPTUSDT",
+        "population": "signal",
+        "stop_id": "fixed20",
+        "entry_i": 478282,
+        "entry_time": "2026-10-21 20:20:00+00:00",
+        "signal_time": "2026-10-21 19:00:00+00:00",
+        "cloud_confirm_time": "2026-10-21 20:20:00+00:00",
+        "side": -1,
+        "entry": 1.697,
+        "stop": 1.7309400000000001,
+        "target_price": 1.651,
+        "risk": 0.033940000000000005,
+        "planned_rr": 1.3553329404832068,
+        "stop_pct": 2.0,
+        "wait_minutes": 80.0,
+        "month": "2026-10",
+        "bucket": -27,
+        "source_entry": 1.717,
+        "source_entry_time": "2026-10-21 19:00:00+00:00",
+        "source_planned_rr": 1.9219569015725118,
+        "ema_fast": 1.7092516520723844,
+        "ema_slow": 1.709851657707028,
+        "exit_i": 478346,
+        "exit_time": "2026-10-22 01:45:00+00:00",
+        "reason": "target",
+        "raw_exit_price": 1.651,
+        "censored": false,
+        "entry_fill": 1.6961515000000003,
+        "exit_fill": 1.651,
+        "fee_entry_rate": 0.0005,
+        "fee_exit_rate": 0.0002,
+        "net_bp": 259.1233014142618,
+        "net_r": 1.2956165070713088,
+        "gross_bp": 271.06658809664134,
+        "fee_bp": 6.9432866823806725,
+        "slippage_bp": 4.999999999998863,
+        "ambiguous_bar": false,
+        "stop_first_net_bp": 259.12330141426185,
+        "stop_first_net_r": 1.295616507071309
+      },
+      "schedule": {
+        "pair_id": "LPTUSDT:2026-10-21T19:00:00+00:00:-1",
+        "signal_time": "2026-10-21 19:00:00+00:00",
+        "side": -1,
+        "status": "entered",
+        "entry_i": 478282,
+        "confirm_i": 478281,
+        "wait_minutes": 80.0
+      },
+      "old_markers": {
+        "entry_bar_open": "2026-10-21T19:00:00+00:00",
+        "entry_price_raw": 1.717,
+        "exit_bar_open": "2026-10-22T01:40:00+00:00",
+        "exit_bar_close_time": "2026-10-22T01:45:00+00:00",
+        "exit_ledger_time": "2026-10-22 01:45:00+00:00",
+        "exit_price_raw": 1.651,
+        "exit_time_semantics": "exit_i identifies this 5m bar; exit_time is the bar close, not a second-accurate fill timestamp"
+      },
+      "new_markers": {
+        "entry_bar_open": "2026-10-21T20:20:00+00:00",
+        "entry_price_raw": 1.697,
+        "exit_bar_open": "2026-10-22T01:40:00+00:00",
+        "exit_bar_close_time": "2026-10-22T01:45:00+00:00",
+        "exit_ledger_time": "2026-10-22 01:45:00+00:00",
+        "exit_price_raw": 1.651,
+        "exit_time_semantics": "exit_i identifies this 5m bar; exit_time is the bar close, not a second-accurate fill timestamp"
+      },
+      "cancellation_reference": null,
+      "windows": {
+        "h1": {
+          "requested_start": "2026-10-18T19:00:00+00:00",
+          "requested_end": "2026-10-22T13:40:00+00:00",
+          "end_anchor": "2026-10-22T01:40:00+00:00",
+          "before_hours": 72,
+          "after_hours": 12
+        },
+        "m5": {
+          "requested_start": "2026-10-21T13:00:00+00:00",
+          "requested_end": "2026-10-22T02:20:00+00:00",
+          "end_anchor": "2026-10-21T20:20:00+00:00",
+          "end_anchor_kind": "cloud_entry",
+          "before_hours": 6,
+          "after_hours": 6
+        }
+      },
+      "actual_windows": {
+        "h1": {
+          "first_bar_open": "2026-10-18T19:00:00+00:00",
+          "last_bar_open": "2026-10-22T13:00:00+00:00",
+          "bars": 91,
+          "gaps": [],
+          "synthetic_rows_added": 0
+        },
+        "m5": {
+          "first_bar_open": "2026-10-21T13:00:00+00:00",
+          "last_bar_open": "2026-10-22T02:20:00+00:00",
+          "bars": 161,
+          "gaps": [],
+          "synthetic_rows_added": 0
+        }
+      },
+      "inputs": {
+        "h1_csv": "experiments/active/exp-h1-ema-cloud-20261102-v1/charts_white_v1/inputs/01_h1.csv",
+        "m5_csv": "experiments/active/exp-h1-ema-cloud-20261102-v1/charts_white_v1/inputs/01_5m.csv"
+      },
+      "provenance": {
+        "source_inputs": {
+          "old_identity": {
+            "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-outside-glyph-stops-20261102-v1/symbols/LPTUSDT/identity.json",
+            "bytes": 3072,
+            "mtime_ns": 1793613768145438064
+          },
+          "cloud_identity": {
+            "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/LPTUSDT/identity.json",
+            "bytes": 5011,
+            "mtime_ns": 1793620896256824724
+          },
+          "registered_inputs": [
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_LPTUSDT_5m_469974.csv",
+              "bytes": 33945277,
+              "mtime_ns": 1788065608000000000
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/binance_um5m_20260923_20261031/series/LPTUSDT.csv.gz",
+              "bytes": 125950,
+              "mtime_ns": 1793521398713811958
+            }
+          ],
+          "current_inputs": [
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_LPTUSDT_5m_469974.csv",
+              "bytes": 33945277,
+              "mtime_ns": 1788065608000000000
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/binance_um5m_20260923_20261031/series/LPTUSDT.csv.gz",
+              "bytes": 125950,
+              "mtime_ns": 1793521398713811958
+            }
+          ],
+          "matches_old_identity": true,
+          "matches_cloud_identity": true
+        },
+        "old_ledger": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-outside-glyph-stops-20261102-v1/symbols/LPTUSDT/trades.csv.gz",
+          "bytes": 227153,
+          "mtime_ns": 1793613767525042501
+        },
+        "cloud_ledger": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/LPTUSDT/trades.csv.gz",
+          "bytes": 183526,
+          "mtime_ns": 1793620895171994295
+        },
+        "schedule": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/LPTUSDT/schedule.csv.gz",
+          "bytes": 3577,
+          "mtime_ns": 1793620893114095640
+        },
+        "full_history_ema_before_window_slice": true,
+        "source_hashes": "not computed per owner instruction"
+      },
+      "validation": {
+        "issues": [],
+        "source_stat_matches": {
+          "old_identity": true,
+          "cloud_identity": true
+        },
+        "h1_signal_bar_found": true,
+        "h1_signal_ohlc_matches_old_ledger": {
+          "high_matches_old_signal": true,
+          "low_matches_old_signal": true,
+          "close_matches_old_signal": true
+        },
+        "signal_open_comparison_available": false,
+        "signal_open_comparison_note": "old fixed20 ledger has no signal_open field",
+        "signal_bar_open_source": 1.717,
+        "old_entry_matches_source_open": {
+          "bar_open": "2026-10-21T19:00:00+00:00",
+          "source_open": 1.717,
+          "ledger_entry": 1.717,
+          "matches": true
+        },
+        "new_entry_matches_source_open": {
+          "bar_open": "2026-10-21T20:20:00+00:00",
+          "source_open": 1.697,
+          "ledger_entry": 1.697,
+          "matches": true
+        },
+        "old_target_matches_original_monday_edge": true,
+        "new_target_matches_old_target": true,
+        "old_raw_exit_in_exit_bar_ohlc": {
+          "valid_index": true,
+          "bar_open": "2026-10-22T01:40:00+00:00",
+          "bar_low": 1.649,
+          "bar_high": 1.664,
+          "raw_exit_price": 1.651,
+          "tolerance": 1e-08,
+          "inside_ohlc_with_tolerance": true
+        },
+        "new_raw_exit_in_exit_bar_ohlc": {
+          "valid_index": true,
+          "bar_open": "2026-10-22T01:40:00+00:00",
+          "bar_low": 1.649,
+          "bar_high": 1.664,
+          "raw_exit_price": 1.651,
+          "tolerance": 1e-08,
+          "inside_ohlc_with_tolerance": true
+        }
+      }
+    },
+    {
+      "number": 2,
+      "role": "baseline_win_cloud_loss",
+      "title": "原来盈利，等待后止损",
+      "caption": "同为2%止损；进场价改变，止损价也随之改变。",
+      "symbol": "ETHUSDT",
+      "side": -1,
+      "pair_id": "ETHUSDT:2025-07-02T21:00:00+00:00:-1",
+      "stop_id": "fixed20",
+      "status": "entered",
+      "signal_time": "2025-07-02T21:00:00+00:00",
+      "signal_candle_time": "2025-07-02T20:00:00+00:00",
+      "level1618": {
+        "monday_date_new_york": "2025-06-30",
+        "monday_start_utc": "2025-06-30T04:00:00+00:00",
+        "levels_available_from_utc": "2025-07-01T04:00:00+00:00",
+        "next_monday_start_utc": "2025-07-07T04:00:00+00:00",
+        "monday_high": 2521.59,
+        "monday_low": 2431.87,
+        "range": 89.72000000000025,
+        "level1618": {
+          "upper": 2577.0369600000004,
+          "lower": 2376.4230399999997,
+          "active_outside_level": 2577.0369600000004,
+          "target_edge": 2521.59,
+          "formula": "upper = monday_low + 1.618 * (monday_high - monday_low); lower = monday_high - 1.618 * (monday_high - monday_low)"
+        }
+      },
+      "old": {
+        "pair_id": "ETHUSDT:2025-07-02T21:00:00+00:00:-1",
+        "trade_key": "ETHUSDT:2025-07-02T21:00:00+00:00:-1:fixed20:0",
+        "symbol": "ETHUSDT",
+        "population": "signal",
+        "stop_id": "fixed20",
+        "entry_i": 578844,
+        "entry_time": "2025-07-02 21:00:00+00:00",
+        "signal_time": "2025-07-02 21:00:00+00:00",
+        "side": -1,
+        "entry": 2589.25,
+        "stop": 2641.035,
+        "target_price": 2521.59,
+        "risk": 51.785000000000004,
+        "planned_rr": 1.3065559524958936,
+        "planned_rr3": false,
+        "stop_pct": 2.0,
+        "month": "2025-07",
+        "bucket": -27,
+        "monday_high": 2521.59,
+        "monday_low": 2431.87,
+        "signal_high": 2604.05,
+        "signal_low": 2585.33,
+        "signal_close": 2589.24,
+        "volume2": false,
+        "rsi_extreme": true,
+        "rsi_div": false,
+        "bb_reentry": true,
+        "trend4h": false,
+        "reclaim1618": false,
+        "exit_i": 579334,
+        "exit_time": "2025-07-04 13:55:00+00:00",
+        "reason": "target",
+        "raw_exit_price": 2521.59,
+        "censored": false,
+        "entry_fill": 2587.955375,
+        "exit_fill": 2521.59,
+        "fee_entry_rate": 0.0005,
+        "fee_exit_rate": 0.0002,
+        "net_bp": 249.36595273727858,
+        "net_r": 1.2468297636863928,
+        "gross_bp": 261.31119049917874,
+        "fee_bp": 6.945237761900164,
+        "slippage_bp": 5.0,
+        "ambiguous_bar": false,
+        "stop_first_net_bp": 249.36595273727858,
+        "stop_first_net_r": 1.2468297636863928
+      },
+      "new": {
+        "pair_id": "ETHUSDT:2025-07-02T21:00:00+00:00:-1",
+        "trade_key": "ETHUSDT:2025-07-02T21:00:00+00:00:-1:fixed20:cloud:0",
+        "symbol": "ETHUSDT",
+        "population": "signal",
+        "stop_id": "fixed20",
+        "entry_i": 578881,
+        "entry_time": "2025-07-03 00:05:00+00:00",
+        "signal_time": "2025-07-02 21:00:00+00:00",
+        "cloud_confirm_time": "2025-07-03 00:05:00+00:00",
+        "side": -1,
+        "entry": 2576.22,
+        "stop": 2627.7443999999996,
+        "target_price": 2521.59,
+        "risk": 51.5244,
+        "planned_rr": 1.060274355451003,
+        "stop_pct": 2.0,
+        "wait_minutes": 185.0,
+        "month": "2025-07",
+        "bucket": -27,
+        "source_entry": 2589.25,
+        "source_entry_time": "2025-07-02 21:00:00+00:00",
+        "source_planned_rr": 1.3065559524958936,
+        "ema_fast": 2583.583871800673,
+        "ema_slow": 2583.7597111278938,
+        "exit_i": 579043,
+        "exit_time": "2025-07-03 13:40:00+00:00",
+        "reason": "stop",
+        "raw_exit_price": 2627.7443999999996,
+        "censored": false,
+        "entry_fill": 2574.93189,
+        "exit_fill": 2629.0582721999995,
+        "fee_entry_rate": 0.0005,
+        "fee_exit_rate": 0.0005,
+        "net_bp": -220.20004999999855,
+        "net_r": -1.1010002499999927,
+        "gross_bp": -199.99999999999918,
+        "fee_bp": 10.10005,
+        "slippage_bp": 10.099999999999369,
+        "ambiguous_bar": false,
+        "stop_first_net_bp": -220.20004999999855,
+        "stop_first_net_r": -1.1010002499999927
+      },
+      "schedule": {
+        "pair_id": "ETHUSDT:2025-07-02T21:00:00+00:00:-1",
+        "signal_time": "2025-07-02 21:00:00+00:00",
+        "side": -1,
+        "status": "entered",
+        "entry_i": 578881,
+        "confirm_i": 578880,
+        "wait_minutes": 185.0
+      },
+      "old_markers": {
+        "entry_bar_open": "2025-07-02T21:00:00+00:00",
+        "entry_price_raw": 2589.25,
+        "exit_bar_open": "2025-07-04T13:50:00+00:00",
+        "exit_bar_close_time": "2025-07-04T13:55:00+00:00",
+        "exit_ledger_time": "2025-07-04 13:55:00+00:00",
+        "exit_price_raw": 2521.59,
+        "exit_time_semantics": "exit_i identifies this 5m bar; exit_time is the bar close, not a second-accurate fill timestamp"
+      },
+      "new_markers": {
+        "entry_bar_open": "2025-07-03T00:05:00+00:00",
+        "entry_price_raw": 2576.22,
+        "exit_bar_open": "2025-07-03T13:35:00+00:00",
+        "exit_bar_close_time": "2025-07-03T13:40:00+00:00",
+        "exit_ledger_time": "2025-07-03 13:40:00+00:00",
+        "exit_price_raw": 2627.7443999999996,
+        "exit_time_semantics": "exit_i identifies this 5m bar; exit_time is the bar close, not a second-accurate fill timestamp"
+      },
+      "cancellation_reference": null,
+      "windows": {
+        "h1": {
+          "requested_start": "2025-06-29T21:00:00+00:00",
+          "requested_end": "2025-07-05T01:50:00+00:00",
+          "end_anchor": "2025-07-04T13:50:00+00:00",
+          "before_hours": 72,
+          "after_hours": 12
+        },
+        "m5": {
+          "requested_start": "2025-07-02T15:00:00+00:00",
+          "requested_end": "2025-07-03T06:05:00+00:00",
+          "end_anchor": "2025-07-03T00:05:00+00:00",
+          "end_anchor_kind": "cloud_entry",
+          "before_hours": 6,
+          "after_hours": 6
+        }
+      },
+      "actual_windows": {
+        "h1": {
+          "first_bar_open": "2025-06-29T21:00:00+00:00",
+          "last_bar_open": "2025-07-05T01:00:00+00:00",
+          "bars": 125,
+          "gaps": [],
+          "synthetic_rows_added": 0
+        },
+        "m5": {
+          "first_bar_open": "2025-07-02T15:00:00+00:00",
+          "last_bar_open": "2025-07-03T06:05:00+00:00",
+          "bars": 182,
+          "gaps": [],
+          "synthetic_rows_added": 0
+        }
+      },
+      "inputs": {
+        "h1_csv": "experiments/active/exp-h1-ema-cloud-20261102-v1/charts_white_v1/inputs/02_h1.csv",
+        "m5_csv": "experiments/active/exp-h1-ema-cloud-20261102-v1/charts_white_v1/inputs/02_5m.csv"
+      },
+      "provenance": {
+        "source_inputs": {
+          "old_identity": {
+            "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-outside-glyph-stops-20261102-v1/symbols/ETHUSDT/identity.json",
+            "bytes": 3075,
+            "mtime_ns": 1793613769871937757
+          },
+          "cloud_identity": {
+            "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/ETHUSDT/identity.json",
+            "bytes": 5014,
+            "mtime_ns": 1793620898002786455
+          },
+          "registered_inputs": [
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv",
+              "bytes": 53200730,
+              "mtime_ns": 1788065142000000000
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHUSDT.csv",
+              "bytes": 3358521,
+              "mtime_ns": 1790092006000000000
+            }
+          ],
+          "current_inputs": [
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv",
+              "bytes": 53200730,
+              "mtime_ns": 1788065142000000000
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHUSDT.csv",
+              "bytes": 3358521,
+              "mtime_ns": 1790092006000000000
+            }
+          ],
+          "matches_old_identity": true,
+          "matches_cloud_identity": true
+        },
+        "old_ledger": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-outside-glyph-stops-20261102-v1/symbols/ETHUSDT/trades.csv.gz",
+          "bytes": 266457,
+          "mtime_ns": 1793613769194585563
+        },
+        "cloud_ledger": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/ETHUSDT/trades.csv.gz",
+          "bytes": 230664,
+          "mtime_ns": 1793620896695322999
+        },
+        "schedule": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/ETHUSDT/schedule.csv.gz",
+          "bytes": 4014,
+          "mtime_ns": 1793620894321697571
+        },
+        "full_history_ema_before_window_slice": true,
+        "source_hashes": "not computed per owner instruction"
+      },
+      "validation": {
+        "issues": [],
+        "source_stat_matches": {
+          "old_identity": true,
+          "cloud_identity": true
+        },
+        "h1_signal_bar_found": true,
+        "h1_signal_ohlc_matches_old_ledger": {
+          "high_matches_old_signal": true,
+          "low_matches_old_signal": true,
+          "close_matches_old_signal": true
+        },
+        "signal_open_comparison_available": false,
+        "signal_open_comparison_note": "old fixed20 ledger has no signal_open field",
+        "signal_bar_open_source": 2603.64,
+        "old_entry_matches_source_open": {
+          "bar_open": "2025-07-02T21:00:00+00:00",
+          "source_open": 2589.25,
+          "ledger_entry": 2589.25,
+          "matches": true
+        },
+        "new_entry_matches_source_open": {
+          "bar_open": "2025-07-03T00:05:00+00:00",
+          "source_open": 2576.22,
+          "ledger_entry": 2576.22,
+          "matches": true
+        },
+        "old_target_matches_original_monday_edge": true,
+        "new_target_matches_old_target": true,
+        "old_raw_exit_in_exit_bar_ohlc": {
+          "valid_index": true,
+          "bar_open": "2025-07-04T13:50:00+00:00",
+          "bar_low": 2521.0,
+          "bar_high": 2534.39,
+          "raw_exit_price": 2521.59,
+          "tolerance": 2.5215900000000003e-07,
+          "inside_ohlc_with_tolerance": true
+        },
+        "new_raw_exit_in_exit_bar_ohlc": {
+          "valid_index": true,
+          "bar_open": "2025-07-03T13:35:00+00:00",
+          "bar_low": 2600.55,
+          "bar_high": 2635.0,
+          "raw_exit_price": 2627.7443999999996,
+          "tolerance": 2.6277444e-07,
+          "inside_ohlc_with_tolerance": true
+        }
+      }
+    },
+    {
+      "number": 3,
+      "role": "baseline_loss_cloud_win",
+      "title": "避开第一轮止损",
+      "caption": "原入场先止损，稍后的云带翻转入场到达目标。",
+      "symbol": "ETHUSDT",
+      "side": -1,
+      "pair_id": "ETHUSDT:2025-01-31T15:00:00+00:00:-1",
+      "stop_id": "fixed20",
+      "status": "entered",
+      "signal_time": "2025-01-31T15:00:00+00:00",
+      "signal_candle_time": "2025-01-31T14:00:00+00:00",
+      "level1618": {
+        "monday_date_new_york": "2025-01-27",
+        "monday_start_utc": "2025-01-27T05:00:00+00:00",
+        "levels_available_from_utc": "2025-01-28T05:00:00+00:00",
+        "next_monday_start_utc": "2025-02-03T05:00:00+00:00",
+        "monday_high": 3238.0,
+        "monday_low": 3020.17,
+        "range": 217.82999999999993,
+        "level1618": {
+          "upper": 3372.61894,
+          "lower": 2885.5510600000002,
+          "active_outside_level": 3372.61894,
+          "target_edge": 3238.0,
+          "formula": "upper = monday_low + 1.618 * (monday_high - monday_low); lower = monday_high - 1.618 * (monday_high - monday_low)"
+        }
+      },
+      "old": {
+        "pair_id": "ETHUSDT:2025-01-31T15:00:00+00:00:-1",
+        "trade_key": "ETHUSDT:2025-01-31T15:00:00+00:00:-1:fixed20:0",
+        "symbol": "ETHUSDT",
+        "population": "signal",
+        "stop_id": "fixed20",
+        "entry_i": 534996,
+        "entry_time": "2025-01-31 15:00:00+00:00",
+        "signal_time": "2025-01-31 15:00:00+00:00",
+        "side": -1,
+        "entry": 3349.59,
+        "stop": 3416.5818,
+        "target_price": 3238.0,
+        "risk": 66.9918,
+        "planned_rr": 1.66572625306381,
+        "planned_rr3": false,
+        "stop_pct": 2.0,
+        "month": "2025-01",
+        "bucket": -27,
+        "monday_high": 3238.0,
+        "monday_low": 3020.17,
+        "signal_high": 3373.46,
+        "signal_low": 3332.39,
+        "signal_close": 3349.59,
+        "volume2": true,
+        "rsi_extreme": false,
+        "rsi_div": true,
+        "bb_reentry": true,
+        "trend4h": false,
+        "reclaim1618": true,
+        "exit_i": 535007,
+        "exit_time": "2025-01-31 16:00:00+00:00",
+        "reason": "stop",
+        "raw_exit_price": 3416.5818,
+        "censored": false,
+        "entry_fill": 3347.9152050000002,
+        "exit_fill": 3418.2900908999995,
+        "fee_entry_rate": 0.0005,
+        "fee_exit_rate": 0.0005,
+        "net_bp": -220.20004999999787,
+        "net_r": -1.1010002499999896,
+        "gross_bp": -199.99999999999935,
+        "fee_bp": 10.10005,
+        "slippage_bp": 10.099999999998545,
+        "ambiguous_bar": false,
+        "stop_first_net_bp": -220.20004999999787,
+        "stop_first_net_r": -1.1010002499999896
+      },
+      "new": {
+        "pair_id": "ETHUSDT:2025-01-31T15:00:00+00:00:-1",
+        "trade_key": "ETHUSDT:2025-01-31T15:00:00+00:00:-1:fixed20:cloud:0",
+        "symbol": "ETHUSDT",
+        "population": "signal",
+        "stop_id": "fixed20",
+        "entry_i": 535039,
+        "entry_time": "2025-01-31 18:35:00+00:00",
+        "signal_time": "2025-01-31 15:00:00+00:00",
+        "cloud_confirm_time": "2025-01-31 18:35:00+00:00",
+        "side": -1,
+        "entry": 3324.78,
+        "stop": 3391.2756000000004,
+        "target_price": 3238.0,
+        "risk": 66.49560000000001,
+        "planned_rr": 1.3050487551056038,
+        "stop_pct": 2.0,
+        "wait_minutes": 215.0,
+        "month": "2025-01",
+        "bucket": -26,
+        "source_entry": 3349.59,
+        "source_entry_time": "2025-01-31 15:00:00+00:00",
+        "source_planned_rr": 1.66572625306381,
+        "ema_fast": 3372.357805363625,
+        "ema_slow": 3374.118327216648,
+        "exit_i": 535219,
+        "exit_time": "2025-02-01 09:40:00+00:00",
+        "reason": "target",
+        "raw_exit_price": 3238.0,
+        "censored": false,
+        "entry_fill": 3323.1176100000002,
+        "exit_fill": 3238.0,
+        "fee_entry_rate": 0.0005,
+        "fee_exit_rate": 0.0002,
+        "net_bp": 249.06445297132515,
+        "net_r": 1.2453222648566256,
+        "gross_bp": 261.0097510211208,
+        "fee_bp": 6.945298049795777,
+        "slippage_bp": 4.999999999999886,
+        "ambiguous_bar": false,
+        "stop_first_net_bp": 249.06445297132515,
+        "stop_first_net_r": 1.2453222648566256
+      },
+      "schedule": {
+        "pair_id": "ETHUSDT:2025-01-31T15:00:00+00:00:-1",
+        "signal_time": "2025-01-31 15:00:00+00:00",
+        "side": -1,
+        "status": "entered",
+        "entry_i": 535039,
+        "confirm_i": 535038,
+        "wait_minutes": 215.0
+      },
+      "old_markers": {
+        "entry_bar_open": "2025-01-31T15:00:00+00:00",
+        "entry_price_raw": 3349.59,
+        "exit_bar_open": "2025-01-31T15:55:00+00:00",
+        "exit_bar_close_time": "2025-01-31T16:00:00+00:00",
+        "exit_ledger_time": "2025-01-31 16:00:00+00:00",
+        "exit_price_raw": 3416.5818,
+        "exit_time_semantics": "exit_i identifies this 5m bar; exit_time is the bar close, not a second-accurate fill timestamp"
+      },
+      "new_markers": {
+        "entry_bar_open": "2025-01-31T18:35:00+00:00",
+        "entry_price_raw": 3324.78,
+        "exit_bar_open": "2025-02-01T09:35:00+00:00",
+        "exit_bar_close_time": "2025-02-01T09:40:00+00:00",
+        "exit_ledger_time": "2025-02-01 09:40:00+00:00",
+        "exit_price_raw": 3238.0,
+        "exit_time_semantics": "exit_i identifies this 5m bar; exit_time is the bar close, not a second-accurate fill timestamp"
+      },
+      "cancellation_reference": null,
+      "windows": {
+        "h1": {
+          "requested_start": "2025-01-28T15:00:00+00:00",
+          "requested_end": "2025-02-01T21:35:00+00:00",
+          "end_anchor": "2025-02-01T09:35:00+00:00",
+          "before_hours": 72,
+          "after_hours": 12
+        },
+        "m5": {
+          "requested_start": "2025-01-31T09:00:00+00:00",
+          "requested_end": "2025-02-01T00:35:00+00:00",
+          "end_anchor": "2025-01-31T18:35:00+00:00",
+          "end_anchor_kind": "cloud_entry",
+          "before_hours": 6,
+          "after_hours": 6
+        }
+      },
+      "actual_windows": {
+        "h1": {
+          "first_bar_open": "2025-01-28T15:00:00+00:00",
+          "last_bar_open": "2025-02-01T21:00:00+00:00",
+          "bars": 103,
+          "gaps": [],
+          "synthetic_rows_added": 0
+        },
+        "m5": {
+          "first_bar_open": "2025-01-31T09:00:00+00:00",
+          "last_bar_open": "2025-02-01T00:35:00+00:00",
+          "bars": 188,
+          "gaps": [],
+          "synthetic_rows_added": 0
+        }
+      },
+      "inputs": {
+        "h1_csv": "experiments/active/exp-h1-ema-cloud-20261102-v1/charts_white_v1/inputs/03_h1.csv",
+        "m5_csv": "experiments/active/exp-h1-ema-cloud-20261102-v1/charts_white_v1/inputs/03_5m.csv"
+      },
+      "provenance": {
+        "source_inputs": {
+          "old_identity": {
+            "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-outside-glyph-stops-20261102-v1/symbols/ETHUSDT/identity.json",
+            "bytes": 3075,
+            "mtime_ns": 1793613769871937757
+          },
+          "cloud_identity": {
+            "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/ETHUSDT/identity.json",
+            "bytes": 5014,
+            "mtime_ns": 1793620898002786455
+          },
+          "registered_inputs": [
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv",
+              "bytes": 53200730,
+              "mtime_ns": 1788065142000000000
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHUSDT.csv",
+              "bytes": 3358521,
+              "mtime_ns": 1790092006000000000
+            }
+          ],
+          "current_inputs": [
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv",
+              "bytes": 53200730,
+              "mtime_ns": 1788065142000000000
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHUSDT.csv",
+              "bytes": 3358521,
+              "mtime_ns": 1790092006000000000
+            }
+          ],
+          "matches_old_identity": true,
+          "matches_cloud_identity": true
+        },
+        "old_ledger": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-outside-glyph-stops-20261102-v1/symbols/ETHUSDT/trades.csv.gz",
+          "bytes": 266457,
+          "mtime_ns": 1793613769194585563
+        },
+        "cloud_ledger": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/ETHUSDT/trades.csv.gz",
+          "bytes": 230664,
+          "mtime_ns": 1793620896695322999
+        },
+        "schedule": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/ETHUSDT/schedule.csv.gz",
+          "bytes": 4014,
+          "mtime_ns": 1793620894321697571
+        },
+        "full_history_ema_before_window_slice": true,
+        "source_hashes": "not computed per owner instruction"
+      },
+      "validation": {
+        "issues": [],
+        "source_stat_matches": {
+          "old_identity": true,
+          "cloud_identity": true
+        },
+        "h1_signal_bar_found": true,
+        "h1_signal_ohlc_matches_old_ledger": {
+          "high_matches_old_signal": true,
+          "low_matches_old_signal": true,
+          "close_matches_old_signal": true
+        },
+        "signal_open_comparison_available": false,
+        "signal_open_comparison_note": "old fixed20 ledger has no signal_open field",
+        "signal_bar_open_source": 3353.65,
+        "old_entry_matches_source_open": {
+          "bar_open": "2025-01-31T15:00:00+00:00",
+          "source_open": 3349.59,
+          "ledger_entry": 3349.59,
+          "matches": true
+        },
+        "new_entry_matches_source_open": {
+          "bar_open": "2025-01-31T18:35:00+00:00",
+          "source_open": 3324.78,
+          "ledger_entry": 3324.78,
+          "matches": true
+        },
+        "old_target_matches_original_monday_edge": true,
+        "new_target_matches_old_target": true,
+        "old_raw_exit_in_exit_bar_ohlc": {
+          "valid_index": true,
+          "bar_open": "2025-01-31T15:55:00+00:00",
+          "bar_low": 3414.41,
+          "bar_high": 3427.8,
+          "raw_exit_price": 3416.5818,
+          "tolerance": 3.4165818e-07,
+          "inside_ohlc_with_tolerance": true
+        },
+        "new_raw_exit_in_exit_bar_ohlc": {
+          "valid_index": true,
+          "bar_open": "2025-02-01T09:35:00+00:00",
+          "bar_low": 3235.02,
+          "bar_high": 3247.14,
+          "raw_exit_price": 3238.0,
+          "tolerance": 3.2380000000000003e-07,
+          "inside_ohlc_with_tolerance": true
+        }
+      }
+    },
+    {
+      "number": 4,
+      "role": "both_loss_btc_long",
+      "title": "两种入场都止损",
+      "caption": "做多案例：等待确认依然可能遇到继续下跌。",
+      "symbol": "BTCUSDT",
+      "side": 1,
+      "pair_id": "BTCUSDT:2025-10-29T18:00:00+00:00:1",
+      "stop_id": "fixed20",
+      "status": "entered",
+      "signal_time": "2025-10-29T18:00:00+00:00",
+      "signal_candle_time": "2025-10-29T17:00:00+00:00",
+      "level1618": {
+        "monday_date_new_york": "2025-10-27",
+        "monday_start_utc": "2025-10-27T04:00:00+00:00",
+        "levels_available_from_utc": "2025-10-28T04:00:00+00:00",
+        "next_monday_start_utc": "2025-11-03T05:00:00+00:00",
+        "monday_high": 116380.2,
+        "monday_low": 113477.5,
+        "range": 2902.699999999997,
+        "level1618": {
+          "upper": 118174.0686,
+          "lower": 111683.6314,
+          "active_outside_level": 111683.6314,
+          "target_edge": 113477.5,
+          "formula": "upper = monday_low + 1.618 * (monday_high - monday_low); lower = monday_high - 1.618 * (monday_high - monday_low)"
+        }
+      },
+      "old": {
+        "pair_id": "BTCUSDT:2025-10-29T18:00:00+00:00:1",
+        "trade_key": "BTCUSDT:2025-10-29T18:00:00+00:00:1:fixed20:0",
+        "symbol": "BTCUSDT",
+        "population": "signal",
+        "stop_id": "fixed20",
+        "entry_i": 613080,
+        "entry_time": "2025-10-29 18:00:00+00:00",
+        "signal_time": "2025-10-29 18:00:00+00:00",
+        "side": 1,
+        "entry": 111819.3,
+        "stop": 109582.914,
+        "target_price": 113477.5,
+        "risk": 2236.386,
+        "planned_rr": 0.7414641300741451,
+        "planned_rr3": false,
+        "stop_pct": 2.0,
+        "month": "2025-10",
+        "bucket": -31,
+        "monday_high": 116380.2,
+        "monday_low": 113477.5,
+        "signal_high": 111872.7,
+        "signal_low": 110941.6,
+        "signal_close": 111819.3,
+        "volume2": false,
+        "rsi_extreme": false,
+        "rsi_div": false,
+        "bb_reentry": true,
+        "trend4h": false,
+        "reclaim1618": true,
+        "exit_i": 613087,
+        "exit_time": "2025-10-29 18:40:00+00:00",
+        "reason": "stop",
+        "raw_exit_price": 109582.914,
+        "censored": false,
+        "entry_fill": 111875.20964999999,
+        "exit_fill": 109528.122543,
+        "fee_entry_rate": 0.0005,
+        "fee_exit_rate": 0.0005,
+        "net_bp": -219.80004999999866,
+        "net_r": -1.0990002499999934,
+        "gross_bp": -199.99999999999986,
+        "fee_bp": 9.90005,
+        "slippage_bp": 9.899999999998784,
+        "ambiguous_bar": false,
+        "stop_first_net_bp": -219.80004999999866,
+        "stop_first_net_r": -1.0990002499999934
+      },
+      "new": {
+        "pair_id": "BTCUSDT:2025-10-29T18:00:00+00:00:1",
+        "trade_key": "BTCUSDT:2025-10-29T18:00:00+00:00:1:fixed20:cloud:0",
+        "symbol": "BTCUSDT",
+        "population": "signal",
+        "stop_id": "fixed20",
+        "entry_i": 613121,
+        "entry_time": "2025-10-29 21:25:00+00:00",
+        "signal_time": "2025-10-29 18:00:00+00:00",
+        "cloud_confirm_time": "2025-10-29 21:25:00+00:00",
+        "side": 1,
+        "entry": 111475.2,
+        "stop": 109245.696,
+        "target_price": 113477.5,
+        "risk": 2229.504,
+        "planned_rr": 0.8980921317028375,
+        "stop_pct": 2.0,
+        "wait_minutes": 205.0,
+        "month": "2025-10",
+        "bucket": -28,
+        "source_entry": 111819.3,
+        "source_entry_time": "2025-10-29 18:00:00+00:00",
+        "source_planned_rr": 0.7414641300741451,
+        "ema_fast": 111189.45247715652,
+        "ema_slow": 111186.55952355031,
+        "exit_i": 613205,
+        "exit_time": "2025-10-30 04:30:00+00:00",
+        "reason": "stop",
+        "raw_exit_price": 109245.696,
+        "censored": false,
+        "entry_fill": 111530.93759999999,
+        "exit_fill": 109191.073152,
+        "fee_entry_rate": 0.0005,
+        "fee_exit_rate": 0.0005,
+        "net_bp": -219.80004999999937,
+        "net_r": -1.099000249999997,
+        "gross_bp": -200.00000000000009,
+        "fee_bp": 9.90005,
+        "slippage_bp": 9.899999999999295,
+        "ambiguous_bar": false,
+        "stop_first_net_bp": -219.80004999999937,
+        "stop_first_net_r": -1.099000249999997
+      },
+      "schedule": {
+        "pair_id": "BTCUSDT:2025-10-29T18:00:00+00:00:1",
+        "signal_time": "2025-10-29 18:00:00+00:00",
+        "side": 1,
+        "status": "entered",
+        "entry_i": 613121,
+        "confirm_i": 613120,
+        "wait_minutes": 205.0
+      },
+      "old_markers": {
+        "entry_bar_open": "2025-10-29T18:00:00+00:00",
+        "entry_price_raw": 111819.3,
+        "exit_bar_open": "2025-10-29T18:35:00+00:00",
+        "exit_bar_close_time": "2025-10-29T18:40:00+00:00",
+        "exit_ledger_time": "2025-10-29 18:40:00+00:00",
+        "exit_price_raw": 109582.914,
+        "exit_time_semantics": "exit_i identifies this 5m bar; exit_time is the bar close, not a second-accurate fill timestamp"
+      },
+      "new_markers": {
+        "entry_bar_open": "2025-10-29T21:25:00+00:00",
+        "entry_price_raw": 111475.2,
+        "exit_bar_open": "2025-10-30T04:25:00+00:00",
+        "exit_bar_close_time": "2025-10-30T04:30:00+00:00",
+        "exit_ledger_time": "2025-10-30 04:30:00+00:00",
+        "exit_price_raw": 109245.696,
+        "exit_time_semantics": "exit_i identifies this 5m bar; exit_time is the bar close, not a second-accurate fill timestamp"
+      },
+      "cancellation_reference": null,
+      "windows": {
+        "h1": {
+          "requested_start": "2025-10-26T18:00:00+00:00",
+          "requested_end": "2025-10-30T16:25:00+00:00",
+          "end_anchor": "2025-10-30T04:25:00+00:00",
+          "before_hours": 72,
+          "after_hours": 12
+        },
+        "m5": {
+          "requested_start": "2025-10-29T12:00:00+00:00",
+          "requested_end": "2025-10-30T03:25:00+00:00",
+          "end_anchor": "2025-10-29T21:25:00+00:00",
+          "end_anchor_kind": "cloud_entry",
+          "before_hours": 6,
+          "after_hours": 6
+        }
+      },
+      "actual_windows": {
+        "h1": {
+          "first_bar_open": "2025-10-26T18:00:00+00:00",
+          "last_bar_open": "2025-10-30T16:00:00+00:00",
+          "bars": 95,
+          "gaps": [],
+          "synthetic_rows_added": 0
+        },
+        "m5": {
+          "first_bar_open": "2025-10-29T12:00:00+00:00",
+          "last_bar_open": "2025-10-30T03:25:00+00:00",
+          "bars": 186,
+          "gaps": [],
+          "synthetic_rows_added": 0
+        }
+      },
+      "inputs": {
+        "h1_csv": "experiments/active/exp-h1-ema-cloud-20261102-v1/charts_white_v1/inputs/04_h1.csv",
+        "m5_csv": "experiments/active/exp-h1-ema-cloud-20261102-v1/charts_white_v1/inputs/04_5m.csv"
+      },
+      "provenance": {
+        "source_inputs": {
+          "old_identity": {
+            "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-outside-glyph-stops-20261102-v1/symbols/BTCUSDT/identity.json",
+            "bytes": 3075,
+            "mtime_ns": 1793613770006755712
+          },
+          "cloud_identity": {
+            "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/BTCUSDT/identity.json",
+            "bytes": 5014,
+            "mtime_ns": 1793620897878984116
+          },
+          "registered_inputs": [
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv",
+              "bytes": 54081964,
+              "mtime_ns": 1788064735000000000
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/BTCUSDT.csv",
+              "bytes": 3326725,
+              "mtime_ns": 1790091692000000000
+            }
+          ],
+          "current_inputs": [
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv",
+              "bytes": 54081964,
+              "mtime_ns": 1788064735000000000
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/BTCUSDT.csv",
+              "bytes": 3326725,
+              "mtime_ns": 1790091692000000000
+            }
+          ],
+          "matches_old_identity": true,
+          "matches_cloud_identity": true
+        },
+        "old_ledger": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-outside-glyph-stops-20261102-v1/symbols/BTCUSDT/trades.csv.gz",
+          "bytes": 285350,
+          "mtime_ns": 1793613769312971570
+        },
+        "cloud_ledger": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/BTCUSDT/trades.csv.gz",
+          "bytes": 242321,
+          "mtime_ns": 1793620896646795076
+        },
+        "schedule": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/BTCUSDT/schedule.csv.gz",
+          "bytes": 4242,
+          "mtime_ns": 1793620894208369528
+        },
+        "full_history_ema_before_window_slice": true,
+        "source_hashes": "not computed per owner instruction"
+      },
+      "validation": {
+        "issues": [],
+        "source_stat_matches": {
+          "old_identity": true,
+          "cloud_identity": true
+        },
+        "h1_signal_bar_found": true,
+        "h1_signal_ohlc_matches_old_ledger": {
+          "high_matches_old_signal": true,
+          "low_matches_old_signal": true,
+          "close_matches_old_signal": true
+        },
+        "signal_open_comparison_available": false,
+        "signal_open_comparison_note": "old fixed20 ledger has no signal_open field",
+        "signal_bar_open_source": 111060.0,
+        "old_entry_matches_source_open": {
+          "bar_open": "2025-10-29T18:00:00+00:00",
+          "source_open": 111819.3,
+          "ledger_entry": 111819.3,
+          "matches": true
+        },
+        "new_entry_matches_source_open": {
+          "bar_open": "2025-10-29T21:25:00+00:00",
+          "source_open": 111475.2,
+          "ledger_entry": 111475.2,
+          "matches": true
+        },
+        "old_target_matches_original_monday_edge": true,
+        "new_target_matches_old_target": true,
+        "old_raw_exit_in_exit_bar_ohlc": {
+          "valid_index": true,
+          "bar_open": "2025-10-29T18:35:00+00:00",
+          "bar_low": 109200.0,
+          "bar_high": 111722.4,
+          "raw_exit_price": 109582.914,
+          "tolerance": 1.0958291400000002e-05,
+          "inside_ohlc_with_tolerance": true
+        },
+        "new_raw_exit_in_exit_bar_ohlc": {
+          "valid_index": true,
+          "bar_open": "2025-10-30T04:25:00+00:00",
+          "bar_low": 107817.3,
+          "bar_high": 109419.6,
+          "raw_exit_price": 109245.696,
+          "tolerance": 1.09245696e-05,
+          "inside_ohlc_with_tolerance": true
+        }
+      }
+    },
+    {
+      "number": 5,
+      "role": "target_before_flip_cancel",
+      "title": "目标先到，等待没有成交",
+      "caption": "云带确认之前行情已经到目标，本轮取消等待。",
+      "symbol": "LPTUSDT",
+      "side": -1,
+      "pair_id": "LPTUSDT:2026-10-20T17:00:00+00:00:-1",
+      "stop_id": "fixed20",
+      "status": "target_before_flip",
+      "signal_time": "2026-10-20T17:00:00+00:00",
+      "signal_candle_time": "2026-10-20T16:00:00+00:00",
+      "level1618": {
+        "monday_date_new_york": "2026-10-19",
+        "monday_start_utc": "2026-10-19T04:00:00+00:00",
+        "levels_available_from_utc": "2026-10-20T04:00:00+00:00",
+        "next_monday_start_utc": "2026-10-26T04:00:00+00:00",
+        "monday_high": 1.651,
+        "monday_low": 1.601,
+        "range": 0.050000000000000044,
+        "level1618": {
+          "upper": 1.6819000000000002,
+          "lower": 1.5701,
+          "active_outside_level": 1.6819000000000002,
+          "target_edge": 1.651,
+          "formula": "upper = monday_low + 1.618 * (monday_high - monday_low); lower = monday_high - 1.618 * (monday_high - monday_low)"
+        }
+      },
+      "old": {
+        "pair_id": "LPTUSDT:2026-10-20T17:00:00+00:00:-1",
+        "trade_key": "LPTUSDT:2026-10-20T17:00:00+00:00:-1:fixed20:0",
+        "symbol": "LPTUSDT",
+        "population": "signal",
+        "stop_id": "fixed20",
+        "entry_i": 477954,
+        "entry_time": "2026-10-20 17:00:00+00:00",
+        "signal_time": "2026-10-20 17:00:00+00:00",
+        "side": -1,
+        "entry": 1.683,
+        "stop": 1.71666,
+        "target_price": 1.651,
+        "risk": 0.03366,
+        "planned_rr": 0.9506833036244808,
+        "planned_rr3": false,
+        "stop_pct": 2.0,
+        "month": "2026-10",
+        "bucket": -26,
+        "monday_high": 1.651,
+        "monday_low": 1.601,
+        "signal_high": 1.687,
+        "signal_low": 1.666,
+        "signal_close": 1.683,
+        "volume2": false,
+        "rsi_extreme": false,
+        "rsi_div": false,
+        "bb_reentry": false,
+        "trend4h": false,
+        "reclaim1618": false,
+        "exit_i": 477971,
+        "exit_time": "2026-10-20 18:30:00+00:00",
+        "reason": "target",
+        "raw_exit_price": 1.651,
+        "censored": false,
+        "entry_fill": 1.6821585000000001,
+        "exit_fill": 1.651,
+        "fee_entry_rate": 0.0005,
+        "fee_exit_rate": 0.0002,
+        "net_bp": 178.17718805704152,
+        "net_r": 0.8908859402852075,
+        "gross_bp": 190.13666072489616,
+        "fee_bp": 6.959472667855022,
+        "slippage_bp": 4.999999999999602,
+        "ambiguous_bar": false,
+        "stop_first_net_bp": 178.17718805704152,
+        "stop_first_net_r": 0.8908859402852075
+      },
+      "new": null,
+      "schedule": {
+        "pair_id": "LPTUSDT:2026-10-20T17:00:00+00:00:-1",
+        "signal_time": "2026-10-20 17:00:00+00:00",
+        "side": -1,
+        "status": "target_before_flip",
+        "entry_i": -1,
+        "confirm_i": -1,
+        "wait_minutes": null
+      },
+      "old_markers": {
+        "entry_bar_open": "2026-10-20T17:00:00+00:00",
+        "entry_price_raw": 1.683,
+        "exit_bar_open": "2026-10-20T18:25:00+00:00",
+        "exit_bar_close_time": "2026-10-20T18:30:00+00:00",
+        "exit_ledger_time": "2026-10-20 18:30:00+00:00",
+        "exit_price_raw": 1.651,
+        "exit_time_semantics": "exit_i identifies this 5m bar; exit_time is the bar close, not a second-accurate fill timestamp"
+      },
+      "new_markers": null,
+      "cancellation_reference": {
+        "kind": "first_target_touch_before_cloud_entry",
+        "bar_open": "2026-10-20T18:25:00+00:00",
+        "bar_close": "2026-10-20T18:30:00+00:00",
+        "target_price": 1.651,
+        "bar_high": 1.656,
+        "bar_low": 1.651,
+        "descriptive_only_not_a_recomputed_fill": true
+      },
+      "windows": {
+        "h1": {
+          "requested_start": "2026-10-17T17:00:00+00:00",
+          "requested_end": "2026-10-21T06:25:00+00:00",
+          "end_anchor": "2026-10-20T18:25:00+00:00",
+          "before_hours": 72,
+          "after_hours": 12
+        },
+        "m5": {
+          "requested_start": "2026-10-20T11:00:00+00:00",
+          "requested_end": "2026-10-21T00:25:00+00:00",
+          "end_anchor": "2026-10-20T18:25:00+00:00",
+          "end_anchor_kind": "first_target_touch",
+          "before_hours": 6,
+          "after_hours": 6
+        }
+      },
+      "actual_windows": {
+        "h1": {
+          "first_bar_open": "2026-10-17T17:00:00+00:00",
+          "last_bar_open": "2026-10-21T06:00:00+00:00",
+          "bars": 86,
+          "gaps": [],
+          "synthetic_rows_added": 0
+        },
+        "m5": {
+          "first_bar_open": "2026-10-20T11:00:00+00:00",
+          "last_bar_open": "2026-10-21T00:25:00+00:00",
+          "bars": 162,
+          "gaps": [],
+          "synthetic_rows_added": 0
+        }
+      },
+      "inputs": {
+        "h1_csv": "experiments/active/exp-h1-ema-cloud-20261102-v1/charts_white_v1/inputs/05_h1.csv",
+        "m5_csv": "experiments/active/exp-h1-ema-cloud-20261102-v1/charts_white_v1/inputs/05_5m.csv"
+      },
+      "provenance": {
+        "source_inputs": {
+          "old_identity": {
+            "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-outside-glyph-stops-20261102-v1/symbols/LPTUSDT/identity.json",
+            "bytes": 3072,
+            "mtime_ns": 1793613768145438064
+          },
+          "cloud_identity": {
+            "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/LPTUSDT/identity.json",
+            "bytes": 5011,
+            "mtime_ns": 1793620896256824724
+          },
+          "registered_inputs": [
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_LPTUSDT_5m_469974.csv",
+              "bytes": 33945277,
+              "mtime_ns": 1788065608000000000
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/binance_um5m_20260923_20261031/series/LPTUSDT.csv.gz",
+              "bytes": 125950,
+              "mtime_ns": 1793521398713811958
+            }
+          ],
+          "current_inputs": [
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_LPTUSDT_5m_469974.csv",
+              "bytes": 33945277,
+              "mtime_ns": 1788065608000000000
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/binance_um5m_20260923_20261031/series/LPTUSDT.csv.gz",
+              "bytes": 125950,
+              "mtime_ns": 1793521398713811958
+            }
+          ],
+          "matches_old_identity": true,
+          "matches_cloud_identity": true
+        },
+        "old_ledger": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-outside-glyph-stops-20261102-v1/symbols/LPTUSDT/trades.csv.gz",
+          "bytes": 227153,
+          "mtime_ns": 1793613767525042501
+        },
+        "cloud_ledger": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/LPTUSDT/trades.csv.gz",
+          "bytes": 183526,
+          "mtime_ns": 1793620895171994295
+        },
+        "schedule": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/LPTUSDT/schedule.csv.gz",
+          "bytes": 3577,
+          "mtime_ns": 1793620893114095640
+        },
+        "full_history_ema_before_window_slice": true,
+        "source_hashes": "not computed per owner instruction"
+      },
+      "validation": {
+        "issues": [],
+        "source_stat_matches": {
+          "old_identity": true,
+          "cloud_identity": true
+        },
+        "h1_signal_bar_found": true,
+        "h1_signal_ohlc_matches_old_ledger": {
+          "high_matches_old_signal": true,
+          "low_matches_old_signal": true,
+          "close_matches_old_signal": true
+        },
+        "signal_open_comparison_available": false,
+        "signal_open_comparison_note": "old fixed20 ledger has no signal_open field",
+        "signal_bar_open_source": 1.679,
+        "old_entry_matches_source_open": {
+          "bar_open": "2026-10-20T17:00:00+00:00",
+          "source_open": 1.683,
+          "ledger_entry": 1.683,
+          "matches": true
+        },
+        "new_entry_matches_source_open": null,
+        "old_target_matches_original_monday_edge": true,
+        "new_target_matches_old_target": null,
+        "old_raw_exit_in_exit_bar_ohlc": {
+          "valid_index": true,
+          "bar_open": "2026-10-20T18:25:00+00:00",
+          "bar_low": 1.651,
+          "bar_high": 1.656,
+          "raw_exit_price": 1.651,
+          "tolerance": 1e-08,
+          "inside_ohlc_with_tolerance": true
+        },
+        "new_raw_exit_in_exit_bar_ohlc": null
+      }
+    },
+    {
+      "number": 6,
+      "role": "invalid_geometry_cancel",
+      "title": "出现翻转，仍不满足入场条件",
+      "caption": "价格越过原信号影线止损参考，未通过准入检查；该参考与固定2%止损不同。",
+      "symbol": "BTCUSDT",
+      "side": -1,
+      "pair_id": "BTCUSDT:2026-04-22T06:00:00+00:00:-1",
+      "stop_id": "fixed20",
+      "status": "invalid_geometry",
+      "signal_time": "2026-04-22T06:00:00+00:00",
+      "signal_candle_time": "2026-04-22T05:00:00+00:00",
+      "level1618": {
+        "monday_date_new_york": "2026-04-20",
+        "monday_start_utc": "2026-04-20T04:00:00+00:00",
+        "levels_available_from_utc": "2026-04-21T04:00:00+00:00",
+        "next_monday_start_utc": "2026-04-27T04:00:00+00:00",
+        "monday_high": 76531.0,
+        "monday_low": 74061.2,
+        "range": 2469.800000000003,
+        "level1618": {
+          "upper": 78057.3364,
+          "lower": 72534.8636,
+          "active_outside_level": 78057.3364,
+          "target_edge": 76531.0,
+          "formula": "upper = monday_low + 1.618 * (monday_high - monday_low); lower = monday_high - 1.618 * (monday_high - monday_low)"
+        }
+      },
+      "old": {
+        "pair_id": "BTCUSDT:2026-04-22T06:00:00+00:00:-1",
+        "trade_key": "BTCUSDT:2026-04-22T06:00:00+00:00:-1:fixed20:0",
+        "symbol": "BTCUSDT",
+        "population": "signal",
+        "stop_id": "fixed20",
+        "entry_i": 663336,
+        "entry_time": "2026-04-22 06:00:00+00:00",
+        "signal_time": "2026-04-22 06:00:00+00:00",
+        "side": -1,
+        "entry": 77954.4,
+        "stop": 79513.488,
+        "target_price": 76531.0,
+        "risk": 1559.088,
+        "planned_rr": 0.9129696335293417,
+        "planned_rr3": false,
+        "stop_pct": 2.0,
+        "month": "2026-04",
+        "bucket": -28,
+        "monday_high": 76531.0,
+        "monday_low": 74061.2,
+        "signal_high": 78447.5,
+        "signal_low": 77406.0,
+        "signal_close": 77954.4,
+        "volume2": true,
+        "rsi_extreme": true,
+        "rsi_div": false,
+        "bb_reentry": false,
+        "trend4h": false,
+        "reclaim1618": true,
+        "exit_i": 663673,
+        "exit_time": "2026-04-23 10:10:00+00:00",
+        "reason": "target",
+        "raw_exit_price": 76531.0,
+        "censored": false,
+        "entry_fill": 77915.4228,
+        "exit_fill": 76531.0,
+        "fee_entry_rate": 0.0005,
+        "fee_exit_rate": 0.0002,
+        "net_bp": 170.6329454912103,
+        "net_r": 0.8531647274560513,
+        "gross_bp": 182.59392670586834,
+        "fee_bp": 6.960981214658826,
+        "slippage_bp": 4.999999999999233,
+        "ambiguous_bar": false,
+        "stop_first_net_bp": 170.6329454912103,
+        "stop_first_net_r": 0.8531647274560513
+      },
+      "new": null,
+      "schedule": {
+        "pair_id": "BTCUSDT:2026-04-22T06:00:00+00:00:-1",
+        "signal_time": "2026-04-22 06:00:00+00:00",
+        "side": -1,
+        "status": "invalid_geometry",
+        "entry_i": 663507,
+        "confirm_i": 663506,
+        "wait_minutes": 855.0
+      },
+      "old_markers": {
+        "entry_bar_open": "2026-04-22T06:00:00+00:00",
+        "entry_price_raw": 77954.4,
+        "exit_bar_open": "2026-04-23T10:05:00+00:00",
+        "exit_bar_close_time": "2026-04-23T10:10:00+00:00",
+        "exit_ledger_time": "2026-04-23 10:10:00+00:00",
+        "exit_price_raw": 76531.0,
+        "exit_time_semantics": "exit_i identifies this 5m bar; exit_time is the bar close, not a second-accurate fill timestamp"
+      },
+      "new_markers": null,
+      "cancellation_reference": {
+        "kind": "invalid_geometry_candidate_not_filled",
+        "entry_bar_open": "2026-04-22T20:15:00+00:00",
+        "entry_price_open": 78700.1,
+        "wait_minutes": 855.0,
+        "confirm_bar_open": "2026-04-22T20:10:00+00:00",
+        "confirm_close_time": "2026-04-22T20:15:00+00:00",
+        "wick_stop_candidate": 78526.2001,
+        "target_price": 76531.0,
+        "target_geometry_valid": true,
+        "wick_stop_geometry_valid": false,
+        "not_a_filled_entry": true
+      },
+      "windows": {
+        "h1": {
+          "requested_start": "2026-04-19T06:00:00+00:00",
+          "requested_end": "2026-04-23T22:05:00+00:00",
+          "end_anchor": "2026-04-23T10:05:00+00:00",
+          "before_hours": 72,
+          "after_hours": 12
+        },
+        "m5": {
+          "requested_start": "2026-04-22T00:00:00+00:00",
+          "requested_end": "2026-04-23T02:15:00+00:00",
+          "end_anchor": "2026-04-22T20:15:00+00:00",
+          "end_anchor_kind": "invalid_geometry_candidate",
+          "before_hours": 6,
+          "after_hours": 6
+        }
+      },
+      "actual_windows": {
+        "h1": {
+          "first_bar_open": "2026-04-19T06:00:00+00:00",
+          "last_bar_open": "2026-04-23T22:00:00+00:00",
+          "bars": 113,
+          "gaps": [],
+          "synthetic_rows_added": 0
+        },
+        "m5": {
+          "first_bar_open": "2026-04-22T00:00:00+00:00",
+          "last_bar_open": "2026-04-23T02:15:00+00:00",
+          "bars": 316,
+          "gaps": [],
+          "synthetic_rows_added": 0
+        }
+      },
+      "inputs": {
+        "h1_csv": "experiments/active/exp-h1-ema-cloud-20261102-v1/charts_white_v1/inputs/06_h1.csv",
+        "m5_csv": "experiments/active/exp-h1-ema-cloud-20261102-v1/charts_white_v1/inputs/06_5m.csv"
+      },
+      "provenance": {
+        "source_inputs": {
+          "old_identity": {
+            "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-outside-glyph-stops-20261102-v1/symbols/BTCUSDT/identity.json",
+            "bytes": 3075,
+            "mtime_ns": 1793613770006755712
+          },
+          "cloud_identity": {
+            "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/BTCUSDT/identity.json",
+            "bytes": 5014,
+            "mtime_ns": 1793620897878984116
+          },
+          "registered_inputs": [
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv",
+              "bytes": 54081964,
+              "mtime_ns": 1788064735000000000
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/BTCUSDT.csv",
+              "bytes": 3326725,
+              "mtime_ns": 1790091692000000000
+            }
+          ],
+          "current_inputs": [
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv",
+              "bytes": 54081964,
+              "mtime_ns": 1788064735000000000
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/BTCUSDT.csv",
+              "bytes": 3326725,
+              "mtime_ns": 1790091692000000000
+            }
+          ],
+          "matches_old_identity": true,
+          "matches_cloud_identity": true
+        },
+        "old_ledger": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-outside-glyph-stops-20261102-v1/symbols/BTCUSDT/trades.csv.gz",
+          "bytes": 285350,
+          "mtime_ns": 1793613769312971570
+        },
+        "cloud_ledger": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/BTCUSDT/trades.csv.gz",
+          "bytes": 242321,
+          "mtime_ns": 1793620896646795076
+        },
+        "schedule": {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-h1-ema-cloud-20261102-v1/symbols/BTCUSDT/schedule.csv.gz",
+          "bytes": 4242,
+          "mtime_ns": 1793620894208369528
+        },
+        "full_history_ema_before_window_slice": true,
+        "source_hashes": "not computed per owner instruction"
+      },
+      "validation": {
+        "issues": [],
+        "source_stat_matches": {
+          "old_identity": true,
+          "cloud_identity": true
+        },
+        "h1_signal_bar_found": true,
+        "h1_signal_ohlc_matches_old_ledger": {
+          "high_matches_old_signal": true,
+          "low_matches_old_signal": true,
+          "close_matches_old_signal": true
+        },
+        "signal_open_comparison_available": false,
+        "signal_open_comparison_note": "old fixed20 ledger has no signal_open field",
+        "signal_bar_open_source": 77475.4,
+        "old_entry_matches_source_open": {
+          "bar_open": "2026-04-22T06:00:00+00:00",
+          "source_open": 77954.4,
+          "ledger_entry": 77954.4,
+          "matches": true
+        },
+        "new_entry_matches_source_open": null,
+        "old_target_matches_original_monday_edge": true,
+        "new_target_matches_old_target": null,
+        "old_raw_exit_in_exit_bar_ohlc": {
+          "valid_index": true,
+          "bar_open": "2026-04-23T10:05:00+00:00",
+          "bar_low": 76504.6,
+          "bar_high": 77580.1,
+          "raw_exit_price": 76531.0,
+          "tolerance": 7.6531e-06,
+          "inside_ohlc_with_tolerance": true
+        },
+        "new_raw_exit_in_exit_bar_ohlc": null
+      }
+    }
+  ]
+}
