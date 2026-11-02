@@ -1,0 +1,51 @@
+{
+  "source_experiment": "exp-h1-ema-cloud-20261102-v1",
+  "baseline_experiment": "exp-h1-outside-glyph-stops-20261102-v1",
+  "stop_id": "fixed20",
+  "timezone": "Asia/Shanghai",
+  "background": "#FFFFFF",
+  "sample_selection": "Explanatory, outcome-stratified examples among BTC/ETH/LPT; not a representative/random sample. Normal examples >=2025, both sides noncensored stop/target and holding<=72h. Prefer class-median delay, avoid extreme R. Fixed LPT screenshot event and latest cancellation cases. BTC long double-loss adds directional coverage.",
+  "panels": [
+    "1H context with signal/entries/exits and relevant weekly levels",
+    "5m close-computed EMA20/50 flip and entry detail"
+  ],
+  "data_policy": "Reuse frozen fills; full source history only to compute continuous EMA and OHLC; never rerun PnL. Freeze displayed candles/EMA and provenance by source size/mtime, no input hashes.",
+  "cases": [
+    {
+      "number": 1,
+      "pair_id": "LPTUSDT:2026-10-21T19:00:00+00:00:-1",
+      "title": "同样到目标，等待后少赚",
+      "caption": "两种入场都到目标；看清80分钟等待消耗了多少空间。"
+    },
+    {
+      "number": 2,
+      "pair_id": "ETHUSDT:2025-07-02T21:00:00+00:00:-1",
+      "title": "原来盈利，等待后止损",
+      "caption": "同为2%止损；进场价改变，止损价也随之改变。"
+    },
+    {
+      "number": 3,
+      "pair_id": "ETHUSDT:2025-01-31T15:00:00+00:00:-1",
+      "title": "避开第一轮止损",
+      "caption": "原入场先止损，稍后的云带翻转入场到达目标。"
+    },
+    {
+      "number": 4,
+      "pair_id": "BTCUSDT:2025-10-29T18:00:00+00:00:1",
+      "title": "两种入场都止损",
+      "caption": "做多案例：等待确认依然可能遇到继续下跌。"
+    },
+    {
+      "number": 5,
+      "pair_id": "LPTUSDT:2026-10-20T17:00:00+00:00:-1",
+      "title": "目标先到，等待没有成交",
+      "caption": "云带确认之前行情已经到目标，本轮取消等待。"
+    },
+    {
+      "number": 6,
+      "pair_id": "BTCUSDT:2026-04-22T06:00:00+00:00:-1",
+      "title": "翻转出现，但原止损已失效",
+      "caption": "候选价越过原信号影线止损；共同准入检查拒绝开仓。"
+    }
+  ]
+}

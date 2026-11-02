@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPIKE · 交易复盘静态图模板 · EMA Cloud 入场时机对照</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f1f3f5;
+      color: #1a1f2c;
+      -webkit-font-smoothing: antialiased;
+    }
+    .font-mono-num {
+      font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-feature-settings: "tnum" 1, "zero" 1;
+    }
+    /* 严格出版物画幅 1600 x 1120 纯白页面 */
+    .plate-container {
+      width: 1600px;
+      height: 1120px;
+      background-color: #ffffff;
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    /* 细网格参考线 */
+    .grid-line {
+      stroke: #f1f3f5;
+      stroke-width: 1;
+    }
+    .axis-line {
+      stroke: #e2e6ea;
+      stroke-width: 1;
+    }
+    .level-dashed {
+      stroke-dasharray: 4 4;
+    }
+    /* 打印与导出优化 */
+    @media print {
+      body { background: none; }
+      .plate-container { box-shadow: none; margin: 0; }
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-8">
+
+  <!-- 1600x1120 纯白专业出版单笔图复盘板 -->
+  <div class="plate-container p-10 flex flex-col justify-between select-none">
+    
+    <!-- 1. 页首：标的与上下文 + A/B 入场策略对照条 -->
+    <header class="border-b border-[#e9ecef] pb-5">
+      <!-- 顶行：币种、方向、时间、核心场景 -->
+      <div class="flex items-baseline justify-between mb-4">
+        <div class="flex items-baseline gap-4">
+          <span class="text-3xl font-bold tracking-tight text-[#111827]">BTC/USDT</span>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold uppercase tracking-wider bg-[#ecfdf5] text-[#065f46] border border-[#a7f3d0]">做多 LONG</span>
+          <span class="font-mono-num text-sm text-[#4b5563]">基准纽约周: 2024-W42 · 信号触发: 10-16 14:00 (UTC)</span>
+        </div>
+        <div class="text-right">
+          <span class="text-xs uppercase tracking-widest text-[#9ca3af] font-semibold">复盘场景</span>
+          <p class="text-sm font-medium text-[#374151]">触达周一 1.618 扩展位假跌破 · EMA Cloud 翻转顺势过滤检验</p>
+        </div>
+      </div>
+
+      <!-- 对照卡片条：A 原勾叉进场 vs B 等云带确认进场 (紧凑数据排布，非卡片阴影堆叠) -->
+      <div class="grid grid-cols-12 gap-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-lg p-3 items-center">
+        <!-- 策略说明 -->
+        <div class="col-span-3 pr-4 border-r border-[#e2e8f0]">
+          <div class="text-xs font-semibold text-[#1e293b]">入场时机对照模式</div>
+          <div class="text-[11px] text-[#64748b] mt-0.5">相同 H1 1.618 触发信号，不同执行确认机制</div>
+        </div>
+
+        <!-- 方案 A: 原信号柱市价即入 -->
+        <div class="col-span-4 flex items-center justify-between px-4 border-r border-[#e2e8f0]">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-[#2563eb] inline-block"></span>
+            <div>
+              <div class="text-xs font-semibold text-[#1e40af]">A · 原勾叉进场 (H1 收盘即入)</div>
+              <div class="text-[11px] text-[#64748b]">等待时长: <span class="font-mono-num font-medium text-[#1e293b]">0 分钟</span> (立即执行)</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-[#64748b]">成交价 <span class="font-mono-num font-semibold text-[#1e293b]">67,240.0</span></div>
+            <div class="text-xs font-mono-num font-bold text-[#b91c1c]">-1.00 R <span class="text-[10px] font-normal text-[#9ca3af]">(假突破扫损)</span></div>
+          </div>
+        </div>
+
+        <!-- 方案 B: 等 5m 云带翻转金叉 -->
+        <div class="col-span-4 flex items-center justify-between px-4 border-r border-[#e2e8f0]">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rotate-45 bg-[#7c3aed] inline-block"></span>
+            <div>
+              <div class="text-xs font-semibold text-[#6d28d9]">B · 等 EMA Cloud 翻转确认</div>
+              <div class="text-[11px] text-[#64748b]">等待时长: <span class="font-mono-num font-medium text-[#1e293b]">35 分钟</span> (7 根 5m 柱)</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-[#64748b]">成交价 <span class="font-mono-num font-semibold text-[#1e293b]">67,410.0</span></div>
+            <div class="text-xs font-mono-num font-bold text-[#15803d]">+2.45 R <span class="text-[10px] font-normal text-[#9ca3af]">(锁定离场)</span></div>
+          </div>
+        </div>
+
+        <!-- 差异摘要 -->
+        <div class="col-span-1 text-center pl-1">
+          <span class="text-[10px] uppercase font-bold text-[#64748b] block">R 差值</span>
+          <span class="font-mono-num text-sm font-bold text-[#15803d]">+3.45 R</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. 上图：1H 市场位置图 (宏观上下文、真实 H1 信号蜡烛、整笔交易前后走势) -->
+    <div class="flex flex-col h-[440px] pt-2">
+      <div class="flex justify-between items-center mb-1 px-1">
+        <div class="flex items-center gap-3">
+          <span class="font-bold text-xs uppercase tracking-wider text-[#334155] bg-[#f1f5f9] px-2 py-0.5 rounded">1H 宏观结构与位置</span>
+          <span class="text-xs text-[#64748b]">周一区间定界 [66,800 - 68,900] · 下沿 1.618 扩展位触及后反转走势</span>
+        </div>
+        <div class="text-xs font-mono-num text-[#94a3b8]">时间跨度: 10-15 00:00 至 10-18 00:00 (72 根 1H 柱)</div>
+      </div>
+
+      <!-- 1H SVG 图表区 -->
+      <div class="relative flex-1 bg-white border border-[#e2e8f0] rounded overflow-hidden">
+        <svg class="w-full h-full" viewBox="0 0 1520 400" preserveAspectRatio="none">
+          <defs>
+            <!-- 聚焦矩形标记: 5m 展开区间 -->
+            <linearGradient id="focusGlow" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f8fafc" stop-opacity="0.8"/>
+              <stop offset="100%" stop-color="#f1f5f9" stop-opacity="0.5"/>
+            </linearGradient>
+          </defs>
+
+          <!-- 水平网格线 -->
+          <line x1="0" y1="50" x2="1420" y2="50" class="grid-line" />
+          <line x1="0" y1="120" x2="1420" y2="120" class="grid-line" />
+          <line x1="0" y1="200" x2="1420" y2="200" class="grid-line" />
+          <line x1="0" y1="280" x2="1420" y2="280" class="grid-line" />
+          <line x1="0" y1="350" x2="1420" y2="350" class="grid-line" />
+
+          <!-- 垂直时间网格线 -->
+          <line x1="200" y1="0" x2="200" y2="375" class="grid-line" />
+          <line x1="500" y1="0" x2="500" y2="375" class="grid-line" />
+          <line x1="800" y1="0" x2="800" y2="375" class="grid-line" />
+          <line x1="1100" y1="0" x2="1100" y2="375" class="grid-line" />
+
+          <!-- 价格关键参考线: 周一高点、周一低点、下沿 1.618 扩展位 -->
+          <!-- 周一低点 66,800 -->
+          <line x1="0" y1="220" x2="1420" y2="220" stroke="#94a3b8" stroke-width="1" class="level-dashed"/>
+          <!-- 下沿 1.618 扩展位 65,502 -->
+          <line x1="0" y1="310" x2="1420" y2="310" stroke="#059669" stroke-width="1.5" />
+          
+          <!-- 5m 细节聚焦微矩形高亮 -->
+          <rect x="650" y="20" width="180" height="355" fill="url(#focusGlow)" stroke="#cbd5e1" stroke-dasharray="3 3"/>
+          <text x="740" y="40" text-anchor="middle" font-size="11" fill="#64748b" font-weight="600">5m 放大细节对应区间</text>
+
+          <!-- 1H 模拟 K 线序列 (精细绘制，出版级对比) -->
+          <!-- 阶段 1: 周初震荡下行 -->
+          <!-- 柱子1 -->
+          <line x1="80" y1="110" x2="80" y2="180" stroke="#dc2626" stroke-width="1.2"/>
+          <rect x="76" y="130" width="8" height="35" fill="#ef4444" stroke="#dc2626" stroke-width="0.8"/>
+          <!-- 柱子2 -->
+          <line x1="120" y1="140" x2="120" y2="200" stroke="#16a34a" stroke-width="1.2"/>
+          <rect x="116" y="150" width="8" height="25" fill="#22c55e" stroke="#16a34a" stroke-width="0.8"/>
+          <!-- 柱子3 -->
+          <line x1="160" y1="160" x2="160" y2="230" stroke="#dc2626" stroke-width="1.2"/>
+          <rect x="156" y="170" width="8" height="40" fill="#ef4444" stroke="#dc2626" stroke-width="0.8"/>
+          <!-- 柱子4 -->
+          <line x1="200" y1="190" x2="200" y2="250" stroke="#16a34a" stroke-width="1.2"/>
+          <rect x="196" y="200" width="8" height="30" fill="#22c55e" stroke="#16a34a" stroke-width="0.8"/>
+          <!-- 柱子5-8 延续下探 -->
+          <line x1="250" y1="210" x2="250" y2="265" stroke="#dc2626" stroke-width="1.2"/>
+          <rect x="246" y="220" width="8" height="35" fill="#ef4444" stroke="#dc2626" stroke-width="0.8"/>
+          <line x1="300" y1="240" x2="300" y2="280" stroke="#dc2626" stroke-width="1.2"/>
+          <rect x="296" y="245" width="8" height="20" fill="#ef4444" stroke="#dc2626" stroke-width="0.8"/>
+          <line x1="350" y1="250" x2="350" y2="295" stroke="#16a34a" stroke-width="1.2"/>
+          <rect x="346" y="260" width="8" height="25" fill="#22c55e" stroke="#16a34a" stroke-width="0.8"/>
+          <line x1="400" y1="265" x2="400" y2="305" stroke="#dc2626" stroke-width="1.2"/>
+          <rect x="396" y="275" width="8" height="22" fill="#ef4444" stroke="#dc2626" stroke-width="0.8"/>
+
+          <!-- 触及 1.618 的信号柱 1H (X=700) -->
+          <!-- 触价引线击穿 1.618，长下影线收回 -->
+          <line x1="700" y1="270" x2="700" y2="345" stroke="#16a34a" stroke-width="1.5"/>
+          <rect x="695" y="280" width="10" height="25" fill="#22c55e" stroke="#16a34a" stroke-width="1"/>
+
+          <!-- 真实 H1 信号勾叉标记 (打在 H1 蜡烛下方，表明此处满足 1.618 触碰与收线规则) -->
+          <text x="700" y="365" text-anchor="middle" font-size="16" fill="#15803d" font-weight="bold">✓</text>
+          <text x="700" y="380" text-anchor="middle" font-size="10" fill="#475569" font-family="Inter" font-weight="600">H1信号触发</text>
+
+          <!-- 后续 1H 蜡烛行情: 震荡后强力拉升 -->
+          <line x1="740" y1="275" x2="740" y2="315" stroke="#dc2626" stroke-width="1.2"/>
+          <rect x="736" y="285" width="8" height="20" fill="#ef4444" stroke="#dc2626" stroke-width="0.8"/>
+
+          <line x1="780" y1="255" x2="780" y2="300" stroke="#16a34a" stroke-width="1.2"/>
+          <rect x="776" y="265" width="8" height="25" fill="#22c55e" stroke="#16a34a" stroke-width="0.8"/>
+
+          <line x1="830" y1="230" x2="830" y2="280" stroke="#16a34a" stroke-width="1.2"/>
+          <rect x="826" y="240" width="8" height="35" fill="#22c55e" stroke="#16a34a" stroke-width="0.8"/>
+
+          <line x1="880" y1="200" x2="880" y2="255" stroke="#16a34a" stroke-width="1.2"/>
+          <rect x="876" y="210" width="8" height="40" fill="#22c55e" stroke="#16a34a" stroke-width="0.8"/>
+
+          <line x1="930" y1="170" x2="930" y2="225" stroke="#16a34a" stroke-width="1.2"/>
+          <rect x="926" y="180" width="8" height="35" fill="#22c55e" stroke="#16a34a" stroke-width="0.8"/>
+
+          <line x1="980" y1="150" x2="980" y2="195" stroke="#dc2626" stroke-width="1.2"/>
+          <rect x="976" y="160" width="8" height="20" fill="#ef4444" stroke="#dc2626" stroke-width="0.8"/>
+
+          <line x1="1040" y1="120" x2="1040" y2="175" stroke="#16a34a" stroke-width="1.2"/>
+          <rect x="1036" y="130" width="8" height="35" fill="#22c55e" stroke="#16a34a" stroke-width="0.8"/>
+
+          <line x1="1100" y1="100" x2="1100" y2="150" stroke="#16a34a" stroke-width="1.2"/>
+          <rect x="1096" y="110" width="8" height="30" fill="#22c55e" stroke="#16a34a" stroke-width="0.8"/>
+
+          <line x1="1160" y1="80" x2="1160" y2="130" stroke="#16a34a" stroke-width="1.2"/>
+          <rect x="1156" y="90" width="8" height="30" fill="#22c55e" stroke="#16a34a" stroke-width="0.8"/>
+
+          <!-- 1H 图中清晰标注：目标离场区域 -->
+          <line x1="1160" y1="95" x2="1420" y2="95" stroke="#7c3aed" stroke-width="1" stroke-dasharray="2 2"/>
+          <circle cx="1160" cy="95" r="4" fill="none" stroke="#7c3aed" stroke-width="2"/>
+          <text x="1175" y="92" font-size="10" fill="#6d28d9" font-family="Inter" font-weight="600">B 策略 2.45R 目标止盈 (68,450)</text>
+
+          <!-- 右侧价格刻度轴 (独立区域，不压K线) -->
+          <rect x="1420" y="0" width="100" height="375" fill="#fafbfc" stroke-left="#e2e6ea"/>
+          <line x1="1420" y1="0" x2="1420" y2="375" class="axis-line" />
+          
+          <text x="1430" y="55" font-size="11" class="font-mono-num" fill="#64748b">69,200.0</text>
+          <text x="1430" y="125" font-size="11" class="font-mono-num" fill="#64748b">68,100.0</text>
+          <text x="1430" y="205" font-size="11" class="font-mono-num" fill="#64748b">67,000.0</text>
+          <text x="1430" y="224" font-size="10" class="font-mono-num" fill="#475569" font-weight="bold">66,800.0</text>
+          <text x="1485" y="224" font-size="9" fill="#64748b">周一L</text>
+          <text x="1430" y="285" font-size="11" class="font-mono-num" fill="#64748b">66,000.0</text>
+          <text x="1430" y="314" font-size="10" class="font-mono-num" fill="#059669" font-weight="bold">65,502.0</text>
+          <text x="1485" y="314" font-size="9" fill="#059669">1.618</text>
+          <text x="1430" y="355" font-size="11" class="font-mono-num" fill="#64748b">65,000.0</text>
+
+          <!-- 底部时间轴 -->
+          <line x1="0" y1="375" x2="1520" y2="375" class="axis-line" />
+          <text x="80" y="392" font-size="11" class="font-mono-num" fill="#94a3b8">10-15 08:00</text>
+          <text x="350" y="392" font-size="11" class="font-mono-num" fill="#94a3b8">10-15 20:00</text>
+          <text x="700" y="392" font-size="11" class="font-mono-num" fill="#1e293b" font-weight="bold">10-16 14:00 (信号日)</text>
+          <text x="980" y="392" font-size="11" class="font-mono-num" fill="#94a3b8">10-17 04:00</text>
+          <text x="1160" y="392" font-size="11" class="font-mono-num" fill="#94a3b8">10-17 18:00</text>
+        </svg>
+
+        <!-- 外部标签: 下沿 1.618 线名与当前位置 (放置在图表左上/右上边缘，不挡住蜡烛) -->
+        <div class="absolute top-2 left-3 bg-white/90 border border-[#cbd5e1] rounded px-2 py-0.5 text-[11px] text-[#475569]">
+          基准位: <span class="font-mono-num font-semibold text-[#059669]">周一下沿 1.618 = 65,502.0</span> · 触达假穿后实体收回
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 下图：5m 细节对比图 (EMA 20/50 翻转云带、A/B 入场点点位、保护止损线与退出路径) -->
+    <div class="flex flex-col h-[480px] pt-3">
+      <div class="flex justify-between items-center mb-1 px-1">
+        <div class="flex items-center gap-3">
+          <span class="font-bold text-xs uppercase tracking-wider text-[#334155] bg-[#f1f5f9] px-2 py-0.5 rounded">5M 执行细节与 EMA CLOUD 翻转</span>
+          <span class="text-xs text-[#64748b]">EMA(20) 与 EMA(50) 动态云带 · 真实成交点位精确标记与假跌破洗盘</span>
+        </div>
+        <div class="flex items-center gap-4 text-xs font-mono-num">
+          <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-[#0284c7]"></span> EMA 20 快线</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-[#d97706]"></span> EMA 50 慢线</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-[#dcfce7] border border-[#86efac]"></span> 多头云带 (看涨)</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-[#fee2e2] border border-[#fca5a5]"></span> 空头云带 (看跌)</span>
+        </div>
+      </div>
+
+      <!-- 5m SVG 图表区 -->
+      <div class="relative flex-1 bg-white border border-[#e2e8f0] rounded overflow-hidden">
+        <svg class="w-full h-full" viewBox="0 0 1520 440" preserveAspectRatio="none">
+          <defs>
+            <!-- 多头云带填充 -->
+            <linearGradient id="bullCloud" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#22c55e" stop-opacity="0.22"/>
+              <stop offset="100%" stop-color="#16a34a" stop-opacity="0.10"/>
+            </linearGradient>
+            <!-- 空头云带填充 -->
+            <linearGradient id="bearCloud" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ef4444" stop-opacity="0.20"/>
+              <stop offset="100%" stop-color="#dc2626" stop-opacity="0.08"/>
+            </linearGradient>
+          </defs>
+
+          <!-- 水平网格线 -->
+          <line x1="0" y1="60" x2="1420" y2="60" class="grid-line" />
+          <line x1="0" y1="140" x2="1420" y2="140" class="grid-line" />
+          <line x1="0" y1="220" x2="1420" y2="220" class="grid-line" />
+          <line x1="0" y1="300" x2="1420" y2="300" class="grid-line" />
+          <line x1="0" y1="380" x2="1420" y2="380" class="grid-line" />
+
+          <!-- 垂直时间网格线 -->
+          <line x1="260" y1="0" x2="260" y2="415" class="grid-line" />
+          <line x1="550" y1="0" x2="550" y2="415" class="grid-line" />
+          <line x1="850" y1="0" x2="850" y2="415" class="grid-line" />
+          <line x1="1150" y1="0" x2="1150" y2="415" class="grid-line" />
+
+          <!-- 价格水平线: 1.618 扩展位 65,502 -->
+          <line x1="0" y1="310" x2="1420" y2="310" stroke="#059669" stroke-width="1.5" />
+          <!-- A 的止损线 67,080 (-1R 止损位) -->
+          <line x1="260" y1="285" x2="480" y2="285" stroke="#ef4444" stroke-width="1.2" class="level-dashed"/>
+          <text x="490" y="289" font-size="10" fill="#dc2626" font-family="Inter" font-weight="600">A 初始止损 (67,080 · 击穿扫损)</text>
+
+          <!-- B 的保护止损线 67,180 -->
+          <line x1="550" y1="250" x2="1200" y2="250" stroke="#7c3aed" stroke-width="1.2" class="level-dashed"/>
+          <text x="1210" y="254" font-size="10" fill="#6d28d9" font-family="Inter" font-weight="600">B 保护止损 (67,180 · 云带下沿安全)</text>
+
+          <!-- EMA CLOUD 多边形绘制 (翻转过程: 前期为空头云带，中期收窄交叉，后期多头云带扩张) -->
+          <!-- 阶段 1: 空头云带 (X: 50 -> 480) 快线在慢线下方 -->
+          <path d="M 50,210 Q 150,225 260,240 T 480,245 L 480,225 Q 360,215 260,200 T 50,170 Z" fill="url(#bearCloud)"/>
+          <!-- 阶段 2: 云带翻转金叉并向上发散 (X: 480 -> 1420) 快线越过慢线 -->
+          <path d="M 480,245 Q 600,210 750,150 T 1100,80 T 1420,50 L 1420,80 Q 1100,110 750,180 T 480,225 Z" fill="url(#bullCloud)"/>
+
+          <!-- EMA 20 快线 (蓝) -->
+          <path d="M 50,210 Q 150,225 260,240 T 480,245 Q 600,210 750,150 T 1100,80 T 1420,50" fill="none" stroke="#0284c7" stroke-width="1.5"/>
+          <!-- EMA 50 慢线 (橙) -->
+          <path d="M 50,170 Q 150,185 260,200 T 480,225 Q 600,215 750,180 T 1100,110 T 1420,80" fill="none" stroke="#d97706" stroke-width="1.5"/>
+
+          <!-- 5m K 线序列 -->
+          <!-- X=50-200: 下跌触及 1.618 -->
+          <line x1="70" y1="180" x2="70" y2="230" stroke="#dc2626" stroke-width="1"/>
+          <rect x="67" y="190" width="6" height="30" fill="#ef4444"/>
+
+          <line x1="110" y1="210" x2="110" y2="260" stroke="#dc2626" stroke-width="1"/>
+          <rect x="107" y="220" width="6" height="30" fill="#ef4444"/>
+
+          <line x1="150" y1="240" x2="150" y2="320" stroke="#16a34a" stroke-width="1"/>
+          <rect x="147" y="260" width="6" height="25" fill="#22c55e"/>
+
+          <line x1="190" y1="250" x2="190" y2="300" stroke="#dc2626" stroke-width="1"/>
+          <rect x="187" y="260" width="6" height="25" fill="#ef4444"/>
+
+          <line x1="230" y1="240" x2="230" y2="280" stroke="#16a34a" stroke-width="1"/>
+          <rect x="227" y="245" width="6" height="25" fill="#22c55e"/>
+
+          <!-- X=260: H1 信号时刻! 方案 A 立即入场处 -->
+          <line x1="260" y1="230" x2="260" y2="270" stroke="#16a34a" stroke-width="1.2"/>
+          <rect x="257" y="235" width="6" height="25" fill="#22c55e"/>
+          <!-- 方案 A 入场标记: 蓝色圆点 -->
+          <circle cx="260" cy="235" r="5.5" fill="#2563eb" stroke="#ffffff" stroke-width="2"/>
+          <text x="260" y="215" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="700">A 入场: 67,240</text>
+          <text x="260" y="198" text-anchor="middle" font-size="10" fill="#64748b">(云带仍呈空头压制)</text>
+
+          <!-- X=300-440: 随后的二次回踩与洗盘下杀 (A 方案在此被扫损离场) -->
+          <line x1="300" y1="240" x2="300" y2="275" stroke="#dc2626" stroke-width="1"/>
+          <rect x="297" y="245" width="6" height="20" fill="#ef4444"/>
+
+          <line x1="340" y1="255" x2="340" y2="295" stroke="#dc2626" stroke-width="1"/>
+          <rect x="337" y="260" width="6" height="28" fill="#ef4444"/>
+
+          <!-- 扫损柱 (X=390, 刺破 67,080 触发 A 止损) -->
+          <line x1="390" y1="270" x2="390" y2="305" stroke="#dc2626" stroke-width="1.2"/>
+          <rect x="387" y="275" width="6" height="20" fill="#ef4444"/>
+          <!-- A 退出标记: 蓝色空心圆圈 -->
+          <circle cx="390" cy="290" r="5" fill="#ffffff" stroke="#2563eb" stroke-width="2.5"/>
+          <text x="390" y="325" text-anchor="middle" font-size="10" fill="#b91c1c" font-weight="bold">A 扫损退出 ✕ (-1.00R)</text>
+
+          <!-- X=440-500: 洗盘结束，EMA 20/50 迅速收敛并在 480 处形成金叉翻转 -->
+          <line x1="440" y1="260" x2="440" y2="290" stroke="#16a34a" stroke-width="1"/>
+          <rect x="437" y="250" width="6" height="25" fill="#22c55e"/>
+
+          <line x1="490" y1="230" x2="490" y2="265" stroke="#16a34a" stroke-width="1"/>
+          <rect x="487" y="235" width="6" height="20" fill="#22c55e"/>
+
+          <!-- X=550: 方案 B 入场时刻! (EMA Cloud 翻转形成多头绿云，K 线站上云带收阳确认) -->
+          <line x1="550" y1="200" x2="550" y2="245" stroke="#16a34a" stroke-width="1.5"/>
+          <rect x="546" y="205" width="8" height="28" fill="#22c55e" stroke="#16a34a" stroke-width="0.8"/>
+          <!-- 方案 B 入场标记: 紫色实心菱形 -->
+          <rect x="546" y="201" width="8" height="8" fill="#7c3aed" stroke="#ffffff" stroke-width="1.5" transform="rotate(45 550 205)"/>
+          <text x="550" y="180" text-anchor="middle" font-size="11" fill="#6d28d9" font-weight="700">B 入场: 67,410</text>
+          <text x="550" y="165" text-anchor="middle" font-size="10" fill="#15803d" font-weight="600">(云带完成看涨翻转)</text>
+
+          <!-- X=600-1150: 强劲顺势主升浪，K 线紧贴 EMA 20 向上推进 -->
+          <line x1="610" y1="180" x2="610" y2="225" stroke="#16a34a" stroke-width="1"/>
+          <rect x="607" y="185" width="6" height="25" fill="#22c55e"/>
+
+          <line x1="670" y1="160" x2="670" y2="200" stroke="#16a34a" stroke-width="1"/>
+          <rect x="667" y="165" width="6" height="25" fill="#22c55e"/>
+
+          <line x1="730" y1="140" x2="730" y2="180" stroke="#16a34a" stroke-width="1"/>
+          <rect x="727" y="145" width="6" height="25" fill="#22c55e"/>
+
+          <line x1="800" y1="125" x2="800" y2="165" stroke="#dc2626" stroke-width="1"/>
+          <rect x="797" y="130" width="6" height="15" fill="#ef4444"/>
+
+          <line x1="870" y1="105" x2="870" y2="150" stroke="#16a34a" stroke-width="1"/>
+          <rect x="867" y="110" width="6" height="30" fill="#22c55e"/>
+
+          <line x1="940" y1="90" x2="940" y2="135" stroke="#16a34a" stroke-width="1"/>
+          <rect x="937" y="95" width="6" height="28" fill="#22c55e"/>
+
+          <line x1="1010" y1="80" x2="1010" y2="115" stroke="#16a34a" stroke-width="1"/>
+          <rect x="1007" y="85" width="6" height="22" fill="#22c55e"/>
+
+          <line x1="1080" y1="70" x2="1080" y2="105" stroke="#dc2626" stroke-width="1"/>
+          <rect x="1077" y="75" width="6" height="15" fill="#ef4444"/>
+
+          <!-- X=1150: B 达到目标分批离场 / 阻力止盈点 -->
+          <line x1="1150" y1="55" x2="1150" y2="95" stroke="#16a34a" stroke-width="1.2"/>
+          <rect x="1147" y="60" width="6" height="25" fill="#22c55e"/>
+          <!-- 方案 B 退出标记: 紫色空心菱形 -->
+          <rect x="1146" y="56" width="8" height="8" fill="#ffffff" stroke="#7c3aed" stroke-width="2" transform="rotate(45 1150 60)"/>
+          <text x="1150" y="42" text-anchor="middle" font-size="11" fill="#6d28d9" font-weight="bold">B 止盈退出 (+2.45R)</text>
+
+          <!-- 右侧价格刻度轴 -->
+          <rect x="1420" y="0" width="100" height="415" fill="#fafbfc" />
+          <line x1="1420" y1="0" x2="1420" y2="415" class="axis-line" />
+
+          <text x="1430" y="65" font-size="11" class="font-mono-num" fill="#64748b">68,450.0</text>
+          <text x="1485" y="65" font-size="9" fill="#7c3aed">B止盈</text>
+          <text x="1430" y="145" font-size="11" class="font-mono-num" fill="#64748b">67,900.0</text>
+          <text x="1430" y="205" font-size="11" class="font-mono-num" fill="#7c3aed" font-weight="bold">67,410.0</text>
+          <text x="1485" y="205" font-size="9" fill="#7c3aed">B入场</text>
+          <text x="1430" y="239" font-size="11" class="font-mono-num" fill="#2563eb" font-weight="bold">67,240.0</text>
+          <text x="1485" y="239" font-size="9" fill="#2563eb">A入场</text>
+          <text x="1430" y="289" font-size="11" class="font-mono-num" fill="#dc2626" font-weight="bold">67,080.0</text>
+          <text x="1485" y="289" font-size="9" fill="#dc2626">A止损</text>
+          <text x="1430" y="314" font-size="10" class="font-mono-num" fill="#059669" font-weight="bold">65,502.0</text>
+          <text x="1485" y="314" font-size="9" fill="#059669">1.618</text>
+          <text x="1430" y="385" font-size="11" class="font-mono-num" fill="#64748b">65,000.0</text>
+
+          <!-- 底部时间轴 -->
+          <line x1="0" y1="415" x2="1520" y2="415" class="axis-line" />
+          <text x="70" y="432" font-size="11" class="font-mono-num" fill="#94a3b8">13:30</text>
+          <text x="260" y="432" font-size="11" class="font-mono-num" fill="#2563eb" font-weight="bold">14:00 (A入场)</text>
+          <text x="390" y="432" font-size="11" class="font-mono-num" fill="#dc2626" font-weight="bold">14:15 (A止损)</text>
+          <text x="550" y="432" font-size="11" class="font-mono-num" fill="#7c3aed" font-weight="bold">14:35 (B入场)</text>
+          <text x="800" y="432" font-size="11" class="font-mono-num" fill="#94a3b8">15:10</text>
+          <text x="1150" y="432" font-size="11" class="font-mono-num" fill="#7c3aed" font-weight="bold">16:15 (B达成)</text>
+        </svg>
+
+        <!-- 外部悬浮对照注释条 (纯文字，透明背景，置于左下角空旷区) -->
+        <div class="absolute bottom-6 left-4 bg-white/95 border border-[#e2e8f0] rounded px-3 py-1.5 shadow-sm text-xs text-[#334155]">
+          <span class="font-bold text-[#0f172a]">复盘因果比照:</span>
+          A 方案在 14:00 信号柱收盘立即入场，此时 5m 仍处 EMA 50 下方空头云带压制，受随后惯性探底扫损；B 方案耐受 35 分钟等待快线金叉翻转并带绿云确认，过滤了洗盘假突破，顺应微观动量直达目标。
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 页底：图例、统计口径与模板说明 -->
+    <footer class="pt-3 border-t border-[#e9ecef] flex items-center justify-between text-xs text-[#64748b]">
+      <div class="flex items-center gap-6">
+        <span class="font-semibold text-[#1e293b] uppercase tracking-wide">标准复盘图例:</span>
+        <span class="inline-flex items-center gap-1.5"><span class="text-sm font-bold text-[#15803d]">✓</span> H1 触发信号蜡烛</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#2563eb]"></span> A 原入场 (实心圆)</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full border-2 border-[#2563eb] bg-white"></span> A 退出 (空心圆)</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rotate-45 bg-[#7c3aed]"></span> B 云带入场 (实心菱)</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rotate-45 border-2 border-[#7c3aed] bg-white"></span> B 退出 (空心菱)</span>
+      </div>
+      <div class="font-mono-num text-[11px] text-[#94a3b8]">
+        数据口径: 真实 OHLCV 替换占位 · R 净值按初始止损距离 (1R) 归一化计算 · Spike Research Spec v1.0
+      </div>
+    </footer>
+
+  </div>
+
+</body>
+</html>
+
