@@ -203,7 +203,7 @@ def render(case):
         fig.text(.735, .829, "本轮取消 · 无 B 收益", fontsize=14)
 
     fig.text(.055, .775, "1h  ·  信号与交易全程", fontsize=12, fontweight="bold")
-    fig.text(.945, .775, "实心 = 入场   空心 = 退出   虚线 = 2% 止损", fontsize=10,
+    fig.text(.945, .775, "黑标 = 1h 信号   实心 = 入场   空心 = 退出   蓝/紫虚线 = 2% 止损", fontsize=9.5,
              color=C["muted"], ha="right")
     ax = fig.add_axes([.055, .451, .866, .301])
     old, new = case["old"], case["new"]
@@ -250,7 +250,7 @@ def render(case):
               date_num(case["signal_time"]), date_num(point["entry_bar_open"]), True)
 
     fig.text(.055, .042, case["caption"], fontsize=12, fontweight="medium")
-    fig.text(.055, .018, "说明性样例，非总体表现。净 R 含手续费和滑点；价格标记为回测基准。退出点落在触发 5m 柱内，EMA 按收盘时刻绘制。",
+    fig.text(.055, .018, "说明性样例。1R = 入场价 2% 风险；净 R 含手续费和滑点，未计资金费。价格为回测基准；退出点标触发 5m 柱，EMA 标收盘时刻。",
              fontsize=8.5, color=C["muted"])
     name = f'{case["number"]:02d}_{case["symbol"]}_{case["role"]}.png'
     out = DIR / name
