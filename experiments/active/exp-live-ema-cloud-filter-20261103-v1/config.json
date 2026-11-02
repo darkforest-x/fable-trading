@@ -1,0 +1,44 @@
+{
+  "experiment_id": "exp-live-ema-cloud-filter-20261103-v1",
+  "question": "Owner 2026-11-03 '我们的那几个live策略，测试一下，使用ema cloud这个指标 默认参数 20 50 50 … 基于12h级别，只做一边，比如红色云带只做空，绿色云只做多，12h。4h。1h的都试试，live原有的所有规则都不变'",
+  "approval": "Owner 2026-11-03 request above",
+  "single_variable": "Admission only: a candidate is taken when its side matches the EMA cloud colour of the last bar closed at the decision (green EMA20 > EMA50 long only, red short only); fills, stops, targets, sizing, seeds and costs of each live- account unchanged",
+  "indicator": {
+    "name": "EMA Trend (owner Pine v4) with fast 20, medium 50, slow 50",
+    "lengths": {"fast": 20, "medium": 50, "slow": 50},
+    "source": "close",
+    "colour": "green when EMA(fast) > EMA(slow), red when EMA(fast) < EMA(slow); medium does not set the colour",
+    "ema": "alpha 2/(n+1), seeded with the SMA of the first n closes (Pine ema); undefined before n bars",
+    "bars": "Resampled from the 5m (1m for crypto_1m jobs) execution series, UTC epoch alignment (12h bars open 00:00 / 12:00 UTC)"
+  },
+  "timeframes": ["12h", "4h", "1h"],
+  "primary": "12h with-cloud (owner names 12h first)",
+  "causality": "Cloud of the last bar whose close is at or before the decision time: live-wick* = the touch 5m close (market entry, entry_t); live-allin3 = the open of the 5m fill bar (the limit rests before the touch; entry_t is that bar's close)",
+  "no_colour": "Candidates whose EMA50 is still undefined (too few bars since listing) or equal are not taken under the filter (no colour = neither side); counted separately",
+  "arms": {
+    "base": "no filter (must reproduce the saved account exactly)",
+    "with": "side == cloud colour (owner rule)",
+    "against": "side == opposite colour (reference only)"
+  },
+  "accounts": {
+    "live-wick6x3": {"paths": "experiments/active/exp-monday-limit-close-survivor-paths-20261101-v10", "starts": ["2020-01-01", "2025-01-01"]},
+    "live-wick3x3": {"paths": "experiments/active/exp-monday-limit-close-survivor-paths-20261101-v11", "starts": ["2020-01-01", "2025-01-01"]},
+    "live-wick6x3hi": {"paths": "experiments/active/exp-monday-limit-close-survivor-paths-20261101-v12", "starts": ["2020-01-01", "2025-01-01"]},
+    "live-wick3x3far": {"paths": "experiments/active/exp-monday-limit-close-survivor-paths-20261101-v13", "starts": ["2020-01-01", "2025-01-01"]},
+    "live-allin3": {"booklet": "experiments/active/exp-pretouch-booklet-20261031-v1", "plan": "allin3|A_rest_causal", "track": "allin3"}
+  },
+  "october_bars": "experiments/active/exp-monday-limit-live-october-20261101-v1/symbols",
+  "control": {
+    "draws": 300,
+    "seed": 20261106,
+    "rule": "Random subsets of the account's own candidates (same start) with the with-cloud arm's size, replayed with the account's allocator and seed; share of draws below the filtered account. Metric: final multiple (live-wick*), trading P&L after refills = end - 1000 - cash added (live-allin3)"
+  },
+  "periods": {
+    "live-wick": ["y2020_2024", "y2025", "y2026"],
+    "live-allin3": ["y2023", "y2024", "y2025", "y2026"]
+  },
+  "fees": "Unchanged from the saved fills: market entry taker 0.05 percent + 10bp, target maker 0.02 percent, other exits taker + 10bp (live-wick); maker limit entry 2bp and 10bp non-target slippage (live-allin3); worse intrabar path; funding not modelled",
+  "limits": "Binance bars, not the OKX paper feed; live-wick touches 2026-10-28..31 not covered (no Binance 2026-10-28 archive); live-allin3 ends 2026-09-23. Timeframes and the 20/50 lengths are owner-given, not selected here.",
+  "training_eligible": false,
+  "production_eligible": false
+}
