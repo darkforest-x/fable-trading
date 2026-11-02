@@ -1,0 +1,183 @@
+{
+  "experiment_id": "exp-month-first-week-touches-20261102-v1",
+  "status": "pass",
+  "method": "Independent standard-library recomputation from only frozen BTC/ETH 1h inputs, months.csv, events.csv and summary.json. America/New_York calendar boundaries generated independently; event detection uses first hourly high/low crossing per complete coin-month side; reaction horizons use the next 24/72/168 full hourly rows, excluding the touch hour.",
+  "no_download_no_backtest_no_rerender": true,
+  "inputs": {
+    "BTC": {
+      "path": "experiments/active/exp-month-first-week-touches-20261102-v1/inputs_BTC_1h.csv.gz",
+      "bytes": 861931,
+      "rows": 42327,
+      "first_utc": "2022-01-03 15:00:00+00:00",
+      "last_utc": "2026-11-02 05:00:00+00:00",
+      "duplicate_timestamps": 0,
+      "hour_gaps": 0,
+      "first_gap": null
+    },
+    "ETH": {
+      "path": "experiments/active/exp-month-first-week-touches-20261102-v1/inputs_ETH_1h.csv.gz",
+      "bytes": 854783,
+      "rows": 42326,
+      "first_utc": "2022-01-03 16:00:00+00:00",
+      "last_utc": "2026-11-02 05:00:00+00:00",
+      "duplicate_timestamps": 0,
+      "hour_gaps": 0,
+      "first_gap": null
+    }
+  },
+  "calendar": {
+    "expected_rows": 118,
+    "compared_rows": 118,
+    "complete_coin_months": 114,
+    "complete_months_by_symbol": {
+      "BTC": 57,
+      "ETH": 57
+    },
+    "month_range_in_file": [
+      "2022-01",
+      "2026-11"
+    ],
+    "status_counts": {
+      "missing_anchor": 2,
+      "complete": 114,
+      "forming": 2
+    },
+    "checks": {
+      "checks": 1660,
+      "mismatches": 0
+    }
+  },
+  "tv_anchor_reference_btc": {
+    "requested": {
+      "2026-08": {
+        "high": 65500.0,
+        "low": 62268.0
+      },
+      "2026-09": {
+        "high": 79888.0,
+        "low": 75866.0
+      },
+      "2026-10": {
+        "high": 86686.8,
+        "low": 80351.0
+      }
+    },
+    "observed": {
+      "2026-08": {
+        "high": 65500.0,
+        "low": 62268.0,
+        "upper": 67497.376,
+        "lower": 60270.624
+      },
+      "2026-09": {
+        "high": 79888.0,
+        "low": 75866.0,
+        "upper": 82373.596,
+        "lower": 73380.404
+      },
+      "2026-10": {
+        "high": 86686.8,
+        "low": 80351.0,
+        "upper": 90602.3244,
+        "lower": 76435.4756
+      }
+    },
+    "checks": {
+      "checks": 6,
+      "mismatches": 0
+    }
+  },
+  "events": {
+    "expected_first_touches": 78,
+    "file_rows": 78,
+    "by_symbol": {
+      "BTC": 39,
+      "ETH": 39
+    },
+    "by_side": {
+      "lower": 36,
+      "upper": 42
+    },
+    "checks": {
+      "checks": 1020,
+      "mismatches": 0
+    }
+  },
+  "reaction_horizons": {
+    "24": {
+      "complete": 78,
+      "censored": 0,
+      "censored_event_ids": [],
+      "row_metric_checks": 312,
+      "checks": {
+        "checks": 936,
+        "mismatches": 0
+      }
+    },
+    "72": {
+      "complete": 77,
+      "censored": 1,
+      "censored_event_ids": [
+        "078"
+      ],
+      "row_metric_checks": 312,
+      "checks": {
+        "checks": 936,
+        "mismatches": 0
+      }
+    },
+    "168": {
+      "complete": 76,
+      "censored": 2,
+      "censored_event_ids": [
+        "077",
+        "078"
+      ],
+      "row_metric_checks": 312,
+      "checks": {
+        "checks": 936,
+        "mismatches": 0
+      }
+    }
+  },
+  "censoring": {
+    "24": {
+      "complete": 78,
+      "censored": 0,
+      "censored_event_ids": []
+    },
+    "72": {
+      "complete": 77,
+      "censored": 1,
+      "censored_event_ids": [
+        "078"
+      ]
+    },
+    "168": {
+      "complete": 76,
+      "censored": 2,
+      "censored_event_ids": [
+        "077",
+        "078"
+      ]
+    }
+  },
+  "summary_rollups": {
+    "horizon_metric_comparisons": 72,
+    "checks": {
+      "checks": 92,
+      "mismatches": 0
+    },
+    "latest_event_copies": {
+      "checks": 168,
+      "mismatches": 0,
+      "boolean_normalization_check": {
+        "field": "literal_touch",
+        "checks": 6,
+        "mismatches": 0,
+        "note": "CSV \"True\"/\"False\" text was normalized to boolean before comparison with JSON summary."
+      }
+    }
+  },
+  "differences": []
+}
