@@ -1,0 +1,33 @@
+{
+  "experiment_id": "exp-signal-center-score-20261106-v1",
+  "status": "frozen_for_execution",
+  "owner_request": "2026-11-05 \"针对我们信号中心的信号（12h的，4h,1h,15min）再做模型做评分？\"; 2026-11-06 plan approved \"按方案开训\" (same rule per timeframe, entry at confirmation close, offline training under the P0/P1 gate).",
+  "question": "Can a LightGBM score rank signal-center cloud signals (EMA20/50 + NY Monday 1.618 wick reclaim) on 12H/4H/1H/15m so that the top group is net-positive after real fees, above matched random controls, out of time?",
+  "single_variable": "New study. Signal rule, stops and exits are the signal-center definitions applied unchanged on each timeframe; the only new element is the score. LightGBM parameters reused from exp-clean-reversal-score-20261101-v1 without search.",
+  "source_config": "experiments/active/exp-monday-limit-reclaim-20261024-v1/config.json",
+  "source_note": "Frozen 633-asset Monday-limit cohort; 632 Binance UM crypto jobs (626 native 5m, 6 native 1m aggregated to complete 5m), 2020-01-01..2026-09-23. XAUUSD excluded. No downloads. All symbols still trade in 2026-09 (survivorship).",
+  "output_dir": "experiments/active/exp-signal-center-score-20261106-v1/results",
+  "timeframes": ["12H", "4H", "1H", "15m"],
+  "signal_rule": "yoyo/monitor/cloud_signals.signal on UTC-aligned complete bars of each timeframe; first per symbol x NY week x timeframe; Monday range from 288 complete 5m bars.",
+  "entry": "Market at the signal bar close (taker).",
+  "stop": "Touched 1.618 * (1 - side*pct); pct 1.5% BTC/ETH, 3% others (cloud_signal_plans.fixed_stop); tick-rounded outward.",
+  "exit": "First of the fixed stop and the intrabar EMA20/50 cross of the signal timeframe (cross price from the prior closed bar's EMA state, re-armed at each timeframe close; level through the close exits at that close). No target. Missing timeframe bar forces exit; data end marks censored.",
+  "engine": "NautilusTrader 1.231.0 via yoyo.layers.l3_backtest.nautilus_stop_schedule.run_schedule on 5m bars, run once.",
+  "maker_fee": 0.0002,
+  "taker_fee": 0.0005,
+  "fee_note": "OKX Lv1 read 2026-10-23; every fill here is market/stop = taker. Slippage reported separately as 5bp per market fill (10bp per trade).",
+  "controls": "Up to 3 matched random entries per signal: same symbol, timeframe, NY week window, side; EMA aligned with side; not a raw signal bar; same floor(4*log2(ATR14/close)) bucket; same close-to-stop distance and exit rule; crc32-seeded, never chosen by outcome.",
+  "label": "net_bp > 0 (binary) for training; net_bp for evaluation.",
+  "folds": [
+    {"name": "test_2025", "train_exit_before": "2025-01-01", "test_from": "2025-01-01", "test_to": "2026-01-01"},
+    {"name": "test_2026", "train_exit_before": "2026-01-01", "test_from": "2026-01-01", "test_to": "2026-09-24"}
+  ],
+  "lightgbm": {"n_estimators": 100, "learning_rate": 0.03, "num_leaves": 7, "max_depth": 3, "min_child_samples": 30,
+               "reg_lambda": 10.0, "reg_alpha": 0.0, "n_jobs": 1, "deterministic": true, "force_col_wise": true,
+               "verbosity": -1, "random_state": 20261106},
+  "evaluation": "Per timeframe and fold: all signals, top 10% / top 20% / bottom 20% by score within the test fold; week-stratified score permutation (2000) for the top-group mean; random same-size signal subsets; paired signal-minus-matched-control difference with week-cluster bootstrap CI; three single-feature baselines (pen_atr, rr_close, ema_spread_atr) with direction from training correlation; AUC reference only.",
+  "success": "Both test years: top 20% mean net_bp > 0, week-stratified permutation p < 0.01, and top-20% signals beat their matched controls (paired CI above 0).",
+  "training_eligible": false,
+  "production_eligible": false,
+  "limitations": "Binance UM bars vs live OKX; survivorship cohort; cross-sectional clustering on market-wide days; 4H/1H/15m signals are not live in the signal center; the live reference entry (touched 1.618) is not executable and is replaced by the confirmation close."
+}
