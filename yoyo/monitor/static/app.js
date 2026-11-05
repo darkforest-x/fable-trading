@@ -547,7 +547,7 @@
       return;
     }
     const scan = status.scan || {};
-    $("lines-scan-state").textContent = !configured ? "未启动" : scan.status === "idle" ? "正常" : scan.status === "scanning" ? "扫描中" : scan.status === "degraded" ? "部分异常" : scan.status === "error" ? "失败" : "—";
+    $("lines-scan-state").textContent = !configured ? "未启动" : scan.status === "retired" ? "已停用" : scan.status === "idle" ? "正常" : scan.status === "scanning" ? "扫描中" : scan.status === "degraded" ? "部分异常" : scan.status === "error" ? "失败" : "—";
     $("lines-scan-detail").textContent = !configured ? "工作进程随监控服务启动" : scan.finished_ms
       ? `上轮 ${shortDate(scan.finished_ms)} · ${number(scan.symbols)} 个合约${scan.errors ? ` · 异常 ${number(scan.errors)}` : ""}`
       : scan.status === "error" ? String(scan.error || "") : `进行中 · ${number(scan.cells)} 格`;
@@ -1126,10 +1126,11 @@
     // `counts.ready` describes persisted feature phase and may belong to a
     // prior pass.  It cannot prove every cell has caught the current close.
     $("metric-signals-detail").textContent = "回踩再突破 · 已收盘确认";
-    $("metric-scan-detail").textContent = scanning ? `扫描 ${number(complete)} / ${number(total)}` : scan.finished_at_ms ? `${ageLabel(scan.finished_at_ms)}更新` : "等待扫描";
+    const scanRetired = scan.status === "retired";
+    $("metric-scan-detail").textContent = scanRetired ? "已停用" : scanning ? `扫描 ${number(complete)} / ${number(total)}` : scan.finished_at_ms ? `${ageLabel(scan.finished_at_ms)}更新` : "等待扫描";
     $("sidebar-runtime").textContent = online ? status.started_at_ms ? `已运行 ${duration(Date.now() - Number(status.started_at_ms))}` : "服务运行中" : "连接中断 · 自动重连";
     const scanDegraded = scan.status === "degraded" || scanErrorCount > 0;
-    $("scan-state-badge").textContent = scan.status === "error" || scan.status === "failed" ? "扫描异常" : scanDegraded ? "部分异常" : scanning ? "扫描中" : scan.finished_at_ms ? "扫描完成" : "等待扫描";
+    $("scan-state-badge").textContent = scanRetired ? "已停用" : scan.status === "error" || scan.status === "failed" ? "扫描异常" : scanDegraded ? "部分异常" : scanning ? "扫描中" : scan.finished_at_ms ? "扫描完成" : "等待扫描";
     $("scan-state-badge").className = `neutral-badge ${scan.status === "error" || scan.status === "failed" || scanDegraded ? "warn" : scan.finished_at_ms || scanning ? "good" : ""}`;
     $("scan-progress-fill").style.width = `${total > 0 ? Math.min(100, Math.max(0, complete / total * 100)) : 0}%`;
     $("scan-facts").innerHTML = factsHTML([

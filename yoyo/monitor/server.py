@@ -20,7 +20,7 @@ from yoyo.monitor import FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRA
 from yoyo.monitor import market_sync as market_sync_research
 from yoyo.monitor.market_sync_okx import Observer as MarketSync
 from yoyo.monitor.market_context import MarketContext
-from yoyo.monitor.service import Monitor
+from yoyo.monitor.service import Monitor, RETIRED_WORKERS
 from yoyo.monitor.shadow_api import (SHADOW_DATABASE, ShadowBookUnavailable, events as shadow_events,
                                      market_snapshots as shadow_market_snapshots,
                                      status as shadow_status)
@@ -107,8 +107,10 @@ def create_app(runtime=None, start_monitor=True):
                 spike_alert.start()
             if start_monitor:
                 app.state.start_yolo_workbench()
-            app.state.paper_desk_market.start()
-            app.state.paper_desk_worker.start()
+            # Owner 2026-11-06 retired the paper desk's background feed: no
+            # all-market ticker/mark polling and no automatic limit/TP/SL/
+            # liquidation checks. Page reads still fetch quotes on demand and
+            # the paper ledger is kept unchanged.
             yield
         finally:
             app.state.monday_candles.close()
@@ -399,6 +401,9 @@ def create_app(runtime=None, start_monitor=True):
     def spike_lines_status():
         try:
             result = lines_status(lines_book, monitor.client.clock())
+            if "lines" in RETIRED_WORKERS:
+                # The book keeps the last worker's receipt; report the owner retirement instead.
+                result["scan"] = dict(result.get("scan") or {}, status="retired", reason=RETIRED_WORKERS["lines"])
             result["notifications"] = monitor.status().get("joint_notifications", {})
             return result
         except LinesUnavailable as error:
@@ -494,6 +499,8 @@ def main():
     parser.add_argument("--port", type=int, default=8766)
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    # httpx logs every request at INFO; the unrotated stderr log reached 180 MB.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
     uvicorn.run(create_app(), host="127.0.0.1", port=args.port, log_level="info", access_log=False)
 
 

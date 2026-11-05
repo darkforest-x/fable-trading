@@ -2,6 +2,8 @@
 from __future__ import annotations
 import uuid
 import hashlib
+import threading
+import time
 from .store import encode
 from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -10,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from .models import DEFAULT_MODEL, MODELS, TIMEFRAMES, catalog, freeze_spec
 from .store import Book, now
 
+SYMBOL_CACHE_SECONDS = 300
 
 class Scan(BaseModel):
     model_config=ConfigDict(extra='forbid')
@@ -82,12 +85,22 @@ def install(app,runtime,launch_worker=True):
     def get_catalog():return catalog()
     @router.get('/latest')
     def latest_results(if_revision:str=''):return latest.read(if_revision)
+    # Each uncached read paid an OKX clock sync plus the instrument list (~1.2 s).
+    # Listings change rarely: share one read for 5 minutes and keep the time it
+    # was actually observed. Concurrent first reads wait for the same fetch.
+    symbol_cache=dict(items=None,at=0.0,observed_ms=None)
+    symbol_lock=threading.Lock()
     @router.get('/symbols')
     def symbols():
-        from .market import Market
-        try:
-            items=Market().universe();return dict(items=items,observed_ms=now())
-        except Exception as exc:raise HTTPException(503,'OKX 币种列表不可用：'+str(exc)[:180]) from exc
+        with symbol_lock:
+            if symbol_cache['items'] is not None and time.monotonic()-symbol_cache['at']<SYMBOL_CACHE_SECONDS:
+                return dict(items=symbol_cache['items'],observed_ms=symbol_cache['observed_ms'])
+            from .market import Market
+            try:
+                items=Market().universe()
+            except Exception as exc:raise HTTPException(503,'OKX 币种列表不可用：'+str(exc)[:180]) from exc
+            symbol_cache.update(items=items,at=time.monotonic(),observed_ms=now())
+            return dict(items=items,observed_ms=symbol_cache['observed_ms'])
     def revision(value):return hashlib.sha256(encode(value).encode()).hexdigest()[:24]
     @router.get('/jobs')
     def jobs(limit:int=Query(30,ge=1,le=100),offset:int=Query(0,ge=0),if_revision:str=''):

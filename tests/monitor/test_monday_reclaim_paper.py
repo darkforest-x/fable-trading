@@ -198,6 +198,34 @@ class PaperTests(PaperFixture):
         for row in value['closed'] + [value['latest_funded']]:
             self.assertEqual([leg['position_id'] for leg in row['exits']], [row['id']])
 
+    def test_track_snapshot_omits_only_other_accounts_closed_pages(self):
+        # Owner 2026-11-06 performance pass: same summaries/open rows, smaller payload.
+        e = self.engine(-1.)
+        e.handle_touch(self.levels, "ABC-USDT-SWAP", "lower", 93.8, self.touch+500, self.touch)
+        with e.db() as db:
+            for i in range(5):
+                row = db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,stage,taken,notional,exit_ms,net_bp) "
+                    "VALUES (?,60,'OLD-USDT-SWAP',1,100,110,?,'closed',1,100,?,?)",
+                    (1000+i, self.touch-10000-i, self.client.now-i, 2))
+                db.execute("INSERT INTO exits (position_id,notional,exit_ms,price,reason,net_bp) VALUES (?,100,?,101,'target',2)",
+                           (row.lastrowid, self.client.now-i))
+        full = e.snapshot("today")
+        self.assertEqual(len(full['tracks']['60']['closed']), 5)
+        self.assertEqual(len(full['tracks']['60']['record_closed']), 5)
+        self.assertNotIn('detail_track', full)
+        part = e.snapshot("today", track='5')
+        self.assertEqual(part['detail_track'], '5')
+        self.assertEqual(part['tracks']['5'], full['tracks']['5'])
+        other = part['tracks']['60']
+        self.assertEqual((other['closed'], other['record_closed'], other['detail_omitted']), ([], [], True))
+        self.assertEqual({k: v for k, v in other.items() if k not in ('closed', 'record_closed', 'detail_omitted')},
+                         {k: v for k, v in full['tracks']['60'].items() if k not in ('closed', 'record_closed')})
+        self.assertEqual({k: v for k, v in part.items() if k not in ('tracks', 'detail_track')},
+                         {k: v for k, v in full.items() if k != 'tracks'})
+        self.assertEqual(e.snapshot("today", track='60')['tracks']['60'], full['tracks']['60'])
+        # An unknown account keeps the previous full snapshot.
+        self.assertEqual(e.snapshot("today", track='nope'), full)
+
     def manual_fixture(self, side='lower'):
         e = self.engine(-1.)
         if side == 'upper':

@@ -38,6 +38,10 @@
   const trackLabel = key => ({60:'60m',5:'5m',v3:'v3',v3add:'v3add',spike:'spike',v3lock:'v3lock',allin3:'allin3',v3add20:'v3add20','live-allin3':'live-allin3','live-wick6x3':'live-wick6x3','live-wick3x3':'live-wick3x3','live-wick6x3hi':'live-wick6x3hi','live-wick3x3far':'live-wick3x3far'}[key] || '未知策略');
   const isAllinTrack = key => ['allin3','live-allin3'].includes(key);
   const isWickTrack = key => ['live-wick6x3','live-wick3x3','live-wick6x3hi','live-wick3x3far'].includes(key);
+  // Owner 2026-11-06 performance pass: the snapshot carries closed/today
+  // records only for the requested account; another account's lists arrive
+  // with the next read and must not be shown as "no records" meanwhile.
+  const detailPending = (data,key) => !!data?.detail_track && data.detail_track!==key;
   const signalRows = (data,key,today=false) => key==='live-allin3' ? (today?data?.live_record_signals??data?.live_signals:data?.live_signals)||[] : (today?data?.record_signals??data?.signals:data?.signals)||[];
   const isAddTrack = key => ['v3add','v3add20'].includes(key);
   const marginLeverage = (data,key) => ['spike','allin3','v3add20','live-allin3','live-wick6x3','live-wick3x3','live-wick6x3hi','live-wick3x3far'].includes(key) ? data?.[key]?.leverage : null;
@@ -269,7 +273,7 @@
     const orderMeta=event||state.track==='spike'?`<span class="rp-order-meta" title="OKX · 15m · 触价时排列分">${esc(orderLabel(row.ema_order))}${!event&&!isFunded?`<br>${esc(allocation(row))}`:''}</span>`:!event&&['allin3','v3add20','live-allin3','live-wick6x3','live-wick3x3','live-wick6x3hi','live-wick3x3far'].includes(state.track)&&!isFunded?`<span class="rp-order-meta">${esc(allocation(row))}</span>`:'';
     return `<article class="rp-record" data-rp-record="${esc(key)}" data-symbol="${esc(row.symbol)}" data-selected="${selected}"><div class="rp-record-main"><button type="button" class="rp-row-select" ${selectAttr} data-rp-focus="select" aria-pressed="${selected}" aria-label="查看 ${esc(base(row.symbol))} ${event?'触价':'开仓'} K 线"></button>${coinHTML(row,platform,`<span class="${row.side===1?'rp-positive':row.side===-1?'rp-negative':''}">${sideLabel(row)}</span>${!event&&isAddTrack(state.track)?` · ${esc(legLabel(row))}`:''} · ${event?date(row.candle_ms):`<span class="${closed?(isFunded?tone(row.pnl):''):tone(row.unrealized_bp)}">${value}</span>`}${carried?'<span class="rp-held-tag">持仓</span>':''}${orderMeta}`)}${scoreHTML(row.score)}</div><div class="rp-record-bottom"><span class="rp-record-meta ${event?'':closed?tone(row.pnl):tone(row.unrealized_bp)}">${meta}</span><a href="${esc(list.inspectionURL(row.symbol,state.period))}" data-rp-focus="patrol" aria-label="查看 ${esc(base(row.symbol))} 巡检 K 线详情" title="巡检 K 线详情"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></a><button type="button" data-rp-detail="${esc(key)}" data-rp-focus="detail" aria-label="展开 ${esc(base(row.symbol))} 明细" aria-expanded="false" aria-controls="rp-detail-${esc(key)}"><span aria-hidden="true">⌄</span></button></div>${closeButton}<section id="rp-detail-${esc(key)}" class="rp-row-detail" hidden><button type="button" data-rp-favorite="${esc(row.symbol)}" data-rp-focus="favorite" class="rp-detail-favorite" aria-pressed="${favorite}" aria-label="${favorite?'取消收藏':'收藏'} ${esc(base(row.symbol))}"><svg width="17" height="17" viewBox="0 0 24 24" fill="${favorite?'currentColor':'none'}" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/></svg><span>${favorite?'取消收藏':'收藏币种'}</span></button><div class="rp-detail-fields">${fields}</div><dl>${orderInfo}${more}</dl>${exits}<a class="rp-chart-link" data-rp-focus="chart" href="${esc(chartLink(row.symbol,state.track))}">查看 ${esc(base(row.symbol))} 的 1.618 图表 ↗</a></section></article>`;
   }
-  const api={finite,esc,num,signed,bp,price,funded,orderLabel,marginLeverage,TRACKS,trackLabel,targetLabel,stopPrice,stage,signalStatus,allocation,route,chartLink,validate,summary,refillTotal,capitalLabel,capitalHTML,refillsHTML,rows,dayStart,heldSignals,createHistory,createFeed,rowHTML,pendingHTML,rulesHTML};
+  const api={finite,esc,num,signed,bp,price,funded,detailPending,orderLabel,marginLeverage,TRACKS,trackLabel,targetLabel,stopPrice,stage,signalStatus,allocation,route,chartLink,validate,summary,refillTotal,capitalLabel,capitalHTML,refillsHTML,rows,dayStart,heldSignals,createHistory,createFeed,rowHTML,pendingHTML,rulesHTML};
   if(typeof module!=='undefined' && module.exports){module.exports=api;return;}
   const root=document.getElementById('monday-reclaim-paper');
   if(!root)return;
@@ -280,7 +284,7 @@
   let startupRead=null;
   const feed=createFeed({read:async()=>{
     const c=new AbortController();startupRead=c;
-    try{const pending=window.SpikeStartup?.take('paper-snapshot',c.signal),warm=pending?await pending:null;if(c.signal.aborted)throw Error('cancelled');return warm?.value||await requests.json('/api/monday-reclaim-paper?list_period=today');}finally{if(startupRead===c)startupRead=null}
+    try{const pending=window.SpikeStartup?.take('paper-snapshot',c.signal),warm=pending?await pending:null;if(c.signal.aborted)throw Error('cancelled');return warm?.value||await requests.json('/api/monday-reclaim-paper?list_period=today&track='+encodeURIComponent(state.track));}finally{if(startupRead===c)startupRead=null}
   },cancel:()=>{startupRead?.abort();startupRead=null;requests.cancel();},change:render});
   const el=id=>root.querySelector(`[data-rp="${id}"]`);
   function mount(){
@@ -387,6 +391,8 @@
   function render(current){
     if(!pageActive)return;mount();
     const {data,error,busy}=current, track=data?.tracks?.[state.track], stats=summary(track,state.track);
+    const pendingDetail=detailPending(data,state.track);
+    if(pendingDetail&&!busy&&!error)feed.refresh();
     root.setAttribute('aria-busy',String(busy && !data));
     el('account-label').textContent=trackLabel(state.track)+' 模拟';el('ledger-label').textContent=trackLabel(state.track);
     root.querySelector('.rp-records').setAttribute('aria-label',trackLabel(state.track)+' 模拟交易簿');
@@ -439,15 +445,15 @@
     const held=data?heldSignals(data):new Set(),archive=!!state.history;
     history.select(archive&&data&&!document.hidden?{track:state.track,tab:state.tab,scope:state.scope,sort:state.sort,q:state.q.trim(),day:dayStart(data.now_ms),held:Array.from(held).sort().join(',')}:null);
     const past=history.getState();
-    for(const tab of ['open','closed','events'])el(`count-${tab}`).textContent=archive&&tab!=='open'?(tab===state.tab&&past.loaded?String(past.total):''):data?String(rows(data,{...state,tab}).length):'—';
-    const items=archive?past.rows:data?rows(data,state):[],visible=archive?items:items.slice(0,shown);
+    for(const tab of ['open','closed','events'])el(`count-${tab}`).textContent=archive&&tab!=='open'?(tab===state.tab&&past.loaded?String(past.total):''):data&&!(tab==='closed'&&pendingDetail)?String(rows(data,{...state,tab}).length):'—';
+    const items=archive?past.rows:data&&!(state.tab==='closed'&&pendingDetail)?rows(data,state):[],visible=archive?items:items.slice(0,shown);
     el('history-error').hidden=!archive||!past.error;
     el('history-error').textContent=past.error?`历史读取失败：${past.error}。${past.loaded?'已保留加载的记录。':''}`:'';
     root.querySelector('[data-rp-action="retry-history"]').hidden=!archive||!past.error;
     el('caption').textContent=archive?(past.busy?'正在读取历史…':past.loaded?`历史${state.tab==='events'?'触价':'已结束'} · ${SORTS[state.sort]} · 已显示 ${items.length} / ${past.total} 条`:'历史记录待读取'):!data?(error?'记录暂时不可用':'正在读取记录…'):`${state.tab==='open'?'当前持仓':state.tab==='events'?'今日触价 · 含跨日持仓':'今日已结束'} · ${SORTS[state.sort]} · ${items.length} 条`;
     preferences?.read();
     const rowSignature=visible.length ? visible.map(row=>rowHTML(row,{...state,v3:data.v3,trade:String(selected?.id||state.trade),symbol:chartSymbol},data.now_ms,{favorite:preferences?.has(row.symbol),platform,carried:state.tab==='events'&&row.candle_ms<dayStart(data.now_ms)&&held.has(row.id)})).join('')
-      : `<div class="rp-empty"><span aria-hidden="true">${data?'◌':'⋯'}</span><strong>${archive?(past.busy?'正在读取历史':past.error?'历史暂时无法读取':state.q?'没有匹配的历史记录':'暂无历史记录'):!data?(error?'暂时无法读取':'正在读取模拟盘'):missingTrack?'该策略暂不可用':state.q?'没有匹配的币种':state.tab==='open'?'当前没有持仓':state.tab==='closed'?'当前没有已结束记录':'还没有触价记录'}</strong><p>${data?(state.q?'换一个币种或清空搜索。':state.scope==='shadow'&&state.tab!=='events'?'未计入资金的模拟交易会出现在这里。':'后台产生新记录后会自动更新。'):'请稍候，数据会自动重试同步。'}</p></div>`;
+      : `<div class="rp-empty"><span aria-hidden="true">${data?'◌':'⋯'}</span><strong>${archive?(past.busy?'正在读取历史':past.error?'历史暂时无法读取':state.q?'没有匹配的历史记录':'暂无历史记录'):!data?(error?'暂时无法读取':'正在读取模拟盘'):missingTrack?'该策略暂不可用':state.tab==='closed'&&pendingDetail?'正在读取记录':state.q?'没有匹配的币种':state.tab==='open'?'当前没有持仓':state.tab==='closed'?'当前没有已结束记录':'还没有触价记录'}</strong><p>${data?(state.q?'换一个币种或清空搜索。':state.scope==='shadow'&&state.tab!=='events'?'未计入资金的模拟交易会出现在这里。':'后台产生新记录后会自动更新。'):'请稍候，数据会自动重试同步。'}</p></div>`;
     if(rowSignature!==signature){
       const container=el('rows'),open=new Set(Array.from(container.querySelectorAll('[data-rp-detail][aria-expanded="true"]'),node=>node.dataset.rpDetail));
       const focused=document.activeElement,focusedRow=focused?.closest?.('[data-rp-record]')?.dataset.rpRecord,focusKind=focused?.dataset?.rpFocus;

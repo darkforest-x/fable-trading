@@ -38,6 +38,16 @@ from yoyo.monitor.v130_policy import (SIGNAL_KIND as V130_KIND, SIGNAL_PROTOCOL 
 LOG = logging.getLogger("fable.monitor")
 PROTOCOL = MODEL_PROTOCOL
 STATUS_REFRESH_SECONDS = 30
+# Owner 2026-11-06 ("三个全部停掉"): retire the V12.8 scanner, its YOLO
+# confirmation worker and the trendline/joint scanner. Their Telegram routes
+# last delivered on 2026-10-18 and 2026-09-25 while the two scanners held about
+# 1.5 CPU cores. Code, databases, checkpoints and outboxes are kept so they can
+# be restored; the delivery threads still drain anything already queued.
+# Consequence accepted by the owner: candle checkpoints stop updating, so the
+# altcoin-leader page and any checkpoint reader see the last stored bars.
+RETIRED_WORKERS = {"scan": "owner_retired_v128_scan_20261106",
+                   "model": "owner_retired_v128_scan_20261106",
+                   "lines": "owner_retired_lines_scan_20261106"}
 
 
 class Monitor:
@@ -94,9 +104,17 @@ class Monitor:
         self.joint_store.recover_outbox()
         self.joint_bark = BarkWorker(self.joint_store)
         self.joint_telegram = TelegramWorker(self.joint_store, enabled=True)
+        if "scan" in RETIRED_WORKERS:
+            # Replace the last worker's "idle" receipt so status/health never
+            # present the retired scanner as live or merely starting.
+            self.store.set_meta("scan", {"status": "retired", "reason": RETIRED_WORKERS["scan"],
+                                         "retired_at_ms": now_ms(), "worker_pid": None, "completed": 0,
+                                         "total": 0, "errors": 0, "error_samples": [], "isolated": True})
         for name, target in (("scan", self.run), ("model", self.run_model), ("lines", self.run_lines),
                              ("telegram", self.deliver_telegram), ("bark", self.deliver_bark),
                              ("status", self.refresh_status_forever)):
+            if name in RETIRED_WORKERS:
+                continue
             thread = threading.Thread(target=target, name="impulse-" + name, daemon=True)
             self.threads.append(thread)
             thread.start()

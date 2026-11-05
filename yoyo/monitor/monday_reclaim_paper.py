@@ -1123,7 +1123,16 @@ class ReclaimPaper:
         acct["start_equity"] = START_EQUITY
         return build_analytics(positions, exits, acct, quotes, self.client.clock(), days, connected)
 
-    def snapshot(self, list_period="recent"):
+    def snapshot(self, list_period="recent", track=None):
+        """Return every account's summary, open positions and pending adds.
+
+        ``track`` (owner 2026-11-06 performance pass) limits the closed-trade
+        page and the today record list to the one account the page shows; the
+        other accounts report ``closed=[]``/``record_closed=[]`` with
+        ``detail_omitted`` set. Statistics, equity, latest funded fill and open
+        positions are computed exactly as before for every account. Without
+        ``track`` (or with an unknown one) the full snapshot is unchanged.
+        """
         if list_period not in ("recent", "today"):
             raise ValueError("list_period must be 'recent' or 'today'")
         today = list_period == "today"
@@ -1134,8 +1143,12 @@ class ReclaimPaper:
         with self.db() as db:
             db.execute("BEGIN")
             tracks = {}
-            for t in db.execute("SELECT * FROM tracks ORDER BY track DESC").fetchall():
+            rows = db.execute("SELECT * FROM tracks ORDER BY track DESC").fetchall()
+            if track is not None and track not in {track_key(t["track"]) for t in rows}:
+                track = None  # Unknown account: keep the previous full snapshot.
+            for t in rows:
                 m = t["track"]
+                detail = track is None or track_key(m) == track
                 tr = members(m); marks = ",".join("?"*len(tr))
                 # Read original entry and EMA order scores even after the signal has left the
                 # recent-touch page. LEFT JOIN preserves legacy position records.
@@ -1143,10 +1156,10 @@ class ReclaimPaper:
                 closed_where = f"p.track IN ({marks}) AND p.stage='closed' AND NOT (p.parent_id IS NOT NULL AND p.taken=0)"
                 joined = "SELECT p.*, " + POSITION_SCORES + " FROM positions p" + SCORE_JOIN + "WHERE "
                 closed = [dict(r) for r in db.execute(
-                    joined + closed_where + " ORDER BY p.exit_ms DESC, p.id DESC LIMIT 100", tr)]
+                    joined + closed_where + " ORDER BY p.exit_ms DESC, p.id DESC LIMIT 100", tr)] if detail else []
                 record_closed = ([dict(r) for r in db.execute(
                     joined + closed_where + " AND p.exit_ms>=? AND p.exit_ms<? ORDER BY p.exit_ms DESC, p.id DESC",
-                    (*tr, day_start_ms, day_start_ms+DAY))] if today else [])
+                    (*tr, day_start_ms, day_start_ms+DAY))] if today and detail else [])
                 # Full-ledger statistics are independent of the bounded display page.
                 stats = dict(db.execute("SELECT COUNT(*) shadow_closed, AVG(p.net_bp) shadow_mean_net_bp, "
                     "COUNT(CASE WHEN p.taken THEN 1 END) taken_closed, "
@@ -1190,6 +1203,8 @@ class ReclaimPaper:
                     latest_funded=latest_funded, stats=stats)
                 if today:
                     track_snapshot["record_closed"] = record_closed
+                if not detail:
+                    track_snapshot["detail_omitted"] = True
                 tracks[track_key(m)] = track_snapshot
             record_signals = []
             if today:
@@ -1212,6 +1227,8 @@ class ReclaimPaper:
                     fees_bp=dict(maker=MAKER_BP, taker=TAKER_BP, report_slippage=SLIP_BP),
                     worker=dict(alive=bool(self.thread and self.thread.is_alive()), queue=self.events.qsize(), error=self.error),
                     tracks=tracks, signals=signals)
+        if track is not None:
+            result["detail_track"] = track
         result["live-allin3"] = self.live_allin
         for t, config in self.wick.items():
             result[KEYS[t]] = config
@@ -1359,7 +1376,8 @@ def install(app, engine):
             raise HTTPException(err.status, str(err)) from err
 
     @app.get("/api/monday-reclaim-paper")
-    def snapshot(list_period: Literal["recent", "today"] = "recent"):
+    def snapshot(list_period: Literal["recent", "today"] = "recent",
+                 track: str = Query(None, pattern=r"^[0-9a-z-]{1,32}$")):
         # SQLite primitives and parsed JSON already satisfy the response contract.
         # Avoid FastAPI walking the complete multi-account ledger a second time.
-        return JSONResponse(engine.snapshot(list_period=list_period))
+        return JSONResponse(engine.snapshot(list_period=list_period, track=track))

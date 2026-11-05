@@ -48,7 +48,10 @@
   document.addEventListener('visibilitychange',()=>{if(document.hidden)cancel();});
   setTimeout(cancel,15000);
   if(paper){
-    start('paper-snapshot','/api/monday-reclaim-paper?list_period=today')?.then(packet=>{
+    // Same account default as monday-reclaim-paper.js route(); the snapshot
+    // then carries closed/today records for this account only.
+    const track=['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3','live-wick6x3','live-wick3x3','live-wick6x3hi','live-wick3x3far'].includes(params.get('track'))?params.get('track'):'spike';
+    start('paper-snapshot','/api/monday-reclaim-paper?list_period=today&track='+encodeURIComponent(track))?.then(packet=>{
       const symbol=paperSymbol(packet?.value,params);if(!symbol)return;
       const candidate=params.get('period'),period=['5m','15m','1H','4H','12H','1D'].includes(candidate)?candidate:'15m';
       start('levels:'+symbol,'/api/monday-fib/levels?symbol='+encodeURIComponent(symbol));

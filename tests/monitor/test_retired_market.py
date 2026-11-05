@@ -37,5 +37,6 @@ def test_retired_market_workers_and_demand_routes_stay_off(tmp_path, monkeypatch
             assert status['monitoring_enabled'] is False
             assert not any(status['workers'].values())
     asyncio.run(run())
+    # Owner 2026-11-06 also retired the paper desk background feed.
     assert set(started) == {'Monitor', 'LeaderService', 'VidyaRetestService',
-                            'MondayFibService', 'patrol', 'paper_desk_worker', 'paper_desk_market'}
+                            'MondayFibService', 'patrol'}
