@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPIKE · 全市场报警中心规范 (Apple Clear Glass 340px)</title>
+  <!-- Google Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+          },
+          colors: {
+            apple: {
+              blue: '#0071e3',
+              'blue-hover': '#0062c4',
+              green: '#30d158',
+              rose: '#ff375f',
+              amber: '#ff9f0a',
+            },
+          },
+          boxShadow: {
+            'glass-popover': '0 24px 50px -12px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.9) inset, 0 1px 3px 0 rgba(0, 0, 0, 0.04)',
+            'apple-toggle': '0 2px 5px rgba(0, 0, 0, 0.18), 0 1px 1px rgba(0, 0, 0, 0.08)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Apple Liquid Frosted Glass material */
+    .glass-surface {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+    
+    .glass-surface-subtle {
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .glass-card-inset {
+      background: rgba(246, 248, 252, 0.65);
+      border: 1px solid rgba(226, 232, 240, 0.7);
+    }
+
+    /* Custom thin scrollbar for 560px max-height overflow */
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.35);
+      border-radius: 9999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.6);
+    }
+
+    /* Fine grid background for design presentation board */
+    .bg-grid-subtle {
+      background-size: 32px 32px;
+      background-image: 
+        linear-gradient(to right, rgba(0, 113, 227, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 113, 227, 0.04) 1px, transparent 1px);
+    }
+
+    /* Popover Anchor Pointer Triangle */
+    .popover-pointer {
+      width: 14px;
+      height: 14px;
+      transform: rotate(45deg);
+      background: rgba(255, 255, 255, 0.85);
+      border-right: 1px solid rgba(255, 255, 255, 0.8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 2px 2px 4px rgba(0,0,0,0.02);
+    }
+  </style>
+</head>
+<body class="bg-[#f2f5fa] text-[#1c1d21] font-sans antialiased min-h-screen bg-grid-subtle flex flex-col selection:bg-apple-blue selection:text-white pb-16">
+
+  <!-- Top Breadcrumb / Spec Header -->
+  <header class="w-full max-w-[1400px] mx-auto px-6 pt-8 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#e2e8f0]/80">
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 border border-white/80 shadow-sm backdrop-blur-md">
+        <span class="inline-block w-2 h-2 rounded-full bg-[#30d158] animate-pulse"></span>
+        <span class="text-[12px] font-semibold text-[#334155] tracking-wide">SPIKE · 悬浮交互设计规范</span>
+      </div>
+      <h1 class="text-lg md:text-xl font-bold tracking-tight text-[#0f172a]">全市场报警中心 (Alert Popover Center)</h1>
+    </div>
+
+    <!-- Token metadata chips -->
+    <div class="flex items-center flex-wrap gap-2 text-[12px] font-mono text-[#64748b]">
+      <span class="px-2.5 py-1 rounded-md bg-white/60 border border-white/80">WIDTH: 340px</span>
+      <span class="px-2.5 py-1 rounded-md bg-white/60 border border-white/80">MAX-H: ~560px (Scrollable)</span>
+      <span class="px-2.5 py-1 rounded-md bg-white/60 border border-white/80">RADIUS: 22px</span>
+      <span class="px-2.5 py-1 rounded-md bg-white/60 border border-white/80">ACCENT: #0071e3</span>
+      <span class="px-2.5 py-1 rounded-md bg-apple-blue/10 text-apple-blue font-semibold border border-apple-blue/20">DESIGN.md v4.19</span>
+    </div>
+  </header>
+
+  <!-- Spec Narrative Subtitle -->
+  <div class="w-full max-w-[1400px] mx-auto px-6 pt-4 pb-8">
+    <p class="text-sm text-[#475569] max-w-3xl leading-relaxed">
+      高质感 Apple Clear Liquid Glass (78% 白透高斯磨砂) 材质演进。针对多币 1.618 极端插针设计的多状态报警中心，支持 <span class="font-medium text-[#1e293b]">「概览配置」</span>、<span class="font-medium text-[#1e293b]">「历史追踪（含单笔穿透展开与代币芯片）」</span> 与 <span class="font-medium text-[#1e293b]">「历史空状态」</span>，并与底部 44px 锚点警铃图标形成严谨视觉对齐。
+    </p>
+  </div>
+
+  <!-- Main Canvas: 3 Frames Side by Side -->
+  <main class="w-full max-w-[1400px] mx-auto px-6 flex-1">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+
+      <!-- ========================================================================= -->
+      <!-- FRAME 1: 概览 Tab Selected -->
+      <!-- ========================================================================= -->
+      <div class="flex flex-col items-center w-[340px]">
+        <!-- State Title Badge -->
+        <div class="mb-3 px-3 py-1 rounded-full bg-white/70 border border-white shadow-sm flex items-center gap-1.5 text-[11px] font-semibold text-[#0f172a]">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#30d158]"></span>
+          <span>状态 A · 概览 Tab (推送正常已连接)</span>
+        </div>
+
+        <!-- 340px Popover Card -->
+        <div class="w-[340px] max-h-[560px] glass-surface rounded-[22px] shadow-glass-popover flex flex-col relative overflow-hidden transition-all duration-200">
+          
+          <!-- Common Header (Sticky) -->
+          <div class="px-4 pt-4 pb-3 flex flex-col gap-3 border-b border-white/60 shrink-0">
+            <!-- Icon + Title row -->
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-apple-blue/10 flex items-center justify-center text-apple-blue border border-apple-blue/15 shadow-sm shrink-0">
+                <span class="material-symbols-outlined text-[19px]">notifications_active</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h2 class="text-[15px] font-bold tracking-tight text-[#0f172a] leading-none mb-1">全市场报警</h2>
+                <p class="text-[11px] text-[#64748b] truncate leading-tight">多币 5 分钟内触及 1.618 时全屏提醒</p>
+              </div>
+            </div>
+
+            <!-- Compact iOS Segmented Control (32px tall, full width) -->
+            <div class="w-full h-8 p-0.5 rounded-[10px] bg-[#e6ebf2]/80 flex items-center text-[12px] font-medium text-[#475569] shadow-inner select-none">
+              <button type="button" class="flex-1 h-full rounded-[8px] bg-white text-[#0f172a] font-semibold shadow-sm flex items-center justify-center transition-all duration-150">
+                概览
+              </button>
+              <button type="button" class="flex-1 h-full rounded-[8px] text-[#64748b] hover:text-[#0f172a] flex items-center justify-center transition-all duration-150">
+                历史 12
+              </button>
+            </div>
+          </div>
+
+          <!-- Body (Scrollable inside max-h-[560px]) -->
+          <div class="p-4 flex flex-col gap-3.5 overflow-y-auto custom-scroll flex-1">
+            
+            <!-- Green status strip -->
+            <div class="p-3 rounded-xl bg-[#ecfdf5] border border-[#a7f3d0]/80 shadow-sm flex flex-col gap-1.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10b981] opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-[#10b981]"></span>
+                  </span>
+                  <span class="text-[13px] font-bold text-[#065f46]">推送已连接</span>
+                </div>
+                <span class="text-[11px] font-mono text-[#059669] font-medium bg-[#d1fae5] px-1.5 py-0.5 rounded">实时</span>
+              </div>
+              <div class="text-[11px] text-[#047857] flex items-center gap-1 font-medium tracking-tight">
+                <span>检测运行中</span>
+                <span class="text-[#10b981] font-bold">·</span>
+                <span>Telegram ✓</span>
+                <span class="text-[#10b981] font-bold">·</span>
+                <span>Bark ✓</span>
+              </div>
+            </div>
+
+            <!-- Grouped inset list rows -->
+            <div class="rounded-xl glass-card-inset overflow-hidden divide-y divide-[#e2e8f0]/60 shadow-sm">
+              <!-- Row 1: 报警声音 -->
+              <div class="p-3 flex items-center justify-between gap-3 bg-white/40 hover:bg-white/60 transition-colors">
+                <div class="flex-1 min-w-0">
+                  <div class="text-[13px] font-semibold text-[#0f172a]">报警声音</div>
+                  <div class="text-[11px] text-[#64748b] leading-tight">需在本页点击一次才能发声</div>
+                </div>
+                <!-- iOS Toggle (ON) -->
+                <div class="w-11 h-6 rounded-full bg-apple-blue flex items-center p-0.5 cursor-pointer shadow-inner shrink-0">
+                  <div class="w-5 h-5 rounded-full bg-white shadow-apple-toggle transform translate-x-5 transition-transform duration-200"></div>
+                </div>
+              </div>
+
+              <!-- Row 2: 测试报警 -->
+              <div class="p-3 flex items-center justify-between gap-3 bg-white/40 hover:bg-white/60 transition-colors">
+                <div class="flex-1 min-w-0">
+                  <div class="text-[13px] font-semibold text-[#0f172a]">测试报警</div>
+                  <div class="text-[11px] text-[#64748b] leading-tight">只在已打开的页面弹出，不推送消息</div>
+                </div>
+                <!-- Outlined Pill CTA -->
+                <button type="button" class="px-3 py-1 rounded-full border border-apple-blue/40 text-apple-blue hover:bg-apple-blue/10 active:scale-95 text-[12px] font-semibold transition-all duration-150 shrink-0">
+                  测试
+                </button>
+              </div>
+            </div>
+
+            <!-- Small rule card (Subtle well background) -->
+            <div class="p-3 rounded-xl bg-[#eef2f8]/70 border border-[#e2e8f0]/80 shadow-xs flex flex-col gap-1.5 text-[11px] text-[#475569]">
+              <div class="flex items-start gap-1.5 leading-snug">
+                <span class="material-symbols-outlined text-[14px] text-apple-blue shrink-0 mt-0.5">bolt</span>
+                <span>触发：5 分钟内同方向 ≥25 个币触及 1.618</span>
+              </div>
+              <div class="flex items-start gap-1.5 leading-snug">
+                <span class="material-symbols-outlined text-[14px] text-apple-blue shrink-0 mt-0.5">timer</span>
+                <span>同方向冷却 30 分钟</span>
+              </div>
+              <div class="flex items-start gap-1.5 leading-snug">
+                <span class="material-symbols-outlined text-[14px] text-apple-blue shrink-0 mt-0.5">shield</span>
+                <span>只通知，不动任何仓位</span>
+              </div>
+            </div>
+
+            <!-- Footer muted line -->
+            <div class="pt-1 text-center">
+              <span class="text-[11px] font-mono text-[#94a3b8]">上次报警 11-02 03:15 · 3 天前</span>
+            </div>
+
+          </div>
+
+          <!-- Bottom subtle border reflection -->
+          <div class="h-1 bg-gradient-to-r from-transparent via-white/80 to-transparent shrink-0"></div>
+        </div>
+
+        <!-- Anchor Pointer & 44px Frosted Bell Button -->
+        <div class="flex flex-col items-center mt-[-6px]">
+          <div class="popover-pointer"></div>
+          <div class="relative mt-2">
+            <button type="button" class="w-11 h-11 rounded-full glass-surface flex items-center justify-center text-[#1e293b] shadow-md border border-white/90 hover:bg-white transition-all active:scale-95">
+              <span class="material-symbols-outlined text-[20px] text-apple-blue">notifications</span>
+            </button>
+            <!-- Small Green Status Dot -->
+            <span class="absolute top-0 right-0 w-3 h-3 rounded-full bg-[#30d158] border-2 border-white shadow-xs"></span>
+          </div>
+          <span class="text-[10px] font-mono text-[#94a3b8] mt-1">44px 锚点按钮 (正常在线)</span>
+        </div>
+      </div>
+
+
+      <!-- ========================================================================= -->
+      <!-- FRAME 2: 历史 Tab Selected (含展开穿透态 & 徽标) -->
+      <!-- ========================================================================= -->
+      <div class="flex flex-col items-center w-[340px]">
+        <!-- State Title Badge -->
+        <div class="mb-3 px-3 py-1 rounded-full bg-white/70 border border-white shadow-sm flex items-center gap-1.5 text-[11px] font-semibold text-[#0f172a]">
+          <span class="w-1.5 h-1.5 rounded-full bg-apple-rose"></span>
+          <span>状态 B · 历史 Tab (含单笔展开与红点角标)</span>
+        </div>
+
+        <!-- 340px Popover Card -->
+        <div class="w-[340px] max-h-[560px] glass-surface rounded-[22px] shadow-glass-popover flex flex-col relative overflow-hidden transition-all duration-200">
+          
+          <!-- Common Header (Sticky) -->
+          <div class="px-4 pt-4 pb-3 flex flex-col gap-3 border-b border-white/60 shrink-0">
+            <!-- Icon + Title row -->
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-apple-blue/10 flex items-center justify-center text-apple-blue border border-apple-blue/15 shadow-sm shrink-0">
+                <span class="material-symbols-outlined text-[19px]">notifications_active</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <h2 class="text-[15px] font-bold tracking-tight text-[#0f172a] leading-none">全市场报警</h2>
+                  <span class="px-1.5 py-0.2 rounded-full bg-apple-rose text-white text-[10px] font-bold leading-tight">1 待确认</span>
+                </div>
+                <p class="text-[11px] text-[#64748b] truncate leading-tight mt-1">多币 5 分钟内触及 1.618 时全屏提醒</p>
+              </div>
+            </div>
+
+            <!-- Compact iOS Segmented Control (32px tall, full width) -->
+            <div class="w-full h-8 p-0.5 rounded-[10px] bg-[#e6ebf2]/80 flex items-center text-[12px] font-medium text-[#475569] shadow-inner select-none">
+              <button type="button" class="flex-1 h-full rounded-[8px] text-[#64748b] hover:text-[#0f172a] flex items-center justify-center transition-all duration-150">
+                概览
+              </button>
+              <button type="button" class="flex-1 h-full rounded-[8px] bg-white text-[#0f172a] font-semibold shadow-sm flex items-center justify-center transition-all duration-150">
+                历史 12
+              </button>
+            </div>
+          </div>
+
+          <!-- Body (Scrollable inside max-h-[560px]) -->
+          <div class="p-3.5 flex flex-col gap-2.5 overflow-y-auto custom-scroll flex-1">
+            
+            <!-- Toolbar row -->
+            <div class="flex items-center justify-between px-1 text-[11px]">
+              <span class="text-[#64748b] font-medium">最近 12 条</span>
+              <!-- Small Checkbox-Chip: 显示测试 -->
+              <label class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/70 border border-[#cbd5e1]/60 text-[#475569] cursor-pointer hover:bg-white select-none">
+                <input type="checkbox" checked class="w-3 h-3 text-apple-blue rounded accent-apple-blue cursor-pointer">
+                <span class="text-[11px]">显示测试</span>
+              </label>
+            </div>
+
+            <!-- Vertical list of alert rows (inside one inset card) -->
+            <div class="rounded-xl glass-card-inset overflow-hidden divide-y divide-[#e2e8f0]/70 shadow-sm">
+
+              <!-- ROW 1: 急跌 (未确认态) -->
+              <div class="p-3 bg-white/50 flex flex-col gap-2 hover:bg-white/70 transition-colors">
+                <div class="flex items-center gap-2.5">
+                  <!-- 28px Round Direction Badge: ↘ Rose tint -->
+                  <div class="w-7 h-7 rounded-full bg-[#ffe4e6] text-apple-rose flex items-center justify-center font-bold text-[14px] shrink-0 border border-apple-rose/20">
+                    ↘
+                  </div>
+
+                  <!-- Middle two lines -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-1.5 leading-tight">
+                      <span class="text-[13px] font-semibold text-[#0f172a]">急跌 · 31 个币</span>
+                      <span class="text-[11px] text-[#64748b]">做多方向</span>
+                    </div>
+                    <div class="text-[11px] font-mono text-[#64748b] truncate mt-0.5">
+                      11-02 03:15 · BTC ETH SOL DOGE 等
+                    </div>
+                  </div>
+
+                  <!-- Right column -->
+                  <div class="flex flex-col items-end gap-1 shrink-0">
+                    <!-- Status Chip: 未确认 filled rose -->
+                    <span class="px-1.5 py-0.5 rounded-full bg-apple-rose text-white text-[10px] font-semibold leading-none shadow-xs">
+                      未确认
+                    </span>
+                    <!-- Channel marks: TG ✓ Bark ✕ in red -->
+                    <span class="text-[10px] font-mono text-[#64748b] leading-tight">
+                      TG ✓ <span class="text-apple-rose font-semibold">Bark ✕</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ROW 2: 急涨 (已展开态 EXPANDED) -->
+              <div class="p-3 bg-white/80 flex flex-col gap-2.5 border-l-2 border-apple-blue shadow-xs">
+                <!-- Row Header -->
+                <div class="flex items-center gap-2.5">
+                  <!-- 28px Round Direction Badge: ↗ Green tint -->
+                  <div class="w-7 h-7 rounded-full bg-[#dcfce7] text-[#15803d] flex items-center justify-center font-bold text-[14px] shrink-0 border border-[#bbf7d0]">
+                    ↗
+                  </div>
+
+                  <!-- Middle two lines -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-1.5 leading-tight">
+                      <span class="text-[13px] font-semibold text-[#0f172a]">急涨 · 28 个币</span>
+                      <span class="text-[11px] text-[#64748b]">做空方向</span>
+                    </div>
+                    <div class="text-[11px] font-mono text-[#64748b] truncate mt-0.5">
+                      10-29 18:40 · SOL AVAX SUI NEAR 等
+                    </div>
+                  </div>
+
+                  <!-- Right column -->
+                  <div class="flex flex-col items-end gap-1 shrink-0">
+                    <!-- Status Chip: 已确认 neutral grey -->
+                    <span class="px-1.5 py-0.5 rounded-full bg-[#e2e8f0] text-[#475569] text-[10px] font-semibold leading-none">
+                      已确认
+                    </span>
+                    <!-- Channel marks -->
+                    <span class="text-[10px] font-mono text-[#059669] font-medium leading-tight">
+                      TG ✓ Bark ✓
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Detail Block (Expanded) -->
+                <div class="p-2.5 rounded-lg bg-[#f1f5f9]/80 border border-[#e2e8f0] flex flex-col gap-2 text-[11px]">
+                  <div class="flex flex-col gap-0.5 font-mono text-[#475569]">
+                    <div class="flex items-center justify-between">
+                      <span class="text-[#64748b]">时间跨度:</span>
+                      <span class="text-[#0f172a] font-medium">首次 03:11:00 → 最后 03:15:00</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-[#64748b]">确认时间:</span>
+                      <span class="text-[#0f172a] font-medium">确认于 03:16:42</span>
+                    </div>
+                  </div>
+
+                  <!-- Wrap of small mono coin chips -->
+                  <div class="flex flex-wrap gap-1 pt-1 border-t border-[#e2e8f0]/80">
+                    <span class="px-1.5 py-0.5 rounded bg-white border border-[#cbd5e1]/70 font-mono text-[10px] text-[#334155] font-semibold">BTC</span>
+                    <span class="px-1.5 py-0.5 rounded bg-white border border-[#cbd5e1]/70 font-mono text-[10px] text-[#334155] font-semibold">ETH</span>
+                    <span class="px-1.5 py-0.5 rounded bg-white border border-[#cbd5e1]/70 font-mono text-[10px] text-[#334155] font-semibold">SOL</span>
+                    <span class="px-1.5 py-0.5 rounded bg-white border border-[#cbd5e1]/70 font-mono text-[10px] text-[#334155] font-semibold">DOGE</span>
+                    <span class="px-1.5 py-0.5 rounded bg-white border border-[#cbd5e1]/70 font-mono text-[10px] text-[#334155] font-semibold">XRP</span>
+                    <span class="px-1.5 py-0.5 rounded bg-white border border-[#cbd5e1]/70 font-mono text-[10px] text-[#334155] font-semibold">ADA</span>
+                    <span class="px-1.5 py-0.5 rounded bg-white border border-[#cbd5e1]/70 font-mono text-[10px] text-[#334155] font-semibold">AVAX</span>
+                    <span class="px-1.5 py-0.5 rounded bg-white border border-[#cbd5e1]/70 font-mono text-[10px] text-[#334155] font-semibold">LINK</span>
+                    <span class="px-1.5 py-0.5 rounded bg-[#e2e8f0]/70 font-mono text-[10px] text-[#64748b] font-medium">+23</span>
+                  </div>
+
+                  <!-- Action button -->
+                  <div class="pt-1 flex justify-end">
+                    <button type="button" class="px-3 py-1 rounded-full bg-apple-blue hover:bg-apple-blue-hover active:scale-95 text-white text-[11px] font-semibold shadow-xs flex items-center gap-1 transition-all">
+                      <span>确认并归档</span>
+                      <span class="material-symbols-outlined text-[13px]">check</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ROW 3: 测试记录行 (Test alert row) -->
+              <div class="p-3 bg-white/40 flex items-center gap-2.5 hover:bg-white/60 transition-colors">
+                <!-- 28px Round Direction Badge: Amber for test -->
+                <div class="w-7 h-7 rounded-full bg-[#fef3c7] text-[#d97706] flex items-center justify-center font-bold text-[13px] shrink-0 border border-[#fde68a]">
+                  ⚡
+                </div>
+
+                <!-- Middle lines -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-1.5 leading-tight">
+                    <span class="text-[13px] font-semibold text-[#0f172a]">急跌 · 模拟演练</span>
+                    <span class="px-1 rounded bg-[#fef3c7] text-[#b45309] text-[9px] font-bold">测试</span>
+                  </div>
+                  <div class="text-[11px] font-mono text-[#64748b] truncate mt-0.5">
+                    10-24 14:02 · 内部触发仿真
+                  </div>
+                </div>
+
+                <!-- Right status -->
+                <div class="flex flex-col items-end gap-1 shrink-0">
+                  <span class="px-1.5 py-0.5 rounded-full bg-[#e2e8f0] text-[#64748b] text-[10px] font-semibold leading-none">
+                    已阅
+                  </span>
+                  <span class="text-[10px] font-mono text-[#94a3b8] leading-tight">
+                    不推送
+                  </span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Bottom subtle border reflection -->
+          <div class="h-1 bg-gradient-to-r from-transparent via-white/80 to-transparent shrink-0"></div>
+        </div>
+
+        <!-- Anchor Pointer & 44px Frosted Bell Button with Red Count Badge "1" -->
+        <div class="flex flex-col items-center mt-[-6px]">
+          <div class="popover-pointer"></div>
+          <div class="relative mt-2">
+            <button type="button" class="w-11 h-11 rounded-full glass-surface flex items-center justify-center text-[#1e293b] shadow-md border border-white/90 hover:bg-white transition-all active:scale-95">
+              <span class="material-symbols-outlined text-[20px] text-apple-rose animate-bounce">notifications_active</span>
+            </button>
+            <!-- Red Count Badge "1" -->
+            <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-apple-rose text-white text-[10px] font-bold flex items-center justify-center border-2 border-white shadow-xs">
+              1
+            </span>
+          </div>
+          <span class="text-[10px] font-mono text-[#94a3b8] mt-1">44px 锚点按钮 (带红点角标 1)</span>
+        </div>
+      </div>
+
+
+      <!-- ========================================================================= -->
+      <!-- FRAME 3: 历史 Tab Empty State -->
+      <!-- ========================================================================= -->
+      <div class="flex flex-col items-center w-[340px]">
+        <!-- State Title Badge -->
+        <div class="mb-3 px-3 py-1 rounded-full bg-white/70 border border-white shadow-sm flex items-center gap-1.5 text-[11px] font-semibold text-[#0f172a]">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#94a3b8]"></span>
+          <span>状态 C · 历史 Tab (无记录空状态)</span>
+        </div>
+
+        <!-- 340px Popover Card -->
+        <div class="w-[340px] max-h-[560px] glass-surface rounded-[22px] shadow-glass-popover flex flex-col relative overflow-hidden transition-all duration-200">
+          
+          <!-- Common Header (Sticky) -->
+          <div class="px-4 pt-4 pb-3 flex flex-col gap-3 border-b border-white/60 shrink-0">
+            <!-- Icon + Title row -->
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-apple-blue/10 flex items-center justify-center text-apple-blue border border-apple-blue/15 shadow-sm shrink-0">
+                <span class="material-symbols-outlined text-[19px]">notifications_active</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h2 class="text-[15px] font-bold tracking-tight text-[#0f172a] leading-none mb-1">全市场报警</h2>
+                <p class="text-[11px] text-[#64748b] truncate leading-tight">多币 5 分钟内触及 1.618 时全屏提醒</p>
+              </div>
+            </div>
+
+            <!-- Compact iOS Segmented Control (32px tall, full width) -->
+            <div class="w-full h-8 p-0.5 rounded-[10px] bg-[#e6ebf2]/80 flex items-center text-[12px] font-medium text-[#475569] shadow-inner select-none">
+              <button type="button" class="flex-1 h-full rounded-[8px] text-[#64748b] hover:text-[#0f172a] flex items-center justify-center transition-all duration-150">
+                概览
+              </button>
+              <button type="button" class="flex-1 h-full rounded-[8px] bg-white text-[#0f172a] font-semibold shadow-sm flex items-center justify-center transition-all duration-150">
+                历史 0
+              </button>
+            </div>
+          </div>
+
+          <!-- Body: Empty State -->
+          <div class="p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[360px] flex-1">
+            
+            <!-- Centered Bell-Slash Icon tile -->
+            <div class="w-14 h-14 rounded-2xl bg-[#eef2f8] border border-white flex items-center justify-center text-[#94a3b8] shadow-inner">
+              <span class="material-symbols-outlined text-[28px]">notifications_off</span>
+            </div>
+
+            <div class="flex flex-col gap-1 max-w-[220px]">
+              <div class="text-[14px] font-bold text-[#334155]">暂无报警记录</div>
+              <p class="text-[11px] text-[#64748b] leading-relaxed">
+                条件较严格，只有极端插针时才会出现
+              </p>
+            </div>
+
+            <div class="mt-4 px-3 py-1.5 rounded-lg bg-white/50 border border-white/80 text-[10px] font-mono text-[#94a3b8]">
+              THRESHOLD: ≥25 COINS / 5 MIN
+            </div>
+
+          </div>
+
+          <!-- Bottom subtle border reflection -->
+          <div class="h-1 bg-gradient-to-r from-transparent via-white/80 to-transparent shrink-0"></div>
+        </div>
+
+        <!-- Anchor Pointer & 44px Frosted Bell Button -->
+        <div class="flex flex-col items-center mt-[-6px]">
+          <div class="popover-pointer"></div>
+          <div class="relative mt-2">
+            <button type="button" class="w-11 h-11 rounded-full glass-surface flex items-center justify-center text-[#1e293b] shadow-md border border-white/90 hover:bg-white transition-all active:scale-95">
+              <span class="material-symbols-outlined text-[20px] text-[#64748b]">notifications_none</span>
+            </button>
+            <!-- Small Muted Status Dot -->
+            <span class="absolute top-0 right-0 w-3 h-3 rounded-full bg-[#94a3b8] border-2 border-white shadow-xs"></span>
+          </div>
+          <span class="text-[10px] font-mono text-[#94a3b8] mt-1">44px 锚点按钮 (空状态静默)</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Design Spec Footer Bar -->
+  <footer class="w-full max-w-[1400px] mx-auto px-6 mt-12 pt-6 border-t border-[#e2e8f0]/80 flex flex-col md:flex-row items-center justify-between text-[12px] text-[#64748b] gap-4">
+    <div class="flex items-center gap-2">
+      <span class="font-bold text-[#0f172a]">SPIKE CLEAR LIQUID GLASS SPEC</span>
+      <span>·</span>
+      <span>340px Popover Anatomy</span>
+      <span>·</span>
+      <span>100% Synthetic Placeholder Data</span>
+    </div>
+    <div class="font-mono text-[11px]">
+      BLUR: 28px SATURATE(180%) · WHITE 78% · CORNER: 22px · HIG COMPLIANT
+    </div>
+  </footer>
+
+</body>
+</html>

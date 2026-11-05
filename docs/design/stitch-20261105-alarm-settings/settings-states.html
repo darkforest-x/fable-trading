@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPIKE · 全市场报警设置浮层规范 (Apple Clear Glass)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Inter & JetBrains Mono Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+          },
+          colors: {
+            apple: {
+              blue: '#0071e3',
+              'blue-hover': '#0077ed',
+              green: '#34c759',
+              amber: '#ff9f0a',
+              red: '#ff3b30',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Apple Clear Frosted Glass Token */
+    .apple-glass {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 
+        0 1px 2px 0 rgba(0, 0, 0, 0.04),
+        0 12px 36px -6px rgba(0, 0, 0, 0.08),
+        0 24px 64px -12px rgba(15, 23, 42, 0.06);
+    }
+
+    .apple-glass-subtle {
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+
+    /* Inner card for settings list */
+    .apple-inset-card {
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    /* Popover Anchor Pointer Triangle */
+    .popover-pointer {
+      position: absolute;
+      bottom: -7px;
+      right: 28px;
+      width: 14px;
+      height: 14px;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(28px);
+      border-right: 1px solid rgba(255, 255, 255, 0.85);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.85);
+      transform: rotate(45deg);
+      border-bottom-right-radius: 3px;
+      z-index: 10;
+    }
+
+    /* Realistic Apple iOS Switch */
+    .ios-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 26px;
+      cursor: pointer;
+    }
+    .ios-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .ios-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(120, 120, 128, 0.2);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 9999px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
+    }
+    .ios-slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2), 0 0 1px rgba(0,0,0,0.1);
+    }
+    .ios-switch input:checked + .ios-slider {
+      background-color: #0071e3;
+    }
+    .ios-switch input:checked + .ios-slider:before {
+      transform: translateX(18px);
+    }
+
+    /* Ambient pulse for green dot */
+    @keyframes greenHalo {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.15);
+      }
+    }
+    .pulse-halo {
+      animation: greenHalo 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    }
+  </style>
+</head>
+<body class="bg-[#f2f4f8] text-[#1d1d1f] font-sans min-h-screen antialiased selection:bg-blue-100 selection:text-apple-blue overflow-x-hidden">
+
+  <!-- Soft Blurred Background Dashboard Simulator -->
+  <div class="fixed inset-0 pointer-events-none z-0">
+    <!-- Abstract subtle chart gradient lines simulating SPIKE dashboard behind -->
+    <div class="absolute top-12 left-10 w-96 h-96 bg-blue-100/40 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-20 right-20 w-[500px] h-[500px] bg-emerald-100/30 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-indigo-50/50 rounded-full blur-3xl"></div>
+    
+    <!-- Subtle chart grid watermark lines -->
+    <div class="absolute inset-0 opacity-[0.035]" style="background-image: linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px); background-size: 40px 40px;"></div>
+    
+    <!-- Mock Faint Header Ribbon -->
+    <div class="w-full h-14 border-b border-black/[0.04] bg-white/40 backdrop-blur-md px-8 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-xs font-semibold tracking-wider text-slate-800 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-apple-blue" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          SPIKE // RESEARCH
+        </span>
+        <span class="text-[11px] text-slate-400 font-mono px-2 py-0.5 rounded bg-black/[0.03]">v4.18.2</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span class="text-[11px] font-mono text-slate-500">ENGINE_SYNCED</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Canvas Content -->
+  <main class="relative z-10 max-w-7xl mx-auto px-6 py-10 lg:py-16">
+
+    <!-- Design Specification Banner -->
+    <div class="mb-12 text-center max-w-2xl mx-auto">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/70 backdrop-blur-md border border-white/80 shadow-xs mb-3">
+        <span class="w-1.5 h-1.5 rounded-full bg-apple-blue"></span>
+        <span class="text-[11px] font-medium text-slate-600 tracking-wide">SPIKE · 悬浮交互规范</span>
+      </div>
+      <h1 class="text-2xl lg:text-3xl font-bold tracking-tight text-slate-900 mb-2">全市场报警设置 Popover</h1>
+      <p class="text-xs lg:text-sm text-slate-500 leading-relaxed">
+        轻量通透 Apple 清透磨砂玻璃材质，严守 300px 宽度、22px 圆角及 16px 留白律动。一屏对照呈现已连接、重连中与已断开三种网络状态。
+      </p>
+    </div>
+
+    <!-- 3 Side-by-Side States Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 items-end justify-center">
+
+      <!-- ========================================== -->
+      <!-- STATE A: CONNECTED (已连接) -->
+      <!-- ========================================== -->
+      <div class="flex flex-col items-center">
+        <!-- State Label Header -->
+        <div class="mb-4 flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50/80 border border-emerald-200/60 text-emerald-800 text-[11px] font-medium">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          状态 A · 正常已连接 (Connected)
+        </div>
+
+        <!-- Popover Anchor Container -->
+        <div class="relative w-[300px] flex flex-col items-end">
+          
+          <!-- Popover Card (300px, 22px radius, 16px padding) -->
+          <div class="relative w-full apple-glass rounded-[22px] p-4 text-slate-900 transition-all duration-200">
+            <!-- Subtle pointer notch -->
+            <div class="popover-pointer"></div>
+
+            <!-- 1. Header Area (Icon tile + Title + Subtitle) -->
+            <div class="flex items-start gap-3 mb-3.5">
+              <!-- 32px rounded-square tinted icon tile -->
+              <div class="w-8 h-8 rounded-[10px] bg-apple-blue/10 border border-apple-blue/20 flex items-center justify-center shrink-0 text-apple-blue">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-[15px] font-semibold tracking-tight text-slate-900 leading-tight">全市场报警</h3>
+                <p class="text-[11px] text-slate-500 font-normal truncate mt-0.5">多币 5 分钟内触及 1.618 时全屏提醒</p>
+              </div>
+            </div>
+
+            <!-- 2. Connection Status Strip (State A: Green / Connected) -->
+            <div class="rounded-[14px] bg-emerald-500/10 border border-emerald-500/15 px-3 py-2 flex items-center justify-between mb-3.5">
+              <div class="flex items-center gap-2">
+                <!-- Green dot with soft halo -->
+                <span class="relative flex h-2 w-2">
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 pulse-halo"></span>
+                </span>
+                <span class="text-xs font-medium text-emerald-800">推送已连接</span>
+              </div>
+              <span class="text-[11px] font-mono font-medium text-emerald-700/80">实时</span>
+            </div>
+
+            <!-- 3. Grouped Inset List (iOS Settings Style) -->
+            <div class="apple-inset-card rounded-[16px] overflow-hidden">
+              
+              <!-- Row 1: 报警声音 (min 52px) -->
+              <div class="min-h-[52px] px-3.5 py-2 flex items-center justify-between gap-2 border-b border-black/[0.04]">
+                <div class="min-w-0 pr-2">
+                  <div class="text-[13px] font-medium text-slate-900 leading-tight">报警声音</div>
+                  <div class="text-[10px] text-slate-400 mt-0.5 leading-snug">需在本页点击一次才能发声</div>
+                </div>
+                <!-- iOS Toggle Switch: ON (Blue) -->
+                <label class="ios-switch shrink-0" aria-label="报警声音开关">
+                  <input type="checkbox" checked>
+                  <span class="ios-slider"></span>
+                </label>
+              </div>
+
+              <!-- Row 2: 测试报警 (min 52px) -->
+              <div class="min-h-[52px] px-3.5 py-2 flex items-center justify-between gap-2">
+                <div class="min-w-0 pr-2">
+                  <div class="text-[13px] font-medium text-slate-900 leading-tight">测试报警</div>
+                  <div class="text-[10px] text-slate-400 mt-0.5 leading-snug">只在已打开的页面弹出，不推送消息</div>
+                </div>
+                <!-- Small outlined pill button: Active -->
+                <button type="button" class="shrink-0 h-7 px-3 rounded-full text-xs font-medium text-apple-blue bg-white border border-apple-blue/30 hover:bg-apple-blue/5 active:scale-95 transition-all shadow-2xs">
+                  测试
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Bottom Anchor Gap & Bell Trigger (44px circle) -->
+          <div class="mt-4 self-end relative pr-4">
+            <button type="button" class="w-11 h-11 rounded-full apple-glass flex items-center justify-center text-slate-700 hover:text-apple-blue active:scale-95 transition-transform shadow-sm focus:outline-none" aria-label="全市场报警快捷设置">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+            </button>
+            <!-- 8px status dot badge at top-right (Green) -->
+            <span class="absolute top-0 right-4 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white shadow-xs"></span>
+          </div>
+
+        </div>
+      </div>
+
+
+      <!-- ========================================== -->
+      <!-- STATE B: RECONNECTING (重连中) -->
+      <!-- ========================================== -->
+      <div class="flex flex-col items-center">
+        <!-- State Label Header -->
+        <div class="mb-4 flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50/80 border border-amber-200/60 text-amber-800 text-[11px] font-medium">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+          状态 B · 正在重连… (Reconnecting)
+        </div>
+
+        <!-- Popover Anchor Container -->
+        <div class="relative w-[300px] flex flex-col items-end">
+          
+          <!-- Popover Card (300px, 22px radius, 16px padding) -->
+          <div class="relative w-full apple-glass rounded-[22px] p-4 text-slate-900 transition-all duration-200">
+            <!-- Subtle pointer notch -->
+            <div class="popover-pointer"></div>
+
+            <!-- 1. Header Area -->
+            <div class="flex items-start gap-3 mb-3.5">
+              <!-- 32px rounded-square tinted icon tile -->
+              <div class="w-8 h-8 rounded-[10px] bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 text-amber-600">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-[15px] font-semibold tracking-tight text-slate-900 leading-tight">全市场报警</h3>
+                <p class="text-[11px] text-slate-500 font-normal truncate mt-0.5">多币 5 分钟内触及 1.618 时全屏提醒</p>
+              </div>
+            </div>
+
+            <!-- 2. Connection Status Strip (State B: Amber / Spinner) -->
+            <div class="rounded-[14px] bg-amber-500/10 border border-amber-500/20 px-3 py-2 flex items-center justify-between mb-3.5">
+              <div class="flex items-center gap-2">
+                <!-- Amber dot -->
+                <span class="inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                <span class="text-xs font-medium text-amber-800">正在重连…</span>
+              </div>
+              <!-- Small Spinner -->
+              <svg class="animate-spin h-3.5 w-3.5 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+
+            <!-- 3. Grouped Inset List (iOS Settings Style) -->
+            <div class="apple-inset-card rounded-[16px] overflow-hidden">
+              
+              <!-- Row 1: 报警声音 (min 52px) -->
+              <div class="min-h-[52px] px-3.5 py-2 flex items-center justify-between gap-2 border-b border-black/[0.04]">
+                <div class="min-w-0 pr-2">
+                  <div class="text-[13px] font-medium text-slate-900 leading-tight">报警声音</div>
+                  <div class="text-[10px] text-slate-400 mt-0.5 leading-snug">需在本页点击一次才能发声</div>
+                </div>
+                <!-- iOS Toggle Switch: OFF -->
+                <label class="ios-switch shrink-0" aria-label="报警声音开关">
+                  <input type="checkbox">
+                  <span class="ios-slider"></span>
+                </label>
+              </div>
+
+              <!-- Row 2: 测试报警 (min 52px) -->
+              <div class="min-h-[52px] px-3.5 py-2 flex items-center justify-between gap-2">
+                <div class="min-w-0 pr-2">
+                  <div class="text-[13px] font-medium text-slate-900 leading-tight">测试报警</div>
+                  <div class="text-[10px] text-slate-400 mt-0.5 leading-snug">连接后可测试</div>
+                </div>
+                <!-- Disabled grey button -->
+                <button type="button" disabled class="shrink-0 h-7 px-3 rounded-full text-xs font-medium text-slate-400 bg-slate-100/70 border border-slate-200/60 cursor-not-allowed">
+                  测试
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Bottom Anchor Gap & Bell Trigger (44px circle) -->
+          <div class="mt-4 self-end relative pr-4">
+            <button type="button" class="w-11 h-11 rounded-full apple-glass flex items-center justify-center text-slate-700 hover:text-amber-600 active:scale-95 transition-transform shadow-sm focus:outline-none" aria-label="全市场报警快捷设置">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+            </button>
+            <!-- 8px status dot badge at top-right (Amber) -->
+            <span class="absolute top-0 right-4 w-2.5 h-2.5 rounded-full bg-amber-500 border-2 border-white shadow-xs"></span>
+          </div>
+
+        </div>
+      </div>
+
+
+      <!-- ========================================== -->
+      <!-- STATE C: OFFLINE (已断开) -->
+      <!-- ========================================== -->
+      <div class="flex flex-col items-center">
+        <!-- State Label Header -->
+        <div class="mb-4 flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50/80 border border-rose-200/60 text-rose-800 text-[11px] font-medium">
+          <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+          状态 C · 推送已断开 (Offline)
+        </div>
+
+        <!-- Popover Anchor Container -->
+        <div class="relative w-[300px] flex flex-col items-end">
+          
+          <!-- Popover Card (300px, 22px radius, 16px padding) -->
+          <div class="relative w-full apple-glass rounded-[22px] p-4 text-slate-900 transition-all duration-200">
+            <!-- Subtle pointer notch -->
+            <div class="popover-pointer"></div>
+
+            <!-- 1. Header Area -->
+            <div class="flex items-start gap-3 mb-3.5">
+              <!-- 32px rounded-square tinted icon tile -->
+              <div class="w-8 h-8 rounded-[10px] bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shrink-0 text-rose-600">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-[15px] font-semibold tracking-tight text-slate-900 leading-tight">全市场报警</h3>
+                <p class="text-[11px] text-slate-500 font-normal truncate mt-0.5">多币 5 分钟内触及 1.618 时全屏提醒</p>
+              </div>
+            </div>
+
+            <!-- 2. Connection Status Strip (State C: Red / Reconnect CTA) -->
+            <div class="rounded-[14px] bg-rose-500/10 border border-rose-500/20 px-3 py-1.5 flex items-center justify-between mb-3.5">
+              <div class="flex items-center gap-2">
+                <!-- Red dot -->
+                <span class="inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                <span class="text-xs font-medium text-rose-800">推送已断开</span>
+              </div>
+              <!-- Filled Blue Pill Button (min 32px tall) -->
+              <button type="button" class="min-h-[32px] px-3 rounded-full text-xs font-semibold text-white bg-apple-blue hover:bg-apple-blue-hover active:scale-95 transition-all shadow-xs flex items-center justify-center">
+                重新连接
+              </button>
+            </div>
+
+            <!-- 3. Grouped Inset List (iOS Settings Style) -->
+            <div class="apple-inset-card rounded-[16px] overflow-hidden">
+              
+              <!-- Row 1: 报警声音 (min 52px) -->
+              <div class="min-h-[52px] px-3.5 py-2 flex items-center justify-between gap-2 border-b border-black/[0.04]">
+                <div class="min-w-0 pr-2">
+                  <div class="text-[13px] font-medium text-slate-900 leading-tight">报警声音</div>
+                  <div class="text-[10px] text-slate-400 mt-0.5 leading-snug">需在本页点击一次才能发声</div>
+                </div>
+                <!-- iOS Toggle Switch: OFF -->
+                <label class="ios-switch shrink-0" aria-label="报警声音开关">
+                  <input type="checkbox">
+                  <span class="ios-slider"></span>
+                </label>
+              </div>
+
+              <!-- Row 2: 测试报警 (min 52px) -->
+              <div class="min-h-[52px] px-3.5 py-2 flex items-center justify-between gap-2">
+                <div class="min-w-0 pr-2">
+                  <div class="text-[13px] font-medium text-slate-900 leading-tight">测试报警</div>
+                  <div class="text-[10px] text-slate-400 mt-0.5 leading-snug">连接后可测试</div>
+                </div>
+                <!-- Disabled grey button -->
+                <button type="button" disabled class="shrink-0 h-7 px-3 rounded-full text-xs font-medium text-slate-400 bg-slate-100/70 border border-slate-200/60 cursor-not-allowed">
+                  测试
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Bottom Anchor Gap & Bell Trigger (44px circle) -->
+          <div class="mt-4 self-end relative pr-4">
+            <button type="button" class="w-11 h-11 rounded-full apple-glass flex items-center justify-center text-slate-700 hover:text-rose-600 active:scale-95 transition-transform shadow-sm focus:outline-none" aria-label="全市场报警快捷设置">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+            </button>
+            <!-- 8px status dot badge at top-right (Red) -->
+            <span class="absolute top-0 right-4 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-white shadow-xs"></span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Engineering Parameters & Specs Footer Sheet -->
+    <div class="mt-16 max-w-3xl mx-auto apple-glass-subtle rounded-2xl p-5 border border-white/80 shadow-2xs">
+      <div class="flex items-center justify-between border-b border-black/[0.05] pb-3 mb-3">
+        <span class="text-xs font-semibold text-slate-800 tracking-tight flex items-center gap-2">
+          <svg class="w-3.5 h-3.5 text-apple-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          交互与设计系统实现契约 (Implementation Specs)
+        </span>
+        <span class="text-[11px] font-mono text-slate-400">DESIGN.md v4.18</span>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-[11px]">
+        <div>
+          <div class="text-slate-400 font-mono">WIDTH & RADIUS</div>
+          <div class="font-medium text-slate-700 mt-0.5">300px · r: 22px</div>
+        </div>
+        <div>
+          <div class="text-slate-400 font-mono">SURFACE BLUR</div>
+          <div class="font-medium text-slate-700 mt-0.5">White 78% · 28px Blur</div>
+        </div>
+        <div>
+          <div class="text-slate-400 font-mono">ACCENT COLOR</div>
+          <div class="font-medium text-slate-700 mt-0.5">#0071e3 (Apple Blue)</div>
+        </div>
+        <div>
+          <div class="text-slate-400 font-mono">TOUCH TARGET</div>
+          <div class="font-medium text-slate-700 mt-0.5">≥ 44px (iOS HIG)</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</body>
+</html>

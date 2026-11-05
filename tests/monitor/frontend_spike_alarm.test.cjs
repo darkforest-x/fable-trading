@@ -1,6 +1,6 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
-const {create,sound,packet,ACTIVE_MS,sirenMotion}=require('../../yoyo/monitor/static/spike-alarm.js');
+const {create,sound,packet,historyPacket,historyLoader,replayWindow,replayCoins,alertStatus,REPLAY_PERIODS,ACTIVE_MS,sirenMotion}=require('../../yoyo/monitor/static/spike-alarm.js');
 const NOW=Date.parse('2026-10-27T04:00Z');
 const alert=(id=1,extra={})=>({id,side:'lower',n:2,symbols:['BTC-USDT-SWAP','ETH-USDT-SWAP'],first_ms:NOW-60000,last_ms:NOW,created_ms:NOW,ack_ms:null,test:0,...extra});
 const flush=async()=>{for(let i=0;i<15;i++)await Promise.resolve();};
@@ -79,4 +79,38 @@ test('sound requires enable, loops in the audio engine, stops on ack/mute, and r
  contexts[0].state='suspended';contexts[0].onstatechange();assert.equal(a.state(),'blocked');assert.equal(nodes[1].stopped,true);
  await a.enable();assert.equal(nodes.length,3);a.mute();assert.equal(a.state(),'off');assert.equal(nodes[2].stopped,true);
  assert.equal(sound({AudioContext:null}).state(),'unsupported');
+});
+test('history packet keeps delivery and acknowledgement facts, sorts newest first and rejects malformed rows',()=>{
+ const row=(id,extra={})=>({id,side:'upper',n:2,symbols:['BTC-USDT-SWAP','ETH-USDT-SWAP'],first_ms:NOW-60000,last_ms:NOW,created_ms:NOW+id,ack_ms:NOW+5,test:0,telegram:'sent',bark:'failed',error:'bark HTTPError',text:'x',active:false,...extra});
+ const base={now_ms:NOW,threshold:25,window_minutes:5,cooldown_minutes:30,active_hours:6,channels:{telegram:true,bark:false},notify_only:true,worker_alive:true,active:[]};
+ const v=historyPacket({...base,alerts:[row(1),row(2,{ack_ms:null,test:1,telegram:'test',bark:'weird'})]});
+ assert.deepEqual(v.alerts.map(a=>a.id),[2,1]);assert.equal(v.alerts[0].test,true);assert.equal(v.alerts[0].bark,'unknown');assert.equal(v.alerts[1].bark,'failed');
+ assert.equal(v.alerts[0].ack_ms,null);assert.equal('error' in v.alerts[1],false,'server error strings are not rendered');
+ assert.equal(v.threshold,25);assert.equal(v.workerAlive,true);assert.deepEqual(v.channels,{telegram:true,bark:false});
+ assert.throws(()=>historyPacket({...base,alerts:[row(1),row(1)]}));assert.throws(()=>historyPacket({...base,alerts:[row(1,{symbols:['<b>-USDT-SWAP']})]}));
+ assert.throws(()=>historyPacket({...base,alerts:[row(1,{side:'both'})]}));assert.throws(()=>historyPacket({...base,threshold:'25',alerts:[]}));
+});
+test('history loads on demand with one same-origin GET, keeps the last good data on failure and drops superseded replies',async()=>{
+ const calls=[],states=[];const loader=historyLoader({request:(url,opts)=>new Promise((resolve,reject)=>calls.push({url,opts,resolve,reject})),later:()=>0,cancel:()=>{},change:s=>states.push(s)});
+ const good={now_ms:NOW,threshold:25,window_minutes:5,cooldown_minutes:30,channels:{},alerts:[]};
+ const first=loader.load();assert.equal(calls.length,1);assert.equal(calls[0].url,'/api/spike-alerts');assert.equal(calls[0].opts.method,undefined);assert.equal(calls[0].opts.credentials,'same-origin');
+ const second=loader.load();assert.equal(calls[0].opts.signal.aborted,true,'a newer load aborts the old one');
+ calls[0].resolve({ok:true,json:async()=>({...good,threshold:99})});assert.equal(await first,false);
+ calls[1].resolve({ok:true,json:async()=>good});assert.equal(await second,true);assert.equal(loader.state().data.threshold,25);
+ const third=loader.load();calls[2].resolve({ok:false});assert.equal(await third,false);assert.match(loader.state().error,/重试/);assert.equal(loader.state().data.threshold,25);
+ const fourth=loader.load();loader.abort();assert.equal(calls[3].opts.signal.aborted,true);assert.equal(loader.state().loading,false);calls[3].reject(Error('abort'));await fourth;assert.equal(loader.state().error,'');
+});
+test('replay window starts at the first touch, waits for the alert bar to close and never asks for future bars',()=>{
+ const H=3600000,M=60000,a={first_ms:NOW-4*M,last_ms:NOW,symbols:['ETH-USDT-SWAP'],test:false};
+ const later=NOW+30*24*H,w=replayWindow(a,'15m',later);
+ assert.equal(w.fill_ms,a.first_ms,'entry stays in the alert week so the Monday 1.618 anchors match');assert.equal(w.exit_ms,a.last_ms+96*REPLAY_PERIODS['15m']);assert.equal(w.ready,true);
+ const soon=NOW+2*H,near=replayWindow(a,'15m',soon);assert.ok(near.exit_ms<=Math.floor(soon/900000)*900000-900000,'exit bar must already be closed');assert.ok(near.exit_ms>=a.last_ms);
+ const open=replayWindow(a,'4H',NOW+60000);assert.equal(open.ready,false);assert.equal(open.exit_ms,a.last_ms);
+ assert.equal(replayWindow(a,'2H',later),null);assert.equal(replayWindow({...a,first_ms:NOW+1},'15m',later),null);
+});
+test('replay coins add BTC as a control, keep alert order and refuse local test alerts',()=>{
+ assert.deepEqual(replayCoins({symbols:['SOL-USDT-SWAP','ETH-USDT-SWAP'],test:false}),['BTC-USDT-SWAP','SOL-USDT-SWAP','ETH-USDT-SWAP']);
+ assert.deepEqual(replayCoins({symbols:['ADA-USDT-SWAP','BTC-USDT-SWAP'],test:false}),['ADA-USDT-SWAP','BTC-USDT-SWAP']);
+ assert.deepEqual(replayCoins({symbols:['TEST0-USDT-SWAP'],test:true}),[]);
+ assert.equal(alertStatus({ack_ms:NOW,active:false}),'acked');assert.equal(alertStatus({ack_ms:null,active:true}),'pending');assert.equal(alertStatus({ack_ms:null,active:false}),'expired');
 });

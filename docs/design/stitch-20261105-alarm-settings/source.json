@@ -1,0 +1,16 @@
+{
+  "project_id": "8978791379095391159",
+  "model": "GEMINI_3_8_FLASH",
+  "design_system": "assets/f8037c9bec31400f835741afe18d3e7f (Liquid Specular Glass)",
+  "screens": {
+    "settings-states": "fdc3ccf65a7745e7a9c8b324b73aa35a",
+    "alert-center": "9de174f631c24300bbda689d94f10837",
+    "alert-replay": "702c3ae360eb42638e05e1f12e643d95"
+  },
+  "requests": [
+    "owner 2026-11-05: 这个模块做好一点吧",
+    "owner 2026-11-05: 功能要丰富一点 现在怎么连历史消息都没有",
+    "owner 2026-11-05: 最起码有个入口我能点击 看到当时报警后的图表走势 以便我来分析行情"
+  ],
+  "adaptation": "Layout, colors and states only. Placeholder coins, prices, counts and the generated 'confirm and archive' action were discarded. History reads the existing GET /api/spike-alerts on panel open and on stream change (no polling); unacknowledged rows stay in the full-screen alarm, so history has no ack button. Replay reuses /api/monday-fib/trade-candles (OKX closed bars, alert-week Monday 1.618) with markers instead of the generated shaded band. Read-only; no orders."
+}
