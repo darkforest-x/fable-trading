@@ -1,3 +1,9 @@
+## 2026-11-06 · Signal-center cloud score (rejected)
+
+- Owner asked for a score on signal-center signals at 12H/4H/1H/15m and approved the plan ("按方案开训"). `exp-signal-center-score-20261106-v1`: live rule per timeframe (12H parity exact), entry at confirmation close, signal-center fixed stop + intrabar EMA20/50 cross exit, one NautilusTrader run on the 632-crypto Binance 5m cohort (87,662 signals, 237,019 matched controls, 0 errors), LightGBM per timeframe, label-purged folds test 2025 / 2026.
+- Fails on every timeframe: no top 20 percent is net-positive in both years with permutation p < 0.01 (1H closest: -54 / +63bp, p 0.010 / 0.014). Unscored signals beat same-week random entries, but 12H/4H totals come from the top 1 percent of trades; 1H/15m net negative. No model promoted; no live, paper or notification change.
+- New adapter `yoyo/layers/l3_backtest/nautilus_stop_schedule.py` (per-bar stop re-arm). Learnings `win-classifier-auc-can-come-from-rule-mechanical-exits.md`, `fat-tailed-trend-exits-need-ex-tail-and-median-checks.md`.
+
 ## 2026-11-02 · H1 glyph plus5m EMA Cloud: delayed confirmation rejected
 
 - Owner supplied Tradewrite Cloud Flip then authorized “试试看？”. `exp-h1-ema-cloud-20261102-v1` reuses all638 registered symbols and53068 frozen glyphs. Only entry changes: new closed5m EMA20/50 crossing, inclusive24h lifetime, cancel target-before-flip/gap/invalid geometry; old four stop formulas/nearMonday target/7day holding/costs unchanged. Cloud-stop variant not tested.

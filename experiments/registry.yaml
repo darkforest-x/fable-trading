@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-signal-center-score-20261106-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 14da5374ae
+    status: rejected
+    question: 'Owner 2026-11-05 "针对我们信号中心的信号（12h的，4h,1h,15min）再做模型做评分？", plan approved 2026-11-06 "按方案开训": can a LightGBM score rank signal-center cloud signals (EMA20/50 + NY Monday 1.618 wick reclaim, first per symbol x NY week) on 12H / 4H / 1H / 15m so the top 20 percent is net-positive, beats matched random entries and a week-stratified permutation out of time?'
+    single_variable: 'New score only. Live signal rule applied unchanged per timeframe (12H parity with cloud_signals.signal exact); executable entry at the confirmation close instead of the non-executable touched-1.618 reference; signal-center fixed stop (1.5 percent BTC/ETH, 3 percent others from the touched 1.618) and intrabar EMA20/50 cross exit, no target. LightGBM binary (net > 0), fixed exp-clean-reversal-score parameters, 26 causal features, label-purged yearly folds (train exits before 2025 -> test 2025; before 2026 -> test 2026).'
+    result: 'Fails on every timeframe. 87,662 signals (12H 24,709 / 4H 20,671 / 1H 13,156 / 15m 29,126) and 237,019 matched controls, one NautilusTrader run, 0 errors. Top 20 percent mean net (2025 / 2026), week-stratified permutation p: 12H +149 / +64bp, p 0.52 / 0.077 (all signals +133 / +12); 4H -21 / -35bp, below all signals (+71 / +10); 1H -54 / +63bp, p 0.010 / 0.014 (all -72 / -35); 15m +0 / +14bp, p 0.78 / 0.70. AUC 0.55-0.69 is reference only; 1H AUC partly from avoiding rule-mechanical exits at the entry close (12 -> 2-3 percent), ex-immediate AUC 0.58 / 0.64, win 21 -> 32 / 37 percent. Unscored signals beat matched same-week random entries on every timeframe (12H +115, 4H +173, 1H +59, 15m +21bp per trade, week-cluster CIs above 0), but 12H / 4H totals come entirely from the top 1 percent of trades (mean ex top 1 percent -74 / -39bp; medians -397 / -184bp) and 1H / 15m are net negative. Single-feature baselines (pen_atr, rr_close, ema_spread_atr) also fail.'
+    artifacts: []
+    canonical_report: experiments/active/exp-signal-center-score-20261106-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Binance UM 5m frozen Monday-limit cohort (632 crypto, 2020-01..2026-09-23; survivorship: all still trading in 2026-09) vs live OKX. 4H / 1H / 15m signals do not exist live. Fees maker 2bp / taker 5bp (all fills taker); slippage 10bp per trade shown separately (1H 2026 top 20 percent +53bp after it). Cross-sectional clustering (n_same_bar is a top feature) makes per-trade CIs optimistic. Adapter yoyo/layers/l3_backtest/nautilus_stop_schedule.py (6 behavioural tests); builder parity and truncation look-ahead tests. Models, OOS scores and gains in results/; per-symbol trades kept local. No promotion, paper or live change.'
+
   - experiment_id: exp-live-ema-cloud-filter-20261103-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 14fd4a5017
