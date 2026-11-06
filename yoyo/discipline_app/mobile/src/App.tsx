@@ -37,6 +37,12 @@ import {useKeyboard} from './useKeyboard';
 import {api,ApiError,SERVICE_URL,authorizationScope,type Connection,type Plan,type Position,type State,type Ticket} from './api';
 import {ReplayDesk} from './ReplayDesk';
 import {Monitor} from './Monitor';
+import {AlarmBanner} from './AlarmBanner';
+import {NotificationCenter} from './NotificationCenter';
+import {useNotifications} from './useNotifications';
+import {setFibBark} from './notifySettings';
+import {playAlarm,unlockAlarmSound} from './alarmSound';
+import {ALERT_PREFS_KEY,parseAlertPrefs,type AlertPrefs,type MonitorSegment,type NotificationEvent} from './monitorFormat';
 import './replay.css';
 
 const fmt=(v:string|number|undefined,d=2)=>v===undefined?'—':Number(v).toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d});
@@ -51,6 +57,10 @@ type Preview={plan:Plan;policy_revision:number;ticket:Ticket;request_id:string;p
 
 export default function App(){
  const [replayOpen,setReplayOpen]=useState(false);
+ // Notifications (owner 2026-11-06): foreground alerts in-app, background pushes stay Bark.
+ const [alertPrefs,setAlertPrefs]=useState<AlertPrefs>(()=>{try{return parseAlertPrefs(localStorage.getItem(ALERT_PREFS_KEY))}catch{return parseAlertPrefs(null)}});
+ const [banner,setBanner]=useState<NotificationEvent|null>(null),[notifyOpen,setNotifyOpen]=useState(false),[barkBusy,setBarkBusy]=useState(false);
+ const [monitorRequest,setMonitorRequest]=useState<{segment:MonitorSegment;nonce:number}>(),[fibFocus,setFibFocus]=useState<{symbol:string;nonce:number}>();
  const pushedOrigin=useRef<Tab>('统计');
  const [fibTicket,setFibTicket]=useState(false);
  const [fibPeriod,setFibPeriod]=useState<CandlePeriod>('15m');
@@ -63,6 +73,14 @@ export default function App(){
  const [preview,setPreview]=useState<Preview|null>(null),[closeTarget,setCloseTarget]=useState<Position|null>(null),[uncertain,setUncertain]=useState(false);
  const live=(state?.mode??connection?.mode)==='okx_live';
  const [restoring,setRestoring]=useState(nativeSession);
+ const onAlert=useCallback((event:NotificationEvent)=>{
+  setBanner(event);
+  feedback(event.kind==='alarm'?'error':'warning');
+  if(alertPrefs.sound)playAlarm(event.kind==='alarm'?'alarm':'fib');
+ },[alertPrefs.sound]);
+ const notices=useNotifications(replayOpen?null:connection,!!connection&&!replayOpen,alertPrefs,onAlert);
+ useEffect(()=>{const unlock=()=>unlockAlarmSound();document.addEventListener('pointerdown',unlock,{passive:true});return()=>document.removeEventListener('pointerdown',unlock)},[]);
+ function updateAlertPrefs(next:Partial<AlertPrefs>){setAlertPrefs(prev=>{const value={...prev,...next};try{localStorage.setItem(ALERT_PREFS_KEY,JSON.stringify(value))}catch{}return value});feedback('light')}
  const [pendingEntry,setPendingEntry]=useState<EntryIntent|null>(null);
  const pendingEntryRef=useRef<EntryIntent|null>(null);
  const pendingKey=(c:Connection)=>`spike-pending:${c.cacheScope}:${c.mode}:${c.accountId??'primary'}`;
@@ -279,6 +297,16 @@ export default function App(){
  function openFibTicket(row:FibContract,period:CandlePeriod){if(busy||pendingEntryRef.current)return;choose(row.symbol,false);setFibPeriod(period);setKind('market');setDirection(fibSide(row));setStopFeedback(null);setFibTicket(true);setQuickAuto({symbol:row.symbol,side:fibSide(row)});feedback('light')}
  function openPositionSymbol(next:string){if(tab==='合约')feedback('light');if(next!==symbol)choose(next,false);nav('合约');requestAnimationFrame(()=>{window.scrollTo({top:0});document.querySelector<HTMLButtonElement>('.symbol-picker')?.focus({preventScroll:true})})}
  function openMonitorSymbol(next:string){if(busy||pendingEntryRef.current){notify('当前有请求在核对，稍后再切换合约');return}if(state&&!state.instruments[next]){notify(`${small(next)} 不在当前可交易合约列表`);return}openPositionSymbol(next)}
+ function openNotification(event:NotificationEvent){
+  setBanner(null);
+  if(event.kind==='alarm'){setMonitorRequest({segment:'alerts',nonce:Date.now()});nav('监控');return}
+  if(event.symbol){setFibFocus({symbol:event.symbol,nonce:Date.now()});nav('1.618')}
+ }
+ async function switchFibBark(enabled:boolean){
+  if(!connection||barkBusy)return;setBarkBusy(true);
+  try{notices.setData(await setFibBark(connection,enabled));notify(enabled?'1.618 Bark 推送已开启':'1.618 Bark 推送已关闭','success','toast');feedback('success')}
+  catch(e){setError((e as Error).message);feedback('warning')}finally{setBarkBusy(false)}
+ }
  function dismissPreview(){setPreview(null);if(uncertain){setTab('持仓');void refresh().catch(()=>setOnline(false))}}
  function closeProgress(){return <section className="trade-progress close-recovery" aria-label="平仓请求进度"><div className="progress-heading"><Spinner/><b>{closeRecovery.attempt?.symbol.replace('-USDT-SWAP','')} · 平仓 {closeRecovery.attempt?.percent}%</b></div><p role="status">{closeRecovery.status==='ready'?'原请求尚未发送，可继续提交':'正在核对原平仓请求'}</p><div className="recovery-actions"><button disabled={busy} onClick={()=>{closeRecovery.check();feedback('light')}}>刷新核对</button>{closeRecovery.status==='ready'&&<button disabled={busy} onClick={()=>void close(null,true)}>以原请求重试</button>}</div></section>}
  const metrics=(plan:Plan)=><dl className="metrics">{[['初始止损价格',`${priceFmt(plan.stop)} USDT`],['入场价格边界',`${priceFmt(plan.entry)} USDT`],['名义仓位',`${fmt(plan.notional)} USDT`],['本单名义 / 净值',`${fmt(plan.notional_equity_multiple)} 倍`],['预计保证金',`${fmt(plan.margin)} USDT`],['价格止损风险',`${fmt(plan.price_risk)} USDT`],['成本预留',`${fmt(plan.costs)} USDT`],['初始计划风险 1R',`${fmt(plan.risk)} USDT`]].map(([k,v])=><div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>;
@@ -291,8 +319,8 @@ export default function App(){
  const quickLatest=useRef(openFibTicket);quickLatest.current=openFibTicket;
  const stableQuick=useCallback((row:FibContract,period:CandlePeriod)=>quickLatest.current(row,period),[]);
  const mainRef=useRef<HTMLElement>(null);
- const pullStatus=usePullRefresh(mainRef,fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal||editing||busy,async()=>{await Promise.all([refresh(),refreshVisible()])},tab);
- const swipe=useSwipeNav(tab,fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal||editing||busy,nav);
+ const pullStatus=usePullRefresh(mainRef,fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal||editing||busy||notifyOpen,async()=>{await Promise.all([refresh(),refreshVisible()])},tab);
+ const swipe=useSwipeNav(tab,fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal||editing||busy||notifyOpen,nav);
  const navIcons:Record<Tab,IconName>={'1.618':'fib','合约':'swap','持仓':'positions','监控':'bell','统计':'bars','纪律':'shield','设置':'link'};
  const ruleGroups=[
   {title:'单笔与仓位',icon:'trade' as IconName,rows:[['单笔计划风险',p?`净值的 ${riskPercent}%`:'待连接服务'],['保证金模式',p?mode:'待连接服务'],['杠杆上限',p?`BTC / ETH ${p.major_leverage}x · 山寨 ${p.alt_leverage}x`:'待连接服务'],...(p?.major_allowance_scope==='independent'?[['BTC 独立额度',`保证金 ${Number(p.major_margin_fraction??0)*100}% · 名义 ${p.major_exposure_multiple}倍`],['ETH 独立额度',`保证金 ${Number(p.major_margin_fraction??0)*100}% · 名义 ${p.major_exposure_multiple}倍`],['山寨币共享额度',`保证金 ${Number(p.alt_margin_fraction??0)*100}% · 名义 ${p.alt_exposure_multiple}倍`]]:[['保证金占比上限',p?`BTC / ETH 合计 ${Number(p.major_margin_fraction??0)*100}% · 山寨合计 ${Number(p.alt_margin_fraction??0)*100}%`:'待连接服务']]),['同时持仓与挂单',p?`合计最多 ${p.max_positions} 笔`:'待连接服务'],['每日基础次数',p?`${p.max_entries} 次`:'待连接服务'],['盈利平仓奖励',p?(p.profit_entry_bonus?'整笔净盈利平仓，当天 +1 次':'未启用'):'待连接服务'],['奖励计次','每笔仅一次，分批止盈不重复计'],['额度计算',p?.major_allowance_scope==='independent'?'BTC、ETH 各自独立，山寨币共享；持仓与挂单合计占用':'同类持仓与挂单共享保证金额度']]},
@@ -324,10 +352,10 @@ export default function App(){
  if(replayOpen)return <ReplayDesk connection={connection} onBack={()=>{setReplayOpen(false);setTab('1.618')}}/>;
 
  return <div className={`app ${tab==='合约'?'trade-page':''} ${tab==='1.618'?'fib-page':''} ${editing?'keyboard-open':''}`}>
-  <div inert={fibTicket||!!preview||!!closeTarget||!!error||!!sheet||noticeModal}>
+  <div inert={fibTicket||!!preview||!!closeTarget||!!error||!!sheet||noticeModal||notifyOpen}>
   <main ref={mainRef} className={`page-transition ${tab==='合约'?'entry-page':''}`} style={{'--page-offset':`${navDirection*12}px`} as CSSProperties} {...swipe}>
    <div className={`pull-refresh ${pullStatus}`} role="status" aria-live="polite"><Icon name={pullStatus==='done'?'check':pullStatus==='error'?'close':'refresh'} size={18}/><span>{({idle:'',pull:'下拉刷新',ready:'松开刷新',loading:'正在刷新',done:'已更新',error:'更新失败，请重试'})[pullStatus]}</span></div>
-   <FibHome connection={connection} state={state} onQuick={stableQuick} onOpenReplay={()=>{setReplayOpen(true);setError('');setMessage(null)}} locked={busy||!!pendingEntry} active={tab==='1.618'} covered={fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal}/>
+   <FibHome connection={connection} state={state} onQuick={stableQuick} onOpenReplay={()=>{setReplayOpen(true);setError('');setMessage(null)}} locked={busy||!!pendingEntry} active={tab==='1.618'} covered={fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal} focus={fibFocus}/>
    {tab==='合约'&&<>
     <section className="quote-hero" aria-label="合约行情">
      <div className="trade-heading"><button className="symbol-picker" aria-label="选择合约" disabled={ticketLocked} aria-haspopup="dialog" onClick={()=>{setSearch('');setSheet('symbol');feedback('light')}}><CoinLogo key={symbol} coin={small(symbol)}/><b>{small(symbol)}<small>/USDT</small></b><span className="down-chevron"/></button><span className="neutral">永续</span><span className="instrument-mode">{mode}</span><ThemeToggle/></div>
@@ -352,7 +380,7 @@ export default function App(){
     <p className="disclaimer">{live?'已确认的交易所止损止盈不依赖手机在线。Mac 离线期间不能执行新的 1R 保本调整或应急指令。':'计划风险固定，实际损失可能超出预算。服务停机期间不会执行自动退出。'}</p>
    </>}
    {tab==='统计'&&<Statistics overview={state} online={online} connection={connection} onConnect={()=>nav('设置')} onDiscipline={()=>nav('纪律')}/>}
-   <Monitor connection={connection} active={tab==='监控'} covered={!!sheet||!!preview||!!closeTarget||!!error||noticeModal} onOpenSymbol={openMonitorSymbol} onConnect={()=>nav('设置')}/>
+   <Monitor connection={connection} active={tab==='监控'} covered={!!sheet||!!preview||!!closeTarget||!!error||noticeModal||notifyOpen} onOpenSymbol={openMonitorSymbol} onConnect={()=>nav('设置')} segmentRequest={monitorRequest} unread={notices.unread} onOpenNotifications={()=>{setNotifyOpen(true);notices.markRead();feedback('light')}}/>
    {tab==='纪律'&&<>
     <PageHeader title="交易纪律" subtitle="把规则提前定好，把执行交给系统。" onBack={()=>nav(pushedOrigin.current)}/>
     <MySystem/>
@@ -370,6 +398,15 @@ export default function App(){
     {connection&&<AccountSettings connection={connection} busy={busy||!!pendingEntry} onSwitch={switchAccount} onError={setError}/>}
     <section className="card experience-settings"><h2>交易操作</h2><label className="haptics-setting"><span><b>开仓二次确认</b><small>开仓可跳过二次确认；平仓选择比例后提交，风控仍执行。</small></span><input type="checkbox" role="switch" aria-label="开仓二次确认" checked={confirmTrades} disabled={busy} onChange={e=>{setConfirmTrades(e.target.checked);localStorage.setItem('spike-confirm-trades',String(e.target.checked));feedback('light')}}/><i aria-hidden="true"/></label></section>
     {connection&&<details className="card connection-card service-details"><summary>连接状态 <span className={`freshness ${online?'connected':''}`}><i/>{online?'已连接':'已中断'}</span></summary><p className="micro">{exchangeStatus?.error??'已有持仓由服务器持续管理。'}</p><button className="soft-button" disabled={busy} onClick={()=>{void forgetSession().then(()=>{epoch.current++;displayCache.clear();setConnection(null);setOnline(false);setState(null);notify('已清除本机授权；服务端继续管理已有持仓','info','toast')}).catch(()=>setError('本机授权未清除，请重试'))}}>清除本机授权</button></details>}
+    <section className="card experience-settings notify-settings"><h2>通知与报警</h2>
+     <label className="haptics-setting"><span><b>App 内报警弹窗</b><small>App 打开时，全市场插针报警顶部提醒并震动</small></span><input type="checkbox" role="switch" aria-label="App 内报警弹窗" checked={alertPrefs.popup} onChange={e=>updateAlertPrefs({popup:e.target.checked})}/><i aria-hidden="true"/></label>
+     <label className="haptics-setting"><span><b>报警声音</b><small>静音模式下不响，震动照常</small></span><input type="checkbox" role="switch" aria-label="报警声音" checked={alertPrefs.sound} onChange={e=>{updateAlertPrefs({sound:e.target.checked});if(e.target.checked){unlockAlarmSound();playAlarm('fib')}}}/><i aria-hidden="true"/></label>
+     <label className="haptics-setting"><span><b>1.618 触价提醒</b><small>{`评分 >${notices.data?.channels.fib.min_score??0.4} 或 live- 账户开仓、已推送的触价`}</small></span><input type="checkbox" role="switch" aria-label="1.618 触价提醒" checked={alertPrefs.fib} onChange={e=>updateAlertPrefs({fib:e.target.checked})}/><i aria-hidden="true"/></label>
+     <h3 className="settings-subhead">Bark 推送 · App 关闭时</h3>
+     <div className="haptics-setting static"><span><b>全市场插针报警</b><small>{notices.data?`${notices.data.channels.alarm.window_minutes??5} 分钟内 ≥${notices.data.channels.alarm.threshold??25} 币触及 1.618`:'连接后读取'}</small></span><em className={`channel-pill ${notices.data?.channels.alarm.bark?'on':''}`}>{!notices.data?'—':notices.data.channels.alarm.bark?'已开启 · 本机配置':'未配置'}</em></div>
+     <label className="haptics-setting"><span><b>1.618 触价信号</b><small>{notices.data?(notices.data.channels.fib.bark_configured?`已推送 ${notices.data.channels.fib.bark_sent} 条`:'本机尚未配置 Bark'):'连接后读取'}</small></span><input type="checkbox" role="switch" aria-label="1.618 Bark 推送" checked={!!notices.data?.channels.fib.bark} disabled={!connection||!notices.data?.channels.fib.bark_configured||barkBusy} onChange={e=>void switchFibBark(e.target.checked)}/><i aria-hidden="true"/></label>
+     <p className="micro">后台推送经 Bark 送达；App 使用个人签名，没有苹果推送权限。{notices.error?` ${notices.error}`:''}</p>
+    </section>
     <section className="card experience-settings"><h2>体验设置</h2><label className="haptics-setting"><span><b>触感反馈</b><small>抽屉开关、选项切换与滑杆档位轻震动</small></span><input type="checkbox" role="switch" aria-label="触感反馈" checked={haptics} onChange={e=>{setHaptics(e.target.checked);setFeedbackEnabled(e.target.checked)}}/><i aria-hidden="true"/></label><p className="micro">行情刷新和拖动过程不连续震动。减少动态效果时仍跟手拖动，松手后直接关闭或归位。</p></section>
     <div className="connection-promises"><p><Icon name="shield" size={18}/><span><b>{live?'独立实盘风控记录':'独立的模拟账户'}</b><small>模拟与实盘记录分开，重启不会清空风控。</small></span></p><p><Icon name="clock" size={18}/><span><b>Mac 在线，保护才持续</b><small>关闭 App 后服务继续管理；Mac 睡眠或断网会暂停新的保护调整。</small></span></p></div>
     <p className="disclaimer">{live?'实盘仅按你点击提交的指令执行。不能限制你在 OKX 官方 App 中的操作。':'仅模拟交易，未启用实盘。不能限制 OKX 官方 App 中的操作。'}</p>
@@ -384,6 +421,8 @@ export default function App(){
   {!error&&sheet==='symbol'&&<Dialog key="symbol-sheet" label="选择合约" busy={false} onDismiss={()=>setSheet(null)}>{dismiss=><><h2>选择合约</h2><p className="muted sheet-intro">全部 USDT 永续 · {Object.values(state?.instruments??{}).filter(i=>i.tradable!==false).length} 个合约</p><label className="input-shell search-contract"><input ref={searchInput} aria-label="搜索合约" value={search} onChange={e=>setSearch(e.target.value)} placeholder="搜索币种，例如 BTC、DOGE" autoComplete="off" autoCapitalize="characters"/>{search&&<button type="button" className="clear-search" aria-label="清空搜索" onPointerDown={e=>e.preventDefault()} onClick={()=>{setSearch('');searchInput.current?.focus();feedback('light')}}><Icon name="close" size={17}/></button>}</label><div className="contract-sort"><span title={contractSort==='volume'?'24h 估算成交额：基准币成交量 × 最新价':undefined}>{contractSort==='volume'?'24h · USDT':'今日 · 北京时间'}</span>{(['volume','gainers','losers'] as const).map((v,i)=><button key={v} aria-pressed={contractSort===v} onClick={()=>{setContractSort(v);feedback('light')}}>{['成交量 ↓','涨幅 ↓','跌幅 ↑'][i]}</button>)}</div><ContractOptions sort={contractSort} state={state} search={search} selected={symbol} onSelect={value=>{choose(value);dismiss()}}/>{!connection&&<p className="micro">连接后读取 OKX 合约列表。</p>}<p className="micro">切换合约会清空委托价格和止损。</p></>}</Dialog>}
 
   {!error&&sheet==='leverage'&&<Dialog key="leverage-sheet" label="调整杠杆" busy={false} onDismiss={()=>setSheet(null)}>{dismiss=><><h2>杠杆</h2><p className="muted sheet-intro">{small(symbol)}USDT · 当前{mode}规则</p><div className="budget leverage-budget"><div className="slider-heading"><label htmlFor="leverage-slider">调整倍数</label><output htmlFor="leverage-slider">{draftLeverage}<small>x</small></output></div><input id="leverage-slider" aria-label="杠杆倍数" type="range" min="1" max={cap} step="1" value={draftLeverage} onChange={e=>{setDraftLeverage(Number(e.target.value));feedback('tick')}} style={{'--fill':`${cap>1?(draftLeverage-1)/(cap-1)*100:0}%`} as CSSProperties}/><div className="slider-scale"><span>1x</span><span>{cap}x</span></div><div className="leverage-stepper"><button aria-label="杠杆减一" disabled={draftLeverage<=1} onClick={()=>{setDraftLeverage(v=>Math.max(1,v-1));feedback('tick')}}>−</button><span>可逐倍微调</span><button aria-label="杠杆加一" disabled={draftLeverage>=cap} onClick={()=>{setDraftLeverage(v=>Math.min(cap,v+1));feedback('tick')}}>＋</button></div></div><p className="micro">杠杆影响保证金，仓位仍由止损风险与当前规则核定。{p?.margin_mode==='isolated'?'逐仓模式下，较远的止损可能需要降低杠杆。':''}</p><button className="primary" onClick={()=>{setLeverage(Math.min(cap,draftLeverage));dismiss();feedback('light')}}>确认 {Math.min(cap,draftLeverage)}x</button></>}</Dialog>}
+  {banner&&!preview&&!closeTarget&&<AlarmBanner event={banner} now={notices.data?.now_ms??Date.now()} onView={()=>openNotification(banner)} onDismiss={()=>setBanner(null)}/>}
+  {notifyOpen&&!preview&&!closeTarget&&!error&&<NotificationCenter data={notices.data} error={notices.error} onOpen={openNotification} onDismiss={()=>setNotifyOpen(false)}/>}
   {!error&&!preview&&!closeTarget&&!sheet&&message&&<Notification notice={message} onDismiss={()=>setMessage(null)}/>}
   {error&&<Dialog key="operation-error" label={errorDetail.title} variant="alert" busy={false} onDismiss={dismissError}>{dismiss=><><span className="alert-icon"><Icon name="shield" size={25}/></span><h2>{uncertain&&preview?'请求结果尚未确认':errorDetail.title}</h2><p className="alert-detail">{errorDetail.detail}</p>{uncertain&&preview&&<p className="muted">服务端可能已经受理。返回确认页后可使用同一请求编号重试，或查看持仓核对。</p>}<button className="primary" onClick={dismiss}>{preview?'返回订单确认':closeTarget?'返回平仓确认':errorDetail.field||errorDetail.rules?'返回修改':'知道了'}<Icon name="arrow" size={17}/></button>{errorDetail.rules&&!preview&&!closeTarget&&<button className="plain" onClick={()=>nav('纪律')}>查看当前规则</button>}</>}</Dialog>}
  </div>;

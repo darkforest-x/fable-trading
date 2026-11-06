@@ -1,4 +1,5 @@
 import {observeChartAppearance} from './chartAppearance';
+import {CHART} from './chartPalette';
 /** Historical replay canvas. It renders only bars in the selected server snapshot. */
 import {useEffect,useMemo,useRef} from 'react';
 import {CandlestickSeries,ColorType,HistogramSeries,LineStyle,createChart,type IChartApi,type ISeriesApi,type Time,type UTCTimestamp} from 'lightweight-charts';
@@ -16,17 +17,17 @@ export function ReplayChart({snapshot}:{snapshot:ReplaySnapshot}){
  useEffect(()=>{
   if(!host.current)return;
   const chart=createChart(host.current,{
-   layout:{background:{type:ColorType.Solid,color:'#fbfcfb'},textColor:'#7d8982',fontSize:10,attributionLogo:true},
-   grid:{vertLines:{visible:false},horzLines:{color:'#e8edea',style:LineStyle.Dotted}},
+   layout:{background:{type:ColorType.Solid,color:CHART.canvas},textColor:CHART.text,fontSize:10,attributionLogo:true},
+   grid:{vertLines:{visible:false},horzLines:{color:CHART.grid,style:LineStyle.Dotted}},
    rightPriceScale:{borderVisible:false,minimumWidth:58,scaleMargins:{top:.12,bottom:.28}},
    timeScale:{borderVisible:false,timeVisible:true,secondsVisible:false,minimumHeight:28,barSpacing:7,rightOffset:3,lockVisibleTimeRangeOnResize:true,tickMarkFormatter:(time:Time)=>timeLabel(time)},
    localization:{locale:'zh-CN',priceFormatter:formatReplayPrice,timeFormatter:timeLabel},
    handleScroll:{mouseWheel:true,pressedMouseMove:true,horzTouchDrag:true,vertTouchDrag:false},
    handleScale:{axisPressedMouseMove:true,mouseWheel:true,pinch:true},
-   crosshair:{vertLine:{color:'#86a291',labelBackgroundColor:'#527360'},horzLine:{color:'#86a291',labelBackgroundColor:'#527360'}},
+   crosshair:{vertLine:{color:CHART.crosshair,labelBackgroundColor:CHART.label},horzLine:{color:CHART.crosshair,labelBackgroundColor:CHART.label}},
   });
   const stopAppearance=observeChartAppearance(chart);
-  const candles=chart.addSeries(CandlestickSeries,{upColor:'#1caf83',downColor:'#f05d63',wickUpColor:'#1caf83',wickDownColor:'#f05d63',borderVisible:false,priceLineColor:'#6f927e',priceLineStyle:LineStyle.Dashed,priceFormat:{type:'price',precision:4,minMove:.0001}});
+  const candles=chart.addSeries(CandlestickSeries,{upColor:CHART.up,downColor:CHART.down,wickUpColor:CHART.up,wickDownColor:CHART.down,borderVisible:false,priceLineColor:CHART.reference,priceLineStyle:LineStyle.Dashed,priceFormat:{type:'price',precision:4,minMove:.0001}});
   const volume=chart.addSeries(HistogramSeries,{priceFormat:{type:'volume'},priceScaleId:'volume',lastValueVisible:false,priceLineVisible:false});
   volume.priceScale().applyOptions({scaleMargins:{top:.82,bottom:0},visible:false});
   graph.current={chart,candles,volume};
@@ -43,7 +44,7 @@ export function ReplayChart({snapshot}:{snapshot:ReplaySnapshot}){
   const reference=bars.at(-1)?.close??Number(snapshot.price);
   const precision=Number.isFinite(reference)&&reference>0?Math.min(8,Math.max(2,6-Math.floor(Math.log10(reference)))):4;
   current.candles.applyOptions({priceFormat:{type:'price',precision,minMove:10**-precision}});
-  current.volume.setData(bars.map(bar=>({time:bar.time as UTCTimestamp,value:bar.volume,color:bar.close>=bar.open?'#1caf8336':'#f05d6336'})));
+  current.volume.setData(bars.map(bar=>({time:bar.time as UTCTimestamp,value:bar.volume,color:bar.close>=bar.open?CHART.upVolume:CHART.downVolume})));
   if(bars.length&&newSession){current.chart.timeScale().fitContent();fittedSession.current=snapshot.id}
   else if(bars.length&&followTail)current.chart.timeScale().scrollToRealTime();
   lastBarCount.current=bars.length;
@@ -53,13 +54,13 @@ export function ReplayChart({snapshot}:{snapshot:ReplaySnapshot}){
   const rows:Array<{price:unknown;title:string;color:string}>=[];
   const range=snapshot.range;
   if(range){
-   rows.push({price:range.high,title:'周一高',color:'#3b82f6'},{price:range.low,title:'周一低',color:'#3b82f6'});
-   rows.push({price:range.upper,title:'上方 1.618',color:'#8b5cf6'},{price:range.lower,title:'下方 1.618',color:'#8b5cf6'});
+   rows.push({price:range.high,title:'周一高',color:CHART.reference},{price:range.low,title:'周一低',color:CHART.reference});
+   rows.push({price:range.upper,title:'上方 1.618',color:CHART.accent},{price:range.lower,title:'下方 1.618',color:CHART.accent});
   }
   for(const position of snapshot.positions){
-   rows.push({price:position.entry,title:`${position.side==='long'?'多':'空'}入场`,color:'#c47c21'});
-   if(position.stop!==undefined)rows.push({price:position.stop,title:'止损',color:'#ef4444'});
-   if(position.target!==undefined)rows.push({price:position.target,title:'止盈',color:'#06a6a0'});
+   rows.push({price:position.entry,title:`${position.side==='long'?'多':'空'}入场`,color:CHART.entry});
+   if(position.stop!==undefined)rows.push({price:position.stop,title:'止损',color:CHART.stop});
+   if(position.target!==undefined)rows.push({price:position.target,title:'止盈',color:CHART.target});
   }
   const lines=rows.flatMap(row=>{const price=lineValue(row.price);return price===null?[]:[series.createPriceLine({price,title:row.title,color:row.color,lineWidth:1,lineStyle:LineStyle.Dashed,axisLabelVisible:true})]});
   return()=>{if(graph.current?.candles===series)for(const line of lines)series.removePriceLine(line)};

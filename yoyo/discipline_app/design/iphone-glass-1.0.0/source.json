@@ -37,6 +37,22 @@
   "trade": {
    "screen_id": "dd7dd3991a2d45c7ba879d8ac34cbcc7",
    "title": "SPIKE 纪律交易 · 合约开仓 (iOS 26 Liquid Glass 402x874)"
+  },
+  "fib-tone": {
+   "screen_id": "a302959877ff4d42ba5e0401f06478f2",
+   "title": "SPIKE · 1.618 (统一 Apple Blue 色调规范与清透 Glass)"
+  },
+  "trade-tone": {
+   "screen_id": "bad2c1f8b2c749cbb533f8d5cab891d0",
+   "title": "SPIKE 纪律交易 · 合约开仓 (统一色调 Apple Liquid Glass)"
+  },
+  "alarm-notify": {
+   "screen_id": "c3ed13e24e9648098621ffd3e5c8a375",
+   "title": "SPIKE 纪律交易 · 监控与通知中心"
+  },
+  "notify-settings": {
+   "screen_id": "1257474928a34e469d6642bada1fc8b1",
+   "title": "SPIKE 纪律交易 · 设置与账户 (通知与报警)"
   }
  },
  "timed_out": [
@@ -59,5 +75,17 @@
   "V2.6 / 实盘沙盒 / 达标 badges",
   "EV values"
  ],
- "placeholder_data": "All numbers, coins and account names in prompts and designs are placeholders; no balances, positions or credentials were uploaded."
+ "placeholder_data": "All numbers, coins and account names in prompts and designs are placeholders; no balances, positions or credentials were uploaded.",
+ "revision_1_0_1": {
+  "owner_requests": [
+   "2026-11-06 “色调保持统一 再优化一下”",
+   "2026-11-06 “能否加上通知功能和报警功能” → 全市场插针报警 + 1.618 触价信号；App 内报警 + Bark"
+  ],
+  "implementation": "chartPalette.ts; legacy Porcelain & Jade colours in app CSS remapped to the Apple palette; AlarmBanner, NotificationCenter, useNotifications, notifySettings (single Bark switch)",
+  "not_used": [
+   "green iOS switches (kept the app blue for one accent)",
+   "全部已读 / 设置 links in the sheet header",
+   "help button"
+  ]
+ }
 }

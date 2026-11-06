@@ -1,5 +1,5 @@
 /* Stitch 2acc1f5244714b8bb6ca736e54b25bc7. Shared binary appearance, no OS listener. */
-:root{color-scheme:light;--chart-text:#657281;--chart-grid:#e4eae6;--chart-label:#47685a}
+:root{color-scheme:light;--chart-text:#657281;--chart-grid:#e7e7e7;--chart-label:#585858}
 .app .theme-toggle{color:var(--ink);background:var(--glass-subtle);border:var(--glass-border);box-shadow:var(--shadow)}
 .app .trade-heading .symbol-picker{min-width:0}.app .trade-heading .symbol-picker b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .app .trade-heading .instrument-mode{margin-left:auto;flex:none}.app .trade-heading>.theme-toggle{margin-left:0}
@@ -9,11 +9,11 @@
 html[data-theme=dark]{
  color-scheme:dark;--canvas:#101318;--card:rgba(28,34,44,.72);--recessed:rgba(35,43,56,.7);--ink:#e8edf4;--muted:#9aaabc;--border:#ffffff17;
  --shadow:inset 0 1px 0 #ffffff09,0 12px 32px -6px #0006;--glass-subtle:rgba(28,34,44,.72);--glass-elevated:rgba(22,27,36,.96);--glass-border:1px solid #ffffff17;
- --accent:#5aa9ff;--accent-soft:#5aa9ff18;--green:#55c7a5;--green-soft:#55c7a518;--red:#f57e98;--red-soft:#f57e9818;
+ --accent:#0a84ff;--accent-soft:#0a84ff18;--green:#30d158;--green-soft:#30d15818;--red:#ff453a;--red-soft:#ff453a18;
  --chart-text:#9aaabc;--chart-grid:#ffffff0d;--chart-label:#334156;
  color:var(--ink);background:var(--canvas);
 }
-html[data-theme=dark] .app:not(.fib-page){background:radial-gradient(ellipse at 12% 10%,#5aa9ff0c,transparent 44%),radial-gradient(ellipse at 92% 28%,#55c7a508,transparent 42%),var(--canvas)}
+html[data-theme=dark] .app:not(.fib-page){background:radial-gradient(ellipse at 12% 10%,#0a84ff0c,transparent 44%),radial-gradient(ellipse at 92% 28%,#30d15808,transparent 42%),var(--canvas)}
 html[data-theme=dark] .app :is(.settings-gear,.page-back,.connection-indicator){color:var(--muted)}
 html[data-theme=dark] .app :is(.input-shell,.input-shell:focus-within,.segment,.catalog-tabs,.allocation-presets button,.position-lite-actions button,.haptics-setting>i){background:var(--recessed);border-color:var(--border);box-shadow:none}
 html[data-theme=dark] .app :is(.segment .active,.segment button[aria-pressed=true],.catalog-tabs button[aria-selected=true],.fib-filter button[aria-pressed=true]){background:#334156;color:var(--accent);box-shadow:none}

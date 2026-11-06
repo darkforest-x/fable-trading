@@ -1,6 +1,6 @@
 /** Pure monitor helpers (no imports, unit-tested with node --test): fixed read-only paths and display text. */
 
-export const MONITOR_PATHS={paper:'/v1/monitor/paper',alerts:'/v1/monitor/alerts',cloud:'/v1/monitor/cloud'} as const;
+export const MONITOR_PATHS={paper:'/v1/monitor/paper',alerts:'/v1/monitor/alerts',cloud:'/v1/monitor/cloud',notifications:'/v1/monitor/notifications'} as const;
 export type MonitorSegment=keyof typeof MONITOR_PATHS;
 export type Side='long'|'short';
 export type PaperAccount={key:string;label:string;group:'live'|'replica';equity:number|null;start_equity:number|null;return_pct:number|null;started_ms:number|null;stats:{closed:number|null;wins:number|null;mean_net_bp:number|null}};
@@ -18,7 +18,7 @@ const TRACK=/^[a-z0-9-]{1,20}$/;
 export function monitorPath(segment:MonitorSegment,query:Record<string,string>={}){
  const path=MONITOR_PATHS[segment];
  if(!path)throw Error('未知监控模块');
- const allowed:Record<MonitorSegment,Record<string,RegExp>>={paper:{track:TRACK},alerts:{},cloud:{side:/^(all|long|short)$/,scope:/^(live|all)$/}};
+ const allowed:Record<MonitorSegment,Record<string,RegExp>>={paper:{track:TRACK},alerts:{},cloud:{side:/^(all|long|short)$/,scope:/^(live|all)$/},notifications:{}};
  const params=new URLSearchParams();
  for(const [key,value] of Object.entries(query)){
   const rule=allowed[segment][key];
@@ -68,3 +68,38 @@ export function groupByDay<T>(rows:T[],time:(row:T)=>number|null,now=Date.now())
  for(const row of rows){const label=dayLabel(time(row),now);const last=groups.at(-1);if(last?.label===label)last.rows.push(row);else groups.push({label,rows:[row]})}
  return groups;
 }
+
+/** In-app notifications (owner 2026-11-06: 全市场插针报警 + 1.618 触价信号; background push stays Bark). */
+export type FibPushStatus='pushed'|'pushing'|'below_threshold'|'score_unavailable'|'not_sent'|'history';
+export type NotificationEvent={id:string;kind:'fib'|'alarm';side:'upper'|'lower';at_ms:number|null;pushed:boolean;
+ symbol?:string;level?:number|null;price?:number|null;status?:FibPushStatus;
+ n?:number;symbols?:string[];first_ms?:number|null;active?:boolean;test?:boolean;acknowledged?:boolean};
+export type NotificationSnapshot={now_ms:number;events:NotificationEvent[];channels:{
+ fib:{bark:boolean;bark_configured:boolean;bark_sent:number;telegram:boolean;min_score:number|null};
+ alarm:{bark:boolean;telegram:boolean;threshold:number|null;window_minutes:number|null}}};
+export type AlertPrefs={popup:boolean;sound:boolean;fib:boolean};
+export const ALERT_PREFS_KEY='spike-alert-prefs-v1';
+export function parseAlertPrefs(raw:string|null):AlertPrefs{
+ const base={popup:true,sound:true,fib:true};
+ try{const v=JSON.parse(raw??'{}');return {popup:v.popup!==false,sound:v.sound!==false,fib:v.fib!==false}}catch{return base}
+}
+/** A 1.618 push older than this when first seen is history, not something to ring for. */
+export const FIB_ALERT_WINDOW_MS=20*60*1000;
+/** Which events should raise an in-app alert. The first snapshot after connecting only seeds `seen`. */
+export function freshAlerts(events:NotificationEvent[],seen:Set<string>|null,now:number,prefs:AlertPrefs){
+ const next=new Set(seen??[]);const alerts:NotificationEvent[]=[];
+ for(const e of events){
+  if(next.has(e.id))continue;next.add(e.id);
+  if(!seen)continue;
+  if(e.kind==='alarm'&&prefs.popup&&e.active&&!e.acknowledged)alerts.push(e);
+  if(e.kind==='fib'&&prefs.fib&&e.pushed&&e.at_ms!==null&&now-e.at_ms<=FIB_ALERT_WINDOW_MS)alerts.push(e);
+ }
+ // Never stack a burst: the newest alarm first, otherwise the newest 1.618 push.
+ const alarm=alerts.find(e=>e.kind==='alarm'),fib=alerts.find(e=>e.kind==='fib');
+ return {alerts:alarm?[alarm]:fib?[fib]:[],seen:next};
+}
+export function pushStatusText(e:NotificationEvent){
+ if(e.kind==='alarm')return e.test?'测试':'已推送';
+ return ({pushed:'已推送',pushing:'推送中',below_threshold:'未达推送阈值',score_unavailable:'评分不可用',not_sent:'未推送',history:'历史回补'} as Record<FibPushStatus,string>)[e.status??'not_sent'];
+}
+export const edgeText=(side:'upper'|'lower')=>side==='upper'?'上沿 1.618':'下沿 1.618';

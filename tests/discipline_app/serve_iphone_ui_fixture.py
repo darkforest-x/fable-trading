@@ -44,7 +44,7 @@ def synthetic_monitor():
         rows += [dict(id=39-i, side=['lower', 'upper'][i % 2], first_ms=t-3600_000*(3+i*9), last_ms=t-3600_000*(3+i*9)+300_000,
                       n=31-i, active=False, ack_ms=t if i != 1 else None, test=1 if i == 1 else 0,
                       symbols=[c+'-USDT-SWAP' for c in coins]) for i in range(6)]
-        return dict(now_ms=t, threshold=25, window_minutes=5, worker_alive=True, alerts=rows)
+        return dict(now_ms=t, threshold=25, window_minutes=5, worker_alive=True, channels=dict(telegram=True, bark=True), alerts=rows)
 
     def cloud():
         t = now()
@@ -56,16 +56,63 @@ def synthetic_monitor():
         return dict(schema=1, version='ema20-50-12h-placeholder', now_ms=t, next_close_ms=t+5400_000, total=len(items),
                     status=dict(state='ready', total=420, completed=412, last_scan_ms=t-120_000, worker_alive=True), items=items)
 
+    state = dict(bark=True, extra=[])
+
+    def alerts_with_extra():
+        value = alerts()
+        value['alerts'] = state['extra'] + value['alerts']
+        return value
+
+    def fib():
+        t = now()
+        event = lambda i, coin, status, error=None: dict(week='2026-11-02', symbol=coin+'-USDT-SWAP', side=['lower', 'upper'][i % 2],
+                                                         level=.5+i*.01, price=.5, observed_ms=t-900_000*(i+1), candle_ms=t-900_000*(i+1),
+                                                         source='live', generation=1, status=status, error=error, due_ms=0, message_id=None)
+        events = [event(i, c, 'sent' if i % 3 == 0 else 'skipped', None if i % 3 == 0 else 'score_not_above_0_4') for i, c in enumerate(coins)]
+        events = [e for e in state['extra_fib']] + events if state.get('extra_fib') else events
+        return dict(now_ms=t, telegram=dict(enabled=True, configured=True, min_score_exclusive=.4),
+                    bark=dict(enabled=state['bark'], configured=True, min_score_exclusive=.4, counts=dict(sent=668, skipped=540)),
+                    events=events)
+
+    def bark(body):
+        state['bark'] = bool(body['enabled'])
+        return {}
+
+    def fetch(path, body=None):
+        if path == '/api/monday-fib/bark':
+            return bark(body)
+        return routes[path.split('?')[0]](path)
+
     routes = {'/api/monday-reclaim-paper': lambda p: paper(dict(x.split('=') for x in p.split('?')[1].split('&'))['track']),
-              '/api/spike-alerts': lambda p: alerts(), '/api/cloud-signals': lambda p: cloud()}
-    return MonitorFeed(lambda path: routes[path.split('?')[0]](path), ttl=2)
+              '/api/spike-alerts': lambda p: alerts_with_extra(), '/api/cloud-signals': lambda p: cloud(),
+              '/api/monday-fib': lambda p: fib()}
+    feed = MonitorFeed(fetch, ttl=2)
+    feed.qa_state = state
+    return feed
+
+
+def qa_trigger(feed, kind):
+    """Inject a brand-new alarm or 1.618 push so the in-app alert can be observed (fixture only)."""
+    t = int(time.time()*1000)
+    if kind == 'alarm':
+        feed.qa_state['extra'].insert(0, dict(id=900+len(feed.qa_state['extra']), side='upper', first_ms=t-120_000, last_ms=t, n=29,
+                                              active=True, ack_ms=None, test=0, symbols=['BTC-USDT-SWAP', 'ETH-USDT-SWAP', 'SOL-USDT-SWAP']))
+    else:
+        feed.qa_state.setdefault('extra_fib', []).insert(0, dict(week='2026-11-02', symbol='SUI-USDT-SWAP', side='lower', level=.47, price=.47,
+                                                                observed_ms=t, candle_ms=t, source='live', generation=len(feed.qa_state.get('extra_fib', []))+2,
+                                                                status='sent', error=None, due_ms=0, message_id=None))
+    feed._cache.clear()
+    return dict(ok=True, kind=kind)
 
 
 def main():
     original = fib.create_app
 
     def create_app(*args, **kwargs):
-        return original(*args, monitor_feed=synthetic_monitor(), **kwargs)
+        feed = synthetic_monitor()
+        app = original(*args, monitor_feed=feed, **kwargs)
+        app.post('/qa/notify/{kind}')(lambda kind: qa_trigger(feed, 'alarm' if kind == 'alarm' else 'fib'))
+        return app
     fib.create_app = create_app
     fib_run = fib.uvicorn.run
     fib.uvicorn.run = lambda app, **kwargs: fib_run(app, **dict(kwargs, port=PORT))

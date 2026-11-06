@@ -13,7 +13,7 @@ import {browserFibCache,currentFibWeek} from './fibCache';
 import './fib.css';
 const CandlePanel=lazy(()=>import('./CandlePanel'));
 const noCollapse=()=>{};
-export const FibHome=memo(function FibHome({connection,state,onQuick,onOpenReplay,locked,active,covered}:{connection:Connection|null;state:State|null;onQuick:(row:FibContract,period:CandlePeriod)=>void;onOpenReplay:()=>void;locked:boolean;active:boolean;covered:boolean}){
+export const FibHome=memo(function FibHome({connection,state,onQuick,onOpenReplay,locked,active,covered,focus}:{connection:Connection|null;state:State|null;onQuick:(row:FibContract,period:CandlePeriod)=>void;onOpenReplay:()=>void;locked:boolean;active:boolean;covered:boolean;focus?:{symbol:string;nonce:number}}){
  const [cache]=useState(()=>browserFibCache(SERVICE_URL)),[saved]=useState(()=>cache.read());
  const [data,setData]=useState<FibSnapshot|null>(saved?.data??null),[symbol,setSymbol]=useState(saved?.symbol??''),[error,setError]=useState(''),[fresh,setFresh]=useState(false);
  const [period,setPeriod]=useState<CandlePeriod>(saved?.period??'15m'),[chooser,setChooser]=useState(false);
@@ -45,6 +45,8 @@ export const FibHome=memo(function FibHome({connection,state,onQuick,onOpenRepla
  const range=useMemo(()=>row&&data?fibRangeFor(row,data):undefined,[selectedSymbol,data?.monday_end_ms,data?.next_week_ms,row?.high,row?.low,row?.upper,row?.lower]);
  const live=fresh&&!!current?.connected&&!!current.last_message_ms&&clock-current.last_message_ms<90000&&!error;
  function select(value:string){if(value!==symbol)feedback('light');setSymbol(value);previous.current.symbol=value;if(current)cache.write(current,value,period)}
+ // A notification can ask for a coin; selection rules (this week's touched rows) still apply on the next poll.
+ useEffect(()=>{if(focus?.symbol){setSymbol(focus.symbol);previous.current.symbol=focus.symbol;if(current)cache.write(current,focus.symbol,period)}},[focus?.nonce]);
  function changePeriod(value:CandlePeriod){if(value!==period)feedback('light');setPeriod(value);if(current)cache.write(current,symbol,value)}
  const recent=visibleRows[0];
  const tick=state?.instruments[selectedSymbol]?.tick??(row?String(10**-Math.min(12,Math.max(2,...[row.high,row.low].map(n=>String(n).split('.')[1]?.length??0)))):undefined);

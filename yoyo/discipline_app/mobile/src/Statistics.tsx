@@ -19,7 +19,7 @@ const PnlChart=memo(function PnlChart({points}:{points:StatisticsData['curve']})
  const x=(date:string)=>first===last?294:48+(Date.parse(date)-first)/(last-first)*246;
  const path=`M24,${y(0)} `+points.map(p=>`H${x(p.date)} V${y(Number(p.pnl))}`).join(' ');
  return <div className="pnl-chart"><svg viewBox="0 0 320 190" role="img" aria-label={`已平仓累计净盈亏 ${fmt(points.at(-1)!.pnl)} USDT，按北京时间每日平仓归集`}>
-  <line x1="24" x2="296" y1={y(0)} y2={y(0)} stroke="#c6d8cd" strokeDasharray="4 5"/>
+  <line x1="24" x2="296" y1={y(0)} y2={y(0)} stroke="var(--border)" strokeDasharray="4 5"/>
   <text x="24" y="16">{fmt(high)} USDT</text><text x="24" y="174">{fmt(low)} USDT</text>
   <path d={path} fill="none" stroke={Number(points.at(-1)!.pnl)>=0?'var(--green)':'var(--red)'} strokeWidth="2.5" strokeLinejoin="round"/>
   <circle cx={x(points.at(-1)!.date)} cy={y(Number(points.at(-1)!.pnl))} r="4" fill="currentColor"/>

@@ -7,8 +7,10 @@ the 12H EMA cloud signal board. The source is the same fixed loopback monitor th
 origin and one device token.
 
 Boundary rules (enforced here, not in the client):
-- GET only. Alarm acknowledgement, test alarms, paper closes and notification
-  routes on the monitor are never proxied.
+- GET only, with one exception: the owner-approved 1.618 Bark switch
+  (2026-11-06 “能否加上通知功能和报警功能”, chose in-app alarm + Bark with a switch in
+  the app). Alarm acknowledgement, test alarms, paper closes and the other
+  notification routes on the monitor are never proxied.
 - Whitelisted fields only. Notification receipts/channels, alarm message text,
   model features, rule internals and worker errors do not cross the boundary.
 - Paper accounts are simulations (``paper_only``). Nothing here touches the live
@@ -22,7 +24,8 @@ import re
 import threading
 import time
 from urllib.parse import urlencode
-from urllib.request import urlopen
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
 SOURCE = 'http://127.0.0.1:8766'
 SYMBOL = re.compile(r'[A-Z0-9]{1,40}-USDT-SWAP')
@@ -164,8 +167,53 @@ def project_cloud(raw):
         raise MonitorUnavailable('云带信号暂不可用') from error
 
 
-def _http(path):
-    with urlopen(SOURCE + path, timeout=4) as response:
+# 1.618 touch rows carry the Telegram outbox status; Bark applies the same gate (score > 0.4 or a live- entry).
+FIB_STATUS = {'sent': 'pushed', 'pending': 'pushing', 'sending': 'pushing', 'unknown': 'pushing', 'history': 'history'}
+FIB_SKIP = {'score_not_above_0_4': 'below_threshold', 'score_unavailable': 'score_unavailable'}
+
+
+def project_notifications(fib, alerts):
+    """In-app notification feed: market alarms + this week's 1.618 touches with their push outcome."""
+    try:
+        events = []
+        for row in fib['events'][:MAX_ROWS]:
+            symbol, side = _symbol(row.get('symbol')), row.get('side')
+            if not symbol or side not in ('upper', 'lower'):
+                continue
+            status = FIB_STATUS.get(row.get('status')) or FIB_SKIP.get(row.get('error')) or 'not_sent'
+            at = _ms(row.get('candle_ms') if row.get('source') == 'history' else row.get('observed_ms'))
+            events.append(dict(id=f"fib:{row.get('week')}:{symbol}:{side}:{row.get('generation')}", kind='fib',
+                               symbol=symbol, side=side, level=_num(row.get('level')), price=_num(row.get('price')),
+                               at_ms=at, status=status, pushed=status in ('pushed', 'pushing')))
+        for alert in project_alerts(alerts)['alerts']:
+            events.append(dict(id=f"alarm:{alert['id']}", kind='alarm', side=alert['side'], n=alert['n'],
+                               symbols=alert['symbols'][:12], at_ms=alert['last_ms'] or alert['first_ms'],
+                               first_ms=alert['first_ms'], active=alert['active'], test=alert['test'],
+                               acknowledged=alert['acknowledged'], pushed=not alert['test']))
+        events.sort(key=lambda e: -(e['at_ms'] or 0))
+        bark, telegram = fib.get('bark') or {}, fib.get('telegram') or {}
+        counts = bark.get('counts') if isinstance(bark.get('counts'), dict) else {}
+        channels = alerts.get('channels') if isinstance(alerts.get('channels'), dict) else {}
+        return dict(now_ms=_ms(fib['now_ms']), events=events[:MAX_ROWS], channels=dict(
+            fib=dict(bark=bool(bark.get('enabled')), bark_configured=bool(bark.get('configured')),
+                     bark_sent=_ms(counts.get('sent')) or 0, telegram=bool(telegram.get('enabled')),
+                     min_score=_num(bark.get('min_score_exclusive'))),
+            alarm=dict(bark=bool(channels.get('bark')), telegram=bool(channels.get('telegram')),
+                       threshold=_ms(alerts.get('threshold')), window_minutes=_ms(alerts.get('window_minutes')))))
+    except (KeyError, TypeError, AttributeError, MonitorUnavailable) as error:
+        raise MonitorUnavailable('通知数据暂不可用') from error
+
+
+def _http(path, body=None):
+    if body is None:
+        with urlopen(SOURCE + path, timeout=4) as response:
+            return json.load(response)
+    # The monitor guards its switch with a same-origin check meant for browsers on the public
+    # tunnel; this authenticated loopback service is a trusted same-host client.
+    request = Request(SOURCE + path, data=json.dumps(body).encode(), method='PUT', headers={
+        'Content-Type': 'application/json', 'Origin': SOURCE, 'Sec-Fetch-Site': 'same-origin',
+        'X-Spike-Action': 'update-monday-fib-bark'})
+    with urlopen(request, timeout=6) as response:
         return json.load(response)
 
 
@@ -177,14 +225,14 @@ class MonitorFeed:
         self._lock = threading.Lock()
         self._cache = {}
 
-    def _read(self, path, project):
+    def _read(self, path, project, load=None):
         with self._lock:
             hit = self._cache.get(path)
             now = time.time()
             if hit and now - hit[0] < self._ttl:
                 return hit[1]
         try:
-            value = project(self._fetch(path))
+            value = load() if load else project(self._fetch(path))
         except (OSError, ValueError) as error:
             raise MonitorUnavailable('监控服务暂未连接，请稍后重试') from error
         with self._lock:
@@ -205,3 +253,24 @@ class MonitorFeed:
     def cloud(self, side, scope):
         query = urlencode(dict(limit=120, side=side, scope=scope, sort='newest'))
         return self._read('/api/cloud-signals?' + query, project_cloud)
+
+    def notifications(self):
+        return self._read('notifications', None, lambda: project_notifications(
+            self._fetch('/api/monday-fib'), self._fetch('/api/spike-alerts')))
+
+    def set_fib_bark(self, enabled):
+        """The one write: switch 1.618 Bark pushes; the monitor validates channel configuration."""
+        try:
+            self._fetch('/api/monday-fib/bark', dict(enabled=bool(enabled)))
+        except HTTPError as error:
+            detail = '监控拒绝了 Bark 开关'
+            try:
+                detail = str(json.load(error).get('detail') or detail)[:80]
+            except (ValueError, AttributeError, OSError):
+                pass
+            raise MonitorUnavailable(detail) from None
+        except (OSError, ValueError) as error:
+            raise MonitorUnavailable('Bark 开关暂未生效，请稍后重试') from error
+        with self._lock:
+            self._cache.pop('notifications', None)
+        return self.notifications()

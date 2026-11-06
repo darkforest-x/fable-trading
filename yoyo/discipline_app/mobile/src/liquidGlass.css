@@ -13,7 +13,8 @@
  --accent:#0a84ff;--accent-soft:rgba(10,132,255,.1);--accent-ink:#0066d6;
  --green:#1f9d55;--green-vivid:#30d158;--green-soft:rgba(48,209,88,.13);--green-ink:#0b5a2f;
  --red:#e5383b;--red-vivid:#ff453a;--red-soft:rgba(255,69,58,.11);--red-ink:#7a1416;
- --amber:#c27400;--amber-soft:rgba(255,159,10,.14);
+ --amber:#a35f00;--amber-fill:#ff9f0a;--amber-soft:rgba(255,159,10,.14);
+ --chart-text:#6e6e73;--chart-grid:rgba(60,60,67,.07);--chart-label:#3a3a3c;
  --radius:26px;
  --lg-fill:linear-gradient(135deg,rgba(255,255,255,.76),rgba(255,255,255,.56));
  --lg-sheen:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0) 46%);
@@ -98,7 +99,7 @@ html,body{background:var(--lg-bg)}
 .app .sell:disabled{background:var(--red-soft);color:#b7797b;box-shadow:none}
 .app .primary{background:linear-gradient(180deg,#2b95ff,#0a84ff);color:#fff;box-shadow:0 10px 22px -10px rgba(10,132,255,.6)}
 .app .discipline-budget{border-radius:22px}
-.app .guard-strip{background:var(--amber-soft);color:#8a5300;border:1px solid rgba(255,159,10,.25);border-radius:18px}
+.app .guard-strip{background:var(--amber-soft);color:var(--amber);border:1px solid rgba(255,159,10,.25);border-radius:18px}
 .app .long{color:var(--green)}.app .short{color:var(--red)}
 
 /* Position cards and sheets. */
@@ -126,7 +127,7 @@ html,body{background:var(--lg-bg)}
 .app .monitor-segments button{min-height:40px;font-size:14px}
 .monitor-page .glass-chip,.monitor-sheet .glass-chip{border-radius:99px}
 .app .monitor-note{display:flex;align-items:center;gap:6px;width:fit-content;max-width:100%;margin:0 0 14px;padding:7px 12px;font-size:12px;color:#3c3c43}
-.app .monitor-note svg{color:var(--green);flex:none}.app .monitor-note.warn{background:var(--amber-soft);color:#8a5300;border-color:rgba(255,159,10,.25)}.app .monitor-note.warn svg{color:var(--amber)}
+.app .monitor-note svg{color:var(--green);flex:none}.app .monitor-note.warn{background:var(--amber-soft);color:var(--amber);border-color:rgba(255,159,10,.25)}.app .monitor-note.warn svg{color:var(--amber-fill)}
 .app .monitor-status{display:flex;align-items:center;gap:8px;margin:0 0 14px;padding:11px 16px;font-size:12.5px;color:#3c3c43}
 .app .monitor-status i{width:8px;height:8px;border-radius:50%;background:#c7c7cc;flex:none}.app .monitor-status i.ok{background:var(--green-vivid);box-shadow:0 0 0 3px var(--green-soft)}
 .app .monitor-status span{margin-left:auto;color:var(--muted);font-size:11.5px;text-align:right}
@@ -154,7 +155,7 @@ html,body{background:var(--lg-bg)}
 .side-pill.long{color:var(--green);background:var(--green-soft)}.side-pill.short{color:var(--red);background:var(--red-soft)}
 .app .monitor-empty{padding:18px;text-align:center;color:var(--muted);font-size:13px;margin:0}
 .app .monitor-loading,.app .monitor-error,.monitor-sheet .monitor-loading,.monitor-sheet .monitor-error{display:flex;align-items:center;gap:7px;margin:4px 6px 10px;font-size:12.5px;color:var(--muted)}
-.app .monitor-error,.monitor-sheet .monitor-error{color:#8a5300}
+.app .monitor-error,.monitor-sheet .monitor-error{color:var(--amber)}
 .app .monitor-caption{margin:0 6px 12px;font-size:12px;color:var(--muted)}
 .app .monitor-foot{margin:18px 8px 0;text-align:center}
 .app .alert-hero{padding:18px;margin:0 0 6px;border-color:rgba(255,175,178,.85);
@@ -179,7 +180,7 @@ html,body{background:var(--lg-bg)}
 .app .alert-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;flex:none}
 .app .alert-icon.lower{background:var(--red-soft);color:var(--red)}.app .alert-icon.upper{background:var(--green-soft);color:var(--green)}
 .state-pill{font-size:12px;font-weight:600;padding:4px 11px;border-radius:99px;flex:none}
-.state-pill.done{background:var(--lg-recessed);color:#6e6e73}.state-pill.test{color:#b06a00;background:var(--amber-soft)}.state-pill.open{color:var(--accent);background:var(--accent-soft)}
+.state-pill.done{background:var(--lg-recessed);color:#6e6e73}.state-pill.test{color:var(--amber);background:var(--amber-soft)}.state-pill.open{color:var(--accent);background:var(--accent-soft)}
 .app .monitor-filters{display:flex;align-items:center;gap:8px;margin:0 0 10px}
 .app .filter-capsules{display:flex;gap:6px;flex:1}
 .app .filter-capsules button,.app .monitor-filters .scope{min-height:34px;padding:0 14px;border-radius:99px;font-size:13px;font-weight:600;color:#3c3c43;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.9)}
@@ -204,7 +205,7 @@ html,body{background:var(--lg-bg)}
 @media(prefers-reduced-motion:reduce){.app .pulse-label i{animation:none}}
 
 /* Dark appearance (binary toggle shared with the workbench). */
-html[data-theme=dark]{--lg-bg:#0b0f17;--canvas:#0b0f17;--ink:#f2f2f7;--muted:#98989f;--border:rgba(255,255,255,.1);
+html[data-theme=dark]{--chart-text:#98989f;--chart-grid:rgba(255,255,255,.06);--chart-label:#48484a;--amber:#ffb340;--lg-bg:#0b0f17;--canvas:#0b0f17;--ink:#f2f2f7;--muted:#98989f;--border:rgba(255,255,255,.1);
  --accent:#409cff;--accent-soft:rgba(64,156,255,.16);--green:#32d74b;--green-soft:rgba(50,215,75,.15);--red:#ff6961;--red-soft:rgba(255,105,97,.15);--amber-soft:rgba(255,159,10,.16);
  --lg-fill:linear-gradient(135deg,rgba(44,50,62,.72),rgba(28,32,42,.6));--lg-sheen:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0) 46%);
  --lg-stroke:1px solid rgba(255,255,255,.1);--lg-shadow:0 14px 34px -8px rgba(0,0,0,.55),inset 0 1px 1px rgba(255,255,255,.08);
@@ -231,3 +232,40 @@ html[data-theme=dark] .app .link-row>svg,html[data-theme=dark] .monitor-row>svg{
 .app .monitor-grid>.monitor-account:last-child:nth-child(odd){grid-column:1/-1;min-height:0;display:grid;grid-template-columns:1fr auto;grid-template-areas:"key eq" "foot ret";align-items:center;column-gap:10px}
 .app .monitor-grid>.monitor-account:last-child:nth-child(odd) .account-key{grid-area:key}.app .monitor-grid>.monitor-account:last-child:nth-child(odd) b{grid-area:eq;margin:0;text-align:right}
 .app .monitor-grid>.monitor-account:last-child:nth-child(odd)>span:nth-of-type(2){grid-area:ret;text-align:right}.app .monitor-grid>.monitor-account:last-child:nth-child(odd) .account-foot{grid-area:foot;margin:0}
+
+/* Unified tone (owner 2026-11-06 “色调保持统一”): one blue, one green, one red, one amber, neutral greys. */
+.app .fib-replay-launcher,.app .wick-stop-status{color:var(--accent)}
+.app .healthy{color:var(--accent);background:var(--accent-soft)}
+.app .warning{color:var(--amber);background:var(--amber-soft)}
+.app .freshness i{background:#c7c7cc}.app .freshness.connected i{background:var(--green-vivid)}.app .freshness.connected{color:var(--green)}
+.app .discipline-budget b,.app .discipline-budget strong{color:var(--ink)}
+.app .discipline-budget.halted b{color:var(--red)}
+
+/* Notifications (Stitch alarm-notify / notify-settings): banner, bell, sheet, settings. */
+.alarm-banner{position:fixed;z-index:60;top:calc(var(--safe-top) + 8px);left:10px;right:10px;max-width:460px;margin:0 auto;display:flex;align-items:center;gap:11px;padding:12px 12px 12px 14px;border-radius:24px;
+ background:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,0) 50%),linear-gradient(145deg,rgba(234,243,255,.9),rgba(255,255,255,.82));border:1px solid rgba(255,255,255,.95);
+ box-shadow:0 18px 40px -12px rgba(15,34,64,.3),inset 0 1px 1px #fff;-webkit-backdrop-filter:blur(26px) saturate(190%);backdrop-filter:blur(26px) saturate(190%);animation:banner-in 320ms var(--motion-ease) both}
+.alarm-banner.is-alarm{background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 50%),linear-gradient(145deg,rgba(255,231,232,.94),rgba(255,255,255,.84));border-color:rgba(255,175,178,.9);box-shadow:0 18px 40px -12px rgba(229,56,59,.35),inset 0 1px 1px #fff}
+@keyframes banner-in{from{opacity:0;transform:translateY(-16px) scale(.98)}to{opacity:1;transform:none}}
+.alarm-banner-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;flex:none;background:var(--accent-soft);color:var(--accent)}
+.alarm-banner.is-alarm .alarm-banner-icon{background:var(--red-soft);color:var(--red);animation:alert-pulse 1.8s ease-out infinite}
+.alarm-banner-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.alarm-banner-text b{font-size:14.5px;font-weight:650;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.alarm-banner-text small{font-size:12px;color:var(--muted)}
+.alarm-banner-actions{display:flex;gap:6px;flex:none}.alarm-banner-actions button{min-height:34px;padding:0 12px;border-radius:99px;font-size:13px;font-weight:600;background:rgba(118,118,128,.12);color:#3c3c43}
+.alarm-banner-actions .view{background:var(--accent);color:#fff}.alarm-banner-actions .close{width:34px;padding:0;display:grid;place-items:center}
+.app .notify-bell{position:relative}.app .badge-dot{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--red-vivid);color:#fff;font:700 10.5px/18px var(--font-ui);font-style:normal;text-align:center;box-shadow:0 0 0 2px #fff}
+.notify-sheet h2{margin:2px 0 12px;font-size:22px;font-weight:700}
+.notify-sheet .notify-filter{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:8px}
+.notify-all{display:flex;align-items:center;gap:8px;margin:6px 2px 4px;font-size:12.5px;color:var(--muted)}.notify-all input{width:18px;height:18px;accent-color:var(--accent)}
+.notify-day h3{margin:14px 2px 6px;font-size:12px;font-weight:600;color:var(--muted)}
+.notify-row{display:flex;align-items:center;gap:11px;width:100%;min-height:58px;padding:8px 2px;text-align:left;color:var(--ink);background:transparent;border:0;border-bottom:.5px solid var(--border)}
+.notify-row .row-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.notify-row .row-main b{font-size:14.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.notify-row .row-main small{font-size:12px;color:var(--muted)}
+.notify-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;flex:none}.notify-icon.alarm{background:var(--red-soft);color:var(--red)}.notify-icon.fib{background:var(--accent-soft);color:var(--accent)}
+.push-pill{flex:none;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:99px}.push-pill.pushed{background:var(--green-soft);color:var(--green)}.push-pill.test{background:var(--amber-soft);color:var(--amber)}.push-pill.muted{background:rgba(118,118,128,.12);color:#6e6e73}
+.app .settings-subhead{margin:16px 0 4px;font-size:12px;font-weight:600;color:var(--muted)}
+.app .haptics-setting.static{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.app .channel-pill{flex:none;font-style:normal;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;background:rgba(118,118,128,.12);color:#6e6e73}.app .channel-pill.on{background:var(--green-soft);color:var(--green)}
+html[data-theme=dark] .alarm-banner{background:linear-gradient(145deg,rgba(36,52,78,.92),rgba(28,32,42,.9));border-color:rgba(255,255,255,.12)}
+html[data-theme=dark] .alarm-banner.is-alarm{background:linear-gradient(145deg,rgba(90,30,34,.92),rgba(28,32,42,.9));border-color:rgba(255,105,97,.35)}
+html[data-theme=dark] .alarm-banner-actions button{background:rgba(255,255,255,.12);color:#e5e5ea}html[data-theme=dark] .alarm-banner-actions .view{background:var(--accent);color:#fff}
+html[data-theme=dark] .app .badge-dot{box-shadow:0 0 0 2px #1c1c1e}
+@media(prefers-reduced-motion:reduce){.alarm-banner,.alarm-banner.is-alarm .alarm-banner-icon{animation:none}}

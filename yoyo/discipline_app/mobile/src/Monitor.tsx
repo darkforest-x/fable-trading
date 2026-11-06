@@ -120,13 +120,14 @@ function CloudModule({connection,active,onOpenSymbol}:{connection:Connection|nul
  </>;
 }
 
-export function Monitor({connection,active,covered,onOpenSymbol,onConnect}:{connection:Connection|null;active:boolean;covered:boolean;onOpenSymbol:(symbol:string)=>void;onConnect:()=>void}){
+export function Monitor({connection,active,covered,onOpenSymbol,onConnect,segmentRequest,unread,onOpenNotifications}:{connection:Connection|null;active:boolean;covered:boolean;onOpenSymbol:(symbol:string)=>void;onConnect:()=>void;segmentRequest?:{segment:MonitorSegment;nonce:number};unread:number;onOpenNotifications:()=>void}){
  const [segment,setSegment]=useState<MonitorSegment>(()=>{try{const v=localStorage.getItem(SEGMENT_KEY);return v==='alerts'||v==='cloud'?v:'paper'}catch{return 'paper'}});
  const choose=(next:MonitorSegment)=>{if(next===segment)return;setSegment(next);feedback('light');try{localStorage.setItem(SEGMENT_KEY,next)}catch{}};
+ useEffect(()=>{if(segmentRequest&&segmentRequest.segment!=='notifications'){setSegment(segmentRequest.segment);try{localStorage.setItem(SEGMENT_KEY,segmentRequest.segment)}catch{}}},[segmentRequest?.nonce]);
  if(!active)return null;
  const live=active&&!covered;
  return <div className="monitor-page">
-  <PageHeader title="监控" subtitle="模拟盘、全市场报警与云带，只读。"/>
+  <PageHeader title="监控" subtitle="模拟盘、全市场报警与云带，只读。" actions={connection&&<button className="settings-gear notify-bell" aria-label={unread?`通知，${unread} 条未读`:"通知"} onClick={onOpenNotifications}><Icon name="bell" size={20}/>{unread>0&&<i className="badge-dot">{unread>9?"9+":unread}</i>}</button>}/>
   <div className="segment monitor-segments" role="tablist" aria-label="监控模块" data-index={SEGMENTS.findIndex(([k])=>k===segment)}>{SEGMENTS.map(([key,label])=><button key={key} role="tab" aria-selected={segment===key} aria-pressed={segment===key} className={segment===key?'active':''} onClick={()=>choose(key)}>{label}</button>)}</div>
   {!connection?<section className="empty card"><span className="empty-icon"><Icon name="bell" size={32}/></span><h2>连接后查看监控</h2><p>监控数据经纪律服务只读转发。</p><button className="primary" onClick={onConnect}>连接纪律服务</button></section>:
    segment==='paper'?<PaperModule connection={connection} active={live} onOpenSymbol={onOpenSymbol}/>:

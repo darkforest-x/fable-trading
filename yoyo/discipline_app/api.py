@@ -59,6 +59,11 @@ class Close(Command):
     fraction: str = Field(default='1', max_length=20)
 
 
+class BarkSwitch(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    enabled: StrictBool
+
+
 class AccountInput(BaseModel):
     model_config = ConfigDict(extra='forbid')
     name: str = Field(min_length=1, max_length=30)
@@ -91,7 +96,7 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
             if live:
                 book.stop()
 
-    app = FastAPI(title='SPIKE Discipline', version='1.0.0', lifespan=lifespan,
+    app = FastAPI(title='SPIKE Discipline', version='1.0.1', lifespan=lifespan,
                   docs_url=None, redoc_url=None, openapi_url=None)
     app.state.candle_history = CandleHistory()
     app.state.monday_fib = MondayFibFeed()
@@ -148,7 +153,7 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
 
     @app.get('/health')
     def health():
-        return dict(service='spike-discipline', mode=mode, live_enabled=live and book.client.write_enabled, version='1.0.0')
+        return dict(service='spike-discipline', mode=mode, live_enabled=live and book.client.write_enabled, version='1.0.1')
 
     @app.get('/v1/market/monday-fib')
     def monday_fib():
@@ -198,6 +203,21 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
             return app.state.monitor.cloud({'all': 0, 'long': 1, 'short': -1}[side], scope)
         except MonitorUnavailable as error:
             raise HTTPException(503, str(error)) from None
+
+    @app.get('/v1/monitor/notifications', dependencies=[Depends(auth)])
+    def monitor_notifications():
+        try:
+            return app.state.monitor.notifications()
+        except MonitorUnavailable as error:
+            raise HTTPException(503, str(error)) from None
+
+    # The single monitor write (owner 2026-11-06): switch 1.618 Bark pushes. No order or ledger effect.
+    @app.post('/v1/monitor/fib-bark', dependencies=[Depends(auth)])
+    def monitor_fib_bark(body: BarkSwitch):
+        try:
+            return app.state.monitor.set_fib_bark(body.enabled)
+        except MonitorUnavailable as error:
+            raise HTTPException(409, str(error)) from None
 
     @app.get('/v1/state', dependencies=[Depends(auth)])
     def state(current=Depends(selected), x_spike_account: str = Header(default='')):

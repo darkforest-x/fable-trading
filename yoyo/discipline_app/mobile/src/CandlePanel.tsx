@@ -1,4 +1,5 @@
 import {observeChartAppearance} from './chartAppearance';
+import {CHART} from './chartPalette';
 import {REFRESH_EVENT,type RefreshRequest} from './refreshEvent';
 import type {FibRange} from './fibData';
 import {FibRangePrimitive} from './FibRangePrimitive';
@@ -38,17 +39,17 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
  useEffect(()=>{
   if(!host.current)return;
   const chart=createChart(host.current,{
-   layout:{background:{type:ColorType.Solid,color:'#f0f4f8'},textColor:'#657281',fontSize:10,attributionLogo:true},
-   grid:{vertLines:{visible:false},horzLines:{visible:!range,color:'#f0f3f0'}},
+   layout:{background:{type:ColorType.Solid,color:CHART.canvas},textColor:CHART.text,fontSize:10,attributionLogo:true},
+   grid:{vertLines:{visible:false},horzLines:{visible:!range,color:CHART.grid}},
    rightPriceScale:{borderVisible:false,minimumWidth:58,scaleMargins:{top:.1,bottom:.27}},
    timeScale:{borderVisible:false,timeVisible:true,secondsVisible:false,minimumHeight:range?34:26,barSpacing:6,rightOffset:4,lockVisibleTimeRangeOnResize:true,tickMarkFormatter:(time:Time,type:number)=>type<3?dateLabel(time):timeLabel(time)},
    localization:{locale:'zh-CN',timeFormatter:(time:Time)=>timeLabel(time,true)},
    handleScroll:{mouseWheel:true,pressedMouseMove:true,horzTouchDrag:true,vertTouchDrag:!!range},
    handleScale:{axisPressedMouseMove:true,mouseWheel:true,pinch:true},
-   crosshair:{vertLine:{color:'#8aa99b',labelBackgroundColor:'#47685a'},horzLine:{color:'#8aa99b',labelBackgroundColor:'#47685a'}},
+   crosshair:{vertLine:{color:CHART.crosshair,labelBackgroundColor:CHART.label},horzLine:{color:CHART.crosshair,labelBackgroundColor:CHART.label}},
   });
   const stopAppearance=observeChartAppearance(chart);
-  const candles=chart.addSeries(CandlestickSeries,{upColor:'#00c990',downColor:'#ff3b69',wickUpColor:'#00c990',wickDownColor:'#ff3b69',borderVisible:false,priceLineColor:'#819b90',priceLineStyle:LineStyle.Dashed});
+  const candles=chart.addSeries(CandlestickSeries,{upColor:CHART.up,downColor:CHART.down,wickUpColor:CHART.up,wickDownColor:CHART.down,borderVisible:false,priceLineColor:CHART.reference,priceLineStyle:LineStyle.Dashed});
   const volume=chart.addSeries(HistogramSeries,{priceFormat:{type:'volume'},priceScaleId:'volume',lastValueVisible:false,priceLineVisible:false});
   volume.priceScale().applyOptions({scaleMargins:{top:.82,bottom:0},visible:false});
   graph.current={chart,candles,volume};
@@ -61,7 +62,7 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
  useEffect(()=>{
   const g=graph.current;if(!g||!state.historyReady)return;
   const data=state.bars,old=previous.current;
-  const volumeBar=(bar:Candle)=>({time:bar.time as UTCTimestamp,value:bar.volume,color:bar.close>=bar.open?'#00c99033':'#ff3b6933'});
+  const volumeBar=(bar:Candle)=>({time:bar.time as UTCTimestamp,value:bar.volume,color:bar.close>=bar.open?CHART.upVolume:CHART.downVolume});
   const reset=old.reset!==state.reset||!old.bars.length||old.bars[0].time!==data[0].time;
   if(reset){
    const range=g.chart.timeScale().getVisibleLogicalRange();
@@ -78,7 +79,7 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
  },[state.bars,state.reset,state.historyReady,symbol,period,view,showBar]);
  useEffect(()=>{
   const series=graph.current?.candles;if(!series)return;
-  const lines=[{price:Number(entry),title:'开仓',color:'#5b8572'},{price:Number(stop),title:'止损',color:'#ff3b69'}].filter(line=>Number.isFinite(line.price)&&line.price>0).map(line=>series.createPriceLine({...line,lineWidth:1,lineStyle:LineStyle.Dashed,axisLabelVisible:true}));
+  const lines=[{price:Number(entry),title:'开仓',color:CHART.entry},{price:Number(stop),title:'止损',color:CHART.stop}].filter(line=>Number.isFinite(line.price)&&line.price>0).map(line=>series.createPriceLine({...line,lineWidth:1,lineStyle:LineStyle.Dashed,axisLabelVisible:true}));
   return()=>{if(graph.current?.candles===series)for(const line of lines)series.removePriceLine(line)};
  },[entry,stop,symbol,period,showBar]);
  useEffect(()=>{

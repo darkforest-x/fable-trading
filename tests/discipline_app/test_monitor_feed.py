@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 from yoyo.discipline_app.api import create_app
 from yoyo.discipline_app.book import Book
 from yoyo.discipline_app.monitor_feed import (MonitorFeed, MonitorUnavailable, TRACKS, project_alerts,
-                                              project_cloud, project_paper)
+                                              project_cloud, project_notifications, project_paper)
 from test_discipline_service import Clock, market
 
 TOKEN = 'monitor-fixture-token-not-a-secret-0123456789'
@@ -58,6 +58,19 @@ def cloud_raw():
                             notifications=dict(telegram='sent'), eligibility_policy='internal')])
 
 
+def fib_raw():
+    event = lambda symbol, status, error=None, source='live': dict(week='2026-11-02', symbol=symbol, side='lower',
+                                                                  level=1.0, price=.99, observed_ms=5, candle_ms=4,
+                                                                  source=source, generation=1, status=status,
+                                                                  error=error, due_ms=0, message_id=987654)
+    return dict(now_ms=10, telegram=dict(enabled=True, configured=True, min_score_exclusive=.4, generation=1),
+                bark=dict(enabled=True, configured=True, min_score_exclusive=.4, generation=1,
+                          counts=dict(sent=7, skipped=3), recent=[dict(server_timestamp=123, error=None)]),
+                events=[event('AAA-USDT-SWAP', 'sent'), event('BBB-USDT-SWAP', 'skipped', 'score_not_above_0_4'),
+                        event('CCC-USDT-SWAP', 'skipped', 'expired_or_disabled'),
+                        event('DDD-USDT-SWAP', 'history', source='history')])
+
+
 def walk(value):
     if isinstance(value, dict):
         for k, v in value.items():
@@ -98,15 +111,32 @@ def test_alert_and_cloud_projections_drop_receipts_text_and_internals():
         project_cloud(dict(cloud_raw(), schema=2))
 
 
+def test_notification_feed_maps_push_outcomes_without_receipts():
+    value = project_notifications(fib_raw(), alerts_raw())
+    assert not set(walk(value)) & {'message_id', 'error', 'server_timestamp', 'recent', 'text', 'ack_ms', 'due_ms'}
+    fib = {e['symbol']: e for e in value['events'] if e['kind'] == 'fib'}
+    assert {k: (e['status'], e['pushed']) for k, e in fib.items()} == {
+        'AAA-USDT-SWAP': ('pushed', True), 'BBB-USDT-SWAP': ('below_threshold', False),
+        'CCC-USDT-SWAP': ('not_sent', False), 'DDD-USDT-SWAP': ('history', False)}
+    assert fib['DDD-USDT-SWAP']['at_ms'] == 4 and fib['AAA-USDT-SWAP']['at_ms'] == 5
+    alarm = next(e for e in value['events'] if e['kind'] == 'alarm')
+    assert alarm['id'] == 'alarm:3' and alarm['pushed'] is True and alarm['acknowledged'] is True
+    assert value['channels'] == dict(fib=dict(bark=True, bark_configured=True, bark_sent=7, telegram=True, min_score=.4),
+                                     alarm=dict(bark=False, telegram=True, threshold=25, window_minutes=5))
+
+
 @pytest.fixture
 def client(tmp_path):
     book = Book(Path(tmp_path) / 'paper.sqlite3', Clock())
     market(book)
     calls = []
-    payloads = {'/api/monday-reclaim-paper': paper_raw, '/api/spike-alerts': alerts_raw, '/api/cloud-signals': cloud_raw}
+    payloads = {'/api/monday-reclaim-paper': paper_raw, '/api/spike-alerts': alerts_raw, '/api/cloud-signals': cloud_raw,
+                '/api/monday-fib': fib_raw}
 
-    def fetch(path):
-        calls.append(path)
+    def fetch(path, body=None):
+        calls.append((path, body) if body is not None else path)
+        if path == '/api/monday-fib/bark':
+            return {}
         return payloads[path.split('?')[0]]()
 
     app = create_app(book, TOKEN, market_enabled=False, monitor_feed=MonitorFeed(fetch, ttl=60))
@@ -116,16 +146,18 @@ def client(tmp_path):
 def test_monitor_routes_need_token_are_get_only_and_never_touch_the_ledger(client):
     http, book, calls, app = client
     before = book.snapshot()
-    for path in ('/v1/monitor/paper', '/v1/monitor/alerts', '/v1/monitor/cloud'):
+    for path in ('/v1/monitor/paper', '/v1/monitor/alerts', '/v1/monitor/cloud', '/v1/monitor/notifications'):
         assert http.get(path).status_code == 401
         assert http.get(path, headers=AUTH).status_code == 200
         assert http.post(path, headers=AUTH, json={}).status_code == 405
     monitor_routes = [r for r in app.routes if getattr(r, 'path', '').startswith('/v1/monitor')]
-    assert monitor_routes and all(r.methods == {'GET'} for r in monitor_routes)
+    # Read-only except the single owner-approved 1.618 Bark switch.
+    assert {(r.path, frozenset(r.methods)) for r in monitor_routes if r.methods != {'GET'}} == {
+        ('/v1/monitor/fib-bark', frozenset({'POST'}))}
     assert http.get('/v1/monitor/paper?track=../x', headers=AUTH).status_code == 422
     assert http.get('/v1/monitor/paper?track=unknown', headers=AUTH).status_code == 503
     assert http.get('/v1/monitor/cloud?side=short', headers=AUTH).status_code == 200
-    assert any('side=-1' in c and 'scope=live' in c for c in calls)
+    assert any(isinstance(c, str) and 'side=-1' in c and 'scope=live' in c for c in calls)
     # Upstream reads are cached briefly and never mutate the discipline ledger.
     count = len(calls)
     http.get('/v1/monitor/alerts', headers=AUTH)
@@ -133,6 +165,19 @@ def test_monitor_routes_need_token_are_get_only_and_never_touch_the_ledger(clien
     after = book.snapshot()
     assert before['positions'] == after['positions'] and before['pending'] == after['pending']
     assert before['daily'] == after['daily']
+
+
+def test_bark_switch_forwards_only_a_boolean_and_needs_the_token(client):
+    http, book, calls, _ = client
+    before = book.snapshot()
+    assert http.post('/v1/monitor/fib-bark', json={'enabled': False}).status_code == 401
+    for bad in ({'enabled': 'no'}, {'enabled': False, 'channel': 'telegram'}, {}):
+        assert http.post('/v1/monitor/fib-bark', headers=AUTH, json=bad).status_code == 422
+    response = http.post('/v1/monitor/fib-bark', headers=AUTH, json={'enabled': False})
+    assert response.status_code == 200 and 'channels' in response.json()
+    assert ('/api/monday-fib/bark', {'enabled': False}) in calls
+    after = book.snapshot()
+    assert before['positions'] == after['positions'] and before['pending'] == after['pending']
 
 
 def test_unreachable_monitor_is_an_honest_503(tmp_path):

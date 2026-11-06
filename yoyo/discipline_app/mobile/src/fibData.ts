@@ -11,12 +11,14 @@ export function latestFibTouch(row:FibContract):FibTouch {
  return Object.values(row.touches).sort((a,b)=>b.occurred_ms-a.occurred_ms||a.side.localeCompare(b.side))[0];
 }
 export function fibSide(row:FibContract){return latestFibTouch(row).side==='upper'?'short':'long'}
+// Unified tone (chartPalette.ts CHART): 1.618 extensions in the app blue, Monday range neutral grey;
+// red/green stay reserved for candles and P&L. Inlined so node tests import this file directly.
 export function fibLevels(range:FibRange){return [
- {price:range.upper,title:'1.618',color:'#087f69'},
- {price:range.high,title:'高点',color:'#627d93'},
- {price:(range.high+range.low)/2,title:'',color:'#c5cdd0'},
- {price:range.low,title:'低点',color:'#627d93'},
- {price:range.lower,title:'1.618',color:'#e14f70'},
+ {price:range.upper,title:'1.618',color:'#0a84ff'},
+ {price:range.high,title:'高点',color:'#8e8e93'},
+ {price:(range.high+range.low)/2,title:'',color:'rgba(142,142,147,.45)'},
+ {price:range.low,title:'低点',color:'#8e8e93'},
+ {price:range.lower,title:'1.618',color:'#0a84ff'},
 ].filter(x=>x.price>0)}
 export function fibSelection(previous:string,previousWeek:string|undefined,next:FibSnapshot){
  return previousWeek===next.week&&next.items.some(r=>r.symbol===previous)?previous:next.items[0]?.symbol??'';
