@@ -15,6 +15,23 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-btc-cloud-reentry-20261106-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f85f299eb9
+    status: inconclusive
+    question: On BTC weeks outside the owner review, do double-bottom or Monday-support re-entry gates reduce stopped longs while retaining 5R trends and improving net PnL versus every 5m flip?
+    single_variable: Entry admission only, with confirmed 12H long / NY-week lower 1.618 reclaim and identical next-open/cost/stop/reverse exits.
+    result: '192 other NY weeks, 36 triggered, 410 longs. USD per fixed 1,000 quote notional: baseline -487.46 (302 stops; 78 cycles reached gross +5R, 17 net exits >=5R). Bottom +5.95 on 13 trades (11 stops, 6 waves, 1 realized winner); its only winner +35.98, late period -12.23, equal-count matched random +2.10, one-sided p=0.403. Strict trend 0 entries. Literal support-hold without 1-ATR cap: 55 trades, 44 stops, -102.47. Taking every eligible week''s first entry and filtering only retries: bottom -62.84, strict -68.79, uncapped -166.27. No verified profitable arm.'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - btc-cloud-reentry-other-weeks-20261106-v1
+    canonical_report: experiments/active/exp-btc-cloud-reentry-20261106-v1/summary.json
+    notes: Owner-confirmed stop is the 5m upcross cloud lower edge minus 0.1 Wilder ATR14; every fill taker 5bp, no funding or added slippage. One native replay of 2,050 baseline/control candidates at real opens; 4,100 fill fees checked. All illustrative weeks excluded. Uncapped support row was specified after observing zero strict candidates but before PnL. No parameter search, model or account change.
+
+
   - experiment_id: exp-signal-center-score-20261106-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 14da5374ae

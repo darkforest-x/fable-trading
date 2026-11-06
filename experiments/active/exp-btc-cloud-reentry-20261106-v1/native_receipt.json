@@ -1,0 +1,26 @@
+{
+  "engine": "nautilus_trader",
+  "version": "1.231.0",
+  "native_replay_runs": 1,
+  "source_bars": 413524,
+  "native_execution_bars": 827048,
+  "candidates": 2050,
+  "fills": 2050,
+  "invalid_open_risk": 0,
+  "open_events": 413524,
+  "full_ohlc_events": 413524,
+  "quantity_btc": 1.0,
+  "price_tick": 0.1,
+  "maker_fee": 0.0002,
+  "taker_fee": 0.0005,
+  "open_price_assumption": "zero-range native bar at recorded OHLC open; zero spread",
+  "intrabar_stop_execution": "NautilusTrader bar_execution OHLC; O-H-L-C fixed path",
+  "synthetic_liquidity": "unlimited volume; no impact",
+  "latency": "none",
+  "funding": "not modeled",
+  "slippage": "none",
+  "seconds": 20.077,
+  "runtime_warnings": [
+    "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+  ]
+}
