@@ -1,16 +1,16 @@
-/* Spike Web Apple Glass: Stitch 8978791379095391159 / df514d3934a043a19f6c8c81bc56f878.
- * Source: docs/design/stitch-20261023-web-glass/. Shared semantic aliases are
+/* Spike Clear Glass: Stitch 8978791379095391159 / 98a9bea6408d4a3fbe26304bfbce2128.
+ * Source: docs/design/stitch-20261103-clear-liquid-glass/. Shared semantic aliases are
  * consumed by lazy modules and the vision shadow root; trading states retain
  * separate red/green colors. Values never define risk policy or market data. */
 :root,html[data-theme],:host,:host([data-theme]) {
   color-scheme:light;
   --font-ui:-apple-system,BlinkMacSystemFont,'SF Pro Text','PingFang SC','Microsoft YaHei',sans-serif;
   --font:var(--font-ui);--mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
-  --surface-base:#f7f8f6;--surface-layer-1:rgba(255,255,255,.65);--surface-layer-2:rgba(238,243,247,.66);--surface-layer-3:rgba(227,235,243,.7);
+  --surface-base:#f5f7fa;--surface-layer-1:var(--glass-panel);--surface-layer-2:var(--glass-well);--surface-layer-3:rgba(218,231,244,.28);
   --brand-primary:#0071e3;--brand-cyan:var(--brand-primary);--signal-accent:var(--brand-primary);--brand-purple:#7356b6;--brand-amber:#a66a13;
   --trade-long:#087f69;--trade-short:#bd3a52;--risk-critical:#bd3048;
-  --surface-lowest:#f7f8f6;--surface-low:rgba(255,255,255,.65);--surface-high:rgba(229,237,245,.7);--surface-highest:#e4eaf0;
-  --bg:#f7f8f6;--sidebar:var(--surface-lowest);--surface:var(--surface-low);--surface-2:rgba(238,243,247,.66);
+  --surface-lowest:#f5f7fa;--surface-low:var(--glass-panel);--surface-high:rgba(229,237,245,.24);--surface-highest:#e4eaf0;
+  --bg:#f5f7fa;--sidebar:var(--surface-lowest);--surface:var(--surface-low);--surface-2:var(--glass-well);
   --line:#304b661a;--line-soft:#304b660d;--text:#18232d;--text-secondary:#465869;--muted:#546577;--dim:#667787;
   --mint:var(--brand-cyan);--mint-soft:#0071e30c;--brand-on:#fff;
   --red:var(--trade-short);--negative-strong:var(--trade-short);--red-soft:#bd3a520d;--amber:#936015;--blue:#0071e3;
@@ -18,8 +18,8 @@
   --positive-bg:#087f690d;--warning-bg:#a66a1312;--direction-long:var(--trade-long);--direction-long-bg:#087f690d;
   --direction-short:var(--trade-short);--direction-short-bg:#bd3a520d;--status-positive:var(--trade-long);
   --nav-hover:var(--surface-high);--nav-active:#0071e30c;--nav-count:var(--surface-lowest);
-  --control-bg:rgba(244,247,250,.72);--control-border:#667d9429;--control-hover:var(--surface-high);
-  --segment-bg:#e8eef480;--segment-active-bg:#ffffffb8;--segment-active-text:var(--brand-primary);
+  --control-bg:var(--glass-well);--control-border:#667d9429;--control-hover:var(--surface-high);
+  --segment-bg:var(--glass-well);--segment-active-bg:#ffffff42;--segment-active-text:var(--brand-primary);
   --card-bg:var(--surface-low);--card-border:#ffffffbf;--card-hover-bg:var(--surface-2);--card-hover-border:#0071e333;--card-selected-bg:#0071e30d;
   --metric-bg:var(--surface-low);--chart-bg:#f7f9f8;--chart-grid:#304b6610;--chart-text:#667787;
   --text-value:var(--text);--text-muted:var(--muted);--text-placeholder:var(--dim);
@@ -34,7 +34,7 @@
   --border:var(--line);--border-strong:var(--control-border);--surface-soft:var(--surface-2);--surface-hover:var(--surface-high);
   --text-soft:var(--text-secondary);--accent:var(--mint);--accent-ink:var(--on-accent);--accent-soft:var(--mint-soft);
   --notice-border:#a66a132b;--notice-bg:#a66a1308;--notice-text:#936015;
-  --toast-bg:var(--surface-high);--toast-text:var(--text);--toast-border:var(--line);
+  --toast-bg:var(--glass-sheet);--toast-text:var(--text);--toast-border:var(--line);
   --danger:var(--trade-short);--danger-soft:var(--red-soft);--success:var(--trade-long);--warning:var(--amber);--warning-soft:var(--warning-bg);
   --glass-opaque-dock:#f8faf9;--glass-opaque-panel:#fcfdfc;--glass-opaque-sheet:#fff;
   --text-caption:11px;--text-label:12px;--control-height:36px;--touch-height:44px;
@@ -42,9 +42,18 @@
   --space-xs:4px;--space-sm:6px;--space-md:10px;--space-lg:16px;--space-xl:20px;--space-2xl:28px;
   --motion-fast:180ms;--motion-panel:220ms;--motion-enter:240ms;
   --motion-ease:cubic-bezier(.22,1,.36,1);--motion-standard:cubic-bezier(.2,.7,.3,1);
-  --glass-dock:rgba(255,255,255,.28);--glass-panel:rgba(255,255,255,.65);--glass-sheet:rgba(255,255,255,.82);--glass-reading:rgba(248,250,252,.58);--glass-reading-blur:24px;--glass-reading-saturation:160%;
-  --glass-edge:rgba(255,255,255,.75);--glass-blur:20px;--glass-saturation:145%;
-  --panel-shadow:0 8px 28px #34465a0a,inset 0 1px 0 #ffffffb8;--elevated-shadow:0 20px 60px #3040501a,0 3px 12px #30405008;
+  /* One clear material. Tint, specular reflection and edge depth are separate;
+   * nested controls use a shallow well rather than another white glass plane. */
+  --glass-dock:rgba(255,255,255,.10);--glass-panel:rgba(255,255,255,.16);--glass-sheet:rgba(255,255,255,.22);
+  --glass-reading:var(--glass-sheet);--glass-reading-blur:var(--glass-blur);--glass-reading-saturation:var(--glass-saturation);
+  --glass-blur:10px;--glass-saturation:150%;--glass-filter:blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  --glass-well:rgba(65,91,122,.045);--glass-highlight:rgba(255,255,255,.92);
+  --glass-edge:rgba(255,255,255,.72);--glass-edge-bottom:rgba(48,70,95,.16);
+  --glass-sheen:linear-gradient(135deg,rgba(255,255,255,.38),rgba(255,255,255,.035) 38%,transparent 64%,rgba(255,255,255,.10));
+  --glass-inner-shadow:inset 0 1px 1px var(--glass-highlight),inset 1px 0 1px #ffffff75,inset 0 -1px 1px #18314a12;
+  --panel-shadow:0 4px 16px -2px #0a1f4412,0 1px 3px #0a1f4410,var(--glass-inner-shadow);
+  --elevated-shadow:0 14px 36px -8px #0a1f4430,0 2px 7px #0a1f4412,var(--glass-inner-shadow);
+  --glass-ambient:none;
 }
 
 /* Binary dark palette from Stitch 2acc1f5244714b8bb6ca736e54b25bc7.
@@ -52,31 +61,35 @@
 html[data-theme=dark],:host([data-theme=dark]){
  color-scheme:dark;
  --surface-base:#101318;--surface-lowest:#101318;--bg:#101318;
- --surface-layer-1:rgba(28,34,44,.72);--surface-layer-2:rgba(35,43,56,.7);--surface-layer-3:#293342;
+ --surface-layer-1:var(--glass-panel);--surface-layer-2:var(--glass-well);--surface-layer-3:#b9cde51c;
  --surface-low:var(--surface-layer-1);--surface-high:var(--surface-layer-2);--surface-highest:#303c4d;--surface-2:var(--surface-layer-2);
  --brand-primary:#5aa9ff;--brand-purple:#ba97ef;--brand-amber:#e6b567;
  --trade-long:#55c7a5;--trade-short:#f57e98;--risk-critical:#ff8798;
  --line:#ffffff1a;--line-soft:#ffffff0d;--text:#e8edf4;--text-secondary:#bcc9d8;--muted:#9aaabc;--dim:#8e9eaf;
  --mint-soft:#5aa9ff18;--red-soft:#f57e9815;--amber:#e6b567;--blue:#5aa9ff;
  --positive-bg:#55c7a514;--warning-bg:#e6b56718;--direction-long-bg:#55c7a514;--direction-short-bg:#f57e9815;
- --nav-active:#5aa9ff18;--control-bg:#232b38b3;--control-border:#ffffff1f;
- --segment-bg:#10131866;--segment-active-bg:#293342;
+ --nav-active:#5aa9ff18;--control-bg:var(--glass-well);--control-border:#ffffff1f;
+ --segment-bg:var(--glass-well);--segment-active-bg:#ffffff1c;
  --card-border:#ffffff17;--card-hover-border:#5aa9ff55;--card-selected-bg:#5aa9ff18;
  --chart-bg:#101318;--chart-grid:#ffffff0d;--chart-text:#9aaabc;
  --focus-glow:#5aa9ff26;--dialog-backdrop:#00000080;--dialog-border:#ffffff24;--scrollbar:#9aaabc55;
  --brand-bg:#5aa9ff18;--brand-border:#5aa9ff40;--on-accent:#101318;--brand-on:#101318;
  --action-border:#5aa9ff40;--action-filled-text:#101318;--card-fresh-border:#5aa9ff55;
  --notice-border:#e6b56740;--notice-bg:#e6b56712;--notice-text:#e6b567;
- --glass-dock:rgba(28,34,44,.72);--glass-panel:rgba(28,34,44,.78);--glass-sheet:rgba(22,27,36,.96);--glass-reading:rgba(18,24,33,.65);--glass-edge:#ffffff17;
+ --glass-dock:rgba(255,255,255,.06);--glass-panel:rgba(255,255,255,.07);--glass-sheet:rgba(18,24,34,.28);
+ --glass-well:rgba(255,255,255,.035);--glass-highlight:rgba(255,255,255,.32);--glass-edge:rgba(255,255,255,.18);--glass-edge-bottom:rgba(0,0,0,.42);
+ --glass-sheen:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.01) 38%,transparent 64%,rgba(255,255,255,.045));
+ --glass-inner-shadow:inset 0 1px 1px var(--glass-highlight),inset 1px 0 1px #ffffff12,inset 0 -1px 1px #00000080;
+ --glass-ambient:none;
  --glass-opaque-dock:#1c222c;--glass-opaque-panel:#1c222c;--glass-opaque-sheet:#161b24;
- --panel-shadow:0 12px 32px -6px #00000066,inset 0 1px 0 #ffffff08;--elevated-shadow:0 20px 60px #00000080;
+ --panel-shadow:0 4px 20px -2px #00000045,var(--glass-inner-shadow);--elevated-shadow:0 16px 40px -4px #00000080,var(--glass-inner-shadow);
 }
 
 /* Material fallbacks live with the palette so shadow-root workspaces inherit
  * the same accessibility behavior as ordinary pages. */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
- :root,html[data-theme],:host,:host([data-theme]){--glass-dock:var(--glass-opaque-dock);--glass-panel:var(--glass-opaque-panel);--glass-sheet:var(--glass-opaque-sheet);--glass-reading:var(--glass-opaque-sheet)}
+ :root,html[data-theme],:host,:host([data-theme]){--glass-dock:var(--glass-opaque-dock);--glass-panel:var(--glass-opaque-panel);--glass-sheet:var(--glass-opaque-sheet);--glass-reading:var(--glass-opaque-sheet);--glass-filter:none;--glass-blur:0px;--glass-sheen:none}
 }
 @media(prefers-reduced-transparency:reduce){
- :root,html[data-theme],:host,:host([data-theme]){--glass-dock:var(--glass-opaque-dock);--glass-panel:var(--glass-opaque-panel);--glass-sheet:var(--glass-opaque-sheet);--glass-reading:var(--glass-opaque-sheet)}
+ :root,html[data-theme],:host,:host([data-theme]){--glass-dock:var(--glass-opaque-dock);--glass-panel:var(--glass-opaque-panel);--glass-sheet:var(--glass-opaque-sheet);--glass-reading:var(--glass-opaque-sheet);--glass-filter:none;--glass-blur:0px;--glass-sheen:none}
 }

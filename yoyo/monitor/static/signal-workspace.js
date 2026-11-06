@@ -105,6 +105,7 @@
     document.body.classList.toggle('reclaim-paper-active',active && pane==='reclaim');
     if(active)document.title=pane==='reclaim'?'spike · 1.618 模拟盘':'spike · 信号中心';
     window.SpikeReclaimPaper?.setActive(active && pane==='reclaim');
+    window.SpikeCloudSignals?.setActive(active && pane==='records');
     if(changed)window.SpikeMotion?.enter(root,{kind:'route'});
     document.getElementById('signal-visuals').hidden=layout!=='history';
     ownCharts();schedule();
@@ -117,10 +118,10 @@
   });
   document.addEventListener('visibilitychange',()=>{ownCharts();schedule();});
   window.SpikeSignalWorkspace={
-    setActive(value){active=value;document.body.classList.toggle('signal-workspace-active',value);root.classList.toggle('signal-workspace',value);if(value) selectPane(pane);else{window.SpikeOKXExecution?.setActive(false);window.SpikeReclaimPaper?.setActive(false);document.body.classList.toggle('reclaim-paper-active',false);ownCharts();}},
+    setActive(value){active=value;document.body.classList.toggle('signal-workspace-active',value);root.classList.toggle('signal-workspace',value);if(value) selectPane(pane);else{window.SpikeOKXExecution?.setActive(false);window.SpikeReclaimPaper?.setActive(false);window.SpikeCloudSignals?.setActive(false);document.body.classList.toggle('reclaim-paper-active',false);ownCharts();}},
     render(data,display,selectedPane='records'){
       ledger=data;layout=display;selectPane(selectedPane);
-      if(selectedPane==='reclaim')return;
+      if(selectedPane==='reclaim'||selectedPane==='records')return;
       const universe=document.getElementById('signal-universe-note'), policy=data?.entry_universe;
       if(universe) universe.textContent=policy ? `${policy.scope}。全周期名单：${policy.excluded_bases.join('、')}；分组名单只限制对应周期和方向的新信号、通知与自动开仓。历史记录保留，已有持仓继续跟踪退出。` : '';
       const stats=data?.stats;

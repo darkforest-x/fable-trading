@@ -43,3 +43,16 @@ test('native child layers and already handled Escape do not close the parent men
  h.layer(null);h.dispatch('keydown',h.link,{key:'Escape',defaultPrevented:true});assert.equal(h.menu.open,true);
  h.dispatch('keydown',h.link,{key:'Escape'});assert.equal(h.menu.open,false);assert.equal(h.summary.focused,true);
 });
+test('committed pushState routes update menu highlights without navigating again',()=>{
+ const code=fs.readFileSync('yoyo/monitor/static/stitch-workspace.js','utf8').split('/* Account navigation')[1];
+ const node=route=>({dataset:{terminalRoute:route},attrs:{},active:false,classList:{toggle(k,v){this[k]=v;}},setAttribute(k,v){this.attrs[k]=v;},removeAttribute(k){delete this.attrs[k];}});
+ const links=['reclaim','signals','yolo-detect','paper-desk'].map(node),more=node('more');
+ const location={hash:'#paper-desk'},visits=[];let changed;
+ const document={body:{},querySelectorAll:()=>links,querySelector:()=>null,getElementById:()=>more};
+ vm.runInNewContext('/* Account navigation'+code,{document,location,URLSearchParams,window:{addEventListener(){},SpikeWorkbench:{navigate:x=>visits.push(x)}},MutationObserver:class{constructor(fn){changed=fn;}observe(){}}});
+ assert.equal(links[3].attrs['aria-current'],'page');
+ location.hash='#research';changed();
+ assert.equal(links.some(x=>x.attrs['aria-current']),false);assert.equal(more.classList.active,true);
+ assert.deepEqual(visits,['paper-desk'],'highlight refresh must not re-enter route lifecycle');
+ location.hash='#signals?pane=records';changed();assert.equal(links[1].attrs['aria-current'],'page');assert.equal(more.classList.active,false);
+});

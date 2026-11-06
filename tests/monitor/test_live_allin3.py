@@ -64,6 +64,21 @@ class LiveAllinTests(PaperFixture):
         e.handle_quote('ABC-USDT-SWAP', {'candle_ms': self.touch+MIN, 'high': 120, 'low': 10, 'price': 100}, skip_live=True)
         self.assertEqual(len(e.snapshot()['tracks']['live-allin3']['open']), 1)
 
+    def test_notice_reads_enabled_gates_and_empty_entries_without_changing_ledger(self):
+        e = self.live(); e._score.return_value = ('scored', .4421, 1, {}, None, 4)
+        self.touch_live(e)
+        self.client.now = self.touch//H5*H5+H5+3000
+        e._score.return_value = ('scored', .438, 1, {}, None, 4); e.score_due()
+        with e.db() as db:
+            before = [tuple(row) for row in db.execute('SELECT * FROM positions')]
+        notice = e.notification_score(dict(week=self.levels['week'], symbol='ABC-USDT-SWAP', side='lower',
+                                           candle_ms=self.touch, observed_ms=self.touch+500))
+        self.assertEqual(notice['live_thresholds'], {'live-allin3': .6})
+        self.assertEqual(notice['live_entries'], [])
+        self.assertEqual((notice['score'], notice['live_allin3_score']), (.438, .4421))
+        with e.db() as db:
+            self.assertEqual(before, [tuple(row) for row in db.execute('SELECT * FROM positions')])
+
     def test_history_uses_pre_score_for_both_events_and_positions(self):
         e = self.live(); self.touch_live(e)
         p = e.snapshot()['tracks']['live-allin3']['open'][0]

@@ -48,8 +48,8 @@
       const width=Math.round(host.clientWidth),height=Math.round(host.clientHeight);
       if(width<=0||height<=0||(width===w&&height===h))return;
       const range=chart.timeScale().getVisibleLogicalRange();w=width;h=height;
-      if(compactAxis&&narrow!==(w<=700)){
-        narrow=w<=700;
+      if(compactAxis&&narrow!==(compactAxis==='always'||w<=700)){
+        narrow=compactAxis==='always'||w<=700;
         chart.applyOptions({localization:{priceFormatter:narrow?compactAxisPrice:axisPrice}});
       }
       chart.resize(w,h);

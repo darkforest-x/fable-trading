@@ -18,7 +18,7 @@
     <div id="mf-wallpaper" class="mf-wallpaper" aria-label="所选合约的周一区间 K 线"></div>
     <div id="mf-watermark" class="mf-watermark" aria-hidden="true" hidden><b id="mf-watermark-symbol"></b><span id="mf-watermark-period"></span></div>
     <div id="mf-empty" class="mf-empty-chart" role="status">正在读取最新触价…</div>
-    <header class="mf-nav mf-glass" data-mf-movable="nav">${grip('导航')}<details id="mf-home-menu" class="mf-home-menu"><summary aria-label="打开工作区菜单">☰ <b>SPIKE</b></summary><nav class="mf-glass" aria-label="工作区"><a href="#signals?pane=reclaim">1.618 模拟盘 · 首页</a><a href="#signals">信号</a><a href="#yolo-detect">巡检</a><a href="#paper-desk">模拟</a><a href="#yolo-detect?tab=account">实盘账户</a><button id="mf-more" type="button">更多工作区…</button></nav></details><span class="mf-divider"></span><h1>周一 1.618</h1><button type="button" class="theme-toggle" data-theme-toggle aria-label="切换浅色或深色" title="切换浅色或深色"></button><span id="mf-stream" class="mf-stream" title="行情连接中"><i></i><span>连接中</span></span></header>
+    <header class="mf-nav mf-glass" data-mf-movable="nav">${grip('导航')}<details id="mf-home-menu" class="mf-home-menu"><summary aria-label="打开工作区菜单">☰ <b>SPIKE</b></summary><nav class="mf-glass" aria-label="工作区"><a href="#signals?pane=reclaim">1.618 模拟盘 · 首页</a><a href="#signals">信号</a><a href="#yolo-detect">巡检</a><a href="#paper-desk">模拟</a><a href="#yolo-detect?tab=account">实盘账户</a><button id="mf-more" type="button" data-workspace-more aria-haspopup="dialog" aria-controls="workspace-command">更多工作区…</button></nav></details><span class="mf-divider"></span><h1>周一 1.618</h1><button type="button" class="theme-toggle" data-theme-toggle aria-label="切换浅色或深色" title="切换浅色或深色"></button><span id="mf-stream" class="mf-stream" title="行情连接中"><i></i><span>连接中</span></span></header>
     <section id="mf-selected" class="mf-selected mf-glass" data-mf-movable="symbol" aria-label="当前合约" hidden>${grip('币种卡片')}
       <div class="mf-symbol-line"><h2 id="mf-symbol">—</h2><span class="mf-perp">USDT 永续</span></div>
       <div id="mf-price" class="mf-price">—</div>
@@ -39,7 +39,6 @@
     <div id="mf-period-menu" class="mf-period-menu mf-glass" role="menu" aria-label="K 线周期" hidden>${['1m','5m','15m','30m','1H','4H','1D'].map(p=>`<button type="button" role="menuitemradio" aria-checked="${p==='15m'}" data-period="${p}" tabindex="-1">${p}<span aria-hidden="true">✓</span></button>`).join('')}</div>
     <footer class="mf-footer"><span id="mf-week">纽约周一 · 读取中</span><span id="mf-updated">15m 实时 K 线</span><span class="mf-gesture-hint">拖动平移 · 滚轮缩放 · 双击价格轴复位</span></footer>`;
   const layout=mountLayout(root,window);
-  $('mf-more').addEventListener('click',()=>{$('mf-home-menu').open=false;$('workspace-search')?.click();});
   // Shared navigation dismissal preserves native anchor activation on Safari.
   const periods=['1m','5m','15m','30m','1H','4H','1D'];
   let period='15m';try{const saved=window.localStorage?.getItem('spike.monday.timeframe');if(periods.includes(saved))period=saved;}catch{}

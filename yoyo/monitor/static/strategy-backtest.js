@@ -13,8 +13,20 @@
   const tone=v=>v>0?'rp-positive':v<0?'rp-negative':'';
   const format=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
   const date=t=>format.format(t);
+  const pointFormat=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
   const shortTime=t=>date(t).slice(-5);
   const entryLabel=r=>Number.isFinite(r.entry_start_ms)?`${date(r.entry_start_ms)}–${shortTime(r.entry_ms)}`:date(r.entry_ms)+'（记账）';
+  const price=v=>Number.isFinite(v)&&v>0?v.toLocaleString('en-US',{maximumFractionDigits:10}):'—';
+  function fillLabel(r,key){
+    const f=r.fills,start=f?.[key+'_start_ms'],end=f?.[key+'_end_ms'];
+    if(!Number.isFinite(start)||!Number.isFinite(end))return key==='entry'?entryLabel(r):date(r.exit_ms)+'（记账）';
+    if(r.point_times&&start===end)return pointFormat.format(start);
+    return date(start)+(end>start?'–'+(date(start).slice(0,-5)===date(end).slice(0,-5)?shortTime(end):date(end)):'');
+  }
+  function summaryHTML(r,{source='Binance',mode='历史回测',costNote='已扣原研究成本',funded=true}={}){
+    const interval=['entry','exit'].some(k=>r.fills?.[k+'_end_ms']>r.fills?.[k+'_start_ms']);
+    return `<div class="bt-summary-coin"><strong>${esc(base(r.symbol))}<small> / USDT</small></strong><span><em class="${r.side===1?'rp-positive':'rp-negative'}">${r.side===1?'做多':'做空'}</em> · ${esc(source)} · ${esc(mode)}</span></div>${['entry','exit'].map((key,i)=>`<div class="bt-summary-fill" data-fill="${key}"><span>${i===0?'① 开仓':'② 平仓'}</span><b>${price(r.fills?.[key+'_price'])}</b><time>${fillLabel(r,key)}</time></div>`).join('')}${Number.isFinite(r.entry_rules?.score)?`<div class="bt-summary-fill bt-summary-score" data-fill="score"><span>入场评分</span><b>${r.entry_rules.score.toFixed(4)}</b><time>${r.entry_rules.score_basis==='pre_touch'?'触价前评分':r.entry_rules.kind==='touch_close'?'触价收盘评分':'原回测评分'} · 门槛 ${r.entry_rules.minimum<.3?'前40%':'≥'+r.entry_rules.minimum}</time></div>`:''}<div class="bt-summary-pnl"><span>${funded?'净收益 <small>USDT</small>':'未计入资金'}</span><strong class="${funded?tone(r.pnl):''}">${funded?(Number.isFinite(r.pnl)?money(r.pnl):'—'):'影子记录'}</strong>${funded&&Number.isFinite(r.return_pct)?`<small class="${tone(r.return_pct)}">${money(r.return_pct)}%</small>`:''}</div><small class="bt-summary-note">北京时间 · ${r.point_times?'按实际成交标记':interval?'横线表示原周期成交区间':'按原回测成交记录'} · ${esc(costNote)}</small>`;
+  }
   function rulesHTML(r){
     const e=r.entry_rules;
     if(e?.status!=='saved'||!Number.isFinite(e.score)||!Number.isFinite(e.minimum))return '<span class="bt-entry">入场条件／评分未留存</span>';
@@ -53,7 +65,7 @@
   function rowHTML(r,selected){
     return `<button type="button" class="bt-row" data-bt-trade="${r.id}" aria-pressed="${r.id===selected}" aria-label="查看 ${esc(base(r.symbol))} ${date(r.entry_ms)} 回测交易"><span class="bt-coin"><b>${esc(base(r.symbol))}</b><em class="${r.side===1?'rp-positive':'rp-negative'}">${r.side===1?'多':'空'}</em>${r.id===selected?'<small>图表焦点</small>':''}</span><span class="bt-pnl ${tone(r.pnl)}"><b>${money(r.pnl)} <small>USDT</small></b><small>${money(r.return_pct)}%</small></span>${rulesHTML(r)}<span class="bt-times"><span title="原回测成交所在区间">开 ${entryLabel(r)}</span><span>${r.exit_reason===0?'期末结算':'平'} ${date(r.exit_ms)}</span></span></button>`;
   }
-  const api={createModel,validate,valid,rowHTML,rulesHTML,entryLabel,periodFor,base,date};
+  const api={createModel,validate,valid,rowHTML,rulesHTML,entryLabel,fillLabel,summaryHTML,periodFor,base,date};
   if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}
   function create({root,onOpen=()=>{},onSelect}){
     let opened=false,selected=null,returnFocus=null,request=null;
@@ -68,7 +80,7 @@
       finally{clearTimeout(timeout);if(request===c)request=null;}}
     function choose(row,track,manual=false){selected=row.id;onSelect({track,row});render();if(manual&&matchMedia('(max-width:700px)').matches)setOpen(false,false);}
     const model=createModel({read,cancel:()=>{request?.abort();request=null;},change:render,focus:(row,track)=>choose(row,track)});
-    function setOpen(value,restore=true){opened=value;sheet.reset();panel.classList.toggle('is-open',value);panel.inert=!value;panel.setAttribute('aria-hidden',String(!value));if(!value){model.pause();if(restore)returnFocus?.focus({preventScroll:true});}else{onOpen();render();if(!model.getState().data&&!model.getState().busy)model.load();node('[data-bt-title]').focus({preventScroll:true});}}
+    function setOpen(value,restore=true){opened=value;sheet.reset();panel.classList.toggle('is-open',value);root.classList.toggle('has-backtest-list',value);root.querySelector('[data-rp-action="backtest-list"]')?.setAttribute('aria-expanded',String(value));panel.inert=!value;panel.setAttribute('aria-hidden',String(!value));if(!value){model.pause();if(restore)(root.classList.contains('is-backtest')?root.querySelector('[data-rp-action="backtest-list"]'):returnFocus)?.focus({preventScroll:true});}else{onOpen();render();if(!model.getState().data&&!model.getState().busy)model.load();node('[data-bt-title]').focus({preventScroll:true});}}
     function render(){
       const s=model.getState();node('[data-bt-title]').textContent=label(s.track)+' · 回测交易';panel.setAttribute('aria-busy',String(s.busy));
       node('[data-bt-status]').textContent=s.error||(s.busy?'正在读取回测成交…':s.total?'':'没有符合条件的回测成交');node('[data-bt-retry]').hidden=!s.error;

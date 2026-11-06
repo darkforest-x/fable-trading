@@ -8,7 +8,8 @@
   const dialog=document.getElementById('workspace-command');
   const input=document.getElementById('workspace-command-input');
   const results=document.getElementById('workspace-command-results');
-  if(!trigger||!dialog||!input||!results)return;
+  const close=document.getElementById('workspace-command-close');
+  if(!trigger||!dialog||!input||!results||!close)return;
   let previous=null;
   const aliases={market:'行情 btc eth',signals:'信号 账户 自动', 'yolo-detect':'均线 yolo 检测 账户 手动', 'trading-books':'书籍 阅读', 'paper-desk':'模拟 交易',system:'健康 服务 状态'};
   const groups={market:'市场',signals:'信号',accounts:'账户与交易',simulation:'模拟',research:'研究',learn:'学习',manage:'系统'};
@@ -40,15 +41,39 @@
     }
     if(!matches.length){const empty=document.createElement('p');empty.textContent='没有匹配的页面，试试“信号”或“均线”。';results.append(empty);}
   }
-  function open(){
-    if(document.querySelector('dialog[open]')||document.body.classList.contains('nav-open')||document.body.classList.contains('workspace-fullscreen-open'))return;
-    previous=document.activeElement;input.value='';render();dialog.showModal();input.focus();
+  function fitViewport(){
+    const viewport=window.visualViewport;
+    dialog.style.setProperty('--command-viewport-height',`${viewport?.height||window.innerHeight}px`);
+    dialog.style.setProperty('--command-viewport-top',`${viewport?.offsetTop||0}px`);
   }
-  trigger.addEventListener('click',open);
+  function open(returnTo=document.activeElement,search=false){
+    if(document.querySelector('dialog[open]')||document.body.classList.contains('nav-open')||document.body.classList.contains('workspace-fullscreen-open'))return;
+    previous=returnTo;input.value='';render();fitViewport();dialog.showModal();
+    results.scrollTop=0;
+    // Browse first on phones; only explicit search intent should summon a keyboard.
+    (search||!window.matchMedia('(max-width:700px)').matches?input:close).focus({preventScroll:true});
+  }
+  trigger.addEventListener('click',()=>{
+    const menu=trigger.closest?.('details'),returnTo=menu?.querySelector('summary')||trigger;
+    if(menu)menu.open=false;
+    open(returnTo);
+  });
+  // The chart's navigation mounts lazily. Keep every More entry on this controller.
+  document.addEventListener('click',event=>{
+    const entry=event.target.closest?.('[data-workspace-more]');
+    if(!entry)return;
+    const menu=entry.closest('details'),returnTo=menu?.querySelector('summary')||entry;
+    if(menu)menu.open=false;
+    open(returnTo);
+  });
+  const resize=()=>{if(dialog.open)fitViewport();};
+  window.addEventListener('resize',resize);
+  window.visualViewport?.addEventListener('resize',resize);
+  window.visualViewport?.addEventListener('scroll',resize);
   // Preserve the existing density control and its owner/listener; only move its surface.
   document.getElementById('glass-appearance')?.append(document.getElementById('workspace-density'));
   window.addEventListener('hashchange',()=>{if(dialog.open){previous=null;dialog.close();}});
-  document.getElementById('workspace-command-close').addEventListener('click',()=>dialog.close());
+  close.addEventListener('click',()=>dialog.close());
   input.addEventListener('input',render);
   dialog.addEventListener('close',()=>{previous?.focus({preventScroll:true});previous=null;});
   dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
@@ -65,6 +90,6 @@
   document.addEventListener('keydown',event=>{
     if(event.defaultPrevented||event.isComposing||event.altKey||!(event.metaKey||event.ctrlKey)||event.key.toLowerCase()!=='k')return;
     if(document.querySelector('dialog[open]'))return;
-    event.preventDefault();open();
+    event.preventDefault();open(document.activeElement,true);
   });
 })();

@@ -142,9 +142,12 @@ def test_bark_receipts_and_private_post(tmp_path, code, payload, expected):
         assert kwargs["allow_redirects"] is False
         assert kwargs["json"]["device_key"] == "test-device-key"
         assert kwargs["json"]["group"] == "SPIKE 1.618"
-        assert kwargs["json"]["ttl"] == 600
-        assert kwargs["json"]["title"] == "BTC · 上沿 1.618"
-        assert kwargs["json"]["body"].splitlines() == ["评分 0.6000 · 点位 116.18", "10-22 00:30 北京"]
+        # Archive lifetime is independent of the 90-second send eligibility.
+        assert kwargs["json"]["isArchive"] == "1"
+        assert "ttl" not in kwargs["json"]
+        assert kwargs["json"]["title"] == "🔔 BTC · 触价提醒"
+        assert kwargs["json"]["body"].splitlines() == ["上沿 1.618 · 点位 116.18", "10-22 00:30 北京触价", "", "5m 收盘分 0.6000"]
+        assert "url" not in kwargs["json"]
         return Response(code, payload)
     assert deliver_once(book, "test-device-key", sender, NOW + 1, score_lookup=scored)
     assert book.bark_status()["counts"] == {expected: 1}
@@ -256,11 +259,12 @@ def test_bark_and_telegram_share_strict_raw_score_and_three_lines(tmp_path, scor
     if allowed:
         text = calls["bark"]["title"] + "\n" + calls["bark"]["body"]
         assert text == calls["telegram"]["text"]
-        assert text.splitlines()[0] == "BTC · 上沿 1.618"
-        assert len(text.splitlines()) == 3 and "点位 116.18" in text and "北京" in text
-        assert "评分 0.4000 ·" not in text
+        assert text.splitlines()[0] == "🔔 BTC · 触价提醒"
+        assert "上沿 1.618 · 点位 116.18" in text and "北京触价" in text
+        assert "5m 收盘分 0.4000" != text.splitlines()[-1]
         assert all(label not in text for label in ["-USDT-SWAP", "纽约时间", "最新价", "网页备用", "https://"])
         assert calls["bark"]["copy"] == "OKX:BTCUSDT.P"
+        assert "url" not in calls["bark"]
 
 
 @pytest.mark.parametrize("result", [
@@ -280,7 +284,7 @@ def test_bark_waits_without_spending_attempts_or_starving_ready_touch(tmp_path):
     book.touch(levels, SYMBOL, "lower", 90, NOW+1, NOW, "live")
     calls = []
     def sender(url, **kwargs):
-        calls.append(kwargs["json"]["title"])
+        calls.append(kwargs["json"]["body"].splitlines()[0])
         return Response()
     def lookup(event):
         assert book.bark_status()["counts"].get("sending", 0) == 0
@@ -292,9 +296,9 @@ def test_bark_waits_without_spending_attempts_or_starving_ready_touch(tmp_path):
     assert calls == [] and book.bark_status()["counts"] == {"pending": 2}
     book.recover()
     deliver_once(book, "key", sender, NOW+1002, score_lookup=lookup)
-    assert calls == ["BTC · 下沿 1.618"]
+    assert calls == [f"下沿 1.618 · 点位 {levels['lower']:.10g}"]
     deliver_once(book, "key", sender, NOW+2002, score_lookup=scored)
-    assert calls == ["BTC · 下沿 1.618", "BTC · 上沿 1.618"]
+    assert calls == [f"下沿 1.618 · 点位 {levels['lower']:.10g}", f"上沿 1.618 · 点位 {levels['upper']:.10g}"]
     assert all(r["attempts"] == 1 for r in book.bark_status()["recent"])
     assert not deliver_once(book, "key", sender, NOW+3002, score_lookup=scored)
 
@@ -372,6 +376,6 @@ def test_bark_names_live_entries_like_telegram(tmp_path):
     assert deliver_once(book, "key", sender, NOW+1, score_lookup=lookup)
     assert deliver_telegram_once(book, ("fake", "fake"), sender, NOW+1, score_lookup=lookup)
     text = calls["bark"]["title"] + "\n" + calls["bark"]["body"]
-    assert text == calls["telegram"]["text"] and text.splitlines()[-1] == "live开仓 · live-allin3 · 模拟"
+    assert text == calls["telegram"]["text"] and text.splitlines()[-1] == "✓ live-allin3 · 已模拟开仓"
     assert book.bark_status()["counts"] == {"sent": 1}
 

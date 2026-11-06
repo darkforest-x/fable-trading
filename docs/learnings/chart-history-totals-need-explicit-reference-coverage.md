@@ -1,0 +1,7 @@
+# Chart totals require reference coverage, not just candle coverage
+
+- **问题**：The chart can hold years of candles while its viewport has reconstructed only a few weeks of references. A total beside that candle date range looks like a full-history result even when it is not.
+- **死胡同**：Using the earliest loaded candle as the statistics coverage boundary, or treating a successful latest-page fetch as complete history, confuses available prices with eligible reference discovery. Summing planned target R or MFE would also answer a different question from ended-reference results.
+- **有效路径**：Reuse the existing reference exit paths; aggregate only confirmed ended references and their explicitly labeled hypothetical costs. Discover candles to the verified exchange API boundary, reconstruct each week with its chosen range policy, and keep loaded, failed, developing and completed states separate. Partial results stay labeled as loaded; missing weeks support retry and never imply zero signals.
+- **通用规则**：Before adding a historical total to an interactive chart, identify both the price-coverage boundary and the reference-discovery boundary, and bind the displayed completeness claim to the latter.
+- **牵连**：`yoyo/monitor/static/cloud-history-loader.js`, `cloud-history-stats.js`, `cloud-history-panel.js`, `cloud-signal-chart.js`; no new fill engine or account-performance claim. NEIRO first-post-confirmation stop example additionally shows that zero-width geometry is not proof of a missing signal.

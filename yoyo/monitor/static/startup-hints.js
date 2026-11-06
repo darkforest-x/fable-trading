@@ -23,7 +23,9 @@
   if(typeof module!=='undefined')module.exports={initialSymbol,paperSymbol};
   if(typeof document==='undefined')return;
   const route=window.location.hash.slice(1).split('?');
-  const params=new URLSearchParams(route[1]||''),paper=!route[0]||route[0]==='market'||route[0]==='signals'&&params.get('pane')==='reclaim';
+  // The home route (empty hash or the retired market alias) is the 1.618 page fixed on BTC 15m (owner 2026-11-05).
+  const home=!route[0]||route[0]==='market';
+  const params=new URLSearchParams(home?'pane=reclaim&track=spike&period=15m&symbol=BTC-USDT-SWAP':route[1]||''),paper=home||route[0]==='signals'&&params.get('pane')==='reclaim';
   if((route[0]!=='monday-fib'&&!paper)||document.hidden)return;
   let versions={};try{versions=JSON.parse(document.getElementById('asset-versions')?.textContent||'{}');}catch{}
   const slots=new Map();let cancelled=false;

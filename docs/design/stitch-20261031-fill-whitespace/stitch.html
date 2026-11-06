@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SPIKE · 1.618 历史模拟交易查看器 (无遮挡纯净K线与点位标尺版)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+          },
+          colors: {
+            trade: {
+              long: '#10b981',
+              'long-bg': 'rgba(16, 185, 129, 0.08)',
+              short: '#ef4444',
+              'short-bg': 'rgba(239, 68, 68, 0.08)',
+              muted: '#64748b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    /* Custom refined scrollbars */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.45); }
+    .chart-grid {
+      background-size: 80px 50px;
+      background-image: 
+        linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+    }
+    .dark .chart-grid {
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    }
+  </style>
+</head>
+<body class="h-full bg-[#f8fafc] dark:bg-[#0c0f17] text-slate-800 dark:text-slate-200 font-sans antialiased overflow-hidden flex flex-col transition-colors duration-200">
+<!-- 1. TOP TOOLBAR: Compact full-width navigation (h-11 = 44px) -->
+<header class="h-11 min-h-[44px] border-b border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-[#111522]/95 backdrop-blur-sm px-3 flex items-center justify-between z-30 select-none"><!-- Left: Brand, Breadcrumb, Strategy selector -->
+<div class="flex items-center gap-2.5">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400"></span>
+<span class="font-bold text-xs tracking-wider text-slate-900 dark:text-white font-mono">SPIKE</span>
+</div>
+<span class="text-slate-300 dark:text-slate-700 text-xs">/</span>
+<span class="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-slate-400">history</span>
+        历史交易
+      </span>
+<div class="h-3.5 w-px bg-slate-200 dark:bg-slate-800 mx-0.5"></div>
+<!-- Strategy Dropdown Selector -->
+<div class="relative flex items-center bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 text-[11px] font-mono px-2 py-0.5 rounded border border-slate-200/70 dark:border-slate-700/60">
+<span class="text-slate-400 dark:text-slate-500 font-sans mr-1">策略:</span>
+<select class="bg-transparent text-slate-800 dark:text-slate-200 font-medium cursor-pointer outline-none appearance-none pr-3.5">
+<option value="allin3">allin3 · v3.2</option>
+<option value="alpha">momentum · v2.1</option>
+<option value="breakout">breakout · v1.0</option>
+</select>
+<span class="material-symbols-outlined absolute right-1 pointer-events-none text-[13px] text-slate-400">expand_more</span>
+</div>
+</div>
+<!-- Right: Sidebar Toggle, Theme, Back to Market -->
+<div class="flex items-center gap-1.5">
+<!-- Sidebar toggle button for both desktop collapse and mobile sheet -->
+<button class="flex items-center gap-1 text-xs font-medium px-2 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200/80 dark:hover:bg-slate-700 rounded text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors" id="toggleSidebarBtn" onclick="toggleSidebar()" title="展开/收起交易流水列表">
+<span class="material-symbols-outlined text-sm">view_sidebar</span>
+<span>交易列表</span>
+</button>
+<!-- Theme Switcher -->
+<button class="p-1.5 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" onclick="toggleTheme()" title="切换深色/浅色外观">
+<span class="material-symbols-outlined text-[17px] dark:hidden">dark_mode</span>
+<span class="material-symbols-outlined text-[17px] hidden dark:inline">light_mode</span>
+</button>
+<div class="h-3.5 w-px bg-slate-200 dark:bg-slate-800 mx-0.5"></div>
+<!-- Return to Live Market -->
+<a class="flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 px-2 py-1 rounded hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">keyboard_return</span>
+<span>返回行情</span>
+</a>
+</div></header>
+<!-- 2. SELECTED-TRADE SUMMARY ROW: Slim, distinct, unambiguous (h-9 = 36px) -->
+<section class="h-9 min-h-[36px] bg-white dark:bg-[#131726] border-b border-slate-200/90 dark:border-slate-800 px-3.5 flex items-center justify-between text-xs z-20 overflow-x-auto whitespace-nowrap"><!-- Left: Selected Trade Core Specs -->
+<div class="flex items-center gap-3">
+<!-- Target Symbol, Exchange & Direction -->
+<div class="flex items-center gap-1.5">
+<span class="font-bold font-mono text-slate-900 dark:text-white tracking-tight">DEMO/USDT</span>
+<span class="px-1.5 py-0.2 rounded text-[10px] font-semibold tracking-wide bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/50">
+          做多 LONG · OKX · 历史交易
+        </span>
+</div>
+<!-- Net PnL -->
+<div class="flex items-center gap-1 font-mono font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50/80 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200/50 dark:border-emerald-900/40">
+<span class="text-[10px] text-emerald-700 dark:text-emerald-500 font-sans font-normal">净收益:</span>
+<span class="tabular-nums">+2.00 USDT</span>
+<span class="text-[10px] opacity-80">(+2.00%)</span>
+</div>
+<div class="h-3 w-px bg-slate-200 dark:bg-slate-750"></div>
+<!-- Exact Point Timestamp: Entry Marker ① -->
+<div class="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+<span class="inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 dark:text-blue-400"><span class="w-1.5 h-1.5 rounded-full border border-blue-600 dark:border-blue-400 inline-block"></span>① 开仓</span>
+<span class="font-mono text-slate-800 dark:text-slate-200 tabular-nums font-semibold">100.00</span>
+<span class="text-slate-400 dark:text-slate-500">·</span>
+<span class="font-mono text-[11px] text-slate-700 dark:text-slate-300">05-18 10:15:00</span>
+<span class="text-[10px] px-1 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-sans border border-slate-200/60 dark:border-slate-700/60">
+          定点成交
+        </span>
+</div>
+<span class="text-slate-300 dark:text-slate-700">→</span>
+<!-- Exact Point Timestamp: Exit Marker ② -->
+<div class="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+<span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 dark:text-slate-300">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 inline-block"></span>
+          ② 平仓
+        </span>
+<span class="font-mono text-slate-800 dark:text-slate-200 tabular-nums font-semibold">102.00</span>
+<span class="text-slate-400 dark:text-slate-500">·</span>
+<span class="font-mono text-[11px] text-slate-700 dark:text-slate-300">05-18 12:30:00</span>
+<span class="text-[10px] px-1 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-sans border border-slate-200/60 dark:border-slate-700/60">
+          止盈出局 (TP1达成)
+        </span>
+</div>
+</div>
+<!-- Right: Backtest & Paper Verification Fact Note -->
+<div class="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">verified</span>
+<span>历史成交定焦 · 点位事实精确复现</span>
+</div></section>
+<!-- 3. MAIN WORKSPACE: Fixed 290px Left Sidebar + Remaining Full-width Unobstructed Chart -->
+<main class="flex-1 flex overflow-hidden relative">
+<!-- LEFT SIDEBAR: Fixed 290px dense transaction ledger (Never covers candles) -->
+<aside class="w-[290px] min-w-[290px] h-full bg-white dark:bg-[#111422] border-r border-slate-200 dark:border-slate-800 flex flex-col z-10 transition-all duration-200 md:relative absolute inset-y-0 left-0 -translate-x-full md:translate-x-0 shadow-lg md:shadow-none" id="ledgerSidebar"><!-- Ledger Header & Filter/Sort Controls -->
+<div class="p-2.5 border-b border-slate-200/80 dark:border-slate-800/80 flex flex-col gap-2 bg-slate-50/50 dark:bg-slate-900/30">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-slate-800 dark:text-slate-200">历史交易列表</span>
+<span class="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">12 笔</span>
+</div>
+<!-- Close button for mobile drawer -->
+<button class="md:hidden p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" onclick="toggleSidebar()">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<!-- Filter & Sort in single compact row with opposing arrows icon -->
+<div class="grid grid-cols-2 gap-1.5 text-[11px]">
+<!-- Coin filter -->
+<div class="relative">
+<select class="w-full h-6 pl-2 pr-5 bg-white dark:bg-[#181d2e] border border-slate-200 dark:border-slate-700/80 rounded text-slate-700 dark:text-slate-300 font-mono text-[11px] outline-none focus:border-blue-500 appearance-none cursor-pointer">
+<option value="ALL">全部标的</option>
+<option selected="" value="DEMO">DEMO/USDT (5)</option>
+<option value="ETH">ETH/USDT (4)</option>
+<option value="BTC">BTC/USDT (3)</option>
+</select>
+<span class="material-symbols-outlined absolute right-1 top-1 text-xs text-slate-400 pointer-events-none">expand_more</span>
+</div>
+<!-- Sorting with sort icon -->
+<div class="relative">
+<select class="w-full h-6 pl-2 pr-5 bg-white dark:bg-[#181d2e] border border-slate-200 dark:border-slate-700/80 rounded text-slate-700 dark:text-slate-300 text-[11px] outline-none focus:border-blue-500 appearance-none cursor-pointer">
+<option selected="" value="TIME_DESC">时间：最新优先</option>
+<option value="SCORE_DESC">评分优先 (≥0.6)</option>
+<option value="PNL_DESC">净收益优先</option>
+<option value="TIME_ASC">时间：最早优先</option>
+</select>
+<span class="material-symbols-outlined absolute right-1 top-1 text-xs text-slate-400 pointer-events-none">swap_vert</span>
+</div>
+</div>
+</div>
+<!-- Dense Transaction List Items -->
+<div class="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 select-none">
+<!-- Row 1: Selected Item (Active Highlight) DEMO/USDT -->
+<div class="p-2.5 bg-blue-50/70 dark:bg-blue-950/30 border-l-2 border-blue-600 dark:border-blue-400 cursor-pointer transition-colors" onclick="selectTrade()">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-xs font-bold text-slate-900 dark:text-white">DEMO/USDT</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">多 10x</span>
+</div>
+<div class="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              +2.00 USDT
+            </div>
+</div>
+<!-- Line 2: Entry point and Exit -->
+<div class="flex items-center justify-between text-[10.5px] text-slate-500 dark:text-slate-400 font-mono mb-1">
+<span>时间: 10:15 → 12:30</span>
+<span class="text-slate-400 dark:text-slate-500">100.00 → 102.00</span>
+</div>
+<!-- Line 3: Entry condition fact -->
+<div class="text-[10px] text-slate-500 dark:text-slate-400 truncate flex items-center gap-1 bg-white/70 dark:bg-slate-900/40 px-1.5 py-0.5 rounded border border-slate-200/50 dark:border-slate-800/60">
+<span class="text-slate-400 dark:text-slate-500">条件:</span>
+<span class="text-slate-700 dark:text-slate-300 font-mono">1.618首触</span>
+<span class="text-slate-300 dark:text-slate-700">·</span>
+<span class="text-blue-600 dark:text-blue-400 font-mono font-medium">评分 0.72≥0.6</span>
+<span class="text-slate-300 dark:text-slate-700">·</span>
+<span class="text-slate-600 dark:text-slate-400 font-mono">排列 3/3</span>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors border-l-2 border-transparent" onclick="selectTrade()">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">ETH/USDT</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-red-100/80 text-red-700 dark:bg-red-900/50 dark:text-red-300">空 20x</span>
+</div>
+<div class="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              +12.00 USDT
+            </div>
+</div>
+<div class="flex items-center justify-between text-[10.5px] text-slate-500 dark:text-slate-400 font-mono mb-1">
+<span>时间: 09:25 → 11:45</span>
+<span class="text-slate-400 dark:text-slate-500">2,642.5 → 2,610.8</span>
+</div>
+<div class="text-[10px] text-slate-400 dark:text-slate-500 truncate flex items-center gap-1">
+<span>条件:</span>
+<span class="font-mono">1.618首触 · 评分 0.65≥0.6</span>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors border-l-2 border-transparent" onclick="selectTrade()">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">BTC/USDT</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">多 10x</span>
+</div>
+<div class="font-mono text-xs font-semibold text-red-500 dark:text-red-400 tabular-nums">
+              -6.20 USDT
+            </div>
+</div>
+<div class="flex items-center justify-between text-[10.5px] text-slate-500 dark:text-slate-400 font-mono mb-1">
+<span>时间: 11:05 → 11:10</span>
+<span class="text-slate-400 dark:text-slate-500">64,500 → 64,280</span>
+</div>
+<div class="text-[10px] text-slate-400 dark:text-slate-500 truncate flex items-center gap-1">
+<span>条件:</span>
+<span class="font-mono">逆向加仓 · 评分 0.54≥0.5</span>
+</div>
+</div>
+<!-- Row 4 -->
+<div class="p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors border-l-2 border-transparent" onclick="selectTrade()">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">DEMO/USDT</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">多 10x</span>
+</div>
+<div class="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              +4.80 USDT
+            </div>
+</div>
+<div class="flex items-center justify-between text-[10.5px] text-slate-500 dark:text-slate-400 font-mono mb-1">
+<span>时间: 13:40 → 14:15</span>
+<span class="text-slate-400 dark:text-slate-500">98.50 → 103.30</span>
+</div>
+<div class="text-[10px] text-slate-400 dark:text-slate-500 truncate flex items-center gap-1">
+<span>条件:</span>
+<span class="font-mono">周一上沿突破 · 评分 0.68≥0.6</span>
+</div>
+</div>
+<!-- Row 5 -->
+<div class="p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors border-l-2 border-transparent" onclick="selectTrade()">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">DEMO/USDT</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-red-100/80 text-red-700 dark:bg-red-900/50 dark:text-red-300">空 10x</span>
+</div>
+<div class="font-mono text-xs font-semibold text-red-500 dark:text-red-400 tabular-nums">
+              -1.10 USDT
+            </div>
+</div>
+<div class="flex items-center justify-between text-[10.5px] text-slate-500 dark:text-slate-400 font-mono mb-1">
+<span>时间: 15:10 → 15:35</span>
+<span class="text-slate-400 dark:text-slate-500">101.40 → 102.50</span>
+</div>
+<div class="text-[10px] text-slate-400 dark:text-slate-500 truncate flex items-center gap-1">
+<span>条件:</span>
+<span class="text-slate-400 font-mono">周一下沿测试 · 评分未留存</span>
+</div>
+</div>
+</div>
+<!-- Ledger Footnote (Historical trade fact note) -->
+<div class="px-2.5 py-1.5 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200/70 dark:border-slate-800 text-[10px] text-slate-400 dark:text-slate-500 flex items-center justify-between">
+<span>原始点位记录 · 非实盘保证</span>
+<span class="font-mono text-[9px] text-slate-400">12 笔记录</span>
+</div></aside>
+<!-- RIGHT CHART AREA: Unobstructed Canvas & Native Price Lines -->
+<section class="flex-1 flex flex-col h-full bg-[#f8fafc] dark:bg-[#0c0f17] relative overflow-hidden">
+<!-- Chart Canvas Container -->
+<div class="flex-1 relative chart-grid overflow-hidden flex flex-col justify-between"><!-- Y-Axis (Right fixed price scale for DEMO/USDT ~100) -->
+<div class="absolute right-0 top-0 bottom-6 w-14 border-l border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between text-[10px] font-mono text-slate-400 dark:text-slate-500 pr-1.5 pt-2 pb-2 select-none z-10 text-right">
+<span>105.00</span>
+<span class="text-indigo-500 font-medium">103.80</span>
+<span class="text-slate-600 dark:text-slate-300 font-medium bg-slate-100 dark:bg-slate-800 rounded px-0.5">102.00</span>
+<span>101.00</span>
+<span class="text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/40 rounded px-0.5">100.00</span>
+<span>99.00</span>
+<span class="text-blue-500 font-medium">98.20</span>
+<span>97.00</span>
+<span>96.00</span>
+</div>
+<!-- SVG CHART LAYER: Precise horizontal lines, historical frozen candles, ① and ② point markers -->
+<svg class="absolute inset-0 w-full h-[calc(100%-1.5rem)] pr-14 select-none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<lineargradient id="paperTradeCorridor" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#10b981" stop-opacity="0.05"></stop>
+<stop offset="100%" stop-color="#10b981" stop-opacity="0.01"></stop>
+</lineargradient>
+</defs>
+<!-- 1. Restrained Monday Reference Levels -->
+<!-- 周一 1.618 Upper (103.80) -->
+<g>
+<line stroke="#6366f1" stroke-dasharray="4,4" stroke-opacity="0.6" stroke-width="1" x1="0" x2="100%" y1="65" y2="65"></line>
+<text fill="#6366f1" font-family="JetBrains Mono" font-size="10" font-weight="500" x="16" y="59">周一 1.618 Upper (103.80)</text>
+</g>
+<!-- 周一 High (102.60) -->
+<g>
+<line stroke="#94a3b8" stroke-opacity="0.45" stroke-width="1" x1="0" x2="100%" y1="120" y2="120"></line>
+<text fill="#94a3b8" font-family="JetBrains Mono" font-size="10" x="16" y="114">周一 High (102.60)</text>
+</g>
+<!-- 周一 Low (99.20) -->
+<g>
+<line stroke="#94a3b8" stroke-opacity="0.45" stroke-width="1" x1="0" x2="100%" y1="330" y2="330"></line>
+<text fill="#94a3b8" font-family="JetBrains Mono" font-size="10" x="16" y="324">周一 Low (99.20)</text>
+</g>
+<!-- 周一 1.618 Lower (98.20) -->
+<g>
+<line stroke="#0ea5e9" stroke-dasharray="4,4" stroke-opacity="0.6" stroke-width="1" x1="0" x2="100%" y1="385" y2="385"></line>
+<text fill="#0ea5e9" font-family="JetBrains Mono" font-size="10" font-weight="500" x="16" y="379">周一 1.618 Lower (98.20)</text>
+</g>
+<!-- 2. Frozen Local Window Candles (09:30 - 13:15) -->
+<g opacity="0.9">
+<!-- Candle 1: 09:30 consolidation near 99.50 -->
+<line stroke="#ef4444" stroke-width="1.2" x1="60" x2="60" y1="310" y2="360"></line>
+<rect fill="#ef4444" height="28" rx="0.5" width="12" x="54" y="322"></rect>
+<!-- Candle 2: 09:45 dip to 98.80 rebound -->
+<line stroke="#10b981" stroke-width="1.2" x1="100" x2="100" y1="320" y2="375"></line>
+<rect fill="#10b981" height="35" rx="0.5" width="12" x="94" y="328"></rect>
+<!-- Candle 3: 10:00 climb toward 100.00 -->
+<line stroke="#10b981" stroke-width="1.2" x1="140" x2="140" y1="280" y2="340"></line>
+<rect fill="#10b981" height="38" rx="0.5" width="12" x="134" y="290"></rect>
+<!-- Candle 4: 10:15 ENTRY CANDLE (triggers at 100.00) -->
+<line stroke="#10b981" stroke-width="1.2" x1="180" x2="180" y1="260" y2="320"></line>
+<rect fill="#10b981" height="36" rx="0.5" width="12" x="174" y="270"></rect>
+<!-- Candle 5: 10:30 steady rise -->
+<line stroke="#10b981" stroke-width="1.2" x1="220" x2="220" y1="230" y2="290"></line>
+<rect fill="#10b981" height="36" rx="0.5" width="12" x="214" y="240"></rect>
+<!-- Candle 6: 10:45 brief pullback -->
+<line stroke="#ef4444" stroke-width="1.2" x1="260" x2="260" y1="235" y2="285"></line>
+<rect fill="#ef4444" height="26" rx="0.5" width="12" x="254" y="245"></rect>
+<!-- Candle 7: 11:00 continuation upward -->
+<line stroke="#10b981" stroke-width="1.2" x1="300" x2="300" y1="200" y2="260"></line>
+<rect fill="#10b981" height="36" rx="0.5" width="12" x="294" y="210"></rect>
+<!-- Candle 8: 11:15 partial TP testing 101.40 -->
+<line stroke="#10b981" stroke-width="1.2" x1="340" x2="340" y1="170" y2="230"></line>
+<rect fill="#10b981" height="34" rx="0.5" width="12" x="334" y="180"></rect>
+<!-- Candle 9: 11:45 consolidation -->
+<line stroke="#ef4444" stroke-width="1.2" x1="380" x2="380" y1="165" y2="215"></line>
+<rect fill="#ef4444" height="28" rx="0.5" width="12" x="374" y="175"></rect>
+<!-- Candle 10: 12:00 pushing up -->
+<line stroke="#10b981" stroke-width="1.2" x1="420" x2="420" y1="150" y2="200"></line>
+<rect fill="#10b981" height="32" rx="0.5" width="12" x="414" y="158"></rect>
+<!-- Candle 11: 12:30 EXIT CANDLE hitting 102.00 target -->
+<line stroke="#10b981" stroke-width="1.2" x1="460" x2="460" y1="130" y2="185"></line>
+<rect fill="#10b981" height="32" rx="0.5" width="12" x="454" y="140"></rect>
+<!-- Candle 12: 12:45 post-exit rejection candle -->
+<line stroke="#ef4444" stroke-width="1.2" x1="500" x2="500" y1="130" y2="195"></line>
+<rect fill="#ef4444" height="35" rx="0.5" width="12" x="494" y="145"></rect>
+<!-- Candle 13: 13:00 following candles -->
+<line stroke="#ef4444" stroke-width="1.2" x1="540" x2="540" y1="160" y2="220"></line>
+<rect fill="#ef4444" height="34" rx="0.5" width="12" x="534" y="172"></rect>
+<!-- Candle 14: 13:15 final local candle -->
+<line stroke="#10b981" stroke-width="1.2" x1="580" x2="580" y1="175" y2="235"></line>
+<rect fill="#10b981" height="30" rx="0.5" width="12" x="574" y="185"></rect>
+</g>
+<!-- 3. SELECTED TRADE EXECUTION OVERLAY: Point markers & Slender dashed connector -->
+<!-- Slender dashed connecting line linking ① (180, 288) to ② (460, 150) -->
+<!-- Floating Net PnL badge on connector line -->
+<!-- ① NUMBERED ENTRY MARKER: Point Timestamp Marker at 10:15:00 at Price 100.00 -->
+<g id="entryTradeAnnotation"><!-- Exact price point tick on entry candle (100.00) --><circle cx="180" cy="288" fill="none" r="3" stroke="#0284c7" stroke-width="1.5"></circle><circle cx="180" cy="288" fill="#0284c7" r="1"></circle><!-- Subtle 1px leader line in clear empty space below lowest wick (wick bottom is at y=320) --><line stroke="#0284c7" stroke-dasharray="2,2" stroke-opacity="0.7" stroke-width="1" x1="180" x2="180" y1="352" y2="334"></line><!-- Micro upward pointing triangle ▲ pointing up towards entry wick bottom --><polygon fill="#0284c7" points="180,328 176.5,335 183.5,335"></polygon><!-- Legible Chinese text label in empty white space safely below lowest candle lows (zero occlusion, no card/background) --><text fill="#0284c7" font-family="Inter, sans-serif" font-size="12" font-weight="600" letter-spacing="0.02em" text-anchor="middle" x="180" y="370">① 开多</text><text fill="#0284c7" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" opacity="0.85" text-anchor="middle" x="180" y="384">100.00</text></g>
+<!-- Secondary partial TP marker note if recorded (Point at 11:15, 101.40) -->
+<!-- ② NUMBERED EXIT MARKER: Point Timestamp Marker at 12:30:00 at Price 102.00 -->
+<g id="exitTradeAnnotation"><!-- Exact price point tick on exit candle (102.00) --><circle cx="460" cy="150" fill="none" r="3" stroke="#475569" stroke-width="1.5"></circle><circle cx="460" cy="150" fill="#475569" r="1"></circle><!-- Legible Chinese text label in empty white space safely above highest wick (peak wick top at 130) --><text fill="#475569" font-family="Inter, sans-serif" font-size="12" font-weight="600" letter-spacing="0.02em" text-anchor="middle" x="460" y="92">② 平仓</text><text fill="#475569" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" opacity="0.85" text-anchor="middle" x="460" y="106">102.00</text><!-- Subtle 1px leader line in clear empty space above highest peak --><line stroke="#475569" stroke-dasharray="2,2" stroke-opacity="0.7" stroke-width="1" x1="460" x2="460" y1="112" y2="120"></line><!-- Micro downward pointing triangle ▼ pointing down towards top wick --><polygon fill="#475569" points="460,126 456.5,120 463.5,120"></polygon></g>
+<!-- 4. Subdued Volume Bars at base -->
+<g opacity="0.3" transform="translate(0, 430)">
+<rect fill="#ef4444" height="22" width="8" x="56" y="22"></rect>
+<rect fill="#10b981" height="30" width="8" x="96" y="14"></rect>
+<rect fill="#10b981" height="34" width="8" x="136" y="10"></rect>
+<rect fill="#10b981" height="39" width="8" x="176" y="5"></rect>
+<rect fill="#10b981" height="32" width="8" x="216" y="12"></rect>
+<rect fill="#ef4444" height="24" width="8" x="256" y="20"></rect>
+<rect fill="#10b981" height="29" width="8" x="296" y="15"></rect>
+<rect fill="#10b981" height="36" width="8" x="336" y="8"></rect>
+<rect fill="#ef4444" height="26" width="8" x="376" y="18"></rect>
+<rect fill="#10b981" height="34" width="8" x="416" y="10"></rect>
+<rect fill="#10b981" height="38" width="8" x="456" y="6"></rect>
+<rect fill="#ef4444" height="30" width="8" x="496" y="14"></rect>
+<rect fill="#ef4444" height="22" width="8" x="536" y="22"></rect>
+<rect fill="#10b981" height="24" width="8" x="576" y="20"></rect>
+</g>
+</svg>
+<!-- X-Axis Timeline (Bottom of chart: 09:30 to 13:15 Local Window) -->
+<div class="h-6 border-t border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-[#101424]/70 px-4 flex items-center justify-between text-[10px] font-mono text-slate-400 dark:text-slate-500 pr-16 select-none z-10">
+<span>09:30</span>
+<span>09:45</span>
+<span>10:00</span>
+<span class="text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/40 px-1 rounded">10:15 (①开仓)</span>
+<span>10:45</span>
+<span>11:15 (TP0.5)</span>
+<span>11:45</span>
+<span>12:00</span>
+<span class="text-slate-700 dark:text-slate-300 font-semibold bg-slate-100 dark:bg-slate-800 px-1 rounded">12:30 (②平仓)</span>
+<span>13:00</span>
+<span>13:15</span>
+</div></div>
+<!-- CHART FOOTER DOCK: Strictly limited to timeframe, indicators, and fit trade -->
+<footer class="h-9 min-h-[36px] bg-white dark:bg-[#111422] border-t border-slate-200 dark:border-slate-800 px-3 flex items-center justify-between text-xs select-none z-20"><!-- Left: Timeframe pills -->
+<div class="flex items-center gap-1">
+<span class="text-[10px] text-slate-400 font-medium mr-1 hidden sm:inline">周期:</span>
+<button class="px-2 py-0.5 rounded text-[11px] font-mono text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">1m</button>
+<button class="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-slate-200 dark:bg-slate-750 text-blue-600 dark:text-blue-400">5m</button>
+<button class="px-2 py-0.5 rounded text-[11px] font-mono text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">15m</button>
+<button class="px-2 py-0.5 rounded text-[11px] font-mono text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">1h</button>
+<button class="px-2 py-0.5 rounded text-[11px] font-mono text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">4h</button>
+<button class="px-2 py-0.5 rounded text-[11px] font-mono text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">1D</button>
+</div>
+<!-- Center: Required clear historical fact note -->
+<div class="hidden lg:flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-500">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+<span>历史成交定焦 · 实际点位时间戳 · 无实时行情流</span>
+</div>
+<!-- Right: Indicators Toggle & Fit Trade action ('定位交易') -->
+<div class="flex items-center gap-2">
+<!-- Indicator Pill -->
+<div class="flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded border border-slate-200/60 dark:border-slate-700/60">
+<span class="material-symbols-outlined text-[14px] text-slate-400">stacked_line_chart</span>
+<span>周一锚点: <strong class="text-blue-600 dark:text-blue-400 font-medium">ON</strong></span>
+</div>
+<!-- Fit to Current Trade Zoom -->
+<button class="flex items-center gap-1 text-[11px] font-medium text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-750 px-2.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 transition-colors" title="自适应居中当前交易开平区间">
+<span class="material-symbols-outlined text-[14px]">center_focus_strong</span>
+<span>定位交易</span>
+</button>
+</div></footer>
+</section>
+</main>
+<!-- Script for Theme & Mobile Drawer Interactions -->
+<script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        localStorage.setItem('spike_theme', 'light');
+      } else {
+        html.classList.add('dark');
+        localStorage.setItem('spike_theme', 'dark');
+      }
+    }
+
+    // Default to light as specified in prompt, but allow user toggle
+    if (localStorage.getItem('spike_theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+
+    function toggleMobileSheet() {
+      const sidebar = document.getElementById('ledgerSidebar');
+      if (sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.remove('-translate-x-full');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+      }
+    }
+  </script>
+<script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('ledgerSidebar');
+      if (window.innerWidth < 768) {
+        // Mobile drawer behavior
+        if (sidebar.classList.contains('-translate-x-full')) {
+          sidebar.classList.remove('-translate-x-full');
+        } else {
+          sidebar.classList.add('-translate-x-full');
+        }
+      } else {
+        // Desktop collapse behavior
+        if (sidebar.classList.contains('hidden')) {
+          sidebar.classList.remove('hidden');
+        } else {
+          sidebar.classList.add('hidden');
+        }
+      }
+    }
+
+    function selectTrade() {
+      // On mobile viewports, auto close drawer upon selecting an item
+      if (window.innerWidth < 768) {
+        const sidebar = document.getElementById('ledgerSidebar');
+        sidebar.classList.add('-translate-x-full');
+      }
+    }
+  </script></body>
+</html>

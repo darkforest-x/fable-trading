@@ -18,6 +18,12 @@ server-sent event stream that pushes the active list on connect and whenever an 
 tested. Owner then asked not to load the backend: each open page waits on its own asyncio queue that the alert
 thread wakes with call_soon_threadsafe, so an idle page costs one sleeping coroutine and a comment heartbeat every
 25 seconds; the database is read only on connect and on change. At most MAX_STREAMS pages stream at once.
+Owner 2026-11-05 ("报警响应台"): the full-screen page shows what happens after the alarm. For each active alert the
+stream also carries the same-side live first touches from the alert window to LIVE_WINDOW_MS after it (read-only from
+the monitor's monday-fib touch book, so a restart keeps them), the latest 1m close per touched coin and BTC/ETH prices
+captured when the alert fired, and how many positions the live- paper accounts opened in that window (read-only from the
+paper book). Quotes and touches only set a flag; the worker pushes at most every PUSH_EVERY_MS while an alert is less
+than HOT_MS old, so an idle monitor still costs nothing. Display only: nothing here places, sizes or closes a position.
 """
 from __future__ import annotations
 
@@ -42,6 +48,12 @@ WINDOW_MS, THRESHOLD, COOLDOWN_MS = 5*MINUTE, 25, 30*MINUTE
 SIDE_TEXT = {"lower": "下方 1.618（急跌，做多方向）", "upper": "上方 1.618（急涨，做空方向）"}
 ACTIVE_MS = 6*60*MINUTE
 MAX_STREAMS = 20
+LIVE_WINDOW_MS = 30*MINUTE  # same window as exp-monday-limit-alarm-entry-20261029-v1
+HOT_MS = 60*MINUTE
+PUSH_EVERY_MS = 3000
+PRICE_FRESH_MS = 5*MINUTE
+REFERENCE = ("BTC-USDT-SWAP", "ETH-USDT-SWAP")
+LIVE_TRACKS = {7060: "live-allin3", 8060: "live-wick6x3", 8160: "live-wick6x3hi", 9060: "live-wick3x3", 9160: "live-wick3x3far"}
 
 
 def alert_text(alert):
@@ -70,15 +82,21 @@ class SpikeAlert:
         self.thread = None
         self.version = 0  # bumped on every create, acknowledge or test
         self.subscribers = set()  # (event loop, asyncio.Queue) per open stream
+        self.prices = {}  # symbol -> (last 1m close, candle_ms); written from the quote callback only
+        self.hot_until_ms, self.hot_symbols, self.dirty, self.last_push_ms = 0, set(REFERENCE), False, 0
+        self.touch_book = self.runtime/"monday-fib.sqlite3"
+        self.paper_book = self.runtime/"monday-reclaim-paper.sqlite3"
         with self.db() as db:
             db.execute("""CREATE TABLE IF NOT EXISTS alerts (id INTEGER PRIMARY KEY, side TEXT, first_ms INTEGER, last_ms INTEGER,
                           n INTEGER, symbols TEXT, created_ms INTEGER, telegram TEXT, bark TEXT, error TEXT)""")
             columns = {r["name"] for r in db.execute("PRAGMA table_info(alerts)")}
-            for name, spec in {"ack_ms": "INTEGER", "test": "INTEGER NOT NULL DEFAULT 0"}.items():
+            for name, spec in {"ack_ms": "INTEGER", "test": "INTEGER NOT NULL DEFAULT 0", "ref_prices": "TEXT"}.items():
                 if name not in columns:
                     db.execute(f"ALTER TABLE alerts ADD COLUMN {name} {spec}")
             self.last_alert = {s: (db.execute("SELECT MAX(last_ms) m FROM alerts WHERE side=? AND test=0", (s,)).fetchone()["m"] or -10**15)
                                for s in SIDE_TEXT}
+            hot = db.execute("SELECT MAX(last_ms) m FROM alerts WHERE ack_ms IS NULL").fetchone()["m"]
+            self.hot_until_ms = (hot or 0) + HOT_MS if hot else 0
 
     @contextmanager
     def db(self):
@@ -94,6 +112,9 @@ class SpikeAlert:
     def on_touch(self, levels, symbol, side, price, observed_ms, candle_ms, source):
         if source != "live" or side not in self.recent:
             return
+        if self.clock() <= self.hot_until_ms:
+            self.hot_symbols.add(symbol)
+            self.dirty = True
         with self.lock:
             q = self.recent[side]
             q.append((candle_ms, symbol))
@@ -105,9 +126,11 @@ class SpikeAlert:
             self.last_alert[side] = candle_ms
             alert = dict(side=side, first_ms=min(c for c, _ in q), last_ms=candle_ms, n=len(symbols), symbols=symbols)
         with self.db() as db:
-            alert["id"] = db.execute("INSERT INTO alerts (side,first_ms,last_ms,n,symbols,created_ms,telegram,bark) VALUES (?,?,?,?,?,?,?,?)",
+            alert["id"] = db.execute("INSERT INTO alerts (side,first_ms,last_ms,n,symbols,created_ms,telegram,bark,ref_prices) VALUES (?,?,?,?,?,?,?,?,?)",
                                      (side, alert["first_ms"], candle_ms, alert["n"], json.dumps(symbols), self.clock(),
-                                      "pending" if self.telegram_creds else "no_channel", "pending" if self.bark_key else "no_channel")).lastrowid
+                                      "pending" if self.telegram_creds else "no_channel", "pending" if self.bark_key else "no_channel",
+                                      json.dumps(self._reference()))).lastrowid
+        self._heat(candle_ms, symbols)
         self._changed()
         try:
             self.events.put_nowait(alert)
@@ -115,7 +138,74 @@ class SpikeAlert:
             pass
 
     def on_quote(self, symbol, quote):
-        return None
+        """Called under the Monday service lock for every 1m update: store and flag only."""
+        try:
+            self.prices[symbol] = (float(quote["price"]), int(quote["candle_ms"]))
+        except (KeyError, TypeError, ValueError):
+            return
+        if symbol in self.hot_symbols and self.hot_until_ms:
+            self.dirty = True
+
+    def _reference(self):
+        now = self.clock()
+        return {s: p for s in REFERENCE if (p := self._price(s, now)) is not None}
+
+    def _price(self, symbol, now):
+        value = self.prices.get(symbol)
+        return value[0] if value and now - value[1] <= PRICE_FRESH_MS else None
+
+    def _heat(self, last_ms, symbols):
+        self.hot_until_ms = max(self.hot_until_ms, max(last_ms, self.clock()) + HOT_MS)
+        self.hot_symbols = set(REFERENCE) | set(symbols)
+        self.dirty = True
+
+    def tick(self):
+        """Worker-side push of live data; bounded by PUSH_EVERY_MS and only while an alert is hot."""
+        now = self.clock()
+        if not self.dirty or now > self.hot_until_ms or now - self.last_push_ms < PUSH_EVERY_MS:
+            return False
+        self.dirty, self.last_push_ms = False, now
+        if self.subscribers:
+            self._changed()
+        return True
+
+    def _live(self, row, now):
+        """Read-only window facts for one active alert (display only)."""
+        lo, hi = row["first_ms"] - self.window_ms, row["last_ms"] + LIVE_WINDOW_MS
+        touches, paper = [], []
+        if not row["test"] and self.touch_book.exists():
+            try:
+                book = sqlite3.connect(f"file:{self.touch_book}?mode=ro", uri=True, timeout=2)
+                try:
+                    found = book.execute("SELECT symbol, level, price, observed_ms, candle_ms FROM touches WHERE source='live' AND side=? "
+                                         "AND candle_ms BETWEEN ? AND ? ORDER BY candle_ms DESC, observed_ms DESC LIMIT 300",
+                                         (row["side"], lo, hi)).fetchall()
+                finally:
+                    book.close()
+                for symbol, level, price, observed_ms, candle_ms in found:
+                    self.hot_symbols.add(symbol)
+                    touches.append(dict(symbol=symbol, level=level, touch_price=price, observed_ms=observed_ms, candle_ms=candle_ms,
+                                        price=self._price(symbol, now)))
+            except sqlite3.Error:
+                touches = []
+        if not row["test"] and self.paper_book.exists():
+            try:
+                book = sqlite3.connect(f"file:{self.paper_book}?mode=ro", uri=True, timeout=2)
+                try:
+                    marks = ",".join("?" * len(LIVE_TRACKS))
+                    counts = dict(book.execute(f"SELECT track, COUNT(*) FROM positions WHERE taken=1 AND track IN ({marks}) "
+                                               "AND fill_ms BETWEEN ? AND ? GROUP BY track", (*LIVE_TRACKS, lo, hi)).fetchall())
+                finally:
+                    book.close()
+                paper = [dict(track=name, opened=int(counts.get(track, 0))) for track, name in LIVE_TRACKS.items()]
+            except sqlite3.Error:
+                paper = []
+        try:
+            ref = json.loads(row["ref_prices"] or "{}")
+        except (TypeError, ValueError):
+            ref = {}
+        reference = {s: dict(at=ref.get(s), now=self._price(s, now)) for s in REFERENCE}
+        return dict(window_end_ms=hi, touches=touches, reference=reference, paper=paper)
 
     def start(self):
         if self.thread is None:
@@ -132,6 +222,10 @@ class SpikeAlert:
             try:
                 self.deliver(self.events.get(timeout=1))
             except queue.Empty:
+                pass
+            try:
+                self.tick()
+            except Exception:  # a display push must never stop alert delivery
                 pass
 
     def deliver(self, alert):
@@ -168,6 +262,9 @@ class SpikeAlert:
         for r in rows:
             r["text"] = alert_text(r)
             r["active"] = r["ack_ms"] is None and now-r["created_ms"] <= ACTIVE_MS
+            if r["active"]:
+                r["live"] = self._live(r, now)
+            r.pop("ref_prices", None)
         return dict(now_ms=now, threshold=self.threshold, window_minutes=self.window_ms//MINUTE, cooldown_minutes=self.cooldown_ms//MINUTE,
                     active_hours=ACTIVE_MS//(60*MINUTE), channels=dict(telegram=bool(self.telegram_creds), bark=bool(self.bark_key)),
                     notify_only=True, worker_alive=bool(self.thread and self.thread.is_alive()),
@@ -185,6 +282,9 @@ class SpikeAlert:
                 changed = False
             out = dict(db.execute("SELECT id, ack_ms FROM alerts WHERE id=?", (alert_id,)).fetchone())
         if changed:
+            with self.db() as db:
+                if db.execute("SELECT COUNT(*) n FROM alerts WHERE ack_ms IS NULL AND created_ms >= ?", (self.clock()-ACTIVE_MS,)).fetchone()["n"] == 0:
+                    self.hot_until_ms = 0
             self._changed()
         return out
 
@@ -193,8 +293,9 @@ class SpikeAlert:
         now = self.clock()
         symbols = [f"TEST{k}-USDT-SWAP" for k in range(self.threshold)]
         with self.db() as db:
-            aid = db.execute("INSERT INTO alerts (side,first_ms,last_ms,n,symbols,created_ms,telegram,bark,test) VALUES (?,?,?,?,?,?,?,?,1)",
-                             (side, now, now, len(symbols), json.dumps(symbols), now, "test", "test")).lastrowid
+            aid = db.execute("INSERT INTO alerts (side,first_ms,last_ms,n,symbols,created_ms,telegram,bark,test,ref_prices) VALUES (?,?,?,?,?,?,?,?,1,?)",
+                             (side, now, now, len(symbols), json.dumps(symbols), now, "test", "test", json.dumps(self._reference()))).lastrowid
+        self._heat(now, [])
         self._changed()
         return dict(id=aid, test=True)
 

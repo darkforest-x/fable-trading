@@ -1,10 +1,10 @@
 /* Demand-only public chart history. Stitch b6adf7933bf9478c8113d8d2d9a20660.
- * Native OKX pages extend three pinned symbols; visible NY weeks load separately.
+ * Native OKX pages extend any selected SWAP; visible NY weeks load separately.
  * Requests stop with their owning chart. No scanner or order-context changes.
  */
 (() => {
   'use strict';
-  const full=symbol=>['BTC-USDT-SWAP','ETH-USDT-SWAP','XAU-USDT-SWAP'].includes(symbol);
+  const full=symbol=>typeof symbol==='string'&&/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(symbol);
   const steps={'1m':60000,'2m':120000,'3m':180000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000},DAY=86400000;
   const weekAt=typeof window==='undefined'?require('./public-chart-cache.js').weekAt:window.SpikePublicChartCache.weekAt;
   function mergeRows(oldRows,newRows,limit=Infinity){
@@ -20,18 +20,20 @@
     for(let t=b;t>=a;t-=7*DAY)out.push(new Date(t).toISOString().slice(0,10));return out;
   }
   function create({symbol,period,request=(url,options)=>fetch(url,options),changed=()=>{},status=()=>{},now=Date.now}={}){
-    const weeks=new Map(),attempts=new Map(),active=new Map();let context=null,instance=null,paused=false,more=true,historyError='',weekError='',weekBlocked=false;
+    const weeks=new Map(),attempts=new Map(),active=new Map();let context=null,instance=null,paused=false,more=true,historyEndReason=null,historyError='',weekError='',weekBlocked=false;
     const native=({'2m':'1m','12H':'12Hutc','1D':'1Dutc'}[period]||period),step=steps[period];
+    // Owner 2026-11-06: a busy server answers state=retry; back off and continue paging instead of stopping.
+    let retryTimer=null,retries=0;
     function publish(){
       const detail=historyError||weekError,error=detail&&!detail.includes('重试')?detail+' · 点击重试':detail;
-      status({text:error|| (active.has('history')?'正在加载更早 K 线…':active.has('weeks')?'正在补齐历史周线…':full(symbol)?more?'← 回看历史，自动加载':'已到此合约最早 K 线':'最近 720 根 · 逐周区间'),retry:!!error,count:context?.candles?.length||0});
+      status({text:error|| (active.has('history')?'正在加载更早 K 线…':active.has('weeks')?'正在补齐历史周线…':full(symbol)?more?'← 回看历史，自动加载':'已到此合约最早 K 线':'最近 720 根 · 逐周区间'),retry:!!error,count:context?.candles?.length||0,history_end_reason:historyEndReason});
     }
     function merge(value){
       if(value.symbol!==symbol||value.bar!==period)throw Error('历史 K 线身份不匹配');
       for(const w of value.weekly_ranges||[])if(validWeek(w,symbol))weeks.set(w.week,w);
-      if(value.history_has_more===false)more=false;
+      if(value.history_has_more===false){more=false;historyEndReason=value.history_end_reason||null;}
       const candles=full(symbol)?mergeRows(context?.candles||[],value.candles||[]):(value.candles||[]).slice(-720);
-      context={...value,candles,weekly_ranges:[...weeks.values()],history_has_more:more};publish();return context;
+      context={...value,candles,weekly_ranges:[...weeks.values()],history_has_more:more,history_end_reason:historyEndReason};publish();return context;
     }
     async function get(kind,url){
       const c=new AbortController();active.set(kind,c);publish();const timeout=setTimeout(()=>c.abort(),30000);
@@ -39,16 +41,17 @@
       catch(e){if(active.get(kind)!==c)e.stale=true;throw e;}
       finally{clearTimeout(timeout);if(active.get(kind)===c)active.delete(kind);}
     }
-    function update(){if(paused||!context)return;context={...context,weekly_ranges:[...weeks.values()],history_has_more:more};changed(context);publish();}
+    function update(){if(paused||!context)return;context={...context,weekly_ranges:[...weeks.values()],history_has_more:more,history_end_reason:historyEndReason};changed(context);publish();}
     async function older(){
       const before=context?.candles?.[0]?.time;
       if(paused||!full(symbol)||!before||!more||historyError||active.has('history'))return;
       try{
         const v=await get('history',`/api/monday-fib/history?symbol=${encodeURIComponent(symbol)}&period=${period}&before_ms=${before}`);if(!v)return;
-        if(v.symbol!==symbol||v.bar!==period||v.native_bar!==native||!['ready','exhausted'].includes(v.state))throw Error(v.error||'历史 K 线待重试');
+        if(v.symbol===symbol&&v.bar===period&&v.state==='retry'&&retries<4){retries++;clearTimeout(retryTimer);retryTimer=setTimeout(()=>{retryTimer=null;older();},800*2**(retries-1));return;}
+        if(v.symbol!==symbol||v.bar!==period||v.native_bar!==native||!['ready','exhausted'].includes(v.state)||v.state==='exhausted'&&v.end_reason!=='exchange_api_boundary')throw Error(v.error||'历史 K 线待重试');
         const rows=v.candles;
         if(!Array.isArray(rows)||rows.some(r=>![r.time,r.open,r.high,r.low,r.close,r.volume].every(Number.isFinite)||r.time>=before||r.time%step||Math.min(r.open,r.low,r.close)<=0||r.volume<0||r.high<Math.max(r.open,r.low,r.close)||r.low>Math.min(r.open,r.close))||rows.some((r,i)=>i&&r.time<=rows[i-1].time)||v.has_more&&(!rows.length||v.next_before_ms!==rows[0].time))throw Error('历史 K 线返回不完整');
-        more=v.has_more!==false;context={...context,candles:mergeRows(rows,context.candles)};update();
+        retries=0;more=v.has_more!==false;historyEndReason=v.state==='exhausted'?v.end_reason:null;context={...context,candles:mergeRows(rows,context.candles)};update();
       }catch(e){if(!paused&&!e.stale){historyError=e.name==='AbortError'?'历史加载超时 · 点击重试':e.message;publish();}}
     }
     async function weekly(from,to){
@@ -77,9 +80,9 @@
       const first=Math.max(0,Math.min(rows.length-1,Math.floor(r.from))),last=Math.max(first,Math.min(rows.length-1,Math.ceil(r.to)));
       if(r.from<80)older();weekly(rows[first].time*1000,rows[last].time*1000);
     }
-    function pause(){paused=true;for(const c of active.values())c.abort();active.clear();}
+    function pause(){paused=true;clearTimeout(retryTimer);retryTimer=null;for(const c of active.values())c.abort();active.clear();}
     function resume(){paused=false;publish();observe(instance);}
-    function retry(){historyError='';weekError='';weekBlocked=false;attempts.clear();publish();observe(instance);}
+    function retry(){retries=0;historyError='';weekError='';weekBlocked=false;attempts.clear();publish();observe(instance);}
     return {merge,observe,pause,resume,retry,older,weekly};
   }
   const api={create,full,mergeRows,validWeek,weekKeys};

@@ -8,15 +8,15 @@ const candle=time=>({time,open:10,high:12,low:9,close:11,volume:2});
 const snapshot=(symbol='BTC-USDT-SWAP')=>({symbol,bar:'5m',candles:Array.from({length:720},(_,i)=>candle(start+i*step))});
 const week=(symbol='BTC-USDT-SWAP')=>({symbol,timezone:'America/New_York',week:'2026-10-19',state:'ready',start_ms:start,end_ms:start+86400000,expires_ms:start+7*86400000,high_ms:start+step,low_ms:start+2*step,high:12,low:9,upper:13.854,lower:7.146});
 const reply=v=>({ok:true,json:async()=>v});
-test('BTC ETH XAU retain prepended history through rolling snapshots; alts stay at 720',async()=>{
+test('all selected swap symbols retain prepended history through rolling snapshots',async()=>{
  for(const symbol of ['BTC-USDT-SWAP','ETH-USDT-SWAP','XAU-USDT-SWAP','SOL-USDT-SWAP']){
   let calls=0,value;
   const h=H.create({symbol,period:'5m',changed:v=>value=v,request:async()=>{calls++;return reply({symbol,bar:'5m',native_bar:'5m',state:'ready',has_more:true,next_before_ms:start-300*step,candles:Array.from({length:300},(_,i)=>candle(start+(i-300)*step))});}});
   h.merge(snapshot(symbol));await h.older();
-  assert.equal(calls,H.full(symbol)?1:0);
+  assert.equal(calls,1);
   const fresh=snapshot(symbol);fresh.candles.push(candle(start+720*step));fresh.candles.shift();
-  const merged=h.merge(fresh);assert.equal(merged.candles.length,H.full(symbol)?1021:720);
-  if(H.full(symbol)){assert.equal(value.candles[0].time,start-300*step);assert.equal(merged.candles.at(-1).time,start+720*step);}
+  const merged=h.merge(fresh);assert.equal(merged.candles.length,1021);
+  assert.equal(value.candles[0].time,start-300*step);assert.equal(merged.candles.at(-1).time,start+720*step);
   h.pause();
  }
 });
@@ -25,11 +25,20 @@ test('identity mismatch or an empty retriable page keeps existing candles and ex
  const h=H.create({symbol:'BTC-USDT-SWAP',period:'5m',status:v=>status=v,request:async()=>reply({symbol:'ETH-USDT-SWAP',bar:'5m',native_bar:'5m',state:'ready',has_more:true,candles:[]})});
  h.merge(snapshot());await h.older();assert.equal(status.retry,true);assert.equal(h.merge(snapshot()).candles.length,720);h.pause();
 });
+test('a legal empty OKX page marks the API boundary and preserves loaded candles',async()=>{
+ let status,data,calls=0;
+ const h=H.create({symbol:'DOGE-USDT-SWAP',period:'5m',status:v=>status=v,changed:v=>data=v,request:async()=>{calls++;return reply({symbol:'DOGE-USDT-SWAP',bar:'5m',native_bar:'5m',state:'exhausted',end_reason:'exchange_api_boundary',has_more:false,candles:[]});}});
+ h.merge(snapshot('DOGE-USDT-SWAP'));await h.older();
+ assert.equal(status.retry,false);assert.equal(status.text,'已到此合约最早 K 线');
+ assert.equal(status.history_end_reason,'exchange_api_boundary');assert.equal(data.history_end_reason,'exchange_api_boundary');
+ assert.equal(h.merge(snapshot('DOGE-USDT-SWAP')).candles.length,720);
+ await h.older();assert.equal(calls,1);h.pause();
+});
 test('pause aborts pages and ignores retired responses even after resume',async()=>{
  let resolve,signal;const draws=[];
  const h=H.create({symbol:'BTC-USDT-SWAP',period:'5m',changed:v=>draws.push(v),request:(url,opts)=>{signal=opts.signal;return new Promise(r=>resolve=r);}});
  h.merge(snapshot());const request=h.older();h.pause();assert.equal(signal.aborted,true);h.resume();
- resolve(reply({symbol:'BTC-USDT-SWAP',bar:'5m',native_bar:'5m',state:'exhausted',has_more:false,candles:[candle(start-step)]}));await request;
+ resolve(reply({symbol:'BTC-USDT-SWAP',bar:'5m',native_bar:'5m',state:'exhausted',end_reason:'exchange_api_boundary',has_more:false,candles:[candle(start-step)]}));await request;
  assert.equal(draws.length,0);h.pause();
 });
 test('all coins load weekly ranges independently of candle-history eligibility',async()=>{
@@ -76,4 +85,14 @@ test('12H historical pages require native UTC identity and half-day timestamps',
   else{assert.equal(value,undefined);assert.equal(status.retry,true);}
   h.pause();
  }
+});
+test('a busy server retry continues paging automatically without a manual retry (owner 2026-11-06)',async()=>{
+ let status,value,calls=0;
+ const page={symbol:'BTC-USDT-SWAP',bar:'5m',native_bar:'5m',state:'ready',has_more:true,next_before_ms:start-300*step,candles:Array.from({length:300},(_,i)=>candle(start+(i-300)*step))};
+ const h=H.create({symbol:'BTC-USDT-SWAP',period:'5m',status:v=>status=v,changed:v=>value=v,request:async()=>{calls++;return reply(calls===1?{symbol:'BTC-USDT-SWAP',bar:'5m',native_bar:'5m',state:'retry',error:'历史 K 线正在读取，请稍后重试',candles:[]}:page);}});
+ h.merge(snapshot());await h.older();
+ assert.equal(calls,1);assert.equal(status.retry,false);
+ await new Promise(r=>setTimeout(r,1000));
+ assert.equal(calls,2);assert.equal(value.candles.length,1020);assert.equal(status.retry,false);
+ h.pause();
 });

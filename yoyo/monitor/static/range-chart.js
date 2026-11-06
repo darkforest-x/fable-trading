@@ -86,11 +86,11 @@
           const start=coordinateAt(scale,logicalAt(o.rows,l.start_ms??w.start_ms)),a=Math.max(0,start??b);
           const y=o.series.priceToCoordinate(l.price);if(y==null||a>=b)continue;
           ctx.globalAlpha=l.historical ? .45 : 1;
-          const color=l.color||'#528cc1';ctx.strokeStyle=color;ctx.lineWidth=l.lineWidth||1;ctx.setLineDash(l.lineStyle===2?[4,4]:[]);
+          const color=l.color||'#528cc1';ctx.strokeStyle=color;ctx.lineWidth=l.lineWidth||1;ctx.setLineDash(l.lineStyle===2?[4,4]:l.lineStyle===1?[1,3]:[]);
           ctx.beginPath();ctx.moveTo(a,y);ctx.lineTo(b,y);ctx.stroke();
-          if(start>=0&&start<b){ctx.beginPath();ctx.arc(start,y,2.5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();}
-          if(l.inlinePriceVisible&&y>=18&&y<=mediaSize.height-12){
-            const number=window.SpikeChartTools?.axisPrice(l.price)??price(l.price),text=l.inlineNameVisible?`${l.label} (${number})`:number;
+          if(l.startMarkerVisible!==false&&start>=0&&start<b){ctx.beginPath();ctx.arc(start,y,2.5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();}
+          if((l.inlinePriceVisible||l.inlineNameVisible)&&y>=18&&y<=mediaSize.height-12){
+            const number=window.SpikeChartTools?.axisPrice(l.price)??price(l.price),text=l.inlinePriceVisible?(l.inlineNameVisible?`${l.label} (${number})`:number):l.label;
             ctx.font='11px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';ctx.textAlign='right';ctx.textBaseline='bottom';
             const width=ctx.measureText(text).width+12;
             if(width<=b-a){
@@ -141,10 +141,11 @@
       this.band=document.createElement('div');this.band.className='cv-monday-band';this.band.setAttribute('aria-hidden','true');this.band.hidden=true;this.canvas.append(this.band);
       this.bandPaint=T.frame(()=>{this.paintMondayBand();this.visibleRange?.(this);});this.chart.timeScale().subscribeVisibleLogicalRangeChange(this.bandPaint);
       this.bandResize=new ResizeObserver(this.bandPaint);this.bandResize.observe(this.canvas);
-      this.resize=T.resize(this.chart,this.canvas,{compactAxis:true});
+      this.resize=T.resize(this.chart,this.canvas,{compactAxis:this.pending.view.wallpaper?'always':true});
       this.theme=new MutationObserver(()=>this.applyTheme());this.theme.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});this.applyTheme();
     }
     scaleLevels(){
+      if(this.referenceScale===false)return [];
       const w=this.levelWindow,r=this.chart?.timeScale().getVisibleLogicalRange();
       if(w&&r&&(r.to<logicalAt(this.rows,w.start_ms)||r.from>=logicalAt(this.rows,w.end_ms)))return [];
       return this.activeLevels?.filter(l=>!w||!r||r.to>=logicalAt(this.rows,l.start_ms??w.start_ms)&&r.from<logicalAt(this.rows,l.end_ms??w.end_ms)).map(l=>l.price)||[];
@@ -152,11 +153,13 @@
     applyTheme(){
       const style=getComputedStyle(this.panel),dark=document.documentElement.dataset.theme==='dark';
       const value=(key,fallback)=>style.getPropertyValue(key).trim()||fallback;
-      this.chart.applyOptions({layout:{background:{type:'solid',color:value('--surface',dark?'#0b0e14':'#fff')},textColor:value('--muted',dark?'#c7c4d7':'#64748b'),fontSize:11},
+      this.chart.applyOptions({layout:{background:{type:'solid',color:value('--surface',dark?'#0b0e14':'#fff')},textColor:value('--muted',dark?'#c7c4d7':'#64748b'),fontSize:this.pending.view.wallpaper?10:11},
+        ...(this.pending.view.wallpaper?{rightPriceScale:{borderVisible:false,ticksVisible:false,minimumWidth:0},timeScale:{borderVisible:false,ticksVisible:false,minimumHeight:0}}:{}),
         grid:{vertLines:{color:value('--line-soft',dark?'#20232b':'#eef1f5')},horzLines:{color:value('--line-soft',dark?'#20232b':'#eef1f5')}}});
     }
     readout(){
       const row=this.rowByTime?.get(this.hover)||this.rows.at(-1),T=window.SpikeChartTools;
+      this.panel.querySelector('.cv-readout').hidden=!!this.compactReplay&&!this.hover;
       const fields=row?[row.time,row.open,row.high,row.low,row.close,row.time!==this.hover]:[];
       if(!this.readoutFields||fields.length!==this.readoutFields.length||fields.some((v,i)=>!Object.is(v,this.readoutFields[i]))){
         const host=this.panel.querySelector('.cv-readout');
@@ -194,17 +197,25 @@
       // by their owning chart; analytical consumers keep their closed series.
       const raw=data?.candles||[],step={'1m':60000,'2m':120000,'3m':180000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000}[data?.bar]||900000;
       if(view.ma)this.averages ||= window.SpikeChartStyle.createAverages();else this.averages=null;
-      this.rows=(this.averages?this.averages(raw,step):raw).slice(-view.bars).map(r=>({...r,time:r.time/1000}));
+      // Compute averages with warmup history before trimming the visible trade window.
+      const computed=this.averages?this.averages(raw,step):raw;
+      this.rows=(view.displayWindow?computed.filter(r=>r.time>=view.displayWindow.from&&r.time<view.displayWindow.to):computed).slice(-view.bars).map(r=>({...r,time:r.time/1000}));
       this.syncAverages(!!view.ma);
       this.rowByTime=new Map(this.rows.map(r=>[r.time,r]));
       const newTimes=T.times(this.rows),timeChanged=oldTimes.length!==newTimes.length||oldTimes.some((t,i)=>t!==newTimes[i]);
-      this.sync(this.series,this.rows.map(({time,open,high,low,close})=>({time,open,high,low,close})));
-      this.sync(this.volume,this.rows.map(r=>({time:r.time,value:r.volume||0,color:r.close>=r.open?T.colors.volumeUp:T.colors.volumeDown})));
-      const options={priceFormat:T.priceFormat(this.rows),...(view.candleColors?{upColor:view.candleColors.up,wickUpColor:view.candleColors.up,downColor:view.candleColors.down,wickDownColor:view.candleColors.down}:{})},optionKey=JSON.stringify(options);
+      // Optional per-bar display palette. Keep colors in sync snapshots so a
+      // palette edit repaints unchanged OHLC, and polling preserves the style.
+      const candleColors=view.candleColor?this.rows.map(view.candleColor):null;
+      this.sync(this.series,this.rows.map(({time,open,high,low,close},i)=>({time,open,high,low,close,...(candleColors?{color:candleColors[i],wickColor:candleColors[i],borderColor:candleColors[i]}:{})})));
+      this.sync(this.volume,this.rows.map((r,i)=>({time:r.time,value:r.volume||0,color:candleColors?candleColors[i]+'38':r.close>=r.open?T.colors.volumeUp:T.colors.volumeDown})));
+      this.compactReplay=!!view.compactReplay;
+      const options={priceFormat:T.priceFormat(this.rows),lastValueVisible:!this.compactReplay,priceLineVisible:!this.compactReplay,...(view.candleColors?{upColor:view.candleColors.up,wickUpColor:view.candleColors.up,downColor:view.candleColors.down,wickDownColor:view.candleColors.down}:{})},optionKey=JSON.stringify(options);
       if(optionKey!==this.optionKey){this.series.applyOptions(options);this.optionKey=optionKey;}
       const colors={range:'#3984b3',fib:'#9774c1',profile:'#cc8d35',npoc:'#b9689e',prior:'#8a969e'};
       const levels=(data?.levels||[]).filter(l=>view[l.kind]&&fin(l.price));this.activeLevels=levels;
-      if(view.wallpaper&&!this.wallpaperOptions){this.wallpaperOptions=true;this.chart.applyOptions({rightPriceScale:{scaleMargins:{top:.25,bottom:.18}},grid:{vertLines:{visible:false},horzLines:{visible:false}}});}
+      this.referenceScale=view.scaleReferenceLevels!==false;
+      const wallpaperKey=view.wallpaper?(view.compactReplay?'replay':'live'):'';
+      if(wallpaperKey&&this.wallpaperOptions!==wallpaperKey){this.wallpaperOptions=wallpaperKey;this.chart.applyOptions({rightPriceScale:{scaleMargins:{top:view.compactReplay ? .12 : .25,bottom:view.compactReplay ? .2 : .18}},grid:{vertLines:{visible:false},horzLines:{visible:false}}});}
       this.levelWindow=data?.level_window;
       if(this.levelWindow&&!this.weekLevels){this.weekLevels=new WeekLevels(this);this.series.attachPrimitive(this.weekLevels);}
       this.weekLevels?.requestUpdate?.();

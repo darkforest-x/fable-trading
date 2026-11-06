@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SPIKE · 85% 极简纯净数字 K 线工作台 (每周单参考框与微细 9px 刻度规范)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          brand: '#0A84FF',
+          monday: '#30D158',
+          normalCandle: '#8B9099'
+        }
+      }
+    }
+  }
+</script>
+<style>
+  :root {
+    --bg-page: #F5F7FA;
+    --glass-bg: rgba(255, 255, 255, 0.22);
+    --glass-border: rgba(255, 255, 255, 0.75);
+    --glass-border-subtle: rgba(15, 23, 42, 0.08);
+    --text-primary: #0F172A;
+    --text-secondary: #64748B;
+    --text-muted: #94A3B8;
+    --grid-line: rgba(15, 23, 42, 0.04);
+    --cloud-green: rgba(52, 199, 89, 0.14);
+    --risk-fill: rgba(255, 59, 48, 0.16);
+    --reward-fill: rgba(48, 209, 88, 0.15);
+  }
+
+  .dark {
+    --bg-page: #0B0E14;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-border-subtle: rgba(255, 255, 255, 0.06);
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+    --grid-line: rgba(255, 255, 255, 0.03);
+    --cloud-green: rgba(48, 209, 88, 0.10);
+    --risk-fill: rgba(255, 69, 58, 0.22);
+    --reward-fill: rgba(48, 209, 88, 0.18);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "PingFang SC", sans-serif;
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .clear-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05),
+                inset 0 1px 1px 0 rgba(255, 255, 255, 0.85),
+                inset 0 -1px 1px 0 rgba(15, 23, 42, 0.04);
+  }
+
+  .dark .clear-glass {
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4),
+                inset 0 1px 1px 0 rgba(255, 255, 255, 0.12),
+                inset 0 -1px 1px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  .spike-capsule {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 18px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+  }
+
+  /* 9px Tiny Sans Tabular Typography */
+  .r-tick-label {
+    font-size: 9px;
+    font-weight: 400;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  }
+
+  .chart-canvas {
+    background-image: 
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size: 80px 48px;
+  }
+</style>
+</head>
+<body class="min-h-screen select-none overflow-x-hidden transition-colors duration-200">
+<!-- Top Global Spec Bar -->
+<header class="h-10 border-b border-[var(--glass-border-subtle)] px-6 flex items-center justify-between text-xs text-[var(--text-secondary)] bg-[var(--bg-page)]/80 backdrop-blur sticky top-0 z-50">
+<div class="flex items-center gap-3">
+<span class="inline-flex items-center gap-1.5 font-medium text-[var(--text-primary)]">
+<span class="w-2 h-2 rounded-full bg-[#30D158]"></span>
+        SPIKE · 85vw 纯净图表抽屉
+      </span>
+<span class="text-[var(--text-muted)]">|</span>
+<span class="hidden sm:inline">每周仅首根确认信号 (First Confirmed Signal) · 无 -1R 纯净红绿覆盖层 · 9px 极简刻度</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-2.5 py-1 rounded-md text-xs clear-glass flex items-center gap-1.5 hover:opacity-90 active:scale-95 transition-all" onclick="toggleTheme()">
+<span id="themeIcon">🌙</span> <span id="themeText">深色模式</span>
+</button>
+</div>
+</header>
+<!-- Main Viewport Container: Left 15% preview + Right 85% immersive drawer -->
+<main class="w-full flex min-h-[calc(100vh-40px)] relative">
+<!-- LEFT 15% Background Faint Signal Cards (Peeking Behind Drawer) -->
+<section class="w-[15vw] border-r border-[var(--glass-border-subtle)] p-3 hidden md:flex flex-col gap-2.5 opacity-35 hover:opacity-75 transition-opacity">
+<div class="flex items-center justify-between pb-1 border-b border-[var(--glass-border-subtle)] text-[11px] font-semibold text-[var(--text-secondary)]">
+<span>信号中心 (12H)</span>
+<span class="text-[9px] px-1.5 py-0.5 rounded bg-[#0A84FF]/10 text-[#0A84FF]">18</span>
+</div>
+<!-- Faint Signal Card 1 (Active Anchor) -->
+<div class="p-2.5 rounded-xl border border-[#0A84FF]/40 bg-[#0A84FF]/5 flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold text-[var(--text-primary)]">DEMO/USDT</span>
+<span class="text-[9px] text-[#30D158] font-semibold">+3.76 R</span>
+</div>
+<div class="text-[9px] text-[var(--text-muted)]">12H 顺势 · W43 已达目标</div>
+</div>
+<!-- Faint Signal Card 2 -->
+<div class="p-2.5 rounded-xl border border-[var(--glass-border-subtle)] bg-[var(--glass-bg)] flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-medium text-[var(--text-primary)]">SOL/USDT</span>
+<span class="text-[9px] text-[#FF453A] font-semibold">12H 空头</span>
+</div>
+<div class="text-[9px] text-[var(--text-muted)]">止损极值 133.60</div>
+</div>
+<!-- Faint Signal Card 3 -->
+<div class="p-2.5 rounded-xl border border-[var(--glass-border-subtle)] bg-[var(--glass-bg)] flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-medium text-[var(--text-primary)]">BTC/USDT</span>
+<span class="text-[9px] text-[#30D158] font-semibold">+2.45 R</span>
+</div>
+<div class="text-[9px] text-[var(--text-muted)]">触及周一 1.618</div>
+</div>
+</section>
+<!-- RIGHT 85% IMMERSIVE CHART DRAWER -->
+<section class="flex-1 md:w-[85vw] relative flex flex-col bg-[var(--bg-page)] shadow-2xl overflow-hidden">
+<!-- Compact 40px Header Bar -->
+<div class="h-10 px-4 border-b border-[var(--glass-border-subtle)] flex items-center justify-between shrink-0 clear-glass rounded-none border-t-0 border-x-0">
+<!-- Left: Symbol Selector + Signal Chart Capsule + 12H Trend -->
+<div class="flex items-center gap-3">
+<!-- Spike Brand Capsule Component (112x36px standard conform) -->
+<div class="spike-capsule clear-glass">
+<svg fill="none" height="18" viewbox="0 0 18 24" width="14" xmlns="http://www.w3.org/2000/svg">
+<path class="dark:fill-[#E2E8F0]" d="M10.8 1.5L2 12.8H8.5L7.2 22.5L16 11.2H9.5L10.8 1.5Z" fill="#334155"></path>
+</svg>
+<span class="text-xs font-semibold tracking-[0.5px] text-[var(--text-primary)]">SPIKE</span>
+</div>
+<div class="h-4 w-px bg-[var(--glass-border-subtle)]"></div>
+<!-- Current Symbol Selector -->
+<button class="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-[var(--glass-bg)] transition-colors">
+<span class="text-xs font-bold tracking-tight text-[var(--text-primary)]">DEMO / USDT</span>
+<svg class="w-3 h-3 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<!-- 12H Signal Status Capsule -->
+<span class="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#0A84FF]/10 text-[#0A84FF] border border-[#0A84FF]/25"><span class="w-1.5 h-1.5 rounded-full bg-[#0A84FF]"></span>12H 顺势 (W43 盘中转向已结束)</span>
+<!-- Current Realtime Price -->
+<span class="text-xs font-semibold tabular-nums text-[var(--text-primary)] hidden md:inline">0.3542</span>
+<span class="text-[10px] font-medium text-[#30D158] tabular-nums hidden md:inline">+2.40%</span>
+</div>
+<!-- Right: Collapsible Top-Left Frozen Plan Disclosure + Legend Ticks + Drawer Close -->
+<div class="flex items-center gap-4 text-xs">
+<!-- Frozen Plan Collapsible Summary (Reference Disclosure Only) -->
+<div class="hidden lg:flex items-center gap-3 px-3 py-1 rounded-lg border border-[var(--glass-border-subtle)] bg-[var(--glass-bg)] text-[10px] tabular-nums text-[var(--text-secondary)]"><span class="text-[var(--text-muted)]">基准计划:</span><span>入场 <strong class="text-[var(--text-primary)] font-normal">0.3500</strong></span><span class="text-[var(--text-muted)]">·</span><span>关键K止损 <strong class="text-[#FF453A] font-normal">0.3420</strong></span><span class="text-[var(--text-muted)]">·</span><span>状态 <strong class="text-[#0A84FF] font-medium">盘中转向已结束</strong></span><span class="text-[var(--text-muted)]">·</span><span>最高 R <strong class="text-[#30D158] font-semibold">12.4R</strong></span><span class="text-[var(--text-muted)]">·</span><span>退出参考 R <strong class="text-[#0A84FF] font-semibold">3.76R</strong></span></div>
+<!-- Color Tokens Hint -->
+<div class="hidden sm:flex items-center gap-2.5 text-[10px] text-[var(--text-muted)]">
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#30D158]"></span>周一绿</span>
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#0A84FF]"></span>关键确认蓝</span>
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#8B9099]"></span>常规灰</span>
+</div>
+<!-- Close / Back Button -->
+<button class="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-bg)] transition-colors" title="关闭抽屉">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+<!-- Candlestick Chart Area (SVG Rendered with 3 Distinct Weeks) -->
+<div class="flex-1 relative chart-canvas w-full overflow-hidden flex">
+<!-- Main Graphic SVG Viewport -->
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 1200 680" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<!-- Smooth Borderless EMA Cloud Gradient -->
+<lineargradient id="emaCloudGrad" x1="0%" x2="100%" y1="0%" y2="0%">
+<stop offset="0%" stop-color="#30D158" stop-opacity="0.10"></stop>
+<stop offset="60%" stop-color="#30D158" stop-opacity="0.16"></stop>
+<stop offset="100%" stop-color="#30D158" stop-opacity="0.12"></stop>
+</lineargradient>
+<!-- Subtle Key Candle Glow -->
+<filter height="140%" id="keyGlow" width="140%" x="-20%" y="-20%">
+<fedropshadow dx="0" dy="0" flood-color="#0A84FF" flood-opacity="0.35" stddeviation="3"></fedropshadow>
+</filter>
+</defs>
+<!-- ========================================== -->
+<!-- 1. HORIZONTAL PRICE & FIBONACCI REFERENCE LINES -->
+<!-- ========================================== -->
+<!-- Opposite 1.618 Fib Target Line (Solid Black in Light / Solid White in Dark) -->
+<line class="dark:stroke-slate-100" stroke="#0F172A" stroke-width="1.2" x1="0" x2="1140" y1="140" y2="140"></line>
+<text class="dark:fill-slate-200" fill="#0F172A" font-family="-apple-system, sans-serif" font-size="10" font-weight="500" x="32" y="134">1.618 Fib · 0.3800 (目标)</text>
+<!-- Current Realtime Price Dotted Line -->
+<line stroke="#30D158" stroke-dasharray="3 3" stroke-opacity="0.75" stroke-width="1" x1="0" x2="1140" y1="200" y2="200"></line>
+<!-- Touched Monday 1.618 Lower Reclaim Base -->
+<line stroke="#64748B" stroke-opacity="0.6" stroke-width="0.9" x1="0" x2="1140" y1="620" y2="620"></line>
+<text fill="#64748B" font-family="-apple-system, sans-serif" font-size="9" font-weight="400" x="32" y="614">下沿 1.618 Fib · 0.3150</text>
+<!-- Weekly Monday High / Low Reference Lines (Neutral Gray, Long Horizon) -->
+<line stroke="#94A3B8" stroke-dasharray="4 4" stroke-opacity="0.4" stroke-width="0.8" x1="420" x2="1140" y1="250" y2="250"></line>
+<text fill="#94A3B8" font-family="-apple-system, sans-serif" font-size="9" x="424" y="244">W42 周高 0.3680</text>
+<line stroke="#94A3B8" stroke-dasharray="4 4" stroke-opacity="0.35" stroke-width="0.8" x1="0" x2="1140" y1="360" y2="360"></line>
+<text fill="#94A3B8" font-family="-apple-system, sans-serif" font-size="9" x="32" y="354">周低 0.3420</text>
+<!-- ========================================== -->
+<!-- 2. SMOOTH BORDERLESS EMA 20/50 CLOUD -->
+<!-- ========================================== -->
+<path d="M 0,580 
+                   C 180,560 300,530 460,450 
+                   C 620,380 750,330 920,270 
+                   C 1020,240 1100,225 1140,215 
+                   L 1140,260 
+                   C 1080,275 980,310 880,350 
+                   C 720,410 580,480 440,540 
+                   C 280,600 120,630 0,640 Z" fill="url(#emaCloudGrad)"></path>
+<!-- ========================================== -->
+<!-- 3. WEEK 1 (W41: 09-22 ~ 09-28) HISTORICAL CANDLES -->
+<!-- ========================================== -->
+<!-- Mon Candle (Bright Green #30D158) -->
+<line stroke="#30D158" stroke-width="1.2" x1="70" x2="70" y1="520" y2="580"></line>
+<rect fill="#30D158" height="35" rx="1" width="12" x="64" y="535"></rect>
+<!-- Regular Gray Candles -->
+<line stroke="#8B9099" stroke-width="1" x1="110" x2="110" y1="490" y2="560"></line>
+<rect fill="#8B9099" height="42" rx="1" width="12" x="104" y="505"></rect>
+<line stroke="#8B9099" stroke-width="1" x1="150" x2="150" y1="460" y2="540"></line>
+<rect fill="#8B9099" height="50" rx="1" width="12" x="144" y="475"></rect>
+<line stroke="#8B9099" stroke-width="1" x1="190" x2="190" y1="430" y2="510"></line>
+<rect fill="#8B9099" height="50" rx="1" width="12" x="184" y="445"></rect>
+<line stroke="#8B9099" stroke-width="1" x1="230" x2="230" y1="410" y2="480"></line>
+<rect fill="#8B9099" height="42" rx="1" width="12" x="224" y="425"></rect>
+<!-- ========================================== -->
+<!-- 4. WEEK 2 (W42: 09-29 ~ 10-05) - FIRST CONFIRMED SIGNAL -->
+<!-- ========================================== -->
+<!-- Monday Candle (Green #30D158) -->
+<line stroke="#30D158" stroke-width="1.2" x1="280" x2="280" y1="430" y2="500"></line>
+<rect fill="#30D158" height="45" rx="1" width="12" x="274" y="440"></rect>
+<!-- Mid week pull back -->
+<line stroke="#8B9099" stroke-width="1" x1="320" x2="320" y1="410" y2="475"></line>
+<rect fill="#8B9099" height="40" rx="1" width="12" x="314" y="420"></rect>
+<!-- The ONLY FIRST Confirmed Signal Candle of W42: Electric Blue #0A84FF (Filtered Glow) -->
+<line stroke="#0A84FF" stroke-width="1.4" x1="360" x2="360" y1="365" y2="465"></line>
+<rect fill="#0A84FF" filter="url(#keyGlow)" height="65" rx="1.5" width="14" x="353" y="380"></rect>
+<!-- === W42 TRADE REFERENCE OVERLAY (ONE PAIRED RECTANGLE PER WEEK) === -->
+<!-- NO −1R text! NO dashed/dotted frame boundaries! Bright translucent fills! -->
+<!-- Green Reward Zone (Entry: 0.3500 @ y=440 down to y=320, 2.34R peak in W42) -->
+<rect class="transition-colors" fill="var(--reward-fill)" height="115" width="125" x="367" y="325"></rect>
+<!-- Red Risk Zone (Entry: y=440 down to Stop Extreme: y=475, height=35px) -->
+<rect class="transition-colors" fill="var(--risk-fill)" height="35" width="125" x="367" y="440"></rect>
+<!-- W42 Tiny 9px Ticks: Only subtle observed peak 2.34R and thin 1px short line -->
+<line stroke="#30D158" stroke-width="0.8" x1="480" x2="492" y1="325" y2="325"></line>
+<text class="r-tick-label" fill="#30D158" x="496" y="328">2.34R</text>
+<!-- Subsequent W42 Candles inside / exiting rectangle -->
+<line stroke="#8B9099" stroke-width="1" x1="400" x2="400" y1="340" y2="415"></line>
+<rect fill="#8B9099" height="50" rx="1" width="12" x="394" y="350"></rect>
+<line stroke="#8B9099" stroke-width="1" x1="440" x2="440" y1="300" y2="390"></line>
+<rect fill="#8B9099" height="60" rx="1" width="12" x="434" y="315"></rect>
+<line stroke="#8B9099" stroke-width="1" x1="480" x2="480" y1="335" y2="430"></line>
+<rect fill="#8B9099" height="65" rx="1" width="12" x="474" y="350"></rect>
+<!-- ========================================== -->
+<!-- 5. WEEK 3 (W43: 10-06 ~ 10-12) - FIRST CONFIRMED SIGNAL -->
+<!-- ========================================== -->
+<!-- Pullback setup candles -->
+<line stroke="#8B9099" stroke-width="1" x1="520" x2="520" y1="380" y2="460"></line>
+<rect fill="#8B9099" height="50" rx="1" width="12" x="514" y="395"></rect>
+<line stroke="#8B9099" stroke-width="1" x1="560" x2="560" y1="390" y2="470"></line>
+<rect fill="#8B9099" height="50" rx="1" width="12" x="554" y="405"></rect>
+<line stroke="#8B9099" stroke-width="1" x1="600" x2="600" y1="410" y2="490"></line>
+<rect fill="#8B9099" height="50" rx="1" width="12" x="604" y="425"></rect>
+<!-- Monday of W43 (Green #30D158) -->
+<line stroke="#30D158" stroke-width="1.2" x1="640" x2="640" y1="370" y2="460"></line>
+<rect fill="#30D158" height="60" rx="1" width="12" x="634" y="385"></rect>
+<!-- FIRST CONFIRMED SIGNAL of W43 (12H Wick Reclaim confirmed): Electric Blue #0A84FF -->
+<line stroke="#0A84FF" stroke-width="1.4" x1="680" x2="680" y1="340" y2="475"></line>
+<rect fill="#0A84FF" filter="url(#keyGlow)" height="85" rx="1.5" width="14" x="673" y="360"></rect>
+<!-- === W43 TRADE REFERENCE OVERLAY (STRICTLY ONE PAIRED RECTANGLE) === -->
+<!-- No -1R text! No dashed lines! Bright translucent fills! -->
+<!-- Green Reward Zone (Spans from Entry 0.3500 y=440 up toward Target y=140) -->
+<!-- Width extends across 5 candles of the week to current position -->
+<rect class="transition-colors" fill="var(--reward-fill)" height="300" width="220" x="687" y="140"></rect>
+<!-- Red Risk Zone (Entry y=440 down to Stop Extreme y=475, height=35px) -->
+<rect class="transition-colors" fill="var(--risk-fill)" height="35" width="220" x="687" y="440"></rect>
+<!-- Subtle 5R and 10R short thin ticks within range + Observed Peak 12.4R -->
+<!-- Short thin tick for 5R (y=290): only thin line + 9px sans label -->
+<line stroke="#30D158" stroke-opacity="0.8" stroke-width="0.8" x1="900" x2="907" y1="290" y2="290"></line>
+<text class="r-tick-label" fill="#30D158" x="912" y="293">5R</text>
+<!-- Short thin tick for 10R (y=190) -->
+<line stroke="#30D158" stroke-opacity="0.8" stroke-width="0.8" x1="900" x2="907" y1="190" y2="190"></line>
+<text class="r-tick-label" fill="#30D158" x="912" y="193">10R</text>
+<!-- Observed Peak Decimal R: 12.4R tucked near right edge, no overlap -->
+<line stroke="#30D158" stroke-width="1" x1="900" x2="910" y1="140" y2="140"></line>
+<text class="r-tick-label font-medium" fill="#30D158" x="914" y="143">12.4R (极值)</text>
+<!-- Current Run Progression: 3.76R tick marker (aligned to current bar) -->
+<line stroke="#30D158" stroke-width="0.9" x1="880" x2="892" y1="200" y2="200"></line>
+<text class="r-tick-label font-medium" fill="#30D158" x="896" y="203">3.76R (退出参考)</text>
+<!-- Subsequent W43 Candles inside the planned corridor -->
+<line stroke="#8B9099" stroke-width="1" x1="720" x2="720" y1="310" y2="410"></line>
+<rect fill="#8B9099" height="70" rx="1" width="12" x="714" y="325"></rect>
+<line stroke="#8B9099" stroke-width="1" x1="760" x2="760" y1="250" y2="360"></line>
+<rect fill="#8B9099" height="70" rx="1" width="12" x="754" y="270"></rect>
+<line stroke="#8B9099" stroke-width="1" x1="800" x2="800" y1="170" y2="300"></line>
+<rect fill="#8B9099" height="85" rx="1" width="12" x="794" y="190"></rect>
+<!-- High extension probe candle poking into 12.4R peak -->
+<line stroke="#8B9099" stroke-width="1" x1="840" x2="840" y1="130" y2="260"></line>
+<rect fill="#8B9099" height="90" rx="1" width="12" x="834" y="150"></rect>
+<!-- Current Active Bar (Monday of next cycle / current) -->
+<line stroke="#30D158" stroke-width="1.4" x1="880" x2="880" y1="180" y2="250"></line>
+<rect fill="#30D158" height="42" rx="1.5" width="14" x="873" y="195"></rect>
+<!-- Trailing volume bars at bottom -->
+<g opacity="0.35">
+<rect fill="#30D158" height="20" rx="1" width="12" x="64" y="630"></rect>
+<rect fill="#8B9099" height="25" rx="1" width="12" x="104" y="625"></rect>
+<rect fill="#8B9099" height="15" rx="1" width="12" x="144" y="635"></rect>
+<rect fill="#8B9099" height="20" rx="1" width="12" x="184" y="630"></rect>
+<rect fill="#8B9099" height="30" rx="1" width="12" x="224" y="620"></rect>
+<rect fill="#30D158" height="25" rx="1" width="12" x="274" y="625"></rect>
+<rect fill="#8B9099" height="15" rx="1" width="12" x="314" y="635"></rect>
+<rect fill="#0A84FF" height="40" rx="1" width="14" x="353" y="610"></rect>
+<rect fill="#8B9099" height="22" rx="1" width="12" x="394" y="628"></rect>
+<rect fill="#8B9099" height="30" rx="1" width="12" x="434" y="620"></rect>
+<rect fill="#8B9099" height="25" rx="1" width="12" x="474" y="625"></rect>
+<rect fill="#8B9099" height="20" rx="1" width="12" x="514" y="630"></rect>
+<rect fill="#8B9099" height="15" rx="1" width="12" x="554" y="635"></rect>
+<rect fill="#8B9099" height="18" rx="1" width="12" x="604" y="632"></rect>
+<rect fill="#30D158" height="26" rx="1" width="12" x="634" y="624"></rect>
+<rect fill="#0A84FF" height="45" rx="1" width="14" x="673" y="605"></rect>
+<rect fill="#8B9099" height="30" rx="1" width="12" x="714" y="620"></rect>
+<rect fill="#8B9099" height="35" rx="1" width="12" x="754" y="615"></rect>
+<rect fill="#8B9099" height="40" rx="1" width="12" x="794" y="610"></rect>
+<rect fill="#8B9099" height="50" rx="1" width="12" x="834" y="600"></rect>
+<rect fill="#30D158" height="32" rx="1" width="14" x="873" y="618"></rect>
+</g>
+<!-- Price Axis Gutter on Right Edge (< 60px) -->
+<line stroke="var(--glass-border-subtle)" stroke-width="1" x1="1140" x2="1140" y1="0" y2="656"></line>
+<text class="dark:fill-slate-100 font-semibold tabular-nums" fill="#0F172A" font-family="-apple-system, sans-serif" font-size="9" x="1152" y="143">0.3800</text>
+<text fill="#30D158" font-family="-apple-system, sans-serif" font-semibold="" font-size="9" tabular-nums"="" x="1152" y="203">0.3542</text>
+<text fill="#94A3B8" font-family="-apple-system, sans-serif" font-size="9" tabular-nums"="" x="1152" y="253">0.3680</text>
+<text fill="#94A3B8" font-family="-apple-system, sans-serif" font-size="9" tabular-nums"="" x="1152" y="363">0.3420</text>
+<text fill="#64748B" font-family="-apple-system, sans-serif" font-size="9" tabular-nums"="" x="1152" y="443">0.3500</text>
+<text fill="#FF453A" font-family="-apple-system, sans-serif" font-size="9" tabular-nums"="" x="1152" y="478">0.3420</text>
+<text fill="#94A3B8" font-family="-apple-system, sans-serif" font-size="9" tabular-nums"="" x="1152" y="623">0.3150</text>
+</svg>
+<!-- Time Axis Bottom Strip (24px) -->
+<div class="absolute bottom-0 left-0 right-0 h-6 border-t border-[var(--glass-border-subtle)] flex items-center justify-between px-8 text-[9px] tabular-nums text-[var(--text-muted)] bg-[var(--bg-page)]/70 backdrop-blur-sm">
+<span>09-22 08:00 (W41)</span>
+<span>09-29 08:00 (W42 首根确认)</span>
+<span>10-06 08:00 (W43 首根确认)</span>
+<span>10-13 08:00</span>
+<span class="font-semibold text-[var(--text-primary)]">10-20 08:00 (12H 当前)</span>
+</div>
+<!-- Floating Period Dock in Bottom Center -->
+<div class="absolute bottom-8 left-1/2 -translate-x-1/2 h-8 px-2 clear-glass rounded-full flex items-center gap-1 text-[11px] font-medium z-20">
+<button class="px-2 py-0.5 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">5m</button>
+<button class="px-2 py-0.5 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">15m</button>
+<button class="px-2 py-0.5 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">1H</button>
+<button class="px-2 py-0.5 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">4H</button>
+<button class="px-2.5 py-0.5 rounded-full bg-[#0A84FF] text-white font-semibold shadow-sm">12H</button>
+<button class="px-2 py-0.5 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">1D</button>
+<div class="h-3 w-px bg-[var(--glass-border-subtle)] mx-1"></div>
+<span class="inline-flex items-center gap-1 text-[10px] text-[var(--text-secondary)] px-1.5 py-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#30D158]"></span>EMA云
+          </span>
+<span class="inline-flex items-center gap-1 text-[10px] text-[var(--text-secondary)] px-1.5 py-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]"></span>1.618
+          </span>
+<button class="ml-1 px-2 py-0.5 rounded-full bg-[var(--glass-bg)] hover:bg-[var(--glass-border)] text-[10px] text-[#0A84FF] font-semibold flex items-center gap-1">
+            » 最新
+          </button>
+</div>
+<!-- Mobile Detail Specimen Card (Bottom-Left Inset Preview for 390px) -->
+<div class="absolute top-12 left-4 w-72 clear-glass rounded-2xl p-3 text-xs flex flex-col gap-2.5 shadow-xl border border-[var(--glass-border)] hidden sm:flex">
+<div class="flex items-center justify-between border-b border-[var(--glass-border-subtle)] pb-1.5">
+<span class="font-semibold text-[11px] text-[var(--text-primary)] flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#0A84FF]"></span>
+              交易参考层排版规范 (V2.4)
+            </span>
+<span class="text-[9px] px-1.5 py-0.5 rounded bg-[#30D158]/10 text-[#30D158] font-medium">已锁定</span>
+</div>
+<ul class="space-y-1.5 text-[10px] text-[var(--text-secondary)] leading-relaxed"><li class="flex items-start gap-1.5"><span class="text-[#30D158] font-bold">✓</span><span><strong>退出规则</strong>：未收盘期间 EMA 20/50 顺势云带一旦反向立即结束，不等待 12H 收盘；固定止损与盘中反向二者谁先触发以谁为准；一旦退出，后续云带再次转回不恢复持仓。</span></li><li class="flex items-start gap-1.5"><span class="text-[#30D158] font-bold">✓</span><span><strong>历史数据口径</strong>：历史仅 12H OHLC 时，若同根 K 线止损与反向先后顺序未知则展示区间范围，时间定位到该 12H；若开盘已反向，开盘即结束，后续高低点不计入最高 R。</span></li><li class="flex items-start gap-1.5"><span class="text-[#30D158] font-bold">✓</span><span><strong>每周仅首根确认信号</strong>：同周不重复绘制多个参考框，纯净红绿覆盖层（无 −1R 文本、无边框气泡）。</span></li><li class="flex items-start gap-1.5"><span class="text-[#30D158] font-bold">✓</span><span><strong>9px 微细刻度</strong>：右边缘区分标注最高 R（如 12.4R 观测极值）与退出参考 R（如 3.76R 退出基准）。</span></li></ul>
+<div class="bg-[var(--glass-bg)] p-2 rounded-xl border border-[var(--glass-border-subtle)] flex items-center justify-between text-[9px] tabular-nums"><span class="text-[var(--text-muted)]">盘中转向已结束:</span><div class="flex items-center gap-2"><span class="text-[var(--text-secondary)]">最高 <strong class="text-[#30D158] font-medium">12.4R</strong></span><span class="font-semibold text-[#0A84FF]">退出参考 3.76R</span></div></div>
+</div>
+</div>
+</section>
+</main>
+<script>
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      document.getElementById('themeIcon').textContent = isDark ? '☀️' : '🌙';
+      document.getElementById('themeText').textContent = isDark ? '浅色模式' : '深色模式';
+    }
+  </script>
+</body>
+</html>

@@ -97,6 +97,7 @@ def create_app(runtime=None, start_monitor=True):
         try:
             fcntl.flock(lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
             if start_monitor:
+                store.pause_v130(int(time.time()*1000), 'owner: signal center uses 12H EMA cloud + 1.618 reclaim')
                 monitor.start()
                 # Owner retired the market workspace on 2026-10-23.
                 # Keep shared quotes, Monday monitoring and execution independent.
@@ -105,6 +106,7 @@ def create_app(runtime=None, start_monitor=True):
                 monday_fib.start()
                 reclaim_paper.start()
                 spike_alert.start()
+                app.state.cloud_signals.start()
             if start_monitor:
                 app.state.start_yolo_workbench()
             # Owner 2026-11-06 retired the paper desk's background feed: no
@@ -113,6 +115,7 @@ def create_app(runtime=None, start_monitor=True):
             # the paper ledger is kept unchanged.
             yield
         finally:
+            app.state.cloud_signals.close()
             app.state.monday_candles.close()
             app.state.market_workstation.close()
             app.state.signal_read_cache.close()
@@ -154,6 +157,8 @@ def create_app(runtime=None, start_monitor=True):
     install_spike_alert(app, spike_alert)
     from yoyo.monitor.monday_candles import install as install_monday_candles
     install_monday_candles(app, runtime)
+    from yoyo.monitor.cloud_signals import install as install_cloud_signals
+    install_cloud_signals(app, runtime)
     from yoyo.monitor.strategy_backtest import install as install_strategy_backtest
     install_strategy_backtest(app)
 

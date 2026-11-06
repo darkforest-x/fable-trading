@@ -270,24 +270,54 @@ class FibBook:
                 "acceptance": "bark_server_accepted_not_device_receipt"}
 
 
+def _score_value(value):
+    return value if type(value) in (int, float) and math.isfinite(value) and 0 <= value <= 1 else None
+
+
+def _score_label(value, threshold=None):
+    value = _score_value(value)
+    if value is None:
+        return "—"
+    label = f"{value:.4f}"
+    if (value > NOTIFICATION_MIN_SCORE and float(label) == NOTIFICATION_MIN_SCORE
+            or threshold is not None and value < threshold <= float(label)):
+        return str(value)  # Rounding must not contradict notification or entry eligibility.
+    return label
+
+
 def notification_text(event, score):
-    """Shared TG/Bark facts: three short lines, raw score, no trading instruction; then the live- accounts that entered."""
+    """Present this touch's recorded entry outcome, not a claim about current holdings.
+
+    Plain-text layout: Stitch 75085c838c684a79a2ca0557b0efad7e. A score alone
+    never implies execution; missing rows cannot explain unrecorded rule failures.
+    """
     symbol = event["symbol"].removesuffix("-USDT-SWAP")
     side = "上沿" if event["side"] == "upper" else "下沿"
     observed = datetime.fromtimestamp(event["observed_ms"] / 1000, ZoneInfo("Asia/Shanghai")).strftime("%m-%d %H:%M")
-    label = "—" if score is None else f"{score:.4f}"
-    if score is not None and label == f"{NOTIFICATION_MIN_SCORE:.4f}" and score > NOTIFICATION_MIN_SCORE:
-        label = str(score)  # Do not display an admitted raw score as the excluded boundary.
-    live_score = event.get("live_allin3_score")
-    live_note = (f"\nlive-allin3 · 触价前评分 {live_score:.4f} · 模拟" if
-                 type(live_score) in (int, float) and math.isfinite(live_score) and 0 <= live_score <= 1 else "")
+    thresholds = event.get("live_thresholds") or {}
+    allin_gate, wick_gate = (_score_value(thresholds.get(name)) for name in ("live-allin3", "live-wick"))
+    score, live_score = _score_value(score), _score_value(event.get("live_allin3_score"))
     entries = event.get("live_entries") or []
-    opened = [e["name"] for e in entries if e["taken"]]
-    missed = [f"{e['name']}（{LIVE_NOTES.get(e['note'], '未开')}）" for e in entries if not e["taken"]]
-    live_note += f"\nlive开仓 · {'、'.join(opened)} · 模拟" if opened else ""
-    live_note += f"\nlive未开 · {'、'.join(missed)}" if missed else ""
-    return (f"{symbol} · {side} 1.618\n评分 {label} · 点位 {event['level']:.10g}\n"
-            f"{observed} 北京{live_note}")
+    opened = any(e["taken"] for e in entries)
+    heading = "🟢 {symbol} · live开仓" if opened else "🟠 {symbol} · live未开" if entries else "🔔 {symbol} · 触价提醒"
+    lines = [heading.format(symbol=symbol)]
+    if opened:
+        lines.append("模拟开仓 · " + ("做空" if event["side"] == "upper" else "做多"))
+    elif "live_entries" in event or thresholds:
+        lines.append("live 未开仓")
+    lines.extend([f"{side} 1.618 · 点位 {event['level']:.10g}", f"{observed} 北京触价", "",
+                  f"5m 收盘分 {_score_label(score, wick_gate)}"])
+    if "live_allin3_score" in event or allin_gate is not None:
+        lines.append(f"live-allin3 触价前分 {_score_label(live_score, allin_gate)}")
+    outcomes = [f"✓ {e['name']} · 已模拟开仓" if e["taken"] else
+                f"— {e['name']} · 未开：{LIVE_NOTES.get(e.get('note'), '无入场记录')}" for e in entries]
+    for name, value, gate, basis in (("live-allin3", live_score, allin_gate, "触价前分"),
+                                     ("live-wick", score, wick_gate, "收盘分")):
+        if gate is None or any(e["name"] == name or name == "live-wick" and e["name"].startswith(name) for e in entries):
+            continue
+        reason = "评分暂缺" if value is None else f"{basis} < {gate:g}" if value < gate else "无入场记录"
+        outcomes.append(f"— {name} · 未开：{reason}")
+    return "\n".join(lines + ([""] + outcomes if outcomes else []))
 
 
 def claim_scored_notification(book, event, now, *, score_lookup=None, clock=None, channel="telegram"):
@@ -313,8 +343,9 @@ def claim_scored_notification(book, event, now, *, score_lookup=None, clock=None
         return None
     score = result.get("score") if isinstance(result, dict) else None
     entries = result.get("live_entries") if isinstance(result, dict) else None
-    live = isinstance(entries, list) and bool(entries) and all(
+    entries_valid = isinstance(entries, list) and all(
         isinstance(e, dict) and isinstance(e.get("name"), str) and type(e.get("taken")) is bool for e in entries)
+    live = entries_valid and bool(entries)
     if (not isinstance(result, dict) or result.get("status") != "scored"
             or type(score) not in (int, float) or not math.isfinite(score) or not 0 <= score <= 1):
         if not live:
@@ -335,8 +366,10 @@ def claim_scored_notification(book, event, now, *, score_lookup=None, clock=None
         return None
     if "live_allin3_score" in result:
         event = dict(event, live_allin3_score=result["live_allin3_score"])
-    if live:
+    if entries_valid:
         event = dict(event, live_entries=entries)
+    if isinstance(result.get("live_thresholds"), dict):
+        event = dict(event, live_thresholds=result["live_thresholds"])
     return event, score, ready_at
 
 

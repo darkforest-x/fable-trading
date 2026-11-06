@@ -21,6 +21,15 @@ test('signals defer ECharts until analysis and shared dependencies execute once'
  assert.ok(c.calls.indexOf('/static/rektproof-core.js')<c.calls.indexOf('/static/rektproof.js'));
  assert.ok(!c.calls.some(x=>x.includes('paper-desk')));
 });
+test('cloud stop settings load before chart, settings, and signal consumers',async()=>{
+ const c=harness();await c.api.ensure('signals');
+ const helper=c.calls.indexOf('/static/cloud-stop-settings.js');
+ for(const consumer of ['cloud-signal-chart.js','cloud-chart-settings.js','cloud-signals.js']){
+  const index=c.calls.indexOf('/static/'+consumer);
+  assert.ok(helper>=0, 'cloud stop settings helper loaded');
+  assert.ok(index>helper, `${consumer} loads after the stop settings helper`);
+ }
+});
 test('failed assets retry without executing successful dependencies again',async()=>{
  const c=harness();c.fail('platform.js');await assert.rejects(c.api.ensure('models'),/重试/);
  c.fail('');await c.api.ensure('platform');

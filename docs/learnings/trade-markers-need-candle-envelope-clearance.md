@@ -1,0 +1,8 @@
+# Keep trade markers legible by placing them outside candle envelopes
+
+- **Problem**: Removing overlay labels stopped candle occlusion but made entry and exit locations difficult to identify at a glance.
+- **Dead end**: Testing only label-to-label overlap missed candle occlusion. Banning all chart text then discarded useful spatial information; the top summary cannot identify a candle by itself.
+- **Effective approach**: Keep compact entry/exit text and arrows, but project every nearby candle's high/low into pixels and clear the entire text width. Recompute on every paint, switch sides at viewport edges and stack labels when needed. Keep exact fill ticks or original execution intervals independent of displaced labels. Leaders stop outside wicks.
+- **General rule**: A chart annotation needs both an accurate anchor and an unobstructed readable label. Test candle and wick clearance, neighboring long wicks, same-bar fills, zoom, viewport edges and label collisions together. If manual zoom removes every safe area, retain the exact tick and summary instead of forcing text over candles.
+- **Coordinate evidence**: Browser QA exposed `logicalToCoordinate(237.5) === 0` in the bundled chart library, although integer indices projected correctly. Interpolate adjacent integer coordinates for interval midpoints and intrabar fills; a mock accepting arbitrary fractions would miss the wrong-edge marker.
+- **Scope**: `yoyo/monitor/static/reclaim-chart.js`, `tests/monitor/frontend_reclaim_chart.test.cjs`; Stitch `c8d8589c0a3b4ad59e1cce3f221564fe`. This extends the earlier [candle collision lesson](chart-label-collision-tests-must-protect-candles.md) after the owner's request to restore visible markers in whitespace.

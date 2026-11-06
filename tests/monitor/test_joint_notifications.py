@@ -73,7 +73,11 @@ def test_first_fresh_joint_atomically_seeds_both_immutable_channel_payloads(tmp_
     assert "突破+spike" in telegram_message(telegram["event"])
     assert "多头框内" in telegram_message(telegram["event"])
     assert "本周期 + 上级周期" in telegram_message(telegram["event"])
-    assert "参考止损（非成交价）" in bark_message(bark["event"])["body"]
+    payload = bark_message(bark["event"])
+    assert "参考止损（非成交价）" in payload["body"]
+    assert "url" not in payload
+    assert "网页备用" not in payload["body"]
+    assert "https://www.tradingview.com/chart/" not in payload["body"]
 
 
 def test_cold_start_old_event_and_duplicate_restart_never_backfill(tmp_path):

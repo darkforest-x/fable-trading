@@ -1,0 +1,60 @@
+/* Stitch 0d4ed0e6d26a4f76a7ee07f1da969041: one floating SPIKE menu.
+ * Existing route, theme and command owners remain unchanged. */
+body[data-design=apple-glass]{--spike-nav-width:112px;--spike-nav-left:24px;--spike-nav-top:max(18px,env(safe-area-inset-top));--spike-nav-space:132px;--spike-nav-surface:var(--glass-dock);--spike-nav-edge:var(--glass-edge);--spike-nav-shadow:var(--panel-shadow);}
+body[data-design=apple-glass] .workspace>.topbar.spike-topbar{position:fixed;inset:var(--spike-nav-top) auto auto var(--spike-nav-left);display:block;width:var(--spike-nav-width);max-width:none;height:44px;min-height:44px;margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;z-index:100;}
+#spike-navigation{position:relative;color:var(--text);font-family:var(--font-ui);}
+#spike-navigation>summary,#spike-navigation .spike-nav-panel{background:var(--glass-sheen),var(--spike-nav-surface);border:1px solid var(--spike-nav-edge);border-bottom-color:var(--glass-edge-bottom);box-shadow:var(--spike-nav-shadow);backdrop-filter:var(--glass-filter);-webkit-backdrop-filter:var(--glass-filter);}
+#spike-navigation>summary{display:flex;align-items:center;justify-content:center;gap:8px;width:var(--spike-nav-width);height:44px;box-sizing:border-box;padding:0 14px;border-radius:22px;list-style:none;cursor:pointer;user-select:none;touch-action:manipulation;transition:background 160ms,box-shadow 160ms;}
+#spike-navigation>summary::-webkit-details-marker{display:none;}
+#spike-navigation>summary b{font-size:14px;font-weight:600;line-height:1;letter-spacing:.6px;}
+#spike-navigation .spike-nav-bolt{width:18px;height:24px;flex:none;display:block;}
+#spike-navigation>summary:hover,#spike-navigation[open]>summary{box-shadow:var(--spike-nav-shadow),0 0 0 1px var(--brand-border);}
+#spike-navigation .spike-nav-panel{--spike-nav-surface:var(--glass-sheet);box-shadow:var(--elevated-shadow);position:absolute;top:54px;left:0;display:grid;gap:2px;width:224px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 90px);overflow:auto;overscroll-behavior:contain;box-sizing:border-box;padding:8px;border-radius:20px;transform-origin:top left;}
+#spike-navigation[open] .spike-nav-panel{animation:spike-nav-in 160ms cubic-bezier(.2,.8,.2,1);}
+#spike-navigation .spike-nav-panel>a,#spike-navigation #workspace-search{display:flex;align-items:center;justify-content:space-between;width:100%;min-width:0;min-height:44px;height:auto;margin:0;padding:10px 12px;box-sizing:border-box;border:0;border-radius:12px;background:transparent;font:13px/1.5 var(--font-ui);text-align:left;text-decoration:none;color:var(--text);transition:background 160ms,color 160ms;}
+#spike-navigation .spike-nav-panel>a:is(:hover,:focus-visible),#spike-navigation #workspace-search:is(:hover,:focus-visible,.active){background:var(--brand-bg);color:var(--brand-primary);}
+#spike-navigation .spike-nav-panel>a[aria-current=page]{background:var(--brand-bg);color:var(--brand-primary);font-weight:600;}
+#spike-navigation #workspace-search{border-top:1px solid var(--line-soft);border-radius:0 0 12px 12px;margin-top:4px;}
+#spike-navigation #workspace-search>span{display:inline-block;}
+#spike-navigation .spike-nav-shortcut{font-size:10px;color:var(--dim);}
+/* Owner 2026-11-06 (Stitch 3f9153807ad3442da2be5def92576fd1): the theme switch leaves the SPIKE menu
+ * for a standalone glass button in the screen's top-right corner; page header rows reserve its width. */
+body[data-design=apple-glass] button.theme-toggle.spike-corner-theme{position:fixed;top:var(--spike-nav-top);right:var(--spike-nav-left);z-index:100;background:var(--glass-sheen),var(--spike-nav-surface);border:1px solid var(--spike-nav-edge);border-bottom-color:var(--glass-edge-bottom);box-shadow:var(--spike-nav-shadow);backdrop-filter:var(--glass-filter,blur(24px));-webkit-backdrop-filter:var(--glass-filter,blur(24px));color:var(--text)}
+body.reclaim-paper-active button.theme-toggle.spike-corner-theme{top:23px;right:100px}
+body:is([data-workspace=monday-fib],.workspace-fullscreen-open) .spike-corner-theme,body:not([data-design=apple-glass]) .spike-corner-theme{display:none!important}
+body[data-design=apple-glass] #main>.page-heading,body[data-design=apple-glass]:not([data-account-route=true]) #yolo-detect-workspace .yd-toolbar,body[data-design=apple-glass].cloud-signals-active #cloud-signal-root>.cs-heading{margin-right:56px}
+#spike-navigation .spike-nav-appearance{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line-soft);padding:4px 4px 0 12px;margin-top:2px;color:var(--muted);font-size:12px;}
+#spike-navigation :is(summary,a,button):focus-visible{outline:2px solid var(--brand-primary);outline-offset:2px;}
+/* Return the old topbar's row to each workspace. Native 1.618 charts own theirs. */
+body[data-design=apple-glass]:not([data-workspace=monday-fib]):where(:not(.reclaim-paper-active):not(.workspace-fullscreen-open)) .workspace{padding-top:var(--spike-nav-top)!important;}
+body[data-design=apple-glass] #main>.page-heading{margin-left:var(--spike-nav-space);min-height:44px;box-sizing:content-box;padding-top:0;padding-bottom:16px;}
+body[data-design=apple-glass].cloud-signals-active #cloud-signal-root>.cs-heading{margin-left:var(--spike-nav-space);min-height:44px;}
+body[data-design=apple-glass]:not([data-account-route=true]) #yolo-detect-workspace .yd-toolbar{margin-left:var(--spike-nav-space);min-height:44px;}
+/* Routes without a title/toolbar still reserve a compact logo-sized first row. */
+body[data-design=apple-glass][data-account-route=true]:not(.workspace-fullscreen-open) .workspace,
+body[data-design=apple-glass][data-workspace=paper-desk]:not(.workspace-fullscreen-open) .workspace,
+body[data-design=apple-glass][data-workspace=signals]:not(.cloud-signals-active):not(.reclaim-paper-active) .workspace{padding-top:calc(var(--spike-nav-top) + 56px)!important;}
+body[data-design=apple-glass] #yolo-detect-workspace :is(.yd-home-link,.yd-theme-toggle){display:none!important;}
+html[data-design=apple-glass]{scroll-padding-top:72px;}
+@keyframes spike-nav-in{from{opacity:0;transform:translateY(-4px) scale(.98);}to{opacity:1;transform:none;}}
+@media(max-width:900px){
+ body[data-design=apple-glass]{--spike-nav-left:16px;--spike-nav-space:124px;}
+ body[data-design=apple-glass].cloud-signals-active #cloud-signal-root>.cs-heading{margin-left:0;}
+ body[data-design=apple-glass].cloud-signals-active:not(.workspace-fullscreen-open) .workspace{padding-top:calc(var(--spike-nav-top) + 54px)!important;}
+}
+@media(max-width:700px){
+ body[data-design=apple-glass]{--spike-nav-left:12px;--spike-nav-top:max(12px,env(safe-area-inset-top));--spike-nav-space:124px;}
+ body.reclaim-paper-active button.theme-toggle.spike-corner-theme{top:max(12px,env(safe-area-inset-top));right:10px}
+ body[data-design=apple-glass] #main>.page-heading{padding-bottom:14px;min-height:44px;margin-left:var(--spike-nav-space);}
+ body[data-design=apple-glass] #main>.page-heading h1{white-space:normal;font-size:18px;}
+ body[data-design=apple-glass] #main>.page-heading p{display:none;}
+ body[data-design=apple-glass]:not([data-account-route=true]) #yolo-detect-workspace .yd-toolbar{margin-left:0;padding-top:54px!important;}
+ #spike-navigation .spike-nav-panel{top:50px;}
+}
+@media(prefers-reduced-motion:reduce){#spike-navigation[open] .spike-nav-panel{animation:none;}#spike-navigation :is(summary,a,button){transition:none!important;}}
+
+/* Stitch 7cbb16cd6ed346a0a4d2f9e6edcd2938: reclaim uses this same DOM owner.
+ * Compact replay has its own short header, but never a second brand control. */
+body:has(#monday-reclaim-paper.is-replay:not([hidden])){--spike-nav-top:6px;--spike-nav-left:10px}
+@media(max-width:700px){body:has(#monday-reclaim-paper.is-replay:not([hidden])){--spike-nav-top:4px;--spike-nav-left:12px}}
+

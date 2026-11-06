@@ -712,7 +712,14 @@ class ReclaimPaper:
         result = {"status": row["status"], "score": row["score"]}
         if live and live["status"] == "scored":
             result["live_allin3_score"] = live["score"]
-        if entries:
+        thresholds = {}
+        if self.live_allin:
+            thresholds["live-allin3"] = self.live_allin["min_score"]
+        if self.wick:
+            thresholds["live-wick"] = WICK["min_score"]
+        if thresholds:
+            result["live_thresholds"] = thresholds
+        if entries or thresholds:
             result["live_entries"] = [dict(name=KEYS[r["track"]], taken=bool(r["taken"]), note=r["note"])
                                       for r in sorted(entries, key=lambda r: LIVE_TRACKS.index(r["track"]))]
         return result

@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>SPIKE · 1.618 / 信号双模沉浸壁纸图表工作台</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter & JetBrains Mono Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "secondary": "#006b58",
+            "on-secondary": "#ffffff",
+            "secondary-fixed-dim": "#78d8be",
+            "outline-variant": "#c1c6d6",
+            "secondary-container": "#92f2d7",
+            "primary-fixed-dim": "#abc7ff",
+            "primary-fixed": "#d7e2ff",
+            "primary": "#0059b5",
+            "on-tertiary-container": "#fffaf9",
+            "surface-container-high": "#dce9ff",
+            "surface-container-low": "#eff4ff",
+            "background": "#f8f9ff",
+            "outline": "#717785",
+            "on-surface": "#0b1c30",
+            "on-secondary-container": "#00705c",
+            "error-container": "#ffdad6",
+            "on-tertiary": "#ffffff",
+            "inverse-surface": "#213145",
+            "surface-tint": "#005cbb",
+            "on-tertiary-fixed-variant": "#92002a",
+            "surface-dim": "#cbdbf5",
+            "surface-container-lowest": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-secondary-fixed": "#002019",
+            "on-tertiary-fixed": "#40000d",
+            "surface-container-highest": "#d3e4fe",
+            "on-primary-container": "#fcfbff",
+            "primary-container": "#0071e3",
+            "tertiary-fixed-dim": "#ffb2b7",
+            "on-primary-fixed-variant": "#00458f",
+            "inverse-on-surface": "#eaf1ff",
+            "inverse-primary": "#abc7ff",
+            "surface-variant": "#d3e4fe",
+            "surface-bright": "#f8f9ff",
+            "surface": "#f8f9ff",
+            "tertiary-fixed": "#ffdadb",
+            "on-secondary-fixed-variant": "#005142",
+            "error": "#ba1a1a",
+            "on-error": "#ffffff",
+            "on-primary-fixed": "#001b3f",
+            "secondary-fixed": "#94f4d9",
+            "on-primary": "#ffffff",
+            "tertiary": "#b70438",
+            "surface-container": "#e5eeff",
+            "on-background": "#0b1c30",
+            "tertiary-container": "#db2b4e",
+            "on-surface-variant": "#414753"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "gutter": "0.75rem",
+            "margin-tablet": "1.5rem",
+            "gutter-tablet": "1rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1rem",
+            "space-md": "0.75rem",
+            "space-xs": "0.25rem",
+            "gutter-desktop": "1.5rem",
+            "space-xl": "1.5rem",
+            "margin-desktop": "2.5rem",
+            "margin": "1rem"
+          },
+          fontFamily: {
+            "headline-lg-mobile": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-md": ["Inter"],
+            "display": ["Inter"],
+            "label-numeric-md": ["JetBrains Mono"],
+            "label-numeric-lg": ["JetBrains Mono"],
+            "body-sm": ["Inter"],
+            "label-caps": ["Inter"],
+            "label-numeric-sm": ["JetBrains Mono"]
+          },
+          fontSize: {
+            "headline-lg-mobile": ["24px", { lineHeight: "32px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "headline-sm": ["17px", { lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "headline-lg": ["28px", { lineHeight: "36px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "body-md": ["14px", { lineHeight: "20px", letterSpacing: "0em", fontWeight: "400" }],
+            "body-lg": ["16px", { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "400" }],
+            "headline-md": ["20px", { lineHeight: "28px", letterSpacing: "-0.015em", fontWeight: "600" }],
+            "display": ["36px", { lineHeight: "44px", letterSpacing: "-0.025em", fontWeight: "600" }],
+            "label-numeric-md": ["14px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "500" }],
+            "label-numeric-lg": ["20px", { lineHeight: "26px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "body-sm": ["12px", { lineHeight: "16px", letterSpacing: "0.005em", fontWeight: "400" }],
+            "label-caps": ["10px", { lineHeight: "12px", letterSpacing: "0.08em", fontWeight: "600" }],
+            "label-numeric-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.02em", fontWeight: "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Liquid Specular Glass Token Styles */
+    .liquid-glass {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      box-shadow: 
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.95),
+        inset 0 -1px 1px 0 rgba(255, 255, 255, 0.3),
+        0 8px 32px -4px rgba(15, 23, 42, 0.08),
+        0 2px 8px -2px rgba(15, 23, 42, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+    }
+
+    .dark .liquid-glass {
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      box-shadow: 
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 1px 0 rgba(0, 0, 0, 0.5),
+        0 16px 40px -8px rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .liquid-subtle-btn {
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .liquid-subtle-btn:hover {
+      background: rgba(255, 255, 255, 0.9);
+    }
+    .dark .liquid-subtle-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .liquid-subtle-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Crosshair & Canvas interactions */
+    #wallpaperCanvas {
+      cursor: crosshair;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Popover Transitions */
+    .popover-hidden {
+      opacity: 0;
+      transform: scale(0.96) translateY(6px);
+      pointer-events: none;
+    }
+    .popover-visible {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+    }
+    .popover-transition {
+      transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  </style>
+</head>
+<body class="h-full w-full overflow-hidden select-none m-0 p-0 font-body-md text-on-surface bg-[#F8FAFC] dark:bg-[#070B12] dark:text-[#F1F5F9]">
+<!-- 100vw x 100vh FULL VIEWPORT BORDERLESS WALLPAPER CANVAS -->
+<div class="relative w-screen h-screen overflow-hidden">
+<canvas class="absolute inset-0 w-full h-full block z-0" id="wallpaperCanvas"></canvas>
+<!-- FLOATING TOP BAR ISLAND (Liquidity Capsule) -->
+<header class="absolute top-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
+<!-- Top Left Micro Island -->
+<div class="flex items-center gap-2 pointer-events-auto flex-wrap max-w-[calc(100vw-72px)]">
+<!-- Brand Badge Capsule -->
+<div class="liquid-glass rounded-full px-3 py-1.5 flex items-center gap-1.5 shadow-sm">
+<span class="text-primary-container dark:text-[#38BDF8] font-bold tracking-tight text-body-md flex items-center">
+<span class="material-symbols-outlined text-[18px] mr-0.5" style="font-variation-settings: 'FILL' 1;">bolt</span>
+            SPIKE
+          </span>
+<span class="w-[1px] h-3.5 bg-outline-variant/60 dark:bg-white/20 mx-1"></span>
+<span class="font-label-caps text-label-caps text-secondary font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-secondary-container/40 dark:bg-secondary/30">1.618 W43</span>
+</div>
+<!-- Symbol & Direction Signal Pill -->
+<div class="liquid-glass rounded-full pl-3 pr-2.5 py-1.5 flex items-center gap-2 shadow-sm">
+<button class="flex items-center gap-1 hover:opacity-80 transition font-headline-sm text-body-md">
+<span class="font-bold tracking-tight">DEMO</span>
+<span class="text-on-surface-variant dark:text-slate-400 text-body-sm font-normal">/ USDT</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant dark:text-slate-400">expand_more</span>
+</button>
+<span class="w-[1px] h-3.5 bg-outline-variant/60 dark:bg-white/20"></span>
+<!-- Live Signal Status -->
+<div class="flex items-center gap-1.5">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container/40 dark:bg-secondary/30 text-secondary dark:text-[#34D399] font-body-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse"></span>
+              做多 LONG
+            </span>
+<span class="hidden sm:inline text-body-sm text-on-surface-variant dark:text-slate-400">顺势突破</span>
+</div>
+<span class="w-[1px] h-3.5 bg-outline-variant/60 dark:bg-white/20"></span>
+<!-- Live Price -->
+<div class="flex items-baseline gap-1.5">
+<span class="font-label-numeric-md text-label-numeric-md font-semibold text-on-surface dark:text-white" id="liveTickerPrice">0.3542</span>
+<span class="font-label-numeric-sm text-label-numeric-sm font-semibold text-[#087F69] dark:text-[#34D399]">+2.40%</span>
+</div>
+</div>
+<!-- Performance Stats Capsule (Click to toggle detailed popover) -->
+<div class="relative">
+<button class="liquid-glass rounded-full px-3 py-1.5 flex items-center gap-2 shadow-sm liquid-subtle-btn cursor-pointer" id="statsCapsuleBtn">
+<span class="w-2 h-2 rounded-full bg-[#10B981]"></span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface dark:text-slate-200">
+              累计 <strong class="text-[#087F69] dark:text-[#34D399] font-semibold">+8.2R</strong> · 胜率 <strong class="font-semibold">54%</strong> · 24笔
+            </span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant dark:text-slate-400">info</span>
+</button>
+<!-- Historical Stats Popover -->
+<div class="popover-hidden popover-transition absolute left-0 top-11 w-72 rounded-2xl liquid-glass p-3.5 z-40 border border-white/80 dark:border-white/10 shadow-xl" id="statsPopover">
+<div class="flex items-center justify-between pb-2 border-b border-outline-variant/40 dark:border-white/10 mb-2.5">
+<span class="font-headline-sm text-body-sm font-semibold">1.618 周度回测表现 (DEMO)</span>
+<span class="font-label-caps text-label-caps px-1.5 py-0.5 rounded bg-primary-fixed text-primary dark:bg-sky-950 dark:text-sky-300">W43 实时</span>
+</div>
+<div class="grid grid-cols-2 gap-2 text-body-sm">
+<div class="p-2 rounded-xl bg-surface-container-low/60 dark:bg-white/5">
+<div class="text-on-surface-variant dark:text-slate-400 text-body-sm text-[11px]">盈亏比 (Avg RR)</div>
+<div class="font-label-numeric-md text-label-numeric-md font-bold text-on-surface dark:text-white mt-0.5">1 : 2.84</div>
+</div>
+<div class="p-2 rounded-xl bg-surface-container-low/60 dark:bg-white/5">
+<div class="text-on-surface-variant dark:text-slate-400 text-body-sm text-[11px]">最大回撤 (Max DD)</div>
+<div class="font-label-numeric-md text-label-numeric-md font-bold text-tertiary dark:text-rose-400 mt-0.5">-3.20 R</div>
+</div>
+<div class="p-2 rounded-xl bg-surface-container-low/60 dark:bg-white/5">
+<div class="text-on-surface-variant dark:text-slate-400 text-body-sm text-[11px]">近期连胜</div>
+<div class="font-label-numeric-md text-label-numeric-md font-bold text-secondary dark:text-emerald-400 mt-0.5">3 笔连续止盈</div>
+</div>
+<div class="p-2 rounded-xl bg-surface-container-low/60 dark:bg-white/5">
+<div class="text-on-surface-variant dark:text-slate-400 text-body-sm text-[11px]">胜率样本</div>
+<div class="font-label-numeric-md text-label-numeric-md font-bold text-on-surface dark:text-white mt-0.5">13 胜 / 11 负</div>
+</div>
+</div>
+<div class="mt-2.5 pt-2 border-t border-outline-variant/30 dark:border-white/10 flex items-center justify-between text-body-sm text-[11px] text-on-surface-variant dark:text-slate-400">
+<span>基准仓位: 1.0R / 笔</span>
+<span class="text-primary-container dark:text-sky-400 font-semibold">无漂移全自动化</span>
+</div>
+</div>
+</div>
+<!-- Alert Bell (40px circular glass) -->
+<button class="w-10 h-10 rounded-full liquid-glass flex items-center justify-center liquid-subtle-btn shadow-sm relative text-on-surface dark:text-white" id="alertBtn" title="价格与突破警报">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-primary-container ring-2 ring-white dark:ring-slate-900"></span>
+</button>
+<!-- External TradingView link button [TV ↗] -->
+<a class="h-10 px-3 rounded-full liquid-glass flex items-center gap-1 liquid-subtle-btn shadow-sm font-label-numeric-sm text-body-sm font-semibold text-on-surface dark:text-white" href="https://www.tradingview.com" rel="noopener noreferrer" target="_blank" title="在 TradingView 打开对应品种">
+<span>TV</span>
+<span class="material-symbols-outlined text-[15px]">arrow_outward</span>
+</a>
+</div>
+<!-- Top Right: Single Circular 40px Theme Switcher Button [☀️/🌙] -->
+<div class="pointer-events-auto">
+<button class="w-10 h-10 rounded-full liquid-glass flex items-center justify-center liquid-subtle-btn shadow-sm text-on-surface dark:text-white" id="themeToggleBtn" title="切换浅色 / 深色模式">
+<span class="material-symbols-outlined text-[20px] dark:hidden">light_mode</span>
+<span class="material-symbols-outlined text-[20px] hidden dark:inline">dark_mode</span>
+</button>
+</div>
+</header>
+<!-- RIGHT PRICE AXIS REFERENCE LEVEL BADGES (Positioned dynamically over wallpaper) -->
+<div class="absolute right-0 top-0 bottom-0 pointer-events-none z-10 w-24" id="priceBadgeContainer">
+<!-- Injected via JavaScript based on coordinates -->
+</div>
+<!-- BOTTOM FLOATING CONTROL DOCK (Centered, bottom-6) -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 pointer-events-auto max-w-[94vw]">
+<!-- Popover Menu for Chart Settings & Parameters (Anchor aligned to Dock) -->
+<div class="popover-hidden popover-transition absolute bottom-14 right-2 sm:right-6 w-72 rounded-2xl liquid-glass p-3.5 border border-white/80 dark:border-white/10 shadow-2xl" id="settingsPopover">
+<div class="flex items-center justify-between pb-2 border-b border-outline-variant/40 dark:border-white/10 mb-3">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-primary-container dark:text-sky-400">tune</span>
+<span class="font-headline-sm text-body-sm font-semibold">交易参数配置</span>
+</div>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded-full bg-secondary-container/40 dark:bg-secondary/30 text-secondary dark:text-emerald-300">AUTO 1.618</span>
+</div>
+<div class="space-y-3">
+<div>
+<label class="text-body-sm text-[12px] text-on-surface-variant dark:text-slate-400 mb-1.5 block">硬止损预设 (Stop Loss)</label>
+<div class="grid grid-cols-2 gap-2">
+<button class="px-2.5 py-1.5 rounded-lg border border-primary-container/40 bg-primary-fixed/20 dark:bg-sky-500/20 text-on-surface dark:text-white font-label-numeric-sm text-body-sm font-semibold text-left">
+                BTC / ETH: <span class="text-primary-container dark:text-sky-400">1.5%</span>
+</button>
+<button class="px-2.5 py-1.5 rounded-lg border border-outline-variant/50 dark:border-white/10 hover:bg-white/40 dark:hover:bg-white/10 text-on-surface dark:text-white font-label-numeric-sm text-body-sm font-semibold text-left">
+                其他山寨: <span class="text-secondary dark:text-emerald-400">3.0%</span>
+</button>
+</div>
+</div>
+<div>
+<label class="text-body-sm text-[12px] text-on-surface-variant dark:text-slate-400 mb-1.5 block">信号参考区间源 (Signal Range)</label>
+<div class="p-1 rounded-xl bg-surface-container-high/40 dark:bg-white/10 flex gap-1">
+<button class="flex-1 py-1 text-center rounded-lg text-body-sm text-[11px] font-semibold bg-white dark:bg-slate-800 shadow-sm text-primary-container dark:text-sky-400">
+                1.618 / 周一高低
+              </button>
+<button class="flex-1 py-1 text-center rounded-lg text-body-sm text-[11px] font-medium text-on-surface-variant dark:text-slate-400 hover:text-on-surface">
+                经典 ATR 动态
+              </button>
+</div>
+</div>
+<div class="pt-2 border-t border-outline-variant/30 dark:border-white/10 flex items-center justify-between text-body-sm text-[11px]">
+<span class="text-on-surface-variant dark:text-slate-400">EMA 云带周期</span>
+<span class="font-label-numeric-sm font-semibold">20 / 50 均线带</span>
+</div>
+</div>
+</div>
+<!-- Dock Capsule -->
+<div class="liquid-glass rounded-full p-1.5 flex items-center gap-1.5 sm:gap-2 shadow-2xl">
+<!-- Segmented Mode Switcher: "区间" (Range) / "信号" (Signal - default active) -->
+<div class="flex items-center p-0.5 rounded-full bg-surface-container-high/40 dark:bg-white/10">
+<button class="px-2.5 sm:px-3 py-1 rounded-full text-body-sm font-semibold transition text-on-surface-variant dark:text-slate-400 hover:text-on-surface" id="modeRangeBtn">
+            区间
+          </button>
+<button class="px-2.5 sm:px-3 py-1 rounded-full text-body-sm font-semibold transition bg-white dark:bg-slate-800 text-on-surface dark:text-white shadow-sm flex items-center gap-1.5" id="modeSignalBtn">
+<span class="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse"></span>
+            信号
+          </button>
+</div>
+<span class="w-[1px] h-4 bg-outline-variant/50 dark:bg-white/20"></span>
+<!-- Timeframe Selector -->
+<div class="flex items-center gap-0.5" id="tfGroup">
+<button class="tf-btn px-2 py-1 rounded-full font-label-numeric-sm text-body-sm text-on-surface-variant dark:text-slate-400 hover:bg-white/40 dark:hover:bg-white/10" data-tf="5m">5m</button>
+<button class="tf-btn px-2 py-1 rounded-full font-label-numeric-sm text-body-sm text-on-surface-variant dark:text-slate-400 hover:bg-white/40 dark:hover:bg-white/10" data-tf="15m">15m</button>
+<button class="tf-btn px-2 py-1 rounded-full font-label-numeric-sm text-body-sm text-on-surface-variant dark:text-slate-400 hover:bg-white/40 dark:hover:bg-white/10" data-tf="1H">1H</button>
+<button class="tf-btn px-2 py-1 rounded-full font-label-numeric-sm text-body-sm text-on-surface-variant dark:text-slate-400 hover:bg-white/40 dark:hover:bg-white/10" data-tf="4H">4H</button>
+<button class="tf-btn active px-2.5 py-1 rounded-full font-label-numeric-sm text-body-sm font-bold bg-white dark:bg-slate-800 text-primary-container dark:text-sky-400 shadow-sm" data-tf="12H">12H</button>
+<button class="tf-btn px-2 py-1 rounded-full font-label-numeric-sm text-body-sm text-on-surface-variant dark:text-slate-400 hover:bg-white/40 dark:hover:bg-white/10" data-tf="1D">1D</button>
+</div>
+<span class="w-[1px] h-4 bg-outline-variant/50 dark:bg-white/20 hidden md:inline"></span>
+<!-- Indicator Toggles -->
+<div class="hidden md:flex items-center gap-1">
+<button class="px-2.5 py-1 rounded-full text-body-sm font-semibold flex items-center gap-1 bg-secondary-container/30 dark:bg-secondary/20 text-secondary dark:text-emerald-300" id="toggleEmaCloud">
+<span class="material-symbols-outlined text-[14px]">check</span>
+            EMA云带
+          </button>
+<button class="px-2.5 py-1 rounded-full text-body-sm font-semibold flex items-center gap-1 bg-primary-fixed/40 dark:bg-sky-950/40 text-primary-container dark:text-sky-300" id="toggleFibLevels">
+<span class="material-symbols-outlined text-[14px]">check</span>
+            1.618水平
+          </button>
+</div>
+<span class="w-[1px] h-4 bg-outline-variant/50 dark:bg-white/20"></span>
+<!-- Chart Settings Trigger -->
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant dark:text-slate-300 hover:bg-white/40 dark:hover:bg-white/10 transition" id="settingsBtn" title="参数配置">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+</button>
+<!-- "» 最新" Follow Latest Candle Button -->
+<button class="px-3 py-1 rounded-full bg-primary-container text-white font-body-sm font-semibold hover:opacity-95 active:scale-95 transition flex items-center gap-1 shadow-sm" id="resetPanBtn">
+<span class="font-bold">»</span> 最新
+        </button>
+</div>
+</div>
+<!-- Active Hover HUD Tooltip (Crosshair readout) -->
+<div class="absolute pointer-events-none z-20 hidden px-2.5 py-1 rounded-lg liquid-glass text-body-sm font-label-numeric-sm text-[11px] shadow-lg border border-white/60 dark:border-white/10" id="crosshairHUD">
+<span id="hudContent">--</span>
+</div>
+</div>
+<!-- SCRIPT: Candlestick Rendering Engine & Interactive Wallpaper -->
+<script>
+    (function() {
+      // Configuration & State
+      const state = {
+        isDark: false,
+        activeMode: 'signal', // 'signal' | 'range'
+        timeframe: '12H',
+        showEmaCloud: true,
+        showFibLevels: true,
+        panOffsetX: 0,
+        zoom: 1.0,
+        hoverCandle: null,
+        cursorX: -1,
+        cursorY: -1
+      };
+
+      const canvas = document.getElementById('wallpaperCanvas');
+      const ctx = canvas.getContext('2d');
+      const priceBadgeContainer = document.getElementById('priceBadgeContainer');
+      const crosshairHUD = document.getElementById('crosshairHUD');
+      const hudContent = document.getElementById('hudContent');
+
+      // Static Reference Horizontal Levels
+      const LEVELS = {
+        fibHigh: 0.3880,   // 上沿 1.618
+        mondayHigh: 0.3620, // 周一高
+        mondayLow: 0.3340,  // 周一低
+        fibLow: 0.3080     // 下沿 1.618
+      };
+
+      // Generate Synthetic Candlestick Market Data (120 bars)
+      const candles = [];
+      const startTime = new Date('2025-02-01T00:00:00Z').getTime();
+      const stepTime = 12 * 3600 * 1000; // 12H
+
+      let curPrice = 0.3180;
+      for (let i = 0; i < 96; i++) {
+        const time = startTime + i * stepTime;
+        const isMonday = new Date(time).getUTCDay() === 1;
+
+        // Controlled random walk with upward trend breakout in W43
+        let drift = (i > 65) ? 0.0011 : (i > 30 ? 0.0004 : -0.0002);
+        const noise = (Math.random() - 0.48) * 0.0055;
+        const open = curPrice;
+        let close = open + drift + noise;
+        let high = Math.max(open, close) + Math.random() * 0.0040;
+        let low = Math.min(open, close) - Math.random() * 0.0040;
+
+        // Ensure Monday special setup & recent breakout
+        if (i === 72) {
+          // Monday reference candle
+          close = 0.3590;
+          high = LEVELS.mondayHigh;
+          low = LEVELS.mondayLow;
+        } else if (i === 88) {
+          // 1.618 confirmation bar
+          close = 0.3685;
+          high = 0.3710;
+        }
+
+        curPrice = close;
+
+        // Compute pseudo EMA 20 & EMA 50
+        const ema20 = (curPrice * 0.65) + (LEVELS.mondayLow * 0.35) + Math.sin(i * 0.12) * 0.006;
+        const ema50 = (curPrice * 0.40) + (LEVELS.mondayLow * 0.60) + Math.cos(i * 0.10) * 0.004;
+
+        candles.push({
+          index: i,
+          time,
+          isMonday,
+          open,
+          high,
+          low,
+          close,
+          ema20,
+          ema50,
+          isConfirmation: (i >= 86 && i <= 88)
+        });
+      }
+
+      // Latest Candle Update
+      const latest = candles[candles.length - 1];
+      document.getElementById('liveTickerPrice').innerText = latest.close.toFixed(4);
+
+      // Sizing & DPI Handler
+      let width = 0;
+      let height = 0;
+      const priceAxisWidth = 84;
+      const timeAxisHeight = 28;
+
+      function resize() {
+        const dpr = window.devicePixelRatio || 1;
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.resetTransform();
+        ctx.scale(dpr, dpr);
+        draw();
+      }
+
+      window.addEventListener('resize', resize);
+
+      // Coordinate Transform Helpers
+      function getPriceRange() {
+        let min = 0.2980;
+        let max = 0.3980;
+        return { min, max, span: max - min };
+      }
+
+      function priceToY(price, range) {
+        const chartAreaH = height - timeAxisHeight;
+        const norm = (price - range.min) / range.span;
+        return chartAreaH - (norm * (chartAreaH - 40)) - 20;
+      }
+
+      function yToPrice(y, range) {
+        const chartAreaH = height - timeAxisHeight;
+        const norm = (chartAreaH - 20 - y) / (chartAreaH - 40);
+        return range.min + norm * range.span;
+      }
+
+      // Rendering Routine
+      function draw() {
+        if (!width || !height) return;
+
+        const isDark = document.documentElement.classList.contains('dark');
+        state.isDark = isDark;
+
+        // 1. Background Fill
+        ctx.fillStyle = isDark ? '#070B12' : '#F8FAFC';
+        ctx.fillRect(0, 0, width, height);
+
+        const range = getPriceRange();
+        const chartW = width - priceAxisWidth;
+        const chartH = height - timeAxisHeight;
+
+        // 2. Subtle Grid Lines
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(15, 23, 42, 0.04)';
+
+        // Horizontal price grids (every 0.0100 step)
+        for (let p = 0.3000; p <= 0.4000; p += 0.0100) {
+          const y = Math.round(priceToY(p, range)) + 0.5;
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(chartW, y);
+          ctx.stroke();
+        }
+
+        // 3. Horizontal Reference Lines (周一高、周一低、上沿 1.618、下沿 1.618)
+        if (state.showFibLevels) {
+          drawReferenceLine(LEVELS.fibHigh, '上沿 1.618', '#0071E3', 'rgba(0, 113, 227, 0.12)', range, chartW, isDark);
+          drawReferenceLine(LEVELS.mondayHigh, '周一高 Mon High', '#30D158', 'rgba(48, 209, 88, 0.14)', range, chartW, isDark);
+          drawReferenceLine(LEVELS.mondayLow, '周一低 Mon Low', '#FF453A', 'rgba(255, 69, 58, 0.14)', range, chartW, isDark);
+          drawReferenceLine(LEVELS.fibLow, '下沿 1.618', '#E11D48', 'rgba(225, 29, 72, 0.12)', range, chartW, isDark);
+        }
+
+        // Layout calculations for Bars
+        const barSpacing = Math.max(7, (chartW / candles.length) * state.zoom);
+        const candleBodyW = Math.max(3, barSpacing * 0.68);
+        const visibleBars = Math.floor(chartW / barSpacing);
+        const startIdx = Math.max(0, candles.length - visibleBars + Math.round(state.panOffsetX / barSpacing));
+
+        // 4. Vibrant Translucent EMA 20/50 Cloud (In 'Signal' mode)
+        if (state.activeMode === 'signal' && state.showEmaCloud && candles.length > 2) {
+          drawEmaCloud(range, barSpacing, startIdx, chartW);
+        }
+
+        // 5. Trade Reference Overlay (1R / 3.75R / 5R Risk / Reward Reference Frame)
+        if (state.activeMode === 'signal') {
+          drawTradeOverlay(range, barSpacing, startIdx, isDark);
+        }
+
+        // 6. Draw Candlesticks (Razor Sharp)
+        for (let i = 0; i < candles.length; i++) {
+          const c = candles[i];
+          const x = (i - startIdx) * barSpacing + (barSpacing / 2);
+          if (x < -20 || x > chartW + 20) continue;
+
+          const openY = priceToY(c.open, range);
+          const closeY = priceToY(c.close, range);
+          const highY = priceToY(c.high, range);
+          const lowY = priceToY(c.low, range);
+
+          const isBull = c.close >= c.open;
+
+          // Color Palette Mapping
+          let barColor = isBull ? '#30D158' : '#FF453A';
+          if (c.isConfirmation) {
+            barColor = '#0A84FF'; // Confirmation Blue
+          } else if (c.isMonday) {
+            barColor = '#30D158'; // Monday Green
+          } else if (!isBull && Math.abs(c.close - c.open) < 0.001) {
+            barColor = '#94A3B8'; // Neutral Slate Grey
+          }
+
+          // Wick
+          ctx.strokeStyle = barColor;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(Math.round(x) + 0.5, Math.round(highY));
+          ctx.lineTo(Math.round(x) + 0.5, Math.round(lowY));
+          ctx.stroke();
+
+          // Body
+          ctx.fillStyle = barColor;
+          const bodyY = Math.min(openY, closeY);
+          const bodyH = Math.max(1.8, Math.abs(openY - closeY));
+          ctx.fillRect(
+            Math.round(x - candleBodyW / 2),
+            Math.round(bodyY),
+            Math.round(candleBodyW),
+            Math.round(bodyH)
+          );
+        }
+
+        // 7. Right Price Axis & Labels
+        drawPriceAxis(range, chartW, chartH, isDark);
+
+        // 8. Bottom Time Axis & Timestamps
+        drawTimeAxis(barSpacing, startIdx, chartW, chartH, isDark);
+
+        // 9. Interactive Crosshair (if inside chart)
+        if (state.cursorX >= 0 && state.cursorX <= chartW && state.cursorY >= 0 && state.cursorY <= chartH) {
+          drawCrosshair(state.cursorX, state.cursorY, chartW, chartH, range, isDark);
+        }
+      }
+
+      // Draw EMA 20/50 Cloud
+      function drawEmaCloud(range, barSpacing, startIdx, chartW) {
+        // Collect coordinates
+        const points = [];
+        for (let i = 0; i < candles.length; i++) {
+          const x = (i - startIdx) * barSpacing + (barSpacing / 2);
+          const y20 = priceToY(candles[i].ema20, range);
+          const y50 = priceToY(candles[i].ema50, range);
+          points.push({ x, y20, y50, isBullish: candles[i].ema20 >= candles[i].ema50 });
+        }
+
+        // Render polygon ribbons
+        for (let i = 0; i < points.length - 1; i++) {
+          const p1 = points[i];
+          const p2 = points[i + 1];
+
+          if (p2.x < 0 || p1.x > chartW) continue;
+
+          const isBull = p1.isBullish;
+          // Spec: Emerald green #10B981 ~0.20 opacity; Coral red #F43F5E ~0.18 opacity
+          ctx.fillStyle = isBull ? 'rgba(16, 185, 129, 0.20)' : 'rgba(244, 63, 94, 0.18)';
+
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y20);
+          ctx.lineTo(p2.x, p2.y20);
+          ctx.lineTo(p2.x, p2.y50);
+          ctx.lineTo(p1.x, p1.y50);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+
+      // Draw Trade Overlay (Discrete Risk/Profit Frame with 1R, 3.75R, 5R Ticks)
+      function drawTradeOverlay(range, barSpacing, startIdx, isDark) {
+        const entryIdx = 76;
+        const exitIdx = 94;
+
+        const xStart = (entryIdx - startIdx) * barSpacing + (barSpacing / 2);
+        const xEnd = (exitIdx - startIdx) * barSpacing + (barSpacing / 2);
+
+        if (xEnd < 0) return;
+
+        const entryP = 0.3420;
+        const slP = 0.3340;     // -1R (Risk)
+        const tp1P = 0.3500;    // +1R
+        const tp2P = 0.3720;    // +3.75R
+        const tp3P = 0.3820;    // +5R
+
+        const yEntry = priceToY(entryP, range);
+        const ySl = priceToY(slP, range);
+        const yTp1 = priceToY(tp1P, range);
+        const yTp2 = priceToY(tp2P, range);
+        const yTp3 = priceToY(tp3P, range);
+
+        const w = xEnd - xStart;
+
+        // 1. Risk Area (-1R Red Box)
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.10)';
+        ctx.strokeStyle = 'rgba(244, 63, 94, 0.55)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.rect(xStart, yEntry, w, ySl - yEntry);
+        ctx.fill();
+        ctx.stroke();
+
+        // 2. Profit Area (+3.75R Green Frame)
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.12)';
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.60)';
+        ctx.beginPath();
+        ctx.rect(xStart, yTp2, w, yEntry - yTp2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Target Horizontal Lines & 9px Ticks
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = '#10B981';
+        ctx.beginPath();
+        ctx.moveTo(xStart, yTp2);
+        ctx.lineTo(xEnd, yTp2);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#38BDF8';
+        ctx.beginPath();
+        ctx.moveTo(xStart, yTp3);
+        ctx.lineTo(xEnd, yTp3);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Overlay Text Ticks (9px JetBrains Mono)
+        ctx.font = '600 9px "JetBrains Mono", monospace';
+        ctx.fillStyle = isDark ? '#F43F5E' : '#E11D48';
+        ctx.fillText('SL -1.0R (0.3340)', xStart + 8, ySl - 4);
+
+        ctx.fillStyle = isDark ? '#34D399' : '#087F69';
+        ctx.fillText('TP 3.75R (0.3720) · 突破兑现', xStart + 8, yTp2 + 11);
+
+        ctx.fillStyle = isDark ? '#38BDF8' : '#0071E3';
+        ctx.fillText('EXT 5.0R (0.3820) · 极值扩展', xStart + 8, yTp3 - 4);
+      }
+
+      // Draw Reference Levels
+      function drawReferenceLine(price, label, strokeColor, fillColor, range, chartW, isDark) {
+        const y = Math.round(priceToY(price, range)) + 0.5;
+
+        // Line across canvas
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(chartW, y);
+        ctx.stroke();
+
+        // Pill Badge on right
+        ctx.font = '600 10px "Inter", sans-serif';
+        const txt = `${label} ${price.toFixed(4)}`;
+        const tw = ctx.measureText(txt).width;
+
+        ctx.fillStyle = fillColor;
+        ctx.beginPath();
+        ctx.roundRect(chartW + 4, y - 8, tw + 10, 16, 4);
+        ctx.fill();
+
+        ctx.fillStyle = strokeColor;
+        ctx.fillText(txt, chartW + 9, y + 3.5);
+      }
+
+      // Price Axis Rendering
+      function drawPriceAxis(range, chartW, chartH, isDark) {
+        // Vertical Separator hairline
+        ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(chartW + 0.5, 0);
+        ctx.lineTo(chartW + 0.5, chartH);
+        ctx.stroke();
+
+        ctx.font = '500 11px "JetBrains Mono", monospace';
+        ctx.fillStyle = isDark ? '#94A3B8' : '#64748B';
+
+        for (let p = 0.3000; p <= 0.4000; p += 0.0100) {
+          const y = priceToY(p, range);
+          ctx.fillText(p.toFixed(4), chartW + 10, y + 4);
+        }
+
+        // Current Price Highlight Badge
+        const lastP = latest.close;
+        const lastY = priceToY(lastP, range);
+        ctx.fillStyle = '#0071E3';
+        ctx.beginPath();
+        ctx.roundRect(chartW + 2, lastY - 9, priceAxisWidth - 6, 18, 5);
+        ctx.fill();
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '600 11px "JetBrains Mono", monospace';
+        ctx.fillText(lastP.toFixed(4), chartW + 10, lastY + 3.5);
+      }
+
+      // Time Axis Rendering
+      function drawTimeAxis(barSpacing, startIdx, chartW, chartH, isDark) {
+        ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, chartH + 0.5);
+        ctx.lineTo(chartW, chartH + 0.5);
+        ctx.stroke();
+
+        ctx.font = '500 10px "JetBrains Mono", monospace';
+        ctx.fillStyle = isDark ? '#64748B' : '#94A3B8';
+
+        const step = Math.max(1, Math.floor(80 / barSpacing));
+        for (let i = 0; i < candles.length; i += step) {
+          const x = (i - startIdx) * barSpacing + (barSpacing / 2);
+          if (x < 10 || x > chartW - 30) continue;
+
+          const d = new Date(candles[i].time);
+          const dateStr = `${d.getUTCMonth() + 1}/${d.getUTCDate()}`;
+          ctx.fillText(dateStr, x - 12, height - 8);
+        }
+      }
+
+      // Crosshair Readout
+      function drawCrosshair(cx, cy, chartW, chartH, range, isDark) {
+        ctx.save();
+        ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.35)' : 'rgba(15, 23, 42, 0.35)';
+        ctx.lineWidth = 1;
+
+        // Horiz
+        ctx.beginPath();
+        ctx.moveTo(0, Math.round(cy) + 0.5);
+        ctx.lineTo(chartW, Math.round(cy) + 0.5);
+        ctx.stroke();
+
+        // Vert
+        ctx.beginPath();
+        ctx.moveTo(Math.round(cx) + 0.5, 0);
+        ctx.lineTo(Math.round(cx) + 0.5, chartH);
+        ctx.stroke();
+        ctx.restore();
+
+        // Axis Pill on Right for cursor Y
+        const curPrice = yToPrice(cy, range);
+        ctx.fillStyle = isDark ? '#1E293B' : '#0F172A';
+        ctx.beginPath();
+        ctx.roundRect(chartW + 2, cy - 8, priceAxisWidth - 6, 16, 4);
+        ctx.fill();
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '600 10px "JetBrains Mono", monospace';
+        ctx.fillText(curPrice.toFixed(4), chartW + 10, cy + 3.5);
+      }
+
+      // Interactive Events (Crosshair, Pan, Pinch Zoom)
+      let isDragging = false;
+      let lastMouseX = 0;
+
+      canvas.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        lastMouseX = e.clientX;
+      });
+
+      window.addEventListener('mouseup', () => {
+        isDragging = false;
+      });
+
+      canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        state.cursorX = e.clientX - rect.left;
+        state.cursorY = e.clientY - rect.top;
+
+        if (isDragging) {
+          const dx = e.clientX - lastMouseX;
+          state.panOffsetX += dx;
+          lastMouseX = e.clientX;
+        }
+
+        // HUD Tooltip Positioning
+        const range = getPriceRange();
+        const pAtCursor = yToPrice(state.cursorY, range);
+        crosshairHUD.classList.remove('hidden');
+        crosshairHUD.style.left = `${Math.min(window.innerWidth - 180, Math.max(10, state.cursorX + 16))}px`;
+        crosshairHUD.style.top = `${Math.min(window.innerHeight - 60, Math.max(70, state.cursorY - 24))}px`;
+        hudContent.innerText = `P: ${pAtCursor.toFixed(4)} | 1.618 扩展带`;
+
+        draw();
+      });
+
+      canvas.addEventListener('mouseleave', () => {
+        state.cursorX = -1;
+        state.cursorY = -1;
+        crosshairHUD.classList.add('hidden');
+        draw();
+      });
+
+      canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const zoomDelta = e.deltaY * -0.0015;
+        state.zoom = Math.min(2.5, Math.max(0.6, state.zoom + zoomDelta));
+        draw();
+      }, { passive: false });
+
+      // Touch handlers for mobile
+      let touchStartX = 0;
+      canvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          touchStartX = e.touches[0].clientX;
+          state.cursorX = e.touches[0].clientX;
+          state.cursorY = e.touches[0].clientY;
+          draw();
+        }
+      }, { passive: true });
+
+      canvas.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1) {
+          const currentX = e.touches[0].clientX;
+          const dx = currentX - touchStartX;
+          state.panOffsetX += dx * 0.85;
+          touchStartX = currentX;
+          state.cursorX = e.touches[0].clientX;
+          state.cursorY = e.touches[0].clientY;
+          draw();
+        }
+      }, { passive: true });
+
+      canvas.addEventListener('touchend', () => {
+        state.cursorX = -1;
+        state.cursorY = -1;
+        draw();
+      });
+
+      // UI Controls Binding
+      // 1. Theme Switcher
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      themeToggleBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        draw();
+      });
+
+      // 2. Mode Switcher (区间 vs 信号)
+      const modeRangeBtn = document.getElementById('modeRangeBtn');
+      const modeSignalBtn = document.getElementById('modeSignalBtn');
+
+      modeRangeBtn.addEventListener('click', () => {
+        state.activeMode = 'range';
+        modeRangeBtn.className = "px-2.5 sm:px-3 py-1 rounded-full text-body-sm font-semibold transition bg-white dark:bg-slate-800 text-on-surface dark:text-white shadow-sm";
+        modeSignalBtn.className = "px-2.5 sm:px-3 py-1 rounded-full text-body-sm font-semibold transition text-on-surface-variant dark:text-slate-400 hover:text-on-surface flex items-center gap-1.5";
+        draw();
+      });
+
+      modeSignalBtn.addEventListener('click', () => {
+        state.activeMode = 'signal';
+        modeSignalBtn.className = "px-2.5 sm:px-3 py-1 rounded-full text-body-sm font-semibold transition bg-white dark:bg-slate-800 text-on-surface dark:text-white shadow-sm flex items-center gap-1.5";
+        modeRangeBtn.className = "px-2.5 sm:px-3 py-1 rounded-full text-body-sm font-semibold transition text-on-surface-variant dark:text-slate-400 hover:text-on-surface";
+        draw();
+      });
+
+      // 3. Timeframe selector
+      const tfButtons = document.querySelectorAll('.tf-btn');
+      tfButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tfButtons.forEach(b => {
+            b.className = "tf-btn px-2 py-1 rounded-full font-label-numeric-sm text-body-sm text-on-surface-variant dark:text-slate-400 hover:bg-white/40 dark:hover:bg-white/10";
+          });
+          btn.className = "tf-btn active px-2.5 py-1 rounded-full font-label-numeric-sm text-body-sm font-bold bg-white dark:bg-slate-800 text-primary-container dark:text-sky-400 shadow-sm";
+          state.timeframe = btn.getAttribute('data-tf');
+          draw();
+        });
+      });
+
+      // 4. Indicator toggles
+      const toggleEmaCloud = document.getElementById('toggleEmaCloud');
+      toggleEmaCloud.addEventListener('click', () => {
+        state.showEmaCloud = !state.showEmaCloud;
+        if (state.showEmaCloud) {
+          toggleEmaCloud.classList.add('bg-secondary-container/30', 'text-secondary', 'dark:bg-secondary/20', 'dark:text-emerald-300');
+          toggleEmaCloud.classList.remove('opacity-40');
+        } else {
+          toggleEmaCloud.classList.remove('bg-secondary-container/30', 'text-secondary', 'dark:bg-secondary/20', 'dark:text-emerald-300');
+          toggleEmaCloud.classList.add('opacity-40');
+        }
+        draw();
+      });
+
+      const toggleFibLevels = document.getElementById('toggleFibLevels');
+      toggleFibLevels.addEventListener('click', () => {
+        state.showFibLevels = !state.showFibLevels;
+        if (state.showFibLevels) {
+          toggleFibLevels.classList.add('bg-primary-fixed/40', 'text-primary-container', 'dark:bg-sky-950/40', 'dark:text-sky-300');
+          toggleFibLevels.classList.remove('opacity-40');
+        } else {
+          toggleFibLevels.classList.remove('bg-primary-fixed/40', 'text-primary-container', 'dark:bg-sky-950/40', 'dark:text-sky-300');
+          toggleFibLevels.classList.add('opacity-40');
+        }
+        draw();
+      });
+
+      // 5. Follow latest candle button
+      const resetPanBtn = document.getElementById('resetPanBtn');
+      resetPanBtn.addEventListener('click', () => {
+        state.panOffsetX = 0;
+        state.zoom = 1.0;
+        draw();
+      });
+
+      // 6. Popovers (Stats & Settings)
+      const statsCapsuleBtn = document.getElementById('statsCapsuleBtn');
+      const statsPopover = document.getElementById('statsPopover');
+      const settingsBtn = document.getElementById('settingsBtn');
+      const settingsPopover = document.getElementById('settingsPopover');
+
+      statsCapsuleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isShown = statsPopover.classList.contains('popover-visible');
+        if (isShown) {
+          statsPopover.classList.remove('popover-visible');
+          statsPopover.classList.add('popover-hidden');
+        } else {
+          settingsPopover.classList.remove('popover-visible');
+          settingsPopover.classList.add('popover-hidden');
+          statsPopover.classList.remove('popover-hidden');
+          statsPopover.classList.add('popover-visible');
+        }
+      });
+
+      settingsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isShown = settingsPopover.classList.contains('popover-visible');
+        if (isShown) {
+          settingsPopover.classList.remove('popover-visible');
+          settingsPopover.classList.add('popover-hidden');
+        } else {
+          statsPopover.classList.remove('popover-visible');
+          statsPopover.classList.add('popover-hidden');
+          settingsPopover.classList.remove('popover-hidden');
+          settingsPopover.classList.add('popover-visible');
+        }
+      });
+
+      window.addEventListener('click', () => {
+        statsPopover.classList.remove('popover-visible');
+        statsPopover.classList.add('popover-hidden');
+        settingsPopover.classList.remove('popover-visible');
+        settingsPopover.classList.add('popover-hidden');
+      });
+
+      [statsPopover, settingsPopover].forEach(p => {
+        p.addEventListener('click', e => e.stopPropagation());
+      });
+
+      // Initial Launch
+      resize();
+    })();
+  </script>
+</body></html>

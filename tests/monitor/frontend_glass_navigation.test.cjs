@@ -3,10 +3,11 @@
 // business writes. DOM fixtures contain both route buttons and account links.
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const source=fs.readFileSync('yoyo/monitor/static/workspace-command.js','utf8');
-function harness(){
- const handlers={},windowHandlers={},nodes=new Map(),visits=[];
+function harness(mobile=false){
+ const handlers={},windowHandlers={},viewportHandlers={},nodes=new Map(),visits=[];
  let document;
  const element=(tag='DIV')=>({tagName:tag,children:[],events:{},textContent:'',value:'',open:false,
+  style:{setProperty(k,v){this[k]=v;}},
   append(...items){this.children.push(...items.filter(Boolean));},replaceChildren(){this.children=[];},
   addEventListener(k,f){this.events[k]=f;},focus(){document.activeElement=this;},
   click(){this.events.click?.({});},showModal(){this.open=true;},close(){this.open=false;this.events.close?.();},
@@ -21,13 +22,14 @@ function harness(){
  document={activeElement:null,body:{classList:{contains:()=>false}},getElementById:get,
   querySelector:()=>get('workspace-command').open?get('workspace-command'):null,
   querySelectorAll:()=>items,createElement:tag=>element(tag.toUpperCase()),addEventListener:(k,f)=>handlers[k]=f};
- vm.runInNewContext(source,{document,window:{addEventListener:(k,f)=>windowHandlers[k]=f}});
+ const viewport={height:844,offsetTop:0,addEventListener:(k,f)=>viewportHandlers[k]=f};
+ vm.runInNewContext(source,{document,window:{innerHeight:844,visualViewport:viewport,matchMedia:()=>({matches:mobile}),addEventListener:(k,f)=>windowHandlers[k]=f}});
  const trigger=get('workspace-search'),dialog=get('workspace-command'),input=get('workspace-command-input'),results=get('workspace-command-results');
  const buttons=()=>results.querySelectorAll('button');
  const open=()=>{trigger.focus();trigger.click();};
  const search=value=>{input.value=value;input.events.input();};
  const key=(key,target=dialog)=>target.events.keydown({key,preventDefault(){}});
- return {get,document,trigger,dialog,input,results,buttons,open,search,key,visits,windowHandlers,handlers};
+ return {get,document,trigger,dialog,input,results,buttons,open,search,key,visits,windowHandlers,handlers,element,viewport,viewportHandlers};
 }
 test('More defaults to grouped secondary destinations; searching reaches primary routes too',()=>{
  const h=harness();h.open();
@@ -51,4 +53,36 @@ test('arrow keys move focus only, and density retains its original node',()=>{
  const h=harness();h.open();h.key('ArrowDown');assert.equal(h.document.activeElement,h.buttons()[0]);
  h.key('ArrowUp');assert.equal(h.document.activeElement,h.input);assert.deepEqual(h.visits,[]);
  assert.equal(h.get('glass-appearance').children[0],h.get('workspace-density'));
+});
+test('phone More opens for browsing without focusing search, but explicit keyboard search focuses it',()=>{
+ const h=harness(true);h.open();
+ assert.equal(h.document.activeElement,h.get('workspace-command-close'));
+ h.key('Escape');
+ h.handlers.keydown({key:'k',ctrlKey:true,preventDefault(){}});
+ assert.equal(h.document.activeElement,h.input);
+});
+test('lazy chart More closes the short menu and returns focus to its visible summary',()=>{
+ const h=harness(true),summary=h.element(),menu={open:true,querySelector:()=>summary};
+ const entry={closest:()=>menu};
+ h.handlers.click({target:{closest:()=>entry}});
+ assert.equal(menu.open,false);assert.equal(h.dialog.open,true);
+ assert.equal(h.document.activeElement,h.get('workspace-command-close'));
+ h.key('Escape');assert.equal(h.document.activeElement,summary);
+ h.handlers.click({target:{closest:()=>entry}});h.search('服务');h.buttons()[0].click();
+ assert.deepEqual(h.visits,['system']);assert.equal(h.document.activeElement,h.get('main'));
+});
+test('global SPIKE More restores the visible logo rather than its collapsed menu item',()=>{
+ const h=harness(),summary=h.element(),menu={open:true,querySelector:()=>summary};
+ h.trigger.closest=()=>menu;
+ h.open();assert.equal(menu.open,false);assert.equal(h.dialog.open,true);
+ h.key('Escape');assert.equal(h.document.activeElement,summary);
+});
+test('visible viewport changes constrain the open phone menu and reopening resets list scroll',()=>{
+ const h=harness(true);h.open();h.results.scrollTop=400;
+ h.viewport.height=390;h.viewport.offsetTop=42;h.viewportHandlers.resize();
+ assert.equal(h.dialog.style['--command-viewport-height'],'390px');
+ assert.equal(h.dialog.style['--command-viewport-top'],'42px');
+ h.viewport.offsetTop=52;h.viewportHandlers.scroll();
+ assert.equal(h.dialog.style['--command-viewport-top'],'52px');
+ h.key('Escape');h.open();assert.equal(h.results.scrollTop,0);
 });

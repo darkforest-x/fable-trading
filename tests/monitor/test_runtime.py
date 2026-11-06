@@ -91,7 +91,7 @@ def response(code=200, payload=None):
 @pytest.mark.parametrize('activation,expected', [(None, 'skipped'), (CONFIRM, 'skipped'),
                                                (CONFIRM + 1, 'skipped'), (CONFIRM - 1, 'skipped'),
                                                (CONFIRM - 7_200_001, 'sent')])
-def test_worker_rechecks_stream_activation_and_links_correct_interval(tmp_path, channel, timeframe, interval, activation, expected):
+def test_worker_rechecks_stream_activation_and_channel_link_policy(tmp_path, channel, timeframe, interval, activation, expected):
     from yoyo.monitor.bark import BarkWorker
     store = Store(tmp_path / 'm.sqlite')
     store.activate_notification_policy(0, protocol=MODEL_PROTOCOL)
@@ -112,11 +112,13 @@ def test_worker_rechecks_stream_activation_and_links_correct_interval(tmp_path, 
     assert status[expected] == 1
     assert len(calls) == int(expected == 'sent')
     if calls:
-        link = (calls[0]['reply_markup']['inline_keyboard'][0][0]['url'] if channel == 'telegram'
-                else calls[0]['body'].split('网页备用：', 1)[1])
-        if channel == 'bark':
-            assert calls[0]['url'] == 'https://www.tradingview.com/chart/'
-        assert 'interval=' + interval in link
+        if channel == 'telegram':
+            link = calls[0]['reply_markup']['inline_keyboard'][0][0]['url']
+            assert 'interval=' + interval in link
+        else:
+            assert 'url' not in calls[0]
+            assert '网页备用' not in calls[0]['body']
+            assert 'https://www.tradingview.com/chart/' not in calls[0]['body']
     untouched = store.bark_status() if channel == 'telegram' else store.telegram_status()
     assert untouched['pending'] == 1
 

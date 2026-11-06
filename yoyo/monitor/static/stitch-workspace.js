@@ -40,7 +40,7 @@
 })();
 /* Account navigation stays distinct from signal records despite a shared module. */
 (() => {
-  function sync(){
+  function sync(navigate=true){
     const raw=location.hash.slice(1),[view,query]=raw.split('?');
     const account=view==='signals'&&new URLSearchParams(query||'').get('pane')==='account';
     const maAccount=view==='yolo-detect'&&new URLSearchParams(query||'').get('tab')==='account';
@@ -56,7 +56,10 @@
     const link=document.querySelector('[data-primary-accounts]');
     if(link){link.classList.toggle('active',account||['manual','copier'].includes(view));if(link.classList.contains('active'))link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
     if(account){const signal=document.querySelector('.stitch-primary-nav [data-view="signals"]');signal?.classList.remove('active');signal?.removeAttribute('aria-current');}
-    window.SpikeWorkbench?.navigate(view||'monday-fib');
+    if(navigate)window.SpikeWorkbench?.navigate(view||'monday-fib');
   }
+  // Command-palette routes use pushState, which does not emit hashchange.
+  // Observe the existing router's committed view without navigating it again.
+  new MutationObserver(()=>sync(false)).observe(document.body,{attributes:true,attributeFilter:['data-workspace','data-account-route']});
   window.addEventListener('hashchange',sync);sync();
 })();

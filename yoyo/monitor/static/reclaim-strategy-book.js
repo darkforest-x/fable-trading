@@ -3,6 +3,8 @@
  * Month calendar: Stitch 744049734c8745ec9111be91a2fca95c.
  * Daily settlements: Stitch 35ddb15e36454b709d1ade43eedae412.
  * Time navigation: Stitch 06e18dbe8d574fafb80a01fe6b5db29f.
+ * Live rule facts: Stitch 4a92f2ca253d46b2a9a15478daa8216a; execution rules remain API-backed.
+ * Live-first grouped picker: Stitch 31e8546ebdde4a7f978815d39f0d6d9e.
  * The selected book and local display order are independent of the paper account. */
 (() => {
   'use strict';
@@ -14,14 +16,43 @@
   const BACKTEST='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 17 9 11l4 4 8-10M15 5h6v6"/></svg>';
   const num=(v,d=2)=>typeof v==='number'&&Number.isFinite(v)?v.toLocaleString('en-US',{maximumFractionDigits:d}):'—';
   const ORDER_KEY='spike:paper-account-order:v1';
+  const LAYOUT_KEY='spike:paper-account-layout:v2';
+  const isWickTrack=t=>['live-wick6x3','live-wick3x3','live-wick6x3hi','live-wick3x3far'].includes(t);
+  function overviewHTML(d,track){
+    const current=d?.tracks?.[track],wick=isWickTrack(track),lock=track==='v3lock',v3=['v3','v3add','v3lock','v3add20'].includes(track);
+    // The common model threshold classifies signals; each live account has its own entry gate.
+    const own=wick||['allin3','live-allin3','spike'].includes(track);
+    const threshold=own?d?.[track]?.min_score:v3?d?.v3?.min_score:d?.model?.threshold;
+    const offset=wick?(d?.[track]?0:undefined):lock?d?.v3lock?.breakeven_offset_bp:d?.breakeven_offset_bp;
+    const protection=typeof offset==='number'&&Number.isFinite(offset)?`${offset>0?'+':''}${num(offset/100)}%`:'—';
+    return `<div class="rs-section-title"><h1>${esc(label(track))}<em>${esc(TITLES[track])}</em></h1></div><div class="rs-facts"><div><small>确认周期</small><b>${num(current?.confirm_minutes,0)} <small>分钟</small></b></div><div><small>入场分门槛</small><b>≥ ${num(threshold,4)}</b></div><div><small>${lock?'利润锁':'保护偏移'}</small><b>${protection}</b></div></div>${!current?'<p class="rs-warning">策略规则尚未读取，参数保持空缺。稍后重新打开可重试。</p>':''}`;
+  }
+  function flowHTML(track){
+    const wick=isWickTrack(track);
+    const entry=track==='live-allin3'?'冻结入场评分仅使用触价前已收盘信息；当前模拟运行。':wick?'触价5m收盘时评分并检查收回比例，收盘后市价入场，不回记；当前模拟运行。':'原回测评分包含触价5m收盘信息，收盘后回记触价入场。';
+    const confirm=wick?'触价所在1小时K线之后，下一根1小时K线收盘，以 1.618 判断是否收回。未收回则退出；目标可在确认前成交。':'触价所在K线之后，下一根确认周期K线收盘。未收回则退出；目标可在确认前成交。';
+    const protection=wick?'收回后止损移到 1.618，不加偏移。':'收回且越过保护价才移动止损；收回但未越过时按确认收盘退出。多单加偏移，空单减偏移。';
+    return `<ol class="rs-flow"><li><b>划区间</b><span>纽约周一高低点 H / L，宽度 W=H−L。上沿 H+0.618W，下沿 L−0.618W。</span></li><li><b>等触价</b><span>每周每侧首次触及；下沿做多、上沿做空。${entry}分数不是胜率。</span></li><li><b>等回收</b><span>${confirm}</span></li><li><b>保护余仓</b><span>${protection}</span></li></ol>`;
+  }
   function accountOrder(saved,tracks){const defaults=[...tracks.filter(t=>t==='spike'),...tracks.filter(t=>t!=='spike')];return [...new Set([...(Array.isArray(saved)?saved:[]).filter(t=>defaults.includes(t)),...defaults])];}
   function moveAccount(order,id,index){const next=order.filter(t=>t!==id);if(!order.includes(id))return [...order];next.splice(Math.max(0,Math.min(next.length,index)),0,id);return next;}
+  function accountLayout(saved,tracks,legacy=null){
+    const valid=saved&&Array.isArray(saved.main)&&Array.isArray(saved.more),defaults=accountOrder(legacy,tracks),seen=new Set(),layout={main:[],more:[]};
+    if(valid)for(const group of ['main','more'])for(const id of saved[group])if(tracks.includes(id)&&!seen.has(id)){layout[group].push(id);seen.add(id);}
+    for(const id of defaults)if(!seen.has(id)){layout[id.startsWith('live-')?'main':'more'].push(id);seen.add(id);}
+    return layout;
+  }
+  function moveAccountGroup(layout,id,group,index){
+    if(!['main','more'].includes(group)||![...layout.main,...layout.more].includes(id))return {main:[...layout.main],more:[...layout.more]};
+    const next={main:layout.main.filter(t=>t!==id),more:layout.more.filter(t=>t!==id)};
+    next[group].splice(Math.max(0,Math.min(next[group].length,index)),0,id);return next;
+  }
   function pnlView(value){
     if(typeof value!=='number'||!Number.isFinite(value))return {text:'—',tone:'',title:'已实现盈亏暂未读取'};
     const sign=value>0?'+':value<0?'−':'',amount=Math.abs(value);
     return {text:sign+(amount>0&&amount<.005?'<0.01':amount.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})),tone:value>0?'rp-positive':value<0?'rp-negative':'',title:'已实现净盈亏 · USDT · 不含浮盈亏和补充本金'};
   }
-  function pickerHTML(tracks){return tracks.map(t=>`<div class="rs-account-row" data-account-row="${esc(t)}"><button type="button" data-account-drag="${esc(t)}" aria-label="拖动调整 ${esc(label(t))} 顺序" aria-description="拖动排序，或按 Alt 加上下方向键" title="拖动排序 · Alt + ↑/↓"><svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" aria-hidden="true"><circle cx="4" cy="5" r="1.2"/><circle cx="10" cy="5" r="1.2"/><circle cx="4" cy="10" r="1.2"/><circle cx="10" cy="10" r="1.2"/><circle cx="4" cy="15" r="1.2"/><circle cx="10" cy="15" r="1.2"/></svg></button><button type="button" data-strategy-select="${esc(t)}" aria-pressed="false"><span>${esc(label(t))}</span><strong data-account-pnl="${esc(t)}">—</strong><i aria-hidden="true">✓</i></button><button type="button" data-strategy-book="${esc(t)}" aria-label="查看 ${esc(label(t))} 策略小册" title="策略小册">${BOOK}</button><button type="button" data-strategy-backtest="${esc(t)}" aria-label="查看 ${esc(label(t))} 回测交易" title="回测交易">${BACKTEST}</button></div>`).join('');}
+  function pickerHTML(tracks){return tracks.map(t=>`<div class="rs-account-row" data-account-row="${esc(t)}"><button type="button" data-account-drag="${esc(t)}" aria-label="拖动调整 ${esc(label(t))} 顺序" aria-description="拖动排序或移入移出常用；Alt 加上下键排序，Alt 加左键移入常用、右键收入更多" title="拖动排序或移入移出常用 · Alt + ↑/↓ 排序 · Alt + ←/→ 分组"><svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" aria-hidden="true"><circle cx="4" cy="5" r="1.2"/><circle cx="10" cy="5" r="1.2"/><circle cx="4" cy="10" r="1.2"/><circle cx="10" cy="10" r="1.2"/><circle cx="4" cy="15" r="1.2"/><circle cx="10" cy="15" r="1.2"/></svg></button><button type="button" data-strategy-select="${esc(t)}" aria-pressed="false"><span>${esc(label(t))}</span><strong data-account-pnl="${esc(t)}">—</strong><i aria-hidden="true">✓</i></button><button type="button" data-strategy-book="${esc(t)}" aria-label="查看 ${esc(label(t))} 策略小册" title="策略小册">${BOOK}</button><button type="button" data-strategy-backtest="${esc(t)}" aria-label="查看 ${esc(label(t))} 回测交易" title="回测交易">${BACKTEST}</button></div>`).join('');}
   function tableHTML(headers,rows){return `<div class="rs-table-wrap"><table><thead><tr>${headers.map(h=>`<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map((v,i)=>i?`<td>${typeof v==='number'?num(v):esc(v??'—')}</td>`:`<th scope="row">${esc(v)}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;}
   const historyDate=ms=>new Date(ms).toISOString().slice(0,10);
   function validateHistory(h,track){
@@ -175,28 +206,43 @@
 
   function barOptions(r,dark=false){const c=dark?'#9ba9b8':'#738392';return {animation:!matchReduced(),animationDuration:450,grid:{left:55,right:18,top:25,bottom:r.labels.length>8?45:60},tooltip:{trigger:'axis',confine:true,valueFormatter:v=>num(v)+' '+r.unit},xAxis:{type:'category',data:r.labels,axisTick:{show:false},axisLabel:{color:c,fontSize:9,hideOverlap:true,interval:r.labels.length>8?'auto':0,formatter:v=>v.replace(' · ','\n')}},yAxis:{type:'value',name:r.unit,nameTextStyle:{color:c},axisLabel:{color:c},splitLine:{lineStyle:{color:dark?'#ffffff12':'#71849420'}}},series:[{type:'bar',barMaxWidth:40,data:r.values,itemStyle:{color:'#3285dc',borderRadius:[4,4,0,0]}}]};}
   function matchReduced(){return typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion:reduce)').matches;}
-  const api={pickerHTML,accountOrder,moveAccount,pnlView,ORDER_KEY,tableHTML,researchHTML,barOptions,historyHTML,heatmapHTML,monthCalendar,calendarHTML,validateDayPage,createDayModel,dayTradeHTML,dayTradesHTML,equityOptions,historyWindow,shiftHistoryWindow,historyAxes,historyWindowLabel,validateHistory,TITLES};
+  const api={pickerHTML,accountOrder,moveAccount,pnlView,ORDER_KEY,LAYOUT_KEY,accountLayout,moveAccountGroup,overviewHTML,flowHTML,tableHTML,researchHTML,barOptions,historyHTML,heatmapHTML,monthCalendar,calendarHTML,validateDayPage,createDayModel,dayTradeHTML,dayTradesHTML,equityOptions,historyWindow,shiftHistoryWindow,historyAxes,historyWindowLabel,validateHistory,TITLES};
   if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}
   function create({root,tracks,getTrack,getSnapshot,getPnl,renderRules,createFeed,onSelect,onBacktest}){
     const trigger=root.querySelector('[data-rp="track"]');
-    let storage,saved;try{storage=window.localStorage;saved=JSON.parse(storage.getItem(ORDER_KEY)||'null');}catch{}
-    let order=accountOrder(saved,tracks),drag=null,dragFrame=0,blockedUntil=0;
-    const picker=document.createElement('div');picker.id='rs-account-picker';picker.className='rs-account-picker';picker.setAttribute('popover','auto');picker.setAttribute('role','dialog');picker.setAttribute('aria-label','策略');picker.innerHTML='<header><b>策略</b><small>已实现盈亏 · USDT</small></header><div class="rs-account-list">'+pickerHTML(order)+'</div><p class="rs-order-status" role="status">拖动左侧把手排序</p>';root.append(picker);
-    const accountList=picker.querySelector('.rs-account-list'),orderStatus=picker.querySelector('.rs-order-status');
+    let storage;try{storage=window.localStorage;}catch{}
+    const stored=key=>{try{return JSON.parse(storage?.getItem(key)||'null');}catch{return null;}};
+    let layout=accountLayout(stored(LAYOUT_KEY),tracks,stored(ORDER_KEY)),drag=null,dragFrame=0,blockedUntil=0;
+    const picker=document.createElement('div');picker.id='rs-account-picker';picker.className='rs-account-picker';picker.setAttribute('popover','auto');picker.setAttribute('role','dialog');picker.setAttribute('aria-label','策略');
+    picker.innerHTML='<header><b>策略</b><small>已实现盈亏 · USDT</small></header><div class="rs-account-list"><div class="rs-group-title">常用策略 <span data-main-count></span></div><div class="rs-account-group" data-account-group="main" aria-label="常用策略">'+pickerHTML(layout.main)+'</div><button type="button" class="rs-more-toggle" data-account-more aria-expanded="false" aria-controls="rs-more-accounts"><span>更多策略</span><span class="rs-group-count" data-more-count></span><small data-more-current></small><span class="rs-more-chevron" aria-hidden="true">⌄</span></button><div id="rs-more-accounts" class="rs-account-group rs-more-accounts" data-account-group="more" aria-label="更多策略" hidden>'+pickerHTML(layout.more)+'</div></div><p class="rs-order-status" role="status">拖动把手排序或移入常用</p>';root.append(picker);
+    const accountList=picker.querySelector('.rs-account-list'),orderStatus=picker.querySelector('.rs-order-status'),moreToggle=picker.querySelector('[data-account-more]');
+    const groups={main:picker.querySelector('[data-account-group="main"]'),more:picker.querySelector('[data-account-group="more"]')};
     const accountNodes=new Map([...picker.querySelectorAll('[data-account-row]')].map(n=>[n.dataset.accountRow,n]));
-    function applyOrder(animate=false){
-      const before=new Map([...accountNodes].map(([id,n])=>[id,n.getBoundingClientRect().top]));
-      const focused=document.activeElement;
-      order.forEach((id,i)=>{const n=accountNodes.get(id);if(accountList.children[i]!==n)accountList.insertBefore(n,accountList.children[i]||null);});
-      if(picker.contains(focused)&&document.activeElement!==focused)focused.focus({preventScroll:true});
-      if(animate&&!matchReduced())for(const [id,n] of accountNodes){if(id===drag?.id)continue;const delta=before.get(id)-n.getBoundingClientRect().top;n.getAnimations().forEach(a=>a.cancel());if(Math.abs(delta)>.5)n.animate([{transform:`translateY(${delta}px)`},{transform:'translateY(0)'}],{duration:160,easing:'cubic-bezier(.2,.8,.2,1)'});}
+    const groupOf=id=>layout.main.includes(id)?'main':'more';
+    function setMore(open){
+      if(!open&&groups.more.contains(document.activeElement))moreToggle.focus({preventScroll:true});
+      groups.more.hidden=!open;moreToggle.setAttribute('aria-expanded',String(open));
+      if(picker.matches(':popover-open')&&!drag)positionPicker();
     }
-    function saveOrder(id){try{if(!storage)throw Error();storage.setItem(ORDER_KEY,JSON.stringify(order));orderStatus.textContent=`${label(id)} 已移至第 ${order.indexOf(id)+1} 位`; }catch{orderStatus.textContent='顺序已调整；浏览器未允许保存';}}
+    function applyOrder(animate=false){
+      const before=new Map([...accountNodes].filter(([,n])=>n.getClientRects().length).map(([id,n])=>[id,n.getBoundingClientRect().top]));
+      const focused=document.activeElement;
+      for(const group of ['main','more'])layout[group].forEach((id,i)=>{const n=accountNodes.get(id),parent=groups[group];if(parent.children[i]!==n)parent.insertBefore(n,parent.children[i]||null);});
+      if(picker.contains(focused)&&focused.getClientRects().length&&document.activeElement!==focused)focused.focus({preventScroll:true});
+      picker.querySelector('[data-main-count]').textContent=layout.main.length;
+      picker.querySelector('[data-more-count]').textContent=layout.more.length;
+      picker.querySelector('[data-more-current]').textContent=layout.more.includes(getTrack())?'当前：'+label(getTrack()):'';
+      if(animate&&!matchReduced())for(const [id,n] of accountNodes){if(!before.has(id)||!n.getClientRects().length)continue;const delta=before.get(id)-n.getBoundingClientRect().top;n.getAnimations().forEach(a=>a.cancel());if(Math.abs(delta)>.5)n.animate([{transform:`translateY(${delta}px)`},{transform:'translateY(0)'}],{duration:160,easing:'cubic-bezier(.2,.8,.2,1)'});}
+    }
+    function saveOrder(id){const group=groupOf(id),text=`${label(id)} 已移至${group==='main'?'常用':'更多'}第 ${layout[group].indexOf(id)+1} 位`;try{if(!storage)throw Error();storage.setItem(LAYOUT_KEY,JSON.stringify(layout));orderStatus.textContent=text;}catch{orderStatus.textContent=text+'；浏览器未允许保存';}}
     function moveDrag(){
       if(!drag?.moved)return;
-      const rows=order.filter(id=>id!==drag.id),index=rows.filter(id=>{const n=accountNodes.get(id);return drag.y>accountList.getBoundingClientRect().top+n.offsetTop-accountList.scrollTop+n.offsetHeight/2;}).length;
-      const next=moveAccount(order,drag.id,index);
-      if(next.join()!==order.join()){order=next;applyOrder(true);}
+      const group=drag.y<moreToggle.getBoundingClientRect().top?'main':'more';
+      if(group==='more'&&groups.more.hidden)setMore(true);
+      const rows=layout[group].filter(id=>id!==drag.id),index=rows.filter(id=>{const r=accountNodes.get(id).getBoundingClientRect();return drag.y>r.top+r.height/2;}).length;
+      const next=moveAccountGroup(layout,drag.id,group,index);
+      if(next.main.join()!==layout.main.join()||next.more.join()!==layout.more.join()){layout=next;applyOrder();}
+      picker.dataset.dropGroup=group;
       const top=drag.node.getBoundingClientRect().top-drag.dy;drag.dy=drag.y-drag.offset-top;drag.node.style.transform=`translateY(${drag.dy}px)`;
     }
     function scrollDrag(){
@@ -204,19 +250,20 @@
       if(delta){accountList.scrollTop+=delta;moveDrag();}dragFrame=requestAnimationFrame(scrollDrag);
     }
     function finishDrag(cancel=false){
-      if(!drag)return;const done=drag;drag=null;cancelAnimationFrame(dragFrame);done.node.classList.remove('is-dragging');done.node.style.transform='';picker.classList.remove('is-sorting');
+      if(!drag)return;const done=drag;drag=null;cancelAnimationFrame(dragFrame);done.node.classList.remove('is-dragging');done.node.style.transform='';picker.classList.remove('is-sorting');picker.style.removeProperty('--rs-picker-height');delete picker.dataset.dropGroup;
       if(picker.hasPointerCapture?.(done.pointer))picker.releasePointerCapture(done.pointer);
-      if(done.moved){blockedUntil=Date.now()+700;if(cancel){order=done.before;applyOrder(true);orderStatus.textContent='已取消排序';}else saveOrder(done.id);}
-      sync();
+      if(done.moved){blockedUntil=Date.now()+700;if(cancel){layout=done.before;applyOrder();setMore(done.moreOpen);orderStatus.textContent='已取消排序';}else saveOrder(done.id);}
+      sync();if(picker.matches(':popover-open'))positionPicker();
     }
-    picker.addEventListener('pointerdown',e=>{const grip=e.target.closest('[data-account-drag]');if(!grip||e.button!==0||e.isPrimary===false)return;e.preventDefault();grip.focus({preventScroll:true});const node=grip.closest('[data-account-row]');drag={id:grip.dataset.accountDrag,node,pointer:e.pointerId,start:e.clientY,y:e.clientY,offset:e.clientY-node.getBoundingClientRect().top,dy:0,moved:false,before:[...order]};picker.setPointerCapture(e.pointerId);});
-    picker.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.pointer)return;drag.y=e.clientY;if(!drag.moved&&Math.abs(e.clientY-drag.start)>5){drag.moved=true;drag.node.classList.add('is-dragging');picker.classList.add('is-sorting');dragFrame=requestAnimationFrame(scrollDrag);}if(drag.moved){e.preventDefault();moveDrag();}},{passive:false});
-    picker.addEventListener('pointerup',e=>{if(e.pointerId===drag?.pointer)finishDrag();});
+    picker.addEventListener('pointerdown',e=>{const grip=e.target.closest('[data-account-drag]');if(!grip||e.button!==0||e.isPrimary===false)return;e.preventDefault();grip.focus({preventScroll:true});for(const n of accountNodes.values())n.getAnimations().forEach(a=>a.cancel());const node=grip.closest('[data-account-row]');drag={id:grip.dataset.accountDrag,node,pointer:e.pointerId,start:e.clientY,y:e.clientY,offset:e.clientY-node.getBoundingClientRect().top,dy:0,moved:false,before:{main:[...layout.main],more:[...layout.more]},moreOpen:!groups.more.hidden};picker.setPointerCapture(e.pointerId);});
+    picker.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.pointer)return;drag.y=e.clientY;if(!drag.moved&&Math.abs(e.clientY-drag.start)>5){drag.moved=true;picker.style.setProperty('--rs-picker-height',Math.max(100,innerHeight-picker.getBoundingClientRect().top-8)+'px');drag.node.classList.add('is-dragging');picker.classList.add('is-sorting');dragFrame=requestAnimationFrame(scrollDrag);}if(drag.moved){e.preventDefault();moveDrag();}},{passive:false});
+    picker.addEventListener('pointerup',e=>{if(e.pointerId===drag?.pointer){const r=accountList.getBoundingClientRect();finishDrag(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom);}});
     picker.addEventListener('pointercancel',e=>{if(e.pointerId===drag?.pointer)finishDrag(true);});
     picker.addEventListener('lostpointercapture',()=>finishDrag(true));
     picker.addEventListener('dragstart',e=>e.preventDefault());
     window.addEventListener('blur',()=>finishDrag(true));
-    window.addEventListener('storage',e=>{if((e.key===ORDER_KEY||e.key===null)&&!drag){try{order=accountOrder(JSON.parse(e.newValue||'null'),tracks);applyOrder();}catch{}}});
+    window.addEventListener('storage',e=>{if([LAYOUT_KEY,ORDER_KEY,null].includes(e.key)&&!drag){layout=accountLayout(stored(LAYOUT_KEY),tracks,stored(ORDER_KEY));applyOrder();if(picker.matches(':popover-open'))positionPicker();}});
+    applyOrder();
     const dialog=document.createElement('dialog');dialog.className='rs-book';dialog.setAttribute('aria-label','策略小册');
     dialog.innerHTML=`<article class="rs-sheet"><header class="rs-header"><span>${BOOK} 策略小册</span><b data-book-label tabindex="-1"></b><button type="button" data-book-close aria-label="关闭策略小册">×</button></header><div class="rs-layout"><nav class="rs-toc" aria-label="小册章节">${[['overview','概览'],['research','历史回测'],['rules','执行规则'],['forward','前向资金'],['sources','来源']].map(([id,title],i)=>`<button type="button" data-book-chapter="${id}"><small>0${i+1}</small>${title}</button>`).join('')}</nav><div class="rs-reading"><section id="rs-overview"></section><section id="rs-research" aria-live="polite"></section><section id="rs-rules"></section><section id="rs-forward"><div class="rs-section-title"><h2>前向模拟资金曲线</h2></div><p>当前策略完整账本 · USDT · 已实现净值</p><div class="rs-forward-status" role="status"></div><div class="rs-forward-metrics"></div><div class="rs-forward-chart" role="img" aria-label="前向模拟资金曲线"></div><p class="rs-forward-note"></p><button type="button" class="rs-text-button" data-book-refresh>刷新曲线</button></section><section id="rs-sources"></section></div></div></article>`;
     document.body.append(dialog);
@@ -310,11 +357,26 @@
     // Follow its anchor instead of dismissing the just-opened calendar.
     el('.rs-reading').addEventListener('scroll',()=>positionCalendar(),{passive:true});
     function positionPicker(){const r=trigger.getBoundingClientRect();picker.style.left=Math.max(8,Math.min(r.left,innerWidth-picker.offsetWidth-8))+'px';picker.style.top=Math.max(8,Math.min(r.bottom+6,innerHeight-picker.offsetHeight-8))+'px';}
-    function sync(){trigger.querySelector('b').textContent=label(getTrack());picker.querySelectorAll('[data-strategy-select]').forEach(b=>{const selected=b.dataset.strategySelect===getTrack();b.setAttribute('aria-pressed',String(selected));b.closest('[data-account-row]').dataset.selected=String(selected);});picker.querySelectorAll('[data-account-pnl]').forEach(n=>{const v=pnlView(getPnl?.(n.dataset.accountPnl));n.textContent=v.text;n.className=v.tone;n.title=v.title;});}
-    trigger.addEventListener('click',()=>{if(picker.matches(':popover-open'))picker.hidePopover();else{sync();picker.showPopover();positionPicker();picker.querySelector(`[data-strategy-select="${getTrack()}"]`).focus({preventScroll:true});}});
+    function sync(){trigger.querySelector('b').textContent=label(getTrack());picker.querySelector('[data-more-current]').textContent=layout.more.includes(getTrack())?'当前：'+label(getTrack()):'';picker.querySelectorAll('[data-strategy-select]').forEach(b=>{const selected=b.dataset.strategySelect===getTrack();b.setAttribute('aria-pressed',String(selected));b.closest('[data-account-row]').dataset.selected=String(selected);});picker.querySelectorAll('[data-account-pnl]').forEach(n=>{const v=pnlView(getPnl?.(n.dataset.accountPnl));n.textContent=v.text;n.className=v.tone;n.title=v.title;});}
+    trigger.addEventListener('click',()=>{if(picker.matches(':popover-open'))picker.hidePopover();else{setMore(false);orderStatus.textContent='拖动把手排序或移入常用';sync();picker.showPopover();accountList.scrollTop=0;positionPicker();(layout.main.includes(getTrack())?picker.querySelector(`[data-strategy-select="${getTrack()}"]`):moreToggle).focus({preventScroll:true});}});
     picker.addEventListener('toggle',()=>{const shown=picker.matches(':popover-open');trigger.setAttribute('aria-expanded',String(shown));root.classList.toggle('rs-picker-webkit',shown&&/AppleWebKit\//.test(navigator.userAgent)&&!/(Chrome|Chromium|Edg)\//.test(navigator.userAgent));if(!shown)finishDrag(true);});
-    picker.addEventListener('keydown',event=>{if(event.key==='Escape'){event.stopPropagation();if(drag){event.preventDefault();finishDrag(true);}return;}const row=event.target.closest('[data-account-row]');if(!row)return;const i=order.indexOf(row.dataset.accountRow);if(event.altKey&&['ArrowDown','ArrowUp'].includes(event.key)){event.preventDefault();order=moveAccount(order,row.dataset.accountRow,i+(event.key==='ArrowDown'?1:-1));applyOrder(true);saveOrder(row.dataset.accountRow);return;}if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();const column=[...row.querySelectorAll('button')].indexOf(event.target),next=event.key==='Home'?0:event.key==='End'?order.length-1:(i+(event.key==='ArrowDown'?1:-1)+order.length)%order.length;accountNodes.get(order[next]).querySelectorAll('button')[Math.max(0,column)].focus();}});
-    picker.addEventListener('click',event=>{if(event.detail!==0&&Date.now()<blockedUntil){event.preventDefault();event.stopPropagation();return;}const b=event.target.closest('button');if(!b)return;if(b.dataset.strategySelect){onSelect(b.dataset.strategySelect);sync();picker.hidePopover();trigger.focus({preventScroll:true});}if(b.dataset.strategyBook){picker.hidePopover();show(b.dataset.strategyBook);}if(b.dataset.strategyBacktest){picker.hidePopover();onBacktest?.(b.dataset.strategyBacktest);}});
+    picker.addEventListener('keydown',event=>{
+      if(event.key==='Escape'){event.stopPropagation();if(drag){event.preventDefault();finishDrag(true);}return;}
+      const row=event.target.closest('[data-account-row]'),isMore=event.target===moreToggle;
+      if(!row&&!isMore)return;
+      if(row&&event.altKey&&['ArrowDown','ArrowUp','ArrowLeft','ArrowRight'].includes(event.key)){
+        event.preventDefault();const id=row.dataset.accountRow,from=groupOf(id),group=event.key==='ArrowLeft'?'main':event.key==='ArrowRight'?'more':from;
+        const index=group!==from?layout[group].length:layout[from].indexOf(id)+(event.key==='ArrowDown'?1:event.key==='ArrowUp'?-1:0);
+        if(group==='more')setMore(true);layout=moveAccountGroup(layout,id,group,index);applyOrder(true);saveOrder(id);positionPicker();event.target.focus();return;
+      }
+      if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){
+        event.preventDefault();const visible=[...layout.main.map(id=>accountNodes.get(id)),moreToggle,...(groups.more.hidden?[]:layout.more.map(id=>accountNodes.get(id)))];
+        const i=visible.indexOf(row||moreToggle),column=row?[...row.querySelectorAll('button')].indexOf(event.target):0;
+        const index=event.key==='Home'?0:event.key==='End'?visible.length-1:(i+(event.key==='ArrowDown'?1:-1)+visible.length)%visible.length,target=visible[index];
+        (target===moreToggle?target:target.querySelectorAll('button')[Math.max(0,column)]).focus();
+      }
+    });
+    picker.addEventListener('click',event=>{if(event.detail!==0&&Date.now()<blockedUntil){event.preventDefault();event.stopPropagation();return;}const b=event.target.closest('button');if(!b)return;if(b.hasAttribute('data-account-more')){setMore(groups.more.hidden);return;}if(b.dataset.strategySelect){onSelect(b.dataset.strategySelect);sync();picker.hidePopover();trigger.focus({preventScroll:true});}if(b.dataset.strategyBook){picker.hidePopover();show(b.dataset.strategyBook);}if(b.dataset.strategyBacktest){picker.hidePopover();onBacktest?.(b.dataset.strategyBacktest);}});
     function stopCharts(){chartObserver.disconnect();visibleCharts.clear();for(const frame of [chartFrame,resizeFrame,zoomFrame])cancelAnimationFrame(frame);chartFrame=resizeFrame=zoomFrame=null;bars.forEach(c=>c?.dispose());bars=[];barPaintKeys=[];line?.dispose();line=null;forwardPaintData=null;historyChart?.dispose();historyChart=null;historyPaintKey='';}
     function close(immediate=false){
       closeCalendar();
@@ -348,11 +410,9 @@
       el('.rs-forward-note').textContent=window.SpikeReclaimAnalytics.curveNote(data)+' 不含浮动盈亏。'+window.SpikeReclaimAnalytics.coverageNote(data.coverage);queueCharts();
     }
     function rules(){
-      const d=getSnapshot(),current=d?.tracks?.[track],lock=track==='v3lock',sp=track==='spike',all=['allin3','live-allin3'].includes(track),v3=['v3','v3add','v3lock','v3add20'].includes(track);
-      const threshold=all?d?.[track]?.min_score:sp?d?.spike?.min_score:v3?d?.v3?.min_score:d?.model?.threshold;
-      const offset=lock?d?.v3lock?.breakeven_offset_bp:d?.breakeven_offset_bp;
-      el('#rs-overview').innerHTML=`<div class="rs-section-title"><h1>${esc(label(track))}<em>${esc(TITLES[track])}</em></h1></div><div class="rs-facts"><div><small>确认周期</small><b>${num(current?.confirm_minutes,0)} <small>分钟</small></b></div><div><small>入场分门槛</small><b>≥ ${num(threshold,4)}</b></div><div><small>${lock?'利润锁':'保护偏移'}</small><b>+${num(offset/100)}%</b></div></div>${!current?'<p class="rs-warning">策略规则尚未读取，参数保持空缺。稍后重新打开可重试。</p>':''}`;
-      el('#rs-rules').innerHTML=`<div class="rs-section-title"><h2>从触价到退出</h2></div><ol class="rs-flow"><li><b>划区间</b><span>纽约周一高低点 H / L，宽度 W=H−L。上沿 H+0.618W，下沿 L−0.618W。</span></li><li><b>等触价</b><span>每周每侧首次触及；下沿做多、上沿做空。${track==='live-allin3'?'冻结入场评分仅使用触价前已收盘信息；当前模拟运行。':['live-wick6x3','live-wick3x3','live-wick6x3hi','live-wick3x3far'].includes(track)?'触价5m收盘时评分并检查收回比例，收盘后市价入场，不回记；当前模拟运行。':'原回测评分包含触价5m收盘信息，收盘后回记触价入场。'}分数不是胜率。</span></li><li><b>等回收</b><span>触价所在K线之后，下一根确认周期K线收盘。未收回则退出；目标可在确认前成交。</span></li><li><b>保护余仓</b><span>收回且越过保护价才移动止损；收回但未越过时按确认收盘退出。多单加偏移，空单减偏移。</span></li></ol><h3>本策略当前规则</h3><div class="rs-current-rules">${current?renderRules(d,track):'<p>正在读取策略数据。</p>'}</div><p class="rs-muted">规则取自当前只读模拟盘接口；历史回测版本差异见回测章节。</p>`;
+      const d=getSnapshot(),current=d?.tracks?.[track];
+      el('#rs-overview').innerHTML=overviewHTML(d,track);
+      el('#rs-rules').innerHTML=`<div class="rs-section-title"><h2>从触价到退出</h2></div>${flowHTML(track)}<h3>本策略当前规则</h3><div class="rs-current-rules">${current?renderRules(d,track):'<p>正在读取策略数据。</p>'}</div><p class="rs-muted">规则取自当前只读模拟盘接口；历史回测版本差异见回测章节。</p>`;
     }
     async function show(next){
       closeCalendar();
@@ -398,7 +458,7 @@
     new MutationObserver(()=>{if(open)queueCharts();}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
     window.addEventListener('resize',()=>{if(picker.matches(':popover-open'))positionPicker();positionCalendar();});
     document.addEventListener('visibilitychange',()=>{analytics?.setActive(active&&open&&!document.hidden&&visibleCharts.has(el('.rs-forward-chart')));if(!document.hidden)queueCharts();});
-    sync();return {sync,close,getOrder:()=>[...order],setActive(value){active=value;if(!value){if(picker.matches(':popover-open'))picker.hidePopover();close(true);}}};
+    sync();return {sync,close,getOrder:()=>[...layout.main,...layout.more],setActive(value){active=value;if(!value){if(picker.matches(':popover-open'))picker.hidePopover();close(true);}}};
   }
   window.SpikeStrategyBook={...api,create};
 })();

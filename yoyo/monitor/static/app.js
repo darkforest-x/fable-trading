@@ -4,7 +4,8 @@
 
   const $ = (id) => document.getElementById(id);
   const DEFAULT_VIEW = "signals";
-  const HOME_ROUTE = "#signals?pane=reclaim&track=spike&tab=events&scope=funded&period=15m";
+  // Owner 2026-11-05: spikeok.com opens the 1.618 page fixed on BTC, 15 minutes.
+  const HOME_ROUTE = "#signals?pane=reclaim&track=spike&tab=events&scope=funded&period=15m&symbol=BTC-USDT-SWAP";
   const state = {
     view: DEFAULT_VIEW, signals: [], directSignals: [], performanceSignals: [], rawYoloSignals: [], candidates: [], signalScope: "retest", markets: [], status: null, health: null,
     signalsLoaded: false, directSignalsLoaded: false, directSignalTotal: 0, candidatesLoaded: false, candidateTotal: 0, candidateCounts: null, marketsLoaded: false, marketsLoading: false, marketsRetryTimer: null, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
@@ -35,7 +36,7 @@
     market: ["市场共振观察", "BTC、ETH 同时放量，多数山寨也同方向涨跌，之后会怎样？"],
     copier: ["Arthur 监控", "一个频道，一套可核对的模拟账本。发布、采集、处理与成交分别记录。"],
     models: ["模型中心", "查看登记制品、来源、特征语义和身份校验；身份校验不代表模型效果或生产准入。"],
-    signals: ["信号中心", "SPIKE V13.1 多空回踩再突破确认 · 15m/30m/1H/4H；通知按通知中心订阅。"],
+    signals: ["信号中心", "12H EMA 云带定方向 · 1.618 插针收盘确认。"],
     warmup: ["预热历史", "V12.8 启用前按当前规则重算的信号，仅供复盘，不补发通知。"],
     watch: ["蓄势观察", "还在横盘的，单独观察。这里的结构尚不是启动信号。"],
     shadow: ["旧版影子记录", "已退役的 V7 / V8 独立观察记录，仅供历史对照；新运行统一进入模拟实盘。"],
@@ -716,6 +717,10 @@
   }
   let signalRowsSignature = null;
   function renderSignals() {
+    if (state.view === "signals" && state.signalPane === "records") {
+      window.SpikeSignalWorkspace?.render(null, state.signalLayout, "records");
+      return;
+    }
     if (state.view === "signals" && state.signalPane === "reclaim") {
       window.SpikeSignalWorkspace?.render(null, state.signalLayout, "reclaim");
       return;
@@ -1262,6 +1267,11 @@
     }
     if (state.view === "signals" && state.signalPane === "account") {
       await Promise.allSettled([refreshShellStatus(trigger === "manual"), trigger === "manual" ? window.SpikeOKXExecution?.refresh() : null]);
+      return;
+    }
+    if (state.view === "signals" && state.signalPane === "records") {
+      window.SpikeSignalWorkspace?.render(null, state.signalLayout, 'records');
+      await Promise.allSettled([refreshShellStatus(trigger === "manual"), window.SpikeCloudSignals?.refresh()]);
       return;
     }
     if (state.view === "notifications") {

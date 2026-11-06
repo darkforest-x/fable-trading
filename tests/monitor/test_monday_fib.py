@@ -137,8 +137,8 @@ def test_sender_receipts(tmp_path, code, payload, expected):
             return payload
     def sender(url, **kwargs):
         assert kwargs["allow_redirects"] is False
-        assert len(kwargs["json"]["text"].splitlines()) == 3
-        assert "评分 0.6000" in kwargs["json"]["text"]
+        assert kwargs["json"]["text"].startswith("🔔 BTC · 触价提醒\n")
+        assert "5m 收盘分 0.6000" in kwargs["json"]["text"]
         return Response()
     deliver_once(book, ("fake", "fake"), sender, NOW + 1, score_lookup=lambda e: {"status":"scored","score":.6})
     assert book.records()[0]["status"] == expected
@@ -253,9 +253,9 @@ def test_telegram_requires_strict_raw_score_and_compact_text(tmp_path, score, al
     assert book.records()[0]['status'] == ('sent' if allowed else 'skipped')
     if allowed:
         text = calls[0]['text']
-        assert text.splitlines()[0] == 'BTC · 上沿 1.618'
-        assert len(text.splitlines()) == 3 and '点位 116.18' in text and '北京' in text
-        assert '评分 0.4000 ·' not in text
+        assert text.splitlines()[0] == '🔔 BTC · 触价提醒'
+        assert '上沿 1.618 · 点位 116.18' in text and '北京触价' in text
+        assert '5m 收盘分 0.4000' != text.splitlines()[-1]
         assert all(label not in text for label in ['-USDT-SWAP', '纽约时间', '本周首次', '最新价'])
         assert calls[0]['reply_markup']['inline_keyboard'][0][0]['url'].endswith('OKX%3ABTCUSDT.P&interval=15')
 
@@ -280,8 +280,9 @@ def test_live_entries_are_sent_once_with_the_accounts_named(tmp_path, result):
     assert deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+1, score_lookup=lookup)
     assert len(calls) == 1 and book.records()[0]['status'] == 'sent'
     lines = calls[0]['text'].splitlines()
-    assert lines[1].startswith('评分 —' if result['score'] is None else f"评分 {result['score']:.4f}")
-    assert lines[3:] == ['live开仓 · live-allin3、live-wick6x3 · 模拟', 'live未开 · live-wick3x3（满仓）']
+    assert lines[0] == '🟢 BTC · live开仓'
+    assert ('5m 收盘分 —' if result['score'] is None else f"5m 收盘分 {result['score']:.4f}") in lines
+    assert lines[-3:] == ['✓ live-allin3 · 已模拟开仓', '✓ live-wick6x3 · 已模拟开仓', '— live-wick3x3 · 未开：满仓']
     assert not deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+2, score_lookup=lookup)
     assert len(calls) == 1  # one message per touch, whatever number of accounts entered
 
@@ -290,8 +291,20 @@ def test_live_entries_are_sent_once_with_the_accounts_named(tmp_path, result):
 def test_without_valid_live_entries_the_score_gate_still_applies(tmp_path, entries):
     book, calls = queued_book(tmp_path), []
     deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+1,
-                 score_lookup=lambda event: {'status': 'scored', 'score': .3, 'live_entries': entries})
+                 score_lookup=lambda event: {'status': 'scored', 'score': .3, 'live_entries': entries,
+                                             'live_thresholds': {'live-allin3': .6, 'live-wick': .5}})
     assert not calls and book.records()[0]['status'] == 'skipped'
+
+
+def test_known_empty_entries_explain_a_touch_alert_without_claiming_execution(tmp_path):
+    book, calls = queued_book(tmp_path), []
+    deliver_once(book, ('fake', 'fake'), fake_sender(calls), NOW+1,
+                 score_lookup=lambda event: {'status': 'scored', 'score': .438, 'live_allin3_score': .4421,
+                                             'live_entries': [], 'live_thresholds': {'live-allin3': .6, 'live-wick': .5}})
+    assert len(calls) == 1 and 'live 未开仓' in calls[0]['text']
+    assert 'live-allin3 · 未开：触价前分 < 0.6' in calls[0]['text']
+    assert 'live-wick · 未开：收盘分 < 0.5' in calls[0]['text']
+    assert '已模拟开仓' not in calls[0]['text']
 
 
 def test_wait_for_score_without_claiming_delivery_or_blocking_other_ready_events(tmp_path):

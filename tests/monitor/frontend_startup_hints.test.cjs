@@ -107,7 +107,9 @@ for(const period of ['12H','1D'])test(`paper cold ${period} link warms the selec
  assert.equal(h.calls.filter(c=>c.url.includes('period=5m')).length,0);
 });
 
-test('empty home warms BTC 15m and ignores other accounts historical trades',async()=>{
+test('empty home warms BTC 15m even when the spike account has a newer funded coin (owner 2026-11-05)',async()=>{
+ const h0=harness({hash:''});h0.calls[0].resolve({ok:true,json:async()=>({tracks:{spike:{open:[{id:7,symbol:'SOL-USDT-SWAP',side:1,entry:1,fill_ms:100,taken:1,notional:100}],closed:[]}}})});await flush();
+ assert.equal(h0.calls[2].url,'/api/monday-fib/candles?symbol=BTC-USDT-SWAP&period=15m&wait_ms=8000');
  const h=harness({hash:''});h.calls[0].resolve({ok:true,json:async()=>({tracks:{spike:{open:[],closed:[]},60:{open:[{id:1,symbol:'SOL-USDT-SWAP',side:1,entry:1,fill_ms:100,taken:1,notional:100}]}}})});await flush();
  assert.deepEqual(h.calls.map(c=>c.url),['/api/monday-reclaim-paper?list_period=today&track=spike','/api/monday-fib/levels?symbol=BTC-USDT-SWAP','/api/monday-fib/candles?symbol=BTC-USDT-SWAP&period=15m&wait_ms=8000']);
  assert.equal(paperSymbol({tracks:{}},new URLSearchParams('trade=999')),null);

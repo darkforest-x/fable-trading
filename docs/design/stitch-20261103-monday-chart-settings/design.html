@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SPIKE · 1.618 全屏图表 · 图表设置与区间线/K线/指标Apple Glass弹层</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+            display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Apple Glass Tokens */
+    :root {
+      --glass-bg: rgba(255, 255, 255, 0.88);
+      --glass-card: rgba(255, 255, 255, 0.72);
+      --glass-border: rgba(255, 255, 255, 0.85);
+      --glass-inner-border: rgba(0, 0, 0, 0.06);
+      --glass-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.16), 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+      --chart-bg: #f8fafc;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --range-line-1618: #17191D;
+      --range-line-hl: #9399A2;
+    }
+    .dark {
+      --glass-bg: rgba(18, 22, 31, 0.88);
+      --glass-card: rgba(28, 34, 48, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-inner-border: rgba(255, 255, 255, 0.08);
+      --glass-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      --chart-bg: #0b0e14;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --range-line-1618: #E3E7EC;
+      --range-line-hl: #9399A2;
+    }
+
+    body {
+      touch-action: pan-x pan-y;
+      -webkit-font-smoothing: antialiased;
+      background-color: var(--chart-bg);
+      color: var(--text-main);
+      user-select: none;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .apple-glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+    }
+
+    .apple-glass-card {
+      background: var(--glass-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-inner-border);
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* custom scrollbar */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 9999px; }
+  </style>
+</head>
+<body class="w-screen h-screen overflow-hidden flex flex-col relative">
+
+  <!-- ==================== 1. FULL VIEWPORT K-LINE WALLPAPER (100% Canvas Background) ==================== -->
+  <div id="chart-viewport" class="absolute inset-0 z-0 overflow-hidden bg-slate-50 dark:bg-[#0b0e14]">
+    <svg class="w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="grid" width="70" height="48" patternUnits="userSpaceOnUse">
+          <path d="M 70 0 L 0 0 0 48" fill="none" stroke="currentColor" class="text-slate-200/50 dark:text-slate-800/40" stroke-width="0.75" stroke-dasharray="2 2"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grid)" />
+
+      <!-- Historical Week Divider lines -->
+      <line x1="28%" y1="0" x2="28%" y2="100%" stroke="currentColor" class="text-slate-300 dark:text-slate-800" stroke-width="1" stroke-dasharray="4 4" />
+      <line x1="58%" y1="0" x2="58%" y2="100%" stroke="currentColor" class="text-slate-300 dark:text-slate-800" stroke-width="1" stroke-dasharray="4 4" />
+      <line x1="84%" y1="0" x2="84%" y2="100%" stroke="currentColor" class="text-blue-400/40 dark:text-blue-500/40" stroke-width="1.2" stroke-dasharray="4 4" />
+
+      <!-- Week Labels -->
+      <text x="29%" y="42" font-size="10" font-family="JetBrains Mono" class="fill-slate-400 dark:fill-slate-500">W2 (09/30 - 10/06)</text>
+      <text x="59%" y="42" font-size="10" font-family="JetBrains Mono" class="fill-slate-400 dark:fill-slate-500">W3 (10/07 - 10/13)</text>
+      <text x="85%" y="42" font-size="10" font-family="JetBrains Mono" font-weight="600" class="fill-blue-500 dark:fill-blue-400">当前周 W4 (10/14 - 10/20)</text>
+
+      <!-- Range Lines W2 (Historical) -->
+      <line x1="28%" y1="28%" x2="58%" y2="28%" stroke="#9399A2" stroke-width="1" />
+      <line x1="28%" y1="62%" x2="58%" y2="62%" stroke="#9399A2" stroke-width="1" />
+
+      <!-- Range Lines W3 (Historical) -->
+      <line x1="58%" y1="24%" x2="84%" y2="24%" stroke="#9399A2" stroke-width="1" />
+      <line x1="58%" y1="60%" x2="84%" y2="60%" stroke="#9399A2" stroke-width="1" />
+
+      <!-- Range Lines W4 (CURRENT WEEK - Active Spec) -->
+      <!-- 上 1.618 Fib line: 171.20 -->
+      <line id="svg-upper-1618" x1="84%" y1="18%" x2="100%" y2="18%" stroke="var(--range-line-1618)" stroke-width="1" />
+      <!-- 周一高: 168.00 -->
+      <line id="svg-mon-high" x1="84%" y1="26%" x2="100%" y2="26%" stroke="var(--range-line-hl)" stroke-width="1" />
+      <!-- 周一低: 158.50 -->
+      <line id="svg-mon-low" x1="84%" y1="56%" x2="100%" y2="56%" stroke="var(--range-line-hl)" stroke-width="1" />
+      <!-- 下 1.618 Fib line: 154.20 -->
+      <line id="svg-lower-1618" x1="84%" y1="68%" x2="100%" y2="68%" stroke="var(--range-line-1618)" stroke-width="1" />
+
+      <!-- Current live price dash line (164.50) -->
+      <line x1="0" y1="36%" x2="100%" y2="36%" stroke="#0071e3" stroke-width="1" stroke-dasharray="4 4" opacity="0.75" />
+
+      <!-- Candlesticks rendering simulation (W2, W3, W4) -->
+      <!-- Candlesticks in neutral grey or classic colors -->
+      <!-- W2 Candles -->
+      <g stroke="#64748b" stroke-width="1.2">
+        <line x1="31%" y1="52%" x2="31%" y2="32%" /><rect x="30.2%" y="36%" width="1.6%" height="12%" fill="#22c55e" stroke="none" rx="1"/>
+        <line x1="34%" y1="46%" x2="34%" y2="28%" /><rect x="33.2%" y="30%" width="1.6%" height="10%" fill="#22c55e" stroke="none" rx="1"/>
+        <line x1="37%" y1="50%" x2="37%" y2="30%" /><rect x="36.2%" y="32%" width="1.6%" height="14%" fill="#ef4444" stroke="none" rx="1"/>
+        <line x1="40%" y1="58%" x2="40%" y2="35%" /><rect x="39.2%" y="40%" width="1.6%" height="16%" fill="#22c55e" stroke="none" rx="1"/>
+        <line x1="43%" y1="62%" x2="43%" y2="42%" /><rect x="42.2%" y="44%" width="1.6%" height="14%" fill="#22c55e" stroke="none" rx="1"/>
+        <line x1="46%" y1="58%" x2="46%" y2="38%" /><rect x="45.2%" y="40%" width="1.6%" height="12%" fill="#ef4444" stroke="none" rx="1"/>
+        <line x1="49%" y1="54%" x2="49%" y2="27%" /><rect x="48.2%" y="30%" width="1.6%" height="18%" fill="#22c55e" stroke="none" rx="1"/>
+        <line x1="52%" y1="48%" x2="52%" y2="29%" /><rect x="51.2%" y="34%" width="1.6%" height="12%" fill="#ef4444" stroke="none" rx="1"/>
+      </g>
+
+      <!-- W3 Candles -->
+      <g stroke="#64748b" stroke-width="1.2">
+        <line x1="61%" y1="54%" x2="61%" y2="34%" /><rect x="60.2%" y="38%" width="1.6%" height="12%" fill="#22c55e" stroke="none" rx="1"/>
+        <line x1="64%" y1="48%" x2="64%" y2="26%" /><rect x="63.2%" y="28%" width="1.6%" height="14%" fill="#22c55e" stroke="none" rx="1"/>
+        <line x1="67%" y1="52%" x2="67%" y2="30%" /><rect x="66.2%" y="34%" width="1.6%" height="12%" fill="#ef4444" stroke="none" rx="1"/>
+        <line x1="70%" y1="58%" x2="70%" y2="36%" /><rect x="69.2%" y="42%" width="1.6%" height="14%" fill="#22c55e" stroke="none" rx="1"/>
+        <line x1="73%" y1="46%" x2="73%" y2="22%" /><rect x="72.2%" y="25%" width="1.6%" height="16%" fill="#ef4444" stroke="none" rx="1"/>
+        <line x1="76%" y1="50%" x2="76%" y2="28%" /><rect x="75.2%" y="32%" width="1.6%" height="14%" fill="#22c55e" stroke="none" rx="1"/>
+        <line x1="79%" y1="56%" x2="79%" y2="38%" /><rect x="78.2%" y="42%" width="1.6%" height="10%" fill="#22c55e" stroke="none" rx="1"/>
+      </g>
+
+      <!-- W4 Current Candles (12H / 4H sequence) -->
+      <g stroke="#64748b" stroke-width="1.2">
+        <!-- Monday bar (anchor candle) -->
+        <line x1="86%" y1="56%" x2="86%" y2="26%" /><rect x="85.2%" y="30%" width="1.6%" height="22%" fill="#22c55e" stroke="none" rx="1"/>
+        <line x1="89%" y1="50%" x2="89%" y2="25%" /><rect x="88.2%" y="28%" width="1.6%" height="18%" fill="#22c55e" stroke="none" rx="1"/>
+        <!-- Wednesday probe touches Mon High 168.00 -->
+        <line x1="92%" y1="46%" x2="92%" y2="21%" /><rect x="91.2%" y="24%" width="1.6%" height="16%" fill="#ef4444" stroke="none" rx="1"/>
+        <!-- Thursday pullback -->
+        <line x1="95%" y1="44%" x2="95%" y2="30%" /><rect x="94.2%" y="34%" width="1.6%" height="8%" fill="#22c55e" stroke="none" rx="1"/>
+      </g>
+
+      <!-- Volume bars at bottom -->
+      <g class="opacity-30 dark:opacity-20">
+        <rect x="30.2%" y="82%" width="1.6%" height="8%" fill="#22c55e" />
+        <rect x="33.2%" y="78%" width="1.6%" height="12%" fill="#22c55e" />
+        <rect x="36.2%" y="84%" width="1.6%" height="6%" fill="#ef4444" />
+        <rect x="39.2%" y="75%" width="1.6%" height="15%" fill="#22c55e" />
+        <rect x="42.2%" y="80%" width="1.6%" height="10%" fill="#22c55e" />
+        <rect x="45.2%" y="83%" width="1.6%" height="7%" fill="#ef4444" />
+        <rect x="48.2%" y="72%" width="1.6%" height="18%" fill="#22c55e" />
+        <rect x="51.2%" y="81%" width="1.6%" height="9%" fill="#ef4444" />
+        <rect x="60.2%" y="76%" width="1.6%" height="14%" fill="#22c55e" />
+        <rect x="63.2%" y="70%" width="1.6%" height="20%" fill="#22c55e" />
+        <rect x="66.2%" y="82%" width="1.6%" height="8%" fill="#ef4444" />
+        <rect x="69.2%" y="78%" width="1.6%" height="12%" fill="#22c55e" />
+        <rect x="72.2%" y="68%" width="1.6%" height="22%" fill="#ef4444" />
+        <rect x="75.2%" y="80%" width="1.6%" height="10%" fill="#22c55e" />
+        <rect x="78.2%" y="84%" width="1.6%" height="6%" fill="#22c55e" />
+        <rect x="85.2%" y="65%" width="1.6%" height="25%" fill="#22c55e" />
+        <rect x="88.2%" y="72%" width="1.6%" height="18%" fill="#22c55e" />
+        <rect x="91.2%" y="62%" width="1.6%" height="28%" fill="#ef4444" />
+        <rect x="94.2%" y="77%" width="1.6%" height="13%" fill="#22c55e" />
+      </g>
+    </svg>
+
+    <!-- Right-hand Price Axis Labels (Pure uncluttered scale) -->
+    <div class="absolute right-0 top-0 bottom-12 w-14 pointer-events-none flex flex-col justify-between py-12 pr-2 text-right text-[11px] font-mono tabular-nums text-slate-400 dark:text-slate-500">
+      <div class="flex items-center justify-end gap-1">
+        <span class="text-[9px] px-1 rounded bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-sans">上1.618</span>
+        <span class="font-semibold text-slate-800 dark:text-slate-200">171.20</span>
+      </div>
+      <div class="flex items-center justify-end gap-1">
+        <span class="text-[9px] px-1 rounded bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-sans">周高</span>
+        <span>168.00</span>
+      </div>
+      <div class="flex items-center justify-end text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-950/40 px-1 py-0.5 rounded border border-blue-200 dark:border-blue-800">
+        164.50
+      </div>
+      <div class="flex items-center justify-end gap-1">
+        <span class="text-[9px] px-1 rounded bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-sans">周低</span>
+        <span>158.50</span>
+      </div>
+      <div class="flex items-center justify-end gap-1">
+        <span class="text-[9px] px-1 rounded bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-sans">下1.618</span>
+        <span class="font-semibold text-slate-800 dark:text-slate-200">154.20</span>
+      </div>
+      <div>148.00</div>
+    </div>
+  </div>
+
+  <!-- ==================== 2. TOP FLOATING APPLE GLASS CONTROLS (Left Header & Watchlist Pill) ==================== -->
+  <header class="relative z-10 w-full px-3 md:px-5 pt-3 md:pt-4 flex items-center justify-between pointer-events-none">
+    
+    <!-- Top-Left Floating Minimal Logo & Dropdown Anchor -->
+    <div class="flex items-center gap-2 pointer-events-auto">
+      <div class="apple-glass rounded-full px-3 py-1.5 flex items-center gap-2 shadow-sm text-xs font-semibold cursor-pointer active:scale-95 transition-transform">
+        <span class="text-amber-500 font-black">ϟ</span>
+        <span class="tracking-wider">SPIKE</span>
+        <span class="text-[10px] text-slate-400 font-mono">1.618</span>
+        <span class="text-slate-400">▾</span>
+      </div>
+
+      <!-- Current Symbol & Live Status Pill -->
+      <div class="apple-glass rounded-full px-3.5 py-1.5 flex items-center gap-2 text-xs font-medium">
+        <span class="font-bold text-sm tracking-tight">SOL/USDT</span>
+        <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 font-mono font-semibold">+1.85%</span>
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="text-[11px] tabular-nums font-mono text-slate-500">164.50</span>
+      </div>
+    </div>
+
+    <!-- Top-Right Theme Toggle & Quick Status -->
+    <div class="flex items-center gap-2 pointer-events-auto">
+      <div class="hidden md:flex apple-glass rounded-full px-3 py-1.5 text-xs text-slate-500 items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+        <span>已加载 4 周行情 · 56根 12H K线</span>
+      </div>
+
+      <button id="theme-btn" onclick="toggleTheme()" class="apple-glass rounded-full w-9 h-9 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-blue-500 active:scale-90 transition-transform" title="切换深浅主题">
+        <svg id="theme-sun" class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        <svg id="theme-moon" class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== 3. FLOATING FOCUS POPOVER: CHART SETTINGS (图表设置) ==================== -->
+  <!-- Anchored above bottom bar, width ~320px, strictly optimized for 390px mobile and desktop -->
+  <div id="chart-settings-popover" class="fixed z-40 bottom-16 left-1/2 -translate-x-1/2 sm:left-auto sm:right-6 sm:translate-x-0 w-[336px] max-w-[calc(100vw-24px)] apple-glass rounded-[22px] p-3.5 shadow-2xl transition-all duration-200">
+    
+    <!-- Popover Header: Title, Reset & Auto-save in same compact row -->
+    <div class="flex items-center justify-between pb-2.5 mb-2 border-b border-black/5 dark:border-white/10">
+      <div class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+        <h3 class="text-xs font-bold tracking-tight text-slate-800 dark:text-slate-100 font-sans">图表设置</h3>
+        <span class="text-[10px] text-slate-400 font-mono font-normal">v2.4</span>
+      </div>
+
+      <!-- Compact Actions in same header row -->
+      <div class="flex items-center gap-2 text-[11px]">
+        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-800/40">
+          <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          已自动保存
+        </span>
+        <button onclick="resetDefaults()" class="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 text-[10px] transition-colors font-medium">恢复默认</button>
+        <button onclick="togglePopover()" class="w-5 h-5 rounded-full flex items-center justify-center text-slate-400 hover:bg-black/5 dark:hover:bg-white/10 text-xs leading-none">✕</button>
+      </div>
+    </div>
+
+    <!-- 3 Compact Tabs: 指标 / K线 / 区间线 -->
+    <div class="grid grid-cols-3 gap-1 p-0.5 rounded-xl bg-slate-200/60 dark:bg-slate-800/60 text-xs font-semibold mb-3">
+      <button id="tab-btn-indicators" onclick="switchTab('indicators')" class="py-1.5 px-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 transition-all text-center">指标</button>
+      <button id="tab-btn-kline" onclick="switchTab('kline')" class="py-1.5 px-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 transition-all text-center">K线</button>
+      <button id="tab-btn-range" onclick="switchTab('range')" class="py-1.5 px-2 rounded-lg bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-300 shadow-sm transition-all text-center">区间线</button>
+    </div>
+
+    <!-- TAB 1: 区间线 TAB CONTENT (Default & Highlighted View) -->
+    <div id="tab-content-range" class="space-y-2 text-xs">
+      <div class="text-[10px] text-slate-500 dark:text-slate-400 flex items-center justify-between px-1">
+        <span>周一高低点与上下1.618斐波扩展线</span>
+        <span class="text-slate-400 font-mono">1px 实线默认</span>
+      </div>
+
+      <!-- 4 Rows of Range Lines in Single Compact List -->
+      <div class="space-y-1.5">
+        
+        <!-- Row 1: 周一高 -->
+        <div class="apple-glass-card rounded-xl p-2 flex items-center justify-between gap-1.5">
+          <div class="flex items-center gap-2 min-w-[76px]">
+            <input type="color" id="color-mon-high" value="#9399A2" onchange="updateLine('mon-high', this.value)" class="w-5 h-5 rounded-md cursor-pointer border border-black/10 dark:border-white/20 p-0 bg-transparent" />
+            <span class="font-medium text-slate-700 dark:text-slate-200">周一高</span>
+          </div>
+          <!-- Line Style Picker: 实线 / 虚线 / 点线 -->
+          <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg text-[10px]">
+            <button onclick="setLineDash('mon-high', 'solid')" class="px-1.5 py-0.5 rounded bg-white dark:bg-slate-700 shadow-xs font-semibold text-slate-800 dark:text-slate-100">实</button>
+            <button onclick="setLineDash('mon-high', 'dashed')" class="px-1.5 py-0.5 rounded text-slate-500 hover:text-slate-800">虚</button>
+            <button onclick="setLineDash('mon-high', 'dotted')" class="px-1.5 py-0.5 rounded text-slate-500 hover:text-slate-800">点</button>
+          </div>
+          <!-- Stroke Width: 1 / 2 / 3 px -->
+          <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg text-[10px]">
+            <button onclick="setLineWidth('mon-high', 1)" class="w-5 py-0.5 text-center rounded bg-white dark:bg-slate-700 font-mono font-bold text-slate-800 dark:text-slate-100">1</button>
+            <button onclick="setLineWidth('mon-high', 2)" class="w-5 py-0.5 text-center rounded font-mono text-slate-500">2</button>
+            <button onclick="setLineWidth('mon-high', 3)" class="w-5 py-0.5 text-center rounded font-mono text-slate-500">3</button>
+          </div>
+          <!-- Hex Tag Display -->
+          <span class="text-[9px] font-mono text-slate-400 w-11 text-right">#9399A2</span>
+        </div>
+
+        <!-- Row 2: 周一低 -->
+        <div class="apple-glass-card rounded-xl p-2 flex items-center justify-between gap-1.5">
+          <div class="flex items-center gap-2 min-w-[76px]">
+            <input type="color" id="color-mon-low" value="#9399A2" onchange="updateLine('mon-low', this.value)" class="w-5 h-5 rounded-md cursor-pointer border border-black/10 dark:border-white/20 p-0 bg-transparent" />
+            <span class="font-medium text-slate-700 dark:text-slate-200">周一低</span>
+          </div>
+          <!-- Line Style Picker -->
+          <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg text-[10px]">
+            <button onclick="setLineDash('mon-low', 'solid')" class="px-1.5 py-0.5 rounded bg-white dark:bg-slate-700 shadow-xs font-semibold text-slate-800 dark:text-slate-100">实</button>
+            <button onclick="setLineDash('mon-low', 'dashed')" class="px-1.5 py-0.5 rounded text-slate-500 hover:text-slate-800">虚</button>
+            <button onclick="setLineDash('mon-low', 'dotted')" class="px-1.5 py-0.5 rounded text-slate-500 hover:text-slate-800">点</button>
+          </div>
+          <!-- Stroke Width -->
+          <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg text-[10px]">
+            <button onclick="setLineWidth('mon-low', 1)" class="w-5 py-0.5 text-center rounded bg-white dark:bg-slate-700 font-mono font-bold text-slate-800 dark:text-slate-100">1</button>
+            <button onclick="setLineWidth('mon-low', 2)" class="w-5 py-0.5 text-center rounded font-mono text-slate-500">2</button>
+            <button onclick="setLineWidth('mon-low', 3)" class="w-5 py-0.5 text-center rounded font-mono text-slate-500">3</button>
+          </div>
+          <!-- Hex Tag Display -->
+          <span class="text-[9px] font-mono text-slate-400 w-11 text-right">#9399A2</span>
+        </div>
+
+        <!-- Row 3: 上 1.618 (Black in light, Light in dark by default) -->
+        <div class="apple-glass-card rounded-xl p-2 flex items-center justify-between gap-1.5">
+          <div class="flex items-center gap-2 min-w-[76px]">
+            <input type="color" id="color-upper-1618" value="#17191D" onchange="updateLine('upper-1618', this.value)" class="w-5 h-5 rounded-md cursor-pointer border border-black/10 dark:border-white/20 p-0 bg-transparent" />
+            <span class="font-semibold text-slate-900 dark:text-slate-100">上 1.618</span>
+          </div>
+          <!-- Line Style Picker -->
+          <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg text-[10px]">
+            <button onclick="setLineDash('upper-1618', 'solid')" class="px-1.5 py-0.5 rounded bg-white dark:bg-slate-700 shadow-xs font-semibold text-slate-800 dark:text-slate-100">实</button>
+            <button onclick="setLineDash('upper-1618', 'dashed')" class="px-1.5 py-0.5 rounded text-slate-500 hover:text-slate-800">虚</button>
+            <button onclick="setLineDash('upper-1618', 'dotted')" class="px-1.5 py-0.5 rounded text-slate-500 hover:text-slate-800">点</button>
+          </div>
+          <!-- Stroke Width -->
+          <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg text-[10px]">
+            <button onclick="setLineWidth('upper-1618', 1)" class="w-5 py-0.5 text-center rounded bg-white dark:bg-slate-700 font-mono font-bold text-slate-800 dark:text-slate-100">1</button>
+            <button onclick="setLineWidth('upper-1618', 2)" class="w-5 py-0.5 text-center rounded font-mono text-slate-500">2</button>
+            <button onclick="setLineWidth('upper-1618', 3)" class="w-5 py-0.5 text-center rounded font-mono text-slate-500">3</button>
+          </div>
+          <!-- Hex Tag Display -->
+          <span class="text-[9px] font-mono text-slate-600 dark:text-slate-300 w-11 text-right font-medium">#17191D</span>
+        </div>
+
+        <!-- Row 4: 下 1.618 (Black in light, Light in dark by default) -->
+        <div class="apple-glass-card rounded-xl p-2 flex items-center justify-between gap-1.5">
+          <div class="flex items-center gap-2 min-w-[76px]">
+            <input type="color" id="color-lower-1618" value="#17191D" onchange="updateLine('lower-1618', this.value)" class="w-5 h-5 rounded-md cursor-pointer border border-black/10 dark:border-white/20 p-0 bg-transparent" />
+            <span class="font-semibold text-slate-900 dark:text-slate-100">下 1.618</span>
+          </div>
+          <!-- Line Style Picker -->
+          <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg text-[10px]">
+            <button onclick="setLineDash('lower-1618', 'solid')" class="px-1.5 py-0.5 rounded bg-white dark:bg-slate-700 shadow-xs font-semibold text-slate-800 dark:text-slate-100">实</button>
+            <button onclick="setLineDash('lower-1618', 'dashed')" class="px-1.5 py-0.5 rounded text-slate-500 hover:text-slate-800">虚</button>
+            <button onclick="setLineDash('lower-1618', 'dotted')" class="px-1.5 py-0.5 rounded text-slate-500 hover:text-slate-800">点</button>
+          </div>
+          <!-- Stroke Width -->
+          <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg text-[10px]">
+            <button onclick="setLineWidth('lower-1618', 1)" class="w-5 py-0.5 text-center rounded bg-white dark:bg-slate-700 font-mono font-bold text-slate-800 dark:text-slate-100">1</button>
+            <button onclick="setLineWidth('lower-1618', 2)" class="w-5 py-0.5 text-center rounded font-mono text-slate-500">2</button>
+            <button onclick="setLineWidth('lower-1618', 3)" class="w-5 py-0.5 text-center rounded font-mono text-slate-500">3</button>
+          </div>
+          <!-- Hex Tag Display -->
+          <span class="text-[9px] font-mono text-slate-600 dark:text-slate-300 w-11 text-right font-medium">#17191D</span>
+        </div>
+
+      </div>
+
+      <!-- Micro Note at bottom of tab -->
+      <div class="pt-1 flex items-center justify-between text-[10px] text-slate-400">
+        <span>无起点圆点 · 历史周同步继承线型</span>
+        <button onclick="applyAllRangeDefault()" class="hover:text-blue-500 underline">对齐主题色</button>
+      </div>
+    </div>
+
+    <!-- TAB 2: K线 TAB CONTENT (Custom Colors Switch Off by Default) -->
+    <div id="tab-content-kline" class="hidden space-y-2.5 text-xs">
+      <!-- Custom Color Master Switch (Default OFF) -->
+      <div class="apple-glass-card rounded-xl p-2.5 flex items-center justify-between">
+        <div>
+          <div class="font-medium text-slate-800 dark:text-slate-200">自定义K线配色</div>
+          <div class="text-[10px] text-slate-400">关闭时沿用原涨跌色</div>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="toggle-custom-kline" onchange="toggleCustomKline(this.checked)" class="sr-only peer">
+          <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+        </label>
+      </div>
+
+      <!-- 4 Rows of Color Inputs: 上涨 / 下跌 / 周一 / 周末 (Disabled when switch OFF) -->
+      <div id="kline-colors-group" class="space-y-1.5 opacity-50 pointer-events-none transition-opacity">
+        <div class="text-[10px] text-slate-400 px-1">纽约开盘日定界（默认四种灰色 #8B9099）</div>
+
+        <!-- Row 1: 上涨蜡烛 -->
+        <div class="apple-glass-card rounded-xl p-2 flex items-center justify-between">
+          <span class="text-slate-700 dark:text-slate-300">上涨蜡烛</span>
+          <div class="flex items-center gap-1.5">
+            <input type="color" value="#8B9099" class="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0">
+            <input type="text" value="#8B9099" class="w-16 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-[10px] text-slate-700 dark:text-slate-300 text-center" readonly>
+          </div>
+        </div>
+
+        <!-- Row 2: 下跌蜡烛 -->
+        <div class="apple-glass-card rounded-xl p-2 flex items-center justify-between">
+          <span class="text-slate-700 dark:text-slate-300">下跌蜡烛</span>
+          <div class="flex items-center gap-1.5">
+            <input type="color" value="#8B9099" class="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0">
+            <input type="text" value="#8B9099" class="w-16 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-[10px] text-slate-700 dark:text-slate-300 text-center" readonly>
+          </div>
+        </div>
+
+        <!-- Row 3: 周一关键K -->
+        <div class="apple-glass-card rounded-xl p-2 flex items-center justify-between">
+          <span class="text-slate-700 dark:text-slate-300">周一定界K</span>
+          <div class="flex items-center gap-1.5">
+            <input type="color" value="#8B9099" class="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0">
+            <input type="text" value="#8B9099" class="w-16 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-[10px] text-slate-700 dark:text-slate-300 text-center" readonly>
+          </div>
+        </div>
+
+        <!-- Row 4: 周末K线 -->
+        <div class="apple-glass-card rounded-xl p-2 flex items-center justify-between">
+          <span class="text-slate-700 dark:text-slate-300">周末过滤K</span>
+          <div class="flex items-center gap-1.5">
+            <input type="color" value="#8B9099" class="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0">
+            <input type="text" value="#8B9099" class="w-16 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-[10px] text-slate-700 dark:text-slate-300 text-center" readonly>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: 指标 TAB CONTENT (Six MA & Internal Fib 0.5/0.618/0.705 Default OFF) -->
+    <div id="tab-content-indicators" class="hidden space-y-2.5 text-xs">
+      
+      <!-- Section 1: 六均线组合 (Default OFF) -->
+      <div class="apple-glass-card rounded-xl p-2.5">
+        <div class="flex items-center justify-between mb-1.5">
+          <div>
+            <div class="font-medium text-slate-800 dark:text-slate-200">六均线密集系统</div>
+            <div class="text-[10px] text-slate-400">SMA & EMA (20 / 60 / 120)</div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" class="sr-only peer">
+            <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+        <div class="grid grid-cols-3 gap-1 pt-1 border-t border-slate-200/50 dark:border-slate-700/50 text-[10px] text-slate-500">
+          <span>● SMA 20</span>
+          <span>● SMA 60</span>
+          <span>● SMA 120</span>
+          <span>▲ EMA 20</span>
+          <span>▲ EMA 60</span>
+          <span>▲ EMA 120</span>
+        </div>
+      </div>
+
+      <!-- Section 2: 区间内部斐波回撤 0.5 / 0.618 / 0.705 (Default OFF) -->
+      <div class="apple-glass-card rounded-xl p-2.5">
+        <div class="flex items-center justify-between mb-1">
+          <div>
+            <div class="font-medium text-slate-800 dark:text-slate-200">区间内部参考位</div>
+            <div class="text-[10px] text-slate-400">0.500 / 0.618 / 0.705 回撤线</div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" class="sr-only peer">
+            <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Section 3: 手绘工具入口 -->
+      <div class="apple-glass-card rounded-xl p-2 flex items-center justify-between">
+        <span class="font-medium text-slate-700 dark:text-slate-300">手绘标尺与测量工具</span>
+        <button class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] text-blue-600 dark:text-blue-400 font-medium">呼出工具条</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== 4. BOTTOM COMPACT TOOLBAR DOCK ==================== -->
+  <!-- Renamed '指标' to '图表设置' while preserving 5m 15m 1h 4h 12H 1D and Follow Latest -->
+  <footer class="mt-auto relative z-10 w-full px-2 sm:px-4 pb-3 pt-1 pointer-events-none flex justify-center">
+    <div class="apple-glass rounded-full px-2 py-1.5 flex items-center gap-1 sm:gap-2 shadow-lg pointer-events-auto max-w-[96vw] overflow-x-auto">
+      
+      <!-- Timeframe selector -->
+      <div class="flex items-center gap-0.5 text-xs font-semibold px-1">
+        <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">5m</button>
+        <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">15m</button>
+        <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">1h</button>
+        <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">4h</button>
+        <!-- 12H Active Timeframe -->
+        <button class="px-2.5 py-1 rounded-full bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-sm">12H</button>
+        <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">1D</button>
+      </div>
+
+      <div class="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
+
+      <!-- ONLY ENTRANCE MODIFIED: '指标' -> '图表设置' (Active State Opening the Popover) -->
+      <button id="chart-settings-btn" onclick="togglePopover()" class="px-3 py-1 rounded-full bg-blue-500/10 dark:bg-blue-400/20 text-blue-600 dark:text-blue-300 border border-blue-400/30 flex items-center gap-1.5 text-xs font-medium active:scale-95 transition-transform" title="打开图表设置">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+        <span>图表设置</span>
+        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+      </button>
+
+      <!-- Zoom and Follow latest button -->
+      <div class="hidden sm:flex items-center gap-1 text-slate-400">
+        <button class="w-6 h-6 rounded-full hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center text-xs">🔍</button>
+        <button class="w-6 h-6 rounded-full hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center text-xs">⛶</button>
+      </div>
+
+      <!-- Follow latest action -->
+      <button class="px-2.5 py-1 rounded-full bg-blue-600 text-white flex items-center gap-1 text-xs font-medium shadow-sm hover:bg-blue-500 active:scale-95 transition-transform">
+        <span class="text-[10px]">▶▶</span>
+        <span class="hidden sm:inline">跟随最新单</span>
+      </button>
+
+    </div>
+  </footer>
+
+  <!-- ==================== 5. INTERACTIVE JAVASCRIPT BEHAVIORS ==================== -->
+  <script>
+    // Tab switching logic
+    function switchTab(tab) {
+      const tabs = ['range', 'kline', 'indicators'];
+      tabs.forEach(t => {
+        const content = document.getElementById('tab-content-' + t);
+        const btn = document.getElementById('tab-btn-' + t);
+        if (t === tab) {
+          content.classList.remove('hidden');
+          btn.className = "py-1.5 px-2 rounded-lg bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-300 shadow-sm transition-all text-center";
+        } else {
+          content.classList.add('hidden');
+          btn.className = "py-1.5 px-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 transition-all text-center";
+        }
+      });
+    }
+
+    // Toggle popover visibility
+    function togglePopover() {
+      const popover = document.getElementById('chart-settings-popover');
+      if (popover.classList.contains('hidden')) {
+        popover.classList.remove('hidden');
+      } else {
+        popover.classList.add('hidden');
+      }
+    }
+
+    // Kline custom color switch toggle
+    function toggleCustomKline(checked) {
+      const group = document.getElementById('kline-colors-group');
+      if (checked) {
+        group.classList.remove('opacity-50', 'pointer-events-none');
+      } else {
+        group.classList.add('opacity-50', 'pointer-events-none');
+      }
+    }
+
+    // Update Range Lines
+    function updateLine(id, color) {
+      const lineMap = {
+        'mon-high': 'svg-mon-high',
+        'mon-low': 'svg-mon-low',
+        'upper-1618': 'svg-upper-1618',
+        'lower-1618': 'svg-lower-1618',
+      };
+      const svgId = lineMap[id];
+      if (svgId) {
+        document.getElementById(svgId).setAttribute('stroke', color);
+      }
+    }
+
+    function setLineWidth(id, width) {
+      const lineMap = {
+        'mon-high': 'svg-mon-high',
+        'mon-low': 'svg-mon-low',
+        'upper-1618': 'svg-upper-1618',
+        'lower-1618': 'svg-lower-1618',
+      };
+      const svgId = lineMap[id];
+      if (svgId) {
+        document.getElementById(svgId).setAttribute('stroke-width', width);
+      }
+    }
+
+    function setLineDash(id, style) {
+      const lineMap = {
+        'mon-high': 'svg-mon-high',
+        'mon-low': 'svg-mon-low',
+        'upper-1618': 'svg-upper-1618',
+        'lower-1618': 'svg-lower-1618',
+      };
+      const svgId = lineMap[id];
+      if (svgId) {
+        const elem = document.getElementById(svgId);
+        if (style === 'solid') elem.removeAttribute('stroke-dasharray');
+        if (style === 'dashed') elem.setAttribute('stroke-dasharray', '4 4');
+        if (style === 'dotted') elem.setAttribute('stroke-dasharray', '2 2');
+      }
+    }
+
+    function applyAllRangeDefault() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const c1618 = isDark ? '#E3E7EC' : '#17191D';
+      document.getElementById('color-upper-1618').value = c1618;
+      document.getElementById('color-lower-1618').value = c1618;
+      document.getElementById('color-mon-high').value = '#9399A2';
+      document.getElementById('color-mon-low').value = '#9399A2';
+      updateLine('upper-1618', c1618);
+      updateLine('lower-1618', c1618);
+      updateLine('mon-high', '#9399A2');
+      updateLine('mon-low', '#9399A2');
+    }
+
+    function resetDefaults() {
+      applyAllRangeDefault();
+      document.getElementById('toggle-custom-kline').checked = false;
+      toggleCustomKline(false);
+    }
+
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      applyAllRangeDefault();
+    }
+  </script>
+</body>
+</html>

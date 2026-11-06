@@ -4,7 +4,7 @@ Uses the existing Bark V2 POST contract (Finb/bark-server/docs/API_V2.md).
 The owner's 1.618 destination is topic-local: changing it cannot redirect other
 signal notifications. Only explicit rate limits retry; ambiguous sends do not.
 """
-from .bark import SERVER, TV_APP_URL, credentials
+from .bark import SERVER, credentials
 from .monday_fib import claim_scored_notification, notification_text
 
 
@@ -19,9 +19,12 @@ def configured_credentials(book):
 def message(event, score):
     tv = event["symbol"].removesuffix("-SWAP").replace("-", "") + ".P"
     title, body = notification_text(event, score).split("\n", 1)
+    # Bark's ttl expires archived history (and matching delivered notifications),
+    # not the signal's delivery freshness. Keep history until the owner deletes it.
+    # Freshness is enforced by claim_scored_notification before sending.
     return {"title": title, "body": body,
-            "group": "SPIKE 1.618", "level": "active", "isArchive": "1", "ttl": 600,
-            "copy": f"OKX:{tv}", "url": TV_APP_URL}
+            "group": "SPIKE 1.618", "level": "active", "isArchive": "1",
+            "copy": f"OKX:{tv}"}
 
 
 def deliver_once(book, creds, sender, now, *, score_lookup=None, clock=None):

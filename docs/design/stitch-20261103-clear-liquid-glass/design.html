@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spike Clear Liquid Glass · 20261103</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* 核心背景与环境光 (Subtle ice-cyan ambient light for optical refraction contrast) */
+    --spike-bg: #f5f8fb;
+    --spike-bg-subtle: #edf3f8;
+    --spike-grid-color: rgba(9, 30, 66, 0.04);
+    
+    /* 核心文字语义 */
+    --text-primary: #0d141e;
+    --text-secondary: #576577;
+    --text-tertiary: #8b99aa;
+    
+    /* 交易与品牌语义 */
+    --accent-blue: #0071e3;
+    --accent-blue-rgb: 0, 113, 227;
+    --trade-long: #10b981;
+    --trade-short: #f43f5e;
+    
+    /* --- SPIKE CLEAR LIQUID GLASS TOKENS (LIGHT) --- */
+    /* 1. 真实超低 Alpha 填充：0.08 ~ 0.20，绝不使用白色牛奶不透明卡片 */
+    --glass-bg-ultra: rgba(255, 255, 255, 0.10);
+    --glass-bg-card: rgba(255, 255, 255, 0.16);
+    --glass-bg-card-hover: rgba(255, 255, 255, 0.24);
+    --glass-bg-sheet: rgba(255, 255, 255, 0.22);
+    --glass-bg-pill: rgba(255, 255, 255, 0.18);
+    
+    /* 2. 光学滤镜：适度 8~12px 模糊 + 150% 饱和度穿透增强 */
+    --glass-blur: blur(10px) saturate(150%);
+    
+    /* 3. 细双色边缘 (Outer specular highlight + subtle bottom rim) */
+    --glass-border: rgba(255, 255, 255, 0.72);
+    --glass-border-bottom: rgba(13, 20, 30, 0.08);
+    --glass-inner-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.85), inset 0 -1px 1px 0 rgba(13, 20, 30, 0.05);
+    
+    /* 4. 镜片厚度微投射柔和阴影 */
+    --glass-shadow-sm: 0 4px 16px -2px rgba(10, 31, 68, 0.06), 0 1px 3px 0 rgba(10, 31, 68, 0.04);
+    --glass-shadow-md: 0 12px 32px -4px rgba(10, 31, 68, 0.09), 0 2px 6px -1px rgba(10, 31, 68, 0.04);
+    --glass-shadow-drawer: -16px 0 40px -8px rgba(10, 31, 68, 0.12), -4px 0 12px 0 rgba(10, 31, 68, 0.04);
+    
+    /* 对角高光透镜渐变 */
+    --glass-specular-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0.0) 100%);
+  }
+
+  .dark {
+    --spike-bg: #090c10;
+    --spike-bg-subtle: #0f141c;
+    --spike-grid-color: rgba(255, 255, 255, 0.035);
+    
+    --text-primary: #f0f4f9;
+    --text-secondary: #9aa7b7;
+    --text-tertiary: #5e6b7c;
+    
+    /* --- SPIKE CLEAR LIQUID GLASS TOKENS (DARK) --- */
+    --glass-bg-ultra: rgba(255, 255, 255, 0.06);
+    --glass-bg-card: rgba(255, 255, 255, 0.09);
+    --glass-bg-card-hover: rgba(255, 255, 255, 0.14);
+    --glass-bg-sheet: rgba(18, 24, 34, 0.45);
+    --glass-bg-pill: rgba(255, 255, 255, 0.10);
+    
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-border-bottom: rgba(0, 0, 0, 0.40);
+    --glass-inner-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 1px 0 rgba(0, 0, 0, 0.5);
+    
+    --glass-shadow-sm: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+    --glass-shadow-md: 0 16px 40px -4px rgba(0, 0, 0, 0.50);
+    --glass-shadow-drawer: -16px 0 48px -8px rgba(0, 0, 0, 0.70);
+    
+    --glass-specular-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.02) 40%, rgba(255, 255, 255, 0.0) 100%);
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    background-color: var(--spike-bg);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-feature-settings: "tnum" 1, "cv01" 1;
+  }
+
+  /* 核心 CSS 材质类：LIQUID GLASS BASE */
+  .liquid-glass {
+    position: relative;
+    background: var(--glass-bg-card);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-bottom-color: var(--glass-border-bottom);
+    box-shadow: var(--glass-shadow-sm), var(--glass-inner-shadow);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  /* 镜片曲面高光层 (Lens Specular Flare) */
+  .liquid-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: var(--glass-specular-gradient);
+    border-radius: inherit;
+    z-index: 1;
+  }
+
+  .liquid-glass-pill {
+    position: relative;
+    background: var(--glass-bg-pill);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow-sm), var(--glass-inner-shadow);
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .liquid-glass-pill::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
+    border-radius: inherit;
+  }
+
+  .liquid-glass-sheet {
+    background: var(--glass-bg-sheet);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border-left: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow-drawer), var(--glass-inner-shadow);
+  }
+
+  /* 降级适配规则 */
+  @media (prefers-reduced-transparency: reduce) {
+    .liquid-glass, .liquid-glass-pill, .liquid-glass-sheet {
+      background: #ffffff !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      border-color: #cbd5e1 !important;
+    }
+    .dark .liquid-glass, .dark .liquid-glass-pill, .dark .liquid-glass-sheet {
+      background: #131a24 !important;
+      border-color: #334155 !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition-duration: 0.001ms !important;
+      animation-duration: 0.001ms !important;
+    }
+  }
+
+  /* 背景网格线，用来检验透明玻璃对下层图元真正的物理透过性 */
+  .grid-underlay {
+    background-image: 
+      linear-gradient(to right, var(--spike-grid-color) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--spike-grid-color) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .active-blue-tab {
+    background: rgba(0, 113, 227, 0.16);
+    color: #0071e3;
+    border: 1px solid rgba(0, 113, 227, 0.4);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.6), 0 2px 8px rgba(0,113,227,0.18);
+  }
+  .dark .active-blue-tab {
+    background: rgba(0, 113, 227, 0.32);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.5);
+  }
+</style>
+</head>
+<body class="min-h-screen grid-underlay pb-24 transition-colors duration-200">
+
+  <!-- 顶部超紧凑导航 (无全宽厚实栏，纯左上 SPIKE 悬浮胶囊 + 右侧主题/状态极简胶囊) -->
+  <header class="sticky top-0 z-50 px-4 py-3 max-w-[1720px] mx-auto flex items-center justify-between pointer-events-none">
+    
+    <!-- 左上单个 SPIKE 触发菜单胶囊 -->
+    <div class="pointer-events-auto flex items-center gap-2">
+      <div class="relative group">
+        <button id="spikeMenuBtn" class="liquid-glass-pill px-3.5 py-1.5 flex items-center gap-2 text-sm font-semibold tracking-wide hover:brightness-105 active:scale-95 transition-all cursor-pointer">
+          <span class="text-amber-500 font-black text-base">ϟ</span>
+          <span class="tracking-tight text-slate-900 dark:text-white font-bold">SPIKE</span>
+          <span class="text-[10px] mono px-1.5 py-0.5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 font-medium border border-blue-500/20">CLEAR GLASS</span>
+          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+
+        <!-- 悬浮菜单展开态 (Liquid Glass Popover Menu) -->
+        <div id="spikeDropdown" class="hidden absolute left-0 top-full mt-2 w-64 liquid-glass p-2 shadow-2xl z-50">
+          <div class="text-[11px] font-semibold text-slate-400 px-3 py-1.5 tracking-wider uppercase">Spike 核心工作区</div>
+          <a href="#" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium hover:bg-white/30 dark:hover:bg-white/10 text-slate-800 dark:text-slate-100 transition-colors active-blue-tab">
+            <span>12H 信号中心 (当前)</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          </a>
+          <a href="#" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium hover:bg-white/30 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 transition-colors">
+            <span>周一 1.618 扩展位</span>
+            <span class="text-[10px] text-slate-400 mono">148 标的</span>
+          </a>
+          <a href="#" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium hover:bg-white/30 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 transition-colors">
+            <span>6 均线密集巡检</span>
+            <span class="text-[10px] text-slate-400 mono">只读</span>
+          </a>
+          <div class="my-1.5 border-t border-slate-200/40 dark:border-slate-700/40"></div>
+          <a href="#" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium hover:bg-white/30 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 transition-colors">
+            <span>策略白皮书 (v3add)</span>
+            <span class="text-[10px] text-blue-500 mono">Tear Sheet ↗</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 实时状态小胶囊 (真正看清背后的细微穿透) -->
+      <div class="liquid-glass-pill px-3 py-1 text-xs mono flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)] animate-pulse"></span>
+        <span class="text-slate-600 dark:text-slate-300">12H 周期待收线 08:00</span>
+      </div>
+    </div>
+
+    <!-- 右侧工具胶囊：主题切换 / 规范定位 / 抽屉开关 -->
+    <div class="pointer-events-auto flex items-center gap-2">
+      <button id="drawerToggleBtn" class="liquid-glass-pill px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5 text-slate-700 dark:text-slate-200 hover:text-blue-600 transition-colors">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M14 18h6"></path></svg>
+        <span>75vw 图表抽屉</span>
+      </button>
+
+      <!-- 单一 44px 太阳/月亮切换按钮 (Owner 严格确认规范) -->
+      <button id="themeToggleBtn" aria-label="切换深浅主题" class="liquid-glass-pill w-9 h-9 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:scale-105 active:scale-95 transition-transform cursor-pointer">
+        <!-- 太阳图标 (暗色可见) -->
+        <svg id="sunIcon" class="w-4 h-4 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        <!-- 月亮图标 (亮色可见) -->
+        <svg id="moonIcon" class="w-4 h-4 block dark:hidden text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 主体工作区容器 -->
+  <main class="max-w-[1720px] mx-auto px-4 mt-2">
+
+    <!-- 顶部材质规范看板 (Design Spec Banner) -->
+    <div class="liquid-glass p-5 mb-6 relative">
+      <div class="relative z-10 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-3">
+            <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Spike Clear Liquid Glass · 20261103</h1>
+            <span class="text-[11px] mono font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">OPTICAL REFRACTION SPEC</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-4xl leading-relaxed">
+            基于 iPhone Liquid Glass 顶级透镜光学物理：彻底弃绝牛奶白模糊卡片，采用 <span class="mono font-semibold text-slate-700 dark:text-slate-200">alpha: 0.08–0.22</span> 真实超低透明度填充、<span class="mono font-semibold text-slate-700 dark:text-slate-200">10px 模糊 + 150% 饱和度穿透</span>、细亮曲面边缘高光（Specular Highlight）与内缘微暗线。下层丰富 K 线与 EMA 云带色彩自然透射穿过，文字保持 100% 不透明清晰度。
+          </p>
+        </div>
+
+        <!-- 核心物理 Token 标牌对比 -->
+        <div class="flex items-center gap-3 text-xs mono">
+          <div class="liquid-glass-pill px-3 py-1.5 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+            <span class="text-slate-600 dark:text-slate-300">Alpha 0.16 (Light) / 0.09 (Dark)</span>
+          </div>
+          <div class="liquid-glass-pill px-3 py-1.5 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            <span class="text-slate-600 dark:text-slate-300">Dual-Tone Specular Edge</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 核心布局：两列协同工作区 -->
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+
+      <!-- 左侧：真实高密信号卡片网格与材质应用 (XL: 5 栏) -->
+      <section class="xl:col-span-5 space-y-4">
+        
+        <!-- 工具栏胶囊与筛选 -->
+        <div class="flex items-center justify-between gap-2">
+          <div class="liquid-glass-pill p-1 flex items-center gap-1 text-xs">
+            <button class="px-3 py-1 rounded-full font-medium active-blue-tab">全部信号 (18)</button>
+            <button class="px-3 py-1 rounded-full text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-colors">做多 (12)</button>
+            <button class="px-3 py-1 rounded-full text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-colors">做空 (6)</button>
+          </div>
+
+          <div class="liquid-glass-pill px-3 py-1.5 text-xs mono text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path></svg>
+            <span>排序: 按预期收益R</span>
+          </div>
+        </div>
+
+        <!-- 真实高密信号卡片列表 (展示真正的透镜透过感) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-3.5">
+          
+          <!-- 信号卡片 1: DEMO / USDT 做多 (当前选定联动态) -->
+          <div class="liquid-glass p-4 cursor-pointer border-blue-500/40 shadow-[0_8px_24px_rgba(0,113,227,0.12)] relative group hover:scale-[1.008] transition-transform">
+            <!-- 激活态右上角蓝色棱镜小光斑 -->
+            <div class="absolute right-0 top-0 w-16 h-16 bg-blue-500/10 rounded-bl-full pointer-events-none"></div>
+
+            <div class="relative z-10">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-lg bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs mono">D</span>
+                  <div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="font-bold text-sm text-slate-900 dark:text-white">DEMO / USDT</span>
+                      <span class="text-[10px] px-1.5 py-0.2 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20">做多 LONG</span>
+                    </div>
+                    <div class="text-[11px] text-slate-400 mono">12H 顺势通道突破 · 14m前</div>
+                  </div>
+                </div>
+
+                <div class="text-right">
+                  <div class="text-xs text-slate-400 font-medium">预期收益</div>
+                  <div class="text-base font-bold text-emerald-600 dark:text-emerald-400 mono">+3.76 R</div>
+                </div>
+              </div>
+
+              <!-- 卡片中间数据行 (等宽对齐，无水平漂移) -->
+              <div class="mt-3.5 grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-white/20 dark:bg-white/5 border border-white/40 dark:border-white/10 text-xs mono">
+                <div>
+                  <div class="text-[10px] text-slate-400">参考入场</div>
+                  <div class="font-semibold text-slate-800 dark:text-slate-200">0.3500</div>
+                </div>
+                <div>
+                  <div class="text-[10px] text-slate-400">关键K止损</div>
+                  <div class="font-semibold text-rose-500 dark:text-rose-400">0.3420</div>
+                </div>
+                <div>
+                  <div class="text-[10px] text-slate-400">对侧 1.618</div>
+                  <div class="font-semibold text-emerald-600 dark:text-emerald-400">0.3800</div>
+                </div>
+              </div>
+
+              <div class="mt-3 flex items-center justify-between text-[11px] text-slate-400">
+                <span>止损前极值: <b class="mono text-slate-700 dark:text-slate-300">5.20 R</b></span>
+                <span class="text-blue-500 font-medium group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                  右侧查看 75% 图表 →
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 信号卡片 2: SOL / USDT 做空 -->
+          <div class="liquid-glass p-4 cursor-pointer hover:border-slate-300 dark:hover:border-slate-600 transition-all hover:scale-[1.008]">
+            <div class="relative z-10">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-lg bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-xs mono">S</span>
+                  <div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="font-bold text-sm text-slate-900 dark:text-white">SOL / USDT</span>
+                      <span class="text-[10px] px-1.5 py-0.2 rounded-md bg-rose-500/15 text-rose-600 dark:text-rose-400 font-semibold border border-rose-500/20">做空 SHORT</span>
+                    </div>
+                    <div class="text-[11px] text-slate-400 mono">12H 空头压制反抽 · 28m前</div>
+                  </div>
+                </div>
+
+                <div class="text-right">
+                  <div class="text-xs text-slate-400 font-medium">预期收益</div>
+                  <div class="text-base font-bold text-emerald-600 dark:text-emerald-400 mono">+2.84 R</div>
+                </div>
+              </div>
+
+              <div class="mt-3.5 grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-white/20 dark:bg-white/5 border border-white/40 dark:border-white/10 text-xs mono">
+                <div>
+                  <div class="text-[10px] text-slate-400">参考入场</div>
+                  <div class="font-semibold text-slate-800 dark:text-slate-200">130.63</div>
+                </div>
+                <div>
+                  <div class="text-[10px] text-slate-400">关键K止损</div>
+                  <div class="font-semibold text-rose-500 dark:text-rose-400">133.60</div>
+                </div>
+                <div>
+                  <div class="text-[10px] text-slate-400">对侧 1.618</div>
+                  <div class="font-semibold text-emerald-600 dark:text-emerald-400">121.49</div>
+                </div>
+              </div>
+
+              <div class="mt-3 flex items-center justify-between text-[11px] text-slate-400">
+                <span>止损前极值: <b class="mono text-slate-700 dark:text-slate-300">3.08 R</b></span>
+                <span class="text-slate-500 flex items-center gap-1">点击加载抽屉 ↗</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 信号卡片 3: BTC / USDT 做多 -->
+          <div class="liquid-glass p-4 cursor-pointer hover:border-slate-300 dark:hover:border-slate-600 transition-all hover:scale-[1.008]">
+            <div class="relative z-10">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xs mono">B</span>
+                  <div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="font-bold text-sm text-slate-900 dark:text-white">BTC / USDT</span>
+                      <span class="text-[10px] px-1.5 py-0.2 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20">做多 LONG</span>
+                    </div>
+                    <div class="text-[11px] text-slate-400 mono">周一扩展位触及 · 1h前</div>
+                  </div>
+                </div>
+
+                <div class="text-right">
+                  <div class="text-xs text-slate-400 font-medium">预期收益</div>
+                  <div class="text-base font-bold text-emerald-600 dark:text-emerald-400 mono">+2.45 R</div>
+                </div>
+              </div>
+
+              <div class="mt-3.5 grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-white/20 dark:bg-white/5 border border-white/40 dark:border-white/10 text-xs mono">
+                <div>
+                  <div class="text-[10px] text-slate-400">参考入场</div>
+                  <div class="font-semibold text-slate-800 dark:text-slate-200">87,420</div>
+                </div>
+                <div>
+                  <div class="text-[10px] text-slate-400">关键K止损</div>
+                  <div class="font-semibold text-rose-500 dark:text-rose-400">85,910</div>
+                </div>
+                <div>
+                  <div class="text-[10px] text-slate-400">对侧 1.618</div>
+                  <div class="font-semibold text-emerald-600 dark:text-emerald-400">92,250</div>
+                </div>
+              </div>
+
+              <div class="mt-3 flex items-center justify-between text-[11px] text-slate-400">
+                <span>止损前极值: <b class="mono text-slate-700 dark:text-slate-300">3.20 R</b></span>
+                <span class="text-slate-500 flex items-center gap-1">点击加载抽屉 ↗</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 390px 移动端规格对比模块 (Mobile 390px Spec Block) -->
+        <div class="liquid-glass p-4 mt-6">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">iPhone 390px 移动端质感验证</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 font-semibold mono">NATIVE CASING</span>
+            </div>
+            <span class="text-[10px] text-slate-400 mono">390 × 844 Viewport</span>
+          </div>
+
+          <!-- 模拟 390px 真实移动端视窗 (透视清透玻璃与底栏) -->
+          <div class="w-full max-w-[390px] mx-auto rounded-[32px] border-4 border-slate-300/80 dark:border-slate-700/80 overflow-hidden shadow-xl bg-slate-50 dark:bg-slate-900 relative">
+            <!-- 手机顶部微型药丸 -->
+            <div class="w-24 h-4 bg-slate-300 dark:bg-slate-800 rounded-b-xl mx-auto mb-2"></div>
+
+            <!-- 手机内悬浮顶栏 -->
+            <div class="px-4 py-2 flex items-center justify-between">
+              <div class="liquid-glass-pill px-2.5 py-1 text-[11px] font-bold flex items-center gap-1.5">
+                <span class="text-amber-500">ϟ</span>
+                <span>DEMO</span>
+                <span class="text-emerald-500 font-medium">多 0.35</span>
+              </div>
+              <div class="liquid-glass-pill px-2 py-1 text-[10px] mono">
+                <span>12H 0.3500</span>
+              </div>
+            </div>
+
+            <!-- 手机内微缩K线背景与悬浮交易卡 -->
+            <div class="h-44 relative mx-3 my-2 rounded-2xl overflow-hidden bg-white/40 dark:bg-slate-950/40 border border-slate-200/50 dark:border-slate-800/50 flex flex-col justify-between p-2.5">
+              <!-- 示意蜡烛背景通过 SVG 渲染 -->
+              <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-40" viewBox="0 0 360 170" preserveAspectRatio="none">
+                <!-- EMA 云带示意 -->
+                <path d="M 0 120 Q 90 90, 180 70 T 360 40 L 360 90 Q 270 120, 180 140 T 0 160 Z" fill="rgba(16, 185, 129, 0.25)"></path>
+                <!-- 灰色蜡烛 -->
+                <rect x="30" y="90" width="8" height="35" fill="#64748b" rx="1"/>
+                <line x1="34" y1="75" x2="34" y2="140" stroke="#64748b" stroke-width="1.5"/>
+                <rect x="70" y="80" width="8" height="25" fill="#64748b" rx="1"/>
+                <line x1="74" y1="65" x2="74" y2="120" stroke="#64748b" stroke-width="1.5"/>
+                <!-- 亮绿关键K -->
+                <rect x="110" y="60" width="9" height="40" fill="#10b981" rx="1"/>
+                <line x1="114.5" y1="45" x2="114.5" y2="115" stroke="#10b981" stroke-width="1.8"/>
+                <rect x="150" y="45" width="8" height="30" fill="#64748b" rx="1"/>
+                <line x1="154" y1="35" x2="154" y2="90" stroke="#64748b" stroke-width="1.5"/>
+              </svg>
+
+              <!-- 悬浮在微缩图表上的清透信息条 -->
+              <div class="liquid-glass-pill px-2.5 py-1 text-[10px] mono flex items-center justify-between z-10">
+                <span>入场 0.3500</span>
+                <span class="text-rose-500">止损 0.3420</span>
+                <span class="text-emerald-500">目标 0.3800 (+3.76R)</span>
+              </div>
+
+              <!-- 悬浮在图表底部的 12H 周期选择坞 -->
+              <div class="liquid-glass-pill p-0.5 flex items-center justify-between text-[10px] mono z-10 w-fit mx-auto">
+                <span class="px-2 py-0.5 rounded-full text-slate-400">5m</span>
+                <span class="px-2 py-0.5 rounded-full text-slate-400">1H</span>
+                <span class="px-2 py-0.5 rounded-full active-blue-tab font-semibold">12H</span>
+                <span class="px-2 py-0.5 rounded-full text-slate-400">1D</span>
+              </div>
+            </div>
+
+            <!-- 手机底部 5 项悬浮药丸底栏 (极简透水胶囊) -->
+            <div class="px-4 py-3">
+              <div class="liquid-glass-pill py-1.5 px-3 flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-300">
+                <span class="text-slate-400">合约</span>
+                <span class="text-slate-400">巡检</span>
+                <span class="text-blue-500 font-bold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>信号
+                </span>
+                <span class="text-slate-400">持仓</span>
+                <span class="text-slate-400">统计</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- 右侧：真实 75% 沉浸图表抽屉工作台 (覆盖灰色K线、浅绿色EMA云带、交易参考覆盖层与悬浮设置弹层) (XL: 7 栏) -->
+      <section class="xl:col-span-7 space-y-4">
+
+        <!-- 75% 图表抽屉外壳 (具有大面积 K 线与透镜覆层) -->
+        <div class="liquid-glass p-0 relative min-h-[760px] flex flex-col justify-between">
+          
+          <!-- 抽屉顶部工具条 (纯悬浮胶囊，不占满实色死行) -->
+          <div class="p-4 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-white/20 dark:border-white/10 bg-white/10 dark:bg-white/5">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2">
+                <span class="font-extrabold text-base text-slate-900 dark:text-white">DEMO / USDT</span>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/30">12H 顺势多头确认</span>
+              </div>
+              <span class="text-xs text-slate-400 mono">现价 0.3542 (+2.4%)</span>
+            </div>
+
+            <!-- 抽屉右上角微操作坞 -->
+            <div class="flex items-center gap-2">
+              <button id="chartSettingsBtn" class="liquid-glass-pill px-3 py-1 text-xs font-medium flex items-center gap-1.5 hover:text-blue-500 transition-colors">
+                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span>图表设置 v2.4</span>
+              </button>
+              
+              <button class="liquid-glass-pill px-3 py-1 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-blue-500 transition-colors">
+                <span>导出分析</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 真实 Canvas / SVG 图表主视窗 (实色保证读图清晰，悬浮控件通透) -->
+          <div class="relative flex-1 w-full h-[520px] overflow-hidden bg-white/70 dark:bg-[#0c1017]/90 select-none">
+            
+            <!-- SVG 完整 K 线图表与交易覆盖层 -->
+            <svg class="w-full h-full" viewBox="0 0 880 500" preserveAspectRatio="none">
+              <defs>
+                <!-- 浅绿色顺滑 EMA 20/50 填充云带 (无多余外描边) -->
+                <linearGradient id="emaCloudGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#10b981" stop-opacity="0.14"/>
+                  <stop offset="50%" stop-color="#10b981" stop-opacity="0.22"/>
+                  <stop offset="100%" stop-color="#10b981" stop-opacity="0.30"/>
+                </linearGradient>
+
+                <!-- 细微水平网格参考 -->
+                <pattern id="chartGrid" width="880" height="50" patternUnits="userSpaceOnUse">
+                  <line x1="0" y1="50" x2="880" y2="50" stroke="rgba(100, 116, 139, 0.08)" stroke-width="1"/>
+                </pattern>
+              </defs>
+
+              <rect width="880" height="500" fill="url(#chartGrid)"/>
+
+              <!-- EMA 20/50 顺势云带 (顺滑多项式平滑贝塞尔曲线，纯填充无描边) -->
+              <path d="M 0 380 Q 220 340, 440 260 T 880 140 L 880 210 Q 660 300, 440 330 T 0 430 Z" fill="url(#emaCloudGrad)"/>
+
+              <!-- 周一锚点参考水平线 (灰色细虚线，极简标尺) -->
+              <line x1="0" y1="110" x2="840" y2="110" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 4" opacity="0.6"/>
+              <text x="760" y="105" fill="#94a3b8" font-size="11" font-family="JetBrains Mono">周高 0.3850</text>
+
+              <line x1="0" y1="440" x2="840" y2="440" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 4" opacity="0.6"/>
+              <text x="760" y="435" fill="#94a3b8" font-size="11" font-family="JetBrains Mono">周低 0.3150</text>
+
+              <!-- 对侧 1.618 标线 (深色模式亮线，浅色模式实线) -->
+              <line x1="0" y1="160" x2="840" y2="160" stroke="#334155" stroke-width="1.2" stroke-dasharray="2 2" opacity="0.8"/>
+              <text x="40" y="152" fill="#334155" font-size="12" font-weight="bold" font-family="JetBrains Mono">1.618 Fib 扩展位 · 0.3800</text>
+
+              <!-- 历史与当前交易参考框 (成对规整矩形，无蓝色入场粗线) -->
+              
+              <!-- 历史参考框 1 (过去多单完成态) -->
+              <g opacity="0.85">
+                <!-- 盈利区 (明亮绿色填充 22%) -->
+                <rect x="220" y="240" width="80" height="70" fill="#10b981" fill-opacity="0.20" stroke="#10b981" stroke-width="1"/>
+                <!-- 止损区 (规整红色矩形，纯入场至关键K止损之间) -->
+                <rect x="220" y="310" width="80" height="35" fill="#f43f5e" fill-opacity="0.18" stroke="#f43f5e" stroke-width="1"/>
+                <!-- 5R 阶梯刻度线 -->
+                <line x1="220" y1="275" x2="300" y2="275" stroke="#10b981" stroke-width="1" stroke-dasharray="2 2"/>
+                <text x="224" y="271" fill="#10b981" font-size="10" font-family="JetBrains Mono">5R · 0.3350</text>
+                <text x="224" y="254" fill="#059669" font-size="10" font-weight="bold" font-family="JetBrains Mono">最高 11.2R</text>
+                <text x="224" y="338" fill="#e11d48" font-size="9" font-family="JetBrains Mono">关键K止损 -1R</text>
+              </g>
+
+              <!-- 最新当前生效参考框 (DEMO / USDT 做多) -->
+              <g>
+                <!-- 绿色盈利目标盒体 (延伸至止损前极值) -->
+                <rect x="520" y="160" width="130" height="120" fill="#10b981" fill-opacity="0.22" stroke="#10b981" stroke-width="1.2"/>
+                <!-- 红色风险止损盒体 (严格限制在入场与关键K止损之间) -->
+                <rect x="520" y="280" width="130" height="40" fill="#f43f5e" fill-opacity="0.20" stroke="#f43f5e" stroke-width="1.2"/>
+                
+                <!-- 5R 刻度阶梯线 -->
+                <line x1="520" y1="240" x2="650" y2="240" stroke="#10b981" stroke-width="1" stroke-dasharray="3 3"/>
+                <text x="525" y="235" fill="#10b981" font-size="10" font-family="JetBrains Mono">5R · 0.3650</text>
+
+                <line x1="520" y1="200" x2="650" y2="200" stroke="#10b981" stroke-width="1" stroke-dasharray="3 3"/>
+                <text x="525" y="195" fill="#10b981" font-size="10" font-family="JetBrains Mono">10R · 0.3750</text>
+
+                <!-- 顶部清晰止损前极值读数胶囊 -->
+                <rect x="520" y="142" width="130" height="18" fill="#047857" rx="3"/>
+                <text x="525" y="155" fill="#ffffff" font-size="10" font-weight="bold" font-family="JetBrains Mono">最高 12.8R · 0.3800</text>
+                
+                <!-- 底部关键K止损标记 -->
+                <rect x="520" y="320" width="90" height="16" fill="#be123c" rx="3"/>
+                <text x="525" y="332" fill="#ffffff" font-size="10" font-weight="bold" font-family="JetBrains Mono">关键K止损 -1R</text>
+              </g>
+
+              <!-- 经典灰色蜡烛柱列 (K线本体采用中性灰 #64748b，仅关键确认K线为亮绿色) -->
+              
+              <!-- 柱 1 (灰) -->
+              <line x1="140" y1="310" x2="140" y2="390" stroke="#64748b" stroke-width="1.2"/>
+              <rect x="135" y="330" width="10" height="45" fill="#64748b" rx="1"/>
+
+              <!-- 柱 2 (灰) -->
+              <line x1="180" y1="290" x2="180" y2="360" stroke="#64748b" stroke-width="1.2"/>
+              <rect x="175" y="305" width="10" height="35" fill="#64748b" rx="1"/>
+
+              <!-- 柱 3: 历史确认K线 (亮绿色高亮 #22C55E 实体与上下影线) -->
+              <line x1="220" y1="270" x2="220" y2="350" stroke="#22c55e" stroke-width="2"/>
+              <rect x="214" y="280" width="12" height="50" fill="#22c55e" rx="1.5"/>
+
+              <!-- 柱 4 (灰) -->
+              <line x1="260" y1="240" x2="260" y2="320" stroke="#64748b" stroke-width="1.2"/>
+              <rect x="255" y="250" width="10" height="40" fill="#64748b" rx="1"/>
+
+              <!-- 柱 5 (灰) -->
+              <line x1="300" y1="220" x2="300" y2="290" stroke="#64748b" stroke-width="1.2"/>
+              <rect x="295" y="230" width="10" height="45" fill="#64748b" rx="1"/>
+
+              <!-- 柱 6 (灰) -->
+              <line x1="380" y1="260" x2="380" y2="330" stroke="#64748b" stroke-width="1.2"/>
+              <rect x="375" y="275" width="10" height="35" fill="#64748b" rx="1"/>
+
+              <!-- 柱 7 (灰) -->
+              <line x1="420" y1="270" x2="420" y2="340" stroke="#64748b" stroke-width="1.2"/>
+              <rect x="415" y="280" width="10" height="45" fill="#64748b" rx="1"/>
+
+              <!-- 柱 8: 最新确认K线 (亮绿色实体与影线) -->
+              <line x1="520" y1="230" x2="520" y2="330" stroke="#22c55e" stroke-width="2"/>
+              <rect x="514" y="245" width="12" height="60" fill="#22c55e" rx="1.5"/>
+
+              <!-- 柱 9 (最新动态进行中柱) -->
+              <line x1="560" y1="180" x2="560" y2="270" stroke="#64748b" stroke-width="1.2"/>
+              <rect x="555" y="195" width="10" height="45" fill="#64748b" rx="1"/>
+
+              <!-- 右侧刻度价格轴 -->
+              <g font-family="JetBrains Mono" font-size="11" fill="#64748b" text-anchor="end">
+                <text x="870" y="115">0.3850</text>
+                <text x="870" y="165">0.3800</text>
+                <text x="870" y="225">0.3650</text>
+                <text x="870" y="285">0.3500</text>
+                <text x="870" y="345">0.3420</text>
+                <text x="870" y="445">0.3150</text>
+              </g>
+            </svg>
+
+            <!-- 覆盖在真实K线上的悬浮透镜小卡：实时交易参数 (展示下面EMA与蜡烛在卡片内透过效果) -->
+            <div class="absolute left-6 top-6 liquid-glass p-3 max-w-sm z-30 shadow-xl pointer-events-none">
+              <div class="text-[11px] text-slate-400 font-semibold tracking-wider uppercase mb-1">计划图例与事实读数</div>
+              <div class="flex items-center gap-3 text-xs mono">
+                <div>
+                  <span class="text-slate-400 text-[10px]">参考入场:</span>
+                  <span class="font-bold text-slate-900 dark:text-white">0.3500</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 text-[10px]">关键K止损:</span>
+                  <span class="font-bold text-rose-500">0.3420</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 text-[10px]">目标:</span>
+                  <span class="font-bold text-emerald-600 dark:text-emerald-400">0.3800 (+3.76R)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 悬浮在图表中的设置弹层示例 (用户点击「图表设置」展开后的 Liquid Glass 弹层) -->
+            <div id="chartSettingsModal" class="absolute right-6 top-6 w-80 liquid-glass p-3.5 z-40 shadow-2xl">
+              <!-- 弹层顶栏：标题 + 状态 + 关闭 -->
+              <div class="flex items-center justify-between pb-2.5 border-b border-white/20 dark:border-white/10">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-100">图表设置</span>
+                  <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 mono">v2.4 已保存</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button class="text-[11px] text-blue-500 hover:underline">恢复默认</button>
+                  <button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">✕</button>
+                </div>
+              </div>
+
+              <!-- 3个紧凑页签 -->
+              <div class="mt-2.5 liquid-glass-pill p-0.5 flex items-center justify-between text-xs">
+                <button class="px-2.5 py-1 rounded-full text-slate-500 hover:text-slate-800">指标</button>
+                <button class="px-2.5 py-1 rounded-full text-slate-500 hover:text-slate-800">K线</button>
+                <button class="px-2.5 py-1 rounded-full active-blue-tab font-medium">区间线</button>
+              </div>
+
+              <!-- 区间线页签内容 (紧凑四行，真实控件) -->
+              <div class="mt-3 space-y-2 text-xs mono">
+                <div class="flex items-center justify-between p-1.5 rounded-lg bg-white/20 dark:bg-white/5 border border-white/30 dark:border-white/10">
+                  <span class="text-slate-700 dark:text-slate-300">周一高</span>
+                  <div class="flex items-center gap-2">
+                    <span class="w-3.5 h-3.5 rounded bg-[#9399A2] border border-white/40"></span>
+                    <span class="text-[11px] text-slate-400">实线 1px</span>
+                    <span class="text-[10px] text-slate-400">#9399A2</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between p-1.5 rounded-lg bg-white/20 dark:bg-white/5 border border-white/30 dark:border-white/10">
+                  <span class="text-slate-700 dark:text-slate-300">周一低</span>
+                  <div class="flex items-center gap-2">
+                    <span class="w-3.5 h-3.5 rounded bg-[#9399A2] border border-white/40"></span>
+                    <span class="text-[11px] text-slate-400">实线 1px</span>
+                    <span class="text-[10px] text-slate-400">#9399A2</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between p-1.5 rounded-lg bg-white/20 dark:bg-white/5 border border-white/30 dark:border-white/10">
+                  <span class="text-slate-700 dark:text-slate-300">上 1.618</span>
+                  <div class="flex items-center gap-2">
+                    <span class="w-3.5 h-3.5 rounded bg-[#17191D] dark:bg-[#E3E7EC] border border-white/40"></span>
+                    <span class="text-[11px] text-slate-400">实线 1px</span>
+                    <span class="text-[10px] text-slate-400">随主题</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between p-1.5 rounded-lg bg-white/20 dark:bg-white/5 border border-white/30 dark:border-white/10">
+                  <span class="text-slate-700 dark:text-slate-300">下 1.618</span>
+                  <div class="flex items-center gap-2">
+                    <span class="w-3.5 h-3.5 rounded bg-[#17191D] dark:bg-[#E3E7EC] border border-white/40"></span>
+                    <span class="text-[11px] text-slate-400">实线 1px</span>
+                    <span class="text-[10px] text-slate-400">随主题</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 底部悬浮控制坞 (时间周期 5m/15m/1H/4H/12H/1D + 一键跟随最新单) -->
+            <div class="absolute bottom-5 inset-x-0 mx-auto w-fit z-30 flex items-center gap-2">
+              <div class="liquid-glass-pill p-1 flex items-center gap-1 text-xs mono">
+                <button class="px-2.5 py-1 rounded-full text-slate-500 hover:text-slate-800">5m</button>
+                <button class="px-2.5 py-1 rounded-full text-slate-500 hover:text-slate-800">15m</button>
+                <button class="px-2.5 py-1 rounded-full text-slate-500 hover:text-slate-800">1H</button>
+                <button class="px-2.5 py-1 rounded-full text-slate-500 hover:text-slate-800">4H</button>
+                <button class="px-3 py-1 rounded-full active-blue-tab font-bold">12H</button>
+                <button class="px-2.5 py-1 rounded-full text-slate-500 hover:text-slate-800">1D</button>
+              </div>
+
+              <button class="liquid-glass-pill px-3.5 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-transform">
+                <span>▶ 跟随最新单</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 抽屉底栏：工程接入 Token 摘要 -->
+          <div class="p-3 bg-white/10 dark:bg-white/5 border-t border-white/20 dark:border-white/10 flex items-center justify-between text-[11px] mono text-slate-500 dark:text-slate-400">
+            <span>// CSS TOKENS: --glass-bg-card: rgba(255,255,255,0.16) | blur(10px) saturate(150%)</span>
+            <span>Safari -webkit-backdrop-filter 已适配</span>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- 底部：CSS 规范与材质代码速查区 (Direct Implementation Reference) -->
+    <section class="mt-8 liquid-glass p-5">
+      <h2 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+        生产级 CSS 材质标准与 Token 规范 (可以直接复制到 React / Tailwind 工程)
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs mono">
+        <div class="p-3.5 rounded-xl bg-white/25 dark:bg-black/25 border border-white/40 dark:border-white/10">
+          <div class="font-bold text-slate-800 dark:text-slate-200 mb-1">1. 通透透明度 (No Milk Fog)</div>
+          <p class="text-slate-500 text-[11px] mb-2 leading-relaxed">严控 Alpha 在 0.08–0.22，绝不使用 #ffffff 实心遮挡。底层色彩 100% 顺畅穿透。</p>
+          <code class="text-blue-600 dark:text-blue-400">background: rgba(255, 255, 255, 0.16);</code>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-white/25 dark:bg-black/25 border border-white/40 dark:border-white/10">
+          <div class="font-bold text-slate-800 dark:text-slate-200 mb-1">2. 光学饱和穿透 (Optical Refraction)</div>
+          <p class="text-slate-500 text-[11px] mb-2 leading-relaxed">8–12px 适度物理高斯模糊 + 150% 饱和度增益，增强透镜内部折射生动感。</p>
+          <code class="text-emerald-600 dark:text-emerald-400">backdrop-filter: blur(10px) saturate(150%);</code>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-white/25 dark:bg-black/25 border border-white/40 dark:border-white/10">
+          <div class="font-bold text-slate-800 dark:text-slate-200 mb-1">3. 双色镜面高光 (Dual Specular Edge)</div>
+          <p class="text-slate-500 text-[11px] mb-2 leading-relaxed">上沿 1px 细微高光白，下沿深色暗线与内阴影，雕塑透镜物理厚度。</p>
+          <code class="text-purple-600 dark:text-purple-400">box-shadow: inset 0 1px 1px rgba(255,255,255,0.85);</code>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 交互脚本：支持深浅色实时切换与下拉菜单交互 -->
+  <script>
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const htmlElem = document.documentElement;
+
+    themeBtn.addEventListener('click', () => {
+      htmlElem.classList.toggle('dark');
+    });
+
+    const menuBtn = document.getElementById('spikeMenuBtn');
+    const dropdown = document.getElementById('spikeDropdown');
+    menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', () => {
+      if (!dropdown.classList.contains('hidden')) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    const chartSettingsBtn = document.getElementById('chartSettingsBtn');
+    const chartSettingsModal = document.getElementById('chartSettingsModal');
+    chartSettingsBtn.addEventListener('click', () => {
+      chartSettingsModal.classList.toggle('hidden');
+    });
+  </script>
+</body>
+</html>
+

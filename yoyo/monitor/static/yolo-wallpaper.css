@@ -1,7 +1,7 @@
 /* Stitch d70c4b10a20f478bae161de14e5e5c49: full-viewport chart and floating glass.
  * Density revision: dd8d13e22c2541e193ed1c35e9c3e4ad.
  * The canvas never changes size when either side panel opens or closes. */
-body[data-yolo-wallpaper]{overflow:hidden;--yd-glass:linear-gradient(145deg,rgba(255,255,255,.78),rgba(240,247,251,.56));--yd-edge:rgba(255,255,255,.88);--yd-shadow:inset 0 1px 1px #fff,0 10px 32px -12px #243e5640;--yd-motion:220ms cubic-bezier(.2,.8,.2,1)}
+body[data-yolo-wallpaper]{overflow:hidden;--yd-glass:var(--glass-panel);--yd-edge:var(--glass-edge);--yd-shadow:var(--panel-shadow);--yd-motion:220ms cubic-bezier(.2,.8,.2,1)}
 body[data-yolo-wallpaper] .workspace{padding:0!important;margin:0!important}
 body[data-yolo-wallpaper] :is(.workspace>.topbar,#main-sidebar,#main>.page-heading){display:none!important}
 body[data-yolo-wallpaper] #main{max-width:none!important;padding:0!important}
@@ -10,7 +10,7 @@ body[data-yolo-wallpaper] #yolo-detect-workspace :is(.yd-shell,#yd-panel-results
 body[data-yolo-wallpaper] #yolo-detect-workspace #yd-chart-stage{position:absolute;inset:0;margin:0;padding:0;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;overflow:visible;pointer-events:none}
 body[data-yolo-wallpaper] #yolo-detect-workspace #yd-chart-wrap{position:absolute;inset:0;margin:0;border:0;height:100%!important;width:100%;min-height:0;pointer-events:auto;z-index:0}
 body[data-yolo-wallpaper] #yd-chart{position:absolute;inset:0;width:100%;height:100%}
-body[data-yolo-wallpaper] #yolo-detect-workspace :is(.yd-toolbar,.yd-chart-head,.yd-chart-commandbar,#yd-symbol-panel,#yd-pattern-panel,.yd-chart-options){background:var(--yd-glass)!important;border:1px solid var(--yd-edge)!important;box-shadow:var(--yd-shadow)!important;backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);pointer-events:auto}
+body[data-yolo-wallpaper] #yolo-detect-workspace :is(.yd-toolbar,.yd-chart-head,.yd-chart-commandbar,#yd-symbol-panel,#yd-pattern-panel,.yd-chart-options){background:var(--glass-sheen),var(--glass-panel)!important;border:1px solid var(--glass-edge)!important;border-bottom-color:var(--glass-edge-bottom)!important;box-shadow:var(--panel-shadow)!important;backdrop-filter:var(--glass-filter);-webkit-backdrop-filter:var(--glass-filter);pointer-events:auto}
 body[data-yolo-wallpaper] #yolo-detect-workspace :is(button,a,select,input):focus-visible{outline:2px solid var(--brand-primary,var(--mint));outline-offset:2px}
 body[data-yolo-wallpaper] #yolo-detect-workspace button{transition:background-color 140ms,opacity 140ms,transform 100ms;}
 body[data-yolo-wallpaper] #yolo-detect-workspace button:active{transform:scale(.97)}
@@ -20,7 +20,7 @@ body[data-yolo-wallpaper] #yolo-detect-workspace .yd-home-link{display:grid;plac
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-toolbar :is(.yd-workspace-title,[data-yd-new]){display:none}
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-view-tabs{display:flex;width:auto;gap:2px;padding:0;margin:0;overflow:visible;flex-wrap:nowrap;background:transparent!important}
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-toolbar .nav-link{font-size:12px;min-height:36px;padding:8px 10px!important;border-radius:22px!important;margin:0}
-body[data-yolo-wallpaper] #yolo-detect-workspace .yd-view-tabs [aria-selected=true]{background:rgba(255,255,255,.85)!important;box-shadow:0 1px 5px #193d6112,inset 0 0 0 1px #0071e31a}
+body[data-yolo-wallpaper] #yolo-detect-workspace .yd-view-tabs [aria-selected=true]{background:var(--glass-sheen),var(--glass-panel)!important;box-shadow:var(--panel-shadow),inset 0 0 0 1px var(--brand-border)}
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-chart-head{position:absolute;top:max(14px,env(safe-area-inset-top));right:86px;z-index:12;display:flex;align-items:center;gap:12px;padding:5px 9px;border-radius:28px!important;max-width:calc(100% - 560px)}
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-title-line{gap:7px;flex-wrap:nowrap;min-width:0}
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-chart-head h2{font:600 15px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
@@ -42,7 +42,7 @@ body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-panel>header{display
 body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-panel h2{font-size:13px;font-weight:600;margin:0;flex:1}
 body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-total{font-size:11px;color:var(--muted)}
 body[data-yolo-wallpaper] #yolo-detect-workspace [data-yd-list-close]{width:32px;min-height:32px;padding:0;border:0;background:transparent;font-size:20px;color:var(--muted)}
-body[data-yolo-wallpaper] #yolo-detect-workspace #yd-result-search{flex-shrink:0;min-height:38px;height:38px;font-size:13px;padding:8px 12px;background:var(--control-bg,rgba(255,255,255,.58))!important;border-color:#98aec130!important;border-radius:12px!important}
+body[data-yolo-wallpaper] #yolo-detect-workspace #yd-result-search{flex-shrink:0;min-height:38px;height:38px;font-size:13px;padding:8px 12px;background:var(--glass-well)!important;border-color:#98aec130!important;border-radius:12px!important}
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-symbol-filters{display:flex;gap:1px;flex-wrap:nowrap;margin:7px 0 4px}
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-symbol-filters button{flex:1;min-width:0;min-height:34px;padding:4px 3px;font-size:11px;border:0;background:transparent;white-space:nowrap}
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-symbol-filters button[aria-pressed=true]{color:var(--brand-primary);background:var(--brand-bg)}
@@ -53,7 +53,7 @@ body[data-yolo-wallpaper] #yolo-detect-workspace #yd-summary{margin:0;padding:0 
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-summary-inline{display:none}
 body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-list{flex:1;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:2px 0}
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-symbol{padding:7px 8px;margin:2px 0;border:1px solid transparent;border-radius:15px;background:transparent;box-shadow:none;content-visibility:auto;contain-intrinsic-size:auto 116px}
-body[data-yolo-wallpaper] #yolo-detect-workspace .yd-symbol.selected{background:rgba(255,255,255,.64);border-color:#0071e34d;box-shadow:inset 0 0 0 1px #0071e30a}
+body[data-yolo-wallpaper] #yolo-detect-workspace .yd-symbol.selected{background:var(--glass-well);border-color:var(--card-hover-border);box-shadow:inset 0 0 0 1px var(--brand-border)}
 .yd-coin-row{display:flex;align-items:center;min-width:0;width:100%}
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-symbol-main{flex:1;display:flex;justify-content:flex-start;align-items:center;gap:9px;min-width:0;min-height:44px;padding:0;border:0;background:transparent;text-align:left}
 .yd-coin-copy{display:flex;flex-direction:column;min-width:0;gap:2px}.yd-coin-copy strong{font-size:13px;overflow:hidden;text-overflow:ellipsis}.yd-coin-copy small{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}.yd-coin-copy small span{font-size:9px;opacity:.8}
@@ -77,11 +77,11 @@ body[data-yolo-wallpaper] #yolo-detect-workspace [data-yd-zoom]{font-size:20px!i
 body[data-yolo-wallpaper] #yolo-detect-workspace #yd-expand{display:none}
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-options-button{min-height:36px;padding:7px 9px;font-size:11px;border:0;background:transparent}
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-chart-options{inset:auto 0 calc(100% + 12px) auto!important;transform:none!important;border-radius:20px!important;max-height:calc(100dvh - 150px);overflow:auto}
-body[data-yolo-wallpaper] #yolo-detect-workspace .yd-chart-readout{position:absolute;z-index:3;top:80px;right:88px;max-width:calc(100% - 440px);padding:8px 10px;background:rgba(247,250,252,.66);border-radius:12px;pointer-events:none;border:0;font-size:10px}
+body[data-yolo-wallpaper] #yolo-detect-workspace .yd-chart-readout{position:absolute;z-index:3;top:80px;right:88px;max-width:calc(100% - 440px);padding:8px 10px;background:var(--glass-sheen),var(--glass-dock);border:1px solid var(--glass-edge);border-bottom-color:var(--glass-edge-bottom);border-radius:12px;box-shadow:var(--panel-shadow);backdrop-filter:var(--glass-filter);-webkit-backdrop-filter:var(--glass-filter);pointer-events:none;font-size:10px}
 body[data-yolo-wallpaper] #yolo-detect-workspace :is(#yd-ohlc,#yd-six-ma){font-size:10px;line-height:1.6;gap:4px 10px;padding:0}
 body[data-yolo-wallpaper] #yolo-detect-workspace #yd-chart-levels{position:absolute;left:336px;bottom:109px;z-index:5;max-width:calc(100% - 440px);padding:0;gap:6px;pointer-events:auto;font-size:10px}
 body[data-yolo-wallpaper] #yd-chart-levels .yd-range-price{display:none}
-body[data-yolo-wallpaper] #yolo-detect-workspace #yd-chart-levels button{min-height:32px;background:var(--yd-glass);border-color:#b4c7d45e}
+body[data-yolo-wallpaper] #yolo-detect-workspace #yd-chart-levels button{min-height:32px;background:var(--glass-sheen),var(--glass-panel);border-color:var(--glass-edge);border-bottom-color:var(--glass-edge-bottom);box-shadow:var(--panel-shadow);backdrop-filter:var(--glass-filter);-webkit-backdrop-filter:var(--glass-filter)}
 body[data-yolo-wallpaper] #yolo-detect-workspace #yd-chart-levels .yd-range-week{flex-basis:auto}
 body[data-yolo-wallpaper] #yolo-detect-workspace #yd-pattern-panel{position:absolute;z-index:14;right:86px;bottom:110px;width:340px;max-width:calc(100% - 32px);max-height:55dvh;display:flex;flex-direction:column;border-radius:22px!important;padding:12px;opacity:0;transform:translate3d(0,14px,0);pointer-events:none;transition:opacity var(--yd-motion),transform var(--yd-motion);overflow:hidden}
 body[data-yolo-wallpaper] #yolo-detect-workspace #yd-pattern-panel.is-open{opacity:1;transform:translate3d(0,0,0);pointer-events:auto}
@@ -90,7 +90,7 @@ body[data-yolo-wallpaper] #yolo-detect-workspace #yd-pattern-panel h3{flex:1;fon
 body[data-yolo-wallpaper] #yolo-detect-workspace #yd-pattern-panel>header>div{flex-basis:100%;display:flex;gap:6px}
 body[data-yolo-wallpaper] #yolo-detect-workspace #yd-pattern-close{border:0;background:transparent;font-size:20px;min-height:32px;width:32px;padding:0}
 body[data-yolo-wallpaper] #yolo-detect-workspace #yd-box-list{overflow:auto;min-height:0;padding:0;overscroll-behavior:contain;scrollbar-width:thin}
-body[data-yolo-wallpaper] #yolo-detect-workspace #yd-insight{position:absolute;z-index:4;right:86px;top:144px;max-width:340px;margin:0;padding:7px 10px;background:rgba(255,255,255,.72);border-radius:12px;pointer-events:auto;font-size:10px}
+body[data-yolo-wallpaper] #yolo-detect-workspace #yd-insight{position:absolute;z-index:4;right:86px;top:144px;max-width:340px;margin:0;padding:7px 10px;background:var(--glass-sheen),var(--glass-panel);border:1px solid var(--glass-edge);border-bottom-color:var(--glass-edge-bottom);border-radius:12px;box-shadow:var(--panel-shadow);backdrop-filter:var(--glass-filter);-webkit-backdrop-filter:var(--glass-filter);pointer-events:auto;font-size:10px}
 body[data-yolo-wallpaper] #yd-insight:empty{display:none}
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-chart-foot{position:absolute;z-index:4;right:88px;bottom:104px;max-width:calc(100% - 440px);margin:0;padding:3px 5px;border:0;font-size:9px;background:transparent;pointer-events:none}
 body[data-yolo-wallpaper] #yolo-detect-workspace #yd-crosshair{display:none}
@@ -125,7 +125,7 @@ body[data-yolo-wallpaper] #yolo-detect-workspace [hidden]{display:none!important
  body[data-yolo-wallpaper] #yolo-detect-workspace .yd-coin-logo{width:26px;height:26px;flex-basis:26px}
  body[data-yolo-wallpaper] #yolo-detect-workspace :is(.yd-monday-link,[data-yd-symbols-toggle]){min-height:44px;padding:4px 5px;font-size:11px}
  body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-home{display:none!important}
- body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-dialog{position:fixed;inset:auto 0 0!important;margin:0!important;max-width:100%;width:100%;height:75dvh;min-height:75dvh;max-height:75dvh;border:1px solid var(--yd-edge);border-radius:28px 28px 0 0!important;padding:0;background:var(--yd-glass);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);box-shadow:var(--yd-shadow);overflow:hidden;transform:translate3d(0,var(--yd-sheet-offset,0px),0);overscroll-behavior:contain}
+ body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-dialog{position:fixed;inset:auto 0 0!important;margin:0!important;max-width:100%;width:100%;height:75dvh;min-height:75dvh;max-height:75dvh;border:1px solid var(--glass-edge);border-bottom-color:var(--glass-edge-bottom);border-radius:28px 28px 0 0!important;padding:0;background:var(--glass-sheen),var(--glass-sheet);backdrop-filter:var(--glass-filter);-webkit-backdrop-filter:var(--glass-filter);box-shadow:var(--elevated-shadow);overflow:hidden;transform:translate3d(0,var(--yd-sheet-offset,0px),0);overscroll-behavior:contain}
  body[data-yolo-wallpaper] #yd-symbol-dialog[open]{display:flex;flex-direction:column}
  body[data-yolo-wallpaper] #yd-symbol-dialog::backdrop{background:#172c403d;backdrop-filter:blur(3px)}
  body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-dialog>header{flex:none;padding:0 16px 8px;border:0;background:transparent;display:flex;align-items:center;justify-content:space-between}
@@ -159,8 +159,8 @@ body[data-yolo-wallpaper] #yolo-detect-workspace [hidden]{display:none!important
 }
 @media(max-width:360px){body[data-yolo-wallpaper] #yolo-detect-workspace #yd-title-logo{display:none}body[data-yolo-wallpaper] #yolo-detect-workspace .yd-chart-head h2{font-size:12px}}
 @media(prefers-reduced-motion:reduce){body[data-yolo-wallpaper] #yolo-detect-workspace :is(button,#yd-symbol-home,#yd-pattern-panel,#yd-symbol-dialog){transition:none!important}}
-html[data-theme=dark] body[data-yolo-wallpaper]{--yd-glass:linear-gradient(145deg,rgba(28,39,52,.86),rgba(20,32,43,.7));--yd-edge:#d2e2ff24;--yd-shadow:inset 0 1px 1px #ffffff15,0 10px 32px -12px #0008}
-html[data-theme=dark] body[data-yolo-wallpaper] #yolo-detect-workspace .yd-symbol.selected{background:#283b4be0!important}
+html[data-theme=dark] body[data-yolo-wallpaper]{--yd-glass:var(--glass-panel);--yd-edge:var(--glass-edge);--yd-shadow:var(--panel-shadow)}
+html[data-theme=dark] body[data-yolo-wallpaper] #yolo-detect-workspace .yd-symbol.selected{background:var(--glass-well)!important;border-color:var(--card-hover-border)!important}
 
 /* Two compact rows; touch controls keep 44px targets on phones. */
 body[data-yolo-wallpaper] #yolo-detect-workspace #yd-symbol-panel{padding:8px}
@@ -189,18 +189,18 @@ body[data-yolo-wallpaper] #yolo-detect-workspace .yd-coin-empty{display:block;ma
 }
 
 /* Reuse the Monday wallpaper interaction and movable glass surfaces. */
-body[data-yolo-wallpaper] {--yd-glass:linear-gradient(145deg,#ffffffa3,#e8f4fa66);--yd-shadow:inset 0 1px 1px #fffffff0,0 12px 32px -14px #20354850;}
-html[data-theme=dark] body[data-yolo-wallpaper] {--yd-glass:linear-gradient(145deg,#202e3da8,#15232e88);--yd-edge:#d2e2ff2b;}
+body[data-yolo-wallpaper] {--yd-glass:var(--glass-panel);--yd-edge:var(--glass-edge);--yd-shadow:var(--panel-shadow);}
+html[data-theme=dark] body[data-yolo-wallpaper] {--yd-glass:var(--glass-panel);--yd-edge:var(--glass-edge);--yd-shadow:var(--panel-shadow);}
 body[data-yolo-wallpaper] #yd-chart {touch-action:none;cursor:grab;}
 body[data-yolo-wallpaper] #yd-chart.cv-panning {cursor:grabbing;}
 .yd-grip {display:none;}
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-grip {display:grid;place-items:center;flex:none;width:44px;height:44px;min-height:44px;padding:0;border:0;background:transparent;font-size:22px;color:var(--muted);touch-action:none;cursor:grab;user-select:none;}
 body[data-yolo-wallpaper] #yolo-detect-workspace .mf-dragging {transition:none!important;cursor:grabbing;}
-body[data-yolo-wallpaper] #yolo-detect-workspace .yd-chart-readout {top:auto;bottom:116px;left:336px;right:72px;max-width:none;padding:0;background:transparent!important;box-shadow:none;pointer-events:none;}
+body[data-yolo-wallpaper] #yolo-detect-workspace .yd-chart-readout {top:auto;bottom:116px;left:336px;right:72px;max-width:none;padding:0;pointer-events:none;}
 body[data-yolo-wallpaper] #yolo-detect-workspace:not(.yd-show-legend) #yd-six-ma {display:none!important;}
 body[data-yolo-wallpaper] #yolo-detect-workspace #yd-chart-levels {bottom:158px;}
 body[data-yolo-wallpaper] #yolo-detect-workspace .yd-chart-head {gap:4px;}
-body[data-yolo-wallpaper] #yolo-detect-workspace #yd-insight {background:transparent!important;pointer-events:none;}
+body[data-yolo-wallpaper] #yolo-detect-workspace #yd-insight {pointer-events:none;}
 @media(max-width:700px){
  body[data-yolo-wallpaper] #yolo-detect-workspace .yd-toolbar {width:max-content;max-width:calc(100% - 16px);}
  body[data-yolo-wallpaper] #yolo-detect-workspace .yd-home-link {display:grid;width:32px;flex-basis:32px;}

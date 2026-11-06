@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SPIKE · 12H 信号图表 · 交易参考覆盖层与纯色云带规范 (390px Apple Glass)</title>
+<!-- Material Symbols & Typography -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS Engine -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed-variant": "#910033",
+            "surface-bright": "#36393f",
+            "text-secondary": "#8c96a5",
+            "on-secondary": "#003828",
+            "surface-glass-light": "rgba(255, 255, 255, 0.25)",
+            "error-container": "#93000a",
+            "text-tertiary": "#556070",
+            "on-secondary-fixed-variant": "#00513b",
+            "surface-container-lowest": "#0b0e13",
+            "on-error": "#690005",
+            "surface-obsidian": "rgba(16, 19, 24, 0.85)",
+            "outline-variant": "#404751",
+            "on-primary": "#00325a",
+            "tertiary": "#ffb2bb",
+            "crimson-loss-surface": "rgba(215, 53, 93, 0.15)",
+            "tertiary-fixed": "#ffd9dd",
+            "primary-fixed": "#d2e4ff",
+            "error": "#ffb4ab",
+            "primary": "#a1c9ff",
+            "on-tertiary-fixed": "#400012",
+            "tertiary-fixed-dim": "#ffb2bb",
+            "primary-fixed-dim": "#a1c9ff",
+            "on-tertiary": "#670022",
+            "on-surface-variant": "#c0c7d3",
+            "primary-container": "#5aa9ff",
+            "surface": "#101319",
+            "secondary-fixed": "#88f7cc",
+            "glass-specular-edge": "rgba(255, 255, 255, 0.4)",
+            "outline": "#8a919d",
+            "on-primary-fixed-variant": "#004880",
+            "surface-container-highest": "#32353a",
+            "secondary-fixed-dim": "#6adbb1",
+            "canvas-dark": "#101318",
+            "background": "#101319",
+            "glass-border-subtle": "rgba(255, 255, 255, 0.08)",
+            "on-background": "#e1e2e9",
+            "on-tertiary-container": "#7b002a",
+            "on-secondary-container": "#003122",
+            "on-secondary-fixed": "#002116",
+            "surface-container-low": "#191c21",
+            "inverse-primary": "#0060a7",
+            "electric-cyan": "#5aa9ff",
+            "pine-gain": "#169873",
+            "surface-tint": "#a1c9ff",
+            "surface-container": "#1d2025",
+            "secondary": "#6adbb1",
+            "on-primary-fixed": "#001c37",
+            "surface-container-high": "#272a2f",
+            "crimson-loss": "#d7355d",
+            "secondary-container": "#2aa37d",
+            "on-surface": "#e1e2e9",
+            "tertiary-container": "#ff7c92",
+            "inverse-surface": "#e1e2e9",
+            "pine-gain-surface": "rgba(22, 152, 115, 0.15)",
+            "text-primary": "#f5f7fa",
+            "surface-variant": "#32353a",
+            "surface-dim": "#101319",
+            "inverse-on-surface": "#2e3036",
+            "on-primary-container": "#003d6c",
+            "on-error-container": "#ffdad6"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "0.75rem",
+            "gutter-tablet": "0.75rem",
+            "gutter": "0.5rem",
+            "space-sm": "0.375rem",
+            "margin-tablet": "1rem",
+            "space-xl": "1rem",
+            "space-lg": "0.75rem",
+            "space-md": "0.5rem",
+            "gutter-desktop": "1rem",
+            "space-xs": "0.25rem",
+            "margin-mobile": "0.5rem",
+            "margin-desktop": "1.5rem"
+          },
+          "fontFamily": {
+            "body-sm": ["Inter"],
+            "numeric-lg": ["JetBrains Mono"],
+            "display": ["Inter"],
+            "headline-md": ["Inter"],
+            "body-lg": ["Inter"],
+            "numeric-sm": ["JetBrains Mono"],
+            "body-md": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "micro-tag-caps": ["JetBrains Mono"],
+            "numeric-md": ["JetBrains Mono"],
+            "headline-lg-mobile": ["Inter"]
+          },
+          "fontSize": {
+            "body-sm": ["11px", { "lineHeight": "15px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+            "numeric-lg": ["20px", { "lineHeight": "24px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "display": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "headline-md": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "numeric-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "body-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-sm": ["15px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg": ["24px", { "lineHeight": "30px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "micro-tag-caps": ["10px", { "lineHeight": "12px", "letterSpacing": "0.06em", "fontWeight": "600" }],
+            "numeric-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "headline-lg-mobile": ["20px", { "lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Apple Specular Edge & Glass Layering */
+    .apple-glass {
+      backdrop-filter: blur(28px) saturate(150%);
+      -webkit-backdrop-filter: blur(28px) saturate(150%);
+    }
+    .specular-border {
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2), 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+    }
+    .light .specular-border {
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.8), 0 4px 16px -2px rgba(0, 0, 0, 0.06);
+    }
+    .pulse-ring {
+      box-shadow: 0 0 0 0 rgba(22, 152, 115, 0.7);
+      animation: pulse-ring-anim 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    }
+    @keyframes pulse-ring-anim {
+      0% { box-shadow: 0 0 0 0 rgba(22, 152, 115, 0.6); }
+      70% { box-shadow: 0 0 0 6px rgba(22, 152, 115, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(22, 152, 115, 0); }
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(140, 150, 165, 0.25); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(140, 150, 165, 0.45); }
+  </style>
+</head>
+<body class="bg-[#f4f6fa] dark:bg-canvas-dark text-slate-900 dark:text-on-surface font-body-md antialiased min-h-screen selection:bg-electric-cyan selection:text-surface-obsidian overflow-x-hidden"><!-- 390px Mobile Viewport Container Shell -->
+<div class="min-h-screen bg-[#F1F4F9] dark:bg-[#0B0E14] text-slate-900 dark:text-[#E2E8F0] font-body-md flex items-center justify-center p-0 sm:py-6 selection:bg-electric-cyan selection:text-surface-obsidian">
+<div class="w-full max-w-[390px] h-[844px] max-h-screen bg-[#FFFFFF] dark:bg-[#0E121A] relative shadow-2xl sm:rounded-[36px] border border-slate-200/90 dark:border-white/10 flex flex-col overflow-hidden apple-glass">
+<!-- TOP NAVIGATION HEADER -->
+<header class="h-12 px-3 border-b border-slate-100 dark:border-white/[0.08] flex items-center justify-between flex-shrink-0 bg-white/85 dark:bg-[#0E121A]/85 backdrop-blur-xl z-20">
+<!-- Left: Back Button -->
+<button class="flex items-center gap-0.5 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-[13px] font-medium">
+<span class="material-symbols-outlined text-[18px]">arrow_back_ios</span>
+<span>信号</span>
+</button>
+<!-- Middle: Symbol Pill & Tag -->
+<div class="flex items-center gap-1.5">
+<div class="flex items-center gap-1 bg-slate-100 dark:bg-white/[0.08] px-2 py-0.5 rounded-full border border-slate-200/60 dark:border-white/10"><span class="font-bold text-[13px] tracking-tight text-slate-900 dark:text-white">DEMO / USDT</span><span class="text-[9px] font-micro-tag-caps font-bold px-1.5 py-0.2 rounded-full bg-[#169873] text-white tracking-wider">多空成对</span></div>
+<span class="font-numeric-sm text-[11px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100/70 dark:bg-white/5 px-1.5 py-0.5 rounded">12H</span>
+</div>
+<!-- Right: Light/Dark Mode Switch & Actions -->
+<div class="flex items-center gap-1">
+<button class="w-7 h-7 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer" id="modeToggleBtn" title="明暗主题切换">
+<span class="material-symbols-outlined text-[16px]" id="modeToggleIcon">dark_mode</span>
+</button>
+<button class="w-7 h-7 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-[17px]">more_horiz</span>
+</button>
+</div>
+</header>
+<!-- COMPACT TRADE PLAN LEGEND (Floating Glass Strip below Header) -->
+<div class="px-3 py-1.5 bg-[#F8FAFC]/90 dark:bg-[#131824]/90 border-b border-slate-100 dark:border-white/[0.06] backdrop-blur-md flex items-center justify-between text-[11px] font-numeric-sm flex-shrink-0 z-10"><div class="flex items-center gap-2.5 overflow-x-hidden"><div class="flex items-center gap-1"><span class="text-slate-400 text-[10px]">参考入场</span><span class="font-semibold text-slate-900 dark:text-white font-numeric-md">100.00</span></div><div class="flex items-center gap-1"><span class="text-slate-400 text-[10px]">关键K止损</span><span class="font-semibold text-[#D7355D] font-numeric-md">98.00</span></div><div class="flex items-center gap-1"><span class="text-slate-400 text-[10px]">对侧目标</span><span class="font-semibold text-[#169873] font-numeric-md">124.00 (12R)</span></div></div><div class="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200/80 dark:border-emerald-500/30 text-[#169873] dark:text-[#6ADBB1] font-bold text-[10px] whitespace-nowrap">止损前极值 21.0R</div></div>
+<!-- MAIN CHART VIEWPORT (390px Mobile View) -->
+<div class="relative flex-1 w-full bg-[#FFFFFF] dark:bg-[#0E121A] overflow-hidden select-none flex flex-col justify-between">
+<!-- Floating Cloud & Price Info Badges -->
+<div class="absolute top-2 left-3 z-10 flex items-center gap-2 pointer-events-none text-[10px] font-numeric-sm"><div class="flex items-center gap-1 text-slate-500 dark:text-slate-400 bg-white/80 dark:bg-[#0E121A]/80 px-1.5 py-0.5 rounded border border-slate-100 dark:border-white/10 shadow-xs"><span class="w-1.5 h-1.5 rounded-full bg-[#169873]"></span><span>EMA 20/50 顺势通道</span></div><span class="text-slate-400 dark:text-slate-400 font-numeric-sm">1R = 2.00</span></div>
+<!-- SVG CHART AREA (Grey Candlesticks, Pure Fill-Only EMA Cloud, 4 Trade Reference Overlays, 1.618 Fib) -->
+<div class="w-full h-full relative"><svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 390 620"><defs><lineargradient id="cloudFillGrad" x1="0" x2="0" y1="1" y2="0"><stop offset="0%" stop-color="#169873" stop-opacity="0.16"></stop><stop offset="100%" stop-color="#169873" stop-opacity="0.04"></stop></lineargradient></defs><g stroke="rgba(148, 163, 184, 0.15)" stroke-width="1"><line x1="10" x2="338" y1="45" y2="45"></line><line x1="10" x2="338" y1="108" y2="108"></line><line x1="10" x2="338" y1="198" y2="198"></line><line x1="10" x2="338" y1="288" y2="288"></line><line x1="10" x2="338" y1="378" y2="378"></line><line x1="10" x2="338" y1="468" y2="468"></line><line x1="10" x2="338" y1="530" y2="530"></line><line x1="10" x2="338" y1="575" y2="575"></line><line x1="338" x2="338" y1="10" y2="600"></line></g><g fill="#94A3B8" font-family="JetBrains Mono" font-size="9" text-anchor="start"><text fill="#169873" font-weight="700" x="344" y="48">142.0</text><text x="344" y="111">130.0</text><text fill="#169873" font-weight="600" x="344" y="173">124.0</text><text x="344" y="201">120.0</text><text x="344" y="291">110.0</text><text font-weight="700" x="344" y="381">100.0</text><text fill="#F43F5E" font-weight="700" x="344" y="471">98.0</text><text x="344" y="578">90.0</text></g><line opacity="0.6" stroke="#94A3B8" stroke-dasharray="2 2" stroke-width="0.8" x1="15" x2="338" y1="30" y2="30"></line><text fill="#94A3B8" font-family="JetBrains Mono" font-size="8.5" opacity="0.8" x="245" y="26">周高 145.00</text><line opacity="0.6" stroke="#94A3B8" stroke-dasharray="2 2" stroke-width="0.8" x1="15" x2="338" y1="585" y2="585"></line><text fill="#94A3B8" font-family="JetBrains Mono" font-size="8.5" opacity="0.8" x="245" y="581">周低 88.50</text><polygon fill="url(#cloudFillGrad)" points="15,410 45,395 75,370 105,340 140,290 175,230 210,180 245,140 280,120 315,115 338,125 338,165 315,150 280,160 245,185 210,230 175,285 140,345 105,400 75,425 45,440 15,455"></polygon><g id="example-1-bull-trade"><rect fill="#F43F5E" fill-opacity="0.19" height="90" rx="0" stroke="#F43F5E" stroke-opacity="0.75" stroke-width="0.8" width="138" x="80" y="378"></rect><rect fill="#10B981" fill-opacity="0.18" height="334" rx="0" stroke="#10B981" stroke-opacity="0.75" stroke-width="0.8" width="138" x="80" y="44"></rect><g opacity="0.85" stroke="#10B981" stroke-dasharray="2 2" stroke-width="0.75"><line x1="80" x2="218" y1="288" y2="288"></line><line x1="80" x2="218" y1="198" y2="198"></line><line x1="80" x2="218" y1="108" y2="108"></line><line x1="80" x2="218" y1="53" y2="53"></line></g><g fill="#10B981" font-family="JetBrains Mono" font-size="7.5" font-weight="600"><text x="84" y="285">5R · 110.00</text><text x="84" y="195">10R · 120.00</text><text x="84" y="105">15R · 130.00</text><text x="84" y="61">20R · 140.00</text></g><line stroke="#10B981" stroke-dasharray="3 3" stroke-width="1.1" x1="76" x2="222" y1="170" y2="170"></line><rect fill="#10B981" height="12" rx="2" width="78" x="84" y="161"></rect><text fill="#FFFFFF" font-family="JetBrains Mono" font-size="7.5" font-weight="700" x="87" y="170">目标 12R · 124.00</text><rect fill="#059669" height="18" rx="3" width="138" x="80" y="25"></rect><text fill="#FFFFFF" font-family="JetBrains Mono" font-size="8" font-weight="700" x="85" y="37">最高 21.0R · 142.00 (触及止损前极值)</text><rect fill="#E11D48" height="12" rx="2" width="62" x="84" y="450"></rect><text fill="#FFFFFF" font-family="JetBrains Mono" font-size="7.5" font-weight="700" x="87" y="459">关键K止损 -1.0R</text></g><g id="example-2-bear-trade"><rect fill="#F43F5E" fill-opacity="0.20" height="35" rx="0" stroke="#F43F5E" stroke-opacity="0.75" stroke-width="0.8" width="76" x="238" y="198"></rect><rect fill="#10B981" fill-opacity="0.18" height="75" rx="0" stroke="#10B981" stroke-opacity="0.75" stroke-width="0.8" width="76" x="238" y="233"></rect><rect fill="#E11D48" height="11" rx="2" width="56" x="242" y="202"></rect><text fill="#FFFFFF" font-family="JetBrains Mono" font-size="7" font-weight="700" x="245" y="210">关键K止损 -1R</text><rect fill="#10B981" height="12" rx="2" width="62" x="242" y="240"></rect><text fill="#FFFFFF" font-family="JetBrains Mono" font-size="7.5" font-weight="700" x="245" y="249">目标 +2.14R</text></g><g id="candlesticks" stroke-width="1.2"><g stroke="#64748B"><line x1="30" x2="30" y1="420" y2="465"></line><rect fill="#64748B" height="28" rx="1" width="8" x="26" y="428"></rect></g><g stroke="#64748B"><line x1="52" x2="52" y1="405" y2="450"></line><rect fill="#64748B" height="25" rx="1" width="8" x="48" y="412"></rect></g><g id="key-signal-candle-bull" stroke="#22C55E" stroke-width="1.4"><line x1="85" x2="85" y1="370" y2="475"></line><rect fill="#22C55E" height="70" rx="1" width="8" x="81" y="378"></rect><circle cx="85" cy="378" fill="#22C55E" r="2.5"></circle></g><g stroke="#64748B"><line x1="106" x2="106" y1="310" y2="385"></line><rect fill="#64748B" height="55" rx="1" width="8" x="102" y="320"></rect></g><g stroke="#64748B"><line x1="127" x2="127" y1="220" y2="330"></line><rect fill="#64748B" height="85" rx="1" width="8" x="123" y="230"></rect></g><g stroke="#64748B"><line x1="148" x2="148" y1="140" y2="245"></line><rect fill="#64748B" height="75" rx="1" width="8" x="144" y="150"></rect></g><g stroke="#64748B"><line x1="169" x2="169" y1="80" y2="165"></line><rect fill="#64748B" height="60" rx="1" width="8" x="165" y="90"></rect></g><g id="peak-candle" stroke="#64748B"><line x1="190" x2="190" y1="44" y2="120"></line><rect fill="#64748B" height="52" rx="1" width="8" x="186" y="50"></rect></g><g stroke="#64748B"><line x1="211" x2="211" y1="100" y2="480"></line><rect fill="#64748B" height="325" rx="1" width="8" x="207" y="150"></rect></g><g id="key-signal-candle-bear" stroke="#22C55E" stroke-width="1.4"><line x1="243" x2="243" y1="190" y2="260"></line><rect fill="#22C55E" height="40" rx="1" width="8" x="239" y="200"></rect><circle cx="243" cy="233" fill="#22C55E" r="2.5"></circle></g><g stroke="#64748B"><line x1="264" x2="264" y1="225" y2="290"></line><rect fill="#64748B" height="45" rx="1" width="8" x="260" y="235"></rect></g><g stroke="#64748B"><line x1="285" x2="285" y1="255" y2="320"></line><rect fill="#64748B" height="42" rx="1" width="8" x="281" y="265"></rect></g><g stroke="#64748B"><line x1="306" x2="306" y1="280" y2="350"></line><rect fill="#64748B" height="45" rx="1" width="8" x="302" y="290"></rect></g></g></svg></div>
+<!-- FLOATING FROSTED-GLASS BOTTOM DOCK (Mobile Timeframe & Minimal Controls) -->
+<div class="p-3 w-full z-20 pointer-events-auto flex-shrink-0">
+<div class="apple-glass bg-white/90 dark:bg-[#131824]/90 border border-slate-200/90 dark:border-white/10 rounded-2xl p-1.5 shadow-xl flex items-center justify-between gap-1 specular-border">
+<!-- Timeframe Segmented Switch -->
+<div class="flex items-center gap-0.5 font-numeric-sm text-[11px]">
+<button class="px-2 py-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">5m</button>
+<button class="px-2 py-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">15m</button>
+<button class="px-2 py-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">1H</button>
+<button class="px-2 py-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">4H</button>
+<!-- Active Highlighted 12H -->
+<button class="px-2.5 py-1 rounded-lg bg-slate-900 dark:bg-electric-cyan text-white dark:text-surface-obsidian font-bold shadow-sm">12H</button>
+<button class="px-2 py-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">1D</button>
+</div>
+<!-- Minimal Secondary Controls (TradingView, Layers, Settings) -->
+<div class="flex items-center gap-1 border-l border-slate-200/80 dark:border-white/10 pl-1.5">
+<button class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" title="层级显示">
+<span class="material-symbols-outlined text-[15px]">layers</span>
+</button>
+<button class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" title="TradingView 打开">
+<span class="material-symbols-outlined text-[15px]">open_in_new</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Light/Dark Mode Interactive Toggle Script -->
+<script>
+  (function() {
+    const btn = document.getElementById('modeToggleBtn');
+    const icon = document.getElementById('modeToggleIcon');
+    const html = document.documentElement;
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const isDark = html.classList.contains('dark');
+      if (isDark) {
+        html.classList.remove('dark');
+        html.classList.add('light');
+        if (icon) icon.textContent = 'dark_mode';
+      } else {
+        html.classList.remove('light');
+        html.classList.add('dark');
+        if (icon) icon.textContent = 'light_mode';
+      }
+    });
+  })();
+</script></body></html>

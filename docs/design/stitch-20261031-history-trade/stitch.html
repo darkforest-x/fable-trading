@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>SPIKE Trading - Historical Replay View</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-variant": "#32353a",
+            "on-error": "#690005",
+            "surface-obsidian": "rgba(16, 19, 24, 0.85)",
+            "on-tertiary-fixed-variant": "#910033",
+            "text-tertiary": "#556070",
+            "surface-container-lowest": "#0b0e13",
+            "on-surface-variant": "#c0c7d3",
+            "primary-container": "#5aa9ff",
+            "on-primary-fixed-variant": "#004880",
+            "inverse-on-surface": "#2e3036",
+            "surface-container": "#1d2025",
+            "on-tertiary-fixed": "#400012",
+            "on-primary-fixed": "#001c37",
+            "crimson-loss-surface": "rgba(215, 53, 93, 0.15)",
+            "pine-gain": "#169873",
+            "text-primary": "#f5f7fa",
+            "primary": "#a1c9ff",
+            "on-tertiary-container": "#7b002a",
+            "surface-container-low": "#191c21",
+            "on-secondary-fixed": "#002116",
+            "surface-container-high": "#272a2f",
+            "text-secondary": "#8c96a5",
+            "surface": "#101319",
+            "electric-cyan": "#5aa9ff",
+            "error-container": "#93000a",
+            "secondary-fixed": "#88f7cc",
+            "crimson-loss": "#d7355d",
+            "surface-dim": "#101319",
+            "tertiary-container": "#ff7c92",
+            "outline": "#8a919d",
+            "tertiary": "#ffb2bb",
+            "primary-fixed": "#d2e4ff",
+            "primary-fixed-dim": "#a1c9ff",
+            "on-tertiary": "#670022",
+            "tertiary-fixed": "#ffd9dd",
+            "on-secondary-container": "#003122",
+            "on-secondary": "#003828",
+            "background": "#101319",
+            "tertiary-fixed-dim": "#ffb2bb",
+            "surface-bright": "#36393f",
+            "outline-variant": "#404751",
+            "pine-gain-surface": "rgba(22, 152, 115, 0.15)",
+            "surface-container-highest": "#32353a",
+            "inverse-primary": "#0060a7",
+            "canvas-dark": "#101318",
+            "glass-border-subtle": "rgba(255, 255, 255, 0.08)",
+            "on-secondary-fixed-variant": "#00513b",
+            "secondary-container": "#2aa37d",
+            "error": "#ffb4ab",
+            "surface-tint": "#a1c9ff",
+            "on-background": "#e1e2e9",
+            "on-primary-container": "#003d6c",
+            "on-primary": "#00325a",
+            "inverse-surface": "#e1e2e9",
+            "secondary": "#6adbb1",
+            "secondary-fixed-dim": "#6adbb1",
+            "glass-specular-edge": "rgba(255, 255, 255, 0.4)",
+            "surface-glass-light": "rgba(255, 255, 255, 0.25)",
+            "on-surface": "#e1e2e9",
+            "on-error-container": "#ffdad6"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "space-md": "0.5rem",
+            "margin": "0.75rem",
+            "space-xs": "0.25rem",
+            "gutter-tablet": "0.75rem",
+            "gutter": "0.5rem",
+            "space-sm": "0.375rem",
+            "space-lg": "0.75rem",
+            "margin-tablet": "1rem",
+            "margin-desktop": "1.5rem",
+            "margin-mobile": "0.5rem",
+            "space-xl": "1rem",
+            "gutter-desktop": "1rem"
+          },
+          fontFamily: {
+            "headline-sm": ["Inter"],
+            "body-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "body-lg": ["Inter"],
+            "numeric-sm": ["JetBrains Mono"],
+            "numeric-md": ["JetBrains Mono"],
+            "headline-lg-mobile": ["Inter"],
+            "micro-tag-caps": ["JetBrains Mono"],
+            "headline-lg": ["Inter"],
+            "display": ["Inter"],
+            "body-md": ["Inter"],
+            "numeric-lg": ["JetBrains Mono"]
+          },
+          fontSize: {
+            "headline-sm": ["15px", { lineHeight: "20px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "body-sm": ["11px", { lineHeight: "15px", letterSpacing: "0.005em", fontWeight: "400" }],
+            "headline-md": ["18px", { lineHeight: "24px", letterSpacing: "-0.015em", fontWeight: "600" }],
+            "body-lg": ["14px", { lineHeight: "20px", letterSpacing: "-0.005em", fontWeight: "400" }],
+            "numeric-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.01em", fontWeight: "500" }],
+            "numeric-md": ["13px", { lineHeight: "16px", letterSpacing: "0em", fontWeight: "500" }],
+            "headline-lg-mobile": ["20px", { lineHeight: "26px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "micro-tag-caps": ["10px", { lineHeight: "12px", letterSpacing: "0.06em", fontWeight: "600" }],
+            "headline-lg": ["24px", { lineHeight: "30px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "display": ["32px", { lineHeight: "38px", letterSpacing: "-0.025em", fontWeight: "600" }],
+            "body-md": ["13px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "400" }],
+            "numeric-lg": ["20px", { lineHeight: "24px", letterSpacing: "-0.02em", fontWeight: "600" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    /* Hide native scrollbars for crisp native app experience */
+    ::-webkit-scrollbar { display: none; }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-text-primary antialiased selection:bg-primary-container selection:text-canvas-dark overflow-hidden select-none">
+<!-- Mobile Screen Frame (Target: 390px x 844px) -->
+<main class="w-[390px] h-[844px] mx-auto relative bg-background flex flex-col overflow-hidden shadow-2xl border border-glass-border-subtle">
+<!-- Ambient Subtle Background Gradient for Specular Obsidian Depth -->
+<div class="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(circle_at_50%_0%,rgba(90,169,255,0.08),transparent_60%)]"></div>
+<!-- 1. TOP HEADER AREA (Docked Apple Glass Pill Header) -->
+<header class="relative z-30 pt-3 px-margin-mobile pb-2 flex-shrink-0">
+<div class="h-12 w-full rounded-xl bg-surface-obsidian backdrop-blur-xl border border-glass-border-subtle px-3 flex items-center justify-between shadow-sm">
+<!-- Left: Synthetic ETH Token Badge & Trade Timestamp Context -->
+<div class="flex items-center space-x-2.5">
+<!-- Token Icon Pill -->
+<div class="w-8 h-8 rounded-lg bg-surface-variant/80 border border-glass-border-subtle flex items-center justify-center flex-shrink-0">
+<span class="text-electric-cyan font-numeric-md text-numeric-md font-bold">Ξ</span>
+</div>
+<div class="flex flex-col justify-center">
+<div class="flex items-center space-x-1.5">
+<span class="font-headline-sm text-headline-sm text-text-primary tracking-tight">ETH/USDT</span>
+<span class="font-micro-tag-caps text-micro-tag-caps text-pine-gain bg-pine-gain-surface border border-pine-gain/30 px-1.5 py-0.5 rounded">做多 10x</span>
+</div>
+<div class="flex items-center space-x-1.5 mt-0.5">
+<span class="font-micro-tag-caps text-micro-tag-caps text-text-secondary bg-surface-variant/50 px-1 rounded">历史交易 · 开仓区间</span>
+<span class="font-numeric-sm text-numeric-sm text-text-tertiary">05-18 14:20–14:25</span>
+</div>
+</div>
+</div>
+<!-- Right: "返回实时" Compact Frosted Glass Action Button -->
+<button class="h-8 px-2.5 rounded-full bg-surface-glass-light hover:bg-surface-variant text-electric-cyan border border-glass-specular-edge flex items-center space-x-1 active:scale-95 transition-all duration-150 shadow-sm group">
+<span class="material-symbols-outlined text-[15px] group-hover:-translate-x-0.5 transition-transform">history_toggle_off</span>
+<span class="font-body-sm text-body-sm font-semibold tracking-tight text-text-primary">返回实时</span>
+</button>
+</div>
+</header>
+<!-- 2. FULL VIEWPORT CANDLESTICK CHART (FROZEN HISTORICAL REPLAY CANVAS) -->
+<div class="relative flex-1 w-full overflow-hidden bg-canvas-dark">
+<!-- Chart SVG Layer (Rendering 14:00 - 17:00 May 18 Frozen Window) -->
+<svg class="absolute inset-0 w-full h-full" preserveaspectratio="none" viewbox="0 0 390 620">
+<defs>
+<!-- Specular Linear Gradients for Gain/Loss Candles -->
+<lineargradient id="bullCandleGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#169873"></stop>
+<stop offset="100%" stop-color="#107559"></stop>
+</lineargradient>
+<lineargradient id="bearCandleGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#d7355d"></stop>
+<stop offset="100%" stop-color="#b52649"></stop>
+</lineargradient>
+<lineargradient id="entryZoneGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="rgba(90, 169, 255, 0.22)"></stop>
+<stop offset="100%" stop-color="rgba(90, 169, 255, 0.02)"></stop>
+</lineargradient>
+<lineargradient id="volumeGreen" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#169873" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#169873" stop-opacity="0.05"></stop>
+</lineargradient>
+<lineargradient id="volumeRed" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#d7355d" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#d7355d" stop-opacity="0.05"></stop>
+</lineargradient>
+</defs>
+<!-- Horizontal Background Price Grid Lines -->
+<line stroke="rgba(255,255,255,0.04)" stroke-dasharray="3 3" x1="0" x2="330" y1="90" y2="90"></line>
+<line stroke="rgba(255,255,255,0.04)" stroke-dasharray="3 3" x1="0" x2="330" y1="170" y2="170"></line>
+<line stroke="rgba(255,255,255,0.04)" stroke-dasharray="3 3" x1="0" x2="330" y1="260" y2="260"></line>
+<line stroke="rgba(255,255,255,0.04)" stroke-dasharray="3 3" x1="0" x2="330" y1="360" y2="360"></line>
+<line stroke="rgba(255,255,255,0.04)" stroke-dasharray="3 3" x1="0" x2="330" y1="460" y2="460"></line>
+<!-- Vertical Time Grid Reference Lines (14:00, 15:00, 16:00, 17:00) -->
+<line stroke="rgba(255,255,255,0.03)" stroke-dasharray="2 4" x1="45" x2="45" y1="20" y2="520"></line>
+<line stroke="rgba(255,255,255,0.03)" stroke-dasharray="2 4" x1="135" x2="135" y1="20" y2="520"></line>
+<line stroke="rgba(255,255,255,0.03)" stroke-dasharray="2 4" x1="225" x2="225" y1="20" y2="520"></line>
+<line stroke="rgba(255,255,255,0.03)" stroke-dasharray="2 4" x1="315" x2="315" y1="20" y2="520"></line>
+<!-- Monday 1.618 Reference Fib Lines -->
+<!-- Monday Upper 1.618 (Price ~ 3,510) -->
+<g opacity="0.55">
+<line stroke="#8c96a5" stroke-dasharray="4 4" stroke-width="0.75" x1="0" x2="330" y1="92" y2="92"></line>
+<text fill="#8c96a5" font-family="'JetBrains Mono', monospace" font-size="9" x="8" y="87">Mon 1.618 (3,512.4)</text>
+</g>
+<!-- Monday High (Price ~ 3,475) -->
+<g opacity="0.6">
+<line stroke="#5aa9ff" stroke-dasharray="6 3" stroke-width="0.8" x1="0" x2="330" y1="168" y2="168"></line>
+<text fill="#5aa9ff" font-family="'JetBrains Mono', monospace" font-size="9" x="8" y="163">Mon High (3,476.0)</text>
+</g>
+<!-- Monday Low (Price ~ 3,405) -->
+<g opacity="0.6">
+<line stroke="#8a919d" stroke-dasharray="6 3" stroke-width="0.8" x1="0" x2="330" y1="410" y2="410"></line>
+<text fill="#8a919d" font-family="'JetBrains Mono', monospace" font-size="9" x="8" y="405">Mon Low (3,404.2)</text>
+</g>
+<!-- Monday Lower 1.618 (Price ~ 3,370) -->
+<g opacity="0.45">
+<line stroke="#556070" stroke-dasharray="4 4" stroke-width="0.75" x1="0" x2="330" y1="485" y2="485"></line>
+<text fill="#556070" font-family="'JetBrains Mono', monospace" font-size="9" x="8" y="480">Mon Lower 1.618 (3,368.5)</text>
+</g>
+<!-- Volume Bars at Bottom (Y: 480 to 540) -->
+<rect fill="url(#volumeGreen)" height="15" rx="0.5" width="4" x="25" y="525"></rect>
+<rect fill="url(#volumeRed)" height="22" rx="0.5" width="4" x="35" y="518"></rect>
+<rect fill="url(#volumeRed)" height="18" rx="0.5" width="4" x="45" y="522"></rect>
+<rect fill="url(#volumeGreen)" height="12" rx="0.5" width="4" x="55" y="528"></rect>
+<rect fill="url(#volumeRed)" height="25" rx="0.5" width="4" x="65" y="515"></rect>
+<!-- Entry volume surge (14:20-14:25) -->
+<rect fill="#169873" fill-opacity="0.65" height="45" rx="0.5" width="5" x="75" y="495"></rect>
+<rect fill="url(#volumeGreen)" height="32" rx="0.5" width="4" x="86" y="508"></rect>
+<rect fill="url(#volumeRed)" height="16" rx="0.5" width="4" x="96" y="524"></rect>
+<rect fill="url(#volumeGreen)" height="28" rx="0.5" width="4" x="106" y="512"></rect>
+<rect fill="url(#volumeGreen)" height="14" rx="0.5" width="4" x="116" y="526"></rect>
+<rect fill="url(#volumeRed)" height="20" rx="0.5" width="4" x="126" y="520"></rect>
+<rect fill="url(#volumeGreen)" height="25" rx="0.5" width="4" x="136" y="515"></rect>
+<rect fill="url(#volumeGreen)" height="18" rx="0.5" width="4" x="146" y="522"></rect>
+<rect fill="url(#volumeRed)" height="10" rx="0.5" width="4" x="156" y="530"></rect>
+<rect fill="url(#volumeGreen)" height="30" rx="0.5" width="4" x="166" y="510"></rect>
+<rect fill="url(#volumeGreen)" height="24" rx="0.5" width="4" x="176" y="516"></rect>
+<rect fill="url(#volumeRed)" height="20" rx="0.5" width="4" x="186" y="520"></rect>
+<rect fill="url(#volumeRed)" height="12" rx="0.5" width="4" x="196" y="528"></rect>
+<rect fill="url(#volumeGreen)" height="26" rx="0.5" width="4" x="206" y="514"></rect>
+<rect fill="url(#volumeGreen)" height="35" rx="0.5" width="4" x="216" y="505"></rect>
+<rect fill="url(#volumeGreen)" height="22" rx="0.5" width="4" x="226" y="518"></rect>
+<rect fill="url(#volumeRed)" height="15" rx="0.5" width="4" x="236" y="525"></rect>
+<rect fill="url(#volumeGreen)" height="28" rx="0.5" width="4" x="246" y="512"></rect>
+<rect fill="url(#volumeGreen)" height="20" rx="0.5" width="4" x="256" y="520"></rect>
+<!-- Exit volume surge (16:45-16:50) -->
+<rect fill="#d7355d" fill-opacity="0.6" height="40" rx="0.5" width="5" x="268" y="500"></rect>
+<rect fill="url(#volumeRed)" height="25" rx="0.5" width="4" x="279" y="515"></rect>
+<rect fill="url(#volumeGreen)" height="16" rx="0.5" width="4" x="289" y="524"></rect>
+<rect fill="url(#volumeRed)" height="11" rx="0.5" width="4" x="299" y="529"></rect>
+<rect fill="url(#volumeGreen)" height="19" rx="0.5" width="4" x="309" y="521"></rect>
+<!-- 5-MINUTE CANDLESTICKS (Synthetic Sequence 14:00 to 17:00) -->
+<!-- Candle 1 (14:00) Red -->
+<line stroke="#d7355d" stroke-width="1" x1="27" x2="27" y1="365" y2="395"></line>
+<rect fill="url(#bearCandleGrad)" height="16" rx="0.5" width="4" x="25" y="372"></rect>
+<!-- Candle 2 (14:05) Red -->
+<line stroke="#d7355d" stroke-width="1" x1="37" x2="37" y1="380" y2="410"></line>
+<rect fill="url(#bearCandleGrad)" height="18" rx="0.5" width="4" x="35" y="388"></rect>
+<!-- Candle 3 (14:10) Green consolidation -->
+<line stroke="#169873" stroke-width="1" x1="47" x2="47" y1="392" y2="418"></line>
+<rect fill="url(#bullCandleGrad)" height="12" rx="0.5" width="4" x="45" y="398"></rect>
+<!-- Candle 4 (14:15) Reversal hammer -->
+<line stroke="#169873" stroke-width="1" x1="57" x2="57" y1="382" y2="422"></line>
+<rect fill="url(#bullCandleGrad)" height="10" rx="0.5" width="4" x="55" y="385"></rect>
+<!-- Candle 5 (14:20-14:25) **TRADE ENTRY 5M CANDLE** -->
+<!-- Price touches entry price 3,420.5 (Y=370) and drives up -->
+<line stroke="#169873" stroke-width="1.2" x1="77" x2="77" y1="352" y2="385"></line>
+<rect fill="#169873" height="22" rx="0.75" stroke="#2aa37d" stroke-width="0.5" width="6" x="74" y="356"></rect>
+<!-- Candle 6 (14:30) Green follow through -->
+<line stroke="#169873" stroke-width="1" x1="88" x2="88" y1="340" y2="368"></line>
+<rect fill="url(#bullCandleGrad)" height="15" rx="0.5" width="4" x="86" y="344"></rect>
+<!-- Candle 7 (14:35) Small red pull -->
+<line stroke="#d7355d" stroke-width="1" x1="98" x2="98" y1="346" y2="362"></line>
+<rect fill="url(#bearCandleGrad)" height="8" rx="0.5" width="4" x="96" y="349"></rect>
+<!-- Candle 8 (14:40) Strong green -->
+<line stroke="#169873" stroke-width="1" x1="108" x2="108" y1="322" y2="354"></line>
+<rect fill="url(#bullCandleGrad)" height="22" rx="0.5" width="4" x="106" y="328"></rect>
+<!-- Candle 9 (14:50) Bullish extension -->
+<line stroke="#169873" stroke-width="1" x1="118" x2="118" y1="305" y2="335"></line>
+<rect fill="url(#bullCandleGrad)" height="18" rx="0.5" width="4" x="116" y="310"></rect>
+<!-- Candle 10 (15:00) Minor indecision -->
+<line stroke="#d7355d" stroke-width="1" x1="128" x2="128" y1="300" y2="322"></line>
+<rect fill="url(#bearCandleGrad)" height="8" rx="0.5" width="4" x="126" y="306"></rect>
+<!-- Candle 11 (15:10) Bull candle -->
+<line stroke="#169873" stroke-width="1" x1="138" x2="138" y1="280" y2="312"></line>
+<rect fill="url(#bullCandleGrad)" height="20" rx="0.5" width="4" x="136" y="286"></rect>
+<!-- Candle 12 (15:20) Step up -->
+<line stroke="#169873" stroke-width="1" x1="148" x2="148" y1="262" y2="295"></line>
+<rect fill="url(#bullCandleGrad)" height="18" rx="0.5" width="4" x="146" y="268"></rect>
+<!-- Candle 13 (15:30) Consolidation -->
+<line stroke="#d7355d" stroke-width="1" x1="158" x2="158" y1="260" y2="280"></line>
+<rect fill="url(#bearCandleGrad)" height="9" rx="0.5" width="4" x="156" y="265"></rect>
+<!-- Candle 14 (15:40) Bull impulse -->
+<line stroke="#169873" stroke-width="1" x1="168" x2="168" y1="240" y2="272"></line>
+<rect fill="url(#bullCandleGrad)" height="20" rx="0.5" width="4" x="166" y="246"></rect>
+<!-- Candle 15 (15:55) Step up -->
+<line stroke="#169873" stroke-width="1" x1="178" x2="178" y1="230" y2="255"></line>
+<rect fill="url(#bullCandleGrad)" height="14" rx="0.5" width="4" x="176" y="234"></rect>
+<!-- Candle 16 (16:10) Test monday high area -->
+<line stroke="#169873" stroke-width="1" x1="188" x2="188" y1="215" y2="245"></line>
+<rect fill="url(#bullCandleGrad)" height="16" rx="0.5" width="4" x="186" y="220"></rect>
+<!-- Candle 17 (16:20) Small red -->
+<line stroke="#d7355d" stroke-width="1" x1="198" x2="198" y1="218" y2="236"></line>
+<rect fill="url(#bearCandleGrad)" height="7" rx="0.5" width="4" x="196" y="222"></rect>
+<!-- Candle 18 (16:30) Surge into high -->
+<line stroke="#169873" stroke-width="1" x1="208" x2="208" y1="188" y2="225"></line>
+<rect fill="url(#bullCandleGrad)" height="26" rx="0.5" width="4" x="206" y="195"></rect>
+<!-- Candle 19 (16:40) Approaching 3,468 -->
+<line stroke="#169873" stroke-width="1" x1="228" x2="228" y1="175" y2="202"></line>
+<rect fill="url(#bullCandleGrad)" height="18" rx="0.5" width="4" x="226" y="180"></rect>
+<!-- Candle 20 (16:45-16:50) **TRADE EXIT 5M CANDLE** -->
+<!-- Exit triggered at 3,468.7 (Y=182) -->
+<line stroke="#d7355d" stroke-width="1.2" x1="270" x2="270" y1="168" y2="198"></line>
+<rect fill="#d7355d" height="16" rx="0.75" stroke="#f43f5e" stroke-width="0.5" width="6" x="267" y="174"></rect>
+<!-- Candle 21 (16:55) Profit taking red -->
+<line stroke="#d7355d" stroke-width="1" x1="281" x2="281" y1="180" y2="208"></line>
+<rect fill="url(#bearCandleGrad)" height="14" rx="0.5" width="4" x="279" y="186"></rect>
+<!-- Candle 22 (17:00) Later period -->
+<line stroke="#169873" stroke-width="1" x1="291" x2="291" y1="192" y2="216"></line>
+<rect fill="url(#bullCandleGrad)" height="10" rx="0.5" width="4" x="289" y="197"></rect>
+<line stroke="#d7355d" stroke-width="1" x1="301" x2="301" y1="195" y2="224"></line>
+<rect fill="url(#bearCandleGrad)" height="12" rx="0.5" width="4" x="299" y="201"></rect>
+<!-- TRADE EXECUTION OVERLAY: CONNECTOR, SEGMENTS, AND FLOATING STAT PILL -->
+<!-- 1. Entry Interval Shaded Footprint Zone -->
+<rect fill="url(#entryZoneGrad)" height="22" rx="2" stroke="rgba(90,169,255,0.3)" stroke-dasharray="2 2" stroke-width="0.75" width="16" x="71" y="356"></rect>
+<!-- 2. Discrete Dashed Vector from Entry (77, 370) to Exit (270, 182) -->
+<line opacity="0.85" stroke="#5aa9ff" stroke-dasharray="4 4" stroke-linecap="round" stroke-width="1.5" x1="85" x2="265" y1="370" y2="182"></line>
+<!-- 3. Entry Price Segment Line at 3,420.5 (Y = 370) with Endcaps -->
+<g id="entryMarker">
+<!-- Horizontal segment across entry 5m zone -->
+<line stroke="#5aa9ff" stroke-linecap="round" stroke-width="1.5" x1="66" x2="115" y1="370" y2="370"></line>
+<!-- End-cap left -->
+<line stroke="#5aa9ff" stroke-linecap="round" stroke-width="1.5" x1="66" x2="66" y1="365" y2="375"></line>
+<!-- End-cap right -->
+<line stroke="#5aa9ff" stroke-linecap="round" stroke-width="1.5" x1="115" x2="115" y1="365" y2="375"></line>
+<!-- Glowing Target Anchor -->
+<circle cx="77" cy="370" fill="#101319" r="3" stroke="#5aa9ff" stroke-width="2"></circle>
+</g>
+<!-- 4. Exit Price Segment Line at 3,468.7 (Y = 182) with Endcaps -->
+<g id="exitMarker">
+<line stroke="#8c96a5" stroke-linecap="round" stroke-width="1.5" x1="258" x2="305" y1="182" y2="182"></line>
+<line stroke="#8c96a5" stroke-linecap="round" stroke-width="1.5" x1="258" x2="258" y1="177" y2="187"></line>
+<line stroke="#8c96a5" stroke-linecap="round" stroke-width="1.5" x1="305" x2="305" y1="177" y2="187"></line>
+<circle cx="270" cy="182" fill="#101319" r="3" stroke="#8c96a5" stroke-width="2"></circle>
+</g>
+</svg>
+<!-- HTML Floated Trade Badges & Labels Overlaid on SVG Anchors -->
+<!-- Entry Callout Pill (Positioned around X:70px, Y:384px) -->
+<div class="absolute left-[54px] top-[378px] z-10 pointer-events-none">
+<div class="inline-flex items-center px-2 py-0.5 rounded bg-surface-obsidian/90 backdrop-blur-md border border-electric-cyan/40 shadow-lg text-electric-cyan">
+<span class="font-numeric-sm text-[10px] leading-tight font-medium tracking-tight">↗ 开仓 3,420.5 · 14:20–14:25</span>
+</div>
+</div>
+<!-- Floating Profit / Return Pill (Midpoint between Entry & Exit ~ X:150px, Y:265px) -->
+<div class="absolute left-[138px] top-[260px] z-10 -translate-x-1/2 -translate-y-1/2">
+<div class="px-2.5 py-1 rounded-full bg-surface-obsidian/90 backdrop-blur-xl border border-pine-gain/50 shadow-xl flex items-center space-x-1">
+<span class="w-1.5 h-1.5 rounded-full bg-pine-gain animate-pulse"></span>
+<span class="font-numeric-md text-numeric-sm font-semibold text-pine-gain">+48.20 USDT</span>
+<span class="font-numeric-sm text-[10px] text-pine-gain/90">(+4.2%)</span>
+</div>
+</div>
+<!-- Exit Callout Pill (Positioned around X:248px, Y:150px) -->
+<div class="absolute left-[242px] top-[148px] z-10 pointer-events-none">
+<div class="inline-flex items-center px-2 py-0.5 rounded bg-surface-obsidian/90 backdrop-blur-md border border-white/20 shadow-lg text-text-primary">
+<span class="font-numeric-sm text-[10px] leading-tight font-medium tracking-tight text-on-surface-variant">⚑ 平仓 3,468.7</span>
+</div>
+</div>
+<!-- Price Axis Sidebar (Right Edge Y-Axis Scale) -->
+<div class="absolute top-0 right-0 w-[58px] h-[530px] border-l border-glass-border-subtle bg-surface-obsidian/40 backdrop-blur-sm flex flex-col justify-between py-4 pl-1.5 select-none pointer-events-none">
+<div class="font-numeric-sm text-[10px] text-text-tertiary">3,520.0</div>
+<div class="font-numeric-sm text-[10px] text-text-secondary/70">3,490.0</div>
+<div class="font-numeric-sm text-[10px] text-electric-cyan font-semibold">3,468.7</div>
+<div class="font-numeric-sm text-[10px] text-text-tertiary">3,450.0</div>
+<div class="font-numeric-sm text-[10px] text-pine-gain font-semibold">3,420.5</div>
+<div class="font-numeric-sm text-[10px] text-text-tertiary">3,390.0</div>
+<div class="font-numeric-sm text-[10px] text-text-tertiary">3,365.0</div>
+</div>
+<!-- Time Axis Bar (Bottom Scale 14:00 – 17:00) -->
+<div class="absolute bottom-[52px] left-0 right-[58px] h-5 border-t border-glass-border-subtle flex justify-between px-6 items-center text-text-tertiary font-numeric-sm text-[10px] pointer-events-none">
+<span>14:00</span>
+<span class="text-electric-cyan font-medium">14:25</span>
+<span>15:00</span>
+<span>16:00</span>
+<span class="text-on-surface-variant font-medium">16:50</span>
+<span>17:00</span>
+</div>
+<!-- Bottom Chart Footer Note (Frozen Replay Stamp) -->
+<div class="absolute bottom-[30px] left-3 right-[62px] flex items-center justify-between pointer-events-none">
+<div class="flex items-center space-x-1.5 px-2 py-0.5 rounded bg-surface-obsidian/60 border border-glass-border-subtle backdrop-blur-md">
+<span class="w-1.5 h-1.5 rounded-full bg-electric-cyan opacity-80"></span>
+<span class="font-body-sm text-[10px] text-text-secondary tracking-tight">原5m成交区间 · 冻结历史回放视口</span>
+</div>
+<span class="font-numeric-sm text-[10px] text-text-tertiary">UTC+8 05-18</span>
+</div>
+<!-- 3. TIMEFRAME SELECTION DOCK (Floating Glass Pill near bottom of chart) -->
+<div class="absolute bottom-2 left-1/2 -translate-x-1/2 z-20">
+<div class="h-8 px-1.5 rounded-full bg-surface-obsidian backdrop-blur-xl border border-glass-border-subtle flex items-center space-x-1 shadow-lg">
+<button class="px-2 py-1 rounded-full text-text-secondary hover:text-text-primary text-[11px] font-numeric-sm transition-colors">1m</button>
+<button class="px-2.5 py-0.5 rounded-full bg-surface-glass-light text-electric-cyan border border-glass-specular-edge font-numeric-sm text-[11px] font-semibold shadow-sm">5m</button>
+<button class="px-2 py-1 rounded-full text-text-secondary hover:text-text-primary text-[11px] font-numeric-sm transition-colors">15m</button>
+<button class="px-2 py-1 rounded-full text-text-secondary hover:text-text-primary text-[11px] font-numeric-sm transition-colors">1h</button>
+<button class="px-2 py-1 rounded-full text-text-secondary hover:text-text-primary text-[11px] font-numeric-sm transition-colors">4h</button>
+<button class="px-2 py-1 rounded-full text-text-secondary hover:text-text-primary text-[11px] font-numeric-sm transition-colors">1D</button>
+</div>
+</div>
+</div>
+<!-- 4. BOTTOM NAVIGATION BAR (Standard SPIKE Apple Glass Floating Dock) -->
+<!-- Mapped directly to Shared Components JSON specifications -->
+<nav class="relative z-30 w-full h-14 bg-surface-obsidian backdrop-blur-2xl border-t border-glass-border-subtle flex justify-around items-center px-margin-mobile flex-shrink-0">
+<!-- 1. 合约 (Contract / Chart) - Active destination for chart review -->
+<button class="flex flex-col items-center justify-center p-1.5 rounded-lg text-text-secondary hover:text-text-primary active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[20px]">timeline</span>
+<span class="text-[10px] font-body-sm mt-0.5">合约</span>
+</button>
+<!-- 2. 巡检 (Inspect) -->
+<button class="flex flex-col items-center justify-center p-1.5 rounded-lg text-text-secondary hover:text-text-primary active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+<span class="text-[10px] font-body-sm mt-0.5">巡检</span>
+</button>
+<!-- 3. 1.618 (SPIKE Algorithm Hub) -->
+<button class="flex flex-col items-center justify-center p-1.5 rounded-lg text-text-secondary hover:text-text-primary active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[20px]">fit_screen</span>
+<span class="text-[10px] font-body-sm mt-0.5">1.618</span>
+</button>
+<!-- 4. 持仓 (Positions & Historical Paper Trades) - Semantically Active Context -->
+<button class="flex flex-col items-center justify-center bg-surface-glass-light text-electric-cyan rounded-lg px-2.5 py-1 border border-glass-specular-edge shadow-sm active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">zoom_in</span>
+<span class="text-[10px] font-body-sm font-semibold mt-0.5">持仓</span>
+</button>
+<!-- 5. 统计 (Stats / Analytics) -->
+<button class="flex flex-col items-center justify-center p-1.5 rounded-lg text-text-secondary hover:text-text-primary active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[20px]">navigation</span>
+<span class="text-[10px] font-body-sm mt-0.5">统计</span>
+</button>
+</nav>
+<!-- Native Home Indicator Bar for iOS Shell Integrity -->
+<div class="w-full pb-1.5 bg-canvas-dark flex justify-center items-center pointer-events-none">
+<div class="w-32 h-1 bg-white/20 rounded-full"></div>
+</div>
+</main>
+</body></html>

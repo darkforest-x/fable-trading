@@ -3,6 +3,44 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const ui=require('../../yoyo/monitor/static/reclaim-strategy-book.js');
 const data=require('../../yoyo/monitor/static/strategy-booklet/research.json');
 const paper=require('../../yoyo/monitor/static/monday-reclaim-paper.js');
+function ruleSnapshot(){
+ const d={model:{threshold:.22621664169752762},breakeven_offset_bp:17,tracks:{},v3:{min_score:.5},spike:{min_score:.5},v3lock:{breakeven_offset_bp:50},allin3:{min_score:.6},'live-allin3':{min_score:.6}};
+ for(const t of paper.TRACKS){d.tracks[t]={confirm_minutes:t==='5'?5:60};if(t.startsWith('live-wick'))d[t]={min_score:.5};}
+ d['live-wick6x3hi'].boost_from_score=.76;d['live-wick6x3hi'].boost=1.5;
+ d['live-wick3x3far'].min_beyond_pct=1.5;
+ return d;
+}
+test('each booklet overview uses its strategy entry threshold and protection, not the shared signal gate',()=>{
+ const d=ruleSnapshot();
+ for(const t of paper.TRACKS){
+  const wick=t.startsWith('live-wick'),threshold=['60','5'].includes(t)?'0.2262':['allin3','live-allin3'].includes(t)?'0.6':'0.5';
+  const html=ui.overviewHTML(d,t);
+  assert.ok(html.includes(`<small>入场分门槛</small><b>≥ ${threshold}</b>`),t);
+  assert.ok(html.includes(`<small>${t==='v3lock'?'利润锁':'保护偏移'}</small><b>${wick?'0':t==='v3lock'?'+0.5':'+0.17'}%</b>`),t);
+  if(wick)assert.doesNotMatch(html,/0\.2262|0\.17%|≥ 0\.76/);
+ }
+ d['live-wick6x3hi'].min_score=.55;
+ assert.match(ui.overviewHTML(d,'live-wick6x3hi'),/≥ 0\.55/,'read the API value rather than hardcode 0.5');
+});
+test('missing live strategy configuration cannot fall back to an unrelated model gate',()=>{
+ const d=ruleSnapshot();
+ for(const t of paper.TRACKS.filter(t=>t.startsWith('live-'))){
+  delete d[t];const html=ui.overviewHTML(d,t);
+  assert.match(html,/<small>入场分门槛<\/small><b>≥ —<\/b>/);
+  assert.doesNotMatch(html,/0\.2262/);
+ }
+ assert.match(ui.overviewHTML(null,'live-wick6x3hi'),/策略规则尚未读取/);
+});
+test('wick flow protects at 1.618 without an entry-price offset while pre-touch scoring stays distinct',()=>{
+ for(const t of paper.TRACKS.filter(t=>t.startsWith('live-wick'))){
+  const html=ui.flowHTML(t);assert.match(html,/触价5m收盘时评分/);
+  assert.match(html,/以 1\.618 判断是否收回/);assert.match(html,/止损移到 1\.618，不加偏移/);
+  assert.doesNotMatch(html,/越过保护价|多单加偏移|回记触价入场/);
+ }
+ assert.match(ui.flowHTML('live-allin3'),/仅使用触价前已收盘信息/);
+ assert.match(ui.flowHTML('live-allin3'),/越过保护价/);
+ assert.match(ui.flowHTML('spike'),/收盘后回记触价入场/);
+});
 test('calendar windows cross leap days and year boundaries without changing settlements',()=>{
  const point=(t,e=1000,dd=0,cash=1000)=>[Date.parse(t),e,e-1000,dd,cash];
  const h={points:[point('2023-12-15T12:00Z'),point('2024-02-29T08:00Z'),point('2024-03-15T16:00Z')]};
@@ -36,13 +74,45 @@ test('all thirteen accounts have separate selection and accessible booklet butto
  assert.equal((html.match(/<button /g)||[]).length,52);
  for(const match of html.matchAll(/<button[^>]*>([\s\S]*?)<\/button>/g))assert.doesNotMatch(match[1],/<button/);
 });
-test('local account ordering defaults to spike and preserves valid user order across new accounts',()=>{
+test('legacy flat ordering defaults to spike and preserves valid user order across new accounts',()=>{
  const defaults=ui.accountOrder(null,paper.TRACKS);assert.equal(defaults[0],'spike');assert.equal(defaults.length,13);
  const saved=['v3add20','60','60','deleted'];const result=ui.accountOrder(saved,paper.TRACKS);
  assert.deepEqual(result.slice(0,3),['v3add20','60','spike']);assert.equal(new Set(result).size,13);assert.deepEqual(saved,['v3add20','60','60','deleted']);
  assert.deepEqual(ui.accountOrder({bad:1},paper.TRACKS),defaults);
  const moved=ui.moveAccount(defaults,'v3add20',0);assert.equal(moved[0],'v3add20');assert.equal(defaults[0],'spike');
  assert.deepEqual(ui.moveAccount(defaults,'unknown',0),defaults);assert.equal(ui.moveAccount(defaults,'spike',99).at(-1),'spike');
+});
+test('grouped strategy defaults put live accounts outside and migrate old ordering within each group',()=>{
+ const tracks=paper.TRACKS,live=tracks.filter(t=>t.startsWith('live-')),other=ui.accountOrder(null,tracks).filter(t=>!t.startsWith('live-'));
+ assert.deepEqual(ui.accountLayout(null,tracks),{main:live,more:other});
+ const old=['v3add20','live-wick6x3hi','spike','live-allin3','spike','removed'];
+ const migrated=ui.accountLayout(null,tracks,old);
+ assert.deepEqual(migrated.main.slice(0,2),['live-wick6x3hi','live-allin3']);
+ assert.deepEqual(migrated.more.slice(0,2),['v3add20','spike']);
+ assert.equal(new Set([...migrated.main,...migrated.more]).size,tracks.length);
+ assert.deepEqual(old,['v3add20','live-wick6x3hi','spike','live-allin3','spike','removed']);
+ assert.notEqual(ui.LAYOUT_KEY,ui.ORDER_KEY);
+});
+test('saved strategy groups preserve manual membership, empty groups and future live defaults',()=>{
+ const tracks=['live-a','live-b','old','other'],saved={main:['old','old','removed'],more:['live-a','old','other']};
+ assert.deepEqual(ui.accountLayout(saved,tracks),{main:['old','live-b'],more:['live-a','other']});
+ assert.deepEqual(ui.accountLayout({main:[],more:tracks},tracks),{main:[],more:tracks});
+ assert.deepEqual(ui.accountLayout({main:tracks,more:[]},tracks),{main:tracks,more:[]});
+ assert.deepEqual(ui.accountLayout({main:'bad',more:[]},tracks),ui.accountLayout(null,tracks));
+ assert.deepEqual(ui.accountLayout({main:[null,5,'old'],more:[]},tracks),{main:['old','live-a','live-b'],more:['other']});
+ assert.deepEqual(saved,{main:['old','old','removed'],more:['live-a','old','other']});
+});
+test('cross-group strategy moves retain every account once and leave the cancel snapshot untouched',()=>{
+ const initial={main:['live-a','live-b'],more:['old','other']},before=JSON.stringify(initial);
+ const promoted=ui.moveAccountGroup(initial,'old','main',1);
+ assert.deepEqual(promoted,{main:['live-a','old','live-b'],more:['other']});
+ const demoted=ui.moveAccountGroup(promoted,'old','more',0);
+ assert.deepEqual(demoted,initial);assert.equal(JSON.stringify(initial),before);
+ assert.deepEqual(ui.moveAccountGroup(promoted,'old','main',99),{main:['live-a','live-b','old'],more:['other']});
+ assert.deepEqual(ui.moveAccountGroup(initial,'missing','main',0),initial);
+ assert.deepEqual(ui.moveAccountGroup(initial,'old','invalid',0),initial);
+ const empty=ui.moveAccountGroup({main:[],more:['old']},'old','main',0);
+ assert.deepEqual(empty,{main:['old'],more:[]});
 });
 test('picker reports complete realized P&L, preserves zero and missing states, and excludes refill cash',()=>{
  const data={equity:1150,start_equity:1000,closed:[{pnl:99999}],open:[{unrealized_bp:22222}]};

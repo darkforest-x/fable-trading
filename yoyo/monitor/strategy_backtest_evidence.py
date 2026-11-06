@@ -128,6 +128,38 @@ def native_index(signature):
     return result
 
 
+def score_close(row, pair, paths, execution_minutes):
+    """Saved touch-bar score is known at its 5m close; adds inherit the parent.
+
+    Read only native entry_time/parent/score/side for this event, on both paths.
+    Missing or ambiguous parent evidence leaves the annotation unavailable.
+    """
+    if int(execution_minutes) != 5:
+        return None
+    rules = row['entry_rules']
+    if rules['kind'] == 'first_touch':
+        return row['entry_ms']
+    if rules['kind'] != 'add5':
+        return None
+    closes = []
+    for rows, path in zip(pair, paths):
+        child = rows[0]
+        parents = native_index(stamp(path)).get((row['event'], 'v3_be0'), [])
+        parents = [p for p in parents if p['trade_id'] == child.get('parent')]
+        if len(parents) != 1:
+            return None
+        parent = parents[0]
+        try:
+            close = millis(parent['entry_time'])
+            if (int(parent['side']) != row['side'] or close > row['entry_ms']
+                    or not math.isclose(float(parent['score']), rules['score'], rel_tol=1e-10, abs_tol=1e-12)):
+                return None
+        except (KeyError, ValueError, TypeError):
+            return None
+        closes.append(close)
+    return closes[0] if len(closes) == 2 and closes[0] == closes[1] else None
+
+
 def fill_geometry(track, row, directory, execution_minutes):
     """Prices are native fills; intrabar times remain source-bar intervals."""
     evidence = row.get('entry_rules', {})
@@ -158,4 +190,5 @@ def fill_geometry(track, row, directory, execution_minutes):
     return dict(entry_price=entry, exit_price=exit_price,
                 entry_start_ms=entry_start, entry_end_ms=row['entry_ms'],
                 exit_start_ms=exit_start, exit_end_ms=row['exit_ms'],
+                score_close_ms=score_close(row, pair, paths, execution_minutes),
                 execution_minutes=int(execution_minutes), exit_kind='close' if close_exit else 'interval')

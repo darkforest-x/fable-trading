@@ -7,6 +7,8 @@ test('multiple weekly lines stop and autoscale at their own expiry',()=>{
   activeLevels:[{price:10,start_ms:0,end_ms:100000,historical:true},{price:20,start_ms:100000,end_ms:300000}],
   chart:{timeScale:()=>({logicalToCoordinate:x=>x*100,getVisibleLogicalRange:()=>({from:1.2,to:2.5})})},series:{priceToCoordinate:p=>p}};
  assert.deepEqual(Array.from(sandbox.module.exports.Interactive.prototype.scaleLevels.call(owner)),[20]);
+ owner.referenceScale=false;assert.deepEqual(Array.from(sandbox.module.exports.Interactive.prototype.scaleLevels.call(owner)),[]);
+ owner.referenceScale=true;
  const ctx={save(){},restore(){},beginPath(){},rect(){},clip(){},setLineDash(){},moveTo:(x,y)=>lines.push([x,y]),lineTo:(x,y)=>lines.push([x,y]),stroke(){},arc(){},fill(){}};
  new sandbox.module.exports.WeekLevels(owner).paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:400,height:100}})});
  assert.deepEqual(lines,[[0,10],[100,10],[100,20],[300,20]]);
@@ -52,6 +54,9 @@ test('readout caching preserves DOM and updates corrected OHLC and MA independen
  row.close=.000003;paint();assert.equal(values[4].textContent,'0.000003');assert.equal(writes,first+1);
  row.ema120=null;paint();assert.equal(numbers[5].textContent,'缺样');assert.equal(writes,first+2);
  owner.hover=null;paint();assert.match(values[0].textContent,/最新 K 线/);
+ owner.compactReplay=true;paint();assert.equal(host.hidden,true);
+ owner.hover=row.time;paint();assert.equal(host.hidden,false);
+ owner.hover=null;owner.compactReplay=false;paint();assert.equal(host.hidden,false);
  owner.rows=[];owner.rowByTime.clear();paint();assert.equal(host.innerHTML,'');
 });
 test('inline names and prices stay inside their anchored ray, without axis badges',()=>{
@@ -64,6 +69,7 @@ test('inline names and prices stay inside their anchored ray, without axis badge
  const paint=()=>primitive.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:180,height:100}})});
  assert.equal(primitive.priceAxisViews().length,0);paint();
  assert.deepEqual(lines,[[0,40],[180,40]]);assert.deepEqual(texts,[['上 1.618 (0.13668908)',174,36]]);assert.equal(rectangles.length,0,'plain Fibonacci text must never paint a filled label');
+ texts.length=0;owner.activeLevels[0].inlinePriceVisible=false;paint();assert.deepEqual(texts,[['上 1.618',174,36]]);owner.activeLevels[0].inlinePriceVisible=true;
  texts.length=0;offset=160;paint();assert.deepEqual(texts,[],'a short visible ray must not crop its number');
  offset=0;y=16;paint();assert.deepEqual(texts,[],'top clipping must not leave a partial label');
  y=120;paint();assert.deepEqual(texts,[],'offscreen levels must not acquire floating labels');
@@ -141,6 +147,12 @@ test('wallpaper starts with readable recent candles and refresh retains a manual
  const older=Array.from({length:240},(_,i)=>({...data.candles[0],time:data.candles[0].time-(240-i)*900000}));
  instance.draw({...data,candles:[...older,...data.candles]},config,'');
  assert.equal(visible.from,340.25);assert.equal(visible.to,420.25,'background history prepends must keep the same candle timestamps in view');
+ sandbox.window.SpikeChartStyle=require('../../yoyo/monitor/static/chart-style.js');instance.syncAverages=()=>{};
+ const from=data.candles[240].time,to=data.candles[267].time;
+ instance.draw(data,{...config,ma:true,displayWindow:{from,to}},'');
+ assert.equal(instance.rows.length,27);assert.equal(instance.rows[0].time,from/1000);assert.equal(instance.rows.at(-1).time,to/1000-900);
+ assert.equal(instance.rows[0].sma120,101,'the hidden 240-bar prefix must still warm up the first displayed SMA');
+ instance.draw(data,config,'');assert.equal(instance.rows.length,400,'leaving the trade window restores the full live history');
  sandbox.window.SpikeRangeChart.unmount(host);
 });
 
@@ -154,4 +166,46 @@ test('each Monday ray starts at its actual extreme even between display bars',()
  assert.deepEqual(lines,[[25,30],[100,30],[75,60],[100,60]]);
  scale.getVisibleLogicalRange=()=>({from:0,to:.5});
  assert.deepEqual(Array.from(sandbox.module.exports.Interactive.prototype.scaleLevels.call(owner)),[30]);
+});
+
+test('per-candle colors repaint identical OHLC, survive live appends and preserve pan',()=>{
+ const T=require('../../yoyo/vision_research/static/chart-tools.js'),C=require('../../yoyo/monitor/static/cloud-candle-colors.js');
+ sandbox.window.SpikeChartTools={...T,library:()=>new Promise(()=>{})};
+ const host={replaceChildren(){}},instance=sandbox.window.SpikeRangeChart.mount(host,{},view);
+ let visible=null,writes=0,rangeWrites=0,candles=[],volume=[];
+ const series=kind=>({setData(rows){writes++;if(kind==='candle')candles=rows;else volume=rows;},update(row){writes++;const rows=kind==='candle'?candles:volume;if(rows.at(-1)?.time===row.time)rows[rows.length-1]=row;else rows.push(row);},applyOptions(){},removePriceLine(){},createPriceLine(){}});
+ instance.series=series('candle');instance.volume=series('volume');
+ const scale={getVisibleLogicalRange:()=>visible,setVisibleLogicalRange:r=>{visible=r;rangeWrites++;},fitContent(){}};
+ instance.chart={priceScale:()=>({applyOptions(){}}),timeScale:()=>scale,applyOptions(){},remove(){}};
+ instance.canvas={clientWidth:1200};instance.panel={querySelector:()=>({classList:{toggle(){}},innerHTML:'',textContent:''})};instance.controls={update(){},destroy(){}};instance.paintMondayBand=()=>{};
+ const start=Date.parse('2026-11-01T00:00Z'),data={symbol:'BTC',bar:'12H',levels:[],candles:Array.from({length:8},(_,i)=>({time:start+i*43200000,open:100,high:110,low:90,close:105,volume:12}))};
+ const before=JSON.stringify(data);let config={...view,bars:Infinity,wallpaper:true,initialBars:8,candleColor:C.colorizer()};
+ instance.draw(data,config,'');const expected=['#8B9099','#8B9099','#8B9099','#30D158','#30D158','#8B9099','#8B9099','#8B9099'];
+ assert.ok(candles.every((r,i)=>r.color===expected[i]&&r.wickColor===r.color&&r.borderColor===r.color));
+ assert.ok(volume.every((r,i)=>r.color===expected[i]+'38'));visible={from:1,to:6};const oldRanges=rangeWrites;
+ config={...config,candleColor:C.colorizer({monday:'#FFAA00',weekend:'#7766DD'})};instance.draw(data,config,'');
+ assert.equal(rangeWrites,oldRanges);assert.deepEqual(visible,{from:1,to:6});
+ assert.equal(candles[0].color,'#7766DD');assert.equal(candles[3].color,'#FFAA00');
+ const oldWrites=writes;instance.draw(JSON.parse(before),config,'');assert.equal(writes,oldWrites);
+ // An older signal arrives asynchronously with identical OHLC and callback.
+ const historicalKeys=new Set(),ordinary=config.candleColor;
+ config={...config,candleColor:r=>historicalKeys.has(r.time)?'#0A84FF':ordinary(r)};
+ instance.draw(data,config,'');const beforeHistoryWrites=writes;
+ historicalKeys.add(data.candles[3].time/1000);instance.draw(data,config,'');
+ assert.ok(writes>beforeHistoryWrites);assert.equal(rangeWrites,oldRanges);
+ for(const field of ['color','wickColor','borderColor'])assert.equal(candles[3][field],'#0A84FF');
+ assert.equal(volume[3].color,'#0A84FF38');assert.deepEqual(visible,{from:1,to:6});
+ instance.draw({...data,candles:[...data.candles,{...data.candles.at(-1),time:start+8*43200000}]},config,'');
+ assert.equal(candles[3].color,'#0A84FF');assert.equal(candles.at(-1).color,'#8B9099');assert.equal(JSON.stringify(data),before);
+ instance.draw(data,{...config,candleColor:undefined},'');assert.ok(candles.every(r=>!('color' in r)));assert.ok(volume.every(r=>r.color===T.colors.volumeUp));
+ sandbox.window.SpikeRangeChart.unmount(host);
+});
+
+test('weekly rays support dotted lineStyle without changing solid or dashed defaults',()=>{
+ const dashes=[],arcs=[],owner={rows:[{time:0},{time:100}],levelWindow:{start_ms:0,end_ms:100000},
+  activeLevels:[{price:10,start_ms:0,lineStyle:0,startMarkerVisible:false},{price:20,start_ms:0,lineStyle:1,startMarkerVisible:false},{price:30,start_ms:0,lineStyle:2,startMarkerVisible:false}],
+  chart:{timeScale:()=>({logicalToCoordinate:i=>i*50})},series:{priceToCoordinate:p=>p}};
+ const ctx={save(){},restore(){},beginPath(){},rect(){},clip(){},setLineDash:value=>dashes.push(value),moveTo(){},lineTo(){},stroke(){},arc:(...args)=>arcs.push(args),fill(){}};
+ new sandbox.module.exports.WeekLevels(owner).paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:120,height:60}})});
+ assert.deepEqual(dashes.map(value=>Array.from(value)),[[],[1,3],[4,4]]);assert.equal(arcs.length,0,'appearance lines do not draw origin dots');
 });

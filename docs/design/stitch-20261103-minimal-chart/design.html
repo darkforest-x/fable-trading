@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPIKE · 85% 极简纯净数字 K 线工作台 (Clear Glass 规范)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Geist', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'PingFang SC', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
+          },
+          colors: {
+            brand: {
+              accent: '#0071E3',
+              glow: 'rgba(0,113,227,0.18)'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bg-page: #F6F8FA;
+      --glass-fill: rgba(255, 255, 255, 0.22);
+      --glass-fill-dense: rgba(255, 255, 255, 0.45);
+      --glass-border: rgba(255, 255, 255, 0.85);
+      --glass-shadow: 0 10px 30px -4px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      --text-main: #0F172A;
+      --text-sub: #64748B;
+      --chart-grid: rgba(148, 163, 184, 0.12);
+      --fib-1618: #1E293B;
+      --mon-ref: #94A3B8;
+      --candle-body: #64748B;
+      --candle-wick: #94A3B8;
+      --key-green: #00D26A;
+      --risk-red-fill: rgba(239, 68, 68, 0.16);
+      --rew-green-fill: rgba(16, 185, 129, 0.16);
+      --active-tab-bg: #FFFFFF;
+      --active-tab-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .dark {
+      --bg-page: #0B0E14;
+      --glass-fill: rgba(255, 255, 255, 0.05);
+      --glass-fill-dense: rgba(20, 26, 38, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.10);
+      --glass-shadow: 0 12px 36px -6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      --text-main: #F1F5F9;
+      --text-sub: #94A3B8;
+      --chart-grid: rgba(255, 255, 255, 0.04);
+      --fib-1618: #E2E8F0;
+      --mon-ref: #475569;
+      --candle-body: #64748B;
+      --candle-wick: #475569;
+      --key-green: #00FF7F;
+      --risk-red-fill: rgba(244, 63, 94, 0.22);
+      --rew-green-fill: rgba(16, 185, 129, 0.20);
+      --active-tab-bg: rgba(255, 255, 255, 0.15);
+      --active-tab-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    }
+
+    .glass-capsule {
+      background: var(--glass-fill);
+      backdrop-filter: blur(12px) saturate(150%);
+      -webkit-backdrop-filter: blur(12px) saturate(150%);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+    }
+
+    .glass-sheet {
+      background: var(--glass-fill-dense);
+      backdrop-filter: blur(24px) saturate(160%);
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      border-left: 1px solid var(--glass-border);
+      box-shadow: -12px 0 36px -4px rgba(15, 23, 42, 0.12);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body class="h-full bg-[var(--bg-page)] text-[var(--text-main)] font-sans antialiased overflow-hidden select-none transition-colors duration-200">
+
+  <!-- Desktop App Wrapper (100vw x 100vh) -->
+  <div class="relative w-full h-full flex overflow-hidden">
+
+    <!-- ============================================================== -->
+    <!-- LEFT 15% BASE: Faint Signal Center & 1.618 Context Overview   -->
+    <!-- ============================================================== -->
+    <div class="w-[15%] min-w-[210px] h-full flex flex-col border-r border-slate-200/60 dark:border-white/5 opacity-40 hover:opacity-75 transition-opacity duration-200 pointer-events-auto">
+      <!-- 40px Compact Left Header -->
+      <div class="h-10 px-3 flex items-center justify-between border-b border-slate-200/50 dark:border-white/5">
+        <div class="flex items-center gap-1.5">
+          <div class="w-5 h-5 rounded-md bg-black text-white dark:bg-white dark:text-black flex items-center justify-center font-bold text-xs tracking-tighter shadow-sm">⚡</div>
+          <span class="text-xs font-semibold tracking-tight text-slate-800 dark:text-slate-200">SPIKE</span>
+        </div>
+        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-white/10 text-slate-600 dark:text-slate-400">1.618</span>
+      </div>
+
+      <!-- Faint Mini Signal List -->
+      <div class="p-2 space-y-2 overflow-hidden text-xs">
+        <div class="text-[10px] uppercase tracking-wider font-semibold text-slate-400 px-1">信号雷达 (12H)</div>
+        
+        <!-- Faint Active Symbol Item -->
+        <div class="p-2 rounded-lg bg-white/70 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-[11px]">DEMO/USDT</span>
+            <span class="text-[10px] font-mono font-medium text-emerald-600 dark:text-emerald-400">+3.76R</span>
+          </div>
+          <div class="text-[10px] text-slate-400 mt-0.5 flex justify-between font-mono">
+            <span>0.3500</span>
+            <span class="text-emerald-500">12H 确认</span>
+          </div>
+        </div>
+
+        <div class="p-2 rounded-lg bg-slate-100/50 dark:bg-white/[0.02] border border-transparent">
+          <div class="flex items-center justify-between">
+            <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">SOL/USDT</span>
+            <span class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">+2.84R</span>
+          </div>
+        </div>
+
+        <div class="p-2 rounded-lg bg-slate-100/50 dark:bg-white/[0.02] border border-transparent">
+          <div class="flex items-center justify-between">
+            <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">BTC/USDT</span>
+            <span class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">+2.45R</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inset Indicator of connection -->
+      <div class="mt-auto p-2.5 border-t border-slate-200/40 dark:border-white/5 text-[10px] font-mono text-slate-400 flex items-center justify-between">
+        <span>DRAW 85%</span>
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- RIGHT 85% IMMERSIVE DRAWER WORKSPACE (Primary Workspace)       -->
+    <!-- ============================================================== -->
+    <div id="signalDrawer" class="w-[85%] max-w-[85%] h-full flex flex-col glass-sheet relative z-20">
+
+      <!-- ========================================== -->
+      <!-- TOP COMPACT 40PX WORKSPACE HEADER           -->
+      <!-- ========================================== -->
+      <header class="h-10 px-3 flex items-center justify-between border-b border-slate-200/60 dark:border-white/10 shrink-0 z-30">
+        <!-- Left: Symbol Selector + Signal Icon Bridge + Quick Meta -->
+        <div class="flex items-center gap-2">
+          <!-- Symbol Picker Button -->
+          <div class="flex items-center gap-1.5 bg-slate-900/5 dark:bg-white/5 hover:bg-slate-900/10 dark:hover:bg-white/10 px-2 py-1 rounded-md transition cursor-pointer border border-slate-300/40 dark:border-white/10">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span class="font-bold text-xs tracking-tight text-slate-900 dark:text-white">DEMO / USDT</span>
+            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </div>
+
+          <!-- Small Signal-Chart Icon next to current symbol to toggle/inspect signal drawer -->
+          <button id="toggleDrawerBtn" title="当前标的 12H 信号抽屉已定焦 (85vw)" class="flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-brand-accent/10 text-brand-accent hover:bg-brand-accent/20 transition border border-brand-accent/20">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <span class="font-mono">12H 顺势突破</span>
+          </button>
+
+          <!-- Price & Tick Metric -->
+          <div class="hidden sm:flex items-center gap-2 text-xs font-mono pl-1">
+            <span class="font-bold text-slate-800 dark:text-slate-200">0.3542</span>
+            <span class="text-emerald-500 font-semibold">+2.4%</span>
+          </div>
+        </div>
+
+        <!-- Center: Minimal Bare R Badge in Header -->
+        <div class="hidden md:flex items-center gap-2 text-xs font-mono">
+          <span class="text-slate-400 text-[11px]">现行计划</span>
+          <span class="font-bold text-emerald-600 dark:text-emerald-400 tracking-tight">+3.76 R</span>
+          <span class="text-slate-300 dark:text-slate-700">|</span>
+          <span class="text-[11px] text-slate-500">止损前极值 <strong class="text-slate-800 dark:text-slate-200 font-semibold">5.20 R</strong></span>
+        </div>
+
+        <!-- Right: Layer Controls, Collapsible Summary Toggle, Theme Switch & Close -->
+        <div class="flex items-center gap-1.5">
+          <!-- Collapsible Compact Glass Summary Toggle -->
+          <button id="summaryToggleBtn" class="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-white/10 transition" title="收起/展开参数摘要">
+            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span>参数摘要</span>
+          </button>
+
+          <!-- Layer / Chart Settings Button -->
+          <button id="settingsModalBtn" class="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-white/10 transition" title="图表设置与图层">
+            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+            <span class="hidden sm:inline">图表设置</span>
+          </button>
+
+          <!-- Theme Toggle Button (Light / Dark) -->
+          <button id="themeToggleBtn" class="w-7 h-7 rounded-md flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/10 transition" title="切换深浅主题">
+            <svg class="w-3.5 h-3.5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.03 9.03 0 008.354-5.646z"/></svg>
+            <svg class="w-3.5 h-3.5 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          </button>
+
+          <!-- Close / Collapse Drawer Button -->
+          <button id="closeDrawerBtn" class="w-7 h-7 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-white/10 transition" title="关闭抽屉">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- ========================================== -->
+      <!-- COMPACT COLLAPSIBLE GLASS SUMMARY (Floating)-->
+      <!-- ========================================== -->
+      <div id="collapsibleSummary" class="absolute top-12 left-4 z-30 transition-all duration-200 ease-out origin-top-left">
+        <div class="glass-capsule rounded-lg px-3 py-1.5 flex items-center gap-3 text-xs font-mono shadow-sm">
+          <div class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span class="text-[11px] text-slate-400 font-sans">参考入场</span>
+            <span class="font-semibold text-slate-800 dark:text-slate-100">0.3500</span>
+          </div>
+          <span class="text-slate-300 dark:text-slate-700">|</span>
+          <div class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+            <span class="text-[11px] text-slate-400 font-sans">关键K止损</span>
+            <span class="font-semibold text-rose-500">0.3420</span>
+          </div>
+          <span class="text-slate-300 dark:text-slate-700">|</span>
+          <div class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <span class="text-[11px] text-slate-400 font-sans">对侧1.618</span>
+            <span class="font-semibold text-emerald-600 dark:text-emerald-400">0.3800</span>
+          </div>
+          <span class="text-slate-300 dark:text-slate-700">|</span>
+          <div class="flex items-center gap-1">
+            <span class="text-[11px] text-slate-400 font-sans">1R基准:</span>
+            <span class="font-bold text-slate-700 dark:text-slate-300">0.0080</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- PRIMARY SVG CHART VIEWPORT                  -->
+      <!-- MAXIMIZED CANDLE SPACE & NARROW GUTTERS    -->
+      <!-- ========================================== -->
+      <div class="relative flex-1 w-full h-full overflow-hidden bg-transparent">
+        
+        <!-- SVG Canvas: Real Scalable Candlestick & Trade Overlays -->
+        <svg id="chartSvg" class="w-full h-full block" viewBox="0 0 1100 680" preserveAspectRatio="none">
+          <defs>
+            <!-- Borderless Pastel Smooth EMA 20/50 Cloud Fill -->
+            <linearGradient id="emaCloudGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#10B981" stop-opacity="0.22"/>
+              <stop offset="50%" stop-color="#34D399" stop-opacity="0.14"/>
+              <stop offset="100%" stop-color="#059669" stop-opacity="0.04"/>
+            </linearGradient>
+
+            <!-- Bright Green Key Candle Glow -->
+            <filter id="keyGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="#00FF7F" flood-opacity="0.6"/>
+            </filter>
+          </defs>
+
+          <!-- Horizontal Reference Grids (Ultra-light, collision-free) -->
+          <g class="chart-grids stroke-[var(--chart-grid)] stroke-[1]">
+            <line x1="20" y1="120" x2="1040" y2="120"/>
+            <line x1="20" y1="200" x2="1040" y2="200"/>
+            <line x1="20" y1="280" x2="1040" y2="280"/>
+            <line x1="20" y1="360" x2="1040" y2="360"/>
+            <line x1="20" y1="440" x2="1040" y2="440"/>
+            <line x1="20" y1="520" x2="1040" y2="520"/>
+            <line x1="20" y1="600" x2="1040" y2="600"/>
+          </g>
+
+          <!-- Vertical Week Time Separation Lines (Sparse dotted) -->
+          <g stroke="var(--chart-grid)" stroke-width="1" stroke-dasharray="3 4">
+            <line x1="180" y1="20" x2="180" y2="640"/>
+            <line x1="500" y1="20" x2="500" y2="640"/>
+            <line x1="820" y1="20" x2="820" y2="640"/>
+          </g>
+
+          <!-- ============================================== -->
+          <!-- BORDERLESS PASTEL EMA 20/50 SMOOTH CLOUD       -->
+          <!-- ============================================== -->
+          <path d="M 40,540 
+                   C 160,520 280,480 380,450 
+                   C 480,420 580,380 680,330 
+                   C 780,280 880,250 1020,210 
+                   L 1020,250 
+                   C 880,290 780,330 680,380 
+                   C 580,430 480,470 380,500 
+                   C 280,530 160,560 40,580 
+                   Z" 
+                fill="url(#emaCloudGrad)"/>
+
+          <!-- ============================================== -->
+          <!-- HORIZONTAL FIB & REFERENCE LINES               -->
+          <!-- ============================================== -->
+          <!-- Mon High 0.3850 Line (Gray) -->
+          <g>
+            <line x1="40" y1="120" x2="1040" y2="120" stroke="var(--mon-ref)" stroke-width="1"/>
+            <text x="1046" y="123" class="fill-[var(--mon-ref)] font-mono text-[9px]">周高 0.3850</text>
+          </g>
+
+          <!-- Upper 1.618 Fib Line (0.3800 - Black/Light Theme Fib) -->
+          <g>
+            <line x1="40" y1="160" x2="1040" y2="160" stroke="var(--fib-1618)" stroke-width="1.2"/>
+            <text x="50" y="153" class="fill-[var(--fib-1618)] font-mono text-[10px] font-semibold">1.618 Fib · 0.3800</text>
+          </g>
+
+          <!-- Mon Low 0.3150 Line (Gray) -->
+          <g>
+            <line x1="40" y1="620" x2="1040" y2="620" stroke="var(--mon-ref)" stroke-width="1"/>
+            <text x="1046" y="623" class="fill-[var(--mon-ref)] font-mono text-[9px]">周低 0.3150</text>
+          </g>
+
+          <!-- ========================================================= -->
+          <!-- PAIRED TRADE REFERENCE RECTANGLES (PURE NUMERIC R SPEC)   -->
+          <!-- NO dashed frames, NO blue entry lines, NO pill badges     -->
+          <!-- ONLY bright translucent fills + bare collision-aware R    -->
+          <!-- ========================================================= -->
+
+          <!-- ------------------------------------------------------- -->
+          <!-- [CASE 1]: HISTORICAL TRADE BOX (X: 300 to 450)          -->
+          <!-- Entry: 0.3520 (Y: 380), Stop: 0.3440 (Y: 460)          -->
+          <!-- Max Target reached: 0.3720 (Y: 220) = +2.5R             -->
+          <!-- ------------------------------------------------------- -->
+          <g id="historicalTradeBox">
+            <!-- Green Reward Area (Pure Fill, No Outer Border Stroke) -->
+            <rect x="310" y="240" width="130" height="140" fill="var(--rew-green-fill)"/>
+            <!-- Red Risk Area (Pure Fill, No Outer Border Stroke) -->
+            <rect x="310" y="380" width="130" height="80" fill="var(--risk-red-fill)"/>
+
+            <!-- Sparse Short Solid R Ticks inside (Fine 1px solid, ~8px length) -->
+            <!-- Entry Tick -->
+            <line x1="310" y1="380" x2="322" y2="380" stroke="#94A3B8" stroke-width="1"/>
+            <!-- Risk -1R Tick -->
+            <line x1="310" y1="460" x2="322" y2="460" stroke="#EF4444" stroke-width="1"/>
+            <!-- Bare Unboxed Numeric -1R -->
+            <text x="326" y="463" class="fill-rose-500 font-mono text-[10px] font-semibold">-1R</text>
+
+            <!-- Reward 2.34R Tick & Bare Numeric -->
+            <line x1="310" y1="240" x2="322" y2="240" stroke="#10B981" stroke-width="1"/>
+            <text x="326" y="244" class="fill-emerald-600 dark:fill-emerald-400 font-mono text-[10px] font-bold">2.34R</text>
+          </g>
+
+          <!-- ------------------------------------------------------- -->
+          <!-- [CASE 2]: ACTIVE MAIN TRADE BOX (X: 620 to 860)         -->
+          <!-- Entry: 0.3500 (Y: 360), Stop: 0.3420 (Y: 440) -> 1R=80px-->
+          <!-- 5R Tick at Y: 260 | 10R Tick at Y: 160 (Fib 0.3800)     -->
+          <!-- Current/Highest R at Y: 140 = 3.76R / 5.20R             -->
+          <!-- ------------------------------------------------------- -->
+          <g id="activeTradeBox">
+            <!-- Green Reward Zone (Bright Translucent Fill, NO Thick Outline) -->
+            <rect x="620" y="140" width="230" height="220" fill="var(--rew-green-fill)"/>
+            <!-- Red Risk Zone (Bright Translucent Fill, NO Thick Outline) -->
+            <rect x="620" y="360" width="230" height="80" fill="var(--risk-red-fill)"/>
+
+            <!-- Entry Reference Tick Line (Fine, muted) -->
+            <line x1="620" y1="360" x2="634" y2="360" stroke="#94A3B8" stroke-width="1.2"/>
+            <text x="638" y="363" class="fill-slate-400 font-mono text-[10px]">0.3500</text>
+
+            <!-- -1R Stop Tick Line & Bare Numeric (No Pill Box) -->
+            <line x1="620" y1="440" x2="634" y2="440" stroke="#EF4444" stroke-width="1.2"/>
+            <text x="638" y="443" class="fill-rose-500 font-mono text-[10px] font-bold">-1R</text>
+
+            <!-- Discrete Fine R Ticks: 5R Tick (Y: 260) -->
+            <line x1="620" y1="260" x2="636" y2="260" stroke="#10B981" stroke-width="1" stroke-opacity="0.7"/>
+            <text x="640" y="263" class="fill-emerald-600 dark:fill-emerald-400 font-mono text-[10px] font-medium opacity-90">5R</text>
+
+            <!-- Discrete Fine R Ticks: 10R Tick (Y: 160) -->
+            <line x1="620" y1="160" x2="636" y2="160" stroke="#10B981" stroke-width="1" stroke-opacity="0.7"/>
+            <text x="640" y="163" class="fill-emerald-600 dark:fill-emerald-400 font-mono text-[10px] font-medium opacity-90">10R</text>
+
+            <!-- Current Price Running Level (+3.76R) -->
+            <line x1="620" y1="210" x2="850" y2="210" stroke="#10B981" stroke-width="1" stroke-dasharray="2 2" stroke-opacity="0.5"/>
+            <!-- Bare Monospace Numeric: 3.76R (Collision-aware single numeral) -->
+            <text x="810" y="206" class="fill-emerald-600 dark:fill-emerald-400 font-mono text-[11px] font-bold">3.76R</text>
+
+            <!-- Top Pre-Stop Peak (+5.20R) -->
+            <line x1="620" y1="140" x2="640" y2="140" stroke="#10B981" stroke-width="1.5"/>
+            <text x="644" y="144" class="fill-emerald-600 dark:fill-emerald-400 font-mono text-[11px] font-black tracking-tight">5.20R</text>
+          </g>
+
+          <!-- ============================================== -->
+          <!-- CANDLESTICK BARS (Gray Neutrals + Bright Green) -->
+          <!-- ============================================== -->
+          <g id="candlestickLayer">
+            <!-- Bar 1: Neutral Gray -->
+            <line x1="80" y1="520" x2="80" y2="580" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="74" y="535" width="12" height="35" rx="1" fill="var(--candle-body)"/>
+
+            <!-- Bar 2: Neutral Gray -->
+            <line x1="120" y1="490" x2="120" y2="560" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="114" y="510" width="12" height="30" rx="1" fill="var(--candle-body)"/>
+
+            <!-- Bar 3: Neutral Gray -->
+            <line x1="160" y1="460" x2="160" y2="540" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="154" y="475" width="12" height="45" rx="1" fill="var(--candle-body)"/>
+
+            <!-- Bar 4: Neutral Gray (Consolidation) -->
+            <line x1="200" y1="440" x2="200" y2="510" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="194" y="455" width="12" height="35" rx="1" fill="var(--candle-body)"/>
+
+            <!-- Bar 5: Neutral Gray -->
+            <line x1="240" y1="420" x2="240" y2="490" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="234" y="435" width="12" height="35" rx="1" fill="var(--candle-body)"/>
+
+            <!-- Bar 6: Neutral Gray dip -->
+            <line x1="280" y1="440" x2="280" y2="505" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="274" y="450" width="12" height="40" rx="1" fill="var(--candle-body)"/>
+
+            <!-- ============================================== -->
+            <!-- BAR 7: HISTORICAL BRIGHT-GREEN KEY CANDLE      -->
+            <!-- High voltage reversal trigger candle           -->
+            <!-- ============================================== -->
+            <line x1="320" y1="360" x2="320" y2="465" stroke="var(--key-green)" stroke-width="1.8" filter="url(#keyGlow)"/>
+            <rect x="313" y="375" width="14" height="65" rx="1.5" fill="var(--key-green)" filter="url(#keyGlow)"/>
+
+            <!-- Bar 8: Neutral Gray follow-through -->
+            <line x1="360" y1="310" x2="360" y2="390" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="354" y="325" width="12" height="50" rx="1" fill="var(--candle-body)"/>
+
+            <!-- Bar 9: Neutral Gray higher push -->
+            <line x1="400" y1="230" x2="400" y2="330" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="394" y="245" width="12" height="60" rx="1" fill="var(--candle-body)"/>
+
+            <!-- Bar 10: Pullback Neutral Gray -->
+            <line x1="440" y1="280" x2="440" y2="370" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="434" y="300" width="12" height="50" rx="1" fill="var(--candle-body)"/>
+
+            <!-- Bar 11: Base Neutral Gray -->
+            <line x1="480" y1="310" x2="480" y2="390" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="474" y="330" width="12" height="45" rx="1" fill="var(--candle-body)"/>
+
+            <!-- Bar 12: Accumulation Neutral Gray -->
+            <line x1="520" y1="340" x2="520" y2="420" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="514" y="350" width="12" height="50" rx="1" fill="var(--candle-body)"/>
+
+            <!-- Bar 13: Neutral Gray pre-breakout -->
+            <line x1="560" y1="350" x2="560" y2="435" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="554" y="360" width="12" height="55" rx="1" fill="var(--candle-body)"/>
+
+            <!-- Bar 14: Pullback to cloud Neutral Gray -->
+            <line x1="600" y1="365" x2="600" y2="445" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="594" y="375" width="12" height="50" rx="1" fill="var(--candle-body)"/>
+
+            <!-- ============================================== -->
+            <!-- BAR 15: ACTIVE BRIGHT-GREEN KEY CANDLE         -->
+            <!-- Breakout trigger on DEMO / USDT at 0.3500      -->
+            <!-- ============================================== -->
+            <line x1="640" y1="320" x2="640" y2="445" stroke="var(--key-green)" stroke-width="2" filter="url(#keyGlow)"/>
+            <rect x="632" y="340" width="16" height="85" rx="2" fill="var(--key-green)" filter="url(#keyGlow)"/>
+
+            <!-- Bar 16: Upward impulse Neutral Gray -->
+            <line x1="680" y1="260" x2="680" y2="360" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="674" y="275" width="12" height="65" rx="1" fill="var(--candle-body)"/>
+
+            <!-- Bar 17: Consolidation at Fib Neutral Gray -->
+            <line x1="720" y1="210" x2="720" y2="310" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="714" y="225" width="12" height="55" rx="1" fill="var(--candle-body)"/>
+
+            <!-- Bar 18: Peak Candle Neutral Gray -->
+            <line x1="760" y1="135" x2="760" y2="245" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="754" y="150" width="12" height="75" rx="1" fill="var(--candle-body)"/>
+
+            <!-- Bar 19: High-level test Neutral Gray -->
+            <line x1="800" y1="170" x2="800" y2="260" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="794" y="190" width="12" height="50" rx="1" fill="var(--candle-body)"/>
+
+            <!-- Bar 20: Latest Live Candle (Pulsing Tip) -->
+            <line x1="840" y1="190" x2="840" y2="250" stroke="var(--candle-wick)" stroke-width="1.2"/>
+            <rect x="834" y="200" width="12" height="35" rx="1" fill="var(--candle-body)"/>
+            <circle cx="840" cy="210" r="3.5" fill="#10B981" class="animate-ping opacity-75"/>
+            <circle cx="840" cy="210" r="2.5" fill="#10B981"/>
+          </g>
+
+          <!-- Current Live Price Horizontal Dashed Line -->
+          <line x1="40" y1="210" x2="1040" y2="210" stroke="#10B981" stroke-width="1" stroke-dasharray="3 3"/>
+        </svg>
+
+        <!-- ============================================== -->
+        <!-- NARROW RIGHT PRICE AXIS GUTTER (<56px)         -->
+        <!-- Monospace Decimal Lock, No layout drift        -->
+        <!-- ============================================== -->
+        <div class="absolute right-0 top-0 bottom-8 w-14 flex flex-col justify-between py-4 text-right pr-2 font-mono text-[10px] text-slate-400 select-none border-l border-slate-200/40 dark:border-white/5 pointer-events-none">
+          <span>0.3850</span>
+          <span class="text-slate-800 dark:text-slate-100 font-semibold">0.3800</span>
+          <span>0.3650</span>
+          <div class="bg-emerald-500 text-white font-bold text-[10px] px-1 py-0.5 rounded -mr-1 shadow-sm">
+            0.3542
+          </div>
+          <span>0.3420</span>
+          <span>0.3300</span>
+          <span>0.3150</span>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- NARROW BOTTOM TIME AXIS GUTTER                 -->
+        <!-- ============================================== -->
+        <div class="absolute left-0 right-14 bottom-0 h-6 flex items-center justify-between px-10 font-mono text-[10px] text-slate-400 border-t border-slate-200/40 dark:border-white/5 pointer-events-none">
+          <span>09-22 08:00</span>
+          <span>09-29 08:00</span>
+          <span>10-06 08:00</span>
+          <span>10-13 08:00</span>
+          <span class="text-slate-700 dark:text-slate-300 font-semibold">10-20 08:00 (12H)</span>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- FLOATING BOTTOM PERIOD & CONTROL DOCK          -->
+        <!-- Matching 1.618 main chart workspace controls   -->
+        <!-- ============================================== -->
+        <div class="absolute bottom-9 left-1/2 -translate-x-1/2 z-30">
+          <div class="glass-capsule rounded-full px-2 py-1 flex items-center gap-1 text-xs shadow-md">
+            <!-- Period Tabs: 5m, 15m, 1H, 4H, 12H, 1D -->
+            <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white font-mono text-[11px] transition">5m</button>
+            <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white font-mono text-[11px] transition">15m</button>
+            <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white font-mono text-[11px] transition">1H</button>
+            <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white font-mono text-[11px] transition">4H</button>
+            <!-- Active 12H -->
+            <button class="px-2.5 py-1 rounded-full font-mono text-[11px] font-bold text-slate-900 dark:text-white bg-[var(--active-tab-bg)] shadow-[var(--active-tab-shadow)]">12H</button>
+            <button class="px-2 py-1 rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white font-mono text-[11px] transition">1D</button>
+
+            <span class="w-[1px] h-3.5 bg-slate-300/70 dark:bg-white/10 mx-0.5"></span>
+
+            <!-- Cloud Layer Toggle -->
+            <button id="cloudToggleBtn" class="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span>EMA云</span>
+            </button>
+
+            <!-- 1.618 Fib Lines Toggle -->
+            <button class="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-white/10 transition">
+              <span>1.618</span>
+            </button>
+
+            <span class="w-[1px] h-3.5 bg-slate-300/70 dark:bg-white/10 mx-0.5"></span>
+
+            <!-- Follow Latest Candle Action -->
+            <button class="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold text-brand-accent bg-brand-accent/10 hover:bg-brand-accent/20 transition">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+              <span>最新</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL: CHART SETTINGS POPUP (Apple Clear Glass)                -->
+  <!-- ============================================================== -->
+  <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm">
+    <div class="glass-sheet rounded-2xl w-full max-w-sm overflow-hidden p-4 shadow-2xl border border-white/60 dark:border-white/10">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200/50 dark:border-white/10">
+        <h3 class="text-xs font-bold tracking-tight text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          图表与渲染设置
+        </h3>
+        <button id="closeSettingsModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="py-3 space-y-3 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-600 dark:text-slate-300">纯净裸数字 R 刻度</span>
+          <span class="font-mono text-emerald-500 font-semibold">已启用 (No Pills)</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-600 dark:text-slate-300">移除矩形虚线外边框</span>
+          <span class="font-mono text-slate-500">仅纯填充矩形</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-600 dark:text-slate-300">顺滑无描边 EMA 20/50 云带</span>
+          <span class="font-mono text-emerald-500 font-semibold">已启用</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-600 dark:text-slate-300">亮绿关键确认 K 实体与影线</span>
+          <span class="font-mono text-emerald-500 font-semibold">#00D26A</span>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-slate-200/50 dark:border-white/10 flex justify-end">
+        <button id="confirmSettingsBtn" class="px-3 py-1 rounded-md bg-brand-accent text-white text-xs font-medium hover:bg-blue-600 transition">完成</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive JavaScript logic -->
+  <script>
+    // Theme toggle handling
+    const themeBtn = document.getElementById('themeToggleBtn');
+    themeBtn.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+    });
+
+    // Summary collapsible toggle
+    const summaryBtn = document.getElementById('summaryToggleBtn');
+    const summaryCard = document.getElementById('collapsibleSummary');
+    let summaryVisible = true;
+    summaryBtn.addEventListener('click', () => {
+      summaryVisible = !summaryVisible;
+      if (summaryVisible) {
+        summaryCard.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+      } else {
+        summaryCard.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+      }
+    });
+
+    // Settings Modal Open/Close
+    const settingsBtn = document.getElementById('settingsModalBtn');
+    const settingsModal = document.getElementById('settingsModal');
+    const closeSettings = document.getElementById('closeSettingsModal');
+    const confirmSettings = document.getElementById('confirmSettingsBtn');
+    [settingsBtn, closeSettings, confirmSettings].forEach(btn => {
+      btn?.addEventListener('click', () => {
+        settingsModal.classList.toggle('hidden');
+      });
+    });
+
+    // Close / Toggle Drawer Interaction (simulate 85% width toggle or collapse)
+    const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+    const toggleDrawerBtn = document.getElementById('toggleDrawerBtn');
+    const signalDrawer = document.getElementById('signalDrawer');
+
+    closeDrawerBtn.addEventListener('click', () => {
+      // Toggle compact indication
+      signalDrawer.classList.toggle('w-[85%]');
+      signalDrawer.classList.toggle('w-[95%]');
+    });
+
+    toggleDrawerBtn.addEventListener('click', () => {
+      // Re-focus drawer with micro-pulse
+      signalDrawer.classList.add('ring-2', 'ring-brand-accent/40');
+      setTimeout(() => {
+        signalDrawer.classList.remove('ring-2', 'ring-brand-accent/40');
+      }, 300);
+    });
+  </script>
+</body>
+</html>
+

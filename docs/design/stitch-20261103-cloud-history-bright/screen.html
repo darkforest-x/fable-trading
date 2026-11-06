@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SPIKE · 12H 信号图表 · 交易参考覆盖层与纯色云带规范 (390px Apple Glass)</title>
+<!-- Material Symbols & Typography -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS Engine -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed-variant": "#910033",
+            "surface-bright": "#36393f",
+            "text-secondary": "#8c96a5",
+            "on-secondary": "#003828",
+            "surface-glass-light": "rgba(255, 255, 255, 0.25)",
+            "error-container": "#93000a",
+            "text-tertiary": "#556070",
+            "on-secondary-fixed-variant": "#00513b",
+            "surface-container-lowest": "#0b0e13",
+            "on-error": "#690005",
+            "surface-obsidian": "rgba(16, 19, 24, 0.85)",
+            "outline-variant": "#404751",
+            "on-primary": "#00325a",
+            "tertiary": "#ffb2bb",
+            "crimson-loss-surface": "rgba(215, 53, 93, 0.15)",
+            "tertiary-fixed": "#ffd9dd",
+            "primary-fixed": "#d2e4ff",
+            "error": "#ffb4ab",
+            "primary": "#a1c9ff",
+            "on-tertiary-fixed": "#400012",
+            "tertiary-fixed-dim": "#ffb2bb",
+            "primary-fixed-dim": "#a1c9ff",
+            "on-tertiary": "#670022",
+            "on-surface-variant": "#c0c7d3",
+            "primary-container": "#5aa9ff",
+            "surface": "#101319",
+            "secondary-fixed": "#88f7cc",
+            "glass-specular-edge": "rgba(255, 255, 255, 0.4)",
+            "outline": "#8a919d",
+            "on-primary-fixed-variant": "#004880",
+            "surface-container-highest": "#32353a",
+            "secondary-fixed-dim": "#6adbb1",
+            "canvas-dark": "#101318",
+            "background": "#101319",
+            "glass-border-subtle": "rgba(255, 255, 255, 0.08)",
+            "on-background": "#e1e2e9",
+            "on-tertiary-container": "#7b002a",
+            "on-secondary-container": "#003122",
+            "on-secondary-fixed": "#002116",
+            "surface-container-low": "#191c21",
+            "inverse-primary": "#0060a7",
+            "electric-cyan": "#5aa9ff",
+            "pine-gain": "#169873",
+            "surface-tint": "#a1c9ff",
+            "surface-container": "#1d2025",
+            "secondary": "#6adbb1",
+            "on-primary-fixed": "#001c37",
+            "surface-container-high": "#272a2f",
+            "crimson-loss": "#d7355d",
+            "secondary-container": "#2aa37d",
+            "on-surface": "#e1e2e9",
+            "tertiary-container": "#ff7c92",
+            "inverse-surface": "#e1e2e9",
+            "pine-gain-surface": "rgba(22, 152, 115, 0.15)",
+            "text-primary": "#f5f7fa",
+            "surface-variant": "#32353a",
+            "surface-dim": "#101319",
+            "inverse-on-surface": "#2e3036",
+            "on-primary-container": "#003d6c",
+            "on-error-container": "#ffdad6"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "0.75rem",
+            "gutter-tablet": "0.75rem",
+            "gutter": "0.5rem",
+            "space-sm": "0.375rem",
+            "margin-tablet": "1rem",
+            "space-xl": "1rem",
+            "space-lg": "0.75rem",
+            "space-md": "0.5rem",
+            "gutter-desktop": "1rem",
+            "space-xs": "0.25rem",
+            "margin-mobile": "0.5rem",
+            "margin-desktop": "1.5rem"
+          },
+          "fontFamily": {
+            "body-sm": ["Inter"],
+            "numeric-lg": ["JetBrains Mono"],
+            "display": ["Inter"],
+            "headline-md": ["Inter"],
+            "body-lg": ["Inter"],
+            "numeric-sm": ["JetBrains Mono"],
+            "body-md": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "micro-tag-caps": ["JetBrains Mono"],
+            "numeric-md": ["JetBrains Mono"],
+            "headline-lg-mobile": ["Inter"]
+          },
+          "fontSize": {
+            "body-sm": ["11px", { "lineHeight": "15px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+            "numeric-lg": ["20px", { "lineHeight": "24px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "display": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "headline-md": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "numeric-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "body-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-sm": ["15px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg": ["24px", { "lineHeight": "30px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "micro-tag-caps": ["10px", { "lineHeight": "12px", "letterSpacing": "0.06em", "fontWeight": "600" }],
+            "numeric-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "headline-lg-mobile": ["20px", { "lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Apple Specular Edge & Glass Layering */
+    .apple-glass {
+      backdrop-filter: blur(28px) saturate(150%);
+      -webkit-backdrop-filter: blur(28px) saturate(150%);
+    }
+    .specular-border {
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2), 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+    }
+    .light .specular-border {
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.8), 0 4px 16px -2px rgba(0, 0, 0, 0.06);
+    }
+    .pulse-ring {
+      box-shadow: 0 0 0 0 rgba(22, 152, 115, 0.7);
+      animation: pulse-ring-anim 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    }
+    @keyframes pulse-ring-anim {
+      0% { box-shadow: 0 0 0 0 rgba(22, 152, 115, 0.6); }
+      70% { box-shadow: 0 0 0 6px rgba(22, 152, 115, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(22, 152, 115, 0); }
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(140, 150, 165, 0.25); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(140, 150, 165, 0.45); }
+  </style>
+</head>
+<body class="bg-[#f4f6fa] dark:bg-canvas-dark text-slate-900 dark:text-on-surface font-body-md antialiased min-h-screen selection:bg-electric-cyan selection:text-surface-obsidian overflow-x-hidden"><!-- 390px Mobile Viewport Container Shell -->
+<div class="min-h-screen bg-[#F1F4F9] dark:bg-[#0B0E14] text-slate-900 dark:text-[#E2E8F0] font-body-md flex items-center justify-center p-0 sm:py-6 selection:bg-electric-cyan selection:text-surface-obsidian">
+<div class="w-full max-w-[390px] h-[844px] max-h-screen bg-[#FFFFFF] dark:bg-[#0E121A] relative shadow-2xl sm:rounded-[36px] border border-slate-200/90 dark:border-white/10 flex flex-col overflow-hidden apple-glass">
+<!-- TOP NAVIGATION HEADER -->
+<header class="h-12 px-3 border-b border-slate-100 dark:border-white/[0.08] flex items-center justify-between flex-shrink-0 bg-white/85 dark:bg-[#0E121A]/85 backdrop-blur-xl z-20">
+<!-- Left: Back Button -->
+<button class="flex items-center gap-0.5 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-[13px] font-medium">
+<span class="material-symbols-outlined text-[18px]">arrow_back_ios</span>
+<span>信号</span>
+</button>
+<!-- Middle: Symbol Pill & Tag -->
+<div class="flex items-center gap-1.5">
+<div class="flex items-center gap-1 bg-slate-100 dark:bg-white/[0.08] px-2 py-0.5 rounded-full border border-slate-200/60 dark:border-white/10">
+<span class="font-bold text-[13px] tracking-tight text-slate-900 dark:text-white">SOL / USDT</span>
+<span class="text-[9px] font-micro-tag-caps font-bold px-1.5 py-0.2 rounded-full bg-[#E11D48] text-white tracking-wider">做空</span>
+</div>
+<span class="font-numeric-sm text-[11px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100/70 dark:bg-white/5 px-1.5 py-0.5 rounded">12H</span>
+</div>
+<!-- Right: Light/Dark Mode Switch & Actions -->
+<div class="flex items-center gap-1">
+<button class="w-7 h-7 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer" id="modeToggleBtn" title="明暗主题切换">
+<span class="material-symbols-outlined text-[16px]" id="modeToggleIcon">dark_mode</span>
+</button>
+<button class="w-7 h-7 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-[17px]">more_horiz</span>
+</button>
+</div>
+</header>
+<!-- COMPACT TRADE PLAN LEGEND (Floating Glass Strip below Header) -->
+<div class="px-3 py-1.5 bg-[#F8FAFC]/90 dark:bg-[#131824]/90 border-b border-slate-100 dark:border-white/[0.06] backdrop-blur-md flex items-center justify-between text-[11px] font-numeric-sm flex-shrink-0 z-10">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1">
+<span class="text-slate-400 dark:text-slate-400 text-[10px]">参考入场</span>
+<span class="font-semibold text-slate-900 dark:text-white font-numeric-md">130.63</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="text-slate-400 dark:text-slate-400 text-[10px]">关键K止损</span>
+<span class="font-semibold text-[#D7355D] font-numeric-md">133.60</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="text-slate-400 dark:text-slate-400 text-[10px]">对侧 1.618</span>
+<span class="font-semibold text-[#169873] font-numeric-md">121.49</span>
+</div>
+</div>
+<div class="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200/80 dark:border-emerald-500/30 text-[#169873] dark:text-[#6ADBB1] font-bold text-[10px]">
+        +3.08 R
+      </div>
+</div>
+<!-- MAIN CHART VIEWPORT (390px Mobile View) -->
+<div class="relative flex-1 w-full bg-[#FFFFFF] dark:bg-[#0E121A] overflow-hidden select-none flex flex-col justify-between">
+<!-- Floating Cloud & Price Info Badges -->
+<div class="absolute top-2 left-3 z-10 flex items-center gap-2 pointer-events-none text-[10px] font-numeric-sm">
+<div class="flex items-center gap-1 text-slate-500 dark:text-slate-400 bg-white/80 dark:bg-[#0E121A]/80 px-1.5 py-0.5 rounded border border-slate-100 dark:border-white/10 shadow-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-[#E11D48]"></span>
+<span>EMA 20/50 空头压制</span>
+</div>
+<span class="text-slate-400 dark:text-slate-400">云带上沿 133.40</span>
+</div>
+<!-- SVG CHART AREA (Grey Candlesticks, Pure Fill-Only EMA Cloud, 4 Trade Reference Overlays, 1.618 Fib) -->
+<div class="w-full h-full relative">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 390 620"><defs><lineargradient id="cloudFillGrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#D7355D" stop-opacity="0.18"></stop><stop offset="100%" stop-color="#D7355D" stop-opacity="0.05"></stop></lineargradient><lineargradient id="latestRiskGrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#F43F5E" stop-opacity="0.24"></stop><stop offset="100%" stop-color="#F43F5E" stop-opacity="0.20"></stop></lineargradient><lineargradient id="latestRewardGrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#10B981" stop-opacity="0.24"></stop><stop offset="100%" stop-color="#10B981" stop-opacity="0.20"></stop></lineargradient></defs><g stroke="rgba(148, 163, 184, 0.15)" stroke-width="1"><line x1="10" x2="340" y1="80" y2="80"></line><line x1="10" x2="340" y1="160" y2="160"></line><line x1="10" x2="340" y1="240" y2="240"></line><line x1="10" x2="340" y1="320" y2="320"></line><line x1="10" x2="340" y1="400" y2="400"></line><line x1="10" x2="340" y1="480" y2="480"></line><line x1="10" x2="340" y1="550" y2="550"></line><line x1="340" x2="340" y1="10" y2="600"></line></g><g fill="#94A3B8" font-family="JetBrains Mono" font-size="9" text-anchor="start"><text x="346" y="83">138.0</text><text x="346" y="163">135.0</text><text fill="#F43F5E" font-weight="600" x="346" y="215">133.6</text><text font-weight="600" x="346" y="295">130.6</text><text x="346" y="403">126.0</text><text fill="#10B981" font-weight="600" x="346" y="515">121.5</text><text x="346" y="553">119.0</text></g><line opacity="0.5" stroke="#94A3B8" stroke-dasharray="2 2" stroke-width="0.8" x1="15" x2="340" y1="55" y2="55"></line><text fill="#94A3B8" font-family="JetBrains Mono" font-size="8.5" opacity="0.8" x="240" y="51">周高 139.20</text><line opacity="0.5" stroke="#94A3B8" stroke-dasharray="2 2" stroke-width="0.8" x1="15" x2="340" y1="575" y2="575"></line><text fill="#94A3B8" font-family="JetBrains Mono" font-size="8.5" opacity="0.8" x="240" y="571">周低 117.80</text><line dark:stroke="#F1F5F9" opacity="0.8" stroke="#1E293B" stroke-dasharray="3 3" stroke-width="1.2" x1="15" x2="340" y1="512" y2="512"></line><text dark:fill="#F1F5F9" fill="#1E293B" font-family="JetBrains Mono" font-size="9" font-weight="600" x="20" y="507">1.618 Fib · 121.49</text><polygon fill="url(#cloudFillGrad)" points="15,160 45,150 75,155 105,170 135,185 165,200 195,210 225,225 255,230 285,225 315,220 340,225 340,265 315,260 285,270 255,280 225,275 195,265 165,250 135,235 105,220 75,205 45,195 15,205"></polygon><g id="historical-trade-1"><line stroke="#F43F5E" stroke-dasharray="2 2" stroke-width="1" x1="22" x2="65" y1="145" y2="145"></line><text fill="#F43F5E" font-family="JetBrains Mono" font-size="7.5" font-weight="600" x="24" y="141">止损 135.2</text><rect fill="#10B981" fill-opacity="0.22" height="52" rx="2" stroke="#10B981" stroke-width="0.75" width="43" x="22" y="167"></rect><rect fill="#10B981" fill-opacity="0.9" height="13" rx="2" width="38" x="25" y="172"></rect><text fill="#FFFFFF" font-family="JetBrains Mono" font-size="8" font-weight="700" x="29" y="182">+2.40R</text></g><g id="historical-trade-2-long"><line stroke="#10B981" stroke-dasharray="3 3" stroke-width="1" x1="78" x2="135" y1="115" y2="115"></line><rect fill="#10B981" fill-opacity="0.22" height="75" rx="2" stroke="#10B981" stroke-width="0.75" width="57" x="78" y="115"></rect><line stroke="#F43F5E" stroke-dasharray="2 2" stroke-width="1" x1="78" x2="135" y1="200" y2="200"></line><text fill="#F43F5E" font-family="JetBrains Mono" font-size="7.5" font-weight="600" x="80" y="209">止损 0.3493</text><rect fill="#10B981" fill-opacity="0.9" height="20" rx="3" width="52" x="80" y="118"></rect><text fill="#FFFFFF" font-family="JetBrains Mono" font-size="7.5" font-weight="700" x="83" y="128">目标 11.98R</text><text fill="#FFFFFF" font-family="JetBrains Mono" font-size="7" font-weight="600" opacity="0.95" x="83" y="136">0.42328</text></g><g id="historical-trade-3"><line stroke="#F43F5E" stroke-dasharray="2 2" stroke-width="1" x1="145" x2="192" y1="175" y2="175"></line><text fill="#F43F5E" font-family="JetBrains Mono" font-size="7.5" font-weight="600" x="147" y="171">止损 133.8</text><rect fill="#10B981" fill-opacity="0.22" height="44" rx="2" stroke="#10B981" stroke-width="0.75" width="47" x="145" y="199"></rect><rect fill="#10B981" fill-opacity="0.9" height="13" rx="2" width="38" x="148" y="204"></rect><text fill="#FFFFFF" font-family="JetBrains Mono" font-size="8" font-weight="700" x="152" y="214">+1.80R</text></g><g id="latestSignalBox"><rect fill="url(#latestRiskGrad)" height="22" rx="2" stroke="#F43F5E" stroke-opacity="0.6" stroke-width="0.8" width="55" x="240" y="213"></rect><line stroke="#F43F5E" stroke-dasharray="2 2" stroke-width="1" x1="240" x2="295" y1="213" y2="213"></line><text fill="#F43F5E" font-family="JetBrains Mono" font-size="7.5" font-weight="600" x="243" y="209">止损 133.60</text><rect fill="url(#latestRewardGrad)" height="57" rx="2" stroke="#10B981" stroke-opacity="0.8" stroke-width="0.8" width="55" x="240" y="235"></rect><line stroke="#10B981" stroke-dasharray="2 2" stroke-width="1" x1="240" x2="295" y1="292" y2="292"></line><rect fill="#10B981" fill-opacity="0.95" height="13" rx="2" width="48" x="243" y="240"></rect><text fill="#FFFFFF" font-family="JetBrains Mono" font-size="8" font-weight="700" x="247" y="250">+3.08 R 目标</text></g><g stroke="#64748B" stroke-width="1.2"><line x1="25" x2="25" y1="140" y2="195"></line><rect fill="#64748B" height="35" rx="1" width="8" x="21" y="150"></rect><g stroke="#10B981"><line x1="45" x2="45" y1="145" y2="210"></line><rect fill="#10B981" height="40" rx="1" width="8" x="41" y="158"></rect></g><line x1="65" x2="65" y1="150" y2="225"></line><rect fill="#64748B" height="48" rx="1" width="8" x="61" y="165"></rect><g stroke="#10B981"><line x1="85" x2="85" y1="130" y2="210"></line><rect fill="#10B981" height="45" rx="1" width="8" x="81" y="145"></rect></g><line x1="105" x2="105" y1="120" y2="190"></line><rect fill="#64748B" height="42" rx="1" width="8" x="101" y="130"></rect><line x1="125" x2="125" y1="110" y2="175"></line><rect fill="#64748B" height="44" rx="1" width="8" x="121" y="118"></rect><line x1="145" x2="145" y1="170" y2="245"></line><rect fill="#64748B" height="46" rx="1" width="8" x="141" y="185"></rect><g stroke="#10B981"><line x1="165" x2="165" y1="175" y2="250"></line><rect fill="#10B981" height="45" rx="1" width="8" x="161" y="190"></rect></g><line x1="185" x2="185" y1="190" y2="250"></line><rect fill="#64748B" height="36" rx="1" width="8" x="181" y="202"></rect><line x1="205" x2="205" y1="205" y2="280"></line><rect fill="#64748B" height="48" rx="1" width="8" x="201" y="218"></rect><line x1="225" x2="225" y1="215" y2="290"></line><rect fill="#64748B" height="46" rx="1" width="8" x="221" y="228"></rect><g stroke="#10B981"><line x1="245" x2="245" y1="218" y2="305"></line><rect fill="#10B981" height="57" rx="1" width="8" x="241" y="235"></rect></g><line x1="265" x2="265" y1="250" y2="335"></line><rect fill="#64748B" height="52" rx="1" width="8" x="261" y="268"></rect><line x1="285" x2="285" y1="285" y2="360"></line><rect fill="#64748B" height="45" rx="1" width="8" x="281" y="295"></rect></g><circle cx="245" cy="292" fill="#10B981" r="2.5"></circle></svg>
+</div>
+<!-- FLOATING FROSTED-GLASS BOTTOM DOCK (Mobile Timeframe & Minimal Controls) -->
+<div class="p-3 w-full z-20 pointer-events-auto flex-shrink-0">
+<div class="apple-glass bg-white/90 dark:bg-[#131824]/90 border border-slate-200/90 dark:border-white/10 rounded-2xl p-1.5 shadow-xl flex items-center justify-between gap-1 specular-border">
+<!-- Timeframe Segmented Switch -->
+<div class="flex items-center gap-0.5 font-numeric-sm text-[11px]">
+<button class="px-2 py-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">5m</button>
+<button class="px-2 py-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">15m</button>
+<button class="px-2 py-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">1H</button>
+<button class="px-2 py-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">4H</button>
+<!-- Active Highlighted 12H -->
+<button class="px-2.5 py-1 rounded-lg bg-slate-900 dark:bg-electric-cyan text-white dark:text-surface-obsidian font-bold shadow-sm">12H</button>
+<button class="px-2 py-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">1D</button>
+</div>
+<!-- Minimal Secondary Controls (TradingView, Layers, Settings) -->
+<div class="flex items-center gap-1 border-l border-slate-200/80 dark:border-white/10 pl-1.5">
+<button class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" title="层级显示">
+<span class="material-symbols-outlined text-[15px]">layers</span>
+</button>
+<button class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors" title="TradingView 打开">
+<span class="material-symbols-outlined text-[15px]">open_in_new</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Light/Dark Mode Interactive Toggle Script -->
+<script>
+  (function() {
+    const btn = document.getElementById('modeToggleBtn');
+    const icon = document.getElementById('modeToggleIcon');
+    const html = document.documentElement;
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const isDark = html.classList.contains('dark');
+      if (isDark) {
+        html.classList.remove('dark');
+        html.classList.add('light');
+        if (icon) icon.textContent = 'dark_mode';
+      } else {
+        html.classList.remove('light');
+        html.classList.add('dark');
+        if (icon) icon.textContent = 'light_mode';
+      }
+    });
+  })();
+</script></body></html>

@@ -21,22 +21,41 @@
     return {entry:candleIndex(rows,p.fill_ms,step),exit:p.stage==='closed'?candleIndex(rows,p.exit_ms,step):-1,
       from:p.fill_ms,to:end,stop:fin(p.be_from_ms)&&p.be_from_ms>=p.fill_ms&&p.be_from_ms<=end?p.be_from_ms:null};
   }
-  function replayRange(trade,rows,step,visibleFraction=1,overlaySide='right'){
+  function replayRange(trade,rows,step,contextBars=45){
     if(!rows.length)return null;
     const a=candleIndex(rows,trade.fills?.entry_start_ms??trade.entry_start_ms??trade.entry_ms,step),b=candleIndex(rows,trade.fills?.exit_kind==='interval'?trade.exit_ms-1:trade.exit_ms,step);
     if(a<0)return null;
-    const end=b>=0?b:rows.length-1,span=Math.max(45,end-a+1),pad=Math.max(12,span*.18);
-    const from=a-pad,to=Math.max(a+45,end+pad);
-    const visibleSpan=(to-from)/Math.min(1,Math.max(.25,visibleFraction));
-    return {from:overlaySide==='left'?to-visibleSpan:from,to:overlaySide==='left'?to:from+visibleSpan,entry:a,exit:b};
+    const end=b>=0?b:rows.length-1,span=Math.max(contextBars,end-a+1),pad=Math.max(contextBars<45?8:12,span*.18);
+    return {from:a-pad,to:Math.max(a+contextBars,end+pad),entry:a,exit:b};
   }
   function replayFills(trade){
     const f=trade?.fills;
     if(!f)return [];
-    return [['entry','开仓','#169873'],['exit','平仓','#738392']].flatMap(([key,label,color])=>{
+    return [['entry',trade.side===-1?'① 开空':'① 开多','#2879bf'],['exit','② 平仓','#738392']].flatMap(([key,label,color])=>{
       const start=f[key+'_start_ms'],end=f[key+'_end_ms'],price=f[key+'_price'];
-      return [start,end,price].every(fin)&&price>0&&start<=end?[{key,label,color,start,end,price}]:[];
+      const above=key==='entry'?trade.side===-1:trade.side!==-1;
+      return [start,end,price].every(fin)&&price>0&&start<=end?[{key,label,color,start,end,price,above}]:[];
     });
+  }
+  function replayScore(trade,rows,step){
+    const rules=trade?.entry_rules,close=trade?.fills?.score_close_ms;
+    if(step!==60000||rules?.status!=='saved'||!fin(rules.score)||rules.score<0||rules.score>1||!fin(close)||close<=0)return null;
+    // Candle timestamps denote opens: the score belongs to the bar that ENDS
+    // here, never the next bar opening at the same timestamp. Do not snap gaps.
+    const index=candleIndex(rows,close-1,step),row=rows[index];
+    if(!row||row.time*1000+step!==close||!fin(row.low))return null;
+    const clock=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(close);
+    return {key:'score',index,close,score:rules.score,label:`${clock} 收盘 · ${rules.score.toFixed(4)}分`,above:false};
+  }
+  function paperReplayTrade(p){
+    return {id:p.id,symbol:p.symbol.replace('-USDT-SWAP','USDT'),side:p.side,entry_ms:p.fill_ms,exit_ms:p.exit_ms,pnl:p.pnl,
+      return_pct:fin(p.net_bp)?p.net_bp/100:null,point_times:true,
+      fills:{entry_start_ms:p.fill_ms,entry_end_ms:p.fill_ms,entry_price:p.entry,exit_start_ms:p.exit_ms,exit_end_ms:p.exit_ms,exit_price:p.exit_price,exit_kind:'point'}};
+  }
+  function paperReplayFills(p){
+    const partial=(p.exits||[]).slice(0,-1).filter(f=>fin(f.exit_ms)&&f.exit_ms>=p.fill_ms&&f.exit_ms<=p.exit_ms&&fin(f.price)&&f.price>0)
+      .map(f=>({key:'partial',label:'',color:'#738392',start:f.exit_ms,end:f.exit_ms,price:f.price}));
+    return [...replayFills(paperReplayTrade(p)),...partial];
   }
   function logicalAt(rows,stamp,step){
     const i=candleIndex(rows,stamp,step);
@@ -44,7 +63,30 @@
     const before=candleIndex(rows,stamp-1,step);
     return before>=0&&rows[before].time*1000+step===stamp?before+1:null;
   }
-  const fillClock=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+  // Label clearance uses all OHLC envelopes under the full text width, not
+  // just the fill candle. Pixel geometry is recomputed on every pan/zoom/resize.
+  function replayLabelLayout(marks,candles,width,height){
+    const placed=[],overlapX=(a,b)=>a.left<b.right+4&&a.right>b.left-4;
+    for(const mark of marks){
+      if(mark.width>width-16||mark.anchor<0||mark.anchor>width)continue;
+      const left=Math.max(8,Math.min(width-mark.width-8,mark.anchor-mark.width/2)),right=left+mark.width;
+      const neighbors=candles.filter(c=>overlapX({left,right},c));
+      if(!neighbors.length)continue; // Missing OHLC must not invent a clear area.
+      const column=candles.filter(c=>c.left<mark.anchor+4&&c.right>mark.anchor-4);
+      for(const above of [mark.above,!mark.above]){
+        const edge=above?Math.min(mark.y,...neighbors.map(c=>c.top)):Math.max(mark.y,...neighbors.map(c=>c.bottom));
+        let top=above?edge-36:edge+18;
+        for(const other of placed.filter(p=>overlapX({left,right},p)).sort((a,b)=>above?b.top-a.top:a.top-b.top)){
+          if(top<other.bottom+4&&top+18>other.top-4)top=above?other.top-22:other.bottom+4;
+        }
+        if(top<6||top+18>Math.min(height-6,mark.maxBottom??height))continue;
+        const tip=above?Math.min(mark.y,...column.map(c=>c.top))-5:Math.max(mark.y,...column.map(c=>c.bottom))+5;
+        placed.push({...mark,left,right,top,bottom:top+18,above,tip});break;
+      }
+    }
+    return placed;
+  }
+  // Stitch c8d8589c0a3b4ad59e1cce3f221564fe: labels and arrows in candle whitespace.
   class ReplayFillDrawing {
     constructor(owner){this.owner=owner;this.items=[];this.view={zOrder:()=> 'top',renderer:()=>({draw:target=>this.paint(target)})};}
     attached({requestUpdate}){this.requestUpdate=requestUpdate;}
@@ -55,21 +97,57 @@
       return prices.length?{priceRange:{minValue:Math.min(...prices),maxValue:Math.max(...prices)}}:null;
     }
     paint(target){
-      const o=this.owner,scale=o.chart.timeScale(),format=window.SpikeChartTools.axisPrice;
+      const o=this.owner,scale=o.chart.timeScale();
+      // LWC's integer logical conversion cannot project an interval midpoint or
+      // an intrabar timestamp directly (see range-chart.js coordinateAt).
+      const at=index=>{const n=Math.floor(index),a=scale.logicalToCoordinate(n),b=scale.logicalToCoordinate(n+1);return a==null||b==null?null:a+(b-a)*(index-n);};
       target.useMediaCoordinateSpace(({context:ctx,mediaSize:s})=>{
-        ctx.save();ctx.beginPath();ctx.rect(0,0,s.width,s.height);ctx.clip();ctx.font='11px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';ctx.textBaseline='middle';
+        ctx.save();ctx.beginPath();ctx.rect(0,0,s.width,s.height);ctx.clip();
+        ctx.font='600 12px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+        const marks=[],candles=[],dark=typeof document!=='undefined'&&document.documentElement.dataset.theme==='dark';
+        const spacing=Math.abs(scale.logicalToCoordinate(1)-scale.logicalToCoordinate(0)),half=Math.max(1,spacing*.4)+1;
+        for(let i=0;i<o.rows.length;i++){
+          const row=o.rows[i],x=scale.logicalToCoordinate(i);
+          if(x==null||x+half<0||x-half>s.width||!fin(row.high)||!fin(row.low))continue;
+          const high=o.series.priceToCoordinate(row.high),low=o.series.priceToCoordinate(row.low);
+          if(high!=null&&low!=null)candles.push({left:x-half,right:x+half,top:Math.min(high,low),bottom:Math.max(high,low)});
+        }
         for(const f of this.items){
           const a=logicalAt(o.rows,f.start,this.step),b=logicalAt(o.rows,f.end,this.step);
           if(a==null||b==null)continue;
-          const x=scale.logicalToCoordinate(a),z=scale.logicalToCoordinate(b),y=o.series.priceToCoordinate(f.price);
+          const x=at(a),z=at(b),y=o.series.priceToCoordinate(f.price);
           if(x==null||z==null||y==null||z<0||x>s.width)continue;
-          ctx.strokeStyle=f.color;ctx.lineWidth=2;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(z,y);
-          ctx.moveTo(x,y-5);ctx.lineTo(x,y+5);ctx.moveTo(z,y-5);ctx.lineTo(z,y+5);ctx.stroke();
-          const time=fillClock.format(f.start)+(f.end>f.start?'–'+fillClock.format(f.end):''),text=f.label+' '+format(f.price)+' · '+time;
-          const w=ctx.measureText(text).width+12,left=Math.max(2,Math.min(f.key==='entry'?x:z-w,s.width-w-2));
-          const top=y+(f.key==='entry'&&y<s.height*.7?8:-45);
-          const dark=typeof document!=='undefined'&&document.documentElement.dataset.theme==='dark';
-          ctx.fillStyle=dark?'#1c222cf2':'#f7faf8f2';ctx.fillRect(left,top,w,20);ctx.fillStyle=f.color;ctx.textAlign='left';ctx.fillText(text,left+6,top+10);
+          ctx.strokeStyle=f.color;ctx.lineWidth=1.25;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(z,y);
+          // Exact fill prices/timestamps remain independent of displaced labels.
+          if(f.start===f.end){ctx.moveTo(x-3,y);ctx.lineTo(x+3,y);}
+          ctx.moveTo(x,y-3);ctx.lineTo(x,y+3);
+          if(f.start!==f.end){ctx.moveTo(z,y-3);ctx.lineTo(z,y+3);}
+          ctx.stroke();
+          const anchor=at(f.start===f.end?Math.floor(a):(a+b)/2);
+          if(f.label&&anchor!=null)marks.push({...f,anchor,y,width:ctx.measureText(f.label).width+8});
+        }
+        // Stitch 25d7e8cf6617402db2bc95aedc911e95: one hollow amber mark,
+        // with plain text outside all candles and above the volume region.
+        if(this.score){
+          const f=this.score,anchor=scale.logicalToCoordinate(f.index),y=o.series.priceToCoordinate(o.rows[f.index].low);
+          ctx.font='500 11px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';
+          if(anchor!=null&&y!=null)marks.push({...f,anchor,y,width:ctx.measureText(f.label).width+8,maxBottom:s.height*.84});
+        }
+        this.labels=replayLabelLayout(marks,candles,s.width,s.height);
+        for(const label of this.labels){
+          const {anchor,tip,above,left,right,top,bottom}=label,dir=above?-1:1;
+          const score=label.key==='score',color=score?(dark?'#d6aa65':'#8b641f'):label.key==='entry'?(dark?'#69b4ff':'#1673bb'):(dark?'#c0ccd8':'#526678');
+          ctx.font=(score?'500 11px':'600 12px')+' -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';
+          ctx.fillStyle=color;ctx.strokeStyle=color;ctx.lineWidth=1;ctx.setLineDash([]);
+          ctx.beginPath();ctx.moveTo(anchor,tip);
+          if(score){ctx.lineTo(anchor-3,tip+dir*3);ctx.lineTo(anchor,tip+dir*6);ctx.lineTo(anchor+3,tip+dir*3);ctx.closePath();ctx.stroke();}
+          else{ctx.lineTo(anchor-3,tip+dir*5);ctx.lineTo(anchor+3,tip+dir*5);ctx.closePath();ctx.fill();}
+          const end=above?bottom+3:top-3,start=tip+dir*6;
+          // A stacked label must not acquire a leader through another label.
+          if(!this.labels.some(p=>p!==label&&anchor>=p.left&&anchor<=p.right&&Math.min(start,end)<p.bottom&&Math.max(start,end)>p.top)){
+            ctx.beginPath();ctx.moveTo(anchor,start);ctx.lineTo(anchor,end);ctx.stroke();
+          }
+          ctx.fillText(label.label,(left+right)/2,(top+bottom)/2);
         }
         ctx.restore();
       });
@@ -106,19 +184,19 @@
       });
     }
   }
-  if(typeof module!=='undefined'&&module.exports){module.exports={latest,select,valid,candleIndex,geometry,TradeDrawing,replayRange,replayFills,logicalAt,ReplayFillDrawing};return;}
-  function create(host,notice,drawings){
-    let active=true,request=null,epoch=0,desired=null,anchor=null,received=0,pinnedFocus='';
+  if(typeof module!=='undefined'&&module.exports){module.exports={latest,select,valid,candleIndex,geometry,TradeDrawing,replayRange,replayFills,replayScore,paperReplayTrade,paperReplayFills,logicalAt,replayLabelLayout,ReplayFillDrawing};return;}
+  function create(host,notice,drawings,onReplay=()=>{}){
+    let active=true,request=null,epoch=0,desired=null,anchor=null,received=0,pinnedFocus='',appearance=null;
     const shared=window.SpikePublicChartCache;
     const chart=window.SpikeMondayFibChart.create({decorate:(instance,data)=>{
       drawings?.attach(instance,data);
-      const p=data.paperTrade,step=periods[data.bar];
+      const p=data.paperTrade,step=periods[data.bar],historical=data.paperHistory&&p?.stage==='closed';
       if(!instance.paperInteractionReady){
         instance.chart?.applyOptions?.({handleScale:{axisDoubleClickReset:false}});
         instance.canvas?.setAttribute('aria-label','K 线交互图；双击或双点任意图表位置隐藏／恢复悬浮组件；拖动平移，滚轮或双指缩放；Home 全图，End 最新');
         instance.paperInteractionReady=true;
       }
-      const trades=new Map([...(data.paperTrades||[]),...(p?[p]:[])].filter(t=>valid(t)&&t.symbol===data.symbol).map(t=>[String(t.id),t]));
+      const trades=new Map((historical?[]:[...(data.paperTrades||[]),...(p?[p]:[])]).filter(t=>valid(t)&&t.symbol===data.symbol).map(t=>[String(t.id),t]));
       instance.paperDrawings ||= new Map();
       for(const [id,old] of instance.paperDrawings)if(!trades.has(id)){old.shape=null;instance.series.detachPrimitive?.(old);instance.paperDrawings.delete(id);}
       for(const [id,t] of trades){let drawing=instance.paperDrawings.get(id);
@@ -126,13 +204,14 @@
         drawing.trade=t;drawing.step=step;drawing.shape=geometry(t,instance.rows,step,Math.max(data.now_ms,p?.asof_ms||0));drawing.requestUpdate?.();
       }
       const draw=instance.paperDrawings.get(String(p?.id));instance.paperDrawing=draw||{shape:null};
-      if(data.backtestTrade){
-        const panel=host.parentElement?.querySelector('.bt-panel.is-open');
-        const fraction=panel&&host.clientWidth>700?1-(panel.getBoundingClientRect().right-host.getBoundingClientRect().left+24)/instance.chart.timeScale().width():1;
-        const t=data.backtestTrade,g=replayRange(t,instance.rows,step,fraction,'left'),key='backtest|'+data.track+'|'+t.id+'|'+data.bar;
+      if(data.backtestTrade||historical){
+        const t=historical?paperReplayTrade(p):data.backtestTrade;
+        const g=historical?(instance.rows.length?{from:-.5,to:instance.rows.length-.5}:null):replayRange(t,instance.rows,step,host.clientWidth<700?25:45),key=(historical?'paper-history|':'backtest|')+(data.track||desired?.track)+'|'+t.id+'|'+data.bar;
+        if(!historical)onReplay(t,data.track);
         instance.series.setMarkers([]);
         if(!instance.backtestDrawing){instance.backtestDrawing=new ReplayFillDrawing(instance);instance.series.attachPrimitive(instance.backtestDrawing);}
-        instance.backtestDrawing.items=replayFills(t);instance.backtestDrawing.step=step;instance.backtestDrawing.requestUpdate?.();
+        instance.backtestDrawing.items=historical?paperReplayFills(p):replayFills(t);instance.backtestDrawing.step=step;
+        instance.backtestDrawing.score=historical?null:replayScore(t,instance.rows,step);instance.backtestDrawing.requestUpdate?.();
         instance.hasBacktestMarkers=true;
         if(g&&pinnedFocus!==key){pinnedFocus=key;instance.chart.priceScale('right').applyOptions({autoScale:true});instance.chart.timeScale().setVisibleLogicalRange({from:g.from,to:g.to});}
         notice(!g?'开仓区间的原始 K 线缺失；请切换周期或重新加载。':!instance.backtestDrawing.items.length?'原始成交价暂不可读，未绘制成交标记。':'');return;
@@ -142,15 +221,18 @@
       if(!p){notice('');return;}
       const focusKey=p.id+'|'+data.bar;
       if(draw.shape&&pinnedFocus!==focusKey){pinnedFocus=focusKey;
-        if(draw.shape.entry>=0){const i=draw.shape.entry,span=host.clientWidth<700?55:115;instance.chart.priceScale('right').applyOptions({autoScale:true});instance.chart.timeScale().setVisibleLogicalRange({from:i-span*.7,to:i+span*.3});}
+        if(draw.shape.entry>=0){const i=draw.shape.entry,span=host.clientWidth<700?55:115;
+          const range={from:i-span*.7,to:i+span*.3};
+          instance.chart.priceScale('right').applyOptions({autoScale:true});instance.chart.timeScale().setVisibleLogicalRange({from:range.from,to:range.to});}
       }
       notice(!draw.shape||draw.shape.entry===-1?'开仓时间不在当前已加载 K 线内；可切换更大周期查看。':'');
     }});
     function paint(){if(active&&anchor&&desired)chart.show(host,anchor,anchor.current_week||anchor.week,{period:desired.period,ma:desired.ma,internal:desired.internal,trade:desired.trade,trades:desired.trades,anchors:anchor});}
-    function showReplay(track,trade,period='15m',ma=false,internal=false){
-      if(desired?.mode!=='backtest'){epoch++;request?.abort();request=null;anchor=null;chart.pause();pinnedFocus='';}
-      desired={mode:'backtest',track,trade,period,ma,internal};
-      if(active)chart.showReplay(host,track,trade,{period,ma,internal,refocus:!pinnedFocus});
+    function showReplay(track,trade,period='15m',ma=false,internal=false,paper=false){
+      const mode=paper?'history':'backtest';
+      if(desired?.mode!==mode){epoch++;request?.abort();request=null;anchor=null;chart.pause();pinnedFocus='';}
+      desired={mode,track,trade,period,ma,internal,paper};
+      if(active)chart.showReplay(host,track,trade,{period,ma,internal,paper,refocus:!pinnedFocus});
     }
     async function show(trade,period='5m',ma=false,symbol=trade?.symbol||'',internal=false,trades=[]){
       const changed=desired?.symbol!==symbol;desired={trade:valid(trade)&&trade.symbol===symbol?trade:null,period,ma,symbol,internal,trades};
@@ -171,9 +253,10 @@
       }catch(e){if(revision===epoch&&active)notice((e.name==='AbortError'?'图表读取超时':e.message)+' · 点击刷新重试');}
       finally{clearTimeout(timeout);if(request===c)request=null;}
     }
-    return {show,showReplay,fit:chart.fit,latest:chart.latest,zoom:chart.zoom,retry(){if(desired?.mode==='backtest'){chart.retry();return;}received=0;if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
-      setActive(value){active=value;if(!value){drawings?.cancel();epoch++;request?.abort();request=null;chart.pause();}else if(desired?.mode==='backtest')showReplay(desired.track,desired.trade,desired.period,desired.ma,desired.internal);else if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
+    function setAppearance(value){appearance=value;chart.setAppearance?.(appearance);}
+    return {show,showReplay,showHistory:(track,trade,period='15m',ma=false,internal=false)=>showReplay(track,trade,period,ma,internal,true),setAppearance,fit:chart.fit,latest:chart.latest,zoom:chart.zoom,retry(){if(desired?.mode){chart.retry();return;}received=0;if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
+      setActive(value){active=value;if(!value){drawings?.cancel();epoch++;request?.abort();request=null;chart.pause();}else if(desired?.mode)showReplay(desired.track,desired.trade,desired.period,desired.ma,desired.internal,desired.paper);else if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
       resetFocus(){pinnedFocus='';},destroy(){active=false;epoch++;request?.abort();chart.hide();}};
   }
-  window.SpikeReclaimChart={create,latest,select,valid};
+  window.SpikeReclaimChart={create,latest,select,valid,paperReplayTrade};
 })();

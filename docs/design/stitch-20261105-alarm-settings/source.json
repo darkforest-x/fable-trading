@@ -5,12 +5,21 @@
   "screens": {
     "settings-states": "fdc3ccf65a7745e7a9c8b324b73aa35a",
     "alert-center": "9de174f631c24300bbda689d94f10837",
-    "alert-replay": "702c3ae360eb42638e05e1f12e643d95"
+    "alert-replay": "702c3ae360eb42638e05e1f12e643d95",
+    "alarm-cockpit-proposal": "5b0423b06e964a928258b642a7c3d1ae",
+    "alarm-themes-long-short": "1e45b37d776a4579a59b768b39837b74",
+    "alarm-wallpaper": "fd4bd89cb2984427a9fe68d0965bddcd"
   },
   "requests": [
     "owner 2026-11-05: 这个模块做好一点吧",
     "owner 2026-11-05: 功能要丰富一点 现在怎么连历史消息都没有",
-    "owner 2026-11-05: 最起码有个入口我能点击 看到当时报警后的图表走势 以便我来分析行情"
+    "owner 2026-11-05: 最起码有个入口我能点击 看到当时报警后的图表走势 以便我来分析行情",
+    "owner 2026-11-05: 去掉显示测试；报警画射线；主流币看一年并显示全部报警，射线按K线根数；跳转1.618页面；全屏报警应该做成什么样",
+    "owner 2026-11-05: 多头报警 空头报警应该是不同的主题色；动画效果还是不够",
+    "owner 2026-11-05: k线改成全局的壁纸；整屏幕的动画；不需要的字和提示不要弄，简洁"
   ],
-  "adaptation": "Layout, colors and states only. Placeholder coins, prices, counts and the generated 'confirm and archive' action were discarded. History reads the existing GET /api/spike-alerts on panel open and on stream change (no polling); unacknowledged rows stay in the full-screen alarm, so history has no ack button. Replay reuses /api/monday-fib/trade-candles (OKX closed bars, alert-week Monday 1.618) with markers instead of the generated shaded band. Read-only; no orders."
+  "adaptation": "Layout, colors and states only. Placeholder coins, prices, counts and the generated 'confirm and archive' action were discarded. History reads the existing GET /api/spike-alerts on panel open and on stream change (no polling); unacknowledged rows stay in the full-screen alarm, so history has no ack button. Replay reuses /api/monday-fib/trade-candles (OKX closed bars, alert-week Monday 1.618) with markers instead of the generated shaded band. Read-only; no orders.",
+  "alert-replay-v2": "Requested (alert-replay-v2-request.json) but the generation timed out client-side and no matching board appeared after the web canvas synced; implementation follows the request text. Not resent, per the Stitch recovery rule.",
+  "alarm-cockpit-proposal": "Implemented, then replaced by alarm-wallpaper after owner feedback (too much text, chart boxed).",
+  "alarm-wallpaper": "Implemented: live 5m chart as full-screen wallpaper scaled to candles, emerald long / crimson short, particle canvas, scan, vignette, edge glow, entry burst, surge on new touches. Generation timed out client-side; the board appeared after the web canvas finished loading."
 }

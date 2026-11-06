@@ -5,6 +5,18 @@ const chart=require('../../yoyo/monitor/static/reclaim-chart.js');
 const flush=()=>new Promise(r=>setImmediate(r));
 const row=(id,symbol='AAAUSDT')=>({id,symbol,side:1,entry_ms:1700000000000+id*300000,exit_ms:1700000000000+id*300000+900000,pnl:id-3,return_pct:(id-3)/100});
 const page=(q,ids,total=ids.length)=>({schema:1,...q,meta:{track:q.track,trades:total},rows:ids.map(i=>row(i)),ranking:[{symbol:'AAAUSDT',pnl:3,trades:total}],focus:row(2),total,has_more:q.offset+ids.length<total});
+test('trade summary preserves source fill prices and native intervals, including a midnight boundary',()=>{
+ const start=Date.parse('2026-09-17T17:25:00Z');
+ const r={...row(166,'SIRENUSDT'),side:-1,entry_ms:start+300000,exit_ms:start+300000,pnl:62.84005123804659,return_pct:2.529151912694961,
+  fills:{entry_start_ms:start,entry_end_ms:start+300000,entry_price:.02670598,exit_start_ms:start,exit_end_ms:start+300000,exit_price:.02602}};
+ const html=ui.summaryHTML(r);
+ assert.match(html,/SIREN/);assert.match(html,/做空/);assert.match(html,/0.02670598/);assert.match(html,/0.02602/);assert.match(html,/\+62.84/);
+ assert.equal((html.match(/2026\/09\/18 01:25–01:30/g)||[]).length,2);
+ const midnight=Date.parse('2026-09-17T15:55:00Z');
+ assert.equal(ui.fillLabel({...r,fills:{entry_start_ms:midnight,entry_end_ms:midnight+300000}},'entry'),'2026/09/17 23:55–2026/09/18 00:00');
+ assert.doesNotMatch(ui.summaryHTML({...r,fills:undefined}),/undefined|NaN|0.02670598|0.02602/);
+ assert.match(ui.summaryHTML({...r,fills:undefined}),/记账/);
+});
 test('each saved row shows its own score and qualified gates without inventing missing values',()=>{
  const r={...row(1),entry_start_ms:row(1).entry_ms-300000,entry_rules:{status:'saved',score:.6592223040584619,minimum:.6,order:3,minimum_order:3,kind:'first_touch'}};
  const html=ui.rowHTML(r,1);assert.match(html,/1.618首触/);assert.match(html,/0.6592≥0.6/);assert.match(html,/排列 3≥3/);
@@ -50,19 +62,14 @@ test('saved history validates identity and full timestamps without inventing pri
  assert.equal(range.entry,8);assert.equal(range.exit,45);assert.ok(range.from<8&&range.to>45);
 });
 
-test('desktop overlay reserves visible chart space for both trade endpoints',()=>{
- const bars=Array.from({length:100},(_,i)=>({time:1700000000+i*300}));
- const r={entry_ms:bars[20].time*1000,exit_ms:bars[70].time*1000};
- const full=chart.replayRange(r,bars,300000),partial=chart.replayRange(r,bars,300000,.6);
- assert.equal(partial.from,full.from);assert.ok(partial.to>full.to);
- assert.ok((partial.exit-partial.from)/(partial.to-partial.from)<.6);
-});
-
-test('left ledger keeps both endpoints in the uncovered right area',()=>{
+test('narrow charts show fewer context bars while retaining both endpoints of long trades',()=>{
  const bars=Array.from({length:100},(_,i)=>({time:1700000040+i*60}));
- const r={entry_ms:bars[20].time*1000,exit_ms:bars[70].time*1000};
- const focus=chart.replayRange(r,bars,60000,.6,'left');
- assert.ok((focus.entry-focus.from)/(focus.to-focus.from)>.4);
- assert.ok((focus.exit-focus.from)/(focus.to-focus.from)<1);
- for(const period of ['1m','2m','3m'])assert.equal(ui.periodFor(r,period),period);
+ const short={entry_ms:bars[20].time*1000,exit_ms:bars[24].time*1000};
+ const desktop=chart.replayRange(short,bars,60000),mobile=chart.replayRange(short,bars,60000,25);
+ assert.ok(mobile.to-mobile.from<desktop.to-desktop.from);
+ assert.ok(mobile.from<mobile.entry&&mobile.to>mobile.exit);
+ const long={...short,exit_ms:bars[70].time*1000};
+ const focus=chart.replayRange(long,bars,60000,25);
+ assert.ok(focus.from<focus.entry&&focus.to>focus.exit);
+ for(const period of ['1m','2m','3m'])assert.equal(ui.periodFor(long,period),period);
 });

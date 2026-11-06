@@ -252,6 +252,9 @@ def test_v130_message_helpers_are_explicitly_research_references():
     bark = bark_message(signal)
     assert bark["group"] == "SPIKE V13.1"
     assert "TradingView" in bark["body"]
+    assert "url" not in bark
+    assert "网页备用" not in bark["body"]
+    assert "https://www.tradingview.com/chart/" not in bark["body"]
     assert "V12.8" not in bark["title"]
     assert JOINT_PROTOCOL not in signal["protocol"]
 

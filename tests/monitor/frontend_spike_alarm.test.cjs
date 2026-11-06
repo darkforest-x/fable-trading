@@ -1,14 +1,14 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
-const {create,sound,packet,historyPacket,historyLoader,replayWindow,replayCoins,alertStatus,REPLAY_PERIODS,ACTIVE_MS,sirenMotion}=require('../../yoyo/monitor/static/spike-alarm.js');
+const {create,sound,packet,historyPacket,historyLoader,liveFacts,deskFacts,particleField,replayWindow,replayCoins,alertStatus,alertTimeline,rayItems,RAY_BARS,MAJORS,REPLAY_PERIODS,ACTIVE_MS,sirenMotion}=require('../../yoyo/monitor/static/spike-alarm.js');
 const NOW=Date.parse('2026-10-27T04:00Z');
 const alert=(id=1,extra={})=>({id,side:'lower',n:2,symbols:['BTC-USDT-SWAP','ETH-USDT-SWAP'],first_ms:NOW-60000,last_ms:NOW,created_ms:NOW,ack_ms:null,test:0,...extra});
 const flush=async()=>{for(let i=0;i<15;i++)await Promise.resolve();};
-test('siren releases all looping animations on hide, acknowledgement and motion preference changes',()=>{
+test('alarm motion releases all looping animations on hide, acknowledgement and motion preference changes',()=>{
  const reduced={matches:false};let hidden=false;const controls=[];
  const motion=sirenMotion({root:{querySelector:x=>x,querySelectorAll:()=>['ring1','ring2','ring3']},reduced,hidden:()=>hidden,
   animate:(node,frames,options)=>{const control={node,frames,options,cancel(){this.cancelled=true}};controls.push(control);return control;}});
- motion.enter();motion.sync(true);const first=controls.length;assert.equal(controls.filter(c=>c.options.repeat===Infinity).length,7);
+ motion.enter();motion.sync(true);const first=controls.length;assert.equal(controls.filter(c=>c.options.repeat===Infinity).length,6,'edge, vignette, scan and one loop per ripple');
  motion.sync(true);assert.equal(controls.length,first,'updates must not duplicate loops');
  reduced.matches=true;motion.sync(true);assert.ok(controls.every(c=>c.cancelled));
  reduced.matches=false;motion.sync(true);hidden=true;motion.sync(true);assert.ok(controls.every(c=>c.cancelled));
@@ -108,9 +108,55 @@ test('replay window starts at the first touch, waits for the alert bar to close 
  const open=replayWindow(a,'4H',NOW+60000);assert.equal(open.ready,false);assert.equal(open.exit_ms,a.last_ms);
  assert.equal(replayWindow(a,'2H',later),null);assert.equal(replayWindow({...a,first_ms:NOW+1},'15m',later),null);
 });
-test('replay coins add BTC as a control, keep alert order and refuse local test alerts',()=>{
+test('replay coins add BTC and ETH as controls, keep alert order and refuse local test alerts',()=>{
  assert.deepEqual(replayCoins({symbols:['SOL-USDT-SWAP','ETH-USDT-SWAP'],test:false}),['BTC-USDT-SWAP','SOL-USDT-SWAP','ETH-USDT-SWAP']);
- assert.deepEqual(replayCoins({symbols:['ADA-USDT-SWAP','BTC-USDT-SWAP'],test:false}),['ADA-USDT-SWAP','BTC-USDT-SWAP']);
+ assert.deepEqual(replayCoins({symbols:['ADA-USDT-SWAP','BTC-USDT-SWAP'],test:false}),['ETH-USDT-SWAP','ADA-USDT-SWAP','BTC-USDT-SWAP']);
  assert.deepEqual(replayCoins({symbols:['TEST0-USDT-SWAP'],test:true}),[]);
  assert.equal(alertStatus({ack_ms:NOW,active:false}),'acked');assert.equal(alertStatus({ack_ms:null,active:true}),'pending');assert.equal(alertStatus({ack_ms:null,active:false}),'expired');
+});
+test('alarm timeline puts replayed alarms before the live book, drops tests and keeps live identity',()=>{
+ const live=[alert(5,{last_ms:NOW,first_ms:NOW-60000,created_ms:NOW}),alert(6,{test:1,last_ms:NOW+1,first_ms:NOW+1,created_ms:NOW+1})];
+ const replayed=[{ms:NOW-86400000,side:'lower'},{ms:NOW+5,side:'upper'},{ms:'x',side:'lower'},{ms:NOW-2*86400000,side:'both'}];
+ const t=alertTimeline(live,replayed);
+ assert.deepEqual(t.map(a=>a.id),['r'+(NOW-86400000),5],'replayed rows after the first live alert and malformed rows are dropped');
+ assert.equal(t[0].live,false);assert.equal(t[0].first_ms,t[0].last_ms);assert.equal(t[1].live,true);
+});
+test('alarm rays start at the alarm bar close and run RAY_BARS bars on every period, clipped at the last bar',()=>{
+ const step=900000,base=Math.floor(NOW/step)*step,rows=Array.from({length:100},(_,i)=>({time:(base+i*step)/1000,close:100+i}));
+ const alerts=[{id:1,side:'lower',last_ms:base+10*step+120000,live:true},{id:'r1',side:'upper',last_ms:base+90*step,live:false},{id:2,side:'lower',last_ms:base-step,live:true}];
+ const items=rayItems(rows,alerts,step,1);
+ assert.equal(items.length,2,'alarms outside the loaded bars are not drawn');
+ assert.deepEqual([items[0].from,items[0].to,items[0].price,items[0].selected],[10,10+RAY_BARS,110,true]);
+ assert.deepEqual([items[1].from,items[1].to,items[1].live],[90,99,false]);
+ assert.equal(RAY_BARS,72);assert.ok(MAJORS.has('BTC-USDT-SWAP')&&!MAJORS.has('1INCH-USDT-SWAP'));
+});
+test('desk facts sanitize the live block and measure depth beyond the 1.618 in the trade direction',()=>{
+ const M=60000,base={id:9,n:25,symbols:['A-USDT-SWAP'],first_ms:NOW-4*M,last_ms:NOW,created_ms:NOW+M,ack_ms:null,test:0};
+ const live={window_end_ms:NOW+30*M,reference:{'BTC-USDT-SWAP':{at:100,now:99},'ETH-USDT-SWAP':{at:'x',now:5}},paper:[{track:'live-wick6x3',opened:1},{track:'<b>',opened:2},{track:'live-allin3',opened:-1}],
+  touches:[{symbol:'SOL-USDT-SWAP',level:100,candle_ms:NOW-M,observed_ms:NOW-M+5,price:99},{symbol:'ADA-USDT-SWAP',level:1,candle_ms:NOW+3*M,observed_ms:NOW+3*M+9,price:1.01},
+   {symbol:'XRP-USDT-SWAP',level:2,candle_ms:NOW+5*M,observed_ms:NOW+5*M,price:null},{symbol:'bad',level:1,candle_ms:NOW},{symbol:'DOT-USDT-SWAP',level:-1,candle_ms:NOW}]};
+ const lf=liveFacts({...base,live});
+ assert.equal(lf.touches.length,3);assert.deepEqual(lf.paper,[{track:'live-wick6x3',opened:1}]);assert.deepEqual(lf.reference['ETH-USDT-SWAP'],{at:null,now:5});
+ const low=deskFacts({...base,side:'lower',live},NOW+11*M);
+ assert.deepEqual(low.flow.map(t=>t.symbol),['XRP-USDT-SWAP','ADA-USDT-SWAP','SOL-USDT-SWAP'],'newest touch first');
+ const sol=low.flow.find(t=>t.symbol==='SOL-USDT-SWAP'),ada=low.flow.find(t=>t.symbol==='ADA-USDT-SWAP');
+ assert.ok(Math.abs(sol.depth-1)<1e-9);assert.equal(sol.outside,true,'long alarm: price below the lower 1.618 is still outside');assert.equal(ada.outside,false);
+ assert.equal(low.later,2);assert.deepEqual(low.latest,['XRP-USDT-SWAP','ADA-USDT-SWAP']);assert.equal(low.first,'SOL-USDT-SWAP');
+ assert.ok(Math.abs(low.btc+1)<1e-9);assert.equal(low.eth,null);assert.equal(low.elapsed,10*M);assert.equal(low.remaining,19*M);assert.equal(low.windowMs,30*M);
+ const up=deskFacts({...base,side:'upper',live},NOW+40*M);
+ assert.equal(up.flow.find(t=>t.symbol==='ADA-USDT-SWAP').outside,true,'short alarm: price above the upper 1.618 is still outside');assert.equal(up.remaining,0);
+ const bare=deskFacts({...base,side:'lower'},NOW);assert.deepEqual([bare.flow.length,bare.btc,bare.remaining],[0,null,30*M]);
+});
+test('particle field drifts with the move, surges on new touches and releases its frame loop',()=>{
+ const strokes=[],frames=new Map();let id=0;
+ const ctx={setTransform(){},clearRect(){},beginPath(){},moveTo(x,y){strokes.push(['m',y])},lineTo(x,y){strokes.push(['l',y])},stroke(){}};
+ const canvas={clientWidth:700,clientHeight:700,getContext:()=>ctx};
+ const field=particleField({canvas,raf:fn=>{frames.set(++id,fn);return id},caf:k=>frames.delete(k),random:()=>.5,ratio:()=>1});
+ assert.equal(field.start({side:'lower',tone:'#10b981'}),true);assert.equal(field.running,true);assert.equal(field.count,70);
+ const run=t=>{const [k,fn]=[...frames][0];frames.delete(k);fn(t);};
+ run(1000);strokes.length=0;run(1050);const down=strokes[0][1]>strokes[1][1];assert.equal(down,true,'急跌: the streak head is below its tail');
+ field.stop();assert.equal(frames.size,0);assert.equal(field.running,false);
+ field.start({side:'upper'});run(2000);strokes.length=0;run(2050);assert.ok(strokes[0][1]<strokes[1][1],'急涨: the streak head is above its tail');
+ field.surge();field.stop();assert.equal(frames.size,0);
+ assert.equal(particleField({canvas:{getContext:()=>null}}).start(),false,'no 2D context: nothing runs');
 });

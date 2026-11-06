@@ -114,7 +114,10 @@ test('every ledger tab ranks raw scores descending, missing last, then newest on
     const html=ui.rowHTML(input[2],ui.route({tab,period:'15m'}),10000);
     assert.match(html,/rp-score is-high/);
     assert.match(html,/https:\/\/www.tradingview.com\/chart\/\?symbol=OKX%3ASOLUSDT.P/);
-    assert.match(html,/#yolo-detect\?tab=results&amp;symbol=SOL-USDT-SWAP&amp;timeframe=15m/);
+    if(tab==='closed'){
+      assert.match(html,/data-rp-trade="3" data-rp-focus="chart" aria-label="查看 SOL 历史交易 K 线"/);
+      assert.doesNotMatch(html,/#yolo-detect\?/);
+    }else assert.match(html,/#yolo-detect\?tab=results&amp;symbol=SOL-USDT-SWAP&amp;timeframe=15m/);
     assert.match(html,tab==='events'?/data-rp-symbol="SOL-USDT-SWAP"/:/data-rp-trade="3"/);
     assert.match(html,/data-rp-detail=/);
     // Links must be sibling actions, never descendants of the background button.
@@ -311,4 +314,12 @@ test('each completed feed read emits one settled snapshot without a duplicate re
   assert.equal(states.length,2);assert.equal(states[0].busy,true);
   assert.equal(states[1].busy,false);assert.equal(states[1].data,data);
   feed.setActive(false);
+});
+
+test('signal chart link preserves the exact current contract and rejects invalid symbols',()=>{
+ const {signalChartLink}=require('../../yoyo/monitor/static/monday-reclaim-paper.js');
+ const href=signalChartLink('BICO-USDT-SWAP');
+ const p=new URLSearchParams(href.split('?')[1]);
+ assert.equal(p.get('pane'),'records');assert.equal(p.get('cloudSymbol'),'BICO-USDT-SWAP');assert.equal(p.get('scope'),'history');
+ assert.equal(signalChartLink('BICO&cloud=x'),'');assert.equal(signalChartLink(''),'');
 });

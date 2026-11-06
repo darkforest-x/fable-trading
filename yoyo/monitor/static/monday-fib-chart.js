@@ -74,7 +74,7 @@
   const shared=window.SpikePublicChartCache,cache=shared?.candles||new Map(),levelCache=shared?.levels||new Map();
   function create({decorate}={}){
   const view={decorate,bars:720,initialBars:160,range:true,fib:true,fitAll:false,showLevels:false,mondayBand:true,wallpaper:true};
-  let target=null,controller=null,timer=null,version=0,paused=false;
+  let target=null,controller=null,timer=null,version=0,paused=false,appearance=null;
   const replayCache=new Map();
   function pause(){paused=true;version++;clearTimeout(timer);controller?.abort();controller=null;target?.feed?.stop();target?.history?.pause();if(target)target.feed=null;}
   function stop(){pause();if(target){window.SpikeRangeChart?.unmount(target.mount);target.host.replaceChildren?.();}target=null;}
@@ -88,7 +88,15 @@
       value.paperTrade=target.trade;value.paperTrades=target.trades;
       if(context.display_cached)value.stale=true;
       if(!target.internal)value.levels=value.levels.filter(l=>['上 1.618','周一高','周一低','下 1.618'].includes(l.label));
-      target.instance=window.SpikeRangeChart.mount(target.mount,value,{...view,bars:target.replay||window.SpikeChartHistory?.full(target.row.symbol)?Infinity:720,ma:target.ma,mondayBand:target.period!=='1D',onVisibleRange:instance=>target?.history?.observe(instance)},error);
+      const appearanceModel=window.SpikeMondayChartAppearance,theme=document.documentElement?.dataset?.theme==='dark'?'dark':'light';
+      if(appearance&&appearanceModel?.applyLevels){
+        value={...value,levels:appearanceModel.applyLevels(value.levels,appearance,theme)};
+      }
+      const compactReplay=!!value.backtestTrade||!!value.paperHistory,step=PERIODS[target.period];
+      const displayWindow=value.paperHistory?{from:Math.floor(target.trade.fill_ms/step)*step-12*step,to:Math.floor(target.trade.exit_ms/step)*step+13*step}:null;
+      if(compactReplay)value.levels=value.levels.map(l=>({...l,lineWidth:1,color:l.kind==='fib'?'#8196ac70':'#8196ac55',inlinePriceVisible:false}));
+      const candleColor=appearance&&appearanceModel?.candleColorizer?appearanceModel.candleColorizer(appearance,window.SpikeCloudCandleColors):null;
+      target.instance=window.SpikeRangeChart.mount(target.mount,value,{...view,...(candleColor?{candleColor}:{}),compactReplay,displayWindow,scaleReferenceLevels:!compactReplay,bars:target.replay||window.SpikeChartHistory?.full(target.row.symbol)?Infinity:720,ma:target.ma,mondayBand:target.period!=='1D',onVisibleRange:instance=>target?.history?.observe(instance)},error);
       message(error||target.levelError||(context.error?'K 线更新失败：'+context.error:context.loading?'正在同步此合约 K 线…':!value.candles?.length?'暂无此周期 K 线，请稍后重试':target.live?.error||''));
     }catch(e){message(e.message);window.SpikeRangeChart.unmount(target.mount);}
   }
@@ -142,23 +150,28 @@
     if(!target?.replay||controller||paused)return;
     const current=target,token=version,c=new AbortController();controller=c;
     const timeout=setTimeout(()=>c.abort(),30000);message('正在读取原始回测 K 线…');
-    try{const r=await fetch('/api/strategy-backtest/candles?'+new URLSearchParams({track:current.track,trade:current.replay.id,period:current.period}),{signal:c.signal,cache:'no-store'}),value=await r.json();
+    const paper=current.paper,trade=current.replay;
+    const url=paper?'/api/monday-fib/trade-candles?'+new URLSearchParams({symbol:trade.symbol,entry_ms:trade.fill_ms,exit_ms:trade.exit_ms,period:current.period}):'/api/strategy-backtest/candles?'+new URLSearchParams({track:current.track,trade:trade.id,period:current.period});
+    if(paper)message('正在读取开仓时段 K 线…');
+    try{const r=await fetch(url,{signal:c.signal,cache:'no-store'}),value=await r.json();
       if(!r.ok)throw Error(value.detail||'回测 K 线读取失败');
       if(token!==version||target!==current)return;
-      if(value.schema!==1||value.track!==current.track||value.trade_id!==current.replay.id||value.symbol!==current.row.symbol||value.bar!==current.period||value.source!=='Binance'||!value.candles?.length)throw Error('回测 K 线与所选交易不匹配');
+      if(value.schema!==1||value.symbol!==current.row.symbol||value.bar!==current.period||!value.candles?.length||(paper
+        ?value.source!=='OKX'||value.entry_ms!==trade.fill_ms||value.exit_ms!==trade.exit_ms||value.paperHistory!==true
+        :value.track!==current.track||value.trade_id!==trade.id||value.source!=='Binance'))throw Error('历史 K 线与所选交易不匹配');
       let last=0;for(const b of value.candles){if(![b.time,b.open,b.high,b.low,b.close,b.volume].every(finite)||b.time<=last||b.time%PERIODS[current.period]||b.high<Math.max(b.open,b.close,b.low)||b.low>Math.min(b.open,b.close))throw Error('回测 K 线数据不完整');last=b.time;}
       replayCache.set(current.key,value);while(replayCache.size>12)replayCache.delete(replayCache.keys().next().value);draw(value);
     }catch(e){if(token===version&&target===current)message((e.name==='AbortError'?'回测 K 线读取超时':e.message)+' · 可重新加载');}
     finally{clearTimeout(timeout);if(controller===c)controller=null;}
   }
-  function showReplay(host,track,trade,{period='15m',ma=false,internal=false,refocus=false}={}){
-    const key='backtest|'+track+'|'+trade.id+'|'+period;
+  function showReplay(host,track,trade,{period='15m',ma=false,internal=false,refocus=false,paper=false}={}){
+    const key=(paper?'paper-history|':'backtest|')+track+'|'+trade.id+'|'+period+(paper?'|'+trade.symbol+'|'+trade.fill_ms+'|'+trade.exit_ms:'');
     if(target?.key===key&&target.host===host){const changed=refocus||target.ma!==ma||target.internal!==internal;target.ma=ma;target.internal=internal;if(changed&&target.context)draw(target.context);if(paused){paused=false;if(!target.context)refreshReplay();}return;}
     const reuse=target?.host===host;pause();if(!reuse)stop();paused=false;
     if(!reuse)host.innerHTML='<div class="mf-chart-caption"><p role="status">正在读取原始回测 K 线…</p><button type="button" data-mf-chart-retry>重新加载</button></div><div class="mf-chart-mount"></div>';
-    target={host,key,track,replay:trade,row:{symbol:trade.symbol},period,ma,internal,week:trade.event?.split(':')[1],state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
+    target={host,key,track,replay:trade,paper,trade:paper?trade:null,row:{symbol:trade.symbol},period,ma,internal,week:paper?trade.week:trade.event?.split(':')[1],state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
     if(!reuse)host.querySelector('[data-mf-chart-retry]').addEventListener('click',()=>{target?.history?.retry();refresh();});
-    const cached=replayCache.get(key);if(cached)draw(cached);else{target.instance=window.SpikeRangeChart.mount(target.mount,{symbol:trade.symbol,source:'Binance',bar:period,candles:[],levels:[]},view);refreshReplay();}
+    const cached=replayCache.get(key);if(cached)draw(cached);else{target.instance=window.SpikeRangeChart.mount(target.mount,{symbol:trade.symbol,source:paper?'OKX':'Binance',bar:period,candles:[],levels:[]},view);refreshReplay();}
   }
   function show(host,row,week,{internal=false,ma=false,period='15m',trade=null,trades=[],anchors=null}={}){
     if(!PERIODS[period])period='15m';
@@ -209,7 +222,11 @@
     const scale=target?.instance?.chart?.timeScale(),range=scale?.getVisibleLogicalRange();if(!range||!finite(factor)||factor<=0)return;
     const span=Math.max(8,Math.min((target.instance?.rows?.length||view.bars)+20,(range.to-range.from)*factor));scale.setVisibleLogicalRange({from:range.to-span,to:range.to});
   }
-  return {show,showReplay,retry:refresh,hide:stop,pause,setInternal,setMa,fit,latest,zoom};
+  function setAppearance(value){
+    appearance=window.SpikeMondayChartAppearance?.normalize?window.SpikeMondayChartAppearance.normalize(value):value;
+    if(target?.context)draw(target.context);
+  }
+  return {show,showReplay,retry:refresh,hide:stop,pause,setInternal,setMa,setAppearance,fit,latest,zoom};
   }
   window.SpikeMondayFibChart=Object.assign(create(),{create});
 })();

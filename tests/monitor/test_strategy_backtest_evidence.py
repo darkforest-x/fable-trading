@@ -66,6 +66,7 @@ def test_native_prices_and_intervals_are_not_the_later_candle_or_level(tmp_path)
     assert f['entry_price'] == .01115564 and f['exit_price'] == .01364
     assert (f['entry_start_ms'],f['entry_end_ms']) == (e.millis('2026-09-02 03:45:00+00:00'), row['entry_ms'])
     assert f['exit_start_ms'] == row['exit_ms']-300000 and f['exit_kind']=='interval'
+    assert f['score_close_ms'] == row['entry_ms']
     assert e.fill_geometry('spike', ledger_row(), directory, 5) is None
     write(paths[1], [dict(native, net_notional_bp=-50)])
     with pytest.raises(ValueError, match='lineage'):
@@ -80,3 +81,22 @@ def test_close_exit_stays_at_its_known_boundary(tmp_path):
     for p in e.native_paths('spike','near_P18','HEMIUSDT',directory):write(p,[native])
     f=e.fill_geometry('spike',row,directory,5)
     assert f['exit_kind']=='close' and f['exit_start_ms']==f['exit_end_ms']==row['exit_ms']
+
+
+def test_add_score_time_comes_from_matching_parent_on_both_native_paths(tmp_path):
+    row = ledger_row()
+    row['entry_rules'] = dict(kind='add5', score=.7)
+    parent = dict(trade_id=row['event']+':parent', variant='v3_be0', side=1,
+                  entry_time='2026-09-02 03:40:00+00:00', score=.7)
+    child = dict(parent=parent['trade_id'])
+    paths = [tmp_path/'ohlc.csv', tmp_path/'olhc.csv']
+    for path in paths: write(path, [parent])
+    pair = [[child], [child]]
+    assert e.score_close(row, pair, paths, 5) == e.millis(parent['entry_time'])
+    assert e.score_close(row, pair, paths, 1) is None
+    for change in [dict(score=.8), dict(side=-1), dict(entry_time='2026-09-02 03:55:00+00:00'),
+                   dict(entry_time='2026-09-02 03:35:00+00:00'), dict(trade_id=row['event']+':other')]:
+        write(paths[1], [dict(parent, **change)])
+        assert e.score_close(row, pair, paths, 5) is None
+    write(paths[1], [parent, parent])
+    assert e.score_close(row, pair, paths, 5) is None

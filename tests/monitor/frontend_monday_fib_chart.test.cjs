@@ -187,3 +187,80 @@ test('historical replay isolates source, trade, timeframe, cancellation and cach
  api.showReplay(host,'allin3',{...trade,id:2},{period:'15m'});assert.equal(pending.length,5);assert.equal(drawn.at(-1).bar,'15m');
  api.hide();assert.equal(timers.size,0);
 });
+
+test('closed paper charts freeze OKX entry windows, cancel stale trades and never start live feeds',async()=>{
+ const pending=[],drawn=[],views=[];let feeds=0;
+ const status={textContent:''},caption={},mount={};
+ const host={innerHTML:'',replaceChildren(){},querySelector:s=>s==='[role=status]'?status:s==='.mf-chart-caption'?caption:s==='.mf-chart-mount'?mount:{addEventListener(){}}};
+ const sandbox={document:{hidden:false},window:{SpikeMondayCandleFeed:{create(){feeds++;}},SpikeRangeChart:{mount:(h,d,v)=>{views.push(v);drawn.push(d);},unmount(){}}},Intl,Date,AbortController,URLSearchParams,
+  setTimeout:()=>1,clearTimeout(){},fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve}))};
+ vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
+ const api=sandbox.window.SpikeMondayFibChart,settle=async()=>{for(let n=0;n<20;n++)await Promise.resolve();};
+ const trade={id:1,symbol:'SOFI-USDT-SWAP',fill_ms:start,exit_ms:start+900000,stage:'closed'};
+ const reply=t=>({schema:1,source:'OKX',symbol:t.symbol,bar:'15m',entry_ms:t.fill_ms,exit_ms:t.exit_ms,paperHistory:true,candles:[bar(start)],weekly_ranges:[]});
+ api.showReplay(host,'spike',trade,{paper:true});
+ assert.match(pending[0].url,/monday-fib\/trade-candles\?/);assert.match(pending[0].url,/entry_ms=/);
+ const other={...trade,id:2,symbol:'HOOD-USDT-SWAP'};api.showReplay(host,'spike',other,{paper:true});
+ assert.equal(pending[0].options.signal.aborted,true);
+ pending[1].resolve({ok:true,json:async()=>reply(other)});pending[0].resolve({ok:true,json:async()=>reply(trade)});await settle();
+ assert.equal(drawn.at(-1).symbol,other.symbol);assert.equal(drawn.at(-1).paperTrade.id,2);
+ assert.equal(drawn.at(-1).paperHistory,true);assert.equal(feeds,0);
+ assert.equal(views.at(-1).compactReplay,true);assert.equal(views.at(-1).scaleReferenceLevels,false);
+ assert.equal(views.at(-1).displayWindow.from,start-12*900000);assert.equal(views.at(-1).displayWindow.to,other.exit_ms+13*900000);
+ api.showReplay(host,'spike',other,{paper:true,ma:true});assert.equal(pending.length,2);
+ api.showReplay(host,'spike',other,{paper:true,period:'5m'});api.pause();assert.equal(pending[2].options.signal.aborted,true);
+ api.showReplay(host,'spike',other,{paper:true});assert.equal(drawn.at(-1).bar,'15m');assert.equal(feeds,0);
+ api.hide();
+});
+
+test('appearance updates repaint only their factory instance without fetching or changing candles',async()=>{
+ const appearance=require('../../yoyo/monitor/static/monday-chart-appearance.js'),cloud=require('../../yoyo/monitor/static/cloud-candle-colors.js');
+ const pending=[],rendered=[],views=[];let viewport={from:10,to:50};
+ const chartInstance={chart:{timeScale:()=>({getVisibleLogicalRange:()=>viewport})}};
+ const sandbox={document:{hidden:false,documentElement:{dataset:{theme:'light'}}},window:{SpikeMondayChartAppearance:appearance,SpikeCloudCandleColors:cloud,
+  SpikeRangeChart:{mount:(host,data,view)=>{rendered.push(data);views.push(view);return chartInstance;},unmount(){}}},Intl,Date,AbortController,
+  setTimeout:()=>1,clearTimeout(){},fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve}))};
+ vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
+ const api=sandbox.window.SpikeMondayFibChart.create(),isolated=sandbox.window.SpikeMondayFibChart.create(),host={innerHTML:'',replaceChildren(){},querySelector:s=>s==='[role=status]'?{textContent:''}:{addEventListener(){}}};
+ const anchors=anchorReply('/?symbol='+row.symbol),palette=appearance.normalize({candleEnabled:true,candleColors:{up:'#ABCDEF'},lines:{'上 1.618':{color:'#112233',width:3,style:'dot'}}});
+ api.setAppearance(palette);api.show(host,row,'2026-10-19',{anchors});assert.equal(pending.length,1);
+ const snapshot={...context(),current_price:82077};pending[0].resolve({ok:true,json:async()=>snapshot});for(let i=0;i<24;i++)await Promise.resolve();
+ assert.equal(rendered.at(-1).current_price,82077);assert.deepEqual(rendered.at(-1).candles,snapshot.candles);
+ assert.equal(rendered.at(-1).levels.find(level=>level.label==='上 1.618').color,'#112233');
+ assert.equal(rendered.at(-1).levels.find(level=>level.label==='周一高').color,'#9399A2');
+ assert.equal(views.at(-1).candleColor({time:Date.parse('2026-11-03T17:00:00Z')/1000,open:1,close:2}),'#ABCDEF');
+ const requests=pending.length;viewport={from:22,to:62};
+ api.setAppearance(appearance.normalize({lines:{'下 1.618':{color:'#AABBCC',width:2,style:'dash'}}}));
+ assert.equal(pending.length,requests,'style changes never request candles or anchors');
+ assert.deepEqual(chartInstance.chart.timeScale().getVisibleLogicalRange(),{from:22,to:62},'style changes do not reset the viewport');
+ assert.equal(views.at(-1).candleColor,undefined,'disabling custom colors restores series defaults');
+ assert.equal(rendered.at(-1).current_price,82077);
+ assert.equal(rendered.at(-1).levels.find(level=>level.label==='上 1.618').color,'#17191D');
+ assert.equal(rendered.at(-1).levels.find(level=>level.label==='下 1.618').lineStyle,2);
+ const other={...row,symbol:'ETH-USDT-SWAP'},otherHost={...host};
+ isolated.show(otherHost,other,'2026-10-19',{anchors:anchorReply('/?symbol='+other.symbol)});
+ pending.at(-1).resolve({ok:true,json:async()=>context(other.symbol)});for(let i=0;i<24;i++)await Promise.resolve();
+ assert.equal(views.at(-1).candleColor,undefined,'another chart factory does not inherit appearance');
+ assert.equal(rendered.at(-1).levels.find(level=>level.label==='上 1.618').color,'#c93248');
+ api.hide();isolated.hide();
+});
+
+test('compact paper replay keeps muted gray rails when chart appearance is customized',async()=>{
+ const appearance=require('../../yoyo/monitor/static/monday-chart-appearance.js'),pending=[],rendered=[],views=[];
+ const sandbox={document:{hidden:false,documentElement:{dataset:{theme:'dark'}}},window:{SpikeMondayChartAppearance:appearance,
+  SpikeRangeChart:{mount:(host,data,view)=>{rendered.push(data);views.push(view);return {};},unmount(){}}},Intl,Date,AbortController,URLSearchParams,setTimeout:()=>1,clearTimeout(){},
+  fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve}))};
+ vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
+ const api=sandbox.window.SpikeMondayFibChart.create(),host={innerHTML:'',replaceChildren(){},querySelector:s=>s==='[role=status]'?{textContent:''}:{addEventListener(){}}};
+ api.setAppearance(appearance.normalize({lines:{'上 1.618':{color:'#FA0011',width:3,style:'dot'},'周一高':{color:'#00CCAA',width:2,style:'dash'}}}));
+ const trade={id:9,symbol:'AAAUSDT',fill_ms:start,exit_ms:start+900000,week:'2026-10-19',stage:'closed'};
+ api.showReplay(host,'spike',trade,{paper:true});
+ const weekly={...row,symbol:trade.symbol,week:trade.week,state:'ready',start_ms:start,end_ms:start+86400000,expires_ms:start+7*86400000,high_ms:start+3600000,low_ms:start+7200000};
+ pending[0].resolve({ok:true,json:async()=>({schema:1,source:'OKX',symbol:trade.symbol,bar:'15m',entry_ms:trade.fill_ms,exit_ms:trade.exit_ms,paperHistory:true,candles:[bar(start)],weekly_ranges:[weekly]})});
+ for(let i=0;i<24;i++)await Promise.resolve();
+ const levels=rendered.at(-1).levels;assert.equal(views.at(-1).compactReplay,true);assert.equal(views.at(-1).scaleReferenceLevels,false);
+ assert.deepEqual([levels.find(level=>level.label==='上 1.618').color,levels.find(level=>level.label==='上 1.618').lineWidth],['#8196ac70',1]);
+ assert.deepEqual([levels.find(level=>level.label==='周一高').color,levels.find(level=>level.label==='周一高').lineWidth],['#8196ac55',1]);
+ assert.equal(levels.find(level=>level.label==='上 1.618').startMarkerVisible,false);
+ api.hide();
+});
