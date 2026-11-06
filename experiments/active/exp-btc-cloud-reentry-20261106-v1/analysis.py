@@ -100,7 +100,9 @@ def matched_control(selected, population, config):
         "matched_total_95pct": np.quantile(samples, [0.025, 0.975]).tolist(),
         "one_sided_p_higher_net": float(
             (1 + (samples >= observed - 1e-10).sum()) / (1 + reps)
-        ),
+        )
+        if interchangeable
+        else None,
         "interchangeable": int(interchangeable),
         "matched": len(selected),
     }

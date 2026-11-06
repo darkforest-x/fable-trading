@@ -208,6 +208,9 @@ def analyze():
     f["gross_usdt"] = CONFIG["notional_usdt_per_trade"] * f.gross_return
     f["fees_usdt"] = CONFIG["notional_usdt_per_trade"] * f.fee_return
     primary, periods, weeks = summarize(f, eval_weeks(), CONFIG)
+    f["trend_hold_pass"] = (
+        f.D.ge(0) & f.h1_streak_pass & f.previous_bull_leg_any_close_above_monday_low
+    )
     f.to_csv(HERE / "ledger.csv.gz", index=False)
     fields = [
         "ny_week",
@@ -220,6 +223,7 @@ def analyze():
         "exit_reason",
         "bottom_pass",
         "trend_pass",
+        "trend_hold_pass",
         "mismatch_abs_atr",
         "mid_rebound_atr",
         "D",
