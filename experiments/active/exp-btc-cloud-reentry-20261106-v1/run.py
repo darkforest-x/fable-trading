@@ -168,12 +168,10 @@ def execute():
     bars, _ = load_bars()
     c = read_schedule()
     orders = c[["entry_time", "exit_time", "initial_stop"]].copy()
-    orders["trade_id"] = orders.entry_time.astype(str)
-    orders["exit_reason"] = np.where(
-        c.boundary_exit | c.exit_reason.eq("dataset_end"), "dataset_end", "cloud_exit"
-    )
+    orders["exit_reason"] = np.where(c.boundary_exit, "dataset_end", c.exit_reason)
     fills = run_native_fills(bars, orders)
     fills.to_csv(HERE / "native_fills.csv.gz", index=False)
+    save_json("native_receipt.json", fills.attrs["audit"])
     print("Native result saved:", len(fills), flush=True)
 
 
@@ -181,6 +179,7 @@ def analyze():
     bars, _ = load_bars()
     c = read_schedule()
     native = pd.read_csv(HERE / "native_fills.csv.gz", parse_dates=["entry_time"])
+    native = native.rename(columns={"exit_time": "actual_exit_time"})
     if set(c.entry_time) != set(native.entry_time) or not native.entry_time.is_unique:
         raise ValueError("Native rows and scheduled candidates differ")
     # Scheduled exit_time is the common end of a trend opportunity. Actual
