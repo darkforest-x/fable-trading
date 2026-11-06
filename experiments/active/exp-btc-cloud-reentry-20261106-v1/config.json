@@ -7,7 +7,16 @@
   ],
   "first_week": "2023-01-02",
   "end_exclusive": "2026-11-02",
-  "exclude_ny_weeks": ["2026-08-17", "2026-08-31", "2026-09-07", "2026-09-14", "2026-09-21", "2026-10-12", "2026-10-19", "2026-10-26"],
+  "exclude_ny_weeks": [
+    "2026-08-17",
+    "2026-08-31",
+    "2026-09-07",
+    "2026-09-14",
+    "2026-09-21",
+    "2026-10-12",
+    "2026-10-19",
+    "2026-10-26"
+  ],
   "exclusions": "Entire known NY review weeks (including direction markers and adjacent chart examples). Boundary exits occur at first excluded NY Monday open. The unfinished Nov 2 week is outside evaluation. Indicators use past known bars across excluded weeks.",
   "setup": "Latest completed 12H (UTC 00/12) EMA20>EMA50 at signal start; own NY Monday complete. After NY Tuesday 00:00 a 5m low pierces the lower 1.618 and closes above it before the bullish signal K. Keep looking for entries until week end. All weekdays; 12H close reclaim is not a requirement.",
   "entry": "New closed 5m EMA20/50 upward cross. Fees charged on next actual 5m open. Same crossing and execution for each arm. Primary comparison screens all entries; secondary comparison takes the first eligible entry in each NY week in all arms and screens only subsequent attempts.",
@@ -15,15 +24,27 @@
   "trend": "Previous positive cloud leg had a close above Monday low; (L2 - Monday low)/pre-signal ATR14 between 0 and 1 inclusive; >=1 consecutive closed 1H close above both own EMA20/50. Target-space ratio is descriptive, not used to filter a cloud-exit strategy.",
   "stop": "Confirmed upcross lower cloud edge minus 0.1 * signal-close 5m Wilder ATR14; rounded down to 0.1 USDT; fixed. Owner confirmed on Nov 6.",
   "exit": "Market stop or next bar open following first confirmed 5m downcross. Excluded/end evaluation week boundary liquidates surviving positions. One leg, no take-profit.",
-  "fees": {"maker": 0.0002, "taker": 0.0005, "entry": "taker", "stop": "taker", "signal_exit": "taker", "tier_read_date": "2026-10-23"},
+  "fees": {
+    "maker": 0.0002,
+    "taker": 0.0005,
+    "entry": "taker",
+    "stop": "taker",
+    "signal_exit": "taker",
+    "tier_read_date": "2026-10-23"
+  },
   "notional_usdt_per_trade": 1000,
   "execution_limits": "No added spread/slippage, funding, latency or impact; OHLC open gaps preserved. Quote PnL normalized to constant entry notional, no compounding. R based on actual open minus initial protective stop, before fees. Net R numerator deducts both fees.",
   "major_multiple_r": 5,
   "major_wave": "Peak gross favorable movement from entry until scheduled exit OPEN (even if stopped before), divided by initial price risk. Separately report baseline net >=5R and >=10R captured at actual exit, and 2-percent absolute price waves. Each baseline flip cycle counts once.",
-  "volatility_buckets_bp": [10, 20, 40],
+  "volatility_buckets_bp": [
+    10,
+    20,
+    40
+  ],
   "matched_control": "Random subset without replacement of new bullish cloud flips, same BTC / NY week / pre-signal (ATR14 / close) bucket. Baseline compared against all bullish-bias complete-Monday flips in that week, including pre-reclaim; admission filters against all baseline flips. Conditioning on flips tests incremental admission, not flip edge against arbitrary times.",
   "replicates": 5000,
   "seed": 20261106,
   "time_split_ny": "2025-01-01",
-  "large_definition_secondary": "Net base trades >=10R and >0 are shown as sensitivity metrics; threshold selection is not optimized."
+  "large_definition_secondary": "Net base trades >=10R and >0 are shown as sensitivity metrics; threshold selection is not optimized.",
+  "trend_original_wording_sensitivity": "Fixed after candidate counts (strict=0) and before any real-sample PnL was available: the prior review's literal support-hold definition was D>=0 with no upper proximity limit, previous bull-leg close above Monday low, 1H streak>=1. Report alongside—not replacing—the strict pre-registered <=1 ATR arm. No search or extra native replay."
 }

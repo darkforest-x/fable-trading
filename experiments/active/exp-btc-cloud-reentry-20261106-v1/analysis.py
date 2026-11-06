@@ -109,12 +109,19 @@ def matched_control(selected, population, config):
 def summarize(ledger, weeks, config):
     base = ledger[ledger.setup_armed].copy()
     first = ~base.ny_week.duplicated()
+    hold = (
+        base.D.ge(0)
+        & base.previous_bull_leg_any_close_above_monday_low
+        & base.h1_streak_pass
+    )
     policies = {
         "all_flips": np.ones(len(base), bool),
         "bottom": base.bottom_pass,
         "trend": base.trend_pass,
+        "trend_hold": hold,
         "first_then_bottom": first | base.bottom_pass,
         "first_then_trend": first | base.trend_pass,
+        "first_then_trend_hold": first | hold,
     }
     years, weekly, by_arm = [], [], {}
     major = config["major_multiple_r"]
@@ -136,7 +143,7 @@ def summarize(ledger, weeks, config):
         s["foregone_net_of_skipped_trades"] = float(
             base.loc[~np.asarray(keep), "net_usdt"].sum()
         )
-        if arm in ("all_flips", "bottom", "trend"):
+        if arm in ("all_flips", "bottom", "trend", "trend_hold"):
             s["matched_random"] = matched_control(
                 selected, ledger if arm == "all_flips" else base, config
             )
