@@ -14,7 +14,7 @@ Owner 2026-11-06：“纪律交易app重构 只做iphone版 把前端的一些�
 
 iOS 26.3 模拟器的 WebKit 在 `-apple-system` 排首位时中文显示为缺字方框，字体栈改为 PingFang SC 兜底（图表标签同改）。QA 构建可用 `VITE_SPIKE_*` 指向回环 fixture，CSP 仅在该情况下放行该来源，`VITE_SPIKE_QA_TOUR=1` 才注入 `tests/discipline_app/qa_tour.js` 巡览；发布构建 CSP 与 0.9.1 逐字节一致、无 QA 脚本。
 
-验证：纪律后端 240 项（新增 4 项监控投影）、前端 91 项（新增 3 项）通过；`tests/boundaries` 另有 8 项既有失败与本次无关。合成 fixture `tests/discipline_app/serve_iphone_ui_fixture.py`（假交易所 + 占位监控数据）上，WebKit 402×874 前后截图对比，iPhone 17 Pro 模拟器（iOS 26.3）原生包连接、各页、账户抽屉、报警展开、云带、持仓、统计、纪律、设置与深色模式通过，交易所开单写入 0。模拟器面板未获授权，未做真实触摸手势；真机 iPhone 不可连接，1.0.0 尚未安装。真机包已签名构建（1.0.0/38），网页资源与正式包一致。服务端 `/v1/monitor/*` 需重启 `com.spike.discipline.live` 才生效。截图 `output/playwright/app-iphone-1.0.0/`，构建收据 `releases/build-1.0.0.json`。
+验证：纪律后端 240 项（新增 4 项监控投影）、前端 91 项（新增 3 项）通过；`tests/boundaries` 另有 8 项既有失败与本次无关。合成 fixture `tests/discipline_app/serve_iphone_ui_fixture.py`（假交易所 + 占位监控数据）上，WebKit 402×874 前后截图对比，iPhone 17 Pro 模拟器（iOS 26.3）原生包连接、各页、账户抽屉、报警展开、云带、持仓、统计、纪律、设置与深色模式通过，交易所开单写入 0。模拟器面板未获授权，未做真实触摸手势；真机 iPhone 不可连接，1.0.0 尚未安装。真机包已签名构建（1.0.0/38），网页资源与正式包一致。2026-11-06 18:39 经 owner 批准重启 `com.spike.discipline.live` 上线 1.0.0（重启前 App 持仓、挂单、在途指令均为 0）；重启空档被循环重启的 `com.spike.discipline.paper` 抢占 8897，确认模拟账本无持仓挂单后按安装脚本做法卸载 paper 代理（plist 与 `paper.sqlite3` 保留）。重启后 10-31 起的“无法同步交易所时间”恢复正常。截图 `output/playwright/app-iphone-1.0.0/`，构建收据 `releases/build-1.0.0.json`。
 
 ## 0.9.1（37）· 玻璃材质、跟手导航和价格标签
 
