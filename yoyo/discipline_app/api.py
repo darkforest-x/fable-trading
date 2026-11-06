@@ -19,6 +19,7 @@ from .book import Book
 from .market import PublicMarket
 from .candles import CandleHistory, CandleUnavailable
 from .monday_fib import MondayFibFeed, FibUnavailable
+from .monitor_feed import MonitorFeed, MonitorUnavailable
 from .wick_stop import WickStops
 from .policy import Rejected
 
@@ -66,7 +67,7 @@ class AccountInput(BaseModel):
     passphrase: SecretStr = Field(min_length=1, max_length=256)
 
 
-def create_app(book: Book, token: str, market_enabled=True, origins=(), web_directory=None):
+def create_app(book: Book, token: str, market_enabled=True, origins=(), web_directory=None, monitor_feed=None):
     if len(token) < 32:
         raise ValueError('Service authentication token is too short')
     digest = hashlib.sha256(token.encode()).digest()
@@ -90,10 +91,11 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
             if live:
                 book.stop()
 
-    app = FastAPI(title='SPIKE Discipline', version='0.9.0', lifespan=lifespan,
+    app = FastAPI(title='SPIKE Discipline', version='1.0.0', lifespan=lifespan,
                   docs_url=None, redoc_url=None, openapi_url=None)
     app.state.candle_history = CandleHistory()
     app.state.monday_fib = MondayFibFeed()
+    app.state.monitor = monitor_feed or MonitorFeed()
     app.state.wick_stops = WickStops()
     from .replay_store import ReplayStore
     runtime = book.runtime if hasattr(book, 'runtime') else Path(book.path).parent
@@ -146,7 +148,7 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
 
     @app.get('/health')
     def health():
-        return dict(service='spike-discipline', mode=mode, live_enabled=live and book.client.write_enabled, version='0.9.0')
+        return dict(service='spike-discipline', mode=mode, live_enabled=live and book.client.write_enabled, version='1.0.0')
 
     @app.get('/v1/market/monday-fib')
     def monday_fib():
@@ -173,6 +175,29 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
             return app.state.candle_history.read(symbol, period, before)
         except (CandleUnavailable, TimeoutError):
             raise HTTPException(503, '历史K线暂不可用，请重试') from None
+
+    # Monitor workbench modules (read-only, GET only). Paper accounts are simulated;
+    # no alarm ack / paper close / notification route is proxied. See monitor_feed.py.
+    @app.get('/v1/monitor/paper', dependencies=[Depends(auth)])
+    def monitor_paper(track: str = Query(default='live-wick6x3', pattern=r'^[a-z0-9-]{1,20}$')):
+        try:
+            return app.state.monitor.paper(track)
+        except MonitorUnavailable as error:
+            raise HTTPException(503, str(error)) from None
+
+    @app.get('/v1/monitor/alerts', dependencies=[Depends(auth)])
+    def monitor_alerts():
+        try:
+            return app.state.monitor.alerts()
+        except MonitorUnavailable as error:
+            raise HTTPException(503, str(error)) from None
+
+    @app.get('/v1/monitor/cloud', dependencies=[Depends(auth)])
+    def monitor_cloud(side: Literal['all', 'long', 'short'] = 'all', scope: Literal['live', 'all'] = 'live'):
+        try:
+            return app.state.monitor.cloud({'all': 0, 'long': 1, 'short': -1}[side], scope)
+        except MonitorUnavailable as error:
+            raise HTTPException(503, str(error)) from None
 
     @app.get('/v1/state', dependencies=[Depends(auth)])
     def state(current=Depends(selected), x_spike_account: str = Header(default='')):

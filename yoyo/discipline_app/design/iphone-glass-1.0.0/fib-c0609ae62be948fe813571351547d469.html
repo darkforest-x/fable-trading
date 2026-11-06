@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SPIKE 纪律交易 · 1.618</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono for pristine tabular numerals -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Global Typography & Reset */
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+      --apple-blue: #0A84FF;
+      --profit-green: #1F9D55;
+      --profit-fill: #30D158;
+      --loss-red: #E5383B;
+      --loss-fill: #FF453A;
+      --warn-amber: #FF9F0A;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      background-color: #0c1017;
+    }
+
+    .num-tabular {
+      font-family: var(--font-mono);
+      font-feature-settings: "tnum" 1, "cv05" 1;
+    }
+
+    /* iOS 26 Liquid Glass Material Specs */
+    .liquid-glass-card {
+      background: rgba(255, 255, 255, 0.64);
+      backdrop-filter: blur(32px) saturate(190%);
+      -webkit-backdrop-filter: blur(32px) saturate(190%);
+      border-radius: 26px;
+      box-shadow: 
+        0 1px 0 0 rgba(255, 255, 255, 0.95) inset,
+        0 -1px 0 0 rgba(0, 0, 0, 0.04) inset,
+        0 20px 40px -15px rgba(22, 38, 66, 0.08),
+        0 8px 16px -6px rgba(22, 38, 66, 0.04);
+      position: relative;
+    }
+
+    .liquid-glass-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.15) 100%);
+    }
+
+    .liquid-glass-capsule {
+      background: rgba(255, 255, 255, 0.68);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      box-shadow: 
+        0 1px 0 0 rgba(255, 255, 255, 0.9) inset,
+        0 12px 28px -8px rgba(10, 40, 80, 0.07);
+    }
+
+    .liquid-glass-capsule-sm {
+      background: rgba(255, 255, 255, 0.62);
+      backdrop-filter: blur(20px) saturate(170%);
+      -webkit-backdrop-filter: blur(20px) saturate(170%);
+      box-shadow: 
+        0 1px 0 0 rgba(255, 255, 255, 0.9) inset,
+        0 4px 12px -2px rgba(10, 30, 60, 0.05);
+    }
+
+    /* Active Tab Lens Pill (Optical refraction boost) */
+    .glass-active-lens {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 
+        0 1px 0 0 rgba(255, 255, 255, 1) inset,
+        0 6px 16px -4px rgba(10, 132, 255, 0.16),
+        0 2px 6px -1px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Primary Order Button Specular Sheen */
+    .primary-glass-cta {
+      background: linear-gradient(180deg, rgba(10, 132, 255, 0.96) 0%, rgba(0, 113, 227, 0.98) 100%);
+      box-shadow: 
+        0 1px 0 0 rgba(255, 255, 255, 0.45) inset,
+        0 -1px 0 0 rgba(0, 0, 0, 0.2) inset,
+        0 12px 28px -4px rgba(10, 132, 255, 0.42),
+        0 4px 10px 0 rgba(10, 132, 255, 0.2);
+    }
+
+    /* Custom Scrollbar hide */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="h-full flex items-center justify-center p-0 md:p-6 bg-[#090C10]">
+
+  <!-- iPhone 17 Pro Screen Canvas Wrapper (402pt x 874pt standard screen ratio) -->
+  <div class="relative w-[402px] h-[874px] bg-[#EEF2F7] rounded-[55px] overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.55),0_0_0_12px_#1E222B,0_0_0_14px_#2E333D] flex flex-col border border-white/20 select-none">
+    
+    <!-- Ambient Refraction Blobs: Apple Blue top-left (12%) & Teal right (10%) -->
+    <div class="absolute -top-16 -left-16 w-80 h-80 rounded-full bg-[#0A84FF] opacity-15 blur-[68px] pointer-events-none z-0"></div>
+    <div class="absolute top-72 -right-20 w-80 h-80 rounded-full bg-[#30B0C7] opacity-12 blur-[72px] pointer-events-none z-0"></div>
+    <div class="absolute bottom-28 left-8 w-64 h-64 rounded-full bg-[#0A84FF] opacity-10 blur-[60px] pointer-events-none z-0"></div>
+
+    <!-- Dynamic Island & Status Bar Safe Area (Top 62pt) -->
+    <div class="relative z-30 w-full h-[62px] px-8 flex items-center justify-between text-slate-800 text-[15px] font-semibold tracking-tight shrink-0">
+      <!-- iOS Clock -->
+      <span class="num-tabular font-medium text-[15px] pl-1.5">9:41</span>
+      
+      <!-- Dynamic Island (Precise iPhone 17 Pro 120x35pt) -->
+      <div class="absolute left-1/2 -translate-x-1/2 top-[13px] w-[124px] h-[35px] bg-black rounded-full flex items-center justify-between px-3 shadow-sm">
+        <div class="w-3 h-3 rounded-full bg-emerald-500/80 animate-pulse"></div>
+        <div class="w-3 h-3 rounded-full bg-[#111] border border-white/10"></div>
+      </div>
+
+      <!-- Battery & Connectivity Icons -->
+      <div class="flex items-center space-x-1.5 pr-1">
+        <svg class="w-4 h-4 fill-current text-slate-800" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.25c-.2.2-.2.51 0 .71.2.2.51.2.71 0l.64-.64C7.4 19.39 9.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
+        <svg class="w-4 h-4 fill-current text-slate-800" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98A16.88 16.88 0 0 0 12 4zm0 2.75c3.78 0 7.21 1.48 9.77 3.92L12 18.42 2.23 10.67A14.28 14.28 0 0 1 12 6.75z"/></svg>
+        <div class="w-6 h-3 rounded-[4px] border border-slate-800 p-0.5 flex items-center">
+          <div class="w-full h-full bg-slate-800 rounded-[1.5px]"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN BODY CONTAINER: Top 60% Candlestick Chart Area + Lower 40% Bottom Sheet -->
+    <div class="relative flex-1 flex flex-col overflow-hidden z-10">
+
+      <!-- ======================================================== -->
+      <!-- TOP 60% CHART BACKDROP & FLOATING GLASS CONTROLS -->
+      <!-- ======================================================== -->
+      <div class="relative w-full h-[58%] overflow-hidden shrink-0">
+        
+        <!-- Candlestick Graphic (Full Bleed Background Canvas with Monday 1.618 Geometry) -->
+        <svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 402 460">
+          <defs>
+            <linearGradient id="chartGridFade" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#94A3B8" stop-opacity="0.05" />
+              <stop offset="90%" stop-color="#94A3B8" stop-opacity="0.15" />
+              <stop offset="100%" stop-color="#94A3B8" stop-opacity="0.25" />
+            </linearGradient>
+            <!-- Up Cloud / Down Cloud Ambient Fills -->
+            <linearGradient id="bullCloud" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stop-color="#30D158" stop-opacity="0.03"/>
+              <stop offset="100%" stop-color="#30D158" stop-opacity="0.12"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Subtle Price Grid Lines -->
+          <line x1="0" y1="88" x2="402" y2="88" stroke="url(#chartGridFade)" stroke-width="0.8" />
+          <line x1="0" y1="162" x2="402" y2="162" stroke="url(#chartGridFade)" stroke-width="0.8" />
+          <line x1="0" y1="240" x2="402" y2="240" stroke="url(#chartGridFade)" stroke-width="0.8" />
+          <line x1="0" y1="318" x2="402" y2="318" stroke="url(#chartGridFade)" stroke-width="0.8" />
+          <line x1="0" y1="392" x2="402" y2="392" stroke="url(#chartGridFade)" stroke-width="0.8" />
+
+          <!-- Monday High Horizontal Line (周一高 0.5210) -->
+          <line x1="0" y1="154" x2="312" y2="154" stroke="#1F9D55" stroke-width="1.2" stroke-opacity="0.65"/>
+          
+          <!-- Monday Low Horizontal Line (周一低 0.4870) -->
+          <line x1="0" y1="288" x2="312" y2="288" stroke="#E5383B" stroke-width="1.2" stroke-opacity="0.65"/>
+          
+          <!-- Upper 1.618 Extension Level (上 1.618 0.5420) -->
+          <line x1="0" y1="92" x2="308" y2="92" stroke="#0A84FF" stroke-width="1.4" stroke-opacity="0.85"/>
+          
+          <!-- Lower 1.618 Extension Level (下 1.618 0.4660) -->
+          <line x1="0" y1="368" x2="308" y2="368" stroke="#0A84FF" stroke-width="1.4" stroke-opacity="0.85"/>
+
+          <!-- Current Real-Time Price Line (Dashed Line 0.4722) -->
+          <line x1="0" y1="344" x2="322" y2="344" stroke="#FF9F0A" stroke-width="1.2" stroke-dasharray="4,4" stroke-opacity="0.95"/>
+
+          <!-- EMA Cloud Organic Band (Bullish rebound through Monday low) -->
+          <path d="M 0,330 Q 80,310 160,285 T 320,240 L 402,232 L 402,265 Q 320,270 240,310 T 120,338 Z" fill="url(#bullCloud)" />
+
+          <!-- CANDLESTICK BARS (Realistic Price Series) -->
+          <!-- Bar 1: Bearish -->
+          <line x1="28" y1="140" x2="28" y2="200" stroke="#FF453A" stroke-width="1.2"/>
+          <rect x="23" y="152" width="10" height="38" rx="1.5" fill="#FF453A" opacity="0.9"/>
+
+          <!-- Bar 2: Bearish -->
+          <line x1="56" y1="180" x2="56" y2="242" stroke="#FF453A" stroke-width="1.2"/>
+          <rect x="51" y="188" width="10" height="42" rx="1.5" fill="#FF453A" opacity="0.9"/>
+
+          <!-- Bar 3: Small Bullish -->
+          <line x1="84" y1="218" x2="84" y2="258" stroke="#30D158" stroke-width="1.2"/>
+          <rect x="79" y="222" width="10" height="24" rx="1.5" fill="#30D158" opacity="0.9"/>
+
+          <!-- Bar 4: Bearish Break Monday Low -->
+          <line x1="112" y1="230" x2="112" y2="302" stroke="#FF453A" stroke-width="1.2"/>
+          <rect x="107" y="244" width="10" height="46" rx="1.5" fill="#FF453A" opacity="0.9"/>
+
+          <!-- Bar 5: Sharp Spike wick touching 1.618 Lower Boundary (0.4660) -->
+          <line x1="140" y1="280" x2="140" y2="372" stroke="#FF453A" stroke-width="1.2"/>
+          <rect x="135" y="284" width="10" height="44" rx="1.5" fill="#FF453A" opacity="0.9"/>
+          <!-- Spike Target Marker Pulse Circle -->
+          <circle cx="140" cy="368" r="4.5" fill="#0A84FF" fill-opacity="0.9"/>
+          <circle cx="140" cy="368" r="9" stroke="#0A84FF" stroke-width="1" stroke-opacity="0.5"/>
+
+          <!-- Bar 6: Strong Reversal Pin Bar (Green) -->
+          <line x1="168" y1="298" x2="168" y2="362" stroke="#30D158" stroke-width="1.2"/>
+          <rect x="163" y="306" width="10" height="34" rx="1.5" fill="#30D158" opacity="0.95"/>
+
+          <!-- Bar 7: Bullish Confirmation Bar -->
+          <line x1="196" y1="272" x2="196" y2="328" stroke="#30D158" stroke-width="1.2"/>
+          <rect x="191" y="278" width="10" height="40" rx="1.5" fill="#30D158" opacity="0.95"/>
+
+          <!-- Bar 8: Bullish Steady -->
+          <line x1="224" y1="245" x2="224" y2="295" stroke="#30D158" stroke-width="1.2"/>
+          <rect x="219" y="250" width="10" height="36" rx="1.5" fill="#30D158" opacity="0.95"/>
+
+          <!-- Bar 9: High test -->
+          <line x1="252" y1="225" x2="252" y2="272" stroke="#30D158" stroke-width="1.2"/>
+          <rect x="247" y="232" width="10" height="30" rx="1.5" fill="#30D158" opacity="0.95"/>
+
+          <!-- Bar 10: Pullback consolidation -->
+          <line x1="280" y1="238" x2="280" y2="285" stroke="#FF453A" stroke-width="1.2"/>
+          <rect x="275" y="244" width="10" height="28" rx="1.5" fill="#FF453A" opacity="0.9"/>
+
+          <!-- Bar 11: Real-time Live Tick candle (pulsing dashed price connection) -->
+          <line x1="308" y1="255" x2="308" y2="348" stroke="#30D158" stroke-width="1.2"/>
+          <rect x="303" y="268" width="10" height="42" rx="1.5" fill="#30D158" opacity="0.95"/>
+        </svg>
+
+        <!-- Right-Edge Plain Text Price Level Tags -->
+        <div class="absolute right-2.5 top-[83px] pointer-events-none text-right">
+          <div class="text-[10.5px] font-semibold text-[#0A84FF] num-tabular tracking-tight bg-white/60 px-1 rounded backdrop-blur-sm shadow-xs">上 1.618 0.5420</div>
+        </div>
+        <div class="absolute right-2.5 top-[146px] pointer-events-none text-right">
+          <div class="text-[10px] font-medium text-[#1F9D55] num-tabular tracking-tight bg-white/60 px-1 rounded backdrop-blur-sm shadow-xs">周一高 0.5210</div>
+        </div>
+        <div class="absolute right-2.5 top-[280px] pointer-events-none text-right">
+          <div class="text-[10px] font-medium text-[#E5383B] num-tabular tracking-tight bg-white/60 px-1 rounded backdrop-blur-sm shadow-xs">周一低 0.4870</div>
+        </div>
+        <div class="absolute right-2.5 top-[337px] pointer-events-none text-right">
+          <div class="text-[11px] font-bold text-[#FF9F0A] num-tabular tracking-tight bg-[#FFF7E8] px-1.5 py-0.5 rounded-md border border-[#FF9F0A]/30 shadow-xs">现价 0.4722</div>
+        </div>
+        <div class="absolute right-2.5 top-[360px] pointer-events-none text-right">
+          <div class="text-[10.5px] font-semibold text-[#0A84FF] num-tabular tracking-tight bg-white/60 px-1 rounded backdrop-blur-sm shadow-xs">下 1.618 0.4660</div>
+        </div>
+
+        <!-- Floating Glass Top Navigation Header -->
+        <div class="absolute top-2.5 left-4 right-4 z-20 flex flex-col space-y-2.5 pointer-events-auto">
+          
+          <!-- Row 1: iOS Large Title (34pt / 40px equivalent) + Round Glass Buttons -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-baseline space-x-2">
+              <h1 class="text-[31px] font-semibold tracking-tight text-slate-900 leading-none drop-shadow-xs">1.618</h1>
+              <span class="text-[12px] font-semibold text-[#0A84FF] bg-[#0A84FF]/10 px-2 py-0.5 rounded-full border border-[#0A84FF]/20 num-tabular tracking-tight">周一定界</span>
+            </div>
+            
+            <!-- Round 38pt (38px) Glass Buttons (Min 44pt touchable wrapper) -->
+            <div class="flex items-center space-x-2">
+              <!-- 模拟盘 Capsule / Button -->
+              <button class="h-[38px] px-3.5 rounded-full liquid-glass-capsule flex items-center space-x-1.5 active:scale-95 transition-transform text-slate-800 text-[13px] font-semibold border border-white/80 min-w-[44px]">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.7)]"></span>
+                <span>模拟盘</span>
+              </button>
+
+              <!-- Settings Round Button -->
+              <button class="w-[38px] h-[38px] rounded-full liquid-glass-capsule flex items-center justify-center text-slate-700 active:scale-95 transition-transform border border-white/80" aria-label="设置">
+                <svg class="w-4 h-4 stroke-current stroke-[2]" fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Row 2: Coin Selector Capsule & Period Switcher Capsule -->
+          <div class="flex items-center justify-between pt-0.5">
+            <!-- Coin Selector Glass Capsule with SUI Logo and Chevron -->
+            <button class="h-[38px] px-3 rounded-full liquid-glass-capsule flex items-center space-x-2 text-slate-800 active:scale-95 transition-transform border border-white/80 shadow-xs">
+              <!-- SUI Token Logo Emblem -->
+              <div class="w-5 h-5 rounded-full bg-gradient-to-tr from-[#2A82E4] to-[#4CA2FE] flex items-center justify-center text-white text-[10px] font-bold shadow-xs">
+                S
+              </div>
+              <span class="text-[14px] font-bold tracking-tight">SUI / USDT</span>
+              <svg class="w-3.5 h-3.5 text-slate-400 stroke-current stroke-[2.2]" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+
+            <!-- Period Switcher Glass Capsule (5m, 15m, 1H, 4H) -->
+            <div class="h-[38px] px-1 rounded-full liquid-glass-capsule flex items-center space-x-0.5 border border-white/80 p-0.5">
+              <button class="px-2.5 py-1 text-[12px] font-medium text-slate-600 rounded-full hover:text-slate-900 transition-colors">5m</button>
+              <button class="px-2.5 py-1 text-[12px] font-bold text-[#0A84FF] glass-active-lens rounded-full transition-all">15m</button>
+              <button class="px-2.5 py-1 text-[12px] font-medium text-slate-600 rounded-full hover:text-slate-900 transition-colors">1H</button>
+              <button class="px-2.5 py-1 text-[12px] font-medium text-slate-600 rounded-full hover:text-slate-900 transition-colors">4H</button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- LOWER 40% BOTTOM SHEET (Liquid Glass Card with Grabber) -->
+      <!-- ======================================================== -->
+      <div class="relative flex-1 liquid-glass-card -mt-4 z-20 flex flex-col px-5 pt-3 pb-24 overflow-hidden border-t border-white/90">
+        
+        <!-- Interactive Grabber Handle -->
+        <div class="w-9 h-1.5 bg-slate-400/40 rounded-full mx-auto mb-3 shrink-0"></div>
+
+        <!-- Bottom Sheet Title Header: '本周触价 · 18' -->
+        <div class="flex items-center justify-between pb-3 shrink-0">
+          <div class="flex items-center space-x-2">
+            <h2 class="text-[17px] font-bold text-slate-900 tracking-tight">本周触价</h2>
+            <span class="text-[12px] font-semibold text-slate-500 bg-white/70 px-2 py-0.5 rounded-full border border-white/80 shadow-xs num-tabular">18 币种已就绪</span>
+          </div>
+          <!-- Filter indicator / sorting -->
+          <div class="flex items-center space-x-1 text-[12px] font-medium text-[#0A84FF]">
+            <span>按时序</span>
+            <svg class="w-3.5 h-3.5 stroke-current stroke-[2]" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+          </div>
+        </div>
+
+        <!-- Scrollable Coin Touching List Rows beneath translucent glass -->
+        <div class="flex-1 overflow-y-auto space-y-2.5 pr-0.5 no-scrollbar">
+
+          <!-- Row 1: SUI (Active Current Focus - 下沿) -->
+          <div class="h-[58px] px-3.5 rounded-[18px] bg-white/75 border border-white/95 shadow-xs flex items-center justify-between active:scale-[0.98] transition-transform">
+            <div class="flex items-center space-x-3">
+              <!-- Token Logo -->
+              <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#2A82E4] to-[#4CA2FE] flex items-center justify-center text-white text-[12px] font-bold shadow-xs">
+                S
+              </div>
+              <div>
+                <div class="flex items-center space-x-1.5">
+                  <span class="text-[15px] font-bold text-slate-900 tracking-tight">SUI</span>
+                  <!-- Capsule '下沿' Red-tint -->
+                  <span class="text-[10.5px] font-bold text-[#E5383B] bg-[#FF453A]/12 px-1.5 py-0.5 rounded-md border border-[#FF453A]/20">下沿 1.618</span>
+                </div>
+                <div class="text-[11px] text-slate-500 num-tabular tracking-tight">触价 11-05 14:35 · 5m实体收回</div>
+              </div>
+            </div>
+            <!-- Trailing distance metric -->
+            <div class="text-right">
+              <div class="text-[14px] font-bold text-[#1F9D55] num-tabular">+0.8%</div>
+              <div class="text-[10px] text-slate-400 font-medium num-tabular">距 1.618</div>
+            </div>
+          </div>
+
+          <!-- Row 2: BTC (上沿) -->
+          <div class="h-[58px] px-3.5 rounded-[18px] bg-white/50 border border-white/80 shadow-xs flex items-center justify-between active:scale-[0.98] transition-transform">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#F7931A] to-[#FFAB4A] flex items-center justify-center text-white text-[13px] font-bold shadow-xs">
+                ₿
+              </div>
+              <div>
+                <div class="flex items-center space-x-1.5">
+                  <span class="text-[15px] font-bold text-slate-900 tracking-tight">BTC</span>
+                  <!-- Capsule '上沿' Green-tint -->
+                  <span class="text-[10.5px] font-bold text-[#1F9D55] bg-[#30D158]/12 px-1.5 py-0.5 rounded-md border border-[#30D158]/20">上沿 1.618</span>
+                </div>
+                <div class="text-[11px] text-slate-500 num-tabular tracking-tight">触价 11-05 11:20 · 穿透 0.4%</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-[14px] font-bold text-[#E5383B] num-tabular">-0.3%</div>
+              <div class="text-[10px] text-slate-400 font-medium num-tabular">距 1.618</div>
+            </div>
+          </div>
+
+          <!-- Row 3: ETH (下沿) -->
+          <div class="h-[58px] px-3.5 rounded-[18px] bg-white/50 border border-white/80 shadow-xs flex items-center justify-between active:scale-[0.98] transition-transform">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#627EEA] to-[#8FA2F4] flex items-center justify-center text-white text-[12px] font-bold shadow-xs">
+                Ξ
+              </div>
+              <div>
+                <div class="flex items-center space-x-1.5">
+                  <span class="text-[15px] font-bold text-slate-900 tracking-tight">ETH</span>
+                  <span class="text-[10.5px] font-bold text-[#E5383B] bg-[#FF453A]/12 px-1.5 py-0.5 rounded-md border border-[#FF453A]/20">下沿 1.618</span>
+                </div>
+                <div class="text-[11px] text-slate-500 num-tabular tracking-tight">触价 11-05 08:45 · 确认做多</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-[14px] font-bold text-[#1F9D55] num-tabular">+1.4%</div>
+              <div class="text-[10px] text-slate-400 font-medium num-tabular">距 1.618</div>
+            </div>
+          </div>
+
+          <!-- Row 4: SOL (上沿) -->
+          <div class="h-[58px] px-3.5 rounded-[18px] bg-white/50 border border-white/80 shadow-xs flex items-center justify-between active:scale-[0.98] transition-transform">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#00FFA3] to-[#DC1FFF] flex items-center justify-center text-white text-[11px] font-extrabold shadow-xs">
+                ◎
+              </div>
+              <div>
+                <div class="flex items-center space-x-1.5">
+                  <span class="text-[15px] font-bold text-slate-900 tracking-tight">SOL</span>
+                  <span class="text-[10.5px] font-bold text-[#1F9D55] bg-[#30D158]/12 px-1.5 py-0.5 rounded-md border border-[#30D158]/20">上沿 1.618</span>
+                </div>
+                <div class="text-[11px] text-slate-500 num-tabular tracking-tight">触价 11-04 22:10 · 假突破冲顶</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-[14px] font-bold text-[#E5383B] num-tabular">-0.9%</div>
+              <div class="text-[10px] text-slate-400 font-medium num-tabular">距 1.618</div>
+            </div>
+          </div>
+
+          <!-- Row 5: DOGE (下沿) -->
+          <div class="h-[58px] px-3.5 rounded-[18px] bg-white/50 border border-white/80 shadow-xs flex items-center justify-between active:scale-[0.98] transition-transform">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#C2A633] to-[#E1CA67] flex items-center justify-center text-white text-[12px] font-bold shadow-xs">
+                Ð
+              </div>
+              <div>
+                <div class="flex items-center space-x-1.5">
+                  <span class="text-[15px] font-bold text-slate-900 tracking-tight">DOGE</span>
+                  <span class="text-[10.5px] font-bold text-[#E5383B] bg-[#FF453A]/12 px-1.5 py-0.5 rounded-md border border-[#FF453A]/20">下沿 1.618</span>
+                </div>
+                <div class="text-[11px] text-slate-500 num-tabular tracking-tight">触价 11-04 18:02 · 极速插针</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-[14px] font-bold text-[#1F9D55] num-tabular">+2.1%</div>
+              <div class="text-[10px] text-slate-400 font-medium num-tabular">距 1.618</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- FLOATING ACTIONS & DETACHED GLASS TAB BAR OVERLAY -->
+    <!-- ======================================================== -->
+    <div class="absolute bottom-0 inset-x-0 z-40 pointer-events-none flex flex-col items-center px-4 pb-3">
+
+      <!-- Floating Glass Primary Action Button: '快捷开单 · 1R' (Min 44pt touchable) -->
+      <div class="w-full flex justify-center mb-2.5 pointer-events-auto">
+        <button class="w-[370px] h-[48px] rounded-full primary-glass-cta text-white font-semibold text-[15px] tracking-tight flex items-center justify-center space-x-2 active:scale-[0.98] transition-all">
+          <svg class="w-4 h-4 stroke-current stroke-[2.2]" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          <span>快捷开单 · 1R 纪律守护</span>
+          <span class="text-[12px] opacity-80 font-normal num-tabular">(0.4660 限价)</span>
+        </button>
+      </div>
+
+      <!-- Detached Floating Capsule Glass Tab Bar (12pt above home indicator) -->
+      <div class="w-[370px] h-[64px] rounded-full liquid-glass-capsule border border-white/90 p-1 flex items-center justify-between pointer-events-auto shadow-[0_16px_36px_-6px_rgba(15,30,50,0.12)]">
+        
+        <!-- Tab 1: 合约 (Contract) -->
+        <button class="flex-1 h-full rounded-full flex flex-col items-center justify-center space-y-0.5 text-slate-500 hover:text-slate-800 active:scale-95 transition-all">
+          <svg class="w-5 h-5 stroke-current stroke-[1.8]" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+          </svg>
+          <span class="text-[10px] font-medium leading-none">合约</span>
+        </button>
+
+        <!-- Tab 2: 监控 (Monitor) -->
+        <button class="flex-1 h-full rounded-full flex flex-col items-center justify-center space-y-0.5 text-slate-500 hover:text-slate-800 active:scale-95 transition-all">
+          <svg class="w-5 h-5 stroke-current stroke-[1.8]" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+          <span class="text-[10px] font-medium leading-none">监控</span>
+        </button>
+
+        <!-- Tab 3: 1.618 (ACTIVE CENTER TAB in Lighter Glass Lens Pill with Apple Blue) -->
+        <button class="flex-1 h-[54px] rounded-full glass-active-lens flex flex-col items-center justify-center space-y-0.5 text-[#0A84FF] shadow-xs active:scale-95 transition-all border border-white/95">
+          <svg class="w-5 h-5 stroke-current stroke-[2.2]" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+          </svg>
+          <span class="text-[10.5px] font-bold leading-none tracking-tight">1.618</span>
+        </button>
+
+        <!-- Tab 4: 持仓 (Positions) -->
+        <button class="flex-1 h-full rounded-full flex flex-col items-center justify-center space-y-0.5 text-slate-500 hover:text-slate-800 active:scale-95 transition-all">
+          <svg class="w-5 h-5 stroke-current stroke-[1.8]" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <span class="text-[10px] font-medium leading-none">持仓</span>
+        </button>
+
+        <!-- Tab 5: 统计 (Analytics) -->
+        <button class="flex-1 h-full rounded-full flex flex-col items-center justify-center space-y-0.5 text-slate-500 hover:text-slate-800 active:scale-95 transition-all">
+          <svg class="w-5 h-5 stroke-current stroke-[1.8]" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          <span class="text-[10px] font-medium leading-none">统计</span>
+        </button>
+
+      </div>
+
+      <!-- iOS Home Indicator (Standard 134x5pt centered) -->
+      <div class="w-[134px] h-[5px] bg-slate-900/25 rounded-full mt-2 shrink-0"></div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<title>SPIKE 纪律交易 · 统计 (iOS 26 Liquid Glass)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --accent: #0A84FF;
+    --accent-glow: rgba(10, 132, 255, 0.22);
+    --green-text: #1F9D55;
+    --green-fill: #30D158;
+    --green-subtle: rgba(48, 209, 88, 0.14);
+    --red-text: #E5383B;
+    --red-fill: #FF453A;
+    --red-subtle: rgba(255, 69, 58, 0.14);
+    --amber: #FF9F0A;
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background-color: #EEF2F7;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .font-tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Liquid Glass Material Recipe */
+  .liquid-glass-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.58) 100%);
+    backdrop-filter: blur(32px) saturate(190%);
+    -webkit-backdrop-filter: blur(32px) saturate(190%);
+    border-radius: 26px;
+    box-shadow: 
+      0 12px 34px -10px rgba(15, 32, 67, 0.08),
+      0 4px 12px -2px rgba(15, 32, 67, 0.04),
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -1px 1px 0 rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .liquid-glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.95) 30%, rgba(255,255,255,0.95) 70%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+  }
+
+  /* Specular Sheen Diagonal */
+  .sheen-layer {
+    background: linear-gradient(115deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 45%, rgba(255,255,255,0.12) 100%);
+    pointer-events: none;
+  }
+
+  .liquid-glass-tile {
+    background: linear-gradient(140deg, rgba(255, 255, 255, 0.68) 0%, rgba(255, 255, 255, 0.52) 100%);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-radius: 20px;
+    box-shadow: 
+      0 8px 24px -8px rgba(20, 36, 68, 0.06),
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+  }
+
+  .liquid-glass-tabbar {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.64) 100%);
+    backdrop-filter: blur(36px) saturate(210%);
+    -webkit-backdrop-filter: blur(36px) saturate(210%);
+    border-radius: 34px;
+    box-shadow: 
+      0 16px 40px -12px rgba(10, 25, 55, 0.16),
+      0 4px 16px -2px rgba(10, 25, 55, 0.06),
+      inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 1),
+      inset 0 -1px 1px 0 rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+  }
+
+  .active-lens-pill {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.78) 100%);
+    box-shadow: 
+      0 4px 14px -3px rgba(10, 132, 255, 0.22),
+      0 2px 6px -1px rgba(0, 0, 0, 0.06),
+      inset 0 1px 1px 0 rgba(255, 255, 255, 1);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+  }
+
+  .glass-segment-pill {
+    background: rgba(118, 140, 170, 0.12);
+    border-radius: 9999px;
+    padding: 3px;
+    border: 0.5px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .glass-segment-active {
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 
+      0 2px 8px -1px rgba(15, 30, 60, 0.12),
+      inset 0 1px 0 0 rgba(255, 255, 255, 1);
+    color: #0A84FF;
+    font-weight: 600;
+  }
+
+  /* Glass round button */
+  .glass-btn-round {
+    width: 38px;
+    height: 38px;
+    border-radius: 19px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.52) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 4px 14px -4px rgba(20, 35, 65, 0.1);
+  }
+
+  .glass-btn-round:active {
+    transform: scale(0.94);
+    background: rgba(255, 255, 255, 0.85);
+  }
+
+  /* Bar hover / interaction */
+  .bar-col:active .bar-fill {
+    opacity: 0.85;
+    transform: scaleY(1.04);
+  }
+
+  /* Hide scrollbar */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
+</head>
+<body class="flex justify-center items-start min-h-screen p-0 sm:py-6 bg-[#D8E1EC]">
+
+  <!-- iPhone 17 Pro Canvas Shell: 402 x 874 pt -->
+  <div class="relative w-full max-w-[402px] h-[874px] overflow-hidden bg-[#EEF2F7] shadow-2xl sm:rounded-[54px] border-0 sm:border-[8px] sm:border-[#D0DAE5] flex flex-col">
+    
+    <!-- Ambient Light & Refraction Backdrop (Soft cool ambient: pale blue-grey #EEF2F7 + Apple blue #0A84FF @12% + Teal #30B0C7 @10%) -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+      <!-- Blue blob top-left -->
+      <div class="absolute -top-16 -left-20 w-[280px] h-[280px] rounded-full bg-[#0A84FF] opacity-[0.14] blur-[68px]"></div>
+      <!-- Teal blob mid-right -->
+      <div class="absolute top-[280px] -right-24 w-[300px] h-[320px] rounded-full bg-[#30B0C7] opacity-[0.12] blur-[76px]"></div>
+      <!-- Soft ambient indigo / cyan bottom glow for tabbar refraction -->
+      <div class="absolute -bottom-20 left-10 w-[320px] h-[220px] rounded-full bg-[#5AC8FA] opacity-[0.13] blur-[70px]"></div>
+      <!-- Faint radial highlight -->
+      <div class="absolute top-[120px] left-[40px] w-[180px] h-[180px] rounded-full bg-white opacity-[0.35] blur-[50px]"></div>
+    </div>
+
+    <!-- iOS 26 Dynamic Island & Status Safe Area (62pt top) -->
+    <header class="relative z-30 pt-3 px-7 flex justify-between items-center h-[54px] flex-shrink-0">
+      <!-- Time -->
+      <span class="text-[15px] font-semibold text-[#1C2533] tracking-tight font-tabular">9:41</span>
+      
+      <!-- Dynamic Island Capsule -->
+      <div class="w-[124px] h-[34px] bg-black/90 rounded-full flex items-center justify-between px-3 shadow-sm border border-white/10">
+        <div class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#30D158] animate-pulse"></span>
+          <span class="text-[10px] font-medium text-white/90 font-mono tracking-wider">SPIKE</span>
+        </div>
+        <div class="w-3 h-3 rounded-full bg-[#0A84FF]/70 border border-white/20"></div>
+      </div>
+
+      <!-- System Status Icons -->
+      <div class="flex items-center gap-1.5 text-[#1C2533]">
+        <!-- Signal -->
+        <svg class="w-4 h-3.5 fill-current" viewBox="0 0 17 12">
+          <rect x="0" y="8" width="2.5" height="4" rx="0.75"/>
+          <rect x="4.5" y="5.5" width="2.5" height="6.5" rx="0.75"/>
+          <rect x="9" y="3" width="2.5" height="9" rx="0.75"/>
+          <rect x="13.5" y="0" width="2.5" height="12" rx="0.75"/>
+        </svg>
+        <!-- 5G / Wifi -->
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 16 12">
+          <path d="M8 2.5a8.2 8.2 0 0 1 5.3 2 .6.6 0 0 0 .8-.1l1.1-1.1a.6.6 0 0 0-.1-.9A11.4 11.4 0 0 0 8 0 11.4 11.4 0 0 0 .9 2.4a.6.6 0 0 0-.1.9l1.1 1.1c.2.2.6.3.8.1A8.2 8.2 0 0 1 8 2.5Zm0 3.8a5.2 5.2 0 0 1 3.3 1.2.6.6 0 0 0 .8 0l1.1-1.1a.6.6 0 0 0 0-.8A7.8 7.8 0 0 0 8 3.8a7.8 7.8 0 0 0-5.2 1.8.6.6 0 0 0 0 .8l1.1 1.1c.2.2.6.2.8 0A5.2 5.2 0 0 1 8 6.3Zm0 3.8a2.3 2.3 0 0 1 1.4.5.6.6 0 0 0 .8 0l1.1-1.1a.6.6 0 0 0 0-.8 4.3 4.3 0 0 0-3.3-1.1c-1.3 0-2.5.4-3.3 1.1a.6.6 0 0 0 0 .8l1.1 1.1c.2.2.6.2.8 0a2.3 2.3 0 0 1 1.5-.5Zm0 2a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Z"/>
+        </svg>
+        <!-- Battery -->
+        <div class="w-6 h-[11px] rounded-[3.5px] border border-current p-[1.5px] flex items-center">
+          <div class="h-full w-4 bg-current rounded-[1.5px]"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Top Large Title Navigation Header (iOS Large Title 34pt semibold) -->
+    <section class="relative z-20 px-6 pt-2 pb-2 flex justify-between items-center flex-shrink-0">
+      <div class="flex items-baseline gap-2">
+        <h1 class="text-[34px] font-semibold text-[#111827] tracking-tight leading-tight">统计</h1>
+        <span class="text-[12px] font-medium text-[#64748B] bg-white/60 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/70 shadow-xs">USDT 本位</span>
+      </div>
+      
+      <!-- Right Action Round Glass Buttons (38pt, >=44pt touch area) -->
+      <div class="flex items-center gap-2">
+        <!-- Calendar / Filter Quick Toggle -->
+        <button class="glass-btn-round flex items-center justify-center text-[#475569] active:text-[#0A84FF] transition-colors" aria-label="筛选">
+          <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+          </svg>
+        </button>
+
+        <!-- Round Glass Gear Button -->
+        <button class="glass-btn-round flex items-center justify-center text-[#1E293B] active:text-[#0A84FF] transition-all" aria-label="设置">
+          <svg class="w-[19px] h-[19px]" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- Scrollable Main Viewport beneath Translucent Layers -->
+    <main class="relative z-10 flex-1 overflow-y-auto px-5 pt-1 pb-32 no-scrollbar space-y-4">
+      
+      <!-- HERO GLASS CARD: 主账户 · App 管理交易 -->
+      <section class="liquid-glass-card p-5 relative">
+        <div class="sheen-layer absolute inset-0"></div>
+
+        <!-- Top Caption & Status Tag -->
+        <div class="relative z-10 flex items-center justify-between mb-2">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[#1F9D55] ring-2 ring-[#30D158]/20"></span>
+            <span class="text-[13px] font-medium text-[#475569] tracking-wide">主账户 · App 管理交易</span>
+          </div>
+          <span class="text-[11px] font-medium text-[#0A84FF] bg-[#0A84FF]/10 px-2 py-0.5 rounded-full border border-[#0A84FF]/25 font-tabular">
+            实盘沙盒
+          </span>
+        </div>
+
+        <!-- Big Equity Number -->
+        <div class="relative z-10 flex items-baseline gap-2 mt-1">
+          <span class="text-[36px] font-bold text-[#0F172A] tracking-tight leading-none font-tabular">512.36</span>
+          <span class="text-[15px] font-semibold text-[#64748B] tracking-wider">USDT</span>
+        </div>
+
+        <!-- Divider Line (Faint glass refraction) -->
+        <div class="relative z-10 my-3.5 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
+
+        <!-- Metric Duo: 累计净盈亏 & 累计收益率 (Green Profit) -->
+        <div class="relative z-10 grid grid-cols-2 gap-3 items-center">
+          <!-- Metric 1: 累计净盈亏 -->
+          <div class="bg-white/40 rounded-2xl p-2.5 border border-white/60">
+            <div class="text-[11px] text-[#64748B] font-medium mb-0.5">累计净盈亏</div>
+            <div class="flex items-baseline gap-1">
+              <span class="text-[19px] font-bold text-[#1F9D55] font-tabular">+12.36</span>
+              <span class="text-[12px] font-semibold text-[#1F9D55]">U</span>
+            </div>
+          </div>
+
+          <!-- Metric 2: 累计收益率 -->
+          <div class="bg-white/40 rounded-2xl p-2.5 border border-white/60">
+            <div class="text-[11px] text-[#64748B] font-medium mb-0.5">累计收益率</div>
+            <div class="flex items-baseline gap-1">
+              <span class="text-[19px] font-bold text-[#1F9D55] font-tabular">+2.47%</span>
+              <span class="text-[10px] text-[#1F9D55] font-medium bg-[#30D158]/15 px-1.5 py-0.2 rounded">达标</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footnote Caption: 固定本金 500.00 U -->
+        <div class="relative z-10 mt-3 pt-2 flex items-center justify-between border-t border-white/40 text-[11px] text-[#64748B]">
+          <div class="flex items-center gap-1 font-tabular">
+            <svg class="w-3.5 h-3.5 text-[#94A3B8]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>固定本金 <strong class="text-[#334155] font-semibold">500.00 U</strong> 作为收益率基准分母</span>
+          </div>
+          <span class="text-[10px] text-[#94A3B8] font-mono">1R=10U</span>
+        </div>
+      </section>
+
+      <!-- Glass Segmented Control: 7 天 | 30 天 | 全部 -->
+      <section class="flex justify-center">
+        <div class="glass-segment-pill flex items-center w-full max-w-[340px] text-[13px]">
+          <button class="flex-1 py-1.5 text-center text-[#64748B] hover:text-[#0A84FF] transition-all rounded-full" onclick="selectRange(this, '7d')">
+            7 天
+          </button>
+          <button class="flex-1 py-1.5 text-center glass-segment-active rounded-full transition-all" onclick="selectRange(this, '30d')">
+            30 天
+          </button>
+          <button class="flex-1 py-1.5 text-center text-[#64748B] hover:text-[#0A84FF] transition-all rounded-full" onclick="selectRange(this, 'all')">
+            全部
+          </button>
+        </div>
+      </section>
+
+      <!-- Glass Card with Daily P&L Bar Chart (Green/Red Bars) -->
+      <section class="liquid-glass-card p-4 relative">
+        <div class="sheen-layer absolute inset-0"></div>
+
+        <div class="relative z-10 flex items-center justify-between mb-3">
+          <div>
+            <h3 class="text-[14px] font-semibold text-[#1E293B]">每日已实现盈亏</h3>
+            <p class="text-[11px] text-[#64748B]">按完成平仓时间归集 · 最近 10 个交易日</p>
+          </div>
+          <!-- Legend -->
+          <div class="flex items-center gap-3 text-[11px] font-tabular">
+            <span class="flex items-center gap-1 text-[#1F9D55]">
+              <span class="w-2 h-2 rounded-[2px] bg-[#30D158]"></span> 盈利 7
+            </span>
+            <span class="flex items-center gap-1 text-[#E5383B]">
+              <span class="w-2 h-2 rounded-[2px] bg-[#FF453A]"></span> 亏损 3
+            </span>
+          </div>
+        </div>
+
+        <!-- SVG / Flex Bar Chart Component -->
+        <div class="relative z-10 pt-2 pb-1">
+          <!-- Zero Baseline -->
+          <div class="absolute top-[68px] left-0 right-0 h-[1px] bg-slate-300/60 z-0"></div>
+          
+          <!-- Bars Container (10 Days Sample) -->
+          <div class="grid grid-cols-10 gap-1.5 h-[130px] items-center relative z-10">
+            
+            <!-- Day 1: +3.2 U -->
+            <div class="bar-col flex flex-col items-center h-full justify-end cursor-pointer group">
+              <span class="text-[9px] text-[#1F9D55] font-tabular opacity-0 group-hover:opacity-100 transition-opacity mb-0.5">+3.2</span>
+              <div class="bar-fill w-full max-w-[18px] h-[34px] rounded-t-[5px] bg-[#30D158] transition-all shadow-xs"></div>
+              <div class="h-[60px]"></div>
+              <span class="text-[9px] text-[#94A3B8] mt-1 font-tabular">10/18</span>
+            </div>
+
+            <!-- Day 2: -2.0 U -->
+            <div class="bar-col flex flex-col items-center h-full justify-start cursor-pointer group">
+              <div class="h-[68px]"></div>
+              <div class="bar-fill w-full max-w-[18px] h-[22px] rounded-b-[5px] bg-[#FF453A] transition-all shadow-xs"></div>
+              <span class="text-[9px] text-[#E5383B] font-tabular opacity-0 group-hover:opacity-100 transition-opacity mt-0.5">-2.0</span>
+              <div class="flex-1"></div>
+              <span class="text-[9px] text-[#94A3B8] font-tabular">19</span>
+            </div>
+
+            <!-- Day 3: +4.8 U -->
+            <div class="bar-col flex flex-col items-center h-full justify-end cursor-pointer group">
+              <span class="text-[9px] text-[#1F9D55] font-tabular opacity-0 group-hover:opacity-100 transition-opacity mb-0.5">+4.8</span>
+              <div class="bar-fill w-full max-w-[18px] h-[48px] rounded-t-[5px] bg-[#30D158] transition-all shadow-xs"></div>
+              <div class="h-[60px]"></div>
+              <span class="text-[9px] text-[#94A3B8] mt-1 font-tabular">20</span>
+            </div>
+
+            <!-- Day 4: +1.5 U -->
+            <div class="bar-col flex flex-col items-center h-full justify-end cursor-pointer group">
+              <span class="text-[9px] text-[#1F9D55] font-tabular opacity-0 group-hover:opacity-100 transition-opacity mb-0.5">+1.5</span>
+              <div class="bar-fill w-full max-w-[18px] h-[18px] rounded-t-[5px] bg-[#30D158] transition-all shadow-xs"></div>
+              <div class="h-[60px]"></div>
+              <span class="text-[9px] text-[#94A3B8] mt-1 font-tabular">21</span>
+            </div>
+
+            <!-- Day 5: -4.1 U -->
+            <div class="bar-col flex flex-col items-center h-full justify-start cursor-pointer group">
+              <div class="h-[68px]"></div>
+              <div class="bar-fill w-full max-w-[18px] h-[38px] rounded-b-[5px] bg-[#FF453A] transition-all shadow-xs"></div>
+              <span class="text-[9px] text-[#E5383B] font-tabular opacity-0 group-hover:opacity-100 transition-opacity mt-0.5">-4.1</span>
+              <div class="flex-1"></div>
+              <span class="text-[9px] text-[#94A3B8] font-tabular">22</span>
+            </div>
+
+            <!-- Day 6: -1.0 U -->
+            <div class="bar-col flex flex-col items-center h-full justify-start cursor-pointer group">
+              <div class="h-[68px]"></div>
+              <div class="bar-fill w-full max-w-[18px] h-[12px] rounded-b-[5px] bg-[#FF453A] transition-all shadow-xs"></div>
+              <span class="text-[9px] text-[#E5383B] font-tabular opacity-0 group-hover:opacity-100 transition-opacity mt-0.5">-1.0</span>
+              <div class="flex-1"></div>
+              <span class="text-[9px] text-[#94A3B8] font-tabular">23</span>
+            </div>
+
+            <!-- Day 7: +2.9 U -->
+            <div class="bar-col flex flex-col items-center h-full justify-end cursor-pointer group">
+              <span class="text-[9px] text-[#1F9D55] font-tabular opacity-0 group-hover:opacity-100 transition-opacity mb-0.5">+2.9</span>
+              <div class="bar-fill w-full max-w-[18px] h-[30px] rounded-t-[5px] bg-[#30D158] transition-all shadow-xs"></div>
+              <div class="h-[60px]"></div>
+              <span class="text-[9px] text-[#94A3B8] mt-1 font-tabular">24</span>
+            </div>
+
+            <!-- Day 8: +5.4 U (Peak) -->
+            <div class="bar-col flex flex-col items-center h-full justify-end cursor-pointer group">
+              <span class="text-[9px] text-[#1F9D55] font-tabular opacity-0 group-hover:opacity-100 transition-opacity mb-0.5">+5.4</span>
+              <div class="bar-fill w-full max-w-[18px] h-[54px] rounded-t-[5px] bg-[#30D158] ring-2 ring-[#30D158]/30 transition-all shadow-xs"></div>
+              <div class="h-[60px]"></div>
+              <span class="text-[9px] text-[#94A3B8] mt-1 font-tabular font-medium">25</span>
+            </div>
+
+            <!-- Day 9: +0.8 U -->
+            <div class="bar-col flex flex-col items-center h-full justify-end cursor-pointer group">
+              <span class="text-[9px] text-[#1F9D55] font-tabular opacity-0 group-hover:opacity-100 transition-opacity mb-0.5">+0.8</span>
+              <div class="bar-fill w-full max-w-[18px] h-[12px] rounded-t-[5px] bg-[#30D158] transition-all shadow-xs"></div>
+              <div class="h-[60px]"></div>
+              <span class="text-[9px] text-[#94A3B8] mt-1 font-tabular">26</span>
+            </div>
+
+            <!-- Day 10 (Today): +1.86 U -->
+            <div class="bar-col flex flex-col items-center h-full justify-end cursor-pointer group">
+              <span class="text-[9px] text-[#0A84FF] font-tabular font-semibold mb-0.5">+1.9</span>
+              <div class="bar-fill w-full max-w-[18px] h-[24px] rounded-t-[5px] bg-gradient-to-t from-[#10B981] to-[#30D158] ring-2 ring-[#0A84FF] transition-all shadow-sm"></div>
+              <div class="h-[60px]"></div>
+              <span class="text-[9px] text-[#0A84FF] font-semibold mt-1 font-tabular">今日</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Micro stats strip -->
+        <div class="mt-2 pt-2 border-t border-white/50 flex items-center justify-between text-[11px] text-[#64748B]">
+          <span>单日最大盈利: <strong class="text-[#1F9D55] font-semibold font-tabular">+5.40 U</strong></span>
+          <span>单日最大亏损: <strong class="text-[#E5383B] font-semibold font-tabular">-4.10 U</strong></span>
+        </div>
+      </section>
+
+      <!-- 2 x 3 Grid of Glass Stat Tiles -->
+      <!-- [胜率 58%] [盈亏比 1.8] [完整平仓 24 笔] [最长连亏 3] [手续费 4.20 U] [最大回撤 6.1%] -->
+      <section class="grid grid-cols-2 gap-2.5">
+        
+        <!-- Tile 1: 胜率 58% -->
+        <div class="liquid-glass-tile p-3.5 flex flex-col justify-between h-[84px] relative overflow-hidden group">
+          <div class="flex items-center justify-between text-[#64748B]">
+            <span class="text-[12px] font-medium">胜率</span>
+            <div class="w-5 h-5 rounded-full bg-[#30D158]/15 flex items-center justify-center text-[#1F9D55]">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+              </svg>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-1.5">
+            <span class="text-[24px] font-bold text-[#0F172A] tracking-tight font-tabular">58<span class="text-[16px] text-[#475569]">%</span></span>
+            <span class="text-[10px] text-[#1F9D55] font-medium font-tabular">14 胜 / 10 负</span>
+          </div>
+        </div>
+
+        <!-- Tile 2: 盈亏比 1.8 -->
+        <div class="liquid-glass-tile p-3.5 flex flex-col justify-between h-[84px] relative overflow-hidden">
+          <div class="flex items-center justify-between text-[#64748B]">
+            <span class="text-[12px] font-medium">盈亏比 (P/L Ratio)</span>
+            <div class="w-5 h-5 rounded-full bg-[#0A84FF]/12 flex items-center justify-center text-[#0A84FF]">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+              </svg>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-1.5">
+            <span class="text-[24px] font-bold text-[#0F172A] tracking-tight font-tabular">1.8</span>
+            <span class="text-[10px] text-[#64748B] font-medium font-tabular">EV = +0.62R</span>
+          </div>
+        </div>
+
+        <!-- Tile 3: 完整平仓 24 笔 -->
+        <div class="liquid-glass-tile p-3.5 flex flex-col justify-between h-[84px] relative overflow-hidden">
+          <div class="flex items-center justify-between text-[#64748B]">
+            <span class="text-[12px] font-medium">完整平仓</span>
+            <div class="w-5 h-5 rounded-full bg-slate-200/60 flex items-center justify-center text-[#475569]">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-1">
+            <span class="text-[24px] font-bold text-[#0F172A] tracking-tight font-tabular">24</span>
+            <span class="text-[12px] font-semibold text-[#64748B]">笔</span>
+            <span class="text-[10px] text-[#0A84FF] ml-auto font-tabular bg-[#0A84FF]/10 px-1.5 py-0.2 rounded">100% 纪律</span>
+          </div>
+        </div>
+
+        <!-- Tile 4: 最长连亏 3 -->
+        <div class="liquid-glass-tile p-3.5 flex flex-col justify-between h-[84px] relative overflow-hidden">
+          <div class="flex items-center justify-between text-[#64748B]">
+            <span class="text-[12px] font-medium">最长连亏</span>
+            <div class="w-5 h-5 rounded-full bg-[#FF9F0A]/15 flex items-center justify-center text-[#FF9F0A]">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-1.5">
+            <span class="text-[24px] font-bold text-[#334155] tracking-tight font-tabular">3</span>
+            <span class="text-[10px] text-[#64748B] font-medium">笔 (熔断上限 3)</span>
+          </div>
+        </div>
+
+        <!-- Tile 5: 手续费 4.20 U -->
+        <div class="liquid-glass-tile p-3.5 flex flex-col justify-between h-[84px] relative overflow-hidden">
+          <div class="flex items-center justify-between text-[#64748B]">
+            <span class="text-[12px] font-medium">手续费</span>
+            <div class="w-5 h-5 rounded-full bg-slate-200/60 flex items-center justify-center text-[#475569]">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-1">
+            <span class="text-[24px] font-bold text-[#0F172A] tracking-tight font-tabular">4.20</span>
+            <span class="text-[12px] font-semibold text-[#64748B]">U</span>
+            <span class="text-[10px] text-[#64748B] ml-auto font-tabular">Maker 0.02%</span>
+          </div>
+        </div>
+
+        <!-- Tile 6: 最大回撤 6.1% -->
+        <div class="liquid-glass-tile p-3.5 flex flex-col justify-between h-[84px] relative overflow-hidden">
+          <div class="flex items-center justify-between text-[#64748B]">
+            <span class="text-[12px] font-medium">最大回撤</span>
+            <div class="w-5 h-5 rounded-full bg-[#FF453A]/12 flex items-center justify-center text-[#E5383B]">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
+              </svg>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-1.5">
+            <span class="text-[24px] font-bold text-[#E5383B] tracking-tight font-tabular">6.1<span class="text-[16px] text-[#E5383B]">%</span></span>
+            <span class="text-[10px] text-[#64748B] font-medium font-tabular">-30.5 U (受控)</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Glass Link Row with Shield Icon: 交易纪律 · 今日 1/3 次 · 规则生效中 with chevron -->
+      <section class="liquid-glass-card p-3.5 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform">
+        <div class="sheen-layer absolute inset-0"></div>
+        <div class="relative z-10 flex items-center gap-3">
+          <!-- Shield Icon Glass Container -->
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#0A84FF]/20 to-[#30B0C7]/20 border border-[#0A84FF]/30 flex items-center justify-center text-[#0A84FF] shadow-xs">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[14px] font-semibold text-[#0F172A]">交易纪律</span>
+              <span class="text-[11px] font-medium text-[#1F9D55] bg-[#30D158]/14 px-2 py-0.2 rounded-full border border-[#30D158]/25">规则生效中</span>
+            </div>
+            <div class="text-[12px] text-[#64748B] mt-0.5 font-tabular">
+              今日开仓配额 <strong class="text-[#0A84FF] font-semibold">1 / 3 次</strong> · 单笔硬止损 2%
+            </div>
+          </div>
+        </div>
+
+        <!-- Chevron right -->
+        <div class="relative z-10 flex items-center text-[#94A3B8]">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+          </svg>
+        </div>
+      </section>
+
+      <!-- Faint disclaimer card -->
+      <div class="text-center pt-1 pb-4">
+        <p class="text-[10px] text-[#94A3B8] font-tabular tracking-wide">
+          所有数据仅为本地沙盒模拟演示 · 无真实交易所账户关联
+        </p>
+      </div>
+
+    </main>
+
+    <!-- FLOATING CAPSULE TAB BAR (Detached 12pt above home indicator, Full Glass, 5 Tabs) -->
+    <!-- Tabs: 1.618, 合约, 持仓, 监控, 统计 (Active) -->
+    <nav class="absolute bottom-[24px] inset-x-4 z-40 h-[64px] liquid-glass-tabbar px-2 flex items-center justify-between" aria-label="主标签栏">
+      
+      <!-- Tab 1: 1.618 -->
+      <button class="flex-1 flex flex-col items-center justify-center h-[52px] rounded-2xl text-[#64748B] active:scale-95 transition-all" onclick="switchTab(this)">
+        <svg class="w-5 h-5 stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
+        </svg>
+        <span class="text-[10px] font-medium mt-0.5 tracking-tight">1.618</span>
+      </button>
+
+      <!-- Tab 2: 合约 -->
+      <button class="flex-1 flex flex-col items-center justify-center h-[52px] rounded-2xl text-[#64748B] active:scale-95 transition-all" onclick="switchTab(this)">
+        <svg class="w-5 h-5 stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+        </svg>
+        <span class="text-[10px] font-medium mt-0.5 tracking-tight">合约</span>
+      </button>
+
+      <!-- Tab 3: 持仓 -->
+      <button class="flex-1 flex flex-col items-center justify-center h-[52px] rounded-2xl text-[#64748B] active:scale-95 transition-all" onclick="switchTab(this)">
+        <svg class="w-5 h-5 stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+        </svg>
+        <span class="text-[10px] font-medium mt-0.5 tracking-tight">持仓</span>
+      </button>
+
+      <!-- Tab 4: 监控 -->
+      <button class="flex-1 flex flex-col items-center justify-center h-[52px] rounded-2xl text-[#64748B] active:scale-95 transition-all" onclick="switchTab(this)">
+        <svg class="w-5 h-5 stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+        <span class="text-[10px] font-medium mt-0.5 tracking-tight">监控</span>
+      </button>
+
+      <!-- Tab 5: 统计 (ACTIVE - inside a lighter glass lens pill with Apple blue #0A84FF) -->
+      <button class="flex-1 flex flex-col items-center justify-center h-[52px] rounded-[22px] active-lens-pill text-[#0A84FF] shadow-xs active:scale-95 transition-all" onclick="switchTab(this)">
+        <svg class="w-5 h-5 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+        <span class="text-[10px] font-semibold mt-0.5 tracking-tight">统计</span>
+      </button>
+
+    </nav>
+
+    <!-- iOS Home Indicator bar (5pt thick, 134pt wide, centered, 8pt from bottom) -->
+    <div class="absolute bottom-2 left-1/2 -translate-x-1/2 w-[134px] h-[5px] bg-[#1E293B]/30 rounded-full z-50 pointer-events-none"></div>
+
+  </div>
+
+  <script>
+    // Range segmented toggle
+    function selectRange(btn, rangeKey) {
+      const container = btn.parentElement;
+      const allBtns = container.querySelectorAll('button');
+      allBtns.forEach(b => {
+        b.classList.remove('glass-segment-active', 'text-[#0A84FF]', 'font-semibold');
+        b.classList.add('text-[#64748B]');
+      });
+      btn.classList.add('glass-segment-active');
+      btn.classList.remove('text-[#64748B]');
+    }
+
+    // Tab switcher demo
+    function switchTab(btn) {
+      const nav = btn.parentElement;
+      const allTabs = nav.querySelectorAll('button');
+      allTabs.forEach(t => {
+        t.classList.remove('active-lens-pill', 'text-[#0A84FF]', 'shadow-xs');
+        t.classList.add('text-[#64748B]');
+        const icon = t.querySelector('svg');
+        if (icon) icon.setAttribute('stroke-width', '1.8');
+        const label = t.querySelector('span');
+        if (label) label.classList.remove('font-semibold');
+      });
+      btn.classList.add('active-lens-pill', 'text-[#0A84FF]', 'shadow-xs');
+      btn.classList.remove('text-[#64748B]');
+      const icon = btn.querySelector('svg');
+      if (icon) icon.setAttribute('stroke-width', '2.2');
+      const label = btn.querySelector('span');
+      if (label) label.classList.add('font-semibold');
+    }
+  </script>
+</body>
+</html>

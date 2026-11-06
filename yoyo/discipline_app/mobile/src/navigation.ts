@@ -1,5 +1,6 @@
 /** Gesture decisions are independent of rendering and never wrap the tab strip. */
-export const MAIN_TABS=['合约','纪律','1.618','持仓','统计'] as const;
+// iPhone 1.0.0 (Stitch iphone-glass-1.0.0): 监控 replaces 纪律 in the bar; 纪律 is a pushed page like 设置.
+export const MAIN_TABS=['合约','监控','1.618','持仓','统计'] as const;
 export type SwipeAxis='pending'|'horizontal'|'vertical';
 export function swipeAxis(axis:SwipeAxis,dx:number,dy:number):SwipeAxis{
  if(axis!=='pending')return axis;

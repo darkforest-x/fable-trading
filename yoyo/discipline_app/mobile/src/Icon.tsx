@@ -1,6 +1,13 @@
 /** Local vector icons matching the Stitch Porcelain & Jade design language. */
-export type IconName='star'|'trash'|'refresh'|'trend'|'trade'|'positions'|'shield'|'link'|'chevron'|'clock'|'check'|'close'|'arrow'|'lock'|'settings';
+export type IconName='bell'|'swap'|'bars'|'fib'|'up'|'down'|'star'|'trash'|'refresh'|'trend'|'trade'|'positions'|'shield'|'link'|'chevron'|'clock'|'check'|'close'|'arrow'|'lock'|'settings';
 const paths:Record<IconName,string>={
+ // iPhone 1.0.0 tab bar and monitor glyphs (Stitch iphone-glass-1.0.0).
+ bell:'M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4',
+ swap:'M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4',
+ bars:'M4 20h16M7 16v-5M12 16V6M17 16V9',
+ fib:'M3 17l5-6 4 4 9-10M3 21h18',
+ up:'M12 19V5M6 11l6-6 6 6',
+ down:'M12 5v14M6 13l6 6 6-6',
  star:'m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z',
  trash:'M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7',
  refresh:'M20 7v5h-5M20 12a8 8 0 1 0-2 5M20 7v5',

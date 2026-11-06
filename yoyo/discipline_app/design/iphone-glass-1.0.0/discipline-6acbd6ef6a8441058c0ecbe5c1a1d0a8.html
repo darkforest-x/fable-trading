@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<title>SPIKE 纪律交易 · 交易纪律 (iOS 26 Liquid Glass)</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          appleBlue: '#0A84FF',
+          appleTeal: '#30B0C7',
+          tradeGreen: '#1F9D55',
+          tradeGreenFill: '#30D158',
+          tradeRed: '#E5383B',
+          tradeRedFill: '#FF453A',
+          appleAmber: '#FF9F0A',
+        },
+        fontFamily: {
+          sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"PingFang SC"', '"Helvetica Neue"', 'sans-serif'],
+          mono: ['"SF Mono"', '"JetBrains Mono"', 'ui-monospace', 'Menlo', 'monospace']
+        }
+      }
+    }
+  }
+</script>
+<style>
+  /* 基础与硬件抗锯齿 */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: #EEF2F7;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", sans-serif;
+    color: #111827;
+    overflow-x: hidden;
+    user-select: none;
+  }
+
+  /* 等宽排版保障数字防抖 */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Apple Liquid Glass 材质核心体系 */
+  .liquid-glass {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.76) 0%, rgba(255, 255, 255, 0.52) 100%);
+    backdrop-filter: blur(34px) saturate(190%);
+    -webkit-backdrop-filter: blur(34px) saturate(190%);
+    border-radius: 26px;
+    border-top: 1px solid rgba(255, 255, 255, 0.95);
+    border-left: 1px solid rgba(255, 255, 255, 0.7);
+    border-right: 1px solid rgba(255, 255, 255, 0.4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 
+      0 18px 38px -12px rgba(15, 34, 64, 0.08),
+      0 4px 12px -2px rgba(15, 34, 64, 0.03),
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 2px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* 极其微妙的斜向镜面高光 (Diagonal Specular Sheen) */
+  .liquid-glass::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 220%;
+    height: 200%;
+    background: linear-gradient(
+      45deg,
+      transparent 42%,
+      rgba(255, 255, 255, 0.22) 48%,
+      rgba(255, 255, 255, 0.08) 52%,
+      transparent 58%
+    );
+    pointer-events: none;
+  }
+
+  /* 状态胶囊微光 */
+  .glass-capsule-green {
+    background: linear-gradient(135deg, rgba(235, 253, 243, 0.78) 0%, rgba(209, 250, 229, 0.58) 100%);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 14px -3px rgba(31, 157, 85, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  }
+
+  /* 圆形玻璃按钮 */
+  .glass-btn-round {
+    width: 38px;
+    height: 38px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.54) 100%);
+    backdrop-filter: blur(24px) saturate(190%);
+    -webkit-backdrop-filter: blur(24px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 6px 16px -4px rgba(20, 36, 60, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .glass-btn-round:active {
+    transform: scale(0.92);
+    background: rgba(255, 255, 255, 0.92);
+  }
+
+  /* 浮动胶囊底栏 */
+  .floating-tabbar {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.84) 0%, rgba(255, 255, 255, 0.62) 100%);
+    backdrop-filter: blur(36px) saturate(200%);
+    -webkit-backdrop-filter: blur(36px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 
+      0 20px 42px -10px rgba(10, 30, 60, 0.13),
+      0 4px 14px 0 rgba(10, 30, 60, 0.04),
+      inset 0 1px 2px rgba(255, 255, 255, 0.95);
+    border-radius: 36px;
+  }
+
+  /* 隐藏滚动条但保留平滑滚动 */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* SVG 进度圆环 */
+  .ring-circle {
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+</style>
+</head>
+<body class="flex justify-center items-start min-h-screen p-0 sm:py-6 bg-[#DCE4EC]">
+
+  <!-- iPhone 17 Pro 402x874pt 严格视口外壳容器 -->
+  <div class="relative w-full max-w-[402px] h-[874px] bg-[#EEF2F7] overflow-hidden sm:rounded-[54px] sm:shadow-[0_28px_80px_-16px_rgba(15,28,50,0.32)] border-0 sm:border-[9px] sm:border-[#1E242E] flex flex-col justify-between">
+    
+    <!-- 背景光斑层 (Liquid Glass Refraction Blobs) -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+      <!-- 左上方 Apple Blue (#0A84FF, 12% opacity) 弥散光斑 -->
+      <div class="absolute -top-[80px] -left-[90px] w-[340px] h-[340px] rounded-full bg-[#0A84FF] opacity-15 blur-[68px]"></div>
+      <!-- 右侧中间 Apple Teal (#30B0C7, 10% opacity) 弥散光斑 -->
+      <div class="absolute top-[320px] -right-[90px] w-[320px] h-[320px] rounded-full bg-[#30B0C7] opacity-12 blur-[72px]"></div>
+      <!-- 底部左侧微蓝光晕 -->
+      <div class="absolute -bottom-[80px] left-[20px] w-[260px] h-[260px] rounded-full bg-[#0A84FF] opacity-10 blur-[60px]"></div>
+    </div>
+
+    <!-- 顶部状态栏与灵动岛预留层 (Dynamic Island Safe Area 62pt) -->
+    <header class="relative z-30 pt-3 px-7 flex justify-between items-center select-none">
+      <!-- 状态栏左侧时间 -->
+      <div class="text-[15px] font-semibold text-[#1C1C1E] tracking-tight tabular-nums">9:41</div>
+      <!-- 灵动岛 (Dynamic Island) 居中拟真模型 -->
+      <div class="w-[124px] h-[34px] bg-[#000000] rounded-full flex items-center justify-between px-3 shadow-sm">
+        <div class="w-3 h-3 rounded-full bg-[#09090B] flex items-center justify-center">
+          <div class="w-1.5 h-1.5 rounded-full bg-[#1A1A24]"></div>
+        </div>
+        <div class="w-2.5 h-2.5 rounded-full bg-[#0D2419] flex items-center justify-center">
+          <div class="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
+        </div>
+      </div>
+      <!-- 状态栏右侧网络与电池 -->
+      <div class="flex items-center space-x-1.5 text-[#1C1C1E]">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9zm0 13c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/></svg>
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"/></svg>
+        <!-- 电池 -->
+        <div class="w-[22px] h-[11px] border border-[#1C1C1E] rounded-[3px] p-[1px] flex items-center">
+          <div class="h-full w-[80%] bg-[#1C1C1E] rounded-[1.5px]"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 可滚动主内容区 (Under-Glass Scrolling Content) -->
+    <main class="relative z-10 flex-1 overflow-y-auto no-scrollbar px-4 pt-1 pb-32">
+
+      <!-- 顶栏导航交互行 (Pushed Page Round Glass Buttons) -->
+      <div class="flex items-center justify-between pt-2 pb-1.5">
+        <!-- 圆形玻璃返回按钮 (44pt 触控热区) -->
+        <button class="glass-btn-round min-w-[44px] min-h-[44px] flex items-center justify-center group" aria-label="返回">
+          <svg class="w-5 h-5 text-[#1C1C1E] group-hover:text-appleBlue transition-colors stroke-[2.4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+
+        <!-- 右侧圆形辅助操作按钮 -->
+        <div class="flex items-center space-x-2">
+          <!-- 历史修改记录 / 审计图标 -->
+          <button class="glass-btn-round min-w-[44px] min-h-[44px] flex items-center justify-center group" aria-label="纪律生效记录">
+            <svg class="w-4 h-4 text-[#4B5563] group-hover:text-appleBlue transition-colors stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
+          <!-- 帮助与规则说明 -->
+          <button class="glass-btn-round min-w-[44px] min-h-[44px] flex items-center justify-center group" aria-label="规则说明">
+            <svg class="w-4 h-4 text-[#4B5563] group-hover:text-appleBlue transition-colors stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M12 18h.01" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- iOS Large Title (34pt Semibold) + 品牌理念副标题 -->
+      <div class="pt-1.5 pb-3">
+        <h1 class="text-[34px] leading-[40px] font-semibold tracking-[-0.02em] text-[#0F172A]">交易纪律</h1>
+        <p class="text-[13px] leading-[18px] text-[#64748B] font-normal mt-0.5 tracking-tight">把规则提前定好，把执行交给系统。</p>
+      </div>
+
+      <!-- 绿色微光状态胶囊 (Glass Status Capsule) -->
+      <div class="glass-capsule-green rounded-full px-3.5 py-1.5 flex items-center justify-between mb-4">
+        <div class="flex items-center space-x-2">
+          <!-- 绿色盾牌徽章 -->
+          <div class="w-5 h-5 rounded-full bg-tradeGreenFill/20 flex items-center justify-center">
+            <svg class="w-3.5 h-3.5 text-tradeGreen fill-current" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <span class="text-[12.5px] font-medium text-tradeGreen tracking-tight">服务端规则生效中</span>
+        </div>
+        <div class="flex items-center space-x-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-tradeGreen animate-pulse"></span>
+          <span class="text-[11px] font-mono text-tradeGreen/80 font-medium">OKX V5 LOCKED</span>
+        </div>
+      </div>
+
+      <!-- 1. 三环仪表盘配额卡片 (Glass Budget Card with Three Ring Gauges) -->
+      <section class="liquid-glass p-4 mb-3.5">
+        <div class="flex items-center justify-between mb-3.5">
+          <div class="flex items-center space-x-1.5">
+            <div class="w-2 h-2 rounded-full bg-appleBlue"></div>
+            <span class="text-[13px] font-semibold text-[#1E293B] tracking-tight">今日执行配额</span>
+          </div>
+          <span class="text-[11px] font-mono text-[#64748B] bg-white/50 px-2 py-0.5 rounded-full border border-white/60">UTC 00:00 刷新</span>
+        </div>
+
+        <!-- 3组环形进度条网格 -->
+        <div class="grid grid-cols-3 gap-2.5">
+          
+          <!-- Gauge 1: 今日开仓 1/3 (Green/Blue) -->
+          <div class="flex flex-col items-center p-2.5 rounded-2xl bg-white/40 border border-white/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
+            <div class="relative w-[58px] h-[58px] flex items-center justify-center">
+              <svg class="w-full h-full" viewBox="0 0 36 36">
+                <!-- 底环 -->
+                <path class="text-slate-200/70" stroke-width="3.2" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                <!-- 进度 1/3 = 33.3% -> stroke-dasharray="33.3, 100" -->
+                <path class="text-appleBlue ring-circle" stroke-dasharray="33.3, 100" stroke-width="3.2" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              </svg>
+              <!-- 环心数字 -->
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-[15px] font-semibold font-mono text-[#0F172A] tabular-nums leading-none">1<span class="text-[11px] text-[#64748B] font-normal">/3</span></span>
+              </div>
+            </div>
+            <span class="text-[11px] font-medium text-[#475569] mt-2">今日开仓</span>
+            <span class="text-[10px] text-tradeGreen font-medium mt-0.5">余 2 次可用</span>
+          </div>
+
+          <!-- Gauge 2: 连亏 0/3 (Safe / Grey-Green) -->
+          <div class="flex flex-col items-center p-2.5 rounded-2xl bg-white/40 border border-white/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
+            <div class="relative w-[58px] h-[58px] flex items-center justify-center">
+              <svg class="w-full h-full" viewBox="0 0 36 36">
+                <!-- 底环 -->
+                <path class="text-slate-200/70" stroke-width="3.2" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                <!-- 进度 0/3 = 0% -->
+                <path class="text-tradeGreenFill ring-circle" stroke-dasharray="0, 100" stroke-width="3.2" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-[15px] font-semibold font-mono text-[#0F172A] tabular-nums leading-none">0<span class="text-[11px] text-[#64748B] font-normal">/3</span></span>
+              </div>
+            </div>
+            <span class="text-[11px] font-medium text-[#475569] mt-2">连亏</span>
+            <span class="text-[10px] text-tradeGreen font-medium mt-0.5">无触发停手</span>
+          </div>
+
+          <!-- Gauge 3: 日亏余量 17%/17% (100% full capacity) -->
+          <div class="flex flex-col items-center p-2.5 rounded-2xl bg-white/40 border border-white/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
+            <div class="relative w-[58px] h-[58px] flex items-center justify-center">
+              <svg class="w-full h-full" viewBox="0 0 36 36">
+                <path class="text-slate-200/70" stroke-width="3.2" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                <!-- 进度 100% -->
+                <path class="text-appleTeal ring-circle" stroke-dasharray="100, 100" stroke-width="3.2" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-[13px] font-semibold font-mono text-[#0F172A] tabular-nums leading-none">17<span class="text-[10px] text-[#64748B] font-normal">%</span></span>
+              </div>
+            </div>
+            <span class="text-[11px] font-medium text-[#475569] mt-2">日亏余量</span>
+            <span class="text-[10px] text-appleTeal font-medium mt-0.5">17%/17% 饱满</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 2. 核心大数概览卡片 (Glass Summary Card: 5% & 3次) -->
+      <section class="liquid-glass p-4 mb-3.5">
+        <div class="grid grid-cols-2 divide-x divide-slate-200/60 pb-3">
+          
+          <!-- 左侧：单笔计划风险 5% -->
+          <div class="pr-3 flex flex-col justify-center">
+            <span class="text-[11.5px] font-medium text-[#64748B] tracking-tight">单笔计划风险</span>
+            <div class="flex items-baseline space-x-1 my-1">
+              <span class="text-[32px] font-semibold font-mono text-[#0F172A] tracking-tight tabular-nums">5%</span>
+              <span class="text-[11px] font-medium text-appleBlue bg-appleBlue/10 px-1.5 py-0.5 rounded-md">硬性上限</span>
+            </div>
+            <span class="text-[11px] text-[#64748B]">按委托建仓时净值锁定</span>
+          </div>
+
+          <!-- 右侧：每日基础次数 3次 -->
+          <div class="pl-4 flex flex-col justify-center">
+            <span class="text-[11.5px] font-medium text-[#64748B] tracking-tight">每日基础次数</span>
+            <div class="flex items-baseline space-x-1 my-1">
+              <span class="text-[32px] font-semibold font-mono text-[#0F172A] tracking-tight tabular-nums">3<span class="text-[18px] font-normal text-[#475569] ml-0.5">次</span></span>
+              <span class="text-[11px] font-medium text-tradeGreen bg-tradeGreenFill/15 px-1.5 py-0.5 rounded-md">严禁频开</span>
+            </div>
+            <span class="text-[11px] text-[#64748B]">包含撤单与止损出局</span>
+          </div>
+
+        </div>
+
+        <!-- 脚注注释行 (Footnote) -->
+        <div class="pt-2.5 border-t border-slate-200/50 flex items-center justify-between text-[11px] text-[#475569]">
+          <div class="flex items-center space-x-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-appleAmber"></span>
+            <span>盈利全平 +1 次 · 日亏与连亏停手优先</span>
+          </div>
+          <svg class="w-3.5 h-3.5 text-[#94A3B8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+      </section>
+
+      <!-- 3. 详细纪律规则卡片群 (Glass Rule Cards with Icon Headers) -->
+      <div class="space-y-3">
+
+        <!-- 规则卡 1: 单笔与仓位 -->
+        <div class="liquid-glass p-4">
+          <!-- 头部标签 -->
+          <div class="flex items-center space-x-2 pb-2.5 border-b border-slate-200/50">
+            <div class="w-6 h-6 rounded-xl bg-appleBlue/12 flex items-center justify-center">
+              <svg class="w-3.5 h-3.5 text-appleBlue" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+              </svg>
+            </div>
+            <h2 class="text-[14px] font-semibold text-[#0F172A] tracking-tight">单笔与仓位</h2>
+          </div>
+
+          <!-- 条目列表 (Rows) -->
+          <div class="divide-y divide-slate-200/40 text-[12.5px]">
+            <div class="py-2.5 flex items-center justify-between">
+              <span class="text-[#64748B]">单笔计划风险</span>
+              <span class="font-medium text-[#0F172A] tabular-nums">净值的 5%</span>
+            </div>
+            <div class="py-2.5 flex items-center justify-between">
+              <span class="text-[#64748B]">保证金模式</span>
+              <span class="font-medium text-[#0F172A] bg-slate-100/70 px-2 py-0.5 rounded-md border border-slate-200/60">全仓 (Cross)</span>
+            </div>
+            <div class="py-2.5 flex items-center justify-between">
+              <span class="text-[#64748B]">杠杆上限</span>
+              <span class="font-medium text-[#0F172A] font-mono tabular-nums text-right">
+                BTC/ETH 100x <span class="text-slate-400">·</span> 山寨 20x
+              </span>
+            </div>
+            <div class="py-2.5 flex items-center justify-between">
+              <span class="text-[#64748B]">同时持仓</span>
+              <span class="font-medium text-appleBlue font-mono tabular-nums">最多 3 笔</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 规则卡 2: 停手与冷静 -->
+        <div class="liquid-glass p-4">
+          <div class="flex items-center space-x-2 pb-2.5 border-b border-slate-200/50">
+            <div class="w-6 h-6 rounded-xl bg-tradeRed/12 flex items-center justify-center">
+              <svg class="w-3.5 h-3.5 text-tradeRed" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+            </div>
+            <h2 class="text-[14px] font-semibold text-[#0F172A] tracking-tight">停手与冷静</h2>
+          </div>
+
+          <div class="divide-y divide-slate-200/40 text-[12.5px]">
+            <div class="py-2.5 flex items-center justify-between">
+              <span class="text-[#64748B]">连续净亏损</span>
+              <span class="font-medium text-tradeRed tabular-nums">3 笔停手</span>
+            </div>
+            <div class="py-2.5 flex items-center justify-between">
+              <span class="text-[#64748B]">日亏停手线</span>
+              <span class="font-medium text-tradeRed tabular-nums">17% (强制熔断)</span>
+            </div>
+            <div class="py-2.5 flex items-center justify-between">
+              <span class="text-[#64748B]">冷静期</span>
+              <span class="font-medium text-[#0F172A] tabular-nums">24 小时 (禁止新建仓)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 规则卡 3: 自动保护 (3-Stage Pipeline) -->
+        <div class="liquid-glass p-4">
+          <div class="flex items-center space-x-2 pb-2.5 border-b border-slate-200/50">
+            <div class="w-6 h-6 rounded-xl bg-tradeGreen/12 flex items-center justify-center">
+              <svg class="w-3.5 h-3.5 text-tradeGreen" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+            </div>
+            <h2 class="text-[14px] font-semibold text-[#0F172A] tracking-tight">自动保护流水线</h2>
+          </div>
+
+          <div class="divide-y divide-slate-200/40 text-[12.5px]">
+            <!-- 阶段 1 -->
+            <div class="py-2.5 flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <span class="w-5 h-5 rounded-md bg-tradeGreenFill/20 text-tradeGreen text-[11px] font-mono font-bold flex items-center justify-center">1R</span>
+                <span class="text-[#64748B]">成本保本</span>
+              </div>
+              <span class="font-medium text-tradeGreen">开仓价 + 手续费缓冲</span>
+            </div>
+            <!-- 阶段 2 -->
+            <div class="py-2.5 flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <span class="w-5 h-5 rounded-md bg-appleBlue/15 text-appleBlue text-[11px] font-mono font-bold flex items-center justify-center">3R</span>
+                <span class="text-[#64748B]">分批止盈</span>
+              </div>
+              <span class="font-medium text-[#0F172A]">平原始 60% 锁定落袋</span>
+            </div>
+            <!-- 阶段 3 -->
+            <div class="py-2.5 flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <span class="w-5 h-5 rounded-md bg-appleTeal/20 text-appleTeal text-[11px] font-mono font-bold flex items-center justify-center">5R</span>
+                <span class="text-[#64748B]">终极离场</span>
+              </div>
+              <span class="font-medium text-[#0F172A]">平全部余仓 (闭环)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. 折叠抽屉说明卡片 (Collapsed Glass Disclosure) -->
+        <details class="liquid-glass group transition-all duration-200">
+          <summary class="p-3.5 flex items-center justify-between cursor-pointer list-none select-none">
+            <div class="flex items-center space-x-2">
+              <svg class="w-4 h-4 text-appleBlue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+              </svg>
+              <span class="text-[13px] font-semibold text-[#1E293B]">规则计算与运行边界</span>
+            </div>
+            <div class="flex items-center space-x-1.5 text-[11px] text-[#64748B]">
+              <span>点击展开</span>
+              <svg class="w-4 h-4 text-[#94A3B8] transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </div>
+          </summary>
+          <div class="px-3.5 pb-3.5 pt-1 text-[11.5px] leading-relaxed text-[#475569] border-t border-slate-200/50 space-y-2">
+            <p>1. <strong class="text-[#1E293B]">1R 现金基准固定</strong>：在开仓指令向撮合引擎提交成功首瞬即由服务端完成数学锚定，持仓存续期间任何浮动盈亏皆不改变此 R 基数。</p>
+            <p>2. <strong class="text-[#1E293B]">熔断停手等级最高</strong>：若连亏达到 3 笔或单日亏损累计越过 17% 阈值，守护进程自动剥夺开仓令牌，即便当日剩余开仓次数大于零亦立即转入 24h 强制定律冷静期。</p>
+            <p>3. <strong class="text-[#1E293B]">只读演示契约</strong>：本界面为客户端纪律监督与参数校验画板，所有展现数据、币种与执行参数均为示例占位，不涉及实盘私钥与真实资金操作。</p>
+          </div>
+        </details>
+
+      </div>
+
+      <!-- 底部安全留白，避免内容被浮动胶囊底栏遮挡 -->
+      <div class="h-6"></div>
+    </main>
+
+    <!-- 底部悬浮胶囊导航栏 (Detached 12pt above Home Indicator, Full Glass) -->
+    <!-- 由于本页面为二级推入页面 (Pushed Page)，当前未激活特定 Tab，五个 Tab 均为常驻待命状态 -->
+    <div class="absolute bottom-[24px] inset-x-4 z-40">
+      <nav class="floating-tabbar h-[58px] px-3 flex items-center justify-between shadow-[0_12px_32px_rgba(15,23,42,0.12)]">
+        
+        <!-- Tab 1: 1.618 -->
+        <button class="flex-1 flex flex-col items-center justify-center py-1 group min-h-[44px]">
+          <svg class="w-5 h-5 text-[#64748B] group-hover:text-appleBlue transition-colors stroke-[1.8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/>
+          </svg>
+          <span class="text-[10px] font-medium text-[#64748B] group-hover:text-appleBlue mt-0.5 tracking-tight">1.618</span>
+        </button>
+
+        <!-- Tab 2: 合约 -->
+        <button class="flex-1 flex flex-col items-center justify-center py-1 group min-h-[44px]">
+          <svg class="w-5 h-5 text-[#64748B] group-hover:text-appleBlue transition-colors stroke-[1.8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/>
+          </svg>
+          <span class="text-[10px] font-medium text-[#64748B] group-hover:text-appleBlue mt-0.5 tracking-tight">合约</span>
+        </button>
+
+        <!-- Tab 3: 持仓 -->
+        <button class="flex-1 flex flex-col items-center justify-center py-1 group min-h-[44px]">
+          <svg class="w-5 h-5 text-[#64748B] group-hover:text-appleBlue transition-colors stroke-[1.8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.52-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/>
+          </svg>
+          <span class="text-[10px] font-medium text-[#64748B] group-hover:text-appleBlue mt-0.5 tracking-tight">持仓</span>
+        </button>
+
+        <!-- Tab 4: 监控 -->
+        <button class="flex-1 flex flex-col items-center justify-center py-1 group min-h-[44px]">
+          <svg class="w-5 h-5 text-[#64748B] group-hover:text-appleBlue transition-colors stroke-[1.8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>
+          </svg>
+          <span class="text-[10px] font-medium text-[#64748B] group-hover:text-appleBlue mt-0.5 tracking-tight">监控</span>
+        </button>
+
+        <!-- Tab 5: 统计 -->
+        <button class="flex-1 flex flex-col items-center justify-center py-1 group min-h-[44px]">
+          <svg class="w-5 h-5 text-[#64748B] group-hover:text-appleBlue transition-colors stroke-[1.8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"/>
+          </svg>
+          <span class="text-[10px] font-medium text-[#64748B] group-hover:text-appleBlue mt-0.5 tracking-tight">统计</span>
+        </button>
+
+      </nav>
+    </div>
+
+    <!-- iOS 底部指示条 (Home Indicator Bar) -->
+    <div class="relative z-50 w-full h-[18px] flex items-center justify-center pointer-events-none pb-1">
+      <div class="w-[138px] h-[4.5px] bg-[#1E293B]/40 rounded-full"></div>
+    </div>
+
+  </div>
+
+</body>
+</html>

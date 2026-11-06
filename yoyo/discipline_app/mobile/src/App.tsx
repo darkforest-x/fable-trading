@@ -36,19 +36,22 @@ import {fieldIssue,issueForMessage,errorCopy,type FieldIssue} from './ticketVali
 import {useKeyboard} from './useKeyboard';
 import {api,ApiError,SERVICE_URL,authorizationScope,type Connection,type Plan,type Position,type State,type Ticket} from './api';
 import {ReplayDesk} from './ReplayDesk';
+import {Monitor} from './Monitor';
 import './replay.css';
 
 const fmt=(v:string|number|undefined,d=2)=>v===undefined?'—':Number(v).toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d});
 const small=(v:string)=>v.replace('-USDT-SWAP','');
 const id=()=>crypto.randomUUID().replaceAll('-','');
 const marginLabel=(mode?:string)=>mode==='cross'?'全仓':'逐仓';
-type Tab='1.618'|'合约'|'持仓'|'统计'|'纪律'|'设置';
+type Tab='1.618'|'合约'|'持仓'|'统计'|'监控'|'纪律'|'设置';
+// 设置 and 纪律 are pushed pages: no tab-bar slot, a back button returns to the tab they came from.
+const PUSHED:Tab[]=['设置','纪律'];
 type ExchangeStatus={connected:boolean;environment:'okx_live'|'okx_demo';execution_enabled:boolean;verified_at?:number;trade_permission?:boolean;position_mode?:string;error?:string};
 type Preview={plan:Plan;policy_revision:number;ticket:Ticket;request_id:string;preview_id?:string};
 
 export default function App(){
  const [replayOpen,setReplayOpen]=useState(false);
- const settingsOrigin=useRef<Tab>('统计');
+ const pushedOrigin=useRef<Tab>('统计');
  const [fibTicket,setFibTicket]=useState(false);
  const [fibPeriod,setFibPeriod]=useState<CandlePeriod>('15m');
  const [quickAuto,setQuickAuto]=useState<{symbol:string;side:'long'|'short'}|null>(null);
@@ -271,10 +274,11 @@ export default function App(){
  }
  function requestClose(pos:Position){if(command.current)return;if(closeRecovery.attempt){notify('请先等待原平仓请求完成核对');return}closeKey.current=id();setClosePercent(50);setCloseLocked(false);setCloseTarget(pos);feedback('light')}
 
- function nav(next:Tab){if(fibTicket)automatic.manual();setFibTicket(false);setQuickAuto(null);if(next!==tab){feedback('light');if(next==='设置')settingsOrigin.current=tab;setNavDirection(next==='设置'?1:tab==='设置'?-1:MAIN_TABS.indexOf(next as typeof MAIN_TABS[number])>MAIN_TABS.indexOf(tab as typeof MAIN_TABS[number])?1:-1)}setTab(next);setError('');setMessage(null)}
+ function nav(next:Tab){if(fibTicket)automatic.manual();setFibTicket(false);setQuickAuto(null);if(next!==tab){feedback('light');if(PUSHED.includes(next)&&!PUSHED.includes(tab))pushedOrigin.current=tab;setNavDirection(PUSHED.includes(next)?1:PUSHED.includes(tab)?-1:MAIN_TABS.indexOf(next as typeof MAIN_TABS[number])>MAIN_TABS.indexOf(tab as typeof MAIN_TABS[number])?1:-1)}setTab(next);setError('');setMessage(null)}
  function choose(next:string,withFeedback=true){automatic.manual();if(next!==symbol&&withFeedback)feedback('light');setSymbol(next);setAllocation(100);setPrice('');setStop('');setFieldError(null)}
  function openFibTicket(row:FibContract,period:CandlePeriod){if(busy||pendingEntryRef.current)return;choose(row.symbol,false);setFibPeriod(period);setKind('market');setDirection(fibSide(row));setStopFeedback(null);setFibTicket(true);setQuickAuto({symbol:row.symbol,side:fibSide(row)});feedback('light')}
  function openPositionSymbol(next:string){if(tab==='合约')feedback('light');if(next!==symbol)choose(next,false);nav('合约');requestAnimationFrame(()=>{window.scrollTo({top:0});document.querySelector<HTMLButtonElement>('.symbol-picker')?.focus({preventScroll:true})})}
+ function openMonitorSymbol(next:string){if(busy||pendingEntryRef.current){notify('当前有请求在核对，稍后再切换合约');return}if(state&&!state.instruments[next]){notify(`${small(next)} 不在当前可交易合约列表`);return}openPositionSymbol(next)}
  function dismissPreview(){setPreview(null);if(uncertain){setTab('持仓');void refresh().catch(()=>setOnline(false))}}
  function closeProgress(){return <section className="trade-progress close-recovery" aria-label="平仓请求进度"><div className="progress-heading"><Spinner/><b>{closeRecovery.attempt?.symbol.replace('-USDT-SWAP','')} · 平仓 {closeRecovery.attempt?.percent}%</b></div><p role="status">{closeRecovery.status==='ready'?'原请求尚未发送，可继续提交':'正在核对原平仓请求'}</p><div className="recovery-actions"><button disabled={busy} onClick={()=>{closeRecovery.check();feedback('light')}}>刷新核对</button>{closeRecovery.status==='ready'&&<button disabled={busy} onClick={()=>void close(null,true)}>以原请求重试</button>}</div></section>}
  const metrics=(plan:Plan)=><dl className="metrics">{[['初始止损价格',`${priceFmt(plan.stop)} USDT`],['入场价格边界',`${priceFmt(plan.entry)} USDT`],['名义仓位',`${fmt(plan.notional)} USDT`],['本单名义 / 净值',`${fmt(plan.notional_equity_multiple)} 倍`],['预计保证金',`${fmt(plan.margin)} USDT`],['价格止损风险',`${fmt(plan.price_risk)} USDT`],['成本预留',`${fmt(plan.costs)} USDT`],['初始计划风险 1R',`${fmt(plan.risk)} USDT`]].map(([k,v])=><div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>;
@@ -289,7 +293,7 @@ export default function App(){
  const mainRef=useRef<HTMLElement>(null);
  const pullStatus=usePullRefresh(mainRef,fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal||editing||busy,async()=>{await Promise.all([refresh(),refreshVisible()])},tab);
  const swipe=useSwipeNav(tab,fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal||editing||busy,nav);
- const navIcons:Record<Tab,IconName>={'1.618':'trade','合约':'trade','持仓':'positions','统计':'trend','纪律':'shield','设置':'link'};
+ const navIcons:Record<Tab,IconName>={'1.618':'fib','合约':'swap','持仓':'positions','监控':'bell','统计':'bars','纪律':'shield','设置':'link'};
  const ruleGroups=[
   {title:'单笔与仓位',icon:'trade' as IconName,rows:[['单笔计划风险',p?`净值的 ${riskPercent}%`:'待连接服务'],['保证金模式',p?mode:'待连接服务'],['杠杆上限',p?`BTC / ETH ${p.major_leverage}x · 山寨 ${p.alt_leverage}x`:'待连接服务'],...(p?.major_allowance_scope==='independent'?[['BTC 独立额度',`保证金 ${Number(p.major_margin_fraction??0)*100}% · 名义 ${p.major_exposure_multiple}倍`],['ETH 独立额度',`保证金 ${Number(p.major_margin_fraction??0)*100}% · 名义 ${p.major_exposure_multiple}倍`],['山寨币共享额度',`保证金 ${Number(p.alt_margin_fraction??0)*100}% · 名义 ${p.alt_exposure_multiple}倍`]]:[['保证金占比上限',p?`BTC / ETH 合计 ${Number(p.major_margin_fraction??0)*100}% · 山寨合计 ${Number(p.alt_margin_fraction??0)*100}%`:'待连接服务']]),['同时持仓与挂单',p?`合计最多 ${p.max_positions} 笔`:'待连接服务'],['每日基础次数',p?`${p.max_entries} 次`:'待连接服务'],['盈利平仓奖励',p?(p.profit_entry_bonus?'整笔净盈利平仓，当天 +1 次':'未启用'):'待连接服务'],['奖励计次','每笔仅一次，分批止盈不重复计'],['额度计算',p?.major_allowance_scope==='independent'?'BTC、ETH 各自独立，山寨币共享；持仓与挂单合计占用':'同类持仓与挂单共享保证金额度']]},
   {title:'停手与冷静',icon:'clock' as IconName,rows:[['连续净亏损',p?`${p.loss_streak} 笔停手`:'待连接服务'],['日亏停手线',p?`当日起始净值的 ${Number(p.daily_loss_fraction)*100}%`:'待连接服务'],['冷静期触发',p?`连亏 ${p.cooldown_after_losses??1} 笔后 ${p.loss_cooldown_seconds/3600} 小时`:'待连接服务'],['盈利 / 分批止盈','不触发冷静期']]},
@@ -347,9 +351,10 @@ export default function App(){
 
     <p className="disclaimer">{live?'已确认的交易所止损止盈不依赖手机在线。Mac 离线期间不能执行新的 1R 保本调整或应急指令。':'计划风险固定，实际损失可能超出预算。服务停机期间不会执行自动退出。'}</p>
    </>}
-   {tab==='统计'&&<Statistics overview={state} online={online} connection={connection} onConnect={()=>nav('设置')}/>}
+   {tab==='统计'&&<Statistics overview={state} online={online} connection={connection} onConnect={()=>nav('设置')} onDiscipline={()=>nav('纪律')}/>}
+   <Monitor connection={connection} active={tab==='监控'} covered={!!sheet||!!preview||!!closeTarget||!!error||noticeModal} onOpenSymbol={openMonitorSymbol} onConnect={()=>nav('设置')}/>
    {tab==='纪律'&&<>
-    <PageHeader title="交易纪律" subtitle="把规则提前定好，把执行交给系统。"/>
+    <PageHeader title="交易纪律" subtitle="把规则提前定好，把执行交给系统。" onBack={()=>nav(pushedOrigin.current)}/>
     <MySystem/>
     <div className={reason?'warning':'healthy'}><Icon name={reason?'lock':'shield'} size={18}/><span>{reason||'服务端规则生效中'}</span></div>
     <DisciplineBudget state={state} online={online} onOpen={()=>{}}/>
@@ -360,7 +365,7 @@ export default function App(){
     <details className="explainer"><summary>规则计算与运行边界<Icon name="chevron" size={16}/></summary><p>每日按北京时间 00:00 切换。未成交撤单经交易所确认后返还次数，已成交不返还。规则以当前生效版本为准。</p><p>外部交易不显示，不占用 App 开仓次数、连亏、仓位或保证金额度。日亏只计算 App 管理交易的当日已实现与浮动盈亏；交易所可用资金仍需满足开仓要求。同币种沿用交易所当前杠杆，App 只管理自己新增的数量。</p><p>保证金占比按账户净值计算：BTC、ETH 各自不超过 10%，山寨合计不超过 5%；本 App 对应额度池的持仓与挂单占用会扣除，单笔计划止损风险仍不超过净值 5%。名义仓位按当前规则分别核验各额度池。开仓与成交前检查，并预留入场费用与不利价差；行情变化仍可能使已有仓位超过比例上限。</p><p>R 按确认的开仓计划固定，包含费用与滑点预留。止盈比例按原始仓位计算。成本预留费率每边 {Number(p?.fee_rate??.0005)*100}%，滑点预留 {Number(p?.slippage_rate??.001)*100}%，未计资金费，不代表你的实际交易所费率。</p><p>日亏停手线不代替每笔止损，多个持仓风险会叠加。{live?'资金费、滑点与全仓强平仍受交易所规则影响；实盘止损不是最大亏损保证。':'当前模拟不计算交易所真实强平价。'}</p></details>
    </>}
    {tab==='设置'&&<>
-    <PageHeader title="设置与账户" subtitle="账户、操作习惯，都在这里。" onBack={()=>nav(settingsOrigin.current)}/>
+    <PageHeader title="设置与账户" subtitle="账户、操作习惯，都在这里。" onBack={()=>nav(pushedOrigin.current)}/>
     {!connection&&<form className="card connection-form" onSubmit={connect}><h2>设备授权</h2><p className="micro">首次授权后，App 会记住这台设备并自动连接。</p><details><summary>首次设备配置</summary><label className="field"><span className="field-label">服务访问令牌<Icon name="lock" size={14}/></span><span className="input-shell"><input aria-label="服务访问令牌" type="password" autoComplete="off" value={token} onChange={e=>setToken(e.target.value)} placeholder="仅首次填写" required/></span></label><button className="primary" disabled={busy}>{busy?<><Spinner/>正在连接…</>:'连接'}<Icon name="arrow" size={18}/></button><p className="micro">{nativeSession?'授权保存在本机安全存储中。':'网页预览仅在本次会话保留授权。'}</p></details></form>}
     {connection&&<AccountSettings connection={connection} busy={busy||!!pendingEntry} onSwitch={switchAccount} onError={setError}/>}
     <section className="card experience-settings"><h2>交易操作</h2><label className="haptics-setting"><span><b>开仓二次确认</b><small>开仓可跳过二次确认；平仓选择比例后提交，风控仍执行。</small></span><input type="checkbox" role="switch" aria-label="开仓二次确认" checked={confirmTrades} disabled={busy} onChange={e=>{setConfirmTrades(e.target.checked);localStorage.setItem('spike-confirm-trades',String(e.target.checked));feedback('light')}}/><i aria-hidden="true"/></label></section>
@@ -371,7 +376,7 @@ export default function App(){
    </>}
   </main>
   {editing&&<div className="keyboard-toolbar"><span>填写完成后继续</span><button onPointerDown={e=>e.preventDefault()} onClick={()=>{(document.activeElement as HTMLElement)?.blur();feedback('light')}}>完成<Icon name="check" size={17}/></button></div>}
-  <nav {...swipe} hidden={editing} className={`bottom-nav ${tab==='设置'?'nav-settings':''}`} style={{'--nav-index':Math.max(0,MAIN_TABS.indexOf(tab as typeof MAIN_TABS[number]))} as CSSProperties} aria-label="主导航">{MAIN_TABS.map(t=><button key={t} aria-current={tab===t?'page':undefined} className={tab===t?'active':''} onClick={()=>nav(t)}><Icon name={navIcons[t]} size={21}/><span>{t}</span></button>)}</nav>
+  <nav {...swipe} hidden={editing} className={`bottom-nav ${PUSHED.includes(tab)?'nav-settings':''}`} style={{'--nav-index':Math.max(0,MAIN_TABS.indexOf(tab as typeof MAIN_TABS[number]))} as CSSProperties} aria-label="主导航">{MAIN_TABS.map(t=><button key={t} aria-current={tab===t?'page':undefined} className={tab===t?'active':''} onClick={()=>nav(t)}><Icon name={navIcons[t]} size={21}/><span>{t}</span></button>)}</nav>
   </div>
   {fibTicket&&!preview&&!error&&!sheet&&!noticeModal&&<Dialog label="1.618 快捷开单" busy={busy||!!pendingEntry} onDismiss={()=>{automatic.manual();setFibTicket(false);setQuickAuto(null)}}><div className="fib-ticket"><div className="fib-ticket-title"><h2>{small(symbol)}<small> / USDT</small></h2><p>快捷开单 · {existing?'沿用持仓方向与止损':'默认 1R 自动计算'}</p></div>{reason&&<button className="guard-strip" onClick={()=>nav(availability?.tab??'纪律')}><Icon name="lock" size={16}/><span>{reason}</span></button>}{orderTicket}</div></Dialog>}
   {!error&&preview&&<Dialog label={live?'确认实盘订单':'确认模拟订单'} busy={busy} onDismiss={dismissPreview}>{dismiss=><><span className="eyebrow">确认交易计划</span><h2>{live?'确认实盘订单':'确认模拟订单'}</h2>{live&&<span className="badge live-mode">真实资金 · OKX 实盘执行</span>}<div className="position-head"><b>{small(preview.ticket.symbol)}USDT</b><span className={preview.ticket.side==='long'?'long':'short'}>{preview.ticket.side==='long'?'开多':'开空'} · {marginLabel(preview.plan.margin_mode)} {preview.ticket.leverage}x</span></div>{metrics(preview.plan)}{preview.plan.exposure_limited&&<p className="micro">本单已按账户剩余名义仓位额度缩小。</p>}<div className="warning"><Icon name="shield" size={18}/><span>{live?`${preview.ticket.kind==='limit'?'限价挂单等待成交，可在持仓页撤单':'全部成交或取消'}；保护异常会尝试平掉余仓，实际损失可能超出预算。`:'提交时重新校验，这不是实盘订单。'}</span></div>{uncertain&&<p className="error">上次请求结果未确认。可用同一编号重试，服务端会去重。也可先查看持仓核对。</p>}{error&&<p className="error" role="alert">{error}</p>}{live&&confirmTrades&&<label className="live-consent"><input type="checkbox" checked={liveConsent} onChange={e=>setLiveConsent(e.target.checked)}/><span>我确认使用真实资金执行本次交易</span></label>}<button className="primary" disabled={busy||(confirmTrades&&live&&!liveConsent)} onClick={confirm}>{busy?<><Spinner/>正在提交…</>:uncertain?'以同一请求重试':live?'确认实盘开仓':'确认模拟开仓'}</button><button className="plain" disabled={busy} onClick={dismiss}>{uncertain?'先查看服务端持仓':'返回修改'}</button></>}</Dialog>}

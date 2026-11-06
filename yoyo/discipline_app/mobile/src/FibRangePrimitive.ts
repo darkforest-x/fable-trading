@@ -28,7 +28,7 @@ export class FibRangePrimitive implements ISeriesPrimitive {
    };
    const x1=coordinate(this.range.start),x2=coordinate(this.range.end);if(x1===null||x2===null||x2<=x1)return;
    ctx.save();ctx.setLineDash([]);ctx.lineWidth=1;
-   ctx.font='11px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';ctx.textAlign='right';ctx.textBaseline='bottom';
+   ctx.font='11px "PingFang SC", -apple-system, BlinkMacSystemFont, sans-serif';ctx.textAlign='right';ctx.textBaseline='bottom';
    for(const level of fibLevels(this.range)){
     const y=source.series.priceToCoordinate(level.price);if(y===null||y<0||y>mediaSize.height)continue;
     ctx.strokeStyle=level.color;ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.stroke();

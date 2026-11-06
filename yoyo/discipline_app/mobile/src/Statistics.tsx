@@ -27,7 +27,7 @@ const PnlChart=memo(function PnlChart({points}:{points:StatisticsData['curve']})
  <details className="chart-data"><summary>查看每日数据</summary>{points.map(point=><div key={point.date}><span>{point.date}</span><b className={tone(point.pnl)}>{fmt(point.pnl)} USDT</b></div>)}</details></div>;
 });
 
-export function Statistics({connection,overview,online,onConnect}:{connection:Connection|null;overview:State|null;online:boolean;onConnect:()=>void}){
+export function Statistics({connection,overview,online,onConnect,onDiscipline}:{connection:Connection|null;overview:State|null;online:boolean;onConnect:()=>void;onDiscipline:()=>void}){
  const [days,setDays]=useState(30),[result,setResult]=useState<{key:string;data:StatisticsData}|null>(null),[error,setError]=useState(''),[loading,setLoading]=useState(false),[refresh,setRefresh]=useState(0);
  const key=connection?statisticsKey(connection,days):'';
  const data=result?.key===key?result.data:cachedStatistics(connection,days);
@@ -66,7 +66,7 @@ export function Statistics({connection,overview,online,onConnect}:{connection:Co
  const unrealized=account?.unrealized_pnl;
  const updateText=updatedAt?`${stale?'上次记录':'截至'} ${new Date(updatedAt*1000).toLocaleTimeString('zh-CN')}${loading?' · 更新中':''}`:loading?'正在读取…':'待连接';
  return <div className="statistics-page">
-  <PageHeader title="账户统计" onSettings={onConnect}/>
+  <PageHeader title="统计" onSettings={onConnect}/>
   {!connection&&<div className="warning"><Icon name="link" size={18}/><span>连接服务后，读取此 App 管理交易的统计。</span><button onClick={onConnect}>连接</button></div>}
   {error&&<div className="error" role="alert"><span>统计暂不可用{data?'，以下为上次记录':''}：{error}</span><button onClick={()=>setRefresh(v=>v+1)}>重试</button></div>}
   <section className={`card account-hero ${loading&&equity==null?'is-loading':''}`} aria-busy={loading}>
@@ -77,6 +77,8 @@ export function Statistics({connection,overview,online,onConnect}:{connection:Co
    {live&&<p className="micro">{fixedCapital!=null&&<>固定本金 {fmt(fixedCapital)} USDT；</>}盈亏仅统计本 App 管理交易，外部仓位不计入。</p>}
    {stale&&equity!=null&&<p className="micro short">当前显示上次记录，等待账户数据更新。</p>}
   </section>
+  {/* iPhone 1.0.0: 纪律 left the tab bar for 监控; its page is one tap away here (Stitch stats 3394dec1518b4b51924f1de5f0af01f4). */}
+  <button className="card link-row discipline-link" onClick={onDiscipline}><span className="link-icon"><Icon name="shield" size={19}/></span><span><b>交易纪律</b><small>{overview?`今日开仓 ${overview.daily?.entries??0} / ${overview.discipline?.entries_limit??overview.policy?.max_entries??3} 次 · ${overview.blockers?.length?'开仓受限':'规则生效中'}`:'连接后读取规则'}</small></span><Icon name="chevron" size={17}/></button>
   <div className="segment stats-period" aria-label="统计周期">{[[7,'近 7 天'],[30,'近 30 天'],[0,'全部']].map(([value,label])=><button key={value} className={days===value?'active':''} aria-pressed={days===value} onClick={()=>{if(days!==value)feedback('light');setDays(Number(value))}}>{label}</button>)}</div>
   <section className="card stats-summary"><div className="section-heading"><h2>已平仓表现</h2><span>仅计完全平仓</span></div>
    <div className="stats-four"><div><span>已平仓</span><b>{summary?.count??'—'}</b><small>笔</small></div><div><span>胜率</span><b>{percent(summary?.win_rate)}</b><small>%</small></div><div><span>盈亏比</span><b>{fmt(summary?.payoff_ratio)}</b><small>均盈 ÷ 均亏</small></div><div><span>平均净 R</span><b>{fmt(summary?.average_net_r)}</b><small>R</small></div></div>

@@ -6,4 +6,5 @@ import './appleGlass.css';
 import './performance.css';
 import '../../../monitor/static/theme-toggle.css';
 import './nightMode.css';
+import './liquidGlass.css';
 createRoot(document.getElementById('root')!).render(<React.StrictMode><App/></React.StrictMode>);
