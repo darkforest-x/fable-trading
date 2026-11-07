@@ -7,12 +7,18 @@ from yoyo.evaluation import monday_breadth_opt_exit_rank as rank
 from yoyo.evaluation import monday_breadth_opt_funding as fund
 
 
-def run():
-    out=study.OUT; entries=pd.read_csv(out/'all_entries.csv')
-    events=pd.read_parquet(out/'all_event_fills/BTC.parquet')
-    anchors=events[events.policy_id==5].drop(columns=['policy_id','net_pct','peak_pct','win','points','legs','ambiguous','up10','gain_half','observed']).copy()
-    entries=pd.concat([entries,pd.read_csv(out/'case_grid_entries.csv')],ignore_index=True)
-    anchors=pd.concat([anchors,pd.read_parquet(out/'case_grid_admissions.parquet')],ignore_index=True)
+def run(case_only=False):
+    out=study.OUT
+    entries=pd.read_csv(out/'case_grid_entries.csv')
+    anchors=pd.read_parquet(out/'case_grid_admissions.parquet')
+    if not case_only:
+        entries=pd.concat([pd.read_csv(out/'all_entries.csv'),entries],ignore_index=True)
+        events=pd.read_parquet(out/'all_event_fills/BTC.parquet')
+        ordinary=events[events.policy_id==5].drop(columns=['policy_id','net_pct','peak_pct','win','points','legs','ambiguous','up10','gain_half','observed']).copy()
+        anchors=pd.concat([ordinary,anchors],ignore_index=True)
+    else:
+        out=out/'funded_case_check'
+        out.mkdir(parents=True,exist_ok=True)
     f=pd.read_parquet(fund.FUNDED_CACHE)
     frame=anchors.merge(f,left_on='decision',right_on='entry_time',how='left',validate='many_to_many')
     frame=frame.dropna(subset=['policy_id']).copy()
@@ -45,6 +51,11 @@ def run():
         for label,part in [(str(i),g[g.epoch==i]) for i in range(4)]+[
              ('2026_ex_september',g[(g.epoch==3)&(g.decision.dt.month!=9)]),('all',g)]:
             evaluated.append(dict(candidate_id=ident,asset='BTC',period=label,**rank.metrics(part)))
+    if case_only:
+        pd.DataFrame(selected).to_csv(out/'locked_rules.csv',index=False)
+        pd.DataFrame(evaluated).to_csv(out/'locked_evaluation.csv',index=False)
+        if returns:pd.concat(returns).to_parquet(out/'locked_events.parquet',index=False)
+        return
     base=pd.read_csv(out/'locked_rules.csv')
     base=base[~base.candidate_id.str.contains('_funded_BTC')].copy()
     base.loc[base.role.eq('case_target'),'role']='fee_only_case'
@@ -57,4 +68,7 @@ def run():
         else:combined.to_csv(out/name,index=False)
 
 
-if __name__=='__main__':run()
+if __name__=='__main__':
+    import argparse
+    parser=argparse.ArgumentParser();parser.add_argument('--case-only',action='store_true')
+    run(parser.parse_args().case_only)
