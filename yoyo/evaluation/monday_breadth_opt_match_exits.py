@@ -85,6 +85,7 @@ def evaluate(rules,events,pairs,primary):
         diff=group.actual_pct-group.random_pct
         stat=study.search.describe(e)
         results.append(dict(candidate_id=row.candidate_id,role=row.role,asset=row.asset,
+            qualified_before_2026=(getattr(row,'eligible',None)==True or getattr(row,'validation_pass',None)==True),
             n_all=len(e),n_pairs=len(diff),coverage=100*len(diff)/len(e) if len(e) else 0,
             months=diff.index.strftime('%Y-%m').nunique() if len(diff) else 0,
             all_net=stat['mean'],all_ex_best_month=stat['exmonth'],all_stress=stat['stress'],
@@ -94,15 +95,34 @@ def evaluate(rules,events,pairs,primary):
     out['p_holm']=np.nan
     adjust_primary(out,primary)
     out['pass']=((out.n_pairs>=10)&(out.months>=6)&(out.coverage>=50)&(out.p_holm<.01)&(out.paired_edge>0)
-                 &(out.all_ex_best_month>0)&(out.all_stress>0)&out.role.eq(primary))
+                 &(out.all_ex_best_month>0)&(out.all_stress>0)&out.role.eq(primary)&out.qualified_before_2026)
     return out
 
 
 if __name__=='__main__':
     import argparse
-    p=argparse.ArgumentParser();p.add_argument('stage',choices=['dynamic','stats_dynamic'])
-    mode=p.parse_args().stage
+    p=argparse.ArgumentParser();p.add_argument('stage',choices=['dynamic','stats_dynamic','stats_fixed','combined'])
+    p.add_argument('--past-only',action='store_true')
+    args=p.parse_args();mode=args.stage
+    if args.past_only:CONTROL=CONTROL/'past_only'
     if mode=='dynamic':study_dynamic()
+    elif mode=='stats_fixed':
+        directory=study.search.SEARCH
+        ev=pd.read_parquet(directory/'locked_events.parquet')
+        draws=pd.read_csv(CONTROL/'fixed_paired.csv',parse_dates=['decision'])
+        acceptable=draws[draws.eligible_coverage.eq(True)]
+        pairs=acceptable.groupby(['candidate_id','decision'],as_index=False).agg(actual_pct=('candidate_member_net_pct','mean'),
+                                                                                   random_pct=('control_net_pct','mean'))
+        final=evaluate(pd.read_csv(directory/'locked_rules.csv'),ev,pairs,'time_exit_winner')
+        final.to_csv(CONTROL/'fixed_validity.csv',index=False)
+    elif mode=='combined':
+        all_=pd.concat([pd.read_csv(CONTROL/(family+'_validity.csv')) for family in ['fixed','dynamic']])
+        prim=all_[all_.role.isin(['dynamic_primary','time_exit_winner'])].sort_values('p_month').copy()
+        pvals=prim.p_month.to_numpy()
+        adj=np.maximum.accumulate(np.where(np.isfinite(pvals),(8-np.arange(len(prim)))*pvals,1)).clip(0,1)
+        prim['p_holm_eight']=np.where(np.isfinite(pvals),adj,np.nan)
+        prim['pass_eight']=prim['pass']&(prim.p_holm_eight<.01)
+        prim.to_csv(CONTROL/'combined_primary_validity.csv',index=False)
     else:
         ev=pd.read_parquet(study.OUT/'locked_events.parquet')
         pairs=pd.read_parquet(CONTROL/'dynamic_paired_events.parquet')
