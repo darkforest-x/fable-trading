@@ -27,7 +27,8 @@ def run():
         plt.rcParams['font.family']=font_manager.FontProperties(fname=str(font)).get_name()
     plt.rcParams.update({'axes.unicode_minus':False,'axes.spines.top':False,'axes.spines.right':False,'font.size':10})
     fig,(top,basket,bottom)=plt.subplots(3,1,figsize=(9.8,9.9),layout='constrained',height_ratios=[1.2,.75,1])
-    top.plot(b.index,b.close,color='#264b64',lw=1.05)
+    closed=b.loc[b.index<last,'close']
+    top.plot([buy,*list(closed.index+pd.Timedelta(minutes=5))],[r.entry_open,*closed.to_list()],color='#264b64',lw=1.05)
     for t,price,caption,offset in [(buy,r.entry_open,'入场  76,127.8',(6,12)),(tp,sale,'卖出 75%  ·  86,325',(-124,18)),
                                   (last,remainder,'卖出余下 25%  ·  86,280',(-110,-40))]:
         top.scatter(t,price,c='#a74324',s=30,zorder=3)
