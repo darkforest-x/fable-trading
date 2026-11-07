@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-breadth-optimization-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: e2bfb16ce495b9049c156c7aa157613c6f0b4ff3
+    status: inconclusive
+    question: Which lower Monday 1.618 market-wide touch and diffusion conditions predict a tradeable rebound, and which causal exits preserve six-day upside in BTC, ETH, SOL and initially touched altcoins?
+    single_variable: Owner-authorized factorial research in PROJECT_PLAN. Stage the entry and fixed-horizon screen, exit comparison on frozen candidates, realized-funding case constraint and paired second-wave exit with unchanged admissions.
+    result: 'Zero of eight primary entry/exit candidates passed historical 2026 matched market controls after 6,143,760 fixed specifications. ETH discretionary-free candidate: 6/7 wins, +3.1565% per trade after fees and funding, past-only matched edge +0.053pp. Twenty-two alt baskets: renewed downside exit +0.6990% vs fixed six days -0.6826% after funding; six strict pairs underperform random by 4.59pp. The named September BTC case earns 10024.65 points after funding with 75% limit, 9886.76 points with 5bp adverse market fills; one net 10000-point capture in 53 original admissions. Sixty-eight equal-weight altcoins earned +20.9095% after funding, with a simultaneous peak close of +23.0693%. Individual stop and trend rules failed to increase mean wave returns in all three pre-2026 blocks. Both historically selected synchronized basket trails timed out throughout 2026.'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - monday-breadth-optimization-20261108-v1
+    canonical_report: experiments/active/exp-monday-breadth-optimization-20261108-v1/controls/combined_primary_validity.csv
+    notes: Chronological first independent admission, 2026 evaluated after 2025 selection. Strict and past-only matched controls, matched-quarter exit timing, funding and adverse costs. MFE is a price-path diagnostic, not a fill. September target is case-informed; registry eligibility remains false.
+
   - experiment_id: exp-monday-breadth-constituent-six-day-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: e6baabae99

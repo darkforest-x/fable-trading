@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: monday-breadth-optimization-20261108-v1
+    artifact_type: manifest
+    role: market_breadth_locked_parameters_controls_and_exit_fills
+    source_repo: darkforest-x/fable-trading
+    source_commit: e2bfb16ce495b9049c156c7aa157613c6f0b4ff3
+    source_path: experiments/active/exp-monday-breadth-optimization-20261108-v1/controls/combined_primary_validity.csv
+    storage_uri: repo://experiments/active/exp-monday-breadth-optimization-20261108-v1/controls/combined_primary_validity.csv
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Includes the 6.14M fixed candidate screen, independent-trade shortlist, practical adaptive and case-informed exits, original Sep 16 fills, full price coverage, both matching regimes, 2026 funding and mark-to-market risk, and separately tested renewed downside breadth exits.
+
   - artifact_id: monday-breadth-constituent-six-day-20261108-v1
     artifact_type: manifest
     role: six_day_outcomes_on_initial_breadth_constituents
