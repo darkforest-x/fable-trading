@@ -307,6 +307,10 @@ def merge_event_fills(events: pd.DataFrame, baseline: pd.DataFrame,
     base["fill_source"] = "prior_case_target_53_locked_events"
     base = attach_funding_proxy(base, proxy_times.as_unit("ns").asi8)
     fills = pd.concat([base, shared0, inc], ignore_index=True, sort=False)
+    # Empty incremental caches start with object dtypes; restore timezone-aware
+    # keys before merging with the UTC event ledger.
+    for column in ("entry_time", "exit_time", "first_exit_time"):
+        fills[column] = pd.to_datetime(fills[column], utc=True)
     fills = fills.drop_duplicates("entry_time", keep="first")
     fill_columns = FILL_COLUMNS + ["funding_proxy_settlement_n", "funding_proxy_used", "fill_source"]
     if "legacy_case_net_pct" in fills:
