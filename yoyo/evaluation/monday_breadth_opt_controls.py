@@ -269,7 +269,7 @@ def _shock_free(shocks: pd.DatetimeIndex, decisions: pd.DatetimeIndex, guard: pd
 
 def _past_shock_free(shocks: pd.DatetimeIndex, decisions: pd.DatetimeIndex,
                      lookback: pd.Timedelta = pd.Timedelta(minutes=60)) -> np.ndarray:
-    """Exclude only shocks already known strictly before each random decision."""
+    """Exclude shocks known within the prior 60 minutes, including the boundary."""
     if not len(shocks):
         return np.ones(len(decisions), dtype=bool)
     left = shocks.searchsorted(decisions - lookback, side="left")
@@ -444,7 +444,9 @@ def _build_task_rows(candidates: pd.DataFrame, selected: pd.DataFrame,
 
 
 def _process_symbol_month(tasks: pd.DataFrame, lower_touches: dict,
-                          shocks: pd.DatetimeIndex, *, past_only: bool = False) -> tuple[list[dict], list[dict]]:
+                          shocks: pd.DatetimeIndex, *, past_only: bool = False,
+                          price_frame: pd.DataFrame | None = None,
+                          price_receipt: dict | None = None) -> tuple[list[dict], list[dict]]:
     tasks = tasks.copy()
     dynamic = tasks.source.eq("exits")
     tasks["match_horizon_hours"] = tasks.hold_hours.astype(int)
@@ -461,7 +463,11 @@ def _process_symbol_month(tasks: pd.DataFrame, lower_touches: dict,
     warmup = pd.Timedelta(minutes=max(max_w + max_x, 65) + 5)
     start = month_start - warmup
     end = month_end + pd.Timedelta(hours=max_h)
-    frame, receipt = load_full_ohlc(symbol, start, end, needed_intervals=None, repair_missing=False)
+    if price_frame is None:
+        frame, receipt = load_full_ohlc(symbol, start, end, needed_intervals=None, repair_missing=False)
+    else:
+        frame = price_frame
+        receipt = price_receipt or {}
     monitor_grid, monitor_prefix = _monitor_prefix(start, month_end)
     match_rows: list[dict] = []
     receipt_row = {"symbol": symbol, "month": month_start.strftime("%Y-%m"),
@@ -700,6 +706,29 @@ def _self_test() -> dict:
     ret = base.trade_returns(frame.open.to_numpy(), first[:1], hold_bars=6*12)
     if len(ret) != 1 or not np.isfinite(ret.iloc[0]):
         raise AssertionError("Fixed VectorBT return replay failed")
+    month_task = pd.DataFrame([{
+        "rule_event_id": "reuse-fixture", "candidate_id": "reuse-fixture",
+        "candidate_trade_id": "reuse-fixture", "decision": decision, "known": known,
+        "asset": "BTC", "source": "search", "role": "time_exit_winner",
+        "policy_id": "fixture", "epoch": 3, "epoch_rank": 3,
+        "minutes": 30, "wait_min": 30, "hold_hours": 6,
+        "candidate_net_pct": np.nan, "symbol": "TESTUSDT", "weight": 1.0,
+        "expected_symbols": 1, "draw_limit": MAX_FIXED_DRAWS,
+        "candidate_monitor_fraction": 1.0,
+    }])
+    original_loader = load_full_ohlc
+    try:
+        def unexpected_price_reload(*args, **kwargs):
+            raise AssertionError("Injected per-month OHLC frame should bypass the local loader")
+        globals()["load_full_ohlc"] = unexpected_price_reload
+        reused_rows, _ = _process_symbol_month(
+            month_task, {}, pd.DatetimeIndex([]), price_frame=frame,
+            price_receipt={"local_sources": ["fixture"]},
+        )
+    finally:
+        globals()["load_full_ohlc"] = original_loader
+    if not reused_rows or not np.isfinite(reused_rows[0]["net_pct"]):
+        raise AssertionError("Per-symbol cached OHLC frame did not produce fixed controls")
     empty_match = pd.DataFrame(columns=["source"])
     no_pair_meta = pd.DataFrame([{
         "rule_event_id": "no-pair", "candidate_id": "no-pair", "decision": decision,
@@ -724,6 +753,7 @@ def _self_test() -> dict:
             "draws": first.tolist(), "sample_net_pct": float(ret.iloc[0]),
             "dynamic_draw_reuse": True,
             "past_only_causality": True,
+            "reused_ohlc_frame": True,
             "unmatched_draw_rows": int(len(no_pairs)), "partial_pair_coverage_pct": float(partial.coverage_pct)}
 
 
@@ -748,16 +778,45 @@ def run(*, sources: list[str], epoch3_only: bool = False, past_only: bool = Fals
     task_coverage_rows: list[dict] = []
     receipts: list[dict] = []
     tasks["month"] = tasks.decision.dt.strftime("%Y-%m")
-    groups = list(tasks.groupby(["symbol", "month"], sort=True))
-    for i, ((symbol, month), group) in enumerate(groups, 1):
-        rows, proofs = _process_symbol_month(group, lower_touches, shocks, past_only=past_only)
-        matches.extend(rows)
-        for proof in proofs:
-            task_coverage_rows.extend(proof.pop("task_coverage", []))
-            proof["sources"] = sorted(group.source.astype(str).unique())
-            receipts.append(proof)
-        if i % 25 == 0 or i == len(groups):
-            print(f"matched {i}/{len(groups)} symbol-months; rows={len(matches)}", flush=True)
+    symbol_groups = tasks.groupby("symbol", sort=True)
+    total_symbols = int(tasks.symbol.nunique())
+    total_month_groups = int(tasks.groupby(["symbol", "month"], sort=True).ngroups)
+    month_i = 0
+    for symbol_i, (symbol, symbol_tasks) in enumerate(symbol_groups, 1):
+        symbol_tasks = symbol_tasks.copy()
+        month_values = sorted(symbol_tasks.month.unique())
+        month_starts = [pd.Timestamp(f"{month}-01", tz="UTC") for month in month_values]
+        last_month_end = pd.Timestamp(f"{month_values[-1]}-01", tz="UTC") + pd.DateOffset(months=1)
+        max_w = int(symbol_tasks.minutes.max())
+        max_x = int(symbol_tasks.wait_min.max())
+        max_h = int(symbol_tasks.hold_hours.max())
+        warmup = pd.Timedelta(minutes=max(max_w + max_x, 65) + 5)
+        symbol_start = month_starts[0] - warmup
+        symbol_end = last_month_end + pd.Timedelta(hours=max_h)
+        full_frame, price_receipt = load_full_ohlc(
+            str(symbol), symbol_start, symbol_end, needed_intervals=None, repair_missing=False
+        )
+        for month, group in symbol_tasks.groupby("month", sort=True):
+            current_month_start = pd.Timestamp(f"{month}-01", tz="UTC")
+            current_month_end = current_month_start + pd.DateOffset(months=1)
+            slice_start = current_month_start - warmup
+            slice_end = current_month_end + pd.Timedelta(hours=max_h)
+            frame = full_frame.loc[(full_frame.index >= slice_start) & (full_frame.index <= slice_end)]
+            rows, proofs = _process_symbol_month(
+                group, lower_touches, shocks, past_only=past_only,
+                price_frame=frame, price_receipt=price_receipt,
+            )
+            matches.extend(rows)
+            for proof in proofs:
+                task_coverage_rows.extend(proof.pop("task_coverage", []))
+                proof["sources"] = sorted(group.source.astype(str).unique())
+                proof["symbol_load_range"] = [symbol_start.isoformat(), symbol_end.isoformat()]
+                proof["symbol_load_months"] = len(month_values)
+                receipts.append(proof)
+            month_i += 1
+            if month_i % 25 == 0 or month_i == total_month_groups:
+                print(f"matched {month_i}/{total_month_groups} symbol-months; symbol {symbol_i}/{total_symbols}; rows={len(matches)}", flush=True)
+        del full_frame
 
     match_frame = pd.DataFrame(matches)
     if match_frame.empty:
@@ -791,7 +850,7 @@ def run(*, sources: list[str], epoch3_only: bool = False, past_only: bool = Fals
         old_coverage = old_coverage[~old_coverage.source.isin(sources)] if "source" in old_coverage else old_coverage
         coverage = pd.concat([old_coverage, coverage], ignore_index=True, sort=False)
     coverage.to_csv(output_dir / "coverage.csv.tmp", index=False)
-    (CONTROL_DIR / "coverage.csv.tmp").replace(old_coverage_path)
+    (output_dir / "coverage.csv.tmp").replace(old_coverage_path)
 
     scope_path = output_dir / "out_of_scope_locked_candidates.csv"
     scope_rows = _scope_only_rows(candidates)
@@ -807,7 +866,7 @@ def run(*, sources: list[str], epoch3_only: bool = False, past_only: bool = Fals
         old_receipts = json.loads(receipts_path.read_text())
         old_receipts = [r for r in old_receipts if not set(r.get("sources", [])) & set(sources)]
         receipts = old_receipts + receipts
-    receipt_tmp = CONTROL_DIR / "price_source_receipts.json.tmp"
+    receipt_tmp = output_dir / "price_source_receipts.json.tmp"
     receipt_tmp.write_text(json.dumps(receipts, indent=2, ensure_ascii=False, default=str) + "\n")
     receipt_tmp.replace(receipts_path)
 
@@ -816,7 +875,8 @@ def run(*, sources: list[str], epoch3_only: bool = False, past_only: bool = Fals
     source_runs = manifest.get("source_runs", {})
     source_runs["+".join(sources)] = {
         "epoch3_only": bool(epoch3_only), "selected_rule_events": int(len(selected)),
-        "symbol_month_tasks": int(len(groups)), "control_rows": int(len(match_frame)),
+        "symbol_month_tasks": int(total_month_groups), "symbols_loaded_once": int(total_symbols),
+        "control_rows": int(len(match_frame)),
         "fixed_rows": int(len(fixed_frame)), "dynamic_rows": int(len(dynamic_frame)),
     }
     manifest.update({
@@ -829,12 +889,12 @@ def run(*, sources: list[str], epoch3_only: bool = False, past_only: bool = Fals
         "shock_exclusion": ("Exclude only if a same-side 25+ ledger shock was already known in [random decision - 60m, random decision); also exclude controls whose hold interval overlaps the candidate actual hold interval. Future shocks are allowed."
                             if past_only else "Exclude controls within +/- (hold_hours + minutes + wait_min) of any completed 5m same-side 25+ first-touch shock known time."),
         "matching_strata": ["same symbol", "same UTC decision month", "same UTC 6h decision block", "same prior-1h realized-vol bucket [.25,.5,1,2,4]%", "same prior-1h trend sign before known", "same NY weekday at known and decision", "same observable 5m-bar fraction over W+X"],
-        "price_data": "monday_breadth_opt_payoffs.load_full_ohlc(..., needed_intervals=None, repair_missing=False); registered local/cache only, no REST.",
+        "price_data": "monday_breadth_opt_payoffs.load_full_ohlc(..., needed_intervals=None, repair_missing=False); once per symbol over selected months then sliced per month in memory; registered local/cache only, no REST.",
         "fixed_fees": "VectorBT fixed-control returns use existing two-taker-fill fees and are replayed from the already loaded local month matrix.",
         "dynamic_behavior": "Dynamic matches store only random entry coordinates and weights; no fixed-horizon VectorBT replay or second price read.",
     })
-    (CONTROL_DIR / "manifest.json.tmp").write_text(json.dumps(manifest, indent=2, ensure_ascii=False, default=str) + "\n")
-    (CONTROL_DIR / "manifest.json.tmp").replace(manifest_path)
+    (output_dir / "manifest.json.tmp").write_text(json.dumps(manifest, indent=2, ensure_ascii=False, default=str) + "\n")
+    (output_dir / "manifest.json.tmp").replace(manifest_path)
     return manifest
 
 
