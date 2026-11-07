@@ -27,15 +27,24 @@ def archive_month(symbol,month):
     markname=f'{symbol}-1h-{month}.zip'
     fetch(base,'mark_1h',symbol,f'{BASE}/monthly/markPriceKlines/{symbol}/1h/{markname}')
     mark=base/'mark_1h'/symbol/markname
-    if not rate.is_file() or not mark.is_file():return pd.DataFrame()
+    if not rate.is_file():return pd.DataFrame()
     rr=pd.read_csv(rate)
-    qq=pd.read_csv(mark,header=None,usecols=[0,1],names=['t','mark_price'])
-    qq=qq[pd.to_numeric(qq.t,errors='coerce').notna()].copy()
-    qq['t']=pd.to_datetime(qq.t.astype('int64'),unit='ms',utc=True)
-    mark_price=pd.to_numeric(qq.set_index('t').mark_price)
+    def archive_opens(path):
+        quotes=pd.read_csv(path,header=None,usecols=[0,1],names=['t','mark_price'])
+        quotes=quotes[pd.to_numeric(quotes.t,errors='coerce').notna()].copy()
+        quotes['t']=pd.to_datetime(quotes.t.astype('int64'),unit='ms',utc=True)
+        return pd.to_numeric(quotes.set_index('t').mark_price)
     rr['clock']=pd.to_datetime(rr.calc_time,unit='ms',utc=True).dt.floor('5min')
     rr=rr.set_index('clock').rename(columns={'last_funding_rate':'realized_rate'})
-    rr['mark_price']=mark_price.reindex(rr.index).to_numpy();rr['price_proxy']=True
+    rr['mark_price']=archive_opens(mark).reindex(rr.index) if mark.is_file() else np.nan
+    # Some monthly mark archives omit a complete UTC day present in the daily archive.
+    for day in rr.index[rr.mark_price.isna()].normalize().unique():
+        filename=f'{symbol}-1h-{day:%Y-%m-%d}.zip'
+        fetch(base,'daily_mark_1h',symbol,f'{BASE}/daily/markPriceKlines/{symbol}/1h/{filename}')
+        path=base/'daily_mark_1h'/symbol/filename
+        if path.is_file():
+            rr['mark_price']=rr.mark_price.fillna(archive_opens(path))
+    rr['price_proxy']=True
     return rr
 
 
