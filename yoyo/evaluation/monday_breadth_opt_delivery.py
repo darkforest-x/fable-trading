@@ -55,7 +55,9 @@ def compact():
     for typ,directory in selectors.items():
         r=pd.read_csv(directory/'locked_rules.csv')
         ev=pd.read_csv(directory/'locked_evaluation.csv')
-        validity=pd.read_csv(control/('fixed_validity.csv' if typ=='timed' else 'dynamic_validity.csv')).set_index('candidate_id')
+        name='fixed_validity.csv' if typ=='timed' else 'dynamic_validity.csv'
+        validity=pd.read_csv(control/name).set_index('candidate_id')
+        past=pd.read_csv(control/'past_only'/name).set_index('candidate_id')
         for row in r[r.role.isin(ROLES)].itertuples():
             k=row.candidate_id
             if typ=='timed':fold=ev[(ev.candidate_id==k)&(ev.epoch==3)]
@@ -74,10 +76,39 @@ def compact():
                 '退出时点复利回撤%':stat.dd,'5分钟收盘盯市回撤%':risk.get('marked_close_drawdown_pct',np.nan),
                 '可配对事件':v.get('n_pairs',0),'同币随机均收%':v.get('paired_random',np.nan),
                 '同组信号均收%':v.get('paired_actual',np.nan),'相对随机均收差_百分点':v.get('paired_edge',np.nan),
-                '严格多重校正p':v.get('p_holm',np.nan),'满足全部检验':v.get('pass',False)})
+                '严格多重校正p':v.get('p_holm',np.nan),'满足全部检验':v.get('pass',False),
+                '仅排除已发生冲击时配对数':past.loc[k,'n_pairs'] if k in past.index else 0,
+                '仅排除已发生冲击时相对随机差_百分点':past.loc[k,'paired_edge'] if k in past.index else np.nan})
     df=pd.DataFrame(res)
     df.to_csv(out/'锁定参数与2026核验.csv',index=False,encoding='utf-8-sig')
     return df
 
 
-if __name__=='__main__':compact()
+def wave_comparison():
+    out=search.OUT
+    rules=pd.read_csv(study.OUT/'second_wave_requests/locked_rules.csv').set_index('asset')
+    timeline=pd.read_csv(study.OUT/'second_wave_random_exit_timing.csv').set_index('asset')
+    funding=pd.read_csv(study.OUT/'second_wave_funding.csv').set_index('asset')
+    chosen=pd.read_csv(study.OUT/'second_wave_chosen.csv').set_index('asset')
+    strict=pd.read_csv(out/'controls/second_wave/second_wave_validity.csv').set_index('asset')
+    past=pd.read_csv(out/'controls/second_wave/past_only/second_wave_validity.csv').set_index('asset')
+    rows=[]
+    for asset,r in rules.iterrows():
+        t=timeline.loc[asset];f=funding.loc[asset];c=chosen.loc[asset]
+        rows.append({'标的':asset,'初始窗口分钟':r.minutes,'初始触轨范围':count_label(r.breadth),'观察分钟':r.wait_min,
+            '入场前新增币条件':FOLLOW[r.diffusion],'入场后检查小时':r.checkpoints,
+            '退出判定':'入场后不同新增下轨币数达到初始币数，在检查时点退出，否则持六天',
+            '2026独立笔数':t.n,'提前退出次数':t.early,'扣费胜率%':c.win3,'扣费六天均收%':t.no_early_exit,
+            '扣费二次扩散退出均收%':t.actual_net,'相对六天改善_百分点':c.edge3,
+            '含资金费配对笔数':f.covered,'含资金费六天均收%':f.fixed_funded,'含资金费二次扩散均收%':f.wave_funded,
+            '含资金费二次扩散胜率%':f.wave_win,'六天单币最大浮盈均值%':f.mean_member_peak,
+            '同季度随机提前退出均收%':t.random_early_net,'随机退出双侧p':t.p_two_sided,
+            '同币严格对照可配对数':strict.loc[asset,'n_pairs'],'同币严格对照差_百分点':strict.loc[asset,'paired_edge'],
+            '仅排除已发生冲击时匹配数':past.loc[asset,'n_pairs'],'仅排除已发生冲击时相对随机差_百分点':past.loc[asset,'paired_edge'],
+            '去最佳月扣费均收%':t.remove_best_month,'单次最差扣费收益%':t.worst_event,'满足严格检验':strict.loc[asset,'pass']})
+    pd.DataFrame(rows).to_csv(out/'二次扩散退出对照.csv',index=False,encoding='utf-8-sig')
+
+
+if __name__=='__main__':
+    compact()
+    wave_comparison()
