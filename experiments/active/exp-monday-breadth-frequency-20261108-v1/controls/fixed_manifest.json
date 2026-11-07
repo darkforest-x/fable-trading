@@ -1,0 +1,49 @@
+{
+  "phase": "fixed",
+  "input_rules": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-breadth-frequency-20261108-v1/fixed/locked_rules.csv",
+  "input_events": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-breadth-frequency-20261108-v1/fixed/locked_events.parquet",
+  "actual_entry_scope": "decision >= 2026-01-01T00:00:00Z and < 2027-01-01T00:00:00Z",
+  "matcher": "monday_breadth_opt_controls._candidate_pool(..., past_only=True), _process_symbol_month",
+  "matching_strata": [
+    "same asset and constituent",
+    "same UTC decision month",
+    "same UTC 6-hour decision block",
+    "same prior-1h realized-volatility bucket",
+    "same prior-1h trend sign before known",
+    "same New York weekday at known and decision",
+    "same monitor fraction over initial+wait"
+  ],
+  "recent_shock_rule": "Exclude a control if any same-side 25+ breadth shock was known during [control decision - 60m, control decision], inclusive at the decision boundary. Future shocks are allowed.",
+  "non_overlap_rule": "For each locked event, control [entry, entry+hold_hours) may not overlap the actual [decision, decision+hold_hours) reservation; each event's own hold_hours is used.",
+  "fixed_method": "One unlevered long entered at Binance USD-M next-bar open and market-exited at the locked event's own hold_hours open; VectorBT two TAKER fees of 0.05% per side.",
+  "dynamic_method": "Random controls replayed using the locked native VectorBT policy_id=67; one market entry and market exit; no funding on actual or controls.",
+  "costs": {
+    "market_entry_fee_pct": 0.05,
+    "market_exit_fee_pct": 0.05,
+    "slippage_pct": 0.0,
+    "funding_in_either_side": false
+  },
+  "draws": {
+    "fixed_max_per_symbol_event": 12,
+    "dynamic_max_per_symbol_event": 3,
+    "sampling": "seeded without replacement within each event's exact matched pool"
+  },
+  "alt_eligibility": "Pair actual and random returns on the same member subset; include only rows with >=80% expected constituent coverage.",
+  "monthly_inference": "Reuse monday_breadth_opt_match_exits.paired_month_p on the summed event differences within each UTC month; finite-sample exact sign flips through 16 months, seeded 65,535 draws above 16 months.",
+  "multiplicity": "Holm correction within locked primary candidate family; combined 9-family table will be written once fixed and long phases are both present.",
+  "dynamic_policy": {
+    "locked_hold_hours": [
+      6,
+      24,
+      144
+    ]
+  },
+  "rows": {
+    "actual_2026_events": 1067,
+    "tasks": 8632,
+    "control_matches": 82431,
+    "paired_events": 1067
+  },
+  "matched_with_builder_commit": "2b445a3048638a4d6353c63fae3051b49e35ac9a",
+  "receipt_packaging_commit": "ab0d7d0c4c06bdad4b47f741894bb57a7c98a022"
+}
