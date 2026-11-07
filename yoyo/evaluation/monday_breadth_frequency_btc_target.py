@@ -128,7 +128,7 @@ def compare_baseline(admissions: pd.DataFrame, baseline: pd.DataFrame, shared: p
                             suffixes=("_case", "_cache"), validate="one_to_one")
     if len(joined) != 53:
         raise AssertionError(f"Only {len(joined)} of 53 original entries exist in the read-only funded cache")
-    numeric = ["entry_open", "exit_vwap", "net_points", "net_pct", "exit_legs", "first_exit_price",
+    numeric = ["entry_open", "exit_vwap", "net_points", "exit_legs", "first_exit_price",
                "reason", "ambiguous", "peak_pct", "funding_points", "funded_points", "funded_pct"]
     max_abs_diff = 0.0
     for col in numeric:
@@ -138,11 +138,23 @@ def compare_baseline(admissions: pd.DataFrame, baseline: pd.DataFrame, shared: p
         max_abs_diff = max(max_abs_diff, float(diff))
         if not np.allclose(left, right, rtol=0, atol=1e-9, equal_nan=True):
             raise AssertionError(f"Baseline funded cache differs from prior case output for {col}: {diff}")
+    # The old locked case ledger labeled funding-adjusted funded_pct as net_pct;
+    # the shared raw-fill cache correctly stores price-and-fee-only net_pct.
+    legacy_net = pd.to_numeric(joined["net_pct_case"], errors="coerce").to_numpy(float)
+    case_funded = pd.to_numeric(joined["funded_pct_case"], errors="coerce").to_numpy(float)
+    cache_price = (100 * pd.to_numeric(joined["net_points_cache"], errors="coerce")
+                   / pd.to_numeric(joined["entry_open_cache"], errors="coerce")).to_numpy(float)
+    cache_net = pd.to_numeric(joined["net_pct_cache"], errors="coerce").to_numpy(float)
+    if not np.allclose(legacy_net, case_funded, rtol=0, atol=1e-9, equal_nan=True):
+        raise AssertionError("Prior case net_pct is no longer its funding-adjusted funded_pct alias")
+    if not np.allclose(cache_price, cache_net, rtol=0, atol=1e-9, equal_nan=True):
+        raise AssertionError("Shared cache net_pct no longer means net_points / entry price")
     if not joined.exit_time_case.equals(joined.exit_time_cache):
         raise AssertionError("Baseline exit times differ from prior funded cache")
     return {"baseline_candidate_id": BASE_CANDIDATE, "expected_events": 53,
             "admitted_events": len(a), "admission_keys_exact": True,
             "read_only_cache_matches": len(joined), "funded_fill_fields_exact": True,
+            "return_column_semantics": "legacy case net_pct aliases funded_pct; shared cache net_pct is price-and-fee return before funding; emitted net_pct is normalized to price-and-fee, funded_pct is funding-adjusted",
             "max_absolute_numeric_difference": max_abs_diff,
             "min_initial_count": int(baseline.initial.min()),
             "policy_key": str(baseline.rule.iloc[0])}
@@ -288,13 +300,18 @@ def merge_event_fills(events: pd.DataFrame, baseline: pd.DataFrame,
         inc["fill_source"] = "this_experiment_incremental_cache"
     # Exact baseline rows take precedence and remain visibly tied to the 53-trade run.
     base = baseline.copy()
+    base["legacy_case_net_pct"] = base["net_pct"]
+    base["net_pct"] = 100 * base.net_points / base.entry_open
     base["policy_id"] = 0
     base["entry_time"] = base.decision
     base["fill_source"] = "prior_case_target_53_locked_events"
     base = attach_funding_proxy(base, proxy_times.as_unit("ns").asi8)
     fills = pd.concat([base, shared0, inc], ignore_index=True, sort=False)
     fills = fills.drop_duplicates("entry_time", keep="first")
-    needed = fills[FILL_COLUMNS + ["funding_proxy_settlement_n", "funding_proxy_used", "fill_source"]]
+    fill_columns = FILL_COLUMNS + ["funding_proxy_settlement_n", "funding_proxy_used", "fill_source"]
+    if "legacy_case_net_pct" in fills:
+        fill_columns.append("legacy_case_net_pct")
+    needed = fills[fill_columns]
     merged = events.merge(needed, left_on="decision", right_on="entry_time", how="left",
                           validate="many_to_one", suffixes=("", "_fill"))
     merged["fill_status"] = np.where(merged.exit_time.notna(), "filled", "no_complete_fill_available")
