@@ -22,7 +22,7 @@
     "2020–2022",
     "2023–2024",
     "2025 used for rule selection",
-    "2026-01-01 to 2026-10-28 UTC (exclusive for entries), track exits through their actual dates. Time zone in raw ledgers is UTC."
+    "2026-01-01 through the close of the last 2026-10-27 UTC signal candle. Initial and observation windows use only candles opened strictly before 2026-10-28 00:00 UTC. The last completed window can produce an entry exactly at 00:00 UTC on October 28 (one freq72_ETH trade). Follow every admitted trade through its actual exit. Raw timestamps are UTC."
   ],
   "fees": "OKX Lv1 assumption; actual proxy market is Binance USD-M futures. Market entries/exits are 0.05% each side and BTC profit-limit fills are 0.02%. Slippage is a separate sensitivity -0.20 percentage points per round trip, not in base estimates. USD-M realized funding applied to the frozen 2026 alerts; random controls compare both sides without funding except BTC target sensitivities where the target and both payoffs use funding.",
   "interpretation": [
