@@ -119,7 +119,7 @@ def _monitor_grid(start: pd.Timestamp, end: pd.Timestamp) -> tuple[pd.DatetimeIn
     first = pd.Timestamp(start).floor("5min")
     stop = pd.Timestamp(end).ceil("5min")
     grid = pd.date_range(first, stop, freq=STEP, inclusive="left")
-    observed = (grid.tz_convert("America/New_York").dayofweek != 0).astype(np.int64)
+    observed = (grid.tz_convert("America/New_York").day_of_week != 0).astype(np.int64)
     return grid, np.r_[0, np.cumsum(observed, dtype=np.int64)]
 
 
@@ -137,7 +137,7 @@ def _trailing_unique_count(ledger: pd.DataFrame, known_times: pd.DatetimeIndex) 
     seen = ledger[["symbol", "touch"]].copy()
     # A touch event is known only once its 5m interval has closed.
     seen["available"] = seen.touch + STEP
-    seen.sort_values("available", inplace=True)
+    seen = seen.sort_values("available")
     times = pd.DatetimeIndex(seen.available)
     names = seen.symbol.to_numpy()
     queries = pd.DatetimeIndex(known_times.unique()).sort_values()
@@ -161,8 +161,8 @@ def _trailing_unique_count(ledger: pd.DataFrame, known_times: pd.DatetimeIndex) 
     return result
 
 
-def _shock_ages(ledger: pd.DataFrame, known_times: pd.DatetimeIndex) -> dict[pd.Timestamp, tuple[float, float]]:
-    """Return age in minutes of latest prior 25+ lower and any-side shocks."""
+def _shock_ages(ledger: pd.DataFrame, known_times: pd.DatetimeIndex) -> dict[pd.Timestamp, tuple]:
+    """Return strict-prior 25+ shock ages and explicit available-history state."""
     counts = ledger.groupby(["touch", "side"]).symbol.nunique().unstack(fill_value=0)
     lower_times = counts.index[counts.get(1, pd.Series(0, index=counts.index)).ge(25)] + STEP
     any_times = counts.index[counts.max(axis=1).ge(25)] + STEP
@@ -170,11 +170,15 @@ def _shock_ages(ledger: pd.DataFrame, known_times: pd.DatetimeIndex) -> dict[pd.
     any_times = pd.DatetimeIndex(any_times).sort_values()
     out: dict[pd.Timestamp, tuple[float, float]] = {}
     for known in pd.DatetimeIndex(known_times.unique()):
-        li = lower_times.searchsorted(known, side="right") - 1
-        ai = any_times.searchsorted(known, side="right") - 1
+        # Strictly prior: a shock completing at this signal's known timestamp
+        # belongs to the current group and must not masquerade as prior context.
+        li = lower_times.searchsorted(known, side="left") - 1
+        ai = any_times.searchsorted(known, side="left") - 1
         lower_age = ((known - lower_times[li]).total_seconds() / 60) if li >= 0 else np.nan
         any_age = ((known - any_times[ai]).total_seconds() / 60) if ai >= 0 else np.nan
-        out[known] = (float(lower_age), float(any_age))
+        lower_status = "prior_lower_25plus_shock_observed" if li >= 0 else "no_prior_lower_25plus_shock_in_available_ledger"
+        any_status = "prior_any_side_25plus_shock_observed" if ai >= 0 else "no_prior_any_side_25plus_shock_in_available_ledger"
+        out[known] = (float(lower_age), float(any_age), lower_status, any_status)
     return out
 
 
@@ -216,7 +220,6 @@ def _build_signals(ledger: pd.DataFrame,
                    member_groups: dict[tuple[int, pd.Timestamp], pd.DataFrame]) -> tuple[pd.DataFrame, pd.DataFrame]:
     lower = ledger[ledger.side.eq(1)].sort_values("touch").reset_index(drop=True)
     touch_times = pd.DatetimeIndex(lower.touch)
-    lower_symbols = lower.symbol.to_numpy()
     knowns = sorted({known for _, known in member_groups})
     unique_count = _trailing_unique_count(ledger, pd.DatetimeIndex(knowns))
     ages = _shock_ages(ledger, pd.DatetimeIndex(knowns))
@@ -237,31 +240,37 @@ def _build_signals(ledger: pd.DataFrame,
             initial_observed = _monitor_count(monitor_grid, monitor_prefix, known - span, known)
             initial_bars = minutes // 5
             initial_fraction = initial_observed / initial_bars
-            half_age = group.sample_touch_history_age_days.to_numpy(float)
+            member_age = group.drop_duplicates("symbol", keep="first").sample_touch_history_age_days
+            half_age = member_age.to_numpy(float)
             history_median = float(np.nanmedian(half_age)) if np.isfinite(half_age).any() else np.nan
-            low_shock_age, any_shock_age = ages[known]
+            low_shock_age, any_shock_age, low_shock_status, any_shock_status = ages[known]
             trailing_universe = unique_count[known]
             market_share = (100 * initial_n / trailing_universe) if trailing_universe else np.nan
+            band = fixed.previous.LABELS[
+                int(np.searchsorted(np.asarray(fixed.previous.CUTS[1:], dtype=float), initial_n, side="left"))
+            ]
+
+            # Read the full 120m continuation slice once per group. Keeping the
+            # first post-decision touch per new symbol lets each X use two
+            # searchsorted calls instead of repeatedly filtering DataFrames.
+            follow_start = int(touch_times.searchsorted(known, side="left"))
+            follow_end = int(touch_times.searchsorted(known + pd.Timedelta(minutes=max(WAITS)), side="left"))
+            follow = lower.iloc[follow_start:follow_end]
+            first_new_touches = follow[~follow.symbol.isin(initial_names)].drop_duplicates("symbol", keep="first")
+            new_times = pd.DatetimeIndex(first_new_touches.touch)
 
             for wait_min in WAITS:
                 decision = known + pd.Timedelta(minutes=wait_min)
                 if decision > fixed.LEDGER_END:
                     continue
-                a = int(touch_times.searchsorted(known, side="left"))
-                b = int(touch_times.searchsorted(decision, side="left"))
-                follow = lower.iloc[a:b]
-                if follow.empty or wait_min == 0:
-                    new = follow.iloc[:0]
-                else:
-                    new = follow[~follow.symbol.isin(initial_names)].drop_duplicates("symbol", keep="first")
+                new_n = int(new_times.searchsorted(decision, side="left"))
                 midpoint = known + pd.Timedelta(minutes=wait_min / 2)
-                first_new = int(new.touch.lt(midpoint).sum()) if wait_min else 0
-                last_new = int(new.touch.ge(midpoint).sum()) if wait_min else 0
+                first_new = int(new_times[:new_n].searchsorted(midpoint, side="left")) if wait_min else 0
+                last_new = new_n - first_new
                 wait_bars = wait_min // 5
                 observed_wait = _monitor_count(monitor_grid, monitor_prefix, known, decision)
                 combined_bars = initial_bars + wait_bars
                 observed_combined = initial_observed + observed_wait
-                lower_shock_age, any_shock_age_now = ages[known]
                 rows.append({
                     "minutes": minutes,
                     "known": known,
@@ -270,9 +279,8 @@ def _build_signals(ledger: pd.DataFrame,
                     "decision": decision,
                     "N": initial_n,
                     "initial": initial_n,
-                    "band": str(pd.cut(pd.Series([initial_n]), fixed.previous.CUTS,
-                                        labels=fixed.previous.LABELS).iloc[0]),
-                    "new_coins": int(new.symbol.nunique()),
+                    "band": band,
+                    "new_coins": new_n,
                     "first_half_new": first_new,
                     "last_half_new": last_new,
                     "last_touch_age_min": float(last_touch_age),
@@ -286,7 +294,9 @@ def _build_signals(ledger: pd.DataFrame,
                     "monitor_fraction": float(observed_combined / combined_bars),
                     "monitor_bars": int(observed_wait),
                     "since_prev_25_lower_shock_min": low_shock_age,
-                    "since_prev_25_any_side_shock_min": any_shock_age_now,
+                    "since_prev_25_any_side_shock_min": any_shock_age,
+                    "lower_shock_history_status": low_shock_status,
+                    "any_side_shock_history_status": any_shock_status,
                 })
             included = sum(known + pd.Timedelta(minutes=w) <= fixed.LEDGER_END for w in WAITS)
             coverage.append({
@@ -338,15 +348,21 @@ def main() -> None:
     ledger, source_coverage = _opportunity_ledger()
     if ledger.empty or ledger.symbol.nunique() != 626:
         raise ValueError("Canonical frozen-plus-extension ledger is incomplete")
+    print(f"Loaded {len(ledger)} frozen-plus-extension touches across {ledger.symbol.nunique()} symbols", flush=True)
     members, member_groups = _build_members(ledger)
+    FEATURES.mkdir(parents=True, exist_ok=True)
+    members_tmp = FEATURES / "members.csv.gz.tmp"
+    members.to_csv(members_tmp, index=False, compression="gzip")
+    members_tmp.replace(FEATURES / "members.csv.gz")
+    source_coverage.to_csv(FEATURES / "original_weekly_opportunity_coverage.csv", index=False)
+    print(f"Saved {len(members)} member bridge rows; building signal features", flush=True)
     signals, group_coverage = _build_signals(ledger, member_groups)
     frozen_check = _check_frozen(signals)
 
-    FEATURES.mkdir(parents=True, exist_ok=True)
-    signals.to_csv(FEATURES / "signals.csv.gz", index=False)
-    members.to_csv(FEATURES / "members.csv.gz", index=False)
+    signals_tmp = FEATURES / "signals.csv.gz.tmp"
+    signals.to_csv(signals_tmp, index=False, compression="gzip")
+    signals_tmp.replace(FEATURES / "signals.csv.gz")
     group_coverage.to_csv(FEATURES / "coverage_by_group.csv", index=False)
-    source_coverage.to_csv(FEATURES / "original_weekly_opportunity_coverage.csv", index=False)
     frozen_check.to_csv(FEATURES / "frozen_x30_check.csv", index=False)
     manifest = {
         "experiment": OUT.name,
@@ -366,7 +382,8 @@ def main() -> None:
         "market_share_status": MARKET_SHARE_STATUS,
         "market_share_definition": "initial / number of distinct symbols with any-direction ledger touch known in the trailing 28 days through known; percentage, a causal activity-universe proxy, not a complete live listing census.",
         "history_age_definition": "Days since the symbol's first observed first-touch event in the available frozen-plus-extension ledger; not a listing-age claim.",
-        "shock_definition": "Age at known of the latest completed native 5m same-side (or any-side) first-touch bar with at least 25 distinct symbols.",
+        "shock_definition": "Age at known of the latest native 5m same-side (or any-side) first-touch bar with at least 25 distinct symbols, strictly before known; missing age has explicit no-prior-in-available-ledger status and is left-censored.",
+        "weekly_opportunity_coverage_caveat": "Coverage file is a source diagnostic only; full-week admitted/no-touch status is not used as a causal market-share denominator.",
         "rows": {"signals": int(len(signals)), "members": int(len(members)), "ledger_touches": int(len(ledger))},
         "frozen_x30_check": frozen_check.to_dict(orient="records"),
     }
