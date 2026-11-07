@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: monday-breadth-reversal-wait-20261107-v1
+    artifact_type: manifest
+    role: fixed_breadth_alarm_zero_touch_wait_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: a6b7eedfd6
+    source_path: experiments/active/exp-monday-breadth-reversal-wait-20261107-v1/summary.csv
+    storage_uri: repo://experiments/active/exp-monday-breadth-reversal-wait-20261107-v1/summary.csv
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Paired waits, events and matched control CSVs cover BTC, ETH and SOL for the same 122 lower alarms. Event records include hypothetical entries for all alarms, and the tested entry rule selects rows with further_n equal to zero.
+
   - artifact_id: monday-breadth-reversal-window-20261107-v1
     artifact_type: manifest
     role: historical_breadth_reversal_window_comparison

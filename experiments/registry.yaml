@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-breadth-reversal-wait-20261107-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: a6b7eedfd6
+    status: inconclusive
+    question: For the same 122 lower breadth alarms, how does waiting 10, 20, 30 or 60 minutes without a new lower first touch affect rebound trades and missed opportunities?
+    single_variable: Zero-new-symbol observation length. All variants use a five-minute breadth window, threshold of 25, original signal cohort, same absolute exit at alarm plus 24 hours and 5bp fees on both fills.
+    result: The four waits admitted 47, 38, 33 and 28 alarms. For SOL, waiting 30 vs 10 minutes skipped 14 alarms whose ten-minute entries averaged -4.23 percent. On the 33 common entries early averaged +3.19 percent vs +2.88 at 30 minutes. The SOL +60 arm averaged +3.16 percent on 28 with +2.64pp matched excess, but only 4 of 9 won in 2025 onward. Removing the 2022-11-08 UTC 18h25m alarm reverses the per-alarm ordering between 30 and 10 minutes for all three assets.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - monday-breadth-reversal-wait-20261107-v1
+    canonical_report: experiments/active/exp-monday-breadth-reversal-wait-20261107-v1/summary.csv
+    notes: Includes paired timing and filter contributions with zero assigned to untraded alarms, early/late splits and week-block descriptive intervals. The prior 30-minute arm was loaded from the frozen result. Costs exclude funding and slippage; equal-notional independent trades.
+
   - experiment_id: exp-monday-breadth-reversal-window-20261107-v1
     source_repo: darkforest-x/fable-trading
     source_commit: ea8b27ac0b
