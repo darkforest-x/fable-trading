@@ -31,9 +31,13 @@ def study_dynamic():
     rules=pd.read_csv(study.OUT/'locked_rules.csv')
     events=pd.read_parquet(study.OUT/'locked_events.parquet')
     matches=matches.dropna(subset=['random_entry']).copy()
+    if matches.empty:
+        pd.DataFrame(columns=['candidate_id','decision','actual_pct','random_pct','sampled_member_share']).to_parquet(CONTROL/'dynamic_paired_events.parquet',index=False)
+        return
     matches=matches[matches.epoch==3]
     for k in ('decision','random_entry'):matches[k]=pd.to_datetime(matches[k],utc=True)
     if 'policy_id' not in matches:matches=matches.merge(rules[['candidate_id','policy_id']],on='candidate_id',validate='many_to_one')
+    matches['policy_id']=pd.to_numeric(matches.policy_id,errors='raise').astype(int)
     meets=matches[['symbol','decision','random_entry','policy_id']].drop_duplicates()
     jobs=[(sym,list(pd.Index(sub.decision).union(sub.random_entry).unique()),sorted(sub.policy_id.unique()))
           for sym,sub in meets[meets.policy_id<1000].groupby('symbol')]
