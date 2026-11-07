@@ -1,0 +1,39 @@
+{
+  "experiment": "exp-monday-breadth-frequency-20261108-v1",
+  "source_experiment": "exp-monday-breadth-optimization-20261108-v1",
+  "source_search": "search/development VectorBT fixed-time grid (6,143,760 searched rule combinations, 3,721,896 distinct development-path rows; source search_counts.csv)",
+  "source_outcomes": "payoffs/event_outcomes_minutes{W}_wait{X}.csv.gz; 5m-open entry/exit, existing two-sided 0.05% taker fees",
+  "holds_hours": [
+    6,
+    12,
+    24,
+    48,
+    72,
+    144
+  ],
+  "frequency_tiers": {
+    "freq36": {
+      "annual_target": 36,
+      "two_year_target": 72
+    },
+    "freq72": {
+      "annual_target": 72,
+      "two_year_target": 144
+    }
+  },
+  "early_minimum_pre2023_events": 50,
+  "minimum_2025_active_months": 8,
+  "selection": {
+    "development_rank": "min(pre-2023, 2023-24) clipped +/-20pp net-return mean minus 1.28 SE; existing VectorBT returns, sorted robust score, win and simpler rule",
+    "rank_family": "progressively check the top (10, 25, 50, 100, 250) development ranks; choose among first tranche with full 2025 frequency/risk-qualified candidates by 2025 clipped-return LCB, mean, lower DD",
+    "2025_return_gate": "positive net mean; win >=50%; compounded one-position DD <=35%; mean remains positive after additional 0.20 percentage-point round-trip stress; remains positive after removing best stressed-return month",
+    "fallback": "If no fully qualified candidate exists, choose the highest-frequency development-ranked rule that meets all frequency gates as descriptive only. If none does, choose the candidate with greatest normalized attainment across early, 2023-24, 2025 count and 2025 month coverage; eligible=false and failure reasons retained."
+  },
+  "frequency_gate": "pre-2023 count >=50; 2023-24 combined count >=72/144; 2025 count >=36/72 and >=8 active months",
+  "single_position": "chronological signal admissions per asset reset by source evaluation epoch; each next entry waits max(24h, hold_hours) from prior accepted entry; no overlapping positions",
+  "initial_breadth": "fixed-N lower bound >=2; share rules additionally filter initial>=2; unknown share is NaN and fails share thresholds",
+  "asset_scope": "BTC, ETH, SOL, ALT are evaluated separately; ALT is the existing equal-dollar initial-altcoin basket; asset event counts are not summed as independent opportunities",
+  "cost_stress": "additional 0.20 percentage points per round trip, after source event net outcomes",
+  "2026_review": "2026 event counts/returns are locked descriptive results through 2026-10-28 exclusive; annualized run rate is shown using available days, not treated as a completed calendar year",
+  "source_feature_caveats": "market_share_pct is a trailing-28-day any-touch proxy, not a listing census; raw first-touch ledger left censoring remains; no funding or extra slippage in source base returns"
+}
