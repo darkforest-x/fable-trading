@@ -181,6 +181,8 @@ def _signal_rows(members: pd.DataFrame, signals: pd.DataFrame) -> pd.DataFrame:
     result = result.drop(columns='_merge')
     if not result.member_rows.eq(result.initial).all():
         raise ValueError('each signal must have one row per initial constituent')
+    result['all_members_positive_flag'] = result.all_members_positive.eq(True).astype('int8')
+    result['all_members_positive_assessable_flag'] = result.all_positive_assessable.astype('int8')
     return result
 
 
@@ -220,12 +222,14 @@ def _aggregate_summary(members: pd.DataFrame, signal_rows: pd.DataFrame) -> pd.D
         assessable_mean_net_signals=('mean_net_pct', 'count'),
         positive_mean_net_signal_pct=('mean_net_pct', lambda x: 100 * x.gt(0).sum() / x.notna().sum()
                                       if x.notna().any() else np.nan),
-        all_positive_signals=('all_members_positive', 'sum'),
-        all_positive_assessable_signals=('all_positive_assessable', 'sum'),
-        all_positive_signal_pct=('all_members_positive', 'mean'),
+        all_members_positive_signals=('all_members_positive_flag', 'sum'),
+        all_members_positive_assessable_signals=('all_members_positive_assessable_flag', 'sum'),
+        all_members_positive_signal_pct=('all_members_positive', 'mean'),
     ).reset_index()
-    equal['all_positive_signal_coverage_pct'] = (
-        100 * equal.all_positive_assessable_signals / equal.signals.replace(0, np.nan))
+    equal['mean_net_signal_coverage_pct'] = (
+        100 * equal.assessable_mean_net_signals / equal.signals.replace(0, np.nan))
+    equal['all_members_positive_coverage_pct'] = (
+        100 * equal.all_members_positive_assessable_signals / equal.signals.replace(0, np.nan))
     pooled = _aggregate_members(member_data, group_dims)
     pooled = pooled.rename(columns={
         'all_positive_assessable': 'pooled_all_positive_assessable',
