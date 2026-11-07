@@ -181,6 +181,12 @@ def main():
     assert members.merge(allrows[keys],on=keys,how='left',indicator=True)._merge.eq('both').all()
     allrows.sort_values(keys,inplace=True)
     allrows.to_csv(OUT/'members.csv.gz',index=False)
+    focus = allrows[(allrows.minutes==5)&(allrows.band=='50-99')&~allrows.continued].copy()
+    focus['entry_bjt'] = focus.decision.dt.tz_convert('Asia/Shanghai')
+    focus['peak_bjt'] = pd.to_datetime(focus.peak_bar_open,utc=True).dt.tz_convert('Asia/Shanghai')
+    focus['exit_bjt'] = focus.exit_time.dt.tz_convert('Asia/Shanghai')
+    focus.sort_values(['known','net_pct'],ascending=[True,False]).to_csv(OUT/'5m_13_case_members.csv',index=False)
+    assert len(focus)==838 and focus.known.nunique()==13
     (OUT/'price_sources.json.gz').write_bytes(__import__('gzip').compress(json.dumps(
         [json.loads(meta.read_text()) for _,meta in sorted(saved)],ensure_ascii=False).encode()))
     from yoyo.evaluation.monday_breadth_constituent_summary import write_outputs
