@@ -622,7 +622,18 @@ def analyze_existing() -> dict:
         metric = _incremental_metrics(group)
         metric.update(asset=asset, policy_id=int(policy_id), policy_key=group.policy_key.iloc[0],
                       epoch=int(epoch), period=PERIOD_LABELS[int(epoch)],
-                      mean_vs_native_pp=float((group.wave_pct - group.native_pct).mean()))
+                      mean_vs_native_pp=float((group.wave_pct - group.native_pct).mean()),
+                      support="common_all_policies")
+        all_rows.append(metric)
+    # Preserve the original lock on its full 458-event cohort as a distinct
+    # support row, even where an unrelated adaptive policy lacks one member fill.
+    full_base = matrix[(matrix.policy_id.eq(5)) & matrix.common_complete]
+    for (asset, epoch), group in full_base.groupby(["asset", "epoch"], sort=False):
+        metric = _incremental_metrics(group)
+        metric.update(asset=asset, policy_id=5, policy_key=group.policy_key.iloc[0],
+                      epoch=int(epoch), period=PERIOD_LABELS[int(epoch)],
+                      mean_vs_native_pp=float((group.wave_pct - group.native_pct).mean()),
+                      support="policy5_full_locked_cohort")
         all_rows.append(metric)
     incremental = pd.DataFrame(all_rows)
 
@@ -690,8 +701,8 @@ def analyze_existing() -> dict:
     # Attach every selected role's four-phase event outcome metrics. This keeps
     # policy and locked-wave support visible in the compact decision table.
     for epoch in range(4):
-        metrics = incremental[incremental.epoch.eq(epoch)].drop(
-            columns=["epoch", "period", "mean_vs_native_pp", "policy_key"])
+        metrics = incremental[(incremental.epoch.eq(epoch)) & incremental.support.eq("common_all_policies")].drop(
+            columns=["epoch", "period", "mean_vs_native_pp", "policy_key", "support"])
         metrics = metrics.rename(columns={c: f"epoch_{epoch}_{c}" for c in metrics.columns if c not in ("asset", "policy_id", "policy_key")})
         candidates = candidates.merge(metrics, on=["asset", "policy_id"], how="left", validate="many_to_one")
     candidates.to_csv(OUT / "wave_protection_incremental_candidates.csv", index=False)
@@ -715,6 +726,11 @@ def analyze_existing() -> dict:
         "source_matrix": str(matrix_path.relative_to(ROOT)),
         "source_matrix_rows": int(len(matrix)),
         "source_matrix_common_event_policy_rows": int(len(common)),
+        "common_event_n_by_asset_epoch": (common.groupby(["asset", "epoch"]).event_i.nunique()
+                                           .rename("n").reset_index().to_dict("records")),
+        "return_priority_eligible_policy_n_by_asset": (ranked.groupby("asset").eligible_return_priority.sum()
+                                                         .astype(int).to_dict()),
+        "policy5_full_cohort_rows": int(len(full_base)),
         "baseline_column": "locked_policy5_wave_pct",
         "incremental_definition": "candidate wave_pct - policy-5 locked wave_pct, paired on the same locked event",
         "selection_period": "epochs 0-2 only; 2026 epoch 3 remains locked evaluation",
