@@ -10,6 +10,7 @@ same native VectorBT policy as the locked event. Neither side includes funding.
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import subprocess
 from pathlib import Path
@@ -589,10 +590,14 @@ def _write_phase(phase: str, rules: pd.DataFrame, events: pd.DataFrame,
     else:
         individual.to_parquet(CONTROL_DIR / "long_individual_payoffs.parquet", index=False)
     summary.to_csv(CONTROL_DIR / f"{phase}_validity.csv", index=False)
-    receipt_path = CONTROL_DIR / f"{phase}_price_source_receipts.json"
-    receipt_path.write_text(json.dumps({"matcher_price_loads": price_receipts,
-                                        "native_dynamic_control_fills": native_receipts},
-                                       indent=2, ensure_ascii=False, default=str) + "\n")
+    receipt_path = CONTROL_DIR / f"{phase}_price_source_receipts.json.gz"
+    receipt_payload = (json.dumps({"matcher_price_loads": price_receipts,
+                                   "native_dynamic_control_fills": native_receipts},
+                                  indent=2, ensure_ascii=False, default=str) + "\n").encode("utf-8")
+    receipt_path.write_bytes(gzip.compress(receipt_payload, compresslevel=9, mtime=0))
+    stale_receipt = CONTROL_DIR / f"{phase}_price_source_receipts.json"
+    if stale_receipt.is_file():
+        stale_receipt.unlink()
     manifest = {
         "phase": phase,
         "input_rules": str((FIXED_INPUT if phase == "fixed" else LONG_INPUT) / "locked_rules.csv"),
@@ -641,7 +646,10 @@ def _write_combined_holm() -> pd.DataFrame:
 
 def _git_head() -> str:
     try:
-        return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+        return subprocess.check_output(
+            ["git", "log", "-1", "--format=%H", "--", "yoyo/evaluation/monday_breadth_frequency_controls.py"],
+            cwd=ROOT, text=True,
+        ).strip()
     except Exception:
         return "unavailable"
 
@@ -665,7 +673,8 @@ def main() -> None:
         policy_manifest = _assert_dynamic_policy(long_rules)
         _write_phase("long", long_rules, long_events, policy_manifest)
     combined = _write_combined_holm()
-    run_manifest = {"builder_commit": _git_head(), "phases_completed": list(args.phase.split()),
+    phases = ["fixed", "long"] if args.phase == "all" else [args.phase]
+    run_manifest = {"builder_commit": _git_head(), "phases_completed": phases,
                     "combined_hypotheses": int(len(combined)), "control_dir": str(CONTROL_DIR.relative_to(ROOT))}
     (CONTROL_DIR / "run_manifest.json").write_text(json.dumps(run_manifest, indent=2) + "\n")
     print(json.dumps(run_manifest, indent=2), flush=True)
