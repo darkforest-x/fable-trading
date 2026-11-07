@@ -717,6 +717,8 @@ def _coverage_table(events: list[dict[str, Any]]) -> pd.DataFrame:
 
 
 def _row_key(row: Any) -> tuple[str, int, int]:
+    if isinstance(row, dict):
+        return (str(row["cohort"]), int(_utc(row["known"]).value), int(_utc(row["decision"]).value))
     return (str(row.cohort), int(_utc(row.known).value), int(_utc(row.decision).value))
 
 
