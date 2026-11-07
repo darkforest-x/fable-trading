@@ -36,15 +36,23 @@ def study_dynamic():
     if 'policy_id' not in matches:matches=matches.merge(rules[['candidate_id','policy_id']],on='candidate_id',validate='many_to_one')
     meets=matches[['symbol','decision','random_entry','policy_id']].drop_duplicates()
     jobs=[(sym,list(pd.Index(sub.decision).union(sub.random_entry).unique()),sorted(sub.policy_id.unique()))
-          for sym,sub in meets.groupby('symbol')]
+          for sym,sub in meets[meets.policy_id<1000].groupby('symbol')]
     with ProcessPoolExecutor(2) as pool:
         for i,(sym,n) in enumerate(pool.map(study.fill_symbol,jobs),1):
             if i%50==0:print('random exit fills',i,'/',len(jobs),flush=True)
+    funded=meets[meets.policy_id>=1000]
+    if len(funded):
+        from yoyo.evaluation import monday_breadth_opt_funding as funding
+        extended=funding.existing_or_simulate(pd.Index(funded.decision).union(funded.random_entry).unique())
+        extended=extended[['entry_time','policy_id','funded_pct']].rename(columns={'funded_pct':'net_pct'})
+        extended['policy_id']+=1000
     paired=[]
     for sym,g in matches.groupby('symbol'):
         path=study.CACHE/(sym+'.parquet')
         if not path.is_file():continue
         f=pd.read_parquet(path,columns=['entry_time','policy_id','net_pct'])
+        if sym=='BTCUSDT' and len(funded):
+            f=pd.concat([f,extended],ignore_index=True)
         sub=g.merge(f.rename(columns={'entry_time':'random_entry','net_pct':'random_pct'}),on=['random_entry','policy_id'],how='left',validate='many_to_one')
         sub=sub.merge(f.rename(columns={'entry_time':'decision','net_pct':'actual_pct'}),on=['decision','policy_id'],how='left',validate='many_to_one')
         paired.append(sub)
@@ -70,7 +78,7 @@ def study_dynamic():
 def evaluate(rules,events,pairs,primary):
     results=[]
     for row in rules.itertuples():
-        if row.role not in (primary,'retention','case_target','baseline'):continue
+        if row.role not in (primary,'retention','case_target','case_runner','baseline'):continue
         e=events[(events.candidate_id==row.candidate_id)&(events.epoch==3)].dropna(subset=['net_pct'])
         group=pairs[pairs.candidate_id==row.candidate_id].dropna(subset=['actual_pct','random_pct']).copy()
         group=group[group.decision.isin(e.decision)].set_index('decision')

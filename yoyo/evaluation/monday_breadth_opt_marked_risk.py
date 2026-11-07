@@ -16,12 +16,21 @@ def one_symbol(task):
     sym,group=task
     windows=[(r.decision,r.decision+pd.Timedelta(hours=r.hours)) for r in group.itertuples()]
     raw,_=load_full_ohlc(sym,min(t for t,_ in windows),max(t for _,t in windows),needed_intervals=windows,repair_missing=False)
+    if group.policy_id.ge(1000).any():
+        from yoyo.evaluation import monday_breadth_opt_funding as funding
+        adv=pd.read_parquet(funding.FUNDED_CACHE)
+        adv['policy_id']+=1000
+        financing=funding.rates('BTCUSDT')
+        funding_policies=funding.funded_policies()
     fills=pd.read_parquet(study.CACHE/(sym+'.parquet')).set_index(['entry_time','policy_id'])
     policies=sim.policies(sym=='BTCUSDT')
     for r in group.itertuples():
-        if (r.decision,r.policy_id) not in fills.index:continue
-        fill=fills.loc[r.decision,r.policy_id]
-        pol=policies[r.policy_id];n=r.hours*12
+        is_funded=r.policy_id>=1000
+        source=adv.set_index(['entry_time','policy_id']) if is_funded else fills
+        if (r.decision,r.policy_id) not in source.index:continue
+        fill=source.loc[(r.decision,r.policy_id),:]
+        pol=funding_policies[r.policy_id-1000] if is_funded else policies[r.policy_id]
+        n=r.hours*12
         index=pd.date_range(r.decision,periods=n+1,freq='5min')
         path=raw.reindex(index)
         if path.close.iloc[:-1].isna().any() or not np.isfinite(path.open.iloc[-1]):continue
@@ -31,9 +40,20 @@ def one_symbol(task):
         last=int((fill.exit_time-r.decision)/pd.Timedelta(minutes=5))
         if fill.exit_legs==2:
             # The first leg can only be the resting, size-limited take-profit order.
-            realized=pol.take_fraction*((1+pol.take_pct/100)*(1-sim.MAKER)-1)
+            first_price=fill.first_exit_price if is_funded else fill.entry_open*(1+pol.take_pct/100)
+            realized=pol.take_fraction*(first_price/fill.entry_open*(1-sim.MAKER)-1)
             marked[first:last]=realized+(1-pol.take_fraction)*mark[first:last]-sim.TAKER
         marked[last:]=fill.net_pct/100
+        if is_funded:
+            raw_cf=(financing.realized_rate*financing.mark_price).reindex(index,fill_value=0.).to_numpy()
+            qty=np.ones(n+1);qty[last+1:]=0.
+            if fill.exit_legs==2:
+                qty[first+1:last+1]=1-pol.take_fraction
+                if raw_cf[first]<0:qty[first]=1-pol.take_fraction
+            if raw_cf[0]<0:qty[0]=0.
+            if raw_cf[last]<0:qty[last]=0.
+            marked-=np.cumsum(qty*raw_cf)/fill.entry_open
+            marked[last:]=fill.funded_pct/100
         yield r.row_i,np.r_[0,marked],np.r_[0,mark]
 
 
