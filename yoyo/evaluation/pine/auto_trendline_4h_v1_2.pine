@@ -1,0 +1,157 @@
+//@version=6
+indicator("4H 主趋势线 V1.2", shorttitle = "4H 主线 1.2", overlay = true, max_lines_count = 500, max_bars_back = 650, calc_bars_count = 3000)
+
+int swing = input.int(3, "高低点左右确认根数", minval = 1, maxval = 12, group = "选线", display = display.none)
+int minSpan = input.int(72, "首末触点最小间隔（4H 根数）", minval = 12, maxval = 240, group = "选线", display = display.none)
+int gap = input.int(24, "独立触点最小间隔（4H 根数）", minval = 4, maxval = 60, group = "选线", display = display.none)
+float nearAtr = input.float(0.65, "贴线容差（ATR）", minval = 0.05, maxval = 1.5, step = 0.05, group = "选线", display = display.none)
+bool showSupport = input.bool(false, "同时画上升支撑", group = "显示")
+color resistanceColor = input.color(#92DCE5, "下降压力", group = "显示")
+color supportColor = input.color(#EAAE67, "上升支撑", group = "显示")
+bool leftGuide = input.bool(true, "向左延长 12 天作参考", group = "显示")
+bool showEvents = input.bool(false, "标出建线与收盘突破", group = "显示")
+
+const int WINDOW = 360
+const int TAIL = 24
+bool fourHour = timeframe.isminutes and timeframe.multiplier == 240
+float atr = ta.atr(14)
+
+type Pivot
+    int x
+    float y
+    float vol
+
+type Candidate
+    Pivot a
+    Pivot b
+    int touches
+
+method level(Candidate self, int x) =>
+    self.b.y + (self.b.y - self.a.y) * (x - self.b.x) / (self.b.x - self.a.x)
+
+method outranks(Candidate self, Candidate other) =>
+    na(other) or self.touches > other.touches or (self.touches == other.touches and self.b.x - self.a.x > other.b.x - other.a.x)
+
+// Signed prices let the identical upper-envelope check handle both directions.
+// Inspect each bar's own ATR, wick and body from the first anchor up to this close.
+method clean(Candidate self, int sign) =>
+    bool ok = true
+    for k = 0 to bar_index - self.a.x
+        float limit = self.level(bar_index - k)
+        float wick = sign == 1 ? high[k] : -low[k]
+        float body = sign == 1 ? math.max(open[k], close[k]) : -math.min(open[k], close[k])
+        if wick > limit + 0.30 * atr[k] or body > limit + 0.10 * atr[k]
+            ok := false
+            break
+    ok
+
+// Reserve space for both endpoints. Several candles in one rebound get one vote.
+f_pick(array<Pivot> pivots, Pivot b, int sign, float closing) =>
+    Candidate best = na
+    for [idx, a] in pivots
+        if idx == pivots.size() - 1
+            break
+        if b.x - a.x >= math.max(minSpan, 2 * gap) and a.y - b.y >= 2 * b.vol
+            Candidate test = Candidate.new(a, b, 2)
+            int lastTouch = a.x
+            for j = idx + 1 to pivots.size() - 1
+                Pivot mid = pivots.get(j)
+                if mid.x > b.x - gap
+                    break
+                if mid.x - lastTouch >= gap and math.abs(mid.y - test.level(mid.x)) <= nearAtr * mid.vol
+                    test.touches += 1
+                    lastTouch := mid.x
+            if test.touches >= 3 and closing <= test.level(bar_index) and test.outranks(best)
+                if test.clean(sign)
+                    best := test
+    best
+
+// One state per written call. Only confirmed chart bars can start or end a line.
+// A short settling window collects pivots from the same retest before locking the slope.
+f_track(bool enabled, int sign, float pivotPrice, float closing, color ink) =>
+    var array<Pivot> pivots = array.new<Pivot>()
+    var Candidate pending = na
+    var int due = na
+    var Candidate current = na
+    var line drawing = na
+    var int ended = na
+    var bool extendBroken = false
+    var int beyond = 0
+    bool born = false
+    bool broken = false
+    int x = bar_index
+    if enabled and barstate.isconfirmed
+        if not na(current) and na(ended)
+            float value = current.level(x)
+            beyond := closing > value + 0.15 * atr ? beyond + 1 : 0
+            broken := beyond >= 2
+            if broken or x - current.a.x >= WINDOW
+                ended := x
+                extendBroken := broken
+                beyond := 0
+                line.set_xy2(drawing, x + TAIL, sign * current.level(x + TAIL))
+                if not broken
+                    line.set_extend(drawing, extend.none)
+                    line.set_color(drawing, color.new(ink, 68))
+                pending := na
+                due := na
+        // Once replaced or aged out, old lines remain in their own price/time region.
+        if not na(ended) and x == ended + WINDOW
+            extendBroken := false
+            line.set_extend(drawing, extend.none)
+            line.set_color(drawing, color.new(ink, 68))
+
+        if not na(pivotPrice) and not na(atr[swing])
+            Pivot b = Pivot.new(x - swing, pivotPrice, atr[swing])
+            while pivots.size() > 0 and x - pivots.first().x > WINDOW
+                pivots.shift()
+            // A distant, older active line may give way to an independent newer structure.
+            bool active = not na(current) and na(ended)
+            bool search = active ? current.level(x) - closing > 3 * atr : na(ended) or b.x - ended >= gap
+            if search and pivots.size() >= 2
+                Candidate test = f_pick(pivots, b, sign, closing)
+                if not na(test)
+                    bool distinct = not active or (test.a.x > current.b.x and test.level(x) < current.level(x))
+                    if distinct and test.outranks(pending)
+                        if na(pending)
+                            due := x + 2 * swing
+                        pending := test
+            pivots.push(b)
+
+        if not na(pending) and x >= due
+            bool active = not na(current) and na(ended)
+            bool stillRelevant = not active or (current.level(x) - closing > 3 * atr and pending.level(x) < current.level(x))
+            if stillRelevant and x - pending.a.x <= WINDOW and closing <= pending.level(x) and pending.clean(sign)
+                if not na(drawing)
+                    if active
+                        line.set_xy2(drawing, x, sign * current.level(x))
+                    line.set_extend(drawing, extend.none)
+                    line.set_color(drawing, color.new(ink, 68))
+                current := pending
+                int start = math.max(0, current.a.x - (leftGuide ? 72 : 0))
+                drawing := line.new(start, sign * current.level(start), current.b.x, sign * current.b.y,
+                     xloc = xloc.bar_index, extend = extend.right, color = ink, width = 1)
+                born := true
+                ended := na
+                extendBroken := false
+                beyond := 0
+            pending := na
+            due := na
+    float known = enabled and not na(current) and (na(ended) or extendBroken or x <= ended + TAIL) ? sign * current.level(x) : na
+    [born, broken, known]
+
+float ph = ta.pivothigh(high, swing, swing)
+float pl = ta.pivotlow(low, swing, swing)
+[resBorn, resBreak, resistance] = f_track(fourHour, 1, ph, close, resistanceColor)
+[supBorn, supBreak, support] = f_track(fourHour and showSupport, -1, -pl, -close, supportColor)
+
+plot(resistance, "4H 压力参考价", display = display.data_window)
+plot(support, "4H 支撑参考价", display = display.data_window)
+plotshape(showEvents and resBorn, "压力建线", shape.circle, location.abovebar, resistanceColor, size = size.tiny, display = display.pane)
+plotshape(showEvents and supBorn, "支撑建线", shape.circle, location.belowbar, supportColor, size = size.tiny, display = display.pane)
+plotshape(showEvents and resBreak, "收盘上破", shape.triangleup, location.belowbar, resistanceColor, size = size.tiny, display = display.pane)
+plotshape(showEvents and supBreak, "收盘下破", shape.triangledown, location.abovebar, supportColor, size = size.tiny, display = display.pane)
+
+var table hint = table.new(position.bottom_right, 1, 1)
+if barstate.islast and not fourHour
+    table.cell(hint, 0, 0, "切换到 4 小时查看主趋势线", text_color = chart.fg_color)
