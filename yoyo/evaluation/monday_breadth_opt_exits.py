@@ -16,7 +16,7 @@ from vectorbt.portfolio.enums import NoOrder
 
 TAKER=.0005
 MAKER=.0002
-KINDS=('time','percent_trail','atr_1h','atr_4h','profit_lock','trend_1h','trend_4h','btc_net_10000')
+KINDS=('time','percent_trail','atr_1h','atr_4h','profit_lock','trend_1h','trend_4h','btc_net_10000','btc_funded_limit','btc_funded_floor')
 
 
 @dataclass(frozen=True)
@@ -131,6 +131,20 @@ def execute_order(c,q,starts,settings,can_trade,highwater,protection,sold_part,g
     if kind==7:
         # Aim for 10,000 USDT after both fees on one BTC.
         target=(entry*(1+fee_in)+10000)/(1-fee_limit)
+    if kind==8 or kind==9:
+        # Additional columns are the dollars settled strictly before this bar, plus
+        # the entry bar's possible settlement. At scheduled settlement bars these
+        # tactical orders pause; ordinary protection remains live.
+        paid=q[pos,10]-q[starts[event],10]
+        if bar>0:paid-=min(0.,q[starts[event],11])
+        settle_bar=int(q[pos,12])==1
+        if not settle_bar and kind==8:
+            target=np.ceil((entry*(1+fee_in)+10000+paid)/(1-fee_limit))
+        if not settle_bar and kind==9 and bar>0:
+            floor=np.ceil((entry*(1+fee_in)+10000+paid)/(1-fee_out))
+            if peak>=floor:
+                level=max(level,floor,peak*(1-s[4]/100))
+                protection[col]=level
     hit_limit=not sold_part[col] and hi>=target
     if hit_limit and op>=target:
         sold_part[col]=True;why[col]=3
