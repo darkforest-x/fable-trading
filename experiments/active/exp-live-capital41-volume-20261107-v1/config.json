@@ -1,0 +1,16 @@
+{
+  "experiment_id": "exp-live-capital41-volume-20261107-v1",
+  "source_commit_capital41": "ce64522f7f747abb00b37503c00e2955a6d687d2",
+  "source_script": "Capital41_Liquidity_Sweep/Capital41_Liquidity_Sweep_Simple.pine",
+  "accounts": "experiments/active/exp-live-ema-cloud-filter-20261103-v1/config.json",
+  "single_variable": "Admission only: last confirmed 5m volume divided by SMA(volume,50), including that bar, >= 1.2. No search. Wick uses the touch bar; allin3 uses the preceding bar as its limit is resting. Missing complete contiguous window skips.",
+  "diagnostic": "Count same-direction strict 20-bar break and close back inside with the same volume test, on the same eligible bar. No secondary portfolio rule.",
+  "comparison": "Original native fills and allocator, baseline must reproduce saved account. Compare full-history accounts; also the registered 2025 starts. Random masks preserve counts within NY event week, side and pre-feature volatility bucket, on existing candidates; sparse strata may be fixed. This addresses selection among existing entries, not the strategy vs new random trades.",
+  "vol_bucket": "floor(2*log2(mean true range of the 14 bars immediately before the last eligible bar / their last close)).",
+  "control_draws": 300,
+  "seed": 20261107,
+  "fees": "Saved fills: wick market entry taker 5bp+10bp slippage; target maker 2bp, other exits taker 5bp+10bp slippage. Allin3 entry maker 2bp, same target and non-target charges. Binance candles; funding excluded.",
+  "reproduce": ".venv/bin/python -m yoyo.evaluation.live_capital41_volume",
+  "production_eligible": false,
+  "training_eligible": false
+}
