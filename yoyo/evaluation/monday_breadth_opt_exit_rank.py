@@ -90,7 +90,6 @@ def run(stage):
             # Deliberately case-aware. Only count the exact named alarm and original entry clock,
             # when the candidate genuinely admits it after applying its own prior-position schedule.
             case=frame[(frame.known==study.CASE_ENTRY-pd.Timedelta(minutes=30))&(frame.decision==study.CASE_ENTRY)].copy()
-            case=case.merge(entries[['candidate_id','minutes']],on='candidate_id')
             case=case[case.minutes==5]
             case_rows.append(case)
             qualifies=case[case.points>=10000-1e-7][keys+['points']]
