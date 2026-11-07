@@ -201,3 +201,31 @@ extension Array {
         return filter { seen.insert(key($0)).inserted }
     }
 }
+
+/// Page title row drawn by the app. Tab pages carry no system navigation bar: a UINavigationBar inside
+/// the swipeable page TabView hit UIKit's layout assertion (all six device crash logs, 2026-11-07).
+struct PageHeader<Trailing: View>: View {
+    let title: String
+    @ViewBuilder var trailing: () -> Trailing
+    var body: some View {
+        HStack(alignment: .center, spacing: 10) {
+            Text(title).font(.system(size: 32, weight: .bold)).foregroundStyle(Color.ink)
+            Spacer(minLength: 0)
+            trailing()
+        }
+        .padding(.horizontal, 4)
+        .padding(.top, 6)
+        .accessibilityAddTraits(.isHeader)
+    }
+}
+
+extension PageHeader where Trailing == EmptyView {
+    init(title: String) { self.init(title: title) { EmptyView() } }
+}
+
+/// Open a paper account's detail sheet from the monitor list.
+struct OpenAccountAction { var run: (PaperAccount) -> Void = { _ in }; func callAsFunction(_ a: PaperAccount) { run(a) } }
+private struct OpenAccountKey: EnvironmentKey { static let defaultValue = OpenAccountAction() }
+extension EnvironmentValues {
+    var openAccount: OpenAccountAction { get { self[OpenAccountKey.self] } set { self[OpenAccountKey.self] = newValue } }
+}

@@ -12,9 +12,11 @@ struct PositionsView: View {
     @State private var error: String?
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
+            ZStack {
+                AmbientBackground()
+                ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
+                    PageHeader(title: "持仓保护")
                     if let entry = account.activeEntry { TradeProgressCard(entry: entry) }
                     if let attempt = account.closeAttempt { closeRecovery(attempt) }
                     if session.connection == nil {
@@ -49,12 +51,8 @@ struct PositionsView: View {
             }
             .refreshable { await account.refresh(session: session); Haptics.success() }
             .contentMargins(.bottom, 96, for: .scrollContent)
-            .scrollEdgeEffectHidden(true, for: .top)
-            .toolbarBackground(.hidden, for: .navigationBar)
-            .containerBackground(for: .navigation) { AmbientBackground() }
-            .navigationTitle("持仓保护")
-            .toolbarTitleDisplayMode(.inlineLarge)
-        }
+            .scrollEdgeEffectHidden(true, for: [.top, .bottom])
+            }
         .sheet(item: $closeTarget) { position in
             ClosePositionSheet(position: position).presentationDetents([.medium, .large]).presentationDragIndicator(.visible)
         }

@@ -2,8 +2,8 @@ import SwiftUI
 
 struct PaperSection: View {
     @Environment(\.openChart) private var openChart
+    @Environment(\.openAccount) private var openAccount
     let connection: Connection
-    let zoom: Namespace.ID
     let refresh: Int
     @State private var data: PaperSnapshot?
     @State private var error: String?
@@ -19,9 +19,9 @@ struct PaperSection: View {
                     let pairs = stride(from: 0, to: live.count - live.count % 2, by: 2).map { (live[$0], live[$0 + 1]) }
                     VStack(spacing: 10) {
                         ForEach(pairs, id: \.0.key) { pair in
-                            HStack(spacing: 10) { AccountTile(account: pair.0, zoom: zoom); AccountTile(account: pair.1, zoom: zoom) }
+                            HStack(spacing: 10) { AccountTile(account: pair.0); AccountTile(account: pair.1) }
                         }
-                        if live.count % 2 == 1, let last = live.last { AccountTile(account: last, zoom: zoom, wide: true) }
+                        if live.count % 2 == 1, let last = live.last { AccountTile(account: last, wide: true) }
                     }
                 }
             }
@@ -29,7 +29,7 @@ struct PaperSection: View {
                 SectionHeader(title: "回测复刻", count: replica.count)
                 VStack(spacing: 0) {
                     ForEach(Array(replica.enumerated()), id: \.element.key) { index, account in
-                        NavigationLink(value: account) {
+                        Button { openAccount(account) } label: {
                             HStack(spacing: 10) {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(account.label).font(.subheadline.weight(.semibold))
@@ -44,8 +44,6 @@ struct PaperSection: View {
                             .padding(.horizontal, 12).frame(minHeight: 48).contentShape(.rect)
                         }
                         .buttonStyle(RowPressStyle())
-                        .simultaneousGesture(TapGesture().onEnded { Haptics.open() })
-                        .matchedTransitionSource(id: account.key, in: zoom)
                         if index < replica.count - 1 { Divider().padding(.leading, 14) }
                     }
                 }
@@ -100,11 +98,11 @@ struct ChangeCapsule: View {
 }
 
 struct AccountTile: View {
+    @Environment(\.openAccount) private var openAccount
     let account: PaperAccount
-    let zoom: Namespace.ID
     var wide = false
     var body: some View {
-        NavigationLink(value: account) {
+        Button { openAccount(account) } label: {
             Group {
                 if wide {
                     HStack(alignment: .center) {
@@ -120,9 +118,7 @@ struct AccountTile: View {
             .contentShape(.rect)
         }
         .buttonStyle(CardPressStyle())
-        .simultaneousGesture(TapGesture().onEnded { Haptics.open() })
         .glassCard(cornerRadius: 18)
-        .matchedTransitionSource(id: account.key, in: zoom)
         .scrollReveal()
     }
     private var name: some View { Text(account.label).font(.system(.caption, design: .monospaced).weight(.semibold)).foregroundStyle(.secondary).lineLimit(1) }
@@ -144,9 +140,10 @@ struct RowPressStyle: ButtonStyle {
     }
 }
 
-/// Pushed with a zoom transition from the tapped tile/row (iOS 18+ navigationTransition).
+/// Account detail, presented as a sheet from the tapped tile/row.
 struct AccountDetailView: View {
     @Environment(\.openChart) private var openChart
+    @Environment(\.dismiss) private var dismiss
     let account: PaperAccount
     let connection: Connection
     @State private var data: PaperSnapshot?
@@ -187,6 +184,7 @@ struct AccountDetailView: View {
         .containerBackground(for: .navigation) { AmbientBackground() }
         .navigationTitle(account.label)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { CloseButton { dismiss() } }.sharedBackgroundVisibility(.hidden) }
         .modifier(Polled(key: "paper-\(account.key)", every: .seconds(10), load: { try await API.get("/v1/monitor/paper", query: [URLQueryItem(name: "track", value: account.key)], connection: connection) }, value: $data, error: $error))
     }
 

@@ -36,8 +36,9 @@ struct AmbientBackground: View {
             RadialGradient(colors: [Color(red: 0.19, green: 0.82, blue: 0.35).opacity(scheme == .dark ? 0.08 : 0.06), .clear],
                            center: UnitPoint(x: 0.1, y: 0.85), startRadius: 0, endRadius: 320)
         }
+        // No drawingGroup(): it renders only inside the layout frame and clipped the safe-area
+        // extension, which showed as white bands under the status bar and home indicator.
         .ignoresSafeArea()
-        .drawingGroup()
     }
 }
 

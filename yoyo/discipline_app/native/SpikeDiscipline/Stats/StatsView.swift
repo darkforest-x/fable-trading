@@ -13,18 +13,22 @@ struct StatsView: View {
     @State private var dataKey = ""
     @State private var error: String?
     @State private var loading = false
-    @State private var path = NavigationPath()
+    @State private var discipline = false
 
     private var key: String { "\(session.connection?.accountId ?? "")|\(session.connection?.mode ?? "")|\(days)" }
 
     var body: some View {
-        NavigationStack(path: $path) {
-            ScrollView {
+            ZStack {
+                AmbientBackground()
+                ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
+                    PageHeader(title: "统计") {
+                        RoundIcon(systemName: "gearshape") { showSettings = true }.accessibilityLabel("设置")
+                    }
                     if session.connection == nil { ConnectPrompt() }
                     if let error { StatusNote(text: "统计暂不可用\(data == nil ? "" : "，以下为上次记录")：\(error)", systemImage: "exclamationmark.triangle", tint: .amber) }
                     hero
-                    NavigationLink(value: "discipline") { disciplineRow }.buttonStyle(CardPressStyle())
+                    Button { Haptics.open(); discipline = true } label: { disciplineRow }.buttonStyle(CardPressStyle())
                     SoftSegment(selection: $days, options: [(7, "近 7 天"), (30, "近 30 天"), (0, "全部")])
                     summary
                     curve
@@ -37,18 +41,10 @@ struct StatsView: View {
             }
             .refreshable { await load(force: true); Haptics.success() }
             .contentMargins(.bottom, 96, for: .scrollContent)
-            .scrollEdgeEffectHidden(true, for: .top)
-            .toolbarBackground(.hidden, for: .navigationBar)
-            .containerBackground(for: .navigation) { AmbientBackground() }
-            .navigationTitle("统计")
-            .toolbarTitleDisplayMode(.inlineLarge)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    RoundIcon(systemName: "gearshape") { showSettings = true }.accessibilityLabel("设置")
-                }
-                .sharedBackgroundVisibility(.hidden)
+            .scrollEdgeEffectHidden(true, for: [.top, .bottom])
             }
-            .navigationDestination(for: String.self) { _ in DisciplineView() }
+        .sheet(isPresented: $discipline) {
+            NavigationStack { DisciplineView() }.presentationDragIndicator(.visible)
         }
         .task(id: "\(key)|\(active)") {
             guard active, session.connection != nil else { return }

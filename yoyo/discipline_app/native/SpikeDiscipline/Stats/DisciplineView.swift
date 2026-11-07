@@ -3,6 +3,7 @@ import SwiftUI
 /// 交易纪律 (1.x 纪律 page): 我的系统, live status, remaining budget, effective rules, pending policy
 /// change, today's record and the calculation notes. Read-only: rules are server-owned.
 struct DisciplineView: View {
+    @Environment(\.dismiss) private var dismiss
     @Environment(SessionStore.self) private var session
     @Environment(AccountStore.self) private var account
 
@@ -40,8 +41,10 @@ struct DisciplineView: View {
         .contentMargins(.bottom, 96, for: .scrollContent)
         .scrollEdgeEffectHidden(true, for: .top)
         .toolbarBackground(.hidden, for: .navigationBar)
+        .background(Color.canvas)
         .navigationTitle("交易纪律")
-        .toolbarTitleDisplayMode(.inlineLarge)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { CloseButton { dismiss() } }.sharedBackgroundVisibility(.hidden) }
     }
 
     /// Owner principles (Notion task 68, edited 2026-10-23); bundled reading only.

@@ -56,30 +56,43 @@ struct RootView: View {
     @State private var showSettings = false
     @State private var bannerDrag: CGFloat = 0
 
+    @State private var scrolled: AppTab? = .monitor
+
     var body: some View {
-        // System page TabView: native finger-following swipes and correct safe areas for each
-        // page's NavigationStack. Each page reports its x offset so the tab-bar lens can follow.
+        // Pure SwiftUI paging (no UIKit page container): pages follow the finger, draw edge to edge,
+        // and no UINavigationBar lives inside a swiping container (device crash logs 2026-11-07).
         GeometryReader { proxy in
-            TabView(selection: $tab) {
+        ScrollViewReader { reader in
+        ScrollView(.horizontal) {
+            HStack(spacing: 0) {
                 ForEach(AppTab.allCases) { page in
                     content(page)
-                        .tag(page)
-                        .background {
-                            GeometryReader { g in
-                                Color.clear.preference(key: PageOffsetKey.self, value: [AppTab.allCases.firstIndex(of: page)!: g.frame(in: .global).minX])
-                            }
-                        }
+                        // Backgrounds run edge to edge; content keeps the real safe area.
+                        .safeAreaPadding(.top, proxy.safeAreaInsets.top)
+                        .safeAreaPadding(.bottom, proxy.safeAreaInsets.bottom)
+                        .containerRelativeFrame(.horizontal)
+                        .id(page)
                 }
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            // The 1.618 page is a full-screen chart: horizontal drags pan the chart, not the pages.
-            .scrollDisabled(tab == .fib)
-            .onPreferenceChange(PageOffsetKey.self) { offsets in
-                let width = max(proxy.size.width, 1)
-                if let (index, x) = offsets.first(where: { abs($0.value) < width }) { progress = CGFloat(index) - x / width }
-            }
+            .scrollTargetLayout()
         }
+        .scrollTargetBehavior(.paging)
+        .scrollIndicators(.hidden)
+        .scrollEdgeEffectHidden(true, for: .all)
+        .scrollPosition(id: $scrolled)
+        // The 1.618 page is a full-screen chart: horizontal drags pan the chart, not the pages.
+        .scrollDisabled(tab == .fib)
+        .onScrollGeometryChange(for: CGFloat.self) { geo in
+            geo.contentOffset.x / max(geo.containerSize.width, 1)
+        } action: { _, value in progress = value }
+        .onChange(of: scrolled) { _, value in if let value, value != tab { tab = value } }
+        .onChange(of: tab) { _, value in
+            if scrolled != value { withAnimation(.spring(response: 0.42, dampingFraction: 0.86)) { reader.scrollTo(value, anchor: .leading) } }
+        }
+        .onAppear { reader.scrollTo(tab, anchor: .leading); scrolled = tab }
         .ignoresSafeArea()
+        }
+        }
         .background(AmbientBackground())
         .overlay(alignment: .bottom) {
             GlassTabBar(selection: $tab, progress: progress, badge: notices.unread)
@@ -246,7 +259,3 @@ struct NoticeToast: View {
     }
 }
 
-private struct PageOffsetKey: PreferenceKey {
-    static var defaultValue: [Int: CGFloat] = [:]
-    static func reduce(value: inout [Int: CGFloat], nextValue: () -> [Int: CGFloat]) { value.merge(nextValue()) { $1 } }
-}

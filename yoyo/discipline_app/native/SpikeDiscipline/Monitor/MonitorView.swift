@@ -13,50 +13,46 @@ struct MonitorView: View {
     @Environment(NotificationStore.self) private var notices
     @AppStorage("monitor.segment") private var segment: MonitorSegment = .paper
     @Binding var showNotifications: Bool
-    @Namespace private var zoom
     @State private var refresh = 0
 
+    @State private var detail: PaperAccount?
+
     var body: some View {
-        NavigationStack {
+        ZStack {
+            AmbientBackground()
             ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
-                    SoftSegment(selection: $segment, options: MonitorSegment.allCases.map { ($0, $0.title) })
-                    if let connection = session.connection {
-                        Group {
-                            switch segment {
-                            case .paper: PaperSection(connection: connection, zoom: zoom, refresh: refresh)
-                            case .alerts: AlertsSection(connection: connection, refresh: refresh)
-                            case .cloud: CloudSection(connection: connection, refresh: refresh)
-                            }
-                        }
-                        .id(segment)
-                        .transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: 18)), removal: .opacity))
-                    } else {
-                        ConnectPrompt()
-                    }
-                }
-                .padding(.horizontal, 14)
-                .padding(.bottom, 24)
-            }
-            .refreshable { refresh += 1; try? await Task.sleep(for: .milliseconds(700)); Haptics.success() }
-            .contentMargins(.bottom, 96, for: .scrollContent)
-            .scrollEdgeEffectHidden(true, for: .top)
-            .toolbarBackground(.hidden, for: .navigationBar)
-            .navigationDestination(for: PaperAccount.self) { account in
-                if let connection = session.connection {
-                    AccountDetailView(account: account, connection: connection)
-                        .navigationTransition(.zoom(sourceID: account.key, in: zoom))
-                }
-            }
-            .containerBackground(for: .navigation) { AmbientBackground() }
-            .navigationTitle("监控")
-            .toolbarTitleDisplayMode(.inlineLarge)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+            VStack(alignment: .leading, spacing: 10) {
+                PageHeader(title: "监控") {
                     RoundIcon(systemName: "bell", badge: notices.unread > 0) { notices.markRead(); showNotifications = true }
                         .accessibilityLabel(notices.unread > 0 ? "通知，\(notices.unread) 条未读" : "通知")
                 }
-                .sharedBackgroundVisibility(.hidden)
+                SoftSegment(selection: $segment, options: MonitorSegment.allCases.map { ($0, $0.title) })
+                if let connection = session.connection {
+                    Group {
+                        switch segment {
+                        case .paper: PaperSection(connection: connection, refresh: refresh)
+                        case .alerts: AlertsSection(connection: connection, refresh: refresh)
+                        case .cloud: CloudSection(connection: connection, refresh: refresh)
+                        }
+                    }
+                    .id(segment)
+                    .transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: 18)), removal: .opacity))
+                } else {
+                    ConnectPrompt()
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.bottom, 24)
+        }
+        .refreshable { refresh += 1; try? await Task.sleep(for: .milliseconds(700)); Haptics.success() }
+        .contentMargins(.bottom, 96, for: .scrollContent)
+        .scrollEdgeEffectHidden(true, for: [.top, .bottom])
+        }
+        .environment(\.openAccount, OpenAccountAction { Haptics.open(); detail = $0 })
+        .sheet(item: $detail) { account in
+            if let connection = session.connection {
+                NavigationStack { AccountDetailView(account: account, connection: connection) }
+                    .presentationDragIndicator(.visible)
             }
         }
     }

@@ -26,9 +26,11 @@ struct TradeView: View {
         let room = Trading.marginRoom(state, symbol: ticket.symbol)
         let block = Trading.availability(state: state, symbol: ticket.symbol, connected: session.connection != nil, online: account.online, fresh: fresh,
                                          pending: account.pendingEntry != nil || account.closeAttempt != nil, room: room, now: account.now)
-        NavigationStack {
-            ScrollView {
+            ZStack {
+                AmbientBackground()
+                ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
+                    PageHeader(title: "合约")
                     if session.connection == nil { ConnectPrompt() }
                     hero(quote: quote, fresh: fresh, tick: tick, state: state)
                     chart(existing: existing, tick: tick)
@@ -53,15 +55,11 @@ struct TradeView: View {
             .scrollDismissesKeyboard(.interactively)
             .refreshable { await account.refresh(session: session); Haptics.success() }
             .contentMargins(.bottom, 96, for: .scrollContent)
-            .scrollEdgeEffectHidden(true, for: .top)
-            .toolbarBackground(.hidden, for: .navigationBar)
-            .containerBackground(for: .navigation) { Color.canvas }
-            .navigationTitle("合约")
-            .toolbarTitleDisplayMode(.inlineLarge)
-        }
+            .scrollEdgeEffectHidden(true, for: [.top, .bottom])
+            }
         .sheet(isPresented: $showSettings) { SettingsView() }
         .sheet(isPresented: $picker) { SymbolPicker().presentationDragIndicator(.visible) }
-        .sheet(isPresented: $discipline) { NavigationStack { DisciplineView().background(Color.canvas) } .presentationDragIndicator(.visible) }
+        .sheet(isPresented: $discipline) { NavigationStack { DisciplineView() }.presentationDragIndicator(.visible) }
         .sheet(item: $closeTarget) { ClosePositionSheet(position: $0).presentationDetents([.medium, .large]) }
         .alert("本次操作未完成", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) { Button("好", role: .cancel) {} } message: { Text(error ?? "") }
         .onChange(of: "\(ticket.symbol)|\(period.rawValue)|\(active)|\(session.connection?.token.hashValue ?? 0)") { _, _ in showCandles() }
