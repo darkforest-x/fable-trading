@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-breadth-bar-rebounds-20261107-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5588f72a77
+    status: inconclusive
+    question: After a native five-minute candle with weekly lower 1.618 first touches, how do BTC, ETH and SOL rebounds vary with its coin count and any new names in the following thirty minutes?
+    single_variable: Within each initial breadth band, compare zero versus one or more new lower-touch names over six subsequent bars, keeping horizons and fees fixed and including cooldown bars.
+    result: Among 185 candles with at least 25 coins, 44 had no new names and 141 had further names. Mean net percentages for BTC/ETH/SOL were +0.32/+0.57/+2.10 and -0.30/-0.19/-1.17 respectively. In the 15 no-new cases since 2025 the means were -0.16/+0.21/-0.01 percent. No conclusive positive matched excess in the no-new arm.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - monday-breadth-bar-rebounds-20261107-v1
+    canonical_report: experiments/active/exp-monday-breadth-bar-rebounds-20261107-v1/summary.csv
+    notes: 13421 initial bars in a 626-symbol ledger. Enter at initial close plus 30m and exit at initial close plus 24h. VectorBT unlevered independent longs with 5bp taker per side. Overlapping windows are counted as requested. SOL has 13256 usable outcomes.
+
   - experiment_id: exp-monday-breadth-bar-counts-20261107-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 01cdaf5251
