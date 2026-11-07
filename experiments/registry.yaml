@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-live-wick-confirmed-swing-20261107-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: dacc3bed4d
+    status: rejected
+    question: Does a confirmed pre-entry swing break distinguish eventual near-edge target hits from protected stops on live-wick positions still open after reclaim?
+    single_variable: After entry through the original H1 reclaim close, a 5m close crosses the frozen most recent five-left/five-right pivot confirmed strictly before the entry close; mirror for shorts.
+    result: Of 416 candidates, 181 closed before the checkpoint and 169 at its timestamp. Of the 66 remaining across 54 NY weeks, 0 had a confirmed swing break. 63 pivots lay strictly beyond the resting target; the other 3 had no break by the decision. 31 later reached target, 35 triggered protection. Whole trade mean net +379.78bp; from checkpoint mark to original exit +56.41bp (median -22.91bp, per entry notional with original exit costs). Both native path orders agree on landmark eligibility and future exit reasons. No breakout group to estimate a difference.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - live-wick-confirmed-swing-20261107-v1
+    canonical_report: experiments/active/exp-live-wick-confirmed-swing-20261107-v1/summary.json
+    notes: Native fills reused; no changed exit or new account P&L. Only archived Binance history through 2026-10-27. Priorities, sizing and production rules unaffected. One CHR gap-stop has the checkpoint timestamp, next bar open; including it as a boundary sensitivity gives 0/67. Strict pivot ties and allowing equals on the left produced identical classifications.
+
   - experiment_id: exp-live-capital41-volume-20261107-v1
     source_repo: darkforest-x/fable-trading
     source_commit: d4d0e7983a

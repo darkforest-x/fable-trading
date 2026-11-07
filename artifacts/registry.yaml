@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: live-wick-confirmed-swing-20261107-v1
+    artifact_type: manifest
+    role: conditional_outcomes_of_open_live_wick_positions_at_hourly_reclaim
+    source_repo: darkforest-x/fable-trading
+    source_commit: dacc3bed4d
+    source_path: experiments/active/exp-live-wick-confirmed-swing-20261107-v1/summary.json
+    storage_uri: repo://experiments/active/exp-live-wick-confirmed-swing-20261107-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen event-level cohort, decision clocks, known swing, original exits and net mark contributions in events.csv.gz; complete native outcome parity on all 400 funded baseline rows.
+
   - artifact_id: live-capital41-volume-20261107-v1
     artifact_type: manifest
     role: capital41_volume_gate_replay_on_frozen_native_fills
