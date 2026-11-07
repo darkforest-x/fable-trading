@@ -1,16 +1,20 @@
 {
-  "experiment_id":"exp-monday-breadth-frequency-20261108-v1",
-  "parent":"exp-monday-breadth-optimization-20261108-v1",
-  "question":"Can the same market-wide lower-band reversal research produce 36 or 72 nonoverlapping entries per year with acceptable net performance?",
-  "signal":"UTC aligned weekly first lower-touch ledger, all original alarm cooldown bars retained, fully observable initial and wait. Original universe definition and USTC exclusion from returns preserved.",
-  "frequency_floor_per_year":[36,72],
-  "selection":"Use pre-2023, 2023-24 and 2025 only. Use 2026 through Oct 27 for historical chronological replication. No candidate selection on 2026. Show all failed frequency or profitability gates and no pooled cross-asset opportunity counts.",
-  "fixed":"Reuse the old VectorBT 6/12/24/48/72/144 hour native fills and max(24h,hold) admission. Require breadth count >=2 and annual frequency. Two tiers per asset. Frozen candidates selected on 2025 or earlier.",
-  "six_day_ETH":"Keep 10-minute initial window, 120-minute observation and original ETH exit policy 67. Test relaxing original breadth, continuation and BTC confirmation over a bounded family. Enter only flat, at least 24h since last entry and at least one 5min candle after its actual exit. Keep original six-day reservation as paired reference. No compounding across overlapping signals.",
-  "six_day_selection":"For each frequency tier require at least 50 pre-2023, 2x tier in 2023-24, tier in 2025 and >=8 populated 2025 months. Prefer positive means all 3 periods, 2025 close-to-close trade-settlement drawdown <=35%; sort by worst period clipped lower confidence score then 2025 mean and fixed lexical names. If no profitable choice meets the floor label best frequency-eligible diagnostic explicitly.",
-  "fee":"Both market fills 0.05% per side. Slippage sensitivity minus 0.20 percentage points per round trip. Realized USDM funding reported separately on frozen 2026 test entries.",
-  "controls":"Same asset/month/time-of-day/volatility/trend and observation calendar, prior-known shock exclusion, matched long using same exit. Event-weighted month block sign tests, Holm correction; no funding in either side of random comparison.",
-  "tiers_are_assumptions":"36 and 72 annual opportunities correspond to 3 and 6 per calendar month on average. No minimum in any single month was requested.",
-  "data_end":"2026-10-28T00:00:00Z (exclusive signal ledger cutoff)",
-  "production_eligible":false
+  "experiment_id": "exp-monday-breadth-frequency-20261108-v1",
+  "parent": "exp-monday-breadth-optimization-20261108-v1",
+  "question": "Can the same market-wide lower-band reversal research produce 36 or 72 nonoverlapping entries per year with acceptable net performance?",
+  "signal": "UTC aligned weekly first lower-touch ledger, all original alarm cooldown bars retained, fully observable initial and wait. Original universe definition and USTC exclusion from returns preserved.",
+  "frequency_floor_per_year": [
+    36,
+    72
+  ],
+  "selection": "Use pre-2023, 2023-24 and 2025 only. Use 2026 through Oct 27 for historical chronological replication. No candidate selection on 2026. Show all failed frequency or profitability gates and no pooled cross-asset opportunity counts.",
+  "fixed": "Reuse the old VectorBT 6/12/24/48/72/144 hour native fills and max(24h,hold) admission. Require breadth count >=2 and annual frequency. Two tiers per asset. Frozen candidates selected on 2025 or earlier.",
+  "six_day_ETH": "Keep 10-minute initial window, 120-minute observation and original ETH exit policy 67. Test relaxing original breadth, continuation and BTC confirmation over a bounded family. Enter only flat, at least 24h since last entry and at least one 5min candle after its actual exit. Keep original six-day reservation as paired reference. No compounding across overlapping signals.",
+  "six_day_selection": "For each frequency tier require at least 50 pre-2023, 2x tier in 2023-24, tier in 2025 and >=8 populated 2025 months. Prefer positive means all 3 periods, 2025 close-to-close trade-settlement drawdown <=35%; sort by worst period clipped lower confidence score then 2025 mean and fixed lexical names. If no profitable choice meets the floor label best frequency-eligible diagnostic explicitly.",
+  "fee": "Both market fills 0.05% per side. Slippage sensitivity minus 0.20 percentage points per round trip. Realized USDM funding reported separately on frozen 2026 test entries.",
+  "controls": "Same asset/month/time-of-day/volatility/trend and observation calendar, prior-known shock exclusion, matched long using same exit. Event-weighted month block sign tests, Holm correction; no funding in either side of random comparison.",
+  "tiers_are_assumptions": "36 and 72 annual opportunities correspond to 3 and 6 per calendar month on average. No minimum in any single month was requested.",
+  "data_end": "2026-10-28T00:00:00Z (exclusive signal ledger cutoff)",
+  "production_eligible": false,
+  "one_account_alert_union": "Prespecified before fixed candidate lock. Separately for each frequency tier, merge the four independent per-rule, fee-paid alerts (each keeps its own virtual reservation even when skipped). One 1x position and 24h minimum between account entries; admit earliest alert after max(24h, last holding period); ties in fixed order BTC, ETH, SOL, ALT. Use all four available frequency-qualified rules, including low-quality ones as exploratory; never rank legs on 2026. Carry historical split boundary purges and separately report year/month counts, funded return, drawdown, source alerts skipped and matched random costs. Do not sum asset trade counts."
 }
