@@ -131,15 +131,16 @@ def fixed_benchmarks(events: pd.DataFrame) -> pd.DataFrame:
                       frame.hold_hours.isin(HORIZONS)]
         if frame.duplicated(["known", "hold_hours"]).any():
             raise ValueError(f"Duplicate benchmark fixed-horizon rows for W={minutes}")
-        for asset in ("BTC", "ETH", "SOL"):
+        for asset in (a for a in ("BTC", "ETH", "SOL") if a in set(group.asset)):
             z = frame[["known", "hold_hours", f"{asset.lower()}_net_return_pct"]].copy()
             z = z.rename(columns={f"{asset.lower()}_net_return_pct": "fixed_return"})
             z["asset"] = asset
-            wide = z.pivot(index=["known", "asset"], columns="hold_hours", values="fixed_return")
+            z["minutes"] = int(minutes)
+            wide = z.pivot(index=["known", "asset", "minutes"], columns="hold_hours", values="fixed_return")
             wide = wide.rename(columns={12: "fixed12", 24: "fixed24", 144: "fixed144"})
             parts.append(wide.reset_index())
     result = pd.concat(parts, ignore_index=True)
-    if result.duplicated(["known", "asset"]).any():
+    if result.duplicated(["known", "asset", "minutes"]).any():
         raise ValueError("Duplicate direct benchmark returns")
     return result
 
@@ -168,14 +169,14 @@ def build_policy_events(events: pd.DataFrame, bridge: pd.DataFrame,
     data_receipts: dict[str, dict] = {}
 
     for (asset, minutes, symbol), members in bridge.groupby(["asset", "minutes", "symbol"], sort=False):
-        member = members[["event_i", "known", "decision", "exit_h", "expected_members"]].copy()
+        member = members[["event_i", "minutes", "known", "decision", "exit_h", "expected_members"]].copy()
         if asset == "ALT":
             fixed = fixed_alt(symbol, int(minutes), pd.DatetimeIndex(member.known.unique()))
             member = member.merge(fixed, on="known", how="left", validate="many_to_one")
             fixed_path = FIXED / f"minutes={int(minutes)}" / f"symbol={symbol}" / "part-00000.parquet"
         else:
             fixed = direct_fixed[direct_fixed.asset.eq(asset)].drop(columns="asset")
-            member = member.merge(fixed, on="known", how="left", validate="many_to_one")
+            member = member.merge(fixed, on=["known", "minutes"], how="left", validate="many_to_one")
             fixed_path = PAYOFFS / f"event_outcomes_minutes{int(minutes)}_wait30.csv.gz"
 
         fill_path = FILLS / f"{symbol}.parquet"
