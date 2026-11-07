@@ -56,6 +56,9 @@ def funded_policies():
     for stop in (6,12):
         out.append(sim.Policy('btc_funded_limit',144,stop,take_fraction=1))
         for width in (.5,1,3):out.append(sim.Policy('btc_funded_floor',144,stop,width=width))
+        for fraction in (.5,.75):
+            for width in (0,4):
+                out.append(sim.Policy('btc_funded_partial',144,stop,width=width,take_fraction=fraction))
     return out
 
 

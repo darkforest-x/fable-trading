@@ -16,7 +16,7 @@ from vectorbt.portfolio.enums import NoOrder
 
 TAKER=.0005
 MAKER=.0002
-KINDS=('time','percent_trail','atr_1h','atr_4h','profit_lock','trend_1h','trend_4h','btc_net_10000','btc_funded_limit','btc_funded_floor')
+KINDS=('time','percent_trail','atr_1h','atr_4h','profit_lock','trend_1h','trend_4h','btc_net_10000','btc_funded_limit','btc_funded_floor','btc_funded_partial')
 
 
 @dataclass(frozen=True)
@@ -131,7 +131,7 @@ def execute_order(c,q,starts,settings,can_trade,highwater,protection,sold_part,g
     if kind==7:
         # Aim for 10,000 USDT after both fees on one BTC.
         target=(entry*(1+fee_in)+10000)/(1-fee_limit)
-    if kind==8 or kind==9:
+    if kind>=8:
         # Additional columns are the dollars settled strictly before this bar, plus
         # the entry bar's possible settlement. At scheduled settlement bars these
         # tactical orders pause; ordinary protection remains live.
@@ -140,6 +140,14 @@ def execute_order(c,q,starts,settings,can_trade,highwater,protection,sold_part,g
         settle_bar=int(q[pos,12])==1
         if not settle_bar and kind==8:
             target=np.ceil((entry*(1+fee_in)+10000+paid)/(1-fee_limit))
+        if kind==10:
+            # Reserve one market-exit fee on the highlighted target. The partial
+            # sale leaves a runner through the deadline or its own trailing stop.
+            if not settle_bar:
+                target=np.ceil((entry*(1+fee_in)+10000+paid)/(1-fee_limit-fee_out))
+            if bar>0 and sold_part[col] and s[4]>0:
+                level=max(level,peak*(1-s[4]/100))
+                protection[col]=level
         if not settle_bar and kind==9 and bar>0:
             floor=np.ceil((entry*(1+fee_in)+10000+paid)/(1-fee_out))
             if peak>=floor:
