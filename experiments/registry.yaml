@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-breadth-alarm-census-20261107-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 09ad984c37
+    status: accepted
+    question: How many market-wide Monday breadth alarms did the historical study count, and how do symbol coverage and the October extension change their calendar distribution?
+    single_variable: Reconcile the frozen event keys, all first touches of the same listed names, expansion to all native 5m ledger symbols, and then the time extension in successive steps. Same threshold and cooldown in all arms.
+    result: The 531-symbol frozen set yields 129 alarms (122 lower, 7 upper), exactly unchanged by restoring 27 first touches on those names. Over the original period all 626 native 5m symbols yield 156 (147 lower, 9 upper). Archived extension to 2026-10-27 UTC yields 162 (152 lower and 10 upper) across 143 Beijing dates. The peak was 12 in October 2025.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - monday-breadth-alarm-census-20261107-v1
+    canonical_report: experiments/active/exp-monday-breadth-alarm-census-20261107-v1/scope.csv
+    notes: Historical Binance native 5m pool only, excludes six separate 1m jobs and spot gold. First-touch coverage varies by listing and history. No inferred past live notifications. Accepted as a descriptive inventory.
+
   - experiment_id: exp-monday-breadth-reversal-wait-20261107-v1
     source_repo: darkforest-x/fable-trading
     source_commit: a6b7eedfd6

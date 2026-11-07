@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: monday-breadth-alarm-census-20261107-v1
+    artifact_type: manifest
+    role: historical_breadth_alarm_scope_and_calendar
+    source_repo: darkforest-x/fable-trading
+    source_commit: 09ad984c37
+    source_path: experiments/active/exp-monday-breadth-alarm-census-20261107-v1/scope.csv
+    storage_uri: repo://experiments/active/exp-monday-breadth-alarm-census-20261107-v1/scope.csv
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Companion alarms.csv and monthly.csv distinguish the four scopes. Beijing month uses known trigger bar close. Historical 5m breadth uses at least 25 distinct names and a half-hour cooldown per side.
+
   - artifact_id: monday-breadth-reversal-wait-20261107-v1
     artifact_type: manifest
     role: fixed_breadth_alarm_zero_touch_wait_comparison
