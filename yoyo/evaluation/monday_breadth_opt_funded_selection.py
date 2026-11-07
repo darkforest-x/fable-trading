@@ -11,7 +11,9 @@ def run():
     out=study.OUT; entries=pd.read_csv(out/'all_entries.csv')
     events=pd.read_parquet(out/'all_event_fills/BTC.parquet')
     anchors=events[events.policy_id==5].drop(columns=['policy_id','net_pct','peak_pct','win','points','legs','ambiguous','up10','gain_half','observed']).copy()
-    f=pd.read_parquet(out/'btc_funded_rule_fills.parquet')
+    entries=pd.concat([entries,pd.read_csv(out/'case_grid_entries.csv')],ignore_index=True)
+    anchors=pd.concat([anchors,pd.read_parquet(out/'case_grid_admissions.parquet')],ignore_index=True)
+    f=pd.read_parquet(fund.FUNDED_CACHE)
     frame=anchors.merge(f,left_on='decision',right_on='entry_time',how='left',validate='many_to_many')
     frame=frame.dropna(subset=['policy_id']).copy()
     frame['policy_id']=frame.policy_id.astype(int)+1000
