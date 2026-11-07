@@ -14,6 +14,8 @@ struct MonitorView: View {
     @AppStorage("monitor.segment") private var segment: MonitorSegment = .paper
     @Binding var showNotifications: Bool
     @Binding var showSettings: Bool
+    @Namespace private var zoom
+    @State private var refresh = 0
 
     var body: some View {
         NavigationStack {
@@ -23,21 +25,30 @@ struct MonitorView: View {
                         ForEach(MonitorSegment.allCases) { Text($0.title).tag($0) }
                     }
                     .pickerStyle(.segmented)
+                    .sensoryFeedback(.selection, trigger: segment)
                     if let connection = session.connection {
                         Group {
                             switch segment {
-                            case .paper: PaperSection(connection: connection)
-                            case .alerts: AlertsSection(connection: connection)
-                            case .cloud: CloudSection(connection: connection)
+                            case .paper: PaperSection(connection: connection, zoom: zoom, refresh: refresh)
+                            case .alerts: AlertsSection(connection: connection, refresh: refresh)
+                            case .cloud: CloudSection(connection: connection, refresh: refresh)
                             }
                         }
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                        .id(segment)
+                        .transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: 18)), removal: .opacity))
                     } else {
                         ConnectPrompt(showSettings: $showSettings)
                     }
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 14)
                 .padding(.bottom, 24)
+            }
+            .refreshable { refresh += 1; try? await Task.sleep(for: .milliseconds(700)) }
+            .navigationDestination(for: PaperAccount.self) { account in
+                if let connection = session.connection {
+                    AccountDetailView(account: account, connection: connection)
+                        .navigationTransition(.zoom(sourceID: account.key, in: zoom))
+                }
             }
             .background(AmbientBackground())
             .navigationTitle("监控")
@@ -46,6 +57,7 @@ struct MonitorView: View {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button { notices.markRead(); showNotifications = true } label: {
                         Image(systemName: notices.unread > 0 ? "bell.badge" : "bell")
+                            .symbolEffect(.bounce, value: notices.unread)
                     }
                     .badge(notices.unread)
                     .accessibilityLabel(notices.unread > 0 ? "通知，\(notices.unread) 条未读" : "通知")

@@ -3,6 +3,7 @@ import SwiftUI
 /// 全市场插针报警 (Stitch monitor-alerts 7e2f6b91…). Test alarms are filtered server-side.
 struct AlertsSection: View {
     let connection: Connection
+    let refresh: Int
     @State private var data: AlertSnapshot?
     @State private var error: String?
     @State private var expanded: Double?
@@ -49,13 +50,14 @@ struct AlertsSection: View {
                         }
                         .padding(14)
                         .glassCard(cornerRadius: 22)
+                        .scrollReveal()
                     }
                 }
             }
             Text("只读显示。确认报警、测试推送与通知设置在监控工作台操作。").font(.caption).foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity).padding(.top, 6)
         }
-        .modifier(Polled(key: "alerts", every: .seconds(8), load: { try await API.get("/v1/monitor/alerts", connection: connection) }, value: $data, error: $error))
+        .modifier(Polled(key: "alerts-\(refresh)", every: .seconds(8), load: { try await API.get("/v1/monitor/alerts", connection: connection) }, value: $data, error: $error))
     }
 
     private func range(_ a: Alarm) -> String {
@@ -80,8 +82,9 @@ struct AlarmHero: View {
                 Text("\(Fmt.clock(alarm.firstMs, now: now)) – \(Fmt.clock(alarm.lastMs, now: now))").font(.caption.weight(.semibold)).monospacedDigit()
                     .padding(.horizontal, 10).padding(.vertical, 4).glassEffect(.regular, in: .capsule)
             }
-            Label("全市场插针 · \(Fmt.edge(alarm.side))", systemImage: alarm.side == .lower ? "arrow.down" : "arrow.up")
-                .font(.title3.weight(.bold)).labelStyle(.titleAndIcon)
+            Label("全市场插针 · \(Fmt.edge(alarm.side))", systemImage: alarm.side == .lower ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
+                .font(.title3.weight(.bold)).fontDesign(.rounded).labelStyle(.titleAndIcon)
+                .symbolEffect(.pulse, options: .repeating)
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text("\(alarm.n)").font(.system(size: 52, weight: .bold, design: .rounded)).monospacedDigit().contentTransition(.numericText())
                 Text("个币 \(windowMinutes) 分钟内触及").font(.subheadline).foregroundStyle(.secondary)

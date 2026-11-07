@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>SPIKE 纪律交易 · 监控 (报警)</title>
+<!-- Tailwind Play CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          appleBlue: '#0A84FF',
+          appleGreenText: '#1F9D55',
+          appleGreenFill: '#30D158',
+          appleRedText: '#E5383B',
+          appleRedFill: '#FF453A',
+          appleAmber: '#FF9F0A',
+        },
+        fontFamily: {
+          sans: [
+            '-apple-system',
+            'BlinkMacSystemFont',
+            '"SF Pro Display"',
+            '"SF Pro Text"',
+            '"PingFang SC"',
+            '"Hiragino Sans GB"',
+            'sans-serif'
+          ],
+          mono: [
+            '"SF Mono"',
+            '"JetBrains Mono"',
+            'ui-monospace',
+            'monospace'
+          ]
+        },
+        borderRadius: {
+          'ios-card': '26px',
+        }
+      }
+    }
+  }
+</script>
+<style>
+  /* iOS 26 Liquid Glass & Refractive Environment */
+  :root {
+    --app-bg: #EEF2F7;
+    --accent: #0A84FF;
+  }
+
+  body {
+    background-color: #0b0f17;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Fixed 402x874 frame (iPhone 17 Pro ratio spec) */
+  .device-frame {
+    width: 402px;
+    height: 874px;
+    background: #EEF2F7;
+    position: relative;
+    overflow: hidden;
+    border-radius: 54px;
+    box-shadow: 0 25px 70px -10px rgba(0, 0, 0, 0.45), 0 0 0 10px #1E232E, 0 0 0 11px #3A4252;
+  }
+
+  /* Tabular numbers lock */
+  .t-num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Liquid Glass Specular and Translucency */
+  .liquid-glass {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    box-shadow:
+      0 12px 32px -4px rgba(15, 23, 42, 0.07),
+      0 2px 6px 0 rgba(15, 23, 42, 0.03),
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -1px 1px 0 rgba(255, 255, 255, 0.3);
+    border-radius: 26px;
+    position: relative;
+  }
+
+  .liquid-glass::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    border-radius: 26px 26px 0 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.02) 65%);
+    pointer-events: none;
+  }
+
+  /* Warm Red Pulsing Hero Glass */
+  .liquid-glass-hero {
+    background: linear-gradient(145deg, rgba(255, 240, 241, 0.72) 0%, rgba(255, 255, 255, 0.62) 100%);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(255, 175, 178, 0.85);
+    box-shadow:
+      0 16px 36px -6px rgba(229, 56, 59, 0.12),
+      0 4px 12px 0 rgba(15, 23, 42, 0.04),
+      inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.98),
+      inset 0 -1px 1px 0 rgba(255, 69, 58, 0.15);
+    border-radius: 26px;
+    position: relative;
+  }
+
+  .liquid-glass-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 48%;
+    border-radius: 26px 26px 0 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.05) 70%);
+    pointer-events: none;
+  }
+
+  /* Coin chip translucent glass */
+  .glass-chip {
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  /* Bottom Tab Bar Lens Pill */
+  .tab-lens-active {
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 4px 16px rgba(10, 132, 255, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05), inset 0 1px 1px #fff;
+    border: 0.5px solid rgba(255, 255, 255, 1);
+  }
+
+  /* Smooth pulse animation */
+  @keyframes alert-pulse {
+    0% { transform: scale(0.95); opacity: 0.85; box-shadow: 0 0 0 0 rgba(255, 69, 58, 0.6); }
+    70% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 0 7px rgba(255, 69, 58, 0); }
+    100% { transform: scale(0.95); opacity: 0.85; box-shadow: 0 0 0 0 rgba(255, 69, 58, 0); }
+  }
+
+  .pulse-dot {
+    animation: alert-pulse 2s infinite ease-in-out;
+  }
+
+  /* Custom scrollbar clean */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
+</head>
+<body>
+<!-- Device Frame: iPhone 17 Pro 402x874pt -->
+<div class="device-frame flex flex-col select-none">
+<!-- Background Ambient Refraction Blooms (Liquid Glass Specular Depth) -->
+<div class="absolute inset-0 pointer-events-none overflow-hidden z-0"><style>@keyframes mesh-drift-1 { 0%, 100% { transform: translate(0px, 0px) scale(1); } 50% { transform: translate(30px, 40px) scale(1.15); } } @keyframes mesh-drift-2 { 0%, 100% { transform: translate(0px, 0px) scale(1); } 50% { transform: translate(-35px, -30px) scale(1.18); } } @keyframes mesh-drift-3 { 0%, 100% { transform: translate(0px, 0px) scale(1.05); } 50% { transform: translate(25px, -35px) scale(0.95); } } .mesh-blob-1 { animation: mesh-drift-1 14s ease-in-out infinite; } .mesh-blob-2 { animation: mesh-drift-2 18s ease-in-out infinite; } .mesh-blob-3 { animation: mesh-drift-3 16s ease-in-out infinite; } @media (prefers-reduced-motion: reduce) { .mesh-blob-1, .mesh-blob-2, .mesh-blob-3 { animation: none !important; } }</style><div class="mesh-blob-1 absolute -top-24 -left-20 w-96 h-96 rounded-full" style="background: radial-gradient(circle, rgba(162, 196, 255, 0.45) 0%, rgba(207, 224, 255, 0.25) 50%, transparent 75%); filter: blur(52px);"></div><div class="mesh-blob-2 absolute top-64 -right-24 w-96 h-96 rounded-full" style="background: radial-gradient(circle, rgba(226, 220, 255, 0.45) 0%, rgba(211, 242, 230, 0.28) 55%, transparent 75%); filter: blur(56px);"></div><div class="mesh-blob-3 absolute bottom-20 -left-12 w-84 h-84 rounded-full" style="background: radial-gradient(circle, rgba(211, 242, 230, 0.42) 0%, rgba(190, 228, 255, 0.2) 60%, transparent 75%); filter: blur(60px);"></div><div class="absolute top-1/3 left-1/4 w-72 h-72 rounded-full" style="background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, transparent 65%); filter: blur(44px);"></div></div>
+<!-- iOS Dynamic Island Safe Area (62pt) -->
+<div class="w-full h-[62px] flex items-end justify-between px-7 pb-1 relative z-30 shrink-0">
+<!-- Time (SF Pro Bold) -->
+<span class="text-[15px] font-semibold tracking-tight text-slate-900 t-num">9:41</span>
+<!-- Dynamic Island Pill -->
+<div class="absolute left-1/2 -translate-x-1/2 top-3 w-[122px] h-[34px] bg-black rounded-full shadow-inner flex items-center justify-between px-3">
+<div class="w-2.5 h-2.5 rounded-full bg-slate-900"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-blue-950/40"></div>
+</div>
+<!-- Cellular, WiFi, Battery Status -->
+<div class="flex items-center space-x-1.5 text-slate-900">
+<svg class="w-4 h-3.5" fill="currentColor" viewbox="0 0 18 12">
+<path d="M1 9.5h2.2v2H1v-2zm4-3h2.2v5H5v-5zm4-3.2h2.2v8.2H9v-8.2zm4-3.3h2.2v11.5H13V0z"></path>
+</svg>
+<svg class="w-3.5 h-3.5" fill="currentColor" viewbox="0 0 16 12">
+<path d="M8 3.6c2.4 0 4.6.9 6.2 2.5l1.4-1.4C13.8 2.8 11 1.7 8 1.7S2.2 2.8.4 4.7l1.4 1.4C3.4 4.5 5.6 3.6 8 3.6zm0 4.3c1.3 0 2.5.5 3.4 1.4l1.4-1.4c-1.3-1.2-3-1.9-4.8-1.9s-3.5.7-4.8 1.9l1.4 1.4c.9-.9 2.1-1.4 3.4-1.4zm0 4.3c.9 0 1.6-.7 1.6-1.6 0-.9-.7-1.6-1.6-1.6S6.4 9.8 6.4 10.7c0 .9.7 1.5 1.6 1.5z"></path>
+</svg>
+<!-- Battery -->
+<div class="w-5 h-2.5 border-[1.2px] border-slate-900 rounded-[3px] p-[1px] flex items-center">
+<div class="h-full w-3.5 bg-slate-900 rounded-[1.5px]"></div>
+</div>
+</div>
+</div>
+<!-- Scrollable Main Container -->
+<div class="flex-1 overflow-y-auto no-scrollbar relative z-10 px-4 pt-1 pb-32"><div class="flex items-center justify-between pt-1 pb-3"><h1 class="text-[34px] font-bold tracking-tight text-slate-900 leading-tight">监控</h1><div class="flex items-center space-x-2"><button aria-label="刷新" class="w-[38px] h-[38px] rounded-full bg-white/60 backdrop-blur-xl border border-white/90 shadow-[0_4px_14px_rgba(15,23,42,0.06),inset_0_1px_1px_#ffffff] flex items-center justify-center text-slate-700 active:scale-95 transition-all hover:rotate-180 duration-500"><svg class="w-[18px] h-[18px] stroke-[2.2]" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><button aria-label="设置" class="w-[38px] h-[38px] rounded-full bg-white/60 backdrop-blur-xl border border-white/90 shadow-[0_4px_14px_rgba(15,23,42,0.06),inset_0_1px_1px_#ffffff] flex items-center justify-center text-slate-700 active:scale-95 transition-transform"><svg class="w-[18px] h-[18px] stroke-[2]" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div></div><div class="w-full bg-black/[0.05] p-[3px] rounded-[18px] backdrop-blur-xl flex items-center mb-3 border border-white/70 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]"><button class="flex-1 py-1.5 text-[14px] font-semibold text-appleBlue bg-white/95 rounded-[15px] shadow-[0_3px_10px_rgba(15,23,42,0.08),inset_0_1px_1px_#ffffff] border border-white transition-all text-center">模拟盘</button><button class="flex-1 py-1.5 text-[14px] font-medium text-slate-600 rounded-[15px] transition-all text-center hover:text-slate-800">报警</button><button class="flex-1 py-1.5 text-[14px] font-medium text-slate-600 rounded-[15px] transition-all text-center hover:text-slate-800">云带</button></div><div class="w-full liquid-glass px-3.5 py-2 mb-4 flex items-center space-x-2 text-[12px] text-slate-600 shadow-[0_4px_16px_rgba(15,23,42,0.04)]"><span class="w-2 h-2 rounded-full bg-appleAmber shadow-[0_0_8px_rgba(255,159,10,0.8)] shrink-0"></span><span class="font-medium text-slate-800 tracking-tight">模拟账户 · 只读 · 不涉及真实资金</span></div><div class="flex items-baseline justify-between px-1 mb-2.5"><div class="flex items-center space-x-2"><h2 class="text-[20px] font-bold tracking-tight text-slate-900">live- 前向模拟</h2><span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold text-appleBlue bg-appleBlue/10 border border-appleBlue/20 t-num">5</span></div><span class="text-[12px] text-slate-500 font-medium">12H 纽约准则</span></div><div class="grid grid-cols-2 gap-2.5 mb-5"><div class="liquid-glass p-3.5 flex flex-col justify-between active:scale-[0.98] transition-transform cursor-pointer"><div class="flex items-center justify-between mb-1.5"><span class="text-[12px] font-mono font-medium text-slate-500 tracking-tight truncate">live-allin3</span><span class="w-2 h-2 rounded-full bg-appleRedFill shadow-[0_0_6px_rgba(255,69,58,0.7)] shrink-0"></span></div><div class="mb-2.5"><div class="text-[26px] font-bold tracking-tight text-slate-900 t-num leading-none mb-1.5">960.24 <span class="text-[13px] font-semibold text-slate-500">U</span></div><span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleRedText bg-appleRedFill/15 border border-appleRedFill/20 t-num">−3.98% (-39.76U)</span></div><div class="text-[11px] text-slate-400 font-mono t-num pt-2 border-t border-black/[0.04]">持仓 0 · 已平 5</div></div><div class="liquid-glass p-3.5 flex flex-col justify-between active:scale-[0.98] transition-transform cursor-pointer"><div class="flex items-center justify-between mb-1.5"><span class="text-[12px] font-mono font-medium text-slate-500 tracking-tight truncate">live-wick6x3</span><span class="w-2 h-2 rounded-full bg-appleGreenFill shadow-[0_0_6px_rgba(48,209,88,0.7)] shrink-0"></span></div><div class="mb-2.5"><div class="text-[26px] font-bold tracking-tight text-slate-900 t-num leading-none mb-1.5">1,016.00 <span class="text-[13px] font-semibold text-slate-500">U</span></div><span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleGreenText bg-appleGreenFill/15 border border-appleGreenFill/20 t-num">+1.60% (+16.00U)</span></div><div class="text-[11px] text-slate-400 font-mono t-num pt-2 border-t border-black/[0.04]">持仓 0 · 已平 5</div></div><div class="liquid-glass p-3.5 flex flex-col justify-between active:scale-[0.98] transition-transform cursor-pointer"><div class="flex items-center justify-between mb-1.5"><span class="text-[12px] font-mono font-medium text-slate-500 tracking-tight truncate">live-wick3x3</span><span class="w-2 h-2 rounded-full bg-appleGreenFill shadow-[0_0_6px_rgba(48,209,88,0.7)] shrink-0"></span></div><div class="mb-2.5"><div class="text-[26px] font-bold tracking-tight text-slate-900 t-num leading-none mb-1.5">1,038.50 <span class="text-[13px] font-semibold text-slate-500">U</span></div><span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleGreenText bg-appleGreenFill/15 border border-appleGreenFill/20 t-num">+3.85% (+38.50U)</span></div><div class="text-[11px] text-slate-400 font-mono t-num pt-2 border-t border-black/[0.04]">持仓 0 · 已平 5</div></div><div class="liquid-glass p-3.5 flex flex-col justify-between active:scale-[0.98] transition-transform cursor-pointer"><div class="flex items-center justify-between mb-1.5"><span class="text-[12px] font-mono font-medium text-slate-500 tracking-tight truncate">live-wick6x3hi</span><span class="w-2 h-2 rounded-full bg-appleGreenFill shadow-[0_0_6px_rgba(48,209,88,0.7)] shrink-0"></span></div><div class="mb-2.5"><div class="text-[26px] font-bold tracking-tight text-slate-900 t-num leading-none mb-1.5">1,072.15 <span class="text-[13px] font-semibold text-slate-500">U</span></div><span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleGreenText bg-appleGreenFill/15 border border-appleGreenFill/20 t-num">+7.21% (+72.15U)</span></div><div class="text-[11px] text-slate-400 font-mono t-num pt-2 border-t border-black/[0.04]">持仓 0 · 已平 5</div></div><div class="liquid-glass col-span-2 p-3.5 flex items-center justify-between active:scale-[0.98] transition-transform cursor-pointer"><div class="flex flex-col"><div class="flex items-center space-x-2 mb-1"><span class="text-[13px] font-mono font-semibold text-slate-800 tracking-tight">live-wick3x3far</span><span class="px-2 py-0.5 rounded-full text-[10px] font-semibold text-appleAmber bg-appleAmber/10 border border-appleAmber/30">高阳位</span></div><div class="text-[11px] text-slate-400 font-mono t-num">持仓 0 · 已平 5</div></div><div class="text-right"><div class="text-[24px] font-bold tracking-tight text-slate-900 t-num leading-none mb-1">984.10 <span class="text-[12px] font-semibold text-slate-500">U</span></div><span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleRedText bg-appleRedFill/15 border border-appleRedFill/20 t-num">−1.59%</span></div></div></div><div class="flex items-baseline justify-between px-1 mb-2.5"><div class="flex items-center space-x-2"><h2 class="text-[20px] font-bold tracking-tight text-slate-900">回测复刻</h2><span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold text-appleBlue bg-appleBlue/10 border border-appleBlue/20 t-num">8</span></div><span class="text-[12px] text-slate-500 font-medium">历史基准一致性</span></div><div class="liquid-glass divide-y divide-black/[0.04] mb-5 overflow-hidden"><div class="px-4 h-[52px] flex items-center justify-between hover:bg-white/40 transition-colors"><div class="flex items-center space-x-2.5"><span class="w-1.5 h-1.5 rounded-full bg-appleGreenFill"></span><span class="text-[15px] font-semibold text-slate-800 font-mono">spike</span></div><div class="flex items-center space-x-3"><span class="text-[14px] font-bold text-slate-900 t-num">1,248.80 U</span><span class="px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleGreenText bg-appleGreenFill/15 border border-appleGreenFill/20 t-num">+24.88%</span><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path></svg></div></div><div class="px-4 h-[52px] flex items-center justify-between hover:bg-white/40 transition-colors"><div class="flex items-center space-x-2.5"><span class="w-1.5 h-1.5 rounded-full bg-appleGreenFill"></span><span class="text-[15px] font-semibold text-slate-800 font-mono">v3add20</span></div><div class="flex items-center space-x-3"><span class="text-[14px] font-bold text-slate-900 t-num">1,180.40 U</span><span class="px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleGreenText bg-appleGreenFill/15 border border-appleGreenFill/20 t-num">+18.04%</span><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path></svg></div></div><div class="px-4 h-[52px] flex items-center justify-between hover:bg-white/40 transition-colors"><div class="flex items-center space-x-2.5"><span class="w-1.5 h-1.5 rounded-full bg-appleGreenFill"></span><span class="text-[15px] font-semibold text-slate-800 font-mono">allin3</span></div><div class="flex items-center space-x-3"><span class="text-[14px] font-bold text-slate-900 t-num">1,142.10 U</span><span class="px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleGreenText bg-appleGreenFill/15 border border-appleGreenFill/20 t-num">+14.21%</span><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path></svg></div></div><div class="px-4 h-[52px] flex items-center justify-between hover:bg-white/40 transition-colors"><div class="flex items-center space-x-2.5"><span class="w-1.5 h-1.5 rounded-full bg-appleGreenFill"></span><span class="text-[15px] font-semibold text-slate-800 font-mono">60m</span></div><div class="flex items-center space-x-3"><span class="text-[14px] font-bold text-slate-900 t-num">1,095.30 U</span><span class="px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleGreenText bg-appleGreenFill/15 border border-appleGreenFill/20 t-num">+9.53%</span><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path></svg></div></div><div class="px-4 h-[52px] flex items-center justify-between hover:bg-white/40 transition-colors"><div class="flex items-center space-x-2.5"><span class="w-1.5 h-1.5 rounded-full bg-appleGreenFill"></span><span class="text-[15px] font-semibold text-slate-800 font-mono">5m</span></div><div class="flex items-center space-x-3"><span class="text-[14px] font-bold text-slate-900 t-num">1,064.20 U</span><span class="px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleGreenText bg-appleGreenFill/15 border border-appleGreenFill/20 t-num">+6.42%</span><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path></svg></div></div><div class="px-4 h-[52px] flex items-center justify-between hover:bg-white/40 transition-colors"><div class="flex items-center space-x-2.5"><span class="w-1.5 h-1.5 rounded-full bg-appleGreenFill"></span><span class="text-[15px] font-semibold text-slate-800 font-mono">v3</span></div><div class="flex items-center space-x-3"><span class="text-[14px] font-bold text-slate-900 t-num">1,032.00 U</span><span class="px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleGreenText bg-appleGreenFill/15 border border-appleGreenFill/20 t-num">+3.20%</span><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path></svg></div></div><div class="px-4 h-[52px] flex items-center justify-between hover:bg-white/40 transition-colors"><div class="flex items-center space-x-2.5"><span class="w-1.5 h-1.5 rounded-full bg-appleGreenFill"></span><span class="text-[15px] font-semibold text-slate-800 font-mono">v3add</span></div><div class="flex items-center space-x-3"><span class="text-[14px] font-bold text-slate-900 t-num">1,018.50 U</span><span class="px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleGreenText bg-appleGreenFill/15 border border-appleGreenFill/20 t-num">+1.85%</span><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path></svg></div></div><div class="px-4 h-[52px] flex items-center justify-between hover:bg-white/40 transition-colors"><div class="flex items-center space-x-2.5"><span class="w-1.5 h-1.5 rounded-full bg-appleRedFill"></span><span class="text-[15px] font-semibold text-slate-800 font-mono">v3lock</span></div><div class="flex items-center space-x-3"><span class="text-[14px] font-bold text-slate-900 t-num">992.30 U</span><span class="px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleRedText bg-appleRedFill/15 border border-appleRedFill/20 t-num">−0.77%</span><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path></svg></div></div></div><div class="flex items-baseline justify-between px-1 mb-2.5"><div class="flex items-center space-x-2"><h2 class="text-[20px] font-bold tracking-tight text-slate-900">今日触价</h2><span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold text-appleBlue bg-appleBlue/10 border border-appleBlue/20 t-num">12</span></div><span class="text-[12px] text-slate-500 font-medium">实时周一定界</span></div><div class="liquid-glass divide-y divide-black/[0.04] mb-4 overflow-hidden"><div class="px-4 py-3 flex items-center justify-between hover:bg-white/40 transition-colors"><div class="flex items-center space-x-3"><div class="w-9 h-9 rounded-full bg-appleBlue/15 border border-appleBlue/30 flex items-center justify-center font-bold text-[13px] text-appleBlue shrink-0">SOL</div><div><div class="flex items-center space-x-2"><span class="text-[15px] font-semibold text-slate-900">SOL</span><span class="text-[12px] text-slate-500 font-mono">下沿 1.618</span><span class="px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleGreenText bg-appleGreenFill/15 border border-appleGreenFill/20">做多</span></div><div class="text-[12px] text-appleGreenText font-medium mt-0.5">3 个 live 已开 · 评分 0.78</div></div></div><span class="text-[12px] text-slate-400 t-num font-mono">14:35</span></div><div class="px-4 py-3 flex items-center justify-between hover:bg-white/40 transition-colors"><div class="flex items-center space-x-3"><div class="w-9 h-9 rounded-full bg-appleBlue/20 border border-appleBlue/35 flex items-center justify-center font-bold text-[13px] text-appleBlue shrink-0">ETH</div><div><div class="flex items-center space-x-2"><span class="text-[15px] font-semibold text-slate-900">ETH</span><span class="text-[12px] text-slate-500 font-mono">下沿 1.618</span><span class="px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleGreenText bg-appleGreenFill/15 border border-appleGreenFill/20">做多</span></div><div class="text-[12px] text-appleGreenText font-medium mt-0.5">3 个 live 已开 · 评分 0.84</div></div></div><span class="text-[12px] text-slate-400 t-num font-mono">13:10</span></div><div class="px-4 py-3 flex items-center justify-between hover:bg-white/40 transition-colors"><div class="flex items-center space-x-3"><div class="w-9 h-9 rounded-full bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center font-bold text-[13px] text-cyan-600 shrink-0">SUI</div><div><div class="flex items-center space-x-2"><span class="text-[15px] font-semibold text-slate-900">SUI</span><span class="text-[12px] text-slate-500 font-mono">上沿 1.618</span><span class="px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleRedText bg-appleRedFill/15 border border-appleRedFill/20">做空</span></div><div class="text-[12px] text-slate-400 font-medium mt-0.5">未开 · 满仓 · 评分 0.65</div></div></div><span class="text-[12px] text-slate-400 t-num font-mono">11:42</span></div><div class="px-4 py-3 flex items-center justify-between hover:bg-white/40 transition-colors"><div class="flex items-center space-x-3"><div class="w-9 h-9 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center justify-center font-bold text-[13px] text-amber-600 shrink-0">DOGE</div><div><div class="flex items-center space-x-2"><span class="text-[15px] font-semibold text-slate-900">DOGE</span><span class="text-[12px] text-slate-500 font-mono">下沿 1.618</span><span class="px-2 py-0.5 rounded-full text-[11px] font-semibold text-appleGreenText bg-appleGreenFill/15 border border-appleGreenFill/20">做多</span></div><div class="text-[12px] text-appleGreenText font-medium mt-0.5">2 个 live 已开 · 评分 0.72</div></div></div><span class="text-[12px] text-slate-400 t-num font-mono">09:15</span></div></div><div class="h-6"></div></div>
+<!-- Detached Floating Capsule Tab Bar (12pt above home indicator, full glass, 5 tabs) -->
+<div class="absolute bottom-[28px] inset-x-3.5 z-40"><div class="w-full h-[62px] bg-white/70 backdrop-blur-[32px] saturate-[190%] border border-white/95 rounded-[31px] shadow-[0_16px_36px_-6px_rgba(15,23,42,0.12),0_2px_8px_rgba(0,0,0,0.04)] px-2 flex items-center justify-between"><button class="flex-1 flex flex-col items-center justify-center py-1 text-slate-500 hover:text-slate-800 transition-colors"><svg class="w-[21px] h-[21px] stroke-[1.8]" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="text-[10px] font-medium tracking-tight mt-0.5">合约</span></button><button class="flex-1 h-[48px] tab-lens-active rounded-[24px] flex flex-col items-center justify-center text-appleBlue transition-all shadow-[0_4px_16px_rgba(10,132,255,0.16)]"><svg class="w-[21px] h-[21px] stroke-[2.2]" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="text-[10px] font-bold tracking-tight mt-0.5">监控</span></button><button class="flex-1 flex flex-col items-center justify-center py-1 text-slate-500 hover:text-slate-800 transition-colors"><svg class="w-[21px] h-[21px] stroke-[1.8]" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M7 12l3-3 3 3 4-4M4 6h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="text-[10px] font-medium tracking-tight mt-0.5">1.618</span></button><button class="flex-1 flex flex-col items-center justify-center py-1 text-slate-500 hover:text-slate-800 transition-colors"><svg class="w-[21px] h-[21px] stroke-[1.8]" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="text-[10px] font-medium tracking-tight mt-0.5">持仓</span></button><button class="flex-1 flex flex-col items-center justify-center py-1 text-slate-500 hover:text-slate-800 transition-colors"><svg class="w-[21px] h-[21px] stroke-[1.8]" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="text-[10px] font-medium tracking-tight mt-0.5">统计</span></button></div></div>
+<!-- iOS Home Indicator Safe Area (12pt gap beneath tab bar) -->
+<div class="absolute bottom-2 inset-x-0 flex justify-center pointer-events-none z-50">
+<div class="w-36 h-1 bg-slate-900/35 rounded-full"></div>
+</div>
+</div>
+</body>
+</html>

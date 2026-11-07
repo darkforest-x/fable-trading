@@ -3,6 +3,7 @@ import SwiftUI
 /// 12H EMA20/50 云带 — observation only; the score was rejected on every timeframe (2026-11-05).
 struct CloudSection: View {
     let connection: Connection
+    let refresh: Int
     @State private var data: CloudSnapshot?
     @State private var error: String?
     @State private var side = "all"
@@ -31,7 +32,7 @@ struct CloudSection: View {
             ForEach(data?.items ?? []) { s in CloudCard(signal: s, now: data?.nowMs ?? 0) }
             Text("云带评分 2026-11-05 已在全部周期被否决，这里仅作盘面观察。").font(.caption).foregroundStyle(.secondary).frame(maxWidth: .infinity).padding(.top, 4)
         }
-        .modifier(Polled(key: "cloud-\(side)-\(scope)", every: .seconds(60), load: { try await API.get("/v1/monitor/cloud", query: [URLQueryItem(name: "side", value: side), URLQueryItem(name: "scope", value: scope)], connection: connection) }, value: $data, error: $error))
+        .modifier(Polled(key: "cloud-\(side)-\(scope)-\(refresh)", every: .seconds(60), load: { try await API.get("/v1/monitor/cloud", query: [URLQueryItem(name: "side", value: side), URLQueryItem(name: "scope", value: scope)], connection: connection) }, value: $data, error: $error))
     }
 }
 
@@ -53,7 +54,7 @@ struct CloudCard: View {
                 figure("止损", Fmt.price(signal.stop), .down, note: signal.stopPct.map { String(format: "−%.1f%%", abs($0)) })
                 figure("目标", Fmt.price(signal.target), .up)
             }
-            .padding(12).background(.quaternary.opacity(0.5), in: .rect(cornerRadius: 16))
+            .padding(12).background(.white.opacity(0.18), in: .rect(cornerRadius: 16))
             HStack {
                 Text("R:R \(signal.plannedRr.map { String(format: "%.1f", $0) } ?? "—")")
                 Spacer()
@@ -63,6 +64,7 @@ struct CloudCard: View {
         }
         .padding(16)
         .glassCard(cornerRadius: 22)
+        .scrollReveal()
     }
     private func figure(_ label: String, _ value: String, _ color: Color, note: String? = nil) -> some View {
         VStack(alignment: .leading, spacing: 2) {

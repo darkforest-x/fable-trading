@@ -25,6 +25,7 @@ struct RootView: View {
     @State private var tab: AppTab = .monitor
     @State private var showNotifications = false
     @State private var showSettings = false
+    @State private var bannerDrag: CGFloat = 0
 
     var body: some View {
         TabView(selection: $tab) {
@@ -50,6 +51,11 @@ struct RootView: View {
             if let banner = notices.banner {
                 AlarmBanner(event: banner, now: notices.data?.nowMs ?? 0, onView: { open(banner) }, onDismiss: {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { notices.banner = nil }
+                })
+                .offset(y: min(0, bannerDrag))
+                .gesture(DragGesture().onChanged { bannerDrag = $0.translation.height }.onEnded { value in
+                    if value.translation.height < -30 { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { notices.banner = nil } }
+                    withAnimation(.spring) { bannerDrag = 0 }
                 })
                 .transition(.move(edge: .top).combined(with: .opacity))
                 .padding(.top, 4)

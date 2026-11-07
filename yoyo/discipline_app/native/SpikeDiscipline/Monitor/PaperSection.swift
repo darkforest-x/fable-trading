@@ -2,9 +2,10 @@ import SwiftUI
 
 struct PaperSection: View {
     let connection: Connection
+    let zoom: Namespace.ID
+    let refresh: Int
     @State private var data: PaperSnapshot?
     @State private var error: String?
-    @State private var detail: PaperAccount?
 
     var body: some View {
         let live = data?.accounts.filter { $0.group == "live" } ?? []
@@ -18,9 +19,9 @@ struct PaperSection: View {
                     let pairs = stride(from: 0, to: live.count - live.count % 2, by: 2).map { (live[$0], live[$0 + 1]) }
                     VStack(spacing: 10) {
                         ForEach(pairs, id: \.0.key) { pair in
-                            HStack(spacing: 10) { AccountTile(account: pair.0) { detail = pair.0 }; AccountTile(account: pair.1) { detail = pair.1 } }
+                            HStack(spacing: 10) { AccountTile(account: pair.0, zoom: zoom); AccountTile(account: pair.1, zoom: zoom) }
                         }
-                        if live.count % 2 == 1, let last = live.last { AccountTile(account: last, wide: true) { detail = last } }
+                        if live.count % 2 == 1, let last = live.last { AccountTile(account: last, zoom: zoom, wide: true) }
                     }
                 }
             }
@@ -28,26 +29,27 @@ struct PaperSection: View {
                 SectionHeader(title: "回测复刻", count: replica.count)
                 VStack(spacing: 0) {
                     ForEach(Array(replica.enumerated()), id: \.element.key) { index, account in
-                        Button { detail = account } label: {
-                            HStack {
+                        NavigationLink(value: account) {
+                            HStack(spacing: 10) {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(account.label).font(.subheadline.weight(.semibold))
-                                    Text("已平 \(Int(account.stats.closed ?? 0)) · 胜 \(Int(account.stats.wins ?? 0))").font(.caption).foregroundStyle(.secondary)
+                                    Text("已平 \(Int(account.stats.closed ?? 0)) · 胜 \(Int(account.stats.wins ?? 0))").font(.caption2).foregroundStyle(.secondary)
                                 }
                                 Spacer()
-                                VStack(alignment: .trailing, spacing: 2) {
-                                    Text(Fmt.money(account.equity)).font(.subheadline.weight(.semibold)).monospacedDigit()
-                                    Text(Fmt.signedPercent(account.returnPct)).font(.caption).foregroundStyle(Fmt.tone(account.returnPct).color).monospacedDigit()
-                                }
-                                Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)
+                                Text(Fmt.money(account.equity)).font(.subheadline.weight(.semibold)).monospacedDigit()
+                                    .contentTransition(.numericText(value: account.equity ?? 0))
+                                ChangeCapsule(value: account.returnPct)
+                                Image(systemName: "chevron.right").font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
                             }
-                            .padding(.horizontal, 16).frame(minHeight: 58).contentShape(.rect)
+                            .padding(.horizontal, 14).frame(minHeight: 52).contentShape(.rect)
                         }
                         .buttonStyle(RowPressStyle())
-                        if index < replica.count - 1 { Divider().padding(.leading, 16) }
+                        .matchedTransitionSource(id: account.key, in: zoom)
+                        if index < replica.count - 1 { Divider().padding(.leading, 14) }
                     }
                 }
                 .glassCard()
+                .scrollReveal()
             }
             if let data {
                 SectionHeader(title: "今日触价", count: data.signals.count)
@@ -56,73 +58,89 @@ struct PaperSection: View {
                 } else {
                     VStack(spacing: 0) {
                         ForEach(Array(data.signals.enumerated()), id: \.element.rowId) { index, signal in
-                            HStack(spacing: 12) {
-                                CoinLogo(coin: Fmt.coin(signal.symbol))
+                            HStack(spacing: 11) {
+                                CoinLogo(coin: Fmt.coin(signal.symbol), size: 30)
                                 VStack(alignment: .leading, spacing: 3) {
                                     HStack(spacing: 6) { Text(Fmt.coin(signal.symbol)).font(.subheadline.weight(.semibold)); SidePill(side: signal.side) }
-                                    Text("\(Fmt.signalStatus(signal)) · 1.618 \(Fmt.price(signal.level))").font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                                    Text("\(Fmt.signalStatus(signal)) · 1.618 \(Fmt.price(signal.level))").font(.caption2).foregroundStyle(.secondary).lineLimit(1)
                                 }
                                 Spacer()
                                 VStack(alignment: .trailing, spacing: 2) {
                                     Text(signal.score.map { String(format: "%.2f", $0) } ?? "—").font(.subheadline.weight(.semibold)).monospacedDigit()
-                                    Text(Fmt.clock(signal.observedMs, now: data.nowMs)).font(.caption).foregroundStyle(.secondary)
+                                    Text(Fmt.clock(signal.observedMs, now: data.nowMs)).font(.caption2).foregroundStyle(.secondary)
                                 }
                             }
-                            .padding(.horizontal, 16).frame(minHeight: 58)
-                            if index < data.signals.count - 1 { Divider().padding(.leading, 60) }
+                            .padding(.horizontal, 14).frame(minHeight: 54)
+                            if index < data.signals.count - 1 { Divider().padding(.leading, 55) }
                         }
                     }
                     .glassCard()
+                    .scrollReveal()
                 }
             }
         }
-        .modifier(Polled(key: "paper", every: .seconds(10), load: { try await API.get("/v1/monitor/paper", query: [URLQueryItem(name: "track", value: "live-wick6x3")], connection: connection) }, value: $data, error: $error))
-        .sheet(item: $detail) { account in AccountSheet(account: account, connection: connection) }
+        .modifier(Polled(key: "paper-\(refresh)", every: .seconds(10), load: { try await API.get("/v1/monitor/paper", query: [URLQueryItem(name: "track", value: "live-wick6x3")], connection: connection) }, value: $data, error: $error))
+    }
+}
+
+/// Green/red return capsule used on tiles and rows.
+struct ChangeCapsule: View {
+    let value: Double?
+    var body: some View {
+        Text(Fmt.signedPercent(value)).font(.caption.weight(.bold)).monospacedDigit()
+            .foregroundStyle(Fmt.tone(value).color)
+            .padding(.horizontal, 7).padding(.vertical, 3)
+            .background(Fmt.tone(value).color.opacity(0.12), in: .capsule)
+            .contentTransition(.numericText(value: value ?? 0))
     }
 }
 
 struct AccountTile: View {
     let account: PaperAccount
+    let zoom: Namespace.ID
     var wide = false
-    let action: () -> Void
     var body: some View {
-        Button(action: action) {
+        NavigationLink(value: account) {
             Group {
                 if wide {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) { name; foot }
+                    HStack(alignment: .center) {
+                        VStack(alignment: .leading, spacing: 6) { name; foot }
                         Spacer()
-                        VStack(alignment: .trailing, spacing: 4) { equity; change }
+                        VStack(alignment: .trailing, spacing: 6) { equity; ChangeCapsule(value: account.returnPct) }
                     }
                 } else {
-                    VStack(alignment: .leading, spacing: 4) { name; equity.padding(.top, 6); change; Spacer(minLength: 2); foot }
+                    VStack(alignment: .leading, spacing: 6) { name; equity.padding(.top, 4); ChangeCapsule(value: account.returnPct); foot.padding(.top, 2) }
                 }
             }
-            .padding(14).frame(maxWidth: .infinity, minHeight: wide ? 0 : 124, alignment: .leading)
+            .padding(14).frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 22))
+        .glassCard(cornerRadius: 22, interactive: true)
+        .matchedTransitionSource(id: account.key, in: zoom)
+        .scrollReveal()
     }
-    private var name: some View { Text(account.label).font(.system(.footnote, design: .monospaced).weight(.semibold)).foregroundStyle(.secondary).lineLimit(1) }
+    private var name: some View { Text(account.label).font(.system(.caption, design: .monospaced).weight(.semibold)).foregroundStyle(.secondary).lineLimit(1) }
     private var equity: some View {
         HStack(alignment: .firstTextBaseline, spacing: 3) {
-            Text(Fmt.money(account.equity)).font(.system(.title2, design: .rounded).weight(.semibold)).monospacedDigit()
+            Text(Fmt.money(account.equity)).font(.system(size: 26, weight: .semibold, design: .rounded)).monospacedDigit()
+                .contentTransition(.numericText(value: account.equity ?? 0))
             Text("U").font(.caption).foregroundStyle(.secondary)
         }
     }
-    private var change: some View { Text(Fmt.signedPercent(account.returnPct)).font(.subheadline.weight(.semibold)).foregroundStyle(Fmt.tone(account.returnPct).color).monospacedDigit() }
     private var foot: some View { Text("已平 \(Int(account.stats.closed ?? 0)) · 胜 \(Int(account.stats.wins ?? 0))").font(.caption2).foregroundStyle(.secondary) }
 }
 
 struct RowPressStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label.background(configuration.isPressed ? Color.primary.opacity(0.06) : .clear)
-            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+        configuration.label.background(configuration.isPressed ? Color.primary.opacity(0.07) : .clear)
+            .scaleEffect(configuration.isPressed ? 0.985 : 1)
+            .animation(.spring(response: 0.25, dampingFraction: 0.8), value: configuration.isPressed)
     }
 }
 
-struct AccountSheet: View {
+/// Pushed with a zoom transition from the tapped tile/row (iOS 18+ navigationTransition).
+struct AccountDetailView: View {
     let account: PaperAccount
     let connection: Connection
     @State private var data: PaperSnapshot?
@@ -131,42 +149,59 @@ struct AccountSheet: View {
     var body: some View {
         let detail = data?.detail.key == account.key ? data?.detail : nil
         let a = data?.accounts.first { $0.key == account.key } ?? account
-        NavigationStack {
-            List {
-                Section {
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(alignment: .firstTextBaseline) {
-                            Text(Fmt.money(a.equity)).font(.system(.largeTitle, design: .rounded).weight(.semibold)).monospacedDigit()
-                            Text("U").foregroundStyle(.secondary)
-                            Text(Fmt.signedPercent(a.returnPct)).font(.headline).foregroundStyle(Fmt.tone(a.returnPct).color)
-                        }
-                        Text("起始 \(Fmt.money(a.startEquity)) U · 已平 \(Int(a.stats.closed ?? 0)) 笔 · 平均 \(a.stats.meanNetBp.map { String(format: "%.1f", $0) } ?? "—")bp")
-                            .font(.footnote).foregroundStyle(.secondary)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("模拟账户 · 只读").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Text(Fmt.money(a.equity)).font(.system(size: 44, weight: .semibold, design: .rounded)).monospacedDigit()
+                            .contentTransition(.numericText(value: a.equity ?? 0))
+                        Text("U").font(.title3).foregroundStyle(.secondary)
+                        Spacer()
+                        ChangeCapsule(value: a.returnPct)
                     }
-                    .listRowBackground(Color.clear)
+                    HStack(spacing: 10) {
+                        stat("起始", "\(Fmt.money(a.startEquity)) U")
+                        stat("已平", "\(Int(a.stats.closed ?? 0)) 笔")
+                        stat("胜", "\(Int(a.stats.wins ?? 0)) 笔")
+                        stat("平均", a.stats.meanNetBp.map { String(format: "%.1fbp", $0) } ?? "—")
+                    }
                 }
-                if let error { Section { Label(error, systemImage: "exclamationmark.triangle").foregroundStyle(Color.amber) } }
+                .padding(18).glassCard(cornerRadius: 26)
+                LoadState(loading: detail == nil && error == nil, error: error, stale: detail != nil)
                 if let detail {
-                    Section("持仓 · \(detail.open.count)") {
-                        if detail.open.isEmpty { Text("当前没有模拟持仓").foregroundStyle(.secondary) }
-                        ForEach(detail.open, id: \.self) { p in PositionRow(position: p, now: data?.nowMs ?? 0, closed: false) }
-                    }
-                    Section("今日平仓 · \(detail.closed.count)") {
-                        if detail.closed.isEmpty { Text("今天没有平仓").foregroundStyle(.secondary) }
-                        ForEach(detail.closed, id: \.self) { p in PositionRow(position: p, now: data?.nowMs ?? 0, closed: true) }
-                    }
-                } else if error == nil {
-                    Section { ProgressView() }
+                    SectionHeader(title: "持仓", count: detail.open.count)
+                    positions(detail.open, closed: false, empty: "当前没有模拟持仓")
+                    SectionHeader(title: "今日平仓", count: detail.closed.count)
+                    positions(detail.closed, closed: true, empty: "今天没有平仓")
                 }
-                Section { Text("监控工作台模拟账本的前向复刻，含回测口径评分；不是可下单的实盘策略。").font(.footnote).foregroundStyle(.secondary) }
+                Text("监控工作台模拟账本的前向复刻，含回测口径评分；不是可下单的实盘策略。").font(.caption).foregroundStyle(.secondary).padding(.horizontal, 4)
             }
-            .scrollContentBackground(.hidden)
-            .navigationTitle(account.label)
-            .navigationBarTitleDisplayMode(.inline)
+            .padding(.horizontal, 14).padding(.bottom, 24)
         }
-        .presentationDetents([.medium, .large])
-        .presentationBackground(.thinMaterial)
+        .background(AmbientBackground())
+        .navigationTitle(account.label)
+        .navigationBarTitleDisplayMode(.inline)
         .modifier(Polled(key: "paper-\(account.key)", every: .seconds(10), load: { try await API.get("/v1/monitor/paper", query: [URLQueryItem(name: "track", value: account.key)], connection: connection) }, value: $data, error: $error))
+    }
+
+    private func stat(_ label: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label).font(.caption2).foregroundStyle(.secondary)
+            Text(value).font(.footnote.weight(.semibold)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    @ViewBuilder private func positions(_ rows: [PaperPosition], closed: Bool, empty: String) -> some View {
+        VStack(spacing: 0) {
+            if rows.isEmpty { Text(empty).font(.footnote).foregroundStyle(.secondary).frame(maxWidth: .infinity).padding(16) }
+            ForEach(Array(rows.enumerated()), id: \.offset) { index, p in
+                PositionRow(position: p, now: data?.nowMs ?? 0, closed: closed).padding(.horizontal, 14).frame(minHeight: 56)
+                if index < rows.count - 1 { Divider().padding(.leading, 56) }
+            }
+        }
+        .glassCard()
+        .scrollReveal()
     }
 }
 
@@ -175,21 +210,21 @@ struct PositionRow: View {
     let now: Double
     let closed: Bool
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 11) {
             CoinLogo(coin: Fmt.coin(position.symbol), size: 30)
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) { Text(Fmt.coin(position.symbol)).font(.subheadline.weight(.semibold)); SidePill(side: position.side) }
                 Text(closed ? "\(Fmt.reason(position.reason)) · \(Fmt.clock(position.exitMs, now: now))" : "\(Fmt.stage(position.stage)) · 入场 \(Fmt.price(position.entry)) · 止损 \(Fmt.price(position.stop))")
-                    .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    .font(.caption2).foregroundStyle(.secondary).lineLimit(1)
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {
                 if closed {
                     Text(position.pnl.map { ($0 > 0 ? "+" : "") + Fmt.money($0) } ?? "—").font(.subheadline.weight(.semibold)).foregroundStyle(Fmt.tone(position.pnl).color)
-                    Text(position.netBp.map { String(format: "%+.0fbp", $0) } ?? "").font(.caption).foregroundStyle(.secondary)
+                    Text(position.netBp.map { String(format: "%+.0fbp", $0) } ?? "").font(.caption2).foregroundStyle(.secondary)
                 } else {
                     Text(position.unrealizedBp.map { String(format: "%+.0fbp", $0) } ?? "—").font(.subheadline.weight(.semibold)).foregroundStyle(Fmt.tone(position.unrealizedBp).color)
-                    Text("目标 \(Fmt.price(position.target))").font(.caption).foregroundStyle(.secondary)
+                    Text("目标 \(Fmt.price(position.target))").font(.caption2).foregroundStyle(.secondary)
                 }
             }.monospacedDigit()
         }

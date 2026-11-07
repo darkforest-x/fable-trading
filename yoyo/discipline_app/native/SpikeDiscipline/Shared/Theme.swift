@@ -12,23 +12,55 @@ extension Fmt.Tone {
     var color: Color { switch self { case .up: .up; case .down: .down; case .flat: .secondary } }
 }
 
+/// Slowly flowing mesh of sky blue, lavender and mint: something for clear glass to refract
+/// (owner 2026-11-07 “玻璃更通透 / 配色与背景”). Static when Reduce Motion is on.
 struct AmbientBackground: View {
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
-        ZStack {
-            (scheme == .dark ? Color(red: 0.04, green: 0.06, blue: 0.09) : Color(red: 0.93, green: 0.95, blue: 0.97))
-            RadialGradient(colors: [Color.blue.opacity(scheme == .dark ? 0.22 : 0.16), .clear], center: .init(x: 0.05, y: 0.02), startRadius: 0, endRadius: 360)
-            RadialGradient(colors: [Color.teal.opacity(scheme == .dark ? 0.16 : 0.14), .clear], center: .init(x: 1.05, y: 0.32), startRadius: 0, endRadius: 320)
-            RadialGradient(colors: [Color.green.opacity(0.07), .clear], center: .init(x: 0.1, y: 0.8), startRadius: 0, endRadius: 300)
+        TimelineView(.animation(minimumInterval: 1 / 30, paused: reduceMotion)) { context in
+            let t = reduceMotion ? 0 : context.date.timeIntervalSinceReferenceDate
+            MeshGradient(width: 3, height: 3, points: points(t), colors: scheme == .dark ? dark : light, smoothsColors: true)
         }
         .ignoresSafeArea()
     }
+
+    private func points(_ t: Double) -> [SIMD2<Float>] {
+        func w(_ speed: Double, _ phase: Double, _ amount: Float) -> Float { Float(sin(t * speed + phase)) * amount }
+        return [
+            [0, 0], [0.5 + w(0.21, 0, 0.12), 0], [1, 0],
+            [0, 0.5 + w(0.17, 1, 0.1)], [0.5 + w(0.13, 2, 0.14), 0.45 + w(0.19, 3, 0.12)], [1, 0.5 + w(0.23, 4, 0.1)],
+            [0, 1], [0.5 + w(0.15, 5, 0.12), 1], [1, 1],
+        ]
+    }
+
+    private let light: [Color] = [
+        Color(red: 0.80, green: 0.87, blue: 1.00), Color(red: 0.90, green: 0.93, blue: 1.00), Color(red: 0.86, green: 0.84, blue: 1.00),
+        Color(red: 0.88, green: 0.95, blue: 1.00), Color(red: 0.97, green: 0.98, blue: 1.00), Color(red: 0.84, green: 0.91, blue: 1.00),
+        Color(red: 0.82, green: 0.95, blue: 0.90), Color(red: 0.93, green: 0.95, blue: 1.00), Color(red: 0.88, green: 0.86, blue: 0.99),
+    ]
+    private let dark: [Color] = [
+        Color(red: 0.05, green: 0.09, blue: 0.20), Color(red: 0.06, green: 0.07, blue: 0.14), Color(red: 0.12, green: 0.08, blue: 0.22),
+        Color(red: 0.04, green: 0.12, blue: 0.18), Color(red: 0.03, green: 0.04, blue: 0.08), Color(red: 0.07, green: 0.10, blue: 0.22),
+        Color(red: 0.03, green: 0.15, blue: 0.13), Color(red: 0.05, green: 0.06, blue: 0.12), Color(red: 0.10, green: 0.07, blue: 0.18),
+    ]
 }
 
 extension View {
-    /// Content card in system glass.
-    func glassCard(cornerRadius: CGFloat = 24, tint: Color? = nil) -> some View {
-        self.glassEffect(tint.map { Glass.regular.tint($0.opacity(0.16)) } ?? .regular, in: .rect(cornerRadius: cornerRadius))
+    /// Content card in clear system glass (more transparent than .regular); optional colour tint.
+    func glassCard(cornerRadius: CGFloat = 24, tint: Color? = nil, interactive: Bool = false) -> some View {
+        var glass: Glass = .clear
+        if let tint { glass = glass.tint(tint.opacity(0.18)) }
+        if interactive { glass = glass.interactive() }
+        return self.glassEffect(glass, in: .rect(cornerRadius: cornerRadius))
+    }
+
+    /// Cards and rows ease in as they scroll into view.
+    func scrollReveal() -> some View {
+        scrollTransition(.interactive, axis: .vertical) { content, phase in
+            content.opacity(phase.isIdentity ? 1 : 0.35).scaleEffect(phase.isIdentity ? 1 : 0.96).blur(radius: phase.isIdentity ? 0 : 1.5)
+        }
     }
 }
 
@@ -38,7 +70,7 @@ struct SectionHeader: View {
     var trailing: String? = nil
     var body: some View {
         HStack(spacing: 8) {
-            Text(title).font(.title3.weight(.bold))
+            Text(title).font(.title3.weight(.bold)).fontDesign(.rounded)
             if let count {
                 Text("\(count)").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                     .padding(.horizontal, 8).padding(.vertical, 2).background(.quaternary, in: .capsule)
@@ -75,7 +107,7 @@ struct StatusNote: View {
             .font(.footnote.weight(.medium)).foregroundStyle(.primary)
             .labelStyle(TintedIconLabel(tint: tint))
             .padding(.horizontal, 14).padding(.vertical, 9)
-            .glassEffect(.regular.tint(tint.opacity(0.08)), in: .capsule)
+            .glassEffect(.clear.tint(tint.opacity(0.10)), in: .capsule)
     }
 }
 
