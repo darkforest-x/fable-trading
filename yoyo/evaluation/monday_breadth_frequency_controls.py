@@ -223,33 +223,52 @@ def _collect_matches(tasks: pd.DataFrame, phase: str) -> tuple[pd.DataFrame, pd.
     matches: list[dict] = []
     coverage_rows: list[dict] = []
     receipts: list[dict] = []
-    symbol_months = tasks.groupby(["symbol", "month"], sort=True)
-    for i, ((symbol, month), group) in enumerate(symbol_months, 1):
-        month_start = pd.Timestamp(f"{month}-01", tz="UTC")
-        month_end = month_start + pd.DateOffset(months=1)
-        warmup = pd.Timedelta(minutes=max(int(group.minutes.max() + group.wait_min.max()), 65) + 5)
-        max_h = int(group.hold_hours.max())
-        start, end = month_start - warmup, month_end + pd.Timedelta(hours=max_h)
-        needed = [(start, end)]
-        frame, receipt = load_full_ohlc(str(symbol), start, end,
-                                        needed_intervals=needed, repair_missing=False)
-        grid, prefix = matcher._monitor_prefix(start, month_end)
-        rows, proofs = matcher._process_symbol_month(
-            group, lower_touches, shocks, past_only=True, price_frame=frame,
-            price_receipt=receipt,
-        )
-        matches.extend(rows)
-        for proof in proofs:
-            coverage_rows.extend(proof.pop("task_coverage", []))
-            proof.update({"phase": phase, "source": sorted(group.source.astype(str).unique()),
-                          "symbol": str(symbol), "month": month,
-                          "load_start": start.isoformat(), "load_end": end.isoformat(),
-                          "local_sources": receipt.get("local_sources", []),
-                          "remaining_missing_full_ohlc_ranges": receipt.get("remaining_missing_full_ohlc_ranges", [])})
-            receipts.append(proof)
-        if i % 25 == 0 or i == len(symbol_months):
-            print(f"matched {phase} symbol-months {i}/{len(symbol_months)}; controls={len(matches)}", flush=True)
-        del frame
+    symbol_groups = tasks.groupby("symbol", sort=True)
+    total_symbol_months = int(tasks.groupby(["symbol", "month"], sort=True).ngroups)
+    finished_symbol_months = 0
+    for symbol_i, (symbol, symbol_tasks) in enumerate(symbol_groups, 1):
+        months = sorted(symbol_tasks.month.unique())
+        month_starts = [pd.Timestamp(f"{month}-01", tz="UTC") for month in months]
+        last_month_end = month_starts[-1] + pd.DateOffset(months=1)
+        max_w = int(symbol_tasks.minutes.max())
+        max_x = int(symbol_tasks.wait_min.max())
+        max_h = int(symbol_tasks.hold_hours.max())
+        warmup = pd.Timedelta(minutes=max(max_w + max_x, 65) + 5)
+        symbol_start = month_starts[0] - warmup
+        symbol_end = last_month_end + pd.Timedelta(hours=max_h)
+        needed = [(month_start - warmup,
+                   month_start + pd.DateOffset(months=1) + pd.Timedelta(hours=max_h))
+                  for month_start in month_starts]
+        # Load each constituent once across its selected months, matching the
+        # original control runner's price reuse and slicing each month in memory.
+        full_frame, receipt = load_full_ohlc(str(symbol), symbol_start, symbol_end,
+                                             needed_intervals=needed, repair_missing=False)
+        for month, group in symbol_tasks.groupby("month", sort=True):
+            current_start = pd.Timestamp(f"{month}-01", tz="UTC")
+            current_end = current_start + pd.DateOffset(months=1)
+            slice_start = current_start - warmup
+            slice_end = current_end + pd.Timedelta(hours=max_h)
+            frame = full_frame.loc[(full_frame.index >= slice_start) & (full_frame.index <= slice_end)]
+            rows, proofs = matcher._process_symbol_month(
+                group, lower_touches, shocks, past_only=True, price_frame=frame,
+                price_receipt=receipt,
+            )
+            matches.extend(rows)
+            for proof in proofs:
+                coverage_rows.extend(proof.pop("task_coverage", []))
+                proof.update({"phase": phase, "source": sorted(group.source.astype(str).unique()),
+                              "symbol": str(symbol), "month": month,
+                              "symbol_load_start": symbol_start.isoformat(),
+                              "symbol_load_end": symbol_end.isoformat(),
+                              "symbol_load_months": len(months),
+                              "local_sources": receipt.get("local_sources", []),
+                              "remaining_missing_full_ohlc_ranges": receipt.get("remaining_missing_full_ohlc_ranges", [])})
+                receipts.append(proof)
+            finished_symbol_months += 1
+            if finished_symbol_months % 25 == 0 or finished_symbol_months == total_symbol_months:
+                print(f"matched {phase} symbol-months {finished_symbol_months}/{total_symbol_months}; "
+                      f"symbol {symbol_i}/{len(symbol_groups)}; controls={len(matches)}", flush=True)
+        del full_frame
     return pd.DataFrame(matches), pd.DataFrame(coverage_rows), receipts
 
 
