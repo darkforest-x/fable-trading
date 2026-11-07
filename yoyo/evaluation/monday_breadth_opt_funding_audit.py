@@ -55,12 +55,12 @@ def per_symbol(task):
     policy[-1]=SimpleNamespace(take_fraction=0)
     policy.update({1000+i:p for i,p in enumerate(fund.funded_policies())})
     parts=[]
-    exact=(fund.ROOT/'funding_2026/normalized/binance'/(sym+'_funding.csv.gz')).exists()
     for months,s in out.groupby('months'):
         f=fund.rates(sym,months=tuple(sorted(set(months))))
         charge=fund.charged(s,f,policy)
         s=s.copy();s['funding_pct']=100*charge/s.entry_open
-        s['mark_proxy']=(not exact)&s.funding_pct.notna()
+        proxied=f.index[f.price_proxy] if not f.empty else pd.DatetimeIndex([],tz='UTC')
+        s['mark_proxy']=(proxied.searchsorted(s.exit_time,side='right')>proxied.searchsorted(s.entry_time,side='left'))&s.funding_pct.notna()
         s['already_charged']=s.policy_id>=1000
         parts.append(s[['row_id','symbol','funding_pct','mark_proxy','already_charged']])
     return pd.concat(parts,ignore_index=True)

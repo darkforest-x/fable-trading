@@ -52,9 +52,16 @@ def rates(symbol,history=False,months=()):
     folder='funding_history' if history else 'funding_2026'
     path=ROOT/folder/'normalized/binance'/(symbol+'_funding.csv.gz')
     if not path.is_file():
-        parts=[archive_month(symbol,month) for month in months]
+        parts=[]
+        for month in months:
+            repaired=ROOT/'funding_months'/month/'normalized/binance'/(symbol+'_funding.csv.gz')
+            parts.append(exact_rates(repaired) if repaired.is_file() else archive_month(symbol,month))
         if len(parts)==0 or any(p.empty for p in parts):return pd.DataFrame()
         return pd.concat(parts).sort_index()
+    return exact_rates(path)
+
+
+def exact_rates(path):
     f=pd.read_csv(path)
     f['price_proxy']=False
     f['clock']=pd.to_datetime(f.funding_time,unit='ms',utc=True).dt.floor('5min')

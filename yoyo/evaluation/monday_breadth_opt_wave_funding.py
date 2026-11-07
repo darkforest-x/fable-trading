@@ -1,12 +1,32 @@
 """Charge observed settlement rates to both exits on each identical second-wave position."""
 from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
+import argparse
 
 import numpy as np
 import pandas as pd
 
 from yoyo.evaluation import monday_breadth_opt_exit_study as study
 from yoyo.evaluation import monday_breadth_opt_funding as funding
+from yoyo.data.altseason_funding import FundingClient, collect
+
+
+def repair_months():
+    frame=pd.read_parquet(study.OUT/'second_wave_member_funding.parquet')
+    missing=frame[frame.wave_funding.isna()|frame.fixed_funding.isna()]
+    clients={}
+    for row in missing.itertuples():
+        end=row.decision+pd.Timedelta(days=6)
+        for month in sorted({row.decision.strftime('%Y-%m'),end.strftime('%Y-%m')}):
+            root=funding.ROOT/'funding_months'/month
+            if month not in clients:
+                clients[month]=FundingClient('binance',root)
+            start=pd.Timestamp(month+'-01',tz='UTC')
+            stop=start+pd.offsets.MonthBegin()
+            try:
+                collect(clients[month],row.symbol,start.value//10**6,stop.value//10**6)
+            except (OSError,ValueError,RuntimeError) as exc:
+                print(f'Funding lookup unavailable: {row.symbol} {month} {exc}',flush=True)
 
 
 def charge_symbol(pair):
@@ -71,4 +91,8 @@ def run():
         mean_member_peak=('six_day_member_peak','mean')).to_csv(out/'second_wave_funding.csv')
 
 
-if __name__=='__main__':run()
+if __name__=='__main__':
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--repair-months',action='store_true')
+    if parser.parse_args().repair_months:repair_months()
+    run()
