@@ -150,7 +150,8 @@ def cached_returns(asset,requested,frame):
     return pd.concat(returns)
 
 
-def evaluate(asset,events,excluded,*,frame=None,control_mask=None,monitor_bars=None,returns_for=cached_returns):
+def evaluate(asset,events,excluded,*,frame=None,control_mask=None,monitor_bars=None,returns_for=cached_returns,
+             hold_bars=base.HOLD_BARS,peak_pct=None):
     if frame is None:
         frame = prices(asset)
     idx = frame.index
@@ -161,15 +162,16 @@ def evaluate(asset,events,excluded,*,frame=None,control_mask=None,monitor_bars=N
     key = (((idx.year*12+idx.month)*4+idx.hour//6)*6+band)*3+(np.sign(prior.fillna(0)).to_numpy().astype(int)+1)
     if monitor_bars is not None:
         key = key*7+monitor_bars
-    valid = frame.open.notna().iloc[::-1].rolling(base.HOLD_BARS+1).sum().iloc[::-1].eq(base.HOLD_BARS+1).to_numpy()
+    valid = frame.open.notna().iloc[::-1].rolling(hold_bars+1).sum().iloc[::-1].eq(hold_bars+1).to_numpy()
     eligible = valid & vol.notna().to_numpy() & prior.notna().to_numpy()
     if control_mask is not None:
         eligible &= control_mask
     split = idx.searchsorted(base.SPLIT)
-    eligible[max(0,split-base.HOLD_BARS):split] = False
+    eligible[max(0,split-hold_bars):split] = False
+    exclusion_bars = hold_bars+6
     for t in excluded:
         dec = idx.searchsorted(t+6*STEP)
-        eligible[max(0,dec-base.EXIT_BARS):dec+base.EXIT_BARS+1] = False
+        eligible[max(0,dec-exclusion_bars):dec+exclusion_bars+1] = False
     # A control's initial bar must have no lower touch. Do not screen its following 30m.
     slots = idx.get_indexer(events.known+6*STEP)
     eligible[slots[slots>=0]] = False
@@ -178,7 +180,7 @@ def evaluate(asset,events,excluded,*,frame=None,control_mask=None,monitor_bars=N
     result = events.copy()
     result['asset'] = asset
     result['decision'] = result.known+6*STEP
-    result['period'] = np.select([result.known+pd.Timedelta(days=1)<base.SPLIT,result.decision>=base.SPLIT],
+    result['period'] = np.select([result.decision+hold_bars*STEP<base.SPLIT,result.decision>=base.SPLIT],
                                  ['early','late'],default='crossing')
     available = (slots>=0) & valid[np.maximum(slots,0)]
     selected = slots[available]
@@ -198,10 +200,17 @@ def evaluate(asset,events,excluded,*,frame=None,control_mask=None,monitor_bars=N
     result['control_win_pct'] = np.nan
     # Flatten once to avoid allocating individual pandas objects for thousands of samples.
     n = np.array([len(m) for m in matches])
-    rr = pd.DataFrame({'i':np.repeat(np.arange(len(matches)),n),'ret':returns.reindex(np.concatenate(matches)).to_numpy()})
+    match_positions = np.concatenate(matches)
+    rr = pd.DataFrame({'i':np.repeat(np.arange(len(matches)),n),'ret':returns.reindex(match_positions).to_numpy()})
     rr['win'] = 100*rr.ret.gt(0)
     means = rr.groupby('i')[['ret','win']].mean().reindex(range(len(matches)))
     result.loc[available,['control_net_pct','control_win_pct']] = means.to_numpy()
+    if peak_pct is not None:
+        result['peak_pct'] = np.nan
+        result.loc[available,'peak_pct'] = peak_pct[selected]
+        result['control_peak_pct'] = np.nan
+        rr['peak'] = peak_pct[match_positions]
+        result.loc[available,'control_peak_pct'] = rr.groupby('i').peak.mean().reindex(range(len(matches))).to_numpy()
     return result
 
 
