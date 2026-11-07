@@ -155,7 +155,7 @@ def summarize(cfg):
                         - slow.reason.eq(4).sum()+slow.early_reason.eq(4).sum()),
                  early_open_conflicts=int(x.early_reason.ne(0).sum()))
     out = dict(source_commit=subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip(),
-               universe=whole, groups=groups, comparison=inference(x, cfg), accounts=run_accounts(alternative))
+               universe=whole, groups=groups, comparison=inference(x, cfg), accounts=run_accounts(alternative, cfg['accounts']))
     dump(EXP/'summary.json', out)
 
 
