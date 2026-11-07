@@ -30,7 +30,7 @@ def main():
     all_fills=pd.concat(cases,ignore_index=True)
     all_fills.to_parquet(output/'sept16_all_policy_member_fills.parquet',index=False)
     btc=all_fills[all_fills.asset.eq('BTCUSDT')].copy()
-    btc['net_10000']=btc.net_points.ge(10000)
+    btc['net_10000']=btc.net_points.ge(10000-1e-7)
     btc['gross_points']=btc.exit_vwap-btc.entry_open
     btc.to_csv(output/'sept16_btc_policies.csv',index=False)
     pooled=all_fills[all_fills.asset.isin(names)].groupby(['policy_id','rule','kind','horizon_hours'])
