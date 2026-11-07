@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: live-capital41-volume-20261107-v1
+    artifact_type: manifest
+    role: capital41_volume_gate_replay_on_frozen_native_fills
+    source_repo: darkforest-x/fable-trading
+    source_commit: d4d0e7983a
+    source_path: experiments/active/exp-live-capital41-volume-20261107-v1/summary.json
+    storage_uri: repo://experiments/active/exp-live-capital41-volume-20261107-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Decision-tagged 50-bar source facts for 1290 frozen family/event/clock rows in tags.csv.gz. Config includes source commit, decision clock, costs and reproduction command.
+
   - artifact_id: btc-cloud-reentry-other-weeks-20261106-v1
     artifact_type: manifest
     role: native_btc_reentry_admission_outside_illustrated_weeks

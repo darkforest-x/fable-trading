@@ -1,0 +1,1334 @@
+{
+  "source_commit": "d4d0e7983a77db26ad81405c088d7c0a0d53c587",
+  "source_config": {
+    "experiment_id": "exp-live-capital41-volume-20261107-v1",
+    "source_commit_capital41": "ce64522f7f747abb00b37503c00e2955a6d687d2",
+    "source_script": "Capital41_Liquidity_Sweep/Capital41_Liquidity_Sweep_Simple.pine",
+    "accounts": "experiments/active/exp-live-ema-cloud-filter-20261103-v1/config.json",
+    "single_variable": "Admission only: last confirmed 5m volume divided by SMA(volume,50), including that bar, >= 1.2. No search. Wick uses the touch bar; allin3 uses the preceding bar as its limit is resting. Missing complete contiguous window skips.",
+    "diagnostic": "Count same-direction strict 20-bar break and close back inside with the same volume test, on the same eligible bar. No secondary portfolio rule.",
+    "comparison": "Original native fills and allocator, baseline must reproduce saved account. Compare full-history accounts; also the registered 2025 starts. Random masks preserve counts within NY event week, side and pre-feature volatility bucket, on existing candidates; sparse strata may be fixed. This addresses selection among existing entries, not the strategy vs new random trades.",
+    "vol_bucket": "floor(2*log2(mean true range of the 14 bars immediately before the last eligible bar / their last close)).",
+    "control_draws": 300,
+    "seed": 20261107,
+    "fees": "Saved fills: wick market entry taker 5bp+10bp slippage; target maker 2bp, other exits taker 5bp+10bp slippage. Allin3 entry maker 2bp, same target and non-target charges. Binance candles; funding excluded.",
+    "reproduce": ".venv/bin/python -m yoyo.evaluation.live_capital41_volume",
+    "production_eligible": false,
+    "training_eligible": false
+  },
+  "results": {
+    "live-wick6x3|2020-01-01": {
+      "base": {
+        "end": 16438.44342656393,
+        "cash_added": 0.0,
+        "trading_pnl": 15438.443426563928,
+        "multiple": 16.43844342656393,
+        "max_drawdown_pct": 19.268293231659182,
+        "taken": 400,
+        "refills": 0,
+        "win_pct": 66.0
+      },
+      "selected": {
+        "end": 15025.63569726023,
+        "cash_added": 0.0,
+        "trading_pnl": 14025.63569726023,
+        "multiple": 15.02563569726023,
+        "max_drawdown_pct": 19.26829323165917,
+        "taken": 392,
+        "refills": 0,
+        "win_pct": 66.58163265306123
+      },
+      "missing": 0,
+      "same_direction_full_sweep": 0,
+      "price_reclaim_before_volume": 0,
+      "per_candidate": {
+        "all": {
+          "baseline": {
+            "n": 416,
+            "mean_net_bp": 170.38481054604983,
+            "median_net_bp": 288.2361569275891,
+            "wins": 280
+          },
+          "pass": {
+            "n": 408,
+            "mean_net_bp": 172.00734207668467,
+            "median_net_bp": 297.7443371889826,
+            "wins": 277
+          },
+          "fail": {
+            "n": 8,
+            "mean_net_bp": 87.63570248367428,
+            "median_net_bp": -20.517916540513195,
+            "wins": 3
+          }
+        },
+        "2020": {
+          "baseline": {
+            "n": 7,
+            "mean_net_bp": 136.08416599416162,
+            "median_net_bp": -13.75677139761525,
+            "wins": 3
+          },
+          "pass": {
+            "n": 7,
+            "mean_net_bp": 136.08416599416162,
+            "median_net_bp": -13.75677139761525,
+            "wins": 3
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2021": {
+          "baseline": {
+            "n": 33,
+            "mean_net_bp": 343.22027922822537,
+            "median_net_bp": 453.3957467144571,
+            "wins": 29
+          },
+          "pass": {
+            "n": 33,
+            "mean_net_bp": 343.22027922822537,
+            "median_net_bp": 453.3957467144571,
+            "wins": 29
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2022": {
+          "baseline": {
+            "n": 13,
+            "mean_net_bp": 184.3097381888235,
+            "median_net_bp": 22.59481731532825,
+            "wins": 8
+          },
+          "pass": {
+            "n": 12,
+            "mean_net_bp": 214.30610222429172,
+            "median_net_bp": 32.17191064969592,
+            "wins": 8
+          },
+          "fail": {
+            "n": 1,
+            "mean_net_bp": -175.64663023679498,
+            "median_net_bp": -175.64663023679498,
+            "wins": 0
+          }
+        },
+        "2023": {
+          "baseline": {
+            "n": 21,
+            "mean_net_bp": -24.941328432446568,
+            "median_net_bp": 60.885709483400134,
+            "wins": 12
+          },
+          "pass": {
+            "n": 21,
+            "mean_net_bp": -24.941328432446568,
+            "median_net_bp": 60.885709483400134,
+            "wins": 12
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2024": {
+          "baseline": {
+            "n": 70,
+            "mean_net_bp": 226.00825651936248,
+            "median_net_bp": 370.01252087079314,
+            "wins": 49
+          },
+          "pass": {
+            "n": 70,
+            "mean_net_bp": 226.00825651936248,
+            "median_net_bp": 370.01252087079314,
+            "wins": 49
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2025": {
+          "baseline": {
+            "n": 119,
+            "mean_net_bp": 139.0421636483228,
+            "median_net_bp": 226.1425414364639,
+            "wins": 76
+          },
+          "pass": {
+            "n": 116,
+            "mean_net_bp": 134.36108413317882,
+            "median_net_bp": 236.24191155280718,
+            "wins": 74
+          },
+          "fail": {
+            "n": 3,
+            "mean_net_bp": 320.0439049005541,
+            "median_net_bp": 5.906833333333719,
+            "wins": 2
+          }
+        },
+        "2026": {
+          "baseline": {
+            "n": 153,
+            "mean_net_bp": 159.23116784828142,
+            "median_net_bp": 335.4933920704855,
+            "wins": 103
+          },
+          "pass": {
+            "n": 149,
+            "mean_net_bp": 164.06555802270154,
+            "median_net_bp": 362.0394431554519,
+            "wins": 102
+          },
+          "fail": {
+            "n": 4,
+            "mean_net_bp": -20.849866148868248,
+            "median_net_bp": -20.517916540513195,
+            "wins": 1
+          }
+        }
+      },
+      "control": {
+        "metric": "end",
+        "movable_candidates": 6,
+        "movable_selected": 3,
+        "fixed_selected": 405,
+        "median": 16095.841613580233,
+        "p05": 15025.63569726023,
+        "p95": 17167.266538814118,
+        "p_ge": 1.0
+      }
+    },
+    "live-wick6x3|2025-01-01": {
+      "base": {
+        "end": 6427.9328311111285,
+        "cash_added": 0.0,
+        "trading_pnl": 5427.9328311111285,
+        "multiple": 6.427932831111129,
+        "max_drawdown_pct": 19.268293231659182,
+        "taken": 272,
+        "refills": 0,
+        "win_pct": 65.80882352941177
+      },
+      "selected": {
+        "end": 6176.108321161457,
+        "cash_added": 0.0,
+        "trading_pnl": 5176.108321161457,
+        "multiple": 6.176108321161457,
+        "max_drawdown_pct": 19.268293231659182,
+        "taken": 265,
+        "refills": 0,
+        "win_pct": 66.41509433962264
+      },
+      "missing": 0,
+      "same_direction_full_sweep": 0,
+      "price_reclaim_before_volume": 0,
+      "per_candidate": {
+        "all": {
+          "baseline": {
+            "n": 272,
+            "mean_net_bp": 150.39847851079946,
+            "median_net_bp": 275.6189853459962,
+            "wins": 179
+          },
+          "pass": {
+            "n": 265,
+            "mean_net_bp": 151.0628449238916,
+            "median_net_bp": 288.6459430979982,
+            "wins": 176
+          },
+          "fail": {
+            "n": 7,
+            "mean_net_bp": 125.24746430088418,
+            "median_net_bp": -14.012898187084003,
+            "wins": 3
+          }
+        },
+        "2025": {
+          "baseline": {
+            "n": 119,
+            "mean_net_bp": 139.0421636483228,
+            "median_net_bp": 226.1425414364639,
+            "wins": 76
+          },
+          "pass": {
+            "n": 116,
+            "mean_net_bp": 134.36108413317882,
+            "median_net_bp": 236.24191155280718,
+            "wins": 74
+          },
+          "fail": {
+            "n": 3,
+            "mean_net_bp": 320.0439049005541,
+            "median_net_bp": 5.906833333333719,
+            "wins": 2
+          }
+        },
+        "2026": {
+          "baseline": {
+            "n": 153,
+            "mean_net_bp": 159.23116784828142,
+            "median_net_bp": 335.4933920704855,
+            "wins": 103
+          },
+          "pass": {
+            "n": 149,
+            "mean_net_bp": 164.06555802270154,
+            "median_net_bp": 362.0394431554519,
+            "wins": 102
+          },
+          "fail": {
+            "n": 4,
+            "mean_net_bp": -20.849866148868248,
+            "median_net_bp": -20.517916540513195,
+            "wins": 1
+          }
+        }
+      },
+      "control": {
+        "metric": "end",
+        "movable_candidates": 6,
+        "movable_selected": 3,
+        "fixed_selected": 262,
+        "median": 6403.837368688253,
+        "p05": 6176.108321161457,
+        "p95": 6682.3577547591185,
+        "p_ge": 1.0
+      }
+    },
+    "live-wick3x3|2020-01-01": {
+      "base": {
+        "end": 85787.2743125916,
+        "cash_added": 0.0,
+        "trading_pnl": 84787.2743125916,
+        "multiple": 85.7872743125916,
+        "max_drawdown_pct": 36.566410107373315,
+        "taken": 387,
+        "refills": 0,
+        "win_pct": 64.85788113695091
+      },
+      "selected": {
+        "end": 82033.96423458778,
+        "cash_added": 0.0,
+        "trading_pnl": 81033.96423458778,
+        "multiple": 82.03396423458778,
+        "max_drawdown_pct": 36.5664101073733,
+        "taken": 379,
+        "refills": 0,
+        "win_pct": 65.69920844327177
+      },
+      "missing": 0,
+      "same_direction_full_sweep": 0,
+      "price_reclaim_before_volume": 0,
+      "per_candidate": {
+        "all": {
+          "baseline": {
+            "n": 416,
+            "mean_net_bp": 170.38481054604983,
+            "median_net_bp": 288.2361569275891,
+            "wins": 280
+          },
+          "pass": {
+            "n": 408,
+            "mean_net_bp": 172.00734207668467,
+            "median_net_bp": 297.7443371889826,
+            "wins": 277
+          },
+          "fail": {
+            "n": 8,
+            "mean_net_bp": 87.63570248367428,
+            "median_net_bp": -20.517916540513195,
+            "wins": 3
+          }
+        },
+        "2020": {
+          "baseline": {
+            "n": 7,
+            "mean_net_bp": 136.08416599416162,
+            "median_net_bp": -13.75677139761525,
+            "wins": 3
+          },
+          "pass": {
+            "n": 7,
+            "mean_net_bp": 136.08416599416162,
+            "median_net_bp": -13.75677139761525,
+            "wins": 3
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2021": {
+          "baseline": {
+            "n": 33,
+            "mean_net_bp": 343.22027922822537,
+            "median_net_bp": 453.3957467144571,
+            "wins": 29
+          },
+          "pass": {
+            "n": 33,
+            "mean_net_bp": 343.22027922822537,
+            "median_net_bp": 453.3957467144571,
+            "wins": 29
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2022": {
+          "baseline": {
+            "n": 13,
+            "mean_net_bp": 184.3097381888235,
+            "median_net_bp": 22.59481731532825,
+            "wins": 8
+          },
+          "pass": {
+            "n": 12,
+            "mean_net_bp": 214.30610222429172,
+            "median_net_bp": 32.17191064969592,
+            "wins": 8
+          },
+          "fail": {
+            "n": 1,
+            "mean_net_bp": -175.64663023679498,
+            "median_net_bp": -175.64663023679498,
+            "wins": 0
+          }
+        },
+        "2023": {
+          "baseline": {
+            "n": 21,
+            "mean_net_bp": -24.941328432446568,
+            "median_net_bp": 60.885709483400134,
+            "wins": 12
+          },
+          "pass": {
+            "n": 21,
+            "mean_net_bp": -24.941328432446568,
+            "median_net_bp": 60.885709483400134,
+            "wins": 12
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2024": {
+          "baseline": {
+            "n": 70,
+            "mean_net_bp": 226.00825651936248,
+            "median_net_bp": 370.01252087079314,
+            "wins": 49
+          },
+          "pass": {
+            "n": 70,
+            "mean_net_bp": 226.00825651936248,
+            "median_net_bp": 370.01252087079314,
+            "wins": 49
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2025": {
+          "baseline": {
+            "n": 119,
+            "mean_net_bp": 139.0421636483228,
+            "median_net_bp": 226.1425414364639,
+            "wins": 76
+          },
+          "pass": {
+            "n": 116,
+            "mean_net_bp": 134.36108413317882,
+            "median_net_bp": 236.24191155280718,
+            "wins": 74
+          },
+          "fail": {
+            "n": 3,
+            "mean_net_bp": 320.0439049005541,
+            "median_net_bp": 5.906833333333719,
+            "wins": 2
+          }
+        },
+        "2026": {
+          "baseline": {
+            "n": 153,
+            "mean_net_bp": 159.23116784828142,
+            "median_net_bp": 335.4933920704855,
+            "wins": 103
+          },
+          "pass": {
+            "n": 149,
+            "mean_net_bp": 164.06555802270154,
+            "median_net_bp": 362.0394431554519,
+            "wins": 102
+          },
+          "fail": {
+            "n": 4,
+            "mean_net_bp": -20.849866148868248,
+            "median_net_bp": -20.517916540513195,
+            "wins": 1
+          }
+        }
+      },
+      "control": {
+        "metric": "end",
+        "movable_candidates": 6,
+        "movable_selected": 3,
+        "fixed_selected": 405,
+        "median": 83553.31598729624,
+        "p05": 78433.47218679442,
+        "p95": 94072.19880963874,
+        "p_ge": 0.7441860465116279
+      }
+    },
+    "live-wick3x3|2025-01-01": {
+      "base": {
+        "end": 28171.10019599893,
+        "cash_added": 0.0,
+        "trading_pnl": 27171.10019599893,
+        "multiple": 28.17110019599893,
+        "max_drawdown_pct": 36.5664101073733,
+        "taken": 272,
+        "refills": 0,
+        "win_pct": 65.80882352941177
+      },
+      "selected": {
+        "end": 26194.236830647278,
+        "cash_added": 0.0,
+        "trading_pnl": 25194.236830647278,
+        "multiple": 26.194236830647277,
+        "max_drawdown_pct": 36.566410107373315,
+        "taken": 265,
+        "refills": 0,
+        "win_pct": 66.41509433962264
+      },
+      "missing": 0,
+      "same_direction_full_sweep": 0,
+      "price_reclaim_before_volume": 0,
+      "per_candidate": {
+        "all": {
+          "baseline": {
+            "n": 272,
+            "mean_net_bp": 150.39847851079946,
+            "median_net_bp": 275.6189853459962,
+            "wins": 179
+          },
+          "pass": {
+            "n": 265,
+            "mean_net_bp": 151.0628449238916,
+            "median_net_bp": 288.6459430979982,
+            "wins": 176
+          },
+          "fail": {
+            "n": 7,
+            "mean_net_bp": 125.24746430088418,
+            "median_net_bp": -14.012898187084003,
+            "wins": 3
+          }
+        },
+        "2025": {
+          "baseline": {
+            "n": 119,
+            "mean_net_bp": 139.0421636483228,
+            "median_net_bp": 226.1425414364639,
+            "wins": 76
+          },
+          "pass": {
+            "n": 116,
+            "mean_net_bp": 134.36108413317882,
+            "median_net_bp": 236.24191155280718,
+            "wins": 74
+          },
+          "fail": {
+            "n": 3,
+            "mean_net_bp": 320.0439049005541,
+            "median_net_bp": 5.906833333333719,
+            "wins": 2
+          }
+        },
+        "2026": {
+          "baseline": {
+            "n": 153,
+            "mean_net_bp": 159.23116784828142,
+            "median_net_bp": 335.4933920704855,
+            "wins": 103
+          },
+          "pass": {
+            "n": 149,
+            "mean_net_bp": 164.06555802270154,
+            "median_net_bp": 362.0394431554519,
+            "wins": 102
+          },
+          "fail": {
+            "n": 4,
+            "mean_net_bp": -20.849866148868248,
+            "median_net_bp": -20.517916540513195,
+            "wins": 1
+          }
+        }
+      },
+      "control": {
+        "metric": "end",
+        "movable_candidates": 6,
+        "movable_selected": 3,
+        "fixed_selected": 262,
+        "median": 28201.403617007098,
+        "p05": 26194.236830647278,
+        "p95": 30765.099402923282,
+        "p_ge": 1.0
+      }
+    },
+    "live-wick6x3hi|2020-01-01": {
+      "base": {
+        "end": 19992.71664333053,
+        "cash_added": 0.0,
+        "trading_pnl": 18992.71664333053,
+        "multiple": 19.992716643330528,
+        "max_drawdown_pct": 19.268293231659182,
+        "taken": 400,
+        "refills": 0,
+        "win_pct": 66.0
+      },
+      "selected": {
+        "end": 18274.435668026552,
+        "cash_added": 0.0,
+        "trading_pnl": 17274.435668026552,
+        "multiple": 18.274435668026552,
+        "max_drawdown_pct": 19.268293231659182,
+        "taken": 392,
+        "refills": 0,
+        "win_pct": 66.58163265306123
+      },
+      "missing": 0,
+      "same_direction_full_sweep": 0,
+      "price_reclaim_before_volume": 0,
+      "per_candidate": {
+        "all": {
+          "baseline": {
+            "n": 416,
+            "mean_net_bp": 170.38481054604983,
+            "median_net_bp": 288.2361569275891,
+            "wins": 280
+          },
+          "pass": {
+            "n": 408,
+            "mean_net_bp": 172.00734207668467,
+            "median_net_bp": 297.7443371889826,
+            "wins": 277
+          },
+          "fail": {
+            "n": 8,
+            "mean_net_bp": 87.63570248367428,
+            "median_net_bp": -20.517916540513195,
+            "wins": 3
+          }
+        },
+        "2020": {
+          "baseline": {
+            "n": 7,
+            "mean_net_bp": 136.08416599416162,
+            "median_net_bp": -13.75677139761525,
+            "wins": 3
+          },
+          "pass": {
+            "n": 7,
+            "mean_net_bp": 136.08416599416162,
+            "median_net_bp": -13.75677139761525,
+            "wins": 3
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2021": {
+          "baseline": {
+            "n": 33,
+            "mean_net_bp": 343.22027922822537,
+            "median_net_bp": 453.3957467144571,
+            "wins": 29
+          },
+          "pass": {
+            "n": 33,
+            "mean_net_bp": 343.22027922822537,
+            "median_net_bp": 453.3957467144571,
+            "wins": 29
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2022": {
+          "baseline": {
+            "n": 13,
+            "mean_net_bp": 184.3097381888235,
+            "median_net_bp": 22.59481731532825,
+            "wins": 8
+          },
+          "pass": {
+            "n": 12,
+            "mean_net_bp": 214.30610222429172,
+            "median_net_bp": 32.17191064969592,
+            "wins": 8
+          },
+          "fail": {
+            "n": 1,
+            "mean_net_bp": -175.64663023679498,
+            "median_net_bp": -175.64663023679498,
+            "wins": 0
+          }
+        },
+        "2023": {
+          "baseline": {
+            "n": 21,
+            "mean_net_bp": -24.941328432446568,
+            "median_net_bp": 60.885709483400134,
+            "wins": 12
+          },
+          "pass": {
+            "n": 21,
+            "mean_net_bp": -24.941328432446568,
+            "median_net_bp": 60.885709483400134,
+            "wins": 12
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2024": {
+          "baseline": {
+            "n": 70,
+            "mean_net_bp": 226.00825651936248,
+            "median_net_bp": 370.01252087079314,
+            "wins": 49
+          },
+          "pass": {
+            "n": 70,
+            "mean_net_bp": 226.00825651936248,
+            "median_net_bp": 370.01252087079314,
+            "wins": 49
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2025": {
+          "baseline": {
+            "n": 119,
+            "mean_net_bp": 139.0421636483228,
+            "median_net_bp": 226.1425414364639,
+            "wins": 76
+          },
+          "pass": {
+            "n": 116,
+            "mean_net_bp": 134.36108413317882,
+            "median_net_bp": 236.24191155280718,
+            "wins": 74
+          },
+          "fail": {
+            "n": 3,
+            "mean_net_bp": 320.0439049005541,
+            "median_net_bp": 5.906833333333719,
+            "wins": 2
+          }
+        },
+        "2026": {
+          "baseline": {
+            "n": 153,
+            "mean_net_bp": 159.23116784828142,
+            "median_net_bp": 335.4933920704855,
+            "wins": 103
+          },
+          "pass": {
+            "n": 149,
+            "mean_net_bp": 164.06555802270154,
+            "median_net_bp": 362.0394431554519,
+            "wins": 102
+          },
+          "fail": {
+            "n": 4,
+            "mean_net_bp": -20.849866148868248,
+            "median_net_bp": -20.517916540513195,
+            "wins": 1
+          }
+        }
+      },
+      "control": {
+        "metric": "end",
+        "movable_candidates": 6,
+        "movable_selected": 3,
+        "fixed_selected": 405,
+        "median": 19576.038446330072,
+        "p05": 18274.435668026552,
+        "p95": 20879.12380416804,
+        "p_ge": 1.0
+      }
+    },
+    "live-wick6x3hi|2025-01-01": {
+      "base": {
+        "end": 7817.7620812379155,
+        "cash_added": 0.0,
+        "trading_pnl": 6817.7620812379155,
+        "multiple": 7.817762081237915,
+        "max_drawdown_pct": 19.268293231659182,
+        "taken": 272,
+        "refills": 0,
+        "win_pct": 65.80882352941177
+      },
+      "selected": {
+        "end": 7511.488796071898,
+        "cash_added": 0.0,
+        "trading_pnl": 6511.488796071898,
+        "multiple": 7.511488796071898,
+        "max_drawdown_pct": 19.268293231659182,
+        "taken": 265,
+        "refills": 0,
+        "win_pct": 66.41509433962264
+      },
+      "missing": 0,
+      "same_direction_full_sweep": 0,
+      "price_reclaim_before_volume": 0,
+      "per_candidate": {
+        "all": {
+          "baseline": {
+            "n": 272,
+            "mean_net_bp": 150.39847851079946,
+            "median_net_bp": 275.6189853459962,
+            "wins": 179
+          },
+          "pass": {
+            "n": 265,
+            "mean_net_bp": 151.0628449238916,
+            "median_net_bp": 288.6459430979982,
+            "wins": 176
+          },
+          "fail": {
+            "n": 7,
+            "mean_net_bp": 125.24746430088418,
+            "median_net_bp": -14.012898187084003,
+            "wins": 3
+          }
+        },
+        "2025": {
+          "baseline": {
+            "n": 119,
+            "mean_net_bp": 139.0421636483228,
+            "median_net_bp": 226.1425414364639,
+            "wins": 76
+          },
+          "pass": {
+            "n": 116,
+            "mean_net_bp": 134.36108413317882,
+            "median_net_bp": 236.24191155280718,
+            "wins": 74
+          },
+          "fail": {
+            "n": 3,
+            "mean_net_bp": 320.0439049005541,
+            "median_net_bp": 5.906833333333719,
+            "wins": 2
+          }
+        },
+        "2026": {
+          "baseline": {
+            "n": 153,
+            "mean_net_bp": 159.23116784828142,
+            "median_net_bp": 335.4933920704855,
+            "wins": 103
+          },
+          "pass": {
+            "n": 149,
+            "mean_net_bp": 164.06555802270154,
+            "median_net_bp": 362.0394431554519,
+            "wins": 102
+          },
+          "fail": {
+            "n": 4,
+            "mean_net_bp": -20.849866148868248,
+            "median_net_bp": -20.517916540513195,
+            "wins": 1
+          }
+        }
+      },
+      "control": {
+        "metric": "end",
+        "movable_candidates": 6,
+        "movable_selected": 3,
+        "fixed_selected": 262,
+        "median": 7788.456766853211,
+        "p05": 7511.488796071898,
+        "p95": 8127.198034113806,
+        "p_ge": 1.0
+      }
+    },
+    "live-wick3x3far|2020-01-01": {
+      "base": {
+        "end": 90852.0053534979,
+        "cash_added": 0.0,
+        "trading_pnl": 89852.0053534979,
+        "multiple": 90.8520053534979,
+        "max_drawdown_pct": 28.56502118594615,
+        "taken": 189,
+        "refills": 0,
+        "win_pct": 74.07407407407408
+      },
+      "selected": {
+        "end": 64765.15590058002,
+        "cash_added": 0.0,
+        "trading_pnl": 63765.15590058002,
+        "multiple": 64.76515590058003,
+        "max_drawdown_pct": 28.565021185946136,
+        "taken": 189,
+        "refills": 0,
+        "win_pct": 73.54497354497354
+      },
+      "missing": 0,
+      "same_direction_full_sweep": 0,
+      "price_reclaim_before_volume": 0,
+      "per_candidate": {
+        "all": {
+          "baseline": {
+            "n": 214,
+            "mean_net_bp": 306.7712526676673,
+            "median_net_bp": 480.480512350821,
+            "wins": 164
+          },
+          "pass": {
+            "n": 213,
+            "mean_net_bp": 300.4461426491064,
+            "median_net_bp": 480.23135755258096,
+            "wins": 163
+          },
+          "fail": {
+            "n": 1,
+            "mean_net_bp": 1654.0196866211331,
+            "median_net_bp": 1654.0196866211331,
+            "wins": 1
+          }
+        },
+        "2020": {
+          "baseline": {
+            "n": 4,
+            "mean_net_bp": 203.93795229263992,
+            "median_net_bp": 209.92749480639483,
+            "wins": 2
+          },
+          "pass": {
+            "n": 4,
+            "mean_net_bp": 203.93795229263992,
+            "median_net_bp": 209.92749480639483,
+            "wins": 2
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2021": {
+          "baseline": {
+            "n": 23,
+            "mean_net_bp": 515.9318852203847,
+            "median_net_bp": 543.9879763343436,
+            "wins": 22
+          },
+          "pass": {
+            "n": 23,
+            "mean_net_bp": 515.9318852203847,
+            "median_net_bp": 543.9879763343436,
+            "wins": 22
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2022": {
+          "baseline": {
+            "n": 2,
+            "mean_net_bp": 1102.9826101410927,
+            "median_net_bp": 1102.9826101410927,
+            "wins": 2
+          },
+          "pass": {
+            "n": 2,
+            "mean_net_bp": 1102.9826101410927,
+            "median_net_bp": 1102.9826101410927,
+            "wins": 2
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2023": {
+          "baseline": {
+            "n": 10,
+            "mean_net_bp": 57.204043307669096,
+            "median_net_bp": 210.42375155068908,
+            "wins": 7
+          },
+          "pass": {
+            "n": 10,
+            "mean_net_bp": 57.204043307669096,
+            "median_net_bp": 210.42375155068908,
+            "wins": 7
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2024": {
+          "baseline": {
+            "n": 35,
+            "mean_net_bp": 415.54071875266436,
+            "median_net_bp": 557.6759398496228,
+            "wins": 29
+          },
+          "pass": {
+            "n": 35,
+            "mean_net_bp": 415.54071875266436,
+            "median_net_bp": 557.6759398496228,
+            "wins": 29
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        },
+        "2025": {
+          "baseline": {
+            "n": 55,
+            "mean_net_bp": 306.974734838933,
+            "median_net_bp": 480.23135755258096,
+            "wins": 40
+          },
+          "pass": {
+            "n": 54,
+            "mean_net_bp": 282.0294579540774,
+            "median_net_bp": 477.45608281669513,
+            "wins": 39
+          },
+          "fail": {
+            "n": 1,
+            "mean_net_bp": 1654.0196866211331,
+            "median_net_bp": 1654.0196866211331,
+            "wins": 1
+          }
+        },
+        "2026": {
+          "baseline": {
+            "n": 85,
+            "mean_net_bp": 220.7214314799758,
+            "median_net_bp": 429.3158375622113,
+            "wins": 62
+          },
+          "pass": {
+            "n": 85,
+            "mean_net_bp": 220.7214314799758,
+            "median_net_bp": 429.3158375622113,
+            "wins": 62
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        }
+      },
+      "control": {
+        "metric": "end",
+        "movable_candidates": 0,
+        "movable_selected": 0,
+        "fixed_selected": 213,
+        "median": 64765.15590058002,
+        "p05": 64765.15590058002,
+        "p95": 64765.15590058002,
+        "p_ge": 1.0
+      }
+    },
+    "live-wick3x3far|2025-01-01": {
+      "base": {
+        "end": 20635.8738296775,
+        "cash_added": 0.0,
+        "trading_pnl": 19635.8738296775,
+        "multiple": 20.6358738296775,
+        "max_drawdown_pct": 28.565021185946136,
+        "taken": 140,
+        "refills": 0,
+        "win_pct": 72.85714285714285
+      },
+      "selected": {
+        "end": 17707.08681174408,
+        "cash_added": 0.0,
+        "trading_pnl": 16707.08681174408,
+        "multiple": 17.70708681174408,
+        "max_drawdown_pct": 28.565021185946136,
+        "taken": 139,
+        "refills": 0,
+        "win_pct": 72.66187050359713
+      },
+      "missing": 0,
+      "same_direction_full_sweep": 0,
+      "price_reclaim_before_volume": 0,
+      "per_candidate": {
+        "all": {
+          "baseline": {
+            "n": 140,
+            "mean_net_bp": 254.6066577995661,
+            "median_net_bp": 464.219327807221,
+            "wins": 102
+          },
+          "pass": {
+            "n": 139,
+            "mean_net_bp": 244.53893816775627,
+            "median_net_bp": 453.7578475336328,
+            "wins": 101
+          },
+          "fail": {
+            "n": 1,
+            "mean_net_bp": 1654.0196866211331,
+            "median_net_bp": 1654.0196866211331,
+            "wins": 1
+          }
+        },
+        "2025": {
+          "baseline": {
+            "n": 55,
+            "mean_net_bp": 306.974734838933,
+            "median_net_bp": 480.23135755258096,
+            "wins": 40
+          },
+          "pass": {
+            "n": 54,
+            "mean_net_bp": 282.0294579540774,
+            "median_net_bp": 477.45608281669513,
+            "wins": 39
+          },
+          "fail": {
+            "n": 1,
+            "mean_net_bp": 1654.0196866211331,
+            "median_net_bp": 1654.0196866211331,
+            "wins": 1
+          }
+        },
+        "2026": {
+          "baseline": {
+            "n": 85,
+            "mean_net_bp": 220.7214314799758,
+            "median_net_bp": 429.3158375622113,
+            "wins": 62
+          },
+          "pass": {
+            "n": 85,
+            "mean_net_bp": 220.7214314799758,
+            "median_net_bp": 429.3158375622113,
+            "wins": 62
+          },
+          "fail": {
+            "n": 0,
+            "mean_net_bp": null,
+            "median_net_bp": null,
+            "wins": 0
+          }
+        }
+      },
+      "control": {
+        "metric": "end",
+        "movable_candidates": 0,
+        "movable_selected": 0,
+        "fixed_selected": 139,
+        "median": 17707.08681174408,
+        "p05": 17707.08681174408,
+        "p95": 17707.08681174408,
+        "p_ge": 1.0
+      }
+    },
+    "live-allin3|2023-01-01": {
+      "base": {
+        "end": 428005.2431207798,
+        "cash_added": 20203.831466330983,
+        "trading_pnl": 406801.41165444884,
+        "multiple": 428.0052431207798,
+        "max_drawdown_pct": 100.0,
+        "taken": 422,
+        "refills": 21,
+        "win_pct": 52.13270142180095
+      },
+      "selected": {
+        "end": 111772.13087782873,
+        "cash_added": 12667.890240510344,
+        "trading_pnl": 98104.24063731839,
+        "multiple": 111.77213087782873,
+        "max_drawdown_pct": 100.0,
+        "taken": 382,
+        "refills": 13,
+        "win_pct": 54.712041884816756
+      },
+      "missing": 0,
+      "same_direction_full_sweep": 105,
+      "price_reclaim_before_volume": 117,
+      "per_candidate": {
+        "all": {
+          "baseline": {
+            "n": 874,
+            "mean_net_bp": 236.10436302713507,
+            "median_net_bp": 0.008507892178825749,
+            "wins": 455
+          },
+          "pass": {
+            "n": 773,
+            "mean_net_bp": 285.63307998428445,
+            "median_net_bp": 0.008517623726911339,
+            "wins": 419
+          },
+          "fail": {
+            "n": 101,
+            "mean_net_bp": -142.9619558627309,
+            "median_net_bp": -0.008483095532996643,
+            "wins": 36
+          }
+        },
+        "2023": {
+          "baseline": {
+            "n": 87,
+            "mean_net_bp": 776.7522461551946,
+            "median_net_bp": 868.7392926573267,
+            "wins": 54
+          },
+          "pass": {
+            "n": 79,
+            "mean_net_bp": 780.9464591690257,
+            "median_net_bp": 736.2367224694195,
+            "wins": 49
+          },
+          "fail": {
+            "n": 8,
+            "mean_net_bp": 735.3343926436116,
+            "median_net_bp": 1000.2238253540351,
+            "wins": 5
+          }
+        },
+        "2024": {
+          "baseline": {
+            "n": 144,
+            "mean_net_bp": 647.101302460106,
+            "median_net_bp": 0.008525966813707875,
+            "wins": 80
+          },
+          "pass": {
+            "n": 129,
+            "mean_net_bp": 769.4270874706217,
+            "median_net_bp": 0.008616928354891584,
+            "wins": 76
+          },
+          "fail": {
+            "n": 15,
+            "mean_net_bp": -404.90044863032836,
+            "median_net_bp": -0.008486693000291368,
+            "wins": 4
+          }
+        },
+        "2025": {
+          "baseline": {
+            "n": 260,
+            "mean_net_bp": -8.5943844275746,
+            "median_net_bp": 0.008506701964908991,
+            "wins": 141
+          },
+          "pass": {
+            "n": 225,
+            "mean_net_bp": 37.294296677635444,
+            "median_net_bp": 0.008513809137795647,
+            "wins": 130
+          },
+          "fail": {
+            "n": 35,
+            "mean_net_bp": -303.59304867535343,
+            "median_net_bp": -32.22089726383246,
+            "wins": 11
+          }
+        },
+        "2026": {
+          "baseline": {
+            "n": 383,
+            "mean_net_bp": 124.88177615438184,
+            "median_net_bp": -0.008202733013295216,
+            "wins": 180
+          },
+          "pass": {
+            "n": 340,
+            "mean_net_bp": 151.33026328623723,
+            "median_net_bp": -0.008052950270467818,
+            "wins": 164
+          },
+          "fail": {
+            "n": 43,
+            "mean_net_bp": -84.24579651610273,
+            "median_net_bp": -0.008438188998395546,
+            "wins": 16
+          }
+        }
+      },
+      "control": {
+        "metric": "trading_pnl",
+        "movable_candidates": 170,
+        "movable_selected": 128,
+        "fixed_selected": 645,
+        "median": 75781.97887590027,
+        "p05": 43443.00858710621,
+        "p95": 109544.09376481432,
+        "p_ge": 0.132890365448505
+      }
+    }
+  }
+}

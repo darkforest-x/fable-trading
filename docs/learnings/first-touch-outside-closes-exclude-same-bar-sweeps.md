@@ -1,0 +1,7 @@
+# A first touch that closes outside the level excludes a same-bar local reclaim
+
+- **Question.** Can a confirmed 20-bar liquidity sweep identify the better entries of an existing weekly first-touch reversal rule?
+- **Dead end.** Both signals mark reversals on a chart. Combining their arrows overlooks where the entry bar must close. On a first visit to a lower weekly extension, recent lows are above the extension. An entry close below the extension is also below those lows. A bullish sweep requires a close back above the lowest one. The short side is symmetric.
+- **Working method.** Write the two close inequalities on the same price axis, then check their intersection at the actual decision clock. All 416 saved wick candidates had complete windows and zero price reclaims, even before the volume condition. The preceding completed bar of the resting-limit account is a different comparison.
+- **Reusable check.** Count coverage of the individual conditions on the original candidate pool before attributing an economic effect to a composite. A later reclaim is a new entry time and requires its own fills.
+- **Evidence.** [Frozen experiment definition](../../experiments/active/exp-live-capital41-volume-20261107-v1/config.json) and [Capital41 Liquidity Sweep](https://github.com/damianpitt/capital41-indicators/blob/ce64522f7f747abb00b37503c00e2955a6d687d2/Capital41_Liquidity_Sweep/Capital41_Liquidity_Sweep_Simple.pine#L37-L48).
