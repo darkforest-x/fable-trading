@@ -74,9 +74,9 @@ def policies(btc=False):
 def prepare(frame):
     """Observed 5m OHLC, plus as-of-open Wilder ATR and EMA of prior completed higher candles."""
     data=frame[['open','high','low','close']].sort_index().asfreq('5min')
-    cols=['open','high','low','close']
+    ohlc_cols=['open','high','low','close']
     for hours in (1,4):
-        group=data[cols].resample(f'{hours}h',closed='left',label='right')
+        group=data[ohlc_cols].resample(f'{hours}h',closed='left',label='right')
         ohlc=group.agg({'open':'first','high':'max','low':'min','close':'last'})
         complete=group.count().eq(hours*12).all(axis=1)
         ohlc.loc[~complete,:]=np.nan
@@ -92,7 +92,6 @@ def prepare(frame):
         for name,s in defs.items():
             key=f'{name}_{hours}h'
             data[key]=s.reindex(data.index,method='ffill')
-            cols.append(key)
     return data
 
 
