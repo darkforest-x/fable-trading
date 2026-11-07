@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-live-wick-reclaim-progress-20261107-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3624cfdeff
+    status: rejected
+    question: Does closing a reclaimed live-wick position below halfway to its existing target improve net returns?
+    single_variable: At original first H1 reclaim close, use a fixed 50% cutoff on (close - weekly 1.618)/(near edge target - weekly 1.618). Exit slow trades at the next observed 5m open; original policy elsewhere.
+    result: Of 66 open positions, 15/46 slow and 16/20 fast later hit target. Replacing 31 protection stops also foregoes 15 targets. Slow trades average -63.60bp early-minus-hold, week-cluster 95% interval [-169.39,+26.32]bp. At 1000 USDT notional per trade the total is -292.57 USDT. All 416 mean net 170.38 to 163.35bp. All four account ends fell at both 2020 and 2025 starts. Full-period end equity declines 13.72%, 25.94%, 13.72%, 17.80% for 6x3, 3x3, hi, far. Realized maximum drawdowns rose for the first three and stayed 28.57% for far.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - live-wick-reclaim-progress-20261107-v1
+    canonical_report: experiments/active/exp-live-wick-reclaim-progress-20261107-v1/summary.json
+    notes: Entry and non-target exit slippage each 10bp apart from actual-fill fee (maker 2bp, taker 5bp), funding excluded. 66 native paired legs. Exact event controls for policy comparison; conditional random early exit within year/side/pre-vol has only 22 movable cases; selection skill and profitability versus holding are different estimands.
+
   - experiment_id: exp-live-wick-confirmed-swing-20261107-v1
     source_repo: darkforest-x/fable-trading
     source_commit: dacc3bed4d
