@@ -1,0 +1,35 @@
+{
+  "parent_experiment": "exp-monday-breadth-optimization-20261108-v1",
+  "inputs": [
+    "parent/reproduction.json for original ledger, registered 5-minute price paths, market observation calendar and native VectorBT fixed exits",
+    "parent/search/development/*.parquet",
+    "parent/payoffs/event_outcomes_minutes{W}_wait{X}.csv.gz",
+    "parent/exits/locked_events.parquet",
+    "data/research/monday_breadth_optimization_20261108 for native exit and funding caches"
+  ],
+  "commands_from_repository_root": [
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_frequency_grid",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_frequency_long",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_frequency_btc_target",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_frequency_audit fixed",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_frequency_audit long",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_frequency_controls --phase all",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_frequency_btc_controls",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_frequency_sleeves",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_frequency_delivery"
+  ],
+  "periods": [
+    "2020–2022",
+    "2023–2024",
+    "2025 used for rule selection",
+    "2026-01-01 to 2026-10-28 UTC (exclusive for entries), track exits through their actual dates. Time zone in raw ledgers is UTC."
+  ],
+  "fees": "OKX Lv1 assumption; actual proxy market is Binance USD-M futures. Market entries/exits are 0.05% each side and BTC profit-limit fills are 0.02%. Slippage is a separate sensitivity -0.20 percentage points per round trip, not in base estimates. USD-M realized funding applied to the frozen 2026 alerts; random controls compare both sides without funding except BTC target sensitivities where the target and both payoffs use funding.",
+  "interpretation": [
+    "Shared-account 36/72 prior-registered allocation permits one position; counts include each resourced alert only. No sums of single-asset frequencies as independent opportunities.",
+    "First touches are relative to the weekly Monday 1.618 level. Universe share denominator uses distinct symbols with any ledger touch in the trailing 28 days. UTC aligned windows and complete scheduled initial and follow-up observations required; no New York Monday monitoring.",
+    "ALT observations equal-weight the initial touched altcoins; exclude BTC/ETH/SOL/USTC from basket pricing. Six-day member maxima can occur at different times.",
+    "Coverage and market liquidities changed over the historical sample. Split boundaries purge entries whose maximum hold crosses the next split. A retrospective evaluation through 2026-10-27 does not constitute live forward validation.",
+    "Two sleeves is an additional exploratory calculation after inspecting frequency results. Capital split 50/50 at the start of 2026, no transfers. Drawdown from synchronous price snapshots is at five-minute closes before funding."
+  ]
+}
