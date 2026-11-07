@@ -523,6 +523,22 @@ def main() -> None:
     monthly.to_csv(OUT / "monthly_distribution.csv", index=False)
     sep16.to_csv(OUT / "sep16_case.csv", index=False)
     quote_receipt = cache_meta.pop("quote_receipt")
+    if quote_receipt.get("status") == "not_needed" and not incremental.empty:
+        # An earlier invocation may have successfully populated the isolated
+        # incremental-fill cache and then stopped before writing result receipts.
+        # Re-read the local-only source lineage for those exact intervals so the
+        # final artifact documents available coverage without replaying fills.
+        cached_times = pd.DatetimeIndex(incremental.entry_time).unique().sort_values()
+        needed = [(t, t + pd.Timedelta(hours=HOLD_HOURS)) for t in cached_times]
+        _, receipt = payoffs.load_full_ohlc(
+            "BTCUSDT", cached_times.min(), cached_times.max() + pd.Timedelta(hours=HOLD_HOURS),
+            needed_intervals=needed, repair_missing=False)
+        quote_receipt = {**receipt,
+                         "status": "incremental_fill_price_inputs_revalidated_local_only",
+                         "repair_missing": False,
+                         "new_entries_simulated_this_materialization": 0,
+                         "receipt_reconstructed_after_fill_cache_creation": True,
+                         "note": "The 33 isolated incremental fills were created by an earlier builder invocation before its price receipt was persisted; this receipt re-reads local OHLC coverage for those exact intervals and does not replay fills."}
     (OUT / "price_receipt.json").write_text(json.dumps(quote_receipt, indent=2, ensure_ascii=False) + "\n")
     parity["baseline_cache_path"] = str(funding.FUNDED_CACHE)
     parity["baseline_cache_read_only"] = True
