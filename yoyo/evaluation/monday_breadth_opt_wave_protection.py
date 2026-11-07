@@ -506,14 +506,245 @@ def run(draws: int = 20_000) -> dict:
     return audit
 
 
+def _incremental_metrics(frame: pd.DataFrame) -> dict:
+    """Compare a candidate overlay with policy 5's locked wave exit on same events."""
+    z = frame.dropna(subset=["wave_pct", "locked_policy5_wave_pct"]).sort_values("decision")
+    wave = z.wave_pct.to_numpy(dtype=float)
+    locked = z.locked_policy5_wave_pct.to_numpy(dtype=float)
+    delta = wave - locked
+    if not len(z):
+        return {"n_events": 0, "candidate_wins": 0, "candidate_losses": 0,
+                "candidate_win_pct": np.nan, "locked_wave_wins": 0, "locked_wave_losses": 0,
+                "locked_wave_win_pct": np.nan, "candidate_mean_net_pct": np.nan,
+                "locked_wave_mean_net_pct": np.nan, "mean_incremental_gain_pp": np.nan,
+                "incremental_gain_positive_n": 0, "worst_candidate_event_pct": np.nan,
+                "worst_incremental_event_pp": np.nan, "candidate_settlement_max_dd_pct": np.nan,
+                "locked_settlement_max_dd_pct": np.nan, "candidate_compounded_net_pct": np.nan,
+                "locked_compounded_net_pct": np.nan, "candidate_mean_ex_best_month_pct": np.nan,
+                "locked_mean_ex_best_month_pct": np.nan, "mean_delta_ex_best_month_pp": np.nan,
+                "positive_locked_upside_retention_pct": np.nan,
+                "locked_positive_winner_retained_pct": np.nan}
+    month = z.decision.dt.strftime("%Y-%m")
+    month_wave = pd.Series(wave).groupby(month.to_numpy()).sum()
+    month_locked = pd.Series(locked).groupby(month.to_numpy()).sum()
+    month_delta = pd.Series(delta).groupby(month.to_numpy()).sum()
+    best_wave_month = month_wave.idxmax()
+    best_locked_month = month_locked.idxmax()
+    best_delta_month = month_delta.idxmax()
+    non_wave_best = month.ne(best_wave_month).to_numpy()
+    non_locked_best = month.ne(best_locked_month).to_numpy()
+    non_delta_best = month.ne(best_delta_month).to_numpy()
+    wave_cash = np.r_[1.0, np.cumprod(1.0 + wave / 100.0)]
+    locked_cash = np.r_[1.0, np.cumprod(1.0 + locked / 100.0)]
+    wave_peak = np.maximum.accumulate(wave_cash)
+    locked_peak = np.maximum.accumulate(locked_cash)
+    profitable_locked = locked > 0
+    upside_denom = locked[profitable_locked].sum()
+    upside = (100 * np.maximum(wave[profitable_locked], 0).sum() / upside_denom
+              if upside_denom > 0 else np.nan)
+    winner_retained = (100 * np.mean(wave[profitable_locked] > 0)
+                       if profitable_locked.any() else np.nan)
+    return {
+        "n_events": int(len(z)),
+        "candidate_wins": int((wave > 0).sum()), "candidate_losses": int((wave <= 0).sum()),
+        "candidate_win_pct": float(100 * np.mean(wave > 0)),
+        "locked_wave_wins": int((locked > 0).sum()), "locked_wave_losses": int((locked <= 0).sum()),
+        "locked_wave_win_pct": float(100 * np.mean(locked > 0)),
+        "candidate_mean_net_pct": float(wave.mean()), "locked_wave_mean_net_pct": float(locked.mean()),
+        "mean_incremental_gain_pp": float(delta.mean()),
+        "incremental_gain_positive_n": int((delta > 0).sum()),
+        "worst_candidate_event_pct": float(wave.min()),
+        "worst_incremental_event_pp": float(delta.min()),
+        "candidate_settlement_max_dd_pct": float(100 * np.max(1.0 - wave_cash / wave_peak)),
+        "locked_settlement_max_dd_pct": float(100 * np.max(1.0 - locked_cash / locked_peak)),
+        "candidate_compounded_net_pct": float(100 * (wave_cash[-1] - 1.0)),
+        "locked_compounded_net_pct": float(100 * (locked_cash[-1] - 1.0)),
+        "candidate_mean_ex_best_month_pct": float(wave[non_wave_best].mean()) if non_wave_best.any() else np.nan,
+        "locked_mean_ex_best_month_pct": float(locked[non_locked_best].mean()) if non_locked_best.any() else np.nan,
+        "mean_delta_ex_best_month_pp": float(delta[non_delta_best].mean()) if non_delta_best.any() else np.nan,
+        # Upside retention only examines events profitable under the already-locked
+        # wave exit. The retained fraction is measured in realized positive PnL;
+        # winner_retained separately measures how often those events stayed green.
+        "positive_locked_upside_retention_pct": float(upside),
+        "locked_positive_winner_retained_pct": float(winner_retained),
+    }
+
+
+def _month_block_sign_test(frame: pd.DataFrame, draws: int = 65_535) -> dict:
+    """Sign-flip monthly sums of event deltas, preserving within-month clustering."""
+    z = frame.dropna(subset=["wave_pct", "locked_policy5_wave_pct"]).copy()
+    if z.empty:
+        return {"permutation_n": 0, "permutation_months": 0,
+                "observed_mean_incremental_gain_pp": np.nan,
+                "p_two_sided": np.nan, "p_positive": np.nan, "permutation_draws": 0,
+                "distinct_sign_assignments": 0}
+    delta = z.wave_pct.to_numpy(float) - z.locked_policy5_wave_pct.to_numpy(float)
+    months = z.decision.dt.strftime("%Y-%m").to_numpy()
+    block_sums = pd.Series(delta).groupby(months).sum().to_numpy(float)
+    observed = float(delta.mean())
+    n_months = len(block_sums)
+    distinct = 1 << n_months if n_months < 63 else 2**63 - 1
+    if n_months <= 16:
+        ids = np.arange(1 << n_months, dtype=np.uint32)
+        null_sum = np.zeros(len(ids), dtype=float)
+        for bit, block_sum in enumerate(block_sums):
+            signs = 1.0 - 2.0 * ((ids >> np.uint32(bit)) & np.uint32(1)).astype(float)
+            null_sum += signs * block_sum
+        null = null_sum / len(delta)
+        used_draws = int(len(null))
+    else:
+        rng = np.random.default_rng(SEED + int(z.policy_id.iloc[0]))
+        used_draws = draws
+        null_sum = np.zeros(draws, dtype=float)
+        for begin in range(0, draws, 2048):
+            end = min(draws, begin + 2048)
+            signs = rng.choice(np.array([-1.0, 1.0]), size=(end - begin, n_months))
+            null_sum[begin:end] = np.sum(signs * block_sums[None, :], axis=1)
+        null = null_sum / len(delta)
+    p_two = float(np.mean(np.abs(null) >= abs(observed) - 1e-12))
+    p_pos = float(np.mean(null >= observed - 1e-12))
+    return {"permutation_n": int(len(delta)), "permutation_months": int(n_months),
+            "observed_mean_incremental_gain_pp": observed,
+            "null_mean_incremental_gain_pp": float(null.mean()),
+            "p_two_sided": p_two, "p_positive": p_pos,
+            "permutation_draws": used_draws, "distinct_sign_assignments": int(distinct)}
+
+
+def analyze_existing() -> dict:
+    """Add the policy-5-wave incremental comparison without rereading market data."""
+    matrix_path = OUT / "wave_protection_policy_events.parquet"
+    if not matrix_path.is_file():
+        raise FileNotFoundError(f"Run the committed build first: {matrix_path}")
+    matrix = pd.read_parquet(matrix_path)
+    common = matrix[matrix.common_event].copy()
+    all_rows = []
+    for (asset, policy_id, epoch), group in common.groupby(["asset", "policy_id", "epoch"], sort=False):
+        metric = _incremental_metrics(group)
+        metric.update(asset=asset, policy_id=int(policy_id), policy_key=group.policy_key.iloc[0],
+                      epoch=int(epoch), period=PERIOD_LABELS[int(epoch)],
+                      mean_vs_native_pp=float((group.wave_pct - group.native_pct).mean()))
+        all_rows.append(metric)
+    incremental = pd.DataFrame(all_rows)
+
+    old = pd.read_csv(OUT / "wave_protection_locked_candidates.csv")
+    candidate_rows = []
+    # Re-label the prior drawdown-first choice explicitly; the prior artifact is
+    # retained byte-for-byte and can still be joined by asset/policy_id.
+    for role, old_role in (("risk_oriented_legacy_primary", "primary"),
+                           ("risk_first_legacy", "risk_first")):
+        for row in old[old.role.eq(old_role)].itertuples():
+            if not np.isfinite(row.policy_id):
+                candidate_rows.append({"asset": row.asset, "role": role, "policy_id": np.nan,
+                                       "policy_key": "none_supported", "selection_status": row.selection_status})
+                continue
+            candidate_rows.append({"asset": row.asset, "role": role, "policy_id": int(row.policy_id),
+                                   "policy_key": row.policy_key, "selection_status": row.selection_status,
+                                   "selection_basis": "legacy pre-2026 risk/drawdown ranking; relabeled for clarity"})
+
+    # Revenue-priority policy: require positive policy-5-wave incremental mean
+    # in every pre-2026 epoch with >=10 events in each. Rank by worst epoch gain,
+    # then gain after removing its best-contributing month, then realized upside
+    # retention on already-profitable policy-5-wave events.
+    pre = common[common.epoch.le(2)]
+    ranked_rows = []
+    for (asset, policy_id), group in pre.groupby(["asset", "policy_id"], sort=False):
+        periods = {}
+        for epoch in (0, 1, 2):
+            part = group[group.epoch.eq(epoch)]
+            periods[epoch] = _incremental_metrics(part)
+        all_stats = _incremental_metrics(group)
+        epoch_ns = [periods[e]["n_events"] for e in (0, 1, 2)]
+        epoch_gains = [periods[e]["mean_incremental_gain_pp"] for e in (0, 1, 2)]
+        record = {"asset": asset, "policy_id": int(policy_id),
+                  "policy_key": group.policy_key.iloc[0], "pre_n_events": all_stats["n_events"],
+                  "pre_epoch_min_n": int(min(epoch_ns)),
+                  "worst_pre_epoch_mean_gain_pp": float(np.nanmin(epoch_gains)),
+                  "pre_mean_incremental_gain_pp": all_stats["mean_incremental_gain_pp"],
+                  "pre_gain_ex_best_month_pp": all_stats["mean_delta_ex_best_month_pp"],
+                  "pre_positive_locked_upside_retention_pct": all_stats["positive_locked_upside_retention_pct"],
+                  "pre_locked_positive_winner_retained_pct": all_stats["locked_positive_winner_retained_pct"],
+                  "eligible_return_priority": bool(min(epoch_ns) >= 10 and np.isfinite(epoch_gains).all()
+                                                    and min(epoch_gains) > 0)}
+        record.update({f"pre_epoch_{e}_n_events": epoch_ns[i] for i, e in enumerate((0, 1, 2))})
+        record.update({f"epoch_{e}_mean_gain_pp": epoch_gains[i] for i, e in enumerate((0, 1, 2))})
+        ranked_rows.append(record)
+    ranked = pd.DataFrame(ranked_rows)
+    for asset, group in ranked.groupby("asset", sort=False):
+        eligible = group[group.eligible_return_priority].sort_values(
+            ["worst_pre_epoch_mean_gain_pp", "pre_gain_ex_best_month_pp",
+             "pre_positive_locked_upside_retention_pct", "pre_mean_incremental_gain_pp"],
+            ascending=[False, False, False, False], kind="stable")
+        if len(eligible):
+            chosen = eligible.iloc[0]
+            candidate_rows.append({**chosen.to_dict(), "asset": asset, "role": "return_priority",
+                                   "policy_id": int(chosen.policy_id), "selection_status": "selected_pre_2026_incremental",
+                                   "selection_basis": "positive wave-minus-policy5-wave mean gain in each pre-2026 epoch; >=10 events per epoch; rank worst epoch gain, ex-best-month gain, upside retention"})
+        else:
+            fallback = group[group.policy_id.eq(5)].iloc[0]
+            candidate_rows.append({**fallback.to_dict(), "asset": asset, "role": "return_priority",
+                                   "policy_id": 5, "policy_key": fallback.policy_key,
+                                   "selection_status": "fallback_locked_policy5_no_qualified_incremental_gain",
+                                   "selection_basis": "no strategy met the positive-gain and per-epoch sample gates; retain locked wave policy 5"})
+
+    candidates = pd.DataFrame(candidate_rows)
+    # Attach every selected role's four-phase event outcome metrics. This keeps
+    # policy and locked-wave support visible in the compact decision table.
+    for epoch in range(4):
+        metrics = incremental[incremental.epoch.eq(epoch)].drop(
+            columns=["epoch", "period", "mean_vs_native_pp", "policy_key"])
+        metrics = metrics.rename(columns={c: f"epoch_{epoch}_{c}" for c in metrics.columns if c not in ("asset", "policy_id", "policy_key")})
+        candidates = candidates.merge(metrics, on=["asset", "policy_id"], how="left", validate="many_to_one")
+    candidates.to_csv(OUT / "wave_protection_incremental_candidates.csv", index=False)
+    incremental.to_csv(OUT / "wave_protection_incremental_summary.csv", index=False)
+
+    perm_rows = []
+    for row in candidates[candidates.role.isin(["risk_oriented_legacy_primary", "risk_first_legacy", "return_priority"])].itertuples():
+        if not np.isfinite(row.policy_id):
+            perm_rows.append({"asset": row.asset, "role": row.role, "policy_id": np.nan,
+                              "policy_key": row.policy_key, "test_period": "2026_locked"})
+            continue
+        panel = common[(common.asset.eq(row.asset)) & (common.policy_id.eq(int(row.policy_id))) &
+                       common.epoch.eq(3)]
+        perm_rows.append({"asset": row.asset, "role": row.role, "policy_id": int(row.policy_id),
+                          "policy_key": row.policy_key, "test_period": "2026_locked",
+                          **_month_block_sign_test(panel)})
+    permutation = pd.DataFrame(perm_rows)
+    permutation.to_csv(OUT / "wave_protection_incremental_permutation_2026.csv", index=False)
+    audit = {
+        "analysis": "incremental policy protection versus the already-locked second-wave policy-5 outcome",
+        "source_matrix": str(matrix_path.relative_to(ROOT)),
+        "source_matrix_rows": int(len(matrix)),
+        "source_matrix_common_event_policy_rows": int(len(common)),
+        "baseline_column": "locked_policy5_wave_pct",
+        "incremental_definition": "candidate wave_pct - policy-5 locked wave_pct, paired on the same locked event",
+        "selection_period": "epochs 0-2 only; 2026 epoch 3 remains locked evaluation",
+        "return_priority_rule": "each pre-2026 epoch needs >=10 complete common events and a strictly positive mean candidate-minus-policy5-wave gain; sort descending by worst epoch mean gain, gain after excluding best incremental-gain month, positive locked-wave upside retention, then overall mean gain; if none qualify, retain policy 5",
+        "legacy_primary_relabel": "prior role=primary is called risk_oriented_legacy_primary here because it prioritized lower drawdown; original wave_protection_locked_candidates.csv is preserved unchanged",
+        "month_block_test": "2026 event-level candidate-minus-policy5-wave deltas summed by UTC calendar month; exact sign flips over month blocks (or 65,535 draws above 16 months), two-sided and positive-tail p-values",
+        "output_files": [
+            "wave_protection_incremental_summary.csv",
+            "wave_protection_incremental_candidates.csv",
+            "wave_protection_incremental_permutation_2026.csv",
+        ],
+    }
+    (OUT / "wave_protection_incremental_audit.json").write_text(json.dumps(audit, indent=2) + "\n")
+    return audit
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--permutations", type=int, default=20_000)
+    parser.add_argument("--incremental-from-cache", action="store_true",
+                        help="Analyze the already-built policy-event matrix; do not reread market data")
     args = parser.parse_args()
-    audit = run(draws=args.permutations)
-    print(json.dumps({k: audit[k] for k in ("event_n", "eligible_policy_n", "locked_policy5_common_rows",
-                                            "policy5_max_abs_wave_error_pp", "policy5_max_abs_native144_error_pp",
-                                            "common_event_n_by_asset_epoch", "builder_commit")}, indent=2))
+    if args.incremental_from_cache:
+        audit = analyze_existing()
+        print(json.dumps(audit, indent=2))
+    else:
+        audit = run(draws=args.permutations)
+        print(json.dumps({k: audit[k] for k in ("event_n", "eligible_policy_n", "locked_policy5_common_rows",
+                                                "policy5_max_abs_wave_error_pp", "policy5_max_abs_native144_error_pp",
+                                                "common_event_n_by_asset_epoch", "builder_commit")}, indent=2))
 
 
 if __name__ == "__main__":
