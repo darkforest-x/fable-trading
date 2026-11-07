@@ -1,0 +1,107 @@
+{
+  "analysis": "incremental policy protection versus the already-locked second-wave policy-5 outcome",
+  "analysis_builder_commit": "cb1b15d30f673abf0a0d5a67233bba40faccaedc",
+  "source_matrix": "experiments/active/exp-monday-breadth-optimization-20261108-v1/exits/wave_protection_policy_events.parquet",
+  "source_matrix_rows": 55656,
+  "source_matrix_common_event_policy_rows": 52873,
+  "common_event_n_by_asset_epoch": [
+    {
+      "asset": "ALT",
+      "epoch": 0,
+      "n": 20
+    },
+    {
+      "asset": "ALT",
+      "epoch": 1,
+      "n": 28
+    },
+    {
+      "asset": "ALT",
+      "epoch": 2,
+      "n": 26
+    },
+    {
+      "asset": "ALT",
+      "epoch": 3,
+      "n": 22
+    },
+    {
+      "asset": "BTC",
+      "epoch": 0,
+      "n": 23
+    },
+    {
+      "asset": "BTC",
+      "epoch": 1,
+      "n": 45
+    },
+    {
+      "asset": "BTC",
+      "epoch": 2,
+      "n": 29
+    },
+    {
+      "asset": "BTC",
+      "epoch": 3,
+      "n": 22
+    },
+    {
+      "asset": "ETH",
+      "epoch": 0,
+      "n": 23
+    },
+    {
+      "asset": "ETH",
+      "epoch": 1,
+      "n": 45
+    },
+    {
+      "asset": "ETH",
+      "epoch": 2,
+      "n": 29
+    },
+    {
+      "asset": "ETH",
+      "epoch": 3,
+      "n": 22
+    },
+    {
+      "asset": "SOL",
+      "epoch": 0,
+      "n": 12
+    },
+    {
+      "asset": "SOL",
+      "epoch": 1,
+      "n": 44
+    },
+    {
+      "asset": "SOL",
+      "epoch": 2,
+      "n": 25
+    },
+    {
+      "asset": "SOL",
+      "epoch": 3,
+      "n": 20
+    }
+  ],
+  "return_priority_eligible_policy_n_by_asset": {
+    "ALT": 0,
+    "BTC": 0,
+    "ETH": 0,
+    "SOL": 0
+  },
+  "policy5_full_cohort_rows": 458,
+  "baseline_column": "locked_policy5_wave_pct",
+  "incremental_definition": "candidate wave_pct - policy-5 locked wave_pct, paired on the same locked event",
+  "selection_period": "epochs 0-2 only; 2026 epoch 3 remains locked evaluation",
+  "return_priority_rule": "each pre-2026 epoch needs >=10 complete common events and a strictly positive mean candidate-minus-policy5-wave gain; sort descending by worst epoch mean gain, gain after excluding best incremental-gain month, positive locked-wave upside retention, then overall mean gain; if none qualify, retain policy 5",
+  "legacy_primary_relabel": "prior role=primary is called risk_oriented_legacy_primary here because it prioritized lower drawdown; original wave_protection_locked_candidates.csv is preserved unchanged",
+  "month_block_test": "2026 event-level candidate-minus-policy5-wave deltas summed by UTC calendar month; exact sign flips over month blocks (or 65,535 draws above 16 months), two-sided and positive-tail p-values",
+  "output_files": [
+    "wave_protection_incremental_summary.csv",
+    "wave_protection_incremental_candidates.csv",
+    "wave_protection_incremental_permutation_2026.csv"
+  ]
+}

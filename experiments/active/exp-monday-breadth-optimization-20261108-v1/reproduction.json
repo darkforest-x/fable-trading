@@ -116,10 +116,10 @@
     "python -m yoyo.data.altseason_funding --venue binance --symbols 0GUSDT,1000CHEEMSUSDT,1000PEPEUSDT,1000SATSUSDT,2ZUSDT,AGLDUSDT,ALCHUSDT,ALPINEUSDT,APEUSDT,ASTERUSDT,BANANAS31USDT,BCHUSDT,BIOUSDT,BLURUSDT,BTCUSDT,CAKEUSDT,CCUSDT,CETUSUSDT,CFGUSDT,COLLECTUSDT,CTSIUSDT,DASHUSDT,EIGENUSDT,ETHUSDT,FARTCOINUSDT,FIDAUSDT,FLUXUSDT,FOGOUSDT,IDUSDT,ILVUSDT,IMXUSDT,IOUSDT,JASMYUSDT,KERNELUSDT,LINKUSDT,MEGAUSDT,MOODENGUSDT,NILUSDT,NOMUSDT,NXPCUSDT,PEOPLEUSDT,PIEVERSEUSDT,PLUMEUSDT,PNUTUSDT,POLUSDT,PYTHUSDT,RAVEUSDT,ROSEUSDT,SAFEUSDT,SCRUSDT,SFPUSDT,SHELLUSDT,SOLUSDT,SOMIUSDT,SONICUSDT,SPACEUSDT,SPELLUSDT,SPKUSDT,STOUSDT,STRKUSDT,SXTUSDT,THEUSDT,TSTUSDT,TURBOUSDT,VETUSDT,VIRTUALUSDT,WIFUSDT,XVGUSDT,YBUSDT,ZENUSDT,ZETAUSDT --output data/research/monday_breadth_optimization_20261108/funding_2026 --start 2026-01-01T00:00:00Z --end 2026-11-07T00:00:00Z --workers 2",
     "python -m yoyo.evaluation.monday_breadth_opt_funding case",
     "python -m yoyo.evaluation.monday_breadth_opt_case_slippage",
-    "python -m yoyo.evaluation.monday_breadth_opt_case_chart",
     "python -m yoyo.evaluation.monday_breadth_opt_case_candidates",
     "python -m yoyo.evaluation.monday_breadth_opt_funding all_btc",
     "python -m yoyo.evaluation.monday_breadth_opt_funded_selection",
+    "python -m yoyo.evaluation.monday_breadth_opt_case_slippage --locked-runner",
     "python -m yoyo.evaluation.monday_breadth_opt_exit_contrast",
     "python -m yoyo.evaluation.monday_breadth_opt_neighbours timed",
     "python -m yoyo.evaluation.monday_breadth_opt_neighbours exits",
@@ -145,7 +145,12 @@
     "python -m yoyo.evaluation.monday_breadth_opt_controls --source second_wave --epoch3-only --past-only",
     "python -m yoyo.evaluation.monday_breadth_opt_second_wave_audit matched --past-only",
     "python -m yoyo.evaluation.monday_breadth_opt_wave_funding",
+    "python -m yoyo.evaluation.monday_breadth_opt_wave_funding --repair-months",
     "python -m yoyo.evaluation.monday_breadth_opt_wave_protection",
+    "python -m yoyo.evaluation.monday_breadth_opt_wave_protection --incremental-from-cache",
+    "python -m yoyo.evaluation.monday_breadth_opt_basket_trail",
+    "python -m yoyo.evaluation.monday_breadth_opt_wave_funding --basket",
+    "python -m yoyo.evaluation.monday_breadth_opt_case_chart",
     "python -m yoyo.evaluation.monday_breadth_opt_delivery",
     "python -m unittest discover -s tests/evaluation -p test_monday_breadth_opt_exits.py -v"
   ],
@@ -160,5 +165,7 @@
   "null_hypothesis": "No excess realized net return over matched long positions. Deterministic rule screen, no fitted binary classifier; classifier AUC/top-decile prediction ranks do not apply. Test-month sign flip preserves correlated market episodes; check Holm by four targets and again across all eight primaries.",
   "fee_convention": "Market entry/market exit .0005 each side; resting take profit .0002. Fixed and normal adaptive development search exclude funding. Funding-aware BTC targets incorporate previously settled rates. Separate realized funding and marked-risk audits on eligible 2026 scenarios. Commissions are the project OKX account assumption on Binance USD-M price paths.",
   "selection_clock": "Entry at open following completed observation. Chronological first admission waits at least max(24 hours, planned maximum holding period). The original 30-minute directional notification cooldown does not remove eligible input bars.",
-  "case_classification": "All specialized net-10000-point rules and any rule explicitly requiring the September admission are case-informed; the normal rank uses only earlier events. The frozen historical market periods had been examined in earlier studies."
+  "case_classification": "All specialized net-10000-point rules and any rule explicitly requiring the September admission are case-informed; the normal rank uses only earlier events. The frozen historical market periods had been examined in earlier studies.",
+  "price_control_caveat": "Same-coin random clocks are matched separately for each basket member. Event inference is computed across distinct entry events with at least 80% of the original constituents represented. Strict controls additionally exclude shocks in the candidate holding window. Past-only sensitivity allows future shocks. The quarter-matched early-exit timing null uses exactly as many early exits per quarter as the observed rule.",
+  "funding_coverage_note": "Funding settlements use exact REST marks where present, otherwise official same-hour mark K-line opens, including a same-day official daily archive when the monthly file omits a day. Keep original and renewed-breadth funded event coverage explicit."
 }
