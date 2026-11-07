@@ -1070,7 +1070,7 @@ def _aggregate_wait_partition(
     event["reclaim_quote_coverage_pct"] = 100 * event.quote_observed_n / event.members_expected_n.replace(0, np.nan)
     bench = benchmark_outcomes.loc[
         benchmark_outcomes.minutes.eq(minutes) & benchmark_outcomes.wait_min.eq(wait_min)
-    ].copy()
+    ].drop(columns=["decision"], errors="ignore")
     event = event.merge(bench, on=["minutes", "known", "wait_min", "hold_hours"], how="left", validate="one_to_one")
     if event.duplicated(["minutes", "known", "wait_min", "hold_hours"]).any():
         raise AssertionError("event outcome join keys are not unique")
