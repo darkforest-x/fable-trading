@@ -15,6 +15,16 @@ enum AppConfig {
         return productionURL
     }
 
+    static let okxRestURL = URL(string: "https://www.okx.com")!
+
+    /// Public OKX business channel for live candles; the loopback fixture serves the same frames.
+    static var candleSocketURL: URL {
+        if let host = serviceURL.host, ["127.0.0.1", "localhost"].contains(host), let port = serviceURL.port {
+            return URL(string: "ws://\(host):\(port)/ws/v5/business")!
+        }
+        return URL(string: "wss://ws.okx.com/ws/v5/business")!
+    }
+
     #if DEBUG
     /// Fixture-only token injected by a launch argument; never used in release builds.
     static var qaToken: String? { UserDefaults.standard.string(forKey: "SpikeQAToken") }

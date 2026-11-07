@@ -1,18 +1,24 @@
 import SwiftUI
 
-/// SPIKE 纪律 2.x — native SwiftUI rewrite (owner 2026-11-07 “原生 SwiftUI 重写”).
-/// Until the trading stages land, the 1.x app remains the only place that can place,
-/// close or modify orders.
+/// SPIKE 纪律 2.x — native SwiftUI rewrite (owner 2026-11-07 “原生 SwiftUI 重写”, 2.1.0 “剩下的全部重构”).
+/// Every order, close, cancel and protection write goes through AccountStore, which persists request
+/// identities before sending and never resends on timeout.
 @main
 struct SpikeDisciplineApp: App {
     @State private var session = SessionStore()
     @State private var notices = NotificationStore()
+    @State private var account = AccountStore()
+    @State private var fib = FibStore()
+    @State private var ticket = TicketModel()
     @AppStorage("appearance") private var appearance = "system"
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environment(session)
                 .environment(notices)
+                .environment(account)
+                .environment(fib)
+                .environment(ticket)
                 .preferredColorScheme(appearance == "light" ? .light : appearance == "dark" ? .dark : nil)
         }
     }
@@ -35,11 +41,15 @@ enum AppTab: String, Hashable, CaseIterable, Identifiable {
 struct RootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(NotificationStore.self) private var notices
+    @Environment(AccountStore.self) private var account
+    @Environment(FibStore.self) private var fib
+    @Environment(TicketModel.self) private var ticket
     @Environment(\.scenePhase) private var scenePhase
     @State private var tab: AppTab = .monitor
     @State private var progress: CGFloat = CGFloat(AppTab.allCases.firstIndex(of: .monitor)!)
     @State private var showNotifications = false
     @State private var showSettings = false
+    @State private var showReplay = false
     @State private var bannerDrag: CGFloat = 0
 
     var body: some View {
@@ -70,6 +80,19 @@ struct RootView: View {
                 .padding(.horizontal, 14)
                 .padding(.bottom, 2)
         }
+        .overlay(alignment: .bottom) {
+            if let notice = account.notice {
+                NoticeToast(notice: notice)
+                    .padding(.bottom, 82)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .task(id: notice.id) {
+                        try? await Task.sleep(for: .seconds(3.2))
+                        withAnimation(.snappy) { if account.notice?.id == notice.id { account.notice = nil } }
+                    }
+                    .onTapGesture { withAnimation(.snappy) { account.notice = nil } }
+            }
+        }
+        .animation(.spring(response: 0.38, dampingFraction: 0.86), value: account.notice)
         .overlay(alignment: .top) {
             if let banner = notices.banner {
                 AlarmBanner(event: banner, now: notices.data?.nowMs ?? 0, onView: { Haptics.open(); open(banner) }, onDismiss: {
@@ -88,28 +111,53 @@ struct RootView: View {
         .onChange(of: tab) { _, _ in Haptics.select() }
         .sheet(isPresented: $showNotifications) { NotificationCenterView(onOpen: open) }
         .sheet(isPresented: $showSettings) { SettingsView() }
+        .fullScreenCover(isPresented: $showReplay) { ReplayView() }
+        .onChange(of: showReplay) { _, open in account.paused = open }
+        .sheet(isPresented: Binding(get: { ticket.fibTicket }, set: { if !$0 { ticket.manual(); ticket.fibTicket = false } })) {
+            QuickTicketSheet(onBlocked: route).presentationDetents([.large]).presentationDragIndicator(.visible)
+        }
         .task { session.restore(); applyQA() }
         .task(id: pollKey) {
             guard let connection = session.connection, scenePhase == .active else { return }
             await notices.poll(connection: connection, session: session)
+        }
+        .task(id: pollKey) {
+            account.attach(session.connection)
+            guard session.connection != nil, scenePhase == .active else { return }
+            await account.run(session: session)
         }
     }
 
     @ViewBuilder private func content(_ page: AppTab) -> some View {
         switch page {
         case .monitor: MonitorView(showNotifications: $showNotifications, showSettings: $showSettings)
-        case .trade: StagePlaceholder(title: "合约", systemImage: page.symbol, stage: "第 4 阶段", note: "下单票据是真金链路，最后迁移并单独测试。", showSettings: $showSettings)
-        case .fib: StagePlaceholder(title: "1.618", systemImage: page.symbol, stage: "第 2 阶段", note: "原生 K 线、区间线、内部线、六均线与触价列表。", showSettings: $showSettings)
-        case .positions: StagePlaceholder(title: "持仓保护", systemImage: page.symbol, stage: "第 3 阶段", note: "持仓、平仓、撤单与止损保护。", showSettings: $showSettings)
-        case .stats: StagePlaceholder(title: "统计", systemImage: page.symbol, stage: "第 3 阶段", note: "账户统计、交易纪律与设置。", showSettings: $showSettings)
+        case .trade: TradeView(active: tab == .trade && scenePhase == .active, showSettings: $showSettings, onDestination: route)
+        case .fib: FibView(active: tab == .fib && scenePhase == .active, showSettings: $showSettings, onQuick: { row, period in
+            guard account.pendingEntry == nil else { return }
+            ticket.openQuick(row, period: period, state: account.state)
+        }, onReplay: { showReplay = true })
+        case .positions: PositionsView(showSettings: $showSettings, onOpenSymbol: { symbol in
+            if symbol != ticket.symbol { ticket.choose(symbol); ticket.syncLeverage(account.state); ticket.syncExisting(account.state) }
+            withAnimation(.snappy) { tab = .trade }
+        })
+        case .stats: StatsView(showSettings: $showSettings, active: tab == .stats && scenePhase == .active)
         }
     }
 
-    private var pollKey: String { "\(session.connection?.token.hashValue ?? 0)-\(scenePhase == .active)" }
+    private var pollKey: String { "\(session.connection?.token.hashValue ?? 0)-\(session.connection?.accountId ?? "")-\(scenePhase == .active)" }
+
+    private func route(_ destination: Trading.Destination) {
+        switch destination {
+        case .settings: showSettings = true
+        case .positions: withAnimation(.snappy) { tab = .positions }
+        case .discipline: withAnimation(.snappy) { tab = .stats }
+        }
+    }
 
     private func open(_ event: NotificationEvent) {
         withAnimation(.snappy) { notices.banner = nil }
         if event.kind == "alarm" { UserDefaults.standard.set(MonitorSegment.alerts.rawValue, forKey: "monitor.segment") }
+        if event.kind != "alarm", let symbol = event.symbol { fib.symbol = symbol }
         withAnimation(.snappy) { tab = event.kind == "alarm" ? .monitor : .fib }
     }
 
@@ -176,33 +224,20 @@ struct GlassTabBar: View {
     }
 }
 
-struct StagePlaceholder: View {
-    let title: String
-    let systemImage: String
-    let stage: String
-    let note: String
-    @Binding var showSettings: Bool
+/// Result of an order, close, cancel or protection request (1.x notify toast).
+struct NoticeToast: View {
+    let notice: AccountStore.Notice
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 16) {
-                    Image(systemName: systemImage).font(.system(size: 38, weight: .medium)).foregroundStyle(.blue)
-                        .frame(width: 84, height: 84).frostedCapsule()
-                    Text("原生版\(stage)").font(.title3.weight(.bold))
-                    Text(note).font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
-                    Text("迁移完成前，交易仍在原 SPIKE 纪律交易 App 中进行，规则与保护不变。").font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity).padding(28).glassCard(cornerRadius: 28)
-                .padding(16)
-            }
-            .contentMargins(.bottom, 96, for: .scrollContent)
-            .scrollEdgeEffectHidden(true, for: .top)
-            .toolbarBackground(.hidden, for: .navigationBar)
-            .containerBackground(for: .navigation) { AmbientBackground() }
-            .navigationTitle(title)
-            .toolbarTitleDisplayMode(.inlineLarge)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { Haptics.tap(); showSettings = true } label: { Image(systemName: "gearshape") } } }
+        HStack(spacing: 8) {
+            Image(systemName: notice.success ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
+                .foregroundStyle(notice.success ? Color.up : Color.amber)
+            Text(notice.text).font(.subheadline.weight(.semibold)).lineLimit(2)
         }
+        .padding(.horizontal, 16).padding(.vertical, 11)
+        .glassEffect(.regular, in: .capsule)
+        .padding(.horizontal, 24)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.updatesFrequently)
     }
 }
 

@@ -12,12 +12,12 @@ struct APIError: LocalizedError {
     var errorDescription: String? { message }
 }
 
-/// Minimal HTTP client for the discipline service. GET for reads; the only POST in this
-/// phase is the 1.618 Bark switch (BarkSwitch below). No order, close or stop path exists here.
+/// HTTP client for the discipline service. Order, close and protection writes go through
+/// AccountStore only, which persists request identities before sending (see AccountStore.swift).
 enum API {
     private static let session: URLSession = {
         let config = URLSessionConfiguration.ephemeral
-        config.timeoutIntervalForRequest = 12
+        config.timeoutIntervalForRequest = 45   // per-request timeouts below; preview needs 45 s
         config.requestCachePolicy = .reloadIgnoringLocalCacheData
         return URLSession(configuration: config)
     }()
@@ -32,16 +32,18 @@ enum API {
         try await send(path, method: "GET", query: query, body: nil, connection: connection)
     }
 
+    /// /v1/preview may take up to 45 s server-side (1.x api.ts); everything else 12 s.
     static func post<T: Decodable>(_ path: String, body: [String: Any], connection: Connection) async throws -> T {
         let data = try JSONSerialization.data(withJSONObject: body)
-        return try await send(path, method: "POST", query: [], body: data, connection: connection)
+        return try await send(path, method: "POST", query: [], body: data, connection: connection, timeout: path == "/v1/preview" ? 45 : 12)
     }
 
-    private static func send<T: Decodable>(_ path: String, method: String, query: [URLQueryItem], body: Data?, connection: Connection?) async throws -> T {
+    private static func send<T: Decodable>(_ path: String, method: String, query: [URLQueryItem], body: Data?, connection: Connection?, timeout: TimeInterval = 12) async throws -> T {
         var components = URLComponents(url: AppConfig.serviceURL.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
         if !query.isEmpty { components.queryItems = query }
         var request = URLRequest(url: components.url!)
         request.httpMethod = method
+        request.timeoutInterval = timeout
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         if let connection {
             request.setValue("Bearer \(connection.token)", forHTTPHeaderField: "Authorization")

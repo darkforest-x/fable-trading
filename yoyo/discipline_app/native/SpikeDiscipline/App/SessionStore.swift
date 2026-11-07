@@ -71,6 +71,16 @@ final class SessionStore {
         phase = .connected
     }
 
+    /// 设置 · 交易账户: switch the account the app reads and trades (1.x switchAccount).
+    func switchAccount(_ id: String) async throws {
+        guard var next = connection, next.accountId != id else { return }
+        next.accountId = id
+        let probe: StateProbe = try await API.get("/v1/state", connection: next)
+        guard probe.accountId == id, probe.mode == next.mode else { throw APIError(status: 0, message: "账户响应不匹配") }
+        if let data = try? JSONEncoder().encode(next) { _ = Keychain.write(data) }
+        connection = next
+    }
+
     func forget() {
         Keychain.clear()
         connection = nil

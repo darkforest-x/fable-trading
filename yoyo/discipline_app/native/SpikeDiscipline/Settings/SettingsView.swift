@@ -9,6 +9,7 @@ struct SettingsView: View {
     @AppStorage("appearance") private var appearance = "system"
     @State private var haptics = Haptics.enabled
     @State private var barkBusy = false
+    @AppStorage("spike-confirm-trades") private var confirmTrades = false
 
     var body: some View {
         @Bindable var notices = notices
@@ -27,6 +28,15 @@ struct SettingsView: View {
                     if let error = session.error { Text(error).font(.footnote).foregroundStyle(Color.amber) }
                     Button("重新连接") { Haptics.tap(); session.reconnect() }
                 }
+                if session.connection != nil { AccountSection() }
+                Section {
+                    Toggle(isOn: $confirmTrades) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("开仓二次确认")
+                            Text("开仓可跳过二次确认；平仓选择比例后提交，风控仍执行。").font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                } header: { Text("交易操作") }
                 Section {
                     Toggle("App 内报警弹窗", isOn: $notices.prefs.popup)
                     Toggle("报警声音", isOn: $notices.prefs.sound)
@@ -63,6 +73,7 @@ struct SettingsView: View {
             .onChange(of: haptics) { _, value in Haptics.enabled = value; Haptics.tap() }
             .onChange(of: notices.prefs) { _, _ in Haptics.select() }
             .onChange(of: appearance) { _, _ in Haptics.select() }
+            .onChange(of: confirmTrades) { _, _ in Haptics.select() }
             .scrollContentBackground(.hidden)
             .background(AmbientBackground())
             .navigationTitle("设置与账户")

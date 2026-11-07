@@ -1,0 +1,246 @@
+{
+ "account_equity": "1000",
+ "account_id": "primary",
+ "account_name": "主账户",
+ "account_synced": true,
+ "available": "1000",
+ "blockers": [],
+ "cash": "1000",
+ "closed": [
+  {
+   "breakeven": false,
+   "close_reason": "exchange",
+   "closed": 1794034982.047864,
+   "entry": "100",
+   "entry_fee": ".01",
+   "id": "synthetic-completed",
+   "leverage": 10,
+   "margin": ".5",
+   "opened": 1794031382.047864,
+   "original_stop": "102",
+   "pnl": "1.23",
+   "policy": {
+    "alt_exposure_multiple": "5",
+    "alt_leverage": 20,
+    "alt_margin_fraction": "0.05",
+    "breakeven_r": "1",
+    "cooldown_after_losses": 3,
+    "daily_loss_fraction": "0.17",
+    "fee_rate": "0.0005",
+    "loss_cooldown_seconds": 86400,
+    "loss_streak": 3,
+    "major_allowance_scope": "independent",
+    "major_exposure_multiple": "10",
+    "major_leverage": 100,
+    "major_margin_fraction": "0.10",
+    "margin_mode": "cross",
+    "max_entries": 3,
+    "max_positions": 3,
+    "pending_ttl_seconds": 900,
+    "policy_change_delay_seconds": 86400,
+    "profit_entry_bonus": 1,
+    "quote_max_age_seconds": 15,
+    "risk_fraction": "0.05",
+    "slippage_rate": "0.001",
+    "take_profits": [
+     [
+      "3",
+      "0.6"
+     ],
+     [
+      "5",
+      "0.4"
+     ]
+    ]
+   },
+   "protection": "closed",
+   "quantity": ".05",
+   "remaining": "0",
+   "risk": "1",
+   "side": "short",
+   "stages": [],
+   "stop": "101",
+   "symbol": "ETH-USDT-SWAP",
+   "total_fee": ".03"
+  }
+ ],
+ "cooldown_until": 0,
+ "daily": {
+  "app_start_pnl": "0",
+  "entries": 1,
+  "key": "2026-11-07",
+  "locked_reason": null,
+  "pnl_scope": "app_managed",
+  "scope_started_at": 1794038581.954082,
+  "start_equity": "1000"
+ },
+ "discipline": {
+  "daily_loss_limit": "170.00",
+  "daily_loss_remaining": "171.18",
+  "entries_bonus": 1,
+  "entries_limit": 4,
+  "entries_remaining": 3,
+  "losses_remaining": 3
+ },
+ "equity": "1000",
+ "heartbeat": 1794038588.164866,
+ "instruments": {
+  "BTC-USDT-SWAP": {
+   "contract_value": ".01",
+   "fee_group": "2",
+   "max_leverage": 100,
+   "minimum": ".01",
+   "step": ".01",
+   "symbol": "BTC-USDT-SWAP",
+   "tick": ".01"
+  },
+  "ETH-USDT-SWAP": {
+   "contract_value": ".01",
+   "fee_group": "2",
+   "max_leverage": 100,
+   "minimum": ".01",
+   "step": ".01",
+   "symbol": "ETH-USDT-SWAP",
+   "tick": ".01"
+  },
+  "SOL-USDT-SWAP": {
+   "contract_value": ".01",
+   "fee_group": "2",
+   "max_leverage": 100,
+   "minimum": ".01",
+   "step": ".01",
+   "symbol": "SOL-USDT-SWAP",
+   "tick": ".01"
+  }
+ },
+ "loss_streak": 0,
+ "mode": "okx_live",
+ "pending": [],
+ "policy": {
+  "alt_exposure_multiple": "5",
+  "alt_leverage": 20,
+  "alt_margin_fraction": "0.05",
+  "breakeven_r": "1",
+  "cooldown_after_losses": 3,
+  "daily_loss_fraction": "0.17",
+  "fee_rate": "0.0005",
+  "loss_cooldown_seconds": 86400,
+  "loss_streak": 3,
+  "major_allowance_scope": "independent",
+  "major_exposure_multiple": "10",
+  "major_leverage": 100,
+  "major_margin_fraction": "0.10",
+  "margin_mode": "cross",
+  "max_entries": 3,
+  "max_positions": 3,
+  "pending_ttl_seconds": 900,
+  "policy_change_delay_seconds": 86400,
+  "profit_entry_bonus": 1,
+  "quote_max_age_seconds": 15,
+  "risk_fraction": "0.05",
+  "slippage_rate": "0.001",
+  "take_profits": [
+   [
+    "3",
+    "0.6"
+   ],
+   [
+    "5",
+    "0.4"
+   ]
+  ]
+ },
+ "policy_proposal": null,
+ "policy_revision": 1,
+ "positions": [
+  {
+   "breakeven": false,
+   "current_r": "-0.01322220317820847557620391380",
+   "direction": 1,
+   "entry": "100",
+   "entry_fee": "0.05",
+   "id": "611eb57612c9409cb462c988e21d0874",
+   "leverage": 100,
+   "margin": "2.49",
+   "margin_mode": "cross",
+   "opened": 1794038582.005,
+   "ord_id": "1",
+   "original_stop": "95",
+   "pnl": "-0.05",
+   "policy": {
+    "alt_exposure_multiple": "5",
+    "alt_leverage": 20,
+    "alt_margin_fraction": "0.05",
+    "breakeven_r": "1",
+    "cooldown_after_losses": 3,
+    "daily_loss_fraction": "0.17",
+    "fee_rate": "0.0005",
+    "loss_cooldown_seconds": 86400,
+    "loss_streak": 3,
+    "major_allowance_scope": "independent",
+    "major_exposure_multiple": "10",
+    "major_leverage": 100,
+    "major_margin_fraction": "0.10",
+    "margin_mode": "cross",
+    "max_entries": 3,
+    "max_positions": 3,
+    "pending_ttl_seconds": 900,
+    "policy_change_delay_seconds": 86400,
+    "profit_entry_bonus": 1,
+    "quote_max_age_seconds": 15,
+    "risk_fraction": "0.05",
+    "slippage_rate": "0.001",
+    "take_profits": [
+     [
+      "3",
+      "0.6"
+     ],
+     [
+      "5",
+      "0.4"
+     ]
+    ]
+   },
+   "policy_revision": 1,
+   "pos_id": "pos-1",
+   "protection": "exchange-verified",
+   "quantity": "2.49",
+   "remaining": "2.49",
+   "risk": "13.197498000",
+   "side": "long",
+   "stages": [],
+   "stop": "95",
+   "symbol": "BTC-USDT-SWAP"
+  }
+ ],
+ "private_at": 1794038588.173122,
+ "private_error": null,
+ "quote_error": null,
+ "quotes": {
+  "BTC-USDT-SWAP": {
+   "ask": "100",
+   "bid": "100",
+   "last": "100",
+   "time": 1794038588.1639118
+  },
+  "ETH-USDT-SWAP": {
+   "ask": "100",
+   "bid": "100",
+   "last": "100",
+   "time": 1794038588.163913
+  },
+  "SOL-USDT-SWAP": {
+   "ask": "100",
+   "bid": "100",
+   "last": "100",
+   "time": 1794038588.163914
+  }
+ },
+ "server_time": 1794038589.149525,
+ "shared_leverage": {
+  "BTC-USDT-SWAP": 100
+ },
+ "shared_leverage_errors": [],
+ "statistics_started_at": null,
+ "version": 64
+}
