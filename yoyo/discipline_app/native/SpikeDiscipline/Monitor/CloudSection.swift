@@ -10,8 +10,7 @@ struct CloudSection: View {
     @State private var scope = "live"
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            StatusNote(text: "12H EMA20/50 云带 · 只供观察，不作开单依据", systemImage: "eye", tint: .amber)
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Picker("方向", selection: $side.animation(.snappy)) { Text("全部").tag("all"); Text("做多").tag("long"); Text("做空").tag("short") }
                     .pickerStyle(.segmented).frame(maxWidth: 220)
@@ -23,16 +22,14 @@ struct CloudSection: View {
                 } label: { Label(scope == "live" ? "本周" : "含历史", systemImage: "line.3.horizontal.decrease").font(.footnote.weight(.semibold)) }
                 .buttonStyle(.glass)
             }
-            if let data {
-                Text("下次 12H 收盘 \(Fmt.clock(data.nextCloseMs, now: data.nowMs)) · 已扫描 \(data.status.completed ?? 0)/\(data.status.total ?? 0)\(data.status.workerAlive ? "" : " · 扫描未运行")")
-                    .font(.caption).foregroundStyle(.secondary).monospacedDigit().padding(.horizontal, 4)
+            if let data, !data.status.workerAlive {
+                StatusNote(text: "云带扫描未运行", systemImage: "exclamationmark.triangle", tint: .amber)
             }
             LoadState(loading: data == nil && error == nil, error: error, stale: data != nil)
             if let data, data.items.isEmpty {
                 Text(scope == "live" ? "本周暂无云带信号" : "暂无信号").font(.footnote).foregroundStyle(.secondary).frame(maxWidth: .infinity).padding(18).glassCard()
             }
             ForEach(data?.items ?? []) { s in CloudCard(signal: s, now: data?.nowMs ?? 0) }
-            Text("云带评分 2026-11-05 已在全部周期被否决，这里仅作盘面观察。").font(.caption).foregroundStyle(.secondary).frame(maxWidth: .infinity).padding(.top, 4)
         }
         .modifier(Polled(key: "cloud-\(side)-\(scope)-\(refresh)", every: .seconds(60), load: { try await API.get("/v1/monitor/cloud", query: [URLQueryItem(name: "side", value: side), URLQueryItem(name: "scope", value: scope)], connection: connection) }, value: $data, error: $error))
     }
@@ -41,31 +38,30 @@ struct CloudSection: View {
 struct CloudCard: View {
     let signal: CloudSignal
     let now: Double
+    @Environment(\.openChart) private var openChart
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        Button { Haptics.open(); openChart(signal.symbol) } label: { card }.buttonStyle(CardPressStyle())
+    }
+    private var card: some View {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
                 CoinLogo(coin: Fmt.coin(signal.symbol))
-                HStack(alignment: .firstTextBaseline, spacing: 3) { Text(Fmt.coin(signal.symbol)).font(.headline); Text("/ USDT").font(.caption).foregroundStyle(.secondary) }
-                Spacer()
+                Text(Fmt.coin(signal.symbol)).font(.headline).foregroundStyle(.primary)
                 SidePill(side: signal.side)
-                Pill(text: signal.timeframe)
-                Pill(text: signal.historical ? "历史" : "最新", color: signal.historical ? .secondary : .blue)
+                if !signal.historical { Circle().fill(Color.blue).frame(width: 7, height: 7).accessibilityLabel("最新") }
+                Spacer()
+                Text(Fmt.clock(signal.confirmedMs, now: now)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                Image(systemName: "chevron.right").font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
             }
             HStack {
                 figure("入场", Fmt.price(signal.entry), .primary)
                 figure("止损", Fmt.price(signal.stop), .down, note: signal.stopPct.map { String(format: "−%.1f%%", abs($0)) })
                 figure("目标", Fmt.price(signal.target), .up)
+                figure("R:R", signal.plannedRr.map { String(format: "%.1f", $0) } ?? "—", .primary)
             }
-            .padding(12).background(.white.opacity(0.18), in: .rect(cornerRadius: 16))
-            HStack {
-                Text("R:R \(signal.plannedRr.map { String(format: "%.1f", $0) } ?? "—")")
-                Spacer()
-                Text("确认 \(Fmt.clock(signal.confirmedMs, now: now))")
-            }
-            .font(.caption).foregroundStyle(.secondary).monospacedDigit()
         }
-        .padding(16)
-        .glassCard(cornerRadius: 22)
+        .padding(12)
+        .glassCard(cornerRadius: 18)
         .scrollReveal()
     }
     private func figure(_ label: String, _ value: String, _ color: Color, note: String? = nil) -> some View {

@@ -286,9 +286,30 @@ struct Candle: Hashable, Identifiable {
 
 struct CandlePage: Decodable { let data: [[String]] }
 
+extension Candle {
+    /// Buckets `bars` into `seconds`-long candles opening at UTC+8 boundaries (OKX 12H/1D convention).
+    /// A bucket is confirmed only when its final source bar is confirmed.
+    static func aggregate(_ bars: [Candle], seconds: Double, source: Double, offset: Double = 28800) -> [Candle] {
+        var out: [Candle] = []
+        for bar in bars {
+            let start = floor((bar.time + offset) / seconds) * seconds - offset
+            let closes = bar.time + source >= start + seconds
+            if let last = out.last, last.time == start {
+                out[out.count - 1] = Candle(time: start, open: last.open, high: max(last.high, bar.high), low: min(last.low, bar.low), close: bar.close,
+                                            volume: last.volume + bar.volume, confirmed: closes && bar.confirmed)
+            } else {
+                out.append(Candle(time: start, open: bar.open, high: bar.high, low: bar.low, close: bar.close, volume: bar.volume, confirmed: closes && bar.confirmed))
+            }
+        }
+        return out
+    }
+}
+
 enum CandlePeriod: String, CaseIterable, Identifiable {
-    case m1 = "1m", m5 = "5m", m15 = "15m", h1 = "1H", h4 = "4H", d1 = "1D"
+    case m1 = "1m", m5 = "5m", m15 = "15m", h1 = "1H", h4 = "4H", h12 = "12H", d1 = "1D"
     var id: String { rawValue }
-    var label: String { switch self { case .m1: "1分"; case .m5: "5分"; case .m15: "15分"; case .h1: "1时"; case .h4: "4时"; case .d1: "日" } }
-    var seconds: Double { switch self { case .m1: 60; case .m5: 300; case .m15: 900; case .h1: 3600; case .h4: 14400; case .d1: 86400 } }
+    var label: String { switch self { case .m1: "1分"; case .m5: "5分"; case .m15: "15分"; case .h1: "1时"; case .h4: "4时"; case .h12: "12时"; case .d1: "日" } }
+    var seconds: Double { switch self { case .m1: 60; case .m5: 300; case .m15: 900; case .h1: 3600; case .h4: 14400; case .h12: 43200; case .d1: 86400 } }
+    /// The relay and the service only serve OKX's own bars; 12H is built from 4H (UTC+8 aligned, like OKX 12H).
+    var source: CandlePeriod { self == .h12 ? .h4 : self }
 }

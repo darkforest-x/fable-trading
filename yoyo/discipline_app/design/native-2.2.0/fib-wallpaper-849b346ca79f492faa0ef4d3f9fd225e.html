@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SPIKE 纪律 · 1.618 (iOS 26 Liquid Glass)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --accent: #0A84FF;
+    --accent-glow: rgba(10, 132, 255, 0.35);
+    --up-green: #169873;
+    --down-red: #D7355D;
+    --mon-highlow: #528CC1;
+    --upper-fib: #C93248;
+    --lower-fib: #087F69;
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: #0B0E14;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", "Helvetica Neue", sans-serif;
+    color: #111827;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 402x874 iPhone 17 Pro Frame Container */
+  .device-frame {
+    width: 402px;
+    height: 874px;
+    position: relative;
+    border-radius: 54px;
+    background: #FFFFFF;
+    overflow: hidden;
+    box-shadow: 
+      0 0 0 1px rgba(255, 255, 255, 0.18),
+      0 28px 80px -16px rgba(0, 0, 0, 0.65),
+      0 0 0 12px #1E232F;
+  }
+
+  .tabular {
+    font-family: 'JetBrains Mono', -apple-system, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Ultra-Clear Apple Liquid Glass (Bright specular rim, high transparency, NO grey haze) */
+  .liquid-glass {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 
+      0 12px 32px -4px rgba(15, 23, 42, 0.08),
+      0 4px 12px -2px rgba(15, 23, 42, 0.04),
+      inset 0 1px 1.5px rgba(255, 255, 255, 0.95),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.03);
+  }
+
+  .liquid-glass-lens {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 
+      0 4px 14px -1px rgba(10, 132, 255, 0.22),
+      inset 0 1px 1px #FFFFFF,
+      0 1px 2px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.95);
+  }
+
+  .liquid-glass-primary {
+    background: linear-gradient(135deg, rgba(10, 132, 255, 0.92) 0%, rgba(0, 113, 227, 0.96) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 
+      0 8px 24px -2px rgba(10, 132, 255, 0.38),
+      inset 0 1px 1.5px rgba(255, 255, 255, 0.7);
+  }
+
+  .chip-active {
+    background: rgba(10, 132, 255, 0.12);
+    color: #0A84FF;
+    border: 1px solid rgba(10, 132, 255, 0.28);
+    font-weight: 600;
+  }
+
+  .toggle-active {
+    background: rgba(10, 132, 255, 0.10);
+    color: #0A84FF;
+    border-color: rgba(10, 132, 255, 0.3);
+  }
+
+  /* Dynamic Island */
+  .dynamic-island {
+    position: absolute;
+    top: 11px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 125px;
+    height: 36px;
+    background: #000000;
+    border-radius: 20px;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+  }
+
+  /* Micro Candlestick SVG Rendering */
+  .candle-up {
+    fill: var(--up-green);
+    stroke: var(--up-green);
+  }
+  .candle-down {
+    fill: var(--down-red);
+    stroke: var(--down-red);
+  }
+
+  /* Pulsing live dot */
+  @keyframes livePulse {
+    0% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.6); opacity: 0.3; }
+    100% { transform: scale(1); opacity: 0.9; }
+  }
+  .live-glow::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 999px;
+    background: #169873;
+    animation: livePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    z-index: -1;
+  }
+</style>
+</head>
+<body>
+
+<!-- Device Frame: iPhone 17 Pro 402x874pt -->
+<div class="device-frame">
+
+  <!-- Dynamic Island -->
+  <div class="dynamic-island">
+    <div class="w-3 h-3 rounded-full bg-[#111] border border-[#222]"></div>
+    <div class="w-2.5 h-2.5 rounded-full bg-[#081a2e] border border-[#0d2a4a]"></div>
+  </div>
+
+  <!-- iOS Status Bar (Clock & Icons) -->
+  <div class="absolute top-0 left-0 w-full h-12 flex justify-between items-center px-8 pt-3 text-[14px] font-semibold text-black tracking-tight z-40 pointer-events-none">
+    <span class="tabular">9:41</span>
+    <div class="flex items-center gap-1.5 opacity-90">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.23 19.58 10.58 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 2c3.87 0 7 3.13 7 7 0 1.62-.55 3.11-1.48 4.31l-9.83-9.83C8.89 5.55 10.38 5 12 5zm-5.52 3.27l9.83 9.83C15.11 18.45 13.62 19 12 19c-3.87 0-7-3.13-7-7 0-1.62.55-3.11 1.48-4.31z"/>
+      </svg>
+      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"/>
+      </svg>
+      <div class="w-5 h-2.5 border border-black rounded-[3px] p-[1px] flex items-center">
+        <div class="h-full w-full bg-black rounded-[1.5px]"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- FULL SCREEN WALLPAPER CANDLESTICK CHART (ABSOLUTE INSET 0) -->
+  <!-- ========================================================= -->
+  <div class="absolute inset-0 bg-[#FFFFFF] overflow-hidden z-0">
+
+    <!-- Faint Centered Watermark: SUIUSDT -->
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+      <span class="text-[52px] font-black tracking-widest text-[#000000] opacity-[0.038] select-none" style="letter-spacing: 0.22em; transform: translateY(-30px);">
+        SUIUSDT
+      </span>
+    </div>
+
+    <!-- SVG Layer: EMA Cloud, Moving Averages, Reference Lines & Candlesticks -->
+    <svg class="w-full h-full" viewBox="0 0 402 874" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- EMA Cloud Green Gradient (Fast > Slow) -->
+        <linearGradient id="cloudGreen" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#10B981" stop-opacity="0.32" />
+          <stop offset="100%" stop-color="#10B981" stop-opacity="0.18" />
+        </linearGradient>
+
+        <!-- EMA Cloud Red Gradient (Fast < Slow) -->
+        <linearGradient id="cloudRed" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#F43F5E" stop-opacity="0.28" />
+          <stop offset="100%" stop-color="#F43F5E" stop-opacity="0.16" />
+        </linearGradient>
+
+        <!-- Live Price Horizontal Line Pulse -->
+        <linearGradient id="livePriceGlow" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#0A84FF" stop-opacity="0.15" />
+          <stop offset="70%" stop-color="#0A84FF" stop-opacity="0.5" />
+          <stop offset="100%" stop-color="#0A84FF" stop-opacity="0.9" />
+        </linearGradient>
+      </defs>
+
+      <!-- 1. TRANSLUCENT EMA20/EMA50 CLOUD BAND -->
+      <!-- Prior bearish contraction segment (x: 0 -> 130) -->
+      <path d="M 0,240 Q 65,260 130,340 L 130,358 Q 65,274 0,252 Z" fill="url(#cloudRed)" />
+      <!-- Bullish expansion crossover & swing segment (x: 130 -> 402) -->
+      <path d="M 130,340 C 180,390 230,470 290,440 C 330,420 370,390 402,365 L 402,400 C 370,428 330,458 290,480 C 230,508 180,420 130,358 Z" fill="url(#cloudGreen)" />
+
+      <!-- 2. SIX THIN SOLID MOVING AVERAGE LINES (Standard Quant Ribbon) -->
+      <!-- SMA 20 (Light Teal) -->
+      <path d="M 0,234 Q 70,252 140,332 T 270,458 T 402,368" fill="none" stroke="#2DD4BF" stroke-width="1.3" opacity="0.85" />
+      <!-- EMA 20 (Vibrant Green) -->
+      <path d="M 0,240 Q 65,260 130,340 T 290,440 T 402,365" fill="none" stroke="#10B981" stroke-width="1.4" opacity="0.95" />
+      <!-- SMA 60 (Slate Blue) -->
+      <path d="M 0,248 Q 68,266 135,348 T 280,466 T 402,382" fill="none" stroke="#60A5FA" stroke-width="1.2" opacity="0.75" />
+      <!-- EMA 50 (Cobalt Core) -->
+      <path d="M 0,252 Q 65,274 130,358 T 290,480 T 402,400" fill="none" stroke="#3B82F6" stroke-width="1.3" opacity="0.85" />
+      <!-- SMA 120 (Warm Amber) -->
+      <path d="M 0,265 Q 80,285 160,370 T 310,490 T 402,425" fill="none" stroke="#F59E0B" stroke-width="1.2" opacity="0.7" />
+      <!-- EMA 120 (Muted Violet) -->
+      <path d="M 0,272 Q 85,295 170,380 T 320,500 T 402,438" fill="none" stroke="#A78BFA" stroke-width="1.2" opacity="0.65" />
+
+      <!-- 3. NY MONDAY RANGE LEVELS (Plain Lines with specified colors & stroke widths) -->
+      <!-- (a) 上 1.618 (0.5420) Crimson #C93248 2px -->
+      <line x1="0" y1="210" x2="402" y2="210" stroke="#C93248" stroke-width="2" />
+
+      <!-- (b) 周一高 (0.5210) Steel Blue #528CC1 1.5px -->
+      <line x1="0" y1="298" x2="402" y2="298" stroke="#528CC1" stroke-width="1.5" />
+
+      <!-- (c) 周一低 (0.4870) Steel Blue #528CC1 1.5px -->
+      <line x1="0" y1="520" x2="402" y2="520" stroke="#528CC1" stroke-width="1.5" />
+
+      <!-- (d) 下 1.618 (0.4660) Teal #087F69 2px -->
+      <line x1="0" y1="620" x2="402" y2="620" stroke="#087F69" stroke-width="2" />
+
+      <!-- (e) Current Live Price Dashed Line: 0.5132 (y = 352) -->
+      <line x1="0" y1="352" x2="340" y2="352" stroke="#0A84FF" stroke-width="1.2" stroke-dasharray="4,4" opacity="0.75" />
+
+      <!-- 4. CANDLESTICKS (Up #169873, Down #D7355D) -->
+      <!-- Monday Base & Initial Plunge -->
+      <!-- C1 Down -->
+      <line x1="16" y1="280" x2="16" y2="330" stroke="#D7355D" stroke-width="1.2" />
+      <rect x="12" y="290" width="8" height="32" rx="1.5" fill="#D7355D" />
+
+      <!-- C2 Down -->
+      <line x1="32" y1="318" x2="32" y2="375" stroke="#D7355D" stroke-width="1.2" />
+      <rect x="28" y="322" width="8" height="42" rx="1.5" fill="#D7355D" />
+
+      <!-- C3 Up -->
+      <line x1="48" y1="350" x2="48" y2="388" stroke="#169873" stroke-width="1.2" />
+      <rect x="44" y="354" width="8" height="24" rx="1.5" fill="#169873" />
+
+      <!-- C4 Down -->
+      <line x1="64" y1="370" x2="64" y2="435" stroke="#D7355D" stroke-width="1.2" />
+      <rect x="60" y="378" width="8" height="48" rx="1.5" fill="#D7355D" />
+
+      <!-- C5 Down Piercing Monday Low -->
+      <line x1="80" y1="418" x2="80" y2="505" stroke="#D7355D" stroke-width="1.2" />
+      <rect x="76" y="424" width="8" height="72" rx="1.5" fill="#D7355D" />
+
+      <!-- C6 Down Sharp Spike touching Lower 1.618 (Wick to 630!) -->
+      <line x1="96" y1="485" x2="96" y2="628" stroke="#D7355D" stroke-width="1.2" />
+      <rect x="92" y="496" width="8" height="68" rx="1.5" fill="#D7355D" />
+
+      <!-- C7 Hammer Rebound (Up Green) -->
+      <line x1="112" y1="530" x2="112" y2="618" stroke="#169873" stroke-width="1.2" />
+      <rect x="108" y="540" width="8" height="34" rx="1.5" fill="#169873" />
+
+      <!-- C8 Up Green Reclaim -->
+      <line x1="128" y1="495" x2="128" y2="558" stroke="#169873" stroke-width="1.2" />
+      <rect x="124" y="502" width="8" height="46" rx="1.5" fill="#169873" />
+
+      <!-- C9 Up Green (Breaks back into Monday Range) -->
+      <line x1="144" y1="460" x2="144" y2="520" stroke="#169873" stroke-width="1.2" />
+      <rect x="140" y="468" width="8" height="42" rx="1.5" fill="#169873" />
+
+      <!-- C10 Small Consolidation Red -->
+      <line x1="160" y1="458" x2="160" y2="495" stroke="#D7355D" stroke-width="1.2" />
+      <rect x="156" y="465" width="8" height="22" rx="1.5" fill="#D7355D" />
+
+      <!-- C11 Steady Up Green -->
+      <line x1="176" y1="440" x2="176" y2="482" stroke="#169873" stroke-width="1.2" />
+      <rect x="172" y="445" width="8" height="30" rx="1.5" fill="#169873" />
+
+      <!-- C12 Strong Momentum Up Green -->
+      <line x1="192" y1="395" x2="192" y2="455" stroke="#169873" stroke-width="1.2" />
+      <rect x="188" y="405" width="8" height="44" rx="1.5" fill="#169873" />
+
+      <!-- C13 Minor Pullback Red -->
+      <line x1="208" y1="400" x2="208" y2="442" stroke="#D7355D" stroke-width="1.2" />
+      <rect x="204" y="406" width="8" height="26" rx="1.5" fill="#D7355D" />
+
+      <!-- C14 Up Green -->
+      <line x1="224" y1="375" x2="224" y2="425" stroke="#169873" stroke-width="1.2" />
+      <rect x="220" y="382" width="8" height="38" rx="1.5" fill="#169873" />
+
+      <!-- C15 Breakout Bar Up Green -->
+      <line x1="240" y1="340" x2="240" y2="395" stroke="#169873" stroke-width="1.2" />
+      <rect x="236" y="348" width="8" height="42" rx="1.5" fill="#169873" />
+
+      <!-- C16 Small Resting Doji Red -->
+      <line x1="256" y1="332" x2="256" y2="370" stroke="#D7355D" stroke-width="1.2" />
+      <rect x="252" y="342" width="8" height="15" rx="1.5" fill="#D7355D" />
+
+      <!-- C17 Massive Green Candle attacking Mon High -->
+      <line x1="272" y1="285" x2="272" y2="350" stroke="#169873" stroke-width="1.2" />
+      <rect x="268" y="294" width="8" height="50" rx="1.5" fill="#169873" />
+
+      <!-- C18 Upper Spike Bar touches Upper 1.618! (wick to 206) -->
+      <line x1="288" y1="206" x2="288" y2="305" stroke="#D7355D" stroke-width="1.2" />
+      <rect x="284" y="235" width="8" height="55" rx="1.5" fill="#D7355D" />
+
+      <!-- C19 Upper Reversal Bar Down Red -->
+      <line x1="304" y1="240" x2="304" y2="328" stroke="#D7355D" stroke-width="1.2" />
+      <rect x="300" y="255" width="8" height="58" rx="1.5" fill="#D7355D" />
+
+      <!-- C20 Up Retest Green -->
+      <line x1="320" y1="285" x2="320" y2="340" stroke="#169873" stroke-width="1.2" />
+      <rect x="316" y="292" width="8" height="34" rx="1.5" fill="#169873" />
+
+      <!-- C21 Live Active Candle (Pulse Dot on close 0.5132 -> y=352) -->
+      <line x1="336" y1="318" x2="336" y2="370" stroke="#169873" stroke-width="1.2" />
+      <rect x="332" y="324" width="8" height="28" rx="1.5" fill="#169873" />
+
+      <!-- Live Candle Close Dot -->
+      <circle cx="336" cy="352" r="3.5" fill="#0A84FF" />
+      <circle cx="336" cy="352" r="7" fill="none" stroke="#0A84FF" stroke-width="1.5" opacity="0.4" />
+    </svg>
+
+    <!-- RIGHT-EDGE NY MONDAY LEVEL LABELS -->
+    <!-- 上 1.618 (0.5420) Crimson #C93248 -->
+    <div class="absolute right-2 text-right pointer-events-none" style="top: 198px;">
+      <span class="inline-block text-[11px] font-bold text-[#C93248] tracking-tight bg-white/80 px-1 py-0.5 rounded backdrop-blur-[2px] shadow-sm">
+        上 1.618 <span class="tabular font-medium text-[10.5px]">(0.5420)</span>
+      </span>
+    </div>
+
+    <!-- 周一高 (0.5210) Steel Blue #528CC1 -->
+    <div class="absolute right-2 text-right pointer-events-none" style="top: 286px;">
+      <span class="inline-block text-[11px] font-semibold text-[#528CC1] tracking-tight bg-white/80 px-1 py-0.5 rounded backdrop-blur-[2px] shadow-sm">
+        周一高 <span class="tabular font-medium text-[10.5px]">(0.5210)</span>
+      </span>
+    </div>
+
+    <!-- Live Current Price Right Label (0.5132) -->
+    <div class="absolute right-1 text-right pointer-events-none" style="top: 341px;">
+      <div class="inline-flex items-center gap-1 bg-[#0A84FF] text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full shadow-md">
+        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+        <span class="tabular tracking-tight">0.5132</span>
+      </div>
+    </div>
+
+    <!-- 周一低 (0.4870) Steel Blue #528CC1 -->
+    <div class="absolute right-2 text-right pointer-events-none" style="top: 508px;">
+      <span class="inline-block text-[11px] font-semibold text-[#528CC1] tracking-tight bg-white/80 px-1 py-0.5 rounded backdrop-blur-[2px] shadow-sm">
+        周一低 <span class="tabular font-medium text-[10.5px]">(0.4870)</span>
+      </span>
+    </div>
+
+    <!-- 下 1.618 (0.4660) Teal #087F69 -->
+    <div class="absolute right-2 text-right pointer-events-none" style="top: 608px;">
+      <span class="inline-block text-[11px] font-bold text-[#087F69] tracking-tight bg-white/80 px-1 py-0.5 rounded backdrop-blur-[2px] shadow-sm">
+        下 1.618 <span class="tabular font-medium text-[10.5px]">(0.4660)</span>
+      </span>
+    </div>
+
+    <!-- Right Edge Price Axis Micro Scales -->
+    <div class="absolute right-1.5 top-[150px] bottom-[260px] flex flex-col justify-between items-end text-[9px] tabular font-medium text-gray-400 pointer-events-none select-none">
+      <span>0.5600</span>
+      <span>0.5400</span>
+      <span>0.5200</span>
+      <span>0.5000</span>
+      <span>0.4800</span>
+      <span>0.4600</span>
+      <span>0.4400</span>
+    </div>
+
+    <!-- Bottom Edge Time Axis Labels -->
+    <div class="absolute left-6 right-8 bottom-[208px] flex justify-between items-center text-[9px] tabular font-medium text-gray-400 pointer-events-none select-none">
+      <span>周一 00:00</span>
+      <span>11-04 12:00</span>
+      <span>11-05 08:00</span>
+      <span>11-06 14:00</span>
+      <span class="text-[#0A84FF] font-semibold">实时</span>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- FLOATING LIQUID GLASS CONTROLS OVER CHART -->
+  <!-- ========================================================= -->
+
+  <!-- Top-Left Glass Capsule: Coin Logo + SUI Bold + Chevron + Live Price (NO title, NO list, NO settings) -->
+  <div class="absolute top-[52px] left-4 z-30">
+    <div class="liquid-glass rounded-full px-2.5 py-1.5 flex items-center gap-2 cursor-pointer active:scale-95 transition-all">
+      <!-- Coin Logo -->
+      <div class="w-6 h-6 rounded-full bg-[#0A84FF] flex items-center justify-center text-white shadow-sm overflow-hidden">
+        <!-- Minimal SUI droplet monogram -->
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+        </svg>
+      </div>
+
+      <!-- SUI Bold + Chevron -->
+      <div class="flex items-center gap-1">
+        <span class="text-[15px] font-bold text-gray-900 tracking-tight">SUI</span>
+        <svg class="w-3.5 h-3.5 text-gray-500 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+
+      <!-- Divider -->
+      <div class="w-[1px] h-3.5 bg-gray-300/80"></div>
+
+      <!-- Live Price -->
+      <span class="text-[14px] font-bold tabular text-gray-900 tracking-tight">
+        0.5132
+      </span>
+      <span class="w-2 h-2 rounded-full bg-[#169873] relative live-glow mr-0.5"></span>
+    </div>
+  </div>
+
+  <!-- Top-Right: Small Glass Period Capsule '15m' -->
+  <div class="absolute top-[52px] right-4 z-30">
+    <div class="liquid-glass rounded-full px-3 py-1.5 flex items-center gap-1 cursor-pointer active:scale-95 transition-all">
+      <span class="text-[13px] font-bold tabular text-gray-900">15m</span>
+      <svg class="w-3 h-3 text-gray-500 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- FLOATING GLASS DOCK (JUST ABOVE BOTTOM TAB BAR) -->
+  <!-- ========================================================= -->
+  <div class="absolute bottom-[94px] left-4 right-4 z-30 flex flex-col gap-2.5">
+
+    <!-- Row A: Primary Quick Order Button + Paper Trading Button -->
+    <div class="flex items-center gap-2">
+      <!-- Wide Primary Button: 快捷开单 · 1R -->
+      <button class="flex-1 h-[46px] liquid-glass-primary text-white rounded-[22px] flex items-center justify-center gap-2 px-4 shadow-lg active:scale-[0.98] transition-all cursor-pointer">
+        <svg class="w-4 h-4 fill-white" viewBox="0 0 24 24">
+          <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+        </svg>
+        <span class="text-[15px] font-bold tracking-tight">快捷开单 · 1R</span>
+      </button>
+
+      <!-- Small Glass Button: 模拟盘 -->
+      <button class="h-[46px] liquid-glass rounded-[22px] px-3.5 flex items-center justify-center gap-1.5 text-gray-800 active:scale-95 transition-all cursor-pointer">
+        <span class="w-2 h-2 rounded-full bg-[#0A84FF]"></span>
+        <span class="text-[13px] font-semibold tracking-tight text-gray-900">模拟盘</span>
+      </button>
+    </div>
+
+    <!-- Row B: Compact Floating Glass Dock (Period Chips + Toggles + Follow-Latest) -->
+    <div class="liquid-glass rounded-[22px] p-1.5 flex items-center justify-between shadow-md">
+      <!-- Period Chips: 5m, 15m (Active), 1H, 4H, 12H -->
+      <div class="flex items-center gap-0.5">
+        <button class="px-2 py-1 rounded-[14px] text-[11.5px] tabular font-medium text-gray-600 hover:text-gray-900">5m</button>
+        <button class="px-2.5 py-1 rounded-[14px] text-[11.5px] tabular font-bold chip-active shadow-sm">15m</button>
+        <button class="px-2 py-1 rounded-[14px] text-[11.5px] tabular font-medium text-gray-600 hover:text-gray-900">1H</button>
+        <button class="px-2 py-1 rounded-[14px] text-[11.5px] tabular font-medium text-gray-600 hover:text-gray-900">4H</button>
+        <button class="px-2 py-1 rounded-[14px] text-[11.5px] tabular font-medium text-gray-600 hover:text-gray-900">12H</button>
+      </div>
+
+      <!-- Vertical Thin Divider -->
+      <div class="w-[1px] h-4 bg-gray-300/80 mx-0.5"></div>
+
+      <!-- Toggles: 内部线 / 六均线 / 云带 -->
+      <div class="flex items-center gap-1 text-[11px] font-medium text-gray-600">
+        <button class="px-1.5 py-0.5 rounded-lg border border-transparent hover:border-gray-200">内部线</button>
+        <button class="px-1.5 py-0.5 rounded-lg border border-gray-200/80 toggle-active font-semibold">六均线</button>
+        <button class="px-1.5 py-0.5 rounded-lg border border-gray-200/80 toggle-active font-semibold">云带</button>
+      </div>
+
+      <!-- Vertical Thin Divider -->
+      <div class="w-[1px] h-4 bg-gray-300/80 mx-0.5"></div>
+
+      <!-- Follow-Latest Icon Button -->
+      <button class="w-7 h-7 rounded-full flex items-center justify-center text-[#0A84FF] bg-blue-50/70 border border-blue-200/60 active:rotate-45 transition-transform" title="跟随最新">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <polyline points="1 20 1 14 7 14"></polyline>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- FLOATING LIQUID GLASS CAPSULE TAB BAR (FIVE ICON-ONLY TABS) -->
+  <!-- NO TEXT LABELS AT ALL | Custom 24pt line icons with 2pt rounded strokes -->
+  <!-- (1) 合约  (2) 监控  (3) 1.618 [ACTIVE]  (4) 持仓  (5) 统计 -->
+  <!-- ========================================================= -->
+  <div class="absolute bottom-5 left-5 right-5 z-40">
+    <div class="liquid-glass rounded-full h-[58px] px-2.5 flex items-center justify-between shadow-2xl">
+
+      <!-- Tab 1: 合约 (Single candlestick with wick and an order arrow) -->
+      <button class="w-12 h-11 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 active:scale-90 transition-all cursor-pointer" aria-label="合约">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Central Candlestick Wick & Body -->
+          <line x1="8" y1="3" x2="8" y2="7" />
+          <rect x="5.5" y="7" width="5" height="9" rx="1.5" />
+          <line x1="8" y1="16" x2="8" y2="21" />
+          <!-- Order diagonal arrow -->
+          <line x1="14" y1="14" x2="20" y2="8" />
+          <polyline points="16 8 20 8 20 12" />
+        </svg>
+      </button>
+
+      <!-- Tab 2: 监控 (Radar sweep / pulse rings) -->
+      <button class="w-12 h-11 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 active:scale-90 transition-all cursor-pointer" aria-label="监控">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Pulse Concentric Rings -->
+          <circle cx="12" cy="12" r="9" />
+          <circle cx="12" cy="12" r="5" />
+          <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+          <!-- Radar sweep line -->
+          <line x1="12" y1="12" x2="18.5" y2="5.5" />
+        </svg>
+      </button>
+
+      <!-- Tab 3: 1.618 [ACTIVE TAB] (Three horizontal levels with a golden spiral arc inside lighter glass lens) -->
+      <button class="w-[52px] h-11 liquid-glass-lens rounded-full flex items-center justify-center text-[#0A84FF] active:scale-95 transition-all cursor-pointer shadow-sm" aria-label="1.618">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Three Horizontal Price Levels -->
+          <line x1="3" y1="5.5" x2="21" y2="5.5" />
+          <line x1="5" y1="12" x2="21" y2="12" stroke-dasharray="2 2" />
+          <line x1="3" y1="18.5" x2="21" y2="18.5" />
+          <!-- Golden spiral / Fibonacci expansion harmonic arc -->
+          <path d="M 4,18.5 C 10,18.5 13,15 13,12 C 13,9 10.5,7.5 8.5,7.5 C 7,7.5 5.8,8.5 5.8,9.8" />
+        </svg>
+      </button>
+
+      <!-- Tab 4: 持仓 (Shield with a check) -->
+      <button class="w-12 h-11 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 active:scale-90 transition-all cursor-pointer" aria-label="持仓">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Protective Discipline Shield -->
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <!-- Inner discipline checkmark -->
+          <polyline points="9 12 11 14 15 9.5" />
+        </svg>
+      </button>
+
+      <!-- Tab 5: 统计 (Rising bar chart with a trend line) -->
+      <button class="w-12 h-11 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 active:scale-90 transition-all cursor-pointer" aria-label="统计">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Rising bar chart bars -->
+          <rect x="4" y="14" width="3.5" height="7" rx="1" />
+          <rect x="10.25" y="10" width="3.5" height="11" rx="1" />
+          <rect x="16.5" y="6" width="3.5" height="15" rx="1" />
+          <!-- Ascending discipline trend line with terminal dot -->
+          <path d="M 4,11 L 11,8 L 19,3" />
+          <circle cx="19" cy="3" r="1.2" fill="currentColor" />
+        </svg>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- iOS Home Bar Indicator (Bottom Safe-Area) -->
+  <div class="absolute bottom-1.5 left-1/2 transform -translate-x-1/2 w-[134px] h-[5px] bg-black/85 rounded-full z-50 pointer-events-none"></div>
+
+</div>
+
+</body>
+</html>

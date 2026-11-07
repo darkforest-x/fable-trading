@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>SPIKE 纪律 · 监控 · 报警 (iOS 26 iPhone 17 Pro)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        accent: '#0A84FF',
+        up: '#169873',
+        down: '#D7355D',
+      },
+      fontFamily: {
+        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"PingFang SC"', 'sans-serif'],
+        mono: ['"SF Mono"', '"JetBrains Mono"', 'ui-monospace', 'monospace'],
+      }
+    }
+  }
+};
+</script>
+<style>
+/* CSS Variables & Liquid Glass Tokens */
+:root {
+  --accent: #0A84FF;
+  --accent-soft: rgba(10, 132, 255, 0.12);
+  --up: #169873;
+  --down: #D7355D;
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-specular: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(255, 255, 255, 0.85);
+  --glass-shadow: 0 12px 36px -4px rgba(15, 30, 60, 0.08), 0 2px 8px -1px rgba(15, 30, 60, 0.04);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #0b0f17;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", sans-serif;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Device Shell: iPhone 17 Pro 402x874pt */
+.iphone-frame {
+  width: 402px;
+  height: 874px;
+  border-radius: 54px;
+  background: #FFFFFF;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 0 0 12px #1E232F,
+    0 0 0 14px #2D3342,
+    0 32px 80px -10px rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Dynamic Ambient Liquid Mesh Background (No grey haze, clear soft highlights) */
+.ambient-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: 
+    radial-gradient(circle at 18% 12%, rgba(207, 224, 255, 0.85) 0%, rgba(207, 224, 255, 0) 50%),
+    radial-gradient(circle at 82% 20%, rgba(226, 220, 255, 0.75) 0%, rgba(226, 220, 255, 0) 48%),
+    radial-gradient(circle at 24% 58%, rgba(211, 242, 230, 0.65) 0%, rgba(211, 242, 230, 0) 50%),
+    radial-gradient(circle at 75% 72%, rgba(255, 235, 240, 0.60) 0%, rgba(255, 235, 240, 0) 46%),
+    #F6F8FC;
+  z-index: 0;
+}
+
+/* Apple Liquid Glass Card Utilities */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 
+    0 10px 30px -4px rgba(22, 38, 70, 0.06),
+    0 2px 6px -1px rgba(22, 38, 70, 0.03),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 1);
+}
+
+.liquid-glass-red {
+  background: rgba(255, 242, 245, 0.78);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 215, 225, 0.85);
+  box-shadow: 
+    0 12px 32px -4px rgba(215, 53, 93, 0.10),
+    0 2px 6px -1px rgba(215, 53, 93, 0.05),
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95);
+}
+
+.recessed-segment {
+  background: rgba(230, 235, 245, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 1.5px 3px rgba(0, 10, 30, 0.05);
+}
+
+.white-lens {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 
+    0 3px 10px rgba(10, 25, 50, 0.09),
+    0 1px 2px rgba(10, 25, 50, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 1);
+}
+
+/* Custom Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Dynamic Island */
+.dynamic-island {
+  position: absolute;
+  top: 11px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 124px;
+  height: 36px;
+  background: #000000;
+  border-radius: 20px;
+  z-index: 50;
+}
+
+/* Coin chip interactive press */
+.coin-chip {
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.15s ease;
+}
+.coin-chip:active {
+  transform: scale(0.94);
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+/* Tab icon active lens animation */
+.tab-lens-active {
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 
+    0 4px 14px rgba(10, 132, 255, 0.18),
+    0 1px 3px rgba(10, 25, 50, 0.08),
+    inset 0 1px 1.5px rgba(255, 255, 255, 1);
+}
+</style>
+</head>
+<body>
+
+<!-- Device Frame 402x874pt -->
+<div class="iphone-frame">
+  <!-- Ambient Flowing Mesh Canvas -->
+  <div class="ambient-canvas"></div>
+
+  <!-- Dynamic Island -->
+  <div class="dynamic-island flex items-center justify-between px-3">
+    <div class="w-3 h-3 rounded-full bg-[#121212] ml-0.5"></div>
+    <div class="w-2.5 h-2.5 rounded-full bg-[#08182b] border border-blue-900/40 mr-0.5"></div>
+  </div>
+
+  <!-- Status Bar (iOS standard) -->
+  <div class="relative z-40 w-full h-[54px] pt-3 px-7 flex items-center justify-between select-none">
+    <span class="text-[15px] font-semibold tracking-tight text-neutral-900 font-mono">9:41</span>
+    <div class="flex items-center space-x-2 text-neutral-900">
+      <!-- Cellular -->
+      <svg class="w-4 h-3.5 fill-current" viewBox="0 0 18 12">
+        <rect x="0" y="8" width="3" height="4" rx="0.8"/>
+        <rect x="5" y="5" width="3" height="7" rx="0.8"/>
+        <rect x="10" y="2.5" width="3" height="9.5" rx="0.8"/>
+        <rect x="15" y="0" width="3" height="12" rx="0.8"/>
+      </svg>
+      <!-- WiFi -->
+      <svg class="w-4 h-3.5 fill-current" viewBox="0 0 16 12">
+        <path d="M8 2.5C4.9 2.5 2.1 3.8 0.2 5.9L8 14.5L15.8 5.9C13.9 3.8 11.1 2.5 8 2.5Z"/>
+      </svg>
+      <!-- Battery -->
+      <div class="flex items-center">
+        <div class="w-6 h-3 border border-neutral-900 rounded-[4px] p-0.5 flex items-center">
+          <div class="h-full w-full bg-neutral-900 rounded-[2px]"></div>
+        </div>
+        <div class="w-0.5 h-1.5 bg-neutral-900 rounded-r-sm ml-0.5"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Scrollable Screen Content -->
+  <div class="relative z-10 flex-1 overflow-y-auto no-scrollbar px-4 pt-1 pb-28">
+
+    <!-- Screen Header: Large Title ONLY (No settings button, No subtitle or hint) -->
+    <header class="pt-2 pb-3 flex items-center justify-between">
+      <h1 class="text-[34px] leading-tight font-extrabold tracking-tight text-neutral-950 font-sans">监控</h1>
+    </header>
+
+    <!-- Glass Segmented Control [模拟盘 | 报警 | 云带] with 报警 selected -->
+    <div class="recessed-segment rounded-[16px] p-1 flex items-center mb-3">
+      <button type="button" class="flex-1 py-1.5 text-center text-[13px] font-medium text-neutral-600 transition-colors">
+        模拟盘
+      </button>
+      <button type="button" class="flex-1 py-1.5 text-center text-[13px] font-semibold text-accent white-lens rounded-[12px] transition-all flex items-center justify-center gap-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
+        报警
+      </button>
+      <button type="button" class="flex-1 py-1.5 text-center text-[13px] font-medium text-neutral-600 transition-colors">
+        云带
+      </button>
+    </div>
+
+    <!-- Layout Container: Tight, dense layout (12pt padding, 8pt gap) -->
+    <div class="flex flex-col gap-2">
+
+      <!-- Compact Hero Alarm Card with Soft Red Tint -->
+      <section class="liquid-glass-red rounded-[22px] p-3 transition-transform">
+        <!-- Top Status Row -->
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <!-- Pulsing siren badge -->
+            <div class="w-6 h-6 rounded-full bg-down/15 flex items-center justify-center text-down">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[17px] font-bold text-neutral-900 tracking-tight">下沿 1.618 · 27 币</span>
+            </div>
+          </div>
+          <span class="font-mono text-[12px] font-medium text-down bg-white/70 px-2 py-0.5 rounded-full border border-down/20 shadow-xs">
+            14:30 – 14:35
+          </span>
+        </div>
+
+        <!-- Metric & Micro Context Bar -->
+        <div class="flex items-center justify-between px-1 py-1 mb-2.5 text-[11px] text-neutral-500 font-mono border-b border-down/15 pb-2">
+          <span class="flex items-center gap-1 text-neutral-700">
+            <span class="w-1.5 h-1.5 rounded-full bg-down"></span>
+            全市场 5m 瞬时突破下沿
+          </span>
+          <span class="text-neutral-500">最大穿透: <strong class="text-down font-semibold">-1.42%</strong></span>
+        </div>
+
+        <!-- Wrap of Tappable Coin Chips with Logos (Each chip opens that coin's chart) -->
+        <div class="flex flex-wrap gap-1.5">
+          <!-- Chip: BTC -->
+          <div class="coin-chip liquid-glass rounded-full pl-1.5 pr-2.5 py-1 flex items-center gap-1.5 cursor-pointer border border-white">
+            <div class="w-5 h-5 rounded-full bg-[#F7931A] text-white flex items-center justify-center font-bold text-[10px] shadow-xs">₿</div>
+            <span class="text-[12px] font-semibold text-neutral-900 font-mono">BTC</span>
+            <span class="text-[11px] font-mono text-down font-medium">-1.2%</span>
+          </div>
+
+          <!-- Chip: ETH -->
+          <div class="coin-chip liquid-glass rounded-full pl-1.5 pr-2.5 py-1 flex items-center gap-1.5 cursor-pointer border border-white">
+            <div class="w-5 h-5 rounded-full bg-[#627EEA] text-white flex items-center justify-center font-bold text-[10px] shadow-xs">Ξ</div>
+            <span class="text-[12px] font-semibold text-neutral-900 font-mono">ETH</span>
+            <span class="text-[11px] font-mono text-down font-medium">-0.9%</span>
+          </div>
+
+          <!-- Chip: SOL -->
+          <div class="coin-chip liquid-glass rounded-full pl-1.5 pr-2.5 py-1 flex items-center gap-1.5 cursor-pointer border border-white">
+            <div class="w-5 h-5 rounded-full bg-neutral-950 text-white flex items-center justify-center font-bold text-[9px] shadow-xs">SOL</div>
+            <span class="text-[12px] font-semibold text-neutral-900 font-mono">SOL</span>
+            <span class="text-[11px] font-mono text-down font-medium">-1.4%</span>
+          </div>
+
+          <!-- Chip: DOGE -->
+          <div class="coin-chip liquid-glass rounded-full pl-1.5 pr-2.5 py-1 flex items-center gap-1.5 cursor-pointer border border-white">
+            <div class="w-5 h-5 rounded-full bg-[#C2A633] text-white flex items-center justify-center font-bold text-[10px] shadow-xs">Ð</div>
+            <span class="text-[12px] font-semibold text-neutral-900 font-mono">DOGE</span>
+            <span class="text-[11px] font-mono text-down font-medium">-1.8%</span>
+          </div>
+
+          <!-- Chip: XRP -->
+          <div class="coin-chip liquid-glass rounded-full pl-1.5 pr-2.5 py-1 flex items-center gap-1.5 cursor-pointer border border-white">
+            <div class="w-5 h-5 rounded-full bg-neutral-900 text-white flex items-center justify-center font-bold text-[9px] shadow-xs">✕</div>
+            <span class="text-[12px] font-semibold text-neutral-900 font-mono">XRP</span>
+            <span class="text-[11px] font-mono text-down font-medium">-0.8%</span>
+          </div>
+
+          <!-- Chip: SUI -->
+          <div class="coin-chip liquid-glass rounded-full pl-1.5 pr-2.5 py-1 flex items-center gap-1.5 cursor-pointer border border-white">
+            <div class="w-5 h-5 rounded-full bg-[#2A82E4] text-white flex items-center justify-center font-bold text-[9px] shadow-xs">S</div>
+            <span class="text-[12px] font-semibold text-neutral-900 font-mono">SUI</span>
+            <span class="text-[11px] font-mono text-down font-medium">-2.1%</span>
+          </div>
+
+          <!-- Chip: PEPE -->
+          <div class="coin-chip liquid-glass rounded-full pl-1.5 pr-2.5 py-1 flex items-center gap-1.5 cursor-pointer border border-white">
+            <div class="w-5 h-5 rounded-full bg-[#4CA352] text-white flex items-center justify-center font-bold text-[9px] shadow-xs">P</div>
+            <span class="text-[12px] font-semibold text-neutral-900 font-mono">PEPE</span>
+            <span class="text-[11px] font-mono text-down font-medium">-2.5%</span>
+          </div>
+
+          <!-- Chip: +20 More -->
+          <div class="coin-chip liquid-glass rounded-full px-2.5 py-1 flex items-center gap-1 cursor-pointer border border-white/80">
+            <span class="text-[11px] font-semibold text-neutral-600 font-mono">+20 标的</span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-neutral-400">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Label: Dense Past Alarms -->
+      <div class="flex items-center justify-between px-1 pt-2 pb-0.5">
+        <h2 class="text-[15px] font-bold text-neutral-800 tracking-tight">历史报警记录</h2>
+        <span class="text-[11px] font-mono text-neutral-400">最近 48 小时</span>
+      </div>
+
+      <!-- Dense List Card of Past Alarms Grouped by Day (Rows 52pt high, direction arrow icon, title, time, chevron; NO grey tags beside icons) -->
+      <div class="liquid-glass rounded-[22px] overflow-hidden divide-y divide-neutral-200/50">
+
+        <!-- Group: 今天 -->
+        <div class="bg-neutral-100/50 px-3 py-1.5 text-[11px] font-bold text-neutral-500 tracking-wider">
+          今天 · 11月07日
+        </div>
+
+        <!-- Row 1: 52pt (h-[52px]) -->
+        <div class="h-[52px] px-3 flex items-center justify-between active:bg-white/80 cursor-pointer transition-colors">
+          <div class="flex items-center gap-3">
+            <!-- Pure direction arrow icon (NO grey tag beside icon) -->
+            <div class="w-8 h-8 rounded-full bg-up/12 text-up flex items-center justify-center shadow-xs">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m18 15-6-6-6 6"/>
+              </svg>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[14px] font-semibold text-neutral-900 tracking-tight">上沿 1.618 · 31 币</span>
+              <span class="text-[11px] font-mono text-neutral-500">瞬时上探突破 · BTC 领涨</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-mono text-[12px] text-neutral-500">09:15</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="text-neutral-400">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Row 2: 52pt (h-[52px]) -->
+        <div class="h-[52px] px-3 flex items-center justify-between active:bg-white/80 cursor-pointer transition-colors">
+          <div class="flex items-center gap-3">
+            <!-- Pure direction arrow icon (NO grey tag beside icon) -->
+            <div class="w-8 h-8 rounded-full bg-up/12 text-up flex items-center justify-center shadow-xs">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m18 15-6-6-6 6"/>
+              </svg>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[14px] font-semibold text-neutral-900 tracking-tight">上沿 1.618 · 28 币</span>
+              <span class="text-[11px] font-mono text-neutral-500">亚洲早盘冲高触达</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-mono text-[12px] text-neutral-500">03:10</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="text-neutral-400">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Group: 昨天 -->
+        <div class="bg-neutral-100/50 px-3 py-1.5 text-[11px] font-bold text-neutral-500 tracking-wider">
+          昨天 · 11月06日
+        </div>
+
+        <!-- Row 3: 52pt (h-[52px]) -->
+        <div class="h-[52px] px-3 flex items-center justify-between active:bg-white/80 cursor-pointer transition-colors">
+          <div class="flex items-center gap-3">
+            <!-- Pure direction arrow icon (NO grey tag beside icon) -->
+            <div class="w-8 h-8 rounded-full bg-down/12 text-down flex items-center justify-center shadow-xs">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[14px] font-semibold text-neutral-900 tracking-tight">下沿 1.618 · 26 币</span>
+              <span class="text-[11px] font-mono text-neutral-500">美盘开盘流动性洗盘</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-mono text-[12px] text-neutral-500">23:50</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="text-neutral-400">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Row 4: 52pt (h-[52px]) -->
+        <div class="h-[52px] px-3 flex items-center justify-between active:bg-white/80 cursor-pointer transition-colors">
+          <div class="flex items-center gap-3">
+            <!-- Pure direction arrow icon (NO grey tag beside icon) -->
+            <div class="w-8 h-8 rounded-full bg-down/12 text-down flex items-center justify-center shadow-xs">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[14px] font-semibold text-neutral-900 tracking-tight">下沿 1.618 · 19 币</span>
+              <span class="text-[11px] font-mono text-neutral-500">欧美交接低位回踩</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-mono text-[12px] text-neutral-500">18:20</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="text-neutral-400">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Row 5: 52pt (h-[52px]) -->
+        <div class="h-[52px] px-3 flex items-center justify-between active:bg-white/80 cursor-pointer transition-colors">
+          <div class="flex items-center gap-3">
+            <!-- Pure direction arrow icon (NO grey tag beside icon) -->
+            <div class="w-8 h-8 rounded-full bg-up/12 text-up flex items-center justify-center shadow-xs">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m18 15-6-6-6 6"/>
+              </svg>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[14px] font-semibold text-neutral-900 tracking-tight">上沿 1.618 · 22 币</span>
+              <span class="text-[11px] font-mono text-neutral-500">山寨脉冲放量破位</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-mono text-[12px] text-neutral-500">10:45</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="text-neutral-400">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Floating Glass Capsule Tab Bar: FIVE ICON-ONLY TABS (NO text labels at all) -->
+  <!-- Custom-drawn 24pt line icons with 2pt rounded strokes -->
+  <!-- Active tab: 监控 (radar sweep / pulse rings) filled in accent blue inside lighter glass lens -->
+  <nav class="absolute bottom-5 inset-x-5 z-40">
+    <div class="liquid-glass rounded-full px-2 py-1.5 flex items-center justify-between shadow-2xl">
+
+      <!-- Tab 1: 合约 = a single candlestick with wick and an order arrow -->
+      <button type="button" class="w-12 h-12 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-700 transition-colors" title="合约">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Candlestick upper & lower wick -->
+          <line x1="9" y1="3" x2="9" y2="7"/>
+          <rect x="6.5" y="7" width="5" height="9" rx="1.2"/>
+          <line x1="9" y1="16" x2="9" y2="21"/>
+          <!-- Order entry arrow on right -->
+          <path d="M15 8l4 4-4 4"/>
+          <line x1="19" y1="12" x2="13" y2="12"/>
+        </svg>
+      </button>
+
+      <!-- Tab 2: 监控 = radar sweep / pulse rings (ACTIVE TAB: icon in accent blue inside lighter glass lens) -->
+      <button type="button" class="w-12 h-12 rounded-full flex items-center justify-center text-accent tab-lens-active transition-transform" title="监控">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Pulse Center -->
+          <circle cx="12" cy="12" r="2.5" fill="currentColor"/>
+          <!-- Inner Pulse Ring -->
+          <circle cx="12" cy="12" r="6"/>
+          <!-- Outer Radar Ring / Sweep Arc -->
+          <path d="M12 2a10 10 0 0 1 10 10"/>
+          <path d="M12 22a10 10 0 0 1-10-10"/>
+          <line x1="12" y1="12" x2="19" y2="5"/>
+        </svg>
+      </button>
+
+      <!-- Tab 3: 1.618 = three horizontal levels with a golden spiral arc -->
+      <button type="button" class="w-12 h-12 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-700 transition-colors" title="1.618">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Three horizontal levels -->
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+          <!-- Golden spiral connecting arc -->
+          <path d="M 4 18 C 11 18, 16 14, 18 6"/>
+        </svg>
+      </button>
+
+      <!-- Tab 4: 持仓 = shield with a check -->
+      <button type="button" class="w-12 h-12 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-700 transition-colors" title="持仓">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Shield contour -->
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <!-- Checkmark inside -->
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+      </button>
+
+      <!-- Tab 5: 统计 = rising bar chart with a trend line -->
+      <button type="button" class="w-12 h-12 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-700 transition-colors" title="统计">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Rising Bars -->
+          <rect x="4" y="14" width="3" height="6" rx="1"/>
+          <rect x="10.5" y="10" width="3" height="10" rx="1"/>
+          <rect x="17" y="6" width="3" height="14" rx="1"/>
+          <!-- Trend line across bars -->
+          <path d="M3 11l6-4 6 2 6-5"/>
+        </svg>
+      </button>
+
+    </div>
+  </nav>
+
+  <!-- iOS Home Bar -->
+  <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-36 h-1 bg-neutral-900/80 rounded-full z-50 pointer-events-none"></div>
+
+</div>
+
+</body>
+</html>

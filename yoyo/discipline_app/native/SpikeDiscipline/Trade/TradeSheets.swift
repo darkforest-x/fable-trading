@@ -54,7 +54,7 @@ struct PreviewSheet: View {
                 }
                 .padding(18)
             }
-            .background(AmbientBackground())
+            .background(Color.canvas)
             .navigationTitle(live ? "确认实盘订单" : "确认模拟订单").navigationBarTitleDisplayMode(.inline)
         }
         .interactiveDismissDisabled(busy)
@@ -123,7 +123,7 @@ struct SymbolPicker: View {
             }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
-            .background(AmbientBackground())
+            .background(Color.canvas)
             .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always), prompt: "搜索币种，例如 BTC、DOGE")
             .textInputAutocapitalization(.characters)
             .navigationTitle("选择合约").navigationBarTitleDisplayMode(.inline)
@@ -159,7 +159,7 @@ struct SymbolPicker: View {
                 HStack(spacing: 12) {
                     CoinLogo(coin: coin, size: 32)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(coin).font(.body.weight(.semibold)) + Text(" / USDT").font(.caption).foregroundStyle(.secondary)
+                        Text(coin).font(.body.weight(.semibold))
                         Text(sort == .volume ? Trading.turnoverLabel(Trading.turnover(quote)) : "永续").font(.caption).foregroundStyle(.secondary)
                     }
                     Spacer()
@@ -203,7 +203,6 @@ struct QuickTicketSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    Text("快捷开单 · " + (ticket.existing(state) != nil ? "沿用持仓方向与止损" : "默认 1R 自动计算")).font(.subheadline).foregroundStyle(.secondary)
                     if let block { GuardStrip(text: block.text) { dismiss(); onBlocked(block.destination) } }
                     TicketForm(onBlocked: onBlocked).padding(16).glassCard()
                     if let entry = account.activeEntry { TradeProgressCard(entry: entry) }
@@ -211,8 +210,8 @@ struct QuickTicketSheet: View {
                 .padding(16)
             }
             .scrollDismissesKeyboard(.interactively)
-            .background(AmbientBackground())
-            .navigationTitle(Fmt.coin(ticket.symbol) + " / USDT").navigationBarTitleDisplayMode(.inline)
+            .background(Color.canvas)
+            .navigationTitle(Fmt.coin(ticket.symbol)).navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button(role: .close) { Haptics.tap(); ticket.manual(); dismiss() } } }
         }
         .interactiveDismissDisabled(ticket.reviewing)

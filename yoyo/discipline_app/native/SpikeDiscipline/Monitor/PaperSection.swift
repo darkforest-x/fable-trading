@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct PaperSection: View {
+    @Environment(\.openChart) private var openChart
     let connection: Connection
     let zoom: Namespace.ID
     let refresh: Int
@@ -10,8 +11,7 @@ struct PaperSection: View {
     var body: some View {
         let live = data?.accounts.filter { $0.group == "live" } ?? []
         let replica = data?.accounts.filter { $0.group != "live" } ?? []
-        VStack(alignment: .leading, spacing: 12) {
-            StatusNote(text: "模拟账户 · 只读 · 不涉及真实资金 · 净值不含浮盈")
+        VStack(alignment: .leading, spacing: 8) {
             LoadState(loading: data == nil && error == nil, error: error, stale: data != nil)
             if !live.isEmpty {
                 SectionHeader(title: "live- 前向模拟", count: live.count)
@@ -41,7 +41,7 @@ struct PaperSection: View {
                                 ChangeCapsule(value: account.returnPct)
                                 Image(systemName: "chevron.right").font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
                             }
-                            .padding(.horizontal, 14).frame(minHeight: 52).contentShape(.rect)
+                            .padding(.horizontal, 12).frame(minHeight: 48).contentShape(.rect)
                         }
                         .buttonStyle(RowPressStyle())
                         .simultaneousGesture(TapGesture().onEnded { Haptics.open() })
@@ -55,10 +55,11 @@ struct PaperSection: View {
             if let data {
                 SectionHeader(title: "今日触价", count: data.signals.count)
                 if data.signals.isEmpty {
-                    Text("今天还没有触价").font(.footnote).foregroundStyle(.secondary).frame(maxWidth: .infinity).padding(18).glassCard()
+                    Text("今天还没有触价").font(.footnote).foregroundStyle(.secondary).frame(maxWidth: .infinity).padding(12).glassCard(cornerRadius: 18)
                 } else {
                     VStack(spacing: 0) {
                         ForEach(Array(data.signals.enumerated()), id: \.element.rowId) { index, signal in
+                            Button { Haptics.open(); openChart(signal.symbol) } label: {
                             HStack(spacing: 11) {
                                 CoinLogo(coin: Fmt.coin(signal.symbol), size: 30)
                                 VStack(alignment: .leading, spacing: 3) {
@@ -71,7 +72,9 @@ struct PaperSection: View {
                                     Text(Fmt.clock(signal.observedMs, now: data.nowMs)).font(.caption2).foregroundStyle(.secondary)
                                 }
                             }
-                            .padding(.horizontal, 14).frame(minHeight: 54)
+                            .padding(.horizontal, 12).frame(minHeight: 50).contentShape(.rect)
+                            }
+                            .buttonStyle(RowPressStyle())
                             if index < data.signals.count - 1 { Divider().padding(.leading, 55) }
                         }
                     }
@@ -113,19 +116,19 @@ struct AccountTile: View {
                     VStack(alignment: .leading, spacing: 6) { name; equity.padding(.top, 4); ChangeCapsule(value: account.returnPct); foot.padding(.top, 2) }
                 }
             }
-            .padding(14).frame(maxWidth: .infinity, alignment: .leading)
+            .padding(12).frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(.rect)
         }
         .buttonStyle(CardPressStyle())
         .simultaneousGesture(TapGesture().onEnded { Haptics.open() })
-        .glassCard(cornerRadius: 22)
+        .glassCard(cornerRadius: 18)
         .matchedTransitionSource(id: account.key, in: zoom)
         .scrollReveal()
     }
     private var name: some View { Text(account.label).font(.system(.caption, design: .monospaced).weight(.semibold)).foregroundStyle(.secondary).lineLimit(1) }
     private var equity: some View {
         HStack(alignment: .firstTextBaseline, spacing: 3) {
-            Text(Fmt.money(account.equity)).font(.system(size: 26, weight: .semibold, design: .rounded)).monospacedDigit()
+            Text(Fmt.money(account.equity)).font(.system(size: 23, weight: .semibold, design: .rounded)).monospacedDigit()
                 .contentTransition(.numericText(value: account.equity ?? 0))
             Text("U").font(.caption).foregroundStyle(.secondary)
         }
@@ -143,6 +146,7 @@ struct RowPressStyle: ButtonStyle {
 
 /// Pushed with a zoom transition from the tapped tile/row (iOS 18+ navigationTransition).
 struct AccountDetailView: View {
+    @Environment(\.openChart) private var openChart
     let account: PaperAccount
     let connection: Connection
     @State private var data: PaperSnapshot?
@@ -154,7 +158,6 @@ struct AccountDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("模拟账户 · 只读").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                     HStack(alignment: .firstTextBaseline, spacing: 6) {
                         Text(Fmt.money(a.equity)).font(.system(size: 44, weight: .semibold, design: .rounded)).monospacedDigit()
                             .contentTransition(.numericText(value: a.equity ?? 0))
@@ -177,7 +180,6 @@ struct AccountDetailView: View {
                     SectionHeader(title: "今日平仓", count: detail.closed.count)
                     positions(detail.closed, closed: true, empty: "今天没有平仓")
                 }
-                Text("监控工作台模拟账本的前向复刻，含回测口径评分；不是可下单的实盘策略。").font(.caption).foregroundStyle(.secondary).padding(.horizontal, 4)
             }
             .padding(.horizontal, 14).padding(.bottom, 24)
         }
@@ -199,7 +201,10 @@ struct AccountDetailView: View {
         VStack(spacing: 0) {
             if rows.isEmpty { Text(empty).font(.footnote).foregroundStyle(.secondary).frame(maxWidth: .infinity).padding(16) }
             ForEach(Array(rows.enumerated()), id: \.offset) { index, p in
-                PositionRow(position: p, now: data?.nowMs ?? 0, closed: closed).padding(.horizontal, 14).frame(minHeight: 56)
+                Button { Haptics.open(); openChart(p.symbol) } label: {
+                    PositionRow(position: p, now: data?.nowMs ?? 0, closed: closed).padding(.horizontal, 12).frame(minHeight: 52).contentShape(.rect)
+                }
+                .buttonStyle(RowPressStyle())
                 if index < rows.count - 1 { Divider().padding(.leading, 56) }
             }
         }

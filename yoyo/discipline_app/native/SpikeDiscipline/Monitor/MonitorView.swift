@@ -13,14 +13,13 @@ struct MonitorView: View {
     @Environment(NotificationStore.self) private var notices
     @AppStorage("monitor.segment") private var segment: MonitorSegment = .paper
     @Binding var showNotifications: Bool
-    @Binding var showSettings: Bool
     @Namespace private var zoom
     @State private var refresh = 0
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 10) {
                     Picker("监控模块", selection: $segment.animation(.snappy)) {
                         ForEach(MonitorSegment.allCases) { Text($0.title).tag($0) }
                     }
@@ -37,7 +36,7 @@ struct MonitorView: View {
                         .id(segment)
                         .transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: 18)), removal: .opacity))
                     } else {
-                        ConnectPrompt(showSettings: $showSettings)
+                        ConnectPrompt()
                     }
                 }
                 .padding(.horizontal, 14)
@@ -64,7 +63,6 @@ struct MonitorView: View {
                     }
                     .badge(notices.unread)
                     .accessibilityLabel(notices.unread > 0 ? "通知，\(notices.unread) 条未读" : "通知")
-                    Button { Haptics.tap(); showSettings = true } label: { Image(systemName: "gearshape") }.accessibilityLabel("设置")
                 }
             }
         }
@@ -72,15 +70,12 @@ struct MonitorView: View {
 }
 
 struct ConnectPrompt: View {
-    @Binding var showSettings: Bool
     var body: some View {
-        VStack(spacing: 14) {
-            Image(systemName: "lock.shield").font(.system(size: 34)).foregroundStyle(.blue)
-            Text("正在连接纪律服务").font(.headline)
-            Text("本机构建已内置授权，打开即自动连接。").font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
-            Button("查看连接状态") { Haptics.tap(); showSettings = true }.buttonStyle(.glassProminent)
+        HStack(spacing: 10) {
+            ProgressView()
+            Text("正在连接纪律服务").font(.subheadline.weight(.semibold))
         }
-        .frame(maxWidth: .infinity).padding(28).glassCard()
+        .frame(maxWidth: .infinity).padding(16).glassCard(cornerRadius: 18)
     }
 }
 

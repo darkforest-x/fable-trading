@@ -21,7 +21,7 @@ struct StatsView: View {
         NavigationStack(path: $path) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    if session.connection == nil { ConnectPrompt(showSettings: $showSettings) }
+                    if session.connection == nil { ConnectPrompt() }
                     if let error { StatusNote(text: "统计暂不可用\(data == nil ? "" : "，以下为上次记录")：\(error)", systemImage: "exclamationmark.triangle", tint: .amber) }
                     hero
                     NavigationLink(value: "discipline") { disciplineRow }.buttonStyle(CardPressStyle())
@@ -226,7 +226,7 @@ struct StatsView: View {
                         Text(Fmt.amount(row?.netPnl) + " USDT").font(.headline.monospacedDigit()).foregroundStyle(tone(row?.netPnl))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12).background(Color.primary.opacity(0.04), in: .rect(cornerRadius: 14))
+                    .padding(12).background(Color.field, in: .rect(cornerRadius: 14))
                 }
             }
         }

@@ -14,7 +14,6 @@ struct DisciplineView: View {
                                           room: 1, now: account.now)?.text
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                Text("把规则提前定好，把执行交给系统。").font(.subheadline).foregroundStyle(.secondary).padding(.horizontal, 4)
                 mySystem
                 StatusNote(text: reason ?? "服务端规则生效中", systemImage: reason == nil ? "checkmark.shield" : "lock", tint: reason == nil ? .up : .amber)
                 DisciplineBudgetRow(state: state, online: account.online)

@@ -1,8 +1,10 @@
 import SwiftUI
 
-/// Native candle chart (replaces lightweight-charts in CandlePanel.tsx): drag to pan, pinch to zoom,
-/// long-press for the crosshair, the NY Monday range levels clipped to their week, optional 内部线
-/// and 六均线, plus entry/stop lines for the ticket. Display only.
+/// Native candle chart replicating the workbench wallpaper chart (yoyo/monitor/static: range-chart.js,
+/// chart-tools.js colors, chart-style.js six lines, monday-fib-chart.js levels, cloud-signal-chart.js cloud).
+/// Gestures (owner 2026-11-07 “交互要做好”): free pan in both axes with momentum, pinch to zoom time,
+/// drag the price axis to scale price, double-tap to reset and follow, long-press for the crosshair.
+/// Display only — never an execution price or risk input.
 struct ChartLine: Equatable, Identifiable {
     let price: Double
     let title: String
@@ -12,11 +14,30 @@ struct ChartLine: Equatable, Identifiable {
 }
 
 enum ChartPalette {
-    static let up = Color(red: 0.188, green: 0.820, blue: 0.345)       // #30d158
-    static let down = Color(red: 1.0, green: 0.271, blue: 0.227)       // #ff453a
-    static let accent = Color(red: 0.039, green: 0.518, blue: 1.0)     // #0a84ff
-    static let amber = Color(red: 1.0, green: 0.624, blue: 0.039)      // #ff9f0a
-    static let reference = Color(red: 0.557, green: 0.557, blue: 0.576) // #8e8e93
+    static func hex(_ v: UInt32, _ a: Double = 1) -> Color {
+        Color(red: Double((v >> 16) & 0xff) / 255, green: Double((v >> 8) & 0xff) / 255, blue: Double(v & 0xff) / 255).opacity(a)
+    }
+    // chart-tools.js colors (workbench).
+    static let up = hex(0x169873)
+    static let down = hex(0xD7355D)
+    static let accent = hex(0x0A84FF)
+    static let reference = hex(0x718096)
+    // monday-fib-chart.js levels.
+    static let upper = hex(0xC93248)
+    static let lower = hex(0x087F69)
+    static let monday = hex(0x528CC1)
+    static let innerUpper = hex(0x408DDD)
+    static let innerLower = hex(0x8A6CBD)
+    // chart-style.js six lines (all solid, 1 px).
+    static let averages: [(kind: String, period: Int, color: Color)] = [
+        ("sma", 20, hex(0x5C65AA)), ("sma", 60, hex(0x087F69)), ("sma", 120, hex(0x586D81)),
+        ("ema", 20, hex(0x8955B6)), ("ema", 60, hex(0xA87512)), ("ema", 120, hex(0xBD3A52)),
+    ]
+    // cloud-signal-chart.js fill.
+    static func cloud(_ bullish: Bool, dark: Bool) -> Color {
+        bullish ? (dark ? Color(red: 48 / 255, green: 209 / 255, blue: 158 / 255).opacity(0.32) : Color(red: 16 / 255, green: 185 / 255, blue: 129 / 255).opacity(0.26))
+                : (dark ? Color(red: 1, green: 99 / 255, blue: 125 / 255).opacity(0.30) : Color(red: 244 / 255, green: 63 / 255, blue: 94 / 255).opacity(0.23))
+    }
 }
 
 struct CandleChart: View {
@@ -27,76 +48,102 @@ struct CandleChart: View {
     var range: FibRange? = nil
     var innerLines = false
     var averages = false
+    var cloud = false
     var lines: [ChartLine] = []
     var watermark: String? = nil
     var followToken = 0
+    /// Wallpaper: full-bleed white canvas, no grid (range-chart.js wallpaper view).
+    var wallpaper = false
+    /// Space kept clear for floating controls (wallpaper mode).
+    var insets = EdgeInsets()
     var onNeedOlder: () -> Void = {}
 
     @Environment(\.colorScheme) private var scheme
     @State private var spacing: CGFloat = 7
     @State private var offset: CGFloat = 0          // bars scrolled back from the live edge
-    @State private var panStart: CGFloat?
+    @State private var yShift: Double = 0           // vertical pan, fraction of the visible span
+    @State private var yZoom: Double = 1            // price-axis scale (1 = auto)
+    @State private var panStart: (offset: CGFloat, shift: Double)?
+    @State private var axisStart: Double?
     @State private var zoomStart: CGFloat?
     @State private var cross: CGPoint?
     @State private var crossHaptic = -1
 
     private let axisWidth: CGFloat = 58
     private let timeHeight: CGFloat = 20
-    private let rightPad: CGFloat = 4
+    private let rightPad: CGFloat = 5
 
     var body: some View {
         GeometryReader { proxy in
-            let plot = CGSize(width: max(1, proxy.size.width - axisWidth), height: max(1, proxy.size.height - timeHeight))
-            let layout = Layout(bars: bars, spacing: spacing, offset: offset, plot: plot, rightPad: rightPad, period: period, range: range, lines: lines)
+            let size = proxy.size
+            let plot = CGRect(x: insets.leading, y: insets.top, width: max(1, size.width - axisWidth - insets.leading - insets.trailing),
+                              height: max(1, size.height - timeHeight - insets.top - insets.bottom))
+            let layout = Layout(bars: bars, spacing: spacing, offset: offset, plot: plot, rightPad: rightPad, period: period, range: range,
+                                lines: lines, wallpaper: wallpaper, yShift: yShift, yZoom: yZoom)
             ZStack(alignment: .topLeading) {
-                Canvas(rendersAsynchronously: false) { context, size in draw(&context, size: size, layout: layout) }
+                if wallpaper { (scheme == .dark ? ChartPalette.hex(0x0B0E14) : Color.white) }
+                Canvas(rendersAsynchronously: false) { context, _ in draw(&context, layout: layout) }
                 legend(layout)
-                    .padding(.leading, 10).padding(.top, 6)
+                    .padding(.leading, plot.minX + 10).padding(.top, plot.minY + (wallpaper ? 4 : 6))
+                    .opacity(wallpaper && cross == nil ? 0 : 1)
                     .allowsHitTesting(false)
             }
             .contentShape(.rect)
-            .gesture(pan(layout))
-            .simultaneousGesture(zoom(layout))
+            .highPriorityGesture(pan(layout))
+            .simultaneousGesture(zoom)
             .simultaneousGesture(crosshair(layout))
+            .simultaneousGesture(TapGesture(count: 2).onEnded { reset() })
             .onChange(of: layout.firstVisible) { _, first in
                 if first < 12 && bars.count >= 55 { onNeedOlder() }
             }
         }
-        .onChange(of: generation) { _, _ in offset = 0; spacing = 7; cross = nil }
-        .onChange(of: followToken) { _, _ in withAnimation(.snappy(duration: 0.35)) { offset = 0 } }
+        .onChange(of: generation) { _, _ in offset = 0; spacing = 7; yShift = 0; yZoom = 1; cross = nil }
+        .onChange(of: followToken) { _, _ in reset() }
         .onChange(of: bars.last?.time) { old, new in
-            // Keep a scrolled-back view still while live bars arrive (lightweight-charts behaviour).
+            // Keep a scrolled-back view still while live bars arrive.
             if let old, let new, new > old, offset > 0.5 { offset += CGFloat((new - old) / period.seconds) }
         }
-        .onChange(of: bars.first?.time) { _, _ in }
         .accessibilityElement()
         .accessibilityLabel("\(watermark ?? "") \(period.label) K线")
+    }
+
+    private func reset() {
+        Haptics.tap()
+        withAnimation(.snappy(duration: 0.35)) { offset = 0; yShift = 0; yZoom = 1 }
     }
 
     // MARK: gestures
 
     private func pan(_ layout: Layout) -> some Gesture {
-        DragGesture(minimumDistance: 4)
+        DragGesture(minimumDistance: 2, coordinateSpace: .local)
             .onChanged { value in
                 guard cross == nil else { return }
-                if panStart == nil { panStart = offset }
-                offset = clampOffset(panStart! + value.translation.width / spacing, layout: layout)
+                if value.startLocation.x > layout.plot.maxX {
+                    // Price axis: drag down to compress, up to expand (axisPressedMouseMove.price).
+                    if axisStart == nil { axisStart = yZoom }
+                    yZoom = min(20, max(0.05, axisStart! * exp(Double(value.translation.height) / 180)))
+                    return
+                }
+                if panStart == nil { panStart = (offset, yShift) }
+                offset = clampOffset(panStart!.offset + value.translation.width / spacing, layout: layout)
+                yShift = panStart!.shift + Double(value.translation.height / layout.plot.height) * yZoom
             }
             .onEnded { value in
+                if axisStart != nil { axisStart = nil; return }
                 guard let start = panStart else { return }
                 panStart = nil
-                let target = clampOffset(start + value.predictedEndTranslation.width / spacing, layout: layout)
-                withAnimation(.smooth(duration: 0.45)) { offset = target }
+                let target = clampOffset(start.offset + value.predictedEndTranslation.width / spacing, layout: layout)
+                withAnimation(.smooth(duration: 0.55)) { offset = target }
             }
     }
 
-    private func zoom(_ layout: Layout) -> some Gesture {
+    private var zoom: some Gesture {
         MagnifyGesture()
             .onChanged { value in
                 if zoomStart == nil { zoomStart = spacing }
-                spacing = min(28, max(2.2, zoomStart! * value.magnification))
+                spacing = min(32, max(1.6, zoomStart! * value.magnification))
             }
-            .onEnded { _ in zoomStart = nil; Haptics.tap() }
+            .onEnded { _ in zoomStart = nil; Haptics.select() }
     }
 
     private func crosshair(_ layout: Layout) -> some Gesture {
@@ -104,8 +151,8 @@ struct CandleChart: View {
             .sequenced(before: DragGesture(minimumDistance: 0))
             .onChanged { value in
                 if case .second(true, let drag) = value {
-                    let point = drag?.location ?? cross ?? .zero
-                    cross = CGPoint(x: min(max(point.x, 0), layout.plot.width), y: min(max(point.y, 0), layout.plot.height))
+                    let point = drag?.location ?? cross ?? CGPoint(x: layout.plot.midX, y: layout.plot.midY)
+                    cross = CGPoint(x: min(max(point.x, layout.plot.minX), layout.plot.maxX), y: min(max(point.y, layout.plot.minY), layout.plot.maxY))
                     let index = layout.index(atX: cross!.x)
                     if index != crossHaptic { crossHaptic = index; Haptics.select() }
                 }
@@ -115,23 +162,24 @@ struct CandleChart: View {
 
     private func clampOffset(_ value: CGFloat, layout: Layout) -> CGFloat {
         let visible = layout.plot.width / spacing
-        return min(max(value, -visible * 0.5), max(0, CGFloat(bars.count) - visible * 0.3))
+        return min(max(value, -visible * 0.6), max(0, CGFloat(bars.count) - visible * 0.3))
     }
 
-    // MARK: drawing
+    // MARK: layout
 
     private struct Layout {
         let bars: [Candle]
         let spacing: CGFloat
         let rightIndex: CGFloat
-        let plot: CGSize
+        let plot: CGRect
         let period: CandlePeriod
         let firstVisible: Int
         let lastVisible: Int
         let low: Double
         let high: Double
 
-        init(bars: [Candle], spacing: CGFloat, offset: CGFloat, plot: CGSize, rightPad: CGFloat, period: CandlePeriod, range: FibRange?, lines: [ChartLine]) {
+        init(bars: [Candle], spacing: CGFloat, offset: CGFloat, plot: CGRect, rightPad: CGFloat, period: CandlePeriod, range: FibRange?,
+             lines: [ChartLine], wallpaper: Bool, yShift: Double, yZoom: Double) {
             self.bars = bars; self.spacing = spacing; self.plot = plot; self.period = period
             rightIndex = CGFloat(bars.count - 1) + rightPad - offset
             firstVisible = max(0, Int(floor(rightIndex - plot.width / spacing)))
@@ -140,23 +188,25 @@ struct CandleChart: View {
             if firstVisible <= lastVisible {
                 for bar in bars[firstVisible...lastVisible] { lo = min(lo, bar.low); hi = max(hi, bar.high) }
             }
-            // The range joins autoscale while its week is on screen (FibRangePrimitive.autoscaleInfo).
+            // The completed range joins autoscale while its week is on screen.
             if let range, firstVisible <= lastVisible, bars[lastVisible].time + period.seconds > range.start, bars[firstVisible].time < range.end {
                 lo = min(lo, max(0, range.lower)); hi = max(hi, range.upper)
             }
             for line in lines where line.price > 0 { lo = min(lo, line.price); hi = max(hi, line.price) }
             if !lo.isFinite || !hi.isFinite { lo = 0; hi = 1 }
             if hi - lo < hi * 1e-6 { let pad = max(hi * 0.001, 1e-9); lo -= pad; hi += pad }
-            let pad = (hi - lo) * 0.07
-            // Keep ~28 pt above the highest content for the OHLC legend.
-            let legend = (hi - lo + 2 * pad) * Double(28 / max(plot.height - 28, 1))
-            low = lo - pad; high = hi + pad + legend
+            let span = hi - lo
+            let top = wallpaper ? 0.10 : 0.07 + 28 / max(Double(plot.height) - 28, 1), bottom = wallpaper ? 0.08 : 0.07
+            let l0 = lo - span * bottom, h0 = hi + span * top
+            // Vertical pan shifts by a fraction of the span; the price-axis drag zooms around the centre.
+            let half = (h0 - l0) / 2 * yZoom, center = (l0 + h0) / 2 + yShift * (h0 - l0)
+            low = center - half; high = center + half
         }
 
-        func x(_ index: CGFloat) -> CGFloat { plot.width - (rightIndex - index) * spacing }
-        func y(_ price: Double) -> CGFloat { CGFloat((high - price) / (high - low)) * plot.height }
-        func price(atY y: CGFloat) -> Double { high - Double(y / plot.height) * (high - low) }
-        func index(atX x: CGFloat) -> Int { min(max(Int((rightIndex - (plot.width - x) / spacing).rounded()), 0), max(0, bars.count - 1)) }
+        func x(_ index: CGFloat) -> CGFloat { plot.maxX - (rightIndex - index) * spacing }
+        func y(_ price: Double) -> CGFloat { plot.minY + CGFloat((high - price) / (high - low)) * plot.height }
+        func price(atY y: CGFloat) -> Double { high - Double((y - plot.minY) / plot.height) * (high - low) }
+        func index(atX x: CGFloat) -> Int { min(max(Int((rightIndex - (plot.maxX - x) / spacing).rounded()), 0), max(0, bars.count - 1)) }
 
         /// Fractional bar index for a timestamp, extrapolated past either end by the period.
         func index(atTime t: Double) -> CGFloat {
@@ -172,65 +222,75 @@ struct CandleChart: View {
 
     private func format(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(decimals)).grouping(.never)) }
 
-    private func draw(_ context: inout GraphicsContext, size: CGSize, layout: Layout) {
-        let plot = layout.plot
-        let gridColor = scheme == .dark ? Color.white.opacity(0.06) : Color(red: 0.235, green: 0.235, blue: 0.263).opacity(0.07)
-        let textColor = scheme == .dark ? Color.white.opacity(0.55) : Color(red: 0.43, green: 0.43, blue: 0.45)
+    // MARK: drawing
+
+    private func draw(_ context: inout GraphicsContext, layout: Layout) {
+        let plot = layout.plot, dark = scheme == .dark
+        let gridColor = dark ? ChartPalette.hex(0x20232B) : ChartPalette.hex(0xEEF1F5)
+        let textColor = dark ? ChartPalette.hex(0xC7C4D7) : ChartPalette.hex(0x64748B)
 
         if let watermark {
-            context.draw(Text(watermark).font(.system(size: 44, weight: .bold)).foregroundStyle(Color.primary.opacity(scheme == .dark ? 0.07 : 0.06)),
-                         at: CGPoint(x: plot.width / 2, y: plot.height / 2))
+            context.draw(Text(watermark).font(.system(size: wallpaper ? 54 : 44, weight: .bold)).foregroundStyle(Color.primary.opacity(dark ? 0.06 : 0.05)),
+                         at: CGPoint(x: plot.midX, y: plot.midY))
         }
 
-        // Price grid + axis labels.
-        let ticks = niceTicks(low: layout.low, high: layout.high, count: 6)
+        let ticks = niceTicks(low: layout.low, high: layout.high, count: wallpaper ? 8 : 6)
         let lastY = layout.bars.last.map { layout.y($0.close) }
         for value in ticks {
             let y = layout.y(value)
-            guard y > 8, y < plot.height - 4 else { continue }
-            if let lastY, abs(lastY - y) < 14 { continue }   // the live price tag owns that spot
-            context.stroke(Path { $0.move(to: CGPoint(x: 0, y: y)); $0.addLine(to: CGPoint(x: plot.width, y: y)) }, with: .color(gridColor), lineWidth: 1)
-            context.draw(Text(format(value)).font(.system(size: 10).monospacedDigit()).foregroundStyle(textColor), at: CGPoint(x: plot.width + 6, y: y), anchor: .leading)
+            guard y > plot.minY + 8, y < plot.maxY - 4 else { continue }
+            if !wallpaper { context.stroke(Path { $0.move(to: CGPoint(x: plot.minX, y: y)); $0.addLine(to: CGPoint(x: plot.maxX, y: y)) }, with: .color(gridColor), lineWidth: 1) }
+            if let lastY, abs(lastY - y) < 14 { continue }
+            context.draw(Text(format(value)).font(.system(size: 10).monospacedDigit()).foregroundStyle(textColor), at: CGPoint(x: plot.maxX + 6, y: y), anchor: .leading)
         }
 
         guard layout.firstVisible <= layout.lastVisible else { return }
         var clipped = context
-        clipped.clip(to: Path(CGRect(origin: .zero, size: plot)))
-
-        // Volume (bottom 14 %, own scale).
+        clipped.clip(to: Path(plot))
         let visible = layout.bars[layout.firstVisible...layout.lastVisible]
-        let maxVolume = visible.map(\.volume).max() ?? 0
         let body = max(1, layout.spacing * 0.72)
+
+        // Volume: bottom 14 %, own scale.
+        let maxVolume = visible.map(\.volume).max() ?? 0
         if maxVolume > 0 {
             for (offset, bar) in visible.enumerated() {
-                let x = layout.x(CGFloat(layout.firstVisible + offset))
-                let h = CGFloat(bar.volume / maxVolume) * plot.height * 0.14
-                clipped.fill(Path(CGRect(x: x - body / 2, y: plot.height - h, width: body, height: h)),
-                             with: .color((bar.close >= bar.open ? ChartPalette.up : ChartPalette.down).opacity(0.13)))
+                let x = layout.x(CGFloat(layout.firstVisible + offset)), h = CGFloat(bar.volume / maxVolume) * plot.height * 0.14
+                clipped.fill(Path(CGRect(x: x - body / 2, y: plot.maxY - h, width: body, height: h)),
+                             with: .color((bar.close >= bar.open ? ChartPalette.up : ChartPalette.down).opacity(0.22)))
             }
         }
 
+        // EMA20 / EMA50 cloud (cloud-signal-chart.js), split at crosses and gaps.
+        if cloud { drawCloud(&clipped, layout: layout, dark: dark) }
+
         // Range levels, clipped to the completed Monday → next week window.
         if let range {
-            let x1 = max(0, layout.x(layout.index(atTime: range.start))), x2 = min(plot.width, layout.x(layout.index(atTime: range.end)))
+            let x1 = max(plot.minX, layout.x(layout.index(atTime: range.start))), x2 = min(plot.maxX, layout.x(layout.index(atTime: range.end)))
             if x2 > x1 {
                 let levels = range.levels(inner: innerLines)
                 for level in levels {
                     let y = layout.y(level.price)
-                    guard y >= 0, y <= plot.height else { continue }
-                    let (color, width, dashed) = style(level.kind)
+                    guard y >= plot.minY, y <= plot.maxY else { continue }
+                    let (color, width, dashed) = style(level)
                     clipped.stroke(Path { $0.move(to: CGPoint(x: x1, y: y)); $0.addLine(to: CGPoint(x: x2, y: y)) },
                                    with: .color(color), style: StrokeStyle(lineWidth: width, dash: dashed ? [4, 4] : []))
                 }
-                // Labels: 1.618 and Monday lines first; a label that would overlap one already drawn is skipped.
                 var taken: [CGFloat] = []
                 for level in levels.sorted(by: { priority($0.kind) < priority($1.kind) }) {
-                    let y = layout.y(level.price), labelY = max(14, y - 4)
-                    guard y >= 0, y <= plot.height, !taken.contains(where: { abs($0 - labelY) < 13 }) else { continue }
-                    let label = Text("\(level.title) (\(format(level.price)))").font(.system(size: 11, weight: .medium)).foregroundStyle(style(level.kind).0)
+                    let y = layout.y(level.price), labelY = max(plot.minY + 14, y - 4)
+                    guard y >= plot.minY, y <= plot.maxY, !taken.contains(where: { abs($0 - labelY) < 18 }) else { continue }
+                    let label = Text("\(level.title) (\(format(level.price)))").font(.system(size: 11, weight: .semibold)).foregroundStyle(style(level).0)
                     let resolved = clipped.resolve(label)
-                    if x2 - x1 > resolved.measure(in: plot).width + 8 {
-                        clipped.draw(resolved, at: CGPoint(x: x2 - 4, y: labelY), anchor: .bottomTrailing)
+                    let width = resolved.measure(in: plot.size).width
+                    if x2 - x1 > width + 8 {
+                        if wallpaper {
+                            // Stitch fib-wallpaper: level names sit in light capsules over the chart.
+                            let box = CGRect(x: x2 - 4 - width - 6, y: labelY - 15, width: width + 12, height: 17)
+                            clipped.fill(Path(roundedRect: box, cornerRadius: 8.5), with: .color(dark ? Color.black.opacity(0.55) : Color.white.opacity(0.9)))
+                            clipped.draw(resolved, at: CGPoint(x: x2 - 4, y: labelY - 6.5), anchor: .trailing)
+                        } else {
+                            clipped.draw(resolved, at: CGPoint(x: x2 - 4, y: labelY), anchor: .bottomTrailing)
+                        }
                         taken.append(labelY)
                     }
                 }
@@ -246,40 +306,42 @@ struct CandleChart: View {
             clipped.fill(Path(CGRect(x: x - body / 2, y: top, width: body, height: max(1, bottom - top))), with: .color(color))
         }
 
-        // Six moving averages: SMA solid, EMA dashed; blue / amber / grey for 20 / 60 / 120.
+        // Six moving averages, all solid 1 px (chart-style.js).
         if averages {
-            for (kind, n, color) in [("sma", 20, ChartPalette.accent), ("sma", 60, ChartPalette.amber), ("sma", 120, ChartPalette.reference),
-                                     ("ema", 20, ChartPalette.accent), ("ema", 60, ChartPalette.amber), ("ema", 120, ChartPalette.reference)] {
-                let values = kind == "sma" ? Indicators.sma(layout.bars, n) : Indicators.ema(layout.bars, n)
+            let step = period.seconds
+            for line in ChartPalette.averages {
+                let values = line.kind == "sma" ? Indicators.sma(layout.bars, line.period, step: step) : Indicators.ema(layout.bars, line.period, step: step)
                 var path = Path(), started = false
-                for i in max(layout.firstVisible - 1, n - 1)...max(layout.lastVisible, n - 1) where i < values.count {
-                    guard let v = values[i] else { continue }
-                    let point = CGPoint(x: layout.x(CGFloat(i)), y: layout.y(v))
-                    if started { path.addLine(to: point) } else { path.move(to: point); started = true }
+                let from = max(0, layout.firstVisible - 1), to = min(values.count - 1, layout.lastVisible + 1)
+                if from <= to {
+                    for i in from...to {
+                        guard let v = values[i] else { started = false; continue }
+                        let point = CGPoint(x: layout.x(CGFloat(i)), y: layout.y(v))
+                        if started { path.addLine(to: point) } else { path.move(to: point); started = true }
+                    }
                 }
-                clipped.stroke(path, with: .color(color.opacity(0.9)), style: StrokeStyle(lineWidth: 1.2, dash: kind == "ema" ? [5, 3] : []))
+                clipped.stroke(path, with: .color(line.color), lineWidth: 1.1)
             }
         }
 
         // Ticket entry / stop lines.
         for line in lines where line.price > 0 {
             let y = layout.y(line.price)
-            clipped.stroke(Path { $0.move(to: CGPoint(x: 0, y: y)); $0.addLine(to: CGPoint(x: plot.width, y: y)) },
+            clipped.stroke(Path { $0.move(to: CGPoint(x: plot.minX, y: y)); $0.addLine(to: CGPoint(x: plot.maxX, y: y)) },
                            with: .color(line.color), style: StrokeStyle(lineWidth: 1.4, dash: line.dashed ? [5, 4] : []))
             clipped.draw(Text("\(line.title) \(format(line.price))").font(.system(size: 10, weight: .semibold)).foregroundStyle(line.color),
-                         at: CGPoint(x: 6, y: y - 3), anchor: .bottomLeading)
+                         at: CGPoint(x: plot.minX + 6, y: y - 3), anchor: .bottomLeading)
         }
 
-        // Last price tag on the axis.
+        // Last price tag.
         if let last = layout.bars.last {
             let y = layout.y(last.close), color = last.close >= last.open ? ChartPalette.up : ChartPalette.down
-            if y >= 0 && y <= plot.height {
-                clipped.stroke(Path { $0.move(to: CGPoint(x: 0, y: y)); $0.addLine(to: CGPoint(x: plot.width, y: y)) },
+            if y >= plot.minY && y <= plot.maxY {
+                clipped.stroke(Path { $0.move(to: CGPoint(x: plot.minX, y: y)); $0.addLine(to: CGPoint(x: plot.maxX, y: y)) },
                                with: .color(color.opacity(0.55)), style: StrokeStyle(lineWidth: 1, dash: [2, 3]))
-                let rect = CGRect(x: plot.width + 1, y: y - 9, width: axisWidth - 2, height: 18)
+                let rect = CGRect(x: plot.maxX + 1, y: y - 9, width: axisWidth - 2, height: 18)
                 context.fill(Path(roundedRect: rect, cornerRadius: 5), with: .color(color))
-                context.draw(Text(format(last.close)).font(.system(size: 10, weight: .semibold).monospacedDigit()).foregroundStyle(.white),
-                             at: CGPoint(x: rect.midX, y: rect.midY))
+                context.draw(Text(format(last.close)).font(.system(size: 10, weight: .semibold).monospacedDigit()).foregroundStyle(.white), at: CGPoint(x: rect.midX, y: rect.midY))
             }
         }
 
@@ -289,10 +351,9 @@ struct CandleChart: View {
         while i <= layout.lastVisible {
             if i >= 0 {
                 let x = layout.x(CGFloat(i))
-                if x > 18 && x < plot.width - 18 {
-                    context.draw(Text(timeLabel(layout.bars[i].time, previous: i >= stride ? layout.bars[i - stride].time : nil))
-                                    .font(.system(size: 10).monospacedDigit()).foregroundStyle(textColor),
-                                 at: CGPoint(x: x, y: plot.height + timeHeight / 2 + 1))
+                if x > plot.minX + 18 && x < plot.maxX - 18 {
+                    context.draw(Text(timeLabel(layout.bars[i].time, previous: i >= stride ? layout.bars[i - stride].time : nil)).font(.system(size: 10).monospacedDigit()).foregroundStyle(textColor),
+                                 at: CGPoint(x: x, y: plot.maxY + timeHeight / 2 + 1))
                 }
             }
             i += stride
@@ -300,27 +361,54 @@ struct CandleChart: View {
 
         // Crosshair.
         if let cross {
-            let index = layout.index(atX: cross.x), x = layout.x(CGFloat(index))
-            let line = Color.primary.opacity(0.35)
-            context.stroke(Path { $0.move(to: CGPoint(x: x, y: 0)); $0.addLine(to: CGPoint(x: x, y: plot.height)) }, with: .color(line), style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
-            context.stroke(Path { $0.move(to: CGPoint(x: 0, y: cross.y)); $0.addLine(to: CGPoint(x: plot.width, y: cross.y)) }, with: .color(line), style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
-            let rect = CGRect(x: plot.width + 1, y: cross.y - 9, width: axisWidth - 2, height: 18)
+            let index = layout.index(atX: cross.x), x = layout.x(CGFloat(index)), line = Color.primary.opacity(0.35)
+            context.stroke(Path { $0.move(to: CGPoint(x: x, y: plot.minY)); $0.addLine(to: CGPoint(x: x, y: plot.maxY)) }, with: .color(line), style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
+            context.stroke(Path { $0.move(to: CGPoint(x: plot.minX, y: cross.y)); $0.addLine(to: CGPoint(x: plot.maxX, y: cross.y)) }, with: .color(line), style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
+            let rect = CGRect(x: plot.maxX + 1, y: cross.y - 9, width: axisWidth - 2, height: 18)
             context.fill(Path(roundedRect: rect, cornerRadius: 5), with: .color(Color(white: 0.23)))
-            context.draw(Text(format(layout.price(atY: cross.y))).font(.system(size: 10, weight: .semibold).monospacedDigit()).foregroundStyle(.white),
-                         at: CGPoint(x: rect.midX, y: rect.midY))
+            context.draw(Text(format(layout.price(atY: cross.y))).font(.system(size: 10, weight: .semibold).monospacedDigit()).foregroundStyle(.white), at: CGPoint(x: rect.midX, y: rect.midY))
         }
+    }
+
+    private func drawCloud(_ context: inout GraphicsContext, layout: Layout, dark: Bool) {
+        let points = Indicators.cloud(layout.bars, step: period.seconds)
+        let from = max(0, layout.firstVisible - 1), to = min(points.count - 1, layout.lastVisible + 1)
+        guard from < to else { return }
+        var segment: [(x: CGFloat, a: Double, b: Double)] = []
+        func flush() {
+            guard segment.count > 1 else { segment.removeAll(); return }
+            let bullish = segment.contains { $0.a > $0.b }
+            var path = Path()
+            path.move(to: CGPoint(x: segment[0].x, y: layout.y(segment[0].a)))
+            for p in segment.dropFirst() { path.addLine(to: CGPoint(x: p.x, y: layout.y(p.a))) }
+            for p in segment.reversed() { path.addLine(to: CGPoint(x: p.x, y: layout.y(p.b))) }
+            path.closeSubpath()
+            context.fill(path, with: .color(ChartPalette.cloud(bullish, dark: dark)))
+            segment.removeAll()
+        }
+        for i in from...to {
+            guard let p = points[i] else { flush(); continue }
+            let x = layout.x(CGFloat(i))
+            if let prev = segment.last, (prev.a - prev.b) * (p.a - p.b) < 0 {
+                let ratio = (prev.a - prev.b) / (prev.a - prev.b - p.a + p.b), value = prev.a + (p.a - prev.a) * ratio
+                let cross = (x: prev.x + (x - prev.x) * CGFloat(ratio), a: value, b: value)
+                segment.append(cross); flush(); segment.append(cross)
+            }
+            segment.append((x, p.a, p.b))
+        }
+        flush()
     }
 
     private func priority(_ kind: FibRange.Kind) -> Int {
         switch kind { case .upper, .lower: 0; case .monday: 1; case .mid: 2; case .inner: 3 }
     }
 
-    private func style(_ kind: FibRange.Kind) -> (Color, CGFloat, Bool) {
-        switch kind {
-        case .upper: (ChartPalette.down, 2, false)
-        case .lower: (ChartPalette.up, 2, false)
-        case .monday: (ChartPalette.accent, 1, false)
-        case .inner: (ChartPalette.accent.opacity(0.5), 1, false)
+    private func style(_ level: FibRange.Level) -> (Color, CGFloat, Bool) {
+        switch level.kind {
+        case .upper: (ChartPalette.upper, 2, false)
+        case .lower: (ChartPalette.lower, 2, false)
+        case .monday: (ChartPalette.monday, 1, false)
+        case .inner: (level.title.hasPrefix("上") ? ChartPalette.innerUpper : ChartPalette.innerLower, 1, false)
         case .mid: (ChartPalette.reference, 1, true)
         }
     }
@@ -337,6 +425,8 @@ struct CandleChart: View {
                 }
             }
             .font(.system(size: 10.5, weight: .medium).monospacedDigit())
+            .padding(.horizontal, wallpaper ? 8 : 0).padding(.vertical, wallpaper ? 4 : 0)
+            .background(wallpaper ? AnyShapeStyle(.regularMaterial) : AnyShapeStyle(.clear), in: .capsule)
         }
     }
 
@@ -358,30 +448,45 @@ struct CandleChart: View {
         let raw = span / Double(count), magnitude = pow(10, floor(log10(raw)))
         let step = [1, 2, 2.5, 5, 10].map { $0 * magnitude }.first { $0 >= raw } ?? raw
         var value = ceil(low / step) * step, result: [Double] = []
-        while value <= high && result.count < 20 { result.append(value); value += step }
+        while value <= high && result.count < 24 { result.append(value); value += step }
         return result
     }
 }
 
-/// SMA / EMA 20 · 60 · 120 (indicators.ts); EMA seeded with the SMA of the first `period` closes.
+/// Causal close-only averages (chart-style.js): a gap resets the warm-up; the EMA seeds with the first
+/// close and is shown once `period` closes are in; the SMA needs a full window.
 enum Indicators {
-    static func sma(_ bars: [Candle], _ period: Int) -> [Double?] {
-        var out = [Double?](repeating: nil, count: bars.count), sum = 0.0
+    static func sma(_ bars: [Candle], _ period: Int, step: Double? = nil) -> [Double?] {
+        var out = [Double?](repeating: nil, count: bars.count), window: [Double] = [], sum = 0.0
         for (i, bar) in bars.enumerated() {
-            sum += bar.close
-            if i >= period { sum -= bars[i - period].close }
-            if i >= period - 1 { out[i] = sum / Double(period) }
+            if i > 0, let step, bar.time - bars[i - 1].time != step { window.removeAll(); sum = 0 }
+            window.append(bar.close); sum += bar.close
+            if window.count > period { sum -= window.removeFirst() }
+            if window.count >= period { out[i] = sum / Double(period) }
         }
         return out
     }
 
-    static func ema(_ bars: [Candle], _ period: Int) -> [Double?] {
-        var out = [Double?](repeating: nil, count: bars.count)
-        guard bars.count >= period else { return out }
+    static func ema(_ bars: [Candle], _ period: Int, step: Double? = nil) -> [Double?] {
+        var out = [Double?](repeating: nil, count: bars.count), value: Double?, count = 0
         let k = 2 / Double(period + 1)
-        var value = bars[0..<period].reduce(0) { $0 + $1.close } / Double(period)
-        out[period - 1] = value
-        for i in period..<bars.count { value = bars[i].close * k + value * (1 - k); out[i] = value }
+        for (i, bar) in bars.enumerated() {
+            if i > 0, let step, bar.time - bars[i - 1].time != step { value = nil; count = 0 }
+            value = value.map { k * bar.close + (1 - k) * $0 } ?? bar.close
+            count += 1
+            if count >= period { out[i] = value }
+        }
+        return out
+    }
+
+    /// EMA20 (a) and EMA50 (b) from the first close, restarting after a gap (cloud-signal-chart.js averages()).
+    static func cloud(_ bars: [Candle], step: Double) -> [(a: Double, b: Double)?] {
+        var out: [(a: Double, b: Double)?] = [], a = 0.0, b = 0.0, last: Double?
+        for bar in bars {
+            if last == nil || bar.time - last! != step { a = bar.close; b = bar.close }
+            a += (bar.close - a) * 2 / 21; b += (bar.close - b) * 2 / 51; last = bar.time
+            out.append((a, b))
+        }
         return out
     }
 }

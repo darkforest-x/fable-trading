@@ -162,4 +162,32 @@ final class TradingLogicTests: XCTestCase {
         XCTAssertEqual(Trading.availability(state: s, symbol: "BTC-USDT-SWAP", connected: true, online: true, fresh: true, pending: true, room: 1, now: 0)?.text, "正在核对上一笔请求")
         XCTAssertEqual(Trading.availability(state: s, symbol: "BTC-USDT-SWAP", connected: true, online: true, fresh: true, pending: false, room: 1, now: 0)?.destination, .positions)
     }
+
+    func testTwelveHourBarsAggregateFourHourBarsOnUTCPlus8Boundaries() {
+        let base = 1_793_894_400.0   // 2026-11-05 00:00 UTC+8 ((t + 8 h) % 1 d == 0)
+        func bar(_ i: Double, _ o: Double, _ c: Double, confirmed: Bool = true) -> Candle {
+            Candle(time: base + i * 14_400, open: o, high: max(o, c) + 1, low: min(o, c) - 1, close: c, volume: 10, confirmed: confirmed)
+        }
+        let bars = [bar(0, 10, 11), bar(1, 11, 12), bar(2, 12, 9), bar(3, 9, 8), bar(4, 8, 7, confirmed: false)]
+        let out = Candle.aggregate(bars, seconds: 43_200, source: 14_400)
+        XCTAssertEqual(out.count, 2)
+        XCTAssertEqual(out[0].time, base)
+        XCTAssertEqual(out[0].open, 10); XCTAssertEqual(out[0].close, 9); XCTAssertEqual(out[0].high, 13); XCTAssertEqual(out[0].low, 8)
+        XCTAssertEqual(out[0].volume, 30); XCTAssertTrue(out[0].confirmed)
+        XCTAssertEqual(out[1].time, base + 43_200); XCTAssertFalse(out[1].confirmed)
+        XCTAssertEqual(CandlePeriod.h12.source, .h4)
+    }
+
+    func testIndicatorsRestartAfterGapsAndCloudSeedsWithFirstClose() {
+        let bars = (0..<30).map { Candle(time: Double($0) * 60, open: 1, high: 2, low: 0.5, close: Double($0 + 1), volume: 1, confirmed: true) }
+        let sma = Indicators.sma(bars, 20, step: 60)
+        XCTAssertNil(sma[18]); XCTAssertEqual(sma[19], 10.5)
+        let ema = Indicators.ema(bars, 20, step: 60)
+        XCTAssertNil(ema[18]); XCTAssertNotNil(ema[19])
+        var gapped = bars; gapped[25] = Candle(time: 25 * 60 + 600, open: 1, high: 2, low: 0.5, close: 26, volume: 1, confirmed: true)
+        XCTAssertNil(Indicators.sma(gapped, 20, step: 60)[25])
+        let cloud = Indicators.cloud(bars, step: 60)
+        XCTAssertEqual(cloud[0]?.a, 1); XCTAssertEqual(cloud[0]?.b, 1)
+        XCTAssertGreaterThan(cloud[29]!.a, cloud[29]!.b)   // rising closes: fast EMA above slow
+    }
 }

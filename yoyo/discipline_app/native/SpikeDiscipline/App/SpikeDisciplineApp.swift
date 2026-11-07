@@ -68,6 +68,8 @@ struct RootView: View {
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
+            // The 1.618 page is a full-screen chart: horizontal drags pan the chart, not the pages.
+            .scrollDisabled(tab == .fib)
             .onPreferenceChange(PageOffsetKey.self) { offsets in
                 let width = max(proxy.size.width, 1)
                 if let (index, x) = offsets.first(where: { abs($0.value) < width }) { progress = CGFloat(index) - x / width }
@@ -77,7 +79,7 @@ struct RootView: View {
         .background(AmbientBackground())
         .overlay(alignment: .bottom) {
             GlassTabBar(selection: $tab, progress: progress, badge: notices.unread)
-                .padding(.horizontal, 14)
+                .padding(.horizontal, 22)
                 .padding(.bottom, 2)
         }
         .overlay(alignment: .bottom) {
@@ -109,6 +111,10 @@ struct RootView: View {
             }
         }
         .onChange(of: tab) { _, _ in Haptics.select() }
+        .environment(\.openChart, OpenChartAction { symbol in
+            Haptics.open(); fib.focus(symbol)
+            withAnimation(.snappy) { tab = .fib }
+        })
         .sheet(isPresented: $showNotifications) { NotificationCenterView(onOpen: open) }
         .sheet(isPresented: $showSettings) { SettingsView() }
         .fullScreenCover(isPresented: $showReplay) { ReplayView() }
@@ -130,13 +136,13 @@ struct RootView: View {
 
     @ViewBuilder private func content(_ page: AppTab) -> some View {
         switch page {
-        case .monitor: MonitorView(showNotifications: $showNotifications, showSettings: $showSettings)
-        case .trade: TradeView(active: tab == .trade && scenePhase == .active, showSettings: $showSettings, onDestination: route)
-        case .fib: FibView(active: tab == .fib && scenePhase == .active, showSettings: $showSettings, onQuick: { row, period in
+        case .monitor: MonitorView(showNotifications: $showNotifications)
+        case .trade: TradeView(active: tab == .trade && scenePhase == .active, onDestination: route)
+        case .fib: FibView(active: tab == .fib && scenePhase == .active, onQuick: { row, period in
             guard account.pendingEntry == nil else { return }
             ticket.openQuick(row, period: period, state: account.state)
         }, onReplay: { showReplay = true })
-        case .positions: PositionsView(showSettings: $showSettings, onOpenSymbol: { symbol in
+        case .positions: PositionsView(onOpenSymbol: { symbol in
             if symbol != ticket.symbol { ticket.choose(symbol); ticket.syncLeverage(account.state); ticket.syncExisting(account.state) }
             withAnimation(.snappy) { tab = .trade }
         })
@@ -193,22 +199,16 @@ struct GlassTabBar: View {
                             Haptics.tap()
                             withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) { selection = page }
                         } label: {
-                            VStack(spacing: 3) {
-                                Image(systemName: page.symbol)
-                                    .font(.system(size: 19, weight: active ? .semibold : .regular))
-                                    .symbolEffect(.bounce, value: active)
-                                    .overlay(alignment: .topTrailing) {
-                                        if page == .monitor && badge > 0 {
-                                            Text(badge > 9 ? "9+" : "\(badge)").font(.system(size: 10, weight: .bold)).foregroundStyle(.white)
-                                                .padding(.horizontal, 5).frame(minWidth: 17, minHeight: 17).background(.red, in: .capsule)
-                                                .offset(x: 10, y: -7)
-                                        }
+                            TabGlyph(tab: page, active: active)
+                                .overlay(alignment: .topTrailing) {
+                                    if page == .monitor && badge > 0 {
+                                        Text(badge > 9 ? "9+" : "\(badge)").font(.system(size: 10, weight: .bold)).foregroundStyle(.white)
+                                            .padding(.horizontal, 5).frame(minWidth: 17, minHeight: 17).background(.red, in: .capsule)
+                                            .offset(x: 10, y: -8)
                                     }
-                                Text(page.title).font(.system(size: 10, weight: active ? .semibold : .medium))
-                            }
-                            .foregroundStyle(active ? Color.accentColor : Color.primary.opacity(0.75))
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .contentShape(.rect)
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .contentShape(.rect)
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel(page.title)
@@ -218,7 +218,7 @@ struct GlassTabBar: View {
                 .padding(.horizontal, inset)
             }
         }
-        .frame(height: 62)
+        .frame(height: 56)
         .glassEffect(.regular, in: .capsule)
         .shadow(color: .black.opacity(0.08), radius: 16, y: 6)
     }

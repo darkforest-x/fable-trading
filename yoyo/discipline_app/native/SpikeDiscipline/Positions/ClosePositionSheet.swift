@@ -28,7 +28,7 @@ struct ClosePositionSheet: View {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
                         CoinLogo(coin: Fmt.coin(current.symbol), size: 30)
-                        Text(Fmt.coin(current.symbol)).font(.headline) + Text(" / USDT").font(.caption).foregroundStyle(.secondary)
+                        Text(Fmt.coin(current.symbol)).font(.headline)
                         Spacer()
                         Pill(text: "\(current.side == "long" ? "多" : "空") · \(current.leverage)x", color: current.side == "long" ? .up : .down)
                     }
@@ -88,7 +88,7 @@ struct ClosePositionSheet: View {
                 .padding(.horizontal, 18).padding(.bottom, 8)
             }
             .scrollContentBackground(.hidden)
-            .background(AmbientBackground())
+            .background(Color.canvas)
             .navigationTitle("平仓")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -6,6 +6,15 @@ extension Color {
     static let up = Color(red: 0.12, green: 0.62, blue: 0.33)
     static let down = Color(red: 0.90, green: 0.22, blue: 0.23)
     static let amber = Color(red: 0.64, green: 0.37, blue: 0.0)
+    /// Bright surfaces (owner 2026-11-07 “灰朦朦的”): inputs and sheet canvas, light and slightly blue.
+    static let field = Color(light: Color(red: 0.937, green: 0.953, blue: 0.980), dark: Color.white.opacity(0.08))
+    static let canvas = Color(light: Color(red: 0.965, green: 0.973, blue: 0.990), dark: Color(red: 0.06, green: 0.07, blue: 0.10))
+}
+
+extension Color {
+    init(light: Color, dark: Color) {
+        self.init(UIColor { $0.userInterfaceStyle == .dark ? UIColor(dark) : UIColor(light) })
+    }
 }
 
 extension Fmt.Tone {
@@ -43,11 +52,11 @@ struct FrostedCard: ViewModifier {
         content
             .background {
                 shape.fill(.ultraThinMaterial)
-                    .overlay(shape.fill(scheme == .dark ? Color.white.opacity(0.06) : Color.white.opacity(0.72)))
+                    .overlay(shape.fill(scheme == .dark ? Color.white.opacity(0.06) : Color.white.opacity(0.93)))
                     .overlay(shape.fill((tint ?? .clear).opacity(scheme == .dark ? 0.18 : 0.08)))
                     .overlay(shape.strokeBorder(LinearGradient(colors: [.white.opacity(scheme == .dark ? 0.16 : 0.95), .white.opacity(scheme == .dark ? 0.04 : 0.45)],
                                                                startPoint: .top, endPoint: .bottom), lineWidth: 1))
-                    .shadow(color: Color(red: 0.06, green: 0.13, blue: 0.25).opacity(scheme == .dark ? 0.35 : 0.07), radius: 14, y: 6)
+                    .shadow(color: Color(red: 0.06, green: 0.13, blue: 0.25).opacity(scheme == .dark ? 0.35 : 0.06), radius: 12, y: 4)
             }
     }
 }
@@ -176,4 +185,12 @@ struct CoinLogo: View {
         .background(.quaternary.opacity(0.6), in: .circle)
         .clipShape(.circle)
     }
+}
+
+
+/// Open a coin on the full-screen 1.618 chart (monitor rows, alarm coins, cloud cards, positions).
+struct OpenChartAction { var run: (String) -> Void = { _ in }; func callAsFunction(_ symbol: String) { run(symbol) } }
+private struct OpenChartKey: EnvironmentKey { static let defaultValue = OpenChartAction() }
+extension EnvironmentValues {
+    var openChart: OpenChartAction { get { self[OpenChartKey.self] } set { self[OpenChartKey.self] = newValue } }
 }

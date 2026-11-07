@@ -10,9 +10,9 @@ struct ReplayView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if store.snapshot != nil { ReplayDesk(store: store) } else { ReplaySetup(store: store, defaultSymbol: fib.selected?.symbol ?? "BTC-USDT-SWAP") }
+                if store.snapshot != nil { ReplayDesk(store: store) } else { ReplaySetup(store: store, defaultSymbol: fib.chartSymbol.isEmpty ? "BTC-USDT-SWAP" : fib.chartSymbol) }
             }
-            .containerBackground(for: .navigation) { AmbientBackground() }
+            .containerBackground(for: .navigation) { Color.canvas }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     if store.snapshot != nil {
@@ -296,7 +296,7 @@ private struct ReplayDesk: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title).font(.caption).foregroundStyle(.secondary)
             TextField(title, text: value).keyboardType(.decimalPad).font(.body.monospacedDigit())
-                .padding(.horizontal, 12).frame(height: 40).background(Color.primary.opacity(0.05), in: .rect(cornerRadius: 12))
+                .padding(.horizontal, 12).frame(height: 40).background(Color.field, in: .rect(cornerRadius: 12))
         }
     }
 

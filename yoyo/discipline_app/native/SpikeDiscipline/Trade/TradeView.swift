@@ -7,7 +7,7 @@ struct TradeView: View {
     @Environment(AccountStore.self) private var account
     @Environment(TicketModel.self) private var ticket
     let active: Bool
-    @Binding var showSettings: Bool
+    @State private var showSettings = false
     var onDestination: (Trading.Destination) -> Void
     @State private var picker = false
     @State private var discipline = false
@@ -29,13 +29,12 @@ struct TradeView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    Text("\(account.live ? "实盘" : "模拟") · 纪律风控托管，1R 自动保护").font(.subheadline).foregroundStyle(.secondary).padding(.horizontal, 4)
-                    if session.connection == nil { ConnectPrompt(showSettings: $showSettings) }
+                    if session.connection == nil { ConnectPrompt() }
                     hero(quote: quote, fresh: fresh, tick: tick, state: state)
                     chart(existing: existing, tick: tick)
                     Button { Haptics.tap(); discipline = true } label: { DisciplineBudgetRow(state: state, online: account.online) }.buttonStyle(CardPressStyle())
                     if session.connection != nil, let block { GuardStrip(text: block.text) { route(block.destination) } }
-                    TicketForm(onBlocked: route, hosts: !ticket.fibTicket).padding(16).glassCard(tint: ticket.side(state) == "long" ? .up : .down)
+                    TicketForm(onBlocked: route, hosts: !ticket.fibTicket).padding(16).glassCard()
                     if let entry = account.activeEntry { TradeProgressCard(entry: entry) }
                     if let positions = state?.positions, !positions.isEmpty, let state {
                         SectionHeader(title: "当前持仓", count: positions.count)
@@ -56,17 +55,13 @@ struct TradeView: View {
             .contentMargins(.bottom, 96, for: .scrollContent)
             .scrollEdgeEffectHidden(true, for: .top)
             .toolbarBackground(.hidden, for: .navigationBar)
-            .containerBackground(for: .navigation) { AmbientBackground() }
+            .containerBackground(for: .navigation) { Color.canvas }
             .navigationTitle("合约")
             .toolbarTitleDisplayMode(.inlineLarge)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { Haptics.tap(); showSettings = true } label: { Image(systemName: "gearshape") }.accessibilityLabel("设置")
-                }
-            }
         }
+        .sheet(isPresented: $showSettings) { SettingsView() }
         .sheet(isPresented: $picker) { SymbolPicker().presentationDragIndicator(.visible) }
-        .sheet(isPresented: $discipline) { NavigationStack { DisciplineView().background(AmbientBackground()) } .presentationDragIndicator(.visible) }
+        .sheet(isPresented: $discipline) { NavigationStack { DisciplineView().background(Color.canvas) } .presentationDragIndicator(.visible) }
         .sheet(item: $closeTarget) { ClosePositionSheet(position: $0).presentationDetents([.medium, .large]) }
         .alert("本次操作未完成", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) { Button("好", role: .cancel) {} } message: { Text(error ?? "") }
         .onChange(of: "\(ticket.symbol)|\(period.rawValue)|\(active)|\(session.connection?.token.hashValue ?? 0)") { _, _ in showCandles() }
@@ -101,15 +96,13 @@ struct TradeView: View {
                 Button { Haptics.open(); picker = true } label: {
                     HStack(spacing: 8) {
                         CoinLogo(coin: Fmt.coin(ticket.symbol), size: 32)
-                        Text(Fmt.coin(ticket.symbol)).font(.title3.weight(.bold)) + Text("/USDT").font(.subheadline).foregroundStyle(.secondary)
+                        Text(Fmt.coin(ticket.symbol)).font(.title3.weight(.bold))
                         Image(systemName: "chevron.down").font(.caption.weight(.bold)).foregroundStyle(.secondary)
                     }
                 }
                 .buttonStyle(.plain)
                 .disabled(ticket.reviewing || account.pendingEntry != nil)
                 .accessibilityLabel("选择合约")
-                Pill(text: "永续")
-                Pill(text: Fmt.marginMode(state?.policy?.marginMode))
                 Spacer()
             }
             HStack(alignment: .firstTextBaseline, spacing: 6) {
@@ -130,7 +123,7 @@ struct TradeView: View {
     private func chart(existing: Position?, tick: String?) -> some View {
         VStack(spacing: 6) {
             HStack(spacing: 6) {
-                ForEach([CandlePeriod.m1, .m5, .m15, .h1, .h4, .d1]) { p in
+                ForEach([CandlePeriod.m1, .m5, .m15, .h1, .h4, .h12, .d1]) { p in
                     Button { Haptics.select(); period = p } label: {
                         Text(p.label).font(.caption.weight(.semibold)).padding(.horizontal, 9).frame(height: 26)
                             .foregroundStyle(period == p ? Color.accentColor : .secondary)

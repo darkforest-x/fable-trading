@@ -20,10 +20,14 @@ final class FibStore {
     var period: CandlePeriod { didSet { save() } }
     var showInternal: Bool { didSet { save() } }
     var showAverages: Bool { didSet { save() } }
+    var showCloud: Bool { didSet { save() } }
     private(set) var preferences: Preferences
 
     private static let key = "fib.native.v1"
-    private struct Saved: Codable { var symbol = ""; var period = "15m"; var inner = false; var averages = false; var preferences = Preferences(); var snapshot: Data? }
+    private struct Saved: Codable {
+        var symbol = ""; var period = "15m"; var inner = false; var averages = false; var cloud: Bool? = true
+        var preferences = Preferences(); var snapshot: Data?
+    }
 
     init() {
         let saved = UserDefaults.standard.data(forKey: Self.key).flatMap { try? JSONDecoder().decode(Saved.self, from: $0) } ?? Saved()
@@ -31,6 +35,7 @@ final class FibStore {
         period = CandlePeriod(rawValue: saved.period) ?? .m15
         showInternal = saved.inner
         showAverages = saved.averages
+        showCloud = saved.cloud ?? true   // owner 2026-11-07: 1.618 shows the cloud band by default
         preferences = saved.preferences
         if let data = saved.snapshot, let cached = try? API.decoder.decode(FibSnapshot.self, from: data), Self.currentWeek(cached, now: Date()) {
             snapshot = cached
@@ -39,7 +44,7 @@ final class FibStore {
 
     private var lastRaw: Data?
     private func save() {
-        let value = Saved(symbol: symbol, period: period.rawValue, inner: showInternal, averages: showAverages, preferences: preferences, snapshot: lastRaw)
+        let value = Saved(symbol: symbol, period: period.rawValue, inner: showInternal, averages: showAverages, cloud: showCloud, preferences: preferences, snapshot: lastRaw)
         if let data = try? JSONEncoder().encode(value) { UserDefaults.standard.set(data, forKey: Self.key) }
     }
 
@@ -62,7 +67,8 @@ final class FibStore {
             let previousWeek = snapshot?.week
             snapshot = value; lastRaw = raw; fresh = true; error = nil; clock = Date()
             let visible = rows
-            if previousWeek != value.week || !visible.contains(where: { $0.symbol == symbol }) { symbol = visible.first?.symbol ?? "" } else { save() }
+            // Keep a coin opened from 监控 even when it has no touch this week.
+            if previousWeek != value.week || symbol.isEmpty { symbol = visible.first?.symbol ?? "" } else { save() }
             return true
         } catch is CancellationError {
             throw CancellationError()
@@ -109,7 +115,13 @@ final class FibStore {
 
     var current: FibSnapshot? { snapshot.flatMap { Self.currentWeek($0, now: max(clock, Date())) ? $0 : nil } }
     var rows: [FibContract] { current?.items.filter { visible($0.symbol) } ?? [] }
-    var selected: FibContract? { rows.first { $0.symbol == symbol } ?? rows.first }
+    /// Touch row for the charted coin, if it touched this week.
+    var selected: FibContract? { current?.items.first { $0.symbol == chartSymbol } }
+    /// The charted coin: the chosen one, else the newest touch.
+    var chartSymbol: String { symbol.isEmpty ? (rows.first?.symbol ?? "") : symbol }
+
+    /// Open any coin (monitor rows, alarm coins); the range shows only if it touched this week.
+    func focus(_ next: String) { symbol = next }
     var live: Bool {
         guard fresh, error == nil, let s = current, s.connected, let last = s.lastMessageMs else { return false }
         return clock.timeIntervalSince1970 * 1000 - last < 90_000

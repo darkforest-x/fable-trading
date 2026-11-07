@@ -6,7 +6,6 @@ import SwiftUI
 struct PositionsView: View {
     @Environment(SessionStore.self) private var session
     @Environment(AccountStore.self) private var account
-    @Binding var showSettings: Bool
     var onOpenSymbol: (String) -> Void
     @State private var closeTarget: Position?
     @State private var action: String?
@@ -19,7 +18,7 @@ struct PositionsView: View {
                     if let entry = account.activeEntry { TradeProgressCard(entry: entry) }
                     if let attempt = account.closeAttempt { closeRecovery(attempt) }
                     if session.connection == nil {
-                        ConnectPrompt(showSettings: $showSettings)
+                        ConnectPrompt()
                     } else if let state = account.state {
                         if state.positions.isEmpty && state.pending.isEmpty {
                             EmptyCard(systemImage: "briefcase", title: "暂无持仓", note: "开仓后，止损、保本与分批止盈都由服务端持续保护。")
@@ -55,11 +54,6 @@ struct PositionsView: View {
             .containerBackground(for: .navigation) { AmbientBackground() }
             .navigationTitle("持仓保护")
             .toolbarTitleDisplayMode(.inlineLarge)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { Haptics.tap(); showSettings = true } label: { Image(systemName: "gearshape") }.accessibilityLabel("设置")
-                }
-            }
         }
         .sheet(item: $closeTarget) { position in
             ClosePositionSheet(position: position).presentationDetents([.medium, .large]).presentationDragIndicator(.visible)
@@ -120,7 +114,7 @@ struct PositionsView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack(spacing: 8) {
                         CoinLogo(coin: Fmt.coin(order.symbol), size: 26)
-                        Text(Fmt.coin(order.symbol)).font(.headline) + Text("/USDT").font(.caption).foregroundStyle(.secondary)
+                        Text(Fmt.coin(order.symbol)).font(.headline)
                         Pill(text: order.side == "long" ? "开多" : "开空", color: order.side == "long" ? .up : .down)
                         Spacer()
                         Text((Double(order.filledQuantity ?? "0") ?? 0) > 0 ? "部分成交" : "挂单中").font(.caption.weight(.semibold)).foregroundStyle(Color.amber)
@@ -229,7 +223,7 @@ struct PositionCardView: View {
                 Button(action: { Haptics.tap(); onSymbol() }) {
                     HStack(spacing: 8) {
                         CoinLogo(coin: coin, size: 30)
-                        Text(coin).font(.headline) + Text(" / USDT").font(.caption).foregroundStyle(.secondary)
+                        Text(coin).font(.headline)
                         Image(systemName: "chevron.right").font(.caption.weight(.bold)).foregroundStyle(.tertiary)
                     }
                 }
@@ -308,7 +302,7 @@ struct CompletedRow: View {
             Button { Haptics.select(); withAnimation(.snappy) { open.toggle() } } label: {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {
-                        Text(Fmt.coin(position.symbol)).font(.subheadline.weight(.semibold)) + Text("/USDT").font(.caption2).foregroundStyle(.secondary)
+                        Text(Fmt.coin(position.symbol)).font(.subheadline.weight(.semibold))
                         Pill(text: position.side == "long" ? "多" : "空", color: position.side == "long" ? .up : .down)
                         Spacer()
                         Text(Fmt.signed(pnl) + " USDT").font(.subheadline.weight(.bold).monospacedDigit()).foregroundStyle(pnl >= 0 ? Color.up : Color.down)
@@ -423,7 +417,7 @@ struct ExternalActivityCard: View {
         let status = history ? "已离开当前列表" : r.mixed ? "归属待核对" : r.kind == "position" ? "外部持仓" : r.kind == "algo" ? "策略委托" : "外部挂单"
         return VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
-                Text(r.symbol.replacingOccurrences(of: "-USDT-SWAP", with: "/USDT")).font(.subheadline.weight(.semibold))
+                Text(Fmt.coin(r.symbol)).font(.subheadline.weight(.semibold))
                 Pill(text: ["long": "多", "short": "空", "buy": "买", "sell": "卖"][r.side] ?? r.side, color: short ? .down : .up)
                 Text(status).font(.caption).foregroundStyle(.secondary)
             }

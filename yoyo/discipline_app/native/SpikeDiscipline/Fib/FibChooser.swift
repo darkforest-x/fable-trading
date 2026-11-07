@@ -47,15 +47,11 @@ struct FibChooser: View {
                         Text(!search.isEmpty ? "没有匹配的合约" : filter == .favorites ? "暂无收藏，点星标即可收藏" : "暂无触价")
                             .font(.subheadline).foregroundStyle(.secondary).frame(maxWidth: .infinity).padding(.vertical, 18)
                     }
-                } header: {
-                    Text("\(fib.current?.week ?? "") 纽约周 · 最新触价在前")
-                } footer: {
-                    Text("点击切换图表 · 左滑隐藏 · 收藏与隐藏只保存在本机")
                 }
             }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
-            .background(AmbientBackground())
+            .background(Color.canvas)
             .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always), prompt: "搜索已触价合约")
             .textInputAutocapitalization(.characters)
             .navigationTitle("最新触价")
@@ -87,7 +83,7 @@ struct FibChooser: View {
 
     private func rowView(_ row: FibContract) -> some View {
         let coin = Fmt.coin(row.symbol), touch = row.latestTouch!, favorite = fib.isFavorite(row.symbol)
-        let selected = row.symbol == fib.selected?.symbol
+        let selected = row.symbol == fib.chartSymbol
         return HStack(spacing: 12) {
             Button {
                 Haptics.select(); fib.symbol = row.symbol; dismiss()
@@ -95,10 +91,7 @@ struct FibChooser: View {
                 HStack(spacing: 12) {
                     CoinLogo(coin: coin, size: 34)
                     VStack(alignment: .leading, spacing: 2) {
-                        HStack(spacing: 1) {
-                            Text(coin).font(.body.weight(.semibold))
-                            Text("/USDT").font(.caption).foregroundStyle(.secondary)
-                        }
+                        Text(coin).font(.body.weight(.semibold))
                         Text(FibView.touchTime(touch.occurredMs)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
                     }
                     Spacer(minLength: 6)

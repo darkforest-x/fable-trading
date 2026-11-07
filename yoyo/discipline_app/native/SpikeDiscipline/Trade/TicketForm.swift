@@ -51,7 +51,7 @@ struct TicketForm: View {
                     .accessibilityAddTraits(on ? .isSelected : [])
                 }
             }
-            .padding(3).background(Color.primary.opacity(0.06), in: .capsule)
+            .padding(3).background(Color.field, in: .capsule)
             .animation(.snappy, value: side)
             if existing != nil { Text("同向加仓 · 沿用当前止损和杠杆").font(.caption).foregroundStyle(.secondary) }
 
@@ -158,7 +158,7 @@ struct TicketForm: View {
                 Metric(title: "保证金", value: Fmt.amount(estimate?.margin), unit: "U")
                 Metric(title: existing != nil ? "合并止损金额" : "预计止损", value: Fmt.amount(estimate?.risk), unit: "U")
             }
-            .padding(12).background(Color.primary.opacity(0.04), in: .rect(cornerRadius: 14))
+            .padding(12).background(Color.field, in: .rect(cornerRadius: 14))
 
             HStack {
                 Text(account.live ? "\(state?.accountName ?? "主账户") · USDT 净值" : "模拟净值").font(.caption).foregroundStyle(.secondary)
@@ -207,7 +207,7 @@ struct TicketForm: View {
                 Text("USDT").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
             }
             .padding(.horizontal, 14).frame(height: 48)
-            .background(Color.primary.opacity(0.05), in: .rect(cornerRadius: 14))
+            .background(Color.field, in: .rect(cornerRadius: 14))
         }
     }
 
@@ -238,6 +238,12 @@ struct TicketForm: View {
 
     private func runAutoStop(context: String, enabled: Bool) async {
         guard let mode = ticket.autoMode, enabled, session.connection != nil else { ticket.autoWorking = false; return }
+        if ticket.fibTicket && ticket.fibPeriod == .h12 {
+            // The service computes wick stops only for OKX's own bars (1m…4H, 1D); 12H is display-only.
+            ticket.autoWorking = false; ticket.autoMode = nil; ticket.stop = ""
+            ticket.fieldIssue = Trading.FieldIssue(field: .stop, message: "12H 暂无插针止损，请切到 4H 或手动填写")
+            return
+        }
         ticket.autoWorking = true
         try? await Task.sleep(for: .milliseconds(350))
         guard !Task.isCancelled else { return }

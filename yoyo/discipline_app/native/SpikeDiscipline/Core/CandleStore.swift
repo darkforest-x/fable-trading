@@ -7,7 +7,9 @@ import Observation
 /// Never an execution price or risk input.
 @MainActor @Observable
 final class CandleStore {
+    /// Bars at `period` (12H is aggregated from the 4H source series).
     private(set) var bars: [Candle] = []
+    private var raw: [Candle] = [] { didSet { bars = period == .h12 ? Candle.aggregate(raw, seconds: period.seconds, source: period.source.seconds) : raw } }
     private(set) var symbol = ""
     private(set) var period: CandlePeriod = .m15
     private(set) var loading = false
@@ -27,7 +29,7 @@ final class CandleStore {
         guard symbol != self.symbol || period != self.period || connection != self.connection || runner == nil else { return }
         stop()
         self.symbol = symbol; self.period = period; self.connection = connection
-        bars = []; historyEnd = false; error = nil; generation += 1
+        raw = []; historyEnd = false; error = nil; generation += 1
         guard !symbol.isEmpty else { return }
         let generation = generation
         runner = Task { await self.run(generation) }
@@ -47,7 +49,7 @@ final class CandleStore {
         do {
             let first = try await page(before: nil)
             guard current(generation) else { return }
-            bars = Candle.merge(bars, first); error = nil
+            raw = Candle.merge(raw, first); error = nil
         } catch {
             if current(generation) { self.error = "K线暂不可用" }
         }
@@ -64,7 +66,7 @@ final class CandleStore {
             try? await Task.sleep(for: .seconds(3))
             guard current(generation), !streaming else { continue }
             if let latest = try? await page(before: nil), current(generation) {
-                bars = Candle.merge(bars, latest); error = nil
+                raw = Candle.merge(raw, latest); error = nil
             }
         }
     }
@@ -75,7 +77,7 @@ final class CandleStore {
             let task = URLSession.shared.webSocketTask(with: AppConfig.candleSocketURL)
             socketTask = task
             task.resume()
-            let channel = "candle" + period.rawValue
+            let channel = "candle" + period.source.rawValue
             let subscribe = #"{"op":"subscribe","args":[{"channel":"\#(channel)","instId":"\#(symbol)"}]}"#
             do {
                 try await task.send(.string(subscribe))
@@ -97,7 +99,7 @@ final class CandleStore {
                     let incoming = Candle.parse(rows)
                     guard current(generation), !incoming.isEmpty else { continue }
                     attempt = 0; streaming = true
-                    bars = Candle.merge(bars, incoming)
+                    raw = Candle.merge(raw, incoming)
                 }
             } catch {}
             task.cancel(with: .goingAway, reason: nil)
@@ -116,18 +118,18 @@ final class CandleStore {
 
     /// Older history when the chart nears its left edge.
     func loadOlder() {
-        guard olderTask == nil, !historyEnd, let first = bars.first, !symbol.isEmpty else { return }
+        guard olderTask == nil, !historyEnd, let first = raw.first, !symbol.isEmpty else { return }
         let generation = generation
         olderTask = Task {
             defer { if self.generation == generation { olderTask = nil } }
             guard let older = try? await page(before: Int(first.time)), self.generation == generation else { return }
             if older.isEmpty || older.allSatisfy({ $0.time >= first.time }) { historyEnd = true; return }
-            bars = Candle.merge(older, bars)
+            raw = Candle.merge(older, raw)
         }
     }
 
     private func page(before: Int?) async throws -> [Candle] {
-        var query = [URLQueryItem(name: "symbol", value: symbol), URLQueryItem(name: "period", value: period.rawValue)]
+        var query = [URLQueryItem(name: "symbol", value: symbol), URLQueryItem(name: "period", value: period.source.rawValue)]
         if let before { query.append(URLQueryItem(name: "before", value: String(before))) }
         if let connection, let value: CandlePage = try? await API.get("/v1/market/candles", query: query, connection: connection) {
             return Candle.parse(value.data)
@@ -136,7 +138,7 @@ final class CandleStore {
         // must never mix real market prices into synthetic candles. `after` pages backwards in OKX's naming.
         guard AppConfig.serviceURL == AppConfig.productionURL else { throw APIError(status: 0, message: "K线暂不可用") }
         var components = URLComponents(url: AppConfig.okxRestURL.appendingPathComponent(before == nil ? "api/v5/market/candles" : "api/v5/market/history-candles"), resolvingAgainstBaseURL: false)!
-        components.queryItems = [URLQueryItem(name: "instId", value: symbol), URLQueryItem(name: "bar", value: period.rawValue), URLQueryItem(name: "limit", value: "300")]
+        components.queryItems = [URLQueryItem(name: "instId", value: symbol), URLQueryItem(name: "bar", value: period.source.rawValue), URLQueryItem(name: "limit", value: "300")]
             + (before.map { [URLQueryItem(name: "after", value: String($0 * 1000))] } ?? [])
         var request = URLRequest(url: components.url!)
         request.timeoutInterval = 9
