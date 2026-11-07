@@ -39,8 +39,8 @@ def rules(frame, w, x):
                    ten_plus=y>=10,at_most_four=y<=4,ratio_le_25pct=4*y<=n,
                    ratio_25_to_100pct=(4*y>n)&(y<=n),ratio_gt_100pct=y>n)
     if x:  # Compare rates rather than unequal half lengths on odd native-bar waits.
-        front_bars=(x//5)//2; back_bars=x//5-front_bars
-        if front_bars:
+        front_bars=(x//5+1)//2; back_bars=x//5-front_bars
+        if back_bars:
             diffusion.update(front_only=(a>0)&(b==0),back_only=(a==0)&(b>0),
                              slowing=a*back_bars>b*front_bars,accelerating=a*back_bars<b*front_bars)
     else:

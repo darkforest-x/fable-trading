@@ -42,7 +42,7 @@ def partition(w,x):
     fr['btc_move']=col(base,'btc_observed_return_pct').to_numpy()
     fr['reclaim_fraction']=col(base,'reclaim_fraction').to_numpy()
     fr['market_share_pct']=col(fr,'share28_pct','market_share_pct')
-    fr['prior_shock_age_min']=col(fr,'since_shock_min','prior_shock_age_min','since_previous_shock_min')
+    fr['prior_shock_age_min']=col(fr,'since_prev_25_lower_shock_min','since_shock_min','prior_shock_age_min','since_previous_shock_min')
     fr['monitor_fraction']=col(fr,'monitor_fraction')
     fr['first_half_new']=col(fr,'first_half_new')
     fr['last_half_new']=col(fr,'last_half_new')
