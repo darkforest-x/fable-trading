@@ -12,7 +12,7 @@ from yoyo.evaluation.monday_breadth_opt_payoffs import load_full_ohlc
 def run():
     out=study.OUT
     adv=pd.read_csv(out/'sept16_btc_funding_aware_rules.csv',parse_dates=['entry_time','first_exit_time','exit_time'])
-    r=adv[adv.rule.eq('btc_funded_partial_144_6_0_4_0_0.75')].iloc[0]
+    r=adv[adv.rule.eq('btc_funded_partial_144_6_0_0_0_0.75')].iloc[0]
     quotes,_=load_full_ohlc('BTCUSDT',r.entry_time,r.exit_time,repair_missing=False)
     funded=pd.read_parquet(out/'sept16_original_funded.parquet')
     alt=funded[(funded.policy_id==5)&(~funded.asset.isin(['BTCUSDT','ETHUSDT','SOLUSDT']))].sort_values('funded_pct')
