@@ -9,6 +9,7 @@ import pandas as pd
 
 from yoyo.evaluation.monday_breadth_frequency_long import EXP
 from yoyo.evaluation.monday_breadth_opt_delivery import CONF, FOLLOW, count_label
+from yoyo.evaluation.monday_breadth_opt_selection import OUT as ORIGINAL
 from yoyo.evaluation.monday_breadth_opt_match_exits import paired_month_p
 
 
@@ -54,7 +55,34 @@ def rule_text(cid, fixed):
             f'确认条件{confirm}，持有{row.hold_hours}小时后全部平仓')
 
 
+def constituent_outcomes():
+    """Summarize member horizons at the actual altcoin-rule entry times.
+
+    The peak column averages each member's individual six-day high. The later
+    observations are labels and cannot change the earlier six-hour fills.
+    """
+    rules=pd.read_csv(EXP/'fixed/locked_rules.csv').query("asset=='ALT'")
+    events=pd.read_parquet(EXP/'audit/fixed/costed_events.parquet')
+    results=[]
+    for row in rules.itertuples():
+        source=ORIGINAL/'payoffs'/f'event_outcomes_minutes{row.minutes}_wait{row.wait_min}.csv.gz'
+        fields=['known','hold_hours','members_expected_n','endpoint_n','path_n','mean_mfe_pct',
+                'member_net_win_pct','basket_net_return_pct','hit10_pct']
+        values=pd.read_csv(source,usecols=fields,parse_dates=['known'])
+        original=events[events.candidate_id.eq(row.candidate_id)][['candidate_id','decision','known','net_pct','funded_pct']]
+        for h in sorted({row.hold_hours,144}):
+            part=original.merge(values[values.hold_hours.eq(h)],on='known',validate='one_to_one')
+            if len(part)!=len(original):raise ValueError('Missing ALT observation clock')
+            if h==row.hold_hours and not np.allclose(part.basket_net_return_pct,part.net_pct):
+                raise ValueError('ALT native outcomes do not match the selected trades')
+            part.loc[part.endpoint_n.ne(part.members_expected_n),['member_net_win_pct','basket_net_return_pct']]=np.nan
+            part.loc[part.path_n.ne(part.members_expected_n),['mean_mfe_pct','hit10_pct']]=np.nan
+            results.append(part)
+    pd.concat(results).to_csv(EXP/'alt_constituent_horizons_2026.csv',index=False)
+
+
 def run():
+    constituent_outcomes()
     ctrl = pd.read_csv(EXP/'controls/combined_primary_validity.csv')
     ctrl = pd.concat([ctrl,controls_for_accounts()],ignore_index=True).set_index('candidate_id')
     if ctrl.index.duplicated().any() or len(ctrl)!=11:
