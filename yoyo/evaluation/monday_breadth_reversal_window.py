@@ -30,7 +30,7 @@ END = pd.Timestamp('2026-09-22 13:55', tz='UTC')
 SEED = 20261107
 
 
-def rebuild():
+def scored_touches():
     data = pd.read_csv(ARCHIVE / 'exp-monday-limit-score-features-v2-20261025-v1/features_v2.csv.gz',
                        usecols=['event', 'symbol', 'side', 'touch'])
     keys = pd.read_csv(ARCHIVE / 'exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz',
@@ -38,6 +38,11 @@ def rebuild():
     touches = keys.merge(data, how='left', validate='one_to_one')
     assert len(touches) == 58740 and touches.touch.notna().all()
     touches['ms'] = pd.to_datetime(touches.touch, utc=True).dt.as_unit('ms').astype('int64')
+    return touches
+
+
+def rebuild():
+    touches = scored_touches()
     frozen = pd.read_csv(SOURCE / 'alarms.csv.gz')
     links = pd.read_csv(SOURCE / 'alarm_windows.csv.gz').query('threshold == 25 and window == 30')
     frozen_links = links.groupby(['side', 'alarm_ms']).event.agg(set).to_dict()
@@ -83,10 +88,10 @@ def market_prices(asset):
     return frame
 
 
-def trade_returns(opens, starts):
+def trade_returns(opens, starts, hold_bars=HOLD_BARS):
     """One unlevered long per distinct entry time, held until its fixed market exit."""
     starts = np.unique(starts)
-    prices = np.stack([opens[starts], opens[starts + HOLD_BARS]])
+    prices = np.stack([opens[starts], opens[starts + hold_bars]])
     portfolio = vbt.Portfolio.from_orders(prices, size=np.array([[1.],[-1.]]), fees=TAKER,
                                            init_cash=float(np.nanmax(prices)*2), cash_sharing=False)
     trades = portfolio.trades.records
@@ -96,30 +101,36 @@ def trade_returns(opens, starts):
     return pd.Series(trades['return'].to_numpy()*100, index=starts)
 
 
-def evaluate(asset, log):
-    frame = market_prices(asset)
+def evaluate(asset, log, *, observe_minutes=30, frame=None, exclusion_times=None):
+    if observe_minutes <= 0 or observe_minutes % 5 or observe_minutes >= EXIT_BARS*5:
+        raise ValueError('Observation must end on a 5m boundary before exit')
+    observe_bars = observe_minutes // 5
+    hold_bars = EXIT_BARS - observe_bars
+    delay = pd.Timedelta(minutes=observe_minutes)
+    if frame is None:
+        frame = market_prices(asset)
     times = frame.index
     anchor_prices = frame.close.shift(1)
     vol = np.log(anchor_prices).diff().pow(2).rolling(12).sum().pow(.5)*100
-    pre = (anchor_prices.shift(OBS_BARS)/anchor_prices.shift(OBS_BARS+12)-1)*100
+    pre = (anchor_prices.shift(observe_bars)/anchor_prices.shift(observe_bars+12)-1)*100
     volbin = np.digitize(vol, [.25,.5,1,2,4])
     calendar = (times.year*12 + times.month)*4 + times.hour//6
-    ahead = frame.open.notna().iloc[::-1].rolling(HOLD_BARS+1).sum().iloc[::-1].eq(HOLD_BARS+1)
+    ahead = frame.open.notna().iloc[::-1].rolling(hold_bars+1).sum().iloc[::-1].eq(hold_bars+1)
     valid = (ahead & vol.notna() & pre.notna()).to_numpy()
     split_at = times.searchsorted(SPLIT)
     eligible = valid.copy()
-    eligible[max(0, split_at-HOLD_BARS):split_at] = False
+    eligible[max(0, split_at-hold_bars):split_at] = False
     # Remove random observation/holding windows that overlap any study alarm's observation/return window.
-    for when in log.known.unique():
-        decision = times.searchsorted(when + pd.Timedelta(minutes=30))
+    for when in (log.known.unique() if exclusion_times is None else exclusion_times):
+        decision = times.searchsorted(when + delay)
         eligible[max(0, decision-EXIT_BARS):decision+EXIT_BARS+1] = False
     rows, matches = [], []
     for r in log[log.side == 1].itertuples():
-        decision = r.known + pd.Timedelta(minutes=30)
+        decision = r.known + delay
         loc = times.get_indexer([decision])[0]
         if loc < 0 or not valid[loc]:
             raise ValueError(f'Missing required path for {asset} at {decision}')
-        period = 'early' if loc + HOLD_BARS < split_at else ('late' if loc >= split_at else 'crossing')
+        period = 'early' if loc + hold_bars < split_at else ('late' if loc >= split_at else 'crossing')
         row = dict(asset=asset, window=r.window, known=r.known, decision=decision, period=period,
                    trigger_n=r.trigger_n, further_n=r.further_n, pre_alarm_1h_pct=pre.iloc[loc], loc=loc)
         regime = (np.sign(pre.to_numpy()) == np.sign(pre.iloc[loc]))
@@ -131,7 +142,7 @@ def evaluate(asset, log):
         rows.append(row)
     res = pd.DataFrame(rows)
     starts = np.concatenate([res['loc'].to_numpy(), *matches])
-    ret = trade_returns(frame.open.to_numpy(), starts)
+    ret = trade_returns(frame.open.to_numpy(), starts, hold_bars)
     res['net_pct'] = res['loc'].map(ret)
     ledger = []
     for row,picks in zip(rows,matches):
