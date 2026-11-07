@@ -3,9 +3,10 @@
 This matcher accepts either the search lock tables or the exit-follow-up lock
 tables. It reads local registered Binance USD-M OHLC only; it does not repair
 or download candles. Random entries match UTC month/6h, pre-observation 1h
-realized-volatility bucket and trend sign, monitor schedule, and symbol. A
-control window must contain no lower first-touch for that symbol and must be
-outside the symmetric H + W + X guard around any 25+ same-side ledger shock.
+realized-volatility bucket and trend sign, monitor schedule, and symbol. The
+primary control excludes lower first-touches and a symmetric H + W + X shock
+guard. An optional past-only sensitivity replaces the latter with shocks
+already known in the prior 60 minutes and no overlap with the actual trade.
 """
 
 from __future__ import annotations
@@ -266,6 +267,27 @@ def _shock_free(shocks: pd.DatetimeIndex, decisions: pd.DatetimeIndex, guard: pd
     return left == right
 
 
+def _past_shock_free(shocks: pd.DatetimeIndex, decisions: pd.DatetimeIndex,
+                     lookback: pd.Timedelta = pd.Timedelta(minutes=60)) -> np.ndarray:
+    """Exclude only shocks already known strictly before each random decision."""
+    if not len(shocks):
+        return np.ones(len(decisions), dtype=bool)
+    left = shocks.searchsorted(decisions - lookback, side="left")
+    # At an exact bar boundary the prior 5m close is already available, so a
+    # shock whose known timestamp equals the random entry must be included.
+    right = shocks.searchsorted(decisions, side="right")
+    return left == right
+
+
+def _nonoverlap_actual(decisions: pd.DatetimeIndex, actual_decision: pd.Timestamp,
+                       hold_hours: int) -> np.ndarray:
+    """Return controls whose [entry, exit) does not overlap actual [entry, exit)."""
+    actual_decision = _utc(actual_decision)
+    actual_exit = actual_decision + pd.Timedelta(hours=int(hold_hours))
+    control_exit = decisions + pd.Timedelta(hours=int(hold_hours))
+    return (decisions >= actual_exit) | (control_exit <= actual_decision)
+
+
 def _no_lower_touch(touches: pd.DatetimeIndex, starts: pd.DatetimeIndex,
                     decisions: pd.DatetimeIndex) -> np.ndarray:
     if not len(touches):
@@ -277,10 +299,12 @@ def _no_lower_touch(touches: pd.DatetimeIndex, starts: pd.DatetimeIndex,
 
 def _candidate_pool(task: pd.Series, frame: pd.DataFrame,
                     lower_touches: dict[str, pd.DatetimeIndex], shocks: pd.DatetimeIndex,
-                    monitor_grid: pd.DatetimeIndex, monitor_prefix: np.ndarray) -> tuple[np.ndarray, dict, str]:
+                    monitor_grid: pd.DatetimeIndex, monitor_prefix: np.ndarray,
+                    *, past_only: bool = False) -> tuple[np.ndarray, dict, str]:
     symbol = str(task.symbol)
     known, decision = _utc(task.known), _utc(task.decision)
-    minutes, wait_min, hold_hours = int(task.minutes), int(task.wait_min), int(task.hold_hours)
+    minutes, wait_min = int(task.minutes), int(task.wait_min)
+    hold_hours = int(task.get("match_horizon_hours", task.hold_hours))
     candidate_vol, candidate_trend, candidate_ok = _pre_observation_features(frame, pd.DatetimeIndex([known]))
     if not candidate_ok[0]:
         return np.empty(0, dtype=np.int64), {}, "missing_candidate_pre_observation_context"
@@ -307,10 +331,15 @@ def _candidate_pool(task: pd.Series, frame: pd.DataFrame,
     ctrl_ny = control_knowns.tz_convert("America/New_York").day_of_week
     ctrl_decision_ny = candidates.tz_convert("America/New_York").day_of_week
     path_ok, positions = _complete_horizon(frame, candidates, hold_hours)
-    guard = pd.Timedelta(hours=hold_hours) + pd.Timedelta(minutes=minutes + wait_min)
-    shock_ok = _shock_free(shocks, candidates, guard)
+    if past_only:
+        shock_ok = _past_shock_free(shocks, candidates)
+        overlap_ok = _nonoverlap_actual(candidates, decision, hold_hours)
+    else:
+        guard = pd.Timedelta(hours=hold_hours) + pd.Timedelta(minutes=minutes + wait_min)
+        shock_ok = _shock_free(shocks, candidates, guard)
+        overlap_ok = np.ones(len(candidates), dtype=bool)
     touch_ok = _no_lower_touch(lower_touches.get(symbol, pd.DatetimeIndex([])), starts, candidates)
-    valid = context_ok & path_ok & shock_ok & touch_ok
+    valid = context_ok & path_ok & shock_ok & overlap_ok & touch_ok
     valid &= vol_bucket == int(candidate_vol[0])
     valid &= trend_bucket == int(candidate_trend[0])
     valid &= monitor_counts == expected_monitor
@@ -327,6 +356,7 @@ def _candidate_pool(task: pd.Series, frame: pd.DataFrame,
         "monitor_session_ny_known_weekday": int(ny),
         "monitor_session_ny_decision_weekday": int(decision_ny),
         "candidate_entry_price": float(frame.open.loc[decision]) if decision in frame.index else np.nan,
+        "matching_policy": "past_only" if past_only else "symmetric_shock_guard",
     }
     if not len(pool_positions):
         return pool_positions, context, "no_exact_stratum_control_times"
@@ -337,11 +367,12 @@ def _draw_positions(pool: np.ndarray, task: pd.Series, n_draws: int) -> np.ndarr
     n = min(int(n_draws), len(pool))
     if not n:
         return np.empty(0, dtype=np.int64)
-    cand_crc = zlib.crc32(str(task.candidate_id).encode("utf-8"))
     symbol_crc = zlib.crc32(str(task.symbol).encode("utf-8"))
     source_crc = zlib.crc32(str(task.source).encode("utf-8"))
-    sequence = np.random.SeedSequence([SEED, cand_crc, symbol_crc, source_crc,
-                                      int(_utc(task.decision).value // 1_000_000_000)])
+    sequence = np.random.SeedSequence([
+        SEED, symbol_crc, source_crc, int(_utc(task.known).value // 1_000_000_000),
+        int(_utc(task.decision).value // 1_000_000_000), int(task.minutes), int(task.wait_min),
+    ])
     rng = np.random.default_rng(sequence)
     return np.sort(rng.choice(pool, size=n, replace=False))
 
@@ -413,14 +444,20 @@ def _build_task_rows(candidates: pd.DataFrame, selected: pd.DataFrame,
 
 
 def _process_symbol_month(tasks: pd.DataFrame, lower_touches: dict,
-                          shocks: pd.DatetimeIndex) -> tuple[list[dict], list[dict]]:
+                          shocks: pd.DatetimeIndex, *, past_only: bool = False) -> tuple[list[dict], list[dict]]:
+    tasks = tasks.copy()
+    dynamic = tasks.source.eq("exits")
+    tasks["match_horizon_hours"] = tasks.hold_hours.astype(int)
+    if dynamic.any():
+        dynamic_key = ["asset", "decision", "known", "minutes", "wait_min", "symbol"]
+        tasks.loc[dynamic, "match_horizon_hours"] = tasks.loc[dynamic].groupby(dynamic_key).hold_hours.transform("max")
     symbol = str(tasks.symbol.iloc[0])
     decisions = pd.DatetimeIndex(tasks.decision)
     month_start = pd.Timestamp(year=decisions[0].year, month=decisions[0].month, day=1, tz="UTC")
     month_end = month_start + pd.DateOffset(months=1)
     max_w = int(tasks.minutes.max())
     max_x = int(tasks.wait_min.max())
-    max_h = int(tasks.hold_hours.max())
+    max_h = int(tasks.match_horizon_hours.max())
     warmup = pd.Timedelta(minutes=max(max_w + max_x, 65) + 5)
     start = month_start - warmup
     end = month_end + pd.Timedelta(hours=max_h)
@@ -437,7 +474,7 @@ def _process_symbol_month(tasks: pd.DataFrame, lower_touches: dict,
     for task in tasks.itertuples(index=False):
         task_series = pd.Series(task._asdict())
         pool, context, status = _candidate_pool(task_series, frame, lower_touches, shocks,
-                                                monitor_grid, monitor_prefix)
+                                                monitor_grid, monitor_prefix, past_only=past_only)
         draws = MAX_DYNAMIC_DRAWS if task.source == "exits" else MAX_FIXED_DRAWS
         sampled = _draw_positions(pool, task_series, draws) if len(pool) else np.empty(0, dtype=np.int64)
         is_fixed = task.source == "search"
@@ -479,6 +516,7 @@ def _process_symbol_month(tasks: pd.DataFrame, lower_touches: dict,
                 "role": task.role, "policy_id": task.policy_id, "epoch": task.epoch,
                 "epoch_rank": task.epoch_rank, "minutes": task.minutes,
                 "wait_min": task.wait_min, "hold_hours": task.hold_hours,
+                "match_horizon_hours": task.match_horizon_hours,
                 "weight": task.weight, "draw": int(draw),
                 "entry_price": entry_price, "exit_price": exit_price,
                 "gross_pct": float(gross),
@@ -497,6 +535,7 @@ def _process_symbol_month(tasks: pd.DataFrame, lower_touches: dict,
                 "monitor_session_ny_known_weekday": context.get("monitor_session_ny_known_weekday"),
                 "monitor_session_ny_decision_weekday": context.get("monitor_session_ny_decision_weekday"),
                 "match_status": status,
+                "matching_policy": "past_only" if past_only else "symmetric_shock_guard",
             })
             if is_fixed:
                 sampled_starts.append((row_index, int(pos), int(task.hold_hours) * 12))
@@ -621,6 +660,36 @@ def _self_test() -> dict:
     second = _draw_positions(pool, task, 3)
     if not np.array_equal(first, second) or np.any(frame.index[first] == decision):
         raise AssertionError("Fixed matcher draws are not deterministic or included the target event")
+    dynamic_a = task.copy()
+    dynamic_a.update({"source": "exits", "candidate_id": "policy-a", "hold_hours": 6,
+                      "match_horizon_hours": 24})
+    dynamic_b = task.copy()
+    dynamic_b.update({"source": "exits", "candidate_id": "policy-b", "hold_hours": 24,
+                      "match_horizon_hours": 24})
+    pool_a, _, _ = _candidate_pool(dynamic_a, frame, {}, pd.DatetimeIndex([]), grid, prefix)
+    pool_b, _, _ = _candidate_pool(dynamic_b, frame, {}, pd.DatetimeIndex([]), grid, prefix)
+    if not np.array_equal(pool_a, pool_b) or not np.array_equal(
+        _draw_positions(pool_a, dynamic_a, MAX_DYNAMIC_DRAWS),
+        _draw_positions(pool_b, dynamic_b, MAX_DYNAMIC_DRAWS),
+    ):
+        raise AssertionError("Dynamic policies for one event did not reuse the same three random draws")
+    probe_times = pd.DatetimeIndex([
+        pd.Timestamp("2025-01-04T06:00:00Z"),
+        pd.Timestamp("2025-01-04T07:00:00Z"),
+        pd.Timestamp("2025-01-04T07:35:00Z"),
+        pd.Timestamp("2025-01-04T06:30:00Z"),
+    ])
+    recent_shock = pd.DatetimeIndex([pd.Timestamp("2025-01-04T06:30:00Z")])
+    if not np.array_equal(_past_shock_free(recent_shock, probe_times), [True, False, True, False]):
+        raise AssertionError("Past-only shock rule used a future or stale shock")
+    overlap_decisions = pd.DatetimeIndex([
+        decision - pd.Timedelta(hours=6), decision - pd.Timedelta(hours=5),
+        decision, decision + pd.Timedelta(hours=6),
+    ])
+    if not np.array_equal(_nonoverlap_actual(overlap_decisions, decision, 6), [True, False, False, True]):
+        raise AssertionError("Past-only controls did not exclude actual-position overlap")
+    if _shock_free(recent_shock, pd.DatetimeIndex([probe_times[1]]), pd.Timedelta(hours=7))[0]:
+        raise AssertionError("Primary symmetric shock rule changed during past-only sensitivity work")
     selected_time = frame.index[int(first[0])]
     control_known = selected_time - pd.Timedelta(minutes=30)
     blocked_touch = control_known - pd.Timedelta(minutes=10)
@@ -653,10 +722,12 @@ def _self_test() -> dict:
         raise AssertionError("ALT paired returns did not use the same 80% matched member subset")
     return {"status": "passed", "fixture": "constant_5m_ohlc", "pool_n": int(len(pool)),
             "draws": first.tolist(), "sample_net_pct": float(ret.iloc[0]),
+            "dynamic_draw_reuse": True,
+            "past_only_causality": True,
             "unmatched_draw_rows": int(len(no_pairs)), "partial_pair_coverage_pct": float(partial.coverage_pct)}
 
 
-def run(*, sources: list[str], epoch3_only: bool = False) -> dict:
+def run(*, sources: list[str], epoch3_only: bool = False, past_only: bool = False) -> dict:
     candidates, selected = _canonical_candidates(sources)
     if epoch3_only:
         selected = selected[selected.epoch_rank.eq(3)].copy()
@@ -679,7 +750,7 @@ def run(*, sources: list[str], epoch3_only: bool = False) -> dict:
     tasks["month"] = tasks.decision.dt.strftime("%Y-%m")
     groups = list(tasks.groupby(["symbol", "month"], sort=True))
     for i, ((symbol, month), group) in enumerate(groups, 1):
-        rows, proofs = _process_symbol_month(group, lower_touches, shocks)
+        rows, proofs = _process_symbol_month(group, lower_touches, shocks, past_only=past_only)
         matches.extend(rows)
         for proof in proofs:
             task_coverage_rows.extend(proof.pop("task_coverage", []))
@@ -699,29 +770,30 @@ def run(*, sources: list[str], epoch3_only: bool = False) -> dict:
         event_meta["status"] = np.where(event_meta.rule_event_id.isin(draw_counts.index), "has_random_matches", event_meta.status)
     fixed_paired = _paired_fixed(match_frame, event_meta)
     coverage = _coverage_table(event_meta, task_coverage, fixed_paired)
-    CONTROL_DIR.mkdir(parents=True, exist_ok=True)
+    output_dir = CONTROL_DIR / "past_only" if past_only else CONTROL_DIR
+    output_dir.mkdir(parents=True, exist_ok=True)
     fixed_frame = match_frame[match_frame.source.eq("search")].copy()
     dynamic_frame = match_frame[match_frame.source.eq("exits")].copy()
     if "search" in sources:
-        temp = CONTROL_DIR / "fixed_matches.parquet.tmp"
+        temp = output_dir / "fixed_matches.parquet.tmp"
         fixed_frame.to_parquet(temp, index=False)
-        temp.replace(CONTROL_DIR / "fixed_matches.parquet")
-        fixed_paired.to_csv(CONTROL_DIR / "fixed_paired.csv.tmp", index=False)
-        (CONTROL_DIR / "fixed_paired.csv.tmp").replace(CONTROL_DIR / "fixed_paired.csv")
+        temp.replace(output_dir / "fixed_matches.parquet")
+        fixed_paired.to_csv(output_dir / "fixed_paired.csv.tmp", index=False)
+        (output_dir / "fixed_paired.csv.tmp").replace(output_dir / "fixed_paired.csv")
     if "exits" in sources:
-        temp = CONTROL_DIR / "dynamic_matches.parquet.tmp"
+        temp = output_dir / "dynamic_matches.parquet.tmp"
         dynamic_frame.to_parquet(temp, index=False)
-        temp.replace(CONTROL_DIR / "dynamic_matches.parquet")
+        temp.replace(output_dir / "dynamic_matches.parquet")
 
-    old_coverage_path = CONTROL_DIR / "coverage.csv"
+    old_coverage_path = output_dir / "coverage.csv"
     if old_coverage_path.is_file() and set(sources) != {"search", "exits"}:
         old_coverage = pd.read_csv(old_coverage_path)
         old_coverage = old_coverage[~old_coverage.source.isin(sources)] if "source" in old_coverage else old_coverage
         coverage = pd.concat([old_coverage, coverage], ignore_index=True, sort=False)
-    coverage.to_csv(CONTROL_DIR / "coverage.csv.tmp", index=False)
+    coverage.to_csv(output_dir / "coverage.csv.tmp", index=False)
     (CONTROL_DIR / "coverage.csv.tmp").replace(old_coverage_path)
 
-    scope_path = CONTROL_DIR / "out_of_scope_locked_candidates.csv"
+    scope_path = output_dir / "out_of_scope_locked_candidates.csv"
     scope_rows = _scope_only_rows(candidates)
     if scope_path.is_file() and set(sources) != {"search", "exits"}:
         old_scope = pd.read_csv(scope_path)
@@ -730,7 +802,7 @@ def run(*, sources: list[str], epoch3_only: bool = False) -> dict:
     scope_rows.to_csv(scope_path.with_suffix(".csv.tmp"), index=False)
     scope_path.with_suffix(".csv.tmp").replace(scope_path)
 
-    receipts_path = CONTROL_DIR / "price_source_receipts.json"
+    receipts_path = output_dir / "price_source_receipts.json"
     if receipts_path.is_file() and set(sources) != {"search", "exits"}:
         old_receipts = json.loads(receipts_path.read_text())
         old_receipts = [r for r in old_receipts if not set(r.get("sources", [])) & set(sources)]
@@ -739,7 +811,7 @@ def run(*, sources: list[str], epoch3_only: bool = False) -> dict:
     receipt_tmp.write_text(json.dumps(receipts, indent=2, ensure_ascii=False, default=str) + "\n")
     receipt_tmp.replace(receipts_path)
 
-    manifest_path = CONTROL_DIR / "manifest.json"
+    manifest_path = output_dir / "manifest.json"
     manifest = json.loads(manifest_path.read_text()) if manifest_path.is_file() else {}
     source_runs = manifest.get("source_runs", {})
     source_runs["+".join(sources)] = {
@@ -753,7 +825,9 @@ def run(*, sources: list[str], epoch3_only: bool = False) -> dict:
         "max_dynamic_draws": MAX_DYNAMIC_DRAWS,
         "minimum_member_coverage_pct": 100*MIN_COVERAGE,
         "same_symbol_lower_touch_rule": "No lower first-touch open in [control_known-minutes, control_decision).",
-        "shock_exclusion": "Exclude controls within +/- (hold_hours + minutes + wait_min) of any completed 5m same-side 25+ first-touch shock known time.",
+        "matching_policy": "past_only_sensitivity" if past_only else "primary_symmetric_shock_guard",
+        "shock_exclusion": ("Exclude only if a same-side 25+ ledger shock was already known in [random decision - 60m, random decision); also exclude controls whose hold interval overlaps the candidate actual hold interval. Future shocks are allowed."
+                            if past_only else "Exclude controls within +/- (hold_hours + minutes + wait_min) of any completed 5m same-side 25+ first-touch shock known time."),
         "matching_strata": ["same symbol", "same UTC decision month", "same UTC 6h decision block", "same prior-1h realized-vol bucket [.25,.5,1,2,4]%", "same prior-1h trend sign before known", "same NY weekday at known and decision", "same observable 5m-bar fraction over W+X"],
         "price_data": "monday_breadth_opt_payoffs.load_full_ohlc(..., needed_intervals=None, repair_missing=False); registered local/cache only, no REST.",
         "fixed_fees": "VectorBT fixed-control returns use existing two-taker-fill fees and are replayed from the already loaded local month matrix.",
@@ -768,13 +842,14 @@ def main() -> None:
     cli = argparse.ArgumentParser()
     cli.add_argument("--source", choices=("search", "exits", "all"), default="all")
     cli.add_argument("--epoch3-only", action="store_true", help="Prioritize the 2026 locked validation epoch only")
-    cli.add_argument("--self-test", action="store_true", help="Run the deterministic fixed matcher fixture")
+    cli.add_argument("--past-only", action="store_true", help="Run the past-only shock-exclusion sensitivity into controls/past_only/")
+    cli.add_argument("--self-test", action="store_true", help="Run deterministic matcher fixtures")
     args = cli.parse_args()
     if args.self_test:
         print(json.dumps(_self_test(), ensure_ascii=False))
         return
     sources = ["search", "exits"] if args.source == "all" else [args.source]
-    print(json.dumps(run(sources=sources, epoch3_only=args.epoch3_only), ensure_ascii=False, default=str))
+    print(json.dumps(run(sources=sources, epoch3_only=args.epoch3_only, past_only=args.past_only), ensure_ascii=False, default=str))
 
 
 if __name__ == "__main__":
