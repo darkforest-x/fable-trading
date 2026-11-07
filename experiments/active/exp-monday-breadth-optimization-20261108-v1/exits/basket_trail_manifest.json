@@ -1,0 +1,207 @@
+{
+  "builder": "yoyo/evaluation/monday_breadth_opt_basket_trail.py",
+  "selection": "pre-2026 highest q25 UTC-month mean paired net delta versus same-event 144h hold; tie-break median month, mean month, smaller serial-event DD",
+  "parameter_grid": [
+    {
+      "activate_pct": 5.0,
+      "trail_width_pct": 4.0,
+      "initial_stop_pct": null,
+      "config_id": "a5_t4_snone"
+    },
+    {
+      "activate_pct": 5.0,
+      "trail_width_pct": 4.0,
+      "initial_stop_pct": 6.0,
+      "config_id": "a5_t4_s6"
+    },
+    {
+      "activate_pct": 5.0,
+      "trail_width_pct": 4.0,
+      "initial_stop_pct": 12.0,
+      "config_id": "a5_t4_s12"
+    },
+    {
+      "activate_pct": 5.0,
+      "trail_width_pct": 8.0,
+      "initial_stop_pct": null,
+      "config_id": "a5_t8_snone"
+    },
+    {
+      "activate_pct": 5.0,
+      "trail_width_pct": 8.0,
+      "initial_stop_pct": 6.0,
+      "config_id": "a5_t8_s6"
+    },
+    {
+      "activate_pct": 5.0,
+      "trail_width_pct": 8.0,
+      "initial_stop_pct": 12.0,
+      "config_id": "a5_t8_s12"
+    },
+    {
+      "activate_pct": 5.0,
+      "trail_width_pct": 12.0,
+      "initial_stop_pct": null,
+      "config_id": "a5_t12_snone"
+    },
+    {
+      "activate_pct": 5.0,
+      "trail_width_pct": 12.0,
+      "initial_stop_pct": 6.0,
+      "config_id": "a5_t12_s6"
+    },
+    {
+      "activate_pct": 5.0,
+      "trail_width_pct": 12.0,
+      "initial_stop_pct": 12.0,
+      "config_id": "a5_t12_s12"
+    },
+    {
+      "activate_pct": 10.0,
+      "trail_width_pct": 4.0,
+      "initial_stop_pct": null,
+      "config_id": "a10_t4_snone"
+    },
+    {
+      "activate_pct": 10.0,
+      "trail_width_pct": 4.0,
+      "initial_stop_pct": 6.0,
+      "config_id": "a10_t4_s6"
+    },
+    {
+      "activate_pct": 10.0,
+      "trail_width_pct": 4.0,
+      "initial_stop_pct": 12.0,
+      "config_id": "a10_t4_s12"
+    },
+    {
+      "activate_pct": 10.0,
+      "trail_width_pct": 8.0,
+      "initial_stop_pct": null,
+      "config_id": "a10_t8_snone"
+    },
+    {
+      "activate_pct": 10.0,
+      "trail_width_pct": 8.0,
+      "initial_stop_pct": 6.0,
+      "config_id": "a10_t8_s6"
+    },
+    {
+      "activate_pct": 10.0,
+      "trail_width_pct": 8.0,
+      "initial_stop_pct": 12.0,
+      "config_id": "a10_t8_s12"
+    },
+    {
+      "activate_pct": 10.0,
+      "trail_width_pct": 12.0,
+      "initial_stop_pct": null,
+      "config_id": "a10_t12_snone"
+    },
+    {
+      "activate_pct": 10.0,
+      "trail_width_pct": 12.0,
+      "initial_stop_pct": 6.0,
+      "config_id": "a10_t12_s6"
+    },
+    {
+      "activate_pct": 10.0,
+      "trail_width_pct": 12.0,
+      "initial_stop_pct": 12.0,
+      "config_id": "a10_t12_s12"
+    },
+    {
+      "activate_pct": 20.0,
+      "trail_width_pct": 4.0,
+      "initial_stop_pct": null,
+      "config_id": "a20_t4_snone"
+    },
+    {
+      "activate_pct": 20.0,
+      "trail_width_pct": 4.0,
+      "initial_stop_pct": 6.0,
+      "config_id": "a20_t4_s6"
+    },
+    {
+      "activate_pct": 20.0,
+      "trail_width_pct": 4.0,
+      "initial_stop_pct": 12.0,
+      "config_id": "a20_t4_s12"
+    },
+    {
+      "activate_pct": 20.0,
+      "trail_width_pct": 8.0,
+      "initial_stop_pct": null,
+      "config_id": "a20_t8_snone"
+    },
+    {
+      "activate_pct": 20.0,
+      "trail_width_pct": 8.0,
+      "initial_stop_pct": 6.0,
+      "config_id": "a20_t8_s6"
+    },
+    {
+      "activate_pct": 20.0,
+      "trail_width_pct": 8.0,
+      "initial_stop_pct": 12.0,
+      "config_id": "a20_t8_s12"
+    },
+    {
+      "activate_pct": 20.0,
+      "trail_width_pct": 12.0,
+      "initial_stop_pct": null,
+      "config_id": "a20_t12_snone"
+    },
+    {
+      "activate_pct": 20.0,
+      "trail_width_pct": 12.0,
+      "initial_stop_pct": 6.0,
+      "config_id": "a20_t12_s6"
+    },
+    {
+      "activate_pct": 20.0,
+      "trail_width_pct": 12.0,
+      "initial_stop_pct": 12.0,
+      "config_id": "a20_t12_s12"
+    }
+  ],
+  "bar_interval": "5m",
+  "entry": "decision timestamp 5m open",
+  "trigger": "completed 5m close of synchronous equal-weight basket return versus common entry open",
+  "exit": "next 5m open after trigger close; otherwise 144h open timeout",
+  "price_api": "monday_breadth_opt_payoffs.load_full_ohlc(repair_missing=False)",
+  "fees": {
+    "entry_taker": 0.0005,
+    "exit_taker": 0.0005
+  },
+  "modeled": [
+    "equal initial notional per member",
+    "Binance USD-M 5m open/close",
+    "two taker fills per member"
+  ],
+  "not_modeled": [
+    "funding",
+    "leverage",
+    "slippage",
+    "market impact",
+    "capacity",
+    "margin/liquidation"
+  ],
+  "coverage": {
+    "locked_events": 170,
+    "complete_locked_events": 170,
+    "complete_sep16": true,
+    "loaded_symbols": 612,
+    "requested_symbols": 612
+  },
+  "input_counts": {
+    "dynamic_primary_ALT_rows": 51,
+    "wave_ALT_rows": 119,
+    "locked_events_after_dedup": 170,
+    "duplicate_member_set_decision_keys_removed": 0,
+    "unique_study_symbols_including_sep16": 612,
+    "membership_rows_including_sep16": 9317,
+    "sep16_members": 68,
+    "sep16_decision": "2026-09-15T19:20:00+00:00"
+  }
+}
