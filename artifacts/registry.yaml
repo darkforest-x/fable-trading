@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: monday-breadth-reversal-window-20261107-v1
+    artifact_type: manifest
+    role: historical_breadth_reversal_window_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: ea8b27ac0b
+    source_path: experiments/active/exp-monday-breadth-reversal-window-20261107-v1/summary.csv
+    storage_uri: repo://experiments/active/exp-monday-breadth-reversal-window-20261107-v1/summary.csv
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Sibling alarm counts, independently funded VectorBT long results and sampled matched controls. Summary splits the selection period before 2025 from later history and includes prior-falling-target subsets.
+
   - artifact_id: alarm-btc-eth-price-response-20261107-v1
     artifact_type: manifest
     role: frozen_breadth_alarm_btc_eth_price_paths

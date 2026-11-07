@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-breadth-reversal-window-20261107-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ea8b27ac0b
+    status: inconclusive
+    question: Does changing the rolling window from five to ten minutes for 25 lower first touches improve a post-observation rebound trade?
+    single_variable: Five vs ten trailing minutes sampled at five-minute closes. The 30-minute observation, cooldown, 24-hour alarm-to-exit schedule and costs are fixed. BTC, ETH and SOL evaluated separately.
+    result: Five minutes reproduced all 129 frozen alarms, with 122 lower and 33 lower without subsequent touches. Ten minutes yielded 168 lower and 42 without. For zero subsequent touches BTC, ETH and SOL averaged +0.67/+0.94/+2.88 percent net at five minutes and +0.23/+0.18/+1.42 at ten. In 2025 onward, ten minutes had the higher average for each asset on only 12 vs 11 observations. The full-period matched excess for SOL at five minutes was +2.59pp on 24 matches.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - monday-breadth-reversal-window-20261107-v1
+    canonical_report: experiments/active/exp-monday-breadth-reversal-window-20261107-v1/summary.csv
+    notes: VectorBT independent long trades, next open after observation, fixed market exit 23.5 hours later. Fee 5bp per fill. No funding, latency or slippage. Inputs inherit the retrospective scored-touch universe. Historical samples overlap and are not forward validation.
+
   - experiment_id: exp-alarm-btc-eth-price-response-20261107-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 9ed50806ad
