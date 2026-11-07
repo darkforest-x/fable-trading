@@ -967,7 +967,7 @@ def _aggregate_wait_partition(
     signals: pd.DataFrame,
     eligible_members: pd.DataFrame,
     symbols: Sequence[str],
-    benchmark_frames: dict[str, pd.DataFrame],
+    benchmark_outcomes: pd.DataFrame,
 ) -> tuple[pd.DataFrame, int]:
     """Read and aggregate one W/X slice; never hold all 15m constituent rows."""
     columns = [
@@ -1068,7 +1068,9 @@ def _aggregate_wait_partition(
     event["reclaim_fraction"] = event.reclaim_n / event.reclaim_eligible_n.replace(0, np.nan)
     event["reclaim_fraction_all_eligible"] = event.reclaim_n / event.members_expected_n.replace(0, np.nan)
     event["reclaim_quote_coverage_pct"] = 100 * event.quote_observed_n / event.members_expected_n.replace(0, np.nan)
-    bench = _benchmark_partition(signals_x, benchmark_frames)
+    bench = benchmark_outcomes.loc[
+        benchmark_outcomes.minutes.eq(minutes) & benchmark_outcomes.wait_min.eq(wait_min)
+    ].copy()
     event = event.merge(bench, on=["minutes", "known", "wait_min", "hold_hours"], how="left", validate="one_to_one")
     if event.duplicated(["minutes", "known", "wait_min", "hold_hours"]).any():
         raise AssertionError("event outcome join keys are not unique")
@@ -1177,6 +1179,13 @@ def main() -> None:
         print("symbol subset complete; event aggregation skipped so partial member coverage is not mislabeled", flush=True)
         return
     benchmark_frames, benchmark_receipts = _load_benchmark_frames(signals, repair_missing=not args.no_repair)
+    benchmark_outcomes = _benchmark_partition(signals, benchmark_frames)
+    print(
+        f"benchmark outcomes={len(benchmark_outcomes):,}; unique actual cases="
+        f"{benchmark_outcomes[['decision', 'hold_hours']].drop_duplicates().shape[0]:,}",
+        flush=True,
+    )
+    del benchmark_frames
     previous_manifest_path = PAYOFFS / "manifest.json"
     previous_manifest = {}
     if previous_manifest_path.is_file():
@@ -1218,7 +1227,7 @@ def main() -> None:
     for minutes in sorted(signals.minutes.unique()):
         for wait_min in sorted(signals.loc[signals.minutes.eq(minutes), "wait_min"].unique()):
             event, raw_rows = _aggregate_wait_partition(
-                int(minutes), int(wait_min), signals, eligible_members, symbols, benchmark_frames
+                int(minutes), int(wait_min), signals, eligible_members, symbols, benchmark_outcomes
             )
             if "event_columns" not in manifest:
                 manifest["event_columns"] = list(event.columns)
