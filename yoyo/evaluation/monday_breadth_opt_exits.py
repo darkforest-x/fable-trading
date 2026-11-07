@@ -96,13 +96,13 @@ def prepare(frame):
 
 
 @njit(cache=True)
-def execute_order(c,q,starts,settings,can_trade,highwater,protection,sold_part,gap_partial,why,ambiguous,fee_in,fee_out,fee_limit):
+def execute_order(c,q,starts,settings,can_trade,highwater,protection,sold_part,gap_partial,why,ambiguous,fee_in,fee_out,fee_limit,entry_slip,exit_slip):
     col=c.from_col
     event=col//len(settings);policy=col%len(settings); bar=c.i
     if not can_trade[event,policy]:return -1,NoOrder
     s=settings[policy];kind=int(s[0]);deadline=int(s[1])
     pos=starts[event]+bar
-    entry=q[starts[event],0]
+    entry=q[starts[event],0]*(1+entry_slip)
     if bar>deadline or pos>=len(q):return -1,NoOrder
     if bar==0 and c.call_idx==0:
         highwater[col]=entry
@@ -114,7 +114,7 @@ def execute_order(c,q,starts,settings,can_trade,highwater,protection,sold_part,g
     qty=c.last_position[col];op=q[pos,0];hi=q[pos,1];lo=q[pos,2]
     if bar==deadline:
         why[col]=1
-        return col,nb.order_nb(size=-qty,price=op,fees=fee_out,direction=0,raise_reject=True)
+        return col,nb.order_nb(size=-qty,price=op*(1-exit_slip),fees=fee_out,direction=0,raise_reject=True)
     peak=highwater[col]
     if bar:
         peak=max(peak,q[pos-1,1]);highwater[col]=peak
@@ -162,18 +162,18 @@ def execute_order(c,q,starts,settings,can_trade,highwater,protection,sold_part,g
         ix=(5 if kind==5 else 8)+(1 if s[4]==50 else 0)
         if q[pos,ix]==1:
             why[col]=4
-            return col,nb.order_nb(size=-qty,price=op,fees=fee_out,direction=0,raise_reject=True)
+            return col,nb.order_nb(size=-qty,price=op*(1-exit_slip),fees=fee_out,direction=0,raise_reject=True)
     if level>0 and lo<=level:
         if hit_limit and op<target and op>level:ambiguous[col]=1
         why[col]=2
-        return col,nb.order_nb(size=-qty,price=min(op,level),fees=fee_out,direction=0,raise_reject=True)
+        return col,nb.order_nb(size=-qty,price=min(op,level)*(1-exit_slip),fees=fee_out,direction=0,raise_reject=True)
     if hit_limit:
         sold_part[col]=True;why[col]=3
         return col,nb.order_nb(size=-min(qty,s[6]),price=target,fees=fee_limit,direction=0,raise_reject=True)
     return -1,NoOrder
 
 
-def simulate(frame,entry_times,policy_list,*,batch_size=8):
+def simulate(frame,entry_times,policy_list,*,batch_size=8,entry_slip=0.,exit_slip=0.):
     """Simulate each supplied entry and policy once, returning actual weighted fill PnL and timing."""
     if not frame.index.is_unique or not frame.index.is_monotonic_increasing:raise ValueError('Invalid quote clock')
     times=pd.DatetimeIndex(entry_times)
@@ -203,7 +203,7 @@ def simulate(frame,entry_times,policy_list,*,batch_size=8):
         capital=np.repeat(np.where(np.isfinite(q[safe,0]),q[safe,0]*2,1.),n_policy)
         why=np.zeros(col_count,dtype=np.int8);ambig=np.zeros_like(why)
         portfolio=vbt.Portfolio.from_order_func(marked,execute_order,q,safe,settings,allow,
-            np.zeros(col_count),np.zeros(col_count),np.zeros(col_count,np.bool_),np.full(col_count,-1),why,ambig,TAKER,TAKER,MAKER,
+            np.zeros(col_count),np.zeros(col_count),np.zeros(col_count,np.bool_),np.full(col_count,-1),why,ambig,TAKER,TAKER,MAKER,entry_slip,exit_slip,
             flexible=True,init_cash=capital,cash_sharing=False,max_orders=3*col_count,freq='5min')
         fills=portfolio.orders.records
         opened=fills[fills.side==0].set_index('col')
