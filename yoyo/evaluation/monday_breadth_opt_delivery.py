@@ -109,6 +109,20 @@ def wave_comparison():
     pd.DataFrame(rows).to_csv(out/'二次扩散退出对照.csv',index=False,encoding='utf-8-sig')
 
 
+def point_targets():
+    events=pd.read_parquet(study.OUT/'funded_case_check/locked_events.parquet')
+    e=events[events.candidate_id.eq('case_runner_funded_BTC')].copy()
+    e['入场北京时间']=e.decision.dt.tz_convert('Asia/Shanghai').dt.strftime('%Y-%m-%d %H:%M')
+    e['六天最高毛浮盈点数']=e.peak_pct*e.entry_open/100
+    e['实际净赚至少一万点']=e.funded_points.ge(10000)
+    e['实现对毛浮盈之比%']=np.where(e['六天最高毛浮盈点数']>0,100*e.funded_points/e['六天最高毛浮盈点数'],np.nan)
+    names={'initial':'初始首触币数','new_coins':'观察期新增币数','entry_open':'BTC买入价','exit_vwap':'加权卖出价',
+           'funding_points':'资金费点数','funded_points':'扣手续费和资金费后实现点数','funded_pct':'最终净收益%'}
+    cols=['入场北京时间',*names.keys(),'六天最高毛浮盈点数','实现对毛浮盈之比%','实际净赚至少一万点']
+    e.sort_values('decision')[cols].rename(columns=names).to_csv(search.OUT/'BTC一万点方案_全部53笔.csv',index=False,encoding='utf-8-sig')
+
+
 if __name__=='__main__':
     compact()
+    point_targets()
     wave_comparison()
