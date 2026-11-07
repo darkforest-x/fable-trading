@@ -1,0 +1,53 @@
+{
+  "experiment": "exp-monday-breadth-frequency-20261108-v1/btc_target",
+  "single_variable": "share threshold only: 5, 2, 1, 0.5 percent; denominator, 5m window, 30m wait, ratio gate, alt move gate, initial floor, funded exit unchanged",
+  "frozen_entry": {
+    "minutes": 5,
+    "wait_min": 30,
+    "initial_min": 1,
+    "diffusion": "4*new_coins <= initial",
+    "confirmation": "alt median observed move >=2%",
+    "touch_share": "initial lower-touch symbols / trailing 28-day any-direction touch-universe proxy; unknown share fails closed"
+  },
+  "frozen_exit": {
+    "policy": "btc_funded_limit_144_6_0_0_0_1",
+    "target": "funding-adjusted limit aimed at +10000 net USDT points after fees and settled funding",
+    "stop_pct": 6,
+    "max_hold_hours": 144,
+    "entry_fee": "taker 0.05%",
+    "limit_exit_fee": "maker 0.02%",
+    "stop_or_time_exit_fee": "taker 0.05%",
+    "funding": "settled Binance UM rate × mark; legacy missing mark price proxied by BTC contract open per source implementation"
+  },
+  "single_position": "reset each source epoch; accept first chronological signal and block next entries for max(24h, 144h)=144h",
+  "time_splits_utc": {
+    "pre2023": "source start through 2022-12-31",
+    "2023_2024": "2023-01-01 through 2024-12-31",
+    "2025": "selection frequency gate",
+    "2026": "locked descriptive review through 2026-10-28 exclusive"
+  },
+  "historical_frequency_gates": {
+    "freq36": {
+      "early_min": 50,
+      "2023_2024_min": 72,
+      "2025_min": 36,
+      "2025_months_min": 8
+    },
+    "freq72": {
+      "early_min": 50,
+      "2023_2024_min": 144,
+      "2025_min": 72,
+      "2025_months_min": 8
+    }
+  },
+  "threshold_selection": "For each tier, choose the highest tested threshold (nearest original 5%) meeting only pre-2026 frequency gates; 2026 never chooses. If none passes, retain all four as sensitivity-only.",
+  "cache_discipline": {
+    "shared_funded_cache": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108/btc_funded_exit_fills.parquet",
+    "shared_cache_write": false,
+    "only_missing_entry_times_simulated": true,
+    "new_fill_cache": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-breadth-frequency-20261108-v1/btc_target/incremental_fills/btc_funded_limit_incremental.parquet",
+    "underlying_execution": "existing VectorBT amount-based sim.simulate and funding.charged adapter; no hand-built OHLC fill engine"
+  },
+  "baseline_check": "5% candidate admissions and its 53 funded fills must match the previous case_target_funded_BTC event ledger exactly; original minimum initial count is 1 and remains explicit",
+  "limitations": "Research sensitivity only; 2026 is partial through the source ledger end; lower thresholds are not automatically validated or eligible for alert deployment; do not sum across thresholds as independent opportunities."
+}

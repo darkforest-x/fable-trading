@@ -1,0 +1,24 @@
+{
+  "baseline_candidate_id": "case_target_funded_BTC",
+  "expected_events": 53,
+  "admitted_events": 53,
+  "admission_keys_exact": true,
+  "read_only_cache_matches": 53,
+  "funded_fill_fields_exact": true,
+  "return_column_semantics": "legacy case net_pct aliases funded_pct; shared cache net_pct is price-and-fee return before funding; emitted net_pct is normalized to price-and-fee, funded_pct is funding-adjusted",
+  "max_absolute_numeric_difference": 0.0,
+  "min_initial_count": 1,
+  "policy_key": "btc_funded_limit_144_6_0_0_0_1",
+  "baseline_cache_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108/btc_funded_exit_fills.parquet",
+  "baseline_cache_read_only": true,
+  "input_feature_window_first_decision": "2020-01-23 18:20:00+00:00",
+  "input_feature_window_end_exclusive": "2026-10-28 00:00:00+00:00",
+  "entry_fill_cache": {
+    "requested_unique_entry_times": 144,
+    "shared_cache_target_policy_reused": 111,
+    "new_incremental_entries_simulated_this_run": 0,
+    "incremental_cache_total_entries": 33,
+    "unresolved_entry_times_without_complete_fill": 0,
+    "unresolved_entry_times": []
+  }
+}
