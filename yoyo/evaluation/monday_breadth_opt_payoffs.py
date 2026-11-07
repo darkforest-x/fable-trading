@@ -715,7 +715,7 @@ def _member_outcomes_for_symbol(
     if local_members.empty:
         return pd.DataFrame(), {"symbol": symbol, "rows": 0}
     if "event" in local_members and "event_id" not in local_members:
-        local_members.rename(columns={"event": "event_id"}, inplace=True)
+        local_members = local_members.rename(columns={"event": "event_id"})
     local_members["known"] = pd.to_datetime(local_members.known, utc=True)
     sig = signals[["minutes", "known", "wait_min", "decision"]].copy()
     sig["known"] = pd.to_datetime(sig.known, utc=True)
@@ -939,6 +939,12 @@ def _benchmark_partition(signals: pd.DataFrame, frames: dict[str, pd.DataFrame])
             "mae_pct": f"{asset.lower()}_mae_pct",
             "endpoint_available": f"{asset.lower()}_endpoint_available",
             "path_complete": f"{asset.lower()}_path_complete",
+            "hit5": f"{asset.lower()}_hit5",
+            "hit10": f"{asset.lower()}_hit10",
+            "first5_vs_drawdown5": f"{asset.lower()}_first5_vs_drawdown5",
+            "first10_vs_drawdown5": f"{asset.lower()}_first10_vs_drawdown5",
+            "pre_target_mae_5_pct": f"{asset.lower()}_pre_target_mae_5_pct",
+            "pre_target_mae_10_pct": f"{asset.lower()}_pre_target_mae_10_pct",
         }
         metrics.rename(columns=names, inplace=True)
         output = pd.concat([output.reset_index(drop=True), metrics.reset_index(drop=True)], axis=1)
