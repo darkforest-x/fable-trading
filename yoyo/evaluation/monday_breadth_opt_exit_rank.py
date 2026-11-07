@@ -110,6 +110,8 @@ def run(stage):
                 ('2026_ex_september',group[(group.epoch==3)&(group.decision.dt.month!=9)]),
                 ('all',group)]:
                 stats.append(dict(candidate_id=ident,asset=asset,period=name,**metrics(sub)))
+    out=out if stage=='all' else out/'anchor_check'
+    out.mkdir(parents=True,exist_ok=True)
     pd.concat(all_development).to_parquet(out/'exit_development.parquet',index=False)
     pd.concat(case_rows).to_csv(out/'sept16_admitted_btc.csv',index=False)
     pd.DataFrame(selected).to_csv(out/'locked_rules.csv',index=False)
