@@ -50,13 +50,16 @@ struct RootView: View {
     @Environment(FibStore.self) private var fib
     @Environment(TicketModel.self) private var ticket
     @Environment(\.scenePhase) private var scenePhase
-    @State private var tab: AppTab = .monitor
-    @State private var progress: CGFloat = CGFloat(AppTab.allCases.firstIndex(of: .monitor)!)
+    @State private var tab: AppTab = .fib       // owner 2026-11-07: open on 1.618
+    @State private var progress: CGFloat = CGFloat(AppTab.allCases.firstIndex(of: .fib)!)
     @State private var showNotifications = false
     @State private var showSettings = false
     @State private var bannerDrag: CGFloat = 0
 
-    @State private var scrolled: AppTab? = .monitor
+    @State private var scrolled: AppTab? = .fib
+    /// Page a tab tap is scrolling to: the pages it passes must not overwrite the selection, and
+    /// paging stays enabled until it lands (1.618 disables paging so drags go to the chart).
+    @State private var target: AppTab?
 
     var body: some View {
         // Pure SwiftUI paging (no UIKit page container): pages follow the finger, draw edge to edge,
@@ -81,13 +84,24 @@ struct RootView: View {
         .scrollEdgeEffectHidden(true, for: .all)
         .scrollPosition(id: $scrolled)
         // The 1.618 page is a full-screen chart: horizontal drags pan the chart, not the pages.
-        .scrollDisabled(tab == .fib)
+        .scrollDisabled(tab == .fib && target == nil)
         .onScrollGeometryChange(for: CGFloat.self) { geo in
             geo.contentOffset.x / max(geo.containerSize.width, 1)
         } action: { _, value in progress = value }
-        .onChange(of: scrolled) { _, value in if let value, value != tab { tab = value } }
+        .onChange(of: scrolled) { _, value in
+            guard let value else { return }
+            if let target {
+                if value == target { self.target = nil }
+                return
+            }
+            if value != tab { tab = value }
+        }
         .onChange(of: tab) { _, value in
-            if scrolled != value { withAnimation(.spring(response: 0.42, dampingFraction: 0.86)) { reader.scrollTo(value, anchor: .leading) } }
+            guard scrolled != value else { return }
+            target = value
+            withAnimation(.spring(response: 0.42, dampingFraction: 0.86)) { reader.scrollTo(value, anchor: .leading) }
+            // Never leave paging locked if the scroll position report is missed.
+            Task { try? await Task.sleep(for: .seconds(1.2)); if target == value { target = nil; scrolled = value } }
         }
         .onAppear { reader.scrollTo(tab, anchor: .leading); scrolled = tab }
         .ignoresSafeArea()
