@@ -59,16 +59,27 @@ REST_MIN_INTERVAL_SECONDS = 0.25
 PARQUET_PART_ROWS = 100_000
 RETURN_BATCH = 16_000
 SIGNAL_FEATURE_COLUMNS = (
+    "N",
     "initial",
     "band",
     "new_coins",
     "first_half_new",
     "last_half_new",
+    "median_member_touch_history_age_days",
+    "trailing28_universe",
+    "share28_pct",
     "monitor_fraction",
+    "initial_monitor_fraction",
+    "wait_monitor_fraction",
+    "monitor_bars",
     "market_share",
     "market_share_status",
     "last_touch_age_min",
     "since_prev_lower_touch_min",
+    "since_prev_25_lower_shock_min",
+    "since_prev_25_any_side_shock_min",
+    "lower_shock_history_status",
+    "any_side_shock_history_status",
     "continued",
     "cooldown",
     "alarm",
@@ -431,6 +442,12 @@ def load_full_ohlc(
     start_ms, end_ms = _ms(start_utc), _ms(end_utc)
     windows = _normalise_intervals(start_utc, end_utc, needed_intervals)
     candidates, excluded = quote_sources._recorded_paths(symbol)
+    source_starts = [
+        int(bounds[0])
+        for kind, path, _, _ in candidates
+        if (bounds := quote_sources._source_bounds(kind, path, symbol)) is not None
+    ]
+    earliest_registered_ms = min(source_starts) if source_starts else None
     local = [(kind, path, priority, aliases) for kind, path, priority, aliases in candidates]
     local.extend(("full_ohlc_rest", path, 60, [str(path)]) for path in _cache_paths(symbol, start_ms, end_ms))
     frame, source_receipts = _merge_full_sources(symbol, start_ms, end_ms, candidates=local)
@@ -441,6 +458,10 @@ def load_full_ohlc(
             first_ms = _ms(first_observed)
             # Never request pre-listing history for instruments such as SOL.
             windows = [(max(left, first_ms), right) for left, right in windows if right >= first_ms]
+        elif earliest_registered_ms is not None:
+            # When the requested slice predates every registered candle, avoid
+            # asking REST for a market that had not begun trading locally.
+            windows = [(max(left, earliest_registered_ms), right) for left, right in windows if right >= earliest_registered_ms]
         for left_ms, right_ms in _missing_full_runs(frame, windows):
             repaired, audit = _fetch_rest_full(symbol, left_ms, right_ms)
             audit["cache"] = _persist_full_rest(symbol, repaired)
@@ -466,6 +487,7 @@ def load_full_ohlc(
         "local_sources": source_receipts,
         "excluded_source_lineage": excluded,
         "rows": int(len(frame)),
+        "earliest_registered_source_ms": earliest_registered_ms,
         "observed_range_utc": {"start": frame.index.min().isoformat() if len(frame) else None, "end": frame.index.max().isoformat() if len(frame) else None},
         "low_missing_rows_in_returned_frame": int(frame.low.isna().sum()),
         "rest_repairs": repair_receipts,
@@ -509,87 +531,158 @@ def _vbt_net_returns(entry: np.ndarray, exit_: np.ndarray) -> np.ndarray:
     return result
 
 
-def _add_path_metrics(
-    frame: pd.DataFrame,
-    decision: pd.DatetimeIndex,
-    hold_hours: int,
-    *,
-    entry_price: np.ndarray | None = None,
-    exit_price: np.ndarray | None = None,
-) -> pd.DataFrame:
-    """Return per-distinct-entry path fields; excludes the exit candle's range."""
-    steps = int(hold_hours * 12)
-    grid_start = frame.index[0] if len(frame) else pd.Timestamp("1970-01-01", tz="UTC")
+_NUMBA_PATH_SCAN = None
+
+
+def _scan_paths_numba(
+    opens: np.ndarray,
+    highs: np.ndarray,
+    lows: np.ndarray,
+    starts: np.ndarray,
+    hold_steps: np.ndarray,
+) -> tuple[np.ndarray, ...]:
+    """Single compiled pass per unique trade path, including explicit exit open."""
+    global _NUMBA_PATH_SCAN
+    if _NUMBA_PATH_SCAN is None:
+        from numba import njit
+
+        @njit
+        def scan(open_, high_, low_, start_, steps_):
+            n = len(start_)
+            entry = np.full(n, np.nan)
+            exit_ = np.full(n, np.nan)
+            gross = np.full(n, np.nan)
+            mfe = np.full(n, np.nan)
+            mae = np.full(n, np.nan)
+            complete = np.zeros(n, dtype=np.bool_)
+            hit5 = np.zeros(n, dtype=np.bool_)
+            hit10 = np.zeros(n, dtype=np.bool_)
+            first5 = np.zeros(n, dtype=np.int8)  # 0=incomplete, 1=neither, 2=target, 3=drawdown, 4=ambiguous
+            first10 = np.zeros(n, dtype=np.int8)
+            pre5 = np.full(n, np.nan)
+            pre10 = np.full(n, np.nan)
+            for i in range(n):
+                p = start_[i]
+                steps = steps_[i]
+                if p < 0 or p + steps >= len(open_):
+                    continue
+                e = open_[p]
+                x = open_[p + steps]
+                if not np.isfinite(e) or not np.isfinite(x) or e <= 0.0 or x <= 0.0:
+                    continue
+                entry[i] = e
+                exit_[i] = x
+                gross[i] = 100.0 * (x / e - 1.0)
+                complete_path = True
+                max_price = e
+                min_price = e
+                down_i = -1
+                up5_i = -1
+                up10_i = -1
+                pre5_price = e
+                pre10_price = e
+                for j in range(steps):
+                    bar = p + j
+                    hi = high_[bar]
+                    lo = low_[bar]
+                    if not np.isfinite(hi) or not np.isfinite(lo) or hi <= 0.0 or lo <= 0.0:
+                        complete_path = False
+                        break
+                    min_before_bar = min_price
+                    if hi > max_price:
+                        max_price = hi
+                    if up5_i < 0 and hi >= e * 1.05 - e * 1e-12:
+                        up5_i = j
+                        pre5_price = min_before_bar
+                    if up10_i < 0 and hi >= e * 1.10 - e * 1e-12:
+                        up10_i = j
+                        pre10_price = min_before_bar
+                    if down_i < 0 and lo <= e * 0.95 + e * 1e-12:
+                        down_i = j
+                    if lo < min_price:
+                        min_price = lo
+                    if up5_i < 0:
+                        pre5_price = min(pre5_price, lo)
+                    if up10_i < 0:
+                        pre10_price = min(pre10_price, lo)
+                if not complete_path:
+                    continue
+                # The exact timed exit is a single open print; do not broadcast
+                # it over earlier highs/lows or inspect the exit candle's range.
+                if x > max_price:
+                    max_price = x
+                if x < min_price:
+                    min_price = x
+                if x >= e * 1.05 - e * 1e-12 and up5_i < 0:
+                    up5_i = steps
+                    pre5_price = min_price
+                if x >= e * 1.10 - e * 1e-12 and up10_i < 0:
+                    up10_i = steps
+                    pre10_price = min_price
+                if x <= e * 0.95 + e * 1e-12 and down_i < 0:
+                    down_i = steps
+                complete[i] = True
+                mfe[i] = 100.0 * (max_price / e - 1.0)
+                mae[i] = 100.0 * (min_price / e - 1.0)
+                hit5[i] = up5_i >= 0
+                hit10[i] = up10_i >= 0
+                if up5_i < 0 and down_i < 0:
+                    first5[i] = 1
+                elif up5_i >= 0 and down_i < 0:
+                    first5[i] = 2
+                    pre5[i] = 100.0 * (pre5_price / e - 1.0)
+                elif down_i >= 0 and up5_i < 0:
+                    first5[i] = 3
+                elif up5_i == down_i:
+                    first5[i] = 4
+                elif up5_i < down_i:
+                    first5[i] = 2
+                    pre5[i] = 100.0 * (pre5_price / e - 1.0)
+                else:
+                    first5[i] = 3
+                if up10_i < 0 and down_i < 0:
+                    first10[i] = 1
+                elif up10_i >= 0 and down_i < 0:
+                    first10[i] = 2
+                    pre10[i] = 100.0 * (pre10_price / e - 1.0)
+                elif down_i >= 0 and up10_i < 0:
+                    first10[i] = 3
+                elif up10_i == down_i:
+                    first10[i] = 4
+                elif up10_i < down_i:
+                    first10[i] = 2
+                    pre10[i] = 100.0 * (pre10_price / e - 1.0)
+                else:
+                    first10[i] = 3
+            return entry, exit_, gross, mfe, mae, complete, hit5, hit10, first5, first10, pre5, pre10
+
+        _NUMBA_PATH_SCAN = scan
+    return _NUMBA_PATH_SCAN(opens, highs, lows, starts, hold_steps)
+
+
+def _path_metrics_many(frame: pd.DataFrame, decisions: Sequence[Any], holds: Sequence[int]) -> pd.DataFrame:
+    """Calculate endpoint and OHLC path statistics for unique decision/horizon rows."""
+    decision = pd.DatetimeIndex(pd.to_datetime(decisions, utc=True))
+    hold_array = np.asarray(holds, dtype=np.int64)
+    if len(decision) != len(hold_array):
+        raise ValueError("decision and hold arrays differ in length")
     if len(frame):
-        grid_end = frame.index[-1]
-        grid = pd.date_range(grid_start, grid_end, freq=BAR)
+        grid = pd.date_range(frame.index[0], frame.index[-1], freq=BAR)
         dense = frame.reindex(grid)
-        opens = dense.open.to_numpy(dtype=float)
-        highs = dense.high.to_numpy(dtype=float)
-        lows = dense.low.to_numpy(dtype=float)
-        pos = grid.get_indexer(decision)
+        opens = dense.open.to_numpy(dtype=np.float64)
+        highs = dense.high.to_numpy(dtype=np.float64)
+        lows = dense.low.to_numpy(dtype=np.float64)
+        starts = grid.get_indexer(decision).astype(np.int64)
     else:
-        grid = pd.DatetimeIndex([], tz="UTC")
-        opens = highs = lows = np.empty(0, dtype=float)
-        pos = np.full(len(decision), -1, dtype=int)
-    n = len(decision)
-    entry = np.full(n, np.nan) if entry_price is None else np.asarray(entry_price, dtype=float).copy()
-    exit_ = np.full(n, np.nan) if exit_price is None else np.asarray(exit_price, dtype=float).copy()
-    valid_pos = pos >= 0
-    within = valid_pos & (pos + steps < len(grid))
-    if entry_price is None:
-        entry[within] = opens[pos[within]]
-    if exit_price is None:
-        exit_[within] = opens[pos[within] + steps]
+        opens = highs = lows = np.empty(0, dtype=np.float64)
+        starts = np.full(len(decision), -1, dtype=np.int64)
+    metrics = _scan_paths_numba(opens, highs, lows, starts, hold_array * 12)
+    entry, exit_, gross, mfe, mae, complete, hit5, hit10, first5, first10, pre5, pre10 = metrics
     endpoint = np.isfinite(entry) & np.isfinite(exit_) & (entry > 0) & (exit_ > 0)
-    net = np.full(n, np.nan)
+    net = np.full(len(entry), np.nan)
     if endpoint.any():
         net[endpoint] = _vbt_net_returns(entry[endpoint], exit_[endpoint])
-    gross = 100 * (exit_ / entry - 1)
-    gross[~endpoint] = np.nan
-    mfe = np.full(n, np.nan)
-    mae = np.full(n, np.nan)
-    path_complete = np.zeros(n, dtype=bool)
-    hit5 = np.zeros(n, dtype=bool)
-    hit10 = np.zeros(n, dtype=bool)
-    first5 = np.full(n, "path_incomplete", dtype=object)
-    first10 = np.full(n, "path_incomplete", dtype=object)
-    prem5 = np.full(n, np.nan)
-    prem10 = np.full(n, np.nan)
-    for i in np.flatnonzero(endpoint & within):
-        left, right = int(pos[i]), int(pos[i] + steps)
-        high_window = highs[left:right]
-        low_window = lows[left:right]
-        if len(high_window) != steps or len(low_window) != steps or not np.isfinite(high_window).all() or not np.isfinite(low_window).all() or not np.isfinite(opens[right]):
-            continue
-        path_complete[i] = True
-        h = np.maximum(high_window, exit_[i])
-        l = np.minimum(low_window, exit_[i])
-        mfe[i] = 100 * (float(np.max(h)) / entry[i] - 1)
-        mae[i] = 100 * (float(np.min(l)) / entry[i] - 1)
-        hit5[i] = bool(np.any(h >= entry[i] * 1.05))
-        hit10[i] = bool(np.any(h >= entry[i] * 1.10))
-        # OHLC cannot resolve high-vs-low order inside one 5m candle. For each
-        # upside target, compare the first target bar with the first -5% bar.
-        downside = np.flatnonzero(low_window <= entry[i] * 0.95)
-        for target, status, pre in ((0.05, first5, prem5), (0.10, first10, prem10)):
-            upside = np.flatnonzero(high_window >= entry[i] * (1 + target))
-            up_i = int(upside[0]) if len(upside) else -1
-            down_i = int(downside[0]) if len(downside) else -1
-            if up_i < 0 and down_i < 0:
-                status[i] = "neither"
-            elif up_i >= 0 and down_i < 0:
-                status[i] = "target_first"
-            elif down_i >= 0 and up_i < 0:
-                status[i] = "drawdown_first"
-            elif up_i == down_i:
-                status[i] = "same_bar_ambiguous"
-            elif up_i < down_i:
-                status[i] = "target_first"
-            else:
-                status[i] = "drawdown_first"
-            if status[i] == "target_first" and up_i > 0:
-                pre[i] = 100 * (float(np.min(low_window[:up_i])) / entry[i] - 1)
+    status = {0: "path_incomplete", 1: "neither", 2: "target_first", 3: "drawdown_first", 4: "same_bar_ambiguous"}
     return pd.DataFrame(
         {
             "entry_open": entry,
@@ -598,14 +691,14 @@ def _add_path_metrics(
             "net_return_pct": net,
             "mfe_pct": mfe,
             "mae_pct": mae,
-            "path_complete": path_complete,
+            "path_complete": complete,
             "endpoint_available": endpoint,
             "hit5": hit5,
             "hit10": hit10,
-            "first5_vs_drawdown5": first5,
-            "first10_vs_drawdown5": first10,
-            "pre_target_mae_5_pct": prem5,
-            "pre_target_mae_10_pct": prem10,
+            "first5_vs_drawdown5": [status[int(x)] for x in first5],
+            "first10_vs_drawdown5": [status[int(x)] for x in first10],
+            "pre_target_mae_5_pct": pre5,
+            "pre_target_mae_10_pct": pre10,
         }
     )
 
@@ -616,17 +709,19 @@ def _member_outcomes_for_symbol(
     signals: pd.DataFrame,
     *,
     repair_missing: bool,
-) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, Any], list[dict[str, Any]]]:
-    member_cols = ["minutes", "known", "symbol"] + [c for c in ("touch", "event_id", "lower_touch_level", "level_source", "age_at_known_min") if c in members]
+) -> tuple[pd.DataFrame, dict[str, Any]]:
+    member_cols = ["minutes", "known", "symbol"] + [c for c in ("touch", "event", "event_id", "lower_touch_level", "level_source", "age_at_known_min") if c in members]
     local_members = members.loc[members.symbol.eq(symbol), member_cols].copy()
     if local_members.empty:
-        return pd.DataFrame(), pd.DataFrame(), {"symbol": symbol, "rows": 0}, []
+        return pd.DataFrame(), {"symbol": symbol, "rows": 0}
+    if "event" in local_members and "event_id" not in local_members:
+        local_members.rename(columns={"event": "event_id"}, inplace=True)
     local_members["known"] = pd.to_datetime(local_members.known, utc=True)
     sig = signals[["minutes", "known", "wait_min", "decision"]].copy()
     sig["known"] = pd.to_datetime(sig.known, utc=True)
     work = local_members.merge(sig, on=["minutes", "known"], how="inner", validate="many_to_many")
     if work.empty:
-        return pd.DataFrame(), pd.DataFrame(), {"symbol": symbol, "rows": 0, "status": "no_matching_signals"}, []
+        return pd.DataFrame(), {"symbol": symbol, "rows": 0, "status": "no_matching_signals"}
     if work.duplicated(["minutes", "known", "symbol", "wait_min"]).any():
         raise ValueError(f"duplicate member/signal key for {symbol}")
     if not (work.decision == work.known + pd.to_timedelta(work.wait_min, unit="m")).all():
@@ -653,22 +748,14 @@ def _member_outcomes_for_symbol(
         decision_close[good] = close_lookup.to_numpy()[decision_pos[good]]
         unique_waits["observed_return_pct"] = 100 * (decision_close / known_close - 1)
         level = pd.to_numeric(unique_waits.lower_touch_level, errors="coerce").to_numpy(dtype=float)
-        unique_waits["reclaimed"] = np.isfinite(decision_close) & np.isfinite(level) & (decision_close > level)
+        unique_waits["reclaim_eligible"] = np.isfinite(decision_close) & np.isfinite(level)
+        unique_waits["reclaimed"] = unique_waits.reclaim_eligible & (decision_close > level)
         unique_waits["quote_observed"] = np.isfinite(known_close) & np.isfinite(decision_close)
     else:
         unique_waits["observed_return_pct"] = np.nan
         unique_waits["reclaimed"] = False
+        unique_waits["reclaim_eligible"] = False
         unique_waits["quote_observed"] = False
-    # Exact lower-level observations are needed once per event/wait; retain the
-    # member return list for an exact median after all symbol shards are reduced.
-    observation_contrib = (
-        unique_waits.groupby(["minutes", "known", "wait_min"], as_index=False, sort=False)
-        .agg(
-            quote_observed_n=("quote_observed", "sum"),
-            reclaim_n=("reclaimed", "sum"),
-            observed_values=("observed_return_pct", lambda s: s[np.isfinite(s)].tolist()),
-        )
-    )
     holds = pd.DataFrame({"hold_hours": HOLD_HOURS})
     work = work.merge(holds, how="cross")
     work["entry_time"] = work.decision
@@ -676,68 +763,23 @@ def _member_outcomes_for_symbol(
     # One VectorBT trade is created per distinct actual (symbol, decision, hold)
     # even where several timeframe/event keys reuse that identical price path.
     distinct = work[["decision", "hold_hours"]].drop_duplicates().sort_values(["decision", "hold_hours"]).reset_index(drop=True)
-    unique_metrics: list[pd.DataFrame] = []
-    for hold, group in distinct.groupby("hold_hours", sort=True):
-        metrics = _add_path_metrics(frame, pd.DatetimeIndex(group.decision), int(hold))
-        metrics["decision"] = group.decision.to_numpy()
-        metrics["hold_hours"] = int(hold)
-        unique_metrics.append(metrics)
-    prices = pd.concat(unique_metrics, ignore_index=True) if unique_metrics else pd.DataFrame()
+    prices = _path_metrics_many(frame, distinct.decision, distinct.hold_hours)
+    prices["decision"] = distinct.decision.to_numpy()
+    prices["hold_hours"] = distinct.hold_hours.to_numpy()
     work = work.merge(prices, on=["decision", "hold_hours"], how="left", validate="many_to_one")
-    obs_cols = ["minutes", "known", "wait_min", "observed_return_pct", "reclaimed", "quote_observed"]
+    obs_cols = ["minutes", "known", "wait_min", "observed_return_pct", "reclaimed", "reclaim_eligible", "quote_observed"]
     work = work.merge(unique_waits[obs_cols], on=["minutes", "known", "wait_min"], how="left", validate="many_to_one")
-    work.insert(0, "symbol", symbol)
+    work["symbol"] = symbol
     work["trade_id"] = symbol + "|" + work.decision.dt.strftime("%Y%m%dT%H%M%SZ") + "|" + work.hold_hours.astype(str) + "h"
     raw_cols = [
         "minutes", "known", "wait_min", "hold_hours", "symbol", "event_id", "touch", "lower_touch_level", "level_source",
         "age_at_known_min", "decision", "entry_time", "exit_time", "trade_id", "entry_open", "exit_open",
         "gross_return_pct", "net_return_pct", "mfe_pct", "mae_pct", "path_complete", "endpoint_available", "hit5", "hit10",
         "first5_vs_drawdown5", "first10_vs_drawdown5", "pre_target_mae_5_pct", "pre_target_mae_10_pct",
-        "observed_return_pct", "reclaimed", "quote_observed",
+        "observed_return_pct", "reclaimed", "reclaim_eligible", "quote_observed",
     ]
     raw = work.loc[:, [c for c in raw_cols if c in work.columns]].copy()
-    return raw, observation_contrib, receipt, _symbol_partials(raw)
-
-
-def _symbol_partials(raw: pd.DataFrame) -> list[dict[str, Any]]:
-    if raw.empty:
-        return []
-    keys = ["minutes", "known", "wait_min", "hold_hours"]
-    groups = raw.groupby(keys, sort=False, dropna=False)
-    rows: list[dict[str, Any]] = []
-    for key, part in groups:
-        endpoint = part[part.endpoint_available.fillna(False)]
-        path = part[part.path_complete.fillna(False)]
-        t5 = part.first5_vs_drawdown5.value_counts()
-        t10 = part.first10_vs_drawdown5.value_counts()
-        row = dict(zip(keys, key))
-        row.update(
-            member_n=len(part),
-            endpoint_n=len(endpoint),
-            gross_sum=float(endpoint.gross_return_pct.sum()),
-            net_sum=float(endpoint.net_return_pct.sum()),
-            gross_win_n=int(endpoint.gross_return_pct.gt(0).sum()),
-            net_win_n=int(endpoint.net_return_pct.gt(0).sum()),
-            path_n=len(path),
-            mfe_sum=float(path.mfe_pct.sum()),
-            mae_sum=float(path.mae_pct.sum()),
-            hit5_n=int(path.hit5.sum()),
-            hit10_n=int(path.hit10.sum()),
-            target5_first_n=int(t5.get("target_first", 0)),
-            drawdown5_before_target5_n=int(t5.get("drawdown_first", 0)),
-            ambiguous5_n=int(t5.get("same_bar_ambiguous", 0)),
-            nohit5_n=int(t5.get("neither", 0)),
-            target10_first_n=int(t10.get("target_first", 0)),
-            drawdown5_before_target10_n=int(t10.get("drawdown_first", 0)),
-            ambiguous10_n=int(t10.get("same_bar_ambiguous", 0)),
-            nohit10_n=int(t10.get("neither", 0)),
-            pre_target_mae5_sum=float(path.pre_target_mae_5_pct.sum()),
-            pre_target_mae5_n=int(path.pre_target_mae_5_pct.notna().sum()),
-            pre_target_mae10_sum=float(path.pre_target_mae_10_pct.sum()),
-            pre_target_mae10_n=int(path.pre_target_mae_10_pct.notna().sum()),
-        )
-        rows.append(row)
-    return rows
+    return raw, receipt
 
 
 def _write_parquet_parts(raw: pd.DataFrame) -> list[dict[str, Any]]:
@@ -745,9 +787,11 @@ def _write_parquet_parts(raw: pd.DataFrame) -> list[dict[str, Any]]:
         return []
     written: list[dict[str, Any]] = []
     for minutes, part in raw.groupby("minutes", sort=True):
-        part = part.reset_index(drop=True)
+        part = part.sort_values(["wait_min", "known", "hold_hours"], kind="stable").reset_index(drop=True)
         part_dir = RESEARCH / "constituents" / f"minutes={int(minutes)}" / f"symbol={str(part.symbol.iloc[0])}"
         part_dir.mkdir(parents=True, exist_ok=True)
+        for stale in part_dir.glob("part-*.parquet"):
+            stale.unlink()
         for offset in range(0, len(part), PARQUET_PART_ROWS):
             chunk = part.iloc[offset : offset + PARQUET_PART_ROWS]
             part_no = offset // PARQUET_PART_ROWS
@@ -773,35 +817,38 @@ def _process_symbol(
     *,
     repair_missing: bool,
     force: bool,
+    scope_minutes: Sequence[int],
+    scope_wait_min: Sequence[int],
 ) -> dict[str, Any]:
     cache_root = RESEARCH / "symbol_receipts"
     receipt_path = cache_root / f"{symbol}.json"
-    contrib_path = RESEARCH / "contributions" / f"{symbol}.parquet"
-    observations_path = RESEARCH / "observations" / f"{symbol}.parquet"
-    if not force and receipt_path.is_file() and contrib_path.is_file() and observations_path.is_file():
+    if not force and receipt_path.is_file():
         saved = json.loads(receipt_path.read_text(encoding="utf-8"))
-        if saved.get("input_contract") == _input_contract():
+        saved_files = [Path(row["path"]) for row in saved.get("constituent_files", [])]
+        covered_minutes = set(saved.get("scope_minutes", []))
+        covered_waits = set(saved.get("scope_wait_min", []))
+        if (
+            saved.get("input_contract") == _input_contract()
+            and set(scope_minutes).issubset(covered_minutes)
+            and set(scope_wait_min).issubset(covered_waits)
+            and saved_files
+            and all(path.is_file() for path in saved_files)
+        ):
             return {"symbol": symbol, "cached": True, "receipt": saved}
-    raw, obs, quote_receipt, partial_rows = _member_outcomes_for_symbol(
+    old_receipt = json.loads(receipt_path.read_text(encoding="utf-8")) if receipt_path.is_file() else {}
+    raw, quote_receipt = _member_outcomes_for_symbol(
         symbol, members, signals, repair_missing=repair_missing
     )
     files = _write_parquet_parts(raw)
-    contrib = pd.DataFrame(partial_rows)
-    contrib_path.parent.mkdir(parents=True, exist_ok=True)
-    contrib_temp = contrib_path.with_suffix(".parquet.tmp")
-    contrib.to_parquet(contrib_temp, index=False, compression="zstd", engine="pyarrow")
-    os.replace(contrib_temp, contrib_path)
-    observations_path.parent.mkdir(parents=True, exist_ok=True)
-    obs_temp = observations_path.with_suffix(".parquet.tmp")
-    obs.to_parquet(obs_temp, index=False, compression="zstd", engine="pyarrow")
-    os.replace(obs_temp, observations_path)
+    old_files = old_receipt.get("constituent_files", []) if old_receipt.get("input_contract") == _input_contract() else []
+    merged_files = {row["path"]: row for row in [*old_files, *files] if Path(row["path"]).is_file()}
     receipt = {
         "symbol": symbol,
         "input_contract": _input_contract(),
+        "scope_minutes": sorted(set(old_receipt.get("scope_minutes", [])) | set(scope_minutes)),
+        "scope_wait_min": sorted(set(old_receipt.get("scope_wait_min", [])) | set(scope_wait_min)),
         "member_outcome_rows": int(len(raw)),
-        "event_contribution_rows": int(len(contrib)),
-        "observation_contribution_rows": int(len(obs)),
-        "constituent_files": files,
+        "constituent_files": list(merged_files.values()),
         "quote_receipt": quote_receipt,
     }
     _write_json(receipt_path, receipt)
@@ -818,127 +865,183 @@ def _input_contract() -> dict[str, Any]:
         "exit": "5m open at entry+hold_hours",
         "path": "high/low for entry bar through bar before exit; exit open included",
         "first_hit": "target +5/+10% versus -5%; same five-minute bar labelled ambiguous",
+        "constituent_scope": "exclude BTC/ETH/SOL benchmarks and USTCUSDT from alt return/reclaim; preserve total initial breadth in signal feature",
+        "schema_version": 2,
+        "feature_input_stats": {
+            path.name: {"bytes": path.stat().st_size, "mtime_ns": path.stat().st_mtime_ns}
+            for path in (MEMBERS_PATH, SIGNALS_PATH)
+            if path.is_file()
+        },
     }
 
 
-def _aggregate_contributions(symbols: Sequence[str]) -> tuple[pd.DataFrame, pd.DataFrame]:
-    contributions: list[pd.DataFrame] = []
-    observations: list[pd.DataFrame] = []
-    for symbol in symbols:
-        cpath = RESEARCH / "contributions" / f"{symbol}.parquet"
-        opath = RESEARCH / "observations" / f"{symbol}.parquet"
-        if cpath.is_file():
-            contributions.append(pd.read_parquet(cpath))
-        if opath.is_file():
-            observations.append(pd.read_parquet(opath))
-    if not contributions:
-        return pd.DataFrame(), pd.DataFrame()
-    raw = pd.concat(contributions, ignore_index=True)
-    keys = ["minutes", "known", "wait_min", "hold_hours"]
-    sums = [c for c in raw.columns if c not in keys]
-    total = raw.groupby(keys, as_index=False, sort=False)[sums].sum(numeric_only=True)
-    if not observations:
-        return total, pd.DataFrame()
-    obs = pd.concat(observations, ignore_index=True)
-    obs_keys = ["minutes", "known", "wait_min"]
-    obs_rows: list[dict[str, Any]] = []
-    for key, part in obs.groupby(obs_keys, sort=False):
-        vals = [np.asarray(x, dtype=float) for x in part.observed_values if isinstance(x, (list, tuple, np.ndarray)) and len(x)]
-        finite = np.concatenate(vals) if vals else np.empty(0, dtype=float)
-        row = dict(zip(obs_keys, key))
-        row["quote_observed_n"] = int(part.quote_observed_n.sum())
-        row["reclaim_n"] = int(part.reclaim_n.sum())
-        row["price_n"] = int(len(finite))
-        row["alt_member_median_observed_return_pct"] = float(np.median(finite)) if len(finite) else np.nan
-        obs_rows.append(row)
-    return total, pd.DataFrame(obs_rows)
-
-
-def _benchmark_outcomes(signals: pd.DataFrame, *, repair_missing: bool) -> tuple[pd.DataFrame, dict[str, Any]]:
-    keys = ["minutes", "known", "wait_min", "decision"]
-    unique = signals[keys].drop_duplicates().copy()
-    unique["known_close_time"] = unique.known - BAR
-    unique["decision_close_time"] = unique.decision - BAR
-    output = unique[["minutes", "known", "wait_min", "decision"]].copy()
-    metadata: dict[str, Any] = {}
-    for asset in ASSETS:
-        symbol = asset + "USDT"
-        start = min(unique.known_close_time.min(), unique.decision_close_time.min())
-        end = unique.decision.max() + pd.Timedelta(hours=max(HOLD_HOURS))
-        intervals = [(row.decision, row.decision + pd.Timedelta(hours=max(HOLD_HOURS))) for row in unique[["decision"]].itertuples(index=False)]
-        frame, receipt = load_full_ohlc(symbol, start, end, needed_intervals=intervals, repair_missing=repair_missing)
-        metadata[asset] = receipt
-        if len(frame):
-            dense_idx = pd.date_range(frame.index[0], frame.index[-1], freq=BAR)
-            dense = frame.reindex(dense_idx)
-            close = dense.close.to_numpy(dtype=float)
-            known_pos = dense_idx.get_indexer(pd.DatetimeIndex(unique.known_close_time))
-            decision_pos = dense_idx.get_indexer(pd.DatetimeIndex(unique.decision_close_time))
-            before = np.full(len(unique), np.nan)
-            after = np.full(len(unique), np.nan)
-            ok = known_pos >= 0
-            before[ok] = close[known_pos[ok]]
-            ok = decision_pos >= 0
-            after[ok] = close[decision_pos[ok]]
-            output[f"{asset.lower()}_observed_return_pct"] = 100 * (after / before - 1)
+def _merge_decision_windows(decisions: Iterable[Any], hold: pd.Timedelta) -> list[tuple[pd.Timestamp, pd.Timestamp]]:
+    starts = pd.DatetimeIndex(pd.to_datetime(list(decisions), utc=True)).drop_duplicates().sort_values()
+    windows: list[list[pd.Timestamp]] = []
+    for start in starts:
+        end = start + hold
+        if windows and start <= windows[-1][1] + BAR:
+            windows[-1][1] = max(windows[-1][1], end)
         else:
-            output[f"{asset.lower()}_observed_return_pct"] = np.nan
-        metric_rows: list[pd.DataFrame] = []
-        for hold in HOLD_HOURS:
-            metrics = _add_path_metrics(frame, pd.DatetimeIndex(unique.decision), hold)
-            metrics["hold_hours"] = hold
-            metrics["minutes"] = unique.minutes.to_numpy()
-            metrics["known"] = unique.known.to_numpy()
-            metrics["wait_min"] = unique.wait_min.to_numpy()
-            metric_rows.append(metrics)
-        long = pd.concat(metric_rows, ignore_index=True)
-        output = output.merge(
-            long[["minutes", "known", "wait_min", "hold_hours", "gross_return_pct", "net_return_pct", "mfe_pct", "mae_pct", "endpoint_available", "path_complete"]]
-            .rename(columns={
-                "gross_return_pct": f"{asset.lower()}_gross_return_pct",
-                "net_return_pct": f"{asset.lower()}_net_return_pct",
-                "mfe_pct": f"{asset.lower()}_mfe_pct",
-                "mae_pct": f"{asset.lower()}_mae_pct",
-                "endpoint_available": f"{asset.lower()}_endpoint_available",
-                "path_complete": f"{asset.lower()}_path_complete",
-            }),
-            on=["minutes", "known", "wait_min"],
-            how="left",
-            validate="one_to_many",
-        )
-    return output, metadata
+            windows.append([start, end])
+    return [(left, right) for left, right in windows]
 
 
-def _final_event_table(signals: pd.DataFrame, members: pd.DataFrame, symbols: Sequence[str], *, repair_missing: bool) -> tuple[pd.DataFrame, dict[str, Any]]:
-    totals, observations = _aggregate_contributions(symbols)
-    if totals.empty:
-        raise RuntimeError("no payoff contribution cache found")
-    signal_cols = [c for c in SIGNAL_FEATURE_COLUMNS if c in signals.columns]
-    base = signals[["minutes", "known", "wait_min", "decision", *signal_cols]].drop_duplicates(
-        ["minutes", "known", "wait_min"]
-    ).copy()
+def _load_benchmark_frames(signals: pd.DataFrame, *, repair_missing: bool) -> tuple[dict[str, pd.DataFrame], dict[str, Any]]:
+    unique = signals[["known", "decision"]].drop_duplicates()
+    if unique.empty:
+        return {}, {}
+    windows = _merge_decision_windows(unique.decision, pd.Timedelta(hours=max(HOLD_HOURS)))
+    first = min(unique.known.min() - BAR, unique.decision.min() - BAR)
+    last = max(end for _, end in windows)
+    frames: dict[str, pd.DataFrame] = {}
+    receipts: dict[str, Any] = {}
+    for asset in ASSETS:
+        frame, receipt = load_full_ohlc(asset + "USDT", first, last, needed_intervals=windows, repair_missing=repair_missing)
+        frames[asset] = frame
+        receipts[asset] = receipt
+        print(f"benchmark {asset}: {len(frame):,} bars; low missing={receipt['low_missing_rows_in_returned_frame']:,}", flush=True)
+    return frames, receipts
+
+
+def _benchmark_partition(signals: pd.DataFrame, frames: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    keys = ["minutes", "known", "wait_min", "decision"]
+    base = signals[keys].drop_duplicates().sort_values(["minutes", "known", "wait_min"]).reset_index(drop=True)
     base["known"] = pd.to_datetime(base.known, utc=True)
-    base = base.merge(observations, on=["minutes", "known", "wait_min"], how="left", validate="one_to_one")
-    # If all initial members have a usable quote, fraction has the original
-    # constituent denominator. Missing prices remain visible in price_n.
-    expected = members.groupby(["minutes", "known"]).size().rename("initial_member_n").reset_index()
-    expected["known"] = pd.to_datetime(expected.known, utc=True)
-    base = base.merge(expected, on=["minutes", "known"], how="left", validate="many_to_one")
-    base["reclaim_fraction"] = base.reclaim_n / base.price_n.replace(0, np.nan)
-    holds = pd.DataFrame({"hold_hours": HOLD_HOURS})
-    event = base.merge(holds, how="cross")
-    event = event.merge(totals, on=["minutes", "known", "wait_min", "hold_hours"], how="left", validate="one_to_one")
-    count_cols = [
-        "member_n", "endpoint_n", "gross_win_n", "net_win_n", "path_n", "hit5_n", "hit10_n",
-        "target5_first_n", "drawdown5_before_target5_n", "ambiguous5_n", "nohit5_n",
-        "target10_first_n", "drawdown5_before_target10_n", "ambiguous10_n", "nohit10_n",
-        "pre_target_mae5_n", "pre_target_mae10_n",
+    base["decision"] = pd.to_datetime(base.decision, utc=True)
+    event = base.assign(known_close_time=base.known - BAR, decision_close_time=base.decision - BAR)
+    output = event[["minutes", "known", "wait_min", "decision", "known_close_time", "decision_close_time"]].merge(
+        pd.DataFrame({"hold_hours": HOLD_HOURS}), how="cross"
+    )
+    for asset, frame in frames.items():
+        if len(frame):
+            grid = pd.date_range(frame.index[0], frame.index[-1], freq=BAR)
+            dense = frame.reindex(grid)
+            close = dense.close.to_numpy(dtype=float)
+            before_pos = grid.get_indexer(pd.DatetimeIndex(event.known_close_time))
+            after_pos = grid.get_indexer(pd.DatetimeIndex(event.decision_close_time))
+            before = np.full(len(event), np.nan)
+            after = np.full(len(event), np.nan)
+            ok = before_pos >= 0
+            before[ok] = close[before_pos[ok]]
+            ok = after_pos >= 0
+            after[ok] = close[after_pos[ok]]
+            event[f"{asset.lower()}_observed_return_pct"] = 100 * (after / before - 1)
+        else:
+            event[f"{asset.lower()}_observed_return_pct"] = np.nan
+        metrics = _path_metrics_many(frame, output.decision, output.hold_hours)
+        names = {
+            "entry_open": f"{asset.lower()}_entry_open",
+            "exit_open": f"{asset.lower()}_exit_open",
+            "gross_return_pct": f"{asset.lower()}_gross_return_pct",
+            "net_return_pct": f"{asset.lower()}_net_return_pct",
+            "mfe_pct": f"{asset.lower()}_mfe_pct",
+            "mae_pct": f"{asset.lower()}_mae_pct",
+            "endpoint_available": f"{asset.lower()}_endpoint_available",
+            "path_complete": f"{asset.lower()}_path_complete",
+        }
+        metrics.rename(columns=names, inplace=True)
+        output = pd.concat([output.reset_index(drop=True), metrics.reset_index(drop=True)], axis=1)
+    obs_cols = [f"{asset.lower()}_observed_return_pct" for asset in frames]
+    output = output.merge(event[["minutes", "known", "wait_min", *obs_cols]], on=["minutes", "known", "wait_min"], how="left", validate="many_to_one")
+    output.drop(columns=["known_close_time", "decision_close_time"], inplace=True)
+    if output.duplicated(["minutes", "known", "wait_min", "hold_hours"]).any():
+        raise AssertionError("benchmark W/X/H join keys are not unique")
+    return output
+
+
+def _aggregate_wait_partition(
+    minutes: int,
+    wait_min: int,
+    signals: pd.DataFrame,
+    eligible_members: pd.DataFrame,
+    symbols: Sequence[str],
+    benchmark_frames: dict[str, pd.DataFrame],
+) -> tuple[pd.DataFrame, int]:
+    """Read and aggregate one W/X slice; never hold all 15m constituent rows."""
+    columns = [
+        "minutes", "known", "wait_min", "hold_hours", "symbol", "gross_return_pct", "net_return_pct",
+        "mfe_pct", "mae_pct", "path_complete", "endpoint_available", "hit5", "hit10",
+        "first5_vs_drawdown5", "first10_vs_drawdown5", "pre_target_mae_5_pct", "pre_target_mae_10_pct",
+        "observed_return_pct", "reclaimed", "reclaim_eligible", "quote_observed",
     ]
-    for column in count_cols:
-        if column in event:
-            event[column] = event[column].fillna(0).astype("int64")
-    event["gross_coverage_pct"] = 100 * event.endpoint_n / event.initial_member_n.replace(0, np.nan)
-    event["path_coverage_pct"] = 100 * event.path_n / event.initial_member_n.replace(0, np.nan)
+    chunks: list[pd.DataFrame] = []
+    for symbol in symbols:
+        folder = RESEARCH / "constituents" / f"minutes={minutes}" / f"symbol={symbol}"
+        for path in sorted(folder.glob("part-*.parquet")):
+            rows = pd.read_parquet(path, columns=columns, filters=[("wait_min", "==", int(wait_min))], engine="pyarrow")
+            if not rows.empty:
+                chunks.append(rows)
+    raw = pd.concat(chunks, ignore_index=True) if chunks else pd.DataFrame(columns=columns)
+    raw["known"] = pd.to_datetime(raw.known, utc=True)
+    keys = ["minutes", "known", "wait_min", "hold_hours"]
+    if not raw.empty and raw.duplicated([*keys, "symbol"]).any():
+        raise AssertionError(f"duplicate member result in W/X={minutes}/{wait_min}")
+    raw["endpoint_ok"] = raw.endpoint_available.fillna(False).astype(bool)
+    raw["path_ok"] = raw.path_complete.fillna(False).astype(bool)
+    raw["gross_sum_item"] = raw.gross_return_pct.where(raw.endpoint_ok, 0.0)
+    raw["net_sum_item"] = raw.net_return_pct.where(raw.endpoint_ok, 0.0)
+    raw["gross_win_item"] = raw.endpoint_ok & raw.gross_return_pct.gt(0)
+    raw["net_win_item"] = raw.endpoint_ok & raw.net_return_pct.gt(0)
+    raw["mfe_sum_item"] = raw.mfe_pct.where(raw.path_ok, 0.0)
+    raw["mae_sum_item"] = raw.mae_pct.where(raw.path_ok, 0.0)
+    raw["hit5_item"] = raw.path_ok & raw.hit5.fillna(False).astype(bool)
+    raw["hit10_item"] = raw.path_ok & raw.hit10.fillna(False).astype(bool)
+    raw["first5"] = raw.first5_vs_drawdown5.eq("target_first")
+    raw["down5_before5"] = raw.first5_vs_drawdown5.eq("drawdown_first")
+    raw["ambiguous5"] = raw.first5_vs_drawdown5.eq("same_bar_ambiguous")
+    raw["nohit5"] = raw.first5_vs_drawdown5.eq("neither")
+    raw["first10"] = raw.first10_vs_drawdown5.eq("target_first")
+    raw["down5_before10"] = raw.first10_vs_drawdown5.eq("drawdown_first")
+    raw["ambiguous10"] = raw.first10_vs_drawdown5.eq("same_bar_ambiguous")
+    raw["nohit10"] = raw.first10_vs_drawdown5.eq("neither")
+    raw["pre5_sum_item"] = raw.pre_target_mae_5_pct.fillna(0.0)
+    raw["pre10_sum_item"] = raw.pre_target_mae_10_pct.fillna(0.0)
+    raw["pre5_count_item"] = raw.pre_target_mae_5_pct.notna()
+    raw["pre10_count_item"] = raw.pre_target_mae_10_pct.notna()
+    agg = raw.groupby(["known", "hold_hours"], sort=False).agg(
+        member_n=("symbol", "size"), endpoint_n=("endpoint_ok", "sum"),
+        gross_sum=("gross_sum_item", "sum"), net_sum=("net_sum_item", "sum"),
+        gross_win_n=("gross_win_item", "sum"), net_win_n=("net_win_item", "sum"),
+        path_n=("path_ok", "sum"), mfe_sum=("mfe_sum_item", "sum"), mae_sum=("mae_sum_item", "sum"),
+        hit5_n=("hit5_item", "sum"), hit10_n=("hit10_item", "sum"),
+        target5_first_n=("first5", "sum"), drawdown5_before_target5_n=("down5_before5", "sum"),
+        ambiguous5_n=("ambiguous5", "sum"), nohit5_n=("nohit5", "sum"),
+        target10_first_n=("first10", "sum"), drawdown5_before_target10_n=("down5_before10", "sum"),
+        ambiguous10_n=("ambiguous10", "sum"), nohit10_n=("nohit10", "sum"),
+        pre5_sum=("pre5_sum_item", "sum"), pre5_n=("pre5_count_item", "sum"),
+        pre10_sum=("pre10_sum_item", "sum"), pre10_n=("pre10_count_item", "sum"),
+    ).reset_index()
+    agg["minutes"] = int(minutes)
+    agg["wait_min"] = int(wait_min)
+    expected = eligible_members.loc[eligible_members.minutes.eq(minutes)].groupby("known").size().rename("members_expected_n").reset_index()
+    expected["known"] = pd.to_datetime(expected.known, utc=True)
+    signals_x = signals[(signals.minutes == minutes) & (signals.wait_min == wait_min)].copy()
+    feature_cols = [c for c in SIGNAL_FEATURE_COLUMNS if c in signals_x.columns]
+    base = signals_x[["minutes", "known", "wait_min", "decision", *feature_cols]].drop_duplicates(["minutes", "known", "wait_min"])
+    base["known"] = pd.to_datetime(base.known, utc=True)
+    base = base.merge(expected, on="known", how="left", validate="one_to_one")
+    base["members_expected_n"] = base.members_expected_n.fillna(0).astype("int64")
+    if not agg.empty:
+        check = agg.merge(base[["known", "members_expected_n"]], on="known", how="left", validate="many_to_one")
+        if not check.member_n.eq(check.members_expected_n).all():
+            raise AssertionError(f"member denominator mismatch in W/X={minutes}/{wait_min}")
+    event = base.merge(pd.DataFrame({"hold_hours": HOLD_HOURS}), how="cross")
+    event = event.merge(agg, on=["minutes", "known", "wait_min", "hold_hours"], how="left", validate="one_to_one")
+    obs = raw[raw.hold_hours.eq(HOLD_HOURS[0])].groupby("known", as_index=False, sort=False).agg(
+        alt_member_median_observed_return_pct=("observed_return_pct", "median"),
+        price_n=("observed_return_pct", "count"), quote_observed_n=("quote_observed", "sum"),
+        reclaim_n=("reclaimed", "sum"), reclaim_eligible_n=("reclaim_eligible", "sum"),
+    )
+    event = event.merge(obs, on="known", how="left", validate="many_to_one")
+    for col in [c for c in agg.columns if c.endswith("_n") or c in {"member_n", "endpoint_n", "path_n"}]:
+        if col in event:
+            event[col] = event[col].fillna(0).astype("int64")
+    for col in ("members_expected_n", "endpoint_n", "path_n", "reclaim_n", "reclaim_eligible_n", "quote_observed_n", "price_n"):
+        if col in event:
+            event[col] = event[col].fillna(0).astype("int64")
+    event["gross_coverage_pct"] = 100 * event.endpoint_n / event.members_expected_n.replace(0, np.nan)
+    event["path_coverage_pct"] = 100 * event.path_n / event.members_expected_n.replace(0, np.nan)
     event["basket_gross_return_pct"] = event.gross_sum / event.endpoint_n.replace(0, np.nan)
     event["basket_net_return_pct"] = event.net_sum / event.endpoint_n.replace(0, np.nan)
     event["member_win_pct"] = 100 * event.gross_win_n / event.endpoint_n.replace(0, np.nan)
@@ -947,39 +1050,18 @@ def _final_event_table(signals: pd.DataFrame, members: pd.DataFrame, symbols: Se
     event["mean_mae_pct"] = event.mae_sum / event.path_n.replace(0, np.nan)
     event["hit5_pct"] = 100 * event.hit5_n / event.path_n.replace(0, np.nan)
     event["hit10_pct"] = 100 * event.hit10_n / event.path_n.replace(0, np.nan)
-    resolved5 = event.target5_first_n + event.drawdown5_before_target5_n
-    resolved10 = event.target10_first_n + event.drawdown5_before_target10_n
-    event["target5_before_drawdown5_pct"] = 100 * event.target5_first_n / resolved5.replace(0, np.nan)
-    event["target10_before_drawdown5_pct"] = 100 * event.target10_first_n / resolved10.replace(0, np.nan)
-    event["pre_target_mae_5_pct"] = event.pre_target_mae5_sum / event.pre_target_mae5_n.replace(0, np.nan)
-    event["pre_target_mae_10_pct"] = event.pre_target_mae10_sum / event.pre_target_mae10_n.replace(0, np.nan)
-    benchmark, quote_receipts = _benchmark_outcomes(signals, repair_missing=repair_missing)
-    event = event.merge(
-        benchmark,
-        on=["minutes", "known", "wait_min", "hold_hours"],
-        how="left",
-        validate="one_to_one",
-    )
-    event["members_expected_n"] = event.initial_member_n
-    wanted = [
-        "minutes", "known", "wait_min", "hold_hours", "decision", *signal_cols,
-        "members_expected_n", "endpoint_n", "gross_coverage_pct", "path_n", "path_coverage_pct",
-        "basket_gross_return_pct", "basket_net_return_pct", "member_win_pct", "member_net_win_pct",
-        "mean_mfe_pct", "mean_mae_pct", "hit5_pct", "hit10_pct",
-        "target5_before_drawdown5_pct", "target10_before_drawdown5_pct",
-        "target5_first_n", "drawdown5_before_target5_n", "ambiguous5_n", "nohit5_n",
-        "target10_first_n", "drawdown5_before_target10_n", "ambiguous10_n", "nohit10_n",
-        "pre_target_mae_5_pct", "pre_target_mae_10_pct",
-        "btc_observed_return_pct", "eth_observed_return_pct", "sol_observed_return_pct",
-        "alt_member_median_observed_return_pct", "reclaim_fraction", "reclaim_n", "price_n",
-        "btc_gross_return_pct", "btc_net_return_pct", "btc_mfe_pct", "btc_mae_pct",
-        "eth_gross_return_pct", "eth_net_return_pct", "eth_mfe_pct", "eth_mae_pct",
-        "sol_gross_return_pct", "sol_net_return_pct", "sol_mfe_pct", "sol_mae_pct",
-    ]
-    event = event.loc[:, [c for c in wanted if c in event.columns]].sort_values(["minutes", "known", "wait_min", "hold_hours"])
+    event["target5_before_drawdown5_pct"] = 100 * event.target5_first_n / (event.target5_first_n + event.drawdown5_before_target5_n).replace(0, np.nan)
+    event["target10_before_drawdown5_pct"] = 100 * event.target10_first_n / (event.target10_first_n + event.drawdown5_before_target10_n).replace(0, np.nan)
+    event["pre_target_mae_5_pct"] = event.pre5_sum / event.pre5_n.replace(0, np.nan)
+    event["pre_target_mae_10_pct"] = event.pre10_sum / event.pre10_n.replace(0, np.nan)
+    event["reclaim_fraction"] = event.reclaim_n / event.reclaim_eligible_n.replace(0, np.nan)
+    event["reclaim_fraction_all_eligible"] = event.reclaim_n / event.members_expected_n.replace(0, np.nan)
+    event["reclaim_quote_coverage_pct"] = 100 * event.quote_observed_n / event.members_expected_n.replace(0, np.nan)
+    bench = _benchmark_partition(signals_x, benchmark_frames)
+    event = event.merge(bench, on=["minutes", "known", "wait_min", "hold_hours"], how="left", validate="one_to_one")
     if event.duplicated(["minutes", "known", "wait_min", "hold_hours"]).any():
         raise AssertionError("event outcome join keys are not unique")
-    return event, quote_receipts
+    return event.sort_values(["minutes", "known", "wait_min", "hold_hours"]), int(len(raw))
 
 
 def _load_inputs(minutes: Sequence[int] | None, waits: Sequence[int] | None) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -1012,17 +1094,22 @@ def _write_event_partitions(event: pd.DataFrame) -> list[dict[str, Any]]:
     PAYOFFS.mkdir(parents=True, exist_ok=True)
     written: list[dict[str, Any]] = []
     for (minutes, wait_min), part in event.groupby(["minutes", "wait_min"], sort=True):
-        path = PAYOFFS / f"event_outcomes_minutes{int(minutes)}_wait{int(wait_min)}.csv.gz"
-        temp = path.with_suffix(path.suffix + ".tmp")
-        part.to_csv(temp, index=False, compression="gzip")
-        os.replace(temp, path)
-        written.append({"path": str(path.relative_to(ROOT)), "minutes": int(minutes), "wait_min": int(wait_min), "rows": int(len(part)), "bytes": int(path.stat().st_size)})
+        written.append(_write_event_partition(int(minutes), int(wait_min), part))
     return written
+
+
+def _write_event_partition(minutes: int, wait_min: int, event: pd.DataFrame) -> dict[str, Any]:
+    PAYOFFS.mkdir(parents=True, exist_ok=True)
+    path = PAYOFFS / f"event_outcomes_minutes{minutes}_wait{wait_min}.csv.gz"
+    temp = path.with_suffix(path.suffix + ".tmp")
+    event.to_csv(temp, index=False, compression="gzip")
+    os.replace(temp, path)
+    return {"path": str(path.relative_to(ROOT)), "minutes": minutes, "wait_min": wait_min, "rows": int(len(event)), "bytes": int(path.stat().st_size)}
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--workers", type=int, default=3)
+    parser.add_argument("--workers", type=int, default=2)
     parser.add_argument("--minutes", type=int, nargs="*", choices=MINUTES)
     parser.add_argument("--wait-min", type=int, nargs="*", choices=WAIT_MINUTES)
     parser.add_argument("--symbols", nargs="*", help="optional symbol subset for a bounded run")
@@ -1031,29 +1118,37 @@ def main() -> None:
     args = parser.parse_args()
     if args.workers < 1 or args.workers > 8:
         raise ValueError("workers must be between 1 and 8 to bound memory/API concurrency")
-    signals, members = _load_inputs(args.minutes, args.wait_min)
-    symbols = sorted(set(members.symbol.astype(str)))
+    if args.wait_min and set(args.wait_min) != set(WAIT_MINUTES):
+        raise ValueError("resume by complete timeframe; keep all wait_min variants together")
+    signals, all_members = _load_inputs(args.minutes, args.wait_min)
+    excluded = {"BTCUSDT", "ETHUSDT", "SOLUSDT", "USTCUSDT"}
+    eligible_members = all_members.loc[~all_members.symbol.astype(str).isin(excluded)].copy()
+    symbols = sorted(set(eligible_members.symbol.astype(str)))
     if args.symbols:
         selected = {str(x).strip().upper() for x in args.symbols}
         symbols = [s for s in symbols if s in selected]
         if not symbols:
             raise ValueError("no requested symbols are in the initial member inputs")
-        members = members[members.symbol.isin(symbols)].copy()
+        eligible_members = eligible_members[eligible_members.symbol.isin(symbols)].copy()
+    scope_minutes = sorted(int(v) for v in signals.minutes.unique())
+    scope_wait_min = sorted(int(v) for v in signals.wait_min.unique())
     RESEARCH.mkdir(parents=True, exist_ok=True)
     PAYOFFS.mkdir(parents=True, exist_ok=True)
     contract = _input_contract()
     _write_json(PAYOFFS / "contract.json", {**contract, "member_input": str(MEMBERS_PATH.relative_to(ROOT)), "signal_input": str(SIGNALS_PATH.relative_to(ROOT)), "join_keys": ["minutes", "known", "wait_min", "hold_hours"]})
-    print(f"signals={len(signals):,} initial_members={len(members):,} symbols={len(symbols):,} workers={args.workers}", flush=True)
+    print(f"signals={len(signals):,} initial_members={len(all_members):,} eligible_alt_members={len(eligible_members):,} symbols={len(symbols):,} workers={args.workers}", flush=True)
     finished: list[dict[str, Any]] = []
     with ThreadPoolExecutor(max_workers=args.workers) as executor:
         futures = {
             executor.submit(
                 _process_symbol,
                 symbol,
-                members[members.symbol.eq(symbol)],
+                eligible_members[eligible_members.symbol.eq(symbol)],
                 signals,
                 repair_missing=not args.no_repair,
                 force=args.force,
+                scope_minutes=scope_minutes,
+                scope_wait_min=scope_wait_min,
             ): symbol
             for symbol in symbols
         }
@@ -1067,28 +1162,64 @@ def main() -> None:
                 raise RuntimeError(f"payoff generation failed for {symbol}") from exc
             if i % 25 == 0 or i == len(futures):
                 print(f"{i}/{len(futures)} symbols complete; last={symbol}", flush=True)
-    final, benchmark_receipts = _final_event_table(signals, members, symbols, repair_missing=not args.no_repair)
-    files = _write_event_partitions(final)
+    if args.symbols:
+        print("symbol subset complete; event aggregation skipped so partial member coverage is not mislabeled", flush=True)
+        return
+    benchmark_frames, benchmark_receipts = _load_benchmark_frames(signals, repair_missing=not args.no_repair)
+    previous_manifest_path = PAYOFFS / "manifest.json"
+    previous_manifest = {}
+    if previous_manifest_path.is_file():
+        try:
+            previous_manifest = json.loads(previous_manifest_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError, json.JSONDecodeError):
+            previous_manifest = {}
+    current_pairs = {
+        (int(row.minutes), int(row.wait_min))
+        for row in signals[["minutes", "wait_min"]].drop_duplicates().itertuples(index=False)
+    }
+    preserved = [
+        row for row in previous_manifest.get("event_partitions", [])
+        if (int(row.get("minutes", -1)), int(row.get("wait_min", -1))) not in current_pairs
+        and (ROOT / str(row.get("path", ""))).is_file()
+    ]
     manifest = {
         "experiment_id": "exp-monday-breadth-optimization-20261108-v1",
         "input_contract": contract,
         "input_paths": {"members": str(MEMBERS_PATH.relative_to(ROOT)), "signals": str(SIGNALS_PATH.relative_to(ROOT))},
         "symbols": len(symbols),
         "signals": int(len(signals)),
-        "initial_member_rows": int(len(members)),
-        "event_outcome_rows": int(len(final)),
-        "event_partitions": files,
+        "initial_member_rows_including_benchmarks_and_USTC": int(len(all_members)),
+        "eligible_alt_member_rows": int(len(eligible_members)),
+        "scope_minutes_completed": sorted(set(previous_manifest.get("scope_minutes_completed", [])) | set(scope_minutes)),
+        "event_outcome_rows": sum(int(row.get("rows", 0)) for row in preserved),
+        "event_partitions": preserved,
         "constituent_cache_root": str((RESEARCH / "constituents").relative_to(ROOT)),
         "constituent_cache_files": sum(len(row["receipt"].get("constituent_files", [])) for row in finished if not row.get("cached")),
         "source_receipt_root": str((RESEARCH / "symbol_receipts").relative_to(ROOT)),
-        "benchmark_quote_receipts": benchmark_receipts,
+        "benchmark_quote_receipts_by_scope": previous_manifest.get("benchmark_quote_receipts_by_scope", []),
         "vectorbt": "Portfolio.from_orders; one independent unit-size market entry/exit per unique (symbol, decision, hold_hours); 0.05% taker per fill; cash_sharing=False",
         "fees": {"entry": TAKER_FEE, "exit": TAKER_FEE, "funding": "not modeled", "slippage": "not modeled"},
         "cash_account_interpretation": "independent unit-size trade returns and equal-weight constituent means; no shared funded multi-symbol account",
         "path_limitations": "5m OHLC does not establish intrabar order; same-bar +target/-5% is ambiguous; missing low/path bars are not inferred",
     }
+    manifest["benchmark_quote_receipts_by_scope"].append({"minutes": scope_minutes, "receipts": benchmark_receipts})
     _write_json(PAYOFFS / "manifest.json", manifest)
-    print(f"wrote {len(files)} event partitions, {len(final):,} joined keys; research cache={RESEARCH}", flush=True)
+    for minutes in sorted(signals.minutes.unique()):
+        for wait_min in sorted(signals.loc[signals.minutes.eq(minutes), "wait_min"].unique()):
+            event, raw_rows = _aggregate_wait_partition(
+                int(minutes), int(wait_min), signals, eligible_members, symbols, benchmark_frames
+            )
+            if "event_columns" not in manifest:
+                manifest["event_columns"] = list(event.columns)
+            elif manifest["event_columns"] != list(event.columns):
+                raise AssertionError("event outcome columns changed between W/X partitions")
+            record = _write_event_partition(int(minutes), int(wait_min), event)
+            record["constituent_raw_rows_scanned"] = int(raw_rows)
+            manifest["event_partitions"].append(record)
+            manifest["event_outcome_rows"] += int(len(event))
+            _write_json(PAYOFFS / "manifest.json", manifest)
+            print(f"wrote W={minutes} X={wait_min}: {len(event):,} event-horizon rows", flush=True)
+    print(f"wrote {len(manifest['event_partitions'])} event partitions, {manifest['event_outcome_rows']:,} joined keys; research cache={RESEARCH}", flush=True)
 
 
 if __name__ == "__main__":
