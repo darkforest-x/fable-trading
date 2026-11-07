@@ -36,33 +36,35 @@ struct RootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(NotificationStore.self) private var notices
     @Environment(\.scenePhase) private var scenePhase
-    @State private var tab: AppTab? = .monitor
+    @State private var tab: AppTab = .monitor
     @State private var progress: CGFloat = CGFloat(AppTab.allCases.firstIndex(of: .monitor)!)
     @State private var showNotifications = false
     @State private var showSettings = false
     @State private var bannerDrag: CGFloat = 0
 
     var body: some View {
+        // System page TabView: native finger-following swipes and correct safe areas for each
+        // page's NavigationStack. Each page reports its x offset so the tab-bar lens can follow.
         GeometryReader { proxy in
-            ScrollView(.horizontal) {
-                LazyHStack(spacing: 0) {
-                    ForEach(AppTab.allCases) { page in
-                        content(page)
-                            .containerRelativeFrame(.horizontal)
-                            .id(page)
-                    }
+            TabView(selection: $tab) {
+                ForEach(AppTab.allCases) { page in
+                    content(page)
+                        .tag(page)
+                        .background {
+                            GeometryReader { g in
+                                Color.clear.preference(key: PageOffsetKey.self, value: [AppTab.allCases.firstIndex(of: page)!: g.frame(in: .global).minX])
+                            }
+                        }
                 }
-                .scrollTargetLayout()
             }
-            .scrollTargetBehavior(.paging)
-            .scrollPosition(id: $tab)
-            .scrollIndicators(.hidden)
-            .scrollBounceBehavior(.basedOnSize)
-            .onScrollGeometryChange(for: CGFloat.self) { $0.contentOffset.x } action: { _, x in
-                if proxy.size.width > 0 { progress = x / proxy.size.width }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .onPreferenceChange(PageOffsetKey.self) { offsets in
+                let width = max(proxy.size.width, 1)
+                if let (index, x) = offsets.first(where: { abs($0.value) < width }) { progress = CGFloat(index) - x / width }
             }
-            .ignoresSafeArea(edges: .bottom)
         }
+        .ignoresSafeArea()
+        .background(AmbientBackground())
         .overlay(alignment: .bottom) {
             GlassTabBar(selection: $tab, progress: progress, badge: notices.unread)
                 .padding(.horizontal, 14)
@@ -121,7 +123,7 @@ struct RootView: View {
 
 /// Floating Liquid Glass tab bar; the lens slides with the page scroll and morphs on taps.
 struct GlassTabBar: View {
-    @Binding var selection: AppTab?
+    @Binding var selection: AppTab
     let progress: CGFloat
     let badge: Int
     @Namespace private var glass
@@ -185,7 +187,7 @@ struct StagePlaceholder: View {
             ScrollView {
                 VStack(spacing: 16) {
                     Image(systemName: systemImage).font(.system(size: 38, weight: .medium)).foregroundStyle(.blue)
-                        .frame(width: 84, height: 84).glassEffect(.regular, in: .circle)
+                        .frame(width: 84, height: 84).frostedCapsule()
                     Text("原生版\(stage)").font(.title3.weight(.bold))
                     Text(note).font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
                     Text("迁移完成前，交易仍在原 SPIKE 纪律交易 App 中进行，规则与保护不变。").font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
@@ -194,10 +196,17 @@ struct StagePlaceholder: View {
                 .padding(16)
             }
             .contentMargins(.bottom, 96, for: .scrollContent)
-            .background(AmbientBackground())
+            .scrollEdgeEffectHidden(true, for: .top)
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .containerBackground(for: .navigation) { AmbientBackground() }
             .navigationTitle(title)
             .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { Haptics.tap(); showSettings = true } label: { Image(systemName: "gearshape") } } }
         }
     }
+}
+
+private struct PageOffsetKey: PreferenceKey {
+    static var defaultValue: [Int: CGFloat] = [:]
+    static func reduce(value: inout [Int: CGFloat], nextValue: () -> [Int: CGFloat]) { value.merge(nextValue()) { $1 } }
 }

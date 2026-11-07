@@ -45,13 +45,15 @@ struct MonitorView: View {
             }
             .refreshable { refresh += 1; try? await Task.sleep(for: .milliseconds(700)); Haptics.success() }
             .contentMargins(.bottom, 96, for: .scrollContent)
+            .scrollEdgeEffectHidden(true, for: .top)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .navigationDestination(for: PaperAccount.self) { account in
                 if let connection = session.connection {
                     AccountDetailView(account: account, connection: connection)
                         .navigationTransition(.zoom(sourceID: account.key, in: zoom))
                 }
             }
-            .background(AmbientBackground())
+            .containerBackground(for: .navigation) { AmbientBackground() }
             .navigationTitle("监控")
             .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {

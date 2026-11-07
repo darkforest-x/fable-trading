@@ -15,7 +15,7 @@ struct PaperSection: View {
             LoadState(loading: data == nil && error == nil, error: error, stale: data != nil)
             if !live.isEmpty {
                 SectionHeader(title: "live- 前向模拟", count: live.count)
-                GlassEffectContainer(spacing: 10) {
+                Group {
                     let pairs = stride(from: 0, to: live.count - live.count % 2, by: 2).map { (live[$0], live[$0 + 1]) }
                     VStack(spacing: 10) {
                         ForEach(pairs, id: \.0.key) { pair in
@@ -116,9 +116,9 @@ struct AccountTile: View {
             .padding(14).frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(CardPressStyle())
         .simultaneousGesture(TapGesture().onEnded { Haptics.open() })
-        .glassCard(cornerRadius: 22, interactive: true)
+        .glassCard(cornerRadius: 22)
         .matchedTransitionSource(id: account.key, in: zoom)
         .scrollReveal()
     }
@@ -181,7 +181,8 @@ struct AccountDetailView: View {
             }
             .padding(.horizontal, 14).padding(.bottom, 24)
         }
-        .background(AmbientBackground())
+        .scrollEdgeEffectHidden(true, for: .top)
+        .containerBackground(for: .navigation) { AmbientBackground() }
         .navigationTitle(account.label)
         .navigationBarTitleDisplayMode(.inline)
         .modifier(Polled(key: "paper-\(account.key)", every: .seconds(10), load: { try await API.get("/v1/monitor/paper", query: [URLQueryItem(name: "track", value: account.key)], connection: connection) }, value: $data, error: $error))

@@ -80,7 +80,7 @@ struct AlarmHero: View {
                 }
                 Spacer()
                 Text("\(Fmt.clock(alarm.firstMs, now: now)) – \(Fmt.clock(alarm.lastMs, now: now))").font(.caption.weight(.semibold)).monospacedDigit()
-                    .padding(.horizontal, 10).padding(.vertical, 4).glassEffect(.regular, in: .capsule)
+                    .padding(.horizontal, 10).padding(.vertical, 4).frostedCapsule()
             }
             Label("全市场插针 · \(Fmt.edge(alarm.side))", systemImage: alarm.side == .lower ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
                 .font(.title3.weight(.bold)).fontDesign(.rounded).labelStyle(.titleAndIcon)
@@ -105,7 +105,7 @@ struct CoinChips: View {
             ForEach(all ? symbols : Array(symbols.prefix(8)), id: \.self) { s in
                 HStack(spacing: 5) { CoinLogo(coin: Fmt.coin(s), size: 18); Text(Fmt.coin(s)).font(.footnote.weight(.semibold)) }
                     .padding(.leading, 5).padding(.trailing, 10).padding(.vertical, 5)
-                    .glassEffect(.regular, in: .capsule)
+                    .frostedCapsule()
             }
             if !all && symbols.count > 8 {
                 Button("+\(symbols.count - 8)") { Haptics.tap(); withAnimation(.snappy) { all = true } }
