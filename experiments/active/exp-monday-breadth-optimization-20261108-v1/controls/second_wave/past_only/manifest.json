@@ -1,0 +1,31 @@
+{
+  "source_runs": {
+    "second_wave": {
+      "epoch3_only": true,
+      "selected_rule_events": 86,
+      "symbol_month_tasks": 1464,
+      "symbols_loaded_once": 513,
+      "control_rows": 2715,
+      "fixed_rows": 0,
+      "dynamic_rows": 2715
+    }
+  },
+  "max_fixed_draws": 12,
+  "max_dynamic_draws": 3,
+  "minimum_member_coverage_pct": 80.0,
+  "same_symbol_lower_touch_rule": "No lower first-touch open in [control_known-minutes, control_decision).",
+  "matching_policy": "past_only_sensitivity",
+  "shock_exclusion": "Exclude only if a same-side 25+ ledger shock was already known in [random decision - 60m, random decision); also exclude controls whose hold interval overlaps the candidate actual hold interval. Future shocks are allowed.",
+  "matching_strata": [
+    "same symbol",
+    "same UTC decision month",
+    "same UTC 6h decision block",
+    "same prior-1h realized-vol bucket [.25,.5,1,2,4]%",
+    "same prior-1h trend sign before known",
+    "same NY weekday at known and decision",
+    "same observable 5m-bar fraction over W+X"
+  ],
+  "price_data": "monday_breadth_opt_payoffs.load_full_ohlc(..., needed_intervals=None, repair_missing=False); once per symbol over selected months then sliced per month in memory; registered local/cache only, no REST.",
+  "fixed_fees": "VectorBT fixed-control returns use existing two-taker-fill fees and are replayed from the already loaded local month matrix.",
+  "dynamic_behavior": "Dynamic matches store only random entry coordinates and weights; no fixed-horizon VectorBT replay or second price read."
+}
