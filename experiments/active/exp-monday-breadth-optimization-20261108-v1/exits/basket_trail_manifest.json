@@ -187,20 +187,34 @@
     "capacity",
     "margin/liquidation"
   ],
+  "basket_membership": "count raw frozen initial N, but exclude any symbol with monday_breadth_constituent_scope.exclusion_reason from the priced ALT basket; exclusion reason is retained in basket_trail_members",
+  "incremental_reuse": {
+    "enabled": true,
+    "recomputed_filtered_events": 23,
+    "reused_unaffected_events": 147
+  },
+  "baseline_parity": {
+    "events": 170,
+    "max_abs_payoff_baseline_delta_pct": 7.105427357601002e-15,
+    "max_abs_wave_locked_baseline_delta_pct": 7.105427357601002e-15,
+    "member_count_mismatches": 0
+  },
   "coverage": {
     "locked_events": 170,
     "complete_locked_events": 170,
     "complete_sep16": true,
-    "loaded_symbols": 612,
-    "requested_symbols": 612
+    "loaded_symbols": 611,
+    "requested_symbols": 611
   },
   "input_counts": {
     "dynamic_primary_ALT_rows": 51,
     "wave_ALT_rows": 119,
     "locked_events_after_dedup": 170,
     "duplicate_member_set_decision_keys_removed": 0,
-    "unique_study_symbols_including_sep16": 612,
+    "unique_study_symbols_including_sep16": 611,
     "membership_rows_including_sep16": 9317,
+    "basket_member_rows_including_sep16": 9294,
+    "excluded_member_rows_including_sep16": 23,
     "sep16_members": 68,
     "sep16_decision": "2026-09-15T19:20:00+00:00"
   }
