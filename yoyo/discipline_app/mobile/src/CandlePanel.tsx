@@ -1,5 +1,6 @@
 import {observeChartAppearance} from './chartAppearance';
-import {CHART} from './chartPalette';
+import {CHART,CHART_FOLLOW_EVENT} from './chartPalette';
+import {AVERAGES,ema,sma} from './indicators';
 import {REFRESH_EVENT,type RefreshRequest} from './refreshEvent';
 import type {FibRange} from './fibData';
 import {FibRangePrimitive} from './FibRangePrimitive';
@@ -8,7 +9,7 @@ import {FibRangePrimitive} from './FibRangePrimitive';
  */
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { CandlestickSeries, HistogramSeries, ColorType, LineStyle, createChart, type IChartApi, type ISeriesApi, type LogicalRange, type UTCTimestamp, type Time } from 'lightweight-charts';
+import { CandlestickSeries, HistogramSeries, LineSeries, ColorType, LineStyle, createChart, createTextWatermark, type IChartApi, type ISeriesApi, type LogicalRange, type UTCTimestamp, type Time } from 'lightweight-charts';
 import { Capacitor, CapacitorHttp } from '@capacitor/core';
 import { candleFetcher } from './candleTransport';
 import { browserCandleCache, PERIODS, type Candle, type CandlePeriod } from './candleData';
@@ -27,7 +28,7 @@ const timeLabel = (time:Time,full=false) => typeof time==='number' ? (full?fullF
 const dateLabel = (time:Time) => typeof time==='number' ? dateFormat.format(time*1000) : String(time);
 type ChartView = { key:string; range:LogicalRange|null };
 
-const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,stop,view,onOlder,fullscreen,range}:{state:CandleState;symbol:string;period:CandlePeriod;tick?:string;entry?:string;stop?:string;view:React.RefObject<ChartView>;onOlder:()=>void;fullscreen:boolean;range?:FibRange}) {
+const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,stop,view,onOlder,fullscreen,range,internal=false,averages=false}:{state:CandleState;symbol:string;period:CandlePeriod;tick?:string;entry?:string;stop?:string;view:React.RefObject<ChartView>;onOlder:()=>void;fullscreen:boolean;range?:FibRange;internal?:boolean;averages?:boolean}) {
  const host=useRef<HTMLDivElement>(null),legend=useRef<HTMLDivElement>(null);
  const graph=useRef<{chart:IChartApi;candles:ISeriesApi<'Candlestick'>;volume:ISeriesApi<'Histogram'>}|null>(null);
  const previous=useRef<{bars:Candle[];reset:number}>({bars:[],reset:-1});
@@ -53,6 +54,8 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
   const volume=chart.addSeries(HistogramSeries,{priceFormat:{type:'volume'},priceScaleId:'volume',lastValueVisible:false,priceLineVisible:false});
   volume.priceScale().applyOptions({scaleMargins:{top:.82,bottom:0},visible:false});
   graph.current={chart,candles,volume};
+  // 1.618 replica: faint coin watermark like the workbench wallpaper chart.
+  if(range)createTextWatermark(chart.panes()[0],{horzAlign:'center',vertAlign:'center',lines:[{text:symbol.replace('-USDT-SWAP','USDT'),color:'rgba(60,60,67,.06)',fontSize:44,fontStyle:'bold'}]});
   const observer=new ResizeObserver(entries=>{const box=entries[0]?.contentRect;if(box&&box.width>0&&box.height>0)chart.resize(Math.floor(box.width),Math.floor(box.height))});observer.observe(host.current);
   chart.subscribeCrosshairMove(event=>{const row=event.seriesData.get(candles);hovering.current=!!event.point&&!!row;if(row&&'open'in row)showBar({...row,volume:0,confirmed:false,time:Number(row.time)});else showBar(latest.current.state.bars.at(-1))});
   chart.timeScale().subscribeVisibleLogicalRangeChange(range=>{if(range&&range.from<12&&previous.current.bars.length>=55&&latest.current.state.historyReady&&!latest.current.state.error)latest.current.onOlder()});
@@ -84,13 +87,28 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
  },[entry,stop,symbol,period,showBar]);
  useEffect(()=>{
   const series=graph.current?.candles;if(!series||!range)return;
-  const primitive=new FibRangePrimitive(range,format);series.attachPrimitive(primitive);
+  const primitive=new FibRangePrimitive(range,format,internal);series.attachPrimitive(primitive);
   return()=>{if(graph.current?.candles===series)series.detachPrimitive(primitive)};
- },[range,symbol,period,showBar]);
+ },[range,internal,symbol,period,showBar]);
+ // 跟随最新 from the 1.618 dock (a window event keeps the chart instance private to this component).
+ useEffect(()=>{const follow=()=>graph.current?.chart.timeScale().scrollToRealTime();window.addEventListener(CHART_FOLLOW_EVENT,follow);return()=>window.removeEventListener(CHART_FOLLOW_EVENT,follow)},[]);
+ // 六均线 (workbench chart-style.js): six thin lines recomputed from the bars on screen.
+ const averageSeries=useRef<ISeriesApi<'Line'>[]>([]);
+ useEffect(()=>{
+  const g=graph.current;if(!g||!averages)return;
+  const lines=AVERAGES.map(a=>g.chart.addSeries(LineSeries,{color:a.color,lineWidth:1,lineStyle:a.dashed?LineStyle.Dashed:LineStyle.Solid,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false}));
+  averageSeries.current=lines;
+  return()=>{if(graph.current===g)for(const line of lines)g.chart.removeSeries(line);averageSeries.current=[]};
+ },[averages,symbol,period,showBar]);
+ useEffect(()=>{
+  if(!averages||!state.historyReady||!averageSeries.current.length)return;
+  const bars=state.bars.map(b=>({time:b.time,close:b.close}));
+  AVERAGES.forEach((a,i)=>averageSeries.current[i]?.setData((a.kind==='sma'?sma(bars,a.period):ema(bars,a.period)).map(p=>({time:p.time as UTCTimestamp,value:p.value}))));
+ },[averages,state.bars,state.historyReady]);
  return <><div className="candle-ohlc" ref={legend} aria-label="K线开高低收">开 —　高 —　低 —　收 —</div><div className={`candle-canvas ${fullscreen?'is-fullscreen':''}`} ref={host} role="img" aria-label={`${symbol.replace('-USDT-SWAP','/USDT')} ${PERIODS[period]} K线与成交量`} onTouchStart={e=>e.stopPropagation()}/>{state.historyReady&&<button className="candle-realtime" onClick={()=>{graph.current?.chart.timeScale().scrollToRealTime();feedback('light')}}>回到最新</button>}</>;
 });
 
-export default function CandlePanel({symbol,connection,tick,entry,stop,period,onPeriod,onCollapse,embedded=false,range,active=true}:CandleProps&{active?:boolean;embedded?:boolean;range?:FibRange;period:CandlePeriod;onPeriod:(period:CandlePeriod)=>void;onCollapse:()=>void}) {
+export default function CandlePanel({symbol,connection,tick,entry,stop,period,onPeriod,onCollapse,embedded=false,range,active=true,internal=false,averages=false}:CandleProps&{active?:boolean;embedded?:boolean;range?:FibRange;period:CandlePeriod;onPeriod:(period:CandlePeriod)=>void;onCollapse:()=>void;internal?:boolean;averages?:boolean}) {
  const identity=symbol+period;
  const [snapshot,setSnapshot]=useState(()=>{const bars=browserCandleCache().read(symbol,period);return {identity,state:bars.length>=2?{...empty,bars,historyReady:true,status:'cached' as const}:empty}}),[fullscreen,setFullscreen]=useState(false);
  // Never paint the previous symbol/period while its replacement effect is starting.
@@ -126,8 +144,8 @@ export default function CandlePanel({symbol,connection,tick,entry,stop,period,on
  const loadOlder=useCallback(()=>{void feed.current?.loadOlder()},[]);
  const content=<div ref={panel} className={`candle-panel ${fullscreen?'candle-fullscreen':''}`} data-no-swipe role={fullscreen?'dialog':undefined} aria-modal={fullscreen||undefined} aria-label={fullscreen?'全屏K线':undefined} tabIndex={fullscreen?-1:undefined}>
   <header className="candle-heading"><b>{fullscreen?symbol.replace('-USDT-SWAP','/USDT'):'K线'}</b><span className={`candle-status ${state.status==='live'?'live':''}`} role="status"><i/>{statusText[state.status]}</span>{fullscreen?<button aria-label="退出全屏" onClick={()=>{setFullscreen(false);feedback('light')}}><Icon name="close" size={20}/></button>:<><button ref={fullButton} aria-label="全屏查看K线" onClick={()=>{setFullscreen(true);feedback('light')}}><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></button><button aria-label="收起K线" onClick={onCollapse}><Icon name="chevron" size={16}/></button></>}</header>
-  <div className="candle-periods" aria-label="K线周期">{(embedded?['5m','15m','1H','4H'] as CandlePeriod[]:Object.keys(PERIODS) as CandlePeriod[]).map(value=><button key={value} aria-pressed={value===period} onClick={()=>{if(value!==period)onPeriod(value)}}>{PERIODS[value]}</button>)}</div>
-  <div className="candle-plot"><CanvasChart key={symbol+period} state={state} symbol={symbol} period={period} tick={tick} entry={entry} stop={stop} view={view} onOlder={loadOlder} fullscreen={fullscreen} range={range}/>{!state.historyReady&&<div className="candle-empty"><span>{state.error?'历史暂不可用':'正在补齐历史K线…'}</span>{!!state.error&&<button onClick={()=>void feed.current?.refresh()}>重试</button>}</div>}</div>
+  <div className="candle-periods" aria-label="K线周期">{(embedded?['1m','5m','15m','1H','4H'] as CandlePeriod[]:Object.keys(PERIODS) as CandlePeriod[]).map(value=><button key={value} aria-pressed={value===period} onClick={()=>{if(value!==period)onPeriod(value)}}>{PERIODS[value]}</button>)}</div>
+  <div className="candle-plot"><CanvasChart key={symbol+period} state={state} symbol={symbol} period={period} tick={tick} entry={entry} stop={stop} view={view} onOlder={loadOlder} fullscreen={fullscreen} range={range} internal={internal} averages={averages}/>{!state.historyReady&&<div className="candle-empty"><span>{state.error?'历史暂不可用':'正在补齐历史K线…'}</span>{!!state.error&&<button onClick={()=>void feed.current?.refresh()}>重试</button>}</div>}</div>
   <footer className="candle-footer"><span>{range?`北京时间 · ${statusText[state.status]}`:'OKX · 北京时间'}</span><button disabled={state.loadingOlder||!state.historyReady||!state.canLoadOlder} onClick={loadOlder}>{state.loadingOlder?'加载历史…':state.canLoadOlder?'更早K线':'历史已加载'}</button></footer>
   {state.error&&state.historyReady&&<button className="candle-error" onClick={()=>state.errorKind==='older'?loadOlder():void feed.current?.refresh()}>{state.error}</button>}
   <details className="candle-credit"><summary>图表来源</summary><a href="https://www.tradingview.com/" target="_blank" rel="noreferrer">TradingView Lightweight Charts™</a><small>Copyright (с) 2025 TradingView, Inc.</small></details>

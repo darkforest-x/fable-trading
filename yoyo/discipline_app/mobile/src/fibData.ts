@@ -11,15 +11,27 @@ export function latestFibTouch(row:FibContract):FibTouch {
  return Object.values(row.touches).sort((a,b)=>b.occurred_ms-a.occurred_ms||a.side.localeCompare(b.side))[0];
 }
 export function fibSide(row:FibContract){return latestFibTouch(row).side==='upper'?'short':'long'}
-// Unified tone (chartPalette.ts CHART): 1.618 extensions in the app blue, Monday range neutral grey;
-// red/green stay reserved for candles and P&L. Inlined so node tests import this file directly.
-export function fibLevels(range:FibRange){return [
- {price:range.upper,title:'1.618',color:'#0a84ff'},
- {price:range.high,title:'高点',color:'#8e8e93'},
- {price:(range.high+range.low)/2,title:'',color:'rgba(142,142,147,.45)'},
- {price:range.low,title:'低点',color:'#8e8e93'},
- {price:range.lower,title:'1.618',color:'#0a84ff'},
-].filter(x=>x.price>0)}
+// Workbench replica (monday-fib-chart.js levels, owner 2026-11-06 “直接复刻”) in the app palette:
+// upper 1.618 red / lower 1.618 green (2 px), Monday high/low blue; 内部线 adds 0.705 / 0.618 / 0.5.
+// Inlined colours so node tests import this file directly.
+export type FibLevel={price:number;title:string;color:string;width:number;dashed:boolean};
+export function fibLevels(range:FibRange,internal=false):FibLevel[]{
+ const h=range.high,l=range.low,r=h-l,inner='rgba(10,132,255,.5)';
+ const rows:FibLevel[]=[
+  {price:range.upper,title:'上 1.618',color:'#ff453a',width:2,dashed:false},
+  {price:h,title:'周一高',color:'#0a84ff',width:1,dashed:false},
+  ...(internal?[
+   {price:l+.705*r,title:'上 0.705',color:inner,width:1,dashed:false},
+   {price:l+.618*r,title:'上 0.618',color:inner,width:1,dashed:false},
+   {price:l+.5*r,title:'中点 0.5',color:'#8e8e93',width:1,dashed:true},
+   {price:h-.618*r,title:'下 0.618',color:inner,width:1,dashed:false},
+   {price:h-.705*r,title:'下 0.705',color:inner,width:1,dashed:false},
+  ]:[]),
+  {price:l,title:'周一低',color:'#0a84ff',width:1,dashed:false},
+  {price:range.lower,title:'下 1.618',color:'#30d158',width:2,dashed:false},
+ ];
+ return rows.filter(x=>x.price>0);
+}
 export function fibSelection(previous:string,previousWeek:string|undefined,next:FibSnapshot){
  return previousWeek===next.week&&next.items.some(r=>r.symbol===previous)?previous:next.items[0]?.symbol??'';
 }

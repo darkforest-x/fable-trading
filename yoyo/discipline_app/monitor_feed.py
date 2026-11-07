@@ -124,7 +124,8 @@ def project_alerts(raw):
         alerts = []
         for row in raw['alerts'][:MAX_ROWS]:
             side = row.get('side')
-            if side not in ('upper', 'lower'):
+            # Owner 2026-11-06: “全市场插针记录不要显示测试的” — workbench test alarms never reach the app.
+            if side not in ('upper', 'lower') or row.get('test'):
                 continue
             symbols = [s for s in (row.get('symbols') or []) if _symbol(s)]
             alerts.append(dict(id=_ms(row.get('id')), side=side, first_ms=_ms(row.get('first_ms')),

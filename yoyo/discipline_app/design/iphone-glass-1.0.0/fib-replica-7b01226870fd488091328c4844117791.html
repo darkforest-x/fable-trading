@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>SPIKE 纪律交易 · 1.618</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Google Fonts: Inter & JetBrains Mono for pristine tabular numerals -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    /* Global Typography & Reset */
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+      --apple-blue: #0A84FF;
+      --profit-green: #1F9D55;
+      --profit-fill: #30D158;
+      --loss-red: #E5383B;
+      --loss-fill: #FF453A;
+      --warn-amber: #FF9F0A;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      background-color: #0c1017;
+    }
+
+    .num-tabular {
+      font-family: var(--font-mono);
+      font-feature-settings: "tnum" 1, "cv05" 1;
+    }
+
+    /* iOS 26 Liquid Glass Material Specs */
+    .liquid-glass-card {
+      background: rgba(255, 255, 255, 0.64);
+      backdrop-filter: blur(32px) saturate(190%);
+      -webkit-backdrop-filter: blur(32px) saturate(190%);
+      border-radius: 26px;
+      box-shadow: 
+        0 1px 0 0 rgba(255, 255, 255, 0.95) inset,
+        0 -1px 0 0 rgba(0, 0, 0, 0.04) inset,
+        0 20px 40px -15px rgba(22, 38, 66, 0.08),
+        0 8px 16px -6px rgba(22, 38, 66, 0.04);
+      position: relative;
+    }
+
+    .liquid-glass-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.15) 100%);
+    }
+
+    .liquid-glass-capsule {
+      background: rgba(255, 255, 255, 0.68);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      box-shadow: 
+        0 1px 0 0 rgba(255, 255, 255, 0.9) inset,
+        0 12px 28px -8px rgba(10, 40, 80, 0.07);
+    }
+
+    .liquid-glass-capsule-sm {
+      background: rgba(255, 255, 255, 0.62);
+      backdrop-filter: blur(20px) saturate(170%);
+      -webkit-backdrop-filter: blur(20px) saturate(170%);
+      box-shadow: 
+        0 1px 0 0 rgba(255, 255, 255, 0.9) inset,
+        0 4px 12px -2px rgba(10, 30, 60, 0.05);
+    }
+
+    /* Active Tab Lens Pill (Optical refraction boost) */
+    .glass-active-lens {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 
+        0 1px 0 0 rgba(255, 255, 255, 1) inset,
+        0 6px 16px -4px rgba(10, 132, 255, 0.16),
+        0 2px 6px -1px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Primary Order Button Specular Sheen */
+    .primary-glass-cta {
+      background: linear-gradient(180deg, rgba(10, 132, 255, 0.96) 0%, rgba(0, 113, 227, 0.98) 100%);
+      box-shadow: 
+        0 1px 0 0 rgba(255, 255, 255, 0.45) inset,
+        0 -1px 0 0 rgba(0, 0, 0, 0.2) inset,
+        0 12px 28px -4px rgba(10, 132, 255, 0.42),
+        0 4px 10px 0 rgba(10, 132, 255, 0.2);
+    }
+
+    /* Custom Scrollbar hide */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="h-full flex items-center justify-center p-0 md:p-6 bg-[#090C10]">
+<!-- iPhone 17 Pro Screen Canvas Wrapper (402pt x 874pt standard screen ratio) -->
+<div class="relative w-[402px] h-[874px] bg-[#EEF2F7] rounded-[55px] overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.55),0_0_0_12px_#1E222B,0_0_0_14px_#2E333D] flex flex-col border border-white/20 select-none">
+<!-- Ambient Refraction Blobs: Apple Blue top-left (12%) & Teal right (10%) -->
+<div class="absolute -top-16 -left-16 w-80 h-80 rounded-full bg-[#0A84FF] opacity-15 blur-[68px] pointer-events-none z-0"></div>
+<div class="absolute top-72 -right-20 w-80 h-80 rounded-full bg-[#0A84FF] opacity-10 blur-[72px] pointer-events-none z-0"></div>
+<div class="absolute bottom-28 left-8 w-64 h-64 rounded-full bg-[#0A84FF] opacity-10 blur-[60px] pointer-events-none z-0"></div>
+<!-- Dynamic Island & Status Bar Safe Area (Top 62pt) -->
+<div class="relative z-30 w-full h-[62px] px-8 flex items-center justify-between text-slate-800 text-[15px] font-semibold tracking-tight shrink-0">
+<!-- iOS Clock -->
+<span class="num-tabular font-medium text-[15px] pl-1.5">9:41</span>
+<!-- Dynamic Island (Precise iPhone 17 Pro 120x35pt) -->
+<div class="absolute left-1/2 -translate-x-1/2 top-[13px] w-[124px] h-[35px] bg-black rounded-full flex items-center justify-between px-3 shadow-sm">
+<div class="w-3 h-3 rounded-full bg-emerald-500/80 animate-pulse"></div>
+<div class="w-3 h-3 rounded-full bg-[#111] border border-white/10"></div>
+</div>
+<!-- Battery & Connectivity Icons -->
+<div class="flex items-center space-x-1.5 pr-1">
+<svg class="w-4 h-4 fill-current text-slate-800" viewbox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.25c-.2.2-.2.51 0 .71.2.2.51.2.71 0l.64-.64C7.4 19.39 9.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"></path></svg>
+<svg class="w-4 h-4 fill-current text-slate-800" viewbox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98A16.88 16.88 0 0 0 12 4zm0 2.75c3.78 0 7.21 1.48 9.77 3.92L12 18.42 2.23 10.67A14.28 14.28 0 0 1 12 6.75z"></path></svg>
+<div class="w-6 h-3 rounded-[4px] border border-slate-800 p-0.5 flex items-center">
+<div class="w-full h-full bg-slate-800 rounded-[1.5px]"></div>
+</div>
+</div>
+</div>
+<!-- MAIN BODY CONTAINER: Top 60% Candlestick Chart Area + Lower 40% Bottom Sheet -->
+<div class="relative flex-1 flex flex-col overflow-hidden z-10"><!-- Candlestick & Volume Full-bleed Canvas Background -->
+<div class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+<!-- BEATUSDT Large Watermark -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+<span class="text-[54px] font-extrabold tracking-widest text-slate-800/5 num-tabular">BEATUSDT</span>
+</div>
+<!-- Full Bleed SVG Chart Canvas -->
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 402 700">
+<defs>
+<lineargradient id="gridFade" x1="0" x2="1" y1="0" y2="0">
+<stop offset="0%" stop-color="#8E8E93" stop-opacity="0.05"></stop>
+<stop offset="100%" stop-color="#8E8E93" stop-opacity="0.15"></stop>
+</lineargradient>
+<lineargradient id="volGreen" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#30D158" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#30D158" stop-opacity="0.05"></stop>
+</lineargradient>
+<lineargradient id="volRed" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#FF453A" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#FF453A" stop-opacity="0.05"></stop>
+</lineargradient>
+</defs>
+<!-- Faint Grid Lines -->
+<line stroke="url(#gridFade)" stroke-width="0.8" x1="0" x2="402" y1="100" y2="100"></line>
+<line stroke="url(#gridFade)" stroke-width="0.8" x1="0" x2="402" y1="190" y2="190"></line>
+<line stroke="url(#gridFade)" stroke-width="0.8" x1="0" x2="402" y1="280" y2="280"></line>
+<line stroke="url(#gridFade)" stroke-width="0.8" x1="0" x2="402" y1="370" y2="370"></line>
+<line stroke="url(#gridFade)" stroke-width="0.8" x1="0" x2="402" y1="460" y2="460"></line>
+<line stroke="url(#gridFade)" stroke-dasharray="3,3" stroke-width="0.8" x1="80" x2="80" y1="0" y2="600"></line>
+<line stroke="url(#gridFade)" stroke-dasharray="3,3" stroke-width="0.8" x1="180" x2="180" y1="0" y2="600"></line>
+<line stroke="url(#gridFade)" stroke-dasharray="3,3" stroke-width="0.8" x1="280" x2="280" y1="0" y2="600"></line>
+<!-- Reference Line 1: 上 1.618 (0.11694746) - Red Solid Ray -->
+<line opacity="0.85" stroke="#FF453A" stroke-width="2" x1="0" x2="402" y1="115" y2="115"></line>
+<!-- Reference Line 2: 周一高 (0.10955) - Apple Blue Solid Ray -->
+<line opacity="0.85" stroke="#0A84FF" stroke-width="1.5" x1="0" x2="402" y1="195" y2="195"></line>
+<!-- Reference Line 3: 中点 0.5 - Neutral Dashed Ray -->
+<line opacity="0.6" stroke="#8E8E93" stroke-dasharray="4,4" stroke-width="1" x1="0" x2="402" y1="290" y2="290"></line>
+<!-- Reference Line 4: 周一低 (0.09758) - Apple Blue Solid Ray -->
+<line opacity="0.85" stroke="#0A84FF" stroke-width="1.5" x1="0" x2="402" y1="385" y2="385"></line>
+<!-- Reference Line 5: 下 1.618 (0.09018254) - Green Solid Ray -->
+<line opacity="0.85" stroke="#30D158" stroke-width="2" x1="0" x2="402" y1="470" y2="470"></line>
+<!-- Current Live Price Line (0.11592) -->
+<line opacity="0.9" stroke="#FF453A" stroke-dasharray="3,3" stroke-width="1.2" x1="0" x2="402" y1="130" y2="130"></line>
+<!-- Moving Averages Multi-Ribbon (六均线) -->
+<path d="M 0,420 Q 90,390 180,310 T 320,180 T 402,140" fill="none" opacity="0.4" stroke="#FF9F0A" stroke-width="1"></path>
+<path d="M 0,430 Q 90,405 180,330 T 320,205 T 402,152" fill="none" opacity="0.4" stroke="#5E5CE6" stroke-width="1"></path>
+<path d="M 0,445 Q 90,420 180,350 T 320,230 T 402,175" fill="none" opacity="0.35" stroke="#30D158" stroke-width="1"></path>
+<!-- Candlestick Series (Surging toward Upper 1.618) -->
+<!-- Candle 1 (Green) -->
+<line stroke="#30D158" stroke-width="1.2" x1="30" x2="30" y1="440" y2="385"></line>
+<rect fill="#30D158" height="35" rx="1.5" width="10" x="25" y="395"></rect>
+<!-- Candle 2 (Green) -->
+<line stroke="#30D158" stroke-width="1.2" x1="58" x2="58" y1="410" y2="360"></line>
+<rect fill="#30D158" height="32" rx="1.5" width="10" x="53" y="370"></rect>
+<!-- Candle 3 (Red Pullback) -->
+<line stroke="#FF453A" stroke-width="1.2" x1="86" x2="86" y1="365" y2="400"></line>
+<rect fill="#FF453A" height="20" rx="1.5" width="10" x="81" y="372"></rect>
+<!-- Candle 4 (Green Breakthrough) -->
+<line stroke="#30D158" stroke-width="1.2" x1="114" x2="114" y1="380" y2="310"></line>
+<rect fill="#30D158" height="52" rx="1.5" width="10" x="109" y="320"></rect>
+<!-- Candle 5 (Consolidation Green) -->
+<line stroke="#30D158" stroke-width="1.2" x1="142" x2="142" y1="325" y2="280"></line>
+<rect fill="#30D158" height="30" rx="1.5" width="10" x="137" y="290"></rect>
+<!-- Candle 6 (Doji Red) -->
+<line stroke="#FF453A" stroke-width="1.2" x1="170" x2="170" y1="275" y2="305"></line>
+<rect fill="#FF453A" height="12" rx="1.5" width="10" x="165" y="285"></rect>
+<!-- Candle 7 (Break Monday High Green) -->
+<line stroke="#30D158" stroke-width="1.2" x1="198" x2="198" y1="290" y2="210"></line>
+<rect fill="#30D158" height="65" rx="1.5" width="10" x="193" y="220"></rect>
+<!-- Candle 8 (Green extension) -->
+<line stroke="#30D158" stroke-width="1.2" x1="226" x2="226" y1="225" y2="175"></line>
+<rect fill="#30D158" height="35" rx="1.5" width="10" x="221" y="185"></rect>
+<!-- Candle 9 (Small red retest) -->
+<line stroke="#FF453A" stroke-width="1.2" x1="254" x2="254" y1="180" y2="215"></line>
+<rect fill="#FF453A" height="22" rx="1.5" width="10" x="249" y="188"></rect>
+<!-- Candle 10 (Impulsive Spike toward 1.618 Upper) -->
+<line stroke="#30D158" stroke-width="1.2" x1="282" x2="282" y1="190" y2="112"></line>
+<rect fill="#30D158" height="58" rx="1.5" width="10" x="277" y="128"></rect>
+<!-- Candle 11 (Pin Wick touching Upper 1.618) -->
+<line stroke="#FF453A" stroke-width="1.2" x1="310" x2="310" y1="112" y2="148"></line>
+<rect fill="#FF453A" height="22" rx="1.5" width="10" x="305" y="120"></rect>
+<!-- Spike Indicator Dot -->
+<circle cx="310" cy="115" fill="#FF453A" r="4"></circle>
+<circle cx="310" cy="115" opacity="0.5" r="8" stroke="#FF453A" stroke-width="1"></circle>
+<!-- Candle 12 (Current Tick Candle 0.11592) -->
+<line stroke="#FF453A" stroke-width="1.2" x1="338" x2="338" y1="122" y2="142"></line>
+<rect fill="#FF453A" height="12" rx="1.5" width="10" x="333" y="126"></rect>
+<!-- Volume Histogram at Chart Bottom (510 to 570) -->
+<rect fill="url(#volGreen)" height="24" rx="1" width="8" x="26" y="540"></rect>
+<rect fill="url(#volGreen)" height="29" rx="1" width="8" x="54" y="535"></rect>
+<rect fill="url(#volRed)" height="14" rx="1" width="8" x="82" y="550"></rect>
+<rect fill="url(#volGreen)" height="44" rx="1" width="8" x="110" y="520"></rect>
+<rect fill="url(#volGreen)" height="26" rx="1" width="8" x="138" y="538"></rect>
+<rect fill="url(#volRed)" height="10" rx="1" width="8" x="166" y="554"></rect>
+<rect fill="url(#volGreen)" height="52" rx="1" width="8" x="194" y="512"></rect>
+<rect fill="url(#volGreen)" height="39" rx="1" width="8" x="222" y="525"></rect>
+<rect fill="url(#volRed)" height="19" rx="1" width="8" x="250" y="545"></rect>
+<rect fill="url(#volGreen)" height="66" rx="1" width="8" x="278" y="498"></rect>
+<rect fill="url(#volRed)" height="49" rx="1" width="8" x="306" y="515"></rect>
+<rect fill="url(#volRed)" height="32" rx="1" width="8" x="334" y="532"></rect>
+</svg>
+<!-- Precise Right-Axis Inline Price Badges -->
+<div class="absolute right-2.5 top-[104px] text-right pointer-events-none">
+<div class="text-[10px] font-bold text-[#E5383B] num-tabular tracking-tight bg-white/70 px-1.5 py-0.5 rounded backdrop-blur-sm shadow-xs border border-[#FF453A]/20">
+      上 1.618 0.11694746
+    </div>
+</div>
+<div class="absolute right-2.5 top-[120px] text-right pointer-events-none">
+<div class="text-[11px] font-bold text-white num-tabular tracking-tight bg-[#FF453A] px-1.5 py-0.5 rounded shadow-xs">
+      0.11592
+    </div>
+</div>
+<div class="absolute right-2.5 top-[184px] text-right pointer-events-none">
+<div class="text-[10px] font-medium text-[#0A84FF] num-tabular tracking-tight bg-white/70 px-1.5 py-0.5 rounded backdrop-blur-sm shadow-xs border border-[#0A84FF]/20">
+      周一高 0.10955
+    </div>
+</div>
+<div class="absolute right-2.5 top-[279px] text-right pointer-events-none">
+<div class="text-[9.5px] font-medium text-slate-500 num-tabular tracking-tight bg-white/70 px-1 rounded backdrop-blur-sm shadow-xs">
+      中点 0.5
+    </div>
+</div>
+<div class="absolute right-2.5 top-[374px] text-right pointer-events-none">
+<div class="text-[10px] font-medium text-[#0A84FF] num-tabular tracking-tight bg-white/70 px-1.5 py-0.5 rounded backdrop-blur-sm shadow-xs border border-[#0A84FF]/20">
+      周一低 0.09758
+    </div>
+</div>
+<div class="absolute right-2.5 top-[459px] text-right pointer-events-none">
+<div class="text-[10px] font-bold text-[#1F9D55] num-tabular tracking-tight bg-white/70 px-1.5 py-0.5 rounded backdrop-blur-sm shadow-xs border border-[#30D158]/20">
+      下 1.618 0.09018254
+    </div>
+</div>
+</div>
+<!-- ======================================================== -->
+<!-- TOP FLOATING GLASS CONTROLS: Price Card & List Pill -->
+<!-- ======================================================== -->
+<div class="relative z-20 px-4 pt-1 flex items-start justify-between pointer-events-auto">
+<!-- Top-Left Floating Glass Price Card (20px radius, specular highlight) -->
+<div class="p-3 rounded-[20px] liquid-glass-card border border-white/90 shadow-[0_12px_28px_-6px_rgba(15,30,50,0.1)] flex flex-col space-y-1 backdrop-blur-[24px]">
+<!-- Coin title row -->
+<div class="flex items-center space-x-2">
+<span class="text-[20px] font-bold tracking-tight text-slate-900 leading-none">BEAT</span>
+<span class="text-[11px] font-medium text-slate-500 bg-white/70 px-2 py-0.5 rounded-full border border-white/80 num-tabular">USDT 永续</span>
+</div>
+<!-- Hero Price -->
+<div class="text-[26px] font-bold tracking-tight text-slate-900 num-tabular leading-none pt-0.5">
+      0.11592
+    </div>
+<!-- Status Subtitle Row -->
+<div class="flex items-center space-x-2 pt-0.5 text-[11px]">
+<span class="font-semibold text-[#E5383B] flex items-center space-x-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#E5383B] animate-pulse"></span>
+<span>上沿 1.618 · 11/06 18:20</span>
+</span>
+<button class="text-[#0A84FF] font-semibold hover:underline flex items-center">
+        跟随最新
+      </button>
+</div>
+</div>
+<!-- Top-Right Floating Glass Capsule: '列表 449' -->
+<button class="h-[38px] px-3.5 rounded-full liquid-glass-capsule border border-white/90 shadow-xs flex items-center space-x-1.5 active:scale-95 transition-transform text-slate-800 text-[13px] font-bold">
+<span class="w-2 h-2 rounded-full bg-[#0A84FF]"></span>
+<span>列表</span>
+<span class="text-[#0A84FF] num-tabular">449</span>
+</button>
+</div>
+<!-- Spacer for Chart Viewability -->
+<div class="flex-1 pointer-events-none"></div>
+<!-- ======================================================== -->
+<!-- BOTTOM FLOATING GLASS CONTROL DOCK & ACTION DOCK -->
+<!-- ======================================================== -->
+<div class="relative z-30 px-4 pb-28 flex flex-col space-y-2 pointer-events-auto">
+<!-- Floating Glass Control Dock (Period switcher, Toggles, Auto-follow) -->
+<div class="h-[44px] px-2.5 rounded-full liquid-glass-capsule border border-white/90 shadow-[0_12px_28px_-6px_rgba(15,30,50,0.1)] flex items-center justify-between backdrop-blur-[24px]">
+<!-- 15m Period Switcher -->
+<button class="h-8 px-2.5 rounded-full bg-white/75 border border-white/95 text-[12px] font-bold text-slate-800 flex items-center space-x-1 active:scale-95 shadow-xs transition-transform">
+<span>15m</span>
+<svg class="w-3 h-3 text-slate-500 stroke-current stroke-[2]" fill="none" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<!-- Toggle 1: 内部线 -->
+<div class="flex items-center space-x-1.5 px-1.5">
+<span class="text-[11px] font-medium text-slate-600">内部线</span>
+<div class="w-7 h-4 bg-[#0A84FF] rounded-full p-0.5 flex items-center justify-end cursor-pointer shadow-xs">
+<div class="w-3 h-3 bg-white rounded-full shadow-sm"></div>
+</div>
+</div>
+<!-- Toggle 2: 六均线 -->
+<div class="flex items-center space-x-1.5 px-1.5">
+<span class="text-[11px] font-medium text-slate-600">六均线</span>
+<div class="w-7 h-4 bg-[#0A84FF] rounded-full p-0.5 flex items-center justify-end cursor-pointer shadow-xs">
+<div class="w-3 h-3 bg-white rounded-full shadow-sm"></div>
+</div>
+</div>
+<!-- Action: 跟随最新 -->
+<button class="h-8 px-2.5 rounded-full bg-[#0A84FF]/10 hover:bg-[#0A84FF]/15 border border-[#0A84FF]/20 text-[#0A84FF] text-[11px] font-bold flex items-center space-x-1 active:scale-95 transition-all">
+<svg class="w-3 h-3 stroke-current stroke-[2.2]" fill="none" viewbox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span>跟随最新</span>
+</button>
+</div>
+<!-- Action Bar: 快捷开单 · 1R + 模拟盘 Chip -->
+<div class="flex items-center space-x-2 pt-0.5">
+<button class="flex-1 h-[48px] rounded-full primary-glass-cta text-white font-semibold text-[15px] tracking-tight flex items-center justify-center space-x-2 active:scale-[0.98] transition-all shadow-md">
+<svg class="w-4 h-4 stroke-current stroke-[2.2]" fill="none" viewbox="0 0 24 24">
+<path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>快捷开单 · 1R</span>
+<span class="text-[12px] opacity-80 font-normal num-tabular">(0.1169 限价)</span>
+</button>
+<button class="h-[48px] px-4 rounded-full liquid-glass-capsule border border-white/90 text-slate-800 text-[13px] font-semibold flex items-center space-x-1.5 active:scale-95 transition-transform shadow-xs">
+<span class="w-2 h-2 rounded-full bg-[#30D158] shadow-xs"></span>
+<span>模拟盘</span>
+</button>
+</div>
+</div></div>
+<!-- ======================================================== -->
+<!-- FLOATING ACTIONS & DETACHED GLASS TAB BAR OVERLAY -->
+<!-- ======================================================== -->
+<div class="absolute bottom-0 inset-x-0 z-40 pointer-events-none flex flex-col items-center px-4 pb-3">
+<!-- Floating Glass Primary Action Button: '快捷开单 · 1R' (Min 44pt touchable) -->
+<!-- Detached Floating Capsule Glass Tab Bar (12pt above home indicator) -->
+<div class="w-[370px] h-[64px] rounded-full liquid-glass-capsule border border-white/90 p-1 flex items-center justify-between pointer-events-auto shadow-[0_16px_36px_-6px_rgba(15,30,50,0.12)]">
+<!-- Tab 1: 合约 (Contract) -->
+<button class="flex-1 h-full rounded-full flex flex-col items-center justify-center space-y-0.5 text-slate-500 hover:text-slate-800 active:scale-95 transition-all">
+<svg class="w-5 h-5 stroke-current stroke-[1.8]" fill="none" viewbox="0 0 24 24">
+<path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-medium leading-none">合约</span>
+</button>
+<!-- Tab 2: 监控 (Monitor) -->
+<button class="flex-1 h-full rounded-full flex flex-col items-center justify-center space-y-0.5 text-slate-500 hover:text-slate-800 active:scale-95 transition-all">
+<svg class="w-5 h-5 stroke-current stroke-[1.8]" fill="none" viewbox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-medium leading-none">监控</span>
+</button>
+<!-- Tab 3: 1.618 (ACTIVE CENTER TAB in Lighter Glass Lens Pill with Apple Blue) -->
+<button class="flex-1 h-[54px] rounded-full glass-active-lens flex flex-col items-center justify-center space-y-0.5 text-[#0A84FF] shadow-xs active:scale-95 transition-all border border-white/95">
+<svg class="w-5 h-5 stroke-current stroke-[2.2]" fill="none" viewbox="0 0 24 24">
+<path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10.5px] font-bold leading-none tracking-tight">1.618</span>
+</button>
+<!-- Tab 4: 持仓 (Positions) -->
+<button class="flex-1 h-full rounded-full flex flex-col items-center justify-center space-y-0.5 text-slate-500 hover:text-slate-800 active:scale-95 transition-all">
+<svg class="w-5 h-5 stroke-current stroke-[1.8]" fill="none" viewbox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-medium leading-none">持仓</span>
+</button>
+<!-- Tab 5: 统计 (Analytics) -->
+<button class="flex-1 h-full rounded-full flex flex-col items-center justify-center space-y-0.5 text-slate-500 hover:text-slate-800 active:scale-95 transition-all">
+<svg class="w-5 h-5 stroke-current stroke-[1.8]" fill="none" viewbox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-medium leading-none">统计</span>
+</button>
+</div>
+<!-- iOS Home Indicator (Standard 134x5pt centered) -->
+<div class="w-[134px] h-[5px] bg-slate-900/25 rounded-full mt-2 shrink-0"></div>
+</div>
+</div>
+</body>
+</html>

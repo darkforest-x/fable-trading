@@ -3,9 +3,15 @@ import assert from 'node:assert/strict';
 import {fibRangeFor,fibLevels,fibSelection,fibSide,latestFibTouch,parseFibSnapshot,touchLabel,type FibSnapshot,type FibContract} from '../../yoyo/discipline_app/mobile/src/fibData.ts';
 const row=(symbol:string,side:'upper'|'lower',at:number,source:'live'|'history'='live'):FibContract=>({symbol,high:110,low:90,upper:122.36,lower:77.64,price:100,stale:false,touches:{[side]:{side,occurred_ms:at,source}}});
 const snapshot=(items:FibContract[],week='2026-10-19'):FibSnapshot=>({week,now_ms:5000,timezone:'America/New_York',week_start_ms:1000,monday_end_ms:2000,next_week_ms:10000,monday_complete:true,connected:true,last_message_ms:5000,items});
-test('five levels use monitor anchors and mirrored extension arithmetic',()=>{
- const levels=fibLevels({high:110,low:90,upper:122.36,lower:77.64,start:1,end:9});
- assert.deepEqual(levels.map(l=>l.price),[122.36,110,100,90,77.64]);
+test('workbench levels: four by default, 内部线 adds 0.705 / 0.618 / 0.5 inside the Monday range',()=>{
+ const range={high:110,low:90,upper:122.36,lower:77.64,start:1,end:9};
+ const levels=fibLevels(range);
+ assert.deepEqual(levels.map(l=>l.price),[122.36,110,90,77.64]);
+ assert.deepEqual(levels.map(l=>l.title),['上 1.618','周一高','周一低','下 1.618']);
+ assert.deepEqual(levels.map(l=>l.width),[2,1,1,2]);
+ const inner=fibLevels(range,true);
+ assert.deepEqual(inner.map(l=>Math.round(l.price*100)/100),[122.36,110,104.1,102.36,100,97.64,95.9,90,77.64]);
+ assert.equal(inner.find(l=>l.title==='中点 0.5')?.dashed,true);
 });
 test('initial latest selection, stable manual selection and weekly reset',()=>{
  const next=parseFibSnapshot(snapshot([row('BTC-USDT-SWAP','upper',3000),row('ETH-USDT-SWAP','lower',4000)]));

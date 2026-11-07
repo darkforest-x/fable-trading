@@ -8,7 +8,7 @@ export class FibRangePrimitive implements ISeriesPrimitive {
  private context?:SeriesAttachedParameter;
  private views:IPrimitivePaneView[];
  private range:FibRange;
- constructor(range:FibRange,formatPrice:(price:number)=>string=price=>String(price)){
+ constructor(range:FibRange,formatPrice:(price:number)=>string=price=>String(price),internal=false){
   this.range=range;
   const renderer:IPrimitivePaneRenderer={draw:target=>target.useMediaCoordinateSpace(({context:ctx,mediaSize})=>{
    const source=this.context;if(!source)return;
@@ -29,11 +29,11 @@ export class FibRangePrimitive implements ISeriesPrimitive {
    const x1=coordinate(this.range.start),x2=coordinate(this.range.end);if(x1===null||x2===null||x2<=x1)return;
    ctx.save();ctx.setLineDash([]);ctx.lineWidth=1;
    ctx.font='11px "PingFang SC", -apple-system, BlinkMacSystemFont, sans-serif';ctx.textAlign='right';ctx.textBaseline='bottom';
-   for(const level of fibLevels(this.range)){
+   for(const level of fibLevels(this.range,internal)){
     const y=source.series.priceToCoordinate(level.price);if(y===null||y<0||y>mediaSize.height)continue;
-    ctx.strokeStyle=level.color;ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.stroke();
-    const name=level.title==='1.618'?(level.price===this.range.upper?'上 1.618':'下 1.618'):level.title;
-    const label=name?`${name} ${formatPrice(level.price)}`:'';
+    ctx.strokeStyle=level.color;ctx.lineWidth=level.width;ctx.setLineDash(level.dashed?[4,4]:[]);ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.stroke();
+    // Workbench label format: name (exact price).
+    const label=level.title?`${level.title} (${formatPrice(level.price)})`:'';
     if(label&&x2-x1>ctx.measureText(label).width+8){ctx.fillStyle=level.color;ctx.fillText(label,x2-4,Math.max(14,y-4))}
    }
    ctx.restore();

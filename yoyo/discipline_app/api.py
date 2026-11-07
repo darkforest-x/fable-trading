@@ -96,7 +96,7 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
             if live:
                 book.stop()
 
-    app = FastAPI(title='SPIKE Discipline', version='1.0.1', lifespan=lifespan,
+    app = FastAPI(title='SPIKE Discipline', version='1.0.2', lifespan=lifespan,
                   docs_url=None, redoc_url=None, openapi_url=None)
     app.state.candle_history = CandleHistory()
     app.state.monday_fib = MondayFibFeed()
@@ -153,7 +153,7 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
 
     @app.get('/health')
     def health():
-        return dict(service='spike-discipline', mode=mode, live_enabled=live and book.client.write_enabled, version='1.0.1')
+        return dict(service='spike-discipline', mode=mode, live_enabled=live and book.client.write_enabled, version='1.0.2')
 
     @app.get('/v1/market/monday-fib')
     def monday_fib():

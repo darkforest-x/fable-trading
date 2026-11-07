@@ -1,4 +1,3 @@
-import {ThemeToggle} from './ThemeToggle';
 import {usePullRefresh} from './usePullRefresh';
 import {refreshVisible} from './refreshEvent';
 import {FibHome} from './FibHome';
@@ -357,8 +356,9 @@ export default function App(){
    <div className={`pull-refresh ${pullStatus}`} role="status" aria-live="polite"><Icon name={pullStatus==='done'?'check':pullStatus==='error'?'close':'refresh'} size={18}/><span>{({idle:'',pull:'下拉刷新',ready:'松开刷新',loading:'正在刷新',done:'已更新',error:'更新失败，请重试'})[pullStatus]}</span></div>
    <FibHome connection={connection} state={state} onQuick={stableQuick} onOpenReplay={()=>{setReplayOpen(true);setError('');setMessage(null)}} locked={busy||!!pendingEntry} active={tab==='1.618'} covered={fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal} focus={fibFocus}/>
    {tab==='合约'&&<>
+    <PageHeader title="合约" subtitle={`${live?'实盘':'模拟'} · 纪律风控托管，1R 自动保护`}/>
     <section className="quote-hero" aria-label="合约行情">
-     <div className="trade-heading"><button className="symbol-picker" aria-label="选择合约" disabled={ticketLocked} aria-haspopup="dialog" onClick={()=>{setSearch('');setSheet('symbol');feedback('light')}}><CoinLogo key={symbol} coin={small(symbol)}/><b>{small(symbol)}<small>/USDT</small></b><span className="down-chevron"/></button><span className="neutral">永续</span><span className="instrument-mode">{mode}</span><ThemeToggle/></div>
+     <div className="trade-heading"><button className="symbol-picker" aria-label="选择合约" disabled={ticketLocked} aria-haspopup="dialog" onClick={()=>{setSearch('');setSheet('symbol');feedback('light')}}><CoinLogo key={symbol} coin={small(symbol)}/><b>{small(symbol)}<small>/USDT</small></b><span className="down-chevron"/></button><span className="neutral">永续</span><span className="instrument-mode">{mode}</span></div>
      <div className="price-row"><strong className={!fresh?'stale':''}>{priceFmt(selectedQuote?.last)}</strong><span>USDT</span><span className={`freshness ${fresh?'connected':''}`}><i/>{fresh?'实时':selectedQuote?'待更新':'待连接'}</span></div>
     </section>
     <CandleModule active={!sheet&&!preview&&!closeTarget&&!error&&!noticeModal} connection={connection} symbol={symbol} tick={state?.instruments[symbol]?.tick} entry={existing?.entry} stop={existing?.stop}/>

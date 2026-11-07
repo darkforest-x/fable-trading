@@ -44,7 +44,8 @@ def alerts_raw():
                 channels=dict(telegram=True, bark=False), alerts=[
                     dict(id=3, side='lower', first_ms=1, last_ms=2, n=26, symbols=['AAA-USDT-SWAP', 'x'],
                          telegram='sent', bark='disabled', text='message body', error='trace', ack_ms=5, test=0,
-                         active=False)])
+                         active=False),
+                    dict(id=4, side='upper', first_ms=1, last_ms=2, n=30, symbols=['AAA-USDT-SWAP'], test=1, active=True)])
 
 
 def cloud_raw():
@@ -103,6 +104,7 @@ def test_alert_and_cloud_projections_drop_receipts_text_and_internals():
     alerts = project_alerts(alerts_raw())
     assert not set(walk(alerts)) & {'telegram', 'bark', 'text', 'error', 'channels', 'ack_ms'}
     assert alerts['alerts'][0]['symbols'] == ['AAA-USDT-SWAP'] and alerts['alerts'][0]['acknowledged'] is True
+    assert [a['id'] for a in alerts['alerts']] == [3]  # test alarms are dropped
     cloud = project_cloud(cloud_raw())
     assert not set(walk(cloud)) & {'notifications', 'eligibility_policy', 'error_samples', 'channels', 'state_extra'}
     assert cloud['reference_only'] is True and cloud['items'][0]['side'] == 'long'

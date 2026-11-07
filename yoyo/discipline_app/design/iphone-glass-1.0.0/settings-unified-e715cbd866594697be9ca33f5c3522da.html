@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>SPIKE 纪律交易 · 设置与账户 (通知与报警 · Apple Liquid Glass)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --accent: #0A84FF;
+      --profit: #1F9D55;
+      --profit-fill: #30D158;
+      --loss: #E5383B;
+      --loss-fill: #FF453A;
+      --warning: #FF9F0A;
+      --glass-bg: rgba(255, 255, 255, 0.64);
+      --glass-border: rgba(255, 255, 255, 0.72);
+      --glass-highlight: rgba(255, 255, 255, 0.95);
+      --glass-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+    }
+
+    * {
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+
+    .num-tabular {
+      font-family: "JetBrains Mono", -apple-system, monospace;
+      font-feature-settings: "tnum" on, "lnum" on;
+    }
+
+    /* Apple Liquid Glass Layer */
+    .liquid-glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(30px) saturate(180%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 26px;
+      box-shadow: var(--glass-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .liquid-glass-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1.5px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.95) 45%, rgba(255,255,255,0.4) 100%);
+      pointer-events: none;
+    }
+
+    .liquid-glass-card::after {
+      content: "";
+      position: absolute;
+      top: -30%;
+      right: -30%;
+      width: 160%;
+      height: 160%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 45%);
+      pointer-events: none;
+    }
+
+    /* Glass pill buttons & tags */
+    .glass-btn {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-btn:active {
+      transform: scale(0.96);
+      background: rgba(255, 255, 255, 0.88);
+    }
+
+    /* iOS 26 Switch */
+    .ios-switch {
+      position: relative;
+      width: 51px;
+      height: 31px;
+      appearance: none;
+      -webkit-appearance: none;
+      background: rgba(120, 120, 128, 0.16);
+      outline: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    .ios-switch::before {
+      content: "";
+      position: absolute;
+      width: 27px;
+      height: 27px;
+      border-radius: 9999px;
+      top: 1px;
+      left: 1px;
+      background: #FFFFFF;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.06);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .ios-switch:checked {
+      background: var(--profit-fill);
+      border-color: rgba(31, 157, 85, 0.2);
+    }
+    .ios-switch:checked::before {
+      transform: translateX(20px);
+    }
+
+    /* Custom Scrollbar hide */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-[#0b0e14] text-[#1c1c1e] min-h-screen flex items-center justify-center p-0 md:p-6 select-none antialiased">
+<!-- iPhone 17 Pro Device Shell (402 x 874 pt) -->
+<div class="relative w-[402px] h-[874px] bg-[#EEF2F7] rounded-[54px] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.45),0_0_0_12px_#1e232d,0_0_0_14px_#0f131a] overflow-hidden flex flex-col border-[4px] border-[#2c3340]/40">
+<!-- Ambient Light Refraction Blobs (Visible through Liquid Glass) -->
+<div class="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-[#0A84FF] opacity-[0.12] blur-[80px] pointer-events-none"></div>
+<div class="absolute top-72 -right-20 w-80 h-80 rounded-full bg-[#30B0C7] opacity-[0.12] blur-[70px] pointer-events-none"></div>
+<div class="absolute bottom-28 left-4 w-72 h-72 rounded-full bg-[#30D158] opacity-[0.08] blur-[80px] pointer-events-none"></div>
+<!-- Status Bar & Dynamic Island (62pt area) -->
+<header class="relative z-30 pt-3 px-8 flex justify-between items-center text-[14px] font-semibold text-[#1c1c1e] h-[52px]">
+<span class="num-tabular font-medium text-[15px] tracking-tight">9:41</span>
+<!-- Dynamic Island Mock -->
+<div class="absolute left-1/2 -translate-x-1/2 top-[11px] w-[124px] h-[34px] bg-black rounded-full flex items-center justify-between px-3">
+<div class="w-3 h-3 rounded-full bg-[#080808] border border-white/10 flex items-center justify-center">
+<div class="w-1 h-1 rounded-full bg-[#0a2540]"></div>
+</div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#10b981] animate-pulse"></div>
+</div>
+<!-- Right Status Icons -->
+<div class="flex items-center gap-1.5 opacity-90">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.28 19.64 10.6 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"></path>
+</svg>
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.5 0 6.69 1.34 9.1 3.55L12 19.3 2.9 11.05C5.31 8.84 8.5 7.5 12 7.5z"></path>
+</svg>
+<!-- Battery -->
+<div class="w-6 h-3 border border-[#1c1c1e] rounded-[4px] p-0.5 flex items-center">
+<div class="h-full w-full bg-[#1c1c1e] rounded-[2px]"></div>
+</div>
+</div>
+</header>
+<!-- Pushed Navigation Header -->
+<nav class="relative z-20 px-6 pt-2 pb-1 flex items-center justify-between"><button aria-label="返回" class="w-10 h-10 rounded-full glass-btn flex items-center justify-center text-[#1c1c1e] shadow-sm active:scale-95">
+<svg class="w-5 h-5 -ml-0.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewbox="0 0 24 24">
+<polyline points="15 18 9 12 15 6"></polyline>
+</svg>
+</button>
+<div class="flex items-center gap-2">
+<button aria-label="帮助说明" class="w-10 h-10 rounded-full glass-btn flex items-center justify-center text-[#0A84FF] shadow-sm active:scale-95" title="帮助说明">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="10"></circle>
+<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+<line x1="12" x2="12.01" y1="17" y2="17"></line>
+</svg>
+</button>
+</div></nav>
+<!-- Main Scrollable Area -->
+<main class="relative z-10 flex-1 overflow-y-auto no-scrollbar px-5 pb-32"><!-- iOS Large Title & Subtitle -->
+<div class="pt-2 pb-5 px-1">
+<h1 class="text-[34px] leading-[41px] font-bold tracking-tight text-[#000000]">设置与账户</h1>
+<p class="text-[13px] text-[#636366] font-medium mt-1 tracking-tight">SPIKE 纪律引擎 v2.6.4 · 客户端常驻风控</p>
+</div>
+<!-- 1. Account Glass Card (26pt radius, top specular highlight, 58pt rows) -->
+<section class="liquid-glass-card p-4 mb-5">
+<div class="flex items-center justify-between pb-3.5 border-b border-[#000000]/[0.06]">
+<div class="flex items-center gap-3.5">
+<!-- 44pt Avatar with blue glass glyph -->
+<div class="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-[#0A84FF] to-[#0051B3] flex items-center justify-center text-white font-bold text-[17px] shadow-[0_4px_14px_rgba(10,132,255,0.35)] flex-shrink-0">
+<span>主</span>
+<div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-[#30D158] border-2 border-white rounded-full"></div>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-[17px] font-semibold text-[#000000] tracking-tight">主账户</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#30D158]/15 border border-[#30D158]/30 text-[11px] font-semibold text-[#1F9D55]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#30D158]"></span>
+            实盘
+          </span>
+</div>
+<p class="text-[12.5px] text-[#636366] font-normal mt-0.5">OKX 合约 · 双向持仓</p>
+</div>
+</div>
+<span class="text-[11px] font-medium text-[#0A84FF] bg-[#0A84FF]/10 px-2 py-0.5 rounded-full">已连接</span>
+</div>
+<!-- Account Actions (58pt Rows separated by hairlines) -->
+<div class="divide-y divide-[#000000]/[0.05]">
+<button class="w-full flex items-center justify-between h-[58px] text-left active:opacity-70 transition-opacity">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-xl bg-[#0A84FF]/10 flex items-center justify-center text-[#0A84FF]">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M16 3h5v5"></path>
+<path d="M4 20L21 3"></path>
+<path d="M21 16v5h-5"></path>
+<path d="M15 15l6 6"></path>
+<path d="M4 4l5 5"></path>
+</svg>
+</div>
+<span class="text-[15px] font-medium text-[#1c1c1e]">切换账户</span>
+</div>
+<div class="flex items-center gap-1.5 text-[#8e8e93]">
+<span class="text-[13px]">2 个实盘席位</span>
+<svg class="w-4 h-4 text-[#c7c7cc]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewbox="0 0 24 24">
+<polyline points="9 18 15 12 9 6"></polyline>
+</svg>
+</div>
+</button>
+<button class="w-full flex items-center justify-between h-[58px] text-left active:opacity-70 transition-opacity">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-xl bg-[#8E8E93]/15 flex items-center justify-center text-[#636366]">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24">
+<rect height="16" rx="2" width="20" x="2" y="4"></rect>
+<path d="M7 15h0M2 9.5h20"></path>
+</svg>
+</div>
+<span class="text-[15px] font-medium text-[#1c1c1e]">管理交易账户</span>
+</div>
+<svg class="w-4 h-4 text-[#c7c7cc]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewbox="0 0 24 24">
+<polyline points="9 18 15 12 9 6"></polyline>
+</svg>
+</button>
+</div>
+</section>
+<!-- 2. Section: 交易操作 (Trading Controls) -->
+<div class="mb-5">
+<div class="flex items-center justify-between px-3 mb-2">
+<h2 class="text-[17px] font-bold text-[#000000] tracking-tight">交易操作</h2>
+<span class="text-[11px] font-medium text-[#8e8e93] bg-[#000000]/[0.05] px-2 py-0.5 rounded-full">风控常驻</span>
+</div>
+<div class="liquid-glass-card px-4 divide-y divide-[#000000]/[0.05]">
+<!-- 开仓二次确认 -->
+<div class="flex items-center justify-between min-h-[58px] py-2.5 gap-3">
+<div class="pr-2">
+<div class="text-[15.5px] font-semibold text-[#000000]">开仓二次确认</div>
+<p class="text-[12.5px] leading-[17px] text-[#636366] mt-0.5 font-normal">开仓需弹窗再次核对；平仓快捷执行</p>
+</div>
+<input aria-label="开仓二次确认" checked="" class="ios-switch" id="confirmToggle" type="checkbox"/>
+</div>
+<!-- 严格止损锁定 -->
+<div class="flex items-center justify-between min-h-[58px] py-2.5 gap-3">
+<div class="pr-2">
+<div class="flex items-center gap-2">
+<span class="text-[15.5px] font-semibold text-[#000000]">严格止损锁定</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-[#0A84FF]/10 text-[10px] font-semibold text-[#0A84FF]">硬性纪律</span>
+</div>
+<p class="text-[12.5px] leading-[17px] text-[#636366] mt-0.5 font-normal">建仓后强制 1R 止损，不可单边撤销</p>
+</div>
+<input aria-label="严格止损锁定" checked="" class="ios-switch" id="hardStopToggle" type="checkbox"/>
+</div>
+</div>
+<!-- Section Footnote -->
+<div class="flex items-center justify-between px-3 pt-2 text-[12px] text-[#8e8e93]">
+<span class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#FF9F0A]"></span>
+      严禁追高与超额止损
+    </span>
+<a class="text-[#0A84FF] font-medium hover:underline cursor-pointer" href="#">查看纪律细则 &gt;</a>
+</div>
+</div>
+<!-- 3. Section: 通知与报警 (Notifications & Alarms) -->
+<div class="mb-5">
+<div class="flex items-center justify-between px-3 mb-2">
+<h2 class="text-[17px] font-bold text-[#000000] tracking-tight">通知与报警</h2>
+<span class="text-[11px] font-medium text-[#636366] bg-[#000000]/[0.05] px-2 py-0.5 rounded-full num-tabular">3 项生效</span>
+</div>
+<div class="liquid-glass-card px-4 divide-y divide-[#000000]/[0.05]">
+<!-- Row 1: App 内报警弹窗 -->
+<div class="flex items-center justify-between min-h-[58px] py-2.5 gap-3">
+<div class="pr-2">
+<div class="text-[15.5px] font-semibold text-[#000000]">App 内报警弹窗</div>
+<p class="text-[12.5px] leading-[17px] text-[#636366] mt-0.5 font-normal">全市场 1.618 瞬时触价即刻全屏提醒</p>
+</div>
+<input aria-label="App 内报警弹窗开关" checked="" class="ios-switch" id="inAppAlertToggle" type="checkbox"/>
+</div>
+<!-- Row 2: 报警声音 -->
+<div class="flex items-center justify-between min-h-[58px] py-2.5 gap-3">
+<div class="pr-2">
+<div class="text-[15.5px] font-semibold text-[#000000]">报警声音</div>
+<p class="text-[12.5px] leading-[17px] text-[#636366] mt-0.5 font-normal">静音模式下遵从系统震动</p>
+</div>
+<input aria-label="报警声音开关" checked="" class="ios-switch" id="soundAlertToggle" type="checkbox"/>
+</div>
+<!-- Row 3: 1.618 触价提醒 -->
+<div class="flex items-center justify-between min-h-[58px] py-2.5 gap-3">
+<div class="pr-2">
+<div class="text-[15.5px] font-semibold text-[#000000]">1.618 触价提醒</div>
+<p class="text-[12.5px] leading-[17px] text-[#636366] mt-0.5 font-normal">单个自选与主流币种首触推送</p>
+</div>
+<input aria-label="1.618 触价提醒开关" checked="" class="ios-switch" id="touchAlertToggle" type="checkbox"/>
+</div>
+<!-- Row 4: 测试即时报警 -->
+<div class="flex items-center justify-between min-h-[58px] py-2.5 gap-3">
+<div class="pr-2">
+<div class="text-[15.5px] font-medium text-[#1c1c1e]">测试即时报警</div>
+<p class="text-[12px] text-[#8e8e93] mt-0.5">触发声音与弹窗预览</p>
+</div>
+<button class="px-3 py-1.5 rounded-full glass-btn text-[12px] font-semibold text-[#0A84FF] active:scale-95">
+        发出测试
+      </button>
+</div>
+</div>
+</div>
+<!-- 4. Section: Bark 推送 (APP 关闭时) -->
+<div class="mb-5">
+<div class="flex items-center justify-between px-3 mb-2">
+<h2 class="text-[17px] font-bold text-[#000000] tracking-tight">Bark 推送</h2>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#30D158]/15 border border-[#30D158]/30 text-[11px] font-semibold text-[#1F9D55]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#30D158]"></span>
+      已绑定设备
+    </span>
+</div>
+<div class="liquid-glass-card px-4 divide-y divide-[#000000]/[0.05]">
+<!-- Row 1: 后台静默推送 -->
+<div class="flex items-center justify-between min-h-[58px] py-2.5 gap-3">
+<div class="pr-2">
+<div class="text-[15.5px] font-semibold text-[#000000]">后台静默推送</div>
+<p class="text-[12.5px] leading-[17px] text-[#636366] mt-0.5 font-normal">通过专用服务器密钥即刻唤醒</p>
+</div>
+<input aria-label="后台静默推送" checked="" class="ios-switch" id="barkSilentToggle" type="checkbox"/>
+</div>
+<!-- Row 2: 推送设备密钥 -->
+<button class="w-full flex items-center justify-between min-h-[58px] py-2.5 text-left active:opacity-70 transition-opacity">
+<div class="pr-2">
+<div class="text-[15px] font-medium text-[#1c1c1e]">推送设备密钥</div>
+<p class="text-[12px] text-[#8e8e93] font-mono mt-0.5">https://api.day.app/••••••••••••</p>
+</div>
+<div class="flex items-center gap-1.5 text-[#1F9D55]">
+<span class="text-[12px] font-medium">已验证</span>
+<svg class="w-4 h-4 text-[#c7c7cc]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewbox="0 0 24 24">
+<polyline points="9 18 15 12 9 6"></polyline>
+</svg>
+</div>
+</button>
+<!-- Row 3: 重要级别 -->
+<div class="flex items-center justify-between min-h-[58px] py-2.5">
+<span class="text-[15px] font-medium text-[#1c1c1e]">重要级别</span>
+<span class="text-[13px] font-medium text-[#0A84FF] bg-[#0A84FF]/10 px-2.5 py-1 rounded-full">时效性高 (Critical)</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 px-3 pt-2 text-[11px] text-[#8e8e93]">
+<svg class="w-3.5 h-3.5 text-[#8e8e93] flex-shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="10"></circle>
+<line x1="12" x2="12" y1="16" y2="12"></line>
+<line x1="12" x2="12.01" y1="8" y2="8"></line>
+</svg>
+<span>后台推送经 Bark 安全加密送达；离线不漏单。</span>
+</div>
+</div>
+<!-- 5. Section: 体验设置 (Experience) -->
+<div class="mb-5">
+<div class="flex items-center justify-between px-3 mb-2">
+<h2 class="text-[17px] font-bold text-[#000000] tracking-tight">体验设置</h2>
+</div>
+<div class="liquid-glass-card px-4 divide-y divide-[#000000]/[0.05]">
+<!-- Row 1: 触感反馈 -->
+<div class="flex items-center justify-between min-h-[58px] py-2.5 gap-3">
+<div class="pr-2">
+<div class="text-[15.5px] font-semibold text-[#000000]">触感反馈 (Haptics)</div>
+<p class="text-[12.5px] leading-[17px] text-[#636366] mt-0.5 font-normal">按键与状态变化时提供微震反馈</p>
+</div>
+<input aria-label="触感反馈" checked="" class="ios-switch" id="hapticToggle" type="checkbox"/>
+</div>
+<!-- Row 2: 外观主题 -->
+<button class="w-full flex items-center justify-between min-h-[58px] py-2.5 text-left active:opacity-70 transition-opacity">
+<span class="text-[15px] font-medium text-[#1c1c1e]">外观主题</span>
+<div class="flex items-center gap-1.5 text-[#8e8e93]">
+<span class="text-[14px]">跟随系统 (Auto)</span>
+<svg class="w-4 h-4 text-[#c7c7cc]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewbox="0 0 24 24">
+<polyline points="9 18 15 12 9 6"></polyline>
+</svg>
+</div>
+</button>
+<!-- Row 3: 图表帧率 -->
+<button class="w-full flex items-center justify-between min-h-[58px] py-2.5 text-left active:opacity-70 transition-opacity">
+<span class="text-[15px] font-medium text-[#1c1c1e]">图表帧率</span>
+<div class="flex items-center gap-1.5 text-[#8e8e93]">
+<span class="text-[14px] num-tabular">120Hz ProMotion</span>
+<svg class="w-4 h-4 text-[#c7c7cc]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewbox="0 0 24 24">
+<polyline points="9 18 15 12 9 6"></polyline>
+</svg>
+</div>
+</button>
+</div>
+</div>
+<!-- 6. Section: 系统与守护 (System & Safeguard) -->
+<div class="mb-5">
+<div class="flex items-center justify-between px-3 mb-2">
+<h2 class="text-[17px] font-bold text-[#000000] tracking-tight">系统与守护</h2>
+</div>
+<div class="liquid-glass-card px-4 divide-y divide-[#000000]/[0.05]">
+<div class="flex items-center justify-between h-[58px]">
+<span class="text-[15px] font-medium text-[#1c1c1e]">守护节点状态</span>
+<div class="flex items-center gap-1.5 text-[#1F9D55]">
+<span class="w-2 h-2 rounded-full bg-[#30D158] animate-pulse"></span>
+<span class="text-[13.5px] font-medium">Mac 在线 · 保护正常</span>
+<span class="text-[11px] text-[#8e8e93] num-tabular ml-1">18ms</span>
+</div>
+</div>
+<div class="flex items-center justify-between h-[58px]">
+<span class="text-[15px] text-[#2c2c2e]">独立实盘风控记录</span>
+<span class="text-[12.5px] text-[#8e8e93] num-tabular">本地端对端加密</span>
+</div>
+</div>
+</div>
+<!-- Footer Caption -->
+<div class="px-4 pt-1 pb-8 text-center">
+<p class="text-[12px] leading-relaxed text-[#8e8e93]">
+    实盘仅按你点击提交的指令执行。
+  </p>
+<p class="text-[11px] text-[#aeaeb2] mt-0.5 num-tabular">
+    SPIKE Protocol © 2026 · 极简冷灰液态透镜
+  </p>
+</div></main>
+<!-- Floating Capsule Glass Tab Bar (Detached 12pt above home indicator) -->
+<nav class="absolute left-4 right-4 bottom-7 z-40 h-[64px] rounded-full bg-white/65 backdrop-blur-[32px] saturate-[190%] border border-white/80 shadow-[0_18px_38px_-6px_rgba(15,23,42,0.14),0_6px_16px_-2px_rgba(15,23,42,0.06)] flex items-center justify-around px-2"><!-- Tab 1: 合约 -->
+<button class="flex flex-col items-center justify-center w-[64px] h-[52px] rounded-full text-[#8e8e93] active:scale-95 transition-all">
+<svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.1" viewbox="0 0 24 24">
+<line x1="12" x2="12" y1="1" y2="23"></line>
+<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+</svg>
+<span class="text-[10px] font-semibold tracking-tight">合约</span>
+</button>
+<!-- Tab 2: 监控 -->
+<button class="flex flex-col items-center justify-center w-[64px] h-[52px] rounded-full text-[#8e8e93] active:scale-95 transition-all">
+<svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.1" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="10"></circle>
+<line x1="2" x2="22" y1="12" y2="12"></line>
+<path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+</svg>
+<span class="text-[10px] font-semibold tracking-tight">监控</span>
+</button>
+<!-- Tab 3: 1.618 -->
+<button class="flex flex-col items-center justify-center w-[64px] h-[52px] rounded-full text-[#8e8e93] active:scale-95 transition-all">
+<svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.1" viewbox="0 0 24 24">
+<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+</svg>
+<span class="text-[10px] font-semibold tracking-tight">1.618</span>
+</button>
+<!-- Tab 4: 持仓 -->
+<button class="flex flex-col items-center justify-center w-[64px] h-[52px] rounded-full text-[#8e8e93] active:scale-95 transition-all">
+<svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.1" viewbox="0 0 24 24">
+<rect height="14" rx="2" ry="2" width="20" x="2" y="7"></rect>
+<path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+</svg>
+<span class="text-[10px] font-semibold tracking-tight">持仓</span>
+</button>
+<!-- Tab 5: 统计 (Active Tab in Apple Blue #0A84FF glass lens) -->
+<button class="flex flex-col items-center justify-center w-[66px] h-[52px] rounded-full bg-white/80 shadow-[0_4px_14px_rgba(10,132,255,0.18),inset_0_1px_1px_rgba(255,255,255,0.9)] border border-white/95 text-[#0A84FF] transition-all">
+<svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" viewbox="0 0 24 24">
+<line x1="18" x2="18" y1="20" y2="10"></line>
+<line x1="12" x2="12" y1="20" y2="4"></line>
+<line x1="6" x2="6" y1="20" y2="14"></line>
+</svg>
+<span class="text-[10px] font-bold tracking-tight">统计</span>
+</button></nav>
+<!-- iOS Home Indicator -->
+<div class="absolute bottom-2 left-1/2 -translate-x-1/2 w-[138px] h-[4.5px] bg-[#000000]/30 rounded-full z-50 pointer-events-none"></div>
+</div>
+</body>
+</html>

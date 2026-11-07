@@ -11,6 +11,10 @@ import {fibRangeFor,fibSelection,latestFibTouch,parseFibSnapshot,touchLabel,type
 import type {CandlePeriod} from './candleData';
 import {browserFibCache,currentFibWeek} from './fibCache';
 import './fib.css';
+import {CHART_FOLLOW_EVENT} from './chartPalette';
+const CHART_PREFS_KEY='spike-fib-chart-v1';
+const FIB_PERIODS:CandlePeriod[]=['1m','5m','15m','1H','4H'];
+const touchTime=(ms:number)=>new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(ms).replace(/\//g,'/');
 const CandlePanel=lazy(()=>import('./CandlePanel'));
 const noCollapse=()=>{};
 export const FibHome=memo(function FibHome({connection,state,onQuick,onOpenReplay,locked,active,covered,focus}:{connection:Connection|null;state:State|null;onQuick:(row:FibContract,period:CandlePeriod)=>void;onOpenReplay:()=>void;locked:boolean;active:boolean;covered:boolean;focus?:{symbol:string;nonce:number}}){
@@ -50,15 +54,32 @@ export const FibHome=memo(function FibHome({connection,state,onQuick,onOpenRepla
  function changePeriod(value:CandlePeriod){if(value!==period)feedback('light');setPeriod(value);if(current)cache.write(current,symbol,value)}
  const recent=visibleRows[0];
  const tick=state?.instruments[selectedSymbol]?.tick??(row?String(10**-Math.min(12,Math.max(2,...[row.high,row.low].map(n=>String(n).split('.')[1]?.length??0)))):undefined);
- return <section className="fib-home" aria-label="1.618 行情" hidden={!active} inert={!active} data-no-swipe>
+ const [chartPrefs,setChartPrefs]=useState(()=>{try{const v=JSON.parse(localStorage.getItem(CHART_PREFS_KEY)??'{}');return {internal:v.internal===true,averages:v.averages===true}}catch{return {internal:false,averages:false}}});
+ function toggleChart(key:'internal'|'averages'){feedback('light');setChartPrefs(prev=>{const next={...prev,[key]:!prev[key]};try{localStorage.setItem(CHART_PREFS_KEY,JSON.stringify(next))}catch{}return next})}
+ const follow=()=>{window.dispatchEvent(new Event(CHART_FOLLOW_EVENT));feedback('light')};
+ const decimals=Math.min(12,Math.max(2,Math.ceil(-Math.log10(Number(tick)||.01))));
+ const coin=selectedSymbol.replace('-USDT-SWAP','');
+ // Workbench 1.618 replica (Stitch fib-replica 7b01226870fd488091328c4844117791): full-bleed chart,
+ // floating price card, 列表 capsule and one control dock. Orders still go through the app ticket.
+ return <section className="fib-home fib-replica" aria-label="1.618 行情" hidden={!active} inert={!active} data-no-swipe>
   <div className="fib-screen" inert={chooser}><div className="fib-refresh-zone" aria-hidden="true"/>
-   <header className="fib-top"><button className="fib-symbol" aria-label="选择已触价合约" onClick={()=>setChooser(true)} disabled={!current}><i className={live?'live':''}/><b>{row?selectedSymbol.replace('-USDT-SWAP',''):'1.618'}<small>{row?'/USDT':''}</small></b><Icon name="chevron" size={13}/></button><ThemeToggle/><button className="fib-replay-launcher" onClick={onOpenReplay}><Icon name="clock" size={15}/>模拟盘</button></header>
    {row&&touch?<>
-    <div className="fib-selected"><span>{touchLabel(touch,clock)}</span>{!fresh&&<span role="status">{error?'离线缓存':'缓存 · 更新中'}</span>}</div>
-    {recent&&recent.symbol!==selectedSymbol&&<button className="fib-new" onClick={()=>select(recent.symbol)}>查看最新触价 · {recent.symbol.replace('-USDT-SWAP','')} <Icon name="arrow" size={12}/></button>}
-    <div className="fib-chart"><Suspense fallback={<div className="fib-empty">正在加载图表…</div>}><CandlePanel symbol={selectedSymbol} connection={connection} tick={tick} period={period} onPeriod={changePeriod} onCollapse={noCollapse} active={enabled&&!chooser} embedded range={range}/></Suspense></div>
-    <div className="fib-quick"><button disabled={locked||!fresh||!live} onClick={()=>onQuick(row,period)}>快捷开单 <span>· 1R</span><Icon name="arrow" size={17}/></button></div>
-   </>:<div className="fib-empty"><Icon name="trade" size={34}/><h2>{error?'监控暂不可用':current?'本周暂无触价':'正在读取触价记录'}</h2><p>{error?'稍后重试，已有交易保护保持独立运行。':current&&!current.monday_complete?'纽约周一结束后锁定高低点。':'首次触及区间外 1.618 的合约会显示在这里。'}</p>{error&&<button onClick={()=>setRevision(n=>n+1)}>重新加载</button>}</div>}
+    <div className="fib-chart"><Suspense fallback={<div className="fib-empty">正在加载图表…</div>}><CandlePanel symbol={selectedSymbol} connection={connection} tick={tick} period={period} onPeriod={changePeriod} onCollapse={noCollapse} active={enabled&&!chooser} embedded range={range} internal={chartPrefs.internal} averages={chartPrefs.averages}/></Suspense></div>
+    <div className="fib-price-card">
+     <div className="fib-price-head"><b>{coin}</b><span className="fib-tag">USDT 永续</span>{!fresh&&<span className="fib-cache" role="status">{error?'离线缓存':'更新中'}</span>}</div>
+     <strong className="t-num">{row.price!==null&&Number.isFinite(row.price)?row.price.toFixed(decimals):'—'}</strong>
+     <p className={`fib-touch ${touch.side}`}><i/>{touch.side==='upper'?'上沿':'下沿'} 1.618 · {touchTime(touch.occurred_ms)}<button onClick={follow}>跟随最新</button></p>
+    </div>
+    <button className="fib-list-button" aria-label="打开触价列表" onClick={()=>{setChooser(true);feedback('light')}} disabled={!current}><i className={live?'live':''}/>列表<b className="t-num">{visibleRows.length}</b></button>
+    {recent&&recent.symbol!==selectedSymbol&&<button className="fib-new" onClick={()=>select(recent.symbol)}>最新触价 · {recent.symbol.replace('-USDT-SWAP','')} <Icon name="arrow" size={12}/></button>}
+    <div className="fib-dock" role="group" aria-label="图表控制">
+     <label className="fib-period"><select aria-label="K线周期" value={period} onChange={e=>changePeriod(e.target.value as CandlePeriod)}>{FIB_PERIODS.map(p=><option key={p} value={p}>{p}</option>)}</select><Icon name="chevron" size={12}/></label>
+     <label className="fib-toggle"><span>内部线</span><input type="checkbox" role="switch" aria-label="内部线 0.5 · 0.618 · 0.705" checked={chartPrefs.internal} onChange={()=>toggleChart('internal')}/><i aria-hidden="true"/></label>
+     <label className="fib-toggle"><span>六均线</span><input type="checkbox" role="switch" aria-label="六均线 SMA / EMA 20 · 60 · 120" checked={chartPrefs.averages} onChange={()=>toggleChart('averages')}/><i aria-hidden="true"/></label>
+     <button className="fib-follow" onClick={follow}><Icon name="refresh" size={14}/>跟随最新</button>
+    </div>
+    <div className="fib-actions"><button className="fib-quick-main" disabled={locked||!fresh||!live} onClick={()=>onQuick(row,period)}><Icon name="arrow" size={16}/>快捷开单<span>· 1R</span></button><button className="fib-replay-chip" onClick={onOpenReplay}><i/>模拟盘</button></div>
+   </>:<div className="fib-empty"><Icon name="fib" size={34}/><h2>{error?'监控暂不可用':current?'本周暂无触价':'正在读取触价记录'}</h2><p>{error?'稍后重试，已有交易保护保持独立运行。':current&&!current.monday_complete?'纽约周一结束后锁定高低点。':'首次触及区间外 1.618 的合约会显示在这里。'}</p>{error&&<button onClick={()=>setRevision(n=>n+1)}>重新加载</button>}<button className="fib-replay-chip" onClick={onOpenReplay}><i/>模拟盘</button></div>}
   </div>
   {chooser&&<FibChooser rows={visibleRows} symbol={selectedSymbol} week={current?.week??''} clock={clock} favorites={listPrefs.favorites} onSelect={select} onFavorite={coin=>updatePrefs(p=>favoriteFibSymbol(p,coin))} onDelete={coin=>updatePrefs(p=>hideFibSymbol(p,current?.week??'',coin))} onRestore={coin=>updatePrefs(p=>restoreFibSymbol(p,current?.week??'',coin))} onDismiss={()=>setChooser(false)}/>}
 

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>SPIKE 纪律交易 · 合约开仓</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --ios-bg: #EEF2F7;
+    --apple-blue: #0A84FF;
+    --profit-green: #30D158;
+    --profit-green-text: #1F9D55;
+    --loss-red: #FF453A;
+    --loss-red-text: #E5383B;
+    --warning-amber: #FF9F0A;
+  }
+  * {
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "JetBrains Mono", monospace;
+  }
+  body {
+    background-color: #0b0f17;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1C1C1E;
+  }
+
+  /* Phone Shell Container: iPhone 17 Pro 402 x 874 pt */
+  .iphone-viewport {
+    width: 402px;
+    height: 874px;
+    background: #EEF2F7;
+    position: relative;
+    overflow: hidden;
+    border-radius: 54px;
+    box-shadow: 0 35px 80px -15px rgba(0, 0, 0, 0.45), 0 0 0 12px #1f242e, 0 0 0 14px #2e3543;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Hardware Dynamic Island */
+  .dynamic-island {
+    position: absolute;
+    top: 11px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 125px;
+    height: 35px;
+    background: #000000;
+    border-radius: 20px;
+    z-index: 100;
+  }
+
+  /* Ambient Colored Glow Blobs (Refined top subtle ambience) */
+  .ambient-top-glow {
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 420px;
+    height: 280px;
+    background: radial-gradient(circle at 40% 30%, rgba(10, 132, 255, 0.12) 0%, rgba(48, 209, 88, 0.08) 45%, rgba(238, 242, 247, 0) 75%);
+    pointer-events: none;
+    z-index: 1;
+    filter: blur(25px);
+  }
+
+  /* Liquid Glass Card Specification */
+  .liquid-glass-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.62) 100%);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border-radius: 26px;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 
+      0 12px 32px -4px rgba(15, 34, 64, 0.05),
+      0 4px 12px 0 rgba(15, 34, 64, 0.02),
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
+    overflow: hidden;
+  }
+  .liquid-glass-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.95) 25%, rgba(255,255,255,0.95) 75%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+  }
+
+  /* Liquid Glass Pill / Capsule */
+  .liquid-glass-pill {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 
+      0 4px 14px rgba(10, 30, 60, 0.04),
+      inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  }
+
+  /* Circular 40pt Liquid Glass Action Buttons */
+  .liquid-glass-btn-40 {
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 
+      0 6px 16px -2px rgba(10, 30, 60, 0.06),
+      inset 0 1px 1.5px rgba(255, 255, 255, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1C1C1E;
+    position: relative;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .liquid-glass-btn-40:active {
+    transform: scale(0.94);
+    background: rgba(255, 255, 255, 0.85);
+  }
+
+  /* Recessed input glass style */
+  .recessed-glass {
+    background: rgba(235, 240, 247, 0.65);
+    border: 1px solid rgba(215, 224, 235, 0.8);
+    box-shadow: inset 0 1.5px 3px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Custom Range Slider */
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    background: #0A84FF;
+    height: 6px;
+    border-radius: 9999px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 22px;
+    width: 22px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(10, 132, 255, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.06);
+    margin-top: -8px;
+    transition: transform 0.1s ease;
+  }
+  input[type="range"]:active::-webkit-slider-thumb {
+    transform: scale(1.15);
+  }
+
+  /* Floating Bottom Glass Tab Bar */
+  .floating-tab-bar {
+    position: absolute;
+    bottom: 24px;
+    left: 18px;
+    right: 18px;
+    height: 64px;
+    border-radius: 36px;
+    background: rgba(255, 255, 255, 0.76);
+    backdrop-filter: blur(34px) saturate(190%);
+    -webkit-backdrop-filter: blur(34px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.88);
+    box-shadow: 
+      0 16px 36px -6px rgba(10, 30, 60, 0.12),
+      0 2px 10px rgba(10, 30, 60, 0.04),
+      inset 0 1px 1.5px rgba(255, 255, 255, 0.95);
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 6px;
+  }
+
+  /* Tab Active Lens Pill */
+  .tab-active-lens {
+    background: rgba(10, 132, 255, 0.12);
+    border: 1px solid rgba(10, 132, 255, 0.22);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+  }
+
+  /* Home Indicator Line */
+  .home-indicator {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 138px;
+    height: 4.5px;
+    background: rgba(0, 0, 0, 0.28);
+    border-radius: 100px;
+    z-index: 95;
+    pointer-events: none;
+  }
+
+  /* Custom Smooth Scroll Area */
+  .scroll-content {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+    padding-top: 54px;
+    padding-bottom: 104px;
+  }
+  .scroll-content::-webkit-scrollbar {
+    display: none;
+  }
+</style>
+</head>
+<body>
+<!-- Device Outer Mockup Container (iPhone 17 Pro 402x874) -->
+<div class="iphone-viewport">
+<!-- Soft Ambient Glow -->
+<div class="ambient-top-glow"></div>
+<!-- Hardware Dynamic Island -->
+<div class="dynamic-island">
+<div class="absolute left-3.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[#111]"></div>
+<div class="absolute right-3.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[#111] flex items-center justify-center">
+<div class="w-1.5 h-1.5 rounded-full bg-[#043328]/40"></div>
+</div>
+</div>
+<!-- Fixed Top Status Bar Content -->
+<div class="absolute top-0 left-0 right-0 h-14 px-7 flex items-center justify-between z-50 pointer-events-none text-xs font-semibold tracking-tight text-neutral-800">
+<span class="text-[14px] font-semibold mt-1">9:41</span>
+<div class="flex items-center gap-1.5 mt-1">
+<!-- Signal -->
+<svg class="w-4 h-3.5" fill="currentColor" viewbox="0 0 17 12">
+<rect height="4" rx="0.5" width="2.5" x="0" y="8"></rect>
+<rect height="6.5" rx="0.5" width="2.5" x="4.5" y="5.5"></rect>
+<rect height="9" rx="0.5" width="2.5" x="9" y="3"></rect>
+<rect height="12" rx="0.5" width="2.5" x="13.5" y="0"></rect>
+</svg>
+<!-- WiFi -->
+<svg class="w-3.5 h-3.5" fill="currentColor" viewbox="0 0 16 12">
+<path d="M8 9.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm-4.2-3.2a6 6 0 018.4 0 .8.8 0 001.1-1.1 7.6 7.6 0 00-10.6 0 .8.8 0 001.1 1.1zm-2.8-2.8a10 10 0 0114 0 .8.8 0 001.1-1.1 11.6 11.6 0 00-16.2 0 .8.8 0 001.1 1.1z"></path>
+</svg>
+<!-- Battery -->
+<div class="w-5 h-2.5 rounded-[4px] border border-neutral-700/80 p-0.5 flex items-center">
+<div class="w-3.5 h-full bg-neutral-800 rounded-[2px]"></div>
+</div>
+</div>
+</div>
+<!-- Main Scrollable Screen Content -->
+<div class="scroll-content px-4 space-y-3.5 relative z-10">
+<!-- 2. Top Navigation Row: Strictly aligned with Monitor Screen Design System -->
+<div class="flex items-center justify-between pt-2">
+<div>
+<h1 class="text-[34px] font-bold text-neutral-900 tracking-tight leading-tight">合约</h1>
+<p class="text-[13px] text-neutral-500 font-normal tracking-tight mt-0.5">纪律风控引擎托管 · 自动1R阶梯保护</p>
+</div>
+<!-- Right Pair of Standard 40pt Liquid Glass Action Buttons -->
+<div class="flex items-center gap-2.5">
+<!-- Notification Button with Unread Badge Dot -->
+<button aria-label="通知中心" class="liquid-glass-btn-40">
+<svg class="w-[19px] h-[19px] text-neutral-700" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m7.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#0A84FF] ring-2 ring-white"></span>
+</button>
+<!-- Appearance / Settings Button -->
+<button aria-label="外观设置" class="liquid-glass-btn-40">
+<svg class="w-[19px] h-[19px] text-[#0A84FF]" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="4"></circle>
+<path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</div>
+<!-- 3. Symbol Picker Glass Capsule Row & 32pt Price -->
+<div class="space-y-1.5 pt-0.5">
+<div class="flex items-center justify-between">
+<!-- Symbol Capsule -->
+<div class="liquid-glass-pill rounded-full px-3 py-1.5 flex items-center gap-2 cursor-pointer active:scale-98 transition-transform">
+<div class="w-6 h-6 rounded-full bg-[#F7931A] text-white flex items-center justify-center font-bold text-[13px] shadow-xs">
+            ₿
+          </div>
+<span class="text-[15px] font-bold tracking-tight text-neutral-900">BTC / USDT 永续</span>
+<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#0A84FF]/10 text-[#0A84FF] border border-[#0A84FF]/20">全仓</span>
+<svg class="w-3.5 h-3.5 text-neutral-400" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M19.5 8.25l-7.5 7.5-7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<!-- 24h Change Capsule -->
+<div class="px-2.5 py-1 rounded-full bg-[#30D158]/15 border border-[#30D158]/25 text-[12px] font-bold text-[#1F9D55] tabular-nums flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#30D158]"></span>
+<span>+2.48%</span>
+</div>
+</div>
+<!-- Big Price Display -->
+<div class="px-1 pt-1">
+<span class="text-[32px] font-bold tracking-tight text-neutral-900 tabular-nums leading-none">104,253.4</span>
+<span class="text-[14px] font-semibold text-neutral-500 ml-1.5">USDT</span>
+</div>
+</div>
+<!-- 4. Minimal Period Switcher & Candlestick Chart Glass Card -->
+<div class="liquid-glass-card p-3 space-y-2.5">
+<!-- Minimal Segmented Period Switcher -->
+<div class="flex items-center justify-between">
+<div class="liquid-glass-pill rounded-full p-0.5 flex items-center gap-0.5 text-[11px] font-semibold text-neutral-600">
+<button class="px-2.5 py-1 rounded-full text-neutral-500 hover:text-neutral-900">1m</button>
+<button class="px-2.5 py-1 rounded-full text-neutral-500 hover:text-neutral-900">5m</button>
+<button class="px-2.5 py-1 rounded-full bg-white/95 text-[#0A84FF] shadow-xs">15m</button>
+<button class="px-2.5 py-1 rounded-full text-neutral-500 hover:text-neutral-900">1H</button>
+<button class="px-2.5 py-1 rounded-full text-neutral-500 hover:text-neutral-900">4H</button>
+</div>
+<span class="text-[11px] font-mono text-[#8E8E93]">VOL: 1.48B</span>
+</div>
+<!-- Chart Viewport (Apple Blue unified system) -->
+<div class="relative w-full h-[112px] rounded-xl bg-gradient-to-b from-white/50 to-transparent p-1 overflow-hidden">
+<!-- Subtle Grid Lines (Neutral Grey #8E8E93) -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-30">
+<div class="border-b border-[#8E8E93] border-dashed w-full h-0"></div>
+<div class="border-b border-[#8E8E93] border-dashed w-full h-0"></div>
+<div class="border-b border-[#8E8E93] border-dashed w-full h-0"></div>
+</div>
+<!-- 1.618 Target Reference Line (Apple Blue #0A84FF) -->
+<div class="absolute top-[20px] left-0 right-0 border-b border-[#0A84FF]/60 border-dashed z-0 flex justify-between items-center px-1">
+<span class="text-[9px] text-[#0A84FF] font-mono tracking-tighter bg-white/80 px-1 rounded shadow-2xs">上沿 1.618 · 104,650</span>
+<span class="text-[8px] text-[#8E8E93] font-mono">周一定界</span>
+</div>
+<!-- Neutral Baseline (Neutral Fine Grey #8E8E93) -->
+<div class="absolute top-[52px] left-0 right-0 border-b border-[#8E8E93]/40 border-dashed z-0 flex justify-between items-center px-1">
+<span class="text-[8px] text-[#8E8E93] font-mono">基准平衡位</span>
+</div>
+<!-- Stoploss Reference Line (Loss Red #FF453A) -->
+<div class="absolute bottom-[22px] left-0 right-0 border-b border-[#FF453A]/60 border-dashed z-0 flex justify-between items-center px-1">
+<span class="text-[9px] text-[#E5383B] font-mono tracking-tighter bg-white/80 px-1 rounded shadow-2xs">止损预设 · 103,180 (-1.03%)</span>
+<span class="text-[8px] text-[#8E8E93] font-mono">1R</span>
+</div>
+<!-- Candlesticks SVG -->
+<svg class="w-full h-full relative z-10" preserveaspectratio="none" viewbox="0 0 370 100">
+<!-- EMA20 Ribbon (Apple Blue #0A84FF) -->
+<path d="M 0,72 Q 90,62 180,48 T 370,26" fill="none" stroke="#0A84FF" stroke-dasharray="3 3" stroke-opacity="0.65" stroke-width="1.5"></path>
+<path d="M 0,78 Q 90,68 180,56 T 370,35" fill="none" stroke="#0A84FF" stroke-opacity="0.25" stroke-width="1"></path>
+<!-- Candle 1 (Green #30D158) -->
+<line stroke="#30D158" stroke-width="1.2" x1="25" x2="25" y1="58" y2="82"></line>
+<rect fill="#30D158" height="14" rx="1.5" width="8" x="21" y="63"></rect>
+<!-- Candle 2 (Red #FF453A) -->
+<line stroke="#FF453A" stroke-width="1.2" x1="55" x2="55" y1="62" y2="86"></line>
+<rect fill="#FF453A" height="11" rx="1.5" width="8" x="51" y="67"></rect>
+<!-- Candle 3 (Green) -->
+<line stroke="#30D158" stroke-width="1.2" x1="85" x2="85" y1="50" y2="76"></line>
+<rect fill="#30D158" height="15" rx="1.5" width="8" x="81" y="55"></rect>
+<!-- Candle 4 (Green) -->
+<line stroke="#30D158" stroke-width="1.2" x1="115" x2="115" y1="42" y2="68"></line>
+<rect fill="#30D158" height="14" rx="1.5" width="8" x="111" y="47"></rect>
+<!-- Candle 5 (Red) -->
+<line stroke="#FF453A" stroke-width="1.2" x1="145" x2="145" y1="44" y2="66"></line>
+<rect fill="#FF453A" height="9" rx="1.5" width="8" x="141" y="48"></rect>
+<!-- Candle 6 (Green hammer) -->
+<line stroke="#30D158" stroke-width="1.2" x1="175" x2="175" y1="36" y2="70"></line>
+<rect fill="#30D158" height="12" rx="1.5" width="8" x="171" y="42"></rect>
+<!-- Candle 7 (Green expansion) -->
+<line stroke="#30D158" stroke-width="1.2" x1="205" x2="205" y1="28" y2="52"></line>
+<rect fill="#30D158" height="16" rx="1.5" width="8" x="201" y="32"></rect>
+<!-- Candle 8 (Red consolidation) -->
+<line stroke="#FF453A" stroke-width="1.2" x1="235" x2="235" y1="30" y2="48"></line>
+<rect fill="#FF453A" height="8" rx="1.5" width="8" x="231" y="34"></rect>
+<!-- Candle 9 (Green breakout) -->
+<line stroke="#30D158" stroke-width="1.2" x1="265" x2="265" y1="20" y2="42"></line>
+<rect fill="#30D158" height="14" rx="1.5" width="8" x="261" y="24"></rect>
+<!-- Candle 10 (Green) -->
+<line stroke="#30D158" stroke-width="1.2" x1="295" x2="295" y1="16" y2="38"></line>
+<rect fill="#30D158" height="12" rx="1.5" width="8" x="291" y="19"></rect>
+<!-- Candle 11 (Current active candle) -->
+<line stroke="#30D158" stroke-width="1.5" x1="325" x2="325" y1="14" y2="32"></line>
+<rect fill="#30D158" height="10" rx="1.5" width="8" x="321" y="16"></rect>
+<!-- Current price horizontal beacon pulse (Apple Blue #0A84FF) -->
+<circle cx="325" cy="21" fill="#0A84FF" fill-opacity="0.9" r="3.5"></circle>
+<circle cx="325" cy="21" fill="#0A84FF" fill-opacity="0.25" r="7"></circle>
+</svg>
+<!-- Current Price Pill on Right Edge -->
+<div class="absolute right-1 top-[14px] liquid-glass-pill px-1.5 py-0.5 rounded text-[10px] font-bold text-[#0A84FF] tabular-nums shadow-xs">
+          104,253.4
+        </div>
+</div>
+</div>
+<!-- 5. 纪律执行额度（3 列通透玻璃统计条 Strip） -->
+<div class="liquid-glass-card py-3 px-4 grid grid-cols-3 divide-x divide-neutral-200/70">
+<!-- Col 1: 今日开仓 -->
+<div class="flex flex-col items-center justify-center text-center px-1">
+<span class="text-[13px] text-neutral-500 font-medium">今日开仓</span>
+<span class="text-[18px] font-bold text-neutral-900 tabular-nums tracking-tight mt-0.5">1/3</span>
+<span class="text-[11px] text-[#0A84FF] font-medium mt-0.5">余 2 次</span>
+</div>
+<!-- Col 2: 连亏停手 -->
+<div class="flex flex-col items-center justify-center text-center px-1">
+<span class="text-[13px] text-neutral-500 font-medium">连亏停手</span>
+<span class="text-[18px] font-bold text-[#1F9D55] tabular-nums tracking-tight mt-0.5">0/3</span>
+<span class="text-[11px] text-neutral-400 font-medium mt-0.5">无触发</span>
+</div>
+<!-- Col 3: 日亏余量 -->
+<div class="flex flex-col items-center justify-center text-center px-1">
+<span class="text-[13px] text-neutral-500 font-medium">日亏余量</span>
+<span class="text-[18px] font-bold text-neutral-900 tabular-nums tracking-tight mt-0.5">17%</span>
+<span class="text-[11px] text-[#1F9D55] font-medium mt-0.5">饱满安全</span>
+</div>
+</div>
+<!-- 6. Main Glass Order Ticket Card -->
+<div class="liquid-glass-card p-4 space-y-3.5">
+<!-- Segmented Direction 50/50 Toggle -->
+<div class="liquid-glass-pill p-1 rounded-2xl flex items-center gap-1.5">
+<!-- 做多 (Active Pure Green #30D158) -->
+<button class="flex-1 py-2.5 rounded-xl bg-[#30D158] text-white text-[15px] font-bold flex items-center justify-center gap-1.5 shadow-[0_4px_12px_rgba(48,209,88,0.28)] active:scale-98 transition-transform">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24">
+<path d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>做多 (LONG)</span>
+</button>
+<!-- 做空 (Inactive Red text / neutral glass) -->
+<button class="flex-1 py-2.5 rounded-xl text-neutral-600 hover:text-[#E5383B] text-[15px] font-semibold flex items-center justify-center gap-1.5 active:scale-98 transition-transform">
+<svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>做空 (SHORT)</span>
+</button>
+</div>
+<!-- Order Type & Leverage Pill Selector -->
+<div class="flex items-center justify-between gap-2 text-xs">
+<div class="liquid-glass-pill p-0.5 rounded-xl flex items-center flex-1">
+<button class="flex-1 py-1.5 rounded-lg bg-white/95 text-neutral-900 font-semibold shadow-2xs text-center">市价委托</button>
+<button class="flex-1 py-1.5 rounded-lg text-neutral-500 font-medium hover:text-neutral-900 text-center">限价委托</button>
+</div>
+<div class="liquid-glass-pill px-3 py-1.5 rounded-xl text-neutral-800 font-bold flex items-center gap-1 shrink-0">
+<span>杠杆</span>
+<span class="text-[#0A84FF]">10x</span>
+</div>
+</div>
+<!-- Field: 初始止损 (Stop Loss) -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-1.5">
+<span class="text-[13px] font-semibold text-neutral-900">初始止损</span>
+<span class="text-[10px] px-1.5 py-0.5 rounded font-semibold" style="background: rgba(255, 69, 58, 0.12); color: #E5383B;">必填</span>
+</div>
+<!-- ⚡ 1R 自动计算 Capsule -->
+<button class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0A84FF]/10 text-[#0A84FF] text-[11px] font-bold border border-[#0A84FF]/25 active:scale-95 transition-transform">
+<span>⚡ 1R 自动计算</span>
+</button>
+</div>
+<!-- Recessed Input -->
+<div class="recessed-glass rounded-xl px-3.5 py-2.5 flex items-center justify-between">
+<input class="bg-transparent border-none outline-none font-semibold text-neutral-900 text-[15px] tabular-nums w-full" readonly="" type="text" value="103,180.0"/>
+<div class="flex items-center gap-2 shrink-0">
+<span class="text-xs font-semibold text-neutral-400">USDT</span>
+<span class="text-[11px] font-bold tabular-nums px-1.5 py-0.5 rounded" style="background: rgba(255, 69, 58, 0.12); color: #E5383B;">-1.03% (25.00 U)</span>
+</div>
+</div>
+</div>
+<!-- Field: 仓位额度 Slider & Preset Buttons -->
+<div class="space-y-2">
+<div class="flex items-center justify-between text-xs">
+<span class="text-[13px] font-semibold text-neutral-900">仓位额度</span>
+<div class="flex items-center gap-1">
+<span class="text-neutral-500">最大允许单笔 1R</span>
+<span class="text-[13px] font-bold text-[#0A84FF] tabular-nums">100%</span>
+</div>
+</div>
+<!-- Apple Blue Track Slider -->
+<div class="py-1">
+<input class="w-full" max="100" min="0" type="range" value="100"/>
+</div>
+<!-- Four Glass Preset Buttons -->
+<div class="grid grid-cols-4 gap-2">
+<button class="liquid-glass-pill py-1.5 rounded-lg text-xs font-semibold text-neutral-600 hover:text-neutral-900 text-center active:scale-95 transition-transform">25%</button>
+<button class="liquid-glass-pill py-1.5 rounded-lg text-xs font-semibold text-neutral-600 hover:text-neutral-900 text-center active:scale-95 transition-transform">50%</button>
+<button class="liquid-glass-pill py-1.5 rounded-lg text-xs font-semibold text-neutral-600 hover:text-neutral-900 text-center active:scale-95 transition-transform">75%</button>
+<button class="liquid-glass-pill py-1.5 rounded-lg text-xs font-bold text-[#0A84FF] bg-white/95 border-[#0A84FF]/30 shadow-2xs text-center active:scale-95 transition-transform">100%</button>
+</div>
+</div>
+<!-- Hairline-divided Summary -->
+<div class="pt-2 border-t border-neutral-200/70 flex items-center justify-between text-[11px] text-neutral-600 tabular-nums">
+<div>
+<span class="text-neutral-400">持仓:</span>
+<span class="font-semibold text-neutral-900 ml-0.5">1,250 U</span>
+</div>
+<span class="text-neutral-300">·</span>
+<div>
+<span class="text-neutral-400">保证金:</span>
+<span class="font-semibold text-neutral-900 ml-0.5">12.50 U</span>
+</div>
+<span class="text-neutral-300">·</span>
+<div>
+<span class="text-neutral-400">净值:</span>
+<span class="font-semibold text-neutral-900 ml-0.5">500.00 U</span>
+</div>
+</div>
+<!-- Main Order CTA Button: 52pt height, 20pt radius, subtle glow -->
+<button class="w-full h-[52px] rounded-[20px] bg-[#30D158] hover:bg-[#28c14e] text-white text-[16px] font-bold tracking-wide flex items-center justify-center gap-2 shadow-[0_8px_24px_rgba(48,209,88,0.32)] active:scale-[0.98] transition-all">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24">
+<path d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>买入开多 (受纪律保护)</span>
+</button>
+</div>
+<!-- 7. Section Header: 当前持仓 + 灰色数量胶囊 1 -->
+<div class="pt-1 space-y-2">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<h2 class="text-[17px] font-bold text-neutral-900 tracking-tight">当前持仓</h2>
+<span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-neutral-200/80 text-neutral-700 tabular-nums">1</span>
+</div>
+<span class="text-[12px] text-[#0A84FF] font-medium">仓位管理</span>
+</div>
+<!-- Position Item: 26pt Glass Card, 58pt row -->
+<div class="liquid-glass-card p-3.5 flex items-center justify-between active:scale-[0.99] transition-transform cursor-pointer">
+<div class="flex items-center gap-3">
+<!-- BTC Icon -->
+<div class="w-10 h-10 rounded-full bg-[#F7931A] text-white flex items-center justify-center font-bold text-[18px] shadow-xs shrink-0">
+            ₿
+          </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-[14px] font-bold text-neutral-900 tracking-tight">BTC / USDT 永续</span>
+<span class="text-[11px] font-bold px-1.5 py-0.2 rounded bg-[#30D158]/15 text-[#1F9D55]">做多 10x</span>
+</div>
+<div class="text-[12px] text-neutral-400 font-medium tabular-nums mt-0.5">
+              开仓 103,180.0 · 止损 102,150.0
+            </div>
+</div>
+</div>
+<!-- Trailing Value & Chevron -->
+<div class="flex items-center gap-2">
+<div class="text-right">
+<div class="text-[14px] font-bold text-[#1F9D55] tabular-nums leading-tight">+42.18 U (+1.6R)</div>
+<div class="text-[11px] text-[#0A84FF] font-semibold mt-0.5 flex items-center justify-end gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#0A84FF]"></span>
+<span>1R保本已锁定</span>
+</div>
+</div>
+<svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M8.25 4.5l7.5 7.5-7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+</div>
+</div>
+<!-- 8. Section Header: 自动保护 + 运行中微光胶囊 & 3-Step Rail Card -->
+<div class="pt-1 space-y-2 pb-2">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<h2 class="text-[17px] font-bold text-neutral-900 tracking-tight">自动保护</h2>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#30D158]/15 border border-[#30D158]/20 text-[11px] font-semibold text-[#1F9D55]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#30D158] animate-pulse"></span>
+<span>运行中</span>
+</span>
+</div>
+<span class="text-[12px] text-neutral-400">纪律执行线</span>
+</div>
+<!-- 3-Step Rail Card (26pt radius liquid glass) -->
+<div class="liquid-glass-card p-4">
+<div class="relative pl-6 space-y-4">
+<!-- Rail Line connecting steps -->
+<div class="absolute left-2.5 top-2.5 bottom-2.5 w-0.5 bg-neutral-200">
+<!-- Active Progress portion -->
+<div class="h-1/3 bg-[#30D158] rounded-full"></div>
+</div>
+<!-- Step 1: Locked -->
+<div class="relative flex items-start justify-between">
+<!-- Checkmark Marker -->
+<div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-[#30D158] text-white flex items-center justify-center text-[11px] font-bold shadow-xs">
+              ✓
+            </div>
+<div>
+<div class="text-[13px] font-bold text-neutral-900">1R 成本保本</div>
+<div class="text-[11px] text-[#1F9D55] font-semibold tabular-nums mt-0.5">已锁定保本 · 103,180.0</div>
+</div>
+<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#30D158]/15 text-[#1F9D55]">已就绪</span>
+</div>
+<!-- Step 2: Next Target -->
+<div class="relative flex items-start justify-between">
+<!-- Circle Marker -->
+<div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-white border-2 border-[#0A84FF] text-[#0A84FF] flex items-center justify-center text-[10px] font-bold shadow-2xs">
+              2
+            </div>
+<div>
+<div class="text-[13px] font-bold text-neutral-900">3R 原始 60% 止盈</div>
+<div class="text-[11px] text-neutral-500 font-medium tabular-nums mt-0.5">目标 105,420.0 · 自动平仓</div>
+</div>
+<span class="text-[10px] font-semibold text-neutral-400 font-mono">阶梯 1</span>
+</div>
+<!-- Step 3: Final Exit -->
+<div class="relative flex items-start justify-between">
+<!-- Circle Marker -->
+<div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-white border-2 border-neutral-300 text-neutral-400 flex items-center justify-center text-[10px] font-bold">
+              3
+            </div>
+<div>
+<div class="text-[13px] font-bold text-neutral-700">5R 全部余仓终点</div>
+<div class="text-[11px] text-neutral-400 font-medium tabular-nums mt-0.5">终点 106,850.0 · 利润最大化</div>
+</div>
+<span class="text-[10px] font-semibold text-neutral-400 font-mono">阶梯 2</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 9. Floating Bottom Glass Tab Bar (Exactly 5 items, matching Monitor screen design) -->
+<nav aria-label="应用主导航" class="floating-tab-bar">
+<!-- Tab 1: 合约 (Active Lens Pill) -->
+<a class="tab-active-lens flex flex-col items-center justify-center py-1.5 px-3 text-[#0A84FF]" href="#">
+<svg class="w-[20px] h-[20px]" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-bold tracking-tight mt-0.5">合约</span>
+</a>
+<!-- Tab 2: 监控 -->
+<a class="flex flex-col items-center justify-center py-1.5 px-3 text-neutral-500 hover:text-neutral-800 transition-colors" href="#">
+<svg class="w-[20px] h-[20px]" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-medium tracking-tight mt-0.5">监控</span>
+</a>
+<!-- Tab 3: 1.618 -->
+<a class="flex flex-col items-center justify-center py-1.5 px-3 text-neutral-500 hover:text-neutral-800 transition-colors" href="#">
+<svg class="w-[20px] h-[20px]" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-medium tracking-tight mt-0.5">1.618</span>
+</a>
+<!-- Tab 4: 持仓 -->
+<a class="flex flex-col items-center justify-center py-1.5 px-3 text-neutral-500 hover:text-neutral-800 transition-colors" href="#">
+<svg class="w-[20px] h-[20px]" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-medium tracking-tight mt-0.5">持仓</span>
+</a>
+<!-- Tab 5: 统计 -->
+<a class="flex flex-col items-center justify-center py-1.5 px-3 text-neutral-500 hover:text-neutral-800 transition-colors" href="#">
+<svg class="w-[20px] h-[20px]" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-medium tracking-tight mt-0.5">统计</span>
+</a>
+</nav>
+<!-- iOS Native Home Indicator -->
+<div class="home-indicator"></div>
+</div>
+</body></html>

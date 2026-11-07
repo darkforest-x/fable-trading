@@ -1,4 +1,5 @@
 import {PageHeader} from './PageHeader';
+import {SegmentLens} from './SegmentLens';
 /** Stitch dfebf9344d99413aa65056d89f9baab5: confirmed fixed-capital return; account-scoped display cache. */
 import {memo,useEffect,useState} from 'react';
 import {type Connection,type State} from './api';
@@ -66,7 +67,7 @@ export function Statistics({connection,overview,online,onConnect,onDiscipline}:{
  const unrealized=account?.unrealized_pnl;
  const updateText=updatedAt?`${stale?'上次记录':'截至'} ${new Date(updatedAt*1000).toLocaleTimeString('zh-CN')}${loading?' · 更新中':''}`:loading?'正在读取…':'待连接';
  return <div className="statistics-page">
-  <PageHeader title="统计" onSettings={onConnect}/>
+  <PageHeader title="统计" subtitle="只统计本 App 管理的交易" onSettings={onConnect}/>
   {!connection&&<div className="warning"><Icon name="link" size={18}/><span>连接服务后，读取此 App 管理交易的统计。</span><button onClick={onConnect}>连接</button></div>}
   {error&&<div className="error" role="alert"><span>统计暂不可用{data?'，以下为上次记录':''}：{error}</span><button onClick={()=>setRefresh(v=>v+1)}>重试</button></div>}
   <section className={`card account-hero ${loading&&equity==null?'is-loading':''}`} aria-busy={loading}>
@@ -79,7 +80,7 @@ export function Statistics({connection,overview,online,onConnect,onDiscipline}:{
   </section>
   {/* iPhone 1.0.0: 纪律 left the tab bar for 监控; its page is one tap away here (Stitch stats 3394dec1518b4b51924f1de5f0af01f4). */}
   <button className="card link-row discipline-link" onClick={onDiscipline}><span className="link-icon"><Icon name="shield" size={19}/></span><span><b>交易纪律</b><small>{overview?`今日开仓 ${overview.daily?.entries??0} / ${overview.discipline?.entries_limit??overview.policy?.max_entries??3} 次 · ${overview.blockers?.length?'开仓受限':'规则生效中'}`:'连接后读取规则'}</small></span><Icon name="chevron" size={17}/></button>
-  <div className="segment stats-period" aria-label="统计周期">{[[7,'近 7 天'],[30,'近 30 天'],[0,'全部']].map(([value,label])=><button key={value} className={days===value?'active':''} aria-pressed={days===value} onClick={()=>{if(days!==value)feedback('light');setDays(Number(value))}}>{label}</button>)}</div>
+  <div className="segment stats-period" aria-label="统计周期">{[[7,'近 7 天'],[30,'近 30 天'],[0,'全部']].map(([value,label])=><button key={value} className={days===value?'active':''} aria-pressed={days===value} onClick={()=>{if(days!==value)feedback('light');setDays(Number(value))}}>{label}</button>)}<SegmentLens value={String(days)}/></div>
   <section className="card stats-summary"><div className="section-heading"><h2>已平仓表现</h2><span>仅计完全平仓</span></div>
    <div className="stats-four"><div><span>已平仓</span><b>{summary?.count??'—'}</b><small>笔</small></div><div><span>胜率</span><b>{percent(summary?.win_rate)}</b><small>%</small></div><div><span>盈亏比</span><b>{fmt(summary?.payoff_ratio)}</b><small>均盈 ÷ 均亏</small></div><div><span>平均净 R</span><b>{fmt(summary?.average_net_r)}</b><small>R</small></div></div>
    {!!summary?.count&&summary.payoff_ratio===null&&<p className="micro">{summary.losses===0?'暂无亏损样本':summary.wins===0?'暂无盈利样本':'盈亏比暂无可比样本'}</p>}

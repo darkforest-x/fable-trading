@@ -4,6 +4,7 @@ import {useState} from 'react';
 import {Dialog} from './Dialog';
 import {Icon} from './Icon';
 import {feedback} from './feedback';
+import {SegmentLens} from './SegmentLens';
 import {clockText,coin,edgeText,groupByDay,pushStatusText,type NotificationEvent,type NotificationSnapshot} from './monitorFormat';
 
 type Filter='all'|'alarm'|'fib';
@@ -12,7 +13,7 @@ export function NotificationCenter({data,error,onOpen,onDismiss}:{data:Notificat
  const rows=(data?.events??[]).filter(e=>(filter==='all'||e.kind===filter)&&(all||e.pushed||e.kind==='alarm'));
  return <Dialog label="通知" busy={false} onDismiss={onDismiss}>{dismiss=><div className="notify-sheet">
   <h2>通知</h2>
-  <div className="segment notify-filter" role="tablist" aria-label="通知类型">{([['all','全部'],['alarm','报警'],['fib','1.618']] as const).map(([k,l])=><button key={k} role="tab" aria-selected={filter===k} aria-pressed={filter===k} className={filter===k?'active':''} onClick={()=>{setFilter(k);feedback('light')}}>{l}</button>)}</div>
+  <div className="segment notify-filter" role="tablist" aria-label="通知类型">{([['all','全部'],['alarm','报警'],['fib','1.618']] as const).map(([k,l])=><button key={k} role="tab" aria-selected={filter===k} aria-pressed={filter===k} className={filter===k?'active':''} onClick={()=>{setFilter(k);feedback('light')}}>{l}</button>)}<SegmentLens value={filter}/></div>
   <label className="notify-all"><input type="checkbox" checked={all} onChange={e=>setAll(e.target.checked)}/><span>显示未推送的触价</span></label>
   {error&&<p className="monitor-error" role="status"><Icon name="refresh" size={15}/>{error}</p>}
   {!data&&!error&&<p className="monitor-loading" role="status">正在读取</p>}

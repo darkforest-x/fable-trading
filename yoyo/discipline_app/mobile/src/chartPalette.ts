@@ -8,3 +8,6 @@ export const CHART={
  entry:'#0a84ff',stop:'#ff453a',target:'#30d158',
  crosshair:'#8e8e93',label:'#3a3a3c',text:'#6e6e73',grid:'rgba(60,60,67,.07)',canvas:'#eef2f7',
 } as const;
+
+/** Lets the lazily loaded chart follow the live edge without exposing its instance (1.618 dock “跟随最新”). */
+export const CHART_FOLLOW_EVENT='spike:chart-follow';

@@ -8,6 +8,7 @@ import {CoinLogo} from './CoinLogo';
 import {Dialog,Spinner} from './Dialog';
 import {Icon} from './Icon';
 import {PageHeader} from './PageHeader';
+import {SegmentLens} from './SegmentLens';
 import {feedback} from './feedback';
 import {REFRESH_EVENT,type RefreshRequest} from './refreshEvent';
 import {MONITOR_POLL_MS,clockText,coin,groupByDay,monitorGet,priceText,reasonText,signalStatus,signedPercent,stageText,tone,
@@ -128,7 +129,7 @@ export function Monitor({connection,active,covered,onOpenSymbol,onConnect,segmen
  const live=active&&!covered;
  return <div className="monitor-page">
   <PageHeader title="监控" subtitle="模拟盘、全市场报警与云带，只读。" actions={connection&&<button className="settings-gear notify-bell" aria-label={unread?`通知，${unread} 条未读`:"通知"} onClick={onOpenNotifications}><Icon name="bell" size={20}/>{unread>0&&<i className="badge-dot">{unread>9?"9+":unread}</i>}</button>}/>
-  <div className="segment monitor-segments" role="tablist" aria-label="监控模块" data-index={SEGMENTS.findIndex(([k])=>k===segment)}>{SEGMENTS.map(([key,label])=><button key={key} role="tab" aria-selected={segment===key} aria-pressed={segment===key} className={segment===key?'active':''} onClick={()=>choose(key)}>{label}</button>)}</div>
+  <div className="segment monitor-segments" role="tablist" aria-label="监控模块" data-index={SEGMENTS.findIndex(([k])=>k===segment)}>{SEGMENTS.map(([key,label])=><button key={key} role="tab" aria-selected={segment===key} aria-pressed={segment===key} className={segment===key?'active':''} onClick={()=>choose(key)}>{label}</button>)}<SegmentLens value={segment}/></div>
   {!connection?<section className="empty card"><span className="empty-icon"><Icon name="bell" size={32}/></span><h2>连接后查看监控</h2><p>监控数据经纪律服务只读转发。</p><button className="primary" onClick={onConnect}>连接纪律服务</button></section>:
    segment==='paper'?<PaperModule connection={connection} active={live} onOpenSymbol={onOpenSymbol}/>:
    segment==='alerts'?<AlertsModule connection={connection} active={live} onOpenSymbol={onOpenSymbol}/>:
