@@ -44,6 +44,7 @@ struct PaperSection: View {
                             .padding(.horizontal, 14).frame(minHeight: 52).contentShape(.rect)
                         }
                         .buttonStyle(RowPressStyle())
+                        .simultaneousGesture(TapGesture().onEnded { Haptics.open() })
                         .matchedTransitionSource(id: account.key, in: zoom)
                         if index < replica.count - 1 { Divider().padding(.leading, 14) }
                     }
@@ -116,6 +117,7 @@ struct AccountTile: View {
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
+        .simultaneousGesture(TapGesture().onEnded { Haptics.open() })
         .glassCard(cornerRadius: 22, interactive: true)
         .matchedTransitionSource(id: account.key, in: zoom)
         .scrollReveal()

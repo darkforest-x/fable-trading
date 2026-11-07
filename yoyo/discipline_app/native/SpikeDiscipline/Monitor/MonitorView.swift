@@ -25,7 +25,7 @@ struct MonitorView: View {
                         ForEach(MonitorSegment.allCases) { Text($0.title).tag($0) }
                     }
                     .pickerStyle(.segmented)
-                    .sensoryFeedback(.selection, trigger: segment)
+                    .onChange(of: segment) { _, _ in Haptics.select() }
                     if let connection = session.connection {
                         Group {
                             switch segment {
@@ -43,7 +43,8 @@ struct MonitorView: View {
                 .padding(.horizontal, 14)
                 .padding(.bottom, 24)
             }
-            .refreshable { refresh += 1; try? await Task.sleep(for: .milliseconds(700)) }
+            .refreshable { refresh += 1; try? await Task.sleep(for: .milliseconds(700)); Haptics.success() }
+            .contentMargins(.bottom, 96, for: .scrollContent)
             .navigationDestination(for: PaperAccount.self) { account in
                 if let connection = session.connection {
                     AccountDetailView(account: account, connection: connection)
@@ -52,16 +53,16 @@ struct MonitorView: View {
             }
             .background(AmbientBackground())
             .navigationTitle("监控")
-            .navigationSubtitle("模拟盘、全市场报警与云带，只读")
+            .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button { notices.markRead(); showNotifications = true } label: {
+                    Button { Haptics.open(); notices.markRead(); showNotifications = true } label: {
                         Image(systemName: notices.unread > 0 ? "bell.badge" : "bell")
                             .symbolEffect(.bounce, value: notices.unread)
                     }
                     .badge(notices.unread)
                     .accessibilityLabel(notices.unread > 0 ? "通知，\(notices.unread) 条未读" : "通知")
-                    Button { showSettings = true } label: { Image(systemName: "gearshape") }.accessibilityLabel("设置")
+                    Button { Haptics.tap(); showSettings = true } label: { Image(systemName: "gearshape") }.accessibilityLabel("设置")
                 }
             }
         }
@@ -73,9 +74,9 @@ struct ConnectPrompt: View {
     var body: some View {
         VStack(spacing: 14) {
             Image(systemName: "lock.shield").font(.system(size: 34)).foregroundStyle(.blue)
-            Text("连接后查看").font(.headline)
-            Text("数据经纪律服务只读转发，令牌只存在本机。").font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
-            Button("连接纪律服务") { showSettings = true }.buttonStyle(.glassProminent)
+            Text("正在连接纪律服务").font(.headline)
+            Text("本机构建已内置授权，打开即自动连接。").font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
+            Button("查看连接状态") { Haptics.tap(); showSettings = true }.buttonStyle(.glassProminent)
         }
         .frame(maxWidth: .infinity).padding(28).glassCard()
     }

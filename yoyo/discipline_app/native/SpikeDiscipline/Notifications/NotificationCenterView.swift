@@ -19,13 +19,14 @@ struct NotificationCenterView: View {
                     Picker("类型", selection: $filter.animation(.snappy)) {
                         Text("全部").tag("all"); Text("报警").tag("alarm"); Text("1.618").tag("fib")
                     }.pickerStyle(.segmented).listRowBackground(Color.clear).listRowInsets(.init())
+                    .onChange(of: filter) { _, _ in Haptics.select() }
                     Toggle("显示未推送的触价", isOn: $showUnpushed.animation()).font(.subheadline)
                 }
                 if let error = notices.error { Section { Label(error, systemImage: "exclamationmark.triangle").foregroundStyle(Color.amber) } }
                 ForEach(Fmt.groupByDay(rows, now: notices.data?.nowMs ?? 0) { $0.atMs }, id: \.label) { group in
                     Section(group.label) {
                         ForEach(group.rows) { e in
-                            Button { onOpen(e); dismiss() } label: { NotificationRow(event: e, now: notices.data?.nowMs ?? 0) }
+                            Button { Haptics.open(); onOpen(e); dismiss() } label: { NotificationRow(event: e, now: notices.data?.nowMs ?? 0) }
                                 .buttonStyle(.plain)
                         }
                     }

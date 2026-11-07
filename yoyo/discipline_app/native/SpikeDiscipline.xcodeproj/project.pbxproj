@@ -17,13 +17,14 @@
 		94B39982BA12BAE8763A4DD6 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		4E6898A7B45A2069EBAA8D2B = {isa = PBXGroup; children = (1DD402786E55BC743DEE098B, 14DEEC455318AB58A3C80DD4, EBE3A46D982CF1D94B03595E, 15528C36EF2DC603CD8232EA); sourceTree = "<group>"; };
 		15528C36EF2DC603CD8232EA /* Products */ = {isa = PBXGroup; children = (D696D68918AD05140FA1CB7E, 75F65EB92A8427ECE11BCAF4); name = Products; sourceTree = "<group>"; };
-		D3209B4563CB0B2A80FD94E1 /* SpikeDiscipline */ = {isa = PBXNativeTarget; buildConfigurationList = 739E0242F06134D7F04D580D; buildPhases = (AE1E3BF8038A878E921F49EA, 4ECAE11522EFDA3A87A678E2, B7D622D9D229137F64DF756D); buildRules = (); dependencies = (); fileSystemSynchronizedGroups = (1DD402786E55BC743DEE098B); name = SpikeDiscipline; packageProductDependencies = (); productName = SpikeDiscipline; productReference = D696D68918AD05140FA1CB7E; productType = "com.apple.product-type.application"; };
+		D3209B4563CB0B2A80FD94E1 /* SpikeDiscipline */ = {isa = PBXNativeTarget; buildConfigurationList = 739E0242F06134D7F04D580D; buildPhases = (AE1E3BF8038A878E921F49EA, 4ECAE11522EFDA3A87A678E2, B7D622D9D229137F64DF756D, 7F66429955D1BF6415794566); buildRules = (); dependencies = (); fileSystemSynchronizedGroups = (1DD402786E55BC743DEE098B); name = SpikeDiscipline; packageProductDependencies = (); productName = SpikeDiscipline; productReference = D696D68918AD05140FA1CB7E; productType = "com.apple.product-type.application"; };
 		B39E26E5B92919E9A10F3D50 /* SpikeDisciplineTests */ = {isa = PBXNativeTarget; buildConfigurationList = 9A4EECD60207833382F94AA5; buildPhases = (D43B7F8423DE860A3D049BE9, 94B39982BA12BAE8763A4DD6, 6729E901D921C865EB45BF27); buildRules = (); dependencies = (B8F6BBF084C75D2E61889B65); fileSystemSynchronizedGroups = (14DEEC455318AB58A3C80DD4); name = SpikeDisciplineTests; packageProductDependencies = (); productName = SpikeDisciplineTests; productReference = 75F65EB92A8427ECE11BCAF4; productType = "com.apple.product-type.bundle.unit-test"; };
 		69C99E51325D2F5360032677 /* Project object */ = {isa = PBXProject; attributes = {BuildIndependentTargetsInParallel = 1; LastSwiftUpdateCheck = 2600; LastUpgradeCheck = 2600; TargetAttributes = {D3209B4563CB0B2A80FD94E1 = {CreatedOnToolsVersion = 26.0; }; B39E26E5B92919E9A10F3D50 = {CreatedOnToolsVersion = 26.0; TestTargetID = D3209B4563CB0B2A80FD94E1; }; }; }; buildConfigurationList = 1523C95E4E9FFFD88E1C1B76; developmentRegion = "zh-Hans"; hasScannedForEncodings = 0; knownRegions = (en, Base, "zh-Hans"); mainGroup = 4E6898A7B45A2069EBAA8D2B; minimizedProjectReferenceProxies = 1; preferredProjectObjectVersion = 77; productRefGroup = 15528C36EF2DC603CD8232EA; projectDirPath = ""; projectRoot = ""; targets = (D3209B4563CB0B2A80FD94E1, B39E26E5B92919E9A10F3D50); };
 		B7D622D9D229137F64DF756D /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (1AC2762CDC5D2DE6F95B4F7A); runOnlyForDeploymentPostprocessing = 0; };
 		6729E901D921C865EB45BF27 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		AE1E3BF8038A878E921F49EA /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		D43B7F8423DE860A3D049BE9 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		7F66429955D1BF6415794566 /* Embed service token */ = {isa = PBXShellScriptBuildPhase; alwaysOutOfDate = 1; buildActionMask = 2147483647; files = (); inputFileListPaths = (); inputPaths = (); name = "Embed service token"; outputFileListPaths = (); outputPaths = (); runOnlyForDeploymentPostprocessing = 0; shellPath = /bin/sh; shellScript = "# Owner 2026-11-07: no token entry in the app. Device builds carry this Mac's existing\n# discipline-service token (never committed); simulator builds never do.\nSRC=\"$HOME/Library/Application Support/SpikeDiscipline/access-token\"\nDST=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/service-token\"\nrm -f \"$DST\"\nif [ \"$PLATFORM_NAME\" = \"iphoneos\" ] && [ -f \"$SRC\" ]; then\n  tr -d ' \\r\\n' < \"$SRC\" > \"$DST\"\n  chmod 600 \"$DST\"\nfi\n"; showEnvVarsInLog = 0; };
 		B8F6BBF084C75D2E61889B65 = {isa = PBXTargetDependency; target = D3209B4563CB0B2A80FD94E1; targetProxy = A217B76F82E0FF6B19D62A32; };
 		706F69920B938F150F750A37 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -68,9 +69,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = L7RP7HZT53;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "SPIKE 纪律";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
@@ -78,7 +80,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 2.0.1;
+				MARKETING_VERSION = 2.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.spike.discipline.native;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -93,9 +95,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = L7RP7HZT53;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "SPIKE 纪律";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
@@ -103,7 +106,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 2.0.1;
+				MARKETING_VERSION = 2.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.spike.discipline.native;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

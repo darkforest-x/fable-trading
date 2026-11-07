@@ -15,9 +15,11 @@ struct CloudSection: View {
             HStack {
                 Picker("方向", selection: $side.animation(.snappy)) { Text("全部").tag("all"); Text("做多").tag("long"); Text("做空").tag("short") }
                     .pickerStyle(.segmented).frame(maxWidth: 220)
+                    .onChange(of: side) { _, _ in Haptics.select() }
                 Spacer()
                 Menu {
                     Picker("范围", selection: $scope) { Text("本周").tag("live"); Text("含历史").tag("all") }
+                        .onChange(of: scope) { _, _ in Haptics.select() }
                 } label: { Label(scope == "live" ? "本周" : "含历史", systemImage: "line.3.horizontal.decrease").font(.footnote.weight(.semibold)) }
                 .buttonStyle(.glass)
             }

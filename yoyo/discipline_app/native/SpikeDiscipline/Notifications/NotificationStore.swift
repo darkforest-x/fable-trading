@@ -51,8 +51,7 @@ final class NotificationStore {
 
     private func raise(_ event: NotificationEvent) {
         withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) { banner = event }
-        let haptic = UINotificationFeedbackGenerator()
-        haptic.notificationOccurred(event.kind == "alarm" ? .error : .warning)
+        if event.kind == "alarm" { Haptics.alarm() } else { Haptics.warning() }
         if prefs.sound { AudioServicesPlaySystemSound(event.kind == "alarm" ? 1005 : 1057) }
         if event.kind != "alarm" {
             let id = event.id

@@ -29,7 +29,7 @@ struct AlertsSection: View {
                     Text(group.label).font(.caption.weight(.semibold)).foregroundStyle(.secondary).padding(.horizontal, 6).padding(.top, 4)
                     ForEach(group.rows, id: \.rowId) { alarm in
                         VStack(alignment: .leading, spacing: 10) {
-                            Button { withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { expanded = expanded == alarm.rowId ? nil : alarm.rowId } } label: {
+                            Button { Haptics.tap(); withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { expanded = expanded == alarm.rowId ? nil : alarm.rowId } } label: {
                                 HStack(spacing: 12) {
                                     Image(systemName: alarm.side == .lower ? "arrow.down" : "arrow.up").font(.headline)
                                         .foregroundStyle(alarm.side == .lower ? Color.down : Color.up)
@@ -108,7 +108,7 @@ struct CoinChips: View {
                     .glassEffect(.regular, in: .capsule)
             }
             if !all && symbols.count > 8 {
-                Button("+\(symbols.count - 8)") { withAnimation(.snappy) { all = true } }
+                Button("+\(symbols.count - 8)") { Haptics.tap(); withAnimation(.snappy) { all = true } }
                     .font(.footnote.weight(.semibold)).buttonStyle(.glass).controlSize(.small)
             }
         }
