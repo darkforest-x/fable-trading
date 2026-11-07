@@ -1,0 +1,167 @@
+{
+  "experiment": "exp-monday-breadth-optimization-20261108-v1",
+  "scope": "Owner 2026-11-08 requests broad joint parameter discovery on the market-wide Monday lower-1.618 reversal; benchmarks BTC, ETH, SOL and equal-dollar initial altcoin basket.",
+  "W_minutes": [
+    5,
+    10,
+    15,
+    30,
+    60,
+    240,
+    720
+  ],
+  "X_minutes": [
+    0,
+    5,
+    10,
+    15,
+    20,
+    30,
+    45,
+    60,
+    90,
+    120
+  ],
+  "H_hours": [
+    6,
+    12,
+    24,
+    48,
+    72,
+    144
+  ],
+  "breadth_count_ranges": [
+    [
+      1,
+      1
+    ],
+    [
+      2,
+      4
+    ],
+    [
+      5,
+      9
+    ],
+    [
+      10,
+      24
+    ],
+    [
+      25,
+      34
+    ],
+    [
+      35,
+      49
+    ],
+    [
+      50,
+      99
+    ],
+    [
+      100,
+      199
+    ],
+    [
+      200,
+      100000
+    ],
+    [
+      1,
+      100000
+    ],
+    [
+      2,
+      100000
+    ],
+    [
+      5,
+      100000
+    ],
+    [
+      10,
+      100000
+    ],
+    [
+      25,
+      100000
+    ],
+    [
+      35,
+      100000
+    ],
+    [
+      50,
+      100000
+    ],
+    [
+      10,
+      49
+    ],
+    [
+      25,
+      99
+    ],
+    [
+      35,
+      99
+    ]
+  ],
+  "breadth_share_min_pct": [
+    2,
+    5,
+    10,
+    20
+  ],
+  "diffusion": [
+    "any",
+    "zero",
+    "one_to_four",
+    "five_to_nine",
+    "ten_plus",
+    "at_most_four",
+    "ratio_le_25pct",
+    "ratio_25_to_100pct",
+    "ratio_gt_100pct",
+    "front_only",
+    "back_only",
+    "slowing",
+    "accelerating"
+  ],
+  "confirmations": [
+    "none",
+    "reclaim_lt25",
+    "reclaim_25to75",
+    "reclaim_ge50",
+    "reclaim_ge75",
+    "alt_move_negative",
+    "alt_move_0to2",
+    "alt_move_ge2",
+    "fresh_cluster",
+    "prior_shock_6h",
+    "no_prior_shock_24h",
+    "btc_move_negative",
+    "btc_move_0to1",
+    "btc_move_ge1"
+  ],
+  "primary_outcome": "net return per admitted 1x event, equally weighted across signals, initial basket equal-dollar at entry; both market fills 5bp, no funding/slippage base. No adding collateral.",
+  "rules": "Require complete scheduled observation and entry/exit quotes. Deduplicate by taking the chronological first eligible signal and blocking entries for max(24h,H) after each accepted entry. Reset at each fixed evaluation epoch. No equity-based exits in the grid; excursions are labels only.",
+  "splits_utc": [
+    "2023-01-01",
+    "2025-01-01",
+    "2026-01-01"
+  ],
+  "purge": "Use only trades whose exit is strictly before next epoch; report first 2 development blocks, 2025 selection check and locked 2026 to October. Historical years previously inspected; not a blind forward test.",
+  "ranking": "Per epoch conservative score = mean of returns clipped at +/-20 percentage points minus 1.28 standard errors of clipped returns. Initial rank takes worse of pre-2023 and 2023-24. Require >=12 events in each block, >=30 combined, each period positive raw mean, >=50% combined win. Keep up to 6 distinct date-path candidates per asset and W from each of 3 ranks (conservative score, win rate, capped mean) then pick using minimum of all 3 epoch lower scores; validation requires >=10 events, >=4 calendar months, win >=50%, positive mean, closing-equity drawdown <=35%. No 2026 information in ranking. Parameter-equivalent candidates collapse by their admission paths in development only; report searched and unique separately.",
+  "baselines": [
+    "all W5 X30 H144 N35-99 Y=0",
+    "all W5 X30 H144 N50-99 Y=0",
+    "all W5 X30 H144 all N any Y",
+    "same coin/time bucket/volatility random with exclusion of shocks"
+  ],
+  "robustness": "Recompute 2026 event count, hit rate, average, median, worst, drawdown, geometric growth, remove best event and best month, cost stress; matched same-symbol UTC month/session/volatility/trend randomized times. Paired cluster-month sign flips with Holm across primary four targets. Require >=10 events, >=6 distinct months, >=50% paired coverage, positive excess with family-adjusted p<.01, positive after subtracting 0.20 percentage points adverse round-trip costs and removing best month to call a validated edge.",
+  "exit_followup": "For the frozen shortlist representative per asset, bounded alternative exit study: per-instrument limit take profit (5%/10%) and time exit as baseline; if appropriate also early market exit on a completed-bar loss or profit rule for realistic executable contrasts. Select or compare on preceding data, always retest later. No alt synchronized peak assumed.",
+  "data": "Original 626-symbol weekly same-side first-touch ledger. USTC counts for breadth but is excluded from altcoin returns. Use Binance USDT perpetual candles. NY Monday observations have no usable signal monitoring; full-clock filter; prior studies are available for exact baseline comparison.",
+  "status": "research_only"
+}
