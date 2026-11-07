@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: monday-breadth-frequency-20261108-v1
+    artifact_type: manifest
+    role: higher_frequency_breadth_opportunities_and_costed_monthly_controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: 161a4e494081149a771cf7a0cfcf30e43c953a40
+    source_path: experiments/active/exp-monday-breadth-frequency-20261108-v1/frequency_results.csv
+    storage_uri: repo://experiments/active/exp-monday-breadth-frequency-20261108-v1/frequency_results.csv
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Locked rules, pre-2026 selection, raw and independent signal counts, calendar and one-account 2026 event ledger, funding/mark risk and contemporaneous matched random results.
+
   - artifact_id: monday-breadth-optimization-20261108-v1
     artifact_type: manifest
     role: market_breadth_locked_parameters_controls_and_exit_fills

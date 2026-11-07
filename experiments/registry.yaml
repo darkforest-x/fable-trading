@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-breadth-frequency-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 161a4e494081149a771cf7a0cfcf30e43c953a40
+    status: inconclusive
+    question: How many historic market-wide first-touch reversal trades were actually available, and can frequency-targeted rules deliver more distinct profitable opportunities?
+    single_variable: Repeat the registered breadth search with annual trade-frequency constraints, plus paired actual-vs-maximum ETH reservation and a separately defined single-capital alert union.
+    result: Through the Oct 27 2026 UTC candle close, continuous one-position schedules produced 71 and 229 entries (417/929 historical) with funded means -0.199%/-0.066% and marked drawdowns 41.6%/46.9%. Medium BTC 40 and ALT 25 trades earned +0.629%/+0.792% after fees and funding; all 11 matched-control Holm p=1. Lowering the original BTC share from 5% to 0.5% preserved the named net 10,000.55-point winner but only increased 2026 count from 3 to 8. No production qualification.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - monday-breadth-frequency-20261108-v1
+    canonical_report: experiments/active/exp-monday-breadth-frequency-20261108-v1/frequency_results.csv
+    notes: Select rules through 2025 and evaluate historical 2026. Returns per 1x trade; actual funding separately audited. Same coin/time/volatility random entries use identical fees/exits. Count opportunities from one account without overlap.
+
   - experiment_id: exp-monday-breadth-optimization-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: e2bfb16ce495b9049c156c7aa157613c6f0b4ff3
