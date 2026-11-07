@@ -150,16 +150,21 @@ def cached_returns(asset,requested,frame):
     return pd.concat(returns)
 
 
-def evaluate(asset,events,excluded):
-    frame = prices(asset)
+def evaluate(asset,events,excluded,*,frame=None,control_mask=None,monitor_bars=None,returns_for=cached_returns):
+    if frame is None:
+        frame = prices(asset)
     idx = frame.index
     close = frame.close.shift(1)
     vol = np.log(close).diff().pow(2).rolling(12).sum().pow(.5)*100
     prior = (close.shift(6)/close.shift(18)-1)*100
     band = np.digitize(vol,[.25,.5,1,2,4])
     key = (((idx.year*12+idx.month)*4+idx.hour//6)*6+band)*3+(np.sign(prior.fillna(0)).to_numpy().astype(int)+1)
+    if monitor_bars is not None:
+        key = key*7+monitor_bars
     valid = frame.open.notna().iloc[::-1].rolling(base.HOLD_BARS+1).sum().iloc[::-1].eq(base.HOLD_BARS+1).to_numpy()
     eligible = valid & vol.notna().to_numpy() & prior.notna().to_numpy()
+    if control_mask is not None:
+        eligible &= control_mask
     split = idx.searchsorted(base.SPLIT)
     eligible[max(0,split-base.HOLD_BARS):split] = False
     for t in excluded:
@@ -184,7 +189,7 @@ def evaluate(asset,events,excluded):
             pool = pool[:0]
         rng = np.random.default_rng([base.SEED,int(dec.value//10**9),ASSETS.index(asset)])
         matches.append(rng.choice(pool,size=min(24,len(pool)),replace=False))
-    returns = cached_returns(asset,np.concatenate([selected,*matches]),frame)
+    returns = returns_for(asset,np.concatenate([selected,*matches]),frame)
     result['net_pct'] = np.nan
     result.loc[available,'net_pct'] = returns.reindex(selected).to_numpy()
     result['control_n'] = 0
@@ -211,7 +216,8 @@ def summaries(events):
                 paired = g.net_pct-g.control_net_pct
                 lo,hi = clustered_interval(g,paired)
                 rows.append(dict(period=period,asset=asset,band=band,continued=more,observations=len(g),n=len(outcome),
-                                 cooldown=int(g.cooldown.sum()),wins=int(outcome.gt(0).sum()),win_pct=100*outcome.gt(0).mean(),
+                                 cooldown=int(g.cooldown.sum()) if 'cooldown' in g else np.nan,
+                                 wins=int(outcome.gt(0).sum()),win_pct=100*outcome.gt(0).mean(),
                                  mean_net_pct=outcome.mean(),median_net_pct=outcome.median(),worst_net_pct=outcome.min(),
                                  weeks=g.loc[outcome.index,'known'].dt.tz_localize(None).dt.to_period('W-SUN').nunique(),
                                  paired_n=paired.count(),control_win_pct=g.control_win_pct.mean(),control_net_pct=g.control_net_pct.mean(),
