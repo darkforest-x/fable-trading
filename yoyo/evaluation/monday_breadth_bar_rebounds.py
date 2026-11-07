@@ -95,6 +95,33 @@ def october_prices(asset):
 
 def prices(asset):
     prefix = base.market_prices(asset)
+    missing = prefix.index[prefix.isna().any(axis=1)]
+    if len(missing):
+        symbol = asset+'USDT'
+        blocks = pd.Series(missing).groupby(pd.Series(missing).diff().ne(STEP).cumsum())
+        proofs = []
+        for _,gap in blocks:
+            start,end = gap.iloc[0]-STEP,gap.iloc[-1]+STEP
+            times = pd.date_range(start,end,freq=STEP)
+            if len(times)>1500:
+                raise ValueError('Historical gap exceeds Binance request limit')
+            key = f'{symbol}-{start:%Y%m%d}-{end:%Y%m%d}'
+            cache = INPUT/(key+'.csv.gz')
+            receipt = INPUT/(key+'.json')
+            if not (cache.is_file() and receipt.is_file()):
+                INPUT.mkdir(parents=True,exist_ok=True)
+                raw,proof = api.Client('binance',INPUT).get(dict(symbol=symbol,interval='5m',
+                    startTime=start.value//10**6,endTime=end.value//10**6,limit=len(times)))
+                quotes = api.canonical([[int(r[0]),*[float(x) for x in r[1:6]]] for r in raw])
+                api.validate(quotes,5,(end+STEP).value//10**6)
+                quotes.to_csv(cache,index=False)
+                receipt.write_text(json.dumps(proof,indent=2)+'\n')
+            fill = pd.read_csv(cache,usecols=['open_time','open','close'],parse_dates=['open_time']).set_index('open_time')
+            if not fill.index.equals(times) or not np.allclose(prefix.loc[[start,end]],fill.loc[[start,end]],rtol=1e-10):
+                raise ValueError('Historical REST quotes failed clock or overlap check')
+            prefix.loc[gap.tolist()] = fill.loc[gap.tolist()]
+            proofs.append(json.loads(receipt.read_text()))
+        (INPUT/(asset+'-historical-gaps.json')).write_text(json.dumps(proofs,indent=2)+'\n')
     minute_file = base.ROOT/'data/research/ma6_knot_1m_20261011/series'/f'binance_um_{asset}USDT_1m_2059200.csv'
     minute = pd.read_csv(minute_file,usecols=['ts','open','close'])
     minute = minute.set_index(pd.to_datetime(minute.ts,unit='ms',utc=True))
@@ -103,7 +130,7 @@ def prices(asset):
     if not np.allclose(prefix.iloc[-1],bridge.iloc[0],rtol=1e-8):
         raise ValueError('September source overlap mismatch for '+asset)
     frame = pd.concat([prefix,bridge.iloc[1:],october_prices(asset)]).asfreq(STEP)
-    assert frame.index.is_unique and frame.loc[base.END:].notna().all().all()
+    assert frame.index.is_unique and frame.notna().all().all()
     return frame
 
 
@@ -192,16 +219,17 @@ def summaries(events):
     return pd.DataFrame(rows)
 
 
-def main():
-    events, excluded = bars_and_followers()
-    result = pd.concat([evaluate(a,events,excluded) for a in ASSETS],ignore_index=True)
+def save_results(result):
     OUT.mkdir(exist_ok=True)
     result.to_csv(OUT/'events.csv.gz',index=False)
     summaries(result).to_csv(OUT/'summary.csv',index=False)
     receipts = {a:json.loads((INPUT/(a+'USDT.json')).read_text()) for a in ASSETS}
     (OUT/'october_sources.json').write_text(json.dumps(receipts,indent=2)+'\n')
+    history = {a:json.loads(p.read_text()) for a in ASSETS if (p:=INPUT/(a+'-historical-gaps.json')).exists()}
+    (OUT/'historical_gap_sources.json').write_text(json.dumps(history,indent=2)+'\n')
     print(result.groupby('asset').net_pct.agg(['size','count']))
 
 
 if __name__ == '__main__':
-    main()
+    events, excluded = bars_and_followers()
+    save_results(pd.concat([evaluate(a,events,excluded) for a in ASSETS],ignore_index=True))
