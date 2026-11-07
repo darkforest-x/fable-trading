@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-breadth-constituent-six-day-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: e6baabae99
+    status: inconclusive
+    question: At the same lower breadth signal, how often do the initial altcoin constituents finish above the entry after six days, and how far do they rise in between?
+    single_variable: Measure the initial constituent contracts instead of just the three benchmark assets. Retain seven frozen UTC candle durations, all cooldown bars, 30-minute observation and six-day holding window.
+    result: Native 5m has 13,421 bars and 36,818 assessable altcoin observations. With 50-99 names and no followers, 521/837 finished positive (+5.13% mean net) with +14.46% mean and +8.13% median peak; 10 of 13 baskets won. With followers, 782/2,062 finished positive (+0.08% mean net) and 9 of 30 baskets won. In the September 16 case 67/68 won (+21.11% mean net, +27.74% mean peak). The 35-49/no-followers cohort had 70.3% wins but just 12 distinct signals, while 25-34/no-followers lost on average. Hypothesis only.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - monday-breadth-constituent-six-day-20261108-v1
+    canonical_report: experiments/active/exp-monday-breadth-constituent-six-day-20261108-v1/5m_table.csv
+    notes: Each coin and signal is an independent unlevered observation. The long enters at the first open after confirmation. Fixed-exit returns are VectorBT USD-M OHLC with two 5bp taker fees; no funding or slippage. Gross highs are not synchronized or realized. Missing endpoint excludes fixed exit; missing high excludes only the peak. Delisted/missing trades not imputed. Controls match same contract, UTC month/session, realized volatility, trend, observation phase and avoid shock-overlapping holding windows.
+
   - experiment_id: exp-monday-breadth-six-day-excursions-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 818db6557f

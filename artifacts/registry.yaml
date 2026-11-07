@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: monday-breadth-constituent-six-day-20261108-v1
+    artifact_type: manifest
+    role: six_day_outcomes_on_initial_breadth_constituents
+    source_repo: darkforest-x/fable-trading
+    source_commit: e6baabae99
+    source_path: experiments/active/exp-monday-breadth-constituent-six-day-20261108-v1/5m_table.csv
+    storage_uri: repo://experiments/active/exp-monday-breadth-constituent-six-day-20261108-v1/5m_table.csv
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Complete member outcomes and price coverage, per-signal equal-weight results, per-symbol summaries, seven duration cohorts, the nine-band native 5m benchmark comparison and the 13 cases with all 838 original member observations.
+
   - artifact_id: monday-breadth-six-day-excursions-20261108-v1
     artifact_type: manifest
     role: gross_six_day_price_excursions_and_fixed_exit_net_returns
