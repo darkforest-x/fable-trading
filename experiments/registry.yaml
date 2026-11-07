@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-breadth-fixed-timeframes-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f47a37ad2c
+    status: inconclusive
+    question: Does the number of distinct lower first touches in one fixed 10m, 15m, 30m, 1h, 4h or 12h candle predict BTC, ETH or SOL rebound strength after waiting 30 minutes?
+    single_variable: Vary the initial accumulation interval on the UTC clock. Keep the 626-symbol first-touch ledger, 30m post-close observation, close-plus-24h exit, breadth bands, costs and inclusion of all bars. Reuse the native 5m results.
+    result: With 50–99 initial names and no followers, the seven frames from 5m to 12h have 13/19/28/33/45/74/79 observations. SOL averaged +3.24/+1.81/+0.03/+0.74/+0.33/+0.15/+0.21 percent net. From 2025 the corresponding means were +1.25/+0.80/+0.18/+0.13/+0.77/-0.55/-0.68 percent. BTC and ETH full-period zero-follower means were negative on all three hourly timeframes.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - monday-breadth-fixed-timeframes-20261108-v1
+    canonical_report: experiments/active/exp-monday-breadth-fixed-timeframes-20261108-v1/summary.csv
+    notes: Native 5m reference matched for all 13421 keys. New random controls match duration and UTC candle-close phase, month, 6h UTC session, prior move, volatility and scheduled NY-weekday observation coverage. Coverage varies by asset and timeframe. Four of 79 zero-follower 12h cases closed into the NY Monday monitoring break. Overlapping outcomes across durations are retained.
+
   - experiment_id: exp-monday-breadth-bar-rebounds-20261107-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 465ad8e41a
