@@ -99,7 +99,8 @@ def basket_funding():
     rules=pd.read_csv(out/'basket_trail_frozen_rules.csv')
     events=pd.read_csv(out/'basket_trail_candidate_events.csv.gz',parse_dates=['decision','exit_time'])
     e=events[events.epoch.eq(3)].merge(rules[['cohort','config_id']],on=['cohort','config_id'],validate='many_to_one')
-    members=pd.read_csv(out/'basket_trail_members.csv.gz',usecols=['event_id','cohort','symbol'])
+    members=pd.read_csv(out/'basket_trail_members.csv.gz',usecols=['event_id','cohort','symbol','included_in_basket'])
+    members=members[members.included_in_basket.eq(True)]
     case=pd.read_csv(out/'basket_trail_sep16.csv',parse_dates=['decision_entry_time_utc','exit_time_utc'])
     case=case.rename(columns={'decision_entry_time_utc':'decision','exit_time_utc':'exit_time','basket_trail_net_pct':'basket_net_pct',
                               'same_68_fixed6d_net_pct':'fixed6d_net_pct'})
