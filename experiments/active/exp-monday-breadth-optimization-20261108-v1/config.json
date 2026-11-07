@@ -163,5 +163,10 @@
   "robustness": "Recompute 2026 event count, hit rate, average, median, worst, drawdown, geometric growth, remove best event and best month, cost stress; matched same-symbol UTC month/session/volatility/trend randomized times. Paired cluster-month sign flips with Holm across primary four targets. Require >=10 events, >=6 distinct months, >=50% paired coverage, positive excess with family-adjusted p<.01, positive after subtracting 0.20 percentage points adverse round-trip costs and removing best month to call a validated edge.",
   "exit_followup": "For the frozen shortlist representative per asset, bounded alternative exit study: per-instrument limit take profit (5%/10%) and time exit as baseline; if appropriate also early market exit on a completed-bar loss or profit rule for realistic executable contrasts. Select or compare on preceding data, always retest later. No alt synchronized peak assumed.",
   "data": "Original 626-symbol weekly same-side first-touch ledger. USTC counts for breadth but is excluded from altcoin returns. Use Binance USDT perpetual candles. NY Monday observations have no usable signal monitoring; full-clock filter; prior studies are available for exact baseline comparison.",
-  "status": "research_only"
+  "status": "research_only",
+  "owner_exit_extension": {
+    "objective": "Owner requires flexible profit taking and risk control, cash capture for altcoins, and at least 10000 BTC points on the Sep 16 case. Evaluate actual size-weighted fills and fees in addition to maximum excursion.",
+    "scope": "Study price-proportional trailing stops, completed-bar ATR/chandelier trailing, no early take profit, trend exit, and a partial profit with a runner. Vary loss protection, activation and maximum horizon, including a 6-day reference. Predefine parameter families without using the September price path to set constants.",
+    "diagnostic": "For the Sep 16, 2026 Beijing breadth event report rule admission, entry, exit VWAP, gross and net BTC points, path ceiling and share of available upside retained. Distinguish the target-conditioned choice from the time-locked selection and report results outside the episode; for basket average member capture separately where defined and disclose timing."
+  }
 }
