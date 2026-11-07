@@ -1,0 +1,16 @@
+{
+  "experiment_id": "exp-live-wick-reclaim-progress-20261107-v1",
+  "cohort": "experiments/active/exp-live-wick-confirmed-swing-20261107-v1/events.csv.gz",
+  "accounts": "experiments/active/exp-live-ema-cloud-filter-20261103-v1/config.json",
+  "volatility": "experiments/active/exp-live-capital41-volume-20261107-v1/tags.csv.gz",
+  "single_variable": "If a still-open E20 position has reclaimed 1.618 at its original hourly close but has completed less than half the distance from 1.618 to the near Monday edge at that close, exit at the next observed 5m open. Hold other positions with their original management.",
+  "threshold": 0.5,
+  "progress": "(hourly close - Monday 1.618 level) / (resting target - Monday 1.618 level). Mirrored by the signed denominator. Use close, not high/low. Equality stays open.",
+  "primary": "Paired early-minus-original net bp on identical entry notionals; target exits foregone and protection exits replaced. Also report a 1000 USDT fixed-notional example and the actual four portfolio allocation replays. Four accounts overlap.",
+  "execution": "Reuse the 416 archived baseline native trades. Compute the 66 potentially actionable alternative exits once on Nautilus 1.231.0, original E20 entry, resting target and protection. A zero-range node after the hourly close exposes only the next actual 5m open; 4ns synthetic order disambiguation. Existing native resting orders have priority. Opening-source timestamp used for account realization. Both original OHLC orders agreed on landmark survival; use OHLC for the brief surviving leg. Preserve boundary exits.",
+  "control": "Paired within event/symbol/week entry, direction, barriers and volatility. Conditional random early exits draw exactly the observed slow count within each entry-year x direction x archived pre-entry volatility bucket; report movable cases. Resample entire New York signal weeks for 95 percent percentile uncertainty in paired slow means. No threshold scan. Descriptive chronological splits through 2024, 2025 and 2026; fixed cutoff across splits.",
+  "costs": "OKX Lv1 documented 2026-10-23 maker 2bp/taker 5bp per fill on executed notional. Separate archived 10bp entry and 10bp per non-target exit, both in entry-notional bp; no funding, historical Binance USDT-M bars to October 27 2026.",
+  "draws": 5000, "seed": 20261107,
+  "reproduce": ["~/.local/bin/nautilus-python -m yoyo.evaluation.live_wick_reclaim_progress fills", ".venv/bin/python -m yoyo.evaluation.live_wick_reclaim_progress summarize"],
+  "training_eligible": false, "production_eligible": false
+}
