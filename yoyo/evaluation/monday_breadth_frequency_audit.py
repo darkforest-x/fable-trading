@@ -34,6 +34,14 @@ def frozen(family):
     e=e.merge(r[['candidate_id','asset','minutes','wait_min','hold_hours']],on='candidate_id',validate='many_to_one')
     if family=='fixed':
         e['exit_time']=e.decision+pd.to_timedelta(e.hold_hours,unit='h')
+    e['can_enter']=True
+    for (w,x,h),g in e[e.net_pct.isna()].groupby(['minutes','wait_min','hold_hours']):
+        if not g.asset.eq('SOL').all():raise ValueError('Unexpected incomplete native outcome')
+        source=study.search.OUT/'payoffs'/f'event_outcomes_minutes{w}_wait{x}.csv.gz'
+        bars=pd.read_csv(source,usecols=['known','hold_hours','sol_entry_open'],parse_dates=['known'])
+        known_opens=bars[bars.hold_hours.eq(h)].set_index('known').sol_entry_open.reindex(g.known)
+        if known_opens.notna().any():raise ValueError('An admitted trade lacks its exit')
+        e.loc[g.index,'can_enter']=False
     e['source_id']=e.candidate_id
     return r,e
 
@@ -52,7 +60,7 @@ def shared_account(rules,events):
         for epoch,g in base.groupby('epoch'):
             after=pd.Timestamp.min.tz_localize('UTC')
             for row in g.itertuples():
-                take=row.decision>=after
+                take=row.can_enter and row.decision>=after
                 flow.append(dict(target=target,epoch=epoch,decision=row.decision,asset=row.asset,source_id=row.candidate_id,taken=take))
                 if take:
                     picked.append(row.Index)
@@ -64,7 +72,7 @@ def shared_account(rules,events):
 
 
 def cash_after_funding(group,history):
-    fills=group.rename(columns={'decision':'entry_time'}).assign(policy_id=0,exit_legs=1)
+    fills=group.assign(entry_time=group.decision,policy_id=0,exit_legs=1)
     fills['first_exit_time']=fills.exit_time
     return 100*fund.charged(fills,history,{0:SimpleNamespace(take_fraction=0)})/fills.entry_open.to_numpy()
 
@@ -112,6 +120,7 @@ def symbol_audit(pair,client):
         # An endpoint reconciliation and a marked-to-market path. Source returns remain native.
         final=r.net_pct if r.family=='long' else 100*((exit_open/r.entry_open)*(1-.0005)-1-.0005)
         path=np.r_[0.,-.0005,closes/r.entry_open-1-.0005,final/100]
+        if not np.isfinite(path).all():raise ValueError(f'Incomplete 5-minute marking path: {symbol} {r.decision}')
         paths.append((r.event_key,path))
     return g[['event_key','symbol','funding_pct','mark_proxy']],paths
 
