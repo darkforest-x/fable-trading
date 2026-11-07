@@ -1,5 +1,6 @@
 """Realized USD-M funding, with conservative ordering when a fill and settlement share a 5m candle."""
-from pathlib import Path
+from functools import lru_cache
+from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 import pandas as pd
 
@@ -10,10 +11,42 @@ ROOT=study.CACHE.parent
 SOURCE_END=pd.Timestamp('2026-11-07',tz='UTC')
 
 
-def rates(symbol,history=False):
+@lru_cache(maxsize=256)
+def archive_month(symbol,month):
+    """Observed settlement rates and official hourly mark-candle opens at the funding timestamps."""
+    from yoyo.data.binance_um_vision_fetch import BASE,fetch
+    base=ROOT/'funding_archives'
+    name=f'{symbol}-fundingRate-{month}.zip'
+    shared=study.search.ROOT/'experiments/active/exp-monday-1618-flow-20261023-v1/inputs/funding'/symbol/name
+    if shared.is_file():
+        rate=shared
+    else:
+        fetch(base,'funding',symbol,f'{BASE}/monthly/fundingRate/{symbol}/{name}')
+        rate=base/'funding'/symbol/name
+    markname=f'{symbol}-1h-{month}.zip'
+    fetch(base,'mark_1h',symbol,f'{BASE}/monthly/markPriceKlines/{symbol}/1h/{markname}')
+    mark=base/'mark_1h'/symbol/markname
+    if not rate.is_file() or not mark.is_file():return pd.DataFrame()
+    rr=pd.read_csv(rate)
+    qq=pd.read_csv(mark,header=None,usecols=[0,1],names=['t','mark_price'])
+    qq=qq[pd.to_numeric(qq.t,errors='coerce').notna()].copy()
+    qq['t']=pd.to_datetime(qq.t.astype('int64'),unit='ms',utc=True)
+    mark_price=pd.to_numeric(qq.set_index('t').mark_price)
+    rr['clock']=pd.to_datetime(rr.calc_time,unit='ms',utc=True).dt.floor('5min')
+    rr=rr.set_index('clock').rename(columns={'last_funding_rate':'realized_rate'})
+    rr['mark_price']=mark_price.reindex(rr.index).to_numpy();rr['price_proxy']=True
+    return rr
+
+
+def rates(symbol,history=False,months=()):
     folder='funding_history' if history else 'funding_2026'
     path=ROOT/folder/'normalized/binance'/(symbol+'_funding.csv.gz')
+    if not path.is_file():
+        parts=[archive_month(symbol,month) for month in months]
+        if len(parts)==0 or any(p.empty for p in parts):return pd.DataFrame()
+        return pd.concat(parts).sort_index()
     f=pd.read_csv(path)
+    f['price_proxy']=False
     f['clock']=pd.to_datetime(f.funding_time,unit='ms',utc=True).dt.floor('5min')
     if f.clock.duplicated().any():raise ValueError('Overlapping settlements')
     return f.set_index('clock').sort_index()
@@ -97,10 +130,13 @@ def named_case():
     b=btc_extra([study.CASE_ENTRY])
     b.to_csv(out/'sept16_btc_funding_aware_rules.csv',index=False)
     original=pd.read_parquet(out/'sept16_all_policy_member_fills.parquet')
+    with ThreadPoolExecutor(3) as pool:
+        list(pool.map(lambda s:rates(s,months=('2026-09',)),original.asset.unique()))
     pieces=[]
     for symbol,group in original.groupby('asset'):
         g=group.copy()
-        f=rates(symbol)
+        f=rates(symbol,months=('2026-09',))
+        g['funding_mark_proxy']=bool(not f.empty and f.price_proxy.any())
         g['funding_points']=charged(g,f,sim.policies(symbol=='BTCUSDT'))
         g['funded_points']=g.net_points-g.funding_points
         g['funded_pct']=100*g.funded_points/g.entry_open
@@ -110,7 +146,7 @@ def named_case():
     alt=audit[~audit.asset.isin(['BTCUSDT','ETHUSDT','SOLUSDT'])].groupby(['policy_id','rule'])
     summary=alt.agg(n=('funded_pct','count'),mean_net_before_funding=('net_pct','mean'),
                     mean_after_funding=('funded_pct','mean'),mean_peak=('peak_pct','mean'),
-                    win_after_funding=('funded_pct',lambda v:100*v.dropna().gt(0).mean())).reset_index()
+                    estimated_marks=('funding_mark_proxy','sum'),win_after_funding=('funded_pct',lambda v:100*v.dropna().gt(0).mean())).reset_index()
     summary.to_csv(out/'sept16_alt_funding.csv',index=False)
 
 
