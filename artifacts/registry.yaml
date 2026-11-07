@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: spike-alert-observed-timing-20261107-v1
+    artifact_type: manifest
+    role: observed_touch_latency_and_breadth_lead_times
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1f0776f2a4
+    source_path: experiments/active/exp-spike-alert-observed-timing-20261107-v1/summary.json
+    storage_uri: repo://experiments/active/exp-spike-alert-observed-timing-20261107-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Per-alert arrival counts and lead times reconstructed from read-only OKX monitor ledgers.
+
   - artifact_id: live-wick-reclaim-progress-20261107-v1
     artifact_type: manifest
     role: paired_reclaim_progress_market_exit_and_four_account_replays

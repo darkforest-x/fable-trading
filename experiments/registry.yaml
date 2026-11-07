@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-spike-alert-observed-timing-20261107-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1f0776f2a4
+    status: inconclusive
+    question: How much preparation time and how many later first touches were observable around real OKX Monday 1.618 market-wide alarms?
+    single_variable: Retrospective breadth count of 15 or 20 vs the installed 25 with the same trailing five-minute window and per-side 30-minute cooldown.
+    result: Seven real 25-coin alarms on four dates matched the replay. Both early counts gave seven warnings followed within five minutes by a real alarm; median leads 47.7 and 28.4 seconds. There were 208 additional same-side first touches in the 30 minutes after server creation, 92 in the first minute.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - spike-alert-observed-timing-20261107-v1
+    canonical_report: experiments/active/exp-spike-alert-observed-timing-20261107-v1/summary.json
+    notes: Fixed observation window Oct 28 to Nov 7 21:50 Beijing. Tests excluded; monitor ledger arrival only. No fills or returns, no certified device receipt time or uninterrupted surveillance. The early-warning target is a later real breadth alarm, not the start of a crash.
+
   - experiment_id: exp-live-wick-reclaim-progress-20261107-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 3624cfdeff
