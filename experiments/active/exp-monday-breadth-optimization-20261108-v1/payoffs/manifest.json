@@ -1,0 +1,3056 @@
+{
+  "experiment_id": "exp-monday-breadth-optimization-20261108-v1",
+  "input_contract": {
+    "minutes": [
+      5,
+      10,
+      15,
+      30,
+      60,
+      240,
+      720
+    ],
+    "wait_min": [
+      0,
+      5,
+      10,
+      15,
+      20,
+      30,
+      45,
+      60,
+      90,
+      120
+    ],
+    "hold_hours": [
+      6,
+      12,
+      24,
+      48,
+      72,
+      144
+    ],
+    "fee_taker_per_fill": 0.0005,
+    "entry": "5m open at known+wait_min",
+    "exit": "5m open at entry+hold_hours",
+    "path": "high/low for entry bar through bar before exit; exit open included",
+    "first_hit": "target +5/+10% versus -5%; same five-minute bar labelled ambiguous",
+    "constituent_scope": "exclude BTC/ETH/SOL benchmarks and USTCUSDT from alt return/reclaim; preserve total initial breadth in signal feature",
+    "schema_version": 2,
+    "feature_input_stats": {
+      "members.csv.gz": {
+        "bytes": 9241749,
+        "mtime_ns": 1794073470350439536
+      },
+      "signals.csv.gz": {
+        "bytes": 7469897,
+        "mtime_ns": 1794073525829635975
+      }
+    }
+  },
+  "input_paths": {
+    "members": "experiments/active/exp-monday-breadth-optimization-20261108-v1/features/members.csv.gz",
+    "signals": "experiments/active/exp-monday-breadth-optimization-20261108-v1/features/signals.csv.gz"
+  },
+  "symbols": 625,
+  "signals": 441382,
+  "initial_member_rows_including_benchmarks_and_USTC": 221322,
+  "eligible_alt_member_rows": 220908,
+  "scope_minutes_completed": [
+    5,
+    10,
+    15,
+    30,
+    60,
+    240,
+    720
+  ],
+  "event_outcome_rows": 3453552,
+  "event_partitions": [
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes5_wait0.csv.gz",
+      "minutes": 5,
+      "wait_min": 0,
+      "rows": 80526,
+      "bytes": 14878652,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes5_wait5.csv.gz",
+      "minutes": 5,
+      "wait_min": 5,
+      "rows": 80526,
+      "bytes": 15588865,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes5_wait10.csv.gz",
+      "minutes": 5,
+      "wait_min": 10,
+      "rows": 80526,
+      "bytes": 15608519,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes5_wait15.csv.gz",
+      "minutes": 5,
+      "wait_min": 15,
+      "rows": 80526,
+      "bytes": 15614357,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes5_wait20.csv.gz",
+      "minutes": 5,
+      "wait_min": 20,
+      "rows": 80526,
+      "bytes": 15623804,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes5_wait30.csv.gz",
+      "minutes": 5,
+      "wait_min": 30,
+      "rows": 80526,
+      "bytes": 15633611,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes5_wait45.csv.gz",
+      "minutes": 5,
+      "wait_min": 45,
+      "rows": 80526,
+      "bytes": 15641649,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes5_wait60.csv.gz",
+      "minutes": 5,
+      "wait_min": 60,
+      "rows": 80526,
+      "bytes": 15643168,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes5_wait90.csv.gz",
+      "minutes": 5,
+      "wait_min": 90,
+      "rows": 80526,
+      "bytes": 15655347,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes5_wait120.csv.gz",
+      "minutes": 5,
+      "wait_min": 120,
+      "rows": 80526,
+      "bytes": 15655353,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes10_wait0.csv.gz",
+      "minutes": 10,
+      "wait_min": 0,
+      "rows": 69960,
+      "bytes": 13111266,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes10_wait5.csv.gz",
+      "minutes": 10,
+      "wait_min": 5,
+      "rows": 69960,
+      "bytes": 13726232,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes10_wait10.csv.gz",
+      "minutes": 10,
+      "wait_min": 10,
+      "rows": 69960,
+      "bytes": 13736865,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes10_wait15.csv.gz",
+      "minutes": 10,
+      "wait_min": 15,
+      "rows": 69960,
+      "bytes": 13745645,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes10_wait20.csv.gz",
+      "minutes": 10,
+      "wait_min": 20,
+      "rows": 69960,
+      "bytes": 13752329,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes10_wait30.csv.gz",
+      "minutes": 10,
+      "wait_min": 30,
+      "rows": 69960,
+      "bytes": 13759461,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes10_wait45.csv.gz",
+      "minutes": 10,
+      "wait_min": 45,
+      "rows": 69960,
+      "bytes": 13764305,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes10_wait60.csv.gz",
+      "minutes": 10,
+      "wait_min": 60,
+      "rows": 69960,
+      "bytes": 13767609,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes10_wait90.csv.gz",
+      "minutes": 10,
+      "wait_min": 90,
+      "rows": 69960,
+      "bytes": 13780005,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes10_wait120.csv.gz",
+      "minutes": 10,
+      "wait_min": 120,
+      "rows": 69960,
+      "bytes": 13786181,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes15_wait0.csv.gz",
+      "minutes": 15,
+      "wait_min": 0,
+      "rows": 63492,
+      "bytes": 12028605,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes15_wait5.csv.gz",
+      "minutes": 15,
+      "wait_min": 5,
+      "rows": 63492,
+      "bytes": 12580200,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes15_wait10.csv.gz",
+      "minutes": 15,
+      "wait_min": 10,
+      "rows": 63492,
+      "bytes": 12592848,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes15_wait15.csv.gz",
+      "minutes": 15,
+      "wait_min": 15,
+      "rows": 63492,
+      "bytes": 12595503,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes15_wait20.csv.gz",
+      "minutes": 15,
+      "wait_min": 20,
+      "rows": 63492,
+      "bytes": 12605829,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes15_wait30.csv.gz",
+      "minutes": 15,
+      "wait_min": 30,
+      "rows": 63492,
+      "bytes": 12604313,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes15_wait45.csv.gz",
+      "minutes": 15,
+      "wait_min": 45,
+      "rows": 63492,
+      "bytes": 12612305,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes15_wait60.csv.gz",
+      "minutes": 15,
+      "wait_min": 60,
+      "rows": 63492,
+      "bytes": 12616027,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes15_wait90.csv.gz",
+      "minutes": 15,
+      "wait_min": 90,
+      "rows": 63492,
+      "bytes": 12626077,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes15_wait120.csv.gz",
+      "minutes": 15,
+      "wait_min": 120,
+      "rows": 63492,
+      "bytes": 12628477,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes30_wait0.csv.gz",
+      "minutes": 30,
+      "wait_min": 0,
+      "rows": 52728,
+      "bytes": 10194290,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes30_wait5.csv.gz",
+      "minutes": 30,
+      "wait_min": 5,
+      "rows": 52728,
+      "bytes": 10646222,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes30_wait10.csv.gz",
+      "minutes": 30,
+      "wait_min": 10,
+      "rows": 52728,
+      "bytes": 10655551,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes30_wait15.csv.gz",
+      "minutes": 30,
+      "wait_min": 15,
+      "rows": 52728,
+      "bytes": 10657209,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes30_wait20.csv.gz",
+      "minutes": 30,
+      "wait_min": 20,
+      "rows": 52728,
+      "bytes": 10663147,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes30_wait30.csv.gz",
+      "minutes": 30,
+      "wait_min": 30,
+      "rows": 52728,
+      "bytes": 10661101,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes30_wait45.csv.gz",
+      "minutes": 30,
+      "wait_min": 45,
+      "rows": 52728,
+      "bytes": 10672087,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes30_wait60.csv.gz",
+      "minutes": 30,
+      "wait_min": 60,
+      "rows": 52728,
+      "bytes": 10672268,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes30_wait90.csv.gz",
+      "minutes": 30,
+      "wait_min": 90,
+      "rows": 52728,
+      "bytes": 10681770,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes30_wait120.csv.gz",
+      "minutes": 30,
+      "wait_min": 120,
+      "rows": 52728,
+      "bytes": 10685947,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes60_wait0.csv.gz",
+      "minutes": 60,
+      "wait_min": 0,
+      "rows": 42330,
+      "bytes": 8383802,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes60_wait5.csv.gz",
+      "minutes": 60,
+      "wait_min": 5,
+      "rows": 42330,
+      "bytes": 8743651,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes60_wait10.csv.gz",
+      "minutes": 60,
+      "wait_min": 10,
+      "rows": 42330,
+      "bytes": 8749363,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes60_wait15.csv.gz",
+      "minutes": 60,
+      "wait_min": 15,
+      "rows": 42330,
+      "bytes": 8749655,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes60_wait20.csv.gz",
+      "minutes": 60,
+      "wait_min": 20,
+      "rows": 42330,
+      "bytes": 8755108,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes60_wait30.csv.gz",
+      "minutes": 60,
+      "wait_min": 30,
+      "rows": 42330,
+      "bytes": 8754379,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes60_wait45.csv.gz",
+      "minutes": 60,
+      "wait_min": 45,
+      "rows": 42330,
+      "bytes": 8761105,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes60_wait60.csv.gz",
+      "minutes": 60,
+      "wait_min": 60,
+      "rows": 42330,
+      "bytes": 8764897,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes60_wait90.csv.gz",
+      "minutes": 60,
+      "wait_min": 90,
+      "rows": 42330,
+      "bytes": 8766619,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes60_wait120.csv.gz",
+      "minutes": 60,
+      "wait_min": 120,
+      "rows": 42330,
+      "bytes": 8773518,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes240_wait0.csv.gz",
+      "minutes": 240,
+      "wait_min": 0,
+      "rows": 23358,
+      "bytes": 4961944,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes240_wait5.csv.gz",
+      "minutes": 240,
+      "wait_min": 5,
+      "rows": 23352,
+      "bytes": 5152971,
+      "constituent_raw_rows_scanned": 220902
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes240_wait10.csv.gz",
+      "minutes": 240,
+      "wait_min": 10,
+      "rows": 23352,
+      "bytes": 5154742,
+      "constituent_raw_rows_scanned": 220902
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes240_wait15.csv.gz",
+      "minutes": 240,
+      "wait_min": 15,
+      "rows": 23352,
+      "bytes": 5154552,
+      "constituent_raw_rows_scanned": 220902
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes240_wait20.csv.gz",
+      "minutes": 240,
+      "wait_min": 20,
+      "rows": 23352,
+      "bytes": 5154369,
+      "constituent_raw_rows_scanned": 220902
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes240_wait30.csv.gz",
+      "minutes": 240,
+      "wait_min": 30,
+      "rows": 23352,
+      "bytes": 5156226,
+      "constituent_raw_rows_scanned": 220902
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes240_wait45.csv.gz",
+      "minutes": 240,
+      "wait_min": 45,
+      "rows": 23352,
+      "bytes": 5159414,
+      "constituent_raw_rows_scanned": 220902
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes240_wait60.csv.gz",
+      "minutes": 240,
+      "wait_min": 60,
+      "rows": 23352,
+      "bytes": 5159874,
+      "constituent_raw_rows_scanned": 220902
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes240_wait90.csv.gz",
+      "minutes": 240,
+      "wait_min": 90,
+      "rows": 23352,
+      "bytes": 5165624,
+      "constituent_raw_rows_scanned": 220902
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes240_wait120.csv.gz",
+      "minutes": 240,
+      "wait_min": 120,
+      "rows": 23352,
+      "bytes": 5169204,
+      "constituent_raw_rows_scanned": 220902
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes720_wait0.csv.gz",
+      "minutes": 720,
+      "wait_min": 0,
+      "rows": 12972,
+      "bytes": 2923039,
+      "constituent_raw_rows_scanned": 220908
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes720_wait5.csv.gz",
+      "minutes": 720,
+      "wait_min": 5,
+      "rows": 12966,
+      "bytes": 3024843,
+      "constituent_raw_rows_scanned": 220878
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes720_wait10.csv.gz",
+      "minutes": 720,
+      "wait_min": 10,
+      "rows": 12966,
+      "bytes": 3025186,
+      "constituent_raw_rows_scanned": 220878
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes720_wait15.csv.gz",
+      "minutes": 720,
+      "wait_min": 15,
+      "rows": 12966,
+      "bytes": 3023495,
+      "constituent_raw_rows_scanned": 220878
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes720_wait20.csv.gz",
+      "minutes": 720,
+      "wait_min": 20,
+      "rows": 12966,
+      "bytes": 3024448,
+      "constituent_raw_rows_scanned": 220878
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes720_wait30.csv.gz",
+      "minutes": 720,
+      "wait_min": 30,
+      "rows": 12966,
+      "bytes": 3024649,
+      "constituent_raw_rows_scanned": 220878
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes720_wait45.csv.gz",
+      "minutes": 720,
+      "wait_min": 45,
+      "rows": 12966,
+      "bytes": 3026597,
+      "constituent_raw_rows_scanned": 220878
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes720_wait60.csv.gz",
+      "minutes": 720,
+      "wait_min": 60,
+      "rows": 12966,
+      "bytes": 3027421,
+      "constituent_raw_rows_scanned": 220878
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes720_wait90.csv.gz",
+      "minutes": 720,
+      "wait_min": 90,
+      "rows": 12966,
+      "bytes": 3030891,
+      "constituent_raw_rows_scanned": 220878
+    },
+    {
+      "path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes720_wait120.csv.gz",
+      "minutes": 720,
+      "wait_min": 120,
+      "rows": 12966,
+      "bytes": 3034779,
+      "constituent_raw_rows_scanned": 220878
+    }
+  ],
+  "constituent_cache_root": "data/research/monday_breadth_optimization_20261108_v1/payoffs/constituents",
+  "constituent_cache_files": 4375,
+  "source_receipt_root": "data/research/monday_breadth_optimization_20261108_v1/payoffs/symbol_receipts",
+  "benchmark_quote_receipts_by_scope": [
+    {
+      "minutes": [
+        5
+      ],
+      "receipts": {
+        "BTC": {
+          "symbol": "BTCUSDT",
+          "venue": "Binance USD-M",
+          "interval": "5m",
+          "columns": [
+            "open",
+            "high",
+            "low",
+            "close"
+          ],
+          "index": "UTC candle open time",
+          "requested_range_utc": {
+            "start": "2020-01-23T17:45:00+00:00",
+            "end": "2026-11-02T23:05:00+00:00",
+            "inclusive": true
+          },
+          "needed_intervals_utc": [
+            [
+              "2020-01-23T17:50:00+00:00",
+              "2020-01-30T11:15:00+00:00"
+            ],
+            [
+              "2020-02-04T09:30:00+00:00",
+              "2020-02-12T15:50:00+00:00"
+            ],
+            [
+              "2020-02-15T16:35:00+00:00",
+              "2020-03-03T18:25:00+00:00"
+            ],
+            [
+              "2020-03-08T06:40:00+00:00",
+              "2020-03-18T12:20:00+00:00"
+            ],
+            [
+              "2020-04-10T15:35:00+00:00",
+              "2020-04-22T02:30:00+00:00"
+            ],
+            [
+              "2020-05-04T01:25:00+00:00",
+              "2020-05-16T02:25:00+00:00"
+            ],
+            [
+              "2020-05-20T15:55:00+00:00",
+              "2020-05-27T20:50:00+00:00"
+            ],
+            [
+              "2020-06-02T14:50:00+00:00",
+              "2020-06-08T17:30:00+00:00"
+            ],
+            [
+              "2020-06-10T00:05:00+00:00",
+              "2020-06-18T02:05:00+00:00"
+            ],
+            [
+              "2020-06-24T10:40:00+00:00",
+              "2020-07-14T02:25:00+00:00"
+            ],
+            [
+              "2020-07-16T06:55:00+00:00",
+              "2020-07-22T11:20:00+00:00"
+            ],
+            [
+              "2020-07-24T22:55:00+00:00",
+              "2020-08-18T04:15:00+00:00"
+            ],
+            [
+              "2020-08-18T12:00:00+00:00",
+              "2020-09-11T12:05:00+00:00"
+            ],
+            [
+              "2020-09-14T00:35:00+00:00",
+              "2020-10-14T09:15:00+00:00"
+            ],
+            [
+              "2020-10-14T10:35:00+00:00",
+              "2020-11-11T12:40:00+00:00"
+            ],
+            [
+              "2020-11-12T10:25:00+00:00",
+              "2021-01-09T08:30:00+00:00"
+            ],
+            [
+              "2021-01-11T03:40:00+00:00",
+              "2021-01-17T05:40:00+00:00"
+            ],
+            [
+              "2021-01-19T19:35:00+00:00",
+              "2021-02-03T02:25:00+00:00"
+            ],
+            [
+              "2021-02-07T16:15:00+00:00",
+              "2021-02-21T04:25:00+00:00"
+            ],
+            [
+              "2021-02-23T09:10:00+00:00",
+              "2021-04-30T17:10:00+00:00"
+            ],
+            [
+              "2021-05-04T16:05:00+00:00",
+              "2021-05-25T14:55:00+00:00"
+            ],
+            [
+              "2021-05-28T06:35:00+00:00",
+              "2021-07-25T03:10:00+00:00"
+            ],
+            [
+              "2021-08-03T05:05:00+00:00",
+              "2021-09-06T22:50:00+00:00"
+            ],
+            [
+              "2021-09-07T06:55:00+00:00",
+              "2021-09-13T17:10:00+00:00"
+            ],
+            [
+              "2021-09-17T10:25:00+00:00",
+              "2021-11-03T03:05:00+00:00"
+            ],
+            [
+              "2021-11-03T11:15:00+00:00",
+              "2021-12-10T07:30:00+00:00"
+            ],
+            [
+              "2021-12-10T07:55:00+00:00",
+              "2021-12-17T02:10:00+00:00"
+            ],
+            [
+              "2021-12-17T07:50:00+00:00",
+              "2021-12-24T02:15:00+00:00"
+            ],
+            [
+              "2021-12-28T19:10:00+00:00",
+              "2022-01-14T20:00:00+00:00"
+            ],
+            [
+              "2022-01-18T08:55:00+00:00",
+              "2022-01-28T11:35:00+00:00"
+            ],
+            [
+              "2022-02-02T16:10:00+00:00",
+              "2022-03-02T12:25:00+00:00"
+            ],
+            [
+              "2022-03-06T23:30:00+00:00",
+              "2022-03-21T15:45:00+00:00"
+            ],
+            [
+              "2022-03-24T19:05:00+00:00",
+              "2022-04-17T00:15:00+00:00"
+            ],
+            [
+              "2022-04-25T00:05:00+00:00",
+              "2022-05-18T07:20:00+00:00"
+            ],
+            [
+              "2022-05-18T14:45:00+00:00",
+              "2022-07-19T16:25:00+00:00"
+            ],
+            [
+              "2022-07-20T16:45:00+00:00",
+              "2022-07-31T05:55:00+00:00"
+            ],
+            [
+              "2022-08-03T00:40:00+00:00",
+              "2022-08-09T02:55:00+00:00"
+            ],
+            [
+              "2022-08-09T08:15:00+00:00",
+              "2022-09-13T09:15:00+00:00"
+            ],
+            [
+              "2022-09-13T12:35:00+00:00",
+              "2022-11-15T20:25:00+00:00"
+            ],
+            [
+              "2022-11-17T04:00:00+00:00",
+              "2023-01-18T15:35:00+00:00"
+            ],
+            [
+              "2023-01-18T15:55:00+00:00",
+              "2023-01-31T16:10:00+00:00"
+            ],
+            [
+              "2023-02-01T15:30:00+00:00",
+              "2023-02-07T20:10:00+00:00"
+            ],
+            [
+              "2023-02-08T16:30:00+00:00",
+              "2023-02-19T03:35:00+00:00"
+            ],
+            [
+              "2023-02-21T08:50:00+00:00",
+              "2023-06-26T16:25:00+00:00"
+            ],
+            [
+              "2023-06-28T03:15:00+00:00",
+              "2023-12-06T10:00:00+00:00"
+            ],
+            [
+              "2023-12-06T14:40:00+00:00",
+              "2024-03-11T22:00:00+00:00"
+            ],
+            [
+              "2024-03-12T08:15:00+00:00",
+              "2024-07-11T06:05:00+00:00"
+            ],
+            [
+              "2024-07-11T09:20:00+00:00",
+              "2024-08-11T05:10:00+00:00"
+            ],
+            [
+              "2024-08-13T14:35:00+00:00",
+              "2024-11-11T22:00:00+00:00"
+            ],
+            [
+              "2024-11-12T10:05:00+00:00",
+              "2024-12-12T00:30:00+00:00"
+            ],
+            [
+              "2024-12-17T14:55:00+00:00",
+              "2026-11-02T23:05:00+00:00"
+            ]
+          ],
+          "local_sources": [
+            {
+              "kind": "preholdout_base",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv"
+              ],
+              "priority": 10,
+              "has_low": true,
+              "rows": 659307,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 54081964,
+              "mtime_ns": 1788064735000000000
+            },
+            {
+              "kind": "forward",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/BTCUSDT.csv",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/BTCUSDT.csv",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/BTCUSDT.csv"
+              ],
+              "priority": 20,
+              "has_low": true,
+              "rows": 41640,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 3326725,
+              "mtime_ns": 1790091692000000000
+            },
+            {
+              "kind": "recent",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/BTCUSDT.csv.gz",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/BTCUSDT.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/BTCUSDT.csv.gz"
+              ],
+              "priority": 30,
+              "has_low": true,
+              "rows": 89904,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 1657368,
+              "mtime_ns": 1790138569000000000
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790136000000_1790364000000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790136000000_1790364000000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790136000000_1790364000000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 761,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 11032,
+              "mtime_ns": 1794073557261980692
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790364300000_1793662200000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790364300000_1793662200000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790364300000_1793662200000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 10989,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 151508,
+              "mtime_ns": 1794073920864959631
+            },
+            {
+              "low_recovered_from_matching_source": 0
+            }
+          ],
+          "excluded_source_lineage": [
+            {
+              "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/ma6_knot_1m_20261011/series/binance_um_BTCUSDT_1m_2059200.csv",
+              "reason": "source_not_in_5m_whitelist"
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/research/ma6_knot_1m_20261011/series/binance_um_BTCUSDT_1m_2059200.csv",
+              "reason": "source_not_in_5m_whitelist"
+            }
+          ],
+          "rows": 712865,
+          "earliest_registered_source_ms": 1577836800000,
+          "observed_range_utc": {
+            "start": "2020-01-23T17:45:00+00:00",
+            "end": "2026-11-02T23:05:00+00:00"
+          },
+          "low_missing_rows_in_returned_frame": 0,
+          "rest_repairs": [],
+          "remaining_missing_full_ohlc_ranges": [],
+          "rest_endpoint": "https://fapi.binance.com/fapi/v1/klines"
+        },
+        "ETH": {
+          "symbol": "ETHUSDT",
+          "venue": "Binance USD-M",
+          "interval": "5m",
+          "columns": [
+            "open",
+            "high",
+            "low",
+            "close"
+          ],
+          "index": "UTC candle open time",
+          "requested_range_utc": {
+            "start": "2020-01-23T17:45:00+00:00",
+            "end": "2026-11-02T23:05:00+00:00",
+            "inclusive": true
+          },
+          "needed_intervals_utc": [
+            [
+              "2020-01-23T17:50:00+00:00",
+              "2020-01-30T11:15:00+00:00"
+            ],
+            [
+              "2020-02-04T09:30:00+00:00",
+              "2020-02-12T15:50:00+00:00"
+            ],
+            [
+              "2020-02-15T16:35:00+00:00",
+              "2020-03-03T18:25:00+00:00"
+            ],
+            [
+              "2020-03-08T06:40:00+00:00",
+              "2020-03-18T12:20:00+00:00"
+            ],
+            [
+              "2020-04-10T15:35:00+00:00",
+              "2020-04-22T02:30:00+00:00"
+            ],
+            [
+              "2020-05-04T01:25:00+00:00",
+              "2020-05-16T02:25:00+00:00"
+            ],
+            [
+              "2020-05-20T15:55:00+00:00",
+              "2020-05-27T20:50:00+00:00"
+            ],
+            [
+              "2020-06-02T14:50:00+00:00",
+              "2020-06-08T17:30:00+00:00"
+            ],
+            [
+              "2020-06-10T00:05:00+00:00",
+              "2020-06-18T02:05:00+00:00"
+            ],
+            [
+              "2020-06-24T10:40:00+00:00",
+              "2020-07-14T02:25:00+00:00"
+            ],
+            [
+              "2020-07-16T06:55:00+00:00",
+              "2020-07-22T11:20:00+00:00"
+            ],
+            [
+              "2020-07-24T22:55:00+00:00",
+              "2020-08-18T04:15:00+00:00"
+            ],
+            [
+              "2020-08-18T12:00:00+00:00",
+              "2020-09-11T12:05:00+00:00"
+            ],
+            [
+              "2020-09-14T00:35:00+00:00",
+              "2020-10-14T09:15:00+00:00"
+            ],
+            [
+              "2020-10-14T10:35:00+00:00",
+              "2020-11-11T12:40:00+00:00"
+            ],
+            [
+              "2020-11-12T10:25:00+00:00",
+              "2021-01-09T08:30:00+00:00"
+            ],
+            [
+              "2021-01-11T03:40:00+00:00",
+              "2021-01-17T05:40:00+00:00"
+            ],
+            [
+              "2021-01-19T19:35:00+00:00",
+              "2021-02-03T02:25:00+00:00"
+            ],
+            [
+              "2021-02-07T16:15:00+00:00",
+              "2021-02-21T04:25:00+00:00"
+            ],
+            [
+              "2021-02-23T09:10:00+00:00",
+              "2021-04-30T17:10:00+00:00"
+            ],
+            [
+              "2021-05-04T16:05:00+00:00",
+              "2021-05-25T14:55:00+00:00"
+            ],
+            [
+              "2021-05-28T06:35:00+00:00",
+              "2021-07-25T03:10:00+00:00"
+            ],
+            [
+              "2021-08-03T05:05:00+00:00",
+              "2021-09-06T22:50:00+00:00"
+            ],
+            [
+              "2021-09-07T06:55:00+00:00",
+              "2021-09-13T17:10:00+00:00"
+            ],
+            [
+              "2021-09-17T10:25:00+00:00",
+              "2021-11-03T03:05:00+00:00"
+            ],
+            [
+              "2021-11-03T11:15:00+00:00",
+              "2021-12-10T07:30:00+00:00"
+            ],
+            [
+              "2021-12-10T07:55:00+00:00",
+              "2021-12-17T02:10:00+00:00"
+            ],
+            [
+              "2021-12-17T07:50:00+00:00",
+              "2021-12-24T02:15:00+00:00"
+            ],
+            [
+              "2021-12-28T19:10:00+00:00",
+              "2022-01-14T20:00:00+00:00"
+            ],
+            [
+              "2022-01-18T08:55:00+00:00",
+              "2022-01-28T11:35:00+00:00"
+            ],
+            [
+              "2022-02-02T16:10:00+00:00",
+              "2022-03-02T12:25:00+00:00"
+            ],
+            [
+              "2022-03-06T23:30:00+00:00",
+              "2022-03-21T15:45:00+00:00"
+            ],
+            [
+              "2022-03-24T19:05:00+00:00",
+              "2022-04-17T00:15:00+00:00"
+            ],
+            [
+              "2022-04-25T00:05:00+00:00",
+              "2022-05-18T07:20:00+00:00"
+            ],
+            [
+              "2022-05-18T14:45:00+00:00",
+              "2022-07-19T16:25:00+00:00"
+            ],
+            [
+              "2022-07-20T16:45:00+00:00",
+              "2022-07-31T05:55:00+00:00"
+            ],
+            [
+              "2022-08-03T00:40:00+00:00",
+              "2022-08-09T02:55:00+00:00"
+            ],
+            [
+              "2022-08-09T08:15:00+00:00",
+              "2022-09-13T09:15:00+00:00"
+            ],
+            [
+              "2022-09-13T12:35:00+00:00",
+              "2022-11-15T20:25:00+00:00"
+            ],
+            [
+              "2022-11-17T04:00:00+00:00",
+              "2023-01-18T15:35:00+00:00"
+            ],
+            [
+              "2023-01-18T15:55:00+00:00",
+              "2023-01-31T16:10:00+00:00"
+            ],
+            [
+              "2023-02-01T15:30:00+00:00",
+              "2023-02-07T20:10:00+00:00"
+            ],
+            [
+              "2023-02-08T16:30:00+00:00",
+              "2023-02-19T03:35:00+00:00"
+            ],
+            [
+              "2023-02-21T08:50:00+00:00",
+              "2023-06-26T16:25:00+00:00"
+            ],
+            [
+              "2023-06-28T03:15:00+00:00",
+              "2023-12-06T10:00:00+00:00"
+            ],
+            [
+              "2023-12-06T14:40:00+00:00",
+              "2024-03-11T22:00:00+00:00"
+            ],
+            [
+              "2024-03-12T08:15:00+00:00",
+              "2024-07-11T06:05:00+00:00"
+            ],
+            [
+              "2024-07-11T09:20:00+00:00",
+              "2024-08-11T05:10:00+00:00"
+            ],
+            [
+              "2024-08-13T14:35:00+00:00",
+              "2024-11-11T22:00:00+00:00"
+            ],
+            [
+              "2024-11-12T10:05:00+00:00",
+              "2024-12-12T00:30:00+00:00"
+            ],
+            [
+              "2024-12-17T14:55:00+00:00",
+              "2026-11-02T23:05:00+00:00"
+            ]
+          ],
+          "local_sources": [
+            {
+              "kind": "preholdout_base",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv"
+              ],
+              "priority": 10,
+              "has_low": true,
+              "rows": 659307,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 53200730,
+              "mtime_ns": 1788065142000000000
+            },
+            {
+              "kind": "forward",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHUSDT.csv",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHUSDT.csv",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHUSDT.csv"
+              ],
+              "priority": 20,
+              "has_low": true,
+              "rows": 41640,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 3358521,
+              "mtime_ns": 1790092006000000000
+            },
+            {
+              "kind": "recent",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/ETHUSDT.csv.gz",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/ETHUSDT.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/ETHUSDT.csv.gz"
+              ],
+              "priority": 30,
+              "has_low": true,
+              "rows": 89904,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 1654868,
+              "mtime_ns": 1790138618000000000
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790136000000_1790364000000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790136000000_1790364000000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790136000000_1790364000000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 761,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 10264,
+              "mtime_ns": 1794073557054731337
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790364300000_1793662200000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790364300000_1793662200000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790364300000_1793662200000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 10989,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 141215,
+              "mtime_ns": 1794074107352778922
+            },
+            {
+              "low_recovered_from_matching_source": 0
+            }
+          ],
+          "excluded_source_lineage": [
+            {
+              "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/ma6_knot_1m_20261011/series/binance_um_ETHUSDT_1m_2059200.csv",
+              "reason": "source_not_in_5m_whitelist"
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/research/ma6_knot_1m_20261011/series/binance_um_ETHUSDT_1m_2059200.csv",
+              "reason": "source_not_in_5m_whitelist"
+            }
+          ],
+          "rows": 712865,
+          "earliest_registered_source_ms": 1577836800000,
+          "observed_range_utc": {
+            "start": "2020-01-23T17:45:00+00:00",
+            "end": "2026-11-02T23:05:00+00:00"
+          },
+          "low_missing_rows_in_returned_frame": 0,
+          "rest_repairs": [],
+          "remaining_missing_full_ohlc_ranges": [],
+          "rest_endpoint": "https://fapi.binance.com/fapi/v1/klines"
+        },
+        "SOL": {
+          "symbol": "SOLUSDT",
+          "venue": "Binance USD-M",
+          "interval": "5m",
+          "columns": [
+            "open",
+            "high",
+            "low",
+            "close"
+          ],
+          "index": "UTC candle open time",
+          "requested_range_utc": {
+            "start": "2020-01-23T17:45:00+00:00",
+            "end": "2026-11-02T23:05:00+00:00",
+            "inclusive": true
+          },
+          "needed_intervals_utc": [
+            [
+              "2020-09-14T07:00:00+00:00",
+              "2020-10-14T09:15:00+00:00"
+            ],
+            [
+              "2020-10-14T10:35:00+00:00",
+              "2020-11-11T12:40:00+00:00"
+            ],
+            [
+              "2020-11-12T10:25:00+00:00",
+              "2021-01-09T08:30:00+00:00"
+            ],
+            [
+              "2021-01-11T03:40:00+00:00",
+              "2021-01-17T05:40:00+00:00"
+            ],
+            [
+              "2021-01-19T19:35:00+00:00",
+              "2021-02-03T02:25:00+00:00"
+            ],
+            [
+              "2021-02-07T16:15:00+00:00",
+              "2021-02-21T04:25:00+00:00"
+            ],
+            [
+              "2021-02-23T09:10:00+00:00",
+              "2021-04-30T17:10:00+00:00"
+            ],
+            [
+              "2021-05-04T16:05:00+00:00",
+              "2021-05-25T14:55:00+00:00"
+            ],
+            [
+              "2021-05-28T06:35:00+00:00",
+              "2021-07-25T03:10:00+00:00"
+            ],
+            [
+              "2021-08-03T05:05:00+00:00",
+              "2021-09-06T22:50:00+00:00"
+            ],
+            [
+              "2021-09-07T06:55:00+00:00",
+              "2021-09-13T17:10:00+00:00"
+            ],
+            [
+              "2021-09-17T10:25:00+00:00",
+              "2021-11-03T03:05:00+00:00"
+            ],
+            [
+              "2021-11-03T11:15:00+00:00",
+              "2021-12-10T07:30:00+00:00"
+            ],
+            [
+              "2021-12-10T07:55:00+00:00",
+              "2021-12-17T02:10:00+00:00"
+            ],
+            [
+              "2021-12-17T07:50:00+00:00",
+              "2021-12-24T02:15:00+00:00"
+            ],
+            [
+              "2021-12-28T19:10:00+00:00",
+              "2022-01-14T20:00:00+00:00"
+            ],
+            [
+              "2022-01-18T08:55:00+00:00",
+              "2022-01-28T11:35:00+00:00"
+            ],
+            [
+              "2022-02-02T16:10:00+00:00",
+              "2022-03-02T12:25:00+00:00"
+            ],
+            [
+              "2022-03-06T23:30:00+00:00",
+              "2022-03-21T15:45:00+00:00"
+            ],
+            [
+              "2022-03-24T19:05:00+00:00",
+              "2022-04-17T00:15:00+00:00"
+            ],
+            [
+              "2022-04-25T00:05:00+00:00",
+              "2022-05-18T07:20:00+00:00"
+            ],
+            [
+              "2022-05-18T14:45:00+00:00",
+              "2022-07-19T16:25:00+00:00"
+            ],
+            [
+              "2022-07-20T16:45:00+00:00",
+              "2022-07-31T05:55:00+00:00"
+            ],
+            [
+              "2022-08-03T00:40:00+00:00",
+              "2022-08-09T02:55:00+00:00"
+            ],
+            [
+              "2022-08-09T08:15:00+00:00",
+              "2022-09-13T09:15:00+00:00"
+            ],
+            [
+              "2022-09-13T12:35:00+00:00",
+              "2022-11-15T20:25:00+00:00"
+            ],
+            [
+              "2022-11-17T04:00:00+00:00",
+              "2023-01-18T15:35:00+00:00"
+            ],
+            [
+              "2023-01-18T15:55:00+00:00",
+              "2023-01-31T16:10:00+00:00"
+            ],
+            [
+              "2023-02-01T15:30:00+00:00",
+              "2023-02-07T20:10:00+00:00"
+            ],
+            [
+              "2023-02-08T16:30:00+00:00",
+              "2023-02-19T03:35:00+00:00"
+            ],
+            [
+              "2023-02-21T08:50:00+00:00",
+              "2023-06-26T16:25:00+00:00"
+            ],
+            [
+              "2023-06-28T03:15:00+00:00",
+              "2023-12-06T10:00:00+00:00"
+            ],
+            [
+              "2023-12-06T14:40:00+00:00",
+              "2024-03-11T22:00:00+00:00"
+            ],
+            [
+              "2024-03-12T08:15:00+00:00",
+              "2024-07-11T06:05:00+00:00"
+            ],
+            [
+              "2024-07-11T09:20:00+00:00",
+              "2024-08-11T05:10:00+00:00"
+            ],
+            [
+              "2024-08-13T14:35:00+00:00",
+              "2024-11-11T22:00:00+00:00"
+            ],
+            [
+              "2024-11-12T10:05:00+00:00",
+              "2024-12-12T00:30:00+00:00"
+            ],
+            [
+              "2024-12-17T14:55:00+00:00",
+              "2026-11-02T23:05:00+00:00"
+            ]
+          ],
+          "local_sources": [
+            {
+              "kind": "preholdout_base",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_SOLUSDT_5m_590316.csv",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_SOLUSDT_5m_590316.csv",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_SOLUSDT_5m_590316.csv"
+              ],
+              "priority": 10,
+              "has_low": true,
+              "rows": 590316,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 44867861,
+              "mtime_ns": 1788066492000000000
+            },
+            {
+              "kind": "recent",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/SOLUSDT.csv.gz",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/SOLUSDT.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/SOLUSDT.csv.gz"
+              ],
+              "priority": 30,
+              "has_low": true,
+              "rows": 89904,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 1321141,
+              "mtime_ns": 1790139541000000000
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1645833600000_1646061300000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1645833600000_1646061300000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1645833600000_1646061300000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 760,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 7772,
+              "mtime_ns": 1794074700359744134
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1648771200000_1648943700000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1648771200000_1648943700000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1648771200000_1648943700000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 576,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 6515,
+              "mtime_ns": 1794074702667435924
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790136000000_1790364000000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790136000000_1790364000000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790136000000_1790364000000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 761,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 7799,
+              "mtime_ns": 1794073557152870257
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790364300000_1793662200000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790364300000_1793662200000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790364300000_1793662200000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 10989,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 102987,
+              "mtime_ns": 1794074716699381862
+            },
+            {
+              "low_recovered_from_matching_source": 0
+            },
+            {
+              "kind": "preholdout_base",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_SOLUSDT_5m_590316.csv",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_SOLUSDT_5m_590316.csv",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_SOLUSDT_5m_590316.csv"
+              ],
+              "priority": 10,
+              "has_low": true,
+              "rows": 590316,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 44867861,
+              "mtime_ns": 1788066492000000000
+            },
+            {
+              "kind": "recent",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/SOLUSDT.csv.gz",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/SOLUSDT.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/SOLUSDT.csv.gz"
+              ],
+              "priority": 30,
+              "has_low": true,
+              "rows": 89904,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 1321141,
+              "mtime_ns": 1790139541000000000
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1645833600000_1646061300000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1645833600000_1646061300000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1645833600000_1646061300000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 760,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 7772,
+              "mtime_ns": 1794074700359744134
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1648771200000_1648943700000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1648771200000_1648943700000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1648771200000_1648943700000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 576,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 6515,
+              "mtime_ns": 1794074702667435924
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790136000000_1790364000000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790136000000_1790364000000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790136000000_1790364000000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 761,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 7799,
+              "mtime_ns": 1794073557152870257
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790364300000_1793662200000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790364300000_1793662200000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790364300000_1793662200000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 10989,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 102987,
+              "mtime_ns": 1794074716699381862
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1646061600000_1646092500000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1646061600000_1646092500000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1646061600000_1646092500000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 104,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 1200,
+              "mtime_ns": 1794075390432976292
+            },
+            {
+              "low_recovered_from_matching_source": 0
+            }
+          ],
+          "excluded_source_lineage": [
+            {
+              "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/ma6_knot_1m_20261011/series/binance_um_SOLUSDT_1m_2059200.csv",
+              "reason": "source_not_in_5m_whitelist"
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/research/ma6_knot_1m_20261011/series/binance_um_SOLUSDT_1m_2059200.csv",
+              "reason": "source_not_in_5m_whitelist"
+            }
+          ],
+          "rows": 645314,
+          "earliest_registered_source_ms": 1600066800000,
+          "observed_range_utc": {
+            "start": "2020-09-14T07:00:00+00:00",
+            "end": "2026-11-02T23:05:00+00:00"
+          },
+          "low_missing_rows_in_returned_frame": 0,
+          "rest_repairs": [
+            {
+              "start_ms": 1646061600000,
+              "end_ms": 1646092500000,
+              "rows": 104,
+              "pages": [
+                {
+                  "start_ms": 1646061600000,
+                  "rows": 104,
+                  "first_ms": 1646061600000,
+                  "last_ms": 1646092500000
+                }
+              ],
+              "stop_reason": "range_complete",
+              "cache": {
+                "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1646061600000_1646092500000.csv.gz",
+                "status": "written",
+                "rows": 104,
+                "bytes": 1200
+              }
+            }
+          ],
+          "remaining_missing_full_ohlc_ranges": [],
+          "rest_endpoint": "https://fapi.binance.com/fapi/v1/klines"
+        }
+      }
+    },
+    {
+      "minutes": [
+        10,
+        15,
+        30,
+        60,
+        240,
+        720
+      ],
+      "receipts": {
+        "BTC": {
+          "symbol": "BTCUSDT",
+          "venue": "Binance USD-M",
+          "interval": "5m",
+          "columns": [
+            "open",
+            "high",
+            "low",
+            "close"
+          ],
+          "index": "UTC candle open time",
+          "requested_range_utc": {
+            "start": "2020-01-23T17:45:00+00:00",
+            "end": "2026-11-03T00:00:00+00:00",
+            "inclusive": true
+          },
+          "needed_intervals_utc": [
+            [
+              "2020-01-23T17:50:00+00:00",
+              "2020-01-30T14:00:00+00:00"
+            ],
+            [
+              "2020-02-04T09:30:00+00:00",
+              "2020-02-13T02:00:00+00:00"
+            ],
+            [
+              "2020-02-15T16:40:00+00:00",
+              "2020-03-04T02:00:00+00:00"
+            ],
+            [
+              "2020-03-08T06:40:00+00:00",
+              "2020-03-18T14:00:00+00:00"
+            ],
+            [
+              "2020-04-10T15:40:00+00:00",
+              "2020-04-22T14:00:00+00:00"
+            ],
+            [
+              "2020-05-04T01:30:00+00:00",
+              "2020-05-16T14:00:00+00:00"
+            ],
+            [
+              "2020-05-20T16:00:00+00:00",
+              "2020-05-28T02:00:00+00:00"
+            ],
+            [
+              "2020-06-02T14:50:00+00:00",
+              "2020-06-09T02:00:00+00:00"
+            ],
+            [
+              "2020-06-10T00:10:00+00:00",
+              "2020-06-18T14:00:00+00:00"
+            ],
+            [
+              "2020-06-24T10:40:00+00:00",
+              "2020-07-14T14:00:00+00:00"
+            ],
+            [
+              "2020-07-16T07:00:00+00:00",
+              "2020-07-22T14:00:00+00:00"
+            ],
+            [
+              "2020-07-24T23:00:00+00:00",
+              "2020-09-11T14:00:00+00:00"
+            ],
+            [
+              "2020-09-14T00:40:00+00:00",
+              "2020-11-11T14:00:00+00:00"
+            ],
+            [
+              "2020-11-12T10:30:00+00:00",
+              "2021-01-09T14:00:00+00:00"
+            ],
+            [
+              "2021-01-11T03:40:00+00:00",
+              "2021-01-17T14:00:00+00:00"
+            ],
+            [
+              "2021-01-19T19:40:00+00:00",
+              "2021-02-03T14:00:00+00:00"
+            ],
+            [
+              "2021-02-07T16:15:00+00:00",
+              "2021-02-21T14:00:00+00:00"
+            ],
+            [
+              "2021-02-23T09:10:00+00:00",
+              "2021-05-01T02:00:00+00:00"
+            ],
+            [
+              "2021-05-04T16:10:00+00:00",
+              "2021-05-26T02:00:00+00:00"
+            ],
+            [
+              "2021-05-28T06:40:00+00:00",
+              "2021-07-25T14:00:00+00:00"
+            ],
+            [
+              "2021-08-03T05:10:00+00:00",
+              "2021-09-07T02:00:00+00:00"
+            ],
+            [
+              "2021-09-07T07:00:00+00:00",
+              "2021-09-14T02:00:00+00:00"
+            ],
+            [
+              "2021-09-17T10:30:00+00:00",
+              "2021-12-24T14:00:00+00:00"
+            ],
+            [
+              "2021-12-28T19:10:00+00:00",
+              "2022-01-15T02:00:00+00:00"
+            ],
+            [
+              "2022-01-18T09:00:00+00:00",
+              "2022-01-28T14:00:00+00:00"
+            ],
+            [
+              "2022-02-02T16:10:00+00:00",
+              "2022-03-02T14:00:00+00:00"
+            ],
+            [
+              "2022-03-06T23:30:00+00:00",
+              "2022-03-22T02:00:00+00:00"
+            ],
+            [
+              "2022-03-24T19:10:00+00:00",
+              "2022-04-17T02:00:00+00:00"
+            ],
+            [
+              "2022-04-25T00:10:00+00:00",
+              "2022-05-18T14:00:00+00:00"
+            ],
+            [
+              "2022-05-18T14:45:00+00:00",
+              "2022-07-20T02:00:00+00:00"
+            ],
+            [
+              "2022-07-20T16:45:00+00:00",
+              "2022-07-31T14:00:00+00:00"
+            ],
+            [
+              "2022-08-03T00:40:00+00:00",
+              "2022-11-16T02:00:00+00:00"
+            ],
+            [
+              "2022-11-17T04:00:00+00:00",
+              "2023-02-01T02:00:00+00:00"
+            ],
+            [
+              "2023-02-01T15:30:00+00:00",
+              "2023-02-08T02:00:00+00:00"
+            ],
+            [
+              "2023-02-08T16:30:00+00:00",
+              "2023-02-19T14:00:00+00:00"
+            ],
+            [
+              "2023-02-21T08:50:00+00:00",
+              "2023-06-27T02:00:00+00:00"
+            ],
+            [
+              "2023-06-28T03:15:00+00:00",
+              "2023-12-06T14:00:00+00:00"
+            ],
+            [
+              "2023-12-06T14:40:00+00:00",
+              "2024-03-12T02:00:00+00:00"
+            ],
+            [
+              "2024-03-12T08:15:00+00:00",
+              "2024-08-11T14:00:00+00:00"
+            ],
+            [
+              "2024-08-13T14:40:00+00:00",
+              "2024-11-12T02:00:00+00:00"
+            ],
+            [
+              "2024-11-12T10:10:00+00:00",
+              "2024-12-12T02:00:00+00:00"
+            ],
+            [
+              "2024-12-17T15:00:00+00:00",
+              "2026-11-03T00:00:00+00:00"
+            ]
+          ],
+          "local_sources": [
+            {
+              "kind": "preholdout_base",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv"
+              ],
+              "priority": 10,
+              "has_low": true,
+              "rows": 659307,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 54081964,
+              "mtime_ns": 1788064735000000000
+            },
+            {
+              "kind": "forward",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/BTCUSDT.csv",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/BTCUSDT.csv",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/BTCUSDT.csv"
+              ],
+              "priority": 20,
+              "has_low": true,
+              "rows": 41640,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 3326725,
+              "mtime_ns": 1790091692000000000
+            },
+            {
+              "kind": "recent",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/BTCUSDT.csv.gz",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/BTCUSDT.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/BTCUSDT.csv.gz"
+              ],
+              "priority": 30,
+              "has_low": true,
+              "rows": 89904,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 1657368,
+              "mtime_ns": 1790138569000000000
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790136000000_1790364000000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790136000000_1790364000000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790136000000_1790364000000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 761,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 11032,
+              "mtime_ns": 1794073557261980692
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790364300000_1793662200000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790364300000_1793662200000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790364300000_1793662200000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 10994,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 151508,
+              "mtime_ns": 1794073920864959631
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1793662500000_1793717400000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1793662500000_1793717400000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1793662500000_1793717400000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 6,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 2635,
+              "mtime_ns": 1794075438243828690
+            },
+            {
+              "low_recovered_from_matching_source": 0
+            }
+          ],
+          "excluded_source_lineage": [
+            {
+              "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/ma6_knot_1m_20261011/series/binance_um_BTCUSDT_1m_2059200.csv",
+              "reason": "source_not_in_5m_whitelist"
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/research/ma6_knot_1m_20261011/series/binance_um_BTCUSDT_1m_2059200.csv",
+              "reason": "source_not_in_5m_whitelist"
+            }
+          ],
+          "rows": 712876,
+          "earliest_registered_source_ms": 1577836800000,
+          "observed_range_utc": {
+            "start": "2020-01-23T17:45:00+00:00",
+            "end": "2026-11-03T00:00:00+00:00"
+          },
+          "low_missing_rows_in_returned_frame": 0,
+          "rest_repairs": [],
+          "remaining_missing_full_ohlc_ranges": [],
+          "rest_endpoint": "https://fapi.binance.com/fapi/v1/klines"
+        },
+        "ETH": {
+          "symbol": "ETHUSDT",
+          "venue": "Binance USD-M",
+          "interval": "5m",
+          "columns": [
+            "open",
+            "high",
+            "low",
+            "close"
+          ],
+          "index": "UTC candle open time",
+          "requested_range_utc": {
+            "start": "2020-01-23T17:45:00+00:00",
+            "end": "2026-11-03T00:00:00+00:00",
+            "inclusive": true
+          },
+          "needed_intervals_utc": [
+            [
+              "2020-01-23T17:50:00+00:00",
+              "2020-01-30T14:00:00+00:00"
+            ],
+            [
+              "2020-02-04T09:30:00+00:00",
+              "2020-02-13T02:00:00+00:00"
+            ],
+            [
+              "2020-02-15T16:40:00+00:00",
+              "2020-03-04T02:00:00+00:00"
+            ],
+            [
+              "2020-03-08T06:40:00+00:00",
+              "2020-03-18T14:00:00+00:00"
+            ],
+            [
+              "2020-04-10T15:40:00+00:00",
+              "2020-04-22T14:00:00+00:00"
+            ],
+            [
+              "2020-05-04T01:30:00+00:00",
+              "2020-05-16T14:00:00+00:00"
+            ],
+            [
+              "2020-05-20T16:00:00+00:00",
+              "2020-05-28T02:00:00+00:00"
+            ],
+            [
+              "2020-06-02T14:50:00+00:00",
+              "2020-06-09T02:00:00+00:00"
+            ],
+            [
+              "2020-06-10T00:10:00+00:00",
+              "2020-06-18T14:00:00+00:00"
+            ],
+            [
+              "2020-06-24T10:40:00+00:00",
+              "2020-07-14T14:00:00+00:00"
+            ],
+            [
+              "2020-07-16T07:00:00+00:00",
+              "2020-07-22T14:00:00+00:00"
+            ],
+            [
+              "2020-07-24T23:00:00+00:00",
+              "2020-09-11T14:00:00+00:00"
+            ],
+            [
+              "2020-09-14T00:40:00+00:00",
+              "2020-11-11T14:00:00+00:00"
+            ],
+            [
+              "2020-11-12T10:30:00+00:00",
+              "2021-01-09T14:00:00+00:00"
+            ],
+            [
+              "2021-01-11T03:40:00+00:00",
+              "2021-01-17T14:00:00+00:00"
+            ],
+            [
+              "2021-01-19T19:40:00+00:00",
+              "2021-02-03T14:00:00+00:00"
+            ],
+            [
+              "2021-02-07T16:15:00+00:00",
+              "2021-02-21T14:00:00+00:00"
+            ],
+            [
+              "2021-02-23T09:10:00+00:00",
+              "2021-05-01T02:00:00+00:00"
+            ],
+            [
+              "2021-05-04T16:10:00+00:00",
+              "2021-05-26T02:00:00+00:00"
+            ],
+            [
+              "2021-05-28T06:40:00+00:00",
+              "2021-07-25T14:00:00+00:00"
+            ],
+            [
+              "2021-08-03T05:10:00+00:00",
+              "2021-09-07T02:00:00+00:00"
+            ],
+            [
+              "2021-09-07T07:00:00+00:00",
+              "2021-09-14T02:00:00+00:00"
+            ],
+            [
+              "2021-09-17T10:30:00+00:00",
+              "2021-12-24T14:00:00+00:00"
+            ],
+            [
+              "2021-12-28T19:10:00+00:00",
+              "2022-01-15T02:00:00+00:00"
+            ],
+            [
+              "2022-01-18T09:00:00+00:00",
+              "2022-01-28T14:00:00+00:00"
+            ],
+            [
+              "2022-02-02T16:10:00+00:00",
+              "2022-03-02T14:00:00+00:00"
+            ],
+            [
+              "2022-03-06T23:30:00+00:00",
+              "2022-03-22T02:00:00+00:00"
+            ],
+            [
+              "2022-03-24T19:10:00+00:00",
+              "2022-04-17T02:00:00+00:00"
+            ],
+            [
+              "2022-04-25T00:10:00+00:00",
+              "2022-05-18T14:00:00+00:00"
+            ],
+            [
+              "2022-05-18T14:45:00+00:00",
+              "2022-07-20T02:00:00+00:00"
+            ],
+            [
+              "2022-07-20T16:45:00+00:00",
+              "2022-07-31T14:00:00+00:00"
+            ],
+            [
+              "2022-08-03T00:40:00+00:00",
+              "2022-11-16T02:00:00+00:00"
+            ],
+            [
+              "2022-11-17T04:00:00+00:00",
+              "2023-02-01T02:00:00+00:00"
+            ],
+            [
+              "2023-02-01T15:30:00+00:00",
+              "2023-02-08T02:00:00+00:00"
+            ],
+            [
+              "2023-02-08T16:30:00+00:00",
+              "2023-02-19T14:00:00+00:00"
+            ],
+            [
+              "2023-02-21T08:50:00+00:00",
+              "2023-06-27T02:00:00+00:00"
+            ],
+            [
+              "2023-06-28T03:15:00+00:00",
+              "2023-12-06T14:00:00+00:00"
+            ],
+            [
+              "2023-12-06T14:40:00+00:00",
+              "2024-03-12T02:00:00+00:00"
+            ],
+            [
+              "2024-03-12T08:15:00+00:00",
+              "2024-08-11T14:00:00+00:00"
+            ],
+            [
+              "2024-08-13T14:40:00+00:00",
+              "2024-11-12T02:00:00+00:00"
+            ],
+            [
+              "2024-11-12T10:10:00+00:00",
+              "2024-12-12T02:00:00+00:00"
+            ],
+            [
+              "2024-12-17T15:00:00+00:00",
+              "2026-11-03T00:00:00+00:00"
+            ]
+          ],
+          "local_sources": [
+            {
+              "kind": "preholdout_base",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv"
+              ],
+              "priority": 10,
+              "has_low": true,
+              "rows": 659307,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 53200730,
+              "mtime_ns": 1788065142000000000
+            },
+            {
+              "kind": "forward",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHUSDT.csv",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHUSDT.csv",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHUSDT.csv"
+              ],
+              "priority": 20,
+              "has_low": true,
+              "rows": 41640,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 3358521,
+              "mtime_ns": 1790092006000000000
+            },
+            {
+              "kind": "recent",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/ETHUSDT.csv.gz",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/ETHUSDT.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/ETHUSDT.csv.gz"
+              ],
+              "priority": 30,
+              "has_low": true,
+              "rows": 89904,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 1654868,
+              "mtime_ns": 1790138618000000000
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790136000000_1790364000000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790136000000_1790364000000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790136000000_1790364000000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 761,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 10264,
+              "mtime_ns": 1794073557054731337
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790364300000_1793662200000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790364300000_1793662200000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790364300000_1793662200000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 10994,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 141215,
+              "mtime_ns": 1794074107352778922
+            },
+            {
+              "low_recovered_from_matching_source": 0
+            },
+            {
+              "kind": "preholdout_base",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv"
+              ],
+              "priority": 10,
+              "has_low": true,
+              "rows": 659307,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 53200730,
+              "mtime_ns": 1788065142000000000
+            },
+            {
+              "kind": "forward",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHUSDT.csv",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHUSDT.csv",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/ETHUSDT.csv"
+              ],
+              "priority": 20,
+              "has_low": true,
+              "rows": 41640,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 3358521,
+              "mtime_ns": 1790092006000000000
+            },
+            {
+              "kind": "recent",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/ETHUSDT.csv.gz",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/ETHUSDT.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/ETHUSDT.csv.gz"
+              ],
+              "priority": 30,
+              "has_low": true,
+              "rows": 89904,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 1654868,
+              "mtime_ns": 1790138618000000000
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790136000000_1790364000000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790136000000_1790364000000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790136000000_1790364000000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 761,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 10264,
+              "mtime_ns": 1794073557054731337
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790364300000_1793662200000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790364300000_1793662200000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1790364300000_1793662200000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 10994,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 141215,
+              "mtime_ns": 1794074107352778922
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1793662500000_1793664000000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1793662500000_1793664000000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1793662500000_1793664000000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 6,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 169,
+              "mtime_ns": 1794075928365924083
+            },
+            {
+              "low_recovered_from_matching_source": 0
+            }
+          ],
+          "excluded_source_lineage": [
+            {
+              "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/ma6_knot_1m_20261011/series/binance_um_ETHUSDT_1m_2059200.csv",
+              "reason": "source_not_in_5m_whitelist"
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/research/ma6_knot_1m_20261011/series/binance_um_ETHUSDT_1m_2059200.csv",
+              "reason": "source_not_in_5m_whitelist"
+            }
+          ],
+          "rows": 712876,
+          "earliest_registered_source_ms": 1577836800000,
+          "observed_range_utc": {
+            "start": "2020-01-23T17:45:00+00:00",
+            "end": "2026-11-03T00:00:00+00:00"
+          },
+          "low_missing_rows_in_returned_frame": 0,
+          "rest_repairs": [
+            {
+              "start_ms": 1793662500000,
+              "end_ms": 1793664000000,
+              "rows": 6,
+              "pages": [
+                {
+                  "start_ms": 1793662500000,
+                  "rows": 6,
+                  "first_ms": 1793662500000,
+                  "last_ms": 1793664000000
+                }
+              ],
+              "stop_reason": "range_complete",
+              "cache": {
+                "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/ETHUSDT/1793662500000_1793664000000.csv.gz",
+                "status": "written",
+                "rows": 6,
+                "bytes": 169
+              }
+            }
+          ],
+          "remaining_missing_full_ohlc_ranges": [],
+          "rest_endpoint": "https://fapi.binance.com/fapi/v1/klines"
+        },
+        "SOL": {
+          "symbol": "SOLUSDT",
+          "venue": "Binance USD-M",
+          "interval": "5m",
+          "columns": [
+            "open",
+            "high",
+            "low",
+            "close"
+          ],
+          "index": "UTC candle open time",
+          "requested_range_utc": {
+            "start": "2020-01-23T17:45:00+00:00",
+            "end": "2026-11-03T00:00:00+00:00",
+            "inclusive": true
+          },
+          "needed_intervals_utc": [
+            [
+              "2020-09-14T07:00:00+00:00",
+              "2020-11-11T14:00:00+00:00"
+            ],
+            [
+              "2020-11-12T10:30:00+00:00",
+              "2021-01-09T14:00:00+00:00"
+            ],
+            [
+              "2021-01-11T03:40:00+00:00",
+              "2021-01-17T14:00:00+00:00"
+            ],
+            [
+              "2021-01-19T19:40:00+00:00",
+              "2021-02-03T14:00:00+00:00"
+            ],
+            [
+              "2021-02-07T16:15:00+00:00",
+              "2021-02-21T14:00:00+00:00"
+            ],
+            [
+              "2021-02-23T09:10:00+00:00",
+              "2021-05-01T02:00:00+00:00"
+            ],
+            [
+              "2021-05-04T16:10:00+00:00",
+              "2021-05-26T02:00:00+00:00"
+            ],
+            [
+              "2021-05-28T06:40:00+00:00",
+              "2021-07-25T14:00:00+00:00"
+            ],
+            [
+              "2021-08-03T05:10:00+00:00",
+              "2021-09-07T02:00:00+00:00"
+            ],
+            [
+              "2021-09-07T07:00:00+00:00",
+              "2021-09-14T02:00:00+00:00"
+            ],
+            [
+              "2021-09-17T10:30:00+00:00",
+              "2021-12-24T14:00:00+00:00"
+            ],
+            [
+              "2021-12-28T19:10:00+00:00",
+              "2022-01-15T02:00:00+00:00"
+            ],
+            [
+              "2022-01-18T09:00:00+00:00",
+              "2022-01-28T14:00:00+00:00"
+            ],
+            [
+              "2022-02-02T16:10:00+00:00",
+              "2022-03-02T14:00:00+00:00"
+            ],
+            [
+              "2022-03-06T23:30:00+00:00",
+              "2022-03-22T02:00:00+00:00"
+            ],
+            [
+              "2022-03-24T19:10:00+00:00",
+              "2022-04-17T02:00:00+00:00"
+            ],
+            [
+              "2022-04-25T00:10:00+00:00",
+              "2022-05-18T14:00:00+00:00"
+            ],
+            [
+              "2022-05-18T14:45:00+00:00",
+              "2022-07-20T02:00:00+00:00"
+            ],
+            [
+              "2022-07-20T16:45:00+00:00",
+              "2022-07-31T14:00:00+00:00"
+            ],
+            [
+              "2022-08-03T00:40:00+00:00",
+              "2022-11-16T02:00:00+00:00"
+            ],
+            [
+              "2022-11-17T04:00:00+00:00",
+              "2023-02-01T02:00:00+00:00"
+            ],
+            [
+              "2023-02-01T15:30:00+00:00",
+              "2023-02-08T02:00:00+00:00"
+            ],
+            [
+              "2023-02-08T16:30:00+00:00",
+              "2023-02-19T14:00:00+00:00"
+            ],
+            [
+              "2023-02-21T08:50:00+00:00",
+              "2023-06-27T02:00:00+00:00"
+            ],
+            [
+              "2023-06-28T03:15:00+00:00",
+              "2023-12-06T14:00:00+00:00"
+            ],
+            [
+              "2023-12-06T14:40:00+00:00",
+              "2024-03-12T02:00:00+00:00"
+            ],
+            [
+              "2024-03-12T08:15:00+00:00",
+              "2024-08-11T14:00:00+00:00"
+            ],
+            [
+              "2024-08-13T14:40:00+00:00",
+              "2024-11-12T02:00:00+00:00"
+            ],
+            [
+              "2024-11-12T10:10:00+00:00",
+              "2024-12-12T02:00:00+00:00"
+            ],
+            [
+              "2024-12-17T15:00:00+00:00",
+              "2026-11-03T00:00:00+00:00"
+            ]
+          ],
+          "local_sources": [
+            {
+              "kind": "preholdout_base",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_SOLUSDT_5m_590316.csv",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_SOLUSDT_5m_590316.csv",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_SOLUSDT_5m_590316.csv"
+              ],
+              "priority": 10,
+              "has_low": true,
+              "rows": 590316,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 44867861,
+              "mtime_ns": 1788066492000000000
+            },
+            {
+              "kind": "recent",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/SOLUSDT.csv.gz",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/SOLUSDT.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/SOLUSDT.csv.gz"
+              ],
+              "priority": 30,
+              "has_low": true,
+              "rows": 89904,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 1321141,
+              "mtime_ns": 1790139541000000000
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1645833600000_1646061300000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1645833600000_1646061300000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1645833600000_1646061300000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 760,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 7772,
+              "mtime_ns": 1794074700359744134
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1646061600000_1646092500000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1646061600000_1646092500000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1646061600000_1646092500000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 104,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 1200,
+              "mtime_ns": 1794075390432976292
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1648771200000_1648943700000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1648771200000_1648943700000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1648771200000_1648943700000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 576,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 6515,
+              "mtime_ns": 1794074702667435924
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790136000000_1790364000000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790136000000_1790364000000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790136000000_1790364000000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 761,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 7799,
+              "mtime_ns": 1794073557152870257
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790364300000_1793662200000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790364300000_1793662200000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790364300000_1793662200000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 10994,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 102987,
+              "mtime_ns": 1794074716699381862
+            },
+            {
+              "low_recovered_from_matching_source": 0
+            },
+            {
+              "kind": "preholdout_base",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_SOLUSDT_5m_590316.csv",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_SOLUSDT_5m_590316.csv",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_SOLUSDT_5m_590316.csv"
+              ],
+              "priority": 10,
+              "has_low": true,
+              "rows": 590316,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 44867861,
+              "mtime_ns": 1788066492000000000
+            },
+            {
+              "kind": "recent",
+              "path": "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/SOLUSDT.csv.gz",
+              "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/SOLUSDT.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/SOLUSDT.csv.gz"
+              ],
+              "priority": 30,
+              "has_low": true,
+              "rows": 89904,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 1321141,
+              "mtime_ns": 1790139541000000000
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1645833600000_1646061300000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1645833600000_1646061300000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1645833600000_1646061300000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 760,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 7772,
+              "mtime_ns": 1794074700359744134
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1646061600000_1646092500000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1646061600000_1646092500000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1646061600000_1646092500000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 104,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 1200,
+              "mtime_ns": 1794075390432976292
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1648771200000_1648943700000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1648771200000_1648943700000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1648771200000_1648943700000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 576,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 6515,
+              "mtime_ns": 1794074702667435924
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790136000000_1790364000000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790136000000_1790364000000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790136000000_1790364000000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 761,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 7799,
+              "mtime_ns": 1794073557152870257
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790364300000_1793662200000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790364300000_1793662200000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1790364300000_1793662200000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 10994,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 102987,
+              "mtime_ns": 1794074716699381862
+            },
+            {
+              "kind": "full_ohlc_rest",
+              "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1793662500000_1793664000000.csv.gz",
+              "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1793662500000_1793664000000.csv.gz",
+              "aliases": [
+                "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1793662500000_1793664000000.csv.gz"
+              ],
+              "priority": 60,
+              "has_low": true,
+              "rows": 6,
+              "invalid_timestamp_alignment": 0,
+              "bytes": 148,
+              "mtime_ns": 1794075930450825900
+            },
+            {
+              "low_recovered_from_matching_source": 0
+            }
+          ],
+          "excluded_source_lineage": [
+            {
+              "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/ma6_knot_1m_20261011/series/binance_um_SOLUSDT_1m_2059200.csv",
+              "reason": "source_not_in_5m_whitelist"
+            },
+            {
+              "path": "/Users/zhangzc/fable-trading/data/research/ma6_knot_1m_20261011/series/binance_um_SOLUSDT_1m_2059200.csv",
+              "reason": "source_not_in_5m_whitelist"
+            }
+          ],
+          "rows": 645325,
+          "earliest_registered_source_ms": 1600066800000,
+          "observed_range_utc": {
+            "start": "2020-09-14T07:00:00+00:00",
+            "end": "2026-11-03T00:00:00+00:00"
+          },
+          "low_missing_rows_in_returned_frame": 0,
+          "rest_repairs": [
+            {
+              "start_ms": 1793662500000,
+              "end_ms": 1793664000000,
+              "rows": 6,
+              "pages": [
+                {
+                  "start_ms": 1793662500000,
+                  "rows": 6,
+                  "first_ms": 1793662500000,
+                  "last_ms": 1793664000000
+                }
+              ],
+              "stop_reason": "range_complete",
+              "cache": {
+                "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/SOLUSDT/1793662500000_1793664000000.csv.gz",
+                "status": "written",
+                "rows": 6,
+                "bytes": 148
+              }
+            }
+          ],
+          "remaining_missing_full_ohlc_ranges": [],
+          "rest_endpoint": "https://fapi.binance.com/fapi/v1/klines"
+        }
+      }
+    }
+  ],
+  "vectorbt": "Portfolio.from_orders; one independent unit-size market entry/exit per unique (symbol, decision, hold_hours); 0.05% taker per fill; cash_sharing=False",
+  "fees": {
+    "entry": 0.0005,
+    "exit": 0.0005,
+    "funding": "not modeled",
+    "slippage": "not modeled"
+  },
+  "cash_account_interpretation": "independent unit-size trade returns and equal-weight constituent means; no shared funded multi-symbol account",
+  "path_limitations": "5m OHLC does not establish intrabar order; same-bar +target/-5% is ambiguous; missing low/path bars are not inferred",
+  "event_columns": [
+    "minutes",
+    "known",
+    "wait_min",
+    "decision",
+    "N",
+    "initial",
+    "band",
+    "new_coins",
+    "first_half_new",
+    "last_half_new",
+    "median_member_touch_history_age_days",
+    "trailing28_universe",
+    "share28_pct",
+    "monitor_fraction",
+    "initial_monitor_fraction",
+    "wait_monitor_fraction",
+    "monitor_bars",
+    "market_share",
+    "market_share_status",
+    "last_touch_age_min",
+    "since_prev_25_lower_shock_min",
+    "since_prev_25_any_side_shock_min",
+    "lower_shock_history_status",
+    "any_side_shock_history_status",
+    "continued",
+    "members_expected_n",
+    "hold_hours",
+    "member_n",
+    "endpoint_n",
+    "gross_sum",
+    "net_sum",
+    "gross_win_n",
+    "net_win_n",
+    "path_n",
+    "mfe_sum",
+    "mae_sum",
+    "hit5_n",
+    "hit10_n",
+    "target5_first_n",
+    "drawdown5_before_target5_n",
+    "ambiguous5_n",
+    "nohit5_n",
+    "target10_first_n",
+    "drawdown5_before_target10_n",
+    "ambiguous10_n",
+    "nohit10_n",
+    "pre5_sum",
+    "pre5_n",
+    "pre10_sum",
+    "pre10_n",
+    "alt_member_median_observed_return_pct",
+    "price_n",
+    "quote_observed_n",
+    "reclaim_n",
+    "reclaim_eligible_n",
+    "gross_coverage_pct",
+    "path_coverage_pct",
+    "basket_gross_return_pct",
+    "basket_net_return_pct",
+    "member_win_pct",
+    "member_net_win_pct",
+    "mean_mfe_pct",
+    "mean_mae_pct",
+    "hit5_pct",
+    "hit10_pct",
+    "target5_before_drawdown5_pct",
+    "target10_before_drawdown5_pct",
+    "pre_target_mae_5_pct",
+    "pre_target_mae_10_pct",
+    "reclaim_fraction",
+    "reclaim_fraction_all_eligible",
+    "reclaim_quote_coverage_pct",
+    "btc_entry_open",
+    "btc_exit_open",
+    "btc_gross_return_pct",
+    "btc_net_return_pct",
+    "btc_mfe_pct",
+    "btc_mae_pct",
+    "btc_path_complete",
+    "btc_endpoint_available",
+    "btc_hit5",
+    "btc_hit10",
+    "btc_first5_vs_drawdown5",
+    "btc_first10_vs_drawdown5",
+    "btc_pre_target_mae_5_pct",
+    "btc_pre_target_mae_10_pct",
+    "eth_entry_open",
+    "eth_exit_open",
+    "eth_gross_return_pct",
+    "eth_net_return_pct",
+    "eth_mfe_pct",
+    "eth_mae_pct",
+    "eth_path_complete",
+    "eth_endpoint_available",
+    "eth_hit5",
+    "eth_hit10",
+    "eth_first5_vs_drawdown5",
+    "eth_first10_vs_drawdown5",
+    "eth_pre_target_mae_5_pct",
+    "eth_pre_target_mae_10_pct",
+    "sol_entry_open",
+    "sol_exit_open",
+    "sol_gross_return_pct",
+    "sol_net_return_pct",
+    "sol_mfe_pct",
+    "sol_mae_pct",
+    "sol_path_complete",
+    "sol_endpoint_available",
+    "sol_hit5",
+    "sol_hit10",
+    "sol_first5_vs_drawdown5",
+    "sol_first10_vs_drawdown5",
+    "sol_pre_target_mae_5_pct",
+    "sol_pre_target_mae_10_pct",
+    "btc_observed_return_pct",
+    "eth_observed_return_pct",
+    "sol_observed_return_pct"
+  ],
+  "schema_normalization": {
+    "method": "atomic CSV column normalization only",
+    "changed_values": false,
+    "removed_redundant_columns": [
+      "decision_y"
+    ],
+    "renamed_columns": {
+      "decision_x": "decision"
+    },
+    "asserted_decision_values_equal": true,
+    "source_commit": "98a8002bcd"
+  },
+  "coverage_audit_path": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/coverage_audit.json",
+  "provenance": {
+    "ohlc_api_commit": "883c06989e",
+    "fixed_horizon_builder_commits": {
+      "initial_builder": "2719e3d5eb",
+      "benchmark_prefix_fix": "35fe6fe817",
+      "dedup_helpers": "78e812fddc",
+      "global_benchmark_dedup_and_six_W_matrix": "2e3bb789b9",
+      "final_join_schema_fix": "98a8002bcd",
+      "manifest_scope_receipt_fix": "33b0b2236d"
+    },
+    "w5_raw_shards": "first attempt started before 2719e3d5eb and was interrupted before event matrix materialization; partial raw shards were reused by the committed W5 run; official W5 event partitions were materialized after 35fe6fe817",
+    "w5_event_partition_times_utc": {
+      "first_partition_mtime_utc": "2026-11-07T18:16:38.208507+00:00",
+      "last_partition_mtime_utc": "2026-11-07T18:17:37.179148+00:00"
+    },
+    "remaining_six_W_event_partition_times_utc": {
+      "10": {
+        "first_partition_mtime_utc": "2026-11-07T18:25:42.283762+00:00",
+        "last_partition_mtime_utc": "2026-11-07T18:26:28.343879+00:00"
+      },
+      "15": {
+        "first_partition_mtime_utc": "2026-11-07T18:26:33.566378+00:00",
+        "last_partition_mtime_utc": "2026-11-07T18:27:22.785878+00:00"
+      },
+      "30": {
+        "first_partition_mtime_utc": "2026-11-07T18:27:28.657043+00:00",
+        "last_partition_mtime_utc": "2026-11-07T18:28:18.084891+00:00"
+      },
+      "60": {
+        "first_partition_mtime_utc": "2026-11-07T18:28:22.495470+00:00",
+        "last_partition_mtime_utc": "2026-11-07T18:28:52.358917+00:00"
+      },
+      "240": {
+        "first_partition_mtime_utc": "2026-11-07T18:28:54.652169+00:00",
+        "last_partition_mtime_utc": "2026-11-07T18:29:13.551913+00:00"
+      },
+      "720": {
+        "first_partition_mtime_utc": "2026-11-07T18:29:15.194969+00:00",
+        "last_partition_mtime_utc": "2026-11-07T18:29:29.071836+00:00"
+      }
+    },
+    "remaining_six_W_materialized_with": "2e3bb789b9; global unique benchmark cases were simulated once and joined into W/X partitions",
+    "fee_contract": {
+      "engine": "VectorBT Portfolio.from_orders",
+      "vectorbt_version": "1.2.0",
+      "direction": "long",
+      "cash_sharing": false,
+      "entry_fee_per_fill": 0.0005,
+      "exit_fee_per_fill": 0.0005,
+      "funding": "not modeled in this fixed-horizon payoff table",
+      "slippage": "not modeled"
+    },
+    "ohlc_source_contract": "registered Binance USD-M 5m local source lineage/priority plus scoped Binance REST gap repair; full OHLC only; no low inferred from close/high",
+    "latest_symbol_quote_receipt_scope_minutes": [
+      10,
+      15,
+      30,
+      60,
+      240,
+      720
+    ],
+    "symbol_source_receipt_summary": {
+      "symbols": 625,
+      "registered_local_source_record_count_by_kind": {
+        "preholdout_base": 762,
+        "forward": 266,
+        "recent": 762,
+        "october_new_bars": 762,
+        "bulk_extension": 762,
+        "rest_cache": 545,
+        "full_ohlc_rest": 695
+      },
+      "low_recovered_marker_count": 762,
+      "low_recovered_rows_from_matching_source": 0,
+      "symbols_with_zero_low_missing_rows_in_returned_frame": 625,
+      "low_missing_rows_in_returned_frames": 0,
+      "symbols_with_rest_repairs": 137,
+      "rest_repaired_rows": 7690,
+      "rest_repair_pages": 137,
+      "remaining_missing_gap_ranges": 0
+    },
+    "benchmark_source_observed_start_utc": {
+      "btc": "2020-01-23T17:45:00+00:00",
+      "eth": "2020-01-23T17:45:00+00:00",
+      "sol": "2020-09-14T07:00:00+00:00"
+    },
+    "sol_missing_decision_range_utc": {
+      "start": "2020-01-23T17:50:00+00:00",
+      "end": "2020-09-14T06:00:00+00:00",
+      "cause": "before first observed Binance USD-M SOL 5m OHLC row; not inferred or forward-filled"
+    },
+    "symbol_receipt_scope_minutes_union": [
+      5,
+      10,
+      15,
+      30,
+      60,
+      240,
+      720
+    ],
+    "quote_receipt_scope_note": "The per-symbol receipt was refreshed for the six-W run and the scope_minutes field is the accumulated shard scope. W5 data provenance is additionally checked against the frozen six-day ledger; benchmark source receipts are retained separately per scope.",
+    "commit_times_local": {
+      "883c06989e": "2026-11-08T01:43:53+08:00",
+      "2719e3d5eb": "2026-11-08T02:09:23+08:00",
+      "35fe6fe817": "2026-11-08T02:12:10+08:00",
+      "78e812fddc": "2026-11-08T02:15:53+08:00",
+      "2e3bb789b9": "2026-11-08T02:18:41+08:00",
+      "98a8002bcd": "2026-11-08T02:26:40+08:00",
+      "33b0b2236d": "2026-11-08T02:35:41+08:00"
+    }
+  },
+  "symbol_receipt_scope_minutes_union": [
+    5,
+    10,
+    15,
+    30,
+    60,
+    240,
+    720
+  ],
+  "latest_symbol_quote_receipt_scope_minutes": [
+    10,
+    15,
+    30,
+    60,
+    240,
+    720
+  ],
+  "quote_receipt_scope_note": "The per-symbol receipt was refreshed for the six-W run and the scope_minutes field is the accumulated shard scope. W5 data provenance is additionally checked against the frozen six-day ledger; benchmark source receipts are retained separately per scope.",
+  "commit_times_local": {
+    "883c06989e": "2026-11-08T01:43:53+08:00",
+    "2719e3d5eb": "2026-11-08T02:09:23+08:00",
+    "35fe6fe817": "2026-11-08T02:12:10+08:00",
+    "78e812fddc": "2026-11-08T02:15:53+08:00",
+    "2e3bb789b9": "2026-11-08T02:18:41+08:00",
+    "98a8002bcd": "2026-11-08T02:26:40+08:00",
+    "33b0b2236d": "2026-11-08T02:35:41+08:00"
+  }
+}

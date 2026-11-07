@@ -1,0 +1,56 @@
+{
+  "minutes": [
+    5,
+    10,
+    15,
+    30,
+    60,
+    240,
+    720
+  ],
+  "wait_min": [
+    0,
+    5,
+    10,
+    15,
+    20,
+    30,
+    45,
+    60,
+    90,
+    120
+  ],
+  "hold_hours": [
+    6,
+    12,
+    24,
+    48,
+    72,
+    144
+  ],
+  "fee_taker_per_fill": 0.0005,
+  "entry": "5m open at known+wait_min",
+  "exit": "5m open at entry+hold_hours",
+  "path": "high/low for entry bar through bar before exit; exit open included",
+  "first_hit": "target +5/+10% versus -5%; same five-minute bar labelled ambiguous",
+  "constituent_scope": "exclude BTC/ETH/SOL benchmarks and USTCUSDT from alt return/reclaim; preserve total initial breadth in signal feature",
+  "schema_version": 2,
+  "feature_input_stats": {
+    "members.csv.gz": {
+      "bytes": 9241749,
+      "mtime_ns": 1794073470350439536
+    },
+    "signals.csv.gz": {
+      "bytes": 7469897,
+      "mtime_ns": 1794073525829635975
+    }
+  },
+  "member_input": "experiments/active/exp-monday-breadth-optimization-20261108-v1/features/members.csv.gz",
+  "signal_input": "experiments/active/exp-monday-breadth-optimization-20261108-v1/features/signals.csv.gz",
+  "join_keys": [
+    "minutes",
+    "known",
+    "wait_min",
+    "hold_hours"
+  ]
+}

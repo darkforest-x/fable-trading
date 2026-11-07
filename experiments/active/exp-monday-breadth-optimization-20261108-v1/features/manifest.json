@@ -1,0 +1,97 @@
+{
+  "experiment": "exp-monday-breadth-optimization-20261108-v1",
+  "source_ledger": "monday_breadth_alarm_census.ledger_rows()",
+  "original_level_source": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-limit-reclaim-20261024-v1/symbols",
+  "extension_level_source": "/Users/zhangzc/fable-trading/experiments/active/exp-monday-limit-live-october-20261101-v1/events.csv.gz",
+  "minutes": [
+    5,
+    10,
+    15,
+    30,
+    60,
+    240,
+    720
+  ],
+  "wait_min": [
+    0,
+    5,
+    10,
+    15,
+    20,
+    30,
+    45,
+    60,
+    90,
+    120
+  ],
+  "ledger_end_exclusive": "2026-10-28T00:00:00+00:00",
+  "signal_key": [
+    "minutes",
+    "known",
+    "wait_min"
+  ],
+  "member_key": [
+    "minutes",
+    "known",
+    "symbol"
+  ],
+  "known_definition": "UTC close of the W-minute candle; touch bars use native 5m opens.",
+  "wait_definition": "Completed lower-touch bars with opens in [known, decision); decision=known+wait_min.",
+  "membership_rule": "Unique initial lower-touch symbols in [known-W, known); earliest touch supplies level when a W group straddles a weekly seam.",
+  "monitor_fraction_definition": "Share of scheduled 5m opens in [known-W, decision) outside New York Monday; initial and wait components are also emitted.",
+  "first_last_half_definition": "Distinct new symbols by earliest wait touch, split at known+wait_min/2; first half is left-closed/right-open.",
+  "market_share_status": "trailing28_any_touch_proxy",
+  "market_share_definition": "initial / number of distinct symbols with any-direction ledger touch known in the trailing 28 days through known; percentage, a causal activity-universe proxy, not a complete live listing census.",
+  "history_age_definition": "Days since the symbol's first observed first-touch event in the available frozen-plus-extension ledger; not a listing-age claim.",
+  "shock_definition": "Age at known of the latest native 5m same-side (or any-side) first-touch bar with at least 25 distinct symbols, strictly before known; missing age has explicit no-prior-in-available-ledger status and is left-censored.",
+  "weekly_opportunity_coverage_caveat": "Coverage file is a source diagnostic only; full-week admitted/no-touch status is not used as a causal market-share denominator.",
+  "rows": {
+    "signals": 575592,
+    "members": 258209,
+    "ledger_touches": 72335
+  },
+  "frozen_x30_check": [
+    {
+      "minutes": 5,
+      "overlap_groups": 13421,
+      "all_fields_match": true,
+      "wait_min": 30
+    },
+    {
+      "minutes": 10,
+      "overlap_groups": 11660,
+      "all_fields_match": true,
+      "wait_min": 30
+    },
+    {
+      "minutes": 15,
+      "overlap_groups": 10582,
+      "all_fields_match": true,
+      "wait_min": 30
+    },
+    {
+      "minutes": 30,
+      "overlap_groups": 8788,
+      "all_fields_match": true,
+      "wait_min": 30
+    },
+    {
+      "minutes": 60,
+      "overlap_groups": 7055,
+      "all_fields_match": true,
+      "wait_min": 30
+    },
+    {
+      "minutes": 240,
+      "overlap_groups": 3892,
+      "all_fields_match": true,
+      "wait_min": 30
+    },
+    {
+      "minutes": 720,
+      "overlap_groups": 2161,
+      "all_fields_match": true,
+      "wait_min": 30
+    }
+  ]
+}
