@@ -106,5 +106,7 @@ if __name__=='__main__':
     else:
         ev=pd.read_parquet(study.OUT/'locked_events.parquet')
         pairs=pd.read_parquet(CONTROL/'dynamic_paired_events.parquet')
+        if not pairs.empty:
+            pairs=pairs[pairs.sampled_member_share>=.80]
         final=evaluate(pd.read_csv(study.OUT/'locked_rules.csv'),ev,pairs,'dynamic_primary')
         final.to_csv(CONTROL/'dynamic_validity.csv',index=False)
