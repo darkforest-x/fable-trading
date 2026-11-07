@@ -440,8 +440,8 @@ def run(draws: int = 20_000) -> dict:
     complete = check[check.common_complete]
     actual_error = (complete.wave_pct - complete.net_pct).abs()
     baseline_error = (complete.native_pct - complete.baseline_pct).abs()
-    if len(complete) != len(locked) or actual_error.max() > 1e-7 or baseline_error.max() > 1e-7:
-        raise ValueError(f"Locked policy 5 check failed: n={len(complete)}/{len(locked)}, "
+    if len(complete) != len(events) or actual_error.max() > 1e-7 or baseline_error.max() > 1e-7:
+        raise ValueError(f"Locked policy 5 check failed: n={len(complete)}/{len(events)}, "
                          f"wave_err={actual_error.max()}, native_err={baseline_error.max()}")
 
     summary, candidates = summarize(policy_events, policies)
