@@ -53,7 +53,7 @@ def partition(w,x):
         for k,asset in enumerate(ASSETS):
             name='basket' if asset=='ALT' else asset.lower()
             ret[:,j,k]=col(part,name+'_net_return_pct',name+'_net_pct').to_numpy()
-        member_n=col(part,'member_n','eligible_n').to_numpy()
+        member_n=col(part,'members_expected_n','member_n','eligible_n').to_numpy()
         valid_n=col(part,'endpoint_n','valid_n').to_numpy()
         ret[valid_n!=member_n,j,3]=np.nan
     return fr,ret
