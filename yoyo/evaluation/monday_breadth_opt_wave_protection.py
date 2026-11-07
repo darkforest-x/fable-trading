@@ -723,6 +723,7 @@ def analyze_existing() -> dict:
     permutation.to_csv(OUT / "wave_protection_incremental_permutation_2026.csv", index=False)
     audit = {
         "analysis": "incremental policy protection versus the already-locked second-wave policy-5 outcome",
+        "analysis_builder_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "source_matrix": str(matrix_path.relative_to(ROOT)),
         "source_matrix_rows": int(len(matrix)),
         "source_matrix_common_event_policy_rows": int(len(common)),
