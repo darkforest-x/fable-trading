@@ -57,14 +57,13 @@ def shared_account(rules,events):
         base['priority']=base.asset.map(PRIORITY)
         base=base.sort_values(['decision','priority','candidate_id'],kind='stable')
         picked=[]
-        for epoch,g in base.groupby('epoch'):
-            after=pd.Timestamp.min.tz_localize('UTC')
-            for row in g.itertuples():
-                take=row.can_enter and row.decision>=after
-                flow.append(dict(target=target,epoch=epoch,decision=row.decision,asset=row.asset,source_id=row.candidate_id,taken=take))
-                if take:
-                    picked.append(row.Index)
-                    after=max(row.exit_time,row.decision+pd.Timedelta(hours=24))
+        after=pd.Timestamp.min.tz_localize('UTC')
+        for row in base.itertuples():
+            take=row.can_enter and row.decision>=after
+            flow.append(dict(target=target,epoch=row.epoch,decision=row.decision,asset=row.asset,source_id=row.candidate_id,taken=take))
+            if take:
+                picked.append(row.Index)
+                after=max(row.exit_time,row.decision+pd.Timedelta(hours=24))
         keep=base.loc[picked].copy()
         keep['candidate_id']=f'account_{int(target)}'
         all_events.append(keep)
@@ -181,13 +180,21 @@ def stats(group):
     return e
 
 
-def run(family):
+def run(family,reuse_costs=False):
     folder=EXP/'audit'/family;folder.mkdir(parents=True,exist_ok=True)
     rules,events=frozen(family)
     events['family']=family
     basket,flow=shared_account(rules,events) if family=='fixed' else (pd.DataFrame(),pd.DataFrame())
     if len(flow):flow.to_parquet(folder/'account_alerts.parquet',index=False)
-    supplement=audit(events,folder)
+    if reuse_costs:
+        supplement=pd.read_parquet(folder/'costed_events.parquet')
+        fields=['source_id','decision','exit_time','net_pct','asset','known']
+        expected=events[events.epoch.eq(3)&events.net_pct.notna()]
+        def native_keys(frame):
+            return frame[fields].sort_values(['source_id','decision']).reset_index(drop=True)
+        pd.testing.assert_frame_equal(native_keys(expected),native_keys(supplement))
+    else:
+        supplement=audit(events,folder)
     cols=['source_id','decision','funded_pct','mark_high','mark_low','inside_dd']
     combined=pd.concat([events,basket],ignore_index=True)
     combined=combined.merge(supplement[cols],on=['source_id','decision'],how='left',validate='many_to_one')
@@ -207,4 +214,6 @@ def run(family):
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('family',choices=['long','fixed'])
-    run(parser.parse_args().family)
+    parser.add_argument('--reuse-costs',action='store_true',help='Reuse verified asset fills and funding when only account admission changes')
+    args=parser.parse_args()
+    run(args.family,args.reuse_costs)

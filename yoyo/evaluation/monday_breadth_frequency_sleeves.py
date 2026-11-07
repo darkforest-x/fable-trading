@@ -84,7 +84,7 @@ def run():
             if cohort.funded_pct.isna().any():raise ValueError('Complete 2026 funded fills required')
             end=cohort.exit_time.max()
             bridge=study.member_bridge().groupby(['minutes','known']).symbol.agg(list).to_dict()
-            cash=pd.concat({name:path_for_funding(g) for name,g in cohort.groupby('sleeve')},axis=1).sort_index().ffill().fillna(1.)
+            cash=pd.concat({name:path_for_funding(g) for name,g in cohort.groupby('sleeve')},axis=1,sort=True).sort_index().ffill().fillna(1.)
             value=cash.xs('funded',axis=1,level=1).mean(axis=1)
             row['two_sleeve_terminal_return_funded_pct']=100*(value.iloc[-1]-1)
             value=pd.concat([pd.Series([1.],index=[SPLIT]),value])
