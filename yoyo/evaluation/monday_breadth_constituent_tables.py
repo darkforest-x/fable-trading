@@ -27,6 +27,23 @@ def main():
     d=d.sort_values(keys); d['continued']=d.continued.map({True:'有',False:'无'})
     d.rename(columns={'minutes':'初始窗口_分钟','band':'初始触及币数档','continued':'随后30分钟有无新币'},inplace=True)
     d.to_csv(OUT/'七种周期_六天结果.csv',index=False,encoding='utf-8-sig',float_format='%.4f')
+    five = d[d['初始窗口_分钟'].eq(5)]
+    assert len(five) == len(BANDS)*2
+    five.to_csv(OUT/'5分钟_全部18组.csv',index=False,encoding='utf-8-sig',float_format='%.4f')
+
+    cols = {'known':'信号收盘_北京时间','decision':'入场_北京时间','initial':'首触币数','band':'币数档',
+            'new_coins':'随后30分钟新增币数','symbol':'首触合约','status':'统计状态','entry_open':'入场价',
+            'peak_price':'六天最高价','peak_bar_open':'峰值K线开盘_北京时间','peak_pct':'六天最大浮盈%',
+            'exit_time':'到期_北京时间','exit_open':'到期价','net_pct':'到期净收益%'}
+    src = pd.read_csv(OUT/'members.csv.gz',usecols=['minutes',*cols],dtype={'band':str})
+    members = src.loc[src.minutes.eq(5),list(cols)].copy()
+    for key in ('known','decision','peak_bar_open','exit_time'):
+        members[key] = pd.to_datetime(members[key],utc=True).dt.tz_convert('Asia/Shanghai').dt.strftime('%Y-%m-%d %H:%M')
+    members['是否到期赚钱'] = members.net_pct.gt(0).map({True:'是',False:'否'}).where(members.net_pct.notna())
+    members.status = members.status.replace({'complete':'完整','former_stablecoin':'USTC仅计触轨数'})
+    assert members.known.nunique() == five['信号K线数'].sum()
+    assert members.net_pct.count() == five['到期可评估笔数'].sum()
+    members.rename(columns=cols).to_csv(OUT/'5分钟_所有首触币明细.csv',index=False,encoding='utf-8-sig')
 
 
 if __name__=='__main__':
