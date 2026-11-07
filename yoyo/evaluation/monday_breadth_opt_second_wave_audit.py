@@ -66,6 +66,8 @@ def matched(past):
     directory=CONTROL/'past_only' if past else CONTROL
     draws=pd.read_parquet(directory/'dynamic_matches.parquet')
     rules=pd.read_csv(REQUEST/'locked_rules.csv');events=pd.read_parquet(REQUEST/'locked_events.parquet')
+    decisions=events.loc[events.epoch.eq(3),['candidate_id','decision']]
+    draws=draws.merge(decisions,on=['candidate_id','decision'],validate='many_to_one')
     if draws.empty:
         empty=pd.DataFrame(columns=['candidate_id','decision','actual_pct','random_pct'])
         evaluate(rules,events,empty,'dynamic_primary').to_csv(directory/'second_wave_validity.csv',index=False)
