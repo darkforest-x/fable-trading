@@ -1,0 +1,21 @@
+{
+ "owner_decision": "2026-11-07 “原生 SwiftUI 重写” after rejecting the 1.0.x web restyle (“和我的预期差一大截 做的不好”)",
+ "project_id": "8978791379095391159",
+ "model": "GEMINI_3_8_FLASH",
+ "stage_1_layout_sources": {
+  "monitor-paper": "d163871fed464cccb5b1a7c76ed51fc7",
+  "monitor-alerts": "7e2f6b9148ec429b9ba732eaaffb35ed",
+  "monitor-cloud": "7e2f6b9148ec429b9ba732eaaffb35ed (in-place edit, HTML only)",
+  "alarm-notify": "c3ed13e24e9648098621ffd3e5c8a375",
+  "notify-settings": "1257474928a34e469d6642bada1fc8b1"
+ },
+ "material": "System iOS 26 Liquid Glass (glassEffect, TabView tab bar, toolbar, segmented Picker, sheets); Stitch HTML/CSS is layout reference only and is not shipped.",
+ "stages": [
+  "0 skeleton/auth/API",
+  "1 监控 + in-app alarms",
+  "2 1.618 native chart",
+  "3 持仓/统计/纪律/设置 incl. close/cancel/stop",
+  "4 合约 order ticket (real money, last)"
+ ],
+ "bundle_id_during_migration": "com.spike.discipline.native (coexists with the 1.x app; trading stays in 1.x until stage 4)"
+}

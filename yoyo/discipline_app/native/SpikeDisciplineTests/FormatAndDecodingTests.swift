@@ -1,0 +1,40 @@
+import XCTest
+@testable import SpikeDiscipline
+
+final class FormatAndDecodingTests: XCTestCase {
+    func testSignsPrecisionAndTone() {
+        XCTAssertEqual(Fmt.signedPercent(1.603), "+1.60%")
+        XCTAssertEqual(Fmt.signedPercent(-3.98), "−3.98%")
+        XCTAssertEqual(Fmt.signedPercent(0.001), "0.00%")
+        XCTAssertEqual(Fmt.signedPercent(nil), "—")
+        XCTAssertEqual(Fmt.price(104_253.44), "104,253.4")
+        XCTAssertEqual(Fmt.price(0.0012076838), "0.001208")
+        XCTAssertEqual(Fmt.price(1.2), "1.2000")
+        XCTAssertEqual(Fmt.coin("SOL-USDT-SWAP"), "SOL")
+        XCTAssertEqual(Fmt.reason("failed_reclaim"), "确认未收回")
+    }
+
+    func testBeijingDayGrouping() {
+        let now = 1_793_955_600_000.0 // 2026-11-06 17:00 Beijing
+        XCTAssertEqual(Fmt.dayLabel(now - 3_600_000, now: now), "今天")
+        XCTAssertEqual(Fmt.dayLabel(now - 86_400_000, now: now), "昨天")
+        let groups = Fmt.groupByDay([now, now - 60_000, now - 86_400_000], now: now) { $0 }
+        XCTAssertEqual(groups.map(\.label), ["今天", "昨天"])
+        XCTAssertEqual(groups.map(\.rows.count), [2, 1])
+    }
+
+    /// Payload shapes exactly as monitor_feed.py projects them (nulls and integers included).
+    func testDecodesServicePayloads() throws {
+        let paper = #"{"now_ms":1793958680127,"paper_only":true,"equity_basis":"realized","accounts":[{"key":"live-allin3","label":"live-allin3","group":"live","equity":1016.03,"start_equity":1000.0,"return_pct":1.603,"started_ms":1793353880127,"stats":{"closed":12,"wins":7,"mean_net_bp":8.5}}],"detail":{"key":"live-allin3","open":[{"id":100,"symbol":"SOL-USDT-SWAP","side":"long","entry":1.2,"target":1.1,"stage":"open","funded":true,"notional":300.0,"fill_ms":1,"score":0.62,"mark":1.21,"unrealized_bp":35.0,"remaining_notional":300.0,"stop":1.44}],"closed":[]},"signals":[{"id":null,"symbol":"SUI-USDT-SWAP","side":"short","level":0.5,"score":null,"status":"scored","taken":false,"observed_ms":1}]}"#
+        let p = try API.decoder.decode(PaperSnapshot.self, from: Data(paper.utf8))
+        XCTAssertEqual(p.accounts.first?.stats.closed, 12)
+        XCTAssertEqual(p.detail.open.first?.side, .long)
+        XCTAssertNil(p.signals.first?.id)
+
+        let notes = #"{"now_ms":10,"events":[{"id":"alarm:3","kind":"alarm","side":"lower","n":26,"symbols":["AAA-USDT-SWAP"],"at_ms":2,"first_ms":1,"active":false,"test":false,"acknowledged":true,"pushed":true},{"id":"fib:2026-11-02:AAA-USDT-SWAP:lower:1","kind":"fib","symbol":"AAA-USDT-SWAP","side":"lower","level":1.0,"price":0.99,"at_ms":5,"status":"pushed","pushed":true}],"channels":{"fib":{"bark":true,"bark_configured":true,"bark_sent":7,"telegram":true,"min_score":0.4},"alarm":{"bark":false,"telegram":true,"threshold":25,"window_minutes":5}}}"#
+        let n = try API.decoder.decode(NotificationSnapshot.self, from: Data(notes.utf8))
+        XCTAssertEqual(n.events.map(\.kind), ["alarm", "fib"])
+        XCTAssertEqual(n.channels.fib.barkSent, 7)
+        XCTAssertEqual(Fmt.pushStatus(n.events[1]), "已推送")
+    }
+}

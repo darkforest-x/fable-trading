@@ -1,5 +1,12 @@
 # SPIKE 纪律交易 1.0.2
 
+## 2.0 原生 SwiftUI 版（进行中，`native/`）
+
+Owner 2026-11-07 否定 1.0.x 网页改版（“和我的预期差一大截 做的不好”），选择“原生 SwiftUI 重写”。新 App `native/SpikeDiscipline.xcodeproj`，iOS 26、仅 iPhone、竖屏，包名 `com.spike.discipline.native`，与 1.x 并存；迁移完成前下单、平仓、改止损只在 1.x 中进行。界面为系统液态玻璃（TabView 底栏、工具栏、分段控件、sheet、`glassEffect` 卡片），Stitch 稿只作版式参考（`design/native-2.0.0/source.json`）。服务端与纪律规则不变，App 只调用现有 `/v1/*`；令牌存本机钥匙串（服务名 `com.spike.discipline.native.session`）。币种图标以文件夹引用复用 `mobile/src/assets/coins`。
+
+阶段：0 骨架、授权与接口客户端 → 1 监控（模拟盘 / 报警 / 云带）与前台报警通知 → 2 1.618 原生 K 线 → 3 持仓 / 统计 / 纪律 / 设置（含平仓、撤单、止损）→ 4 合约下单票据（真金链路，最后迁移并单独测试）。阶段 0、1 已完成：XCTest 6 项（报警判定、格式化、服务端载荷解码）通过；iPhone 17 Pro 模拟器连合成 fixture 验收监控三段、报警横幅与未读角标，开单写入 0。DEBUG 构建可用启动参数 `-SpikeServiceURL`（仅回环地址）、`-SpikeQAToken`、`-SpikeQATab`、`-SpikeQASegment` 做模拟器验收，发布构建不读取。
+
+
 ## 1.0.2（40）· 全页按监控页统一、1.618 复刻工作台、交互动效
 
 Owner 2026-11-07：“为什么几个页面的ui 色调都没统一？ 监控菜单页面的为准”“全市场插针记录不要显示测试的啊”“还有一些交互和动画做好一点”“1.618页面怎么没有复刻前端的1.618页面 直接复刻 但是ui ux动画啥的保持统一”。
