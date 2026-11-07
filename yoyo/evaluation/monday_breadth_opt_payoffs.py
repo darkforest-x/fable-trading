@@ -929,7 +929,12 @@ def _benchmark_partition(signals: pd.DataFrame, frames: dict[str, pd.DataFrame])
             event[f"{asset.lower()}_observed_return_pct"] = 100 * (after / before - 1)
         else:
             event[f"{asset.lower()}_observed_return_pct"] = np.nan
-        metrics = _path_metrics_many(frame, output.decision, output.hold_hours)
+        # Timeframe/event keys can point to the same underlying benchmark
+        # trade. Evaluate each actual (decision, horizon) once, then fan the
+        # immutable price result back out to its event rows.
+        unique_cases = output[["decision", "hold_hours"]].drop_duplicates().reset_index(drop=True)
+        metrics = _path_metrics_many(frame, unique_cases.decision, unique_cases.hold_hours)
+        asset_metrics = pd.concat([unique_cases, metrics], axis=1)
         names = {
             "entry_open": f"{asset.lower()}_entry_open",
             "exit_open": f"{asset.lower()}_exit_open",
@@ -946,8 +951,8 @@ def _benchmark_partition(signals: pd.DataFrame, frames: dict[str, pd.DataFrame])
             "pre_target_mae_5_pct": f"{asset.lower()}_pre_target_mae_5_pct",
             "pre_target_mae_10_pct": f"{asset.lower()}_pre_target_mae_10_pct",
         }
-        metrics.rename(columns=names, inplace=True)
-        output = pd.concat([output.reset_index(drop=True), metrics.reset_index(drop=True)], axis=1)
+        asset_metrics.rename(columns=names, inplace=True)
+        output = output.merge(asset_metrics, on=["decision", "hold_hours"], how="left", validate="many_to_one")
     obs_cols = [f"{asset.lower()}_observed_return_pct" for asset in frames]
     output = output.merge(event[["minutes", "known", "wait_min", *obs_cols]], on=["minutes", "known", "wait_min"], how="left", validate="many_to_one")
     output.drop(columns=["known_close_time", "decision_close_time"], inplace=True)
