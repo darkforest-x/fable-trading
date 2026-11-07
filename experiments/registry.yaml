@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-breadth-bar-counts-20261107-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 01cdaf5251
+    status: accepted
+    question: How many distinct coins first touched the same weekly 1.618 side in each native five-minute candle, including bars during the cooldown?
+    single_variable: Descriptive aggregation of the frozen 626-symbol extended census by five-minute close and side, comparing all observed bars to alarm-trigger bars.
+    result: In 40072 distinct candles with any touch, 199 candles had at least 25 names on one side (185 lower, 14 upper). Of these 162 triggered and 37 were in cooldown. Alarm breadth median 39 and max 241; largest observed candle 258 lower on 2026-01-19 at 08h05 Beijing, after a 26-name alarm at 07h50.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - monday-breadth-bar-counts-20261107-v1
+    canonical_report: experiments/active/exp-monday-breadth-bar-counts-20261107-v1/frequency.csv
+    notes: Upper and lower counts are separate. Any-side unique names in bars_with_touches.csv.gz deduplicate both directions, and alarm_coins.csv lists every triggering constituent.
+
   - experiment_id: exp-monday-breadth-alarm-census-20261107-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 09ad984c37
