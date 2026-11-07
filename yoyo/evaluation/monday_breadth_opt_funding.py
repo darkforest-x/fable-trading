@@ -9,6 +9,7 @@ from yoyo.evaluation import monday_breadth_opt_exits as sim
 
 ROOT=study.CACHE.parent
 SOURCE_END=pd.Timestamp('2026-11-07',tz='UTC')
+FUNDED_CACHE=ROOT/'btc_funded_exit_fills.parquet'
 
 
 @lru_cache(maxsize=256)
@@ -125,6 +126,20 @@ def btc_extra(times):
     return out
 
 
+def existing_or_simulate(times):
+    times=pd.DatetimeIndex(times).unique().sort_values()
+    previous=pd.read_parquet(FUNDED_CACHE) if FUNDED_CACHE.is_file() else pd.DataFrame()
+    if not previous.empty:
+        coverage=previous.groupby('entry_time').policy_id.nunique()
+        times=times.difference(coverage[coverage==len(funded_policies())].index)
+    if len(times):
+        part=btc_extra(times)
+        previous=pd.concat([previous,part],ignore_index=True).drop_duplicates(['policy_id','entry_time'],keep='last')
+        tmp=FUNDED_CACHE.with_suffix('.tmp')
+        previous.to_parquet(tmp,index=False);tmp.replace(FUNDED_CACHE)
+    return previous
+
+
 def named_case():
     out=study.OUT
     b=btc_extra([study.CASE_ENTRY])
@@ -153,15 +168,18 @@ def named_case():
 if __name__=='__main__':
     import argparse
     parser=argparse.ArgumentParser()
-    parser.add_argument('stage',choices=['btc_case','case','all_btc'])
+    parser.add_argument('stage',choices=['btc_case','case','anchor_btc','all_btc'])
     a=parser.parse_args()
     if a.stage=='btc_case':
         btc_extra([study.CASE_ENTRY]).to_csv(study.OUT/'sept16_btc_funding_aware_rules.csv',index=False)
     elif a.stage=='case':named_case()
+    elif a.stage=='anchor_btc':
+        existing=pd.read_parquet(study.CACHE/'BTCUSDT.parquet',columns=['entry_time'])
+        existing_or_simulate(existing.entry_time.unique())
     else:
         events=pd.read_parquet(study.OUT/'all_event_fills/BTC.parquet')
         e=events[(events.hours==144)&(events.policy_id==5)].copy()
-        add=btc_extra(list(e.decision))
+        add=existing_or_simulate(list(e.decision))
         add.to_parquet(study.OUT/'btc_funded_rule_fills.parquet',index=False)
         result=e[['candidate_id','known','decision','epoch']].merge(add,left_on='decision',right_on='entry_time')
         result.to_parquet(study.OUT/'btc_funded_rule_events.parquet',index=False)

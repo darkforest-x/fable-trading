@@ -222,6 +222,7 @@ def simulate(frame,entry_times,policy_list,*,batch_size=8):
         records=pd.DataFrame(dict(entry_time=times[begin+sig],policy_id=pid,
             exit_time=frame.index[safe[sig]+aggregated.last_bar.to_numpy()],entry_open=buy,exit_vwap=vwap,
             net_points=net,net_pct=100*net/buy,exit_legs=aggregated.legs.to_numpy(),
+            first_exit_price=sales.groupby('col').price.first().to_numpy(),
             first_exit_time=frame.index[safe[sig]+first],reason=why[expected],ambiguous=ambig[expected]))
         # One observable peak over the same prespecified opportunity horizon even if the policy leaves early.
         for h in np.unique(horizons):
