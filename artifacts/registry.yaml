@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: monday-breadth-six-day-excursions-20261108-v1
+    artifact_type: manifest
+    role: gross_six_day_price_excursions_and_fixed_exit_net_returns
+    source_repo: darkforest-x/fable-trading
+    source_commit: 818db6557f
+    source_path: experiments/active/exp-monday-breadth-six-day-excursions-20261108-v1/summary.csv
+    storage_uri: repo://experiments/active/exp-monday-breadth-six-day-excursions-20261108-v1/summary.csv
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Full outcomes, subgroup medians, means, best peak, 5 and 10 percent reach rates, matched control peaks and fixed-exit returns. Companion files retain entry/peak/exit prices and times, the 13 native focal cases, and November price-source receipts.
+
   - artifact_id: monday-breadth-fixed-timeframes-20261108-v1
     artifact_type: manifest
     role: fixed_timeframe_lower_first_touch_rebound_outcomes

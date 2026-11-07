@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-breadth-six-day-excursions-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 818db6557f
+    status: inconclusive
+    question: For the same breadth bars across seven fixed durations, how much did BTC, ETH and SOL rise at their six-day peak and what remained at the fixed exit?
+    single_variable: Extend the holding period to six full days after the 30m confirmation and keep the original decisions. Record forward intrabar highs as descriptive labels and use VectorBT for time-exit returns.
+    result: For 13 native 5m cases with 50–99 lower names and zero new names, average maximum gross excursions were +6.23/+7.46/+15.51 percent for BTC/ETH/SOL. Fixed-exit mean net returns were +3.89/+4.61/+10.24 percent; SOL reached 10 percent in 8 cases. For the other 30 cases with followers, SOL excursions averaged +7.09 percent and fixed-exit returns -0.53 percent. The 6 recent zero-follower cases averaged +11.78 percent peak and +7.43 percent net on SOL.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - monday-breadth-six-day-excursions-20261108-v1
+    canonical_report: experiments/active/exp-monday-breadth-six-day-excursions-20261108-v1/summary.csv
+    notes: Maximum floating profit uses the 1728 five-minute highs after entry plus the open at exactly six days, with no future bars or hypothetical peak sale. Closes use two 5bp taker fills. Strict matched controls can be sparse with a six-day exclusion. The 2026-09-16 case had a +13.41 percent BTC peak and +13.23 percent fixed-exit net. All 13 focal event peak means independently checked against 1m highs.
+
   - experiment_id: exp-monday-breadth-fixed-timeframes-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: f47a37ad2c
