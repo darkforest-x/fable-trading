@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-alarm-btc-eth-price-response-20261107-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9ed50806ad
+    status: inconclusive
+    question: How did BTC and ETH move after the close that identified each of the 129 frozen Binance breadth alarms?
+    single_variable: Elapsed time after the trigger close for the same frozen alarms. Also describe the existing later-touch cohort.
+    result: In 96 alarms with later touches BTC and ETH were up in 63 and 56 cases at 30 minutes, and in 50 and 51 at 24 hours. At 24 hours BTC averaged -0.061 percent and ETH +0.140 percent. After 122 lower alarms the next-day mean for 89 with later touches was -0.240 and -0.185 percent versus +1.116 and +1.481 percent for 33 without.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - alarm-btc-eth-price-response-20261107-v1
+    canonical_report: experiments/active/exp-alarm-btc-eth-price-response-20261107-v1/summary.csv
+    notes: Descriptive gross USD-M perpetual price changes. Trigger bar excluded from future. Later-touch membership known only at minute 30. Some alarms overlap. Controls matched for 118 BTC and 114 ETH alarms.
+
   - experiment_id: exp-spike-alert-observed-timing-20261107-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 1f0776f2a4

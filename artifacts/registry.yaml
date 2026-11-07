@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: alarm-btc-eth-price-response-20261107-v1
+    artifact_type: manifest
+    role: frozen_breadth_alarm_btc_eth_price_paths
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9ed50806ad
+    source_path: experiments/active/exp-alarm-btc-eth-price-response-20261107-v1/summary.csv
+    storage_uri: repo://experiments/active/exp-alarm-btc-eth-price-response-20261107-v1/summary.csv
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Summary and sibling events.csv contain gross price responses at seven horizons plus matched random timestamps for the same asset, UTC month, session and trailing one-hour volatility bucket.
+
   - artifact_id: spike-alert-observed-timing-20261107-v1
     artifact_type: manifest
     role: observed_touch_latency_and_breadth_lead_times
