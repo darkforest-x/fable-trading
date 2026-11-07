@@ -3,8 +3,6 @@
 All statistics here reuse native trade ledgers. An account's controls are the
 matched returns for its accepted alerts, not an average across its four rules.
 """
-import json
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -49,8 +47,11 @@ def rule_text(cid, fixed):
     breadth = count_label(row.breadth)
     if row.breadth.startswith('share_'):
         breadth = '至少2币，且'+breadth
+    confirm = CONF[row.confirmation]
+    if row.confirmation.startswith('reclaim_'):
+        confirm = '初始可交易山寨币中'+confirm
     return (f'{row.minutes}分钟初始首触{breadth}，其后等{row.wait_min}分钟，新增币条件{FOLLOW[row.diffusion]}，'
-            f'确认条件{CONF[row.confirmation]}，持有{row.hold_hours}小时后全部平仓')
+            f'确认条件{confirm}，持有{row.hold_hours}小时后全部平仓')
 
 
 def run():
@@ -85,7 +86,7 @@ def run():
         results.append({'候选':cid,'研究状态':quality,'规则':rule_text(cid,fixed),
                         '全历史实计笔数':int(all_time.n),'全历史扣手续费每笔均收%':all_time['mean'],
                         '2025笔数':int(v.n),'2025扣手续费每笔均收%':v['mean'],
-                        '2025收盘结算回撤%':v.dd,'2025截尾均值减1.28SE%':v.lcb,
+                        '2025逐笔平仓结算回撤%':v.dd,'2025截尾均值减1.28SE%':v.lcb,
                         '2026截至10月27日笔数':int(t.n),'2026活跃月份':int(t.months),
                         '2026每月最少':int(m.n.min()),'2026每月最多':int(m.n.max()),
                         '2026相邻入场最长间隔天':t.largest_gap_days,

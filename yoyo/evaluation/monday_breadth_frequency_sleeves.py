@@ -26,7 +26,9 @@ def legs():
     b=original.drop(columns='net_pct').merge(fills,left_on='decision',right_on='entry_time',validate='one_to_one')
     if len(b)!=len(original) or not np.allclose(b.funded_pct,original.set_index('decision').loc[b.decision].net_pct):
         raise ValueError('Original funded BTC events were not reproduced')
-    a['sleeve']='frequency';b['sleeve']='btc_target'
+    a['sleeve']='frequency'
+    b['sleeve']='btc_target'
+    b['source_id']=b.candidate_id
     return pd.concat([a,b],ignore_index=True)
 
 
