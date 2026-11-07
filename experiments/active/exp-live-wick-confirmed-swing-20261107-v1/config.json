@@ -1,0 +1,17 @@
+{
+  "experiment_id": "exp-live-wick-confirmed-swing-20261107-v1",
+  "source": "Capital41 Structure Swings v3, ce64522f7f747abb00b37503c00e2955a6d687d2; threshold fixed at entry for this question.",
+  "base": "experiments/active/exp-monday-limit-close-survivor-paths-20261101-v10/config.json",
+  "population": "experiments/active/exp-live-ema-cloud-filter-20261103-v1/candidates.csv.gz",
+  "single_variable": "A 5m close crosses the most recent pre-entry confirmed 5-left/5-right swing high (long) or low (short), after entry through the first 1h confirmation close. Require previous close at or below / above; strict crossings. No new fills or changed exits.",
+  "pivot_cutoff": "Pivot confirmation strictly before the entry close, excluding the touch candle. Freeze that level; no later pivot replacement. Strict highs/lows primary; allow equal on left and strict right as plateau sensitivity. Do not bridge missing candles.",
+  "landmark": "Original native fill bar open floored to UTC hour + 2h. Primary population is reclaimed and still open strictly after this time on the archived per-event worse-net path. Record exit at the landmark separately. Count both OHLC orders independently for eligibility parity.",
+  "primary": "Future near Monday-edge target and armed stop frequencies. Paired descriptive columns: original full-trade net bp and remaining mark-to-exit net bp per entry notional (full net less side-adjusted entry-to-confirm mark, add back sunk 15bp market entry costs). The remaining measure has no synthetic fill at the landmark.",
+  "comparisons": "2020-24 versus 2025 versus 2026, long/short, common and far candidate groups, funded 6x3 cohort, breakout pivot reachable strictly before target, plateau sensitivity. Week-cluster bootstrap 95% intervals; conditional null permutes breakout labels within UTC entry year, side and pre-entry target reachability among eligible positions. No changes to historical account execution.",
+  "fees": "Frozen E20 native fills on Binance UM 5m. Entry taker 5bp and 10bp slippage, original target maker 2bp, other exits taker 5bp and 10bp slippage. Funding excluded.",
+  "seed": 20261107,
+  "draws": 5000,
+  "reproduce": ".venv/bin/python -m yoyo.evaluation.live_wick_confirmed_swing",
+  "production_eligible": false,
+  "training_eligible": false
+}
