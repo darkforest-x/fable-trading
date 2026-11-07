@@ -1202,6 +1202,10 @@ def main() -> None:
         if (int(row.get("minutes", -1)), int(row.get("wait_min", -1))) not in current_pairs
         and (ROOT / str(row.get("path", ""))).is_file()
     ]
+    prior_benchmark_scopes = [
+        row for row in previous_manifest.get("benchmark_quote_receipts_by_scope", [])
+        if sorted(int(x) for x in row.get("minutes", [])) != scope_minutes
+    ]
     manifest = {
         "experiment_id": "exp-monday-breadth-optimization-20261108-v1",
         "input_contract": contract,
@@ -1216,7 +1220,7 @@ def main() -> None:
         "constituent_cache_root": str((RESEARCH / "constituents").relative_to(ROOT)),
         "constituent_cache_files": sum(len(row["receipt"].get("constituent_files", [])) for row in finished if not row.get("cached")),
         "source_receipt_root": str((RESEARCH / "symbol_receipts").relative_to(ROOT)),
-        "benchmark_quote_receipts_by_scope": previous_manifest.get("benchmark_quote_receipts_by_scope", []),
+        "benchmark_quote_receipts_by_scope": prior_benchmark_scopes,
         "vectorbt": "Portfolio.from_orders; one independent unit-size market entry/exit per unique (symbol, decision, hold_hours); 0.05% taker per fill; cash_sharing=False",
         "fees": {"entry": TAKER_FEE, "exit": TAKER_FEE, "funding": "not modeled", "slippage": "not modeled"},
         "cash_account_interpretation": "independent unit-size trade returns and equal-weight constituent means; no shared funded multi-symbol account",
