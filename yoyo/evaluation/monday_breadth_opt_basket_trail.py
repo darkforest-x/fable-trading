@@ -31,6 +31,7 @@ import numpy as np
 import pandas as pd
 
 from yoyo.evaluation import monday_breadth_opt_payoffs as payoffs
+from yoyo.evaluation.monday_breadth_constituent_scope import exclusion_reason
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -116,16 +117,34 @@ def _load_events() -> tuple[list[dict[str, Any]], pd.DataFrame, dict[str, Any]]:
         if group is None or group.empty:
             initial_mismatch.append({"cohort": row.cohort, "known": row.known.isoformat(), "reason": "no_frozen_members"})
             continue
-        symbols = tuple(sorted(set(group["symbol"].astype(str).str.upper())))
-        if len(symbols) != len(group) or len(symbols) != int(row.initial):
+        raw_symbols = tuple(sorted(set(group["symbol"].astype(str).str.upper())))
+        if len(raw_symbols) != len(group) or len(raw_symbols) != int(row.initial):
             initial_mismatch.append(
                 {
                     "cohort": row.cohort,
                     "known": row.known.isoformat(),
                     "expected_initial": int(row.initial),
                     "frozen_member_rows": int(len(group)),
-                    "unique_symbols": len(symbols),
+                    "unique_symbols": len(raw_symbols),
                     "reason": "initial_membership_mismatch",
+                }
+            )
+            continue
+        group = group.copy()
+        group["symbol"] = group["symbol"].astype(str).str.upper()
+        group["exclusion_reason"] = group["symbol"].map(exclusion_reason)
+        group["included_in_basket"] = group["exclusion_reason"].eq("")
+        eligible_group = group.loc[group["included_in_basket"]].copy()
+        symbols = tuple(sorted(eligible_group["symbol"].astype(str)))
+        if not symbols or len(symbols) != len(eligible_group):
+            initial_mismatch.append(
+                {
+                    "cohort": row.cohort,
+                    "known": row.known.isoformat(),
+                    "raw_initial": int(row.initial),
+                    "eligible_member_rows": int(len(eligible_group)),
+                    "unique_eligible_symbols": len(symbols),
+                    "reason": "eligible_basket_membership_mismatch",
                 }
             )
             continue
@@ -144,7 +163,10 @@ def _load_events() -> tuple[list[dict[str, Any]], pd.DataFrame, dict[str, Any]]:
             "epoch": int(row.epoch),
             "minutes": int(row.minutes),
             "wait_min": int(row.wait_min),
+            "initial_n": int(row.initial),
             "n_members": len(symbols),
+            "n_excluded_from_basket": int(len(group) - len(eligible_group)),
+            "excluded_members": tuple(sorted(group.loc[~group["included_in_basket"], "symbol"].astype(str))),
             "member_set_id": set_id,
             "symbols": symbols,
             "source_event_i": getattr(row, "event_i", np.nan),
@@ -165,6 +187,10 @@ def _load_events() -> tuple[list[dict[str, Any]], pd.DataFrame, dict[str, Any]]:
                     "known": row.known,
                     "decision": row.decision,
                     "symbol": str(member.symbol).upper(),
+                    "initial_n": int(row.initial),
+                    "basket_n": len(symbols),
+                    "included_in_basket": bool(member.included_in_basket),
+                    "exclusion_reason": str(member.exclusion_reason),
                     "lower_touch_level": getattr(member, "lower_touch_level", np.nan),
                     "level_source": getattr(member, "level_source", ""),
                 }
@@ -187,7 +213,10 @@ def _load_events() -> tuple[list[dict[str, Any]], pd.DataFrame, dict[str, Any]]:
         "epoch": 3,
         "minutes": 5,
         "wait_min": 0,
+        "initial_n": len(sep_symbols),
         "n_members": len(sep_symbols),
+        "n_excluded_from_basket": 0,
+        "excluded_members": (),
         "member_set_id": sep_set_id,
         "symbols": sep_symbols,
         "source_event_i": np.nan,
@@ -208,6 +237,10 @@ def _load_events() -> tuple[list[dict[str, Any]], pd.DataFrame, dict[str, Any]]:
                 "known": sep_key,
                 "decision": sep_key,
                 "symbol": symbol,
+                "initial_n": len(sep_symbols),
+                "basket_n": len(sep_symbols),
+                "included_in_basket": True,
+                "exclusion_reason": "",
                 "lower_touch_level": np.nan,
                 "level_source": "sept16_original_funded_unique_assets",
             }
@@ -224,7 +257,9 @@ def _load_events() -> tuple[list[dict[str, Any]], pd.DataFrame, dict[str, Any]]:
         "locked_events_after_dedup": len(eval_events),
         "duplicate_member_set_decision_keys_removed": duplicate_keys,
         "unique_study_symbols_including_sep16": len(set().union(*(set(e["symbols"]) for e in events))),
-        "membership_rows_including_sep16": sum(int(e["n_members"]) for e in events),
+        "membership_rows_including_sep16": sum(int(e["initial_n"]) for e in events),
+        "basket_member_rows_including_sep16": sum(int(e["n_members"]) for e in events),
+        "excluded_member_rows_including_sep16": sum(int(e["n_excluded_from_basket"]) for e in events),
         "sep16_members": len(sep_symbols),
         "sep16_decision": sep_key.isoformat(),
     }
@@ -377,7 +412,9 @@ def _event_identity(event: dict[str, Any]) -> dict[str, Any]:
         "epoch": event["epoch"],
         "minutes": event["minutes"],
         "wait_min": event["wait_min"],
+        "initial_n": event["initial_n"],
         "n_members": event["n_members"],
+        "n_excluded_from_basket": event["n_excluded_from_basket"],
     }
 
 
@@ -679,6 +716,138 @@ def _coverage_table(events: list[dict[str, Any]]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def _row_key(row: Any) -> tuple[str, int, int]:
+    return (str(row.cohort), int(_utc(row.known).value), int(_utc(row.decision).value))
+
+
+def _attach_current_event_metadata(frame: pd.DataFrame, events: list[dict[str, Any]]) -> pd.DataFrame:
+    lookup = {_row_key(event): event for event in events}
+    result = frame.copy()
+    keys = [_row_key(row) for row in result.itertuples(index=False)]
+    missing = [key for key in keys if key not in lookup]
+    if missing:
+        raise AssertionError(f"result rows do not map to current frozen events: {missing[:3]}")
+    for column in (
+        "event_id",
+        "candidate_id",
+        "member_set_id",
+        "known",
+        "decision",
+        "epoch",
+        "minutes",
+        "wait_min",
+        "initial_n",
+        "n_members",
+        "n_excluded_from_basket",
+    ):
+        result[column] = [lookup[key][column] for key in keys]
+    return result
+
+
+def _reuse_unchanged_results(
+    events: list[dict[str, Any]],
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Reuse committed trajectories except events whose basket membership changed.
+
+    The committed result has no raw member-by-bar path matrix. Recompute only
+    events with newly excluded members and Sep16; preserve all other event and
+    config rows, then refresh their event/member metadata from current inputs.
+    """
+    paths = {
+        "baseline": EXITS / "basket_trail_fixed6d_events.csv.gz",
+        "strategy": EXITS / "basket_trail_candidate_events.csv.gz",
+        "coverage": EXITS / "basket_trail_coverage.csv",
+        "receipts": EXITS / "basket_trail_price_receipts.csv.gz",
+    }
+    for path in paths.values():
+        if not path.is_file():
+            raise FileNotFoundError(f"cannot reuse missing prior basket trail artifact: {path}")
+    old_base = pd.read_csv(paths["baseline"], compression="gzip")
+    old_strategy = pd.read_csv(paths["strategy"], compression="gzip")
+    old_coverage = pd.read_csv(paths["coverage"])
+    old_receipts = pd.read_csv(paths["receipts"], compression="gzip")
+
+    affected = [e for e in events if e["cohort"] != "sept16_original_68" and e["n_excluded_from_basket"] > 0]
+    sep = next(e for e in events if e["cohort"] == "sept16_original_68")
+    recompute_events = affected + [sep]
+    recompute_keys = {_row_key(e) for e in recompute_events}
+    unaffected_n = sum(e["cohort"] != "sept16_original_68" and e["n_excluded_from_basket"] == 0 for e in events)
+    print(f"incremental repair: recompute {len(affected)} filtered events + Sep16; reuse {unaffected_n} unchanged events", flush=True)
+
+    new_receipts = _load_prices_once_per_symbol(recompute_events)
+    new_coverage = _coverage_table(recompute_events)
+    if not new_coverage.status.eq("complete").all():
+        raise AssertionError("an affected/Sep16 basket became incomplete during scoped reload")
+    new_base, new_strategy = _calculate_event_returns(recompute_events)
+    if new_base.event_id.nunique() != len(recompute_events):
+        raise AssertionError("scoped reload did not produce every affected/fixed baseline event")
+    if new_strategy.groupby("event_id").config_id.nunique().ne(len(CONFIGS)).any():
+        raise AssertionError("scoped reload did not produce all configured paths for each event")
+
+    def keep_unaffected(frame: pd.DataFrame) -> pd.DataFrame:
+        keys = [_row_key(row) for row in frame.itertuples(index=False)]
+        return frame.loc[[key not in recompute_keys for key in keys]].copy()
+
+    baseline = pd.concat([keep_unaffected(old_base), new_base], ignore_index=True, sort=False)
+    strategies = pd.concat([keep_unaffected(old_strategy), new_strategy], ignore_index=True, sort=False)
+    coverage = pd.concat([keep_unaffected(old_coverage), new_coverage], ignore_index=True, sort=False)
+    baseline = _attach_current_event_metadata(baseline, events)
+    strategies = _attach_current_event_metadata(strategies, events)
+    coverage = _attach_current_event_metadata(coverage, events)
+
+    required_symbols = set().union(*(set(e["symbols"]) for e in events))
+    old_receipts["symbol"] = old_receipts["symbol"].astype(str).str.upper()
+    new_receipts["symbol"] = new_receipts["symbol"].astype(str).str.upper()
+    old_receipts = old_receipts.loc[old_receipts.symbol.isin(required_symbols)]
+    reused_receipts = old_receipts.loc[~old_receipts.symbol.isin(set(new_receipts.symbol))]
+    receipts = pd.concat([reused_receipts, new_receipts], ignore_index=True, sort=False).drop_duplicates("symbol", keep="last")
+    if set(receipts.symbol) != required_symbols:
+        missing = sorted(required_symbols - set(receipts.symbol))
+        raise AssertionError(f"current price receipts lack required symbols: {missing[:8]}")
+    return baseline, strategies, coverage, receipts
+
+
+def _verify_baseline_parity(baseline: pd.DataFrame, events: list[dict[str, Any]]) -> pd.DataFrame:
+    """Assert event-by-event parity to the frozen eligible-member baseline."""
+    checks: list[pd.DataFrame] = []
+    for cohort, wait_min in (("dynamic_primary_ALT", 60), ("wave_ALT", 30)):
+        source_path = EXPERIMENT / f"payoffs/event_outcomes_minutes30_wait{wait_min}.csv.gz"
+        expected = pd.read_csv(
+            source_path,
+            compression="gzip",
+            usecols=["known", "decision", "hold_hours", "basket_net_return_pct", "member_n"],
+        )
+        expected = expected.loc[expected.hold_hours.eq(144)].copy()
+        expected["known"] = pd.to_datetime(expected.known, utc=True)
+        expected["decision"] = pd.to_datetime(expected.decision, utc=True)
+        actual = baseline.loc[baseline.cohort.eq(cohort)].copy()
+        actual["known"] = pd.to_datetime(actual.known, utc=True)
+        actual["decision"] = pd.to_datetime(actual.decision, utc=True)
+        merged = actual.merge(expected, on=["known", "decision"], how="left", validate="one_to_one")
+        if merged.basket_net_return_pct.isna().any():
+            raise AssertionError(f"{cohort} lacks a frozen hold144 outcome row")
+        merged["parity_delta_pct"] = merged.fixed6d_net_pct - merged.basket_net_return_pct
+        merged["member_count_delta"] = merged.n_members - merged.member_n
+        merged["baseline_source"] = "payoffs/event_outcomes hold_hours=144 basket_net_return_pct"
+        if merged.member_count_delta.ne(0).any() or merged.parity_delta_pct.abs().max() > 1e-6:
+            bad = merged.loc[merged.member_count_delta.ne(0) | merged.parity_delta_pct.abs().gt(1e-6)]
+            raise AssertionError(f"{cohort} fixed6d parity failed: {bad.head(5).to_dict('records')}")
+        if cohort == "wave_ALT":
+            locked = pd.read_parquet(WAVE_EVENTS_PATH)
+            locked = locked.loc[locked.candidate_id.eq("wave_ALT"), ["known", "decision", "baseline_pct"]].copy()
+            locked["known"] = pd.to_datetime(locked.known, utc=True)
+            locked["decision"] = pd.to_datetime(locked.decision, utc=True)
+            merged = merged.merge(locked, on=["known", "decision"], how="left", validate="one_to_one")
+            merged["locked_baseline_delta_pct"] = merged.fixed6d_net_pct - merged.baseline_pct
+            if merged.baseline_pct.isna().any() or merged.locked_baseline_delta_pct.abs().max() > 1e-6:
+                raise AssertionError("wave_ALT fixed6d fails event-by-event parity to locked baseline_pct")
+        checks.append(merged)
+    result = pd.concat(checks, ignore_index=True, sort=False)
+    if len(result) != 170:
+        raise AssertionError(f"expected 170 event-level baseline parity rows, found {len(result)}")
+    return result
+
+
 def _self_test() -> None:
     sample = np.array([0.02, 0.06, 0.04, 0.01])
     cfg = {"activate_pct": 5.0, "trail_width_pct": 4.0, "initial_stop_pct": None}
@@ -697,12 +866,18 @@ def _self_test() -> None:
     assert 9.8 < net[0] < 10.0, net
 
 
-def run() -> dict[str, Any]:
+def run(*, reuse_existing: bool = False) -> dict[str, Any]:
     events, members_df, metadata = _load_events()
     print(json.dumps(metadata, indent=2), flush=True)
-    receipt_df = _load_prices_once_per_symbol(events)
-    coverage = _coverage_table(events)
-    baseline, strategies = _calculate_event_returns(events)
+    if reuse_existing:
+        baseline, strategies, coverage, receipt_df = _reuse_unchanged_results(events)
+    else:
+        receipt_df = _load_prices_once_per_symbol(events)
+        coverage = _coverage_table(events)
+        baseline, strategies = _calculate_event_returns(events)
+    if len(baseline) != len(events) or len(strategies) != len(events) * len(CONFIGS):
+        raise AssertionError(f"unexpected result cardinality: baseline={len(baseline)}, candidate={len(strategies)}")
+    parity = _verify_baseline_parity(baseline, events)
     selection_table, frozen = _selection_table(strategies, events)
     # Add UTC decision to the result table for transparent monthly aggregation.
     decision_map = {e["event_id"]: e["decision"] for e in events}
@@ -718,6 +893,7 @@ def run() -> dict[str, Any]:
     strategies.to_csv(EXITS / "basket_trail_candidate_events.csv.gz", index=False, compression="gzip")
     selection_table.to_csv(EXITS / "basket_trail_pre2026_selection.csv", index=False)
     frozen.to_csv(EXITS / "basket_trail_frozen_rules.csv", index=False)
+    parity.to_csv(EXITS / "basket_trail_baseline_parity.csv", index=False)
     summary_2026.to_csv(EXITS / "basket_trail_2026_summary.csv", index=False)
     monthly_2026.to_csv(EXITS / "basket_trail_2026_monthly.csv", index=False)
     sep_results.to_csv(EXITS / "basket_trail_sep16.csv", index=False)
@@ -734,6 +910,18 @@ def run() -> dict[str, Any]:
         "fees": {"entry_taker": payoffs.TAKER_FEE, "exit_taker": payoffs.TAKER_FEE},
         "modeled": ["equal initial notional per member", "Binance USD-M 5m open/close", "two taker fills per member"],
         "not_modeled": ["funding", "leverage", "slippage", "market impact", "capacity", "margin/liquidation"],
+        "basket_membership": "count raw frozen initial N, but exclude any symbol with monday_breadth_constituent_scope.exclusion_reason from the priced ALT basket; exclusion reason is retained in basket_trail_members",
+        "incremental_reuse": {
+            "enabled": bool(reuse_existing),
+            "recomputed_filtered_events": int(((coverage.cohort != "sept16_original_68") & coverage.n_excluded_from_basket.gt(0)).sum()) if reuse_existing else None,
+            "reused_unaffected_events": int(((coverage.cohort != "sept16_original_68") & coverage.n_excluded_from_basket.eq(0)).sum()) if reuse_existing else None,
+        },
+        "baseline_parity": {
+            "events": int(len(parity)),
+            "max_abs_payoff_baseline_delta_pct": float(parity.parity_delta_pct.abs().max()),
+            "max_abs_wave_locked_baseline_delta_pct": float(parity.loc[parity.cohort.eq("wave_ALT"), "locked_baseline_delta_pct"].abs().max()),
+            "member_count_mismatches": int(parity.member_count_delta.ne(0).sum()),
+        },
         "coverage": {
             "locked_events": int((coverage.cohort != "sept16_original_68").sum()),
             "complete_locked_events": int(((coverage.cohort != "sept16_original_68") & coverage.status.eq("complete")).sum()),
@@ -750,6 +938,8 @@ def run() -> dict[str, Any]:
     print(sep_results.to_string(index=False))
     print("coverage:")
     print(coverage.groupby(["cohort", "status"]).size().to_string())
+    print("baseline parity:")
+    print(parity.groupby("cohort").parity_delta_pct.agg(["count", "max", "min"]).to_string())
     return manifest
 
 
@@ -757,6 +947,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--self-test", action="store_true", help="check close-to-next-open logic and native VectorBT fee fills")
     parser.add_argument("--preflight-only", action="store_true", help="validate locked events and member bridge without loading bars")
+    parser.add_argument("--reuse-existing", action="store_true", help="recompute filtered baskets and Sep16 only; reuse committed unaffected trajectories")
     args = parser.parse_args(argv)
     if args.self_test:
         _self_test()
@@ -768,7 +959,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(metadata, indent=2))
         print("cohort counts:", pd.Series([e["cohort"] for e in events]).value_counts().to_dict())
         return 0
-    run()
+    run(reuse_existing=args.reuse_existing)
     return 0
 
 
