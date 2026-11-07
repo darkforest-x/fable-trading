@@ -8,15 +8,12 @@ exit open are outcome fields only. Use observed Binance USD-M quotes; no padding
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
-from pathlib import Path
 import zlib
 
 import numpy as np
 import pandas as pd
 
 from yoyo.evaluation import monday_breadth_six_day_excursions as six
-from yoyo.evaluation.monday_breadth_constituent_prices import load_quotes
-from yoyo.evaluation.monday_breadth_constituent_summary import write_outputs
 from yoyo.evaluation.monday_breadth_constituent_scope import exclusion_reason
 
 fixed, base = six.fixed, six.base
@@ -40,8 +37,8 @@ def membership():
         initial = ledger.assign(known=ledger.touch.dt.floor(span)+span)
         pairs = initial[initial.side.eq(1)][['known','symbol','touch']].sort_values('touch').drop_duplicates(['known','symbol'])
         joined = pairs.merge(g,on='known',validate='many_to_one')
-        pd.testing.assert_series_equal(joined.groupby('known').size(),g.set_index('known').initial,
-                                       check_names=False,check_dtype=False)
+        tally = joined.groupby('known').size().reindex(g.known)
+        assert np.array_equal(tally.to_numpy(),g.initial.to_numpy()), 'Frozen breadth mismatch'
         members.append(joined)
         counts = initial.groupby(['known','side']).symbol.nunique()
         blocked = counts[counts.ge(25)].index.get_level_values(0).unique()+fixed.WAIT
@@ -73,6 +70,7 @@ def study_symbol(symbol, rows, clocks, grid):
     starts = pd.DatetimeIndex(rows.decision.unique()).sort_values()
     start = max(grid[0],starts[0].normalize().replace(day=1)-pd.Timedelta(hours=2))
     end = min(grid[-1],starts[-1].normalize().replace(day=1)+pd.offsets.MonthBegin()+six.HOLD)
+    from yoyo.evaluation.monday_breadth_constituent_prices import load_quotes
     raw,receipt = load_quotes(symbol,start,end,needed_intervals=[(t,t+six.HOLD) for t in starts])
     if raw.empty:
         return rows,receipt
@@ -185,6 +183,7 @@ def main():
     allrows.to_csv(OUT/'members.csv.gz',index=False)
     (OUT/'price_sources.json.gz').write_bytes(__import__('gzip').compress(json.dumps(
         [json.loads(meta.read_text()) for _,meta in sorted(saved)],ensure_ascii=False).encode()))
+    from yoyo.evaluation.monday_breadth_constituent_summary import write_outputs
     write_outputs(allrows,sig,OUT,pd.read_csv(six.OUT/'summary.csv',dtype={'band':str}))
 
 
