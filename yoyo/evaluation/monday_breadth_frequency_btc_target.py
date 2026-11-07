@@ -103,7 +103,7 @@ def candidate_events(frame: pd.DataFrame, slots: np.ndarray, folds: np.ndarray,
 
 
 def baseline_case_fills() -> pd.DataFrame:
-    path = SOURCE / "funded_case_check/locked_events.parquet"
+    path = SOURCE / "exits/funded_case_check/locked_events.parquet"
     events = pd.read_parquet(path)
     rows = events[(events.candidate_id == BASE_CANDIDATE) & (events.policy_id == 1000)].copy()
     if len(rows) != 53:
