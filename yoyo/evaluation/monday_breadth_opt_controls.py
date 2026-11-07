@@ -28,6 +28,12 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPERIMENT = ROOT / "experiments/active/exp-monday-breadth-optimization-20261108-v1"
 FEATURES = EXPERIMENT / "features"
 CONTROL_DIR = EXPERIMENT / "controls"
+SOURCE_DIRS = {
+    "search": EXPERIMENT / "search",
+    "exits": EXPERIMENT / "exits",
+    "second_wave": EXPERIMENT / "exits" / "second_wave_requests",
+}
+DYNAMIC_SOURCES = {"exits", "second_wave"}
 BAR = pd.Timedelta(minutes=5)
 STEP_NS = BAR.value
 SEED = 20261108
@@ -66,9 +72,16 @@ def _epoch_rank(value) -> int:
         return 0
 
 
+def _is_dynamic_source(source: str) -> bool:
+    return str(source) in DYNAMIC_SOURCES
+
+
 def _read_locked_source(source: str) -> pd.DataFrame:
-    events_path = EXPERIMENT / source / "locked_events.parquet"
-    rules_path = EXPERIMENT / source / "locked_rules.csv"
+    if source not in SOURCE_DIRS:
+        raise ValueError(f"Unknown locked source profile: {source}")
+    source_dir = SOURCE_DIRS[source]
+    events_path = source_dir / "locked_events.parquet"
+    rules_path = source_dir / "locked_rules.csv"
     if not events_path.is_file() or not rules_path.is_file():
         return pd.DataFrame()
     events = pd.read_parquet(events_path)
@@ -124,6 +137,11 @@ def _read_locked_source(source: str) -> pd.DataFrame:
 def _in_scope(row: pd.Series) -> bool:
     role = str(row.role).lower()
     source = str(row.source)
+    if source == "second_wave":
+        asset = str(row.asset).upper()
+        expected_id = f"wave_{asset}"
+        return (role == "dynamic_primary" and asset in {"BTC", "ETH", "SOL", "ALT"}
+                and str(row.candidate_id) == expected_id and int(row.hold_hours) == 144)
     if source == "exits":
         return role in {"dynamic_primary", "retention", "case_target", "case_runner"}
     breadth = str(row.get("breadth", "")).upper().replace("-", "_")
@@ -425,7 +443,7 @@ def _build_task_rows(candidates: pd.DataFrame, selected: pd.DataFrame,
             "status": "awaiting_controls", "expected_symbols": expected_symbols,
             "candidate_monitor_fraction": float(signal["monitor_fraction"]),
         })
-        draw_limit = (MAX_DYNAMIC_DRAWS if event.source == "exits" else MAX_FIXED_DRAWS)
+        draw_limit = (MAX_DYNAMIC_DRAWS if _is_dynamic_source(event.source) else MAX_FIXED_DRAWS)
         for symbol in symbols:
             task_rows.append({
                 "rule_event_id": event_key, "candidate_id": event.candidate_id,
@@ -448,7 +466,7 @@ def _process_symbol_month(tasks: pd.DataFrame, lower_touches: dict,
                           price_frame: pd.DataFrame | None = None,
                           price_receipt: dict | None = None) -> tuple[list[dict], list[dict]]:
     tasks = tasks.copy()
-    dynamic = tasks.source.eq("exits")
+    dynamic = tasks.source.isin(DYNAMIC_SOURCES)
     tasks["match_horizon_hours"] = tasks.hold_hours.astype(int)
     if dynamic.any():
         dynamic_key = ["asset", "decision", "known", "minutes", "wait_min", "symbol"]
@@ -481,7 +499,7 @@ def _process_symbol_month(tasks: pd.DataFrame, lower_touches: dict,
         task_series = pd.Series(task._asdict())
         pool, context, status = _candidate_pool(task_series, frame, lower_touches, shocks,
                                                 monitor_grid, monitor_prefix, past_only=past_only)
-        draws = MAX_DYNAMIC_DRAWS if task.source == "exits" else MAX_FIXED_DRAWS
+        draws = MAX_DYNAMIC_DRAWS if _is_dynamic_source(task.source) else MAX_FIXED_DRAWS
         sampled = _draw_positions(pool, task_series, draws) if len(pool) else np.empty(0, dtype=np.int64)
         is_fixed = task.source == "search"
         candidate_valid, candidate_positions = _complete_horizon(frame, pd.DatetimeIndex([task.decision]),
@@ -758,6 +776,8 @@ def _self_test() -> dict:
 
 
 def run(*, sources: list[str], epoch3_only: bool = False, past_only: bool = False) -> dict:
+    if "second_wave" in sources and len(sources) != 1:
+        raise ValueError("The second_wave profile must run separately to keep its outputs isolated")
     candidates, selected = _canonical_candidates(sources)
     if epoch3_only:
         selected = selected[selected.epoch_rank.eq(3)].copy()
@@ -829,17 +849,22 @@ def run(*, sources: list[str], epoch3_only: bool = False, past_only: bool = Fals
         event_meta["status"] = np.where(event_meta.rule_event_id.isin(draw_counts.index), "has_random_matches", event_meta.status)
     fixed_paired = _paired_fixed(match_frame, event_meta)
     coverage = _coverage_table(event_meta, task_coverage, fixed_paired)
-    output_dir = CONTROL_DIR / "past_only" if past_only else CONTROL_DIR
+    if sources == ["second_wave"]:
+        output_dir = CONTROL_DIR / "second_wave"
+        if past_only:
+            output_dir = output_dir / "past_only"
+    else:
+        output_dir = CONTROL_DIR / "past_only" if past_only else CONTROL_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
     fixed_frame = match_frame[match_frame.source.eq("search")].copy()
-    dynamic_frame = match_frame[match_frame.source.eq("exits")].copy()
+    dynamic_frame = match_frame[match_frame.source.isin(DYNAMIC_SOURCES)].copy()
     if "search" in sources:
         temp = output_dir / "fixed_matches.parquet.tmp"
         fixed_frame.to_parquet(temp, index=False)
         temp.replace(output_dir / "fixed_matches.parquet")
         fixed_paired.to_csv(output_dir / "fixed_paired.csv.tmp", index=False)
         (output_dir / "fixed_paired.csv.tmp").replace(output_dir / "fixed_paired.csv")
-    if "exits" in sources:
+    if "exits" in sources or "second_wave" in sources:
         temp = output_dir / "dynamic_matches.parquet.tmp"
         dynamic_frame.to_parquet(temp, index=False)
         temp.replace(output_dir / "dynamic_matches.parquet")
@@ -900,7 +925,7 @@ def run(*, sources: list[str], epoch3_only: bool = False, past_only: bool = Fals
 
 def main() -> None:
     cli = argparse.ArgumentParser()
-    cli.add_argument("--source", choices=("search", "exits", "all"), default="all")
+    cli.add_argument("--source", choices=("search", "exits", "second_wave", "all"), default="all")
     cli.add_argument("--epoch3-only", action="store_true", help="Prioritize the 2026 locked validation epoch only")
     cli.add_argument("--past-only", action="store_true", help="Run the past-only shock-exclusion sensitivity into controls/past_only/")
     cli.add_argument("--self-test", action="store_true", help="Run deterministic matcher fixtures")
