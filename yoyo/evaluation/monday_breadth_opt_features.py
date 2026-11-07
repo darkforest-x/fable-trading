@@ -332,9 +332,9 @@ def _check_frozen(signals: pd.DataFrame) -> pd.DataFrame:
     for col in exact_cols:
         if not merged[f"{col}_frozen"].astype(str).equals(merged[f"{col}_new"].astype(str)):
             raise AssertionError(f"X=30 frozen feature mismatch: {col}")
-    if not np.allclose(merged.last_touch_age_min_frozen, merged.last_touch_age_min, equal_nan=True):
+    if not np.allclose(merged.last_touch_age_min_frozen, merged.last_touch_age_min_new, equal_nan=True):
         raise AssertionError("X=30 frozen last-touch age mismatch")
-    if not merged.continued_frozen.astype(bool).equals(merged.new_coins.gt(0)):
+    if not merged.continued_frozen.astype(bool).equals(merged.new_coins_new.gt(0)):
         raise AssertionError("X=30 frozen continuation flag mismatch")
     return pd.DataFrame([{
         "minutes": int(minutes),
