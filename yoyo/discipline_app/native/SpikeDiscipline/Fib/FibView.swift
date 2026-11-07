@@ -26,7 +26,6 @@ struct FibView: View {
                     HStack(alignment: .top) {
                         coinButton
                         Spacer(minLength: 8)
-                        periodPicker
                     }
                     Spacer(minLength: 0)
                     if fib.current == nil && fib.error != nil && candles.bars.isEmpty { offlineNote }
@@ -110,42 +109,44 @@ struct FibView: View {
         .accessibilityLabel("切换币种，当前 \(Fmt.coin(fib.chartSymbol))")
     }
 
-    /// Custom period picker: no system menu chrome (it drew a grey halo on device).
-    private var periodPicker: some View {
-        @Bindable var fib = fib
-        return VStack(alignment: .trailing, spacing: 6) {
-            Button { Haptics.tap(); withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { periods.toggle() } } label: {
-                HStack(spacing: 4) {
-                    Text(fib.period.rawValue).font(.system(size: 15, weight: .bold).monospacedDigit())
-                    Image(systemName: "chevron.down").font(.system(size: 10, weight: .bold)).rotationEffect(.degrees(periods ? 180 : 0))
-                }
-                .foregroundStyle(Color.accentColor)
-                .padding(.horizontal, 14).frame(height: 42)
-                .frosted(Capsule())
+    /// Period chip at the bottom-left (owner Notion #76); the list opens upward. Custom drawn —
+    /// the system menu drew a grey halo on device.
+    private var periodChip: some View {
+        Button { Haptics.tap(); withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { periods.toggle() } } label: {
+            HStack(spacing: 3) {
+                Text(fib.period.rawValue).font(.system(size: 13, weight: .bold).monospacedDigit()).lineLimit(1)
+                Image(systemName: "chevron.up").font(.system(size: 8, weight: .bold)).rotationEffect(.degrees(periods ? 180 : 0))
             }
-            .buttonStyle(CardPressStyle())
-            .accessibilityLabel("K线周期 \(fib.period.rawValue)")
-            if periods {
-                VStack(spacing: 2) {
-                    ForEach(Self.choices) { p in
-                        Button {
-                            Haptics.select(); fib.period = p
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { periods = false }
-                        } label: {
-                            Text(p.rawValue).font(.system(size: 14, weight: .semibold).monospacedDigit())
-                                .foregroundStyle(fib.period == p ? Color.white : Color.ink)
-                                .frame(width: 52, height: 32)
-                                .background(fib.period == p ? Color.accentColor : .clear, in: .capsule)
-                                .contentShape(.capsule)
-                        }
-                        .buttonStyle(.plain)
-                    }
+            .fixedSize()
+            .foregroundStyle(Color.white)
+            .padding(.horizontal, 10).frame(height: 34)
+            .background(Color.accentColor, in: .capsule)
+            .contentShape(.capsule)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("K线周期 \(fib.period.rawValue)")
+    }
+
+    private var periodList: some View {
+        @Bindable var fib = fib
+        return VStack(spacing: 2) {
+            ForEach(Self.choices.reversed()) { p in
+                Button {
+                    Haptics.select(); fib.period = p
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { periods = false }
+                } label: {
+                    Text(p.rawValue).font(.system(size: 14, weight: .semibold).monospacedDigit())
+                        .foregroundStyle(fib.period == p ? Color.white : Color.ink)
+                        .frame(width: 56, height: 34)
+                        .background(fib.period == p ? Color.accentColor : .clear, in: .capsule)
+                        .contentShape(.capsule)
                 }
-                .padding(4)
-                .frosted(RoundedRectangle(cornerRadius: 20, style: .continuous), veil: 0.8)
-                .transition(.scale(scale: 0.8, anchor: .top).combined(with: .opacity))
+                .buttonStyle(.plain)
             }
         }
+        .padding(4)
+        .frosted(RoundedRectangle(cornerRadius: 20, style: .continuous), veil: 0.85)
+        .transition(.scale(scale: 0.8, anchor: .bottomLeading).combined(with: .opacity))
     }
 
     /// One slim frosted bar: layer chips, follow, and a small 开单 pill.
@@ -154,18 +155,20 @@ struct FibView: View {
         let locked = account.pendingEntry != nil || account.closeAttempt != nil || session.connection == nil
         let row = fib.selected
         return HStack(spacing: 4) {
+            periodChip
             ToggleChip(title: "内部线", on: $fib.showInternal)
             ToggleChip(title: "六均线", on: $fib.showAverages)
             ToggleChip(title: "云带", on: $fib.showCloud)
             Spacer(minLength: 0)
             Button { Haptics.tap(); follow += 1 } label: {
-                Image(systemName: "arrow.right.to.line").font(.system(size: 14, weight: .bold)).foregroundStyle(Color.ink)
-                    .frame(width: 34, height: 34).contentShape(.circle)
+                Image(systemName: "arrow.right.to.line").font(.system(size: 13, weight: .bold)).foregroundStyle(Color.ink)
+                    .frame(width: 30, height: 34).contentShape(.circle)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("跟随最新")
             Button { if let row { Haptics.open(); onQuick(row, fib.period) } } label: {
-                Label("开单", systemImage: "bolt.fill").font(.system(size: 14, weight: .bold)).labelStyle(.titleAndIcon)
+                HStack(spacing: 3) { Image(systemName: "bolt.fill"); Text("开单") }
+                    .font(.system(size: 13, weight: .bold)).lineLimit(1).fixedSize()
             }
             .buttonStyle(.pill(.solid(.accentColor), height: 34))
             .disabled(locked || row == nil || !fib.fresh || !fib.live)
@@ -173,6 +176,9 @@ struct FibView: View {
         }
         .padding(5)
         .frosted(Capsule())
+        .overlay(alignment: .bottomLeading) {
+            if periods { periodList.offset(x: 2, y: -52) }
+        }
     }
 
     private var offlineNote: some View {
@@ -194,9 +200,9 @@ struct ToggleChip: View {
     @Binding var on: Bool
     var body: some View {
         Button { Haptics.select(); withAnimation(.snappy) { on.toggle() } } label: {
-            Text(title).font(.system(size: 14, weight: .semibold))
+            Text(title).font(.system(size: 13, weight: .semibold)).lineLimit(1).fixedSize()
                 .foregroundStyle(on ? Color.accentColor : Color.ink)
-                .padding(.horizontal, 11).frame(height: 34)
+                .padding(.horizontal, 9).frame(height: 34)
                 .background(on ? Color.accentColor.opacity(0.13) : .clear, in: .capsule)
                 .contentShape(.capsule)
         }

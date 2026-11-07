@@ -1,9 +1,9 @@
 import SwiftUI
 
 enum MonitorSegment: String, CaseIterable, Identifiable {
-    case paper, alerts, cloud
+    case paper, alerts, cloud, touches
     var id: String { rawValue }
-    var title: String { switch self { case .paper: "模拟盘"; case .alerts: "报警"; case .cloud: "云带" } }
+    var title: String { switch self { case .paper: "模拟盘"; case .alerts: "报警"; case .cloud: "云带"; case .touches: "触价" } }
 }
 
 /// 监控 (owner 2026-11-06): 1.618 paper accounts, market alarms and the 12H cloud board — read-only.
@@ -33,6 +33,7 @@ struct MonitorView: View {
                         case .paper: PaperSection(connection: connection, refresh: refresh)
                         case .alerts: AlertsSection(connection: connection, refresh: refresh)
                         case .cloud: CloudSection(connection: connection, refresh: refresh)
+                        case .touches: TouchesSection(connection: connection, refresh: refresh)
                         }
                     }
                     .id(segment)

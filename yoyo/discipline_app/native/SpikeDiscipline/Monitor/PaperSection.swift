@@ -50,36 +50,6 @@ struct PaperSection: View {
                 .glassCard()
                 .scrollReveal()
             }
-            if let data {
-                SectionHeader(title: "今日触价", count: data.signals.count)
-                if data.signals.isEmpty {
-                    Text("今天还没有触价").font(.footnote).foregroundStyle(.secondary).frame(maxWidth: .infinity).padding(12).glassCard(cornerRadius: 18)
-                } else {
-                    VStack(spacing: 0) {
-                        ForEach(Array(data.signals.enumerated()), id: \.offset) { index, signal in
-                            Button { Haptics.open(); openChart(signal.symbol) } label: {
-                            HStack(spacing: 11) {
-                                CoinLogo(coin: Fmt.coin(signal.symbol), size: 30)
-                                VStack(alignment: .leading, spacing: 3) {
-                                    HStack(spacing: 6) { Text(Fmt.coin(signal.symbol)).font(.subheadline.weight(.semibold)); SidePill(side: signal.side) }
-                                    Text("\(Fmt.signalStatus(signal)) · 1.618 \(Fmt.price(signal.level))").font(.caption2).foregroundStyle(.secondary).lineLimit(1)
-                                }
-                                Spacer()
-                                VStack(alignment: .trailing, spacing: 2) {
-                                    Text(signal.score.map { String(format: "%.2f", $0) } ?? "—").font(.subheadline.weight(.semibold)).monospacedDigit()
-                                    Text(Fmt.clock(signal.observedMs, now: data.nowMs)).font(.caption2).foregroundStyle(.secondary)
-                                }
-                            }
-                            .padding(.horizontal, 12).frame(minHeight: 50).contentShape(.rect)
-                            }
-                            .buttonStyle(RowPressStyle())
-                            if index < data.signals.count - 1 { Divider().padding(.leading, 55) }
-                        }
-                    }
-                    .glassCard()
-                    .scrollReveal()
-                }
-            }
         }
         .modifier(Polled(key: "paper-\(refresh)", every: .seconds(10), load: { try await API.get("/v1/monitor/paper", query: [URLQueryItem(name: "track", value: "live-wick6x3")], connection: connection) }, value: $data, error: $error))
     }

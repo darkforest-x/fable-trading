@@ -70,9 +70,12 @@ extension View {
     func frostedCapsule(tint: Color? = nil) -> some View { modifier(FrostedCard(cornerRadius: 99, tint: tint)) }
 
     /// Light entrance as rows scroll in (no blur: it is expensive on every frame).
+    /// Cards taller than the screen are never "fully visible", so the old transition left long lists
+    /// at 60 % opacity — the grey 今日触价 / 回测复刻 cards (owner Notion #76). Now a card counts as
+    /// fully shown once 5 % of it is on screen, and only fades slightly while entering.
     func scrollReveal() -> some View {
-        scrollTransition(.animated(.smooth(duration: 0.25)), axis: .vertical) { content, phase in
-            content.opacity(phase.isIdentity ? 1 : 0.6).scaleEffect(phase.isIdentity ? 1 : 0.98)
+        scrollTransition(.animated(.smooth(duration: 0.25)).threshold(.visible(0.05)), axis: .vertical) { content, phase in
+            content.opacity(phase.isIdentity ? 1 : 0.85).scaleEffect(phase.isIdentity ? 1 : 0.99)
         }
     }
 }
