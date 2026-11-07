@@ -9,8 +9,9 @@ struct AlertsSection: View {
     @State private var expanded: Double?
 
     var body: some View {
-        let live = data?.alerts.filter(\.active) ?? []
-        let history = data?.alerts.filter { !$0.active } ?? []
+        let all = (data?.alerts ?? []).uniqued { $0.rowId }
+        let live = all.filter(\.active)
+        let history = all.filter { !$0.active }
         VStack(alignment: .leading, spacing: 8) {
             if let data, !data.workerAlive {
                 StatusNote(text: "报警服务未运行", systemImage: "exclamationmark.triangle", tint: .amber)
@@ -105,7 +106,7 @@ struct CoinChips: View {
             }
             if !all && symbols.count > 12 {
                 Button("+\(symbols.count - 12)") { Haptics.tap(); withAnimation(.snappy) { all = true } }
-                    .font(.footnote.weight(.semibold)).buttonStyle(.glass).controlSize(.small)
+                    .font(.footnote.weight(.semibold)).buttonStyle(.pill(.soft, height: 28))
             }
         }
     }

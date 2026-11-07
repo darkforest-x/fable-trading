@@ -48,7 +48,7 @@ struct PreviewSheet: View {
                         HStack { if busy { ProgressView().tint(.white); Text("正在提交…") } else { Text(live ? "确认实盘开仓" : "确认模拟开仓") } }
                             .font(.body.weight(.bold)).frame(maxWidth: .infinity).frame(height: 50)
                     }
-                    .buttonStyle(.glassProminent).tint(order.side == "long" ? .up : .down)
+                    .buttonStyle(.pill(.solid(order.side == "long" ? .up : .down), height: 50))
                     .disabled(busy || (live && !consent))
                     Button("返回修改") { Haptics.tap(); dismiss() }.frame(maxWidth: .infinity).disabled(busy)
                 }
@@ -101,14 +101,13 @@ struct SymbolPicker: View {
         NavigationStack {
             List {
                 Section {
-                    Picker("合约范围", selection: $filter) { Text("全部").tag(0); Text("自选").tag(1); Text("最近交易").tag(2) }
-                        .pickerStyle(.segmented).listRowBackground(Color.clear).listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 0, trailing: 0))
+                    SoftSegment(selection: $filter, options: [(0, "全部"), (1, "自选"), (2, "最近交易")]).listRowBackground(Color.clear).listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 0, trailing: 0))
                     HStack(spacing: 8) {
                         Text(sort == .volume ? "24h · USDT" : "今日 · 北京时间").font(.caption).foregroundStyle(.secondary)
                         Spacer()
                         ForEach([(Trading.ContractSort.volume, "成交量 ↓"), (.gainers, "涨幅 ↓"), (.losers, "跌幅 ↑")], id: \.1) { item in
                             Button(item.1) { Haptics.select(); sort = item.0 }
-                                .font(.caption.weight(.semibold)).buttonStyle(.glass).controlSize(.small).tint(sort == item.0 ? .accentColor : nil)
+                                .font(.caption.weight(.semibold)).buttonStyle(.pill(sort == item.0 ? .tinted(.accentColor) : .soft, height: 28))
                         }
                     }
                     .listRowBackground(Color.clear).listRowInsets(EdgeInsets(top: 6, leading: 0, bottom: 4, trailing: 0))
@@ -128,8 +127,8 @@ struct SymbolPicker: View {
             .textInputAutocapitalization(.characters)
             .navigationTitle("选择合约").navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) { Button("更新排名") { Haptics.tap(); rank() } }
-                ToolbarItem(placement: .topBarTrailing) { Button(role: .close) { Haptics.tap(); dismiss() } }
+                ToolbarItem(placement: .topBarLeading) { Button("更新排名") { Haptics.tap(); rank() }.buttonStyle(.pill(.soft, height: 32)) }.sharedBackgroundVisibility(.hidden)
+                ToolbarItem(placement: .topBarTrailing) { CloseButton { dismiss() } }.sharedBackgroundVisibility(.hidden)
             }
         }
         .onAppear { rank() }
@@ -212,7 +211,7 @@ struct QuickTicketSheet: View {
             .scrollDismissesKeyboard(.interactively)
             .background(Color.canvas)
             .navigationTitle(Fmt.coin(ticket.symbol)).navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button(role: .close) { Haptics.tap(); ticket.manual(); dismiss() } } }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { CloseButton { ticket.manual(); dismiss() } }.sharedBackgroundVisibility(.hidden) }
         }
         .interactiveDismissDisabled(ticket.reviewing)
     }

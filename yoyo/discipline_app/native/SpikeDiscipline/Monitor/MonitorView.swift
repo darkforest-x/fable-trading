@@ -20,11 +20,7 @@ struct MonitorView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
-                    Picker("监控模块", selection: $segment.animation(.snappy)) {
-                        ForEach(MonitorSegment.allCases) { Text($0.title).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                    .onChange(of: segment) { _, _ in Haptics.select() }
+                    SoftSegment(selection: $segment, options: MonitorSegment.allCases.map { ($0, $0.title) })
                     if let connection = session.connection {
                         Group {
                             switch segment {
@@ -56,14 +52,11 @@ struct MonitorView: View {
             .navigationTitle("监控")
             .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button { Haptics.open(); notices.markRead(); showNotifications = true } label: {
-                        Image(systemName: notices.unread > 0 ? "bell.badge" : "bell")
-                            .symbolEffect(.bounce, value: notices.unread)
-                    }
-                    .badge(notices.unread)
-                    .accessibilityLabel(notices.unread > 0 ? "通知，\(notices.unread) 条未读" : "通知")
+                ToolbarItem(placement: .topBarTrailing) {
+                    RoundIcon(systemName: "bell", badge: notices.unread > 0) { notices.markRead(); showNotifications = true }
+                        .accessibilityLabel(notices.unread > 0 ? "通知，\(notices.unread) 条未读" : "通知")
                 }
+                .sharedBackgroundVisibility(.hidden)
             }
         }
     }

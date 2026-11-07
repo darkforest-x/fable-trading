@@ -58,7 +58,7 @@ struct PaperSection: View {
                     Text("今天还没有触价").font(.footnote).foregroundStyle(.secondary).frame(maxWidth: .infinity).padding(12).glassCard(cornerRadius: 18)
                 } else {
                     VStack(spacing: 0) {
-                        ForEach(Array(data.signals.enumerated()), id: \.element.rowId) { index, signal in
+                        ForEach(Array(data.signals.enumerated()), id: \.offset) { index, signal in
                             Button { Haptics.open(); openChart(signal.symbol) } label: {
                             HStack(spacing: 11) {
                                 CoinLogo(coin: Fmt.coin(signal.symbol), size: 30)

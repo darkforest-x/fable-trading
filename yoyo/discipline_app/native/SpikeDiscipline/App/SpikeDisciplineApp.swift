@@ -28,10 +28,15 @@ enum AppTab: String, Hashable, CaseIterable, Identifiable {
     case trade, monitor, fib, positions, stats
     var id: String { rawValue }
     var title: String { switch self { case .trade: "合约"; case .monitor: "监控"; case .fib: "1.618"; case .positions: "持仓"; case .stats: "统计" } }
-    var symbol: String {
+    /// Minimal SF Symbols (owner 2026-11-07 “简约”): outline when idle, filled when active.
+    func symbol(active: Bool) -> String {
+        // Stitch native-2.3.0: one stroke weight, no fills — the active tab only changes colour.
         switch self {
-        case .trade: "arrow.left.arrow.right"; case .monitor: "bell"; case .fib: "chart.line.uptrend.xyaxis"
-        case .positions: "briefcase"; case .stats: "chart.bar"
+        case .trade: "arrow.up.arrow.down"
+        case .monitor: "bell"
+        case .fib: "chart.line.uptrend.xyaxis"
+        case .positions: "checkmark.shield"
+        case .stats: "chart.bar"
         }
     }
 }
@@ -49,7 +54,6 @@ struct RootView: View {
     @State private var progress: CGFloat = CGFloat(AppTab.allCases.firstIndex(of: .monitor)!)
     @State private var showNotifications = false
     @State private var showSettings = false
-    @State private var showReplay = false
     @State private var bannerDrag: CGFloat = 0
 
     var body: some View {
@@ -79,7 +83,7 @@ struct RootView: View {
         .background(AmbientBackground())
         .overlay(alignment: .bottom) {
             GlassTabBar(selection: $tab, progress: progress, badge: notices.unread)
-                .padding(.horizontal, 22)
+                .padding(.horizontal, 28)
                 .padding(.bottom, 2)
         }
         .overlay(alignment: .bottom) {
@@ -117,8 +121,7 @@ struct RootView: View {
         })
         .sheet(isPresented: $showNotifications) { NotificationCenterView(onOpen: open) }
         .sheet(isPresented: $showSettings) { SettingsView() }
-        .fullScreenCover(isPresented: $showReplay) { ReplayView() }
-        .onChange(of: showReplay) { _, open in account.paused = open }
+
         .sheet(isPresented: Binding(get: { ticket.fibTicket }, set: { if !$0 { ticket.manual(); ticket.fibTicket = false } })) {
             QuickTicketSheet(onBlocked: route).presentationDetents([.large]).presentationDragIndicator(.visible)
         }
@@ -141,7 +144,7 @@ struct RootView: View {
         case .fib: FibView(active: tab == .fib && scenePhase == .active, onQuick: { row, period in
             guard account.pendingEntry == nil else { return }
             ticket.openQuick(row, period: period, state: account.state)
-        }, onReplay: { showReplay = true })
+        })
         case .positions: PositionsView(onOpenSymbol: { symbol in
             if symbol != ticket.symbol { ticket.choose(symbol); ticket.syncLeverage(account.state); ticket.syncExisting(account.state) }
             withAnimation(.snappy) { tab = .trade }
@@ -175,7 +178,7 @@ struct RootView: View {
     }
 }
 
-/// Floating Liquid Glass tab bar; the lens slides with the page scroll and morphs on taps.
+/// Floating frosted tab bar (icons only); the accent lens slides with the page scroll.
 struct GlassTabBar: View {
     @Binding var selection: AppTab
     let progress: CGFloat
@@ -188,8 +191,7 @@ struct GlassTabBar: View {
             let item = (proxy.size.width - inset * 2) / count
             let x = inset + item * min(max(progress, 0), count - 1)
             ZStack(alignment: .leading) {
-                Capsule().fill(.clear)
-                    .glassEffect(.regular.tint(Color.accentColor.opacity(0.10)).interactive(), in: .capsule)
+                Capsule().fill(Color.accentColor.opacity(0.10))
                     .frame(width: item, height: proxy.size.height - inset * 2)
                     .offset(x: x)
                 HStack(spacing: 0) {
@@ -199,7 +201,11 @@ struct GlassTabBar: View {
                             Haptics.tap()
                             withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) { selection = page }
                         } label: {
-                            TabGlyph(tab: page, active: active)
+                            Image(systemName: page.symbol(active: active))
+                                .font(.system(size: 19, weight: active ? .semibold : .regular))
+                                .foregroundStyle(active ? Color.accentColor : Color.muted)
+                                .symbolEffect(.bounce, value: active)
+                                .contentTransition(.symbolEffect(.replace))
                                 .overlay(alignment: .topTrailing) {
                                     if page == .monitor && badge > 0 {
                                         Text(badge > 9 ? "9+" : "\(badge)").font(.system(size: 10, weight: .bold)).foregroundStyle(.white)
@@ -218,9 +224,8 @@ struct GlassTabBar: View {
                 .padding(.horizontal, inset)
             }
         }
-        .frame(height: 56)
-        .glassEffect(.regular, in: .capsule)
-        .shadow(color: .black.opacity(0.08), radius: 16, y: 6)
+        .frame(height: 54)
+        .frosted(Capsule(), veil: 0.7)
     }
 }
 
@@ -234,7 +239,7 @@ struct NoticeToast: View {
             Text(notice.text).font(.subheadline.weight(.semibold)).lineLimit(2)
         }
         .padding(.horizontal, 16).padding(.vertical, 11)
-        .glassEffect(.regular, in: .capsule)
+        .frosted(Capsule(), veil: 0.85)
         .padding(.horizontal, 24)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.updatesFrequently)

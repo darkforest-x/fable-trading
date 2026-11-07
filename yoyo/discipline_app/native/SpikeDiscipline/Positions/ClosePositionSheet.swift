@@ -56,8 +56,7 @@ struct ClosePositionSheet: View {
                                 Button { withAnimation(.snappy) { percent = Double(value) }; value == 100 ? Haptics.open() : Haptics.press() } label: {
                                     Text("\(value)%").font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity).frame(height: 34)
                                 }
-                                .buttonStyle(.glass)
-                                .tint(pct == value ? .accentColor : nil)
+                                .buttonStyle(.pill(pct == value ? .tinted(.accentColor) : .soft, height: 34))
                                 .disabled(busy)
                             }
                         }
@@ -83,7 +82,7 @@ struct ClosePositionSheet: View {
                     }
                     .font(.body.weight(.bold)).frame(maxWidth: .infinity).frame(height: 50)
                 }
-                .buttonStyle(.glassProminent).tint(.down)
+                .buttonStyle(.pill(.solid(.down), height: 50))
                 .disabled(busy || !account.online || !valid)
                 .padding(.horizontal, 18).padding(.bottom, 8)
             }
@@ -92,7 +91,7 @@ struct ClosePositionSheet: View {
             .navigationTitle("平仓")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) { Button(role: .close) { Haptics.tap(); dismiss() }.disabled(busy) }
+                ToolbarItem(placement: .topBarTrailing) { CloseButton { dismiss() }.disabled(busy) }.sharedBackgroundVisibility(.hidden)
             }
         }
         .interactiveDismissDisabled(busy)

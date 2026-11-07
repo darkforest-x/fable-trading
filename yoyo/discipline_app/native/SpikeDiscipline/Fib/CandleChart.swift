@@ -68,6 +68,7 @@ struct CandleChart: View {
     @State private var zoomStart: CGFloat?
     @State private var cross: CGPoint?
     @State private var crossHaptic = -1
+    @State private var memo = IndicatorMemo()
 
     private let axisWidth: CGFloat = 58
     private let timeHeight: CGFloat = 20
@@ -77,7 +78,7 @@ struct CandleChart: View {
         GeometryReader { proxy in
             let size = proxy.size
             let plot = CGRect(x: insets.leading, y: insets.top, width: max(1, size.width - axisWidth - insets.leading - insets.trailing),
-                              height: max(1, size.height - timeHeight - insets.top - insets.bottom))
+                              height: max(1, size.height - (wallpaper ? 0 : timeHeight) - insets.top - insets.bottom))
             let layout = Layout(bars: bars, spacing: spacing, offset: offset, plot: plot, rightPad: rightPad, period: period, range: range,
                                 lines: lines, wallpaper: wallpaper, yShift: yShift, yZoom: yZoom)
             ZStack(alignment: .topLeading) {
@@ -196,7 +197,7 @@ struct CandleChart: View {
             if !lo.isFinite || !hi.isFinite { lo = 0; hi = 1 }
             if hi - lo < hi * 1e-6 { let pad = max(hi * 0.001, 1e-9); lo -= pad; hi += pad }
             let span = hi - lo
-            let top = wallpaper ? 0.10 : 0.07 + 28 / max(Double(plot.height) - 28, 1), bottom = wallpaper ? 0.08 : 0.07
+            let top = wallpaper ? 0.05 : 0.07 + 28 / max(Double(plot.height) - 28, 1), bottom = wallpaper ? 0.30 : 0.07
             let l0 = lo - span * bottom, h0 = hi + span * top
             // Vertical pan shifts by a fraction of the span; the price-axis drag zooms around the centre.
             let half = (h0 - l0) / 2 * yZoom, center = (l0 + h0) / 2 + yShift * (h0 - l0)
@@ -254,8 +255,9 @@ struct CandleChart: View {
         let maxVolume = visible.map(\.volume).max() ?? 0
         if maxVolume > 0 {
             for (offset, bar) in visible.enumerated() {
-                let x = layout.x(CGFloat(layout.firstVisible + offset)), h = CGFloat(bar.volume / maxVolume) * plot.height * 0.14
-                clipped.fill(Path(CGRect(x: x - body / 2, y: plot.maxY - h, width: body, height: h)),
+                let x = layout.x(CGFloat(layout.firstVisible + offset)), h = CGFloat(bar.volume / maxVolume) * plot.height * (wallpaper ? 0.10 : 0.14)
+                let floor = wallpaper ? plot.maxY - plot.height * 0.22 : plot.maxY
+                clipped.fill(Path(CGRect(x: x - body / 2, y: floor - h, width: body, height: h)),
                              with: .color((bar.close >= bar.open ? ChartPalette.up : ChartPalette.down).opacity(0.22)))
             }
         }
@@ -310,7 +312,7 @@ struct CandleChart: View {
         if averages {
             let step = period.seconds
             for line in ChartPalette.averages {
-                let values = line.kind == "sma" ? Indicators.sma(layout.bars, line.period, step: step) : Indicators.ema(layout.bars, line.period, step: step)
+                let values = memo.average(line.kind, line.period, layout.bars, step: step)
                 var path = Path(), started = false
                 let from = max(0, layout.firstVisible - 1), to = min(values.count - 1, layout.lastVisible + 1)
                 if from <= to {
@@ -353,7 +355,7 @@ struct CandleChart: View {
                 let x = layout.x(CGFloat(i))
                 if x > plot.minX + 18 && x < plot.maxX - 18 {
                     context.draw(Text(timeLabel(layout.bars[i].time, previous: i >= stride ? layout.bars[i - stride].time : nil)).font(.system(size: 10).monospacedDigit()).foregroundStyle(textColor),
-                                 at: CGPoint(x: x, y: plot.maxY + timeHeight / 2 + 1))
+                                 at: CGPoint(x: x, y: wallpaper ? plot.minY + 8 : plot.maxY + timeHeight / 2 + 1))
                 }
             }
             i += stride
@@ -371,7 +373,7 @@ struct CandleChart: View {
     }
 
     private func drawCloud(_ context: inout GraphicsContext, layout: Layout, dark: Bool) {
-        let points = Indicators.cloud(layout.bars, step: period.seconds)
+        let points = memo.cloud(layout.bars, step: period.seconds)
         let from = max(0, layout.firstVisible - 1), to = min(points.count - 1, layout.lastVisible + 1)
         guard from < to else { return }
         var segment: [(x: CGFloat, a: Double, b: Double)] = []
@@ -488,5 +490,30 @@ enum Indicators {
             out.append((a, b))
         }
         return out
+    }
+}
+
+/// Indicator results reused across frames while the bars are unchanged (pans redraw ~60 times a second).
+final class IndicatorMemo {
+    private var key = ""
+    private var averages: [String: [Double?]] = [:]
+    private var cloudPoints: [(a: Double, b: Double)?] = []
+
+    private func check(_ bars: [Candle], _ step: Double) {
+        let next = "\(bars.count)|\(bars.first?.time ?? 0)|\(bars.last?.time ?? 0)|\(bars.last?.close ?? 0)|\(step)"
+        if next != key { key = next; averages = [:]; cloudPoints = [] }
+    }
+    func average(_ kind: String, _ period: Int, _ bars: [Candle], step: Double) -> [Double?] {
+        check(bars, step)
+        let id = kind + String(period)
+        if let hit = averages[id] { return hit }
+        let values = kind == "sma" ? Indicators.sma(bars, period, step: step) : Indicators.ema(bars, period, step: step)
+        averages[id] = values
+        return values
+    }
+    func cloud(_ bars: [Candle], step: Double) -> [(a: Double, b: Double)?] {
+        check(bars, step)
+        if cloudPoints.count != bars.count { cloudPoints = Indicators.cloud(bars, step: step) }
+        return cloudPoints
     }
 }

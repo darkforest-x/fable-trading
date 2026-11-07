@@ -35,31 +35,34 @@ struct TicketForm: View {
 
         VStack(alignment: .leading, spacing: 14) {
             // Direction.
-            HStack(spacing: 0) {
+            HStack(spacing: 10) {
                 ForEach(["long", "short"], id: \.self) { value in
-                    let on = side == value
+                    let on = side == value, hue = value == "long" ? Color.up : Color.down
                     Button {
                         selectDirection(value, state: state)
                     } label: {
-                        Text(value == "long" ? "做多" : "做空").font(.body.weight(.bold)).frame(maxWidth: .infinity).frame(height: 40)
-                            .foregroundStyle(on ? .white : .primary)
-                            .background(on ? (value == "long" ? Color.up : Color.down) : .clear, in: .capsule)
-                            .contentShape(.capsule)
+                        HStack(spacing: 6) {
+                            Circle().fill(on ? Color.white : Color.muted.opacity(0.5)).frame(width: 6, height: 6)
+                            Text(value == "long" ? "做多" : "做空").font(.system(size: 16, weight: .bold))
+                        }
+                        .foregroundStyle(on ? Color.white : Color.muted)
+                        .frame(maxWidth: .infinity).frame(height: 44)
+                        .background(on ? hue : Color.field, in: .capsule)
+                        .shadow(color: on ? hue.opacity(0.28) : .clear, radius: 8, y: 3)
+                        .contentShape(.capsule)
                     }
                     .buttonStyle(.plain)
                     .disabled(locked || existing != nil)
                     .accessibilityAddTraits(on ? .isSelected : [])
                 }
             }
-            .padding(3).background(Color.field, in: .capsule)
             .animation(.snappy, value: side)
             if existing != nil { Text("同向加仓 · 沿用当前止损和杠杆").font(.caption).foregroundStyle(.secondary) }
 
             HStack(spacing: 10) {
-                Picker("委托类型", selection: $ticket.kind) { Text("市价").tag("market"); Text("限价").tag("limit") }
-                    .pickerStyle(.segmented)
+                SoftSegment(selection: $ticket.kind, options: [("market", "市价"), ("limit", "限价")])
                     .disabled(locked)
-                    .onChange(of: ticket.kind) { _, _ in Haptics.select(); ticket.fieldIssue = nil }
+                    .onChange(of: ticket.kind) { _, _ in ticket.fieldIssue = nil }
                 Button {
                     Haptics.tap(); leverageSheet = true
                 } label: {
@@ -68,9 +71,8 @@ struct TicketForm: View {
                         Text("\(ticket.leverage)x").font(.subheadline.weight(.bold).monospacedDigit())
                         Image(systemName: "chevron.right").font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
                     }
-                    .padding(.horizontal, 12).frame(height: 32)
                 }
-                .buttonStyle(.glass)
+                .buttonStyle(.pill(.soft, height: 36))
                 .disabled(locked || existing != nil || state?.sharedLeverage?[ticket.symbol] != nil)
                 .accessibilityLabel("调整杠杆，当前 \(ticket.leverage) 倍")
             }
@@ -80,7 +82,7 @@ struct TicketForm: View {
                     Button("最新价") {
                         if let value = Trading.priceAtTick(quote?.last, tick: tick), fresh { ticket.price = value; ticket.fieldIssue = nil; Haptics.tap() }
                     }
-                    .font(.caption.weight(.semibold)).buttonStyle(.glass).controlSize(.small).disabled(locked || !fresh)
+                    .font(.caption.weight(.semibold)).buttonStyle(.pill(.soft, height: 28)).disabled(locked || !fresh)
                 }) {
                     TextField("输入委托价格", text: $ticket.price).keyboardType(.decimalPad).focused($focus, equals: .price).disabled(locked)
                         .onChange(of: ticket.price) { _, _ in ticket.fieldIssue = nil }
@@ -102,12 +104,11 @@ struct TicketForm: View {
                             }
                             .font(.caption.weight(.semibold))
                         }
-                        .buttonStyle(.glass).controlSize(.small)
-                        .tint(ticket.autoMode == side ? .accentColor : nil)
+                        .buttonStyle(.pill(ticket.autoMode == side ? .tinted(.accentColor) : .soft, height: 28))
                         .disabled(locked || (!ticket.fibTicket && block != nil) || session.connection == nil)
                         .accessibilityLabel(side == "long" ? "多单 1R" : "空单 1R")
                         if ticket.autoMode != nil {
-                            Button("手动") { Haptics.tap(); ticket.manual() }.font(.caption.weight(.semibold)).buttonStyle(.glass).controlSize(.small).disabled(locked)
+                            Button("手动") { Haptics.tap(); ticket.manual() }.font(.caption.weight(.semibold)).buttonStyle(.pill(.soft, height: 28)).disabled(locked)
                         }
                     }
                 }
@@ -144,7 +145,7 @@ struct TicketForm: View {
                         Button { withAnimation(.snappy) { ticket.allocation = Double(value) }; value == 100 ? Haptics.open() : Haptics.press() } label: {
                             Text("\(value)%").font(.caption.weight(.semibold)).frame(maxWidth: .infinity).frame(height: 30)
                         }
-                        .buttonStyle(.glass).tint(Int(ticket.allocation) == value ? .accentColor : nil)
+                        .buttonStyle(.pill(Int(ticket.allocation) == value ? .tinted(.accentColor) : .soft, height: 30))
                         .disabled(locked || state == nil || room <= 0)
                     }
                 }
@@ -177,7 +178,7 @@ struct TicketForm: View {
                 }
                 .font(.body.weight(.bold)).frame(maxWidth: .infinity).frame(height: 50)
             }
-            .buttonStyle(.glassProminent).tint(side == "long" ? .up : .down)
+            .buttonStyle(.pill(.solid(side == "long" ? .up : .down), height: 50))
             .disabled(block != nil || locked || !ready)
         }
         .toolbar {
@@ -339,17 +340,17 @@ struct LeverageSheet: View {
                 }
                 HStack(spacing: 12) {
                     Button { draft = max(1, draft - 1); Haptics.select() } label: { Image(systemName: "minus").frame(width: 30, height: 30) }
-                        .buttonStyle(.glass).disabled(draft <= 1).accessibilityLabel("杠杆减一")
+                        .buttonStyle(.pill(.soft)).disabled(draft <= 1).accessibilityLabel("杠杆减一")
                     Slider(value: $draft, in: 1...Double(max(cap, 2)), step: 1).onChange(of: draft) { _, _ in Haptics.select() }
                     Button { draft = min(Double(cap), draft + 1); Haptics.select() } label: { Image(systemName: "plus").frame(width: 30, height: 30) }
-                        .buttonStyle(.glass).disabled(Int(draft) >= cap).accessibilityLabel("杠杆加一")
+                        .buttonStyle(.pill(.soft)).disabled(Int(draft) >= cap).accessibilityLabel("杠杆加一")
                 }
                 Text("杠杆影响保证金，仓位仍由止损风险与当前规则核定。" + (account.state?.policy?.marginMode == "isolated" ? "逐仓模式下，较远的止损可能需要降低杠杆。" : ""))
                     .font(.caption).foregroundStyle(.secondary)
                 Button {
                     ticket.leverage = min(cap, Int(draft)); Haptics.tap(); dismiss()
                 } label: { Text("确认 \(min(cap, Int(draft)))x").font(.body.weight(.bold)).frame(maxWidth: .infinity).frame(height: 46) }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.pill(.solid(.accentColor), height: 46))
             }
             .padding(18)
             .navigationTitle("杠杆").navigationBarTitleDisplayMode(.inline)

@@ -163,31 +163,6 @@ struct FlowLayout: Layout {
     }
 }
 
-/// Bundled public OKX coin artwork (shared with the 1.x app), falling back to initials.
-struct CoinLogo: View {
-    let coin: String
-    var size: CGFloat = 32
-    private static var cache: [String: UIImage] = [:]
-    private var image: UIImage? {
-        let key = coin.lowercased()
-        if let hit = Self.cache[key] { return hit }
-        guard let url = Bundle.main.url(forResource: key, withExtension: "png", subdirectory: "coins"),
-              let image = UIImage(contentsOfFile: url.path) else { return nil }
-        Self.cache[key] = image
-        return image
-    }
-    var body: some View {
-        Group {
-            if let image { Image(uiImage: image).resizable().scaledToFit() }
-            else { Text(String(coin.prefix(2))).font(.system(size: size * 0.36, weight: .bold)).foregroundStyle(.secondary) }
-        }
-        .frame(width: size, height: size)
-        .background(.quaternary.opacity(0.6), in: .circle)
-        .clipShape(.circle)
-    }
-}
-
-
 /// Open a coin on the full-screen 1.618 chart (monitor rows, alarm coins, cloud cards, positions).
 struct OpenChartAction { var run: (String) -> Void = { _ in }; func callAsFunction(_ symbol: String) { run(symbol) } }
 private struct OpenChartKey: EnvironmentKey { static let defaultValue = OpenChartAction() }

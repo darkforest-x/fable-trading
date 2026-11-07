@@ -33,13 +33,9 @@ struct FibChooser: View {
         NavigationStack {
             List {
                 Section {
-                    Picker("触价筛选", selection: $filter.animation(.snappy)) {
-                        ForEach(Filter.allCases) { Text($0.title).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
+                    SoftSegment(selection: $filter, options: Filter.allCases.map { ($0, $0.title) })
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
-                    .onChange(of: filter) { _, _ in Haptics.select() }
                 }
                 Section {
                     ForEach(visible) { row in rowView(row) }
@@ -57,12 +53,10 @@ struct FibChooser: View {
             .navigationTitle("最新触价")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Text("\(fib.rows.count) 个").font(.subheadline.weight(.semibold).monospacedDigit()).foregroundStyle(.secondary)
-                }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(role: .close) { Haptics.tap(); dismiss() }
+                    CloseButton { dismiss() }
                 }
+                .sharedBackgroundVisibility(.hidden)
             }
             .overlay(alignment: .bottom) {
                 if let hidden {
@@ -72,7 +66,7 @@ struct FibChooser: View {
                             .font(.subheadline.weight(.bold))
                     }
                     .padding(.horizontal, 18).padding(.vertical, 12)
-                    .glassEffect(.regular, in: .capsule)
+                    .frosted(Capsule(), veil: 0.85)
                     .padding(.bottom, 14)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                     .task(id: hidden) { try? await Task.sleep(for: .seconds(5)); withAnimation(.snappy) { self.hidden = nil } }

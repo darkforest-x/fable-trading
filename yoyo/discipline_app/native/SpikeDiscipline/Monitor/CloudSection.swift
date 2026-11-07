@@ -12,15 +12,13 @@ struct CloudSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Picker("方向", selection: $side.animation(.snappy)) { Text("全部").tag("all"); Text("做多").tag("long"); Text("做空").tag("short") }
-                    .pickerStyle(.segmented).frame(maxWidth: 220)
-                    .onChange(of: side) { _, _ in Haptics.select() }
+                SoftSegment(selection: $side, options: [("all", "全部"), ("long", "做多"), ("short", "做空")], height: 34).frame(maxWidth: 220)
                 Spacer()
                 Menu {
                     Picker("范围", selection: $scope) { Text("本周").tag("live"); Text("含历史").tag("all") }
                         .onChange(of: scope) { _, _ in Haptics.select() }
                 } label: { Label(scope == "live" ? "本周" : "含历史", systemImage: "line.3.horizontal.decrease").font(.footnote.weight(.semibold)) }
-                .buttonStyle(.glass)
+                .buttonStyle(.pill(.soft, height: 32))
             }
             if let data, !data.status.workerAlive {
                 StatusNote(text: "云带扫描未运行", systemImage: "exclamationmark.triangle", tint: .amber)
@@ -29,7 +27,7 @@ struct CloudSection: View {
             if let data, data.items.isEmpty {
                 Text(scope == "live" ? "本周暂无云带信号" : "暂无信号").font(.footnote).foregroundStyle(.secondary).frame(maxWidth: .infinity).padding(18).glassCard()
             }
-            ForEach(data?.items ?? []) { s in CloudCard(signal: s, now: data?.nowMs ?? 0) }
+            ForEach(Array((data?.items ?? []).enumerated()), id: \.offset) { _, s in CloudCard(signal: s, now: data?.nowMs ?? 0) }
         }
         .modifier(Polled(key: "cloud-\(side)-\(scope)-\(refresh)", every: .seconds(60), load: { try await API.get("/v1/monitor/cloud", query: [URLQueryItem(name: "side", value: side), URLQueryItem(name: "scope", value: scope)], connection: connection) }, value: $data, error: $error))
     }

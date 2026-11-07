@@ -25,11 +25,7 @@ struct StatsView: View {
                     if let error { StatusNote(text: "统计暂不可用\(data == nil ? "" : "，以下为上次记录")：\(error)", systemImage: "exclamationmark.triangle", tint: .amber) }
                     hero
                     NavigationLink(value: "discipline") { disciplineRow }.buttonStyle(CardPressStyle())
-                    Picker("统计周期", selection: $days.animation(.snappy)) {
-                        Text("近 7 天").tag(7); Text("近 30 天").tag(30); Text("全部").tag(0)
-                    }
-                    .pickerStyle(.segmented)
-                    .onChange(of: days) { _, _ in Haptics.select() }
+                    SoftSegment(selection: $days, options: [(7, "近 7 天"), (30, "近 30 天"), (0, "全部")])
                     summary
                     curve
                     directions
@@ -48,8 +44,9 @@ struct StatsView: View {
             .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button { Haptics.tap(); showSettings = true } label: { Image(systemName: "gearshape") }.accessibilityLabel("设置")
+                    RoundIcon(systemName: "gearshape") { showSettings = true }.accessibilityLabel("设置")
                 }
+                .sharedBackgroundVisibility(.hidden)
             }
             .navigationDestination(for: String.self) { _ in DisciplineView() }
         }

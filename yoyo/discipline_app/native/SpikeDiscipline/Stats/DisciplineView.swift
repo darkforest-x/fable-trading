@@ -158,7 +158,7 @@ struct DisciplineBudgetRow: View {
     let online: Bool
     var body: some View {
         let d = state?.discipline
-        let fresh = online && (state?.privateAt == nil || (state!.serverTime - state!.privateAt!) <= 15) && state?.privateError == nil
+        let fresh = online && (state.map { s in s.privateAt.map { s.serverTime - $0 <= 15 } ?? true } ?? true) && state?.privateError == nil
         let halted = state?.daily?.lockedReason != nil || (state.map { $0.cooldownUntil > $0.serverTime } ?? false)
         HStack(spacing: 0) {
             cell("今日可开", d.map { "\($0.entriesRemaining)" } ?? "—", "次")

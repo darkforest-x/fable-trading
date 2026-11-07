@@ -25,12 +25,12 @@ struct AlarmBanner: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer(minLength: 4)
-            Button("查看", action: onView).buttonStyle(.glassProminent).controlSize(.small)
+            Button("查看", action: onView).buttonStyle(.pill(.solid(.accentColor), height: 30))
             Button(action: onDismiss) { Image(systemName: "xmark").font(.caption.weight(.bold)) }
-                .buttonStyle(.glass).controlSize(.small).accessibilityLabel(alarm ? "知道了" : "关闭提醒")
+                .buttonStyle(.pill(.soft, height: 30)).accessibilityLabel(alarm ? "知道了" : "关闭提醒")
         }
         .padding(.leading, 12).padding(.trailing, 10).padding(.vertical, 10)
-        .glassEffect(.regular.tint((alarm ? Color.down : Color.blue).opacity(0.12)).interactive(), in: .rect(cornerRadius: 26))
+        .frosted(RoundedRectangle(cornerRadius: 24, style: .continuous), veil: 0.85)
         .padding(.horizontal, 10)
         .onAppear { if alarm { withAnimation(.easeInOut(duration: 0.9).repeatForever()) { pulse = true } } }
     }

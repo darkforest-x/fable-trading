@@ -92,13 +92,13 @@ struct PositionsView: View {
             Text(account.closeStatus == "ready" ? "原请求尚未发送，可继续提交" : "正在核对原平仓请求")
                 .font(.subheadline).foregroundStyle(.secondary)
             HStack(spacing: 10) {
-                Button("刷新核对") { Haptics.tap(); account.checkClose() }.buttonStyle(.glass)
+                Button("刷新核对") { Haptics.tap(); account.checkClose() }.buttonStyle(.pill(.soft))
                 if account.closeStatus == "ready" {
                     Button("以原请求重试") {
                         Haptics.tap()
                         Task { do { try await account.close(nil, percent: attempt.percent, recovered: true) } catch { self.error = error.localizedDescription } }
                     }
-                    .buttonStyle(.glassProminent)
+                    .buttonStyle(.pill(.solid(.accentColor)))
                 }
             }
         }
@@ -134,7 +134,7 @@ struct PositionsView: View {
                         } label: {
                             if action == "cancel:" + order.id { HStack(spacing: 6) { ProgressView().controlSize(.mini); Text("撤单中") } } else { Text("撤单") }
                         }
-                        .buttonStyle(.glass)
+                        .buttonStyle(.pill(.tinted(.down)))
                         .disabled(action != nil)
                         .accessibilityLabel("撤销 \(Fmt.coin(order.symbol)) 委托")
                     }
@@ -262,12 +262,12 @@ struct PositionCardView: View {
                     }
                     .font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity).frame(height: 36)
                 }
-                .buttonStyle(.glass)
+                .buttonStyle(.pill(.soft, height: 38))
                 .disabled(busy || !allowed)
                 Button(action: onClose) {
                     Text("平仓").font(.subheadline.weight(.bold)).frame(maxWidth: .infinity).frame(height: 36)
                 }
-                .buttonStyle(.glassProminent).tint(.down)
+                .buttonStyle(.pill(.solid(.down), height: 38))
                 .disabled(busy || !online)
             }
             if !compact {
@@ -366,7 +366,7 @@ struct TradeProgressCard: View {
                 Spacer()
                 if !checking && account.pendingEntry == nil {
                     Button { Haptics.tap(); withAnimation(.snappy) { account.entryProgress = nil } } label: { Image(systemName: "xmark").font(.caption.weight(.bold)) }
-                        .buttonStyle(.glass).controlSize(.small).accessibilityLabel("收起订单进度")
+                        .buttonStyle(.pill(.soft, height: 28)).accessibilityLabel("收起订单进度")
                 }
             }
             Text(text).font(.subheadline.weight(.medium)).foregroundStyle(status == "rejected" ? Color.down : .primary)

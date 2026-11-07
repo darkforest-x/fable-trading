@@ -78,7 +78,7 @@ struct SettingsView: View {
             .background(AmbientBackground())
             .navigationTitle("设置与账户")
             .toolbarTitleDisplayMode(.inlineLarge)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完成") { Haptics.tap(); dismiss() } } }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { CloseButton { dismiss() } }.sharedBackgroundVisibility(.hidden) }
         }
     }
 

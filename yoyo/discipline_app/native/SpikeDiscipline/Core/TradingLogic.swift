@@ -192,9 +192,9 @@ enum Trading {
         return v
     }
     static func rank(_ symbols: [String], quotes: [String: Quote], now: Double, sort: ContractSort) -> [String] {
-        let metric: [String: Double?] = Dictionary(uniqueKeysWithValues: symbols.map { s in
+        let metric: [String: Double?] = Dictionary(symbols.map { s in
             (s, sort == .volume ? turnover(quotes[s]) : quotes[s].flatMap { dayChange($0, now: now) })
-        })
+        }, uniquingKeysWith: { first, _ in first })
         return symbols.sorted { a, b in
             let x = metric[a] ?? nil, y = metric[b] ?? nil
             switch (x, y) {

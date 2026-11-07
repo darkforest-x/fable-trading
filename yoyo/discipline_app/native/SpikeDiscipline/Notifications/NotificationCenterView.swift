@@ -9,17 +9,14 @@ struct NotificationCenterView: View {
     @State private var showUnpushed = false
 
     private var rows: [NotificationEvent] {
-        (notices.data?.events ?? []).filter { (filter == "all" || $0.kind == filter) && (showUnpushed || $0.pushed || $0.kind == "alarm") }
+        (notices.data?.events ?? []).uniqued { $0.id }.filter { (filter == "all" || $0.kind == filter) && (showUnpushed || $0.pushed || $0.kind == "alarm") }
     }
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    Picker("类型", selection: $filter.animation(.snappy)) {
-                        Text("全部").tag("all"); Text("报警").tag("alarm"); Text("1.618").tag("fib")
-                    }.pickerStyle(.segmented).listRowBackground(Color.clear).listRowInsets(.init())
-                    .onChange(of: filter) { _, _ in Haptics.select() }
+                    SoftSegment(selection: $filter, options: [("all", "全部"), ("alarm", "报警"), ("fib", "1.618")]).listRowBackground(Color.clear).listRowInsets(.init())
                     Toggle("显示未推送的触价", isOn: $showUnpushed.animation()).font(.subheadline)
                 }
                 if let error = notices.error { Section { Label(error, systemImage: "exclamationmark.triangle").foregroundStyle(Color.amber) } }
@@ -36,7 +33,7 @@ struct NotificationCenterView: View {
             .scrollContentBackground(.hidden)
             .navigationTitle("通知")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完成") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { CloseButton { dismiss() } }.sharedBackgroundVisibility(.hidden) }
         }
         .presentationDetents([.medium, .large])
         .presentationBackground(.thinMaterial)

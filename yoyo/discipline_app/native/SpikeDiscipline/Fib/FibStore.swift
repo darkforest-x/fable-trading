@@ -99,7 +99,7 @@ final class FibStore {
                 && row.touches.allSatisfy { side, touch in side == touch.side.rawValue && ["live", "history"].contains(touch.source) && touch.occurredMs >= raw.weekStartMs && touch.occurredMs <= raw.nowMs }
         }
         .sorted { a, b in
-            let x = a.latestTouch!.occurredMs, y = b.latestTouch!.occurredMs
+            let x = a.latestTouch?.occurredMs ?? 0, y = b.latestTouch?.occurredMs ?? 0
             return x == y ? a.symbol < b.symbol : x > y
         }
         return FibSnapshot(nowMs: raw.nowMs, week: raw.week, timezone: raw.timezone, weekStartMs: raw.weekStartMs, mondayEndMs: raw.mondayEndMs, nextWeekMs: raw.nextWeekMs,
