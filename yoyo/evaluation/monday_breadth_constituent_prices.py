@@ -35,6 +35,14 @@ BULK_SERIES = ROOT / "data/crypto/market/binance_um5m_20260923_20261031/series"
 BULK_MANIFEST = BULK_SERIES.parent / "manifest.json"
 RECENT_MANIFEST = RECENT_SERIES.parent / "manifest.json"
 REST_CACHE_SERIES = ROOT / "data/crypto/market/binance_um5m_rest_fallback/series"
+ALLOWED_LOCAL_SOURCE_KINDS = {
+    "preholdout_base",
+    "forward",
+    "recent",
+    "october_new_bars",
+    "bulk_extension",
+    "rest_cache",
+}
 
 BAR_MS = 5 * 60 * 1000
 BAR_FREQ = "5min"
@@ -109,10 +117,26 @@ def _october_jobs() -> dict[str, dict[str, Any]]:
     return {str(key).upper(): value for key, value in obj.items()} if isinstance(obj, dict) else {}
 
 
-def _recorded_paths(symbol: str) -> list[tuple[str, Path, int]]:
-    """Return known local inputs in ascending duplicate-resolution priority."""
+def _recorded_paths(
+    symbol: str,
+) -> tuple[list[tuple[str, Path, int, list[str]]], list[dict[str, str]]]:
+    """Return whitelisted 5m sources, collapsing path aliases by file identity."""
     symbol = symbol.upper()
-    candidates: list[tuple[str, Path, int]] = []
+    candidates: list[tuple[str, Path, int, str]] = []
+    excluded: list[dict[str, str]] = []
+
+    def add(raw_path: str, *, recorded: bool) -> None:
+        path = _resolve_recorded_path(raw_path) if recorded else Path(raw_path)
+        kind = _source_kind(path)
+        if kind not in ALLOWED_LOCAL_SOURCE_KINDS:
+            if recorded:
+                excluded.append({"path": raw_path, "reason": "source_not_in_5m_whitelist"})
+            return
+        if kind == "preholdout_base" and "_5m_" not in path.name:
+            if recorded:
+                excluded.append({"path": raw_path, "reason": "base_filename_not_5m"})
+            return
+        candidates.append((kind, path, _priority(kind), raw_path))
 
     identity_path = RECLAIM_EXPERIMENT / "symbols" / symbol / "identity.json"
     if identity_path.is_file():
@@ -121,52 +145,69 @@ def _recorded_paths(symbol: str) -> list[tuple[str, Path, int]]:
             for item in identity.get("inputs", []):
                 raw = item.get("path")
                 if raw:
-                    path = _resolve_recorded_path(str(raw))
-                    kind = _source_kind(path)
-                    candidates.append((kind, path, _priority(kind)))
+                    add(str(raw), recorded=True)
             for raw in identity.get("job", {}).get("paths", []):
-                path = _resolve_recorded_path(str(raw))
-                kind = _source_kind(path)
-                candidates.append((kind, path, _priority(kind)))
+                add(str(raw), recorded=True)
         except (OSError, ValueError, TypeError, json.JSONDecodeError):
             # Fixed-name sources below still provide a usable fallback.
             pass
 
     job = _october_jobs().get(symbol, {})
     for raw in job.get("paths", []):
-        path = _resolve_recorded_path(str(raw))
-        kind = _source_kind(path)
-        candidates.append((kind, path, _priority(kind)))
+        add(str(raw), recorded=True)
 
     # Construct known per-symbol paths so all 626 symbols are covered even
     # when an older job manifest contains only a subset.
     if BASE_SERIES.is_dir():
-        candidates.extend(
-            ("preholdout_base", path, _priority("preholdout_base"))
-            for path in BASE_SERIES.glob(f"binance_um_{symbol}_5m_*.csv")
-        )
+        for path in BASE_SERIES.glob(f"binance_um_{symbol}_5m_*.csv"):
+            add(str(path), recorded=False)
     for kind, path in (
         ("forward", FORWARD_SERIES / f"{symbol}.csv"),
         ("recent", RECENT_SERIES / f"{symbol}.csv.gz"),
         ("october_new_bars", OCTOBER_EXPERIMENT / "symbols" / symbol / "new_bars.csv.gz"),
         ("bulk_extension", BULK_SERIES / f"{symbol}.csv.gz"),
     ):
-        candidates.append((kind, path, _priority(kind)))
+        add(str(path), recorded=False)
     cache_dir = REST_CACHE_SERIES / symbol
     if cache_dir.is_dir():
-        candidates.extend(
-            ("rest_cache", path, _priority("rest_cache"))
-            for path in cache_dir.glob("*.csv")
-        )
+        for path in cache_dir.glob("*.csv"):
+            add(str(path), recorded=False)
 
-    unique: dict[str, tuple[str, Path, int]] = {}
-    for kind, path, priority in candidates:
-        # Keep the repo-facing path in the receipt; avoid resolving through
-        # external-disk symlinks, whose target is useful but not stable.
-        key = str(path)
-        if path.is_file() and (key not in unique or priority > unique[key][2]):
-            unique[key] = (kind, path, priority)
-    return sorted(unique.values(), key=lambda row: (row[2], str(row[1])))
+    unique: dict[tuple[Any, ...], dict[str, Any]] = {}
+    for kind, path, priority, alias in candidates:
+        if not path.is_file():
+            continue
+        try:
+            stat = path.stat()
+            resolved = str(path.resolve())
+            key: tuple[Any, ...] = ("inode", stat.st_dev, stat.st_ino) if stat.st_ino else ("path", resolved)
+        except OSError:
+            key = ("path", str(path))
+            resolved = str(path)
+        current = unique.get(key)
+        if current is None:
+            unique[key] = {"kind": kind, "path": path, "priority": priority, "aliases": [alias], "resolved": resolved}
+            continue
+        if alias not in current["aliases"]:
+            current["aliases"].append(alias)
+        if priority > current["priority"] or (
+            priority == current["priority"] and _canonical_path_score(path) < _canonical_path_score(current["path"])
+        ):
+            current.update(kind=kind, path=path, priority=priority, resolved=resolved)
+    result = [
+        (row["kind"], row["path"], row["priority"], sorted(row["aliases"]))
+        for row in unique.values()
+    ]
+    # Keep one excluded record per path spelling; alias groups for allowed
+    # files are carried on the actual source receipt above.
+    excluded = [dict(row) for row in { (item["path"], item["reason"]): item for item in excluded }.values()]
+    return sorted(result, key=lambda row: (row[2], str(row[1]))), excluded
+
+
+def _canonical_path_score(path: Path) -> tuple[int, int, str]:
+    """Prefer the workspace-facing spelling while retaining all aliases."""
+    in_workspace = path == ROOT or ROOT in path.parents
+    return (0 if in_workspace else 1, len(str(path)), str(path))
 
 
 def _source_kind(path: Path) -> str:
@@ -593,15 +634,15 @@ def load_quotes(
 
     frames: list[pd.DataFrame] = []
     sources_receipt: list[dict[str, Any]] = []
-    lineage: list[str] = []
-    for kind, path, priority in _recorded_paths(symbol):
-        lineage.append(str(path))
+    source_candidates, excluded_lineage = _recorded_paths(symbol)
+    for kind, path, priority, aliases in source_candidates:
         bounds = _source_bounds(kind, path, symbol)
         if bounds is not None and (bounds[1] < start_ms or bounds[0] > end_ms):
             sources_receipt.append(
                 {
                     "kind": kind,
                     "path": str(path),
+                    "aliases": aliases,
                     "status": "outside_requested_range",
                     "source_first_utc": _ms_to_iso(bounds[0]),
                     "source_last_utc": _ms_to_iso(bounds[1]),
@@ -618,6 +659,7 @@ def load_quotes(
                 {
                     "kind": kind,
                     "path": str(path),
+                    "aliases": aliases,
                     "resolved_path": str(path.resolve()),
                     "status": "read" if len(frame) else "no_rows_in_requested_range",
                     "rows_in_requested_range": int(len(frame)),
@@ -633,6 +675,7 @@ def load_quotes(
                 {
                     "kind": kind,
                     "path": str(path),
+                    "aliases": aliases,
                     "status": "read_error",
                     "error": f"{type(exc).__name__}: {exc}"[:500],
                 }
@@ -691,7 +734,10 @@ def load_quotes(
             {"start": _ms_to_iso(left), "end": _ms_to_iso(right)} for left, right in rest_windows
         ],
         "local_sources": sources_receipt,
-        "source_lineage_paths": sorted(set(lineage)),
+        "source_lineage_paths": sorted(
+            {alias for source in sources_receipt for alias in source.get("aliases", [source["path"]])}
+        ),
+        "excluded_source_lineage": excluded_lineage,
         "local_rows": local_row_count,
         "local_observed_range_utc": {
             "start": combined.index.min().isoformat() if len(combined) else None,
