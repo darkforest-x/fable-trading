@@ -1,0 +1,12 @@
+{
+  "experiment_id": "exp-live-wick-score040-oct-20261109-v1",
+  "source": "experiments/active/exp-monday-limit-live-october-20261101-v1",
+  "single_variable": "Lower the touch-close score floor from 0.50 to 0.40. Evaluate the incremental band separately, then use the same six-slot account for both policies.",
+  "start": "2026-10-01",
+  "end_exclusive": "2026-11-01",
+  "minimum_score": 0.40,
+  "baseline_score": 0.50,
+  "seed": 20261103,
+  "costs": "Frozen October native E20 fills. 5bp taker and 10bp adverse slippage on entry; 2bp maker on target, 5bp taker and 10bp slippage on other exits; no funding.",
+  "evaluation": "Exploratory one-period comparison through last archived Binance bar October 27. Keep nominal per-trade net metrics separate from realized account drawdown and count. Check baseline against frozen October result. No live changes."
+}
