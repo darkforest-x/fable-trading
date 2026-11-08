@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-pa-prior24h-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: c368dc3345
+    status: inconclusive
+    question: At the first BTC/ETH Monday lower-1.618 touch, does an upward prior 24h trend predict a higher close 4h after the touch-bar close?
+    single_variable: Sign of last fully closed UTC 4h close minus its close 6 bars earlier. Mirror upper touches as secondary.
+    result: 120 mature lower touches; up 8/12 vs down 61/108 (+10.2pp, NY-week 95pct -23.3 to +38.1). BTC 5/8 vs 36/53, ETH 3/4 vs 25/55. Later 2026 0/1 vs 21/34. Common recovery/volatility/asset/period strata 78 lower touches, -1.7pp. No stable evidence for a trend gate.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-pa-prior24h-20261108-v1/summary.json
+    notes: Hypothesis frozen in 31b761e22a. 242 original OKX BTC and ETH first touches from 147 NY weeks, 232 mature direction labels across both sides. Source 12h partial-recovery native ledger and matched controls reused as separate marked-net diagnostics. No refit or score increment established. Notion https://app.notion.com/p/4128856479af8143a100cfd66fbfbde1
+
   - experiment_id: exp-monday-pa-followthrough-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 7bddcf9f09
