@@ -1004,7 +1004,7 @@ def build_oos_trajectory(actual_ledger: pd.DataFrame, oos_paths: dict,
                     continue
                 step_costs = np.zeros(maximum + 1, dtype=float)
                 if len(settlements):
-                    cash_cost = (settlements.realized_rate * settlements.mark_price).to_numpy(dtype=float)
+                    cash_cost = (settlements.realized_rate * settlements.mark_price).to_numpy(dtype=float).copy()
                     if row.decision in settlements.index:
                         i = settlements.index.get_loc(row.decision)
                         cash_cost[i] -= min(float(cash_cost[i]), 0.0)
