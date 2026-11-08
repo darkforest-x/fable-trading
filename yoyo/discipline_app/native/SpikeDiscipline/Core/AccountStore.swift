@@ -18,6 +18,10 @@ final class AccountStore {
     private(set) var state: AccountState?
     private(set) var receivedAt = Date()
     private(set) var online = false
+    /// Last snapshot from a previous launch, for display only until the first live read (LaunchCache).
+    private(set) var cached: AccountState?
+    var display: AccountState? { state ?? cached }
+    private var cachedAt = Date.distantPast
     var lastError: String?
     /// Persisted entry identity: while set, every new entry is locked.
     private(set) var pendingEntry: EntryIntent?
@@ -30,7 +34,7 @@ final class AccountStore {
     struct Notice: Equatable, Identifiable { let id = UUID(); let text: String; let success: Bool }
 
     private(set) var connection: Connection?
-    private var scope = ""
+    private(set) var scope = ""
     private var terminalEntry: String?
     private var closeNonce = 0
 
@@ -52,9 +56,10 @@ final class AccountStore {
         guard connection != self.connection else { return }
         self.connection = connection
         state = nil; online = false; pendingEntry = nil; entryProgress = nil; closeAttempt = nil; closeStatus = "checking"
-        guard let connection else { scope = ""; return }
+        guard let connection else { scope = ""; cached = nil; return }
         let digest = SHA256.hash(data: Data((AppConfig.serviceURL.absoluteString + "\n" + connection.token).utf8))
         scope = digest.prefix(16).map { String(format: "%02x", $0) }.joined() + ":\(connection.mode):\(connection.accountId)"
+        cached = LaunchCache.read(AccountState.self, "state", scope: scope)
         if let data = UserDefaults.standard.data(forKey: entryKey), let saved = try? JSONDecoder().decode(EntryIntent.self, from: data), Trading.isRequestId(saved.id) {
             pendingEntry = saved
         }
@@ -92,6 +97,9 @@ final class AccountStore {
                 throw APIError(status: 0, message: "账户或服务模式已变化，请重新连接")
             }
             state = next; receivedAt = Date(); online = true; lastError = nil
+            if Date().timeIntervalSince(cachedAt) > 30 { cachedAt = Date(); LaunchCache.write(next, "state", scope: scope) }
+            WidgetBridge.state(next)
+            PositionActivities.sync(next)
         } catch is CancellationError {
         } catch {
             online = false; lastError = error.localizedDescription; session?.handle(error)

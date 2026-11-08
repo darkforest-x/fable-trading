@@ -16,6 +16,8 @@ struct StatsView: View {
     @State private var loading = false
     @State private var discipline = false
     @State private var picked: String?
+    @State private var scroll = ScrollPosition(edge: .top)
+    @Environment(\.reselect) private var reselect
 
     private var key: String { "\(session.connection?.accountId ?? "")|\(session.connection?.mode ?? "")|\(days)" }
 
@@ -39,6 +41,7 @@ struct StatsView: View {
                 .padding(.horizontal, 14)
                 .padding(.bottom, 24)
             }
+            .scrollPosition($scroll)
             .refreshable { await load(); Haptics.success() }
             .contentMargins(.bottom, 96, for: .scrollContent)
             .scrollEdgeEffectHidden(true, for: [.top, .bottom])
@@ -46,7 +49,9 @@ struct StatsView: View {
         .sheet(isPresented: $discipline) {
             NavigationStack { DisciplineView() }.presentationDragIndicator(.visible)
         }
-        .onChange(of: days) { _, _ in Haptics.select(); picked = nil }
+        .onChange(of: days) { _, _ in Haptics.select(); picked = nil; restore() }
+        .onChange(of: reselect) { _, _ in withAnimation(.snappy) { scroll.scrollTo(edge: .top) } }
+        .onAppear { if data == nil { restore() } }
         .task(id: "\(key)|\(active)") {
             guard active, session.connection != nil else { return }
             while !Task.isCancelled {
@@ -54,6 +59,14 @@ struct StatsView: View {
                 try? await Task.sleep(for: .seconds(10))
             }
         }
+    }
+
+    /// Last statistics of this account and range from a previous launch (display only, LaunchCache).
+    private func restore() {
+        guard let connection = session.connection,
+              let saved = LaunchCache.read(Statistics.self, "stats-\(days)", scope: account.scope),
+              saved.periodDays == days, saved.accountId == connection.accountId, saved.mode == connection.mode else { return }
+        data = saved
     }
 
     private func load() async {
@@ -67,6 +80,7 @@ struct StatsView: View {
             guard requested == key else { return }
             withAnimation(.snappy) { data = next }
             error = nil
+            LaunchCache.write(next, "stats-\(days)", scope: account.scope)
         } catch is CancellationError {
         } catch {
             self.error = error.localizedDescription; session.handle(error)
@@ -83,7 +97,7 @@ struct StatsView: View {
     // MARK: hero
 
     private var hero: some View {
-        let s = data, state = account.state
+        let s = data, state = account.display
         let currentAt = state.map { live ? ($0.privateAt ?? 0) : $0.serverTime } ?? 0
         let cachedAt = s.map { $0.accountUpdatedAt ?? $0.serverTime } ?? 0
         let useCurrent = state != nil && currentAt > 0 && currentAt >= cachedAt
@@ -95,11 +109,15 @@ struct StatsView: View {
             HStack {
                 Text("净值").font(.subheadline.weight(.medium)).foregroundStyle(Color.muted)
                 Spacer()
+                // Syncing after a launch from the cached snapshot (Stitch c8bea04c… “同步最新中”).
+                if stale && session.connection != nil && NetworkWatch.shared.online {
+                    ProgressView().controlSize(.mini).accessibilityLabel("同步中")
+                }
                 tag(stale ? (updatedAt > 0 ? "上次 \(Self.time(updatedAt))" : loading ? "读取中" : "待连接") : live ? "实盘 · 仅 App 交易" : "模拟",
                     tint: stale ? .amber : live ? .down : .up)
             }
             HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text(Fmt.amount(equity)).font(.system(size: 38, weight: .bold, design: .rounded).monospacedDigit()).foregroundStyle(Color.ink)
+                Text(Fmt.amount(equity)).font(.scaled(size: 38, weight: .bold, design: .rounded).monospacedDigit()).foregroundStyle(Color.ink)
                     .contentTransition(.numericText(value: Double(equity ?? "0") ?? 0)).animation(.snappy, value: equity)
                 Text("USDT").font(.subheadline.weight(.semibold)).foregroundStyle(Color.muted)
             }
@@ -134,7 +152,7 @@ struct StatsView: View {
     private func tag(_ text: String, tint: Color) -> some View {
         HStack(spacing: 4) {
             Circle().fill(tint).frame(width: 6, height: 6)
-            Text(text).font(.system(size: 11, weight: .semibold).monospacedDigit()).foregroundStyle(tint)
+            Text(text).font(.scaled(size: 11, weight: .semibold).monospacedDigit()).foregroundStyle(tint)
         }
         .padding(.horizontal, 8).padding(.vertical, 4)
         .background(tint.opacity(0.1), in: .capsule)
@@ -160,7 +178,8 @@ struct StatsView: View {
                 Text(title).font(.caption).foregroundStyle(Color.muted)
                 HStack(alignment: .firstTextBaseline, spacing: 2) {
                     Text(value).font(.title3.weight(.bold).monospacedDigit()).foregroundStyle(Color.ink).contentTransition(.numericText())
-                    if let unit { Text(unit).font(.caption.weight(.medium)).foregroundStyle(Color.muted) }
+                        .lineLimit(1).minimumScaleFactor(0.6)
+                    if let unit { Text(unit).font(.caption.weight(.medium)).foregroundStyle(Color.muted).fixedSize() }
                 }
             }
             Spacer(minLength: 0)
@@ -210,7 +229,7 @@ struct StatsView: View {
                                     Text(Self.day(p.date)).foregroundStyle(.white.opacity(0.8))
                                     Text(Fmt.signed(Double(p.pnl)) + " U").foregroundStyle(.white)
                                 }
-                                .font(.system(size: 11, weight: .semibold).monospacedDigit())
+                                .font(.scaled(size: 11, weight: .semibold).monospacedDigit())
                                 .padding(.horizontal, 9).padding(.vertical, 5)
                                 .background(Color(white: 0.12), in: .capsule)
                             }
@@ -218,6 +237,16 @@ struct StatsView: View {
                             .symbolSize(70).foregroundStyle(Color.accentColor)
                     } else if let p = points.last {
                         PointMark(x: .value("日期", p.date), y: .value("净盈亏", Double(p.pnl) ?? 0)).foregroundStyle(hue)
+                            .symbolSize(points.count == 1 ? 80 : 30)
+                            .annotation(position: .top, spacing: 6) {
+                                // One day only: show its value instead of an empty grid (Stitch c8bea04c… “曲线点太少”).
+                                if points.count == 1 {
+                                    Text("\(Self.day(p.date)) \(Fmt.signed(Double(p.pnl)))")
+                                        .font(.scaled(size: 12, weight: .semibold).monospacedDigit()).foregroundStyle(.white)
+                                        .padding(.horizontal, 9).padding(.vertical, 5)
+                                        .background(Color(white: 0.12), in: .capsule)
+                                }
+                            }
                     }
                 }
                 .chartXSelection(value: $picked)
@@ -229,6 +258,10 @@ struct StatsView: View {
                 .chartYAxis { AxisMarks(position: .trailing) { _ in AxisGridLine().foregroundStyle(Color.muted.opacity(0.12)); AxisValueLabel() } }
                 .frame(height: 180)
                 .onChange(of: picked) { _, now in if now != nil { Haptics.select() } }
+                if points.count == 1 {
+                    Label("只有 1 天记录，满 2 天后显示曲线", systemImage: "info.circle")
+                        .font(.footnote).foregroundStyle(Color.muted)
+                }
             }
         }
         .padding(16).glassCard()

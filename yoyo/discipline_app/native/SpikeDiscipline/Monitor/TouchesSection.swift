@@ -70,7 +70,7 @@ struct TouchesSection: View {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { sortMenu = false }
                         } label: {
                             HStack {
-                                Text(option.1).font(.system(size: 15, weight: .semibold)).foregroundStyle(Color.ink)
+                                Text(option.1).font(.scaled(size: 15, weight: .semibold)).foregroundStyle(Color.ink)
                                 Spacer(minLength: 16)
                                 if sort == option.0 { Image(systemName: "checkmark").font(.system(size: 13, weight: .bold)).foregroundStyle(Color.accentColor) }
                             }
@@ -95,11 +95,11 @@ struct TouchesSection: View {
                 CoinLogo(coin: Fmt.coin(signal.symbol), size: 32)
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
-                        Text(Fmt.coin(signal.symbol)).font(.system(size: 16, weight: .semibold)).foregroundStyle(Color.ink)
+                        Text(Fmt.coin(signal.symbol)).font(.scaled(size: 16, weight: .semibold)).foregroundStyle(Color.ink)
                         SidePill(side: signal.side)
                     }
                     Text(sort == "volume" ? Trading.turnoverLabel(volume) : Fmt.clock(signal.observedMs, now: now))
-                        .font(.system(size: 12).monospacedDigit()).foregroundStyle(Color.muted).lineLimit(1)
+                        .font(.scaled(size: 12).monospacedDigit()).foregroundStyle(Color.muted).lineLimit(1)
                 }
                 Spacer()
                 ScoreBadge(score: signal.score)
@@ -213,7 +213,7 @@ struct RangeBar: View {
                 ForEach([(lower, "下1.618", ChartPalette.lower), (low, "周一低", ChartPalette.monday), (high, "周一高", ChartPalette.monday), (upper, "上1.618", ChartPalette.upper)], id: \.1) { tick in
                     VStack(spacing: 3) {
                         Rectangle().fill(tick.2).frame(width: 2, height: 12)
-                        Text(tick.1).font(.system(size: 9, weight: .semibold)).foregroundStyle(tick.2).fixedSize()
+                        Text(tick.1).font(.scaled(size: 9, weight: .semibold)).foregroundStyle(tick.2).fixedSize()
                     }
                     .position(x: min(max(f(tick.0) * w, 18), w - 18), y: 18)
                 }

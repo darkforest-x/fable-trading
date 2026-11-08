@@ -5,6 +5,7 @@ import SwiftUI
 /// identities before sending and never resends on timeout.
 @main
 struct SpikeDisciplineApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var delegate
     @State private var session = SessionStore()
     @State private var notices = NotificationStore()
     @State private var account = AccountStore()
@@ -26,6 +27,8 @@ struct SpikeDisciplineApp: App {
                 .environment(mondayHistory)
                 .environment(touchFeed)
                 .preferredColorScheme(appearance == "light" ? .light : appearance == "dark" ? .dark : nil)
+                // Text follows the system size up to xxxLarge; larger sizes would break the floating docks.
+                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         }
     }
 }
@@ -61,6 +64,12 @@ struct RootView: View {
     @State private var showNotifications = false
     @State private var showSettings = false
     @State private var bannerDrag: CGFloat = 0
+    /// Landscape is allowed only on the 1.618 / 合约 charts (owner 2026-11-08 item 6).
+    @State private var landscape = false
+    @State private var reselect: [AppTab: Int] = [:]
+    @AppStorage("trade.period") private var tradePeriod: CandlePeriod = .m15
+    private var chartTab: Bool { tab == .fib || tab == .trade }
+    private var landscapeChart: Bool { landscape && chartTab }
 
     @State private var scrolled: AppTab? = .fib
     /// Page a tab tap is scrolling to: the pages it passes must not overwrite the selection, and
@@ -76,6 +85,7 @@ struct RootView: View {
             HStack(spacing: 0) {
                 ForEach(AppTab.allCases) { page in
                     content(page)
+                        .environment(\.reselect, reselect[page] ?? 0)
                         // Backgrounds run edge to edge; content keeps the real safe area.
                         .safeAreaPadding(.top, proxy.safeAreaInsets.top)
                         .safeAreaPadding(.bottom, proxy.safeAreaInsets.bottom)
@@ -114,10 +124,26 @@ struct RootView: View {
         }
         }
         .background(AmbientBackground())
+        .onGeometryChange(for: Bool.self) { $0.size.width > $0.size.height } action: { landscape = $0 }
+        .overlay {
+            if landscapeChart {
+                LandscapeChart(symbol: tab == .fib ? fib.chartSymbol : ticket.symbol,
+                               period: tab == .fib ? Bindable(fib).period : $tradePeriod,
+                               lines: tab == .trade ? tradeLines : [])
+                    .transition(.opacity)
+            }
+        }
         .overlay(alignment: .bottom) {
-            GlassTabBar(selection: $tab, progress: progress, badge: notices.unread)
-                .padding(.horizontal, 28)
-                .padding(.bottom, 2)
+            if !landscape {
+                GlassTabBar(selection: $tab, onReselect: { reselect[$0, default: 0] += 1 }, progress: progress, badge: notices.unread)
+                    .padding(.horizontal, 28)
+                    .padding(.bottom, 2)
+            }
+        }
+        .overlay(alignment: .top) {
+            if !NetworkWatch.shared.online {
+                OfflineCapsule().padding(.top, 2).transition(.move(edge: .top).combined(with: .opacity))
+            }
         }
         .overlay(alignment: .bottom) {
             if let notice = account.notice {
@@ -147,11 +173,27 @@ struct RootView: View {
                 .padding(.top, 4)
             }
         }
-        .onChange(of: tab) { _, _ in Haptics.select() }
+        .onChange(of: tab) { _, now in Haptics.select(); Orientation.allowLandscape(now == .fib || now == .trade) }
+        .onAppear { Orientation.allowLandscape(chartTab) }
+        // Widget taps (spike://fib, spike://trade) open their page.
+        .onOpenURL { url in
+            guard url.scheme == "spike", let page = AppTab(rawValue: url.host() ?? "") else { return }
+            withAnimation(.snappy) { tab = page }
+        }
+        .onChange(of: PushRegistry.shared.openRequest?.kind) { _, _ in
+            guard let request = PushRegistry.shared.openRequest else { return }
+            PushRegistry.shared.openRequest = nil
+            if request.kind == "alarm" { UserDefaults.standard.set(MonitorSegment.alerts.rawValue, forKey: "monitor.segment") }
+            if request.kind != "alarm", let symbol = request.symbol { fib.focus(symbol) }
+            withAnimation(.snappy) { tab = request.kind == "alarm" ? .monitor : .fib }
+        }
         .environment(\.openChart, OpenChartAction { symbol in
             Haptics.open(); fib.focus(symbol)
             withAnimation(.snappy) { tab = .fib }
         })
+        #if DEBUG
+        .sheet(isPresented: .constant(AppConfig.qaWidgets)) { WidgetGallery() }
+        #endif
         .sheet(isPresented: $showNotifications) { NotificationCenterView(onOpen: open) }
         .sheet(isPresented: $showSettings) { SettingsView() }
 
@@ -163,6 +205,10 @@ struct RootView: View {
             guard let connection = session.connection, scenePhase == .active else { return }
             await notices.poll(connection: connection, session: session)
         }
+        .task(id: session.connection?.token.hashValue ?? 0) {
+            guard session.connection != nil else { return }
+            await PushRegistry.shared.start(connection: session.connection, fib: notices.prefs.fib, alarm: notices.prefs.popup)
+        }
         .task(id: pollKey) {
             account.attach(session.connection)
             guard session.connection != nil, scenePhase == .active else { return }
@@ -173,8 +219,8 @@ struct RootView: View {
     @ViewBuilder private func content(_ page: AppTab) -> some View {
         switch page {
         case .monitor: MonitorView(showNotifications: $showNotifications)
-        case .trade: TradeView(active: tab == .trade && scenePhase == .active, onDestination: route)
-        case .fib: FibView(active: tab == .fib && scenePhase == .active, onQuick: { row, period in
+        case .trade: TradeView(active: tab == .trade && scenePhase == .active && !landscape, onDestination: route)
+        case .fib: FibView(active: tab == .fib && scenePhase == .active && !landscape, onQuick: { row, period in
             guard account.pendingEntry == nil else { return }
             ticket.openQuick(row, period: period, state: account.state)
         })
@@ -184,6 +230,13 @@ struct RootView: View {
         })
         case .stats: StatsView(showSettings: $showSettings, active: tab == .stats && scenePhase == .active)
         }
+    }
+
+    /// Entry / stop of the 合约 coin's open position for the landscape chart (same as TradeView).
+    private var tradeLines: [ChartLine] {
+        guard let e = ticket.existing(account.state) else { return [] }
+        return [ChartLine(price: Double(e.entry) ?? 0, title: "开仓", color: ChartPalette.accent),
+                ChartLine(price: Double(e.stop) ?? 0, title: "止损", color: ChartPalette.down, dashed: true)]
     }
 
     private var pollKey: String { "\(session.connection?.token.hashValue ?? 0)-\(session.connection?.accountId ?? "")-\(scenePhase == .active)" }
@@ -214,6 +267,7 @@ struct RootView: View {
 /// Floating frosted tab bar (icons only); the accent lens slides with the page scroll.
 struct GlassTabBar: View {
     @Binding var selection: AppTab
+    var onReselect: (AppTab) -> Void = { _ in }
     let progress: CGFloat
     let badge: Int
     @Namespace private var glass
@@ -232,16 +286,16 @@ struct GlassTabBar: View {
                         let active = selection == page
                         Button {
                             Haptics.tap()
-                            withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) { selection = page }
+                            if selection == page { Haptics.tap(); onReselect(page) } else { withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) { selection = page } }
                         } label: {
                             Image(systemName: page.symbol(active: active))
-                                .font(.system(size: 19, weight: active ? .semibold : .regular))
+                                .font(.scaled(size: 19, weight: active ? .semibold : .regular))
                                 .foregroundStyle(active ? Color.accentColor : Color.muted)
                                 .symbolEffect(.bounce, value: active)
                                 .contentTransition(.symbolEffect(.replace))
                                 .overlay(alignment: .topTrailing) {
                                     if page == .monitor && badge > 0 {
-                                        Text(badge > 9 ? "9+" : "\(badge)").font(.system(size: 10, weight: .bold)).foregroundStyle(.white)
+                                        Text(badge > 9 ? "9+" : "\(badge)").font(.scaled(size: 10, weight: .bold)).foregroundStyle(.white)
                                             .padding(.horizontal, 5).frame(minWidth: 17, minHeight: 17).background(.red, in: .capsule)
                                             .offset(x: 10, y: -8)
                                     }

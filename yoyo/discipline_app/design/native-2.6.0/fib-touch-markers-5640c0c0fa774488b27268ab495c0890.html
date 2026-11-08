@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>天才交易员 · 1.618</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-container-highest": "#dce2f3",
+            "on-secondary-fixed": "#002116",
+            "on-primary-fixed-variant": "#00468d",
+            "on-surface": "#151c27",
+            "surface-container-low": "#f0f3ff",
+            "primary": "#005ab3",
+            "on-secondary": "#ffffff",
+            "tertiary-container": "#d6345c",
+            "on-secondary-container": "#007153",
+            "background": "#f9f9ff",
+            "outline": "#717786",
+            "surface-variant": "#dce2f3",
+            "secondary-fixed-dim": "#6adbb1",
+            "on-tertiary-fixed": "#400012",
+            "surface-bright": "#f9f9ff",
+            "inverse-on-surface": "#ebf1ff",
+            "on-error": "#ffffff",
+            "primary-fixed": "#d6e3ff",
+            "outline-variant": "#c0c6d6",
+            "on-primary": "#ffffff",
+            "secondary-fixed": "#88f7cc",
+            "error-container": "#ffdad6",
+            "on-primary-fixed": "#001b3e",
+            "on-primary-container": "#fefcff",
+            "inverse-primary": "#aac7ff",
+            "primary-fixed-dim": "#aac7ff",
+            "on-error-container": "#93000a",
+            "surface-container": "#e7eefe",
+            "surface-tint": "#005db8",
+            "on-surface-variant": "#414754",
+            "on-background": "#151c27",
+            "on-tertiary-fixed-variant": "#910033",
+            "tertiary": "#b41645",
+            "surface-container-high": "#e2e8f8",
+            "tertiary-fixed-dim": "#ffb2bb",
+            "inverse-surface": "#2a313d",
+            "tertiary-fixed": "#ffd9dd",
+            "surface": "#f9f9ff",
+            "surface-dim": "#d3daea",
+            "on-tertiary": "#ffffff",
+            "primary-container": "#0073e0",
+            "secondary-container": "#85f4c9",
+            "error": "#ba1a1a",
+            "on-tertiary-container": "#fffbff",
+            "surface-container-lowest": "#ffffff",
+            "secondary": "#006c50",
+            "on-secondary-fixed-variant": "#00513b"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "space-xl": "2rem",
+            "gutter-lg": "1.5rem",
+            "space-sm": "0.5rem",
+            "margin-lg": "2rem",
+            "margin": "1rem",
+            "gutter-md": "1rem",
+            "space-xs": "0.25rem",
+            "gutter": "0.75rem",
+            "space-md": "0.875rem",
+            "space-lg": "1.25rem",
+            "margin-md": "1.5rem"
+          },
+          fontFamily: {
+            "headline-xl": ["Space Grotesk"],
+            "body-lg": ["Manrope"],
+            "data-md": ["JetBrains Mono"],
+            "body-md": ["Manrope"],
+            "headline-xl-mobile": ["Space Grotesk"],
+            "data-lg": ["JetBrains Mono"],
+            "title-lg": ["Manrope"],
+            "label-caps": ["Manrope"],
+            "headline-lg-mobile": ["Space Grotesk"],
+            "headline-lg": ["Space Grotesk"],
+            "data-sm": ["JetBrains Mono"],
+            "body-sm": ["Manrope"],
+            "headline-md": ["Space Grotesk"]
+          },
+          fontSize: {
+            "headline-xl": ["40px", { lineHeight: "48px", fontWeight: "700" }],
+            "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            "data-md": ["14px", { lineHeight: "18px", fontWeight: "500" }],
+            "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            "headline-xl-mobile": ["30px", { lineHeight: "36px", fontWeight: "700" }],
+            "data-lg": ["20px", { lineHeight: "26px", fontWeight: "600" }],
+            "title-lg": ["18px", { lineHeight: "24px", fontWeight: "600" }],
+            "label-caps": ["10px", { lineHeight: "14px", letterSpacing: "0.06em", fontWeight: "700" }],
+            "headline-lg-mobile": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+            "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+            "data-sm": ["11px", { lineHeight: "14px", fontWeight: "500" }],
+            "body-sm": ["12px", { lineHeight: "16px", fontWeight: "400" }],
+            "headline-md": ["22px", { lineHeight: "28px", fontWeight: "600" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    /* Liquid Glass & iOS 26 High Focus Stylings */
+    body {
+      background-color: #0b0f17;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .ios-device-frame {
+      width: 402px;
+      height: 874px;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(120% 120% at 50% 0%, #FFFFFF 0%, #F8FAFC 70%, #F1F5F9 100%);
+      box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.45), 0 0 0 12px #1E293B, 0 0 0 14px #0F172A;
+      border-radius: 56px;
+    }
+
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(36px) saturate(200%);
+      -webkit-backdrop-filter: blur(36px) saturate(200%);
+      box-shadow: 0 12px 36px -4px rgba(17, 24, 39, 0.07), inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95);
+    }
+
+    .glass-callout {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(40px) saturate(220%);
+      -webkit-backdrop-filter: blur(40px) saturate(220%);
+      box-shadow: 0 16px 40px -4px rgba(15, 23, 42, 0.12), 0 4px 14px 0 rgba(215, 53, 93, 0.08), inset 0 1px 1px 0 rgba(255, 255, 255, 1);
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .dynamic-island {
+      width: 126px;
+      height: 37px;
+      background: #000000;
+      border-radius: 20px;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-slate-950 flex items-center justify-center p-0 sm:p-4">
+<!-- iPhone Container (iOS 26 402x874pt) -->
+<div class="ios-device-frame text-on-surface">
+<!-- Top Hardware Island & Status Area -->
+<div class="absolute top-0 left-0 right-0 h-12 z-50 flex items-center justify-between px-8 pt-3 pointer-events-none">
+<span class="font-data-md text-body-sm font-semibold tracking-tight text-slate-900">9:41</span>
+<div class="dynamic-island absolute left-1/2 -translate-x-1/2 top-2.5 flex items-center justify-end px-3">
+<div class="w-3 h-3 rounded-full bg-emerald-500/20 flex items-center justify-center">
+<div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+</div>
+</div>
+<div class="flex items-center space-x-1.5 text-slate-900">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">signal_cellular_4_bar</span>
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">wifi</span>
+<span class="material-symbols-outlined text-[17px]" style="font-variation-settings: 'FILL' 1;">battery_full</span>
+</div>
+</div>
+<!-- SHARED COMPONENT: TopAppBar (Mandated Anchors) -->
+<div class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-margin pt-11 pb-space-sm w-full bg-surface/80 backdrop-blur-2xl shadow-sm">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-primary text-[24px]">candlestick_chart</span>
+<span class="text-headline-md font-headline-md font-bold text-on-surface tracking-tight">天才交易员</span>
+</div>
+<div class="flex items-center space-x-2">
+<span class="text-label-caps font-label-caps uppercase px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-bold">1.618 ENGINE</span>
+<button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container-highest/50 active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant">tune</span>
+</button>
+</div>
+</div>
+<!-- FULLSCREEN WALLPAPER CANDLESTICK CHART CANVAS (402x874pt Canvas) -->
+<div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+<svg class="w-full h-full" fill="none" viewbox="0 0 402 874" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<lineargradient id="bull-glow" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#169873" stop-opacity="0.15"></stop>
+<stop offset="100%" stop-color="#169873" stop-opacity="0.0"></stop>
+</lineargradient>
+<lineargradient id="score-grad" x1="0" x2="1" y1="0" y2="0">
+<stop offset="0%" stop-color="#FF9F0A"></stop>
+<stop offset="100%" stop-color="#F5731A"></stop>
+</lineargradient>
+</defs>
+<!-- Subtle Canvas Grid -->
+<g opacity="0.6" stroke="#E2E8F0" stroke-dasharray="2 3" stroke-width="0.75">
+<line x1="20" x2="382" y1="240" y2="240"></line>
+<line x1="20" x2="382" y1="360" y2="360"></line>
+<line x1="20" x2="382" y1="460" y2="460"></line>
+<line x1="20" x2="382" y1="560" y2="560"></line>
+<line x1="20" x2="382" y1="670" y2="670"></line>
+<!-- Vertical time guides -->
+<line x1="90" x2="90" y1="200" y2="760"></line>
+<line x1="190" x2="190" y1="200" y2="760"></line>
+<line x1="290" x2="290" y1="200" y2="760"></line>
+</g>
+<!-- 1.618 & Benchmarks Level Lines -->
+<!-- 上 1.618 (2,223.6) -->
+<g id="level-upper-1618">
+<line stroke="#111827" stroke-linecap="round" stroke-width="1.2" x1="12" x2="390" y1="318" y2="318"></line>
+<rect fill="#111827" height="18" rx="5" width="102" x="290" y="306"></rect>
+<text dominant-baseline="middle" fill="#FFFFFF" font-family="JetBrains Mono" font-size="9" font-weight="600" text-anchor="middle" x="341" y="319">上 1.618 (2,223.6)</text>
+</g>
+<!-- 周一高 (2,100) -->
+<g id="level-monday-high">
+<line stroke="#9CA3AF" stroke-dasharray="4 3" stroke-width="0.9" x1="12" x2="390" y1="428" y2="428"></line>
+<rect fill="#F1F5F9" height="16" rx="4" width="78" x="312" y="418"></rect>
+<text dominant-baseline="middle" fill="#6B7280" font-family="JetBrains Mono" font-size="8.5" font-weight="500" text-anchor="middle" x="351" y="429">周一高 (2,100)</text>
+</g>
+<!-- 周一低 (1,900) -->
+<g id="level-monday-low">
+<line stroke="#9CA3AF" stroke-dasharray="4 3" stroke-width="0.9" x1="12" x2="390" y1="568" y2="568"></line>
+<rect fill="#F1F5F9" height="16" rx="4" width="78" x="312" y="558"></rect>
+<text dominant-baseline="middle" fill="#6B7280" font-family="JetBrains Mono" font-size="8.5" font-weight="500" text-anchor="middle" x="351" y="569">周一低 (1,900)</text>
+</g>
+<!-- 下 1.618 (1,776.4) -->
+<g id="level-lower-1618">
+<line stroke="#9CA3AF" stroke-dasharray="3 3" stroke-width="1.1" x1="12" x2="390" y1="676" y2="676"></line>
+<rect fill="#E2E8F0" height="18" rx="5" width="102" x="290" y="666"></rect>
+<text dominant-baseline="middle" fill="#475569" font-family="JetBrains Mono" font-size="9" font-weight="600" text-anchor="middle" x="341" y="678">下 1.618 (1,776.4)</text>
+</g>
+<!-- Previous weeks' faded historical level lines at far left -->
+<g opacity="0.38">
+<line stroke="#94A3B8" stroke-dasharray="2 2" stroke-width="1" x1="12" x2="88" y1="344" y2="344"></line>
+<line stroke="#94A3B8" stroke-width="0.75" x1="12" x2="88" y1="446" y2="446"></line>
+<line stroke="#94A3B8" stroke-width="0.75" x1="12" x2="88" y1="590" y2="590"></line>
+<text fill="#64748B" font-family="JetBrains Mono" font-size="7.5" x="14" y="339">Prev 1.618</text>
+</g>
+<!-- CANDLESTICKS SERIES -->
+<!-- Historical candles (left segment) -->
+<g id="candles-historical" opacity="0.45">
+<!-- C1 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="28" x2="28" y1="490" y2="538"></line>
+<rect fill="#8B9099" height="24" rx="1.5" width="8" x="24" y="502"></rect>
+<!-- C2 (Prev week lower touch) -->
+<line stroke="#8B9099" stroke-width="1.2" x1="44" x2="44" y1="565" y2="618"></line>
+<rect fill="#8B9099" height="32" rx="1.5" width="8" x="40" y="572"></rect>
+<!-- Previous week touch dot (lower 1.618 historical, opacity-40) -->
+<circle cx="44" cy="618" fill="#169873" opacity="0.4" r="3.2"></circle>
+<!-- C3 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="60" x2="60" y1="530" y2="580"></line>
+<rect fill="none" height="28" rx="1.5" stroke="#8B9099" stroke-width="1.2" width="8" x="56" y="540"></rect>
+<!-- C4 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="76" x2="76" y1="495" y2="548"></line>
+<rect fill="#8B9099" height="30" rx="1.5" width="8" x="72" y="505"></rect>
+</g>
+<!-- Monday Benchmark Candles (Solid Green #169873) -->
+<g id="monday-benchmark">
+<!-- Mon C1 -->
+<line stroke="#169873" stroke-width="1.3" x1="94" x2="94" y1="450" y2="540"></line>
+<rect fill="#169873" height="58" rx="1.5" width="8" x="90" y="468"></rect>
+<!-- Mon C2 (Range setting) -->
+<line stroke="#169873" stroke-width="1.3" x1="110" x2="110" y1="428" y2="568"></line>
+<rect fill="#169873" height="98" rx="1.5" width="8" x="106" y="445"></rect>
+<!-- Monday Banner Indicator -->
+<rect fill="#169873" fill-opacity="0.15" height="12" rx="3" width="30" x="90" y="582"></rect>
+<text fill="#006C50" font-family="Manrope" font-size="7.5" font-weight="700" text-anchor="middle" x="105" y="591">周一基准</text>
+</g>
+<!-- Mid-week Expansion Candles (Neutral grey / outlines) -->
+<g id="midweek-candles">
+<!-- C5 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="128" x2="128" y1="432" y2="480"></line>
+<rect fill="none" height="24" rx="1.5" stroke="#8B9099" stroke-width="1.2" width="8" x="124" y="440"></rect>
+<!-- C6 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="144" x2="144" y1="410" y2="465"></line>
+<rect fill="#8B9099" height="32" rx="1.5" width="8" x="140" y="420"></rect>
+<!-- C7 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="160" x2="160" y1="400" y2="445"></line>
+<rect fill="none" height="26" rx="1.5" stroke="#8B9099" stroke-width="1.2" width="8" x="156" y="408"></rect>
+<!-- C8 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="176" x2="176" y1="375" y2="430"></line>
+<rect fill="#8B9099" height="35" rx="1.5" width="8" x="172" y="385"></rect>
+<!-- C9 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="192" x2="192" y1="365" y2="415"></line>
+<rect fill="none" height="28" rx="1.5" stroke="#8B9099" stroke-width="1.2" width="8" x="188" y="372"></rect>
+<!-- C10 (Failed small impulse) -->
+<line stroke="#8B9099" stroke-width="1.2" x1="208" x2="208" y1="340" y2="395"></line>
+<rect fill="#8B9099" height="32" rx="1.5" width="8" x="204" y="352"></rect>
+<!-- C11 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="224" x2="224" y1="348" y2="400"></line>
+<rect fill="none" height="28" rx="1.5" stroke="#8B9099" stroke-width="1.2" width="8" x="220" y="360"></rect>
+<!-- C12 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="240" x2="240" y1="330" y2="385"></line>
+<rect fill="#8B9099" height="30" rx="1.5" width="8" x="236" y="342"></rect>
+<!-- C13 Consolidation -->
+<line stroke="#8B9099" stroke-width="1.2" x1="256" x2="256" y1="332" y2="370"></line>
+<rect fill="none" height="20" rx="1.5" stroke="#8B9099" stroke-width="1.2" width="8" x="252" y="340"></rect>
+</g>
+<!-- TARGET CANDLE WITH 1.618 UPPER TOUCH (CRITICAL FEATURE) -->
+<g id="touch-candle-group">
+<!-- The exact touch candle (C14) hitting 上 1.618 (y=318) exactly at its upper wick tip -->
+<line stroke="#8B9099" stroke-width="1.5" x1="274" x2="274" y1="318" y2="375"></line>
+<rect fill="#8B9099" height="36" rx="1.5" width="8" x="270" y="328"></rect>
+<!-- TOUCH MARKER: Upper wick tip touch (Short = #D7355D) -->
+<circle cx="274" cy="318" fill="#D7355D" r="4.5" stroke="#FFFFFF" stroke-width="1.5"></circle>
+<circle cx="274" cy="318" fill="#D7355D" fill-opacity="0.18" r="9"></circle>
+<!-- High Score Capsule Pointer Label above Touch Marker -->
+<g transform="translate(260, 292)">
+<rect fill="url(#score-grad)" filter="drop-shadow(0px 2px 4px rgba(245,115,26,0.35))" height="15" rx="7.5" width="28" x="0" y="0"></rect>
+<text fill="#FFFFFF" font-family="JetBrains Mono" font-size="8" font-weight="700" text-anchor="middle" x="14" y="10.5">0.82</text>
+</g>
+</g>
+<!-- Continuation & Current Candles -->
+<g id="current-candles">
+<!-- C15 (Immediate rejection down) -->
+<line stroke="#8B9099" stroke-width="1.2" x1="292" x2="292" y1="324" y2="372"></line>
+<rect fill="#8B9099" height="28" rx="1.5" width="8" x="288" y="335"></rect>
+<!-- C16 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="310" x2="310" y1="332" y2="384"></line>
+<rect fill="none" height="26" rx="1.5" stroke="#8B9099" stroke-width="1.2" width="8" x="306" y="344"></rect>
+<!-- C17 Live Price Candle -->
+<line stroke="#169873" stroke-width="1.4" x1="328" x2="328" y1="322" y2="360"></line>
+<rect fill="#169873" height="22" rx="1.5" width="8" x="324" y="325"></rect>
+<!-- Price tick dotted line extending to scale -->
+<line stroke="#169873" stroke-dasharray="2 2" stroke-width="1" x1="332" x2="385" y1="325" y2="325"></line>
+</g>
+<!-- Bottom Time Axis Reference Markers -->
+<g id="time-axis" opacity="0.65">
+<line stroke="#CBD5E1" stroke-width="0.8" x1="20" x2="382" y1="720" y2="720"></line>
+<text fill="#64748B" font-family="JetBrains Mono" font-size="8.5" text-anchor="middle" x="44" y="734">11/04 08:00</text>
+<text fill="#64748B" font-family="JetBrains Mono" font-size="8.5" text-anchor="middle" x="144" y="734">11/06 12:00</text>
+<text fill="#111827" font-family="JetBrains Mono" font-size="8.5" font-weight="700" text-anchor="middle" x="274" y="734">11/08 18:00</text>
+<text fill="#64748B" font-family="JetBrains Mono" font-size="8.5" text-anchor="middle" x="350" y="734">实时</text>
+</g>
+</svg>
+</div>
+<!-- MAIN FOREGROUND INTERACTION LAYER -->
+<div class="relative z-10 w-full h-full flex flex-col justify-between pt-24 pb-20 pointer-events-auto">
+<!-- TOP SECTION: Coin Strip & Context Card -->
+<div class="px-3.5 space-y-2.5">
+<!-- 2. Top Floating Coin Strip (Horizontal Scroll Ribbon) -->
+<div class="glass-pill rounded-full py-1.5 px-2 flex items-center space-x-2 overflow-x-auto hide-scrollbar">
+<!-- Coin Chip: TIA -->
+<div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-white/70 shadow-sm shrink-0">
+<span class="w-4 h-4 rounded-full bg-violet-600 text-[9px] font-bold text-white flex items-center justify-center font-headline-md">T</span>
+<span class="font-headline-md font-bold text-slate-800 text-[12px] leading-none">TIA</span>
+<span class="px-1.5 py-0.5 rounded-full bg-gradient-to-r from-[#FF9F0A] to-[#F5731A] text-white font-data-md font-bold text-[9px] leading-tight">0.88</span>
+</div>
+<!-- Coin Chip: ETH (Active/Selected) -->
+<div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-blue-50/90 ring-1 ring-blue-500/30 shadow-sm shrink-0">
+<span class="w-4 h-4 rounded-full bg-slate-900 text-[9px] font-bold text-white flex items-center justify-center font-headline-md">Ξ</span>
+<span class="font-headline-md font-bold text-slate-950 text-[12px] leading-none">ETH</span>
+<span class="px-1.5 py-0.5 rounded-full bg-gradient-to-r from-[#FF9F0A] to-[#F5731A] text-white font-data-md font-bold text-[9px] leading-tight shadow-sm">0.82</span>
+</div>
+<!-- Coin Chip: SOL -->
+<div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-white/70 shadow-sm shrink-0">
+<span class="w-4 h-4 rounded-full bg-teal-500 text-[9px] font-bold text-white flex items-center justify-center font-headline-md">S</span>
+<span class="font-headline-md font-bold text-slate-800 text-[12px] leading-none">SOL</span>
+<span class="px-1.5 py-0.5 rounded-full bg-gradient-to-r from-[#FF9F0A] to-[#F5731A] text-white font-data-md font-bold text-[9px] leading-tight">0.75</span>
+</div>
+<!-- Coin Chip: BTC -->
+<div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-white/70 shadow-sm shrink-0">
+<span class="w-4 h-4 rounded-full bg-amber-500 text-[9px] font-bold text-white flex items-center justify-center font-headline-md">₿</span>
+<span class="font-headline-md font-bold text-slate-800 text-[12px] leading-none">BTC</span>
+<span class="px-1.5 py-0.5 rounded-full bg-slate-200 text-slate-700 font-data-md font-bold text-[9px] leading-tight">0.64</span>
+</div>
+<!-- Coin Chip: ARB -->
+<div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-white/70 shadow-sm shrink-0">
+<span class="w-4 h-4 rounded-full bg-sky-500 text-[9px] font-bold text-white flex items-center justify-center font-headline-md">A</span>
+<span class="font-headline-md font-bold text-slate-800 text-[12px] leading-none">ARB</span>
+<span class="px-1.5 py-0.5 rounded-full bg-gray-200 text-[#6B7280] font-data-md font-semibold text-[9px] leading-tight">0.31</span>
+</div>
+</div>
+<!-- 3. Top Floating Coin Card (Context Header) -->
+<div class="glass-card rounded-3xl p-3.5 space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#169873]"></span>
+</span>
+<h2 class="font-headline-md font-bold text-slate-900 text-[17px] tracking-tight">ETH / USDT</h2>
+<span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-data-sm font-semibold text-[10px]">1.618 策略</span>
+</div>
+<div class="flex items-center space-x-1 text-[#6B7280] font-body-sm text-[11px]">
+<span>高 2,223.6</span>
+<span class="text-slate-300">·</span>
+<span>低 2,084.0</span>
+</div>
+</div>
+<div class="flex items-baseline justify-between pt-0.5">
+<div class="flex items-baseline space-x-2.5">
+<span class="font-data-lg text-[28px] font-bold tracking-tight text-slate-900 leading-none">2,218.4</span>
+<span class="font-data-md font-bold text-[#169873] text-[13px] bg-emerald-50 px-2 py-0.5 rounded-md leading-none">+3.85%</span>
+</div>
+<div class="text-right">
+<span class="font-data-sm text-[11px] text-slate-500 tracking-tight">天才交易员 · 1.618</span>
+</div>
+</div>
+<!-- Compact OHLC Ribbon -->
+<div class="flex items-center justify-between text-slate-500 font-data-sm text-[10px] pt-1 border-t border-slate-100/70">
+<div><span class="text-slate-400">O</span> 2,185.0</div>
+<div><span class="text-slate-400">H</span> 2,223.6</div>
+<div><span class="text-slate-400">L</span> 2,174.2</div>
+<div><span class="text-slate-400">C</span> 2,218.4</div>
+<div class="text-slate-400 font-sans">15m 柱内</div>
+</div>
+</div>
+</div>
+<!-- MID SECTION: Interactive Frosted Callout Popup (Tapped state visible over candle 274,318) -->
+<div class="relative w-full px-4 h-48 pointer-events-none">
+<!-- Floating Popover Placed Dynamically Near Touch Marker -->
+<div class="absolute left-24 top-6 pointer-events-auto transition-transform active:scale-95 duration-200">
+<div class="glass-callout rounded-2xl p-3 w-56 ring-1 ring-white/90">
+<!-- Header Row -->
+<div class="flex items-center justify-between pb-1.5 border-b border-slate-100">
+<div class="flex items-center space-x-1.5">
+<span class="w-2 h-2 rounded-full bg-[#D7355D]"></span>
+<span class="font-body-md font-bold text-[12px] text-slate-900">上沿触价</span>
+</div>
+<span class="font-data-sm text-[10px] text-slate-500">11/08 18:51</span>
+</div>
+<!-- Quantitative Validation Row -->
+<div class="flex items-center justify-between py-2">
+<div class="flex items-center space-x-1.5">
+<span class="font-body-sm text-[11px] text-slate-600">模型评分</span>
+<span class="px-1.5 py-0.5 rounded-full bg-gradient-to-r from-[#FF9F0A] to-[#F5731A] text-white font-data-md font-bold text-[10px] shadow-sm">0.82</span>
+</div>
+<span class="inline-flex items-center text-[10px] font-bold text-[#169873] bg-emerald-50 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[12px] mr-0.5" style="font-variation-settings: 'FILL' 1;">verified</span>
+                已通过
+              </span>
+</div>
+<!-- Price Detail & Call to Action -->
+<div class="flex items-center justify-between pt-1 bg-slate-50/70 p-2 rounded-xl">
+<div>
+<div class="text-[9px] text-slate-400 font-body-sm">触价价位</div>
+<div class="font-data-md font-bold text-slate-900 text-[13px]">2,223.6</div>
+</div>
+<button class="bg-[#D7355D] text-white font-body-sm text-[11px] font-bold px-2.5 py-1.5 rounded-lg shadow-sm hover:brightness-105 active:scale-95 transition-all">
+                做空信号
+              </button>
+</div>
+</div>
+<!-- Decorative Callout Triangle Pointer pointing down-left toward wick tip -->
+<div class="w-3 h-3 bg-white/90 transform rotate-45 ml-8 -mt-1.5 shadow-sm"></div>
+</div>
+</div>
+<!-- 6. BOTTOM CONTROLS & DOCK SYSTEM -->
+<div class="px-3.5 space-y-2.5">
+<!-- Timeframe Dock + Quick Action Bar -->
+<div class="glass-pill rounded-2xl p-1.5 flex items-center justify-between shadow-lg">
+<!-- Timeframe Segmented Chips -->
+<div class="flex items-center space-x-1 bg-slate-100/60 p-0.5 rounded-xl">
+<button class="px-2 py-1 rounded-lg text-slate-600 font-data-sm text-[11px] font-medium hover:text-slate-900">5m</button>
+<button class="px-2 py-1 rounded-lg bg-[#0A84FF] text-white font-data-sm text-[11px] font-bold shadow-sm">15m</button>
+<button class="px-2 py-1 rounded-lg text-slate-600 font-data-sm text-[11px] font-medium hover:text-slate-900">1H</button>
+<button class="px-2 py-1 rounded-lg text-slate-600 font-data-sm text-[11px] font-medium hover:text-slate-900">4H</button>
+<button class="px-2 py-1 rounded-lg text-slate-600 font-data-sm text-[11px] font-medium hover:text-slate-900">12H</button>
+<button class="px-2 py-1 rounded-lg text-slate-600 font-data-sm text-[11px] font-medium hover:text-slate-900">1D</button>
+</div>
+<!-- Right Action Tools -->
+<div class="flex items-center space-x-1.5 pr-1">
+<button class="w-8 h-8 rounded-xl bg-white/80 text-slate-700 flex items-center justify-center shadow-xs active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[17px]">radar</span>
+</button>
+<!-- Vibrant '⚡ 开单' FAB Apple Blue -->
+<button class="h-8 px-3 rounded-full bg-[#0A84FF] text-white font-body-sm font-bold text-[12px] flex items-center space-x-1 shadow-md hover:bg-blue-600 active:scale-95 transition-all">
+<span>⚡</span>
+<span>开单</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- SHARED COMPONENT: BottomNavBar (Execution Rules & Style Tokens Applied) -->
+<!-- The user explicitly requires '1.618' screen. Active destination mapped to "雷达 / 1.618" (Index 2) -->
+<div class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter py-space-xs pb-6 bg-surface/85 backdrop-blur-2xl shadow-lg">
+<!-- Tab 1: 行情 (Monitoring) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-space-md py-space-xs hover:bg-surface-container/60 active:scale-95 transition-all duration-200">
+<span class="material-symbols-outlined text-[20px]">monitoring</span>
+<span class="text-label-caps font-label-caps mt-0.5">行情</span>
+</button>
+<!-- Tab 2: 交易 (Query Stats) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-space-md py-space-xs hover:bg-surface-container/60 active:scale-95 transition-all duration-200">
+<span class="material-symbols-outlined text-[20px]">query_stats</span>
+<span class="text-label-caps font-label-caps mt-0.5">交易</span>
+</button>
+<!-- Tab 3: 雷达 (1.618 Engine Active State) -->
+<button class="flex flex-col items-center justify-center bg-primary-fixed text-on-primary-fixed rounded-full px-space-md py-space-xs active:scale-95 transition-all duration-200 shadow-sm">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+<span class="text-label-caps font-label-caps mt-0.5 font-bold">1.618 雷达</span>
+</button>
+<!-- Tab 4: 我的 (Account) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-space-md py-space-xs hover:bg-surface-container/60 active:scale-95 transition-all duration-200">
+<span class="material-symbols-outlined text-[20px]">account_circle</span>
+<span class="text-label-caps font-label-caps mt-0.5">我的</span>
+</button>
+</div>
+<!-- Home Indicator Bar (iOS safe bottom) -->
+<div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-slate-900/25 rounded-full z-50 pointer-events-none"></div>
+</div>
+</body></html>

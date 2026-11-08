@@ -30,5 +30,6 @@ enum AppConfig {
     static var qaToken: String? { UserDefaults.standard.string(forKey: "SpikeQAToken") }
     static var qaTab: String? { UserDefaults.standard.string(forKey: "SpikeQATab") }
     static var qaSegment: String? { UserDefaults.standard.string(forKey: "SpikeQASegment") }
+    static var qaWidgets: Bool { UserDefaults.standard.bool(forKey: "SpikeQAWidgets") }
     #endif
 }

@@ -1,4 +1,13 @@
 import SwiftUI
+
+extension Font {
+    /// A design size that follows the system text size (owner 2026-11-08 item 7 “系统调大字号”),
+    /// capped at 1.35× so floating chips and docks keep their shape. Chart canvas labels and icons
+    /// in fixed-size buttons keep `.system(size:)` on purpose.
+    static func scaled(size: CGFloat, weight: Font.Weight = .regular, design: Font.Design = .default) -> Font {
+        .system(size: min(size * 1.35, UIFontMetrics.default.scaledValue(for: size)), weight: weight, design: design)
+    }
+}
 import UIKit
 
 /// One minimal design system (owner 2026-11-07 “简约，好看，iPhone 毛玻璃，色调统一”; Stitch native-2.3.0).
@@ -110,6 +119,7 @@ struct CoinLogo: View {
     let coin: String
     var size: CGFloat = 32
     @State private var remote: UIImage?
+    @Environment(\.colorScheme) private var scheme
     private static var cache: [String: UIImage] = [:]
     private static var missing: Set<String> = []
 
@@ -128,6 +138,9 @@ struct CoinLogo: View {
             else { monogram }
         }
         .frame(width: size, height: size)
+        // Dark mode: a light disc behind the logo so dark glyphs (XRP, NEAR, ADA) stay visible
+        // (Stitch c8bea04c… “深色模式币种图标”). Full-colour round logos cover it.
+        .background { if scheme == .dark { Circle().fill(Color.white.opacity(0.92)) } }
         .clipShape(.circle)
         .task(id: coin) { await loadRemote() }
     }
@@ -137,7 +150,7 @@ struct CoinLogo: View {
         return ZStack {
             Circle().fill(LinearGradient(colors: [Color(hue: hue, saturation: 0.55, brightness: 0.95), Color(hue: hue, saturation: 0.75, brightness: 0.75)],
                                          startPoint: .topLeading, endPoint: .bottomTrailing))
-            Text(String(coin.prefix(coin.count > 3 ? 2 : 3))).font(.system(size: size * (coin.count > 2 ? 0.30 : 0.36), weight: .heavy, design: .rounded))
+            Text(String(coin.prefix(coin.count > 3 ? 2 : 3))).font(.scaled(size: size * (coin.count > 2 ? 0.30 : 0.36), weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).minimumScaleFactor(0.5).padding(2)
         }
     }
@@ -172,7 +185,7 @@ struct SoftSegment<T: Hashable>: View {
                     Haptics.select()
                     withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) { selection = option.0 }
                 } label: {
-                    Text(option.1).font(.system(size: 14, weight: on ? .semibold : .medium))
+                    Text(option.1).font(.scaled(size: 14, weight: on ? .semibold : .medium))
                         .foregroundStyle(on ? Color.ink : Color.muted)
                         .frame(maxWidth: .infinity).frame(height: height - 6)
                         .background {
@@ -209,7 +222,7 @@ struct PageHeader<Trailing: View>: View {
     @ViewBuilder var trailing: () -> Trailing
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
-            Text(title).font(.system(size: 32, weight: .bold)).foregroundStyle(Color.ink)
+            Text(title).font(.scaled(size: 32, weight: .bold)).foregroundStyle(Color.ink)
             Spacer(minLength: 0)
             trailing()
         }

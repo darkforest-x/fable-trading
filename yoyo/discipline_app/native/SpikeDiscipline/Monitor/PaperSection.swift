@@ -94,7 +94,7 @@ struct AccountTile: View {
     private var name: some View { Text(account.label).font(.system(.caption, design: .monospaced).weight(.semibold)).foregroundStyle(.secondary).lineLimit(1) }
     private var equity: some View {
         HStack(alignment: .firstTextBaseline, spacing: 3) {
-            Text(Fmt.money(account.equity)).font(.system(size: 23, weight: .semibold, design: .rounded)).monospacedDigit()
+            Text(Fmt.money(account.equity)).font(.scaled(size: 23, weight: .semibold, design: .rounded)).monospacedDigit()
                 .contentTransition(.numericText(value: account.equity ?? 0))
             Text("U").font(.caption).foregroundStyle(.secondary)
         }
@@ -126,7 +126,7 @@ struct AccountDetailView: View {
             VStack(alignment: .leading, spacing: 14) {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        Text(Fmt.money(a.equity)).font(.system(size: 44, weight: .semibold, design: .rounded)).monospacedDigit()
+                        Text(Fmt.money(a.equity)).font(.scaled(size: 44, weight: .semibold, design: .rounded)).monospacedDigit()
                             .contentTransition(.numericText(value: a.equity ?? 0))
                         Text("U").font(.title3).foregroundStyle(.secondary)
                         Spacer()

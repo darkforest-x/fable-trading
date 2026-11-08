@@ -43,7 +43,7 @@ struct TicketForm: View {
                     } label: {
                         HStack(spacing: 6) {
                             Circle().fill(on ? Color.white : Color.muted.opacity(0.5)).frame(width: 6, height: 6)
-                            Text(value == "long" ? "做多" : "做空").font(.system(size: 16, weight: .bold))
+                            Text(value == "long" ? "做多" : "做空").font(.scaled(size: 16, weight: .bold))
                         }
                         .foregroundStyle(on ? Color.white : Color.muted)
                         .frame(maxWidth: .infinity).frame(height: 44)
@@ -335,7 +335,7 @@ struct LeverageSheet: View {
                 HStack(alignment: .firstTextBaseline) {
                     Text("调整倍数").font(.subheadline.weight(.semibold))
                     Spacer()
-                    Text("\(Int(draft))").font(.system(size: 34, weight: .bold, design: .rounded).monospacedDigit()).contentTransition(.numericText(value: draft))
+                    Text("\(Int(draft))").font(.scaled(size: 34, weight: .bold, design: .rounded).monospacedDigit()).contentTransition(.numericText(value: draft))
                     Text("x").font(.headline).foregroundStyle(.secondary)
                 }
                 HStack(spacing: 12) {

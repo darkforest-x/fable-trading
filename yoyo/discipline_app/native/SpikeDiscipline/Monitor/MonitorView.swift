@@ -14,6 +14,8 @@ struct MonitorView: View {
     @AppStorage("monitor.segment") private var segment: MonitorSegment = .paper
     @Binding var showNotifications: Bool
     @State private var refresh = 0
+    @State private var scroll = ScrollPosition(edge: .top)
+    @Environment(\.reselect) private var reselect
 
     @State private var detail: PaperAccount?
 
@@ -45,6 +47,8 @@ struct MonitorView: View {
             .padding(.horizontal, 14)
             .padding(.bottom, 24)
         }
+        .scrollPosition($scroll)
+        .onChange(of: reselect) { _, _ in withAnimation(.snappy) { scroll.scrollTo(edge: .top) } }
         .refreshable { refresh += 1; try? await Task.sleep(for: .milliseconds(700)); Haptics.success() }
         .contentMargins(.bottom, 96, for: .scrollContent)
         .scrollEdgeEffectHidden(true, for: [.top, .bottom])

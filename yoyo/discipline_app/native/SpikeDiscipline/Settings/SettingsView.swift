@@ -5,12 +5,25 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(SessionStore.self) private var session
     @Environment(NotificationStore.self) private var notices
+    @Environment(AccountStore.self) private var account
     @Environment(\.dismiss) private var dismiss
     @AppStorage("appearance") private var appearance = "system"
     @State private var haptics = Haptics.enabled
     @State private var barkBusy = false
     @AppStorage("spike-confirm-trades") private var confirmTrades = false
     @AppStorage("touch.highScore") private var highScore = 0.5
+
+    @AppStorage("activity.enabled") private var liveActivity = true
+
+    private var pushStatus: (text: String, ok: Bool) {
+        let push = PushRegistry.shared
+        if !PushRegistry.available { return ("需付费开发者账号", false) }
+        if push.authorized == false { return ("未允许通知 · 去系统设置开启", false) }
+        if push.serverOutdated { return ("服务端待更新", false) }
+        if push.token == nil { return (push.error == nil ? "注册中" : "注册失败", false) }
+        if push.serverConfigured == false { return ("服务端未配置推送密钥", false) }
+        return push.serverConfigured == true ? ("已开启", true) : ("—", false)
+    }
 
     var body: some View {
         @Bindable var notices = notices
@@ -71,6 +84,22 @@ struct SettingsView: View {
                 } header: { Text("Bark 推送 · App 关闭时") } footer: {
                     Text("后台推送经 Bark 送达；确认报警仍在监控工作台操作。")
                 }
+                // Owner 2026-11-08 item 4: native push + lock-screen Live Activity (display only).
+                Section {
+                    LabeledContent("系统推送") {
+                        Text(pushStatus.text).foregroundStyle(pushStatus.ok ? Color.up : .secondary)
+                    }
+                    Toggle(isOn: $liveActivity) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("锁屏实时活动")
+                            Text("最新一笔持仓的现价与浮盈").font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                } header: { Text("原生推送与锁屏") } footer: {
+                    Text(PushRegistry.available
+                         ? "触价与报警按上面的开关经苹果推送送达，App 在后台也能收到，与 Bark 互不影响。服务端配好推送密钥后生效；锁屏实时活动只展示，不能下单。"
+                         : "当前签名是个人开发团队，苹果不允许推送，后台提醒仍走 Bark。锁屏实时活动由 App 自己刷新，App 退到后台后显示为过期；只展示，不能下单。")
+                }
                 Section {
                     Toggle(isOn: $haptics) {
                         VStack(alignment: .leading, spacing: 2) {
@@ -82,7 +111,8 @@ struct SettingsView: View {
                 } header: { Text("体验设置") }
             }
             .onChange(of: haptics) { _, value in Haptics.enabled = value; Haptics.tap() }
-            .onChange(of: notices.prefs) { _, _ in Haptics.select() }
+            .onChange(of: notices.prefs) { _, now in Haptics.select(); PushRegistry.shared.update(fib: now.fib, alarm: now.popup) }
+            .onChange(of: liveActivity) { _, _ in Haptics.select(); if let state = account.state { PositionActivities.sync(state) } }
             .onChange(of: appearance) { _, _ in Haptics.select() }
             .onChange(of: confirmTrades) { _, _ in Haptics.select() }
             .onChange(of: highScore) { _, _ in Haptics.select() }

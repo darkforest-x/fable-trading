@@ -19,7 +19,7 @@ struct FibChooser: View {
 
     private var visible: [FibContract] {
         let query = search.trimmingCharacters(in: .whitespaces).uppercased()
-        let today = Fmt.beijingDay(Date()), quotes = account.state?.quotes ?? [:], scores = touches.scoreBySymbol
+        let today = Fmt.beijingDay(Date()), quotes = account.state?.quotes ?? [:]
         let rows = fib.rows.filter { row in
             guard let touch = row.latestTouch, !FibView.pinned.contains(row.symbol) else { return false }
             if scope == "today" && Fmt.beijingDay(Date(timeIntervalSince1970: touch.occurredMs / 1000)) != today { return false }
@@ -32,7 +32,7 @@ struct FibChooser: View {
             return pass && (query.isEmpty || row.symbol.contains(query))
         }
         switch sort {
-        case "score": return rows.sorted { (scores[$0.symbol] ?? -1) > (scores[$1.symbol] ?? -1) }
+        case "score": return rows.sorted { (touches.score($0.symbol, $0.latestTouch) ?? -1) > (touches.score($1.symbol, $1.latestTouch) ?? -1) }
         case "volume": return rows.sorted { (Trading.turnover(quotes[$0.symbol]) ?? -1) > (Trading.turnover(quotes[$1.symbol]) ?? -1) }
         default: return rows.sorted { ($0.latestTouch?.occurredMs ?? 0) > ($1.latestTouch?.occurredMs ?? 0) }
         }
@@ -92,7 +92,7 @@ struct FibChooser: View {
         Button { Haptics.tap(); sortMenu = true } label: {
             HStack(spacing: 4) {
                 Image(systemName: "arrow.up.arrow.down").font(.system(size: 12, weight: .bold))
-                Text(Self.sorts.first { $0.0 == sort }?.1 ?? "").font(.system(size: 13, weight: .semibold))
+                Text(Self.sorts.first { $0.0 == sort }?.1 ?? "").font(.scaled(size: 13, weight: .semibold))
             }
             .foregroundStyle(Color.ink).padding(.horizontal, 12).frame(height: 34)
             .background(Color.field, in: .capsule).contentShape(.capsule)
@@ -103,7 +103,7 @@ struct FibChooser: View {
                 ForEach(Self.sorts, id: \.0) { option in
                     Button { Haptics.select(); sort = option.0; sortMenu = false } label: {
                         HStack {
-                            Text(option.1).font(.system(size: 15, weight: .semibold)).foregroundStyle(Color.ink)
+                            Text(option.1).font(.scaled(size: 15, weight: .semibold)).foregroundStyle(Color.ink)
                             Spacer(minLength: 20)
                             if sort == option.0 { Image(systemName: "checkmark").font(.system(size: 13, weight: .bold)).foregroundStyle(Color.accentColor) }
                         }
@@ -130,7 +130,7 @@ struct FibChooser: View {
                 }
                 Spacer(minLength: 6)
                 VStack(alignment: .trailing, spacing: 3) {
-                    if let score = touches.scoreBySymbol[symbol] { ScoreBadge(score: score) }
+                    if let score = touches.score(symbol, row?.latestTouch) { ScoreBadge(score: score) }
                     Text(price(symbol, row: row)).font(.caption.monospacedDigit()).foregroundStyle(Color.muted)
                 }
             }
@@ -156,7 +156,7 @@ struct FibChooser: View {
                         HStack(spacing: 6) {
                             Text(coin).font(.body.weight(.semibold)).foregroundStyle(Color.ink)
                             if let touch {
-                                Text(touch.side == .upper ? "上沿" : "下沿").font(.system(size: 11, weight: .semibold))
+                                Text(touch.side == .upper ? "上沿" : "下沿").font(.scaled(size: 11, weight: .semibold))
                                     .foregroundStyle(touch.side == .upper ? ChartPalette.down : ChartPalette.up)
                                     .padding(.horizontal, 6).padding(.vertical, 1)
                                     .background((touch.side == .upper ? ChartPalette.down : ChartPalette.up).opacity(0.12), in: .capsule)
@@ -166,7 +166,7 @@ struct FibChooser: View {
                     }
                     Spacer(minLength: 6)
                     VStack(alignment: .trailing, spacing: 3) {
-                        ScoreBadge(score: touches.scoreBySymbol[row.symbol])
+                        ScoreBadge(score: touches.score(row.symbol, touch))
                         Text(Self.price(row.price)).font(.caption.monospacedDigit()).foregroundStyle(Color.muted)
                     }
                 }

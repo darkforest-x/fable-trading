@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>天才交易员 · iOS 26 主屏幕微件展示 (402x874pt)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=SF+Pro+Display:wght@400;500;600;700&family=SF+Pro+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+<style>
+  :root {
+    --accent: #0A84FF;
+    --long: #169873;
+    --short: #D7355D;
+    --text-primary: #111827;
+    --text-secondary: #6B7280;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Plus Jakarta Sans", "PingFang SC", "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background-color: #0c0e14;
+    margin: 0;
+    padding: 0;
+  }
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Ultra-soft realistic Apple wallpaper */
+  .ios-wallpaper {
+    background: radial-gradient(circle at 20% 15%, #EAF2FF 0%, transparent 55%),
+                radial-gradient(circle at 85% 30%, #FFEFE6 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, #E8F5EE 0%, transparent 60%),
+                linear-gradient(145deg, #F3F6FD 0%, #EDF2FA 50%, #F5F7FB 100%);
+  }
+  /* iOS 26 Frosted Glass Widget Spec: White frosted with rounded 22 corners and NO borders */
+  .ios26-widget {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border-radius: 22px;
+    border: none;
+    box-shadow: 0 10px 30px -4px rgba(0, 20, 50, 0.08), 
+                0 4px 12px -2px rgba(0, 0, 0, 0.04),
+                inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  }
+  .orange-gradient-pill {
+    background: linear-gradient(135deg, #FF9F0A 0%, #F5731A 100%);
+    box-shadow: 0 2px 6px -1px rgba(245, 115, 26, 0.35);
+  }
+  .ios-app-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.12),
+                inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    user-select: none;
+  }
+  .app-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #1c1f26;
+    letter-spacing: -0.01em;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+    margin-top: 5px;
+    text-align: center;
+    width: 68px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .dock-blur {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(35px) saturate(180%);
+    -webkit-backdrop-filter: blur(35px) saturate(180%);
+    border-radius: 35px;
+    box-shadow: 0 10px 32px -4px rgba(0, 20, 50, 0.10),
+                inset 0 1px 1.5px rgba(255, 255, 255, 0.8);
+  }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-8">
+
+<!-- iPhone 16/17 Pro Shell Canvas (402 x 874 pt) -->
+<div class="relative w-[402px] h-[874px] rounded-[54px] overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.6),0_0_0_12px_#1e232d,0_0_0_14px_#2c323f] ios-wallpaper flex flex-col justify-between select-none">
+  
+  <!-- Dynamic Island & Status Bar -->
+  <div class="relative z-30 pt-3 px-7 flex items-center justify-between text-[#111827]">
+    <!-- Time (Left) -->
+    <span class="text-[15px] font-semibold tracking-tight tabular-nums font-['SF_Pro_Text'] ml-1">18:55</span>
+    
+    <!-- Dynamic Island (Centered) -->
+    <div class="absolute left-1/2 -translate-x-1/2 top-3 w-[124px] h-[35px] bg-black rounded-full flex items-center justify-between px-3 shadow-sm">
+      <div class="w-3 h-3 rounded-full bg-[#169873] animate-pulse"></div>
+      <div class="w-3 h-3 rounded-full bg-[#111827]"></div>
+    </div>
+    
+    <!-- Status Icons (Right) -->
+    <div class="flex items-center gap-1.5 mr-0.5">
+      <svg class="w-4 h-3.5 fill-[#111827]" viewBox="0 0 16 12">
+        <path d="M1 9h2v3H1V9zm4-3h2v6H5V6zm4-3h2v9H9V3zm4-3h2v12h-2V0z"/>
+      </svg>
+      <svg class="w-4 h-3.5 fill-[#111827]" viewBox="0 0 16 12">
+        <path d="M8 2.5C4.9 2.5 2.2 3.8.3 5.8L8 14.5l7.7-8.7C13.8 3.8 11.1 2.5 8 2.5z"/>
+      </svg>
+      <!-- Battery -->
+      <div class="flex items-center">
+        <div class="w-6 h-[11.5px] border-[1.5px] border-[#111827] rounded-[4px] p-0.5 flex items-center">
+          <div class="h-full w-4 bg-[#111827] rounded-[1.5px]"></div>
+        </div>
+        <div class="w-[1.5px] h-1 bg-[#111827] rounded-r-sm ml-[0.5px]"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Home Screen Content Area -->
+  <div class="px-5 pt-4 flex-1 flex flex-col justify-start gap-4">
+    
+    <!-- ======================================================== -->
+    <!-- WIDGET 1: MEDIUM WIDGET (4x2)                            -->
+    <!-- Split in two halves: left '持仓' | right '今日触价 12'       -->
+    <!-- 362px x 170px                                            -->
+    <!-- ======================================================== -->
+    <div class="w-full h-[166px] ios26-widget p-4 flex flex-col justify-between relative overflow-hidden transition-transform active:scale-[0.985] duration-200">
+      
+      <!-- Top / Main Split Area -->
+      <div class="grid grid-cols-2 gap-3 h-full pb-1">
+        
+        <!-- LEFT HALF: 持仓 -->
+        <div class="flex flex-col justify-between pr-3 border-r border-[#E5E9F0]/60">
+          <div>
+            <!-- Header Row -->
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[14px] font-bold text-[#111827] tracking-tight">持仓</span>
+              <span class="w-2 h-2 rounded-full bg-[#169873] shadow-[0_0_6px_#169873]"></span>
+            </div>
+            <!-- Sub / Symbol Row -->
+            <div class="text-[13px] font-medium text-[#4B5563] flex items-center gap-1.5">
+              <span class="text-[#111827] font-semibold">ETH 多 3x</span>
+            </div>
+          </div>
+
+          <!-- Major Metric & Return -->
+          <div class="my-auto py-0.5">
+            <div class="text-[25px] font-extrabold text-[#169873] tracking-tight tabular-nums leading-none">
+              +18.60 U
+            </div>
+            <div class="text-[11px] font-medium text-[#169873] mt-1 tabular-nums">
+              +0.93% · 保护中
+            </div>
+          </div>
+          
+          <!-- Mini subtle baseline -->
+          <div class="text-[10px] text-[#9CA3AF] tabular-nums">
+            开仓 2,001.2 · 现 2,007.4
+          </div>
+        </div>
+
+        <!-- RIGHT HALF: 今日触价 12 -->
+        <div class="flex flex-col justify-between pl-1">
+          <div>
+            <!-- Header Row -->
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[14px] font-bold text-[#111827] tracking-tight flex items-center gap-1">
+                今日触价 <span class="text-[#111827] tabular-nums font-bold">12</span>
+              </span>
+              <span class="text-[11px] font-semibold text-[#FF9F0A] bg-[#FFF4E5] px-1.5 py-0.5 rounded-full tabular-nums">
+                高分 5
+              </span>
+            </div>
+            
+            <!-- Context subtitle -->
+            <div class="text-[11px] text-[#6B7280]">
+              最新触价
+            </div>
+          </div>
+
+          <!-- Newest touch row card -->
+          <div class="bg-white/80 rounded-[14px] p-2 shadow-sm flex items-center justify-between my-auto">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-full bg-[#7C3AED] text-white flex items-center justify-center font-bold text-[11px] shadow-sm">
+                T
+              </div>
+              <div class="flex flex-col">
+                <span class="text-[12px] font-bold text-[#111827] leading-tight">TIA 上沿</span>
+                <span class="text-[10px] text-[#6B7280] tabular-nums">16:54 探顶收回</span>
+              </div>
+            </div>
+            
+            <!-- Orange capsule '0.88' -->
+            <div class="orange-gradient-pill text-white text-[12px] font-bold px-2 py-0.5 rounded-full tabular-nums shadow-sm">
+              0.88
+            </div>
+          </div>
+
+          <!-- Win Rate tag -->
+          <div class="text-[10px] text-[#6B7280] flex items-center justify-between">
+            <span>胜率 68% 信号</span>
+            <span class="text-[#0A84FF] text-[10px] font-medium">查看全部 ›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer: grey '18:55' -->
+      <div class="pt-1.5 border-t border-[#E5E9F0]/60 flex items-center justify-between text-[11px] text-[#6B7280] tabular-nums">
+        <span class="text-[10px] text-[#9CA3AF] flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#169873]"></span>
+          天才交易员 · 模拟实盘
+        </span>
+        <span class="font-medium text-[#6B7280]">18:55</span>
+      </div>
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!-- ROW 2: SMALL WIDGET (2x2) + 2x2 APP ICONS GRID          -->
+    <!-- Small widget: 172px x 166px                              -->
+    <!-- 2x2 App Icons: 172px x 166px                             -->
+    <!-- ======================================================== -->
+    <div class="grid grid-cols-2 gap-4">
+      
+      <!-- SMALL WIDGET (2x2): '高分触价' -->
+      <div class="h-[166px] ios26-widget p-3.5 flex flex-col justify-between transition-transform active:scale-[0.98] duration-200">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between">
+          <span class="text-[14px] font-bold text-[#111827] tracking-tight">高分触价</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-[#FF9F0A]"></span>
+        </div>
+
+        <!-- Three Rows of Coins -->
+        <div class="space-y-1.5 my-auto">
+          <!-- Row 1: TIA 0.88 -->
+          <div class="flex items-center justify-between py-0.5">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded-full bg-[#7C3AED] text-white flex items-center justify-center font-bold text-[10px] shadow-sm">
+                T
+              </div>
+              <span class="text-[13px] font-bold text-[#111827] tracking-tight">TIA</span>
+            </div>
+            <span class="orange-gradient-pill text-white text-[11px] font-bold px-2 py-0.5 rounded-full tabular-nums">
+              0.88
+            </span>
+          </div>
+
+          <!-- Row 2: NEAR 0.83 -->
+          <div class="flex items-center justify-between py-0.5">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded-full bg-[#000000] text-white flex items-center justify-center font-bold text-[10px] shadow-sm">
+                N
+              </div>
+              <span class="text-[13px] font-bold text-[#111827] tracking-tight">NEAR</span>
+            </div>
+            <span class="orange-gradient-pill text-white text-[11px] font-bold px-2 py-0.5 rounded-full tabular-nums">
+              0.83
+            </span>
+          </div>
+
+          <!-- Row 3: APT 0.79 -->
+          <div class="flex items-center justify-between py-0.5">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded-full bg-[#059669] text-white flex items-center justify-center font-bold text-[10px] shadow-sm">
+                A
+              </div>
+              <span class="text-[13px] font-bold text-[#111827] tracking-tight">APT</span>
+            </div>
+            <span class="orange-gradient-pill text-white text-[11px] font-bold px-2 py-0.5 rounded-full tabular-nums">
+              0.79
+            </span>
+          </div>
+        </div>
+
+        <!-- Footer: grey '18:55' -->
+        <div class="pt-1 border-t border-[#E5E9F0]/60 flex items-center justify-between text-[11px] text-[#6B7280] tabular-nums">
+          <span class="text-[10px] text-[#9CA3AF]">评分 ≥ 0.5</span>
+          <span class="font-medium text-[#6B7280]">18:55</span>
+        </div>
+      </div>
+
+      <!-- 2x2 App Icons to Balance the Grid (True iOS Experience) -->
+      <div class="h-[166px] flex flex-col justify-between py-1">
+        <div class="flex items-center justify-around">
+          <!-- App 1: 天才交易员 (Main App Icon) -->
+          <div class="flex flex-col items-center">
+            <div class="ios-app-icon bg-gradient-to-br from-[#0A84FF] to-[#0055D6] text-white">
+              <span class="material-symbols-outlined text-[32px]">candlestick_chart</span>
+            </div>
+            <span class="app-label">天才交易员</span>
+          </div>
+          
+          <!-- App 2: TradingView -->
+          <div class="flex flex-col items-center">
+            <div class="ios-app-icon bg-black text-white">
+              <span class="text-[20px] font-black tracking-tighter">TV</span>
+            </div>
+            <span class="app-label">TradingView</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-around">
+          <!-- App 3: OKX -->
+          <div class="flex flex-col items-center">
+            <div class="ios-app-icon bg-white text-black font-extrabold border border-black/5">
+              <span class="text-[17px] tracking-tight font-mono">OKX</span>
+            </div>
+            <span class="app-label">OKX</span>
+          </div>
+          
+          <!-- App 4: Telegram -->
+          <div class="flex flex-col items-center">
+            <div class="ios-app-icon bg-gradient-to-tr from-[#229ED9] to-[#25ACDE] text-white">
+              <svg class="w-7 h-7 fill-white translate-x-[-1px] translate-y-[1px]" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.77-1.15 3.35-1.35 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+              </svg>
+            </div>
+            <span class="app-label">Telegram</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- ROW 3: TWO ROWS OF APPS TO FILL IPHONE SCREEN            -->
+    <!-- 4 icons per row                                          -->
+    <!-- ======================================================== -->
+    <div class="grid grid-cols-4 gap-2 pt-2">
+      <!-- App 5: 照片 -->
+      <div class="flex flex-col items-center">
+        <div class="ios-app-icon bg-white">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 via-rose-500 to-indigo-500 opacity-90 blur-[1px]"></div>
+        </div>
+        <span class="app-label">照片</span>
+      </div>
+
+      <!-- App 6: 日历 -->
+      <div class="flex flex-col items-center">
+        <div class="ios-app-icon bg-white flex flex-col justify-center items-center">
+          <span class="text-[10px] text-rose-500 font-semibold uppercase leading-none">星期五</span>
+          <span class="text-[26px] font-light text-[#111827] leading-none mt-0.5">8</span>
+        </div>
+        <span class="app-label">日历</span>
+      </div>
+
+      <!-- App 7: 提醒事项 -->
+      <div class="flex flex-col items-center">
+        <div class="ios-app-icon bg-white flex items-center justify-center">
+          <div class="space-y-1.5">
+            <div class="w-7 h-1.5 bg-[#FF9F0A] rounded-full"></div>
+            <div class="w-5 h-1.5 bg-[#0A84FF] rounded-full"></div>
+            <div class="w-6 h-1.5 bg-[#169873] rounded-full"></div>
+          </div>
+        </div>
+        <span class="app-label">提醒事项</span>
+      </div>
+
+      <!-- App 8: 设置 -->
+      <div class="flex flex-col items-center">
+        <div class="ios-app-icon bg-gradient-to-b from-[#9CA3AF] to-[#6B7280] text-white">
+          <span class="material-symbols-outlined text-[30px]">settings</span>
+        </div>
+        <span class="app-label">设置</span>
+      </div>
+    </div>
+
+    <!-- App Page Indicator Dots -->
+    <div class="flex items-center justify-center gap-1.5 pt-1">
+      <div class="w-1.5 h-1.5 rounded-full bg-[#111827]/80"></div>
+      <div class="w-1.5 h-1.5 rounded-full bg-[#111827]/25"></div>
+      <div class="w-1.5 h-1.5 rounded-full bg-[#111827]/25"></div>
+    </div>
+
+  </div>
+
+  <!-- iOS Dock Bar (Bottom) -->
+  <div class="px-5 pb-5 pt-1">
+    <div class="dock-blur h-[90px] px-4 flex items-center justify-around">
+      <!-- Dock 1: 电话 -->
+      <div class="flex flex-col items-center">
+        <div class="ios-app-icon bg-gradient-to-tr from-[#22C55E] to-[#16A34A] text-white">
+          <span class="material-symbols-outlined text-[30px]">call</span>
+        </div>
+      </div>
+
+      <!-- Dock 2: Safari -->
+      <div class="flex flex-col items-center">
+        <div class="ios-app-icon bg-white text-[#0A84FF]">
+          <span class="material-symbols-outlined text-[34px]">explore</span>
+        </div>
+      </div>
+
+      <!-- Dock 3: 信息 -->
+      <div class="flex flex-col items-center">
+        <div class="ios-app-icon bg-gradient-to-tr from-[#22C55E] to-[#15803D] text-white">
+          <span class="material-symbols-outlined text-[30px]">chat</span>
+        </div>
+      </div>
+
+      <!-- Dock 4: 音乐 -->
+      <div class="flex flex-col items-center">
+        <div class="ios-app-icon bg-gradient-to-tr from-[#FB7185] to-[#E11D48] text-white">
+          <span class="material-symbols-outlined text-[30px]">music_note</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Home Indicator -->
+    <div class="w-[134px] h-[5px] bg-[#111827]/80 rounded-full mx-auto mt-2"></div>
+  </div>
+
+</div>
+
+</body>
+</html>

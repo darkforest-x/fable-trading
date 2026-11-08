@@ -42,6 +42,18 @@ enum ChartPalette {
     }
 }
 
+/// A 1.618 touch drawn on its bar (owner 2026-11-08 item 2, Stitch 5640c0c0…): a dot on the level
+/// with the touch's own score above (upper) or below (lower). Previous weeks' first touches are found
+/// from the bars, drawn faded and unscored. Display only.
+struct ChartMarker: Equatable, Identifiable {
+    let time: Double      // epoch seconds of the touch
+    let price: Double     // the touched 1.618 level
+    let edge: Edge
+    var score: Double? = nil
+    var faded = false
+    var id: String { "\(edge.rawValue)-\(Int(time))" }
+}
+
 struct CandleChart: View {
     let bars: [Candle]
     let generation: Int
@@ -53,6 +65,9 @@ struct CandleChart: View {
     var averages = false
     var cloud = false
     var lines: [ChartLine] = []
+    var markers: [ChartMarker] = []
+    /// Also mark the first 1.618 touch of each previous week in `history` (found from the bars).
+    var markHistory = false
     var colors: ChartColors = .classic
     var watermark: String? = nil
     var followToken = 0
@@ -74,6 +89,8 @@ struct CandleChart: View {
     @State private var cross: CGPoint?
     @State private var crossHaptic = -1
     @State private var memo = IndicatorMemo()
+    @State private var picked: String?
+    @AppStorage("touch.highScore") private var highScore = 0.5
 
     private let axisWidth: CGFloat = 58
     private let timeHeight: CGFloat = 20
@@ -92,6 +109,12 @@ struct CandleChart: View {
             ZStack(alignment: .topLeading) {
                 if wallpaper { (scheme == .dark ? ChartPalette.hex(0x0B0E14) : Color.white) }
                 Canvas(rendersAsynchronously: false) { context, _ in draw(&context, layout: layout, axisY: axisY) }
+                if let picked, let hit = markerPoints(layout).first(where: { $0.marker.id == picked }) {
+                    MarkerCallout(marker: hit.marker, price: groupedPrice(hit.marker.price))
+                        .position(x: min(max(hit.point.x, plot.minX + 112), plot.maxX - 112),
+                                  y: hit.marker.edge == .upper ? hit.point.y + 72 : hit.point.y - 72)
+                        .transition(.scale(scale: 0.9).combined(with: .opacity))
+                }
                 if let cross, !bars.isEmpty {
                     readout(layout.bars[layout.index(atX: cross.x)])
                         // Wallpaper charts have floating controls on top, so the readout sits just above the time pill.
@@ -109,7 +132,7 @@ struct CandleChart: View {
                 if first < 12 && bars.count >= 55 { onNeedOlder() }
             }
         }
-        .onChange(of: generation) { _, _ in offset = 0; spacing = 7; yShift = 0; yZoom = 1; cross = nil }
+        .onChange(of: generation) { _, _ in offset = 0; spacing = 7; yShift = 0; yZoom = 1; cross = nil; picked = nil }
         .onChange(of: followToken) { _, _ in reset() }
         .onChange(of: bars.last?.time) { old, new in
             if let old, let new, new > old, offset > 0.5 { offset += CGFloat((new - old) / period.seconds) }
@@ -127,7 +150,13 @@ struct CandleChart: View {
 
     private func tap(_ point: CGPoint, layout: Layout) {
         guard point.x <= layout.plot.maxX else { return }
+        if picked != nil { withAnimation(.easeOut(duration: 0.15)) { picked = nil }; return }
         if cross != nil { withAnimation(.easeOut(duration: 0.15)) { cross = nil }; return }
+        if let hit = markerPoints(layout).first(where: { hypot($0.point.x - point.x, $0.point.y - point.y) < 22 }) {
+            Haptics.select()
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { picked = hit.marker.id }
+            return
+        }
         Haptics.select()
         let p = clamp(point, layout)
         cross = p
@@ -319,6 +348,8 @@ struct CandleChart: View {
                          at: CGPoint(x: plot.minX + 6, y: y - 3), anchor: .bottomLeading)
         }
 
+        drawMarkers(&clipped, layout: layout)
+
         if let last = layout.bars.last {
             let y = layout.y(last.close), color = last.close >= last.open ? ChartPalette.up : ChartPalette.down
             if y >= plot.minY && y <= priceFloor {
@@ -392,6 +423,68 @@ struct CandleChart: View {
                 context.draw(text, at: CGPoint(x: x2 - 4, y: labelY), anchor: .bottomTrailing)
                 taken.append(labelY)
             }
+        }
+    }
+
+    // MARK: touch markers
+
+    /// The bar holding time `t` (last bar opening at or before it), if any.
+    private func barIndex(_ t: Double) -> Int? {
+        guard let first = bars.first, t >= first.time, t < (bars.last?.time ?? 0) + period.seconds else { return nil }
+        var lo = 0, hi = bars.count - 1
+        while lo < hi { let mid = (lo + hi + 1) / 2; if bars[mid].time <= t { lo = mid } else { hi = mid - 1 } }
+        return lo
+    }
+
+    /// Given markers plus each previous week's first touch after Monday (from the bars).
+    private var allMarkers: [ChartMarker] {
+        guard markHistory, !bars.isEmpty else { return markers }
+        var out = markers
+        for past in history {
+            let mondayEnd = past.start + 86_400
+            guard let from = barIndex(max(mondayEnd, bars[0].time)) ?? (bars[0].time >= mondayEnd ? 0 : nil) else { continue }
+            var upper: Double?, lower: Double?
+            for bar in bars[from...] where bar.time >= mondayEnd {
+                if bar.time >= past.end { break }
+                if upper == nil && bar.high >= past.upper { upper = bar.time }
+                if lower == nil && bar.low <= past.lower { lower = bar.time }
+                if upper != nil && lower != nil { break }
+            }
+            if let upper { out.append(ChartMarker(time: upper, price: past.upper, edge: .upper, faded: true)) }
+            if let lower { out.append(ChartMarker(time: lower, price: past.lower, edge: .lower, faded: true)) }
+        }
+        return out
+    }
+
+    private func markerPoints(_ layout: Layout) -> [(marker: ChartMarker, point: CGPoint)] {
+        allMarkers.compactMap { marker in
+            guard let index = barIndex(marker.time), index >= layout.firstVisible, index <= layout.lastVisible else { return nil }
+            let point = CGPoint(x: layout.x(CGFloat(index)), y: layout.y(marker.price))
+            guard point.y > layout.plot.minY, point.y < layout.plot.maxY else { return nil }
+            return (marker, point)
+        }
+    }
+
+    private func drawMarkers(_ context: inout GraphicsContext, layout: Layout) {
+        for (marker, point) in markerPoints(layout) {
+            let alpha = marker.faded ? 0.4 : 1, color = marker.edge == .upper ? ChartPalette.down : ChartPalette.up
+            let selected = marker.id == picked
+            if selected { context.fill(Path(ellipseIn: CGRect(x: point.x - 9, y: point.y - 9, width: 18, height: 18)), with: .color(color.opacity(0.22))) }
+            context.fill(Path(ellipseIn: CGRect(x: point.x - 4.5, y: point.y - 4.5, width: 9, height: 9)), with: .color(.white.opacity(alpha)))
+            context.fill(Path(ellipseIn: CGRect(x: point.x - 3.2, y: point.y - 3.2, width: 6.4, height: 6.4)), with: .color(color.opacity(alpha)))
+            guard let score = marker.score else { continue }
+            let text = context.resolve(Text(String(format: "%.2f", score)).font(.system(size: 10, weight: .bold).monospacedDigit()).foregroundStyle(.white))
+            let size = text.measure(in: layout.plot.size)
+            let rect = CGRect(x: point.x - size.width / 2 - 5, y: marker.edge == .upper ? point.y - 9 - size.height - 4 : point.y + 9,
+                              width: size.width + 10, height: size.height + 4)
+            let shape = Path(roundedRect: rect, cornerRadius: rect.height / 2)
+            if score >= highScore {
+                context.fill(shape, with: .linearGradient(Gradient(colors: [ChartPalette.hex(0xFF9F0A), ChartPalette.hex(0xF5731A)]),
+                                                          startPoint: CGPoint(x: rect.minX, y: rect.minY), endPoint: CGPoint(x: rect.maxX, y: rect.maxY)))
+            } else {
+                context.fill(shape, with: .color(ChartPalette.hex(0x9CA3AF).opacity(alpha)))
+            }
+            context.draw(text, at: CGPoint(x: rect.midX, y: rect.midY))
         }
     }
 
@@ -543,5 +636,44 @@ final class IndicatorMemo {
         let value = Self.ny.component(.weekday, from: Date(timeIntervalSince1970: time)) == 2
         mondays[time] = value
         return value
+    }
+}
+
+/// Tap callout for a touch marker: edge and Beijing time, the touch's score with the 0.5 gate of the
+/// live-wick6x3 paper account (通过评分), and the touched level. Read-only; no order action here.
+private struct MarkerCallout: View {
+    let marker: ChartMarker
+    let price: String
+
+    var body: some View {
+        let color = marker.edge == .upper ? ChartPalette.down : ChartPalette.up
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Circle().fill(color).frame(width: 7, height: 7)
+                Text("\(marker.faded ? "往周" : "")\(marker.edge == .upper ? "上沿" : "下沿")触价").font(.system(size: 14, weight: .bold)).foregroundStyle(Color.ink)
+                Spacer(minLength: 8)
+                Text(CandleChart.fullTime(marker.time)).font(.system(size: 12).monospacedDigit()).foregroundStyle(Color.muted)
+            }
+            HStack(spacing: 6) {
+                Text("评分").font(.system(size: 12)).foregroundStyle(Color.muted)
+                ScoreBadge(score: marker.score)
+                Spacer(minLength: 8)
+                if let score = marker.score {
+                    Label(score >= 0.5 ? "已通过" : "未通过", systemImage: score >= 0.5 ? "checkmark.circle.fill" : "minus.circle")
+                        .font(.system(size: 11, weight: .semibold)).foregroundStyle(score >= 0.5 ? ChartPalette.up : Color.muted)
+                } else {
+                    Text(marker.faded ? "往周不评分" : "未评分").font(.system(size: 11)).foregroundStyle(Color.muted)
+                }
+            }
+            HStack {
+                Text("触价价位").font(.system(size: 12)).foregroundStyle(Color.muted)
+                Spacer()
+                Text(price).font(.system(size: 15, weight: .bold).monospacedDigit()).foregroundStyle(Color.ink)
+            }
+        }
+        .padding(12)
+        .frame(width: 214)
+        .frosted(RoundedRectangle(cornerRadius: 16, style: .continuous), veil: 0.9)
+        .accessibilityElement(children: .combine)
     }
 }

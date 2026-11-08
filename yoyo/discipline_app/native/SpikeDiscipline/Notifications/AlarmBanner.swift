@@ -13,7 +13,7 @@ struct AlarmBanner: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: alarm ? "bell.and.waves.left.and.right.fill" : "chart.line.uptrend.xyaxis")
-                .font(.system(size: 17, weight: .semibold))
+                .font(.scaled(size: 17, weight: .semibold))
                 .foregroundStyle(alarm ? Color.down : Color.blue)
                 .frame(width: 40, height: 40)
                 .background((alarm ? Color.down : Color.blue).opacity(0.14), in: .circle)

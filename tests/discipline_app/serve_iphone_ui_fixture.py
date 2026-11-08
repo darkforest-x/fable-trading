@@ -8,10 +8,45 @@ paper accounts, alarms and cloud signals. No credentials, no live service, no ne
 """
 import sys
 import time
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 import serve_fib_ui_fixture as fib
 from yoyo.discipline_app.monitor_feed import MonitorFeed, TRACKS
 
 PORT = 18923
+# 2.6.0: extra synthetic 1.618 touches beyond BTC/ETH so the 最新触价 list, the coin strip and the
+# per-touch scores (/v1/monitor/touch-scores) can be checked. (coin, side, minutes ago, score)
+EXTRA_TOUCHES = [('SOL', 'upper', 3, .81), ('DOGE', 'lower', 25, .33), ('ARB', 'upper', 30*60, .58)]
+TOUCH_SCORES = {'BTC': ('upper', .72), 'ETH': ('lower', .46)}
+
+
+def ny_week():
+    date = datetime.now(ZoneInfo('America/New_York'))
+    monday = (date - timedelta(days=date.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+    return monday.date().isoformat(), int(monday.timestamp()*1000)
+
+
+def touch_ms(minutes):
+    """A synthetic touch time inside the current NY week (never before Monday 01:00)."""
+    _, start = ny_week()
+    return max(start + 3600_000, int(time.time()*1000) - minutes*60_000)
+
+
+def with_extra_touches(raw):
+    raw = dict(raw)
+    if raw.get('items'):
+        raw['items'] = list(raw['items']) + [dict(
+            symbol=c+'-USDT-SWAP', high=101, low=97, price=100, stale=False,
+            touches={side: dict(week=raw['week'], symbol=c+'-USDT-SWAP', side=side, source='live', observed_ms=touch_ms(m))})
+            for c, side, m, _ in EXTRA_TOUCHES]
+    return raw
+
+
+def score_signal(i, coin, side, score, minutes):
+    week, _ = ny_week()
+    at = touch_ms(minutes) if minutes is not None else int(time.time()*1000) - 60_000
+    return dict(id=700+i, week=week, symbol=coin+'-USDT-SWAP', side=-1 if side == 'upper' else 1, level=.5, score=score,
+                status='scored', taken=0, observed_ms=at, candle_ms=at//60_000*60_000)
 
 
 def synthetic_monitor():
@@ -35,7 +70,18 @@ def synthetic_monitor():
         signals = [dict(id=500+i, symbol=c+'-USDT-SWAP', side=(-1)**i, level=.5+i*.01, score=round(.38+i*.045, 3),
                         status='scored' if i != 7 else 'excluded', taken=1 if i % 3 else 0, observed_ms=t-600_000*(i+1))
                    for i, c in enumerate(coins)]
-        return dict(now_ms=t, tracks=tracks, signals=signals)
+        week, _ = ny_week()
+        for s in signals:
+            s.update(week=week, candle_ms=s['observed_ms']//60_000*60_000)
+        extra = [score_signal(i, c, side, score, None) for i, (c, (side, score)) in enumerate(TOUCH_SCORES.items())]
+        extra += [score_signal(5+i, c, side, score, m) for i, (c, side, m, score) in enumerate(EXTRA_TOUCHES) if m < 600]
+        return dict(now_ms=t, tracks=tracks, signals=extra + signals)
+
+    def history(query):
+        """Older touches of this week (the 本周 rows); only ARB in the fixture."""
+        offset = int(dict(x.split('=') for x in query.split('&')).get('offset', 0))
+        rows = [score_signal(9+i, c, side, score, m) for i, (c, side, m, score) in enumerate(EXTRA_TOUCHES) if m >= 600]
+        return dict(rows=rows if offset == 0 else [], total=len(rows), has_more=False, now_ms=int(time.time()*1000))
 
     def alerts():
         t = now()
@@ -84,6 +130,7 @@ def synthetic_monitor():
         return routes[path.split('?')[0]](path)
 
     routes = {'/api/monday-reclaim-paper': lambda p: paper(dict(x.split('=') for x in p.split('?')[1].split('&'))['track']),
+              '/api/monday-reclaim-paper/history': lambda p: history(p.split('?')[1]),
               '/api/spike-alerts': lambda p: alerts_with_extra(), '/api/cloud-signals': lambda p: cloud(),
               '/api/monday-fib': lambda p: fib()}
     feed = MonitorFeed(fetch, ttl=2)
@@ -107,6 +154,8 @@ def qa_trigger(feed, kind):
 
 def main():
     original = fib.create_app
+    project = fib.project_snapshot
+    fib.project_snapshot = lambda raw, now: project(with_extra_touches(raw), now)
 
     def create_app(*args, **kwargs):
         feed = synthetic_monitor()

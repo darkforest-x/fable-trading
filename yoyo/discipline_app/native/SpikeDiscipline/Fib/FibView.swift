@@ -17,6 +17,7 @@ struct FibView: View {
     @State private var chooser = false
     @State private var settings = false
     @State private var follow = 0
+    @Environment(\.reselect) private var reselect
 
     static let choices: [CandlePeriod] = [.m1, .m5, .m15, .h1, .h4, .h12, .d1]
     static let pinned = ["BTC-USDT-SWAP", "ETH-USDT-SWAP"]
@@ -28,7 +29,11 @@ struct FibView: View {
                 chart(top: top, bottom: bottom).ignoresSafeArea()
                 VStack(alignment: .leading, spacing: 8) {
                     coinStrip
-                    coinCard
+                    HStack(alignment: .top, spacing: 8) {
+                        coinCard
+                        Spacer(minLength: 8)
+                        rotateButton
+                    }
                     Spacer(minLength: 0)
                     if fib.current == nil && fib.error != nil && candles.bars.isEmpty { offlineNote }
                     dock
@@ -40,6 +45,7 @@ struct FibView: View {
         }
         .sheet(isPresented: $chooser) { FibChooser().presentationDetents([.large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $settings) { ChartSettingsSheet().presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
+        .onChange(of: reselect) { _, _ in follow += 1 }   // tab tapped again → back to the latest bar
         .task(id: active) {
             guard active else { candles.stopAndSave(); return }
             await fib.poll()
@@ -92,7 +98,7 @@ struct FibView: View {
         return ZStack {
             CandleChart(bars: candles.bars, generation: candles.generation, period: fib.period, decimals: decimals(symbol),
                         range: row.flatMap { fib.range(for: $0) }, history: past, innerLines: fib.showInternal, averages: fib.showAverages,
-                        cloud: fib.showCloud, colors: style.colors,
+                        cloud: fib.showCloud, markers: touches.markers(row), markHistory: true, colors: style.colors,
                         watermark: symbol.isEmpty ? nil : Fmt.coin(symbol) + "USDT", followToken: follow, wallpaper: true,
                         topInset: top + 58, bottomOverlay: bottom + 78 + 50,
                         onNeedOlder: { candles.loadOlder() })
@@ -109,7 +115,7 @@ struct FibView: View {
                 let others = todayRows.filter { !Self.pinned.contains($0.symbol) }
                 HStack(spacing: 4) {
                     ForEach(others) { row in stripChip(row.symbol, edge: row.latestTouch?.side) }
-                    if others.isEmpty { Text("今日暂无其他触价").font(.system(size: 12, weight: .medium)).foregroundStyle(Color.muted).padding(.horizontal, 10) }
+                    if others.isEmpty { Text("今日暂无其他触价").font(.scaled(size: 12, weight: .medium)).foregroundStyle(Color.muted).padding(.horizontal, 10) }
                 }
                 .padding(.horizontal, 4)
             }
@@ -128,10 +134,15 @@ struct FibView: View {
             HStack(spacing: 5) {
                 CoinLogo(coin: coin, size: 20)
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(coin).font(.system(size: 12, weight: .bold)).foregroundStyle(Color.ink).lineLimit(1)
+                    HStack(spacing: 4) {
+                        Text(coin).font(.scaled(size: 12, weight: .bold)).foregroundStyle(Color.ink).lineLimit(1)
+                        if !compact, let score = touches.score(symbol, fib.rows.first { $0.symbol == symbol }?.latestTouch) {
+                            ScoreBadge(score: score, small: true)
+                        }
+                    }
                     if !compact {
                         Text(price(symbol).map { $0.formatted(.number.precision(.significantDigits(1...5)).grouping(.never)) } ?? "—")
-                            .font(.system(size: 10, weight: .medium).monospacedDigit()).foregroundStyle(edge == .upper ? ChartPalette.down : ChartPalette.up)
+                            .font(.scaled(size: 10, weight: .medium).monospacedDigit()).foregroundStyle(edge == .upper ? ChartPalette.down : ChartPalette.up)
                     }
                 }
             }
@@ -143,6 +154,11 @@ struct FibView: View {
         .accessibilityLabel("查看 \(coin)")
     }
 
+    /// Turns the chart to landscape (owner 2026-11-08 item 6); also works with the rotation lock on.
+    private var rotateButton: some View {
+        RoundIcon(systemName: "rotate.right", size: 36) { Orientation.rotate(landscape: true) }.accessibilityLabel("横屏查看")
+    }
+
     /// Floating coin card (tap → 最新触价 list): logo, coin, live price and this week's touch.
     private var coinCard: some View {
         let symbol = fib.chartSymbol, touch = fib.selected?.latestTouch
@@ -151,20 +167,20 @@ struct FibView: View {
                 if !symbol.isEmpty { CoinLogo(coin: Fmt.coin(symbol), size: 30) }
                 VStack(alignment: .leading, spacing: 1) {
                     HStack(spacing: 3) {
-                        Text(symbol.isEmpty ? "选择币种" : Fmt.coin(symbol)).font(.system(size: 17, weight: .bold)).foregroundStyle(Color.ink)
-                        Text("/ USDT").font(.system(size: 11, weight: .medium)).foregroundStyle(Color.muted)
+                        Text(symbol.isEmpty ? "选择币种" : Fmt.coin(symbol)).font(.scaled(size: 17, weight: .bold)).foregroundStyle(Color.ink)
+                        Text("/ USDT").font(.scaled(size: 11, weight: .medium)).foregroundStyle(Color.muted)
                         Image(systemName: "chevron.down").font(.system(size: 9, weight: .bold)).foregroundStyle(Color.muted)
                     }
                     if let touch {
                         Text("\(touch.side == .upper ? "上沿" : "下沿") · \(FibView.touchTime(touch.occurredMs))")
-                            .font(.system(size: 11, weight: .medium)).foregroundStyle(touch.side == .upper ? ChartPalette.down : ChartPalette.up)
+                            .font(.scaled(size: 11, weight: .medium)).foregroundStyle(touch.side == .upper ? ChartPalette.down : ChartPalette.up)
                     } else {
-                        Text("本周未触价").font(.system(size: 11, weight: .medium)).foregroundStyle(Color.muted)
+                        Text("本周未触价").font(.scaled(size: 11, weight: .medium)).foregroundStyle(Color.muted)
                     }
                 }
                 if let p = price(symbol) {
                     Text(p.formatted(.number.precision(.fractionLength(decimals(symbol))).grouping(.never)))
-                        .font(.system(size: 16, weight: .bold).monospacedDigit())
+                        .font(.scaled(size: 16, weight: .bold).monospacedDigit())
                         .foregroundStyle((candles.bars.last.map { $0.close >= $0.open } ?? true) ? ChartPalette.up : ChartPalette.down)
                         .contentTransition(.numericText(value: p)).animation(.snappy, value: p)
                         .padding(.leading, 4)
@@ -226,7 +242,7 @@ struct PeriodChips: View {
                 HStack(spacing: 1) {
                     ForEach(FibView.choices) { p in
                         Button { Haptics.select(); selection = p } label: {
-                            Text(p.rawValue).font(.system(size: 13, weight: .bold).monospacedDigit())
+                            Text(p.rawValue).font(.scaled(size: 13, weight: .bold).monospacedDigit())
                                 .foregroundStyle(selection == p ? Color.white : Color.ink)
                                 .padding(.horizontal, 8).frame(height: 34)
                                 .background(selection == p ? Color.accentColor : .clear, in: .capsule)
@@ -250,7 +266,7 @@ struct ToggleChip: View {
     @Binding var on: Bool
     var body: some View {
         Button { Haptics.select(); withAnimation(.snappy) { on.toggle() } } label: {
-            Text(title).font(.system(size: 13, weight: .semibold)).lineLimit(1).fixedSize()
+            Text(title).font(.scaled(size: 13, weight: .semibold)).lineLimit(1).fixedSize()
                 .foregroundStyle(on ? Color.accentColor : Color.ink)
                 .padding(.horizontal, 9).frame(height: 34)
                 .background(on ? Color.accentColor.opacity(0.13) : .clear, in: .capsule)

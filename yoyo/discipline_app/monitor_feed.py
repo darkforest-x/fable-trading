@@ -205,6 +205,36 @@ def project_notifications(fib, alerts):
         raise MonitorUnavailable('通知数据暂不可用') from error
 
 
+def project_touch_scores(rows):
+    """This NY week's 1.618 touch scores keyed like the chart's touches (symbol + upper/lower).
+
+    Owner 2026-11-08 (“除了3全做”, item 1): the 最新触价 list must show each touch's own score,
+    including 本周 rows older than the recent page. The monitor keeps one signal per
+    (week, symbol, side); ``score`` is the touch 5m-close score the paper accounts use.
+    Model features and errors never cross the boundary. Authenticated route only: the public
+    ``/v1/market/monday-fib`` projection stays market-only.
+    """
+    try:
+        rows = [r for r in rows if isinstance(r, dict)]
+        week = max((r.get('week') for r in rows if isinstance(r.get('week'), str)), default=None)
+        out, seen = [], set()
+        for row in rows:
+            symbol, side = _symbol(row.get('symbol')), _side(row.get('side'))
+            status = row.get('status')
+            if not symbol or not side or row.get('week') != week or status not in ('scored', 'excluded', 'feature_error'):
+                continue
+            edge = 'lower' if side == 'long' else 'upper'
+            if (symbol, edge) in seen:
+                continue
+            seen.add((symbol, edge))
+            out.append(dict(symbol=symbol, side=edge, candle_ms=_ms(row.get('candle_ms')),
+                            observed_ms=_ms(row.get('observed_ms')), score=_num(row.get('score')), status=status))
+        out.sort(key=lambda s: -(s['candle_ms'] or 0))
+        return dict(week=week, scores=out)
+    except (TypeError, AttributeError, ValueError) as error:
+        raise MonitorUnavailable('触价评分暂不可用') from error
+
+
 def _http(path, body=None):
     if body is None:
         with urlopen(SOURCE + path, timeout=4) as response:
@@ -221,10 +251,14 @@ def _http(path, body=None):
 class MonitorFeed:
     """Short-lived cache in front of the loopback monitor; ``fetch`` is injectable for fixtures."""
 
+    HISTORY_TTL = 300
+    HISTORY_PAGES = 10
+
     def __init__(self, fetch=_http, ttl=5):
         self._fetch, self._ttl = fetch, ttl
         self._lock = threading.Lock()
         self._cache = {}
+        self._history = (0, None, [])  # (fetched_at, week, rows) for touches before today
 
     def _read(self, path, project, load=None):
         with self._lock:
@@ -258,6 +292,30 @@ class MonitorFeed:
     def notifications(self):
         return self._read('notifications', None, lambda: project_notifications(
             self._fetch('/api/monday-fib'), self._fetch('/api/spike-alerts')))
+
+    def touch_scores(self):
+        """Recent page (every call, 15 s cache) + this week's older pages (5 min cache)."""
+        return self._read('touch-scores', None, self._load_touch_scores)
+
+    def _load_touch_scores(self):
+        snapshot = self._fetch('/api/monday-reclaim-paper?' + urlencode(dict(list_period='today', track='live-wick6x3')))
+        if not isinstance(snapshot, dict):
+            raise MonitorUnavailable('触价评分暂不可用')
+        recent = list(snapshot.get('signals') or []) + list(snapshot.get('record_signals') or [])
+        week = max((r.get('week') for r in recent if isinstance(r, dict) and isinstance(r.get('week'), str)), default=None)
+        fetched_at, cached_week, older = self._history
+        if week and (week != cached_week or time.time() - fetched_at > self.HISTORY_TTL):
+            older = []
+            for page in range(self.HISTORY_PAGES):
+                query = urlencode(dict(track='live-wick6x3', tab='events', scope='all', sort='time_desc',
+                                       limit=100, offset=page*100))
+                page_value = self._fetch('/api/monday-reclaim-paper/history?' + query)
+                rows = page_value.get('rows') or [] if isinstance(page_value, dict) else []
+                older += [r for r in rows if isinstance(r, dict) and r.get('week') == week]
+                if len(rows) < 100 or any(isinstance(r, dict) and r.get('week') != week for r in rows):
+                    break
+            self._history = (time.time(), week, older)
+        return project_touch_scores(recent + older)
 
     def set_fib_bark(self, enabled):
         """The one write: switch 1.618 Bark pushes; the monitor validates channel configuration."""

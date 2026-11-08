@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>天才交易员 · iOS 26 锁屏实时活动与灵动岛 (402x874pt)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=SF+Pro+Display:wght@200;300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            accent: '#0A84FF',
+            long: '#169873',
+            short: '#D7355D',
+            textPrimary: '#111827',
+            textSecondary: '#6B7280',
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Inter', 'PingFang SC', 'sans-serif'],
+            mono: ['JetBrains Mono', 'SF Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* iOS 26 Glassmorphism and Backdrop Blur Tokens */
+    .ios-glass-card {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(32px) saturate(180%);
+      -webkit-backdrop-filter: blur(32px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 16px 36px -8px rgba(17, 24, 39, 0.08), 0 4px 12px rgba(255, 255, 255, 0.4) inset;
+    }
+    .ios-island {
+      background: #000000;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    }
+    .wallpaper-mesh {
+      background: radial-gradient(at 0% 0%, rgba(207, 224, 255, 0.9) 0px, transparent 50%),
+                  radial-gradient(at 100% 0%, rgba(226, 220, 255, 0.85) 0px, transparent 50%),
+                  radial-gradient(at 100% 100%, rgba(211, 242, 230, 0.8) 0px, transparent 50%),
+                  radial-gradient(at 0% 100%, rgba(255, 240, 225, 0.75) 0px, transparent 50%),
+                  #f5f7fb;
+    }
+  </style>
+</head>
+<body class="bg-[#0b0e14] text-textPrimary flex items-center justify-center min-h-screen p-4 sm:p-8 antialiased selection:bg-accent/20">
+
+  <!-- iPhone Frame Mockup (402pt x 874pt standard iPhone 16 Pro / iOS 26 reference) -->
+  <div class="relative w-[402px] h-[874px] rounded-[55px] overflow-hidden border-[7px] border-[#2d3139] shadow-[0_30px_90px_rgba(0,0,0,0.65),0_0_0_1px_rgba(255,255,255,0.12)] wallpaper-mesh flex flex-col justify-between select-none">
+
+    <!-- Top Status Bar & Dynamic Island Zone -->
+    <div class="pt-3 px-7 z-20">
+      <div class="flex items-center justify-between text-textPrimary text-[14.5px] font-semibold tracking-tight pb-2">
+        <span class="pl-1">18:55</span>
+        <div class="flex items-center gap-1.5 opacity-90 pr-1 text-[13px]">
+          <!-- Signal Icon -->
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+            <path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.2 18.39C2.83 16.63 2 14.42 2 12 2 6.48 6.48 2 12 2s10 4.48 10 10c0 2.42-.83 4.63-2.2 6.39l-.77-.78C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9zm0 4c-2.76 0-5 2.24-5 5 0 1.34.53 2.56 1.39 3.46l.71-.71C8.42 14.1 8 13.1 8 12c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.1-.42 2.1-1.1 2.75l.71.71c.86-.9 1.39-2.12 1.39-3.46 0-2.76-2.24-5-5-5zm0 4c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z" opacity="0"/>
+            <path d="M3 18h2v3H3zm4-4h2v7H7zm4-4h2v11h-2zm4-4h2v15h-2zm4-4h2v19h-2z"/>
+          </svg>
+          <!-- 5G / Wifi -->
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+            <path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98A16.88 16.88 0 0 0 12 4zm0 2c3.99 0 7.63 1.57 10.33 4.14L12 19.34 1.67 10.14C4.37 7.57 8.01 6 12 6z"/>
+          </svg>
+          <!-- Battery -->
+          <div class="w-6 h-3 rounded-[4px] border border-textPrimary/80 p-0.5 flex items-center">
+            <div class="h-full w-4/5 bg-textPrimary rounded-[1.5px]"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compact Dynamic Island (Near top) -->
+      <div class="flex justify-center mt-0.5">
+        <div class="ios-island w-[208px] h-[36px] rounded-full px-4 flex items-center justify-between text-white text-[12.5px] font-medium transition-all duration-300 hover:scale-[1.02] cursor-pointer">
+          <!-- Left Label in Compact Island -->
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full bg-[#169873] animate-pulse"></div>
+            <span class="tracking-tight text-white font-medium">ETH 多</span>
+          </div>
+          <!-- Right Compact P&L in Island -->
+          <div class="flex items-center gap-1 font-mono font-semibold text-[#169873]">
+            <span>+18.6U</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center Zone: Lock Screen Big Clock & Date -->
+    <div class="flex flex-col items-center justify-center mt-3 z-10">
+      <!-- Lock Icon / Date -->
+      <div class="flex items-center gap-1.5 text-textSecondary text-[14px] font-medium tracking-wide mb-1">
+        <svg class="w-3.5 h-3.5 fill-current opacity-80" viewBox="0 0 24 24">
+          <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+        </svg>
+        <span>11月8日 星期五</span>
+      </div>
+
+      <!-- Big Clock: 18:55 -->
+      <h1 class="text-[86px] leading-[90px] font-light text-textPrimary tracking-tight select-none" style="font-family: -apple-system, 'SF Pro Display', sans-serif; font-weight: 200;">
+        18:55
+      </h1>
+    </div>
+
+    <!-- Live Activity Card & Bottom Quick Shortcuts -->
+    <div class="px-4 pb-6 flex flex-col gap-5 z-20">
+      
+      <!-- Live Activity Card (white frosted, rounded 24) -->
+      <div class="ios-glass-card rounded-[24px] p-4.5 pt-4 pb-3.5 transition-all duration-300">
+        
+        <!-- Header row: Left round ETH logo, title, small entry price; Right big P&L & % -->
+        <div class="flex items-start justify-between">
+          
+          <!-- Left side: ETH Logo + Info -->
+          <div class="flex items-center gap-3">
+            <!-- Round ETH Logo -->
+            <div class="w-10 h-10 rounded-full bg-white shadow-sm border border-black/5 flex items-center justify-center p-2 shrink-0">
+              <svg class="w-full h-full" viewBox="0 0 32 32" fill="none">
+                <path d="M16 2.5L15.7 3.5V21.8L16 22.1L24.3 17.2L16 2.5Z" fill="#627EEA"/>
+                <path d="M16 2.5L7.7 17.2L16 22.1V2.5Z" fill="#8A92B2"/>
+                <path d="M16 23.9L15.8 24.1V29.3L16 29.5L24.3 18.7L16 23.9Z" fill="#627EEA"/>
+                <path d="M16 29.5V23.9L7.7 18.7L16 29.5Z" fill="#8A92B2"/>
+                <path d="M16 22.1L24.3 17.2L16 13.5V22.1Z" fill="#454A75"/>
+                <path d="M7.7 17.2L16 22.1V13.5L7.7 17.2Z" fill="#8A92B2"/>
+              </svg>
+            </div>
+
+            <!-- Title & Entry -->
+            <div class="flex flex-col">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[17px] font-bold text-textPrimary tracking-tight">ETH 多 3x</span>
+                <span class="text-[10px] font-medium bg-[#169873]/10 text-[#169873] px-1.5 py-0.5 rounded-full">持仓中</span>
+              </div>
+              <div class="text-[12.5px] text-textSecondary font-mono mt-0.5">
+                开仓 <span class="text-textPrimary/80 font-medium">2,001.2</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right side: Big P&L in green #169873 with +9.3% under it -->
+          <div class="flex flex-col items-end">
+            <div class="text-[23px] font-bold text-[#169873] font-mono leading-none tracking-tight">
+              +18.60 U
+            </div>
+            <div class="text-[13px] font-semibold text-[#169873] font-mono mt-1">
+              +9.3%
+            </div>
+          </div>
+        </div>
+
+        <!-- Middle row: Thin progress bar from 止损 1,960 to 现价 2,007.4 with dot at mark -->
+        <div class="mt-4 px-1">
+          <!-- Labels above / aligned -->
+          <div class="flex items-center justify-between text-[11.5px] font-mono mb-1.5">
+            <div class="flex items-center gap-1 text-[#D7355D]">
+              <span class="text-textSecondary">止损</span>
+              <span class="font-medium">1,960</span>
+            </div>
+            <div class="flex items-center gap-1 text-textPrimary">
+              <span class="text-textSecondary">现价</span>
+              <span class="font-bold text-[#169873]">2,007.4</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar Track -->
+          <div class="relative w-full h-[5px] bg-black/[0.06] rounded-full overflow-visible">
+            <!-- Filled Bar (From SL up through Current price) -->
+            <div class="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-[#D7355D]/70 via-[#FF9F0A]/70 to-[#169873]" style="width: 78%;"></div>
+            
+            <!-- Target Dot Indicator on the mark -->
+            <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-[#169873] shadow-md cursor-pointer" style="left: 78%;"></div>
+          </div>
+
+          <!-- Sub baseline / ticks -->
+          <div class="flex justify-between items-center text-[10px] text-textSecondary/70 mt-1.5 font-mono">
+            <span>入场 2,001.2</span>
+            <span>盈亏比 1:2.4</span>
+            <span>目标 2,100</span>
+          </div>
+        </div>
+
+        <!-- Footer row: Small grey '天才交易员 · 18:55 更新' -->
+        <div class="mt-3 pt-2.5 border-t border-black/[0.05] flex items-center justify-between text-[11.5px] text-textSecondary font-sans">
+          <div class="flex items-center gap-1.5">
+            <div class="w-1.5 h-1.5 rounded-full bg-[#169873]"></div>
+            <span>天才交易员 · 18:55 更新</span>
+          </div>
+          <div class="text-[11px] text-accent font-medium hover:underline cursor-pointer flex items-center gap-0.5">
+            <span>进入图表</span>
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Lock screen bottom flashlight & camera buttons -->
+      <div class="flex items-center justify-between px-3 pt-1">
+        <button class="w-[50px] h-[50px] rounded-full ios-glass-card flex items-center justify-center text-textPrimary hover:scale-105 active:scale-95 transition-transform" aria-label="手电筒">
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+            <path d="M6 2h12v3l-4 4v11a2 2 0 0 1-2 2h0a2 2 0 0 1-2-2V9L6 5V2zm2 2v.5l4 4 4-4V4H8zm3 7v8h2v-8h-2z"/>
+          </svg>
+        </button>
+
+        <!-- Home Indicator Bar -->
+        <div class="w-[134px] h-[4.5px] bg-textPrimary/40 rounded-full"></div>
+
+        <button class="w-[50px] h-[50px] rounded-full ios-glass-card flex items-center justify-center text-textPrimary hover:scale-105 active:scale-95 transition-transform" aria-label="相机">
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+            <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>

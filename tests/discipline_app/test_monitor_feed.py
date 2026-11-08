@@ -10,7 +10,8 @@ from fastapi.testclient import TestClient
 from yoyo.discipline_app.api import create_app
 from yoyo.discipline_app.book import Book
 from yoyo.discipline_app.monitor_feed import (MonitorFeed, MonitorUnavailable, TRACKS, project_alerts,
-                                              project_cloud, project_notifications, project_paper)
+                                              project_cloud, project_notifications, project_paper,
+                                              project_touch_scores)
 from test_discipline_service import Clock, market
 
 TOKEN = 'monitor-fixture-token-not-a-secret-0123456789'
@@ -70,6 +71,14 @@ def fib_raw():
                 events=[event('AAA-USDT-SWAP', 'sent'), event('BBB-USDT-SWAP', 'skipped', 'score_not_above_0_4'),
                         event('CCC-USDT-SWAP', 'skipped', 'expired_or_disabled'),
                         event('DDD-USDT-SWAP', 'history', source='history')])
+
+
+def history_raw():
+    row = lambda i, symbol, side, week='2026-11-02': dict(id=i, week=week, symbol=symbol, side=side, level=1.0, score=.55,
+                                                         status='scored', candle_ms=1_789_900_000_000+i, observed_ms=1,
+                                                         features={'secret_model_input': 1}, error='trace')
+    return dict(rows=[row(9, 'EEE-USDT-SWAP', -1), row(8, 'AAA-USDT-SWAP', -1), row(3, 'OLD-USDT-SWAP', 1, '2026-10-26')],
+                total=3, has_more=False, now_ms=1_790_000_200_000, day_start_ms=1_790_000_000_000)
 
 
 def walk(value):
@@ -132,8 +141,13 @@ def client(tmp_path):
     book = Book(Path(tmp_path) / 'paper.sqlite3', Clock())
     market(book)
     calls = []
-    payloads = {'/api/monday-reclaim-paper': paper_raw, '/api/spike-alerts': alerts_raw, '/api/cloud-signals': cloud_raw,
-                '/api/monday-fib': fib_raw}
+    def paper_with_week():
+        raw = paper_raw()
+        for s in raw['signals']:
+            s['week'] = '2026-11-02'
+        return raw
+    payloads = {'/api/monday-reclaim-paper': paper_with_week, '/api/spike-alerts': alerts_raw, '/api/cloud-signals': cloud_raw,
+                '/api/monday-fib': fib_raw, '/api/monday-reclaim-paper/history': history_raw}
 
     def fetch(path, body=None):
         calls.append((path, body) if body is not None else path)
@@ -148,7 +162,8 @@ def client(tmp_path):
 def test_monitor_routes_need_token_are_get_only_and_never_touch_the_ledger(client):
     http, book, calls, app = client
     before = book.snapshot()
-    for path in ('/v1/monitor/paper', '/v1/monitor/alerts', '/v1/monitor/cloud', '/v1/monitor/notifications'):
+    for path in ('/v1/monitor/paper', '/v1/monitor/alerts', '/v1/monitor/cloud', '/v1/monitor/notifications',
+                 '/v1/monitor/touch-scores'):
         assert http.get(path).status_code == 401
         assert http.get(path, headers=AUTH).status_code == 200
         assert http.post(path, headers=AUTH, json={}).status_code == 405
@@ -191,3 +206,34 @@ def test_unreachable_monitor_is_an_honest_503(tmp_path):
     http = TestClient(create_app(book, TOKEN, market_enabled=False, monitor_feed=MonitorFeed(down)))
     response = http.get('/v1/monitor/alerts', headers=AUTH)
     assert response.status_code == 503 and response.json()['detail'] == '监控服务暂未连接，请稍后重试'
+
+
+def test_touch_scores_cover_this_week_per_touch_without_model_internals(client):
+    """2.6.0 item 1: one score per (symbol, edge) of this NY week, recent page first, older pages after."""
+    http, book, calls, _ = client
+    before = book.snapshot()
+    body = http.get('/v1/monitor/touch-scores', headers=AUTH).json()
+    assert body['week'] == '2026-11-02'
+    keyed = {(s['symbol'], s['side']): s for s in body['scores']}
+    # short (-1) touches the upper 1.618, long (+1) the lower; the recent page wins over an older duplicate.
+    assert set(keyed) == {('AAA-USDT-SWAP', 'upper'), ('CCC-USDT-SWAP', 'lower'), ('EEE-USDT-SWAP', 'upper')}
+    assert keyed[('AAA-USDT-SWAP', 'upper')]['score'] == .8 and keyed[('EEE-USDT-SWAP', 'upper')]['score'] == .55
+    assert not {'features', 'error', 'levels', 'taken', 'id'} & set(walk(body))
+    assert any(isinstance(c, str) and c.startswith('/api/monday-reclaim-paper/history?') and 'offset=0' in c for c in calls)
+    # Older pages are cached between refreshes; the ledger is never touched.
+    count = sum(isinstance(c, str) and 'history' in c for c in calls)
+    http.app.state.monitor._cache.clear()
+    http.get('/v1/monitor/touch-scores', headers=AUTH)
+    assert sum(isinstance(c, str) and 'history' in c for c in calls) == count
+    after = book.snapshot()
+    assert before['positions'] == after['positions'] and before['pending'] == after['pending']
+
+
+def test_touch_scores_projection_drops_other_weeks_and_bad_rows():
+    rows = [dict(week='2026-11-02', symbol='AAA-USDT-SWAP', side=1, score=.4, status='scored', candle_ms=5),
+            dict(week='2026-10-26', symbol='BBB-USDT-SWAP', side=1, score=.9, status='scored', candle_ms=4),
+            dict(week='2026-11-02', symbol='bad', side=1, score=.9, status='scored'),
+            dict(week='2026-11-02', symbol='CCC-USDT-SWAP', side=-1, score=None, status='pending'), 'junk']
+    out = project_touch_scores(rows)
+    assert out['week'] == '2026-11-02' and [s['symbol'] for s in out['scores']] == ['AAA-USDT-SWAP']
+    assert out['scores'][0]['side'] == 'lower'

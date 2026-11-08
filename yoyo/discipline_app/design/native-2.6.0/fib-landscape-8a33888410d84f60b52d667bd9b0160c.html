@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>天才交易员 · 全屏极简K线终端</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Font Family -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary-fixed-variant": "#00468d",
+            "tertiary-fixed": "#ffd9dd",
+            "outline-variant": "#c0c6d6",
+            "on-surface-variant": "#414754",
+            "on-primary-container": "#fefcff",
+            "outline": "#717786",
+            "on-tertiary-fixed": "#400012",
+            "primary": "#005ab3",
+            "secondary-fixed-dim": "#6adbb1",
+            "inverse-on-surface": "#edf0ff",
+            "on-tertiary-container": "#fffbff",
+            "error-container": "#ffdad6",
+            "secondary-container": "#85f4c9",
+            "surface-bright": "#f9f9ff",
+            "on-error": "#ffffff",
+            "primary-container": "#0073e0",
+            "surface-container-high": "#e1e8fd",
+            "background": "#f9f9ff",
+            "secondary-fixed": "#88f7cc",
+            "inverse-primary": "#aac7ff",
+            "tertiary": "#b41645",
+            "tertiary-container": "#d6345c",
+            "surface-variant": "#dce2f7",
+            "on-secondary-container": "#007153",
+            "tertiary-fixed-dim": "#ffb2bb",
+            "surface-container-highest": "#dce2f7",
+            "secondary": "#006c50",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed-variant": "#910033",
+            "on-surface": "#141b2b",
+            "surface-container": "#e9edff",
+            "primary-fixed": "#d6e3ff",
+            "on-secondary": "#ffffff",
+            "surface": "#f9f9ff",
+            "inverse-surface": "#293040",
+            "surface-container-low": "#f1f3ff",
+            "on-secondary-fixed": "#002116",
+            "surface-dim": "#d3daef",
+            "on-background": "#141b2b",
+            "surface-tint": "#005db8",
+            "error": "#ba1a1a",
+            "primary-fixed-dim": "#aac7ff",
+            "on-secondary-fixed-variant": "#00513b",
+            "surface-container-lowest": "#ffffff",
+            "on-primary-fixed": "#001b3e",
+            "on-tertiary": "#ffffff",
+            "on-primary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "0.75rem",
+            "space-xl": "1.5rem",
+            "space-xs": "0.25rem",
+            "space-md": "0.75rem",
+            "margin": "1rem",
+            "space-lg": "1rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "ticker-numeric-md": ["Inter"],
+            "label-lg": ["Inter"],
+            "headline-xl": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "ticker-numeric-lg": ["Inter"],
+            "label-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "ticker-numeric-sm": ["Inter"],
+            "body-sm": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-md": ["Inter"]
+          },
+          "fontSize": {
+            "ticker-numeric-md": ["15px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "label-lg": ["15px", { "lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "500" }],
+            "headline-xl": ["34px", { "lineHeight": "41px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-md": ["15px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-sm": ["17px", { "lineHeight": "22px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "ticker-numeric-lg": ["24px", { "lineHeight": "28px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "body-lg": ["17px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "ticker-numeric-sm": ["12px", { "lineHeight": "14px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* iOS 26 Liquid Frosted Glass Specifications */
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      box-shadow: inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95),
+                  inset 0 -0.5px 0.5px 0 rgba(255, 255, 255, 0.4),
+                  0 8px 30px -4px rgba(20, 27, 43, 0.06),
+                  0 2px 8px -1px rgba(20, 27, 43, 0.03);
+    }
+    .glass-button {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 1.0),
+                  0 4px 16px -2px rgba(20, 27, 43, 0.05);
+    }
+    .glass-button:active {
+      transform: scale(0.95);
+      background: rgba(255, 255, 255, 0.92);
+    }
+    /* Touch animation */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      50% { transform: scale(1.6); opacity: 0.15; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+    .touch-ring {
+      animation: pulse-ring 2.2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-high text-on-surface m-0 p-0 overflow-hidden flex items-center justify-center min-h-screen select-none font-ticker-numeric-md antialiased">
+<!-- iPhone 16/17 Pro Landscape Orientation Container (874pt x 402pt canonical ratio) -->
+<div class="relative w-[874px] h-[402px] bg-surface-container-lowest rounded-[48px] overflow-hidden shadow-[0_25px_70px_-15px_rgba(20,27,43,0.18)] flex flex-col">
+<!-- Edge-to-Edge SVG Candlestick & Technical Engine Canvas -->
+<div class="absolute inset-0 w-full h-full pointer-events-none z-0">
+<svg class="w-full h-full" fill="none" viewbox="0 0 874 402" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<lineargradient id="vol-bull" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#88f7cc" stop-opacity="0.45"></stop>
+<stop offset="100%" stop-color="#88f7cc" stop-opacity="0.08"></stop>
+</lineargradient>
+<lineargradient id="vol-bear" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#ffd9dd" stop-opacity="0.45"></stop>
+<stop offset="100%" stop-color="#ffd9dd" stop-opacity="0.08"></stop>
+</lineargradient>
+<lineargradient id="range-fill" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#005ab3" stop-opacity="0.025"></stop>
+<stop offset="100%" stop-color="#005ab3" stop-opacity="0.005"></stop>
+</lineargradient>
+</defs>
+<!-- Subtle Background Grid -->
+<g stroke="#f1f3ff" stroke-width="1">
+<line x1="0" x2="804" y1="74" y2="74"></line>
+<line x1="0" x2="804" y1="138" y2="138"></line>
+<line x1="0" x2="804" y1="202" y2="202"></line>
+<line x1="0" x2="804" y1="268" y2="268"></line>
+<line x1="0" x2="804" y1="334" y2="334"></line>
+<!-- Vertical Time Division Lines -->
+<line x1="88" x2="88" y1="0" y2="378"></line>
+<line x1="192" x2="192" y1="0" y2="378"></line>
+<line x1="296" x2="296" y1="0" y2="378"></line>
+<line x1="400" x2="400" y1="0" y2="378"></line>
+<line x1="504" x2="504" y1="0" y2="378"></line>
+<line x1="608" x2="608" y1="0" y2="378"></line>
+<line x1="712" x2="712" y1="0" y2="378"></line>
+</g>
+<!-- Shaded Trading Zone (Between 周一高 and 周一低) -->
+<rect fill="url(#range-fill)" height="130" width="804" x="0" y="138"></rect>
+<!-- 1.618 & Institutional Horizontal Reference Rays -->
+<!-- 上1.618 Level (2,042.80) -->
+<line stroke="#717786" stroke-dasharray="3 3" stroke-opacity="0.5" stroke-width="1" x1="0" x2="804" y1="74" y2="74"></line>
+<!-- 周一高 (2,028.50) -->
+<line stroke="#717786" stroke-dasharray="2 4" stroke-opacity="0.4" stroke-width="1" x1="0" x2="804" y1="138" y2="138"></line>
+<!-- 周一低 (1,988.00) -->
+<line stroke="#717786" stroke-dasharray="2 4" stroke-opacity="0.4" stroke-width="1" x1="0" x2="804" y1="268" y2="268"></line>
+<!-- 下1.618 Level (1,972.10) -->
+<line stroke="#006c50" stroke-dasharray="4 3" stroke-opacity="0.65" stroke-width="1.2" x1="0" x2="804" y1="334" y2="334"></line>
+<!-- Current Price Benchmark Line (2,007.40 -> y=198) -->
+<line opacity="0.8" stroke="#0073e0" stroke-dasharray="5 4" stroke-width="1.2" x1="0" x2="804" y1="198" y2="198"></line>
+<!-- Volume Profile Bars (Bottom Section) -->
+<g>
+<rect fill="url(#vol-bull)" height="34" rx="1.5" width="7" x="52" y="342"></rect>
+<rect fill="url(#vol-bear)" height="28" rx="1.5" width="7" x="68" y="348"></rect>
+<rect fill="url(#vol-bull)" height="40" rx="1.5" width="7" x="84" y="336"></rect>
+<rect fill="url(#vol-bear)" height="31" rx="1.5" width="7" x="100" y="345"></rect>
+<rect fill="url(#vol-bear)" height="36" rx="1.5" width="7" x="116" y="340"></rect>
+<rect fill="url(#vol-bull)" height="24" rx="1.5" width="7" x="132" y="352"></rect>
+<rect fill="url(#vol-bull)" height="38" rx="1.5" width="7" x="148" y="338"></rect>
+<rect fill="url(#vol-bear)" height="32" rx="1.5" width="7" x="164" y="344"></rect>
+<rect fill="url(#vol-bull)" height="21" rx="1.5" width="7" x="180" y="355"></rect>
+<rect fill="url(#vol-bear)" height="27" rx="1.5" width="7" x="196" y="349"></rect>
+<rect fill="url(#vol-bear)" height="44" rx="1.5" width="7" x="212" y="332"></rect>
+<rect fill="url(#vol-bull)" height="37" rx="1.5" width="7" x="228" y="339"></rect>
+<rect fill="url(#vol-bear)" height="29" rx="1.5" width="7" x="244" y="347"></rect>
+<rect fill="url(#vol-bear)" height="41" rx="1.5" width="7" x="260" y="335"></rect>
+<rect fill="url(#vol-bull)" height="34" rx="1.5" width="7" x="276" y="342"></rect>
+<rect fill="url(#vol-bear)" height="46" rx="1.5" width="7" x="292" y="330"></rect>
+<rect fill="url(#vol-bear)" height="30" rx="1.5" width="7" x="308" y="346"></rect>
+<rect fill="url(#vol-bull)" height="25" rx="1.5" width="7" x="324" y="351"></rect>
+<rect fill="url(#vol-bear)" height="38" rx="1.5" width="7" x="340" y="338"></rect>
+<rect fill="url(#vol-bear)" height="33" rx="1.5" width="7" x="356" y="343"></rect>
+<rect fill="url(#vol-bull)" height="22" rx="1.5" width="7" x="372" y="354"></rect>
+<rect fill="url(#vol-bear)" height="36" rx="1.5" width="7" x="388" y="340"></rect>
+<rect fill="url(#vol-bear)" height="42" rx="1.5" width="7" x="404" y="334"></rect>
+<rect fill="url(#vol-bull)" height="54" rx="1.5" width="7" x="420" y="322"></rect>
+<rect fill="url(#vol-bear)" height="46" rx="1.5" width="7" x="436" y="330"></rect>
+<rect fill="url(#vol-bear)" height="35" rx="1.5" width="7" x="452" y="341"></rect>
+<rect fill="url(#vol-bull)" height="48" rx="1.5" width="7" x="468" y="328"></rect>
+<rect fill="url(#vol-bull)" height="58" rx="1.5" width="7" x="484" y="318"></rect>
+<rect fill="url(#vol-bear)" height="52" rx="1.5" width="7" x="500" y="324"></rect>
+<rect fill="url(#vol-bear)" height="43" rx="1.5" width="7" x="516" y="333"></rect>
+<rect fill="url(#vol-bull)" height="50" rx="1.5" width="7" x="532" y="326"></rect>
+<rect fill="url(#vol-bull)" height="64" rx="1.5" width="7" x="548" y="312"></rect>
+<rect fill="url(#vol-bull)" height="70" rx="1.5" width="7" x="564" y="306"></rect>
+<rect fill="url(#vol-bear)" height="57" rx="1.5" width="7" x="580" y="319"></rect>
+<rect fill="url(#vol-bull)" height="51" rx="1.5" width="7" x="596" y="325"></rect>
+<rect fill="url(#vol-bull)" height="62" rx="1.5" width="7" x="612" y="314"></rect>
+<rect fill="url(#vol-bear)" height="56" rx="1.5" width="7" x="628" y="320"></rect>
+<rect fill="url(#vol-bull)" height="68" rx="1.5" width="7" x="644" y="308"></rect>
+<rect fill="url(#vol-bear)" height="60" rx="1.5" width="7" x="660" y="316"></rect>
+<rect fill="url(#vol-bull)" height="53" rx="1.5" width="7" x="676" y="323"></rect>
+<rect fill="url(#vol-bull)" height="66" rx="1.5" width="7" x="692" y="310"></rect>
+<rect fill="url(#vol-bear)" height="58" rx="1.5" width="7" x="708" y="318"></rect>
+<rect fill="url(#vol-bull)" height="72" rx="1.5" width="7" x="724" y="304"></rect>
+</g>
+<!-- Candlestick Series Stream -->
+<!-- Monday Open Anchor Candle (Highlighted Vivid Green as per Style Guidance) -->
+<g id="monday-anchor">
+<line stroke="#006c50" stroke-width="1.5" x1="55" x2="55" y1="126" y2="178"></line>
+<rect fill="#006c50" height="34" rx="1" width="7" x="51.5" y="138"></rect>
+</g>
+<!-- Flow of Candlesticks in Mineral Tones (#717786, #006c50, #ba1a1a) -->
+<g stroke-linecap="round">
+<!-- 1 -->
+<line stroke="#717786" stroke-width="1.2" x1="71" x2="71" y1="134" y2="182"></line>
+<rect fill="#717786" height="26" rx="1" width="7" x="67.5" y="142"></rect>
+<!-- 2 -->
+<line stroke="#717786" stroke-width="1.2" x1="87" x2="87" y1="128" y2="168"></line>
+<rect fill="#ffffff" height="22" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="83.5" y="132"></rect>
+<!-- 3 -->
+<line stroke="#717786" stroke-width="1.2" x1="103" x2="103" y1="140" y2="188"></line>
+<rect fill="#717786" height="30" rx="1" width="7" x="99.5" y="146"></rect>
+<!-- 4 -->
+<line stroke="#717786" stroke-width="1.2" x1="119" x2="119" y1="152" y2="196"></line>
+<rect fill="#717786" height="24" rx="1" width="7" x="115.5" y="160"></rect>
+<!-- 5 -->
+<line stroke="#717786" stroke-width="1.2" x1="135" x2="135" y1="156" y2="192"></line>
+<rect fill="#ffffff" height="18" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="131.5" y="164"></rect>
+<!-- 6 -->
+<line stroke="#717786" stroke-width="1.2" x1="151" x2="151" y1="144" y2="184"></line>
+<rect fill="#ffffff" height="24" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="147.5" y="152"></rect>
+<!-- 7 -->
+<line stroke="#717786" stroke-width="1.2" x1="167" x2="167" y1="150" y2="198"></line>
+<rect fill="#717786" height="28" rx="1" width="7" x="163.5" y="158"></rect>
+<!-- 8 -->
+<line stroke="#717786" stroke-width="1.2" x1="183" x2="183" y1="162" y2="204"></line>
+<rect fill="#ffffff" height="20" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="179.5" y="170"></rect>
+<!-- 9 -->
+<line stroke="#717786" stroke-width="1.2" x1="199" x2="199" y1="172" y2="218"></line>
+<rect fill="#717786" height="30" rx="1" width="7" x="195.5" y="178"></rect>
+<!-- 10 -->
+<line stroke="#717786" stroke-width="1.2" x1="215" x2="215" y1="186" y2="236"></line>
+<rect fill="#717786" height="32" rx="1" width="7" x="211.5" y="196"></rect>
+<!-- 11 -->
+<line stroke="#717786" stroke-width="1.2" x1="231" x2="231" y1="202" y2="242"></line>
+<rect fill="#ffffff" height="22" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="227.5" y="210"></rect>
+<!-- 12 -->
+<line stroke="#717786" stroke-width="1.2" x1="247" x2="247" y1="216" y2="258"></line>
+<rect fill="#717786" height="24" rx="1" width="7" x="243.5" y="224"></rect>
+<!-- 13 -->
+<line stroke="#717786" stroke-width="1.2" x1="263" x2="263" y1="228" y2="276"></line>
+<rect fill="#717786" height="28" rx="1" width="7" x="259.5" y="238"></rect>
+<!-- 14 -->
+<line stroke="#717786" stroke-width="1.2" x1="279" x2="279" y1="244" y2="284"></line>
+<rect fill="#ffffff" height="22" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="275.5" y="250"></rect>
+<!-- 15 -->
+<line stroke="#717786" stroke-width="1.2" x1="295" x2="295" y1="254" y2="298"></line>
+<rect fill="#717786" height="26" rx="1" width="7" x="291.5" y="262"></rect>
+<!-- 16 -->
+<line stroke="#717786" stroke-width="1.2" x1="311" x2="311" y1="268" y2="312"></line>
+<rect fill="#717786" height="24" rx="1" width="7" x="307.5" y="278"></rect>
+<!-- 17 -->
+<line stroke="#717786" stroke-width="1.2" x1="327" x2="327" y1="278" y2="318"></line>
+<rect fill="#ffffff" height="20" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="323.5" y="286"></rect>
+<!-- 18 -->
+<line stroke="#717786" stroke-width="1.2" x1="343" x2="343" y1="288" y2="330"></line>
+<rect fill="#717786" height="24" rx="1" width="7" x="339.5" y="296"></rect>
+<!-- 19 -->
+<line stroke="#717786" stroke-width="1.2" x1="359" x2="359" y1="298" y2="336"></line>
+<rect fill="#717786" height="22" rx="1" width="7" x="355.5" y="306"></rect>
+<!-- Rebound Point: Touch at 下1.618 (x=420) -->
+<!-- 20 -->
+<line stroke="#717786" stroke-width="1.2" x1="375" x2="375" y1="304" y2="338"></line>
+<rect fill="#ffffff" height="18" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="371.5" y="312"></rect>
+<!-- 21 -->
+<line stroke="#717786" stroke-width="1.2" x1="391" x2="391" y1="312" y2="344"></line>
+<rect fill="#717786" height="18" rx="1" width="7" x="387.5" y="320"></rect>
+<!-- 22: TOUCH CANDLE (Lowest wick exactly touches 下1.618 at 334px) -->
+<line stroke="#006c50" stroke-width="1.5" x1="407" x2="407" y1="316" y2="336"></line>
+<rect fill="#006c50" height="12" rx="1" width="7" x="403.5" y="322"></rect>
+<!-- 23: STRONG REBOUND CANDLE -->
+<line stroke="#006c50" stroke-width="1.5" x1="423" x2="423" y1="288" y2="334"></line>
+<rect fill="#ffffff" height="30" rx="1" stroke="#006c50" stroke-width="1.4" width="7" x="419.5" y="294"></rect>
+<!-- Continuation of Wave -->
+<!-- 24 -->
+<line stroke="#717786" stroke-width="1.2" x1="439" x2="439" y1="282" y2="318"></line>
+<rect fill="#717786" height="18" rx="1" width="7" x="435.5" y="288"></rect>
+<!-- 25 -->
+<line stroke="#717786" stroke-width="1.2" x1="455" x2="455" y1="274" y2="308"></line>
+<rect fill="#717786" height="18" rx="1" width="7" x="451.5" y="280"></rect>
+<!-- 26 -->
+<line stroke="#717786" stroke-width="1.2" x1="471" x2="471" y1="258" y2="294"></line>
+<rect fill="#ffffff" height="24" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="467.5" y="264"></rect>
+<!-- 27 -->
+<line stroke="#717786" stroke-width="1.2" x1="487" x2="487" y1="242" y2="278"></line>
+<rect fill="#ffffff" height="24" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="483.5" y="248"></rect>
+<!-- 28 -->
+<line stroke="#717786" stroke-width="1.2" x1="503" x2="503" y1="240" y2="268"></line>
+<rect fill="#717786" height="16" rx="1" width="7" x="499.5" y="246"></rect>
+<!-- 29 -->
+<line stroke="#717786" stroke-width="1.2" x1="519" x2="519" y1="246" y2="274"></line>
+<rect fill="#717786" height="14" rx="1" width="7" x="515.5" y="250"></rect>
+<!-- 30 -->
+<line stroke="#717786" stroke-width="1.2" x1="535" x2="535" y1="230" y2="262"></line>
+<rect fill="#ffffff" height="20" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="531.5" y="236"></rect>
+<!-- 31 -->
+<line stroke="#717786" stroke-width="1.2" x1="551" x2="551" y1="214" y2="246"></line>
+<rect fill="#ffffff" height="22" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="547.5" y="220"></rect>
+<!-- 32 -->
+<line stroke="#717786" stroke-width="1.2" x1="567" x2="567" y1="202" y2="232"></line>
+<rect fill="#ffffff" height="18" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="563.5" y="208"></rect>
+<!-- 33 -->
+<line stroke="#717786" stroke-width="1.2" x1="583" x2="583" y1="206" y2="238"></line>
+<rect fill="#717786" height="18" rx="1" width="7" x="579.5" y="212"></rect>
+<!-- 34 -->
+<line stroke="#717786" stroke-width="1.2" x1="599" x2="599" y1="198" y2="230"></line>
+<rect fill="#ffffff" height="20" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="595.5" y="204"></rect>
+<!-- 35 -->
+<line stroke="#717786" stroke-width="1.2" x1="615" x2="615" y1="184" y2="218"></line>
+<rect fill="#ffffff" height="22" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="611.5" y="190"></rect>
+<!-- 36 -->
+<line stroke="#717786" stroke-width="1.2" x1="631" x2="631" y1="190" y2="224"></line>
+<rect fill="#717786" height="20" rx="1" width="7" x="627.5" y="196"></rect>
+<!-- 37 -->
+<line stroke="#717786" stroke-width="1.2" x1="647" x2="647" y1="182" y2="214"></line>
+<rect fill="#ffffff" height="18" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="643.5" y="188"></rect>
+<!-- 38 -->
+<line stroke="#717786" stroke-width="1.2" x1="663" x2="663" y1="186" y2="216"></line>
+<rect fill="#717786" height="16" rx="1" width="7" x="659.5" y="192"></rect>
+<!-- 39 -->
+<line stroke="#717786" stroke-width="1.2" x1="679" x2="679" y1="178" y2="208"></line>
+<rect fill="#ffffff" height="18" rx="1" stroke="#717786" stroke-width="1.2" width="7" x="675.5" y="184"></rect>
+<!-- 40: Current Session Candle (ETH 2,007.40) -->
+<line stroke="#0073e0" stroke-width="1.4" x1="695" x2="695" y1="174" y2="204"></line>
+<rect fill="#ffffff" height="18" rx="1" stroke="#0073e0" stroke-width="1.4" width="7" x="691.5" y="182"></rect>
+</g>
+<!-- Dynamic Touch Radar Highlight at 下1.618 Rebound (x=410, y=334) -->
+<g transform="translate(410, 334)">
+<circle class="touch-ring" cx="0" cy="0" fill="#006c50" fill-opacity="0.12" r="14"></circle>
+<circle cx="0" cy="0" fill="#006c50" r="4.5" stroke="#ffffff" stroke-width="1.5"></circle>
+<!-- Callout badge -->
+<rect fill="#006c50" height="18" rx="9" width="76" x="-38" y="10"></rect>
+<text fill="#ffffff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle" x="0" y="22.5">触及反弹 · 1.618</text>
+</g>
+<!-- Vertical Crosshair Line (Intersects latest candle x=695) -->
+<line opacity="0.6" stroke="#0073e0" stroke-dasharray="2 3" stroke-width="1" x1="695" x2="695" y1="48" y2="378"></line>
+</svg>
+</div>
+<!-- Left Safe Area / Dynamic Island Landscape Inset Indicator -->
+<div class="absolute left-3 top-1/2 -translate-y-1/2 w-[4.5px] h-[92px] bg-outline-variant/30 rounded-full z-10 pointer-events-none"></div>
+<!-- RIGHT AXIS: Compact Institutional Price Ladder -->
+<div class="absolute right-0 top-0 bottom-6 w-[70px] flex flex-col justify-between items-end pr-2 pt-2 pb-2 z-10 pointer-events-none select-none">
+<!-- Top Ceiling Reference -->
+<span class="font-ticker-numeric-sm text-ticker-numeric-sm text-outline">2,060.0</span>
+<!-- 上 1.618 -->
+<div class="flex items-center space-x-1" style="transform: translateY(4px);">
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container-high px-1 py-0.5 rounded">上1.618</span>
+<span class="font-ticker-numeric-sm text-ticker-numeric-sm text-on-surface-variant font-medium">2,042.8</span>
+</div>
+<!-- 周一高 -->
+<div class="flex items-center space-x-1" style="transform: translateY(12px);">
+<span class="font-label-sm text-label-sm text-outline px-0.5">周一高</span>
+<span class="font-ticker-numeric-sm text-ticker-numeric-sm text-outline">2,028.5</span>
+</div>
+<!-- Current Price Floating Badge (Active Price: 2,007.40) -->
+<div class="flex items-center bg-primary text-on-primary px-1.5 py-1 rounded-md shadow-sm pointer-events-auto" style="transform: translateY(22px);">
+<span class="font-ticker-numeric-sm text-ticker-numeric-sm font-semibold tracking-tight">2,007.40</span>
+</div>
+<!-- 周一低 -->
+<div class="flex items-center space-x-1" style="transform: translateY(32px);">
+<span class="font-label-sm text-label-sm text-outline px-0.5">周一低</span>
+<span class="font-ticker-numeric-sm text-ticker-numeric-sm text-outline">1,988.0</span>
+</div>
+<!-- 下 1.618 -->
+<div class="flex items-center space-x-1" style="transform: translateY(38px);">
+<span class="font-label-sm text-label-sm text-secondary bg-secondary-fixed px-1 py-0.5 rounded font-semibold">下1.618</span>
+<span class="font-ticker-numeric-sm text-ticker-numeric-sm text-secondary font-semibold">1,972.1</span>
+</div>
+<!-- Bottom Floor Reference -->
+<span class="font-ticker-numeric-sm text-ticker-numeric-sm text-outline">1,960.0</span>
+</div>
+<!-- BOTTOM AXIS: Hairline Time Horizon Axis -->
+<div class="absolute bottom-0 inset-x-0 h-6 pl-14 pr-20 flex items-center justify-between z-10 pointer-events-none border-t border-surface-container/60 bg-surface-container-lowest/40 backdrop-blur-md">
+<span class="font-ticker-numeric-sm text-ticker-numeric-sm text-outline">11/08 04:00</span>
+<span class="font-ticker-numeric-sm text-ticker-numeric-sm text-outline">11/08 08:00</span>
+<span class="font-ticker-numeric-sm text-ticker-numeric-sm text-outline">11/08 12:00</span>
+<span class="font-ticker-numeric-sm text-ticker-numeric-sm text-primary font-medium">11/08 16:00</span>
+<span class="font-ticker-numeric-sm text-ticker-numeric-sm text-outline">11/08 20:00</span>
+<span class="font-ticker-numeric-sm text-ticker-numeric-sm text-outline">11/09 00:00</span>
+<span class="font-ticker-numeric-sm text-ticker-numeric-sm text-outline">11/09 04:00</span>
+</div>
+<!-- FLOATING TOP DECK (Overlay Level 3) -->
+<!-- 5. FLOATING TOP-LEFT: Asset Status Capsule -->
+<div class="absolute top-4 left-6 z-30 flex items-center space-x-2">
+<div class="glass-pill rounded-full px-3.5 py-1.5 flex items-center space-x-2.5 transition-transform duration-150 active:scale-[0.97]">
+<!-- Token Identifier & App Name Stamp -->
+<div class="flex items-center space-x-1.5">
+<span class="w-2 h-2 rounded-full bg-primary ring-2 ring-primary/20"></span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-tight">ETH / USDT</span>
+</div>
+<!-- Live Spot Price -->
+<span class="font-ticker-numeric-md text-ticker-numeric-md font-semibold text-on-surface">2,007.40</span>
+<!-- Delta Badge -->
+<div class="bg-secondary-fixed text-on-secondary-fixed font-ticker-numeric-sm text-ticker-numeric-sm font-semibold px-1.5 py-0.5 rounded-full flex items-center space-x-0.5">
+<span>+1.85%</span>
+</div>
+<div class="h-3 w-px bg-outline-variant/60 mx-0.5"></div>
+<!-- Touch Status Indicator -->
+<div class="flex items-center space-x-1 bg-secondary-fixed/40 px-2 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-secondary font-semibold">下沿 · 11/08 18:51</span>
+</div>
+</div>
+</div>
+<!-- 6. FLOATING TOP-CENTER: Precision Crosshair OHLC Readout -->
+<div class="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+<div class="glass-pill rounded-full px-4 py-1.5 flex items-center space-x-3 text-on-surface-variant font-ticker-numeric-sm text-ticker-numeric-sm">
+<span class="font-medium text-on-surface">11/08 16:00</span>
+<div class="flex items-center space-x-2 tracking-tight">
+<span>开 <strong class="text-on-surface font-medium">2,001.2</strong></span>
+<span>高 <strong class="text-secondary font-medium">2,010.0</strong></span>
+<span>低 <strong class="text-tertiary font-medium">1,998.4</strong></span>
+<span>收 <strong class="text-primary font-semibold">2,007.4</strong></span>
+</div>
+</div>
+</div>
+<!-- 7. FLOATING TOP-RIGHT: Screen Rotation & Viewport Utilities -->
+<div class="absolute top-4 right-6 z-30 flex items-center space-x-2">
+<!-- Network / Quant Feed Status -->
+<div class="glass-pill rounded-full px-2.5 py-1.5 flex items-center space-x-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-outline font-medium">12ms</span>
+</div>
+<!-- Quick Portrait Toggle Button (36x36) -->
+<button aria-label="返回竖屏" class="glass-button w-9 h-9 rounded-full flex items-center justify-center text-on-surface transition-transform duration-150" title="返回竖屏">
+<span class="material-symbols-outlined" style="font-size: 19px;">screen_rotation</span>
+</button>
+</div>
+<!-- FLOATING BOTTOM DECK -->
+<!-- 8. FLOATING BOTTOM-LEFT: Compact Multi-Timeframe Dock & Technical Tools -->
+<div class="absolute bottom-9 left-6 z-30 flex items-center space-x-2">
+<!-- Period Selector Glass Track -->
+<div class="glass-pill rounded-full p-1 flex items-center space-x-0.5">
+<button class="px-2.5 py-1 rounded-full font-label-md text-label-md text-outline hover:text-on-surface transition-all duration-150">1m</button>
+<button class="px-2.5 py-1 rounded-full font-label-md text-label-md text-outline hover:text-on-surface transition-all duration-150">5m</button>
+<!-- Active 15m Chip (iOS 26 Elevated Apple Blue Tint Pill) -->
+<button class="px-3 py-1 rounded-full font-label-md text-label-md font-semibold bg-primary text-on-primary shadow-sm transition-all duration-150 active:scale-95">15m</button>
+<button class="px-2.5 py-1 rounded-full font-label-md text-label-md text-outline hover:text-on-surface transition-all duration-150">1H</button>
+<button class="px-2.5 py-1 rounded-full font-label-md text-label-md text-outline hover:text-on-surface transition-all duration-150">4H</button>
+<button class="px-2.5 py-1 rounded-full font-label-md text-label-md text-outline hover:text-on-surface transition-all duration-150">12H</button>
+<button class="px-2.5 py-1 rounded-full font-label-md text-label-md text-outline hover:text-on-surface transition-all duration-150">1D</button>
+<div class="h-4 w-px bg-outline-variant/60 mx-1"></div>
+<!-- Follow Crosshair Mode Toggle -->
+<button aria-label="十字光标" class="w-7 h-7 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-150 active:scale-95" title="定位十字光标">
+<span class="material-symbols-outlined" style="font-size: 17px;">filter_center_focus</span>
+</button>
+<!-- Indicator Settings / Tune Trigger -->
+<button aria-label="指标设置" class="w-7 h-7 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-150 active:scale-95" title="指标微调设置">
+<span class="material-symbols-outlined" style="font-size: 17px;">tune</span>
+</button>
+</div>
+</div>
+<!-- Quick Floating Action Trigger (Bottom-Right: Instant Execution Mini Pod) -->
+<div class="absolute bottom-9 right-20 z-30 flex items-center space-x-2">
+<!-- Quick Signal Badge -->
+<div class="glass-pill rounded-full pl-3 pr-2 py-1 flex items-center space-x-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant">策略状态</span>
+<span class="font-label-sm text-label-sm font-semibold text-secondary flex items-center">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary inline-block mr-1"></span>
+          反弹中
+        </span>
+<button class="glass-button px-2.5 py-0.5 rounded-full text-primary font-label-sm text-label-sm font-semibold active:scale-95 flex items-center space-x-0.5">
+<span>闪电开多</span>
+<span class="material-symbols-outlined" style="font-size: 14px;">bolt</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>

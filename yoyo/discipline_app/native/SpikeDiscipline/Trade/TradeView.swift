@@ -11,6 +11,7 @@ struct TradeView: View {
     @Environment(FibStore.self) private var fib
     @Environment(ChartStyle.self) private var style
     @Environment(MondayHistory.self) private var history
+    @Environment(TouchFeed.self) private var touches
     let active: Bool
     var onDestination: (Trading.Destination) -> Void
     @State private var showSettings = false
@@ -21,6 +22,7 @@ struct TradeView: View {
     @State private var candles = CandleStore()
     @AppStorage("trade.period") private var period: CandlePeriod = .m15
     @State private var follow = 0
+    @Environment(\.reselect) private var reselect
 
     var body: some View {
         let state = account.state
@@ -38,16 +40,22 @@ struct TradeView: View {
                         Spacer(minLength: 4)
                         budgetChip
                     }
-                    if session.connection == nil {
-                        chip(icon: nil, text: "正在连接纪律服务", tint: Color.muted, spinning: true) {}
-                    } else if let existing {
-                        chip(icon: "circle.fill", text: "\(existing.side == "short" ? "空头" : "多头")持仓中 · \(existing.leverage)x · \(Fmt.signed(Double(existing.pnl))) U",
-                             tint: existing.side == "short" ? ChartPalette.down : ChartPalette.up) { onDestination(.positions) }
-                    } else if let count = state?.positions.count, count > 0 {
-                        chip(icon: "circle.fill", text: "其他持仓 \(count) 笔", tint: Color.accentColor) { onDestination(.positions) }
-                    }
-                    if session.connection != nil, let block {
-                        chip(icon: "lock.fill", text: block.text, tint: Color.amber) { route(block.destination) }
+                    HStack(alignment: .top, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            if session.connection == nil {
+                                chip(icon: nil, text: "正在连接纪律服务", tint: Color.muted, spinning: true) {}
+                            } else if let existing {
+                                chip(icon: "circle.fill", text: "\(existing.side == "short" ? "空头" : "多头")持仓中 · \(existing.leverage)x · \(Fmt.signed(Double(existing.pnl))) U",
+                                     tint: existing.side == "short" ? ChartPalette.down : ChartPalette.up) { onDestination(.positions) }
+                            } else if let count = state?.positions.count, count > 0 {
+                                chip(icon: "circle.fill", text: "其他持仓 \(count) 笔", tint: Color.accentColor) { onDestination(.positions) }
+                            }
+                            if session.connection != nil, let block {
+                                chip(icon: "lock.fill", text: block.text, tint: Color.amber) { route(block.destination) }
+                            }
+                        }
+                        Spacer(minLength: 8)
+                        RoundIcon(systemName: "rotate.right", size: 36) { Orientation.rotate(landscape: true) }.accessibilityLabel("横屏查看")
                     }
                     Spacer(minLength: 0)
                     if let entry = account.activeEntry { TradeProgressCard(entry: entry) }
@@ -71,9 +79,14 @@ struct TradeView: View {
             guard active, style.showHistory else { return }
             await history.load(ticket.symbol, connection: session.connection)
         }
+        .onChange(of: reselect) { _, _ in follow += 1 }   // tab tapped again → back to the latest bar
         .task(id: active) {
             guard active else { candles.stopAndSave(); return }
             if fib.current == nil { try? await fib.refresh() }
+        }
+        .task(id: "\(active)|\(session.connection?.token.hashValue ?? 0)") {
+            guard active, let connection = session.connection else { return }
+            await touches.watch(connection: connection, session: session)   // touch-marker scores
         }
         .onChange(of: "\(ticket.symbol)|\(period.rawValue)|\(active)|\(session.connection?.token.hashValue ?? 0)") { _, _ in showCandles() }
         .onAppear { showCandles() }
@@ -112,7 +125,8 @@ struct TradeView: View {
             CandleChart(bars: candles.bars, generation: candles.generation, period: period, decimals: Fmt.decimals(tick: tick),
                         range: row.flatMap { fib.range(for: $0) }, history: style.showHistory ? (history.ranges[symbol] ?? []) : [],
                         innerLines: fib.showInternal, averages: fib.showAverages, cloud: fib.showCloud,
-                        lines: lines, colors: style.colors, watermark: Fmt.coin(symbol) + "USDT", followToken: follow, wallpaper: true,
+                        lines: lines, markers: touches.markers(row), markHistory: true,
+                        colors: style.colors, watermark: Fmt.coin(symbol) + "USDT", followToken: follow, wallpaper: true,
                         topInset: top + 58, bottomOverlay: bottom + 78 + 112,
                         onNeedOlder: { candles.loadOlder() })
             if candles.bars.isEmpty {
@@ -131,12 +145,12 @@ struct TradeView: View {
             HStack(spacing: 8) {
                 CoinLogo(coin: Fmt.coin(ticket.symbol), size: 28)
                 HStack(spacing: 3) {
-                    Text(Fmt.coin(ticket.symbol)).font(.system(size: 17, weight: .bold)).foregroundStyle(Color.ink).lineLimit(1).fixedSize()
+                    Text(Fmt.coin(ticket.symbol)).font(.scaled(size: 17, weight: .bold)).foregroundStyle(Color.ink).lineLimit(1).fixedSize()
                     Image(systemName: "chevron.down").font(.system(size: 9, weight: .bold)).foregroundStyle(Color.muted)
                 }
                 Rectangle().fill(Color.muted.opacity(0.25)).frame(width: 1, height: 18)
                 Text(Fmt.price(quote?.last ?? last.map { String($0.close) }, tick: tick))
-                    .font(.system(size: 16, weight: .bold).monospacedDigit()).lineLimit(1).fixedSize()
+                    .font(.scaled(size: 16, weight: .bold).monospacedDigit()).lineLimit(1).fixedSize()
                     .foregroundStyle((last.map { $0.close >= $0.open } ?? true) ? ChartPalette.up : ChartPalette.down)
                     .contentTransition(.numericText(value: Double(quote?.last ?? "0") ?? 0)).animation(.snappy, value: quote?.last)
                 Circle().fill(fresh ? Color.up : Color.muted.opacity(0.45)).frame(width: 7, height: 7)
@@ -161,7 +175,7 @@ struct TradeView: View {
                 Image(systemName: halted ? "pause.circle.fill" : "shield.lefthalf.filled").font(.system(size: 12, weight: .bold))
                     .foregroundStyle(halted ? ChartPalette.down : Color.accentColor)
                 Text(d.map { "\($0.entriesRemaining) 次 · 余 \(loss)U" } ?? "纪律")
-                    .font(.system(size: 12, weight: .semibold).monospacedDigit()).foregroundStyle(Color.ink).lineLimit(1).minimumScaleFactor(0.8)
+                    .font(.scaled(size: 12, weight: .semibold).monospacedDigit()).foregroundStyle(Color.ink).lineLimit(1).minimumScaleFactor(0.6)
             }
             .padding(.horizontal, 12).frame(height: 46)
             .frosted(Capsule())
@@ -175,7 +189,7 @@ struct TradeView: View {
             HStack(spacing: 6) {
                 if spinning { ProgressView().controlSize(.mini) }
                 if let icon { Image(systemName: icon).font(.system(size: icon == "circle.fill" ? 6 : 11, weight: .bold)).foregroundStyle(tint) }
-                Text(text).font(.system(size: 12, weight: .semibold).monospacedDigit()).foregroundStyle(Color.ink).lineLimit(1)
+                Text(text).font(.scaled(size: 12, weight: .semibold).monospacedDigit()).foregroundStyle(Color.ink).lineLimit(1)
             }
             .padding(.horizontal, 12).frame(height: 30)
             .frosted(Capsule(), veil: 0.75)
@@ -210,8 +224,8 @@ struct TradeView: View {
                 Button { open(side) } label: {
                     HStack(spacing: 6) {
                         Image(systemName: side == "long" ? "arrow.up.right" : "arrow.down.right").font(.system(size: 15, weight: .heavy))
-                        Text(side == "long" ? "做多" : "做空").font(.system(size: 18, weight: .bold))
-                        if held { Text("持仓").font(.system(size: 11, weight: .bold)).padding(.horizontal, 6).padding(.vertical, 2).background(.white.opacity(0.25), in: .capsule) }
+                        Text(side == "long" ? "做多" : "做空").font(.scaled(size: 18, weight: .bold))
+                        if held { Text("持仓").font(.scaled(size: 11, weight: .bold)).padding(.horizontal, 6).padding(.vertical, 2).background(.white.opacity(0.25), in: .capsule) }
                     }
                     .frame(maxWidth: .infinity)
                 }

@@ -8,6 +8,8 @@ struct PositionsView: View {
     @Environment(AccountStore.self) private var account
     var onOpenSymbol: (String) -> Void
     @State private var closeTarget: Position?
+    @State private var scroll = ScrollPosition(edge: .top)
+    @Environment(\.reselect) private var reselect
     @State private var action: String?
     @State private var error: String?
 
@@ -49,6 +51,8 @@ struct PositionsView: View {
                 .padding(.horizontal, 14)
                 .padding(.bottom, 24)
             }
+            .scrollPosition($scroll)
+            .onChange(of: reselect) { _, _ in withAnimation(.snappy) { scroll.scrollTo(edge: .top) } }
             .refreshable { await account.refresh(session: session); Haptics.success() }
             .contentMargins(.bottom, 96, for: .scrollContent)
             .scrollEdgeEffectHidden(true, for: [.top, .bottom])
@@ -233,7 +237,7 @@ struct PositionCardView: View {
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(alignment: .firstTextBaseline, spacing: 3) {
-                        Text(Fmt.signed(pnl)).font(.system(size: 28, weight: .bold, design: .rounded).monospacedDigit()).foregroundStyle(tone)
+                        Text(Fmt.signed(pnl)).font(.scaled(size: 28, weight: .bold, design: .rounded).monospacedDigit()).foregroundStyle(tone)
                             .contentTransition(.numericText(value: pnl ?? 0)).animation(.snappy, value: pnl)
                         Text("USDT").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                     }

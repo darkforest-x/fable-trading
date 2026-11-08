@@ -7,25 +7,36 @@
 	objects = {
 
 		1AC2762CDC5D2DE6F95B4F7A /* coins in Resources */ = {isa = PBXBuildFile; fileRef = EBE3A46D982CF1D94B03595E /* coins */; };
+		BF967F935FB309FC27BFD39B /* SpikeWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AE8BA3708B4768E5DB2FCC56 /* SpikeWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A217B76F82E0FF6B19D62A32 = {isa = PBXContainerItemProxy; containerPortal = 69C99E51325D2F5360032677; proxyType = 1; remoteGlobalIDString = D3209B4563CB0B2A80FD94E1; remoteInfo = SpikeDiscipline; };
+		F29C521E9560D96D892426DD = {isa = PBXContainerItemProxy; containerPortal = 69C99E51325D2F5360032677; proxyType = 1; remoteGlobalIDString = B4E261567BDBB81078E5196B; remoteInfo = SpikeWidgets; };
+		5BD60042076FBF94849E2986 /* Embed Foundation Extensions */ = {isa = PBXCopyFilesBuildPhase; buildActionMask = 2147483647; dstPath = ""; dstSubfolderSpec = 13; files = (BF967F935FB309FC27BFD39B); name = "Embed Foundation Extensions"; runOnlyForDeploymentPostprocessing = 0; };
 		D696D68918AD05140FA1CB7E /* SpikeDiscipline.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpikeDiscipline.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		75F65EB92A8427ECE11BCAF4 /* SpikeDisciplineTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpikeDisciplineTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AE8BA3708B4768E5DB2FCC56 /* SpikeWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SpikeWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		EBE3A46D982CF1D94B03595E /* coins */ = {isa = PBXFileReference; lastKnownFileType = folder; name = coins; path = ../mobile/src/assets/coins; sourceTree = SOURCE_ROOT; };
 		1DD402786E55BC743DEE098B /* SpikeDiscipline */ = {isa = PBXFileSystemSynchronizedRootGroup; path = SpikeDiscipline; sourceTree = "<group>"; };
 		14DEEC455318AB58A3C80DD4 /* SpikeDisciplineTests */ = {isa = PBXFileSystemSynchronizedRootGroup; path = SpikeDisciplineTests; sourceTree = "<group>"; };
+		882F4CDC64DAA86897406D3D /* SpikeWidgets */ = {isa = PBXFileSystemSynchronizedRootGroup; path = SpikeWidgets; sourceTree = "<group>"; };
+		BE9A35062E6E6B735F82FD8E /* SpikeShared */ = {isa = PBXFileSystemSynchronizedRootGroup; path = SpikeShared; sourceTree = "<group>"; };
 		4ECAE11522EFDA3A87A678E2 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		94B39982BA12BAE8763A4DD6 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
-		4E6898A7B45A2069EBAA8D2B = {isa = PBXGroup; children = (1DD402786E55BC743DEE098B, 14DEEC455318AB58A3C80DD4, EBE3A46D982CF1D94B03595E, 15528C36EF2DC603CD8232EA); sourceTree = "<group>"; };
-		15528C36EF2DC603CD8232EA /* Products */ = {isa = PBXGroup; children = (D696D68918AD05140FA1CB7E, 75F65EB92A8427ECE11BCAF4); name = Products; sourceTree = "<group>"; };
-		D3209B4563CB0B2A80FD94E1 /* SpikeDiscipline */ = {isa = PBXNativeTarget; buildConfigurationList = 739E0242F06134D7F04D580D; buildPhases = (AE1E3BF8038A878E921F49EA, 4ECAE11522EFDA3A87A678E2, B7D622D9D229137F64DF756D, 7F66429955D1BF6415794566); buildRules = (); dependencies = (); fileSystemSynchronizedGroups = (1DD402786E55BC743DEE098B); name = SpikeDiscipline; packageProductDependencies = (); productName = SpikeDiscipline; productReference = D696D68918AD05140FA1CB7E; productType = "com.apple.product-type.application"; };
+		86382364AE4261E3BBD3AAEB /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		4E6898A7B45A2069EBAA8D2B = {isa = PBXGroup; children = (1DD402786E55BC743DEE098B, BE9A35062E6E6B735F82FD8E, 882F4CDC64DAA86897406D3D, 14DEEC455318AB58A3C80DD4, EBE3A46D982CF1D94B03595E, 15528C36EF2DC603CD8232EA); sourceTree = "<group>"; };
+		15528C36EF2DC603CD8232EA /* Products */ = {isa = PBXGroup; children = (D696D68918AD05140FA1CB7E, 75F65EB92A8427ECE11BCAF4, AE8BA3708B4768E5DB2FCC56); name = Products; sourceTree = "<group>"; };
+		D3209B4563CB0B2A80FD94E1 /* SpikeDiscipline */ = {isa = PBXNativeTarget; buildConfigurationList = 739E0242F06134D7F04D580D; buildPhases = (AE1E3BF8038A878E921F49EA, 4ECAE11522EFDA3A87A678E2, B7D622D9D229137F64DF756D, 7F66429955D1BF6415794566, 5BD60042076FBF94849E2986); buildRules = (); dependencies = (9576B5413C63564EB30C7660); fileSystemSynchronizedGroups = (1DD402786E55BC743DEE098B, BE9A35062E6E6B735F82FD8E); name = SpikeDiscipline; packageProductDependencies = (); productName = SpikeDiscipline; productReference = D696D68918AD05140FA1CB7E; productType = "com.apple.product-type.application"; };
+		B4E261567BDBB81078E5196B /* SpikeWidgets */ = {isa = PBXNativeTarget; buildConfigurationList = 11A78EB3B671ED764C92AC4E; buildPhases = (A33633FCCF4CE20649A83DF6, 86382364AE4261E3BBD3AAEB, FFC13DDA1994617FCD669602); buildRules = (); dependencies = (); fileSystemSynchronizedGroups = (882F4CDC64DAA86897406D3D, BE9A35062E6E6B735F82FD8E); name = SpikeWidgets; packageProductDependencies = (); productName = SpikeWidgets; productReference = AE8BA3708B4768E5DB2FCC56; productType = "com.apple.product-type.app-extension"; };
 		B39E26E5B92919E9A10F3D50 /* SpikeDisciplineTests */ = {isa = PBXNativeTarget; buildConfigurationList = 9A4EECD60207833382F94AA5; buildPhases = (D43B7F8423DE860A3D049BE9, 94B39982BA12BAE8763A4DD6, 6729E901D921C865EB45BF27); buildRules = (); dependencies = (B8F6BBF084C75D2E61889B65); fileSystemSynchronizedGroups = (14DEEC455318AB58A3C80DD4); name = SpikeDisciplineTests; packageProductDependencies = (); productName = SpikeDisciplineTests; productReference = 75F65EB92A8427ECE11BCAF4; productType = "com.apple.product-type.bundle.unit-test"; };
-		69C99E51325D2F5360032677 /* Project object */ = {isa = PBXProject; attributes = {BuildIndependentTargetsInParallel = 1; LastSwiftUpdateCheck = 2600; LastUpgradeCheck = 2600; TargetAttributes = {D3209B4563CB0B2A80FD94E1 = {CreatedOnToolsVersion = 26.0; }; B39E26E5B92919E9A10F3D50 = {CreatedOnToolsVersion = 26.0; TestTargetID = D3209B4563CB0B2A80FD94E1; }; }; }; buildConfigurationList = 1523C95E4E9FFFD88E1C1B76; developmentRegion = "zh-Hans"; hasScannedForEncodings = 0; knownRegions = (en, Base, "zh-Hans"); mainGroup = 4E6898A7B45A2069EBAA8D2B; minimizedProjectReferenceProxies = 1; preferredProjectObjectVersion = 77; productRefGroup = 15528C36EF2DC603CD8232EA; projectDirPath = ""; projectRoot = ""; targets = (D3209B4563CB0B2A80FD94E1, B39E26E5B92919E9A10F3D50); };
+		69C99E51325D2F5360032677 /* Project object */ = {isa = PBXProject; attributes = {BuildIndependentTargetsInParallel = 1; LastSwiftUpdateCheck = 2600; LastUpgradeCheck = 2600; TargetAttributes = {D3209B4563CB0B2A80FD94E1 = {CreatedOnToolsVersion = 26.0; }; B4E261567BDBB81078E5196B = {CreatedOnToolsVersion = 26.0; }; B39E26E5B92919E9A10F3D50 = {CreatedOnToolsVersion = 26.0; TestTargetID = D3209B4563CB0B2A80FD94E1; }; }; }; buildConfigurationList = 1523C95E4E9FFFD88E1C1B76; developmentRegion = "zh-Hans"; hasScannedForEncodings = 0; knownRegions = (en, Base, "zh-Hans"); mainGroup = 4E6898A7B45A2069EBAA8D2B; minimizedProjectReferenceProxies = 1; preferredProjectObjectVersion = 77; productRefGroup = 15528C36EF2DC603CD8232EA; projectDirPath = ""; projectRoot = ""; targets = (D3209B4563CB0B2A80FD94E1, B4E261567BDBB81078E5196B, B39E26E5B92919E9A10F3D50); };
 		B7D622D9D229137F64DF756D /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (1AC2762CDC5D2DE6F95B4F7A); runOnlyForDeploymentPostprocessing = 0; };
 		6729E901D921C865EB45BF27 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		FFC13DDA1994617FCD669602 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		AE1E3BF8038A878E921F49EA /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		D43B7F8423DE860A3D049BE9 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A33633FCCF4CE20649A83DF6 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		7F66429955D1BF6415794566 /* Embed service token */ = {isa = PBXShellScriptBuildPhase; alwaysOutOfDate = 1; buildActionMask = 2147483647; files = (); inputFileListPaths = (); inputPaths = (); name = "Embed service token"; outputFileListPaths = (); outputPaths = (); runOnlyForDeploymentPostprocessing = 0; shellPath = /bin/sh; shellScript = "# Owner 2026-11-07: no token entry in the app. Device builds carry this Mac's existing\n# discipline-service token (never committed); simulator builds never do.\nSRC=\"$HOME/Library/Application Support/SpikeDiscipline/access-token\"\nDST=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/service-token\"\nrm -f \"$DST\"\nif [ \"$PLATFORM_NAME\" = \"iphoneos\" ] && [ -f \"$SRC\" ]; then\n  tr -d ' \\r\\n' < \"$SRC\" > \"$DST\"\n  chmod 600 \"$DST\"\nfi\n"; showEnvVarsInLog = 0; };
 		B8F6BBF084C75D2E61889B65 = {isa = PBXTargetDependency; target = D3209B4563CB0B2A80FD94E1; targetProxy = A217B76F82E0FF6B19D62A32; };
+		9576B5413C63564EB30C7660 = {isa = PBXTargetDependency; target = B4E261567BDBB81078E5196B; targetProxy = F29C521E9560D96D892426DD; };
 		706F69920B938F150F750A37 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -68,19 +79,22 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = SpikeDiscipline.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = L7RP7HZT53;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "天才交易员";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 2.5.0;
+				MARKETING_VERSION = 2.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.spike.discipline.native;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -94,21 +108,68 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = SpikeDiscipline.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = L7RP7HZT53;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "天才交易员";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 2.5.0;
+				MARKETING_VERSION = 2.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.spike.discipline.native;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		E9B83FF089433F7F6E3336A7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = SpikeWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 12;
+				DEVELOPMENT_TEAM = L7RP7HZT53;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "SpikeWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "天才交易员";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 2.6.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.spike.discipline.native.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		5F71497D3048A3E8B94E33F7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = SpikeWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 12;
+				DEVELOPMENT_TEAM = L7RP7HZT53;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "SpikeWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "天才交易员";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 2.6.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.spike.discipline.native.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
@@ -142,6 +203,7 @@
 		};
 		1523C95E4E9FFFD88E1C1B76 = {isa = XCConfigurationList; buildConfigurations = (706F69920B938F150F750A37, C9B27C47E52F7D58934884A2); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 		739E0242F06134D7F04D580D = {isa = XCConfigurationList; buildConfigurations = (6B9797CB3222BC28CE048CD1, BFD3D1BECDEA8AA0558CEBAD); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		11A78EB3B671ED764C92AC4E = {isa = XCConfigurationList; buildConfigurations = (E9B83FF089433F7F6E3336A7, 5F71497D3048A3E8B94E33F7); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 		9A4EECD60207833382F94AA5 = {isa = XCConfigurationList; buildConfigurations = (53E5905D8899F636AB09F7C1, 6F6D5D6636738D554F692BE8); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 	};
 	rootObject = 69C99E51325D2F5360032677 /* Project object */;

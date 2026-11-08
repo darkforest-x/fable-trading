@@ -68,12 +68,12 @@ struct DisciplineView: View {
             Label(p == nil ? "连接后读取规则" : "当前生效规则", systemImage: "lock.fill").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
             HStack {
                 VStack(alignment: .leading) {
-                    Text(p.map { Fmt.plainPercent($0.riskFraction) } ?? "—").font(.system(size: 30, weight: .bold, design: .rounded)) + Text("%").font(.headline)
+                    Text(p.map { Fmt.plainPercent($0.riskFraction) } ?? "—").font(.scaled(size: 30, weight: .bold, design: .rounded)) + Text("%").font(.headline)
                     Text("单笔计划风险").font(.caption).foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 VStack(alignment: .leading) {
-                    Text(p.map { "\($0.maxEntries)" } ?? "—").font(.system(size: 30, weight: .bold, design: .rounded)) + Text("次").font(.headline)
+                    Text(p.map { "\($0.maxEntries)" } ?? "—").font(.scaled(size: 30, weight: .bold, design: .rounded)) + Text("次").font(.headline)
                     Text("每日基础次数").font(.caption).foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

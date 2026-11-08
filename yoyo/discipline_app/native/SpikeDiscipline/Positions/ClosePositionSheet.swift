@@ -41,7 +41,7 @@ struct ClosePositionSheet: View {
                         HStack(alignment: .firstTextBaseline) {
                             Text("平仓比例").font(.subheadline.weight(.semibold))
                             Spacer()
-                            Text("\(pct)").font(.system(size: 34, weight: .bold, design: .rounded).monospacedDigit()).contentTransition(.numericText(value: percent))
+                            Text("\(pct)").font(.scaled(size: 34, weight: .bold, design: .rounded).monospacedDigit()).contentTransition(.numericText(value: percent))
                             Text("%").font(.headline).foregroundStyle(.secondary)
                         }
                         Slider(value: $percent, in: 1...100, step: 1)

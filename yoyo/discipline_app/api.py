@@ -20,6 +20,7 @@ from .market import PublicMarket
 from .candles import CandleHistory, CandleUnavailable
 from .monday_fib import MondayFibFeed, FibUnavailable
 from .monitor_feed import MonitorFeed, MonitorUnavailable
+from .push import PushService, PushUnavailable
 from .wick_stop import WickStops
 from .policy import Rejected
 
@@ -59,6 +60,26 @@ class Close(Command):
     fraction: str = Field(default='1', max_length=20)
 
 
+class PushDevice(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    token: str = Field(pattern=r'^[0-9a-f]{64,200}$')
+    environment: Literal['development', 'production']
+    fib: StrictBool = True
+    alarm: StrictBool = True
+
+
+class PushRemove(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    token: str = Field(pattern=r'^[0-9a-f]{64,200}$')
+
+
+class PushActivity(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    token: str = Field(pattern=r'^[0-9a-f]{64,200}$')
+    environment: Literal['development', 'production']
+    position_id: str = Field(pattern=r'^[\w.:-]{1,80}$')
+
+
 class BarkSwitch(BaseModel):
     model_config = ConfigDict(extra='forbid')
     enabled: StrictBool
@@ -88,7 +109,9 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
             market.start()
             if live:
                 book.start()
+            app.state.push.start()
         yield
+        app.state.push.stop()
         app.state.replay.stop()
         order_requests.shutdown()
         if market_enabled:
@@ -105,6 +128,9 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
     from .replay_store import ReplayStore
     runtime = book.runtime if hasattr(book, 'runtime') else Path(book.path).parent
     app.state.replay = ReplayStore(runtime / 'replay' / 'sessions.sqlite3')
+    # Native push (owner 2026-11-08): idle until the owner adds an APNs key under <runtime>/push.
+    app.state.push = PushService(runtime / 'push', app.state.monitor,
+                                 lambda account: book.resolve(account) if hasattr(book, 'resolve') else book)
     app.add_middleware(CORSMiddleware, allow_origins=list(origins), allow_methods=['GET', 'POST'],
                        allow_headers=['Authorization', 'Content-Type', 'X-Spike-Account'], allow_credentials=False)
     app.add_middleware(GZipMiddleware, minimum_size=1024, compresslevel=5)
@@ -201,6 +227,36 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
     def monitor_cloud(side: Literal['all', 'long', 'short'] = 'all', scope: Literal['live', 'all'] = 'live'):
         try:
             return app.state.monitor.cloud({'all': 0, 'long': 1, 'short': -1}[side], scope)
+        except MonitorUnavailable as error:
+            raise HTTPException(503, str(error)) from None
+
+    # Native push registration (owner 2026-11-08). Tokens only address this phone; no order effect.
+    @app.get('/v1/push/status', dependencies=[Depends(auth)])
+    def push_status():
+        return app.state.push.status()
+
+    @app.post('/v1/push/device', dependencies=[Depends(auth)])
+    def push_device(body: PushDevice):
+        try:
+            return app.state.push.register(body.token, body.environment, body.fib, body.alarm)
+        except PushUnavailable as error:
+            raise HTTPException(422, str(error)) from None
+
+    @app.post('/v1/push/device/remove', dependencies=[Depends(auth)])
+    def push_remove(body: PushRemove):
+        return app.state.push.remove(body.token)
+
+    @app.post('/v1/push/activity', dependencies=[Depends(auth)])
+    def push_activity(body: PushActivity, x_spike_account: str = Header(default='')):
+        try:
+            return app.state.push.follow(body.token, body.environment, x_spike_account or 'primary', body.position_id)
+        except PushUnavailable as error:
+            raise HTTPException(422, str(error)) from None
+
+    @app.get('/v1/monitor/touch-scores', dependencies=[Depends(auth)])
+    def monitor_touch_scores():
+        try:
+            return app.state.monitor.touch_scores()
         except MonitorUnavailable as error:
             raise HTTPException(503, str(error)) from None
 
