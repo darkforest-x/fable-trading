@@ -115,6 +115,8 @@ def study_one(spec):
     folder = (TOP if known else EXP)/'inputs'/symbol
     if not (folder/'receipt.json').exists():
         return None
+    if not known and json.loads((folder/'receipt.json').read_text()).get('status') != 'complete':
+        return None
     if not (folder/'bars12h.csv.gz').exists() or not (folder/'bars1h.csv.gz').exists():
         return None
     bars = read_bars(folder)
