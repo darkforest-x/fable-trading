@@ -38,3 +38,7 @@ test('rules describe the band, the approximation and SOL-only funding',()=>{
  const html=paper.rulesHTML({tracks:{'live-breadth':{start_equity:1000}},'live-breadth':{count_min:31,count_max:62,observe_minutes:30,hold_days:6,leverage:1,taker_bp:5}},'live-breadth');
  assert.match(html,/31–62 个 OKX 币/);assert.match(html,/近似/);assert.match(html,/BTC、ETH 以同样金额记作对照/);
 });
+test('legs opened together list the funded SOL leg first',()=>{
+ const data={now_ms:now,tracks:{'live-breadth':{open:[leg('ETH-USDT-SWAP',0,{id:9260000003}),leg('BTC-USDT-SWAP',0,{id:9260000002}),leg('SOL-USDT-SWAP',1)],closed:[]}},signals:[]};
+ assert.deepEqual(paper.rows(data,{track:'live-breadth',tab:'open',q:'',scope:'all',sort:'score'}).map(r=>r.symbol.split('-')[0]),['SOL','ETH','BTC']);
+});

@@ -542,6 +542,6 @@ html[data-theme=dark] body.reclaim-paper-active #spike-alarm-dock :is(.sa-trigge
 #monday-reclaim-paper .rp-breadth-chip.is-warn {background:var(--rp-warning-bg,#fff4d6);color:var(--rp-warning,#a86a00);}
 #monday-reclaim-paper .rp-breadth-tag {font-size:9px;padding:2px 5px;border-radius:5px;background:var(--rp-recessed);color:var(--rp-muted);}
 #monday-reclaim-paper .rp-breadth-tag.is-funded {background:color-mix(in srgb,var(--rp-blue) 14%,transparent);color:var(--rp-blue);}
-#monday-reclaim-paper .rp-hold-progress {display:grid;grid-template-columns:1fr auto;gap:3px 8px;padding:0 12px 6px;font-size:9px;color:var(--rp-muted);}
+#monday-reclaim-paper .rp-hold-progress {grid-column:1/-1;display:grid;grid-template-columns:1fr auto;gap:3px 8px;padding:0 12px 6px;font-size:9px;color:var(--rp-muted);}
 #monday-reclaim-paper .rp-hold-progress>span {grid-column:1/-1;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--rp-blue) var(--rp-hold),var(--rp-recessed) var(--rp-hold));}
 #monday-reclaim-paper .rp-breadth-position:not(:has(.is-funded)) .rp-hold-progress>span {background:linear-gradient(90deg,var(--rp-muted) var(--rp-hold),var(--rp-recessed) var(--rp-hold));opacity:.6;}

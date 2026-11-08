@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const tracks=['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3','live-wick6x3','live-wick3x3','live-wick6x3hi','live-wick3x3far'];
+  const tracks=['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3','live-wick6x3','live-wick3x3','live-wick6x3hi','live-wick3x3far','live-breadth'];
   const BREADTH='breadth-ema20', SEPTEMBER_CASE='BTC|2026-09-15T19:20:00Z';
   tracks.push(BREADTH);
   const steps={'1m':60000,'2m':120000,'3m':180000,'5m':300000,'15m':900000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000};
@@ -44,6 +44,8 @@
   function rulesHTML(r){
     if(r.event_id&&r.branch_label){const b=r.signal_snapshot;return `<span class="bt-entry">${esc(r.branch_label)}${Number.isInteger(b?.initial_touch_count)?' · 首触 '+b.initial_touch_count+' 币':''}${Number.isInteger(b?.new_coins)?' · 新增 '+b.new_coins+' 币':''}</span>`;}
     const e=r.entry_rules;
+    // live-breadth rows carry the saved breadth facts instead of a score (owner 2026-11-08).
+    if(e?.status==='saved'&&e.kind==='breadth'&&Number.isFinite(e.initial))return `<span class="bt-entry">宽度信号 · ${esc(e.initial)} 个币 · 30分钟零新增</span>`;
     if(e?.status!=='saved'||!Number.isFinite(e.score)||!Number.isFinite(e.minimum))return '<span class="bt-entry">入场条件／评分未留存</span>';
     const add=e.kind==='add5',gate=e.minimum<.3?' · 前40%':`≥${e.minimum}`;
     return `<span class="bt-entry"><span>${add?'逆向5%加仓':e.kind==='touch_close'?'触价收盘进场':'1.618首触'}</span><span class="bt-score" title="原回测评分 ${e.score}，门槛 ${e.minimum}；不是胜率">${e.score_basis==='pre_touch'?'触价前评分':add?'主单评分':'评分'} ${e.score.toFixed(4)}${gate}</span>${Number.isFinite(e.minimum_order)&&Number.isFinite(e.order)?`<span>排列 ${e.order}≥${e.minimum_order}</span>`:''}</span>`;

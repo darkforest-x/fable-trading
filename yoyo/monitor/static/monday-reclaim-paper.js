@@ -145,6 +145,7 @@
     const field=state.tab==='events'?'candle_ms':state.tab==='closed'?'exit_ms':'fill_ms';
     const time=(Number(finite(b[field]))-Number(finite(a[field])))
       || (finite(a[field])&&finite(b[field])?direction*(a[field]-b[field]):0)
+      || (isBreadthTrack(state.track)?Number(funded(b))-Number(funded(a)):0)
       || direction*(Number(a.id)-Number(b.id));
     return sort==='score' ? (Number(finite(b.score))-Number(finite(a.score)))
       || (finite(a.score)&&finite(b.score)?b.score-a.score:0) || time : time;
@@ -282,7 +283,7 @@
     const more=detail('名义本金',isFunded?`${num(row.notional)} USDT · 1 倍`:'对照记录，不占用资金')+detail('止损','不设 · 第 6 天按 1 分钟开盘价平仓')
       +(closed?detail('平仓价格',price(row.exit_price))+detail('毛收益',bp(row.gross_bp))+detail('手续费',finite(row.fee_bp)?`${num(row.fee_bp/100)}%`:'—')+detail('净收益',bp(row.net_bp)):detail('后台参考报价',price(row.mark)));
     const selected=state.trade===String(row.id), toneClass=closed?(isFunded?tone(row.pnl):''):tone(row.unrealized_bp);
-    return `<article class="rp-record rp-breadth-position" data-rp-record="${esc(key)}" data-symbol="${esc(row.symbol)}" data-selected="${selected}"><div class="rp-record-main"><button type="button" class="rp-row-select" data-rp-trade="${esc(row.id)}" data-rp-focus="select" aria-pressed="${selected}" aria-label="查看 ${esc(base(row.symbol))} ${closed?'历史交易':'持仓'} K 线"></button>${coinHTML(row,platform,`${tag} · <span class="${toneClass}">${value}</span>`)}</div>${progress}<div class="rp-record-bottom"><span class="rp-record-meta">买入 ${price(row.entry)} · ${date(row.fill_ms)}</span><button type="button" data-rp-detail="${esc(key)}" data-rp-focus="detail" aria-label="展开 ${esc(base(row.symbol))} 明细" aria-expanded="false" aria-controls="rp-detail-${esc(key)}"><span aria-hidden="true">⌄</span></button></div><section id="rp-detail-${esc(key)}" class="rp-row-detail" hidden><div class="rp-detail-fields">${fields}</div><dl>${more}</dl></section></article>`;
+    return `<article class="rp-record rp-breadth-position" data-rp-record="${esc(key)}" data-symbol="${esc(row.symbol)}" data-selected="${selected}"><div class="rp-record-main"><button type="button" class="rp-row-select" data-rp-trade="${esc(row.id)}" data-rp-focus="select" aria-pressed="${selected}" aria-label="查看 ${esc(base(row.symbol))} ${closed?'历史交易':'持仓'} K 线"></button>${coinHTML(row,platform,`${tag} · <span class="${toneClass}">${value}</span>`)}</div><div class="rp-record-bottom"><span class="rp-record-meta">买入 ${price(row.entry)} · ${date(row.fill_ms)}</span><button type="button" data-rp-detail="${esc(key)}" data-rp-focus="detail" aria-label="展开 ${esc(base(row.symbol))} 明细" aria-expanded="false" aria-controls="rp-detail-${esc(key)}"><span aria-hidden="true">⌄</span></button></div>${progress}<section id="rp-detail-${esc(key)}" class="rp-row-detail" hidden><div class="rp-detail-fields">${fields}</div><dl>${more}</dl></section></article>`;
   }
   function rowHTML(row, state, now, {favorite=false,platform='',carried=false}={}) {
     if (isBreadthRow(row)) return breadthRowHTML(row, state, now, platform);
