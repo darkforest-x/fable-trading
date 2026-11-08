@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-pa-followthrough-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7bddcf9f09
+    status: inconclusive
+    question: Does breaking the touch candle's inward extreme on the next 5m close improve the subsequent four-hour inward price frequency among two-close 1.618 reclaims?
+    single_variable: Next 5m close strictly beyond the touch candle's inward extreme versus two inside closes without that break. Same decision clock and four-hour label.
+    result: 242 first touches in 147 common OKX NY weeks for BTC and ETH, 105 mature two-close reclaims. Breaks 15/27 versus other two-close reclaims 36/78, difference +9.4pp (NY-week bootstrap 95pct -12.8 to +29.9). 2024-25 12/21 versus 21/48; 2026 3/6 versus 15/30. No reproducible extra confirmation established.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-pa-followthrough-20261108-v1/summary.json
+    notes: Reuses frozen OKX 5m candles and NY Monday anchor metadata in exp-monday-12h-partial-recovery-20261026-v1, January 2024 through NY week of 2026-10-19. Same-clock descriptive labels only; no simulated fills or P&L. Ledger includes no-touches and censored observations. Criteria committed at 75083cf5fe. Notion https://app.notion.com/p/4128856479af81b59d24dae3b1b30199
+
   - experiment_id: exp-monday-1618-cvd-divergence-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 95c33aefbe
