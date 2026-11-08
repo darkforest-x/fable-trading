@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-same-time-control-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "a195f2aac7"
+    status: "inconclusive"
+    question: "Does the specific V1.7 trigger coin outperform other comparable coins at the identical market instant?"
+    single_variable: "Replace the later same-coin control with a different non-signal contract at the very same open in the same EMA direction and within 25 percent of the parent's prior ATR/price."
+    result: "11400/11780 eligible parents matched. Under common sizing and exits actual signals ended at 5611.28U vs about 7073U in contemporaneous non-signals. Mean equal-notional paired difference -0.052 percentage points, four-week block 95% interval [-0.257, +0.172]. The interval includes zero separately in development, 2025 and 2026."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-same-time-control-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af81098edfd038d2c8b7cf."
+
+  - experiment_id: exp-cloud-close-binance-confirm-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "20820aa09a"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Test the frozen one-confirmed-12H EMA reversal against intrabar reversal on the full Binance cohort using the same transaction model, nine slots and 75% partial."
+    result: "Intrabar 4298.59U, DD bound 31.38%; confirmed 3225.70U, 1410 trades, wins 34.82%, cash payoff 2.21, DD bound 37.01%. 2025 +8.00% and 2026 through Sept 23 +0.10%. Extra 5bp slip 2809.83U. OKX's improvement failed to transfer. Missing 216 position-leg hours for the confirmed case."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-binance-confirm-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af818b8995c596f49b19ce."
+
   - experiment_id: exp-cloud-close-side-exit-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "fe9fb6a383"
