@@ -1,0 +1,8 @@
+{
+  "id": "exp-cloud-close-partial-r-20261109-v1",
+  "parent": "exp-cloud-close-leadership-20261109-v1, development-selected 90-day coverage reference",
+  "factor": "Only the resting limit on the 75% partial varies among 1R, 2R, 3R, 4R, 6R, 10R. The 25% runner always keeps the original fixed stop and EMA close. Initial R is actual post-confirmation entry to the original absolute fixed stop. All variations already have frozen VectorBT price fills; fund them once. Two-part weighting and other account rules remain fixed.",
+  "grid": [1,2,3,4,6,10],
+  "decision": "Compare 2020-2024 terminal NAV among at least 100 closed positions, >=30% wins, >=2.5 net payoff on equal notional and <=35% marked hourly DD upper bound, baseline fallback. Show 2025/26 after decision; target and family selected after earlier studies on this history. Paired and slippage checks if dev leader or pick differs from baseline.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_partial_r"
+}

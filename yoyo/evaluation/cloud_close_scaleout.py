@@ -20,7 +20,7 @@ def pair_data(runner, target, slots=12, *, start=w.START, end=w.END, quote_loade
     return w.prepare(None,slots*2,start,end,assigned=(merged,skips),quote_loader=quote_loader)
 
 
-def simulate(data, fraction, slip=0., full_slots=0, slot_weights=None):
+def simulate(data, fraction, slip=0., full_slots=0, slot_weights=None, target_r=2.):
     legs, eq = w.account(data, weights=(fraction,1-fraction), slip=slip,
                          full_slots=full_slots,slot_weights=slot_weights)
     if not legs.groupby('event_id').size().eq(2).all():
@@ -30,7 +30,10 @@ def simulate(data, fraction, slip=0., full_slots=0, slot_weights=None):
                 entry_ms=('entry_ms','first'),exit_bar_ms=('exit_bar_ms','max'),
                 cash_pnl=('cash_pnl','sum'),notional=('notional','sum'))
     pos['net_return'] = pos.cash_pnl/pos.notional
-    fraction_filled = legs[legs.tp_r.eq(2)].set_index('event_id').notional/pos.notional
+    target_legs = legs[legs.tp_r.eq(target_r)].set_index('event_id')
+    if not target_legs.index.is_unique or set(target_legs.index)!=set(pos.index):
+        raise ValueError('Every funded position must have one assigned target leg')
+    fraction_filled = target_legs.notional/pos.notional
     if not np.allclose(fraction_filled,fraction,atol=1.e-9):
         raise ValueError('Funded weights did not match the intended split')
     limits = {'all':(None,None),'dev':(None,'2025-01-01T00:00Z'),
