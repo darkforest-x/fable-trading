@@ -8,6 +8,19 @@ from yoyo.evaluation import cloud_close_drawdown_bounds as five
 from yoyo.evaluation import cloud_close_reward_account as wallet
 
 
+def record_result(result):
+    five_file = five.EXP/'five_minute_summary.json'
+    if not five_file.exists():
+        earlier = json.loads((five.EXP/'summary.json').read_text())
+        if not np.isclose(earlier['refined_drawdown_upper_pct'],result['previous_5m_upper_pct']):
+            raise ValueError('Expected the frozen 5m valuation before recording the 1m result')
+        five_file.write_text(json.dumps(earlier,indent=2,allow_nan=False)+'\n')
+    earlier = json.loads(five_file.read_text())
+    (five.EXP/'minute_summary.json').write_text(json.dumps(result,indent=2,allow_nan=False)+'\n')
+    latest = dict(venue='OKX', original_hourly_upper_pct=earlier['original_drawdown_upper_pct'], **result)
+    (five.EXP/'summary.json').write_text(json.dumps(latest,indent=2,allow_nan=False)+'\n')
+
+
 def main():
     equity = pd.read_csv(five.PARENT/'hourly_OKX.csv.gz',index_col='hour_end_utc',parse_dates=True)
     five_hours = pd.read_csv(five.EXP/'hourly_refinement.csv',index_col='hour_end',parse_dates=True)
@@ -56,7 +69,7 @@ def main():
                   refined_upper_pct=bound,observed_lower_pct=observed,
                   passes_35pct_drawdown_upper=bool(bound<=35),
                   method='Two binding hours valued on synchronized 1m OHLC; other five-minute and hourly envelopes retained. Fills unchanged.')
-    (five.EXP/'minute_summary.json').write_text(json.dumps(result,indent=2,allow_nan=False)+'\n')
+    record_result(result)
     print(result)
 
 

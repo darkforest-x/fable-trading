@@ -118,7 +118,10 @@ def main():
                   refined_drawdown_upper_pct=max_drawdown(equity), terminal_usdt=float(equity.nav.iloc[-1]),
                   marked_hourly_nav_unchanged=True, tightened_hours=len(records),
                   passes_35pct_drawdown_upper=max_drawdown(equity)<=35)
-    (EXP/'summary.json').write_text(json.dumps(result,indent=2,allow_nan=False)+'\n')
+    serialized = json.dumps(result,indent=2,allow_nan=False)+'\n'
+    (EXP/'five_minute_summary.json').write_text(serialized)
+    if not (EXP/'minute_summary.json').exists():
+        (EXP/'summary.json').write_text(serialized)
     print(result)
 
 
