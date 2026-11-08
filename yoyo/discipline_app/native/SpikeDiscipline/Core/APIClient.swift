@@ -56,10 +56,22 @@ enum API {
         let (data, response) = try await session.data(for: request)
         let status = (response as? HTTPURLResponse)?.statusCode ?? 0
         guard (200..<300).contains(status) else {
+            if let message = edgeFailure(status) { throw APIError(status: status, message: message) }
             let detail = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["detail"] as? String
             throw APIError(status: status, message: detail ?? "服务暂不可用（\(status)）")
         }
         return try decoder.decode(T.self, from: data)
+    }
+
+    /// Cloudflare-edge failures (owner 2026-11-08: the app showed Cloudflare's English 1033 text).
+    /// The service itself never answers 502/504/52x, so these mean the tunnel or the edge, not a
+    /// rejected request; polling retries on its own and the Mac watchdog reconnects the tunnel.
+    static func edgeFailure(_ status: Int) -> String? {
+        switch status {
+        case 530: "服务连接中断（隧道 1033），正在自动重连"
+        case 502, 504, 520...529: "服务连接中断（\(status)），正在自动重连"
+        default: nil
+        }
     }
 }
 

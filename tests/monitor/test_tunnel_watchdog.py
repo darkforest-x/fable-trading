@@ -150,3 +150,54 @@ def test_attempt_is_durable_before_failed_restart(monkeypatch, tmp_path):
         state = guard.check()
         clock[0] += 60
     assert state["action"] == "cooldown" and attempts == [10120]
+
+
+# Discipline app tunnel (owner 2026-11-08 “app报错了 今天好几次了 能稳定一点吗”).
+
+def test_discipline_health_and_json_1033_classification(origin):
+    url, replies = origin
+    replies.append((200, b'{"service":"spike-discipline","mode":"okx_live"}', False))
+    assert guard.probe(url, service=guard.DISCIPLINE_SERVICE) == "healthy"
+    assert guard.probe(url) == "http_200"  # the monitor's name does not match
+    replies.append((530, b'{"title":"Tunnel unavailable","error_code":1033,"detail":"The host is configured as a Cloudflare Tunnel"}', True))
+    assert guard.probe(url, service=guard.DISCIPLINE_SERVICE) == "cloudflare_1033"
+
+
+def discipline_runtime(tmp_path, monkeypatch, local, public, enabled=True):
+    (tmp_path / "cloudflared.json").write_text(json.dumps({"tunnel": "test-tunnel"}))
+    flag = tmp_path / "enabled"
+    if enabled:
+        flag.write_text("owner-approved\n")
+    clock = iter(range(20000, 30000, 60))
+    restarts = []
+    monkeypatch.setattr(guard.time, "time", lambda: next(clock))
+    monkeypatch.setattr(guard.gateway, "installed", lambda label: True)
+    monkeypatch.setattr(guard, "probe", lambda url, headers=None, service=guard.SERVICE: local if "127.0.0.1" in url else public)
+    monkeypatch.setattr(guard, "restart_connector", lambda label=None: restarts.append(label) or "requested")
+    return flag, restarts
+
+
+def test_discipline_check_is_inert_until_enabled(tmp_path, monkeypatch):
+    flag, restarts = discipline_runtime(tmp_path, monkeypatch, "healthy", "cloudflare_1033", enabled=False)
+    for _ in range(5):
+        assert guard.check_discipline(tmp_path, flag)["action"] == "discipline_not_enabled"
+    assert restarts == [] and not (tmp_path / "tunnel-health.json").exists()
+
+
+def test_discipline_restarts_only_its_connector_after_three_confirmed_1033(tmp_path, monkeypatch):
+    flag, restarts = discipline_runtime(tmp_path, monkeypatch, "healthy", "cloudflare_1033")
+    actions = [guard.check_discipline(tmp_path, flag)["action"] for _ in range(3)]
+    assert actions == ["observe", "observe", "restart_connector"]
+    assert restarts == [guard.DISCIPLINE_LABEL]
+    state = json.loads((tmp_path / "tunnel-health.json").read_text())
+    assert state["restart_result"] == "requested" and state["identity"].endswith("/test-tunnel")
+    # Inside the 10-minute cooldown nothing else is restarted.
+    assert [guard.check_discipline(tmp_path, flag)["action"] for _ in range(3)][-1] == "cooldown"
+    assert restarts == [guard.DISCIPLINE_LABEL]
+
+
+def test_discipline_never_restarts_when_the_service_itself_is_down(tmp_path, monkeypatch):
+    flag, restarts = discipline_runtime(tmp_path, monkeypatch, "unreachable", "cloudflare_1033")
+    for _ in range(5):
+        assert guard.check_discipline(tmp_path, flag)["action"] == "observe"
+    assert restarts == []

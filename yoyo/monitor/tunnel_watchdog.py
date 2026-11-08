@@ -29,8 +29,19 @@ INTERVAL = 60
 COOLDOWN = 600
 SERVICE = "spike Impulse Monitor"
 
+# Discipline app tunnel (owner 2026-11-08 “app报错了 今天好几次了 能稳定一点吗”): the same
+# cloudflared silent-1033 failure hit discipline.spikeok.com, whose connector is a separate job.
+# Same rule (3 confirmed 1033 with a healthy local origin, 10 min cooldown, 3/hour), and only the
+# connector restarts — never the trading service. Opt-in: inert until the enable file exists.
+DISCIPLINE_LABEL = "com.spike.discipline.cloudflared"
+DISCIPLINE_RUNTIME = Path.home() / "Library/Application Support/SpikeDiscipline/public"
+DISCIPLINE_URL = "https://discipline.spikeok.com/health"
+DISCIPLINE_LOCAL = "http://127.0.0.1:8897/health"
+DISCIPLINE_SERVICE = "spike-discipline"
+DISCIPLINE_ENABLED = DISCIPLINE_RUNTIME / "tunnel-health.enabled"
 
-def probe(url, headers=None):
+
+def probe(url, headers=None, service=SERVICE):
     """Read a bounded response without system HTTP proxies or redirect following."""
     class NoRedirect(urllib.request.HTTPRedirectHandler):
         def redirect_request(self, *args, **kwargs):
@@ -53,13 +64,13 @@ def probe(url, headers=None):
         if code == 200:
             try:
                 payload = json.loads(body)
-                if isinstance(payload, dict) and payload.get("service") == SERVICE:
+                if isinstance(payload, dict) and payload.get("service") == service:
                     return "healthy"
             except ValueError:
                 pass
         # Both curl's plain-text page and Cloudflare's browser error template.
         if code == 530 and cloudflare and re.search(
-            r"error\s+code\s*:\s*1033\b|\bError\s+1033\b|error-code[^>]*>\s*1033\b",
+            r"error\s+code\s*:\s*1033\b|\bError\s+1033\b|error-code[^>]*>\s*1033\b|\"error_code\"\s*:\s*1033\b",
             body, re.I,
         ):
             return "cloudflare_1033"
@@ -95,13 +106,14 @@ def decide(previous, now, identity, local, edge, public, installed):
                 public=public, failures=failures, attempts=attempts, action=action)
 
 
-def restart_connector():
+def restart_connector(label=None):
     # Never bootstrap a deliberately stopped job or touch the application worker.
-    if not gateway.installed(gateway.NAMED_LABEL):
+    label = label or gateway.NAMED_LABEL
+    if not gateway.installed(label):
         return "connector_disabled"
     try:
         result = subprocess.run(
-            ["launchctl", "kickstart", "-k", gateway.target(gateway.NAMED_LABEL)],
+            ["launchctl", "kickstart", "-k", gateway.target(label)],
             capture_output=True, timeout=25, check=False)
         return "requested" if result.returncode == 0 else "failed"
     except (OSError, subprocess.SubprocessError):
@@ -143,6 +155,39 @@ def check():
         return state
 
 
+def check_discipline(runtime=None, enabled=None):
+    """Discipline tunnel check; inert unless the owner-approved enable file exists."""
+    runtime = runtime or DISCIPLINE_RUNTIME
+    if not (enabled or DISCIPLINE_ENABLED).exists():
+        return {"action": "discipline_not_enabled"}
+    config_path = runtime / "cloudflared.json"
+    if not config_path.exists():
+        return {"action": "not_configured"}
+    lock_fd = os.open(runtime / "tunnel-health.lock", os.O_RDWR | os.O_CREAT, 0o600)
+    with os.fdopen(lock_fd, "w") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return {"action": "already_checking"}
+        tunnel = str(json.loads(config_path.read_text()).get("tunnel") or "")
+        state_path = runtime / "tunnel-health.json"
+        previous = json.loads(state_path.read_text()) if state_path.exists() else {}
+        installed = gateway.installed(DISCIPLINE_LABEL)
+        local = public = "not_checked"
+        if installed:
+            local = probe(DISCIPLINE_LOCAL, service=DISCIPLINE_SERVICE)
+            public = probe(DISCIPLINE_URL, service=DISCIPLINE_SERVICE)
+        # No separate gateway: cloudflared forwards straight to the service, so the origin stands in.
+        state = decide(previous, time.time(), DISCIPLINE_URL + "/" + tunnel, local, local, public, installed)
+        gateway.private_write(state_path, json.dumps(state) + "\n")
+        if state["action"] == "restart_connector":
+            state["restart_result"] = restart_connector(DISCIPLINE_LABEL)
+            gateway.private_write(state_path, json.dumps(state) + "\n")
+        if state["action"] != previous.get("action") or state["action"] == "restart_connector":
+            print(json.dumps(dict(state, target="discipline")), flush=True)
+        return state
+
+
 def install():
     """Install a separate one-shot check; no changes to the connector or monitor."""
     from .named_tunnel import saved
@@ -168,7 +213,7 @@ def install():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["check", "install", "stop", "status"])
+    parser.add_argument("action", choices=["check", "install", "stop", "status", "enable-discipline", "disable-discipline"])
     action = parser.parse_args().action
     if action == "install":
         install()
@@ -178,8 +223,19 @@ def main():
         path = gateway.RUNTIME / "tunnel-health.json"
         print(json.dumps(dict(installed=gateway.installed(LABEL),
                               last_check=json.loads(path.read_text()) if path.exists() else None)))
+    elif action == "enable-discipline":
+        gateway.private_write(DISCIPLINE_ENABLED, "owner-approved\n")
+        print("Discipline tunnel recovery enabled (same 60s check job)")
+    elif action == "disable-discipline":
+        DISCIPLINE_ENABLED.unlink(missing_ok=True)
+        print("Discipline tunnel recovery disabled")
     else:
-        check()
+        # Each tunnel is checked independently; one failing check never skips the other.
+        for run in (check, check_discipline):
+            try:
+                run()
+            except Exception as error:  # noqa: BLE001 - report and continue with the next tunnel
+                print(json.dumps({"action": "check_error", "check": run.__name__, "error": type(error).__name__}), flush=True)
 
 
 if __name__ == "__main__":

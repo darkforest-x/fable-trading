@@ -50,3 +50,13 @@ final class LaunchCacheTests: XCTestCase {
         XCTAssertNil(LaunchCache.read(Box.self, "unit", scope: ""))
     }
 }
+
+/// Cloudflare edge failures read as a reconnecting tunnel, never as Cloudflare's English page.
+final class EdgeFailureTests: XCTestCase {
+    func testEdgeStatusesMapToChineseReconnectAndServiceErrorsDoNot() {
+        XCTAssertEqual(API.edgeFailure(530), "服务连接中断（隧道 1033），正在自动重连")
+        XCTAssertEqual(API.edgeFailure(522), "服务连接中断（522），正在自动重连")
+        XCTAssertNotNil(API.edgeFailure(502))
+        for status in [400, 401, 409, 422, 503] { XCTAssertNil(API.edgeFailure(status), "\(status) is the service's own answer") }
+    }
+}
