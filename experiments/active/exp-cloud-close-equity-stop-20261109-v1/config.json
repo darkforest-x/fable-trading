@@ -1,5 +1,6 @@
 {
   "id": "exp-cloud-close-equity-stop-20261109-v1",
+  "thresholds": [0.0, 0.15, 0.25, 0.35],
   "parent": "exp-cloud-close-lock-profit-20261109-v1 arm_at_r=2.0: full-position exit engine, fixed nine-slot wallet, low prior_atr_pct priority, 11,780 frozen 90d real opportunities. The static 1,922-row funded roster is a parity reference only; every threshold re-admits from all raw eligible opportunities.",
   "factor": "Close-NAV drawdown stop from the current risk-cycle closing high-water mark. Thresholds 0% (strict no-trigger parity), 15%, 25%, and 35%. All native event stop/EMA/profit-lock behavior stays unchanged until a portfolio-level liquidation supersedes it.",
   "risk_stop": {
