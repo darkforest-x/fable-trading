@@ -1,0 +1,8 @@
+{
+  "id": "exp-cloud-close-binance-confirm-20261109-v1",
+  "single_variable": "On the full recovered Binance entry cohort, compare native intrabar reversal versus first fully confirmed opposite 12H EMA close on the identical nine-slot 75%-at-2R account. No 90-day screen here: match the OKX flip-confirm study exactly. Causal first V1.7 key and fee/capacity assumptions remain those of the original Binance transfer.",
+  "source": "Precomputed unfiltered executable Binance entries, controls and intrabar fills in exp-cloud-close-binance-transfer-20261109-v1/fills.csv.gz. Reuse its frozen hourly quote checkpoints (every populated worker receipt) from complete native 5m candles and its originally frozen 632-contract manifest. Missing checkpoint material should be regenerated from the same prior native source, not substituted.",
+  "method": "Complete 12H OHLC from the same complete hourly source, exact EMA20/50 causal recurrence. Disable intrabar EMA trigger, expose opposite confirmed spread at first H1 opening boundary, keep original stop/limit and gap handling. Fixed cash 1000U. Native frame produces both legs; cash-share account chooses funded trades.",
+  "decision": "No new optimization on Binance. Report all 2020-01-01 through 2026-09-23, dev through 2024, 2025 and 2026 YTD. Extra 5bp market-slip scenario and strictly later matching controls for the 1x-confirmed variant. This transfer evaluates robustness of the already selected exit and does not make Binance an unseen market regime.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_binance_confirm"
+}
