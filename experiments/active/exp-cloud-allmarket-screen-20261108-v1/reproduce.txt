@@ -1,0 +1,13 @@
+SPIKE V1.7 chart-label study. Run from the repository root with Node available.
+Dates are exchange/frozen timestamps, not the runtime clock. No orders or P&L.
+1. .venv/bin/python -m yoyo.evaluation.cloud_allmarket_inputs
+2. .venv/bin/python -m yoyo.evaluation.cloud_allmarket_census
+3. .venv/bin/python -m yoyo.evaluation.cloud_allmarket_totals
+4. .venv/bin/python -m yoyo.evaluation.cloud_allmarket_screen
+5. .venv/bin/python -m yoyo.evaluation.cloud_allmarket_cross_section
+6. .venv/bin/python -m yoyo.evaluation.cloud_allmarket_cooldown
+The input receipts freeze completed official 12Hutc / NY Monday hourly OHLC and
+use existing OKX archives. Frozen Top20 histories are linked by symbol in code.
+Preserve ./inputs, ./work, market_meta.json, universe.csv and instruments_snapshot.json.gz.
+The broad ledger, Chinese hit list and rule outputs are descriptive label studies.
+Two held-out calendar slices: 2025 and 2026 up to 2026-11-08T12:00:00Z.
