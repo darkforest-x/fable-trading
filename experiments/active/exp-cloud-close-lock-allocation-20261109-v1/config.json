@@ -1,0 +1,8 @@
+{
+  "id": "exp-cloud-close-lock-allocation-20261109-v1",
+  "parent": "exp-cloud-close-lock-profit-20261109-v1. In development only, activation at 2R is the unique full-size arm with net win rate >=30% and payoff >=2.5 using BOTH % returns and actual funded USDT. Its prior drawdown was too high, motivating the current risk study; the later history was already observed. Keep fixed +0.5R lock and native stop/EMA exit.",
+  "factor": "Scalar on proposed allocation NAV/9 at each entry, cap each slot by actual available unallocated collateral as usual. Fully cash-funded longs and shorts, no borrowing or other new restrictions. At multipliers <1, the rest stays in cash.",
+  "allocation_multiples": [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1],
+  "selection": "Maximize pre-2025 growth subject to >=100 positions, wins >=30%, BOTH payoff definitions >=2.5 and maximum hourly DD upper bound <=35%. If none pass, mark no candidate. Report 2025 and 2026 separately, and 5bp stress and matched later controls for dev pick. All earlier results remain available, no later-period adjustment.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_lock_allocation"
+}
