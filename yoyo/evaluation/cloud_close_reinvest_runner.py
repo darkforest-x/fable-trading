@@ -290,7 +290,7 @@ def _pre_segment(c):
 def _order_func(c, nav, actions, prices, fees, market_slip, reservation,
                 target_notional, add_budget, add_cash_before,
                 target_entry_rows, addon_stop_prices, runner_stop_by_entry,
-                profit_only_budget, position_state, risk_audit, slots):
+                profit_only_budget, profit_risk_fraction, position_state, risk_audit, slots):
     action = actions[c.i, c.col]
     if action == 0:
         return NoOrder
@@ -388,7 +388,7 @@ def _order_func(c, nav, actions, prices, fees, market_slip, reservation,
                                - runner_entry_fee
                                - abs(runner_qty) * runner_stop_fill * TAKER)
             runner_stop_loss = max(0., -runner_stop_pnl)
-            profit_budget = max(0., target_profit - runner_stop_loss)
+            profit_budget = profit_risk_fraction * max(0., target_profit - runner_stop_loss)
             risk_audit[0, c.i, slot] = profit_budget
             risk_audit[1, c.i, slot] = runner_stop_loss
             if profit_budget <= 1.e-8:
@@ -448,8 +448,10 @@ def _leg_result(orders, entry_stage, exit_stage, col):
                 exit_fee=float(exit_['fees']))
 
 
-def account(data: dict, *, slip: float = 0., initial_cash: float = 1000.):
+def account(data: dict, *, slip: float = 0., initial_cash: float = 1000., profit_risk_fraction: float = 1.):
     """Run the combined account in one cash-sharing VectorBT portfolio."""
+    if not 0 < profit_risk_fraction <= 1:
+        raise ValueError('Earned-profit risk fraction must be in (0,1]')
     slots = int(data['slots'])
     reservation = np.zeros(slots, dtype=np.float64)
     target_notional = np.zeros((len(data['actions']), slots), dtype=np.float64)
@@ -462,7 +464,7 @@ def account(data: dict, *, slip: float = 0., initial_cash: float = 1000.):
         data['marks'], _order_func, actions, data['prices'], data['fees'], slip,
         reservation, target_notional, add_budget, add_cash_before,
         data['target_entry_rows'], data['addon_stop_prices'],
-        data['runner_stop_by_entry'], int(data['profit_only_budget']),
+        data['runner_stop_by_entry'], int(data['profit_only_budget']), profit_risk_fraction,
         position_state, risk_audit, slots,
         pre_segment_func_nb=_pre_segment, cash_sharing=True, group_by=True,
         init_cash=initial_cash, max_orders=int(np.count_nonzero(actions)) + 1,
@@ -623,12 +625,12 @@ def account(data: dict, *, slip: float = 0., initial_cash: float = 1000.):
 def simulate(paths: pd.DataFrame, opportunities: pd.DataFrame, *, slots: int = 9,
              slip: float = 0., reinvest: bool = True, start: int = wallet.START,
              end: int = wallet.END, profit_only_budget: bool = False,
-             quote_loader=None):
+             quote_loader=None, profit_risk_fraction: float = 1.):
     base, skips = _selected_originals(paths, slots)
     data = prepare(base, opportunities, slots, start=start, end=end,
                    reinvest=reinvest, profit_only_budget=profit_only_budget,
                    quote_loader=quote_loader)
-    parent_ledger, reentry_ledger, equity, meta = account(data, slip=slip)
+    parent_ledger, reentry_ledger, equity, meta = account(data, slip=slip, profit_risk_fraction=profit_risk_fraction)
     periods = {'all': (None, None), 'dev': (None, '2025-01-01T00:00Z'),
                '2025': ('2025-01-01T00:00Z', '2026-01-01T00:00Z'),
                '2026': ('2026-01-01T00:00Z', None)}

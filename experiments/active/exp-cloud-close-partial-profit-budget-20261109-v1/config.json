@@ -1,0 +1,8 @@
+{
+ "id":"exp-cloud-close-partial-profit-budget-20261109-v1",
+ "factor":"Preserve part of each parent's realized net profit after allowing for its remaining original stop. Spend only [1/8,1/4,1/2] of the earned-risk allowance on the identically timed 12H +2R-confirmed add-on; reuse the prior 0/no-add and 1/full-risk endpoints. No change to the stop, fees, entry clocks, capacity or selection priorities. Absolute earned-risk and free cash must each cover their respective caps in the native VectorBT callback.",
+ "reason":"Spending the whole cushion makes many economically flat parents at their stop and substantially increases drawdown. Use a frozen dyadic search to trade off exposure and retained parent profit without selecting assets after outcomes.",
+ "selection":"Through 2024 maximize terminal wealth subject to at least 100 funded parents, 30% wins, >=2.5 payoff by cash and underlying return, and drawdown upper <=35%. Apply only dev choice to later periods for the decision. Also publish all predefined arms as exploratory. Pre-existing zero-add endpoint uses its previously refined all-period drawdown and wins; normalize parent PnL magnitudes <=1e-8 USDT to zero for win/payoff classification. Extra 5bp per market fill and matched actual/control accounts for a selected new arm.",
+ "account":"OKX 1000U; nine slots; native two-thirds at 2R / one-third cloud runner; maintain original signal roster, merge add-on PnL into each parent. Single-side maker 2bp/taker 5bp. No funding, depth or size rounding. Historical 2025/2026 previously inspected.",
+ "runner":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_partial_profit_budget"
+}
