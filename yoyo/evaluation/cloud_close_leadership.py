@@ -26,6 +26,7 @@ def trailing_return(bars):
 
 
 def leadership():
+    """Return ranks indexed only by contract/clocks with observed 90-day returns."""
     coverage = pd.read_csv(wallet.SOURCE/'input_coverage.csv',keep_default_na=False)
     history = {}
     for row in coverage.itertuples():
@@ -38,7 +39,8 @@ def leadership():
     wide = pd.DataFrame(history)
     members = wide.notna().sum(axis=1)
     rank = (wide.rank(axis=1,ascending=False,method='average')-.5).div(members,axis=0)
-    return rank.loc[members.ge(10)].rename_axis(index='entry_ms',columns='symbol').stack()
+    # pandas 3 stack retains missing contract/clocks. Only a measured rank confers eligibility.
+    return rank.loc[members.ge(10)].rename_axis(index='entry_ms',columns='symbol').stack().dropna()
 
 
 def main():

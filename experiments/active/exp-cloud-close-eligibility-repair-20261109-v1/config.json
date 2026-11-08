@@ -1,0 +1,11 @@
+{
+  "id": "exp-cloud-close-eligibility-repair-20261109-v1",
+  "scope": "Correct four OKX studies that accepted missing 90-day ranks by stacked index membership. Only ranks calculated at the event's own clock count. Require an eligible signal and eligible control for pairs.",
+  "unchanged": "Original fee schedules, trade paths, thresholds, slot priority and chronological gates. Reuse previously reconstructed Binance daily gaps and the frozen, independently eligible Binance two-thirds account.",
+  "reference": "The independent OKX 4H study's unfiltered 90-day screen used numeric rank values. Expect the same 11780 actual events, 10816 paired controls and 1569 funded positions for any simple partial on the same runner.",
+  "supersedes_okx_studies": ["thirds", "concentration", "prior-expectancy", "reclaim-failure"],
+  "starting_usdt": 1000,
+  "target_final_usdt_exclusive": 1001000,
+  "development_end_exclusive": "2025-01-01T00:00:00Z",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_eligibility_repair"
+}
