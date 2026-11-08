@@ -1,0 +1,7 @@
+{
+ "id":"exp-cloud-close-protect-remainder-20261109-v1",
+ "single_variable":"Keep the original 2/3 2R sale; add the existing native +0.5R protective stop to only the remaining third. Its activation at +2R is observed on a completed hourly bar and becomes live on the following native hourly bar. Preserve the original cloud exit, protective stops and executable gap handling. Re-admit the entire 12H event roster when the earlier exit frees a slot.",
+ "inputs":"Join the previously generated arm_at_r=2 native locked runner to the immutable original tp_r=2 target; check each clock, quantity issuer, symbol, actual/control status, direction, opening-price/stop equality, fee class, and target-before-locked-runner ordering. Both legs use original market entry price. No cash from a shadow trade.",
+ "economics":"1000U cash funded; 9 slots; 5bp taker and resting maker 2bp. Extra market slippage +5bp; no funding/capacity. Development through 2024 and full risk/payoff gates, with 2025 and 2026 separate. Transfer to corrected Binance only when OKX passes both and increases wealth over the original unlevered baseline.",
+ "runner":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_protect_remainder"
+}
