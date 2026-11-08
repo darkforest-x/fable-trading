@@ -45,6 +45,36 @@ experiments:
     canonical_report: experiments/active/exp-monday-limit-alarm-reclaim-time-20261108-v1/summary.json
     notes: 'Split corrected by owner before results ("用2020-2025这5年的"): the earlier select-on-2025-only registration (3caf89c898) was superseded in ba5a32b32d before any full result was read. Under that superseded rule 15m (2025 1.36x vs 1.31x) would have been picked and then failed 2026 (1.13x vs 1.23x). All periods were seen in earlier studies; per-symbol fills stay local. No paper account or service changed.'
 
+  - experiment_id: exp-monday-breadth-drop-control-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3db4bee355
+    status: complete
+    question: 'Owner 2026-11-08 approved "Run a stricter control against similar sharp drops that had no breadth signal?": do the 13 native 5m cases (50-99 coins first touching the weekly lower 1.618 in one bar, zero new touches for 30 minutes) earn more over six days than the same coin after a similar drop without a breadth crash?'
+    single_variable: 'Presence of the breadth signal. Controls: 10 nearest same-coin 5m entries within +-365 days, drop24 within 25 percent, standardized distance on drop24 / bounce1h / trend30 / vol7, no >=25-coin lower bar in the prior 24h, outside +-6 days of the events, 24h spacing. Same Binance price series and VectorBT six-day exit (taker 0.05 percent both fills), run once.'
+    result: 'Event returns reproduce the six-day study exactly (39/39, diff 0.0). Pre-registered main arm, excess vs matched controls: BTC +3.52pp (CI +0.97 to +6.43, 9/13), ETH +3.90pp (+0.62 to +7.74, 8/13), SOL +10.59pp (+5.26 to +15.63, 11/13); decision rule passed for all three. Balance check failed on trend: events sat in stronger 30-day trends (BTC +8.0 vs +1.7, ETH +7.1 vs -2.3, SOL +1.8 vs -2.7 percent). Conservative bound (controls also free of crashes in their own six days): only SOL kept a CI above zero (+7.39pp, +2.04 to +12.65). Secondary >=35 zero-new (31 events): BTC +1.68, ETH +4.08, SOL +7.63pp.'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-breadth-drop-control-20261108-v1/summary.json
+    notes: 'The 50-99 zero-follower cell was chosen after seeing results; this tests mechanism, not a blind period. Superseded in interpretation by v2 because of the trend imbalance. No paper account or service changed.'
+
+  - experiment_id: exp-monday-breadth-drop-control-20261108-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 09fc31bafb
+    status: complete
+    question: 'Post-hoc after the v1 balance check: does the breadth excess survive when controls also match the 30-day trend?'
+    single_variable: 'Versus v1, only adds a 3 percentage point caliper on trend30 for controls. Matching, prices, exit and costs unchanged; VectorBT run once (summary re-run from saved matches after a NaN serialization fix in 3f66894511).'
+    result: 'Matched events are balanced on all four features (e.g. trend30 BTC 4.75 vs 4.88, ETH 1.28 vs 1.23, SOL -0.59 vs -0.62 percent). Excess: BTC +2.35pp (CI -0.16 to +5.12, 7/12), ETH +0.82pp (-1.35 to +3.08, 7/11), SOL +9.35pp (+2.61 to +15.84, 9/12). Only SOL keeps a CI above zero; conservative bound SOL +5.62pp (-2.06 to +13.06). Secondary >=35 zero-new: BTC +2.15 (+0.14 to +4.22), ETH +2.35 (-1.24 to +7.02), SOL +7.67pp (+2.37 to +13.14).'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-breadth-drop-control-20261108-v2/summary.json
+    notes: 'Post-hoc sensitivity; v1 stays the pre-registered result. Events with no trend-matched control are dropped: BTC 2024-03-06, ETH 2024-03-06 and 2026-09-16, SOL 2026-09-16 (BTC 2026-09-16 has one control). This removes the largest BTC winner and the two largest ETH winners. Conclusion: the breadth signal adds beyond drop and trend for SOL, not shown for BTC or ETH. No paper account or service changed.'
+
   - experiment_id: exp-monday-breadth-extension-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 645c60527f4b552a8a1e792bb1a0fcd9f3a1cc53

@@ -1,0 +1,2024 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-breadth-drop-control-20261108-v2",
+    "owner_request": "2026-11-08: owner approved 'Run a stricter control against similar sharp drops that had no breadth signal?' (Yes, run it) after the 13-case 50-99 zero-follower six-day review.",
+    "question": "Does the breadth signal (one native 5m bar with 50-99 coins first-touching the weekly lower 1.618, then zero new lower touches for 30 minutes) add six-day return beyond a similar sharp drop of the same coin without a breadth crash?",
+    "single_variable": "Versus v1, only the control pool changes: controls must also be within 3 percentage points of the event 30-day trend (trend30). Everything else is identical.",
+    "source_events": "experiments/active/exp-monday-breadth-six-day-excursions-20261108-v1/events.csv.gz",
+    "price_series": "yoyo.evaluation.monday_breadth_excursion_prices.prices (Binance USD-M 5m, same as the six-day study)",
+    "returns": "yoyo.evaluation.monday_breadth_reversal_window.trade_returns (VectorBT from_orders, buy at decision 5m open, sell at the open 1728 bars later, taker 0.05% on both fills, unlevered, no funding or slippage), run once for events and controls",
+    "assets": [
+      "BTC",
+      "ETH",
+      "SOL"
+    ],
+    "primary_population": {
+      "minutes": 5,
+      "initial_min": 50,
+      "initial_max": 99,
+      "new_coins": 0
+    },
+    "secondary_population": {
+      "minutes": 5,
+      "initial_min": 35,
+      "initial_max": 100000,
+      "new_coins": 0,
+      "note": "descriptive robustness only, not decisive"
+    },
+    "features_at_entry_open_T": {
+      "drop24": "min of the 12 closes before T divided by max of the 288 closes before T, minus 1",
+      "bounce1h": "open at T divided by min of the 12 closes before T, minus 1",
+      "trend30": "close before T divided by the close 8640 bars earlier, minus 1",
+      "vol7": "std of 5m log close changes over the 2016 bars before T"
+    },
+    "control_pool": {
+      "same_asset": true,
+      "window_days": 365,
+      "no_breadth_bar_min_coins": 25,
+      "no_breadth_lookback_hours": 24,
+      "exclude_days_around_population_events": 6,
+      "drop24_caliper_relative": 0.25,
+      "spacing_hours": 24,
+      "k": 10,
+      "distance": "Euclidean on the four features standardized by the pool standard deviation; greedy nearest with 24h minimum spacing",
+      "trend30_caliper_abs": 0.03
+    },
+    "sensitivity": "Conservative pool that also drops controls with any >=25-coin lower bar inside their own six-day holding window (uses future information to exclude, so it can only make controls look better).",
+    "decision_rule": "Per asset on the primary 13 events: the breadth signal adds value beyond the drop if the mean paired excess (event net minus the mean net of its matched controls) is positive and its event-bootstrap 95% CI (20000 draws, seed 20261108) excludes zero. Three assets are tested; report all, adopt nothing automatically.",
+    "bootstrap_seed": 20261108,
+    "bootstrap_draws": 20000,
+    "in_sample_note": "The 50-99 zero-follower cell was chosen after seeing results; this control tests a mechanism, not a blind period.",
+    "production_eligible": false,
+    "training_eligible": false,
+    "parent": "exp-monday-breadth-drop-control-20261108-v1",
+    "post_hoc_note": "Added after reading v1: v1 passed its decision rule but the balance check showed events in stronger 30-day trends than controls (BTC +8.0% vs +1.7%, ETH +7.1% vs -2.3%, SOL +1.8% vs -2.7%). This v2 is a post-hoc sensitivity; v1 remains the pre-registered result."
+  },
+  "checks": {
+    "BTC": {
+      "events": 13,
+      "max_abs_diff_pct": 0.0
+    },
+    "ETH": {
+      "events": 13,
+      "max_abs_diff_pct": 0.0
+    },
+    "SOL": {
+      "events": 13,
+      "max_abs_diff_pct": 0.0
+    }
+  },
+  "results": {
+    "primary": {
+      "conservative": {
+        "BTC": {
+          "events": 13,
+          "matched_events": 12,
+          "controls_per_event": 8.0,
+          "event_mean_pct": 3.8906743272657924,
+          "control_mean_pct": 1.9832667514298539,
+          "control_positive_share": 0.65625,
+          "excess_mean_pp": 0.9846336808681738,
+          "excess_median_pp": 0.4689596014522104,
+          "excess_positive": 6,
+          "excess_ci95_pp": [
+            -1.4515471331852488,
+            3.7015720042416373
+          ],
+          "balance_event": {
+            "drop24": -0.04314941701642358,
+            "bounce1h": 0.006659271731515806,
+            "trend30": 0.08030958686391573,
+            "vol7": 0.0015067394831395065
+          },
+          "balance_control": {
+            "drop24": -0.031020331679094366,
+            "bounce1h": 0.003096778988494141,
+            "trend30": 0.02397687387256861,
+            "vol7": 0.001460816973093568
+          },
+          "per_event": [
+            {
+              "event": "2023-04-26 20:35:00+00:00",
+              "event_net": 2.889316990252964,
+              "control_mean": -1.075806204068357,
+              "controls": 4
+            },
+            {
+              "event": "2023-06-28 20:05:00+00:00",
+              "event_net": 2.1631859311879023,
+              "control_mean": 0.164827423895696,
+              "controls": 10
+            },
+            {
+              "event": "2023-07-05 11:10:00+00:00",
+              "event_net": -0.3143053918365581,
+              "control_mean": 2.158929301021627,
+              "controls": 10
+            },
+            {
+              "event": "2023-09-10 04:55:00+00:00",
+              "event_net": 2.8395806300426427,
+              "control_mean": 1.635500855282268,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-17 14:20:00+00:00",
+              "event_net": 8.04370366977648,
+              "control_mean": -1.8553334299358792,
+              "controls": 10
+            },
+            {
+              "event": "2024-03-05 20:30:00+00:00",
+              "event_net": 14.963961066878973,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2024-06-14 16:40:00+00:00",
+              "event_net": -1.050812351289521,
+              "control_mean": 1.6148785783845743,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-14 07:20:00+00:00",
+              "event_net": -0.8046390298802472,
+              "control_mean": 3.4372228449292606,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-22 11:35:00+00:00",
+              "event_net": 6.147611079514094,
+              "control_mean": 4.177689040317037,
+              "controls": 9
+            },
+            {
+              "event": "2026-01-20 23:05:00+00:00",
+              "event_net": -0.21921143776683452,
+              "control_mean": 4.248434852535257,
+              "controls": 10
+            },
+            {
+              "event": "2026-08-22 05:45:00+00:00",
+              "event_net": 3.2805779646522275,
+              "control_mean": 3.5467385365081814,
+              "controls": 2
+            },
+            {
+              "event": "2026-09-15 19:20:00+00:00",
+              "event_net": 13.22906494079692,
+              "control_mean": 4.218683497893413,
+              "controls": 1
+            },
+            {
+              "event": "2026-09-23 14:45:00+00:00",
+              "event_net": -0.5892678078737354,
+              "control_mean": 1.527435720395172,
+              "controls": 10
+            }
+          ]
+        },
+        "ETH": {
+          "events": 13,
+          "matched_events": 11,
+          "controls_per_event": 8.818181818181818,
+          "event_mean_pct": 4.60521297693362,
+          "control_mean_pct": 3.329024623794751,
+          "control_positive_share": 0.6597938144329897,
+          "excess_mean_pp": -0.8442189151765033,
+          "excess_median_pp": -0.5007088601046692,
+          "excess_positive": 4,
+          "excess_ci95_pp": [
+            -3.315214905238625,
+            1.6273599080800791
+          ],
+          "balance_event": {
+            "drop24": -0.057242342754559375,
+            "bounce1h": 0.0074176424446910595,
+            "trend30": 0.07112717031021745,
+            "vol7": 0.0018029007023275079
+          },
+          "balance_control": {
+            "drop24": -0.04335798997673291,
+            "bounce1h": 0.005319113748631504,
+            "trend30": 0.001993276577193437,
+            "vol7": 0.0018279053288573766
+          },
+          "per_event": [
+            {
+              "event": "2023-04-26 20:35:00+00:00",
+              "event_net": 1.7115295282336334,
+              "control_mean": 9.953919444958851,
+              "controls": 7
+            },
+            {
+              "event": "2023-06-28 20:05:00+00:00",
+              "event_net": 5.621075041951125,
+              "control_mean": 8.461337918022641,
+              "controls": 10
+            },
+            {
+              "event": "2023-07-05 11:10:00+00:00",
+              "event_net": -2.560264324773206,
+              "control_mean": 4.341058419019581,
+              "controls": 10
+            },
+            {
+              "event": "2023-09-10 04:55:00+00:00",
+              "event_net": 0.8161765430122672,
+              "control_mean": 0.22979174463878885,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-17 14:20:00+00:00",
+              "event_net": 6.5491079257367275,
+              "control_mean": 7.474588746551104,
+              "controls": 10
+            },
+            {
+              "event": "2024-03-05 20:30:00+00:00",
+              "event_net": 17.711765229444808,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2024-06-14 16:40:00+00:00",
+              "event_net": 2.937618759881383,
+              "control_mean": 3.4383276199860524,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-14 07:20:00+00:00",
+              "event_net": 1.3881400159505477,
+              "control_mean": 1.674560106781192,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-22 11:35:00+00:00",
+              "event_net": 7.568037430780472,
+              "control_mean": 0.08344428417180683,
+              "controls": 10
+            },
+            {
+              "event": "2026-01-20 23:05:00+00:00",
+              "event_net": -0.7365353588301782,
+              "control_mean": -2.564408697968077,
+              "controls": 4
+            },
+            {
+              "event": "2026-08-22 05:45:00+00:00",
+              "event_net": 2.410212344420509,
+              "control_mean": -0.6670238641412541,
+              "controls": 6
+            },
+            {
+              "event": "2026-09-15 19:20:00+00:00",
+              "event_net": 14.823140675891539,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2026-09-23 14:45:00+00:00",
+              "event_net": 1.6277648884374454,
+              "control_mean": 4.193675139721573,
+              "controls": 10
+            }
+          ]
+        },
+        "SOL": {
+          "events": 13,
+          "matched_events": 12,
+          "controls_per_event": 7.833333333333333,
+          "event_mean_pct": 10.236525922769498,
+          "control_mean_pct": 3.810034495746771,
+          "control_positive_share": 0.7021276595744681,
+          "excess_mean_pp": 5.615590368289289,
+          "excess_median_pp": 5.828812034787842,
+          "excess_positive": 7,
+          "excess_ci95_pp": [
+            -2.0554379974949146,
+            13.05831834803221
+          ],
+          "balance_event": {
+            "drop24": -0.07737046672947444,
+            "bounce1h": 0.01207993600555913,
+            "trend30": 0.01802686443211537,
+            "vol7": 0.0029242022778427895
+          },
+          "balance_control": {
+            "drop24": -0.06747049361193681,
+            "bounce1h": 0.008198324784751947,
+            "trend30": -0.05759741149988884,
+            "vol7": 0.0028102262397378002
+          },
+          "per_event": [
+            {
+              "event": "2023-04-26 20:35:00+00:00",
+              "event_net": 5.826095949030049,
+              "control_mean": 3.9687025442540658,
+              "controls": 7
+            },
+            {
+              "event": "2023-06-28 20:05:00+00:00",
+              "event_net": 22.92229708456647,
+              "control_mean": -0.37375895444707247,
+              "controls": 10
+            },
+            {
+              "event": "2023-07-05 11:10:00+00:00",
+              "event_net": 17.417175633757626,
+              "control_mean": 2.809081888515081,
+              "controls": 10
+            },
+            {
+              "event": "2023-09-10 04:55:00+00:00",
+              "event_net": 5.201780851759069,
+              "control_mean": 5.452047330285852,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-17 14:20:00+00:00",
+              "event_net": 22.989035438877416,
+              "control_mean": 3.1127981138890783,
+              "controls": 10
+            },
+            {
+              "event": "2024-03-05 20:30:00+00:00",
+              "event_net": 20.567332754126856,
+              "control_mean": -2.136134603487036,
+              "controls": 3
+            },
+            {
+              "event": "2024-06-14 16:40:00+00:00",
+              "event_net": -6.450497920346835,
+              "control_mean": 12.55921106271397,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-14 07:20:00+00:00",
+              "event_net": -1.5323559304807364,
+              "control_mean": 12.18890206225676,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-22 11:35:00+00:00",
+              "event_net": 8.028431319572036,
+              "control_mean": 10.51475226359011,
+              "controls": 9
+            },
+            {
+              "event": "2026-01-20 23:05:00+00:00",
+              "event_net": -1.4579731447640185,
+              "control_mean": 2.4211188367406136,
+              "controls": 10
+            },
+            {
+              "event": "2026-08-22 05:45:00+00:00",
+              "event_net": 14.343271387375841,
+              "control_mean": -0.24898087550940973,
+              "controls": 3
+            },
+            {
+              "event": "2026-09-15 19:20:00+00:00",
+              "event_net": 19.96733862757076,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2026-09-23 14:45:00+00:00",
+              "event_net": 5.252904944958947,
+              "control_mean": -4.547325719840754,
+              "controls": 2
+            }
+          ]
+        }
+      },
+      "main": {
+        "BTC": {
+          "events": 13,
+          "matched_events": 12,
+          "controls_per_event": 8.333333333333334,
+          "event_mean_pct": 3.8906743272657924,
+          "control_mean_pct": 0.6134007488324927,
+          "control_positive_share": 0.56,
+          "excess_mean_pp": 2.354499683465535,
+          "excess_median_pp": 1.8795809509311525,
+          "excess_positive": 7,
+          "excess_ci95_pp": [
+            -0.16464711222110956,
+            5.118953357945668
+          ],
+          "balance_event": {
+            "drop24": -0.04314941701642358,
+            "bounce1h": 0.006659271731515806,
+            "trend30": 0.08030958686391573,
+            "vol7": 0.0015067394831395065
+          },
+          "balance_control": {
+            "drop24": -0.03211389638561237,
+            "bounce1h": 0.0032621433730398064,
+            "trend30": 0.026422935405861034,
+            "vol7": 0.0014449690638586817
+          },
+          "per_event": [
+            {
+              "event": "2023-04-26 20:35:00+00:00",
+              "event_net": 2.889316990252964,
+              "control_mean": -3.7218906804769047,
+              "controls": 5
+            },
+            {
+              "event": "2023-06-28 20:05:00+00:00",
+              "event_net": 2.1631859311879023,
+              "control_mean": 0.26692100154770565,
+              "controls": 10
+            },
+            {
+              "event": "2023-07-05 11:10:00+00:00",
+              "event_net": -0.3143053918365581,
+              "control_mean": 1.7618962516965169,
+              "controls": 10
+            },
+            {
+              "event": "2023-09-10 04:55:00+00:00",
+              "event_net": 2.8395806300426427,
+              "control_mean": -0.04267642202707561,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-17 14:20:00+00:00",
+              "event_net": 8.04370366977648,
+              "control_mean": -4.0981190726930565,
+              "controls": 10
+            },
+            {
+              "event": "2024-03-05 20:30:00+00:00",
+              "event_net": 14.963961066878973,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2024-06-14 16:40:00+00:00",
+              "event_net": -1.050812351289521,
+              "control_mean": -0.8571354045001065,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-14 07:20:00+00:00",
+              "event_net": -0.8046390298802472,
+              "control_mean": 3.3858923018266944,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-22 11:35:00+00:00",
+              "event_net": 6.147611079514094,
+              "control_mean": 2.7762748322609,
+              "controls": 10
+            },
+            {
+              "event": "2026-01-20 23:05:00+00:00",
+              "event_net": -0.21921143776683452,
+              "control_mean": 1.9308776600496116,
+              "controls": 10
+            },
+            {
+              "event": "2026-08-22 05:45:00+00:00",
+              "event_net": 3.2805779646522275,
+              "control_mean": 1.417680992430119,
+              "controls": 4
+            },
+            {
+              "event": "2026-09-15 19:20:00+00:00",
+              "event_net": 13.22906494079692,
+              "control_mean": 4.218683497893413,
+              "controls": 1
+            },
+            {
+              "event": "2026-09-23 14:45:00+00:00",
+              "event_net": -0.5892678078737354,
+              "control_mean": 0.3224040279820959,
+              "controls": 10
+            }
+          ]
+        },
+        "ETH": {
+          "events": 13,
+          "matched_events": 11,
+          "controls_per_event": 9.272727272727273,
+          "event_mean_pct": 4.60521297693362,
+          "control_mean_pct": 1.664756206459122,
+          "control_positive_share": 0.5882352941176471,
+          "excess_mean_pp": 0.8200495021591262,
+          "excess_median_pp": 1.50940493664957,
+          "excess_positive": 7,
+          "excess_ci95_pp": [
+            -1.3456495050874069,
+            3.082365184521623
+          ],
+          "balance_event": {
+            "drop24": -0.057242342754559375,
+            "bounce1h": 0.0074176424446910595,
+            "trend30": 0.07112717031021745,
+            "vol7": 0.0018029007023275079
+          },
+          "balance_control": {
+            "drop24": -0.045204343251980916,
+            "bounce1h": 0.005039002434399826,
+            "trend30": 0.00453213716698739,
+            "vol7": 0.0018409928590409149
+          },
+          "per_event": [
+            {
+              "event": "2023-04-26 20:35:00+00:00",
+              "event_net": 1.7115295282336334,
+              "control_mean": 6.384254957616666,
+              "controls": 8
+            },
+            {
+              "event": "2023-06-28 20:05:00+00:00",
+              "event_net": 5.621075041951125,
+              "control_mean": 7.510847822883905,
+              "controls": 10
+            },
+            {
+              "event": "2023-07-05 11:10:00+00:00",
+              "event_net": -2.560264324773206,
+              "control_mean": 2.012966723170714,
+              "controls": 10
+            },
+            {
+              "event": "2023-09-10 04:55:00+00:00",
+              "event_net": 0.8161765430122672,
+              "control_mean": -0.6126698554320018,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-17 14:20:00+00:00",
+              "event_net": 6.5491079257367275,
+              "control_mean": 3.2468296842068014,
+              "controls": 10
+            },
+            {
+              "event": "2024-03-05 20:30:00+00:00",
+              "event_net": 17.711765229444808,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2024-06-14 16:40:00+00:00",
+              "event_net": 2.937618759881383,
+              "control_mean": 0.47078043171201145,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-14 07:20:00+00:00",
+              "event_net": 1.3881400159505477,
+              "control_mean": -0.6158088810138024,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-22 11:35:00+00:00",
+              "event_net": 7.568037430780472,
+              "control_mean": -1.2459309375534633,
+              "controls": 10
+            },
+            {
+              "event": "2026-01-20 23:05:00+00:00",
+              "event_net": -0.7365353588301782,
+              "control_mean": -2.2459402954797483,
+              "controls": 7
+            },
+            {
+              "event": "2026-08-22 05:45:00+00:00",
+              "event_net": 2.410212344420509,
+              "control_mean": -0.4804747855896749,
+              "controls": 7
+            },
+            {
+              "event": "2026-09-15 19:20:00+00:00",
+              "event_net": 14.823140675891539,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2026-09-23 14:45:00+00:00",
+              "event_net": 1.6277648884374454,
+              "control_mean": 3.88746340652893,
+              "controls": 10
+            }
+          ]
+        },
+        "SOL": {
+          "events": 13,
+          "matched_events": 12,
+          "controls_per_event": 8.416666666666666,
+          "event_mean_pct": 10.236525922769498,
+          "control_mean_pct": 0.08055806473205214,
+          "control_positive_share": 0.5346534653465347,
+          "excess_mean_pp": 9.345066799304007,
+          "excess_median_pp": 11.438064495005843,
+          "excess_positive": 9,
+          "excess_ci95_pp": [
+            2.607604297784061,
+            15.843211809040884
+          ],
+          "balance_event": {
+            "drop24": -0.07737046672947444,
+            "bounce1h": 0.01207993600555913,
+            "trend30": 0.01802686443211537,
+            "vol7": 0.0029242022778427895
+          },
+          "balance_control": {
+            "drop24": -0.06799924876269409,
+            "bounce1h": 0.009318782333101636,
+            "trend30": -0.04874207226511139,
+            "vol7": 0.002726367555123541
+          },
+          "per_event": [
+            {
+              "event": "2023-04-26 20:35:00+00:00",
+              "event_net": 5.826095949030049,
+              "control_mean": -9.01327834658266,
+              "controls": 10
+            },
+            {
+              "event": "2023-06-28 20:05:00+00:00",
+              "event_net": 22.92229708456647,
+              "control_mean": -1.3622565227390628,
+              "controls": 10
+            },
+            {
+              "event": "2023-07-05 11:10:00+00:00",
+              "event_net": 17.417175633757626,
+              "control_mean": 4.582204904464973,
+              "controls": 10
+            },
+            {
+              "event": "2023-09-10 04:55:00+00:00",
+              "event_net": 5.201780851759069,
+              "control_mean": 3.9879326020997903,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-17 14:20:00+00:00",
+              "event_net": 22.989035438877416,
+              "control_mean": -2.556940049378734,
+              "controls": 10
+            },
+            {
+              "event": "2024-03-05 20:30:00+00:00",
+              "event_net": 20.567332754126856,
+              "control_mean": -2.136134603487036,
+              "controls": 3
+            },
+            {
+              "event": "2024-06-14 16:40:00+00:00",
+              "event_net": -6.450497920346835,
+              "control_mean": 6.645976150312871,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-14 07:20:00+00:00",
+              "event_net": -1.5323559304807364,
+              "control_mean": 4.256558861208082,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-22 11:35:00+00:00",
+              "event_net": 8.028431319572036,
+              "control_mean": 1.5071308556654208,
+              "controls": 10
+            },
+            {
+              "event": "2026-01-20 23:05:00+00:00",
+              "event_net": -1.4579731447640185,
+              "control_mean": 0.09273711649047485,
+              "controls": 10
+            },
+            {
+              "event": "2026-08-22 05:45:00+00:00",
+              "event_net": 14.343271387375841,
+              "control_mean": -0.24898087550940973,
+              "controls": 3
+            },
+            {
+              "event": "2026-09-15 19:20:00+00:00",
+              "event_net": 19.96733862757076,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2026-09-23 14:45:00+00:00",
+              "event_net": 5.252904944958947,
+              "control_mean": -4.788253315760085,
+              "controls": 5
+            }
+          ]
+        }
+      }
+    },
+    "secondary": {
+      "conservative": {
+        "BTC": {
+          "events": 31,
+          "matched_events": 30,
+          "controls_per_event": 8.2,
+          "event_mean_pct": 2.6377550228813496,
+          "control_mean_pct": 1.7986565804467622,
+          "control_positive_share": 0.6382113821138211,
+          "excess_mean_pp": 0.42822490763466675,
+          "excess_median_pp": -0.8167758154885822,
+          "excess_positive": 13,
+          "excess_ci95_pp": [
+            -1.5275639393463227,
+            2.445408458375455
+          ],
+          "balance_event": {
+            "drop24": -0.044756452880811766,
+            "bounce1h": 0.005708350189606499,
+            "trend30": 0.07262263003290598,
+            "vol7": 0.0014262893497239233
+          },
+          "balance_control": {
+            "drop24": -0.03696595271336222,
+            "bounce1h": 0.003945938047841687,
+            "trend30": 0.04068368247948254,
+            "vol7": 0.001524711311928105
+          },
+          "per_event": [
+            {
+              "event": "2022-04-06 00:55:00+00:00",
+              "event_net": -12.028221260686843,
+              "control_mean": 0.8175399918327848,
+              "controls": 10
+            },
+            {
+              "event": "2022-07-13 13:15:00+00:00",
+              "event_net": 15.270102796910875,
+              "control_mean": 1.2449390086069732,
+              "controls": 10
+            },
+            {
+              "event": "2023-04-19 08:55:00+00:00",
+              "event_net": -6.715704269626069,
+              "control_mean": -3.6933269149768897,
+              "controls": 10
+            },
+            {
+              "event": "2023-04-26 20:35:00+00:00",
+              "event_net": 2.889316990252964,
+              "control_mean": -1.075806204068357,
+              "controls": 4
+            },
+            {
+              "event": "2023-05-24 14:25:00+00:00",
+              "event_net": 5.4391164313500235,
+              "control_mean": 3.83816550058255,
+              "controls": 10
+            },
+            {
+              "event": "2023-06-28 20:05:00+00:00",
+              "event_net": 2.1631859311879023,
+              "control_mean": -0.2097449572625798,
+              "controls": 10
+            },
+            {
+              "event": "2023-07-05 11:10:00+00:00",
+              "event_net": -0.3143053918365581,
+              "control_mean": 2.46449984913193,
+              "controls": 10
+            },
+            {
+              "event": "2023-09-10 04:55:00+00:00",
+              "event_net": 2.8395806300426427,
+              "control_mean": 1.635500855282268,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-17 14:20:00+00:00",
+              "event_net": 8.04370366977648,
+              "control_mean": -1.8553334299358792,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-31 15:50:00+00:00",
+              "event_net": 2.377903795221006,
+              "control_mean": 4.529885785271994,
+              "controls": 10
+            },
+            {
+              "event": "2023-11-09 16:45:00+00:00",
+              "event_net": 0.13793094897630642,
+              "control_mean": -6.215194508819605,
+              "controls": 2
+            },
+            {
+              "event": "2023-12-11 02:45:00+00:00",
+              "event_net": -0.15804518364780884,
+              "control_mean": 1.4778613113669035,
+              "controls": 10
+            },
+            {
+              "event": "2024-02-28 18:05:00+00:00",
+              "event_net": 6.638007634648551,
+              "control_mean": 3.8239344067076795,
+              "controls": 4
+            },
+            {
+              "event": "2024-03-05 20:30:00+00:00",
+              "event_net": 14.963961066878973,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2024-04-30 12:45:00+00:00",
+              "event_net": 4.06165791597375,
+              "control_mean": 5.360716413201605,
+              "controls": 10
+            },
+            {
+              "event": "2024-06-14 16:40:00+00:00",
+              "event_net": -1.050812351289521,
+              "control_mean": 1.6148785783845743,
+              "controls": 10
+            },
+            {
+              "event": "2024-10-15 15:40:00+00:00",
+              "event_net": 1.400106359929868,
+              "control_mean": 0.6524807326454225,
+              "controls": 10
+            },
+            {
+              "event": "2024-10-23 18:35:00+00:00",
+              "event_net": 10.9140064114767,
+              "control_mean": -1.1892473319406824,
+              "controls": 10
+            },
+            {
+              "event": "2024-12-18 20:40:00+00:00",
+              "event_net": -3.0571639499231864,
+              "control_mean": -1.4704845274771472,
+              "controls": 7
+            },
+            {
+              "event": "2025-05-30 01:30:00+00:00",
+              "event_net": -0.8090671263684879,
+              "control_mean": 4.383376128856508,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-14 07:20:00+00:00",
+              "event_net": -0.8046390298802472,
+              "control_mean": 3.891037553336537,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-22 11:35:00+00:00",
+              "event_net": 6.147611079514094,
+              "control_mean": 4.177689040317037,
+              "controls": 9
+            },
+            {
+              "event": "2025-11-04 20:50:00+00:00",
+              "event_net": 5.219424131036946,
+              "control_mean": 1.4347928028121606,
+              "controls": 8
+            },
+            {
+              "event": "2025-11-21 08:05:00+00:00",
+              "event_net": 8.966797701682056,
+              "control_mean": 9.301290835431365,
+              "controls": 3
+            },
+            {
+              "event": "2025-12-23 15:30:00+00:00",
+              "event_net": 0.40517808699598745,
+              "control_mean": 2.9638940570569203,
+              "controls": 10
+            },
+            {
+              "event": "2026-01-19 00:35:00+00:00",
+              "event_net": -3.692179358284145,
+              "control_mean": 1.1219327708692022,
+              "controls": 10
+            },
+            {
+              "event": "2026-01-20 23:05:00+00:00",
+              "event_net": -0.21921143776683452,
+              "control_mean": 4.248434852535257,
+              "controls": 10
+            },
+            {
+              "event": "2026-08-22 05:45:00+00:00",
+              "event_net": 3.2805779646522275,
+              "control_mean": 3.5467385365081814,
+              "controls": 2
+            },
+            {
+              "event": "2026-09-09 22:40:00+00:00",
+              "event_net": -3.1782116107989977,
+              "control_mean": 1.3931270588575657,
+              "controls": 6
+            },
+            {
+              "event": "2026-09-15 19:20:00+00:00",
+              "event_net": 13.22906494079692,
+              "control_mean": 4.218683497893413,
+              "controls": 1
+            },
+            {
+              "event": "2026-09-23 14:45:00+00:00",
+              "event_net": -0.5892678078737354,
+              "control_mean": 1.527435720395172,
+              "controls": 10
+            }
+          ]
+        },
+        "ETH": {
+          "events": 31,
+          "matched_events": 29,
+          "controls_per_event": 8.551724137931034,
+          "event_mean_pct": 4.386333419464751,
+          "control_mean_pct": 3.0510140442459375,
+          "control_positive_share": 0.6653225806451613,
+          "excess_mean_pp": 0.5159318212047832,
+          "excess_median_pp": -2.1869958474663536,
+          "excess_positive": 11,
+          "excess_ci95_pp": [
+            -3.2130965864278473,
+            5.348581375346264
+          ],
+          "balance_event": {
+            "drop24": -0.06022565029501183,
+            "bounce1h": 0.006690547275097812,
+            "trend30": 0.07432807415552431,
+            "vol7": 0.0017964576765200015
+          },
+          "balance_control": {
+            "drop24": -0.053674320407189106,
+            "bounce1h": 0.006582557912117165,
+            "trend30": 0.020643421784193813,
+            "vol7": 0.0020268563940370053
+          },
+          "per_event": [
+            {
+              "event": "2022-04-06 00:55:00+00:00",
+              "event_net": -10.4209516612229,
+              "control_mean": 7.324712588518277,
+              "controls": 10
+            },
+            {
+              "event": "2022-07-13 13:15:00+00:00",
+              "event_net": 51.39876743258105,
+              "control_mean": -0.5031955498777947,
+              "controls": 10
+            },
+            {
+              "event": "2023-04-19 08:55:00+00:00",
+              "event_net": -8.786107035175883,
+              "control_mean": -1.1541770680563768,
+              "controls": 10
+            },
+            {
+              "event": "2023-04-26 20:35:00+00:00",
+              "event_net": 1.7115295282336334,
+              "control_mean": 6.080760494127073,
+              "controls": 6
+            },
+            {
+              "event": "2023-05-24 14:25:00+00:00",
+              "event_net": 6.403910062681888,
+              "control_mean": 8.801528192350807,
+              "controls": 10
+            },
+            {
+              "event": "2023-06-28 20:05:00+00:00",
+              "event_net": 5.621075041951125,
+              "control_mean": 8.461337918022641,
+              "controls": 10
+            },
+            {
+              "event": "2023-07-05 11:10:00+00:00",
+              "event_net": -2.560264324773206,
+              "control_mean": 4.341058419019581,
+              "controls": 10
+            },
+            {
+              "event": "2023-09-10 04:55:00+00:00",
+              "event_net": 0.8161765430122672,
+              "control_mean": 0.22979174463878888,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-17 14:20:00+00:00",
+              "event_net": 6.5491079257367275,
+              "control_mean": 7.474588746551104,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-31 15:50:00+00:00",
+              "event_net": 6.251968877767611,
+              "control_mean": 2.2195576732981315,
+              "controls": 10
+            },
+            {
+              "event": "2023-11-09 16:45:00+00:00",
+              "event_net": 0.061462087133732635,
+              "control_mean": 4.08460838973647,
+              "controls": 10
+            },
+            {
+              "event": "2023-12-11 02:45:00+00:00",
+              "event_net": -0.6312802294417271,
+              "control_mean": 6.295368229390161,
+              "controls": 7
+            },
+            {
+              "event": "2024-02-28 18:05:00+00:00",
+              "event_net": 10.752571108393234,
+              "control_mean": 8.861425289171592,
+              "controls": 2
+            },
+            {
+              "event": "2024-03-05 20:30:00+00:00",
+              "event_net": 17.711765229444808,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2024-04-30 12:45:00+00:00",
+              "event_net": 3.4440270156183983,
+              "control_mean": -2.9760950893653257,
+              "controls": 10
+            },
+            {
+              "event": "2024-06-14 16:40:00+00:00",
+              "event_net": 2.937618759881383,
+              "control_mean": 3.2616238925899124,
+              "controls": 10
+            },
+            {
+              "event": "2024-10-15 15:40:00+00:00",
+              "event_net": 3.483259721089226,
+              "control_mean": 9.63615180695179,
+              "controls": 8
+            },
+            {
+              "event": "2024-10-23 18:35:00+00:00",
+              "event_net": 6.866602838023063,
+              "control_mean": -5.32148842290166,
+              "controls": 10
+            },
+            {
+              "event": "2024-12-18 20:40:00+00:00",
+              "event_net": -6.4825343050037825,
+              "control_mean": 2.3082928687641977,
+              "controls": 9
+            },
+            {
+              "event": "2025-05-30 01:30:00+00:00",
+              "event_net": 0.03699771172320157,
+              "control_mean": 6.825408743045506,
+              "controls": 3
+            },
+            {
+              "event": "2025-10-14 07:20:00+00:00",
+              "event_net": 1.3881400159505477,
+              "control_mean": 1.674560106781192,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-22 11:35:00+00:00",
+              "event_net": 7.568037430780472,
+              "control_mean": -0.4040087330805765,
+              "controls": 9
+            },
+            {
+              "event": "2025-11-04 20:50:00+00:00",
+              "event_net": 11.835821936880697,
+              "control_mean": 1.4688359440420624,
+              "controls": 10
+            },
+            {
+              "event": "2025-11-21 08:05:00+00:00",
+              "event_net": 11.675357991703459,
+              "control_mean": 1.0217161252116314,
+              "controls": 10
+            },
+            {
+              "event": "2025-12-23 15:30:00+00:00",
+              "event_net": 0.4636715116278995,
+              "control_mean": 2.650667359094253,
+              "controls": 10
+            },
+            {
+              "event": "2026-01-19 00:35:00+00:00",
+              "event_net": -7.857190422348687,
+              "control_mean": 3.489294358047146,
+              "controls": 10
+            },
+            {
+              "event": "2026-01-20 23:05:00+00:00",
+              "event_net": -0.7365353588301782,
+              "control_mean": -2.564408697968077,
+              "controls": 4
+            },
+            {
+              "event": "2026-08-22 05:45:00+00:00",
+              "event_net": 2.410212344420509,
+              "control_mean": -0.6670238641412541,
+              "controls": 6
+            },
+            {
+              "event": "2026-09-09 22:40:00+00:00",
+              "event_net": -2.387787338760289,
+              "control_mean": 1.3648406794493744,
+              "controls": 4
+            },
+            {
+              "event": "2026-09-15 19:20:00+00:00",
+              "event_net": 14.823140675891539,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2026-09-23 14:45:00+00:00",
+              "event_net": 1.6277648884374454,
+              "control_mean": 4.193675139721573,
+              "controls": 10
+            }
+          ]
+        },
+        "SOL": {
+          "events": 31,
+          "matched_events": 29,
+          "controls_per_event": 8.206896551724139,
+          "event_mean_pct": 8.608561355470412,
+          "control_mean_pct": 3.3198249152195975,
+          "control_positive_share": 0.6176470588235294,
+          "excess_mean_pp": 3.850293052698393,
+          "excess_median_pp": 6.024983855452188,
+          "excess_positive": 16,
+          "excess_ci95_pp": [
+            -1.3064595911201802,
+            8.876847312672785
+          ],
+          "balance_event": {
+            "drop24": -0.07594185514799479,
+            "bounce1h": 0.013269218579904391,
+            "trend30": 0.07893227253863058,
+            "vol7": 0.002718530315819096
+          },
+          "balance_control": {
+            "drop24": -0.06649925241102154,
+            "bounce1h": 0.009591441641667664,
+            "trend30": 0.010173202822192896,
+            "vol7": 0.0028840620191000195
+          },
+          "per_event": [
+            {
+              "event": "2022-04-06 00:55:00+00:00",
+              "event_net": -19.58116945489475,
+              "control_mean": 7.439725379763153,
+              "controls": 8
+            },
+            {
+              "event": "2022-07-13 13:15:00+00:00",
+              "event_net": 44.58425954672462,
+              "control_mean": 13.313313668946927,
+              "controls": 10
+            },
+            {
+              "event": "2023-04-19 08:55:00+00:00",
+              "event_net": -8.818652215715419,
+              "control_mean": 3.108480010733139,
+              "controls": 4
+            },
+            {
+              "event": "2023-04-26 20:35:00+00:00",
+              "event_net": 5.826095949030049,
+              "control_mean": -0.6223160219626239,
+              "controls": 6
+            },
+            {
+              "event": "2023-05-24 14:25:00+00:00",
+              "event_net": 11.205276857548508,
+              "control_mean": 1.9402706431590775,
+              "controls": 10
+            },
+            {
+              "event": "2023-06-28 20:05:00+00:00",
+              "event_net": 22.92229708456647,
+              "control_mean": -0.37375895444707247,
+              "controls": 10
+            },
+            {
+              "event": "2023-07-05 11:10:00+00:00",
+              "event_net": 17.417175633757626,
+              "control_mean": 2.809081888515081,
+              "controls": 10
+            },
+            {
+              "event": "2023-09-10 04:55:00+00:00",
+              "event_net": 5.201780851759069,
+              "control_mean": 5.445025155250593,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-17 14:20:00+00:00",
+              "event_net": 22.989035438877416,
+              "control_mean": 3.1127981138890783,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-31 15:50:00+00:00",
+              "event_net": 11.710738505826662,
+              "control_mean": -3.2442359685217093,
+              "controls": 9
+            },
+            {
+              "event": "2023-11-09 16:45:00+00:00",
+              "event_net": 38.964642322390326,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2023-12-11 02:45:00+00:00",
+              "event_net": 4.812081813630828,
+              "control_mean": 11.574908033050468,
+              "controls": 6
+            },
+            {
+              "event": "2024-02-28 18:05:00+00:00",
+              "event_net": 19.143089348053387,
+              "control_mean": 2.425241926112913,
+              "controls": 10
+            },
+            {
+              "event": "2024-03-05 20:30:00+00:00",
+              "event_net": 20.567332754126856,
+              "control_mean": -2.136134603487036,
+              "controls": 3
+            },
+            {
+              "event": "2024-04-30 12:45:00+00:00",
+              "event_net": 18.102616858683415,
+              "control_mean": 2.357524332354469,
+              "controls": 10
+            },
+            {
+              "event": "2024-06-14 16:40:00+00:00",
+              "event_net": -6.450497920346835,
+              "control_mean": 12.55921106271397,
+              "controls": 10
+            },
+            {
+              "event": "2024-10-15 15:40:00+00:00",
+              "event_net": 6.744289241164256,
+              "control_mean": 0.7193053857120681,
+              "controls": 10
+            },
+            {
+              "event": "2024-10-23 18:35:00+00:00",
+              "event_net": 7.658594169200509,
+              "control_mean": 6.916571768348805,
+              "controls": 10
+            },
+            {
+              "event": "2024-12-18 20:40:00+00:00",
+              "event_net": -7.211615388296093,
+              "control_mean": 6.904829203281904,
+              "controls": 10
+            },
+            {
+              "event": "2025-05-30 01:30:00+00:00",
+              "event_net": -6.336577324622991,
+              "control_mean": 3.0239338739117176,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-14 07:20:00+00:00",
+              "event_net": -1.5323559304807364,
+              "control_mean": 13.46191100571349,
+              "controls": 9
+            },
+            {
+              "event": "2025-10-22 11:35:00+00:00",
+              "event_net": 8.028431319572036,
+              "control_mean": 11.824433678884333,
+              "controls": 8
+            },
+            {
+              "event": "2025-11-04 20:50:00+00:00",
+              "event_net": 9.38582936533821,
+              "control_mean": -1.7609694763442154,
+              "controls": 10
+            },
+            {
+              "event": "2025-11-21 08:05:00+00:00",
+              "event_net": 12.78129034797669,
+              "control_mean": -1.6484669902358462,
+              "controls": 7
+            },
+            {
+              "event": "2025-12-23 15:30:00+00:00",
+              "event_net": 0.468682435178414,
+              "control_mean": 3.643748706528507,
+              "controls": 10
+            },
+            {
+              "event": "2026-01-19 00:35:00+00:00",
+              "event_net": -5.352280361274906,
+              "control_mean": 0.12048808166720289,
+              "controls": 10
+            },
+            {
+              "event": "2026-01-20 23:05:00+00:00",
+              "event_net": -1.4579731447640185,
+              "control_mean": 2.4211188367406136,
+              "controls": 10
+            },
+            {
+              "event": "2026-08-22 05:45:00+00:00",
+              "event_net": 14.343271387375841,
+              "control_mean": -0.24898087550940973,
+              "controls": 3
+            },
+            {
+              "event": "2026-09-09 22:40:00+00:00",
+              "event_net": -4.470531043332353,
+              "control_mean": -4.264809603560536,
+              "controls": 3
+            },
+            {
+              "event": "2026-09-15 19:20:00+00:00",
+              "event_net": 19.96733862757076,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2026-09-23 14:45:00+00:00",
+              "event_net": 5.252904944958947,
+              "control_mean": -4.547325719840754,
+              "controls": 2
+            }
+          ]
+        }
+      },
+      "main": {
+        "BTC": {
+          "events": 31,
+          "matched_events": 30,
+          "controls_per_event": 8.7,
+          "event_mean_pct": 2.6377550228813496,
+          "control_mean_pct": 0.07841159973406302,
+          "control_positive_share": 0.5210727969348659,
+          "excess_mean_pp": 2.148469888347366,
+          "excess_median_pp": 1.3425198261479099,
+          "excess_positive": 17,
+          "excess_ci95_pp": [
+            0.1444153589406825,
+            4.2230180113021465
+          ],
+          "balance_event": {
+            "drop24": -0.044756452880811766,
+            "bounce1h": 0.005708350189606499,
+            "trend30": 0.07262263003290598,
+            "vol7": 0.0014262893497239233
+          },
+          "balance_control": {
+            "drop24": -0.03821508387561296,
+            "bounce1h": 0.003971280145158726,
+            "trend30": 0.0404048594216746,
+            "vol7": 0.0014929999466175182
+          },
+          "per_event": [
+            {
+              "event": "2022-04-06 00:55:00+00:00",
+              "event_net": -12.028221260686843,
+              "control_mean": -0.30050763047079415,
+              "controls": 10
+            },
+            {
+              "event": "2022-07-13 13:15:00+00:00",
+              "event_net": 15.270102796910875,
+              "control_mean": -2.09491674873085,
+              "controls": 10
+            },
+            {
+              "event": "2023-04-19 08:55:00+00:00",
+              "event_net": -6.715704269626069,
+              "control_mean": -4.284708714718603,
+              "controls": 10
+            },
+            {
+              "event": "2023-04-26 20:35:00+00:00",
+              "event_net": 2.889316990252964,
+              "control_mean": -3.7218906804769047,
+              "controls": 5
+            },
+            {
+              "event": "2023-05-24 14:25:00+00:00",
+              "event_net": 5.4391164313500235,
+              "control_mean": -0.7625648542910783,
+              "controls": 10
+            },
+            {
+              "event": "2023-06-28 20:05:00+00:00",
+              "event_net": 2.1631859311879023,
+              "control_mean": 0.585181235904162,
+              "controls": 10
+            },
+            {
+              "event": "2023-07-05 11:10:00+00:00",
+              "event_net": -0.3143053918365581,
+              "control_mean": 1.0852393799945474,
+              "controls": 10
+            },
+            {
+              "event": "2023-09-10 04:55:00+00:00",
+              "event_net": 2.8395806300426427,
+              "control_mean": -0.04267642202707561,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-17 14:20:00+00:00",
+              "event_net": 8.04370366977648,
+              "control_mean": -4.0981190726930565,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-31 15:50:00+00:00",
+              "event_net": 2.377903795221006,
+              "control_mean": 1.4582968422788918,
+              "controls": 10
+            },
+            {
+              "event": "2023-11-09 16:45:00+00:00",
+              "event_net": 0.13793094897630642,
+              "control_mean": -6.215194508819605,
+              "controls": 2
+            },
+            {
+              "event": "2023-12-11 02:45:00+00:00",
+              "event_net": -0.15804518364780884,
+              "control_mean": 2.064125209853729,
+              "controls": 10
+            },
+            {
+              "event": "2024-02-28 18:05:00+00:00",
+              "event_net": 6.638007634648551,
+              "control_mean": 1.0697956899455008,
+              "controls": 6
+            },
+            {
+              "event": "2024-03-05 20:30:00+00:00",
+              "event_net": 14.963961066878973,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2024-04-30 12:45:00+00:00",
+              "event_net": 4.06165791597375,
+              "control_mean": 2.7486411101206856,
+              "controls": 10
+            },
+            {
+              "event": "2024-06-14 16:40:00+00:00",
+              "event_net": -1.050812351289521,
+              "control_mean": -0.8571354045001065,
+              "controls": 10
+            },
+            {
+              "event": "2024-10-15 15:40:00+00:00",
+              "event_net": 1.400106359929868,
+              "control_mean": 0.028083513487112466,
+              "controls": 10
+            },
+            {
+              "event": "2024-10-23 18:35:00+00:00",
+              "event_net": 10.9140064114767,
+              "control_mean": -0.5679542523649388,
+              "controls": 10
+            },
+            {
+              "event": "2024-12-18 20:40:00+00:00",
+              "event_net": -3.0571639499231864,
+              "control_mean": -2.468821129804716,
+              "controls": 10
+            },
+            {
+              "event": "2025-05-30 01:30:00+00:00",
+              "event_net": -0.8090671263684879,
+              "control_mean": -0.3947356144133015,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-14 07:20:00+00:00",
+              "event_net": -0.8046390298802472,
+              "control_mean": 3.89232902014696,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-22 11:35:00+00:00",
+              "event_net": 6.147611079514094,
+              "control_mean": 1.1223238397569097,
+              "controls": 10
+            },
+            {
+              "event": "2025-11-04 20:50:00+00:00",
+              "event_net": 5.219424131036946,
+              "control_mean": 0.11356632410760747,
+              "controls": 10
+            },
+            {
+              "event": "2025-11-21 08:05:00+00:00",
+              "event_net": 8.966797701682056,
+              "control_mean": 3.0321422061964074,
+              "controls": 6
+            },
+            {
+              "event": "2025-12-23 15:30:00+00:00",
+              "event_net": 0.40517808699598745,
+              "control_mean": 2.399491105631576,
+              "controls": 10
+            },
+            {
+              "event": "2026-01-19 00:35:00+00:00",
+              "event_net": -3.692179358284145,
+              "control_mean": -0.3944921744829569,
+              "controls": 10
+            },
+            {
+              "event": "2026-01-20 23:05:00+00:00",
+              "event_net": -0.21921143776683452,
+              "control_mean": 1.9308776600496116,
+              "controls": 10
+            },
+            {
+              "event": "2026-08-22 05:45:00+00:00",
+              "event_net": 3.2805779646522275,
+              "control_mean": 1.417680992430119,
+              "controls": 4
+            },
+            {
+              "event": "2026-09-09 22:40:00+00:00",
+              "event_net": -3.1782116107989977,
+              "control_mean": 1.0672035440365488,
+              "controls": 7
+            },
+            {
+              "event": "2026-09-15 19:20:00+00:00",
+              "event_net": 13.22906494079692,
+              "control_mean": 4.218683497893413,
+              "controls": 1
+            },
+            {
+              "event": "2026-09-23 14:45:00+00:00",
+              "event_net": -0.5892678078737354,
+              "control_mean": 0.3224040279820959,
+              "controls": 10
+            }
+          ]
+        },
+        "ETH": {
+          "events": 31,
+          "matched_events": 29,
+          "controls_per_event": 8.862068965517242,
+          "event_mean_pct": 4.386333419464751,
+          "control_mean_pct": 1.2146672468942885,
+          "control_positive_share": 0.5914396887159533,
+          "excess_mean_pp": 2.3522786185564333,
+          "excess_median_pp": 1.428846398444269,
+          "excess_positive": 17,
+          "excess_ci95_pp": [
+            -1.2439404180894436,
+            7.021184413934725
+          ],
+          "balance_event": {
+            "drop24": -0.06022565029501183,
+            "bounce1h": 0.006690547275097812,
+            "trend30": 0.07432807415552431,
+            "vol7": 0.0017964576765200015
+          },
+          "balance_control": {
+            "drop24": -0.05439049230405282,
+            "bounce1h": 0.005309423539175593,
+            "trend30": 0.024073041334577952,
+            "vol7": 0.0019935581762447066
+          },
+          "per_event": [
+            {
+              "event": "2022-04-06 00:55:00+00:00",
+              "event_net": -10.4209516612229,
+              "control_mean": 2.1486955648136012,
+              "controls": 10
+            },
+            {
+              "event": "2022-07-13 13:15:00+00:00",
+              "event_net": 51.39876743258105,
+              "control_mean": -0.5031955498777947,
+              "controls": 10
+            },
+            {
+              "event": "2023-04-19 08:55:00+00:00",
+              "event_net": -8.786107035175883,
+              "control_mean": -3.4090299283341174,
+              "controls": 10
+            },
+            {
+              "event": "2023-04-26 20:35:00+00:00",
+              "event_net": 1.7115295282336334,
+              "control_mean": 2.554452358711976,
+              "controls": 7
+            },
+            {
+              "event": "2023-05-24 14:25:00+00:00",
+              "event_net": 6.403910062681888,
+              "control_mean": 6.151525306922405,
+              "controls": 10
+            },
+            {
+              "event": "2023-06-28 20:05:00+00:00",
+              "event_net": 5.621075041951125,
+              "control_mean": 7.502551439544037,
+              "controls": 10
+            },
+            {
+              "event": "2023-07-05 11:10:00+00:00",
+              "event_net": -2.560264324773206,
+              "control_mean": 2.012966723170714,
+              "controls": 10
+            },
+            {
+              "event": "2023-09-10 04:55:00+00:00",
+              "event_net": 0.8161765430122672,
+              "control_mean": -0.6126698554320018,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-17 14:20:00+00:00",
+              "event_net": 6.5491079257367275,
+              "control_mean": 4.349392393952078,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-31 15:50:00+00:00",
+              "event_net": 6.251968877767611,
+              "control_mean": -1.8666418567379381,
+              "controls": 10
+            },
+            {
+              "event": "2023-11-09 16:45:00+00:00",
+              "event_net": 0.061462087133732635,
+              "control_mean": 2.4698031411699546,
+              "controls": 10
+            },
+            {
+              "event": "2023-12-11 02:45:00+00:00",
+              "event_net": -0.6312802294417271,
+              "control_mean": 6.295368229390161,
+              "controls": 7
+            },
+            {
+              "event": "2024-02-28 18:05:00+00:00",
+              "event_net": 10.752571108393234,
+              "control_mean": 1.6263026729029566,
+              "controls": 3
+            },
+            {
+              "event": "2024-03-05 20:30:00+00:00",
+              "event_net": 17.711765229444808,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2024-04-30 12:45:00+00:00",
+              "event_net": 3.4440270156183983,
+              "control_mean": -2.8020740516351736,
+              "controls": 10
+            },
+            {
+              "event": "2024-06-14 16:40:00+00:00",
+              "event_net": 2.937618759881383,
+              "control_mean": 1.1307092088673294,
+              "controls": 10
+            },
+            {
+              "event": "2024-10-15 15:40:00+00:00",
+              "event_net": 3.483259721089226,
+              "control_mean": 1.9943563842158074,
+              "controls": 10
+            },
+            {
+              "event": "2024-10-23 18:35:00+00:00",
+              "event_net": 6.866602838023063,
+              "control_mean": -5.770367519412218,
+              "controls": 10
+            },
+            {
+              "event": "2024-12-18 20:40:00+00:00",
+              "event_net": -6.4825343050037825,
+              "control_mean": 3.737900478065646,
+              "controls": 10
+            },
+            {
+              "event": "2025-05-30 01:30:00+00:00",
+              "event_net": 0.03699771172320157,
+              "control_mean": 5.545321607570038,
+              "controls": 4
+            },
+            {
+              "event": "2025-10-14 07:20:00+00:00",
+              "event_net": 1.3881400159505477,
+              "control_mean": -0.6158088810138024,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-22 11:35:00+00:00",
+              "event_net": 7.568037430780472,
+              "control_mean": -3.6315862147146776,
+              "controls": 10
+            },
+            {
+              "event": "2025-11-04 20:50:00+00:00",
+              "event_net": 11.835821936880697,
+              "control_mean": 1.773331269905532,
+              "controls": 10
+            },
+            {
+              "event": "2025-11-21 08:05:00+00:00",
+              "event_net": 11.675357991703459,
+              "control_mean": 1.3547983266285177,
+              "controls": 10
+            },
+            {
+              "event": "2025-12-23 15:30:00+00:00",
+              "event_net": 0.4636715116278995,
+              "control_mean": -0.2581310484518474,
+              "controls": 10
+            },
+            {
+              "event": "2026-01-19 00:35:00+00:00",
+              "event_net": -7.857190422348687,
+              "control_mean": 3.060734300439629,
+              "controls": 10
+            },
+            {
+              "event": "2026-01-20 23:05:00+00:00",
+              "event_net": -0.7365353588301782,
+              "control_mean": -3.509475564538839,
+              "controls": 6
+            },
+            {
+              "event": "2026-08-22 05:45:00+00:00",
+              "event_net": 2.410212344420509,
+              "control_mean": -0.6670238641412541,
+              "controls": 6
+            },
+            {
+              "event": "2026-09-09 22:40:00+00:00",
+              "event_net": -2.387787338760289,
+              "control_mean": 1.3648406794493744,
+              "controls": 4
+            },
+            {
+              "event": "2026-09-15 19:20:00+00:00",
+              "event_net": 14.823140675891539,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2026-09-23 14:45:00+00:00",
+              "event_net": 1.6277648884374454,
+              "control_mean": 3.7983044085042685,
+              "controls": 10
+            }
+          ]
+        },
+        "SOL": {
+          "events": 31,
+          "matched_events": 30,
+          "controls_per_event": 8.433333333333334,
+          "event_mean_pct": 8.608561355470412,
+          "control_mean_pct": 0.5574571736588416,
+          "control_positive_share": 0.5296442687747036,
+          "excess_mean_pp": 7.672478272741559,
+          "excess_median_pp": 9.232353093649401,
+          "excess_positive": 21,
+          "excess_ci95_pp": [
+            2.3672399517771705,
+            13.141036739538459
+          ],
+          "balance_event": {
+            "drop24": -0.07594185514799479,
+            "bounce1h": 0.013269218579904391,
+            "trend30": 0.07893227253863058,
+            "vol7": 0.002718530315819096
+          },
+          "balance_control": {
+            "drop24": -0.0677538349877347,
+            "bounce1h": 0.010082097196448744,
+            "trend30": 0.01760123964756574,
+            "vol7": 0.0027835902974633086
+          },
+          "per_event": [
+            {
+              "event": "2022-04-06 00:55:00+00:00",
+              "event_net": -19.58116945489475,
+              "control_mean": 7.439725379763153,
+              "controls": 8
+            },
+            {
+              "event": "2022-07-13 13:15:00+00:00",
+              "event_net": 44.58425954672462,
+              "control_mean": 13.313313668946927,
+              "controls": 10
+            },
+            {
+              "event": "2023-04-19 08:55:00+00:00",
+              "event_net": -8.818652215715419,
+              "control_mean": -8.891801604152366,
+              "controls": 5
+            },
+            {
+              "event": "2023-04-26 20:35:00+00:00",
+              "event_net": 5.826095949030049,
+              "control_mean": -13.5163997119312,
+              "controls": 9
+            },
+            {
+              "event": "2023-05-24 14:25:00+00:00",
+              "event_net": 11.205276857548508,
+              "control_mean": -2.781331531473041,
+              "controls": 10
+            },
+            {
+              "event": "2023-06-28 20:05:00+00:00",
+              "event_net": 22.92229708456647,
+              "control_mean": 0.26612649142070816,
+              "controls": 10
+            },
+            {
+              "event": "2023-07-05 11:10:00+00:00",
+              "event_net": 17.417175633757626,
+              "control_mean": 4.582204904464973,
+              "controls": 10
+            },
+            {
+              "event": "2023-09-10 04:55:00+00:00",
+              "event_net": 5.201780851759069,
+              "control_mean": 4.085432690737134,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-17 14:20:00+00:00",
+              "event_net": 22.989035438877416,
+              "control_mean": -1.3671703083627185,
+              "controls": 10
+            },
+            {
+              "event": "2023-10-31 15:50:00+00:00",
+              "event_net": 11.710738505826662,
+              "control_mean": 0.8836256942712357,
+              "controls": 10
+            },
+            {
+              "event": "2023-11-09 16:45:00+00:00",
+              "event_net": 38.964642322390326,
+              "control_mean": -10.284039416445179,
+              "controls": 1
+            },
+            {
+              "event": "2023-12-11 02:45:00+00:00",
+              "event_net": 4.812081813630828,
+              "control_mean": 7.70344038511932,
+              "controls": 8
+            },
+            {
+              "event": "2024-02-28 18:05:00+00:00",
+              "event_net": 19.143089348053387,
+              "control_mean": 3.118797907292298,
+              "controls": 10
+            },
+            {
+              "event": "2024-03-05 20:30:00+00:00",
+              "event_net": 20.567332754126856,
+              "control_mean": -2.136134603487036,
+              "controls": 3
+            },
+            {
+              "event": "2024-04-30 12:45:00+00:00",
+              "event_net": 18.102616858683415,
+              "control_mean": 0.05308963360500538,
+              "controls": 10
+            },
+            {
+              "event": "2024-06-14 16:40:00+00:00",
+              "event_net": -6.450497920346835,
+              "control_mean": 6.645976150312871,
+              "controls": 10
+            },
+            {
+              "event": "2024-10-15 15:40:00+00:00",
+              "event_net": 6.744289241164256,
+              "control_mean": 2.4479392595673,
+              "controls": 10
+            },
+            {
+              "event": "2024-10-23 18:35:00+00:00",
+              "event_net": 7.658594169200509,
+              "control_mean": -0.7649537573792632,
+              "controls": 10
+            },
+            {
+              "event": "2024-12-18 20:40:00+00:00",
+              "event_net": -7.211615388296093,
+              "control_mean": 2.8647411603318953,
+              "controls": 10
+            },
+            {
+              "event": "2025-05-30 01:30:00+00:00",
+              "event_net": -6.336577324622991,
+              "control_mean": 0.3517452219899086,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-14 07:20:00+00:00",
+              "event_net": -1.5323559304807364,
+              "control_mean": 8.916725117218842,
+              "controls": 10
+            },
+            {
+              "event": "2025-10-22 11:35:00+00:00",
+              "event_net": 8.028431319572036,
+              "control_mean": 1.197948116435419,
+              "controls": 10
+            },
+            {
+              "event": "2025-11-04 20:50:00+00:00",
+              "event_net": 9.38582936533821,
+              "control_mean": -1.1975921106869334,
+              "controls": 10
+            },
+            {
+              "event": "2025-11-21 08:05:00+00:00",
+              "event_net": 12.78129034797669,
+              "control_mean": -2.529865246710718,
+              "controls": 8
+            },
+            {
+              "event": "2025-12-23 15:30:00+00:00",
+              "event_net": 0.468682435178414,
+              "control_mean": 0.4003405774965116,
+              "controls": 10
+            },
+            {
+              "event": "2026-01-19 00:35:00+00:00",
+              "event_net": -5.352280361274906,
+              "control_mean": 3.7898777883713892,
+              "controls": 10
+            },
+            {
+              "event": "2026-01-20 23:05:00+00:00",
+              "event_net": -1.4579731447640185,
+              "control_mean": 1.433997147878842,
+              "controls": 10
+            },
+            {
+              "event": "2026-08-22 05:45:00+00:00",
+              "event_net": 14.343271387375841,
+              "control_mean": -0.24898087550940973,
+              "controls": 3
+            },
+            {
+              "event": "2026-09-09 22:40:00+00:00",
+              "event_net": -4.470531043332353,
+              "control_mean": -4.264809603560536,
+              "controls": 3
+            },
+            {
+              "event": "2026-09-15 19:20:00+00:00",
+              "event_net": 19.96733862757076,
+              "control_mean": null,
+              "controls": 0
+            },
+            {
+              "event": "2026-09-23 14:45:00+00:00",
+              "event_net": 5.252904944958947,
+              "control_mean": -4.788253315760085,
+              "controls": 5
+            }
+          ]
+        }
+      }
+    }
+  },
+  "decision": {
+    "BTC": false,
+    "ETH": false,
+    "SOL": true
+  },
+  "source_commit": "3f6689451136d6a9145eeb16986e4fb7ec31be55",
+  "training_eligible": false,
+  "production_eligible": false
+}
