@@ -50,7 +50,7 @@
     const root = standalone ? document.getElementById('breadth-standalone') : document.createElement('dialog');
     root.className='bb-sheet';
     root.setAttribute('aria-labelledby','bb-title');
-    root.innerHTML='<header class="bb-top"><div><div class="bb-kicker">SPIKE · 策略小册</div><h1 id="bb-title">全市场下轨反弹 · 4H EMA20</h1></div><button type="button" class="bb-close" data-action="close" aria-label="关闭策略小册">×</button></header><nav class="bb-tabs" aria-label="小册章节">'+Object.entries(PAGES).map(([v,t])=>'<button type="button" data-page="'+v+'">'+t+'</button>').join('')+'</nav><div class="bb-body" aria-live="off"></div>';
+    root.innerHTML='<div class="bb-menu"><header class="bb-top"><div><div class="bb-kicker">SPIKE · 策略小册</div><h1 id="bb-title">全市场下轨反弹 · 4H EMA20</h1></div><button type="button" class="bb-close" data-action="close" aria-label="关闭策略小册">×</button></header><nav class="bb-tabs" aria-label="小册章节">'+Object.entries(PAGES).map(([v,t])=>'<button type="button" data-page="'+v+'">'+t+'</button>').join('')+'</nav></div><div class="bb-body" aria-live="off"></div>';
     const body=root.querySelector('.bb-body');
     if (!standalone) {document.body.append(root);root.showModal();root.querySelector('.bb-close').focus();}
     current=root;
@@ -66,6 +66,7 @@
       if (origin?.getClientRects().length) origin.focus({preventScroll:true});
       else (document.querySelector('.sa-trigger') && origin?.closest('#spike-alarm-dock') ? document.querySelector('.sa-trigger') : document.querySelector('[aria-label="选择策略"]'))?.focus({preventScroll:true});
     }
+    const topOfBook=()=>{(standalone?window:root).scrollTo({top:0,behavior:'instant'});};
     const nav=()=>root.querySelectorAll('[data-page]').forEach(b=>b.setAttribute('aria-current',b.dataset.page===section?'page':'false'));
     function filtered() {return entries.filter(e=>(year==='all'||e.entry_time.startsWith(year))&&(kind==='all'||branch(e)===kind));}
     function setUrl() {
@@ -256,10 +257,10 @@
       if(event.target===root && !standalone && (event.clientX<root.getBoundingClientRect().left || event.clientX>root.getBoundingClientRect().right)){close();return;}
       if(action==='close'){close();return;}
       if(action==='retry'){load();return;}
-      if(btn?.dataset.page){section=btn.dataset.page;render();return;}
+      if(btn?.dataset.page){section=btn.dataset.page;render();topOfBook();return;}
       if(!data)return;
       if(btn?.dataset.period){
-        year=btn.dataset.period;kind='all';page=0;chosen=null;block=null;chosenSymbol='';section='history';render();
+        year=btn.dataset.period;kind='all';page=0;chosen=null;block=null;chosenSymbol='';section='history';render();topOfBook();
         body.querySelector('.bb-open-event')?.focus({preventScroll:true});return;
       }
       if(action==='retry-chart'){catalog=null;block=null;detail();return;}

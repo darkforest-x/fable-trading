@@ -12,7 +12,8 @@ dialog.bb-sheet::backdrop {background:#192e4340; backdrop-filter:blur(3px)}
 .bb-sheet button:disabled {opacity:.38;cursor:default}
 .bb-sheet :focus-visible {outline:2px solid var(--brand-primary);outline-offset:2px}
 .bb-sheet button:hover:not(:disabled),.bb-sheet select:hover {background:var(--control-hover)}
-.bb-sheet .bb-top {position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px clamp(16px,3vw,38px) 10px;background:var(--bb-paper)}
+.bb-menu {position:sticky;top:0;z-index:2;background:var(--bb-paper)}
+.bb-sheet .bb-top {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px clamp(16px,3vw,38px) 10px;background:var(--bb-paper)}
 .bb-top .bb-kicker,.bb-muted,.bb-note,.bb-meta,.bb-sheet label {color:var(--muted);font-size:12px}
 .bb-sheet h1 {font-size:clamp(18px,2.5vw,29px);letter-spacing:-.035em;line-height:1.3}
 .bb-sheet h2 {font-size:18px;letter-spacing:-.02em}
@@ -49,7 +50,7 @@ dialog.bb-sheet::backdrop {background:#192e4340; backdrop-filter:blur(3px)}
 .bb-sheet .bb-up {color:var(--trade-long)} .bb-sheet .bb-down {color:var(--trade-short)}
 .bb-pager {justify-content:space-between;margin-top:10px;color:var(--muted);font-size:12px}
 .bb-chart {height:clamp(240px,32vh,350px);width:100%;min-width:0;overflow:hidden}
-.bb-detail {scroll-margin-top:90px}
+.bb-detail {scroll-margin-top:125px}
 .bb-detail .bb-chart-select {display:grid;gap:3px}
 .bb-note {line-height:1.65;margin-top:9px!important}
 .bb-marks {list-style:none;padding:0;margin:9px 0 0!important}
@@ -74,3 +75,4 @@ dialog.bb-sheet::backdrop {background:#192e4340; backdrop-filter:blur(3px)}
 .bb-sheet .bb-period-link{border:0;padding:0;background:transparent;color:var(--brand-primary);text-decoration:underline;text-underline-offset:3px}
 .bb-comparison{display:block;width:100%;max-width:900px;height:auto;margin:12px auto 0;border-radius:8px}
 .bb-chart-nav{display:flex;gap:4px}.bb-chart-nav button{min-width:34px;font-size:18px;line-height:1}
+@media(max-width:720px){.bb-detail{min-height:calc(100dvh - 80px)}.bb-detail [data-chart-area]{min-height:255px}}
