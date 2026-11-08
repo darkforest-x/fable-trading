@@ -15,6 +15,51 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-live-wick-score040-oct-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8889a8ce6a
+    status: rejected
+    question: Does admitting all 0.40 to below 0.50 touch-close scores improve volume and payoff while retaining the E20 exit?
+    single_variable: Lower the score floor only. Reuse the native E20 October adapter for new admissions and the original six-slot allocation.
+    result: October 1-27 2026, 17 to 39 funded, wins 64.71 to 61.54 percent, payoff 1.046 to 0.685, mean net +157.00 to +20.87bp, realized drawdown 10.89 to 16.33 percent. Incremental 13/22 wins, mean -84.33bp.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-live-wick-score040-oct-20261109-v1/summary.json
+    notes: Binance bars, native Nautilus 1.231.0 both intrabar paths, market 5bp / target 2bp, 10bp adverse per market fill, no funding. Equal-notional net payoff. Frozen baseline account reproduced. Notion 4128856479af81299e05d02ac862f9d2.
+
+  - experiment_id: exp-live-wick-deep-score-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3d8c852bb8
+    status: inconclusive
+    question: Can a separate deep-close low-score admission preserve the original live-wick payoff?
+    single_variable: Append 0.40 to below 0.50 scores when the close is at least 1.5 percent past the level. All original entries and management remain eligible.
+    result: Aug 3 through Sep 30 2026, funded 34 to 56; incremental 14/22, +160.04bp each, payoff 1.168 to 1.162, drawdown 14.23 to 21.67 percent. October 1-27, 17 to 23, incremental 6/6, +347.20bp; total payoff 1.046 to 0.930. No displacement. September incremental 9 rows averaged -14.61bp.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-live-wick-deep-score-20261109-v1/summary.json
+    notes: The 1.5 percent threshold already existed for higher scores; applying it to the new band was motivated by October. Earlier check retrospective, exact baseline roster and native E20 outcomes. Notion 4128856479af8133a3f2eee748991a80.
+
+  - experiment_id: exp-live-wick-two-target-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: fbfd3adc9f
+    status: inconclusive
+    question: How much does holding half of a live-wick signal to the Monday midpoint change independent per-trade payoff?
+    single_variable: Equally allocate to near and midpoint target legs with identical native E20 management; compute the worse scenario after combining same-path fills.
+    result: 398 paired opportunities, payoff 0.957 to 1.009, win rate 67.34 to 66.33 percent, +168.16 to +175.05bp. Since 2025, 254 opportunities, payoff 0.903 to 0.950 while mean net slipped +145.50 to +144.08bp. In 2026 through September mean +151.20 to +136.15bp.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-live-wick-two-target-20261109-v1/summary.json
+    notes: Linear independent-leg attribution on frozen native fills; near-leg parity below 1e-6bp. No new fills or funded-account comparison, no funding or order-book interaction. Notion 4128856479af8158ad0ef415683f9f8e.
+
   - experiment_id: exp-cloud-highwin-20261109-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2eb85c8053
