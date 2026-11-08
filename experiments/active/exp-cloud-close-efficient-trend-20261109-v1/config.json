@@ -1,0 +1,8 @@
+{
+  "id":"exp-cloud-close-efficient-trend-20261109-v1",
+  "single_variable":"Assign the original full cloud runner at entry if the sign-adjusted net log-price movement exceeds half of total absolute log-price movement across the twenty prior, closed 12H returns. Equivalently the sum in the trade direction exceeds three times the opposite-direction sum. Otherwise make the normal two-thirds sale at 2R. There are no other lengths, cutoff values, or selected assets.",
+  "clock":"Use 21 consecutive closes ending at the open of the signal key, twelve hours before the order. Missing history or zero total movement chooses the regular 2R split. Use each control's own ticker, side and decision clock. No change of policy once funded.",
+  "economics":"Corrected 90-day pool, all original 12H entries, coherent original stops and executable EMA/limit exits. Nine actual cash slots, 1000U, 5bp market and 2bp resting fee; also run 5bp adverse market slippage. Copy both actual runner quantities onto the native cloud exit only on selected events; retain original native fee classes. Preserve funded IDs across the two exit templates. No funding, depth, or lot rounding.",
+  "validation":"Pre-2025 and full gate: at least 100 funded parents, >=30% winning parents, cash and equal-notional payoff >=2.5, <=35% maximum drawdown. Record each later year separately and include paired matched controls for both venues. Earlier studies used these years already. The motivation is to retain upside on a minority of visibly persistent trends while realizing profits on other positions.",
+  "runner":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_efficient_trend"
+}
