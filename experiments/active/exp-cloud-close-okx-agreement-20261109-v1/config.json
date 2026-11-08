@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "id": "exp-cloud-close-okx-agreement-20261109-v1",
+  "question": "Does an OKX-native first same-week V1.7 4H confirmation agree with the frozen 12H event early enough to improve a fixed 50% 2R scaleout account versus its same-scope no-4H baseline?",
+  "inputs": {
+    "signals_csv": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/signals.csv",
+    "parent_paths_csv_gz": "experiments/active/exp-cloud-close-reward-20261109-v1/paths.csv.gz",
+    "input_cutoff_utc": "2026-11-08T12:00:00Z"
+  },
+  "signal_screen": {
+    "source": "yoyo.monitor.cloud_signals V1.7 strict rules, adapted to complete UTC-aligned 4H bars aggregated from archived OKX H1 OHLC",
+    "ema": "EMA20/50 close-only recurrence, first-close seed, 50 consecutive complete 4H bars, reset at any missing 4H bar",
+    "monday_anchor": "Reuse source monday_fib.week_window/baseline on the 24 complete archived H1 bars from each frozen parent 12H signal NY week; verify lower/upper 1.618 against that parent reference_entry/opposite_target",
+    "first_key": "Earliest qualifying 4H key for each symbol and NY week, shared across long and short; scan chronologically from Tuesday 00:00 NY, stop at the first known key, and mark unknown only if an earlier expected 4H bar is missing",
+    "agreement_clock": "The first 4H key must be confirmed no later than that actual or matched-control event's own 12H entry/open timestamp",
+    "strict_signal": "long: EMA20>EMA50 and low<lower<close<upper; short: EMA20<EMA50 and lower<close<upper<high"
+  },
+  "coverage": {
+    "account_scope": "90-day leadership coverage only: 181 prior consecutive completed native 12H closes and at least 10 contemporaneously rankable contracts; top_fraction=1.0",
+    "controls": "Use only frozen parent-matched same-symbol/week/direction controls; require each actual and its control to independently pass 90-day coverage and its own 4H confirmation clock for paired comparison",
+    "unmatched_controls": "Retain in event screen with explicit reason; never include in funded account"
+  },
+  "account": {
+    "slots": 9,
+    "partial_2r_fraction": 0.5,
+    "entry_priority": "low_prior_atr",
+    "priority_basis": "Frozen parent's prior_atr_pct inherited by its matched control",
+    "baseline": "Same 90-day eligible OKX parent universe with no 4H filter",
+    "funding_framework": "Reuse cloud_close_slots.run -> cloud_close_scaleout -> VectorBT; frozen tp_r=0 and tp_r=2 paths only",
+    "starting_equity_usdt": 1000
+  },
+  "fees": {
+    "taker_per_fill": 0.0005,
+    "resting_maker_per_fill": 0.0002,
+    "stress_market_slippage_per_fill": 0.0005
+  },
+  "comparison": {
+    "periods": ["all", "dev", "2025", "2026", "all_through_2026-09-23", "2026_through_2026-09-23", "post_2026-09-23"],
+    "metrics": ["final_usdt", "win_pct", "payoff", "payoff_usdt", "dd_mark_pct", "dd_bound_pct", "trades"],
+    "checks": ["same-scope paired controls", "actual-only 5bp market-fill slippage stress"],
+    "binance_reference": "exp-cloud-close-agreement-split-20261109-v1/account_metrics.csv, fraction=0.50, through 2026-09-23"
+  },
+  "outputs": {
+    "event_screen": "experiments/active/exp-cloud-close-okx-agreement-20261109-v1/event_screen.csv.gz",
+    "weekly_keys": "experiments/active/exp-cloud-close-okx-agreement-20261109-v1/weekly_keys.csv.gz",
+    "account_metrics": "experiments/active/exp-cloud-close-okx-agreement-20261109-v1/account_metrics.csv",
+    "audit": "experiments/active/exp-cloud-close-okx-agreement-20261109-v1/audit.json",
+    "summary": "experiments/active/exp-cloud-close-okx-agreement-20261109-v1/summary.json",
+    "funded": "experiments/active/exp-cloud-close-okx-agreement-20261109-v1/funded.csv.gz",
+    "equity": "experiments/active/exp-cloud-close-okx-agreement-20261109-v1/hourly.csv.gz"
+  },
+  "provenance": {
+    "frozen_parent_experiment": "exp-cloud-close-reward-20261109-v1",
+    "source_row_join": "signals.csv one-based source_row_number -> paths.csv.gz source_row_number; parent_id=signal-row-{source_row_number:05d}",
+    "production_execution": "Run once after builder/config commit using /Users/zhangzc/.local/bin/vectorbt-python; no bespoke fills"
+  }
+}
