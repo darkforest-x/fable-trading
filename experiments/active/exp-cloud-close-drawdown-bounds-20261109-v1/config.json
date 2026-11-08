@@ -1,0 +1,77 @@
+{
+  "experiment_id": "exp-cloud-close-drawdown-bounds-20261109-v1",
+  "purpose": "Input collection plan for two-thirds OKX conservative drawdown bounds; no account replay is included.",
+  "collection_status": "builder_ready_not_collected",
+  "instrument_type": "OKX USDT linear perpetual swap",
+  "windows": [
+    {
+      "id": "nov12_12_16_utc",
+      "start_utc": "2025-11-12T12:00:00Z",
+      "end_utc_exclusive": "2025-11-12T16:00:00Z",
+      "symbols": [
+        "NMR",
+        "SOL",
+        "DOGE",
+        "SYRUP",
+        "SHIB",
+        "LRC",
+        "BABY",
+        "CFX",
+        "CORE"
+      ]
+    },
+    {
+      "id": "nov04_21_22_peak_utc",
+      "start_utc": "2025-11-04T21:00:00Z",
+      "end_utc_exclusive": "2025-11-04T22:00:00Z",
+      "symbols": [
+        "RESOLV",
+        "JELLYJELLY",
+        "H",
+        "NMR",
+        "TAO",
+        "SOL",
+        "DOGE"
+      ]
+    }
+  ],
+  "bar_contract": {
+    "output_bar": "5m",
+    "timezone": "UTC",
+    "time_column": "time",
+    "time_unit": "epoch_milliseconds",
+    "time_semantics": "open time of the five-minute bar",
+    "expected_rows_per_symbol_hour": 12,
+    "group_policy": "If any five-minute bar is absent, unconfirmed, invalid, or fails the H1 OHLC check, omit all twelve rows for that symbol-hour and record the reason in acquisition_audit.csv.",
+    "h1_validation": "Aggregate 12 five-minute OHLC rows and compare with native OKX 1H history-candles. LRC uses official 2025-11 1m archive aggregation plus an independent local OKX 15m cross-check because its history-candles instrument id returns 51001."
+  },
+  "sources": {
+    "history_candles_api": "https://www.okx.com/api/v5/market/history-candles",
+    "api_bars": [
+      "5m",
+      "1H"
+    ],
+    "api_request_contract": "Use instId=<symbol>-USDT-SWAP, after=<exclusive window end in UTC epoch ms>, and filter rows to [window start, window end). Keep only confirm=1.",
+    "lrc_1m_archive_template": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202511/LRC-USDT-SWAP-candlesticks-2025-11.zip?v=999",
+    "lrc_local_15m_crosscheck": "data/crypto/market/kline_fetched/okx_LRC_USDT_SWAP_15m_39172.csv"
+  },
+  "expected_coverage": {
+    "symbol_hour_groups": 43,
+    "five_minute_rows": 516
+  },
+  "outputs": {
+    "quotes_csv": "data/research/cloud_close_drawdown_bounds_20261109/quotes.csv",
+    "quotes_columns": [
+      "symbol",
+      "time",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "audit_csv": "data/research/cloud_close_drawdown_bounds_20261109/acquisition_audit.csv"
+  },
+  "builder": "python3 -m yoyo.evaluation.cloud_close_drawdown_quotes --fetch",
+  "evaluation": "Revalue only the frozen 2/3 partial funded holdings in the four H1 troughs exceeding the historic 35% bound and their single binding H1 peak. Use synchronous 5m OHLC, retain both frozen fill and holding marks in any stop-crossing 5m bar, keep native H1 extremes for any missing ticker-hour. Leave all other historical bounds and all fills unchanged. Compare with 35% and disclose hourly and 5m conservative bounds.",
+  "evaluation_runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_drawdown_bounds"
+}
