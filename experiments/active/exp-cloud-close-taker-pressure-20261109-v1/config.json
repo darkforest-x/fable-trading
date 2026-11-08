@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "id": "exp-cloud-close-taker-pressure-20261109-v1",
+  "question": "Within a fixed 12-major historical flow-coverage panel, does a V1.7 cloud 12H recovery perform differently when the completed key candle has a majority of Binance USD-M taker flow against the signal side?",
+  "single_factor": "The sole screen is strict side-adjusted native taker imbalance < 0 at the completed 12H key candle. No thresholds, bar windows, entries, stops, targets, or account rules are searched.",
+  "universe": {
+    "symbols": [
+      "BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "ADA", "AVAX", "LINK", "LTC", "DOT", "TRX"
+    ],
+    "venue": "Binance USD-M",
+    "bar_interval": "15m",
+    "common_archive_months": ["2022-09", "2026-09"],
+    "common_event_window_utc": {
+      "start_inclusive": "2022-09-01T00:00:00Z",
+      "end_exclusive": "2026-10-01T00:00:00Z",
+      "rule": "The full 12H key must lie inside this interval; the final confirmation may equal the exclusive end because its last native 15m bar closes then."
+    },
+    "data_root": "experiments/active/exp-monday-1618-flow-20261023-v1/inputs/klines15m",
+    "loader": "yoyo.evaluation.monday_1618_flow.klines; reads raw Vision monthly kline ZIPs only, with no OHLCV fallback"
+  },
+  "factor": {
+    "raw_fields": {
+      "total_volume": "Binance native 15m kline base-asset volume",
+      "taker_buy_volume": "Binance native 15m kline taker-buy base-asset volume"
+    },
+    "formula": "imbalance=(2*sum(taker_buy_volume)-sum(total_volume))/sum(total_volume); qualify iff side*imbalance<0",
+    "window": "Exactly 48 continuous UTC 15m bars in [key_open_ms, confirmation_ms); the final bar closes exactly at confirmation_ms.",
+    "actual_clock": "For each Binance signal, use its own entry_ms as confirmation and entry_ms-12h as the key open.",
+    "control_clock": "For each matched Binance control, use its own entry_ms as confirmation and entry_ms-12h as the key open; never reuse its parent's signal clock.",
+    "invalid_windows": [
+      "missing or non-contiguous 15m bars",
+      "unknown/nonfinite native flow",
+      "negative flow",
+      "zero aggregate base volume",
+      "taker-buy base volume above total base volume"
+    ],
+    "invalid_data_policy": "Retain in the event screen with an explicit flow_status; never qualify. No proxy or imputation."
+  },
+  "parent_paths": {
+    "source": "cloud_close_binance_gap_repair.assembled(set(cloud_close_binance_gap_repair.patch.affected_tickers()))",
+    "eligibility": "Corrected Binance native 12H V1.7 paths with numeric rank eligibility at each event's own time; the existing runner preserves low prior ATR entry priority.",
+    "source_join": "Signals use their frozen event_id and parent_id; matched controls share the parent_id but each has its own entry_ms confirmation clock.",
+    "path_legs": [0, 2],
+    "path_rule": "Reuse the corrected Binance executed paths, quotes, stops, fees, exits, and per-event two-leg identities. No new fill simulator."
+  },
+  "account": {
+    "starting_equity_usdt": 1000,
+    "slots": 9,
+    "entry_priority": "low_prior_atr",
+    "two_leg_split": "2/3 exits at the original 2R resting limit; 1/3 follows the original cloud exit",
+    "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_taker_pressure",
+    "adapter": "cloud_close_volatility_expansion.fund('Binance') -> corrected Binance quotes -> cloud_close_scaleout.simulate -> VectorBT"
+  },
+  "fees_and_gates": {
+    "frozen_path_taker_fee_per_fill": 0.0005,
+    "frozen_path_resting_maker_fee_per_fill": 0.0002,
+    "additional_slippage": 0,
+    "development_period": "entry before 2025-01-01T00:00:00Z",
+    "gates": {
+      "win_pct_min": 30,
+      "payoff_min": 2.5,
+      "payoff_usdt_min": 2.5,
+      "dd_bound_pct_max": 35,
+      "trades_min": 100
+    },
+    "gate_application": "Report dev and all-period gates for the factor cohort and its flow-available actual baseline; no candidate tuning or deployment."
+  },
+  "comparisons": {
+    "flow_available_baseline": "Actual events in the common complete 12-major Binance observation window with a valid 48-bar native flow window, independent of imbalance direction.",
+    "paired_coverage_baseline": "Actual and matched-control events only where both independently have valid flow windows.",
+    "factor_actual": "Actual events with valid flow and side*imbalance<0.",
+    "factor_controls": "Matched controls are screened on their own key candle and own entry_ms confirmation clock; their parent actual must have valid flow coverage.",
+    "paired_factor_comparison": "Restrict both actual and control accounts to parents where each independently passes the factor; count and report unmatched pairs."
+  },
+  "outputs": {
+    "event_screen": "experiments/active/exp-cloud-close-taker-pressure-20261109-v1/event_flow_screen.csv.gz",
+    "monthly_coverage": "experiments/active/exp-cloud-close-taker-pressure-20261109-v1/flow_coverage_by_symbol_month.csv",
+    "account_metrics": "experiments/active/exp-cloud-close-taker-pressure-20261109-v1/account_metrics.csv",
+    "audit": "experiments/active/exp-cloud-close-taker-pressure-20261109-v1/audit.json",
+    "summary": "experiments/active/exp-cloud-close-taker-pressure-20261109-v1/summary.json"
+  },
+  "execution": {
+    "official_run": "Only after builder and config are committed: /Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_taker_pressure",
+    "mini_contract": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_taker_pressure --self-check",
+    "no_other_changes": true,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
