@@ -94,8 +94,8 @@ def run():
             funded_n=len(q),funded_win_pct=100*q.gt(0).mean(),funded_mean_pct=q.mean(),
             funded_growth_pct=100*((1+q/100).prod()-1) if full else np.nan,
             stressed_growth_pct=100*((1+(q-.2)/100).prod()-1) if full else np.nan,matched_events=len(paired),
-            matched_edge_pp=paired.paired_delta_pp.mean(),monthly_p=chosen.at[rule,'p_month_2026_vs_random'] if rule in chosen.index else np.nan,
-            family_holm_p=chosen.at[rule,'p_holm_2026_vs_random'] if rule in chosen.index else np.nan,
+            matched_edge_pp=paired.paired_delta_pp.mean(),monthly_p=chosen.at[rule,'p_month_2026_vs_random_funded_net'] if rule in chosen.index else np.nan,
+            family_holm_p=chosen.at[rule,'p_holm_2026_vs_random_funded_net'] if rule in chosen.index else np.nan,
             cost_and_scope='full-member funded actual results; compound only with complete event coverage; random requires >=80% matched members')]))
     result=pd.concat(rows,ignore_index=True)
     order=['family','rule','events','full_history_entries','funded_n','funded_win_pct','funded_mean_pct','funded_growth_pct',
