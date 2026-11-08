@@ -1,0 +1,59 @@
+{
+  "frozen_signal_exit": "75% at 2R, 25% V1.7 runner",
+  "periods": {
+    "all": {
+      "n_pairs": 10816,
+      "nonempty_signal_weeks": 328,
+      "mean_net_signal_pct": 0.6418208288629949,
+      "mean_net_control_pct": 0.3911499403758407,
+      "difference_pp": 0.2506708884871541,
+      "paired_difference_95pct_interval_pp": [
+        -0.16320276335457895,
+        0.6669384289982627
+      ],
+      "funded_top5_profit_usdt": 2050.7470141470053,
+      "sum_funded_closed_pnl_usdt": 5219.838934340021
+    },
+    "dev": {
+      "n_pairs": 4889,
+      "nonempty_signal_weeks": 232,
+      "mean_net_signal_pct": 0.7543747754610689,
+      "mean_net_control_pct": 0.14965684924248726,
+      "difference_pp": 0.6047179262185817,
+      "paired_difference_95pct_interval_pp": [
+        0.05436923909554707,
+        1.2274671495250706
+      ],
+      "funded_top5_profit_usdt": 1987.591309973457,
+      "sum_funded_closed_pnl_usdt": 4080.734112223603
+    },
+    "2025": {
+      "n_pairs": 2006,
+      "nonempty_signal_weeks": 51,
+      "mean_net_signal_pct": -0.44652024314430666,
+      "mean_net_control_pct": -0.19265152079903755,
+      "difference_pp": -0.2538687223452691,
+      "paired_difference_95pct_interval_pp": [
+        -1.1023834619800041,
+        0.653988749297028
+      ],
+      "funded_top5_profit_usdt": 896.4370082989049,
+      "sum_funded_closed_pnl_usdt": -953.0538303162184
+    },
+    "2026": {
+      "n_pairs": 3566,
+      "nonempty_signal_weeks": 45,
+      "mean_net_signal_pct": 0.4788065544798182,
+      "mean_net_control_pct": 0.3528503734648613,
+      "difference_pp": 0.12595618101495692,
+      "paired_difference_95pct_interval_pp": [
+        -0.6233301537711547,
+        0.7600987308040175
+      ],
+      "funded_top5_profit_usdt": 701.9237661912975,
+      "sum_funded_closed_pnl_usdt": 796.9878225883185
+    }
+  },
+  "interval": "5000 circular resamples of four NY weeks; no adjustment for prior strategy selection; individual event returns, not account NAV.",
+  "sample": "Only pairs with both trades complete in the period. Parent timestamps determine week membership."
+}

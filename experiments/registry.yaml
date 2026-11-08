@@ -15,6 +15,51 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-pyramid-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "07d2e6c569"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Maximum same-contract positions after a fresh original 12H close while every existing position is profitable; nine total slots."
+    result: "Development chose no additions. The full-sample two-position arm reached 6547.12U, 33.57% wins, 2.98 payoff by return / 2.60 by money, DD upper bound 30.44% on 1519 paid positions, 91 additions. No target pass."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-pyramid-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af811893cce93075616516."
+
+  - experiment_id: exp-cloud-close-wick-timing-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "e7ec1b1dee"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Within the closed key, distinguish 0-1, 2-5 or 6-11 hours since the last hourly wick strictly crossed the touched extension."
+    result: "All 11780 eligible parents have complete wick timing. No screen exceeded the parent. Latest-to-earliest bins ended at 2376.10, 2869.70 and 4281.83U. Earliest group: 36.46% wins, 2.464 payoff, DD bound 27.56%."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-wick-timing-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af8119b3b2ff096ddf01d0."
+
+  - experiment_id: exp-cloud-close-risk-budget-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "2218af7533"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Initial notional multiplied by the clipped inverse of actual open-to-stop risk at exponents 0/0.5/1/1.5 within prepaid aggregate capital."
+    result: "Development retained equal sizing. With 1569 unchanged positions, terminal wealth fell from 6219.84U to 5890.73, 5577.37 and 5311.10U as sensitivity increased. Half strength reduced DD bound to 29.38% versus base 30.05%."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-risk-budget-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af8136a1c1d9ad444310f8."
+
   - experiment_id: exp-cloud-close-leadership-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "5befa339c9"
