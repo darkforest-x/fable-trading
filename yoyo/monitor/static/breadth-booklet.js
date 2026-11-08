@@ -17,7 +17,7 @@
   const epochYear = row => row.entry_time.slice(0,4);
   const branch = row => row.asset === 'ALT' ? 'ALT' : row.source;
   const held = row => number((Date.parse(row.exit_time)-Date.parse(row.entry_time))/3600000,1) + 'h';
-  const table = (heads, rows) => '<div class="bb-scroll"><table><thead><tr>' + heads.map(h=>'<th scope="col">'+esc(h)+'</th>').join('') + '</tr></thead><tbody>' + rows.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('') + '</tbody></table></div>';
+  const table = (heads, rows, linkPeriod=false) => '<div class="bb-scroll"><table><thead><tr>' + heads.map(h=>'<th scope="col">'+esc(h)+'</th>').join('') + '</tr></thead><tbody>' + rows.map(row=>'<tr>'+row.map((v,i)=>'<td>'+(linkPeriod && i===0?'<button class="bb-period-link" data-period="'+esc(v)+'" aria-label="查看 '+esc(v)+' 的历史开仓">'+esc(v)+'</button>':esc(v))+'</td>').join('')+'</tr>').join('') + '</tbody></table></div>';
   const tile = (label,value) => '<div class="bb-tile"><small>'+esc(label)+'</small><b>'+esc(value)+'</b></div>';
   const panel = (title,body) => '<section class="bb-panel"><h3>'+esc(title)+'</h3>'+body+'</section>';
   const note = text => '<p class="bb-note">'+esc(text)+'</p>';
@@ -44,7 +44,7 @@
   let current = null;
   function open({origin=null, standalone=false, tab='history', eventId=null}={}) {
     if (current) return;
-    let data, entries=[], chosen=null, chosenSymbol='', section=PAGES[tab]?tab:'history', year='all', kind='all', page=0, scope='2026_actual_funded';
+    let data, entries=[], chosen=null, chosenSymbol='', section=Object.hasOwn(PAGES,tab)?tab:'history', year='all', kind='all', page=0, scope='2026_actual_funded';
     let plot=null, chartRequest=null, catalog=null, block=null, busyId=0;
     const lifetime=new AbortController();
     const root = standalone ? document.getElementById('breadth-standalone') : document.createElement('dialog');
@@ -67,7 +67,7 @@
       else (document.querySelector('.sa-trigger') && origin?.closest('#spike-alarm-dock') ? document.querySelector('.sa-trigger') : document.querySelector('[aria-label="选择策略"]'))?.focus({preventScroll:true});
     }
     const nav=()=>root.querySelectorAll('[data-page]').forEach(b=>b.setAttribute('aria-current',b.dataset.page===section?'page':'false'));
-    function filtered() {return entries.filter(e=>(year==='all'||epochYear(e)===year)&&(kind==='all'||branch(e)===kind));}
+    function filtered() {return entries.filter(e=>(year==='all'||e.entry_time.startsWith(year))&&(kind==='all'||branch(e)===kind));}
     function setUrl() {
       if(!standalone)return;
       const u=new URL(location.href);u.searchParams.set('tab',section);
@@ -83,7 +83,9 @@
       const pages=Math.max(1,Math.ceil(rows.length/LIMIT));
       const shown=rows.slice(page*LIMIT,(page+1)*LIMIT);
       const years=[...new Set(entries.map(epochYear))];
-      const list='<div class="bb-filter"><label>年份（UTC）<select data-field="year">'+options([['all','全部年份'],...years.map(y=>[y,y])],year)+'</select></label><label>入场类型<select data-field="kind">'+options([['all','全部类型'],...Object.entries(NAMES)],kind)+'</select></label><button type="button" class="bb-case" data-action="case">9/16 BTC 案例</button></div>'+
+      const periods=[['all','全部年份'],...years.map(y=>[y,y])];
+      if(year.length===7)periods.push([year,year]);
+      const list='<div class="bb-filter"><label>区间（UTC）<select data-field="year">'+options(periods,year)+'</select></label><label>入场类型<select data-field="kind">'+options([['all','全部类型'],...Object.entries(NAMES)],kind)+'</select></label><button type="button" class="bb-case" data-action="case">9/16 BTC 案例</button></div>'+
         '<table class="bb-trades"><thead><tr><th>开仓 · 北京时间</th><th>类型</th><th>净收益</th></tr></thead><tbody>'+shown.map(e=>{const when=bjt(e.entry_time),v=actual(e);return '<tr data-id="'+esc(e.event_id)+'" aria-current="'+(e===chosen)+'"><td><button class="bb-open-event" type="button" aria-label="查看 '+esc(when+' '+NAMES[branch(e)])+' 开仓图">'+when.slice(0,10)+'<small>'+when.slice(11)+'</small></button></td><td>'+NAMES[branch(e)]+'<small>'+held(e)+'</small></td><td class="'+tone(v)+'">'+pct(v)+'</td></tr>';}).join('')+'</tbody></table>'+
         (!shown.length?'<p role="status">此条件没有历史入场。</p>':'')+'<div class="bb-pager"><button data-action="prev" '+(!page?'disabled':'')+'>上一页</button><span>'+rows.length+' 笔 · '+(page+1)+' / '+pages+'</span><button data-action="next" '+(page>=pages-1?'disabled':'')+'>下一页</button></div>';
       return '<div class="bb-ledger"><section class="bb-panel"><h2>历史开仓</h2>'+list+note('每行是一笔 BTC 或一次篮子入场。2026 年含资金费，其余年份仅扣手续费。')+'</section><section class="bb-panel bb-detail" aria-label="历史开仓图"><div data-detail></div></section></div>';
@@ -117,8 +119,8 @@
         '<div class="bb-chart-grid">'+panel('结算净值 · 初始 1,000 USDT','<div data-equity class="bb-equity"></div>'+note('曲线按已退出事件结算，两边各从 500 USDT 独立复利。上方最大回撤采用同步 5 分钟盯市。'))+
         panel('按入场类型',table(['类型','入场数','胜率','笔均净收益'],sizes)+note('篮子成员等权，一篮计一笔。笔均净收益与组合复利收益分别计算。'))+'</div>'+
         panel('加 EMA20 条件前后',table(['组合','入场数','组合净收益','最大回撤'],[['原组合',base.event_count,pct(base.growth_pct),pct(base.max_drawdown_pct,false)],['普通 BTC 加 4H EMA20',s.event_count,pct(s.growth_pct),pct(s.max_drawdown_pct,false)]])+note('在所选区间内，对新组合每笔额外扣 0.20 个百分点的往返成本，净收益为 '+pct(stress.growth_pct)+'，最大回撤为 '+pct(stress.max_drawdown_pct,false)+'。'))+
-        panel('逐年表现',table(['UTC 年','入场数','BTC','山寨篮子','年度收益'],years)+note('每年重新等额分配，统一只扣手续费。2026 年统计截至 10 月 27 日 UTC，已入场持仓继续跟踪至退出。'))+
-        '<details class="bb-panel bb-details"><summary>查看所选区间的逐月入场统计</summary>'+table(['UTC 月','入场数','盈利笔数','胜率','笔均净收益'],monthRows)+'</details>'+
+        panel('逐年表现',table(['UTC 年','入场数','BTC','山寨篮子','年度收益'],years,true)+note('每年重新等额分配，统一只扣手续费。2026 年统计截至 10 月 27 日 UTC，已入场持仓继续跟踪至退出。'))+
+        '<details class="bb-panel bb-details"><summary>查看所选区间的逐月入场统计</summary>'+table(['UTC 月','入场数','盈利笔数','胜率','笔均净收益'],monthRows,true)+'</details>'+
         (control?panel('2026 匹配随机入场对照',note(control.matched+' / '+control.total+' 次有可比入场，覆盖 '+control.matched_months+' 个月。两组笔均收益相差 '+number(control.edge_pp,3)+' 个百分点，按月检验 p = '+number(control.p_month,3)+'。急跌 BTC 的可匹配样本为 '+control.case_matched+'。')):'')+
         panel('核算口径',note((funded?'本区间计入实际资金费。':'全历史按手续费后、资金费前统计。')+'以收盘盯市计算最大回撤，按入场事件的净收益是否大于零计算胜率。2026 年行情曾参与研究和案例选择。'))+'</div>';
     }
@@ -252,6 +254,10 @@
       if(action==='retry'){load();return;}
       if(btn?.dataset.page){section=btn.dataset.page;render();return;}
       if(!data)return;
+      if(btn?.dataset.period){
+        year=btn.dataset.period;kind='all';page=0;chosen=null;block=null;chosenSymbol='';section='history';render();
+        body.querySelector('.bb-open-event')?.focus({preventScroll:true});return;
+      }
       if(action==='retry-chart'){detail();return;}
       const row=event.target.closest('[data-id]');
       if(row || action==='case'){
