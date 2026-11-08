@@ -1,0 +1,579 @@
+{
+  "experiment": "/Users/zhangzc/fable-trading/experiments/active/exp-cloud-allmarket-screen-20261108-v1",
+  "input": "/Users/zhangzc/fable-trading/experiments/active/exp-cloud-allmarket-screen-20261108-v1/signals.csv",
+  "input_sha256": "983ee19d4be76673258f738943d44725fa0afbd1af4f05d1b3be11ad3720abef",
+  "input_rows": 12707,
+  "input_status": {
+    "input_status_counts": {
+      "miss": 10392,
+      "hit": 2080,
+      "censored": 229,
+      "possible": 6
+    },
+    "exit_reason_counts": {
+      "stop": 8467,
+      "cloud_flip": 3963,
+      "open": 276,
+      "gap": 1
+    },
+    "early_stop_two_bar_labels": {
+      "False": 9118,
+      "True": 3586,
+      "<NA>": 3
+    },
+    "early_stop_pre10_labels": {
+      "False": 9118,
+      "True": 3583,
+      "<NA>": 6
+    }
+  },
+  "training_thresholds": {
+    "close_distance_r_high": {
+      "rule": {
+        "id": "close_distance_r_high",
+        "feature": "close_distance_r",
+        "keep": "ge_q33",
+        "label": "确认距离R较高",
+        "kind": "continuous"
+      },
+      "threshold": 0.3476400363291413,
+      "training_n": 5029,
+      "training_median": 0.5829938286388381,
+      "quantile": 0.3333333333333333,
+      "quantile_value": 0.3476400363291413
+    },
+    "prior_atr_pct_low": {
+      "rule": {
+        "id": "prior_atr_pct_low",
+        "feature": "prior_atr_pct",
+        "keep": "le_q67",
+        "label": "确认前ATR百分比较低",
+        "kind": "continuous"
+      },
+      "threshold": 6.919274082440899,
+      "training_n": 5029,
+      "training_median": 5.860210079295155,
+      "quantile": 0.6666666666666666,
+      "quantile_value": 6.919274082440899
+    },
+    "trend_eff_14_high": {
+      "rule": {
+        "id": "trend_eff_14_high",
+        "feature": "trend_eff_14",
+        "keep": "ge_q33",
+        "label": "14期趋势效率较高",
+        "kind": "continuous"
+      },
+      "threshold": -0.13527066607506652,
+      "training_n": 5029,
+      "training_median": -0.0150228128841968,
+      "quantile": 0.3333333333333333,
+      "quantile_value": -0.13527066607506652
+    },
+    "btc_same_side_true": {
+      "rule": {
+        "id": "btc_same_side_true",
+        "feature": "btc_same_side",
+        "keep": "true",
+        "label": "与BTC同向",
+        "kind": "boolean"
+      },
+      "threshold": true,
+      "training_n": 5029,
+      "training_median": null,
+      "quantile": null,
+      "quantile_value": null
+    },
+    "rel_strength_14_high": {
+      "rule": {
+        "id": "rel_strength_14_high",
+        "feature": "rel_strength_14",
+        "keep": "ge_q33",
+        "label": "14期相对BTC强度较高",
+        "kind": "continuous"
+      },
+      "threshold": -0.03531067245170761,
+      "training_n": 5029,
+      "training_median": -0.0011632602955167,
+      "quantile": 0.3333333333333333,
+      "quantile_value": -0.03531067245170761
+    },
+    "atr_expansion_high": {
+      "rule": {
+        "id": "atr_expansion_high",
+        "feature": "atr_expansion",
+        "keep": "ge_q33",
+        "label": "波动扩张较高",
+        "kind": "continuous"
+      },
+      "threshold": 0.8571706794988072,
+      "training_n": 4946,
+      "training_median": 0.9486986447408796,
+      "quantile": 0.3333333333333333,
+      "quantile_value": 0.8571706794988072
+    },
+    "ema_spread_atr_high": {
+      "rule": {
+        "id": "ema_spread_atr_high",
+        "feature": "ema_spread_atr",
+        "keep": "ge_q33",
+        "label": "EMA分离较高",
+        "kind": "continuous"
+      },
+      "threshold": 0.4718241931473948,
+      "training_n": 5029,
+      "training_median": 0.7267428173814078,
+      "quantile": 0.3333333333333333,
+      "quantile_value": 0.4718241931473948
+    },
+    "prior_stop_rate_6_low": {
+      "rule": {
+        "id": "prior_stop_rate_6_low",
+        "feature": "prior_stop_rate_6",
+        "keep": "le_q67",
+        "label": "本币近六笔历史止损率较低",
+        "kind": "continuous"
+      },
+      "threshold": 0.8333333333333334,
+      "training_n": 4617,
+      "training_median": 0.6666666666666666,
+      "quantile": 0.6666666666666666,
+      "quantile_value": 0.8333333333333334
+    }
+  },
+  "frozen_decision": {
+    "primary_cohort": "altcoins where was_top20=false; BTC and ETH excluded",
+    "label_cutoff": "Only paths whose exit bar closed by 2025-01-01 00:00 BJT are development labels; confirmed year <= 2024; only definite hit/miss outcomes.",
+    "rule_count": 8,
+    "candidate_rule_id": "close_distance_r_high",
+    "candidate_rule": {
+      "id": "close_distance_r_high",
+      "feature": "close_distance_r",
+      "keep": "ge_q33",
+      "label": "确认距离R较高",
+      "kind": "continuous"
+    },
+    "candidate_threshold": 0.3476400363291413,
+    "candidate_admitted": true,
+    "candidate_status": "admitted_from_development",
+    "candidate_development_metrics": {
+      "winner_recall": 0.8196531791907514,
+      "early_stop_count_reduction": 0.4418118466898955,
+      "candidate_early_stop_rate_pct": 24.061279663562633,
+      "baseline_early_stop_rate_pct": 28.68279032580452,
+      "matched_early_stop_rate_pct": 28.860366608851407,
+      "early_stop_rate_delta_vs_baseline_pp": -4.621510662241885,
+      "early_rate_beats_random": true,
+      "early_rate_below_baseline": true,
+      "early_stop_n_removed": 634,
+      "false_drop_winner_n": 156,
+      "candidate_signals_n": 3329,
+      "candidate_early_stop_assessable_n": 3329,
+      "baseline_early_stop_n": 1435,
+      "baseline_winner_n": 865,
+      "candidate_weeks_n": 237
+    },
+    "candidate_development_gate": {
+      "checks": {
+        "retain_at_least_70pct_winners": true,
+        "remove_at_least_30pct_early_stop_count": true,
+        "early_stop_rate_below_matched_random": true,
+        "early_stop_rate_below_unfiltered_baseline": true,
+        "minimum_development_support": true
+      },
+      "passed": true,
+      "failed": []
+    },
+    "fallback_order": "If no rule passes, rank by most development gates passed, smallest combined gate deficit, largest early-stop count reduction, highest winner recall, then stable rule ID.",
+    "all_rules_development": [
+      {
+        "rule_id": "close_distance_r_high",
+        "rule_label": "确认距离R较高",
+        "rule": {
+          "id": "close_distance_r_high",
+          "feature": "close_distance_r",
+          "keep": "ge_q33",
+          "label": "确认距离R较高",
+          "kind": "continuous"
+        },
+        "threshold": 0.3476400363291413,
+        "threshold_training_median": 0.5829938286388381,
+        "threshold_training_n": 5029,
+        "development_metrics": {
+          "winner_recall": 0.8196531791907514,
+          "early_stop_count_reduction": 0.4418118466898955,
+          "candidate_early_stop_rate_pct": 24.061279663562633,
+          "baseline_early_stop_rate_pct": 28.68279032580452,
+          "matched_early_stop_rate_pct": 28.860366608851407,
+          "early_stop_rate_delta_vs_baseline_pp": -4.621510662241885,
+          "early_rate_beats_random": true,
+          "early_rate_below_baseline": true,
+          "early_stop_n_removed": 634,
+          "false_drop_winner_n": 156,
+          "candidate_signals_n": 3329,
+          "candidate_early_stop_assessable_n": 3329,
+          "baseline_early_stop_n": 1435,
+          "baseline_winner_n": 865,
+          "candidate_weeks_n": 237
+        },
+        "gate": {
+          "checks": {
+            "retain_at_least_70pct_winners": true,
+            "remove_at_least_30pct_early_stop_count": true,
+            "early_stop_rate_below_matched_random": true,
+            "early_stop_rate_below_unfiltered_baseline": true,
+            "minimum_development_support": true
+          },
+          "passed": true,
+          "failed": []
+        }
+      },
+      {
+        "rule_id": "prior_atr_pct_low",
+        "rule_label": "确认前ATR百分比较低",
+        "rule": {
+          "id": "prior_atr_pct_low",
+          "feature": "prior_atr_pct",
+          "keep": "le_q67",
+          "label": "确认前ATR百分比较低",
+          "kind": "continuous"
+        },
+        "threshold": 6.919274082440899,
+        "threshold_training_median": 5.860210079295155,
+        "threshold_training_n": 5029,
+        "development_metrics": {
+          "winner_recall": 0.6265895953757226,
+          "early_stop_count_reduction": 0.43066202090592337,
+          "candidate_early_stop_rate_pct": 24.39534189310242,
+          "baseline_early_stop_rate_pct": 28.68279032580452,
+          "matched_early_stop_rate_pct": 25.81591724083776,
+          "early_stop_rate_delta_vs_baseline_pp": -4.287448432702099,
+          "early_rate_beats_random": true,
+          "early_rate_below_baseline": true,
+          "early_stop_n_removed": 618,
+          "false_drop_winner_n": 323,
+          "candidate_signals_n": 3349,
+          "candidate_early_stop_assessable_n": 3349,
+          "baseline_early_stop_n": 1435,
+          "baseline_winner_n": 865,
+          "candidate_weeks_n": 214
+        },
+        "gate": {
+          "checks": {
+            "retain_at_least_70pct_winners": false,
+            "remove_at_least_30pct_early_stop_count": true,
+            "early_stop_rate_below_matched_random": true,
+            "early_stop_rate_below_unfiltered_baseline": true,
+            "minimum_development_support": true
+          },
+          "passed": false,
+          "failed": [
+            "retain_at_least_70pct_winners"
+          ]
+        }
+      },
+      {
+        "rule_id": "trend_eff_14_high",
+        "rule_label": "14期趋势效率较高",
+        "rule": {
+          "id": "trend_eff_14_high",
+          "feature": "trend_eff_14",
+          "keep": "ge_q33",
+          "label": "14期趋势效率较高",
+          "kind": "continuous"
+        },
+        "threshold": -0.13527066607506652,
+        "threshold_training_median": -0.0150228128841968,
+        "threshold_training_n": 5029,
+        "development_metrics": {
+          "winner_recall": 0.738728323699422,
+          "early_stop_count_reduction": 0.3254355400696864,
+          "candidate_early_stop_rate_pct": 29.08653846153846,
+          "baseline_early_stop_rate_pct": 28.68279032580452,
+          "matched_early_stop_rate_pct": 28.740157963834967,
+          "early_stop_rate_delta_vs_baseline_pp": 0.40374813573394164,
+          "early_rate_beats_random": false,
+          "early_rate_below_baseline": false,
+          "early_stop_n_removed": 467,
+          "false_drop_winner_n": 226,
+          "candidate_signals_n": 3328,
+          "candidate_early_stop_assessable_n": 3328,
+          "baseline_early_stop_n": 1435,
+          "baseline_winner_n": 865,
+          "candidate_weeks_n": 236
+        },
+        "gate": {
+          "checks": {
+            "retain_at_least_70pct_winners": true,
+            "remove_at_least_30pct_early_stop_count": true,
+            "early_stop_rate_below_matched_random": false,
+            "early_stop_rate_below_unfiltered_baseline": false,
+            "minimum_development_support": true
+          },
+          "passed": false,
+          "failed": [
+            "early_stop_rate_below_matched_random",
+            "early_stop_rate_below_unfiltered_baseline"
+          ]
+        }
+      },
+      {
+        "rule_id": "btc_same_side_true",
+        "rule_label": "与BTC同向",
+        "rule": {
+          "id": "btc_same_side_true",
+          "feature": "btc_same_side",
+          "keep": "true",
+          "label": "与BTC同向",
+          "kind": "boolean"
+        },
+        "threshold": true,
+        "threshold_training_median": null,
+        "threshold_training_n": 5029,
+        "development_metrics": {
+          "winner_recall": 0.8497109826589595,
+          "early_stop_count_reduction": 0.2264808362369338,
+          "candidate_early_stop_rate_pct": 28.734144447320734,
+          "baseline_early_stop_rate_pct": 28.68279032580452,
+          "matched_early_stop_rate_pct": 28.793608546810116,
+          "early_stop_rate_delta_vs_baseline_pp": 0.051354121516215656,
+          "early_rate_beats_random": true,
+          "early_rate_below_baseline": false,
+          "early_stop_n_removed": 325,
+          "false_drop_winner_n": 130,
+          "candidate_signals_n": 3863,
+          "candidate_early_stop_assessable_n": 3863,
+          "baseline_early_stop_n": 1435,
+          "baseline_winner_n": 865,
+          "candidate_weeks_n": 217
+        },
+        "gate": {
+          "checks": {
+            "retain_at_least_70pct_winners": true,
+            "remove_at_least_30pct_early_stop_count": false,
+            "early_stop_rate_below_matched_random": true,
+            "early_stop_rate_below_unfiltered_baseline": false,
+            "minimum_development_support": true
+          },
+          "passed": false,
+          "failed": [
+            "remove_at_least_30pct_early_stop_count",
+            "early_stop_rate_below_unfiltered_baseline"
+          ]
+        }
+      },
+      {
+        "rule_id": "rel_strength_14_high",
+        "rule_label": "14期相对BTC强度较高",
+        "rule": {
+          "id": "rel_strength_14_high",
+          "feature": "rel_strength_14",
+          "keep": "ge_q33",
+          "label": "14期相对BTC强度较高",
+          "kind": "continuous"
+        },
+        "threshold": -0.03531067245170761,
+        "threshold_training_median": -0.0011632602955167,
+        "threshold_training_n": 5029,
+        "development_metrics": {
+          "winner_recall": 0.6820809248554913,
+          "early_stop_count_reduction": 0.33170731707317075,
+          "candidate_early_stop_rate_pct": 28.764247150569886,
+          "baseline_early_stop_rate_pct": 28.68279032580452,
+          "matched_early_stop_rate_pct": 27.890012771867283,
+          "early_stop_rate_delta_vs_baseline_pp": 0.0814568247653682,
+          "early_rate_beats_random": false,
+          "early_rate_below_baseline": false,
+          "early_stop_n_removed": 476,
+          "false_drop_winner_n": 275,
+          "candidate_signals_n": 3334,
+          "candidate_early_stop_assessable_n": 3334,
+          "baseline_early_stop_n": 1435,
+          "baseline_winner_n": 865,
+          "candidate_weeks_n": 237
+        },
+        "gate": {
+          "checks": {
+            "retain_at_least_70pct_winners": false,
+            "remove_at_least_30pct_early_stop_count": true,
+            "early_stop_rate_below_matched_random": false,
+            "early_stop_rate_below_unfiltered_baseline": false,
+            "minimum_development_support": true
+          },
+          "passed": false,
+          "failed": [
+            "retain_at_least_70pct_winners",
+            "early_stop_rate_below_matched_random",
+            "early_stop_rate_below_unfiltered_baseline"
+          ]
+        }
+      },
+      {
+        "rule_id": "atr_expansion_high",
+        "rule_label": "波动扩张较高",
+        "rule": {
+          "id": "atr_expansion_high",
+          "feature": "atr_expansion",
+          "keep": "ge_q33",
+          "label": "波动扩张较高",
+          "kind": "continuous"
+        },
+        "threshold": 0.8571706794988072,
+        "threshold_training_median": 0.9486986447408796,
+        "threshold_training_n": 4946,
+        "development_metrics": {
+          "winner_recall": 0.7421965317919075,
+          "early_stop_count_reduction": 0.32613240418118467,
+          "candidate_early_stop_rate_pct": 28.779761904761905,
+          "baseline_early_stop_rate_pct": 28.68279032580452,
+          "matched_early_stop_rate_pct": 29.043417806613707,
+          "early_stop_rate_delta_vs_baseline_pp": 0.09697157895738684,
+          "early_rate_beats_random": true,
+          "early_rate_below_baseline": false,
+          "early_stop_n_removed": 468,
+          "false_drop_winner_n": 223,
+          "candidate_signals_n": 3360,
+          "candidate_early_stop_assessable_n": 3360,
+          "baseline_early_stop_n": 1435,
+          "baseline_winner_n": 865,
+          "candidate_weeks_n": 235
+        },
+        "gate": {
+          "checks": {
+            "retain_at_least_70pct_winners": true,
+            "remove_at_least_30pct_early_stop_count": true,
+            "early_stop_rate_below_matched_random": true,
+            "early_stop_rate_below_unfiltered_baseline": false,
+            "minimum_development_support": true
+          },
+          "passed": false,
+          "failed": [
+            "early_stop_rate_below_unfiltered_baseline"
+          ]
+        }
+      },
+      {
+        "rule_id": "ema_spread_atr_high",
+        "rule_label": "EMA分离较高",
+        "rule": {
+          "id": "ema_spread_atr_high",
+          "feature": "ema_spread_atr",
+          "keep": "ge_q33",
+          "label": "EMA分离较高",
+          "kind": "continuous"
+        },
+        "threshold": 0.4718241931473948,
+        "threshold_training_median": 0.7267428173814078,
+        "threshold_training_n": 5029,
+        "development_metrics": {
+          "winner_recall": 0.7745664739884393,
+          "early_stop_count_reduction": 0.3073170731707317,
+          "candidate_early_stop_rate_pct": 29.796163069544363,
+          "baseline_early_stop_rate_pct": 28.68279032580452,
+          "matched_early_stop_rate_pct": 28.630838505137596,
+          "early_stop_rate_delta_vs_baseline_pp": 1.1133727437398449,
+          "early_rate_beats_random": false,
+          "early_rate_below_baseline": false,
+          "early_stop_n_removed": 441,
+          "false_drop_winner_n": 195,
+          "candidate_signals_n": 3336,
+          "candidate_early_stop_assessable_n": 3336,
+          "baseline_early_stop_n": 1435,
+          "baseline_winner_n": 865,
+          "candidate_weeks_n": 232
+        },
+        "gate": {
+          "checks": {
+            "retain_at_least_70pct_winners": true,
+            "remove_at_least_30pct_early_stop_count": true,
+            "early_stop_rate_below_matched_random": false,
+            "early_stop_rate_below_unfiltered_baseline": false,
+            "minimum_development_support": true
+          },
+          "passed": false,
+          "failed": [
+            "early_stop_rate_below_matched_random",
+            "early_stop_rate_below_unfiltered_baseline"
+          ]
+        }
+      },
+      {
+        "rule_id": "prior_stop_rate_6_low",
+        "rule_label": "本币近六笔历史止损率较低",
+        "rule": {
+          "id": "prior_stop_rate_6_low",
+          "feature": "prior_stop_rate_6",
+          "keep": "le_q67",
+          "label": "本币近六笔历史止损率较低",
+          "kind": "continuous"
+        },
+        "threshold": 0.8333333333333334,
+        "threshold_training_median": 0.6666666666666666,
+        "threshold_training_n": 4617,
+        "development_metrics": {
+          "winner_recall": 0.8670520231213873,
+          "early_stop_count_reduction": 0.14494773519163764,
+          "candidate_early_stop_rate_pct": 27.968999316161387,
+          "baseline_early_stop_rate_pct": 28.68279032580452,
+          "matched_early_stop_rate_pct": 28.140811397743644,
+          "early_stop_rate_delta_vs_baseline_pp": -0.7137910096431312,
+          "early_rate_beats_random": true,
+          "early_rate_below_baseline": true,
+          "early_stop_n_removed": 208,
+          "false_drop_winner_n": 115,
+          "candidate_signals_n": 4387,
+          "candidate_early_stop_assessable_n": 4387,
+          "baseline_early_stop_n": 1435,
+          "baseline_winner_n": 865,
+          "candidate_weeks_n": 241
+        },
+        "gate": {
+          "checks": {
+            "retain_at_least_70pct_winners": true,
+            "remove_at_least_30pct_early_stop_count": false,
+            "early_stop_rate_below_matched_random": true,
+            "early_stop_rate_below_unfiltered_baseline": true,
+            "minimum_development_support": true
+          },
+          "passed": false,
+          "failed": [
+            "remove_at_least_30pct_early_stop_count"
+          ]
+        }
+      }
+    ]
+  },
+  "decision_gates": {
+    "winner_recall_min": 0.7,
+    "early_fixed_stop_count_reduction_min": 0.3,
+    "early_stop_rate_must_be_below_equal_size_symbol_side_year_random": true,
+    "minimum_support": {
+      "candidate_signals": 30,
+      "candidate_early_stop_assessable": 20,
+      "baseline_early_stops": 5,
+      "baseline_winners": 5,
+      "candidate_week_clusters": 8
+    },
+    "fallback": "If none passes, freeze one closest diagnostic rule by the predeclared development-only ordering; do not call it admitted."
+  },
+  "cohort_counts": {
+    "all_altcoins": 12506,
+    "primary_non_top20_alt": 11415,
+    "major_excluded": 201,
+    "was_top20_missing": 0,
+    "is_current_true": 12599,
+    "observed_first_24h_bars_true": 12704,
+    "observed_first_24h_bars_false_or_missing": 3
+  },
+  "analysis_contract": {
+    "thresholds": "Feature thresholds use only confirmation years <= 2024. Continuous screens retain the training 2/3 side by using Q33 or Q67; missing features pass. Boolean BTC alignment keeps true and missing.",
+    "development_labels": "Only definite hit/miss rows confirmed <= 2024 whose 12H exit bar closed by 2025-01-01 00:00 BJT (exit bar open plus 12H <= cutoff). Open, gap, unavailable, possible and censored rows are not misses and are excluded from development outcomes.",
+    "early_stop": "First fixed-stop path endpoint in [confirmed time, confirmed time + 24 hours), i.e. the first two 12H bars. For non-stop/flip paths, observed_first_24h_bars=true establishes a negative; false/missing stays unassessable. If the column is absent in a fixture only, evaluation_cutoff_bjt is the compatibility fallback. Whether a same-bar 10R upper-only excursion occurred before the stop is marked indeterminate.",
+    "matched_random": "Equal-size random cohorts sampled within symbol x side x year strata; summary table gives exact expected rates, and the frozen candidate also gets a without-replacement Monte Carlo comparison.",
+    "week_cluster": "Bootstrap resamples the full market week as a cluster and compares the selected rate against the same-size expected rate within symbol x side strata.",
+    "confirmation_basis": "Robustness reclassifies the same excursion path using confirmation_close-to-original_stop risk from confirmation_basis_lower_r/upper_r. It does not replace the touched-price reference result.",
+    "no_economics": "No simulated fills, returns, fees, training, model fitting, or strategy recommendation.",
+    "candidate_rows": "筛选信号明细.csv and 冻结候选入选明细.csv preserve selected, symbol, week and confirmed_bjt for deduplication of unique peak candles and stop exposure."
+  },
+  "warnings": []
+}

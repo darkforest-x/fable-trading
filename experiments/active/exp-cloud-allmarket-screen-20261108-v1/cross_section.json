@@ -1,0 +1,114 @@
+{
+  "method": "Two prespecified diagnostic rules; same-time/side opportunity controls; no later-year tuning.",
+  "missing": 32,
+  "rows": [
+    {
+      "year": 2025,
+      "rule": "retain_upper_two_thirds",
+      "signals": 2586,
+      "kept": 1603,
+      "coverage": 0.619876256767208,
+      "hits": 490,
+      "retained_hits": 324,
+      "hit_recall": 0.6612244897959184,
+      "hit_rate": 0.20212102308172178,
+      "unfiltered_hit_rate": 0.1895551257253385,
+      "early_stops": 834,
+      "retained_early_stops": 523,
+      "removed_early_stops": 0.37290167865707435,
+      "early_stop_rate": 0.32626325639426074,
+      "unfiltered_early_stop_rate": 0.3225058004640371,
+      "matched_time_hit": {
+        "expected": 304.8504341145947,
+        "observed": 324,
+        "informative_blocks": 216
+      },
+      "matched_time_early_stop": {
+        "expected": 526.7493771774284,
+        "observed": 523,
+        "informative_blocks": 216
+      }
+    },
+    {
+      "year": 2026,
+      "rule": "retain_upper_two_thirds",
+      "signals": 3800,
+      "kept": 2416,
+      "coverage": 0.6357894736842106,
+      "hits": 507,
+      "retained_hits": 324,
+      "hit_recall": 0.6390532544378699,
+      "hit_rate": 0.1422924901185771,
+      "unfiltered_hit_rate": 0.14134374128798438,
+      "early_stops": 1007,
+      "retained_early_stops": 646,
+      "removed_early_stops": 0.3584905660377358,
+      "early_stop_rate": 0.26749482401656316,
+      "unfiltered_early_stop_rate": 0.2652093758230182,
+      "matched_time_hit": {
+        "expected": 315.36961274194977,
+        "observed": 324,
+        "informative_blocks": 336
+      },
+      "matched_time_early_stop": {
+        "expected": 644.6446419535591,
+        "observed": 646,
+        "informative_blocks": 340
+      }
+    },
+    {
+      "year": 2025,
+      "rule": "retain_majority_aligned",
+      "signals": 2586,
+      "kept": 2264,
+      "coverage": 0.8754833720030936,
+      "hits": 490,
+      "retained_hits": 434,
+      "hit_recall": 0.8857142857142857,
+      "hit_rate": 0.19169611307420495,
+      "unfiltered_hit_rate": 0.1895551257253385,
+      "early_stops": 834,
+      "retained_early_stops": 741,
+      "removed_early_stops": 0.11151079136690648,
+      "early_stop_rate": 0.32729681978798586,
+      "unfiltered_early_stop_rate": 0.3225058004640371,
+      "matched_time_hit": {
+        "expected": 434.0,
+        "observed": 434,
+        "informative_blocks": 0
+      },
+      "matched_time_early_stop": {
+        "expected": 741.0,
+        "observed": 741,
+        "informative_blocks": 0
+      }
+    },
+    {
+      "year": 2026,
+      "rule": "retain_majority_aligned",
+      "signals": 3800,
+      "kept": 3068,
+      "coverage": 0.8073684210526316,
+      "hits": 507,
+      "retained_hits": 421,
+      "hit_recall": 0.8303747534516766,
+      "hit_rate": 0.1472027972027972,
+      "unfiltered_hit_rate": 0.14134374128798438,
+      "early_stops": 1007,
+      "retained_early_stops": 805,
+      "removed_early_stops": 0.2005958291956306,
+      "early_stop_rate": 0.2625570776255708,
+      "unfiltered_early_stop_rate": 0.2652093758230182,
+      "matched_time_hit": {
+        "expected": 420.25,
+        "observed": 421,
+        "informative_blocks": 1
+      },
+      "matched_time_early_stop": {
+        "expected": 805.0,
+        "observed": 805,
+        "informative_blocks": 1
+      }
+    }
+  ]
+}

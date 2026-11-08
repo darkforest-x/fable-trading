@@ -1,0 +1,9 @@
+﻿规则ID,规则,特征,通过方向,开发期样本数,训练期中位数,冻结阈值,阈值分位数,缺失值处理,候选,候选准入
+close_distance_r_high,确认距离R较高,close_distance_r,ge_q33,5029,0.5829938286,0.3476400363291413,0.3333333333,保留,True,True
+prior_atr_pct_low,确认前ATR百分比较低,prior_atr_pct,le_q67,5029,5.860210079,6.919274082440899,0.6666666667,保留,False,False
+trend_eff_14_high,14期趋势效率较高,trend_eff_14,ge_q33,5029,-0.01502281288,-0.13527066607506652,0.3333333333,保留,False,False
+btc_same_side_true,与BTC同向,btc_same_side,true,5029,,True,,保留,False,False
+rel_strength_14_high,14期相对BTC强度较高,rel_strength_14,ge_q33,5029,-0.001163260296,-0.03531067245170761,0.3333333333,保留,False,False
+atr_expansion_high,波动扩张较高,atr_expansion,ge_q33,4946,0.9486986447,0.8571706794988072,0.3333333333,保留,False,False
+ema_spread_atr_high,EMA分离较高,ema_spread_atr,ge_q33,5029,0.7267428174,0.4718241931473948,0.3333333333,保留,False,False
+prior_stop_rate_6_low,本币近六笔历史止损率较低,prior_stop_rate_6,le_q67,4617,0.6666666667,0.8333333333333334,0.6666666667,保留,False,False
