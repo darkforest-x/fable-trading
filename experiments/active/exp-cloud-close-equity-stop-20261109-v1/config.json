@@ -1,0 +1,72 @@
+{
+  "id": "exp-cloud-close-equity-stop-20261109-v1",
+  "parent": "exp-cloud-close-lock-profit-20261109-v1 arm_at_r=2.0: full-position exit engine, fixed nine-slot wallet, low prior_atr_pct priority, 11,780 frozen 90d real opportunities. The static 1,922-row funded roster is a parity reference only; every threshold re-admits from all raw eligible opportunities.",
+  "factor": "Close-NAV drawdown stop from the current risk-cycle closing high-water mark. Thresholds 0% (strict no-trigger parity), 15%, 25%, and 35%. All native event stop/EMA/profit-lock behavior stays unchanged until a portfolio-level liquidation supersedes it.",
+  "risk_stop": {
+    "measure": "Hourly close-stage VectorBT NAV after native exits at that H1 close; compare to the maximum such close in the current risk cycle.",
+    "trigger": "NAV <= cycle_close_high * (1 - threshold). A breach schedules group liquidation at the next UTC H1 open.",
+    "liquidation": "At each affected symbol's first observed H1 open at or after the scheduled open, market-close its full remaining position. If that symbol has no quote at the scheduled open, hold to its next observed open and record delay hours. No carried mark is an executable quote.",
+    "entry_lock": "Reject every new event from trigger through the open where the final group position is actually liquidated. The liquidation open never accepts an entry. Resume on the next eligible new 12H event after that open.",
+    "cycle_reset": "Once all positions are actually flat, reset risk-cycle HWM to post-liquidation cash and advance the cycle ID. Lifetime NAV high-water mark and lifetime drawdown never reset.",
+    "same_open_precedence": "An already scheduled native open exit takes precedence at that open and is recorded once; remaining positions receive the forced market exit. No position can receive both fills. Earlier intrabar/close native exits remain in force, and positions preempted at an earlier open cannot execute their later native exit.",
+    "market_costs": "Entry/native/forced market fills use OKX Lv1 taker fee 0.0005. Base market slippage is 0.0 to match the frozen wallet; the preregistered stress adds 0.0005 slippage to market fills. Maker fee is 0.0002 and remains available for classification although TP=0 lock paths use taker exits."
+  },
+  "population": {
+    "real_opportunities": 11780,
+    "matched_controls_available": 10816,
+    "slots": 9,
+    "priority": "entry_ms ascending, low frozen prior_atr_pct ascending, then CRC32(symbol), symbol and event_id, matching cloud_close_reward_account.admit",
+    "capacity": "Runtime slot availability, same-contract busy rule and priority are re-evaluated at every event. Do not filter from the old 1,922 funded ledger.",
+    "source_paths": "experiments/active/exp-cloud-close-lock-profit-20261109-v1/profit_lock_paths.csv.gz; arm_at_r=2.0; tp_r=0; entry_status=executed",
+    "quote_source": "Frozen OKX H1 OHLC under exp-cloud-allmarket-screen-20261108-v1/inputs/<symbol>/bars1h.csv.gz, with existing Top20 fallback through cloud_close_reward_account.quotes",
+    "account_grid": {
+      "start_utc": "2020-01-24T00:00:00Z",
+      "end_utc_exclusive": "2026-11-08T12:00:00Z",
+      "timezone": "UTC",
+      "initial_cash_usdt": 1000.0
+    }
+  },
+  "accounting": {
+    "engine": "VectorBT Portfolio.from_order_func, flexible order callback, one cash-sharing group; one column per live wallet slot",
+    "sizing": "Reuse wallet: per fresh entry reserve min(NAV / 9, available free cash / currently free slots), then convert to base-unit quantity using executable price, fee and configured market slippage.",
+    "entry_fee_rate": 0.0005,
+    "maker_fee_rate": 0.0002,
+    "taker_fee_rate": 0.0005,
+    "base_market_slippage": 0.0,
+    "stress_additional_market_slippage": 0.0005,
+    "missing_hour_marks": "Carry the last observed close for NAV and conservative OHLC bounds only; never execute at a carried mark. Unquoted position-hours are counted.",
+    "drawdown": "Retain close-mark NAV, open NAV, post-open-exit NAV, and synchronized hourly OHLC conservative lower/upper bounds. Report lifetime marked and conservative drawdown; do not reset either lifetime measure at cycle resets.",
+    "cash_reconciliation": "Reconcile signed VectorBT order cash flows, summed event cash PnL and final VectorBT NAV; one entry and one exit order per funded event."
+  },
+  "development_gate": {
+    "period": "2020-01-24 through 2024-12-31 UTC",
+    "minimum_closed_trades": 100,
+    "minimum_net_winner_pct": 30.0,
+    "minimum_equal_notional_payoff": 2.5,
+    "minimum_cash_payoff": 2.5,
+    "maximum_hourly_conservative_drawdown_pct": 35.0,
+    "selection": "Among nonzero thresholds that pass every gate, select greatest development terminal multiple; tie-break on lower conservative DD. If none pass, retain the existing +2R baseline and do not run paired-control or 5bp stress accounts.",
+    "follow_up": "Only the passing nonzero development pick receives a parent-paired real sample, matched-control account, and additional 5bp market-slippage stress."
+  },
+  "baseline_reference": {
+    "artifact": "experiments/active/exp-cloud-close-lock-profit-20261109-v1/account_metrics.csv",
+    "arm_at_r": 2.0,
+    "all_final_usdt": 27432.017158220166,
+    "all_closed_positions": 1922,
+    "all_net_winner_pct": 33.1945889698231,
+    "all_hourly_conservative_drawdown_pct": 53.30569300139284,
+    "parity": "Run the new VectorBT wallet once at 0% trigger and compare all/dev/2025/2026 metrics and the complete static event/slot roster to this existing artifact. Do not replay the old account separately."
+  },
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_equity_stop",
+  "manual_fixture": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_equity_stop --mini-check",
+  "outputs": [
+    "input_audit.json",
+    "account_metrics.csv",
+    "summary.json",
+    "funded_dd{0,15,25,35}.csv.gz",
+    "hourly_dd{0,15,25,35}.csv.gz",
+    "roster_dd{0,15,25,35}.csv.gz",
+    "triggers_dd{0,15,25,35}.csv",
+    "resets_dd{0,15,25,35}.csv"
+  ]
+}
