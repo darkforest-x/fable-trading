@@ -88,12 +88,11 @@
   if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}
   function create({root,onOpen=()=>{},onSelect}){
     let opened=false,selected=null,returnFocus=null,request=null;
-    let breadth=null,activeRow=null;
+    let breadth=null,activeRow=null,renderedRows='';
     const panel=document.createElement('section');panel.id='strategy-backtest-panel';panel.className='bt-panel rp-glass';panel.inert=true;panel.setAttribute('aria-hidden','true');panel.setAttribute('aria-label','历史回测交易');
     panel.innerHTML='<header class="bt-heading" data-yd-sheet-drag><strong tabindex="-1" data-bt-title>回测交易</strong><button type="button" data-bt-close aria-label="收起回测交易">×</button></header><div class="bt-controls"><div class="bt-badges"><span>历史回测 · Binance</span><button type="button" data-bt-top title="查看累计净盈亏第一名">Top 1 · 读取中</button></div><div class="bt-sort"><select aria-label="回测币种" data-bt-symbol><option value="">全部币种</option></select><select aria-label="下轨入场区间" data-bt-breadth-period hidden></select><button type="button" data-bt-sort="time" aria-pressed="true">开仓时间 ↓</button><button type="button" data-bt-sort="pnl" aria-pressed="false">净收益</button><button type="button" data-bt-sort="score" aria-pressed="false">评分</button></div><small data-bt-hint>原回测入场条件 · 评分非胜率<br>北京时间 · 收益已扣原研究成本</small></div><div class="bt-scroll"><p data-bt-status role="status"></p><button type="button" data-bt-retry hidden>重试读取</button><div class="bt-rows"></div><button type="button" class="bt-more" data-bt-more hidden>再显示 50 笔</button><p class="bt-count"></p><details class="bt-notes"><summary>历史版本与统计口径</summary><p></p></details></div>';
     root.append(panel);
     const node=s=>panel.querySelector(s),sheet=window.SpikeYoloPreviewSheet.bind({panel,isOpen:()=>opened,dismiss:()=>setOpen(false)});
-    window.SpikeYoloPreviewSheet.bindOutside({panel,triggers:[root.querySelector('[data-rp-action="backtest-list"]')],isOpen:()=>opened,dismiss:restore=>setOpen(false,restore)});
     async function read(params){const c=new AbortController();request=c;const timeout=setTimeout(()=>c.abort(),20000);
       try{
         if(params.track===BREADTH){
@@ -110,17 +109,34 @@
         const r=await fetch('/api/strategy-backtest?'+new URLSearchParams(params),{signal:c.signal,cache:'no-store'});const value=await r.json();if(!r.ok)throw Error(value.detail||'回测读取失败');return value;}
       catch(e){if(e.name==='AbortError')throw Error('回测读取超时，请重试');throw e;}
       finally{clearTimeout(timeout);if(request===c)request=null;}}
-    function choose(row,track,manual=false){
+    function choose(row,track){
       selected=row.id;activeRow=row;
       const options=track===BREADTH?{scope:breadth.scope,replay_source:BREADTH}:{};
       onSelect({track,row,options});
       if(track===BREADTH){
         window.SpikeBreadthBookRoute?.write({chapter:'replay',eventId:row.event_id,scope:breadth.scope,memberSymbol:row.asset==='ALT'?row.symbol:null});
-        if(breadth.eventId){breadth.eventId=null;setOpen(false,false);}
+        breadth.eventId=null;
       }
-      render();if(manual&&matchMedia('(max-width:700px)').matches)setOpen(false,false);}
+      render();
+    }
     const model=createModel({read,cancel:()=>{request?.abort();request=null;},change:render,focus:(row,track)=>choose(row,track)});
-    function setOpen(value,restore=true){opened=value;sheet.reset();panel.classList.toggle('is-open',value);root.classList.toggle('has-backtest-list',value);root.querySelector('[data-rp-action="backtest-list"]')?.setAttribute('aria-expanded',String(value));panel.inert=!value;panel.setAttribute('aria-hidden',String(!value));if(!value){model.pause();if(restore)(root.classList.contains('is-backtest')?root.querySelector('[data-rp-action="backtest-list"]'):returnFocus)?.focus({preventScroll:true});}else{onOpen();render();if(!model.getState().data&&!model.getState().busy)model.load();node('[data-bt-title]').focus({preventScroll:true});}}
+    function setOpen(value,restore=true){
+      if(value&&opened)return;
+      opened=value;sheet.reset();
+      panel.classList.toggle('is-open',value);root.classList.toggle('has-backtest-list',value);
+      const trigger=root.querySelector('[data-rp-action="backtest-list"]');
+      trigger?.setAttribute('aria-expanded',String(value));
+      panel.inert=!value;panel.setAttribute('aria-hidden',String(!value));
+      if(!value){
+        model.pause();
+        if(restore)(root.classList.contains('is-backtest')?trigger:returnFocus)?.focus({preventScroll:true});
+        return;
+      }
+      onOpen();render();
+      const state=model.getState();
+      if(!state.data&&!state.busy&&!state.error)model.load();
+      node('[data-bt-title]').focus({preventScroll:true});
+    }
     function render(){
       const s=model.getState();node('[data-bt-title]').textContent=label(s.track)+' · 回测交易';panel.setAttribute('aria-busy',String(s.busy));
       node('[data-bt-status]').textContent=s.error||(s.busy?'正在读取回测成交…':s.total?'':'没有符合条件的回测成交');node('[data-bt-retry]').hidden=!s.error;
@@ -146,7 +162,14 @@
       if(select.innerHTML!==options)select.innerHTML=options;select.value=research?(breadth?.kind||''):s.symbol;
       node('[data-bt-hint]').textContent=research?'北京时间 · 一次山寨篮子入场计一笔':'原回测入场条件 · 评分非胜率 · 北京时间 · 收益已扣原研究成本';
       panel.querySelectorAll('[data-bt-sort]').forEach(b=>{const key=b.dataset.btSort,active=s.sort===key;b.hidden=research&&key==='score';b.setAttribute('aria-pressed',String(active));b.textContent=({time:'开仓时间',pnl:'净收益',score:'评分'}[key])+(active?(s.direction==='desc'?' ↓':' ↑'):'');b.setAttribute('aria-label',b.textContent+(active?'，点击反向排序':'，点击降序排序'));});
-      const markup=s.rows.map(r=>rowHTML(r,selected)).join('');if(node('.bt-rows').innerHTML!==markup)node('.bt-rows').innerHTML=markup;
+      const markup=s.rows.map(r=>rowHTML(r,selected)).join('');
+      if(renderedRows!==markup){
+        const list=node('.bt-rows'),scroller=node('.bt-scroll'),top=scroller.scrollTop;
+        const focused=list.contains(document.activeElement)&&document.activeElement.dataset.btTrade;
+        list.innerHTML=markup;renderedRows=markup;
+        if(focused)list.querySelector(`[data-bt-trade="${focused}"]`)?.focus({preventScroll:true});
+        scroller.scrollTop=top;
+      }
       node('[data-bt-more]').hidden=!s.has_more;node('[data-bt-more]').disabled=s.busy;
       node('.bt-count').textContent=s.data?`显示 ${s.rows.length} / ${s.total} 笔 · 全策略 ${s.data.meta.trades} 笔`:'';
       node('.bt-notes').hidden=!s.data;node('.bt-notes p').textContent=s.data?[s.data.meta.basis,s.data.meta.note,s.data.meta.limitation].join(' '):'';
@@ -156,8 +179,8 @@
       if(b.hasAttribute('data-bt-retry'))model.load(model.getState().rows.length>0);
       if(b.hasAttribute('data-bt-more'))model.load(true);
       if(b.dataset.btSort){node('.bt-scroll').scrollTop=0;model.sort(b.dataset.btSort);}
-      if(b.dataset.btTrade){const s=model.getState(),r=s.rows.find(r=>r.id===Number(b.dataset.btTrade));if(r)choose(r,s.track,true);}
-      if(b.hasAttribute('data-bt-top')&&breadth){open(BREADTH,null,{scope:breadth.scope,data:breadth.data,eventId:SEPTEMBER_CASE});return;}
+      if(b.dataset.btTrade){const s=model.getState(),r=s.rows.find(r=>r.id===Number(b.dataset.btTrade));if(r)choose(r,s.track);}
+      if(b.hasAttribute('data-bt-top')&&breadth?.view){choose(breadth.view.resolve(SEPTEMBER_CASE),BREADTH);return;}
       if(b.hasAttribute('data-bt-top')){const s=model.getState();if(s.data?.focus){choose(s.data.focus,s.track);model.filter(s.data.focus.symbol);}}
     });
     function filterBreadth(changes){
@@ -181,8 +204,12 @@
       if(track!==BREADTH)clearReplayLink();
       breadth=track===BREADTH?{scope:options.scope||'all_history_fee_only',entryPeriod:options.entryPeriod||'',kind:options.kind||'',eventId:options.eventId,memberSymbol:options.memberSymbol,data:options.data}:null;
       returnFocus=root.querySelector('[data-rp="track"]');selected=null;activeRow=null;
-      model.select(track,row);
-      if(row){onOpen();setOpen(false,false);root.querySelector('[data-rp-action="backtest-list"]')?.focus({preventScroll:true});}else setOpen(true);
+      const compactDirect=!opened&&(row||options.eventId)&&matchMedia('(max-width:700px)').matches;
+      const loaded=model.select(track,row);
+      if(compactDirect){
+        onOpen();
+        loaded?.then(()=>{if(!opened&&model.getState().track===track&&model.getState().error)setOpen(true);});
+      }else setOpen(true);
     }
     return {open,clearReplayLink,setOpen,getState:model.getState,isOpen:()=>opened,
       setActive(value){if(!value){model.pause();sheet.reset();}else if(opened&&!model.getState().data)model.load();}};

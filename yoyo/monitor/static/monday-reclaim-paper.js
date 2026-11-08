@@ -365,7 +365,7 @@
       if(action==='indicators')setIndicators(!indicatorsOpen);
       if(action==='ma'){ma=!ma;render(feed.getState());}
       if(action==='internal'){internal=!internal;render(feed.getState());}
-      if(action==='backtest-list'){if(root.classList.contains('is-paper-history'))setRecords(!recordsOpen);else backtest.setOpen(!backtest.isOpen());}
+      if(action==='backtest-list'){if(root.classList.contains('is-paper-history'))setRecords(!recordsOpen);else backtest.setOpen(true);}
       if(action==='backtest-exit'){if(root.classList.contains('is-paper-history')){state.symbol=chartSymbol;state.trade='';pinned=null;setRecords(false,false);chart.resetFocus();}else leaveBacktest();sync();render(feed.getState());}
       if(action==='follow'){leaveBacktest(false);state.symbol='';state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());}
       if(button.dataset.rpAction==='more'){if(state.history)history.load(true);else{shown+=50;render(feed.getState());}}
