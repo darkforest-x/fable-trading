@@ -1,0 +1,231 @@
+{
+  "config_id": "exp-cloud-close-exit-rotation-20261109-v1",
+  "source_commit": "5ef5bb7809de65cd281641ff4672b50fd2639f56",
+  "static_shadow_manifest": "experiments/active/exp-cloud-close-exit-rotation-20261109-v1/shadow_manifest.json",
+  "periods": [
+    "all",
+    "dev",
+    "2025",
+    "2026"
+  ],
+  "venues": {
+    "OKX": {
+      "actual_opportunities": 11780,
+      "eligible_controls": 10816,
+      "paired_parent_ids": 10816,
+      "actual_unmatched": 964,
+      "control_unmatched": 0,
+      "chosen_arms_actual": {
+        "full_runner": 7655,
+        "partial_2_3": 4125
+      },
+      "chosen_arms_control": {
+        "full_runner": 6389,
+        "partial_2_3": 4427
+      }
+    },
+    "Binance": {
+      "actual_opportunities": 22623,
+      "eligible_controls": 20588,
+      "paired_parent_ids": 20588,
+      "actual_unmatched": 2035,
+      "control_unmatched": 0,
+      "chosen_arms_actual": {
+        "full_runner": 12153,
+        "partial_2_3": 10470
+      },
+      "chosen_arms_control": {
+        "partial_2_3": 11789,
+        "full_runner": 8799
+      }
+    }
+  },
+  "accounts": [
+    {
+      "venue": "OKX",
+      "scenario": "rotation_actual",
+      "slippage": 0.0,
+      "period": "all",
+      "final_usdt": 18433.763967943156,
+      "multiple": 18.433763967943158,
+      "dd_mark_pct": 49.70570176249516,
+      "dd_bound_pct": 51.518814419595294,
+      "trades": 1569,
+      "win_pct": 25.812619502868067,
+      "payoff": 5.24150617386676,
+      "payoff_usdt": 4.053751071706827,
+      "median_net_pct": -3.2996793857451427
+    },
+    {
+      "venue": "OKX",
+      "scenario": "shadow_reference_partial",
+      "slippage": 0.0,
+      "period": "all",
+      "final_usdt": 8788.773972912815,
+      "multiple": 8.788773972912816,
+      "dd_mark_pct": 31.497518296674276,
+      "dd_bound_pct": 35.3873110915114,
+      "trades": 1569,
+      "win_pct": 33.1421287444232,
+      "payoff": 3.2644049187331343,
+      "payoff_usdt": 2.6282142069469545,
+      "median_net_pct": -2.840922407549211
+    },
+    {
+      "venue": "OKX",
+      "scenario": "rotation_control",
+      "slippage": 0.0,
+      "period": "all",
+      "final_usdt": 4725.111199409637,
+      "multiple": 4.725111199409637,
+      "dd_mark_pct": 42.184655742371056,
+      "dd_bound_pct": 43.12260298703195,
+      "trades": 1712,
+      "win_pct": 23.598130841121495,
+      "payoff": 5.023514576949671,
+      "payoff_usdt": 3.920234871892677,
+      "median_net_pct": -3.1428998208952055
+    },
+    {
+      "venue": "OKX",
+      "scenario": "rotation_paired_actual",
+      "slippage": 0.0,
+      "period": "all",
+      "final_usdt": 7626.360233740545,
+      "multiple": 7.626360233740544,
+      "dd_mark_pct": 50.83149890525679,
+      "dd_bound_pct": 51.96403910240819,
+      "trades": 1480,
+      "win_pct": 26.68918918918919,
+      "payoff": 4.31110073890916,
+      "payoff_usdt": 3.5814422072820613,
+      "median_net_pct": -3.483172038799735
+    },
+    {
+      "venue": "OKX",
+      "scenario": "rotation_paired_control",
+      "slippage": 0.0,
+      "period": "all",
+      "final_usdt": 4725.111199409637,
+      "multiple": 4.725111199409637,
+      "dd_mark_pct": 42.184655742371056,
+      "dd_bound_pct": 43.12260298703195,
+      "trades": 1712,
+      "win_pct": 23.598130841121495,
+      "payoff": 5.023514576949671,
+      "payoff_usdt": 3.920234871892677,
+      "median_net_pct": -3.1428998208952055
+    },
+    {
+      "venue": "OKX",
+      "scenario": "rotation_stress_5bp",
+      "slippage": 0.0005,
+      "period": "all",
+      "final_usdt": 15769.698225121345,
+      "multiple": 15.769698225121346,
+      "dd_mark_pct": 51.579448132231185,
+      "dd_bound_pct": 53.3282956477759,
+      "trades": 1569,
+      "win_pct": 25.621414913957935,
+      "payoff": 5.1476978056434595,
+      "payoff_usdt": 3.9895082689430708,
+      "median_net_pct": -3.402980715795915
+    },
+    {
+      "venue": "Binance",
+      "scenario": "rotation_actual",
+      "slippage": 0.0,
+      "period": "all",
+      "final_usdt": 7582.280262155333,
+      "multiple": 7.582280262155333,
+      "dd_mark_pct": 48.714463334464284,
+      "dd_bound_pct": 49.795959634093265,
+      "trades": 1629,
+      "win_pct": 25.72130141190915,
+      "payoff": 4.475539905384065,
+      "payoff_usdt": 3.589700981546758,
+      "median_net_pct": -3.3587293255813924
+    },
+    {
+      "venue": "Binance",
+      "scenario": "shadow_reference_partial",
+      "slippage": 0.0,
+      "period": "all",
+      "final_usdt": 6508.24380987614,
+      "multiple": 6.508243809876141,
+      "dd_mark_pct": 30.805388942082967,
+      "dd_bound_pct": 31.584120323329103,
+      "trades": 1629,
+      "win_pct": 32.65807243707796,
+      "payoff": 3.04622626206114,
+      "payoff_usdt": 2.5490010161106924,
+      "median_net_pct": -3.097662991371047
+    },
+    {
+      "venue": "Binance",
+      "scenario": "rotation_control",
+      "slippage": 0.0,
+      "period": "all",
+      "final_usdt": 2874.7269294033913,
+      "multiple": 2.8747269294033915,
+      "dd_mark_pct": 51.40013510198705,
+      "dd_bound_pct": 53.69384256162944,
+      "trades": 1767,
+      "win_pct": 21.901528013582343,
+      "payoff": 4.886072262435249,
+      "payoff_usdt": 3.98930792636677,
+      "median_net_pct": -3.177261822746389
+    },
+    {
+      "venue": "Binance",
+      "scenario": "rotation_paired_actual",
+      "slippage": 0.0,
+      "period": "all",
+      "final_usdt": 3623.6833347346765,
+      "multiple": 3.6236833347346766,
+      "dd_mark_pct": 43.03342720875597,
+      "dd_bound_pct": 43.70917906849964,
+      "trades": 1486,
+      "win_pct": 27.388963660834452,
+      "payoff": 3.584639803695583,
+      "payoff_usdt": 3.2118510478342137,
+      "median_net_pct": -3.4468041419512625
+    },
+    {
+      "venue": "Binance",
+      "scenario": "rotation_paired_control",
+      "slippage": 0.0,
+      "period": "all",
+      "final_usdt": 2874.7269294033913,
+      "multiple": 2.8747269294033915,
+      "dd_mark_pct": 51.40013510198705,
+      "dd_bound_pct": 53.69384256162944,
+      "trades": 1767,
+      "win_pct": 21.901528013582343,
+      "payoff": 4.886072262435249,
+      "payoff_usdt": 3.98930792636677,
+      "median_net_pct": -3.177261822746389
+    },
+    {
+      "venue": "Binance",
+      "scenario": "rotation_stress_5bp",
+      "slippage": 0.0005,
+      "period": "all",
+      "final_usdt": 6439.355798230209,
+      "multiple": 6.439355798230209,
+      "dd_mark_pct": 50.747719120072944,
+      "dd_bound_pct": 51.78571069097384,
+      "trades": 1629,
+      "win_pct": 25.41436464088398,
+      "payoff": 4.423110614647751,
+      "payoff_usdt": 3.56775538119642,
+      "median_net_pct": -3.4620897351117264
+    }
+  ],
+  "fees": {
+    "path_fees_unchanged": true,
+    "additional_market_slippage_stress": 0.0005
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}

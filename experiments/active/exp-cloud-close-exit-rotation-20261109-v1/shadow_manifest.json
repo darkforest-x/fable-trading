@@ -1,0 +1,25 @@
+{
+  "config_id": "exp-cloud-close-exit-rotation-20261109-v1",
+  "config_sha256": "2edea3b69501e630441a9739785cb373a7a7bde9cc2e996456d0f256608cbac4",
+  "source_commit": "5ef5bb7809de65cd281641ff4672b50fd2639f56",
+  "input_counts": {
+    "OKX": {
+      "eligible_actual": 11780,
+      "eligible_controls": 10816,
+      "paired_parent_ids": 10816
+    },
+    "Binance": {
+      "eligible_actual": 22623,
+      "eligible_controls": 20588,
+      "paired_parent_ids": 20588
+    }
+  },
+  "choice_evidence_files": [
+    "experiments/active/exp-cloud-close-exit-rotation-20261109-v1/choice_evidence_OKX_actual.csv.gz",
+    "experiments/active/exp-cloud-close-exit-rotation-20261109-v1/choice_evidence_OKX_control.csv.gz",
+    "experiments/active/exp-cloud-close-exit-rotation-20261109-v1/choice_evidence_Binance_actual.csv.gz",
+    "experiments/active/exp-cloud-close-exit-rotation-20261109-v1/choice_evidence_Binance_control.csv.gz"
+  ],
+  "shadow_audit": "experiments/active/exp-cloud-close-exit-rotation-20261109-v1/shadow_audit.json",
+  "status": "shadows_and_choice_evidence_frozen"
+}

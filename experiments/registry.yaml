@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-exit-rotation-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "b7bfa13e58"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "At each confirmed key select full runner versus two-thirds partial using two independently funded shadows and their previously completed lagged 90-day NAV change."
+    result: "OKX 18433.76U/1569 parent positions, 25.81% wins, cash payoff 4.054, DD bound 51.52%; Binance 7582.28U/1629, 25.72%, cash payoff 3.590, DD bound 49.80%. Static shadow parity and lagged choice records archived; neither meets gates."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-exit-rotation-20261109-v1/rotation_summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af81128d07c24a2e1a13d4."
+
   - experiment_id: exp-cloud-close-reinvest-runner-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "fbe31e4b5f"

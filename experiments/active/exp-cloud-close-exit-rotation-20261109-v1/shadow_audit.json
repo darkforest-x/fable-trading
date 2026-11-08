@@ -1,0 +1,183 @@
+{
+  "config_id": "exp-cloud-close-exit-rotation-20261109-v1",
+  "vectorbt_version": "1.2.0",
+  "selection_rule": {
+    "lookback_days": 90,
+    "safe_lag_hours": 12,
+    "measure": "Each static shadow's NAV at exact completed H1 close labels: nav_end/nav_start-1, where end is event entry_ms minus 12 hours and start is end minus 90 days.",
+    "boundary_evidence": "Both NAV timestamps must exist; for each symbol still open at a boundary in either shadow, the exact native H1 bar ending at that boundary must be present. The engine marks that bar from its native close; no carried mark or interpolation validates a decision boundary.",
+    "arm_rule": "Select full_runner only when its own-cohort trailing return exceeds partial_2_3 by more than 1e-12.",
+    "missing_or_tied_rule": "fallback to 2/3 scaleout",
+    "decision_scope": "Make one decision per event at its own 12H-confirmed entry open. Actual and eligible paired controls each use their own static shadow histories."
+  },
+  "runner_reuse_review": {
+    "OKX": "cloud_close_leadership fraction=1.0 is a 100% 2R target (cloud_close_slots maps it to tp_r=2); equity-stop dd0 is a 2R lock-profit account.",
+    "Binance": "cloud_close_binance_transfer runner uses the earlier 2026-09-24 cutoff and pre-gap-repair event set; it is not the corrected full-period baseline.",
+    "decision": "Recompute both true full-runner shadows with the corrected source paths and VectorBT wallet."
+  },
+  "static_partial_reference_checks": {},
+  "cohorts": {
+    "OKX.actual": {
+      "input_events": 11780,
+      "funded_positions": 1569,
+      "shared_event_slot_roster": 1569,
+      "admission_rejections": {
+        "same_contract": 695,
+        "all_slots_busy": 9516
+      },
+      "unquoted_position_hours": {
+        "partial_2_3": 0,
+        "full_runner": 0
+      },
+      "corrected_partial_reference": {
+        "passed": true,
+        "per_trade": {
+          "events": 1569,
+          "max_absolute_error": {
+            "cash_pnl": 0.0,
+            "notional": 0.0,
+            "net_return": 0.0
+          }
+        },
+        "all_hourly_marks": {
+          "hours": 59532,
+          "max_absolute_error": {
+            "nav": 0.0,
+            "open_nav": 0.0,
+            "open_exit_nav": 0.0,
+            "lower_nav": 0.0,
+            "upper_nav": 0.0
+          }
+        },
+        "metrics": {
+          "metrics_checked": 36,
+          "max_absolute_error": 0.0
+        },
+        "slot_roster": 1569
+      },
+      "runner_curve_reuse": "not reused; existing candidates have different exits, eligibility, or source cutoff",
+      "choice_counts": {
+        "full_runner": 7655,
+        "partial_2_3": 4125
+      },
+      "choice_reasons": {
+        "full_runner_higher_trailing_90d_nav_return": 7655,
+        "partial_leads_or_returns_tie": 4125
+      },
+      "valid_90d_boundary_evidence": 11780,
+      "fallback_count": 0
+    },
+    "OKX.control": {
+      "input_events": 10816,
+      "funded_positions": 1712,
+      "shared_event_slot_roster": 1712,
+      "admission_rejections": {
+        "same_contract": 605,
+        "all_slots_busy": 8499
+      },
+      "unquoted_position_hours": {
+        "partial_2_3": 0,
+        "full_runner": 0
+      },
+      "corrected_partial_reference": null,
+      "runner_curve_reuse": "not reused; existing candidates have different exits, eligibility, or source cutoff",
+      "choice_counts": {
+        "full_runner": 6389,
+        "partial_2_3": 4427
+      },
+      "choice_reasons": {
+        "full_runner_higher_trailing_90d_nav_return": 6389,
+        "partial_leads_or_returns_tie": 4427
+      },
+      "valid_90d_boundary_evidence": 10816,
+      "fallback_count": 0
+    },
+    "Binance.actual": {
+      "input_events": 22623,
+      "funded_positions": 1629,
+      "shared_event_slot_roster": 1629,
+      "admission_rejections": {
+        "same_contract": 689,
+        "all_slots_busy": 20305
+      },
+      "unquoted_position_hours": {
+        "partial_2_3": 0,
+        "full_runner": 0
+      },
+      "corrected_partial_reference": {
+        "passed": true,
+        "per_trade": {
+          "events": 1629,
+          "max_absolute_error": {
+            "cash_pnl": 0.0,
+            "notional": 0.0,
+            "net_return": 0.0
+          }
+        },
+        "all_hourly_marks": {
+          "hours": 58992,
+          "max_absolute_error": {
+            "nav": 0.0,
+            "open_nav": 0.0,
+            "open_exit_nav": 0.0,
+            "lower_nav": 0.0,
+            "upper_nav": 0.0
+          }
+        },
+        "metrics": {
+          "metrics_checked": 36,
+          "max_absolute_error": 0.0
+        },
+        "slot_roster": 1629
+      },
+      "runner_curve_reuse": "not reused; existing candidates have different exits, eligibility, or source cutoff",
+      "choice_counts": {
+        "full_runner": 12153,
+        "partial_2_3": 10470
+      },
+      "choice_reasons": {
+        "full_runner_higher_trailing_90d_nav_return": 12153,
+        "partial_leads_or_returns_tie": 10470
+      },
+      "valid_90d_boundary_evidence": 22623,
+      "fallback_count": 0
+    },
+    "Binance.control": {
+      "input_events": 20588,
+      "funded_positions": 1767,
+      "shared_event_slot_roster": 1767,
+      "admission_rejections": {
+        "same_contract": 552,
+        "all_slots_busy": 18269
+      },
+      "unquoted_position_hours": {
+        "partial_2_3": 0,
+        "full_runner": 0
+      },
+      "corrected_partial_reference": null,
+      "runner_curve_reuse": "not reused; existing candidates have different exits, eligibility, or source cutoff",
+      "choice_counts": {
+        "partial_2_3": 11789,
+        "full_runner": 8799
+      },
+      "choice_reasons": {
+        "partial_leads_or_returns_tie": 11789,
+        "full_runner_higher_trailing_90d_nav_return": 8799
+      },
+      "valid_90d_boundary_evidence": 20588,
+      "fallback_count": 0
+    }
+  },
+  "input_counts": {
+    "OKX": {
+      "eligible_actual": 11780,
+      "eligible_controls": 10816,
+      "paired_parent_ids": 10816
+    },
+    "Binance": {
+      "eligible_actual": 22623,
+      "eligible_controls": 20588,
+      "paired_parent_ids": 20588
+    }
+  }
+}
