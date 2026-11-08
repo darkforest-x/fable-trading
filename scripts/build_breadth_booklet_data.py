@@ -487,12 +487,17 @@ def frequency_review() -> dict[str, Any]:
         "alt_legs", "total_legs", "distinct_entry_times", "combo_50_50_fee_only_growth_pct",
         "combo_50_50_settlement_drawdown_pct",
     ]].merge(branch[keys + [
-        "selected", "new_vs_24h", "replaced_24h", "new_mean_net_pct", "new_win_pct",
+        "raw_rule_signals", "selected", "new_vs_24h", "replaced_24h", "new_mean_net_pct", "new_win_pct",
     ]], on=keys, validate="one_to_one")
     if set(zip(joined.period, joined.minimum_gap_hours)) != {
         (period, hours) for period in periods for hours in (6, 12, 24)
     } or not joined.alt_legs.equals(joined.selected):
         raise ValueError("Incomplete or inconsistent ALT spacing comparison")
+    marks = pd.read_csv(SPACING / "marks_2026.csv")
+    checked = joined[joined.period.eq("2026_to_2026-10-27")].merge(marks, on="minimum_gap_hours", validate="one_to_one")
+    if len(checked) != 3 or not checked.alt_legs.equals(checked.events):
+        raise ValueError("2026 marked account uses different baskets")
+    np.testing.assert_allclose(checked.combo_50_50_fee_only_growth_pct, checked.fee_growth_pct, atol=1e-5)
     archived = pd.read_csv(FREQUENCY / "audit/fixed/performance.csv")
     high_frequency = archived.loc[
         archived.period.astype(str).eq("2026") & archived.candidate_id.isin(["account_36", "account_72"]),
@@ -503,6 +508,8 @@ def frequency_review() -> dict[str, Any]:
     return {
         "spacing": clean(joined.drop(columns="selected").sort_values("minimum_gap_hours", ascending=False).to_dict("records")),
         "higher_frequency_2026": clean(high_frequency.to_dict("records")),
+        "marks_2026": clean(marks[["minimum_gap_hours", "events", "fee_marked_dd_pct", "funded_events",
+                                   "funded_growth_pct", "funded_marked_dd_pct"]].to_dict("records")),
     }
 
 
