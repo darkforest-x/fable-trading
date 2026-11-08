@@ -1140,7 +1140,7 @@ def run(*, prices_only: bool = False, resume_prices: bool = False) -> dict:
     }
     _json(OUT / "price_stage.json", price_stage)
     print("PRICE_STAGE_COMPLETE " + json.dumps(price_stage, ensure_ascii=False, default=str), flush=True)
-    if prices_only:
+    if prices_only or resume_prices:
         return price_stage
 
     native_random = native_random_fills(matches, quotes)
