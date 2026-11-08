@@ -30,6 +30,21 @@ experiments:
     canonical_report: experiments/active/exp-monday-limit-alarm-episode-diag-20261108-v1/summary.json
     notes: 'All periods were seen before; stability check, not a blind test. Episode size is only known after the 30-minute window and is diagnostic only. 2025 losses sit in episodes with 31+ followers (582 trades, -69bp) that cannot be identified at entry.'
 
+  - experiment_id: exp-monday-limit-alarm-reclaim-time-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ba5a32b32d
+    status: rejected
+    question: 'Owner 2026-11-08 "是否还能继续优化" (10-29 alarm-entry rule): the 737 trades not reclaimed within 60 minutes lose -190bp on average; does a shorter reclaim confirmation (5m or 15m, with the next candle also closing inside) improve on the frozen 60m exit?'
+    single_variable: 'Reclaim confirmation length 5 / 15 / 60 minutes (1 and 3 are not multiples of the 5m execution clock). Same 25-coin alarm, 30-minute window, 1.618 limit entries, near Monday edge target, entry +0.17% stop after reclaim, -30% backstop, maker 2bp / taker 5bp, 10bp slippage on non-target exits, worse of OHLC/OLHC, frac N20 3x. NautilusTrader 1.231.0 run_native, run once per path.'
+    result: 'm60 reproduces the source near30 hold fills exactly (2146/2146, max diff 0.0bp). Pre-registered selection on 2020-2025 frac N20 3x multiple: 60m 3.14x, 15m 3.02x, 5m 2.39x; neither candidate beats 60m, so nothing selected and the 60m rule stays. Per-trade mean 2020-24 / 2025 / 2026: 60m +186 / +3 / +67bp, 15m +152 / +23 / +46bp, 5m +46 / +23 / +10bp. Paired episode-mean difference vs 60m: 15m -0.1 / -23 / -5bp (all CIs include 0); 5m -66 / -35 / -42bp (2020-24 and 2026 CIs exclude 0). Shorter confirmation cuts trades that would have reclaimed later.'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-alarm-reclaim-time-20261108-v1/summary.json
+    notes: 'Split corrected by owner before results ("用2020-2025这5年的"): the earlier select-on-2025-only registration (3caf89c898) was superseded in ba5a32b32d before any full result was read. Under that superseded rule 15m (2025 1.36x vs 1.31x) would have been picked and then failed 2026 (1.13x vs 1.23x). All periods were seen in earlier studies; per-symbol fills stay local. No paper account or service changed.'
+
   - experiment_id: exp-monday-breadth-extension-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 645c60527f4b552a8a1e792bb1a0fcd9f3a1cc53
