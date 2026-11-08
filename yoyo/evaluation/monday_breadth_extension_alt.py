@@ -656,7 +656,7 @@ def selection_and_pvalues(fold_summary: pd.DataFrame, event_rows: pd.DataFrame,
             ascending=[False, False], kind="stable",
         ).index[0]
         status = "no_candidate_passed_three_fold_mean_gate; best_diagnostic_only"
-    selection["selected_for_locked_2026_review"] = selection.index.eq(chosen)
+    selection["selected_for_locked_2026_review"] = selection.index == chosen
     selection["selection_status"] = status
 
     # The selection p-values are descriptive after the preregistered historical
