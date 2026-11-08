@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SPIKE · 1.618 模拟盘 · live-breadth 广度策略工作台</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=PingFang+SC:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #2F6BFF;
+    --profit: #169873;
+    --loss: #D7355D;
+    --text-primary: #111827;
+    --text-secondary: #6B7280;
+    --glass-bg: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.85);
+    --glass-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.06), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", Roboto, sans-serif;
+    color: var(--text-primary);
+    background-color: #F4F6F9;
+    overflow-x: auto;
+  }
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 14px;
+  }
+  .glass-card-subtle {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
+    border-radius: 12px;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(107, 114, 128, 0.2);
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body class="p-6 min-w-[1880px] bg-[#EEF2F6]">
+
+  <!-- Outer Canvas Presentation Header -->
+  <div class="mb-4 flex items-center justify-between max-w-[1860px]">
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 shadow-sm border border-black/5">
+        <span class="w-2 h-2 rounded-full bg-[#169873] animate-pulse"></span>
+        <span class="text-[12px] font-semibold tracking-wide text-gray-800">SPIKE QUANT // LIVE-BREADTH</span>
+        <span class="text-[11px] text-gray-400">|</span>
+        <span class="text-[11px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">广度·SOL 模拟账户</span>
+      </div>
+      <span class="text-[12px] text-gray-500">桌面端 1440×900 工作台 + 右侧 390px 移动端堆叠规范</span>
+    </div>
+    <div class="flex items-center gap-2 text-[12px] text-gray-500 tabular-nums">
+      <span>基准时间: 2026-11-12 17:34 (UTC+8)</span>
+      <span class="px-2 py-0.5 rounded bg-white text-gray-700 font-medium border border-gray-200">纯占位数据 · 非实盘资金</span>
+    </div>
+  </div>
+
+  <!-- Dual Viewport Grid Container: Desktop (1440px) + Mobile Inset (390px) -->
+  <div class="flex items-start gap-6">
+
+    <!-- ========================================== -->
+    <!-- DESKTOP 1440 x 900 WORKBENCH CONTAINER    -->
+    <!-- ========================================== -->
+    <div class="w-[1440px] h-[900px] relative bg-[#FAFBFD] rounded-[18px] shadow-2xl border border-white overflow-hidden flex flex-col select-none">
+      
+      <!-- 1. TOP BAR UNCHANGED -->
+      <header class="h-[52px] w-full px-4 flex items-center justify-between border-b border-gray-200/60 bg-white/70 backdrop-blur-md z-30 shrink-0">
+        <!-- Left: Logo pill & Touch ticker strip -->
+        <div class="flex items-center gap-3">
+          <!-- Logo Pill -->
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white shadow-sm border border-gray-200/80 cursor-pointer hover:border-blue-400 transition-all">
+            <svg class="w-4 h-4 text-[#2F6BFF]" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13 2L3 14h8l-2 8 10-12h-8l2-8z"/>
+            </svg>
+            <span class="font-bold text-[13px] tracking-tight text-gray-900">SPIKE</span>
+            <span class="text-[10px] font-semibold px-1.5 py-0.2 bg-blue-50 text-[#2F6BFF] rounded">1.618</span>
+          </div>
+
+          <!-- Ticker Strip -->
+          <div class="flex items-center gap-1.5 pl-2">
+            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/60 hover:bg-white text-[11px] text-gray-600 border border-gray-200/50 cursor-pointer transition-all">
+              <span class="font-medium">BTC</span>
+              <span class="tabular-nums text-[#169873] font-semibold">+1.84%</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/60 hover:bg-white text-[11px] text-gray-600 border border-gray-200/50 cursor-pointer transition-all">
+              <span class="font-medium">ETH</span>
+              <span class="tabular-nums text-[#169873] font-semibold">+2.15%</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50/80 text-[11px] text-blue-900 border border-blue-200 cursor-pointer">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+              <span class="font-semibold">SOL</span>
+              <span class="tabular-nums text-[#169873] font-semibold">+2.41%</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/60 hover:bg-white text-[11px] text-gray-600 border border-gray-200/50 cursor-pointer transition-all">
+              <span class="font-medium">XAU</span>
+              <span class="tabular-nums text-gray-500 font-semibold">-0.12%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center: Equity Pill (exact requirement) -->
+        <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white shadow-sm border border-gray-200/80 text-[12px]">
+          <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+          <span class="text-gray-500 font-medium">live-breadth 模拟 · 已实现净值</span>
+          <span class="font-bold text-gray-900 tabular-nums text-[13px]">1,000.00</span>
+          <span class="text-[11px] font-semibold text-gray-400">USDT</span>
+          <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-[#169873] font-semibold tabular-nums text-[11px]">+0.00</span>
+        </div>
+
+        <!-- Right: Stats button & theme toggle -->
+        <div class="flex items-center gap-2">
+          <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-gray-50 text-[12px] font-medium text-gray-700 border border-gray-200/80 shadow-sm transition-all">
+            <span>统计分析 ↗</span>
+          </button>
+          <button class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-600 border border-gray-200/80 shadow-sm hover:text-gray-900 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- MAIN CHART CANVAS (Full Viewport Pale Candlestick Chart) -->
+      <div class="relative flex-1 w-full overflow-hidden bg-[#FBFDFB]">
+        <!-- Candlestick Graphic Mock SVG Background -->
+        <svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 1440 780">
+          <defs>
+            <!-- Soft vertical gridlines -->
+            <pattern id="grid" width="120" height="60" patternUnits="userSpaceOnUse">
+              <path d="M 120 0 L 0 0 0 60" fill="none" stroke="rgba(229, 231, 235, 0.45)" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="1440" height="780" fill="#F8FAFC"/>
+          <rect width="1440" height="780" fill="url(#grid)"/>
+
+          <!-- Lower 1.618 Fib line (Faint Green / Slate) -->
+          <line x1="0" y1="620" x2="1440" y2="620" stroke="#169873" stroke-width="1.2" stroke-dasharray="6,4" stroke-opacity="0.35"/>
+          <text x="1330" y="615" fill="#169873" font-size="11" font-family="JetBrains Mono" opacity="0.6">周一下轨 1.618 (138.80)</text>
+
+          <!-- Upper Fib / Reference Lines -->
+          <line x1="0" y1="210" x2="1440" y2="210" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,4" stroke-opacity="0.25"/>
+          <text x="1350" y="205" fill="#64748B" font-size="10" font-family="JetBrains Mono" opacity="0.5">周一高点 (154.20)</text>
+
+          <!-- Entry Horizontal Dashed Line (exact requirement: 142.30) -->
+          <line x1="420" y1="480" x2="1440" y2="480" stroke="#2F6BFF" stroke-width="1.5" stroke-dasharray="5,4"/>
+          <text x="1270" y="474" fill="#2F6BFF" font-size="11" font-family="JetBrains Mono" font-weight="600">入场价 142.30</text>
+
+          <!-- Current Price Dashed Reference (145.73) -->
+          <line x1="0" y1="410" x2="1440" y2="410" stroke="#169873" stroke-width="1" stroke-dasharray="3,3" stroke-opacity="0.5"/>
+          <rect x="1375" y="400" width="55" height="18" rx="4" fill="#169873"/>
+          <text x="1382" y="413" fill="#FFFFFF" font-size="10" font-family="JetBrains Mono" font-weight="600">145.73</text>
+
+          <!-- Vertical Dashed Line at Exit Time (6 days later) -->
+          <line x1="1120" y1="60" x2="1120" y2="720" stroke="#6B7280" stroke-width="1.5" stroke-dasharray="5,4" stroke-opacity="0.7"/>
+          
+          <!-- Label at the top of the exit vertical line (exact: 第6天平仓) -->
+          <rect x="1075" y="70" width="90" height="24" rx="6" fill="rgba(255,255,255,0.9)" stroke="#E5E7EB"/>
+          <text x="1087" y="86" fill="#4B5563" font-size="11" font-weight="600" font-family="PingFang SC">第6天平仓</text>
+          <text x="1084" y="105" fill="#9CA3AF" font-size="9" font-family="JetBrains Mono">11/16 03:20</text>
+
+          <!-- Candlesticks drawing series -->
+          <!-- Group 1: Lead up to touch down -->
+          <g opacity="0.85">
+            <!-- Bars before entry -->
+            <line x1="200" y1="360" x2="200" y2="440" stroke="#94A3B8" stroke-width="1.5"/>
+            <rect x="195" y="380" width="10" height="40" fill="#E2E8F0"/>
+
+            <line x1="240" y1="410" x2="240" y2="520" stroke="#D7355D" stroke-width="1.5"/>
+            <rect x="235" y="430" width="10" height="60" fill="#D7355D" opacity="0.75"/>
+
+            <line x1="280" y1="470" x2="280" y2="590" stroke="#D7355D" stroke-width="1.5"/>
+            <rect x="275" y="500" width="10" height="70" fill="#D7355D" opacity="0.85"/>
+
+            <line x1="320" y1="540" x2="320" y2="640" stroke="#D7355D" stroke-width="1.5"/>
+            <rect x="315" y="560" width="10" height="60" fill="#D7355D" opacity="0.9"/>
+
+            <!-- The Spike Wick Touch Bar (11/10 02:45 trigger 36 coins) -->
+            <line x1="370" y1="530" x2="370" y2="655" stroke="#D7355D" stroke-width="2"/>
+            <rect x="364" y="550" width="12" height="40" fill="#D7355D"/>
+            <!-- Pin touch circle annotation -->
+            <circle cx="370" cy="655" r="4" fill="#D7355D" stroke="#FFFFFF" stroke-width="1.5"/>
+            <text x="345" y="675" fill="#6B7280" font-size="9" font-family="JetBrains Mono">下轨穿透 138.2</text>
+
+            <!-- BUY CANDLE (30m cooldown passed -> 03:20 Entry Bar) -->
+            <line x1="420" y1="460" x2="420" y2="520" stroke="#169873" stroke-width="2"/>
+            <rect x="413" y="475" width="14" height="30" fill="#169873"/>
+
+            <!-- Up Arrow Entry Marker labeled '买入' (exact requirement) -->
+            <g transform="translate(420, 528)">
+              <!-- Green upward indicator triangle -->
+              <path d="M 0 -8 L 6 2 L 2 2 L 2 12 L -2 12 L -2 2 L -6 2 Z" fill="#169873"/>
+              <rect x="-18" y="16" width="36" height="18" rx="4" fill="#169873"/>
+              <text x="0" y="29" fill="#FFFFFF" font-size="10" font-weight="700" font-family="PingFang SC" text-anchor="middle">买入</text>
+            </g>
+
+            <!-- Subsequent Candlesticks ascending (Holding Phase) -->
+            <line x1="470" y1="460" x2="470" y2="495" stroke="#169873" stroke-width="1.5"/>
+            <rect x="465" y="465" width="10" height="20" fill="#169873" opacity="0.8"/>
+
+            <line x1="520" y1="440" x2="520" y2="480" stroke="#169873" stroke-width="1.5"/>
+            <rect x="515" y="450" width="10" height="25" fill="#169873" opacity="0.85"/>
+
+            <line x1="570" y1="435" x2="570" y2="470" stroke="#D7355D" stroke-width="1.5"/>
+            <rect x="565" y="445" width="10" height="15" fill="#D7355D" opacity="0.7"/>
+
+            <line x1="620" y1="410" x2="620" y2="455" stroke="#169873" stroke-width="1.5"/>
+            <rect x="615" y="420" width="10" height="25" fill="#169873"/>
+
+            <line x1="670" y1="395" x2="670" y2="435" stroke="#169873" stroke-width="1.5"/>
+            <rect x="665" y="405" width="10" height="22" fill="#169873"/>
+
+            <!-- Current bar -->
+            <line x1="720" y1="400" x2="720" y2="430" stroke="#169873" stroke-width="2"/>
+            <rect x="714" y="408" width="12" height="14" fill="#169873"/>
+
+            <!-- Ghost / Faint projection candles towards day 6 -->
+            <g opacity="0.25">
+              <rect x="765" y="390" width="10" height="20" fill="#169873"/>
+              <rect x="815" y="380" width="10" height="25" fill="#169873"/>
+              <rect x="865" y="375" width="10" height="15" fill="#D7355D"/>
+              <rect x="915" y="360" width="10" height="28" fill="#169873"/>
+              <rect x="965" y="350" width="10" height="22" fill="#169873"/>
+              <rect x="1015" y="340" width="10" height="30" fill="#169873"/>
+              <rect x="1065" y="335" width="10" height="25" fill="#169873"/>
+              <rect x="1115" y="325" width="10" height="35" fill="#2F6BFF"/>
+            </g>
+          </g>
+        </svg>
+
+        <!-- FLOATING OVERLAY LAYER (Absolute Positioned Clear Glass Components) -->
+
+        <!-- 2. ACCOUNT CARD TOP-LEFT (Exact component specification) -->
+        <div class="absolute top-4 left-4 w-[286px] glass-card p-3.5 z-20 transition-all hover:shadow-lg">
+          <!-- Symbol Header -->
+          <div class="flex items-center justify-between mb-1.5">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center text-white text-[10px] font-bold shadow-sm">
+                S
+              </div>
+              <span class="text-[15px] font-bold text-gray-900 tracking-tight">SOL / USDT</span>
+            </div>
+            <span class="text-[12px] font-bold tabular-nums text-gray-900">145.73</span>
+          </div>
+
+          <!-- Status Line (green: 做多 · 持有中 · 剩 3天14小时) -->
+          <div class="flex items-center gap-1.5 mb-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#169873]"></span>
+            <span class="text-[12px] font-semibold text-[#169873]">做多 · 持有中 · 剩 3天14小时</span>
+          </div>
+
+          <!-- Secondary Line (最新资金交易 · 11/10 03:20 开仓) -->
+          <div class="text-[11px] text-gray-500 mb-3 flex items-center justify-between">
+            <span>最新资金交易 · 11/10 03:20 开仓</span>
+            <span class="tabular-nums text-[#169873] font-medium">+2.41%</span>
+          </div>
+
+          <!-- Bottom Row: '策略' dropdown showing 'live-breadth' and link '交易簿 3' -->
+          <div class="flex items-center justify-between pt-2 border-t border-gray-100 text-[12px]">
+            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50/70 border border-blue-200/60 text-[#2F6BFF] font-medium cursor-pointer hover:bg-blue-100/60 transition-colors">
+              <span class="text-gray-500 text-[11px]">策略</span>
+              <span class="font-semibold">live-breadth</span>
+              <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </div>
+
+            <button class="flex items-center gap-1 text-[12px] font-medium text-gray-700 hover:text-blue-600 transition-colors px-2 py-1 rounded-md hover:bg-white/80">
+              <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              <span>交易簿</span>
+              <span class="px-1.5 py-0.2 text-[10px] bg-gray-100 rounded-full font-bold text-gray-600">3</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. STRATEGY PICKER POPOVER SNIPPET (Exact component layout) -->
+        <!-- Placed below account card with open state representation -->
+        <div class="absolute top-[172px] left-4 w-[286px] glass-card p-2.5 z-30 shadow-xl border border-white/90">
+          <div class="flex items-center justify-between px-2 py-1 mb-1 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+            <span>策略</span>
+            <span class="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">常用策略 6</span>
+          </div>
+
+          <div class="space-y-0.5 text-[12px]">
+            <!-- Row: live-allin3 -->
+            <div class="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-white/70 text-gray-600 cursor-pointer transition-colors group">
+              <div class="flex items-center gap-2">
+                <span class="text-gray-300 group-hover:text-gray-400 cursor-grab">⋮⋮</span>
+                <span class="font-medium text-gray-700">live-allin3</span>
+              </div>
+              <div class="flex items-center gap-2 text-[11px] tabular-nums text-gray-400">
+                <span>0.00</span>
+                <span class="text-gray-300">📖</span>
+                <span class="text-gray-300">↗</span>
+              </div>
+            </div>
+
+            <!-- Row: live-wick6x3 -->
+            <div class="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-white/70 text-gray-600 cursor-pointer transition-colors group">
+              <div class="flex items-center gap-2">
+                <span class="text-gray-300 group-hover:text-gray-400 cursor-grab">⋮⋮</span>
+                <span class="font-medium text-gray-700">live-wick6x3</span>
+              </div>
+              <div class="flex items-center gap-2 text-[11px] tabular-nums text-gray-400">
+                <span>0.00</span>
+                <span class="text-gray-300">📖</span>
+                <span class="text-gray-300">↗</span>
+              </div>
+            </div>
+
+            <!-- Row: live-wick3x3 -->
+            <div class="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-white/70 text-gray-600 cursor-pointer transition-colors group">
+              <div class="flex items-center gap-2">
+                <span class="text-gray-300 group-hover:text-gray-400 cursor-grab">⋮⋮</span>
+                <span class="font-medium text-gray-700">live-wick3x3</span>
+              </div>
+              <div class="flex items-center gap-2 text-[11px] tabular-nums text-gray-400">
+                <span>0.00</span>
+                <span class="text-gray-300">📖</span>
+                <span class="text-gray-300">↗</span>
+              </div>
+            </div>
+
+            <!-- Row: live-wick6x3hi -->
+            <div class="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-white/70 text-gray-600 cursor-pointer transition-colors group">
+              <div class="flex items-center gap-2">
+                <span class="text-gray-300 group-hover:text-gray-400 cursor-grab">⋮⋮</span>
+                <span class="font-medium text-gray-700">live-wick6x3hi</span>
+              </div>
+              <div class="flex items-center gap-2 text-[11px] tabular-nums text-gray-400">
+                <span>0.00</span>
+                <span class="text-gray-300">📖</span>
+                <span class="text-gray-300">↗</span>
+              </div>
+            </div>
+
+            <!-- Row: live-wick3x3far -->
+            <div class="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-white/70 text-gray-600 cursor-pointer transition-colors group">
+              <div class="flex items-center gap-2">
+                <span class="text-gray-300 group-hover:text-gray-400 cursor-grab">⋮⋮</span>
+                <span class="font-medium text-gray-700">live-wick3x3far</span>
+              </div>
+              <div class="flex items-center gap-2 text-[11px] tabular-nums text-gray-400">
+                <span>0.00</span>
+                <span class="text-gray-300">📖</span>
+                <span class="text-gray-300">↗</span>
+              </div>
+            </div>
+
+            <!-- NEW HIGHLIGHTED ROW: live-breadth with tag '宽度·SOL' (exact requirement) -->
+            <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-blue-50/90 border border-blue-200 text-blue-900 cursor-pointer shadow-sm">
+              <div class="flex items-center gap-2">
+                <span class="text-blue-400 cursor-grab">⋮⋮</span>
+                <span class="font-semibold text-[#2F6BFF]">live-breadth</span>
+                <span class="text-[10px] font-bold px-1.5 py-0.2 bg-blue-600 text-white rounded">宽度·SOL</span>
+              </div>
+              <div class="flex items-center gap-1.5 text-[11px] tabular-nums">
+                <span class="font-semibold text-gray-700">0.00</span>
+                <span class="text-blue-500">📖</span>
+                <span class="text-blue-500">↗</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. TRADE BOOK SIDE PANEL (Holding Tab Active) -->
+        <!-- Placed floating top-right (350px wide) -->
+        <div class="absolute top-4 right-[380px] w-[356px] glass-card p-3.5 z-20 flex flex-col shadow-xl">
+          <!-- Header: live-breadth with search, sort, history and collapse icons -->
+          <div class="flex items-center justify-between mb-2.5 pb-2 border-b border-gray-100">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+              <h3 class="font-bold text-[13px] text-gray-900">live-breadth 交易簿</h3>
+            </div>
+            <div class="flex items-center gap-1 text-gray-500">
+              <button class="w-6 h-6 rounded flex items-center justify-center hover:bg-gray-100 transition-colors" title="搜索">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </button>
+              <button class="w-6 h-6 rounded flex items-center justify-center hover:bg-gray-100 transition-colors" title="排序">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/></svg>
+              </button>
+              <button class="w-6 h-6 rounded flex items-center justify-center hover:bg-gray-100 transition-colors" title="历史">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </button>
+              <button class="w-6 h-6 rounded flex items-center justify-center hover:bg-gray-100 transition-colors" title="收折">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Segmented Tabs: 持仓 3 (active), 已结束 0, 信号 4 + scope dropdown 全部记录 -->
+          <div class="flex items-center justify-between gap-1 mb-3">
+            <div class="flex items-center p-0.5 rounded-lg bg-gray-100/80 text-[11px] font-medium">
+              <button class="px-2.5 py-1 rounded-md bg-white text-gray-900 shadow-sm font-semibold">持仓 3</button>
+              <button class="px-2.5 py-1 rounded-md text-gray-500 hover:text-gray-800">已结束 0</button>
+              <button class="px-2.5 py-1 rounded-md text-gray-500 hover:text-gray-800">信号 4</button>
+            </div>
+            <div class="flex items-center gap-1 text-[11px] text-gray-500 bg-white/70 px-2 py-1 rounded-md border border-gray-200/60 cursor-pointer">
+              <span>全部记录</span>
+              <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </div>
+          </div>
+
+          <!-- Trade List (Rows 1, 2, 3) -->
+          <div class="space-y-2.5 mb-3 custom-scrollbar max-h-[460px] overflow-y-auto pr-0.5">
+            
+            <!-- Row 1: SOL (Primary trade, tag '计入资金') -->
+            <div class="p-2.5 rounded-xl bg-white border border-blue-100/80 shadow-sm">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5">
+                  <div class="w-5 h-5 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center text-white text-[9px] font-bold">S</div>
+                  <span class="font-bold text-[13px] text-gray-900">SOL</span>
+                  <span class="text-[10px] font-bold px-1.5 py-0.2 bg-blue-100 text-[#2F6BFF] rounded">计入资金</span>
+                </div>
+                <span class="text-[12px] font-bold text-[#169873] tabular-nums">浮动 +2.41%</span>
+              </div>
+
+              <div class="flex items-center justify-between text-[11px] text-gray-500 tabular-nums mb-2">
+                <span>买入 142.30</span>
+                <span>11/10 03:20</span>
+              </div>
+
+              <!-- Thin progress bar: 持有 2天10小时 / 6天 + 到期 11/16 03:20 平仓 -->
+              <div>
+                <div class="flex items-center justify-between text-[10px] text-gray-500 mb-1">
+                  <span>持有 2天10小时 / 6天</span>
+                  <span class="text-gray-400">到期 11/16 03:20 平仓</span>
+                </div>
+                <div class="w-full h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                  <div class="h-full bg-[#2F6BFF] rounded-full" style="width: 40%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Row 2: BTC (Muted, tag '影子 · 对照') -->
+            <div class="p-2.5 rounded-xl bg-white/60 border border-gray-100/90 text-gray-600">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5">
+                  <div class="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center text-white text-[9px] font-bold">₿</div>
+                  <span class="font-semibold text-[13px] text-gray-800">BTC</span>
+                  <span class="text-[10px] font-medium px-1.5 py-0.2 bg-gray-100 text-gray-500 rounded">影子 · 对照</span>
+                </div>
+                <span class="text-[12px] font-semibold text-[#169873] tabular-nums">浮动 +1.18%</span>
+              </div>
+
+              <div class="flex items-center justify-between text-[11px] text-gray-500 tabular-nums mb-1.5">
+                <span>买入 88,420.00</span>
+                <span>11/10 03:20</span>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between text-[10px] text-gray-400 mb-1">
+                  <span>持有 2天10小时 / 6天</span>
+                  <span>到期 11/16 03:20 平仓</span>
+                </div>
+                <div class="w-full h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                  <div class="h-full bg-gray-300 rounded-full" style="width: 40%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Row 3: ETH (Muted, tag '影子 · 对照') -->
+            <div class="p-2.5 rounded-xl bg-white/60 border border-gray-100/90 text-gray-600">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5">
+                  <div class="w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center text-white text-[9px] font-bold">Ξ</div>
+                  <span class="font-semibold text-[13px] text-gray-800">ETH</span>
+                  <span class="text-[10px] font-medium px-1.5 py-0.2 bg-gray-100 text-gray-500 rounded">影子 · 对照</span>
+                </div>
+                <span class="text-[12px] font-semibold text-[#169873] tabular-nums">浮动 +1.45%</span>
+              </div>
+
+              <div class="flex items-center justify-between text-[11px] text-gray-500 tabular-nums mb-1.5">
+                <span>买入 3,142.50</span>
+                <span>11/10 03:20</span>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between text-[10px] text-gray-400 mb-1">
+                  <span>持有 2天10小时 / 6天</span>
+                  <span>到期 11/16 03:20 平仓</span>
+                </div>
+                <div class="w-full h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                  <div class="h-full bg-gray-300 rounded-full" style="width: 40%;"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Secondary Rule Line (Exact verbatim requirement) -->
+          <div class="p-2.5 rounded-lg bg-gray-50 border border-gray-100/80 text-[11px] text-gray-500 leading-relaxed">
+            同一根5分钟K 31–62 个币首次碰周一下轨，之后30分钟无新币 → 买入 SOL，6天后按开盘价平仓；BTC/ETH 只作对照 · OKX 计数为近似换算
+          </div>
+        </div>
+
+        <!-- 5. SECOND SMALL FRAME: SAME PANEL ON THE '信号' TAB (Exact requirement) -->
+        <!-- Placed next to it on the right edge of desktop viewport (356px wide) -->
+        <div class="absolute top-4 right-4 w-[356px] glass-card p-3.5 z-20 flex flex-col shadow-xl">
+          <!-- Header -->
+          <div class="flex items-center justify-between mb-2.5 pb-2 border-b border-gray-100">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+              <h3 class="font-bold text-[13px] text-gray-900">live-breadth 信号触发</h3>
+            </div>
+            <span class="text-[11px] text-gray-400 font-medium">触发状态流水</span>
+          </div>
+
+          <!-- Segmented Tabs: 信号 4 Active -->
+          <div class="flex items-center justify-between gap-1 mb-3">
+            <div class="flex items-center p-0.5 rounded-lg bg-gray-100/80 text-[11px] font-medium">
+              <button class="px-2.5 py-1 rounded-md text-gray-500 hover:text-gray-800">持仓 3</button>
+              <button class="px-2.5 py-1 rounded-md text-gray-500 hover:text-gray-800">已结束 0</button>
+              <button class="px-2.5 py-1 rounded-md bg-white text-gray-900 shadow-sm font-semibold">信号 4</button>
+            </div>
+            <div class="text-[11px] text-gray-400">
+              近14天记录
+            </div>
+          </div>
+
+          <!-- Signal Rows (Exact 5 status items) -->
+          <div class="space-y-2 text-[12px]">
+            <!-- Item 1: 11/10 02:45 · 36 个币 · 已开仓 (blue chip) -->
+            <div class="p-2.5 rounded-xl bg-white border border-blue-100 flex items-center justify-between shadow-xs">
+              <div class="flex flex-col">
+                <span class="font-semibold text-gray-900 tabular-nums">11/10 02:45</span>
+                <span class="text-[11px] text-gray-500">36 个币首次触达下轨</span>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-blue-50 text-[#2F6BFF] border border-blue-200 text-[11px] font-semibold">
+                已开仓
+              </span>
+            </div>
+
+            <!-- Item 2: 11/05 23:50 · 51 个币 · 观察期有新币 · 取消 (gray chip with '+2') -->
+            <div class="p-2.5 rounded-xl bg-white/70 border border-gray-100 flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="font-medium text-gray-700 tabular-nums">11/05 23:50</span>
+                <div class="flex items-center gap-1.5 text-[11px] text-gray-500">
+                  <span>51 个币</span>
+                  <span class="text-gray-400">· 观察期有新币</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[11px] font-medium">取消</span>
+                <span class="px-1.5 py-0.5 rounded bg-gray-200/70 text-gray-600 text-[10px] font-bold tabular-nums">+2</span>
+              </div>
+            </div>
+
+            <!-- Item 3: 11/03 14:10 · 40 个币 · 已有持仓 · 跳过 (amber chip) -->
+            <div class="p-2.5 rounded-xl bg-white/70 border border-gray-100 flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="font-medium text-gray-700 tabular-nums">11/03 14:10</span>
+                <div class="flex items-center gap-1.5 text-[11px] text-gray-500">
+                  <span>40 个币</span>
+                  <span class="text-gray-400">· 单账户单持仓锁</span>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-semibold">
+                已有持仓 · 跳过
+              </span>
+            </div>
+
+            <!-- Item 4: 11/10 04:05 · 33 个币 · 观察中 · 剩 12分 (blue outline chip) -->
+            <div class="p-2.5 rounded-xl bg-blue-50/40 border border-blue-200/80 flex items-center justify-between">
+              <div class="flex flex-col">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping"></span>
+                  <span class="font-semibold text-gray-900 tabular-nums">11/10 04:05</span>
+                </div>
+                <span class="text-[11px] text-gray-500">33 个币 · 30分钟冷静期</span>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-white text-[#2F6BFF] border border-[#2F6BFF] text-[11px] font-semibold shadow-xs">
+                观察中 · 剩 12分
+              </span>
+            </div>
+
+            <!-- Item 5: 10/30 04:40 · 75 个币 · 币数不在区间 (gray chip) -->
+            <div class="p-2.5 rounded-xl bg-white/60 border border-gray-100 flex items-center justify-between opacity-85">
+              <div class="flex flex-col">
+                <span class="font-medium text-gray-600 tabular-nums">10/30 04:40</span>
+                <span class="text-[11px] text-gray-400">75 个币 (超出上限 62)</span>
+              </div>
+              <span class="px-2 py-0.8 rounded-full bg-gray-100 text-gray-500 text-[11px]">
+                币数不在区间
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. EXISTING BOTTOM TOOLBAR UNCHANGED (区间 信号 5m 15m 1H 4H 12H 1D) -->
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 glass-card px-3.5 py-1.5 flex items-center gap-3 z-30 shadow-lg">
+          <!-- View modes -->
+          <div class="flex items-center gap-1 pr-3 border-r border-gray-200">
+            <button class="px-2.5 py-1 rounded-md text-[12px] font-medium text-gray-600 hover:text-gray-900 hover:bg-white/80 transition-colors">区间</button>
+            <button class="px-2.5 py-1 rounded-md text-[12px] font-semibold text-blue-600 bg-blue-50/80 transition-colors">信号</button>
+          </div>
+
+          <!-- Timeframes (exact list: 5m 15m 1H 4H 12H 1D) -->
+          <div class="flex items-center gap-1">
+            <button class="px-2 py-1 rounded text-[11px] text-gray-500 hover:text-gray-900">5m</button>
+            <button class="px-2 py-1 rounded text-[11px] text-gray-500 hover:text-gray-900">15m</button>
+            <button class="px-2.5 py-1 rounded bg-white text-[11px] font-bold text-gray-900 shadow-xs border border-gray-200/80">1H</button>
+            <button class="px-2 py-1 rounded text-[11px] text-gray-500 hover:text-gray-900">4H</button>
+            <button class="px-2 py-1 rounded text-[11px] text-gray-500 hover:text-gray-900">12H</button>
+            <button class="px-2 py-1 rounded text-[11px] text-gray-500 hover:text-gray-900">1D</button>
+          </div>
+
+          <!-- Quick tools -->
+          <div class="flex items-center gap-1.5 pl-3 border-l border-gray-200 text-gray-500">
+            <button class="p-1 hover:text-gray-900" title="定位最新">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- MOBILE INSET 390px (Exact stacked state)   -->
+    <!-- ========================================== -->
+    <div class="w-[390px] h-[900px] bg-[#FAFBFD] rounded-[28px] shadow-2xl border-[6px] border-[#1E293B] overflow-hidden flex flex-col relative select-none shrink-0">
+      
+      <!-- iOS Status Bar Mock -->
+      <div class="h-10 w-full px-6 flex items-center justify-between text-[12px] font-semibold text-gray-900 z-30 shrink-0">
+        <span class="tabular-nums">09:41</span>
+        <div class="w-24 h-4 bg-black rounded-full mx-auto -mt-2"></div>
+        <div class="flex items-center gap-1 text-[11px]">
+          <span>5G</span>
+          <div class="w-4 h-2.5 border border-gray-800 rounded-xs p-0.5 flex items-center">
+            <div class="w-full h-full bg-gray-800 rounded-2xs"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Top Bar with Ticker & Theme -->
+      <div class="px-4 py-2 flex items-center justify-between border-b border-gray-200/50 bg-white/80 backdrop-blur-md z-20">
+        <div class="flex items-center gap-2">
+          <div class="w-5 h-5 rounded-full bg-[#2F6BFF] flex items-center justify-center text-white text-[10px] font-bold">⚡</div>
+          <span class="font-bold text-[13px] text-gray-900">SPIKE</span>
+          <span class="text-[11px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded font-medium">live-breadth</span>
+        </div>
+        <div class="flex items-center gap-1.5 text-[11px]">
+          <span class="tabular-nums font-bold text-gray-900">1,000.00 U</span>
+          <span class="text-[#169873] font-semibold">+0.00</span>
+        </div>
+      </div>
+
+      <!-- Mobile Chart Background Layer (Faint Canvas) -->
+      <div class="relative flex-1 w-full overflow-hidden flex flex-col justify-between p-3 bg-gradient-to-b from-[#F8FAFC] to-[#EEF2F6]">
+        
+        <!-- Faint SVG Candlestick Background on Mobile -->
+        <svg class="absolute inset-0 w-full h-[320px] opacity-40 pointer-events-none" viewBox="0 0 390 320">
+          <line x1="0" y1="180" x2="390" y2="180" stroke="#2F6BFF" stroke-width="1.2" stroke-dasharray="4,4"/>
+          <line x1="80" y1="220" x2="80" y2="280" stroke="#D7355D" stroke-width="2"/>
+          <rect x="74" y="235" width="12" height="35" fill="#D7355D"/>
+          <line x1="130" y1="170" x2="130" y2="210" stroke="#169873" stroke-width="2"/>
+          <rect x="124" y="175" width="12" height="25" fill="#169873"/>
+          <polygon points="130,220 134,228 126,228" fill="#169873"/>
+          <line x1="310" y1="30" x2="310" y2="300" stroke="#6B7280" stroke-width="1.2" stroke-dasharray="4,4"/>
+        </svg>
+
+        <!-- 1. STACKED COMPONENT: Account Card Top -->
+        <div class="w-full glass-card p-3 z-10 shadow-md">
+          <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center text-white text-[9px] font-bold">S</div>
+              <span class="text-[14px] font-bold text-gray-900">SOL / USDT</span>
+            </div>
+            <span class="text-[12px] font-bold tabular-nums text-gray-900">145.73</span>
+          </div>
+
+          <div class="flex items-center gap-1.5 text-[11px] font-semibold text-[#169873] mb-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#169873]"></span>
+            <span>做多 · 持有中 · 剩 3天14小时</span>
+          </div>
+
+          <div class="text-[10px] text-gray-500 mb-2.5 flex items-center justify-between">
+            <span>最新资金交易 · 11/10 03:20 开仓</span>
+            <span class="text-[#169873] font-semibold">+2.41%</span>
+          </div>
+
+          <div class="flex items-center justify-between pt-2 border-t border-gray-100 text-[11px]">
+            <div class="px-2 py-0.5 rounded bg-blue-50 text-[#2F6BFF] font-semibold flex items-center gap-1">
+              <span class="text-gray-400 font-normal">策略</span> live-breadth
+            </div>
+            <span class="text-gray-500 font-medium">交易簿 3 笔</span>
+          </div>
+        </div>
+
+        <!-- 2. STACKED COMPONENT: Trade Book as a Bottom Sheet (Exact requirement) -->
+        <div class="w-full glass-card p-3.5 z-20 shadow-2xl flex flex-col -mb-1 rounded-t-[20px] border-b-0 max-h-[480px]">
+          <!-- Sheet handle bar -->
+          <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-2.5"></div>
+
+          <!-- Header & Segmented Tabs -->
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+              <h4 class="font-bold text-[13px] text-gray-900">live-breadth 交易簿</h4>
+            </div>
+            <span class="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">全部记录</span>
+          </div>
+
+          <!-- Segmented Tab control -->
+          <div class="flex items-center p-0.5 rounded-lg bg-gray-100 text-[11px] font-medium mb-2.5">
+            <button class="flex-1 py-1 rounded bg-white text-gray-900 font-bold shadow-xs">持仓 3</button>
+            <button class="flex-1 py-1 rounded text-gray-500">已结束 0</button>
+            <button class="flex-1 py-1 rounded text-gray-500">信号 4</button>
+          </div>
+
+          <!-- Stacked trade item: SOL -->
+          <div class="p-2.5 rounded-xl bg-white border border-blue-100 mb-2 shadow-xs">
+            <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-[12px] text-gray-900">SOL</span>
+                <span class="text-[9px] font-bold px-1.5 py-0.2 bg-blue-100 text-[#2F6BFF] rounded">计入资金</span>
+              </div>
+              <span class="text-[11px] font-bold text-[#169873] tabular-nums">浮动 +2.41%</span>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-gray-500 tabular-nums mb-1.5">
+              <span>买入 142.30</span>
+              <span>11/10 03:20</span>
+            </div>
+            <div class="flex items-center justify-between text-[9px] text-gray-400 mb-1">
+              <span>持有 2天10小时 / 6天</span>
+              <span>到期 11/16 03:20 平仓</span>
+            </div>
+            <div class="w-full h-1 rounded-full bg-gray-100 overflow-hidden">
+              <div class="h-full bg-[#2F6BFF] rounded-full" style="width: 40%;"></div>
+            </div>
+          </div>
+
+          <!-- Stacked trade item: BTC Muted -->
+          <div class="p-2 rounded-lg bg-white/70 border border-gray-100 mb-2 text-gray-600">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5">
+                <span class="font-semibold text-[11px] text-gray-800">BTC</span>
+                <span class="text-[9px] px-1 py-0.2 bg-gray-100 text-gray-400 rounded">影子 · 对照</span>
+              </div>
+              <span class="text-[10px] font-semibold text-[#169873] tabular-nums">+1.18%</span>
+            </div>
+            <div class="flex items-center justify-between text-[9px] text-gray-400 mt-1">
+              <span>买入 88,420.00</span>
+              <span>持有 2天10小时 / 6天</span>
+            </div>
+          </div>
+
+          <!-- Exact Rule Line on mobile bottom -->
+          <div class="p-2 rounded-lg bg-gray-50 border border-gray-100 text-[9.5px] text-gray-500 leading-normal">
+            同一根5分钟K 31–62 个币首次碰周一下轨，之后30分钟无新币 → 买入 SOL，6天后按开盘价平仓；BTC/ETH 只作对照 · OKX 计数为近似换算
+          </div>
+        </div>
+
+      </div>
+
+      <!-- iOS Home Indicator -->
+      <div class="h-4 w-full flex items-center justify-center bg-white/90 z-30 shrink-0">
+        <div class="w-32 h-1 bg-gray-300 rounded-full"></div>
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>
