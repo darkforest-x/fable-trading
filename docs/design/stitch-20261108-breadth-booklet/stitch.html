@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SPIKE Terminal · Quantitative Research Monograph #08</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed": "#40000d",
+            "primary-fixed-dim": "#abc7ff",
+            "surface-container": "#e5eeff",
+            "surface-container-highest": "#d3e4fe",
+            "inverse-on-surface": "#eaf1ff",
+            "secondary-fixed": "#94f4d9",
+            "on-secondary-fixed": "#002019",
+            "error-container": "#ffdad6",
+            "on-surface": "#0b1c30",
+            "on-background": "#0b1c30",
+            "on-error-container": "#93000a",
+            "error": "#ba1a1a",
+            "on-error": "#ffffff",
+            "tertiary-fixed-dim": "#ffb2b7",
+            "tertiary-fixed": "#ffdadb",
+            "tertiary-container": "#db2b4e",
+            "secondary": "#006b58",
+            "surface-tint": "#005cbb",
+            "primary-fixed": "#d7e2ff",
+            "on-secondary-container": "#00705c",
+            "surface-container-high": "#dce9ff",
+            "on-primary-container": "#fcfbff",
+            "on-tertiary-container": "#fffaf9",
+            "surface-bright": "#f8f9ff",
+            "on-secondary": "#ffffff",
+            "inverse-surface": "#213145",
+            "on-surface-variant": "#414753",
+            "background": "#f8f9ff",
+            "surface-dim": "#cbdbf5",
+            "surface-variant": "#d3e4fe",
+            "secondary-container": "#92f2d7",
+            "inverse-primary": "#abc7ff",
+            "tertiary": "#b70438",
+            "secondary-fixed-dim": "#78d8be",
+            "outline-variant": "#c1c6d6",
+            "on-secondary-fixed-variant": "#005142",
+            "on-primary-fixed-variant": "#00458f",
+            "on-tertiary-fixed-variant": "#92002a",
+            "on-tertiary": "#ffffff",
+            "primary-container": "#0071e3",
+            "on-primary-fixed": "#001b3f",
+            "on-primary": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "outline": "#717785",
+            "primary": "#0059b5",
+            "surface": "#f8f9ff",
+            "surface-container-low": "#eff4ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-md": "0.75rem",
+            "space-lg": "1rem",
+            "margin-desktop": "2.5rem",
+            "margin": "1rem",
+            "gutter-tablet": "1rem",
+            "gutter": "0.75rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "margin-tablet": "1.5rem",
+            "space-xl": "1.5rem",
+            "gutter-desktop": "1.5rem"
+          },
+          "fontFamily": {
+            "body-lg": ["Inter"],
+            "label-numeric-lg": ["JetBrains Mono"],
+            "headline-md": ["Inter"],
+            "body-md": ["Inter"],
+            "body-sm": ["Inter"],
+            "label-numeric-sm": ["JetBrains Mono"],
+            "label-numeric-md": ["JetBrains Mono"],
+            "label-caps": ["Inter"],
+            "headline-lg": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "display": ["Inter"]
+          },
+          "fontSize": {
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "label-numeric-lg": ["20px", { "lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+            "label-numeric-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "label-numeric-md": ["14px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "label-caps": ["10px", { "lineHeight": "12px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-sm": ["17px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .glass-base {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 1px 0 rgba(255, 255, 255, 0.2), 0 20px 48px -12px rgba(11, 28, 48, 0.08);
+    }
+    .dark .glass-base {
+      background: rgba(21, 33, 49, 0.82);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.12), inset 0 -1px 1px 0 rgba(0, 0, 0, 0.4), 0 20px 48px -12px rgba(0, 0, 0, 0.4);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(20px);
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.9), 0 4px 16px -2px rgba(11, 28, 48, 0.04);
+    }
+    .dark .glass-card {
+      background: rgba(33, 49, 69, 0.7);
+      backdrop-filter: blur(20px);
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 4px 16px -2px rgba(0, 0, 0, 0.3);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(113, 119, 133, 0.25);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased overflow-hidden min-h-screen selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Ambient Market Background Visual (Terminal Canvas View Behind Drawer) -->
+<div class="fixed inset-0 pointer-events-none flex flex-col justify-between p-6 opacity-40 dark:opacity-20 transition-opacity">
+<div class="flex items-center justify-between border-b border-outline-variant/30 pb-4">
+<div class="flex items-center gap-3">
+<span class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Spike Terminal</span>
+<span class="font-label-numeric-sm text-label-numeric-sm px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-semibold">1.618 NODE #04</span>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant font-body-sm text-body-sm">
+<span>BTC/USDT 4H: <strong class="font-label-numeric-sm text-secondary font-semibold">68,412.50 (+3.42%)</strong></span>
+<span>ETH/USDT 4H: <strong class="font-label-numeric-sm text-secondary font-semibold">3,542.10 (+2.18%)</strong></span>
+<span>VOL: 2.84B</span>
+</div>
+</div>
+<div class="grid grid-cols-4 gap-4 my-auto">
+<div class="h-64 rounded-xl border border-outline-variant/20 bg-surface-container-lowest/40 p-4">
+<div class="h-3 w-24 bg-outline-variant/40 rounded mb-4"></div>
+<div class="h-40 w-full bg-gradient-to-t from-primary/10 to-transparent rounded"></div>
+</div>
+<div class="h-64 rounded-xl border border-outline-variant/20 bg-surface-container-lowest/40 p-4">
+<div class="h-3 w-32 bg-outline-variant/40 rounded mb-4"></div>
+<div class="h-40 w-full bg-gradient-to-t from-secondary/10 to-transparent rounded"></div>
+</div>
+<div class="h-64 rounded-xl border border-outline-variant/20 bg-surface-container-lowest/40 p-4">
+<div class="h-3 w-28 bg-outline-variant/40 rounded mb-4"></div>
+<div class="h-40 w-full bg-gradient-to-t from-tertiary/10 to-transparent rounded"></div>
+</div>
+<div class="h-64 rounded-xl border border-outline-variant/20 bg-surface-container-lowest/40 p-4">
+<div class="h-3 w-20 bg-outline-variant/40 rounded mb-4"></div>
+<div class="h-40 w-full bg-gradient-to-t from-primary/10 to-transparent rounded"></div>
+</div>
+</div>
+<div class="text-center font-body-sm text-body-sm text-outline">
+      Spike Quantitative Execution Framework · Node 4.12.0 · Live Connection Active
+    </div>
+</div>
+<!-- Modal Backdrop Overlay -->
+<div class="fixed inset-0 bg-on-surface/20 dark:bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300" id="drawer-backdrop"></div>
+<!-- Research Study Drawer (Apple Clear Liquid Glass) -->
+<aside aria-label="Quantitative Research Monograph" class="fixed top-0 right-0 h-full w-full sm:w-[92vw] md:w-[82vw] lg:w-[78vw] xl:w-[75vw] min-w-[390px] max-w-[1580px] z-50 glass-base border-l border-white/60 dark:border-white/10 flex flex-col transition-transform duration-300 ease-out shadow-2xl overflow-hidden" id="monograph-drawer">
+<!-- 1. Header Area -->
+<header class="flex-shrink-0 px-4 md:px-7 pt-4 pb-3.5 border-b border-outline-variant/30 dark:border-white/10 bg-surface-container-lowest/60 dark:bg-inverse-surface/60 backdrop-blur-xl">
+<div class="flex flex-wrap items-center justify-between gap-3">
+<!-- Left: Tag & Title & Subtitle -->
+<div class="min-w-0 flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary-container/10 text-primary dark:text-inverse-primary font-label-caps text-label-caps tracking-widest border border-primary/20">
+<span class="material-symbols-outlined text-[13px]" data-icon="science">science</span>
+              QUANTITATIVE RESEARCH // MONOGRAPH #08 · 只读研究小册
+            </span>
+<span class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container/30 text-secondary dark:text-secondary-fixed font-label-numeric-sm text-label-numeric-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+              2021-2026 全周期实证
+            </span>
+</div>
+<div class="flex items-baseline gap-3 flex-wrap">
+<h1 class="font-headline-lg font-bold text-headline-lg text-on-surface dark:text-inverse-on-surface tracking-tight">
+              全市场下轨反弹 · 4H EMA20
+            </h1>
+<span class="font-body-sm text-body-sm text-on-surface-variant dark:text-outline-variant truncate">
+              多周期超卖共振与均线顺势修复模型 · 跨标的对冲回测
+            </span>
+</div>
+</div>
+<!-- Right: Status / Theme / Close -->
+<div class="flex items-center gap-2.5 flex-shrink-0">
+<div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-low dark:bg-inverse-surface border border-outline-variant/40 dark:border-white/10 text-on-surface-variant dark:text-inverse-on-surface text-body-sm font-body-sm">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="lock">lock</span>
+<span>非实盘执行 · 纯研投模型</span>
+</div>
+<!-- Theme Toggle -->
+<button class="w-9 h-9 rounded-full flex items-center justify-center bg-surface-container-low/80 dark:bg-surface-container-highest/30 border border-outline-variant/30 text-on-surface dark:text-inverse-on-surface hover:bg-surface-container-high transition-colors" id="theme-toggle" title="切换浅色/深色主题">
+<span class="material-symbols-outlined text-[18px]" data-icon="dark_mode">dark_mode</span>
+</button>
+<!-- Dismiss / Close Button -->
+<button aria-label="关闭研究小册" class="w-9 h-9 rounded-full flex items-center justify-center bg-surface-container-low/80 dark:bg-surface-container-highest/30 border border-outline-variant/30 text-on-surface-variant dark:text-inverse-on-surface hover:text-error hover:border-error/40 transition-colors" id="close-drawer">
+<span class="material-symbols-outlined text-[20px]" data-icon="close">close</span>
+</button>
+</div>
+</div>
+<!-- Navigation Tabs & Subbar -->
+<div class="mt-3 flex items-center justify-between border-t border-outline-variant/20 dark:border-white/5 pt-2.5">
+<nav class="flex items-center gap-2" role="tablist">
+<button aria-selected="false" class="tab-btn px-4 py-1.5 rounded-lg text-body-md font-body-md font-medium text-on-surface-variant dark:text-outline-variant hover:text-on-surface dark:hover:text-white transition-all flex items-center gap-1.5" data-tab="rules" role="tab">
+<span class="material-symbols-outlined text-[17px]" data-icon="menu_book">menu_book</span>
+            策略规则
+          </button>
+<button aria-selected="true" class="tab-btn px-4 py-1.5 rounded-lg text-body-md font-body-md font-semibold bg-primary-container text-on-primary-container shadow-sm flex items-center gap-1.5 transition-all" data-tab="executions" role="tab">
+<span class="material-symbols-outlined text-[17px]" data-icon="timeline">timeline</span>
+            历史开仓
+            <span class="ml-1 text-[11px] font-label-numeric-sm bg-white/20 px-1.5 py-0.2 rounded-full">512</span>
+</button>
+<button aria-selected="false" class="tab-btn px-4 py-1.5 rounded-lg text-body-md font-body-md font-medium text-on-surface-variant dark:text-outline-variant hover:text-on-surface dark:hover:text-white transition-all flex items-center gap-1.5" data-tab="stats" role="tab">
+<span class="material-symbols-outlined text-[17px]" data-icon="query_stats">query_stats</span>
+            统计分析
+          </button>
+</nav>
+<!-- Quick friction tag -->
+<div class="hidden lg:flex items-center gap-2 text-on-surface-variant font-label-caps text-label-caps">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>摩擦模型: TAKER 0.05% + SLIPPAGE 0.03% (净 R 结算)</span>
+</div>
+</div>
+</header>
+<!-- Top KPI Summary Strip (Dense Glass Pill Row) -->
+<section class="flex-shrink-0 px-4 md:px-7 py-3 bg-surface-container-low/40 dark:bg-inverse-surface/40 border-b border-outline-variant/25 dark:border-white/5 overflow-x-auto custom-scroll">
+<div class="flex items-center gap-3 min-w-max">
+<!-- KPI 1 -->
+<div class="glass-card px-3.5 py-2 rounded-xl flex items-center gap-3 border border-white/80 dark:border-white/10">
+<div class="w-8 h-8 rounded-lg bg-primary-container/10 flex items-center justify-center text-primary dark:text-inverse-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="dataset">dataset</span>
+</div>
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant dark:text-outline-variant uppercase">样本总数</div>
+<div class="font-label-numeric-md text-label-numeric-md font-semibold text-on-surface dark:text-inverse-on-surface">
+              512 <span class="font-body-sm text-body-sm font-normal text-on-surface-variant">(普通 214 / 急跌 146 / 山寨 152)</span>
+</div>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="glass-card px-3.5 py-2 rounded-xl flex items-center gap-3 border border-white/80 dark:border-white/10">
+<div class="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary dark:text-secondary-fixed">
+<span class="material-symbols-outlined text-[18px]" data-icon="verified">verified</span>
+</div>
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant dark:text-outline-variant uppercase">胜率 (Win Rate)</div>
+<div class="font-label-numeric-md text-label-numeric-md font-semibold text-secondary dark:text-secondary-fixed">
+              64.8% <span class="text-body-sm font-body-sm font-normal text-on-surface-variant">/ 332 胜</span>
+</div>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="glass-card px-3.5 py-2 rounded-xl flex items-center gap-3 border border-white/80 dark:border-white/10">
+<div class="w-8 h-8 rounded-lg bg-primary-container/10 flex items-center justify-center text-primary dark:text-inverse-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="balance">balance</span>
+</div>
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant dark:text-outline-variant uppercase">平均盈亏比 (Avg R:R)</div>
+<div class="font-label-numeric-md text-label-numeric-md font-semibold text-on-surface dark:text-inverse-on-surface">
+              1 : 2.15
+            </div>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="glass-card px-3.5 py-2 rounded-xl flex items-center gap-3 border border-white/80 dark:border-white/10">
+<div class="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary dark:text-secondary-fixed">
+<span class="material-symbols-outlined text-[18px]" data-icon="trending_up">trending_up</span>
+</div>
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant dark:text-outline-variant uppercase">净期望收益 (Net Expectancy)</div>
+<div class="font-label-numeric-md text-label-numeric-md font-semibold text-secondary dark:text-secondary-fixed">
+              +0.48 R <span class="font-body-sm text-body-sm font-normal text-on-surface-variant">/ 笔 (扣摩擦)</span>
+</div>
+</div>
+</div>
+<!-- KPI 5 -->
+<div class="glass-card px-3.5 py-2 rounded-xl flex items-center gap-3 border border-white/80 dark:border-white/10">
+<div class="w-8 h-8 rounded-lg bg-tertiary-container/10 flex items-center justify-center text-tertiary dark:text-tertiary-fixed-dim">
+<span class="material-symbols-outlined text-[18px]" data-icon="warning">warning</span>
+</div>
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant dark:text-outline-variant uppercase">历史最大回撤 (Max DD)</div>
+<div class="font-label-numeric-md text-label-numeric-md font-semibold text-tertiary dark:text-tertiary-fixed-dim">
+              -6.42 R
+            </div>
+</div>
+</div>
+<!-- KPI 6 -->
+<div class="glass-card px-3.5 py-2 rounded-xl flex items-center gap-3 border border-white/80 dark:border-white/10">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[18px]" data-icon="schedule">schedule</span>
+</div>
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant dark:text-outline-variant uppercase">交易时长中位数</div>
+<div class="font-label-numeric-md text-label-numeric-md font-semibold text-on-surface dark:text-inverse-on-surface">
+              18.4 h <span class="font-body-sm text-body-sm font-normal text-on-surface-variant">(4H EMA20 动态触达)</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Content Canvas (Scrollable Body) -->
+<main class="flex-1 overflow-y-auto custom-scroll p-4 md:p-7 space-y-6">
+<!-- ================= TAB 1: 策略规则 (Strategy Rules) ================= -->
+<div class="hidden space-y-6" id="tab-content-rules">
+<!-- Summary Alert Box -->
+<div class="glass-card p-5 rounded-2xl border border-primary/20 bg-primary-container/5 dark:bg-primary-container/10 flex items-start gap-4">
+<span class="material-symbols-outlined text-primary text-[28px] mt-0.5" data-icon="auto_awesome">auto_awesome</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm font-semibold text-on-surface dark:text-inverse-on-surface mb-1">
+              模型核心假设与数学原语 (Alpha Thesis)
+            </h2>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-outline-variant leading-relaxed">
+              实时监控全市场 40+ 主流与高贝塔山寨标的。当市场在日线或 4H 级别出现下沿 1.618 波动率离散极值刺穿，且全市场大单急跌脉冲进入流动性抽干真空区时，极速诱发空头拥挤平仓。策略在 4H K 线收线反转或均线顺势修复第一目标 <span class="font-semibold text-primary dark:text-inverse-primary">4H EMA20</span> 时实施离散分批止盈。
+            </p>
+</div>
+</div>
+<!-- 3 Legs Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Leg A -->
+<div class="glass-card p-5 rounded-2xl border border-white/80 dark:border-white/10 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<span class="px-2.5 py-1 rounded-md bg-primary-container/10 text-primary dark:text-inverse-primary font-label-caps text-label-caps font-semibold">分腿 A</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">权重 40%</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface dark:text-inverse-on-surface mb-2">BTC 普通反弹 (基准修复)</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-outline-variant leading-relaxed">
+                常规阴跌后触及 4H 布林/ATR 下轨 1.618 偏离，出现下影线刺穿收回。波动率收敛型常规回归，盈亏比稳定在 1:1.8 ~ 1:2.2。
+              </p>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/20 font-label-numeric-sm text-label-numeric-sm text-on-surface-variant flex justify-between">
+<span>样本容量: 214 笔</span>
+<span class="text-secondary font-semibold">胜率: 62.1%</span>
+</div>
+</div>
+<!-- Leg B -->
+<div class="glass-card p-5 rounded-2xl border border-white/80 dark:border-white/10 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<span class="px-2.5 py-1 rounded-md bg-secondary-container/20 text-secondary dark:text-secondary-fixed font-label-caps text-label-caps font-semibold">分腿 B</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">权重 35%</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface dark:text-inverse-on-surface mb-2">BTC 急跌流动性刺杀脉冲</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-outline-variant leading-relaxed">
+                清算地图爆仓峰值触发，4H 振幅 > 4.8% 且急速放量 3 倍以上。超跌反弹动量最强，迅速向 4H EMA20 靠拢。
+              </p>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/20 font-label-numeric-sm text-label-numeric-sm text-on-surface-variant flex justify-between">
+<span>样本容量: 146 笔</span>
+<span class="text-secondary font-semibold">胜率: 71.2%</span>
+</div>
+</div>
+<!-- Leg C -->
+<div class="glass-card p-5 rounded-2xl border border-white/80 dark:border-white/10 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<span class="px-2.5 py-1 rounded-md bg-surface-container-high text-on-surface font-label-caps text-label-caps font-semibold">分腿 C</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">权重 25%</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface dark:text-inverse-on-surface mb-2">山寨币优质篮子 (Top Alt Basket)</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-outline-variant leading-relaxed">
+                对冲分仓配置 SOL, SUI, ETH, DOGE, NEAR, AVAX。在大盘探底信号确立后秒级跟进，弹性爆发高，提供组合 Alpha 超额。
+              </p>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/20 font-label-numeric-sm text-label-numeric-sm text-on-surface-variant flex justify-between">
+<span>样本容量: 152 笔</span>
+<span class="text-secondary font-semibold">胜率: 61.8%</span>
+</div>
+</div>
+</div>
+<!-- Exit & Defense Protocols -->
+<div class="glass-card p-6 rounded-2xl border border-white/80 dark:border-white/10">
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface dark:text-inverse-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="shield">shield</span>
+            退出与防守执行规范 (Exit & Risk Invariants)
+          </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="p-4 rounded-xl bg-surface-container-low/70 dark:bg-inverse-surface/40 border border-outline-variant/20">
+<div class="flex items-center gap-2 text-tertiary dark:text-tertiary-fixed-dim font-headline-sm font-semibold mb-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="stop_circle">stop_circle</span>
+                止损约束 (Dynamic Hard Stop)
+              </div>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-outline-variant leading-relaxed">
+                入场后以触发 K 线极限影线最低价位下方 <strong class="text-tertiary font-label-numeric-sm font-semibold">-0.15 R</strong> 设定硬件防穿止损；若连续两根 4H 收盘击穿且均线斜率维持发散，则硬性斩仓，单笔回撤严控在 1.0 R 以内。
+              </p>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-low/70 dark:bg-inverse-surface/40 border border-outline-variant/20">
+<div class="flex items-center gap-2 text-secondary dark:text-secondary-fixed font-headline-sm font-semibold mb-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="price_check">price_check</span>
+                止盈分段 (4H EMA20 Dynamic Take Profit)
+              </div>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-outline-variant leading-relaxed">
+                价格首次向上触碰 <strong class="text-primary font-semibold">4H EMA20 均线</strong> 时，强制市价对冲离散平仓 <strong class="text-secondary font-semibold">60% 仓位</strong> 锁定基准利润；剩余 40% 仓位底仓立即调整止损位至成本线（保本持有），捕捉顺势翻转超额脉冲。
+              </p>
+</div>
+</div>
+</div>
+</div>
+<!-- ================= TAB 2: 历史开仓 (Historical Executions) [Active by Default] ================= -->
+<div class="space-y-6" id="tab-content-executions">
+<!-- Master-Detail Split Grid: Left Execution List, Right Synchronized Chart Drill-down -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+<!-- Left Table (5 or 6 cols in desktop) -->
+<div class="xl:col-span-6 space-y-3">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface dark:text-inverse-on-surface">回测历史开仓记录</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded">点击单行即时同步 K 线</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">共 512 笔 · 默认显示近 6 笔样本</span>
+</div>
+<!-- Execution Table Container -->
+<div class="glass-card rounded-2xl border border-white/80 dark:border-white/10 overflow-hidden shadow-sm">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant/30 bg-surface-container-low/50 dark:bg-inverse-surface/50 text-on-surface-variant font-label-caps text-label-caps">
+<th class="py-2.5 px-3">开仓时间 (UTC)</th>
+<th class="py-2.5 px-3">类型标签</th>
+<th class="py-2.5 px-3 text-right">入场 / 出场 (USD)</th>
+<th class="py-2.5 px-3 text-center">时长</th>
+<th class="py-2.5 px-3 text-right">单笔净收益</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20 font-body-sm text-body-sm" id="execution-rows">
+<!-- Row 1: Selected (BTC 急跌) -->
+<tr class="trade-row cursor-pointer transition-colors bg-primary-container/10 dark:bg-primary-container/20 border-l-4 border-l-primary" data-entry="49,850.0" data-exit="54,200.0" data-is-alt="false" data-pnl="+2.45 R (+8.72%)" data-status="win" data-ticker="BTC/USDT" data-time="2024-08-05 08:00" data-trade-id="trade-1" data-type="BTC 急跌">
+<td class="py-3 px-3">
+<div class="font-label-numeric-sm text-label-numeric-sm font-semibold text-on-surface dark:text-inverse-on-surface">2024-08-05</div>
+<div class="font-label-numeric-sm text-[10px] text-on-surface-variant">08:00 UTC (日元套息崩盘)</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-secondary-container/20 text-secondary dark:text-secondary-fixed">
+                          BTC 急跌
+                        </span>
+</td>
+<td class="py-3 px-3 text-right font-label-numeric-sm text-label-numeric-sm">
+<span class="text-on-surface dark:text-inverse-on-surface">49,850.0</span>
+<span class="text-on-surface-variant block text-[10px]">→ 54,200.0</span>
+</td>
+<td class="py-3 px-3 text-center font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">
+                        16h <span class="text-[10px] block">(4 根 4H)</span>
+</td>
+<td class="py-3 px-3 text-right">
+<span class="font-label-numeric-md text-label-numeric-md font-semibold text-secondary dark:text-secondary-fixed">+2.45 R</span>
+<span class="block text-[10px] text-secondary font-label-numeric-sm">+8.72%</span>
+</td>
+</tr>
+<!-- Row 2: 山寨篮子 -->
+<tr class="trade-row cursor-pointer transition-colors hover:bg-surface-container-high/40 border-l-4 border-l-transparent" data-entry="综合入场指数 100.0" data-exit="综合出场指数 115.8" data-is-alt="true" data-pnl="+3.10 R (+15.80%)" data-status="win" data-ticker="ALT BASKET" data-time="2024-11-05 16:00" data-trade-id="trade-2" data-type="山寨篮子 (6币)">
+<td class="py-3 px-3">
+<div class="font-label-numeric-sm text-label-numeric-sm font-semibold text-on-surface dark:text-inverse-on-surface">2024-11-05</div>
+<div class="font-label-numeric-sm text-[10px] text-on-surface-variant">16:00 UTC (大选前夕探底)</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-surface-container-high text-on-surface">
+                          山寨篮子 (6币)
+                        </span>
+</td>
+<td class="py-3 px-3 text-right font-label-numeric-sm text-label-numeric-sm">
+<span class="text-on-surface dark:text-inverse-on-surface">指数 100.0</span>
+<span class="text-on-surface-variant block text-[10px]">→ 指数 115.8</span>
+</td>
+<td class="py-3 px-3 text-center font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">
+                        28h <span class="text-[10px] block">(7 根 4H)</span>
+</td>
+<td class="py-3 px-3 text-right">
+<span class="font-label-numeric-md text-label-numeric-md font-semibold text-secondary dark:text-secondary-fixed">+3.10 R</span>
+<span class="block text-[10px] text-secondary font-label-numeric-sm">+15.80%</span>
+</td>
+</tr>
+<!-- Row 3: BTC 普通 (Loss) -->
+<tr class="trade-row cursor-pointer transition-colors hover:bg-surface-container-high/40 border-l-4 border-l-transparent" data-entry="63,200.0" data-exit="61,900.0" data-is-alt="false" data-pnl="-1.00 R (-5.20%)" data-status="loss" data-ticker="BTC/USDT" data-time="2024-04-14 20:00" data-trade-id="trade-3" data-type="BTC 普通">
+<td class="py-3 px-3">
+<div class="font-label-numeric-sm text-label-numeric-sm font-semibold text-on-surface dark:text-inverse-on-surface">2024-04-14</div>
+<div class="font-label-numeric-sm text-[10px] text-on-surface-variant">20:00 UTC (地缘冲突下插)</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-primary-container/10 text-primary dark:text-inverse-primary">
+                          BTC 普通
+                        </span>
+</td>
+<td class="py-3 px-3 text-right font-label-numeric-sm text-label-numeric-sm">
+<span class="text-on-surface dark:text-inverse-on-surface">63,200.0</span>
+<span class="text-on-surface-variant block text-[10px]">→ 61,900.0 (破位SL)</span>
+</td>
+<td class="py-3 px-3 text-center font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">
+                        8h <span class="text-[10px] block">(2 根 4H)</span>
+</td>
+<td class="py-3 px-3 text-right">
+<span class="font-label-numeric-md text-label-numeric-md font-semibold text-tertiary dark:text-tertiary-fixed-dim">-1.00 R</span>
+<span class="block text-[10px] text-tertiary font-label-numeric-sm">-5.20%</span>
+</td>
+</tr>
+<!-- Row 4: BTC 普通 (Win) -->
+<tr class="trade-row cursor-pointer transition-colors hover:bg-surface-container-high/40 border-l-4 border-l-transparent" data-entry="38,900.0" data-exit="40,250.0" data-is-alt="false" data-pnl="+1.85 R (+3.47%)" data-status="win" data-ticker="BTC/USDT" data-time="2024-01-23 12:00" data-trade-id="trade-4" data-type="BTC 普通">
+<td class="py-3 px-3">
+<div class="font-label-numeric-sm text-label-numeric-sm font-semibold text-on-surface dark:text-inverse-on-surface">2024-01-23</div>
+<div class="font-label-numeric-sm text-[10px] text-on-surface-variant">12:00 UTC (ETF 落地抛压衰竭)</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-primary-container/10 text-primary dark:text-inverse-primary">
+                          BTC 普通
+                        </span>
+</td>
+<td class="py-3 px-3 text-right font-label-numeric-sm text-label-numeric-sm">
+<span class="text-on-surface dark:text-inverse-on-surface">38,900.0</span>
+<span class="text-on-surface-variant block text-[10px]">→ 40,250.0</span>
+</td>
+<td class="py-3 px-3 text-center font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">
+                        20h <span class="text-[10px] block">(5 根 4H)</span>
+</td>
+<td class="py-3 px-3 text-right">
+<span class="font-label-numeric-md text-label-numeric-md font-semibold text-secondary dark:text-secondary-fixed">+1.85 R</span>
+<span class="block text-[10px] text-secondary font-label-numeric-sm">+3.47%</span>
+</td>
+</tr>
+<!-- Row 5: 山寨篮子 (Win) -->
+<tr class="trade-row cursor-pointer transition-colors hover:bg-surface-container-high/40 border-l-4 border-l-transparent" data-entry="综合指数 74.2" data-exit="综合指数 82.5" data-is-alt="true" data-pnl="+2.15 R (+11.18%)" data-status="win" data-ticker="ALT BASKET" data-time="2023-10-16 04:00" data-trade-id="trade-5" data-type="山寨篮子 (6币)">
+<td class="py-3 px-3">
+<div class="font-label-numeric-sm text-label-numeric-sm font-semibold text-on-surface dark:text-inverse-on-surface">2023-10-16</div>
+<div class="font-label-numeric-sm text-[10px] text-on-surface-variant">04:00 UTC (假新闻回踩清洗)</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-surface-container-high text-on-surface">
+                          山寨篮子 (6币)
+                        </span>
+</td>
+<td class="py-3 px-3 text-right font-label-numeric-sm text-label-numeric-sm">
+<span class="text-on-surface dark:text-inverse-on-surface">指数 74.2</span>
+<span class="text-on-surface-variant block text-[10px]">→ 指数 82.5</span>
+</td>
+<td class="py-3 px-3 text-center font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">
+                        24h <span class="text-[10px] block">(6 根 4H)</span>
+</td>
+<td class="py-3 px-3 text-right">
+<span class="font-label-numeric-md text-label-numeric-md font-semibold text-secondary dark:text-secondary-fixed">+2.15 R</span>
+<span class="block text-[10px] text-secondary font-label-numeric-sm">+11.18%</span>
+</td>
+</tr>
+<!-- Row 6: BTC 急跌 (Win) -->
+<tr class="trade-row cursor-pointer transition-colors hover:bg-surface-container-high/40 border-l-4 border-l-transparent" data-entry="19,650.0" data-exit="21,150.0" data-is-alt="false" data-pnl="+2.80 R (+7.63%)" data-status="win" data-ticker="BTC/USDT" data-time="2023-03-10 16:00" data-trade-id="trade-6" data-type="BTC 急跌">
+<td class="py-3 px-3">
+<div class="font-label-numeric-sm text-label-numeric-sm font-semibold text-on-surface dark:text-inverse-on-surface">2023-03-10</div>
+<div class="font-label-numeric-sm text-[10px] text-on-surface-variant">16:00 UTC (硅谷银行危机极速插针)</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-secondary-container/20 text-secondary dark:text-secondary-fixed">
+                          BTC 急跌
+                        </span>
+</td>
+<td class="py-3 px-3 text-right font-label-numeric-sm text-label-numeric-sm">
+<span class="text-on-surface dark:text-inverse-on-surface">19,650.0</span>
+<span class="text-on-surface-variant block text-[10px]">→ 21,150.0</span>
+</td>
+<td class="py-3 px-3 text-center font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">
+                        16h <span class="text-[10px] block">(4 根 4H)</span>
+</td>
+<td class="py-3 px-3 text-right">
+<span class="font-label-numeric-md text-label-numeric-md font-semibold text-secondary dark:text-secondary-fixed">+2.80 R</span>
+<span class="block text-[10px] text-secondary font-label-numeric-sm">+7.63%</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Right Interactive Drill-Down Section: Synchronized 4H K-Line Chart Viewer -->
+<div class="xl:col-span-6 space-y-3">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface dark:text-inverse-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[19px]" data-icon="candlestick_chart">candlestick_chart</span>
+                  同源 K 线回放与进出场标记 (4H Sync Replay)
+                </span>
+</div>
+<div class="hidden items-center gap-1.5" id="alt-selector-container">
+<label class="text-xs text-on-surface-variant font-label-caps" for="alt-coin-select">成分币选择:</label>
+<select class="bg-surface-container-high/80 dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface font-label-numeric-sm text-label-numeric-sm rounded-lg border border-outline-variant/30 px-2 py-1 focus:ring-1 focus:ring-primary" id="alt-coin-select">
+<option selected="" value="SOL">SOL/USDT (+4.2R 贡献)</option>
+<option value="SUI">SUI/USDT (+5.1R 贡献)</option>
+<option value="ETH">ETH/USDT (+1.8R 贡献)</option>
+<option value="DOGE">DOGE/USDT (+2.6R 贡献)</option>
+<option value="NEAR">NEAR/USDT (+2.9R 贡献)</option>
+<option value="AVAX">AVAX/USDT (+2.0R 贡献)</option>
+</select>
+</div>
+</div>
+<!-- Chart Canvas Glass Window -->
+<div class="glass-card rounded-2xl border border-white/80 dark:border-white/10 p-4 shadow-sm relative overflow-hidden">
+<!-- Chart Header Info Pill -->
+<div class="flex flex-wrap items-center justify-between gap-2 border-b border-outline-variant/20 pb-3 mb-3">
+<div class="flex items-center gap-2">
+<span class="font-label-numeric-md text-label-numeric-md font-bold px-2 py-0.5 rounded bg-primary-container/10 text-primary dark:text-inverse-primary" id="chart-ticker-badge">
+                    BTC/USDT 4H
+                  </span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate" id="chart-event-desc">
+                    2024-08-05 08:00 UTC · 刺穿下沿 1.618 极端恐慌
+                  </span>
+</div>
+<div class="flex items-center gap-3 font-label-numeric-sm text-label-numeric-sm">
+<div class="flex items-center gap-1">
+<span class="w-3 h-0.5 bg-[#00d2ff] rounded"></span>
+<span class="text-on-surface-variant">4H EMA20 (动态顺势目标)</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-3 h-0.5 bg-tertiary-container border-dashed border-t"></span>
+<span class="text-on-surface-variant">1.618 极值下轨</span>
+</div>
+</div>
+</div>
+<!-- High Precision SVG K-Line Graphic -->
+<div class="relative w-full h-[320px] bg-surface-container-low/30 dark:bg-black/20 rounded-xl overflow-hidden p-2 flex items-center justify-center">
+<svg class="w-full h-full" id="kline-svg" preserveaspectratio="none" viewbox="0 0 600 300">
+<!-- Grid Lines -->
+<line class="text-outline-variant/20" stroke="currentColor" stroke-dasharray="3,3" x1="0" x2="600" y1="60" y2="60"></line>
+<line class="text-outline-variant/20" stroke="currentColor" stroke-dasharray="3,3" x1="0" x2="600" y1="130" y2="130"></line>
+<line class="text-outline-variant/20" stroke="currentColor" stroke-dasharray="3,3" x1="0" x2="600" y1="210" y2="210"></line>
+<line class="text-outline-variant/15" stroke="currentColor" stroke-dasharray="3,3" x1="150" x2="150" y1="0" y2="300"></line>
+<line class="text-outline-variant/15" stroke="currentColor" stroke-dasharray="3,3" x1="300" x2="300" y1="0" y2="300"></line>
+<line class="text-outline-variant/15" stroke="currentColor" stroke-dasharray="3,3" x1="450" x2="450" y1="0" y2="300"></line>
+<!-- Indicator 1: 1.618 Extreme Lower Band Line (Crimson / Magenta dashed) -->
+<path d="M 0 240 Q 150 250 260 255 T 600 230" fill="none" stroke="#db2b4e" stroke-dasharray="4,4" stroke-width="1.8"></path>
+<text class="text-[10px] font-label-numeric-sm font-semibold" fill="#db2b4e" x="15" y="235">1.618 极限下轨 (动态刺穿区)</text>
+<!-- Indicator 2: 4H EMA20 Smooth Trend Line (Apple Neon Cyan-Blue) -->
+<path d="M 0 90 C 120 110 240 145 350 135 C 450 125 520 115 600 100" fill="none" stroke="#0071e3" stroke-width="2.5"></path>
+<text class="text-[11px] font-label-numeric-sm font-bold" fill="#0071e3" x="500" y="95">4H EMA20 目标线</text>
+<!-- Candlesticks Sequence (12 bars simulation) -->
+<!-- Bar 1 (Red) -->
+<line stroke="#ba1a1a" stroke-width="1.5" x1="40" x2="40" y1="80" y2="130"></line>
+<rect fill="#ba1a1a" height="30" rx="1" width="14" x="33" y="90"></rect>
+<!-- Bar 2 (Red) -->
+<line stroke="#ba1a1a" stroke-width="1.5" x1="85" x2="85" y1="110" y2="160"></line>
+<rect fill="#ba1a1a" height="32" rx="1" width="14" x="78" y="120"></rect>
+<!-- Bar 3 (Red) -->
+<line stroke="#ba1a1a" stroke-width="1.5" x1="130" x2="130" y1="140" y2="195"></line>
+<rect fill="#ba1a1a" height="38" rx="1" width="14" x="123" y="150"></rect>
+<!-- Bar 4 (Severe Dump Spike - Lower Wick Piercing 1.618) -->
+<line stroke="#ba1a1a" stroke-width="1.8" x1="175" x2="175" y1="180" y2="282"></line>
+<rect fill="#ba1a1a" height="70" rx="1" width="14" x="168" y="185"></rect>
+<!-- ENTRY TRIGGER MARKER (Piercing Recovery) -->
+<g class="animate-bounce">
+<polygon fill="#006b58" points="175,296 169,308 181,308"></polygon>
+<circle cx="175" cy="275" fill="#006b58" r="4" stroke="#ffffff" stroke-width="1.5"></circle>
+</g>
+<text class="text-[11px] font-label-numeric-sm font-bold" fill="#006b58" x="145" y="270">入场触发 (49,850)</text>
+<!-- Bar 5 (Green Reversal Hammer) -->
+<line stroke="#006b58" stroke-width="1.5" x1="220" x2="220" y1="210" y2="270"></line>
+<rect fill="#006b58" height="42" rx="1" width="14" x="213" y="215"></rect>
+<!-- Bar 6 (Green Strong) -->
+<line stroke="#006b58" stroke-width="1.5" x1="265" x2="265" y1="180" y2="235"></line>
+<rect fill="#006b58" height="38" rx="1" width="14" x="258" y="185"></rect>
+<!-- Bar 7 (Green Impulse) -->
+<line stroke="#006b58" stroke-width="1.5" x1="310" x2="310" y1="150" y2="200"></line>
+<rect fill="#006b58" height="36" rx="1" width="14" x="303" y="155"></rect>
+<!-- Bar 8 (EMA20 Touch - EXIT TRIGGER) -->
+<line stroke="#006b58" stroke-width="1.5" x1="355" x2="355" y1="120" y2="175"></line>
+<rect fill="#006b58" height="38" rx="1" width="14" x="348" y="128"></rect>
+<!-- EXIT MARKER (Touch 4H EMA20) -->
+<circle cx="355" cy="135" fill="#0071e3" r="5" stroke="#ffffff" stroke-width="2"></circle>
+<polygon fill="#0071e3" points="355,118 349,106 361,106"></polygon>
+<text class="text-[11px] font-label-numeric-sm font-bold" fill="#0071e3" x="325" y="100">平仓 60% (54,200)</text>
+<!-- Bar 9 (Consolidation above EMA) -->
+<line stroke="#006b58" stroke-width="1.5" x1="400" x2="400" y1="110" y2="155"></line>
+<rect fill="#006b58" height="25" rx="1" width="14" x="393" y="118"></rect>
+<!-- Bar 10 (Red retest EMA) -->
+<line stroke="#ba1a1a" stroke-width="1.5" x1="445" x2="445" y1="115" y2="150"></line>
+<rect fill="#ba1a1a" height="20" rx="1" width="14" x="438" y="122"></rect>
+<!-- Bar 11 (Green Breakout) -->
+<line stroke="#006b58" stroke-width="1.5" x1="490" x2="490" y1="95" y2="135"></line>
+<rect fill="#006b58" height="28" rx="1" width="14" x="483" y="100"></rect>
+<!-- Bar 12 (Current / Holding) -->
+<line stroke="#006b58" stroke-width="1.5" x1="535" x2="535" y1="85" y2="120"></line>
+<rect fill="#006b58" height="22" rx="1" width="14" x="528" y="90"></rect>
+</svg>
+<!-- Floating Watermark -->
+<div class="absolute bottom-3 left-4 text-[10px] font-label-numeric-sm text-outline-variant/60 pointer-events-none">
+                  OKX/BINANCE 4H SYNTHETIC AGGREGATE · EMA20 LAG: 0.00ms
+                </div>
+</div>
+<!-- Replay Inspection Metrics Bar -->
+<div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-outline-variant/20 font-label-numeric-sm text-label-numeric-sm">
+<div class="p-2 rounded-lg bg-surface-container-low/50 dark:bg-inverse-surface/30">
+<span class="text-on-surface-variant block text-[10px]">入场点刺穿深度</span>
+<span class="font-bold text-tertiary">-3.84% (下沿 1.618 破位)</span>
+</div>
+<div class="p-2 rounded-lg bg-surface-container-low/50 dark:bg-inverse-surface/30">
+<span class="text-on-surface-variant block text-[10px]">EMA20 触达耗时</span>
+<span class="font-bold text-on-surface dark:text-inverse-on-surface">16 小时 (4 根 4H)</span>
+</div>
+<div class="p-2 rounded-lg bg-surface-container-low/50 dark:bg-inverse-surface/30">
+<span class="text-on-surface-variant block text-[10px]">首批出场价格</span>
+<span class="font-bold text-secondary">54,200.0 (+8.72%)</span>
+</div>
+<div class="p-2 rounded-lg bg-surface-container-low/50 dark:bg-inverse-surface/30">
+<span class="text-on-surface-variant block text-[10px]">剩余仓位状态</span>
+<span class="font-bold text-primary">保本推损持有中 (40%)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ================= TAB 3: 统计分析 (Statistical Analysis) ================= -->
+<div class="hidden space-y-6" id="tab-content-stats">
+<!-- 1. Dual Window Benchmark (双区间对比) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+<!-- Window A -->
+<div class="glass-card p-5 rounded-2xl border border-secondary/30 relative overflow-hidden">
+<div class="absolute top-0 right-0 px-3 py-1 bg-secondary/15 rounded-bl-xl font-label-caps text-label-caps text-secondary font-bold">
+              极值共振高胜率区间
+            </div>
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-secondary text-[22px]" data-icon="bolt">bolt</span>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface dark:text-inverse-on-surface">窗口 A: 全市场极端急跌行情</h3>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">
+              恐慌盘集中释放、全网单小时爆仓 > 3 亿美元、4H 偏离下轨达 1.618 以上强脉冲反转。
+            </p>
+<div class="grid grid-cols-3 gap-3 pt-3 border-t border-outline-variant/20 font-label-numeric-md text-label-numeric-md">
+<div class="text-center p-2 rounded-lg bg-surface-container-low/50 dark:bg-inverse-surface/40">
+<span class="font-label-caps text-[10px] text-on-surface-variant block">胜率 (Win Rate)</span>
+<span class="font-bold text-secondary">71.2%</span>
+</div>
+<div class="text-center p-2 rounded-lg bg-surface-container-low/50 dark:bg-inverse-surface/40">
+<span class="font-label-caps text-[10px] text-on-surface-variant block">平均单笔收益</span>
+<span class="font-bold text-secondary">+0.68 R</span>
+</div>
+<div class="text-center p-2 rounded-lg bg-surface-container-low/50 dark:bg-inverse-surface/40">
+<span class="font-label-caps text-[10px] text-on-surface-variant block">区间最大回撤</span>
+<span class="font-bold text-tertiary">-3.8 R</span>
+</div>
+</div>
+</div>
+<!-- Window B -->
+<div class="glass-card p-5 rounded-2xl border border-outline-variant/40 relative overflow-hidden">
+<div class="absolute top-0 right-0 px-3 py-1 bg-surface-container-high rounded-bl-xl font-label-caps text-label-caps text-on-surface-variant font-bold">
+              均值回归基准区间
+            </div>
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-[22px]" data-icon="water_drop">water_drop</span>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface dark:text-inverse-on-surface">窗口 B: 常规震荡阴跌行情</h3>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">
+              缺乏流动性真空的常规通道下行，触碰 1.618 边界后修复动量较弱，偶发多次防穿止损。
+            </p>
+<div class="grid grid-cols-3 gap-3 pt-3 border-t border-outline-variant/20 font-label-numeric-md text-label-numeric-md">
+<div class="text-center p-2 rounded-lg bg-surface-container-low/50 dark:bg-inverse-surface/40">
+<span class="font-label-caps text-[10px] text-on-surface-variant block">胜率 (Win Rate)</span>
+<span class="font-bold text-on-surface dark:text-inverse-on-surface">58.4%</span>
+</div>
+<div class="text-center p-2 rounded-lg bg-surface-container-low/50 dark:bg-inverse-surface/40">
+<span class="font-label-caps text-[10px] text-on-surface-variant block">平均单笔收益</span>
+<span class="font-bold text-on-surface dark:text-inverse-on-surface">+0.28 R</span>
+</div>
+<div class="text-center p-2 rounded-lg bg-surface-container-low/50 dark:bg-inverse-surface/40">
+<span class="font-label-caps text-[10px] text-on-surface-variant block">区间最大回撤</span>
+<span class="font-bold text-tertiary">-6.4 R</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 2. Breakdown Matrix: Annual Performance & Legs Breakdown -->
+<div class="glass-card p-6 rounded-2xl border border-white/80 dark:border-white/10 space-y-6">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface dark:text-inverse-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="bar_chart">bar_chart</span>
+              2021 ~ 2026 各年度 R 回报柱状分布与年化胜率
+            </h3>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">净收益已归一化</span>
+</div>
+<!-- Bar Chart Visual -->
+<div class="grid grid-cols-6 gap-3 items-end h-44 pt-4 border-b border-outline-variant/30 pb-2">
+<!-- 2021 -->
+<div class="flex flex-col items-center gap-1.5 h-full justify-end">
+<span class="font-label-numeric-sm text-label-numeric-sm font-bold text-secondary">+42.6R</span>
+<div class="w-full bg-secondary/80 rounded-t-lg transition-all" style="height: 68%;"></div>
+<span class="font-label-numeric-sm text-[11px] text-on-surface">2021</span>
+<span class="text-[10px] text-secondary font-label-numeric-sm">胜率 66%</span>
+</div>
+<!-- 2022 (Bear market test) -->
+<div class="flex flex-col items-center gap-1.5 h-full justify-end">
+<span class="font-label-numeric-sm text-label-numeric-sm font-bold text-secondary">+28.4R</span>
+<div class="w-full bg-secondary/60 rounded-t-lg transition-all" style="height: 48%;"></div>
+<span class="font-label-numeric-sm text-[11px] text-on-surface">2022</span>
+<span class="text-[10px] text-secondary font-label-numeric-sm">胜率 59%</span>
+</div>
+<!-- 2023 -->
+<div class="flex flex-col items-center gap-1.5 h-full justify-end">
+<span class="font-label-numeric-sm text-label-numeric-sm font-bold text-secondary">+36.2R</span>
+<div class="w-full bg-secondary/70 rounded-t-lg transition-all" style="height: 58%;"></div>
+<span class="font-label-numeric-sm text-[11px] text-on-surface">2023</span>
+<span class="text-[10px] text-secondary font-label-numeric-sm">胜率 63%</span>
+</div>
+<!-- 2024 -->
+<div class="flex flex-col items-center gap-1.5 h-full justify-end">
+<span class="font-label-numeric-sm text-label-numeric-sm font-bold text-secondary">+58.9R</span>
+<div class="w-full bg-secondary rounded-t-lg transition-all" style="height: 92%;"></div>
+<span class="font-label-numeric-sm text-[11px] text-on-surface font-bold">2024</span>
+<span class="text-[10px] text-secondary font-label-numeric-sm font-bold">胜率 69%</span>
+</div>
+<!-- 2025 -->
+<div class="flex flex-col items-center gap-1.5 h-full justify-end">
+<span class="font-label-numeric-sm text-label-numeric-sm font-bold text-secondary">+46.1R</span>
+<div class="w-full bg-secondary/80 rounded-t-lg transition-all" style="height: 74%;"></div>
+<span class="font-label-numeric-sm text-[11px] text-on-surface">2025</span>
+<span class="text-[10px] text-secondary font-label-numeric-sm">胜率 65%</span>
+</div>
+<!-- 2026 (YTD Projected) -->
+<div class="flex flex-col items-center gap-1.5 h-full justify-end">
+<span class="font-label-numeric-sm text-label-numeric-sm font-bold text-primary">+12.8R</span>
+<div class="w-full bg-primary/70 rounded-t-lg transition-all" style="height: 25%;"></div>
+<span class="font-label-numeric-sm text-[11px] text-on-surface">2026 (YTD)</span>
+<span class="text-[10px] text-primary font-label-numeric-sm">胜率 67%</span>
+</div>
+</div>
+<!-- Legs Contrast Bar -->
+<div class="pt-2">
+<h4 class="font-headline-sm text-headline-sm font-semibold text-on-surface dark:text-inverse-on-surface mb-3">
+              三大分腿贡献对比 (Leg Contribution Decomposition)
+            </h4>
+<div class="space-y-3">
+<div>
+<div class="flex justify-between text-body-sm font-body-sm mb-1">
+<span>分腿 B: BTC 急跌流动性刺杀 (最强 Alpha 来源)</span>
+<span class="font-label-numeric-sm font-bold text-secondary">+108.5 R (胜率 71.2%)</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-2 overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 48%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-body-sm font-body-sm mb-1">
+<span>分腿 C: 山寨币优质篮子 (Top Alt Basket 弹性加速)</span>
+<span class="font-label-numeric-sm font-bold text-primary">+74.2 R (胜率 61.8%)</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-2 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 32%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-body-sm font-body-sm mb-1">
+<span>分腿 A: BTC 普通反弹 (高频稳健基准)</span>
+<span class="font-label-numeric-sm font-bold text-on-surface dark:text-inverse-on-surface">+42.3 R (胜率 62.1%)</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-2 overflow-hidden">
+<div class="bg-outline-variant h-full rounded-full" style="width: 20%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 3. Cost & Friction Mark (成本口径说明) -->
+<div class="glass-card p-5 rounded-2xl border border-outline-variant/30 flex items-start gap-3.5 bg-surface-container-low/60 dark:bg-inverse-surface/40">
+<span class="material-symbols-outlined text-outline text-[22px] mt-0.5" data-icon="fact_check">fact_check</span>
+<div class="text-body-sm font-body-sm text-on-surface-variant dark:text-outline-variant leading-relaxed">
+<strong class="text-on-surface dark:text-inverse-on-surface font-semibold block mb-1">量化成本严谨性声明 (Friction & Execution Reality):</strong>
+            全回测口径已强制按 <span class="font-label-numeric-sm font-semibold text-on-surface dark:text-inverse-on-surface">OKX/Binance Taker 0.05%</span> 双边费率 + <span class="font-label-numeric-sm font-semibold text-on-surface dark:text-inverse-on-surface">4H 极速触价滑点 0.03%</span> 归一化净 R 扣除。无未来函数，未设无序杠杆；所有 EMA20 离散平仓价格均为收线后第一时刻市价实际成交建模。
+          </div>
+</div>
+</div>
+</main>
+<!-- Footer Action / Status Ribbon (Read-only Institutional Bar) -->
+<footer class="flex-shrink-0 px-4 md:px-7 py-3 border-t border-outline-variant/25 dark:border-white/10 bg-surface-container-lowest/80 dark:bg-inverse-surface/80 backdrop-blur-xl flex flex-wrap items-center justify-between gap-3 text-body-sm font-body-sm">
+<div class="flex items-center gap-2 text-on-surface-variant dark:text-outline-variant">
+<span class="material-symbols-outlined text-[17px] text-secondary" data-icon="check_circle">check_circle</span>
+<span>回测引擎: Spike Alpha Matrix v4.12 · 标的数据集 OKX-Futures-4H (归档完成)</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant/40 hover:bg-surface-container-high transition-colors font-body-sm text-body-sm text-on-surface dark:text-inverse-on-surface" id="export-monograph-btn">
+<span class="material-symbols-outlined text-[16px]" data-icon="ios_share">ios_share</span>
+          导出研究报告 (PDF / TeX)
+        </button>
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-high/80 hover:bg-surface-container-highest transition-colors font-body-sm text-body-sm text-on-surface dark:text-inverse-on-surface" id="footer-close-btn">
+          关闭
+        </button>
+</div>
+</footer>
+</aside>
+<!-- Interactive Logic for Drawer Tabs, Theme Switch & K-Line Sync Selection -->
+<script>
+    // Tab Switching Logic
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = {
+      rules: document.getElementById('tab-content-rules'),
+      executions: document.getElementById('tab-content-executions'),
+      stats: document.getElementById('tab-content-stats')
+    };
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetTab = btn.getAttribute('data-tab');
+
+        // Update Button Styles
+        tabButtons.forEach(b => {
+          b.setAttribute('aria-selected', 'false');
+          b.className = 'tab-btn px-4 py-1.5 rounded-lg text-body-md font-body-md font-medium text-on-surface-variant dark:text-outline-variant hover:text-on-surface dark:hover:text-white transition-all flex items-center gap-1.5';
+        });
+
+        btn.setAttribute('aria-selected', 'true');
+        btn.className = 'tab-btn px-4 py-1.5 rounded-lg text-body-md font-body-md font-semibold bg-primary-container text-on-primary-container shadow-sm flex items-center gap-1.5 transition-all';
+
+        // Toggle Content Visibility
+        Object.keys(tabContents).forEach(key => {
+          if (key === targetTab) {
+            tabContents[key].classList.remove('hidden');
+          } else {
+            tabContents[key].classList.add('hidden');
+          }
+        });
+      });
+    });
+
+    // Theme Toggle Logic
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const htmlElem = document.documentElement;
+
+    themeToggleBtn.addEventListener('click', () => {
+      const isDark = htmlElem.classList.contains('dark');
+      if (isDark) {
+        htmlElem.classList.remove('dark');
+        htmlElem.classList.add('light');
+        themeToggleBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]" data-icon="dark_mode">dark_mode</span>';
+      } else {
+        htmlElem.classList.remove('light');
+        htmlElem.classList.add('dark');
+        themeToggleBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]" data-icon="light_mode">light_mode</span>';
+      }
+    });
+
+    // Trade Row Click & K-Line Drilldown Synchronization
+    const tradeRows = document.querySelectorAll('.trade-row');
+    const chartTickerBadge = document.getElementById('chart-ticker-badge');
+    const chartEventDesc = document.getElementById('chart-event-desc');
+    const altSelectorContainer = document.getElementById('alt-selector-container');
+    const altCoinSelect = document.getElementById('alt-coin-select');
+
+    tradeRows.forEach(row => {
+      row.addEventListener('click', () => {
+        tradeRows.forEach(r => {
+          r.classList.remove('bg-primary-container/10', 'dark:bg-primary-container/20', 'border-l-primary');
+          r.classList.add('border-l-transparent');
+        });
+
+        row.classList.add('bg-primary-container/10', 'dark:bg-primary-container/20', 'border-l-primary');
+        row.classList.remove('border-l-transparent');
+
+        const ticker = row.getAttribute('data-ticker');
+        const time = row.getAttribute('data-time');
+        const type = row.getAttribute('data-type');
+        const isAlt = row.getAttribute('data-is-alt') === 'true';
+
+        chartTickerBadge.textContent = ticker + " 4H";
+        chartEventDesc.textContent = time + " UTC · " + type + " 极值触发回放";
+
+        // Show Alt Selector if Alt Basket is active
+        if (isAlt) {
+          altSelectorContainer.classList.remove('hidden');
+          altSelectorContainer.classList.add('flex');
+        } else {
+          altSelectorContainer.classList.add('hidden');
+          altSelectorContainer.classList.remove('flex');
+        }
+      });
+    });
+
+    // Alt Coin Selector Change Drill-down
+    if (altCoinSelect) {
+      altCoinSelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+        chartTickerBadge.textContent = val + "/USDT 4H (成分币)";
+        chartEventDesc.textContent = "篮子成分同源回放 · " + val + " 触及 4H EMA20 离场";
+      });
+    }
+
+    // Dismiss Drawer Handlers
+    const drawerElem = document.getElementById('monograph-drawer');
+    const backdropElem = document.getElementById('drawer-backdrop');
+    const closeDrawerBtn = document.getElementById('close-drawer');
+    const footerCloseBtn = document.getElementById('footer-close-btn');
+
+    function closeDrawer() {
+      drawerElem.classList.add('translate-x-full');
+      backdropElem.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function openDrawer() {
+      drawerElem.classList.remove('translate-x-full');
+      backdropElem.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    if (closeDrawerBtn) closeDrawerBtn.addEventListener('click', closeDrawer);
+    if (footerCloseBtn) footerCloseBtn.addEventListener('click', closeDrawer);
+    if (backdropElem) backdropElem.addEventListener('click', closeDrawer);
+
+    // Export Feedback Simulation
+    const exportBtn = document.getElementById('export-monograph-btn');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        const origText = exportBtn.innerHTML;
+        exportBtn.innerHTML = '<span class="material-symbols-outlined text-[16px] text-secondary" data-icon="done">done</span> 已生成只读研报快照';
+        setTimeout(() => {
+          exportBtn.innerHTML = origText;
+        }, 2000);
+      });
+    }
+  </script>
+</body></html>

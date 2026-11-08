@@ -250,3 +250,5 @@ html[data-theme=dark] #spike-alarm-replay{--sa-sheet:rgba(22,27,36,.97);border-c
 @media(max-height:640px) and (min-width:701px){.sa-stat b{font-size:48px}.sa-stat [data-kpi=btc]{font-size:36px}}
 @media(min-width:701px) and (max-width:1100px){.sa-chart-tabs{bottom:calc(max(22px,env(safe-area-inset-bottom)) + 76px);max-width:calc(100% - 2*clamp(16px,3vw,44px))}}
 @media(prefers-reduced-motion:reduce){#spike-alarm-dock *,#spike-alarm-dialog *,#spike-alarm-dialog{animation:none!important;transition:none!important}.sa-edge{opacity:.8}.sa-particles{display:none}}
+#spike-alarm-dock .sa-book-link{align-self:flex-start;margin:2px 0 10px;color:var(--brand-primary);font-size:12px;text-decoration:none}
+#spike-alarm-dock .sa-book-link:hover{text-decoration:underline}

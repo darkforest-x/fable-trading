@@ -307,6 +307,7 @@
 <header class="sa-settings-head"><span class="sa-settings-icon" aria-hidden="true">${bell}</span><h2 id="spike-alarm-settings-title">全市场报警</h2><div class="sa-status" role="status"><i class="sa-dot" aria-hidden="true"></i><span data-sa="connection"></span><span class="sa-health" data-sa="health" hidden></span><i class="sa-spin" aria-hidden="true"></i></div></header>
 <button type="button" class="sa-reconnect" data-sa-action="reconnect" hidden>重新连接</button>
 <div class="sa-tabs" role="group" aria-label="报警中心视图"><button type="button" data-sa-tab="overview" aria-pressed="true">概览</button><button type="button" data-sa-tab="history" aria-pressed="false">历史 <span data-sa="history-count"></span></button></div>
+<a class="sa-book-link" data-breadth-book href="/static/strategy-booklet/breadth-ema20.html">全市场下轨反弹 · 策略小册 ↗</a>
 <div class="sa-body">
 <div class="sa-pane" data-sa-pane="overview">
 <div class="sa-list"><div class="sa-row"><div class="sa-row-text"><span class="sa-row-title" id="spike-alarm-sound-title">报警声音</span><span class="sa-row-note" data-sa="sound-note"></span></div><button type="button" class="sa-switch" role="switch" aria-checked="false" aria-labelledby="spike-alarm-sound-title" data-sa-action="sound"><span></span></button></div><div class="sa-row"><div class="sa-row-text"><span class="sa-row-title" id="spike-alarm-test-title">测试报警</span><span class="sa-row-note" data-sa="test-note"></span></div><button type="button" class="sa-pill" aria-describedby="spike-alarm-test-title" data-sa-action="test">测试</button></div></div>
