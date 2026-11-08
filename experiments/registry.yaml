@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-cross-venue-key-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "48c3e32b2c"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Require a simultaneous original native V1.7 12H key on both venues at the same clock and direction. Compare only jointly observable exact tickers on both independently funded accounts through Sep 23."
+    result: "8955 coincident keys from 9814 OKX / 9816 Binance common-coverage signals. Common versus dual: OKX 4702.16 to 5802.98U, Binance 5584.16 to 4710.31U. Dual wins 34.26/33.92%, cash payoff 2.411/2.400, hourly DD upper 37.71/40.66%. Neither cleared development. Shared economic signals."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-cross-venue-key-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af81229a15f9a744c77e29."
+
   - experiment_id: exp-cloud-close-volatility-expansion-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "533501e6d1"
