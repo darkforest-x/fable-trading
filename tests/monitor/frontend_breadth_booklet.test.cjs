@@ -124,3 +124,14 @@ test('changing BTC admission and splitting capital preserve scope and actual cas
   const html=ui.statsHTML(data,{scope:'2026_actual_funded'});
   for(const text of ['+30.86 USDT','+95.20 USDT','51 个北京时间交易日','32 个自然周','尚未回测'])assert.ok(html.includes(text),text);
 });
+
+test('forward paper state displays realized balances and independently flags an expired heartbeat',()=>{
+  const {forwardHTML}=require('../../yoyo/monitor/static/breadth-booklet.js');
+  const now=Date.now();
+  const state={strategy:'breadth-ema20',mode:'paper',phase:'running',heartbeat_ms:now,last_close_ms:now,
+    market:{covered:12,symbols:12},account:{start_equity:1000,equity:1000,btc_equity:500,alt_equity:500,open_positions:0,recent_positions:[]}};
+  assert.match(forwardHTML(state,now),/监听中/);
+  assert.match(forwardHTML(state,now),/1,000/);
+  assert.match(forwardHTML(state,now+91000),/过期/);
+  assert.throws(()=>forwardHTML({...state,mode:'live'}));
+});

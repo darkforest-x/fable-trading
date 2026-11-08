@@ -53,7 +53,7 @@
     const sign=value>0?'+':value<0?'−':'',amount=Math.abs(value);
     return {text:sign+(amount>0&&amount<.005?'<0.01':amount.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})),tone:value>0?'rp-positive':value<0?'rp-negative':'',title:'已实现净盈亏 · USDT · 不含浮盈亏和补充本金'};
   }
-  function pickerHTML(tracks){return tracks.map(t=>`<div class="rs-account-row" data-account-row="${esc(t)}"><button type="button" data-account-drag="${esc(t)}" aria-label="拖动调整 ${esc(label(t))} 顺序" aria-description="拖动排序或移入移出常用；Alt 加上下键排序，Alt 加左键移入常用、右键收入更多" title="拖动排序或移入移出常用 · Alt + ↑/↓ 排序 · Alt + ←/→ 分组"><svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" aria-hidden="true"><circle cx="4" cy="5" r="1.2"/><circle cx="10" cy="5" r="1.2"/><circle cx="4" cy="10" r="1.2"/><circle cx="10" cy="10" r="1.2"/><circle cx="4" cy="15" r="1.2"/><circle cx="10" cy="15" r="1.2"/></svg></button><button type="button" data-strategy-select="${esc(t)}" aria-pressed="false"><span>${esc(label(t))}</span>${t===BREADTH?'<small title="尚无前向模拟账户">研究</small>':`<strong data-account-pnl="${esc(t)}">—</strong>`}<i aria-hidden="true">✓</i></button><button type="button" data-strategy-book="${esc(t)}" aria-label="查看 ${esc(label(t))} 策略小册" title="策略小册">${BOOK}</button><button type="button" data-strategy-backtest="${esc(t)}" aria-label="查看 ${esc(label(t))} 回测交易" title="回测交易">${BACKTEST}</button></div>`).join('');}
+  function pickerHTML(tracks){return tracks.map(t=>`<div class="rs-account-row" data-account-row="${esc(t)}"><button type="button" data-account-drag="${esc(t)}" aria-label="拖动调整 ${esc(label(t))} 顺序" aria-description="拖动排序或移入移出常用；Alt 加上下键排序，Alt 加左键移入常用、右键收入更多" title="拖动排序或移入移出常用 · Alt + ↑/↓ 排序 · Alt + ←/→ 分组"><svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" aria-hidden="true"><circle cx="4" cy="5" r="1.2"/><circle cx="10" cy="5" r="1.2"/><circle cx="4" cy="10" r="1.2"/><circle cx="10" cy="10" r="1.2"/><circle cx="4" cy="15" r="1.2"/><circle cx="10" cy="15" r="1.2"/></svg></button><button type="button" data-strategy-select="${esc(t)}" aria-pressed="false"><span>${esc(label(t))}</span>${t===BREADTH?'<small title="查看前向模拟账户">模拟</small>':`<strong data-account-pnl="${esc(t)}">—</strong>`}<i aria-hidden="true">✓</i></button><button type="button" data-strategy-book="${esc(t)}" aria-label="查看 ${esc(label(t))} 策略小册" title="策略小册">${BOOK}</button><button type="button" data-strategy-backtest="${esc(t)}" aria-label="查看 ${esc(label(t))} 回测交易" title="回测交易">${BACKTEST}</button></div>`).join('');}
   function tableHTML(headers,rows){return `<div class="rs-table-wrap"><table><thead><tr>${headers.map(h=>`<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map((v,i)=>i?`<td>${typeof v==='number'?num(v):esc(v??'—')}</td>`:`<th scope="row">${esc(v)}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;}
   const historyDate=ms=>new Date(ms).toISOString().slice(0,10);
   function validateHistory(h,track){
@@ -273,6 +273,7 @@
     let open=false,track='',epoch=0,closing=null,analytics=null,research=null,bars=[],line=null,chartData=null,active=true,history=null,historyChart=null,historyMode='equity',historyPaintKey='';
     let breadthData=null,replayRouteHandled=false,breadthScope=null,breadthPending=null;
     const forwardTemplate=el('#rs-forward').innerHTML;
+    let breadthForwardTimer=null;
     let historyView=null,chartFrame=null,resizeFrame=null,zoomFrame=null,barPaintKeys=[],forwardPaintData=null,forwardPaintTheme='';
     const visibleCharts=new Set(),reading=el('.rs-reading');
     const chartObserver=new IntersectionObserver(entries=>{
@@ -392,7 +393,7 @@
       closeCalendar();
       if(!open&&!dialog.open)return;open=false;epoch++;requests.cancel();analytics?.setActive(false);stopCharts();dialog.classList.remove('is-open');clearTimeout(closing);
       if(track===BREADTH)clearBookLocation();
-      breadthData=null;breadthPending=null;
+      clearTimeout(breadthForwardTimer);breadthData=null;breadthPending=null;
       const finish=()=>{dialog.close();document.body.classList.remove('rs-book-open','rs-book-webkit');trigger.focus({preventScroll:true});};
       if(immediate||matchReduced())finish();else closing=setTimeout(finish,280);
     }
@@ -448,6 +449,18 @@
       dialog.querySelectorAll('[data-breadth-scope]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.breadthScope===scope)));
       observeCharts();queueCharts();
     }
+    async function pollBreadthForward(token){
+      if(!open||track!==BREADTH||epoch!==token)return;
+      if(active&&!document.hidden){
+        try{
+          const [,state]=await Promise.all([window.SpikeModules.ensure('breadth-booklet'),requests.json('/static/strategy-booklet/breadth-ema20-forward.json')]);
+          if(open&&epoch===token)el('#rs-forward').innerHTML=window.SpikeBreadthBook.forwardHTML(state);
+        }catch{
+          if(open&&epoch===token)el('#rs-forward').innerHTML='<div class="rs-section-title"><h2>前向资金</h2></div><p class="rs-warning">暂时读不到模拟账户，30 秒后重试。</p>';
+        }
+      }
+      if(open&&epoch===token)breadthForwardTimer=setTimeout(()=>pollBreadthForward(token),30000);
+    }
     async function showBreadth(token,options){
       window.SpikeBreadthBookRoute?.write(options);
       try{
@@ -465,11 +478,11 @@
       closeCalendar();
       if(!catalog.includes(next))return;
       if(track===BREADTH&&next!==track)clearBookLocation();
-      breadthData=null;breadthPending=next===BREADTH?options:null;
+      clearTimeout(breadthForwardTimer);breadthData=null;breadthPending=next===BREADTH?options:null;
       clearTimeout(closing);epoch++;const token=epoch;track=next;open=true;chartData=null;research=null;history=null;historyView=null;historyMode='equity';analytics?.setActive(false);requests.cancel();requests=window.SpikeRuntime.createRequests();stopCharts();
       analytics=null;
       el('[data-book-label]').textContent=label(track);
-      el('#rs-forward').innerHTML=track===BREADTH?'<div class="rs-section-title"><h2>前向模拟资金曲线</h2></div><p>这条策略尚未运行模拟账户，暂无前向资金记录。</p>':forwardTemplate;
+      el('#rs-forward').innerHTML=track===BREADTH?'<div class="rs-section-title"><h2>前向资金</h2></div><p>正在读取模拟账户…</p>':forwardTemplate;
       if(track===BREADTH){
         el('#rs-overview').innerHTML='<div class="rs-section-title"><h1>全市场下轨反弹<em>普通 BTC · 4H EMA20 过滤</em></h1></div><div class="rs-facts"><div><small>方向</small><b>做多</b></div><div><small>交易标的</small><b>BTC / 山寨篮子</b></div><div><small>信号</small><b>周一下轨首触</b></div></div>';
         el('#rs-rules').innerHTML='';
@@ -478,7 +491,7 @@
       el('#rs-research').innerHTML='<p class="rs-muted">正在读取回测资料…</p>';el('#rs-sources').innerHTML='';
       document.body.classList.add('rs-book-open');document.body.classList.toggle('rs-book-webkit',/AppleWebKit\//.test(navigator.userAgent)&&!/(Chrome|Chromium|Edg)\//.test(navigator.userAgent));if(!dialog.open)dialog.showModal();el('.rs-sheet').getBoundingClientRect();requestAnimationFrame(()=>{if(open&&token===epoch)dialog.classList.add('is-open');});el('[data-book-label]').focus({preventScroll:true});
       const selected=track;
-      if(selected===BREADTH){await showBreadth(token,options);return;}
+      if(selected===BREADTH){void pollBreadthForward(token);await showBreadth(token,options);return;}
       analytics=createFeed({read:()=>requests.json(`/api/monday-reclaim-paper/analytics?track=${selected}&days=0`),validateData:d=>window.SpikeReclaimAnalytics.validate(d,selected,0),cancel:()=>{},change:renderForward});
       try{
         const receipts=await Promise.allSettled([requests.json('/static/strategy-booklet/research.json'),requests.json(`/static/strategy-booklet/${selected}-history.json`)]);if(!open||token!==epoch)return;

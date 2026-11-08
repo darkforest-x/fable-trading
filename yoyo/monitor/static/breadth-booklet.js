@@ -157,7 +157,28 @@
       panel('核算口径',note((funded?'本区间计入实际资金费。':'全历史按手续费后、资金费前统计。')+'以收盘盯市计算最大回撤，按入场事件的净收益是否大于零计算胜率。2026 年行情曾参与研究和案例选择。'))+'</div></div>';
   }
 
-  const api={validateData,rulesHTML,statsHTML,originHTML};
+  function forwardHTML(data, time=Date.now()) {
+    if(data?.strategy!=='breadth-ema20'||data.mode!=='paper'||!finite(data.heartbeat_ms))throw Error('前向账户数据不完整');
+    const a=data.account || {}, m=data.market || {}, prog=data.progress || {};
+    const phases={warming:'正在预热市场数据',running:'监听中',catching_up:'正在追平行情',degraded:'行情或账本待补',stopped:'已停止'};
+    const stale=time-data.heartbeat_ms>90000 || (data.phase==='running' && time-data.last_close_ms>420000);
+    const state=stale?'心跳或行情已过期':phases[data.phase]||'状态待确认';
+    const fmt=ms=>finite(ms)?new Date(ms).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}):'—';
+    const metrics=[['已实现权益 · USDT',number(a.equity)],['BTC 资金 · USDT',number(a.btc_equity)],['山寨资金 · USDT',number(a.alt_equity)],
+                   ['持仓合约笔数',number(a.open_positions,0)],[data.phase==='warming'?'市场预热进度':'市场覆盖',m.symbols?number(m.covered,0)+' / '+number(m.symbols,0):(prog.total?number(prog.done,0)+' / '+number(prog.total,0):'—')],['初始资金 · USDT',number(a.start_equity)]];
+    const positions=Array.isArray(a.recent_positions)?a.recent_positions:[];
+    const labels={BTC_ordinary:'普通 BTC',BTC_case:'急跌 BTC',medium:'普通 BTC',ordinary:'普通 BTC',case:'急跌 BTC',ALT:'山寨篮子',alt:'山寨篮子'};
+    const rows=positions.map(p=>[labels[p.branch]||p.branch,p.symbol,fmt(p.entry_ms),number(p.entry,6),p.exit_ms?fmt(p.exit_ms):'持仓中']);
+    return '<div class="rs-section-title"><h2>前向资金</h2><span class="rs-badge">实时模拟</span></div><p role="status">'+esc(state)+'</p>'+
+      '<div class="rs-forward-metrics">'+metrics.map(([key,val])=>'<div><small>'+esc(key)+'</small><strong>'+esc(val)+'</strong></div>').join('')+'</div>'+
+      '<p class="rs-muted">北京时间 · 账户启用 '+esc(fmt(a.started_ms))+' · 最近收盘 '+esc(fmt(data.last_close_ms ?? a.cursor_close_ms))+' · 心跳 '+esc(fmt(data.heartbeat_ms))+'</p>'+
+      (finite(m.lower_first_touches)?'<p class="rs-muted">最近一根 5 分钟 K 线有 '+number(m.lower_first_touches,0)+' 个币本周首次触及下轨'+(finite(m.trailing28)?'。过去 28 天触及任一侧的币有 '+number(m.trailing28,0)+' 个':'')+'。</p>':'')+
+      (a.funding_complete===false?'<p class="rs-warning">资金费待核对。</p>':'')+
+      '<p class="rs-muted">以 Binance 5 分钟行情模拟成交。信号确认后按下一根开盘价记账，处理延迟超过 90 秒跳过入场；已实现权益含已入账费用，不含持仓浮盈亏。</p>'+
+      '<h3>最近 20 笔合约持仓与成交</h3>'+(rows.length?table(['分支','合约','开仓时间','入场价','平仓时间'],rows):'<p class="rs-muted">暂无模拟成交。</p>');
+  }
+
+  const api={validateData,rulesHTML,statsHTML,originHTML,forwardHTML};
   if(typeof module!=='undefined' && module.exports)module.exports=api;
   else window.SpikeBreadthBook=api;
 })();
