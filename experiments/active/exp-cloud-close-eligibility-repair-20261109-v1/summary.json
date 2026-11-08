@@ -1,0 +1,103 @@
+{
+  "thirds": {
+    "fraction": 0.6666666666666666,
+    "counts": {
+      "OKX": {
+        "actual": 11780,
+        "pairs": 10816
+      },
+      "Binance": {
+        "actual": 22623,
+        "pairs": 20588
+      }
+    },
+    "qualifies": {
+      "dev": {
+        "OKX": true,
+        "Binance": true
+      },
+      "all": {
+        "OKX": false,
+        "Binance": true
+      }
+    }
+  },
+  "concentration": {
+    "experiment_id": "exp-cloud-close-concentration-20261109-v1",
+    "output_dir": "/Users/zhangzc/fable-trading/experiments/active/exp-cloud-close-eligibility-repair-20261109-v1/concentration",
+    "eligible_actual_events": 11780,
+    "development_contributors_usdt": {
+      "partial_both": {
+        "DOGE": 744.9777793477025,
+        "PEPE": 580.7537432650905,
+        "TRX": 473.1006219860196
+      },
+      "partial_shorts": {
+        "PEPE": 10198.969913142202,
+        "DOGE": 6816.973742110591,
+        "TRX": 3890.643156061748
+      }
+    }
+  },
+  "prior-expectancy": {
+    "experiment_id": "exp-cloud-close-prior-expectancy-20261109-v1",
+    "output_dir": "/Users/zhangzc/fable-trading/experiments/active/exp-cloud-close-eligibility-repair-20261109-v1/prior-expectancy",
+    "pick": "all",
+    "counts": {
+      "coverage": {
+        "real": 7862,
+        "paired": 7233
+      },
+      "nonnegative": {
+        "real": 4033,
+        "paired": 3535
+      },
+      "quarter_pct": {
+        "real": 3682,
+        "paired": 3210
+      },
+      "half_pct": {
+        "real": 3404,
+        "paired": 2966
+      }
+    },
+    "checks": {},
+    "binance_input": null,
+    "binance_source_contract": null
+  },
+  "reclaim-failure": {
+    "experiment_id": "exp-cloud-close-reclaim-failure-20261109-v1",
+    "output_dir": "/Users/zhangzc/fable-trading/experiments/active/exp-cloud-close-eligibility-repair-20261109-v1/reclaim-failure",
+    "pick": 0,
+    "checks": {},
+    "failures": {
+      "1": 7982,
+      "4": 5765,
+      "12": 3213
+    },
+    "path_audit": {
+      "source_events": 24270,
+      "source_actual_events": 12654,
+      "source_control_events": 11616,
+      "rank_nonnull_actual_events": 11780,
+      "rank_nonnull_control_events": 10833,
+      "rank_nonnull_controls_with_eligible_actual_parent": 10816,
+      "rank_nonnull_control_orphans_removed": 17,
+      "selected_events": 22596,
+      "selected_actual_events": 11780,
+      "selected_control_events": 10816,
+      "selected_parent_pairs": 10816,
+      "durations": [
+        1,
+        4,
+        12
+      ],
+      "legs_per_event_duration": 2,
+      "selected_rows": 135576,
+      "duplicate_event_hour_leg_keys": 0,
+      "complete_duration_and_leg_sets": true
+    },
+    "reused_native_source": "experiments/active/exp-cloud-close-reclaim-failure-20261109-v1/paths.csv.gz"
+  },
+  "thirds_binance_original_ledgers": "experiments/active/exp-cloud-close-thirds-20261109-v1"
+}

@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-eligibility-repair-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "4d8c243820"
+    status: "accepted"
+    question: "What do four affected research arms show when pandas 3 missing rank cells are excluded at each event clock?"
+    single_variable: "Repair four OKX studies by requiring an observed 90-day rank at every actual/control entry, and both eligible parents for control comparisons. Preserve native fills, cash rules, and immutable historical versions."
+    result: "11780 eligible actual and 10816 matched controls agree with the independent value-based screen. Two-thirds actual 8788.77U OKX (33.14% wins, cash payoff 2.628, hourly DD bound 35.387%) and 6508.24U Binance (32.66%, 2.549, 31.584%). All 1569 funded OKX identities and order match the frozen baseline. Without the top three contributors partial_both ends at 4590.41U, partial_shorts at 24916.87U. Prior-expectancy and reclaim-failure retained their unfitted parents in development. Frozen Binance two-thirds ledgers are stored under exp-cloud-close-thirds-20261109-v1."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-eligibility-repair-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af81aba66de41fdd8d46dc."
+
+  - experiment_id: exp-cloud-close-thirds-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "7cd04f5bf7"
+    status: "superseded"
+    question: "Does a two-thirds partial improve growth at a 35% risk bound in both venues?"
+    single_variable: "Compare 66.67% at 2R and one third on original cloud versus existing 50% and 75% endpoints."
+    result: "Historical OKX calculation used index membership that admitted missing 90-day ranks; use exp-cloud-close-eligibility-repair-20261109-v1 for all authoritative comparisons. The frozen Binance native daily-corrected ledger and hourly NAV are unaffected and reused there."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-thirds-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af8113b133fc77d62c1fc9."
+
   - experiment_id: exp-cloud-close-trend-sequence-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "c241750db8"
@@ -108,32 +138,32 @@ experiments:
   - experiment_id: exp-cloud-close-concentration-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "0ac33c58d5"
-    status: "accepted"
+    status: "superseded"
     question: "Is the previously observed funded growth materially concentrated in its leading pre-2025 contributors after cash and slot replacement?"
     single_variable: "Counterfactually exclude the highest one or three realized USDT contributors identified only from completed pre-2025 positions. Let other native V1.7 positions genuinely refill the slots."
     result: "Bidirectional 2R partial ended at 6219.84U, excluding DOGE 4323.67U, excluding DOGE/PEPE/TRX 3618.95U. Long runner / short partial originally 49582.45U; excluding PEPE 27031.21U; excluding PEPE/DOGE/TRX 17821.80U. All three long-runner/short-partial variants still exceeded the 35% limit. Concentration stress, not an early-history executable filter."
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    reuse_allowed: true
+    reuse_allowed: false
     artifacts: []
     canonical_report: "experiments/active/exp-cloud-close-concentration-20261109-v1/summary.json"
-    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af81349a03f45912f10a45."
+    notes: "OKX 90-day missing ranks were included in this version. Use exp-cloud-close-eligibility-repair-20261109-v1 for corrected results. Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af81349a03f45912f10a45."
 
   - experiment_id: exp-cloud-close-reclaim-failure-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "e6e82e2cd9"
-    status: "rejected"
+    status: "superseded"
     question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
     single_variable: "Exit at the next observed opening quote after a complete 1H, 4H or 12H candle closes back through the original weekly 1.618 level, retaining the original intrabar stop, target and cloud."
     result: "At the three exit windows the funded 1000U balance ended at 4386.82, 5267.44, 5334.70U. Cash payoff improved to 4.43, 3.66 and 3.15, but wins fell to 21.15%, 25.26% and 28.77%. Pre-2025 selection retained the unmodified baseline."
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    reuse_allowed: true
+    reuse_allowed: false
     artifacts: []
     canonical_report: "experiments/active/exp-cloud-close-reclaim-failure-20261109-v1/summary.json"
-    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af81d29958d89c079a6bed."
+    notes: "OKX 90-day missing ranks were included in this version. Use exp-cloud-close-eligibility-repair-20261109-v1 for corrected results. Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af81d29958d89c079a6bed."
 
   - experiment_id: exp-cloud-close-lower-agreement-20261109-v1
     source_repo: "darkforest-x/fable-trading"
@@ -213,17 +243,17 @@ experiments:
   - experiment_id: exp-cloud-close-prior-expectancy-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "73eb1b093b"
-    status: "rejected"
+    status: "superseded"
     question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
     single_variable: "Screen on same-asset same-direction trailing shadow signal return (rolling 12, at least 8 matured results, available strictly before entry)."
     result: "Development retained unfiltered parent. Coverage-only and mean net return at least 0, 25, 50bp ended at 2354.59, 2089.47, 1708.33, 1838.04U vs 6219.84U parent. Higher minimum did not recover the lost gains."
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    reuse_allowed: true
+    reuse_allowed: false
     artifacts: []
     canonical_report: "experiments/active/exp-cloud-close-prior-expectancy-20261109-v1/summary.json"
-    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af817e92b9ea6675ca67f6."
+    notes: "OKX 90-day missing ranks were included in this version. Use exp-cloud-close-eligibility-repair-20261109-v1 for corrected results. Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af817e92b9ea6675ca67f6."
 
   - experiment_id: exp-cloud-close-same-time-control-20261109-v1
     source_repo: "darkforest-x/fable-trading"
