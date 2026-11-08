@@ -1,0 +1,8 @@
+{
+  "id": "exp-cloud-close-two-targets-20261109-v1",
+  "factor": "Within a fixed 75% exit leg, vary the fraction assigned to a resting 1R limit instead of 10R. Fractions [0, 0.25, 0.5, 0.75, 1] refer to that 75%, leaving 25% at the original V1.7 runner throughout. Each entry is fully collateralized by one reservation. No stop changes, future MFE, or alternative bar-fill calculation.",
+  "early_fraction_of_partial": [0, 0.25, 0.5, 0.75, 1],
+  "parent": "exp-cloud-close-partial-r-20261109-v1 10R development growth leader; 1R is the nearest frozen target comparator. 90d eligible, low prior ATR, nine funded slots. The 2R account is an external frozen incumbent; keep it if all new policies fail dev gates or lose dev growth to that incumbent. Post-selection research, later years already seen.",
+  "selection": "At least 100 closed through 2024, wins >=30%, actual equal-notional net payoff >=2.5 and conservative hourly DD <=35%. Maximize development terminal NAV, report all later segments plus 5bp slippage and paired checks for winning new policy and development growth leader when not reuseable.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_two_targets"
+}
