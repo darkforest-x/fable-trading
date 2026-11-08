@@ -9,12 +9,17 @@ import pandas as pd
 from yoyo.evaluation import monday_flow_divergence_stats as stats
 
 
+def divergence_group(frame):
+    """Group a trade only when every feasible endpoint label agrees on yes/no."""
+    definite = frame.possible.fillna("").str.split("|",regex=False).map(
+        lambda x: bool(x) and set(x).issubset({"regular","absorption"}))
+    return np.select([definite, frame.label.eq("none")], ["yes", "no"], default="unknown")
+
+
 def comparison(g, name):
     z = g.rename(columns={"week":"_week","net_bp":"_net"}).copy()
-    # A set containing both divergence subtypes still identifies the binary arm.
-    definite = z.possible.fillna("").str.split("|",regex=False).map(
-        lambda x: bool(x) and set(x).issubset({"regular","absorption"}))
-    z["_label"] = np.where(definite, "regular", z.label.where(z.label=="none","unknown"))
+    z["_label"] = pd.Series(divergence_group(z), index=z.index).map(
+        {"yes":"regular", "no":"none", "unknown":"unknown"})
     left, right = frozenset(["regular"]), frozenset(["none"])
     yes = stats._cohort(z,left)
     no = stats._cohort(z,right)
@@ -86,9 +91,11 @@ def write_summary(exp:Path):
              "by_timeframe":{tf:metrics(z,tf) for tf,z in actual.groupby("timeframe")}}
     for tf,z in actual.groupby("timeframe"):
         picked=z.copy()
+        picked["divergence_group"] = divergence_group(picked)
+        picked["net_win"] = picked.net_bp.gt(0).astype("Int64").where(picked.net_bp.notna())
         for old,new in [("first_ms","first_touch_utc"),("armed_close_ms","armed_close_utc"),("retest_bar_ms","retest_bar_utc")]:
             picked[new]=pd.to_datetime(picked[old],unit="ms",utc=True).dt.strftime("%Y-%m-%d %H:%M")
         picked[["symbol","week","side","first_touch_utc","armed_close_utc","retest_bar_utc","limit","first_extreme",
-                "label","possible","asof_label","cvd_min","cvd_max","entry_price","exit_price","reason","fee_bp","net_bp"]].to_csv(
+                "divergence_group","label","possible","asof_label","cvd_min","cvd_max","entry_price","exit_price","reason","fee_bp","net_bp","net_win"]].to_csv(
                     exp/f"retests_{tf}.csv.gz",index=False)
     (exp/"summary.json").write_text(json.dumps(summary,indent=2,allow_nan=False)+"\n")
