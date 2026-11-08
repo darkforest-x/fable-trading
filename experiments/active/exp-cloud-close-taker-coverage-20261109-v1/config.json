@@ -1,0 +1,8 @@
+{
+  "id":"exp-cloud-close-taker-coverage-20261109-v1",
+  "parent":"exp-cloud-close-market-taker-pressure-20261109-v1",
+  "change":"Complete only missing native flow inputs: 741 actual signals plus 702 controls, 452 contract-months, mainly 2026-09. Untouched historical observations retain their actual native values. Same archive grids, all twelve hourly OHLC need to reconcile; same formula, cohorts, portfolio, initial capital and costs.",
+  "source":"Binance Vision USDT linear futures official monthly 15m archives for only missing contract-months. Reuse local files; if unavailable or missing exact bars, try the native daily 15m archive at that key and then daily 5m. No amount inferred from price or substituted from another venue. Record source and remaining missing reasons.",
+  "account":"Use the prior fixed 1000U shared, nine-slot, 2/3 resting target and 1/3 cloud, original corrected Binance universe, 5bp taker/2bp maker, additional 5bp market stress. Preserve full prior baseline when coverage is identical. Development through 2024, 2025 and 2026 till Sep 23, all previously examined. Funding, order capacity, contract rounding omitted.",
+  "runner":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_taker_coverage"
+}
