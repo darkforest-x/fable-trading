@@ -159,6 +159,8 @@ def _asof_features(times: pd.DatetimeIndex | pd.Series, htf: dict[int, pd.DataFr
             f"{prefix}_close": pd.Series(np.nan, index=result.index, dtype=float),
             f"{prefix}_ema20": pd.Series(np.nan, index=result.index, dtype=float),
             f"{prefix}_ema50": pd.Series(np.nan, index=result.index, dtype=float),
+            f"{prefix}_prior_close": pd.Series(np.nan, index=result.index, dtype=float),
+            f"{prefix}_prior_ema20": pd.Series(np.nan, index=result.index, dtype=float),
             f"{prefix}_reclaim_ema20": pd.Series(np.nan, index=result.index, dtype=float),
             f"{prefix}_complete": pd.Series(False, index=result.index, dtype=bool),
         }
@@ -170,6 +172,8 @@ def _asof_features(times: pd.DatetimeIndex | pd.Series, htf: dict[int, pd.DataFr
             names[f"{prefix}_close"].iloc[valid_rows] = selected.close.to_numpy(dtype=float)
             names[f"{prefix}_ema20"].iloc[valid_rows] = selected.ema20.to_numpy(dtype=float)
             names[f"{prefix}_ema50"].iloc[valid_rows] = selected.ema50.to_numpy(dtype=float)
+            names[f"{prefix}_prior_close"].iloc[valid_rows] = selected.prior_close.to_numpy(dtype=float)
+            names[f"{prefix}_prior_ema20"].iloc[valid_rows] = selected.prior_ema20.to_numpy(dtype=float)
             names[f"{prefix}_reclaim_ema20"].iloc[valid_rows] = selected.reclaim_ema20.to_numpy(dtype=float)
             names[f"{prefix}_complete"].iloc[valid_rows] = selected.complete.to_numpy(dtype=bool)
         for name, values in names.items():
@@ -445,6 +449,7 @@ def _control_summaries(controls: dict[str, pd.DataFrame], events: pd.DataFrame,
             group = subset.groupby("event_id", as_index=False).agg(
                 random_net_mean_pct=("random_net_pct", "mean"),
                 random_funded_mean_pct=("funded_net_pct", "mean"),
+                random_fee_mean_pct=("random_fee_pct", "mean"),
                 random_draws=("draw", "nunique"),
                 random_unique_times=("random_entry", "nunique"),
                 random_pool_n=("trend_filtered_match_pool_n", "first"),
@@ -452,7 +457,7 @@ def _control_summaries(controls: dict[str, pd.DataFrame], events: pd.DataFrame,
             )
         else:
             group = pd.DataFrame(columns=["event_id", "random_net_mean_pct", "random_funded_mean_pct",
-                                          "random_draws", "random_unique_times", "random_pool_n",
+                                          "random_fee_mean_pct", "random_draws", "random_unique_times", "random_pool_n",
                                           "random_unfiltered_pool_n"])
         a2026 = accepted[accepted.period.eq("2026_to_ledger_end")].copy()
         a2026 = _attach_funding(a2026, funding_history, frame, return_col="net_pct")
@@ -477,6 +482,9 @@ def _control_summaries(controls: dict[str, pd.DataFrame], events: pd.DataFrame,
             "mean_actual_price_net_pct": float(paired.net_pct.mean()) if len(paired) else np.nan,
             "mean_random_price_net_pct": float(paired.random_net_mean_pct.mean()) if paired.random_net_mean_pct.notna().any() else np.nan,
             "mean_paired_edge_price_pp": float(paired.price_edge_pp.mean()) if paired.price_edge_pp.notna().any() else np.nan,
+            "mean_actual_taker_fee_pct": float(paired.total_fee_pct.mean()) if len(paired) else np.nan,
+            "mean_random_taker_fee_pct": float(paired.random_fee_mean_pct.mean()) if paired.random_fee_mean_pct.notna().any() else np.nan,
+            "mean_actual_minus_random_fee_pp": float(paired.total_fee_pct.mean() - paired.random_fee_mean_pct.mean()) if paired.random_fee_mean_pct.notna().any() else np.nan,
             "mean_actual_funded_pct": float(good.funded_net_pct.mean()) if len(good) else np.nan,
             "mean_random_funded_pct": float(good.random_funded_mean_pct.mean()) if len(good) else np.nan,
             "mean_paired_edge_funded_pp": float(good.funded_edge_pp.mean()) if len(good) else np.nan,
@@ -564,8 +572,11 @@ def run() -> dict[str, Path]:
             "mean_accepted_net_pct_all_history": float(selected.net_pct.mean()) if len(selected) else np.nan,
             "mean_per_original_opportunity_net_pct_skips_zero_all_history": float(per_all.mean()),
             "baseline_mean_net_pct_all_history": float(base_all.mean()),
+            "mean_taker_fee_pct_per_accepted_trade_all_history": float(selected.total_fee_pct.mean()) if len(selected) else np.nan,
+            "baseline_mean_taker_fee_pct_per_trade_all_history": float(events.total_fee_pct.mean()),
             "incremental_mean_per_original_opportunity_pp_all_history": float(per_all.mean() - base_all.mean()),
             "active_months_all_history": int(selected.month.nunique()),
+            "baseline_active_months_all_history": int(events.month.nunique()),
             "development_2020_2025_month_p_vs_baseline": development_p.loc[rule],
             "development_2020_2025_month_p_holm_five_rules": development_holm.loc[rule],
             "price_month_p_vs_baseline_all_history": price_p.loc[rule],
@@ -576,6 +587,7 @@ def run() -> dict[str, Path]:
         row.update({f"accepted_all_history_{k}": v for k, v in _mean_win_metrics(selected.net_pct).items()})
         row.update({f"accepted_all_history_{k}": v for k, v in _equity_metrics(selected.net_pct).items()})
         row.update({f"zero_skip_all_history_{k}": v for k, v in _equity_metrics(per_all).items()})
+        row.update({f"baseline_all_history_{k}": v for k, v in _equity_metrics(events.net_pct).items()})
         improvement_values = []
         for period in ("2020_2022", "2023_2024", "2025", "2026_to_ledger_end"):
             part = events[events.period.eq(period)].copy()
@@ -586,6 +598,7 @@ def run() -> dict[str, Path]:
             equity = _equity_metrics(chosen.net_pct)
             zero_equity = _equity_metrics(per_op)
             baseline_mean = float(part.net_pct.mean()) if len(part) else np.nan
+            baseline_equity = _equity_metrics(part.net_pct)
             accepted_mean = metric["mean_net_pct"]
             delta = accepted_mean - baseline_mean if np.isfinite(accepted_mean) and np.isfinite(baseline_mean) else np.nan
             if period in MINIMUMS:
@@ -598,12 +611,17 @@ def run() -> dict[str, Path]:
                 f"{period}_median_accepted_net_pct": metric["median_net_pct"],
                 f"{period}_win_pct_accepted": metric["win_pct"],
                 f"{period}_baseline_mean_net_pct": baseline_mean,
+                f"{period}_baseline_mean_taker_fee_pct": float(part.total_fee_pct.mean()) if len(part) else np.nan,
+                f"{period}_accepted_mean_taker_fee_pct": float(chosen.total_fee_pct.mean()) if len(chosen) else np.nan,
+                f"{period}_baseline_active_months": int(part.month.nunique()),
                 f"{period}_accepted_mean_lift_vs_baseline_per_fill_pp": delta,
                 f"{period}_mean_net_pct_per_original_opportunity_skips_zero": float(per_op.mean()) if len(part) else np.nan,
                 f"{period}_incremental_mean_per_original_opportunity_pp": float(per_op.mean() - baseline_mean) if len(part) else np.nan,
                 f"{period}_active_months": int(chosen.month.nunique()),
                 f"{period}_accepted_growth_pct": equity["growth_pct"],
                 f"{period}_accepted_max_drawdown_pct": equity["max_drawdown_pct"],
+                f"{period}_baseline_growth_pct": baseline_equity["growth_pct"],
+                f"{period}_baseline_max_drawdown_pct": baseline_equity["max_drawdown_pct"],
                 f"{period}_zero_skip_growth_pct": zero_equity["growth_pct"],
                 f"{period}_zero_skip_max_drawdown_pct": zero_equity["max_drawdown_pct"],
             })
@@ -634,17 +652,23 @@ def run() -> dict[str, Path]:
         funded_part = y2026.copy()
         funded_selected = funded_part[funded_part[f"accept_{rule}"]]
         funded_zero = funded_part.funded_net_pct.where(funded_part[f"accept_{rule}"], 0.0)
+        funded_baseline_equity = _equity_metrics(funded_part.funded_net_pct)
         row.update({
             "2026_original_n": int(len(funded_part)),
             "2026_accepted_n": int(funded_part[f"accept_{rule}"].sum()),
             "2026_funding_active_months": int(funded_selected.month.nunique()),
             "2026_baseline_mean_funded_pct": float(funded_part.funded_net_pct.mean()),
+            "2026_baseline_mean_taker_fee_pct": float(funded_part.total_fee_pct.mean()),
+            "2026_accepted_mean_taker_fee_pct": float(funded_selected.total_fee_pct.mean()) if len(funded_selected) else np.nan,
+            "2026_baseline_active_months": int(funded_part.month.nunique()),
             "2026_accepted_mean_funded_pct": float(funded_selected.funded_net_pct.mean()) if len(funded_selected) else np.nan,
             "2026_accepted_mean_funded_lift_vs_baseline_per_fill_pp": float(funded_selected.funded_net_pct.mean() - funded_part.funded_net_pct.mean()) if len(funded_selected) else np.nan,
             "2026_mean_funded_per_original_opportunity_skips_zero": float(funded_zero.mean()),
             "2026_incremental_mean_funded_per_original_opportunity_pp": float(funded_zero.mean() - funded_part.funded_net_pct.mean()),
             "2026_total_funding_cost_points_per_BTC_baseline": float(funded_part.funding_points_cost.sum()),
             "2026_mean_funding_cost_points_per_BTC_baseline": float(funded_part.funding_points_cost.mean()),
+            "2026_baseline_funded_growth_pct": funded_baseline_equity["growth_pct"],
+            "2026_baseline_funded_max_drawdown_pct": funded_baseline_equity["max_drawdown_pct"],
         })
         row.update({f"2026_funded_accepted_{k}": v for k, v in _mean_win_metrics(funded_selected.funded_net_pct).items()})
         row.update({f"2026_funded_accepted_{k}": v for k, v in _equity_metrics(funded_selected.funded_net_pct).items()})
