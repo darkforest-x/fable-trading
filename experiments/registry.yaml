@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-drawdown-bounds-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "96e0f44d88"
+    status: "accepted"
+    question: "Does the two-thirds 12H funded account actually satisfy the 35% limit once cross-contract intrahour timestamps are aligned?"
+    single_variable: "Narrow only the peak and trough uncertainty of the genuinely funded 2/3 partial. Use 516 native 5m bars across 43 complete symbol-hours; then 900 native 1m bars across 15 complete symbol-hours binding the 35% test. Keep all native fills and fees."
+    result: "1000 to 8788.77U; the coarse hourly upper bound was 35.3873%, five-minute 35.0394%, and final one-minute-informed all-history interval 34.6395% to 34.9042%. Every held instrument in both final hours has quotes matching independent native 5m and archived H1 aggregates. The historical account passes the 35% conservative limit, not the target wealth. Binance same strategy 6508.24U, conservative hourly bound 31.5841%."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-drawdown-bounds-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af81b28076cf0bf362ad12."
+
   - experiment_id: exp-cloud-close-daily-exit-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "3ce9e3dc00"
