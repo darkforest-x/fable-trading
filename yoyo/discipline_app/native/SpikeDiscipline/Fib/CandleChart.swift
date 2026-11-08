@@ -312,7 +312,11 @@ struct CandleChart: View {
         if cloud { drawCloud(&clipped, layout: layout, dark: dark) }
 
         // Previous weeks first (lighter), then the current week.
-        for past in history { drawRange(&clipped, past, layout: layout, dark: dark, inner: false, faded: true) }
+        // Full history can hold hundreds of weeks: draw only those overlapping the visible span.
+        let shownFrom = layout.bars[layout.firstVisible].time, shownTo = layout.bars[layout.lastVisible].time + period.seconds
+        for past in history where past.end > shownFrom && past.start < shownTo {
+            drawRange(&clipped, past, layout: layout, dark: dark, inner: false, faded: true)
+        }
         if let range { drawRange(&clipped, range, layout: layout, dark: dark, inner: innerLines, faded: false) }
 
         for (offset, bar) in visible.enumerated() {
@@ -440,8 +444,9 @@ struct CandleChart: View {
     private var allMarkers: [ChartMarker] {
         guard markHistory, !bars.isEmpty else { return markers }
         var out = markers
-        for past in history {
-            let mondayEnd = past.start + 86_400
+        guard let firstTime = bars.first?.time, let lastTime = bars.last?.time else { return out }
+        for past in history where past.end > firstTime && past.start <= lastTime {
+            let mondayEnd = past.start   // a FibRange starts when its Monday closes (Tuesday 00:00 NY)
             guard let from = barIndex(max(mondayEnd, bars[0].time)) ?? (bars[0].time >= mondayEnd ? 0 : nil) else { continue }
             var upper: Double?, lower: Double?
             for bar in bars[from...] where bar.time >= mondayEnd {

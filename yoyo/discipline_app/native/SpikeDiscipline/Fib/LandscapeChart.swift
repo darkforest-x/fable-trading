@@ -48,9 +48,9 @@ struct LandscapeChart: View {
         .task(id: "\(symbol)|\(period.rawValue)|\(session.connection?.token.hashValue ?? 0)") {
             candles.show(symbol: symbol, period: period, connection: session.connection)
         }
-        .task(id: "\(symbol)|\(style.showHistory)") {
+        .task(id: "\(symbol)|\(style.showHistory)|\(Int((candles.bars.first?.time ?? 0) / 86_400))|\(session.connection?.token.hashValue ?? 0)") {
             guard style.showHistory else { return }
-            await history.load(symbol, connection: session.connection)
+            await history.load(symbol, from: candles.bars.first?.time, connection: session.connection)
         }
         .task(id: session.connection?.token.hashValue ?? 0) {
             guard let connection = session.connection else { return }

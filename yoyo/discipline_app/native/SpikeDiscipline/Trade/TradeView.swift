@@ -75,9 +75,9 @@ struct TradeView: View {
             TradeTicketSheet(onBlocked: { destination in ticketSheet = false; route(destination) })
                 .presentationDetents([.large]).presentationDragIndicator(.visible)
         }
-        .task(id: "\(ticket.symbol)|\(style.showHistory)|\(active)") {
+        .task(id: "\(ticket.symbol)|\(style.showHistory)|\(active)|\(Int((candles.bars.first?.time ?? 0) / 86_400))|\(session.connection?.token.hashValue ?? 0)") {
             guard active, style.showHistory else { return }
-            await history.load(ticket.symbol, connection: session.connection)
+            await history.load(ticket.symbol, from: candles.bars.first?.time, connection: session.connection)
         }
         .onChange(of: reselect) { _, _ in follow += 1 }   // tab tapped again → back to the latest bar
         .task(id: active) {

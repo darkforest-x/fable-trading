@@ -69,32 +69,93 @@ extension Color {
     }
 }
 
-/// Previous weeks' NY Monday ranges per symbol (owner 2026-11-08 “也要支持历史的高低点 1.618 的线”),
-/// computed from 1H bars (~5 weeks via the service relay, cached on disk like the chart series).
+/// Previous weeks' NY Monday ranges per symbol (owner 2026-11-08 “也要支持历史的高低点 1.618 的线”;
+/// 11-09 “历史的区间线只能看到最近几周的，我需要看全历史的”). Weeks are filled backwards from the newest
+/// completed Monday to the oldest bar the chart has loaded: one 1H page ending at a Tuesday 00:00 NY
+/// holds that Monday and the one before. A completed Monday never changes, so each week is computed
+/// once and kept on disk per service host and contract; the walk stops at the listing (empty page).
 /// Each range is drawn from that Monday's close to the next week, like the current one.
 @MainActor @Observable
 final class MondayHistory {
     private(set) var ranges: [String: [FibRange]] = [:]
-    private var loaded: [String: Date] = [:]
+    private var weeks: [String: [Double: FibRange]] = [:]      // keyed by Tuesday 00:00 NY (range.start)
+    private var checked: [String: Set<Double>] = [:]           // Tuesdays fetched without a usable Monday
+    private var listed: [String: Bool] = [:]                   // walked back to the listing
+    private var wanted: [String: Double] = [:]
+    private var busy: Set<String> = []
 
-    func load(_ symbol: String, connection: Connection?) async {
-        guard !symbol.isEmpty, Date().timeIntervalSince(loaded[symbol] ?? .distantPast) > 1800 else { return }
-        loaded[symbol] = Date()
-        var bars = CandleCache.read(symbol: symbol, period: .h1)
-        if !bars.isEmpty { ranges[symbol] = Self.compute(bars) }
-        do {
-            var page = try await CandleStore.page(symbol: symbol, period: .h1, before: nil, connection: connection)
-            bars = Candle.merge(bars, page, limit: 2000)
-            for _ in 0..<2 {   // ~37 days in all
-                guard let first = page.first else { break }
-                page = try await CandleStore.page(symbol: symbol, period: .h1, before: Int(first.time), connection: connection)
-                bars = Candle.merge(page, bars, limit: 2000)
+    private static let calendar: Calendar = {
+        var c = Calendar(identifier: .gregorian); c.timeZone = TimeZone(identifier: "America/New_York")!; c.firstWeekday = 2; return c
+    }()
+
+    /// Fill completed Mondays back to `from` (epoch seconds; default ~5 weeks).
+    func load(_ symbol: String, from: Double? = nil, connection: Connection?) async {
+        guard !symbol.isEmpty else { return }
+        if weeks[symbol] == nil { restore(symbol) }
+        guard connection != nil else { return }   // the caller's task id includes the connection
+        let target = from ?? Date().addingTimeInterval(-35 * 86_400).timeIntervalSince1970
+        wanted[symbol] = min(wanted[symbol] ?? .infinity, target)
+        guard !busy.contains(symbol) else { return }   // the running walk reads the wider target
+        busy.insert(symbol)
+        // Not tied to the view task: when the chart's oldest bar moves, the view task is replaced,
+        // and the walk must keep going to the new target instead of dying with the old task.
+        Task { await walk(symbol, target: target, connection: connection) }
+    }
+
+    private func walk(_ symbol: String, target: Double, connection: Connection?) async {
+        defer { busy.remove(symbol); save(symbol) }
+        let cal = Self.calendar
+        guard let current = cal.dateInterval(of: .weekOfYear, for: Date()) else { return }
+        var monday = cal.date(byAdding: .weekOfYear, value: -1, to: current.start)!
+        var fetched = 0
+        while listed[symbol] != true, monday.timeIntervalSince1970 + 7 * 86_400 > (wanted[symbol] ?? target) {
+            let tuesday = cal.date(byAdding: .day, value: 1, to: monday)!.timeIntervalSince1970
+            if weeks[symbol]?[tuesday] == nil && checked[symbol]?.contains(tuesday) != true {
+                guard let bars = try? await CandleStore.page(symbol: symbol, period: .h1, before: Int(tuesday), connection: connection) else { return }
+                if bars.isEmpty { listed[symbol] = true; break }
+                for range in Self.compute(bars) { weeks[symbol, default: [:]][range.start] = range }
+                if weeks[symbol]?[tuesday] == nil { checked[symbol, default: []].insert(tuesday) }
+                fetched += 1
+                if fetched % 4 == 1 { publish(symbol) }
             }
-            CandleCache.write(symbol: symbol, period: .h1, bars: bars)
-            ranges[symbol] = Self.compute(bars)
-        } catch {
-            loaded[symbol] = nil
+            monday = cal.date(byAdding: .weekOfYear, value: -1, to: monday)!
         }
+        publish(symbol)
+    }
+
+    private func publish(_ symbol: String) {
+        ranges[symbol] = (weeks[symbol] ?? [:]).values.sorted { $0.start < $1.start }
+    }
+
+    // MARK: disk (completed weeks only; keyed by service host so fixture and production never mix)
+
+    private struct Saved: Codable { var weeks: [[Double]]; var checked: [Double]; var listed: Bool }
+
+    private static func url(_ symbol: String) -> URL? {
+        guard let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return nil }
+        let host = "\(AppConfig.serviceURL.host ?? "")-\(AppConfig.serviceURL.port ?? 443)"
+        return base.appendingPathComponent("monday-ranges", isDirectory: true).appendingPathComponent("\(host)-\(symbol).json")
+    }
+
+    private func restore(_ symbol: String) {
+        weeks[symbol] = [:]
+        guard let url = Self.url(symbol), let data = try? Data(contentsOf: url),
+              let saved = try? JSONDecoder().decode(Saved.self, from: data) else { return }
+        for row in saved.weeks where row.count == 4 && row[0] > row[1] {
+            let (high, low, start, end) = (row[0], row[1], row[2], row[3]), r = high - low
+            weeks[symbol]![start] = FibRange(high: high, low: low, upper: high + 0.618 * r, lower: low - 0.618 * r, start: start, end: end)
+        }
+        checked[symbol] = Set(saved.checked)
+        listed[symbol] = saved.listed
+        publish(symbol)
+    }
+
+    private func save(_ symbol: String) {
+        guard let url = Self.url(symbol), let all = weeks[symbol] else { return }
+        let saved = Saved(weeks: all.values.map { [$0.high, $0.low, $0.start, $0.end] }, checked: Array(checked[symbol] ?? []), listed: listed[symbol] ?? false)
+        guard let data = try? JSONEncoder().encode(saved) else { return }
+        try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try? data.write(to: url, options: .atomic)
     }
 
     /// Completed Mondays before the current NY week.

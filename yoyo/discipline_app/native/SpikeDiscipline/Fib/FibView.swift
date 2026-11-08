@@ -54,9 +54,10 @@ struct FibView: View {
             guard active, let connection = session.connection else { return }
             await touches.watch(connection: connection, session: session)
         }
-        .task(id: "\(fib.chartSymbol)|\(style.showHistory)|\(active)") {
+        // Full history (owner 2026-11-09): weeks back to the oldest loaded bar; older bars → older weeks.
+        .task(id: "\(fib.chartSymbol)|\(style.showHistory)|\(active)|\(Int((candles.bars.first?.time ?? 0) / 86_400))|\(session.connection?.token.hashValue ?? 0)") {
             guard active, style.showHistory else { return }
-            await history.load(fib.chartSymbol, connection: session.connection)
+            await history.load(fib.chartSymbol, from: candles.bars.first?.time, connection: session.connection)
         }
         .onChange(of: chartKey) { _, _ in showCandles() }
         .onChange(of: active) { _, now in if now { showCandles() } }
