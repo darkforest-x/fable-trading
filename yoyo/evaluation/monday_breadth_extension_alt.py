@@ -260,7 +260,10 @@ def load_quotes_for_entries(members: pd.DataFrame, controls: pd.DataFrame) -> tu
 
 
 def add_actual_close_decisions(members: pd.DataFrame, quotes: pd.DataFrame) -> pd.DataFrame:
-    q = quotes.rename(columns={"entry_time": "decision"})
+    q = quotes.rename(columns={
+        "entry_time": "decision",
+        **{f"gross_return_pct_{h}h": f"quote_gross_return_pct_{h}h" for h in HOLDS},
+    })
     out = members.merge(q, on=["symbol", "decision"], how="left", validate="one_to_one")
     if out.entry_open.notna().any():
         for h in HOLDS:
@@ -970,20 +973,40 @@ def run(*, prices_only: bool = False) -> dict:
     rule, events, members = load_locked_members()
     matches = (pd.DataFrame(columns=["symbol", "random_entry"])
                if prices_only else load_control_matches(events))
-    cached = load_member_payoff_cache(members)
-    quotes, oos_paths, price_receipts = load_quotes_for_entries(members, matches)
-    actual = add_actual_close_decisions(cached, quotes)
-    actual.to_parquet(OUT / "actual_member_price_inputs.parquet", index=False)
-    if oos_paths:
-        path_rows = [
-            {"symbol": symbol, "entry_time": entry, "step_5m": step, "mark_price": price}
-            for (symbol, entry), values in oos_paths.items()
-            for step, price in enumerate(values)
-        ]
-        pd.DataFrame(path_rows).to_parquet(OUT / "actual_oos_path_marks.parquet", index=False)
-    with gzip.open(OUT / "actual_price_source_receipts.json.gz", "wt", encoding="utf-8") as f:
-        json.dump({"symbols_loaded": len(price_receipts), "local_only": True,
-                   "source_receipts": price_receipts}, f, indent=2, ensure_ascii=False, default=str)
+    actual_input = OUT / "actual_member_price_inputs.parquet"
+    if not prices_only and actual_input.is_file() and (OUT / "actual_oos_path_marks.parquet").is_file():
+        # Reuse the just-materialized 239-event price stage; load only the
+        # random timestamps needed for the matched-control extension.
+        actual = pd.read_parquet(actual_input)
+        for col in ("known", "decision", "entry_time", "selected_exit_time"):
+            if col in actual:
+                actual[col] = pd.to_datetime(actual[col], utc=True)
+        cached = actual
+        empty_members = members.iloc[:0][["symbol", "decision"]]
+        quotes, _, random_receipts = load_quotes_for_entries(empty_members, matches)
+        mark_rows = pd.read_parquet(OUT / "actual_oos_path_marks.parquet")
+        oos_paths = {
+            (str(symbol), pd.Timestamp(entry).tz_convert("UTC")): group.sort_values("step_5m").mark_price.to_numpy(dtype=float)
+            for (symbol, entry), group in mark_rows.groupby(["symbol", "entry_time"], sort=False)
+        }
+        with gzip.open(OUT / "actual_price_source_receipts.json.gz", "rt", encoding="utf-8") as f:
+            actual_receipt = json.load(f)
+        price_receipts = actual_receipt.get("source_receipts", []) + random_receipts
+    else:
+        cached = load_member_payoff_cache(members)
+        quotes, oos_paths, price_receipts = load_quotes_for_entries(members, matches)
+        actual = add_actual_close_decisions(cached, quotes)
+        actual.to_parquet(actual_input, index=False)
+        if oos_paths:
+            path_rows = [
+                {"symbol": symbol, "entry_time": entry, "step_5m": step, "mark_price": price}
+                for (symbol, entry), values in oos_paths.items()
+                for step, price in enumerate(values)
+            ]
+            pd.DataFrame(path_rows).to_parquet(OUT / "actual_oos_path_marks.parquet", index=False)
+        with gzip.open(OUT / "actual_price_source_receipts.json.gz", "wt", encoding="utf-8") as f:
+            json.dump({"symbols_loaded": len(price_receipts), "local_only": True,
+                       "source_receipts": price_receipts}, f, indent=2, ensure_ascii=False, default=str)
 
     # The full raw ledger retains every frozen member even when one of its price
     # endpoints or six-hour close is unavailable.
@@ -1025,6 +1048,25 @@ def run(*, prices_only: bool = False) -> dict:
         member_exit_6h_pct=("exit_6h_pct", "mean"), member_exit_12h_pct=("exit_12h_pct", "mean"),
         member_exit_24h_pct=("exit_24h_pct", "mean"),
     )
+    exit_rows = []
+    for strategy, part in actual_ledger.groupby("strategy", sort=False):
+        for period, sub in [("all_239", part), *[
+            (name, part[part.epoch.eq(epoch)]) for epoch, name in
+            [(0, "pre2023"), (1, "2023_2024"), (2, "2025"), (3, "2026")]
+        ]]:
+            denominator = len(sub)
+            exit_rows.append({
+                "strategy": strategy, "period": period,
+                "constituent_rows": denominator,
+                "decision_available_rows": int(sub.selected_exit_hours.notna().sum()),
+                "actual_6h_exits": int(sub.selected_exit_hours.eq(6).sum()),
+                "actual_12h_exits": int(sub.selected_exit_hours.eq(12).sum()),
+                "actual_24h_exits": int(sub.selected_exit_hours.eq(24).sum()),
+                "exit_6h_pct_all_constituents": 100 * sub.selected_exit_hours.eq(6).sum() / denominator if denominator else np.nan,
+                "exit_12h_pct_all_constituents": 100 * sub.selected_exit_hours.eq(12).sum() / denominator if denominator else np.nan,
+                "exit_24h_pct_all_constituents": 100 * sub.selected_exit_hours.eq(24).sum() / denominator if denominator else np.nan,
+            })
+    pd.DataFrame(exit_rows).to_csv(OUT / "constituent_exit_distribution_price_only.csv", index=False)
     price_metrics.to_csv(OUT / "price_stage_summary.csv", index=False)
     price_stage = {
         "locked_entries": len(events), "locked_constituent_rows": len(members),
