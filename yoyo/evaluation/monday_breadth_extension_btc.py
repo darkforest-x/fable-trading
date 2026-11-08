@@ -289,6 +289,13 @@ def _attach_funding(events: pd.DataFrame, history: pd.DataFrame, frame: pd.DataF
                     *, return_col: str, entry_time_col: str = "decision") -> pd.DataFrame:
     result = events.copy()
     result["entry_time"] = pd.to_datetime(result[entry_time_col], utc=True)
+    if "exit_time" not in result:
+        exit_col = "random_exit" if "random_exit" in result else None
+        result["exit_time"] = (
+            pd.to_datetime(result[exit_col], utc=True)
+            if exit_col is not None
+            else result.entry_time + pd.Timedelta(hours=HOLD_HOURS)
+        )
     result["entry_open"] = frame.open.reindex(pd.DatetimeIndex(result.entry_time)).to_numpy(dtype=float)
     result["funding_points_cost"] = _funding_points(result, history)
     result["funded_net_pct"] = pd.to_numeric(result[return_col], errors="coerce") - (
