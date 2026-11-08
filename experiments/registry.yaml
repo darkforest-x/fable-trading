@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-breadth-extension-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 645c60527f4b552a8a1e792bb1a0fcd9f3a1cc53
+    status: inconclusive
+    question: Can an improved entry, exit or BTC/ALT capital allocation keep more opportunities, retain the September rally and deliver a repeatable edge?
+    single_variable: 'Four independent research families: causal BTC regime filter, six-hour constituent-specific ALT extensions, earliest shared capital among pairs, funded-target BTC overlay. Separately labeled half-capital sleeve comparison.'
+    result: 'Exploratory below-4h-EMA20 ordinary BTC + half-scale rare BTC + independent 6h ALT sleeves: 398 historical distinct entries, 48 in known 2026 through 27 Oct, 31 positive, funded growth +42.03%, 5m funded DD 6.59%. Whole-period fee-only growth +466.60%, DD 26.75%; matched 28/48, nine months, equally weighted fee-only edge +0.715pp, monthly p=.387. Case net +10,005.75 points at base fills; at 10bp adverse market fills +9,805.56 and hindsight maker upper bound 9,982.38. 6h winners held to 12h improved recent ALT average to +0.953% from +0.792%, with weaker early history.'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - monday-breadth-extension-20261108-v1
+    canonical_report: experiments/active/exp-monday-breadth-extension-20261108-v1/results.csv
+    notes: Frozen parent births, chronological development selection, actual funding on 2026 events, monthly matched controls, sensitivity and complete alternatives. Known historical evaluation, no live eligibility.
+
   - experiment_id: exp-monday-breadth-frequency-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 161a4e494081149a771cf7a0cfcf30e43c953a40

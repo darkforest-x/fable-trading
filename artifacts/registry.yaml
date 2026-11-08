@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: monday-breadth-extension-20261108-v1
+    artifact_type: manifest
+    role: breadth_alternative_entry_exit_and_sleeve_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 645c60527f4b552a8a1e792bb1a0fcd9f3a1cc53
+    source_path: experiments/active/exp-monday-breadth-extension-20261108-v1/results.csv
+    storage_uri: repo://experiments/active/exp-monday-breadth-extension-20261108-v1/results.csv
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Results index plus underlying VectorBT fills, full rule/control comparison and parallel-sleeve account paths.
+
   - artifact_id: monday-breadth-frequency-20261108-v1
     artifact_type: manifest
     role: higher_frequency_breadth_opportunities_and_costed_monthly_controls
