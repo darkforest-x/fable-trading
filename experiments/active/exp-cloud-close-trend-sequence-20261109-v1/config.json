@@ -1,0 +1,8 @@
+{
+  "id":"exp-cloud-close-trend-sequence-20261109-v1",
+  "hypothesis":"The first confirmed V1.7 weekly key in a newly observed 12H EMA20/50 trend might leave more remaining upside than a later pullback during that same trend.",
+  "factor":"Ordinal of the original, fully closed V1.7 signal in the current uninterrupted EMA20/50 direction. Compare first versus repeat. A crossover must be observed after EMA warmup and after the beginning of the frozen signal history, with consecutive valid 12H observations. Reset at an unknown or zero spread. Count all original keys, including ones skipped by a full account or the 90-day gate. Reject left-censored trend episodes.",
+  "parent":"Original nine-slot 1000U portfolio, known 90d history, fully funded runner with 2R arming +0.5R stop. All market fills 5bp. No new stop, target, leverage, funding or impact. Exact 12H confirmation, first executable open.",
+  "selection":"Pre-2025 highest NAV among qualifying covered baseline/first/repeat; >=100 closed, win >=30%, realized cash and return payoff >=2.5, upper DD <=35%. Count unverifiable episodes; check 5bp slip and later matched controls only if selected by development. Controls reuse the prior observed parent's sequence with separately eligible control entry time. 2025/26 already explored.",
+  "runner":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_trend_sequence"
+}
