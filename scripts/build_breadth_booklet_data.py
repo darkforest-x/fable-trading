@@ -488,6 +488,13 @@ def btc_admission_review(accounts: pd.DataFrame) -> list[dict[str, Any]]:
     })
     reserve = pd.read_csv(BTC_RESERVE / "partition_summary.csv")
     reserve = reserve.loc[reserve.variant.eq("reserved_25_25_50") & reserve.scope.isin(["all_history", "2026"])].copy()
+    ledger = pd.read_csv(BTC_RESERVE / "event_ledger.csv", usecols=["decision"], parse_dates=["decision"])
+    local = pd.DatetimeIndex(ledger.loc[ledger.decision.dt.year.eq(2026), "decision"].unique()).tz_convert("Asia/Shanghai").sort_values()
+    expected_clocks = reserve.loc[reserve.scope.eq("2026"), "distinct_entries"].item()
+    if len(local) != expected_clocks:
+        raise ValueError("Independent sleeve opening clocks disagree with the combined ledger")
+    reserve["active_days_bjt"] = pd.Series(len(set(local.date)), index=reserve.index).where(reserve.scope.eq("2026"))
+    reserve["active_weeks_bjt"] = pd.Series(len(set(local.strftime("%G-%V"))), index=reserve.index).where(reserve.scope.eq("2026"))
     reserve["variant"] = "reserved_case"
     reserve["september_funded_pnl_usdt"] = reserve.sep16_case_contribution_usd_2026_reset.where(reserve.scope.eq("2026"))
     rows = pd.concat([variants, reserve], ignore_index=True)
@@ -500,7 +507,7 @@ def btc_admission_review(accounts: pd.DataFrame) -> list[dict[str, Any]]:
         np.testing.assert_allclose([check.growth_pct, check.marked_dd_pct, check.distinct_entries],
                                    [reference.growth_pct, reference.max_dd_pct, reference.distinct], atol=1e-6)
     cols = ["variant", "scope", "btc_count", "alt_count", "total_legs", "distinct_entries",
-            "growth_pct", "settlement_dd_pct", "marked_dd_pct", "sep16_admitted", "september_funded_pnl_usdt"]
+            "growth_pct", "settlement_dd_pct", "marked_dd_pct", "sep16_admitted", "september_funded_pnl_usdt", "active_days_bjt", "active_weeks_bjt"]
     return clean(rows[cols].to_dict("records"))
 
 

@@ -74,7 +74,8 @@
     const scope=funded?'2026':'all_history';
     const names={current:'现版',early_ema:'普通 BTC 先验 EMA',reserved_case:'急跌 BTC 单留一份资金'};
     const variants=review.btc_variants.filter(r=>r.scope===scope);
-    const sepPnl=variants.find(r=>r.variant==='reserved_case')?.september_funded_pnl_usdt;
+    const reserve=variants.find(r=>r.variant==='reserved_case');
+    const sepPnl=reserve.september_funded_pnl_usdt;
     const rows=variants.map(r=>[
       names[r.variant],r.btc_count,r.total_legs,r.distinct_entries,pct(r.growth_pct),
       pct(r.marked_dd_pct,false),pct(r.settlement_dd_pct,false),r.sep16_admitted?'入场':'错过'
@@ -84,6 +85,7 @@
       table(['BTC 准入与资金','BTC 笔数','组合笔数','不同开仓时点','组合净收益','5 分钟盯市回撤','结算回撤','9 月 16 日急跌'],rows)+
       note('先验 EMA 后，未通过的普通 BTC 信号立即释放六天名额。9 月 12 日 08:10（北京时间）一笔普通 BTC 得以开仓，持有六天。9 月 16 日急跌信号出现时，BTC 资金已占用。原版在那次急跌每 BTC 实现了约一万点净收益。')+
       note('分仓方案从一开始把 250 USDT 分给普通 BTC，250 USDT 分给急跌 BTC，500 USDT 分给山寨。三份独立复利，两路 BTC 可同时有仓。单笔 BTC 的点数相同，分到这笔的资金决定它对组合赚了多少。'+(funded&&finite(sepPnl)?'按 2026 年初 1,000 USDT 起步，9 月 16 日急跌单在分仓组合中贡献 '+money(sepPnl)+' USDT。':''))+
+      (funded?note('分仓的 '+reserve.distinct_entries+' 次入场分布在 '+reserve.active_days_bjt+' 个北京时间交易日、'+reserve.active_weeks_bjt+' 个自然周。现版为 44 天、30 周。'):'')+
       note('这些比较使用已看过的行情。同一轮下跌可以触发多笔。结算回撤按平仓净值计算，表内空缺表示该口径没有核实。'));
   }
 
@@ -104,6 +106,7 @@
     return panel('为什么开单少',timing+admission)+
       btcVariantsHTML(review,funded)+
       panel('缩短山寨入场间隔',spacingHTML(review,funded))+
+      panel('下一步研究什么',note('优先寻找原版空仓期间的新交易日。一个可以单独检验的改动是，每个币当周首次触轨后，等一根完整的 1 小时 K 线收回下轨，再允许它下一次触轨参与计数。其余窗口、入场和退出固定。将新增交易日单独与同币、同期、同波动的随机入场比较，并核对含费用的收益和盯市回撤。这条假设尚未回测。'))+
       '<details class="bb-panel bb-details"><summary>曾试过的高频组合 · 2026 年至 10 月 27 日</summary>'+
       note('将 BTC、ETH、SOL 和山寨篮子四路提醒合到一个账户，空仓时接最早一笔。下表中的 36 和 72 是选规则时设定的年度笔数门槛。')+
       table(['候选','入场数','含资金费笔均收益','5 分钟盯市回撤'],frequent)+
