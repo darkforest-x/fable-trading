@@ -409,9 +409,11 @@ def _month_inputs(events: pd.DataFrame, frame: pd.DataFrame, htf: dict[int, pd.D
                     "rule": rule,
                     "event_id": event_id,
                     "decision": _utc(event.decision),
+                    "candidate_known": _utc(event.known),
                     "month": str(month),
                     "candidate_vol_bucket": context.get("candidate_vol_bucket"),
                     "candidate_trend_bucket_1h": context.get("candidate_trend_bucket"),
+                    "candidate_monitor_fraction": context.get("candidate_monitor_fraction"),
                     "unfiltered_match_pool_n": int(len(pool)),
                     "trend_filtered_match_pool_n": int(len(trend_pool)),
                     "draw_count": int(len(sampled)),
@@ -460,6 +462,30 @@ def _month_inputs(events: pd.DataFrame, frame: pd.DataFrame, htf: dict[int, pd.D
             rule_rows = drafts.rule.eq(rule)
             if rule_rows.any() and not _gate(drafts.loc[rule_rows], rule).all():
                 raise ValueError(f"A {rule} random control failed the trend gate")
+        random_knowns = pd.DatetimeIndex(drafts.random_entry) - pd.Timedelta(minutes=10)
+        random_vol, random_trend, random_context_ok = matcher._pre_observation_features(frame, random_knowns)
+        drafts["random_known"] = random_knowns
+        drafts["random_vol_bucket"] = random_vol
+        drafts["random_trend_bucket_1h"] = random_trend
+        drafts["random_context_valid"] = random_context_ok
+        drafts["same_month_as_candidate"] = drafts.random_entry.dt.strftime("%Y-%m").eq(drafts.month)
+        drafts["same_utc_6h_session"] = (drafts.random_entry.dt.hour // 6).eq(drafts.decision.dt.hour // 6)
+        drafts["same_1h_volatility_stratum"] = pd.to_numeric(drafts.random_vol_bucket).eq(
+            pd.to_numeric(drafts.candidate_vol_bucket)
+        )
+        drafts["same_1h_trend_stratum"] = pd.to_numeric(drafts.random_trend_bucket_1h).eq(
+            pd.to_numeric(drafts.candidate_trend_bucket_1h)
+        )
+        drafts["same_new_york_weekdays"] = (
+            random_knowns.tz_convert("America/New_York").day_of_week
+            == (pd.DatetimeIndex(drafts.candidate_known).tz_convert("America/New_York").day_of_week)
+        ) & (
+            drafts.random_entry.dt.tz_convert("America/New_York").day_of_week
+            == drafts.decision.dt.tz_convert("America/New_York").day_of_week
+        )
+        if not (drafts[["random_context_valid", "same_month_as_candidate", "same_utc_6h_session",
+                       "same_1h_volatility_stratum", "same_1h_trend_stratum", "same_new_york_weekdays"]].all().all()):
+            raise ValueError("A sampled BTC control failed the inherited monthly/session/1h/weekday strata")
     receipts = {
         "local_ohlc": "source receipt written separately",
         "random_control_engine": "monday_breadth_reversal_window.trade_returns (VectorBT from_orders), 144h fixed market exit",
