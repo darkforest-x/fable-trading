@@ -197,7 +197,7 @@ def _validate_reinvestment_candidates(base: pd.DataFrame, opportunities: pd.Data
 
 def prepare(base: pd.DataFrame, opportunities: pd.DataFrame, slots: int = 9, *,
             start: int = wallet.START, end: int = wallet.END, reinvest: bool = True,
-            quote_loader=None) -> dict:
+            profit_only_budget: bool = False, quote_loader=None) -> dict:
     """Build three VectorBT columns per base slot: target, runner, and optional re-entry."""
     quote_loader = quote_loader or wallet.quotes
     candidates, candidate_counts = _validate_reinvestment_candidates(base, opportunities, quote_loader)
@@ -243,6 +243,13 @@ def prepare(base: pd.DataFrame, opportunities: pd.DataFrame, slots: int = 9, *,
     # event-specific after the slot has been reused.
     target_entry_rows = np.full((len(addon_data['actions']), slots), -1,
                                 dtype=np.int64)
+    addon_stop_prices = np.zeros((len(addon_data['actions']), slots),
+                                 dtype=np.float64)
+    runner_stop_by_entry = np.zeros((len(addon_data['actions']), slots),
+                                    dtype=np.float64)
+    for row in selected.itertuples(index=False):
+        entry_stage = _stage(int(row.entry_ms), 'entry', start)
+        runner_stop_by_entry[entry_stage, int(row.slot)] = float(row.stop_price)
     if len(addon_paths):
         entry_row_by_event = {
             str(row.event_id): _stage(int(row.entry_ms), 'entry', start)
@@ -256,6 +263,7 @@ def prepare(base: pd.DataFrame, opportunities: pd.DataFrame, slots: int = 9, *,
             if target_entry_rows[reentry_row, slot] >= 0:
                 raise ValueError('Two re-entry parents map to one slot at the same H1 open')
             target_entry_rows[reentry_row, slot] = entry_row_by_event[str(row.event_id)]
+            addon_stop_prices[reentry_row, slot] = float(row.stop_price)
 
     return dict(selected=selected, candidates=addon_paths.reset_index(drop=True),
                 candidate_counts=candidate_counts, skips=original_data['skips'],
@@ -265,6 +273,9 @@ def prepare(base: pd.DataFrame, opportunities: pd.DataFrame, slots: int = 9, *,
                 high=np.concatenate([original_data['high'], addon_data['high']], axis=1),
                 low=np.concatenate([original_data['low'], addon_data['low']], axis=1),
                 target_entry_rows=target_entry_rows,
+                addon_stop_prices=addon_stop_prices,
+                runner_stop_by_entry=runner_stop_by_entry,
+                profit_only_budget=profit_only_budget,
                 start=start, slots=slots, reinvest=reinvest)
 
 
@@ -278,7 +289,8 @@ def _pre_segment(c):
 @njit(cache=True)
 def _order_func(c, nav, actions, prices, fees, market_slip, reservation,
                 target_notional, add_budget, add_cash_before,
-                target_entry_rows, slots):
+                target_entry_rows, addon_stop_prices, runner_stop_by_entry,
+                profit_only_budget, position_state, risk_audit, slots):
     action = actions[c.i, c.col]
     if action == 0:
         return NoOrder
@@ -294,6 +306,14 @@ def _order_func(c, nav, actions, prices, fees, market_slip, reservation,
     if action == 2:
         if c.position_now == 0.:
             return NoOrder
+        if profit_only_budget and leg == 0:
+            side = 1. if c.position_now > 0. else -1.
+            fill_price = price * (1. - side * slip)
+            exit_fee = abs(c.position_now) * fill_price * fee
+            position_state[3, slot] = (
+                c.position_now * (fill_price - position_state[1, slot])
+                - position_state[2, slot] - exit_fee)
+            risk_audit[5, c.i, slot] = position_state[3, slot]
         return nb.order_nb(size=-c.position_now, price=price, fees=fee,
                            slippage=slip, lock_cash=True, allow_partial=False,
                            raise_reject=True)
@@ -320,6 +340,16 @@ def _order_func(c, nav, actions, prices, fees, market_slip, reservation,
         if leg == 0:
             fill_price = price * (1. + slip if action > 0 else 1. - slip)
             target_notional[c.i, slot] = abs(size) * fill_price
+            if profit_only_budget:
+                position_state[0, slot] = abs(size)
+                position_state[1, slot] = fill_price
+                position_state[2, slot] = abs(size) * fill_price * fee
+        elif profit_only_budget:
+            fill_price = price * (1. + slip if action > 0 else 1. - slip)
+            position_state[4, slot] = size
+            position_state[5, slot] = fill_price
+            position_state[6, slot] = abs(size) * fill_price * fee
+            position_state[7, slot] = runner_stop_by_entry[c.i, slot]
         return nb.order_nb(size=size, price=price, fees=fee, slippage=slip,
                            lock_cash=True, allow_partial=False, raise_reject=True)
     if abs(action) == 3:
@@ -330,13 +360,62 @@ def _order_func(c, nav, actions, prices, fees, market_slip, reservation,
         if c.last_position[slot * 2 + 1] == 0.:
             add_cash_before[c.i, slot] = max(0., c.free_cash_now)
             add_budget[c.i, slot] = 0.
+            if profit_only_budget:
+                risk_audit[4, c.i, slot] = 4.
             return NoOrder
         cash = max(0., c.free_cash_now)
         target_entry_row = target_entry_rows[c.i, slot]
         if target_entry_row < 0:
             raise ValueError('Re-entry lacks its parent target-entry row')
-        budget = min(target_notional[target_entry_row, slot], cash)
+        target_cap = target_notional[target_entry_row, slot]
+        budget = min(target_cap, cash)
         add_cash_before[c.i, slot] = cash
+        if profit_only_budget:
+            target_profit = position_state[3, slot]
+            risk_audit[5, c.i, slot] = target_profit
+            runner_qty = position_state[4, slot]
+            runner_entry = position_state[5, slot]
+            runner_entry_fee = position_state[6, slot]
+            runner_stop = position_state[7, slot]
+            if (position_state[0, slot] <= 0. or runner_qty == 0. or
+                    runner_entry <= 0. or runner_stop <= 0.):
+                risk_audit[4, c.i, slot] = 2.
+                add_budget[c.i, slot] = 0.
+                return NoOrder
+            runner_side = 1. if runner_qty > 0. else -1.
+            runner_stop_fill = runner_stop * (1. - runner_side * slip)
+            runner_stop_pnl = (runner_qty * (runner_stop_fill - runner_entry)
+                               - runner_entry_fee
+                               - abs(runner_qty) * runner_stop_fill * TAKER)
+            runner_stop_loss = max(0., -runner_stop_pnl)
+            profit_budget = max(0., target_profit - runner_stop_loss)
+            risk_audit[0, c.i, slot] = profit_budget
+            risk_audit[1, c.i, slot] = runner_stop_loss
+            if profit_budget <= 1.e-8:
+                risk_audit[4, c.i, slot] = 1.
+                add_budget[c.i, slot] = 0.
+                return NoOrder
+            addon_side = 1. if action > 0 else -1.
+            addon_entry_fill = price * (1. + addon_side * slip)
+            addon_stop = addon_stop_prices[c.i, slot]
+            addon_stop_fill = addon_stop * (1. - addon_side * slip)
+            unit_loss = (addon_side * (addon_entry_fill - addon_stop_fill)
+                         + TAKER * addon_entry_fill + TAKER * addon_stop_fill)
+            if (addon_stop <= 0. or addon_stop_fill <= 0. or
+                    not np.isfinite(unit_loss) or unit_loss <= 0.):
+                risk_audit[4, c.i, slot] = 2.
+                add_budget[c.i, slot] = 0.
+                return NoOrder
+            qty_cap = profit_budget / unit_loss
+            risk_audit[2, c.i, slot] = unit_loss
+            risk_audit[3, c.i, slot] = qty_cap
+            # Convert the loss-limited quantity to the callback's cash budget.
+            risk_cash_cap = qty_cap * price * (1. + slip) * (1. + fee) / (1. - 1.e-10)
+            budget = min(target_cap, cash, risk_cash_cap)
+            if budget <= 1.e-8:
+                risk_audit[4, c.i, slot] = 3.
+                add_budget[c.i, slot] = 0.
+                return NoOrder
         add_budget[c.i, slot] = budget
         if budget < 1.e-8:
             return NoOrder
@@ -376,11 +455,15 @@ def account(data: dict, *, slip: float = 0., initial_cash: float = 1000.):
     target_notional = np.zeros((len(data['actions']), slots), dtype=np.float64)
     add_budget = np.zeros((len(data['actions']), slots), dtype=np.float64)
     add_cash_before = np.zeros((len(data['actions']), slots), dtype=np.float64)
+    position_state = np.zeros((8, slots), dtype=np.float64)
+    risk_audit = np.zeros((6, len(data['actions']), slots), dtype=np.float64)
     actions = data['actions']
     portfolio = vbt.Portfolio.from_order_func(
         data['marks'], _order_func, actions, data['prices'], data['fees'], slip,
         reservation, target_notional, add_budget, add_cash_before,
-        data['target_entry_rows'], slots,
+        data['target_entry_rows'], data['addon_stop_prices'],
+        data['runner_stop_by_entry'], int(data['profit_only_budget']),
+        position_state, risk_audit, slots,
         pre_segment_func_nb=_pre_segment, cash_sharing=True, group_by=True,
         init_cash=initial_cash, max_orders=int(np.count_nonzero(actions)) + 1,
         fill_pos_record=False)
@@ -434,7 +517,19 @@ def account(data: dict, *, slip: float = 0., initial_cash: float = 1000.):
             addon_exit = _stage(int(c.exit_bar_ms), str(c.exit_phase), start)
             addon = _leg_result(order_map, addon_entry, addon_exit, slots * 2 + slot)
             if addon is None:
-                original['reinvest_status'] = 'no_free_cash'
+                if data['profit_only_budget']:
+                    skip_status = int(risk_audit[4, addon_entry, slot])
+                    original['reinvest_status'] = {
+                        1: 'no_positive_profit_budget',
+                        2: 'invalid_risk_distance',
+                        3: 'budget_below_minimum',
+                        4: 'runner_not_live',
+                    }.get(skip_status, 'no_free_cash')
+                    original['profit_budget_usdt'] = float(risk_audit[0, addon_entry, slot])
+                    original['runner_stop_loss_usdt'] = float(risk_audit[1, addon_entry, slot])
+                    original['target_net_profit_usdt'] = float(risk_audit[5, addon_entry, slot])
+                else:
+                    original['reinvest_status'] = 'no_free_cash'
             else:
                 addon_row = int(addon_entry)
                 available_cash = float(add_cash_before[addon_row, slot])
@@ -443,6 +538,23 @@ def account(data: dict, *, slip: float = 0., initial_cash: float = 1000.):
                     raise ValueError(f'Re-entry exceeded released target-leg notional: {row.event_id}')
                 if addon['notional'] > available_cash + 1e-6:
                     raise ValueError(f'Re-entry exceeded free cash at order time: {row.event_id}')
+                if data['profit_only_budget']:
+                    target_net_profit = float(risk_audit[5, addon_row, slot])
+                    profit_budget = float(risk_audit[0, addon_row, slot])
+                    runner_stop_loss = float(risk_audit[1, addon_row, slot])
+                    unit_loss = float(risk_audit[2, addon_row, slot])
+                    quantity_cap = float(risk_audit[3, addon_row, slot])
+                    if addon['quantity'] > quantity_cap + 1e-8:
+                        raise ValueError(f'Re-entry quantity exceeded earned-risk cap: {row.event_id}')
+                    used_loss_budget = addon['quantity'] * unit_loss
+                    if used_loss_budget > profit_budget + 1e-6:
+                        raise ValueError(f'Re-entry stop risk exceeded earned-profit budget: {row.event_id}')
+                    if not np.isclose(target_net_profit, target['cash_pnl'],
+                                      rtol=1e-9, atol=1e-6):
+                        raise ValueError(f'Runtime TP profit differs from actual fee-net fill: '
+                                         f'{row.event_id} runtime={target_net_profit} '
+                                         f'ledger={target["cash_pnl"]} '
+                                         f'diff={target_net_profit-target["cash_pnl"]}')
                 original['reinvest_status'] = 'filled'
                 original['reinvest_cash_pnl'] = addon['cash_pnl']
                 original['reinvest_notional'] = addon['notional']
@@ -467,6 +579,14 @@ def account(data: dict, *, slip: float = 0., initial_cash: float = 1000.):
                                requested_budget=requested_budget,
                                sync_to_runner=bool(c.sync_to_runner),
                                same_bar_exit_order=c.same_bar_exit_order)
+                if data['profit_only_budget']:
+                    reentry.update(target_net_profit_usdt=target_net_profit,
+                                   profit_budget_usdt=profit_budget,
+                                   runner_stop_loss_usdt=runner_stop_loss,
+                                   addon_unit_stop_loss=unit_loss,
+                                   max_quantity_from_profit=quantity_cap,
+                                   stop_risk_used_usdt=used_loss_budget,
+                                   stop_risk_budget_unused_usdt=max(0., profit_budget-used_loss_budget))
                 reentry_rows.append(reentry)
         rows.append(original)
     if not rows:
@@ -502,10 +622,12 @@ def account(data: dict, *, slip: float = 0., initial_cash: float = 1000.):
 
 def simulate(paths: pd.DataFrame, opportunities: pd.DataFrame, *, slots: int = 9,
              slip: float = 0., reinvest: bool = True, start: int = wallet.START,
-             end: int = wallet.END, quote_loader=None):
+             end: int = wallet.END, profit_only_budget: bool = False,
+             quote_loader=None):
     base, skips = _selected_originals(paths, slots)
     data = prepare(base, opportunities, slots, start=start, end=end,
-                   reinvest=reinvest, quote_loader=quote_loader)
+                   reinvest=reinvest, profit_only_budget=profit_only_budget,
+                   quote_loader=quote_loader)
     parent_ledger, reentry_ledger, equity, meta = account(data, slip=slip)
     periods = {'all': (None, None), 'dev': (None, '2025-01-01T00:00Z'),
                '2025': ('2025-01-01T00:00Z', '2026-01-01T00:00Z'),
