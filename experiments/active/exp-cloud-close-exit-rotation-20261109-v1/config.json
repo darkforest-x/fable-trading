@@ -1,0 +1,81 @@
+{
+  "id": "exp-cloud-close-exit-rotation-20261109-v1",
+  "status": "preregistered_builder_pending_owner_commit",
+  "hypothesis": "A causal 90-day marked-NAV comparison between the universal 2/3-at-2R-plus-runner shadow and the universal full-runner shadow can choose an exit mix while retaining the corrected V1.7 event universe, entry priority, slot capacity, fees, and native VectorBT fill paths.",
+  "single_variable": "For each entry, use the full-runner exits for both child legs only when its own cohort's preceding 90-day full-runner NAV return exceeds the corresponding 2/3 shadow return; otherwise keep the native 2R target on two-thirds and the native runner on one-third.",
+  "account": {
+    "initial_cash_usdt": 1000.0,
+    "slots": 9,
+    "entry_priority": "frozen source priority (low prior ATR first), then original entry-time/contract tie-break",
+    "base_market_slippage": 0.0,
+    "entry_fee": "native taker, 0.0005",
+    "native_2r_exit_fee": "resting maker, 0.0002",
+    "runner_exit_fee": "native path fee class",
+    "partial_2r_fraction": 0.6666666666666666,
+    "partial_runner_fraction": 0.3333333333333333,
+    "full_runner_fraction": 1.0,
+    "selected_full_runner_execution": "Reuse each event's native tp_r=0 runner path as both tp_r=0 and tp_r=2 child legs, then let the shared VectorBT scaleout account execute and value both legs."
+  },
+  "selector": {
+    "lookback_days": 90,
+    "safe_lag_hours": 12,
+    "measure": "Each static shadow's NAV at exact completed H1 close labels: nav_end/nav_start-1, where end is event entry_ms minus 12 hours and start is end minus 90 days.",
+    "boundary_evidence": "Both NAV timestamps must exist; for each symbol still open at a boundary in either shadow, the exact native H1 bar ending at that boundary must be present. The engine marks that bar from its native close; no carried mark or interpolation validates a decision boundary.",
+    "arm_rule": "Select full_runner only when its own-cohort trailing return exceeds partial_2_3 by more than 1e-12.",
+    "missing_or_tied_rule": "fallback to 2/3 scaleout",
+    "decision_scope": "Make one decision per event at its own 12H-confirmed entry open. Actual and eligible paired controls each use their own static shadow histories."
+  },
+  "venues": {
+    "OKX": {
+      "path_source": "cloud_close_thirds.okx_paths() followed by cloud_close_eligibility_repair.check_parent_sets()",
+      "expected_actual_opportunities": 11780,
+      "expected_paired_controls": 10816,
+      "static_partial_reference": "experiments/active/exp-cloud-close-eligibility-repair-20261109-v1/thirds/{funded_OKX.csv.gz,hourly_OKX.csv.gz,account_metrics.csv}"
+    },
+    "Binance": {
+      "path_source": "cloud_close_binance_gap_repair.assembled(set(cloud_close_binance_daily_patch.affected_tickers()))",
+      "expected_actual_opportunities": 22623,
+      "expected_paired_controls": 20588,
+      "static_partial_reference": "experiments/active/exp-cloud-close-thirds-20261109-v1/{funded_Binance.csv.gz,hourly_Binance.csv.gz,account_metrics.csv}"
+    }
+  },
+  "runner_reuse_review": {
+    "OKX": "Existing leadership fraction=1.0 output is 100% at the 2R target; it is not a full runner curve. The equity-stop account changes the exit rule.",
+    "Binance": "Existing Binance transfer runner candidate uses an earlier data cutoff and the pre-repair event set. It is not the corrected full-period runner.",
+    "decision": "Reprice the full-runner shadow through the existing VectorBT wallet from the corrected per-event native paths."
+  },
+  "evaluation": {
+    "periods_utc": {
+      "all": "full frozen source range",
+      "dev": "before 2025-01-01",
+      "2025": "2025-01-01 through 2025-12-31",
+      "2026": "2026-01-01 through the frozen source end"
+    },
+    "comparison": ["actual", "eligible_controls", "paired_actual", "paired_controls"],
+    "stress": "Additional 0.0005 market slippage on taker fills; maker 2R limits retain their native fee and zero market slippage.",
+    "static_parity_gate": "Before freezing choices, static 2/3 actual account must match the corrected reference's funded event IDs, per-trade cash PnL/entry/exit fields, every hourly NAV and conservative mark, and all-period metrics.",
+    "same_slot_gate": "Static partial and full-runner shadows must fund identical event IDs in identical slots; rotated account admissions and slots must match its static shadow roster."
+  },
+  "commands": {
+    "mini": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_exit_rotation --mini-check",
+    "static_shadows_and_choice_evidence_after_commit": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_exit_rotation --phase shadows",
+    "rotated_accounts_after_shadow_review": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_exit_rotation --phase rotation"
+  },
+  "outputs": [
+    "shadow_metrics.csv",
+    "shadow_audit.json",
+    "shadow_manifest.json",
+    "funded_<venue>_<cohort>_shadow_<policy>.csv.gz",
+    "hourly_<venue>_<cohort>_shadow_<policy>.csv.gz",
+    "choice_evidence_<venue>_<cohort>.csv.gz",
+    "account_metrics.csv",
+    "rotation_summary.json",
+    "funded_<venue>_rotation_<cohort>.csv.gz",
+    "hourly_<venue>_rotation_<cohort>.csv.gz"
+  ],
+  "limitations": [
+    "Hourly OHLC cannot reveal the exact intrabar ordering of open-position mark excursions; drawdown uses the existing conservative bounds.",
+    "The 12-hour selector lag is intentionally conservative; entries without exact lookback NAV or native boundary quote evidence default to 2/3.",
+    "This is a historical research comparison, not a production or deployment authorization."
+  ]
+}
