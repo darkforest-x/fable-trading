@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-cloud-close-week-target-20261109-v1",
+  "created_utc": "2026-11-09",
+  "question": "On the frozen 9-slot low-prior-ATR V1.7 account with a 75% resting partial and 25% unchanged cloud runner, does the original opposite weekly 1.618 reference improve on the fixed 2R partial when the 75% target is placed at a preregistered fraction of the remaining confirmation-entry-to-extension distance?",
+  "single_variable": "resting target geometry for the 75% partial; entries, stops, 25% runner, account allocation, controls, and fees are frozen",
+  "frozen_inputs": {
+    "reward_paths_config": "experiments/active/exp-cloud-close-reward-20261109-v1/paths_config.json",
+    "paths_csv_gz": "experiments/active/exp-cloud-close-reward-20261109-v1/paths.csv.gz",
+    "paths_audit_json": "experiments/active/exp-cloud-close-reward-20261109-v1/paths_audit.json",
+    "signals_csv": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/signals.csv",
+    "scaleout_experiment": "experiments/active/exp-cloud-close-scaleout-20261109-v1",
+    "slots_experiment": "experiments/active/exp-cloud-close-slots-20261109-v1",
+    "priority_experiment": "experiments/active/exp-cloud-close-priority-20261109-v1",
+    "expected_signal_rows": 12707,
+    "expected_verified_path_rows": 170555,
+    "expected_executable_runner_events": 24365,
+    "baseline_expected": {
+      "all.multiple": 5.52983846302229,
+      "all.final_usdt": 5529.83846302229,
+      "all.trades": 1676,
+      "dev.multiple": 4.999444871442975,
+      "dev.final_usdt": 4999.444871442975,
+      "dev.dd_bound_pct": 29.549279991094966,
+      "dev.trades": 1166,
+      "2025.multiple": 0.9636474673339884,
+      "2026.multiple": 1.147816535178438
+    }
+  },
+  "account": {
+    "starting_equity_usdt": 1000,
+    "partial_fraction": 0.75,
+    "runner_fraction": 0.25,
+    "slots": 9,
+    "priority_policy": "low_prior_atr",
+    "priority_feature": "frozen signal prior_atr_pct ascending; simultaneous order matches the selected parent account",
+    "entry": "frozen exact next-1H-open fill at each completed UTC 12H confirmation",
+    "stop": "exact per-event original touched-side 1.618 stop from the frozen path input",
+    "runner": "exact frozen tp_r=0 cloud/stale/hour-gap/series-tail path",
+    "periods": {
+      "dev": "entry and exit before 2025-01-01T00:00:00Z",
+      "2025": "2025-01-01T00:00:00Z through before 2026-01-01T00:00:00Z",
+      "2026": "2026-01-01T00:00:00Z through frozen data end 2026-11-08T12:00:00Z"
+    }
+  },
+  "target_fractions_of_remaining_extension": [0.5, 1.0, 1.5, 2.0],
+  "expected_geometry_audit": {
+    "opposite_1p618_x_1p5": {
+      "already_passed_extension_2r_fallback": 0,
+      "unplaceable_extension_signal": 2,
+      "unplaceable_extension_control": 1
+    },
+    "opposite_1p618_x_2": {
+      "already_passed_extension_2r_fallback": 0,
+      "unplaceable_extension_signal": 10,
+      "unplaceable_extension_control": 6
+    }
+  },
+  "baseline_candidate": "fixed_2r",
+  "target_geometry": {
+    "signal": "target = actual_confirmation_entry + fraction * (original_opposite_weekly_1p618_reference - actual_confirmation_entry), after verifying the reference remains favorable from entry",
+    "control": "transfer the parent reference-to-parent-actual-entry price ratio to the control entry, then apply the same fraction",
+    "fallback": "if the event's opposite reference is already at or beyond the entry in the adverse direction, use the original fixed 2R target for that event in every candidate; if any projected resting limit price is zero or negative, submit no target order and let that 75% leg follow the unchanged runner",
+    "risk_denominator": "original entry-to-stop distance; the vectorized path adapter's synthetic target distance is not used as trade risk",
+    "scaleout_adapter_sentinel": "new target path rows use tp_r=2 only to enter the existing 75/25 target-runner pair adapter; target_fraction and target_price are the actual candidate geometry"
+  },
+  "selection": {
+    "candidates": ["fixed_2r", "opposite_1p618_x_0p5", "opposite_1p618_x_1", "opposite_1p618_x_1p5", "opposite_1p618_x_2"],
+    "development_only": true,
+    "constraints": {
+      "win_pct_min": 30,
+      "equal_notional_payoff_min": 2.5,
+      "conservative_drawdown_bound_pct_max": 35,
+      "trades_min": 100
+    },
+    "pick": "among eligible frozen fixed_2r and four preregistered extension geometries, highest development account multiple; if none qualify retain fixed_2r",
+    "best_dev_growth": "highest development account multiple regardless of qualification"
+  },
+  "costs": {
+    "maker_per_fill": 0.0002,
+    "taker_per_fill": 0.0005,
+    "slippage_stress_per_taker_fill": 0.0005,
+    "target_limit": "resting maker at exact target",
+    "entry_stop_runner": "market/taker; the parent path fee class is reused unchanged",
+    "funding": "not modeled"
+  },
+  "execution": {
+    "framework": "VectorBT Portfolio.from_order_func via cloud_close_reward_paths._simulate_symbol and existing wallet cash-sharing account",
+    "new_path_generation": "sequential by symbol; four target alternatives batched in event chunks of 8; no data download or parent rerun",
+    "accounting": "existing cloud_close_slots.run and cloud_close_scaleout.pair_data/simulate with full 1000U shared account",
+    "fallback_path_parity": "assert orderable passed-extension fallbacks match frozen fixed-2R paths and nonpositive projected prices match frozen 0R runner paths, including matched controls",
+    "output_target_paths_csv_gz": "experiments/active/exp-cloud-close-week-target-20261109-v1/target_paths.csv.gz",
+    "output_account_metrics_csv": "experiments/active/exp-cloud-close-week-target-20261109-v1/account_metrics.csv",
+    "output_summary_json": "experiments/active/exp-cloud-close-week-target-20261109-v1/summary.json"
+  },
+  "outputs": {
+    "target_paths_csv_gz": "experiments/active/exp-cloud-close-week-target-20261109-v1/target_paths.csv.gz",
+    "account_metrics_csv": "experiments/active/exp-cloud-close-week-target-20261109-v1/account_metrics.csv",
+    "summary_json": "experiments/active/exp-cloud-close-week-target-20261109-v1/summary.json"
+  },
+  "limits": {
+    "fills": "OHLC target touches are modeled as filled resting limits at the level; queue position and non-fill probability are not represented",
+    "capacity": "no market-depth or market-impact model",
+    "funding": "not modeled",
+    "liquidation": "exchange-specific maintenance-margin tiers and liquidation are outside this exit-geometry study"
+  }
+}
