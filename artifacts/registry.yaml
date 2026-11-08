@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: cloud-pretouch-and-early-stop-paths-20261108-v1
+    artifact_type: manifest
+    role: historical_first_day_stop_path_labels
+    source_repo: darkforest-x/fable-trading
+    source_commit: f93f7e12a8
+    source_path: experiments/active/exp-cloud-pretouch-structure-20261108-v1/early_stop_paths.csv.gz
+    storage_uri: repo://experiments/active/exp-cloud-pretouch-structure-20261108-v1/early_stop_paths.csv.gz
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: One row per stopped original alert, with post-stop outcomes and right censoring. Sibling features.csv.gz stores the three pre-key labels.
+
   - artifact_id: cloud-allmarket-12h-labels-20261108-v1
     artifact_type: manifest
     role: chart_reference_census_filter_evidence_and_coverage

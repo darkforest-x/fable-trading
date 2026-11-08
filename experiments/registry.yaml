@@ -15,6 +15,37 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-pretouch-structure-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    source_commit: f93f7e12a8
+    status: inconclusive
+    question: Can pre-key cloud trend structure filter first-day stops, and how many of those stopped paths return to their original 10R target?
+    single_variable: Three independent pre-key descriptors. Post-stop 30-day future path is a separate descriptive diagnostic.
+    result: None of three rules reduced the early-stop probability in both years. After 834/1007 early stops in 2025/26, 475/543 stop candles recovered their stop level at the close; 236/132 paths later exceeded the original 10R before cloud invalidation, 60 unresolved in 2026. No alternative
+      exit P&L tested.
+    artifacts:
+    - cloud-pretouch-and-early-stop-paths-20261108-v1
+    canonical_report: experiments/active/exp-cloud-pretouch-structure-20261108-v1/summary.json
+    notes: The original 1.618-selected sample cannot establish a replacement entry trigger. Post-stop labels start after the stop candle, exclude its wick and use original 3 percent R. Notion 4128856479af813794a8c7270df8988e.
+  - experiment_id: exp-cloud-strong-retest-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    source_commit: 8ede09cba4
+    status: superseded
+    question: Should strong cloud reclaims wait 12 hours for a new retest?
+    single_variable: Entry change only, not executed.
+    result: Owner discontinued this proposal after opportunity counts. No native executions or P&L. Of 399/379 original chart winners, 320/321 never revisited the line in the next 12 hours.
+    artifacts: []
+    canonical_report: experiments/active/exp-cloud-strong-retest-20261108-v1/config.json
+    notes: Frozen selection and cases retained. No pending execution task.
+
   - experiment_id: exp-monday-retest-cvd-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2bb363ff37
