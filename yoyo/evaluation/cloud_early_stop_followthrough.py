@@ -50,7 +50,11 @@ def after_stop(r,b,ema):
         elif over.iloc[turnover-1] and not cloud_crossed(bar.open,prior.ema20.iloc[turnover],prior.ema50.iloc[turnover],r.side):
             cloud='possible'
         else: cloud='miss'
+    close_r=(adjacent.close.iloc[0]-r.reference_entry)*r.side/risk
+    adverse_r=(adjacent[adverse].iloc[0]-r.reference_entry)*r.side/risk
     return dict(symbol=r.symbol,week=r.week,year=int(r.confirmed_bjt[:4]),side=r.side,
+                stop_bar_close_back=bool((adjacent.close.iloc[0]-r.reference_stop)*r.side>0),
+                stop_bar_close_r=float(close_r),stop_bar_adverse_r=float(adverse_r),
                 stop_bar_open=r.path_end_bar_bjt,observed_12h=last,cloud_flip_same_stop_candle=turnover==0,
                 original_line_back_next_two='yes' if original_entry_back else 'no' if last>=2 else 'censored',
                 above_original_10r='hit' if over.any() else 'miss' if last==60 else 'censored',
@@ -70,6 +74,14 @@ def main():
     assert out.year.value_counts().to_dict()=={2025:834,2026:1007}
     out.to_csv(EXP/'early_stop_paths.csv.gz',index=False)
     counts={str(y):{k:g[k].value_counts().to_dict() for k in ['above_original_10r','above_10r_before_cloud_flip','original_line_back_next_two']} for y,g in out.groupby('year')}
+    for year,g in out.groupby('year'):
+        subsets={'all':g,'cloud_still_valid_at_stop_bar_end':g[~g.cloud_flip_same_stop_candle]}
+        for label,subset in subsets.items():
+            counts[str(year)][label+'_by_close_back']={
+                str(bool(back)):{'n':len(rows),'trend_10r':rows.above_10r_before_cloud_flip.value_counts().to_dict(),
+                'close_r_q05_median_q95':rows.stop_bar_close_r.quantile([.05,.5,.95]).tolist(),
+                'worst_intrabar_r':float(rows.stop_bar_adverse_r.min())}
+                for back,rows in subset.groupby('stop_bar_close_back')}
     dump(EXP/'early_stop_paths.json',counts)
 if __name__=='__main__':
     main()
