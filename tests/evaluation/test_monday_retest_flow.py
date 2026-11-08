@@ -34,3 +34,16 @@ def test_cvd_sign_absorption_at_retest(monkeypatch):
     # Future prints after the retest cannot affect its label.
     bars[271:,r.BUY]=1
     assert r.classify("TEST",bars,249,254,270,1,15,1,100)==out
+
+
+def test_invalid_buy_volume_preserves_observed_price_and_censors_flow():
+    from yoyo.evaluation import monday_retest_flow_data as data
+
+    # One real XRPUSDT archive row had more taker buys than total volume.
+    rows = np.array([[1701347700000, .6038, .6038, .6034, .6036, 91695.7, 470, 132462.5],
+                     [1701347760000, .6036, .6037, .6035, .6036, 100, 3, 45]])
+    clean = data._sanitize_raw_flow(rows)
+    np.testing.assert_array_equal(clean[:, :data.COUNT], rows[:, :data.COUNT])
+    np.testing.assert_array_equal(clean[1], rows[1])
+    assert np.isnan(clean[0, data.COUNT:]).all()
+    assert r.middle_delta("XRPUSDT", clean, 1) is None
