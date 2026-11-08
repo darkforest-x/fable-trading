@@ -682,9 +682,10 @@ def selection_and_pvalues(fold_summary: pd.DataFrame, event_rows: pd.DataFrame,
     random_p = {}
     for basis in ("fee_net", "funded_net"):
         eligible = control_pairs[(control_pairs.basis.eq(basis)) & control_pairs.eligible_80pct]
-        p = eligible.groupby("strategy", sort=False).apply(
-            lambda g: _month_p(g, "paired_delta_pp")
-        )
+        p = pd.Series({
+            strategy: _month_p(group, "paired_delta_pp")
+            for strategy, group in eligible.groupby("strategy", sort=False)
+        }, dtype=float)
         random_p[basis] = p
         selection[f"p_month_2026_vs_random_{basis}"] = p
         family = pd.Series({s: p.get(s, np.nan) for s in STRATEGIES})
