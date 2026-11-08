@@ -86,6 +86,7 @@
   },
   "execution": {
     "framework": "VectorBT Portfolio.from_order_func via cloud_close_reward_paths._simulate_symbol and existing wallet cash-sharing account",
+    "event_batch_size": 8,
     "new_path_generation": "sequential by symbol; four target alternatives batched in event chunks of 8; no data download or parent rerun",
     "accounting": "existing cloud_close_slots.run and cloud_close_scaleout.pair_data/simulate with full 1000U shared account",
     "fallback_path_parity": "assert orderable passed-extension fallbacks match frozen fixed-2R paths and nonpositive projected prices match frozen 0R runner paths, including matched controls",
