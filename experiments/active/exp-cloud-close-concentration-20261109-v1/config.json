@@ -1,0 +1,9 @@
+{
+  "id":"exp-cloud-close-concentration-20261109-v1",
+  "question":"How sensitive are prior historical funding paths to the best contributing asset names when the remaining alerts may genuinely use the released portfolio slots?",
+  "factor":"Counterfactual universe exclusions only. From the original funded ledger for each parent separately, identify the top one and top three symbols by cumulative realized USDT PnL with complete exits strictly observed before 2025-01-01. Ties broken lexicographically. Replay original 90-day, nine-slot candidate stream excluding these names from inception. No new candidate selection from these results. Development-period exclusions are hindsight stress; the exclusion set never uses later data.",
+  "parents":["partial_both","partial_shorts"],
+  "counts":[1,3],
+  "account":"Original 1000U, original 12H signal and original costs. For partial_both, 75% at 2R on both sides. For partial_shorts, the same 75% exit on shorts only, entire long rides original cloud. Retain the original 90-day/10-contract coverage identities before exclusions, placement priority, cash sizing and original native VectorBT fills. Re-admit all other alerts after the exclusion. Use the actual native cash-sharing account. This is a sensitivity study, not a tradeable rule for early years.",
+  "runner":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_concentration"
+}
