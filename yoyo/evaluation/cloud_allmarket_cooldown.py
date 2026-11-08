@@ -52,6 +52,15 @@ def main():
     x=a[~a.was_top20 & (a.confirm >= START)]
     results={rule:{str(year):rates(y,y[rule]) for year,y in x.groupby(x.confirm.dt.year)}
              for rule in ('primary_rule_kept','cooldown_kept')}
+    # By 2025 entry cohort, to see whether the fixed rule transfers to contracts
+    # not even listed during development. Archive-only listTime is not official.
+    u=pd.read_csv(EXP/'universe.csv').set_index('symbol')
+    live=x[x.is_current & ~x.pre_current_listing].copy()
+    listed=pd.to_datetime(live.symbol.map(u.list_time),unit='ms',utc=True)
+    live['listed_after_development']=(listed>=START)
+    results['candidate_current_listing_cohorts']={
+        str((int(year), 'new' if new else 'incumbent')):rates(z,z.primary_rule_kept)
+        for (year,new),z in live.groupby([live.confirm.dt.year,'listed_after_development'])}
     dump(EXP/'cooldown_and_distinct_trends.json',results)
 
 if __name__=='__main__':
