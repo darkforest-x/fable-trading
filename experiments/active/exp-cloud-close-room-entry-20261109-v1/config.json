@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-cloud-close-room-entry-20261109-v1",
+  "created_utc": "2026-11-09",
+  "question": "Within the frozen 90-day top_fraction=1.0, nine-slot low-prior-ATR V1.7 account, does filtering actual confirmation entries by the directional distance to the original opposite Monday 1.618 reference relative to original stop risk improve the funded account?",
+  "single_variable": "minimum available planned reward room at actual entry, measured as directional opposite-reference distance divided by original absolute entry-to-stop distance",
+  "frozen_inputs": {
+    "week_target_config": "experiments/active/exp-cloud-close-week-target-20261109-v1/config.json",
+    "week_target_paths": "experiments/active/exp-cloud-close-week-target-20261109-v1/target_paths.csv.gz",
+    "week_target_summary": "experiments/active/exp-cloud-close-week-target-20261109-v1/summary.json",
+    "leadership_experiment": "experiments/active/exp-cloud-close-leadership-20261109-v1",
+    "leadership_metrics": "experiments/active/exp-cloud-close-leadership-20261109-v1/account_metrics.csv",
+    "leadership_funded": "experiments/active/exp-cloud-close-leadership-20261109-v1/funded_1.0.csv.gz",
+    "leadership_hourly": "experiments/active/exp-cloud-close-leadership-20261109-v1/hourly_1.0.csv.gz",
+    "scaleout_experiment": "experiments/active/exp-cloud-close-scaleout-20261109-v1",
+    "slots_experiment": "experiments/active/exp-cloud-close-slots-20261109-v1",
+    "priority_experiment": "experiments/active/exp-cloud-close-priority-20261109-v1",
+    "signals_csv": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/signals.csv",
+    "expected_signal_rows": 12707,
+    "expected_runner_events": 24365,
+    "expected_week_target_path_rows": 97460,
+    "expected_90d_arm_counts": {
+      "signal_events": 11780,
+      "matched_control_events": 10816
+    },
+    "baseline_expected": {
+      "all.final_usdt": 6219.83893406774,
+      "all.multiple": 6.219838934067741,
+      "all.dd_mark_pct": 29.24730176192383,
+      "all.dd_bound_pct": 30.05398222251158,
+      "all.trades": 1569,
+      "all.win_pct": 33.1421287444232,
+      "all.payoff": 3.014512176837241,
+      "all.payoff_usdt": 2.5576029282152977,
+      "dev.final_usdt": 5417.764595351657,
+      "dev.multiple": 5.417764595351657,
+      "dev.dd_bound_pct": 28.07404363274027,
+      "dev.trades": 1085,
+      "dev.win_pct": 34.00921658986175,
+      "dev.payoff": 3.1838763728610995,
+      "dev.payoff_usdt": 2.6310009269902466,
+      "2025.final_usdt": 5566.33598189066,
+      "2025.multiple": 1.027423005175691,
+      "2025.dd_bound_pct": 30.05398222251158,
+      "2025.trades": 258,
+      "2026.final_usdt": 6219.83893406774,
+      "2026.multiple": 1.1174027141558047,
+      "2026.dd_bound_pct": 12.46247316952116,
+      "2026.trades": 210
+    }
+  },
+  "account": {
+    "starting_equity_usdt": 1000,
+    "leadership_fraction": 1.0,
+    "slots": 9,
+    "priority_policy": "low_prior_atr",
+    "priority_feature": "frozen signal prior_atr_pct ascending; simultaneous order uses the existing capacity runner",
+    "partial_fraction": 0.75,
+    "runner_fraction": 0.25,
+    "target": "frozen original 2R resting limit on the 75% partial",
+    "runner": "exact frozen tp_r=0 cloud/stale/hour-gap/series-tail path on the remaining 25%",
+    "entry": "frozen exact next-1H-open fill after each completed UTC 12H confirmation",
+    "stop": "exact per-event original touched-side Monday 1.618 stop",
+    "periods": {
+      "dev": "entry and exit before 2025-01-01T00:00:00Z",
+      "2025": "2025-01-01T00:00:00Z through before 2026-01-01T00:00:00Z",
+      "2026": "2026-01-01T00:00:00Z through frozen data end 2026-11-08T12:00:00Z"
+    }
+  },
+  "room_geometry": {
+    "formula": "side * (original_opposite_weekly_1p618_reference_price - actual_entry_price) / abs(actual_entry_price - original_stop_price)",
+    "numerator_field": "target_reference_remaining_distance",
+    "denominator_field": "risk_distance",
+    "source": "tested geometry fields in the frozen week-target target_paths.csv.gz; select one fraction=0.5 row per event because the reference distance and original risk are invariant across target fractions",
+    "numerator_unit": "quote-price units; side-adjusted favorable direction",
+    "denominator_unit": "quote-price units; absolute original entry-to-stop distance",
+    "result_unit": "dimensionless R",
+    "eligibility_timing": "at the actual next-1H-open entry; use only the original opposite reference and stop already fixed by the completed signal",
+    "controls": "a matched control is retained only when its frozen actual parent signal passed the candidate room screen and the control is rankable in the original 90-day top_fraction=1 arm at its own entry; the control's own room ratio is not screened"
+  },
+  "candidates": [
+    {
+      "id": "no_room_filter",
+      "minimum_room_r": null,
+      "meaning": "frozen 90-day top_fraction=1.0 baseline with no additional room gate"
+    },
+    {
+      "id": "room_ge_2",
+      "minimum_room_r": 2.0
+    },
+    {
+      "id": "room_ge_3",
+      "minimum_room_r": 3.0
+    },
+    {
+      "id": "room_ge_5",
+      "minimum_room_r": 5.0
+    }
+  ],
+  "selection": {
+    "development_only": true,
+    "objective": "highest development ending account capital among candidates satisfying every registered gate",
+    "constraints": {
+      "win_pct_min": 30,
+      "payoff_pct_min": 2.5,
+      "payoff_usdt_min": 2.5,
+      "dd_bound_pct_max": 35,
+      "trades_min": 100
+    },
+    "fallback": "reuse no_room_filter if no candidate meets all development gates",
+    "best_dev_growth": "report the highest development account capital regardless of qualification"
+  },
+  "costs": {
+    "maker_per_fill": 0.0002,
+    "taker_per_fill": 0.0005,
+    "slippage_stress_per_taker_fill": 0.0005,
+    "entry_stop_runner": "frozen parent market/taker classification",
+    "resting_target": "maker at the frozen original 2R limit",
+    "funding": "not modeled"
+  },
+  "execution": {
+    "framework": "VectorBT via existing cloud_close_slots.run and frozen reward-account/scale-out adapters",
+    "accounting": "one shared 1000U account, nine concurrent slots, low-prior-ATR entry ordering",
+    "baseline": "reuse top_fraction=1.0 leadership metrics and funded/hourly ledgers; verify cash reconciliation; do not replay baseline",
+    "new_candidates": "evaluate the three room filters sequentially; run matched-control, paired-signal, and +5bp taker-slippage checks only for the selected and development-best candidates",
+    "outputs": {
+      "account_metrics_csv": "experiments/active/exp-cloud-close-room-entry-20261109-v1/account_metrics.csv",
+      "summary_json": "experiments/active/exp-cloud-close-room-entry-20261109-v1/summary.json",
+      "funded_prefix": "experiments/active/exp-cloud-close-room-entry-20261109-v1/funded_<candidate>.csv.gz",
+      "hourly_prefix": "experiments/active/exp-cloud-close-room-entry-20261109-v1/hourly_<candidate>.csv"
+    }
+  },
+  "limits": {
+    "fills": "reuses frozen V1.7 OHLC and resting-limit fill assumptions; no queue-position or non-fill model",
+    "capacity": "no order-book depth or market-impact model",
+    "funding": "perpetual funding is not modeled",
+    "liquidation": "exchange-specific maintenance-margin tiers and liquidation are not modeled",
+    "later_periods": "2025 and 2026 are disclosed after development selection and do not affect the pick"
+  },
+  "outputs": {
+    "account_metrics_csv": "experiments/active/exp-cloud-close-room-entry-20261109-v1/account_metrics.csv",
+    "summary_json": "experiments/active/exp-cloud-close-room-entry-20261109-v1/summary.json"
+  }
+}
