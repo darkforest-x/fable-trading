@@ -1,0 +1,435 @@
+{
+  "experiment_id": "exp-cloud-close-room-entry-20261109-v1",
+  "question": "Within the frozen 90-day top_fraction=1.0, nine-slot low-prior-ATR V1.7 account, does filtering actual confirmation entries by the directional distance to the original opposite Monday 1.618 reference relative to original stop risk improve the funded account?",
+  "selection": {
+    "development_period": "entry and exit before 2025-01-01 UTC; same frozen account split",
+    "objective": "maximum development ending account capital among candidates satisfying every registered gate",
+    "constraints": {
+      "win_pct_min": 30,
+      "payoff_pct_min": 2.5,
+      "payoff_usdt_min": 2.5,
+      "dd_bound_pct_max": 35,
+      "trades_min": 100
+    },
+    "eligible": [
+      "no_room_filter",
+      "room_ge_2",
+      "room_ge_5"
+    ],
+    "pick": "no_room_filter",
+    "best_dev_growth": "no_room_filter",
+    "fallback": "reuse the original 90d no-room-filter baseline if no candidate qualifies"
+  },
+  "room_screen": {
+    "formula": "side * (original opposite Monday 1.618 reference - actual confirmation-entry price) / abs(actual entry - original stop)",
+    "thresholds_r": [
+      null,
+      2.0,
+      3.0,
+      5.0
+    ],
+    "screen_timing": "evaluated at the actual next-1H-open entry after the completed UTC 12H confirmation; reference and original stop are frozen signal geometry",
+    "count_period_basis": "signal/control counts are grouped by entry_ms; account metric trade counts require both entry and exit inside the period",
+    "baseline_scope": "no_room_filter still requires rankability in the frozen 90-day top_fraction=1.0 arm",
+    "candidate_counts": {
+      "no_room_filter": {
+        "candidate": "no_room_filter",
+        "room_threshold_r": null,
+        "screened_signal_entries": {
+          "all": 11780,
+          "dev": 5361,
+          "2025": 2553,
+          "2026": 3866
+        },
+        "matched_control_entries": {
+          "all": 10816,
+          "dev": 4917,
+          "2025": 2325,
+          "2026": 3574
+        },
+        "paired_signal_entries": {
+          "all": 10816,
+          "dev": 4917,
+          "2025": 2333,
+          "2026": 3566
+        },
+        "unmatched_eligible_signal_entries": {
+          "all": 964,
+          "dev": 444,
+          "2025": 220,
+          "2026": 300
+        },
+        "room_ratio_summary_r": {
+          "min": 0.00048654028967562126,
+          "median": 2.4327656274433913,
+          "p95": 6.777178233341844,
+          "max": 43.19805372930775
+        }
+      },
+      "room_ge_2": {
+        "candidate": "room_ge_2",
+        "room_threshold_r": 2.0,
+        "screened_signal_entries": {
+          "all": 7231,
+          "dev": 3478,
+          "2025": 1628,
+          "2026": 2125
+        },
+        "matched_control_entries": {
+          "all": 6579,
+          "dev": 3177,
+          "2025": 1457,
+          "2026": 1945
+        },
+        "paired_signal_entries": {
+          "all": 6579,
+          "dev": 3177,
+          "2025": 1462,
+          "2026": 1940
+        },
+        "unmatched_eligible_signal_entries": {
+          "all": 652,
+          "dev": 301,
+          "2025": 166,
+          "2026": 185
+        },
+        "room_ratio_summary_r": {
+          "min": 2.000344218739057,
+          "median": 3.3335704910958843,
+          "p95": 7.803236731800854,
+          "max": 43.19805372930775
+        }
+      },
+      "room_ge_3": {
+        "candidate": "room_ge_3",
+        "room_threshold_r": 3.0,
+        "screened_signal_entries": {
+          "all": 4335,
+          "dev": 2213,
+          "2025": 1021,
+          "2026": 1101
+        },
+        "matched_control_entries": {
+          "all": 3875,
+          "dev": 2000,
+          "2025": 899,
+          "2026": 976
+        },
+        "paired_signal_entries": {
+          "all": 3875,
+          "dev": 2000,
+          "2025": 900,
+          "2026": 975
+        },
+        "unmatched_eligible_signal_entries": {
+          "all": 460,
+          "dev": 213,
+          "2025": 121,
+          "2026": 126
+        },
+        "room_ratio_summary_r": {
+          "min": 3.000362615268378,
+          "median": 4.249559129552137,
+          "p95": 8.987145262251708,
+          "max": 43.19805372930775
+        }
+      },
+      "room_ge_5": {
+        "candidate": "room_ge_5",
+        "room_threshold_r": 5.0,
+        "screened_signal_entries": {
+          "all": 1418,
+          "dev": 747,
+          "2025": 403,
+          "2026": 268
+        },
+        "matched_control_entries": {
+          "all": 1254,
+          "dev": 670,
+          "2025": 358,
+          "2026": 226
+        },
+        "paired_signal_entries": {
+          "all": 1254,
+          "dev": 670,
+          "2025": 358,
+          "2026": 226
+        },
+        "unmatched_eligible_signal_entries": {
+          "all": 164,
+          "dev": 77,
+          "2025": 45,
+          "2026": 42
+        },
+        "room_ratio_summary_r": {
+          "min": 5.000043672317865,
+          "median": 6.398600543454235,
+          "p95": 11.209145191566021,
+          "max": 43.19805372930775
+        }
+      }
+    },
+    "geometry_audit": {
+      "geometry_source": "experiments/active/exp-cloud-close-week-target-20261109-v1/target_paths.csv.gz",
+      "selected_target_fraction_row": 0.5,
+      "field_units": {
+        "target_reference_remaining_distance": "quote-price units; side-adjusted favorable direction",
+        "risk_distance": "quote-price units; abs(actual entry - original stop)",
+        "room_r": "dimensionless R = directional remaining distance / original risk distance"
+      },
+      "field_checks": {
+        "remaining_distance_equals_side_times_reference_minus_entry": true,
+        "risk_equals_abs_entry_minus_original_stop": true,
+        "relative_percent_matches_remaining_over_entry": true,
+        "control_reference_transfer_matches_parent_entry_relative_ratio": true
+      },
+      "events": 24365,
+      "signal_events": 12707,
+      "control_events": 11658,
+      "signal_room_ratio_min": 0.00048654028967562126,
+      "signal_room_ratio_max": 43.19805372930775
+    },
+    "matched_controls": "Controls are from the previously eligible parent signal set; each frozen control must also be rankable in the 90-day arm at its own entry, and its parent must pass the candidate room gate. The control's own room ratio is not screened. wallet.read_paths verifies control entry is strictly after the parent entry."
+  },
+  "frozen_baseline": {
+    "candidate": "no_room_filter",
+    "source_account_metrics": "experiments/active/exp-cloud-close-leadership-20261109-v1/account_metrics.csv",
+    "source_funded_ledger": "experiments/active/exp-cloud-close-leadership-20261109-v1/funded_1.0.csv.gz",
+    "source_hourly_ledger": "experiments/active/exp-cloud-close-leadership-20261109-v1/hourly_1.0.csv.gz",
+    "account_metrics": [
+      {
+        "period": "all",
+        "final_usdt": 6219.83893406774,
+        "multiple": 6.219838934067741,
+        "dd_mark_pct": 29.24730176192383,
+        "dd_bound_pct": 30.05398222251158,
+        "trades": 1569,
+        "win_pct": 33.1421287444232,
+        "payoff": 3.014512176837241,
+        "payoff_usdt": 2.5576029282152977,
+        "median_net_pct": -2.8409224075492108,
+        "top_fraction": 1.0
+      },
+      {
+        "period": "dev",
+        "final_usdt": 5417.764595351657,
+        "multiple": 5.417764595351657,
+        "dd_mark_pct": 26.99310026907179,
+        "dd_bound_pct": 28.074043632740274,
+        "trades": 1085,
+        "win_pct": 34.00921658986175,
+        "payoff": 3.1838763728610995,
+        "payoff_usdt": 2.6310009269902466,
+        "median_net_pct": -2.8409224075492108,
+        "top_fraction": 1.0
+      },
+      {
+        "period": "2025",
+        "final_usdt": 5566.33598189066,
+        "multiple": 1.027423005175691,
+        "dd_mark_pct": 24.555058997796763,
+        "dd_bound_pct": 30.05398222251158,
+        "trades": 258,
+        "win_pct": 25.1937984496124,
+        "payoff": 2.43794388236991,
+        "payoff_usdt": 2.371823527134067,
+        "median_net_pct": -3.281401124425387,
+        "top_fraction": 1.0
+      },
+      {
+        "period": "2026",
+        "final_usdt": 6219.83893406774,
+        "multiple": 1.1174027141558047,
+        "dd_mark_pct": 12.16079473932734,
+        "dd_bound_pct": 12.46247316952116,
+        "trades": 210,
+        "win_pct": 33.80952380952381,
+        "payoff": 2.4670645517053607,
+        "payoff_usdt": 2.436217368263922,
+        "median_net_pct": -1.7248174928234667,
+        "top_fraction": 1.0
+      }
+    ],
+    "funded_rows": 1569,
+    "ledger_cash_final_usdt": 6219.838934340021,
+    "hourly_final_nav_usdt": 6219.83893406774,
+    "account_metrics_final_usdt": 6219.83893406774,
+    "ledger_minus_metrics_usdt": 2.7228088583797216e-07,
+    "hourly_minus_metrics_usdt": 0.0,
+    "reused_without_replaying": true,
+    "replayed": false
+  },
+  "parent_picks": {
+    "partial_fraction": 0.75,
+    "slots": 9,
+    "priority_policy": "low_prior_atr",
+    "leadership_fraction": 1.0
+  },
+  "checks": {
+    "no_room_filter": {
+      "control": {
+        "all": {
+          "final_usdt": 2369.8223313893513,
+          "multiple": 2.369822331389351,
+          "dd_mark_pct": 30.81039043257473,
+          "dd_bound_pct": 31.551012852829572,
+          "trades": 1712,
+          "win_pct": 28.91355140186916,
+          "payoff": 3.0302729174207417,
+          "payoff_usdt": 2.79870431731684,
+          "median_net_pct": -2.0819451622602605
+        },
+        "dev": {
+          "final_usdt": 2400.4227169294236,
+          "multiple": 2.4004227169294237,
+          "dd_mark_pct": 26.011200227633335,
+          "dd_bound_pct": 26.999582446984117,
+          "trades": 1176,
+          "win_pct": 29.846938775510207,
+          "payoff": 3.0559370258847536,
+          "payoff_usdt": 2.788819895987676,
+          "median_net_pct": -2.2971464370245216
+        },
+        "2025": {
+          "final_usdt": 2254.167309609239,
+          "multiple": 0.939070978503623,
+          "dd_mark_pct": 23.942447386710054,
+          "dd_bound_pct": 27.049285832368685,
+          "trades": 264,
+          "win_pct": 23.106060606060606,
+          "payoff": 2.574652012685766,
+          "payoff_usdt": 2.4842457168147494,
+          "median_net_pct": -3.108935935841585
+        },
+        "2026": {
+          "final_usdt": 2369.8223313893513,
+          "multiple": 1.0513072039005664,
+          "dd_mark_pct": 13.563706479016812,
+          "dd_bound_pct": 14.428941124234996,
+          "trades": 255,
+          "win_pct": 27.84313725490196,
+          "payoff": 2.962131360536777,
+          "payoff_usdt": 2.9392829524561908,
+          "median_net_pct": -1.1556553434173216
+        }
+      },
+      "paired_signals": {
+        "all": {
+          "final_usdt": 4181.507811904881,
+          "multiple": 4.181507811904881,
+          "dd_mark_pct": 36.70530858526011,
+          "dd_bound_pct": 37.16136507912437,
+          "trades": 1480,
+          "win_pct": 34.72972972972973,
+          "payoff": 2.639790946649756,
+          "payoff_usdt": 2.298341141403184,
+          "median_net_pct": -3.1974970039717956
+        },
+        "dev": {
+          "final_usdt": 3454.2412701063304,
+          "multiple": 3.4542412701063303,
+          "dd_mark_pct": 32.96864884082207,
+          "dd_bound_pct": 33.463324899268365,
+          "trades": 1064,
+          "win_pct": 34.68045112781955,
+          "payoff": 2.7737163015237996,
+          "payoff_usdt": 2.3281138277015545,
+          "median_net_pct": -3.2269321850944084
+        },
+        "2025": {
+          "final_usdt": 3606.901219213437,
+          "multiple": 1.0441949294127932,
+          "dd_mark_pct": 23.832176463638945,
+          "dd_bound_pct": 29.919979860299673,
+          "trades": 217,
+          "win_pct": 28.110599078341014,
+          "payoff": 2.1064937865966558,
+          "payoff_usdt": 2.030766854792819,
+          "median_net_pct": -3.338276292428202
+        },
+        "2026": {
+          "final_usdt": 4181.507811904881,
+          "multiple": 1.1593075489926363,
+          "dd_mark_pct": 13.380169005946396,
+          "dd_bound_pct": 13.556533753613643,
+          "trades": 183,
+          "win_pct": 37.15846994535519,
+          "payoff": 2.262411916681438,
+          "payoff_usdt": 2.234607474397502,
+          "median_net_pct": -3.038017829050857
+        }
+      },
+      "slippage_5bp": {
+        "all": {
+          "final_usdt": 5331.7582746029475,
+          "multiple": 5.331758274602947,
+          "dd_mark_pct": 31.29934060658025,
+          "dd_bound_pct": 31.79316511099869,
+          "trades": 1569,
+          "win_pct": 33.01465901848311,
+          "payoff": 2.9433463000119406,
+          "payoff_usdt": 2.5096028333192137,
+          "median_net_pct": -2.9437647511285303
+        },
+        "dev": {
+          "final_usdt": 4870.363035136096,
+          "multiple": 4.870363035136096,
+          "dd_mark_pct": 27.417992226954656,
+          "dd_bound_pct": 28.49048608925783,
+          "trades": 1085,
+          "win_pct": 33.82488479262673,
+          "payoff": 3.1183405675444824,
+          "payoff_usdt": 2.5876405017561126,
+          "median_net_pct": -2.9437647511285303
+        },
+        "2025": {
+          "final_usdt": 4871.833744682461,
+          "multiple": 1.0003019712361798,
+          "dd_mark_pct": 24.675679543425243,
+          "dd_bound_pct": 30.173917733397793,
+          "trades": 258,
+          "win_pct": 25.1937984496124,
+          "payoff": 2.3658004912001225,
+          "payoff_usdt": 2.303505665943271,
+          "median_net_pct": -3.3814136691219674
+        },
+        "2026": {
+          "final_usdt": 5331.7582746029475,
+          "multiple": 1.0944048081325617,
+          "dd_mark_pct": 12.635288850112092,
+          "dd_bound_pct": 12.925695857340692,
+          "trades": 210,
+          "win_pct": 33.80952380952381,
+          "payoff": 2.38404332815758,
+          "payoff_usdt": 2.3534631779253856,
+          "median_net_pct": -1.8247921562002716
+        }
+      }
+    }
+  },
+  "costs_and_limits": {
+    "starting_equity_usdt": 1000.0,
+    "taker_fee_per_fill": 0.0005,
+    "resting_maker_fee_per_fill": 0.0002,
+    "slippage_stress": "additional 5bp per taker fill; resting 2R target fills do not receive market slippage",
+    "funding": "not modeled",
+    "capacity": "one shared 1000U account, nine concurrent slots; no exchange depth or market-impact model",
+    "fills": "reuses frozen V1.7 VectorBT OHLC path semantics and the existing cash-sharing account; resting 2R limit is assumed filled at the frozen target",
+    "liquidation": "exchange-specific maintenance-margin tiers and liquidation are not modeled"
+  },
+  "outputs": {
+    "account_metrics_csv": "experiments/active/exp-cloud-close-room-entry-20261109-v1/account_metrics.csv",
+    "summary_json": "experiments/active/exp-cloud-close-room-entry-20261109-v1/summary.json",
+    "funded_and_hourly": "funded_<candidate>.csv.gz and hourly_<candidate>.csv.gz for the three filtered candidates; no_room_filter reuses its frozen parent files",
+    "funded_files": [
+      "funded_room_ge_2.csv.gz",
+      "funded_room_ge_3.csv.gz",
+      "funded_room_ge_5.csv.gz"
+    ],
+    "hourly_files": [
+      "hourly_room_ge_2.csv.gz",
+      "hourly_room_ge_3.csv.gz",
+      "hourly_room_ge_5.csv.gz"
+    ]
+  }
+}

@@ -520,7 +520,8 @@ def main(argv=None):
     outputs["account_metrics_csv"].parent.mkdir(parents=True, exist_ok=True)
     for candidate, (funded, hourly) in curves.items():
         funded.to_csv(EXP / f"funded_{candidate}.csv.gz", index=False, compression="gzip")
-        hourly.to_csv(EXP / f"hourly_{candidate}.csv.gz", index_label="hour_end_utc")
+        hourly.to_csv(EXP / f"hourly_{candidate}.csv.gz", index_label="hour_end_utc",
+                      compression="gzip")
     frame.to_csv(outputs["account_metrics_csv"], index=False)
 
     summary = {
@@ -573,7 +574,9 @@ def main(argv=None):
         "outputs": {
             "account_metrics_csv": str(outputs["account_metrics_csv"].relative_to(ROOT)),
             "summary_json": str(outputs["summary_json"].relative_to(ROOT)),
-            "funded_and_hourly": "funded_<candidate>.csv.gz and hourly_<candidate>.csv for the three filtered candidates; no_room_filter reuses its frozen parent files",
+            "funded_and_hourly": "funded_<candidate>.csv.gz and hourly_<candidate>.csv.gz for the three filtered candidates; no_room_filter reuses its frozen parent files",
+            "funded_files": [f"funded_{candidate}.csv.gz" for candidate in sorted(curves)],
+            "hourly_files": [f"hourly_{candidate}.csv.gz" for candidate in sorted(curves)],
         },
     }
     outputs["summary_json"].write_text(
