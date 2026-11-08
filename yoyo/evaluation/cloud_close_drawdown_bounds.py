@@ -56,11 +56,23 @@ def hour_envelope(stamp, old, legs, subbars):
         variations = (bounds-hourly[0]) * row.signed_size
         low_move, high_move = variations.min(axis=1), variations.max(axis=1)
         if row.exit_bar_ms == hour:
-            # Before an exit, the market holds the marked position. After it, only its exact
-            # native fill cash remains. Include both in every slice to avoid assuming exit ordering.
             settled = (row.exit_price-hourly[0])*row.signed_size - row.exit_price*abs(row.signed_size)*row.exit_fee_rate
-            low_move = np.minimum(low_move,settled)
-            high_move = np.maximum(high_move,settled)
+            if len(group) and row.exit_phase == 'intrabar' and row.exit_reason == 'stop':
+                touched = five.low.le(row.stop_price) if row.side == 1 else five.high.ge(row.stop_price)
+                hits = np.flatnonzero(touched)
+                if not len(hits):
+                    raise ValueError(f'Native stop was never reached in the observed subbars: {row.symbol}')
+                # Keep both mark and settlement in the crossing bar. After that first
+                # crossing the native stop has fully exited; subsequent prices carry no exposure.
+                first_hit = hits[0]
+                low_move[first_hit] = min(low_move[first_hit],settled)
+                high_move[first_hit] = max(high_move[first_hit],settled)
+                low_move[first_hit+1:] = settled
+                high_move[first_hit+1:] = settled
+            else:
+                # Unknown within-hour ordering: allow both a still-open and already-closed position.
+                low_move = np.minimum(low_move,settled)
+                high_move = np.maximum(high_move,settled)
             end_nav += settled
         else:
             end_nav += (hourly[3]-hourly[0])*row.signed_size
