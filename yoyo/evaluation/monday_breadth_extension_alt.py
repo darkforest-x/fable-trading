@@ -263,6 +263,7 @@ def add_actual_close_decisions(members: pd.DataFrame, quotes: pd.DataFrame) -> p
     q = quotes.rename(columns={
         "entry_time": "decision",
         **{f"gross_return_pct_{h}h": f"quote_gross_return_pct_{h}h" for h in HOLDS},
+        **{f"exit_open_{h}h": f"quote_exit_open_{h}h" for h in HOLDS},
     })
     out = members.merge(q, on=["symbol", "decision"], how="left", validate="one_to_one")
     if out.entry_open.notna().any():
