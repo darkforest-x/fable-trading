@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-market-taker-pressure-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "43c815f903"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Transfer the unchanged counter-side native taker imbalance from the twelve-major pilot to every corrected Binance historical signal and control using each event clock."
+    result: "630 affected symbols, 21882 of 22623 signals observed, 10129 pass, 1585 funded. Opposed 7392.97U vs coverage-matched 6500.94; wins 34.51%, cash payoff 2.412, DD bound 45.65%. Outside twelve pilot assets opposed 4541.73 vs coverage 8872.15U. Dev and full fail."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-market-taker-pressure-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af81538bf9d295c1ef1579."
+
+  - experiment_id: exp-cloud-close-time-stop-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "e8657de6df"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Exit unscaled positions only at the 48h open after the previous completed mark fails to cover taker roundtrip; protect all earlier and coincident native opening orders."
+    result: "OKX 8700.11U/1724, wins 30.74%, cash payoff 2.982, measured DD 39.06% and upper 40.86%. Binance 5800.55U/1612, wins 29.71%, cash 2.978, DD upper 30.99%. Both development passes failed on the entire history."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-time-stop-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af81838cb1e9f850d1a461."
+
   - experiment_id: exp-cloud-close-taker-pressure-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "ca1abff38b26ebd2d1ee97322a88e10da80d532d"
