@@ -419,8 +419,12 @@ def _order_func(c, nav, actions, prices, fees, market_slip, reservation,
         add_budget[c.i, slot] = budget
         if budget < 1.e-8:
             return NoOrder
-        size = (1 if action > 0 else -1) * (budget * (1. - 1.e-10) /
-                    (price * (1. + slip) * (1. + fee)))
+        quantity = budget * (1. - 1.e-10) / (price * (1. + slip) * (1. + fee))
+        if profit_only_budget:
+            # Limit in actual contract units too. Converting via USDT and back can
+            # otherwise overshoot by one representable unit on sub-cent contracts.
+            quantity = min(quantity, risk_audit[3, c.i, slot])
+        size = (1 if action > 0 else -1) * quantity
         return nb.order_nb(size=size, price=price, fees=fee, slippage=slip,
                            lock_cash=True, allow_partial=False, raise_reject=True)
     raise ValueError('Unknown account action')
