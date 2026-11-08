@@ -13,11 +13,13 @@ from yoyo.evaluation import cloud_close_reward_account as wallet
 EXP=wallet.ROOT/'experiments/active/exp-cloud-close-side-exit-20261109-v1'
 
 
-def account(pool,partial_side,slip=0.):
+def account(pool,partial_side=None,slip=0.,*,partial_events=None):
+    if (partial_events is None) == (partial_side is None):
+        raise ValueError('Specify one partial-exit rule')
     original=pool[pool.tp_r.eq(0)]
     final,skips=wallet.admit(original,9)
     limits=pool[pool.tp_r.eq(2)].set_index('event_id',drop=False).loc[final.event_id].copy()
-    enable=limits.side.eq(partial_side).to_numpy()
+    enable=(limits.side.eq(partial_side) if partial_events is None else limits.event_id.isin(partial_events)).to_numpy()
     if np.any(limits.exit_bar_ms.to_numpy()>final.exit_bar_ms.to_numpy()):
         raise ValueError('2R limit outlasts original runner exit')
     primary=pd.concat([limits.iloc[np.flatnonzero(enable)],final.iloc[np.flatnonzero(~enable)]],ignore_index=True)
@@ -31,8 +33,9 @@ def account(pool,partial_side,slip=0.):
         cash_pnl=('cash_pnl','sum'),notional=('notional','sum'))
     pos['net_return']=pos.cash_pnl/pos.notional
     first=legs[legs.slot.mod(2).eq(0)].set_index('event_id')
-    if not np.allclose(first.notional/pos.notional,.75) or not np.array_equal(first.tp_r.eq(2),first.side.eq(partial_side)):
-        raise ValueError('Direction or dollar allocation mismatch')
+    expected = first.side.eq(partial_side) if partial_events is None else first.index.isin(partial_events)
+    if not np.allclose(first.notional/pos.notional,.75) or not np.array_equal(first.tp_r.eq(2),expected):
+        raise ValueError('Assigned exits or dollar allocations differ from the intended rule')
     periods={'all':(None,None),'dev':(None,'2025-01-01T00:00Z'),
              '2025':('2025-01-01T00:00Z','2026-01-01T00:00Z'),'2026':('2026-01-01T00:00Z',None)}
     return {p:wallet.summarize(pos,eq,*bounds) for p,bounds in periods.items()},pos,eq

@@ -1,0 +1,8 @@
+{
+  "id":"exp-cloud-close-daily-exit-20261109-v1",
+  "only_change":"All eligible 12H V1.7 entries still trade. When the last fully closed UTC 1D EMA20/50 agrees with the 12H side, keep the entire position on its original cloud runner. Otherwise retain the existing 75% resting target at 2R and 25% runner. Set the rule once at entry. No daily-key requirement or changed risk size.",
+  "clock":"Allow a UTC day closing exactly at the confirmed 12H entry; a noon UTC decision sees only the previous completed day. Each daily candle requires both UTC 12H closes; reset EMA after gaps, require 50 complete days. Missing/unready/flat daily trend follows the base 75% exit. Matched controls use their own subsequent entry time.",
+  "baseline":"The frozen universal 75% partial and universal runner, nine slots, low prior ATR with 90-day eligibility, 1000U. Compare actual 1569 funded identities across rules; 5bp taker, 2bp resting maker; no funding or impact.",
+  "selection":"Evaluate the single adaptive rule on development through 2024, all history and later years. Development gate >=100 positions, wins >=30%, realized cash and return payoffs >=2.5, hourly DD bound <=35%. For any arm passing development run later matched pairs and 5bp stress; if it also passes the full sample transfer unchanged to corrected Binance history. All years previously seen.",
+  "runner":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_daily_exit"
+}
