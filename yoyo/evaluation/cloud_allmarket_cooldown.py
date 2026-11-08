@@ -60,6 +60,15 @@ def main():
     results['candidate_current_listing_cohorts']={
         str((int(year), 'new' if new else 'incumbent')):rates(z,z.primary_rule_kept)
         for (year,new),z in live.groupby([live.confirm.dt.year,'listed_after_development'])}
+    winners=pd.read_csv(EXP/'全市场明确超过10R.csv')
+    winners=winners[~winners['币种'].isin(['BTC','ETH'])].copy()
+    flags=a[['symbol','confirmed_bjt','close_distance_r','primary_rule_kept','cooldown_kept']].rename(columns={
+        'symbol':'币种','confirmed_bjt':'确认时间_北京时间','close_distance_r':'确认收盘沿信号方向离触线_R',
+        'primary_rule_kept':'通过冻结收回规则','cooldown_kept':'两周冷却规则仍保留'})
+    winners=winners.merge(flags,on=['币种','确认时间_北京时间'],how='left',validate='one_to_one')
+    assert winners['通过冻结收回规则'].notna().all()
+    winners['确认收盘价起仍明确超过10R']=winners['按确认收盘至止损重算峰值R下界'].gt(10)
+    winners.to_csv(EXP/'山寨币10R逐笔与筛选.csv',index=False,encoding='utf-8-sig')
     dump(EXP/'cooldown_and_distinct_trends.json',results)
 
 if __name__=='__main__':
