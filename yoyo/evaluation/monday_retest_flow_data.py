@@ -132,12 +132,34 @@ def _read_month(path: Path, month: str, step_ms: int) -> np.ndarray:
     bars = _csv_to_bars(raw, header=has_header)
     if not len(bars):
         return EMPTY.copy()
-    _validate_bars(bars, step_ms, f"{path}", allow_unknown_flow=False)
+    bars = _sanitize_raw_flow(bars)
+    _validate_bars(bars, step_ms, f"{path}", allow_unknown_flow=True)
     month_start = int(pd.Timestamp(f"{month}-01", tz="UTC").value // 1_000_000)
     next_month_start = int((pd.Timestamp(f"{month}-01", tz="UTC") + pd.offsets.MonthBegin(1)).value // 1_000_000)
     if ((bars[:, TS] < month_start) | (bars[:, TS] >= next_month_start)).any():
         raise ValueError(f"{path}: archive contains a bar outside its named month")
     return bars
+
+
+def _sanitize_raw_flow(bars: np.ndarray) -> np.ndarray:
+    """Keep valid prices and invalidate both flow values on anomalous rows.
+
+    Flow anomalies are isolated from OHLCV: do not clamp taker-buy volume or
+    infer corrected counts. A bad or missing count/buy pair becomes NaN.
+    """
+    out = bars.copy()
+    flow = out[:, COUNT:BUY + 1]
+    count = out[:, COUNT]
+    buy = out[:, BUY]
+    volume = out[:, VOL]
+    known = np.isfinite(count) & np.isfinite(buy)
+    # Use exactly the original archive admission checks. Previously accepted
+    # archives remain identical; only rows that formerly rejected a whole
+    # archive switch to missing flow. Never change prices or invent a delta.
+    tolerance = np.maximum(1e-12, volume * 1e-12)
+    valid = known & (count >= 0) & (buy >= 0) & (buy - volume <= tolerance)
+    flow[~valid] = np.nan
+    return out
 
 
 def _validate_bars(bars: np.ndarray, step_ms: int, label: str,
