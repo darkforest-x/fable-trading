@@ -1,0 +1,92 @@
+{
+  "id": "exp-cloud-close-efficient-trend-20261109-v1-binance-dd-refinement",
+  "venue": "Binance",
+  "status": "preregistered_builder_pending_owner_commit",
+  "single_scope": "Tighten the existing Binance efficient-trend account's H1 conservative NAV envelope using finer native Binance bars only in every H1 peak/trough window that can exceed the 35% upper-drawdown limit.",
+  "source_account": {
+    "experiment": "exp-cloud-close-efficient-trend-20261109-v1",
+    "policy": "trend_efficiency",
+    "scenario": "actual",
+    "initial_cash_usdt": 1000.0,
+    "slot_count": 9,
+    "full_usdt_final": 8772.84230679136,
+    "development_usdt_final": 7885.655963408748,
+    "full_h1_dd_mark_pct": 34.21994396271314,
+    "full_h1_dd_upper_pct": 35.18048446045784,
+    "development_h1_dd_mark_pct": 34.21994396271314,
+    "development_h1_dd_upper_pct": 35.18048446045784
+  },
+  "drawdown_threshold_pct": 35.0,
+  "periods": {
+    "full": "all hourly marks in the frozen Binance account file",
+    "development": "hour_end_utc <= 2025-01-01T00:00:00Z"
+  },
+  "expected_h1_critical_windows": {
+    "full": [
+      {
+        "peak_hour_end_utc": "2023-02-20T18:00:00+00:00",
+        "trough_hour_end_utc": "2023-04-30T16:00:00+00:00"
+      }
+    ],
+    "development": [
+      {
+        "peak_hour_end_utc": "2023-02-20T18:00:00+00:00",
+        "trough_hour_end_utc": "2023-04-30T16:00:00+00:00"
+      }
+    ]
+  },
+  "expected_fee_adjusted_h1_critical_windows": {
+    "full": [
+      {
+        "peak_hour_end_utc": "2023-02-20T18:00:00+00:00",
+        "trough_hour_end_utc": "2023-04-30T16:00:00+00:00"
+      }
+    ],
+    "development": [
+      {
+        "peak_hour_end_utc": "2023-02-20T18:00:00+00:00",
+        "trough_hour_end_utc": "2023-04-30T16:00:00+00:00"
+      }
+    ]
+  },
+  "accounting": {
+    "entry_fee_rate": 0.0005,
+    "native_2r_limit_exit_fee_rate": 0.0002,
+    "native_runner_exit_fee_rate": "preserve each selected source leg's exit_fee_rate",
+    "child_weights": {
+      "tp_r_0_runner": 0.3333333333333333,
+      "tp_r_2_leg": 0.6666666666666666
+    },
+    "full_runner_replacement": "For each funded full_runner decision, replace its tp_r=2 child with an exact copy of the original native tp_r=0 path, preserving entry/exit clocks, price, phase, fee class and reason. Leave partial_2_3 events on their original limit and runner paths.",
+    "cash_reconciliation_tolerance_usdt": 0.0001,
+    "coarse_h1_bounds": {
+      "lower_nav": "For unrefined hours, subtract each intrabar/close exit fee at its actual exit hour from the H1 lower mark; open-phase exits remain represented in open NAV stages.",
+      "upper_nav": "For every H1 hour, include open_nav plus all entry taker fees due during that hour, preserving the pre-entry-fee mark as an upper bound.",
+      "candidate_scan": "Apply these fee bounds across every H1 hour before identifying candidate peak/trough windows. At fine-refined hours, replace the coarse exit-fee subtraction with the native subbar envelope and retain the pre-entry-fee upper mark."
+    },
+    "reconcile": "Reconstruct child quantities only from the existing funded position notional and the frozen 2/3 plus 1/3 weights, then verify each event cash PnL, terminal H1 NAV, selected runner path, entry/exit clocks and fees. No account replay or OHLC fill simulation."
+  },
+  "resolution": {
+    "first_pass": "For each derived critical peak/trough hour, read the exact active Binance contracts' complete 12 native 5m bars, aggregate them to native Binance H1 OHLC, and apply the existing dd.hour_envelope calculation to the unchanged VectorBT hourly ledger.",
+    "five_minute_source": "Existing frozen 5m sources via monday_limit_reclaim_inputs.jobs() and signal_center_score.five_minute(); the source audit identifies Binance official data.binance.vision USD-M monthly klines.",
+    "cache_root": "data/research/cloud_close_efficiency_binance_dd/",
+    "fallback": "Only if the complete 5m upper bound still straddles 35%, use checksum-verified official Binance USD-M daily 1m klines for the same active contracts and exact candidate hours. Do not fetch a broad history.",
+    "h1_integrity": "Each refined hour must aggregate exactly to the corrected Binance-native H1 OHLC; the envelope helper also checks the refined end NAV against the frozen H1 NAV.",
+    "fee_bound_integrity": "The complete coarse fee-adjusted H1 candidate scan precedes source extraction. Fee deductions are applied only to coarse lower marks after refinement; candidate-window entry-fee upper marks remain in the refined envelope.",
+    "result_rule": "Report strict lower/upper drawdown bounds for full and development. If observed_lower_pct <= 35 <= refined_upper_pct after 1m, return unresolved."
+  },
+  "outputs": {
+    "primary": "experiments/active/exp-cloud-close-efficient-trend-20261109-v1/binance_refinement.json",
+    "local_finer_quote_cache": "data/research/cloud_close_efficiency_binance_dd/5m_quotes.csv.gz",
+    "conditional_1m_cache": "data/research/cloud_close_efficiency_binance_dd/1m_quotes.csv.gz"
+  },
+  "commands": {
+    "mini": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_efficiency_binance_bounds --mini-check",
+    "official_after_builder_commit": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_efficiency_binance_bounds"
+  },
+  "limits": [
+    "This refinement changes no signal, entry, exit, quantity, fee, or cash path; it only narrows the existing H1 intrabar mark envelope.",
+    "The H1 candidate scan is run over the complete full and development hourly NAV series before any fine-bar extraction.",
+    "No OKX quote or OKX NAV is used in the Binance calculation."
+  ]
+}
