@@ -522,9 +522,11 @@ class BinanceBreadthEma20Feed:
             self._source_failures["new_symbol_cache"] = "; ".join(errors)
             self._warmed = False
             return
-        self._seed_hourly_touch_ledger(self._touch_start_ms, None, symbols=symbols)
+        expected, verified = self._seed_hourly_touch_ledger(self._touch_start_ms, None, symbols=symbols)
+        if expected != verified or self._source_failures:
+            self._warmed = False
+            return
         self._seed_recent_five_touch_ledger(hour_end, five_end)
-        self._market_seeded_through_ms = max(self._market_seeded_through_ms, five_end)
 
     def _read_hourly(self, symbol: str) -> pd.DataFrame:
         frame = _read_ohlc_cache(self.hour_cache / f"{symbol}.csv.gz", interval_ms=HOUR_MS)
@@ -1083,9 +1085,9 @@ class BinanceBreadthEma20Feed:
         universe in bounded parallel REST calls so no market breadth is inferred
         from the current position basket alone.
         """
-        if not self._warmed:
-            self.warmup()
         self._universe()
+        if not self._warmed and not self.warmup()["complete"]:
+            raise RuntimeError("Incomplete market history after universe refresh")
         now = _now_ms()
         latest_closed = (now // BAR_MS) * BAR_MS
         through = int(through_close_ms if through_close_ms is not None else latest_closed)

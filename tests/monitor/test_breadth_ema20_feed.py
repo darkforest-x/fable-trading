@@ -98,6 +98,15 @@ def test_4h_ema_uses_only_complete_closed_4h_bars_and_resets_after_gap():
     assert asof_4h_ema20(broken_ema, 84 * HOUR_MS)["valid"] is False
 
 
+def test_failed_new_listing_warmup_defers_close(tmp_path, monkeypatch):
+    feed = BinanceBreadthEma20Feed(cache_root=tmp_path)
+    feed._warmed = True
+    monkeypatch.setattr(feed, "_universe", lambda: setattr(feed, "_warmed", False))
+    monkeypatch.setattr(feed, "warmup", lambda: {"complete": False})
+    with pytest.raises(RuntimeError, match="Incomplete market history"):
+        next(feed.iter_closed_events(5 * BAR_MS, 6 * BAR_MS))
+
+
 def _candidate_fixture(tmp_path: Path, symbols, known_ms, decision_ms):
     feed = BinanceBreadthEma20Feed(cache_root=tmp_path)
     feed._hourly_ema20 = pd.DataFrame()
