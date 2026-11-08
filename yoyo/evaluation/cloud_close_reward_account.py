@@ -139,7 +139,7 @@ def pre_segment(c):
 
 
 @njit(cache=True)
-def account_order(c, nav, actions, prices, fees, market_slip, exposure, weights, reservation):
+def account_order(c, nav, actions, prices, fees, market_slip, exposure, weights, reservation, full_slots):
     action = actions[c.i, c.col]
     if action == 0:
         return NoOrder
@@ -164,6 +164,16 @@ def account_order(c, nav, actions, prices, fees, market_slip, exposure, weights,
                 if c.last_position[child] != 0.:
                     occupied = True
             free_slots += int(not occupied)
+        if full_slots:
+            # The first leg exits at the partial target. After that only its
+            # runner remains, and the released collateral can fund a new entry.
+            capacity = full_slots
+            occupied_full = 0
+            for first in range(c.from_col,c.to_col,len(weights)):
+                occupied_full += int(c.last_position[first] != 0.)
+            free_slots = min(free_slots,capacity - occupied_full)
+            if free_slots < 1:
+                raise ValueError('No full position slot available')
         reservation[0] = min(nav * exposure / capacity, c.free_cash_now/max(1,free_slots))
     budget = reservation[0] * weights[leg]
     if budget < 1.e-8:
@@ -174,13 +184,13 @@ def account_order(c, nav, actions, prices, fees, market_slip, exposure, weights,
                        lock_cash=True, allow_partial=False, raise_reject=True)
 
 
-def account(data, slip=0., exposure=1., weights=(1.,)):
+def account(data, slip=0., exposure=1., weights=(1.,), full_slots=0):
     actions = data['actions']
     weights = np.asarray(weights, dtype=float)
     if np.any(weights<=0) or not np.isclose(weights.sum(), 1) or actions.shape[1]%len(weights):
         raise ValueError('Invalid leg weights')
     pf = vbt.Portfolio.from_order_func(data['marks'], account_order, actions, data['prices'],
-        data['fees'], slip, exposure, weights, np.zeros(1), pre_segment_func_nb=pre_segment, cash_sharing=True,
+        data['fees'], slip, exposure, weights, np.zeros(1), full_slots, pre_segment_func_nb=pre_segment, cash_sharing=True,
         group_by=True, init_cash=1000., max_orders=int(np.count_nonzero(actions))+1,
         fill_pos_record=False)
     orders = pf.orders.records

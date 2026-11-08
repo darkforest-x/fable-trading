@@ -20,8 +20,8 @@ def pair_data(runner, target, slots=12):
     return w.prepare(None,slots*2,assigned=(merged,skips))
 
 
-def simulate(data, fraction, slip=0.):
-    legs, eq = w.account(data, weights=(fraction,1-fraction), slip=slip)
+def simulate(data, fraction, slip=0., full_slots=0):
+    legs, eq = w.account(data, weights=(fraction,1-fraction), slip=slip, full_slots=full_slots)
     if not legs.groupby('event_id').size().eq(2).all():
         raise ValueError('Unpaired funded legs')
     g = legs.groupby('event_id',sort=False)

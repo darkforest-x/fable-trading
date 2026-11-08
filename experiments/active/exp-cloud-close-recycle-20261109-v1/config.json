@@ -1,0 +1,9 @@
+{
+  "id": "exp-cloud-close-recycle-20261109-v1",
+  "parent": "exp-cloud-close-priority-20261109-v1",
+  "single_variable": "Extra physical position slots to retain older, 25% residual cloud runners after the resting 2R order fills. There are always at most nine full entries still awaiting a target or stop. A new signal can only use cash released before its entry hour. Simultaneous signals preserve prior ATR priority and the frozen one-open-position-per-contract rule.",
+  "extra_slots": [0, 3, 6, 9],
+  "allocation": "Fund new entries with min(current open NAV/9, current available collateral / number of currently available full-entry slots). The number of available full-entry slots is the minimum of physically flat slots and nine minus occupied first legs. Long/short collateral segregated, free cash only, no leverage. Existing partial and runner quantities remain fixed.",
+  "development_choice": "Rank by development terminal NAV through 2024 among rules with at least 100 funded trades, >=30% winners, equal-notional realized net payoff >=2.5 and hourly drawdown bound <=35%. Fallback is zero spare slots. Stress and parent-paired controls for selected and unconstrained dev leader if different from inherited baseline. No tuning on 2025 and 2026, both previously inspected.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_recycle"
+}
