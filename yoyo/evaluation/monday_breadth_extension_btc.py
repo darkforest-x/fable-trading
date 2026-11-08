@@ -480,11 +480,11 @@ def _month_inputs(events: pd.DataFrame, frame: pd.DataFrame, htf: dict[int, pd.D
         candidate_decisions = pd.DatetimeIndex(drafts.decision)
         random_decisions = pd.DatetimeIndex(drafts.random_entry)
         drafts["same_new_york_weekdays"] = (
-            random_knowns.tz_convert("America/New_York").dayofweek
-            == candidate_knowns.tz_convert("America/New_York").dayofweek
+            random_knowns.tz_convert("America/New_York").day_of_week
+            == candidate_knowns.tz_convert("America/New_York").day_of_week
         ) & (
-            random_decisions.tz_convert("America/New_York").dayofweek
-            == candidate_decisions.tz_convert("America/New_York").dayofweek
+            random_decisions.tz_convert("America/New_York").day_of_week
+            == candidate_decisions.tz_convert("America/New_York").day_of_week
         )
         if not (drafts[["random_context_valid", "same_month_as_candidate", "same_utc_6h_session",
                        "same_1h_volatility_stratum", "same_1h_trend_stratum", "same_new_york_weekdays"]].all().all()):
