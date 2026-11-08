@@ -1,0 +1,43 @@
+{
+  "periods": {
+    "all": {
+      "pairs": 12684,
+      "active_weeks": 319,
+      "mean_net_difference_pp": 0.1585735388990328,
+      "interval95_pp": [
+        -0.3904703532820031,
+        0.7324815938770344
+      ]
+    },
+    "dev": {
+      "pairs": 5591,
+      "active_weeks": 230,
+      "mean_net_difference_pp": 0.9416582795596792,
+      "interval95_pp": [
+        0.05049634582002968,
+        1.8734416977807957
+      ]
+    },
+    "2025": {
+      "pairs": 2574,
+      "active_weeks": 52,
+      "mean_net_difference_pp": -0.5041044024132826,
+      "interval95_pp": [
+        -1.4951999948005426,
+        0.21772474486520502
+      ]
+    },
+    "2026": {
+      "pairs": 3890,
+      "active_weeks": 38,
+      "mean_net_difference_pp": -0.4802517898079897,
+      "interval95_pp": [
+        -1.478658448732531,
+        0.2931807550697031
+      ]
+    }
+  },
+  "units": "percentage points of equal-notional net trade return",
+  "comparison": "same contract and direction, later matched time, both pass weekly 4H confirmation",
+  "inference": "Post-selection, 5000 four-week circular block resamples; no multiple-search adjustment."
+}
