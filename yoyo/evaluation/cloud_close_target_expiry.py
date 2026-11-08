@@ -13,15 +13,17 @@ from yoyo.evaluation import cloud_close_efficient_trend as trend
 EXP=archive.EXP.parent/'exp-cloud-close-target-expiry-20261109-v1'
 
 
-def time_in_force(paths, *, defer=False):
+def time_in_force(paths, *, defer=False, hours=12):
     """By the next 12H boundary all previous H1 fills are known; cancel any unfilled limit."""
+    if hours<=0 or hours%12:
+        raise ValueError('Resting limit expires at a completed 12h boundary')
     target=paths[paths.tp_r.eq(2)].copy()
     is_limit=target.exit_reason.str.startswith('take_profit')
     if not np.array_equal(is_limit,target.exit_fee_rate.lt(.0005)):
         raise ValueError('Native TP path and fee class disagree')
     if (target.entry_ms % (12*archive.native.wallet.HOUR)).any():
         raise ValueError('Native entry not aligned to a 12h boundary')
-    target['expiry_ms']=target.entry_ms+12*archive.native.wallet.HOUR
+    target['expiry_ms']=target.entry_ms+hours*archive.native.wallet.HOUR
     early = target.exit_bar_ms.lt(target.expiry_ms)
     replace_limit = is_limit & (early if defer else ~early)
     target['choice']=np.where(replace_limit,'full_runner','partial_2_3')
