@@ -15,6 +15,81 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-leadership-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "5befa339c9"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Fraction of the contemporaneous 90-day momentum ranking retained, with a coverage-only arm."
+    result: "Development picked coverage alone. 6219.84U, 1569 trades, 33.14% wins, realized payoff 3.015 by return or 2.558 in U, DD bound 30.05%. Restricting to the best decile fell to 870.06U. 2025 +2.74%, 2026 +11.74%; additional 5bp market slippage reduced terminal wealth to 5332U."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-leadership-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af81528b1bd7b5c01c2026."
+
+  - experiment_id: exp-cloud-close-recycle-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "28e1fc53f8"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Increase the room for residual 25% positions after a 2R partial, with full positions and unit allocation capped at nine."
+    result: "Dev picked three spare runner slots. Full history 6988.81U, 2170 funded, wins 32.67%, payoff 2.90 in returns / 2.47 in U, but DD bound 37.88%. Nine spare slots grew to 8660.49U with DD 46.31%."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-recycle-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af815ca223f82b6777e286."
+
+  - experiment_id: exp-cloud-close-exposure-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "391cbcd32f"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Fixed gross exposure per entry on the original unsplit runner, with a conservative maintenance-boundary check."
+    result: "0.5x/1x/1.5x ended at 5163.74/11006.33/18206.42U with DD bounds 39.39/53.11/61.44%. Two positions at 2x and 29 positions at 3x breached the assumed 10% maintenance limit. Both tiers invalidated. 1.5x lost 3.8% in 2026 YTD before additional slippage."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-exposure-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af8164ad7ff66a256fd936."
+
+  - experiment_id: exp-cloud-close-btc-regime-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "5aa5733e61"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Sign of the prior BTC return at one rolling horizon gates entries of the frozen split account."
+    result: "Only the original unfiltered arm passed development risk/payoff thresholds. 30-day rule reached 6035.65U, 33.43% wins, payoff 3.04 and 44.52% drawdown upper bound; all five BTC gates exceeded 35% full-history drawdown."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-btc-regime-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af8167ae8ccd0e29a92f1c."
+
+  - experiment_id: exp-cloud-close-stop-distance-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "18402ddfc5"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Only fixed stop distance from the touched extension changes; the 2R absolute limit and the cloud runner remain unchanged."
+    result: "Only original fixed stop qualified in development. Half-distance returned 6317.46U, wins 25.97%, payoff 4.14 and DD bound 29.88%; twice the distance returned 6218.12U, wins 39.56%, payoff 2.25 and DD bound 30.15%."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-stop-distance-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af81189404d067bdfd5453."
+
   - experiment_id: exp-cloud-close-priority-20261109-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 384add9952
