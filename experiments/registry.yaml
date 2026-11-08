@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-market-direction-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "210af54859"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Gate the original 2R-activated lock runner on positive or negative past-90-day returns of other observable contracts matching its own direction. Test one-half and two-thirds thresholds on leave-one-out denominators."
+    result: "Unfiltered 27432.02U and 53.31% drawdown bound; majority-aligned 15633.00U, 33.36% wins, 2.679 USDT payoff, 56.24% bound; two-thirds 4528.56U, 33.38%, 2.477, 49.80%. No qualifying development configuration."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-market-direction-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af812f9228ce92248e7e35."
+
   - experiment_id: exp-cloud-close-okx-agreement-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "088e38c1da"
