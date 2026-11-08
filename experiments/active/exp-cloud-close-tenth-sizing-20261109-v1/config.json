@@ -1,0 +1,6 @@
+{
+  "id":"exp-cloud-close-tenth-sizing-20261109-v1",
+  "factor":"Replace only the original nominal cap of current wallet NAV / 9 per new position by NAV / 10, while continuing to allow nine simultaneous funded positions and respecting the same free cash constraint. This does not continuously hold an exact tenth in cash and never resizes an existing position. Fixed round fraction; no search to find the nearest 35% drawdown threshold.",
+  "rule":"Use the frozen trend-efficiency exit (normally two-thirds resting 2R, whole runner only on prior 20-bar directional efficiency >0.5) with its unchanged native fills. This is a response to the expanded Binance sample's observed 35.28% DD; later years have been inspected and form no new validation set.",
+  "scope":"1000U each, full native OKX and expanded 661-contract Binance histories; compare against frozen original size with identical parent IDs and per-unit returns. 5bp market and 2bp resting, additional 5bp on market fills as sensitivity. Preserve shared-capital compounding. Run paired and later non-signal accounts in full; no funding, impact or lot rounding. >=30% winning parents, both realized payoff >=2.5, at least 100 trades, <=35% DD; terminal >1,001,000 for user target."
+}

@@ -20,9 +20,9 @@ def pair_data(runner, target, slots=12, *, start=w.START, end=w.END, quote_loade
     return w.prepare(None,slots*2,start,end,assigned=(merged,skips),quote_loader=quote_loader)
 
 
-def simulate(data, fraction, slip=0., full_slots=0, slot_weights=None, target_r=2.):
+def simulate(data, fraction, slip=0., full_slots=0, slot_weights=None, target_r=2., *, exposure=1.):
     legs, eq = w.account(data, weights=(fraction,1-fraction), slip=slip,
-                         full_slots=full_slots,slot_weights=slot_weights)
+                         full_slots=full_slots,slot_weights=slot_weights,exposure=exposure)
     if not legs.groupby('event_id').size().eq(2).all():
         raise ValueError('Unpaired funded legs')
     g = legs.groupby('event_id',sort=False)
