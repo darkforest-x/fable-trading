@@ -15,6 +15,23 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-allmarket-screen-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 081a4befd0
+    status: inconclusive
+    question: Can a causal single-variable SPIKE V1.7 confirmation screen retain at least 70% of chart >10R winners while removing 30% of first-day fixed stops across additional OKX alts?
+    single_variable: Each fixed rule evaluated independently; one development-selected candidate; two year slices; distinct peaks and close-based risk are separate checks.
+    result: All 291 recoverable contracts screened; 2,033 definite chart hits / 12,506 alt references, 770 hits from confirmation-close risk. Outside the old Top20 the frozen 0.347640R reclaim rule retained 399/490 and 379/507 chart winners while removing 384/834 and 487/1,007 early fixed stops in 2025
+      and 2026 YTD. Only 79/153 and 84/183 close-basis winners remained. No single prespecified rule met both operational gates in both years on the close basis. Notion 4128856479af819b8588e9cda18e0b91.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts:
+    - cloud-allmarket-12h-labels-20261108-v1
+    canonical_report: experiments/active/exp-cloud-allmarket-screen-20261108-v1/summary.json
+    notes: Census of recoverable OKX USDT crypto swaps. Equal-count random controls; enrollment is retrospective. Chart excursion labels only, no fills or realized returns.
+
   - experiment_id: exp-monday-pa-prior24h-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: c368dc3345

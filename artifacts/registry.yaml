@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: cloud-allmarket-12h-labels-20261108-v1
+    artifact_type: manifest
+    role: chart_reference_census_filter_evidence_and_coverage
+    source_repo: darkforest-x/fable-trading
+    source_commit: ae4c49a53b
+    source_path: experiments/active/exp-cloud-allmarket-screen-20261108-v1/signals.csv
+    storage_uri: repo://experiments/active/exp-cloud-allmarket-screen-20261108-v1/signals.csv
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 291 contracts, 12707 weekly references; includes zero-signal symbols in coverage and explicit unknown labels.
+
   - artifact_id: cloud-top20-peak10r-ledger-20261108-v1
     artifact_type: manifest
     role: chart_reference_excursion_census_and_outcome_controls
