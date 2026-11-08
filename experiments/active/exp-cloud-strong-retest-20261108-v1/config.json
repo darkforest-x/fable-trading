@@ -1,0 +1,12 @@
+{
+  "source": "exp-cloud-allmarket-screen-20261108-v1/signals.csv",
+  "source_cutoff_utc": "2026-11-08T12:00:00Z",
+  "cohort": "was_top20=false; 2025 and 2026, year by Asia/Shanghai confirmation time",
+  "reclaim_threshold_r": 0.3476400363291413,
+  "missing_reclaim": "retain as in frozen source",
+  "single_change": "Same strong-reclaim signals and original fixed stop / 12H intrabar EMA reversal. Replace immediate confirmation execution with a resting limit at the original 1.618 level, live for the next one 12H candle only, cancelled on earlier invalidation.",
+  "execution": "NautilusTrader 1.231.0 native matching. Paired historical independent opportunities. Fixed OKX Lv1 maker 0.0002/taker 0.0005 per fill. Slippage/funding and queue depth not modeled. With incomplete data report unavailable or bounds; no imputation.",
+  "comparison": "All common opportunities each year; count confirmed chart >10R missed without fill; actual post-fill strictly >10R from each entry and distance to original stop; first 24h fixed stops per fill and per original signal. Compare fees and realized net R per eligible original signal on comparable, closed paths (unfilled contributes zero).",
+  "decision": "A practical improvement should capture at least as many remaining >10R opportunities per original signal and improve net R per original signal in both periods; also show conditional first-day stop risk, missing, overlapping positions and uncertainty.",
+  "registration": "All intervals and rules are fixed before reading new retest outcomes. Both historical test years have already been used for the preceding screen."
+}
