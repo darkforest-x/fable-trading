@@ -44,6 +44,7 @@ from nautilus_trader.persistence.wranglers import BarDataWrangler
 from nautilus_trader.trading.strategy import Strategy
 
 ENGINE_VERSION = "1.231.0"
+WICK_FAILURE_NEXT_OPEN_REASON = 15
 
 
 @dataclass(frozen=True)
@@ -81,6 +82,9 @@ class ExitPolicy:
     # until the confirmation close: a reclaim moves it to entry, a failed
     # reclaim cancels it before the market exit (owner 2026-10-25 backstop).
     reclaim_backstop: bool = False
+    # Close-market E20 5m reclaim sensitivity: after two continuous completed
+    # closes beyond the entry bar's wick, exit the survivor at the next open.
+    wick_failure_next_open: bool = False
 
     def __post_init__(self):
         actual = (self.fill_maker_fee, self.fill_taker_fee)
@@ -101,6 +105,10 @@ class ExitPolicy:
             raise ValueError("Monotone segments require an explicit intrabar path")
         if self.reclaim_backstop and not self.reclaim_next_bar:
             raise ValueError("Backstop requires the reclaim rule")
+        if self.wick_failure_next_open and not (
+                self.reclaim_next_bar and self.reclaim_backstop and self.target_from_entry
+                and self.intrabar_path is not None and self.monotone_segments):
+            raise ValueError("Wick-failure exit requires a monotone explicit-path reclaim backstop")
         if self.breakeven_on_touch and (self.breakeven_r is None or self.intrabar_path is None):
             raise ValueError("Touch breakeven requires an R trigger and explicit intrabar path")
         if self.breakeven_on_touch and self.breakeven_includes_cost:
@@ -275,6 +283,7 @@ class TradeState:
     reclaim_due_ns: int = -1
     reclaim_i: int = -1
     reclaim_status: str = "not_applicable"
+    wick_failure_exit_i: int = -1
 
     def __post_init__(self):
         self.remaining = int(self.quantity)
@@ -522,9 +531,22 @@ class IndependentCloseStrategy(Strategy):
                     position_id=str(event.position_id),
                     client_order_id=str(event.client_order_id))
         point_phase = self.point_phases.get(event.ts_event, (i, 0))[1]
+        if phase == WICK_FAILURE_NEXT_OPEN_REASON:
+            expected_i = state.wick_failure_exit_i
+            open_price = float(self.prices[i, 0])
+            if (not self.policy.wick_failure_next_open or expected_i != i or point_phase != 0
+                    or abs(price-open_price) > max(
+                        self.eps, 2*math.ulp(price), 2*math.ulp(open_price))):
+                raise RuntimeError(
+                    "Wick-failure exit did not fill at the next opening print "
+                    f"(bar={i}, expected_bar={expected_i}, phase={point_phase}, "
+                    f"fill={price}, open={open_price})"
+                )
         if self.market_open:
             fill.update(bar_open_time=str(self.frame.index[i]-pd.Timedelta(minutes=self.execution_minutes)),
                         bar_close_time=str(self.frame.index[i]), intrabar_phase=point_phase)
+        elif self.policy.intrabar_path:
+            fill["intrabar_phase"] = point_phase
         self.fill_rows.append(fill)
         state.fills.append(fill)
         if event.last_qty != requested:
@@ -672,7 +694,8 @@ class IndependentCloseStrategy(Strategy):
             net_r=gross-self.policy.round_trip_cost*entry/risk,
             net_notional_bp=(gross*risk/entry-self.policy.round_trip_cost)*10000,
             exit_time=str(self.frame.index[i]-pd.Timedelta(minutes=self.execution_minutes
-                if gap or (self.market_open and point_phase == 0) else 0)),
+                if gap or phase == WICK_FAILURE_NEXT_OPEN_REASON
+                or (self.market_open and point_phase == 0) else 0)),
             framework_exit_time=str(self.frame.index[i]),
             framework_position_id=str(event.position_id),
             framework_commission=state.fees, quantity=float(state.quantity),
@@ -769,10 +792,46 @@ class IndependentCloseStrategy(Strategy):
             if abs(float(order.price)-entry) > self.eps:
                 self.modify_order(order, price=self.instrument.make_price(entry))
 
+    def _check_wick_failure_open(self, i):
+        """Exit only when the two closes before this open form a continuous 5m pair.
+
+        Native stop/target matching for the opening point has already run. The
+        entry bar and both closes are read from the original 5m frame; synthetic
+        intrabar highs/lows do not contribute to this close-confirmed rule.
+        """
+        if i < 3:
+            return
+        # The candidate pair must be strictly after each position's own entry
+        # bar, not merely after some close observed while it was pending.
+        interval_ns = pd.Timedelta(minutes=5).value
+        if (self.frame.index[i-1].value-self.frame.index[i-2].value != interval_ns
+                or self.frame.index[i].value-self.frame.index[i-1].value != interval_ns):
+            return
+        for state in list(self.active.values()):
+            if state.remaining <= 0 or state.reclaim_status not in ("pending", "reclaimed"):
+                continue
+            entry_i = int(state.source["entry_i"])
+            if i-2 <= entry_i:
+                continue
+            side = int(state.source["side"])
+            wick = float(self.prices[entry_i, 2 if side > 0 else 1])
+            closes = self.prices[i-2:i, 3]
+            failed = bool(np.all(closes < wick) if side > 0 else np.all(closes > wick))
+            if not failed:
+                continue
+            # Prevent duplicate exits while preserving native matching order:
+            # the stop and target above have already had their opening match.
+            self._cancel_stop(state)
+            self._cancel_target(state)
+            state.wick_failure_exit_i = i
+            self._market(state, reason=WICK_FAILURE_NEXT_OPEN_REASON)
+
     def on_bar(self, bar):
         i = self.indices[bar.ts_event]
         if self.policy.intrabar_path:
             point_phase = self.point_phases[bar.ts_event][1]
+            if self.policy.wick_failure_next_open and point_phase == 0:
+                self._check_wick_failure_open(i)
             if self.market_open and point_phase == 0:
                 # The first synthetic segment ends at this bar's opening print.
                 # Submit after matching that segment so a pre-entry gap cannot
@@ -1059,6 +1118,17 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         raise ValueError("Unknown entry order mode")
     limit_entry = entry_order_mode == "limit"
     market_open = entry_order_mode == "market_open"
+    if policy.wick_failure_next_open:
+        close_market = (entry_order_mode == "market" or
+                        (limit_entry and "order_mode" in entries
+                         and entries.order_mode.astype(str).eq("market").all()))
+        grouped = any(
+            c in entries and entries[c].map(lambda v: isinstance(v, str) and bool(v)).any()
+            for c in ("parent", "pyramid_parent")
+        )
+        if (execution_minutes != 5 or not close_market or grouped
+                or "fill_close_exit" in entries):
+            raise ValueError("Wick-failure exit requires original close-market 5m reclaim entries")
     if market_open:
         if not (policy.target_from_entry and policy.intrabar_path is not None
                 and policy.monotone_segments and not policy.opposite_hour_exit
