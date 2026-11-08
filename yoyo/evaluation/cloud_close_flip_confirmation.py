@@ -487,7 +487,7 @@ def _candidate_metrics(paths: pd.DataFrame, cfg: dict, source: pd.DataFrame,
                        & (~paths.is_control)].copy()
         if events.empty:
             raise ValueError(f"No executable frozen signals for {cadence}")
-        metrics, meta, trades, equity = capacity.run(events, slots, fraction)
+        metrics, meta, trades, equity = _run_capacity(events, slots, fraction)
         execution_by_mode[cadence] = meta
         output_rows.extend(dict(cadence=cadence, confirmations=confirmations,
                                 period=period, **values)
@@ -518,7 +518,7 @@ def _candidate_metrics(paths: pd.DataFrame, cfg: dict, source: pd.DataFrame,
         for label, pool, slip in (("matched_controls", controls, 0.0),
                                   ("paired_signals", paired, 0.0),
                                   ("slippage_5bp", actual, 0.0005)):
-            m, details, _, _ = capacity.run(pool, slots, fraction, slip)
+            m, details, _, _ = _run_capacity(pool, slots, fraction, slip)
             checks[cadence][label] = {"metrics": m, "admission": details}
     if not control_frame.empty and control_frame.parent_id.nunique() != control_frame.event_id.nunique():
         raise ValueError("Frozen matched controls have duplicated parent IDs")
@@ -534,6 +534,22 @@ def _candidate_metrics(paths: pd.DataFrame, cfg: dict, source: pd.DataFrame,
     }
     return frame, {"selection": selection, "checks": checks,
                    "execution_by_mode": execution_by_mode}
+
+
+def _run_capacity(events: pd.DataFrame, slots: int, fraction: float,
+                  slip: float = 0.0) -> tuple[dict, dict, pd.DataFrame, pd.DataFrame]:
+    """Call the existing capacity runner and normalize its scale-out return contract."""
+    result = capacity.run(events, slots, fraction, slip)
+    if not isinstance(result, tuple) or len(result) != 3:
+        raise TypeError(f"cloud_close_slots.run must return 3 values, got {type(result)}")
+    metrics, trades, equity = result
+    runner = events[events.tp_r.eq(0.0)]
+    selected, skips = account.admit(runner, slots)
+    if len(selected) != len(trades):
+        raise AssertionError("Capacity admissions and funded scale-out trades differ")
+    details = {"opportunities": int(runner.event_id.nunique()),
+               "admitted": int(len(selected)), "funded": int(len(trades)), **skips}
+    return metrics, details, trades, equity
 
 
 def _audit_parent_tail_rows(parent: pd.DataFrame, tail_by_symbol: dict[str, int]) -> dict:
@@ -564,6 +580,46 @@ def _write_csv_atomic(frame: pd.DataFrame, path: Path, compression=None) -> None
     tmp.replace(path)
 
 
+def _validate_complete_paths(paths: pd.DataFrame, parent: pd.DataFrame) -> None:
+    expected_modes = set(MODES)
+    if set(paths.cadence.dropna().unique()) != expected_modes:
+        raise ValueError("Cached path table does not contain the frozen cadence set")
+    if paths.duplicated(["cadence", "event_id", "tp_r"]).any():
+        raise ValueError("Cached path table has duplicate cadence/event/TP rows")
+    expected_count = len(parent) * len(MODES)
+    if len(paths) != expected_count:
+        raise ValueError(f"Cached path table is incomplete: {len(paths)} != {expected_count}")
+    identity = ("parent_id", "source_row_number", "symbol", "side", "is_control",
+                "entry_status", "entry_ms", "entry_price", "stop_price")
+    base = paths[paths.cadence.eq("intrabar_baseline")].set_index(
+        ["event_id", "tp_r"]).sort_index()
+    expected = parent.set_index(["event_id", "tp_r"]).sort_index()
+    if not base.index.equals(expected.index):
+        raise ValueError("Cached baseline path identities differ from the frozen parent")
+    for column in identity:
+        left, right = base[column], expected[column]
+        if pd.api.types.is_numeric_dtype(left.dtype) or pd.api.types.is_numeric_dtype(right.dtype):
+            if not np.allclose(pd.to_numeric(left, errors="coerce"),
+                               pd.to_numeric(right, errors="coerce"),
+                               rtol=0.0, atol=0.0, equal_nan=True):
+                raise ValueError(f"Cached baseline changed frozen identity field {column}")
+        elif not left.fillna("<NA>").astype(str).equals(right.fillna("<NA>").astype(str)):
+            raise ValueError(f"Cached baseline changed frozen identity field {column}")
+    for cadence in expected_modes - {"intrabar_baseline"}:
+        frame = paths[paths.cadence.eq(cadence)].set_index(["event_id", "tp_r"]).sort_index()
+        if not frame.index.equals(expected.index):
+            raise ValueError(f"Cached {cadence} path identities differ from the frozen parent")
+        for column in identity:
+            left, right = frame[column], expected[column]
+            if pd.api.types.is_numeric_dtype(left.dtype) or pd.api.types.is_numeric_dtype(right.dtype):
+                if not np.allclose(pd.to_numeric(left, errors="coerce"),
+                                   pd.to_numeric(right, errors="coerce"),
+                                   rtol=0.0, atol=0.0, equal_nan=True):
+                    raise ValueError(f"Cached {cadence} changed frozen identity field {column}")
+            elif not left.fillna("<NA>").astype(str).equals(right.fillna("<NA>").astype(str)):
+                raise ValueError(f"Cached {cadence} changed frozen identity field {column}")
+
+
 def generate(config_path: Path = EXP / "config.json") -> dict:
     cfg = json.loads(config_path.read_text(encoding="utf-8"))
     if cfg.get("experiment_id") != EXP.name:
@@ -575,59 +631,85 @@ def generate(config_path: Path = EXP / "config.json") -> dict:
                                                     "paths_audit_json",
                                                     "account_metrics_csv",
                                                     "summary_json")]
-    if any(path.exists() for path in output_paths):
-        raise FileExistsError("Refusing to overwrite frozen confirmation outputs")
+    path_file, path_audit_file, metrics_file, summary_file = output_paths
+    if metrics_file.exists() or summary_file.exists():
+        raise FileExistsError("Account outputs already exist; refusing to rerun the experiment")
+    if path_file.exists() != path_audit_file.exists():
+        raise FileExistsError("Only one path cache file exists; cannot resume an incomplete build")
     picks = _check_parent_picks(cfg)
     parent, source, input_audit = _read_inputs(cfg)
     parent_audit = json.loads((PARENT_EXP / "paths_audit.json").read_text(encoding="utf-8"))
     path_cfg = json.loads(PARENT_CFG.read_text(encoding="utf-8"))
     baseline_parent = parent[parent.exit_reason.eq("series_tail_close")]
-    # Build candidate paths; executable entries must remain the original exact-open ledger.
-    print("Building causal 12H confirmation paths with the frozen VectorBT callback", flush=True)
-    all_paths, path_audit, tail_by_symbol = _build_variant_paths(parent, cfg, path_cfg)
-    tail_audit = _audit_parent_tail_rows(parent, tail_by_symbol)
-    if len(baseline_parent) != tail_audit["parent_series_tail_exits"]:
-        raise AssertionError("Parent series-tail audit count changed while reading")
-    account_metrics, account_audit = _candidate_metrics(all_paths, cfg, source, picks)
-
     revision = hashlib.sha256(Path(__file__).read_bytes() + config_path.read_bytes()).hexdigest()
-    audit = {
-        "experiment_id": cfg["experiment_id"],
-        "generator": "yoyo/evaluation/cloud_close_flip_confirmation.py",
-        "source_sha256": revision,
-        "vectorbt_version": vbt.__version__,
-        "numpy_version": version("numpy"),
-        "pandas_version": version("pandas"),
-        "numba_version": version("numba"),
-        "input_parent_paths": str((PARENT_EXP / "paths.csv.gz").relative_to(ROOT)),
-        "input_source_signals": str(SIGNALS.relative_to(ROOT)),
-        "input_signal_rows": len(source),
-        "original_signal_source_counts": parent_audit.get("signal_source_counts", {}),
-        "frozen_parent_picks": picks["observed"],
-        "frozen_path_counts": input_audit,
-        "path_build": path_audit,
-        "parent_tail_bounds": tail_audit,
+    if path_file.exists():
+        audit = json.loads(path_audit_file.read_text(encoding="utf-8"))
+        if (audit.get("path_build_complete") is not True
+                or audit.get("source_sha256") != revision
+                or audit.get("experiment_id") != cfg["experiment_id"]):
+            raise ValueError("Cached paths are incomplete or do not match this frozen builder/config")
+        all_paths = pd.read_csv(path_file, low_memory=False)
+        _validate_complete_paths(all_paths, parent)
+        path_audit = audit["path_build"]
+        tail_audit = audit["parent_tail_bounds"]
+        if int(tail_audit.get("parent_series_tail_exits", -1)) != len(baseline_parent):
+            raise ValueError("Cached path audit tail count differs from the frozen parent")
+        print(f"Resuming from complete frozen path cache ({len(all_paths)} rows)", flush=True)
+    else:
+        # Build candidate paths; executable entries must remain the original exact-open ledger.
+        print("Building causal 12H confirmation paths with the frozen VectorBT callback", flush=True)
+        all_paths, path_audit, tail_by_symbol = _build_variant_paths(parent, cfg, path_cfg)
+        _validate_complete_paths(all_paths, parent)
+        tail_audit = _audit_parent_tail_rows(parent, tail_by_symbol)
+        if len(baseline_parent) != tail_audit["parent_series_tail_exits"]:
+            raise AssertionError("Parent series-tail audit count changed while reading")
+        audit = {
+            "experiment_id": cfg["experiment_id"],
+            "generator": "yoyo/evaluation/cloud_close_flip_confirmation.py",
+            "source_sha256": revision,
+            "path_build_complete": True,
+            "account_complete": False,
+            "vectorbt_version": vbt.__version__,
+            "numpy_version": version("numpy"),
+            "pandas_version": version("pandas"),
+            "numba_version": version("numba"),
+            "input_parent_paths": str((PARENT_EXP / "paths.csv.gz").relative_to(ROOT)),
+            "input_source_signals": str(SIGNALS.relative_to(ROOT)),
+            "input_signal_rows": len(source),
+            "original_signal_source_counts": parent_audit.get("signal_source_counts", {}),
+            "frozen_parent_picks": picks["observed"],
+            "frozen_path_counts": input_audit,
+            "path_build": path_audit,
+            "parent_tail_bounds": tail_audit,
+            "fees": {"market_or_stop_per_fill": engine.TAKER,
+                     "resting_2r_limit_per_fill": engine.MAKER},
+            "control_join": {
+                "key": "parent_id; frozen event_id is parent_id + ':signal' or parent_id + ':control'",
+                "frozen_control_candidates": input_audit["control_event_count"],
+                "unmatched_and_no_entry_rows_retained": True,
+            },
+            "chronology": {
+                "signal_entry": "exact H1 open at the completed UTC12H confirmation timestamp",
+                "confirmation_streak_start": "first completed 12H close strictly after the frozen entry_ms",
+                "next_open": "first observed H1 open timestamp >= the Nth adverse 12H close timestamp",
+                "same_timestamp_entry_confirmation": "cannot exit at entry; strictly post-entry closes only",
+                "gap_precedence": "the original VectorBT callback marks the first next observed open before reading that bar OHLC",
+                "stale_12h": "original stale flag and callback precedence retained",
+            },
+            "output_rows": len(all_paths),
+            "output_cadence_counts": all_paths.cadence.value_counts(dropna=False).to_dict(),
+        }
+        # Persist a complete reusable path table before account evaluation.
+        _write_csv_atomic(all_paths, path_file, compression="gzip")
+        _write_json(path_audit_file, audit)
+
+    account_metrics, account_audit = _candidate_metrics(all_paths, cfg, source, picks)
+    audit.update({
+        "account_complete": True,
         "account_selection": account_audit["selection"],
         "account_checks": account_audit["checks"],
         "account_execution": account_audit["execution_by_mode"],
-        "fees": {"market_or_stop_per_fill": engine.TAKER,
-                 "resting_2r_limit_per_fill": engine.MAKER},
-        "control_join": {
-            "key": "parent_id; frozen event_id is parent_id + ':signal' or parent_id + ':control'",
-            "frozen_control_candidates": input_audit["control_event_count"],
-            "unmatched_and_no_entry_rows_retained": True,
-        },
-        "chronology": {
-            "signal_entry": "exact H1 open at the completed UTC12H confirmation timestamp",
-            "confirmation_streak_start": "first completed 12H close strictly after the frozen entry_ms",
-            "next_open": "first observed H1 open timestamp >= the Nth adverse 12H close timestamp",
-            "same_timestamp_entry_confirmation": "cannot exit at entry; strictly post-entry closes only",
-            "gap_precedence": "the original VectorBT callback marks the first next observed open before reading that bar OHLC",
-            "stale_12h": "original stale flag and callback precedence retained",
-        },
-        "output_rows": len(all_paths),
-        "output_cadence_counts": all_paths.cadence.value_counts(dropna=False).to_dict(),
-    }
+    })
     summary = {
         "experiment_id": cfg["experiment_id"],
         "development_pick": account_audit["selection"],
@@ -635,10 +717,9 @@ def generate(config_path: Path = EXP / "config.json") -> dict:
         "checks": account_audit["checks"],
         "frozen_parent_picks": picks["observed"],
     }
-    _write_csv_atomic(all_paths, output_paths[0], compression="gzip")
-    _write_json(output_paths[1], audit)
-    _write_csv_atomic(account_metrics, output_paths[2])
-    _write_json(output_paths[3], summary)
+    _write_csv_atomic(account_metrics, metrics_file)
+    _write_json(path_audit_file, audit)
+    _write_json(summary_file, summary)
     print(account_metrics[account_metrics.period.eq("all")].to_string(index=False), flush=True)
     return audit
 
