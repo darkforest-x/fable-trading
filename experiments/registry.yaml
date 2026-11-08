@@ -167,6 +167,21 @@ experiments:
     canonical_report: experiments/active/exp-monday-breadth-alt-spacing-20261108-v1/spacing_summary.csv
     notes: 'The 2026 fee-only matched-control subset reuses only 13 baseline clocks (mean actual +1.085%, random +0.324%, excess +0.761pp); it does not cover the added events. `spacing_summary.csv` and `portfolio_summary.csv` report fee-only returns and settlement DD. Synchronized 2026 funding and 5m mark coverage are in the sibling `marks_2026.csv`; missing data is not imputed. No paper account, BTC event, or live service changed.'
 
+  - experiment_id: exp-monday-breadth-btc-reserve-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7aa7a98937eb06cf28232794637256bc827a1c8a
+    status: inconclusive
+    question: 'Does splitting the original BTC 50% allocation into independent ordinary and case sleeves preserve the September 16 case while improving frequency without giving up portfolio performance?'
+    single_variable: 'Only repartition BTC into 25% for the frozen 177-event EMA-prefiltered ordinary BTC stream and 25% for the original 53-event case stream; retain 50% for the original ALT 24h stream. Each sleeve compounds separately at 1x with no transfers. The original case events were already reserved for six days per epoch before the shared BTC admission and are retained unchanged.'
+    result: '2026: 29 ordinary + 3 case + 25 ALT = 57 source legs and 57 distinct entry times; +16.86% with settlement DD 6.66% and funded synchronized 5m DD 7.92%. Frozen 50/50 baseline: 21 ordinary + 2 case + 25 ALT = 48/48; +42.03%, 3.54% settlement DD and 6.59% funded 5m DD. Full history: partitioned 469/469, +232.14%, 16.28% fee-only settlement DD and 19.13% fee-only 5m marked DD; baseline 398/398, +466.60%, 24.07% / 26.75%. New-vs-baseline entries: 14 in 2026 (13 ordinary, 1 case), with zero repeated timestamps and 10 cross-sleeve holding overlaps involving an added leg. The September 16 case remains admitted: 10,005.75 funded points; its 25% sleeve had $234.76 before the trade and contributed $30.86 on a 13.143% funded return.'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-breadth-btc-reserve-20261108-v1/partition_summary.csv
+    notes: 'The split was proposed after inspecting the EMA-prefilter experiment and is explicitly post hoc. The 2026-09-12 ordinary admission remains open through 09-18 and overlaps the separately funded 09-16 case sleeve; it no longer blocks that case. Baseline itself also admits the case and its 2026 50% BTC sleeve contribution is $95.20. All 57 2026 entries have funding coverage. All-history prices are fee-only; no all-history funding is claimed. The output distinguishes entry events, distinct timestamps, native exit legs, and cross-sleeve holding overlaps.'
+
   - experiment_id: exp-monday-breadth-optimization-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: e2bfb16ce495b9049c156c7aa157613c6f0b4ff3

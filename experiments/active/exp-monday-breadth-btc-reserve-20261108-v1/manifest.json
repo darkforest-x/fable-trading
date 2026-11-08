@@ -1,0 +1,53 @@
+{
+  "experiment_id": "exp-monday-breadth-btc-reserve-20261108-v1",
+  "builder_commit": "7aa7a98937eb06cf28232794637256bc827a1c8a",
+  "generated_at_utc": "2026-11-08T14:04:24.144867+00:00",
+  "inputs": {
+    "ordinary_stream": "experiments/active/exp-monday-breadth-btc-admission-20261108-v1/ordinary_stream.parquet",
+    "original_case_stream": "experiments/active/exp-monday-breadth-frequency-20261108-v1/btc_target/threshold_events.parquet",
+    "case_native_fills": "data/research/monday_breadth_optimization_20261108/btc_funded_exit_fills.parquet",
+    "alt24h_events": "experiments/active/exp-monday-breadth-alt-spacing-20261108-v1/events.csv",
+    "baseline_btc": "experiments/active/exp-monday-breadth-extension-20261108-v1/risk/integrated_btc_events.parquet",
+    "risk_adapter": "yoyo.evaluation.monday_breadth_extension_risk"
+  },
+  "source_counts": {
+    "case_source_events": 53,
+    "case_source_events_2026": 3,
+    "case_source_original_admitted_in_shared_pool": 32,
+    "ordinary_source_events": 177,
+    "ordinary_source_events_2026": 29,
+    "alt_source_events": 239,
+    "alt_source_events_2026": 25,
+    "baseline_btc_events": 159,
+    "baseline_btc_events_2026": 23,
+    "case_source_spacing_check": "exactly 53 source events, unchanged from the independently six-day-reserved source, verified per original epoch; no second admission pass"
+  },
+  "case_policy_id": 4,
+  "case_source_retained_without_second_admission_pass": true,
+  "2026_btc_funding_missing_intervals": [],
+  "2026_funding_status": "complete local actual BTC settlements; ALT reuses verified funded 5m marks",
+  "september_16": {
+    "sep16_admitted": true,
+    "sep16_decision": "2026-09-15T19:20:00+00:00",
+    "sep16_case_net_points": 10106.433599999998,
+    "sep16_case_funded_points": 10005.751464915347,
+    "sep16_case_fee_net_pct": 13.275614952750503,
+    "sep16_case_funded_pct": 13.143360854924676,
+    "sep16_case_equity_pre_usd_all_history_seed1000": 449.1937302896595,
+    "sep16_case_contribution_usd_all_history_seed1000": 59.03915290966704,
+    "sep16_case_equity_pre_usd_2026_reset": 234.75871202707367,
+    "sep16_case_contribution_usd_2026_reset": 30.85518466009175,
+    "sep16_case_exit_legs": 2,
+    "sep16_overlapping_ordinary_count": 1,
+    "sep16_overlapping_ordinary_decisions": "2026-09-12T00:10:00+00:00",
+    "sep16_all_history_basis": "$250 initial case sleeve compounded fee-only before entry; Sep 16 PnL uses the actual funded return",
+    "sep16_2026_basis": "2026-only reset; fee and actual funding included"
+  },
+  "portfolio": "unlevered 25% ordinary BTC, 25% original case BTC, 50% ALT24h; independent compounding, no transfers",
+  "scope_notes": {
+    "all_history": "fee-only returns; both five-minute price-marked DD and exit-settlement DD are reported; no funding is applied",
+    "2026": "funding-adjusted returns through 2026-10-27 and synchronized five-minute marked DD; missing funding is an error, never zero",
+    "counting": "total_legs counts allocated entry events per source stream; distinct_entries de-duplicates exact timestamps; native_exit_legs separately counts partial exit legs",
+    "post_hoc": "The 24h 50/50 baseline to 25/25/50 split was formed after inspecting the ordinary EMA prefilter and the blocked 2026-09-16 case event."
+  }
+}
