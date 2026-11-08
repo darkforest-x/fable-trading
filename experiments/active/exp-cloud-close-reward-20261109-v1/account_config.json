@@ -1,0 +1,14 @@
+{
+  "experiment_id": "exp-cloud-close-reward-20261109-v1",
+  "input": "exp-cloud-allmarket-screen-20261108-v1 with exp-cloud-top20-peak10r-20261108-v1 hourly bars",
+  "starting_usdt": 1000,
+  "objective": "Full available OKX history, net profit / initial balance strictly greater than 1000 (terminal balance above 1001000). Maximum drawdown no more than 35%, win rate at least 30%, average net winning return / absolute average net losing return at least 2.5 as an explicit research convention. Also disclose actual scaled USDT payoff.",
+  "factor": "Resting take-profit multiple of actual entry-to-fixed-stop risk. 0 is the V1.7 fixed stop + adverse cloud-cross runner with no TP. Independent variants; all other rules fixed.",
+  "tp_r": [0, 1, 2, 3, 4, 6, 10],
+  "allocation": "One pooled account, 12 equal equity slots with no leverage. At the simultaneous UTC opens use only opening marks for sizing, cap new notional at NAV/12 and available segregated collateral (fee-inclusive). One position per symbol. Same-time priority by fixed crc32(symbol) then symbol, no outcome or future volume ranking. Occupied slots released for new entries only from hour after exit bar. Shorts fully collateralized on entry; no rebalancing while held.",
+  "development_until_utc_exclusive": "2025-01-01T00:00:00Z",
+  "selection": "Only completed exits before cutoff count for development win/payoff. Rank eligible variants by development marked account growth under 35% conservative intrahour drawdown bound, win>=30%, equal-notional payoff>=2.5; if none eligible retain the V1.7 runner as baseline and show best development-growth candidate strictly descriptively. No later-period tuning of this factor.",
+  "evaluation": "On the continuous account also report 2025 and 2026 YTD growth and max drawdown. Save full roster, hourly valuation for the development pick/baseline as needed. Controls share funds and execution rules. Paired matched-signal/control diagnostics and week-cluster intervals address controls unavailable for some signals. Signal rows with missing executable opens counted separately, no forward-looking exclusions.",
+  "costs": "Market/stop 5bp and resting TP 2bp per fill. Model baseline no funding/slippage. Stress 5bp adverse on each market fill, separately. No exchange depth, fee tier changes or lot rounding. Prior usage of these historical years and incomplete delisting roster both acknowledged.",
+  "commands": ["/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_reward_paths", "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_reward_account"]
+}
