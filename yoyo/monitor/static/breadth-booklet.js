@@ -69,7 +69,7 @@
       (funded?table(['最短间隔','仅手续费盯市回撤','资金费完整篮子','含资金费组合收益','含资金费盯市回撤'],markedRows)+note('盯市按两边资金的同期 5 分钟收盘净值计算。含资金费结果仅列出每笔均有覆盖的组合。'):'');
   }
 
-  function btcVariantsHTML(review, funded) {
+  function btcVariantsHTML(review, funded, casePnl) {
     if(!review.btc_variants)return '';
     const scope=funded?'2026':'all_history';
     const names={current:'现版',early_ema:'普通 BTC 先验 EMA',reserved_case:'急跌 BTC 单留一份资金'};
@@ -84,12 +84,12 @@
       note((funded?'2026 年至 10 月 27 日，含实际资金费。':'全历史，仅扣手续费。')+'三行各从 1,000 USDT 起步，山寨始终占起始资金的一半，两次入场至少相隔 24 小时。')+
       table(['BTC 准入与资金','BTC 笔数','组合笔数','不同开仓时点','组合净收益','5 分钟盯市回撤','结算回撤','9 月 16 日急跌'],rows)+
       note('先验 EMA 后，未通过的普通 BTC 信号立即释放六天名额。9 月 12 日 08:10（北京时间）一笔普通 BTC 得以开仓，持有六天。9 月 16 日急跌信号出现时，BTC 资金已占用。原版在那次急跌每 BTC 实现了约一万点净收益。')+
-      note('分仓方案从一开始把 250 USDT 分给普通 BTC，250 USDT 分给急跌 BTC，500 USDT 分给山寨。三份独立复利，两路 BTC 可同时有仓。单笔 BTC 的点数相同，分到这笔的资金决定它对组合赚了多少。'+(funded&&finite(sepPnl)?'按 2026 年初 1,000 USDT 起步，9 月 16 日急跌单在分仓组合中贡献 '+money(sepPnl)+' USDT。':''))+
+      note('分仓方案从一开始把 250 USDT 分给普通 BTC，250 USDT 分给急跌 BTC，500 USDT 分给山寨。三份独立复利，两路 BTC 可同时有仓。单笔 BTC 的点数相同，分到这笔的资金决定它对组合赚了多少。'+(funded&&finite(sepPnl)?'按 2026 年初 1,000 USDT 起步，9 月 16 日急跌单在分仓组合中贡献 '+money(sepPnl)+' USDT，原版同一笔贡献 '+money(casePnl)+' USDT。':''))+
       (funded?note('分仓的 '+reserve.distinct_entries+' 次入场分布在 '+reserve.active_days_bjt+' 个北京时间交易日、'+reserve.active_weeks_bjt+' 个自然周。现版为 44 天、30 周。'):'')+
       note('这些比较使用已看过的行情。同一轮下跌可以触发多笔。结算回撤按平仓净值计算，表内空缺表示该口径没有核实。'));
   }
 
-  function frequencyHTML(data, funded, entries) {
+  function frequencyHTML(data, funded, entries, settled) {
     const dates=[...new Set(entries.map(e=>Date.parse(e.entry_time)))].sort((a,b)=>a-b);
     const gaps=dates.slice(1).map((end,i)=>(end-dates[i])/86400000).sort((a,b)=>a-b);
     const mid=Math.floor(gaps.length/2);
@@ -104,7 +104,7 @@
     if(!review)return panel('为什么开单少',timing+admission);
     const frequent=review.higher_frequency_2026.map(r=>[r.candidate_id==='account_36'?'36 次档':'72 次档',r.n,pct(r.funded_mean),pct(r.marked_close_dd_before_funding,false)]);
     return panel('为什么开单少',timing+admission)+
-      btcVariantsHTML(review,funded)+
+      btcVariantsHTML(review,funded,settled.find(r=>r.eventId==='BTC|2026-09-15T19:20:00Z').pnl)+
       panel('缩短山寨入场间隔',spacingHTML(review,funded))+
       panel('下一步研究什么',note('优先寻找原版空仓期间的新交易日。一个可以单独检验的改动是，每个币当周首次触轨后，等一根完整的 1 小时 K 线收回下轨，再允许它下一次触轨参与计数。其余窗口、入场和退出固定。将新增交易日单独与同币、同期、同波动的随机入场比较，并核对含费用的收益和盯市回撤。这条假设尚未回测。'))+
       '<details class="bb-panel bb-details"><summary>曾试过的高频组合 · 2026 年至 10 月 27 日</summary>'+
@@ -150,7 +150,7 @@
       panel('按入场类型',table(['类型','入场数','盈利笔数','胜率','笔均净收益','组合盈亏（USDT）'],sizes)+note('每个区间从 1,000 USDT 起步。组合盈亏按每笔当时实际分配的资金计算，三行相加就是组合总盈亏。每个等权篮子计一笔。')+note('本区间普通 BTC 最差一笔为 '+pct(worstOrdinary)+'。急跌 BTC 共 '+caseTrades.length+' 笔，其中 '+caseTrades.filter(e=>e.exit_legs>1).length+' 笔实际触发了分批止盈。'))+
       panel('加 EMA20 条件前后',table(['组合','入场数','组合净收益','最大回撤'],[['原组合',base.event_count,pct(base.growth_pct),pct(base.max_drawdown_pct,false)],['普通 BTC 加 4H EMA20',s.event_count,pct(s.growth_pct),pct(s.max_drawdown_pct,false)]])+note('在所选区间内，对新组合每笔额外扣 0.20 个百分点的往返成本，净收益为 '+pct(stress.growth_pct)+'，最大回撤为 '+pct(stress.max_drawdown_pct,false)+'。'))+
       (funded?'<details class="bb-panel bb-details"><summary>对照图 · 2026 年净值和日内最深回撤</summary><a href="'+BASE+'breadth-ema20-2026-equity.png" target="_blank" rel="noopener"><img loading="lazy" class="bb-comparison" src="'+BASE+'breadth-ema20-2026-equity.png" alt="原组合与加入 EMA20 条件的组合：每日收盘净值，以及每日最深的五分钟盯市回撤"></a></details>':'')+
-      frequencyHTML(data,funded,sample)+
+      frequencyHTML(data,funded,sample,settled)+
       panel('逐年表现',table(['UTC 年','入场数','BTC','山寨篮子','年度收益'],years,true)+note('每年重新等额分配，统一只扣手续费。2026 年统计截至 10 月 27 日 UTC，已入场持仓继续跟踪至退出。'))+
       '<details class="bb-panel bb-details"><summary>查看所选区间的逐月入场统计</summary>'+table(['UTC 月','入场数','盈利笔数','胜率','笔均净收益'],monthRows,true)+'</details>'+
       (control?panel('2026 匹配随机入场对照',note(control.matched+' / '+control.total+' 次有可比入场，覆盖 '+control.matched_months+' 个月。两组笔均收益相差 '+number(control.edge_pp,3)+' 个百分点，按月检验 p = '+number(control.p_month,3)+'。急跌 BTC 的可匹配样本为 '+control.case_matched+'。目前不能据此确认信号比随机入场有稳定优势。')):'')+

@@ -122,5 +122,5 @@ test('changing BTC admission and splitting capital preserve scope and actual cas
     ['current',398,466.60,26.75,true],['early_ema',431,234.73,25.57,false],['reserved_case',469,232.14,19.13,true],
   ]);
   const html=ui.statsHTML(data,{scope:'2026_actual_funded'});
-  for(const text of ['+30.86 USDT','51 个北京时间交易日','32 个自然周','尚未回测'])assert.ok(html.includes(text),text);
+  for(const text of ['+30.86 USDT','+95.20 USDT','51 个北京时间交易日','32 个自然周','尚未回测'])assert.ok(html.includes(text),text);
 });
