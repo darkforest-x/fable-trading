@@ -151,3 +151,9 @@ body:has(#monday-reclaim-paper.is-replay:not([hidden])) #spike-alarm-dock{displa
  #monday-reclaim-paper.is-paper-history.has-history-list{--bt-sidebar:0px;}
  #monday-reclaim-paper.is-paper-history .rp-records{top:auto;bottom:var(--bt-footer);left:8px;right:8px;width:auto;max-height:65dvh;height:520px;border:var(--bt-border);border-radius:16px;box-shadow:0 -8px 40px #0002;}
 }
+#monday-reclaim-paper .bt-summary-coin [data-bt-member]{max-width:100%;font:inherit;color:inherit;background:transparent;border:0;cursor:pointer}
+#monday-reclaim-paper .bt-sort [data-bt-breadth-period]{width:auto;min-width:62px;max-width:95px}
+@media(max-width:700px){
+  #monday-reclaim-paper.is-replay .bt-mode{padding-right:60px}
+  #monday-reclaim-paper.is-replay .bt-mode select{flex:0 1 74px;min-width:35px}
+}

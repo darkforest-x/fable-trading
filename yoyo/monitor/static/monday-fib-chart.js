@@ -150,26 +150,49 @@
     if(!target?.replay||controller||paused)return;
     const current=target,token=version,c=new AbortController();controller=c;
     const timeout=setTimeout(()=>c.abort(),30000);message('正在读取原始回测 K 线…');
-    const paper=current.paper,trade=current.replay;
-    const url=paper?'/api/monday-fib/trade-candles?'+new URLSearchParams({symbol:trade.symbol,entry_ms:trade.fill_ms,exit_ms:trade.exit_ms,period:current.period}):'/api/strategy-backtest/candles?'+new URLSearchParams({track:current.track,trade:trade.id,period:current.period});
+    const paper=current.paper,trade=current.replay,breadth=current.replaySource==='breadth-ema20';
+    const eventId=current.replayOptions?.event_id||trade.event_id;
+    const url=breadth?'/api/breadth-replay/candles?'+new URLSearchParams({event_id:eventId,symbol:trade.symbol,period:current.period})
+      :paper?'/api/monday-fib/trade-candles?'+new URLSearchParams({symbol:trade.symbol,entry_ms:trade.fill_ms,exit_ms:trade.exit_ms,period:current.period})
+      :'/api/strategy-backtest/candles?'+new URLSearchParams({track:current.track,trade:trade.id,period:current.period});
     if(paper)message('正在读取开仓时段 K 线…');
-    try{const r=await fetch(url,{signal:c.signal,cache:'no-store'}),value=await r.json();
+    else if(breadth)message('正在读取全市场下轨原始 Binance K 线…');
+    try{
+      if(breadth&&(!eventId||typeof eventId!=='string'||typeof trade.symbol!=='string'||!trade.symbol))throw Error('回放事件或成分币标识缺失');
+      const r=await fetch(url,{signal:c.signal,cache:'no-store'});
+      let value=await r.json();
       if(!r.ok)throw Error(value.detail||'回测 K 线读取失败');
       if(token!==version||target!==current)return;
-      if(value.schema!==1||value.symbol!==current.row.symbol||value.bar!==current.period||!value.candles?.length||(paper
-        ?value.source!=='OKX'||value.entry_ms!==trade.fill_ms||value.exit_ms!==trade.exit_ms||value.paperHistory!==true
+      if(value.schema!==1||value.symbol!==current.row.symbol||value.bar!==current.period||!value.candles?.length||(breadth
+        ?value.source!=='Binance'||value.event_id!==eventId||value.entry_ms!==trade.entry_ms||value.exit_ms!==trade.exit_ms
+        :paper?value.source!=='OKX'||value.entry_ms!==trade.fill_ms||value.exit_ms!==trade.exit_ms||value.paperHistory!==true
         :value.track!==current.track||value.trade_id!==trade.id||value.source!=='Binance'))throw Error('历史 K 线与所选交易不匹配');
-      let last=0;for(const b of value.candles){if(![b.time,b.open,b.high,b.low,b.close,b.volume].every(finite)||b.time<=last||b.time%PERIODS[current.period]||b.high<Math.max(b.open,b.close,b.low)||b.low>Math.min(b.open,b.close))throw Error('回测 K 线数据不完整');last=b.time;}
+      let last=0;for(const b of value.candles){const volumeOK=breadth?b.volume===null||finite(b.volume):finite(b.volume);
+        if(![b.time,b.open,b.high,b.low,b.close].every(finite)||!volumeOK||b.time<=last||b.time%PERIODS[current.period]
+          ||b.high<Math.max(b.open,b.close,b.low)||b.low>Math.min(b.open,b.close))throw Error('回测 K 线数据不完整');last=b.time;}
+      if(breadth){
+        if(!finite(value.now_ms)||!finite(value.last_close_ms))throw Error('历史 K 线收盘边界缺失');
+        value={...value,track:current.track,backtestSource:'breadth-ema20',
+          backtestScope:current.replayOptions?.scope||trade.scope||'',backtestEventId:eventId,backtestTrade:trade};
+      }
       replayCache.set(current.key,value);while(replayCache.size>12)replayCache.delete(replayCache.keys().next().value);draw(value);
     }catch(e){if(token===version&&target===current)message((e.name==='AbortError'?'回测 K 线读取超时':e.message)+' · 可重新加载');}
     finally{clearTimeout(timeout);if(controller===c)controller=null;}
   }
-  function showReplay(host,track,trade,{period='15m',ma=false,internal=false,refocus=false,paper=false}={}){
-    const key=(paper?'paper-history|':'backtest|')+track+'|'+trade.id+'|'+period+(paper?'|'+trade.symbol+'|'+trade.fill_ms+'|'+trade.exit_ms:'');
-    if(target?.key===key&&target.host===host){const changed=refocus||target.ma!==ma||target.internal!==internal;target.ma=ma;target.internal=internal;if(changed&&target.context)draw(target.context);if(paused){paused=false;if(!target.context)refreshReplay();}return;}
+  function showReplay(host,track,trade,{period='15m',ma=false,internal=false,refocus=false,paper=false,replayOptions={}}={}){
+    const options=replayOptions&&typeof replayOptions==='object'?replayOptions:{};
+    const breadth=!paper&&(options.replay_source==='breadth-ema20'||options.source==='breadth-ema20'),eventId=options.event_id||trade.event_id;
+    const scope=options.scope||trade.scope||'';
+    const key=breadth?`breadth|${scope}|${eventId}|${trade.symbol}|${period}`
+      :(paper?'paper-history|':'backtest|')+track+'|'+trade.id+'|'+period+(paper?'|'+trade.symbol+'|'+trade.fill_ms+'|'+trade.exit_ms:'');
+    if(target?.key===key&&target.host===host){
+      const changed=refocus||target.ma!==ma||target.internal!==internal||target.replay!==trade||JSON.stringify(target.replayOptions)!==JSON.stringify(options);
+      target.ma=ma;target.internal=internal;target.replay=trade;target.replayOptions=options;
+      if(changed&&target.context)draw(target.context);if(paused){paused=false;if(!target.context)refreshReplay();}return;
+    }
     const reuse=target?.host===host;pause();if(!reuse)stop();paused=false;
     if(!reuse)host.innerHTML='<div class="mf-chart-caption"><p role="status">正在读取原始回测 K 线…</p><button type="button" data-mf-chart-retry>重新加载</button></div><div class="mf-chart-mount"></div>';
-    target={host,key,track,replay:trade,paper,trade:paper?trade:null,row:{symbol:trade.symbol},period,ma,internal,week:paper?trade.week:trade.event?.split(':')[1],state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
+    target={host,key,track,replay:trade,paper,replaySource:breadth?'breadth-ema20':'',replayOptions:options,trade:paper?trade:null,row:{symbol:trade.symbol},period,ma,internal,week:paper?trade.week:trade.event?.split(':')[1],state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
     if(!reuse)host.querySelector('[data-mf-chart-retry]').addEventListener('click',()=>{target?.history?.retry();refresh();});
     const cached=replayCache.get(key);if(cached)draw(cached);else{target.instance=window.SpikeRangeChart.mount(target.mount,{symbol:trade.symbol,source:paper?'OKX':'Binance',bar:period,candles:[],levels:[]},view);refreshReplay();}
   }

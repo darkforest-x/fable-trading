@@ -13,6 +13,7 @@ import re
 import tempfile
 import time
 from urllib.request import urlopen
+from urllib.parse import quote
 import zipfile
 from datetime import datetime, timezone
 
@@ -44,7 +45,7 @@ def parse(body, day_start):
 
 def read(symbol, start, end, *, registered=REGISTERED, cache=None):
     """At most 14 UTC days and 20 seconds per attempt; retries reuse saved days."""
-    if not re.fullmatch(r'[A-Z0-9]{1,32}USDT', symbol) or not 0 < end-start <= 13*DAY:
+    if not re.fullmatch(r'(?:[A-Z0-9]|[^\W\d_a-zA-Z]){1,32}USDT', symbol) or not 0 < end-start <= 13*DAY:
         raise ValueError('unsupported_minute_window')
     if cache is None:
         from yoyo.data.candle_hub import runtime_path
@@ -60,7 +61,7 @@ def read(symbol, start, end, *, registered=REGISTERED, cache=None):
             remaining = deadline-time.monotonic()
             if remaining <= 0:
                 raise TimeoutError('minute_window_retry')
-            with urlopen(URL.format(s=symbol,d=day),timeout=min(5,remaining)) as response:
+            with urlopen(URL.format(s=quote(symbol,safe=''),d=day),timeout=min(5,remaining)) as response:
                 raw = response.read(2_000_001)
             if len(raw) > 2_000_000:
                 raise ValueError('oversized_minute_archive')

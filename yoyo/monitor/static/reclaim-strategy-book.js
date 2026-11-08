@@ -271,7 +271,7 @@
     document.body.append(dialog);
     const el=s=>dialog.querySelector(s);let requests=window.SpikeRuntime.createRequests();
     let open=false,track='',epoch=0,closing=null,analytics=null,research=null,bars=[],line=null,chartData=null,active=true,history=null,historyChart=null,historyMode='equity',historyPaintKey='';
-    let breadthData=null,breadthReplay=null,breadthScope=null,breadthPending=null;
+    let breadthData=null,replayRouteHandled=false,breadthScope=null,breadthPending=null;
     const forwardTemplate=el('#rs-forward').innerHTML;
     let historyView=null,chartFrame=null,resizeFrame=null,zoomFrame=null,barPaintKeys=[],forwardPaintData=null,forwardPaintTheme='';
     const visibleCharts=new Set(),reading=el('.rs-reading');
@@ -386,13 +386,13 @@
         (target===moreToggle?target:target.querySelectorAll('button')[Math.max(0,column)]).focus();
       }
     });
-    picker.addEventListener('click',event=>{if(event.detail!==0&&Date.now()<blockedUntil){event.preventDefault();event.stopPropagation();return;}const b=event.target.closest('button');if(!b)return;if(b.hasAttribute('data-account-more')){setMore(groups.more.hidden);return;}if(b.dataset.strategySelect===BREADTH){picker.hidePopover();show(BREADTH);return;}if(b.dataset.strategySelect){onSelect(b.dataset.strategySelect);sync();picker.hidePopover();trigger.focus({preventScroll:true});}if(b.dataset.strategyBook){picker.hidePopover();show(b.dataset.strategyBook);}if(b.dataset.strategyBacktest){picker.hidePopover();if(b.dataset.strategyBacktest===BREADTH)show(BREADTH,{chapter:'replay'});else onBacktest?.(b.dataset.strategyBacktest);}});
+    picker.addEventListener('click',event=>{if(event.detail!==0&&Date.now()<blockedUntil){event.preventDefault();event.stopPropagation();return;}const b=event.target.closest('button');if(!b)return;if(b.hasAttribute('data-account-more')){setMore(groups.more.hidden);return;}if(b.dataset.strategySelect===BREADTH){picker.hidePopover();show(BREADTH);return;}if(b.dataset.strategySelect){onSelect(b.dataset.strategySelect);sync();picker.hidePopover();trigger.focus({preventScroll:true});}if(b.dataset.strategyBook){picker.hidePopover();show(b.dataset.strategyBook);}if(b.dataset.strategyBacktest){picker.hidePopover();if(b.dataset.strategyBacktest===BREADTH)openBreadthReplay({});else onBacktest?.(b.dataset.strategyBacktest);}});
     function stopCharts(){chartObserver.disconnect();visibleCharts.clear();for(const frame of [chartFrame,resizeFrame,zoomFrame])cancelAnimationFrame(frame);chartFrame=resizeFrame=zoomFrame=null;bars.forEach(c=>c?.dispose());bars=[];barPaintKeys=[];line?.dispose();line=null;forwardPaintData=null;historyChart?.dispose();historyChart=null;historyPaintKey='';}
     function close(immediate=false){
       closeCalendar();
       if(!open&&!dialog.open)return;open=false;epoch++;requests.cancel();analytics?.setActive(false);stopCharts();dialog.classList.remove('is-open');clearTimeout(closing);
       if(track===BREADTH)clearBookLocation();
-      breadthReplay?.destroy();breadthReplay=null;breadthData=null;breadthPending=null;
+      breadthData=null;breadthPending=null;
       const finish=()=>{dialog.close();document.body.classList.remove('rs-book-open','rs-book-webkit');trigger.focus({preventScroll:true});};
       if(immediate||matchReduced())finish();else closing=setTimeout(finish,280);
     }
@@ -427,12 +427,17 @@
       el('#rs-rules').innerHTML=`<div class="rs-section-title"><h2>从触价到退出</h2></div>${flowHTML(track)}<h3>本策略当前规则</h3><div class="rs-current-rules">${current?renderRules(d,track):'<p>正在读取策略数据。</p>'}</div><p class="rs-muted">规则取自当前只读模拟盘接口；历史回测版本差异见回测章节。</p>`;
     }
     function clearBookLocation(){window.SpikeBreadthBookRoute?.write(null);}
+    function openBreadthReplay(options){
+      const scope=options.scope||(open?breadthScope:null)||'all_history_fee_only';
+      const data=breadthData;
+      close(true);
+      replayRouteHandled=true;
+      onBacktest?.(BREADTH,null,{...options,scope,data,replay_source:BREADTH});
+    }
     function jumpBreadth(chapter,eventId=null){
-      const targets={replay:'rs-breadth-replay',stats:'rs-breadth-stats',overview:'rs-overview',research:'rs-research',rules:'rs-rules',forward:'rs-forward',sources:'rs-sources'};
-      const id=targets[chapter];if(!id)return;
-      if(eventId)breadthReplay?.selectEvent(eventId);
-      window.SpikeBreadthBookRoute?.write({chapter,eventId,scope:breadthScope});
-      el('#'+id)?.scrollIntoView({block:'start',behavior:'instant'});
+      if(chapter==='replay'){openBreadthReplay({eventId});return;}
+      el('#rs-breadth-stats').scrollIntoView({block:'start',behavior:'instant'});
+      window.SpikeBreadthBookRoute?.write({chapter:'stats',scope:breadthScope});
     }
     function renderBreadthScope(scope){
       const h=validateHistory(window.SpikeBreadthHistory.createBreadthBookHistory(breadthData,{track:BREADTH,scope}),BREADTH);
@@ -448,20 +453,19 @@
         const [,data]=await Promise.all([window.SpikeModules.ensure('breadth-booklet'),requests.json('/static/strategy-booklet/breadth-ema20-data.json')]);
         if(!open||epoch!==token)return;
         breadthData=data;
-        el('#rs-research').innerHTML='<div class="rs-section-title"><h2>历史回测</h2><span class="rs-badge">组合回测</span></div><div class="rs-breadth-tools"><div class="rs-chart-modes" role="group" aria-label="回测区间"><button type="button" data-breadth-scope="all_history_fee_only">全历史 · 仅手续费</button><button type="button" data-breadth-scope="2026_actual_funded">2026 · 含资金费</button></div><button class="rs-text-button" type="button" data-breadth-jump="replay">查看逐笔开仓图</button><button class="rs-text-button" type="button" data-breadth-jump="stats">统计分析</button></div><div data-breadth-path></div><p class="rs-chart-status" role="status"></p><div id="rs-breadth-stats"></div><div id="rs-breadth-replay"></div>';
+        el('#rs-research').innerHTML='<div class="rs-section-title"><h2>历史回测</h2><span class="rs-badge">组合回测</span></div><div class="rs-breadth-tools"><div class="rs-chart-modes" role="group" aria-label="回测区间"><button type="button" data-breadth-scope="all_history_fee_only">全历史 · 仅手续费</button><button type="button" data-breadth-scope="2026_actual_funded">2026 · 含资金费</button></div><button class="rs-text-button" type="button" data-breadth-jump="replay">查看回测交易与 K 线</button><button class="rs-text-button" type="button" data-breadth-jump="stats">统计分析</button></div><div data-breadth-path></div><p class="rs-chart-status" role="status"></p><div id="rs-breadth-stats"></div>';
         renderBreadthScope(options.scope==='2026_actual_funded'?options.scope:'all_history_fee_only');
         el('#rs-rules').innerHTML='<div class="rs-section-title"><h2>执行规则</h2></div>'+window.SpikeBreadthBook.rulesHTML(data);
         const p=data.provenance;
         el('#rs-sources').innerHTML='<div class="rs-section-title"><h2>口径与来源</h2></div><p>原实验：'+esc(p.experiment_id)+'</p><p>信号覆盖至 '+esc(historyDate(Date.parse(data.signal_cutoff_exclusive_utc)-1))+'（UTC）。普通 BTC 的 EMA20 条件是在看过这段历史后选出的，2026 年并非盲测。</p>'+[['BTC 逐笔账本',p.event_sources.BTC],['山寨篮子与成员退出',p.event_sources.ALT],['山寨资金费核对',p.ALT_2026_funding]].map(([name,path])=>'<details class="rs-source-note"><summary>'+esc(name)+'</summary><p>'+esc(path)+'</p></details>').join('');
-        breadthReplay=window.SpikeBreadthBook.mountReplay(el('#rs-breadth-replay'),data,options.eventId,{scope:breadthScope,onEvent:eventId=>window.SpikeBreadthBookRoute?.write({chapter:'replay',eventId,scope:breadthScope})});
-        if(options.chapter&&options.chapter!=='overview'){const dest=options.chapter==='replay'?el('#rs-breadth-replay'):options.chapter==='stats'?el('#rs-breadth-stats'):el('#rs-'+options.chapter);dest?.scrollIntoView({block:'start',behavior:'instant'});}
+        if(options.chapter&&options.chapter!=='overview'){const dest=options.chapter==='stats'?el('#rs-breadth-stats'):el('#rs-'+options.chapter);dest?.scrollIntoView({block:'start',behavior:'instant'});}
       }catch(error){if(open&&epoch===token)el('#rs-research').innerHTML='<p class="rs-warning">回测资料暂时不可用：'+esc(error.message)+'</p><button type="button" data-book-retry>重试读取</button>';}
     }
     async function show(next,options={}){
       closeCalendar();
       if(!catalog.includes(next))return;
       if(track===BREADTH&&next!==track)clearBookLocation();
-      breadthReplay?.destroy();breadthReplay=null;breadthData=null;breadthPending=next===BREADTH?options:null;
+      breadthData=null;breadthPending=next===BREADTH?options:null;
       clearTimeout(closing);epoch++;const token=epoch;track=next;open=true;chartData=null;research=null;history=null;historyView=null;historyMode='equity';analytics?.setActive(false);requests.cancel();requests=window.SpikeRuntime.createRequests();stopCharts();
       analytics=null;
       el('[data-book-label]').textContent=label(track);
@@ -494,10 +498,13 @@
       if(e.target.closest('[data-book-refresh]')){analytics?.refresh();queueCharts();}
       if(e.target.closest('[data-book-retry]'))show(track,breadthPending||{});
       const scope=e.target.closest('[data-breadth-scope]'),jump=e.target.closest('[data-breadth-jump]');
-      if(scope&&breadthData&&scope.dataset.breadthScope!==breadthScope){renderBreadthScope(scope.dataset.breadthScope);breadthReplay?.setScope(breadthScope);window.SpikeBreadthBookRoute?.write({chapter:'research',scope:breadthScope});}
+      if(scope&&breadthData&&scope.dataset.breadthScope!==breadthScope){renderBreadthScope(scope.dataset.breadthScope);window.SpikeBreadthBookRoute?.write({chapter:'research',scope:breadthScope});}
       if(jump)jumpBreadth(jump.dataset.breadthJump);
       const period=e.target.closest('#rs-breadth-stats [data-period]');
-      if(period&&breadthReplay?.selectPeriod(period.dataset.period))jumpBreadth('replay');
+      if(period&&breadthData){
+        const entryPeriod=period.dataset.period;
+        openBreadthReplay({entryPeriod,scope:entryPeriod.length===4?'all_history_fee_only':breadthScope});
+      }
       const mode=e.target.closest('[data-history-mode]');
       if(mode&&history){historyMode=mode.dataset.historyMode;dialog.querySelectorAll('[data-history-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===mode)));queueCharts();}
       const range=e.target.closest('[data-history-range]'),step=e.target.closest('[data-history-step]');
@@ -517,7 +524,7 @@
     new MutationObserver(()=>{if(open)queueCharts();}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
     window.addEventListener('resize',()=>{if(picker.matches(':popover-open'))positionPicker();positionCalendar();});
     document.addEventListener('visibilitychange',()=>{analytics?.setActive(active&&open&&!document.hidden&&visibleCharts.has(el('.rs-forward-chart')));if(!document.hidden)queueCharts();});
-    sync();return {sync,close,show,getOrder:()=>[...layout.main,...layout.more].filter(t=>tracks.includes(t)),setActive(value){active=value;if(value&&!open){const dest=window.SpikeBreadthBookRoute?.read(location.search);if(dest)show(BREADTH,dest);}if(!value){if(picker.matches(':popover-open'))picker.hidePopover();close(true);}}};
+    sync();return {sync,close,show,getOrder:()=>[...layout.main,...layout.more].filter(t=>tracks.includes(t)),setActive(value){active=value;if(value&&!open){const dest=window.SpikeBreadthBookRoute?.read(location.search);if(dest?.chapter==='replay'){if(!replayRouteHandled)openBreadthReplay(dest);}else{replayRouteHandled=false;if(dest)show(BREADTH,dest);}}if(!value){if(picker.matches(':popover-open'))picker.hidePopover();close(true);}}};
   }
   window.SpikeStrategyBook={...api,create};
 })();

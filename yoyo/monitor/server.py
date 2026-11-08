@@ -161,6 +161,8 @@ def create_app(runtime=None, start_monitor=True):
     install_cloud_signals(app, runtime)
     from yoyo.monitor.strategy_backtest import install as install_strategy_backtest
     install_strategy_backtest(app)
+    from yoyo.monitor.breadth_replay import install as install_breadth_replay
+    install_breadth_replay(app)
 
     @app.middleware("http")
     async def headers(request, call_next):

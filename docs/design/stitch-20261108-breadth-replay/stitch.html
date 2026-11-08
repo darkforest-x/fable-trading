@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SPIKE · 全市场下轨反弹 · 共用历史 K 线主图</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+          },
+          colors: {
+            trade: {
+              long: '#10b981',
+              'long-bg': 'rgba(16, 185, 129, 0.08)',
+              short: '#ef4444',
+              'short-bg': 'rgba(239, 68, 68, 0.08)',
+              muted: '#64748b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    /* Custom refined scrollbars */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.45); }
+    .chart-grid {
+      background-size: 80px 50px;
+      background-image:
+        linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+    }
+    .dark .chart-grid {
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    }
+  </style>
+</head>
+<body class="h-full bg-[#f8fafc] dark:bg-[#0c0f17] text-slate-800 dark:text-slate-200 font-sans antialiased overflow-hidden flex flex-col transition-colors duration-200">
+<!-- 1. TOP TOOLBAR: Compact full-width navigation (h-11 = 44px) -->
+<header class="h-11 min-h-[44px] border-b border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-[#111522]/95 backdrop-blur-sm px-3 flex items-center justify-between z-30 select-none">
+<!-- Left: Brand, Breadcrumb, Strategy label -->
+<div class="flex items-center gap-2.5">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400"></span>
+<span class="font-bold text-xs tracking-wider text-slate-900 dark:text-white font-mono">SPIKE</span>
+</div>
+<span class="text-slate-300 dark:text-slate-700 text-xs">/</span>
+<span class="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-slate-400">history_toggle_off</span>
+        历史回测
+      </span>
+<div class="h-3.5 w-px bg-slate-200 dark:bg-slate-800 mx-0.5"></div>
+<div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 text-[11px] font-mono px-2 py-0.5 rounded border border-slate-200/70 dark:border-slate-700/60"><span class="text-slate-400 dark:text-slate-500 font-sans">策略:</span>
+<span class="font-medium text-slate-800 dark:text-slate-200">全市场下轨反弹 · 4H EMA20</span></div>
+</div>
+<!-- Right: Mobile Drawer Toggle, Theme, Back to Live -->
+<div class="flex items-center gap-1.5">
+<!-- Mobile only drawer toggle button -->
+<button class="md:hidden flex items-center gap-1 text-xs font-medium px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700" id="mobileListBtn" onclick="toggleMobileSheet()">
+<span class="material-symbols-outlined text-sm">format_list_bulleted</span>
+<span>交易流水 (18)</span>
+</button>
+<!-- Theme Switcher -->
+<button class="p-1.5 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" onclick="toggleTheme()" title="切换深色/浅色外观">
+<span class="material-symbols-outlined text-[17px] dark:hidden">dark_mode</span>
+<span class="material-symbols-outlined text-[17px] hidden dark:inline">light_mode</span>
+</button>
+<div class="h-3.5 w-px bg-slate-200 dark:bg-slate-800 mx-0.5"></div>
+<!-- Return to Live Trade / Return to Market -->
+<a class="flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 px-2 py-1 rounded hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">keyboard_return</span>
+<span>返回行情</span>
+</a>
+</div>
+</header>
+<!-- 2. SELECTED-TRADE SUMMARY ROW: Slim, distinct, unambiguous (h-9 = 36px) -->
+<section class="h-9 min-h-[36px] bg-white dark:bg-[#131726] border-b border-slate-200/90 dark:border-slate-800 px-3.5 flex items-center justify-between text-xs z-20 overflow-x-auto whitespace-nowrap"><div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5">
+<span class="font-bold font-mono text-slate-900 dark:text-white tracking-tight" id="activeTradeSymbolBadge">BTC/USDT</span>
+<span class="px-1.5 py-0.2 rounded text-[10px] font-semibold tracking-wide bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/50">
+          做多 LONG · 4H EMA20反弹
+        </span>
+</div>
+<div class="flex items-center gap-1 font-mono font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50/80 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200/50 dark:border-emerald-900/40">
+<span class="text-[10px] text-emerald-700 dark:text-emerald-500 font-sans font-normal">净收益:</span>
+<span class="tabular-nums" id="activeTradeNetPnlBadge">+2.80 R</span>
+<span class="text-[10px] opacity-80">(+14.20%)</span>
+</div>
+<div class="h-3 w-px bg-slate-200 dark:bg-slate-750"></div>
+<div class="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+<span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+          极值刺穿入场
+        </span>
+<span class="font-mono text-slate-800 dark:text-slate-200 tabular-nums font-semibold" id="activeTradeEntryPrice">49,850.0</span>
+<span class="text-slate-400 dark:text-slate-500">·</span>
+<span class="font-mono text-[11px] text-slate-700 dark:text-slate-300">08-05 08:00</span>
+<span class="text-[10px] px-1 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-sans border border-slate-200/60 dark:border-slate-700/60" title="-1.618 周线下轨穿透信号">
+          -1.618 刺穿触发
+        </span>
+</div>
+<span class="text-slate-300 dark:text-slate-700">→</span>
+<div class="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+<span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span>
+          分批出场达成
+        </span>
+<span class="font-mono text-slate-800 dark:text-slate-200 tabular-nums font-semibold" id="activeTradeExitPrice">54,200.0</span>
+<span class="text-slate-400 dark:text-slate-500">·</span>
+<span class="font-mono text-[11px] text-slate-700 dark:text-slate-300">08-06 08:00</span>
+<span class="text-[10px] px-1 py-0.2 rounded bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-sans border border-blue-200/60 dark:border-blue-800/60">
+          首批60% EMA20 + 二批40% 推进
+        </span>
+</div>
+</div>
+<div class="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[13px] text-emerald-500">verified</span>
+<span>全市场下轨反弹回测 · 动态4H EMA20阻力测算</span>
+</div></section>
+<!-- 3. MAIN WORKSPACE: Fixed 290px Left Sidebar + Remaining Full-width Unobstructed Chart -->
+<main class="flex-1 flex overflow-hidden relative">
+<!-- LEFT SIDEBAR: Fixed 290px dense transaction ledger (Never covers candles) -->
+<aside class="w-[290px] min-w-[290px] h-full bg-white dark:bg-[#111422] border-r border-slate-200 dark:border-slate-800 flex flex-col z-10 transition-all duration-200 md:relative absolute inset-y-0 left-0 -translate-x-full md:translate-x-0 shadow-lg md:shadow-none" id="ledgerSidebar">
+<!-- Ledger Header & Filter/Sort Controls -->
+<div class="p-2.5 border-b border-slate-200/80 dark:border-slate-800/80 flex flex-col gap-2 bg-slate-50/50 dark:bg-slate-900/30">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-slate-800 dark:text-slate-200">回测交易流水</span>
+<span class="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">7 笔</span>
+</div>
+<!-- Close button for mobile sheet -->
+<button class="md:hidden p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" onclick="toggleMobileSheet()">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<!-- Filter & Sort in single compact row -->
+<div class="grid grid-cols-2 gap-1.5 text-[11px]"><!-- Coin & Basket filter -->
+<div class="relative">
+<select class="w-full h-6 pl-2 pr-5 bg-white dark:bg-[#181d2e] border border-slate-200 dark:border-slate-700/80 rounded text-slate-700 dark:text-slate-300 font-mono text-[11px] outline-none focus:border-blue-500 appearance-none cursor-pointer" id="symbolFilterSelect" onchange="filterLedger(this.value)">
+<option value="ALL">全部标的 (All)</option>
+<option selected="" value="BTC_PANIC">BTC · 急跌 (1)</option>
+<option value="BASKET_6">山寨篮子 (6币)</option>
+<option value="BTC_NORMAL">BTC · 普通 (2)</option>
+<option value="SOL">SOL/USDT (1)</option>
+<option value="ETH">ETH/USDT (1)</option>
+<option value="SUI">SUI/USDT (1)</option>
+<option value="DOGE">DOGE/USDT (1)</option>
+</select>
+<span class="material-symbols-outlined absolute right-1 top-1 text-xs text-slate-400 pointer-events-none">expand_more</span>
+</div>
+<!-- Sorting -->
+<div class="relative">
+<select class="w-full h-6 pl-2 pr-5 bg-white dark:bg-[#181d2e] border border-slate-200 dark:border-slate-700/80 rounded text-slate-700 dark:text-slate-300 text-[11px] outline-none focus:border-blue-500 appearance-none cursor-pointer">
+<option selected="" value="TIME_DESC">时间：最新优先</option>
+<option value="TIME_ASC">时间：最早优先</option>
+<option value="R_DESC">收益R：最高优先</option>
+</select>
+<span class="material-symbols-outlined absolute right-1 top-1 text-xs text-slate-400 pointer-events-none">expand_more</span>
+</div></div>
+</div>
+<!-- Dense Transaction List Items -->
+<div class="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 select-none"><!-- Row 1: BTC/USDT 急跌 (Selected Active) -->
+<div class="trade-row p-2.5 bg-blue-50/70 dark:bg-blue-950/30 border-l-2 border-blue-600 dark:border-blue-400 cursor-pointer transition-colors" id="trade-row-btc-panic" onclick="selectTrade('BTC_PANIC')">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-xs font-bold text-slate-900 dark:text-white">BTC/USDT</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-red-100/80 text-red-700 dark:bg-red-900/50 dark:text-red-300 font-sans">急跌</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 font-mono">多 24h</span>
+</div>
+<div class="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              +2.80 R
+            </div>
+</div>
+<div class="flex items-center justify-between text-[10.5px] text-slate-500 dark:text-slate-400 font-mono mb-1">
+<span>入场: 08-05 08:00</span>
+<span class="text-slate-400 dark:text-slate-500">49,850 → 54,200</span>
+</div>
+<div class="text-[10px] text-slate-500 dark:text-slate-400 truncate flex items-center gap-1 bg-white/70 dark:bg-slate-900/40 px-1.5 py-0.5 rounded border border-slate-200/50 dark:border-slate-800/60">
+<span class="text-slate-400 dark:text-slate-500">信号:</span>
+<span class="text-red-600 dark:text-red-400 font-mono font-medium">-1.618刺穿</span>
+<span class="text-slate-300 dark:text-slate-700">·</span>
+<span class="text-blue-600 dark:text-blue-400 font-mono">EMA20首批60%</span>
+<span class="text-slate-300 dark:text-slate-700">·</span>
+<span class="text-slate-600 dark:text-slate-400 font-mono">保本推进</span>
+</div>
+</div>
+<!-- Row 2: 山寨篮子 · 6币 (+3.10 R) -->
+<div class="trade-row p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors border-l-2 border-transparent" id="trade-row-basket-6" onclick="selectTrade('BASKET_6')">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-xs font-bold text-slate-900 dark:text-white">山寨篮子</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300 font-sans">6币组合</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 font-mono">多 16h</span>
+</div>
+<div class="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              +3.10 R
+            </div>
+</div>
+<div class="flex items-center justify-between text-[10.5px] text-slate-500 dark:text-slate-400 font-mono mb-1">
+<span>入场: 08-05 12:00</span>
+<span class="text-slate-400 dark:text-slate-500">全成分等权共振反弹</span>
+</div>
+<div class="text-[10px] text-slate-400 dark:text-slate-500 truncate flex items-center gap-1">
+<span>构成:</span>
+<span class="font-mono text-slate-600 dark:text-slate-300">SOL / SUI / ETH / NEAR / DOGE / AVAX</span>
+</div>
+</div>
+<!-- Row 3: BTC/USDT · 普通 (+1.85 R) -->
+<div class="trade-row p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors border-l-2 border-transparent" id="trade-row-btc-normal-1" onclick="selectTrade('BTC_NORMAL_1')">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">BTC/USDT</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-sans">普通</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 font-mono">多 20h</span>
+</div>
+<div class="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              +1.85 R
+            </div>
+</div>
+<div class="flex items-center justify-between text-[10.5px] text-slate-500 dark:text-slate-400 font-mono mb-1">
+<span>入场: 07-28 16:00</span>
+<span class="text-slate-400 dark:text-slate-500">63,400 → 65,280</span>
+</div>
+<div class="text-[10px] text-slate-400 dark:text-slate-500 truncate flex items-center gap-1">
+<span>信号:</span>
+<span class="font-mono">-1.618下轨触及 · EMA20阻力位离场</span>
+</div>
+</div>
+<!-- Row 4: SOL/USDT · 山寨 (+2.24 R) -->
+<div class="trade-row p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors border-l-2 border-transparent" id="trade-row-sol" onclick="selectTrade('SOL')">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">SOL/USDT</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300 font-sans">山寨</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 font-mono">多 16h</span>
+</div>
+<div class="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              +2.24 R
+            </div>
+</div>
+<div class="flex items-center justify-between text-[10.5px] text-slate-500 dark:text-slate-400 font-mono mb-1">
+<span>入场: 08-05 12:00</span>
+<span class="text-slate-400 dark:text-slate-500">112.5 → 129.8</span>
+</div>
+<div class="text-[10px] text-slate-400 dark:text-slate-500 truncate flex items-center gap-1">
+<span>信号:</span>
+<span class="font-mono">4H下轨刺穿+EMA20目标</span>
+</div>
+</div>
+<!-- Row 5: BTC/USDT · 普通 (SL止损 -1.00 R) -->
+<div class="trade-row p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors border-l-2 border-transparent" id="trade-row-btc-sl" onclick="selectTrade('BTC_SL')">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">BTC/USDT</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-sans">普通</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-red-100/80 text-red-700 dark:bg-red-900/50 dark:text-red-300 font-mono">止损 8h</span>
+</div>
+<div class="font-mono text-xs font-semibold text-red-500 dark:text-red-400 tabular-nums">
+              -1.00 R
+            </div>
+</div>
+<div class="flex items-center justify-between text-[10.5px] text-slate-500 dark:text-slate-400 font-mono mb-1">
+<span>入场: 07-22 04:00</span>
+<span class="text-slate-400 dark:text-slate-500">66,200 → 65,400 (SL)</span>
+</div>
+<div class="text-[10px] text-slate-400 dark:text-slate-500 truncate flex items-center gap-1">
+<span>结果:</span>
+<span class="text-red-600 dark:text-red-400 font-mono">跌破极值止损保护 · -1.00R已控制</span>
+</div>
+</div>
+<!-- Row 6: 山寨篮子 · 6币 (+2.15 R) -->
+<div class="trade-row p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors border-l-2 border-transparent" id="trade-row-basket-old" onclick="selectTrade('BASKET_6_OLD')">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-xs font-bold text-slate-900 dark:text-white">山寨篮子</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300 font-sans">6币组合</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 font-mono">多 24h</span>
+</div>
+<div class="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              +2.15 R
+            </div>
+</div>
+<div class="flex items-center justify-between text-[10.5px] text-slate-500 dark:text-slate-400 font-mono mb-1">
+<span>入场: 07-08 08:00</span>
+<span class="text-slate-400 dark:text-slate-500">周期性超跌同频修复</span>
+</div>
+<div class="text-[10px] text-slate-400 dark:text-slate-500 truncate flex items-center gap-1">
+<span>构成:</span>
+<span class="font-mono text-slate-600 dark:text-slate-300">首触EMA20均线离场</span>
+</div>
+</div>
+<!-- Row 7: SUI/USDT · 山寨 (+2.90 R) -->
+<div class="trade-row p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors border-l-2 border-transparent" id="trade-row-sui" onclick="selectTrade('SUI')">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">SUI/USDT</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300 font-sans">山寨</span>
+<span class="text-[9.5px] px-1 py-0.2 rounded font-medium bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 font-mono">多 18h</span>
+</div>
+<div class="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              +2.90 R
+            </div>
+</div>
+<div class="flex items-center justify-between text-[10.5px] text-slate-500 dark:text-slate-400 font-mono mb-1">
+<span>入场: 08-05 16:00</span>
+<span class="text-slate-400 dark:text-slate-500">0.462 → 0.584</span>
+</div>
+<div class="text-[10px] text-slate-400 dark:text-slate-500 truncate flex items-center gap-1">
+<span>信号:</span>
+<span class="font-mono">-1.618下轨极值企稳 · 4H EMA20止盈</span>
+</div>
+</div></div>
+<!-- Ledger Footnote (Data caveat) -->
+<div class="px-2.5 py-1.5 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200/70 dark:border-slate-800 text-[10px] text-slate-400 dark:text-slate-500 flex items-center justify-between">
+<span>原回测撮合数据 · 非实盘保证</span>
+<span class="font-mono text-[9px] text-slate-400">PAGE 1/1</span>
+</div>
+</aside>
+<!-- RIGHT CHART AREA: Unobstructed Canvas & Native Price Lines -->
+<section class="flex-1 flex flex-col h-full bg-[#f8fafc] dark:bg-[#0c0f17] relative overflow-hidden">
+<!-- Chart Canvas Container -->
+<div class="flex-1 relative chart-grid overflow-hidden flex flex-col justify-between">
+<!-- Y-Axis (Right fixed price scale) -->
+<div class="absolute right-0 top-0 bottom-6 w-14 border-l border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between text-[10px] font-mono text-slate-400 dark:text-slate-500 pr-1.5 pt-2 pb-2 select-none z-10 text-right"><span>58,000.0</span>
+<span class="text-blue-500 font-medium">56,400.0</span>
+<span class="text-indigo-500 font-semibold bg-indigo-50 dark:bg-indigo-950/40 rounded px-0.5">55,100.0</span>
+<span class="text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/40 rounded px-0.5">54,200.0 (EMA)</span>
+<span>52,800.0</span>
+<span>51,500.0</span>
+<span class="text-red-500 font-semibold bg-red-50 dark:bg-red-950/40 rounded px-0.5">49,850.0 (入场)</span>
+<span class="text-blue-600 dark:text-blue-400 font-medium">49,500.0 (-1.618)</span>
+<span>48,000.0</span></div>
+<!-- SVG CHART LAYER: Precise horizontal lines, intervals and candlestick models -->
+<svg class="absolute inset-0 w-full h-[calc(100%-1.5rem)] pr-14 select-none" xmlns="http://www.w3.org/2000/svg"><defs>
+<!-- Gradient for lower extreme corridor -->
+<lineargradient id="extremeLowerZone" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#3b82f6" stop-opacity="0.08"></stop>
+<stop offset="100%" stop-color="#ef4444" stop-opacity="0.15"></stop>
+</lineargradient>
+</defs>
+<!-- 1. 周一基准线 & -1.618 下轨极值线 -->
+<!-- Monday High -->
+<g>
+<line stroke="#94a3b8" stroke-dasharray="3,3" stroke-opacity="0.5" stroke-width="1" x1="0" x2="100%" y1="65" y2="65"></line>
+<text fill="#94a3b8" font-family="JetBrains Mono" font-size="10" x="16" y="59">周一高点 High (56,400.00)</text>
+</g>
+<!-- Monday Low -->
+<g>
+<line stroke="#94a3b8" stroke-opacity="0.5" stroke-width="1" x1="0" x2="100%" y1="250" y2="250"></line>
+<text fill="#94a3b8" font-family="JetBrains Mono" font-size="10" x="16" y="244">周一低点 Low (51,500.00)</text>
+</g>
+<!-- -1.618 下轨极值线 (Lower Bound Key Anchor) -->
+<g>
+<rect fill="url(#extremeLowerZone)" height="60" width="100%" x="0" y="375"></rect>
+<line stroke="#2563eb" stroke-dasharray="5,3" stroke-opacity="0.85" stroke-width="1.5" x1="0" x2="100%" y1="375" y2="375"></line>
+<text fill="#2563eb" font-family="JetBrains Mono" font-size="10.5" font-weight="600" x="16" y="369">周线 -1.618 下轨极值锚点 (49,500.00 · 超跌超卖防御区)</text>
+</g>
+<!-- 2. 动态 4H EMA20 趋势阻力均线 (Curved Spline in vivid Indigo/Amber) -->
+<g>
+<path d="M 0,165 C 120,185 240,205 340,210 C 440,212 540,200 680,185 C 800,170 920,155 1200,140" fill="none" id="ema20Path" stroke="#818cf8" stroke-linecap="round" stroke-opacity="0.95" stroke-width="2.2"></path>
+<rect fill="#1e1b4b" fill-opacity="0.9" height="18" rx="3" stroke="#818cf8" stroke-width="1" width="118" x="350" y="190"></rect>
+<text fill="#c7d2fe" font-family="JetBrains Mono" font-size="9.5" font-weight="600" text-anchor="middle" x="409" y="203">4H EMA20 动态目标位</text>
+</g>
+<!-- 3. Clean 4H Candlestick Stream (Panic plunge -> bottom pierce -> rebound to EMA20) -->
+<g id="candlestickGroup" opacity="0.92">
+<!-- Candle 1: High level breakdown -->
+<line stroke="#ef4444" stroke-width="1.2" x1="60" x2="60" y1="100" y2="190"></line>
+<rect fill="#ef4444" height="60" rx="0.5" width="12" x="54" y="115"></rect>
+<!-- Candle 2: Strong selloff -->
+<line stroke="#ef4444" stroke-width="1.2" x1="105" x2="105" y1="160" y2="270"></line>
+<rect fill="#ef4444" height="85" rx="0.5" width="12" x="99" y="172"></rect>
+<!-- Candle 3: Fast panic plunge -->
+<line stroke="#ef4444" stroke-width="1.2" x1="150" x2="150" y1="250" y2="360"></line>
+<rect fill="#ef4444" height="95" rx="0.5" width="12" x="144" y="255"></rect>
+<!-- Candle 4: 08-05 08:00 PANIC PIN-BAR (Pierces -1.618 down to 49,200, Closes at 49,850) -->
+<line stroke="#10b981" stroke-width="1.5" x1="195" x2="195" y1="320" y2="410"></line>
+<rect fill="#10b981" height="28" rx="0.5" width="12" x="189" y="345"></rect>
+<!-- Candle 5: Immediate strong bullish continuation -->
+<line stroke="#10b981" stroke-width="1.2" x1="240" x2="240" y1="300" y2="365"></line>
+<rect fill="#10b981" height="42" rx="0.5" width="12" x="234" y="310"></rect>
+<!-- Candle 6: Bullish momentum continuation -->
+<line stroke="#10b981" stroke-width="1.2" x1="285" x2="285" y1="260" y2="325"></line>
+<rect fill="#10b981" height="45" rx="0.5" width="12" x="279" y="270"></rect>
+<!-- Candle 7: Approaching EMA20 -->
+<line stroke="#10b981" stroke-width="1.2" x1="330" x2="330" y1="230" y2="285"></line>
+<rect fill="#10b981" height="38" rx="0.5" width="12" x="324" y="238"></rect>
+<!-- Candle 8: 08-06 08:00 REACHES 4H EMA20 (Exit Candle 1, 54,200) -->
+<line stroke="#10b981" stroke-width="1.2" x1="375" x2="375" y1="195" y2="255"></line>
+<rect fill="#10b981" height="36" rx="0.5" width="12" x="369" y="206"></rect>
+<!-- Candle 9: Slight pause at EMA20 -->
+<line stroke="#ef4444" stroke-width="1.2" x1="420" x2="420" y1="190" y2="240"></line>
+<rect fill="#ef4444" height="20" rx="0.5" width="12" x="414" y="202"></rect>
+<!-- Candle 10: 08-06 16:00 Trail TP2 Hit (55,100) -->
+<line stroke="#10b981" stroke-width="1.2" x1="465" x2="465" y1="175" y2="225"></line>
+<rect fill="#10b981" height="28" rx="0.5" width="12" x="459" y="185"></rect>
+<!-- Post-exit candles (consolidation) -->
+<line stroke="#ef4444" stroke-width="1.2" x1="510" x2="510" y1="180" y2="235"></line>
+<rect fill="#ef4444" height="26" rx="0.5" width="12" x="504" y="190"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="555" x2="555" y1="185" y2="240"></line>
+<rect fill="#10b981" height="24" rx="0.5" width="12" x="549" y="195"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="600" x2="600" y1="170" y2="230"></line>
+<rect fill="#10b981" height="32" rx="0.5" width="12" x="594" y="180"></rect>
+<line stroke="#ef4444" stroke-width="1.2" x1="645" x2="645" y1="165" y2="220"></line>
+<rect fill="#ef4444" height="25" rx="0.5" width="12" x="639" y="175"></rect>
+</g>
+<!-- 4. TRADE EXECUTION OVERLAY: Slanted guide vectors & High-precision clean labels -->
+<!-- Guideline from entry to TP1 -->
+<line opacity="0.75" stroke="#10b981" stroke-dasharray="4,3" stroke-width="1.6" x1="195" x2="375" y1="360" y2="210"></line>
+<!-- Guideline from TP1 to TP2 -->
+<line opacity="0.75" stroke="#3b82f6" stroke-dasharray="4,3" stroke-width="1.6" x1="375" x2="465" y1="210" y2="190"></line>
+<!-- Overall PnL Badge in transit -->
+<g transform="translate(255, 275)">
+<rect fill="#10b981" fill-opacity="0.95" height="20" rx="4" width="102" x="0" y="0"></rect>
+<text fill="#ffffff" font-family="JetBrains Mono" font-size="10" font-weight="600" text-anchor="middle" x="51" y="14">综合 +2.80 R</text>
+</g>
+<!-- (A) ENTRY MARKER: 08-05 08:00 @ 49,850 (-1.618 刺穿触发) -->
+<g id="chartEntryMarker">
+<!-- Upward Triangle Marker -->
+<polygon fill="#10b981" points="195,385 189,397 201,397" stroke="#ffffff" stroke-width="1"></polygon>
+<!-- Entry Anchor Line -->
+<line stroke="#10b981" stroke-width="2.5" x1="175" x2="215" y1="373" y2="373"></line>
+<!-- Entry Callout Box -->
+<rect class="dark:fill-[#13192b]" fill="#ffffff" height="22" rx="3" stroke="#10b981" stroke-width="1" width="215" x="110" y="412"></rect>
+<text fill="#059669" font-family="JetBrains Mono" font-size="10" font-weight="600" text-anchor="middle" x="217.5" y="427">
+              ▲ 08-05 08:00 开仓 49,850 (-1.618刺穿)
+            </text>
+</g>
+<!-- (B) TP 1 MARKER: First batch 60% @ 54,200 (+2.10 R) -->
+<g id="chartTp1Marker">
+<line stroke="#3b82f6" stroke-width="2.5" x1="355" x2="395" y1="208" y2="208"></line>
+<rect class="dark:fill-[#13192b]" fill="#ffffff" height="22" rx="3" stroke="#3b82f6" stroke-width="1" width="158" x="310" y="160"></rect>
+<text fill="#2563eb" font-family="JetBrains Mono" font-size="10" font-weight="600" text-anchor="middle" x="389" y="175">
+              ⚑ 平仓 60% @ 54,200 (+2.10 R)
+            </text>
+</g>
+<!-- (C) TP 2 MARKER: Second batch 40% (保本推进至 49,850, 移动止盈 @ 55,100) -->
+<g id="chartTp2Marker">
+<line stroke="#8b5cf6" stroke-width="2.5" x1="450" x2="485" y1="188" y2="188"></line>
+<rect class="dark:fill-[#13192b]" fill="#ffffff" height="22" rx="3" stroke="#8b5cf6" stroke-width="1" width="185" x="445" y="132"></rect>
+<text fill="#7c3aed" font-family="JetBrains Mono" font-size="10" font-weight="600" text-anchor="middle" x="537.5" y="147">
+              ★ 平仓 40% (保本推进至 49,850)
+            </text>
+</g>
+<!-- 5. Subdued Volume Bars at base -->
+<g opacity="0.32" transform="translate(0, 440)">
+<rect fill="#ef4444" height="30" width="8" x="56" y="15"></rect>
+<rect fill="#ef4444" height="37" width="8" x="101" y="8"></rect>
+<rect fill="#ef4444" height="42" width="8" x="146" y="4"></rect>
+<rect fill="#10b981" height="44" width="8" x="191" y="2"></rect>
+<rect fill="#10b981" height="35" width="8" x="236" y="10"></rect>
+<rect fill="#10b981" height="31" width="8" x="281" y="14"></rect>
+<rect fill="#10b981" height="27" width="8" x="326" y="18"></rect>
+<rect fill="#10b981" height="37" width="8" x="371" y="8"></rect>
+<rect fill="#ef4444" height="23" width="8" x="416" y="22"></rect>
+<rect fill="#10b981" height="29" width="8" x="461" y="16"></rect>
+<rect fill="#ef4444" height="25" width="8" x="506" y="20"></rect>
+<rect fill="#10b981" height="21" width="8" x="551" y="24"></rect>
+<rect fill="#10b981" height="27" width="8" x="596" y="18"></rect>
+<rect fill="#ef4444" height="23" width="8" x="641" y="22"></rect>
+</g></svg>
+<!-- X-Axis Timeline (Bottom of chart) -->
+<div class="h-6 border-t border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-[#101424]/70 px-4 flex items-center justify-between text-[10px] font-mono text-slate-400 dark:text-slate-500 pr-16 select-none z-10"><span>08-04 12:00</span>
+<span>08-04 20:00</span>
+<span>08-05 04:00</span>
+<span class="text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/40 px-1 rounded">08-05 08:00 (刺穿入场)</span>
+<span>08-05 16:00</span>
+<span>08-06 00:00</span>
+<span class="text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-950/40 px-1 rounded">08-06 08:00 (TP1触达)</span>
+<span class="text-purple-600 dark:text-purple-400 font-semibold bg-purple-50 dark:bg-purple-950/40 px-1 rounded">08-06 16:00 (TP2推进)</span>
+<span>08-07 00:00</span></div>
+</div>
+<!-- CHART FOOTER DOCK: Strictly limited to timeframe, indicators, and fit trade -->
+<!-- Discrete Batch Execution Summary Banner -->
+<div class="h-8 min-h-[32px] bg-slate-50/90 dark:bg-[#141829] border-t border-slate-200/80 dark:border-slate-800 px-3 flex items-center justify-between text-[11px] font-mono z-20 overflow-x-auto whitespace-nowrap" id="tradeBatchDetailBanner">
+<div class="flex items-center gap-3">
+<span class="font-sans text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-xs text-blue-500">splitscreen</span>
+            分批执行明细:
+          </span>
+<div class="flex items-center gap-1.5 bg-white dark:bg-slate-800/80 px-2 py-0.5 rounded border border-slate-200/60 dark:border-slate-700/60">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+<span class="text-slate-600 dark:text-slate-300">首批止盈:</span>
+<span class="font-semibold text-emerald-600 dark:text-emerald-400" id="batch1Detail">60% @ 54,200.0 (触达4H EMA20)</span>
+</div>
+<div class="flex items-center gap-1.5 bg-white dark:bg-slate-800/80 px-2 py-0.5 rounded border border-slate-200/60 dark:border-slate-700/60">
+<span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+<span class="text-slate-600 dark:text-slate-300">二批推进:</span>
+<span class="font-semibold text-purple-600 dark:text-purple-400" id="batch2Detail">40% @ 55,100.0 (保本底仓移动止盈)</span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+<span>实际综合净收益:</span>
+<span class="font-bold text-emerald-600 dark:text-emerald-400 tabular-nums" id="summaryNetR">+2.80 R (+14.20%)</span>
+</div>
+</div><footer class="h-9 min-h-[36px] bg-white dark:bg-[#111422] border-t border-slate-200 dark:border-slate-800 px-3 flex items-center justify-between text-xs select-none z-20"><!-- Left: Timeframe pills (4H active by strategy requirement) -->
+<div class="flex items-center gap-1">
+<span class="text-[10px] text-slate-400 font-medium mr-1 hidden sm:inline">周期:</span>
+<button class="px-2 py-0.5 rounded text-[11px] font-mono text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">1m</button>
+<button class="px-2 py-0.5 rounded text-[11px] font-mono text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">5m</button>
+<button class="px-2 py-0.5 rounded text-[11px] font-mono text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">15m</button>
+<button class="px-2 py-0.5 rounded text-[11px] font-mono text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">1h</button>
+<button class="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-blue-600 text-white dark:bg-blue-500 shadow-sm">4H</button>
+<button class="px-2 py-0.5 rounded text-[11px] font-mono text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">1D</button>
+</div>
+<!-- Center: Interactive constituents ribbon (Switches between Basket members / shows BTC batches) -->
+<div class="flex items-center gap-1.5 overflow-x-auto py-0.5 max-w-2xl text-[10.5px] font-mono" id="basketMemberBar">
+<span class="text-[10px] text-slate-400 font-sans whitespace-nowrap">篮子成分:</span>
+<button class="basket-pill px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-medium border border-blue-300 dark:border-blue-700 whitespace-nowrap" onclick="switchBasketMember('INDEX', '+3.10R')">全部指数</button>
+<button class="basket-pill px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap" onclick="switchBasketMember('SOL', '+3.20R')">SOL (+3.20R)</button>
+<button class="basket-pill px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap" onclick="switchBasketMember('SUI', '+2.90R')">SUI (+2.90R)</button>
+<button class="basket-pill px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap" onclick="switchBasketMember('ETH', '+1.85R')">ETH (+1.85R)</button>
+<button class="basket-pill px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap" onclick="switchBasketMember('NEAR', '+2.40R')">NEAR (+2.40R)</button>
+<button class="basket-pill px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap" onclick="switchBasketMember('DOGE', '+1.60R')">DOGE (+1.60R)</button>
+<button class="basket-pill px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap" onclick="switchBasketMember('AVAX', '+1.75R')">AVAX (+1.75R)</button>
+</div>
+<!-- Right: Indicators Toggle & Fit Trade action -->
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded border border-slate-200/60 dark:border-slate-700/60">
+<span class="material-symbols-outlined text-[14px] text-indigo-500">stacked_line_chart</span>
+<span>EMA20/-1.618: <strong class="text-blue-600 dark:text-blue-400 font-medium">ON</strong></span>
+</div>
+<button class="flex items-center gap-1 text-[11px] font-medium text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-750 px-2.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 transition-colors" onclick="focusCurrentInterval()" title="自适应居中当前交易开平区间">
+<span class="material-symbols-outlined text-[14px]">center_focus_strong</span>
+<span>聚焦本笔区间</span>
+</button>
+</div></footer>
+</section>
+</main>
+<!-- Script for Theme & Mobile Drawer Interactions -->
+<script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        localStorage.setItem('spike_theme', 'light');
+      } else {
+        html.classList.add('dark');
+        localStorage.setItem('spike_theme', 'dark');
+      }
+    }
+
+    // Default to light as specified in prompt, but allow user toggle
+    if (localStorage.getItem('spike_theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+
+    function toggleMobileSheet() {
+      const sidebar = document.getElementById('ledgerSidebar');
+      if (sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.remove('-translate-x-full');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+      }
+    }
+  </script>
+<script>
+    function selectTrade(type) {
+      document.querySelectorAll('.trade-row').forEach(el => {
+        el.classList.remove('bg-blue-50/70', 'dark:bg-blue-950/30', 'border-blue-600', 'dark:border-blue-400');
+        el.classList.add('border-transparent');
+      });
+
+      const symbolBadge = document.getElementById('activeTradeSymbolBadge');
+      const pnlBadge = document.getElementById('activeTradeNetPnlBadge');
+      const entryPrice = document.getElementById('activeTradeEntryPrice');
+      const exitPrice = document.getElementById('activeTradeExitPrice');
+      const batch1 = document.getElementById('batch1Detail');
+      const batch2 = document.getElementById('batch2Detail');
+      const netR = document.getElementById('summaryNetR');
+
+      if (type === 'BASKET_6' || type === 'BASKET_6_OLD') {
+        const row = document.getElementById(type === 'BASKET_6' ? 'trade-row-basket-6' : 'trade-row-basket-old');
+        if (row) {
+          row.classList.remove('border-transparent');
+          row.classList.add('bg-blue-50/70', 'dark:bg-blue-950/30', 'border-blue-600', 'dark:border-blue-400');
+        }
+        if (symbolBadge) symbolBadge.innerText = '山寨篮子 (6币)';
+        if (pnlBadge) pnlBadge.innerText = '+3.10 R';
+        if (entryPrice) entryPrice.innerText = '等权组合锚点';
+        if (exitPrice) exitPrice.innerText = 'EMA20共振';
+        if (batch1) batch1.innerText = '首批50% @ 各币4H EMA20 (+2.40 R)';
+        if (batch2) batch2.innerText = '二批50% 移动止盈 (+3.80 R)';
+        if (netR) netR.innerText = '+3.10 R (+21.60%)';
+      } else if (type === 'SOL') {
+        const row = document.getElementById('trade-row-sol');
+        if (row) {
+          row.classList.remove('border-transparent');
+          row.classList.add('bg-blue-50/70', 'dark:bg-blue-950/30', 'border-blue-600', 'dark:border-blue-400');
+        }
+        if (symbolBadge) symbolBadge.innerText = 'SOL/USDT';
+        if (pnlBadge) pnlBadge.innerText = '+2.24 R';
+        if (entryPrice) entryPrice.innerText = '112.50';
+        if (exitPrice) exitPrice.innerText = '129.80';
+        if (batch1) batch1.innerText = '60% @ 125.40 (4H EMA20)';
+        if (batch2) batch2.innerText = '40% @ 129.80 (移动止盈)';
+        if (netR) netR.innerText = '+2.24 R (+15.38%)';
+      } else if (type === 'SUI') {
+        const row = document.getElementById('trade-row-sui');
+        if (row) {
+          row.classList.remove('border-transparent');
+          row.classList.add('bg-blue-50/70', 'dark:bg-blue-950/30', 'border-blue-600', 'dark:border-blue-400');
+        }
+        if (symbolBadge) symbolBadge.innerText = 'SUI/USDT';
+        if (pnlBadge) pnlBadge.innerText = '+2.90 R';
+        if (entryPrice) entryPrice.innerText = '0.462';
+        if (exitPrice) exitPrice.innerText = '0.584';
+        if (batch1) batch1.innerText = '60% @ 0.545 (4H EMA20)';
+        if (batch2) batch2.innerText = '40% @ 0.584 (移动止盈)';
+        if (netR) netR.innerText = '+2.90 R (+26.40%)';
+      } else {
+        const row = document.getElementById('trade-row-btc-panic');
+        if (row) {
+          row.classList.remove('border-transparent');
+          row.classList.add('bg-blue-50/70', 'dark:bg-blue-950/30', 'border-blue-600', 'dark:border-blue-400');
+        }
+        if (symbolBadge) symbolBadge.innerText = 'BTC/USDT';
+        if (pnlBadge) pnlBadge.innerText = '+2.80 R';
+        if (entryPrice) entryPrice.innerText = '49,850.0';
+        if (exitPrice) exitPrice.innerText = '54,200.0';
+        if (batch1) batch1.innerText = '60% @ 54,200.0 (触达4H EMA20)';
+        if (batch2) batch2.innerText = '40% @ 55,100.0 (保本底仓移动止盈)';
+        if (netR) netR.innerText = '+2.80 R (+14.20%)';
+      }
+    }
+
+    function switchBasketMember(coin, returnR) {
+      document.querySelectorAll('.basket-pill').forEach(btn => {
+        btn.className = 'basket-pill px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap';
+      });
+      event.target.className = 'basket-pill px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-medium border border-blue-300 dark:border-blue-700 whitespace-nowrap';
+
+      const symbolBadge = document.getElementById('activeTradeSymbolBadge');
+      const pnlBadge = document.getElementById('activeTradeNetPnlBadge');
+      const netR = document.getElementById('summaryNetR');
+      if (symbolBadge) symbolBadge.innerText = coin === 'INDEX' ? '山寨篮子 (6币)' : coin + '/USDT';
+      if (pnlBadge) pnlBadge.innerText = returnR;
+      if (netR) netR.innerText = returnR + ' (成分实际贡献)';
+    }
+
+    function filterLedger(val) {
+      if (val === 'BASKET_6') {
+        selectTrade('BASKET_6');
+      } else if (val === 'SOL') {
+        selectTrade('SOL');
+      } else if (val === 'SUI') {
+        selectTrade('SUI');
+      } else {
+        selectTrade('BTC_PANIC');
+      }
+    }
+
+    function focusCurrentInterval() {
+      const group = document.getElementById('candlestickGroup');
+      if (group) {
+        group.style.transition = 'opacity 0.3s ease';
+        group.style.opacity = '0.4';
+        setTimeout(() => { group.style.opacity = '0.92'; }, 300);
+      }
+    }
+  </script></body>
+</html>

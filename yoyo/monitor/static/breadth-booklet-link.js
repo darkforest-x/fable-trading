@@ -4,7 +4,7 @@
   const id='breadth-ema20',chapters=['overview','research','rules','forward','sources','stats','replay'];
   function read(search){
     const q=new URLSearchParams(search);if(q.get('book')!==id)return null;
-    return {chapter:chapters.includes(q.get('chapter'))?q.get('chapter'):'overview',eventId:q.get('event')||null,
+    return {...(q.get('member')?{memberSymbol:q.get('member')}:{}),chapter:chapters.includes(q.get('chapter'))?q.get('chapter'):'overview',eventId:q.get('event')||null,
       scope:q.get('cost')==='funded'?'2026_actual_funded':'all_history_fee_only'};
   }
   function write(options){
@@ -13,8 +13,9 @@
       url.searchParams.set('book',id);
       if(chapters.includes(options.chapter)&&options.chapter!=='overview')url.searchParams.set('chapter',options.chapter);else url.searchParams.delete('chapter');
       if(options.eventId)url.searchParams.set('event',options.eventId);else url.searchParams.delete('event');
+      if(options.eventId&&options.memberSymbol)url.searchParams.set('member',options.memberSymbol);else url.searchParams.delete('member');
       if(options.scope==='2026_actual_funded')url.searchParams.set('cost','funded');else url.searchParams.delete('cost');
-    }else if(url.searchParams.get('book')===id){for(const k of ['book','chapter','event','cost'])url.searchParams.delete(k);}else return;
+    }else if(url.searchParams.get('book')===id){for(const k of ['book','chapter','event','cost','member'])url.searchParams.delete(k);}else return;
     if(url.href!==location.href)history.replaceState(history.state,'',url.href);
   }
   function legacyTarget(search){

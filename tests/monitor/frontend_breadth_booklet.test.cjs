@@ -13,14 +13,6 @@ const chartRoot = path.join(root,'breadth-charts');
 const readJSON = name => JSON.parse(fs.readFileSync(path.join(chartRoot,name)));
 const readBlock = item => JSON.parse(gunzipSync(fs.readFileSync(path.join(chartRoot,item.path))));
 const close = (actual, expected) => assert.ok(Math.abs(actual-expected)<1e-6, actual+' != '+expected);
-function replayMountStub(){
- const body={innerHTML:'',querySelector:()=>null};
- const root={innerHTML:'',querySelector:selector=>selector==='.bb-body'?body:null,setAttribute(){},addEventListener(){},removeEventListener(){},remove(){this.removed=true;}};
- const doc={documentElement:{},createElement:()=>root};
- const container={ownerDocument:doc,replaceChildren(...children){this.children=children;}};
- return {container,root,body};
-}
-
 test('both cost scopes have a reconciled endpoint and distinct event counts', () => {
   for (const [scope,field,rows] of [
     ['all_history_fee_only','net_pct',data.events],
@@ -39,8 +31,7 @@ test('both cost scopes have a reconciled endpoint and distinct event counts', ()
 
 test('the shared drawer receives content fragments and complete selectable replay data', () => {
   assert.equal(ui.validateData(data),data);
-  assert.equal(typeof ui.loadData,'function');
-  assert.equal(typeof ui.mountReplay,'function');
+  assert.equal(ui.mountReplay,undefined);
   const rules=ui.rulesHTML(data);
   assert.match(rules,/全市场下轨怎么数/);
   assert.match(rules,/普通 BTC/);
@@ -65,29 +56,6 @@ test('the shared drawer receives content fragments and complete selectable repla
   assert.match(css,/\.bb-fragment \{--bb-paper:/);
   assert.doesNotMatch(css,/\.bb-embedded|\.bb-sheet|dialog\.bb-sheet|\.bb-tabs/);
   assert.throws(()=>ui.statsHTML(data,{scope:'unsupported'}),/区间不受支持/);
-});
-
-test('replay scope and period selection keep cost basis explicit and select the period first event', () => {
- const {container,root,body}=replayMountStub(),events=[];
- const replay=ui.mountReplay(container,data,null,{scope:'2026_actual_funded',onEvent:id=>events.push(id)});
- assert.deepEqual(events,[],'mounting does not rewrite the shareable event link');
- assert.match(body.innerHTML,/研究账本 · 全部 398 笔/);
- assert.match(body.innerHTML,/value="2026" selected/);
- assert.equal(replay.selectPeriod('2025-01'),true);
- const january=data.events.filter(e=>e.entry_time.startsWith('2025-01')).sort((a,b)=>a.entry_time.localeCompare(b.entry_time)||a.asset.localeCompare(b.asset));
- const selected=body.innerHTML.match(/<tr data-id="([^"]+)" aria-current="true">/);
- assert.equal(selected?.[1],january[0].event_id);
- assert.match(body.innerHTML,/data-field="period"/);
- assert.match(body.innerHTML,/value="2025-01" selected/);
- assert.equal(events.at(-1),january[0].event_id);
- replay.selectEvent(data.events.find(e=>e.event_id==='BTC|2026-09-15T19:20:00Z').event_id);
- assert.match(body.innerHTML,/含资金费/);
- replay.selectEvent(january[0].event_id);
- assert.match(body.innerHTML,/仅手续费/);
- replay.setScope('all_history_fee_only');
- assert.match(body.innerHTML,/仅手续费/);
- assert.equal(replay.selectPeriod('2099'),false);
- replay.destroy();assert.equal(root.removed,true);
 });
 
 test('each entry links its own candles, and the September replay labels the two fill prices', () => {

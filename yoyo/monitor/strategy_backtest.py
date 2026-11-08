@@ -136,6 +136,27 @@ def aggregate(frame, step, native):
     return bars[counts == step // native].set_axis(pd.Index(bars.index[counts == step // native], name='time'))
 
 
+def weekly_ranges(frame, symbol, native):
+    import pandas as pd
+    # Historical Monday rays are computed from complete original Monday data,
+    # using the same NY/DST boundary as this strategy's saved source identity.
+    from .monday_fib import week_window
+    weeks = []
+    for stamp in pd.to_datetime(frame.index, unit='ms', utc=True).tz_convert('America/New_York').normalize().unique():
+        if stamp.dayofweek != 0:
+            continue
+        window = week_window(int(stamp.timestamp() * 1000))
+        monday = frame[(frame.index >= window['start']) & (frame.index < window['end'])]
+        if len(monday) != (window['end'] - window['start']) // native:
+            continue
+        high, low = float(monday.high.max()), float(monday.low.min())
+        weeks.append(dict(symbol=symbol, week=stamp.strftime('%Y-%m-%d'), state='ready',
+                          start_ms=window['start'], end_ms=window['end'], expires_ms=window['expires'],
+                          high=high, low=low, upper=high + .618 * (high - low), lower=low - .618 * (high - low),
+                          high_ms=int(monday.high.idxmax()), low_ms=int(monday.low.idxmin())))
+    return weeks
+
+
 @lru_cache(maxsize=12)
 def _candles(identity_path, identity_stamp, source_stamps, start, end, period, extra=()):
     import pandas as pd
@@ -166,22 +187,7 @@ def _candles(identity_path, identity_stamp, source_stamps, start, end, period, e
             or (frame.low > frame[['open', 'high', 'close']].min(axis=1)).any()):
         raise ValueError('invalid_saved_candles')
     bars = aggregate(frame, PERIODS[period], native)
-    # Historical Monday rays are computed from complete original Monday data,
-    # using the same NY/DST boundary as this strategy's saved source identity.
-    from .monday_fib import week_window
-    weeks = []
-    for stamp in pd.to_datetime(frame.index, unit='ms', utc=True).tz_convert('America/New_York').normalize().unique():
-        if stamp.dayofweek != 0:
-            continue
-        window = week_window(int(stamp.timestamp() * 1000))
-        monday = frame[(frame.index >= window['start']) & (frame.index < window['end'])]
-        if len(monday) != (window['end'] - window['start']) // native:
-            continue
-        high, low = float(monday.high.max()), float(monday.low.min())
-        weeks.append(dict(symbol=job['symbol'], week=stamp.strftime('%Y-%m-%d'), state='ready',
-                          start_ms=window['start'], end_ms=window['end'], expires_ms=window['expires'],
-                          high=high, low=low, upper=high + .618 * (high - low), lower=low - .618 * (high - low),
-                          high_ms=int(monday.high.idxmax()), low_ms=int(monday.low.idxmin())))
+    weeks = weekly_ranges(frame, job['symbol'], native)
     return dict(candles=[dict(time=int(t), **r) for t, r in bars.to_dict('index').items()], weekly_ranges=weeks)
 
 
