@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-1618-cvd-divergence-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 95c33aefbe
+    status: inconclusive
+    question: 'Does touch-time CVD divergence on 15m or 1h change net win rate at the first weekly Monday 1.618 limit fill?'
+    single_variable: 'Regular divergence versus none, both directions, at the first touch versus the latest same-side already-confirmed 2-left/2-right price swing in the last 20 closed timeframe bars. Same original m60 near Monday edge native fills in all groups.'
+    result: '71062 events on 632 Binance UM contracts, Jan 2020 to Sep 2026. Among settled determinable events, 15m 1668/7838 (21.28%) versus 7556/32619 (23.16%); 1h 3062/14308 (21.40%) versus 8329/36484 (22.83%). Both differences reverse sign in 2025. The fully observable completed-minute proxy gives differences of -0.74pp and +0.36pp.'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-1618-cvd-divergence-20261108-v1/summary.json
+    notes: 'Per-minute Binance taker buy, base volume and optionally reconciled touch aggTrades. Unknown within-minute order leaves 27536 (15m) and 18851 (1h) settled events ambiguous. Exclude missing references separately. All classifiable first touches broke the reference extreme; absorption-on-retest had no examples. No new strategy fills; source fees maker 2bp/taker 5bp, zero slippage/funding. Notion https://app.notion.com/p/4128856479af8154873cceeb3bb80f97'
+
   - experiment_id: exp-cloud-top20-peak10r-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 28698414e0
