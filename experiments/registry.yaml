@@ -15,6 +15,51 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-binance-volume-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "0e9cabcd75"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Admit signals within fixed ranges of the completed Binance 12H volume divided by the median of its preceding 20 bars."
+    result: "22565 eligible original parents, all priced volume ratios. Baseline 5125.18U; below 1x, 1-2x, at least 2x gave 1961.67U, 4663.75U, 4170.29U. No development arm qualified; last group exceeded 35% DD bound."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-binance-volume-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af81bda0a2c211b93991b0."
+
+  - experiment_id: exp-cloud-close-peak-retention-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "6960fca4ba"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Raise the originally fixed +0.5R stop after +2R to retain 25, 50, or 75 percent of maximum favorable excursion known through the prior completed H1."
+    result: "Parent 27432.02U. New arms 16048.09, 3606.58, 1999.11U; all conservative hourly drawdown bounds 48.26-53.49%, above 35%. All admitted positions funded, no missing hours."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-peak-retention-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af818dbfe3f0f467eae21e."
+
+  - experiment_id: exp-cloud-close-prior-expectancy-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "73eb1b093b"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Screen on same-asset same-direction trailing shadow signal return (rolling 12, at least 8 matured results, available strictly before entry)."
+    result: "Development retained unfiltered parent. Coverage-only and mean net return at least 0, 25, 50bp ended at 2354.59, 2089.47, 1708.33, 1838.04U vs 6219.84U parent. Higher minimum did not recover the lost gains."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-prior-expectancy-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af817e92b9ea6675ca67f6."
+
   - experiment_id: exp-cloud-close-same-time-control-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "a195f2aac7"
