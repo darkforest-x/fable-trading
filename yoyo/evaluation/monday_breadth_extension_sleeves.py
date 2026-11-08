@@ -30,7 +30,7 @@ def funded_marks(alt, btc):
     for symbol, group in legs.groupby('symbol'):
         q, _ = prices.load_full_ohlc(symbol, group.decision.min(), group.exit_time.max(), repair_missing=False)
         months = sorted(set(group.decision.dt.strftime('%Y-%m')) | set(group.exit_time.dt.strftime('%Y-%m')))
-        history = funding.rates(symbol, months=months)
+        history = funding.rates(symbol, months=months, local_only=True)
         if history.empty:
             raise ValueError(f'Missing funding data for {symbol}')
         settlements = history.realized_rate * history.mark_price
@@ -117,14 +117,14 @@ def run():
     case = pd.read_parquet(PARENT/'btc_target/matched_draws_2026.parquet')[['decision','random_entry']].assign(source='case')
     draws = pd.concat([draws,case],ignore_index=True)
     annual, rows, controls, monthly = [], [], [], []
-    daily = {'ALT':ac.resample('1D').last()}
+    curves = {'ALT':ac}
     for name in RULES:
         b = b26[b26.strategy.eq(name)]
         both = pd.concat([a26,b],ignore_index=True)
         bc = curve(b,'BTC',paths,costs,idx)
         eq = (ac+bc)/2
-        daily[name] = eq.resample('1D').last()
-        daily[name+'_BTC'] = bc.resample('1D').last()
+        curves[name] = eq
+        curves[name+'_BTC'] = bc
         np.testing.assert_allclose(eq.iloc[-1],(compound(b,'funded_pct')+compound(a26,'funded_pct'))/2)
         counts = both.groupby(both.decision.dt.strftime('%Y-%m')).decision.nunique()
         monthly.extend(dict(strategy=name,month=month,n=int(n)) for month,n in counts.items())
@@ -141,7 +141,9 @@ def run():
                          stressed_growth=100*((compound(b,'funded_pct',.2)+compound(a26,'funded_pct',.2))/2-1),
                          september_btc_funded_points=sep.iloc[0].funded_points))
         controls.append(matched_summary(name,both,fixed,native,draws))
-    pd.DataFrame(daily).to_csv(OUT/'daily_funded.csv',index_label='utc_day')
+    equity = pd.DataFrame(curves)
+    equity.to_parquet(OUT/'equity_5m.parquet')
+    equity.resample('1D').last().to_csv(OUT/'daily_funded.csv',index_label='utc_day')
     for file,records in [('periods',annual),('accounts_2026',rows),('controls',controls),('monthly',monthly)]:
         pd.DataFrame(records).to_csv(OUT/(file+'.csv'),index=False)
 

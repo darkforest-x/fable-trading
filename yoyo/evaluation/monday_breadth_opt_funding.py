@@ -13,7 +13,7 @@ FUNDED_CACHE=ROOT/'btc_funded_exit_fills.parquet'
 
 
 @lru_cache(maxsize=256)
-def archive_month(symbol,month):
+def archive_month(symbol,month,*,local_only=False):
     """Observed settlement rates and official hourly mark-candle opens at the funding timestamps."""
     from yoyo.data.binance_um_vision_fetch import BASE,fetch
     base=ROOT/'funding_archives'
@@ -22,10 +22,12 @@ def archive_month(symbol,month):
     if shared.is_file():
         rate=shared
     else:
-        fetch(base,'funding',symbol,f'{BASE}/monthly/fundingRate/{symbol}/{name}')
+        if not local_only:
+            fetch(base,'funding',symbol,f'{BASE}/monthly/fundingRate/{symbol}/{name}')
         rate=base/'funding'/symbol/name
     markname=f'{symbol}-1h-{month}.zip'
-    fetch(base,'mark_1h',symbol,f'{BASE}/monthly/markPriceKlines/{symbol}/1h/{markname}')
+    if not local_only:
+        fetch(base,'mark_1h',symbol,f'{BASE}/monthly/markPriceKlines/{symbol}/1h/{markname}')
     mark=base/'mark_1h'/symbol/markname
     if not rate.is_file():return pd.DataFrame()
     rr=pd.read_csv(rate)
@@ -40,7 +42,8 @@ def archive_month(symbol,month):
     # Some monthly mark archives omit a complete UTC day present in the daily archive.
     for day in rr.index[rr.mark_price.isna()].normalize().unique():
         filename=f'{symbol}-1h-{day:%Y-%m-%d}.zip'
-        fetch(base,'daily_mark_1h',symbol,f'{BASE}/daily/markPriceKlines/{symbol}/1h/{filename}')
+        if not local_only:
+            fetch(base,'daily_mark_1h',symbol,f'{BASE}/daily/markPriceKlines/{symbol}/1h/{filename}')
         path=base/'daily_mark_1h'/symbol/filename
         if path.is_file():
             rr['mark_price']=rr.mark_price.fillna(archive_opens(path))
@@ -48,14 +51,14 @@ def archive_month(symbol,month):
     return rr
 
 
-def rates(symbol,history=False,months=()):
+def rates(symbol,history=False,months=(),*,local_only=False):
     folder='funding_history' if history else 'funding_2026'
     path=ROOT/folder/'normalized/binance'/(symbol+'_funding.csv.gz')
     if not path.is_file():
         parts=[]
         for month in months:
             repaired=ROOT/'funding_months'/month/'normalized/binance'/(symbol+'_funding.csv.gz')
-            parts.append(exact_rates(repaired) if repaired.is_file() else archive_month(symbol,month))
+            parts.append(exact_rates(repaired) if repaired.is_file() else archive_month(symbol,month,local_only=local_only))
         if len(parts)==0 or any(p.empty for p in parts):return pd.DataFrame()
         return pd.concat(parts).sort_index()
     return exact_rates(path)
