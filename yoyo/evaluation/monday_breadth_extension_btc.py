@@ -476,12 +476,15 @@ def _month_inputs(events: pd.DataFrame, frame: pd.DataFrame, htf: dict[int, pd.D
         drafts["same_1h_trend_stratum"] = pd.to_numeric(drafts.random_trend_bucket_1h).eq(
             pd.to_numeric(drafts.candidate_trend_bucket_1h)
         )
+        candidate_knowns = pd.DatetimeIndex(drafts.candidate_known)
+        candidate_decisions = pd.DatetimeIndex(drafts.decision)
+        random_decisions = pd.DatetimeIndex(drafts.random_entry)
         drafts["same_new_york_weekdays"] = (
-            random_knowns.tz_convert("America/New_York").day_of_week
-            == (pd.DatetimeIndex(drafts.candidate_known).tz_convert("America/New_York").day_of_week)
+            random_knowns.tz_convert("America/New_York").dayofweek
+            == candidate_knowns.tz_convert("America/New_York").dayofweek
         ) & (
-            drafts.random_entry.dt.tz_convert("America/New_York").day_of_week
-            == drafts.decision.dt.tz_convert("America/New_York").day_of_week
+            random_decisions.tz_convert("America/New_York").dayofweek
+            == candidate_decisions.tz_convert("America/New_York").dayofweek
         )
         if not (drafts[["random_context_valid", "same_month_as_candidate", "same_utc_6h_session",
                        "same_1h_volatility_stratum", "same_1h_trend_stratum", "same_new_york_weekdays"]].all().all()):
