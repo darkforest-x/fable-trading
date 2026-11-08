@@ -84,8 +84,11 @@ def compare(rows, weeks, cfg):
               for k, (h, n) in zip(["held_only", "breakout"], totals)}
     answer["difference_pp"] = (float(100 * (totals[1, 0]/totals[1, 1] - totals[0, 0]/totals[0, 1]))
                                if totals[:, 1].all() else None)
+    # A single contributing week cannot identify a between-week sampling distribution.
+    group_weeks = (counts[:, :, 1] > 0).sum(axis=0)
+    answer["contributing_weeks"] = dict(zip(["held_only", "breakout"], map(int, group_weeks)))
     answer["week_cluster_95_pp"] = (np.percentile(100*(rates[:, 1]-rates[:, 0]), [2.5, 97.5]).tolist()
-                                    if len(rates) else None)
+                                    if len(rates) and min(group_weeks) >= 2 else None)
     answer["valid_bootstrap_draws"] = int(both.sum())
     return answer
 
