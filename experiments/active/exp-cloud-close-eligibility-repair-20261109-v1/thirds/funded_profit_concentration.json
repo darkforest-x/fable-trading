@@ -1,0 +1,73 @@
+{
+  "grouping": "By final UTC exit of each funded position; realized dollar attribution differs from marked calendar-period NAV. Gross winner pool before trading fees; net from actual funded orders. Top net winners are ranked retrospectively, with no counterfactual claim about removing trades.",
+  "OKX": {
+    "source": "experiments/active/exp-cloud-close-eligibility-repair-20261109-v1/thirds/funded_OKX.csv.gz",
+    "all_matched": 1569,
+    "max_cash_pnl_error_usdt": 2.2737367544323206e-13,
+    "periods": {
+      "all": {
+        "positions": 1569,
+        "net_realized_cash_usdt": 7788.77397332291,
+        "net_winner_pool_usdt": 33508.508946698275,
+        "gross_winner_pool_usdt": 33756.99290834066,
+        "series_tail_settlement_positions": 9,
+        "cash_pnl_of_those_positions_usdt": 1110.9354469588504,
+        "top1_cash_usdt": 1044.8029688003191,
+        "top1_pct_net_realized_profit": 13.414216054783997,
+        "top5_cash_usdt": 3236.115688145247,
+        "top5_pct_net_realized_profit": 41.548460633588384,
+        "top10_cash_usdt": 4934.510802804264,
+        "top10_pct_net_realized_profit": 63.354140455292516
+      },
+      "2025_and_2026_closed": {
+        "positions": 484,
+        "net_realized_cash_usdt": 1835.2736922542008,
+        "net_winner_pool_usdt": 13017.136979414865,
+        "gross_winner_pool_usdt": 13118.988774461262,
+        "series_tail_settlement_positions": 9,
+        "cash_pnl_of_those_positions_usdt": 1110.9354469588504,
+        "top1_cash_usdt": 520.1745975884942,
+        "top1_pct_net_realized_profit": 28.343162100775412,
+        "top5_cash_usdt": 1644.8492781723155,
+        "top5_pct_net_realized_profit": 89.62419529656125,
+        "top10_cash_usdt": 2784.451049094713,
+        "top10_pct_net_realized_profit": 151.71857259473228
+      }
+    }
+  },
+  "Binance": {
+    "source": "experiments/active/exp-cloud-close-thirds-20261109-v1/funded_Binance.csv.gz",
+    "all_matched": 1629,
+    "max_cash_pnl_error_usdt": 1.1368683772161603e-13,
+    "periods": {
+      "all": {
+        "positions": 1629,
+        "net_realized_cash_usdt": 5508.2438101772,
+        "net_winner_pool_usdt": 28832.355052896695,
+        "gross_winner_pool_usdt": 29053.359544461062,
+        "series_tail_settlement_positions": 9,
+        "cash_pnl_of_those_positions_usdt": 599.8809521415888,
+        "top1_cash_usdt": 671.1183456552316,
+        "top1_pct_net_realized_profit": 12.183889616782261,
+        "top5_cash_usdt": 2260.3433076005686,
+        "top5_pct_net_realized_profit": 41.03564376406667,
+        "top10_cash_usdt": 3509.6990170828703,
+        "top10_pct_net_realized_profit": 63.717205302318725
+      },
+      "2025_and_2026_closed": {
+        "positions": 439,
+        "net_realized_cash_usdt": 1393.5609195902584,
+        "net_winner_pool_usdt": 9179.975978810024,
+        "gross_winner_pool_usdt": 9258.362043475256,
+        "series_tail_settlement_positions": 9,
+        "cash_pnl_of_those_positions_usdt": 599.8809521415888,
+        "top1_cash_usdt": 245.0166323123109,
+        "top1_pct_net_realized_profit": 17.582053921571788,
+        "top5_cash_usdt": 1119.7066778551496,
+        "top5_pct_net_realized_profit": 80.34859919754145,
+        "top10_cash_usdt": 2039.8087748535804,
+        "top10_pct_net_realized_profit": 146.37385034113436
+      }
+    }
+  }
+}
