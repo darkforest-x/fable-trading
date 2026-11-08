@@ -1,0 +1,13 @@
+{
+  "id": "exp-cloud-highwin-20261109-v1",
+  "source": "exp-cloud-allmarket-screen-20261108-v1",
+  "symbols": ["ONE", "TRB", "AGLD", "BAND", "ZETA", "ACT", "ATH"],
+  "start_bjt": "2025-01-01", "cutoff_utc": "2026-11-08T12:00:00Z",
+  "rule": "First eligible signal for each symbol and NY week across both sides. A complete 12H wick strictly pierces an outer Monday 1.618 and closes strictly between extensions. Skip double-sided bars. Both confirmation close and next open must leave a fee-positive target inside the stop/target bracket. At the following hour open trade toward the near Monday high/low. Stop 3% beyond the touched extension. Fixed protective orders, 48h time exit, no cloud-flip exit.",
+  "factor": "Label trend aligned or countertrend using only the confirmation EMA20/50. Each group is a subset of the common first-eligible weekly signal. No parameter tuning.",
+  "holding_hours": 48, "stop_fraction": 0.03, "maker": 0.0002, "taker": 0.0005,
+  "controls": "One seeded different 12H boundary per signal, same symbol, NY week, year, and UTC hour of day after the Monday anchor closes. Same side, proportional reward and risk, 48h horizon and costs. Paired geometry null, not an alternative deployed entry.",
+  "decision": "Exploratory threshold 60% net winners with average net R > 0 in each year, inspect 2026 separately and compare with matched controls. Weeks by entry, no tuning or fitting; not blinded. Report number, PF, ambiguous 1H candles, and adverse 10bp per market fill cost sensitivity.",
+  "seed": 20261109,
+  "commands": [".venv/bin/python -m yoyo.evaluation.cloud_highwin_near_edge prepare", "/Users/zhangzc/.local/bin/nautilus-python -m yoyo.evaluation.cloud_highwin_near_edge execute"]
+}
