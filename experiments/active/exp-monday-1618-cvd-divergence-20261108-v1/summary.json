@@ -1,0 +1,5329 @@
+{
+  "all": {
+    "events": 71062,
+    "periods": {
+      "15m": {
+        "events": 71062,
+        "exact_label_counts": {
+          "none": 32632,
+          "ambiguous": 27546,
+          "regular": 7845,
+          "no_confirmed_pivot": 3026,
+          "missing_touch_interval": 9,
+          "source_bad_event": 2,
+          "invalid_or_gapped_history": 2
+        },
+        "unknown_label_events": 30585,
+        "feasible_set_missing_or_unusable": 3039,
+        "feasible_set_events": 68023,
+        "cohorts": {
+          "regular": {
+            "label_events": 7845,
+            "wins": 1668,
+            "total": 7838,
+            "rate": 0.21280939015054862,
+            "mean_net_bp": 11.355918442816252,
+            "net_bp_missing": 7
+          },
+          "absorption": {
+            "label_events": 0,
+            "wins": 0,
+            "total": 0,
+            "rate": null,
+            "mean_net_bp": null,
+            "net_bp_missing": 0
+          },
+          "none": {
+            "label_events": 32632,
+            "wins": 7556,
+            "total": 32619,
+            "rate": 0.23164413378705662,
+            "mean_net_bp": 19.552577065895335,
+            "net_bp_missing": 13
+          },
+          "any": {
+            "label_events": 7845,
+            "wins": 1668,
+            "total": 7838,
+            "rate": 0.21280939015054862,
+            "mean_net_bp": 11.355918442816252,
+            "net_bp_missing": 7
+          }
+        },
+        "comparisons": {
+          "regular_vs_none": {
+            "left": {
+              "label_events": 7845,
+              "wins": 1668,
+              "total": 7838,
+              "rate": 0.21280939015054862,
+              "mean_net_bp": 11.355918442816252,
+              "net_bp_missing": 7
+            },
+            "right": {
+              "label_events": 32632,
+              "wins": 7556,
+              "total": 32619,
+              "rate": 0.23164413378705662,
+              "mean_net_bp": 19.552577065895335,
+              "net_bp_missing": 13
+            },
+            "win_rate_diff": -0.018834743636508,
+            "mean_net_bp_diff": -8.196658623079083,
+            "bootstrap": {
+              "method": "NY-week cluster percentile bootstrap",
+              "reps": 5000,
+              "valid_reps": 5000,
+              "mean_valid_reps": 5000,
+              "weeks": 352,
+              "excluded_missing_week_events": 0,
+              "win_rate_diff_95ci": [
+                -0.036328638417809825,
+                -0.0008465493739258914
+              ],
+              "mean_net_bp_diff_95ci": [
+                -20.759321542347475,
+                5.137385367421434
+              ]
+            }
+          },
+          "absorption_vs_none": {
+            "left": {
+              "label_events": 0,
+              "wins": 0,
+              "total": 0,
+              "rate": null,
+              "mean_net_bp": null,
+              "net_bp_missing": 0
+            },
+            "right": {
+              "label_events": 32632,
+              "wins": 7556,
+              "total": 32619,
+              "rate": 0.23164413378705662,
+              "mean_net_bp": 19.552577065895335,
+              "net_bp_missing": 13
+            },
+            "win_rate_diff": null,
+            "mean_net_bp_diff": null,
+            "bootstrap": {
+              "method": "NY-week cluster percentile bootstrap",
+              "reps": 5000,
+              "valid_reps": 0,
+              "mean_valid_reps": 0,
+              "weeks": 352,
+              "excluded_missing_week_events": 0,
+              "win_rate_diff_95ci": null,
+              "mean_net_bp_diff_95ci": null
+            }
+          },
+          "any_vs_none": {
+            "left": {
+              "label_events": 7845,
+              "wins": 1668,
+              "total": 7838,
+              "rate": 0.21280939015054862,
+              "mean_net_bp": 11.355918442816252,
+              "net_bp_missing": 7
+            },
+            "right": {
+              "label_events": 32632,
+              "wins": 7556,
+              "total": 32619,
+              "rate": 0.23164413378705662,
+              "mean_net_bp": 19.552577065895335,
+              "net_bp_missing": 13
+            },
+            "win_rate_diff": -0.018834743636508,
+            "mean_net_bp_diff": -8.196658623079083,
+            "bootstrap": {
+              "method": "NY-week cluster percentile bootstrap",
+              "reps": 5000,
+              "valid_reps": 5000,
+              "mean_valid_reps": 5000,
+              "weeks": 352,
+              "excluded_missing_week_events": 0,
+              "win_rate_diff_95ci": [
+                -0.03727758725174447,
+                -0.000862684670432007
+              ],
+              "mean_net_bp_diff_95ci": [
+                -21.16055623213021,
+                5.1375693772825
+              ]
+            }
+          }
+        }
+      },
+      "1h": {
+        "events": 71062,
+        "exact_label_counts": {
+          "none": 36500,
+          "ambiguous": 18858,
+          "regular": 14315,
+          "no_confirmed_pivot": 1336,
+          "empty_timeframe_bar": 38,
+          "missing_touch_interval": 9,
+          "source_bad_event": 2,
+          "history_gap": 2,
+          "invalid_or_gapped_history": 2
+        },
+        "unknown_label_events": 20247,
+        "feasible_set_missing_or_unusable": 1389,
+        "feasible_set_events": 69673,
+        "cohorts": {
+          "regular": {
+            "label_events": 14315,
+            "wins": 3062,
+            "total": 14308,
+            "rate": 0.21400615040536763,
+            "mean_net_bp": 7.317002490069283,
+            "net_bp_missing": 7
+          },
+          "absorption": {
+            "label_events": 0,
+            "wins": 0,
+            "total": 0,
+            "rate": null,
+            "mean_net_bp": null,
+            "net_bp_missing": 0
+          },
+          "none": {
+            "label_events": 36500,
+            "wins": 8329,
+            "total": 36484,
+            "rate": 0.2282918539633812,
+            "mean_net_bp": 17.95908992937626,
+            "net_bp_missing": 16
+          },
+          "any": {
+            "label_events": 14315,
+            "wins": 3062,
+            "total": 14308,
+            "rate": 0.21400615040536763,
+            "mean_net_bp": 7.317002490069283,
+            "net_bp_missing": 7
+          }
+        },
+        "comparisons": {
+          "regular_vs_none": {
+            "left": {
+              "label_events": 14315,
+              "wins": 3062,
+              "total": 14308,
+              "rate": 0.21400615040536763,
+              "mean_net_bp": 7.317002490069283,
+              "net_bp_missing": 7
+            },
+            "right": {
+              "label_events": 36500,
+              "wins": 8329,
+              "total": 36484,
+              "rate": 0.2282918539633812,
+              "mean_net_bp": 17.95908992937626,
+              "net_bp_missing": 16
+            },
+            "win_rate_diff": -0.014285703558013563,
+            "mean_net_bp_diff": -10.642087439306975,
+            "bootstrap": {
+              "method": "NY-week cluster percentile bootstrap",
+              "reps": 5000,
+              "valid_reps": 5000,
+              "mean_valid_reps": 5000,
+              "weeks": 352,
+              "excluded_missing_week_events": 0,
+              "win_rate_diff_95ci": [
+                -0.03147479754314365,
+                0.003163395288601007
+              ],
+              "mean_net_bp_diff_95ci": [
+                -23.576772501830543,
+                2.6956404399149543
+              ]
+            }
+          },
+          "absorption_vs_none": {
+            "left": {
+              "label_events": 0,
+              "wins": 0,
+              "total": 0,
+              "rate": null,
+              "mean_net_bp": null,
+              "net_bp_missing": 0
+            },
+            "right": {
+              "label_events": 36500,
+              "wins": 8329,
+              "total": 36484,
+              "rate": 0.2282918539633812,
+              "mean_net_bp": 17.95908992937626,
+              "net_bp_missing": 16
+            },
+            "win_rate_diff": null,
+            "mean_net_bp_diff": null,
+            "bootstrap": {
+              "method": "NY-week cluster percentile bootstrap",
+              "reps": 5000,
+              "valid_reps": 0,
+              "mean_valid_reps": 0,
+              "weeks": 352,
+              "excluded_missing_week_events": 0,
+              "win_rate_diff_95ci": null,
+              "mean_net_bp_diff_95ci": null
+            }
+          },
+          "any_vs_none": {
+            "left": {
+              "label_events": 14315,
+              "wins": 3062,
+              "total": 14308,
+              "rate": 0.21400615040536763,
+              "mean_net_bp": 7.317002490069283,
+              "net_bp_missing": 7
+            },
+            "right": {
+              "label_events": 36500,
+              "wins": 8329,
+              "total": 36484,
+              "rate": 0.2282918539633812,
+              "mean_net_bp": 17.95908992937626,
+              "net_bp_missing": 16
+            },
+            "win_rate_diff": -0.014285703558013563,
+            "mean_net_bp_diff": -10.642087439306975,
+            "bootstrap": {
+              "method": "NY-week cluster percentile bootstrap",
+              "reps": 5000,
+              "valid_reps": 5000,
+              "mean_valid_reps": 5000,
+              "weeks": 352,
+              "excluded_missing_week_events": 0,
+              "win_rate_diff_95ci": [
+                -0.03214295330374174,
+                0.002691619464968891
+              ],
+              "mean_net_bp_diff_95ci": [
+                -23.702456631607948,
+                2.4444987495515558
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "by_year": {
+    "<=2024": {
+      "events": 31274,
+      "periods": {
+        "15m": {
+          "events": 31274,
+          "exact_label_counts": {
+            "none": 14564,
+            "ambiguous": 12133,
+            "regular": 3417,
+            "no_confirmed_pivot": 1148,
+            "missing_touch_interval": 9,
+            "invalid_or_gapped_history": 2,
+            "source_bad_event": 1
+          },
+          "unknown_label_events": 13293,
+          "feasible_set_missing_or_unusable": 1160,
+          "feasible_set_events": 30114,
+          "cohorts": {
+            "regular": {
+              "label_events": 3417,
+              "wins": 667,
+              "total": 3417,
+              "rate": 0.1952004682470003,
+              "mean_net_bp": 10.907468419236643,
+              "net_bp_missing": 0
+            },
+            "absorption": {
+              "label_events": 0,
+              "wins": 0,
+              "total": 0,
+              "rate": null,
+              "mean_net_bp": null,
+              "net_bp_missing": 0
+            },
+            "none": {
+              "label_events": 14564,
+              "wins": 3353,
+              "total": 14564,
+              "rate": 0.23022521285361164,
+              "mean_net_bp": 25.69625033569435,
+              "net_bp_missing": 0
+            },
+            "any": {
+              "label_events": 3417,
+              "wins": 667,
+              "total": 3417,
+              "rate": 0.1952004682470003,
+              "mean_net_bp": 10.907468419236643,
+              "net_bp_missing": 0
+            }
+          },
+          "comparisons": {
+            "regular_vs_none": {
+              "left": {
+                "label_events": 3417,
+                "wins": 667,
+                "total": 3417,
+                "rate": 0.1952004682470003,
+                "mean_net_bp": 10.907468419236643,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 14564,
+                "wins": 3353,
+                "total": 14564,
+                "rate": 0.23022521285361164,
+                "mean_net_bp": 25.69625033569435,
+                "net_bp_missing": 0
+              },
+              "win_rate_diff": -0.03502474460661134,
+              "mean_net_bp_diff": -14.788781916457708,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 261,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.060440683606865005,
+                  -0.00951572671699181
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -36.59254112377099,
+                  7.952246502267523
+                ]
+              }
+            },
+            "absorption_vs_none": {
+              "left": {
+                "label_events": 0,
+                "wins": 0,
+                "total": 0,
+                "rate": null,
+                "mean_net_bp": null,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 14564,
+                "wins": 3353,
+                "total": 14564,
+                "rate": 0.23022521285361164,
+                "mean_net_bp": 25.69625033569435,
+                "net_bp_missing": 0
+              },
+              "win_rate_diff": null,
+              "mean_net_bp_diff": null,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 0,
+                "mean_valid_reps": 0,
+                "weeks": 261,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": null,
+                "mean_net_bp_diff_95ci": null
+              }
+            },
+            "any_vs_none": {
+              "left": {
+                "label_events": 3417,
+                "wins": 667,
+                "total": 3417,
+                "rate": 0.1952004682470003,
+                "mean_net_bp": 10.907468419236643,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 14564,
+                "wins": 3353,
+                "total": 14564,
+                "rate": 0.23022521285361164,
+                "mean_net_bp": 25.69625033569435,
+                "net_bp_missing": 0
+              },
+              "win_rate_diff": -0.03502474460661134,
+              "mean_net_bp_diff": -14.788781916457708,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 261,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.06028909605072887,
+                  -0.010125284670733415
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -36.27701081488551,
+                  7.682761411762526
+                ]
+              }
+            }
+          }
+        },
+        "1h": {
+          "events": 31274,
+          "exact_label_counts": {
+            "none": 15912,
+            "ambiguous": 7862,
+            "regular": 6945,
+            "no_confirmed_pivot": 503,
+            "empty_timeframe_bar": 38,
+            "missing_touch_interval": 9,
+            "history_gap": 2,
+            "invalid_or_gapped_history": 2,
+            "source_bad_event": 1
+          },
+          "unknown_label_events": 8417,
+          "feasible_set_missing_or_unusable": 555,
+          "feasible_set_events": 30719,
+          "cohorts": {
+            "regular": {
+              "label_events": 6945,
+              "wins": 1383,
+              "total": 6945,
+              "rate": 0.19913606911447085,
+              "mean_net_bp": 7.0483663508823335,
+              "net_bp_missing": 0
+            },
+            "absorption": {
+              "label_events": 0,
+              "wins": 0,
+              "total": 0,
+              "rate": null,
+              "mean_net_bp": null,
+              "net_bp_missing": 0
+            },
+            "none": {
+              "label_events": 15912,
+              "wins": 3641,
+              "total": 15912,
+              "rate": 0.22882101558572146,
+              "mean_net_bp": 26.86555735046982,
+              "net_bp_missing": 0
+            },
+            "any": {
+              "label_events": 6945,
+              "wins": 1383,
+              "total": 6945,
+              "rate": 0.19913606911447085,
+              "mean_net_bp": 7.0483663508823335,
+              "net_bp_missing": 0
+            }
+          },
+          "comparisons": {
+            "regular_vs_none": {
+              "left": {
+                "label_events": 6945,
+                "wins": 1383,
+                "total": 6945,
+                "rate": 0.19913606911447085,
+                "mean_net_bp": 7.0483663508823335,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 15912,
+                "wins": 3641,
+                "total": 15912,
+                "rate": 0.22882101558572146,
+                "mean_net_bp": 26.86555735046982,
+                "net_bp_missing": 0
+              },
+              "win_rate_diff": -0.02968494647125061,
+              "mean_net_bp_diff": -19.81719099958749,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 261,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.05687191270313133,
+                  -0.001994776612926825
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -41.964311643341546,
+                  2.956957167576319
+                ]
+              }
+            },
+            "absorption_vs_none": {
+              "left": {
+                "label_events": 0,
+                "wins": 0,
+                "total": 0,
+                "rate": null,
+                "mean_net_bp": null,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 15912,
+                "wins": 3641,
+                "total": 15912,
+                "rate": 0.22882101558572146,
+                "mean_net_bp": 26.86555735046982,
+                "net_bp_missing": 0
+              },
+              "win_rate_diff": null,
+              "mean_net_bp_diff": null,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 0,
+                "mean_valid_reps": 0,
+                "weeks": 261,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": null,
+                "mean_net_bp_diff_95ci": null
+              }
+            },
+            "any_vs_none": {
+              "left": {
+                "label_events": 6945,
+                "wins": 1383,
+                "total": 6945,
+                "rate": 0.19913606911447085,
+                "mean_net_bp": 7.0483663508823335,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 15912,
+                "wins": 3641,
+                "total": 15912,
+                "rate": 0.22882101558572146,
+                "mean_net_bp": 26.86555735046982,
+                "net_bp_missing": 0
+              },
+              "win_rate_diff": -0.02968494647125061,
+              "mean_net_bp_diff": -19.81719099958749,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 261,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.05686401137519359,
+                  -0.0024641555249923577
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -41.96696546799948,
+                  4.364790465284594
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "2025": {
+      "events": 20325,
+      "periods": {
+        "15m": {
+          "events": 20325,
+          "exact_label_counts": {
+            "none": 9132,
+            "ambiguous": 8033,
+            "regular": 2230,
+            "no_confirmed_pivot": 930
+          },
+          "unknown_label_events": 8963,
+          "feasible_set_missing_or_unusable": 930,
+          "feasible_set_events": 19395,
+          "cohorts": {
+            "regular": {
+              "label_events": 2230,
+              "wins": 476,
+              "total": 2230,
+              "rate": 0.21345291479820627,
+              "mean_net_bp": 12.78296790917064,
+              "net_bp_missing": 0
+            },
+            "absorption": {
+              "label_events": 0,
+              "wins": 0,
+              "total": 0,
+              "rate": null,
+              "mean_net_bp": null,
+              "net_bp_missing": 0
+            },
+            "none": {
+              "label_events": 9132,
+              "wins": 1818,
+              "total": 9131,
+              "rate": 0.19910196035483518,
+              "mean_net_bp": 3.1429297454546394,
+              "net_bp_missing": 1
+            },
+            "any": {
+              "label_events": 2230,
+              "wins": 476,
+              "total": 2230,
+              "rate": 0.21345291479820627,
+              "mean_net_bp": 12.78296790917064,
+              "net_bp_missing": 0
+            }
+          },
+          "comparisons": {
+            "regular_vs_none": {
+              "left": {
+                "label_events": 2230,
+                "wins": 476,
+                "total": 2230,
+                "rate": 0.21345291479820627,
+                "mean_net_bp": 12.78296790917064,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 9132,
+                "wins": 1818,
+                "total": 9131,
+                "rate": 0.19910196035483518,
+                "mean_net_bp": 3.1429297454546394,
+                "net_bp_missing": 1
+              },
+              "win_rate_diff": 0.014350954443371089,
+              "mean_net_bp_diff": 9.640038163716001,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 52,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.023899839420163764,
+                  0.05414235664886486
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -16.52427969089454,
+                  35.975351576193056
+                ]
+              }
+            },
+            "absorption_vs_none": {
+              "left": {
+                "label_events": 0,
+                "wins": 0,
+                "total": 0,
+                "rate": null,
+                "mean_net_bp": null,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 9132,
+                "wins": 1818,
+                "total": 9131,
+                "rate": 0.19910196035483518,
+                "mean_net_bp": 3.1429297454546394,
+                "net_bp_missing": 1
+              },
+              "win_rate_diff": null,
+              "mean_net_bp_diff": null,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 0,
+                "mean_valid_reps": 0,
+                "weeks": 52,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": null,
+                "mean_net_bp_diff_95ci": null
+              }
+            },
+            "any_vs_none": {
+              "left": {
+                "label_events": 2230,
+                "wins": 476,
+                "total": 2230,
+                "rate": 0.21345291479820627,
+                "mean_net_bp": 12.78296790917064,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 9132,
+                "wins": 1818,
+                "total": 9131,
+                "rate": 0.19910196035483518,
+                "mean_net_bp": 3.1429297454546394,
+                "net_bp_missing": 1
+              },
+              "win_rate_diff": 0.014350954443371089,
+              "mean_net_bp_diff": 9.640038163716001,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 52,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.023954589210427785,
+                  0.0551519014120845
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -16.0958793317676,
+                  36.732196129258085
+                ]
+              }
+            }
+          }
+        },
+        "1h": {
+          "events": 20325,
+          "exact_label_counts": {
+            "none": 10397,
+            "ambiguous": 5675,
+            "regular": 3858,
+            "no_confirmed_pivot": 395
+          },
+          "unknown_label_events": 6070,
+          "feasible_set_missing_or_unusable": 395,
+          "feasible_set_events": 19930,
+          "cohorts": {
+            "regular": {
+              "label_events": 3858,
+              "wins": 808,
+              "total": 3858,
+              "rate": 0.20943494038361846,
+              "mean_net_bp": 5.241866948316032,
+              "net_bp_missing": 0
+            },
+            "absorption": {
+              "label_events": 0,
+              "wins": 0,
+              "total": 0,
+              "rate": null,
+              "mean_net_bp": null,
+              "net_bp_missing": 0
+            },
+            "none": {
+              "label_events": 10397,
+              "wins": 2060,
+              "total": 10396,
+              "rate": 0.1981531358214698,
+              "mean_net_bp": -0.3796305273276275,
+              "net_bp_missing": 1
+            },
+            "any": {
+              "label_events": 3858,
+              "wins": 808,
+              "total": 3858,
+              "rate": 0.20943494038361846,
+              "mean_net_bp": 5.241866948316032,
+              "net_bp_missing": 0
+            }
+          },
+          "comparisons": {
+            "regular_vs_none": {
+              "left": {
+                "label_events": 3858,
+                "wins": 808,
+                "total": 3858,
+                "rate": 0.20943494038361846,
+                "mean_net_bp": 5.241866948316032,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 10397,
+                "wins": 2060,
+                "total": 10396,
+                "rate": 0.1981531358214698,
+                "mean_net_bp": -0.3796305273276275,
+                "net_bp_missing": 1
+              },
+              "win_rate_diff": 0.011281804562148667,
+              "mean_net_bp_diff": 5.621497475643659,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 52,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.02122308610327062,
+                  0.046074710113151195
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -18.66698475361068,
+                  32.69288617584609
+                ]
+              }
+            },
+            "absorption_vs_none": {
+              "left": {
+                "label_events": 0,
+                "wins": 0,
+                "total": 0,
+                "rate": null,
+                "mean_net_bp": null,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 10397,
+                "wins": 2060,
+                "total": 10396,
+                "rate": 0.1981531358214698,
+                "mean_net_bp": -0.3796305273276275,
+                "net_bp_missing": 1
+              },
+              "win_rate_diff": null,
+              "mean_net_bp_diff": null,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 0,
+                "mean_valid_reps": 0,
+                "weeks": 52,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": null,
+                "mean_net_bp_diff_95ci": null
+              }
+            },
+            "any_vs_none": {
+              "left": {
+                "label_events": 3858,
+                "wins": 808,
+                "total": 3858,
+                "rate": 0.20943494038361846,
+                "mean_net_bp": 5.241866948316032,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 10397,
+                "wins": 2060,
+                "total": 10396,
+                "rate": 0.1981531358214698,
+                "mean_net_bp": -0.3796305273276275,
+                "net_bp_missing": 1
+              },
+              "win_rate_diff": 0.011281804562148667,
+              "mean_net_bp_diff": 5.621497475643659,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 52,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.020775084384470493,
+                  0.04469786661731999
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -18.780494929244973,
+                  31.890388532174086
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "2026": {
+      "events": 19463,
+      "periods": {
+        "15m": {
+          "events": 19463,
+          "exact_label_counts": {
+            "none": 8936,
+            "ambiguous": 7380,
+            "regular": 2198,
+            "no_confirmed_pivot": 948,
+            "source_bad_event": 1
+          },
+          "unknown_label_events": 8329,
+          "feasible_set_missing_or_unusable": 949,
+          "feasible_set_events": 18514,
+          "cohorts": {
+            "regular": {
+              "label_events": 2198,
+              "wins": 525,
+              "total": 2191,
+              "rate": 0.23961661341853036,
+              "mean_net_bp": 10.60285291136999,
+              "net_bp_missing": 7
+            },
+            "absorption": {
+              "label_events": 0,
+              "wins": 0,
+              "total": 0,
+              "rate": null,
+              "mean_net_bp": null,
+              "net_bp_missing": 0
+            },
+            "none": {
+              "label_events": 8936,
+              "wins": 2385,
+              "total": 8924,
+              "rate": 0.26725683549977586,
+              "mean_net_bp": 26.316363729005054,
+              "net_bp_missing": 12
+            },
+            "any": {
+              "label_events": 2198,
+              "wins": 525,
+              "total": 2191,
+              "rate": 0.23961661341853036,
+              "mean_net_bp": 10.60285291136999,
+              "net_bp_missing": 7
+            }
+          },
+          "comparisons": {
+            "regular_vs_none": {
+              "left": {
+                "label_events": 2198,
+                "wins": 525,
+                "total": 2191,
+                "rate": 0.23961661341853036,
+                "mean_net_bp": 10.60285291136999,
+                "net_bp_missing": 7
+              },
+              "right": {
+                "label_events": 8936,
+                "wins": 2385,
+                "total": 8924,
+                "rate": 0.26725683549977586,
+                "mean_net_bp": 26.316363729005054,
+                "net_bp_missing": 12
+              },
+              "win_rate_diff": -0.027640222081245502,
+              "mean_net_bp_diff": -15.713510817635065,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 39,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.05850383518300819,
+                  0.002173635740264687
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -32.252410522274836,
+                  0.572291745575943
+                ]
+              }
+            },
+            "absorption_vs_none": {
+              "left": {
+                "label_events": 0,
+                "wins": 0,
+                "total": 0,
+                "rate": null,
+                "mean_net_bp": null,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 8936,
+                "wins": 2385,
+                "total": 8924,
+                "rate": 0.26725683549977586,
+                "mean_net_bp": 26.316363729005054,
+                "net_bp_missing": 12
+              },
+              "win_rate_diff": null,
+              "mean_net_bp_diff": null,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 0,
+                "mean_valid_reps": 0,
+                "weeks": 39,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": null,
+                "mean_net_bp_diff_95ci": null
+              }
+            },
+            "any_vs_none": {
+              "left": {
+                "label_events": 2198,
+                "wins": 525,
+                "total": 2191,
+                "rate": 0.23961661341853036,
+                "mean_net_bp": 10.60285291136999,
+                "net_bp_missing": 7
+              },
+              "right": {
+                "label_events": 8936,
+                "wins": 2385,
+                "total": 8924,
+                "rate": 0.26725683549977586,
+                "mean_net_bp": 26.316363729005054,
+                "net_bp_missing": 12
+              },
+              "win_rate_diff": -0.027640222081245502,
+              "mean_net_bp_diff": -15.713510817635065,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 39,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.05807784671853974,
+                  0.0021847279152813425
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -32.252781223350574,
+                  -0.06835665281705569
+                ]
+              }
+            }
+          }
+        },
+        "1h": {
+          "events": 19463,
+          "exact_label_counts": {
+            "none": 10191,
+            "ambiguous": 5321,
+            "regular": 3512,
+            "no_confirmed_pivot": 438,
+            "source_bad_event": 1
+          },
+          "unknown_label_events": 5760,
+          "feasible_set_missing_or_unusable": 439,
+          "feasible_set_events": 19024,
+          "cohorts": {
+            "regular": {
+              "label_events": 3512,
+              "wins": 871,
+              "total": 3505,
+              "rate": 0.2485021398002853,
+              "mean_net_bp": 10.133422149623465,
+              "net_bp_missing": 7
+            },
+            "absorption": {
+              "label_events": 0,
+              "wins": 0,
+              "total": 0,
+              "rate": null,
+              "mean_net_bp": null,
+              "net_bp_missing": 0
+            },
+            "none": {
+              "label_events": 10191,
+              "wins": 2628,
+              "total": 10176,
+              "rate": 0.25825471698113206,
+              "mean_net_bp": 22.76742604017155,
+              "net_bp_missing": 15
+            },
+            "any": {
+              "label_events": 3512,
+              "wins": 871,
+              "total": 3505,
+              "rate": 0.2485021398002853,
+              "mean_net_bp": 10.133422149623465,
+              "net_bp_missing": 7
+            }
+          },
+          "comparisons": {
+            "regular_vs_none": {
+              "left": {
+                "label_events": 3512,
+                "wins": 871,
+                "total": 3505,
+                "rate": 0.2485021398002853,
+                "mean_net_bp": 10.133422149623465,
+                "net_bp_missing": 7
+              },
+              "right": {
+                "label_events": 10191,
+                "wins": 2628,
+                "total": 10176,
+                "rate": 0.25825471698113206,
+                "mean_net_bp": 22.76742604017155,
+                "net_bp_missing": 15
+              },
+              "win_rate_diff": -0.009752577180846767,
+              "mean_net_bp_diff": -12.634003890548085,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 39,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.038947742647456235,
+                  0.019536492482331743
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -26.960378220143888,
+                  1.3180070067202885
+                ]
+              }
+            },
+            "absorption_vs_none": {
+              "left": {
+                "label_events": 0,
+                "wins": 0,
+                "total": 0,
+                "rate": null,
+                "mean_net_bp": null,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 10191,
+                "wins": 2628,
+                "total": 10176,
+                "rate": 0.25825471698113206,
+                "mean_net_bp": 22.76742604017155,
+                "net_bp_missing": 15
+              },
+              "win_rate_diff": null,
+              "mean_net_bp_diff": null,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 0,
+                "mean_valid_reps": 0,
+                "weeks": 39,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": null,
+                "mean_net_bp_diff_95ci": null
+              }
+            },
+            "any_vs_none": {
+              "left": {
+                "label_events": 3512,
+                "wins": 871,
+                "total": 3505,
+                "rate": 0.2485021398002853,
+                "mean_net_bp": 10.133422149623465,
+                "net_bp_missing": 7
+              },
+              "right": {
+                "label_events": 10191,
+                "wins": 2628,
+                "total": 10176,
+                "rate": 0.25825471698113206,
+                "mean_net_bp": 22.76742604017155,
+                "net_bp_missing": 15
+              },
+              "win_rate_diff": -0.009752577180846767,
+              "mean_net_bp_diff": -12.634003890548085,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 39,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.03980794615206214,
+                  0.019186125811108037
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -27.251564604530948,
+                  1.2115854594617934
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "by_side": {
+    "+1": {
+      "events": 36206,
+      "periods": {
+        "15m": {
+          "events": 36206,
+          "exact_label_counts": {
+            "none": 19889,
+            "ambiguous": 13096,
+            "regular": 1918,
+            "no_confirmed_pivot": 1298,
+            "missing_touch_interval": 4,
+            "source_bad_event": 1
+          },
+          "unknown_label_events": 14399,
+          "feasible_set_missing_or_unusable": 1303,
+          "feasible_set_events": 34903,
+          "cohorts": {
+            "regular": {
+              "label_events": 1918,
+              "wins": 367,
+              "total": 1918,
+              "rate": 0.19134515119916579,
+              "mean_net_bp": 11.391604430863236,
+              "net_bp_missing": 0
+            },
+            "absorption": {
+              "label_events": 0,
+              "wins": 0,
+              "total": 0,
+              "rate": null,
+              "mean_net_bp": null,
+              "net_bp_missing": 0
+            },
+            "none": {
+              "label_events": 19889,
+              "wins": 4166,
+              "total": 19886,
+              "rate": 0.20949411646384392,
+              "mean_net_bp": 24.376148228851292,
+              "net_bp_missing": 3
+            },
+            "any": {
+              "label_events": 1918,
+              "wins": 367,
+              "total": 1918,
+              "rate": 0.19134515119916579,
+              "mean_net_bp": 11.391604430863236,
+              "net_bp_missing": 0
+            }
+          },
+          "comparisons": {
+            "regular_vs_none": {
+              "left": {
+                "label_events": 1918,
+                "wins": 367,
+                "total": 1918,
+                "rate": 0.19134515119916579,
+                "mean_net_bp": 11.391604430863236,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 19889,
+                "wins": 4166,
+                "total": 19886,
+                "rate": 0.20949411646384392,
+                "mean_net_bp": 24.376148228851292,
+                "net_bp_missing": 3
+              },
+              "win_rate_diff": -0.01814896526467813,
+              "mean_net_bp_diff": -12.984543797988056,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 328,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.04158487802696786,
+                  0.006018959101856805
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -33.33570135799071,
+                  6.134539150381857
+                ]
+              }
+            },
+            "absorption_vs_none": {
+              "left": {
+                "label_events": 0,
+                "wins": 0,
+                "total": 0,
+                "rate": null,
+                "mean_net_bp": null,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 19889,
+                "wins": 4166,
+                "total": 19886,
+                "rate": 0.20949411646384392,
+                "mean_net_bp": 24.376148228851292,
+                "net_bp_missing": 3
+              },
+              "win_rate_diff": null,
+              "mean_net_bp_diff": null,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 0,
+                "mean_valid_reps": 0,
+                "weeks": 328,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": null,
+                "mean_net_bp_diff_95ci": null
+              }
+            },
+            "any_vs_none": {
+              "left": {
+                "label_events": 1918,
+                "wins": 367,
+                "total": 1918,
+                "rate": 0.19134515119916579,
+                "mean_net_bp": 11.391604430863236,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 19889,
+                "wins": 4166,
+                "total": 19886,
+                "rate": 0.20949411646384392,
+                "mean_net_bp": 24.376148228851292,
+                "net_bp_missing": 3
+              },
+              "win_rate_diff": -0.01814896526467813,
+              "mean_net_bp_diff": -12.984543797988056,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 328,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.04221961419079587,
+                  0.006123579133673965
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -33.39594026070443,
+                  5.986957441561307
+                ]
+              }
+            }
+          }
+        },
+        "1h": {
+          "events": 36206,
+          "exact_label_counts": {
+            "none": 24759,
+            "ambiguous": 8341,
+            "regular": 2522,
+            "no_confirmed_pivot": 577,
+            "missing_touch_interval": 4,
+            "empty_timeframe_bar": 2,
+            "source_bad_event": 1
+          },
+          "unknown_label_events": 8925,
+          "feasible_set_missing_or_unusable": 584,
+          "feasible_set_events": 35622,
+          "cohorts": {
+            "regular": {
+              "label_events": 2522,
+              "wins": 460,
+              "total": 2522,
+              "rate": 0.1823949246629659,
+              "mean_net_bp": 2.5315864431558084,
+              "net_bp_missing": 0
+            },
+            "absorption": {
+              "label_events": 0,
+              "wins": 0,
+              "total": 0,
+              "rate": null,
+              "mean_net_bp": null,
+              "net_bp_missing": 0
+            },
+            "none": {
+              "label_events": 24759,
+              "wins": 5185,
+              "total": 24756,
+              "rate": 0.2094441751494587,
+              "mean_net_bp": 22.059819068653802,
+              "net_bp_missing": 3
+            },
+            "any": {
+              "label_events": 2522,
+              "wins": 460,
+              "total": 2522,
+              "rate": 0.1823949246629659,
+              "mean_net_bp": 2.5315864431558084,
+              "net_bp_missing": 0
+            }
+          },
+          "comparisons": {
+            "regular_vs_none": {
+              "left": {
+                "label_events": 2522,
+                "wins": 460,
+                "total": 2522,
+                "rate": 0.1823949246629659,
+                "mean_net_bp": 2.5315864431558084,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 24759,
+                "wins": 5185,
+                "total": 24756,
+                "rate": 0.2094441751494587,
+                "mean_net_bp": 22.059819068653802,
+                "net_bp_missing": 3
+              },
+              "win_rate_diff": -0.027049250486492815,
+              "mean_net_bp_diff": -19.528232625497992,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 328,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.04974760717651761,
+                  -0.004149878205257813
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -36.90022956607898,
+                  -2.4455622500950263
+                ]
+              }
+            },
+            "absorption_vs_none": {
+              "left": {
+                "label_events": 0,
+                "wins": 0,
+                "total": 0,
+                "rate": null,
+                "mean_net_bp": null,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 24759,
+                "wins": 5185,
+                "total": 24756,
+                "rate": 0.2094441751494587,
+                "mean_net_bp": 22.059819068653802,
+                "net_bp_missing": 3
+              },
+              "win_rate_diff": null,
+              "mean_net_bp_diff": null,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 0,
+                "mean_valid_reps": 0,
+                "weeks": 328,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": null,
+                "mean_net_bp_diff_95ci": null
+              }
+            },
+            "any_vs_none": {
+              "left": {
+                "label_events": 2522,
+                "wins": 460,
+                "total": 2522,
+                "rate": 0.1823949246629659,
+                "mean_net_bp": 2.5315864431558084,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 24759,
+                "wins": 5185,
+                "total": 24756,
+                "rate": 0.2094441751494587,
+                "mean_net_bp": 22.059819068653802,
+                "net_bp_missing": 3
+              },
+              "win_rate_diff": -0.027049250486492815,
+              "mean_net_bp_diff": -19.528232625497992,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 328,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.04990761588329838,
+                  -0.005430322615968196
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -36.402964757068624,
+                  -2.679318397379096
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "-1": {
+      "events": 34856,
+      "periods": {
+        "15m": {
+          "events": 34856,
+          "exact_label_counts": {
+            "ambiguous": 14450,
+            "none": 12743,
+            "regular": 5927,
+            "no_confirmed_pivot": 1728,
+            "missing_touch_interval": 5,
+            "invalid_or_gapped_history": 2,
+            "source_bad_event": 1
+          },
+          "unknown_label_events": 16186,
+          "feasible_set_missing_or_unusable": 1736,
+          "feasible_set_events": 33120,
+          "cohorts": {
+            "regular": {
+              "label_events": 5927,
+              "wins": 1301,
+              "total": 5920,
+              "rate": 0.2197635135135135,
+              "mean_net_bp": 11.34435666493211,
+              "net_bp_missing": 7
+            },
+            "absorption": {
+              "label_events": 0,
+              "wins": 0,
+              "total": 0,
+              "rate": null,
+              "mean_net_bp": null,
+              "net_bp_missing": 0
+            },
+            "none": {
+              "label_events": 12743,
+              "wins": 3390,
+              "total": 12733,
+              "rate": 0.2662373360559177,
+              "mean_net_bp": 12.019274926058522,
+              "net_bp_missing": 10
+            },
+            "any": {
+              "label_events": 5927,
+              "wins": 1301,
+              "total": 5920,
+              "rate": 0.2197635135135135,
+              "mean_net_bp": 11.34435666493211,
+              "net_bp_missing": 7
+            }
+          },
+          "comparisons": {
+            "regular_vs_none": {
+              "left": {
+                "label_events": 5927,
+                "wins": 1301,
+                "total": 5920,
+                "rate": 0.2197635135135135,
+                "mean_net_bp": 11.34435666493211,
+                "net_bp_missing": 7
+              },
+              "right": {
+                "label_events": 12743,
+                "wins": 3390,
+                "total": 12733,
+                "rate": 0.2662373360559177,
+                "mean_net_bp": 12.019274926058522,
+                "net_bp_missing": 10
+              },
+              "win_rate_diff": -0.0464738225424042,
+              "mean_net_bp_diff": -0.6749182611264111,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 351,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.06234213997995901,
+                  -0.030285996481273426
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -11.984122243476351,
+                  10.82872112297682
+                ]
+              }
+            },
+            "absorption_vs_none": {
+              "left": {
+                "label_events": 0,
+                "wins": 0,
+                "total": 0,
+                "rate": null,
+                "mean_net_bp": null,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 12743,
+                "wins": 3390,
+                "total": 12733,
+                "rate": 0.2662373360559177,
+                "mean_net_bp": 12.019274926058522,
+                "net_bp_missing": 10
+              },
+              "win_rate_diff": null,
+              "mean_net_bp_diff": null,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 0,
+                "mean_valid_reps": 0,
+                "weeks": 351,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": null,
+                "mean_net_bp_diff_95ci": null
+              }
+            },
+            "any_vs_none": {
+              "left": {
+                "label_events": 5927,
+                "wins": 1301,
+                "total": 5920,
+                "rate": 0.2197635135135135,
+                "mean_net_bp": 11.34435666493211,
+                "net_bp_missing": 7
+              },
+              "right": {
+                "label_events": 12743,
+                "wins": 3390,
+                "total": 12733,
+                "rate": 0.2662373360559177,
+                "mean_net_bp": 12.019274926058522,
+                "net_bp_missing": 10
+              },
+              "win_rate_diff": -0.0464738225424042,
+              "mean_net_bp_diff": -0.6749182611264111,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 351,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.0627076844989105,
+                  -0.029998764697315668
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -12.127831193531124,
+                  11.510926258195537
+                ]
+              }
+            }
+          }
+        },
+        "1h": {
+          "events": 34856,
+          "exact_label_counts": {
+            "regular": 11793,
+            "none": 11741,
+            "ambiguous": 10517,
+            "no_confirmed_pivot": 759,
+            "empty_timeframe_bar": 36,
+            "missing_touch_interval": 5,
+            "history_gap": 2,
+            "invalid_or_gapped_history": 2,
+            "source_bad_event": 1
+          },
+          "unknown_label_events": 11322,
+          "feasible_set_missing_or_unusable": 805,
+          "feasible_set_events": 34051,
+          "cohorts": {
+            "regular": {
+              "label_events": 11793,
+              "wins": 2602,
+              "total": 11786,
+              "rate": 0.22077040556592567,
+              "mean_net_bp": 8.340998694915355,
+              "net_bp_missing": 7
+            },
+            "absorption": {
+              "label_events": 0,
+              "wins": 0,
+              "total": 0,
+              "rate": null,
+              "mean_net_bp": null,
+              "net_bp_missing": 0
+            },
+            "none": {
+              "label_events": 11741,
+              "wins": 3144,
+              "total": 11728,
+              "rate": 0.2680763983628922,
+              "mean_net_bp": 9.303082888793483,
+              "net_bp_missing": 13
+            },
+            "any": {
+              "label_events": 11793,
+              "wins": 2602,
+              "total": 11786,
+              "rate": 0.22077040556592567,
+              "mean_net_bp": 8.340998694915355,
+              "net_bp_missing": 7
+            }
+          },
+          "comparisons": {
+            "regular_vs_none": {
+              "left": {
+                "label_events": 11793,
+                "wins": 2602,
+                "total": 11786,
+                "rate": 0.22077040556592567,
+                "mean_net_bp": 8.340998694915355,
+                "net_bp_missing": 7
+              },
+              "right": {
+                "label_events": 11741,
+                "wins": 3144,
+                "total": 11728,
+                "rate": 0.2680763983628922,
+                "mean_net_bp": 9.303082888793483,
+                "net_bp_missing": 13
+              },
+              "win_rate_diff": -0.04730599279696654,
+              "mean_net_bp_diff": -0.9620841938781286,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 351,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.06257982062515798,
+                  -0.03154981903869265
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -11.678403803586514,
+                  10.165429594112846
+                ]
+              }
+            },
+            "absorption_vs_none": {
+              "left": {
+                "label_events": 0,
+                "wins": 0,
+                "total": 0,
+                "rate": null,
+                "mean_net_bp": null,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 11741,
+                "wins": 3144,
+                "total": 11728,
+                "rate": 0.2680763983628922,
+                "mean_net_bp": 9.303082888793483,
+                "net_bp_missing": 13
+              },
+              "win_rate_diff": null,
+              "mean_net_bp_diff": null,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 0,
+                "mean_valid_reps": 0,
+                "weeks": 351,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": null,
+                "mean_net_bp_diff_95ci": null
+              }
+            },
+            "any_vs_none": {
+              "left": {
+                "label_events": 11793,
+                "wins": 2602,
+                "total": 11786,
+                "rate": 0.22077040556592567,
+                "mean_net_bp": 8.340998694915355,
+                "net_bp_missing": 7
+              },
+              "right": {
+                "label_events": 11741,
+                "wins": 3144,
+                "total": 11728,
+                "rate": 0.2680763983628922,
+                "mean_net_bp": 9.303082888793483,
+                "net_bp_missing": 13
+              },
+              "win_rate_diff": -0.04730599279696654,
+              "mean_net_bp_diff": -0.9620841938781286,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 351,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.06250011817424085,
+                  -0.03176592214787609
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -11.344955888871237,
+                  9.944868048399915
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "shared_coverage": {
+    "events": 34552,
+    "periods": {
+      "15m": {
+        "events": 34552,
+        "exact_label_counts": {
+          "none": 27708,
+          "regular": 6844
+        },
+        "unknown_label_events": 0,
+        "feasible_set_missing_or_unusable": 0,
+        "feasible_set_events": 34552,
+        "cohorts": {
+          "regular": {
+            "label_events": 6844,
+            "wins": 1430,
+            "total": 6838,
+            "rate": 0.20912547528517111,
+            "mean_net_bp": 7.410205272949965,
+            "net_bp_missing": 6
+          },
+          "absorption": {
+            "label_events": 0,
+            "wins": 0,
+            "total": 0,
+            "rate": null,
+            "mean_net_bp": null,
+            "net_bp_missing": 0
+          },
+          "none": {
+            "label_events": 27708,
+            "wins": 6311,
+            "total": 27695,
+            "rate": 0.22787506770175123,
+            "mean_net_bp": 18.87338250139024,
+            "net_bp_missing": 13
+          },
+          "any": {
+            "label_events": 6844,
+            "wins": 1430,
+            "total": 6838,
+            "rate": 0.20912547528517111,
+            "mean_net_bp": 7.410205272949965,
+            "net_bp_missing": 6
+          }
+        },
+        "comparisons": {
+          "regular_vs_none": {
+            "left": {
+              "label_events": 6844,
+              "wins": 1430,
+              "total": 6838,
+              "rate": 0.20912547528517111,
+              "mean_net_bp": 7.410205272949965,
+              "net_bp_missing": 6
+            },
+            "right": {
+              "label_events": 27708,
+              "wins": 6311,
+              "total": 27695,
+              "rate": 0.22787506770175123,
+              "mean_net_bp": 18.87338250139024,
+              "net_bp_missing": 13
+            },
+            "win_rate_diff": -0.018749592416580113,
+            "mean_net_bp_diff": -11.463177228440273,
+            "bootstrap": {
+              "method": "NY-week cluster percentile bootstrap",
+              "reps": 5000,
+              "valid_reps": 5000,
+              "mean_valid_reps": 5000,
+              "weeks": 351,
+              "excluded_missing_week_events": 0,
+              "win_rate_diff_95ci": [
+                -0.038496711578815325,
+                0.0009976989828680738
+              ],
+              "mean_net_bp_diff_95ci": [
+                -25.721249231996627,
+                2.850834653823307
+              ]
+            }
+          },
+          "absorption_vs_none": {
+            "left": {
+              "label_events": 0,
+              "wins": 0,
+              "total": 0,
+              "rate": null,
+              "mean_net_bp": null,
+              "net_bp_missing": 0
+            },
+            "right": {
+              "label_events": 27708,
+              "wins": 6311,
+              "total": 27695,
+              "rate": 0.22787506770175123,
+              "mean_net_bp": 18.87338250139024,
+              "net_bp_missing": 13
+            },
+            "win_rate_diff": null,
+            "mean_net_bp_diff": null,
+            "bootstrap": {
+              "method": "NY-week cluster percentile bootstrap",
+              "reps": 5000,
+              "valid_reps": 0,
+              "mean_valid_reps": 0,
+              "weeks": 351,
+              "excluded_missing_week_events": 0,
+              "win_rate_diff_95ci": null,
+              "mean_net_bp_diff_95ci": null
+            }
+          },
+          "any_vs_none": {
+            "left": {
+              "label_events": 6844,
+              "wins": 1430,
+              "total": 6838,
+              "rate": 0.20912547528517111,
+              "mean_net_bp": 7.410205272949965,
+              "net_bp_missing": 6
+            },
+            "right": {
+              "label_events": 27708,
+              "wins": 6311,
+              "total": 27695,
+              "rate": 0.22787506770175123,
+              "mean_net_bp": 18.87338250139024,
+              "net_bp_missing": 13
+            },
+            "win_rate_diff": -0.018749592416580113,
+            "mean_net_bp_diff": -11.463177228440273,
+            "bootstrap": {
+              "method": "NY-week cluster percentile bootstrap",
+              "reps": 5000,
+              "valid_reps": 5000,
+              "mean_valid_reps": 5000,
+              "weeks": 351,
+              "excluded_missing_week_events": 0,
+              "win_rate_diff_95ci": [
+                -0.038643372297390656,
+                0.00039618017138288606
+              ],
+              "mean_net_bp_diff_95ci": [
+                -25.772091041644067,
+                2.5901973425060136
+              ]
+            }
+          }
+        }
+      },
+      "1h": {
+        "events": 34552,
+        "exact_label_counts": {
+          "none": 26145,
+          "regular": 8407
+        },
+        "unknown_label_events": 0,
+        "feasible_set_missing_or_unusable": 0,
+        "feasible_set_events": 34552,
+        "cohorts": {
+          "regular": {
+            "label_events": 8407,
+            "wins": 1733,
+            "total": 8402,
+            "rate": 0.2062604141870983,
+            "mean_net_bp": 3.916273560936708,
+            "net_bp_missing": 5
+          },
+          "absorption": {
+            "label_events": 0,
+            "wins": 0,
+            "total": 0,
+            "rate": null,
+            "mean_net_bp": null,
+            "net_bp_missing": 0
+          },
+          "none": {
+            "label_events": 26145,
+            "wins": 6008,
+            "total": 26131,
+            "rate": 0.2299184876200681,
+            "mean_net_bp": 20.68289700254274,
+            "net_bp_missing": 14
+          },
+          "any": {
+            "label_events": 8407,
+            "wins": 1733,
+            "total": 8402,
+            "rate": 0.2062604141870983,
+            "mean_net_bp": 3.916273560936708,
+            "net_bp_missing": 5
+          }
+        },
+        "comparisons": {
+          "regular_vs_none": {
+            "left": {
+              "label_events": 8407,
+              "wins": 1733,
+              "total": 8402,
+              "rate": 0.2062604141870983,
+              "mean_net_bp": 3.916273560936708,
+              "net_bp_missing": 5
+            },
+            "right": {
+              "label_events": 26145,
+              "wins": 6008,
+              "total": 26131,
+              "rate": 0.2299184876200681,
+              "mean_net_bp": 20.68289700254274,
+              "net_bp_missing": 14
+            },
+            "win_rate_diff": -0.0236580734329698,
+            "mean_net_bp_diff": -16.766623441606033,
+            "bootstrap": {
+              "method": "NY-week cluster percentile bootstrap",
+              "reps": 5000,
+              "valid_reps": 5000,
+              "mean_valid_reps": 5000,
+              "weeks": 351,
+              "excluded_missing_week_events": 0,
+              "win_rate_diff_95ci": [
+                -0.043168647158980875,
+                -0.005000438019484213
+              ],
+              "mean_net_bp_diff_95ci": [
+                -30.937359186181645,
+                -2.6987880548666587
+              ]
+            }
+          },
+          "absorption_vs_none": {
+            "left": {
+              "label_events": 0,
+              "wins": 0,
+              "total": 0,
+              "rate": null,
+              "mean_net_bp": null,
+              "net_bp_missing": 0
+            },
+            "right": {
+              "label_events": 26145,
+              "wins": 6008,
+              "total": 26131,
+              "rate": 0.2299184876200681,
+              "mean_net_bp": 20.68289700254274,
+              "net_bp_missing": 14
+            },
+            "win_rate_diff": null,
+            "mean_net_bp_diff": null,
+            "bootstrap": {
+              "method": "NY-week cluster percentile bootstrap",
+              "reps": 5000,
+              "valid_reps": 0,
+              "mean_valid_reps": 0,
+              "weeks": 351,
+              "excluded_missing_week_events": 0,
+              "win_rate_diff_95ci": null,
+              "mean_net_bp_diff_95ci": null
+            }
+          },
+          "any_vs_none": {
+            "left": {
+              "label_events": 8407,
+              "wins": 1733,
+              "total": 8402,
+              "rate": 0.2062604141870983,
+              "mean_net_bp": 3.916273560936708,
+              "net_bp_missing": 5
+            },
+            "right": {
+              "label_events": 26145,
+              "wins": 6008,
+              "total": 26131,
+              "rate": 0.2299184876200681,
+              "mean_net_bp": 20.68289700254274,
+              "net_bp_missing": 14
+            },
+            "win_rate_diff": -0.0236580734329698,
+            "mean_net_bp_diff": -16.766623441606033,
+            "bootstrap": {
+              "method": "NY-week cluster percentile bootstrap",
+              "reps": 5000,
+              "valid_reps": 5000,
+              "mean_valid_reps": 5000,
+              "weeks": 351,
+              "excluded_missing_week_events": 0,
+              "win_rate_diff_95ci": [
+                -0.0431349588294656,
+                -0.004600133889649903
+              ],
+              "mean_net_bp_diff_95ci": [
+                -30.944473283126143,
+                -2.11637829049502
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "shared_coverage_rule": "both exact period labels are regular, absorption or none; ambiguous/unknown labels are not imputed",
+  "meta": {
+    "events": 71062,
+    "unique_event_ids": 71062,
+    "duplicate_event_id_rows": 0,
+    "numeric_net_bp_events": 71032,
+    "missing_or_non_numeric_net_bp_events": 30,
+    "events_with_invalid_or_missing_week": 0,
+    "events_with_unknown_side": 0,
+    "win_definition": "numeric net_bp > 0; zero remains in total but is neither win nor loss",
+    "week_definition": "input week normalized to YYYY-MM-DD and used as the NY-week cluster key",
+    "bootstrap": {
+      "method": "NY-week cluster percentile",
+      "reps": 5000,
+      "seed_base": 20261108,
+      "ci": "95%"
+    }
+  },
+  "label_quality": {
+    "15m": {
+      "label_counts": {
+        "none": 32632,
+        "ambiguous": 27546,
+        "regular": 7845,
+        "no_confirmed_pivot": 3026,
+        "missing_touch_interval": 9,
+        "source_bad_event": 2,
+        "invalid_or_gapped_history": 2
+      },
+      "unknown_label_count": 30585,
+      "empty_feasible_set_count": 3039,
+      "candidate_set_count": 68023
+    },
+    "1h": {
+      "label_counts": {
+        "none": 36500,
+        "ambiguous": 18858,
+        "regular": 14315,
+        "no_confirmed_pivot": 1336,
+        "empty_timeframe_bar": 38,
+        "missing_touch_interval": 9,
+        "source_bad_event": 2,
+        "history_gap": 2,
+        "invalid_or_gapped_history": 2
+      },
+      "unknown_label_count": 20247,
+      "empty_feasible_set_count": 1389,
+      "candidate_set_count": 69673
+    }
+  },
+  "full_period_feasible_bounds": {
+    "15m": {
+      "regular_vs_none": {
+        "left_arm": [
+          "regular"
+        ],
+        "right_arm": [
+          "none"
+        ],
+        "left": {
+          "possible_label_events": 35391,
+          "minimum_label_denominator": 7845,
+          "maximum_label_denominator": 35391,
+          "possible_outcome_denominator": 35374,
+          "minimum_denominator": 7838,
+          "maximum_denominator": 35374,
+          "outcome_denominator_scope": "numeric net_bp events; ties remain in total",
+          "mandatory_outcomes": {
+            "n": 7838,
+            "wins": 1668,
+            "losses": 6170,
+            "flat": 0
+          },
+          "optional_outcomes": {
+            "n": 27536,
+            "wins": 7468,
+            "losses": 20068,
+            "flat": 0
+          },
+          "win_rate_bounds": [
+            0.05977209202322081,
+            0.596890108454201
+          ],
+          "mean_net_bp_bounds": [
+            -170.27457401380295,
+            233.84905943495835
+          ]
+        },
+        "right": {
+          "possible_label_events": 60178,
+          "minimum_label_denominator": 32632,
+          "maximum_label_denominator": 60178,
+          "possible_outcome_denominator": 60155,
+          "minimum_denominator": 32619,
+          "maximum_denominator": 60155,
+          "outcome_denominator_scope": "numeric net_bp events; ties remain in total",
+          "mandatory_outcomes": {
+            "n": 32619,
+            "wins": 7556,
+            "losses": 25063,
+            "flat": 0
+          },
+          "optional_outcomes": {
+            "n": 27536,
+            "wins": 7468,
+            "losses": 20068,
+            "flat": 0
+          },
+          "win_rate_bounds": [
+            0.14341298612560974,
+            0.37478484296654774
+          ],
+          "mean_net_bp_bounds": [
+            -46.88882710395516,
+            101.69898108411114
+          ]
+        },
+        "joint_feasible_set_overlap_events": 27536,
+        "win_rate_diff_bounds": [
+          -0.3150127509433269,
+          0.4534771223285913
+        ],
+        "mean_net_bp_diff_bounds": [
+          -271.9735550979141,
+          280.73788653891353
+        ],
+        "conservative_difference_bound": true,
+        "sharp_for_win_rate_difference": true,
+        "sharp_for_joint_difference": false,
+        "sharpness_by_metric": {
+          "win_rate_diff": true,
+          "mean_net_bp_diff": false
+        },
+        "sharpness_note": "Win-rate difference bounds are sharp when both arms have fixed numeric outcomes, or their feasible memberships do not overlap. Mean-net-bp bounds are guaranteed sharp when feasible memberships do not overlap; with overlap they are conservative outer bounds.",
+        "unknown_feasible_set_outcomes_excluded": 3039,
+        "missing_net_bp_events_excluded": 30,
+        "denominator_note": "Bounds use numeric-net_bp events per arm. Denominators range from mandatory to all feasible arm members. Events with no feasible set are excluded, never assigned to none."
+      },
+      "any_vs_none": {
+        "left_arm": [
+          "absorption",
+          "regular"
+        ],
+        "right_arm": [
+          "none"
+        ],
+        "left": {
+          "possible_label_events": 35391,
+          "minimum_label_denominator": 7845,
+          "maximum_label_denominator": 35391,
+          "possible_outcome_denominator": 35374,
+          "minimum_denominator": 7838,
+          "maximum_denominator": 35374,
+          "outcome_denominator_scope": "numeric net_bp events; ties remain in total",
+          "mandatory_outcomes": {
+            "n": 7838,
+            "wins": 1668,
+            "losses": 6170,
+            "flat": 0
+          },
+          "optional_outcomes": {
+            "n": 27536,
+            "wins": 7468,
+            "losses": 20068,
+            "flat": 0
+          },
+          "win_rate_bounds": [
+            0.05977209202322081,
+            0.596890108454201
+          ],
+          "mean_net_bp_bounds": [
+            -170.27457401380295,
+            233.84905943495835
+          ]
+        },
+        "right": {
+          "possible_label_events": 60178,
+          "minimum_label_denominator": 32632,
+          "maximum_label_denominator": 60178,
+          "possible_outcome_denominator": 60155,
+          "minimum_denominator": 32619,
+          "maximum_denominator": 60155,
+          "outcome_denominator_scope": "numeric net_bp events; ties remain in total",
+          "mandatory_outcomes": {
+            "n": 32619,
+            "wins": 7556,
+            "losses": 25063,
+            "flat": 0
+          },
+          "optional_outcomes": {
+            "n": 27536,
+            "wins": 7468,
+            "losses": 20068,
+            "flat": 0
+          },
+          "win_rate_bounds": [
+            0.14341298612560974,
+            0.37478484296654774
+          ],
+          "mean_net_bp_bounds": [
+            -46.88882710395516,
+            101.69898108411114
+          ]
+        },
+        "joint_feasible_set_overlap_events": 27536,
+        "win_rate_diff_bounds": [
+          -0.3150127509433269,
+          0.4534771223285913
+        ],
+        "mean_net_bp_diff_bounds": [
+          -271.9735550979141,
+          280.73788653891353
+        ],
+        "conservative_difference_bound": true,
+        "sharp_for_win_rate_difference": true,
+        "sharp_for_joint_difference": false,
+        "sharpness_by_metric": {
+          "win_rate_diff": true,
+          "mean_net_bp_diff": false
+        },
+        "sharpness_note": "Win-rate difference bounds are sharp when both arms have fixed numeric outcomes, or their feasible memberships do not overlap. Mean-net-bp bounds are guaranteed sharp when feasible memberships do not overlap; with overlap they are conservative outer bounds.",
+        "unknown_feasible_set_outcomes_excluded": 3039,
+        "missing_net_bp_events_excluded": 30,
+        "denominator_note": "Bounds use numeric-net_bp events per arm. Denominators range from mandatory to all feasible arm members. Events with no feasible set are excluded, never assigned to none."
+      }
+    },
+    "1h": {
+      "regular_vs_none": {
+        "left_arm": [
+          "regular"
+        ],
+        "right_arm": [
+          "none"
+        ],
+        "left": {
+          "possible_label_events": 33173,
+          "minimum_label_denominator": 14315,
+          "maximum_label_denominator": 33173,
+          "possible_outcome_denominator": 33159,
+          "minimum_denominator": 14308,
+          "maximum_denominator": 33159,
+          "outcome_denominator_scope": "numeric net_bp events; ties remain in total",
+          "mandatory_outcomes": {
+            "n": 14308,
+            "wins": 3062,
+            "losses": 11246,
+            "flat": 0
+          },
+          "optional_outcomes": {
+            "n": 18851,
+            "wins": 5721,
+            "losses": 13130,
+            "flat": 0
+          },
+          "win_rate_bounds": [
+            0.1115970551789489,
+            0.4385141544760098
+          ],
+          "mean_net_bp_bounds": [
+            -86.4670625260495,
+            135.1643292440176
+          ]
+        },
+        "right": {
+          "possible_label_events": 55358,
+          "minimum_label_denominator": 36500,
+          "maximum_label_denominator": 55358,
+          "possible_outcome_denominator": 55335,
+          "minimum_denominator": 36484,
+          "maximum_denominator": 55335,
+          "outcome_denominator_scope": "numeric net_bp events; ties remain in total",
+          "mandatory_outcomes": {
+            "n": 36484,
+            "wins": 8329,
+            "losses": 28155,
+            "flat": 0
+          },
+          "optional_outcomes": {
+            "n": 18851,
+            "wins": 5721,
+            "losses": 13130,
+            "flat": 0
+          },
+          "win_rate_bounds": [
+            0.16787600274116177,
+            0.33289894562255656
+          ],
+          "mean_net_bp_bounds": [
+            -27.485737191542572,
+            77.12218743271302
+          ]
+        },
+        "joint_feasible_set_overlap_events": 18851,
+        "win_rate_diff_bounds": [
+          -0.22130189044360765,
+          0.270638151734848
+        ],
+        "mean_net_bp_diff_bounds": [
+          -163.58924995876254,
+          162.65006643556018
+        ],
+        "conservative_difference_bound": true,
+        "sharp_for_win_rate_difference": true,
+        "sharp_for_joint_difference": false,
+        "sharpness_by_metric": {
+          "win_rate_diff": true,
+          "mean_net_bp_diff": false
+        },
+        "sharpness_note": "Win-rate difference bounds are sharp when both arms have fixed numeric outcomes, or their feasible memberships do not overlap. Mean-net-bp bounds are guaranteed sharp when feasible memberships do not overlap; with overlap they are conservative outer bounds.",
+        "unknown_feasible_set_outcomes_excluded": 1389,
+        "missing_net_bp_events_excluded": 30,
+        "denominator_note": "Bounds use numeric-net_bp events per arm. Denominators range from mandatory to all feasible arm members. Events with no feasible set are excluded, never assigned to none."
+      },
+      "any_vs_none": {
+        "left_arm": [
+          "absorption",
+          "regular"
+        ],
+        "right_arm": [
+          "none"
+        ],
+        "left": {
+          "possible_label_events": 33173,
+          "minimum_label_denominator": 14315,
+          "maximum_label_denominator": 33173,
+          "possible_outcome_denominator": 33159,
+          "minimum_denominator": 14308,
+          "maximum_denominator": 33159,
+          "outcome_denominator_scope": "numeric net_bp events; ties remain in total",
+          "mandatory_outcomes": {
+            "n": 14308,
+            "wins": 3062,
+            "losses": 11246,
+            "flat": 0
+          },
+          "optional_outcomes": {
+            "n": 18851,
+            "wins": 5721,
+            "losses": 13130,
+            "flat": 0
+          },
+          "win_rate_bounds": [
+            0.1115970551789489,
+            0.4385141544760098
+          ],
+          "mean_net_bp_bounds": [
+            -86.4670625260495,
+            135.1643292440176
+          ]
+        },
+        "right": {
+          "possible_label_events": 55358,
+          "minimum_label_denominator": 36500,
+          "maximum_label_denominator": 55358,
+          "possible_outcome_denominator": 55335,
+          "minimum_denominator": 36484,
+          "maximum_denominator": 55335,
+          "outcome_denominator_scope": "numeric net_bp events; ties remain in total",
+          "mandatory_outcomes": {
+            "n": 36484,
+            "wins": 8329,
+            "losses": 28155,
+            "flat": 0
+          },
+          "optional_outcomes": {
+            "n": 18851,
+            "wins": 5721,
+            "losses": 13130,
+            "flat": 0
+          },
+          "win_rate_bounds": [
+            0.16787600274116177,
+            0.33289894562255656
+          ],
+          "mean_net_bp_bounds": [
+            -27.485737191542572,
+            77.12218743271302
+          ]
+        },
+        "joint_feasible_set_overlap_events": 18851,
+        "win_rate_diff_bounds": [
+          -0.22130189044360765,
+          0.270638151734848
+        ],
+        "mean_net_bp_diff_bounds": [
+          -163.58924995876254,
+          162.65006643556018
+        ],
+        "conservative_difference_bound": true,
+        "sharp_for_win_rate_difference": true,
+        "sharp_for_joint_difference": false,
+        "sharpness_by_metric": {
+          "win_rate_diff": true,
+          "mean_net_bp_diff": false
+        },
+        "sharpness_note": "Win-rate difference bounds are sharp when both arms have fixed numeric outcomes, or their feasible memberships do not overlap. Mean-net-bp bounds are guaranteed sharp when feasible memberships do not overlap; with overlap they are conservative outer bounds.",
+        "unknown_feasible_set_outcomes_excluded": 1389,
+        "missing_net_bp_events_excluded": 30,
+        "denominator_note": "Bounds use numeric-net_bp events per arm. Denominators range from mandatory to all feasible arm members. Events with no feasible set are excluded, never assigned to none."
+      }
+    }
+  },
+  "same_price_action_check": {
+    "15m": {
+      "events": 68023,
+      "rule": "side +1: touch_price_max < pivot_price; side -1: touch_price_min > pivot_price",
+      "regular_vs_none": {
+        "left": {
+          "label_events": 7845,
+          "wins": 1668,
+          "total": 7838,
+          "rate": 0.21280939015054862,
+          "mean_net_bp": 11.355918442816252,
+          "net_bp_missing": 7
+        },
+        "right": {
+          "label_events": 32632,
+          "wins": 7556,
+          "total": 32619,
+          "rate": 0.23164413378705662,
+          "mean_net_bp": 19.552577065895335,
+          "net_bp_missing": 13
+        },
+        "win_rate_diff": -0.018834743636508,
+        "bootstrap": {
+          "method": "NY-week cluster percentile bootstrap",
+          "reps": 5000,
+          "valid_reps": 5000,
+          "mean_valid_reps": 5000,
+          "weeks": 352,
+          "excluded_missing_week_events": 0,
+          "win_rate_diff_95ci": [
+            -0.036815445950632776,
+            -0.0002317793367121623
+          ],
+          "mean_net_bp_diff_95ci": [
+            -21.10013160977931,
+            5.163497334679114
+          ]
+        }
+      }
+    },
+    "1h": {
+      "events": 69673,
+      "rule": "side +1: touch_price_max < pivot_price; side -1: touch_price_min > pivot_price",
+      "regular_vs_none": {
+        "left": {
+          "label_events": 14315,
+          "wins": 3062,
+          "total": 14308,
+          "rate": 0.21400615040536763,
+          "mean_net_bp": 7.317002490069283,
+          "net_bp_missing": 7
+        },
+        "right": {
+          "label_events": 36500,
+          "wins": 8329,
+          "total": 36484,
+          "rate": 0.2282918539633812,
+          "mean_net_bp": 17.95908992937626,
+          "net_bp_missing": 16
+        },
+        "win_rate_diff": -0.014285703558013563,
+        "bootstrap": {
+          "method": "NY-week cluster percentile bootstrap",
+          "reps": 5000,
+          "valid_reps": 5000,
+          "mean_valid_reps": 5000,
+          "weeks": 352,
+          "excluded_missing_week_events": 0,
+          "win_rate_diff_95ci": [
+            -0.03178903736430701,
+            0.002764627832899501
+          ],
+          "mean_net_bp_diff_95ci": [
+            -23.607344925002227,
+            1.9639128608192007
+          ]
+        }
+      }
+    }
+  },
+  "supporting_versions": {
+    "asof_pre": {
+      "available_periods": [
+        "15m",
+        "1h"
+      ],
+      "periods": {
+        "15m": {
+          "events": 71062,
+          "exact_label_counts": {
+            "none": 47630,
+            "regular": 20393,
+            "<missing>": 3039
+          },
+          "unknown_label_events": 3039,
+          "feasible_set_missing_or_unusable": 3039,
+          "feasible_set_events": 68023,
+          "cohorts": {
+            "regular": {
+              "label_events": 20393,
+              "wins": 4897,
+              "total": 20378,
+              "rate": 0.24030817548336442,
+              "mean_net_bp": 20.712431108504923,
+              "net_bp_missing": 15
+            },
+            "absorption": {
+              "label_events": 0,
+              "wins": 0,
+              "total": 0,
+              "rate": null,
+              "mean_net_bp": null,
+              "net_bp_missing": 0
+            },
+            "none": {
+              "label_events": 47630,
+              "wins": 11795,
+              "total": 47615,
+              "rate": 0.2477160558647485,
+              "mean_net_bp": 22.127677062128193,
+              "net_bp_missing": 15
+            },
+            "any": {
+              "label_events": 20393,
+              "wins": 4897,
+              "total": 20378,
+              "rate": 0.24030817548336442,
+              "mean_net_bp": 20.712431108504923,
+              "net_bp_missing": 15
+            }
+          },
+          "comparisons": {
+            "regular_vs_none": {
+              "left": {
+                "label_events": 20393,
+                "wins": 4897,
+                "total": 20378,
+                "rate": 0.24030817548336442,
+                "mean_net_bp": 20.712431108504923,
+                "net_bp_missing": 15
+              },
+              "right": {
+                "label_events": 47630,
+                "wins": 11795,
+                "total": 47615,
+                "rate": 0.2477160558647485,
+                "mean_net_bp": 22.127677062128193,
+                "net_bp_missing": 15
+              },
+              "win_rate_diff": -0.0074078803813840965,
+              "mean_net_bp_diff": -1.4152459536232698,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 352,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.01996748900651237,
+                  0.004705380568039915
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -10.804875610231278,
+                  8.193455223112236
+                ]
+              }
+            },
+            "absorption_vs_none": {
+              "left": {
+                "label_events": 0,
+                "wins": 0,
+                "total": 0,
+                "rate": null,
+                "mean_net_bp": null,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 47630,
+                "wins": 11795,
+                "total": 47615,
+                "rate": 0.2477160558647485,
+                "mean_net_bp": 22.127677062128193,
+                "net_bp_missing": 15
+              },
+              "win_rate_diff": null,
+              "mean_net_bp_diff": null,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 0,
+                "mean_valid_reps": 0,
+                "weeks": 352,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": null,
+                "mean_net_bp_diff_95ci": null
+              }
+            },
+            "any_vs_none": {
+              "left": {
+                "label_events": 20393,
+                "wins": 4897,
+                "total": 20378,
+                "rate": 0.24030817548336442,
+                "mean_net_bp": 20.712431108504923,
+                "net_bp_missing": 15
+              },
+              "right": {
+                "label_events": 47630,
+                "wins": 11795,
+                "total": 47615,
+                "rate": 0.2477160558647485,
+                "mean_net_bp": 22.127677062128193,
+                "net_bp_missing": 15
+              },
+              "win_rate_diff": -0.0074078803813840965,
+              "mean_net_bp_diff": -1.4152459536232698,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 352,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.019690111231257416,
+                  0.004479673012265946
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -10.901722282898923,
+                  7.7216216230465085
+                ]
+              }
+            }
+          }
+        },
+        "1h": {
+          "events": 71062,
+          "exact_label_counts": {
+            "none": 45606,
+            "regular": 24067,
+            "<missing>": 1389
+          },
+          "unknown_label_events": 1389,
+          "feasible_set_missing_or_unusable": 1389,
+          "feasible_set_events": 69673,
+          "cohorts": {
+            "regular": {
+              "label_events": 24067,
+              "wins": 5967,
+              "total": 24055,
+              "rate": 0.2480565371024735,
+              "mean_net_bp": 18.25785066236211,
+              "net_bp_missing": 12
+            },
+            "absorption": {
+              "label_events": 0,
+              "wins": 0,
+              "total": 0,
+              "rate": null,
+              "mean_net_bp": null,
+              "net_bp_missing": 0
+            },
+            "none": {
+              "label_events": 45606,
+              "wins": 11145,
+              "total": 45588,
+              "rate": 0.24447222953408793,
+              "mean_net_bp": 22.645104934538324,
+              "net_bp_missing": 18
+            },
+            "any": {
+              "label_events": 24067,
+              "wins": 5967,
+              "total": 24055,
+              "rate": 0.2480565371024735,
+              "mean_net_bp": 18.25785066236211,
+              "net_bp_missing": 12
+            }
+          },
+          "comparisons": {
+            "regular_vs_none": {
+              "left": {
+                "label_events": 24067,
+                "wins": 5967,
+                "total": 24055,
+                "rate": 0.2480565371024735,
+                "mean_net_bp": 18.25785066236211,
+                "net_bp_missing": 12
+              },
+              "right": {
+                "label_events": 45606,
+                "wins": 11145,
+                "total": 45588,
+                "rate": 0.24447222953408793,
+                "mean_net_bp": 22.645104934538324,
+                "net_bp_missing": 18
+              },
+              "win_rate_diff": 0.0035843075683855696,
+              "mean_net_bp_diff": -4.387254272176214,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 352,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.01094053725535248,
+                  0.01781986351366388
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -14.717284607459257,
+                  6.211370481956592
+                ]
+              }
+            },
+            "absorption_vs_none": {
+              "left": {
+                "label_events": 0,
+                "wins": 0,
+                "total": 0,
+                "rate": null,
+                "mean_net_bp": null,
+                "net_bp_missing": 0
+              },
+              "right": {
+                "label_events": 45606,
+                "wins": 11145,
+                "total": 45588,
+                "rate": 0.24447222953408793,
+                "mean_net_bp": 22.645104934538324,
+                "net_bp_missing": 18
+              },
+              "win_rate_diff": null,
+              "mean_net_bp_diff": null,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 0,
+                "mean_valid_reps": 0,
+                "weeks": 352,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": null,
+                "mean_net_bp_diff_95ci": null
+              }
+            },
+            "any_vs_none": {
+              "left": {
+                "label_events": 24067,
+                "wins": 5967,
+                "total": 24055,
+                "rate": 0.2480565371024735,
+                "mean_net_bp": 18.25785066236211,
+                "net_bp_missing": 12
+              },
+              "right": {
+                "label_events": 45606,
+                "wins": 11145,
+                "total": 45588,
+                "rate": 0.24447222953408793,
+                "mean_net_bp": 22.645104934538324,
+                "net_bp_missing": 18
+              },
+              "win_rate_diff": 0.0035843075683855696,
+              "mean_net_bp_diff": -4.387254272176214,
+              "bootstrap": {
+                "method": "NY-week cluster percentile bootstrap",
+                "reps": 5000,
+                "valid_reps": 5000,
+                "mean_valid_reps": 5000,
+                "weeks": 352,
+                "excluded_missing_week_events": 0,
+                "win_rate_diff_95ci": [
+                  -0.011281837117281238,
+                  0.017428025917055688
+                ],
+                "mean_net_bp_diff_95ci": [
+                  -14.905338047492773,
+                  5.809865008430521
+                ]
+              }
+            }
+          }
+        }
+      },
+      "shared_coverage": {
+        "events": 66860,
+        "periods": {
+          "15m": {
+            "events": 66860,
+            "exact_label_counts": {
+              "none": 46884,
+              "regular": 19976
+            },
+            "unknown_label_events": 0,
+            "feasible_set_missing_or_unusable": 0,
+            "feasible_set_events": 66860,
+            "cohorts": {
+              "regular": {
+                "label_events": 19976,
+                "wins": 4798,
+                "total": 19961,
+                "rate": 0.240368719002054,
+                "mean_net_bp": 20.384787526095717,
+                "net_bp_missing": 15
+              },
+              "absorption": {
+                "label_events": 0,
+                "wins": 0,
+                "total": 0,
+                "rate": null,
+                "mean_net_bp": null,
+                "net_bp_missing": 0
+              },
+              "none": {
+                "label_events": 46884,
+                "wins": 11600,
+                "total": 46869,
+                "rate": 0.2474983464550129,
+                "mean_net_bp": 22.3794817682562,
+                "net_bp_missing": 15
+              },
+              "any": {
+                "label_events": 19976,
+                "wins": 4798,
+                "total": 19961,
+                "rate": 0.240368719002054,
+                "mean_net_bp": 20.384787526095717,
+                "net_bp_missing": 15
+              }
+            },
+            "comparisons": {
+              "regular_vs_none": {
+                "left": {
+                  "label_events": 19976,
+                  "wins": 4798,
+                  "total": 19961,
+                  "rate": 0.240368719002054,
+                  "mean_net_bp": 20.384787526095717,
+                  "net_bp_missing": 15
+                },
+                "right": {
+                  "label_events": 46884,
+                  "wins": 11600,
+                  "total": 46869,
+                  "rate": 0.2474983464550129,
+                  "mean_net_bp": 22.3794817682562,
+                  "net_bp_missing": 15
+                },
+                "win_rate_diff": -0.007129627452958892,
+                "mean_net_bp_diff": -1.994694242160481,
+                "bootstrap": {
+                  "method": "NY-week cluster percentile bootstrap",
+                  "reps": 5000,
+                  "valid_reps": 5000,
+                  "mean_valid_reps": 5000,
+                  "weeks": 352,
+                  "excluded_missing_week_events": 0,
+                  "win_rate_diff_95ci": [
+                    -0.019663368361121304,
+                    0.005353789993714634
+                  ],
+                  "mean_net_bp_diff_95ci": [
+                    -11.609510976952937,
+                    7.8605709258573615
+                  ]
+                }
+              },
+              "absorption_vs_none": {
+                "left": {
+                  "label_events": 0,
+                  "wins": 0,
+                  "total": 0,
+                  "rate": null,
+                  "mean_net_bp": null,
+                  "net_bp_missing": 0
+                },
+                "right": {
+                  "label_events": 46884,
+                  "wins": 11600,
+                  "total": 46869,
+                  "rate": 0.2474983464550129,
+                  "mean_net_bp": 22.3794817682562,
+                  "net_bp_missing": 15
+                },
+                "win_rate_diff": null,
+                "mean_net_bp_diff": null,
+                "bootstrap": {
+                  "method": "NY-week cluster percentile bootstrap",
+                  "reps": 5000,
+                  "valid_reps": 0,
+                  "mean_valid_reps": 0,
+                  "weeks": 352,
+                  "excluded_missing_week_events": 0,
+                  "win_rate_diff_95ci": null,
+                  "mean_net_bp_diff_95ci": null
+                }
+              },
+              "any_vs_none": {
+                "left": {
+                  "label_events": 19976,
+                  "wins": 4798,
+                  "total": 19961,
+                  "rate": 0.240368719002054,
+                  "mean_net_bp": 20.384787526095717,
+                  "net_bp_missing": 15
+                },
+                "right": {
+                  "label_events": 46884,
+                  "wins": 11600,
+                  "total": 46869,
+                  "rate": 0.2474983464550129,
+                  "mean_net_bp": 22.3794817682562,
+                  "net_bp_missing": 15
+                },
+                "win_rate_diff": -0.007129627452958892,
+                "mean_net_bp_diff": -1.994694242160481,
+                "bootstrap": {
+                  "method": "NY-week cluster percentile bootstrap",
+                  "reps": 5000,
+                  "valid_reps": 5000,
+                  "mean_valid_reps": 5000,
+                  "weeks": 352,
+                  "excluded_missing_week_events": 0,
+                  "win_rate_diff_95ci": [
+                    -0.019820418830128975,
+                    0.005121285558430152
+                  ],
+                  "mean_net_bp_diff_95ci": [
+                    -11.353489969999229,
+                    7.634619511727748
+                  ]
+                }
+              }
+            }
+          },
+          "1h": {
+            "events": 66860,
+            "exact_label_counts": {
+              "none": 43767,
+              "regular": 23093
+            },
+            "unknown_label_events": 0,
+            "feasible_set_missing_or_unusable": 0,
+            "feasible_set_events": 66860,
+            "cohorts": {
+              "regular": {
+                "label_events": 23093,
+                "wins": 5730,
+                "total": 23081,
+                "rate": 0.24825614141501667,
+                "mean_net_bp": 18.741718928609608,
+                "net_bp_missing": 12
+              },
+              "absorption": {
+                "label_events": 0,
+                "wins": 0,
+                "total": 0,
+                "rate": null,
+                "mean_net_bp": null,
+                "net_bp_missing": 0
+              },
+              "none": {
+                "label_events": 43767,
+                "wins": 10668,
+                "total": 43749,
+                "rate": 0.24384557361311116,
+                "mean_net_bp": 23.388581686748452,
+                "net_bp_missing": 18
+              },
+              "any": {
+                "label_events": 23093,
+                "wins": 5730,
+                "total": 23081,
+                "rate": 0.24825614141501667,
+                "mean_net_bp": 18.741718928609608,
+                "net_bp_missing": 12
+              }
+            },
+            "comparisons": {
+              "regular_vs_none": {
+                "left": {
+                  "label_events": 23093,
+                  "wins": 5730,
+                  "total": 23081,
+                  "rate": 0.24825614141501667,
+                  "mean_net_bp": 18.741718928609608,
+                  "net_bp_missing": 12
+                },
+                "right": {
+                  "label_events": 43767,
+                  "wins": 10668,
+                  "total": 43749,
+                  "rate": 0.24384557361311116,
+                  "mean_net_bp": 23.388581686748452,
+                  "net_bp_missing": 18
+                },
+                "win_rate_diff": 0.004410567801905518,
+                "mean_net_bp_diff": -4.646862758138845,
+                "bootstrap": {
+                  "method": "NY-week cluster percentile bootstrap",
+                  "reps": 5000,
+                  "valid_reps": 5000,
+                  "mean_valid_reps": 5000,
+                  "weeks": 352,
+                  "excluded_missing_week_events": 0,
+                  "win_rate_diff_95ci": [
+                    -0.009873310576669486,
+                    0.018211472146985166
+                  ],
+                  "mean_net_bp_diff_95ci": [
+                    -15.231892235340212,
+                    5.89688563833138
+                  ]
+                }
+              },
+              "absorption_vs_none": {
+                "left": {
+                  "label_events": 0,
+                  "wins": 0,
+                  "total": 0,
+                  "rate": null,
+                  "mean_net_bp": null,
+                  "net_bp_missing": 0
+                },
+                "right": {
+                  "label_events": 43767,
+                  "wins": 10668,
+                  "total": 43749,
+                  "rate": 0.24384557361311116,
+                  "mean_net_bp": 23.388581686748452,
+                  "net_bp_missing": 18
+                },
+                "win_rate_diff": null,
+                "mean_net_bp_diff": null,
+                "bootstrap": {
+                  "method": "NY-week cluster percentile bootstrap",
+                  "reps": 5000,
+                  "valid_reps": 0,
+                  "mean_valid_reps": 0,
+                  "weeks": 352,
+                  "excluded_missing_week_events": 0,
+                  "win_rate_diff_95ci": null,
+                  "mean_net_bp_diff_95ci": null
+                }
+              },
+              "any_vs_none": {
+                "left": {
+                  "label_events": 23093,
+                  "wins": 5730,
+                  "total": 23081,
+                  "rate": 0.24825614141501667,
+                  "mean_net_bp": 18.741718928609608,
+                  "net_bp_missing": 12
+                },
+                "right": {
+                  "label_events": 43767,
+                  "wins": 10668,
+                  "total": 43749,
+                  "rate": 0.24384557361311116,
+                  "mean_net_bp": 23.388581686748452,
+                  "net_bp_missing": 18
+                },
+                "win_rate_diff": 0.004410567801905518,
+                "mean_net_bp_diff": -4.646862758138845,
+                "bootstrap": {
+                  "method": "NY-week cluster percentile bootstrap",
+                  "reps": 5000,
+                  "valid_reps": 5000,
+                  "mean_valid_reps": 5000,
+                  "weeks": 352,
+                  "excluded_missing_week_events": 0,
+                  "win_rate_diff_95ci": [
+                    -0.009735433680357812,
+                    0.01847226486995509
+                  ],
+                  "mean_net_bp_diff_95ci": [
+                    -15.052899363055154,
+                    5.854229792051917
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "unknown_label_counts": {
+        "15m": 3039,
+        "1h": 1389
+      }
+    },
+    "tick_exact": {
+      "exact_events": 1852,
+      "not_exact_events": 69210,
+      "unknown_tick_exact_count": 0,
+      "summary": {
+        "all": {
+          "events": 1852,
+          "periods": {
+            "15m": {
+              "events": 1852,
+              "exact_label_counts": {
+                "none": 1286,
+                "regular": 291,
+                "ambiguous": 190,
+                "no_confirmed_pivot": 85
+              },
+              "unknown_label_events": 275,
+              "feasible_set_missing_or_unusable": 85,
+              "feasible_set_events": 1767,
+              "cohorts": {
+                "regular": {
+                  "label_events": 291,
+                  "wins": 124,
+                  "total": 291,
+                  "rate": 0.4261168384879725,
+                  "mean_net_bp": 35.041830672987146,
+                  "net_bp_missing": 0
+                },
+                "absorption": {
+                  "label_events": 0,
+                  "wins": 0,
+                  "total": 0,
+                  "rate": null,
+                  "mean_net_bp": null,
+                  "net_bp_missing": 0
+                },
+                "none": {
+                  "label_events": 1286,
+                  "wins": 669,
+                  "total": 1286,
+                  "rate": 0.5202177293934681,
+                  "mean_net_bp": 82.3253491150854,
+                  "net_bp_missing": 0
+                },
+                "any": {
+                  "label_events": 291,
+                  "wins": 124,
+                  "total": 291,
+                  "rate": 0.4261168384879725,
+                  "mean_net_bp": 35.041830672987146,
+                  "net_bp_missing": 0
+                }
+              },
+              "comparisons": {
+                "regular_vs_none": {
+                  "left": {
+                    "label_events": 291,
+                    "wins": 124,
+                    "total": 291,
+                    "rate": 0.4261168384879725,
+                    "mean_net_bp": 35.041830672987146,
+                    "net_bp_missing": 0
+                  },
+                  "right": {
+                    "label_events": 1286,
+                    "wins": 669,
+                    "total": 1286,
+                    "rate": 0.5202177293934681,
+                    "mean_net_bp": 82.3253491150854,
+                    "net_bp_missing": 0
+                  },
+                  "win_rate_diff": -0.09410089090549562,
+                  "mean_net_bp_diff": -47.283518442098256,
+                  "bootstrap": {
+                    "method": "NY-week cluster percentile bootstrap",
+                    "reps": 5000,
+                    "valid_reps": 5000,
+                    "mean_valid_reps": 5000,
+                    "weeks": 23,
+                    "excluded_missing_week_events": 0,
+                    "win_rate_diff_95ci": [
+                      -0.1736523728951839,
+                      -0.003137986717706733
+                    ],
+                    "mean_net_bp_diff_95ci": [
+                      -132.55503300789803,
+                      36.012399077092425
+                    ]
+                  }
+                },
+                "absorption_vs_none": {
+                  "left": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "right": {
+                    "label_events": 1286,
+                    "wins": 669,
+                    "total": 1286,
+                    "rate": 0.5202177293934681,
+                    "mean_net_bp": 82.3253491150854,
+                    "net_bp_missing": 0
+                  },
+                  "win_rate_diff": null,
+                  "mean_net_bp_diff": null,
+                  "bootstrap": {
+                    "method": "NY-week cluster percentile bootstrap",
+                    "reps": 5000,
+                    "valid_reps": 0,
+                    "mean_valid_reps": 0,
+                    "weeks": 23,
+                    "excluded_missing_week_events": 0,
+                    "win_rate_diff_95ci": null,
+                    "mean_net_bp_diff_95ci": null
+                  }
+                },
+                "any_vs_none": {
+                  "left": {
+                    "label_events": 291,
+                    "wins": 124,
+                    "total": 291,
+                    "rate": 0.4261168384879725,
+                    "mean_net_bp": 35.041830672987146,
+                    "net_bp_missing": 0
+                  },
+                  "right": {
+                    "label_events": 1286,
+                    "wins": 669,
+                    "total": 1286,
+                    "rate": 0.5202177293934681,
+                    "mean_net_bp": 82.3253491150854,
+                    "net_bp_missing": 0
+                  },
+                  "win_rate_diff": -0.09410089090549562,
+                  "mean_net_bp_diff": -47.283518442098256,
+                  "bootstrap": {
+                    "method": "NY-week cluster percentile bootstrap",
+                    "reps": 5000,
+                    "valid_reps": 5000,
+                    "mean_valid_reps": 5000,
+                    "weeks": 23,
+                    "excluded_missing_week_events": 0,
+                    "win_rate_diff_95ci": [
+                      -0.17320613949278604,
+                      -0.007764898341497035
+                    ],
+                    "mean_net_bp_diff_95ci": [
+                      -135.17381299943108,
+                      34.282153108005815
+                    ]
+                  }
+                }
+              }
+            },
+            "1h": {
+              "events": 1852,
+              "exact_label_counts": {
+                "none": 1298,
+                "regular": 408,
+                "ambiguous": 111,
+                "no_confirmed_pivot": 35
+              },
+              "unknown_label_events": 146,
+              "feasible_set_missing_or_unusable": 35,
+              "feasible_set_events": 1817,
+              "cohorts": {
+                "regular": {
+                  "label_events": 408,
+                  "wins": 194,
+                  "total": 408,
+                  "rate": 0.47549019607843135,
+                  "mean_net_bp": 60.055861676632404,
+                  "net_bp_missing": 0
+                },
+                "absorption": {
+                  "label_events": 0,
+                  "wins": 0,
+                  "total": 0,
+                  "rate": null,
+                  "mean_net_bp": null,
+                  "net_bp_missing": 0
+                },
+                "none": {
+                  "label_events": 1298,
+                  "wins": 658,
+                  "total": 1298,
+                  "rate": 0.5069337442218799,
+                  "mean_net_bp": 70.03253063765497,
+                  "net_bp_missing": 0
+                },
+                "any": {
+                  "label_events": 408,
+                  "wins": 194,
+                  "total": 408,
+                  "rate": 0.47549019607843135,
+                  "mean_net_bp": 60.055861676632404,
+                  "net_bp_missing": 0
+                }
+              },
+              "comparisons": {
+                "regular_vs_none": {
+                  "left": {
+                    "label_events": 408,
+                    "wins": 194,
+                    "total": 408,
+                    "rate": 0.47549019607843135,
+                    "mean_net_bp": 60.055861676632404,
+                    "net_bp_missing": 0
+                  },
+                  "right": {
+                    "label_events": 1298,
+                    "wins": 658,
+                    "total": 1298,
+                    "rate": 0.5069337442218799,
+                    "mean_net_bp": 70.03253063765497,
+                    "net_bp_missing": 0
+                  },
+                  "win_rate_diff": -0.03144354814344852,
+                  "mean_net_bp_diff": -9.976668961022568,
+                  "bootstrap": {
+                    "method": "NY-week cluster percentile bootstrap",
+                    "reps": 5000,
+                    "valid_reps": 5000,
+                    "mean_valid_reps": 5000,
+                    "weeks": 23,
+                    "excluded_missing_week_events": 0,
+                    "win_rate_diff_95ci": [
+                      -0.10106528955292063,
+                      0.038874516636516025
+                    ],
+                    "mean_net_bp_diff_95ci": [
+                      -82.11887589749831,
+                      57.9988099009185
+                    ]
+                  }
+                },
+                "absorption_vs_none": {
+                  "left": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "right": {
+                    "label_events": 1298,
+                    "wins": 658,
+                    "total": 1298,
+                    "rate": 0.5069337442218799,
+                    "mean_net_bp": 70.03253063765497,
+                    "net_bp_missing": 0
+                  },
+                  "win_rate_diff": null,
+                  "mean_net_bp_diff": null,
+                  "bootstrap": {
+                    "method": "NY-week cluster percentile bootstrap",
+                    "reps": 5000,
+                    "valid_reps": 0,
+                    "mean_valid_reps": 0,
+                    "weeks": 23,
+                    "excluded_missing_week_events": 0,
+                    "win_rate_diff_95ci": null,
+                    "mean_net_bp_diff_95ci": null
+                  }
+                },
+                "any_vs_none": {
+                  "left": {
+                    "label_events": 408,
+                    "wins": 194,
+                    "total": 408,
+                    "rate": 0.47549019607843135,
+                    "mean_net_bp": 60.055861676632404,
+                    "net_bp_missing": 0
+                  },
+                  "right": {
+                    "label_events": 1298,
+                    "wins": 658,
+                    "total": 1298,
+                    "rate": 0.5069337442218799,
+                    "mean_net_bp": 70.03253063765497,
+                    "net_bp_missing": 0
+                  },
+                  "win_rate_diff": -0.03144354814344852,
+                  "mean_net_bp_diff": -9.976668961022568,
+                  "bootstrap": {
+                    "method": "NY-week cluster percentile bootstrap",
+                    "reps": 5000,
+                    "valid_reps": 5000,
+                    "mean_valid_reps": 5000,
+                    "weeks": 23,
+                    "excluded_missing_week_events": 0,
+                    "win_rate_diff_95ci": [
+                      -0.1008358933293333,
+                      0.040273119592424675
+                    ],
+                    "mean_net_bp_diff_95ci": [
+                      -80.7879850096769,
+                      58.27725441372555
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "by_year": {
+          "<=2024": {
+            "events": 0,
+            "periods": {
+              "15m": {
+                "events": 0,
+                "exact_label_counts": {},
+                "unknown_label_events": 0,
+                "feasible_set_missing_or_unusable": 0,
+                "feasible_set_events": 0,
+                "cohorts": {
+                  "regular": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "absorption": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "none": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "any": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  }
+                },
+                "comparisons": {
+                  "regular_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "weeks": 0,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  },
+                  "absorption_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "weeks": 0,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  },
+                  "any_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "weeks": 0,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  }
+                }
+              },
+              "1h": {
+                "events": 0,
+                "exact_label_counts": {},
+                "unknown_label_events": 0,
+                "feasible_set_missing_or_unusable": 0,
+                "feasible_set_events": 0,
+                "cohorts": {
+                  "regular": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "absorption": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "none": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "any": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  }
+                },
+                "comparisons": {
+                  "regular_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "weeks": 0,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  },
+                  "absorption_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "weeks": 0,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  },
+                  "any_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "weeks": 0,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "2025": {
+            "events": 0,
+            "periods": {
+              "15m": {
+                "events": 0,
+                "exact_label_counts": {},
+                "unknown_label_events": 0,
+                "feasible_set_missing_or_unusable": 0,
+                "feasible_set_events": 0,
+                "cohorts": {
+                  "regular": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "absorption": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "none": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "any": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  }
+                },
+                "comparisons": {
+                  "regular_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "weeks": 0,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  },
+                  "absorption_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "weeks": 0,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  },
+                  "any_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "weeks": 0,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  }
+                }
+              },
+              "1h": {
+                "events": 0,
+                "exact_label_counts": {},
+                "unknown_label_events": 0,
+                "feasible_set_missing_or_unusable": 0,
+                "feasible_set_events": 0,
+                "cohorts": {
+                  "regular": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "absorption": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "none": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "any": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  }
+                },
+                "comparisons": {
+                  "regular_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "weeks": 0,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  },
+                  "absorption_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "weeks": 0,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  },
+                  "any_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "weeks": 0,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "2026": {
+            "events": 1852,
+            "periods": {
+              "15m": {
+                "events": 1852,
+                "exact_label_counts": {
+                  "none": 1286,
+                  "regular": 291,
+                  "ambiguous": 190,
+                  "no_confirmed_pivot": 85
+                },
+                "unknown_label_events": 275,
+                "feasible_set_missing_or_unusable": 85,
+                "feasible_set_events": 1767,
+                "cohorts": {
+                  "regular": {
+                    "label_events": 291,
+                    "wins": 124,
+                    "total": 291,
+                    "rate": 0.4261168384879725,
+                    "mean_net_bp": 35.041830672987146,
+                    "net_bp_missing": 0
+                  },
+                  "absorption": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "none": {
+                    "label_events": 1286,
+                    "wins": 669,
+                    "total": 1286,
+                    "rate": 0.5202177293934681,
+                    "mean_net_bp": 82.3253491150854,
+                    "net_bp_missing": 0
+                  },
+                  "any": {
+                    "label_events": 291,
+                    "wins": 124,
+                    "total": 291,
+                    "rate": 0.4261168384879725,
+                    "mean_net_bp": 35.041830672987146,
+                    "net_bp_missing": 0
+                  }
+                },
+                "comparisons": {
+                  "regular_vs_none": {
+                    "left": {
+                      "label_events": 291,
+                      "wins": 124,
+                      "total": 291,
+                      "rate": 0.4261168384879725,
+                      "mean_net_bp": 35.041830672987146,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 1286,
+                      "wins": 669,
+                      "total": 1286,
+                      "rate": 0.5202177293934681,
+                      "mean_net_bp": 82.3253491150854,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": -0.09410089090549562,
+                    "mean_net_bp_diff": -47.283518442098256,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 5000,
+                      "mean_valid_reps": 5000,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": [
+                        -0.17589493294542688,
+                        -0.0034474554460621957
+                      ],
+                      "mean_net_bp_diff_95ci": [
+                        -133.93233627828377,
+                        37.20100334485665
+                      ]
+                    }
+                  },
+                  "absorption_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 1286,
+                      "wins": 669,
+                      "total": 1286,
+                      "rate": 0.5202177293934681,
+                      "mean_net_bp": 82.3253491150854,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "mean_valid_reps": 0,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  },
+                  "any_vs_none": {
+                    "left": {
+                      "label_events": 291,
+                      "wins": 124,
+                      "total": 291,
+                      "rate": 0.4261168384879725,
+                      "mean_net_bp": 35.041830672987146,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 1286,
+                      "wins": 669,
+                      "total": 1286,
+                      "rate": 0.5202177293934681,
+                      "mean_net_bp": 82.3253491150854,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": -0.09410089090549562,
+                    "mean_net_bp_diff": -47.283518442098256,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 5000,
+                      "mean_valid_reps": 5000,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": [
+                        -0.1752561247663049,
+                        -0.005781760097856905
+                      ],
+                      "mean_net_bp_diff_95ci": [
+                        -135.56790479947313,
+                        37.26131272417925
+                      ]
+                    }
+                  }
+                }
+              },
+              "1h": {
+                "events": 1852,
+                "exact_label_counts": {
+                  "none": 1298,
+                  "regular": 408,
+                  "ambiguous": 111,
+                  "no_confirmed_pivot": 35
+                },
+                "unknown_label_events": 146,
+                "feasible_set_missing_or_unusable": 35,
+                "feasible_set_events": 1817,
+                "cohorts": {
+                  "regular": {
+                    "label_events": 408,
+                    "wins": 194,
+                    "total": 408,
+                    "rate": 0.47549019607843135,
+                    "mean_net_bp": 60.055861676632404,
+                    "net_bp_missing": 0
+                  },
+                  "absorption": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "none": {
+                    "label_events": 1298,
+                    "wins": 658,
+                    "total": 1298,
+                    "rate": 0.5069337442218799,
+                    "mean_net_bp": 70.03253063765497,
+                    "net_bp_missing": 0
+                  },
+                  "any": {
+                    "label_events": 408,
+                    "wins": 194,
+                    "total": 408,
+                    "rate": 0.47549019607843135,
+                    "mean_net_bp": 60.055861676632404,
+                    "net_bp_missing": 0
+                  }
+                },
+                "comparisons": {
+                  "regular_vs_none": {
+                    "left": {
+                      "label_events": 408,
+                      "wins": 194,
+                      "total": 408,
+                      "rate": 0.47549019607843135,
+                      "mean_net_bp": 60.055861676632404,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 1298,
+                      "wins": 658,
+                      "total": 1298,
+                      "rate": 0.5069337442218799,
+                      "mean_net_bp": 70.03253063765497,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": -0.03144354814344852,
+                    "mean_net_bp_diff": -9.976668961022568,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 5000,
+                      "mean_valid_reps": 5000,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": [
+                        -0.10203945150946357,
+                        0.03898432310819371
+                      ],
+                      "mean_net_bp_diff_95ci": [
+                        -83.1186485093554,
+                        57.439299817548445
+                      ]
+                    }
+                  },
+                  "absorption_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 1298,
+                      "wins": 658,
+                      "total": 1298,
+                      "rate": 0.5069337442218799,
+                      "mean_net_bp": 70.03253063765497,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "mean_valid_reps": 0,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  },
+                  "any_vs_none": {
+                    "left": {
+                      "label_events": 408,
+                      "wins": 194,
+                      "total": 408,
+                      "rate": 0.47549019607843135,
+                      "mean_net_bp": 60.055861676632404,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 1298,
+                      "wins": 658,
+                      "total": 1298,
+                      "rate": 0.5069337442218799,
+                      "mean_net_bp": 70.03253063765497,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": -0.03144354814344852,
+                    "mean_net_bp_diff": -9.976668961022568,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 5000,
+                      "mean_valid_reps": 5000,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": [
+                        -0.10389496965756068,
+                        0.041586422450588564
+                      ],
+                      "mean_net_bp_diff_95ci": [
+                        -84.91482204463543,
+                        59.50644255290151
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "by_side": {
+          "+1": {
+            "events": 520,
+            "periods": {
+              "15m": {
+                "events": 520,
+                "exact_label_counts": {
+                  "none": 435,
+                  "regular": 38,
+                  "ambiguous": 34,
+                  "no_confirmed_pivot": 13
+                },
+                "unknown_label_events": 47,
+                "feasible_set_missing_or_unusable": 13,
+                "feasible_set_events": 507,
+                "cohorts": {
+                  "regular": {
+                    "label_events": 38,
+                    "wins": 9,
+                    "total": 38,
+                    "rate": 0.23684210526315788,
+                    "mean_net_bp": -106.97759376561844,
+                    "net_bp_missing": 0
+                  },
+                  "absorption": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "none": {
+                    "label_events": 435,
+                    "wins": 203,
+                    "total": 435,
+                    "rate": 0.4666666666666667,
+                    "mean_net_bp": 87.34397423149996,
+                    "net_bp_missing": 0
+                  },
+                  "any": {
+                    "label_events": 38,
+                    "wins": 9,
+                    "total": 38,
+                    "rate": 0.23684210526315788,
+                    "mean_net_bp": -106.97759376561844,
+                    "net_bp_missing": 0
+                  }
+                },
+                "comparisons": {
+                  "regular_vs_none": {
+                    "left": {
+                      "label_events": 38,
+                      "wins": 9,
+                      "total": 38,
+                      "rate": 0.23684210526315788,
+                      "mean_net_bp": -106.97759376561844,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 435,
+                      "wins": 203,
+                      "total": 435,
+                      "rate": 0.4666666666666667,
+                      "mean_net_bp": 87.34397423149996,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": -0.2298245614035088,
+                    "mean_net_bp_diff": -194.3215679971184,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 5000,
+                      "mean_valid_reps": 5000,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": [
+                        -0.43285189212446995,
+                        -0.02071429720581247
+                      ],
+                      "mean_net_bp_diff_95ci": [
+                        -396.4732173368384,
+                        11.269183315736282
+                      ]
+                    }
+                  },
+                  "absorption_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 435,
+                      "wins": 203,
+                      "total": 435,
+                      "rate": 0.4666666666666667,
+                      "mean_net_bp": 87.34397423149996,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "mean_valid_reps": 0,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  },
+                  "any_vs_none": {
+                    "left": {
+                      "label_events": 38,
+                      "wins": 9,
+                      "total": 38,
+                      "rate": 0.23684210526315788,
+                      "mean_net_bp": -106.97759376561844,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 435,
+                      "wins": 203,
+                      "total": 435,
+                      "rate": 0.4666666666666667,
+                      "mean_net_bp": 87.34397423149996,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": -0.2298245614035088,
+                    "mean_net_bp_diff": -194.3215679971184,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 5000,
+                      "mean_valid_reps": 5000,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": [
+                        -0.43238697410762456,
+                        -0.015176915773011867
+                      ],
+                      "mean_net_bp_diff_95ci": [
+                        -396.0503431519096,
+                        16.919674527022398
+                      ]
+                    }
+                  }
+                }
+              },
+              "1h": {
+                "events": 520,
+                "exact_label_counts": {
+                  "none": 472,
+                  "regular": 35,
+                  "ambiguous": 9,
+                  "no_confirmed_pivot": 4
+                },
+                "unknown_label_events": 13,
+                "feasible_set_missing_or_unusable": 4,
+                "feasible_set_events": 516,
+                "cohorts": {
+                  "regular": {
+                    "label_events": 35,
+                    "wins": 16,
+                    "total": 35,
+                    "rate": 0.45714285714285713,
+                    "mean_net_bp": 39.542549816946384,
+                    "net_bp_missing": 0
+                  },
+                  "absorption": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "none": {
+                    "label_events": 472,
+                    "wins": 213,
+                    "total": 472,
+                    "rate": 0.451271186440678,
+                    "mean_net_bp": 85.57513813859526,
+                    "net_bp_missing": 0
+                  },
+                  "any": {
+                    "label_events": 35,
+                    "wins": 16,
+                    "total": 35,
+                    "rate": 0.45714285714285713,
+                    "mean_net_bp": 39.542549816946384,
+                    "net_bp_missing": 0
+                  }
+                },
+                "comparisons": {
+                  "regular_vs_none": {
+                    "left": {
+                      "label_events": 35,
+                      "wins": 16,
+                      "total": 35,
+                      "rate": 0.45714285714285713,
+                      "mean_net_bp": 39.542549816946384,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 472,
+                      "wins": 213,
+                      "total": 472,
+                      "rate": 0.451271186440678,
+                      "mean_net_bp": 85.57513813859526,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": 0.005871670702179144,
+                    "mean_net_bp_diff": -46.03258832164888,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 5000,
+                      "mean_valid_reps": 5000,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": [
+                        -0.16082805096683317,
+                        0.15306129297482432
+                      ],
+                      "mean_net_bp_diff_95ci": [
+                        -247.37920808058237,
+                        140.78375849469805
+                      ]
+                    }
+                  },
+                  "absorption_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 472,
+                      "wins": 213,
+                      "total": 472,
+                      "rate": 0.451271186440678,
+                      "mean_net_bp": 85.57513813859526,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "mean_valid_reps": 0,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  },
+                  "any_vs_none": {
+                    "left": {
+                      "label_events": 35,
+                      "wins": 16,
+                      "total": 35,
+                      "rate": 0.45714285714285713,
+                      "mean_net_bp": 39.542549816946384,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 472,
+                      "wins": 213,
+                      "total": 472,
+                      "rate": 0.451271186440678,
+                      "mean_net_bp": 85.57513813859526,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": 0.005871670702179144,
+                    "mean_net_bp_diff": -46.03258832164888,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 5000,
+                      "mean_valid_reps": 5000,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": [
+                        -0.1629725564874639,
+                        0.15382892566851222
+                      ],
+                      "mean_net_bp_diff_95ci": [
+                        -240.7349916313665,
+                        137.51634042066704
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "-1": {
+            "events": 1332,
+            "periods": {
+              "15m": {
+                "events": 1332,
+                "exact_label_counts": {
+                  "none": 851,
+                  "regular": 253,
+                  "ambiguous": 156,
+                  "no_confirmed_pivot": 72
+                },
+                "unknown_label_events": 228,
+                "feasible_set_missing_or_unusable": 72,
+                "feasible_set_events": 1260,
+                "cohorts": {
+                  "regular": {
+                    "label_events": 253,
+                    "wins": 115,
+                    "total": 253,
+                    "rate": 0.45454545454545453,
+                    "mean_net_bp": 56.37281141870657,
+                    "net_bp_missing": 0
+                  },
+                  "absorption": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "none": {
+                    "label_events": 851,
+                    "wins": 466,
+                    "total": 851,
+                    "rate": 0.5475910693301997,
+                    "mean_net_bp": 79.76001195217081,
+                    "net_bp_missing": 0
+                  },
+                  "any": {
+                    "label_events": 253,
+                    "wins": 115,
+                    "total": 253,
+                    "rate": 0.45454545454545453,
+                    "mean_net_bp": 56.37281141870657,
+                    "net_bp_missing": 0
+                  }
+                },
+                "comparisons": {
+                  "regular_vs_none": {
+                    "left": {
+                      "label_events": 253,
+                      "wins": 115,
+                      "total": 253,
+                      "rate": 0.45454545454545453,
+                      "mean_net_bp": 56.37281141870657,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 851,
+                      "wins": 466,
+                      "total": 851,
+                      "rate": 0.5475910693301997,
+                      "mean_net_bp": 79.76001195217081,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": -0.09304561478474521,
+                    "mean_net_bp_diff": -23.387200533464245,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 5000,
+                      "mean_valid_reps": 5000,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": [
+                        -0.15247101943192803,
+                        -0.023475128435660197
+                      ],
+                      "mean_net_bp_diff_95ci": [
+                        -100.31566222238993,
+                        48.37456134671282
+                      ]
+                    }
+                  },
+                  "absorption_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 851,
+                      "wins": 466,
+                      "total": 851,
+                      "rate": 0.5475910693301997,
+                      "mean_net_bp": 79.76001195217081,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "mean_valid_reps": 0,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  },
+                  "any_vs_none": {
+                    "left": {
+                      "label_events": 253,
+                      "wins": 115,
+                      "total": 253,
+                      "rate": 0.45454545454545453,
+                      "mean_net_bp": 56.37281141870657,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 851,
+                      "wins": 466,
+                      "total": 851,
+                      "rate": 0.5475910693301997,
+                      "mean_net_bp": 79.76001195217081,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": -0.09304561478474521,
+                    "mean_net_bp_diff": -23.387200533464245,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 5000,
+                      "mean_valid_reps": 5000,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": [
+                        -0.14992493703227205,
+                        -0.024280527274307465
+                      ],
+                      "mean_net_bp_diff_95ci": [
+                        -96.07073947829015,
+                        46.00649017892976
+                      ]
+                    }
+                  }
+                }
+              },
+              "1h": {
+                "events": 1332,
+                "exact_label_counts": {
+                  "none": 826,
+                  "regular": 373,
+                  "ambiguous": 102,
+                  "no_confirmed_pivot": 31
+                },
+                "unknown_label_events": 133,
+                "feasible_set_missing_or_unusable": 31,
+                "feasible_set_events": 1301,
+                "cohorts": {
+                  "regular": {
+                    "label_events": 373,
+                    "wins": 178,
+                    "total": 373,
+                    "rate": 0.4772117962466488,
+                    "mean_net_bp": 61.9807032720453,
+                    "net_bp_missing": 0
+                  },
+                  "absorption": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "none": {
+                    "label_events": 826,
+                    "wins": 445,
+                    "total": 826,
+                    "rate": 0.5387409200968523,
+                    "mean_net_bp": 61.151040637117646,
+                    "net_bp_missing": 0
+                  },
+                  "any": {
+                    "label_events": 373,
+                    "wins": 178,
+                    "total": 373,
+                    "rate": 0.4772117962466488,
+                    "mean_net_bp": 61.9807032720453,
+                    "net_bp_missing": 0
+                  }
+                },
+                "comparisons": {
+                  "regular_vs_none": {
+                    "left": {
+                      "label_events": 373,
+                      "wins": 178,
+                      "total": 373,
+                      "rate": 0.4772117962466488,
+                      "mean_net_bp": 61.9807032720453,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 826,
+                      "wins": 445,
+                      "total": 826,
+                      "rate": 0.5387409200968523,
+                      "mean_net_bp": 61.151040637117646,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": -0.06152912385020348,
+                    "mean_net_bp_diff": 0.8296626349276508,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 5000,
+                      "mean_valid_reps": 5000,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": [
+                        -0.12113333259500332,
+                        -0.004712760997294727
+                      ],
+                      "mean_net_bp_diff_95ci": [
+                        -68.58388244142219,
+                        65.91805754389752
+                      ]
+                    }
+                  },
+                  "absorption_vs_none": {
+                    "left": {
+                      "label_events": 0,
+                      "wins": 0,
+                      "total": 0,
+                      "rate": null,
+                      "mean_net_bp": null,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 826,
+                      "wins": 445,
+                      "total": 826,
+                      "rate": 0.5387409200968523,
+                      "mean_net_bp": 61.151040637117646,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": null,
+                    "mean_net_bp_diff": null,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 0,
+                      "mean_valid_reps": 0,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": null,
+                      "mean_net_bp_diff_95ci": null
+                    }
+                  },
+                  "any_vs_none": {
+                    "left": {
+                      "label_events": 373,
+                      "wins": 178,
+                      "total": 373,
+                      "rate": 0.4772117962466488,
+                      "mean_net_bp": 61.9807032720453,
+                      "net_bp_missing": 0
+                    },
+                    "right": {
+                      "label_events": 826,
+                      "wins": 445,
+                      "total": 826,
+                      "rate": 0.5387409200968523,
+                      "mean_net_bp": 61.151040637117646,
+                      "net_bp_missing": 0
+                    },
+                    "win_rate_diff": -0.06152912385020348,
+                    "mean_net_bp_diff": 0.8296626349276508,
+                    "bootstrap": {
+                      "method": "NY-week cluster percentile bootstrap",
+                      "reps": 5000,
+                      "valid_reps": 5000,
+                      "mean_valid_reps": 5000,
+                      "weeks": 23,
+                      "excluded_missing_week_events": 0,
+                      "win_rate_diff_95ci": [
+                        -0.12210436293605496,
+                        -0.002983261619515394
+                      ],
+                      "mean_net_bp_diff_95ci": [
+                        -68.92328232503678,
+                        67.63516019936249
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "shared_coverage": {
+          "events": 1467,
+          "periods": {
+            "15m": {
+              "events": 1467,
+              "exact_label_counts": {
+                "none": 1210,
+                "regular": 257
+              },
+              "unknown_label_events": 0,
+              "feasible_set_missing_or_unusable": 0,
+              "feasible_set_events": 1467,
+              "cohorts": {
+                "regular": {
+                  "label_events": 257,
+                  "wins": 106,
+                  "total": 257,
+                  "rate": 0.41245136186770426,
+                  "mean_net_bp": 23.493569942390348,
+                  "net_bp_missing": 0
+                },
+                "absorption": {
+                  "label_events": 0,
+                  "wins": 0,
+                  "total": 0,
+                  "rate": null,
+                  "mean_net_bp": null,
+                  "net_bp_missing": 0
+                },
+                "none": {
+                  "label_events": 1210,
+                  "wins": 629,
+                  "total": 1210,
+                  "rate": 0.5198347107438016,
+                  "mean_net_bp": 85.45882099484214,
+                  "net_bp_missing": 0
+                },
+                "any": {
+                  "label_events": 257,
+                  "wins": 106,
+                  "total": 257,
+                  "rate": 0.41245136186770426,
+                  "mean_net_bp": 23.493569942390348,
+                  "net_bp_missing": 0
+                }
+              },
+              "comparisons": {
+                "regular_vs_none": {
+                  "left": {
+                    "label_events": 257,
+                    "wins": 106,
+                    "total": 257,
+                    "rate": 0.41245136186770426,
+                    "mean_net_bp": 23.493569942390348,
+                    "net_bp_missing": 0
+                  },
+                  "right": {
+                    "label_events": 1210,
+                    "wins": 629,
+                    "total": 1210,
+                    "rate": 0.5198347107438016,
+                    "mean_net_bp": 85.45882099484214,
+                    "net_bp_missing": 0
+                  },
+                  "win_rate_diff": -0.10738334887609735,
+                  "mean_net_bp_diff": -61.96525105245179,
+                  "bootstrap": {
+                    "method": "NY-week cluster percentile bootstrap",
+                    "reps": 5000,
+                    "valid_reps": 5000,
+                    "mean_valid_reps": 5000,
+                    "weeks": 23,
+                    "excluded_missing_week_events": 0,
+                    "win_rate_diff_95ci": [
+                      -0.1926126691661539,
+                      -0.012920573750054974
+                    ],
+                    "mean_net_bp_diff_95ci": [
+                      -152.8820991853629,
+                      17.602143774085356
+                    ]
+                  }
+                },
+                "absorption_vs_none": {
+                  "left": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "right": {
+                    "label_events": 1210,
+                    "wins": 629,
+                    "total": 1210,
+                    "rate": 0.5198347107438016,
+                    "mean_net_bp": 85.45882099484214,
+                    "net_bp_missing": 0
+                  },
+                  "win_rate_diff": null,
+                  "mean_net_bp_diff": null,
+                  "bootstrap": {
+                    "method": "NY-week cluster percentile bootstrap",
+                    "reps": 5000,
+                    "valid_reps": 0,
+                    "mean_valid_reps": 0,
+                    "weeks": 23,
+                    "excluded_missing_week_events": 0,
+                    "win_rate_diff_95ci": null,
+                    "mean_net_bp_diff_95ci": null
+                  }
+                },
+                "any_vs_none": {
+                  "left": {
+                    "label_events": 257,
+                    "wins": 106,
+                    "total": 257,
+                    "rate": 0.41245136186770426,
+                    "mean_net_bp": 23.493569942390348,
+                    "net_bp_missing": 0
+                  },
+                  "right": {
+                    "label_events": 1210,
+                    "wins": 629,
+                    "total": 1210,
+                    "rate": 0.5198347107438016,
+                    "mean_net_bp": 85.45882099484214,
+                    "net_bp_missing": 0
+                  },
+                  "win_rate_diff": -0.10738334887609735,
+                  "mean_net_bp_diff": -61.96525105245179,
+                  "bootstrap": {
+                    "method": "NY-week cluster percentile bootstrap",
+                    "reps": 5000,
+                    "valid_reps": 5000,
+                    "mean_valid_reps": 5000,
+                    "weeks": 23,
+                    "excluded_missing_week_events": 0,
+                    "win_rate_diff_95ci": [
+                      -0.18809056741729724,
+                      -0.013393766878919898
+                    ],
+                    "mean_net_bp_diff_95ci": [
+                      -147.02492249918527,
+                      17.273652447413614
+                    ]
+                  }
+                }
+              }
+            },
+            "1h": {
+              "events": 1467,
+              "exact_label_counts": {
+                "none": 1127,
+                "regular": 340
+              },
+              "unknown_label_events": 0,
+              "feasible_set_missing_or_unusable": 0,
+              "feasible_set_events": 1467,
+              "cohorts": {
+                "regular": {
+                  "label_events": 340,
+                  "wins": 154,
+                  "total": 340,
+                  "rate": 0.45294117647058824,
+                  "mean_net_bp": 53.50694815851823,
+                  "net_bp_missing": 0
+                },
+                "absorption": {
+                  "label_events": 0,
+                  "wins": 0,
+                  "total": 0,
+                  "rate": null,
+                  "mean_net_bp": null,
+                  "net_bp_missing": 0
+                },
+                "none": {
+                  "label_events": 1127,
+                  "wins": 581,
+                  "total": 1127,
+                  "rate": 0.515527950310559,
+                  "mean_net_bp": 80.96775377556088,
+                  "net_bp_missing": 0
+                },
+                "any": {
+                  "label_events": 340,
+                  "wins": 154,
+                  "total": 340,
+                  "rate": 0.45294117647058824,
+                  "mean_net_bp": 53.50694815851823,
+                  "net_bp_missing": 0
+                }
+              },
+              "comparisons": {
+                "regular_vs_none": {
+                  "left": {
+                    "label_events": 340,
+                    "wins": 154,
+                    "total": 340,
+                    "rate": 0.45294117647058824,
+                    "mean_net_bp": 53.50694815851823,
+                    "net_bp_missing": 0
+                  },
+                  "right": {
+                    "label_events": 1127,
+                    "wins": 581,
+                    "total": 1127,
+                    "rate": 0.515527950310559,
+                    "mean_net_bp": 80.96775377556088,
+                    "net_bp_missing": 0
+                  },
+                  "win_rate_diff": -0.06258677383997074,
+                  "mean_net_bp_diff": -27.460805617042652,
+                  "bootstrap": {
+                    "method": "NY-week cluster percentile bootstrap",
+                    "reps": 5000,
+                    "valid_reps": 5000,
+                    "mean_valid_reps": 5000,
+                    "weeks": 23,
+                    "excluded_missing_week_events": 0,
+                    "win_rate_diff_95ci": [
+                      -0.14137882551628428,
+                      0.019368324726431387
+                    ],
+                    "mean_net_bp_diff_95ci": [
+                      -102.37817450614465,
+                      48.28598579131467
+                    ]
+                  }
+                },
+                "absorption_vs_none": {
+                  "left": {
+                    "label_events": 0,
+                    "wins": 0,
+                    "total": 0,
+                    "rate": null,
+                    "mean_net_bp": null,
+                    "net_bp_missing": 0
+                  },
+                  "right": {
+                    "label_events": 1127,
+                    "wins": 581,
+                    "total": 1127,
+                    "rate": 0.515527950310559,
+                    "mean_net_bp": 80.96775377556088,
+                    "net_bp_missing": 0
+                  },
+                  "win_rate_diff": null,
+                  "mean_net_bp_diff": null,
+                  "bootstrap": {
+                    "method": "NY-week cluster percentile bootstrap",
+                    "reps": 5000,
+                    "valid_reps": 0,
+                    "mean_valid_reps": 0,
+                    "weeks": 23,
+                    "excluded_missing_week_events": 0,
+                    "win_rate_diff_95ci": null,
+                    "mean_net_bp_diff_95ci": null
+                  }
+                },
+                "any_vs_none": {
+                  "left": {
+                    "label_events": 340,
+                    "wins": 154,
+                    "total": 340,
+                    "rate": 0.45294117647058824,
+                    "mean_net_bp": 53.50694815851823,
+                    "net_bp_missing": 0
+                  },
+                  "right": {
+                    "label_events": 1127,
+                    "wins": 581,
+                    "total": 1127,
+                    "rate": 0.515527950310559,
+                    "mean_net_bp": 80.96775377556088,
+                    "net_bp_missing": 0
+                  },
+                  "win_rate_diff": -0.06258677383997074,
+                  "mean_net_bp_diff": -27.460805617042652,
+                  "bootstrap": {
+                    "method": "NY-week cluster percentile bootstrap",
+                    "reps": 5000,
+                    "valid_reps": 5000,
+                    "mean_valid_reps": 5000,
+                    "weeks": 23,
+                    "excluded_missing_week_events": 0,
+                    "win_rate_diff_95ci": [
+                      -0.14497591905695917,
+                      0.0204969148647251
+                    ],
+                    "mean_net_bp_diff_95ci": [
+                      -105.02200664254323,
+                      46.87706708530354
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "shared_coverage_rule": "both exact period labels are regular, absorption or none; ambiguous/unknown labels are not imputed"
+      }
+    }
+  },
+  "builder_commit": "498615675648623c6d70a9fc294625cf3e186e0a",
+  "first_touch_utc": "2020-01-10 15:00:00+00:00",
+  "last_touch_utc": "2026-09-30 13:31:00+00:00"
+}
