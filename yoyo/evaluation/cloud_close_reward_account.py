@@ -205,8 +205,15 @@ def account(data, slip=0., exposure=1., weights=(1.,)):
     roster['notional'] = roster.quantity*entries.price.to_numpy()
     roster['net_return'] = roster.cash_pnl / roster.notional
     nav = np.asarray(pf.value()).reshape(-1, 3)
-    if not np.isclose(nav[-1,-1], 1000.+roster.cash_pnl.sum(), rtol=1e-8):
-        raise ValueError('Final NAV does not reconcile to actual fills')
+    # VectorBT's reconstructed cash flow can accumulate sub-cent cancellation
+    # across reused slots with base-unit quantities ranging from <1 to >1e9.
+    cash_from_orders = 1000.+float((np.where(orders.side.eq(0),-1.,1.) *
+                                    orders['size']*orders.price-orders.fees).sum())
+    final_pnl = 1000.+roster.cash_pnl.sum()
+    if (not np.isclose(cash_from_orders,final_pnl,rtol=1.e-10,atol=1.e-5)
+            or not np.isclose(nav[-1,-1],cash_from_orders,rtol=1.e-10,atol=.005)):
+        raise ValueError(f'Final NAV {nav[-1,-1]} versus orders {cash_from_orders} and PnL {final_pnl}')
+
     qty = np.asarray(pf.assets())[1::3]
     hi, lo = data['high'], data['low']
     favorable = np.where(qty >= 0, hi, lo)
