@@ -1,0 +1,7 @@
+{
+  "id":"exp-cloud-close-target-expiry-20261109-v1",
+  "factor":"Make the normal two-thirds resting 2R profit-taking order valid only until the next 12H close, then cancel it if unfilled. An order resting within the initial twelve native hours remains eligible including their gap and intrabar ordering. Expiry precedes the next hour's open. After expiry the unsold position exits at the original V1.7 stop or EMA. Fast first bursts are monetised; slow moves retain full exposure.",
+  "causal_implementation":"A time-in-force decision made at admission. Retain the original native 2R leg only when it actually executed before expiry; for a fill from the expiry boundary onwards replace it by the existing actual runner path. Identical native legs on assets which would have stopped before taking profit. Monetary and fee outcomes come from VectorBT executions. No new candidate prioritisation; same nine funded slots, 1000U and stop logic.",
+  "universe":"Corrected OKX 90d eligible and extended 661-contract historical Binance archive, incl. the full cohort of 29 older archived additions. Original normal 2R accounts on exactly the same cohorts reused from prior runs.",
+  "test":"Pre2025 and full: >=100 funded, >=30% wins, both payoff measures >=2.5, conservative DD <=35%; other years/discovery history previously observed. Stress extra 5bp per market fill and matched later controls for development-pass policy. Single fixed 12h time in force; no retrospective cutoff fitting. No funding, impact or lot rounding."
+}

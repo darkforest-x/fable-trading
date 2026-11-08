@@ -2,6 +2,7 @@
 import gc
 import json
 from collections import Counter
+from contextlib import contextmanager
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 from pathlib import Path
@@ -124,6 +125,20 @@ def quotes(symbol):
     raise FileNotFoundError(f'Missing extra contract H1 path: {symbol}')
 
 
+@contextmanager
+def market_quotes(extra):
+    native_quotes=native.quotes
+    def extended(symbol):
+        if symbol+'USDT' in extra:
+            return quotes(symbol)
+        return native_quotes(symbol)
+    native.quotes=extended
+    try:
+        yield
+    finally:
+        native.quotes=native_quotes
+
+
 def pool(extra):
     repaired=set(native.patch.affected_tickers())
     baseline=pd.read_csv(venue.EXP/'fills.csv.gz',dtype={'symbol':str},keep_default_na=False,float_precision='round_trip')
@@ -185,15 +200,8 @@ def main():
         coverage=list(executor.map(price,sorted(extra)))
     pd.DataFrame(coverage).to_csv(EXP/'archive_coverage.csv',index=False)
     paths=pool(extra)
-    native_quotes=native.quotes
-    # Different venue callbacks and all live settings stay outside this offline process.
-    def extended(symbol):
-        if symbol+'USDT' in extra:
-            return quotes(symbol)
-        return native_quotes(symbol)
-    native.quotes=extended
     records=[];summary={'archived_additions':sorted(extra),'overlap_validation':overlap}
-    try:
+    with market_quotes(extra):
         for policy in ['normal_partial','trend_efficiency']:
             selected=paths if policy=='normal_partial' else trend.inputs('Binance',paths)[1]
             real=selected[~selected.is_control]
@@ -212,8 +220,6 @@ def main():
                     records.extend(dict(policy=policy,scenario=name,period=p,**m) for p,m in checked.items())
             del selected,real,controls,trades,equity
             gc.collect()
-    finally:
-        native.quotes=native_quotes
     pd.DataFrame(records).to_csv(EXP/'account_metrics.csv',index=False)
     (EXP/'summary.json').write_text(json.dumps(summary,indent=2,allow_nan=False)+'\n')
     print(json.dumps(summary,indent=2),flush=True)
