@@ -8,11 +8,12 @@ function ruleSnapshot(){
  for(const t of paper.TRACKS){d.tracks[t]={confirm_minutes:t==='5'?5:60};if(t.startsWith('live-wick'))d[t]={min_score:.5};}
  d['live-wick6x3hi'].boost_from_score=.76;d['live-wick6x3hi'].boost=1.5;
  d['live-wick3x3far'].min_beyond_pct=1.5;
+ d['live-breadth']={count_min:31,count_max:62,observe_minutes:30,hold_days:6};
  return d;
 }
 test('each booklet overview uses its strategy entry threshold and protection, not the shared signal gate',()=>{
  const d=ruleSnapshot();
- for(const t of paper.TRACKS){
+ for(const t of paper.TRACKS.filter(t=>t!=='live-breadth')){
   const wick=t.startsWith('live-wick'),threshold=['60','5'].includes(t)?'0.2262':['allin3','live-allin3'].includes(t)?'0.6':'0.5';
   const html=ui.overviewHTML(d,t);
   assert.ok(html.includes(`<small>入场分门槛</small><b>≥ ${threshold}</b>`),t);
@@ -21,15 +22,22 @@ test('each booklet overview uses its strategy entry threshold and protection, no
  }
  d['live-wick6x3hi'].min_score=.55;
  assert.match(ui.overviewHTML(d,'live-wick6x3hi'),/≥ 0\.55/,'read the API value rather than hardcode 0.5');
+ // live-breadth has no entry score or 1.618 protection: its facts are the coin band, observation and holding period.
+ const breadth=ui.overviewHTML(d,'live-breadth');
+ assert.match(breadth,/<small>信号<\/small><b>31–62 <small>个币 \/ 5分钟<\/small><\/b>/);
+ assert.match(breadth,/<b>30 <small>分钟零新增<\/small><\/b>/);assert.match(breadth,/<b>6 <small>天<\/small><\/b>/);
+ assert.doesNotMatch(breadth,/入场分门槛|保护偏移|0\.2262/);
 });
 test('missing live strategy configuration cannot fall back to an unrelated model gate',()=>{
  const d=ruleSnapshot();
- for(const t of paper.TRACKS.filter(t=>t.startsWith('live-'))){
+ for(const t of paper.TRACKS.filter(t=>t.startsWith('live-')&&t!=='live-breadth')){
   delete d[t];const html=ui.overviewHTML(d,t);
   assert.match(html,/<small>入场分门槛<\/small><b>≥ —<\/b>/);
   assert.doesNotMatch(html,/0\.2262/);
  }
  assert.match(ui.overviewHTML(null,'live-wick6x3hi'),/策略规则尚未读取/);
+ delete d['live-breadth'];const breadth=ui.overviewHTML(d,'live-breadth');
+ assert.match(breadth,/策略规则尚未读取/);assert.match(breadth,/<b>—–— <small>个币/);assert.doesNotMatch(breadth,/0\.2262/);
 });
 test('wick flow protects at 1.618 without an entry-price offset while pre-touch scoring stays distinct',()=>{
  for(const t of paper.TRACKS.filter(t=>t.startsWith('live-wick'))){
@@ -68,16 +76,16 @@ test('custom windows shift by their span and clamp at the saved history boundari
  assert.deepEqual(ui.shiftHistoryWindow(h,w,-1),{period:'custom',start:0,end:300});
  assert.deepEqual(ui.shiftHistoryWindow(h,{...w,start:650,end:950},1),{period:'custom',start:700,end:1000});
 });
-test('all thirteen accounts have separate selection and accessible booklet buttons',()=>{
+test('all fourteen accounts have separate selection and accessible booklet buttons',()=>{
  const html=ui.pickerHTML(paper.TRACKS);
  for(const t of paper.TRACKS){assert.ok(html.includes(`data-strategy-select="${t}"`));assert.ok(html.includes(`data-strategy-book="${t}"`));assert.ok(html.includes(`data-strategy-backtest="${t}"`));assert.ok(data.accounts[t]);assert.doesNotThrow(()=>ui.researchHTML(data,t));}
- assert.equal((html.match(/<button /g)||[]).length,52);
+ assert.equal((html.match(/<button /g)||[]).length,56);
  for(const match of html.matchAll(/<button[^>]*>([\s\S]*?)<\/button>/g))assert.doesNotMatch(match[1],/<button/);
 });
 test('legacy flat ordering defaults to spike and preserves valid user order across new accounts',()=>{
- const defaults=ui.accountOrder(null,paper.TRACKS);assert.equal(defaults[0],'spike');assert.equal(defaults.length,13);
+ const defaults=ui.accountOrder(null,paper.TRACKS);assert.equal(defaults[0],'spike');assert.equal(defaults.length,14);
  const saved=['v3add20','60','60','deleted'];const result=ui.accountOrder(saved,paper.TRACKS);
- assert.deepEqual(result.slice(0,3),['v3add20','60','spike']);assert.equal(new Set(result).size,13);assert.deepEqual(saved,['v3add20','60','60','deleted']);
+ assert.deepEqual(result.slice(0,3),['v3add20','60','spike']);assert.equal(new Set(result).size,14);assert.deepEqual(saved,['v3add20','60','60','deleted']);
  assert.deepEqual(ui.accountOrder({bad:1},paper.TRACKS),defaults);
  const moved=ui.moveAccount(defaults,'v3add20',0);assert.equal(moved[0],'v3add20');assert.equal(defaults[0],'spike');
  assert.deepEqual(ui.moveAccount(defaults,'unknown',0),defaults);assert.equal(ui.moveAccount(defaults,'spike',99).at(-1),'spike');

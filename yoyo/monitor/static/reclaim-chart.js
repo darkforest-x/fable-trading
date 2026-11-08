@@ -183,7 +183,7 @@
         ctx.save();ctx.beginPath();ctx.rect(0,0,s.width,s.height);ctx.clip();ctx.font='11px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';ctx.textBaseline='middle';
         const left=Math.max(0,a),right=Math.min(s.width,b);
         const line=(value,label,tone,start=left,dash=[],finish=right)=>{const yy=y(value);if(yy==null||start>finish)return;ctx.strokeStyle=tone;ctx.lineWidth=1.4;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(start,yy);ctx.lineTo(finish,yy);ctx.stroke();ctx.setLineDash([]);const text=label+' '+format(value),w=ctx.measureText(text).width+14;if(finish-start>w){ctx.fillStyle=dark?'#1c222cee':'#f7faf8ee';ctx.fillRect(finish-w,yy+3,w,19);ctx.fillStyle=dark?({'#169873':'#55c7a5','#d7355d':'#f57e98','#8b6ab1':'#ba97ef'}[tone]||'#e8edf4'):tone;ctx.textAlign='right';ctx.fillText(text,finish-6,yy+12);}};
-        if(right>=left){if(targetY!=null){ctx.fillStyle=color;ctx.globalAlpha=.065;ctx.fillRect(left,Math.min(entry,targetY),right-left,Math.abs(entry-targetY));ctx.globalAlpha=1;line(p.target,'目标',color,left,[4,4]);}line(p.entry,'开仓',color);}
+        if(right>=left){if(targetY!=null){ctx.fillStyle=color;ctx.globalAlpha=.065;ctx.fillRect(left,Math.min(entry,targetY),right-left,Math.abs(entry-targetY));ctx.globalAlpha=1;line(p.target,'目标',color,left,[4,4]);}line(p.entry,p.track===9260?'买入':'开仓',color);}
         const stopIndex=g.stop!=null?candleIndex(o.rows,g.stop,this.step):-1;
         const stopX=g.stop==null?null:stopIndex>=0?at(stopIndex,g.stop):g.stop<o.rows[0].time*1000?0:null;
         if(fin(p.backstop))line(p.backstop,'确认前兜底止损','#d7355d',left,[3,4],g.stop==null?right:Math.min(right,stopX??left));
@@ -192,6 +192,8 @@
         if(g.entry>=0)marker(g.entry,p.entry,p.side===1,color);
         for(const fill of p.exits||[]){if(fill.reason!=='manual'||(p.stage==='closed'&&fill===p.exits.at(-1)))continue;const i=candleIndex(o.rows,fill.exit_ms,this.step);if(i>=0)marker(i,fill.price,p.side!==1,'#617488');}
         if(g.exit>=0&&fin(p.exit_price))marker(g.exit,p.exit_price,p.side!==1,'#617488');
+        // live-breadth (track 9260, Stitch 2762455ffefe4f5a9784c2e2e0fd4db5): mark the scheduled six-day exit of an open trade.
+        if(p.track===9260&&p.stage!=='closed'&&fin(p.decision_ms)&&o.rows.length){const last=o.rows.length-1,xx=x(last+(p.decision_ms-o.rows[last].time*1000)/this.step);if(xx!=null&&xx>=0&&xx<=s.width){ctx.strokeStyle=dark?'#9aa8b6':'#617488';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(xx,0);ctx.lineTo(xx,s.height);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=dark?'#c9d2dc':'#617488';ctx.textAlign='right';ctx.fillText('第6天平仓',xx-5,14);}}
         ctx.restore();
       });
     }

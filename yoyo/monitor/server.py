@@ -98,6 +98,7 @@ def create_app(runtime=None, start_monitor=True):
     # Owner 2026-11-08: forward paper account for the lower-rail breadth signal (SOL funded, BTC/ETH shadow).
     # It reads the monday-fib touch book and OKX 1m candles; it never writes another account's ledger.
     breadth_paper = BreadthPaper(runtime, monday_fib.client, quotes=fib_quotes)
+    reclaim_paper.extra_accounts["live-breadth"] = breadth_paper  # shown on the paper page, booked separately
 
     @asynccontextmanager
     async def lifespan(app):

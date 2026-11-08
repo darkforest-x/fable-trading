@@ -344,6 +344,9 @@ class ReclaimPaper:
         self.score_basis = score_basis
         self.write_lock = threading.RLock()
         self.fib, self.client, self.model = fib, fib.client, ScoreModel(model_path)
+        # Owner 2026-11-08: separately booked accounts shown on the same page (live-breadth). Each provides
+        # paper_track / paper_analytics / paper_history; this engine never writes their ledgers.
+        self.extra_accounts = {}
         self.v3 = json.loads(Path(v3_path).read_text()) if enable_v3 else None
         self.add = dict(ADD) if self.v3 and enable_v3add else None
         self.spike = dict(SPIKE) if enable_spike else None
@@ -1116,6 +1119,10 @@ class ReclaimPaper:
 
     def analytics(self, track=60, days=0):
         from .reclaim_analytics import build_analytics
+        if track in self.extra_accounts:
+            with self.fib.lock:
+                quotes, connected = dict(self.fib.quotes), self.fib.connected
+            return self.extra_accounts[track].paper_analytics(quotes, self.client.clock(), days, connected)
         track = track_id(track)
         tracks = members(track); marks = ",".join("?"*len(tracks))
         with self.fib.lock:
@@ -1151,7 +1158,7 @@ class ReclaimPaper:
             db.execute("BEGIN")
             tracks = {}
             rows = db.execute("SELECT * FROM tracks ORDER BY track DESC").fetchall()
-            if track is not None and track not in {track_key(t["track"]) for t in rows}:
+            if track is not None and track not in {track_key(t["track"]) for t in rows} | set(self.extra_accounts):
                 track = None  # Unknown account: keep the previous full snapshot.
             for t in rows:
                 m = t["track"]
@@ -1213,6 +1220,13 @@ class ReclaimPaper:
                 if not detail:
                     track_snapshot["detail_omitted"] = True
                 tracks[track_key(m)] = track_snapshot
+            extra_configs = {}
+            for key, extra in self.extra_accounts.items():
+                try:
+                    tracks[key], extra_configs[key] = extra.paper_track(quotes=quotes, detail=track is None or track == key,
+                                                                        today=today, day_start_ms=day_start_ms)
+                except Exception as err:  # a separate ledger must never break the reclaim snapshot
+                    extra_configs[key] = dict(error=f"{type(err).__name__}: {err}")
             record_signals = []
             if today:
                 record_signals = [dict(r) for r in db.execute(
@@ -1237,6 +1251,7 @@ class ReclaimPaper:
         if track is not None:
             result["detail_track"] = track
         result["live-allin3"] = self.live_allin
+        result.update(extra_configs)
         for t, config in self.wick.items():
             result[KEYS[t]] = config
         result["live_signals"] = [self._live_signal(s, live_scores[s["id"]]) for s in signals if s["id"] in live_scores]
@@ -1287,6 +1302,8 @@ class ReclaimPaper:
 
         now_ms = self.client.clock()
         day_start_ms = shanghai_day_start_ms(now_ms)
+        if track in self.extra_accounts:
+            return self.extra_accounts[track].paper_history(tab, scope, q, offset, limit, sort, day_start_ms)
         search = "%" + q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
         if tab == "events":
             order_by = self._history_order_by(tab, sort)
@@ -1356,14 +1373,14 @@ def install(app, engine):
     @app.get("/api/monday-reclaim-paper/analytics")
     def analytics(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20", "live-allin3",
                                   "live-wick6x3", "live-wick3x3",
-                                  "live-wick6x3hi", "live-wick3x3far"] = "60",
+                                  "live-wick6x3hi", "live-wick3x3far", "live-breadth"] = "60",
                   days: Literal["0", "7", "30"] = "0"):
         return engine.analytics(track, int(days))
 
     @app.get("/api/monday-reclaim-paper/history")
     def record_history(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20", "live-allin3",
                                   "live-wick6x3", "live-wick3x3",
-                                  "live-wick6x3hi", "live-wick3x3far"] = "60",
+                                  "live-wick6x3hi", "live-wick3x3far", "live-breadth"] = "60",
                        tab: Literal["events", "closed"] = "events",
                        scope: Literal["funded", "shadow", "all"] = "funded",
                        q: str = Query("", max_length=100), offset: int = Query(0, ge=0),

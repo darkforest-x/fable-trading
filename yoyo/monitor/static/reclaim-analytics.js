@@ -11,7 +11,7 @@
   const reason=(v,track)=>({target:'到达目标',breakeven:track==='4060'?'利润锁止损':'保本止损',backstop:'兜底止损',reclaimed_inside_be:track==='4060'?'收回但未越过利润锁价':'收回但未越过保本价',failed_reclaim:'确认未收回',manual:'手动平仓'}[v]||'其他退出');
   const time=v=>new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(v);
   function validate(d,track,days){
-    if(d?.paper_only!==true||d.track!==({v3:'1060',v3add:'2060',spike:'3060',v3lock:'4060',allin3:'5060',v3add20:'6060','live-allin3':'7060','live-wick6x3':'8060','live-wick3x3':'9060','live-wick6x3hi':'8160','live-wick3x3far':'9160'}[track]||track)||d.days!==days||!finite(d.now_ms)||!d.summary||!d.coverage||!['curve','by_side','by_symbol','by_reason'].every(k=>Array.isArray(d[k]))||!d.curve.every(p=>finite(p.time_ms)&&finite(p.equity)))throw Error('统计返回格式不完整');
+    if(d?.paper_only!==true||d.track!==({v3:'1060',v3add:'2060',spike:'3060',v3lock:'4060',allin3:'5060',v3add20:'6060','live-allin3':'7060','live-wick6x3':'8060','live-wick3x3':'9060','live-wick6x3hi':'8160','live-wick3x3far':'9160','live-breadth':'9260'}[track]||track)||d.days!==days||!finite(d.now_ms)||!d.summary||!d.coverage||!['curve','by_side','by_symbol','by_reason'].every(k=>Array.isArray(d[k]))||!d.curve.every(p=>finite(p.time_ms)&&finite(p.equity)))throw Error('统计返回格式不完整');
     return d;
   }
   const pf=s=>s.profit_factor_state==='no_losses'?'∞':num(s.profit_factor);

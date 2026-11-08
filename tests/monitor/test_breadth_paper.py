@@ -176,3 +176,52 @@ class BreadthPaperTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class BreadthOnPaperPageTests(unittest.TestCase):
+    """The paper page reads live-breadth through /api/monday-reclaim-paper (Stitch 2762455ffefe4f5a9784c2e2e0fd4db5)."""
+
+    def setUp(self):
+        import os
+        from fastapi.testclient import TestClient
+        self.tmp = tempfile.TemporaryDirectory()
+        os.environ["FABLE_IMPULSE_RUNTIME"] = self.tmp.name
+        from yoyo.monitor.server import create_app
+        self.app = create_app(start_monitor=False)
+        self.client = TestClient(self.app)
+        e = self.app.state.breadth_paper
+        now = e.clock()
+        with e.db() as db:
+            db.execute("INSERT INTO signals (id,bar_ms,n,symbols,decision_ms,new_n,new_symbols,status,created_ms,evaluated_ms) "
+                       "VALUES (1,?,36,'[]',?,0,'[]','taken',?,?)", (now-3*DAY, now-3*DAY+35*MIN, now-3*DAY, now-3*DAY+36*MIN))
+            for sym, funded in (("SOL-USDT-SWAP", 1), ("BTC-USDT-SWAP", 0), ("ETH-USDT-SWAP", 0)):
+                db.execute("INSERT INTO positions (signal_id,symbol,funded,notional,entry_ms,entry,exit_due_ms,stage) VALUES (1,?,?,1000,?,100,?,'open')",
+                           (sym, funded, now-3*DAY+35*MIN, now+3*DAY))
+            db.execute("INSERT INTO positions (signal_id,symbol,funded,notional,entry_ms,entry,exit_due_ms,exit_ms,exit,gross_bp,fee_bp,net_bp,pnl,stage) "
+                       "VALUES (9,'SOL-USDT-SWAP',1,1000,?,100,?,?,104,400,10,390,39,'closed')", (now-20*DAY, now-14*DAY, now-14*DAY))
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_snapshot_lists_the_account_like_the_other_tracks(self):
+        d = self.client.get("/api/monday-reclaim-paper?list_period=today&track=live-breadth").json()
+        t = d["tracks"]["live-breadth"]
+        legs = {p["symbol"]: p for p in t["open"]}
+        self.assertEqual((legs["SOL-USDT-SWAP"]["taken"], legs["BTC-USDT-SWAP"]["taken"], legs["BTC-USDT-SWAP"]["note"]), (1, 0, "comparison"))
+        self.assertTrue(all(p["track"] == bp.TRACK_ID and p["stage"] == "holding" and p["remaining_notional"] is None for p in t["open"]))
+        self.assertEqual((t["stats"]["taken_closed"], t["stats"]["wins"], t["equity"]), (1, 1, 1000.0))
+        self.assertEqual(d["live-breadth"]["signals"][0]["status"], "taken")
+        self.assertTrue(d["live-breadth"]["signals"][0]["breadth"])
+        self.assertTrue(d["tracks"]["spike"].get("detail_omitted"))
+
+    def test_analytics_and_history_route_to_the_breadth_ledger(self):
+        a = self.client.get("/api/monday-reclaim-paper/analytics?track=live-breadth&days=0").json()
+        self.assertEqual(a["track"], str(bp.TRACK_ID))
+        h = self.client.get("/api/monday-reclaim-paper/history?track=live-breadth&tab=closed&scope=funded").json()
+        self.assertEqual((h["total"], h["rows"][0]["reason"]), (1, "time_6d"))
+        h = self.client.get("/api/monday-reclaim-paper/history?track=live-breadth&tab=events").json()
+        self.assertEqual(h["total"], 1)
+
+    def test_backtest_list_reads_the_thirteen_saved_cases(self):
+        p = self.client.get("/api/strategy-backtest?track=live-breadth").json()
+        self.assertEqual((p["total"], p["rows"][0]["symbol"]), (13, "SOLUSDT"))

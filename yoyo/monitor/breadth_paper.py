@@ -50,6 +50,8 @@ SHADOWS = ("BTC-USDT-SWAP", "ETH-USDT-SWAP")
 LEGS = (FUNDED,)+SHADOWS
 START_EQUITY, TAKER_BP = 1000.0, 5.0
 TRACK_KEY = "live-breadth"
+TRACK_ID = 9260  # row.track on the paper page; never a reclaim-ledger track
+ID_OFFSET = 9_260_000_000
 SHANGHAI = ZoneInfo("Asia/Shanghai")
 RULE = dict(track=TRACK_KEY, count_min=COUNT_MIN, count_max=COUNT_MAX, bar_minutes=5, observe_minutes=30, hold_days=6,
             funded=FUNDED, shadows=list(SHADOWS), start_equity=START_EQUITY, leverage=1.0, taker_bp=TAKER_BP,
@@ -336,6 +338,83 @@ class BreadthPaper:
                     closed=len(funded_closed), wins=sum(1 for p in funded_closed if p["net_bp"] > 0)),
                     signals=signals, positions=positions, notices=notices,
                     worker=dict(alive=bool(self.thread and self.thread.is_alive()), error=self.error))
+
+
+    # ---- paper-page read model (Stitch 2762455ffefe4f5a9784c2e2e0fd4db5) ----------------------------------------
+    # The paper page lists every account from /api/monday-reclaim-paper. These methods shape this ledger like that
+    # snapshot so the existing picker, account card, trade book and chart can show it. Ids are offset so they can
+    # never collide with reclaim-ledger ids in shared lists; there is no manual close (remaining_notional is None).
+    def paper_row(self, p, quotes=None, now=None):
+        closed = p["stage"] == "closed"
+        row = dict(id=ID_OFFSET+p["id"], track=TRACK_ID, signal_id=ID_OFFSET+p["signal_id"], symbol=p["symbol"], side=1,
+                   entry=p["entry"], target=None, fill_ms=p["entry_ms"], decision_ms=p["exit_due_ms"],
+                   stage="closed" if closed else "holding", be_from_ms=None, backstop=None, be_price=None, parent_id=None,
+                   taken=int(p["funded"]), notional=p["notional"], remaining_notional=None, realized_pnl=0., close_revision=0,
+                   exit_ms=p["exit_ms"], exit_price=p["exit"], reason="time_6d" if closed else None, gross_bp=p["gross_bp"],
+                   fee_bp=p["fee_bp"], net_bp=p["net_bp"], net_slip_bp=p["net_bp"], pnl=p["pnl"],
+                   note=None if p["funded"] else "comparison", score=None, ema_order=None, score_basis=None, exits=[],
+                   error=p["error"])
+        if not closed:
+            q = (quotes or {}).get(p["symbol"]) or {}
+            mark = q.get("price")
+            row.update(mark=mark, quote_ms=q.get("received_ms"),
+                       unrealized_bp=(mark/p["entry"]-1)*1e4 if isinstance(mark, (int, float)) and mark > 0 else None)
+        return row
+
+    def paper_signal(self, s):
+        return dict(id=ID_OFFSET+s["id"], symbol=FUNDED, side=1, candle_ms=s["bar_ms"], observed_ms=s["evaluated_ms"] or s["created_ms"],
+                    decision_ms=s["decision_ms"], n=s["n"], new_n=s["new_n"], status=s["status"], breadth=True,
+                    score=None, error=s["error"])
+
+    def paper_track(self, quotes=None, detail=True, today=False, day_start_ms=None):
+        now = self.clock()
+        with self.db() as db:
+            acct = self.account(db)
+            rows = [dict(r) for r in db.execute("SELECT * FROM positions ORDER BY entry_ms DESC, funded DESC, symbol")]
+            signals = [dict(r) for r in db.execute("SELECT * FROM signals ORDER BY bar_ms DESC LIMIT 100")]
+        shaped = [self.paper_row(p, quotes, now) for p in rows]
+        open_rows = [r for r in shaped if r["stage"] != "closed"]
+        closed = [r for r in shaped if r["stage"] == "closed"]
+        closed.sort(key=lambda r: (r["exit_ms"], r["id"]), reverse=True)
+        funded_closed = [r for r in closed if r["taken"] == 1]
+        mean = lambda xs: sum(xs)/len(xs) if xs else None
+        latest = next((r for r in sorted(shaped, key=lambda r: (r["fill_ms"], r["id"]), reverse=True) if r["taken"] == 1), None)
+        track = dict(confirm_minutes=None, rule=TRACK_KEY, equity=acct["equity"], start_equity=START_EQUITY, started_ms=acct["started_ms"],
+                     open=open_rows, closed=closed[:100] if detail else [], pending_adds=[], latest_funded=latest,
+                     stats=dict(shadow_closed=len(closed), shadow_mean_net_bp=mean([r["net_bp"] for r in closed]),
+                                taken_closed=len(funded_closed), wins=sum(1 for r in funded_closed if r["net_bp"] > 0),
+                                mean_net_bp=mean([r["net_bp"] for r in funded_closed])))
+        if today:
+            track["record_closed"] = [r for r in closed if day_start_ms <= r["exit_ms"] < day_start_ms+DAY] if detail else []
+        if not detail:
+            track["detail_omitted"] = True
+        config = dict(RULE, signals=[self.paper_signal(s) for s in signals], now_ms=now)
+        return track, config
+
+    def paper_analytics(self, quotes, now, days, connected):
+        from .reclaim_analytics import build_analytics
+        with self.db() as db:
+            acct = self.account(db)
+            rows = [dict(r) for r in db.execute("SELECT * FROM positions")]
+        positions = [self.paper_row(p, quotes, now) for p in rows]
+        account = dict(track=TRACK_ID, started_ms=acct["started_ms"], equity=acct["equity"], start_equity=START_EQUITY, refills=[])
+        return build_analytics(positions, [], account, quotes, now, days, connected)
+
+    def paper_history(self, tab, scope, q, offset, limit, sort, day_start_ms):
+        """Rows before today, like ReclaimPaper.record_history, for the signal or closed tab."""
+        needle = q.strip().upper()
+        reverse = sort != "time_asc"
+        with self.db() as db:
+            if tab == "events":
+                items = [self.paper_signal(dict(r)) for r in db.execute("SELECT * FROM signals WHERE bar_ms<?", (day_start_ms,))]
+                items = [r for r in items if not needle or needle in r["symbol"]]
+                items.sort(key=lambda r: (r["candle_ms"], r["id"]), reverse=reverse)
+            else:
+                items = [self.paper_row(dict(r)) for r in db.execute("SELECT * FROM positions WHERE stage='closed' AND exit_ms<?", (day_start_ms,))]
+                items = [r for r in items if (scope == "all" or (scope == "funded") == (r["taken"] == 1)) and (not needle or needle in r["symbol"])]
+                items.sort(key=lambda r: (r["exit_ms"], r["id"]), reverse=reverse)
+        page = items[offset:offset+limit]
+        return dict(rows=page, total=len(items), has_more=offset+len(page) < len(items), now_ms=self.clock(), day_start_ms=day_start_ms)
 
 
 def install(app, engine):

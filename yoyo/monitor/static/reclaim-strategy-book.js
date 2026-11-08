@@ -9,10 +9,10 @@
 (() => {
   'use strict';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const BREADTH='breadth-ema20';
+  const BREADTH='breadth-ema20',LIVE_BREADTH='live-breadth';
   const label=t=>({60:'60m',5:'5m',[BREADTH]:'全市场下轨反弹'}[t]||t);
   // Stitch 1e1df06e25b64257b3f0de741e8f8c81: independent pre-touch account.
-  const TITLES={'live-wick6x3':'插针收盘 · 6份3倍','live-wick3x3':'插针收盘 · 3份3倍','live-wick6x3hi':'插针收盘 · 6份3倍 · 高分加仓','live-wick3x3far':'插针收盘 · 3份3倍 · 离1.618≥1.5%','live-allin3':'触价前评分 · 模拟运行',60:'等待回收',5:'快速确认',v3:'分数决定目标',v3add:'逆向分步加仓',spike:'排列过滤插针',v3lock:'回收后锁住利润',allin3:'单仓 · 梭哈3倍',v3add20:'20份动态保证金 · 3倍加仓'};
+  const TITLES={'live-breadth':'全市场宽度信号 · SOL 计资金','live-wick6x3':'插针收盘 · 6份3倍','live-wick3x3':'插针收盘 · 3份3倍','live-wick6x3hi':'插针收盘 · 6份3倍 · 高分加仓','live-wick3x3far':'插针收盘 · 3份3倍 · 离1.618≥1.5%','live-allin3':'触价前评分 · 模拟运行',60:'等待回收',5:'快速确认',v3:'分数决定目标',v3add:'逆向分步加仓',spike:'排列过滤插针',v3lock:'回收后锁住利润',allin3:'单仓 · 梭哈3倍',v3add20:'20份动态保证金 · 3倍加仓'};
   const BOOK='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5C8 2 4 3 2 4v15c3-1 6-1 10 2 4-3 7-3 10-2V4c-2-1-6-2-10 1Zm0 0v16"/></svg>';
   const BACKTEST='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 17 9 11l4 4 8-10M15 5h6v6"/></svg>';
   const num=(v,d=2)=>typeof v==='number'&&Number.isFinite(v)?v.toLocaleString('en-US',{maximumFractionDigits:d}):'—';
@@ -20,6 +20,7 @@
   const LAYOUT_KEY='spike:paper-account-layout:v2';
   const isWickTrack=t=>['live-wick6x3','live-wick3x3','live-wick6x3hi','live-wick3x3far'].includes(t);
   function overviewHTML(d,track){
+    if(track===LIVE_BREADTH){const b=d?.[LIVE_BREADTH];return `<div class="rs-section-title"><h1>${esc(label(track))}<em>${esc(TITLES[track])}</em></h1></div><div class="rs-facts"><div><small>信号</small><b>${num(b?.count_min,0)}–${num(b?.count_max,0)} <small>个币 / 5分钟</small></b></div><div><small>观察</small><b>${num(b?.observe_minutes,0)} <small>分钟零新增</small></b></div><div><small>持有</small><b>${num(b?.hold_days,0)} <small>天</small></b></div></div>${!b?'<p class="rs-warning">策略规则尚未读取，参数保持空缺。稍后重新打开可重试。</p>':''}`;}
     const current=d?.tracks?.[track],wick=isWickTrack(track),lock=track==='v3lock',v3=['v3','v3add','v3lock','v3add20'].includes(track);
     // The common model threshold classifies signals; each live account has its own entry gate.
     const own=wick||['allin3','live-allin3','spike'].includes(track);
@@ -29,6 +30,7 @@
     return `<div class="rs-section-title"><h1>${esc(label(track))}<em>${esc(TITLES[track])}</em></h1></div><div class="rs-facts"><div><small>确认周期</small><b>${num(current?.confirm_minutes,0)} <small>分钟</small></b></div><div><small>入场分门槛</small><b>≥ ${num(threshold,4)}</b></div><div><small>${lock?'利润锁':'保护偏移'}</small><b>${protection}</b></div></div>${!current?'<p class="rs-warning">策略规则尚未读取，参数保持空缺。稍后重新打开可重试。</p>':''}`;
   }
   function flowHTML(track){
+    if(track===LIVE_BREADTH)return '<ol class="rs-flow"><li><b>数币</b><span>每根 UTC 5 分钟 K 线统计首次碰到周一下轨 1.618 的币数；31–62 个 OKX 币（近似币安 50–99）记为信号。</span></li><li><b>等 30 分钟</b><span>之后 30 分钟没有新币碰下轨才确认；有新币就取消。</span></li><li><b>买入</b><span>按 OKX 1 分钟开盘价买 SOL，1 倍全仓；BTC、ETH 同额记为对照，不计入净值。</span></li><li><b>第 6 天平仓</b><span>不设止损，6 天后按 1 分钟开盘价平仓；持有期间的新信号跳过。</span></li></ol>';
     const wick=isWickTrack(track);
     const entry=track==='live-allin3'?'冻结入场评分仅使用触价前已收盘信息；当前模拟运行。':wick?'触价5m收盘时评分并检查收回比例，收盘后市价入场，不回记；当前模拟运行。':'原回测评分包含触价5m收盘信息，收盘后回记触价入场。';
     const confirm=wick?'触价所在1小时K线之后，下一根1小时K线收盘，以 1.618 判断是否收回。未收回则退出；目标可在确认前成交。':'触价所在K线之后，下一根确认周期K线收盘。未收回则退出；目标可在确认前成交。';
@@ -53,7 +55,7 @@
     const sign=value>0?'+':value<0?'−':'',amount=Math.abs(value);
     return {text:sign+(amount>0&&amount<.005?'<0.01':amount.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})),tone:value>0?'rp-positive':value<0?'rp-negative':'',title:'已实现净盈亏 · USDT · 不含浮盈亏和补充本金'};
   }
-  function pickerHTML(tracks){return tracks.map(t=>`<div class="rs-account-row" data-account-row="${esc(t)}"><button type="button" data-account-drag="${esc(t)}" aria-label="拖动调整 ${esc(label(t))} 顺序" aria-description="拖动排序或移入移出常用；Alt 加上下键排序，Alt 加左键移入常用、右键收入更多" title="拖动排序或移入移出常用 · Alt + ↑/↓ 排序 · Alt + ←/→ 分组"><svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" aria-hidden="true"><circle cx="4" cy="5" r="1.2"/><circle cx="10" cy="5" r="1.2"/><circle cx="4" cy="10" r="1.2"/><circle cx="10" cy="10" r="1.2"/><circle cx="4" cy="15" r="1.2"/><circle cx="10" cy="15" r="1.2"/></svg></button><button type="button" data-strategy-select="${esc(t)}" aria-pressed="false"><span>${esc(label(t))}</span>${t===BREADTH?'<small title="查看前向模拟账户">模拟</small>':`<strong data-account-pnl="${esc(t)}">—</strong>`}<i aria-hidden="true">✓</i></button><button type="button" data-strategy-book="${esc(t)}" aria-label="查看 ${esc(label(t))} 策略小册" title="策略小册">${BOOK}</button><button type="button" data-strategy-backtest="${esc(t)}" aria-label="查看 ${esc(label(t))} 回测交易" title="回测交易">${BACKTEST}</button></div>`).join('');}
+  function pickerHTML(tracks){return tracks.map(t=>`<div class="rs-account-row" data-account-row="${esc(t)}"><button type="button" data-account-drag="${esc(t)}" aria-label="拖动调整 ${esc(label(t))} 顺序" aria-description="拖动排序或移入移出常用；Alt 加上下键排序，Alt 加左键移入常用、右键收入更多" title="拖动排序或移入移出常用 · Alt + ↑/↓ 排序 · Alt + ←/→ 分组"><svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" aria-hidden="true"><circle cx="4" cy="5" r="1.2"/><circle cx="10" cy="5" r="1.2"/><circle cx="4" cy="10" r="1.2"/><circle cx="10" cy="10" r="1.2"/><circle cx="4" cy="15" r="1.2"/><circle cx="10" cy="15" r="1.2"/></svg></button><button type="button" data-strategy-select="${esc(t)}" aria-pressed="false"><span>${esc(label(t))}${t===LIVE_BREADTH?'<em class="rs-account-tag">宽度·SOL</em>':''}</span>${t===BREADTH?'<small title="查看前向模拟账户">模拟</small>':`<strong data-account-pnl="${esc(t)}">—</strong>`}<i aria-hidden="true">✓</i></button><button type="button" data-strategy-book="${esc(t)}" aria-label="查看 ${esc(label(t))} 策略小册" title="策略小册">${BOOK}</button><button type="button" data-strategy-backtest="${esc(t)}" aria-label="查看 ${esc(label(t))} 回测交易" title="回测交易">${BACKTEST}</button></div>`).join('');}
   function tableHTML(headers,rows){return `<div class="rs-table-wrap"><table><thead><tr>${headers.map(h=>`<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map((v,i)=>i?`<td>${typeof v==='number'?num(v):esc(v??'—')}</td>`:`<th scope="row">${esc(v)}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;}
   const historyDate=ms=>new Date(ms).toISOString().slice(0,10);
   function validateHistory(h,track){
