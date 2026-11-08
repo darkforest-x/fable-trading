@@ -1,0 +1,8 @@
+{
+  "id":"exp-cloud-close-time-stop-20261109-v1",
+  "single_variable":"Exactly four completed 12H candles after entry, exit the entire still-unscaled position at the next coincident native H1 open if its just-closed mark would not cover the original market entry and a market exit at the baseline fee rate. One decision per position, no re-tuning of duration or PnL threshold.",
+  "ordering":"Observe the 48 complete hours excluding the decision open. The original orders remain active throughout. Require both native legs still open as of this execution instant, including priority of original exits at this opening tick. A runner already partially realized at 2R is never cut by this test. If either leg closes on that open preserve original execution on both. A later intrabar exit may be superseded. Missing observation windows do not trigger this extra order.",
+  "account":"Two-thirds at 2R, original V1.7 cloud runner, corrected ninety-day history universe, low prior ATR, nine slots, re-admit every later signal from the complete roster. Real 1000 USDT shared account, fees 2bp maker / 5bp taker. Compute additional market fills using VectorBT; fixed signal at baseline roundtrip fee even in 5bp/slippage stress.",
+  "comparison":"Both corrected OKX and Binance, baseline and new gross decision identical except the single deadline rule. Evaluate development through 2024, 2025, 2026, whole history. Match later controls and test slippage. Years have previously been examined. Preserve cash and equal-notional payoff, drawdown and sample size. Funding and depth omitted.",
+  "runner":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_time_stop"
+}
