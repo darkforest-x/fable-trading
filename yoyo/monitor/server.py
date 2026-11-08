@@ -90,6 +90,14 @@ def create_app(runtime=None, start_monitor=True):
     from yoyo.monitor.spike_alert import SpikeAlert, install as install_spike_alert
     spike_alert = SpikeAlert(runtime)  # owner 2026-10-27: notify only, never touches positions
     monday_fib.listeners.append(spike_alert)
+    from yoyo.monitor.breadth_paper import BreadthPaper, install as install_breadth_paper
+
+    def fib_quotes():
+        with monday_fib.lock:
+            return dict(monday_fib.quotes)
+    # Owner 2026-11-08: forward paper account for the lower-rail breadth signal (SOL funded, BTC/ETH shadow).
+    # It reads the monday-fib touch book and OKX 1m candles; it never writes another account's ledger.
+    breadth_paper = BreadthPaper(runtime, monday_fib.client, quotes=fib_quotes)
 
     @asynccontextmanager
     async def lifespan(app):
@@ -106,6 +114,7 @@ def create_app(runtime=None, start_monitor=True):
                 monday_fib.start()
                 reclaim_paper.start()
                 spike_alert.start()
+                breadth_paper.start()
                 app.state.cloud_signals.start()
             if start_monitor:
                 app.state.start_yolo_workbench()
@@ -126,6 +135,7 @@ def create_app(runtime=None, start_monitor=True):
             vidya_retest.close()
             reclaim_paper.close()
             spike_alert.close()
+            breadth_paper.close()
             monday_fib.close()
             market_context.close()
             market_sync.close()
@@ -155,6 +165,7 @@ def create_app(runtime=None, start_monitor=True):
     install_monday_fib(app, monday_fib)
     install_reclaim_paper(app, reclaim_paper)
     install_spike_alert(app, spike_alert)
+    install_breadth_paper(app, breadth_paper)
     from yoyo.monitor.monday_candles import install as install_monday_candles
     install_monday_candles(app, runtime)
     from yoyo.monitor.cloud_signals import install as install_cloud_signals
