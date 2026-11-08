@@ -1,0 +1,7 @@
+{
+  "id":"exp-cloud-close-thirds-20261109-v1",
+  "question":"Across both venues, does realizing two thirds of the position at 2R preserve a funded payoff of 2.5 and the 35% maximum drawdown while improving funded growth?",
+  "factor":"Only the 2R exit share in the original 90-day, nine-slot, low prior ATR V1.7 account: two equal shares at 2R, one equal share remains on the cloud. No 4H screen. Freeze this one intermediate fraction after seeing that 50% and 75% straddle the OKX risk limit. Explicitly adaptive; no interpolated PnL or edge claim.",
+  "comparison":"Re-use saved 50% and 75% endpoints on each venue. Binance uses corrected 43-contract daily archive repair. Evaluate actual opportunities, later same-contract paired parents/controls and adverse 5bp slippage. Both originally 1000U, same fee basis, no funding or impact.",
+  "runner":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_thirds"
+}
