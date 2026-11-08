@@ -54,11 +54,17 @@ def process(job):
     bars=bars[(times>=START)&(times<END)]
     hourly,twelve=aggregate(bars,1),aggregate(bars,12)
     del bars
+    file=source/'signals.csv.gz'
+    signals=pd.read_csv(file,usecols=['tf','close_ns','signal_id','week','side','stop']) if file.exists() else pd.DataFrame(columns=['tf','close_ns'])
+    return price_frames(ticker,slot,hourly,twelve,signals)
+
+
+def price_frames(ticker,slot,hourly,twelve,signals):
+    """Price the supplied V1.7 keys and later matched controls in the supplied native market."""
+    receipt=slot/'coverage.json'
     rank_times=leader.trailing_return(twelve.reset_index()).dropna().index.to_numpy(dtype='int64')
     np.savez(slot/'quotes.npz',clock=hourly.index.to_numpy(),prices=hourly[FIELDS].to_numpy(),
              rank_times=rank_times)
-    file=source/'signals.csv.gz'
-    signals=pd.read_csv(file,usecols=['tf','close_ns','signal_id','week','side','stop']) if file.exists() else pd.DataFrame(columns=['tf','close_ns'])
     signals=signals[signals.tf.eq('12H') & signals.close_ns.ge(START*1_000_000)&signals.close_ns.lt(END*1_000_000)]
     skips=dict(missing_entry=0,nonpositive_risk=0)
     rows=[]

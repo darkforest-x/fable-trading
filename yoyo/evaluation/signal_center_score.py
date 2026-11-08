@@ -238,11 +238,13 @@ def _ctx(path):
     return _CTX
 
 
-def build_inputs(f, sym, ctx):
+def build_inputs(f, sym, ctx, *, key_timeframes=None):
     """Signals, causal features, matched controls and stop schedules for one symbol.
 
     ``f`` is complete 5m OHLCV indexed by bar open. Reads no trade outcome.
     Returns (f_rounded, tick, decimals, close_ns5, signals, raw, entries, schedules).
+    With key_timeframes only the key columns for those timeframes are needed;
+    skip model features and sampling of model-training controls.
     """
     f = f.copy()
     decimals = max(2, min(9, int(np.ceil(-np.log10(f[["open", "high", "low", "close"]].to_numpy().min()))) + 7))
@@ -253,7 +255,8 @@ def build_inputs(f, sym, ctx):
     mr = monday_ranges(f)
     pct = stop_pct(sym)
     sig_parts, raw_parts, entries, schedules = [], [], [], {}
-    for tf, m in TFS.items():
+    timeframes = TFS.items() if key_timeframes is None else [(tf, TFS[tf]) for tf in key_timeframes]
+    for tf, m in timeframes:
         b = tf_bars(f, m)
         if len(b) < 60:
             continue
@@ -296,10 +299,13 @@ def build_inputs(f, sym, ctx):
         first["stop"] = np.where(s > 0, np.floor(raw_stop / tick + 1e-7), np.ceil(raw_stop / tick - 1e-7)) * tick
         first["prior_touches"] = np.where(s > 0, first.prior_lo, first.prior_hi)
         first["bucket"] = np.floor(np.log2(first.atr / first.close) * 4)
-        X = features_for(first, b, f, mr, ctx, close_ns5[0] - 300 * NS, tf)
         first["signal_id"] = [f"{tf}|{sym}|{int(x)}|{int(v)}" for x, v in zip(first.close_ns, first.side)]
         meta = first[["signal_id", "close_ns", "side", "close", "stop", "pos", "bucket"]].copy()
         meta["tf"], meta["week"] = tf, [str(w.date()) for w in first.wk]
+        if key_timeframes is not None:
+            sig_parts.append(meta)
+            continue
+        X = features_for(first, b, f, mr, ctx, close_ns5[0] - 300 * NS, tf)
         sig_parts.append(pd.concat([meta, X.drop(columns="side")], axis=1))
         for r in meta.itertuples():
             entries.append(dict(trade_id=r.signal_id, entry_i=int(r.pos), side=int(r.side), entry=float(r.close),

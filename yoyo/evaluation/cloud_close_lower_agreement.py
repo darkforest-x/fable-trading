@@ -11,12 +11,15 @@ from yoyo.evaluation import cloud_close_reward_account as wallet
 EXP = wallet.ROOT / 'experiments/active/exp-cloud-close-lower-agreement-20261109-v1'
 
 
-def prior_signal_times(paths, frames):
+def prior_signal_times(paths, frames, replacements=None):
     """Use only same-contract/NY-week/side lower keys with close_ns <= entry_ms * 1e6."""
     files = sorted((venue.ARCHIVE/'results/symbols').glob('*/signals.csv.gz'))
     columns = ['signal_id','symbol','week','side','tf','close_ns']
-    signals = pd.concat([pd.read_csv(file, usecols=columns, dtype={'symbol':str}) for file in files],
-                        ignore_index=True)
+    parts = [pd.read_csv(file, usecols=columns, dtype={'symbol':str}) for file in files
+             if replacements is None or file.parent.name not in replacements]
+    if replacements is not None:
+        parts.extend(frame[columns] for frame in replacements.values())
+    signals = pd.concat(parts,ignore_index=True)
     if len(files) != 632 or not signals.signal_id.is_unique:
         raise ValueError('Frozen signal identities changed')
     anchors = signals[signals.tf.eq('12H')].set_index('signal_id')
