@@ -7,7 +7,7 @@ the 1.618 (737 of 2146 trades, -190bp mean). The single variable here is that co
 candle and its immediate successor must close before protection exists (adapter reclaim_next_bar), at 5, 15 or the
 frozen 60 minutes; 1 and 3 minutes are not whole multiples of the 5m execution bars. Entries, target, backstop,
 breakeven offset, fees and sizing are unchanged, so the control is the paired 60-minute exit on the same fills.
-Pre-registered split (owner): choose on 2025 (universe closest to now), test on 2026, and 2020-24 must not reverse.
+Pre-registered split (owner correction "用2020-2025这5年的"): choose on 2020-2025 together, test on 2026.
 Native NautilusTrader run, both intrabar paths, worse path with 10bp slippage on non-target exits (load_symbol of the
 alarm study), frac N20 3x replay by period, alarm episodes as the independent unit.
 """
@@ -152,9 +152,12 @@ def summarize(config, workers):
     for k in sorted(t.kind.unique()):
         x = t[t.kind == k]
         jobs.append((k, 'frac', x.reset_index(drop=True), window, cfg, ro, sh, py))
+        sel = x[x.period != '2026']
+        jobs.append((f'{k}|2020-2025', 'frac', sel.reset_index(drop=True), window, cfg, ro, sh, py))
         stats[k] = {p: dict(n=int(len(g)), mean_bp=float(g.net.mean()), target_pct=float(100*(g.reason == 4).mean()),
                             reasons={str(r): int(n) for r, n in g.reason.value_counts().items()})
                     for p, g in x.groupby('period')}
+        stats[k]['2020-2025'] = dict(n=int(len(sel)), mean_bp=float(sel.net.mean()), target_pct=float(100*(sel.reason == 4).mean()))
         if k != 'm60':
             c = x.set_index('event'); b = t[t.kind == 'm60'].set_index('event')
             pairs[k] = {p: paired(c.net[c.period == p], b.net, b.episode, cfg['bootstrap_seed']) for p in ('2020-24', '2025', '2026')}
@@ -163,14 +166,14 @@ def summarize(config, workers):
         for name, out in ex.map(replay, jobs):
             plans[name] = out
     mult = lambda k, per: (plans[k].get(per) or {}).get('replay', {}).get('final_median')
-    # Pre-registered decision (config.decision_rule).
-    cands = [k for k in plans if k != 'm60' and (mult(k, 'y2025') or 0) > (mult('m60', 'y2025') or 0)]
-    pick = max(cands, key=lambda k: mult(k, 'y2025')) if cands else None
-    decision = dict(selected_on_2025=pick)
+    # Pre-registered decision (config.decision_rule): select on 2020-2025, test on 2026.
+    kinds = [k for k in stats]
+    cands = [k for k in kinds if k != 'm60' and (mult(f'{k}|2020-2025', 'all') or 0) > (mult('m60|2020-2025', 'all') or 0)]
+    pick = max(cands, key=lambda k: mult(f'{k}|2020-2025', 'all')) if cands else None
+    decision = dict(selection_multiple_2020_2025={k: mult(f'{k}|2020-2025', 'all') for k in kinds}, selected=pick)
     if pick:
         ok26 = mult(pick, 'y2026') > mult('m60', 'y2026') and stats[pick]['2026']['mean_bp'] > stats['m60']['2026']['mean_bp']
-        ok_old = stats[pick]['2020-24']['mean_bp'] >= stats['m60']['2020-24']['mean_bp']
-        decision.update(passes_2026=bool(ok26), no_reversal_2020_24=bool(ok_old), adopt=bool(ok26 and ok_old))
+        decision.update(passes_2026=bool(ok26), adopt=bool(ok26))
     else:
         decision['adopt'] = False
     res = clean(dict(checks=dict(rows=int(len(t)), parity=parity, issues=[f'{g[0]}: {i}' for g in got for i in g[2]][:20]),
@@ -179,9 +182,11 @@ def summarize(config, workers):
                                  training_eligible=False, production_eligible=False))
     print(json.dumps(res['checks'], ensure_ascii=False))
     print(json.dumps(decision, ensure_ascii=False))
-    for k in plans:
-        print(k, {p: (stats[k].get(q, {}).get('n'), round(stats[k].get(q, {}).get('mean_bp', np.nan), 1), mult(k, p))
-                  for p, q in (('all', None), ('y2020_2024', '2020-24'), ('y2025', '2025'), ('y2026', '2026'))})
+    for k in kinds:
+        print(k, {q: (stats[k].get(q, {}).get('n'), round(stats[k].get(q, {}).get('mean_bp', np.nan), 1), m)
+                  for q, m in (('2020-2025', mult(f'{k}|2020-2025', 'all')), ('2020-24', mult(k, 'y2020_2024')),
+                               ('2025', mult(k, 'y2025')), ('2026', mult(k, 'y2026')))})
+        print(' paired vs m60', {p: (d.get('episode_diff_bp'), d.get('ci95_bp')) for p, d in pairs.get(k, {}).items()})
 
 
 if __name__ == '__main__':
