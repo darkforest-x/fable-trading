@@ -45,7 +45,8 @@ def quotes(symbol):
 def admit(events, slots):
     events = events.copy()
     events['priority'] = [zlib.crc32(s.encode()) for s in events.symbol]
-    events = events.sort_values(['entry_ms', 'priority', 'symbol', 'event_id'])
+    ranks = ['entry_order'] if 'entry_order' in events else []
+    events = events.sort_values(['entry_ms', *ranks, 'priority', 'symbol', 'event_id'])
     busy_until = np.full(slots, -1, dtype=np.int64)
     symbols = np.full(slots, '', dtype=object)
     picks = []

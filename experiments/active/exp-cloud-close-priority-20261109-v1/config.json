@@ -1,0 +1,8 @@
+{
+  "id": "exp-cloud-close-priority-20261109-v1",
+  "parent": "exp-cloud-close-slots-20261109-v1",
+  "factor": "When multiple native V1.7 signals arrive on exactly the same UTC12H close, consider one confirmation-time ranking at a time, preserving CRC32 for ties/missing last. Retain the development-selected capacity and scale-out. No outcome-based asset restrictions; one open position per symbol; an isolated signal is always treated identically.",
+  "policies": ["crc","high_prior_atr","low_prior_atr","strong_relative_momentum","weak_relative_momentum","tight_reclaim","strong_reclaim","wide_monday","strong_cloud","large_wick","younger","older"],
+  "selection": "Highest development growth through 2024 among policies with >=100 closed positions, win>=30%, equal-notional fee-net payoff>=2.5, conservative hourly DD<=35%. 2025 and 2026 shown separately after decision. Prior use of these years and cumulative selection acknowledged. Paired controls carry only parent features available strictly before each control opens; an actual or random account draws only from its simultaneous confirmations.",
+  "command": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_priority"
+}
