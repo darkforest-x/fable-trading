@@ -1,0 +1,150 @@
+{
+  "experiment_id": "exp-cloud-close-profit-budget-add-20261109-v1",
+  "scoring": "Neutralize parent cash PnL with absolute value <= 1e-8 USDT; set the matching net_return to zero for metrics only.",
+  "source_files": {
+    "funded": "/Users/zhangzc/fable-trading/experiments/active/exp-cloud-close-profit-budget-add-20261109-v1/funded.csv.gz",
+    "hourly": "/Users/zhangzc/fable-trading/experiments/active/exp-cloud-close-profit-budget-add-20261109-v1/hourly.csv.gz"
+  },
+  "source_rows": {
+    "funded": 1569,
+    "hourly": 59532
+  },
+  "neutralization_epsilon_usdt": 1e-08,
+  "parent_classification": {
+    "all": {
+      "trades": 1569,
+      "raw_positive_gt_zero": 446,
+      "raw_negative_lt_zero": 1076,
+      "positive": 414,
+      "negative": 1049,
+      "neutral": 106
+    },
+    "by_period": {
+      "all": {
+        "trades": 1569,
+        "positive": 414,
+        "negative": 1049,
+        "neutral": 106
+      },
+      "dev": {
+        "trades": 1085,
+        "positive": 290,
+        "negative": 716,
+        "neutral": 79
+      },
+      "2025": {
+        "trades": 258,
+        "positive": 53,
+        "negative": 193,
+        "neutral": 12
+      },
+      "2026": {
+        "trades": 210,
+        "positive": 60,
+        "negative": 139,
+        "neutral": 11
+      }
+    }
+  },
+  "parent_metrics": {
+    "all": {
+      "final_usdt": 18303.54690618012,
+      "multiple": 18.30354690618012,
+      "dd_mark_pct": 45.10579044316788,
+      "dd_bound_pct": 52.77960807075732,
+      "trades": 1569,
+      "win_pct": 26.38623326959847,
+      "payoff": 3.6006639285615285,
+      "payoff_usdt": 3.4790399275385884,
+      "median_net_pct": -2.8409224075492108
+    },
+    "dev": {
+      "final_usdt": 14779.916218183003,
+      "multiple": 14.779916218183004,
+      "dd_mark_pct": 41.41656141732073,
+      "dd_bound_pct": 44.87411037717373,
+      "trades": 1085,
+      "win_pct": 26.72811059907834,
+      "payoff": 4.07952003868458,
+      "payoff_usdt": 3.8204862088489633,
+      "median_net_pct": -2.8409224075492108
+    },
+    "2025": {
+      "final_usdt": 16774.281588568076,
+      "multiple": 1.1349375288021932,
+      "dd_mark_pct": 45.10579044316788,
+      "dd_bound_pct": 52.77960807075732,
+      "trades": 258,
+      "win_pct": 20.54263565891473,
+      "payoff": 2.308275582622371,
+      "payoff_usdt": 2.9540400622182217,
+      "median_net_pct": -3.281401124425387
+    },
+    "2026": {
+      "final_usdt": 18303.54690618012,
+      "multiple": 1.0911672615925478,
+      "dd_mark_pct": 26.279322131182713,
+      "dd_bound_pct": 27.69746342362445,
+      "trades": 210,
+      "win_pct": 28.57142857142857,
+      "payoff": 2.218986600228183,
+      "payoff_usdt": 2.9702602563072134,
+      "median_net_pct": -1.7248174928234667
+    }
+  },
+  "original_metrics_as_saved": [
+    {
+      "policy": "profit_only_reinvested",
+      "period": "all",
+      "final_usdt": 18303.54690618012,
+      "multiple": 18.30354690618012,
+      "dd_mark_pct": 45.10579044316788,
+      "dd_bound_pct": 52.77960807075732,
+      "trades": 1569,
+      "win_pct": 28.425748884639894,
+      "payoff": 3.4283476389487593,
+      "payoff_usdt": 3.3125441746379205,
+      "median_net_pct": -2.8409224075492108
+    },
+    {
+      "policy": "profit_only_reinvested",
+      "period": "dev",
+      "final_usdt": 14779.916218183003,
+      "multiple": 14.779916218183004,
+      "dd_mark_pct": 41.41656141732073,
+      "dd_bound_pct": 44.87411037717373,
+      "trades": 1085,
+      "win_pct": 28.663594470046082,
+      "payoff": 3.910312548531663,
+      "payoff_usdt": 3.662022743433162,
+      "median_net_pct": -2.8409224075492108
+    },
+    {
+      "policy": "profit_only_reinvested",
+      "period": "2025",
+      "final_usdt": 16774.281588568076,
+      "multiple": 1.1349375288021932,
+      "dd_mark_pct": 45.10579044316788,
+      "dd_bound_pct": 52.77960807075732,
+      "trades": 258,
+      "win_pct": 22.868217054263564,
+      "payoff": 2.1057668176237105,
+      "payoff_usdt": 2.6948773308441982,
+      "median_net_pct": -3.281401124425387
+    },
+    {
+      "policy": "profit_only_reinvested",
+      "period": "2026",
+      "final_usdt": 18303.54690618012,
+      "multiple": 1.0911672615925478,
+      "dd_mark_pct": 26.279322131182713,
+      "dd_bound_pct": 27.69746342362445,
+      "trades": 210,
+      "win_pct": 30.476190476190478,
+      "payoff": 2.125198497520697,
+      "payoff_usdt": 2.844718680725884,
+      "median_net_pct": -1.7248174928234667
+    }
+  ],
+  "raw_account_cash_and_hourly_nav_preserved": true
+}

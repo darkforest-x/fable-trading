@@ -15,6 +15,51 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-protect-remainder-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "d8ba456b2c"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "After original +2R partial realization protect the last one-third with the frozen native completed-hour +0.5R stop. Re-admit the full stream as slots free."
+    result: "7938.68U/1922, wins 33.25%, USDT payoff 2.525, observed 35.42% / upper 35.85% DD. Dev passes but full risk gate and overall wealth fall short."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-protect-remainder-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af813caf7ffa0eb0f44b31."
+
+  - experiment_id: exp-cloud-close-profit-budget-add-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "756d96dd6a"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Reinvest only to the extent actual realized target profit less reserved original runner fixed stop loss covers the new +0.5R stop risk. Treat sub-1e-8U cash results as neutral in payoff statistics."
+    result: "18303.55U, 378 additions, 45.11% observed and 52.78% upper DD. Normalized parent outcome 414 wins/1049 losses/106 economic flats, 26.386%, cash payoff 3.479. Full and dev fail; original ledgers and raw float scoring retained."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-profit-budget-add-20261109-v1/summary_neutralized.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af8172986ac06f896fc329."
+
+  - experiment_id: exp-cloud-close-partial-profit-budget-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "756d96dd6a"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Restrict the confirmed add-on risk to one-eighth, one-quarter or one-half of the net TP profit cushion; freeze fractions and choose via pre-2025 results."
+    result: "Dev chose one eighth, terminal 9880.02 vs 8788.77U. 33.14% wins, 2.653 cash payoff; synchronized minute closes from actual parent and add-on quantities prove DD >=37.557%. Quarter and half yield 11005.17/13408.72U, with observed H1 DD >=35.43/38.44%."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-partial-profit-budget-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af814b8a38d40c59055f06."
+
   - experiment_id: exp-cloud-close-shadow-trend-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "a8fc6f6b0c"

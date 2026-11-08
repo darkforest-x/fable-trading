@@ -1,0 +1,139 @@
+{
+  "experiment_id": "exp-cloud-close-profit-budget-add-20261109-v1",
+  "baseline_reconciliation": {
+    "events": 1569,
+    "max_abs_cash_pnl_diff": 5.6843418860808015e-12,
+    "max_abs_notional_diff": 5.6843418860808015e-12,
+    "total_cash_pnl_diff": -1.486413769846706e-11,
+    "total_notional_diff": -2.864339876396116e-09,
+    "identity_mismatches": {
+      "symbol": 0,
+      "side": 0,
+      "entry_ms": 0,
+      "exit_bar_ms": 0
+    }
+  },
+  "baseline_hourly_reconciliation": {
+    "hours": 59532,
+    "max_abs_by_field": {
+      "nav": 3.637978807091713e-11,
+      "open_nav": 3.637978807091713e-11,
+      "open_exit_nav": 3.637978807091713e-11,
+      "lower_nav": 3.637978807091713e-11,
+      "upper_nav": 3.637978807091713e-11
+    },
+    "hours_over_1e_6": 0
+  },
+  "zero_add_account": {
+    "original_selected": 1569,
+    "original_funded": 1569,
+    "original_no_cash": 0,
+    "reinvest_candidates": 0,
+    "reinvest_funded": 0,
+    "reinvest_no_cash": 0,
+    "total_fees": 898.6415300176881,
+    "missing_hour_marks": 0,
+    "cash_from_orders": 8788.773973322894,
+    "cash_from_position_ledger": 8788.773973322895,
+    "final_nav": 8788.773972912808,
+    "candidate_counts": {
+      "opportunities_on_funded_originals": 0
+    },
+    "admission_skips": {
+      "same_contract": 695,
+      "all_slots_busy": 9516
+    }
+  },
+  "original_event_set_matches_frozen": true,
+  "development_pass": false,
+  "parent_level_metrics": {
+    "all": {
+      "final_usdt": 18303.54690618012,
+      "multiple": 18.30354690618012,
+      "dd_mark_pct": 45.10579044316788,
+      "dd_bound_pct": 52.77960807075732,
+      "trades": 1569,
+      "win_pct": 28.425748884639894,
+      "payoff": 3.4283476389487593,
+      "payoff_usdt": 3.3125441746379205,
+      "median_net_pct": -2.8409224075492108
+    },
+    "dev": {
+      "final_usdt": 14779.916218183003,
+      "multiple": 14.779916218183004,
+      "dd_mark_pct": 41.41656141732073,
+      "dd_bound_pct": 44.87411037717373,
+      "trades": 1085,
+      "win_pct": 28.663594470046082,
+      "payoff": 3.910312548531663,
+      "payoff_usdt": 3.662022743433162,
+      "median_net_pct": -2.8409224075492108
+    },
+    "2025": {
+      "final_usdt": 16774.281588568076,
+      "multiple": 1.1349375288021932,
+      "dd_mark_pct": 45.10579044316788,
+      "dd_bound_pct": 52.77960807075732,
+      "trades": 258,
+      "win_pct": 22.868217054263564,
+      "payoff": 2.1057668176237105,
+      "payoff_usdt": 2.6948773308441982,
+      "median_net_pct": -3.281401124425387
+    },
+    "2026": {
+      "final_usdt": 18303.54690618012,
+      "multiple": 1.0911672615925478,
+      "dd_mark_pct": 26.279322131182713,
+      "dd_bound_pct": 27.69746342362445,
+      "trades": 210,
+      "win_pct": 30.476190476190478,
+      "payoff": 2.125198497520697,
+      "payoff_usdt": 2.844718680725884,
+      "median_net_pct": -1.7248174928234667
+    }
+  },
+  "addon_leg_metrics": {
+    "trades": 378,
+    "total_cash_pnl": 6118.554295135484,
+    "win_pct": 32.53968253968254,
+    "mean_win_usdt": 144.96951519389822,
+    "mean_loss_usdt": -45.932141465545065,
+    "payoff_usdt": 3.156167131955817
+  },
+  "earned_profit_risk": {
+    "status_counts": {
+      "not_offered": 1188,
+      "filled": 378,
+      "budget_below_minimum": 3
+    },
+    "funded_addons": 378,
+    "target_net_profit_usdt": 26166.52300839155,
+    "runner_stop_loss_reserved_usdt": 6721.337817049685,
+    "available_profit_budget_usdt": 19445.18519134187,
+    "realized_stop_risk_used_usdt": 19264.67785418935,
+    "max_budget_overrun_usdt": 2.842170943040401e-14
+  },
+  "account": {
+    "original_selected": 1569,
+    "original_funded": 1569,
+    "original_no_cash": 0,
+    "reinvest_candidates": 381,
+    "reinvest_funded": 378,
+    "reinvest_no_cash": 0,
+    "total_fees": 1816.3868926670254,
+    "missing_hour_marks": 0,
+    "cash_from_orders": 18303.546910785888,
+    "cash_from_position_ledger": 18303.546910785888,
+    "final_nav": 18303.54690618012,
+    "candidate_counts": {
+      "opportunities_on_funded_originals": 381,
+      "eligible_reentry": 381,
+      "proven_addon_stop_first_same_bar": 17
+    },
+    "admission_skips": {
+      "same_contract": 695,
+      "all_slots_busy": 9516
+    }
+  },
+  "checks": {}
+}
