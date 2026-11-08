@@ -45,6 +45,21 @@ experiments:
     canonical_report: experiments/active/exp-live-wick-deep-midpoint-20261109-v1/summary.json
     notes: Saved worst-of-two native legs on identical entry IDs, no new trades or sizing change. From-2025 paired weekly 95 percent interval for mean difference -83.99 to +25.88bp. P=0.969 versus random midpoint assignment within year and side. Notion 4128856479af8135a1d2c5b584caf11e.
 
+  - experiment_id: exp-live-wick-shallow-midpoint-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: d203587331
+    status: inconclusive
+    question: Does a midpoint target only for closes less than 1.5 percent beyond 1.618 improve payoff and mean net return?
+    single_variable: Switch only the shallow target. Keep original entry, E20, hourly reclaim, near target for all deeper closes and six-slot allocation.
+    result: Since 2020 both accounts fund 400 entries, payoff 0.958 to 1.064, mean net 153.81 to 174.82bp, wins 66 to 65 percent, realized maximum drawdown 19.27 percent in both. Since 2025 both fund 272 entries, payoff 0.918 to 1.024, mean 150.40 to 177.92bp, wins 65.81 to 65.07 percent. In October 17 entries (10 shallow), payoff 1.046 to 1.633, 10 vs 11 wins.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-live-wick-shallow-midpoint-20261109-v1/summary.json
+    notes: Exploratory discovery on 398 events, one unchanged September bridge, then 10 newly run native midpoint alternatives through October 27 on both OHLC orders. October baseline was known. Aggregate builder 3e2dea82f3. No prospective OKX validation. Notion 4128856479af8184b620f6c4c7f6a527.
+
   - experiment_id: exp-live-wick-score040-oct-20261109-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 8889a8ce6a
