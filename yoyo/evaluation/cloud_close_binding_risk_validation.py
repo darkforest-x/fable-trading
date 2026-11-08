@@ -13,6 +13,15 @@ from yoyo.evaluation import cloud_close_volatility_expansion as market
 EXP = study.EXP
 
 
+def merge_decision(summary,result):
+    """Keep the original H1-only decision alongside the finer lifetime valuation."""
+    summary.update(hourly_only_full_pass=summary['full_pass'],hourly_only_transfer=summary['transfer'],
+                   full_pass=result['okx_full_qualifies_with_refinement'],transfer=result['binance_transfer'],
+                   passes_both_venues=result['okx_full_qualifies_with_refinement'] and result.get('binance_full_pass',False),
+                   validation='validation.json')
+    (EXP/'summary.json').write_text(json.dumps(summary,indent=2,allow_nan=False)+'\n')
+
+
 def refine():
     equity = pd.read_csv(EXP/'hourly.csv.gz', index_col='hour_end_utc', parse_dates=True)
     old = dd.max_drawdown(equity)
@@ -83,6 +92,7 @@ def main():
                               binance_dev_pass=second.meets(metrics['dev']),binance_full_pass=second.meets(metrics['all']))
         pd.DataFrame(records).to_csv(EXP/'binance_metrics.csv',index=False)
     (EXP/'validation.json').write_text(json.dumps(result,indent=2,allow_nan=False)+'\n')
+    merge_decision(summary,result)
     print(result)
 
 
