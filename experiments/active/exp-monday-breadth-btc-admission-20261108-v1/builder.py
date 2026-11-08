@@ -8,6 +8,7 @@ and the independent 50/50 BTC/ALT sleeves with the original ALT 24h spacing.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -367,6 +368,23 @@ def run() -> None:
     if outcomes.index.duplicated().any():
         raise ValueError("Native BTC VectorBT outcome clocks are not unique")
 
+    # Publish the standalone pre-case ordinary stream as soon as its 177 fills
+    # reconcile to both the cached VectorBT matrix and native price outcomes.
+    ordinary = medium_events(
+        pd.DataFrame({"decision": frame.iloc[new_indices].decision,
+                      "epoch": epoch[new_indices], "source": "medium"}),
+        raw, frame, returns, outcomes,
+    )
+    if len(ordinary) != 177 or ordinary.net_pct.isna().any():
+        raise ValueError("The standalone post-EMA ordinary BTC stream must validate all 177 native fills")
+    ordinary["candidate_id"] = "freq36_BTC"
+    ordinary["fee_bps_round_trip"] = 10.0
+    ordinary["admission_rule"] = "below_4h_close_ema20_then_original_6d_clock"
+    ordinary_path = OUT / "ordinary_stream.parquet"
+    ordinary_tmp = OUT / ".ordinary_stream.parquet.tmp"
+    ordinary.to_parquet(ordinary_tmp, index=False)
+    os.replace(ordinary_tmp, ordinary_path)
+
     cases = pd.read_parquet(FREQ / "btc_target/threshold_events.parquet")
     cases = cases[cases.threshold_pct.eq(5)][["decision", "epoch"]].copy()
     cases["decision"] = pd.to_datetime(cases.decision, utc=True)
@@ -670,23 +688,12 @@ def run() -> None:
                 btc_removed_vs_baseline=(len(old_decisions - set(b.decision)) if name == "ema_before_reservation" else 0),
             ))
 
-    # Output the pre-case-overlay ordinary stream for the independent sleeve study.
-    ordinary = medium_events(
-        pd.DataFrame({"decision": frame.iloc[new_indices].decision,
-                      "epoch": epoch[new_indices], "source": "medium"}),
-        raw, frame, returns, outcomes,
-    )
-    ordinary["candidate_id"] = "freq36_BTC"
-    ordinary["fee_bps_round_trip"] = 10.0
-    ordinary["admission_rule"] = "below_4h_close_ema20_then_original_6d_clock"
-
     # Save all owned outputs only after every reconciliation and coverage assertion passed.
     raw["baseline_admitted_then_ema"] = candidates.old_admitted_then_ema.to_numpy()
     candidates.to_parquet(OUT / "candidate_audit.parquet", index=False)
     pd.concat([old_schedule, new_schedule], ignore_index=True).to_csv(
         OUT / "admission_audit.csv", index=False,
     )
-    ordinary.to_parquet(OUT / "ordinary_stream.parquet", index=False)
     events = pd.concat([baseline, new_events], ignore_index=True, sort=False)
     events.to_parquet(OUT / "btc_events.parquet", index=False)
     summary.to_csv(OUT / "summary.csv", index=False)
