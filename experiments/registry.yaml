@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-daily-exit-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "3ce9e3dc00"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Keep all 12H signals. A fully observed daily EMA20/50 aligned at the entry gives the full runner; otherwise retain 75% 2R partial. All 1569 funded names and times fixed."
+    result: "Out of 1569 funded positions 1228 were daily-aligned, all 11780 eligible opportunities had a known daily direction. 32759.35U, 22.63% wins, 4.759 cash payoff, 56.99% conservative DD. The original both-side partial gave 6219.84U and full runners 48190.55U. No development pass."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-daily-exit-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af81659451ca68abace711."
+
   - experiment_id: exp-cloud-close-eligibility-repair-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "4d8c243820"
