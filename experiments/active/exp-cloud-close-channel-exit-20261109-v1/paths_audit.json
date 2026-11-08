@@ -1,0 +1,172 @@
+{
+  "experiment_id": "exp-cloud-close-channel-exit-20261109-v1",
+  "builder": "yoyo/evaluation/cloud_close_channel_exit.py",
+  "vectorbt_version": "1.2.0",
+  "source_paths": "experiments/active/exp-cloud-close-reward-20261109-v1/paths.csv.gz",
+  "baseline": "experiments/active/exp-cloud-close-eligibility-repair-20261109-v1/thirds/account_metrics.csv",
+  "population": {
+    "actual_events": 11780,
+    "paired_controls": 10816,
+    "rank_eligible_control_orphans_excluded": 17,
+    "actual_and_control_target_legs": [
+      0.0,
+      2.0
+    ],
+    "source_event_join": "source_row_number + event_id; parent_id is preserved",
+    "non_null_rank_filter": "reused thirds.okx_paths(); checked by repair.check_parent_sets",
+    "priority": "source prior_atr_pct indexed by 1-based source_row_number; lower first"
+  },
+  "construction": {
+    "channel_window": "N preceding complete contiguous native UTC12H bars; exclude current bar high/low",
+    "long_condition": "completed close < minimum prior-N low",
+    "short_condition": "completed close > maximum prior-N high",
+    "execution": "first observed H1 open at/after completed 12H close",
+    "q_encoding": "copy frozen q; q[:,4]=NaN; q[:,5] = -1 on long breakout, +1 on short breakout; q[:,6] unchanged",
+    "fill_engine": "frozen cloud_close_reward_paths._simulate_symbol -> VectorBT Portfolio.from_order_func -> unchanged _order_func",
+    "entry_stop_target": "frozen exact H1-open entry and absolute stop; native resting 2R limit",
+    "same_open_precedence": "gap, stale and stop remain ahead of channel; channel callback is ahead of TP open as in frozen order; entry-hour exit is guarded by the callback",
+    "tail": "the engine still asserts series_tail_close is the physical last H1 bar and uses its close",
+    "no_lookahead": true
+  },
+  "account": {
+    "slots": 9,
+    "initial_cash_usdt": 1000.0,
+    "target_leg_fraction_at_2r": 0.6666666666666666,
+    "priority": "low prior ATR; frozen CRC32 tie-break order",
+    "market_fee_per_fill": 0.0005,
+    "resting_2r_fee_per_fill": 0.0002,
+    "stress_market_slippage_per_fill": 0.0005,
+    "baseline_frozen": "experiments/active/exp-cloud-close-eligibility-repair-20261109-v1/thirds/account_metrics.csv"
+  },
+  "counts": {
+    "10": {
+      "symbols": 273,
+      "event_count": 22596,
+      "vectorbt": {
+        "columns": 45192,
+        "orders": 90384,
+        "trades": 45192
+      },
+      "channel": {
+        "native_12h_long_breaks": 39567,
+        "native_12h_short_breaks": 35061,
+        "channel_markers_written": 74596,
+        "breaks_after_hourly_tail": 32,
+        "noncontiguous_native_windows_skipped": 60,
+        "marker_fill_clock_counts": {
+          "exact_h1_open": 74596
+        }
+      },
+      "exit_reasons": {
+        "stop": 26540,
+        "channel_breakout_open": 10851,
+        "take_profit": 7186,
+        "series_tail_close": 600,
+        "take_profit_open": 2,
+        "stop_gap_open": 12,
+        "data_gap_markout": 1
+      },
+      "safe_path_bounds": {
+        "first_channel_breakout_open": 21960,
+        "actual_hourly_series_tail": 632,
+        "first_hour_gap_open": 4
+      }
+    },
+    "20": {
+      "symbols": 273,
+      "event_count": 22596,
+      "vectorbt": {
+        "columns": 45192,
+        "orders": 90384,
+        "trades": 45192
+      },
+      "channel": {
+        "native_12h_long_breaks": 26349,
+        "native_12h_short_breaks": 22255,
+        "channel_markers_written": 48575,
+        "breaks_after_hourly_tail": 29,
+        "noncontiguous_native_windows_skipped": 120,
+        "marker_fill_clock_counts": {
+          "exact_h1_open": 48575
+        }
+      },
+      "exit_reasons": {
+        "stop": 29349,
+        "take_profit": 7444,
+        "channel_breakout_open": 7696,
+        "series_tail_close": 686,
+        "take_profit_open": 2,
+        "stop_gap_open": 12,
+        "data_gap_markout": 3
+      },
+      "safe_path_bounds": {
+        "first_channel_breakout_open": 21754,
+        "actual_hourly_series_tail": 834,
+        "first_hour_gap_open": 8
+      }
+    }
+  },
+  "path_schema": [
+    "event_id",
+    "id",
+    "parent_id",
+    "source_row_number",
+    "symbol",
+    "week",
+    "side",
+    "tp_r",
+    "is_control",
+    "rank",
+    "cohort",
+    "is_current",
+    "was_top20",
+    "bar_source",
+    "key_open_ms",
+    "confirmation_ms",
+    "confirmed_bjt",
+    "confirmation_12h_bar_present",
+    "entry_ms",
+    "exit_bar_ms",
+    "entry_time_utc",
+    "exit_time_utc",
+    "entry_price",
+    "exit_price",
+    "stop_price",
+    "target_price",
+    "risk_distance",
+    "risk_fraction",
+    "entry_fee_class",
+    "entry_fee_rate",
+    "entry_fee_amount",
+    "exit_fee_class",
+    "exit_fee_rate",
+    "exit_fee_amount",
+    "exit_reason",
+    "status",
+    "exit_phase",
+    "same_bar_ambiguous",
+    "ambiguous_triggers",
+    "gap_flag",
+    "gap_hours_missing",
+    "gross_pnl",
+    "net_pnl",
+    "gross_r",
+    "net_r",
+    "entry_status",
+    "control_match_status",
+    "control_confirmation_ms",
+    "control_12h_open_ms",
+    "control_atr_relative_difference",
+    "control_prior_atr_pct",
+    "control_match_reason",
+    "stop_basis",
+    "source_path_12h",
+    "source_path_1h",
+    "path_upper_bound_reason",
+    "channel_confirm_ms",
+    "exit_model",
+    "channel_lookback_12h",
+    "entry_order",
+    "source_input_group"
+  ]
+}

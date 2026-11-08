@@ -1,0 +1,337 @@
+{
+  "baseline_source": "experiments/active/exp-cloud-close-eligibility-repair-20261109-v1/thirds/account_metrics.csv",
+  "baseline_funded_positions": 1569,
+  "baseline_all_final_usdt": 8788.773972912815,
+  "fraction_at_2r": 0.6666666666666666,
+  "slots": 9,
+  "initial_cash_usdt": 1000.0,
+  "gate_results": {
+    "frozen_ema_baseline": {
+      "all": {
+        "checks": {
+          "win_pct_ge_30": true,
+          "equal_notional_payoff_ge_2_5": true,
+          "cash_payoff_ge_2_5": true,
+          "conservative_dd_le_35": false
+        },
+        "pass": false
+      },
+      "dev": {
+        "checks": {
+          "win_pct_ge_30": true,
+          "equal_notional_payoff_ge_2_5": true,
+          "cash_payoff_ge_2_5": true,
+          "conservative_dd_le_35": true,
+          "minimum_100_closed_positions": true
+        },
+        "pass": true
+      },
+      "2025": {
+        "checks": {
+          "win_pct_ge_30": false,
+          "equal_notional_payoff_ge_2_5": false,
+          "cash_payoff_ge_2_5": false,
+          "conservative_dd_le_35": false
+        },
+        "pass": false
+      },
+      "2026": {
+        "checks": {
+          "win_pct_ge_30": true,
+          "equal_notional_payoff_ge_2_5": true,
+          "cash_payoff_ge_2_5": false,
+          "conservative_dd_le_35": true
+        },
+        "pass": false
+      }
+    },
+    "prior_channel_10x12h": {
+      "all": {
+        "checks": {
+          "win_pct_ge_30": true,
+          "equal_notional_payoff_ge_2_5": true,
+          "cash_payoff_ge_2_5": false,
+          "conservative_dd_le_35": false
+        },
+        "pass": false
+      },
+      "dev": {
+        "checks": {
+          "win_pct_ge_30": true,
+          "equal_notional_payoff_ge_2_5": true,
+          "cash_payoff_ge_2_5": false,
+          "conservative_dd_le_35": false,
+          "minimum_100_closed_positions": true
+        },
+        "pass": false
+      },
+      "2025": {
+        "checks": {
+          "win_pct_ge_30": true,
+          "equal_notional_payoff_ge_2_5": true,
+          "cash_payoff_ge_2_5": true,
+          "conservative_dd_le_35": true
+        },
+        "pass": true
+      },
+      "2026": {
+        "checks": {
+          "win_pct_ge_30": true,
+          "equal_notional_payoff_ge_2_5": false,
+          "cash_payoff_ge_2_5": false,
+          "conservative_dd_le_35": true
+        },
+        "pass": false
+      }
+    },
+    "prior_channel_20x12h": {
+      "all": {
+        "checks": {
+          "win_pct_ge_30": true,
+          "equal_notional_payoff_ge_2_5": true,
+          "cash_payoff_ge_2_5": false,
+          "conservative_dd_le_35": false
+        },
+        "pass": false
+      },
+      "dev": {
+        "checks": {
+          "win_pct_ge_30": true,
+          "equal_notional_payoff_ge_2_5": true,
+          "cash_payoff_ge_2_5": false,
+          "conservative_dd_le_35": false,
+          "minimum_100_closed_positions": true
+        },
+        "pass": false
+      },
+      "2025": {
+        "checks": {
+          "win_pct_ge_30": true,
+          "equal_notional_payoff_ge_2_5": false,
+          "cash_payoff_ge_2_5": false,
+          "conservative_dd_le_35": true
+        },
+        "pass": false
+      },
+      "2026": {
+        "checks": {
+          "win_pct_ge_30": true,
+          "equal_notional_payoff_ge_2_5": true,
+          "cash_payoff_ge_2_5": true,
+          "conservative_dd_le_35": false
+        },
+        "pass": false
+      }
+    }
+  },
+  "paired_and_stress_checks": {
+    "prior_channel_10x12h": {
+      "funded_positions": 2297,
+      "periods": {
+        "all": {
+          "final_usdt": 5708.884684890632,
+          "multiple": 5.7088846848906325,
+          "dd_mark_pct": 42.80105607856007,
+          "dd_bound_pct": 43.94808399667098,
+          "trades": 2297,
+          "win_pct": 34.04440574662603,
+          "payoff": 2.5191621385167196,
+          "payoff_usdt": 2.3015084612896617,
+          "median_net_pct": -3.2991384743914693
+        },
+        "dev": {
+          "final_usdt": 3722.2689902997117,
+          "multiple": 3.7222689902997117,
+          "dd_mark_pct": 42.80105607856007,
+          "dd_bound_pct": 43.94808399667098,
+          "trades": 1590,
+          "win_pct": 33.899371069182386,
+          "payoff": 2.5657481694830775,
+          "payoff_usdt": 2.264255236846439,
+          "median_net_pct": -3.3774562700639845
+        },
+        "2025": {
+          "final_usdt": 5020.705731469574,
+          "multiple": 1.3488293684721893,
+          "dd_mark_pct": 19.187990076551298,
+          "dd_bound_pct": 19.563255503081933,
+          "trades": 372,
+          "win_pct": 31.989247311827956,
+          "payoff": 2.691528902845673,
+          "payoff_usdt": 2.6524973246174564,
+          "median_net_pct": -3.2849721162733436
+        },
+        "2026": {
+          "final_usdt": 5708.884684890632,
+          "multiple": 1.1370681713344761,
+          "dd_mark_pct": 17.366648910510595,
+          "dd_bound_pct": 18.119088224821322,
+          "trades": 320,
+          "win_pct": 35.625,
+          "payoff": 2.164513514870007,
+          "payoff_usdt": 2.1224238598853606,
+          "median_net_pct": -2.8623967871598754
+        }
+      },
+      "dev_gate": {
+        "checks": {
+          "win_pct_ge_30": true,
+          "equal_notional_payoff_ge_2_5": true,
+          "cash_payoff_ge_2_5": false,
+          "conservative_dd_le_35": false,
+          "minimum_100_closed_positions": true
+        },
+        "pass": false
+      },
+      "all_gate": {
+        "checks": {
+          "win_pct_ge_30": true,
+          "equal_notional_payoff_ge_2_5": true,
+          "cash_payoff_ge_2_5": false,
+          "conservative_dd_le_35": false
+        },
+        "pass": false
+      }
+    },
+    "prior_channel_20x12h": {
+      "funded_positions": 1648,
+      "periods": {
+        "all": {
+          "final_usdt": 5431.659217199969,
+          "multiple": 5.431659217199969,
+          "dd_mark_pct": 41.7475595138717,
+          "dd_bound_pct": 43.51737368289344,
+          "trades": 1648,
+          "win_pct": 34.28398058252427,
+          "payoff": 2.667232480616517,
+          "payoff_usdt": 2.3051835467510857,
+          "median_net_pct": -3.4701553445118334
+        },
+        "dev": {
+          "final_usdt": 4208.91076931127,
+          "multiple": 4.20891076931127,
+          "dd_mark_pct": 34.087215226920605,
+          "dd_bound_pct": 38.08446896794271,
+          "trades": 1148,
+          "win_pct": 35.01742160278746,
+          "payoff": 2.709711156560851,
+          "payoff_usdt": 2.2457578312359283,
+          "median_net_pct": -3.5196964199904417
+        },
+        "2025": {
+          "final_usdt": 5052.111126458129,
+          "multiple": 1.2003369525661949,
+          "dd_mark_pct": 19.370008375203952,
+          "dd_bound_pct": 19.78379696116527,
+          "trades": 250,
+          "win_pct": 31.2,
+          "payoff": 2.4243334069894624,
+          "payoff_usdt": 2.358930958181118,
+          "median_net_pct": -3.376388833631988
+        },
+        "2026": {
+          "final_usdt": 5431.659217199969,
+          "multiple": 1.075126631469789,
+          "dd_mark_pct": 41.7475595138717,
+          "dd_bound_pct": 43.51737368289344,
+          "trades": 235,
+          "win_pct": 30.21276595744681,
+          "payoff": 2.637860942303182,
+          "payoff_usdt": 2.5871030147934984,
+          "median_net_pct": -3.4766540130390147
+        }
+      },
+      "dev_gate": {
+        "checks": {
+          "win_pct_ge_30": true,
+          "equal_notional_payoff_ge_2_5": true,
+          "cash_payoff_ge_2_5": false,
+          "conservative_dd_le_35": false,
+          "minimum_100_closed_positions": true
+        },
+        "pass": false
+      },
+      "all_gate": {
+        "checks": {
+          "win_pct_ge_30": true,
+          "equal_notional_payoff_ge_2_5": true,
+          "cash_payoff_ge_2_5": false,
+          "conservative_dd_le_35": false
+        },
+        "pass": false
+      }
+    }
+  },
+  "dev_and_all_period_winners": [],
+  "pick": "frozen_ema_baseline",
+  "path_audit": {
+    "10": {
+      "symbols": 273,
+      "events": 22596,
+      "vectorbt": {
+        "columns": 45192,
+        "orders": 90384,
+        "trades": 45192
+      },
+      "channel": {
+        "native_12h_long_breaks": 39567,
+        "native_12h_short_breaks": 35061,
+        "channel_markers_written": 74596,
+        "breaks_after_hourly_tail": 32,
+        "noncontiguous_native_windows_skipped": 60,
+        "marker_fill_clock_counts": {
+          "exact_h1_open": 74596
+        }
+      },
+      "exit_reasons": {
+        "stop": 26540,
+        "channel_breakout_open": 10851,
+        "take_profit": 7186,
+        "series_tail_close": 600,
+        "take_profit_open": 2,
+        "stop_gap_open": 12,
+        "data_gap_markout": 1
+      },
+      "safe_path_bounds": {
+        "first_channel_breakout_open": 21960,
+        "actual_hourly_series_tail": 632,
+        "first_hour_gap_open": 4
+      }
+    },
+    "20": {
+      "symbols": 273,
+      "events": 22596,
+      "vectorbt": {
+        "columns": 45192,
+        "orders": 90384,
+        "trades": 45192
+      },
+      "channel": {
+        "native_12h_long_breaks": 26349,
+        "native_12h_short_breaks": 22255,
+        "channel_markers_written": 48575,
+        "breaks_after_hourly_tail": 29,
+        "noncontiguous_native_windows_skipped": 120,
+        "marker_fill_clock_counts": {
+          "exact_h1_open": 48575
+        }
+      },
+      "exit_reasons": {
+        "stop": 29349,
+        "take_profit": 7444,
+        "channel_breakout_open": 7696,
+        "series_tail_close": 686,
+        "take_profit_open": 2,
+        "stop_gap_open": 12,
+        "data_gap_markout": 3
+      },
+      "safe_path_bounds": {
+        "first_channel_breakout_open": 21754,
+        "actual_hourly_series_tail": 834,
+        "first_hour_gap_open": 8
+      }
+    }
+  },
+  "paths_csv_gz": "experiments/active/exp-cloud-close-channel-exit-20261109-v1/paths.csv.gz",
+  "vectorbt_version": "1.2.0"
+}

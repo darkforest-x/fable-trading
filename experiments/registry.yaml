@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-channel-exit-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "48a7cf2ec4"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Change only the V1.7 EMA trend exit to the first 12H close beyond the previous 10 or 20 complete bars' adverse channel, entering the exit at the next H1 open."
+    result: "Original 8788.77U. 10 bars 5708.88U, 2297 funded, 34.04% wins, cash payoff 2.302, DD mark 42.80% / upper 43.95%; 20 bars 5431.66U, 1648 funded, 34.28%, 2.305, 41.75% / 43.52%. Neither cleared development. 90384 native paths."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-channel-exit-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af8197b2c5f7e196a47f5d."
+
   - experiment_id: exp-cloud-close-stopped-reentry-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "8a6f89c7a5"
