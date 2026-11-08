@@ -6,6 +6,7 @@ and allocation order. All source times are UTC; candle indexes in raw denote ope
 """
 import argparse
 import json
+import subprocess
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
@@ -30,7 +31,13 @@ STEP = pd.Timedelta(minutes=5)
 def replay_symbol(task):
     from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy, run_native
 
-    symbol, events, job, native_dir = task
+    symbol, source, events, job, native_dir, revision = task
+    checkpoint = OUT / "cache" / revision / source / (symbol + ".csv.gz")
+    if checkpoint.exists():
+        done = pd.read_csv(checkpoint)
+        if (set(done.event) == set(events.event) and len(done) == 2*len(events)
+                and set(done.path) == {"ohlc", "olhc"} and not done.duplicated(["event", "path"]).any()):
+            return done.to_dict("records")
     raw, _ = load_job(job)
     decimals = max(2, min(9, int(np.ceil(-np.log10(raw[OHLC].to_numpy().min()))) + 7))
     tick = 10.**-decimals
@@ -91,6 +98,10 @@ def replay_symbol(task):
                                old_px=ref.exit_price, new_px=alt.exit_price,
                                first_close=frame.close.iloc[i-2] if alt.reason == 15 else None,
                                second_close=frame.close.iloc[i-1] if alt.reason == 15 else None))
+    checkpoint.parent.mkdir(exist_ok=True, parents=True)
+    pending = checkpoint.with_suffix(".tmp")
+    pd.DataFrame(result).to_csv(pending, compression="gzip", index=False)
+    pending.replace(checkpoint)
     return result
 
 
@@ -98,6 +109,9 @@ def run_fills(cfg, workers):
     cohort = pd.read_csv(ROOT / cfg["cohort"], parse_dates=["entry_t"])
     base = json.loads((ROOT / cfg["base"] / "config.json").read_text())
     ext_jobs = json.loads((ROOT / base["extension"] / "jobs.json").read_text())
+    revision = subprocess.check_output(["git", "log", "-1", "--format=%H", "--",
+        "yoyo/evaluation/live_wick_two_closes_exit.py", "yoyo/layers/l3_backtest/nautilus_independent.py",
+        str((OUT / "config.json").relative_to(ROOT))], cwd=ROOT, text=True).strip()
     tasks = []
     for (symbol, source), group in cohort.groupby(["symbol", "source"]):
         if source == "extension":
@@ -105,7 +119,7 @@ def run_fills(cfg, workers):
         else:
             job = json.loads((CODEX / "symbols" / symbol / "identity.json").read_text())["job"]
             native_dir = base["fills"]
-        tasks.append((symbol, group, job, str(ROOT / native_dir)))
+        tasks.append((symbol, source, group, job, str(ROOT / native_dir), revision))
     with ProcessPoolExecutor(workers) as pool:
         both = pd.DataFrame([r for block in pool.map(replay_symbol, tasks) for r in block])
     if len(both) != 832 or both.duplicated(["event", "path"]).any() or set(both.event) != set(cohort.event):
