@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-fvg-pilot-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 24e11f5c18
+    status: rejected
+    question: Does active same-direction 12H FVG overlap at the first weekly 1.618 touch select fewer early stops while retaining strict >10R chart excursions in six alts?
+    single_variable: Prior confirmed FVG contains the weekly level at first touch. Separately compare AUTO POC with zone midpoint within overlaps.
+    result: 245 original signals, 5 warmup exclusions. Overlap 18/38 early stops versus 44/202 outside. Both years and all six coins had higher stop rates inside. Only 6/47 chart and 1/17 confirmation-basis winners retained. Nearer POC 7/12 early stops versus 10/25; one zone had no positive bins.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-cloud-fvg-pilot-20261108-v1/summary.json
+    notes: Retrospective count-selected sample and price-path labels only. Seven >10R outcomes unresolved. See sibling signals.csv and config.json and Notion 4128856479af813794a8c7270df8988e.
+
   - experiment_id: exp-cloud-pretouch-structure-20261108-v1
     source_repo: darkforest-x/fable-trading
     holdout_consumed: false

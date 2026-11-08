@@ -1,7 +1,8 @@
 """Rebuild ChartPrime's AUTO lower-timeframe POC for a UTC 12H FVG.
 
-ChartPrime's FVG Volume Profile uses ``int(chart_minutes / 10)`` as the AUTO
-timeframe. On a 12H chart this is 72 minutes. The native 72m sequence is
+The frozen ``qujivabv.pine`` source under the ChartPrime audit uses
+``int(chart_minutes / 10)`` as the AUTO timeframe. On a 12H chart this is 72
+minutes. The native 72m sequence is
 reconstructed from confirmed OKX 3m candles (10 buckets, 24 inputs each), then
 the frozen Pine close/volume binning is applied to the supplied FVG bounds.
 
@@ -25,7 +26,6 @@ import requests
 from yoyo.evaluation.top20_1618_rank import request as okx_request
 
 
-API = "https://www.okx.com/api/v5/market/history-candles"
 BAR = "3m"
 BAR_MS = 3 * 60_000
 MIDDLE_MS = 12 * 60 * 60_000
@@ -76,7 +76,7 @@ def _validate_bounds(middle_open_ms: int, lo: float, hi: float) -> tuple[int, fl
 
 def _parse_confirmed_rows(raw_rows: Iterable[list], start_ms: int, end_ms: int) -> list[tuple[int, float, float]]:
     """Validate native OKX rows and retain only the requested 12H interval."""
-    found: dict[int, tuple[float, float]] = {}
+    found: dict[int, tuple[float, float, float, float, float]] = {}
     for raw in raw_rows:
         if not isinstance(raw, (list, tuple)) or len(raw) < 9:
             raise ValueError("OKX candle row is malformed")
@@ -98,7 +98,7 @@ def _parse_confirmed_rows(raw_rows: Iterable[list], start_ms: int, end_ms: int) 
             raise ValueError(f"nonfinite OKX candle at {stamp}")
         if min(o, h, low, close) <= 0 or volume < 0 or h < max(o, low, close) or low > min(o, close):
             raise ValueError(f"invalid OHLCV geometry at {stamp}")
-        item = (close, volume)
+        item = (o, h, low, close, volume)
         prior = found.get(stamp)
         if prior is not None and prior != item:
             raise ValueError(f"conflicting duplicate confirmed candle at {stamp}")
@@ -110,7 +110,7 @@ def _parse_confirmed_rows(raw_rows: Iterable[list], start_ms: int, end_ms: int) 
     missing = [stamp for stamp in expected if stamp not in found]
     if missing:
         raise ValueError(f"incomplete confirmed 3m grid: {len(missing)} missing; first={missing[0]}")
-    return [(stamp, *found[stamp]) for stamp in expected]
+    return [(stamp, found[stamp][3], found[stamp][4]) for stamp in expected]
 
 
 def _bucket_72m(rows: list[tuple[int, float, float]], start_ms: int) -> list[tuple[float, float]]:
