@@ -213,11 +213,12 @@
       const markers=fills.map((m,i)=>{
         const t=Math.floor(Date.parse(m.time)/step)*step,index=ticks.indexOf(t);
         if(index<0||!byTime.has(t)||!finite(m.price))return null;
-        return {name:labelOf(i,fills.length),coord:[index,m.price],symbol:'triangle',symbolRotate:i?180:0,symbolSize:13,itemStyle:{color:i?c.down:c.blue},label:{show:true,position:i?'top':'bottom',formatter:i?(fills.length===3?(i===1?'卖½':'余仓'):'卖'):'买',fontSize:10,color:i?c.down:c.blue}};
+        const placement=fills.length===3 && i===1?'left':i?'top':'bottom';
+        return {name:labelOf(i,fills.length),coord:[index,m.price],symbol:'triangle',symbolRotate:i?180:0,symbolSize:13,itemStyle:{color:i?c.down:c.blue},label:{show:true,position:placement,formatter:i?(fills.length===3?(i===1?'卖½':'余仓'):'卖'):'买',fontSize:10,color:i?c.down:c.blue}};
       }).filter(Boolean);
       makeChart(target).setOption({animation:false,grid:{left:9,right:10,top:24,bottom:48,containLabel:true},
         tooltip:{trigger:'axis',confine:true,axisPointer:{type:'cross'},formatter:params=>{const i=params[0]?.dataIndex,b=byTime.get(ticks[i]);return b?bjt(new Date(b[0]).toISOString())+' 北京时间<br>开 '+price(b[1])+'　高 '+price(b[2])+'<br>低 '+price(b[3])+'　收 '+price(b[4]):'此处缺 K 线';}},
-        xAxis:{type:'category',data:ticks.map(String),axisLabel:{color:c.text,hideOverlap:true,formatter:t=>bjt(new Date(Number(t)).toISOString()).slice(minutes>=60?5:11,minutes>=60?10:16)},axisLine:{lineStyle:{color:c.grid}}},
+        xAxis:{type:'category',data:ticks.map(String),axisLabel:{color:c.text,hideOverlap:true,formatter:t=>{const time=bjt(new Date(Number(t)).toISOString());return minutes>=60?time.slice(5,16).replace(' ','\n'):time.slice(11);}},axisLine:{lineStyle:{color:c.grid}}},
         yAxis:{type:'value',scale:true,splitNumber:4,axisLabel:{color:c.text,formatter:v=>price(v)},splitLine:{lineStyle:{color:c.grid}}},
         dataZoom:[{type:'inside',zoomOnMouseWheel:'ctrl',preventDefaultMouseMove:false},{type:'slider',height:16,bottom:4,showDetail:false}],
         series:[{type:'candlestick',data:values,itemStyle:{color:c.up,color0:c.down,borderColor:c.up,borderColor0:c.down},markPoint:{animation:false,data:markers}}]});
@@ -261,7 +262,7 @@
         year=btn.dataset.period;kind='all';page=0;chosen=null;block=null;chosenSymbol='';section='history';render();
         body.querySelector('.bb-open-event')?.focus({preventScroll:true});return;
       }
-      if(action==='retry-chart'){detail();return;}
+      if(action==='retry-chart'){catalog=null;block=null;detail();return;}
       const row=event.target.closest('[data-id]');
       if(row || action==='case' || btn?.dataset.step){
         const rows=filtered();
