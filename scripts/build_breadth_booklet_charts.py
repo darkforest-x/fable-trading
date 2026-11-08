@@ -9,7 +9,6 @@ data, calculate strategy outcomes, fill missing candles, or render images.
 from __future__ import annotations
 
 import argparse
-import csv
 import gzip
 import hashlib
 import json
@@ -17,6 +16,7 @@ import math
 import os
 import re
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
@@ -126,6 +126,25 @@ def normalized_event(row: dict[str, Any], index: int) -> dict[str, Any]:
         raise ChartBuildError(f"events[{index}] BTC block must not contain synthetic basket members")
     if asset == "ALT" and (row.get("entry_price") is not None or row.get("exit_price") is not None):
         raise ChartBuildError(f"events[{index}] ALT event-level prices must be null; prices belong to members")
+    exit_legs = max(0, int(finite_number(row.get("exit_legs")) or 0))
+    raw_exit_details = row.get("exit_legs_detail") or []
+    if not isinstance(raw_exit_details, list) or any(not isinstance(detail, dict) for detail in raw_exit_details):
+        raise ChartBuildError(f"events[{index}].exit_legs_detail must be a list of objects")
+    exit_details = []
+    for leg_index, detail in enumerate(raw_exit_details):
+        leg_time = utc_ms(detail.get("time"), f"events[{index}].exit_legs_detail[{leg_index}].time")
+        leg_price = finite_number(detail.get("price"))
+        size_fraction = finite_number(detail.get("size_fraction"))
+        if leg_time is not None and (leg_time < entry_ms or leg_time % BASE_INTERVAL_MS):
+            raise ChartBuildError(f"events[{index}].exit_legs_detail[{leg_index}].time must be a 5m candle open after entry")
+        if leg_price is not None and leg_price <= 0:
+            raise ChartBuildError(f"events[{index}].exit_legs_detail[{leg_index}].price must be positive")
+        if size_fraction is not None and not 0 < size_fraction <= 1:
+            raise ChartBuildError(f"events[{index}].exit_legs_detail[{leg_index}].size_fraction must be in (0, 1]")
+        exit_details.append({"time_ms": leg_time, "price": leg_price, "size_fraction": size_fraction,
+                             "fill_type": detail.get("fill_type")})
+    if exit_details and len(exit_details) != exit_legs:
+        raise ChartBuildError(f"events[{index}] exit_legs_detail count disagrees with exit_legs")
     return {
         "input": row,
         "index": index,
@@ -136,8 +155,10 @@ def normalized_event(row: dict[str, Any], index: int) -> dict[str, Any]:
         "first_exit_ms": first_exit_ms,
         "entry_price": finite_number(row.get("entry_price")),
         "exit_price": finite_number(row.get("exit_price")),
+        "exit_vwap": finite_number(row.get("exit_vwap")),
         "first_exit_price": finite_number(row.get("first_exit_price")),
-        "exit_legs": max(0, int(finite_number(row.get("exit_legs")) or 0)),
+        "exit_legs": exit_legs,
+        "exit_legs_detail": exit_details,
         "members": members,
     }
 
@@ -370,17 +391,47 @@ def aggregate_window(frame: Any, start_ms: int, end_ms: int, period_ms: int) -> 
     }
 
 
-def exact_open(frame: Any, stamp_ms: int | None) -> float | None:
-    if stamp_ms is None or frame.empty:
-        return None
-    rows = frame.loc[frame.ts == stamp_ms, "open"]
-    if len(rows):
-        return float(rows.iloc[0])
-    return None
+def marker(kind: str, stamp_ms: int | None, price: float | None, source: str, *,
+           size_pct: int | None = None, reference_price: float | None = None,
+           size_fraction: float | None = None, fill_type: str | None = None,
+           price_note: str | None = None) -> dict[str, Any]:
+    value = {"kind": kind, "time_ms": stamp_ms, "time": iso_utc(stamp_ms), "price": price, "price_source": source}
+    if size_pct is not None:
+        value["size_pct"] = size_pct
+    if reference_price is not None:
+        value["reference_price"] = reference_price
+    if size_fraction is not None:
+        value["size_fraction"] = size_fraction
+    if fill_type is not None:
+        value["fill_type"] = fill_type
+    if price_note:
+        value["price_note"] = price_note
+    return value
 
 
-def marker(kind: str, stamp_ms: int | None, price: float | None, source: str) -> dict[str, Any]:
-    return {"kind": kind, "time_ms": stamp_ms, "time": iso_utc(stamp_ms), "price": price, "price_source": source}
+def btc_exit_markers(event: dict[str, Any]) -> list[dict[str, Any]]:
+    details = event["exit_legs_detail"]
+    if details:
+        markers = []
+        for index, detail in enumerate(details, start=1):
+            fraction = detail["size_fraction"]
+            markers.append({"kind": f"exit_{index}", "time_ms": detail["time_ms"], "price": detail["price"],
+                            "size_fraction": fraction, "fill_type": detail["fill_type"], "saved_detail": True})
+        return markers
+    if event["exit_legs"] == 2:
+        # Fallback to the normalized source fields only when the per-fill detail
+        # ledger is absent. exit_price is the actual final leg fill price;
+        # exit_vwap is informational and is never expanded into a fill price.
+        return [
+            {"kind": "exit_1", "time_ms": event["first_exit_ms"], "price": event["first_exit_price"],
+             "size_fraction": 0.5, "fill_type": None, "saved_detail": False},
+            {"kind": "exit_2", "time_ms": event["exit_ms"], "price": event["exit_price"],
+             "size_fraction": 0.5, "fill_type": None, "saved_detail": False},
+        ]
+    stamp = event["exit_ms"] if event["exit_ms"] is not None else event["first_exit_ms"]
+    price = event["exit_price"] if event["exit_price"] is not None else event["first_exit_price"]
+    return [{"kind": "exit_1", "time_ms": stamp, "price": price,
+             "size_fraction": 1.0, "fill_type": None, "saved_detail": False}]
 
 
 def chart_windows(events: list[dict[str, Any]], context_ms: int) -> tuple[dict[str, list[dict[str, Any]]], dict[tuple[int, int | None], dict[str, Any]]]:
@@ -391,17 +442,10 @@ def chart_windows(events: list[dict[str, Any]], context_ms: int) -> tuple[dict[s
         event_index = event["index"]
         period_ms = PERIOD_MS[asset]
         if asset == "BTC":
-            markers: list[tuple[str, int | None, float | None]] = []
-            if event["exit_legs"] >= 2:
-                if event["first_exit_ms"] is not None:
-                    markers.append(("exit_1", event["first_exit_ms"], event["first_exit_price"]))
-                if event["exit_ms"] is not None and event["exit_ms"] != event["first_exit_ms"]:
-                    markers.append(("exit_2", event["exit_ms"], event["exit_price"]))
-            elif event["exit_ms"] is not None:
-                markers.append(("exit_1", event["exit_ms"], event["exit_price"]))
-            elif event["first_exit_ms"] is not None:
-                markers.append(("exit_1", event["first_exit_ms"], event["first_exit_price"]))
-            last_ms = max((stamp for _, stamp, _ in markers if stamp is not None), default=event["entry_ms"])
+            if event["exit_legs"] not in (1, 2):
+                raise ChartBuildError(f"BTC event {event['event_id']} must have one or two source exit legs")
+            markers = btc_exit_markers(event)
+            last_ms = max((mark["time_ms"] for mark in markers if mark["time_ms"] is not None), default=event["entry_ms"])
             start_ms, end_ms = requested_window(event["entry_ms"], last_ms, period_ms, context_ms)
             descriptor = {"event": event, "member": None, "symbol": "BTCUSDT", "asset": asset,
                           "period_ms": period_ms, "start_ms": start_ms, "end_ms": end_ms, "markers": markers}
@@ -429,15 +473,19 @@ def build_chart(descriptor: dict[str, Any], frame: Any, source_status: str) -> d
     result = aggregate_window(frame, start_ms, end_ms, period_ms)
     if asset == "BTC":
         event = descriptor["event"]
-        markers = [marker("entry", event["entry_ms"], event["entry_price"], "saved_event_entry")]
-        markers.extend(marker(kind, stamp, price, "saved_fill" if price is not None else "unavailable")
-                       for kind, stamp, price in descriptor["markers"])
-        for mark in markers:
-            if mark["price"] is None and mark["kind"] != "entry":
-                bar_price = exact_open(frame, mark["time_ms"])
-                if bar_price is not None:
-                    mark["price"] = bar_price
-                    mark["price_source"] = "binance_5m_open_fallback"
+        markers = [marker("entry", event["entry_ms"], event["entry_price"],
+                          "saved_event_entry" if event["entry_price"] is not None else "unavailable",
+                          size_pct=100)]
+        for detail in descriptor["markers"]:
+            fraction = detail["size_fraction"]
+            markers.append(marker(
+                detail["kind"], detail["time_ms"], detail["price"],
+                "saved_exit_leg_detail" if detail["saved_detail"] else "saved_event_exit",
+                size_pct=round(fraction * 100) if fraction is not None else None,
+                size_fraction=fraction,
+                fill_type=detail["fill_type"],
+                price_note="saved fill price unavailable; candle open is not a fill substitute" if detail["price"] is None else None,
+            ))
         return {
             "symbol": "BTCUSDT", "bar_minutes": 60, "source_status": source_status,
             "window_start_ms": start_ms, "window_end_ms": end_ms, "markers": markers,
@@ -448,19 +496,21 @@ def build_chart(descriptor: dict[str, Any], frame: Any, source_status: str) -> d
     exit_price = finite_number(member.get("exit_price"))
     if exit_price is None:
         exit_price = finite_number(member.get("selected_exit_open"))
-    if entry_price is None:
-        entry_price = exact_open(frame, descriptor["entry_ms"])
-        entry_source = "binance_5m_open_fallback"
-    else:
-        entry_source = "saved_member_entry"
-    if exit_price is None:
-        exit_price = exact_open(frame, descriptor["exit_ms"])
-        exit_source = "binance_5m_open_fallback" if exit_price is not None else "unavailable"
-    else:
+    outcome_complete = member.get("outcome_complete", member.get("member_outcome_complete")) is True
+    entry_source = "saved_member_entry" if entry_price is not None else "unavailable"
+    if outcome_complete and exit_price is not None:
+        exit_marker_price = exit_price
+        exit_reference_price = None
         exit_source = "saved_member_exit"
-    markers = [marker("entry", descriptor["entry_ms"], entry_price, entry_source)]
+    else:
+        exit_marker_price = None
+        exit_reference_price = exit_price
+        exit_source = "incomplete_outcome"
+    markers = [marker("entry", descriptor["entry_ms"], entry_price, entry_source, size_pct=100)]
     if descriptor["exit_ms"] is not None:
-        markers.append(marker("exit_1", descriptor["exit_ms"], exit_price, exit_source))
+        markers.append(marker("exit_1", descriptor["exit_ms"], exit_marker_price, exit_source, size_pct=100,
+                              reference_price=exit_reference_price,
+                              price_note="saved price is reference-only because outcome is incomplete" if exit_reference_price is not None else None))
     return {
         "symbol": descriptor["symbol"], "bar_minutes": 15, "source_status": source_status,
         "window_start_ms": start_ms, "window_end_ms": end_ms, "markers": markers,
@@ -488,6 +538,8 @@ def event_block(event: dict[str, Any], charts: dict[tuple[int, int | None], dict
             raise ChartBuildError(f"missing chart job for BTC event {event['event_id']}")
         base.update({
             "exit_legs": event["exit_legs"],
+            "exit_vwap": event["exit_vwap"],
+            "exit_legs_detail": event["exit_legs_detail"],
             "exit_policy": row.get("exit_policy"),
             "event_source": row.get("source"),
             "markers": chart["markers"],
@@ -510,6 +562,7 @@ def event_block(event: dict[str, Any], charts: dict[tuple[int, int | None], dict
                 "entry_price": chart["markers"][0]["price"] if chart["markers"] else None,
                 "exit_time": iso_utc(exit_ms),
                 "exit_price": chart["markers"][-1]["price"] if len(chart["markers"]) > 1 else None,
+                "reference_exit_price": chart["markers"][-1].get("reference_price") if len(chart["markers"]) > 1 else None,
                 "net_pct": finite_number(source_member.get("selected_net_pct", source_member.get("net_pct"))),
                 "funded_net_pct": finite_number(source_member.get("selected_funded_net_pct", source_member.get("funded_net_pct"))),
                 "outcome_complete": source_member.get("outcome_complete"),
@@ -517,7 +570,12 @@ def event_block(event: dict[str, Any], charts: dict[tuple[int, int | None], dict
                 "markers": chart["markers"],
                 "chart": chart,
             })
-        coverage = row.get("member_coverage")
+        coverage = row.get("member_coverage") or {
+            "expected": row.get("expected_members"),
+            "observed": row.get("observed_members"),
+            "coverage_pct": finite_number(row.get("member_coverage_pct")),
+            "source": row.get("source"),
+        }
         base.update({
             "entry_price": None,
             "exit_price": None,
@@ -568,12 +626,11 @@ def build(events_path: Path = DEFAULT_EVENTS, output_dir: Path = DEFAULT_OUTPUT,
     by_symbol, _ = chart_windows(events, pre_context_ms)
     charts: dict[tuple[int, int | None], dict[str, Any]] = {}
     source_inventory: dict[str, Any] = {}
-    source_symbol_status: dict[str, str] = {}
+    build_started = time.monotonic()
     for n, (symbol, jobs) in enumerate(sorted(by_symbol.items()), start=1):
         asset = "BTC" if symbol == "BTCUSDT" else "ALT"
         frame, receipt_info = read_symbol_bars(symbol, asset, [(job["start_ms"], job["end_ms"]) for job in jobs])
         source_inventory[symbol] = receipt_info
-        source_symbol_status[symbol] = receipt_info["status"]
         for job in jobs:
             key = (job["event"]["index"], job.get("member_index"))
             chart = build_chart(job, frame, receipt_info["status"])
@@ -581,12 +638,18 @@ def build(events_path: Path = DEFAULT_EVENTS, output_dir: Path = DEFAULT_OUTPUT,
                 chart["source_conflict_bars_for_symbol"] = receipt_info["conflict_bars"]
             charts[key] = chart
         if n == 1 or n % 25 == 0 or n == len(by_symbol):
-            print(f"[charts] symbols {n}/{len(by_symbol)}; bars={sum(len(x.get('bars', [])) for x in charts.values())}", file=sys.stderr)
+            elapsed = max(time.monotonic() - build_started, 1e-9)
+            rate = n / elapsed
+            eta = (len(by_symbol) - n) / rate if rate else float("inf")
+            print(f"[charts] symbols {n}/{len(by_symbol)} ({rate:.2f}/s; eta {eta:.0f}s); "
+                  f"current={symbol}; chart_bars={sum(len(x.get('bars', [])) for x in charts.values())}", file=sys.stderr)
 
     event_files: list[dict[str, Any]] = []
     expected_block_names: set[str] = set()
     totals = {"BTC_events": 0, "ALT_events": 0, "BTC_bars": 0, "ALT_member_charts": 0,
-              "ALT_member_charts_with_bars": 0, "ALT_bars": 0, "missing_charts": 0}
+              "ALT_member_charts_with_bars": 0, "ALT_bars": 0, "missing_charts": 0,
+              "BTC_markers": 0, "ALT_member_markers": 0, "markers_with_prices": 0,
+              "markers_without_prices": 0, "reference_only_markers": 0, "markers_without_times": 0}
     for event in events:
         block = event_block(event, charts)
         event_key = event_timestamp_id(event["asset"], event["entry_ms"])
@@ -602,6 +665,12 @@ def build(events_path: Path = DEFAULT_EVENTS, output_dir: Path = DEFAULT_OUTPUT,
         if event["asset"] == "BTC":
             totals["BTC_events"] += 1
             chart = block["chart"]
+            if len(block["markers"]) != 1 + event["exit_legs"]:
+                raise ChartBuildError(f"marker count mismatch for BTC event {event['event_id']}")
+            if sum(str(item["kind"]).startswith("exit_") for item in block["markers"]) != event["exit_legs"]:
+                raise ChartBuildError(f"exit marker count mismatch for BTC event {event['event_id']}")
+            marker_rows = block["markers"]
+            totals["BTC_markers"] += len(marker_rows)
             available_charts = int(bool(chart["bars"]))
             total_bars = len(chart["bars"])
             totals["BTC_bars"] += total_bars
@@ -610,11 +679,17 @@ def build(events_path: Path = DEFAULT_EVENTS, output_dir: Path = DEFAULT_OUTPUT,
         else:
             totals["ALT_events"] += 1
             totals["ALT_member_charts"] += len(block["members"])
+            marker_rows = [item for member in block["members"] for item in member["markers"]]
+            totals["ALT_member_markers"] += len(marker_rows)
             available_charts = sum(bool(member["chart"]["bars"]) for member in block["members"])
             total_bars = sum(len(member["chart"]["bars"]) for member in block["members"])
             totals["ALT_member_charts_with_bars"] += available_charts
             totals["ALT_bars"] += total_bars
             totals["missing_charts"] += len(block["members"]) - available_charts
+        totals["markers_with_prices"] += sum(item.get("price") is not None for item in marker_rows)
+        totals["markers_without_prices"] += sum(item.get("price") is None for item in marker_rows)
+        totals["reference_only_markers"] += sum(item.get("price") is None and item.get("reference_price") is not None for item in marker_rows)
+        totals["markers_without_times"] += sum(item.get("time_ms") is None for item in marker_rows)
         event_files.append({
             "event_id": event["event_id"],
             "asset": event["asset"],
@@ -626,6 +701,10 @@ def build(events_path: Path = DEFAULT_EVENTS, output_dir: Path = DEFAULT_OUTPUT,
             "charts": 1 if event["asset"] == "BTC" else len(block["members"]),
             "available_charts": available_charts,
             "bars": total_bars,
+            "markers": len(marker_rows),
+            "markers_with_prices": sum(item.get("price") is not None for item in marker_rows),
+            "markers_without_prices": sum(item.get("price") is None for item in marker_rows),
+            "reference_only_markers": sum(item.get("price") is None and item.get("reference_price") is not None for item in marker_rows),
         })
 
     source_payload = {
@@ -685,6 +764,8 @@ def main() -> int:
     if not math.isfinite(args.context_hours) or args.context_hours < 0:
         parser.error("--context-hours must be a finite non-negative number")
     context_ms = int(args.context_hours * 3_600_000)
+    if context_ms % 3_600_000:
+        parser.error("--context-hours must align to whole 1h candles")
     try:
         manifest = build(args.events, args.output_dir, args.expected_events, args.expected_2026,
                          pre_context_ms=context_ms, post_context_ms=context_ms)
