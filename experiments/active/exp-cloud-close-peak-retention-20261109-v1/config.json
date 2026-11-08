@@ -1,0 +1,9 @@
+{
+  "id": "exp-cloud-close-peak-retention-20261109-v1",
+  "single_variable": "After the existing +2R favorable move activates the +0.5R initial profit lock, retain a fixed fraction of maximum favorable price excursion measured from the original entry. Preset fractions 0%, 25%, 50%, 75%. Market stop locks the greater of +0.5 original R and that retained excursion. Original protective orders continue. Original 12H confirmation entries, no partials, nine 90-day-eligible slots, low prior ATR priority, 1000 USDT.",
+  "fractions": [0.25, 0.50, 0.75],
+  "causality": "Use each completed H1 high for longs and low for shorts only from the following observed H1 open, never the same bar. A gap through an existing stop fills at the open. Overlay on the frozen 2R/+0.5R native paths; original opening exits have priority, then nearer adverse stop, then end-of-bar exit.",
+  "selection": "Use development through 2024 to select highest ending NAV with at least 100 trades, >=30% wins, both funded USDT and equal-notional payoff >=2.5, and conservative hourly DD upper bound <=35%. Paired later same-contract controls and 5bp extra market slippage on any qualifying new pick. Later years previously inspected. Extra test following observation of large unrealized drawdowns.",
+  "costs": "5bp per market fill. No funding, depth or contract rounding. Original rankable 90-day OKX cohort only.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_peak_retention"
+}
