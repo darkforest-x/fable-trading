@@ -806,7 +806,7 @@ def _period_gate(decision: pd.Timestamp, epoch: int, max_hours: int) -> bool:
 
 def constituent_behavior(member_ledger: pd.DataFrame, members: pd.DataFrame) -> pd.DataFrame:
     rows = []
-    base = members.copy()
+    base = member_ledger.copy()
     base["green6"] = base.close6_green
     for epoch, period in [(0, "pre2023"), (1, "2023_2024"), (2, "2025"), (3, "2026"), (None, "all_239")]:
         sub = base if epoch is None else base[base.epoch.eq(epoch)]
@@ -999,14 +999,16 @@ def build_oos_trajectory(actual_ledger: pd.DataFrame, oos_paths: dict,
     return pd.DataFrame(trajectories), pd.DataFrame(summaries)
 
 
-def run(*, prices_only: bool = False) -> dict:
+def run(*, prices_only: bool = False, resume_prices: bool = False) -> dict:
     started = time.time()
     OUT.mkdir(parents=True, exist_ok=True)
     rule, events, members = load_locked_members()
     matches = (pd.DataFrame(columns=["symbol", "random_entry"])
-               if prices_only else load_control_matches(events))
+               if prices_only or resume_prices else load_control_matches(events))
     actual_input = OUT / "actual_member_price_inputs.parquet"
-    if not prices_only and actual_input.is_file() and (OUT / "actual_oos_path_marks.parquet").is_file():
+    if resume_prices and not actual_input.is_file():
+        raise FileNotFoundError("--resume-prices needs actual_member_price_inputs.parquet")
+    if (resume_prices or not prices_only) and actual_input.is_file() and (OUT / "actual_oos_path_marks.parquet").is_file():
         # Reuse the just-materialized 239-event price stage; load only the
         # random timestamps needed for the matched-control extension.
         actual = pd.read_parquet(actual_input)
@@ -1022,9 +1024,13 @@ def run(*, prices_only: bool = False) -> dict:
         if not actual.cache_time_parity.fillna(False).all():
             raise ValueError("Persisted price stage failed native cache entry-clock parity")
         cached = actual
-        empty_members = members.iloc[:0][["symbol", "decision"]]
-        quotes, _, random_receipts = load_quotes_for_entries(empty_members, matches)
-        quotes.to_parquet(OUT / "control_quote_rows_before_merge.parquet", index=False)
+        if resume_prices:
+            quotes = pd.DataFrame()
+            random_receipts = []
+        else:
+            empty_members = members.iloc[:0][["symbol", "decision"]]
+            quotes, _, random_receipts = load_quotes_for_entries(empty_members, matches)
+            quotes.to_parquet(OUT / "control_quote_rows_before_merge.parquet", index=False)
         mark_rows = pd.read_parquet(OUT / "actual_oos_path_marks.parquet")
         oos_paths = {
             (str(symbol), pd.Timestamp(entry).tz_convert("UTC")): group.sort_values("step_5m").mark_price.to_numpy(dtype=float)
@@ -1307,7 +1313,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", action="store_true", help="materialize the frozen 6/12/24h comparison")
     parser.add_argument("--prices-only", action="store_true", help="materialize all constituent price outcomes first")
+    parser.add_argument("--resume-prices", action="store_true", help="aggregate the persisted price stage without re-reading OHLC")
     args = parser.parse_args()
-    if not (args.run or args.prices_only):
-        raise SystemExit("Use --prices-only or --run to execute the frozen local-data study")
-    run(prices_only=args.prices_only)
+    if not (args.run or args.prices_only or args.resume_prices):
+        raise SystemExit("Use --prices-only, --resume-prices, or --run to execute the frozen local-data study")
+    run(prices_only=args.prices_only, resume_prices=args.resume_prices)
