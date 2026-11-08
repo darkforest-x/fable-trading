@@ -24,13 +24,18 @@ def merge_decision(summary,result):
 
 def refine():
     equity = pd.read_csv(EXP/'hourly.csv.gz', index_col='hour_end_utc', parse_dates=True)
-    old = dd.max_drawdown(equity)
     f = pd.read_csv(EXP/'funded.csv.gz',usecols=['event_id','notional','cash_pnl'])
     legs = wallet.read_paths()
     legs = legs[legs.tp_r.isin([0,2]) & legs.event_id.isin(f.event_id)]
     changed = pd.read_csv(EXP/'changed_limits.csv.gz',dtype={'symbol':str},keep_default_na=False,float_precision='round_trip')
     changed = changed[changed.event_id.isin(f.event_id)]
     legs = pd.concat([legs[~(legs.tp_r.eq(2) & legs.event_id.isin(changed.event_id))],changed],ignore_index=True)
+    return refine_funded_okx(equity,f,legs,EXP/'okx_refined_marks.csv')
+
+
+def refine_funded_okx(equity,f,legs,marks_path):
+    """Refine this account’s own fills and marked NAV using the archived November 2025 OKX quotes."""
+    old = dd.max_drawdown(equity)
     legs = legs.merge(f,on='event_id',validate='many_to_one')
     if len(legs)!=2*len(f) or legs.duplicated(['event_id','tp_r']).any():
         raise ValueError('Missing binding-risk funded leg')
@@ -61,7 +66,7 @@ def refine():
     upper = dd.max_drawdown(equity)
     if lower>upper or upper>old+.01:
         raise ValueError('Refined drawdown bounds disagree')
-    pd.DataFrame(records).to_csv(EXP/'okx_refined_marks.csv',index=False)
+    pd.DataFrame(records).to_csv(marks_path,index=False)
     return dict(terminal_usdt=float(equity.nav.iloc[-1]),hourly_upper_pct=old,refined_upper_pct=upper,observed_lower_pct=lower)
 
 
