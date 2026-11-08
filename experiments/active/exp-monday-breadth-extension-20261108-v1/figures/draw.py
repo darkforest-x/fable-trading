@@ -82,7 +82,7 @@ def selection_chart(book, selected):
         fig.text(.075, fy-.062, f"均收 {values.mean():+.2f}%", fontsize=13, color=INK, va="center")
     fig.text(.075,.16,f"新组合的 {len(selected)+alt:.0f} 次入场 = {sum(keep)} 次普通 BTC + {special} 次急跌 BTC + {alt:.0f} 次山寨篮子",
              fontsize=15, color=INK, weight="bold")
-    fig.text(.075,.07,"跳过的点按原策略计算。EMA20 是最近 20 根 4 小时收盘价的指数均线。",fontsize=11,color=MUTED)
+    fig.text(.075,.07,"跳过的点按原策略计算。EMA20 是按 4 小时收盘价计算的 20 周期指数移动平均线。",fontsize=11,color=MUTED)
     save(fig, "01-btc-filter.png", "partial/events.parquet; risk/integrated_btc_events.parquet; risk/integrated_sensitivity.csv")
 
 
@@ -173,7 +173,7 @@ def case_chart(trade, quotes, fill):
     main.set_xticks([pd.Timestamp(f"2026-09-{d}") for d in [16,18,20,22]],["9/16","9/18","9/20","9/22"])
     main.set_title("价格（USDT / BTC）",loc="left",fontsize=12.5,color=INK)
     main.scatter(t0,trade.entry_open,s=78,marker="^",color=BLUE,edgecolor=BG,zorder=5)
-    main.annotate(f"买入  {trade.entry_open:,.1f}",(t0,trade.entry_open),
+    main.annotate(f"9/16 03:20 买入\n{trade.entry_open:,.1f}",(t0,trade.entry_open),
                   xytext=(.19,.34),textcoords="axes fraction",fontsize=12,color=BLUE,weight="bold",
                   arrowprops=dict(arrowstyle="-",color=BLUE,lw=1.1))
     start = t1-pd.Timedelta(hours=2)
