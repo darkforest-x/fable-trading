@@ -38,7 +38,7 @@
     const replay=(event, label, symbol='')=>'<button type="button" class="bb-period-link" data-breadth-case="'+esc(event.event_id)+'" data-member="'+esc(symbol)+'">'+esc(label)+'</button>';
     const btcSignal=btc.signal_snapshot;
     const sep=data.summaries.september_case_review;
-    return panel('两笔真实历史信号 · 北京时间',
+    return panel('两笔历史回测 · 北京时间',
       note('9 月 16 日 02:50，'+btcSignal.initial_touch_count+' 个币首触。随后 30 分钟新增 '+btcSignal.new_coins+' 个，初始山寨涨幅中位数 '+pct(btcSignal.alt_move_pct)+'。03:20 按 '+number(btc.entry_price)+' 买 BTC。六天内，一半仓位在 '+number(btc.first_exit_price)+' 成交，另一半到期在 '+number(btc.exit_price)+' 卖出。'+basis+'，整笔 '+pct(btc[net])+'，折合每 BTC '+money(btc.entry_price*btc[net]/100)+' 点。')+
       (sep?note('2026 含资金费口径剔除这笔后，组合收益为 '+pct(sep.without_case_growth_pct)+'。若每次市价成交另外计 10 bp 滑点，这笔的限价目标未触发，到期净得 '+number(sep.slipped_funded_points)+' 点。'):'')+
       replay(btc,'查看 BTC 成交 K 线')+
@@ -73,7 +73,9 @@
     if(!review.btc_variants)return '';
     const scope=funded?'2026':'all_history';
     const names={current:'现版',early_ema:'普通 BTC 先验 EMA',reserved_case:'急跌 BTC 单留一份资金'};
-    const rows=review.btc_variants.filter(r=>r.scope===scope).map(r=>[
+    const variants=review.btc_variants.filter(r=>r.scope===scope);
+    const sepPnl=variants.find(r=>r.variant==='reserved_case')?.september_funded_pnl_usdt;
+    const rows=variants.map(r=>[
       names[r.variant],r.btc_count,r.total_legs,r.distinct_entries,pct(r.growth_pct),
       pct(r.marked_dd_pct,false),pct(r.settlement_dd_pct,false),r.sep16_admitted?'入场':'错过'
     ]);
@@ -81,7 +83,7 @@
       note((funded?'2026 年至 10 月 27 日，含实际资金费。':'全历史，仅扣手续费。')+'三行各从 1,000 USDT 起步，山寨始终占起始资金的一半，两次入场至少相隔 24 小时。')+
       table(['BTC 准入与资金','BTC 笔数','组合笔数','不同开仓时点','组合净收益','5 分钟盯市回撤','结算回撤','9 月 16 日急跌'],rows)+
       note('先验 EMA 后，未通过的普通 BTC 信号立即释放六天名额。9 月 12 日 08:10（北京时间）一笔普通 BTC 得以开仓，持有六天。9 月 16 日急跌信号出现时，BTC 资金已占用。原版在那次急跌每 BTC 实现了约一万点净收益。')+
-      note('分仓方案从一开始把 250 USDT 分给普通 BTC，250 USDT 分给急跌 BTC，500 USDT 分给山寨。三份独立复利，两路 BTC 可同时有仓。单笔 BTC 的点数相同，分到这笔的资金决定它对组合赚了多少。')+
+      note('分仓方案从一开始把 250 USDT 分给普通 BTC，250 USDT 分给急跌 BTC，500 USDT 分给山寨。三份独立复利，两路 BTC 可同时有仓。单笔 BTC 的点数相同，分到这笔的资金决定它对组合赚了多少。'+(funded&&finite(sepPnl)?'按 2026 年初 1,000 USDT 起步，9 月 16 日急跌单在分仓组合中贡献 '+money(sepPnl)+' USDT。':''))+
       note('这些比较使用已看过的行情。同一轮下跌可以触发多笔。结算回撤按平仓净值计算，表内空缺表示该口径没有核实。'));
   }
 

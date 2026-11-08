@@ -487,7 +487,9 @@ def btc_admission_review(accounts: pd.DataFrame) -> list[dict[str, Any]]:
         "baseline_below_post_reservation": "current", "ema_before_reservation": "early_ema",
     })
     reserve = pd.read_csv(BTC_RESERVE / "partition_summary.csv")
-    reserve = reserve.loc[reserve.scope.isin(["all_history", "2026"])].assign(variant="reserved_case")
+    reserve = reserve.loc[reserve.variant.eq("reserved_25_25_50") & reserve.scope.isin(["all_history", "2026"])].copy()
+    reserve["variant"] = "reserved_case"
+    reserve["september_funded_pnl_usdt"] = reserve.sep16_case_contribution_usd_2026_reset.where(reserve.scope.eq("2026"))
     rows = pd.concat([variants, reserve], ignore_index=True)
     if rows.duplicated(["variant", "scope"]).any() or len(rows.dropna(subset=["variant", "scope"])) != 6:
         raise ValueError("Expected three BTC allocation rules in both cost scopes")
@@ -498,7 +500,7 @@ def btc_admission_review(accounts: pd.DataFrame) -> list[dict[str, Any]]:
         np.testing.assert_allclose([check.growth_pct, check.marked_dd_pct, check.distinct_entries],
                                    [reference.growth_pct, reference.max_dd_pct, reference.distinct], atol=1e-6)
     cols = ["variant", "scope", "btc_count", "alt_count", "total_legs", "distinct_entries",
-            "growth_pct", "settlement_dd_pct", "marked_dd_pct", "sep16_admitted"]
+            "growth_pct", "settlement_dd_pct", "marked_dd_pct", "sep16_admitted", "september_funded_pnl_usdt"]
     return clean(rows[cols].to_dict("records"))
 
 
