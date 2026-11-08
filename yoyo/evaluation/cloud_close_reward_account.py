@@ -156,7 +156,14 @@ def account_order(c, nav, actions, prices, fees, market_slip, exposure, weights,
     leg = c.col % len(weights)
     if leg == 0:
         capacity = c.group_len // len(weights)
-        reservation[0] = min(nav * exposure / capacity, c.free_cash_now)
+        free_slots = 0
+        for first in range(c.from_col,c.to_col,len(weights)):
+            occupied = False
+            for child in range(first,first+len(weights)):
+                if c.last_position[child] != 0.:
+                    occupied = True
+            free_slots += int(not occupied)
+        reservation[0] = min(nav * exposure / capacity, c.free_cash_now/max(1,free_slots))
     budget = reservation[0] * weights[leg]
     if budget < 1.e-8:
         return NoOrder
@@ -184,6 +191,8 @@ def account(data, slip=0., exposure=1., weights=(1.,)):
     entries = keyed.reindex(pd.MultiIndex.from_arrays([stage, roster.slot]))
     exits = keyed.reindex(pd.MultiIndex.from_arrays([exit_stage, roster.slot]))
     have = entries['size'].notna().to_numpy()
+    if not have.all():
+        raise ValueError('A reserved slot was left unfunded')
     if not np.array_equal(have, exits['size'].notna().to_numpy()):
         raise ValueError('Unclosed funded position')
     entries, exits = entries[have], exits[have]
@@ -258,7 +267,7 @@ def read_paths():
               'stop_price','exit_reason','exit_fee_rate','same_bar_ambiguous','gap_flag']
     frame = pd.read_csv(EXP/'paths.csv.gz',usecols=fields,float_precision='round_trip',
                         dtype={'symbol':str},keep_default_na=False,na_values={'entry_ms':[''],
-                        'exit_bar_ms':[''],'entry_price':[''],'exit_price':[''],'exit_fee_rate':['']})
+                        'exit_bar_ms':[''],'entry_price':[''],'exit_price':[''],'exit_fee_rate':[''],'stop_price':['']})
     frame = frame[frame.entry_status.eq('executed')].copy()
     for col in ('entry_ms','exit_bar_ms'):
         if frame[col].isna().any():
