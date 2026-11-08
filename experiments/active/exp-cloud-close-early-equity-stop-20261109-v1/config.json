@@ -1,0 +1,9 @@
+{
+  "id":"exp-cloud-close-early-equity-stop-20261109-v1",
+  "parent":"exp-cloud-close-equity-stop-20261109-v1",
+  "only_change":"Cycle trigger at 5% or 10% closing-NAV drawdown; the previous 15% trigger still had 37.33% observed lifetime drawdown. This is an adaptive extension after seeing that result. No other changes. Re-use the existing 0/15/25/35% capital curves for comparison.",
+  "thresholds":[0.05,0.10],
+  "selection":"Choose the highest development capital multiple through 2024 that passes the original minimum 100 trades, 30% wins, 2.5 realized monetary and equal-notional payoff, 35% lifetime DD upper bound. If selected, evaluate matched-parent actual and later-control funded accounts and +5bp market slippage. Use all 11780 causal 12H parents, re-admit from the entire roster after liquidations. All data are historical and later periods have been inspected previously.",
+  "costs":"All newly tested accounts pay 5bp taker per executed side. No funding or depth. One 1000U shared account.",
+  "runner":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_early_equity_stop"
+}

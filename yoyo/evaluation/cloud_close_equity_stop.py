@@ -415,8 +415,8 @@ def simulate(events: pd.DataFrame, drawdown: float, *, grid: dict,
     observed open. The account remains entry-locked until every forced close is
     recorded. That liquidation open cannot also admit a new event.
     """
-    if drawdown not in THRESHOLDS:
-        raise ValueError(f'Unexpected pre-registered DD threshold: {drawdown}')
+    if not 0 <= drawdown < 1:
+        raise ValueError(f'Invalid portfolio drawdown threshold: {drawdown}')
     if slots < 1 or exposure <= 0.0 or market_slippage < 0.0:
         raise ValueError('Invalid wallet parameters')
     arrays = _arrays(events, grid)
@@ -768,13 +768,13 @@ def _pass_gate(dev: dict) -> bool:
             and dev['dd_bound_pct'] <= 35.0)
 
 
-def _write_sim(t: float, sim: dict) -> None:
+def _write_sim(t: float, sim: dict, output_dir=EXP) -> None:
     tag = int(round(t*100))
-    sim['roster'].to_csv(EXP/f'funded_dd{tag}.csv.gz', index=False, compression='gzip')
-    sim['equity'].to_csv(EXP/f'hourly_dd{tag}.csv.gz', index_label='hour_end_utc', compression='gzip')
-    sim['candidate_audit'].to_csv(EXP/f'roster_dd{tag}.csv.gz', index=False, compression='gzip')
-    sim['triggers'].to_csv(EXP/f'triggers_dd{tag}.csv', index=False)
-    sim['resets'].to_csv(EXP/f'resets_dd{tag}.csv', index=False)
+    sim['roster'].to_csv(output_dir/f'funded_dd{tag}.csv.gz', index=False, compression='gzip')
+    sim['equity'].to_csv(output_dir/f'hourly_dd{tag}.csv.gz', index_label='hour_end_utc', compression='gzip')
+    sim['candidate_audit'].to_csv(output_dir/f'roster_dd{tag}.csv.gz', index=False, compression='gzip')
+    sim['triggers'].to_csv(output_dir/f'triggers_dd{tag}.csv', index=False)
+    sim['resets'].to_csv(output_dir/f'resets_dd{tag}.csv', index=False)
 
 
 def main() -> None:
